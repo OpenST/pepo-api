@@ -82,6 +82,10 @@ class CoreConstants {
   get KMS_KNOWN_ADDR_KEY_ID() {
     return process.env.SA_KNOWN_ADDRESS_KMS_ID;
   }
+
+  get MIGRATION_FOLDER_FILE_PATH() {
+    return process.env.MIGRATION_FOLDER_FILE_PATH;
+  }
 }
 
 module.exports = new CoreConstants();
