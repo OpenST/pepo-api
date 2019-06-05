@@ -16,7 +16,7 @@ class CoreConstants {
   get environment() {
     return process.env.PA_ENVIRONMENT;
   }
-  
+
   get environmentShort() {
     return process.env.SA_ENVIRONMENT.substring(0, 2);
   }
@@ -32,13 +32,12 @@ class CoreConstants {
   get MEMCACHE_SERVERS() {
     return process.env.PA_MEMCACHE_SERVERS.split(',');
   }
-
   // MYSQL related details
-  
+
   get PEPO_API_MYSQL_DB() {
     return process.env.PEPO_API_MYSQL_DB;
   }
-  
+
   get MYSQL_CONNECTION_POOL_SIZE() {
     return process.env.PA_MYSQL_CONNECTION_POOL_SIZE;
   }
