@@ -5,7 +5,8 @@
 const rootPrefix = '../../..',
   MysqlQueryBuilders = require(rootPrefix + '/lib/queryBuilders/mysql'),
   mysqlWrapper = require(rootPrefix + '/lib/mysqlWrapper'),
-  logger = require(rootPrefix + '/lib/logger/customConsoleLogger');
+  logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
+  bitHelper = require(rootPrefix + '/helpers/bit');
 
 class ModelBase extends MysqlQueryBuilders {
   /**
@@ -64,6 +65,31 @@ class ModelBase extends MysqlQueryBuilders {
           }
         });
     });
+  }
+
+  /**
+   * Convert Bitwise to enum values
+   *
+   * @return {Array}
+   */
+  getBitwiseArray(keyName, keyValue) {
+    const oThis = this;
+    if (!oThis.bitwiseConfig) {
+      throw new Error('Bitwise Config not defined');
+    }
+    let modelInstance = new oThis.constructor();
+
+    let config = oThis.bitwiseConfig[keyName],
+      arr = [];
+
+    Object.keys(config).forEach((key) => {
+      let value = config[key];
+      if ((keyValue & key) == key) {
+        arr.push(value);
+      }
+    });
+
+    return arr;
   }
 }
 
