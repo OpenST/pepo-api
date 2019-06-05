@@ -13,6 +13,18 @@ class CoreConstants {
    */
   constructor() {}
 
+  get environment() {
+    return process.env.PA_ENVIRONMENT;
+  }
+  
+  get environmentShort() {
+    return process.env.SA_ENVIRONMENT.substring(0, 2);
+  }
+
+  get DEBUG_ENABLED() {
+    return process.env.PA_DEBUG_ENABLED;
+  }
+
   get CACHE_ENGINE() {
     return process.env.PA_CACHE_ENGINE;
   }
@@ -21,14 +33,12 @@ class CoreConstants {
     return process.env.PA_MEMCACHE_SERVERS.split(',');
   }
 
-  get environment() {
-    return process.env.PA_ENVIRONMENT;
+  // MYSQL related details
+  
+  get PEPO_API_MYSQL_DB() {
+    return process.env.PEPO_API_MYSQL_DB;
   }
-
-  get DEBUG_ENABLED() {
-    return process.env.PA_DEBUG_ENABLED;
-  }
-
+  
   get MYSQL_CONNECTION_POOL_SIZE() {
     return process.env.PA_MYSQL_CONNECTION_POOL_SIZE;
   }
@@ -45,12 +55,33 @@ class CoreConstants {
     return process.env.PA_MYSQL_PASSWORD;
   }
 
-  get environmentShort() {
-    return process.env.SA_ENVIRONMENT.substring(0, 2);
+  // kms related constants
+  get KMS_AWS_ACCESS_KEY() {
+    return process.env.SA_KMS_AWS_ACCESS_KEY;
   }
 
-  get PEPO_API_MYSQL_DB() {
-    return process.env.PEPO_API_MYSQL_DB;
+  get KMS_AWS_SECRET_KEY() {
+    return process.env.SA_KMS_AWS_SECRET_KEY;
+  }
+
+  get KMS_AWS_REGION() {
+    return process.env.SA_KMS_AWS_REGION;
+  }
+
+  get KMS_API_KEY_ARN() {
+    return process.env.SA_API_KEY_KMS_ARN;
+  }
+
+  get KMS_API_KEY_ID() {
+    return process.env.SA_API_KEY_KMS_ID;
+  }
+
+  get KMS_KNOWN_ADDR_KEY_ARN() {
+    return process.env.SA_KNOWN_ADDRESS_KMS_ARN;
+  }
+
+  get KMS_KNOWN_ADDR_KEY_ID() {
+    return process.env.SA_KNOWN_ADDRESS_KMS_ID;
   }
 }
 
