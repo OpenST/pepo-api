@@ -18,7 +18,7 @@ class CoreConstants {
   }
 
   get environmentShort() {
-    return process.env.SA_ENVIRONMENT.substring(0, 2);
+    return process.env.PA_ENVIRONMENT.substring(0, 2);
   }
 
   get DEBUG_ENABLED() {
