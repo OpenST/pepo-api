@@ -6,48 +6,52 @@
  * @class
  */
 class CoreConstants {
-	/**
-	 * Constructor for core constants
-	 *
-	 * @constructor
-	 */
-	constructor() {}
+  /**
+   * Constructor for core constants
+   *
+   * @constructor
+   */
+  constructor() {}
 
-	get CACHE_ENGINE() {
-		return process.env.PA_CACHE_ENGINE;
-	}
+  get CACHE_ENGINE() {
+    return process.env.PA_CACHE_ENGINE;
+  }
 
-	get MEMCACHE_SERVERS() {
-		return process.env.PA_MEMCACHE_SERVERS.split(',');
-	}
+  get MEMCACHE_SERVERS() {
+    return process.env.PA_MEMCACHE_SERVERS.split(',');
+  }
 
-	get environment() {
-		return process.env.PA_ENVIRONMENT;
-	}
+  get environment() {
+    return process.env.PA_ENVIRONMENT;
+  }
 
-	get DEBUG_ENABLED() {
-		return process.env.PA_DEBUG_ENABLED;
-	}
+  get DEBUG_ENABLED() {
+    return process.env.PA_DEBUG_ENABLED;
+  }
 
-	get MYSQL_CONNECTION_POOL_SIZE() {
-		return process.env.PA_MYSQL_CONNECTION_POOL_SIZE;
-	}
+  get MYSQL_CONNECTION_POOL_SIZE() {
+    return process.env.PA_MYSQL_CONNECTION_POOL_SIZE;
+  }
 
-	get MYSQL_HOST() {
-		return process.env.PA_MYSQL_HOST;
-	}
+  get MYSQL_HOST() {
+    return process.env.PA_MYSQL_HOST;
+  }
 
-	get MYSQL_USER() {
-		return process.env.PA_MYSQL_USER;
-	}
+  get MYSQL_USER() {
+    return process.env.PA_MYSQL_USER;
+  }
 
-	get MYSQL_PASSWORD() {
-		return process.env.PA_MYSQL_PASSWORD;
-	}
+  get MYSQL_PASSWORD() {
+    return process.env.PA_MYSQL_PASSWORD;
+  }
 
-	get environmentShort() {
-		return process.env.SA_ENVIRONMENT.substring(0, 2);
-	}
+  get environmentShort() {
+    return process.env.SA_ENVIRONMENT.substring(0, 2);
+  }
+
+  get PEPO_API_MYSQL_DB() {
+    return process.env.PEPO_API_MYSQL_DB;
+  }
 }
 
 module.exports = new CoreConstants();
