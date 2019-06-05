@@ -1,29 +1,12 @@
-const mysql = require('mysql');
-
-const rootPrefix = '../..',
+const rootPrefix = '..',
+  ExecuteQuery = require(rootPrefix + '/db/ExecuteQuery'),
   coreConstants = require(rootPrefix + '/config/coreConstants');
 
-const connection = mysql.createConnection({
-  host: coreConstants.MYSQL_HOST,
-  user: coreConstants.MYSQL_USER,
-  password: coreConstants.MYSQL_PASSWORD
-});
+const dbName = 'pepo_api_' + coreConstants.environment;
+const schemaMigrationQuery =
+  'CREATE TABLE IF NOT EXISTS `schema_migrations` ' +
+  '(`version` varchar(255) COLLATE utf8mb4_general_ci NOT NULL, ' +
+  'PRIMARY KEY (`version`)' +
+  ') ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;';
 
-connection.connect(function(error) {
-  if (error) {
-    return console.error('Error: ' + error.message);
-  }
-
-  connection.query(`CREATE DATABASE ${coreConstants.PEPO_API_MYSQL_DB}`, function(err) {
-    if (err) {
-      throw err;
-    }
-    console.log('Database Created.');
-  });
-
-  connection.end(function(err) {
-    if (err) {
-      return console.log(err.message);
-    }
-  });
-});
+new ExecuteQuery(dbName, schemaMigrationQuery).perform();
