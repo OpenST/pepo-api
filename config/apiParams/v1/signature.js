@@ -3,7 +3,7 @@
 const rootPrefix = '../../..',
   apiName = require(rootPrefix + '/lib/globalConstant/apiName');
 const v1Signature = {
-  [apiName.signup]: {
+  [apiName.signUp]: {
     mandatory: [
       {
         parameter: 'user_name',

@@ -8,8 +8,8 @@ const rootPrefix = '../..',
   sanitizer = require(rootPrefix + '/helpers/sanitizer');
 
 /* Create user*/
-router.post('/signup', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
-  req.decodedParams.apiName = apiName.signup;
+router.get('/sign-up', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.signUp;
 
   const dataFormatterFunc = async function(serviceResponse) {
     const loggedInUserFormatterRsp = await new LoggedInUserFormatter(serviceResponse.data).perform();
@@ -18,7 +18,7 @@ router.post('/signup', sanitizer.sanitizeDynamicUrlParams, function(req, res, ne
   };
 
   Promise.resolve(
-    routeHelper.perform(req, res, next, 'userManagement/SignUp', 'r_v1_wa_l_s_1', null, dataFormatterFunc)
+    routeHelper.perform(req, res, next, '/userManagement/SignUp', 'r_v1_wa_l_s_1', null, dataFormatterFunc)
   );
 });
 

@@ -40,6 +40,10 @@ class ApiAuthentication {
     }
 
     getRequestConfigData = [
+      {
+        apiName: apiName.signUp,
+        route: '/sign-up/'
+      }
       // Note: - Urls should end with a slash. Add config above this.
     ];
 
@@ -52,12 +56,8 @@ class ApiAuthentication {
     }
     postRequestConfigData = [
       {
-        apiName: apiName.signup,
-        route: '/signup/'
-      },
-      {
-        apiName: apiName.login,
-        route: '/login/'
+        apiName: apiName.signUp,
+        route: '/sign-up/'
       }
       // Note: - Urls should end with a slash. Add config above this.
     ];

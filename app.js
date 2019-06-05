@@ -82,45 +82,6 @@ const getRequestParams = function(req) {
   return {};
 };
 
-/**
- * Validate API signature
- *
- * @param req
- * @param res
- * @param next
- * @return {Promise|*|{$ref}|PromiseLike<T>|Promise<T>}
- */
-const validateAuthCookie = function(req, res, next) {
-  const inputParams = getRequestParams(req);
-
-  const handleParamValidationResult = function(result) {
-    if (result.isSuccess()) {
-      if (!req.decodedParams) {
-        req.decodedParams = {};
-      }
-      // NOTE: MAKE SURE ALL SANITIZED VALUES ARE ASSIGNED HERE
-      req.decodedParams.client_id = result.data.clientId;
-      req.decodedParams.token_id = result.data.tokenId;
-      req.decodedParams.user_data = result.data.userData;
-      req.decodedParams.app_validated_api_name = result.data.appValidatedApiName;
-      req.decodedParams.api_signature_kind = result.data.apiSignatureKind;
-      req.decodedParams.token_shard_details = result.data.tokenShardDetails;
-      next();
-    } else {
-      return result.renderResponse(res, errorConfig);
-    }
-  };
-
-  // Following line always gives resolution. In case this assumption changes, please add catch here.
-  return new ValidateAuthCookie({
-    inputParams: inputParams,
-    requestPath: customUrlParser.parse(req.originalUrl).pathname,
-    requestMethod: req.method
-  })
-    .perform()
-    .then(handleParamValidationResult);
-};
-
 // Set request debugging/logging details to shared namespace
 const appendRequestDebugInfo = function(req, res, next) {
   requestSharedNameSpace.run(function() {
@@ -187,13 +148,13 @@ app.use(
 // Catch 404 and forward to error handler
 app.use(function(req, res, next) {
   const message =
-    "Started '" +
+    "Cannot Find '" +
     customUrlParser.parse(req.originalUrl).pathname +
     "'  '" +
     req.method +
     "' at " +
     basicHelper.logDateFormat();
-  logger.info(message);
+  logger.step(message);
 
   return responseHelper
     .error({
