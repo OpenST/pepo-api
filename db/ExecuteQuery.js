@@ -1,7 +1,8 @@
 const mysql = require('mysql');
 
 const rootPrefix = '..',
-  mysqlConfig = require(rootPrefix + '/config/mysql');
+  mysqlConfig = require(rootPrefix + '/config/mysql'),
+  logger = require(rootPrefix + '/lib/logger/customConsoleLogger');
 
 class ExecuteQuery {
   /**
@@ -73,7 +74,7 @@ class ExecuteQuery {
           onReject(err);
         }
 
-        console.log('Executed:', oThis.sql);
+        logger.log(oThis.sql);
 
         onResolve([results, fields]);
       });
