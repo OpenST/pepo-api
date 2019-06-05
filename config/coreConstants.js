@@ -12,7 +12,6 @@ class CoreConstants {
 	 * @constructor
 	 */
 	constructor() {}
-	}
 
 	get CACHE_ENGINE() {
 		return process.env.PA_CACHE_ENGINE;
