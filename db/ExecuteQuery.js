@@ -67,15 +67,15 @@ class ExecuteQuery {
     });
 
     // Execute the sql
-    await new Promise(function(onResolve, onReject) {
-      connection.query(oThis.sql, function(err) {
+    let queryResult = await new Promise(function(onResolve, onReject) {
+      connection.query(oThis.sql, function(err, results, fields) {
         if (err) {
           onReject(err);
         }
 
         console.log('Executed:', oThis.sql);
 
-        onResolve();
+        onResolve([results, fields]);
       });
     });
 
@@ -89,6 +89,8 @@ class ExecuteQuery {
         onResolve();
       });
     });
+
+    return queryResult;
   }
 }
 
