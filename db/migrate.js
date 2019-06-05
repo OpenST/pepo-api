@@ -19,13 +19,12 @@ class RunDbMigrate {
       let currVersion = currFile.split('_')[0];
 
       if (currVersion) allVersionMap[currVersion] = currFile;
-      console.log(allVersionMap);
     }
 
-    const dbName = 'pepo_api_' + coreConstants.environment;
+    const mainDbName = 'pepo_api_' + coreConstants.environment;
     const schemaMigrationQuery = 'SELECT * FROM schema_migrations;';
 
-    let versionQueryResult = await new ExecuteQuery(dbName, schemaMigrationQuery).perform();
+    let versionQueryResult = await new ExecuteQuery(mainDbName, schemaMigrationQuery).perform();
 
     let rows = (versionQueryResult || [])[0] || [];
 
@@ -43,9 +42,21 @@ class RunDbMigrate {
       if (!existingVersionMap[version]) missingVersions.push(parseInt(version));
     }
 
-    existingVersionMap.sort();
+    missingVersions.sort();
 
     // looping over the missing versions to run the migrations
+    for (let i = 0; i < missingVersions.length; i++) {
+      let version = missingVersions[i],
+        migrationFile = allVersionMap[version];
+
+      let versionInfo = require(migrationFolder + '/' + migrationFile);
+
+      await new ExecuteQuery(versionInfo.dbName, versionInfo.up).perform();
+
+      const insertVersionSql = "INSERT INTO `schema_migrations` (`version`) VALUES('" + version + "')";
+
+      await new ExecuteQuery(mainDbName, insertVersionSql).perform();
+    }
   }
 }
 
