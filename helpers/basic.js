@@ -9,9 +9,7 @@ const BigNumber = require('bignumber.js');
 const rootPrefix = '..',
   base64Helper = require(rootPrefix + '/lib/base64Helper'),
   coreConstants = require(rootPrefix + '/config/coreConstants'),
-  responseHelper = require(rootPrefix + '/lib/formatter/response'),
   apiVersions = require(rootPrefix + '/lib/globalConstant/apiVersions'),
-  contractConstants = require(rootPrefix + '/lib/globalConstant/contract'),
   apiErrorConfig = require(rootPrefix + '/config/apiParams/apiErrorConfig'),
   v1ParamErrorConfig = require(rootPrefix + '/config/apiParams/v1/errorConfig');
 

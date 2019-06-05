@@ -1,10 +1,10 @@
 const express = require('express'),
   router = express.Router();
 
-const rootPrefix = '../..',
+const rootPrefix = '../../..',
+  LoggedInUserFormatter = require(rootPrefix + '/lib/formatter/entity/LoggedInUser'),
   routeHelper = require(rootPrefix + '/routes/helper'),
   apiName = require(rootPrefix + '/lib/globalConstant/apiName'),
-  resultType = require(rootPrefix + '/lib/globalConstant/resultType'),
   sanitizer = require(rootPrefix + '/helpers/sanitizer');
 
 /* Create user*/
@@ -12,10 +12,9 @@ router.post('/signup', sanitizer.sanitizeDynamicUrlParams, function(req, res, ne
   req.decodedParams.apiName = apiName.signup;
 
   const dataFormatterFunc = async function(serviceResponse) {
-    serviceResponse.data = {
-      result_type: resultType.user,
-      [resultType.user]: serviceResponse.data
-    };
+    const loggedInUserFormatterRsp = await new LoggedInUserFormatter(serviceResponse.data).perform();
+
+    serviceResponse.data = loggedInUserFormatterRsp.data;
   };
 
   Promise.resolve(

@@ -10,8 +10,7 @@ const express = require('express'),
   customUrlParser = require('url');
 
 const responseHelper = require(rootPrefix + '/lib/formatter/response'),
-  v1withoutAuthRoutes = require(rootPrefix + '/routes/v1/withoutAuth/index'),
-  v1AuthRoutes = require(rootPrefix + '/routes/v1/auth/index'),
+  v1Routes = require(rootPrefix + '/routes/v1/index'),
   ValidateAuthCookie = require(rootPrefix + '/lib/authentication/cookie'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   customMiddleware = require(rootPrefix + '/helpers/customMiddleware'),
@@ -176,24 +175,13 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use(
-  '/api/v1/auth',
-  startRequestLogLine,
-  appendRequestDebugInfo,
-  sanitizer.sanitizeBodyAndQuery,
-  assignParams,
-  appendV1Version,
-  v1withoutAuthRoutes
-);
-
-app.use(
   '/api/v1',
   startRequestLogLine,
   appendRequestDebugInfo,
-  validateAuthCookie,
   sanitizer.sanitizeBodyAndQuery,
   assignParams,
   appendV1Version,
-  v1AuthRoutes
+  v1Routes
 );
 
 // Catch 404 and forward to error handler
@@ -228,3 +216,5 @@ app.use(function(err, req, res, next) {
     })
     .renderResponse(res, errorConfig);
 });
+
+module.exports = app;

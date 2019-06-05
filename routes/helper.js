@@ -36,11 +36,6 @@ class RoutesHelper {
       if (responseHelper.isCustomResult(error)) {
         error.renderResponse(res, errorConfig);
       } else {
-        const errorObject = responseHelper.error({
-          internal_error_identifier: `unhandled_catch_response:r_h:${errorCode}`,
-          api_error_identifier: 'unhandled_catch_response',
-          debug_options: {}
-        });
         logger.error(errorCode, 'Something went wrong', error);
 
         responseHelper

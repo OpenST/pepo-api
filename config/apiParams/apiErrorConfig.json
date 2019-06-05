@@ -44,6 +44,16 @@
     "code": "BAD_REQUEST",
     "message": "At least one parameter is invalid or missing. See \"err.error_data\" array for more details."
   },
+  "invalid_api_version": {
+    "http_code": "400",
+    "code": "BAD_REQUEST",
+    "message": "At least one parameter is invalid or missing. See \"err.error_data\" array for more details."
+  },
+  "invalid_api_name": {
+    "http_code": "400",
+    "code": "BAD_REQUEST",
+    "message": "At least one parameter is invalid or missing. See \"err.error_data\" array for more details."
+  },
   "could_not_proceed": {
     "http_code": "422",
     "code": "UNPROCESSABLE_ENTITY",

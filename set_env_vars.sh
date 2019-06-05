@@ -1,6 +1,6 @@
 # Core ENV Details
 export PA_ENVIRONMENT='development'
-
+export PA_PORT=3000
 export PA_DEBUG_ENABLED='1';
 
 

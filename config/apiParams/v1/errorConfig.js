@@ -6,14 +6,14 @@
 
 const v1ErrorConfig = {
   invalid_email: {
-    parameter: 'email',
+    parameter: 'user_name',
     code: 'invalid',
-    message: 'Invalid parameter email.'
+    message: 'Invalid parameter User Name.'
   },
   invalid_password: {
     parameter: 'password',
     code: 'invalid',
-    message: 'Invalid parameter password.'
+    message: 'Invalid parameter Password.'
   }
 };
 

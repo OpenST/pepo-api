@@ -6,12 +6,12 @@ const v1Signature = {
   [apiName.signup]: {
     mandatory: [
       {
-        parameter: 'email',
-        validatorMethod: 'validatePasswordString'
+        parameter: 'user_name',
+        validatorMethods: ['validateAlphaNumericString']
       },
       {
         parameter: 'password',
-        validatorMethod: 'validatePasswordString'
+        validatorMethods: ['validatePasswordString']
       }
     ],
     optional: []
