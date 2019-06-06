@@ -9,6 +9,6 @@ const rootPrefix = '../../..',
 const router = express.Router();
 
 router.use('/auth', authRoutes);
-router.use('/users', usersRoutes);
+// router.use('/users', usersRoutes);
 
 module.exports = router;
