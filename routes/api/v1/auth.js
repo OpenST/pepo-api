@@ -3,11 +3,12 @@ const express = require('express'),
   cookieParser = require('cookie-parser');
 
 const rootPrefix = '../../..',
-  LoggedInUserFormatter = require(rootPrefix + '/lib/formatter/entity/LoggedInUser'),
+  WrapperFormatter = require(rootPrefix + '/lib/formatter/Wrapper'),
   routeHelper = require(rootPrefix + '/routes/helper'),
   apiName = require(rootPrefix + '/lib/globalConstant/apiName'),
   sanitizer = require(rootPrefix + '/helpers/sanitizer'),
   coreConstant = require(rootPrefix + '/config/coreConstants'),
+  resultType = require(rootPrefix + '/lib/globalConstant/resultType'),
   userConstant = require(rootPrefix + '/lib/globalConstant/user');
 
 // Node.js cookie parsing middleware.
@@ -28,9 +29,13 @@ router.get('/sign-up', sanitizer.sanitizeDynamicUrlParams, function(req, res, ne
     // Set cookie
     res.cookie(userConstant.loginCookieName, serviceResponse.data.userLoginCookieValue, options); // options is optional
 
-    const loggedInUserFormatterRsp = await new LoggedInUserFormatter(serviceResponse.data).perform();
+    const wrapperFormatterRsp = await new WrapperFormatter({
+      resultType: resultType.loggedInUser,
+      entities: [resultType.loggedInUser],
+      serviceData: serviceResponse.data
+    }).perform();
 
-    serviceResponse.data = loggedInUserFormatterRsp.data;
+    serviceResponse.data = wrapperFormatterRsp.data;
   };
 
   const onServiceFailure = async function(serviceResponse) {
