@@ -12,7 +12,6 @@ const express = require('express'),
 const responseHelper = require(rootPrefix + '/lib/formatter/response'),
   apiRoutes = require(rootPrefix + '/routes/api/index'),
   ostWebhookRoutes = require(rootPrefix + '/routes/ostWebhook/index'),
-  ValidateAuthCookie = require(rootPrefix + '/lib/authentication/cookie'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   customMiddleware = require(rootPrefix + '/helpers/customMiddleware'),
   apiVersions = require(rootPrefix + '/lib/globalConstant/apiVersions'),
@@ -92,18 +91,6 @@ const appendRequestDebugInfo = function(req, res, next) {
   });
 };
 
-/**
- * Append V1 version
- *
- * @param req
- * @param res
- * @param next
- */
-const appendV1Version = function(req, res, next) {
-  req.decodedParams.apiVersion = apiVersions.v1;
-  next();
-};
-
 // If the process is not a master
 
 // Set worker process title
@@ -131,30 +118,9 @@ app.use(bodyParser.json());
 // Parsing the URL-encoded data with the qs library (extended: true)
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// Node.js cookie parsing middleware.
-app.use(cookieParser());
-
-app.get('/', function(req, res) {
-  // Cookies that have not been signed
-  console.log('Cookies: ', req.cookies);
-
-  // Cookies that have been signed
-  console.log('Signed Cookies: ', req.signedCookies);
-
-  res.status(200).json({ hello: 'world' });
-});
-
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use(
-  '/api',
-  startRequestLogLine,
-  appendRequestDebugInfo,
-  sanitizer.sanitizeBodyAndQuery,
-  assignParams,
-  appendV1Version,
-  apiRoutes
-);
+app.use('/api', startRequestLogLine, appendRequestDebugInfo, sanitizer.sanitizeBodyAndQuery, assignParams, apiRoutes);
 
 app.use('/ost-webhook', ostWebhookRoutes);
 
