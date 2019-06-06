@@ -165,7 +165,9 @@ class SignUp extends ServiceBase {
   async _serviceResponse() {
     const oThis = this;
 
-    let userLoginCookieValue = new UserModel().getCookieValueFor(oThis.user, {});
+    let userLoginCookieValue = new UserModel().getCookieValueFor(oThis.user, {
+      timestamp: Date.now() / 1000
+    });
 
     return responseHelper.successWithData({
       user: oThis.secureUser,
