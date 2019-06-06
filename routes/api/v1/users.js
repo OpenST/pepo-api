@@ -13,15 +13,19 @@ const rootPrefix = '../../..',
 router.get('/register-device', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.registerDevice;
 
-  const dataFormatterFunc = async function(serviceResponse) {
-    const chainFormattedRsp = new LoggedInUserFormatter(serviceResponse.data[resultType.chain]).perform();
-    serviceResponse.data = {
-      result_type: resultType.chain,
-      [resultType.chain]: chainFormattedRsp.data
-    };
+  const onServiceSuccess = async function(serviceResponse) {
+    const wrapperFormatterRsp = await new WrapperFormatter({
+      resultType: resultType.device,
+      entities: [resultType.device],
+      serviceData: serviceResponse.data
+    }).perform();
+
+    serviceResponse.data = wrapperFormatterRsp.data;
   };
 
-  Promise.resolve(routeHelper.perform(req, res, next, '/app/services/chain/Get', 'r_v2_c_1', null, dataFormatterFunc));
+  Promise.resolve(
+    routeHelper.perform(req, res, next, '/userManagement/RegisterDevice.js', 'r_a_v1_u_1', null, onServiceSuccess)
+  );
 });
 
 /* Recovery Info Device*/

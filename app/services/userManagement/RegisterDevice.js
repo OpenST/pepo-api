@@ -121,9 +121,12 @@ class RegisterDevice extends ServiceBase {
       return Promise.reject(platformResponse);
     }
 
-    let resultType = platformResponse.data['result_type'];
+    let resultType = platformResponse.data['result_type'],
+      returnData = {
+        device: platformResponse.data[resultType]
+      };
 
-    return platformResponse.data[resultType];
+    return returnData;
   }
 }
 
