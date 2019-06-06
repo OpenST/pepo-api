@@ -98,6 +98,10 @@ class CoreConstants {
   get CACHE_SHA_KEY() {
     return process.env.PA_CACHE_DATA_SHA_KEY;
   }
+
+  get COOKIE_SECRET() {
+    return process.env.PA_COOKIE_SECRET;
+  }
 }
 
 module.exports = new CoreConstants();

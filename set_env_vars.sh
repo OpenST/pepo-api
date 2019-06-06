@@ -31,3 +31,6 @@ export PA_KNOWN_ADDRESS_KMS_ID='eab8148d-fd9f-451d-9eb9-16c115645635'
 export PA_SA_API_END_POINT='https://api.stagingost.com/testnet/v2/'
 export PA_SA_API_KEY='bb6740a6ed27452de43c0a5012d8f9be'
 export PA_SA_API_SECRET='aa5298d3a3fe181a3a52d085ee1525df57ac498337f8f3b76ca7df0a5de3211b'
+
+# cookie signing secret
+export PA_COOKIE_SECRET='aa5298d3a3fe181a3a52d085ee1525df5asa498337f8f3b76ca7df0a5de3211b'
