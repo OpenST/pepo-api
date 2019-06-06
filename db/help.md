@@ -15,6 +15,11 @@
  > node db/migrate.js
 ```
 
+* Redo All versions.
+```sh
+ > node db/migrate.js --redoAll
+```
+
 * Running a specific migration version.
 ```sh
  > node db/migrate.js --up 1234

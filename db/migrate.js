@@ -5,6 +5,7 @@ program
   .option('--up <up>', 'Specify a specific migration version to perform.')
   .option('--down <down>', 'Specify a specific migration version to revert.')
   .option('--redo <redo>', 'Specify a specific migration version to redo.')
+  .option('--redoAll', 'Rerun all the migrations')
   .option('--generate <name>', 'Specify migration name to generate with bare minimum content.')
   .parse(process.argv);
 
@@ -26,6 +27,7 @@ class DbMigrate {
     oThis.upVersion = program.up;
     oThis.downVersion = program.down;
     oThis.redoVersion = program.redo;
+    oThis.redoAllVersion = program.redoAll;
 
     oThis.allVersionMap = {};
     oThis.existingVersionMap = {};
@@ -76,6 +78,25 @@ class DbMigrate {
       }
       await oThis._revertMigration(oThis.redoVersion);
       await oThis._runMigration(oThis.redoVersion);
+    } else if (oThis.redoAllVersion) {
+      let existingVersionArr = Object.keys(oThis.existingVersionMap);
+      existingVersionArr.sort();
+
+      if (existingVersionArr.length == 0) {
+        return null;
+      }
+
+      // looping over the existing versions to run the migrations in reverse order
+      for (let i = existingVersionArr.length - 1; i > -1; i--) {
+        let currentVersion = existingVersionArr[i];
+        await oThis._revertMigration(currentVersion);
+      }
+
+      // looping over the existing versions to run the migrations in reverse order
+      for (let i = 0; i < existingVersionArr.length; i++) {
+        let currentVersion = existingVersionArr[i];
+        await oThis._runMigration(currentVersion);
+      }
     } else {
       oThis._findMissingVersions();
 
