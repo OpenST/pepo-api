@@ -97,7 +97,7 @@ class SignUp extends ServiceBase {
    */
   async _fetchUser() {
     const oThis = this;
-    logger.log('fetch Token User');
+    logger.log('fetch User');
 
     let secureUserRes = await new SecureUserByIDCache({ id: oThis.userId }).fetch();
     oThis.secureUser = secureUserRes.data;
@@ -166,7 +166,7 @@ class SignUp extends ServiceBase {
   async _serviceResponse() {
     const oThis = this;
 
-    let userLoginCookieValue = new UserModel().getCookieValueFor(oThis.user, {
+    let userLoginCookieValue = new UserModel().getCookieValueFor(oThis.secureUser, {
       timestamp: Date.now() / 1000
     });
 
