@@ -10,7 +10,8 @@ const express = require('express'),
   customUrlParser = require('url');
 
 const responseHelper = require(rootPrefix + '/lib/formatter/response'),
-  v1Routes = require(rootPrefix + '/routes/v1/index'),
+  apiRoutes = require(rootPrefix + '/routes/api/index'),
+  ostWebhookRoutes = require(rootPrefix + '/routes/ostWebhook/index'),
   ValidateAuthCookie = require(rootPrefix + '/lib/authentication/cookie'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   customMiddleware = require(rootPrefix + '/helpers/customMiddleware'),
@@ -133,17 +134,29 @@ app.use(bodyParser.urlencoded({ extended: true }));
 // Node.js cookie parsing middleware.
 app.use(cookieParser());
 
+app.get('/', function(req, res) {
+  // Cookies that have not been signed
+  console.log('Cookies: ', req.cookies);
+
+  // Cookies that have been signed
+  console.log('Signed Cookies: ', req.signedCookies);
+
+  res.status(200).json({ hello: 'world' });
+});
+
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use(
-  '/api/v1',
+  '/api',
   startRequestLogLine,
   appendRequestDebugInfo,
   sanitizer.sanitizeBodyAndQuery,
   assignParams,
   appendV1Version,
-  v1Routes
+  apiRoutes
 );
+
+app.use('/ost-webhook', ostWebhookRoutes);
 
 // Catch 404 and forward to error handler
 app.use(function(req, res, next) {

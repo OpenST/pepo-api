@@ -3,10 +3,10 @@
 const express = require('express');
 
 const rootPrefix = '../..',
-  authRoutes = require(rootPrefix + '/routes/v1/auth');
+  v1Routes = require(rootPrefix + '/routes/api/v1/index');
 
 const router = express.Router();
 
-router.use('/auth', authRoutes);
+router.use('/v1', v1Routes);
 
 module.exports = router;
