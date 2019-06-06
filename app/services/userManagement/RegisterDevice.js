@@ -50,7 +50,7 @@ class RegisterDevice extends ServiceBase {
 
     await oThis._fetchTokenUserData();
 
-    await oThis._requestPlatformToRegisterDevice();
+    return oThis._requestPlatformToRegisterDevice();
   }
 
   /**
@@ -84,7 +84,7 @@ class RegisterDevice extends ServiceBase {
       return Promise.reject(tokenUserData);
     }
 
-    if (!tokenUserData.data[oThis.userId].ostUserId) {
+    if (!tokenUserData.data.ostUserId) {
       logger.error('Invalid userdata in token user table');
       return Promise.reject(
         responseHelper.error({
@@ -95,7 +95,7 @@ class RegisterDevice extends ServiceBase {
       );
     }
 
-    oThis.ostUserId = tokenUserData.data[oThis.userId].ostUserId;
+    oThis.ostUserId = tokenUserData.data.ostUserId;
   }
 
   /**
