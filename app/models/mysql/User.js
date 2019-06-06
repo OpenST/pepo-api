@@ -114,12 +114,26 @@ class UserModel extends ModelBase {
     return oThis.formatDbData(dbRows[0]);
   }
 
+  /**
+   * Get Cookie Value For
+   *
+   * @param userObj
+   * @param options
+   * @returns {string}
+   */
   getCookieValueFor(userObj, options) {
     const oThis = this;
 
     return userObj.id + ':' + options.timestamp + ':' + oThis.getCookieTokenFor(userObj, options);
   }
 
+  /**
+   * Get Cookie Token For
+   *
+   * @param userObj
+   * @param options
+   * @returns {String}
+   */
   getCookieTokenFor(userObj, options) {
     let passwordEncrypted = userObj.password;
     let stringToSign =
