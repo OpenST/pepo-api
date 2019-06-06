@@ -38,6 +38,16 @@ class SignUp extends ServiceBase {
    */
   async _asyncPerform() {
     const oThis = this;
+
+    //Check if username exists
+
+    //create salt
+
+    //Create user
+
+    //create ost user
+
+    //Entry in token users
   }
 
   /**
