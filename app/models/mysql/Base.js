@@ -83,6 +83,10 @@ class ModelBase extends MysqlQueryBuilders {
     let config = oThis.bitwiseConfig[bitwiseColumnName],
       arr = [];
 
+    if (!config) {
+      throw new Error(`Bitwise Config for ${bitwiseCloumnName} not defined`);
+    }
+
     Object.keys(config).forEach((key) => {
       let value = config[key];
       if ((bitwiseColumnValue & key) == key) {

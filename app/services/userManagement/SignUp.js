@@ -11,8 +11,13 @@ const rootPrefix = '../../..',
   coreConstants = require(rootPrefix + '/config/coreConstants'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   localCipher = require(rootPrefix + '/lib/encryptors/localCipher'),
-  resultType = require(rootPrefix + '/lib/globalConstant/resultType'),
-  tokenUserConstants = require(rootPrefix + '/lib/globalConstant/user');
+  UserByUserNameCache = require(rootPrefix + '/lib/cacheManagement/UserByUserName'),
+  KmsWrapper = require(rootPrefix + '/lib/authentication/KmsWrapper'),
+  kmsGlobalConstant = require(rootPrefix + '/lib/globalConstant/kms.js'),
+  UserModel = require(rootPrefix + '/app/models/mysql/User'),
+  TokenUserModel = require(rootPrefix + '/app/models/mysql/TokenUser'),
+  userConstants = require(rootPrefix + '/lib/globalConstant/user'),
+  tokenUserConstants = require(rootPrefix + '/lib/globalConstant/tokenUser');
 
 class SignUp extends ServiceBase {
   /**
@@ -29,6 +34,11 @@ class SignUp extends ServiceBase {
 
     oThis.userName = params.user_name;
     oThis.password = params.password;
+
+    oThis.userId = null;
+    oThis.ostUserId = null;
+    oThis.ostTokenHolderAddress = null;
+    oThis.ostStatus = null;
   }
 
   /**
@@ -40,83 +50,147 @@ class SignUp extends ServiceBase {
     const oThis = this;
 
     //Check if username exists
+    let fetchCacheRsp = await oThis._validateAndSanitizeParams();
 
-    //create salt
+    await oThis._createUser();
 
-    //Create user
+    await oThis._createUserInOst();
 
-    //create ost user
+    await oThis._createTokenUser();
 
-    //Entry in token users
+    return Promise.resolve(oThis._serviceResponse());
   }
 
   /**
-   * Generate salt for user
+   * Validate Request
    *
-   * @returns {Promise<void>}
+   *
+   * @return {Promise<void>}
    *
    * @private
    */
-  async _generateUserSalt() {
+  async _validateAndSanitizeParams() {
     const oThis = this;
+    let userObj = await new UserByUserNameCache({ userName: oThis.userName }).fetch();
 
-    let UserSaltEncryptorKeyCache = oThis
-        .ic()
-        .getShadowedClassFor(coreConstants.icNameSpace, 'UserSaltEncryptorKeyCache'),
-      encryptionSaltResp = await new UserSaltEncryptorKeyCache({ tokenId: oThis.tokenId }).fetchDecryptedData();
-
-    let encryptionSalt = encryptionSaltResp.data.encryption_salt_d,
-      userSalt = localCipher.generateRandomSalt();
-
-    oThis.userSaltEncrypted = await new AddressesEncryptor({ encryptionSaltD: encryptionSalt }).encrypt(userSalt);
-  }
-
-  /**
-   * createUser - Creates new user
-   *
-   * @return {Promise<string>}
-   */
-  async createUser() {
-    const oThis = this;
-
-    let timeInSecs = Math.floor(Date.now() / 1000);
-
-    let params = {
-      tokenId: oThis.tokenId,
-      userId: oThis.userId,
-      kind: oThis.kind,
-      salt: oThis.userSaltEncrypted,
-      deviceShardNumber: oThis.shardNumbersMap[shardConstants.deviceEntityKind],
-      sessionShardNumber: oThis.shardNumbersMap[shardConstants.sessionEntityKind],
-      recoveryOwnerShardNumber: oThis.shardNumbersMap[shardConstants.recoveryOwnerAddressEntityKind],
-      status: tokenUserConstants.createdStatus,
-      updatedTimestamp: timeInSecs
-    };
-
-    if (oThis.tokenHolderAddress) {
-      params['tokenHolderAddress'] = oThis.tokenHolderAddress;
-    }
-
-    if (oThis.multisigAddress) {
-      params['multisigAddress'] = oThis.multisigAddress;
-    }
-
-    let User = oThis.ic().getShadowedClassFor(coreConstants.icNameSpace, 'UserModel'),
-      user = new User({ shardNumber: oThis.userShardNumber });
-
-    let insertRsp = await user.insertUser(params);
-
-    if (insertRsp.isFailure()) {
+    if (userObj.id) {
       return Promise.reject(
-        responseHelper.error({
-          internal_error_identifier: 's_u_c_2',
-          api_error_identifier: 'error_in_user_creation'
+        responseHelper.paramValidationError({
+          internal_error_identifier: 's_um_su_v_1',
+          api_error_identifier: 'invalid_api_params',
+          params_error_identifiers: ['duplicate_user_name'],
+          debug_options: {}
         })
       );
     }
 
-    // NOTE: As base library change the params values, reverse sanitize the data
-    return responseHelper.successWithData({ [resultType.user]: user._sanitizeRowFromDynamo(params) });
+    return Promise.resolve(responseHelper.successWithData({}));
+  }
+
+  /**
+   * Create user
+   *
+   *
+   * @return {Promise<void>}
+   *
+   * @private
+   */
+  async _createUser() {
+    const oThis = this;
+    let KMSObject = new KmsWrapper(kmsGlobalConstant.userPasswordEncryptionPurpose);
+    let kmsResp = await KMSObject.generateDataKey();
+    const decryptedEncryptionSalt = kmsResp['Plaintext'],
+      encryptedEncryptionSalt = kmsResp['CiphertextBlob'];
+
+    //Todo: use sha-256 encryption
+    let encryptedPassword = localCipher.encrypt(decryptedEncryptionSalt, oThis.password);
+
+    // Insert user in database
+    let insertResponse = await new UserModel()
+      .insert({
+        user_name: oThis.userName,
+        password: encryptedPassword,
+        encryption_salt: encryptedEncryptionSalt,
+        mark_inactive_trigger_count: 0,
+        properties: 0,
+        status: userConstants.invertedStatuses[userConstants.activeStatus]
+      })
+      .fire();
+
+    if (!insertResponse) {
+      logger.error('Error while inserting data in users table');
+      return Promise.reject();
+    }
+
+    oThis.userId = insertResponse.insertId;
+
+    return Promise.resolve(responseHelper.successWithData({}));
+  }
+
+  /**
+   * Create token user
+   *
+   *
+   * @return {Promise<void>}
+   *
+   * @private
+   */
+  async _createUserInOst() {}
+
+  /**
+   * Create token user
+   *
+   *
+   * @return {Promise<void>}
+   *
+   * @private
+   */
+  async _createTokenUser() {
+    const oThis = this;
+    let KMSObject = new KmsWrapper(kmsGlobalConstant.userScryptSaltPurpose);
+    let kmsResp = await KMSObject.generateDataKey();
+    const decryptedEncryptionSalt = kmsResp['Plaintext'],
+      encryptedEncryptionSalt = kmsResp['CiphertextBlob'],
+      scryptSalt = null;
+
+    //Todo: use sha-256 encryption
+    let encryptedScryptSalt = localCipher.encrypt(decryptedEncryptionSalt, scryptSalt);
+
+    // Insert user in database
+    let insertResponse = await new TokenUserModel()
+      .insert({
+        user_id: oThis.userId,
+        ost_user_id: oThis.ostUserId,
+        ost_token_holder_address: oThis.ostTokenHolderAddress,
+        scrypt_salt: encryptedScryptSalt,
+        encryption_salt: encryptedEncryptionSalt,
+        properties: 0,
+        ost_status: tokenUserConstants.invertedOstStatuses[oThis.ostStatus]
+      })
+      .fire();
+
+    if (!insertResponse) {
+      logger.error('Error while inserting data in token_users table');
+      return Promise.reject();
+    }
+
+    return Promise.resolve(responseHelper.successWithData({}));
+  }
+
+  /**
+   * Create token user
+   *
+   *
+   * @return {Promise<void>}
+   *
+   * @private
+   */
+  async _serviceResponse() {
+    retunr;
+    responseHelper.successWithData({
+      user: oThis.user,
+      tokenUser: oThis.tokenUser
+    });
   }
 }
 

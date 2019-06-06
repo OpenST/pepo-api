@@ -34,6 +34,25 @@ class UserModel extends ModelBase {
     };
   }
 
+  /**
+   *
+   * @param dbRow
+   * @return {object}
+   */
+  formatDbData(dbRow) {
+    return {
+      id: dbRow.id,
+      userName: dbRow.user_name,
+      password: dbRow.password,
+      encryptionSalt: dbRow.encryption_salt,
+      markInactiveTriggerCount: dbRow.mark_inactive_trigger_count,
+      properties: dbRow.properties,
+      status: dbRow.status,
+      createdAt: dbRow.created_at,
+      updatedAt: dbRow.updated_at
+    };
+  }
+
   /***
    * Fetch user for id
    *
@@ -43,20 +62,35 @@ class UserModel extends ModelBase {
    */
   fetchByUserName(userName) {
     const oThis = this;
-    return oThis
-      .select([
-        'id',
-        'user_name',
-        'password',
-        'encryption_salt',
-        'mark_inactive_trigger_count',
-        'properties',
-        'status',
-        'created_at',
-        'updated_at'
-      ])
-      .where({ user_name: userName })
+    let dbRows = oThis
+      .select(['id', 'user_name', 'mark_inactive_trigger_count'])
+      .where(['user_name = ?', userName])
       .fire();
+
+    if (dbRows.length === 0) {
+      return {};
+    }
+    return oThis.formatDbData(dbRows[0]);
+  }
+
+  /***
+   * Fetch user for id
+   *
+   * @param id {Integer} - User Id
+   *
+   * @return {Object}
+   */
+  fetchSecureByUserName(userName) {
+    const oThis = this;
+    let dbRows = oThis
+      .select('*')
+      .where(['user_name = ?', userName])
+      .fire();
+
+    if (dbRows.length === 0) {
+      return {};
+    }
+    return oThis.formatDbData(dbRows[0]);
   }
 }
 

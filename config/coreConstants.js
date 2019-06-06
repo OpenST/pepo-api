@@ -94,6 +94,10 @@ class CoreConstants {
   get PA_SA_API_SECRET() {
     return process.env.PA_SA_API_SECRET;
   }
+
+  get CACHE_SHA_KEY() {
+    return process.env.PA_CACHE_DATA_SHA_KEY;
+  }
 }
 
 module.exports = new CoreConstants();

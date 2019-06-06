@@ -7,11 +7,15 @@ const v1Signature = {
     mandatory: [
       {
         parameter: 'user_name',
-        validatorMethods: ['validateAlphaNumericString']
+        validatorMethods: [
+          'validateString',
+          'validateAlphaNumericCommonSpecailCharString',
+          'validateMaxLengthMediumString'
+        ]
       },
       {
         parameter: 'password',
-        validatorMethods: ['validatePasswordString']
+        validatorMethods: ['validateString', 'validateMaxLengthMediumString']
       }
     ],
     optional: []

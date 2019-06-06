@@ -46,7 +46,7 @@ class ServicesBaseKlass {
         return err;
       }
       logger.error(' In catch block of services/Base.js', err);
-
+      //TODO: error mail
       return responseHelper.error({
         internal_error_identifier: 'a_s_b_1',
         api_error_identifier: 'something_went_wrong',

@@ -5,7 +5,7 @@
  */
 
 const v1ErrorConfig = {
-  invalid_email: {
+  invalid_user_name: {
     parameter: 'user_name',
     code: 'invalid',
     message: 'Invalid parameter User Name.'
@@ -14,6 +14,11 @@ const v1ErrorConfig = {
     parameter: 'password',
     code: 'invalid',
     message: 'Invalid parameter Password.'
+  },
+  duplicate_user_name: {
+    parameter: 'user_name',
+    code: 'invalid',
+    message: 'User Name has been used.'
   }
 };
 
