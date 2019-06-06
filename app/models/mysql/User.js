@@ -85,7 +85,7 @@ class UserModel extends ModelBase {
     const oThis = this;
     let dbRows = await oThis
       .select(['id', 'user_name', 'mark_inactive_trigger_count', 'properties', 'status', 'created_at', 'updated_at'])
-      .where(['id = ?', userId])
+      .where(['id = ?', id])
       .fire();
 
     if (dbRows.length === 0) {

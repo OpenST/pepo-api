@@ -203,8 +203,11 @@ class SignUp extends ServiceBase {
   async _serviceResponse() {
     const oThis = this;
 
-    oThis.user = await new UserByIdCache({ id: oThis.userId }).fetch();
-    oThis.tokenUser = await new TokenUserByUserIdCache({ userId: oThis.userId }).fetch();
+    let userRes = await new UserByIdCache({ id: oThis.userId }).fetch();
+    let tokenUserRes = await new TokenUserByUserIdCache({ userId: oThis.userId }).fetch();
+
+    oThis.user = userRes.data;
+    oThis.tokenUser = tokenUserRes.data;
 
     let userLoginCookieValue = new UserModel().getCookieValueFor(oThis.user, {
       browserUserAgent: oThis.browserUserAgent
