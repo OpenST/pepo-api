@@ -70,6 +70,7 @@ class UserModel extends ModelBase {
     if (dbRows.length === 0) {
       return {};
     }
+
     return oThis.formatDbData(dbRows[0]);
   }
 

@@ -13,6 +13,7 @@ const rootPrefix = '../../..',
   localCipher = require(rootPrefix + '/lib/encryptors/localCipher'),
   UserByUserNameCache = require(rootPrefix + '/lib/cacheManagement/UserByUserName'),
   KmsWrapper = require(rootPrefix + '/lib/authentication/KmsWrapper'),
+  ostPlatformSdk = require(rootPrefix + '/lib/ostPlatform/JsSdkWrapper'),
   kmsGlobalConstant = require(rootPrefix + '/lib/globalConstant/kms.js'),
   UserModel = require(rootPrefix + '/app/models/mysql/User'),
   TokenUserModel = require(rootPrefix + '/app/models/mysql/TokenUser'),
@@ -37,7 +38,6 @@ class SignUp extends ServiceBase {
 
     oThis.userId = null;
     oThis.ostUserId = null;
-    oThis.ostTokenHolderAddress = null;
     oThis.ostStatus = null;
   }
 
@@ -134,7 +134,18 @@ class SignUp extends ServiceBase {
    *
    * @private
    */
-  async _createUserInOst() {}
+  async _createUserInOst() {
+    const oThis = this;
+    const createUserServiceResponse = await ostPlatformSdk.createUser();
+    if (!createUserServiceResponse.isSuccess()) {
+      return Promise.reject(createUserServiceResponse);
+    }
+
+    oThis.ostUserId = createUserServiceResponse.data.user.id;
+    oThis.ostStatus = createUserServiceResponse.data.user.status;
+
+    return Promise.resolve(responseHelper.successWithData({}));
+  }
 
   /**
    * Create token user
@@ -154,16 +165,16 @@ class SignUp extends ServiceBase {
 
     let encryptedScryptSalt = localCipher.encrypt(decryptedEncryptionSalt, scryptSalt);
 
-    // Insert user in database
+    // Insert token user in database
     let insertResponse = await new TokenUserModel()
       .insert({
         user_id: oThis.userId,
         ost_user_id: oThis.ostUserId,
-        ost_token_holder_address: oThis.ostTokenHolderAddress,
+        ost_token_holder_address: null,
         scrypt_salt: encryptedScryptSalt,
         encryption_salt: encryptedEncryptionSalt,
         properties: 0,
-        ost_status: tokenUserConstants.invertedOstStatuses[oThis.ostStatus]
+        ost_status: tokenUserConstants.invertedOstStatuses[oThis.ostStatus.toUpperCase()]
       })
       .fire();
 
@@ -184,8 +195,7 @@ class SignUp extends ServiceBase {
    * @private
    */
   async _serviceResponse() {
-    retunr;
-    responseHelper.successWithData({
+    return responseHelper.successWithData({
       user: oThis.user,
       tokenUser: oThis.tokenUser
     });
