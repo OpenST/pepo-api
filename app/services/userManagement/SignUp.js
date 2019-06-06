@@ -213,6 +213,8 @@ class SignUp extends ServiceBase {
       timestamp: Date.now() / 1000
     });
 
+    //TODO - delete password from secureUser
+
     return responseHelper.successWithData({
       user: secureUser,
       tokenUser: tokenUser,

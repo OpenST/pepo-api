@@ -22,7 +22,7 @@ class RegisterDevice extends ServiceBase {
   /**
    * Constructor for cache management base
    *
-   * @param {String} params.currentUser.id: Current user id
+   * @param {String} params.current_user.id: Current user id
    * @param {String} params.device_address: Device address
    * @param {String} params.api_signer_address: API signer address
    *
@@ -32,7 +32,7 @@ class RegisterDevice extends ServiceBase {
     super(params);
 
     const oThis = this;
-    oThis.userId = params.currentUser.id;
+    oThis.userId = params.current_user.id;
     oThis.deviceAddress = params.device_address;
     oThis.apiSignerAddress = params.api_signer_address;
   }

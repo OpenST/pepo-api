@@ -30,7 +30,6 @@ class ServicesBaseKlass {
 
     oThis.token = null;
     oThis.tokenId = null;
-    oThis.delayedRecoveryInterval = null;
   }
 
   /**

@@ -36,6 +36,15 @@ const v1Signature = {
       }
     ],
     optional: []
+  },
+  [apiName.recoveryInfo]: {
+    mandatory: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateObject']
+      }
+    ],
+    optional: []
   }
 };
 

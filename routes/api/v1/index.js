@@ -28,7 +28,7 @@ const validateCookie = async function(req, res, next) {
     return authResponse.renderResponse(res, errorConfig);
   }
 
-  req.decodedParams.currentUser = authResponse.data.currentUser;
+  req.decodedParams.current_user = authResponse.data.current_user;
 
   next();
 };
