@@ -4,7 +4,7 @@
  */
 const rootPrefix = '../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
-  userGC = require(rootPrefix + '/lib/globalConstant/user'),
+  userConstants = require(rootPrefix + '/lib/globalConstant/user'),
   coreConstants = require(rootPrefix + '/config/coreConstants');
 
 const dbName = 'pepo_api_' + coreConstants.environment;
@@ -30,7 +30,7 @@ class UserModel extends ModelBase {
    */
   get bitwiseConfig() {
     return {
-      properties: userGC.properties
+      properties: userConstants.properties
     };
   }
 
