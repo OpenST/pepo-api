@@ -100,7 +100,7 @@ class SignUp extends ServiceBase {
     let secureUserRes = await new SecureUserByIDCache({ id: oThis.userId }).fetch();
     oThis.secureUser = secureUserRes.data;
 
-    if (oThis.secureUser.status !== userConstants.invertedStatuses[userConstants.activeStatus]) {
+    if (oThis.secureUser.status !== userConstants.activeStatus) {
       return Promise.reject(
         responseHelper.paramValidationError({
           internal_error_identifier: 's_um_l_fu_1',
@@ -171,6 +171,11 @@ class SignUp extends ServiceBase {
           debug_options: {}
         })
       );
+    }
+
+    if (oThis.secureUser.markInactiveTriggerCount > 0) {
+      await new UserModel().update({ mark_inactive_trigger_count: 0 }).fire();
+      await UserModel.flushCache({ id: oThis.secureUser.id });
     }
 
     return Promise.resolve(responseHelper.successWithData({}));
