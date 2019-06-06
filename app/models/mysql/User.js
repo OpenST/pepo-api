@@ -92,6 +92,14 @@ class UserModel extends ModelBase {
     }
     return oThis.formatDbData(dbRows[0]);
   }
+
+  getLoginCookieValue(userId, timestamp) {
+    return '1:123:abcd';
+  }
+
+  getCookieValueFor(userObj, options) {
+    return '1:123:abcd';
+  }
 }
 
 module.exports = UserModel;
