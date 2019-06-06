@@ -43,6 +43,10 @@ class ApiAuthentication {
       {
         apiName: apiName.signUp,
         route: '/sign-up/'
+      },
+      {
+        apiName: apiName.login,
+        route: '/login/'
       }
       // Note: - Urls should end with a slash. Add config above this.
     ];
@@ -58,6 +62,10 @@ class ApiAuthentication {
       {
         apiName: apiName.signUp,
         route: '/sign-up/'
+      },
+      {
+        apiName: apiName.login,
+        route: '/login/'
       }
       // Note: - Urls should end with a slash. Add config above this.
     ];

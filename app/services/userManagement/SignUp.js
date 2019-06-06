@@ -210,7 +210,6 @@ class SignUp extends ServiceBase {
     oThis.tokenUser = tokenUserRes.data;
 
     let userLoginCookieValue = new UserModel().getCookieValueFor(oThis.user, {
-      browserUserAgent: oThis.browserUserAgent,
       timestamp: Date.now() / 1000
     });
 

@@ -19,6 +19,23 @@ const v1Signature = {
       }
     ],
     optional: []
+  },
+  [apiName.login]: {
+    mandatory: [
+      {
+        parameter: 'user_name',
+        validatorMethods: [
+          'validateString',
+          'validateAlphaNumericCommonSpecailCharString',
+          'validateMaxLengthMediumString'
+        ]
+      },
+      {
+        parameter: 'password',
+        validatorMethods: ['validateString', 'validateMaxLengthMediumString']
+      }
+    ],
+    optional: []
   }
 };
 

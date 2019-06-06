@@ -48,7 +48,49 @@ router.get('/sign-up', sanitizer.sanitizeDynamicUrlParams, function(req, res, ne
       res,
       next,
       '/userManagement/SignUp',
-      'r_v1_wa_l_s_1',
+      'r_a_v1_a_s_1',
+      null,
+      onServiceSuccess,
+      onServiceFailure
+    )
+  );
+});
+
+/* Login user*/
+router.get('/login', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.login;
+
+  const onServiceSuccess = async function(serviceResponse) {
+    //Todo: Cookie Security Review
+    let options = {
+      maxAge: 1000 * 60 * 15, // would expire after 15 minutes
+      httpOnly: true, // The cookie only accessible by the web server
+      signed: true // Indicates if the cookie should be signed
+    };
+
+    // Set cookie
+    res.cookie(userConstant.loginCookieName, serviceResponse.data.userLoginCookieValue, options); // options is optional
+
+    const wrapperFormatterRsp = await new WrapperFormatter({
+      resultType: resultType.loggedInUser,
+      entities: [resultType.loggedInUser],
+      serviceData: serviceResponse.data
+    }).perform();
+
+    serviceResponse.data = wrapperFormatterRsp.data;
+  };
+
+  const onServiceFailure = async function(serviceResponse) {
+    // TODO - delete cookie here.
+  };
+
+  Promise.resolve(
+    routeHelper.perform(
+      req,
+      res,
+      next,
+      '/userManagement/Login',
+      'r_a_v1_a_l_1',
       null,
       onServiceSuccess,
       onServiceFailure
