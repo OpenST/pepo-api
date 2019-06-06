@@ -7,7 +7,7 @@ const upQuery =
       `id` bigint(20) NOT NULL AUTO_INCREMENT, \n\
       `user_name` varchar(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL, \n\
       `password` varchar(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL, \n\
-      `encryption_salt` blob CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL, \n\
+      `encryption_salt` blob NOT NULL, \n\
       `mark_inactive_trigger_count` tinyint(4) NOT NULL DEFAULT '0', \n\
       `properties` tinyint(4) NOT NULL DEFAULT '0', \n\
       `status` tinyint(4) NOT NULL DEFAULT '1', \n\
