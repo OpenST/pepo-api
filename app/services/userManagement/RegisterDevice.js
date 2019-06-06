@@ -5,7 +5,7 @@
  */
 
 const rootPrefix = '../../..',
-  jsSdkWrapper = require(rootPrefix + '/lib/ostPlatform/JsSdkWrapper'),
+  jsSdkWrapper = require(rootPrefix + '/lib/ostPlatform/jsSdkWrapper'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   createErrorLogsEntry = require(rootPrefix + '/lib/errorLogs/createEntry'),
