@@ -1,7 +1,7 @@
 const express = require('express'),
   router = express.Router();
 
-const rootPrefix = '../..',
+const rootPrefix = '../../..',
   LoggedInUserFormatter = require(rootPrefix + '/lib/formatter/entity/LoggedInUser'),
   routeHelper = require(rootPrefix + '/routes/helper'),
   apiName = require(rootPrefix + '/lib/globalConstant/apiName'),
