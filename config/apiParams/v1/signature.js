@@ -45,6 +45,23 @@ const v1Signature = {
       }
     ],
     optional: []
+  },
+  [apiName.registerDevice]: {
+    mandatory: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateObject']
+      },
+      {
+        parameter: 'device_address',
+        validatorMethods: ['validateEthAddress']
+      },
+      {
+        parameter: 'api_signer_address',
+        validatorMethods: ['validateEthAddress']
+      }
+    ],
+    optional: []
   }
 };
 
