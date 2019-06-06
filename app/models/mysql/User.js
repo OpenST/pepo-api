@@ -81,6 +81,26 @@ class UserModel extends ModelBase {
    *
    * @return {Object}
    */
+  async fetchById(id) {
+    const oThis = this;
+    let dbRows = await oThis
+      .select(['id', 'user_name', 'mark_inactive_trigger_count', 'properties', 'status', 'created_at', 'updated_at'])
+      .where(['id = ?', userId])
+      .fire();
+
+    if (dbRows.length === 0) {
+      return {};
+    }
+    return oThis.formatDbData(dbRows[0]);
+  }
+
+  /***
+   * Fetch secure user for id
+   *
+   * @param id {Integer} - User Id
+   *
+   * @return {Object}
+   */
   async fetchSecureById(id) {
     const oThis = this;
     let dbRows = await oThis

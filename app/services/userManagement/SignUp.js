@@ -11,6 +11,8 @@ const rootPrefix = '../../..',
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   localCipher = require(rootPrefix + '/lib/encryptors/localCipher'),
   UserByUserNameCache = require(rootPrefix + '/lib/cacheManagement/UserByUserName'),
+  UserByIdCache = require(rootPrefix + '/lib/cacheManagement/UserById'),
+  TokenUserByUserIdCache = require(rootPrefix + '/lib/cacheManagement/TokenUserByUserId'),
   KmsWrapper = require(rootPrefix + '/lib/authentication/KmsWrapper'),
   ostPlatformSdk = require(rootPrefix + '/lib/ostPlatform/jsSdkWrapper'),
   kmsGlobalConstant = require(rootPrefix + '/lib/globalConstant/kms.js'),
@@ -73,7 +75,7 @@ class SignUp extends ServiceBase {
     const oThis = this;
     let userObj = await new UserByUserNameCache({ userName: oThis.userName }).fetch();
 
-    if (userObj.isSuccess() && userObj.id) {
+    if (userObj.isSuccess() && userObj.data.id) {
       return Promise.reject(
         responseHelper.paramValidationError({
           internal_error_identifier: 's_um_su_v_1',
@@ -201,9 +203,17 @@ class SignUp extends ServiceBase {
   async _serviceResponse() {
     const oThis = this;
 
+    oThis.user = await new UserByIdCache({ id: oThis.userId }).fetch();
+    oThis.tokenUser = await new TokenUserByUserIdCache({ userId: oThis.userId }).fetch();
+
+    let userLoginCookieValue = new UserModel().getCookieValueFor(oThis.user, {
+      browserUserAgent: oThis.browserUserAgent
+    });
+
     return responseHelper.successWithData({
       user: oThis.user,
-      tokenUser: oThis.tokenUser
+      tokenUser: oThis.tokenUser,
+      userLoginCookieValue: userLoginCookieValue
     });
   }
 }

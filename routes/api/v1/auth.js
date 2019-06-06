@@ -18,6 +18,7 @@ router.get('/sign-up', sanitizer.sanitizeDynamicUrlParams, function(req, res, ne
   req.decodedParams.apiName = apiName.signUp;
 
   const onServiceSuccess = async function(serviceResponse) {
+    //Todo: Cookie Security Review
     let options = {
       maxAge: 1000 * 60 * 15, // would expire after 15 minutes
       httpOnly: true, // The cookie only accessible by the web server
