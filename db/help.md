@@ -10,7 +10,7 @@
  > node db/migrate.js --generate test123
 ```
 
-* Running all missing migrations.
+* Running all pending migrations.
 ```sh
  > node db/migrate.js
 ```
