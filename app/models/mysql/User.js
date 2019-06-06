@@ -114,12 +114,32 @@ class UserModel extends ModelBase {
     return oThis.formatDbData(dbRows[0]);
   }
 
-  getLoginCookieValue(userId, timestamp) {
-    return '1:123:abcd';
+  getCookieValueFor(userObj, options) {
+    const oThis = this;
+
+    return userObj.id + ':' + options.timestamp + ':' + oThis.getCookieTokenFor(userObj, options);
   }
 
-  getCookieValueFor(userObj, options) {
-    return '1:123:abcd';
+  getCookieTokenFor(userObj, options) {
+    let passwordEncrypted = userObj.password;
+    let stringToSign =
+      userObj.id +
+      ':' +
+      options.timestamp +
+      ':' +
+      coreConstants.PA_COOKIE_TOKEN_SECRET +
+      ':' +
+      passwordEncrypted.substring(0, 16);
+    let salt =
+      userObj.id +
+      ':' +
+      passwordEncrypted.slice(-16) +
+      ':' +
+      coreConstants.PA_COOKIE_TOKEN_SECRET +
+      ':' +
+      options.timestamp;
+    let cookieToken = util.createSha256Digest(salt, stringToSign);
+    return cookieToken;
   }
 }
 
