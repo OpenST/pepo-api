@@ -1,6 +1,7 @@
 'use strict';
 
 const express = require('express'),
+  router = express.Router(),
   cookieParser = require('cookie-parser');
 
 const rootPrefix = '../../..',
@@ -19,7 +20,7 @@ router.use(cookieParser(coreConstant.COOKIE_SECRET));
 
 const validateCookie = async function(req, res, next) {
   let loginCookieValue = req.signedCookies[userConstant.loginCookieName];
-  let authResponse = new LoginCookieAuth(loginCookieValue).perform().catch(function(r) {
+  let authResponse = await new LoginCookieAuth(loginCookieValue).perform().catch(function(r) {
     return r;
   });
 
@@ -31,8 +32,6 @@ const validateCookie = async function(req, res, next) {
 
   next();
 };
-
-const router = express.Router();
 
 router.use('/auth', authRoutes);
 router.use('/users', validateCookie, usersRoutes);

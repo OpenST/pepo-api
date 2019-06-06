@@ -1,16 +1,12 @@
 'use strict';
 
-const express = require('express'),
-  cookieParser = require('cookie-parser');
+const express = require('express');
 
 const rootPrefix = '../..',
   apiVersions = require(rootPrefix + '/lib/globalConstant/apiVersions'),
   v1Routes = require(rootPrefix + '/routes/api/v1/index');
 
 const router = express.Router();
-
-// Node.js cookie parsing middleware.
-router.use(cookieParser('test123'));
 
 /**
  * Append V1 version

@@ -57,7 +57,7 @@ class TokenUserModel extends ModelBase {
   /***
    * Fetch token user for user id
    *
-   * @param id {Integer} - Token User Id
+   * @param userId {Integer} - Token User Id
    *
    * @return {Object}
    */
@@ -80,6 +80,27 @@ class TokenUserModel extends ModelBase {
     if (dbRows.length === 0) {
       return {};
     }
+    return oThis.formatDbData(dbRows[0]);
+  }
+
+  /***
+   * Fetch secured data of user for id
+   *
+   * @param userId {Integer} - Token User Id
+   *
+   * @return {Object}
+   */
+  async fetchSecureByUserId(userId) {
+    const oThis = this;
+    let dbRows = await oThis
+      .select('*')
+      .where(['user_id = ?', userId])
+      .fire();
+
+    if (dbRows.length === 0) {
+      return {};
+    }
+
     return oThis.formatDbData(dbRows[0]);
   }
 }

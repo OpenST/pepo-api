@@ -57,7 +57,7 @@ class UserModel extends ModelBase {
   /***
    * Fetch user for id
    *
-   * @param id {Integer} - User Id
+   * @param userName {Integer} - User Id
    *
    * @return {Object}
    */
@@ -78,7 +78,7 @@ class UserModel extends ModelBase {
   /***
    * Fetch secure user for id
    *
-   * @param id {Integer} - User Id
+   * @param id {String} - id
    *
    * @return {Object}
    */
