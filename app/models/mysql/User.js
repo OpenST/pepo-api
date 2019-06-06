@@ -156,6 +156,27 @@ class UserModel extends ModelBase {
     let cookieToken = util.createSha256Digest(salt, stringToSign);
     return cookieToken;
   }
+
+  /***
+   * Flush cache
+   *
+   * @param {object} params
+   *
+   * @returns {Promise<*>}
+   */
+  static async flushCache(params) {
+    const SecureUserByIDCache = require(rootPrefix + '/lib/cacheManagement/SecureUserByID');
+
+    await new SecureUserByIDCache({
+      id: params.id
+    }).clear();
+
+    const UserByIdCache = require(rootPrefix + '/lib/cacheManagement/UserById');
+
+    await new UserByIdCache({
+      id: params.id
+    }).clear();
+  }
 }
 
 module.exports = UserModel;
