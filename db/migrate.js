@@ -5,6 +5,7 @@ program
   .option('--up <up>', 'Specify a specific migration version to perform.')
   .option('--down <down>', 'Specify a specific migration version to revert.')
   .option('--redo <redo>', 'Specify a specific migration version to redo.')
+  .option('--generate <name>', 'Specify migration name to generate with bare minimum content.')
   .parse(process.argv);
 
 const rootPrefix = '..',
@@ -197,4 +198,24 @@ class DbMigrate {
   }
 }
 
-new DbMigrate().perform();
+if (program.generate) {
+  let fileName = migrationFolder + '/' + Date.now() + '_' + program.generate + '.js';
+  let fileDummyData =
+    'const migrationName = {\n' +
+    "  dbName: 'db name here',\n" +
+    "  up: 'sql query here',\n" +
+    "  down: 'sql query here'\n" +
+    '};\n' +
+    '\n' +
+    'module.exports = migrationName;';
+
+  fs.appendFile(fileName, fileDummyData, function(err) {
+    if (err) {
+      logger.error(err);
+    }
+
+    logger.log('The file ' + fileName + ' is created!');
+  });
+} else {
+  new DbMigrate().perform();
+}
