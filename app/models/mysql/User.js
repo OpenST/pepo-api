@@ -60,9 +60,9 @@ class UserModel extends ModelBase {
    *
    * @return {Object}
    */
-  fetchByUserName(userName) {
+  async fetchByUserName(userName) {
     const oThis = this;
-    let dbRows = oThis
+    let dbRows = await oThis
       .select(['id'])
       .where(['user_name = ?', userName])
       .fire();
@@ -81,9 +81,9 @@ class UserModel extends ModelBase {
    *
    * @return {Object}
    */
-  fetchSecureById(id) {
+  async fetchSecureById(id) {
     const oThis = this;
-    let dbRows = oThis
+    let dbRows = await oThis
       .select('*')
       .where(['id = ?', userId])
       .fire();

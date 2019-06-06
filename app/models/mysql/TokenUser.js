@@ -61,9 +61,9 @@ class TokenUserModel extends ModelBase {
    *
    * @return {Object}
    */
-  fetchByUserId(userId) {
+  async fetchByUserId(userId) {
     const oThis = this;
-    let dbRows = oThis
+    let dbRows = await oThis
       .select([
         'id',
         'user_id',

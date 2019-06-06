@@ -18,6 +18,7 @@ const rootPrefix = '../../..',
   UserModel = require(rootPrefix + '/app/models/mysql/User'),
   TokenUserModel = require(rootPrefix + '/app/models/mysql/TokenUser'),
   userConstants = require(rootPrefix + '/lib/globalConstant/user'),
+  logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   tokenUserConstants = require(rootPrefix + '/lib/globalConstant/tokenUser');
 
 class SignUp extends ServiceBase {
@@ -73,7 +74,8 @@ class SignUp extends ServiceBase {
     const oThis = this;
     let userObj = await new UserByUserNameCache({ userName: oThis.userName }).fetch();
 
-    if (userObj.id) {
+    console.log('HERE====', userObj);
+    if (userObj.isSuccess() && userObj.id) {
       return Promise.reject(
         responseHelper.paramValidationError({
           internal_error_identifier: 's_um_su_v_1',
@@ -136,6 +138,9 @@ class SignUp extends ServiceBase {
    */
   async _createUserInOst() {
     const oThis = this;
+
+    logger.log('create User In Ost');
+
     const createUserServiceResponse = await ostPlatformSdk.createUser();
     if (!createUserServiceResponse.isSuccess()) {
       return Promise.reject(createUserServiceResponse);
@@ -157,11 +162,12 @@ class SignUp extends ServiceBase {
    */
   async _createTokenUser() {
     const oThis = this;
-    let KMSObject = new KmsWrapper(kmsGlobalConstant.userScryptSaltPurpose);
+    logger.log('create Token User');
+    let KMSObject = new KmsWrapper(kmsGlobalConstant.tokenUserScryptSaltPurpose);
     let kmsResp = await KMSObject.generateDataKey();
     const decryptedEncryptionSalt = kmsResp['Plaintext'],
       encryptedEncryptionSalt = kmsResp['CiphertextBlob'],
-      scryptSalt = null;
+      scryptSalt = 'qwerty';
 
     let encryptedScryptSalt = localCipher.encrypt(decryptedEncryptionSalt, scryptSalt);
 
