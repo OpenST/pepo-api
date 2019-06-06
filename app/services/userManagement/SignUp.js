@@ -8,7 +8,6 @@
 const rootPrefix = '../../..',
   util = require(rootPrefix + '/lib/util'),
   ServiceBase = require(rootPrefix + '/app/services/Base'),
-  coreConstants = require(rootPrefix + '/config/coreConstants'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   localCipher = require(rootPrefix + '/lib/encryptors/localCipher'),
   UserByUserNameCache = require(rootPrefix + '/lib/cacheManagement/UserByUserName'),
@@ -74,7 +73,6 @@ class SignUp extends ServiceBase {
     const oThis = this;
     let userObj = await new UserByUserNameCache({ userName: oThis.userName }).fetch();
 
-    console.log('HERE====', userObj);
     if (userObj.isSuccess() && userObj.id) {
       return Promise.reject(
         responseHelper.paramValidationError({
@@ -167,7 +165,7 @@ class SignUp extends ServiceBase {
     let kmsResp = await KMSObject.generateDataKey();
     const decryptedEncryptionSalt = kmsResp['Plaintext'],
       encryptedEncryptionSalt = kmsResp['CiphertextBlob'],
-      scryptSalt = 'qwerty';
+      scryptSalt = localCipher.generateRandomIv();
 
     let encryptedScryptSalt = localCipher.encrypt(decryptedEncryptionSalt, scryptSalt);
 
@@ -201,6 +199,8 @@ class SignUp extends ServiceBase {
    * @private
    */
   async _serviceResponse() {
+    const oThis = this;
+
     return responseHelper.successWithData({
       user: oThis.user,
       tokenUser: oThis.tokenUser

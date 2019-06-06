@@ -17,7 +17,7 @@ const createTokensTable = {
       `api_key` varchar(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL, \n\
       `api_secret` text CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL, \n\
       `encryption_salt` blob NOT NULL, \n\
-      `ost_company_user_id` int(11) NOT NULL, \n\
+      `ost_company_user_id` varchar(40) NOT NULL, \n\
       `created_at` int(11) NOT NULL, \n\
       `updated_at` int(11) NOT NULL, \n\
       PRIMARY KEY (`id`), \n\
