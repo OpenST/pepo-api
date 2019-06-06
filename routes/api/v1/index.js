@@ -3,8 +3,8 @@
 const express = require('express');
 
 const rootPrefix = '../../..',
-  authRoutes = require(rootPrefix + '/routes/api/v1/auth'),
-  usersRoutes = require(rootPrefix + '/routes/api/v1/users');
+  authRoutes = require(rootPrefix + '/routes/api/v1/auth');
+// usersRoutes = require(rootPrefix + '/routes/api/v1/users');
 
 const router = express.Router();
 
