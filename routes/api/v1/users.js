@@ -10,7 +10,7 @@ const rootPrefix = '../../..',
   RecoveryInfoFormatter = require(rootPrefix + '/lib/formatter/entity/RecoveryInfo');
 
 /* Register Device*/
-router.get('/register-device', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+router.post('/register-device', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.registerDevice;
 
   const onServiceSuccess = async function(serviceResponse) {

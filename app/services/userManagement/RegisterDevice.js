@@ -126,7 +126,7 @@ class RegisterDevice extends ServiceBase {
         device: platformResponse.data[resultType]
       };
 
-    return returnData;
+    return responseHelper.successWithData(returnData);
   }
 }
 

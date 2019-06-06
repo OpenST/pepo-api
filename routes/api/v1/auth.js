@@ -15,7 +15,7 @@ const rootPrefix = '../../..',
 router.use(cookieParser(coreConstant.COOKIE_SECRET));
 
 /* Create user*/
-router.get('/sign-up', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+router.post('/sign-up', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.signUp;
 
   const onServiceSuccess = async function(serviceResponse) {
@@ -57,7 +57,7 @@ router.get('/sign-up', sanitizer.sanitizeDynamicUrlParams, function(req, res, ne
 });
 
 /* Login user*/
-router.get('/login', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+router.post('/login', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.login;
 
   const onServiceSuccess = async function(serviceResponse) {
