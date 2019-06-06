@@ -11,7 +11,7 @@ const rootPrefix = '../../..',
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   localCipher = require(rootPrefix + '/lib/encryptors/localCipher'),
   UserByUserNameCache = require(rootPrefix + '/lib/cacheManagement/UserByUserName'),
-  UserByIdCache = require(rootPrefix + '/lib/cacheManagement/UserById'),
+  SecureUserByIDCache = require(rootPrefix + '/lib/cacheManagement/SecureUserByID'),
   TokenUserByUserIdCache = require(rootPrefix + '/lib/cacheManagement/TokenUserByUserId'),
   KmsWrapper = require(rootPrefix + '/lib/authentication/KmsWrapper'),
   ostPlatformSdk = require(rootPrefix + '/lib/ostPlatform/jsSdkWrapper'),
@@ -193,7 +193,7 @@ class SignUp extends ServiceBase {
   }
 
   /**
-   * Create token user
+   * Service Response
    *
    *
    * @return {Promise<void>}
@@ -203,19 +203,19 @@ class SignUp extends ServiceBase {
   async _serviceResponse() {
     const oThis = this;
 
-    let userRes = await new UserByIdCache({ id: oThis.userId }).fetch();
+    let secureUserRes = await new SecureUserByIDCache({ id: oThis.userId }).fetch();
     let tokenUserRes = await new TokenUserByUserIdCache({ userId: oThis.userId }).fetch();
 
-    oThis.user = userRes.data;
-    oThis.tokenUser = tokenUserRes.data;
+    let secureUser = secureUserRes.data,
+      tokenUser = tokenUserRes.data;
 
-    let userLoginCookieValue = new UserModel().getCookieValueFor(oThis.user, {
+    let userLoginCookieValue = new UserModel().getCookieValueFor(secureUser, {
       timestamp: Date.now() / 1000
     });
 
     return responseHelper.successWithData({
-      user: oThis.user,
-      tokenUser: oThis.tokenUser,
+      user: secureUser,
+      tokenUser: tokenUser,
       userLoginCookieValue: userLoginCookieValue
     });
   }

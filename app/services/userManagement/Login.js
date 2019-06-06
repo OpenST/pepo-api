@@ -15,6 +15,7 @@ const rootPrefix = '../../..',
   TokenUserByUserIdCache = require(rootPrefix + '/lib/cacheManagement/TokenUserByUserId'),
   UserModel = require(rootPrefix + '/app/models/mysql/User'),
   userConstants = require(rootPrefix + '/lib/globalConstant/user'),
+  coreConstants = require(rootPrefix + '/config/coreConstants'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger');
 
 class SignUp extends ServiceBase {
@@ -68,9 +69,9 @@ class SignUp extends ServiceBase {
    */
   async _validateAndSanitizeParams() {
     const oThis = this;
-    let userObj = await new UserByUserNameCache({ userName: oThis.userName }).fetch();
+    let userObjRes = await new UserByUserNameCache({ userName: oThis.userName }).fetch();
 
-    if (userObj.isFailure() || !userObj.data.id) {
+    if (userObjRes.isFailure() || !userObjRes.data.id) {
       return Promise.reject(
         responseHelper.paramValidationError({
           internal_error_identifier: 's_um_su_v_1',
@@ -81,7 +82,7 @@ class SignUp extends ServiceBase {
       );
     }
 
-    oThis.userId = userObj.data.id;
+    oThis.userId = userObjRes.data.id;
 
     return Promise.resolve(responseHelper.successWithData({}));
   }
