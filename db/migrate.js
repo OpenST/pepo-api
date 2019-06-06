@@ -2,8 +2,9 @@ const fs = require('fs'),
   program = require('commander');
 
 program
-  .option('--up <up>', 'Version to perform the migration.')
-  .option('--down <down>', 'Version to revert the migration.')
+  .option('--up <up>', 'Specify a specific migration version to perform.')
+  .option('--down <down>', 'Specify a specific migration version to revert.')
+  .option('--redo <redo>', 'Specify a specific migration version to redo.')
   .parse(process.argv);
 
 const rootPrefix = '..',
@@ -14,9 +15,16 @@ const rootPrefix = '..',
 const migrationFolder = __dirname + '/migration',
   mainDbName = 'pepo_api_' + coreConstants.environment;
 
-class RunDbMigrate {
+class DbMigrate {
+  /**
+   * Constructor
+   */
   constructor() {
     const oThis = this;
+
+    oThis.upVersion = program.up;
+    oThis.downVersion = program.down;
+    oThis.redoVersion = program.redo;
 
     oThis.allVersionMap = {};
     oThis.existingVersionMap = {};
@@ -26,15 +34,48 @@ class RunDbMigrate {
   async perform() {
     const oThis = this;
 
+    oThis
+      ._asyncPerform()
+      .then(function() {
+        logger.win('Done!');
+      })
+      .catch(function(err) {
+        logger.error(err);
+      });
+  }
+
+  /**
+   * Async perform
+   *
+   * @return {Promise<void>}
+   * @private
+   */
+  async _asyncPerform() {
+    const oThis = this;
+
     oThis._fetchAllVersions();
 
-    if (program.up) {
-      await oThis._runMigration(program.up);
-    } else if (program.down) {
-      await oThis._revertMigration(program.down);
-    } else {
-      await oThis._fetchExistingVersions();
+    await oThis._fetchExistingVersions();
 
+    if (oThis.upVersion) {
+      if (oThis.existingVersionMap[oThis.upVersion]) {
+        throw new Error(
+          'Migration version ' + oThis.upVersion + ' is already up. If you want to re-run it, use redo flag.'
+        );
+      }
+      await oThis._runMigration(oThis.upVersion);
+    } else if (oThis.downVersion) {
+      if (!oThis.existingVersionMap[oThis.downVersion]) {
+        throw new Error('Migration version ' + oThis.downVersion + ' is NOT up. Reverting it is not allowed.');
+      }
+      await oThis._revertMigration(oThis.downVersion);
+    } else if (oThis.redoVersion) {
+      if (!oThis.existingVersionMap[oThis.redoVersion]) {
+        throw new Error('Migration version ' + oThis.redoVersion + ' is NOT up. Re-doing it is not allowed.');
+      }
+      await oThis._revertMigration(oThis.redoVersion);
+      await oThis._runMigration(oThis.redoVersion);
+    } else {
       oThis._findMissingVersions();
 
       // looping over the missing versions to run the migrations
@@ -46,6 +87,13 @@ class RunDbMigrate {
     }
   }
 
+  /**
+   * Run migration
+   *
+   * @param version
+   * @return {Promise<void>}
+   * @private
+   */
   async _runMigration(version) {
     const oThis = this;
 
@@ -66,6 +114,13 @@ class RunDbMigrate {
     logger.log('-----------------------------------------');
   }
 
+  /**
+   * Revert migration
+   *
+   * @param version
+   * @return {Promise<void>}
+   * @private
+   */
   async _revertMigration(version) {
     const oThis = this;
 
@@ -86,6 +141,11 @@ class RunDbMigrate {
     logger.log('-----------------------------------------');
   }
 
+  /**
+   * Fetch all versions
+   *
+   * @private
+   */
   _fetchAllVersions() {
     const oThis = this;
 
@@ -99,6 +159,12 @@ class RunDbMigrate {
     }
   }
 
+  /**
+   * Fetch existing versions
+   *
+   * @return {Promise<void>}
+   * @private
+   */
   async _fetchExistingVersions() {
     const oThis = this;
 
@@ -115,6 +181,11 @@ class RunDbMigrate {
     }
   }
 
+  /**
+   * Find missing versions and sort them
+   *
+   * @private
+   */
   _findMissingVersions() {
     const oThis = this;
 
@@ -126,4 +197,4 @@ class RunDbMigrate {
   }
 }
 
-new RunDbMigrate().perform();
+new DbMigrate().perform();
