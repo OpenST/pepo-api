@@ -6,6 +6,7 @@ const rootPrefix = '../../..',
   MysqlQueryBuilders = require(rootPrefix + '/lib/queryBuilders/mysql'),
   mysqlWrapper = require(rootPrefix + '/lib/mysqlWrapper'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
+  util = require(rootPrefix + '/lib/util'),
   bitHelper = require(rootPrefix + '/helpers/bit');
 
 class ModelBase extends MysqlQueryBuilders {
@@ -72,24 +73,46 @@ class ModelBase extends MysqlQueryBuilders {
    *
    * @return {Array}
    */
-  getBitwiseArray(keyName, keyValue) {
+  getBitwiseArray(bitwiseColumnName, bitwiseColumnValue) {
     const oThis = this;
     if (!oThis.bitwiseConfig) {
       throw new Error('Bitwise Config not defined');
     }
     let modelInstance = new oThis.constructor();
 
-    let config = oThis.bitwiseConfig[keyName],
+    let config = oThis.bitwiseConfig[bitwiseColumnName],
       arr = [];
 
     Object.keys(config).forEach((key) => {
       let value = config[key];
-      if ((keyValue & key) == key) {
+      if ((bitwiseColumnValue & key) == key) {
         arr.push(value);
       }
     });
 
     return arr;
+  }
+
+  /**
+   * Convert enum to Bitwise values
+   *
+   * @return {number}
+   */
+  setBitwise(bitwiseColumnName, bitwiseColumnExistingValue, bitEnumToSet) {
+    const oThis = this;
+    if (!oThis.bitwiseConfig) {
+      throw new Error('Bitwise Config not defined');
+    }
+
+    let config = oThis.bitwiseConfig[bitwiseColumnName],
+      invertedConfig = util.invert(config),
+      bitEnumIntegerValue = invertedConfig[bitEnumToSet];
+
+    if (!bitEnumIntegerValue) {
+      throw new Error('Invalid enum passed');
+    }
+
+    return bitwiseColumnExistingValue | bitEnumIntegerValue;
   }
 }
 
