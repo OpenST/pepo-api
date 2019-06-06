@@ -47,7 +47,7 @@ class UserModel extends ModelBase {
       encryptionSalt: dbRow.encryption_salt,
       markInactiveTriggerCount: dbRow.mark_inactive_trigger_count,
       properties: dbRow.properties,
-      status: dbRow.status,
+      status: userConstants.statuses[dbRow.status],
       createdAt: dbRow.created_at,
       updatedAt: dbRow.updated_at
     };
@@ -105,7 +105,7 @@ class UserModel extends ModelBase {
     const oThis = this;
     let dbRows = await oThis
       .select('*')
-      .where(['id = ?', userId])
+      .where(['id = ?', id])
       .fire();
 
     if (dbRows.length === 0) {
