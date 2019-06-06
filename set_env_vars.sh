@@ -17,10 +17,15 @@ export PA_MYSQL_USER='root'
 export PA_MYSQL_PASSWORD='root'
 
 # AWS-KMS details
-export SA_KMS_AWS_ACCESS_KEY='AKIAJUDRALNURKAVS5IQ'
-export SA_KMS_AWS_SECRET_KEY='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'
-export SA_KMS_AWS_REGION='us-east-1'
-export SA_API_KEY_KMS_ARN='arn:aws:kms:us-east-1:604850698061:key'
-export SA_API_KEY_KMS_ID='eab8148d-fd9f-451d-9eb9-16c115645635'
-export SA_KNOWN_ADDRESS_KMS_ARN='arn:aws:kms:us-east-1:604850698061:key'
-export SA_KNOWN_ADDRESS_KMS_ID='eab8148d-fd9f-451d-9eb9-16c115645635'
+export PA_KMS_AWS_ACCESS_KEY='AKIAJUDRALNURKAVS5IQ'
+export PA_KMS_AWS_SECRET_KEY='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'
+export PA_KMS_AWS_REGION='us-east-1'
+export PA_API_KEY_KMS_ARN='arn:aws:kms:us-east-1:604850698061:key'
+export PA_API_KEY_KMS_ID='eab8148d-fd9f-451d-9eb9-16c115645635'
+export PA_KNOWN_ADDRESS_KMS_ARN='arn:aws:kms:us-east-1:604850698061:key'
+export PA_KNOWN_ADDRESS_KMS_ID='eab8148d-fd9f-451d-9eb9-16c115645635'
+
+# ost-platform API credentials
+export PA_SA_API_END_POINT='https://api.stagingost.com/testnet/v2/'
+export PA_SA_API_KEY='bb6740a6ed27452de43c0a5012d8f9be'
+export PA_SA_API_SECRET='aa5298d3a3fe181a3a52d085ee1525df57ac498337f8f3b76ca7df0a5de3211b'

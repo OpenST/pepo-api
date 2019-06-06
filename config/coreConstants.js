@@ -56,31 +56,43 @@ class CoreConstants {
 
   // kms related constants
   get KMS_AWS_ACCESS_KEY() {
-    return process.env.SA_KMS_AWS_ACCESS_KEY;
+    return process.env.PA_KMS_AWS_ACCESS_KEY;
   }
 
   get KMS_AWS_SECRET_KEY() {
-    return process.env.SA_KMS_AWS_SECRET_KEY;
+    return process.env.PA_KMS_AWS_SECRET_KEY;
   }
 
   get KMS_AWS_REGION() {
-    return process.env.SA_KMS_AWS_REGION;
+    return process.env.PA_KMS_AWS_REGION;
   }
 
   get KMS_API_KEY_ARN() {
-    return process.env.SA_API_KEY_KMS_ARN;
+    return process.env.PA_API_KEY_KMS_ARN;
   }
 
   get KMS_API_KEY_ID() {
-    return process.env.SA_API_KEY_KMS_ID;
+    return process.env.PA_API_KEY_KMS_ID;
   }
 
   get KMS_KNOWN_ADDR_KEY_ARN() {
-    return process.env.SA_KNOWN_ADDRESS_KMS_ARN;
+    return process.env.PA_KNOWN_ADDRESS_KMS_ARN;
   }
 
   get KMS_KNOWN_ADDR_KEY_ID() {
-    return process.env.SA_KNOWN_ADDRESS_KMS_ID;
+    return process.env.PA_KNOWN_ADDRESS_KMS_ID;
+  }
+
+  get PA_SA_API_END_POINT() {
+    return process.env.PA_SA_API_END_POINT;
+  }
+
+  get PA_SA_API_KEY() {
+    return process.env.PA_SA_API_KEY;
+  }
+
+  get PA_SA_API_SECRET() {
+    return process.env.PA_SA_API_SECRET;
   }
 }
 
