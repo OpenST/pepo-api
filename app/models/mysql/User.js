@@ -63,7 +63,7 @@ class UserModel extends ModelBase {
   fetchByUserName(userName) {
     const oThis = this;
     let dbRows = oThis
-      .select(['id', 'user_name', 'mark_inactive_trigger_count'])
+      .select(['id'])
       .where(['user_name = ?', userName])
       .fire();
 
@@ -74,17 +74,17 @@ class UserModel extends ModelBase {
   }
 
   /***
-   * Fetch user for id
+   * Fetch secure user for id
    *
    * @param id {Integer} - User Id
    *
    * @return {Object}
    */
-  fetchSecureByUserName(userName) {
+  fetchSecureById(id) {
     const oThis = this;
     let dbRows = oThis
       .select('*')
-      .where(['user_name = ?', userName])
+      .where(['id = ?', userId])
       .fire();
 
     if (dbRows.length === 0) {

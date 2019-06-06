@@ -6,7 +6,7 @@
  */
 
 const rootPrefix = '../../..',
-  basicHelper = require(rootPrefix + '/helpers/basic'),
+  util = require(rootPrefix + '/lib/util'),
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   coreConstants = require(rootPrefix + '/config/coreConstants'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
@@ -102,8 +102,7 @@ class SignUp extends ServiceBase {
     const decryptedEncryptionSalt = kmsResp['Plaintext'],
       encryptedEncryptionSalt = kmsResp['CiphertextBlob'];
 
-    //Todo: use sha-256 encryption
-    let encryptedPassword = localCipher.encrypt(decryptedEncryptionSalt, oThis.password);
+    let encryptedPassword = util.createSha256Digest(decryptedEncryptionSalt, oThis.password);
 
     // Insert user in database
     let insertResponse = await new UserModel()
@@ -153,7 +152,6 @@ class SignUp extends ServiceBase {
       encryptedEncryptionSalt = kmsResp['CiphertextBlob'],
       scryptSalt = null;
 
-    //Todo: use sha-256 encryption
     let encryptedScryptSalt = localCipher.encrypt(decryptedEncryptionSalt, scryptSalt);
 
     // Insert user in database
