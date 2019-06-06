@@ -105,7 +105,11 @@ class DbMigrate {
 
     let versionInfo = require(migrationFolder + '/' + migrationFile);
 
-    await new ExecuteQuery(versionInfo.dbName, versionInfo.up).perform();
+    for (let i = 0; i < versionInfo.up.length; i++) {
+      let sql = versionInfo.up[i];
+
+      await new ExecuteQuery(versionInfo.dbName, sql).perform();
+    }
 
     const insertVersionSql = "INSERT INTO `schema_migrations` (`version`) VALUES('" + version + "')";
 
@@ -132,7 +136,11 @@ class DbMigrate {
 
     let versionInfo = require(migrationFolder + '/' + migrationFile);
 
-    await new ExecuteQuery(versionInfo.dbName, versionInfo.down).perform();
+    for (let i = 0; i < versionInfo.down.length; i++) {
+      let sql = versionInfo.down[i];
+
+      await new ExecuteQuery(versionInfo.dbName, sql).perform();
+    }
 
     const insertVersionSql = "DELETE FROM `schema_migrations` WHERE `version`='" + version + "'";
 
@@ -203,8 +211,8 @@ if (program.generate) {
   let fileDummyData =
     'const migrationName = {\n' +
     "  dbName: 'db name here',\n" +
-    "  up: 'sql query here',\n" +
-    "  down: 'sql query here'\n" +
+    "  up: ['array of sql queries here'],\n" +
+    "  down: ['array of sql queries here']\n" +
     '};\n' +
     '\n' +
     'module.exports = migrationName;';
