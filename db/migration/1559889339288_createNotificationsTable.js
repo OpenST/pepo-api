@@ -9,7 +9,7 @@ const upQuery =
       `status` tinyint(4) NOT NULL, \n\
       `entity_id` varchar(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL, \n\
       `entity_kind` tinyint(4) NOT NULL, \n\
-      `extra_data` varchar(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL, \n\
+      `extra_data` text CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL, \n\
       `created_at` int(11) NOT NULL, \n\
       `updated_at` int(11) NOT NULL, \n\
       PRIMARY KEY (`id`), \n\
