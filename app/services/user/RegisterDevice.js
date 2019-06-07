@@ -78,7 +78,7 @@ class RegisterDevice extends ServiceBase {
       return Promise.reject(tokenUserData);
     }
 
-    if (!tokenUserData.data.ostUserId) {
+    if (!tokenUserData.data[oThis.userId].ostUserId) {
       logger.error('Invalid userdata in token user table');
       return Promise.reject(
         responseHelper.error({
@@ -89,7 +89,7 @@ class RegisterDevice extends ServiceBase {
       );
     }
 
-    oThis.ostUserId = tokenUserData.data.ostUserId;
+    oThis.ostUserId = tokenUserData.data[oThis.userId].ostUserId;
   }
 
   /**
