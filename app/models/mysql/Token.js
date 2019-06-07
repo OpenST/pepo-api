@@ -4,9 +4,7 @@
  */
 const rootPrefix = '../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
-  coreConstants = require(rootPrefix + '/config/coreConstants'),
-  responseHelper = require(rootPrefix + '/lib/formatter/response');
-
+  coreConstants = require(rootPrefix + '/config/coreConstants');
 const dbName = 'pepo_api_' + coreConstants.environment;
 
 /**
@@ -70,8 +68,7 @@ class Token extends ModelBase {
   /**
    * Fetch the first token present in table.
    *
-   *
-   * @return {Promise<any>}
+   * @returns {Promise<*>}
    */
   async fetchToken() {
     const oThis = this;
@@ -82,7 +79,7 @@ class Token extends ModelBase {
       return Promise.reject(new Error(`No entry found in tokens table.`));
     }
 
-    return responseHelper.successWithData(oThis._formatDbData(dbRow[0]));
+    return oThis._formatDbData(dbRow[0]);
   }
 }
 

@@ -6,8 +6,7 @@ const rootPrefix = '../../..',
   apiName = require(rootPrefix + '/lib/globalConstant/apiName'),
   sanitizer = require(rootPrefix + '/helpers/sanitizer'),
   WrapperFormatter = require(rootPrefix + '/lib/formatter/Wrapper'),
-  resultType = require(rootPrefix + '/lib/globalConstant/resultType'),
-  RecoveryInfoFormatter = require(rootPrefix + '/lib/formatter/entity/RecoveryInfo');
+  resultType = require(rootPrefix + '/lib/globalConstant/resultType');
 
 /* Register Device*/
 router.post('/register-device', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {

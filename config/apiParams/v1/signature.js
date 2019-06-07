@@ -62,6 +62,10 @@ const v1Signature = {
       }
     ],
     optional: []
+  },
+  [apiName.token]: {
+    mandatory: [],
+    optional: []
   }
 };
 
