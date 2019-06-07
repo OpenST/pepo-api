@@ -33,11 +33,31 @@ class OstEventModel extends ModelBase {
     return {
       id: dbRow.id,
       eventId: dbRow.event_id,
-      status: dbRow.status,
+      status: ostEventConstants.statuses[dbRow.status],
       eventData: dbRow.event_data,
       createdAt: dbRow.created_at,
       updatedAt: dbRow.updated_at
     };
+  }
+
+  /***
+   * Fetch ost event for id
+   *
+   * @param id {Integer} - id
+   *
+   * @return {Object}
+   */
+  async fetchById(id) {
+    const oThis = this;
+    let dbRows = await oThis
+      .select('*')
+      .where({ id: id })
+      .fire();
+
+    if (dbRows.length === 0) {
+      return {};
+    }
+    return oThis.formatDbData(dbRows[0]);
   }
 }
 

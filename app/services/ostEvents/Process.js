@@ -66,7 +66,7 @@ class OstEventProcess extends ServiceBase {
 
     logger.log('Validate for ost events process');
 
-    if (!oThis.ostEventId || !CommonValidators.validateString(oThis.ostEventId)) {
+    if (!oThis.ostEventId || !CommonValidators.validateInteger(oThis.ostEventId)) {
       return Promise.reject(
         responseHelper.error({
           internal_error_identifier: 's_oe_c_vas_1',
@@ -90,13 +90,10 @@ class OstEventProcess extends ServiceBase {
     const oThis = this;
     logger.log('fetch entry for Ost Event process');
 
-    let dbRows = await new OstEventModel()
-      .select('*')
-      .where({ id: oThis.ostEventId })
-      .fire();
+    let dbRows = await new OstEventModel().fetchById(oThis.ostEventId);
 
-    if (dbRows.length !== 1 || dbRows[0].status != ostEventConstant.pendingStatus) {
-      logger.error('Error while fetching data from ost events table');
+    if (!dbRows || dbRows.status != ostEventConstant.pendingStatus) {
+      logger.error('Error while fetching data from ost events table. dbRows=', dbRows);
       return Promise.reject(dbRows);
     }
 
@@ -118,7 +115,7 @@ class OstEventProcess extends ServiceBase {
     logger.log('Update Ost Event status-', ostEventStatus);
 
     await new OstEventModel()
-      .update({ status: ostEventStatus })
+      .update({ status: ostEventConstant.invertedStatuses[ostEventStatus] })
       .where({ id: oThis.ostEventId })
       .fire();
 

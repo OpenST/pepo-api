@@ -132,7 +132,7 @@ class OstEventCreate extends ServiceBase {
     const oThis = this;
     logger.log('Publish Ost Event');
 
-    await new ProcessOstEventClass({ ostEventId: oThis.ostEventId }).perform;
+    await new ProcessOstEventClass({ ostEventId: oThis.ostEventId }).perform();
 
     return Promise.resolve(responseHelper.successWithData({}));
   }
