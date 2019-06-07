@@ -23,9 +23,7 @@ router.post('/register-device', sanitizer.sanitizeDynamicUrlParams, function(req
     serviceResponse.data = wrapperFormatterRsp.data;
   };
 
-  Promise.resolve(
-    routeHelper.perform(req, res, next, '/userManagement/RegisterDevice.js', 'r_a_v1_u_1', null, onServiceSuccess)
-  );
+  Promise.resolve(routeHelper.perform(req, res, next, '/user/RegisterDevice.js', 'r_a_v1_u_1', null, onServiceSuccess));
 });
 
 /* Recovery Info Device*/
@@ -42,9 +40,7 @@ router.get('/recovery-info', sanitizer.sanitizeDynamicUrlParams, function(req, r
     serviceResponse.data = wrapperFormatterRsp.data;
   };
 
-  Promise.resolve(
-    routeHelper.perform(req, res, next, '/userManagement/RecoveryInfo', 'r_a_v1_u_2', null, dataFormatterFunc)
-  );
+  Promise.resolve(routeHelper.perform(req, res, next, '/user/RecoveryInfo', 'r_a_v1_u_2', null, dataFormatterFunc));
 });
 
 module.exports = router;

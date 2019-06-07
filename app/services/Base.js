@@ -17,9 +17,9 @@ const errorConfig = basicHelper.fetchErrorConfig(apiVersions.v1);
 /**
  * Base class for all services.
  *
- * @class ServicesBaseKlass
+ * @class ServicesBase
  */
-class ServicesBaseKlass {
+class ServicesBase {
   /**
    * Constructor for base class for all services.
    *
@@ -66,4 +66,4 @@ class ServicesBaseKlass {
   }
 }
 
-module.exports = ServicesBaseKlass;
+module.exports = ServicesBase;

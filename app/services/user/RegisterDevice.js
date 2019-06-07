@@ -1,9 +1,3 @@
-/**
- * Util class to handle bit wise operations
- *
- * @module app/services/userManagement/RegisterDevice
- */
-
 const rootPrefix = '../../..',
   jsSdkWrapper = require(rootPrefix + '/lib/ostPlatform/jsSdkWrapper'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),

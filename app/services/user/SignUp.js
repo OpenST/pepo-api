@@ -1,10 +1,3 @@
-'use strict';
-/**
- * This service helps in Creating User in our System
- *
- * Note:-
- */
-
 const rootPrefix = '../../..',
   util = require(rootPrefix + '/lib/util'),
   ServiceBase = require(rootPrefix + '/app/services/Base'),
@@ -167,7 +160,7 @@ class SignUp extends ServiceBase {
     let kmsResp = await KMSObject.generateDataKey();
     const decryptedEncryptionSalt = kmsResp['Plaintext'],
       encryptedEncryptionSalt = kmsResp['CiphertextBlob'],
-      scryptSalt = localCipher.generateRandomIv();
+      scryptSalt = localCipher.generateRandomIv(32);
 
     let encryptedScryptSalt = localCipher.encrypt(decryptedEncryptionSalt, scryptSalt);
 

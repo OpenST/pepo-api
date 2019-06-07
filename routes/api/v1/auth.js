@@ -43,16 +43,7 @@ router.post('/sign-up', sanitizer.sanitizeDynamicUrlParams, function(req, res, n
   };
 
   Promise.resolve(
-    routeHelper.perform(
-      req,
-      res,
-      next,
-      '/userManagement/SignUp',
-      'r_a_v1_a_s_1',
-      null,
-      onServiceSuccess,
-      onServiceFailure
-    )
+    routeHelper.perform(req, res, next, '/user/SignUp', 'r_a_v1_a_s_1', null, onServiceSuccess, onServiceFailure)
   );
 });
 
@@ -85,16 +76,7 @@ router.post('/login', sanitizer.sanitizeDynamicUrlParams, function(req, res, nex
   };
 
   Promise.resolve(
-    routeHelper.perform(
-      req,
-      res,
-      next,
-      '/userManagement/Login',
-      'r_a_v1_a_l_1',
-      null,
-      onServiceSuccess,
-      onServiceFailure
-    )
+    routeHelper.perform(req, res, next, '/user/Login', 'r_a_v1_a_l_1', null, onServiceSuccess, onServiceFailure)
   );
 });
 
