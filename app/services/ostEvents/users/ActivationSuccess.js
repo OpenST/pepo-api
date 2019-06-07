@@ -5,12 +5,12 @@
  * Note:-
  */
 
-const rootPrefix = '../../..',
+const rootPrefix = '../../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   TokenUserByOstUserIdCache = require(rootPrefix + '/lib/cacheManagement/TokenUserByOstUserId'),
-  TokenUserByUserIdCache = require(rootPrefix + '/lib/cacheManagement/TokenUserByUserId'),
+  TokenUserDetailByUserIdCache = require(rootPrefix + '/lib/cacheMultiManagement/TokenUserDetailByUserIds'),
   TokenUserModel = require(rootPrefix + '/app/models/mysql/TokenUser'),
   tokenUserConstants = require(rootPrefix + '/lib/globalConstant/tokenUser'),
   ostPlatformSdk = require(rootPrefix + '/lib/ostPlatform/jsSdkWrapper'),
@@ -119,8 +119,8 @@ class UserActivationSuccess extends ServiceBase {
 
     oThis.userId = tokenUserObjRes.data.userId;
 
-    tokenUserObjRes = await new TokenUserByUserIdCache({ userId: oThis.userId }).fetch();
-    if (tokenUserObjRes.isFailure() || !tokenUserObjRes.data.id) {
+    tokenUserObjRes = await new TokenUserDetailByUserIdCache({ userId: [oThis.userId] }).fetch();
+    if (tokenUserObjRes.isFailure() || !tokenUserObjRes.data || !tokenUserObjRes.data[oThis.userId]) {
       return Promise.reject(
         responseHelper.error({
           internal_error_identifier: 's_oe_u_as_ftu_2',
@@ -129,7 +129,7 @@ class UserActivationSuccess extends ServiceBase {
       );
     }
 
-    oThis.tokenUserObj = tokenUserObjRes.data;
+    oThis.tokenUserObj = tokenUserObjRes.data[oThis.userId];
 
     if (
       oThis.tokenUserObj.ostStatus === tokenUserConstants.activatedOstStatus &&
