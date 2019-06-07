@@ -13,6 +13,7 @@ const responseHelper = require(rootPrefix + '/lib/formatter/response'),
   apiRoutes = require(rootPrefix + '/routes/api/index'),
   ostWebhookRoutes = require(rootPrefix + '/routes/ostWebhook/index'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
+  elbHealthCheckerRoute = require(rootPrefix + '/routes/internal/elb_health_checker'),
   customMiddleware = require(rootPrefix + '/helpers/customMiddleware'),
   apiVersions = require(rootPrefix + '/lib/globalConstant/apiVersions'),
   basicHelper = require(rootPrefix + '/helpers/basic'),
@@ -121,6 +122,9 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/api', startRequestLogLine, appendRequestDebugInfo, sanitizer.sanitizeBodyAndQuery, assignParams, apiRoutes);
+
+// Following are the routes
+app.use('/health-checker', elbHealthCheckerRoute);
 
 app.use('/ost-webhook', ostWebhookRoutes);
 

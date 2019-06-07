@@ -11,7 +11,8 @@ const rootPrefix = '..',
   coreConstants = require(rootPrefix + '/config/coreConstants'),
   apiVersions = require(rootPrefix + '/lib/globalConstant/apiVersions'),
   apiErrorConfig = require(rootPrefix + '/config/apiParams/apiErrorConfig'),
-  v1ParamErrorConfig = require(rootPrefix + '/config/apiParams/v1/errorConfig');
+  v1ParamErrorConfig = require(rootPrefix + '/config/apiParams/v1/errorConfig'),
+  internalParamErrorConfig = require(rootPrefix + '/config/apiParams/internal/errorConfig');
 
 /**
  * Class for basic helper.
@@ -262,6 +263,10 @@ class BasicHelper {
       paramErrorConfig = dynamicErrorConfig
         ? Object.assign(dynamicErrorConfig, v1ParamErrorConfig)
         : v1ParamErrorConfig;
+    } else if (apiVersion === apiVersions.internal) {
+      paramErrorConfig = dynamicErrorConfig
+        ? Object.assign(dynamicErrorConfig, internalParamErrorConfig)
+        : internalParamErrorConfig;
     } else {
       throw new Error(`Unsupported API Version ${apiVersion}`);
     }
