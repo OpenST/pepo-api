@@ -82,7 +82,7 @@ class Token extends ModelBase {
       return Promise.reject(new Error(`No entry found in tokens table.`));
     }
 
-    return responseHelper.successWithData(Token._formatDbData(dbRow[0]));
+    return responseHelper.successWithData(oThis._formatDbData(dbRow[0]));
   }
 }
 
