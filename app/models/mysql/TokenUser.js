@@ -92,6 +92,26 @@ class TokenUserModel extends ModelBase {
   }
 
   /***
+   * Fetch token user for ost user id
+   *
+   * @param ostUserId {String} - Ost User Id
+   *
+   * @return {Object}
+   */
+  async fetchByOstUserId(ostUserId) {
+    const oThis = this;
+    let dbRows = await oThis
+      .select(['id', 'user_id'])
+      .where(['ost_user_id = ?', ostUserId])
+      .fire();
+
+    if (dbRows.length === 0) {
+      return {};
+    }
+    return oThis.formatDbData(dbRows[0]);
+  }
+
+  /***
    * Fetch secured data of user for id
    *
    * @param userId {Integer} - Token User Id
@@ -110,6 +130,28 @@ class TokenUserModel extends ModelBase {
     }
 
     return oThis.formatDbData(dbRows[0]);
+  }
+
+  /***
+   * Flush cache
+   *
+   * @param {object} params
+   * @param {Integer} params.userId
+   *
+   * @returns {Promise<*>}
+   */
+  static async flushCache(params) {
+    const SecureUserByIDCache = require(rootPrefix + '/lib/cacheManagement/SecureTokenUserByUserID');
+
+    await new SecureUserByIDCache({
+      id: params.userId
+    }).clear();
+
+    const UserByIdCache = require(rootPrefix + '/lib/cacheManagement/TokenUserByUserID');
+
+    await new UserByIdCache({
+      id: params.userId
+    }).clear();
   }
 }
 

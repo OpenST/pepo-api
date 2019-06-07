@@ -174,7 +174,10 @@ class SignUp extends ServiceBase {
     }
 
     if (oThis.secureUser.markInactiveTriggerCount > 0) {
-      await new UserModel().update({ mark_inactive_trigger_count: 0 }).fire();
+      await new UserModel()
+        .update({ mark_inactive_trigger_count: 0 })
+        .where(['id = ?', oThis.secureUser.id])
+        .fire();
       await UserModel.flushCache({ id: oThis.secureUser.id });
     }
 

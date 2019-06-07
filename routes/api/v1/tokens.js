@@ -6,7 +6,7 @@ const rootPrefix = '../../..',
   apiName = require(rootPrefix + '/lib/globalConstant/apiName'),
   sanitizer = require(rootPrefix + '/helpers/sanitizer'),
   WrapperFormatter = require(rootPrefix + '/lib/formatter/Wrapper'),
-  resultType = require(rootPrefix + '/lib/globalConstant/resultType');
+  entityType = require(rootPrefix + '/lib/globalConstant/entityType');
 
 /* Tokens*/
 router.get('/', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
@@ -15,8 +15,8 @@ router.get('/', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
 
   const dataFormatterFunc = async function(serviceResponse) {
     const wrapperFormatterRsp = await new WrapperFormatter({
-      resultType: resultType.token,
-      entities: [resultType.token],
+      resultType: entityType.token,
+      entities: [entityType.token],
       serviceData: serviceResponse.data
     }).perform();
 

@@ -19,6 +19,16 @@ const v1ErrorConfig = {
     parameter: 'user_name',
     code: 'invalid',
     message: 'User Name has been used.'
+  },
+  invalid_token_holder_address: {
+    parameter: 'token_holder_address',
+    code: 'invalid',
+    message: 'Invalid parameter Token Holder Address.'
+  },
+  invalid_status: {
+    parameter: 'status',
+    code: 'invalid',
+    message: 'Invalid parameter status.'
   }
 };
 
