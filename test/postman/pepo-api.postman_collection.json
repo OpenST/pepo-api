@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "21cfc260-b4c1-4f76-b76e-386ce2c98f46",
+		"_postman_id": "a34ecc28-79fd-4144-96cf-46131d6b5279",
 		"name": "pepo-api",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -42,12 +42,6 @@
 						"v1",
 						"auth",
 						"sign-up"
-					],
-					"query": [
-						{
-							"key": "",
-							"value": ""
-						}
 					]
 				}
 			},
