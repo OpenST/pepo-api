@@ -6,8 +6,7 @@ const rootPrefix = '../../..',
   apiName = require(rootPrefix + '/lib/globalConstant/apiName'),
   sanitizer = require(rootPrefix + '/helpers/sanitizer'),
   WrapperFormatter = require(rootPrefix + '/lib/formatter/Wrapper'),
-  entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
-  RecoveryInfoFormatter = require(rootPrefix + '/lib/formatter/entity/RecoveryInfo');
+  entityType = require(rootPrefix + '/lib/globalConstant/entityType');
 
 /* Register Device*/
 router.post('/register-device', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
@@ -23,7 +22,7 @@ router.post('/register-device', sanitizer.sanitizeDynamicUrlParams, function(req
     serviceResponse.data = wrapperFormatterRsp.data;
   };
 
-  Promise.resolve(routeHelper.perform(req, res, next, '/user/RegisterDevice.js', 'r_a_v1_u_1', null, onServiceSuccess));
+  Promise.resolve(routeHelper.perform(req, res, next, '/user/RegisterDevice', 'r_a_v1_u_1', null, onServiceSuccess));
 });
 
 /* Recovery Info Device*/
