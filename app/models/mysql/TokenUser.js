@@ -3,6 +3,7 @@
  * @file - Model for token_users table
  */
 const rootPrefix = '../../..',
+  responseHelper = require(rootPrefix + '/lib/formatter/response'),
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
   tokenUserConstants = require(rootPrefix + '/lib/globalConstant/tokenUser'),
   coreConstants = require(rootPrefix + '/config/coreConstants');
@@ -55,14 +56,16 @@ class TokenUserModel extends ModelBase {
   }
 
   /***
-   * Fetch token user for user id
+   * Fetch token user for given token user ids
    *
-   * @param userId {Integer} - Token User Id
+   * @param userIds {Array} - Token User Ids
    *
    * @return {Object}
    */
-  async fetchByUserId(userId) {
+  async fetchByUserIds(userIds) {
     const oThis = this;
+    let response = {};
+
     let dbRows = await oThis
       .select([
         'id',
@@ -74,13 +77,18 @@ class TokenUserModel extends ModelBase {
         'created_at',
         'updated_at'
       ])
-      .where(['user_id = ?', userId])
+      .where(['user_id IN (?)', userIds])
       .fire();
 
     if (dbRows.length === 0) {
-      return {};
+      return responseHelper.successWithData(response);
     }
-    return oThis.formatDbData(dbRows[0]);
+
+    for (let index = 0; index < dbRows.length; index++) {
+      response[dbRows[index].user_id] = oThis.formatDbData(dbRows[index]);
+    }
+
+    return responseHelper.successWithData(response);
   }
 
   /***

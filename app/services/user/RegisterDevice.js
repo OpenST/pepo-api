@@ -4,7 +4,7 @@ const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   createErrorLogsEntry = require(rootPrefix + '/lib/errorLogs/createEntry'),
   ErrorLogsConstants = require(rootPrefix + '/lib/globalConstant/errorLogs'),
-  TokenUserByUserIdCache = require(rootPrefix + '/lib/cacheManagement/TokenUserByUserId'),
+  TokenUserDetailByUserIdsCache = require(rootPrefix + '/lib/cacheMultiManagement/TokenUserDetailByUserIds'),
   responseHelper = require(rootPrefix + '/lib/formatter/response');
 
 /**
@@ -71,7 +71,7 @@ class RegisterDevice extends ServiceBase {
   async _fetchTokenUserData() {
     const oThis = this;
 
-    let tokenUserData = await new TokenUserByUserIdCache({ userId: oThis.userId }).fetch();
+    let tokenUserData = await new TokenUserDetailByUserIdsCache({ userIds: [oThis.userId] }).fetch();
 
     if (tokenUserData.isFailure()) {
       logger.error('Error while fetching data from token user cache');
