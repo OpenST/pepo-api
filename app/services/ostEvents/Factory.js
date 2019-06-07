@@ -58,14 +58,24 @@ class OstEventProcess extends ServiceBase {
     logger.log('execute class from Ost Event Factory');
 
     let eventProcessor = oThis.eventClassMapping[oThis.ostEventTopic];
+    let eventData = JSON.parse(oThis.ostEventObj.eventData);
 
-    let eventData = JSON.parse(oThis.ostEventObj.event_data());
+    if (!eventProcessor) {
+      return Promise.reject(
+        responseHelper.error({
+          internal_error_identifier: 's_oe_f_e_1',
+          api_error_identifier: 'something_went_wrong',
+          debug_options: { ostEventObjId: oThis.ostEventObj.id, msg: 'Invalid Topic of ost event' }
+        })
+      );
+    }
+
     let eventProcessResp = await new eventProcessor(eventData).perform();
 
     if (eventProcessResp.isFailure()) {
       return Promise.reject(
         responseHelper.error({
-          internal_error_identifier: 's_oe_f_e_1',
+          internal_error_identifier: 's_oe_f_e_2',
           api_error_identifier: 'something_went_wrong',
           debug_options: { eventProcessResp: eventProcessResp, ostEventObj: oThis.ostEventObj }
         })

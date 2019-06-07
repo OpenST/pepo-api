@@ -45,7 +45,6 @@ class OstEventProcess extends ServiceBase {
     try {
       await oThis._updateOstEventStatus(ostEventConstant.startedStatus);
       await oThis._processEvent();
-      await oThis._updateOstEventStatus(ostEventConstant.doneStatus);
     } catch {
       await oThis._updateOstEventStatus(ostEventConstant.failedStatus);
     }
@@ -97,7 +96,7 @@ class OstEventProcess extends ServiceBase {
       return Promise.reject(dbRows);
     }
 
-    oThis.ostEventObj = dbRows[0];
+    oThis.ostEventObj = dbRows;
 
     return Promise.resolve(responseHelper.successWithData({}));
   }
@@ -132,9 +131,15 @@ class OstEventProcess extends ServiceBase {
    */
   async _processEvent() {
     const oThis = this;
-    logger.log('Update Ost Event status');
+    logger.log('Process Ost Event');
 
-    await new OstEventProcessFactory({ ostEventObj: oThis.ostEventObj }).perform();
+    let r = await new OstEventProcessFactory({ ostEventObj: oThis.ostEventObj }).perform();
+
+    if (r.isSuccess()) {
+      await oThis._updateOstEventStatus(ostEventConstant.doneStatus);
+    } else {
+      await oThis._updateOstEventStatus(ostEventConstant.failedStatus);
+    }
 
     return Promise.resolve(responseHelper.successWithData({}));
   }
