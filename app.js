@@ -126,7 +126,7 @@ app.use('/api', startRequestLogLine, appendRequestDebugInfo, sanitizer.sanitizeB
 // Following are the routes
 app.use('/health-checker', elbHealthCheckerRoute);
 
-app.use('/ost-webhook', ostWebhookRoutes);
+app.use('/ost-webhook', startRequestLogLine, appendRequestDebugInfo, ostWebhookRoutes);
 
 // Catch 404 and forward to error handler
 app.use(function(req, res, next) {
