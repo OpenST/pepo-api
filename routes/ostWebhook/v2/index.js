@@ -9,9 +9,9 @@ const rootPrefix = '../../..',
 
 /* Listen to Ost Events*/
 router.post('/', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
-  const performer = function() {
-    let reponse = OstEventCreateService.new(req.decodedParams).perform();
-    return reponse.renderResponse(res);
+  const performer = async function() {
+    let response = await new OstEventCreateService(req.decodedParams).perform();
+    return response.renderResponse(res);
   };
 
   performer();
