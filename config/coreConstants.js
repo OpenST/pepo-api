@@ -106,6 +106,10 @@ class CoreConstants {
   get PA_COOKIE_TOKEN_SECRET() {
     return process.env.PA_COOKIE_TOKEN_SECRET;
   }
+
+  get PA_DOMAIN() {
+    return process.env.PA_DOMAIN;
+  }
 }
 
 module.exports = new CoreConstants();
