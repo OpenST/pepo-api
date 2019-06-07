@@ -6,7 +6,7 @@ const rootPrefix = '../../..',
   apiName = require(rootPrefix + '/lib/globalConstant/apiName'),
   sanitizer = require(rootPrefix + '/helpers/sanitizer'),
   WrapperFormatter = require(rootPrefix + '/lib/formatter/Wrapper'),
-  resultType = require(rootPrefix + '/lib/globalConstant/resultType'),
+  entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
   RecoveryInfoFormatter = require(rootPrefix + '/lib/formatter/entity/RecoveryInfo');
 
 /* Register Device*/
@@ -15,8 +15,8 @@ router.post('/register-device', sanitizer.sanitizeDynamicUrlParams, function(req
 
   const onServiceSuccess = async function(serviceResponse) {
     const wrapperFormatterRsp = await new WrapperFormatter({
-      resultType: resultType.device,
-      entities: [resultType.device],
+      resultType: entityType.device,
+      entities: [entityType.device],
       serviceData: serviceResponse.data
     }).perform();
 
@@ -32,8 +32,8 @@ router.get('/recovery-info', sanitizer.sanitizeDynamicUrlParams, function(req, r
 
   const dataFormatterFunc = async function(serviceResponse) {
     const wrapperFormatterRsp = await new WrapperFormatter({
-      resultType: resultType.recoveryInfo,
-      entities: [resultType.recoveryInfo],
+      resultType: entityType.recoveryInfo,
+      entities: [entityType.recoveryInfo],
       serviceData: serviceResponse.data
     }).perform();
 

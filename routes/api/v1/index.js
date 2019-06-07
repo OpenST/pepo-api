@@ -11,6 +11,7 @@ const rootPrefix = '../../..',
   LoginCookieAuth = require(rootPrefix + '/lib/authentication/LoginCookie'),
   apiVersions = require(rootPrefix + '/lib/globalConstant/apiVersions'),
   userConstant = require(rootPrefix + '/lib/globalConstant/user'),
+  longPollingRoutes = require(rootPrefix + '/routes/api/v1/longPolling'),
   usersRoutes = require(rootPrefix + '/routes/api/v1/users');
 
 const errorConfig = basicHelper.fetchErrorConfig(apiVersions.v1);
@@ -35,5 +36,6 @@ const validateCookie = async function(req, res, next) {
 
 router.use('/auth', authRoutes);
 router.use('/users', validateCookie, usersRoutes);
+router.use('/users', validateCookie, longPollingRoutes);
 
 module.exports = router;

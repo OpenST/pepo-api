@@ -8,7 +8,7 @@ const rootPrefix = '../../..',
   apiName = require(rootPrefix + '/lib/globalConstant/apiName'),
   sanitizer = require(rootPrefix + '/helpers/sanitizer'),
   coreConstant = require(rootPrefix + '/config/coreConstants'),
-  resultType = require(rootPrefix + '/lib/globalConstant/resultType'),
+  entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
   userConstant = require(rootPrefix + '/lib/globalConstant/user');
 
 // Node.js cookie parsing middleware.
@@ -30,8 +30,8 @@ router.post('/sign-up', sanitizer.sanitizeDynamicUrlParams, function(req, res, n
     res.cookie(userConstant.loginCookieName, serviceResponse.data.userLoginCookieValue, options); // options is optional
 
     const wrapperFormatterRsp = await new WrapperFormatter({
-      resultType: resultType.loggedInUser,
-      entities: [resultType.loggedInUser],
+      resultType: entityType.loggedInUser,
+      entities: [entityType.loggedInUser],
       serviceData: serviceResponse.data
     }).perform();
 
@@ -63,8 +63,8 @@ router.post('/login', sanitizer.sanitizeDynamicUrlParams, function(req, res, nex
     res.cookie(userConstant.loginCookieName, serviceResponse.data.userLoginCookieValue, options); // options is optional
 
     const wrapperFormatterRsp = await new WrapperFormatter({
-      resultType: resultType.loggedInUser,
-      entities: [resultType.loggedInUser],
+      resultType: entityType.loggedInUser,
+      entities: [entityType.loggedInUser],
       serviceData: serviceResponse.data
     }).perform();
 
