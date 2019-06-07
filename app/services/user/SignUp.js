@@ -200,7 +200,7 @@ class SignUp extends ServiceBase {
     let tokenUserRes = await new TokenUserDetailByUserIdsCache({ userIds: [oThis.userId] }).fetch();
 
     let secureUser = secureUserRes.data,
-      tokenUser = tokenUserRes.data;
+      tokenUser = tokenUserRes.data[oThis.userId];
 
     let userLoginCookieValue = new UserModel().getCookieValueFor(secureUser, {
       timestamp: Date.now() / 1000

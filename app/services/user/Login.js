@@ -128,7 +128,7 @@ class SignUp extends ServiceBase {
     logger.log('fetch Token User');
 
     let tokenUserRes = await new TokenUserDetailByUserIdsCache({ userIds: [oThis.userId] }).fetch();
-    oThis.tokenUser = tokenUserRes.data;
+    oThis.tokenUser = tokenUserRes.data[oThis.userId];
 
     return Promise.resolve(responseHelper.successWithData({}));
   }
