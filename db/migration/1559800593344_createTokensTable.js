@@ -14,6 +14,7 @@ const createTokensTable = {
       `ost_token_id` int(11) NOT NULL, \n\
       `conversion_factor` decimal(15,6) NOT NULL, \n\
       `company_token_holder_address` varchar(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL, \n\
+      `rule_addresses` text COLLATE utf8_unicode_ci NOT NULL, \n\
       `api_key` varchar(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL, \n\
       `api_secret` text CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL, \n\
       `encryption_salt` blob NOT NULL, \n\

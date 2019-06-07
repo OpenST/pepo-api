@@ -37,6 +37,7 @@ class Token extends ModelBase {
    * @param {string} dbRow.ost_token_id
    * @param {string} dbRow.conversion_factor
    * @param {string} dbRow.company_token_holder_address
+   * @param {string} dbRow.rule_addresses
    * @param {string} dbRow.api_key
    * @param {string} dbRow.api_secret
    * @param {string} dbRow.encryption_salt
@@ -56,6 +57,7 @@ class Token extends ModelBase {
       decimal: dbRow.decimal,
       conversionFactor: dbRow.conversion_factor,
       companyTokenHolderAddress: dbRow.company_token_holder_address,
+      ruleAddresses: dbRow.rule_addresses,
       apiKey: dbRow.api_key,
       apiSecret: dbRow.api_secret,
       encryptionSalt: dbRow.encryption_salt,

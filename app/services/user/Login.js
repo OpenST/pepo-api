@@ -74,7 +74,7 @@ class SignUp extends ServiceBase {
     if (userObjRes.isFailure() || !userObjRes.data.id) {
       return Promise.reject(
         responseHelper.error({
-          internal_error_identifier: 's_um_su_v_1',
+          internal_error_identifier: 's_um_l_v_1',
           api_error_identifier: 'unauthorized_api_request'
         })
       );

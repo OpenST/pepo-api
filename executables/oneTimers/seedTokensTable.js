@@ -84,11 +84,20 @@ class seedTokensTable {
     oThis._initializeSDKObj();
 
     let tokenServiceResponse = await oThis.tokenService.get();
+    let ruleServiceResponse = await oThis.rulesService.getList({});
 
     if (tokenServiceResponse && tokenServiceResponse.success) {
       let resultType = tokenServiceResponse.data['result_type'];
       oThis.tokenData = tokenServiceResponse.data[resultType];
-      logger.step('*----- Fetched Data from Platform');
+      logger.step('*----- Fetched Token Service Data from Platform');
+    } else {
+      return Promise.reject(new Error('No data returned from platform'));
+    }
+
+    if (ruleServiceResponse && ruleServiceResponse.success) {
+      let resultType = ruleServiceResponse.data['result_type'];
+      oThis.ruleData = ruleServiceResponse.data[resultType];
+      logger.step('*----- Fetched Rule Service Data from Platform');
     } else {
       return Promise.reject(new Error('No data returned from platform'));
     }
@@ -108,6 +117,7 @@ class seedTokensTable {
     });
 
     oThis.tokenService = ostSdkObj.services.tokens;
+    oThis.rulesService = ostSdkObj.services.rules;
   }
 
   /**
@@ -126,6 +136,14 @@ class seedTokensTable {
 
     let encryptedApiSecret = localCipher.encrypt(decryptedEncryptionSalt, oThis.apiSecret);
 
+    let ruleAddresses = {};
+
+    for (let i = 0; i < oThis.ruleData.length; i++) {
+      let key = oThis.ruleData[i].name.toString();
+      let value = oThis.ruleData[i].address.toLowerCase();
+      ruleAddresses[key] = value;
+    }
+
     // Insert user in database
     let insertResponse = await new TokenModel()
       .insert({
@@ -135,6 +153,7 @@ class seedTokensTable {
         decimal: oThis.tokenData.decimals,
         conversion_factor: oThis.tokenData.conversion_factor,
         company_token_holder_address: oThis.tokenData.auxiliary_chains[0].company_token_holders[0].toLowerCase(),
+        rule_addresses: JSON.stringify(ruleAddresses),
         api_key: oThis.apiKey,
         api_secret: encryptedApiSecret,
         encryption_salt: encryptedEncryptionSalt,
