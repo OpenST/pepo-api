@@ -30,8 +30,7 @@ class UserActivationSuccess extends ServiceBase {
 
     const oThis = this;
 
-    oThis.resultType = params.result_type;
-    oThis.ostUser = params.user;
+    oThis.ostUser = params.data.user;
 
     oThis.ostUserid = oThis.ostUser.id;
     oThis.ostUserTokenHolderAddress = oThis.ostUser.token_holder_address.toLowerCase();
@@ -124,7 +123,7 @@ class UserActivationSuccess extends ServiceBase {
 
     oThis.userId = tokenUserObjRes.data.userId;
 
-    tokenUserObjRes = await new TokenUserDetailByUserIdCache({ userId: [oThis.userId] }).fetch();
+    tokenUserObjRes = await new TokenUserDetailByUserIdCache({ userIds: [oThis.userId] }).fetch();
     if (tokenUserObjRes.isFailure() || !tokenUserObjRes.data || !tokenUserObjRes.data[oThis.userId]) {
       return Promise.reject(
         responseHelper.error({
@@ -181,7 +180,7 @@ class UserActivationSuccess extends ServiceBase {
       .update({
         ost_token_holder_address: oThis.ostUserTokenHolderAddress,
         properties: propertyVal,
-        ost_status: oThis.ostUserStatus
+        ost_status: tokenUserConstants.invertedOstStatuses[oThis.ostUserStatus]
       })
       .where(['id = ?', oThis.tokenUserObj.id])
       .fire();
