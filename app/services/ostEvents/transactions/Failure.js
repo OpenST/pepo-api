@@ -200,24 +200,31 @@ class UserActivationSuccess extends ServiceBase {
       throw `Feed Object not found for externalEntityObj- ${oThis.externalEntityObj}`;
     }
 
+    let userFeedObj = await new UserFeedModel().fetchByFeedId(oThis.externalEntityObj.id);
+
+    if (!userFeedObj.id) {
+      throw `User Feed Object not found for externalEntityObj- ${oThis.externalEntityObj}`;
+    }
+
+    let published_ts = Math.round(new Date() / 1000);
+
     await new FeedModel()
       .update({
-        published_ts: Math.round(new Date() / 1000),
+        published_ts: published_ts,
         status: feedConstants.invertedStatuses[feedConstants.failedStatus]
       })
       .where(['id = ?', feedObj.id])
       .fire();
 
-    await FeedModel.flushCache({ id: feedObj.id });
-
     await new UserFeedModel()
       .update({
-        published_ts: Math.round(new Date() / 1000)
+        published_ts: published_ts
       })
-      .where(['feed_id = ?', feedObj.id])
+      .where(['id = ?', userFeedObj.id])
       .fire();
 
-    await UserFeedModel.flushCache({ feedId: feedObj.id });
+    await FeedModel.flushCache({ id: feedObj.id });
+    await UserFeedModel.flushCache({ id: userFeedObj.id });
 
     return Promise.resolve(responseHelper.successWithData({}));
   }

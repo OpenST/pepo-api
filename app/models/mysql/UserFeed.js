@@ -80,6 +80,26 @@ class UserFeedModel extends ModelBase {
   }
 
   /***
+   * Fetch user feed by feed id
+   *
+   * @param feedId {Integer} - feedId
+   *
+   * @return {Object}
+   */
+  async fetchByFeedId(feedId) {
+    const oThis = this;
+    let dbRows = await oThis
+      .select('*')
+      .where({ feed_id: feedId })
+      .fire();
+
+    if (dbRows.length === 0) {
+      return {};
+    }
+    return oThis.formatDbData(dbRows[0]);
+  }
+
+  /***
    * Flush cache
    *
    * @param {object} params
@@ -87,7 +107,7 @@ class UserFeedModel extends ModelBase {
    * @returns {Promise<*>}
    */
   static async flushCache(params) {
-    let feedId = params.feedId;
+    let id = params.id;
     return null;
   }
 }
