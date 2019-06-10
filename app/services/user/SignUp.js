@@ -20,6 +20,8 @@ class SignUp extends ServiceBase {
    * @param {Object} params
    * @param {String} params.user_name: User Name
    * @param {String} params.password: Password
+   * @param {String} params.first_name: First Name
+   * @param {String} params.last_name: Last Name
    *
    * @constructor
    */
@@ -30,6 +32,8 @@ class SignUp extends ServiceBase {
 
     oThis.userName = params.user_name;
     oThis.password = params.password;
+    oThis.firstName = params.first_name;
+    oThis.lastName = params.last_name;
 
     oThis.userId = null;
     oThis.ostUserId = null;
@@ -103,6 +107,8 @@ class SignUp extends ServiceBase {
     let insertResponse = await new UserModel()
       .insert({
         user_name: oThis.userName,
+        first_name: oThis.firstName,
+        last_name: oThis.lastName,
         password: encryptedPassword,
         encryption_salt: encryptedEncryptionSalt,
         mark_inactive_trigger_count: 0,

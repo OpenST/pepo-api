@@ -1,7 +1,7 @@
 /**
  * One timer to insert data in webhooks table
  *
- * Usage: node executables/oneTimers/insertWebhooksSecret.js --webhooksSecret "aa5298d3a3fe181a3a52d085ee1525df57ac498337f8f3b76ca7df0a5de3211b" --webhooksId "24b60bae-d97c-4f1f-b014-8737b3dbe3d5"
+ * Usage: node executables/oneTimers/insertWebhooksSecret.js --webhooksSecret "aa5298d3a3fe181a3a52d085ee1525df57ac498337f8f3b76ca7df0a5de3211b" --webhooksId "2084ec0e-db97-4e8f-94a6-0eab80521da1"
  *
  * @module executables/oneTimers/insertWebhooksSecret
  */

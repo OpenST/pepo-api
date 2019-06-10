@@ -44,6 +44,8 @@ class UserModel extends ModelBase {
     return {
       id: dbRow.id,
       userName: dbRow.user_name,
+      firstName: dbRow.first_name,
+      lastName: dbRow.last_name,
       password: dbRow.password,
       encryptionSalt: dbRow.encryption_salt,
       markInactiveTriggerCount: dbRow.mark_inactive_trigger_count,
@@ -85,7 +87,17 @@ class UserModel extends ModelBase {
   async fetchById(id) {
     const oThis = this;
     let dbRows = await oThis
-      .select(['id', 'user_name', 'mark_inactive_trigger_count', 'properties', 'status', 'created_at', 'updated_at'])
+      .select([
+        'id',
+        'user_name',
+        'first_name',
+        'last_name',
+        'mark_inactive_trigger_count',
+        'properties',
+        'status',
+        'created_at',
+        'updated_at'
+      ])
       .where(['id = ?', id])
       .fire();
 

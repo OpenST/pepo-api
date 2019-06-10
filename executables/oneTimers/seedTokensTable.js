@@ -1,6 +1,8 @@
 /**
  * One time to seed tokens table.
  *
+ * Usage: node executables/oneTimers/seedTokensTable.js --apiKey "bb6740a6ed27452de43c0a5012d8f9be" --apiSecret "aa5298d3a3fe181a3a52d085ee1525df57ac498337f8f3b76ca7df0a5de3211b"
+ *
  * @module executables/oneTimers/seedTokensTable
  */
 const program = require('commander'),

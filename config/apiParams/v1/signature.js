@@ -14,6 +14,14 @@ const v1Signature = {
         ]
       },
       {
+        parameter: 'first_name',
+        validatorMethods: ['validateString', 'validateMaxLengthMediumString']
+      },
+      {
+        parameter: 'last_name',
+        validatorMethods: ['validateString', 'validateMaxLengthMediumString']
+      },
+      {
         parameter: 'password',
         validatorMethods: ['validateString', 'validateMaxLengthMediumString']
       }
