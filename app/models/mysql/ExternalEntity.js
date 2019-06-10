@@ -74,7 +74,7 @@ class ExternalEntityModel extends ModelBase {
    *
    * @return {Object}
    */
-  async fetchByEntityIdAndEntityKind(entityKind, entityId) {
+  async fetchByEntityKindAndEntityId(entityKind, entityId) {
     const oThis = this;
     let entityKindInt = externalEntityConstants.invertedEntityKinds[entityKind];
     let dbRows = await oThis

@@ -60,6 +60,38 @@ class FeedModel extends ModelBase {
     }
     return oThis.formatDbData(dbRows[0]);
   }
+
+  /***
+   * Fetch feed by externalEntityId
+   *
+   * @param externalEntityId {Integer} - externalEntityId
+   *
+   * @return {Object}
+   */
+  async fetchByPrimaryExternalEntityId(externalEntityId) {
+    const oThis = this;
+    let dbRows = await oThis
+      .select('*')
+      .where({ primary_external_entity_id: externalEntityId })
+      .fire();
+
+    if (dbRows.length === 0) {
+      return {};
+    }
+    return oThis.formatDbData(dbRows[0]);
+  }
+
+  /***
+   * Flush cache
+   *
+   * @param {object} params
+   *
+   * @returns {Promise<*>}
+   */
+  static async flushCache(params) {
+    let id = params.id;
+    return null;
+  }
 }
 
 module.exports = FeedModel;

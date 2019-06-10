@@ -118,6 +118,28 @@ class ModelBase extends MysqlQueryBuilders {
 
     return bitwiseColumnExistingValue | bitEnumIntegerValue;
   }
+
+  /**
+   * unset enum to Bitwise values
+   *
+   * @return {number}
+   */
+  unSetBitwise(bitwiseColumnName, bitwiseColumnExistingValue, bitEnumToUnSet) {
+    const oThis = this;
+    if (!oThis.bitwiseConfig) {
+      throw new Error('Bitwise Config not defined');
+    }
+
+    let config = oThis.bitwiseConfig[bitwiseColumnName],
+      invertedConfig = util.invert(config),
+      bitEnumIntegerValue = invertedConfig[bitEnumToSet];
+
+    if (!bitEnumIntegerValue) {
+      throw new Error('Invalid enum passed');
+    }
+
+    return bitwiseColumnExistingValue & ~bitEnumIntegerValue;
+  }
 }
 
 module.exports = ModelBase;

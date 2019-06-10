@@ -10,6 +10,7 @@ const rootPrefix = '../../..',
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   ostEventConstant = require(rootPrefix + '/lib/globalConstant/ostEvent'),
   ActivationSuccessClass = require(rootPrefix + '/app/services/ostEvents/users/ActivationSuccess'),
+  FailureTransactionClass = require(rootPrefix + '/app/services/ostEvents/transactions/Failure'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger');
 
 class OstEventProcess extends ServiceBase {
@@ -29,7 +30,8 @@ class OstEventProcess extends ServiceBase {
     oThis.ostEventTopic = oThis.eventData.topic;
 
     oThis.eventClassMapping = {
-      [ostEventConstant.usersActivationSuccess]: ActivationSuccessClass
+      [ostEventConstant.usersActivationSuccessOstWebhookTopic]: ActivationSuccessClass,
+      [ostEventConstant.transactionsFailureOstWebhookTopic]: FailureTransactionClass
     };
   }
 

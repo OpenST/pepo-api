@@ -78,6 +78,18 @@ class UserFeedModel extends ModelBase {
     }
     return oThis.formatDbData(dbRows[0]);
   }
+
+  /***
+   * Flush cache
+   *
+   * @param {object} params
+   *
+   * @returns {Promise<*>}
+   */
+  static async flushCache(params) {
+    let feedId = params.feedId;
+    return null;
+  }
 }
 
 module.exports = UserFeedModel;
