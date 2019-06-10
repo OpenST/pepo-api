@@ -46,6 +46,7 @@ class OstEventProcess extends ServiceBase {
       await oThis._updateOstEventStatus(ostEventConstant.startedStatus);
       await oThis._processEvent();
     } catch {
+      logger.error('In catch block of ost events process, Err-', err);
       await oThis._updateOstEventStatus(ostEventConstant.failedStatus);
     }
 

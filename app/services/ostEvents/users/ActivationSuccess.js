@@ -270,10 +270,14 @@ class UserActivationSuccess extends ServiceBase {
       })
     };
 
-    const startAirdropResponse = await ostPlatformSdk.executeTransaction(executeParams);
-
-    if (!startAirdropResponse.isSuccess()) {
-      return Promise.reject(startAirdropResponse);
+    try {
+      const startAirdropResponse = await ostPlatformSdk.executeTransaction(executeParams);
+      if (!startAirdropResponse.isSuccess()) {
+        return Promise.reject(startAirdropResponse);
+      }
+    } catch (err) {
+      logger.error('Error in Activation airdrop OST Wrapper api call::->', err);
+      return Promise.reject(err);
     }
 
     return Promise.resolve(responseHelper.successWithData({}));
