@@ -124,7 +124,7 @@ class UserActivationSuccess extends ServiceBase {
     oThis.userId = tokenUserObjRes.data.userId;
 
     tokenUserObjRes = await new TokenUserDetailByUserIdCache({ userIds: [oThis.userId] }).fetch();
-    if (tokenUserObjRes.isFailure() || !tokenUserObjRes.data || !tokenUserObjRes.data[oThis.userId]) {
+    if (tokenUserObjRes.isFailure() || !tokenUserObjRes.data[oThis.userId].id) {
       return Promise.reject(
         responseHelper.error({
           internal_error_identifier: 's_oe_u_as_ftu_2',
@@ -186,6 +186,8 @@ class UserActivationSuccess extends ServiceBase {
       .fire();
 
     await TokenUserModel.flushCache({ userId: oThis.tokenUserObj.userId });
+
+    oThis.tokenUserObj.properties = propertyVal;
 
     return Promise.resolve(responseHelper.successWithData({}));
   }
