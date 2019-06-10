@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "db596214-17ad-43e4-b4b5-d4bf7a0e68c0",
+		"_postman_id": "1d68ee24-5a44-454a-a711-f196d617995d",
 		"name": "pepo-api",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -74,7 +74,7 @@
 					"urlencoded": [
 						{
 							"key": "user_name",
-							"value": "kedar123",
+							"value": "ankit123",
 							"type": "text"
 						},
 						{
@@ -116,12 +116,12 @@
 					"urlencoded": [
 						{
 							"key": "device_address",
-							"value": "0x3F5Cf1D1734fBDCf90b02ce3680f4557B10D1D1C",
+							"value": "0xC295795a74e9c2f63eB57a1E6731CB2156f5f482",
 							"type": "text"
 						},
 						{
 							"key": "api_signer_address",
-							"value": "0xb50a9D682191Da900f9d4004CdadE378B27b1557",
+							"value": "0xA5334b78629AA4E24713Db0D73dF3253D34b48f4",
 							"type": "text"
 						}
 					]
