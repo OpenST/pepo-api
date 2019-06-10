@@ -24,7 +24,9 @@ class OstEventProcess extends ServiceBase {
     const oThis = this;
 
     oThis.ostEventObj = params.ostEventObj;
-    oThis.ostEventTopic = oThis.ostEventObj.topic;
+    oThis.eventData = JSON.parse(oThis.ostEventObj.eventData);
+
+    oThis.ostEventTopic = oThis.eventData.topic;
 
     oThis.eventClassMapping = {
       [ostEventConstant.usersActivationSuccess]: ActivationSuccessClass
@@ -58,7 +60,6 @@ class OstEventProcess extends ServiceBase {
     logger.log('execute class from Ost Event Factory');
 
     let eventProcessor = oThis.eventClassMapping[oThis.ostEventTopic];
-    let eventData = JSON.parse(oThis.ostEventObj.eventData);
 
     if (!eventProcessor) {
       return Promise.reject(
@@ -70,7 +71,7 @@ class OstEventProcess extends ServiceBase {
       );
     }
 
-    let eventProcessResp = await new eventProcessor(eventData).perform();
+    let eventProcessResp = await new eventProcessor(oThis.eventData).perform();
 
     if (eventProcessResp.isFailure()) {
       return Promise.reject(

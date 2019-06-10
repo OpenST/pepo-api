@@ -15,7 +15,7 @@ const rootPrefix = '../../../..',
   tokenUserConstants = require(rootPrefix + '/lib/globalConstant/tokenUser'),
   ostPlatformSdk = require(rootPrefix + '/lib/ostPlatform/jsSdkWrapper'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
-  SecureTokenData = require(rootPrefix + '/lib/cacheManagement/secureTokenData');
+  SecureTokenData = require(rootPrefix + '/lib/cacheManagement/SecureTokenData');
 
 class UserActivationSuccess extends ServiceBase {
   /**
@@ -30,8 +30,7 @@ class UserActivationSuccess extends ServiceBase {
 
     const oThis = this;
 
-    oThis.resultType = params.result_type;
-    oThis.ostUser = params.user;
+    oThis.ostUser = params.data.user;
 
     oThis.ostUserid = oThis.ostUser.id;
     oThis.ostUserTokenHolderAddress = oThis.ostUser.token_holder_address.toLowerCase();
@@ -124,8 +123,8 @@ class UserActivationSuccess extends ServiceBase {
 
     oThis.userId = tokenUserObjRes.data.userId;
 
-    tokenUserObjRes = await new TokenUserDetailByUserIdCache({ userId: [oThis.userId] }).fetch();
-    if (tokenUserObjRes.isFailure() || !tokenUserObjRes.data || !tokenUserObjRes.data[oThis.userId]) {
+    tokenUserObjRes = await new TokenUserDetailByUserIdCache({ userIds: [oThis.userId] }).fetch();
+    if (tokenUserObjRes.isFailure() || !tokenUserObjRes.data[oThis.userId].id) {
       return Promise.reject(
         responseHelper.error({
           internal_error_identifier: 's_oe_u_as_ftu_2',
@@ -181,12 +180,14 @@ class UserActivationSuccess extends ServiceBase {
       .update({
         ost_token_holder_address: oThis.ostUserTokenHolderAddress,
         properties: propertyVal,
-        ost_status: oThis.ostUserStatus
+        ost_status: tokenUserConstants.invertedOstStatuses[oThis.ostUserStatus]
       })
       .where(['id = ?', oThis.tokenUserObj.id])
       .fire();
 
     await TokenUserModel.flushCache({ userId: oThis.tokenUserObj.userId });
+
+    oThis.tokenUserObj.properties = propertyVal;
 
     return Promise.resolve(responseHelper.successWithData({}));
   }
@@ -271,10 +272,14 @@ class UserActivationSuccess extends ServiceBase {
       })
     };
 
-    const startAirdropResponse = await ostPlatformSdk.executeTransaction(executeParams);
-
-    if (!startAirdropResponse.isSuccess()) {
-      return Promise.reject(startAirdropResponse);
+    try {
+      const startAirdropResponse = await ostPlatformSdk.executeTransaction(executeParams);
+      if (!startAirdropResponse.isSuccess()) {
+        return Promise.reject(startAirdropResponse);
+      }
+    } catch (err) {
+      logger.error('Error in Activation airdrop OST Wrapper api call::->', err);
+      return Promise.reject(err);
     }
 
     return Promise.resolve(responseHelper.successWithData({}));

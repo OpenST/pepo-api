@@ -177,7 +177,7 @@ class UserModel extends ModelBase {
    * @returns {Promise<*>}
    */
   static async flushCache(params) {
-    const SecureUserByIDCache = require(rootPrefix + '/lib/cacheManagement/SecureUserByID');
+    const SecureUserByIDCache = require(rootPrefix + '/lib/cacheManagement/SecureUserById');
 
     await new SecureUserByIDCache({
       id: params.id
