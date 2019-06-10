@@ -56,6 +56,66 @@ class ServicesBase {
   }
 
   /**
+   * Parse pagination identifier.
+   *
+   * @param {string} paginationIdentifier
+   *
+   * @return {*}
+   * @private
+   */
+  _parsePaginationParams(paginationIdentifier) {
+    return basicHelper.decryptPageIdentifier(paginationIdentifier);
+  }
+
+  /**
+   * Validate page size.
+   *
+   * @sets oThis.limit
+   *
+   * @return {Promise<never>}
+   * @private
+   */
+  async _validatePageSize() {
+    const oThis = this;
+
+    const limitVas = CommonValidators.validateAndSanitizeLimit(
+      oThis._currentPageLimit(),
+      oThis._defaultPageLimit(),
+      oThis._minPageLimit(),
+      oThis._maxPageLimit()
+    );
+
+    if (!limitVas[0]) {
+      return Promise.reject(
+        responseHelper.paramValidationError({
+          internal_error_identifier: 'a_s_b_5',
+          api_error_identifier: 'invalid_api_params',
+          params_error_identifiers: ['invalid_limit'],
+          debug_options: {}
+        })
+      );
+    }
+
+    oThis.limit = limitVas[1];
+  }
+
+  _currentPageLimit() {
+    throw new Error('Sub-class to implement');
+  }
+
+  _defaultPageLimit() {
+    throw new Error('Sub-class to implement');
+  }
+
+  _minPageLimit() {
+    throw new Error('Sub-class to implement');
+  }
+
+  _maxPageLimit() {
+    throw new Error('Sub-class to implement');
+  }
+
+  /**
    * Async perform.
    *
    * @private

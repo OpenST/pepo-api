@@ -6,6 +6,7 @@ const rootPrefix = '../../..',
   apiName = require(rootPrefix + '/lib/globalConstant/apiName'),
   sanitizer = require(rootPrefix + '/helpers/sanitizer'),
   WrapperFormatter = require(rootPrefix + '/lib/formatter/Wrapper'),
+  UserListMetaFormatter = require(rootPrefix + '/lib/formatter/meta/UserList'),
   entityType = require(rootPrefix + '/lib/globalConstant/entityType');
 
 /* Register Device*/
@@ -40,6 +41,28 @@ router.get('/recovery-info', sanitizer.sanitizeDynamicUrlParams, function(req, r
   };
 
   Promise.resolve(routeHelper.perform(req, res, next, '/user/RecoveryInfo', 'r_a_v1_u_2', null, dataFormatterFunc));
+});
+
+/* User List*/
+router.get('/', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.userList;
+
+  const dataFormatterFunc = async function(serviceResponse) {
+    let metaPayload = await new UserListMetaFormatter(serviceResponse.data).perform().data;
+
+    console.log('metaPayload-----', metaPayload);
+
+    const wrapperFormatterRsp = await new WrapperFormatter({
+      resultType: entityType.userList,
+      entities: [entityType.userList],
+      serviceData: serviceResponse.data.serviceResponse
+    }).perform();
+
+    serviceResponse.data = wrapperFormatterRsp.data;
+    serviceResponse.meta = metaPayload;
+  };
+
+  Promise.resolve(routeHelper.perform(req, res, next, '/user/List', 'r_a_v1_u_3', null, dataFormatterFunc));
 });
 
 module.exports = router;
