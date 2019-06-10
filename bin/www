@@ -7,6 +7,7 @@
 var app = require('../app');
 var debug = require('debug')('pepo-api:server');
 var http = require('http');
+var logger = require('../lib/logger/customConsoleLogger');
 
 /**
  * Normalize a port into a number, string, or false.
@@ -62,6 +63,7 @@ function onError(error) {
     ? 'Pipe ' + port
     : 'Port ' + port;
 
+    logger.error('Error while starting server.',error.code);
   // handle specific listen errors with friendly messages
   switch (error.code) {
     case 'EACCES': {
@@ -100,5 +102,5 @@ function onListening() {
   var bind = typeof addr === 'string'
     ? 'pipe ' + addr
     : 'port ' + addr.port;
-  debug('Listening on ' + bind);
+  logger.log('Listening on ' + bind);
 }
