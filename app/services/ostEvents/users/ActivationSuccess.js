@@ -15,7 +15,7 @@ const rootPrefix = '../../../..',
   tokenUserConstants = require(rootPrefix + '/lib/globalConstant/tokenUser'),
   ostPlatformSdk = require(rootPrefix + '/lib/ostPlatform/jsSdkWrapper'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
-  SecureTokenData = require(rootPrefix + '/lib/cacheManagement/secureTokenData');
+  SecureTokenData = require(rootPrefix + '/lib/cacheManagement/SecureTokenData');
 
 class UserActivationSuccess extends ServiceBase {
   /**

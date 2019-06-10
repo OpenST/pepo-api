@@ -7,7 +7,7 @@
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
-  secureTokenData = require(rootPrefix + '/lib/cacheManagement/secureTokenData'),
+  secureTokenData = require(rootPrefix + '/lib/cacheManagement/SecureTokenData'),
   responseHelper = require(rootPrefix + '/lib/formatter/response');
 
 class GetTokens extends ServiceBase {
