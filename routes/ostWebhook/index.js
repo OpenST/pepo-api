@@ -13,9 +13,11 @@ const validateV2Signature = async function(req, res, next) {
 
   let authResponse;
 
-  authResponse = await new OstWebhookAuth({ decodedParams: req.decodedParams }).perform().catch(function(r) {
-    return r;
-  });
+  authResponse = await new OstWebhookAuth({ webhookParams: req.decodedParams, requestHeaders: req.headers })
+    .perform()
+    .catch(function(r) {
+      return r;
+    });
 
   if (authResponse.isFailure()) {
     return authResponse.renderResponse(res);
