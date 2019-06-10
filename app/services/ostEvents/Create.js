@@ -75,12 +75,9 @@ class OstEventCreate extends ServiceBase {
       );
     }
 
-    let dbRows = await new OstEventModel()
-      .select(['id'])
-      .where({ event_id: oThis.eventId })
-      .fire();
+    let ostEventRes = await new OstEventModel().fetchByEventId(oThis.eventId);
 
-    if (dbRows.length > 0) {
+    if (ostEventRes.data.id) {
       oThis.duplicateEvent = true;
     }
 

@@ -31,7 +31,10 @@ class UserActivationSuccess extends ServiceBase {
 
     oThis.resultType = params.result_type;
     oThis.ostUser = params.user;
+
     oThis.ostUserid = oThis.ostUser.id;
+    oThis.ostUserTokenHolderAddress = oThis.ostUser.token_holder_address.toLowerCase();
+    oThis.ostUserStatus = oThis.ostUser.status.toUpperCase();
 
     oThis.tokenUserObj = null;
     oThis.userId = null;
@@ -71,11 +74,11 @@ class UserActivationSuccess extends ServiceBase {
     logger.log('Validate for user activation success');
     let paramErrors = [];
 
-    if (!CommonValidators.validateEthAddress(oThis.ostUser.token_holder_address)) {
+    if (!CommonValidators.validateEthAddress(oThis.ostUserTokenHolderAddress)) {
       paramErrors.push('invalid_token_holder_address');
     }
 
-    if (oThis.ostUser.status.toUpperCase() !== tokenUserConstants.activatedOstStatus) {
+    if (oThis.ostUserStatus !== tokenUserConstants.activatedOstStatus) {
       paramErrors.push('invalid_status');
     }
 
@@ -133,7 +136,7 @@ class UserActivationSuccess extends ServiceBase {
 
     if (
       oThis.tokenUserObj.ostStatus === tokenUserConstants.activatedOstStatus &&
-      oThis.tokenUserObj.ost_token_holder_address !== oThis.ostUser.token_holder_address.toLowerCase()
+      oThis.tokenUserObj.ost_token_holder_address !== oThis.ostUserTokenHolderAddress
     ) {
       return Promise.reject(
         responseHelper.error({
@@ -174,9 +177,9 @@ class UserActivationSuccess extends ServiceBase {
 
     await new TokenUserModel()
       .update({
-        ost_token_holder_address: oThis.ostUser.token_holder_address.toLowerCase(),
+        ost_token_holder_address: oThis.ostUserTokenHolderAddress,
         properties: propertyVal,
-        ost_status: oThis.ostUser.status.toUpperCase()
+        ost_status: oThis.ostUserStatus
       })
       .where(['id = ?', oThis.tokenUserObj.id])
       .fire();

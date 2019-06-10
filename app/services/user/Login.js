@@ -146,20 +146,22 @@ class SignUp extends ServiceBase {
 
     logger.log('Validate Password');
 
-    let decryptedEncryptionSalt = localCipher.decrypt(coreConstants.CACHE_SHA_KEY, oThis.secureUser.encryptionSalt);
+    let decryptedEncryptionSalt = localCipher.decrypt(coreConstants.CACHE_SHA_KEY, oThis.secureUser.encryptionSaltLc);
 
     let generatedEncryptedPassword = util.createSha256Digest(decryptedEncryptionSalt, oThis.password);
 
     if (generatedEncryptedPassword != oThis.secureUser.password) {
-      let userModelInstance = new UserModel().update({
-        mark_inactive_trigger_count: oThis.secureUser.markInactiveTriggerCount + 1
-      });
+      let userModelInstance = new UserModel()
+        .update({
+          mark_inactive_trigger_count: oThis.secureUser.markInactiveTriggerCount + 1
+        })
+        .where(['id = ?', oThis.secureUser.id]);
 
       if (oThis.secureUser.markInactiveTriggerCount + 1 >= userConstants.maxMarkInactiveTriggerCount) {
         userModelInstance.update({ status: userConstants.invertedStatuses[userConstants.inActiveStatus] });
       }
 
-      await userModelInstance.where(['id = ?', oThis.secureUser.id]).fire();
+      await userModelInstance.fire();
 
       await UserModel.flushCache({ id: oThis.secureUser.id });
 
@@ -178,6 +180,8 @@ class SignUp extends ServiceBase {
         .update({ mark_inactive_trigger_count: 0 })
         .where(['id = ?', oThis.secureUser.id])
         .fire();
+
+      oThis.secureUser.markInactiveTriggerCount = 0;
       await UserModel.flushCache({ id: oThis.secureUser.id });
     }
 

@@ -59,6 +59,26 @@ class OstEventModel extends ModelBase {
     }
     return oThis.formatDbData(dbRows[0]);
   }
+
+  /***
+   * Fetch ost event for id
+   *
+   * @param id {Integer} - id
+   *
+   * @return {Object}
+   */
+  async fetchByEventId(eventId) {
+    const oThis = this;
+    let dbRows = await oThis
+      .select(['id'])
+      .where({ event_id: eventId })
+      .fire();
+
+    if (dbRows.length === 0) {
+      return {};
+    }
+    return oThis.formatDbData(dbRows[0]);
+  }
 }
 
 module.exports = OstEventModel;

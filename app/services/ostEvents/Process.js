@@ -91,7 +91,7 @@ class OstEventProcess extends ServiceBase {
 
     let dbRows = await new OstEventModel().fetchById(oThis.ostEventId);
 
-    if (!dbRows || dbRows.status != ostEventConstant.pendingStatus) {
+    if (!dbRows || !dbRows.id || dbRows.status != ostEventConstant.pendingStatus) {
       logger.error('Error while fetching data from ost events table. dbRows=', dbRows);
       return Promise.reject(dbRows);
     }
@@ -113,8 +113,14 @@ class OstEventProcess extends ServiceBase {
     const oThis = this;
     logger.log('Update Ost Event status-', ostEventStatus);
 
+    let ostEventstatus = ostEventConstant.invertedStatuses[ostEventStatus];
+
+    if (!ostEventstatus) {
+      throw `Invalid ostEventstatus for Process. ostEventStatus=${ostEventStatus}`;
+    }
+
     await new OstEventModel()
-      .update({ status: ostEventConstant.invertedStatuses[ostEventStatus] })
+      .update({ status: ostEventstatus })
       .where({ id: oThis.ostEventId })
       .fire();
 
