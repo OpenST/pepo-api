@@ -14,7 +14,8 @@ const rootPrefix = '../../../..',
   TokenUserModel = require(rootPrefix + '/app/models/mysql/TokenUser'),
   tokenUserConstants = require(rootPrefix + '/lib/globalConstant/tokenUser'),
   ostPlatformSdk = require(rootPrefix + '/lib/ostPlatform/jsSdkWrapper'),
-  logger = require(rootPrefix + '/lib/logger/customConsoleLogger');
+  logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
+  SecureTokenData = require(rootPrefix + '/lib/cacheManagement/secureTokenData');
 
 class UserActivationSuccess extends ServiceBase {
   /**
@@ -37,6 +38,7 @@ class UserActivationSuccess extends ServiceBase {
     oThis.ostUserStatus = oThis.ostUser.status.toUpperCase();
 
     oThis.tokenUserObj = null;
+    oThis.tokenData = null;
     oThis.userId = null;
     oThis.userAlreadyActive = false;
   }
@@ -207,10 +209,7 @@ class UserActivationSuccess extends ServiceBase {
       return Promise.resolve(responseHelper.successWithData({}));
     }
 
-    // const startAirdropResponse = await ostPlatformSdk.createUser();
-    // if (!startAirdropResponse.isSuccess()) {
-    //   return Promise.reject(startAirdropResponse);
-    // }
+    await oThis._executeTransaction();
 
     let propertyVal = oThis.tokenUserObj.properties;
 
@@ -222,6 +221,61 @@ class UserActivationSuccess extends ServiceBase {
       })
       .where(['id = ?', oThis.tokenUserObj.id])
       .fire();
+
+    await TokenUserModel.flushCache({ userId: oThis.tokenUserObj.userId });
+
+    return Promise.resolve(responseHelper.successWithData({}));
+  }
+
+  /**
+   * Execute Transaction using OST sdk
+   *
+   *
+   * @return {Promise<void>}
+   *
+   * @private
+   */
+  async _executeTransaction() {
+    const oThis = this;
+    logger.log('Start executeTransaction on user activation success');
+
+    let tokenData = await new SecureTokenData().fetch();
+    if (tokenData.isFailure()) {
+      logger.error('Error while fetching token data');
+      return Promise.reject(
+        responseHelper.error({
+          internal_error_identifier: 's_oe_u_as_et_1',
+          api_error_identifier: 'something_went_wrong'
+        })
+      );
+    }
+
+    oThis.tokenData = tokenData.data;
+
+    const transferToAddresses = oThis.tokenData.ostTokenHolderAddress,
+      transferAmount = '10000000000000000000'; //10 BT
+
+    let ruleAddresses = JSON.parse(oThis.tokenData.ruleAddresses);
+
+    let executeParams = {
+      user_id: oThis.tokenData.ostCompanyUserId,
+      to: ruleAddresses['Direct Transfer'],
+      meta_property: {
+        details: 'Welcome',
+        type: 'company_to_user',
+        name: 'UserActivateAirdrop'
+      },
+      raw_calldata: JSON.stringify({
+        method: 'directTransfers',
+        parameters: [transferToAddresses, transferAmount]
+      })
+    };
+
+    const startAirdropResponse = await ostPlatformSdk.executeTransaction(executeParams);
+
+    if (!startAirdropResponse.isSuccess()) {
+      return Promise.reject(startAirdropResponse);
+    }
 
     return Promise.resolve(responseHelper.successWithData({}));
   }
