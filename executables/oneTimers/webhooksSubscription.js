@@ -1,3 +1,10 @@
+/**
+ * Usage: node executables/oneTimers/webhooksSubscription.js
+ *
+ *
+ * @type {string}
+ */
+
 const rootPrefix = '../..',
   WebhooksModel = require(rootPrefix + '/app/models/mysql/Webhook'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
