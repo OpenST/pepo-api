@@ -13,7 +13,6 @@ router.get('/search', sanitizer.sanitizeDynamicUrlParams, function(req, res, nex
   req.decodedParams.apiName = apiName.gifs;
 
   const dataFormatterFunc = async function(serviceResponse) {
-    console.log('Service Response: ', serviceResponse);
     const wrapperFormatterRsp = await new WrapperFormatter({
       resultType: entityType.gifs,
       entities: [entityType.gifs],
