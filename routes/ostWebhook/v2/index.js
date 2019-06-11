@@ -4,8 +4,8 @@ const express = require('express'),
   router = express.Router();
 
 const rootPrefix = '../../..',
-  sanitizer = require(rootPrefix + '/helpers/sanitizer'),
-  OstEventCreateService = require(rootPrefix + '/app/services/ostEvents/Create');
+  OstEventCreateService = require(rootPrefix + '/app/services/ostEvents/Create'),
+  sanitizer = require(rootPrefix + '/helpers/sanitizer');
 
 /* Listen to Ost Events*/
 router.post('/', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
