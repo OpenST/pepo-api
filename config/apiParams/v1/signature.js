@@ -102,6 +102,20 @@ const v1Signature = {
       }
     ],
     optional: []
+  },
+  [apiName.gifs]: {
+    mandatory: [
+      {
+        parameter: 'query',
+        validatorMethods: ['validateString']
+      }
+    ],
+    optional: [
+      {
+        parameter: 'page_number',
+        validatorMethods: ['validateNonZeroInteger']
+      }
+    ]
   }
 };
 

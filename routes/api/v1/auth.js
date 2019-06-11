@@ -19,7 +19,11 @@ router.post('/sign-up', sanitizer.sanitizeDynamicUrlParams, function(req, res, n
   req.decodedParams.apiName = apiName.signUp;
 
   const onServiceSuccess = async function(serviceResponse) {
-    //Todo: Cookie Security Review
+    //TODO: Cookie Security Review. Duplicate settings.
+    //TODO: Read: https://expressjs.com/en/advanced/best-practice-security.html#use-cookies-securely
+    //TODO: Domain not defined.
+    //TODO: secure true not defined.
+    //TODO: path / not defined.
     let options = {
       maxAge: 1000 * 60 * 15, // would expire after 15 minutes
       httpOnly: true, // The cookie only accessible by the web server
@@ -43,7 +47,7 @@ router.post('/sign-up', sanitizer.sanitizeDynamicUrlParams, function(req, res, n
   };
 
   Promise.resolve(
-    routeHelper.perform(req, res, next, '/user/SignUp', 'r_a_v1_a_s_1', null, onServiceSuccess, onServiceFailure)
+    routeHelper.perform(req, res, next, '/user/SignUp', 'r_a_v1_a_1', null, onServiceSuccess, onServiceFailure)
   );
 });
 
@@ -52,7 +56,11 @@ router.post('/login', sanitizer.sanitizeDynamicUrlParams, function(req, res, nex
   req.decodedParams.apiName = apiName.login;
 
   const onServiceSuccess = async function(serviceResponse) {
-    //Todo: Cookie Security Review
+    //TODO: Cookie Security Review. Duplicate settings.
+    //TODO: Read: https://expressjs.com/en/advanced/best-practice-security.html#use-cookies-securely
+    //TODO: Domain not defined.
+    //TODO: secure true not defined.
+    //TODO: path / not defined.
     let options = {
       maxAge: 1000 * 60 * 15, // would expire after 15 minutes
       httpOnly: true, // The cookie only accessible by the web server
@@ -76,7 +84,7 @@ router.post('/login', sanitizer.sanitizeDynamicUrlParams, function(req, res, nex
   };
 
   Promise.resolve(
-    routeHelper.perform(req, res, next, '/user/Login', 'r_a_v1_a_l_1', null, onServiceSuccess, onServiceFailure)
+    routeHelper.perform(req, res, next, '/user/Login', 'r_a_v1_a_2', null, onServiceSuccess, onServiceFailure)
   );
 });
 

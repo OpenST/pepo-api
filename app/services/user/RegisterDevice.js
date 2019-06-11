@@ -3,7 +3,7 @@ const rootPrefix = '../../..',
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   createErrorLogsEntry = require(rootPrefix + '/lib/errorLogs/createEntry'),
-  ErrorLogsConstants = require(rootPrefix + '/lib/globalConstant/errorLogs'),
+  errorLogsConstants = require(rootPrefix + '/lib/globalConstant/errorLogs'),
   TokenUserDetailByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TokenUserByUserIds'),
   responseHelper = require(rootPrefix + '/lib/formatter/response');
 
@@ -111,7 +111,7 @@ class RegisterDevice extends ServiceBase {
 
     if (platformResponse.isFailure()) {
       logger.error('Register device API to platform failed.');
-      await createErrorLogsEntry.perform(platformResponse, ErrorLogsConstants.highSeverity);
+      await createErrorLogsEntry.perform(platformResponse, errorLogsConstants.highSeverity);
       return Promise.reject(platformResponse);
     }
 

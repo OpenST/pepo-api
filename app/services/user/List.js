@@ -1,8 +1,12 @@
 const rootPrefix = '../../..',
-  logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   ServiceBase = require(rootPrefix + '/app/services/Base'),
-  pagination = require(rootPrefix + '/lib/globalConstant/pagination'),
   UserPaginationCache = require(rootPrefix + '/lib/cacheManagement/single/UserPagination'),
+  UserMultiCache = require(rootPrefix + '/lib/cacheManagement/multi/User'),
+  TokenUserByUserIdsMultiCache = require(rootPrefix + '/lib/cacheManagement/multi/TokenUserByUserIds'),
+  UserModel = require(rootPrefix + '/app/models/mysql/User'),
+  TokenUserModel = require(rootPrefix + '/app/models/mysql/TokenUser'),
+  pagination = require(rootPrefix + '/lib/globalConstant/pagination'),
+  logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   responseHelper = require(rootPrefix + '/lib/formatter/response');
 
 /**
@@ -27,9 +31,9 @@ class UserList extends ServiceBase {
     oThis.paginationIdentifier = params[pagination.paginationIdentifierKey] || null;
 
     oThis.page = null;
-    oThis.responseMetaData = {
-      [pagination.nextPagePayloadKey]: {}
-    };
+    oThis.userIds = [];
+    oThis.usersByIdHash = {};
+    oThis.tokenUsersByUserIdHash = {};
   }
 
   /**
@@ -43,18 +47,19 @@ class UserList extends ServiceBase {
 
     await oThis._validateAndSanitizeParams();
 
-    let cacheUserData = await oThis._fetchFromCache();
+    await oThis._fetchPaginatedUserIdsFromCache();
 
-    oThis._removeCurrentUserFromResponse(cacheUserData);
+    oThis._removeCurrentUserFromResponse();
 
-    oThis._setMeta();
+    if (oThis.userIds.length === 0) {
+      return oThis.finalResponse();
+    }
 
-    let finalResponse = {
-      users: Object.values(cacheUserData),
-      meta: oThis.responseMetaData
-    };
+    await oThis._fetchUsers();
 
-    return responseHelper.successWithData(finalResponse);
+    await oThis._fetchTokenUsers();
+
+    return responseHelper.successWithData(oThis.finalResponse());
   }
 
   /**
@@ -85,52 +90,112 @@ class UserList extends ServiceBase {
    * @returns {Promise<void>}
    * @private
    */
-  async _fetchFromCache() {
+  async _fetchPaginatedUserIdsFromCache() {
     const oThis = this;
 
-    const tokenUserByUserIdCache = new UserPaginationCache({
+    const UserPaginationCacheObj = new UserPaginationCache({
         limit: oThis.limit,
         page: oThis.page
       }),
-      tokenUserByUserIdCacheRsp = await tokenUserByUserIdCache.fetch();
+      UserPaginationCacheRes = await UserPaginationCacheObj.fetch();
 
-    if (!tokenUserByUserIdCacheRsp || tokenUserByUserIdCacheRsp.isFailure()) {
+    if (!UserPaginationCacheRes || UserPaginationCacheRes.isFailure()) {
       logger.log('Could not fetch details.');
-      return responseHelper.successWithData({});
+      return responseHelper.error({
+        internal_error_identifier: 's_u_l_fuifc_1',
+        api_error_identifier: 'something_went_wrong',
+        debug_options: { UserPaginationCacheRes: UserPaginationCacheRes }
+      });
     }
 
-    return tokenUserByUserIdCacheRsp.data;
+    oThis.userIds = UserPaginationCacheRes.data;
+
+    return Promise.resolve(responseHelper.successWithData({}));
   }
 
   /**
    * remove current user from final response
    *
-   * @param inputDataMap {Object} - input data
    * @private
    */
-  _removeCurrentUserFromResponse(inputDataMap) {
+  _removeCurrentUserFromResponse() {
     const oThis = this;
 
-    for (let userId in inputDataMap)
-      if (oThis.currentUserId == userId) {
-        delete inputDataMap[userId];
-      }
+    const index = oThis.userIds.indexOf(oThis.currentUserId);
+
+    if (index > -1) {
+      oThis.userIds.splice(index, 1);
+    }
+    return Promise.resolve(responseHelper.successWithData({}));
   }
 
   /**
-   * Set meta property.
+   * Fetch users from cache
    *
+   * @returns {Promise<void>}
    * @private
    */
-  _setMeta() {
+  async _fetchUsers() {
     const oThis = this;
 
-    oThis.responseMetaData[pagination.nextPagePayloadKey] = {
-      [pagination.paginationIdentifierKey]: {
-        page: oThis.page + 1,
-        limit: oThis.limit
+    let usersByIdHashRes = await new UserMultiCache({ ids: oThis.userIds }).fetch();
+    oThis.usersByIdHash = usersByIdHashRes.data;
+
+    return Promise.resolve(responseHelper.successWithData({}));
+  }
+
+  /**
+   * Fetch token user details from cache
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _fetchTokenUsers() {
+    const oThis = this;
+
+    let tokenUsersByIdHashRes = await new TokenUserByUserIdsMultiCache({ userIds: oThis.userIds }).fetch();
+    oThis.tokenUsersByUserIdHash = tokenUsersByIdHashRes.data;
+
+    return Promise.resolve(responseHelper.successWithData({}));
+  }
+
+  /**
+   * Service Response
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  finalResponse() {
+    const oThis = this;
+
+    let responseMetaData = {
+      [pagination.nextPagePayloadKey]: {
+        [pagination.paginationIdentifierKey]: {
+          page: oThis.page + 1,
+          limit: oThis.limit
+        }
       }
     };
+
+    let userHash = {},
+      tokenUserHash = {};
+
+    for (let i = 0; i < oThis.userIds.length; i++) {
+      const userId = oThis.userIds[i],
+        user = oThis.usersByIdHash[userId],
+        tokenUser = oThis.tokenUsersByUserIdHash[userId];
+      userHash[userId] = new UserModel().safeFormattedData(user);
+      tokenUserHash[userId] = new TokenUserModel().safeFormattedData(tokenUser);
+    }
+
+    let finalResponse = {
+      usersByIdHash: userHash,
+      tokenUsersByUserIdHash: tokenUserHash,
+      userIds: oThis.userIds,
+      meta: responseMetaData
+    };
+
+    return finalResponse;
   }
 
   /**
