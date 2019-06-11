@@ -12,7 +12,7 @@ const rootPrefix = '../../..',
   coreConstants = require(rootPrefix + '/config/coreConstants'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger');
 
-class SignUp extends ServiceBase {
+class Login extends ServiceBase {
   /**
    * @param {Object} params
    * @param {String} params.user_name: User Name
@@ -205,4 +205,4 @@ class SignUp extends ServiceBase {
   }
 }
 
-module.exports = SignUp;
+module.exports = Login;

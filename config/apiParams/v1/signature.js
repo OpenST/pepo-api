@@ -93,6 +93,15 @@ const v1Signature = {
         validatorMethods: ['validateString']
       }
     ]
+  },
+  [apiName.loggedInUser]: {
+    mandatory: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateObject']
+      }
+    ],
+    optional: []
   }
 };
 
