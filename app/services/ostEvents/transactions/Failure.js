@@ -6,8 +6,8 @@
  */
 
 const rootPrefix = '../../../..',
-  TokenUserModel = require(rootPrefix + '/app/models/mysql/TokenUser'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
+  TokenUserModel = require(rootPrefix + '/app/models/mysql/TokenUser'),
   tokenUserConstants = require(rootPrefix + '/lib/globalConstant/tokenUser'),
   feedConstants = require(rootPrefix + '/lib/globalConstant/feed'),
   externalEntityConstants = require(rootPrefix + '/lib/globalConstant/externalEntity'),
