@@ -1,16 +1,9 @@
-'use strict';
-/**
- * This service helps in Creating User in our System
- *
- * Note:-
- */
-
 const rootPrefix = '../../..',
   util = require(rootPrefix + '/lib/util'),
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   localCipher = require(rootPrefix + '/lib/encryptors/localCipher'),
-  UserByUserNameCache = require(rootPrefix + '/lib/cacheManagement/UserByUserName'),
+  UserByUserNameCache = require(rootPrefix + '/lib/cacheManagement/single/UserByUsername'),
   SecureUserCache = require(rootPrefix + '/lib/cacheManagement/single/SecureUser'),
   TokenUserDetailByUserIdsCache = require(rootPrefix + '/lib/cacheMultiManagement/TokenUserByUserIds'),
   UserModel = require(rootPrefix + '/app/models/mysql/User'),

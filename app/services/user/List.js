@@ -2,7 +2,7 @@ const rootPrefix = '../../..',
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   pagination = require(rootPrefix + '/lib/globalConstant/pagination'),
-  TokenUserByUserIdCache = require(rootPrefix + '/lib/cacheManagement/UserDetails'),
+  UserPaginationCache = require(rootPrefix + '/lib/cacheManagement/single/UserPagination'),
   responseHelper = require(rootPrefix + '/lib/formatter/response');
 
 /**
@@ -84,7 +84,7 @@ class UserList extends ServiceBase {
   async _fetchFromCache() {
     const oThis = this;
 
-    const tokenUserByUserIdCache = new TokenUserByUserIdCache({
+    const tokenUserByUserIdCache = new UserPaginationCache({
         limit: oThis.limit,
         page: oThis.page
       }),

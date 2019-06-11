@@ -8,7 +8,7 @@
 const rootPrefix = '../../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
-  TokenUserByOstUserIdCache = require(rootPrefix + '/lib/cacheManagement/TokenUserByOstUserId'),
+  TokenUserByOstUserIdCache = require(rootPrefix + '/lib/cacheManagement/single/TokenUserByOstUserId'),
   TokenUserDetailByUserIdCache = require(rootPrefix + '/lib/cacheMultiManagement/TokenUserByUserIds'),
   TokenUserModel = require(rootPrefix + '/app/models/mysql/TokenUser'),
   ExternalEntityModel = require(rootPrefix + '/app/models/mysql/ExternalEntity'),
