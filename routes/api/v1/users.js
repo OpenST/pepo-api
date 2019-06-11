@@ -55,19 +55,17 @@ router.get('/', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
       serviceData: serviceResponse.data.users
     }).perform();
 
-    let meta = {};
+    let serviceResponseMeta = serviceResponse.data.meta,
+      finalMetaResponse = {};
 
-    if (serviceResponse.data.meta) {
-      meta = serviceResponse.data.meta;
+    if (serviceResponseMeta && CommonValidators.validateObject(serviceResponseMeta)) {
+      finalMetaResponse = await new UserListMetaFormatter({ meta: serviceResponse.data.meta }).perform().data;
     }
 
     serviceResponse.data = wrapperFormatterRsp.data;
+    serviceResponse.data.meta = finalMetaResponse;
 
-    if (meta && CommonValidators.validateObject(meta)) {
-      serviceResponse.data.meta = await new UserListMetaFormatter({ meta: meta }).perform().data;
-    }
-
-    console.log('FINAL:::::serviceResponse-----', serviceResponse);
+    console.log('User List:::::serviceResponse-----', serviceResponse);
   };
 
   Promise.resolve(routeHelper.perform(req, res, next, '/user/List', 'r_a_v1_u_3', null, dataFormatterFunc));

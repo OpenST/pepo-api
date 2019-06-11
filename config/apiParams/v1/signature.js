@@ -79,6 +79,10 @@ const v1Signature = {
   [apiName.users]: {
     mandatory: [
       {
+        parameter: 'current_user',
+        validatorMethods: ['validateObject']
+      },
+      {
         parameter: 'limit',
         validatorMethods: ['validateNonZeroInteger']
       }

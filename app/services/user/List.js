@@ -22,6 +22,7 @@ class UserList extends ServiceBase {
 
     const oThis = this;
 
+    oThis.currentUserId = params.current_user.id;
     oThis.limit = params.limit;
     oThis.paginationIdentifier = params[pagination.paginationIdentifierKey] || null;
 
@@ -40,18 +41,20 @@ class UserList extends ServiceBase {
   async _asyncPerform() {
     const oThis = this;
 
-    oThis._validateAndSanitizeParams();
+    await oThis._validateAndSanitizeParams();
 
     let cacheUserData = await oThis._fetchFromCache();
 
+    oThis._removeCurrentUserFromResponse(cacheUserData);
+
     oThis._setMeta();
 
-    let resp = {
+    let finalResponse = {
       users: cacheUserData,
       meta: oThis.responseMetaData
     };
 
-    return responseHelper.successWithData(resp);
+    return responseHelper.successWithData(finalResponse);
   }
 
   /**
@@ -97,6 +100,21 @@ class UserList extends ServiceBase {
     }
 
     return tokenUserByUserIdCacheRsp.data;
+  }
+
+  /**
+   * remove current user from final response
+   *
+   * @param inputDataMap {Object} - input data
+   * @private
+   */
+  _removeCurrentUserFromResponse(inputDataMap) {
+    const oThis = this;
+
+    for (let userId in inputDataMap)
+      if (oThis.currentUserId == userId) {
+        delete inputDataMap[userId];
+      }
   }
 
   /**

@@ -167,8 +167,6 @@ class UserModel extends ModelBase {
       };
     }
 
-    console.log('fetchUserIds: response----', response);
-
     return responseHelper.successWithData(response);
   }
 
