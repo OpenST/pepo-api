@@ -135,6 +135,30 @@ class ExternalEntityModel extends ModelBase {
     }
     return oThis.formatDbData(dbRows[0]);
   }
+
+  /***
+   * Flush cache
+   *
+   * @param {object} params
+   * @param {Integer} params.Id
+   *
+   * @returns {Promise<*>}
+   */
+  static async flushCache(params) {
+    const ExternalEntitiyByEntityIdAndEntityKindCache = require(rootPrefix +
+      '/lib/cacheManagement/single/ExternalEntitiyByEntityIdAndEntityKind');
+
+    await new ExternalEntitiyByEntityIdAndEntityKindCache({
+      entityId: params.entityId,
+      entityKind: params.entityKind
+    }).clear();
+
+    const ExternalEntityByIds = require(rootPrefix + '/lib/cacheManagement/multi/ExternalEntityByIds');
+
+    await new ExternalEntityByIds({
+      Ids: [params.Id]
+    }).clear();
+  }
 }
 
 module.exports = ExternalEntityModel;
