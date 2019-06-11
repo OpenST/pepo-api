@@ -11,6 +11,7 @@ const rootPrefix = '../../../..',
   UserFeedModel = require(rootPrefix + '/app/models/mysql/UserFeed'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   tokenUserConstants = require(rootPrefix + '/lib/globalConstant/tokenUser'),
+  TransactionOstEventBase = require(rootPrefix + '/app/services/ostEvents/transactions/Base'),
   feedConstants = require(rootPrefix + '/lib/globalConstant/feed'),
   externalEntityConstants = require(rootPrefix + '/lib/globalConstant/externalEntity'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger');
