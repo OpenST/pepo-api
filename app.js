@@ -6,7 +6,7 @@ const express = require('express'),
   morgan = require('morgan'),
   bodyParser = require('body-parser'),
   helmet = require('helmet'),
-  cookieParser = require('cookie-parser'),
+  //cookieParser = require('cookie-parser'),
   customUrlParser = require('url');
 
 const responseHelper = require(rootPrefix + '/lib/formatter/response'),
@@ -119,13 +119,20 @@ app.use(bodyParser.json());
 // Parsing the URL-encoded data with the qs library (extended: true)
 app.use(bodyParser.urlencoded({ extended: true }));
 
+// Static file location
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/api', startRequestLogLine, appendRequestDebugInfo, sanitizer.sanitizeBodyAndQuery, assignParams, apiRoutes);
-
-// Following are the routes
+// Health checker
 app.use('/health-checker', elbHealthCheckerRoute);
 
+/**
+ * NOTE: API routes where first sanitize and then assign params
+ */
+app.use('/api', startRequestLogLine, appendRequestDebugInfo, sanitizer.sanitizeBodyAndQuery, assignParams, apiRoutes);
+
+/**
+ * NOTE: OST webhooks where first assign params, validate signature and then sanitize the params
+ */
 app.use('/ost-webhook', startRequestLogLine, appendRequestDebugInfo, ostWebhookRoutes);
 
 // Catch 404 and forward to error handler
