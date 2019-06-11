@@ -36,4 +36,26 @@ router.get('/', function(req, res, next) {
   performer();
 });
 
+router.get('/caching-test-1', function(req, res, next) {
+  const performer = function() {
+    logger.log('\n\nreq.headers: ', req.headers);
+
+    var dt = new Date();
+    var currentMinute = dt.getMinutes();
+    var headerDt = new Date(req.headers['if-modified-since']);
+    var headerMinute = headerDt.getMinutes();
+
+    logger.log('currentMinute: ', currentMinute, ' --- headerMinute', headerMinute);
+
+    if (currentMinute === headerMinute) {
+      res.status(304).send();
+    } else {
+      res.setHeader('Last-Modified', dt);
+      res.status(200).json({ minute: currentMinute, date: dt });
+    }
+  };
+
+  performer();
+});
+
 module.exports = router;
