@@ -10,7 +10,7 @@ const v1Signature = {
         parameter: 'user_name',
         validatorMethods: [
           'validateString',
-          'validateAlphaNumericCommonSpecailCharString',
+          'validateAlphaNumericCommonSpecialCharString',
           'validateMaxLengthMediumString'
         ]
       },
@@ -35,7 +35,7 @@ const v1Signature = {
         parameter: 'user_name',
         validatorMethods: [
           'validateString',
-          'validateAlphaNumericCommonSpecailCharString',
+          'validateAlphaNumericCommonSpecialCharString',
           'validateMaxLengthMediumString'
         ]
       },
