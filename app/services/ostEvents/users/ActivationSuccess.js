@@ -10,7 +10,7 @@ const rootPrefix = '../../../..',
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   TokenUserByOstUserIdCache = require(rootPrefix + '/lib/cacheManagement/TokenUserByOstUserId'),
-  TokenUserDetailByUserIdCache = require(rootPrefix + '/lib/cacheMultiManagement/TokenUserDetailByUserIds'),
+  TokenUserDetailByUserIdCache = require(rootPrefix + '/lib/cacheMultiManagement/TokenUserByUserIds'),
   TokenUserModel = require(rootPrefix + '/app/models/mysql/TokenUser'),
   ExternalEntityModel = require(rootPrefix + '/app/models/mysql/ExternalEntity'),
   tokenUserConstants = require(rootPrefix + '/lib/globalConstant/tokenUser'),
@@ -18,7 +18,7 @@ const rootPrefix = '../../../..',
   externalEntityConstants = require(rootPrefix + '/lib/globalConstant/externalEntity'),
   ostPlatformSdk = require(rootPrefix + '/lib/ostPlatform/jsSdkWrapper'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
-  SecureTokenData = require(rootPrefix + '/lib/cacheManagement/secureTokenData');
+  SecureTokenData = require(rootPrefix + '/lib/cacheManagement/SecureTokenData');
 
 class UserActivationSuccess extends ServiceBase {
   /**

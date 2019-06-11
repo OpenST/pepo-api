@@ -4,7 +4,7 @@ const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   createErrorLogsEntry = require(rootPrefix + '/lib/errorLogs/createEntry'),
   ErrorLogsConstants = require(rootPrefix + '/lib/globalConstant/errorLogs'),
-  TokenUserDetailByUserIdsCache = require(rootPrefix + '/lib/cacheMultiManagement/TokenUserDetailByUserIds'),
+  TokenUserDetailByUserIdsCache = require(rootPrefix + '/lib/cacheMultiManagement/TokenUserByUserIds'),
   responseHelper = require(rootPrefix + '/lib/formatter/response');
 
 /**
