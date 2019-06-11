@@ -10,7 +10,6 @@ const rootPrefix = '../../../..',
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   tokenUserConstants = require(rootPrefix + '/lib/globalConstant/tokenUser'),
   feedConstants = require(rootPrefix + '/lib/globalConstant/feed'),
-  TransactionOstEventBase = require(rootPrefix + '/app/services/ostEvents/transactions/Base'),
   externalEntityConstants = require(rootPrefix + '/lib/globalConstant/externalEntity'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger');
 
