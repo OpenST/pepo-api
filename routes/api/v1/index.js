@@ -32,6 +32,8 @@ const validateCookie = async function(req, res, next) {
     return authResponse.renderResponse(res, errorConfig);
   }
 
+  // TODO: Cookie time is not extended here
+
   req.decodedParams.current_user = authResponse.data.current_user;
 
   next();
