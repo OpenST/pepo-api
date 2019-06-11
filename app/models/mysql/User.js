@@ -228,9 +228,9 @@ class UserModel extends ModelBase {
       id: params.id
     }).clear();
 
-    const UserByIdCache = require(rootPrefix + '/lib/cacheManagement/UserById');
+    const UserCache = require(rootPrefix + '/lib/cacheManagement/single/User');
 
-    await new UserByIdCache({
+    await new UserCache({
       id: params.id
     }).clear();
   }
