@@ -7,7 +7,7 @@ const upQuery =
       `id` bigint(20) NOT NULL AUTO_INCREMENT, \n\
       `user_id` bigint(20) NOT NULL, \n\
       `feed_id` bigint(20) NOT NULL, \n\
-      `published_ts` int(11) NOT NULL, \n\
+      `published_ts` int(11) NULL, \n\
       `created_at` int(11) NOT NULL, \n\
       `updated_at` int(11) NOT NULL, \n\
       PRIMARY KEY (`id`), \n\

@@ -9,7 +9,7 @@ const upQuery =
       `primary_external_entity_id` bigint(20) NOT NULL, \n\
       `extra_data` TEXT COLLATE utf8_unicode_ci NOT NULL, \n\
       `status` tinyint(4) NOT NULL, \n\
-      `published_ts` int(11) NOT NULL, \n\
+      `published_ts` int(11) NULL, \n\
       `created_at` int(11) NOT NULL, \n\
       `updated_at` int(11) NOT NULL, \n\
       PRIMARY KEY (`id`), \n\
