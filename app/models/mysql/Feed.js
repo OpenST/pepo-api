@@ -3,6 +3,7 @@
  * @file - Model for Feeds table
  */
 const rootPrefix = '../../..',
+  responseHelper = require(rootPrefix + '/lib/formatter/response'),
   feedsConstants = require(rootPrefix + '/lib/globalConstant/feed'),
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
   coreConstants = require(rootPrefix + '/config/coreConstants');
@@ -91,6 +92,49 @@ class FeedModel extends ModelBase {
   static async flushCache(params) {
     let id = params.id;
     return null;
+  }
+
+  /***
+   * Fetch feeds for given ids
+   *
+   * @param Ids {Array} - Feed Ids
+   *
+   * @return {Object}
+   */
+  async fetchByIds(Ids) {
+    const oThis = this;
+    let response = {};
+
+    let dbRows = await oThis
+      .select('*')
+      .where(['id IN (?)', Ids])
+      .fire();
+
+    if (dbRows.length === 0) {
+      return responseHelper.successWithData(response);
+    }
+
+    for (let index = 0; index < dbRows.length; index++) {
+      response[dbRows[index].id] = oThis.formatDbData(dbRows[index]);
+    }
+
+    return responseHelper.successWithData(response);
+  }
+
+  /***
+   * Flush cache
+   *
+   * @param {object} params
+   * @param {Integer} params.Id
+   *
+   * @returns {Promise<*>}
+   */
+  static async flushCache(params) {
+    const FeedByIds = require(rootPrefix + '/lib/cacheManagement/multi/FeedByIds');
+
+    await new FeedByIds({
+      Ids: [params.Id]
+    }).clear();
   }
 }
 
