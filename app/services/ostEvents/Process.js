@@ -8,10 +8,10 @@
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
-  responseHelper = require(rootPrefix + '/lib/formatter/response'),
   OstEventModel = require(rootPrefix + '/app/models/mysql/OstEvent'),
   ostEventConstant = require(rootPrefix + '/lib/globalConstant/ostEvent'),
   OstEventProcessFactory = require(rootPrefix + '/app/services/ostEvents/Factory'),
+  responseHelper = require(rootPrefix + '/lib/formatter/response'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger');
 
 class OstEventProcess extends ServiceBase {

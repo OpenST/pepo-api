@@ -7,13 +7,14 @@
 
 const rootPrefix = '../../../..',
   TokenUserModel = require(rootPrefix + '/app/models/mysql/TokenUser'),
+  UserFeedModel = require(rootPrefix + '/app/models/mysql/UserFeed'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   tokenUserConstants = require(rootPrefix + '/lib/globalConstant/tokenUser'),
   feedConstants = require(rootPrefix + '/lib/globalConstant/feed'),
   externalEntityConstants = require(rootPrefix + '/lib/globalConstant/externalEntity'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger');
 
-class FailureTransactionOstEvent extends TransactionOstEventBase {
+class SuccessTransactionOstEvent extends TransactionOstEventBase {
   /**
    * @param {Object} params
    * @param {String} params.data: contains the webhook event data
@@ -55,7 +56,7 @@ class FailureTransactionOstEvent extends TransactionOstEventBase {
    * @private
    */
   _validTransactionStatus() {
-    return externalEntityConstants.failedOstTransactionStatus;
+    return externalEntityConstants.successOstTransactionStatus;
   }
 
   /**
@@ -67,7 +68,7 @@ class FailureTransactionOstEvent extends TransactionOstEventBase {
    * @private
    */
   _feedStatus() {
-    return feedConstants.failedStatus;
+    return feedConstants.publishedStatus;
   }
 
   /**
@@ -80,15 +81,9 @@ class FailureTransactionOstEvent extends TransactionOstEventBase {
    */
   _getPropertyValForTokenUser(propertyVal) {
     const oThis = this;
-    logger.log('Get PropertyVal for Transaction Failure Webhook');
+    logger.log('Get PropertyVal for Transaction Success Webhook');
 
-    propertyVal = new TokenUserModel().setBitwise('properties', propertyVal, tokenUserConstants.airdropFailedProperty);
-    propertyVal = new TokenUserModel().unSetBitwise(
-      'properties',
-      propertyVal,
-      tokenUserConstants.airdropStartedProperty
-    );
-    propertyVal = new TokenUserModel().unSetBitwise('properties', propertyVal, tokenUserConstants.airdropDoneProperty);
+    propertyVal = new TokenUserModel().setBitwise('properties', propertyVal, tokenUserConstants.airdropDoneProperty);
 
     return propertyVal;
   }
@@ -103,12 +98,20 @@ class FailureTransactionOstEvent extends TransactionOstEventBase {
    */
   async _processForUserTransaction() {
     const oThis = this;
-    logger.log('Process on User Transaction Fail of Transaction Failure Webhook');
+    logger.log('Process on User Transaction Fail of Transaction Success Webhook');
 
     await super._processForUserTransaction();
+
+    await new UserFeedModel()
+      .insert({
+        user_id: oThis.externalEntityObj.parsedExtraData.toUserIds[0],
+        feed_id: oThis.feedObj.id,
+        published_ts: oThis.published_ts()
+      })
+      .fire();
 
     return Promise.resolve(responseHelper.successWithData({}));
   }
 }
 
-module.exports = FailureTransactionOstEvent;
+module.exports = SuccessTransactionOstEvent;
