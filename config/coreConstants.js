@@ -87,14 +87,6 @@ class CoreConstants {
     return process.env.PA_SA_API_END_POINT;
   }
 
-  get PA_SA_API_KEY() {
-    return process.env.PA_SA_API_KEY;
-  }
-
-  get PA_SA_API_SECRET() {
-    return process.env.PA_SA_API_SECRET;
-  }
-
   get CACHE_SHA_KEY() {
     return process.env.PA_CACHE_DATA_SHA_KEY;
   }

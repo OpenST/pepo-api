@@ -95,7 +95,7 @@ const appendRequestDebugInfo = function(req, res, next) {
 // If the process is not a master
 
 // Set worker process title
-process.title = 'pepo API node worker';
+process.title = 'Pepo API node worker';
 
 // Create express application instance
 const app = express();
@@ -144,11 +144,12 @@ app.use(function(req, res, next) {
     req.method +
     "' at " +
     basicHelper.logDateFormat();
+
   logger.step(message);
 
   return responseHelper
     .error({
-      internal_error_identifier: 'a_5',
+      internal_error_identifier: 'a_1',
       api_error_identifier: 'resource_not_found',
       debug_options: {}
     })
@@ -157,11 +158,11 @@ app.use(function(req, res, next) {
 
 // Error handler
 app.use(function(err, req, res, next) {
-  logger.error('a_6', 'Something went wrong', err);
+  logger.error('a_2', 'Something went wrong', err);
 
   return responseHelper
     .error({
-      internal_error_identifier: 'a_6',
+      internal_error_identifier: 'a_2',
       api_error_identifier: 'something_went_wrong',
       debug_options: {}
     })

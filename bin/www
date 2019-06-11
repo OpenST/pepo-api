@@ -3,11 +3,12 @@
 /**
  * Module dependencies.
  */
+const http = require('http');
 
-var app = require('../app');
-var debug = require('debug')('pepo-api:server');
-var http = require('http');
-var logger = require('../lib/logger/customConsoleLogger');
+const rootPrefix = '..',
+  app = require(rootPrefix + '/app'),
+  logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
+  createErrorLogsEntry = require(rootPrefix + '/lib/errorLogs/createEntry');
 
 /**
  * Normalize a port into a number, string, or false.
@@ -63,28 +64,28 @@ function onError(error) {
     ? 'Pipe ' + port
     : 'Port ' + port;
 
-    logger.error('Error while starting server.',error.code);
+  logger.error('Error while starting server.',error.code);
   // handle specific listen errors with friendly messages
   switch (error.code) {
     case 'EACCES': {
       const errorObject = responseHelper.error({
-        internal_error_identifier: `elevated_privilege_required:a_7`,
+        internal_error_identifier: `elevated_privilege_required:b_w_1`,
         api_error_identifier: 'elevated_privilege_required',
         debug_options: { port: bind }
       });
       createErrorLogsEntry.perform(errorObject, ErrorLogsConstants.highSeverity);
-      logger.error('a_7', bind + ' requires elevated privileges');
+      logger.error('b_w_1', bind + ' requires elevated privileges');
       process.exit(1);
       break;
     }
     case 'EADDRINUSE': {
       const errorObject = responseHelper.error({
-        internal_error_identifier: `port_in_use:a_8`,
+        internal_error_identifier: `port_in_use:b_w_2`,
         api_error_identifier: 'port_in_use',
         debug_options: { port: bind }
       });
       createErrorLogsEntry.perform(errorObject, ErrorLogsConstants.highSeverity);
-      logger.error('a_8', bind + ' is already in use');
+      logger.error('b_w_2', bind + ' is already in use');
       process.exit(1);
       break;
     }
