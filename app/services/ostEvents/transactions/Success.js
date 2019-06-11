@@ -107,7 +107,7 @@ class SuccessTransactionOstEvent extends TransactionOstEventBase {
       .insert({
         user_id: oThis.externalEntityObj.parsedExtraData.toUserIds[0],
         feed_id: oThis.feedObj.id,
-        published_ts: oThis.published_ts()
+        published_ts: oThis._published_timestamp()
       })
       .fire();
 

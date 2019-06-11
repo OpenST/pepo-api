@@ -3,7 +3,6 @@
  * @file - Model for User Feeds table
  */
 const rootPrefix = '../../..',
-  feedsConstants = require(rootPrefix + '/lib/globalConstant/feed'),
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
   coreConstants = require(rootPrefix + '/config/coreConstants');
 

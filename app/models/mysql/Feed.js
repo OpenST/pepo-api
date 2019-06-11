@@ -32,7 +32,7 @@ class FeedModel extends ModelBase {
     return {
       id: dbRow.id,
       kind: feedsConstants.kinds[dbRow.kind],
-      entityKind: feedsConstants.entityKinds[dbRow.entity_kind],
+      primaryExternalEntityId: dbRow.primary_external_entity_id,
       extraData: dbRow.extra_data,
       status: feedsConstants.statuses[dbRow.status],
       publishedTs: dbRow.published_ts,

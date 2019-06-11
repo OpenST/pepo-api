@@ -187,18 +187,18 @@ class TransactionOstEventBase extends ServiceBase {
 
     oThis.feedObj = feedObjRes;
 
-    let userFeedObj = await new UserFeedModel().fetchByFeedId(oThis.externalEntityObj.id);
+    let userFeedObj = await new UserFeedModel().fetchByFeedId(oThis.feedObj.id);
 
     if (!userFeedObj.id) {
       throw `User Feed Object not found for externalEntityObj- ${oThis.externalEntityObj}`;
     }
 
-    let published_ts = oThis._published_timestamp;
+    let published_ts = oThis._published_timestamp();
 
     await new FeedModel()
       .update({
         published_ts: published_ts,
-        status: feedConstants.invertedStatuses[oThis._feedStatus]
+        status: feedConstants.invertedStatuses[oThis._feedStatus()]
       })
       .where(['id = ?', oThis.feedObj.id])
       .fire();
