@@ -132,7 +132,7 @@ class ModelBase extends MysqlQueryBuilders {
 
     let config = oThis.bitwiseConfig[bitwiseColumnName],
       invertedConfig = util.invert(config),
-      bitEnumIntegerValue = invertedConfig[bitEnumToSet];
+      bitEnumIntegerValue = invertedConfig[bitEnumToUnSet];
 
     if (!bitEnumIntegerValue) {
       throw new Error('Invalid enum passed');

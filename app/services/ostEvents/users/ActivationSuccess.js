@@ -252,7 +252,7 @@ class UserActivationSuccess extends ServiceBase {
 
     oThis.tokenData = tokenData.data;
 
-    const transferToAddresses = oThis.tokenUserObj.ostTokenHolderAddress;
+    const transferToAddress = oThis.tokenUserObj.ostTokenHolderAddress;
     let ruleAddresses = JSON.parse(oThis.tokenData.ruleAddresses);
 
     let executeParams = {
@@ -265,7 +265,7 @@ class UserActivationSuccess extends ServiceBase {
       },
       raw_calldata: JSON.stringify({
         method: 'directTransfers',
-        parameters: [transferToAddresses, tokenConstants.airdropAmount]
+        parameters: [transferToAddress, tokenConstants.airdropAmount]
       })
     };
 
@@ -338,7 +338,7 @@ class UserActivationSuccess extends ServiceBase {
     // Insert in database
     let insertResponse = await new ExternalEntityModel()
       .insert({
-        event_kind: externalEntityConstants.invertedEntityTypes[externalEntityConstants.ostTransactionEntityKind],
+        entity_kind: externalEntityConstants.invertedEntityKinds[externalEntityConstants.ostTransactionEntityKind],
         entity_id: oThis.airdropTxResp.transaction.id,
         extra_data: JSON.stringify(extraData)
       })

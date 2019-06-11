@@ -25,11 +25,6 @@ const v1ErrorConfig = {
     code: 'invalid',
     message: 'Invalid parameter Token Holder Address.'
   },
-  invalid_address: {
-    parameter: 'address',
-    code: 'invalid',
-    message: 'Invalid parameter address.'
-  },
   invalid_status: {
     parameter: 'status',
     code: 'invalid',

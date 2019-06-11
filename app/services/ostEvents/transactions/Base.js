@@ -34,6 +34,7 @@ class TransactionOstEventBase extends ServiceBase {
     oThis.ostTransaction = params.data.transaction;
 
     oThis.ostTransactionId = oThis.ostTransaction.id;
+    oThis.ostTransactionStatus = oThis.ostTransaction.status;
 
     oThis.externalEntityObj = null;
     oThis.feedObj = null;
@@ -59,12 +60,8 @@ class TransactionOstEventBase extends ServiceBase {
   async _validateAndSanitizeParams() {
     const oThis = this;
 
-    logger.log('Validate for Transaction Failure Webhook');
+    logger.log('Validate for Transaction Webhook');
     let paramErrors = [];
-
-    if (!CommonValidators.validateEthAddressArray([oThis.ostTransactionFromAddress, oThis.ostTransactionToAddress])) {
-      paramErrors.push('invalid_address');
-    }
 
     if (oThis.ostTransactionStatus !== oThis._validTransactionStatus()) {
       paramErrors.push('invalid_status');
@@ -73,7 +70,7 @@ class TransactionOstEventBase extends ServiceBase {
     if (paramErrors.length > 0) {
       return Promise.reject(
         responseHelper.paramValidationError({
-          internal_error_identifier: 's_oe_t_f_vas_1',
+          internal_error_identifier: 's_oe_t_b_vas_1',
           api_error_identifier: 'invalid_api_params',
           params_error_identifiers: paramErrors,
           debug_options: {}
@@ -95,9 +92,9 @@ class TransactionOstEventBase extends ServiceBase {
   async _fetchExternalEntityObj() {
     const oThis = this;
 
-    logger.log('Fetch external entity for Transaction Failure Webhook');
+    logger.log('Fetch external entity for Transaction Webhook');
 
-    let externalEntityGetRes = await new ExternalEntityModel.fetchByEntityKindAndEntityId(
+    let externalEntityGetRes = await new ExternalEntityModel().fetchByEntityKindAndEntityId(
       externalEntityConstants.ostTransactionEntityKind,
       oThis.ostTransactionId
     );
@@ -105,7 +102,7 @@ class TransactionOstEventBase extends ServiceBase {
     if (!externalEntityGetRes.id) {
       return Promise.reject(
         responseHelper.error({
-          internal_error_identifier: 's_oe_t_f_feeo_1',
+          internal_error_identifier: 's_oe_t_b_feeo_1',
           api_error_identifier: 'resource_not_found'
         })
       );
@@ -126,7 +123,7 @@ class TransactionOstEventBase extends ServiceBase {
    */
   async _updateExternalEntityObj() {
     const oThis = this;
-    logger.log('Update external entity for Transaction Failure Webhook');
+    logger.log('Update external entity for Transaction Webhook');
 
     let extraData = JSON.parse(oThis.externalEntityObj.extraData);
     extraData.ostTransactionStatus = oThis._validTransactionStatus();
@@ -153,14 +150,14 @@ class TransactionOstEventBase extends ServiceBase {
    */
   async _updateOtherEntity() {
     const oThis = this;
-    logger.log('Update other entity for Transaction Failure Webhook');
+    logger.log('Update other entity for Transaction Webhook');
 
     switch (oThis.externalEntityObj.parsedExtraData.kind) {
-      case [externalEntityConstants.extraData.airdropKind]: {
+      case externalEntityConstants.extraData.airdropKind: {
         await oThis._processForAirdropTransaction();
         break;
       }
-      case [externalEntityConstants.extraData.userTransactionKind]: {
+      case externalEntityConstants.extraData.userTransactionKind: {
         await oThis._processForUserTransaction();
         break;
       }
@@ -180,7 +177,7 @@ class TransactionOstEventBase extends ServiceBase {
    */
   async _processForUserTransaction() {
     const oThis = this;
-    logger.log('Process on User Transaction Fail of Transaction Failure Webhook');
+    logger.log('Process on User Transaction of Transaction Webhook');
 
     let feedObjRes = await new FeedModel().fetchByPrimaryExternalEntityId(oThis.externalEntityObj.id);
 
@@ -240,7 +237,7 @@ class TransactionOstEventBase extends ServiceBase {
     if (tokenUserObjRes.isFailure() || !tokenUserObjRes.data[toUserId].id) {
       return Promise.reject(
         responseHelper.error({
-          internal_error_identifier: 's_oe_t_f_mtuafp_1',
+          internal_error_identifier: 's_oe_t_b_mtuafp_1',
           api_error_identifier: 'resource_not_found'
         })
       );

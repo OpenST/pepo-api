@@ -100,7 +100,7 @@ class SuccessTransactionOstEvent extends TransactionOstEventBase {
    */
   async _processForUserTransaction() {
     const oThis = this;
-    logger.log('Process on User Transaction Fail of Transaction Success Webhook');
+    logger.log('Process on User Transaction of Transaction Success Webhook');
 
     await super._processForUserTransaction();
 
