@@ -86,7 +86,7 @@ const v1Signature = {
     optional: [
       {
         parameter: pagination.paginationIdentifierKey,
-        validatorMethods: ['validateDdbPaginationIdentifier']
+        validatorMethods: ['validateString']
       }
     ]
   }

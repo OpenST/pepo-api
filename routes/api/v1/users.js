@@ -48,18 +48,17 @@ router.get('/', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.userList;
 
   const dataFormatterFunc = async function(serviceResponse) {
-    let metaPayload = await new UserListMetaFormatter(serviceResponse.data).perform().data;
-
-    console.log('metaPayload-----', metaPayload);
+    if (serviceResponse.data.meta) {
+      serviceResponse.data.meta = await new UserListMetaFormatter(serviceResponse.data).perform().data;
+    }
 
     const wrapperFormatterRsp = await new WrapperFormatter({
       resultType: entityType.userList,
       entities: [entityType.userList],
-      serviceData: serviceResponse.data.serviceResponse
+      serviceData: serviceResponse.data
     }).perform();
 
     serviceResponse.data = wrapperFormatterRsp.data;
-    serviceResponse.meta = metaPayload;
   };
 
   Promise.resolve(routeHelper.perform(req, res, next, '/user/List', 'r_a_v1_u_3', null, dataFormatterFunc));

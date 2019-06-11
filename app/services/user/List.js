@@ -26,6 +26,9 @@ class UserList extends ServiceBase {
     oThis.paginationIdentifier = params[pagination.paginationIdentifierKey] || null;
 
     oThis.page = null;
+    oThis.responseMetaData = {
+      [pagination.nextPagePayloadKey]: {}
+    };
   }
 
   /**
@@ -39,7 +42,15 @@ class UserList extends ServiceBase {
 
     oThis._validateAndSanitizeParams();
 
-    return oThis._fetchFromCache();
+    let serviceResp = await oThis._fetchFromCache();
+
+    oThis._setMeta();
+
+    serviceResp['meta'] = oThis.responseMetaData;
+
+    console.log('serviceResp-----', JSON.stringify(serviceResp));
+
+    return responseHelper.successWithData(serviceResp);
   }
 
   /**
@@ -84,10 +95,23 @@ class UserList extends ServiceBase {
       return responseHelper.successWithData({});
     }
 
-    return responseHelper.successWithData({
-      serviceResponse: tokenUserByUserIdCacheRsp.data,
-      meta: 'next_page_payload'
-    });
+    return tokenUserByUserIdCacheRsp.data;
+  }
+
+  /**
+   * Set meta property.
+   *
+   * @private
+   */
+  _setMeta() {
+    const oThis = this;
+
+    oThis.responseMetaData[pagination.nextPagePayloadKey] = {
+      [pagination.paginationIdentifierKey]: {
+        page: oThis.page + 1,
+        limit: oThis.limit
+      }
+    };
   }
 
   /**

@@ -149,6 +149,7 @@ class UserModel extends ModelBase {
 
     let dbRows = await oThis
       .select('*')
+      .where(['status IS NOT ?', userConstants.statuses[userConstants.blockedStatus]])
       .limit(limit)
       .offset(offset)
       .order_by('first_name DESC')
