@@ -82,7 +82,7 @@ class TokenUserModel extends ModelBase {
    * @returns {Array}
    */
   safeFormattedColumnNames() {
-    return ['id', 'userId', 'ostUserId', 'ostTokenHolderAddress', 'properties', 'ostStatus', 'createdAt', 'createdAt'];
+    return ['id', 'userId', 'ostUserId', 'ostTokenHolderAddress', 'properties', 'ostStatus', 'createdAt', 'updatedAt'];
   }
 
   /***

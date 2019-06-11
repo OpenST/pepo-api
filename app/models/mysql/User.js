@@ -73,7 +73,7 @@ class UserModel extends ModelBase {
       'properties',
       'status',
       'createdAt',
-      'createdAt'
+      'updatedAt'
     ];
   }
 
@@ -107,6 +107,25 @@ class UserModel extends ModelBase {
    */
   async fetchById(id) {
     const oThis = this;
+
+    let res = fetchByIds([id]);
+
+    if (res[id]) {
+      return res[id];
+    } else {
+      return null;
+    }
+  }
+
+  /***
+   * Fetch secure user for id
+   *
+   * @param ids {Array} - ids
+   *
+   * @return {Object}
+   */
+  async fetchByIds(ids) {
+    const oThis = this;
     let dbRows = await oThis
       .select([
         'id',
@@ -119,13 +138,20 @@ class UserModel extends ModelBase {
         'created_at',
         'updated_at'
       ])
-      .where(['id = ?', id])
+      .where({ id: ids })
       .fire();
 
     if (dbRows.length === 0) {
       return {};
     }
-    return oThis.formatDbData(dbRows[0]);
+
+    let response = {};
+
+    for (let index = 0; index < dbRows.length; index++) {
+      response[dbRows[index].id] = oThis.formatDbData(dbRows[index]);
+    }
+
+    return response;
   }
 
   /***
@@ -158,18 +184,18 @@ class UserModel extends ModelBase {
    *
    * @returns {Promise<*>}
    */
-  async fetchUserIds(params) {
+  async fetchPaginatedUsers(params) {
     const oThis = this;
 
     const page = params.page || 1,
       limit = params.limit || 10,
       offset = (page - 1) * limit;
 
-    let response = {};
+    let response = [];
 
     let dbRows = await oThis
-      .select('*')
-      .where(['status IS NOT ?', userConstants.statuses[userConstants.blockedStatus]])
+      .select(['id'])
+      .where(['status != ?', userConstants.invertedStatuses[userConstants.blockedStatus]])
       .limit(limit)
       .offset(offset)
       .order_by('first_name DESC')
@@ -180,14 +206,10 @@ class UserModel extends ModelBase {
     }
 
     for (let index = 0; index < dbRows.length; index++) {
-      response[dbRows[index].id] = {
-        userName: dbRows[index].user_name,
-        firstName: dbRows[index].first_name,
-        lastName: dbRows[index].last_name
-      };
+      response.push(dbRows[index].id);
     }
 
-    return responseHelper.successWithData(response);
+    return response;
   }
 
   /**
