@@ -38,14 +38,14 @@ router.get('/', function(req, res, next) {
 
 router.get('/caching-test-1', function(req, res, next) {
   const performer = function() {
-    logger.log('\n\nreq.headers: ', req.headers);
+    console.log('\n\nreq.headers: ', req.headers);
 
     var dt = new Date();
     var currentMinute = dt.getMinutes();
     var headerDt = new Date(req.headers['if-modified-since']);
     var headerMinute = headerDt.getMinutes();
 
-    logger.log('currentMinute: ', currentMinute, ' --- headerMinute', headerMinute);
+    console.log('currentMinute: ', currentMinute, ' --- headerMinute', headerMinute);
 
     if (currentMinute === headerMinute) {
       res.status(304).send();

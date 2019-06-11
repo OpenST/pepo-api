@@ -7,6 +7,7 @@ const rootPrefix = '../../..',
   SecureUserCache = require(rootPrefix + '/lib/cacheManagement/single/SecureUser'),
   TokenUserDetailByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TokenUserByUserIds'),
   UserModel = require(rootPrefix + '/app/models/mysql/User'),
+  TokenUserModel = require(rootPrefix + '/app/models/mysql/TokenUser'),
   userConstants = require(rootPrefix + '/lib/globalConstant/user'),
   coreConstants = require(rootPrefix + '/config/coreConstants'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger');
@@ -197,8 +198,8 @@ class SignUp extends ServiceBase {
     });
 
     return responseHelper.successWithData({
-      user: oThis.secureUser,
-      tokenUser: oThis.tokenUser,
+      user: new UserModel().safeFormattedData(oThis.secureUser),
+      tokenUser: new TokenUserModel().safeFormattedData(oThis.tokenUser),
       userLoginCookieValue: userLoginCookieValue
     });
   }

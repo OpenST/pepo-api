@@ -215,8 +215,8 @@ class SignUp extends ServiceBase {
     //TODO - delete password from secureUser
 
     return responseHelper.successWithData({
-      user: secureUser,
-      tokenUser: tokenUser,
+      user: new UserModel().safeFormattedData(secureUser),
+      tokenUser: new TokenUserModel().safeFormattedData(tokenUser),
       userLoginCookieValue: userLoginCookieValue
     });
   }

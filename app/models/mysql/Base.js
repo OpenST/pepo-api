@@ -140,6 +140,35 @@ class ModelBase extends MysqlQueryBuilders {
 
     return bitwiseColumnExistingValue & ~bitEnumIntegerValue;
   }
+
+  /**
+   * List Of Formatted Column names that can be exposed by service
+   *
+   *
+   * @returns {Array}
+   */
+  safeFormattedColumnNames() {
+    return ['id', 'createdAt', 'updatedAt'];
+  }
+
+  /**
+   * List Of Formatted Column names that can be exposed by service
+   *
+   *
+   * @returns {Array}
+   */
+  safeFormattedData(formattedRow) {
+    const oThis = this,
+      safeData = {},
+      safeFormattedColumnNamesArr = oThis.safeFormattedColumnNames();
+
+    for (let i = 0; i < safeFormattedColumnNamesArr.length; i++) {
+      const colName = safeFormattedColumnNamesArr[i];
+      safeData[colName] = formattedRow[colName];
+    }
+
+    return safeData;
+  }
 }
 
 module.exports = ModelBase;

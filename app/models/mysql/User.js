@@ -57,6 +57,26 @@ class UserModel extends ModelBase {
     };
   }
 
+  /**
+   * List Of Formatted Column names that can be exposed by service
+   *
+   *
+   * @returns {Array}
+   */
+  safeFormattedColumnNames() {
+    return [
+      'id',
+      'userName',
+      'firstName',
+      'lastName',
+      'markInactiveTriggerCount',
+      'properties',
+      'status',
+      'createdAt',
+      'createdAt'
+    ];
+  }
+
   /***
    * Fetch user for id
    *
