@@ -112,6 +112,10 @@ class CoreConstants {
   get PA_SA_API_END_POINT() {
     return process.env.PA_SA_API_END_POINT;
   }
+
+  get GIPHY_API_KEY() {
+    return process.env.PA_GIPHY_API_KEY;
+  }
 }
 
 module.exports = new CoreConstants();

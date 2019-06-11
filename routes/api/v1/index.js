@@ -12,7 +12,8 @@ const rootPrefix = '../../..',
   apiVersions = require(rootPrefix + '/lib/globalConstant/apiVersions'),
   userConstant = require(rootPrefix + '/lib/globalConstant/user'),
   usersRoutes = require(rootPrefix + '/routes/api/v1/users'),
-  tokensRoutes = require(rootPrefix + '/routes/api/v1/tokens');
+  tokensRoutes = require(rootPrefix + '/routes/api/v1/tokens'),
+  gifsRoutes = require(rootPrefix + '/routes/api/v1/gifs');
 
 const errorConfig = basicHelper.fetchErrorConfig(apiVersions.v1);
 
@@ -39,5 +40,6 @@ const validateCookie = async function(req, res, next) {
 router.use('/auth', authRoutes);
 router.use('/users', validateCookie, usersRoutes);
 router.use('/tokens', validateCookie, tokensRoutes);
+router.use('/gifs', gifsRoutes);
 
 module.exports = router;

@@ -34,3 +34,6 @@ export PA_SA_API_END_POINT='https://api.stagingost.com/testnet/v2/'
 # cookie signing secret
 export PA_COOKIE_SECRET='aa5298d3a3fe181a3a52d085ee1525df5asa498337f8f3b76ca7df0a5de3211b'
 export PA_COOKIE_TOKEN_SECRET='aa5298d3a3fe181a3a52d085ee1525df5asa498337f8f3b76ca7df0a5de3211b'
+
+# Giphy Api Key
+export PA_GIPHY_API_KEY='PbWiMCsT9RxXtatEtKp6w1vapdqNxhFQ'
