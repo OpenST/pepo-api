@@ -36,5 +36,5 @@ memcached -p 11211 -d
 
 * Clear cache.
 ```bash
-node executables/flush/memcached.js
+node devops/exec/flushMemcache.js
 ```

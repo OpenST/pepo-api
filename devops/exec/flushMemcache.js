@@ -5,7 +5,7 @@
  *
  * Utility to flush shared memcached
  *
- * Usage: node ./executables/flush/memcached.js
+ * Usage: node ./devops/exec/flushMemcache.js
  *
  */
 
