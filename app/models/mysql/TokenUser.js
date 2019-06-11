@@ -167,7 +167,7 @@ class TokenUserModel extends ModelBase {
       userId: params.userId
     }).clear();
 
-    const UserByIdCache = require(rootPrefix + '/lib/cacheMultiManagement/TokenUserByUserIds');
+    const UserByIdCache = require(rootPrefix + '/lib/cacheManagement/multi/TokenUserByUserIds');
 
     await new UserByIdCache({
       userIds: [params.userId]
