@@ -75,6 +75,16 @@ class TokenUserModel extends ModelBase {
     };
   }
 
+  /**
+   * List Of Formatted Column names that can be exposed by service
+   *
+   *
+   * @returns {Array}
+   */
+  safeFormattedColumnNames() {
+    return ['id', 'userId', 'ostUserId', 'ostTokenHolderAddress', 'properties', 'ostStatus', 'createdAt', 'createdAt'];
+  }
+
   /***
    * Fetch token user for given token user ids
    *
