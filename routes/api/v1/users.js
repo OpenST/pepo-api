@@ -7,6 +7,7 @@ const rootPrefix = '../../..',
   sanitizer = require(rootPrefix + '/helpers/sanitizer'),
   WrapperFormatter = require(rootPrefix + '/lib/formatter/Wrapper'),
   UserListMetaFormatter = require(rootPrefix + '/lib/formatter/meta/UserList'),
+  CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   entityType = require(rootPrefix + '/lib/globalConstant/entityType');
 
 /* Register Device*/
@@ -45,20 +46,28 @@ router.get('/recovery-info', sanitizer.sanitizeDynamicUrlParams, function(req, r
 
 /* User List*/
 router.get('/', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
-  req.decodedParams.apiName = apiName.userList;
+  req.decodedParams.apiName = apiName.users;
 
   const dataFormatterFunc = async function(serviceResponse) {
-    if (serviceResponse.data.meta) {
-      serviceResponse.data.meta = await new UserListMetaFormatter(serviceResponse.data).perform().data;
-    }
-
     const wrapperFormatterRsp = await new WrapperFormatter({
-      resultType: entityType.userList,
-      entities: [entityType.userList],
-      serviceData: serviceResponse.data
+      resultType: entityType.users,
+      entities: [entityType.users],
+      serviceData: serviceResponse.data.users
     }).perform();
 
+    let meta = {};
+
+    if (serviceResponse.data.meta) {
+      meta = serviceResponse.data.meta;
+    }
+
     serviceResponse.data = wrapperFormatterRsp.data;
+
+    if (meta && CommonValidators.validateObject(meta)) {
+      serviceResponse.data.meta = await new UserListMetaFormatter({ meta: meta }).perform().data;
+    }
+
+    console.log('FINAL:::::serviceResponse-----', serviceResponse);
   };
 
   Promise.resolve(routeHelper.perform(req, res, next, '/user/List', 'r_a_v1_u_3', null, dataFormatterFunc));

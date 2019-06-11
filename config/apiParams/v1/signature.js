@@ -76,7 +76,7 @@ const v1Signature = {
     mandatory: [],
     optional: []
   },
-  [apiName.userList]: {
+  [apiName.users]: {
     mandatory: [
       {
         parameter: 'limit',

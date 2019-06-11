@@ -42,15 +42,16 @@ class UserList extends ServiceBase {
 
     oThis._validateAndSanitizeParams();
 
-    let serviceResp = await oThis._fetchFromCache();
+    let cacheUserData = await oThis._fetchFromCache();
 
     oThis._setMeta();
 
-    serviceResp['meta'] = oThis.responseMetaData;
+    let resp = {
+      users: cacheUserData,
+      meta: oThis.responseMetaData
+    };
 
-    console.log('serviceResp-----', JSON.stringify(serviceResp));
-
-    return responseHelper.successWithData(serviceResp);
+    return responseHelper.successWithData(resp);
   }
 
   /**
