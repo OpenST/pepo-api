@@ -10,17 +10,18 @@ const express = require('express'),
   customUrlParser = require('url');
 
 const responseHelper = require(rootPrefix + '/lib/formatter/response'),
-  apiRoutes = require(rootPrefix + '/routes/api/index'),
-  ostWebhookRoutes = require(rootPrefix + '/routes/ostWebhook/index'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
-  elbHealthCheckerRoute = require(rootPrefix + '/routes/internal/elb_health_checker'),
   customMiddleware = require(rootPrefix + '/helpers/customMiddleware'),
   apiVersions = require(rootPrefix + '/lib/globalConstant/apiVersions'),
   basicHelper = require(rootPrefix + '/helpers/basic'),
-  errorConfig = basicHelper.fetchErrorConfig(apiVersions.v1),
   sanitizer = require(rootPrefix + '/helpers/sanitizer');
 
-const requestSharedNameSpace = createNamespace('pepoApiNameSpace');
+const apiRoutes = require(rootPrefix + '/routes/api/index'),
+  ostWebhookRoutes = require(rootPrefix + '/routes/ostWebhook/index'),
+  elbHealthCheckerRoute = require(rootPrefix + '/routes/internal/elb_health_checker');
+
+const requestSharedNameSpace = createNamespace('pepoApiNameSpace'),
+  errorConfig = basicHelper.fetchErrorConfig(apiVersions.v1);
 
 morgan.token('id', function getId(req) {
   return req.id;
