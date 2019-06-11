@@ -81,13 +81,13 @@ const v1Signature = {
       {
         parameter: 'current_user',
         validatorMethods: ['validateObject']
-      },
-      {
-        parameter: 'limit',
-        validatorMethods: ['validateNonZeroInteger']
       }
     ],
     optional: [
+      {
+        parameter: 'limit',
+        validatorMethods: ['validateNonZeroInteger']
+      },
       {
         parameter: pagination.paginationIdentifierKey,
         validatorMethods: ['validateString']

@@ -6,21 +6,22 @@ const express = require('express'),
   morgan = require('morgan'),
   bodyParser = require('body-parser'),
   helmet = require('helmet'),
-  cookieParser = require('cookie-parser'),
+  //cookieParser = require('cookie-parser'),
   customUrlParser = require('url');
 
 const responseHelper = require(rootPrefix + '/lib/formatter/response'),
-  apiRoutes = require(rootPrefix + '/routes/api/index'),
-  ostWebhookRoutes = require(rootPrefix + '/routes/ostWebhook/index'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
-  elbHealthCheckerRoute = require(rootPrefix + '/routes/internal/elb_health_checker'),
   customMiddleware = require(rootPrefix + '/helpers/customMiddleware'),
   apiVersions = require(rootPrefix + '/lib/globalConstant/apiVersions'),
   basicHelper = require(rootPrefix + '/helpers/basic'),
-  errorConfig = basicHelper.fetchErrorConfig(apiVersions.v1),
   sanitizer = require(rootPrefix + '/helpers/sanitizer');
 
-const requestSharedNameSpace = createNamespace('pepoApiNameSpace');
+const apiRoutes = require(rootPrefix + '/routes/api/index'),
+  ostWebhookRoutes = require(rootPrefix + '/routes/ostWebhook/index'),
+  elbHealthCheckerRoute = require(rootPrefix + '/routes/internal/elb_health_checker');
+
+const requestSharedNameSpace = createNamespace('pepoApiNameSpace'),
+  errorConfig = basicHelper.fetchErrorConfig(apiVersions.v1);
 
 morgan.token('id', function getId(req) {
   return req.id;
@@ -95,7 +96,7 @@ const appendRequestDebugInfo = function(req, res, next) {
 // If the process is not a master
 
 // Set worker process title
-process.title = 'pepo API node worker';
+process.title = 'Pepo API node worker';
 
 // Create express application instance
 const app = express();
@@ -119,13 +120,20 @@ app.use(bodyParser.json());
 // Parsing the URL-encoded data with the qs library (extended: true)
 app.use(bodyParser.urlencoded({ extended: true }));
 
+// Static file location
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/api', startRequestLogLine, appendRequestDebugInfo, sanitizer.sanitizeBodyAndQuery, assignParams, apiRoutes);
-
-// Following are the routes
+// Health checker
 app.use('/health-checker', elbHealthCheckerRoute);
 
+/**
+ * NOTE: API routes where first sanitize and then assign params
+ */
+app.use('/api', startRequestLogLine, appendRequestDebugInfo, sanitizer.sanitizeBodyAndQuery, assignParams, apiRoutes);
+
+/**
+ * NOTE: OST webhooks where first assign params, validate signature and then sanitize the params
+ */
 app.use('/ost-webhook', startRequestLogLine, appendRequestDebugInfo, ostWebhookRoutes);
 
 // Catch 404 and forward to error handler
@@ -137,11 +145,12 @@ app.use(function(req, res, next) {
     req.method +
     "' at " +
     basicHelper.logDateFormat();
+
   logger.step(message);
 
   return responseHelper
     .error({
-      internal_error_identifier: 'a_5',
+      internal_error_identifier: 'a_1',
       api_error_identifier: 'resource_not_found',
       debug_options: {}
     })
@@ -150,11 +159,11 @@ app.use(function(req, res, next) {
 
 // Error handler
 app.use(function(err, req, res, next) {
-  logger.error('a_6', 'Something went wrong', err);
+  logger.error('a_2', 'Something went wrong', err);
 
   return responseHelper
     .error({
-      internal_error_identifier: 'a_6',
+      internal_error_identifier: 'a_2',
       api_error_identifier: 'something_went_wrong',
       debug_options: {}
     })
