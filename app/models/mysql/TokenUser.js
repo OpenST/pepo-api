@@ -142,6 +142,32 @@ class TokenUserModel extends ModelBase {
   }
 
   /***
+   * Fetch token user for ost user ids
+   *
+   * @param ostUserIds {Array} - Ost User Ids
+   *
+   * @return {Object}
+   */
+  async fetchByOstUserIds(ostUserIds) {
+    const oThis = this;
+    let response = {},
+      dbRows = await oThis
+        .select('*')
+        .where(['ost_user_id IN (?)', ostUserIds])
+        .fire();
+
+    if (dbRows.length === 0) {
+      return responseHelper.successWithData(response);
+    }
+
+    for (let index = 0; index < dbRows.length; index++) {
+      response[dbRows[index].ost_user_id] = oThis.formatDbData(dbRows[index]);
+    }
+
+    return responseHelper.successWithData(response);
+  }
+
+  /***
    * Fetch secured data of user for id
    *
    * @param userId {Integer} - Token User Id
