@@ -2,12 +2,12 @@ const express = require('express'),
   router = express.Router();
 
 const rootPrefix = '../../..',
-  routeHelper = require(rootPrefix + '/routes/helper'),
-  apiName = require(rootPrefix + '/lib/globalConstant/apiName'),
-  sanitizer = require(rootPrefix + '/helpers/sanitizer'),
   WrapperFormatter = require(rootPrefix + '/lib/formatter/Wrapper'),
   UserListMetaFormatter = require(rootPrefix + '/lib/formatter/meta/UserList'),
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
+  routeHelper = require(rootPrefix + '/routes/helper'),
+  apiName = require(rootPrefix + '/lib/globalConstant/apiName'),
+  sanitizer = require(rootPrefix + '/helpers/sanitizer'),
   entityType = require(rootPrefix + '/lib/globalConstant/entityType');
 
 /* Register Device*/
