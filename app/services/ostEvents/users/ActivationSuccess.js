@@ -8,7 +8,7 @@
 const rootPrefix = '../../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
-  TokenUserByOstUserIdCache = require(rootPrefix + '/lib/cacheManagement/single/TokenUserByOstUserId'),
+  TokenUserByOstUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TokenUserByOstUserIds'),
   TokenUserDetailByUserIdCache = require(rootPrefix + '/lib/cacheManagement/multi/TokenUserByUserIds'),
   TokenUserModel = require(rootPrefix + '/app/models/mysql/TokenUser'),
   ExternalEntityModel = require(rootPrefix + '/app/models/mysql/ExternalEntity'),
@@ -122,9 +122,9 @@ class UserActivationSuccess extends ServiceBase {
 
     logger.log('Fetch Token User for user activation success');
 
-    let tokenUserObjRes = await new TokenUserByOstUserIdCache({ ostUserId: oThis.ostUserid }).fetch();
+    let tokenUserObjRes = await new TokenUserByOstUserIdsCache({ ostUserIds: [oThis.ostUserid] }).fetch();
 
-    if (tokenUserObjRes.isFailure() || !tokenUserObjRes.data.id) {
+    if (tokenUserObjRes.isFailure()) {
       return Promise.reject(
         responseHelper.error({
           internal_error_identifier: 's_oe_u_as_ftu_1',
@@ -133,7 +133,7 @@ class UserActivationSuccess extends ServiceBase {
       );
     }
 
-    oThis.userId = tokenUserObjRes.data.userId;
+    oThis.userId = tokenUserObjRes.data[oThis.ostUserid].userId;
 
     tokenUserObjRes = await new TokenUserDetailByUserIdCache({ userIds: [oThis.userId] }).fetch();
     if (tokenUserObjRes.isFailure() || !tokenUserObjRes.data[oThis.userId].id) {
