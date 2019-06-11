@@ -50,7 +50,7 @@ class UserList extends ServiceBase {
     oThis._setMeta();
 
     let finalResponse = {
-      users: cacheUserData,
+      users: Object.values(cacheUserData),
       meta: oThis.responseMetaData
     };
 
