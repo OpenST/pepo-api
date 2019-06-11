@@ -11,7 +11,7 @@ const rootPrefix = '../../..',
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   localCipher = require(rootPrefix + '/lib/encryptors/localCipher'),
   UserByUserNameCache = require(rootPrefix + '/lib/cacheManagement/UserByUserName'),
-  SecureUserByIDCache = require(rootPrefix + '/lib/cacheManagement/SecureUserById'),
+  SecureUserCache = require(rootPrefix + '/lib/cacheManagement/single/SecureUser'),
   TokenUserDetailByUserIdsCache = require(rootPrefix + '/lib/cacheMultiManagement/TokenUserByUserIds'),
   UserModel = require(rootPrefix + '/app/models/mysql/User'),
   userConstants = require(rootPrefix + '/lib/globalConstant/user'),
@@ -97,7 +97,7 @@ class SignUp extends ServiceBase {
     const oThis = this;
     logger.log('fetch User');
 
-    let secureUserRes = await new SecureUserByIDCache({ id: oThis.userId }).fetch();
+    let secureUserRes = await new SecureUserCache({ id: oThis.userId }).fetch();
     oThis.secureUser = secureUserRes.data;
 
     if (oThis.secureUser.status !== userConstants.activeStatus) {

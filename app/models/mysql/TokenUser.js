@@ -161,9 +161,9 @@ class TokenUserModel extends ModelBase {
    * @returns {Promise<*>}
    */
   static async flushCache(params) {
-    const SecureUserByIDCache = require(rootPrefix + '/lib/cacheManagement/SecureTokenUserByUserID');
+    const SecureTokenUserByUserIdCache = require(rootPrefix + '/lib/cacheManagement/single/SecureTokenUserByUserId');
 
-    await new SecureUserByIDCache({
+    await new SecureTokenUserByUserIdCache({
       userId: params.userId
     }).clear();
 

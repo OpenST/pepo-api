@@ -12,13 +12,13 @@ const rootPrefix = '../../../..',
   TokenUserDetailByUserIdCache = require(rootPrefix + '/lib/cacheMultiManagement/TokenUserByUserIds'),
   TokenUserModel = require(rootPrefix + '/app/models/mysql/TokenUser'),
   ExternalEntityModel = require(rootPrefix + '/app/models/mysql/ExternalEntity'),
-  SecureTokenData = require(rootPrefix + '/lib/cacheManagement/SecureTokenData'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   tokenUserConstants = require(rootPrefix + '/lib/globalConstant/tokenUser'),
   tokenConstants = require(rootPrefix + '/lib/globalConstant/token'),
   externalEntityConstants = require(rootPrefix + '/lib/globalConstant/externalEntity'),
   ostPlatformSdk = require(rootPrefix + '/lib/ostPlatform/jsSdkWrapper'),
-  logger = require(rootPrefix + '/lib/logger/customConsoleLogger');
+  logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
+  SecureTokenCache = require(rootPrefix + '/lib/cacheManagement/single/SecureToken');
 
 class UserActivationSuccess extends ServiceBase {
   /**
@@ -239,7 +239,7 @@ class UserActivationSuccess extends ServiceBase {
     const oThis = this;
     logger.log('Start executeTransaction on user activation success');
 
-    let tokenData = await new SecureTokenData().fetch();
+    let tokenData = await new SecureTokenCache().fetch();
     if (tokenData.isFailure()) {
       logger.error('Error while fetching token data');
       return Promise.reject(
