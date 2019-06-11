@@ -6,6 +6,7 @@
  */
 
 const rootPrefix = '../../../..',
+  TransactionOstEventBase = require(rootPrefix + '/app/services/ostEvents/transactions/Base'),
   TokenUserModel = require(rootPrefix + '/app/models/mysql/TokenUser'),
   UserFeedModel = require(rootPrefix + '/app/models/mysql/UserFeed'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),

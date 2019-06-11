@@ -8,7 +8,7 @@
 const rootPrefix = '../../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
-  TokenUserDetailByUserIdCache = require(rootPrefix + '/lib/cacheMultiManagement/TokenUserDetailByUserIds'),
+  TokenUserByUserIdCache = require(rootPrefix + '/lib/cacheManagement/multi/TokenUserByUserIds'),
   TokenUserModel = require(rootPrefix + '/app/models/mysql/TokenUser'),
   FeedModel = require(rootPrefix + '/app/models/mysql/Feed'),
   UserFeedModel = require(rootPrefix + '/app/models/mysql/UserFeed'),
@@ -233,7 +233,7 @@ class TransactionOstEventBase extends ServiceBase {
 
     let toUserId = oThis.externalEntityObj.parsedExtraData.toUserIds[0];
 
-    let tokenUserObjRes = await new TokenUserDetailByUserIdCache({
+    let tokenUserObjRes = await new TokenUserByUserIdCache({
       userIds: [toUserId]
     }).fetch();
 
