@@ -6,6 +6,7 @@ const rootPrefix = '../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
   userConstants = require(rootPrefix + '/lib/globalConstant/user'),
   util = require(rootPrefix + '/lib/util'),
+  responseHelper = require(rootPrefix + '/lib/formatter/response'),
   coreConstants = require(rootPrefix + '/config/coreConstants');
 
 const dbName = 'pepo_api_' + coreConstants.environment;
@@ -59,7 +60,7 @@ class UserModel extends ModelBase {
   /***
    * Fetch user for id
    *
-   * @param userName {Integer} - User Id
+   * @param userName {String} - user name
    *
    * @return {Object}
    */
@@ -128,6 +129,48 @@ class UserModel extends ModelBase {
   }
 
   /**
+   * Fetch user ids
+   *
+   * @param {object} params
+   * @param {Array} params.userId
+   * @param {number} [params.page]
+   * @param {number} [params.limit]
+   *
+   * @returns {Promise<*>}
+   */
+  async fetchUserIds(params) {
+    const oThis = this;
+
+    const page = params.page || 1,
+      limit = params.limit || 10,
+      offset = (page - 1) * limit;
+
+    let response = {};
+
+    let dbRows = await oThis
+      .select('*')
+      .where(['status IS NOT ?', userConstants.statuses[userConstants.blockedStatus]])
+      .limit(limit)
+      .offset(offset)
+      .order_by('first_name DESC')
+      .fire();
+
+    if (dbRows.length === 0) {
+      return {};
+    }
+
+    for (let index = 0; index < dbRows.length; index++) {
+      response[dbRows[index].id] = {
+        userName: dbRows[index].user_name,
+        firstName: dbRows[index].first_name,
+        lastName: dbRows[index].last_name
+      };
+    }
+
+    return responseHelper.successWithData(response);
+  }
+
+  /**
    * Get Cookie Value For
    *
    * @param userObj
@@ -177,15 +220,15 @@ class UserModel extends ModelBase {
    * @returns {Promise<*>}
    */
   static async flushCache(params) {
-    const SecureUserByIDCache = require(rootPrefix + '/lib/cacheManagement/SecureUserById');
+    const SecureUserCache = require(rootPrefix + '/lib/cacheManagement/single/SecureUser');
 
-    await new SecureUserByIDCache({
+    await new SecureUserCache({
       id: params.id
     }).clear();
 
-    const UserByIdCache = require(rootPrefix + '/lib/cacheManagement/UserById');
+    const UserCache = require(rootPrefix + '/lib/cacheManagement/single/User');
 
-    await new UserByIdCache({
+    await new UserCache({
       id: params.id
     }).clear();
   }

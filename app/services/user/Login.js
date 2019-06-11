@@ -1,18 +1,11 @@
-'use strict';
-/**
- * This service helps in Creating User in our System
- *
- * Note:-
- */
-
 const rootPrefix = '../../..',
   util = require(rootPrefix + '/lib/util'),
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   localCipher = require(rootPrefix + '/lib/encryptors/localCipher'),
-  UserByUserNameCache = require(rootPrefix + '/lib/cacheManagement/UserByUserName'),
-  SecureUserByIDCache = require(rootPrefix + '/lib/cacheManagement/SecureUserById'),
-  TokenUserDetailByUserIdsCache = require(rootPrefix + '/lib/cacheMultiManagement/TokenUserDetailByUserIds'),
+  UserByUserNameCache = require(rootPrefix + '/lib/cacheManagement/single/UserByUsername'),
+  SecureUserCache = require(rootPrefix + '/lib/cacheManagement/single/SecureUser'),
+  TokenUserDetailByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TokenUserByUserIds'),
   UserModel = require(rootPrefix + '/app/models/mysql/User'),
   userConstants = require(rootPrefix + '/lib/globalConstant/user'),
   coreConstants = require(rootPrefix + '/config/coreConstants'),
@@ -97,7 +90,7 @@ class SignUp extends ServiceBase {
     const oThis = this;
     logger.log('fetch User');
 
-    let secureUserRes = await new SecureUserByIDCache({ id: oThis.userId }).fetch();
+    let secureUserRes = await new SecureUserCache({ id: oThis.userId }).fetch();
     oThis.secureUser = secureUserRes.data;
 
     if (oThis.secureUser.status !== userConstants.activeStatus) {

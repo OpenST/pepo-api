@@ -8,14 +8,17 @@
 const rootPrefix = '../../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
-  responseHelper = require(rootPrefix + '/lib/formatter/response'),
-  TokenUserByOstUserIdCache = require(rootPrefix + '/lib/cacheManagement/TokenUserByOstUserId'),
-  TokenUserDetailByUserIdCache = require(rootPrefix + '/lib/cacheMultiManagement/TokenUserDetailByUserIds'),
+  TokenUserByOstUserIdCache = require(rootPrefix + '/lib/cacheManagement/single/TokenUserByOstUserId'),
+  TokenUserDetailByUserIdCache = require(rootPrefix + '/lib/cacheManagement/multi/TokenUserByUserIds'),
   TokenUserModel = require(rootPrefix + '/app/models/mysql/TokenUser'),
+  ExternalEntityModel = require(rootPrefix + '/app/models/mysql/ExternalEntity'),
+  responseHelper = require(rootPrefix + '/lib/formatter/response'),
   tokenUserConstants = require(rootPrefix + '/lib/globalConstant/tokenUser'),
+  tokenConstants = require(rootPrefix + '/lib/globalConstant/token'),
+  externalEntityConstants = require(rootPrefix + '/lib/globalConstant/externalEntity'),
   ostPlatformSdk = require(rootPrefix + '/lib/ostPlatform/jsSdkWrapper'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
-  SecureTokenData = require(rootPrefix + '/lib/cacheManagement/SecureTokenData');
+  SecureTokenCache = require(rootPrefix + '/lib/cacheManagement/single/SecureToken');
 
 class UserActivationSuccess extends ServiceBase {
   /**
@@ -39,7 +42,8 @@ class UserActivationSuccess extends ServiceBase {
     oThis.tokenUserObj = null;
     oThis.tokenData = null;
     oThis.userId = null;
-    oThis.userAlreadyActive = false;
+    oThis.airdropTxResp = null;
+    oThis.airdropNotNeeded = false;
   }
 
   /**
@@ -57,6 +61,14 @@ class UserActivationSuccess extends ServiceBase {
     await oThis._updateTokenUser();
 
     await oThis._startAirdrop();
+
+    if (oThis.airdropNotNeeded) {
+      return Promise.resolve(responseHelper.successWithData({}));
+    }
+
+    await oThis._markTokenUserAirdropStartedProperty();
+
+    await oThis._createExternalEntity();
 
     return Promise.resolve(responseHelper.successWithData({}));
   }
@@ -164,7 +176,6 @@ class UserActivationSuccess extends ServiceBase {
     logger.log('Update Token User for user activation success');
 
     if (oThis.tokenUserObj.ostStatus === tokenUserConstants.activatedOstStatus) {
-      oThis.userAlreadyActive = true;
       return Promise.resolve(responseHelper.successWithData({}));
     }
 
@@ -207,23 +218,11 @@ class UserActivationSuccess extends ServiceBase {
     let propertyArr = new TokenUserModel().getBitwiseArray('properties', oThis.tokenUserObj.properties);
 
     if (propertyArr.indexOf(tokenUserConstants.airdropStartedProperty) > -1) {
+      oThis.airdropNotNeeded = true;
       return Promise.resolve(responseHelper.successWithData({}));
     }
 
     await oThis._executeTransaction();
-
-    let propertyVal = oThis.tokenUserObj.properties;
-
-    propertyVal = new TokenUserModel().setBitwise('properties', propertyVal, tokenUserConstants.airdropStartedProperty);
-
-    await new TokenUserModel()
-      .update({
-        properties: propertyVal
-      })
-      .where(['id = ?', oThis.tokenUserObj.id])
-      .fire();
-
-    await TokenUserModel.flushCache({ userId: oThis.tokenUserObj.userId });
 
     return Promise.resolve(responseHelper.successWithData({}));
   }
@@ -240,7 +239,7 @@ class UserActivationSuccess extends ServiceBase {
     const oThis = this;
     logger.log('Start executeTransaction on user activation success');
 
-    let tokenData = await new SecureTokenData().fetch();
+    let tokenData = await new SecureTokenCache().fetch();
     if (tokenData.isFailure()) {
       logger.error('Error while fetching token data');
       return Promise.reject(
@@ -253,9 +252,7 @@ class UserActivationSuccess extends ServiceBase {
 
     oThis.tokenData = tokenData.data;
 
-    const transferToAddresses = oThis.tokenData.ostTokenHolderAddress,
-      transferAmount = '10000000000000000000'; //10 BT
-
+    const transferToAddress = oThis.tokenUserObj.ostTokenHolderAddress;
     let ruleAddresses = JSON.parse(oThis.tokenData.ruleAddresses);
 
     let executeParams = {
@@ -268,18 +265,88 @@ class UserActivationSuccess extends ServiceBase {
       },
       raw_calldata: JSON.stringify({
         method: 'directTransfers',
-        parameters: [transferToAddresses, transferAmount]
+        parameters: [transferToAddress, tokenConstants.airdropAmount]
       })
     };
 
+    let startAirdropResponse = null;
     try {
-      const startAirdropResponse = await ostPlatformSdk.executeTransaction(executeParams);
-      if (!startAirdropResponse.isSuccess()) {
-        return Promise.reject(startAirdropResponse);
-      }
+      startAirdropResponse = await ostPlatformSdk.executeTransaction(executeParams);
     } catch (err) {
       logger.error('Error in Activation airdrop OST Wrapper api call::->', err);
       return Promise.reject(err);
+    }
+
+    if (!startAirdropResponse.isSuccess()) {
+      return Promise.reject(startAirdropResponse);
+    }
+
+    oThis.airdropTxResp = startAirdropResponse.data;
+
+    return Promise.resolve(responseHelper.successWithData({}));
+  }
+
+  /**
+   * Mark Airdrop Started Property for Token USer
+   *
+   *
+   * @return {Promise<void>}
+   *
+   * @private
+   */
+  async _markTokenUserAirdropStartedProperty() {
+    const oThis = this;
+    logger.log('Mark Token User Airdrop Done Property');
+
+    let propertyVal = oThis.tokenUserObj.properties;
+    propertyVal = new TokenUserModel().setBitwise('properties', propertyVal, tokenUserConstants.airdropStartedProperty);
+
+    if (propertyVal !== oThis.tokenUserObj.properties) {
+      await new TokenUserModel()
+        .update({
+          properties: propertyVal
+        })
+        .where(['id = ?', oThis.tokenUserObj.id])
+        .fire();
+
+      await TokenUserModel.flushCache({ userId: oThis.tokenUserObj.userId });
+    }
+
+    return Promise.resolve(responseHelper.successWithData({}));
+  }
+
+  /**
+   * Create External Entitites record for airdrop
+   *
+   *
+   * @return {Promise<void>}
+   *
+   * @private
+   */
+  async _createExternalEntity() {
+    const oThis = this;
+    logger.log('Create External Entitites record for airdrop started');
+
+    let extraData = {
+      kind: externalEntityConstants.extraData.airdropKind,
+      fromUserId: 0,
+      toUserIds: [oThis.tokenUserObj.userId],
+      amounts: [tokenConstants.airdropAmount],
+      ostTransactionStatus: oThis.airdropTxResp.transaction.status.toUpperCase()
+    };
+
+    // Insert in database
+    let insertResponse = await new ExternalEntityModel()
+      .insert({
+        entity_kind: externalEntityConstants.invertedEntityKinds[externalEntityConstants.ostTransactionEntityKind],
+        entity_id: oThis.airdropTxResp.transaction.id,
+        extra_data: JSON.stringify(extraData)
+      })
+      .fire();
+
+    if (!insertResponse) {
+      logger.error('Error while inserting data in external_entities table');
+      return Promise.reject(insertResponse);
     }
 
     return Promise.resolve(responseHelper.successWithData({}));

@@ -3,9 +3,9 @@ const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   localCipher = require(rootPrefix + '/lib/encryptors/localCipher'),
-  UserByUserNameCache = require(rootPrefix + '/lib/cacheManagement/UserByUserName'),
-  SecureUserByIDCache = require(rootPrefix + '/lib/cacheManagement/SecureUserById'),
-  TokenUserDetailByUserIdsCache = require(rootPrefix + '/lib/cacheMultiManagement/TokenUserDetailByUserIds'),
+  UserByUserNameCache = require(rootPrefix + '/lib/cacheManagement/single/UserByUsername'),
+  SecureUserCache = require(rootPrefix + '/lib/cacheManagement/single/SecureUser'),
+  TokenUserDetailByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TokenUserByUserIds'),
   KmsWrapper = require(rootPrefix + '/lib/authentication/KmsWrapper'),
   ostPlatformSdk = require(rootPrefix + '/lib/ostPlatform/jsSdkWrapper'),
   kmsGlobalConstant = require(rootPrefix + '/lib/globalConstant/kms'),
@@ -202,7 +202,7 @@ class SignUp extends ServiceBase {
   async _serviceResponse() {
     const oThis = this;
 
-    let secureUserRes = await new SecureUserByIDCache({ id: oThis.userId }).fetch();
+    let secureUserRes = await new SecureUserCache({ id: oThis.userId }).fetch();
     let tokenUserRes = await new TokenUserDetailByUserIdsCache({ userIds: [oThis.userId] }).fetch();
 
     let secureUser = secureUserRes.data,

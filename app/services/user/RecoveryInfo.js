@@ -9,7 +9,7 @@ const rootPrefix = '../../..',
   coreConstants = require(rootPrefix + '/config/coreConstants'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   localCipher = require(rootPrefix + '/lib/encryptors/localCipher'),
-  SecureTokenUserByUserId = require(rootPrefix + '/lib/cacheManagement/SecureTokenUserByUserId'),
+  SecureTokenUserByUserIdCache = require(rootPrefix + '/lib/cacheManagement/single/SecureTokenUserByUserId'),
   responseHelper = require(rootPrefix + '/lib/formatter/response');
 
 class RecoveryInfo extends ServiceBase {
@@ -47,14 +47,14 @@ class RecoveryInfo extends ServiceBase {
   async _fetchScryptSaltFromTokenUserCache() {
     const oThis = this;
 
-    let secureTokenUserByUserIdRsp = await new SecureTokenUserByUserId({ userId: oThis.userId }).fetch();
+    let secureTokenUserRsp = await new SecureTokenUserByUserIdCache({ userId: oThis.userId }).fetch();
 
-    if (secureTokenUserByUserIdRsp.isFailure()) {
+    if (secureTokenUserRsp.isFailure()) {
       logger.error('Error while fetching data from token user cache');
-      return Promise.reject(secureTokenUserByUserIdRsp);
+      return Promise.reject(secureTokenUserRsp);
     }
 
-    return secureTokenUserByUserIdRsp.data;
+    return secureTokenUserRsp.data;
   }
 
   /**

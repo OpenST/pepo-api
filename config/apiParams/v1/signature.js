@@ -1,6 +1,7 @@
 'use strict';
 
 const rootPrefix = '../../..',
+  pagination = require(rootPrefix + '/lib/globalConstant/pagination'),
   apiName = require(rootPrefix + '/lib/globalConstant/apiName');
 const v1Signature = {
   [apiName.signUp]: {
@@ -74,6 +75,24 @@ const v1Signature = {
   [apiName.token]: {
     mandatory: [],
     optional: []
+  },
+  [apiName.users]: {
+    mandatory: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateObject']
+      },
+      {
+        parameter: 'limit',
+        validatorMethods: ['validateNonZeroInteger']
+      }
+    ],
+    optional: [
+      {
+        parameter: pagination.paginationIdentifierKey,
+        validatorMethods: ['validateString']
+      }
+    ]
   }
 };
 

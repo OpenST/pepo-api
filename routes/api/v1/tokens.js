@@ -10,7 +10,6 @@ const rootPrefix = '../../..',
 
 /* Tokens*/
 router.get('/', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
-  console.log('apiName.token--', apiName.token);
   req.decodedParams.apiName = apiName.token;
 
   const dataFormatterFunc = async function(serviceResponse) {

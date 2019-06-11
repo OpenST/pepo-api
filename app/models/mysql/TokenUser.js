@@ -36,6 +36,28 @@ class TokenUserModel extends ModelBase {
   }
 
   /**
+   * Format Secure Db data
+   *
+   * @param dbRow
+   * @return {object}
+   */
+  formatSecureDbData(dbRow) {
+    return {
+      id: dbRow.id,
+      userId: dbRow.user_id,
+      ostUserId: dbRow.ost_user_id,
+      ostTokenHolderAddress: dbRow.ost_token_holder_address,
+      scryptSalt: dbRow.scrypt_salt,
+      encryptionSalt: dbRow.encryption_salt,
+      properties: dbRow.properties,
+      ostStatus: tokenUserConstants.ostStatuses[dbRow.ost_status],
+      createdAt: dbRow.created_at,
+      updatedAt: dbRow.updated_at
+    };
+  }
+
+  /**
+   * Format Db data
    *
    * @param dbRow
    * @return {object}
@@ -46,10 +68,8 @@ class TokenUserModel extends ModelBase {
       userId: dbRow.user_id,
       ostUserId: dbRow.ost_user_id,
       ostTokenHolderAddress: dbRow.ost_token_holder_address,
-      scryptSalt: dbRow.scrypt_salt,
-      encryptionSalt: dbRow.encryption_salt,
       properties: dbRow.properties,
-      ostStatus: dbRow.ost_status,
+      ostStatus: tokenUserConstants.ostStatuses[dbRow.ost_status],
       createdAt: dbRow.created_at,
       updatedAt: dbRow.updated_at
     };
@@ -129,7 +149,7 @@ class TokenUserModel extends ModelBase {
       return {};
     }
 
-    return oThis.formatDbData(dbRows[0]);
+    return oThis.formatSecureDbData(dbRows[0]);
   }
 
   /***
@@ -141,13 +161,13 @@ class TokenUserModel extends ModelBase {
    * @returns {Promise<*>}
    */
   static async flushCache(params) {
-    const SecureUserByIDCache = require(rootPrefix + '/lib/cacheManagement/SecureTokenUserByUserID');
+    const SecureTokenUserByUserIdCache = require(rootPrefix + '/lib/cacheManagement/single/SecureTokenUserByUserId');
 
-    await new SecureUserByIDCache({
+    await new SecureTokenUserByUserIdCache({
       userId: params.userId
     }).clear();
 
-    const UserByIdCache = require(rootPrefix + '/lib/cacheMultiManagement/TokenUserDetailByUserIds');
+    const UserByIdCache = require(rootPrefix + '/lib/cacheManagement/multi/TokenUserByUserIds');
 
     await new UserByIdCache({
       userIds: [params.userId]

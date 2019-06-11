@@ -7,7 +7,7 @@
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
-  secureTokenData = require(rootPrefix + '/lib/cacheManagement/SecureTokenData'),
+  SecureTokenCache = require(rootPrefix + '/lib/cacheManagement/single/SecureToken'),
   responseHelper = require(rootPrefix + '/lib/formatter/response');
 
 class GetTokens extends ServiceBase {
@@ -40,7 +40,7 @@ class GetTokens extends ServiceBase {
    * @private
    */
   async _fetchTokenDetails() {
-    let tokenDetailsRsp = await new secureTokenData({}).fetch();
+    let tokenDetailsRsp = await new SecureTokenCache({}).fetch();
 
     if (tokenDetailsRsp.isFailure()) {
       logger.error('Error while fetching data from secure token cache');
