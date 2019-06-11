@@ -9,10 +9,12 @@ const rootPrefix = '../..',
   sanitizer = require(rootPrefix + '/helpers/sanitizer');
 
 const validateV2Signature = async function(req, res, next) {
+  // TODO: Decoded params can't be merged directly in body json data from OST
   req.decodedParams = Object.assign(req.body, req.decodedParams);
 
   let authResponse;
 
+  // TODO: For signature varification complete decoded params can't be sent. sent req.body
   authResponse = await new OstWebhookAuth({ webhookParams: req.decodedParams, requestHeaders: req.headers })
     .perform()
     .catch(function(r) {
