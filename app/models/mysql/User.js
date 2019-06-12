@@ -184,7 +184,7 @@ class UserModel extends ModelBase {
       .where(['status != ?', userConstants.invertedStatuses[userConstants.blockedStatus]])
       .limit(limit)
       .offset(offset)
-      .order_by('first_name DESC')
+      .order_by('first_name ASC')
       .fire();
 
     let response = [];
