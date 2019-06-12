@@ -6,8 +6,7 @@ const rootPrefix = '../../..',
   UserModel = require(rootPrefix + '/app/models/mysql/User'),
   TokenUserModel = require(rootPrefix + '/app/models/mysql/TokenUser'),
   userConstants = require(rootPrefix + '/lib/globalConstant/user'),
-  logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
-  tokenUserConstants = require(rootPrefix + '/lib/globalConstant/tokenUser');
+  logger = require(rootPrefix + '/lib/logger/customConsoleLogger');
 
 class CurrentUser extends ServiceBase {
   /**
