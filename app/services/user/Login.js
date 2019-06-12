@@ -1,22 +1,31 @@
 const rootPrefix = '../../..',
-  util = require(rootPrefix + '/lib/util'),
   ServiceBase = require(rootPrefix + '/app/services/Base'),
-  responseHelper = require(rootPrefix + '/lib/formatter/response'),
-  localCipher = require(rootPrefix + '/lib/encryptors/localCipher'),
-  UserByUserNameCache = require(rootPrefix + '/lib/cacheManagement/single/UserByUsername'),
-  SecureUserCache = require(rootPrefix + '/lib/cacheManagement/single/SecureUser'),
-  TokenUserDetailByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TokenUserByUserIds'),
   UserModel = require(rootPrefix + '/app/models/mysql/User'),
   TokenUserModel = require(rootPrefix + '/app/models/mysql/TokenUser'),
-  userConstants = require(rootPrefix + '/lib/globalConstant/user'),
+  SecureUserCache = require(rootPrefix + '/lib/cacheManagement/single/SecureUser'),
+  UserByUserNameCache = require(rootPrefix + '/lib/cacheManagement/single/UserByUsername'),
+  TokenUserDetailByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TokenUserByUserIds'),
+  util = require(rootPrefix + '/lib/util'),
   coreConstants = require(rootPrefix + '/config/coreConstants'),
-  logger = require(rootPrefix + '/lib/logger/customConsoleLogger');
+  responseHelper = require(rootPrefix + '/lib/formatter/response'),
+  userConstants = require(rootPrefix + '/lib/globalConstant/user'),
+  logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
+  localCipher = require(rootPrefix + '/lib/encryptors/localCipher');
 
+/**
+ * Class for login service.
+ *
+ * @class Login
+ */
 class Login extends ServiceBase {
   /**
-   * @param {Object} params
-   * @param {String} params.user_name: User Name
-   * @param {String} params.password: Password
+   * Constructor for login service.
+   *
+   * @param {object} params
+   * @param {string} params.user_name: User Name
+   * @param {string} params.password: Password
+   *
+   * @augments ServiceBase
    *
    * @constructor
    */
@@ -34,17 +43,17 @@ class Login extends ServiceBase {
   }
 
   /**
-   * perform - Validate Login Credentials
+   * Perform: Validate login credentials.
    *
    * @return {Promise<void>}
    */
   async _asyncPerform() {
     const oThis = this;
 
-    //Check if username exists
-    let fetchCacheRsp = await oThis._validateAndSanitizeParams();
+    // Check if username exists.
+    await oThis._validateAndSanitizeParams();
 
-    await oThis._fetchUser();
+    await oThis._fetchSecureUser();
 
     await oThis._validatePassword();
 
@@ -56,16 +65,17 @@ class Login extends ServiceBase {
   }
 
   /**
-   * Validate Request
+   * Validate request.
    *
+   * @sets oThis.userId
    *
    * @return {Promise<void>}
-   *
    * @private
    */
   async _validateAndSanitizeParams() {
     const oThis = this;
-    let userObjRes = await new UserByUserNameCache({ userName: oThis.userName }).fetch();
+
+    const userObjRes = await new UserByUserNameCache({ userName: oThis.userName }).fetch();
 
     if (!userObjRes.data.id) {
       return Promise.reject(
@@ -82,18 +92,20 @@ class Login extends ServiceBase {
   }
 
   /**
-   * Fetch Secure user
+   * Fetch secure user.
    *
+   * @sets oThis.secureUser
    *
    * @return {Promise<void>}
-   *
    * @private
    */
-  async _fetchUser() {
+  async _fetchSecureUser() {
     const oThis = this;
-    logger.log('fetch User');
 
-    let secureUserRes = await new SecureUserCache({ id: oThis.userId }).fetch();
+    logger.log('Fetching secure user.');
+
+    const secureUserRes = await new SecureUserCache({ id: oThis.userId }).fetch();
+
     oThis.secureUser = secureUserRes.data;
 
     if (oThis.secureUser.status !== userConstants.activeStatus) {
@@ -111,43 +123,42 @@ class Login extends ServiceBase {
   }
 
   /**
-   * Fetch Token user
+   * Fetch token user.
    *
+   * @sets oThis.tokenUser
    *
    * @return {Promise<void>}
-   *
    * @private
    */
   async _fetchTokenUser() {
     const oThis = this;
 
-    logger.log('fetch Token User');
+    logger.log('Fetching token user.');
 
-    let tokenUserRes = await new TokenUserDetailByUserIdsCache({ userIds: [oThis.userId] }).fetch();
+    const tokenUserRes = await new TokenUserDetailByUserIdsCache({ userIds: [oThis.userId] }).fetch();
+
     oThis.tokenUser = tokenUserRes.data[oThis.userId];
 
     return Promise.resolve(responseHelper.successWithData({}));
   }
 
   /**
-   * Match Password
-   *
+   * Validate password.
    *
    * @return {Promise<void>}
-   *
    * @private
    */
   async _validatePassword() {
     const oThis = this;
 
-    logger.log('Validate Password');
+    logger.log('Validating password.');
 
-    let decryptedEncryptionSalt = localCipher.decrypt(coreConstants.CACHE_SHA_KEY, oThis.secureUser.encryptionSaltLc);
+    const decryptedEncryptionSalt = localCipher.decrypt(coreConstants.CACHE_SHA_KEY, oThis.secureUser.encryptionSaltLc);
 
-    let generatedEncryptedPassword = util.createSha256Digest(decryptedEncryptionSalt, oThis.password);
+    const generatedEncryptedPassword = util.createSha256Digest(decryptedEncryptionSalt, oThis.password);
 
-    if (generatedEncryptedPassword != oThis.secureUser.password) {
-      let userModelInstance = new UserModel()
+    if (generatedEncryptedPassword !== oThis.secureUser.password) {
+      const userModelInstance = new UserModel()
         .update({
           mark_inactive_trigger_count: oThis.secureUser.markInactiveTriggerCount + 1
         })
@@ -178,6 +189,7 @@ class Login extends ServiceBase {
         .fire();
 
       oThis.secureUser.markInactiveTriggerCount = 0;
+
       await UserModel.flushCache({ id: oThis.secureUser.id });
     }
 
@@ -185,16 +197,16 @@ class Login extends ServiceBase {
   }
 
   /**
-   * Get Airdrop Signup Status
+   * Get airdrop signup status/
    *
+   * @sets oThis.signUpAirdropStatus
    *
    * @return {Promise<void>}
-   *
    * @private
    */
   async _getSignupAirdropStatus() {
     const oThis = this;
-    let propertiesArray = await new TokenUserModel().getBitwiseArray('properties', oThis.tokenUser.properties);
+    const propertiesArray = await new TokenUserModel().getBitwiseArray('properties', oThis.tokenUser.properties);
     if (propertiesArray.indexOf('AIRDROP_DONE') > -1) {
       oThis.signUpAirdropStatus = 1;
     } else {
@@ -203,17 +215,15 @@ class Login extends ServiceBase {
   }
 
   /**
-   * Response for service
-   *
+   * Service response.
    *
    * @return {Promise<void>}
-   *
    * @private
    */
   async _serviceResponse() {
     const oThis = this;
 
-    let userLoginCookieValue = new UserModel().getCookieValueFor(oThis.secureUser, {
+    const userLoginCookieValue = new UserModel().getCookieValueFor(oThis.secureUser, {
       timestamp: Date.now() / 1000
     });
 
