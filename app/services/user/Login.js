@@ -67,7 +67,7 @@ class Login extends ServiceBase {
     const oThis = this;
     let userObjRes = await new UserByUserNameCache({ userName: oThis.userName }).fetch();
 
-    if (userObjRes.isFailure() || !userObjRes.data.id) {
+    if (!userObjRes.data.id) {
       return Promise.reject(
         responseHelper.error({
           internal_error_identifier: 's_um_l_v_1',

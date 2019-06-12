@@ -73,23 +73,14 @@ class RegisterDevice extends ServiceBase {
 
     let tokenUserData = await new TokenUserDetailByUserIdsCache({ userIds: [oThis.userId] }).fetch();
 
-    if (tokenUserData.isFailure()) {
+    oThis.ostUserId = tokenUserData.data[oThis.userId].ostUserId;
+
+    if (!oThis.ostUserId) {
       logger.error('Error while fetching data from token user cache');
       return Promise.reject(tokenUserData);
     }
 
-    if (!tokenUserData.data[oThis.userId].ostUserId) {
-      logger.error('Invalid userdata in token user table');
-      return Promise.reject(
-        responseHelper.error({
-          internal_error_identifier: 'a_s_um_rd_1',
-          api_error_identifier: 'something_went_wrong',
-          debug_options: tokenUserData.data
-        })
-      );
-    }
-
-    oThis.ostUserId = tokenUserData.data[oThis.userId].ostUserId;
+    return responseHelper.successWithData({});
   }
 
   /**

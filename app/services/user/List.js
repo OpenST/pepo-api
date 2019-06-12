@@ -99,15 +99,6 @@ class UserList extends ServiceBase {
       }),
       UserPaginationCacheRes = await UserPaginationCacheObj.fetch();
 
-    if (!UserPaginationCacheRes || UserPaginationCacheRes.isFailure()) {
-      logger.log('Could not fetch details.');
-      return responseHelper.error({
-        internal_error_identifier: 's_u_l_fuifc_1',
-        api_error_identifier: 'something_went_wrong',
-        debug_options: { UserPaginationCacheRes: UserPaginationCacheRes }
-      });
-    }
-
     oThis.userIds = UserPaginationCacheRes.data;
 
     return Promise.resolve(responseHelper.successWithData({}));

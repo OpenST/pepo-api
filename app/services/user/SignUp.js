@@ -81,7 +81,7 @@ class SignUp extends ServiceBase {
 
     const userObj = await new UserByUserNameCache({ userName: oThis.userName }).fetch();
 
-    if (userObj.isSuccess() && userObj.data.id) {
+    if (userObj.data.id) {
       return Promise.reject(
         responseHelper.paramValidationError({
           internal_error_identifier: 's_um_su_v_1',
@@ -134,6 +134,8 @@ class SignUp extends ServiceBase {
     }
 
     oThis.userId = insertResponse.insertId;
+
+    await UserModel.flushCache({ id: oThis.userId });
 
     return Promise.resolve(responseHelper.successWithData({}));
   }
@@ -203,6 +205,8 @@ class SignUp extends ServiceBase {
       return Promise.reject(new Error('Error while inserting data in token_users table.'));
     }
 
+    await TokenUserModel.flushCache({ userId: oThis.userId });
+
     return Promise.resolve(responseHelper.successWithData({}));
   }
 
@@ -231,8 +235,6 @@ class SignUp extends ServiceBase {
     const userLoginCookieValue = new UserModel().getCookieValueFor(secureUser, {
       timestamp: Date.now() / 1000
     });
-
-    // TODO - delete password from secureUser
 
     return responseHelper.successWithData({
       user: new UserModel().safeFormattedData(secureUser),
