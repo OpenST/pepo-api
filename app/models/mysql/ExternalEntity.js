@@ -111,19 +111,21 @@ class ExternalEntityModel extends ModelBase {
    * @returns {Promise<*>}
    */
   static async flushCache(params) {
-    const ExternalEntitiyByEntityIdAndEntityKindCache = require(rootPrefix +
-      '/lib/cacheManagement/single/ExternalEntitiyByEntityIdAndEntityKind');
-
-    await new ExternalEntitiyByEntityIdAndEntityKindCache({
-      entityId: params.entityId,
-      entityKind: params.entityKind
-    }).clear();
-
     const ExternalEntityByIds = require(rootPrefix + '/lib/cacheManagement/multi/ExternalEntityByIds');
 
     await new ExternalEntityByIds({
       ids: [params.id]
     }).clear();
+
+    const ExternalEntitiyByEntityIdAndEntityKindCache = require(rootPrefix +
+      '/lib/cacheManagement/single/ExternalEntitiyByEntityIdAndEntityKind');
+
+    if (params.entityId && params.entityKind) {
+      await new ExternalEntitiyByEntityIdAndEntityKindCache({
+        entityId: params.entityId,
+        entityKind: params.entityKind
+      }).clear();
+    }
   }
 }
 
