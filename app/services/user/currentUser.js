@@ -36,6 +36,8 @@ class CurrentUser extends ServiceBase {
 
     await oThis._fetchTokenUser();
 
+    await oThis._getSignupAirdropStatus();
+
     return Promise.resolve(oThis._serviceResponse());
   }
 
@@ -84,13 +86,37 @@ class CurrentUser extends ServiceBase {
     let tokenUserRes = await new TokenUserDetailByUserIdsCache({ userIds: [oThis.userId] }).fetch();
     oThis.tokenUser = tokenUserRes.data[oThis.userId];
 
-    let propertiesArray = await new TokenUserModel().getBitwiseArray('properties', oThis.tokenUser.properties);
-    let validPropertiesArray = tokenUserConstants.validPropertiesArray;
-    oThis.properties = oThis._common(validPropertiesArray, propertiesArray);
-
     return Promise.resolve(responseHelper.successWithData({}));
   }
 
+  /**
+   * Get Airdrop Signup Status
+   *
+   *
+   * @return {Promise<void>}
+   *
+   * @private
+   */
+  async _getSignupAirdropStatus() {
+    const oThis = this;
+    let propertiesArray = await new TokenUserModel().getBitwiseArray('properties', oThis.tokenUser.properties);
+    let validPropertiesArray = tokenUserConstants.validPropertiesArray;
+    let tokenUserPropertyArray = oThis._common(validPropertiesArray, propertiesArray);
+    if (tokenUserPropertyArray.indexOf('AIRDROP_DONE') > -1) {
+      oThis.signUpAirdropStatus = 1;
+    } else {
+      oThis.signUpAirdropStatus = 0;
+    }
+  }
+
+  /**
+   * Get Common Elements Between Two Arrays
+   *
+   *
+   * @return {Array}
+   *
+   * @private
+   */
   _common(arr1, arr2) {
     var newArr = [];
     newArr = arr1.filter(function(v) {
@@ -123,7 +149,7 @@ class CurrentUser extends ServiceBase {
     return responseHelper.successWithData({
       user: new UserModel().safeFormattedData(oThis.secureUser),
       tokenUser: new TokenUserModel().safeFormattedData(oThis.tokenUser),
-      properties: oThis.properties,
+      signUpAirdropStatus: oThis.signUpAirdropStatus,
       userLoginCookieValue: userLoginCookieValue
     });
   }

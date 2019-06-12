@@ -28,11 +28,17 @@ mysql.server start
 memcached -p 11211 -d
 ```
 
+## Installation Steps
 
+* Create the main db and create schema_migrations table.
+```bash
+node db/seed.js
+```
 
-
-
-
+* Run all pending migrations.
+```bash
+node db/migrate.js
+```
 
 * Clear cache.
 ```bash
