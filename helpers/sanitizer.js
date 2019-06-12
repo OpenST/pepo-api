@@ -1,10 +1,3 @@
-'use strict';
-/**
- * Sanitize request parameters
- *
- * @module helpers/sanitizer
- */
-
 const sanitizeHtml = require('sanitize-html');
 
 class SanitizeRecursively {

@@ -1,7 +1,3 @@
-'use strict';
-/**
- * @file - Model for Feeds table
- */
 const rootPrefix = '../../..',
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   feedsConstants = require(rootPrefix + '/lib/globalConstant/feed'),

@@ -1,7 +1,3 @@
-'use strict';
-/**
- * @file - Model for token_users table
- */
 const rootPrefix = '../../..',
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
@@ -82,7 +78,7 @@ class TokenUserModel extends ModelBase {
    * @returns {Array}
    */
   safeFormattedColumnNames() {
-    return ['id', 'userId', 'ostUserId', 'ostTokenHolderAddress', 'properties', 'ostStatus', 'createdAt', 'createdAt'];
+    return ['id', 'userId', 'ostUserId', 'ostTokenHolderAddress', 'properties', 'ostStatus', 'createdAt', 'updatedAt'];
   }
 
   /***
@@ -139,6 +135,32 @@ class TokenUserModel extends ModelBase {
       return {};
     }
     return oThis.formatDbData(dbRows[0]);
+  }
+
+  /***
+   * Fetch token user for ost user ids
+   *
+   * @param ostUserIds {Array} - Ost User Ids
+   *
+   * @return {Object}
+   */
+  async fetchByOstUserIds(ostUserIds) {
+    const oThis = this;
+    let response = {},
+      dbRows = await oThis
+        .select('*')
+        .where(['ost_user_id IN (?)', ostUserIds])
+        .fire();
+
+    if (dbRows.length === 0) {
+      return responseHelper.successWithData(response);
+    }
+
+    for (let index = 0; index < dbRows.length; index++) {
+      response[dbRows[index].ost_user_id] = oThis.formatDbData(dbRows[index]);
+    }
+
+    return responseHelper.successWithData(response);
   }
 
   /***

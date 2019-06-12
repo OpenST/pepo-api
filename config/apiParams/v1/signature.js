@@ -1,5 +1,3 @@
-'use strict';
-
 const rootPrefix = '../../..',
   pagination = require(rootPrefix + '/lib/globalConstant/pagination'),
   apiName = require(rootPrefix + '/lib/globalConstant/apiName');
@@ -10,7 +8,7 @@ const v1Signature = {
         parameter: 'user_name',
         validatorMethods: [
           'validateString',
-          'validateAlphaNumericCommonSpecailCharString',
+          'validateAlphaNumericCommonSpecialCharString',
           'validateMaxLengthMediumString'
         ]
       },
@@ -35,7 +33,7 @@ const v1Signature = {
         parameter: 'user_name',
         validatorMethods: [
           'validateString',
-          'validateAlphaNumericCommonSpecailCharString',
+          'validateAlphaNumericCommonSpecialCharString',
           'validateMaxLengthMediumString'
         ]
       },
@@ -91,6 +89,29 @@ const v1Signature = {
       {
         parameter: pagination.paginationIdentifierKey,
         validatorMethods: ['validateString']
+      }
+    ]
+  },
+  [apiName.loggedInUser]: {
+    mandatory: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateObject']
+      }
+    ],
+    optional: []
+  },
+  [apiName.gifs]: {
+    mandatory: [
+      {
+        parameter: 'query',
+        validatorMethods: ['validateString']
+      }
+    ],
+    optional: [
+      {
+        parameter: 'page_number',
+        validatorMethods: ['validateNonZeroInteger']
       }
     ]
   }

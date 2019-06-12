@@ -1,10 +1,3 @@
-'use strict';
-
-/**
- * Class for core constants
- *
- * @class
- */
 class CoreConstants {
   /**
    * Constructor for core constants
@@ -25,6 +18,12 @@ class CoreConstants {
     return process.env.PA_DEBUG_ENABLED;
   }
 
+  get PA_DOMAIN() {
+    return process.env.PA_DOMAIN;
+  }
+
+  // Cache related details
+
   get CACHE_ENGINE() {
     return process.env.PA_CACHE_ENGINE;
   }
@@ -32,6 +31,7 @@ class CoreConstants {
   get MEMCACHE_SERVERS() {
     return process.env.PA_MEMCACHE_SERVERS.split(',');
   }
+
   // MYSQL related details
 
   get PEPO_API_MYSQL_DB() {
@@ -55,6 +55,7 @@ class CoreConstants {
   }
 
   // kms related constants
+
   get KMS_AWS_ACCESS_KEY() {
     return process.env.PA_KMS_AWS_ACCESS_KEY;
   }
@@ -75,17 +76,17 @@ class CoreConstants {
     return process.env.PA_API_KEY_KMS_ID;
   }
 
+  //TODO: CHANGE name "known addr" to something else
   get KMS_KNOWN_ADDR_KEY_ARN() {
     return process.env.PA_KNOWN_ADDRESS_KMS_ARN;
   }
 
+  //TODO: CHANGE name "known addr" to something else
   get KMS_KNOWN_ADDR_KEY_ID() {
     return process.env.PA_KNOWN_ADDRESS_KMS_ID;
   }
 
-  get PA_SA_API_END_POINT() {
-    return process.env.PA_SA_API_END_POINT;
-  }
+  // Encryption Secrets
 
   get CACHE_SHA_KEY() {
     return process.env.PA_CACHE_DATA_SHA_KEY;
@@ -99,8 +100,14 @@ class CoreConstants {
     return process.env.PA_COOKIE_TOKEN_SECRET;
   }
 
-  get PA_DOMAIN() {
-    return process.env.PA_DOMAIN;
+  // SaaS api details
+
+  get PA_SA_API_END_POINT() {
+    return process.env.PA_SA_API_END_POINT;
+  }
+
+  get GIPHY_API_KEY() {
+    return process.env.PA_GIPHY_API_KEY;
   }
 }
 

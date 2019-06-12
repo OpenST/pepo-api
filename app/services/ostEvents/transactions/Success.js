@@ -1,10 +1,3 @@
-'use strict';
-/**
- * This service helps in processing the user activation success event from ost platform
- *
- * Note:-
- */
-
 const rootPrefix = '../../../..',
   TransactionOstEventBase = require(rootPrefix + '/app/services/ostEvents/transactions/Base'),
   TokenUserModel = require(rootPrefix + '/app/models/mysql/TokenUser'),
