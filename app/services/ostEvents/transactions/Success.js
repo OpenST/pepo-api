@@ -96,13 +96,15 @@ class SuccessTransactionOstEvent extends TransactionOstEventBase {
 
     await super._processForUserTransaction();
 
-    await new UserFeedModel()
+    let insertRsp = await new UserFeedModel()
       .insert({
         user_id: oThis.externalEntityObj.parsedExtraData.toUserIds[0],
         feed_id: oThis.feedObj.id,
         published_ts: oThis._published_timestamp()
       })
       .fire();
+
+    await UserFeedModel.flushCache({ id: insertRsp.insertId });
 
     return Promise.resolve(responseHelper.successWithData({}));
   }
