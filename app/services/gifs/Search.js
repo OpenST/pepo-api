@@ -6,13 +6,15 @@
 
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
-  GifsSearchWrapper = require(rootPrefix + '/lib/giphy/Search'),
+  GifsCacheKlass = require(rootPrefix + '/lib/cacheManagement/single/GifsByKeyword'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   responseHelper = require(rootPrefix + '/lib/formatter/response');
 
 class GifsSearch extends ServiceBase {
   /**
    * @param {Object} params
+   * @param {String} params.query
+   * @param {Number} params.page_number
    *
    * @constructor
    */
@@ -45,7 +47,7 @@ class GifsSearch extends ServiceBase {
    */
   async _searchGifs() {
     const oThis = this;
-    let resp = await new GifsSearchWrapper(oThis.query, oThis.pageNumber).getGifs();
+    let resp = await new GifsCacheKlass({ query: oThis.query, pageNumber: oThis.pageNumber }).fetch();
 
     if (resp.isFailure()) {
       logger.error('Error while fetching gifs');
