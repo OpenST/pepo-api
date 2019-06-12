@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "6d4d06be-5113-409a-a97b-a9e11d5b5dd2",
+		"_postman_id": "26f9a9e7-e877-4868-9a70-cd0621fdb364",
 		"name": "pepo-api",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -301,6 +301,46 @@
 						"v1",
 						"users",
 						"recovery-info"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "token",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{api_server}}/api/v1/tokens/",
+					"host": [
+						"{{api_server}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"tokens",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "logged-in-user",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{api_server}}/api/v1/users/current",
+					"host": [
+						"{{api_server}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"users",
+						"current"
 					]
 				}
 			},
