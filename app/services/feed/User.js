@@ -1,8 +1,8 @@
 const rootPrefix = '../../..',
-  logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   pagination = require(rootPrefix + '/lib/globalConstant/pagination'),
-  UserFeedModal = require(rootPrefix + '/app/models/mysql/UserFeed'),
+  UserFeedModel = require(rootPrefix + '/app/models/mysql/UserFeed'),
+  FeedModel = require(rootPrefix + '/app/models/mysql/Feed'),
   FeedByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/FeedByIds'),
   responseHelper = require(rootPrefix + '/lib/formatter/response');
 
@@ -29,6 +29,8 @@ class UserFeed extends ServiceBase {
     oThis.paginationIdentifier = params[pagination.paginationIdentifierKey] || null;
 
     oThis.page = null;
+    oThis.feedIds = [];
+    oThis.feedIdToFeedDetailsMap = {};
     oThis.responseMetaData = {
       [pagination.nextPagePayloadKey]: {}
     };
@@ -45,16 +47,17 @@ class UserFeed extends ServiceBase {
 
     await oThis._validateAndSanitizeParams();
 
-    let userFeed = await oThis._fetchUserFeed();
+    oThis._fetchUserFeedIds();
 
-    oThis._setMeta();
+    if (oThis.feedIds.length === 0) {
+      return responseHelper.successWithData(oThis.finalResponse());
+    }
 
-    let finalResponse = {
-      users: userFeed,
-      meta: oThis.responseMetaData
-    };
+    await oThis._fetchOstTransaction();
+    await oThis._fetchGiphy();
+    await oThis._fetchUsers();
 
-    return responseHelper.successWithData(finalResponse);
+    return responseHelper.successWithData(oThis.finalResponse());
   }
 
   /**
@@ -80,35 +83,93 @@ class UserFeed extends ServiceBase {
   }
 
   /**
-   * Fetch user feed
+   * Fetch user feed ids
    *
    * @return {Result}
    */
-  async _fetchUserFeed() {
+  async _fetchUserFeedIds() {
     const oThis = this;
 
-    // This value is only returned if cache is not set.
-    let feedIds = await new UserFeedModal().fetchFeedIds({
+    oThis.feedIds = await new UserFeedModel().fetchFeedIds({
       limit: oThis.limit,
       page: oThis.page,
       userId: oThis.currentUserId
     });
 
-    let finalResponse = {};
+    const feedByIdsCacheRsp = await new FeedByIdsCache({ ids: oThis.feedIds }).fetch();
+    oThis.feedIdToFeedDetailsMap = feedByIdsCacheRsp.data;
 
-    const FeedByIdsCacheRsp = await new FeedByIdsCache({ ids: feedIds }).fetch(),
-      feedIdToFeedDetailsMap = FeedByIdsCacheRsp.data;
+    return Promise.resolve(responseHelper.successWithData({}));
+  }
 
-    for (let i = 0; i < feedIds.length; i++) {
-      let feedId = feedIds[i];
+  /**
+   * Service Response
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  finalResponse() {
+    const oThis = this,
+      nextPagePayloadKey = {};
 
-      finalResponse[feedId] = feedIdToFeedDetailsMap[feedId];
-      finalResponse[userId]['userName'] = userIdToUserDetailsMap[userId].userName;
-      finalResponse[userId]['firstName'] = userIdToUserDetailsMap[userId].firstName;
-      finalResponse[userId]['lastName'] = userIdToUserDetailsMap[userId].lastName;
+    if (oThis.feedIds.length > 0) {
+      nextPagePayloadKey[pagination.paginationIdentifierKey] = {
+        page: oThis.page + 1,
+        limit: oThis.limit
+      };
     }
 
-    return responseHelper.successWithData(finalResponse);
+    let responseMetaData = {
+      [pagination.nextPagePayloadKey]: nextPagePayloadKey
+    };
+
+    let feedHash = {},
+      tokenUserHash = {};
+
+    for (let i = 0; i < oThis.feedIds.length; i++) {
+      const feedId = oThis.feedIds[i],
+        feed = oThis.feedIdToFeedDetailsMap[feedId];
+      feedHash[feedId] = new FeedModel().safeFormattedData(feed);
+    }
+
+    let finalResponse = {
+      usersByIdHash: userHash,
+      tokenUsersByUserIdHash: tokenUserHash,
+      userIds: oThis.userIds,
+      meta: responseMetaData
+    };
+
+    return finalResponse;
+  }
+
+  /**
+   * Fetch ost transactions
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _fetchOstTransaction() {
+    const oThis = this;
+
+    let usersByIdHashRes = await new UserMultiCache({ ids: oThis.userIds }).fetch();
+    oThis.usersByIdHash = usersByIdHashRes.data;
+
+    return Promise.resolve(responseHelper.successWithData({}));
+  }
+
+  /**
+   * Fetch users from cache
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _fetchUsers() {
+    const oThis = this;
+
+    let usersByIdHashRes = await new UserMultiCache({ ids: oThis.userIds }).fetch();
+    oThis.usersByIdHash = usersByIdHashRes.data;
+
+    return Promise.resolve(responseHelper.successWithData({}));
   }
 
   /**

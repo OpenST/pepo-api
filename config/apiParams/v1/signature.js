@@ -114,6 +114,24 @@ const v1Signature = {
         validatorMethods: ['validateNonZeroInteger']
       }
     ]
+  },
+  [apiName.myFeed]: {
+    mandatory: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateObject']
+      }
+    ],
+    optional: [
+      {
+        parameter: 'limit',
+        validatorMethods: ['validateNonZeroInteger']
+      },
+      {
+        parameter: pagination.paginationIdentifierKey,
+        validatorMethods: ['validateString']
+      }
+    ]
   }
 };
 
