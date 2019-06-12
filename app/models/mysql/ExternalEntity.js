@@ -95,7 +95,8 @@ class ExternalEntityModel extends ModelBase {
       .fire();
 
     for (let index = 0; index < dbRows.length; index++) {
-      response[dbRows[index].id] = oThis.formatDbData(dbRows[index]);
+      let formatDbRow = oThis.formatDbData(dbRows[index]);
+      response[formatDbRow.id] = formatDbRow;
     }
 
     return response;

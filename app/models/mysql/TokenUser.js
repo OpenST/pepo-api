@@ -106,7 +106,8 @@ class TokenUserModel extends ModelBase {
       .fire();
 
     for (let index = 0; index < dbRows.length; index++) {
-      response[dbRows[index].user_id] = oThis.formatDbData(dbRows[index]);
+      let formatDbRow = oThis.formatDbData(dbRows[index]);
+      response[formatDbRow.userId] = formatDbRow;
     }
 
     return response;
