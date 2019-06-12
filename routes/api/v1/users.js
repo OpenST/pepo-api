@@ -15,7 +15,7 @@ router.post('/register-device', sanitizer.sanitizeDynamicUrlParams, function(req
 
   const onServiceSuccess = async function(serviceResponse) {
     const wrapperFormatterRsp = await new WrapperFormatter({
-      resultType: entityType.device,
+      resultType: responseEntityKey.device,
       entityKindToResponseKeyMap: {
         [entityType.device]: responseEntityKey.device
       },
@@ -34,7 +34,7 @@ router.get('/recovery-info', sanitizer.sanitizeDynamicUrlParams, function(req, r
 
   const dataFormatterFunc = async function(serviceResponse) {
     const wrapperFormatterRsp = await new WrapperFormatter({
-      resultType: entityType.recoveryInfo,
+      resultType: responseEntityKey.recoveryInfo,
       entityKindToResponseKeyMap: {
         [entityType.recoveryInfo]: responseEntityKey.recoveryInfo
       },
@@ -53,10 +53,10 @@ router.get('/', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
 
   const dataFormatterFunc = async function(serviceResponse) {
     const wrapperFormatterRsp = await new WrapperFormatter({
-      resultType: entityType.users,
+      resultType: responseEntityKey.users,
       entityKindToResponseKeyMap: {
         [entityType.users]: responseEntityKey.users,
-        [entityType.meta]: responseEntityKey.meta
+        [entityType.userListMeta]: responseEntityKey.meta
       },
       serviceData: serviceResponse.data
     }).perform();
