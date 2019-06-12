@@ -23,9 +23,9 @@ router.post('/sign-up', sanitizer.sanitizeDynamicUrlParams, function(req, res, n
     setLoginCookies(res, serviceResponse.data.userLoginCookieValue);
 
     const wrapperFormatterRsp = await new WrapperFormatter({
-      resultType: entityType.loggedInUser,
+      resultType: responseEntityKey.loggedInUser,
       entityKindToResponseKeyMap: {
-        [entityType.loggedInUser]: responseEntityKey.loggedInUser
+        [entityType.user]: responseEntityKey.loggedInUser
       },
       serviceData: serviceResponse.data
     }).perform();
@@ -49,9 +49,9 @@ router.post('/login', sanitizer.sanitizeDynamicUrlParams, function(req, res, nex
   const onServiceSuccess = async function(serviceResponse) {
     setLoginCookies(res, serviceResponse.data.userLoginCookieValue);
     const wrapperFormatterRsp = await new WrapperFormatter({
-      resultType: entityType.loggedInUser,
+      resultType: responseEntityKey.loggedInUser,
       entityKindToResponseKeyMap: {
-        [entityType.loggedInUser]: responseEntityKey.loggedInUser
+        [entityType.user]: responseEntityKey.loggedInUser
       },
       serviceData: serviceResponse.data
     }).perform();

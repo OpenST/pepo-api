@@ -15,7 +15,7 @@ router.get('/', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
 
   const dataFormatterFunc = async function(serviceResponse) {
     const wrapperFormatterRsp = await new WrapperFormatter({
-      resultType: entityType.token,
+      resultType: responseEntityKey.token,
       entityKindToResponseKeyMap: {
         [entityType.token]: responseEntityKey.token
       },
