@@ -129,7 +129,7 @@ class TransactionOstEventBase extends ServiceBase {
 
     oThis.externalEntityObj.parsedExtraData = extraData;
 
-    await ExternalEntityModel.flushCache({ id: oThis.externalEntityObj });
+    await ExternalEntityModel.flushCache(oThis.externalEntityObj);
 
     return Promise.resolve(responseHelper.successWithData({}));
   }
