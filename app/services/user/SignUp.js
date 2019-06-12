@@ -47,7 +47,6 @@ class SignUp extends ServiceBase {
     oThis.userId = null;
     oThis.ostUserId = null;
     oThis.ostStatus = null;
-    oThis.signUpAirdropStatus = null;
   }
 
   /**
@@ -197,8 +196,6 @@ class SignUp extends ServiceBase {
       })
       .fire();
 
-    oThis.signUpAirdropStatus = 0;
-
     if (!insertResponse) {
       logger.error('Error while inserting data in token_users table.');
 
@@ -239,7 +236,6 @@ class SignUp extends ServiceBase {
     return responseHelper.successWithData({
       user: new UserModel().safeFormattedData(secureUser),
       tokenUser: new TokenUserModel().safeFormattedData(tokenUser),
-      signUpAirdropStatus: oThis.signUpAirdropStatus,
       userLoginCookieValue: userLoginCookieValue
     });
   }
