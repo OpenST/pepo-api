@@ -259,7 +259,7 @@ class UserActivationSuccess extends ServiceBase {
       },
       raw_calldata: JSON.stringify({
         method: 'directTransfers',
-        parameters: [transferToAddress, tokenConstants.airdropAmount]
+        parameters: [[transferToAddress], [tokenConstants.airdropAmount]]
       })
     };
 
