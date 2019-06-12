@@ -33,6 +33,8 @@ const validateV2Signature = async function(req, res, next) {
 const assignParams = function(req, res, next) {
   // IMPORTANT NOTE: Don't assign parameters before sanitization
   // And assign it to req.decodedParams
+  req.decodedParams = req.decodedParams || {};
+
   req.decodedParams.webhookParams = Object.assign(req.body);
 
   next();
