@@ -1,15 +1,20 @@
-/**
- * @file - Model for webhooks table
- */
 const rootPrefix = '../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
   coreConstants = require(rootPrefix + '/config/coreConstants');
 
+// Declare variables.
 const dbName = 'pepo_api_' + coreConstants.environment;
 
+/**
+ * Class for webhook model.
+ *
+ * @class Webhook
+ */
 class Webhook extends ModelBase {
   /**
-   * Webhook model
+   * Constructor for webhook model.
+   *
+   * @augments ModelBase
    *
    * @constructor
    */
@@ -22,7 +27,7 @@ class Webhook extends ModelBase {
   }
 
   /**
-   * format db data
+   * Format db data.
    *
    * @param {object} dbRow
    * @param {number} dbRow.id
@@ -48,15 +53,16 @@ class Webhook extends ModelBase {
   }
 
   /**
-   * Fetch webhook by ost id
+   * Fetch webhook by ost id.
    *
-   * @param ostId
+   * @param {string/number} ostId
+   *
    * @returns {Promise<*>}
    */
   async fetchWebhookByOstId(ostId) {
     const oThis = this;
 
-    let dbRows = await oThis
+    const dbRows = await oThis
       .select('*')
       .where(['ost_id = ?', ostId])
       .fire();

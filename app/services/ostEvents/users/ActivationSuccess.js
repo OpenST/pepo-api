@@ -193,6 +193,8 @@ class UserActivationSuccess extends ServiceBase {
     await TokenUserModel.flushCache({ userId: oThis.tokenUserObj.userId });
 
     oThis.tokenUserObj.properties = propertyVal;
+    oThis.tokenUserObj.ostUserTokenHolderAddress = oThis.ostUserTokenHolderAddress;
+    oThis.tokenUserObj.ostStatus = oThis.ostUserStatus;
 
     return Promise.resolve(responseHelper.successWithData({}));
   }
@@ -259,7 +261,7 @@ class UserActivationSuccess extends ServiceBase {
       },
       raw_calldata: JSON.stringify({
         method: 'directTransfers',
-        parameters: [transferToAddress, tokenConstants.airdropAmount]
+        parameters: [[transferToAddress], [tokenConstants.airdropAmount]]
       })
     };
 
