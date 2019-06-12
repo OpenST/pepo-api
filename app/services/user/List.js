@@ -52,7 +52,7 @@ class UserList extends ServiceBase {
     oThis._removeCurrentUserFromResponse();
 
     if (oThis.userIds.length === 0) {
-      return oThis.finalResponse();
+      return responseHelper.successWithData(oThis.finalResponse());
     }
 
     await oThis._fetchUsers();
@@ -166,15 +166,18 @@ class UserList extends ServiceBase {
    * @private
    */
   finalResponse() {
-    const oThis = this;
+    const oThis = this,
+      nextPagePayloadKey = {};
+
+    if (oThis.userIds.length > 0) {
+      nextPagePayloadKey[pagination.paginationIdentifierKey] = {
+        page: oThis.page + 1,
+        limit: oThis.limit
+      };
+    }
 
     let responseMetaData = {
-      [pagination.nextPagePayloadKey]: {
-        [pagination.paginationIdentifierKey]: {
-          page: oThis.page + 1,
-          limit: oThis.limit
-        }
-      }
+      [pagination.nextPagePayloadKey]: nextPagePayloadKey
     };
 
     let userHash = {},
