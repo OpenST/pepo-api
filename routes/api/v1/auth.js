@@ -86,7 +86,7 @@ function setLoginCookies(responseObject, cookieValue) {
   };
 
   // For non-development environments
-  if (!basicHelper.isDevelopment()) {
+  if (false && !basicHelper.isDevelopment()) {
     options.secure = true; // to ensure browser sends cookie over https
     options.domain = coreConstant.PA_DOMAIN;
   }
