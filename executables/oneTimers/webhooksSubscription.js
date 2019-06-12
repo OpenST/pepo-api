@@ -47,10 +47,12 @@ class WebhooksSubscription {
 
     let webhookUrl = webhookConstants.webhookUrl;
     let params = {
-      topics: ['transactions/success', 'users/activation_success'],
+      topics: ['transactions/success', 'transactions/failure', 'users/activation_success', 'users/activation_failure'],
       url: webhookUrl,
       status: webhookConstants.active
     };
+
+    logger.log('Created webhook for: ', params);
 
     let webhooksCreationResponse = await jsSdkWrapper.createWebhooks(params);
 
