@@ -1,27 +1,36 @@
 const rootPrefix = '../../..',
-  util = require(rootPrefix + '/lib/util'),
   ServiceBase = require(rootPrefix + '/app/services/Base'),
-  responseHelper = require(rootPrefix + '/lib/formatter/response'),
-  localCipher = require(rootPrefix + '/lib/encryptors/localCipher'),
-  UserByUserNameCache = require(rootPrefix + '/lib/cacheManagement/single/UserByUsername'),
-  SecureUserCache = require(rootPrefix + '/lib/cacheManagement/single/SecureUser'),
-  TokenUserDetailByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TokenUserByUserIds'),
-  KmsWrapper = require(rootPrefix + '/lib/authentication/KmsWrapper'),
-  ostPlatformSdk = require(rootPrefix + '/lib/ostPlatform/jsSdkWrapper'),
-  kmsGlobalConstant = require(rootPrefix + '/lib/globalConstant/kms'),
   UserModel = require(rootPrefix + '/app/models/mysql/User'),
+  KmsWrapper = require(rootPrefix + '/lib/authentication/KmsWrapper'),
   TokenUserModel = require(rootPrefix + '/app/models/mysql/TokenUser'),
+  SecureUserCache = require(rootPrefix + '/lib/cacheManagement/single/SecureUser'),
+  UserByUserNameCache = require(rootPrefix + '/lib/cacheManagement/single/UserByUsername'),
+  TokenUserDetailByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TokenUserByUserIds'),
+  util = require(rootPrefix + '/lib/util'),
+  responseHelper = require(rootPrefix + '/lib/formatter/response'),
   userConstants = require(rootPrefix + '/lib/globalConstant/user'),
+  localCipher = require(rootPrefix + '/lib/encryptors/localCipher'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
+  kmsGlobalConstant = require(rootPrefix + '/lib/globalConstant/kms'),
+  ostPlatformSdk = require(rootPrefix + '/lib/ostPlatform/jsSdkWrapper'),
   tokenUserConstants = require(rootPrefix + '/lib/globalConstant/tokenUser');
 
+/**
+ * Class for signup service.
+ *
+ * @class SignUp
+ */
 class SignUp extends ServiceBase {
   /**
-   * @param {Object} params
-   * @param {String} params.user_name: User Name
-   * @param {String} params.password: Password
-   * @param {String} params.first_name: First Name
-   * @param {String} params.last_name: Last Name
+   * Constructor for signup service.
+   *
+   * @param {object} params
+   * @param {string} params.user_name: User Name
+   * @param {string} params.password: Password
+   * @param {string} params.first_name: First Name
+   * @param {string} params.last_name: Last Name
+   *
+   * @augments ServiceBase
    *
    * @constructor
    */
@@ -42,15 +51,15 @@ class SignUp extends ServiceBase {
   }
 
   /**
-   * perform - perform user creation
+   * Perform: Perform user creation.
    *
    * @return {Promise<void>}
    */
   async _asyncPerform() {
     const oThis = this;
 
-    //Check if username exists
-    let fetchCacheRsp = await oThis._validateAndSanitizeParams();
+    // Check if username exists.
+    await oThis._validateAndSanitizeParams();
 
     await oThis._createUser();
 
@@ -62,16 +71,15 @@ class SignUp extends ServiceBase {
   }
 
   /**
-   * Validate Request
-   *
+   * Validate request.
    *
    * @return {Promise<void>}
-   *
    * @private
    */
   async _validateAndSanitizeParams() {
     const oThis = this;
-    let userObj = await new UserByUserNameCache({ userName: oThis.userName }).fetch();
+
+    const userObj = await new UserByUserNameCache({ userName: oThis.userName }).fetch();
 
     if (userObj.isSuccess() && userObj.data.id) {
       return Promise.reject(
@@ -88,24 +96,25 @@ class SignUp extends ServiceBase {
   }
 
   /**
-   * Create user
+   * Create user.
    *
+   * @sets oThis.userId
    *
    * @return {Promise<void>}
-   *
    * @private
    */
   async _createUser() {
     const oThis = this;
-    let KMSObject = new KmsWrapper(kmsGlobalConstant.userPasswordEncryptionPurpose);
-    let kmsResp = await KMSObject.generateDataKey();
-    const decryptedEncryptionSalt = kmsResp['Plaintext'],
-      encryptedEncryptionSalt = kmsResp['CiphertextBlob'];
 
-    let encryptedPassword = util.createSha256Digest(decryptedEncryptionSalt, oThis.password);
+    const KMSObject = new KmsWrapper(kmsGlobalConstant.userPasswordEncryptionPurpose);
+    const kmsResp = await KMSObject.generateDataKey();
+    const decryptedEncryptionSalt = kmsResp.Plaintext,
+      encryptedEncryptionSalt = kmsResp.CiphertextBlob;
 
-    // Insert user in database
-    let insertResponse = await new UserModel()
+    const encryptedPassword = util.createSha256Digest(decryptedEncryptionSalt, oThis.password);
+
+    // Insert user in database.
+    const insertResponse = await new UserModel()
       .insert({
         user_name: oThis.userName,
         first_name: oThis.firstName,
@@ -119,8 +128,9 @@ class SignUp extends ServiceBase {
       .fire();
 
     if (!insertResponse) {
-      logger.error('Error while inserting data in users table');
-      return Promise.reject();
+      logger.error('Error while inserting data in users table.');
+
+      return Promise.reject(new Error('Error while inserting data in users table.'));
     }
 
     oThis.userId = insertResponse.insertId;
@@ -129,17 +139,17 @@ class SignUp extends ServiceBase {
   }
 
   /**
-   * Create token user
+   * Create token user.
    *
+   * @sets oThis.ostUserId, oThis.ostStatus
    *
    * @return {Promise<void>}
-   *
    * @private
    */
   async _createUserInOst() {
     const oThis = this;
 
-    logger.log('create User In Ost');
+    logger.log('Creating user in OST.');
 
     const createUserServiceResponse = await ostPlatformSdk.createUser();
     if (!createUserServiceResponse.isSuccess()) {
@@ -162,17 +172,18 @@ class SignUp extends ServiceBase {
    */
   async _createTokenUser() {
     const oThis = this;
-    logger.log('create Token User');
-    let KMSObject = new KmsWrapper(kmsGlobalConstant.tokenUserScryptSaltPurpose);
-    let kmsResp = await KMSObject.generateDataKey();
-    const decryptedEncryptionSalt = kmsResp['Plaintext'],
-      encryptedEncryptionSalt = kmsResp['CiphertextBlob'],
+
+    logger.log('Creating token user.');
+    const KMSObject = new KmsWrapper(kmsGlobalConstant.tokenUserScryptSaltPurpose);
+    const kmsResp = await KMSObject.generateDataKey();
+    const decryptedEncryptionSalt = kmsResp.Plaintext,
+      encryptedEncryptionSalt = kmsResp.CiphertextBlob,
       scryptSalt = localCipher.generateRandomIv(32);
 
-    let encryptedScryptSalt = localCipher.encrypt(decryptedEncryptionSalt, scryptSalt);
+    const encryptedScryptSalt = localCipher.encrypt(decryptedEncryptionSalt, scryptSalt);
 
-    // Insert token user in database
-    let insertResponse = await new TokenUserModel()
+    // Insert token user in database.
+    const insertResponse = await new TokenUserModel()
       .insert({
         user_id: oThis.userId,
         ost_user_id: oThis.ostUserId,
@@ -187,35 +198,41 @@ class SignUp extends ServiceBase {
     oThis.signUpAirdropStatus = 0;
 
     if (!insertResponse) {
-      logger.error('Error while inserting data in token_users table');
-      return Promise.reject();
+      logger.error('Error while inserting data in token_users table.');
+
+      return Promise.reject(new Error('Error while inserting data in token_users table.'));
     }
 
     return Promise.resolve(responseHelper.successWithData({}));
   }
 
   /**
-   * Service Response
-   *
+   * Service response.
    *
    * @return {Promise<void>}
-   *
    * @private
    */
   async _serviceResponse() {
     const oThis = this;
 
-    let secureUserRes = await new SecureUserCache({ id: oThis.userId }).fetch();
-    let tokenUserRes = await new TokenUserDetailByUserIdsCache({ userIds: [oThis.userId] }).fetch();
+    const promisesArray = [];
 
-    let secureUser = secureUserRes.data,
+    promisesArray.push(new SecureUserCache({ id: oThis.userId }).fetch());
+    promisesArray.push(new TokenUserDetailByUserIdsCache({ userIds: [oThis.userId] }).fetch());
+
+    const promisesArrayResponse = await Promise.all(promisesArray);
+
+    const secureUserRes = promisesArrayResponse[0];
+    const tokenUserRes = promisesArrayResponse[1];
+
+    const secureUser = secureUserRes.data,
       tokenUser = tokenUserRes.data[oThis.userId];
 
-    let userLoginCookieValue = new UserModel().getCookieValueFor(secureUser, {
+    const userLoginCookieValue = new UserModel().getCookieValueFor(secureUser, {
       timestamp: Date.now() / 1000
     });
 
-    //TODO - delete password from secureUser
+    // TODO - delete password from secureUser
 
     return responseHelper.successWithData({
       user: new UserModel().safeFormattedData(secureUser),

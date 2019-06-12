@@ -1,5 +1,4 @@
 const rootPrefix = '../../..',
-  responseHelper = require(rootPrefix + '/lib/formatter/response'),
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
   coreConstants = require(rootPrefix + '/config/coreConstants');
 
@@ -33,26 +32,6 @@ class UserFeedModel extends ModelBase {
       createdAt: dbRow.created_at,
       updatedAt: dbRow.updated_at
     };
-  }
-
-  /***
-   * Fetch user feed by id
-   *
-   * @param id {Integer} - id
-   *
-   * @return {Object}
-   */
-  async fetchById(id) {
-    const oThis = this;
-    let dbRows = await oThis
-      .select('*')
-      .where({ id: id })
-      .fire();
-
-    if (dbRows.length === 0) {
-      return {};
-    }
-    return oThis.formatDbData(dbRows[0]);
   }
 
   /***
@@ -111,15 +90,26 @@ class UserFeedModel extends ModelBase {
       .where(['id IN (?)', Ids])
       .fire();
 
-    if (dbRows.length === 0) {
-      return responseHelper.successWithData(response);
-    }
-
     for (let index = 0; index < dbRows.length; index++) {
-      response[dbRows[index].id] = oThis.formatDbData(dbRows[index]);
+      let formatDbRow = oThis.formatDbData(dbRows[index]);
+      response[formatDbRow.id] = formatDbRow;
     }
 
-    return responseHelper.successWithData(response);
+    return response;
+  }
+
+  /***
+   * Fetch user feed by id
+   *
+   * @param id {Integer} - id
+   *
+   * @return {Object}
+   */
+  async fetchById(id) {
+    const oThis = this;
+    let dbRows = await oThis.fetchByIds([id]);
+
+    return dbRows[id] || {};
   }
 
   /***
