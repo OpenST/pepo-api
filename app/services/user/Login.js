@@ -50,6 +50,8 @@ class Login extends ServiceBase {
 
     await oThis._fetchTokenUser();
 
+    await oThis._getSignupAirdropStatus();
+
     return Promise.resolve(oThis._serviceResponse());
   }
 
@@ -183,6 +185,24 @@ class Login extends ServiceBase {
   }
 
   /**
+   * Get Airdrop Signup Status
+   *
+   *
+   * @return {Promise<void>}
+   *
+   * @private
+   */
+  async _getSignupAirdropStatus() {
+    const oThis = this;
+    let propertiesArray = await new TokenUserModel().getBitwiseArray('properties', oThis.tokenUser.properties);
+    if (propertiesArray.indexOf('AIRDROP_DONE') > -1) {
+      oThis.signUpAirdropStatus = 1;
+    } else {
+      oThis.signUpAirdropStatus = 0;
+    }
+  }
+
+  /**
    * Response for service
    *
    *
@@ -200,6 +220,7 @@ class Login extends ServiceBase {
     return responseHelper.successWithData({
       user: new UserModel().safeFormattedData(oThis.secureUser),
       tokenUser: new TokenUserModel().safeFormattedData(oThis.tokenUser),
+      signUpAirdropStatus: oThis.signUpAirdropStatus,
       userLoginCookieValue: userLoginCookieValue
     });
   }
