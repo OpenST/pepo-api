@@ -73,9 +73,9 @@ router.get('/current', sanitizer.sanitizeDynamicUrlParams, function(req, res, ne
 
   const dataFormatterFunc = async function(serviceResponse) {
     const wrapperFormatterRsp = await new WrapperFormatter({
-      resultType: entityType.loggedInUser,
+      resultType: responseEntityKey.loggedInUser,
       entityKindToResponseKeyMap: {
-        [entityType.loggedInUser]: responseEntityKey.loggedInUser
+        [entityType.user]: responseEntityKey.loggedInUser
       },
       serviceData: serviceResponse.data
     }).perform();
