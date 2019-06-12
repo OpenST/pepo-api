@@ -1,10 +1,3 @@
-'use strict';
-/**
- * This service helps in processing the ost events
- *
- * Note:-
- */
-
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   ActivationSuccessClass = require(rootPrefix + '/app/services/ostEvents/users/ActivationSuccess'),

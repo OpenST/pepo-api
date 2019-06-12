@@ -1,10 +1,3 @@
-'use strict';
-/**
- * This service helps in creating the ost events from webhooks
- *
- * Note:-
- */
-
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),

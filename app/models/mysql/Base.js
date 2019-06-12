@@ -1,7 +1,3 @@
-'use strict';
-/**
- * @file - Base file for all the MySQL Models
- */
 const rootPrefix = '../../..',
   MysqlQueryBuilders = require(rootPrefix + '/lib/queryBuilders/mysql'),
   mysqlWrapper = require(rootPrefix + '/lib/mysqlWrapper'),

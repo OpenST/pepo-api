@@ -1,13 +1,5 @@
-'use strict';
-/**
- * This service helps in processing the user activation success event from ost platform
- *
- * Note:-
- */
-
 const rootPrefix = '../../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
-  CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   TokenUserByUserIdCache = require(rootPrefix + '/lib/cacheManagement/multi/TokenUserByUserIds'),
   TokenUserModel = require(rootPrefix + '/app/models/mysql/TokenUser'),
   FeedModel = require(rootPrefix + '/app/models/mysql/Feed'),

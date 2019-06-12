@@ -1,7 +1,3 @@
-'use strict';
-/**
- * @file - Model for users table
- */
 const rootPrefix = '../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
   userConstants = require(rootPrefix + '/lib/globalConstant/user'),
@@ -268,10 +264,10 @@ class UserModel extends ModelBase {
       id: params.id
     }).clear();
 
-    const UserCache = require(rootPrefix + '/lib/cacheManagement/single/User');
+    const UserCache = require(rootPrefix + '/lib/cacheManagement/multi/User');
 
     await new UserCache({
-      id: params.id
+      ids: [params.id]
     }).clear();
   }
 }

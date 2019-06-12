@@ -1,7 +1,3 @@
-'use strict';
-/**
- * @file - Model for token_users table
- */
 const rootPrefix = '../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
   coreConstants = require(rootPrefix + '/config/coreConstants');

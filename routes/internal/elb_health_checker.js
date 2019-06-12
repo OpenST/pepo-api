@@ -1,11 +1,3 @@
-'use strict';
-
-/**
- *
- * 200 OK response needed for ELB Health checker.
- *
- */
-
 const express = require('express');
 
 const rootPrefix = '../..',
