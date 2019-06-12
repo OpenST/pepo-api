@@ -115,9 +115,10 @@ class UserActivationSuccess extends ServiceBase {
 
     logger.log('Fetch Token User for user activation success');
 
-    let tokenUserObjRes = await new TokenUserByOstUserIdsCache({ ostUserIds: [oThis.ostUserid] }).fetch();
+    let tokenUserObjsRes = await new TokenUserByOstUserIdsCache({ ostUserIds: [oThis.ostUserid] }).fetch();
+    let tokenUserObjRes = tokenUserObjsRes.data[oThis.ostUserid] || {};
 
-    if (tokenUserObjRes.isFailure()) {
+    if (!tokenUserObjRes.userId) {
       return Promise.reject(
         responseHelper.error({
           internal_error_identifier: 's_oe_u_as_ftu_1',
@@ -126,10 +127,12 @@ class UserActivationSuccess extends ServiceBase {
       );
     }
 
-    oThis.userId = tokenUserObjRes.data[oThis.ostUserid].userId;
+    oThis.userId = tokenUserObjRes.userId;
 
-    tokenUserObjRes = await new TokenUserDetailByUserIdCache({ userIds: [oThis.userId] }).fetch();
-    if (tokenUserObjRes.isFailure() || !tokenUserObjRes.data[oThis.userId].id) {
+    tokenUserObjsRes = await new TokenUserDetailByUserIdCache({ userIds: [oThis.userId] }).fetch();
+    tokenUserObjRes = tokenUserObjsRes.data[oThis.userId] || {};
+
+    if (!tokenUserObjRes.id) {
       return Promise.reject(
         responseHelper.error({
           internal_error_identifier: 's_oe_u_as_ftu_2',
@@ -138,7 +141,7 @@ class UserActivationSuccess extends ServiceBase {
       );
     }
 
-    oThis.tokenUserObj = tokenUserObjRes.data[oThis.userId];
+    oThis.tokenUserObj = tokenUserObjRes;
 
     if (
       oThis.tokenUserObj.ostStatus === tokenUserConstants.activatedOstStatus &&

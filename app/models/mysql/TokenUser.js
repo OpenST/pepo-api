@@ -137,12 +137,13 @@ class TokenUserModel extends ModelBase {
     const oThis = this;
     let response = {},
       dbRows = await oThis
-        .select(['id', 'user_id'])
+        .select(['id', 'user_id', 'ost_user_id'])
         .where(['ost_user_id IN (?)', ostUserIds])
         .fire();
 
     for (let index = 0; index < dbRows.length; index++) {
-      response[dbRows[index].ost_user_id] = oThis.formatDbData(dbRows[index]);
+      let formatDbRows = oThis.formatDbData(dbRows[index]);
+      response[formatDbRows.ostUserId] = formatDbRows;
     }
 
     return response;
