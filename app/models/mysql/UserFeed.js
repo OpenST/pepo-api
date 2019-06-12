@@ -162,7 +162,7 @@ class UserFeedModel extends ModelBase {
     const UserFeedByIds = require(rootPrefix + '/lib/cacheManagement/multi/UserFeedByIds');
 
     await new UserFeedByIds({
-      Ids: [params.Id]
+      ids: [params.Id]
     }).clear();
   }
 }

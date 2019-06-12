@@ -29,7 +29,7 @@ class Base extends ServiceBase {
     super(params);
     const oThis = this;
 
-    oThis.transactionUuid = params.transaction_uuid;
+    oThis.transactionUuid = params.ost_transaction_uuid;
     oThis.meta = params.meta;
     oThis.userId = params.current_user.id;
 
@@ -52,7 +52,7 @@ class Base extends ServiceBase {
     let response = await oThis._checkExternalEntities();
     if (response) {
       //If transaction is already present in external entity id. It is a duplicate
-      return Promise.resolve(responseHelper.successWithData(response));
+      return Promise.resolve(responseHelper.successWithData({ transactionDetails: response }));
     }
 
     //Only if transaction is new. Request OST Platform to give transaction details.
@@ -67,9 +67,7 @@ class Base extends ServiceBase {
     //Insert in user feeds
     await oThis._insertInUserFeedsTable();
 
-    let tokenDetails = await oThis._fetchTokenDetails();
-
-    return responseHelper.successWithData({ tokenDetails: tokenDetails });
+    return Promise.resolve(oThis._prepareResponseEntities());
   }
 
   /**
@@ -109,7 +107,7 @@ class Base extends ServiceBase {
         entityId: oThis.giphyObject.id,
         entityKind: externalEntityConstants.giphyEntityKind
       },
-      cacheResponseForGiphy = await new ExternalEntitiesByEntityIdAndEntityKindCache(params).fetch();
+      cacheResponseForGiphy = await new ExternalEntitiesByEntityIdAndEntityKindCache(paramsForGiphy).fetch();
 
     if (cacheResponseForGiphy.isSuccess() && cacheResponseForGiphy.data.id) {
       oThis.giphyExternalEntityId = cacheResponseForGiphy.data.id;
@@ -139,7 +137,7 @@ class Base extends ServiceBase {
     }
 
     let transactionParams = {
-      transaction_uuid: oThis.transactionUuid,
+      transaction_id: oThis.transactionUuid,
       user_id: oThis.ostUserId
     };
 
@@ -254,6 +252,13 @@ class Base extends ServiceBase {
 
     oThis.giphyExternalEntityId = insertResponse.insertId;
 
+    let clearCacheParams = {
+      id: oThis.giphyExternalEntityId,
+      entityId: entityId,
+      entityKind: externalEntityConstants.giphyEntityKind
+    };
+    await ExternalEntityModel.flushCache(clearCacheParams);
+
     return Promise.resolve();
   }
 
@@ -272,7 +277,7 @@ class Base extends ServiceBase {
 
     //Loop to prepare array of toOstUserIds which will be used to fetch user ids from multi cache.
     for (let i = 0; i < oThis.transfersData.length; i++) {
-      toOstUserIdsArray.push(transfersData[i].to_user_id);
+      toOstUserIdsArray.push(oThis.transfersData[i].to_user_id);
     }
 
     let TokenUserData = await new TokenUserByOstUserIdsCache({ ostUserIds: toOstUserIdsArray }).fetch();
@@ -297,6 +302,7 @@ class Base extends ServiceBase {
     }
 
     oThis.toUserIdsArray = toUserIdsArray; //To be used while inserting in user feeds table
+    oThis.amountsArray = amountsArray;
 
     let extraData = {
         kind: externalEntityConstants.extraData.userTransactionKind,
@@ -317,6 +323,13 @@ class Base extends ServiceBase {
       .fire();
 
     oThis.transactionExternalEntityId = insertResponse.insertId;
+
+    let clearCacheParams = {
+      id: oThis.transactionExternalEntityId,
+      entityId: entityId,
+      entityKind: externalEntityConstants.ostTransactionEntityKind
+    };
+    await ExternalEntityModel.flushCache(clearCacheParams);
 
     return Promise.resolve();
   }
@@ -364,6 +377,8 @@ class Base extends ServiceBase {
       .fire();
 
     oThis.feedId = insertResponse.insertId;
+
+    await FeedModel.flushCache({ id: oThis.feedId });
   }
 
   /**
@@ -383,6 +398,8 @@ class Base extends ServiceBase {
       })
       .fire();
 
+    await UserFeedModel.flushCache({ Id: insertResponse.insertId });
+
     if (oThis.feedStatus === feedConstants.publishedStatus) {
       //Insert entry for to user ids as well.
       for (let i = 0; i < oThis.toUserIdsArray.length; i++) {
@@ -393,8 +410,30 @@ class Base extends ServiceBase {
             published_ts: oThis.publishedAtTs
           })
           .fire();
+
+        await UserFeedModel.flushCache({ Id: toUserInsertResponse.insertId });
       }
     }
+  }
+
+  /**
+   * Prepares response entity and returns it.
+   *
+   * @returns {{transactionUuid: *, fromUserId: (String|*), toUserIds: (Array|*), amounts: (Array|*), status: *}}
+   * @private
+   */
+  _prepareResponseEntities() {
+    const oThis = this;
+
+    let responseEntity = {
+      transactionUuid: oThis.transactionUuid,
+      fromUserId: oThis.userId,
+      toUserIds: oThis.toUserIdsArray,
+      amounts: oThis.amountsArray,
+      status: oThis.transactionStatus
+    };
+
+    return responseHelper.successWithData({ transactionDetails: responseEntity });
   }
 
   _setKind() {

@@ -26,7 +26,7 @@ class Send extends OstTransactionBase {
   _setKind() {
     const oThis = this;
 
-    oThis.transactionKind = feedConstants.sendKind;
+    oThis.transactionKind = feedConstants.invertedKinds[feedConstants.sendKind];
   }
 }
 

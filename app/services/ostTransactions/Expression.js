@@ -26,7 +26,7 @@ class Expression extends OstTransactionBase {
   _setKind() {
     const oThis = this;
 
-    oThis.transactionKind = feedConstants.expressionKind;
+    oThis.transactionKind = feedConstants.invertedKinds[feedConstants.expressionKind];
   }
 }
 

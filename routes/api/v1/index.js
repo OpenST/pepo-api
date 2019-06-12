@@ -12,7 +12,8 @@ const rootPrefix = '../../..',
   usersRoutes = require(rootPrefix + '/routes/api/v1/users'),
   tokensRoutes = require(rootPrefix + '/routes/api/v1/tokens'),
   gifsRoutes = require(rootPrefix + '/routes/api/v1/gifs'),
-  feedsRoutes = require(rootPrefix + '/routes/api/v1/feeds');
+  feedsRoutes = require(rootPrefix + '/routes/api/v1/feeds'),
+  ostTransactionRoutes = require(rootPrefix + '/routes/api/v1/ostTransactions');
 
 const errorConfig = basicHelper.fetchErrorConfig(apiVersions.v1);
 
@@ -41,6 +42,7 @@ const validateCookie = async function(req, res, next) {
 router.use('/auth', authRoutes);
 router.use('/users', validateCookie, usersRoutes);
 router.use('/tokens', validateCookie, tokensRoutes);
+router.use('/ost-transactions', validateCookie, ostTransactionRoutes);
 router.use('/gifs', gifsRoutes);
 router.use('/feeds', validateCookie, feedsRoutes);
 

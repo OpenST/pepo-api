@@ -136,6 +136,36 @@ const v1Signature = {
   [apiName.gifsCategories]: {
     mandatory: [],
     optional: []
+  },
+  [apiName.expressionTransaction]: {
+    mandatory: [
+      {
+        parameter: 'ost_transaction_uuid',
+        validatorMethods: ['validateUuidV4']
+      },
+      {
+        parameter: 'meta',
+        validatorMethods: ['validateObject', 'validateOstTransactionMeta']
+      },
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateObject']
+      }
+    ],
+    optional: []
+  },
+  [apiName.sendTransaction]: {
+    mandatory: [
+      {
+        parameter: 'ost_transaction_uuid',
+        validatorMethods: ['validateUuidV4']
+      },
+      {
+        parameter: 'meta',
+        validatorMethods: ['validateObject', 'validateOstTransactionMeta']
+      }
+    ],
+    optional: []
   }
 };
 
