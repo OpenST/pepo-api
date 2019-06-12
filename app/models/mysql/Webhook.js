@@ -56,7 +56,7 @@ class Webhook extends ModelBase {
   async fetchWebhookByOstId(ostId) {
     const oThis = this;
 
-    let dbRows = oThis
+    let dbRows = await oThis
       .select('*')
       .where(['ost_id = ?', ostId])
       .fire();
