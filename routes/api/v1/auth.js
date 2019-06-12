@@ -81,7 +81,7 @@ function setLoginCookies(responseObject, cookieValue) {
   //TODO: path / not defined.
   let options = {
     maxAge: 1000 * 60 * 15, // would expire after 15 minutes
-    secure: true, // to ensure browser sends cookie over https
+    // secure: true, // to ensure browser sends cookie over https
     httpOnly: true, // The cookie only accessible by the web server
     signed: true // Indicates if the cookie should be signed
   };

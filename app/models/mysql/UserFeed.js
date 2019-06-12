@@ -34,6 +34,44 @@ class UserFeedModel extends ModelBase {
     };
   }
 
+  /**
+   * Fetch feed ids
+   *
+   * @param {object} params
+   * @param {Array} params.userId
+   * @param {number} [params.page]
+   * @param {number} [params.limit]
+   *
+   * @returns {Array}
+   */
+  async fetchFeedIds(params) {
+    const oThis = this;
+
+    const page = params.page || 1,
+      limit = params.limit || 10,
+      offset = (page - 1) * limit;
+
+    let feedIds = [];
+
+    let dbRows = await oThis
+      .select('*')
+      .where({ user_id: params.userId })
+      .limit(limit)
+      .offset(offset)
+      .order_by('published_ts DESC')
+      .fire();
+
+    if (dbRows.length === 0) {
+      return [];
+    }
+
+    for (let index = 0; index < dbRows.length; index++) {
+      feedIds.push(response[dbRows[index].feed_id]);
+    }
+
+    return feedIds;
+  }
+
   /***
    * Fetch user feed by feed id
    *
