@@ -101,7 +101,7 @@ const v1Signature = {
     ],
     optional: []
   },
-  [apiName.gifs]: {
+  [apiName.gifsSearch]: {
     mandatory: [
       {
         parameter: 'query',
@@ -132,6 +132,10 @@ const v1Signature = {
         validatorMethods: ['validateString']
       }
     ]
+  },
+  [apiName.gifsCategories]: {
+    mandatory: [],
+    optional: []
   }
 };
 
