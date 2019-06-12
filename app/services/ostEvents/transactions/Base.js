@@ -117,7 +117,7 @@ class TransactionOstEventBase extends ServiceBase {
     const oThis = this;
     logger.log('Update external entity for Transaction Webhook');
 
-    let extraData = JSON.parse(oThis.externalEntityObj.extraData);
+    let extraData = oThis.externalEntityObj.extraData;
     extraData.ostTransactionStatus = oThis._validTransactionStatus();
 
     await new ExternalEntityModel()
