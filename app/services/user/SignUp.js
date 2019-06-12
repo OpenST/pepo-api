@@ -112,29 +112,28 @@ class SignUp extends ServiceBase {
 
     const encryptedPassword = util.createSha256Digest(decryptedEncryptionSalt, oThis.password);
 
+    let insertData = {
+      user_name: oThis.userName,
+      first_name: oThis.firstName,
+      last_name: oThis.lastName,
+      password: encryptedPassword,
+      encryption_salt: encryptedEncryptionSalt,
+      mark_inactive_trigger_count: 0,
+      properties: 0,
+      status: userConstants.invertedStatuses[userConstants.activeStatus]
+    };
     // Insert user in database.
-    const insertResponse = await new UserModel()
-      .insert({
-        user_name: oThis.userName,
-        first_name: oThis.firstName,
-        last_name: oThis.lastName,
-        password: encryptedPassword,
-        encryption_salt: encryptedEncryptionSalt,
-        mark_inactive_trigger_count: 0,
-        properties: 0,
-        status: userConstants.invertedStatuses[userConstants.activeStatus]
-      })
-      .fire();
+    const insertResponse = await new UserModel().insert(insertData).fire();
 
     if (!insertResponse) {
       logger.error('Error while inserting data in users table.');
-
       return Promise.reject(new Error('Error while inserting data in users table.'));
     }
 
     oThis.userId = insertResponse.insertId;
 
-    await UserModel.flushCache({ id: oThis.userId });
+    let formattedInsertData = new UserModel().formatDbData(insertData);
+    await UserModel.flushCache(formattedInsertData);
 
     return Promise.resolve(responseHelper.successWithData({}));
   }
@@ -183,18 +182,17 @@ class SignUp extends ServiceBase {
 
     const encryptedScryptSalt = localCipher.encrypt(decryptedEncryptionSalt, scryptSalt);
 
+    let insertData = {
+      user_id: oThis.userId,
+      ost_user_id: oThis.ostUserId,
+      ost_token_holder_address: null,
+      scrypt_salt: encryptedScryptSalt,
+      encryption_salt: encryptedEncryptionSalt,
+      properties: 0,
+      ost_status: tokenUserConstants.invertedOstStatuses[oThis.ostStatus.toUpperCase()]
+    };
     // Insert token user in database.
-    const insertResponse = await new TokenUserModel()
-      .insert({
-        user_id: oThis.userId,
-        ost_user_id: oThis.ostUserId,
-        ost_token_holder_address: null,
-        scrypt_salt: encryptedScryptSalt,
-        encryption_salt: encryptedEncryptionSalt,
-        properties: 0,
-        ost_status: tokenUserConstants.invertedOstStatuses[oThis.ostStatus.toUpperCase()]
-      })
-      .fire();
+    const insertResponse = await new TokenUserModel().insert(insertData).fire();
 
     if (!insertResponse) {
       logger.error('Error while inserting data in token_users table.');
@@ -202,7 +200,8 @@ class SignUp extends ServiceBase {
       return Promise.reject(new Error('Error while inserting data in token_users table.'));
     }
 
-    await TokenUserModel.flushCache({ userId: oThis.userId });
+    let formattedInsertData = new TokenUserModel().formatDbData(insertData);
+    await TokenUserModel.flushCache(formattedInsertData);
 
     return Promise.resolve(responseHelper.successWithData({}));
   }
