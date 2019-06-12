@@ -19,7 +19,7 @@ router.get('/search', sanitizer.sanitizeDynamicUrlParams, function(req, res, nex
       entityKindToResponseKeyMap: {
         [entityType.gifs]: responseEntityKey.gifs
       },
-      serviceData: serviceResponse.data.gifs
+      serviceData: serviceResponse.data
     }).perform();
 
     serviceResponse.data = wrapperFormatterRsp.data;

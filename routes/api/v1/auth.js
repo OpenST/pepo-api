@@ -10,6 +10,7 @@ const rootPrefix = '../../..',
   coreConstant = require(rootPrefix + '/config/coreConstants'),
   entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
   responseEntityKey = require(rootPrefix + '/lib/globalConstant/responseEntityKey'),
+  basicHelper = require(rootPrefix + '/helpers/basic'),
   userConstant = require(rootPrefix + '/lib/globalConstant/user');
 
 // Node.js cookie parsing middleware.
@@ -75,16 +76,20 @@ router.post('/login', sanitizer.sanitizeDynamicUrlParams, function(req, res, nex
  * @param cookieValue
  */
 function setLoginCookies(responseObject, cookieValue) {
-  //TODO: Cookie Security Review. Duplicate settings.
+  //TODO: Cookie Security Review.
   //TODO: Read: https://expressjs.com/en/advanced/best-practice-security.html#use-cookies-securely
-  //TODO: Domain not defined.
-  //TODO: path / not defined.
   let options = {
     maxAge: 1000 * 60 * 15, // would expire after 15 minutes
-    // secure: true, // to ensure browser sends cookie over https
     httpOnly: true, // The cookie only accessible by the web server
-    signed: true // Indicates if the cookie should be signed
+    signed: true, // Indicates if the cookie should be signed
+    path: '/'
   };
+
+  // For non-development environments
+  if (!basicHelper.isDevelopment()) {
+    options.secure = true; // to ensure browser sends cookie over https
+    options.domain = coreConstant.PA_DOMAIN;
+  }
 
   // Set cookie
   responseObject.cookie(userConstant.loginCookieName, cookieValue, options); // options is optional

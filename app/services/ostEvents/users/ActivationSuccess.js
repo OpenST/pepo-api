@@ -263,6 +263,7 @@ class UserActivationSuccess extends ServiceBase {
       })
     };
 
+    console.log('\n\n\n==executeParams===', JSON.stringify(executeParams));
     let startAirdropResponse = null;
     try {
       startAirdropResponse = await ostPlatformSdk.executeTransaction(executeParams);
