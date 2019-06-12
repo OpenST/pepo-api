@@ -1,5 +1,3 @@
-'use strict';
-
 const rootPrefix = '..',
   coreConstants = require(rootPrefix + '/config/coreConstants');
 
