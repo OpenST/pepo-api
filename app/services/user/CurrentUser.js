@@ -1,11 +1,10 @@
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
-  SecureUserCache = require(rootPrefix + '/lib/cacheManagement/single/SecureUser'),
+  UserMultiCache = require(rootPrefix + '/lib/cacheManagement/multi/User'),
   TokenUserDetailByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TokenUserByUserIds'),
   UserModel = require(rootPrefix + '/app/models/mysql/User'),
   TokenUserModel = require(rootPrefix + '/app/models/mysql/TokenUser'),
-  userConstants = require(rootPrefix + '/lib/globalConstant/user'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger');
 
 class CurrentUser extends ServiceBase {
@@ -50,19 +49,9 @@ class CurrentUser extends ServiceBase {
     const oThis = this;
     logger.log('fetch User');
 
-    let secureUserRes = await new SecureUserCache({ id: oThis.userId }).fetch();
-    oThis.secureUser = secureUserRes.data;
-
-    if (oThis.secureUser.status !== userConstants.activeStatus) {
-      return Promise.reject(
-        responseHelper.paramValidationError({
-          internal_error_identifier: 's_um_l_fu_1',
-          api_error_identifier: 'invalid_api_params',
-          params_error_identifiers: ['invalid_user_name'],
-          debug_options: {}
-        })
-      );
-    }
+    let usersByIdHashRes = await new UserMultiCache({ ids: [oThis.userId] }).fetch();
+    let usersByIdHash = usersByIdHashRes.data;
+    oThis.user = usersByIdHash[oThis.userId];
 
     return Promise.resolve(responseHelper.successWithData({}));
   }
@@ -97,14 +86,9 @@ class CurrentUser extends ServiceBase {
   async _serviceResponse() {
     const oThis = this;
 
-    let userLoginCookieValue = new UserModel().getCookieValueFor(oThis.secureUser, {
-      timestamp: Date.now() / 1000
-    });
-
     return responseHelper.successWithData({
-      user: new UserModel().safeFormattedData(oThis.secureUser),
-      tokenUser: new TokenUserModel().safeFormattedData(oThis.tokenUser),
-      userLoginCookieValue: userLoginCookieValue
+      user: new UserModel().safeFormattedData(oThis.user),
+      tokenUser: new TokenUserModel().safeFormattedData(oThis.tokenUser)
     });
   }
 }
