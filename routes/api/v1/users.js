@@ -3,12 +3,11 @@ const express = require('express'),
 
 const rootPrefix = '../../..',
   WrapperFormatter = require(rootPrefix + '/lib/formatter/Wrapper'),
-  UserListMetaFormatter = require(rootPrefix + '/lib/formatter/meta/UserList'),
-  CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   routeHelper = require(rootPrefix + '/routes/helper'),
   apiName = require(rootPrefix + '/lib/globalConstant/apiName'),
   sanitizer = require(rootPrefix + '/helpers/sanitizer'),
-  entityType = require(rootPrefix + '/lib/globalConstant/entityType');
+  entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
+  responseEntityKey = require(rootPrefix + '/lib/globalConstant/responseEntityKey');
 
 /* Register Device*/
 router.post('/register-device', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
@@ -16,8 +15,10 @@ router.post('/register-device', sanitizer.sanitizeDynamicUrlParams, function(req
 
   const onServiceSuccess = async function(serviceResponse) {
     const wrapperFormatterRsp = await new WrapperFormatter({
-      resultType: entityType.device,
-      entities: [entityType.device],
+      resultType: responseEntityKey.device,
+      entityKindToResponseKeyMap: {
+        [entityType.device]: responseEntityKey.device
+      },
       serviceData: serviceResponse.data
     }).perform();
 
@@ -33,8 +34,10 @@ router.get('/recovery-info', sanitizer.sanitizeDynamicUrlParams, function(req, r
 
   const dataFormatterFunc = async function(serviceResponse) {
     const wrapperFormatterRsp = await new WrapperFormatter({
-      resultType: entityType.recoveryInfo,
-      entities: [entityType.recoveryInfo],
+      resultType: responseEntityKey.recoveryInfo,
+      entityKindToResponseKeyMap: {
+        [entityType.recoveryInfo]: responseEntityKey.recoveryInfo
+      },
       serviceData: serviceResponse.data
     }).perform();
 
@@ -50,8 +53,11 @@ router.get('/', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
 
   const dataFormatterFunc = async function(serviceResponse) {
     const wrapperFormatterRsp = await new WrapperFormatter({
-      resultType: entityType.users,
-      entities: [entityType.users, entityType.meta],
+      resultType: responseEntityKey.users,
+      entityKindToResponseKeyMap: {
+        [entityType.users]: responseEntityKey.users,
+        [entityType.userListMeta]: responseEntityKey.meta
+      },
       serviceData: serviceResponse.data
     }).perform();
 
@@ -67,8 +73,10 @@ router.get('/current', sanitizer.sanitizeDynamicUrlParams, function(req, res, ne
 
   const dataFormatterFunc = async function(serviceResponse) {
     const wrapperFormatterRsp = await new WrapperFormatter({
-      resultType: entityType.loggedInUser,
-      entities: [entityType.loggedInUser],
+      resultType: responseEntityKey.loggedInUser,
+      entityKindToResponseKeyMap: {
+        [entityType.user]: responseEntityKey.loggedInUser
+      },
       serviceData: serviceResponse.data
     }).perform();
 

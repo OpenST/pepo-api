@@ -6,7 +6,8 @@ const rootPrefix = '../../..',
   apiName = require(rootPrefix + '/lib/globalConstant/apiName'),
   sanitizer = require(rootPrefix + '/helpers/sanitizer'),
   WrapperFormatter = require(rootPrefix + '/lib/formatter/Wrapper'),
-  entityType = require(rootPrefix + '/lib/globalConstant/entityType');
+  entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
+  responseEntityKey = require(rootPrefix + '/lib/globalConstant/responseEntityKey');
 
 /* Tokens*/
 router.get('/', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
@@ -14,8 +15,10 @@ router.get('/', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
 
   const dataFormatterFunc = async function(serviceResponse) {
     const wrapperFormatterRsp = await new WrapperFormatter({
-      resultType: entityType.token,
-      entities: [entityType.token],
+      resultType: responseEntityKey.token,
+      entityKindToResponseKeyMap: {
+        [entityType.token]: responseEntityKey.token
+      },
       serviceData: serviceResponse.data
     }).perform();
 

@@ -11,7 +11,8 @@ const rootPrefix = '../../..',
   userConstant = require(rootPrefix + '/lib/globalConstant/user'),
   usersRoutes = require(rootPrefix + '/routes/api/v1/users'),
   tokensRoutes = require(rootPrefix + '/routes/api/v1/tokens'),
-  gifsRoutes = require(rootPrefix + '/routes/api/v1/gifs');
+  gifsRoutes = require(rootPrefix + '/routes/api/v1/gifs'),
+  feedsRoutes = require(rootPrefix + '/routes/api/v1/feeds');
 
 const errorConfig = basicHelper.fetchErrorConfig(apiVersions.v1);
 
@@ -41,5 +42,6 @@ router.use('/auth', authRoutes);
 router.use('/users', validateCookie, usersRoutes);
 router.use('/tokens', validateCookie, tokensRoutes);
 router.use('/gifs', gifsRoutes);
+router.use('/feeds', validateCookie, feedsRoutes);
 
 module.exports = router;

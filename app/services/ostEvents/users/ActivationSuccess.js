@@ -116,7 +116,7 @@ class UserActivationSuccess extends ServiceBase {
     logger.log('Fetch Token User for user activation success');
 
     let tokenUserObjsRes = await new TokenUserByOstUserIdsCache({ ostUserIds: [oThis.ostUserid] }).fetch();
-    let tokenUserObjRes = tokenUserObjsRes.data[oThis.ostUserid] || {};
+    let tokenUserObjRes = tokenUserObjsRes.data[oThis.ostUserid];
 
     if (!tokenUserObjRes.userId) {
       return Promise.reject(
@@ -130,9 +130,9 @@ class UserActivationSuccess extends ServiceBase {
     oThis.userId = tokenUserObjRes.userId;
 
     tokenUserObjsRes = await new TokenUserDetailByUserIdCache({ userIds: [oThis.userId] }).fetch();
-    tokenUserObjRes = tokenUserObjsRes.data[oThis.userId] || {};
+    oThis.tokenUserObj = tokenUserObjsRes.data[oThis.userId];
 
-    if (!tokenUserObjRes.id) {
+    if (!oThis.tokenUserObj.id) {
       return Promise.reject(
         responseHelper.error({
           internal_error_identifier: 's_oe_u_as_ftu_2',
@@ -140,8 +140,6 @@ class UserActivationSuccess extends ServiceBase {
         })
       );
     }
-
-    oThis.tokenUserObj = tokenUserObjRes;
 
     if (
       oThis.tokenUserObj.ostStatus === tokenUserConstants.activatedOstStatus &&
@@ -195,6 +193,8 @@ class UserActivationSuccess extends ServiceBase {
     await TokenUserModel.flushCache({ userId: oThis.tokenUserObj.userId });
 
     oThis.tokenUserObj.properties = propertyVal;
+    oThis.tokenUserObj.ostUserTokenHolderAddress = oThis.ostUserTokenHolderAddress;
+    oThis.tokenUserObj.ostStatus = oThis.ostUserStatus;
 
     return Promise.resolve(responseHelper.successWithData({}));
   }
@@ -261,7 +261,7 @@ class UserActivationSuccess extends ServiceBase {
       },
       raw_calldata: JSON.stringify({
         method: 'directTransfers',
-        parameters: [transferToAddress, tokenConstants.airdropAmount]
+        parameters: [[transferToAddress], [tokenConstants.airdropAmount]]
       })
     };
 
@@ -345,6 +345,8 @@ class UserActivationSuccess extends ServiceBase {
       logger.error('Error while inserting data in external_entities table');
       return Promise.reject(insertResponse);
     }
+
+    await ExternalEntityModel.flushCache({ id: insertResponse.insertId });
 
     return Promise.resolve(responseHelper.successWithData({}));
   }

@@ -8,13 +8,9 @@ const rootPrefix = '../..',
 const router = express.Router();
 
 const validateV2Signature = async function(req, res, next) {
-  // TODO: Decoded params can't be merged directly in body json data from OST
-  req.decodedParams = Object.assign(req.body, req.decodedParams);
-
   let authResponse;
 
-  // TODO: For signature verification complete decoded params can't be sent. sent req.body
-  authResponse = await new OstWebhookAuth({ webhookParams: req.decodedParams, requestHeaders: req.headers })
+  authResponse = await new OstWebhookAuth({ webhookParams: req.body, requestHeaders: req.headers })
     .perform()
     .catch(function(r) {
       return r;
@@ -27,6 +23,21 @@ const validateV2Signature = async function(req, res, next) {
   next();
 };
 
-router.use('/v2', validateV2Signature, sanitizer.sanitizeBodyAndQuery, v2Routes);
+/**
+ * Assign params
+ *
+ * @param req
+ * @param res
+ * @param next
+ */
+const assignParams = function(req, res, next) {
+  // IMPORTANT NOTE: Don't assign parameters before sanitization
+  // And assign it to req.decodedParams
+  req.decodedParams.webhookParams = Object.assign(req.body);
+
+  next();
+};
+
+router.use('/v2', validateV2Signature, sanitizer.sanitizeBodyAndQuery, assignParams, v2Routes);
 
 module.exports = router;

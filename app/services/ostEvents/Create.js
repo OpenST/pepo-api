@@ -18,7 +18,7 @@ class OstEventCreate extends ServiceBase {
 
     const oThis = this;
 
-    oThis.eventData = params;
+    oThis.eventData = params.webhookParams;
     oThis.eventId = oThis.eventData.id;
 
     oThis.ostEventId = null;

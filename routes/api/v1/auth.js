@@ -9,6 +9,8 @@ const rootPrefix = '../../..',
   sanitizer = require(rootPrefix + '/helpers/sanitizer'),
   coreConstant = require(rootPrefix + '/config/coreConstants'),
   entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
+  responseEntityKey = require(rootPrefix + '/lib/globalConstant/responseEntityKey'),
+  basicHelper = require(rootPrefix + '/helpers/basic'),
   userConstant = require(rootPrefix + '/lib/globalConstant/user');
 
 // Node.js cookie parsing middleware.
@@ -19,23 +21,13 @@ router.post('/sign-up', sanitizer.sanitizeDynamicUrlParams, function(req, res, n
   req.decodedParams.apiName = apiName.signUp;
 
   const onServiceSuccess = async function(serviceResponse) {
-    //TODO: Cookie Security Review. Duplicate settings.
-    //TODO: Read: https://expressjs.com/en/advanced/best-practice-security.html#use-cookies-securely
-    //TODO: Domain not defined.
-    //TODO: secure true not defined.
-    //TODO: path / not defined.
-    let options = {
-      maxAge: 1000 * 60 * 15, // would expire after 15 minutes
-      httpOnly: true, // The cookie only accessible by the web server
-      signed: true // Indicates if the cookie should be signed
-    };
-
-    // Set cookie
-    res.cookie(userConstant.loginCookieName, serviceResponse.data.userLoginCookieValue, options); // options is optional
+    setLoginCookies(res, serviceResponse.data.userLoginCookieValue);
 
     const wrapperFormatterRsp = await new WrapperFormatter({
-      resultType: entityType.loggedInUser,
-      entities: [entityType.loggedInUser],
+      resultType: responseEntityKey.loggedInUser,
+      entityKindToResponseKeyMap: {
+        [entityType.user]: responseEntityKey.loggedInUser
+      },
       serviceData: serviceResponse.data
     }).perform();
 
@@ -43,7 +35,7 @@ router.post('/sign-up', sanitizer.sanitizeDynamicUrlParams, function(req, res, n
   };
 
   const onServiceFailure = async function(serviceResponse) {
-    // TODO - delete cookie here.
+    deleteLoginCookie(res);
   };
 
   Promise.resolve(
@@ -56,23 +48,12 @@ router.post('/login', sanitizer.sanitizeDynamicUrlParams, function(req, res, nex
   req.decodedParams.apiName = apiName.login;
 
   const onServiceSuccess = async function(serviceResponse) {
-    //TODO: Cookie Security Review. Duplicate settings.
-    //TODO: Read: https://expressjs.com/en/advanced/best-practice-security.html#use-cookies-securely
-    //TODO: Domain not defined.
-    //TODO: secure true not defined.
-    //TODO: path / not defined.
-    let options = {
-      maxAge: 1000 * 60 * 15, // would expire after 15 minutes
-      httpOnly: true, // The cookie only accessible by the web server
-      signed: true // Indicates if the cookie should be signed
-    };
-
-    // Set cookie
-    res.cookie(userConstant.loginCookieName, serviceResponse.data.userLoginCookieValue, options); // options is optional
-
+    setLoginCookies(res, serviceResponse.data.userLoginCookieValue);
     const wrapperFormatterRsp = await new WrapperFormatter({
-      resultType: entityType.loggedInUser,
-      entities: [entityType.loggedInUser],
+      resultType: responseEntityKey.loggedInUser,
+      entityKindToResponseKeyMap: {
+        [entityType.user]: responseEntityKey.loggedInUser
+      },
       serviceData: serviceResponse.data
     }).perform();
 
@@ -80,12 +61,47 @@ router.post('/login', sanitizer.sanitizeDynamicUrlParams, function(req, res, nex
   };
 
   const onServiceFailure = async function(serviceResponse) {
-    // TODO - delete cookie here.
+    deleteLoginCookie(res);
   };
 
   Promise.resolve(
     routeHelper.perform(req, res, next, '/user/Login', 'r_a_v1_a_2', null, onServiceSuccess, onServiceFailure)
   );
 });
+
+/**
+ * Method to set login cookies
+ *
+ * @param responseObject
+ * @param cookieValue
+ */
+function setLoginCookies(responseObject, cookieValue) {
+  //TODO: Cookie Security Review.
+  //TODO: Read: https://expressjs.com/en/advanced/best-practice-security.html#use-cookies-securely
+  let options = {
+    maxAge: 1000 * 60 * 15, // would expire after 15 minutes
+    httpOnly: true, // The cookie only accessible by the web server
+    signed: true, // Indicates if the cookie should be signed
+    path: '/'
+  };
+
+  // For non-development environments
+  if (!basicHelper.isDevelopment()) {
+    options.secure = true; // to ensure browser sends cookie over https
+    options.domain = coreConstant.PA_DOMAIN;
+  }
+
+  // Set cookie
+  responseObject.cookie(userConstant.loginCookieName, cookieValue, options); // options is optional
+}
+
+/**
+ * Method to delete login cookie
+ *
+ * @param responseObject
+ */
+function deleteLoginCookie(responseObject) {
+  responseObject.clearCookie(userConstant.loginCookieName);
+}
 
 module.exports = router;

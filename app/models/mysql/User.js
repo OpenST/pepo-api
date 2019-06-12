@@ -246,17 +246,23 @@ class UserModel extends ModelBase {
    * @returns {Promise<*>}
    */
   static async flushCache(params) {
-    const SecureUserCache = require(rootPrefix + '/lib/cacheManagement/single/SecureUser');
+    const UserCache = require(rootPrefix + '/lib/cacheManagement/multi/User');
+    await new UserCache({
+      ids: [params.id]
+    }).clear();
 
+    const UserPaginationCache = require(rootPrefix + '/lib/cacheManagement/single/UserPagination');
+    await new UserPaginationCache().clear();
+
+    const SecureUserCache = require(rootPrefix + '/lib/cacheManagement/single/SecureUser');
     await new SecureUserCache({
       id: params.id
     }).clear();
 
-    const UserCache = require(rootPrefix + '/lib/cacheManagement/multi/User');
-
-    await new UserCache({
-      ids: [params.id]
-    }).clear();
+    if (params.userName) {
+      const UserByUsernameCache = require(rootPrefix + '/lib/cacheManagement/single/UserByUsername');
+      await new UserByUsernameCache({ userName: params.userName }).clear();
+    }
   }
 }
 
