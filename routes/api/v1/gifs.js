@@ -6,7 +6,8 @@ const rootPrefix = '../../..',
   apiName = require(rootPrefix + '/lib/globalConstant/apiName'),
   sanitizer = require(rootPrefix + '/helpers/sanitizer'),
   WrapperFormatter = require(rootPrefix + '/lib/formatter/Wrapper'),
-  entityType = require(rootPrefix + '/lib/globalConstant/entityType');
+  entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
+  responseEntityKey = require(rootPrefix + '/lib/globalConstant/responseEntityKey');
 
 /* Tokens*/
 router.get('/search', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
@@ -15,7 +16,9 @@ router.get('/search', sanitizer.sanitizeDynamicUrlParams, function(req, res, nex
   const dataFormatterFunc = async function(serviceResponse) {
     const wrapperFormatterRsp = await new WrapperFormatter({
       resultType: entityType.gifs,
-      entities: [entityType.gifs],
+      entityKindToResponseKeyMap: {
+        [entityType.gifs]: responseEntityKey.gifs
+      },
       serviceData: serviceResponse.data.gifs
     }).perform();
 
