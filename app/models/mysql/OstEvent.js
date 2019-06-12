@@ -1,5 +1,4 @@
 const rootPrefix = '../../..',
-  responseHelper = require(rootPrefix + '/lib/formatter/response'),
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
   ostEventConstants = require(rootPrefix + '/lib/globalConstant/ostEvent'),
   coreConstants = require(rootPrefix + '/config/coreConstants');

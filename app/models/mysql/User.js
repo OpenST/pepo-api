@@ -2,7 +2,6 @@ const rootPrefix = '../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
   userConstants = require(rootPrefix + '/lib/globalConstant/user'),
   util = require(rootPrefix + '/lib/util'),
-  responseHelper = require(rootPrefix + '/lib/formatter/response'),
   coreConstants = require(rootPrefix + '/config/coreConstants');
 
 const dbName = 'pepo_api_' + coreConstants.environment;
@@ -106,11 +105,7 @@ class UserModel extends ModelBase {
 
     let res = fetchByIds([id]);
 
-    if (res[id]) {
-      return res[id];
-    } else {
-      return null;
-    }
+    return res[id] || {};
   }
 
   /***
@@ -136,10 +131,6 @@ class UserModel extends ModelBase {
       ])
       .where({ id: ids })
       .fire();
-
-    if (dbRows.length === 0) {
-      return {};
-    }
 
     let response = {};
 
@@ -187,8 +178,6 @@ class UserModel extends ModelBase {
       limit = params.limit || 10,
       offset = (page - 1) * limit;
 
-    let response = [];
-
     let dbRows = await oThis
       .select(['id'])
       .where(['status != ?', userConstants.invertedStatuses[userConstants.blockedStatus]])
@@ -197,9 +186,7 @@ class UserModel extends ModelBase {
       .order_by('first_name DESC')
       .fire();
 
-    if (dbRows.length === 0) {
-      return {};
-    }
+    let response = [];
 
     for (let index = 0; index < dbRows.length; index++) {
       response.push(dbRows[index].id);

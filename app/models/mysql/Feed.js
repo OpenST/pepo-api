@@ -1,7 +1,6 @@
 const rootPrefix = '../../..',
-  responseHelper = require(rootPrefix + '/lib/formatter/response'),
-  feedsConstants = require(rootPrefix + '/lib/globalConstant/feed'),
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
+  feedsConstants = require(rootPrefix + '/lib/globalConstant/feed'),
   coreConstants = require(rootPrefix + '/config/coreConstants');
 
 const dbName = 'pepo_api_' + coreConstants.environment;
@@ -39,26 +38,6 @@ class FeedModel extends ModelBase {
   }
 
   /***
-   * Fetch feed by id
-   *
-   * @param id {Integer} - id
-   *
-   * @return {Object}
-   */
-  async fetchById(id) {
-    const oThis = this;
-    let dbRows = await oThis
-      .select('*')
-      .where({ id: id })
-      .fire();
-
-    if (dbRows.length === 0) {
-      return {};
-    }
-    return oThis.formatDbData(dbRows[0]);
-  }
-
-  /***
    * Fetch feed by externalEntityId
    *
    * @param externalEntityId {Integer} - externalEntityId
@@ -79,15 +58,17 @@ class FeedModel extends ModelBase {
   }
 
   /***
-   * Flush cache
+   * Fetch feed by id
    *
-   * @param {object} params
+   * @param id {Integer} - id
    *
-   * @returns {Promise<*>}
+   * @return {Object}
    */
-  static async flushCache(params) {
-    let id = params.id;
-    return null;
+  async fetchById(id) {
+    const oThis = this;
+    let dbRows = await oThis.fetchByIds([id]);
+
+    return dbRows[id] || {};
   }
 
   /***
@@ -97,31 +78,27 @@ class FeedModel extends ModelBase {
    *
    * @return {Object}
    */
-  async fetchByIds(Ids) {
+  async fetchByIds(ids) {
     const oThis = this;
     let response = {};
 
     let dbRows = await oThis
       .select('*')
-      .where(['id IN (?)', Ids])
+      .where(['id IN (?)', ids])
       .fire();
-
-    if (dbRows.length === 0) {
-      return responseHelper.successWithData(response);
-    }
 
     for (let index = 0; index < dbRows.length; index++) {
       response[dbRows[index].id] = oThis.formatDbData(dbRows[index]);
     }
 
-    return responseHelper.successWithData(response);
+    return response;
   }
 
   /***
    * Flush cache
    *
    * @param {object} params
-   * @param {Integer} params.Id
+   * @param {Integer} params.id
    *
    * @returns {Promise<*>}
    */
@@ -129,7 +106,7 @@ class FeedModel extends ModelBase {
     const FeedByIds = require(rootPrefix + '/lib/cacheManagement/multi/FeedByIds');
 
     await new FeedByIds({
-      Ids: [params.Id]
+      ids: [params.id]
     }).clear();
   }
 }

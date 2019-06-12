@@ -1,5 +1,4 @@
 const rootPrefix = '../../..',
-  responseHelper = require(rootPrefix + '/lib/formatter/response'),
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
   tokenUserConstants = require(rootPrefix + '/lib/globalConstant/tokenUser'),
   coreConstants = require(rootPrefix + '/config/coreConstants');
@@ -106,15 +105,11 @@ class TokenUserModel extends ModelBase {
       .where(['user_id IN (?)', userIds])
       .fire();
 
-    if (dbRows.length === 0) {
-      return responseHelper.successWithData(response);
-    }
-
     for (let index = 0; index < dbRows.length; index++) {
       response[dbRows[index].user_id] = oThis.formatDbData(dbRows[index]);
     }
 
-    return responseHelper.successWithData(response);
+    return response;
   }
 
   /***
@@ -126,15 +121,9 @@ class TokenUserModel extends ModelBase {
    */
   async fetchByOstUserId(ostUserId) {
     const oThis = this;
-    let dbRows = await oThis
-      .select(['id', 'user_id'])
-      .where(['ost_user_id = ?', ostUserId])
-      .fire();
+    let dbRows = await oThis.fetchByOstUserIds([ostUserId]);
 
-    if (dbRows.length === 0) {
-      return {};
-    }
-    return oThis.formatDbData(dbRows[0]);
+    return dbRows[ostUserId] || {};
   }
 
   /***
@@ -148,19 +137,15 @@ class TokenUserModel extends ModelBase {
     const oThis = this;
     let response = {},
       dbRows = await oThis
-        .select('*')
+        .select(['id', 'user_id'])
         .where(['ost_user_id IN (?)', ostUserIds])
         .fire();
-
-    if (dbRows.length === 0) {
-      return responseHelper.successWithData(response);
-    }
 
     for (let index = 0; index < dbRows.length; index++) {
       response[dbRows[index].ost_user_id] = oThis.formatDbData(dbRows[index]);
     }
 
-    return responseHelper.successWithData(response);
+    return response;
   }
 
   /***

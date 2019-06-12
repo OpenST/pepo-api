@@ -1,7 +1,6 @@
 const rootPrefix = '../../..',
-  responseHelper = require(rootPrefix + '/lib/formatter/response'),
-  externalEntityConstants = require(rootPrefix + '/lib/globalConstant/externalEntity'),
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
+  externalEntityConstants = require(rootPrefix + '/lib/globalConstant/externalEntity'),
   coreConstants = require(rootPrefix + '/config/coreConstants');
 
 const dbName = 'pepo_api_' + coreConstants.environment;
@@ -44,26 +43,6 @@ class ExternalEntityModel extends ModelBase {
   }
 
   /***
-   * Fetch external entity by id
-   *
-   * @param id {Integer} - id
-   *
-   * @return {Object}
-   */
-  async fetchById(id) {
-    const oThis = this;
-    let dbRows = await oThis
-      .select('*')
-      .where({ id: id })
-      .fire();
-
-    if (dbRows.length === 0) {
-      return {};
-    }
-    return oThis.formatDbData(dbRows[0]);
-  }
-
-  /***
    * Fetch external entity by entity kind and entity id
    *
    * @param entityKind {String} - entityKind
@@ -86,6 +65,20 @@ class ExternalEntityModel extends ModelBase {
   }
 
   /***
+   * Fetch external entity by id
+   *
+   * @param id {Integer} - id
+   *
+   * @return {Object}
+   */
+  async fetchById(id) {
+    const oThis = this;
+    let dbRows = await oThis.fetchByIds([id]);
+
+    return dbRows[id] || {};
+  }
+
+  /***
    * Fetch external entities for given ids
    *
    * @param Ids {Array} - External Entities Ids
@@ -101,35 +94,11 @@ class ExternalEntityModel extends ModelBase {
       .where(['id IN (?)', Ids])
       .fire();
 
-    if (dbRows.length === 0) {
-      return responseHelper.successWithData(response);
-    }
-
     for (let index = 0; index < dbRows.length; index++) {
       response[dbRows[index].id] = oThis.formatDbData(dbRows[index]);
     }
 
-    return responseHelper.successWithData(response);
-  }
-
-  /***
-   * Fetch external entity by entity id
-   *
-   * @param entityId {Integer} - entityId
-   *
-   * @return {Object}
-   */
-  async fetchByEntityId(entityId) {
-    const oThis = this;
-    let dbRows = await oThis
-      .select('*')
-      .where({ entity_id: entityId })
-      .fire();
-
-    if (dbRows.length === 0) {
-      return {};
-    }
-    return oThis.formatDbData(dbRows[0]);
+    return response;
   }
 
   /***
@@ -152,7 +121,7 @@ class ExternalEntityModel extends ModelBase {
     const ExternalEntityByIds = require(rootPrefix + '/lib/cacheManagement/multi/ExternalEntityByIds');
 
     await new ExternalEntityByIds({
-      Ids: [params.Id]
+      ids: [params.id]
     }).clear();
   }
 }
