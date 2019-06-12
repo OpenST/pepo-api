@@ -102,40 +102,17 @@
 		{
 			"name": "user-list",
 			"request": {
-				"method": "POST",
-				"header": [
-					{
-						"key": "Content-Type",
-						"name": "Content-Type",
-						"type": "text",
-						"value": "application/x-www-form-urlencoded"
-					}
-				],
-				"body": {
-					"mode": "urlencoded",
-					"urlencoded": [
-						{
-							"key": "device_address",
-							"value": "0xC295795a74e9c2f63eB57a1E6731CB2156f5f482",
-							"type": "text"
-						},
-						{
-							"key": "api_signer_address",
-							"value": "0xA5334b78629AA4E24713Db0D73dF3253D34b48f4",
-							"type": "text"
-						}
-					]
-				},
+				"method": "GET",
+				"header": [],
 				"url": {
-					"raw": "{{api_server}}/api/v1/users/register-device",
+					"raw": "{{api_server}}/api/v1/users",
 					"host": [
 						"{{api_server}}"
 					],
 					"path": [
 						"api",
 						"v1",
-						"users",
-						"register-device"
+						"users"
 					]
 				}
 			},
