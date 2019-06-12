@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "cc02ef31-d2b4-4680-bfca-f997ff422abe",
+		"_postman_id": "a7789dba-0b2a-4b65-98e7-64c05d8afe62",
 		"name": "pepo-api",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -310,6 +310,10 @@
 			"request": {
 				"method": "GET",
 				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
 				"url": {
 					"raw": "{{api_server}}/api/v1/users/recovery-info",
 					"host": [
@@ -362,6 +366,38 @@
 						"current"
 					]
 				}
+			},
+			"response": []
+		},
+		{
+			"name": "expression - ost-transactions",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"ost_transaction_uuid\": \"21aefa74-1fbe-490e-860d-95d4ac0e1d98\",\n\t\"meta\": {\n\t\t\"text\": \"Hello World\",\n\t\t\"giphy\": {\n\t\t\t\"id\": \"9ad6a605-69f0-4a4b-bcc4-bf73b0d906aa\",\n\t\t\t\"downsized\": \"adas\",\n\t\t\t\"original\": \"addd\"\n\t\t}\n\t}\n}"
+				},
+				"url": {
+					"raw": "{{api_server}}/api/v1/ost-transactions/expression",
+					"host": [
+						"{{api_server}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"ost-transactions",
+						"expression"
+					]
+				},
+				"description": "ost-transaction"
 			},
 			"response": []
 		}
