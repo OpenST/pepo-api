@@ -1,22 +1,28 @@
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
-  pagination = require(rootPrefix + '/lib/globalConstant/pagination'),
   UserFeedModel = require(rootPrefix + '/app/models/mysql/UserFeed'),
-  FeedModel = require(rootPrefix + '/app/models/mysql/Feed'),
+  UserMultiCache = require(rootPrefix + '/lib/cacheManagement/multi/User'),
   FeedByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/FeedByIds'),
-  responseHelper = require(rootPrefix + '/lib/formatter/response');
+  ExternalEntityByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/ExternalEntityByIds'),
+  responseHelper = require(rootPrefix + '/lib/formatter/response'),
+  paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination'),
+  externalEntityConstants = require(rootPrefix + '/lib/globalConstant/externalEntity');
 
 /**
- * Class for User Feed
+ * Class for user feed service.
  *
- * @class
+ * @class UserFeed
  */
 class UserFeed extends ServiceBase {
   /**
-   * Constructor for user feed
+   * Constructor for user feed service.
    *
-   * @param params
+   * @param {object} params
+   * @param {string} params.current_user
+   * @param {number/string} params.limit
+   * @param {string} params.limit.pagination_identifier
    *
+   * @augments ServiceBase
    */
   constructor(params) {
     super(params);
@@ -26,18 +32,25 @@ class UserFeed extends ServiceBase {
     oThis.current_user = params.current_user;
     oThis.currentUserId = oThis.current_user.id;
     oThis.limit = params.limit;
-    oThis.paginationIdentifier = params[pagination.paginationIdentifierKey] || null;
+    oThis.paginationIdentifier = params[paginationConstants.paginationIdentifierKey] || null;
 
     oThis.page = null;
     oThis.feedIds = [];
     oThis.feedIdToFeedDetailsMap = {};
+    oThis.usersByIdMap = {};
+    oThis.userIds = {};
+    oThis.externalEntityIds = [];
+    oThis.ostTransactionIds = [];
+    oThis.giphyTransactionIds = [];
+    oThis.externalEntityIdToDetailsMap = {};
+    oThis.externalEntityIdsResponseMap = { ost_transactions: {}, gif_details: {} };
     oThis.responseMetaData = {
-      [pagination.nextPagePayloadKey]: {}
+      [paginationConstants.nextPagePayloadKey]: {}
     };
   }
 
   /**
-   * Async Perform
+   * Async perform.
    *
    * @returns {Promise<void>}
    * @private
@@ -47,21 +60,23 @@ class UserFeed extends ServiceBase {
 
     await oThis._validateAndSanitizeParams();
 
-    oThis._fetchUserFeedIds();
+    await oThis._fetchUserFeedIds();
 
     if (oThis.feedIds.length === 0) {
-      return responseHelper.successWithData(oThis.finalResponse());
+      return responseHelper.successWithData(oThis._finalResponse());
     }
 
-    await oThis._fetchOstTransaction();
-    await oThis._fetchGiphy();
+    await oThis._fetchFeedDetails();
+    await oThis._fetchExternalEntities();
     await oThis._fetchUsers();
 
-    return responseHelper.successWithData(oThis.finalResponse());
+    return responseHelper.successWithData(oThis._finalResponse());
   }
 
   /**
-   * Validate and sanitize specific params
+   * Validate and sanitize specific params.
+   *
+   * @sets oThis.page, oThis.limit
    *
    * @returns {Promise<never>}
    * @private
@@ -70,22 +85,26 @@ class UserFeed extends ServiceBase {
     const oThis = this;
 
     if (oThis.paginationIdentifier) {
-      let parsedPaginationParams = oThis._parsePaginationParams(oThis.paginationIdentifier);
-      oThis.page = parsedPaginationParams.page; //override page
-      oThis.limit = parsedPaginationParams.limit; //override limit
+      const parsedPaginationParams = oThis._parsePaginationParams(oThis.paginationIdentifier);
+
+      oThis.page = parsedPaginationParams.page; // Override page number.
+      oThis.limit = parsedPaginationParams.limit; // Override limit.
     } else {
       oThis.page = 1;
-      oThis.limit = oThis.limit || pagination.defaultUserFeedPageSize;
+      oThis.limit = oThis.limit || paginationConstants.defaultUserFeedPageSize;
     }
 
-    //Validate limit
-    return await oThis._validatePageSize();
+    // Validate limit.
+    return oThis._validatePageSize();
   }
 
   /**
-   * Fetch user feed ids
+   * Fetch user feed ids.
    *
-   * @return {Result}
+   * @sets oThis.feedIds
+   *
+   * @returns {Promise<*|result>}
+   * @private
    */
   async _fetchUserFeedIds() {
     const oThis = this;
@@ -96,69 +115,100 @@ class UserFeed extends ServiceBase {
       userId: oThis.currentUserId
     });
 
-    const feedByIdsCacheRsp = await new FeedByIdsCache({ ids: oThis.feedIds }).fetch();
-    oThis.feedIdToFeedDetailsMap = feedByIdsCacheRsp.data;
-
-    return Promise.resolve(responseHelper.successWithData({}));
+    return responseHelper.successWithData({});
   }
 
   /**
-   * Service Response
+   * Fetch feed details.
+   *
+   * @sets oThis.feedIdToFeedDetailsMap, oThis.externalEntityIds
    *
    * @returns {Promise<void>}
    * @private
    */
-  finalResponse() {
-    const oThis = this,
-      nextPagePayloadKey = {};
-
-    if (oThis.feedIds.length > 0) {
-      nextPagePayloadKey[pagination.paginationIdentifierKey] = {
-        page: oThis.page + 1,
-        limit: oThis.limit
-      };
-    }
-
-    let responseMetaData = {
-      [pagination.nextPagePayloadKey]: nextPagePayloadKey
-    };
-
-    let feedHash = {},
-      tokenUserHash = {};
-
-    for (let i = 0; i < oThis.feedIds.length; i++) {
-      const feedId = oThis.feedIds[i],
-        feed = oThis.feedIdToFeedDetailsMap[feedId];
-      feedHash[feedId] = new FeedModel().safeFormattedData(feed);
-    }
-
-    let finalResponse = {
-      usersByIdHash: userHash,
-      tokenUsersByUserIdHash: tokenUserHash,
-      userIds: oThis.userIds,
-      meta: responseMetaData
-    };
-
-    return finalResponse;
-  }
-
-  /**
-   * Fetch ost transactions
-   *
-   * @returns {Promise<void>}
-   * @private
-   */
-  async _fetchOstTransaction() {
+  async _fetchFeedDetails() {
     const oThis = this;
 
-    let usersByIdHashRes = await new UserMultiCache({ ids: oThis.userIds }).fetch();
-    oThis.usersByIdHash = usersByIdHashRes.data;
+    const feedByIdsCacheRsp = await new FeedByIdsCache({ ids: oThis.feedIds }).fetch();
 
-    return Promise.resolve(responseHelper.successWithData({}));
+    if (feedByIdsCacheRsp.isFailure()) {
+      return Promise.reject(new Error(`Details for some or all of the feed Ids: ${oThis.feedIds} unavailable.`));
+    }
+
+    oThis.feedIdToFeedDetailsMap = feedByIdsCacheRsp.data;
+
+    for (let index = 0; index < oThis.feedIds.length; index++) {
+      const feedId = oThis.feedIds[index];
+      const feedDetails = oThis.feedIdToFeedDetailsMap[feedId];
+
+      oThis.externalEntityIds.push(feedDetails.primaryExternalEntityId);
+    }
+
+    return responseHelper.successWithData({});
   }
 
   /**
-   * Fetch users from cache
+   * Fetch external entities data.
+   *
+   * @sets oThis.externalEntityIdToDetailsMap, oThis.userIds
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _fetchExternalEntities() {
+    const oThis = this;
+
+    oThis.externalEntityIdToDetailsMap = await new ExternalEntityByIdsCache({ ids: oThis.externalEntityIds }).fetch();
+
+    if (oThis.externalEntityIdToDetailsMap.isFailure()) {
+      return Promise.reject(
+        new Error(`Details for some or all of the external entity Ids: ${oThis.externalEntityIds} unavailable.`)
+      );
+    }
+
+    for (
+      let externalEntityIdIndex = 0;
+      externalEntityIdIndex < oThis.externalEntityIds.length;
+      externalEntityIdIndex++
+    ) {
+      const externalEntityId = oThis.externalEntityIds[externalEntityIdIndex];
+
+      const externalEntityDetails = oThis.externalEntityIdToDetailsMap[externalEntityId];
+      const externalEntityExtraData = externalEntityDetails.extraData;
+
+      if (!externalEntityExtraData) {
+        return Promise.reject(new Error('External data for external entity is null'));
+      }
+
+      switch (externalEntityDetails.entityKind) {
+        case externalEntityConstants.ostTransactionEntityKind: {
+          oThis.externalEntityIdsResponseMap.ost_transactions[externalEntityDetails.entityId] = externalEntityExtraData;
+
+          oThis.userIds[externalEntityExtraData.from_user_id] = 1;
+
+          for (let index = 0; index < externalEntityExtraData.to_user_ids.length; index++) {
+            oThis.userIds[externalEntityExtraData.to_user_ids[index]] = 1;
+          }
+
+          break;
+        }
+        case externalEntityConstants.giphyEntityKind: {
+          oThis.externalEntityIdsResponseMap.gif_details[externalEntityDetails.entityId] = externalEntityExtraData;
+          break;
+        }
+        default: {
+          throw new Error('Invalid entity kind.');
+        }
+      }
+    }
+
+    return responseHelper.successWithData({});
+  }
+
+  /**
+   * Fetch users from cache.
+   *
+   * @sets oThis.usersByIdMap
    *
    * @returns {Promise<void>}
    * @private
@@ -166,79 +216,39 @@ class UserFeed extends ServiceBase {
   async _fetchUsers() {
     const oThis = this;
 
-    let usersByIdHashRes = await new UserMultiCache({ ids: oThis.userIds }).fetch();
-    oThis.usersByIdHash = usersByIdHashRes.data;
+    const cacheResp = await new UserMultiCache({ ids: Object.keys(oThis.userIds) }).fetch();
+    oThis.usersByIdMap = cacheResp.data;
 
-    return Promise.resolve(responseHelper.successWithData({}));
+    return responseHelper.successWithData({});
   }
 
   /**
-   * remove current user from final response
+   * Service response.
    *
-   * @param inputDataMap {Object} - input data
+   * @returns {*|result}
    * @private
    */
-  _removeCurrentUserFromResponse(inputDataMap) {
+  _finalResponse() {
     const oThis = this;
 
-    for (let userId in inputDataMap)
-      if (oThis.currentUserId == userId) {
-        delete inputDataMap[userId];
-      }
-  }
-
-  /**
-   * Set meta property.
-   *
-   * @private
-   */
-  _setMeta() {
-    const oThis = this;
-
-    oThis.responseMetaData[pagination.nextPagePayloadKey] = {
-      [pagination.paginationIdentifierKey]: {
+    const nextPagePayloadKey = {
+      [paginationConstants.paginationIdentifierKey]: {
         page: oThis.page + 1,
         limit: oThis.limit
       }
     };
-  }
 
-  /**
-   * _defaultPageLimit
-   *
-   * @private
-   */
-  _defaultPageLimit() {
-    return pagination.defaultUserListPageSize;
-  }
+    const responseMetaData = {
+      [paginationConstants.nextPagePayloadKey]: nextPagePayloadKey
+    };
 
-  /**
-   * _minPageLimit
-   *
-   * @private
-   */
-  _minPageLimit() {
-    return pagination.minUserListPageSize;
-  }
-
-  /**
-   * _maxPageLimit
-   *
-   * @private
-   */
-  _maxPageLimit() {
-    return pagination.maxUserListPageSize;
-  }
-
-  /**
-   * _currentPageLimit
-   *
-   * @private
-   */
-  _currentPageLimit() {
-    const oThis = this;
-
-    return oThis.limit;
+    return {
+      feedIds: oThis.feedIds,
+      feedIdToFeedDetailsMap: oThis.feedIdToFeedDetailsMap,
+      externalEntityDetails: oThis.externalEntityIdsResponseMap,
+      usersByIdMap: oThis.usersByIdMap,
+      meta: responseMetaData
+    };
   }
 }
 

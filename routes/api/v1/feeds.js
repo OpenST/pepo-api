@@ -6,7 +6,8 @@ const rootPrefix = '../../..',
   apiName = require(rootPrefix + '/lib/globalConstant/apiName'),
   sanitizer = require(rootPrefix + '/helpers/sanitizer'),
   WrapperFormatter = require(rootPrefix + '/lib/formatter/Wrapper'),
-  entityType = require(rootPrefix + '/lib/globalConstant/entityType');
+  entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
+  responseEntityKey = require(rootPrefix + '/lib/globalConstant/responseEntityKey');
 
 /* User Feeds*/
 router.get('/my-feed', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
@@ -14,8 +15,10 @@ router.get('/my-feed', sanitizer.sanitizeDynamicUrlParams, function(req, res, ne
 
   const dataFormatterFunc = async function(serviceResponse) {
     const wrapperFormatterRsp = await new WrapperFormatter({
-      resultType: entityType.feeds,
-      entities: [entityType.feeds],
+      resultType: responseEntityKey.feeds,
+      entityKindToResponseKeyMap: {
+        [entityType.feeds]: responseEntityKey.feeds
+      },
       serviceData: serviceResponse.data
     }).perform();
 
