@@ -1,10 +1,3 @@
-'use strict';
-
-/**
- * Class for core constants
- *
- * @class
- */
 class CoreConstants {
   /**
    * Constructor for core constants

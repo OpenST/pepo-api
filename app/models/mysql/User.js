@@ -1,7 +1,3 @@
-'use strict';
-/**
- * @file - Model for users table
- */
 const rootPrefix = '../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
   userConstants = require(rootPrefix + '/lib/globalConstant/user'),

@@ -1,7 +1,3 @@
-'use strict';
-/**
- * @file - Model for External Entities table
- */
 const rootPrefix = '../../..',
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   externalEntityConstants = require(rootPrefix + '/lib/globalConstant/externalEntity'),

@@ -1,5 +1,3 @@
-'use strict';
-
 const rootPrefix = '../../..',
   pagination = require(rootPrefix + '/lib/globalConstant/pagination'),
   apiName = require(rootPrefix + '/lib/globalConstant/apiName');
