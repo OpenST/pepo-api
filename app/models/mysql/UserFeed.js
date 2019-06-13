@@ -46,6 +46,7 @@ class UserFeedModel extends ModelBase {
    */
   async fetchFeedIds(params) {
     const oThis = this;
+    let response = {};
 
     const page = params.page || 1,
       limit = params.limit || 10,
