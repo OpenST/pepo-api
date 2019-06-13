@@ -1,8 +1,7 @@
 /**
  * Usage: node executables/oneTimers/webhooksSubscription.js
  *
- *
- * @type {string}
+ * @module executables/oneTimers/webhooksSubscription
  */
 
 const rootPrefix = '../..',
