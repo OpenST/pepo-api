@@ -1,6 +1,8 @@
 const rootPrefix = '../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
-  coreConstants = require(rootPrefix + '/config/coreConstants');
+  coreConstants = require(rootPrefix + '/config/coreConstants'),
+  gifCategoryConstant = require(rootPrefix + '/lib/globalConstant/gifCategory');
+
 const dbName = 'pepo_api_' + coreConstants.environment;
 
 /**
@@ -30,6 +32,7 @@ class GifCategory extends ModelBase {
    * @param {string} dbRow.name
    * @param {string} dbRow.gif_id
    * @param {string} dbRow.gif_data
+   * @param {string} dbRow.kind
    * @param {string} dbRow.created_at
    * @param {string} dbRow.updated_at
    *
@@ -42,6 +45,7 @@ class GifCategory extends ModelBase {
       name: dbRow.name,
       gifId: dbRow.gif_id,
       gifData: JSON.parse(dbRow.gif_data),
+      kind: gifCategoryConstant.kinds[dbRow.kind],
       createdAt: dbRow.created_at,
       updatedAt: dbRow.updated_at
     };

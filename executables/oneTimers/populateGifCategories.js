@@ -5,11 +5,14 @@
  *
  * @module executables/oneTimers/populateGifCategories
  */
-const program = require('commander');
+const program = require('commander'),
+  querystring = require('querystring');
 
 const rootPrefix = '../..',
   GifCategoryModel = require(rootPrefix + '/app/models/mysql/GifCategory'),
   GifsCacheByKeyword = require(rootPrefix + '/lib/cacheManagement/single/GifsByKeyword'),
+  GifsTrendingCache = require(rootPrefix + '/lib/cacheManagement/single/GifsTrending'),
+  gifCategoryConstant = require(rootPrefix + '/lib/globalConstant/gifCategory'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger');
 
 const KNOWN_CATEGORIES = [
@@ -62,6 +65,17 @@ class PopulateGifCategories {
   async perform() {
     const oThis = this;
 
+    // Insert trending gif category
+    const trendingGifObj = await oThis._fetchTrendingGif();
+    await new GifCategoryModel()
+      .insert({
+        name: 'trending',
+        gif_id: trendingGifObj.id,
+        kind: gifCategoryConstant.invertedKinds[gifCategoryConstant.trendingKind],
+        gif_data: JSON.stringify(trendingGifObj)
+      })
+      .fire();
+
     // Fetch Random gif for categories
     for (let i = 0; i < KNOWN_CATEGORIES.length; i++) {
       const categoryName = KNOWN_CATEGORIES[i];
@@ -69,7 +83,14 @@ class PopulateGifCategories {
       const gifObj = await oThis._fetchRandomGifForCategory(categoryName);
 
       if (null != gifObj) {
-        await oThis._insertGifCategory(categoryName, gifObj);
+        await new GifCategoryModel()
+          .insert({
+            name: categoryName,
+            gif_id: gifObj.id,
+            kind: gifCategoryConstant.invertedKinds[gifCategoryConstant.searchKind],
+            gif_data: JSON.stringify(gifObj)
+          })
+          .fire();
       }
     }
   }
@@ -97,23 +118,24 @@ class PopulateGifCategories {
   }
 
   /**
-   * Insert category and one random gif
+   * Fetch trending Gif
    *
-   * @param categoryName
-   * @param gifObj
    * @returns {Promise<void>}
    * @private
    */
-  async _insertGifCategory(categoryName, gifObj) {
+  async _fetchTrendingGif() {
     const oThis = this;
 
-    await new GifCategoryModel()
-      .insert({
-        name: categoryName,
-        gif_id: gifObj.id,
-        gif_data: JSON.stringify(gifObj)
-      })
-      .fire();
+    // Fetch set of random Gifs
+    let resp = await new GifsTrendingCache({
+      pageNumber: 1
+    }).fetch();
+
+    if (resp.isSuccess() && null != resp.data.gifs) {
+      return resp.data.gifs[Math.floor(Math.random() * 10 + 1)];
+    }
+
+    return null;
   }
 }
 
