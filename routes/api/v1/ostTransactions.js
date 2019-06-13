@@ -13,42 +13,14 @@ const rootPrefix = '../../..',
 router.post('/expression', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.expressionTransaction;
 
-  const dataFormatterFunc = async function(serviceResponse) {
-    const wrapperFormatterRsp = await new WrapperFormatter({
-      resultType: entityType.ostTransaction,
-      entityKindToResponseKeyMap: {
-        [entityType.ostTransaction]: responseEntityKey.ostTransaction
-      },
-      serviceData: serviceResponse.data
-    }).perform();
-
-    serviceResponse.data = wrapperFormatterRsp.data;
-  };
-
-  Promise.resolve(
-    routeHelper.perform(req, res, next, '/ostTransactions/Expression', 'r_a_v1_ot_1', null, dataFormatterFunc)
-  );
+  Promise.resolve(routeHelper.perform(req, res, next, '/ostTransactions/Expression', 'r_a_v1_ot_1', null, null));
 });
 
 /* Send*/
 router.post('/send', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.expressionTransaction;
 
-  const dataFormatterFunc = async function(serviceResponse) {
-    const wrapperFormatterRsp = await new WrapperFormatter({
-      resultType: entityType.ostTransaction,
-      entityKindToResponseKeyMap: {
-        [entityType.ostTransaction]: responseEntityKey.ostTransaction
-      },
-      serviceData: serviceResponse.data
-    }).perform();
-
-    serviceResponse.data = wrapperFormatterRsp.data;
-  };
-
-  Promise.resolve(
-    routeHelper.perform(req, res, next, '/ostTransactions/Expression', 'r_a_v1_ot_2', null, dataFormatterFunc)
-  );
+  Promise.resolve(routeHelper.perform(req, res, next, '/ostTransactions/Expression', 'r_a_v1_ot_2', null, null));
 });
 
 module.exports = router;

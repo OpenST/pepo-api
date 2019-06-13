@@ -8,6 +8,7 @@ const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   feedConstants = require(rootPrefix + '/lib/globalConstant/feed'),
   TokenUserByUserId = require(rootPrefix + '/lib/cacheManagement/multi/TokenUserByUserIds'),
+  ExternalEntityByIds = require(rootPrefix + '/lib/cacheManagement/multi/ExternalEntityByIds'),
   externalEntityConstants = require(rootPrefix + '/lib/globalConstant/externalEntity'),
   ExternalEntityModel = require(rootPrefix + '/app/models/mysql/ExternalEntity'),
   TokenUserByOstUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TokenUserByOstUserIds'),
@@ -52,7 +53,7 @@ class Base extends ServiceBase {
     let response = await oThis._checkExternalEntities();
     if (response) {
       //If transaction is already present in external entity id. It is a duplicate
-      return Promise.resolve(responseHelper.successWithData({ transactionDetails: response }));
+      return Promise.resolve(responseHelper.successWithData());
     }
 
     //Only if transaction is new. Request OST Platform to give transaction details.
@@ -67,7 +68,7 @@ class Base extends ServiceBase {
     //Insert in user feeds
     await oThis._insertInUserFeedsTable();
 
-    return Promise.resolve(oThis._prepareResponseEntities());
+    return Promise.resolve(responseHelper.successWithData());
   }
 
   /**
@@ -84,22 +85,11 @@ class Base extends ServiceBase {
         entityId: oThis.transactionUuid,
         entityKind: externalEntityConstants.ostTransactionEntityKind
       },
-      responseEntity = null,
       cacheResponse = await new ExternalEntitiesByEntityIdAndEntityKindCache(params).fetch();
 
     if (cacheResponse.isSuccess() && cacheResponse.data.id) {
       //Transaction is present in db
-      let cacheData = cacheResponse.data;
-
-      responseEntity = {
-        transactionUuid: oThis.transactionUuid,
-        fromUserId: cacheData.extraData.from_user_id,
-        toUserIds: cacheData.extraData.to_user_ids,
-        amounts: cacheData.extraData.amounts,
-        status: cacheData.extraData.ost_transaction_status
-      };
-
-      return responseEntity;
+      return cacheResponse.data;
     }
 
     //Check if giphy entity is present in external entities table.
@@ -237,7 +227,7 @@ class Base extends ServiceBase {
     let entityKindInt = externalEntityConstants.invertedEntityKinds[externalEntityConstants.giphyEntityKind],
       entityId = oThis.giphyObject.id,
       extraData = {
-        type: 'GIF',
+        type: oThis.giphyObject.kind,
         downsized: oThis.giphyObject.downsized,
         original: oThis.giphyObject.original
       };
@@ -306,10 +296,10 @@ class Base extends ServiceBase {
 
     let extraData = {
         kind: externalEntityConstants.extraData.userTransactionKind,
-        from_user_id: oThis.ostUserId,
-        to_user_ids: toUserIdsArray,
+        fromUserId: oThis.ostUserId,
+        toUserIds: toUserIdsArray,
         amounts: amountsArray,
-        ost_transaction_status: oThis.transactionStatus
+        ostTransactionStatus: oThis.transactionStatus
       },
       entityKindInt = externalEntityConstants.invertedEntityKinds[externalEntityConstants.ostTransactionEntityKind],
       entityId = oThis.transactionUuid;
@@ -357,10 +347,7 @@ class Base extends ServiceBase {
       oThis.feedStatus = feedConstants.pendingStatus;
     }
 
-    extraData['giphy'] = {
-      ee_id: oThis.giphyExternalEntityId,
-      giphy_id: oThis.giphyObject.id
-    };
+    extraData['giphyExternalEntityId'] = oThis.giphyExternalEntityId;
 
     if (oThis.text) {
       extraData['text'] = oThis.text;
@@ -422,18 +409,24 @@ class Base extends ServiceBase {
    * @returns {{transactionUuid: *, fromUserId: (String|*), toUserIds: (Array|*), amounts: (Array|*), status: *}}
    * @private
    */
-  _prepareResponseEntities() {
+  async _prepareResponseEntities() {
     const oThis = this;
 
-    let responseEntity = {
-      transactionUuid: oThis.transactionUuid,
-      fromUserId: oThis.userId,
-      toUserIds: oThis.toUserIdsArray,
-      amounts: oThis.amountsArray,
-      status: oThis.transactionStatus
-    };
+    let externalEntityByIdsCache = await new ExternalEntityByIds({ ids: [oThis.transactionExternalEntityId] }).fetch();
 
-    return responseHelper.successWithData({ transactionDetails: responseEntity });
+    if (externalEntityByIdsCache.isFailure() || !externalEntityByIdsCache.data[oThis.transactionExternalEntityId].id) {
+      return Promise.reject(
+        responseHelper.error({
+          internal_error_identifier: 'a_s_ot_b_7',
+          api_error_identifier: 'something_went_wrong',
+          debug_options: { ids: [oThis.transactionExternalEntityId], msg: 'Error while fetching external entity' }
+        })
+      );
+    }
+
+    let response = externalEntityByIdsCache.data[oThis.transactionExternalEntityId];
+
+    return responseHelper.successWithData({ ostTransaction: response });
   }
 
   _setKind() {
