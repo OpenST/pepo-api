@@ -1,19 +1,21 @@
 const rootPrefix = '../../../..',
-  UserOstEventBase = require(rootPrefix + '/app/services/ostEvents/users/Base'),
-  TokenUserModel = require(rootPrefix + '/app/models/mysql/TokenUser'),
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
+  TokenUserModel = require(rootPrefix + '/app/models/mysql/TokenUser'),
+  UserOstEventBase = require(rootPrefix + '/app/services/ostEvents/users/Base'),
   ExternalEntityModel = require(rootPrefix + '/app/models/mysql/ExternalEntity'),
+  SecureTokenCache = require(rootPrefix + '/lib/cacheManagement/single/SecureToken'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
-  tokenUserConstants = require(rootPrefix + '/lib/globalConstant/tokenUser'),
-  tokenConstants = require(rootPrefix + '/lib/globalConstant/token'),
-  externalEntityConstants = require(rootPrefix + '/lib/globalConstant/externalEntity'),
-  ostPlatformSdk = require(rootPrefix + '/lib/ostPlatform/jsSdkWrapper'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
-  SecureTokenCache = require(rootPrefix + '/lib/cacheManagement/single/SecureToken');
+  tokenConstants = require(rootPrefix + '/lib/globalConstant/token'),
+  ostPlatformSdk = require(rootPrefix + '/lib/ostPlatform/jsSdkWrapper'),
+  tokenUserConstants = require(rootPrefix + '/lib/globalConstant/tokenUser'),
+  externalEntityConstants = require(rootPrefix + '/lib/globalConstant/externalEntity');
 
 class UserActivationSuccess extends UserOstEventBase {
   /**
    * @param {Object} params
+   *
+   * @augments UserOstEventBase
    *
    * @constructor
    */
@@ -30,7 +32,7 @@ class UserActivationSuccess extends UserOstEventBase {
   }
 
   /**
-   * perform - Validate Login Credentials
+   * Async performer.
    *
    * @return {Promise<void>}
    */
@@ -57,8 +59,7 @@ class UserActivationSuccess extends UserOstEventBase {
   }
 
   /**
-   * Validate Request
-   *
+   * Validate and sanitize params.
    *
    * @return {Promise<void>}
    *
@@ -92,8 +93,7 @@ class UserActivationSuccess extends UserOstEventBase {
   }
 
   /**
-   * Validate Request
-   *
+   * Fetch token user.
    *
    * @return {Promise<void>}
    *
@@ -122,7 +122,6 @@ class UserActivationSuccess extends UserOstEventBase {
 
   /**
    * Update Token User Properties
-   *
    *
    * @return {Promise<void>}
    *
@@ -163,8 +162,7 @@ class UserActivationSuccess extends UserOstEventBase {
   }
 
   /**
-   * Start Airdrop For User
-   *
+   * Start airdrop for user.
    *
    * @return {Promise<void>}
    *
@@ -187,8 +185,7 @@ class UserActivationSuccess extends UserOstEventBase {
   }
 
   /**
-   * Execute Transaction using OST sdk
-   *
+   * Execute transaction using OST sdk.
    *
    * @return {Promise<void>}
    *
@@ -228,7 +225,7 @@ class UserActivationSuccess extends UserOstEventBase {
       })
     };
 
-    console.log('\n\n\n==executeParams===', JSON.stringify(executeParams));
+    logger.log('\n\n\n==executeParams===', JSON.stringify(executeParams));
     let startAirdropResponse = null;
     try {
       startAirdropResponse = await ostPlatformSdk.executeTransaction(executeParams);
@@ -247,8 +244,7 @@ class UserActivationSuccess extends UserOstEventBase {
   }
 
   /**
-   * Mark Airdrop Started Property for Token USer
-   *
+   * Mark airdrop started property for token user.
    *
    * @return {Promise<void>}
    *
@@ -276,8 +272,7 @@ class UserActivationSuccess extends UserOstEventBase {
   }
 
   /**
-   * Create External Entitites record for airdrop
-   *
+   * Create external entities record for airdrop.
    *
    * @return {Promise<void>}
    *

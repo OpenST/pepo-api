@@ -3,6 +3,7 @@ export PA_ENVIRONMENT='development'
 export PA_PORT=3000
 export PA_DEBUG_ENABLED='1';
 export PA_DOMAIN='www.pepo.com'
+export PA_COOKIE_DOMAIN='127.0.0.1'
 
 
 # Cache Engine
@@ -25,8 +26,8 @@ export PA_KMS_AWS_SECRET_KEY='qS0sJZCPQ5t2WnpJymxyGQjX62Wf13kjs80MYhML'
 export PA_KMS_AWS_REGION='us-east-1'
 export PA_API_KEY_KMS_ARN='arn:aws:kms:us-east-1:604850698061:key'
 export PA_API_KEY_KMS_ID='eab8148d-fd9f-451d-9eb9-16c115645635'
-export PA_KNOWN_ADDRESS_KMS_ARN='arn:aws:kms:us-east-1:604850698061:key'
-export PA_KNOWN_ADDRESS_KMS_ID='eab8148d-fd9f-451d-9eb9-16c115645635'
+export PA_SECRET_ENC_KEY_KMS_ARN='arn:aws:kms:us-east-1:604850698061:key'
+export PA_SECRET_ENC_KEY_KMS_ID='eab8148d-fd9f-451d-9eb9-16c115645635'
 
 # ost-platform API credentials
 export PA_SA_API_END_POINT='https://api.stagingost.com/testnet/v2/'

@@ -1,11 +1,12 @@
 const rootPrefix = '../../../..',
+  CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   TokenUserModel = require(rootPrefix + '/app/models/mysql/TokenUser'),
   UserOstEventBase = require(rootPrefix + '/app/services/ostEvents/users/Base'),
-  tokenUserConstants = require(rootPrefix + '/lib/globalConstant/tokenUser'),
+  logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
-  logger = require(rootPrefix + '/lib/logger/customConsoleLogger');
+  tokenUserConstants = require(rootPrefix + '/lib/globalConstant/tokenUser');
 
-class UserActivationInitiated extends UserOstEventBase {
+class UserActivationFailure extends UserOstEventBase {
   /**
    * @param {Object} params
    *
@@ -46,14 +47,18 @@ class UserActivationInitiated extends UserOstEventBase {
 
     await super._validateAndSanitizeParams();
 
-    if (oThis.ostUserStatus !== tokenUserConstants.activatingOstStatus) {
+    if (!CommonValidators.validateEthAddress(oThis.ostUserTokenHolderAddress)) {
+      oThis.paramErrors.push('invalid_token_holder_address');
+    }
+
+    if (oThis.ostUserStatus !== tokenUserConstants.createdOstStatus) {
       oThis.paramErrors.push('invalid_status');
     }
 
     if (oThis.paramErrors.length > 0) {
       return Promise.reject(
         responseHelper.paramValidationError({
-          internal_error_identifier: 's_oe_u_ai_vas_1',
+          internal_error_identifier: 's_oe_u_af_vas_1',
           api_error_identifier: 'invalid_api_params',
           params_error_identifiers: oThis.paramErrors,
           debug_options: {}
@@ -74,27 +79,26 @@ class UserActivationInitiated extends UserOstEventBase {
   async _fetchTokenUser() {
     const oThis = this;
 
-    const rsp = await super._fetchTokenUser();
+    await super._fetchTokenUser();
 
-    if (rsp.isFailure()) {
-      return rsp;
-    }
-
-    if (oThis.tokenUserObj.ostStatus === tokenUserConstants.activatingOstStatus) {
+    if (
+      oThis.tokenUserObj.ostStatus === tokenUserConstants.createdOstStatus &&
+      oThis.tokenUserObj.ost_token_holder_address !== oThis.ostUserTokenHolderAddress
+    ) {
       return Promise.reject(
         responseHelper.error({
-          internal_error_identifier: 's_oe_u_ai_ftu_2',
+          internal_error_identifier: 's_oe_u_af_ftu_1',
           api_error_identifier: 'something_went_wrong',
           debug_options: { tokenUserObj: oThis.tokenUserObj, ostUser: oThis.ostUser }
         })
       );
     }
 
-    return Promise.resolve(responseHelper.successWithData({}));
+    return responseHelper.successWithData({});
   }
 
   /**
-   * Update token user properties.
+   * Update token user status.
    *
    * @return {Promise<void>}
    *
@@ -102,11 +106,13 @@ class UserActivationInitiated extends UserOstEventBase {
    */
   async _updateTokenUser() {
     const oThis = this;
-    logger.log('Update Token User for user activating success');
+    logger.log('Update Token User for user activation failure.');
 
-    if (oThis.tokenUserObj.ostStatus === tokenUserConstants.activatingOstStatus) {
+    if (oThis.tokenUserObj.ostStatus === tokenUserConstants.createdOstStatus) {
       return Promise.resolve(responseHelper.successWithData({}));
     }
+
+    let propertyVal = oThis.tokenUserObj.properties;
 
     await new TokenUserModel()
       .update({
@@ -121,4 +127,4 @@ class UserActivationInitiated extends UserOstEventBase {
   }
 }
 
-module.exports = UserActivationInitiated;
+module.exports = UserActivationFailure;
