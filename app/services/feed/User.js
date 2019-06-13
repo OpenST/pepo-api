@@ -155,7 +155,7 @@ class UserFeed extends ServiceBase {
 
       oThis.feedIdToFeedDetailsMap[feedId].payload = {
         text: feedExtraData.text,
-        ost_transaction_id: feedDetails.primaryExternalEntityId
+        ostTransactionId: feedDetails.primaryExternalEntityId
       };
 
       oThis.giphyKindExternalEntityIdToFeedIdMap[feedExtraData.giphyExternalEntityId] = feedId;
@@ -191,8 +191,6 @@ class UserFeed extends ServiceBase {
 
     const externalEntityIdToDetailsMap = cacheResp.data;
 
-    console.log('====externalEntityIdToDetailsMap====', externalEntityIdToDetailsMap);
-
     // Loop over external entity ids to ensure data is in order.
     for (
       let externalEntityIdIndex = 0;
@@ -203,9 +201,6 @@ class UserFeed extends ServiceBase {
 
       // Fetch external entity details.
       const externalEntityDetails = externalEntityIdToDetailsMap[externalEntityTableId];
-
-      console.log('====externalEntityTableId====', externalEntityTableId);
-      console.log('====externalEntityDetails====', externalEntityDetails);
 
       const externalEntityExtraData = externalEntityDetails.extraData;
       const externalEntityTableEntityId = externalEntityDetails.entityId;
@@ -230,16 +225,9 @@ class UserFeed extends ServiceBase {
         case externalEntityConstants.giphyEntityKind: {
           oThis.gifsMap[externalEntityTableEntityId] = externalEntityExtraData;
 
-          console.log(
-            '=====oThis.giphyKindExternalEntityIdToFeedIdMap====',
-            oThis.giphyKindExternalEntityIdToFeedIdMap
-          );
-          console.log('=====oThis.feedIdToFeedDetailsMap====', oThis.feedIdToFeedDetailsMap);
-
           // Insert entityId in feed details payload.
           const feedId = oThis.giphyKindExternalEntityIdToFeedIdMap[externalEntityTableId];
-          console.log('===feedId=====', feedId);
-          oThis.feedIdToFeedDetailsMap[feedId].payload.gif_detail_id = externalEntityTableEntityId;
+          oThis.feedIdToFeedDetailsMap[feedId].payload.gifDetailId = externalEntityTableEntityId;
 
           break;
         }
@@ -247,8 +235,6 @@ class UserFeed extends ServiceBase {
           throw new Error('Invalid entity kind.');
         }
       }
-
-      console.log('===========finished==========');
     }
 
     oThis.userIds = [...new Set(oThis.userIds)]; // Removes duplication.
