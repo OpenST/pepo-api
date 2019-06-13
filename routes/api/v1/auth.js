@@ -24,23 +24,21 @@ router.use(cookieParser(coreConstant.COOKIE_SECRET));
  * @param cookieValue
  */
 function setLoginCookies(responseObject, cookieValue) {
-  // TODO: Cookie Security Review.
-  // TODO: Read: https://expressjs.com/en/advanced/best-practice-security.html#use-cookies-securely
-  const options = {
-    maxAge: 1000 * 60 * 15, // Cookie would expire after 15 minutes.
-    httpOnly: true, // The cookie only accessible by the web server.
-    signed: true, // Indicates if the cookie should be signed.
-    path: '/'
+  let options = {
+    maxAge: 1000 * 60 * 15, // Cookie would expire after 15 minutes
+    httpOnly: true, // The cookie only accessible by the web server
+    signed: true, // Indicates if the cookie should be signed
+    path: '/',
+    domain: coreConstant.PA_COOKIE_DOMAIN
   };
 
   // For non-development environments
   if (basicHelper.isProduction()) {
-    options.secure = true; // To ensure browser sends cookie over https.
-    options.domain = coreConstant.PA_DOMAIN;
+    options.secure = true; // To ensure browser sends cookie over https
   }
 
   // Set cookie
-  responseObject.cookie(userConstant.loginCookieName, cookieValue, options); // Options is optional.
+  responseObject.cookie(userConstant.loginCookieName, cookieValue, options); // Options is optional
 }
 
 /**
