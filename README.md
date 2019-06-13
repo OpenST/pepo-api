@@ -44,3 +44,9 @@ node db/migrate.js
 ```bash
 node devops/exec/flushMemcache.js
 ```
+
+* Seed Gif categories
+```bash
+source set_env_vars.sh
+node executables/oneTimers/populateGifCategories.js
+```
