@@ -17,6 +17,41 @@ const rootPrefix = '../../..',
 // Node.js cookie parsing middleware.
 router.use(cookieParser(coreConstant.COOKIE_SECRET));
 
+/**
+ * Method to set login cookies
+ *
+ * @param responseObject
+ * @param cookieValue
+ */
+function setLoginCookies(responseObject, cookieValue) {
+  // TODO: Cookie Security Review.
+  // TODO: Read: https://expressjs.com/en/advanced/best-practice-security.html#use-cookies-securely
+  const options = {
+    maxAge: 1000 * 60 * 15, // Cookie would expire after 15 minutes.
+    httpOnly: true, // The cookie only accessible by the web server.
+    signed: true, // Indicates if the cookie should be signed.
+    path: '/'
+  };
+
+  // For non-development environments
+  if (basicHelper.isProduction()) {
+    options.secure = true; // To ensure browser sends cookie over https.
+    options.domain = coreConstant.PA_DOMAIN;
+  }
+
+  // Set cookie
+  responseObject.cookie(userConstant.loginCookieName, cookieValue, options); // Options is optional.
+}
+
+/**
+ * Method to delete login cookie
+ *
+ * @param responseObject
+ */
+function deleteLoginCookie(responseObject) {
+  responseObject.clearCookie(userConstant.loginCookieName);
+}
+
 /* Create user*/
 router.post('/sign-up', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.signUp;
@@ -70,47 +105,13 @@ router.post('/login', sanitizer.sanitizeDynamicUrlParams, function(req, res, nex
   );
 });
 
-router.post('/logout', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+/* Logout user*/
+router.post('/logout', sanitizer.sanitizeDynamicUrlParams, function(req, res) {
   req.decodedParams.apiName = apiName.logout;
   const errorConfig = basicHelper.fetchErrorConfig(req.decodedParams.apiVersion);
   const responseObject = responseHelper.successWithData({});
   deleteLoginCookie(res);
   Promise.resolve(responseObject.renderResponse(res, errorConfig));
 });
-
-/**
- * Method to set login cookies
- *
- * @param responseObject
- * @param cookieValue
- */
-function setLoginCookies(responseObject, cookieValue) {
-  //TODO: Cookie Security Review.
-  //TODO: Read: https://expressjs.com/en/advanced/best-practice-security.html#use-cookies-securely
-  let options = {
-    maxAge: 1000 * 60 * 15, // would expire after 15 minutes
-    httpOnly: true, // The cookie only accessible by the web server
-    signed: true, // Indicates if the cookie should be signed
-    path: '/'
-  };
-
-  // For non-development environments
-  if (basicHelper.isProduction()) {
-    options.secure = true; // to ensure browser sends cookie over https
-    options.domain = coreConstant.PA_DOMAIN;
-  }
-
-  // Set cookie
-  responseObject.cookie(userConstant.loginCookieName, cookieValue, options); // options is optional
-}
-
-/**
- * Method to delete login cookie
- *
- * @param responseObject
- */
-function deleteLoginCookie(responseObject) {
-  responseObject.clearCookie(userConstant.loginCookieName);
-}
 
 module.exports = router;
