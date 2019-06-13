@@ -79,15 +79,16 @@ class WebhooksSubscription {
    * @returns {Promise<never>}
    */
   async seedWebhooksDataInTable() {
-    const oThis = this;
+    const oThis = this,
+      currentTime = Math.floor(Date.now() / 1000);
 
     // Insert user in database
     let insertResponse = await new WebhooksModel()
       .insert({
         ost_id: oThis.webhooksData.id,
         status: webhookConstants.invertedStatuses[oThis.webhooksData.status],
-        created_at: Date.now() / 1000,
-        updated_at: Date.now() / 1000
+        created_at: currentTime,
+        updated_at: currentTime
       })
       .fire();
 
