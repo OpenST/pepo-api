@@ -41,6 +41,7 @@ router.get('/caching-test-1', function(req, res, next) {
 
   const performer = function() {
     console.log('\n\nreq.headers: ', req.headers);
+    console.log('req.cookies: ', req.cookies);
     console.log('req.query: ', req.query);
     console.log('req.body: ', req.body);
 
@@ -49,9 +50,11 @@ router.get('/caching-test-1', function(req, res, next) {
     let headerDt;
 
     if (req.headers['if-none-match']) {
+      // value from ETag response header
       let dtStr = decodeString(req.headers['if-none-match']);
       headerDt = new Date(dtStr);
     } else if (req.headers['if-modified-since']) {
+      // value from Last-Modified response header
       headerDt = new Date(req.headers['if-modified-since']);
     }
 
@@ -59,14 +62,22 @@ router.get('/caching-test-1', function(req, res, next) {
 
     console.log('currentMinute: ', currentMinute, ' --- headerMinute', headerMinute);
     if (currentMinute === headerMinute) {
+      // res.cookie('bl_ck1', dt.toString(), {maxAge: 900000, httpOnly: true});
+
       res.status(304).send();
     } else {
+      // Set headers
       res.setHeader('Date', dt);
       res.setHeader('Last-Modified', dt);
       let etagData = encodeString(dt);
       res.setHeader('ETag', etagData);
       res.setHeader('Vary', '*');
-      res.setHeader('Cache-Control', 'max-age=60, s-maxage=60, must-revalidate');
+      res.setHeader('Cache-Control', 'max-age=120, must-revalidate');
+
+      // Set cookie
+      // res.cookie('bl_ck1',dt.toString(), { maxAge: 900000, httpOnly: true });
+
+      // Set response
       res.status(200).json({ minute: currentMinute, date: dt });
     }
   };
