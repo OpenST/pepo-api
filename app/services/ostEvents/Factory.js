@@ -1,5 +1,6 @@
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
+  ActivationInitiateClass = require(rootPrefix + '/app/services/ostEvents/users/ActivationInitiated'),
   ActivationSuccessClass = require(rootPrefix + '/app/services/ostEvents/users/ActivationSuccess'),
   FailureTransactionClass = require(rootPrefix + '/app/services/ostEvents/transactions/Failure'),
   SuccessTransactionClass = require(rootPrefix + '/app/services/ostEvents/transactions/Success'),
@@ -24,6 +25,7 @@ class OstEventProcess extends ServiceBase {
     oThis.ostEventTopic = oThis.eventData.topic;
 
     oThis.eventClassMapping = {
+      [ostEventConstant.usersActivationInitiateOstWebhookTopic]: ActivationInitiateClass,
       [ostEventConstant.usersActivationSuccessOstWebhookTopic]: ActivationSuccessClass,
       [ostEventConstant.transactionsFailureOstWebhookTopic]: FailureTransactionClass,
       [ostEventConstant.transactionsSuccessOstWebhookTopic]: SuccessTransactionClass

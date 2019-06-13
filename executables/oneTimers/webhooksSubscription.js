@@ -47,7 +47,13 @@ class WebhooksSubscription {
 
     let webhookUrl = webhookConstants.webhookUrl;
     let params = {
-      topics: ['transactions/success', 'transactions/failure', 'users/activation_success', 'users/activation_failure'],
+      topics: [
+        'transactions/success',
+        'transactions/failure',
+        'users/activation_initiate',
+        'users/activation_success',
+        'users/activation_failure'
+      ],
       url: webhookUrl,
       status: webhookConstants.active
     };

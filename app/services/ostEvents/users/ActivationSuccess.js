@@ -1,8 +1,5 @@
 const rootPrefix = '../../../..',
-  ServiceBase = require(rootPrefix + '/app/services/Base'),
-  CommonValidators = require(rootPrefix + '/lib/validators/Common'),
-  TokenUserByOstUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TokenUserByOstUserIds'),
-  TokenUserDetailByUserIdCache = require(rootPrefix + '/lib/cacheManagement/multi/TokenUserByUserIds'),
+  UserOstEventBase = require(rootPrefix + '/app/services/ostEvents/users/Base'),
   TokenUserModel = require(rootPrefix + '/app/models/mysql/TokenUser'),
   ExternalEntityModel = require(rootPrefix + '/app/models/mysql/ExternalEntity'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
@@ -13,11 +10,9 @@ const rootPrefix = '../../../..',
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   SecureTokenCache = require(rootPrefix + '/lib/cacheManagement/single/SecureToken');
 
-class UserActivationSuccess extends ServiceBase {
+class UserActivationSuccess extends UserOstEventBase {
   /**
    * @param {Object} params
-   * @param {String} params.result_type: Result Type
-   * @param {String} params.password: User
    *
    * @constructor
    */
@@ -25,12 +20,6 @@ class UserActivationSuccess extends ServiceBase {
     super(params);
 
     const oThis = this;
-
-    oThis.ostUser = params.data.user;
-
-    oThis.ostUserid = oThis.ostUser.id;
-    oThis.ostUserTokenHolderAddress = oThis.ostUser.token_holder_address.toLowerCase();
-    oThis.ostUserStatus = oThis.ostUser.status.toUpperCase();
 
     oThis.tokenUserObj = null;
     oThis.tokenData = null;
@@ -77,23 +66,18 @@ class UserActivationSuccess extends ServiceBase {
   async _validateAndSanitizeParams() {
     const oThis = this;
 
-    logger.log('Validate for user activation success');
-    let paramErrors = [];
-
-    if (!CommonValidators.validateEthAddress(oThis.ostUserTokenHolderAddress)) {
-      paramErrors.push('invalid_token_holder_address');
-    }
+    await super._validateAndSanitizeParams();
 
     if (oThis.ostUserStatus !== tokenUserConstants.activatedOstStatus) {
-      paramErrors.push('invalid_status');
+      oThis.paramErrors.push('invalid_status');
     }
 
-    if (paramErrors.length > 0) {
+    if (oThis.paramErrors.length > 0) {
       return Promise.reject(
         responseHelper.paramValidationError({
           internal_error_identifier: 's_oe_u_as_vas_1',
           api_error_identifier: 'invalid_api_params',
-          params_error_identifiers: paramErrors,
+          params_error_identifiers: oThis.paramErrors,
           debug_options: {}
         })
       );
@@ -113,33 +97,7 @@ class UserActivationSuccess extends ServiceBase {
   async _fetchTokenUser() {
     const oThis = this;
 
-    logger.log('Fetch Token User for user activation success');
-
-    let tokenUserObjsRes = await new TokenUserByOstUserIdsCache({ ostUserIds: [oThis.ostUserid] }).fetch();
-    let tokenUserObjRes = tokenUserObjsRes.data[oThis.ostUserid];
-
-    if (!tokenUserObjRes.userId) {
-      return Promise.reject(
-        responseHelper.error({
-          internal_error_identifier: 's_oe_u_as_ftu_1',
-          api_error_identifier: 'resource_not_found'
-        })
-      );
-    }
-
-    oThis.userId = tokenUserObjRes.userId;
-
-    tokenUserObjsRes = await new TokenUserDetailByUserIdCache({ userIds: [oThis.userId] }).fetch();
-    oThis.tokenUserObj = tokenUserObjsRes.data[oThis.userId];
-
-    if (!oThis.tokenUserObj.id) {
-      return Promise.reject(
-        responseHelper.error({
-          internal_error_identifier: 's_oe_u_as_ftu_2',
-          api_error_identifier: 'something_went_wrong'
-        })
-      );
-    }
+    await super._fetchTokenUser();
 
     if (
       oThis.tokenUserObj.ostStatus === tokenUserConstants.activatedOstStatus &&
@@ -149,7 +107,7 @@ class UserActivationSuccess extends ServiceBase {
         responseHelper.error({
           internal_error_identifier: 's_oe_u_as_ftu_3',
           api_error_identifier: 'something_went_wrong',
-          debug_options: { tokenUserObj: tokenUserObj, ostUser: oThis.ostUser }
+          debug_options: { tokenUserObj: oThis.tokenUserObj, ostUser: oThis.ostUser }
         })
       );
     }
