@@ -76,10 +76,7 @@ class UserActivationInitiated extends UserOstEventBase {
       return rsp;
     }
 
-    if (
-      oThis.tokenUserObj.ostStatus === tokenUserConstants.activatingOstStatus &&
-      oThis.tokenUserObj.ost_token_holder_address !== oThis.ostUserTokenHolderAddress
-    ) {
+    if (oThis.tokenUserObj.ostStatus === tokenUserConstants.activatingOstStatus) {
       return Promise.reject(
         responseHelper.error({
           internal_error_identifier: 's_oe_u_ai_ftu_2',
@@ -110,7 +107,6 @@ class UserActivationInitiated extends UserOstEventBase {
 
     await new TokenUserModel()
       .update({
-        ost_token_holder_address: oThis.ostUserTokenHolderAddress,
         ost_status: tokenUserConstants.invertedOstStatuses[oThis.ostUserStatus]
       })
       .where(['id = ?', oThis.tokenUserObj.id])
