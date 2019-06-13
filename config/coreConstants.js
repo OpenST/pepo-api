@@ -22,6 +22,10 @@ class CoreConstants {
     return process.env.PA_DOMAIN;
   }
 
+  get PA_COOKIE_DOMAIN() {
+    return process.env.PA_COOKIE_DOMAIN;
+  }
+
   // Cache related details
 
   get CACHE_ENGINE() {
@@ -76,14 +80,12 @@ class CoreConstants {
     return process.env.PA_API_KEY_KMS_ID;
   }
 
-  //TODO: CHANGE name "known addr" to something else
-  get KMS_KNOWN_ADDR_KEY_ARN() {
-    return process.env.PA_KNOWN_ADDRESS_KMS_ARN;
+  get KMS_SECRET_ENC_KEY_ARN() {
+    return process.env.PA_SECRET_ENC_KEY_KMS_ARN;
   }
 
-  //TODO: CHANGE name "known addr" to something else
-  get KMS_KNOWN_ADDR_KEY_ID() {
-    return process.env.PA_KNOWN_ADDRESS_KMS_ID;
+  get KMS_SECRET_ENC_KEY_ID() {
+    return process.env.PA_SECRET_ENC_KEY_KMS_ID;
   }
 
   // Encryption Secrets
