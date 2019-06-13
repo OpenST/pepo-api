@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "8cc30b64-83b6-410f-8578-db540f4a1bd8",
+		"_postman_id": "6908e459-ca96-4960-8a91-fd9ed163cbd1",
 		"name": "pepo-api",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -97,6 +97,37 @@
 								"v1",
 								"auth",
 								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "logout",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/x-www-form-urlencoded"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": []
+						},
+						"url": {
+							"raw": "{{api_server}}/api/v1/auth/logout",
+							"host": [
+								"{{api_server}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"logout"
 							]
 						}
 					},
