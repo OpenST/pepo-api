@@ -9,7 +9,7 @@ const program = require('commander');
 
 const rootPrefix = '../..',
   GifCategoryModel = require(rootPrefix + '/app/models/mysql/GifCategory'),
-  GifsCacheKlass = require(rootPrefix + '/lib/cacheManagement/single/GifsByKeyword'),
+  GifsCacheByKeyword = require(rootPrefix + '/lib/cacheManagement/single/GifsByKeyword'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger');
 
 const KNOWN_CATEGORIES = [
@@ -84,7 +84,7 @@ class PopulateGifCategories {
     const oThis = this;
 
     // Fetch set of random Gifs
-    let resp = await new GifsCacheKlass({
+    let resp = await new GifsCacheByKeyword({
       query: categoryName,
       pageNumber: Math.floor(Math.random() * 10 + 1)
     }).fetch();

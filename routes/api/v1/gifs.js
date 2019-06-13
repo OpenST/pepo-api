@@ -28,6 +28,24 @@ router.get('/search', sanitizer.sanitizeDynamicUrlParams, function(req, res, nex
   Promise.resolve(routeHelper.perform(req, res, next, '/gifs/Search', 'r_a_v1_g_s_1', null, dataFormatterFunc));
 });
 
+router.get('/trending', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.gifsTrending;
+
+  const dataFormatterFunc = async function(serviceResponse) {
+    const wrapperFormatterRsp = await new WrapperFormatter({
+      resultType: entityType.gifs,
+      entityKindToResponseKeyMap: {
+        [entityType.gifs]: responseEntityKey.gifs
+      },
+      serviceData: serviceResponse.data
+    }).perform();
+
+    serviceResponse.data = wrapperFormatterRsp.data;
+  };
+
+  Promise.resolve(routeHelper.perform(req, res, next, '/gifs/Trending', 'r_a_v1_g_t_1', null, dataFormatterFunc));
+});
+
 router.get('/categories', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.gifsCategories;
 
@@ -44,7 +62,7 @@ router.get('/categories', sanitizer.sanitizeDynamicUrlParams, function(req, res,
     serviceResponse.data = wrapperFormatterRsp.data;
   };
 
-  Promise.resolve(routeHelper.perform(req, res, next, '/gifs/GetCategories', 'r_a_v1_g_s_2', null, dataFormatterFunc));
+  Promise.resolve(routeHelper.perform(req, res, next, '/gifs/GetCategories', 'r_a_v1_g_c_1', null, dataFormatterFunc));
 });
 
 module.exports = router;

@@ -1,19 +1,18 @@
 /**
- * This service helps in searching Gifs for given search query
+ * This service helps in getting trending Gifs
  *
- * @module app/services/gifs/Search
+ * @module app/services/gifs/Trending
  */
 
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
-  GifsCacheByKeyword = require(rootPrefix + '/lib/cacheManagement/single/GifsByKeyword'),
+  GifsTrendingCache = require(rootPrefix + '/lib/cacheManagement/single/GifsTrending'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   responseHelper = require(rootPrefix + '/lib/formatter/response');
 
-class GifsSearch extends ServiceBase {
+class GifsTrending extends ServiceBase {
   /**
    * @param {Object} params
-   * @param {String} params.query
    * @param {Number} params.page_number
    *
    * @constructor
@@ -22,7 +21,6 @@ class GifsSearch extends ServiceBase {
     super(params);
 
     const oThis = this;
-    oThis.query = params.query;
     oThis.pageNumber = params.page_number;
   }
 
@@ -47,7 +45,7 @@ class GifsSearch extends ServiceBase {
    */
   async _searchGifs() {
     const oThis = this;
-    let resp = await new GifsCacheByKeyword({ query: oThis.query, pageNumber: oThis.pageNumber }).fetch();
+    let resp = await new GifsTrendingCache({ pageNumber: oThis.pageNumber }).fetch();
 
     if (resp.isFailure()) {
       logger.error('Error while fetching gifs');
@@ -58,4 +56,4 @@ class GifsSearch extends ServiceBase {
   }
 }
 
-module.exports = GifsSearch;
+module.exports = GifsTrending;

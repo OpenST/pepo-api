@@ -115,6 +115,15 @@ const v1Signature = {
       }
     ]
   },
+  [apiName.gifsTrending]: {
+    mandatory: [],
+    optional: [
+      {
+        parameter: 'page_number',
+        validatorMethods: ['validateNonZeroInteger']
+      }
+    ]
+  },
   [apiName.userFeed]: {
     mandatory: [
       {
