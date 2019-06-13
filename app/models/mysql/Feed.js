@@ -1,13 +1,13 @@
 const rootPrefix = '../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
-  feedsConstants = require(rootPrefix + '/lib/globalConstant/feed'),
-  coreConstants = require(rootPrefix + '/config/coreConstants');
+  coreConstants = require(rootPrefix + '/config/coreConstants'),
+  feedsConstants = require(rootPrefix + '/lib/globalConstant/feed');
 
 const dbName = 'pepo_api_' + coreConstants.environment;
 
 class FeedModel extends ModelBase {
   /**
-   * Feed model
+   * Constructor for feed model.
    *
    * @constructor
    */
@@ -20,8 +20,10 @@ class FeedModel extends ModelBase {
   }
 
   /**
+   * Format db data.
    *
-   * @param dbRow
+   * @param {object} dbRow
+   *
    * @return {object}
    */
   formatDbData(dbRow) {
@@ -37,16 +39,17 @@ class FeedModel extends ModelBase {
     };
   }
 
-  /***
-   * Fetch feed by externalEntityId
+  /**
+   * Fetch feed by externalEntityId.
    *
-   * @param externalEntityId {Integer} - externalEntityId
+   * @param {number} externalEntityId
    *
-   * @return {Object}
+   * @return {object}
    */
   async fetchByPrimaryExternalEntityId(externalEntityId) {
     const oThis = this;
-    let dbRows = await oThis
+
+    const dbRows = await oThis
       .select('*')
       .where({ primary_external_entity_id: externalEntityId })
       .fire();
@@ -54,52 +57,55 @@ class FeedModel extends ModelBase {
     if (dbRows.length === 0) {
       return {};
     }
+
     return oThis.formatDbData(dbRows[0]);
   }
 
-  /***
-   * Fetch feed by id
+  /**
+   * Fetch feed by id.
    *
-   * @param id {Integer} - id
+   * @param {number} id: id
    *
-   * @return {Object}
+   * @return {object}
    */
   async fetchById(id) {
     const oThis = this;
-    let dbRows = await oThis.fetchByIds([id]);
+
+    const dbRows = await oThis.fetchByIds([id]);
 
     return dbRows[id] || {};
   }
 
-  /***
-   * Fetch feeds for given ids
+  /**
+   * Fetch feeds for given ids.
    *
-   * @param Ids {Array} - Feed Ids
+   * @param {array} ids: Feed Ids
    *
    * @return {Object}
    */
   async fetchByIds(ids) {
     const oThis = this;
-    let response = {};
 
-    let dbRows = await oThis
+    const response = {};
+
+    const dbRows = await oThis
       .select('*')
       .where(['id IN (?)', ids])
       .fire();
 
     for (let index = 0; index < dbRows.length; index++) {
-      let formatDbRow = oThis.formatDbData(dbRows[index]);
+      const formatDbRow = oThis.formatDbData(dbRows[index]);
       response[formatDbRow.id] = formatDbRow;
     }
 
     return response;
   }
 
-  /***
-   * Flush cache
+  /**
+   * Flush cache.
    *
    * @param {object} params
-   * @param {Integer} params.id
+   * @param {number} params.id
    *
    * @returns {Promise<*>}
    */
