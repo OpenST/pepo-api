@@ -19,8 +19,9 @@ class UserFeed extends ServiceBase {
    * Constructor for user feed service.
    *
    * @param {object} params
-   * @param {string} params.current_user
-   * @param {string} params.user_id
+   * @param {object} params.current_user
+   * @param {string/number} params.current_user.id
+   * @param {string/number} params.user_id
    * @param {number/string} [params.limit]
    * @param {string} [params.limit.pagination_identifier]
    *
@@ -43,10 +44,8 @@ class UserFeed extends ServiceBase {
     oThis.feedIdToFeedDetailsMap = {};
     oThis.giphyKindExternalEntityIdToFeedIdMap = {};
     oThis.usersByIdMap = {};
-    oThis.userIds = {};
+    oThis.userIds = [];
     oThis.externalEntityIds = [];
-    oThis.ostTransactionIds = [];
-    oThis.giphyTransactionIds = [];
     oThis.ostTransactionsMap = {};
     oThis.gifsMap = {};
     oThis.responseMetaData = {
@@ -120,7 +119,7 @@ class UserFeed extends ServiceBase {
       userId: oThis.currentUserId
     };
 
-    if (oThis.isCurrentUser) {
+    if (!oThis.isCurrentUser) {
       fetchFeedIdsParams.privacyType = userFeedConstants.publicPrivacyType;
     }
 
@@ -133,7 +132,7 @@ class UserFeed extends ServiceBase {
   /**
    * Fetch feed details.
    *
-   * @sets oThis.feedIdToFeedDetailsMap, oThis.externalEntityIds
+   * @sets oThis.feedIdToFeedDetailsMap, oThis.externalEntityIds, oThis.giphyKindExternalEntityIdToFeedIdMap
    *
    * @returns {Promise<void>}
    * @private
@@ -141,13 +140,13 @@ class UserFeed extends ServiceBase {
   async _fetchFeedDetails() {
     const oThis = this;
 
-    const feedByIdsCacheRsp = await new FeedByIdsCache({ ids: oThis.feedIds }).fetch();
+    const cacheResp = await new FeedByIdsCache({ ids: oThis.feedIds }).fetch();
 
-    if (feedByIdsCacheRsp.isFailure()) {
+    if (cacheResp.isFailure()) {
       return Promise.reject(new Error(`Details for some or all of the feed Ids: ${oThis.feedIds} unavailable.`));
     }
 
-    oThis.feedIdToFeedDetailsMap = feedByIdsCacheRsp.data;
+    oThis.feedIdToFeedDetailsMap = cacheResp.data;
 
     for (let index = 0; index < oThis.feedIds.length; index++) {
       const feedId = oThis.feedIds[index];
@@ -164,6 +163,8 @@ class UserFeed extends ServiceBase {
       oThis.externalEntityIds.push(feedDetails.primaryExternalEntityId); // OST transaction ID.
       oThis.externalEntityIds.push(feedExtraData.giphyExternalEntityId); // GIF external entity table ID.
     }
+
+    oThis.externalEntityIds = [...new Set(oThis.externalEntityIds)]; // Removes duplication.
 
     return responseHelper.successWithData({});
   }
@@ -219,9 +220,9 @@ class UserFeed extends ServiceBase {
           // OST Transaction is mapped with external entity table ID.
 
           // Fetch users.
-          oThis.userIds[externalEntityExtraData.from_user_id] = 1;
+          oThis.userIds.push(externalEntityExtraData.from_user_id);
           for (let index = 0; index < externalEntityExtraData.to_user_ids.length; index++) {
-            oThis.userIds[externalEntityExtraData.to_user_ids[index]] = 1;
+            oThis.userIds.push(externalEntityExtraData.to_user_ids[index]);
           }
 
           break;
@@ -250,6 +251,8 @@ class UserFeed extends ServiceBase {
       console.log('===========finished==========');
     }
 
+    oThis.userIds = [...new Set(oThis.userIds)]; // Removes duplication.
+
     return responseHelper.successWithData({});
   }
 
@@ -264,7 +267,12 @@ class UserFeed extends ServiceBase {
   async _fetchUsers() {
     const oThis = this;
 
-    const cacheResp = await new UserMultiCache({ ids: Object.keys(oThis.userIds) }).fetch();
+    const cacheResp = await new UserMultiCache({ ids: oThis.userIds }).fetch();
+
+    if (cacheResp.isFailure()) {
+      return Promise.reject(new Error(`Details for some or all of the user Ids: ${oThis.userIds} unavailable.`));
+    }
+
     oThis.usersByIdMap = cacheResp.data;
 
     return responseHelper.successWithData({});
@@ -281,7 +289,7 @@ class UserFeed extends ServiceBase {
 
     const nextPagePayloadKey = {};
 
-    if (oThis.userIds.length > 0) {
+    if (oThis.feedIds.length > 0) {
       nextPagePayloadKey[paginationConstants.paginationIdentifierKey] = {
         page: oThis.page + 1,
         limit: oThis.limit
