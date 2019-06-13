@@ -108,18 +108,9 @@ class UserActivationInitiated extends UserOstEventBase {
       return Promise.resolve(responseHelper.successWithData({}));
     }
 
-    let propertyVal = oThis.tokenUserObj.properties;
-
-    propertyVal = new TokenUserModel().setBitwise(
-      'properties',
-      propertyVal,
-      tokenUserConstants.userActivationInitiated
-    );
-
     await new TokenUserModel()
       .update({
         ost_token_holder_address: oThis.ostUserTokenHolderAddress,
-        properties: propertyVal,
         ost_status: tokenUserConstants.invertedOstStatuses[oThis.ostUserStatus]
       })
       .where(['id = ?', oThis.tokenUserObj.id])
