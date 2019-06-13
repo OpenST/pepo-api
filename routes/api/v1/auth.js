@@ -11,6 +11,7 @@ const rootPrefix = '../../..',
   entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
   responseEntityKey = require(rootPrefix + '/lib/globalConstant/responseEntityKey'),
   basicHelper = require(rootPrefix + '/helpers/basic'),
+  responseHelper = require(rootPrefix + '/lib/formatter/response'),
   userConstant = require(rootPrefix + '/lib/globalConstant/user');
 
 // Node.js cookie parsing middleware.
@@ -67,6 +68,14 @@ router.post('/login', sanitizer.sanitizeDynamicUrlParams, function(req, res, nex
   Promise.resolve(
     routeHelper.perform(req, res, next, '/user/Login', 'r_a_v1_a_2', null, onServiceSuccess, onServiceFailure)
   );
+});
+
+router.post('/logout', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.logout;
+  const errorConfig = basicHelper.fetchErrorConfig(req.decodedParams.apiVersion);
+  const responseObject = responseHelper.successWithData({});
+  deleteLoginCookie(res);
+  Promise.resolve(responseObject.renderResponse(res, errorConfig));
 });
 
 /**
