@@ -14,8 +14,8 @@ router.get('/public-feed', sanitizer.sanitizeDynamicUrlParams, function(req, res
 
   const dataFormatterFunc = async function(serviceResponse) {
     const wrapperFormatterRsp = await new WrapperFormatter({
-      resultType: entityType.feeds,
-      entities: [entityType.feeds],
+      resultType: entityType.feed,
+      entities: [entityType.feed],
       serviceData: serviceResponse.data
     }).perform();
 
