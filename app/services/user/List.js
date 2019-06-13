@@ -157,10 +157,11 @@ class UserList extends ServiceBase {
    * @private
    */
   finalResponse() {
-    const oThis = this,
-      nextPagePayloadKey = {};
+    const oThis = this;
 
-    if (oThis.userIds.length > 0) {
+    let nextPagePayloadKey = {};
+
+    if (oThis.userIds.length == oThis.limit) {
       nextPagePayloadKey[pagination.paginationIdentifierKey] = {
         page: oThis.page + 1,
         limit: oThis.limit
