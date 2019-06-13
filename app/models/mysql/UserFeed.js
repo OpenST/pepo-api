@@ -154,7 +154,7 @@ class UserFeedModel extends ModelBase {
    * Flush cache
    *
    * @param {object} params
-   * @param {Integer} params.Id
+   * @param {Integer} params.id
    *
    * @returns {Promise<*>}
    */
@@ -162,7 +162,7 @@ class UserFeedModel extends ModelBase {
     const UserFeedByIds = require(rootPrefix + '/lib/cacheManagement/multi/UserFeedByIds');
 
     await new UserFeedByIds({
-      ids: [params.Id]
+      ids: [params.id]
     }).clear();
   }
 }
