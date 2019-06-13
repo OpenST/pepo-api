@@ -86,4 +86,28 @@ router.get('/current', sanitizer.sanitizeDynamicUrlParams, function(req, res, ne
   Promise.resolve(routeHelper.perform(req, res, next, '/user/CurrentUser', 'r_a_v1_u_4', null, dataFormatterFunc));
 });
 
+/* User Feeds*/
+router.get('/feeds/:user_id', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.userFeed;
+  req.decodedParams.user_id = req.params.user_id;
+
+  const dataFormatterFunc = async function(serviceResponse) {
+    const wrapperFormatterRsp = await new WrapperFormatter({
+      resultType: responseEntityKey.feeds,
+      entityKindToResponseKeyMap: {
+        [entityType.feeds]: responseEntityKey.feeds,
+        [entityType.users]: responseEntityKey.users,
+        [entityType.meta]: responseEntityKey.meta,
+        [entityType.ostTransactionMap]: responseEntityKey.ostTransaction,
+        [entityType.gifsMap]: responseEntityKey.gifs
+      },
+      serviceData: serviceResponse.data
+    }).perform();
+
+    serviceResponse.data = wrapperFormatterRsp.data;
+  };
+
+  Promise.resolve(routeHelper.perform(req, res, next, '/feed/User', 'r_a_v1_u_5', null, dataFormatterFunc));
+});
+
 module.exports = router;

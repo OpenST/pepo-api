@@ -115,11 +115,15 @@ const v1Signature = {
       }
     ]
   },
-  [apiName.myFeed]: {
+  [apiName.userFeed]: {
     mandatory: [
       {
         parameter: 'current_user',
         validatorMethods: ['validateObject']
+      },
+      {
+        parameter: 'user_id',
+        validatorMethods: ['validateInteger']
       }
     ],
     optional: [

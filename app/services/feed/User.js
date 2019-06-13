@@ -19,8 +19,9 @@ class UserFeed extends ServiceBase {
    *
    * @param {object} params
    * @param {string} params.current_user
-   * @param {number/string} params.limit
-   * @param {string} params.limit.pagination_identifier
+   * @param {string} params.user_id
+   * @param {number/string} [params.limit]
+   * @param {string} [params.limit.pagination_identifier]
    *
    * @augments ServiceBase
    */
@@ -29,21 +30,22 @@ class UserFeed extends ServiceBase {
 
     const oThis = this;
 
-    oThis.current_user = params.current_user;
-    oThis.currentUserId = oThis.current_user.id;
+    oThis.currentUserId = params.current_user.id;
+    oThis.profileUserId = params.user_id;
     oThis.limit = params.limit;
     oThis.paginationIdentifier = params[paginationConstants.paginationIdentifierKey] || null;
 
     oThis.page = null;
     oThis.feedIds = [];
     oThis.feedIdToFeedDetailsMap = {};
+    oThis.giphyKindExternalEntityIdToFeedIdMap = {};
     oThis.usersByIdMap = {};
     oThis.userIds = {};
     oThis.externalEntityIds = [];
     oThis.ostTransactionIds = [];
     oThis.giphyTransactionIds = [];
-    oThis.externalEntityIdToDetailsMap = {};
-    oThis.externalEntityIdsResponseMap = { ost_transactions: {}, gif_details: {} };
+    oThis.ostTransactionsMap = {};
+    oThis.gifsMap = {};
     oThis.responseMetaData = {
       [paginationConstants.nextPagePayloadKey]: {}
     };
@@ -109,6 +111,7 @@ class UserFeed extends ServiceBase {
   async _fetchUserFeedIds() {
     const oThis = this;
 
+    // TODO: @Shlok @Tejas Change the condition.
     oThis.feedIds = await new UserFeedModel().fetchFeedIds({
       limit: oThis.limit,
       page: oThis.page,
@@ -139,9 +142,18 @@ class UserFeed extends ServiceBase {
 
     for (let index = 0; index < oThis.feedIds.length; index++) {
       const feedId = oThis.feedIds[index];
-      const feedDetails = oThis.feedIdToFeedDetailsMap[feedId];
+      const feedDetails = oThis.feedIdToFeedDetailsMap[feedId],
+        feedExtraData = feedDetails.extraData;
 
-      oThis.externalEntityIds.push(feedDetails.primaryExternalEntityId);
+      oThis.feedIdToFeedDetailsMap[feedId].payload = {
+        text: feedExtraData.text,
+        ost_transaction_id: feedDetails.primaryExternalEntityId
+      };
+
+      oThis.giphyKindExternalEntityIdToFeedIdMap[feedExtraData.giphyExternalEntityId] = feedId;
+
+      oThis.externalEntityIds.push(feedDetails.primaryExternalEntityId); // OST transaction ID.
+      oThis.externalEntityIds.push(feedExtraData.giphyExternalEntityId); // GIF external entity table ID.
     }
 
     return responseHelper.successWithData({});
@@ -150,7 +162,7 @@ class UserFeed extends ServiceBase {
   /**
    * Fetch external entities data.
    *
-   * @sets oThis.externalEntityIdToDetailsMap, oThis.userIds
+   * @sets  oThis.userIds
    *
    * @returns {Promise<void>}
    * @private
@@ -158,23 +170,35 @@ class UserFeed extends ServiceBase {
   async _fetchExternalEntities() {
     const oThis = this;
 
-    oThis.externalEntityIdToDetailsMap = await new ExternalEntityByIdsCache({ ids: oThis.externalEntityIds }).fetch();
+    // Fetch external entity details.
+    const cacheResp = await new ExternalEntityByIdsCache({ ids: oThis.externalEntityIds }).fetch();
 
-    if (oThis.externalEntityIdToDetailsMap.isFailure()) {
+    if (cacheResp.isFailure()) {
       return Promise.reject(
         new Error(`Details for some or all of the external entity Ids: ${oThis.externalEntityIds} unavailable.`)
       );
     }
 
+    const externalEntityIdToDetailsMap = cacheResp.data;
+
+    console.log('====externalEntityIdToDetailsMap====', externalEntityIdToDetailsMap);
+
+    // Loop over external entity ids to ensure data is in order.
     for (
       let externalEntityIdIndex = 0;
       externalEntityIdIndex < oThis.externalEntityIds.length;
       externalEntityIdIndex++
     ) {
-      const externalEntityId = oThis.externalEntityIds[externalEntityIdIndex];
+      const externalEntityTableId = oThis.externalEntityIds[externalEntityIdIndex];
 
-      const externalEntityDetails = oThis.externalEntityIdToDetailsMap[externalEntityId];
+      // Fetch external entity details.
+      const externalEntityDetails = externalEntityIdToDetailsMap[externalEntityTableId];
+
+      console.log('====externalEntityTableId====', externalEntityTableId);
+      console.log('====externalEntityDetails====', externalEntityDetails);
+
       const externalEntityExtraData = externalEntityDetails.extraData;
+      const externalEntityTableEntityId = externalEntityDetails.entityId;
 
       if (!externalEntityExtraData) {
         return Promise.reject(new Error('External data for external entity is null'));
@@ -182,10 +206,11 @@ class UserFeed extends ServiceBase {
 
       switch (externalEntityDetails.entityKind) {
         case externalEntityConstants.ostTransactionEntityKind: {
-          oThis.externalEntityIdsResponseMap.ost_transactions[externalEntityDetails.entityId] = externalEntityExtraData;
+          oThis.ostTransactionsMap[externalEntityTableId] = externalEntityExtraData;
+          // OST Transaction is mapped with external entity table ID.
 
+          // Fetch users.
           oThis.userIds[externalEntityExtraData.from_user_id] = 1;
-
           for (let index = 0; index < externalEntityExtraData.to_user_ids.length; index++) {
             oThis.userIds[externalEntityExtraData.to_user_ids[index]] = 1;
           }
@@ -193,13 +218,27 @@ class UserFeed extends ServiceBase {
           break;
         }
         case externalEntityConstants.giphyEntityKind: {
-          oThis.externalEntityIdsResponseMap.gif_details[externalEntityDetails.entityId] = externalEntityExtraData;
+          oThis.gifsMap[externalEntityTableEntityId] = externalEntityExtraData;
+
+          console.log(
+            '=====oThis.giphyKindExternalEntityIdToFeedIdMap====',
+            oThis.giphyKindExternalEntityIdToFeedIdMap
+          );
+          console.log('=====oThis.feedIdToFeedDetailsMap====', oThis.feedIdToFeedDetailsMap);
+
+          // Insert entityId in feed details payload.
+          const feedId = oThis.giphyKindExternalEntityIdToFeedIdMap[externalEntityTableId];
+          console.log('===feedId=====', feedId);
+          oThis.feedIdToFeedDetailsMap[feedId].payload.gif_detail_id = externalEntityTableEntityId;
+
           break;
         }
         default: {
           throw new Error('Invalid entity kind.');
         }
       }
+
+      console.log('===========finished==========');
     }
 
     return responseHelper.successWithData({});
@@ -229,8 +268,9 @@ class UserFeed extends ServiceBase {
    * @private
    */
   _finalResponse() {
-    const oThis = this,
-      nextPagePayloadKey = {};
+    const oThis = this;
+
+    const nextPagePayloadKey = {};
 
     if (oThis.userIds.length > 0) {
       nextPagePayloadKey[paginationConstants.paginationIdentifierKey] = {
@@ -239,17 +279,56 @@ class UserFeed extends ServiceBase {
       };
     }
 
-    let responseMetaData = {
+    const responseMetaData = {
       [paginationConstants.nextPagePayloadKey]: nextPagePayloadKey
     };
 
     return {
       feedIds: oThis.feedIds,
       feedIdToFeedDetailsMap: oThis.feedIdToFeedDetailsMap,
-      externalEntityDetails: oThis.externalEntityIdsResponseMap,
+      ostTransactionsMap: oThis.ostTransactionsMap,
+      gifsMap: oThis.gifsMap,
       usersByIdMap: oThis.usersByIdMap,
       meta: responseMetaData
     };
+  }
+
+  /**
+   * Default page limit.
+   *
+   * @private
+   */
+  _defaultPageLimit() {
+    return paginationConstants.defaultUserListPageSize;
+  }
+
+  /**
+   * Min page limit.
+   *
+   * @private
+   */
+  _minPageLimit() {
+    return paginationConstants.minUserListPageSize;
+  }
+
+  /**
+   * Max page limit.
+   *
+   * @private
+   */
+  _maxPageLimit() {
+    return paginationConstants.maxUserListPageSize;
+  }
+
+  /**
+   * Current page limit.
+   *
+   * @private
+   */
+  _currentPageLimit() {
+    const oThis = this;
+
+    return oThis.limit;
   }
 }
 

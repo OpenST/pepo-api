@@ -38,7 +38,7 @@ class UserFeedModel extends ModelBase {
    * Fetch feed ids
    *
    * @param {object} params
-   * @param {Array} params.userId
+   * @param {array} params.userId
    * @param {number} [params.page]
    * @param {number} [params.limit]
    *
@@ -46,15 +46,14 @@ class UserFeedModel extends ModelBase {
    */
   async fetchFeedIds(params) {
     const oThis = this;
-    let response = {};
 
     const page = params.page || 1,
       limit = params.limit || 10,
       offset = (page - 1) * limit;
 
-    let feedIds = [];
+    const feedIds = [];
 
-    let dbRows = await oThis
+    const dbRows = await oThis
       .select('*')
       .where({ user_id: params.userId })
       .limit(limit)
@@ -67,7 +66,7 @@ class UserFeedModel extends ModelBase {
     }
 
     for (let index = 0; index < dbRows.length; index++) {
-      feedIds.push(response[dbRows[index].feed_id]);
+      feedIds.push(dbRows[index].feed_id);
     }
 
     return feedIds;
