@@ -10,17 +10,10 @@ const rootPrefix = '../../..',
   responseEntityKey = require(rootPrefix + '/lib/globalConstant/responseEntityKey');
 
 /* Expression*/
-router.post('/expression', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
-  req.decodedParams.apiName = apiName.expressionTransaction;
+router.post('/', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.ostTransaction;
 
-  Promise.resolve(routeHelper.perform(req, res, next, '/ostTransactions/Expression', 'r_a_v1_ot_1', null, null));
-});
-
-/* Send*/
-router.post('/send', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
-  req.decodedParams.apiName = apiName.expressionTransaction;
-
-  Promise.resolve(routeHelper.perform(req, res, next, '/ostTransactions/Expression', 'r_a_v1_ot_2', null, null));
+  Promise.resolve(routeHelper.perform(req, res, next, '/OstTransaction', 'r_a_v1_ot_1', null, null));
 });
 
 module.exports = router;

@@ -1,11 +1,12 @@
 /**
- * This service is base for ost transaction
+ * This service is for ost transaction
  *
  * Note:-
  */
 
-const rootPrefix = '../../..',
+const rootPrefix = '../../',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
+  commonValidator = require(rootPrefix + '/lib/validators/Common'),
   TokenUserByUserId = require(rootPrefix + '/lib/cacheManagement/multi/TokenUserByUserIds'),
   ExternalEntityByIds = require(rootPrefix + '/lib/cacheManagement/multi/ExternalEntityByIds'),
   ExternalEntityModel = require(rootPrefix + '/app/models/mysql/ExternalEntity'),
@@ -21,7 +22,7 @@ const rootPrefix = '../../..',
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   responseHelper = require(rootPrefix + '/lib/formatter/response');
 
-class Base extends ServiceBase {
+class OstTransaction extends ServiceBase {
   /**
    * @param {Object} params
    *
@@ -34,6 +35,7 @@ class Base extends ServiceBase {
     oThis.transactionUuid = params.ost_transaction_uuid;
     oThis.userId = params.current_user.id;
     oThis.privacyType = params.privacy_type.toUpperCase();
+
     oThis.giphyObject = params.meta.giphy;
     oThis.text = params.meta.text;
 
@@ -94,18 +96,44 @@ class Base extends ServiceBase {
       return true;
     }
 
-    //Check if giphy entity is present in external entities table.
-    let paramsForGiphy = {
-        entityId: oThis.giphyObject.id,
-        entityKind: externalEntityConstants.giphyEntityKind
-      },
-      cacheResponseForGiphy = await new ExternalEntitiesByEntityIdAndEntityKindCache(paramsForGiphy).fetch();
+    if (oThis._isGiphyPresent()) {
+      //Check if giphy entity is present in external entities table.
+      let paramsForGiphy = {
+          entityId: oThis.giphyObject.id,
+          entityKind: externalEntityConstants.giphyEntityKind
+        },
+        cacheResponseForGiphy = await new ExternalEntitiesByEntityIdAndEntityKindCache(paramsForGiphy).fetch();
 
-    if (cacheResponseForGiphy.data.id) {
-      oThis.giphyExternalEntityId = cacheResponseForGiphy.data.id;
+      if (cacheResponseForGiphy.data.id) {
+        oThis.giphyExternalEntityId = cacheResponseForGiphy.data.id;
+      }
     }
 
     return false;
+  }
+
+  /**
+   * This function check if the giphy is present or not
+   *
+   * @returns {boolean}
+   * @private
+   */
+  _isGiphyPresent() {
+    const oThis = this;
+
+    return oThis.giphyObject !== undefined && oThis.giphyObject.id !== undefined;
+  }
+
+  /**
+   * This function check if the text is present or not
+   *
+   * @returns {boolean}
+   * @private
+   */
+  _isTextPresent() {
+    const oThis = this;
+
+    return !commonValidator.isVarNull(oThis.text) && oThis.text !== '';
   }
 
   /**
@@ -199,7 +227,7 @@ class Base extends ServiceBase {
 
     let promiseArray = [];
 
-    if (!oThis.giphyExternalEntityId) {
+    if (oThis._isGiphyPresent() && !oThis.giphyExternalEntityId) {
       promiseArray.push(oThis._insertGiphyInExternalEntities());
     }
 
@@ -322,14 +350,16 @@ class Base extends ServiceBase {
       throw new Error(`Invalid Ost Transaction Status. ExternalEntityId -${oThis.transactionExternalEntityId}`);
     }
 
-    extraData['giphyExternalEntityId'] = oThis.giphyExternalEntityId;
+    if (oThis._isGiphyPresent()) {
+      extraData['giphyExternalEntityId'] = oThis.giphyExternalEntityId;
+    }
 
-    if (oThis.text) {
+    if (oThis._isTextPresent()) {
       extraData['text'] = oThis.text;
     }
 
     let insertData = {
-      kind: oThis._transactionKind,
+      kind: feedConstants.invertedKinds[feedConstants.transactionKind],
       primary_external_entity_id: oThis.transactionExternalEntityId,
       extra_data: JSON.stringify(extraData),
       privacy_type: feedConstants.invertedPrivacyTypes[oThis.privacyType],
@@ -420,4 +450,4 @@ class Base extends ServiceBase {
   }
 }
 
-module.exports = Base;
+module.exports = OstTransaction;

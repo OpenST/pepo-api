@@ -150,47 +150,27 @@ const v1Signature = {
     mandatory: [],
     optional: []
   },
-  [apiName.expressionTransaction]: {
+  [apiName.ostTransaction]: {
     mandatory: [
       {
         parameter: 'ost_transaction_uuid',
         validatorMethods: ['validateUuidV4']
       },
       {
-        parameter: 'meta',
-        validatorMethods: ['validateObject', 'validateOstTransactionMeta']
+        parameter: 'current_user',
+        validatorMethods: ['validateObject']
       },
       {
         parameter: 'privacy_type',
         validatorMethods: ['validateString', 'validateFeedPrivacyType']
-      },
-      {
-        parameter: 'current_user',
-        validatorMethods: ['validateObject']
       }
     ],
-    optional: []
-  },
-  [apiName.sendTransaction]: {
-    mandatory: [
-      {
-        parameter: 'ost_transaction_uuid',
-        validatorMethods: ['validateUuidV4']
-      },
+    optional: [
       {
         parameter: 'meta',
         validatorMethods: ['validateObject', 'validateOstTransactionMeta']
-      },
-      {
-        parameter: 'privacy_type',
-        validatorMethods: ['validateString', 'validateFeedPrivacyType']
-      },
-      {
-        parameter: 'current_user',
-        validatorMethods: ['validateObject']
       }
-    ],
-    optional: []
+    ]
   }
 };
 
