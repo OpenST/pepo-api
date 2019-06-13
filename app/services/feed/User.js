@@ -5,6 +5,7 @@ const rootPrefix = '../../..',
   FeedByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/FeedByIds'),
   ExternalEntityByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/ExternalEntityByIds'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
+  userFeedConstants = require(rootPrefix + '/lib/globalConstant/userFeed'),
   paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination'),
   externalEntityConstants = require(rootPrefix + '/lib/globalConstant/externalEntity');
 
@@ -34,6 +35,8 @@ class UserFeed extends ServiceBase {
     oThis.profileUserId = params.user_id;
     oThis.limit = params.limit;
     oThis.paginationIdentifier = params[paginationConstants.paginationIdentifierKey] || null;
+
+    oThis.isCurrentUser = oThis.currentUserId === oThis.profileUserId;
 
     oThis.page = null;
     oThis.feedIds = [];
@@ -111,12 +114,18 @@ class UserFeed extends ServiceBase {
   async _fetchUserFeedIds() {
     const oThis = this;
 
-    // TODO: @Shlok @Tejas Change the condition.
-    oThis.feedIds = await new UserFeedModel().fetchFeedIds({
+    const fetchFeedIdsParams = {
       limit: oThis.limit,
       page: oThis.page,
       userId: oThis.currentUserId
-    });
+    };
+
+    if (oThis.isCurrentUser) {
+      fetchFeedIdsParams.privacyType = userFeedConstants.publicPrivacyType;
+    }
+
+    // TODO: @Shlok @Tejas Change the condition.
+    oThis.feedIds = await new UserFeedModel().fetchFeedIds(fetchFeedIdsParams);
 
     return responseHelper.successWithData({});
   }

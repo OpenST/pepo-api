@@ -41,6 +41,7 @@ class UserFeedModel extends ModelBase {
    *
    * @param {object} params
    * @param {array} params.userId
+   * @param {string} [params.privacyType]
    * @param {number} [params.page]
    * @param {number} [params.limit]
    *
@@ -55,9 +56,17 @@ class UserFeedModel extends ModelBase {
 
     const feedIds = [];
 
+    const whereClause = {
+      user_id: params.userId
+    };
+
+    if (params.privacyType && params.privacyType === userFeedConstants.publicPrivacyType) {
+      whereClause.privacy_type = userFeedConstants.invertedPrivacyTypes[userFeedConstants.publicPrivacyType];
+    }
+
     const dbRows = await oThis
       .select('*')
-      .where({ user_id: params.userId })
+      .where(whereClause)
       .limit(limit)
       .offset(offset)
       .order_by('published_ts DESC')
