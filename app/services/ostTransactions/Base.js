@@ -398,7 +398,7 @@ class Base extends ServiceBase {
       })
       .fire();
 
-    await UserFeedModel.flushCache({ Id: insertResponse.insertId });
+    await UserFeedModel.flushCache({ id: insertResponse.insertId });
 
     if (oThis.feedStatus === feedConstants.publishedStatus) {
       //Insert entry for to user ids as well.
@@ -411,7 +411,7 @@ class Base extends ServiceBase {
           })
           .fire();
 
-        await UserFeedModel.flushCache({ Id: toUserInsertResponse.insertId });
+        await UserFeedModel.flushCache({ id: toUserInsertResponse.insertId });
       }
     }
   }
