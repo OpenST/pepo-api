@@ -229,16 +229,17 @@ class UserFeed extends ServiceBase {
    * @private
    */
   _finalResponse() {
-    const oThis = this;
+    const oThis = this,
+      nextPagePayloadKey = {};
 
-    const nextPagePayloadKey = {
-      [paginationConstants.paginationIdentifierKey]: {
+    if (oThis.userIds.length > 0) {
+      nextPagePayloadKey[paginationConstants.paginationIdentifierKey] = {
         page: oThis.page + 1,
         limit: oThis.limit
-      }
-    };
+      };
+    }
 
-    const responseMetaData = {
+    let responseMetaData = {
       [paginationConstants.nextPagePayloadKey]: nextPagePayloadKey
     };
 
