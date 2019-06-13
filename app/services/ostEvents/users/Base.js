@@ -25,8 +25,7 @@ class UserOstEventBase extends ServiceBase {
   }
 
   /**
-   * Validate Request
-   *
+   * Validate and sanitize params.
    *
    * @return {Promise<void>}
    *
@@ -35,14 +34,17 @@ class UserOstEventBase extends ServiceBase {
   async _validateAndSanitizeParams() {
     const oThis = this;
 
-    logger.log('Validate for user activation initiate status');
+    logger.log('Validate user params.');
+
+    if (!CommonValidators.validateUuidV4(oThis.ostUserid)) {
+      oThis.paramErrors.push('invalid_user_id');
+    }
 
     return Promise.resolve(responseHelper.successWithData({}));
   }
 
   /**
-   * Fetch token user
-   *
+   * Fetch token user.
    *
    * @return {Promise<void>}
    *

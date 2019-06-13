@@ -35,6 +35,11 @@ const v1ErrorConfig = {
     code: 'invalid',
     message:
       'A limit of 10 objects in an api request has been put in place to ensure the performance and reliability. Parameter limit possibly exceeds the threshold. Please verify and re-submit'
+  },
+  invalid_user_id: {
+    parameter: 'user_id',
+    code: 'invalid',
+    message: 'Invalid parameter user id.'
   }
 };
 

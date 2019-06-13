@@ -2,6 +2,7 @@ const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   ActivationInitiateClass = require(rootPrefix + '/app/services/ostEvents/users/ActivationInitiated'),
   ActivationSuccessClass = require(rootPrefix + '/app/services/ostEvents/users/ActivationSuccess'),
+  ActivationFailureClass = require(rootPrefix + '/app/services/ostEvents/users/ActivationFailure'),
   FailureTransactionClass = require(rootPrefix + '/app/services/ostEvents/transactions/Failure'),
   SuccessTransactionClass = require(rootPrefix + '/app/services/ostEvents/transactions/Success'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
@@ -12,6 +13,8 @@ class OstEventProcess extends ServiceBase {
   /**
    * @param {Object} params
    * @param {Object} params.ostEventObj: OST Event Table row
+   *
+   * @augments ServiceBase
    *
    * @constructor
    */
@@ -27,6 +30,7 @@ class OstEventProcess extends ServiceBase {
     oThis.eventClassMapping = {
       [ostEventConstant.usersActivationInitiateOstWebhookTopic]: ActivationInitiateClass,
       [ostEventConstant.usersActivationSuccessOstWebhookTopic]: ActivationSuccessClass,
+      [ostEventConstant.usersActivationFailureOstWebhookTopic]: ActivationFailureClass,
       [ostEventConstant.transactionsFailureOstWebhookTopic]: FailureTransactionClass,
       [ostEventConstant.transactionsSuccessOstWebhookTopic]: SuccessTransactionClass
     };
@@ -47,7 +51,6 @@ class OstEventProcess extends ServiceBase {
 
   /**
    * Validate param
-   *
    *
    * @return {Promise<void>}
    *
