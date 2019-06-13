@@ -37,10 +37,6 @@ class UserOstEventBase extends ServiceBase {
 
     logger.log('Validate for user activation initiate status');
 
-    if (!CommonValidators.validateEthAddress(oThis.ostUserTokenHolderAddress)) {
-      oThis.paramErrors.push('invalid_token_holder_address');
-    }
-
     return Promise.resolve(responseHelper.successWithData({}));
   }
 

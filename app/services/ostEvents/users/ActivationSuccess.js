@@ -1,6 +1,7 @@
 const rootPrefix = '../../../..',
   UserOstEventBase = require(rootPrefix + '/app/services/ostEvents/users/Base'),
   TokenUserModel = require(rootPrefix + '/app/models/mysql/TokenUser'),
+  CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   ExternalEntityModel = require(rootPrefix + '/app/models/mysql/ExternalEntity'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   tokenUserConstants = require(rootPrefix + '/lib/globalConstant/tokenUser'),
@@ -67,6 +68,10 @@ class UserActivationSuccess extends UserOstEventBase {
     const oThis = this;
 
     await super._validateAndSanitizeParams();
+
+    if (!CommonValidators.validateEthAddress(oThis.ostUserTokenHolderAddress)) {
+      oThis.paramErrors.push('invalid_token_holder_address');
+    }
 
     if (oThis.ostUserStatus !== tokenUserConstants.activatedOstStatus) {
       oThis.paramErrors.push('invalid_status');

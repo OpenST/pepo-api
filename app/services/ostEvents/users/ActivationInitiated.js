@@ -1,5 +1,6 @@
 const rootPrefix = '../../../..',
   UserOstEventBase = require(rootPrefix + '/app/services/ostEvents/users/Base'),
+  CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   TokenUserModel = require(rootPrefix + '/app/models/mysql/TokenUser'),
   tokenUserConstants = require(rootPrefix + '/lib/globalConstant/tokenUser'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
