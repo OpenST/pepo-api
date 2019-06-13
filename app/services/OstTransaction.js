@@ -440,10 +440,6 @@ class OstTransaction extends ServiceBase {
   //
   //   return responseHelper.successWithData({ ostTransaction: response });
   // }
-
-  get _transactionKind() {
-    throw new Error('Sub-class to implement');
-  }
 }
 
 module.exports = OstTransaction;
