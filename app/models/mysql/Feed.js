@@ -32,6 +32,7 @@ class FeedModel extends ModelBase {
       kind: feedsConstants.kinds[dbRow.kind],
       primaryExternalEntityId: dbRow.primary_external_entity_id,
       extraData: JSON.parse(dbRow.extra_data),
+      privacyType: feedsConstants.privacyTypes[dbRow.privacy_type],
       status: feedsConstants.statuses[dbRow.status],
       publishedTs: dbRow.published_ts,
       createdAt: dbRow.created_at,

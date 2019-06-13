@@ -29,6 +29,7 @@ class TransactionOstEventBase extends ServiceBase {
     oThis.ostTransactionStatus = oThis.ostTransaction.status;
 
     oThis.externalEntityObj = null;
+    oThis.privacyType = null;
     oThis.feedObj = null;
   }
 
@@ -180,6 +181,11 @@ class TransactionOstEventBase extends ServiceBase {
     }
 
     oThis.feedObj = feedObjRes;
+    oThis.privacyType = oThis.feedObj.privacyType;
+
+    if (oThis.feedObj.status === feedConstants.invertedStatuses[oThis._feedStatus()]) {
+      return Promise.resolve(responseHelper.successWithData({}));
+    }
 
     let userFeedObj = await new UserFeedModel().fetchByFeedId(oThis.feedObj.id);
 

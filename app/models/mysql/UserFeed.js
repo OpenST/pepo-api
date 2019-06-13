@@ -1,6 +1,7 @@
 const rootPrefix = '../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
-  coreConstants = require(rootPrefix + '/config/coreConstants');
+  coreConstants = require(rootPrefix + '/config/coreConstants'),
+  userFeedConstants = require(rootPrefix + '/lib/globalConstant/userFeed');
 
 const dbName = 'pepo_api_' + coreConstants.environment;
 
@@ -28,6 +29,7 @@ class UserFeedModel extends ModelBase {
       id: dbRow.id,
       userId: dbRow.user_id,
       feedId: dbRow.feed_id,
+      privacyType: userFeedConstants.privacyTypes[dbRow.privacy_type],
       publishedTs: dbRow.published_ts,
       createdAt: dbRow.created_at,
       updatedAt: dbRow.updated_at

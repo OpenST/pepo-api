@@ -152,6 +152,10 @@ const v1Signature = {
         validatorMethods: ['validateObject', 'validateOstTransactionMeta']
       },
       {
+        parameter: 'privacy_type',
+        validatorMethods: ['validateString', 'validateFeedPrivacyType']
+      },
+      {
         parameter: 'current_user',
         validatorMethods: ['validateObject']
       }
@@ -167,6 +171,14 @@ const v1Signature = {
       {
         parameter: 'meta',
         validatorMethods: ['validateObject', 'validateOstTransactionMeta']
+      },
+      {
+        parameter: 'privacy_type',
+        validatorMethods: ['validateString', 'validateFeedPrivacyType']
+      },
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateObject']
       }
     ],
     optional: []

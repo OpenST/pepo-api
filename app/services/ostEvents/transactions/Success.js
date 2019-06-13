@@ -6,6 +6,7 @@ const rootPrefix = '../../../..',
   tokenUserConstants = require(rootPrefix + '/lib/globalConstant/tokenUser'),
   feedConstants = require(rootPrefix + '/lib/globalConstant/feed'),
   externalEntityConstants = require(rootPrefix + '/lib/globalConstant/externalEntity'),
+  userFeedConstants = require(rootPrefix + '/lib/globalConstant/userFeed'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger');
 
 class SuccessTransactionOstEvent extends TransactionOstEventBase {
@@ -100,6 +101,7 @@ class SuccessTransactionOstEvent extends TransactionOstEventBase {
       .insert({
         user_id: oThis.externalEntityObj.parsedExtraData.toUserIds[0],
         feed_id: oThis.feedObj.id,
+        privacy_type: userFeedConstants.invertedPrivacyTypes[oThis.privacyType],
         published_ts: oThis._published_timestamp()
       })
       .fire();
