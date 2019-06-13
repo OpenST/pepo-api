@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "6908e459-ca96-4960-8a91-fd9ed163cbd1",
+		"_postman_id": "83a3c14f-3d43-444e-8c43-94ed69a3c025",
 		"name": "pepo-api",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -471,7 +471,7 @@
 			"name": "transaction",
 			"item": [
 				{
-					"name": "expression",
+					"name": "ost-transaction",
 					"request": {
 						"method": "POST",
 						"header": [
@@ -484,18 +484,17 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\t\"ost_transaction_uuid\": \"21aefa74-1fbe-490e-860d-95d4ac0e1d98\",\n\t\"meta\": {\n\t\t\"text\": \"Hello World\",\n\t\t\"giphy\": {\n\t\t\t\"id\": \"9ad6a605-69f0-4a4b-bcc4-bf73b0d906aa\",\n\t\t\t\"downsized\": \"adas\",\n\t\t\t\"original\": \"addd\"\n\t\t}\n\t}\n}"
+							"raw": "{\n\t\"ost_transaction_uuid\": \"eba869c5-3c4d-4323-a548-a080547e59ba\",\n\t\"privacy_type\": \"PUBLIC\",\n\t\"meta\": {\n\t\t\"text\": \"yaa\",\n\t\t\"giphy\": {\n                \"id\": \"Tia2InBEWaQgckP3UG\",\n                \"kind\": \"gif\",\n                \"downsized\": {\n                    \"media_id\": \"Tia2InBEWaQgckP3UG\",\n                    \"rendition_type\": \"fixed_width\",\n                    \"url\": \"https://media3.giphy.com/media/Tia2InBEWaQgckP3UG/200w.gif?cid=3f796fa35d02328f79752f375907e041&rid=200w.gif\",\n                    \"width\": \"200\",\n                    \"height\": \"145\",\n                    \"size\": \"44280\",\n                    \"frames\": null,\n                    \"mp4\": \"https://media3.giphy.com/media/Tia2InBEWaQgckP3UG/200w.mp4?cid=3f796fa35d02328f79752f375907e041&rid=200w.mp4\",\n                    \"mp4_size\": \"18335\",\n                    \"webp\": \"https://media3.giphy.com/media/Tia2InBEWaQgckP3UG/200w.webp?cid=3f796fa35d02328f79752f375907e041&rid=200w.webp\",\n                    \"webp_size\": \"33916\"\n                },\n                \"original\": {\n                    \"media_id\": \"Tia2InBEWaQgckP3UG\",\n                    \"rendition_type\": \"original\",\n                    \"url\": \"https://media3.giphy.com/media/Tia2InBEWaQgckP3UG/giphy.gif?cid=3f796fa35d02328f79752f375907e041&rid=giphy.gif\",\n                    \"width\": \"370\",\n                    \"height\": \"268\",\n                    \"size\": \"168377\",\n                    \"frames\": \"10\",\n                    \"mp4\": \"https://media3.giphy.com/media/Tia2InBEWaQgckP3UG/giphy.mp4?cid=3f796fa35d02328f79752f375907e041&rid=giphy.mp4\",\n                    \"mp4_size\": \"88410\",\n                    \"webp\": \"https://media3.giphy.com/media/Tia2InBEWaQgckP3UG/giphy.webp?cid=3f796fa35d02328f79752f375907e041&rid=giphy.webp\",\n                    \"webp_size\": \"79318\"\n                }\n            }\n\t}\n}"
 						},
 						"url": {
-							"raw": "{{api_server}}/api/v1/ost-transactions/expression",
+							"raw": "{{api_server}}/api/v1/ost-transactions",
 							"host": [
 								"{{api_server}}"
 							],
 							"path": [
 								"api",
 								"v1",
-								"ost-transactions",
-								"expression"
+								"ost-transactions"
 							]
 						},
 						"description": "ost-transaction"

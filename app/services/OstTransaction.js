@@ -247,11 +247,7 @@ class OstTransaction extends ServiceBase {
 
     let entityKindInt = externalEntityConstants.invertedEntityKinds[externalEntityConstants.giphyEntityKind],
       entityId = oThis.giphyObject.id,
-      extraData = {
-        type: oThis.giphyObject.kind,
-        downsized: oThis.giphyObject.downsized,
-        original: oThis.giphyObject.original
-      };
+      extraData = oThis.giphyObject;
 
     let insertData = {
       entity_kind: entityKindInt,
