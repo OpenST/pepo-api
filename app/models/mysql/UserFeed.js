@@ -60,9 +60,13 @@ class UserFeedModel extends ModelBase {
       user_id: params.userId
     };
 
-    if (params.privacyType && params.privacyType === userFeedConstants.publicPrivacyType) {
+    if (params.privacyType === userFeedConstants.publicPrivacyType) {
       whereClause.privacy_type = userFeedConstants.invertedPrivacyTypes[userFeedConstants.publicPrivacyType];
     }
+
+    // TODO - feeds if not published, don't show in other user feed
+    //  TODO - feedsorder by and where will change
+    //  TODO - feedscheck if index is being used or not
 
     const dbRows = await oThis
       .select('*')
@@ -91,7 +95,7 @@ class UserFeedModel extends ModelBase {
   /***
    * Fetch user feed by feed id
    *
-   * @param id {Integer} - id
+   * @param userId {Integer} - id
    *
    * @return {Object}
    */
@@ -175,6 +179,7 @@ class UserFeedModel extends ModelBase {
    * @returns {Promise<*>}
    */
   static async flushCache(params) {
+    // TODO - feeds - remove this cache and its flush
     const UserFeedByIds = require(rootPrefix + '/lib/cacheManagement/multi/UserFeedByIds');
 
     await new UserFeedByIds({

@@ -63,8 +63,7 @@ class FeedBase extends ServiceBase {
 
     await oThis._fetchFeedDetails();
     await oThis._fetchExternalEntities();
-    await oThis._fetchUsers();
-    await oThis._fetchTokenUser();
+    await Promise.all([oThis._fetchUsers(), oThis._fetchTokenUser()]);
 
     return responseHelper.successWithData(oThis._finalResponse());
   }
@@ -92,18 +91,6 @@ class FeedBase extends ServiceBase {
 
     // Validate limit.
     return oThis._validatePageSize();
-  }
-
-  /**
-   * Fetch feed ids.
-   *
-   * @sets oThis.feedIds
-   *
-   * @returns {Promise<*|result>}
-   * @private
-   */
-  async _fetchFeedIds() {
-    throw new Error('Sub-class to implement.');
   }
 
   /**
@@ -138,6 +125,7 @@ class FeedBase extends ServiceBase {
       oThis.giphyKindExternalEntityIdToFeedIdMap[feedExtraData.giphyExternalEntityId] = feedId;
 
       oThis.externalEntityIds.push(feedDetails.primaryExternalEntityId); // OST transaction ID.
+      // TODO: feed - giphyExternalEntityId is optional
       oThis.externalEntityIds.push(feedExtraData.giphyExternalEntityId); // GIF external entity table ID.
     }
 
@@ -156,6 +144,8 @@ class FeedBase extends ServiceBase {
    */
   async _fetchExternalEntities() {
     const oThis = this;
+
+    // TODO - feed - what if oThis.externalEntityIds is []
 
     // Fetch external entity details.
     const cacheResp = await new ExternalEntityByIdsCache({ ids: oThis.externalEntityIds }).fetch();
@@ -234,6 +224,8 @@ class FeedBase extends ServiceBase {
   async _fetchUsers() {
     const oThis = this;
 
+    // TODO - feeds
+
     const cacheResp = await new UserMultiCache({ ids: oThis.userIds }).fetch();
 
     if (cacheResp.isFailure()) {
@@ -255,6 +247,8 @@ class FeedBase extends ServiceBase {
    */
   async _fetchTokenUser() {
     const oThis = this;
+
+    // TODO - feeds
 
     const cacheResp = await new TokenUserDetailByUserIdsCache({ userIds: oThis.userIds }).fetch();
 
@@ -282,6 +276,8 @@ class FeedBase extends ServiceBase {
 
     if (oThis.feedIds.length > 0) {
       nextPagePayloadKey[paginationConstants.paginationIdentifierKey] = {
+        // TODO - change the page number to timestamp
+        // TODO - think on how to remove duplicates.
         page: oThis.page + 1,
         limit: oThis._currentPageLimit()
       };
@@ -326,6 +322,18 @@ class FeedBase extends ServiceBase {
    * @private
    */
   _maxPageLimit() {
+    throw new Error('Sub-class to implement.');
+  }
+
+  /**
+   * Fetch feed ids.
+   *
+   * @sets oThis.feedIds
+   *
+   * @returns {Promise<*|result>}
+   * @private
+   */
+  async _fetchFeedIds() {
     throw new Error('Sub-class to implement.');
   }
 

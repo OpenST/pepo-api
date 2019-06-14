@@ -21,7 +21,8 @@ class PublicFeed extends FeedServiceBase {
   async _fetchFeedIds() {
     const oThis = this;
 
-    // TODO: @Shlok @Tejas Change the condition.
+    // TODO: feeds
+
     oThis.feedIds = await new FeedModel().fetchPublicPublishedFeedIds({
       page: oThis.page,
       limit: oThis._currentPageLimit()

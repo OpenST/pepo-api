@@ -55,7 +55,6 @@ class UserFeed extends FeedServiceBase {
       fetchFeedIdsParams.privacyType = userFeedConstants.publicPrivacyType;
     }
 
-    // TODO: @Shlok @Tejas Change the condition.
     oThis.feedIds = await new UserFeedModel().fetchFeedIds(fetchFeedIdsParams);
 
     return responseHelper.successWithData({});
