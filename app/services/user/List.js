@@ -34,6 +34,7 @@ class UserList extends ServiceBase {
     oThis.userIds = [];
     oThis.usersByIdHash = {};
     oThis.tokenUsersByUserIdHash = {};
+    oThis.currentUserRemoved = false;
   }
 
   /**
@@ -116,6 +117,7 @@ class UserList extends ServiceBase {
 
     if (index > -1) {
       oThis.userIds.splice(index, 1);
+      oThis.currentUserRemoved = true;
     }
     return Promise.resolve(responseHelper.successWithData({}));
   }
@@ -159,9 +161,14 @@ class UserList extends ServiceBase {
   finalResponse() {
     const oThis = this;
 
-    let nextPagePayloadKey = {};
+    let nextPagePayloadKey = {},
+      limit = oThis.limit;
 
-    if (oThis.userIds.length == oThis.limit) {
+    if (oThis.currentUserRemoved) {
+      limit = limit - 1;
+    }
+
+    if (oThis.userIds.length == limit) {
       nextPagePayloadKey[pagination.paginationIdentifierKey] = {
         page: oThis.page + 1,
         limit: oThis.limit
