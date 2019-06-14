@@ -76,7 +76,7 @@ router.get('/caching-test-1', function(req, res, next) {
       let etagData = encodeString(val);
       res.setHeader('ETag', etagData);
       res.setHeader('Vary', '*');
-      res.setHeader('Cache-Control', 'max-age=120, must-revalidate');
+      res.setHeader('Cache-Control', 'max-age=50, must-revalidate');
       res.setHeader('PepoCache', etagData);
 
       // Set cookie
