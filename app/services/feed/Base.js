@@ -1,7 +1,6 @@
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   UserMultiCache = require(rootPrefix + '/lib/cacheManagement/multi/User'),
-  FeedByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/FeedByIds'),
   ExternalEntityByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/ExternalEntityByIds'),
   TokenUserDetailByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TokenUserByUserIds'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
@@ -55,14 +54,13 @@ class FeedBase extends ServiceBase {
     const oThis = this;
 
     await oThis._validateAndSanitizeParams();
-    await oThis._fetchFeedIds();
-
-    if (oThis.feedIds.length === 0) {
-      return responseHelper.successWithData(oThis._finalResponse());
-    }
 
     await oThis._fetchFeedDetails();
+
+    oThis._processFeedDetails();
+
     await oThis._fetchExternalEntities();
+
     await Promise.all([oThis._fetchUsers(), oThis._fetchTokenUser()]);
 
     return responseHelper.successWithData(oThis._finalResponse());
@@ -98,19 +96,11 @@ class FeedBase extends ServiceBase {
    *
    * @sets oThis.feedIdToFeedDetailsMap, oThis.externalEntityIds, oThis.giphyKindExternalEntityIdToFeedIdMap
    *
-   * @returns {Promise<void>}
+   * @returns {result}
    * @private
    */
-  async _fetchFeedDetails() {
+  _processFeedDetails() {
     const oThis = this;
-
-    const cacheResp = await new FeedByIdsCache({ ids: oThis.feedIds }).fetch();
-
-    if (cacheResp.isFailure()) {
-      return Promise.reject(new Error(`Details for some or all of the feed Ids: ${oThis.feedIds} unavailable.`));
-    }
-
-    oThis.feedIdToFeedDetailsMap = cacheResp.data;
 
     for (let index = 0; index < oThis.feedIds.length; index++) {
       const feedId = oThis.feedIds[index];
@@ -125,8 +115,9 @@ class FeedBase extends ServiceBase {
       oThis.giphyKindExternalEntityIdToFeedIdMap[feedExtraData.giphyExternalEntityId] = feedId;
 
       oThis.externalEntityIds.push(feedDetails.primaryExternalEntityId); // OST transaction ID.
-      // TODO: feed - giphyExternalEntityId is optional
-      oThis.externalEntityIds.push(feedExtraData.giphyExternalEntityId); // GIF external entity table ID.
+      if (feedExtraData.giphyExternalEntityId) {
+        oThis.externalEntityIds.push(feedExtraData.giphyExternalEntityId); // GIF external entity table ID.
+      }
     }
 
     oThis.externalEntityIds = [...new Set(oThis.externalEntityIds)]; // Removes duplication.
@@ -145,7 +136,9 @@ class FeedBase extends ServiceBase {
   async _fetchExternalEntities() {
     const oThis = this;
 
-    // TODO - feed - what if oThis.externalEntityIds is []
+    if (oThis.externalEntityIds.length === 0) {
+      return responseHelper.successWithData({});
+    }
 
     // Fetch external entity details.
     const cacheResp = await new ExternalEntityByIdsCache({ ids: oThis.externalEntityIds }).fetch();
@@ -224,7 +217,9 @@ class FeedBase extends ServiceBase {
   async _fetchUsers() {
     const oThis = this;
 
-    // TODO - feeds
+    if (oThis.userIds.length === 0) {
+      return responseHelper.successWithData({});
+    }
 
     const cacheResp = await new UserMultiCache({ ids: oThis.userIds }).fetch();
 
@@ -248,7 +243,9 @@ class FeedBase extends ServiceBase {
   async _fetchTokenUser() {
     const oThis = this;
 
-    // TODO - feeds
+    if (oThis.userIds.length === 0) {
+      return responseHelper.successWithData({});
+    }
 
     const cacheResp = await new TokenUserDetailByUserIdsCache({ userIds: oThis.userIds }).fetch();
 
@@ -299,6 +296,16 @@ class FeedBase extends ServiceBase {
   }
 
   /**
+   * Fetch feed details map.
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _fetchFeedDetails() {
+    throw new Error('Sub-class to implement.');
+  }
+
+  /**
    * Default page limit.
    *
    * @private
@@ -322,18 +329,6 @@ class FeedBase extends ServiceBase {
    * @private
    */
   _maxPageLimit() {
-    throw new Error('Sub-class to implement.');
-  }
-
-  /**
-   * Fetch feed ids.
-   *
-   * @sets oThis.feedIds
-   *
-   * @returns {Promise<*|result>}
-   * @private
-   */
-  async _fetchFeedIds() {
     throw new Error('Sub-class to implement.');
   }
 

@@ -47,7 +47,7 @@ class FeedModel extends ModelBase {
    * @param {number/string} [params.page]
    * @param {number/string} [params.limit]
    *
-   *  @returns {Promise<Array>}
+   *  @returns {Promise<object>}
    */
   async fetchPublicPublishedFeedIds(params) {
     const oThis = this;
@@ -57,9 +57,10 @@ class FeedModel extends ModelBase {
       offset = (page - 1) * limit;
 
     const feedIds = [];
+    const feedDetails = {};
 
     const dbRows = await oThis
-      .select('id')
+      .select('*')
       .where({
         status: feedsConstants.invertedStatuses[feedsConstants.publishedStatus],
         privacy_type: feedsConstants.invertedPrivacyTypes[feedsConstants.publicPrivacyType]
@@ -74,10 +75,12 @@ class FeedModel extends ModelBase {
     }
 
     for (let index = 0; index < dbRows.length; index++) {
-      feedIds.push(dbRows[index].id);
+      const formatDbRow = oThis.formatDbData(dbRows[index]);
+      feedIds.push(formatDbRow.id);
+      feedDetails[formatDbRow.id] = formatDbRow;
     }
 
-    return feedIds;
+    return { feedIds, feedDetails };
   }
 
   /**

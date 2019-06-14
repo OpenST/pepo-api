@@ -13,20 +13,21 @@ class PublicFeed extends FeedServiceBase {
   /**
    * Fetch feed ids.
    *
-   * @sets oThis.feedIds
+   * @sets oThis.feedIds, oThis.feedIdToFeedDetailsMap
    *
    * @returns {Promise<*|result>}
    * @private
    */
-  async _fetchFeedIds() {
+  async _fetchFeedDetails() {
     const oThis = this;
 
-    // TODO: feeds
-
-    oThis.feedIds = await new FeedModel().fetchPublicPublishedFeedIds({
+    const modelResp = await new FeedModel().fetchPublicPublishedFeedIds({
       page: oThis.page,
       limit: oThis._currentPageLimit()
     });
+
+    oThis.feedIds = modelResp.feedIds;
+    oThis.feedIdToFeedDetailsMap = modelResp.feedDetails;
 
     return responseHelper.successWithData({});
   }

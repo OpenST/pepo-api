@@ -1,8 +1,8 @@
 const rootPrefix = '../../..',
   FeedServiceBase = require(rootPrefix + '/app/services/feed/Base'),
   UserFeedModel = require(rootPrefix + '/app/models/mysql/UserFeed'),
+  FeedByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/FeedByIds'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
-  userFeedConstants = require(rootPrefix + '/lib/globalConstant/userFeed'),
   paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination');
 
 /**
@@ -35,14 +35,14 @@ class UserFeed extends FeedServiceBase {
   }
 
   /**
-   * Fetch user feed ids.
+   * Fetch user feed details.
    *
-   * @sets oThis.feedIds
+   * @sets oThis.feedIds, oThis.feedIdToFeedDetailsMap
    *
    * @returns {Promise<*|result>}
    * @private
    */
-  async _fetchFeedIds() {
+  async _fetchFeedDetails() {
     const oThis = this;
 
     const fetchFeedIdsParams = {
@@ -51,11 +51,23 @@ class UserFeed extends FeedServiceBase {
       userId: oThis.profileUserId
     };
 
-    if (!oThis.isCurrentUser) {
-      fetchFeedIdsParams.privacyType = userFeedConstants.publicPrivacyType;
+    if (oThis.isCurrentUser) {
+      oThis.feedIds = await new UserFeedModel()._currentUserFeedIds(fetchFeedIdsParams);
+    } else {
+      oThis.feedIds = await new UserFeedModel()._otherUserFeedIds(fetchFeedIdsParams);
     }
 
-    oThis.feedIds = await new UserFeedModel().fetchFeedIds(fetchFeedIdsParams);
+    if (oThis.feedIds.length === 0) {
+      return responseHelper.successWithData(oThis._finalResponse());
+    }
+
+    const cacheResp = await new FeedByIdsCache({ ids: oThis.feedIds }).fetch();
+
+    if (cacheResp.isFailure()) {
+      return Promise.reject(new Error(`Details for some or all of the feed Ids: ${oThis.feedIds} unavailable.`));
+    }
+
+    oThis.feedIdToFeedDetailsMap = cacheResp.data;
 
     return responseHelper.successWithData({});
   }

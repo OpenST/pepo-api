@@ -37,17 +37,16 @@ class UserFeedModel extends ModelBase {
   }
 
   /**
-   * Fetch feed ids
+   * Fetch feed ids for current user.
    *
    * @param {object} params
    * @param {array} params.userId
-   * @param {string} [params.privacyType]
    * @param {number} [params.page]
    * @param {number} [params.limit]
    *
-   * @returns {Array}
+   * @returns Promise<array>
    */
-  async fetchFeedIds(params) {
+  async _currentUserFeedIds(params) {
     const oThis = this;
 
     const page = params.page || 1,
@@ -56,29 +55,59 @@ class UserFeedModel extends ModelBase {
 
     const feedIds = [];
 
-    const whereClause = {
-      user_id: params.userId
-    };
-
-    if (params.privacyType === userFeedConstants.publicPrivacyType) {
-      whereClause.privacy_type = userFeedConstants.invertedPrivacyTypes[userFeedConstants.publicPrivacyType];
-    }
-
-    // TODO - feeds if not published, don't show in other user feed
-    //  TODO - feedsorder by and where will change
-    //  TODO - feedscheck if index is being used or not
-
     const dbRows = await oThis
-      .select('*')
-      .where(whereClause)
+      .select('feed_id')
+      .where({ user_id: params.userId })
       .limit(limit)
       .offset(offset)
       .order_by(
-        'case when published_ts IS NULL then 1\n' +
+        'case when published_ts IS NULL then 3\n' +
           '              when published_ts > 0 then 2\n' +
-          '              else 3\n' +
-          '         end asc'
+          '              else 1\n' +
+          '         end desc'
       )
+      .fire();
+
+    if (dbRows.length === 0) {
+      return [];
+    }
+
+    for (let index = 0; index < dbRows.length; index++) {
+      feedIds.push(dbRows[index].feed_id);
+    }
+
+    return feedIds;
+  }
+
+  /**
+   * Fetch feed ids for other user.
+   *
+   * @param {object} params
+   * @param {array} params.userId
+   * @param {number} [params.page]
+   * @param {number} [params.limit]
+   *
+   * @returns Promise<array>
+   */
+  async _otherUserFeedIds(params) {
+    const oThis = this;
+
+    const page = params.page || 1,
+      limit = params.limit || 10,
+      offset = (page - 1) * limit;
+
+    const feedIds = [];
+
+    const dbRows = await oThis
+      .select('feed_id')
+      .where([
+        'user_id = ? AND privacy_type = ? AND published_ts > 0',
+        params.userId,
+        userFeedConstants.invertedPrivacyTypes[userFeedConstants.publicPrivacyType]
+      ])
+      .limit(limit)
+      .offset(offset)
+      .order_by('published_ts desc')
       .fire();
 
     if (dbRows.length === 0) {
