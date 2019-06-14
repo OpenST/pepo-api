@@ -66,7 +66,7 @@ router.get('/caching-test-1', function(req, res, next) {
     let cookieOptions = {
       maxAge: 1000 * 60 * 15, // would expire after 15 minutes
       httpOnly: true, // The cookie only accessible by the web server
-      signed: true, // Indicates if the cookie should be signed
+      // signed: true, // Indicates if the cookie should be signed
       path: '/'
     };
     let val = req.query['v'] ? dt.toString() + req.query['v'] : dt.toString();
