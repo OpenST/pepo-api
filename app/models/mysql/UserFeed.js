@@ -198,23 +198,6 @@ class UserFeedModel extends ModelBase {
 
     return dbRows[id] || {};
   }
-
-  /***
-   * Flush cache
-   *
-   * @param {object} params
-   * @param {Integer} params.id
-   *
-   * @returns {Promise<*>}
-   */
-  static async flushCache(params) {
-    // TODO - feeds - remove this cache and its flush
-    const UserFeedByIds = require(rootPrefix + '/lib/cacheManagement/multi/UserFeedByIds');
-
-    await new UserFeedByIds({
-      ids: [params.id]
-    }).clear();
-  }
 }
 
 module.exports = UserFeedModel;
