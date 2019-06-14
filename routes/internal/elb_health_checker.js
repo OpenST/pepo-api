@@ -8,6 +8,9 @@ const rootPrefix = '../..',
 const router = express.Router(),
   errorConfig = basicHelper.fetchErrorConfig(apiVersions.internal);
 
+let cookieParser = require('cookie-parser');
+router.use(cookieParser());
+
 /* Elb health checker request */
 router.get('/', function(req, res, next) {
   const performer = function() {
@@ -60,33 +63,34 @@ router.get('/caching-test-1', function(req, res, next) {
       headerDt = new Date(req.headers['if-modified-since']);
     }
 
+    let cookieOptions = {
+      maxAge: 1000 * 60 * 15, // would expire after 15 minutes
+      httpOnly: true, // The cookie only accessible by the web server
+      signed: true, // Indicates if the cookie should be signed
+      path: '/'
+    };
+    let val = req.query['v'] ? dt.toString() + req.query['v'] : dt.toString();
+    let etagData = encodeString(val);
+
     let headerMinute = headerDt ? headerDt.getMinutes() : -1;
 
     console.log('currentMinute: ', currentMinute, ' --- headerMinute', headerMinute);
     if (currentMinute === headerMinute) {
-      // res.cookie('bl_ck1', dt.toString(), {maxAge: 900000, httpOnly: true});
+      res.cookie('bl_ck1', etagData + '-304', cookieOptions);
 
       res.status(304).send();
     } else {
       // Set headers
       res.setHeader('Date', dt);
       res.setHeader('Last-Modified', dt);
-      let val = req.query['v'] ? dt.toString() + req.query['v'] : dt.toString();
       console.log('ETag Val: ', val);
-      let etagData = encodeString(val);
       res.setHeader('ETag', etagData);
       res.setHeader('Vary', '*');
       res.setHeader('Cache-Control', 'max-age=50, must-revalidate');
       res.setHeader('PepoCache', etagData);
 
       // Set cookie
-      // let cookieOptions = {
-      //   maxAge: 1000 * 60 * 15, // would expire after 15 minutes
-      //   httpOnly: true, // The cookie only accessible by the web server
-      //   signed: true, // Indicates if the cookie should be signed
-      //   path: '/'
-      // };
-      // res.cookie('bl_ck1',dt.toString(), cookieOptions);
+      res.cookie('bl_ck1', etagData, cookieOptions);
 
       // Set response
       res.status(200).json({ minute: currentMinute, date: dt, v: req.query['v'] });
