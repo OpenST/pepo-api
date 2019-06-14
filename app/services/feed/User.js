@@ -4,6 +4,7 @@ const rootPrefix = '../../..',
   UserMultiCache = require(rootPrefix + '/lib/cacheManagement/multi/User'),
   FeedByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/FeedByIds'),
   ExternalEntityByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/ExternalEntityByIds'),
+  TokenUserDetailByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TokenUserByUserIds'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   userFeedConstants = require(rootPrefix + '/lib/globalConstant/userFeed'),
   paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination'),
@@ -46,8 +47,8 @@ class UserFeed extends ServiceBase {
     oThis.usersByIdMap = {};
     oThis.userIds = [];
     oThis.externalEntityIds = [];
-    oThis.ostTransactionsMap = {};
-    oThis.gifsMap = {};
+    oThis.ostTransactionMap = {};
+    oThis.gifMap = {};
     oThis.responseMetaData = {
       [paginationConstants.nextPagePayloadKey]: {}
     };
@@ -73,6 +74,7 @@ class UserFeed extends ServiceBase {
     await oThis._fetchFeedDetails();
     await oThis._fetchExternalEntities();
     await oThis._fetchUsers();
+    await oThis._fetchTokenUser();
 
     return responseHelper.successWithData(oThis._finalResponse());
   }
@@ -211,19 +213,23 @@ class UserFeed extends ServiceBase {
 
       switch (externalEntityDetails.entityKind) {
         case externalEntityConstants.ostTransactionEntityKind: {
-          oThis.ostTransactionsMap[externalEntityTableId] = externalEntityExtraData;
+          oThis.ostTransactionMap[externalEntityTableId] = {
+            id: externalEntityTableId,
+            entityId: externalEntityTableEntityId,
+            extraData: externalEntityExtraData
+          };
           // OST Transaction is mapped with external entity table ID.
 
           // Fetch users.
-          oThis.userIds.push(externalEntityExtraData.from_user_id);
-          for (let index = 0; index < externalEntityExtraData.to_user_ids.length; index++) {
-            oThis.userIds.push(externalEntityExtraData.to_user_ids[index]);
+          oThis.userIds.push(externalEntityExtraData.fromUserId);
+          for (let index = 0; index < externalEntityExtraData.toUserIds.length; index++) {
+            oThis.userIds.push(externalEntityExtraData.toUserIds[index]);
           }
 
           break;
         }
         case externalEntityConstants.giphyEntityKind: {
-          oThis.gifsMap[externalEntityTableEntityId] = externalEntityExtraData;
+          oThis.gifMap[externalEntityTableEntityId] = externalEntityExtraData;
 
           // Insert entityId in feed details payload.
           const feedId = oThis.giphyKindExternalEntityIdToFeedIdMap[externalEntityTableId];
@@ -265,6 +271,30 @@ class UserFeed extends ServiceBase {
   }
 
   /**
+   * Fetch token user.
+   *
+   * @sets oThis.tokenUsersByUserIdMap
+   *
+   * @return {Promise<void>}
+   * @private
+   */
+  async _fetchTokenUser() {
+    const oThis = this;
+
+    const cacheResp = await new TokenUserDetailByUserIdsCache({ userIds: oThis.userIds }).fetch();
+
+    if (cacheResp.isFailure()) {
+      return Promise.reject(
+        new Error(`Token user details for some or all of the user Ids: ${oThis.userIds} unavailable.`)
+      );
+    }
+
+    oThis.tokenUsersByUserIdMap = cacheResp.data;
+
+    return Promise.resolve(responseHelper.successWithData({}));
+  }
+
+  /**
    * Service response.
    *
    * @returns {*|result}
@@ -289,9 +319,10 @@ class UserFeed extends ServiceBase {
     return {
       feedIds: oThis.feedIds,
       feedIdToFeedDetailsMap: oThis.feedIdToFeedDetailsMap,
-      ostTransactionsMap: oThis.ostTransactionsMap,
-      gifsMap: oThis.gifsMap,
+      ostTransactionMap: oThis.ostTransactionMap,
+      gifMap: oThis.gifMap,
       usersByIdMap: oThis.usersByIdMap,
+      tokenUsersByUserIdMap: oThis.tokenUsersByUserIdMap,
       meta: responseMetaData
     };
   }
