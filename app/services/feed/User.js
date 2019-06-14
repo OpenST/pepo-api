@@ -47,7 +47,7 @@ class UserFeed extends FeedServiceBase {
 
     const fetchFeedIdsParams = {
       limit: oThis._currentPageLimit(),
-      page: oThis.page,
+      paginationTimestamp: oThis.paginationTimestamp,
       userId: oThis.profileUserId
     };
 
@@ -56,6 +56,8 @@ class UserFeed extends FeedServiceBase {
     }
 
     oThis.feedIds = await new UserFeedModel().fetchFeedIds(fetchFeedIdsParams);
+
+    oThis.firstFeedId = oThis.feedIds[0];
 
     return responseHelper.successWithData({});
   }

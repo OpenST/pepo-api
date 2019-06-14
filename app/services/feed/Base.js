@@ -31,8 +31,9 @@ class FeedBase extends ServiceBase {
     oThis.limit = params.limit;
     oThis.paginationIdentifier = params[paginationConstants.paginationIdentifierKey] || null;
 
-    oThis.page = null;
+    oThis.paginationTimestamp = null;
     oThis.feedIds = [];
+    oThis.firstFeedId = null;
     oThis.feedIdToFeedDetailsMap = {};
     oThis.giphyKindExternalEntityIdToFeedIdMap = {};
     oThis.usersByIdMap = {};
@@ -71,7 +72,7 @@ class FeedBase extends ServiceBase {
   /**
    * Validate and sanitize specific params.
    *
-   * @sets oThis.page, oThis.limit
+   * @sets oThis.paginationTimestamp, oThis.limit
    *
    * @returns {Promise<never>}
    * @private
@@ -82,10 +83,9 @@ class FeedBase extends ServiceBase {
     if (oThis.paginationIdentifier) {
       const parsedPaginationParams = oThis._parsePaginationParams(oThis.paginationIdentifier);
 
-      oThis.page = parsedPaginationParams.page; // Override page number.
+      oThis.paginationTimestamp = parsedPaginationParams.paginationTimestamp; // Override paginationTimestamp number.
       oThis.limit = parsedPaginationParams.limit; // Override limit.
     } else {
-      oThis.page = 1;
       oThis.limit = oThis.limit || oThis._defaultPageLimit();
     }
 
@@ -111,6 +111,8 @@ class FeedBase extends ServiceBase {
     }
 
     oThis.feedIdToFeedDetailsMap = cacheResp.data;
+
+    oThis.paginationTimestamp = oThis.feedIdToFeedDetailsMap[oThis.firstFeedId].publishedTs;
 
     for (let index = 0; index < oThis.feedIds.length; index++) {
       const feedId = oThis.feedIds[index];
@@ -278,7 +280,8 @@ class FeedBase extends ServiceBase {
       nextPagePayloadKey[paginationConstants.paginationIdentifierKey] = {
         // TODO - change the page number to timestamp
         // TODO - think on how to remove duplicates.
-        page: oThis.page + 1,
+        paginationTimestamp: oThis.paginationTimestamp,
+
         limit: oThis._currentPageLimit()
       };
     }

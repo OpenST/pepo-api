@@ -24,9 +24,11 @@ class PublicFeed extends FeedServiceBase {
     // TODO: feeds
 
     oThis.feedIds = await new FeedModel().fetchPublicPublishedFeedIds({
-      page: oThis.page,
+      paginationTimestamp: oThis.paginationTimestamp,
       limit: oThis._currentPageLimit()
     });
+
+    oThis.firstFeedId = oThis.feedIds[0];
 
     return responseHelper.successWithData({});
   }
