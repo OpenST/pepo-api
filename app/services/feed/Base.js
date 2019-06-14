@@ -84,6 +84,7 @@ class FeedBase extends ServiceBase {
       oThis.paginationTimestamp = parsedPaginationParams.paginationTimestamp; // Override paginationTimestamp number.
       oThis.limit = parsedPaginationParams.limit; // Override limit.
     } else {
+      oThis.paginationTimestamp = null;
       oThis.limit = oThis.limit || oThis._defaultPageLimit();
     }
 
@@ -273,7 +274,7 @@ class FeedBase extends ServiceBase {
 
     const nextPagePayloadKey = {};
 
-    if (oThis.feedIds.length > 0) {
+    if (oThis.feedIds.length > oThis._currentPageLimit()) {
       nextPagePayloadKey[paginationConstants.paginationIdentifierKey] = {
         // TODO - change the page number to timestamp
         // TODO - think on how to remove duplicates.

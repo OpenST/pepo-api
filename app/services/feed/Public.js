@@ -28,7 +28,7 @@ class PublicFeed extends FeedServiceBase {
 
     oThis.feedIds = modelResp.feedIds;
     oThis.feedIdToFeedDetailsMap = modelResp.feedDetails;
-    oThis.lastFeedId = oThis.feedIds[oThis._currentPageLimit() - 1];
+    oThis.lastFeedId = oThis.feedIds[oThis.feedIds.length - 1];
 
     return responseHelper.successWithData({});
   }

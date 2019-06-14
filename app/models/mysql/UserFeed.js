@@ -41,7 +41,7 @@ class UserFeedModel extends ModelBase {
    *
    * @param {object} params
    * @param {array} params.userId
-   * @param {number} [params.page]
+   * @param {number} [params.paginationTimestamp]
    * @param {number} [params.limit]
    *
    * @returns Promise<array>
@@ -49,23 +49,29 @@ class UserFeedModel extends ModelBase {
   async _currentUserFeedIds(params) {
     const oThis = this;
 
-    const page = params.page || 1,
-      limit = params.limit || 10,
-      offset = (page - 1) * limit;
+    const paginationTimestamp = params.paginationTimestamp,
+      limit = params.limit || 10;
+
+    const whereArray = ['user_id = ?', params.userId];
+
+    if (paginationTimestamp) {
+      whereArray[0] = whereArray[0] + ' AND published_ts < ?';
+      whereArray.push(paginationTimestamp);
+    }
 
     const feedIds = [];
 
     const dbRows = await oThis
       .select('feed_id')
-      .where({ user_id: params.userId })
+      .where(whereArray)
       .limit(limit)
-      .offset(offset)
       .order_by(
         'case when published_ts IS NULL then 3\n' +
           '              when published_ts > 0 then 2\n' +
           '              else 1\n' +
           '         end desc'
       )
+      .order_by('published_ts DESC')
       .fire();
 
     if (dbRows.length === 0) {
@@ -84,7 +90,7 @@ class UserFeedModel extends ModelBase {
    *
    * @param {object} params
    * @param {array} params.userId
-   * @param {number} [params.page]
+   * @param {number} [params.paginationTimestamp]
    * @param {number} [params.limit]
    *
    * @returns Promise<array>
@@ -92,21 +98,26 @@ class UserFeedModel extends ModelBase {
   async _otherUserFeedIds(params) {
     const oThis = this;
 
-    const page = params.page || 1,
-      limit = params.limit || 10,
-      offset = (page - 1) * limit;
+    const paginationTimestamp = params.paginationTimestamp,
+      limit = params.limit || 10;
+
+    const whereArray = [
+      'user_id = ? AND privacy_type = ? AND published_ts > 0',
+      params.userId,
+      userFeedConstants.invertedPrivacyTypes[userFeedConstants.publicPrivacyType]
+    ];
+
+    if (paginationTimestamp) {
+      whereArray[0] = whereArray[0] + ' AND published_ts < ?';
+      whereArray.push(paginationTimestamp);
+    }
 
     const feedIds = [];
 
     const dbRows = await oThis
       .select('feed_id')
-      .where([
-        'user_id = ? AND privacy_type = ? AND published_ts > 0',
-        params.userId,
-        userFeedConstants.invertedPrivacyTypes[userFeedConstants.publicPrivacyType]
-      ])
+      .where(whereArray)
       .limit(limit)
-      .offset(offset)
       .order_by('published_ts desc')
       .fire();
 

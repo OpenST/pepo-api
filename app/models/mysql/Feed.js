@@ -44,7 +44,7 @@ class FeedModel extends ModelBase {
    * Fetch public and published feed ids.
    *
    * @param {object} params
-   * @param {number/string} [params.page]
+   * @param {number/string} [params.paginationTimestamp]
    * @param {number/string} [params.limit]
    *
    *  @returns {Promise<object>}
@@ -52,21 +52,26 @@ class FeedModel extends ModelBase {
   async fetchPublicPublishedFeedIds(params) {
     const oThis = this;
 
-    const page = params.page || 1,
-      limit = params.limit || 10,
-      offset = (page - 1) * limit;
+    const paginationTimestamp = params.paginationTimestamp,
+      limit = params.limit || 10;
+
+    const whereArray = [
+      'status = ? AND privacy_type = ?',
+      feedsConstants.invertedStatuses[feedsConstants.publishedStatus],
+      feedsConstants.invertedPrivacyTypes[feedsConstants.publicPrivacyType]
+    ];
+
+    if (paginationTimestamp) {
+      whereArray[0] = whereArray[0] + ' AND published_ts < ?';
+      whereArray.push(paginationTimestamp);
+    }
 
     const feedIds = [];
     const feedDetails = {};
-
     const dbRows = await oThis
       .select('*')
-      .where({
-        status: feedsConstants.invertedStatuses[feedsConstants.publishedStatus],
-        privacy_type: feedsConstants.invertedPrivacyTypes[feedsConstants.publicPrivacyType]
-      })
+      .where(whereArray)
       .limit(limit)
-      .offset(offset)
       .order_by('published_ts desc')
       .fire();
 
