@@ -66,7 +66,12 @@ class FeedModel extends ModelBase {
       })
       .limit(limit)
       .offset(offset)
-      .order_by('published_ts DESC')
+      .order_by(
+        'case when published_ts IS NULL then 1\n' +
+          '              when published_ts > 0 then 2\n' +
+          '              else 3\n' +
+          '         end asc'
+      )
       .fire();
 
     if (dbRows.length === 0) {

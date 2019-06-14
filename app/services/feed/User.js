@@ -48,7 +48,7 @@ class UserFeed extends FeedServiceBase {
     const fetchFeedIdsParams = {
       limit: oThis._currentPageLimit(),
       page: oThis.page,
-      userId: oThis.currentUserId
+      userId: oThis.profileUserId
     };
 
     if (!oThis.isCurrentUser) {
