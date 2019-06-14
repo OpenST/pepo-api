@@ -1,6 +1,7 @@
 const rootPrefix = '../../..',
-  pagination = require(rootPrefix + '/lib/globalConstant/pagination'),
-  apiName = require(rootPrefix + '/lib/globalConstant/apiName');
+  apiName = require(rootPrefix + '/lib/globalConstant/apiName'),
+  paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination');
+
 const v1Signature = {
   [apiName.signUp]: {
     mandatory: [
@@ -87,7 +88,7 @@ const v1Signature = {
         validatorMethods: ['validateNonZeroInteger']
       },
       {
-        parameter: pagination.paginationIdentifierKey,
+        parameter: paginationConstants.paginationIdentifierKey,
         validatorMethods: ['validateString']
       }
     ]
@@ -110,7 +111,7 @@ const v1Signature = {
     ],
     optional: [
       {
-        parameter: pagination.paginationIdentifierKey,
+        parameter: paginationConstants.paginationIdentifierKey,
         validatorMethods: ['validateString']
       }
     ]
@@ -141,7 +142,7 @@ const v1Signature = {
         validatorMethods: ['validateNonZeroInteger']
       },
       {
-        parameter: pagination.paginationIdentifierKey,
+        parameter: paginationConstants.paginationIdentifierKey,
         validatorMethods: ['validateString']
       }
     ]
@@ -185,7 +186,7 @@ const v1Signature = {
         validatorMethods: ['validateNonZeroInteger']
       },
       {
-        parameter: pagination.paginationIdentifierKey,
+        parameter: paginationConstants.paginationIdentifierKey,
         validatorMethods: ['validateString']
       }
     ]
