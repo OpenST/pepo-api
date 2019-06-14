@@ -47,10 +47,6 @@ class UserActivationFailure extends UserOstEventBase {
 
     await super._validateAndSanitizeParams();
 
-    if (!CommonValidators.validateEthAddress(oThis.ostUserTokenHolderAddress)) {
-      oThis.paramErrors.push('invalid_token_holder_address');
-    }
-
     if (oThis.ostUserStatus !== tokenUserConstants.createdOstStatus) {
       oThis.paramErrors.push('invalid_status');
     }
