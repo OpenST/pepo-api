@@ -81,10 +81,7 @@ class UserActivationFailure extends UserOstEventBase {
 
     await super._fetchTokenUser();
 
-    if (
-      oThis.tokenUserObj.ostStatus === tokenUserConstants.createdOstStatus &&
-      oThis.tokenUserObj.ost_token_holder_address !== oThis.ostUserTokenHolderAddress
-    ) {
+    if (oThis.tokenUserObj.ostStatus === tokenUserConstants.activatedOstStatus) {
       return Promise.reject(
         responseHelper.error({
           internal_error_identifier: 's_oe_u_af_ftu_1',
