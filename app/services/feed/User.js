@@ -69,7 +69,7 @@ class UserFeed extends FeedServiceBase {
 
     oThis.feedIdToFeedDetailsMap = cacheResp.data;
 
-    oThis.firstFeedId = oThis.feedIds[0];
+    oThis.lastFeedId = oThis.feedIds[oThis._currentPageLimit() - 1];
 
     return responseHelper.successWithData({});
   }

@@ -32,7 +32,7 @@ class FeedBase extends ServiceBase {
 
     oThis.paginationTimestamp = null;
     oThis.feedIds = [];
-    oThis.firstFeedId = null;
+    oThis.lastFeedId = null;
     oThis.feedIdToFeedDetailsMap = {};
     oThis.giphyKindExternalEntityIdToFeedIdMap = {};
     oThis.usersByIdMap = {};
@@ -102,7 +102,7 @@ class FeedBase extends ServiceBase {
   _processFeedDetails() {
     const oThis = this;
 
-    oThis.paginationTimestamp = oThis.feedIdToFeedDetailsMap[oThis.firstFeedId].publishedTs;
+    oThis.paginationTimestamp = oThis.feedIdToFeedDetailsMap[oThis.lastFeedId].publishedTs;
 
     for (let index = 0; index < oThis.feedIds.length; index++) {
       const feedId = oThis.feedIds[index];
