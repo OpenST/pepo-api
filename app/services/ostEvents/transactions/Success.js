@@ -106,7 +106,7 @@ class SuccessTransactionOstEvent extends TransactionOstEventBase {
       })
       .fire();
 
-    await UserFeedModel.flushCache({ id: insertRsp.insertId });
+    //await UserFeedModel.flushCache({ id: insertRsp.insertId });
 
     return Promise.resolve(responseHelper.successWithData({}));
   }

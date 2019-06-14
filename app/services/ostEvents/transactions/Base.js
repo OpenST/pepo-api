@@ -211,7 +211,7 @@ class TransactionOstEventBase extends ServiceBase {
       .fire();
 
     await FeedModel.flushCache({ id: oThis.feedObj.id });
-    await UserFeedModel.flushCache({ id: userFeedObj.id });
+    //await UserFeedModel.flushCache({ id: userFeedObj.id });
 
     return Promise.resolve(responseHelper.successWithData({}));
   }

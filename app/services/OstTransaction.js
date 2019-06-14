@@ -388,12 +388,7 @@ class OstTransaction extends ServiceBase {
       published_ts: oThis.publishedAtTs
     };
 
-    let insertResponse = await new UserFeedModel().insert(insertData).fire();
-
-    insertData.id = insertResponse.insertId;
-    let formattedInsertData = new UserFeedModel().formatDbData(insertData);
-
-    await UserFeedModel.flushCache(formattedInsertData);
+    await new UserFeedModel().insert(insertData).fire();
 
     if (oThis.feedStatus === feedConstants.publishedStatus) {
       //Insert entry for to user ids as well.
@@ -405,12 +400,7 @@ class OstTransaction extends ServiceBase {
           published_ts: oThis.publishedAtTs
         };
 
-        let toUserInsertResponse = await new UserFeedModel().insert(insertUserFeedData).fire();
-
-        insertUserFeedData.id = toUserInsertResponse.insertId;
-        let formattedInsertData = new UserFeedModel().formatDbData(insertUserFeedData);
-
-        await UserFeedModel.flushCache(formattedInsertData);
+        await new UserFeedModel().insert(insertUserFeedData).fire();
       }
     }
   }
