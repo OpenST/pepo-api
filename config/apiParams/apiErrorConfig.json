@@ -7,7 +7,7 @@
   "unauthorized_api_request": {
     "http_code": "401",
     "code": "UNAUTHORIZED",
-    "message": "Access denied due to invalid credentials. Please inspect if you are using a valid API Key and Secret to send the request. You can verify the API Key against the one shown on developer's page in OST Platform and re-submit."
+    "message": "Access denied due to invalid credentials."
   },
   "api_under_maintenance": {
     "http_code": "503",

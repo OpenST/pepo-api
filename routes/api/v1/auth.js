@@ -12,50 +12,17 @@ const rootPrefix = '../../..',
   responseEntityKey = require(rootPrefix + '/lib/globalConstant/responseEntityKey'),
   basicHelper = require(rootPrefix + '/helpers/basic'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
-  userConstant = require(rootPrefix + '/lib/globalConstant/user');
+  cookieHelper = require(rootPrefix + '/lib/cookieHelper');
 
 // Node.js cookie parsing middleware.
 router.use(cookieParser(coreConstant.COOKIE_SECRET));
-
-/**
- * Method to set login cookies
- *
- * @param responseObject
- * @param cookieValue
- */
-function setLoginCookies(responseObject, cookieValue) {
-  let options = {
-    maxAge: 1000 * 60 * 15, // Cookie would expire after 15 minutes
-    httpOnly: true, // The cookie only accessible by the web server
-    signed: true, // Indicates if the cookie should be signed
-    path: '/',
-    domain: coreConstant.PA_COOKIE_DOMAIN
-  };
-
-  // For non-development environments
-  if (basicHelper.isProduction()) {
-    options.secure = true; // To ensure browser sends cookie over https
-  }
-
-  // Set cookie
-  responseObject.cookie(userConstant.loginCookieName, cookieValue, options); // Options is optional
-}
-
-/**
- * Method to delete login cookie
- *
- * @param responseObject
- */
-function deleteLoginCookie(responseObject) {
-  responseObject.clearCookie(userConstant.loginCookieName);
-}
 
 /* Create user*/
 router.post('/sign-up', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.signUp;
 
   const onServiceSuccess = async function(serviceResponse) {
-    setLoginCookies(res, serviceResponse.data.userLoginCookieValue);
+    cookieHelper.setLoginCookie(res, serviceResponse.data.userLoginCookieValue);
 
     const wrapperFormatterRsp = await new WrapperFormatter({
       resultType: responseEntityKey.loggedInUser,
@@ -69,7 +36,7 @@ router.post('/sign-up', sanitizer.sanitizeDynamicUrlParams, function(req, res, n
   };
 
   const onServiceFailure = async function(serviceResponse) {
-    deleteLoginCookie(res);
+    cookieHelper.deleteLoginCookie(res);
   };
 
   Promise.resolve(
@@ -82,7 +49,7 @@ router.post('/login', sanitizer.sanitizeDynamicUrlParams, function(req, res, nex
   req.decodedParams.apiName = apiName.login;
 
   const onServiceSuccess = async function(serviceResponse) {
-    setLoginCookies(res, serviceResponse.data.userLoginCookieValue);
+    cookieHelper.setLoginCookie(res, serviceResponse.data.userLoginCookieValue);
     const wrapperFormatterRsp = await new WrapperFormatter({
       resultType: responseEntityKey.loggedInUser,
       entityKindToResponseKeyMap: {
@@ -95,7 +62,7 @@ router.post('/login', sanitizer.sanitizeDynamicUrlParams, function(req, res, nex
   };
 
   const onServiceFailure = async function(serviceResponse) {
-    deleteLoginCookie(res);
+    cookieHelper.deleteLoginCookie(res);
   };
 
   Promise.resolve(
@@ -106,9 +73,12 @@ router.post('/login', sanitizer.sanitizeDynamicUrlParams, function(req, res, nex
 /* Logout user*/
 router.post('/logout', sanitizer.sanitizeDynamicUrlParams, function(req, res) {
   req.decodedParams.apiName = apiName.logout;
-  const errorConfig = basicHelper.fetchErrorConfig(req.decodedParams.apiVersion);
-  const responseObject = responseHelper.successWithData({});
-  deleteLoginCookie(res);
+
+  const errorConfig = basicHelper.fetchErrorConfig(req.decodedParams.apiVersion),
+    responseObject = responseHelper.successWithData({});
+
+  cookieHelper.deleteLoginCookie(res);
+
   Promise.resolve(responseObject.renderResponse(res, errorConfig));
 });
 
