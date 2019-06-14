@@ -274,9 +274,8 @@ class FeedBase extends ServiceBase {
 
     const nextPagePayloadKey = {};
 
-    if (oThis.feedIds.length > oThis._currentPageLimit()) {
+    if (oThis.feedIds.length >= oThis.limit) {
       nextPagePayloadKey[paginationConstants.paginationIdentifierKey] = {
-        // TODO - change the page number to timestamp
         // TODO - think on how to remove duplicates.
         paginationTimestamp: oThis.paginationTimestamp,
 

@@ -64,14 +64,12 @@ class UserFeedModel extends ModelBase {
     const dbRows = await oThis
       .select('feed_id')
       .where(whereArray)
-      .limit(limit)
       .order_by(
-        'case when published_ts IS NULL then 3\n' +
-          '              when published_ts > 0 then 2\n' +
-          '              else 1\n' +
+        'case when published_ts IS NULL then CURRENT_TIMESTAMP()\n' +
+          '              else published_ts\n' +
           '         end desc'
       )
-      .order_by('published_ts DESC')
+      .limit(limit)
       .fire();
 
     if (dbRows.length === 0) {
