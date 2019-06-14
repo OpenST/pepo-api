@@ -41,6 +41,46 @@ class FeedModel extends ModelBase {
   }
 
   /**
+   * Fetch public and published feed ids.
+   *
+   * @param {object} params
+   * @param {number/string} [params.page]
+   * @param {number/string} [params.limit]
+   *
+   *  @returns {Promise<Array>}
+   */
+  async fetchPublicPublishedFeedIds(params) {
+    const oThis = this;
+
+    const page = params.page || 1,
+      limit = params.limit || 10,
+      offset = (page - 1) * limit;
+
+    const feedIds = [];
+
+    const dbRows = await oThis
+      .select('id')
+      .where({
+        status: feedsConstants.invertedStatuses[feedsConstants.publishedStatus],
+        privacy_type: feedsConstants.invertedPrivacyTypes[feedsConstants.publicPrivacyType]
+      })
+      .limit(limit)
+      .offset(offset)
+      .order_by('published_ts DESC')
+      .fire();
+
+    if (dbRows.length === 0) {
+      return [];
+    }
+
+    for (let index = 0; index < dbRows.length; index++) {
+      feedIds.push(dbRows[index].id);
+    }
+
+    return feedIds;
+  }
+
+  /**
    * Fetch feed by externalEntityId.
    *
    * @param {number} externalEntityId

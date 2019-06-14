@@ -171,6 +171,24 @@ const v1Signature = {
         validatorMethods: ['validateObject', 'validateOstTransactionMeta']
       }
     ]
+  },
+  [apiName.publicFeed]: {
+    mandatory: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateObject']
+      }
+    ],
+    optional: [
+      {
+        parameter: 'limit',
+        validatorMethods: ['validateNonZeroInteger']
+      },
+      {
+        parameter: pagination.paginationIdentifierKey,
+        validatorMethods: ['validateString']
+      }
+    ]
   }
 };
 
