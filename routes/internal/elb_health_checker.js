@@ -28,17 +28,19 @@ router.get('/', function(req, res, next) {
   performer();
 });
 
+/* Test routes */
+
+const encodeString = function(str) {
+  let buff = new Buffer(str.toString());
+  return buff.toString('base64');
+};
+
+const decodeString = function(str) {
+  let buff = new Buffer(str, 'base64');
+  return buff.toString('ascii');
+};
+
 router.get('/caching-test-1', function(req, res, next) {
-  const encodeString = function(str) {
-    let buff = new Buffer(str.toString());
-    return buff.toString('base64');
-  };
-
-  const decodeString = function(str) {
-    let buff = new Buffer(str, 'base64');
-    return buff.toString('ascii');
-  };
-
   const performer = function() {
     console.log('\n\nreq.headers: ', req.headers);
     console.log('req.cookies: ', req.cookies);
@@ -69,16 +71,25 @@ router.get('/caching-test-1', function(req, res, next) {
       // Set headers
       res.setHeader('Date', dt);
       res.setHeader('Last-Modified', dt);
-      let etagData = encodeString(dt);
+      let val = req.query['v'] ? dt.toString() + req.query['v'] : dt.toString();
+      console.log('ETag Val: ', val);
+      let etagData = encodeString(val);
       res.setHeader('ETag', etagData);
       res.setHeader('Vary', '*');
       res.setHeader('Cache-Control', 'max-age=120, must-revalidate');
+      res.setHeader('PepoCache', etagData);
 
       // Set cookie
-      // res.cookie('bl_ck1',dt.toString(), { maxAge: 900000, httpOnly: true });
+      // let cookieOptions = {
+      //   maxAge: 1000 * 60 * 15, // would expire after 15 minutes
+      //   httpOnly: true, // The cookie only accessible by the web server
+      //   signed: true, // Indicates if the cookie should be signed
+      //   path: '/'
+      // };
+      // res.cookie('bl_ck1',dt.toString(), cookieOptions);
 
       // Set response
-      res.status(200).json({ minute: currentMinute, date: dt });
+      res.status(200).json({ minute: currentMinute, date: dt, v: req.query['v'] });
     }
   };
 
