@@ -8,7 +8,6 @@ const rootPrefix = '../../',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   commonValidator = require(rootPrefix + '/lib/validators/Common'),
   TokenUserByUserId = require(rootPrefix + '/lib/cacheManagement/multi/TokenUserByUserIds'),
-  ExternalEntityByIds = require(rootPrefix + '/lib/cacheManagement/multi/ExternalEntityByIds'),
   ExternalEntityModel = require(rootPrefix + '/app/models/mysql/ExternalEntity'),
   TokenUserByOstUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TokenUserByOstUserIds'),
   FeedModel = require(rootPrefix + '/app/models/mysql/Feed'),
@@ -16,10 +15,8 @@ const rootPrefix = '../../',
   ExternalEntitiesByEntityIdAndEntityKindCache = require(rootPrefix +
     '/lib/cacheManagement/single/ExternalEntitiyByEntityIdAndEntityKind'),
   externalEntityConstants = require(rootPrefix + '/lib/globalConstant/externalEntity'),
-  jsSdkWrapper = require(rootPrefix + '/lib/ostPlatform/jsSdkWrapper'),
   feedConstants = require(rootPrefix + '/lib/globalConstant/feed'),
   userFeedConstants = require(rootPrefix + '/lib/globalConstant/userFeed'),
-  logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   responseHelper = require(rootPrefix + '/lib/formatter/response');
 
 class OstTransaction extends ServiceBase {
@@ -32,12 +29,16 @@ class OstTransaction extends ServiceBase {
     super(params);
     const oThis = this;
 
-    oThis.transactionUuid = params.ost_transaction_uuid;
+    oThis.transaction = params.ost_transaction;
     oThis.userId = params.current_user.id;
     oThis.privacyType = params.privacy_type.toUpperCase();
-
     oThis.giphyObject = params.meta.giphy;
     oThis.text = params.meta.text;
+
+    // TODO - validate and set later
+    oThis.transactionUuid = oThis.transaction.id;
+    oThis.transactionStatus = oThis.transaction.status.toUpperCase();
+    oThis.transfersData = oThis.transaction.transfers;
 
     oThis.ostTxExternalEntityId = null;
     oThis.transactionExternalEntityId = null;
@@ -61,8 +62,7 @@ class OstTransaction extends ServiceBase {
       return Promise.resolve(responseHelper.successWithData());
     }
 
-    //Only if transaction is new. Request OST Platform to give transaction details.
-    await oThis._requestTransactionDataFromOstPlatform();
+    await oThis._fetchOstUserId();
 
     //Insert in external entities.
     await oThis._insertInExternalEntities();
@@ -137,71 +137,14 @@ class OstTransaction extends ServiceBase {
   }
 
   /**
-   * This function requests OST platform for transaction details
+   * Fetch OST user id
    *
-   * @returns {Promise<never>}
    * @private
    */
-  async _requestTransactionDataFromOstPlatform() {
+  async _fetchOstUserId() {
     const oThis = this;
 
-    let userIdToOstUserIdsHash = await oThis._fetchOstUserId([oThis.userId]);
-
-    oThis.ostUserId = userIdToOstUserIdsHash[oThis.userId];
-    if (!oThis.ostUserId) {
-      return Promise.reject(
-        responseHelper.error({
-          internal_error_identifier: `a_s_ot_b_5`,
-          api_error_identifier: 'something_went_wrong',
-          debug_options: { userId: oThis.userId }
-        })
-      );
-    }
-
-    let transactionParams = {
-      transaction_id: oThis.transactionUuid,
-      user_id: oThis.ostUserId
-    };
-
-    let transactionResponse = await jsSdkWrapper.getTransaction(transactionParams);
-
-    if (transactionResponse.isFailure()) {
-      logger.error('Transaction not fetched');
-      return Promise.reject(
-        responseHelper.error({
-          internal_error_identifier: `a_s_ot_b_2`,
-          api_error_identifier: 'something_went_wrong',
-          debug_options: { transactionParams: transactionParams }
-        })
-      );
-    }
-
-    let resultType = transactionResponse.data['result_type'];
-
-    oThis.transactionStatus = transactionResponse.data[resultType].status.toUpperCase();
-    oThis.transfersData = transactionResponse.data[resultType].transfers;
-
-    if (oThis.ostUserId !== oThis.transfersData[0].from_user_id) {
-      logger.error('Data mismatch: ost user id is not same as from user in transfer data.');
-      return Promise.reject(
-        responseHelper.error({
-          internal_error_identifier: `a_s_ot_b_6`,
-          api_error_identifier: 'something_went_wrong',
-          debug_options: { userId: oThis.userId, transfersData: oThis.transfersData }
-        })
-      );
-    }
-  }
-
-  /**
-   * This function return user id to ost user id hash.
-   *
-   * @param {Array} userIds
-   * @returns {Promise<Hash>} user id to ost user id hash
-   * @private
-   */
-  async _fetchOstUserId(userIds) {
-    const oThis = this;
+    let userIds = [oThis.userId];
 
     let tokenUserDetailsResponse = await new TokenUserByUserId({ userIds: userIds }).fetch();
 
@@ -213,7 +156,18 @@ class OstTransaction extends ServiceBase {
         userIdToOstUserIdHash[userId] = tokenUserDetailsResponse.data[userId].ostUserId;
       }
     }
-    return userIdToOstUserIdHash;
+
+    oThis.ostUserId = userIdToOstUserIdHash[oThis.userId];
+
+    if (!oThis.ostUserId) {
+      return Promise.reject(
+        responseHelper.error({
+          internal_error_identifier: `a_s_ot_b_5`,
+          api_error_identifier: 'something_went_wrong',
+          debug_options: { userId: oThis.userId }
+        })
+      );
+    }
   }
 
   /**

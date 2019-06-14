@@ -154,8 +154,8 @@ const v1Signature = {
   [apiName.ostTransaction]: {
     mandatory: [
       {
-        parameter: 'ost_transaction_uuid',
-        validatorMethods: ['validateUuidV4']
+        parameter: 'ost_transaction',
+        validatorMethods: ['validateObject']
       },
       {
         parameter: 'current_user',
