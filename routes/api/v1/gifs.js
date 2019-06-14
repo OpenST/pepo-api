@@ -17,7 +17,8 @@ router.get('/search', sanitizer.sanitizeDynamicUrlParams, function(req, res, nex
     const wrapperFormatterRsp = await new WrapperFormatter({
       resultType: entityType.gifs,
       entityKindToResponseKeyMap: {
-        [entityType.gifs]: responseEntityKey.gifs
+        [entityType.gifs]: responseEntityKey.gifs,
+        [entityType.gifsSearchMeta]: responseEntityKey.meta
       },
       serviceData: serviceResponse.data
     }).perform();
