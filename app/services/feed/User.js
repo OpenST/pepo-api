@@ -1,6 +1,7 @@
 const rootPrefix = '../../..',
   FeedServiceBase = require(rootPrefix + '/app/services/feed/Base'),
   UserFeedModel = require(rootPrefix + '/app/models/mysql/UserFeed'),
+  UserCache = require(rootPrefix + '/lib/cacheManagement/multi/User'),
   FeedByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/FeedByIds'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination');
@@ -32,6 +33,25 @@ class UserFeed extends FeedServiceBase {
     oThis.profileUserId = params.user_id;
 
     oThis.isCurrentUser = oThis.currentUserId === oThis.profileUserId;
+  }
+
+  /**
+   * Validate and sanitize params. This method validates the profileUserId and performs some
+   * other validations of base class.
+   *
+   * @returns {Promise<*|Promise<Promise<never>|*>>}
+   * @private
+   */
+  async _validateAndSanitizeParams() {
+    const oThis = this;
+
+    const cacheResp = await new UserCache({ ids: [oThis.profileUserId] }).fetch();
+
+    if (cacheResp.isFailure()) {
+      return Promise.reject(new Error(`Profile user Id ${oThis.profileUserId} is invalid.`));
+    }
+
+    return super._validateAndSanitizeParams();
   }
 
   /**
