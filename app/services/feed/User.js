@@ -57,10 +57,6 @@ class UserFeed extends FeedServiceBase {
       oThis.feedIds = await new UserFeedModel()._otherUserFeedIds(fetchFeedIdsParams);
     }
 
-    if (oThis.feedIds.length === 0) {
-      return responseHelper.successWithData(oThis._finalResponse());
-    }
-
     const cacheResp = await new FeedByIdsCache({ ids: oThis.feedIds }).fetch();
 
     if (cacheResp.isFailure()) {

@@ -58,6 +58,10 @@ class FeedBase extends ServiceBase {
 
     await oThis._fetchFeedDetails();
 
+    if (oThis.feedIds.length === 0) {
+      return responseHelper.successWithData(oThis._finalResponse());
+    }
+
     oThis._processFeedDetails();
 
     await oThis._fetchExternalEntities();
