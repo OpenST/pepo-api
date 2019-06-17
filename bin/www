@@ -8,7 +8,9 @@ const http = require('http');
 const rootPrefix = '..',
   app = require(rootPrefix + '/app'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
-  createErrorLogsEntry = require(rootPrefix + '/lib/errorLogs/createEntry');
+  responseHelper = require(rootPrefix + '/lib/formatter/response'),
+  createErrorLogsEntry = require(rootPrefix + '/lib/errorLogs/createEntry'),
+  errorLogsConstants = require(rootPrefix + '/lib/globalConstant/errorLogs');
 
 /**
  * Normalize a port into a number, string, or false.
@@ -65,7 +67,7 @@ function onError(error) {
     : 'Port ' + port;
 
   logger.error('Error while starting server.',error.code);
-  // handle specific listen errors with friendly messages
+  // Handle specific listen errors with friendly messages
   switch (error.code) {
     case 'EACCES': {
       const errorObject = responseHelper.error({
@@ -73,7 +75,7 @@ function onError(error) {
         api_error_identifier: 'elevated_privilege_required',
         debug_options: { port: bind }
       });
-      createErrorLogsEntry.perform(errorObject, ErrorLogsConstants.highSeverity);
+      createErrorLogsEntry.perform(errorObject, errorLogsConstants.highSeverity);
       logger.error('b_w_1', bind + ' requires elevated privileges');
       process.exit(1);
       break;
@@ -84,7 +86,7 @@ function onError(error) {
         api_error_identifier: 'port_in_use',
         debug_options: { port: bind }
       });
-      createErrorLogsEntry.perform(errorObject, ErrorLogsConstants.highSeverity);
+      createErrorLogsEntry.perform(errorObject, errorLogsConstants.highSeverity);
       logger.error('b_w_2', bind + ' is already in use');
       process.exit(1);
       break;
