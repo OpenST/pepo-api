@@ -281,7 +281,7 @@ class FeedBase extends ServiceBase {
     if (oThis.feedIds.length >= oThis.limit) {
       nextPagePayloadKey[paginationConstants.paginationIdentifierKey] = {
         // TODO - think on how to remove duplicates.
-        paginationTimestamp: oThis.paginationTimestamp,
+        pagination_timestamp: oThis.paginationTimestamp,
 
         limit: oThis._currentPageLimit()
       };
