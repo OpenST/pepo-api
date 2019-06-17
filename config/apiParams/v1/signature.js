@@ -143,7 +143,7 @@ const v1Signature = {
     mandatory: [
       {
         parameter: 'ost_transaction',
-        validatorMethods: ['validateObject']
+        validatorMethods: ['validateObject', 'validateOstTransactionObject']
       },
       {
         parameter: 'current_user',
