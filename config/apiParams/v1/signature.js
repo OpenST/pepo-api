@@ -108,8 +108,8 @@ const v1Signature = {
     mandatory: [],
     optional: [
       {
-        parameter: 'page_number',
-        validatorMethods: ['validateNonZeroInteger']
+        parameter: paginationConstants.paginationIdentifierKey,
+        validatorMethods: ['validateString']
       }
     ]
   },

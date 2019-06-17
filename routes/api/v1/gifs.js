@@ -36,7 +36,8 @@ router.get('/trending', sanitizer.sanitizeDynamicUrlParams, function(req, res, n
     const wrapperFormatterRsp = await new WrapperFormatter({
       resultType: entityType.gifs,
       entityKindToResponseKeyMap: {
-        [entityType.gifs]: responseEntityKey.gifs
+        [entityType.gifs]: responseEntityKey.gifs,
+        [entityType.gifsSearchMeta]: responseEntityKey.meta
       },
       serviceData: serviceResponse.data
     }).perform();

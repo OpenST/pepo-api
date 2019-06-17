@@ -7,6 +7,7 @@
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   GifsTrendingCache = require(rootPrefix + '/lib/cacheManagement/single/GifsTrending'),
+  pagination = require(rootPrefix + '/lib/globalConstant/pagination'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   responseHelper = require(rootPrefix + '/lib/formatter/response');
 
@@ -14,6 +15,7 @@ class GifsTrending extends ServiceBase {
   /**
    * @param {Object} params
    * @param {Number} params.page_number
+   * @param {String} [params.pagination_identifier]
    *
    * @constructor
    */
@@ -21,7 +23,9 @@ class GifsTrending extends ServiceBase {
     super(params);
 
     const oThis = this;
-    oThis.pageNumber = params.page_number;
+    oThis.paginationIdentifier = params[pagination.paginationIdentifierKey] || null;
+
+    oThis.pageNumber = null;
   }
 
   /**
@@ -32,9 +36,28 @@ class GifsTrending extends ServiceBase {
   async _asyncPerform() {
     const oThis = this;
 
-    let response = await oThis._searchGifs();
+    await oThis._validateAndSanitizeParams();
 
-    return responseHelper.successWithData(response);
+    let response = await oThis._getGifs();
+
+    return responseHelper.successWithData(oThis._finalResponse(response));
+  }
+
+  /**
+   * Validate and sanitize specific params
+   *
+   * @returns {Promise<never>}
+   * @private
+   */
+  async _validateAndSanitizeParams() {
+    const oThis = this;
+
+    if (oThis.paginationIdentifier) {
+      let parsedPaginationParams = oThis._parsePaginationParams(oThis.paginationIdentifier);
+      oThis.pageNumber = parsedPaginationParams.page; //override page
+    } else {
+      oThis.pageNumber = 1;
+    }
   }
 
   /**
@@ -43,8 +66,9 @@ class GifsTrending extends ServiceBase {
    * @returns {Promise<*>}
    * @private
    */
-  async _searchGifs() {
+  async _getGifs() {
     const oThis = this;
+
     let resp = await new GifsTrendingCache({ pageNumber: oThis.pageNumber }).fetch();
 
     if (resp.isFailure()) {
@@ -53,6 +77,32 @@ class GifsTrending extends ServiceBase {
     }
 
     return resp.data;
+  }
+
+  /**
+   * Service Response
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  _finalResponse(response) {
+    const oThis = this;
+
+    let nextPagePayloadKey = {};
+
+    if (response.gifs.length != 0) {
+      nextPagePayloadKey[pagination.paginationIdentifierKey] = {
+        page: oThis.pageNumber + 1
+      };
+    }
+
+    let responseMetaData = {
+      [pagination.nextPagePayloadKey]: nextPagePayloadKey
+    };
+
+    response.meta = responseMetaData;
+
+    return response;
   }
 }
 
