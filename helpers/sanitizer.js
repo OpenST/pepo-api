@@ -17,7 +17,7 @@ class SanitizeRecursively {
 
     if (typeof params === 'string') {
       params = oThis._sanitizeString(params);
-    } else if (typeof params === 'boolean' || typeof params === 'number') {
+    } else if (typeof params === 'boolean' || typeof params === 'number' || params === null) {
       // do nothing and return param as is
     } else if (params instanceof Array) {
       for (let i in params) {

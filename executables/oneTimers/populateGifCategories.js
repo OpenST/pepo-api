@@ -107,14 +107,14 @@ class PopulateGifCategories {
     // Fetch set of random Gifs
     let resp = await new GifsCacheByKeyword({
       query: categoryName,
-      pageNumber: Math.floor(Math.random() * 10 + 1)
+      pageNumber: 1
     }).fetch();
 
-    if (resp.isSuccess() && null != resp.data.gifs) {
-      return resp.data.gifs[Math.floor(Math.random() * 10 + 1)];
+    if (resp.isSuccess() && resp.data.gifs.length > 0) {
+      return resp.data.gifs[Math.floor(Math.random() * 10)];
     }
 
-    return null;
+    return {};
   }
 
   /**
@@ -131,11 +131,11 @@ class PopulateGifCategories {
       pageNumber: 1
     }).fetch();
 
-    if (resp.isSuccess() && null != resp.data.gifs) {
-      return resp.data.gifs[Math.floor(Math.random() * 10 + 1)];
+    if (resp.isSuccess() && resp.data.gifs.length > 0) {
+      return resp.data.gifs[Math.floor(Math.random() * 10)];
     }
 
-    return null;
+    return {};
   }
 }
 

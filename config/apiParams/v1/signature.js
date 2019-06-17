@@ -7,23 +7,19 @@ const v1Signature = {
     mandatory: [
       {
         parameter: 'user_name',
-        validatorMethods: [
-          'validateString',
-          'validateAlphaNumericCommonSpecialCharString',
-          'validateMaxLengthMediumString'
-        ]
+        validatorMethods: ['validateString', 'validateUserName']
       },
       {
         parameter: 'first_name',
-        validatorMethods: ['validateString', 'validateMaxLengthMediumString']
+        validatorMethods: ['validateString', 'validateName']
       },
       {
         parameter: 'last_name',
-        validatorMethods: ['validateString', 'validateMaxLengthMediumString']
+        validatorMethods: ['validateString', 'validateName']
       },
       {
         parameter: 'password',
-        validatorMethods: ['validateString', 'validateMaxLengthMediumString']
+        validatorMethods: ['validateString', 'validatePassword']
       }
     ],
     optional: []
@@ -32,15 +28,11 @@ const v1Signature = {
     mandatory: [
       {
         parameter: 'user_name',
-        validatorMethods: [
-          'validateString',
-          'validateAlphaNumericCommonSpecialCharString',
-          'validateMaxLengthMediumString'
-        ]
+        validatorMethods: ['validateString', 'validateUserName']
       },
       {
         parameter: 'password',
-        validatorMethods: ['validateString', 'validateMaxLengthMediumString']
+        validatorMethods: ['validateString', 'validatePassword']
       }
     ],
     optional: []

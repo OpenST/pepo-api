@@ -113,7 +113,7 @@ class Login extends ServiceBase {
         responseHelper.paramValidationError({
           internal_error_identifier: 's_um_l_fu_1',
           api_error_identifier: 'invalid_api_params',
-          params_error_identifiers: ['invalid_user_name'],
+          params_error_identifiers: ['user_not_active'],
           debug_options: {}
         })
       );
@@ -176,7 +176,7 @@ class Login extends ServiceBase {
         responseHelper.paramValidationError({
           internal_error_identifier: 's_um_l_vp_1',
           api_error_identifier: 'invalid_api_params',
-          params_error_identifiers: ['invalid_password'],
+          params_error_identifiers: ['user_not_found'],
           debug_options: {}
         })
       );

@@ -75,13 +75,11 @@ class UserList extends ServiceBase {
     if (oThis.paginationIdentifier) {
       let parsedPaginationParams = oThis._parsePaginationParams(oThis.paginationIdentifier);
       oThis.page = parsedPaginationParams.page; //override page
-      oThis.limit = parsedPaginationParams.limit; //override limit
     } else {
       oThis.page = 1;
-      oThis.limit = oThis.limit || pagination.defaultUserListPageSize;
     }
+    oThis.limit = pagination.defaultUserListPageSize;
 
-    //Validate limit
     return await oThis._validatePageSize();
   }
 
@@ -170,8 +168,7 @@ class UserList extends ServiceBase {
 
     if (oThis.userIds.length == limit) {
       nextPagePayloadKey[pagination.paginationIdentifierKey] = {
-        page: oThis.page + 1,
-        limit: oThis.limit
+        page: oThis.page + 1
       };
     }
 
