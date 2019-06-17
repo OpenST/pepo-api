@@ -15,6 +15,11 @@ const v1ErrorConfig = {
     code: 'invalid',
     message: 'Invalid parameter Password.'
   },
+  user_not_found: {
+    parameter: 'user_id',
+    code: 'invalid',
+    message: 'User Name dose not exist.'
+  },
   duplicate_user_name: {
     parameter: 'user_name',
     code: 'invalid',

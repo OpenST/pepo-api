@@ -77,9 +77,11 @@ class Login extends ServiceBase {
 
     if (!userObjRes.data.id) {
       return Promise.reject(
-        responseHelper.error({
+        responseHelper.paramValidationError({
           internal_error_identifier: 's_um_l_v_1',
-          api_error_identifier: 'unauthorized_api_request'
+          api_error_identifier: 'invalid_api_params',
+          params_error_identifiers: ['user_not_found'],
+          debug_options: {}
         })
       );
     }
@@ -174,7 +176,7 @@ class Login extends ServiceBase {
         responseHelper.paramValidationError({
           internal_error_identifier: 's_um_l_vp_1',
           api_error_identifier: 'invalid_api_params',
-          params_error_identifiers: ['invalid_user_name'],
+          params_error_identifiers: ['invalid_password'],
           debug_options: {}
         })
       );
