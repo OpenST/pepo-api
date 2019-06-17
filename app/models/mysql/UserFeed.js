@@ -41,47 +41,46 @@ class UserFeedModel extends ModelBase {
    *
    * @param {object} params
    * @param {array} params.userId
+   * @param {number} params.limit
    * @param {number} [params.paginationTimestamp]
-   * @param {number} [params.limit]
    *
-   * @returns Promise<array>
+   * @returns Promise<object>
    */
   async _currentUserFeedIds(params) {
     const oThis = this;
 
-    const paginationTimestamp = params.paginationTimestamp,
-      limit = params.limit || 10;
-
-    const whereArray = ['user_id = ?', params.userId];
-
-    if (paginationTimestamp) {
-      whereArray[0] = whereArray[0] + ' AND published_ts < ?';
-      whereArray.push(paginationTimestamp);
-    }
-
     const feedIds = [];
+    const userFeedIdToFeedDetailsMap = {};
 
-    //todo: Published Ts and privacy type should be sent
-    const dbRows = await oThis
-      .select('feed_id')
-      .where(whereArray)
+    const paginationTimestamp = params.paginationTimestamp,
+      limit = params.limit;
+
+    const queryObject = oThis
+      .select(['feed_id', 'published_ts', 'privacy_type', 'updated_at'])
+      .where(['user_id = ?', params.userId])
+      .limit(limit)
       .order_by(
         'case when published_ts IS NULL then CURRENT_TIMESTAMP()\n' +
           '              else published_ts\n' +
           '         end desc'
-      )
-      .limit(limit)
-      .fire();
+      );
+
+    if (paginationTimestamp) {
+      queryObject.where(['published_ts < ?', paginationTimestamp]);
+    }
+
+    const dbRows = await queryObject.fire();
 
     if (dbRows.length === 0) {
-      return [];
+      return {};
     }
 
     for (let index = 0; index < dbRows.length; index++) {
       feedIds.push(dbRows[index].feed_id);
+      userFeedIdToFeedDetailsMap[dbRows[index].feed_id] = oThis.formatDbData(dbRows[index]);
     }
 
-    return feedIds;
+    return { feedIds: feedIds, userFeedIdToFeedDetailsMap: userFeedIdToFeedDetailsMap };
   }
 
   /**
@@ -89,46 +88,46 @@ class UserFeedModel extends ModelBase {
    *
    * @param {object} params
    * @param {array} params.userId
+   * @param {number} params.limit
    * @param {number} [params.paginationTimestamp]
-   * @param {number} [params.limit]
    *
-   * @returns Promise<array>
+   * @returns Promise<object>
    */
   async _otherUserFeedIds(params) {
     const oThis = this;
 
-    const paginationTimestamp = params.paginationTimestamp,
-      limit = params.limit || 10;
+    const feedIds = [];
+    const userFeedIdToFeedDetailsMap = {};
 
-    const whereArray = [
-      'user_id = ? AND privacy_type = ? AND published_ts > 0',
-      params.userId,
-      userFeedConstants.invertedPrivacyTypes[userFeedConstants.publicPrivacyType]
-    ];
+    const paginationTimestamp = params.paginationTimestamp,
+      limit = params.limit;
+
+    const queryObject = oThis
+      .select(['feed_id', 'published_ts', 'privacy_type', 'updated_at'])
+      .where([
+        'user_id = ? AND privacy_type = ? AND published_ts > 0',
+        params.userId,
+        userFeedConstants.invertedPrivacyTypes[userFeedConstants.publicPrivacyType]
+      ])
+      .limit(limit)
+      .order_by('published_ts desc');
 
     if (paginationTimestamp) {
-      whereArray[0] = whereArray[0] + ' AND published_ts < ?';
-      whereArray.push(paginationTimestamp);
+      queryObject.where(['published_ts < ?', paginationTimestamp]);
     }
 
-    const feedIds = [];
-
-    const dbRows = await oThis
-      .select('feed_id')
-      .where(whereArray)
-      .limit(limit)
-      .order_by('published_ts desc')
-      .fire();
+    const dbRows = await queryObject.fire();
 
     if (dbRows.length === 0) {
-      return [];
+      return {};
     }
 
     for (let index = 0; index < dbRows.length; index++) {
       feedIds.push(dbRows[index].feed_id);
+      userFeedIdToFeedDetailsMap[dbRows[index].feed_id] = oThis.formatDbData(dbRows[index]);
     }
 
-    return feedIds;
+    return { feedIds: feedIds, userFeedIdToFeedDetailsMap: userFeedIdToFeedDetailsMap };
   }
 
   /***

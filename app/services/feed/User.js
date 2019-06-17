@@ -19,8 +19,7 @@ class UserFeed extends FeedServiceBase {
    * @param {object} params.current_user
    * @param {string/number} params.current_user.id
    * @param {string/number} params.user_id
-   * @param {number/string} [params.limit]
-   * @param {string} [params.limit.pagination_identifier]
+   * @param {string} [params.pagination_identifier]
    *
    * @augments FeedServiceBase
    */
@@ -29,8 +28,8 @@ class UserFeed extends FeedServiceBase {
 
     const oThis = this;
 
-    oThis.currentUserId = params.current_user.id;
-    oThis.profileUserId = params.user_id;
+    oThis.currentUserId = parseInt(params.current_user.id);
+    oThis.profileUserId = parseInt(params.user_id);
 
     //todo: profileUserId will be string and currentUserId will be int
     oThis.isCurrentUser = oThis.currentUserId === oThis.profileUserId;
@@ -58,13 +57,15 @@ class UserFeed extends FeedServiceBase {
   /**
    * Fetch user feed details.
    *
-   * @sets oThis.feedIds, oThis.feedIdToFeedDetailsMap
+   * @sets oThis.feedIds, oThis.feedIdToFeedDetailsMap, oThis.userFeedIdToFeedDetailsMap
    *
    * @returns {Promise<*|result>}
    * @private
    */
   async _fetchFeedDetails() {
     const oThis = this;
+
+    let modelResp = {};
 
     const fetchFeedIdsParams = {
       limit: oThis._currentPageLimit(),
@@ -73,12 +74,19 @@ class UserFeed extends FeedServiceBase {
     };
 
     if (oThis.isCurrentUser) {
-      oThis.feedIds = await new UserFeedModel()._currentUserFeedIds(fetchFeedIdsParams);
+      modelResp = await new UserFeedModel()._currentUserFeedIds(fetchFeedIdsParams);
     } else {
-      oThis.feedIds = await new UserFeedModel()._otherUserFeedIds(fetchFeedIdsParams);
+      modelResp = await new UserFeedModel()._otherUserFeedIds(fetchFeedIdsParams);
     }
 
-    //todo: return if no feed ids
+    oThis.feedIds = modelResp.feedIds;
+    oThis.userFeedIdToFeedDetailsMap = modelResp.userFeedIdToFeedDetailsMap;
+    oThis.lastFeedId = oThis.feedIds[oThis.feedIds.length - 1];
+
+    if (oThis.feedIds.length === 0) {
+      return responseHelper.successWithData(oThis._finalResponse());
+    }
+
     const cacheResp = await new FeedByIdsCache({ ids: oThis.feedIds }).fetch();
 
     //todo: cache will not give failure
@@ -88,9 +96,42 @@ class UserFeed extends FeedServiceBase {
 
     oThis.feedIdToFeedDetailsMap = cacheResp.data;
 
-    oThis.lastFeedId = oThis.feedIds[oThis.feedIds.length - 1];
-
     return responseHelper.successWithData({});
+  }
+
+  /**
+   * Service response.
+   *
+   * @returns {*|result}
+   * @private
+   */
+  _finalResponse() {
+    const oThis = this;
+
+    const nextPagePayloadKey = {};
+
+    if (oThis.feedIds.length >= oThis.limit) {
+      nextPagePayloadKey[paginationConstants.paginationIdentifierKey] = {
+        // TODO - think on how to remove duplicates.
+        pagination_timestamp: oThis.paginationTimestamp
+      };
+    }
+
+    const responseMetaData = {
+      profileUserId: oThis.profileUserId,
+      [paginationConstants.nextPagePayloadKey]: nextPagePayloadKey
+    };
+
+    return {
+      feedIds: oThis.feedIds,
+      userFeedIdToFeedDetailsMap: oThis.userFeedIdToFeedDetailsMap,
+      feedIdToFeedDetailsMap: oThis.feedIdToFeedDetailsMap,
+      ostTransactionMap: oThis.ostTransactionMap,
+      externalEntityGifMap: oThis.externalEntityGifMap,
+      usersByIdMap: oThis.usersByIdMap,
+      tokenUsersByUserIdMap: oThis.tokenUsersByUserIdMap,
+      meta: responseMetaData
+    };
   }
 
   /**

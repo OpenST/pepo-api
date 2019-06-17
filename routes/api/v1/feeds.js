@@ -19,7 +19,7 @@ router.get('/', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
       entityKindToResponseKeyMap: {
         [entityType.feedList]: responseEntityKey.publicFeed,
         [entityType.ostTransactionMap]: responseEntityKey.ostTransaction,
-        [entityType.gifMap]: responseEntityKey.gifs,
+        [entityType.externalEntityGifMap]: responseEntityKey.gifs,
         [entityType.usersMap]: responseEntityKey.users,
         [entityType.feedListMeta]: responseEntityKey.meta
       },

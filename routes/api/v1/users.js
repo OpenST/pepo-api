@@ -95,9 +95,9 @@ router.get('/:user_id/feeds', sanitizer.sanitizeDynamicUrlParams, function(req, 
     const wrapperFormatterRsp = await new WrapperFormatter({
       resultType: responseEntityKey.userFeed,
       entityKindToResponseKeyMap: {
-        [entityType.feedList]: responseEntityKey.userFeed,
+        [entityType.userFeedMap]: responseEntityKey.userFeed,
         [entityType.ostTransactionMap]: responseEntityKey.ostTransaction,
-        [entityType.gifMap]: responseEntityKey.gifs,
+        [entityType.externalEntityGifMap]: responseEntityKey.gifs,
         [entityType.usersMap]: responseEntityKey.users,
         [entityType.feedListMeta]: responseEntityKey.meta
       },

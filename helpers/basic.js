@@ -459,6 +459,16 @@ class BasicHelper {
       setTimeout(resolve, ms);
     });
   }
+
+  mapToObj(inputMap) {
+    let obj = {};
+
+    inputMap.forEach(function(value, key) {
+      obj[key] = value;
+    });
+
+    return obj;
+  }
 }
 
 module.exports = new BasicHelper();

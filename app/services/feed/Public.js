@@ -34,6 +34,39 @@ class PublicFeed extends FeedServiceBase {
   }
 
   /**
+   * Service response.
+   *
+   * @returns {*|result}
+   * @private
+   */
+  _finalResponse() {
+    const oThis = this;
+
+    const nextPagePayloadKey = {};
+
+    if (oThis.feedIds.length >= oThis.limit) {
+      nextPagePayloadKey[paginationConstants.paginationIdentifierKey] = {
+        // TODO - think on how to remove duplicates.
+        pagination_timestamp: oThis.paginationTimestamp
+      };
+    }
+
+    const responseMetaData = {
+      [paginationConstants.nextPagePayloadKey]: nextPagePayloadKey
+    };
+
+    return {
+      feedIds: oThis.feedIds,
+      feedIdToFeedDetailsMap: oThis.feedIdToFeedDetailsMap,
+      ostTransactionMap: oThis.ostTransactionMap,
+      externalEntityGifMap: oThis.externalEntityGifMap,
+      usersByIdMap: oThis.usersByIdMap,
+      tokenUsersByUserIdMap: oThis.tokenUsersByUserIdMap,
+      meta: responseMetaData
+    };
+  }
+
+  /**
    * Default page limit.
    *
    * @private

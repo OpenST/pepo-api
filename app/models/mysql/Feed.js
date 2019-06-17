@@ -44,51 +44,48 @@ class FeedModel extends ModelBase {
    * Fetch public and published feed ids.
    *
    * @param {object} params
+   * @param {number/string} params.limit
    * @param {number/string} [params.paginationTimestamp]
-   * @param {number/string} [params.limit]
    *
    *  @returns {Promise<object>}
    */
   async fetchPublicPublishedFeedIds(params) {
     const oThis = this;
 
-    const paginationTimestamp = params.paginationTimestamp,
-      limit = params.limit || 10;
-
-    const whereArray = [
-      'status = ? AND privacy_type = ?',
-      feedsConstants.invertedStatuses[feedsConstants.publishedStatus],
-      feedsConstants.invertedPrivacyTypes[feedsConstants.publicPrivacyType]
-    ];
-
-    //todo: use where clause
-    if (paginationTimestamp) {
-      whereArray[0] = whereArray[0] + ' AND published_ts < ?';
-      whereArray.push(paginationTimestamp);
-    }
-
     const feedIds = [];
     const feedDetails = {};
-    const dbRows = await oThis
-      .select('*')
-      .where(whereArray)
-      .limit(limit)
-      .order_by('published_ts desc')
-      .fire();
 
-    //todo: invalid response
+    const paginationTimestamp = params.paginationTimestamp,
+      limit = params.limit;
+
+    const queryObject = oThis
+      .select('*')
+      .where([
+        'status = ? AND privacy_type = ?',
+        feedsConstants.invertedStatuses[feedsConstants.publishedStatus],
+        feedsConstants.invertedPrivacyTypes[feedsConstants.publicPrivacyType]
+      ])
+      .limit(limit)
+      .order_by('published_ts desc');
+
+    if (paginationTimestamp) {
+      queryObject.where(['published_ts < ?', paginationTimestamp]);
+    }
+
+    const dbRows = await queryObject.fire();
+
     if (dbRows.length === 0) {
-      return [];
+      return {};
     }
 
     for (let index = 0; index < dbRows.length; index++) {
       const formatDbRow = oThis.formatDbData(dbRows[index]);
+
       feedIds.push(formatDbRow.id);
       feedDetails[formatDbRow.id] = formatDbRow;
     }
 
-    //todo: invalid response
-    return { feedIds, feedDetails };
+    return { feedIds: feedIds, feedDetails: feedDetails };
   }
 
   /**

@@ -17,7 +17,6 @@ class FeedBase extends ServiceBase {
    * Constructor for feed service base.
    *
    * @param {object} params
-   * @param {number/string} [params.limit]
    * @param {string} [params.limit.pagination_identifier]
    *
    * @augments ServiceBase
@@ -27,8 +26,9 @@ class FeedBase extends ServiceBase {
 
     const oThis = this;
 
-    oThis.limit = params.limit;
     oThis.paginationIdentifier = params[paginationConstants.paginationIdentifierKey] || null;
+
+    oThis.limit = oThis._defaultPageLimit();
 
     oThis.paginationTimestamp = null;
     oThis.feedIds = [];
@@ -39,7 +39,7 @@ class FeedBase extends ServiceBase {
     oThis.userIds = [];
     oThis.externalEntityIds = [];
     oThis.ostTransactionMap = {};
-    oThis.gifMap = {};
+    oThis.externalEntityGifMap = {};
     oThis.responseMetaData = {
       [paginationConstants.nextPagePayloadKey]: {}
     };
@@ -74,7 +74,7 @@ class FeedBase extends ServiceBase {
   /**
    * Validate and sanitize specific params.
    *
-   * @sets oThis.paginationTimestamp, oThis.limit
+   * @sets oThis.paginationTimestamp
    *
    * @returns {Promise<never>}
    * @private
@@ -86,10 +86,8 @@ class FeedBase extends ServiceBase {
       const parsedPaginationParams = oThis._parsePaginationParams(oThis.paginationIdentifier);
 
       oThis.paginationTimestamp = parsedPaginationParams.pagination_timestamp; // Override paginationTimestamp number.
-      oThis.limit = parsedPaginationParams.limit; // Override limit.
     } else {
       oThis.paginationTimestamp = null;
-      oThis.limit = oThis.limit || oThis._defaultPageLimit();
     }
 
     // Validate limit.
@@ -194,8 +192,7 @@ class FeedBase extends ServiceBase {
           break;
         }
         case externalEntityConstants.giphyEntityKind: {
-          //todo: Send model
-          oThis.gifMap[externalEntityTableEntityId] = externalEntityExtraData;
+          oThis.externalEntityGifMap[externalEntityTableId] = externalEntityDetails;
 
           // Insert entityId in feed details payload.
           const feedId = oThis.giphyKindExternalEntityIdToFeedIdMap[externalEntityTableId];
@@ -275,32 +272,7 @@ class FeedBase extends ServiceBase {
    * @private
    */
   _finalResponse() {
-    const oThis = this;
-
-    const nextPagePayloadKey = {};
-
-    if (oThis.feedIds.length >= oThis.limit) {
-      nextPagePayloadKey[paginationConstants.paginationIdentifierKey] = {
-        // TODO - think on how to remove duplicates.
-        pagination_timestamp: oThis.paginationTimestamp,
-
-        limit: oThis._currentPageLimit()
-      };
-    }
-
-    const responseMetaData = {
-      [paginationConstants.nextPagePayloadKey]: nextPagePayloadKey
-    };
-
-    return {
-      feedIds: oThis.feedIds,
-      feedIdToFeedDetailsMap: oThis.feedIdToFeedDetailsMap,
-      ostTransactionMap: oThis.ostTransactionMap,
-      gifMap: oThis.gifMap,
-      usersByIdMap: oThis.usersByIdMap,
-      tokenUsersByUserIdMap: oThis.tokenUsersByUserIdMap,
-      meta: responseMetaData
-    };
+    throw new Error('Sub-class to implement.');
   }
 
   /**
