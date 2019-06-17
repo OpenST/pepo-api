@@ -85,7 +85,7 @@ class FeedBase extends ServiceBase {
     if (oThis.paginationIdentifier) {
       const parsedPaginationParams = oThis._parsePaginationParams(oThis.paginationIdentifier);
 
-      oThis.paginationTimestamp = parsedPaginationParams.paginationTimestamp; // Override paginationTimestamp number.
+      oThis.paginationTimestamp = parsedPaginationParams.pagination_timestamp; // Override paginationTimestamp number.
       oThis.limit = parsedPaginationParams.limit; // Override limit.
     } else {
       oThis.paginationTimestamp = null;
