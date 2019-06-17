@@ -45,6 +45,11 @@ node db/migrate.js
 node devops/exec/flushMemcache.js
 ```
 
+* Seed Tokens Table.
+```bash
+node executables/oneTimers/seedTokensTable.js --apiKey "__ABCD" --apiSecret "__WXYZ"
+```
+
 * Seed Gif categories
 ```bash
 source set_env_vars.sh
