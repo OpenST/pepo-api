@@ -194,6 +194,7 @@ class FeedBase extends ServiceBase {
           break;
         }
         case externalEntityConstants.giphyEntityKind: {
+          //todo: Send model
           oThis.gifMap[externalEntityTableEntityId] = externalEntityExtraData;
 
           // Insert entityId in feed details payload.

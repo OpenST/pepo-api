@@ -32,6 +32,7 @@ class UserFeed extends FeedServiceBase {
     oThis.currentUserId = params.current_user.id;
     oThis.profileUserId = params.user_id;
 
+    //todo: profileUserId will be string and currentUserId will be int
     oThis.isCurrentUser = oThis.currentUserId === oThis.profileUserId;
   }
 
@@ -77,8 +78,10 @@ class UserFeed extends FeedServiceBase {
       oThis.feedIds = await new UserFeedModel()._otherUserFeedIds(fetchFeedIdsParams);
     }
 
+    //todo: return if no feed ids
     const cacheResp = await new FeedByIdsCache({ ids: oThis.feedIds }).fetch();
 
+    //todo: cache will not give failure
     if (cacheResp.isFailure()) {
       return Promise.reject(new Error(`Details for some or all of the feed Ids: ${oThis.feedIds} unavailable.`));
     }

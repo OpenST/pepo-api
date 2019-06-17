@@ -61,6 +61,7 @@ class FeedModel extends ModelBase {
       feedsConstants.invertedPrivacyTypes[feedsConstants.publicPrivacyType]
     ];
 
+    //todo: use where clause
     if (paginationTimestamp) {
       whereArray[0] = whereArray[0] + ' AND published_ts < ?';
       whereArray.push(paginationTimestamp);
@@ -75,6 +76,7 @@ class FeedModel extends ModelBase {
       .order_by('published_ts desc')
       .fire();
 
+    //todo: invalid response
     if (dbRows.length === 0) {
       return [];
     }
@@ -85,6 +87,7 @@ class FeedModel extends ModelBase {
       feedDetails[formatDbRow.id] = formatDbRow;
     }
 
+    //todo: invalid response
     return { feedIds, feedDetails };
   }
 

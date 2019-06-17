@@ -234,7 +234,7 @@ class TransactionOstEventBase extends ServiceBase {
       userIds: [toUserId]
     }).fetch();
 
-    if (tokenUserObjRes.isFailure() || !tokenUserObjRes.data[toUserId].id) {
+    if (!tokenUserObjRes.data[toUserId].id) {
       return Promise.reject(
         responseHelper.error({
           internal_error_identifier: 's_oe_t_b_mtuafp_1',

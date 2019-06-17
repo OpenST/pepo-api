@@ -61,6 +61,7 @@ class UserFeedModel extends ModelBase {
 
     const feedIds = [];
 
+    //todo: Published Ts and privacy type should be sent
     const dbRows = await oThis
       .select('feed_id')
       .where(whereArray)
