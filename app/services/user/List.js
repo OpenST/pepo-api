@@ -27,9 +27,9 @@ class UserList extends ServiceBase {
     const oThis = this;
 
     oThis.currentUserId = params.current_user.id;
-    oThis.limit = params.limit;
     oThis.paginationIdentifier = params[pagination.paginationIdentifierKey] || null;
 
+    oThis.limit = null;
     oThis.page = null;
     oThis.userIds = [];
     oThis.usersByIdHash = {};
@@ -98,9 +98,9 @@ class UserList extends ServiceBase {
         limit: oThis.limit,
         page: oThis.page
       }),
-      UserPaginationCacheRes = await UserPaginationCacheObj.fetch();
+      userPaginationCacheRes = await UserPaginationCacheObj.fetch();
 
-    oThis.userIds = UserPaginationCacheRes.data;
+    oThis.userIds = userPaginationCacheRes.data;
 
     return Promise.resolve(responseHelper.successWithData({}));
   }
