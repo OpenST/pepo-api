@@ -73,5 +73,10 @@
     "http_code": "422",
     "code": "UNPROCESSABLE_ENTITY",
     "message": "The request was good, but nevertheless could not be processed."
+  },
+  "duplicate_entry": {
+    "http_code": "409",
+    "code": "ALREADY_EXISTS",
+    "message": "Addresses already exists."
   }
 }

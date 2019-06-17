@@ -101,6 +101,13 @@ class RegisterDevice extends ServiceBase {
     let platformResponse = await jsSdkWrapper.registerDevice(paramsForPlatform);
 
     if (platformResponse.isFailure()) {
+      if (platformResponse.debugOptions.err.code === 'ALREADY_EXISTS') {
+        return responseHelper.error({
+          internal_error_identifier: 'a_s_u_rd_1',
+          api_error_identifier: 'duplicate_entry',
+          debug_options: { err: platformResponse.debugOptions.err }
+        });
+      }
       logger.error('Register device API to platform failed.');
       await createErrorLogsEntry.perform(platformResponse, errorLogsConstants.highSeverity);
       return Promise.reject(platformResponse);
