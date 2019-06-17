@@ -250,7 +250,7 @@ class OstTransaction extends ServiceBase {
 
     let extraData = {
         kind: externalEntityConstants.extraData.userTransactionKind,
-        fromUserId: oThis.ostUserId,
+        fromUserId: oThis.userId,
         toUserIds: oThis.toUserIdsArray,
         amounts: oThis.amountsArray,
         ostTransactionStatus: oThis.transactionStatus
