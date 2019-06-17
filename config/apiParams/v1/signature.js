@@ -89,7 +89,7 @@ const v1Signature = {
       },
       {
         parameter: paginationConstants.paginationIdentifierKey,
-        validatorMethods: ['validateString']
+        validatorMethods: ['validateString', 'validatePaginationIdentifier']
       }
     ]
   },
