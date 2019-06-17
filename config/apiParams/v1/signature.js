@@ -108,8 +108,8 @@ const v1Signature = {
     mandatory: [],
     optional: [
       {
-        parameter: 'page_number',
-        validatorMethods: ['validateNonZeroInteger']
+        parameter: paginationConstants.paginationIdentifierKey,
+        validatorMethods: ['validateString']
       }
     ]
   },
@@ -139,7 +139,7 @@ const v1Signature = {
     mandatory: [
       {
         parameter: 'ost_transaction',
-        validatorMethods: ['validateObject']
+        validatorMethods: ['validateObject', 'validateOstTransactionObject']
       },
       {
         parameter: 'current_user',
