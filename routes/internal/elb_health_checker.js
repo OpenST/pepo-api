@@ -63,12 +63,6 @@ router.get('/set-cookie', function(req, res, next) {
 
     // Set headers
     res.setHeader('Date', dt);
-    res.setHeader('Last-Modified', dt);
-    console.log('ETag Val: ', val);
-    res.setHeader('ETag', etagData);
-    res.setHeader('Vary', '*');
-    res.setHeader('Cache-Control', 'max-age=50, must-revalidate');
-    res.setHeader('PepoCache', etagData);
 
     // Set cookie
     res.cookie('bl_ck1', etagData, cookieOptions);
@@ -90,23 +84,23 @@ router.get('/get-cookie', function(req, res, next) {
     let dt = new Date();
     let currentMinute = dt.getMinutes();
     let headerDt;
+    let headerVal;
 
     if (req.headers['if-none-match']) {
       // value from ETag response header
-      let dtStr = decodeString(req.headers['if-none-match']);
-      headerDt = new Date(dtStr);
+      headerVal = decodeString(req.headers['if-none-match']);
     } else if (req.headers['if-modified-since']) {
       // value from Last-Modified response header
       headerDt = new Date(req.headers['if-modified-since']);
     }
 
-    let val = req.query['v'] ? dt.toString() + req.query['v'] : dt.toString();
+    let val = req.query['v'] ? req.query['v'] : '';
     let etagData = encodeString(val);
 
     let headerMinute = headerDt ? headerDt.getMinutes() : -1;
 
     console.log('currentMinute: ', currentMinute, ' --- headerMinute', headerMinute);
-    if (currentMinute === headerMinute) {
+    if (headerVal === req.query['v']) {
       res.status(304).send();
     } else {
       // Set headers
@@ -115,7 +109,7 @@ router.get('/get-cookie', function(req, res, next) {
       console.log('ETag Val: ', val);
       res.setHeader('ETag', etagData);
       res.setHeader('Vary', '*');
-      res.setHeader('Cache-Control', 'max-age=50, must-revalidate');
+      res.setHeader('Cache-Control', 'max-age=120, must-revalidate');
       res.setHeader('PepoCache', etagData);
 
       // Set response
