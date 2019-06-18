@@ -27,10 +27,12 @@ morgan.token('id', function getId(req) {
   return req.id;
 });
 
-morgan.token('endTime', function getendTime(req) {
-  const hrTime = process.hrtime();
+morgan.token('pid', function getId(req) {
+  return process.pid;
+});
 
-  return hrTime[0] * 1000 + hrTime[1] / 1000000;
+morgan.token('endTime', function getendTime(req) {
+  return Date.now();
 });
 
 morgan.token('endDateTime', function getEndDateTime(req) {
@@ -38,15 +40,16 @@ morgan.token('endDateTime', function getEndDateTime(req) {
 });
 
 const startRequestLogLine = function(req, res, next) {
-  const message =
-    "Started '" +
-    customUrlParser.parse(req.originalUrl).pathname +
-    "'  '" +
-    req.method +
-    "' at " +
-    basicHelper.logDateFormat();
+  const message = [
+    "Started '",
+    customUrlParser.parse(req.originalUrl).pathname,
+    "'  '",
+    req.method,
+    "' at ",
+    basicHelper.logDateFormat()
+  ];
 
-  logger.info(message);
+  logger.info(message.join(''));
 
   next();
 };
@@ -107,7 +110,7 @@ app.use(customMiddleware());
 // Load Morgan
 app.use(
   morgan(
-    '[:id][:endTime] Completed with ":status" in :response-time ms at :endDateTime -  ":res[content-length] bytes" - ":remote-addr" ":remote-user" - "HTTP/:http-version :method :url" - ":referrer" - ":user-agent"'
+    '[:pid][:id][:endTime][pepo-api] Completed with ":status" in :response-time ms at :endDateTime -  ":res[content-length] bytes" - ":remote-addr" ":remote-user" - "HTTP/:http-version :method :url" - ":referrer" - ":user-agent"'
   )
 );
 
@@ -126,28 +129,21 @@ app.use(express.static(path.join(__dirname, 'public')));
 // Health checker
 app.use('/health-checker', elbHealthCheckerRoute);
 
+// Start Request logging. Placed below static and health check to reduce logs
+app.use(appendRequestDebugInfo, startRequestLogLine);
+
 /**
  * NOTE: API routes where first sanitize and then assign params
  */
-app.use('/api', startRequestLogLine, appendRequestDebugInfo, sanitizer.sanitizeBodyAndQuery, assignParams, apiRoutes);
+app.use('/api', sanitizer.sanitizeBodyAndQuery, assignParams, apiRoutes);
 
 /**
  * NOTE: OST webhooks where first assign params, validate signature and then sanitize the params
  */
-app.use('/ost-webhook', startRequestLogLine, appendRequestDebugInfo, ostWebhookRoutes);
+app.use('/ost-webhook', ostWebhookRoutes);
 
 // Catch 404 and forward to error handler
 app.use(function(req, res, next) {
-  const message =
-    "Cannot Find '" +
-    customUrlParser.parse(req.originalUrl).pathname +
-    "'  '" +
-    req.method +
-    "' at " +
-    basicHelper.logDateFormat();
-
-  logger.step(message);
-
   return responseHelper
     .error({
       internal_error_identifier: 'a_1',
