@@ -121,7 +121,7 @@ class OstTransaction extends ServiceBase {
   _isGiphyPresent() {
     const oThis = this;
 
-    return oThis.giphyObject !== undefined && oThis.giphyObject.id !== undefined;
+    return !commonValidator.isVarNull(oThis.giphyObject);
   }
 
   /**
