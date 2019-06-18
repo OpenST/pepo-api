@@ -1,6 +1,7 @@
 const rootPrefix = '../../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   TokenUserByUserIdCache = require(rootPrefix + '/lib/cacheManagement/multi/TokenUserByUserIds'),
+  TokenUserByOstUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TokenUserByOstUserIds'),
   TokenUserModel = require(rootPrefix + '/app/models/mysql/TokenUser'),
   FeedModel = require(rootPrefix + '/app/models/mysql/Feed'),
   UserFeedModel = require(rootPrefix + '/app/models/mysql/UserFeed'),
@@ -45,7 +46,6 @@ class TransactionOstEventBase extends ServiceBase {
   /**
    * Validate Request
    *
-   *
    * @return {Promise<void>}
    *
    * @private
@@ -77,7 +77,6 @@ class TransactionOstEventBase extends ServiceBase {
   /**
    * Get external Entity Row
    *
-   *
    * @return {Promise<void>}
    *
    * @private
@@ -107,8 +106,37 @@ class TransactionOstEventBase extends ServiceBase {
   }
 
   /**
-   * Update ost transaction status in extra data of external Entity
+   * This function gives user id for the given ost user id(uuid).
    *
+   * @param ostUserIds
+   * @returns {Promise<void>}
+   */
+  async _getUserIdFromOstUserIds(ostUserIds) {
+    const oThis = this;
+
+    let tokenUserRsp = await new TokenUserByOstUserIdsCache({ ostUserIds: ostUserIds }).fetch();
+
+    if (tokenUserRsp.isFailure()) {
+      return Promise.reject(
+        responseHelper.error({
+          internal_error_identifier: 's_oe_t_b_feeo_1',
+          api_error_identifier: 'something_went_wrong'
+        })
+      );
+    }
+
+    let ostUserIdToUserIdHash = {};
+
+    for (let i = 0; i < ostUserIds.length; i++) {
+      let ostUserId = ostUserIds[i];
+      ostUserIdToUserIdHash[ostUserId] = tokenUserRsp.data[ostUserId].userId;
+    }
+
+    return ostUserIdToUserIdHash;
+  }
+
+  /**
+   * Update ost transaction status in extra data of external Entity
    *
    * @return {Promise<void>}
    *
@@ -164,7 +192,6 @@ class TransactionOstEventBase extends ServiceBase {
 
   /**
    * Update Feeds and User Feed
-   *
    *
    * @return {Promise<void>}
    *
