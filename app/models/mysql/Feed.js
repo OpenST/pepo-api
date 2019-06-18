@@ -75,7 +75,7 @@ class FeedModel extends ModelBase {
     const dbRows = await queryObject.fire();
 
     if (dbRows.length === 0) {
-      return {};
+      return { feedIds: feedIds, feedDetails: feedDetails };
     }
 
     for (let index = 0; index < dbRows.length; index++) {
