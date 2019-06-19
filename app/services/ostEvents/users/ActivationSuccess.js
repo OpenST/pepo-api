@@ -68,6 +68,8 @@ class UserActivationSuccess extends UserOstEventBase {
   async _validateAndSanitizeParams() {
     const oThis = this;
 
+    oThis.ostUserTokenHolderAddress = oThis.ostUserTokenHolderAddress.toLowerCase();
+
     await super._validateAndSanitizeParams();
 
     if (!CommonValidators.validateEthAddress(oThis.ostUserTokenHolderAddress)) {

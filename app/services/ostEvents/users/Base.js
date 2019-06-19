@@ -19,7 +19,7 @@ class UserOstEventBase extends ServiceBase {
     oThis.ostUser = params.data.user;
 
     oThis.ostUserid = oThis.ostUser.id;
-    oThis.ostUserTokenHolderAddress = oThis.ostUser.token_holder_address.toLowerCase();
+    oThis.ostUserTokenHolderAddress = oThis.ostUser.token_holder_address;
     oThis.ostUserStatus = oThis.ostUser.status.toUpperCase();
     oThis.paramErrors = [];
   }
