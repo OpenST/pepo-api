@@ -149,9 +149,7 @@ class FeedBase extends ServiceBase {
     const cacheResp = await new ExternalEntityByIdsCache({ ids: oThis.externalEntityIds }).fetch();
 
     if (cacheResp.isFailure()) {
-      return Promise.reject(
-        new Error(`Details for some or all of the external entity Ids: ${oThis.externalEntityIds} unavailable.`)
-      );
+      return Promise.reject(cacheResp);
     }
 
     const externalEntityIdToDetailsMap = cacheResp.data;
@@ -229,7 +227,7 @@ class FeedBase extends ServiceBase {
     const cacheResp = await new UserMultiCache({ ids: oThis.userIds }).fetch();
 
     if (cacheResp.isFailure()) {
-      return Promise.reject(new Error(`Details for some or all of the user Ids: ${oThis.userIds} unavailable.`));
+      return Promise.reject(cacheResp);
     }
 
     oThis.usersByIdMap = cacheResp.data;
@@ -255,9 +253,7 @@ class FeedBase extends ServiceBase {
     const cacheResp = await new TokenUserDetailByUserIdsCache({ userIds: oThis.userIds }).fetch();
 
     if (cacheResp.isFailure()) {
-      return Promise.reject(
-        new Error(`Token user details for some or all of the user Ids: ${oThis.userIds} unavailable.`)
-      );
+      return Promise.reject(cacheResp);
     }
 
     oThis.tokenUsersByUserIdMap = cacheResp.data;

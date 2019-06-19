@@ -6,7 +6,6 @@ const rootPrefix = '../../..',
   UserModel = require(rootPrefix + '/app/models/mysql/User'),
   TokenUserModel = require(rootPrefix + '/app/models/mysql/TokenUser'),
   pagination = require(rootPrefix + '/lib/globalConstant/pagination'),
-  logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   responseHelper = require(rootPrefix + '/lib/formatter/response');
 
 /**
@@ -98,6 +97,10 @@ class UserList extends ServiceBase {
       }),
       userPaginationCacheRes = await UserPaginationCacheObj.fetch();
 
+    if (userPaginationCacheRes.isFailure()) {
+      return Promise.reject(userPaginationCacheRes);
+    }
+
     oThis.userIds = userPaginationCacheRes.data;
 
     return Promise.resolve(responseHelper.successWithData({}));
@@ -130,6 +133,11 @@ class UserList extends ServiceBase {
     const oThis = this;
 
     let usersByIdHashRes = await new UserMultiCache({ ids: oThis.userIds }).fetch();
+
+    if (usersByIdHashRes.isFailure()) {
+      return Promise.reject(usersByIdHashRes);
+    }
+
     oThis.usersByIdHash = usersByIdHashRes.data;
 
     return Promise.resolve(responseHelper.successWithData({}));
@@ -145,6 +153,11 @@ class UserList extends ServiceBase {
     const oThis = this;
 
     let tokenUsersByIdHashRes = await new TokenUserByUserIdsMultiCache({ userIds: oThis.userIds }).fetch();
+
+    if (tokenUsersByIdHashRes.isFailure()) {
+      return Promise.reject(tokenUsersByIdHashRes);
+    }
+
     oThis.tokenUsersByUserIdHash = tokenUsersByIdHashRes.data;
 
     return Promise.resolve(responseHelper.successWithData({}));

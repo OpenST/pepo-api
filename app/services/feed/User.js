@@ -44,10 +44,12 @@ class UserFeed extends FeedServiceBase {
   async _validateAndSanitizeParams() {
     const oThis = this;
 
-    const cacheResp = await new UserCache({ ids: [oThis.profileUserId] }).fetch();
+    if (!oThis.isCurrentUser) {
+      const cacheResp = await new UserCache({ ids: [oThis.profileUserId] }).fetch();
 
-    if (cacheResp.isFailure()) {
-      return Promise.reject(new Error(`Profile user Id ${oThis.profileUserId} is invalid.`));
+      if (cacheResp.isFailure()) {
+        return Promise.reject(cacheResp);
+      }
     }
 
     return super._validateAndSanitizeParams();
@@ -89,7 +91,7 @@ class UserFeed extends FeedServiceBase {
     const cacheResp = await new FeedByIdsCache({ ids: oThis.feedIds }).fetch();
 
     if (cacheResp.isFailure()) {
-      return Promise.reject(new Error(`Details for some or all of the feed Ids: ${oThis.feedIds} unavailable.`));
+      return Promise.reject(cacheResp);
     }
 
     oThis.feedIdToFeedDetailsMap = cacheResp.data;

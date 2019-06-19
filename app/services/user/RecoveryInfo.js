@@ -49,6 +49,10 @@ class RecoveryInfo extends ServiceBase {
 
     let secureTokenUserRsp = await new SecureTokenUserByUserIdCache({ userId: oThis.userId }).fetch();
 
+    if (secureTokenUserRsp.isFailure()) {
+      return Promise.reject(secureTokenUserRsp);
+    }
+
     if (!secureTokenUserRsp.data.id) {
       logger.error('Error while fetching data from token user cache');
       return Promise.reject(secureTokenUserRsp);

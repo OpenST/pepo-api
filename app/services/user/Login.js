@@ -75,6 +75,10 @@ class Login extends ServiceBase {
 
     const userObjRes = await new UserByUserNameCache({ userName: oThis.userName }).fetch();
 
+    if (userObjRes.isFailure()) {
+      return Promise.reject(userObjRes);
+    }
+
     if (!userObjRes.data.id) {
       return Promise.reject(
         responseHelper.paramValidationError({
@@ -106,6 +110,10 @@ class Login extends ServiceBase {
 
     const secureUserRes = await new SecureUserCache({ id: oThis.userId }).fetch();
 
+    if (secureUserRes.isFailure()) {
+      return Promise.reject(secureUserRes);
+    }
+
     oThis.secureUser = secureUserRes.data;
 
     if (oThis.secureUser.status !== userConstants.activeStatus) {
@@ -136,6 +144,10 @@ class Login extends ServiceBase {
     logger.log('Fetching token user.');
 
     const tokenUserRes = await new TokenUserDetailByUserIdsCache({ userIds: [oThis.userId] }).fetch();
+
+    if (tokenUserRes.isFailure()) {
+      return Promise.reject(tokenUserRes);
+    }
 
     oThis.tokenUser = tokenUserRes.data[oThis.userId];
 

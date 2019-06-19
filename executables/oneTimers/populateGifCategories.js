@@ -110,6 +110,10 @@ class PopulateGifCategories {
       pageNumber: 1
     }).fetch();
 
+    if (resp.isFailure()) {
+      return Promise.reject(resp);
+    }
+
     if (resp.isSuccess() && resp.data.gifs.length > 0) {
       return resp.data.gifs[Math.floor(Math.random() * 10)];
     }
@@ -130,6 +134,10 @@ class PopulateGifCategories {
     let resp = await new GifsTrendingCache({
       pageNumber: 1
     }).fetch();
+
+    if (resp.isFailure()) {
+      return Promise.reject(resp);
+    }
 
     if (resp.isSuccess() && resp.data.gifs.length > 0) {
       return resp.data.gifs[Math.floor(Math.random() * 10)];

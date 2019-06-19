@@ -80,6 +80,10 @@ class SignUp extends ServiceBase {
 
     const userObj = await new UserByUserNameCache({ userName: oThis.userName }).fetch();
 
+    if (userObj.isFailure()) {
+      return Promise.reject(userObj);
+    }
+
     if (userObj.data.id) {
       return Promise.reject(
         responseHelper.paramValidationError({
@@ -224,6 +228,10 @@ class SignUp extends ServiceBase {
     promisesArray.push(new TokenUserDetailByUserIdsCache({ userIds: [oThis.userId] }).fetch());
 
     const promisesArrayResponse = await Promise.all(promisesArray);
+
+    if (promisesArrayResponse.isFailure()) {
+      return Promise.reject(promisesArrayResponse);
+    }
 
     const secureUserRes = promisesArrayResponse[0];
     const tokenUserRes = promisesArrayResponse[1];

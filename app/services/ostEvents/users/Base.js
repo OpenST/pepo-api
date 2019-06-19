@@ -56,6 +56,11 @@ class UserOstEventBase extends ServiceBase {
     logger.log('Fetch Token User');
 
     let tokenUserObjsRes = await new TokenUserByOstUserIdsCache({ ostUserIds: [oThis.ostUserid] }).fetch();
+
+    if (tokenUserObjsRes.isFailure()) {
+      return Promise.reject(tokenUserObjsRes);
+    }
+
     const tokenUserObjRes = tokenUserObjsRes.data[oThis.ostUserid];
 
     if (!tokenUserObjRes.userId) {
@@ -70,6 +75,11 @@ class UserOstEventBase extends ServiceBase {
     oThis.userId = tokenUserObjRes.userId;
 
     tokenUserObjsRes = await new TokenUserDetailByUserIdCache({ userIds: [oThis.userId] }).fetch();
+
+    if (tokenUserObjsRes.isFailure()) {
+      return Promise.reject(tokenUserObjsRes);
+    }
+
     oThis.tokenUserObj = tokenUserObjsRes.data[oThis.userId];
 
     if (!oThis.tokenUserObj.id) {

@@ -92,6 +92,10 @@ class OstTransaction extends ServiceBase {
       },
       cacheResponse = await new ExternalEntitiesByEntityIdAndEntityKindCache(params).fetch();
 
+    if (cacheResponse.isFailure()) {
+      return Promise.reject(cacheResponse);
+    }
+
     if (cacheResponse.data.id) {
       return true;
     }
@@ -103,6 +107,10 @@ class OstTransaction extends ServiceBase {
           entityKind: externalEntityConstants.giphyEntityKind
         },
         cacheResponseForGiphy = await new ExternalEntitiesByEntityIdAndEntityKindCache(paramsForGiphy).fetch();
+
+      if (cacheResponseForGiphy.isFailure()) {
+        return Promise.reject(cacheResponseForGiphy);
+      }
 
       if (cacheResponseForGiphy.data.id) {
         oThis.giphyExternalEntityId = cacheResponseForGiphy.data.id;
@@ -147,6 +155,10 @@ class OstTransaction extends ServiceBase {
     let userIds = [oThis.userId];
 
     let tokenUserDetailsResponse = await new TokenUserByUserId({ userIds: userIds }).fetch();
+
+    if (tokenUserDetailsResponse.isFailure()) {
+      return Promise.reject(tokenUserDetailsResponse);
+    }
 
     let userIdToOstUserIdHash = {};
     for (let i = 0; i < userIds.length; i++) {
@@ -238,6 +250,10 @@ class OstTransaction extends ServiceBase {
 
     let TokenUserData = await new TokenUserByOstUserIdsCache({ ostUserIds: toOstUserIdsArray }).fetch();
 
+    if (TokenUserData.isFailure()) {
+      return Promise.reject(TokenUserData);
+    }
+
     //A separate for loop is written in order to ensure user ids and amount's index correspond
     //to each other in toUserIdsArray and amountsArray.
     for (let i = 0; i < oThis.transfersData.length; i++) {
@@ -253,7 +269,8 @@ class OstTransaction extends ServiceBase {
         fromUserId: oThis.userId,
         toUserIds: oThis.toUserIdsArray,
         amounts: oThis.amountsArray,
-        ostTransactionStatus: oThis.transactionStatus
+        ostTransactionStatus: oThis.transactionStatus,
+        minedTimestamp: null
       },
       entityKindInt = externalEntityConstants.invertedEntityKinds[externalEntityConstants.ostTransactionEntityKind],
       entityId = oThis.transactionUuid;

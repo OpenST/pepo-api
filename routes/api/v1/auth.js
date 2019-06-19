@@ -79,7 +79,7 @@ router.post('/logout', sanitizer.sanitizeDynamicUrlParams, function(req, res) {
 
   cookieHelper.deleteLoginCookie(res);
 
-  Promise.resolve(responseObject.renderResponse(res, errorConfig));
+  Promise.resolve(responseHelper.renderApiResponse(responseObject, res, errorConfig));
 });
 
 module.exports = router;

@@ -198,12 +198,7 @@ class UserActivationSuccess extends UserOstEventBase {
     let tokenData = await new SecureTokenCache().fetch();
     if (tokenData.isFailure()) {
       logger.error('Error while fetching token data');
-      return Promise.reject(
-        responseHelper.error({
-          internal_error_identifier: 's_oe_u_as_et_1',
-          api_error_identifier: 'something_went_wrong'
-        })
-      );
+      return Promise.reject(tokenData);
     }
 
     oThis.tokenData = tokenData.data;

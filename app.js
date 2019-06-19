@@ -144,26 +144,30 @@ app.use('/ost-webhook', ostWebhookRoutes);
 
 // Catch 404 and forward to error handler
 app.use(function(req, res, next) {
-  return responseHelper
-    .error({
+  return responseHelper.renderApiResponse(
+    responseHelper.error({
       internal_error_identifier: 'a_1',
       api_error_identifier: 'resource_not_found',
       debug_options: {}
-    })
-    .renderResponse(res, errorConfig);
+    }),
+    res,
+    errorConfig
+  );
 });
 
 // Error handler
 app.use(function(err, req, res, next) {
   logger.error('a_2', 'Something went wrong', err);
 
-  return responseHelper
-    .error({
+  return responseHelper.renderApiResponse(
+    responseHelper.error({
       internal_error_identifier: 'a_2',
       api_error_identifier: 'something_went_wrong',
       debug_options: {}
-    })
-    .renderResponse(res, errorConfig);
+    }),
+    res,
+    errorConfig
+  );
 });
 
 module.exports = app;

@@ -16,15 +16,17 @@ router.get('/', function(req, res, next) {
   const performer = function() {
     // 200 OK response needed for ELB Health checker
     if (req.headers['user-agent'] === 'ELB-HealthChecker/2.0') {
-      return responseHelper.successWithData({}).renderResponse(res, errorConfig);
+      return responseHelper.renderApiResponse(responseHelper.successWithData({}), res, errorConfig);
     } else {
-      return responseHelper
-        .error({
+      return responseHelper.renderApiResponse(
+        responseHelper.error({
           internal_error_identifier: 'r_i_e_h_c_1',
           api_error_identifier: 'resource_not_found',
           debug_options: {}
-        })
-        .renderResponse(res, errorConfig);
+        }),
+        res,
+        errorConfig
+      );
     }
   };
 

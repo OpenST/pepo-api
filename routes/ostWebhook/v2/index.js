@@ -5,6 +5,7 @@ const rootPrefix = '../../..',
   OstEventCreateService = require(rootPrefix + '/app/services/ostEvents/Create'),
   apiVersions = require(rootPrefix + '/lib/globalConstant/apiVersions'),
   basicHelper = require(rootPrefix + '/helpers/basic'),
+  responseHelper = require(rootPrefix + '/lib/formatter/response'),
   errorConfig = basicHelper.fetchErrorConfig(apiVersions.v1),
   sanitizer = require(rootPrefix + '/helpers/sanitizer');
 
@@ -12,7 +13,7 @@ const rootPrefix = '../../..',
 router.post('/', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   const performer = async function() {
     let response = await new OstEventCreateService(req.decodedParams).perform();
-    return response.renderResponse(res, errorConfig);
+    return responseHelper.renderApiResponse(response, res, errorConfig);
   };
 
   performer();

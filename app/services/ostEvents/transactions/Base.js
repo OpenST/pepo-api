@@ -28,6 +28,7 @@ class TransactionOstEventBase extends ServiceBase {
 
     oThis.ostTransactionId = oThis.ostTransaction.id;
     oThis.ostTransactionStatus = oThis.ostTransaction.status;
+    oThis.ostTransactionMinedTimestamp = oThis.ostTransaction.block_timestamp || null;
 
     oThis.externalEntityObj = null;
     oThis.privacyType = null;
@@ -148,6 +149,7 @@ class TransactionOstEventBase extends ServiceBase {
 
     let extraData = oThis.externalEntityObj.extraData;
     extraData.ostTransactionStatus = oThis._validTransactionStatus();
+    extraData.minedTimestamp = oThis.ostTransactionMinedTimestamp;
 
     await new ExternalEntityModel()
       .update({
@@ -261,10 +263,14 @@ class TransactionOstEventBase extends ServiceBase {
       userIds: [toUserId]
     }).fetch();
 
+    if (tokenUserObjRes.isFailure()) {
+      return Promise.reject(tokenUserObjRes);
+    }
+
     if (!tokenUserObjRes.data[toUserId].id) {
       return Promise.reject(
         responseHelper.error({
-          internal_error_identifier: 's_oe_t_b_mtuafp_1',
+          internal_error_identifier: 'a_s_oe_t_b_2',
           api_error_identifier: 'resource_not_found'
         })
       );

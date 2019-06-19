@@ -12,6 +12,7 @@ const rootPrefix = '../../..',
   usersRoutes = require(rootPrefix + '/routes/api/v1/users'),
   tokensRoutes = require(rootPrefix + '/routes/api/v1/tokens'),
   gifsRoutes = require(rootPrefix + '/routes/api/v1/gifs'),
+  responseHelper = require(rootPrefix + '/lib/formatter/response'),
   feedsRoutes = require(rootPrefix + '/routes/api/v1/feeds'),
   cookieHelper = require(rootPrefix + '/lib/cookieHelper'),
   ostTransactionRoutes = require(rootPrefix + '/routes/api/v1/ostTransactions');
@@ -29,7 +30,7 @@ const validateCookie = async function(req, res, next) {
 
   if (authResponse.isFailure()) {
     cookieHelper.deleteLoginCookie(res);
-    return authResponse.renderResponse(res, errorConfig);
+    return responseHelper.renderApiResponse(authResponse, res, errorConfig);
   }
 
   cookieHelper.setLoginCookie(res, authResponse.data.user_login_cookie_value);

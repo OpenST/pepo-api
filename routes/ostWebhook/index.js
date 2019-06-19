@@ -5,6 +5,7 @@ const rootPrefix = '../..',
   v2Routes = require(rootPrefix + '/routes/ostWebhook/v2/index'),
   apiVersions = require(rootPrefix + '/lib/globalConstant/apiVersions'),
   basicHelper = require(rootPrefix + '/helpers/basic'),
+  responseHelper = require(rootPrefix + '/lib/formatter/response'),
   errorConfig = basicHelper.fetchErrorConfig(apiVersions.v1),
   sanitizer = require(rootPrefix + '/helpers/sanitizer');
 
@@ -20,7 +21,7 @@ const validateV2Signature = async function(req, res, next) {
     });
 
   if (authResponse.isFailure()) {
-    return authResponse.renderResponse(res, errorConfig);
+    return responseHelper.renderApiResponse(authResponse, res, errorConfig);
   }
 
   next();
