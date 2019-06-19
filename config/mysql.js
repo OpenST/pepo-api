@@ -4,7 +4,7 @@ const rootPrefix = '..',
 const mysqlConfig = {
   commonNodeConfig: {
     connectionLimit: coreConstants.MYSQL_CONNECTION_POOL_SIZE,
-    charset: 'UTF8_UNICODE_CI',
+    charset: 'utf8mb4',
     bigNumberStrings: true,
     supportBigNumbers: true,
     dateStrings: true,
