@@ -16,23 +16,23 @@ const rootPrefix = '../..',
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger');
 
 const KNOWN_CATEGORIES = [
-  'love',
-  'good night',
-  'good morning',
-  'kisses',
-  'funny',
-  'hey',
-  'happy birthday',
-  'flirt',
-  'lol',
-  'i love you',
-  'hearts',
-  'good',
-  'hi',
-  'hug',
-  'sad',
+  'thank you',
+  'high five',
+  'yes',
+  'amazing',
+  'omg',
+  'swooning',
+  'excited',
   'happy',
-  'miss you'
+  'applause',
+  'inspired',
+  'mind blown',
+  'lol',
+  'crying',
+  'hmm',
+  'facepalm',
+  'speechless',
+  'love'
 ];
 
 program.on('--help', function() {
@@ -107,7 +107,7 @@ class PopulateGifCategories {
     // Fetch set of random Gifs
     let resp = await new GifsCacheByKeyword({
       query: categoryName,
-      pageNumber: 1
+      pageNumber: Math.floor(Math.random() * 10)
     }).fetch();
 
     if (resp.isFailure()) {
@@ -115,10 +115,10 @@ class PopulateGifCategories {
     }
 
     if (resp.isSuccess() && resp.data.gifs.length > 0) {
-      return resp.data.gifs[Math.floor(Math.random() * 10)];
+      return resp.data.gifs[Math.floor(Math.random() * 18)];
     }
 
-    return {};
+    return null;
   }
 
   /**
