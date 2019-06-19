@@ -229,10 +229,6 @@ class SignUp extends ServiceBase {
 
     const promisesArrayResponse = await Promise.all(promisesArray);
 
-    if (promisesArrayResponse.isFailure()) {
-      return Promise.reject(promisesArrayResponse);
-    }
-
     const secureUserRes = promisesArrayResponse[0];
     const tokenUserRes = promisesArrayResponse[1];
 
