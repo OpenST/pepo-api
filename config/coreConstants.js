@@ -1,11 +1,9 @@
+/**
+ * Class for core constants.
+ *
+ * @class CoreConstants
+ */
 class CoreConstants {
-  /**
-   * Constructor for core constants
-   *
-   * @constructor
-   */
-  constructor() {}
-
   get environment() {
     return process.env.PA_ENVIRONMENT;
   }

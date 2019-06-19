@@ -28,7 +28,7 @@ const mysqlConfig = {
   databases: {}
 };
 
-// pa database
-mysqlConfig['databases']['pepo_api_' + coreConstants.environment] = ['cluster1'];
+// Pepo API database.
+mysqlConfig.databases['pepo_api_' + coreConstants.environment] = ['cluster1'];
 
 module.exports = mysqlConfig;
