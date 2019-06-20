@@ -3,7 +3,7 @@ const express = require('express'),
   cookieParser = require('cookie-parser');
 
 const rootPrefix = '../../..',
-  WrapperFormatter = require(rootPrefix + '/lib/formatter/Wrapper'),
+  FormatterComposer = require(rootPrefix + '/lib/formatter/Composer'),
   routeHelper = require(rootPrefix + '/routes/helper'),
   apiName = require(rootPrefix + '/lib/globalConstant/apiName'),
   sanitizer = require(rootPrefix + '/helpers/sanitizer'),
@@ -24,7 +24,7 @@ router.post('/sign-up', sanitizer.sanitizeDynamicUrlParams, function(req, res, n
   const onServiceSuccess = async function(serviceResponse) {
     cookieHelper.setLoginCookie(res, serviceResponse.data.userLoginCookieValue);
 
-    const wrapperFormatterRsp = await new WrapperFormatter({
+    const wrapperFormatterRsp = await new FormatterComposer({
       resultType: responseEntityKey.loggedInUser,
       entityKindToResponseKeyMap: {
         [entityType.user]: responseEntityKey.loggedInUser
@@ -50,7 +50,7 @@ router.post('/login', sanitizer.sanitizeDynamicUrlParams, function(req, res, nex
 
   const onServiceSuccess = async function(serviceResponse) {
     cookieHelper.setLoginCookie(res, serviceResponse.data.userLoginCookieValue);
-    const wrapperFormatterRsp = await new WrapperFormatter({
+    const wrapperFormatterRsp = await new FormatterComposer({
       resultType: responseEntityKey.loggedInUser,
       entityKindToResponseKeyMap: {
         [entityType.user]: responseEntityKey.loggedInUser

@@ -5,7 +5,7 @@ const rootPrefix = '../../..',
   routeHelper = require(rootPrefix + '/routes/helper'),
   apiName = require(rootPrefix + '/lib/globalConstant/apiName'),
   sanitizer = require(rootPrefix + '/helpers/sanitizer'),
-  WrapperFormatter = require(rootPrefix + '/lib/formatter/Wrapper'),
+  FormatterComposer = require(rootPrefix + '/lib/formatter/Composer'),
   entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
   responseEntityKey = require(rootPrefix + '/lib/globalConstant/responseEntityKey');
 
@@ -14,7 +14,7 @@ router.get('/search', sanitizer.sanitizeDynamicUrlParams, function(req, res, nex
   req.decodedParams.apiName = apiName.gifsSearch;
 
   const dataFormatterFunc = async function(serviceResponse) {
-    const wrapperFormatterRsp = await new WrapperFormatter({
+    const wrapperFormatterRsp = await new FormatterComposer({
       resultType: entityType.gifs,
       entityKindToResponseKeyMap: {
         [entityType.gifs]: responseEntityKey.gifs,
@@ -33,7 +33,7 @@ router.get('/trending', sanitizer.sanitizeDynamicUrlParams, function(req, res, n
   req.decodedParams.apiName = apiName.gifsTrending;
 
   const dataFormatterFunc = async function(serviceResponse) {
-    const wrapperFormatterRsp = await new WrapperFormatter({
+    const wrapperFormatterRsp = await new FormatterComposer({
       resultType: entityType.gifs,
       entityKindToResponseKeyMap: {
         [entityType.gifs]: responseEntityKey.gifs,
@@ -52,7 +52,7 @@ router.get('/categories', sanitizer.sanitizeDynamicUrlParams, function(req, res,
   req.decodedParams.apiName = apiName.gifsCategories;
 
   const dataFormatterFunc = async function(serviceResponse) {
-    const wrapperFormatterRsp = await new WrapperFormatter({
+    const wrapperFormatterRsp = await new FormatterComposer({
       resultType: responseEntityKey.gifCategories,
       entityKindToResponseKeyMap: {
         [entityType.gifMap]: responseEntityKey.gifs,
