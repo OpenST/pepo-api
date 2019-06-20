@@ -6,6 +6,7 @@ export PA_DOMAIN='www.pepo.com'
 export PA_COOKIE_DOMAIN='127.0.0.1'
 
 # Devops error logs framework
+export DEVOPS_APP_NAME='pepo-api';
 export DEVOPS_ENV_ID='dev1-sandbox';
 export DEVOPS_IP_ADDRESS='127.0.0.1';
 
