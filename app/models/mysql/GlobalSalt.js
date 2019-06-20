@@ -3,7 +3,6 @@ const rootPrefix = '../../..',
   coreConstants = require(rootPrefix + '/config/coreConstants'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   KmsWrapper = require(rootPrefix + '/lib/authentication/KmsWrapper'),
-  kmsPurposeConstants = require(rootPrefix + '/lib/globalConstant/kms'),
   globalSaltConstants = require(rootPrefix + '/lib/globalConstant/globalSalt');
 
 // Declare variables.
@@ -12,9 +11,9 @@ const dbName = 'pepo_api_' + coreConstants.environment;
 /**
  * Class for global salt model.
  *
- * @class GlobalSalt
+ * @class GlobalSaltModel
  */
-class GlobalSalt extends ModelBase {
+class GlobalSaltModel extends ModelBase {
   /**
    * Constructor for global salt model.
    *
@@ -80,4 +79,4 @@ class GlobalSalt extends ModelBase {
   }
 }
 
-module.exports = GlobalSalt;
+module.exports = GlobalSaltModel;
