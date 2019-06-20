@@ -36,12 +36,12 @@ router.get('/', function(req, res, next) {
 /* Test routes */
 
 const encodeString = function(str) {
-  let buff = new Buffer(str.toString());
+  let buff = new Buffer.from(str.toString());
   return buff.toString('base64');
 };
 
 const decodeString = function(str) {
-  let buff = new Buffer(str, 'base64');
+  let buff = new Buffer.from(str, 'base64');
   return buff.toString('ascii');
 };
 
