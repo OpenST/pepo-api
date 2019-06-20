@@ -44,7 +44,7 @@ router.use('/auth', authRoutes);
 router.use('/users', validateCookie, usersRoutes);
 router.use('/tokens', validateCookie, tokensRoutes);
 router.use('/ost-transactions', validateCookie, ostTransactionRoutes);
-router.use('/gifs', gifsRoutes);
+router.use('/gifs', validateCookie, gifsRoutes);
 router.use('/feeds', validateCookie, feedsRoutes);
 
 module.exports = router;
