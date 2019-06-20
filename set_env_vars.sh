@@ -4,7 +4,6 @@ export PA_PORT=3000
 export PA_DEBUG_ENABLED='1';
 export PA_DOMAIN='www.pepo.com'
 export PA_COOKIE_DOMAIN='127.0.0.1'
-export PA_APP_NAME='pepo-api';
 
 # Devops error logs framework
 export DEVOPS_ENV_ID='dev1-sandbox';
