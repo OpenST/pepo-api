@@ -35,6 +35,7 @@ class FeedModel extends ModelBase {
       privacyType: feedsConstants.privacyTypes[dbRow.privacy_type],
       status: feedsConstants.statuses[dbRow.status],
       publishedTs: dbRow.published_ts,
+      displayTs: dbRow.display_ts,
       createdAt: dbRow.created_at,
       updatedAt: dbRow.updated_at
     };

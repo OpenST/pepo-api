@@ -331,7 +331,8 @@ class OstTransaction extends ServiceBase {
       extra_data: JSON.stringify(extraData),
       privacy_type: feedConstants.invertedPrivacyTypes[oThis.privacyType],
       status: feedConstants.invertedStatuses[oThis.feedStatus],
-      published_ts: oThis.publishedAtTs
+      published_ts: oThis.publishedAtTs,
+      display_ts: null
     };
 
     let insertResponse = await new FeedModel().insert(insertData).fire();
