@@ -30,6 +30,13 @@ const mysqlConfig = {
         user: coreConstants.INFRA_MYSQL_USER,
         password: coreConstants.INFRA_MYSQL_PASSWORD
       }
+    },
+    cluster3: {
+      master: {
+        host: coreConstants.CONFIG_ENV_MYSQL_HOST,
+        user: coreConstants.CONFIG_ENV_MYSQL_USER,
+        password: coreConstants.CONFIG_ENV_MYSQL_PASSWORD
+      }
     }
   },
   databases: {}
@@ -38,7 +45,10 @@ const mysqlConfig = {
 // Pepo API database.
 mysqlConfig.databases['pepo_api_' + coreConstants.environment] = ['cluster1'];
 
-// infra database
-mysqlConfig['databases'][coreConstants.INFRA_MYSQL_DB] = ['cluster2'];
+// Infra database.
+mysqlConfig.databases[coreConstants.INFRA_MYSQL_DB] = ['cluster2'];
+
+// Config database.
+mysqlConfig.databases['pepo_api_config_' + coreConstants.environment] = ['cluster3'];
 
 module.exports = mysqlConfig;

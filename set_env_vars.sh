@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 # Core ENV Details
 export PA_ENVIRONMENT='development'
 export PA_PORT=3000
@@ -21,6 +22,11 @@ export PA_MYSQL_CONNECTION_POOL_SIZE='3'
 export PA_MYSQL_HOST='127.0.0.1'
 export PA_MYSQL_USER='root'
 export PA_MYSQL_PASSWORD='root'
+
+# mysql config details
+export PA_CONFIG_ENV_MYSQL_HOST='127.0.0.1'
+export PA_CONFIG_ENV_MYSQL_USER='root'
+export PA_CONFIG_ENV_MYSQL_PASSWORD='root'
 
 # mysql - devops error logs infra details
 export PA_INFRA_MYSQL_HOST='127.0.0.1'
