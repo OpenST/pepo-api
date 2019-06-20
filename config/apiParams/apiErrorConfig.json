@@ -83,5 +83,10 @@
     "http_code": "409",
     "code": "ALREADY_EXISTS",
     "message": "Addresses already exists."
+  },
+  "invalid_login_details": {
+    "http_code": "500",
+    "code": "INTERNAL_SERVER_ERROR",
+    "message": "Invalid login details."
   }
 }

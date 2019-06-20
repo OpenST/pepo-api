@@ -185,10 +185,9 @@ class Login extends ServiceBase {
       await UserModel.flushCache({ id: oThis.secureUser.id });
 
       return Promise.reject(
-        responseHelper.paramValidationError({
+        responseHelper.error({
           internal_error_identifier: 's_um_l_vp_1',
-          api_error_identifier: 'invalid_api_params',
-          params_error_identifiers: ['user_not_found'],
+          api_error_identifier: 'invalid_login_details',
           debug_options: {}
         })
       );
