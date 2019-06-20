@@ -17,7 +17,7 @@ class CoreConstants {
   }
 
   get APP_NAME() {
-    return 'pepo-api';
+    return process.env.DEVOPS_APP_NAME;
   }
 
   get PA_DOMAIN() {
