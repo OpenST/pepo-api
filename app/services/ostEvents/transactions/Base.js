@@ -222,6 +222,7 @@ class TransactionOstEventBase extends ServiceBase {
     await new FeedModel()
       .update({
         published_ts: published_ts,
+        display_ts: oThis.ostTransactionMinedTimestamp,
         status: feedConstants.invertedStatuses[oThis._feedStatus()]
       })
       .where(['id = ?', oThis.feedObj.id])

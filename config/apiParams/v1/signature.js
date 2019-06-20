@@ -41,7 +41,7 @@ const v1Signature = {
     mandatory: [
       {
         parameter: 'current_user',
-        validatorMethods: ['validateObject']
+        validatorMethods: ['validateNonEmptyObject']
       }
     ],
     optional: []
@@ -50,7 +50,7 @@ const v1Signature = {
     mandatory: [
       {
         parameter: 'current_user',
-        validatorMethods: ['validateObject']
+        validatorMethods: ['validateNonEmptyObject']
       },
       {
         parameter: 'device_address',
@@ -71,7 +71,7 @@ const v1Signature = {
     mandatory: [
       {
         parameter: 'current_user',
-        validatorMethods: ['validateObject']
+        validatorMethods: ['validateNonEmptyObject']
       }
     ],
     optional: [
@@ -85,7 +85,7 @@ const v1Signature = {
     mandatory: [
       {
         parameter: 'current_user',
-        validatorMethods: ['validateObject']
+        validatorMethods: ['validateNonEmptyObject']
       }
     ],
     optional: []
@@ -117,7 +117,7 @@ const v1Signature = {
     mandatory: [
       {
         parameter: 'current_user',
-        validatorMethods: ['validateObject']
+        validatorMethods: ['validateNonEmptyObject']
       },
       {
         parameter: 'user_id',
@@ -139,11 +139,11 @@ const v1Signature = {
     mandatory: [
       {
         parameter: 'ost_transaction',
-        validatorMethods: ['validateObject', 'validateOstTransactionObject']
+        validatorMethods: ['validateNonEmptyObject', 'validateOstTransactionObject']
       },
       {
         parameter: 'current_user',
-        validatorMethods: ['validateObject']
+        validatorMethods: ['validateNonEmptyObject']
       },
       {
         parameter: 'privacy_type',
@@ -153,7 +153,7 @@ const v1Signature = {
     optional: [
       {
         parameter: 'meta',
-        validatorMethods: ['validateObject', 'validateOstTransactionMeta']
+        validatorMethods: ['validateNonEmptyObject', 'validateOstTransactionMeta']
       }
     ]
   },
@@ -161,7 +161,7 @@ const v1Signature = {
     mandatory: [
       {
         parameter: 'current_user',
-        validatorMethods: ['validateObject']
+        validatorMethods: ['validateNonEmptyObject']
       }
     ],
     optional: [

@@ -129,7 +129,7 @@ class OstTransaction extends ServiceBase {
   _isGiphyPresent() {
     const oThis = this;
 
-    return !commonValidator.isVarNull(oThis.giphyObject);
+    return !commonValidator.isVarNullOrUndefined(oThis.giphyObject);
   }
 
   /**
@@ -141,7 +141,7 @@ class OstTransaction extends ServiceBase {
   _isTextPresent() {
     const oThis = this;
 
-    return !commonValidator.isVarNull(oThis.text) && oThis.text !== '';
+    return !commonValidator.isVarNullOrUndefined(oThis.text) && oThis.text !== '';
   }
 
   /**
@@ -331,7 +331,8 @@ class OstTransaction extends ServiceBase {
       extra_data: JSON.stringify(extraData),
       privacy_type: feedConstants.invertedPrivacyTypes[oThis.privacyType],
       status: feedConstants.invertedStatuses[oThis.feedStatus],
-      published_ts: oThis.publishedAtTs
+      published_ts: oThis.publishedAtTs,
+      display_ts: null
     };
 
     let insertResponse = await new FeedModel().insert(insertData).fire();

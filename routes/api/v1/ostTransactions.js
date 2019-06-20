@@ -4,10 +4,7 @@ const express = require('express'),
 const rootPrefix = '../../..',
   routeHelper = require(rootPrefix + '/routes/helper'),
   apiName = require(rootPrefix + '/lib/globalConstant/apiName'),
-  sanitizer = require(rootPrefix + '/helpers/sanitizer'),
-  WrapperFormatter = require(rootPrefix + '/lib/formatter/Wrapper'),
-  entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
-  responseEntityKey = require(rootPrefix + '/lib/globalConstant/responseEntityKey');
+  sanitizer = require(rootPrefix + '/helpers/sanitizer');
 
 /* Expression*/
 router.post('/', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {

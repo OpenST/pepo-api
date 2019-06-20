@@ -6,22 +6,25 @@ const express = require('express'),
   morgan = require('morgan'),
   bodyParser = require('body-parser'),
   helmet = require('helmet'),
-  //cookieParser = require('cookie-parser'),
   customUrlParser = require('url');
+
+const requestSharedNameSpace = createNamespace('pepoApiNameSpace');
 
 const responseHelper = require(rootPrefix + '/lib/formatter/response'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   customMiddleware = require(rootPrefix + '/helpers/customMiddleware'),
   apiVersions = require(rootPrefix + '/lib/globalConstant/apiVersions'),
   basicHelper = require(rootPrefix + '/helpers/basic'),
+  coreConstants = require(rootPrefix + '/config/coreConstants'),
+  createErrorLogsEntry = require(rootPrefix + '/lib/errorLogs/createEntry'),
+  errorLogsConstants = require(rootPrefix + '/lib/globalConstant/errorLogs'),
   sanitizer = require(rootPrefix + '/helpers/sanitizer');
 
 const apiRoutes = require(rootPrefix + '/routes/api/index'),
   ostWebhookRoutes = require(rootPrefix + '/routes/ostWebhook/index'),
   elbHealthCheckerRoute = require(rootPrefix + '/routes/internal/elb_health_checker');
 
-const requestSharedNameSpace = createNamespace('pepoApiNameSpace'),
-  errorConfig = basicHelper.fetchErrorConfig(apiVersions.v1);
+const errorConfig = basicHelper.fetchErrorConfig(apiVersions.v1);
 
 morgan.token('id', function getId(req) {
   return req.id;
@@ -110,7 +113,9 @@ app.use(customMiddleware());
 // Load Morgan
 app.use(
   morgan(
-    '[:pid][:id][:endTime][pepo-api] Completed with ":status" in :response-time ms at :endDateTime -  ":res[content-length] bytes" - ":remote-addr" ":remote-user" - "HTTP/:http-version :method :url" - ":referrer" - ":user-agent"'
+    '[:pid][:id][:endTime][' +
+      coreConstants.APP_NAME +
+      '] Completed with ":status" in :response-time ms at :endDateTime -  ":res[content-length] bytes" - ":remote-addr" ":remote-user" - "HTTP/:http-version :method :url" - ":referrer" - ":user-agent"'
   )
 );
 
@@ -156,18 +161,18 @@ app.use(function(req, res, next) {
 });
 
 // Error handler
-app.use(function(err, req, res, next) {
+app.use(async function(err, req, res, next) {
   logger.error('a_2', 'Something went wrong', err);
 
-  return responseHelper.renderApiResponse(
-    responseHelper.error({
-      internal_error_identifier: 'a_2',
-      api_error_identifier: 'something_went_wrong',
-      debug_options: {}
-    }),
-    res,
-    errorConfig
-  );
+  let errorObject = responseHelper.error({
+    internal_error_identifier: 'a_2',
+    api_error_identifier: 'something_went_wrong',
+    debug_options: {}
+  });
+
+  await createErrorLogsEntry.perform(errorObject, errorLogsConstants.mediumSeverity);
+
+  return responseHelper.renderApiResponse(errorObject, res, errorConfig);
 });
 
 module.exports = app;

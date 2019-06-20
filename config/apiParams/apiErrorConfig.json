@@ -65,9 +65,9 @@
     "message": "The request was good, but nevertheless could not be processed."
   },
   "entity_formatting_failed": {
-    "http_code": "422",
-    "code": "UNPROCESSABLE_ENTITY",
-    "message": "The request was good, but nevertheless could not be processed."
+    "http_code": "500",
+    "code": "INTERNAL_SERVER_ERROR",
+    "message": "Something went wrong."
   },
   "cache_key_invalid": {
     "http_code": "422",

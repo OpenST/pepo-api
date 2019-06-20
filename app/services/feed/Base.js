@@ -40,6 +40,7 @@ class FeedBase extends ServiceBase {
     oThis.externalEntityIds = [];
     oThis.ostTransactionMap = {};
     oThis.externalEntityGifMap = {};
+    oThis.tokenUsersByUserIdMap = {};
     oThis.responseMetaData = {
       [paginationConstants.nextPagePayloadKey]: {}
     };
@@ -113,8 +114,9 @@ class FeedBase extends ServiceBase {
         feedExtraData = feedDetails.extraData;
 
       oThis.feedIdToFeedDetailsMap[feedId].payload = {
-        text: feedExtraData.text,
-        ostTransactionId: feedDetails.primaryExternalEntityId
+        text: feedExtraData.text || '',
+        ostTransactionId: feedDetails.primaryExternalEntityId,
+        gifDetailId: ''
       };
 
       oThis.giphyKindExternalEntityIdToFeedIdMap[feedExtraData.giphyExternalEntityId] = feedId;
