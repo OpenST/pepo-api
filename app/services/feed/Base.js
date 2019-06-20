@@ -40,6 +40,7 @@ class FeedBase extends ServiceBase {
     oThis.externalEntityIds = [];
     oThis.ostTransactionMap = {};
     oThis.externalEntityGifMap = {};
+    oThis.tokenUsersByUserIdMap = {};
     oThis.responseMetaData = {
       [paginationConstants.nextPagePayloadKey]: {}
     };
