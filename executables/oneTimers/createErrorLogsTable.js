@@ -85,8 +85,8 @@ class CreateErrorLogsTable {
                                 \`data\` text,
                                 \`status\` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
                                 \`retry_count\` int(11) DEFAULT '0',
-                                \`created_at\` int(11) NOT NULL,
-                                \`updated_at\` int(11) NOT NULL,
+                                \`created_at\` DATETIME NOT NULL,
+                                \`updated_at\` DATETIME NOT NULL,
                                 PRIMARY KEY (\`id\`),
                                 KEY \`index_1\` (\`severity\`,\`status\`)
                               ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;`;
