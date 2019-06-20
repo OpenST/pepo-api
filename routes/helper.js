@@ -8,6 +8,8 @@ const rootPrefix = '..',
   ApiParamsValidator = require(rootPrefix + '/lib/validators/ApiParams'),
   basicHelper = require(rootPrefix + '/helpers/basic'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
+  createErrorLogsEntry = require(rootPrefix + '/lib/errorLogs/createEntry'),
+  errorLogsConstants = require(rootPrefix + '/lib/globalConstant/errorLogs'),
   responseHelper = require(rootPrefix + '/lib/formatter/response');
 /**
  * Class for routes helper.
@@ -44,27 +46,23 @@ class RoutesHelper {
 
     return oThis
       .asyncPerform(req, res, next, serviceGetter, afterValidationCallback, onServiceSuccess, onServiceFailure)
-      .catch(function(error) {
+      .catch(async function(error) {
+        let errorObject = error;
+
         if (responseHelper.isCustomResult(error)) {
           responseHelper.renderApiResponse(error, res, errorConfig);
         } else {
-          const errorObject = responseHelper.error({
+          errorObject = responseHelper.error({
             internal_error_identifier: `unhandled_catch_response:r_h:${errorCode}`,
             api_error_identifier: 'unhandled_catch_response',
             debug_options: {}
           });
           logger.error(errorCode, 'Something went wrong', error);
 
-          responseHelper.renderApiResponse(
-            responseHelper.error({
-              internal_error_identifier: errorCode,
-              api_error_identifier: 'unhandled_catch_response',
-              debug_options: {}
-            }),
-            res,
-            errorConfig
-          );
+          responseHelper.renderApiResponse(errorObject, res, errorConfig);
         }
+
+        await createErrorLogsEntry.perform(errorObject, errorLogsConstants.mediumSeverity);
       });
   }
 

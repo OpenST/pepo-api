@@ -16,6 +16,10 @@ class CoreConstants {
     return process.env.PA_DEBUG_ENABLED;
   }
 
+  get APP_NAME() {
+    return process.env.PA_APP_NAME;
+  }
+
   get PA_DOMAIN() {
     return process.env.PA_DOMAIN;
   }
@@ -54,6 +58,24 @@ class CoreConstants {
 
   get MYSQL_PASSWORD() {
     return process.env.PA_MYSQL_PASSWORD;
+  }
+
+  // Mysql ost infra related details
+
+  get INFRA_MYSQL_HOST() {
+    return process.env.PA_INFRA_MYSQL_HOST;
+  }
+
+  get INFRA_MYSQL_USER() {
+    return process.env.PA_INFRA_MYSQL_USER;
+  }
+
+  get INFRA_MYSQL_PASSWORD() {
+    return process.env.PA_INFRA_MYSQL_PASSWORD;
+  }
+
+  get INFRA_MYSQL_DB() {
+    return process.env.PA_INFRA_MYSQL_DB;
   }
 
   // kms related constants
@@ -106,8 +128,20 @@ class CoreConstants {
     return process.env.PA_SA_API_END_POINT;
   }
 
+  // Giphy api details
+
   get GIPHY_API_KEY() {
     return process.env.PA_GIPHY_API_KEY;
+  }
+
+  // Devops error logs framework details
+
+  get ENV_IDENTIFIER() {
+    return process.env.DEVOPS_ENV_ID;
+  }
+
+  get IP_ADDRESS() {
+    return process.env.DEVOPS_IP_ADDRESS;
   }
 }
 

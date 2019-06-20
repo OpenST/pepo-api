@@ -4,7 +4,11 @@ export PA_PORT=3000
 export PA_DEBUG_ENABLED='1';
 export PA_DOMAIN='www.pepo.com'
 export PA_COOKIE_DOMAIN='127.0.0.1'
+export PA_APP_NAME='pepo-api';
 
+# Devops error logs framework
+export DEVOPS_ENV_ID='dev1-sandbox';
+export DEVOPS_IP_ADDRESS='127.0.0.1';
 
 # Cache Engine
 export PA_CACHE_ENGINE='memcached'
@@ -18,6 +22,13 @@ export PA_MYSQL_HOST='127.0.0.1'
 export PA_MYSQL_USER='root'
 export PA_MYSQL_PASSWORD='root'
 
+# mysql - devops error logs infra details
+export PA_INFRA_MYSQL_HOST='127.0.0.1'
+export PA_INFRA_MYSQL_USER='root'
+export PA_INFRA_MYSQL_PASSWORD='root'
+export PA_INFRA_MYSQL_DB='ost_infra_development'
+
+# SHA256 details
 export PA_CACHE_DATA_SHA_KEY='066f7e6e833db143afee3dbafc888bcf'
 
 # AWS-KMS details
