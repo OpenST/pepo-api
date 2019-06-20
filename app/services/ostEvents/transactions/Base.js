@@ -118,12 +118,7 @@ class TransactionOstEventBase extends ServiceBase {
     let tokenUserRsp = await new TokenUserByOstUserIdsCache({ ostUserIds: ostUserIds }).fetch();
 
     if (tokenUserRsp.isFailure()) {
-      return Promise.reject(
-        responseHelper.error({
-          internal_error_identifier: 's_oe_t_b_feeo_1',
-          api_error_identifier: 'something_went_wrong'
-        })
-      );
+      return Promise.reject(tokenUserRsp);
     }
 
     let ostUserIdToUserIdHash = {};
