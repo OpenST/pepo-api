@@ -129,7 +129,7 @@ class OstTransaction extends ServiceBase {
   _isGiphyPresent() {
     const oThis = this;
 
-    return !commonValidator.isVarNull(oThis.giphyObject);
+    return !commonValidator.isVarNullOrUndefined(oThis.giphyObject);
   }
 
   /**
@@ -141,7 +141,7 @@ class OstTransaction extends ServiceBase {
   _isTextPresent() {
     const oThis = this;
 
-    return !commonValidator.isVarNull(oThis.text) && oThis.text !== '';
+    return !commonValidator.isVarNullOrUndefined(oThis.text) && oThis.text !== '';
   }
 
   /**
