@@ -332,13 +332,13 @@ class ConfigStrategyModel extends ModelBase {
   }
 
   /**
-   * Sets the status of given strategy id as active.
+   * Sets the status of given strategy kind as active.
    *
-   * @param {number} id: config_strategy_id from config_strategies table
+   * @param {number} kind: config_strategy_kind from config_strategies table
    *
    * @returns {Promise<*>}
    */
-  async activateById(id) {
+  async activateByKind(kind) {
     const oThis = this;
 
     // Update query.
@@ -346,7 +346,7 @@ class ConfigStrategyModel extends ModelBase {
       .update({
         status: configStrategyConstants.invertedStatuses[configStrategyConstants.activeStatus]
       })
-      .where({ id: id })
+      .where({ kind: kind })
       .fire();
 
     if (!queryResponse) {
@@ -354,43 +354,12 @@ class ConfigStrategyModel extends ModelBase {
     }
 
     if (queryResponse.affectedRows === 1) {
-      logger.info(`Status of strategy id: [${id}] is now active.`);
+      logger.info(`Status of strategy kind: [${kind}] is now active.`);
 
       return responseHelper.successWithData({});
     }
 
-    return oThis._customError('a_mo_m_cs_11', 'Strategy Id not present in the table.');
-  }
-
-  /**
-   * Activate strategies by ids.
-   *
-   * @param {array} ids
-   *
-   * @returns {Promise<Promise<never>|*|result>}
-   */
-  async activateByIds(ids) {
-    const oThis = this;
-
-    // Update query.
-    const queryResponse = await oThis
-      .update({
-        status: configStrategyConstants.invertedStatuses[configStrategyConstants.activeStatus]
-      })
-      .where(['id IN ?', ids])
-      .fire();
-
-    if (!queryResponse) {
-      return oThis._customError('a_mo_m_cs_12', 'Error in setStatusActive.');
-    }
-
-    if (queryResponse.affectedRows === ids.length) {
-      logger.info(`Status of strategy ids: [${ids}] is now active.`);
-
-      return responseHelper.successWithData({});
-    }
-
-    return oThis._customError('a_mo_m_cs_13', 'Strategy Ids not present in the table.');
+    return oThis._customError('a_mo_m_cs_11', 'Strategy kind not present in the table.');
   }
 
   /**
