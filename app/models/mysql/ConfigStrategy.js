@@ -2,6 +2,7 @@ const rootPrefix = '../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
   KmsWrapper = require(rootPrefix + '/lib/authentication/KmsWrapper'),
   InMemoryCacheProvider = require(rootPrefix + '/lib/providers/inMemoryCache'),
+  SecureGlobalSaltCache = require(rootPrefix + '/lib/cacheManagement/single/SecureGlobalSalt'),
   basicHelper = require(rootPrefix + '/helpers/basic'),
   coreConstants = require(rootPrefix + '/config/coreConstants'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
@@ -44,26 +45,18 @@ class ConfigStrategyModel extends ModelBase {
    *
    * @param {number} globalSaltId
    *
-   * @return {Promise<Result>}
+   * @return {Promise<string>}
    */
   async getDecryptedSalt(globalSaltId) {
-    const oThis = this,
-      cacheKey = coreConstants.CONFIG_STRATEGY_SALT + '_' + globalSaltId;
+    const secureGlobalSaltCacheObj = new SecureGlobalSaltCache({ globalSaltId: globalSaltId });
 
-    const consistentBehavior = '0';
-    const cacheObject = InMemoryCacheProvider.getInstance(consistentBehavior);
-    const cacheImplementer = cacheObject.cacheInstance;
+    const configSaltResp = await secureGlobalSaltCacheObj.fetch();
 
-    const configSaltResp = await cacheImplementer.get(cacheKey);
-    let configSalt = configSaltResp.data.response;
-
-    if (!configSalt) {
-      const addrSaltResp = await oThis._fetchAddressSalt(globalSaltId);
-      configSalt = addrSaltResp.data.addressSalt;
-      await cacheImplementer.set(cacheKey, configSalt);
+    if (configSaltResp.isFailure()) {
+      return Promise.reject(configSaltResp);
     }
 
-    return Promise.resolve(responseHelper.successWithData({ addressSalt: configSalt }));
+    return configSaltResp.data.addressSalt;
   }
 
   /**
