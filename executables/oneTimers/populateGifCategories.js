@@ -5,8 +5,7 @@
  *
  * @module executables/oneTimers/populateGifCategories
  */
-const program = require('commander'),
-  querystring = require('querystring');
+const program = require('commander');
 
 const rootPrefix = '../..',
   GifCategoryModel = require(rootPrefix + '/app/models/mysql/GifCategory'),

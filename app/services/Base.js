@@ -9,8 +9,6 @@ const rootPrefix = '../..',
   basicHelper = require(rootPrefix + '/helpers/basic'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
-  createErrorLogsEntry = require(rootPrefix + '/lib/errorLogs/createEntry'),
-  errorLogsConstants = require(rootPrefix + '/lib/globalConstant/errorLogs'),
   apiVersions = require(rootPrefix + '/lib/globalConstant/apiVersions');
 
 // Declare error config.
@@ -53,8 +51,6 @@ class ServicesBase {
           error_config: errorConfig
         });
       }
-
-      await createErrorLogsEntry.perform(errorObject, errorLogsConstants.mediumSeverity);
       logger.error(' In catch block of services/Base.js', err);
 
       return errorObject;
