@@ -8,8 +8,6 @@ const rootPrefix = '..',
   ApiParamsValidator = require(rootPrefix + '/lib/validators/ApiParams'),
   basicHelper = require(rootPrefix + '/helpers/basic'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
-  createErrorLogsEntry = require(rootPrefix + '/lib/errorLogs/createEntry'),
-  errorLogsConstants = require(rootPrefix + '/lib/globalConstant/errorLogs'),
   responseHelper = require(rootPrefix + '/lib/formatter/response');
 /**
  * Class for routes helper.
@@ -61,8 +59,6 @@ class RoutesHelper {
 
           responseHelper.renderApiResponse(errorObject, res, errorConfig);
         }
-
-        await createErrorLogsEntry.perform(errorObject, errorLogsConstants.mediumSeverity);
       });
   }
 
