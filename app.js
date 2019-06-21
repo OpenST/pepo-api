@@ -52,7 +52,7 @@ const startRequestLogLine = function(req, res, next) {
     basicHelper.logDateFormat()
   ];
 
-  logger.info(message.join(''));
+  logger.step(message.join(''));
 
   next();
 };
