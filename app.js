@@ -16,8 +16,6 @@ const responseHelper = require(rootPrefix + '/lib/formatter/response'),
   apiVersions = require(rootPrefix + '/lib/globalConstant/apiVersions'),
   basicHelper = require(rootPrefix + '/helpers/basic'),
   coreConstants = require(rootPrefix + '/config/coreConstants'),
-  createErrorLogsEntry = require(rootPrefix + '/lib/errorLogs/createEntry'),
-  errorLogsConstants = require(rootPrefix + '/lib/globalConstant/errorLogs'),
   sanitizer = require(rootPrefix + '/helpers/sanitizer');
 
 const apiRoutes = require(rootPrefix + '/routes/api/index'),
@@ -52,7 +50,7 @@ const startRequestLogLine = function(req, res, next) {
     basicHelper.logDateFormat()
   ];
 
-  logger.info(message.join(''));
+  logger.step(message.join(''));
 
   next();
 };
@@ -181,8 +179,6 @@ app.use(async function(err, req, res, next) {
     api_error_identifier: 'something_went_wrong',
     debug_options: {}
   });
-
-  await createErrorLogsEntry.perform(errorObject, errorLogsConstants.mediumSeverity);
 
   return responseHelper.renderApiResponse(errorObject, res, errorConfig);
 });
