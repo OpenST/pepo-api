@@ -198,9 +198,10 @@ class ConfigStrategyModel extends ModelBase {
       finalResult = {};
 
     for (let index = 0; index < queryResult.length; index++) {
+      const configStrategy = queryResult[index];
       // Following logic is added so that decrypt call is not given for already decrypted salts.
-      if (decryptedSalts[queryResult[index].global_salt_id] == null) {
-        const response = await oThis._getDecryptedSalt(queryResult[index].global_salt_id);
+      if (decryptedSalts[configStrategy.global_salt_id] == null) {
+        const response = await oThis._getDecryptedSalt(configStrategy.global_salt_id);
         if (response.isFailure()) {
           return Promise.reject(
             responseHelper.error({
@@ -212,31 +213,27 @@ class ConfigStrategyModel extends ModelBase {
           );
         }
 
-        decryptedSalts[queryResult[index].global_salt_id] = response.data.addressSalt;
+        decryptedSalts[configStrategy.global_salt_id] = response.data.addressSalt;
       }
 
       let localDecryptedJsonObj = {};
 
-      if (queryResult[index].encrypted_params) {
+      if (configStrategy.encrypted_params) {
         const localDecryptedParams = localCipher.decrypt(
-          decryptedSalts[queryResult[index].global_salt_id],
-          queryResult[index].encrypted_params
+          decryptedSalts[configStrategy.global_salt_id],
+          configStrategy.encrypted_params
         );
         localDecryptedJsonObj = JSON.parse(localDecryptedParams);
       }
 
-      const configStrategyHash = JSON.parse(queryResult[index].unencrypted_params);
+      const configStrategyHash = JSON.parse(configStrategy.unencrypted_params);
 
-      localDecryptedJsonObj = oThis._mergeConfigResult(
-        queryResult[index].kind,
-        configStrategyHash,
-        localDecryptedJsonObj
-      );
+      localDecryptedJsonObj = oThis._mergeConfigResult(configStrategy.kind, configStrategyHash, localDecryptedJsonObj);
 
-      finalResult[queryResult[index].id] = localDecryptedJsonObj;
+      finalResult[configStrategy.id] = localDecryptedJsonObj;
     }
 
-    return Promise.resolve(finalResult);
+    return responseHelper.successWithData(finalResult);
   }
 
   /**
@@ -394,6 +391,64 @@ class ConfigStrategyModel extends ModelBase {
     }
 
     return oThis._customError('a_mo_m_cs_13', 'Strategy Ids not present in the table.');
+  }
+
+  /**
+   * Get complete config strategy.
+   *
+   * @returns {result}
+   */
+  async getCompleteConfigStrategy() {
+    const oThis = this;
+
+    const queryResult = await oThis
+      .select('*')
+      .where({
+        status: configStrategyConstants.invertedStatuses[configStrategyConstants.activeStatus]
+      })
+      .fire();
+
+    const decryptedSalts = {},
+      finalResult = {};
+
+    for (let index = 0; index < queryResult.length; index++) {
+      const configStrategy = queryResult[index];
+      // Following logic is added so that decrypt call is not given for already decrypted salts.
+      if (decryptedSalts[configStrategy.global_salt_id] == null) {
+        const response = await oThis._getDecryptedSalt(configStrategy.global_salt_id);
+        if (response.isFailure()) {
+          return Promise.reject(
+            responseHelper.error({
+              internal_error_identifier: 'a_mo_m_cs_6',
+              api_error_identifier: 'something_went_wrong',
+              debug_options: {},
+              error_config: errorConfig
+            })
+          );
+        }
+
+        decryptedSalts[configStrategy.global_salt_id] = response.data.addressSalt;
+      }
+
+      let localDecryptedJsonObj = {};
+
+      if (configStrategy.encrypted_params) {
+        const localDecryptedParams = localCipher.decrypt(
+          decryptedSalts[configStrategy.global_salt_id],
+          configStrategy.encrypted_params
+        );
+        localDecryptedJsonObj = JSON.parse(localDecryptedParams);
+      }
+
+      const configStrategyHash = JSON.parse(configStrategy.unencrypted_params);
+
+      localDecryptedJsonObj = oThis._mergeConfigResult(configStrategy.kind, configStrategyHash, localDecryptedJsonObj);
+
+      finalResult[configStrategyConstants.kinds[configStrategy.kind]] =
+        localDecryptedJsonObj[configStrategyConstants.kinds[configStrategy.kind]];
+    }
+
+    return responseHelper.successWithData(finalResult);
   }
 
   /**
