@@ -101,7 +101,7 @@ class CronProcessesMonitorExecutable extends CronBase {
 
     const existingCrons = await new CronProcessModel()
         .select('*')
-        .where(['status NOT IN (?)', new CronProcessModel().invertedStatuses[cronProcessesConstants.inactiveStatus]])
+        .where(['status NOT IN (?)', cronProcessesConstants.invertedStatuses[cronProcessesConstants.inactiveStatus]])
         .fire(),
       existingCronsLength = existingCrons.length;
 
@@ -132,8 +132,8 @@ class CronProcessesMonitorExecutable extends CronBase {
         continue;
       }
 
-      const invertedRunningStatus = new CronProcessModel().invertedStatuses[cronProcessesConstants.runningStatus],
-        invertedStoppedStatus = new CronProcessModel().invertedStatuses[cronProcessesConstants.stoppedStatus];
+      const invertedRunningStatus = cronProcessesConstants.invertedStatuses[cronProcessesConstants.runningStatus],
+        invertedStoppedStatus = cronProcessesConstants.invertedStatuses[cronProcessesConstants.stoppedStatus];
 
       if (oThis.cronKindToRestartTimeMap[cronProcessesConstants.continuousCronsType][cronKind]) {
         const restartIntervalForCron =

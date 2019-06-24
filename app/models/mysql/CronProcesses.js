@@ -79,8 +79,8 @@ class CronProcessesModel extends ModelBaseKlass {
     if (typeof params.kind !== 'string' || typeof params.ip_address !== 'string' || typeof params.status !== 'string') {
       throw TypeError('Insertion parameters are of wrong params types.');
     }
-    params.status = oThis.invertedStatuses[params.status];
-    params.kind = oThis.invertedKinds[params.kind];
+    params.status = cronProcessesConstants.invertedStatuses[params.status];
+    params.kind = cronProcessesConstants.invertedKinds[params.kind];
 
     return oThis.insert(params).fire();
   }
@@ -108,8 +108,8 @@ class CronProcessesModel extends ModelBaseKlass {
       throw 'Mandatory parameters are missing. Expected an object with the following keys: {id, kind, newLastStartTime, newStatus}';
     }
 
-    params.newStatus = oThis.invertedStatuses[params.newStatus];
-    params.kind = oThis.invertedKinds[params.kind];
+    params.newStatus = cronProcessesConstants.invertedStatuses[params.newStatus];
+    params.kind = cronProcessesConstants.invertedKinds[params.kind];
 
     return oThis
       .update({
@@ -137,7 +137,7 @@ class CronProcessesModel extends ModelBaseKlass {
     if (!params.id || !params.newLastEndTime || !params.newStatus) {
       throw 'Mandatory parameters are missing. Expected an object with the following keys: {id, newLastEndTime, newStatus}';
     }
-    params.newStatus = oThis.invertedStatuses[params.newStatus];
+    params.newStatus = cronProcessesConstants.invertedStatuses[params.newStatus];
 
     await oThis
       .update({ last_ended_at: params.newLastEndTime, status: params.newStatus })
