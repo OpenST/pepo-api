@@ -10,19 +10,7 @@ const rootPrefix = '../../..',
   ModelBaseKlass = require(rootPrefix + '/app/models/mysql/Base'),
   cronProcessesConstants = require(rootPrefix + '/lib/globalConstant/cronProcesses');
 
-const dbName = coreConstants.INFRA_MYSQL_DB;
-
-const kinds = {
-    '1': cronProcessesConstants.hookProcesser,
-    '2': cronProcessesConstants.cronProcessesMonitor
-  },
-  statuses = {
-    '1': cronProcessesConstants.runningStatus,
-    '2': cronProcessesConstants.stoppedStatus,
-    '3': cronProcessesConstants.inactiveStatus
-  },
-  invertedKinds = util.invert(kinds),
-  invertedStatuses = util.invert(statuses);
+const dbName = 'pepo_api_' + coreConstants.environment;
 
 /**
  * Class for cron process model
@@ -41,22 +29,6 @@ class CronProcessesModel extends ModelBaseKlass {
     const oThis = this;
 
     oThis.tableName = 'cron_processes';
-  }
-
-  get kinds() {
-    return kinds;
-  }
-
-  get statuses() {
-    return statuses;
-  }
-
-  get invertedKinds() {
-    return invertedKinds;
-  }
-
-  get invertedStatuses() {
-    return invertedStatuses;
   }
 
   /**
