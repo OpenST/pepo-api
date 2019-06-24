@@ -49,6 +49,16 @@ class EmailServiceApiCall extends HookProcessorsBase {
   async _processHook() {
     const oThis = this;
   }
+
+  /**
+   * Function which will mark the hook processed
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _updateStatusToProcessed() {
+    const oThis = this;
+  }
 }
 
 module.exports = EmailServiceApiCall;

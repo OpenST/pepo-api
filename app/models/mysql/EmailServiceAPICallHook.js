@@ -118,6 +118,72 @@ class EmailServiceAPICallHook extends ModelBase {
 
     return response;
   }
+
+  /**
+   * Mark status as processed
+   *
+   * @param processedHookIds
+   * @returns {Promise<void>}
+   */
+  async markStatusAsProcessed(hookId, successResponse) {
+    const oThis = this;
+
+    let updateResponse = await oThis
+      .update({
+        lock_identifier: null,
+        locked_at: null,
+        success_response: successResponse,
+        status: emailServiceApiCallHookConstants.invertedStatuses[emailServiceApiCallHookConstants.processedStatus]
+      })
+      .where(['id = ?', hookId])
+      .fire();
+  }
+
+  /**
+   * Mark hook as failed
+   *
+   * @param hookId
+   * @param failedCount
+   * @param failedLogs
+   * @returns {Promise<void>}
+   */
+  async markFailedToBeRetried(hookId, failedCount, failedLogs) {
+    const oThis = this;
+
+    let updateResponse = await oThis
+      .update({
+        status: emailServiceApiCallHookConstants.invertedStatuses[emailServiceApiCallHookConstants.failedStatus],
+        failed_count: failedCount + 1,
+        lock_identifier: null,
+        locked_at: null,
+        failed_response: failedLogs
+      })
+      .where(['id = ?', hookId])
+      .fire();
+  }
+
+  /**
+   * Mark hoos as ignored
+   *
+   * @param hookId
+   * @param failedCount
+   * @param failedLogs
+   * @returns {Promise<void>}
+   */
+  async markFailedToBeIgnored(hookId, failedCount, failedLogs) {
+    const oThis = this;
+
+    let updateResponse = await oThis
+      .update({
+        status: emailServiceApiCallHookConstants.invertedStatuses[emailServiceApiCallHookConstants.ignoredStatus],
+        failed_count: failedCount + 1,
+        lock_identifier: null,
+        locked_at: null,
+        failed_response: failedLogs
+      })
+      .where(['id = ?', hookId])
+      .fire();
+  }
 }
 
 module.exports = EmailServiceAPICallHook;

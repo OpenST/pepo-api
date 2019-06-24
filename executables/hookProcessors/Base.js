@@ -48,7 +48,7 @@ class HookProcessorsBase {
     await oThis._processHooks();
 
     // Mark Hooks as processed
-    await oThis.updateStatusToProcessed();
+    await oThis._updateStatusToProcessed();
 
     // For hooks which failed, mark them as failed
     await oThis.releaseLockAndUpdateStatusForNonProcessedHooks();
@@ -94,8 +94,8 @@ class HookProcessorsBase {
   async _acquireLockOnFreshHooks() {
     const oThis = this;
 
-    let modelKlass = oThis.hookModelKlass;
-    await new modelKlass().acquireLocksOnFreshHooks();
+    let ModelKlass = oThis.hookModelKlass;
+    await new ModelKlass().acquireLocksOnFreshHooks();
   }
 
   /**
@@ -107,8 +107,8 @@ class HookProcessorsBase {
   async _acquireLockOnFailedHooks() {
     const oThis = this;
 
-    let modelKlass = oThis.hookModelKlass;
-    await new modelKlass().acquireLocksOnFailedHooks();
+    let ModelKlass = oThis.hookModelKlass;
+    await new ModelKlass().acquireLocksOnFailedHooks();
   }
 
   /**
@@ -119,8 +119,8 @@ class HookProcessorsBase {
   async _fetchLockedHooks() {
     const oThis = this;
 
-    let modelKlass = oThis.hookModelKlass;
-    oThis.hooksToBeProcessed = await new modelKlass().fetchLockedHooks();
+    let ModelKlass = oThis.hookModelKlass;
+    oThis.hooksToBeProcessed = await new ModelKlass().fetchLockedHooks();
   }
 
   /**
@@ -135,8 +135,37 @@ class HookProcessorsBase {
     for (let hookId in oThis.hooksToBeProcessed) {
       oThis.hook = oThis.hooksToBeProcessed[hookId];
 
-      await oThis._processHook();
+      await oThis._processHook().catch(function(err) {
+        oThis.failedHookToBeRetried[oThis.hook.id] = {
+          exception: err
+        };
+      });
     }
+  }
+
+  /**
+   * Release lock and update status for non processed hooks
+   *
+   * @returns {Promise<void>}
+   */
+  async releaseLockAndUpdateStatusForNonProcessedHooks() {
+    const oThis = this;
+
+    for (let hookId in oThis.hooksToBeProcessed) {
+      if (oThis.failedHookToBeRetried[hookId]) {
+        let ModelKlass = oThis.hookModelKlass;
+        await new ModelKlass().markFailedToBeRetried();
+      }
+
+      if (oThis.failedHookToBeIgnored[hookId]) {
+        let ModelKlass = oThis.hookModelKlass;
+        await new ModelKlass().markFailedToBeRetried();
+      }
+    }
+  }
+
+  async _updateStatusToProcessed() {
+    throw new Error('Sub-class to implement');
   }
 
   async _processHook() {
