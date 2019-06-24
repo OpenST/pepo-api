@@ -1,8 +1,9 @@
 {
   "hookProcessor": {
-    "abcd": "1234"
+    "abcd": "1234",
+    "sequenceNumber": 1
   },
-  "cronProcessMonitor": {
+  "cronProcessesMonitor": {
     "ncbhjc": "hwvtuc"
   }
 }
