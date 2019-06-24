@@ -150,16 +150,15 @@ class HookProcessorsBase {
    */
   async releaseLockAndUpdateStatusForNonProcessedHooks() {
     const oThis = this;
-
+    let ModelKlass = oThis.hookModelKlass;
     for (let hookId in oThis.hooksToBeProcessed) {
+      let failedCount = oThis.hooksToBeProcessed[hookId].failedCount;
       if (oThis.failedHookToBeRetried[hookId]) {
-        let ModelKlass = oThis.hookModelKlass;
-        await new ModelKlass().markFailedToBeRetried();
+        await new ModelKlass().markFailedToBeRetried(hookId, failedCount, oThis.failedHookToBeRetried[hookId]);
       }
 
       if (oThis.failedHookToBeIgnored[hookId]) {
-        let ModelKlass = oThis.hookModelKlass;
-        await new ModelKlass().markFailedToBeRetried();
+        await new ModelKlass().markFailedToBeRetried(hookId, failedCount, oThis.failedHookToBeRetried[hookId]);
       }
     }
   }
