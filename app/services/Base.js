@@ -40,18 +40,20 @@ class ServicesBase {
   perform() {
     const oThis = this;
 
-    return oThis._asyncPerform().catch(function(err) {
-      if (responseHelper.isCustomResult(err)) {
-        return err;
+    return oThis._asyncPerform().catch(async function(err) {
+      let errorObject = err;
+
+      if (!responseHelper.isCustomResult(err)) {
+        errorObject = responseHelper.error({
+          internal_error_identifier: 'a_s_b_1',
+          api_error_identifier: 'something_went_wrong',
+          debug_options: { error: err.toString() },
+          error_config: errorConfig
+        });
       }
       logger.error(' In catch block of services/Base.js', err);
-      //TODO: error mail
-      return responseHelper.error({
-        internal_error_identifier: 'a_s_b_1',
-        api_error_identifier: 'something_went_wrong',
-        debug_options: { error: err.toString() },
-        error_config: errorConfig
-      });
+
+      return errorObject;
     });
   }
 

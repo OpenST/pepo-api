@@ -1,23 +1,21 @@
 const rootPrefix = '../../../..',
-  ServiceBase = require(rootPrefix + '/app/services/Base'),
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
-  TokenUserByOstUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TokenUserByOstUserIds'),
-  TokenUserDetailByUserIdCache = require(rootPrefix + '/lib/cacheManagement/multi/TokenUserByUserIds'),
   TokenUserModel = require(rootPrefix + '/app/models/mysql/TokenUser'),
+  UserOstEventBase = require(rootPrefix + '/app/services/ostEvents/users/Base'),
   ExternalEntityModel = require(rootPrefix + '/app/models/mysql/ExternalEntity'),
+  SecureTokenCache = require(rootPrefix + '/lib/cacheManagement/single/SecureToken'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
-  tokenUserConstants = require(rootPrefix + '/lib/globalConstant/tokenUser'),
-  tokenConstants = require(rootPrefix + '/lib/globalConstant/token'),
-  externalEntityConstants = require(rootPrefix + '/lib/globalConstant/externalEntity'),
-  ostPlatformSdk = require(rootPrefix + '/lib/ostPlatform/jsSdkWrapper'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
-  SecureTokenCache = require(rootPrefix + '/lib/cacheManagement/single/SecureToken');
+  tokenConstants = require(rootPrefix + '/lib/globalConstant/token'),
+  ostPlatformSdk = require(rootPrefix + '/lib/ostPlatform/jsSdkWrapper'),
+  tokenUserConstants = require(rootPrefix + '/lib/globalConstant/tokenUser'),
+  externalEntityConstants = require(rootPrefix + '/lib/globalConstant/externalEntity');
 
-class UserActivationSuccess extends ServiceBase {
+class UserActivationSuccess extends UserOstEventBase {
   /**
    * @param {Object} params
-   * @param {String} params.result_type: Result Type
-   * @param {String} params.password: User
+   *
+   * @augments UserOstEventBase
    *
    * @constructor
    */
@@ -25,12 +23,6 @@ class UserActivationSuccess extends ServiceBase {
     super(params);
 
     const oThis = this;
-
-    oThis.ostUser = params.data.user;
-
-    oThis.ostUserid = oThis.ostUser.id;
-    oThis.ostUserTokenHolderAddress = oThis.ostUser.token_holder_address.toLowerCase();
-    oThis.ostUserStatus = oThis.ostUser.status.toUpperCase();
 
     oThis.tokenUserObj = null;
     oThis.tokenData = null;
@@ -40,7 +32,7 @@ class UserActivationSuccess extends ServiceBase {
   }
 
   /**
-   * perform - Validate Login Credentials
+   * Async performer.
    *
    * @return {Promise<void>}
    */
@@ -67,8 +59,7 @@ class UserActivationSuccess extends ServiceBase {
   }
 
   /**
-   * Validate Request
-   *
+   * Validate and sanitize params.
    *
    * @return {Promise<void>}
    *
@@ -77,23 +68,24 @@ class UserActivationSuccess extends ServiceBase {
   async _validateAndSanitizeParams() {
     const oThis = this;
 
-    logger.log('Validate for user activation success');
-    let paramErrors = [];
+    oThis.ostUserTokenHolderAddress = oThis.ostUserTokenHolderAddress.toLowerCase();
+
+    await super._validateAndSanitizeParams();
 
     if (!CommonValidators.validateEthAddress(oThis.ostUserTokenHolderAddress)) {
-      paramErrors.push('invalid_token_holder_address');
+      oThis.paramErrors.push('invalid_token_holder_address');
     }
 
     if (oThis.ostUserStatus !== tokenUserConstants.activatedOstStatus) {
-      paramErrors.push('invalid_status');
+      oThis.paramErrors.push('invalid_status');
     }
 
-    if (paramErrors.length > 0) {
+    if (oThis.paramErrors.length > 0) {
       return Promise.reject(
         responseHelper.paramValidationError({
           internal_error_identifier: 's_oe_u_as_vas_1',
           api_error_identifier: 'invalid_api_params',
-          params_error_identifiers: paramErrors,
+          params_error_identifiers: oThis.paramErrors,
           debug_options: {}
         })
       );
@@ -103,8 +95,7 @@ class UserActivationSuccess extends ServiceBase {
   }
 
   /**
-   * Validate Request
-   *
+   * Fetch token user.
    *
    * @return {Promise<void>}
    *
@@ -113,33 +104,7 @@ class UserActivationSuccess extends ServiceBase {
   async _fetchTokenUser() {
     const oThis = this;
 
-    logger.log('Fetch Token User for user activation success');
-
-    let tokenUserObjsRes = await new TokenUserByOstUserIdsCache({ ostUserIds: [oThis.ostUserid] }).fetch();
-    let tokenUserObjRes = tokenUserObjsRes.data[oThis.ostUserid];
-
-    if (!tokenUserObjRes.userId) {
-      return Promise.reject(
-        responseHelper.error({
-          internal_error_identifier: 's_oe_u_as_ftu_1',
-          api_error_identifier: 'resource_not_found'
-        })
-      );
-    }
-
-    oThis.userId = tokenUserObjRes.userId;
-
-    tokenUserObjsRes = await new TokenUserDetailByUserIdCache({ userIds: [oThis.userId] }).fetch();
-    oThis.tokenUserObj = tokenUserObjsRes.data[oThis.userId];
-
-    if (!oThis.tokenUserObj.id) {
-      return Promise.reject(
-        responseHelper.error({
-          internal_error_identifier: 's_oe_u_as_ftu_2',
-          api_error_identifier: 'something_went_wrong'
-        })
-      );
-    }
+    await super._fetchTokenUser();
 
     if (
       oThis.tokenUserObj.ostStatus === tokenUserConstants.activatedOstStatus &&
@@ -149,7 +114,7 @@ class UserActivationSuccess extends ServiceBase {
         responseHelper.error({
           internal_error_identifier: 's_oe_u_as_ftu_3',
           api_error_identifier: 'something_went_wrong',
-          debug_options: { tokenUserObj: tokenUserObj, ostUser: oThis.ostUser }
+          debug_options: { tokenUserObj: oThis.tokenUserObj, ostUser: oThis.ostUser }
         })
       );
     }
@@ -159,7 +124,6 @@ class UserActivationSuccess extends ServiceBase {
 
   /**
    * Update Token User Properties
-   *
    *
    * @return {Promise<void>}
    *
@@ -193,15 +157,14 @@ class UserActivationSuccess extends ServiceBase {
     await TokenUserModel.flushCache({ userId: oThis.tokenUserObj.userId });
 
     oThis.tokenUserObj.properties = propertyVal;
-    oThis.tokenUserObj.ostUserTokenHolderAddress = oThis.ostUserTokenHolderAddress;
+    oThis.tokenUserObj.ostTokenHolderAddress = oThis.ostUserTokenHolderAddress;
     oThis.tokenUserObj.ostStatus = oThis.ostUserStatus;
 
     return Promise.resolve(responseHelper.successWithData({}));
   }
 
   /**
-   * Start Airdrop For User
-   *
+   * Start airdrop for user.
    *
    * @return {Promise<void>}
    *
@@ -224,8 +187,7 @@ class UserActivationSuccess extends ServiceBase {
   }
 
   /**
-   * Execute Transaction using OST sdk
-   *
+   * Execute transaction using OST sdk.
    *
    * @return {Promise<void>}
    *
@@ -238,12 +200,7 @@ class UserActivationSuccess extends ServiceBase {
     let tokenData = await new SecureTokenCache().fetch();
     if (tokenData.isFailure()) {
       logger.error('Error while fetching token data');
-      return Promise.reject(
-        responseHelper.error({
-          internal_error_identifier: 's_oe_u_as_et_1',
-          api_error_identifier: 'something_went_wrong'
-        })
-      );
+      return Promise.reject(tokenData);
     }
 
     oThis.tokenData = tokenData.data;
@@ -265,7 +222,7 @@ class UserActivationSuccess extends ServiceBase {
       })
     };
 
-    console.log('\n\n\n==executeParams===', JSON.stringify(executeParams));
+    logger.log('\n\n\n==executeParams===', JSON.stringify(executeParams));
     let startAirdropResponse = null;
     try {
       startAirdropResponse = await ostPlatformSdk.executeTransaction(executeParams);
@@ -284,8 +241,7 @@ class UserActivationSuccess extends ServiceBase {
   }
 
   /**
-   * Mark Airdrop Started Property for Token USer
-   *
+   * Mark airdrop started property for token user.
    *
    * @return {Promise<void>}
    *
@@ -313,8 +269,7 @@ class UserActivationSuccess extends ServiceBase {
   }
 
   /**
-   * Create External Entitites record for airdrop
-   *
+   * Create external entities record for airdrop.
    *
    * @return {Promise<void>}
    *

@@ -7,7 +7,7 @@
   "unauthorized_api_request": {
     "http_code": "401",
     "code": "UNAUTHORIZED",
-    "message": "Access denied due to invalid credentials. Please inspect if you are using a valid API Key and Secret to send the request. You can verify the API Key against the one shown on developer's page in OST Platform and re-submit."
+    "message": "Access denied due to invalid credentials."
   },
   "api_under_maintenance": {
     "http_code": "503",
@@ -64,6 +64,11 @@
     "code": "UNPROCESSABLE_ENTITY",
     "message": "The request was good, but nevertheless could not be processed."
   },
+  "entity_formatting_failed": {
+    "http_code": "500",
+    "code": "INTERNAL_SERVER_ERROR",
+    "message": "Something went wrong."
+  },
   "cache_key_invalid": {
     "http_code": "422",
     "code": "UNPROCESSABLE_ENTITY",
@@ -73,5 +78,20 @@
     "http_code": "422",
     "code": "UNPROCESSABLE_ENTITY",
     "message": "The request was good, but nevertheless could not be processed."
+  },
+  "service_unavailable": {
+    "http_code": "422",
+    "code": "UNPROCESSABLE_ENTITY",
+    "message": "Service seems to be down or unavailable."
+  },
+  "duplicate_entry": {
+    "http_code": "409",
+    "code": "ALREADY_EXISTS",
+    "message": "Addresses already exists."
+  },
+  "invalid_login_details": {
+    "http_code": "500",
+    "code": "INTERNAL_SERVER_ERROR",
+    "message": "Invalid login details."
   }
 }

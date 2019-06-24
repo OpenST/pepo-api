@@ -36,7 +36,7 @@ class ExternalEntityModel extends ModelBase {
       id: dbRow.id,
       entityKind: externalEntityConstants.entityKinds[dbRow.entity_kind],
       entityId: dbRow.entity_id,
-      extraData: dbRow.extra_data,
+      extraData: JSON.parse(dbRow.extra_data),
       createdAt: dbRow.created_at,
       updatedAt: dbRow.updated_at
     };

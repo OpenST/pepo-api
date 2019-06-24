@@ -50,6 +50,11 @@ class CurrentUser extends ServiceBase {
     logger.log('fetch User');
 
     let usersByIdHashRes = await new UserMultiCache({ ids: [oThis.userId] }).fetch();
+
+    if (usersByIdHashRes.isFailure()) {
+      return Promise.reject(usersByIdHashRes);
+    }
+
     let usersByIdHash = usersByIdHashRes.data;
     oThis.user = usersByIdHash[oThis.userId];
 
@@ -70,6 +75,11 @@ class CurrentUser extends ServiceBase {
     logger.log('fetch Token User');
 
     let tokenUserRes = await new TokenUserDetailByUserIdsCache({ userIds: [oThis.userId] }).fetch();
+
+    if (tokenUserRes.isFailure()) {
+      return Promise.reject(tokenUserRes);
+    }
+
     oThis.tokenUser = tokenUserRes.data[oThis.userId];
 
     return Promise.resolve(responseHelper.successWithData({}));

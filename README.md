@@ -44,3 +44,20 @@ node db/migrate.js
 ```bash
 node devops/exec/flushMemcache.js
 ```
+
+* [Only Development] Create `infra` database and `error_logs` table.
+```bash
+   source set_env_vars.sh
+   node executables/oneTimers/createErrorLogsTable.js
+```
+
+* Seed Tokens Table.
+```bash
+node executables/oneTimers/seedTokensTable.js --apiKey "__ABCD" --apiSecret "__WXYZ"
+```
+
+* Seed Gif categories
+```bash
+source set_env_vars.sh
+node executables/oneTimers/populateGifCategories.js
+```

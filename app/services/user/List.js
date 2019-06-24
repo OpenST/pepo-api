@@ -6,7 +6,6 @@ const rootPrefix = '../../..',
   UserModel = require(rootPrefix + '/app/models/mysql/User'),
   TokenUserModel = require(rootPrefix + '/app/models/mysql/TokenUser'),
   pagination = require(rootPrefix + '/lib/globalConstant/pagination'),
-  logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   responseHelper = require(rootPrefix + '/lib/formatter/response');
 
 /**
@@ -27,13 +26,14 @@ class UserList extends ServiceBase {
     const oThis = this;
 
     oThis.currentUserId = params.current_user.id;
-    oThis.limit = params.limit;
     oThis.paginationIdentifier = params[pagination.paginationIdentifierKey] || null;
 
+    oThis.limit = null;
     oThis.page = null;
     oThis.userIds = [];
     oThis.usersByIdHash = {};
     oThis.tokenUsersByUserIdHash = {};
+    oThis.currentUserRemoved = false;
   }
 
   /**
@@ -74,13 +74,11 @@ class UserList extends ServiceBase {
     if (oThis.paginationIdentifier) {
       let parsedPaginationParams = oThis._parsePaginationParams(oThis.paginationIdentifier);
       oThis.page = parsedPaginationParams.page; //override page
-      oThis.limit = parsedPaginationParams.limit; //override limit
     } else {
       oThis.page = 1;
-      oThis.limit = oThis.limit || pagination.defaultUserListPageSize;
     }
+    oThis.limit = pagination.defaultUserListPageSize;
 
-    //Validate limit
     return await oThis._validatePageSize();
   }
 
@@ -97,9 +95,13 @@ class UserList extends ServiceBase {
         limit: oThis.limit,
         page: oThis.page
       }),
-      UserPaginationCacheRes = await UserPaginationCacheObj.fetch();
+      userPaginationCacheRes = await UserPaginationCacheObj.fetch();
 
-    oThis.userIds = UserPaginationCacheRes.data;
+    if (userPaginationCacheRes.isFailure()) {
+      return Promise.reject(userPaginationCacheRes);
+    }
+
+    oThis.userIds = userPaginationCacheRes.data;
 
     return Promise.resolve(responseHelper.successWithData({}));
   }
@@ -116,6 +118,7 @@ class UserList extends ServiceBase {
 
     if (index > -1) {
       oThis.userIds.splice(index, 1);
+      oThis.currentUserRemoved = true;
     }
     return Promise.resolve(responseHelper.successWithData({}));
   }
@@ -130,6 +133,11 @@ class UserList extends ServiceBase {
     const oThis = this;
 
     let usersByIdHashRes = await new UserMultiCache({ ids: oThis.userIds }).fetch();
+
+    if (usersByIdHashRes.isFailure()) {
+      return Promise.reject(usersByIdHashRes);
+    }
+
     oThis.usersByIdHash = usersByIdHashRes.data;
 
     return Promise.resolve(responseHelper.successWithData({}));
@@ -145,6 +153,11 @@ class UserList extends ServiceBase {
     const oThis = this;
 
     let tokenUsersByIdHashRes = await new TokenUserByUserIdsMultiCache({ userIds: oThis.userIds }).fetch();
+
+    if (tokenUsersByIdHashRes.isFailure()) {
+      return Promise.reject(tokenUsersByIdHashRes);
+    }
+
     oThis.tokenUsersByUserIdHash = tokenUsersByIdHashRes.data;
 
     return Promise.resolve(responseHelper.successWithData({}));
@@ -157,13 +170,18 @@ class UserList extends ServiceBase {
    * @private
    */
   finalResponse() {
-    const oThis = this,
-      nextPagePayloadKey = {};
+    const oThis = this;
 
-    if (oThis.userIds.length > 0) {
+    let nextPagePayloadKey = {},
+      limit = oThis.limit;
+
+    if (oThis.currentUserRemoved) {
+      limit = limit - 1;
+    }
+
+    if (oThis.userIds.length == limit) {
       nextPagePayloadKey[pagination.paginationIdentifierKey] = {
-        page: oThis.page + 1,
-        limit: oThis.limit
+        page: oThis.page + 1
       };
     }
 

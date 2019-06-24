@@ -75,11 +75,17 @@ class Login extends ServiceBase {
 
     const userObjRes = await new UserByUserNameCache({ userName: oThis.userName }).fetch();
 
+    if (userObjRes.isFailure()) {
+      return Promise.reject(userObjRes);
+    }
+
     if (!userObjRes.data.id) {
       return Promise.reject(
-        responseHelper.error({
+        responseHelper.paramValidationError({
           internal_error_identifier: 's_um_l_v_1',
-          api_error_identifier: 'unauthorized_api_request'
+          api_error_identifier: 'invalid_api_params',
+          params_error_identifiers: ['user_not_found'],
+          debug_options: {}
         })
       );
     }
@@ -104,6 +110,10 @@ class Login extends ServiceBase {
 
     const secureUserRes = await new SecureUserCache({ id: oThis.userId }).fetch();
 
+    if (secureUserRes.isFailure()) {
+      return Promise.reject(secureUserRes);
+    }
+
     oThis.secureUser = secureUserRes.data;
 
     if (oThis.secureUser.status !== userConstants.activeStatus) {
@@ -111,7 +121,7 @@ class Login extends ServiceBase {
         responseHelper.paramValidationError({
           internal_error_identifier: 's_um_l_fu_1',
           api_error_identifier: 'invalid_api_params',
-          params_error_identifiers: ['invalid_user_name'],
+          params_error_identifiers: ['user_not_active'],
           debug_options: {}
         })
       );
@@ -134,6 +144,10 @@ class Login extends ServiceBase {
     logger.log('Fetching token user.');
 
     const tokenUserRes = await new TokenUserDetailByUserIdsCache({ userIds: [oThis.userId] }).fetch();
+
+    if (tokenUserRes.isFailure()) {
+      return Promise.reject(tokenUserRes);
+    }
 
     oThis.tokenUser = tokenUserRes.data[oThis.userId];
 
@@ -171,10 +185,9 @@ class Login extends ServiceBase {
       await UserModel.flushCache({ id: oThis.secureUser.id });
 
       return Promise.reject(
-        responseHelper.paramValidationError({
+        responseHelper.error({
           internal_error_identifier: 's_um_l_vp_1',
-          api_error_identifier: 'invalid_api_params',
-          params_error_identifiers: ['invalid_user_name'],
+          api_error_identifier: 'invalid_login_details',
           debug_options: {}
         })
       );

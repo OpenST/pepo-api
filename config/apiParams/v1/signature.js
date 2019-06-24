@@ -1,28 +1,25 @@
 const rootPrefix = '../../..',
-  pagination = require(rootPrefix + '/lib/globalConstant/pagination'),
-  apiName = require(rootPrefix + '/lib/globalConstant/apiName');
+  apiName = require(rootPrefix + '/lib/globalConstant/apiName'),
+  paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination');
+
 const v1Signature = {
   [apiName.signUp]: {
     mandatory: [
       {
         parameter: 'user_name',
-        validatorMethods: [
-          'validateString',
-          'validateAlphaNumericCommonSpecialCharString',
-          'validateMaxLengthMediumString'
-        ]
+        validatorMethods: ['validateString', 'validateUserName']
       },
       {
         parameter: 'first_name',
-        validatorMethods: ['validateString', 'validateMaxLengthMediumString']
+        validatorMethods: ['validateString', 'validateName']
       },
       {
         parameter: 'last_name',
-        validatorMethods: ['validateString', 'validateMaxLengthMediumString']
+        validatorMethods: ['validateString', 'validateName']
       },
       {
         parameter: 'password',
-        validatorMethods: ['validateString', 'validateMaxLengthMediumString']
+        validatorMethods: ['validateString', 'validatePassword']
       }
     ],
     optional: []
@@ -31,15 +28,11 @@ const v1Signature = {
     mandatory: [
       {
         parameter: 'user_name',
-        validatorMethods: [
-          'validateString',
-          'validateAlphaNumericCommonSpecialCharString',
-          'validateMaxLengthMediumString'
-        ]
+        validatorMethods: ['validateString', 'validateUserName']
       },
       {
         parameter: 'password',
-        validatorMethods: ['validateString', 'validateMaxLengthMediumString']
+        validatorMethods: ['validateString', 'validatePassword']
       }
     ],
     optional: []
@@ -48,7 +41,7 @@ const v1Signature = {
     mandatory: [
       {
         parameter: 'current_user',
-        validatorMethods: ['validateObject']
+        validatorMethods: ['validateNonEmptyObject']
       }
     ],
     optional: []
@@ -57,7 +50,7 @@ const v1Signature = {
     mandatory: [
       {
         parameter: 'current_user',
-        validatorMethods: ['validateObject']
+        validatorMethods: ['validateNonEmptyObject']
       },
       {
         parameter: 'device_address',
@@ -78,17 +71,13 @@ const v1Signature = {
     mandatory: [
       {
         parameter: 'current_user',
-        validatorMethods: ['validateObject']
+        validatorMethods: ['validateNonEmptyObject']
       }
     ],
     optional: [
       {
-        parameter: 'limit',
-        validatorMethods: ['validateNonZeroInteger']
-      },
-      {
-        parameter: pagination.paginationIdentifierKey,
-        validatorMethods: ['validateString']
+        parameter: paginationConstants.paginationIdentifierKey,
+        validatorMethods: ['validateString', 'validatePaginationIdentifier']
       }
     ]
   },
@@ -96,12 +85,12 @@ const v1Signature = {
     mandatory: [
       {
         parameter: 'current_user',
-        validatorMethods: ['validateObject']
+        validatorMethods: ['validateNonEmptyObject']
       }
     ],
     optional: []
   },
-  [apiName.gifs]: {
+  [apiName.gifsSearch]: {
     mandatory: [
       {
         parameter: 'query',
@@ -110,8 +99,75 @@ const v1Signature = {
     ],
     optional: [
       {
-        parameter: 'page_number',
-        validatorMethods: ['validateNonZeroInteger']
+        parameter: paginationConstants.paginationIdentifierKey,
+        validatorMethods: ['validateString']
+      }
+    ]
+  },
+  [apiName.gifsTrending]: {
+    mandatory: [],
+    optional: [
+      {
+        parameter: paginationConstants.paginationIdentifierKey,
+        validatorMethods: ['validateString']
+      }
+    ]
+  },
+  [apiName.userFeed]: {
+    mandatory: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      },
+      {
+        parameter: 'user_id',
+        validatorMethods: ['validateInteger']
+      }
+    ],
+    optional: [
+      {
+        parameter: paginationConstants.paginationIdentifierKey,
+        validatorMethods: ['validateString', 'validatePaginationIdentifier']
+      }
+    ]
+  },
+  [apiName.gifsCategories]: {
+    mandatory: [],
+    optional: []
+  },
+  [apiName.ostTransaction]: {
+    mandatory: [
+      {
+        parameter: 'ost_transaction',
+        validatorMethods: ['validateNonEmptyObject', 'validateOstTransactionObject']
+      },
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      },
+      {
+        parameter: 'privacy_type',
+        validatorMethods: ['validateString', 'validateFeedPrivacyType']
+      }
+    ],
+    optional: [
+      {
+        parameter: 'meta',
+        validatorMethods: ['validateNonEmptyObject', 'validateOstTransactionMeta']
+      }
+    ]
+  },
+  [apiName.publicFeed]: {
+    mandatory: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      }
+    ],
+    optional: [
+      {
+        parameter: paginationConstants.paginationIdentifierKey,
+        validatorMethods: ['validateString', 'validatePaginationIdentifier']
       }
     ]
   }

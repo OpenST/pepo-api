@@ -80,6 +80,10 @@ class SignUp extends ServiceBase {
 
     const userObj = await new UserByUserNameCache({ userName: oThis.userName }).fetch();
 
+    if (userObj.isFailure()) {
+      return Promise.reject(userObj);
+    }
+
     if (userObj.data.id) {
       return Promise.reject(
         responseHelper.paramValidationError({
@@ -131,6 +135,7 @@ class SignUp extends ServiceBase {
     }
 
     oThis.userId = insertResponse.insertId;
+    insertData.id = insertResponse.insertId;
 
     let formattedInsertData = new UserModel().formatDbData(insertData);
     await UserModel.flushCache(formattedInsertData);
@@ -199,6 +204,8 @@ class SignUp extends ServiceBase {
 
       return Promise.reject(new Error('Error while inserting data in token_users table.'));
     }
+
+    insertData.id = insertResponse.insertId;
 
     let formattedInsertData = new TokenUserModel().formatDbData(insertData);
     await TokenUserModel.flushCache(formattedInsertData);

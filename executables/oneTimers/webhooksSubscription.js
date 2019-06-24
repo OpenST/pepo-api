@@ -1,8 +1,7 @@
 /**
  * Usage: node executables/oneTimers/webhooksSubscription.js
  *
- *
- * @type {string}
+ * @module executables/oneTimers/webhooksSubscription
  */
 
 const rootPrefix = '../..',
@@ -47,7 +46,13 @@ class WebhooksSubscription {
 
     let webhookUrl = webhookConstants.webhookUrl;
     let params = {
-      topics: ['transactions/success', 'transactions/failure', 'users/activation_success', 'users/activation_failure'],
+      topics: [
+        'transactions/success',
+        'transactions/failure',
+        'users/activation_initiate',
+        'users/activation_success',
+        'users/activation_failure'
+      ],
       url: webhookUrl,
       status: webhookConstants.active
     };
@@ -74,15 +79,16 @@ class WebhooksSubscription {
    * @returns {Promise<never>}
    */
   async seedWebhooksDataInTable() {
-    const oThis = this;
+    const oThis = this,
+      currentTime = Math.floor(Date.now() / 1000);
 
     // Insert user in database
     let insertResponse = await new WebhooksModel()
       .insert({
         ost_id: oThis.webhooksData.id,
         status: webhookConstants.invertedStatuses[oThis.webhooksData.status],
-        created_at: Date.now() / 1000,
-        updated_at: Date.now() / 1000
+        created_at: currentTime,
+        updated_at: currentTime
       })
       .fire();
 

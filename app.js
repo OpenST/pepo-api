@@ -6,31 +6,34 @@ const express = require('express'),
   morgan = require('morgan'),
   bodyParser = require('body-parser'),
   helmet = require('helmet'),
-  //cookieParser = require('cookie-parser'),
   customUrlParser = require('url');
+
+const requestSharedNameSpace = createNamespace('pepoApiNameSpace');
 
 const responseHelper = require(rootPrefix + '/lib/formatter/response'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   customMiddleware = require(rootPrefix + '/helpers/customMiddleware'),
   apiVersions = require(rootPrefix + '/lib/globalConstant/apiVersions'),
   basicHelper = require(rootPrefix + '/helpers/basic'),
+  coreConstants = require(rootPrefix + '/config/coreConstants'),
   sanitizer = require(rootPrefix + '/helpers/sanitizer');
 
 const apiRoutes = require(rootPrefix + '/routes/api/index'),
   ostWebhookRoutes = require(rootPrefix + '/routes/ostWebhook/index'),
   elbHealthCheckerRoute = require(rootPrefix + '/routes/internal/elb_health_checker');
 
-const requestSharedNameSpace = createNamespace('pepoApiNameSpace'),
-  errorConfig = basicHelper.fetchErrorConfig(apiVersions.v1);
+const errorConfig = basicHelper.fetchErrorConfig(apiVersions.v1);
 
 morgan.token('id', function getId(req) {
   return req.id;
 });
 
-morgan.token('endTime', function getendTime(req) {
-  const hrTime = process.hrtime();
+morgan.token('pid', function getId(req) {
+  return process.pid;
+});
 
-  return hrTime[0] * 1000 + hrTime[1] / 1000000;
+morgan.token('endTime', function getendTime(req) {
+  return Date.now();
 });
 
 morgan.token('endDateTime', function getEndDateTime(req) {
@@ -38,15 +41,16 @@ morgan.token('endDateTime', function getEndDateTime(req) {
 });
 
 const startRequestLogLine = function(req, res, next) {
-  const message =
-    "Started '" +
-    customUrlParser.parse(req.originalUrl).pathname +
-    "'  '" +
-    req.method +
-    "' at " +
-    basicHelper.logDateFormat();
+  const message = [
+    "Started '",
+    customUrlParser.parse(req.originalUrl).pathname,
+    "'  '",
+    req.method,
+    "' at ",
+    basicHelper.logDateFormat()
+  ];
 
-  logger.info(message);
+  logger.step(message.join(''));
 
   next();
 };
@@ -93,6 +97,15 @@ const appendRequestDebugInfo = function(req, res, next) {
   });
 };
 
+const setResponseHeader = async function(req, res, next) {
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('Cache-Control', 'no-store, no-cache, max-age=0, must-revalidate, post-check=0, pre-check=0');
+  res.setHeader('Vary', '*');
+  res.setHeader('Expires', '-1');
+  res.setHeader('Last-Modified', new Date().toUTCString());
+  next();
+};
+
 // If the process is not a master
 
 // Set worker process title
@@ -107,7 +120,9 @@ app.use(customMiddleware());
 // Load Morgan
 app.use(
   morgan(
-    '[:id][:endTime] Completed with ":status" in :response-time ms at :endDateTime -  ":res[content-length] bytes" - ":remote-addr" ":remote-user" - "HTTP/:http-version :method :url" - ":referrer" - ":user-agent"'
+    '[:pid][:id][:endTime][' +
+      coreConstants.APP_NAME +
+      '] Completed with ":status" in :response-time ms at :endDateTime -  ":res[content-length] bytes" - ":remote-addr" ":remote-user" - "HTTP/:http-version :method :url" - ":referrer" - ":user-agent"'
   )
 );
 
@@ -126,48 +141,46 @@ app.use(express.static(path.join(__dirname, 'public')));
 // Health checker
 app.use('/health-checker', elbHealthCheckerRoute);
 
+// Start Request logging. Placed below static and health check to reduce logs
+app.use(appendRequestDebugInfo, startRequestLogLine);
+
+// set response Headers
+app.use(setResponseHeader);
+
 /**
  * NOTE: API routes where first sanitize and then assign params
  */
-app.use('/api', startRequestLogLine, appendRequestDebugInfo, sanitizer.sanitizeBodyAndQuery, assignParams, apiRoutes);
+app.use('/api', sanitizer.sanitizeBodyAndQuery, assignParams, apiRoutes);
 
 /**
  * NOTE: OST webhooks where first assign params, validate signature and then sanitize the params
  */
-app.use('/ost-webhook', startRequestLogLine, appendRequestDebugInfo, ostWebhookRoutes);
+app.use('/ost-webhook', ostWebhookRoutes);
 
 // Catch 404 and forward to error handler
 app.use(function(req, res, next) {
-  const message =
-    "Cannot Find '" +
-    customUrlParser.parse(req.originalUrl).pathname +
-    "'  '" +
-    req.method +
-    "' at " +
-    basicHelper.logDateFormat();
-
-  logger.step(message);
-
-  return responseHelper
-    .error({
+  return responseHelper.renderApiResponse(
+    responseHelper.error({
       internal_error_identifier: 'a_1',
       api_error_identifier: 'resource_not_found',
       debug_options: {}
-    })
-    .renderResponse(res, errorConfig);
+    }),
+    res,
+    errorConfig
+  );
 });
 
 // Error handler
-app.use(function(err, req, res, next) {
+app.use(async function(err, req, res, next) {
   logger.error('a_2', 'Something went wrong', err);
 
-  return responseHelper
-    .error({
-      internal_error_identifier: 'a_2',
-      api_error_identifier: 'something_went_wrong',
-      debug_options: {}
-    })
-    .renderResponse(res, errorConfig);
+  let errorObject = responseHelper.error({
+    internal_error_identifier: 'a_2',
+    api_error_identifier: 'something_went_wrong',
+    debug_options: {}
+  });
+
+  return responseHelper.renderApiResponse(errorObject, res, errorConfig);
 });
 
 module.exports = app;

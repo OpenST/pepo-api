@@ -2,7 +2,7 @@ const express = require('express'),
   router = express.Router();
 
 const rootPrefix = '../../..',
-  WrapperFormatter = require(rootPrefix + '/lib/formatter/Wrapper'),
+  FormatterComposer = require(rootPrefix + '/lib/formatter/Composer'),
   routeHelper = require(rootPrefix + '/routes/helper'),
   apiName = require(rootPrefix + '/lib/globalConstant/apiName'),
   sanitizer = require(rootPrefix + '/helpers/sanitizer'),
@@ -14,7 +14,7 @@ router.post('/register-device', sanitizer.sanitizeDynamicUrlParams, function(req
   req.decodedParams.apiName = apiName.registerDevice;
 
   const onServiceSuccess = async function(serviceResponse) {
-    const wrapperFormatterRsp = await new WrapperFormatter({
+    const wrapperFormatterRsp = await new FormatterComposer({
       resultType: responseEntityKey.device,
       entityKindToResponseKeyMap: {
         [entityType.device]: responseEntityKey.device
@@ -33,7 +33,7 @@ router.get('/recovery-info', sanitizer.sanitizeDynamicUrlParams, function(req, r
   req.decodedParams.apiName = apiName.recoveryInfo;
 
   const dataFormatterFunc = async function(serviceResponse) {
-    const wrapperFormatterRsp = await new WrapperFormatter({
+    const wrapperFormatterRsp = await new FormatterComposer({
       resultType: responseEntityKey.recoveryInfo,
       entityKindToResponseKeyMap: {
         [entityType.recoveryInfo]: responseEntityKey.recoveryInfo
@@ -52,7 +52,7 @@ router.get('/', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.users;
 
   const dataFormatterFunc = async function(serviceResponse) {
-    const wrapperFormatterRsp = await new WrapperFormatter({
+    const wrapperFormatterRsp = await new FormatterComposer({
       resultType: responseEntityKey.users,
       entityKindToResponseKeyMap: {
         [entityType.users]: responseEntityKey.users,
@@ -72,7 +72,7 @@ router.get('/current', sanitizer.sanitizeDynamicUrlParams, function(req, res, ne
   req.decodedParams.apiName = apiName.loggedInUser;
 
   const dataFormatterFunc = async function(serviceResponse) {
-    const wrapperFormatterRsp = await new WrapperFormatter({
+    const wrapperFormatterRsp = await new FormatterComposer({
       resultType: responseEntityKey.loggedInUser,
       entityKindToResponseKeyMap: {
         [entityType.user]: responseEntityKey.loggedInUser
@@ -84,6 +84,30 @@ router.get('/current', sanitizer.sanitizeDynamicUrlParams, function(req, res, ne
   };
 
   Promise.resolve(routeHelper.perform(req, res, next, '/user/CurrentUser', 'r_a_v1_u_4', null, dataFormatterFunc));
+});
+
+/* User Feeds*/
+router.get('/:user_id/feeds', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.userFeed;
+  req.decodedParams.user_id = req.params.user_id;
+
+  const dataFormatterFunc = async function(serviceResponse) {
+    const wrapperFormatterRsp = await new FormatterComposer({
+      resultType: responseEntityKey.userFeed,
+      entityKindToResponseKeyMap: {
+        [entityType.userFeedList]: responseEntityKey.userFeed,
+        [entityType.ostTransactionMap]: responseEntityKey.ostTransaction,
+        [entityType.externalEntityGifMap]: responseEntityKey.gifs,
+        [entityType.usersMap]: responseEntityKey.users,
+        [entityType.feedListMeta]: responseEntityKey.meta
+      },
+      serviceData: serviceResponse.data
+    }).perform();
+
+    serviceResponse.data = wrapperFormatterRsp.data;
+  };
+
+  Promise.resolve(routeHelper.perform(req, res, next, '/feed/User', 'r_a_v1_u_5', null, dataFormatterFunc));
 });
 
 module.exports = router;

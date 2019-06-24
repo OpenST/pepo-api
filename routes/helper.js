@@ -44,24 +44,20 @@ class RoutesHelper {
 
     return oThis
       .asyncPerform(req, res, next, serviceGetter, afterValidationCallback, onServiceSuccess, onServiceFailure)
-      .catch(function(error) {
+      .catch(async function(error) {
+        let errorObject = error;
+
         if (responseHelper.isCustomResult(error)) {
-          error.renderResponse(res, errorConfig);
+          responseHelper.renderApiResponse(error, res, errorConfig);
         } else {
-          const errorObject = responseHelper.error({
+          errorObject = responseHelper.error({
             internal_error_identifier: `unhandled_catch_response:r_h:${errorCode}`,
             api_error_identifier: 'unhandled_catch_response',
             debug_options: {}
           });
           logger.error(errorCode, 'Something went wrong', error);
 
-          responseHelper
-            .error({
-              internal_error_identifier: errorCode,
-              api_error_identifier: 'unhandled_catch_response',
-              debug_options: {}
-            })
-            .renderResponse(res, errorConfig);
+          responseHelper.renderApiResponse(errorObject, res, errorConfig);
         }
       });
   }
@@ -116,7 +112,7 @@ class RoutesHelper {
         await onServiceFailure(response);
       }
 
-      response.renderResponse(res, errorConfig);
+      responseHelper.renderApiResponse(response, res, errorConfig);
     };
 
     let Service;

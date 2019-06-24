@@ -1,392 +1,593 @@
 {
 	"info": {
-		"_postman_id": "cc02ef31-d2b4-4680-bfca-f997ff422abe",
+		"_postman_id": "a8a13720-6130-439b-88ad-24399f8032fb",
 		"name": "pepo-api",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [
 		{
-			"name": "sign-up",
-			"request": {
-				"method": "POST",
-				"header": [
-					{
-						"key": "Content-Type",
-						"name": "Content-Type",
-						"value": "application/x-www-form-urlencoded",
-						"type": "text"
-					}
-				],
-				"body": {
-					"mode": "urlencoded",
-					"urlencoded": [
-						{
-							"key": "user_name",
-							"value": "ankit123",
-							"type": "text"
+			"name": "auth",
+			"item": [
+				{
+					"name": "sign-up",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/x-www-form-urlencoded",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "user_name",
+									"value": "ankit123",
+									"type": "text"
+								},
+								{
+									"key": "password",
+									"value": "12345678",
+									"type": "text"
+								},
+								{
+									"key": "first_name",
+									"value": "Ankit",
+									"type": "text"
+								},
+								{
+									"key": "last_name",
+									"value": "Singh",
+									"type": "text"
+								}
+							]
 						},
-						{
-							"key": "password",
-							"value": "12345678",
-							"type": "text"
-						},
-						{
-							"key": "first_name",
-							"value": "Ankit",
-							"type": "text"
-						},
-						{
-							"key": "last_name",
-							"value": "Singh",
-							"type": "text"
+						"url": {
+							"raw": "{{api_server}}/api/v1/auth/sign-up",
+							"host": [
+								"{{api_server}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"sign-up"
+							]
 						}
-					]
+					},
+					"response": []
 				},
-				"url": {
-					"raw": "{{api_server}}/api/v1/auth/sign-up",
-					"host": [
-						"{{api_server}}"
-					],
-					"path": [
-						"api",
-						"v1",
-						"auth",
-						"sign-up"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "login",
-			"request": {
-				"method": "POST",
-				"header": [
-					{
-						"key": "Content-Type",
-						"name": "Content-Type",
-						"type": "text",
-						"value": "application/x-www-form-urlencoded"
-					}
-				],
-				"body": {
-					"mode": "urlencoded",
-					"urlencoded": [
-						{
-							"key": "user_name",
-							"value": "ankit123",
-							"type": "text"
+				{
+					"name": "login",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/x-www-form-urlencoded"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "user_name",
+									"value": "ankit123",
+									"type": "text"
+								},
+								{
+									"key": "password",
+									"value": "12345678",
+									"type": "text"
+								}
+							]
 						},
-						{
-							"key": "password",
-							"value": "12345678",
-							"type": "text"
+						"url": {
+							"raw": "{{api_server}}/api/v1/auth/login",
+							"host": [
+								"{{api_server}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"login"
+							]
 						}
-					]
+					},
+					"response": []
 				},
-				"url": {
-					"raw": "{{api_server}}/api/v1/auth/login",
-					"host": [
-						"{{api_server}}"
-					],
-					"path": [
-						"api",
-						"v1",
-						"auth",
-						"login"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "user-list",
-			"request": {
-				"method": "POST",
-				"header": [
-					{
-						"key": "Content-Type",
-						"name": "Content-Type",
-						"type": "text",
-						"value": "application/x-www-form-urlencoded"
-					}
-				],
-				"body": {
-					"mode": "urlencoded",
-					"urlencoded": [
-						{
-							"key": "device_address",
-							"value": "0xC295795a74e9c2f63eB57a1E6731CB2156f5f482",
-							"type": "text"
+				{
+					"name": "logout",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/x-www-form-urlencoded"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": []
 						},
-						{
-							"key": "api_signer_address",
-							"value": "0xA5334b78629AA4E24713Db0D73dF3253D34b48f4",
-							"type": "text"
+						"url": {
+							"raw": "{{api_server}}/api/v1/auth/logout",
+							"host": [
+								"{{api_server}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"logout"
+							]
 						}
-					]
-				},
-				"url": {
-					"raw": "{{api_server}}/api/v1/users/register-device",
-					"host": [
-						"{{api_server}}"
-					],
-					"path": [
-						"api",
-						"v1",
-						"users",
-						"register-device"
-					]
+					},
+					"response": []
 				}
-			},
-			"response": []
+			]
 		},
 		{
-			"name": "register-device",
-			"request": {
-				"method": "POST",
-				"header": [
-					{
-						"key": "Content-Type",
-						"name": "Content-Type",
-						"value": "application/x-www-form-urlencoded",
-						"type": "text"
-					}
-				],
-				"body": {
-					"mode": "urlencoded",
-					"urlencoded": [
-						{
-							"key": "device_address",
-							"value": "0xC295795a74e9c2f63eB57a1E6731CB2156f5f482",
-							"type": "text"
-						},
-						{
-							"key": "api_signer_address",
-							"value": "0xA5334b78629AA4E24713Db0D73dF3253D34b48f4",
-							"type": "text"
+			"name": "gifs",
+			"item": [
+				{
+					"name": "gif-categories",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{api_server}}/api/v1/gifs/categories",
+							"host": [
+								"{{api_server}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"gifs",
+								"categories"
+							]
 						}
-					]
+					},
+					"response": []
 				},
-				"url": {
-					"raw": "{{api_server}}/api/v1/users/register-device",
-					"host": [
-						"{{api_server}}"
-					],
-					"path": [
-						"api",
-						"v1",
-						"users",
-						"register-device"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Webhook-activate-user-success",
-			"request": {
-				"method": "POST",
-				"header": [
-					{
-						"key": "Content-Type",
-						"name": "Content-Type",
-						"value": "application/json",
-						"type": "text"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{ \"id\": \"28262d90-4545-424d-8422-74d4df5cc963\",\n  \"topic\": \"users/activation_success\",\n  \"created_at\": 1560164197,\n  \"webhook_id\": \"96f9ff47-5dc8-432f-9a6c-1c79e0cf3bd0\",\n  \"version\": \"2\",\n  \"data\": \n   { \"result_type\": \"user\",\n     \"user\": \n      { \"id\": \"2e0f3041-026a-4be3-b1d2-791c98565219\",\n        \"token_id\": 1128,\n        \"token_holder_address\": \"0x55fc5e23f3ae102f5615f6c7cefaf414922322fe\",\n        \"device_manager_address\": \"0x5ac584e41ec36b16015f86ebff94dcc668a3e457\",\n        \"recovery_address\": \"0x15d3f1825d193d9b688c8dfa3c4234a05e79a092\",\n        \"recovery_owner_address\": \"0x49a74de62e7db11dcc1010780d0699b5bf83c2ac\",\n        \"type\": \"user\",\n        \"status\": \"ACTIVATED\",\n        \"updated_timestamp\": 1560164197 } } }"
+				{
+					"name": "gif-search",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{api_server}}/api/v1/gifs/search?query=love",
+							"host": [
+								"{{api_server}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"gifs",
+								"search"
+							],
+							"query": [
+								{
+									"key": "query",
+									"value": "love"
+								}
+							]
+						}
+					},
+					"response": []
 				},
-				"url": {
-					"raw": "{{api_server}}/ost-webhook/v2",
-					"host": [
-						"{{api_server}}"
-					],
-					"path": [
-						"ost-webhook",
-						"v2"
-					]
+				{
+					"name": "gif-trending",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{api_server}}/api/v1/gifs/trending",
+							"host": [
+								"{{api_server}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"gifs",
+								"trending"
+							]
+						}
+					},
+					"response": []
 				}
-			},
-			"response": []
-		},
-		{
-			"name": "Webhook-Airdrop-success",
-			"request": {
-				"method": "POST",
-				"header": [
-					{
-						"key": "Content-Type",
-						"name": "Content-Type",
-						"type": "text",
-						"value": "application/json"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "\n{\n    \"id\": \"29262d00-4545-424d-8422-74d4df5cc963\",\n    \"topic\": \"transactions/success\",\n    \"webhook_id\": \"ncse-42jkrbw-32bekjq3-23jheb423q\",\n    \"created_at\": 1552536269,\n    \"version\": \"2\",\n    \"data\": {\n        \"result_type\": \"transaction\",\n        \"transaction\": {\n            \"id\":\"e2c6cba9-ef2a-4da2-8a23-f6b3421a938c\",\n            \"transaction_hash\":\"0xa9632350057c2226c5a10418b1c3bc9acdf7e2ee\",\n            \"from\":\"0x55fc5e23f3ae102f5615f6c7cefaf414922322fe\",\n            \"to\":\"0xa9632350057c2226c5a10418b1c3bc9acdf7e2ee\",\n            \"nonce\":1,\n            \"value\":1000000000,\n            \"gas_price\":\"1000000000\",\n            \"gas_used\":1,\n            \"transaction_fee\":1,\n            \"block_confirmation\":12,\n            \"status\":\"CREATED\",\n            \"updated_timestamp\":1552536269,\n            \"block_timestamp\":1552536269,\n            \"block_number\":1552536269,\n            \"rule_name\":\"\",\n            \"meta_property\":{\n              \"name\":\"UserActivateAirdrop\",\n              \"type\":\"company_to_user\",\n              \"details\":\"Welcome\"\n            },\n            \"transfers\":[\n                {\n                \"from\":\"0xa9632350057c2226c5a10418b1c3bc9acdf7e2ee\",\n                \"from_user_id\":\"724ed66c-8a0a-477e-b303-b0486e2a3797\",\n                \"to\":\"0xc3b9b4a5c1997d73cd8d9d0fb95aa945e68e0496\",\n                \"to_user_id\":\"9e847ac4-1bd8-498f-b601-51a56bbca076\",\n                \"kind\":\"transfer\"\n                }\n            ]\n        }\n    }\n}   "
-				},
-				"url": {
-					"raw": "{{api_server}}/ost-webhook/v2",
-					"host": [
-						"{{api_server}}"
-					],
-					"path": [
-						"ost-webhook",
-						"v2"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Webhook-User-Transaction-success Copy",
-			"request": {
-				"method": "POST",
-				"header": [
-					{
-						"key": "Content-Type",
-						"name": "Content-Type",
-						"type": "text",
-						"value": "application/json"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "\n{\n    \"id\": \"29262d00-4545-424d-8422-74d4df5cc966\",\n    \"topic\": \"transactions/success\",\n    \"webhook_id\": \"ncse-42jkrbw-32bekjq3-23jheb423q\",\n    \"created_at\": 1552536269,\n    \"version\": \"2\",\n    \"data\": {\n        \"result_type\": \"transaction\",\n        \"transaction\": {\n            \"id\":\"e2c6cba9-ef2a-4da2-8a23-f6b3421a938t\",\n            \"transaction_hash\":\"0xa9632350057c2226c5a10418b1c3bc9acdf7e2ee\",\n            \"from\":\"0x55fc5e23f3ae102f5615f6c7cefaf414922322fe\",\n            \"to\":\"0xa9632350057c2226c5a10418b1c3bc9acdf7e2ee\",\n            \"nonce\":1,\n            \"value\":1000000000,\n            \"gas_price\":\"1000000000\",\n            \"gas_used\":1,\n            \"transaction_fee\":1,\n            \"block_confirmation\":12,\n            \"status\":\"SUCCESS\",\n            \"updated_timestamp\":1552536269,\n            \"block_timestamp\":1552536269,\n            \"block_number\":1552536269,\n            \"rule_name\":\"\",\n            \"transfers\":[\n                {\n                \"from\":\"0xa9632350057c2226c5a10418b1c3bc9acdf7e2ee\",\n                \"from_user_id\":\"724ed66c-8a0a-477e-b303-b0486e2a3797\",\n                \"to\":\"0xc3b9b4a5c1997d73cd8d9d0fb95aa945e68e0496\",\n                \"to_user_id\":\"9e847ac4-1bd8-498f-b601-51a56bbca076\",\n                \"kind\":\"transfer\"\n                }\n            ]\n        }\n    }\n}   "
-				},
-				"url": {
-					"raw": "{{api_server}}/ost-webhook/v2",
-					"host": [
-						"{{api_server}}"
-					],
-					"path": [
-						"ost-webhook",
-						"v2"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Webhook-Airdrop-failed",
-			"request": {
-				"method": "POST",
-				"header": [
-					{
-						"key": "Content-Type",
-						"name": "Content-Type",
-						"type": "text",
-						"value": "application/json"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n    \"id\": \"29262d00-4545-424d-8422-74d4df5cc965\",\n    \"topic\": \"transactions/failure\",\n    \"webhook_id\": \"ncse-42jkrbw-32bekjq3-23jheb423q\",\n    \"created_at\": 1552536269,\n    \"version\": \"2\",\n    \"data\": {\n        \"result_type\": \"transaction\",\n        \"transaction\": {\n            \"id\":\"e2c6cba9-ef2a-4da2-8a23-f6b3421a938c\",\n            \"transaction_hash\":\"0xa9632350057c2226c5a10418b1c3bc9acdf7e2ee\",\n            \"from\":\"0x81b7e08f65bdf5648606c89998a9cc8164397647\",\n            \"to\":\"0x81b7e08f65bdf5648606c89998a9cc8164397647\",\n            \"nonce\":1,\n            \"value\":1000000000,\n            \"gas_price\":\"1000000000\",\n            \"gas_used\":1,\n            \"transaction_fee\":1,\n            \"block_confirmation\":12,\n            \"status\":\"FAILED\",\n            \"updated_timestamp\":1552536269,\n            \"block_timestamp\":1552536269,\n            \"block_number\":1552536269,\n            \"rule_name\":\"\",\n            \"meta_property\":{\n              \"name\":\"UserActivateAirdrop\",\n              \"type\":\"company_to_user\",\n              \"details\":\"Welcome\"\n            },\n            \"transfers\":[]\n        }\n    }\n}  "
-				},
-				"url": {
-					"raw": "{{api_server}}/ost-webhook/v2",
-					"host": [
-						"{{api_server}}"
-					],
-					"path": [
-						"ost-webhook",
-						"v2"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Webhook-User-Transaction-failed Copy",
-			"request": {
-				"method": "POST",
-				"header": [
-					{
-						"key": "Content-Type",
-						"name": "Content-Type",
-						"type": "text",
-						"value": "application/json"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n    \"id\": \"29262d00-4545-424d-8422-74d4df5cc965\",\n    \"topic\": \"transactions/failure\",\n    \"webhook_id\": \"ncse-42jkrbw-32bekjq3-23jheb423q\",\n    \"created_at\": 1552536269,\n    \"version\": \"2\",\n    \"data\": {\n        \"result_type\": \"transaction\",\n        \"transaction\": {\n            \"id\":\"e2c6cba9-ef2a-4da2-8a23-f6b3421a938t\",\n            \"transaction_hash\":\"0xa9632350057c2226c5a10418b1c3bc9acdf7e2ee\",\n            \"from\":\"0x81b7e08f65bdf5648606c89998a9cc8164397647\",\n            \"to\":\"0x81b7e08f65bdf5648606c89998a9cc8164397647\",\n            \"nonce\":1,\n            \"value\":1000000000,\n            \"gas_price\":\"1000000000\",\n            \"gas_used\":1,\n            \"transaction_fee\":1,\n            \"block_confirmation\":12,\n            \"status\":\"FAILED\",\n            \"updated_timestamp\":1552536269,\n            \"block_timestamp\":1552536269,\n            \"block_number\":1552536269,\n            \"rule_name\":\"\",\n            \"transfers\":[]\n        }\n    }\n}  "
-				},
-				"url": {
-					"raw": "{{api_server}}/ost-webhook/v2",
-					"host": [
-						"{{api_server}}"
-					],
-					"path": [
-						"ost-webhook",
-						"v2"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "recovery-info",
-			"request": {
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "{{api_server}}/api/v1/users/recovery-info",
-					"host": [
-						"{{api_server}}"
-					],
-					"path": [
-						"api",
-						"v1",
-						"users",
-						"recovery-info"
-					]
-				}
-			},
-			"response": []
+			]
 		},
 		{
 			"name": "token",
-			"request": {
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "{{api_server}}/api/v1/tokens/",
-					"host": [
-						"{{api_server}}"
-					],
-					"path": [
-						"api",
-						"v1",
-						"tokens",
-						""
-					]
+			"item": [
+				{
+					"name": "token",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{api_server}}/api/v1/tokens/",
+							"host": [
+								"{{api_server}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"tokens",
+								""
+							]
+						}
+					},
+					"response": []
 				}
-			},
-			"response": []
+			]
 		},
 		{
-			"name": "logged-in-user",
-			"request": {
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "{{api_server}}/api/v1/users/current",
-					"host": [
-						"{{api_server}}"
-					],
-					"path": [
-						"api",
-						"v1",
-						"users",
-						"current"
-					]
+			"name": "users",
+			"item": [
+				{
+					"name": "recovery-info",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{api_server}}/api/v1/users/recovery-info",
+							"host": [
+								"{{api_server}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"users",
+								"recovery-info"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "user-list",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{api_server}}/api/v1/users",
+							"host": [
+								"{{api_server}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"users"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "register-device",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/x-www-form-urlencoded",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "device_address",
+									"value": "0xC295795a74e9c2f63eB57a1E6731CB2156f5f482",
+									"type": "text"
+								},
+								{
+									"key": "api_signer_address",
+									"value": "0xA5334b78629AA4E24713Db0D73dF3253D34b48f4",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{api_server}}/api/v1/users/register-device",
+							"host": [
+								"{{api_server}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"users",
+								"register-device"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "logged-in-user",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{api_server}}/api/v1/users/current",
+							"host": [
+								"{{api_server}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"users",
+								"current"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "personal-user-feed",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{api_server}}/api/v1/users/1000/feeds",
+							"host": [
+								"{{api_server}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"users",
+								"1000",
+								"feeds"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "other-user-feed",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{api_server}}/api/v1/users/1001/feeds?",
+							"host": [
+								"{{api_server}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"users",
+								"1001",
+								"feeds"
+							]
+						}
+					},
+					"response": []
 				}
-			},
-			"response": []
+			]
+		},
+		{
+			"name": "webhook",
+			"item": [
+				{
+					"name": "activate-user-success",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{ \"id\": \"28262d90-4545-424d-8422-74d4df5cc963\",\n  \"topic\": \"users/activation_success\",\n  \"created_at\": 1560164197,\n  \"webhook_id\": \"96f9ff47-5dc8-432f-9a6c-1c79e0cf3bd0\",\n  \"version\": \"2\",\n  \"data\": \n   { \"result_type\": \"user\",\n     \"user\": \n      { \"id\": \"2e0f3041-026a-4be3-b1d2-791c98565219\",\n        \"token_id\": 1128,\n        \"token_holder_address\": \"0x55fc5e23f3ae102f5615f6c7cefaf414922322fe\",\n        \"device_manager_address\": \"0x5ac584e41ec36b16015f86ebff94dcc668a3e457\",\n        \"recovery_address\": \"0x15d3f1825d193d9b688c8dfa3c4234a05e79a092\",\n        \"recovery_owner_address\": \"0x49a74de62e7db11dcc1010780d0699b5bf83c2ac\",\n        \"type\": \"user\",\n        \"status\": \"ACTIVATED\",\n        \"updated_timestamp\": 1560164197 } } }"
+						},
+						"url": {
+							"raw": "{{api_server}}/ost-webhook/v2",
+							"host": [
+								"{{api_server}}"
+							],
+							"path": [
+								"ost-webhook",
+								"v2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "airdrop-success",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "\n{\n    \"id\": \"29262d00-4545-424d-8422-74d4df5cc963\",\n    \"topic\": \"transactions/success\",\n    \"webhook_id\": \"ncse-42jkrbw-32bekjq3-23jheb423q\",\n    \"created_at\": 1552536269,\n    \"version\": \"2\",\n    \"data\": {\n        \"result_type\": \"transaction\",\n        \"transaction\": {\n            \"id\":\"e2c6cba9-ef2a-4da2-8a23-f6b3421a938c\",\n            \"transaction_hash\":\"0xa9632350057c2226c5a10418b1c3bc9acdf7e2ee\",\n            \"from\":\"0x55fc5e23f3ae102f5615f6c7cefaf414922322fe\",\n            \"to\":\"0xa9632350057c2226c5a10418b1c3bc9acdf7e2ee\",\n            \"nonce\":1,\n            \"value\":1000000000,\n            \"gas_price\":\"1000000000\",\n            \"gas_used\":1,\n            \"transaction_fee\":1,\n            \"block_confirmation\":12,\n            \"status\":\"CREATED\",\n            \"updated_timestamp\":1552536269,\n            \"block_timestamp\":1552536269,\n            \"block_number\":1552536269,\n            \"rule_name\":\"\",\n            \"meta_property\":{\n              \"name\":\"UserActivateAirdrop\",\n              \"type\":\"company_to_user\",\n              \"details\":\"Welcome\"\n            },\n            \"transfers\":[\n                {\n                \"from\":\"0xa9632350057c2226c5a10418b1c3bc9acdf7e2ee\",\n                \"from_user_id\":\"724ed66c-8a0a-477e-b303-b0486e2a3797\",\n                \"to\":\"0xc3b9b4a5c1997d73cd8d9d0fb95aa945e68e0496\",\n                \"to_user_id\":\"9e847ac4-1bd8-498f-b601-51a56bbca076\",\n                \"kind\":\"transfer\"\n                }\n            ]\n        }\n    }\n}   "
+						},
+						"url": {
+							"raw": "{{api_server}}/ost-webhook/v2",
+							"host": [
+								"{{api_server}}"
+							],
+							"path": [
+								"ost-webhook",
+								"v2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "user-Transaction-success",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "\n{\n    \"id\": \"29262d00-4545-424d-8422-74d4df5cc966\",\n    \"topic\": \"transactions/success\",\n    \"webhook_id\": \"ncse-42jkrbw-32bekjq3-23jheb423q\",\n    \"created_at\": 1552536269,\n    \"version\": \"2\",\n    \"data\": {\n        \"result_type\": \"transaction\",\n        \"transaction\": {\n            \"id\":\"e2c6cba9-ef2a-4da2-8a23-f6b3421a938t\",\n            \"transaction_hash\":\"0xa9632350057c2226c5a10418b1c3bc9acdf7e2ee\",\n            \"from\":\"0x55fc5e23f3ae102f5615f6c7cefaf414922322fe\",\n            \"to\":\"0xa9632350057c2226c5a10418b1c3bc9acdf7e2ee\",\n            \"nonce\":1,\n            \"value\":1000000000,\n            \"gas_price\":\"1000000000\",\n            \"gas_used\":1,\n            \"transaction_fee\":1,\n            \"block_confirmation\":12,\n            \"status\":\"SUCCESS\",\n            \"updated_timestamp\":1552536269,\n            \"block_timestamp\":1552536269,\n            \"block_number\":1552536269,\n            \"rule_name\":\"\",\n            \"transfers\":[\n                {\n                \"from\":\"0xa9632350057c2226c5a10418b1c3bc9acdf7e2ee\",\n                \"from_user_id\":\"724ed66c-8a0a-477e-b303-b0486e2a3797\",\n                \"to\":\"0xc3b9b4a5c1997d73cd8d9d0fb95aa945e68e0496\",\n                \"to_user_id\":\"9e847ac4-1bd8-498f-b601-51a56bbca076\",\n                \"kind\":\"transfer\"\n                }\n            ]\n        }\n    }\n}   "
+						},
+						"url": {
+							"raw": "{{api_server}}/ost-webhook/v2",
+							"host": [
+								"{{api_server}}"
+							],
+							"path": [
+								"ost-webhook",
+								"v2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "airdrop-failed",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"id\": \"29262d00-4545-424d-8422-74d4df5cc965\",\n    \"topic\": \"transactions/failure\",\n    \"webhook_id\": \"ncse-42jkrbw-32bekjq3-23jheb423q\",\n    \"created_at\": 1552536269,\n    \"version\": \"2\",\n    \"data\": {\n        \"result_type\": \"transaction\",\n        \"transaction\": {\n            \"id\":\"e2c6cba9-ef2a-4da2-8a23-f6b3421a938c\",\n            \"transaction_hash\":\"0xa9632350057c2226c5a10418b1c3bc9acdf7e2ee\",\n            \"from\":\"0x81b7e08f65bdf5648606c89998a9cc8164397647\",\n            \"to\":\"0x81b7e08f65bdf5648606c89998a9cc8164397647\",\n            \"nonce\":1,\n            \"value\":1000000000,\n            \"gas_price\":\"1000000000\",\n            \"gas_used\":1,\n            \"transaction_fee\":1,\n            \"block_confirmation\":12,\n            \"status\":\"FAILED\",\n            \"updated_timestamp\":1552536269,\n            \"block_timestamp\":1552536269,\n            \"block_number\":1552536269,\n            \"rule_name\":\"\",\n            \"meta_property\":{\n              \"name\":\"UserActivateAirdrop\",\n              \"type\":\"company_to_user\",\n              \"details\":\"Welcome\"\n            },\n            \"transfers\":[]\n        }\n    }\n}  "
+						},
+						"url": {
+							"raw": "{{api_server}}/ost-webhook/v2",
+							"host": [
+								"{{api_server}}"
+							],
+							"path": [
+								"ost-webhook",
+								"v2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "user-transaction-failed",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"id\": \"29262d00-4545-424d-8422-74d4df5cc965\",\n    \"topic\": \"transactions/failure\",\n    \"webhook_id\": \"ncse-42jkrbw-32bekjq3-23jheb423q\",\n    \"created_at\": 1552536269,\n    \"version\": \"2\",\n    \"data\": {\n        \"result_type\": \"transaction\",\n        \"transaction\": {\n            \"id\":\"e2c6cba9-ef2a-4da2-8a23-f6b3421a938t\",\n            \"transaction_hash\":\"0xa9632350057c2226c5a10418b1c3bc9acdf7e2ee\",\n            \"from\":\"0x81b7e08f65bdf5648606c89998a9cc8164397647\",\n            \"to\":\"0x81b7e08f65bdf5648606c89998a9cc8164397647\",\n            \"nonce\":1,\n            \"value\":1000000000,\n            \"gas_price\":\"1000000000\",\n            \"gas_used\":1,\n            \"transaction_fee\":1,\n            \"block_confirmation\":12,\n            \"status\":\"FAILED\",\n            \"updated_timestamp\":1552536269,\n            \"block_timestamp\":1552536269,\n            \"block_number\":1552536269,\n            \"rule_name\":\"\",\n            \"transfers\":[]\n        }\n    }\n}  "
+						},
+						"url": {
+							"raw": "{{api_server}}/ost-webhook/v2",
+							"host": [
+								"{{api_server}}"
+							],
+							"path": [
+								"ost-webhook",
+								"v2"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "transaction",
+			"item": [
+				{
+					"name": "ost-transaction",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"ost_transaction\": {\n            \"id\": \"8a15c59c-674c-449f-8f0e-dec613d4c6b6\",\n            \"transaction_hash\": null,\n            \"from\": null,\n            \"to\": \"0x5ca103d5db984993de179cab0ce112a7763db4d7\",\n            \"nonce\": null,\n            \"value\": null,\n            \"gas_price\": \"1000000000\",\n            \"gas_used\": null,\n            \"transaction_fee\": null,\n            \"block_confirmation\": null,\n            \"status\": \"CREATED\",\n            \"updated_timestamp\": 1560753926,\n            \"block_timestamp\": null,\n            \"block_number\": null,\n            \"rule_name\": null,\n            \"meta_property\": {},\n            \"transfers\": [\n                {\n                    \"from\": \"0x5ca103d5db984993de179cab0ce112a7763db4d7\",\n                    \"from_user_id\": \"191a361f-43d7-4bf9-a981-245fde53d1c8\",\n                    \"to\": \"0x561f497a5d2b8529128086de4917aa1fa7e096c6\",\n                    \"to_user_id\": \"f9fbcb3d-165a-4b3e-a613-879c1bf7c36b\",\n                    \"amount\": \"2\",\n                    \"kind\": \"transfer\"\n                }\n            ]\n        },\n\t\"privacy_type\": \"PUBLIC\",\n\t\"meta\": {\n\t\t\"text\": \"yaa\",\n\t\t\"giphy\": {\n                \"id\": \"3ohhwAADQcO4Ti5LSo\",\n                \"kind\": \"gif\",\n                \"fixed_width_downsampled\": {\n                    \"media_id\": \"3ohhwAADQcO4Ti5LSo\",\n                    \"rendition_type\": \"fixed_width_downsampled\",\n                    \"url\": \"https://media2.giphy.com/media/3ohhwAADQcO4Ti5LSo/200w_d.gif?cid=3f796fa35d0742a12f435a463686e664&rid=200w_d.gif\",\n                    \"width\": \"200\",\n                    \"height\": \"194\",\n                    \"size\": \"83811\",\n                    \"frames\": null,\n                    \"mp4\": null,\n                    \"mp4_size\": null,\n                    \"webp\": \"https://media2.giphy.com/media/3ohhwAADQcO4Ti5LSo/200w_d.webp?cid=3f796fa35d0742a12f435a463686e664&rid=200w_d.webp\",\n                    \"webp_size\": \"16726\"\n                },\n                \"downsized\": {\n                    \"media_id\": \"3ohhwAADQcO4Ti5LSo\",\n                    \"rendition_type\": \"downsized\",\n                    \"url\": \"https://media2.giphy.com/media/3ohhwAADQcO4Ti5LSo/giphy-downsized.gif?cid=3f796fa35d0742a12f435a463686e664&rid=giphy-downsized.gif\",\n                    \"width\": \"250\",\n                    \"height\": \"241\",\n                    \"size\": \"660501\",\n                    \"frames\": null,\n                    \"mp4\": null,\n                    \"mp4_size\": null,\n                    \"webp\": null,\n                    \"webp_size\": null\n                }\n            }\n       \n\t}\n}"
+						},
+						"url": {
+							"raw": "{{api_server}}/api/v1/ost-transactions",
+							"host": [
+								"{{api_server}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"ost-transactions"
+							]
+						},
+						"description": "ost-transaction"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "feeds",
+			"item": [
+				{
+					"name": "public-feed",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{api_server}}/api/v1/feeds",
+							"host": [
+								"{{api_server}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"feeds"
+							]
+						}
+					},
+					"response": []
+				}
+			]
 		}
 	]
 }

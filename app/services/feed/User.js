@@ -1,176 +1,168 @@
 const rootPrefix = '../../..',
-  logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
-  ServiceBase = require(rootPrefix + '/app/services/Base'),
-  pagination = require(rootPrefix + '/lib/globalConstant/pagination'),
-  UserFeedModal = require(rootPrefix + '/app/models/mysql/UserFeed'),
+  FeedServiceBase = require(rootPrefix + '/app/services/feed/Base'),
+  UserFeedModel = require(rootPrefix + '/app/models/mysql/UserFeed'),
+  UserCache = require(rootPrefix + '/lib/cacheManagement/multi/User'),
   FeedByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/FeedByIds'),
-  responseHelper = require(rootPrefix + '/lib/formatter/response');
+  responseHelper = require(rootPrefix + '/lib/formatter/response'),
+  paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination');
 
 /**
- * Class for User Feed
+ * Class for user feed service.
  *
- * @class
+ * @class UserFeed
  */
-class UserFeed extends ServiceBase {
+class UserFeed extends FeedServiceBase {
   /**
-   * Constructor for user feed
+   * Constructor for user feed service.
    *
-   * @param params
+   * @param {object} params
+   * @param {object} params.current_user
+   * @param {string/number} params.current_user.id
+   * @param {string/number} params.user_id
+   * @param {string} [params.pagination_identifier]
    *
+   * @augments FeedServiceBase
    */
   constructor(params) {
     super(params);
 
     const oThis = this;
 
-    oThis.current_user = params.current_user;
-    oThis.currentUserId = oThis.current_user.id;
-    oThis.limit = params.limit;
-    oThis.paginationIdentifier = params[pagination.paginationIdentifierKey] || null;
+    oThis.currentUserId = +params.current_user.id;
+    oThis.profileUserId = +params.user_id;
 
-    oThis.page = null;
-    oThis.responseMetaData = {
-      [pagination.nextPagePayloadKey]: {}
-    };
+    oThis.isCurrentUser = oThis.currentUserId === oThis.profileUserId;
   }
 
   /**
-   * Async Perform
+   * Validate and sanitize params. This method validates the profileUserId and performs some
+   * other validations of base class.
    *
-   * @returns {Promise<void>}
-   * @private
-   */
-  async _asyncPerform() {
-    const oThis = this;
-
-    await oThis._validateAndSanitizeParams();
-
-    let userFeed = await oThis._fetchUserFeed();
-
-    oThis._setMeta();
-
-    let finalResponse = {
-      users: userFeed,
-      meta: oThis.responseMetaData
-    };
-
-    return responseHelper.successWithData(finalResponse);
-  }
-
-  /**
-   * Validate and sanitize specific params
-   *
-   * @returns {Promise<never>}
+   * @returns {Promise<*|Promise<Promise<never>|*>>}
    * @private
    */
   async _validateAndSanitizeParams() {
     const oThis = this;
 
-    if (oThis.paginationIdentifier) {
-      let parsedPaginationParams = oThis._parsePaginationParams(oThis.paginationIdentifier);
-      oThis.page = parsedPaginationParams.page; //override page
-      oThis.limit = parsedPaginationParams.limit; //override limit
+    if (!oThis.isCurrentUser) {
+      const cacheResp = await new UserCache({ ids: [oThis.profileUserId] }).fetch();
+
+      if (cacheResp.isFailure()) {
+        return Promise.reject(cacheResp);
+      }
+    }
+
+    return super._validateAndSanitizeParams();
+  }
+
+  /**
+   * Fetch user feed details.
+   *
+   * @sets oThis.feedIds, oThis.feedIdToFeedDetailsMap, oThis.userFeedIdToFeedDetailsMap
+   *
+   * @returns {Promise<*|result>}
+   * @private
+   */
+  async _fetchFeedDetails() {
+    const oThis = this;
+
+    let modelResp = {};
+
+    const fetchFeedIdsParams = {
+      limit: oThis._currentPageLimit(),
+      paginationTimestamp: oThis.paginationTimestamp,
+      userId: oThis.profileUserId
+    };
+
+    if (oThis.isCurrentUser) {
+      modelResp = await new UserFeedModel()._currentUserFeedIds(fetchFeedIdsParams);
     } else {
-      oThis.page = 1;
-      oThis.limit = oThis.limit || pagination.defaultUserFeedPageSize;
+      modelResp = await new UserFeedModel()._otherUserFeedIds(fetchFeedIdsParams);
     }
 
-    //Validate limit
-    return await oThis._validatePageSize();
-  }
+    oThis.feedIds = modelResp.feedIds;
+    oThis.userFeedIdToFeedDetailsMap = modelResp.userFeedIdToFeedDetailsMap;
+    oThis.lastFeedId = oThis.feedIds[oThis.feedIds.length - 1];
 
-  /**
-   * Fetch user feed
-   *
-   * @return {Result}
-   */
-  async _fetchUserFeed() {
-    const oThis = this;
-
-    // This value is only returned if cache is not set.
-    let feedIds = await new UserFeedModal().fetchFeedIds({
-      limit: oThis.limit,
-      page: oThis.page,
-      userId: oThis.currentUserId
-    });
-
-    let finalResponse = {};
-
-    const FeedByIdsCacheRsp = await new FeedByIdsCache({ ids: feedIds }).fetch(),
-      feedIdToFeedDetailsMap = FeedByIdsCacheRsp.data;
-
-    for (let i = 0; i < feedIds.length; i++) {
-      let feedId = feedIds[i];
-
-      finalResponse[feedId] = feedIdToFeedDetailsMap[feedId];
-      finalResponse[userId]['userName'] = userIdToUserDetailsMap[userId].userName;
-      finalResponse[userId]['firstName'] = userIdToUserDetailsMap[userId].firstName;
-      finalResponse[userId]['lastName'] = userIdToUserDetailsMap[userId].lastName;
+    if (oThis.feedIds.length === 0) {
+      return responseHelper.successWithData(oThis._finalResponse());
     }
 
-    return responseHelper.successWithData(finalResponse);
+    const cacheResp = await new FeedByIdsCache({ ids: oThis.feedIds }).fetch();
+
+    if (cacheResp.isFailure()) {
+      return Promise.reject(cacheResp);
+    }
+
+    oThis.feedIdToFeedDetailsMap = cacheResp.data;
+
+    return responseHelper.successWithData({});
   }
 
   /**
-   * remove current user from final response
+   * Service response.
    *
-   * @param inputDataMap {Object} - input data
+   * @returns {*|result}
    * @private
    */
-  _removeCurrentUserFromResponse(inputDataMap) {
+  _finalResponse() {
     const oThis = this;
 
-    for (let userId in inputDataMap)
-      if (oThis.currentUserId == userId) {
-        delete inputDataMap[userId];
-      }
-  }
+    const nextPagePayloadKey = {};
 
-  /**
-   * Set meta property.
-   *
-   * @private
-   */
-  _setMeta() {
-    const oThis = this;
+    if (oThis.feedIds.length >= oThis.limit) {
+      nextPagePayloadKey[paginationConstants.paginationIdentifierKey] = {
+        // TODO - think on how to remove duplicates.
+        pagination_timestamp: oThis.paginationTimestamp
+      };
+    }
 
-    oThis.responseMetaData[pagination.nextPagePayloadKey] = {
-      [pagination.paginationIdentifierKey]: {
-        page: oThis.page + 1,
-        limit: oThis.limit
-      }
+    const responseMetaData = {
+      profileUserId: oThis.profileUserId,
+      [paginationConstants.nextPagePayloadKey]: nextPagePayloadKey
+    };
+
+    return {
+      feedIds: oThis.feedIds,
+      userFeedIdToFeedDetailsMap: oThis.userFeedIdToFeedDetailsMap,
+      feedIdToFeedDetailsMap: oThis.feedIdToFeedDetailsMap,
+      ostTransactionMap: oThis.ostTransactionMap,
+      externalEntityGifMap: oThis.externalEntityGifMap,
+      usersByIdMap: oThis.usersByIdMap,
+      tokenUsersByUserIdMap: oThis.tokenUsersByUserIdMap,
+      meta: responseMetaData
     };
   }
 
   /**
-   * _defaultPageLimit
+   * Default page limit.
    *
    * @private
    */
   _defaultPageLimit() {
-    return pagination.defaultUserListPageSize;
+    return paginationConstants.defaultUserFeedPageSize;
   }
 
   /**
-   * _minPageLimit
+   * Min page limit.
    *
    * @private
    */
   _minPageLimit() {
-    return pagination.minUserListPageSize;
+    return paginationConstants.minUserFeedPageSize;
   }
 
   /**
-   * _maxPageLimit
+   * Max page limit.
    *
    * @private
    */
   _maxPageLimit() {
-    return pagination.maxUserListPageSize;
+    return paginationConstants.maxUserFeedPageSize;
   }
 
   /**
-   * _currentPageLimit
+   * Current page limit.
    *
    * @private
    */

@@ -1,7 +1,7 @@
 /**
  * One time to seed tokens table.
  *
- * Usage: node executables/oneTimers/seedTokensTable.js --apiKey "bb6740a6ed27452de43c0a5012d8f9be" --apiSecret "aa5298d3a3fe181a3a52d085ee1525df57ac498337f8f3b76ca7df0a5de3211b"
+ * Usage: node executables/oneTimers/seedTokensTable.js --apiKey "566c9bf2338652283c50c326bab27f14" --apiSecret "33f83e788f9ffb7e474656cd52648102903eb090080239956d01701012b4ba92"
  *
  * @module executables/oneTimers/seedTokensTable
  */

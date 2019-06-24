@@ -2,44 +2,34 @@ const express = require('express'),
   router = express.Router();
 
 const rootPrefix = '../../..',
+  FormatterComposer = require(rootPrefix + '/lib/formatter/Composer'),
   routeHelper = require(rootPrefix + '/routes/helper'),
-  apiName = require(rootPrefix + '/lib/globalConstant/apiName'),
   sanitizer = require(rootPrefix + '/helpers/sanitizer'),
-  WrapperFormatter = require(rootPrefix + '/lib/formatter/Wrapper'),
-  entityType = require(rootPrefix + '/lib/globalConstant/entityType');
-
-/* User Feeds*/
-router.get('/my-feed', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
-  req.decodedParams.apiName = apiName.myFeed;
-
-  const dataFormatterFunc = async function(serviceResponse) {
-    const wrapperFormatterRsp = await new WrapperFormatter({
-      resultType: entityType.feeds,
-      entities: [entityType.feeds],
-      serviceData: serviceResponse.data
-    }).perform();
-
-    serviceResponse.data = wrapperFormatterRsp.data;
-  };
-
-  Promise.resolve(routeHelper.perform(req, res, next, '/feed/User', 'r_a_v1_f_1', null, dataFormatterFunc));
-});
+  apiName = require(rootPrefix + '/lib/globalConstant/apiName'),
+  entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
+  responseEntityKey = require(rootPrefix + '/lib/globalConstant/responseEntityKey');
 
 /* Public Feeds*/
-router.get('/public-feed', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+router.get('/', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.publicFeed;
 
   const dataFormatterFunc = async function(serviceResponse) {
-    const wrapperFormatterRsp = await new WrapperFormatter({
-      resultType: entityType.feeds,
-      entities: [entityType.feeds],
+    const wrapperFormatterRsp = await new FormatterComposer({
+      resultType: responseEntityKey.publicFeed,
+      entityKindToResponseKeyMap: {
+        [entityType.feedList]: responseEntityKey.publicFeed,
+        [entityType.ostTransactionMap]: responseEntityKey.ostTransaction,
+        [entityType.externalEntityGifMap]: responseEntityKey.gifs,
+        [entityType.usersMap]: responseEntityKey.users,
+        [entityType.feedListMeta]: responseEntityKey.meta
+      },
       serviceData: serviceResponse.data
     }).perform();
 
     serviceResponse.data = wrapperFormatterRsp.data;
   };
 
-  Promise.resolve(routeHelper.perform(req, res, next, '/feed/Public', 'r_a_v1_f_2', null, dataFormatterFunc));
+  Promise.resolve(routeHelper.perform(req, res, next, '/feed/Public', 'r_a_v1_f_1', null, dataFormatterFunc));
 });
 
 module.exports = router;

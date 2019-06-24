@@ -73,6 +73,10 @@ class RegisterDevice extends ServiceBase {
 
     let tokenUserData = await new TokenUserDetailByUserIdsCache({ userIds: [oThis.userId] }).fetch();
 
+    if (tokenUserData.isFailure()) {
+      return Promise.reject(tokenUserData);
+    }
+
     oThis.ostUserId = tokenUserData.data[oThis.userId].ostUserId;
 
     if (!oThis.ostUserId) {
@@ -101,6 +105,13 @@ class RegisterDevice extends ServiceBase {
     let platformResponse = await jsSdkWrapper.registerDevice(paramsForPlatform);
 
     if (platformResponse.isFailure()) {
+      if (platformResponse.debugOptions.err.code === 'ALREADY_EXISTS') {
+        return responseHelper.error({
+          internal_error_identifier: 'a_s_u_rd_2',
+          api_error_identifier: 'duplicate_entry',
+          debug_options: { err: platformResponse.debugOptions.err }
+        });
+      }
       logger.error('Register device API to platform failed.');
       await createErrorLogsEntry.perform(platformResponse, errorLogsConstants.highSeverity);
       return Promise.reject(platformResponse);

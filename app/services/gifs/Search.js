@@ -6,15 +6,16 @@
 
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
-  GifsCacheKlass = require(rootPrefix + '/lib/cacheManagement/single/GifsByKeyword'),
+  GifsCacheByKeyword = require(rootPrefix + '/lib/cacheManagement/single/GifsByKeyword'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
+  pagination = require(rootPrefix + '/lib/globalConstant/pagination'),
   responseHelper = require(rootPrefix + '/lib/formatter/response');
 
 class GifsSearch extends ServiceBase {
   /**
    * @param {Object} params
    * @param {String} params.query
-   * @param {Number} params.page_number
+   * @param {String} [params.pagination_identifier]
    *
    * @constructor
    */
@@ -23,7 +24,9 @@ class GifsSearch extends ServiceBase {
 
     const oThis = this;
     oThis.query = params.query;
-    oThis.pageNumber = params.page_number;
+    oThis.paginationIdentifier = params[pagination.paginationIdentifierKey] || null;
+
+    oThis.pageNumber = null;
   }
 
   /**
@@ -34,9 +37,28 @@ class GifsSearch extends ServiceBase {
   async _asyncPerform() {
     const oThis = this;
 
+    await oThis._validateAndSanitizeParams();
+
     let response = await oThis._searchGifs();
 
-    return responseHelper.successWithData(response);
+    return responseHelper.successWithData(oThis._finalResponse(response));
+  }
+
+  /**
+   * Validate and sanitize specific params
+   *
+   * @returns {Promise<never>}
+   * @private
+   */
+  async _validateAndSanitizeParams() {
+    const oThis = this;
+
+    if (oThis.paginationIdentifier) {
+      let parsedPaginationParams = oThis._parsePaginationParams(oThis.paginationIdentifier);
+      oThis.pageNumber = parsedPaginationParams.page; //override page
+    } else {
+      oThis.pageNumber = 1;
+    }
   }
 
   /**
@@ -47,7 +69,7 @@ class GifsSearch extends ServiceBase {
    */
   async _searchGifs() {
     const oThis = this;
-    let resp = await new GifsCacheKlass({ query: oThis.query, pageNumber: oThis.pageNumber }).fetch();
+    let resp = await new GifsCacheByKeyword({ query: oThis.query, pageNumber: oThis.pageNumber }).fetch();
 
     if (resp.isFailure()) {
       logger.error('Error while fetching gifs');
@@ -55,6 +77,32 @@ class GifsSearch extends ServiceBase {
     }
 
     return resp.data;
+  }
+
+  /**
+   * Service Response
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  _finalResponse(response) {
+    const oThis = this;
+
+    let nextPagePayloadKey = {};
+
+    if (response.gifs.length != 0) {
+      nextPagePayloadKey[pagination.paginationIdentifierKey] = {
+        page: oThis.pageNumber + 1
+      };
+    }
+
+    let responseMetaData = {
+      [pagination.nextPagePayloadKey]: nextPagePayloadKey
+    };
+
+    response.meta = responseMetaData;
+
+    return response;
   }
 }
 
