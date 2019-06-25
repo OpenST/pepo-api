@@ -40,11 +40,12 @@ class ConfigStrategyModel extends ModelBase {
    *
    * @param {string} kind
    * @param {object} allParams
-   * @param {number} [encryptionSaltId]: presently the id of encryption_salts table
+   * @param {number} encryptionSaltId - presently the id of encryption_salts table
    *
    * @returns {Promise<*>}
    */
-  async create(kind, allParams, encryptionSaltId = 0) {
+  async create(kind, allParams, encryptionSaltId) {
+    // TODO - encryption salt ID is not needed.
     const oThis = this;
 
     const strategyKindIntResp = configStrategyValidator.getStrategyKindInt(kind);
@@ -142,7 +143,7 @@ class ConfigStrategyModel extends ModelBase {
 
     const encryptedKeysFound = false;
 
-    // currently we do not have any config strategy kinds with encrypted parameters
+    // TODO - currently we do not have any config strategy kinds with encrypted parameters
     return {
       hashToEncrypt: encryptedKeysFound ? hashToEncrypt : null,
       hashNotToEncrypt: hashNotToEncrypt
@@ -167,74 +168,6 @@ class ConfigStrategyModel extends ModelBase {
     }
 
     return configSaltResp;
-  }
-
-  /**
-   * Get complete config strategy hash by passing array of strategy ids.
-   *
-   * @param {array} ids
-   *
-   * @returns {Promise<Promise<never>|Promise<{}>>}
-   */
-  async getByIds(ids) {
-    const oThis = this;
-
-    if (ids.length === 0) {
-      return Promise.reject(
-        responseHelper.error({
-          internal_error_identifier: 'a_mo_m_cs_5',
-          api_error_identifier: 'empty_strategy_array',
-          debug_options: {},
-          error_config: errorConfig
-        })
-      );
-    }
-
-    const queryResult = await oThis
-      .select(['id', 'encrypted_params', 'unencrypted_params', 'kind', 'global_salt_id'])
-      .where(['id IN (?)', ids])
-      .fire();
-
-    const decryptedSalts = {},
-      finalResult = {};
-
-    for (let index = 0; index < queryResult.length; index++) {
-      const configStrategy = queryResult[index];
-      // Following logic is added so that decrypt call is not given for already decrypted salts.
-      if (decryptedSalts[configStrategy.global_salt_id] == null) {
-        const response = await oThis._getDecryptedSalt(configStrategy.global_salt_id);
-        if (response.isFailure()) {
-          return Promise.reject(
-            responseHelper.error({
-              internal_error_identifier: 'a_mo_m_cs_6',
-              api_error_identifier: 'something_went_wrong',
-              debug_options: {},
-              error_config: errorConfig
-            })
-          );
-        }
-
-        decryptedSalts[configStrategy.global_salt_id] = response.data.addressSalt;
-      }
-
-      let localDecryptedJsonObj = {};
-
-      if (configStrategy.encrypted_params) {
-        const localDecryptedParams = localCipher.decrypt(
-          decryptedSalts[configStrategy.global_salt_id],
-          configStrategy.encrypted_params
-        );
-        localDecryptedJsonObj = JSON.parse(localDecryptedParams);
-      }
-
-      const configStrategyHash = JSON.parse(configStrategy.unencrypted_params);
-
-      localDecryptedJsonObj = oThis._mergeConfigResult(configStrategy.kind, configStrategyHash, localDecryptedJsonObj);
-
-      finalResult[configStrategy.id] = localDecryptedJsonObj;
-    }
-
-    return responseHelper.successWithData(finalResult);
   }
 
   /**
@@ -281,6 +214,7 @@ class ConfigStrategyModel extends ModelBase {
    *
    * @returns {Promise<*>}
    */
+  // TODO - expose update by kind and not by id
   async updateStrategyId(strategyId, configStrategyParams) {
     const oThis = this;
 
@@ -337,6 +271,8 @@ class ConfigStrategyModel extends ModelBase {
    *
    * @param {number} kind: config_strategy_kind from config_strategies table
    *
+   * NOTE - inmemory cache can have old data - restart needed after usage.
+   *
    * @returns {Promise<*>}
    */
   async activateByKind(kind) {
@@ -371,7 +307,7 @@ class ConfigStrategyModel extends ModelBase {
   async getCompleteConfigStrategy() {
     const oThis = this;
 
-    const queryResult = await oThis
+    const configStrategyRows = await oThis
       .select('*')
       .where({
         status: configStrategyConstants.invertedStatuses[configStrategyConstants.activeStatus]
@@ -381,8 +317,8 @@ class ConfigStrategyModel extends ModelBase {
     const decryptedSalts = {},
       finalResult = {};
 
-    for (let index = 0; index < queryResult.length; index++) {
-      const configStrategy = queryResult[index];
+    for (let index = 0; index < configStrategyRows.length; index++) {
+      const configStrategy = configStrategyRows[index];
       // Following logic is added so that decrypt call is not given for already decrypted salts.
       if (decryptedSalts[configStrategy.global_salt_id] == null) {
         const response = await oThis._getDecryptedSalt(configStrategy.global_salt_id);
@@ -414,13 +350,10 @@ class ConfigStrategyModel extends ModelBase {
 
       localDecryptedJsonObj = oThis._mergeConfigResult(configStrategy.kind, configStrategyHash, localDecryptedJsonObj);
 
-      console.log('The localDecryptedJsonObj is : ', localDecryptedJsonObj);
-
+      // TODO - clean up - don't merge
       finalResult[configStrategyConstants.kinds[configStrategy.kind]] =
         localDecryptedJsonObj[configStrategyConstants.kinds[configStrategy.kind]];
     }
-
-    console.log('The finalResult is : ', finalResult);
 
     return responseHelper.successWithData(finalResult);
   }

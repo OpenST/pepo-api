@@ -127,4 +127,6 @@ class GlobalSaltModel extends ModelBase {
   }
 }
 
+// TODO new column status in global salts - status for inactive in table will be null
+
 module.exports = GlobalSaltModel;
