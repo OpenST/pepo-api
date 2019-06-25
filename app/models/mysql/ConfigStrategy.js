@@ -272,7 +272,7 @@ class ConfigStrategyModel extends ModelBase {
   /**
    * Sets the status of given strategy kind as active.
    *
-   * @param {number} kind: config_strategy_kind from config_strategies table
+   * @param {string} kind: config_strategy_kind from config_strategies table
    *
    * NOTE - inmemory cache can have old data - restart needed after usage.
    *
@@ -281,12 +281,20 @@ class ConfigStrategyModel extends ModelBase {
   async activateByKind(kind) {
     const oThis = this;
 
+    const strategyKindIntResp = configStrategyValidator.getStrategyKindInt(kind);
+
+    if (strategyKindIntResp.isFailure()) {
+      return Promise.reject(strategyKindIntResp);
+    }
+
+    const strategyKindInt = strategyKindIntResp.data;
+
     // Update query.
     const queryResponse = await oThis
       .update({
         status: configStrategyConstants.invertedStatuses[configStrategyConstants.activeStatus]
       })
-      .where({ kind: kind })
+      .where({ kind: strategyKindInt })
       .fire();
 
     if (!queryResponse) {

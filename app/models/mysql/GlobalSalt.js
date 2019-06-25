@@ -90,7 +90,8 @@ class GlobalSaltModel extends ModelBase {
           const insertedRec = await oThis
             .insert({
               kind: globalSaltConstants.invertedKinds[kind],
-              salt: addressSalt
+              salt: addressSalt,
+              status: globalSaltConstants.invertedStatuses[globalSaltConstants.activeStatus]
             })
             .fire();
           onResolve(insertedRec);
