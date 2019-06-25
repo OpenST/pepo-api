@@ -43,7 +43,7 @@ class EmailServiceApiCall extends HookProcessorsBase {
   }
 
   /**
-   * Function which will process the hook
+   * Function which will process the hook.
    *
    * @returns {Promise<void>}
    * @private
@@ -89,7 +89,7 @@ class EmailServiceApiCall extends HookProcessorsBase {
   }
 
   /**
-   * Function which will mark the hook processed
+   * Function which will mark the hook processed.
    *
    * @returns {Promise<void>}
    * @private

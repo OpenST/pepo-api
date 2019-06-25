@@ -41,10 +41,10 @@ class HookProcessorsBase {
   async perform() {
     const oThis = this;
 
-    //acquire lock and fetch the locked hooks
+    // Acquire lock and fetch the locked hooks.
     await oThis._fetchHooksToBeProcessed();
 
-    // Process these Hooks
+    // Process these Hooks.
     await oThis._processHooks();
 
     // Mark Hooks as processed
@@ -68,7 +68,7 @@ class HookProcessorsBase {
   }
 
   /**
-   * Acquire lock
+   * Acquire lock.
    *
    * @private
    * @returns {Promise<void>}
@@ -86,7 +86,7 @@ class HookProcessorsBase {
   }
 
   /**
-   * Acquire lock on fresh hooks
+   * Acquire lock on fresh hooks.
    *
    * @returns {Promise<void>}
    * @private
@@ -112,7 +112,7 @@ class HookProcessorsBase {
   }
 
   /**
-   * Fetch locked hooks for processing
+   * Fetch locked hooks for processing.
    *
    * @returns {Promise<void>}
    */
@@ -171,3 +171,5 @@ class HookProcessorsBase {
     throw new Error('Sub-class to implement');
   }
 }
+
+module.exports = HookProcessorsBase;
