@@ -3,7 +3,6 @@ const rootPrefix = '../../..',
   coreConstants = require(rootPrefix + '/config/coreConstants'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   KmsWrapper = require(rootPrefix + '/lib/authentication/KmsWrapper'),
-  kmsPurposeConstants = require(rootPrefix + '/lib/globalConstant/kms'),
   globalSaltConstants = require(rootPrefix + '/lib/globalConstant/globalSalt');
 
 // Declare variables.
@@ -42,7 +41,10 @@ class GlobalSaltModel extends ModelBase {
 
     return oThis
       .select('*')
-      .where({ id: id })
+      .where({
+        id: id,
+        status: globalSaltConstants.invertedStatuses[globalSaltConstants.activeStatus]
+      })
       .fire();
   }
 
@@ -60,7 +62,10 @@ class GlobalSaltModel extends ModelBase {
 
     return oThis
       .select('*')
-      .where({ kind: kindInt })
+      .where({
+        kind: kindInt,
+        status: globalSaltConstants.invertedStatuses[globalSaltConstants.activeStatus]
+      })
       .fire();
   }
 
@@ -95,37 +100,6 @@ class GlobalSaltModel extends ModelBase {
           onResolve({});
         });
     });
-  }
-
-  /**
-   * Generate config strategy encryption salt.
-   *
-   * @returns {object}
-   * @private
-   */
-  async getEncryptionSaltId(kind) {
-    const oThis = this;
-
-    const response = await new GlobalSaltModel().getByKind(kind);
-
-    if (!response[0]) {
-      const KMSObject = new KmsWrapper(kmsPurposeConstants.configStrategyEncryptionPurpose);
-
-      return KMSObject.generateDataKey().then(async function(response) {
-        const addressSalt = response.CiphertextBlob;
-
-        const insertedRec = await new GlobalSaltModel()
-          .insert({
-            kind: kind,
-            salt: addressSalt
-          })
-          .fire();
-
-        return { id: insertedRec.insertId };
-      });
-    }
-
-    return { id: response[0].id };
   }
 }
 
