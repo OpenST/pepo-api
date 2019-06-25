@@ -49,16 +49,18 @@ class GlobalSaltModel extends ModelBase {
   /**
    * Get encryption salt by kind.
    *
-   * @param {string/number} kind
+   * @param {string} kind
    *
    * @returns {Promise<any>}
    */
   async getByKind(kind) {
     const oThis = this;
 
+    const kindInt = globalSaltConstants.invertedKinds[kind];
+
     return oThis
       .select('*')
-      .where({ kind: kind })
+      .where({ kind: kindInt })
       .fire();
   }
 
@@ -126,7 +128,5 @@ class GlobalSaltModel extends ModelBase {
     return { id: response[0].id };
   }
 }
-
-// TODO new column status in global salts - status for inactive in table will be null
 
 module.exports = GlobalSaltModel;

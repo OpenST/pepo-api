@@ -1,7 +1,7 @@
 const rootPrefix = '../..',
+  responseHelper = require(rootPrefix + '/lib/formatter/response'),
   ConfigStrategyModel = require(rootPrefix + '/app/models/mysql/ConfigStrategy'),
-  configStrategyConstant = require(rootPrefix + '/lib/globalConstant/configStrategy'),
-  GlobalSaltModel = require(rootPrefix + '/app/models/mysql/GlobalSalt');
+  configStrategyConstant = require(rootPrefix + '/lib/globalConstant/configStrategy');
 
 const command = require('commander'),
   path = require('path'),
@@ -23,13 +23,15 @@ const handleError = function() {
 
 const Main = async function() {
   const oThis = this;
+
   let kind = command.kind;
+
   if (command.addConfigs) {
     let configFilePath =
       command.configFilePath === undefined
         ? `${appRootPath}/config-samples/development/global_config.json`
         : command.configFilePath;
-    let invertedKind = configStrategyConstant.invertedKinds[kind];
+
     if (configStrategyConstant.mandatoryKinds[kind] !== 1) {
       return Promise.reject(
         responseHelper.error({
@@ -41,10 +43,9 @@ const Main = async function() {
     }
 
     const configData = require(configFilePath);
-    let allParams = configData['config'];
-    let encryptionSaltId = await new GlobalSaltModel().getEncryptionSaltId(invertedKind);
+    let allParams = configData.config;
 
-    return new ConfigStrategyModel().create(kind, allParams, encryptionSaltId.id);
+    return new ConfigStrategyModel().create(kind, allParams);
   } else if (command.activateConfig) {
     if (!kind) {
       handleError();

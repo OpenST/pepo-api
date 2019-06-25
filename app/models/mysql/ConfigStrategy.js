@@ -7,6 +7,7 @@ const rootPrefix = '../../..',
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   localCipher = require(rootPrefix + '/lib/encryptors/localCipher'),
   apiVersions = require(rootPrefix + '/lib/globalConstant/apiVersions'),
+  globalSaltConstants = require(rootPrefix + '/lib/globalConstant/globalSalt'),
   configStrategyValidator = require(rootPrefix + '/helpers/configStrategyValidator'),
   configStrategyConstants = require(rootPrefix + '/lib/globalConstant/configStrategy');
 
@@ -40,12 +41,10 @@ class ConfigStrategyModel extends ModelBase {
    *
    * @param {string} kind
    * @param {object} allParams
-   * @param {number} encryptionSaltId - presently the id of encryption_salts table
    *
    * @returns {Promise<*>}
    */
-  async create(kind, allParams, encryptionSaltId) {
-    // TODO - encryption salt ID is not needed.
+  async create(kind, allParams) {
     const oThis = this;
 
     const strategyKindIntResp = configStrategyValidator.getStrategyKindInt(kind);
@@ -73,7 +72,7 @@ class ConfigStrategyModel extends ModelBase {
     let encryptedHash = null;
 
     if (hashToEncrypt) {
-      const encryptedHashResponse = await oThis._getEncryption(hashToEncrypt, encryptionSaltId);
+      const encryptedHashResponse = await oThis._getEncryption(hashToEncrypt);
 
       if (encryptedHashResponse.isFailure()) {
         return oThis._customError('a_mo_m_cs_3', 'Error while encrypting data');
@@ -87,7 +86,6 @@ class ConfigStrategyModel extends ModelBase {
       kind: strategyKindInt,
       encrypted_params: encryptedHash,
       unencrypted_params: hashNotToEncryptString,
-      global_salt_id: encryptionSaltId,
       status: configStrategyConstants.invertedStatuses[configStrategyConstants.inActiveStatus]
     };
 
@@ -100,15 +98,14 @@ class ConfigStrategyModel extends ModelBase {
    * Encrypt params using salt.
    *
    * @param {object} paramsToEncrypt
-   * @param {number} globalSaltId
    *
    * @returns {Promise<result>}
    * @private
    */
-  async _getEncryption(paramsToEncrypt, globalSaltId) {
+  async _getEncryption(paramsToEncrypt) {
     const oThis = this;
 
-    const response = await oThis._getDecryptedSalt(globalSaltId);
+    const response = await oThis._getDecryptedSalt();
 
     if (response.isFailure()) {
       return Promise.reject(
@@ -153,13 +150,13 @@ class ConfigStrategyModel extends ModelBase {
   /**
    * Get decrypted config strategy salt from cache or fetch.
    *
-   * @param {number} globalSaltId
-   *
    * @return {Promise<result>}
    * @private
    */
-  async _getDecryptedSalt(globalSaltId) {
-    const secureGlobalSaltCacheObj = new SecureGlobalSaltCache({ globalSaltId: globalSaltId });
+  async _getDecryptedSalt() {
+    const secureGlobalSaltCacheObj = new SecureGlobalSaltCache({
+      globalSaltKind: globalSaltConstants.configStrategyKind
+    });
 
     const configSaltResp = await secureGlobalSaltCacheObj.fetch();
 
@@ -209,18 +206,25 @@ class ConfigStrategyModel extends ModelBase {
   /**
    * This method updates strategy ID.
    *
-   * @param {number} strategyId
+   * @param {string} strategyKind
    * @param {object} configStrategyParams
    *
    * @returns {Promise<*>}
    */
-  // TODO - expose update by kind and not by id
-  async updateStrategyId(strategyId, configStrategyParams) {
+  async updateStrategyByKind(strategyKind, configStrategyParams) {
     const oThis = this;
 
+    const strategyKindIntResp = configStrategyValidator.getStrategyKindInt(strategyKind);
+
+    if (strategyKindIntResp.isFailure()) {
+      return Promise.reject(strategyKindIntResp);
+    }
+
+    const strategyKindInt = strategyKindIntResp.data;
+
     const queryResult = await new ConfigStrategyModel()
-      .select(['global_salt_id', 'kind'])
-      .where({ id: strategyId })
+      .select(['kind'])
+      .where({ kind: strategyKindInt })
       .fire();
 
     if (queryResult.length === 0) {
@@ -228,9 +232,8 @@ class ConfigStrategyModel extends ModelBase {
     }
 
     const finalDataToInsertInDb = {},
-      strategyKind = queryResult[0].kind,
-      managedAddressSaltId = queryResult[0].global_salt_id,
-      strategyKindName = configStrategyConstants.kinds[strategyKind];
+      configStrategyKind = queryResult[0].kind,
+      strategyKindName = configStrategyConstants.kinds[configStrategyKind];
 
     const validationResult = configStrategyValidator.validateConfigStrategy(strategyKindName, configStrategyParams);
 
@@ -247,7 +250,7 @@ class ConfigStrategyModel extends ModelBase {
     let encryptedHash = null;
 
     if (hashToEncrypt) {
-      const encryptedHashResponse = await oThis._getEncryption(hashToEncrypt, managedAddressSaltId);
+      const encryptedHashResponse = await oThis._getEncryption(hashToEncrypt);
 
       if (encryptedHashResponse.isFailure()) {
         return oThis._customError('a_mo_m_cs_9', 'Error while encrypting data');
@@ -260,7 +263,7 @@ class ConfigStrategyModel extends ModelBase {
 
     await new ConfigStrategyModel()
       .update(finalDataToInsertInDb)
-      .where({ id: strategyId })
+      .where({ kind: strategyKindInt })
       .fire();
 
     return responseHelper.successWithData({});
@@ -314,14 +317,15 @@ class ConfigStrategyModel extends ModelBase {
       })
       .fire();
 
-    const decryptedSalts = {},
-      finalResult = {};
+    const finalResult = {};
+
+    let decryptedSalt = null;
 
     for (let index = 0; index < configStrategyRows.length; index++) {
       const configStrategy = configStrategyRows[index];
       // Following logic is added so that decrypt call is not given for already decrypted salts.
-      if (decryptedSalts[configStrategy.global_salt_id] == null) {
-        const response = await oThis._getDecryptedSalt(configStrategy.global_salt_id);
+      if (!decryptedSalt) {
+        const response = await oThis._getDecryptedSalt();
         if (response.isFailure()) {
           return Promise.reject(
             responseHelper.error({
@@ -333,26 +337,22 @@ class ConfigStrategyModel extends ModelBase {
           );
         }
 
-        decryptedSalts[configStrategy.global_salt_id] = response.data.addressSalt;
+        decryptedSalt = response.data.addressSalt;
       }
 
       let localDecryptedJsonObj = {};
 
       if (configStrategy.encrypted_params) {
-        const localDecryptedParams = localCipher.decrypt(
-          decryptedSalts[configStrategy.global_salt_id],
-          configStrategy.encrypted_params
-        );
+        const localDecryptedParams = localCipher.decrypt(decryptedSalt, configStrategy.encrypted_params);
         localDecryptedJsonObj = JSON.parse(localDecryptedParams);
       }
 
       const configStrategyHash = JSON.parse(configStrategy.unencrypted_params);
 
-      localDecryptedJsonObj = oThis._mergeConfigResult(configStrategy.kind, configStrategyHash, localDecryptedJsonObj);
+      const mergedConfig = oThis._mergeConfigResult(configStrategy.kind, configStrategyHash, localDecryptedJsonObj);
 
-      // TODO - clean up - don't merge
       finalResult[configStrategyConstants.kinds[configStrategy.kind]] =
-        localDecryptedJsonObj[configStrategyConstants.kinds[configStrategy.kind]];
+        mergedConfig[configStrategyConstants.kinds[configStrategy.kind]];
     }
 
     return responseHelper.successWithData(finalResult);
