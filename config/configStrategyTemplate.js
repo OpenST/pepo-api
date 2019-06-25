@@ -18,6 +18,15 @@ class ConfigStrategyTemplate {
           consistentBehavior: 'consistentBehaviorEntity'
         }
       },
+      inMemoryCacheEntity: {
+        entityType: 'object',
+        entitiesPresent: {
+          engine: 'engineEntity',
+          defaultTtl: 'defaultTtlEntity',
+          namespace: 'namespaceEntity',
+          consistentBehavior: 'consistentBehaviorEntity'
+        }
+      },
       engineEntity: {
         entityType: 'string'
       },
@@ -33,16 +42,6 @@ class ConfigStrategyTemplate {
       },
       consistentBehaviorEntity: {
         entityType: 'string'
-      },
-
-      inMemoryCacheEntity: {
-        entityType: 'object',
-        entitiesPresent: {
-          engine: 'engineEntity',
-          defaultTtl: 'defaultTtlEntity',
-          namespace: 'namespaceEntity',
-          consistentBehavior: 'consistentBehaviorEntity'
-        }
       },
       namespaceEntity: {
         entityType: 'string'

@@ -142,6 +142,7 @@ class ConfigStrategyModel extends ModelBase {
 
     const encryptedKeysFound = false;
 
+    // currently we do not have any config strategy kinds with encrypted parameters
     return {
       hashToEncrypt: encryptedKeysFound ? hashToEncrypt : null,
       hashNotToEncrypt: hashNotToEncrypt
@@ -413,9 +414,13 @@ class ConfigStrategyModel extends ModelBase {
 
       localDecryptedJsonObj = oThis._mergeConfigResult(configStrategy.kind, configStrategyHash, localDecryptedJsonObj);
 
+      console.log('The localDecryptedJsonObj is : ', localDecryptedJsonObj);
+
       finalResult[configStrategyConstants.kinds[configStrategy.kind]] =
         localDecryptedJsonObj[configStrategyConstants.kinds[configStrategy.kind]];
     }
+
+    console.log('The finalResult is : ', finalResult);
 
     return responseHelper.successWithData(finalResult);
   }
@@ -436,8 +441,7 @@ class ConfigStrategyModel extends ModelBase {
       responseHelper.error({
         internal_error_identifier: errCode,
         api_error_identifier: 'something_went_wrong',
-        debug_options: { errMsg: errMsg },
-        error_config: errorConfig
+        debug_options: { errMsg: errMsg }
       })
     );
   }
