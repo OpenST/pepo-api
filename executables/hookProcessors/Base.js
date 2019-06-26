@@ -6,10 +6,11 @@
  */
 
 const rootPrefix = '../..',
+  CronBase = require(rootPrefix + '/executables/CronBase'),
   coreConstants = require(rootPrefix + '/config/coreConstants'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger');
 
-class HookProcessorsBase {
+class HookProcessorsBase extends CronBase {
   /**
    *
    * @constructor
@@ -19,6 +20,7 @@ class HookProcessorsBase {
    *
    */
   constructor(params) {
+    super(params);
     const oThis = this;
 
     oThis.processFailed = params.processFailed;
@@ -31,6 +33,8 @@ class HookProcessorsBase {
     oThis.successResponse = {};
     oThis.failedHookToBeRetried = {};
     oThis.failedHookToBeIgnored = {};
+
+    oThis.canExit = true;
   }
 
   /**
@@ -38,9 +42,10 @@ class HookProcessorsBase {
    *
    * @returns
    */
-  async perform() {
+  async _start() {
     const oThis = this;
 
+    oThis.canExit = false;
     // Acquire lock and fetch the locked hooks.
     await oThis._fetchHooksToBeProcessed();
 
@@ -52,6 +57,8 @@ class HookProcessorsBase {
 
     // For hooks which failed, mark them as failed
     await oThis.releaseLockAndUpdateStatusForNonProcessedHooks();
+
+    oThis.canExit = true;
   }
 
   /**
@@ -86,32 +93,6 @@ class HookProcessorsBase {
   }
 
   /**
-   * Acquire lock on fresh hooks.
-   *
-   * @returns {Promise<void>}
-   * @private
-   */
-  async _acquireLockOnFreshHooks() {
-    const oThis = this;
-
-    let ModelKlass = oThis.hookModelKlass;
-    await new ModelKlass().acquireLocksOnFreshHooks();
-  }
-
-  /**
-   * Acquire lock on failed hooks
-   *
-   * @returns {Promise<void>}
-   * @private
-   */
-  async _acquireLockOnFailedHooks() {
-    const oThis = this;
-
-    let ModelKlass = oThis.hookModelKlass;
-    await new ModelKlass().acquireLocksOnFailedHooks();
-  }
-
-  /**
    * Fetch locked hooks for processing.
    *
    * @returns {Promise<void>}
@@ -120,7 +101,7 @@ class HookProcessorsBase {
     const oThis = this;
 
     let ModelKlass = oThis.hookModelKlass;
-    oThis.hooksToBeProcessed = await new ModelKlass().fetchLockedHooks();
+    oThis.hooksToBeProcessed = await new ModelKlass().fetchLockedHooks(oThis.lockIdentifier);
   }
 
   /**
@@ -144,6 +125,32 @@ class HookProcessorsBase {
   }
 
   /**
+   * Acquire lock on fresh hooks.
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _acquireLockOnFreshHooks() {
+    const oThis = this;
+
+    let ModelKlass = oThis.hookModelKlass;
+    await new ModelKlass().acquireLocksOnFreshHooks(oThis.lockIdentifier);
+  }
+
+  /**
+   * Acquire lock on failed hooks
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _acquireLockOnFailedHooks() {
+    const oThis = this;
+
+    let ModelKlass = oThis.hookModelKlass;
+    await new ModelKlass().acquireLocksOnFailedHooks();
+  }
+
+  /**
    * Release lock and update status for non processed hooks
    *
    * @returns {Promise<void>}
@@ -161,6 +168,18 @@ class HookProcessorsBase {
         await new ModelKlass().markFailedToBeRetried(hookId, failedCount, oThis.failedHookToBeRetried[hookId]);
       }
     }
+  }
+
+  /**
+   * This function provides info whether the process has to exit.
+   *
+   * @returns {boolean}
+   * @private
+   */
+  _pendingTasksDone() {
+    const oThis = this;
+
+    return oThis.canExit;
   }
 
   async _updateStatusToProcessed() {

@@ -156,7 +156,7 @@ class EmailServiceAPICallHook extends ModelBase {
         failed_count: failedCount + 1,
         lock_identifier: null,
         locked_at: null,
-        failed_response: failedLogs
+        failed_response: JSON.stringify(failedLogs)
       })
       .where(['id = ?', hookId])
       .fire();

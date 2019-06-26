@@ -1,19 +1,39 @@
 /**
- *
  * This class is to process hooks specifically related to pepo campaigns.
  *
- * @module executables/hookProcessors/EmailServiceAPICall
+ * @module executables/hookProcessors/emailServiceApiCall
  */
+const program = require('commander');
 
 const rootPrefix = '../..',
+  HookProcessorsBase = require(rootPrefix + '/executables/hookProcessors/Base'),
+  SendTransactionalMail = require(rootPrefix + '/lib/email/hookProcessor/SendTransactionalMail'),
+  EmailServiceAPICallHookModel = require(rootPrefix + '/app/models/mysql/EmailServiceAPICallHook'),
+  emailServiceApiCallHookConstants = require(rootPrefix + '/lib/globalConstant/emailServiceApiCallHook'),
   coreConstants = require(rootPrefix + '/config/coreConstants'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
-  HookProcessorsBase = require(rootPrefix + '/executables/hookProcessors/Base'),
-  SendTransactionalMail = require(rootPrefix + '/lib/hookProcessor/SendTransactionalMail'),
-  EmailServiceAPICallHookModel = require(rootPrefix + '/app/models/mysql/EmailServiceAPICallHook'),
-  emailServiceApiCallHookConstants = require(rootPrefix + '/lib/globalConstant/emailServiceApiCallHook');
+  cronProcessesConstants = require(rootPrefix + '/lib/globalConstant/cronProcesses');
 
 let ModelKlass;
+
+program.option('--cronProcessId <cronProcessId>', 'Cron table process ID').parse(process.argv);
+
+program.on('--help', function() {
+  logger.log('');
+  logger.log('  Example:');
+  logger.log('');
+  logger.log('    node executables/hookProcessors/emailServiceApiCall.js --cronProcessId 1');
+  logger.log('');
+  logger.log('');
+});
+
+const cronProcessId = +program.cronProcessId;
+
+if (!cronProcessId) {
+  program.help();
+  process.exit(1);
+}
+
 /**
  * Class for EmailServiceApicall
  *
@@ -52,7 +72,7 @@ class EmailServiceApiCall extends HookProcessorsBase {
     const oThis = this;
 
     let HookProcessorKlass = oThis.getHookProcessorClass(),
-      response = new HookProcessorKlass(oThis.hook).perform();
+      response = await new HookProcessorKlass({ hook: oThis.hook }).perform();
 
     if (response.isSuccess()) {
       oThis.successResponse[oThis.hook.id] = response.data;
@@ -103,6 +123,49 @@ class EmailServiceApiCall extends HookProcessorsBase {
       }
     }
   }
+
+  /**
+   * This function provides info whether the process has to exit.
+   *
+   * @returns {boolean}
+   * @private
+   */
+  _pendingTasksDone() {
+    const oThis = this;
+
+    return oThis.canExit;
+  }
+
+  /**
+   * Run validations on input parameters.
+   *
+   * @return {Promise<void>}
+   * @private
+   */
+  async _validateAndSanitize() {}
+
+  /**
+   * Get cron kind.
+   *
+   * @returns {string}
+   *
+   * @private
+   */
+  get _cronKind() {
+    return cronProcessesConstants.emailServiceApiCallHookProcessor;
+  }
 }
 
-module.exports = EmailServiceApiCall;
+const emailServiceApiCall = new EmailServiceApiCall({ cronProcessId: +cronProcessId });
+
+emailServiceApiCall
+  .perform()
+  .then(function() {
+    logger.step('** Exiting process');
+    logger.info('Cron last run at: ', Date.now());
+    process.emit('SIGINT');
+  })
+  .catch(function(err) {
+    logger.error('** Exiting process due to Error: ', err);
+    process.emit('SIGINT');
+  });

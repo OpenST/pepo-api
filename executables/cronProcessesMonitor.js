@@ -77,7 +77,7 @@ class CronProcessesMonitorExecutable extends CronBase {
 
     oThis.cronKindToRestartTimeMap = {
       [cronProcessesConstants.continuousCronsType]: {
-        [cronProcessesConstants.hookProcesser]: cronProcessesConstants.continuousCronRestartInterval
+        [cronProcessesConstants.emailServiceApiCallHookProcessor]: cronProcessesConstants.continuousCronRestartInterval
       },
       // Restart interval time for periodic crons should match with devops-cron config file.
       [cronProcessesConstants.periodicCronsType]: {}
@@ -274,7 +274,7 @@ class CronProcessesMonitorExecutable extends CronBase {
   }
 }
 
-const cronProcessesMonitor = new CronProcessesMonitorExecutable({ cronProcessId: +program.cronProcessId });
+const cronProcessesMonitor = new CronProcessesMonitorExecutable({ cronProcessId: +cronProcessId });
 
 cronProcessesMonitor
   .perform()

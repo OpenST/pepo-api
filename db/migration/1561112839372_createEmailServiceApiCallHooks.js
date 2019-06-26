@@ -17,8 +17,8 @@ const upQuery =
   '  `params` text COLLATE utf8_unicode_ci,\n' +
   '  `success_response` text COLLATE utf8_unicode_ci,\n' +
   '  `failed_response` text COLLATE utf8_unicode_ci,\n' +
-  '  `created_at` datetime NOT NULL,\n' +
-  '  `updated_at` datetime NOT NULL,\n' +
+  '  `created_at` int(11) NOT NULL,\n' +
+  '  `updated_at` int(11) NOT NULL,\n' +
   '  PRIMARY KEY (`id`),\n' +
   '  KEY `index_1` (`execution_timestamp`,`status`),\n' +
   '  KEY `index_2` (`lock_identifier`)\n' +

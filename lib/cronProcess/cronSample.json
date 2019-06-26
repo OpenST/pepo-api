@@ -1,5 +1,5 @@
 {
-  "hookProcessor": {
+  "emailServiceApiCallHookProcessor": {
     "abcd": "1234",
     "sequenceNumber": 1
   },
