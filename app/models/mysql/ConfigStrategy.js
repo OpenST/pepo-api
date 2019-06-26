@@ -302,7 +302,7 @@ class ConfigStrategyModel extends ModelBase {
     }
 
     if (queryResponse.affectedRows === 1) {
-      logger.info(`Status of strategy kind: [${kind}] is now active.`);
+      logger.info(`Status of strategy kind: ${kind} is now active.`);
 
       return responseHelper.successWithData({});
     }
