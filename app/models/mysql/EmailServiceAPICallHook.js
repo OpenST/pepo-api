@@ -51,12 +51,12 @@ class EmailServiceAPICallHook extends ModelBase {
    * Function to acquire lock on fresh hooks
    *
    * @param lockIdentifier
-   * @returns {Promise<void>}
+   * @returns {Promise<any>}
    */
   async acquireLocksOnFreshHooks(lockIdentifier) {
     const oThis = this;
 
-    let updateResponse = await oThis
+    return oThis
       .update({
         lock_identifier: lockIdentifier,
         locked_at: Math.round(Date.now() / 1000)
@@ -75,12 +75,12 @@ class EmailServiceAPICallHook extends ModelBase {
    * Function to acquire lock on failed hooks
    *
    * @param lockIdentifier
-   * @returns {Promise<void>}
+   * @returns {Promise<any>}
    */
   async acquireLocksOnFailedHooks(lockIdentifier) {
     const oThis = this;
 
-    let updateResponse = await oThis
+    return oThis
       .update({
         lock_identifier: lockIdentifier,
         locked_at: Math.round(Date.now() / 1000)
@@ -122,7 +122,8 @@ class EmailServiceAPICallHook extends ModelBase {
   /**
    * Mark status as processed
    *
-   * @param processedHookIds
+   * @param hookId
+   * @param successResponse
    * @returns {Promise<void>}
    */
   async markStatusAsProcessed(hookId, successResponse) {
@@ -132,7 +133,7 @@ class EmailServiceAPICallHook extends ModelBase {
       .update({
         lock_identifier: null,
         locked_at: null,
-        success_response: successResponse,
+        success_response: JSON.stringify(successResponse),
         status: emailServiceApiCallHookConstants.invertedStatuses[emailServiceApiCallHookConstants.processedStatus]
       })
       .where(['id = ?', hookId])
@@ -163,7 +164,7 @@ class EmailServiceAPICallHook extends ModelBase {
   }
 
   /**
-   * Mark hoos as ignored
+   * Mark hooks as ignored
    *
    * @param hookId
    * @param failedCount

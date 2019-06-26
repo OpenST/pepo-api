@@ -7,6 +7,7 @@
 
 const rootPrefix = '../..',
   CronBase = require(rootPrefix + '/executables/CronBase'),
+  basicHelper = require(rootPrefix + '/helpers/basic'),
   coreConstants = require(rootPrefix + '/config/coreConstants'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger');
 
@@ -34,6 +35,7 @@ class HookProcessorsBase extends CronBase {
     oThis.failedHookToBeRetried = {};
     oThis.failedHookToBeIgnored = {};
 
+    oThis.processableHooksPresentFlag = true;
     oThis.canExit = true;
   }
 
@@ -45,37 +47,41 @@ class HookProcessorsBase extends CronBase {
   async _start() {
     const oThis = this;
 
-    oThis.canExit = false;
-    // Acquire lock and fetch the locked hooks.
-    await oThis._fetchHooksToBeProcessed();
+    while (true) {
+      if (oThis.stopPickingUpNewWork) {
+        oThis.canExit = true;
+        break;
+      }
 
-    // Process these Hooks.
-    await oThis._processHooks();
+      oThis.canExit = false;
+      // Acquire lock
+      await oThis._acquireLock();
 
-    // Mark Hooks as processed
-    await oThis._updateStatusToProcessed();
+      // Fetch the locked hooks.
 
-    // For hooks which failed, mark them as failed
-    await oThis.releaseLockAndUpdateStatusForNonProcessedHooks();
+      if (oThis.processableHooksPresentFlag) {
+        logger.log('Processing hooks...');
+        await oThis._fetchLockedHooks();
 
-    oThis.canExit = true;
-  }
+        // Process these Hooks.
+        await oThis._processHooks();
 
-  /**
-   * This fetches hooks to be processed
-   *
-   * @private
-   * @returns {Promise<void>}
-   */
-  async _fetchHooksToBeProcessed() {
-    const oThis = this;
+        // Mark Hooks as processed
+        await oThis._updateStatusToProcessed();
 
-    await oThis._acquireLock();
-    await oThis._fetchLockedHooks();
+        // For hooks which failed, mark them as failed
+        await oThis.releaseLockAndUpdateStatusForNonProcessedHooks();
+      } else {
+        logger.log('No processable hook present..\n Sleeping Now...');
+        await basicHelper.sleep(5000);
+      }
+    }
   }
 
   /**
    * Acquire lock.
+   *
+   * @Sets oThis.processableHooksPresentFlag
    *
    * @private
    * @returns {Promise<void>}
@@ -85,11 +91,20 @@ class HookProcessorsBase extends CronBase {
 
     if (oThis.processFailed) {
       //Acquire Lock on failed hooks
-      await oThis._acquireLockOnFailedHooks();
+      let acquireLockResponse = await oThis._acquireLockOnFailedHooks();
+      if (acquireLockResponse.affectedRows === 0) {
+        oThis.processableHooksPresentFlag = false;
+        return;
+      }
     } else {
       //Acquire lock on fresh hooks
-      await oThis._acquireLockOnFreshHooks();
+      let acquireLockResponse = await oThis._acquireLockOnFreshHooks();
+      if (acquireLockResponse.affectedRows === 0) {
+        oThis.processableHooksPresentFlag = false;
+        return;
+      }
     }
+    oThis.processableHooksPresentFlag = true;
   }
 
   /**
@@ -134,7 +149,7 @@ class HookProcessorsBase extends CronBase {
     const oThis = this;
 
     let ModelKlass = oThis.hookModelKlass;
-    await new ModelKlass().acquireLocksOnFreshHooks(oThis.lockIdentifier);
+    return new ModelKlass().acquireLocksOnFreshHooks(oThis.lockIdentifier);
   }
 
   /**
@@ -147,7 +162,7 @@ class HookProcessorsBase extends CronBase {
     const oThis = this;
 
     let ModelKlass = oThis.hookModelKlass;
-    await new ModelKlass().acquireLocksOnFailedHooks();
+    return new ModelKlass().acquireLocksOnFailedHooks();
   }
 
   /**
