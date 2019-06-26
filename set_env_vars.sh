@@ -11,10 +11,6 @@ export DEVOPS_APP_NAME='pepo-api';
 export DEVOPS_ENV_ID='dev1-sandbox';
 export DEVOPS_IP_ADDRESS='127.0.0.1';
 
-# Cache Engine
-export PA_CACHE_ENGINE='memcached'
-export PA_MEMCACHE_SERVERS='127.0.0.1:11211'
-
 # Database details
 export PA_MYSQL_CONNECTION_POOL_SIZE='3'
 

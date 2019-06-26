@@ -28,16 +28,6 @@ class CoreConstants {
     return process.env.PA_COOKIE_DOMAIN;
   }
 
-  // Cache related details
-
-  get CACHE_ENGINE() {
-    return process.env.PA_CACHE_ENGINE;
-  }
-
-  get MEMCACHE_SERVERS() {
-    return process.env.PA_MEMCACHE_SERVERS.split(',');
-  }
-
   // MYSQL related details
 
   get PEPO_API_MYSQL_DB() {

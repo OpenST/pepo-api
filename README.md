@@ -28,7 +28,9 @@ mysql.server start
 memcached -p 11211 -d
 ```
 
-## Installation Steps
+# Installation Steps
+
+## Run DB Migrations
 
 * Create the main db and create schema_migrations table.
 ```bash
@@ -40,16 +42,34 @@ node db/seed.js
 node db/migrate.js
 ```
 
-* Clear cache.
-```bash
-node devops/exec/flushMemcache.js
-```
-
 * [Only Development] Create `infra` database and `error_logs` table.
 ```bash
    source set_env_vars.sh
    node executables/oneTimers/createErrorLogsTable.js
 ```
+
+## Seed config strategy
+
+* Global Configs Seed
+```bash
+    source set_env_vars.sh
+    ./devops/exec/configStrategy.js --add-global-configs
+
+    # Note: For staging and production follow help
+```
+
+* Activate Global Configs
+```bash
+    source set_env_vars.sh
+    ./devops/exec/configStrategy.js --activate-configs
+```
+
+* Clear cache.
+```bash
+node devops/exec/flushMemcache.js
+```
+
+## Seed tables.
 
 * Seed Tokens Table.
 ```bash
