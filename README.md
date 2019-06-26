@@ -53,7 +53,7 @@ node db/migrate.js
 * Global Configs Seed
 ```bash
     source set_env_vars.sh
-    ./devops/exec/configStrategy.js --add-global-configs
+    node devops/exec/configStrategy.js --add-configs
 
     # Note: For staging and production follow help
 ```
@@ -61,7 +61,7 @@ node db/migrate.js
 * Activate Global Configs
 ```bash
     source set_env_vars.sh
-    ./devops/exec/configStrategy.js --activate-configs
+    node devops/exec/configStrategy.js --activate-configs
 ```
 
 * Clear cache.

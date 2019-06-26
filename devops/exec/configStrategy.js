@@ -15,7 +15,7 @@ command
   .version('0.1.0')
   .usage('[options]')
   .option('-g, --add-configs', 'Add config')
-  .option('-t, --activate-config', 'Activate config')
+  .option('-t, --activate-configs', 'Activate config')
   .option('-f, --config-file-path <required>', 'Config file absolute path for action -g')
   .option('-f, --kind <kind>', 'kind of the config strategy') // Comma separated kinds should be there.
   .parse(process.argv);
@@ -42,7 +42,7 @@ const Main = async function() {
       globalSaltConstant.configStrategyKind
     );
     await _addConfig(oThis.config);
-  } else if (command.activateConfig) {
+  } else if (command.activateConfigs) {
     await _activateConfigStrategy(oThis.config);
   } else {
     return handleError();
