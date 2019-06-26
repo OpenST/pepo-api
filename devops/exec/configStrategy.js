@@ -17,18 +17,18 @@ command
   .option('-g, --add-configs', 'Add config')
   .option('-t, --activate-config', 'Activate config')
   .option('-f, --config-file-path <required>', 'Config file absolute path for action -g')
-  .option('-f, --kind <kind>', 'kind of the config strategy') // comma separated kinds should be there
+  .option('-f, --kind <kind>', 'kind of the config strategy') // Comma separated kinds should be there.
   .parse(process.argv);
 
 const handleError = function() {
   command.outputHelp();
-  throw 'Required parameters are missing!';
+  throw new Error('Required parameters are missing!');
 };
 
 const Main = async function() {
   const oThis = this;
 
-  let configFilePath =
+  const configFilePath =
     command.configFilePath === undefined
       ? `${appRootPath}/config-samples/development/global_config.json`
       : command.configFilePath;
@@ -59,14 +59,13 @@ const Main = async function() {
  */
 const _addConfig = async function(config) {
   if (command.kind) {
-    let kinds = command.kind.split(',');
+    const kinds = command.kind.split(',');
     for (let index = 0; index < kinds.length; index++) {
-      let kind = kinds[index];
+      const kind = kinds[index];
       await _validateKind(kind);
       await _create(kind, config);
     }
   } else {
-    console.log('hereeeeeeeee11111111111111');
     for (const kind in config) {
       await _validateKind(kind);
       await _create(kind, config);
@@ -75,7 +74,7 @@ const _addConfig = async function(config) {
 };
 
 /**
- * create Config Strategy.
+ * Create Config Strategy.
  *
  * @param {string} kind: Config kind
  * @param {object} configParams: config JSON
@@ -84,8 +83,6 @@ const _addConfig = async function(config) {
  * @private
  */
 const _create = async function(kind, configParams) {
-  console.log('hereeeeeee222222222222222');
-
   logger.step(`** Adding entry for ${kind} in config startegy`);
 
   return new ConfigStrategyModel().create(kind, configParams);
@@ -101,9 +98,9 @@ const _create = async function(kind, configParams) {
  */
 const _activateConfigStrategy = async function(config) {
   if (command.kind) {
-    let kinds = command.kind.split(',');
+    const kinds = command.kind.split(',');
     for (let index = 0; index < kinds.length; index++) {
-      let kind = kinds[index];
+      const kind = kinds[index];
       await _validateKind(kind);
       await _activate(kind);
     }
@@ -130,7 +127,7 @@ const _activate = async function(kind) {
 };
 
 /**
- * validate kind.
+ * Validate kind.
  *
  * @param {string} kind: Config kind
  *
@@ -141,7 +138,7 @@ const _validateKind = async function(kind) {
   if (configStrategyConstant.mandatoryKinds[kind] !== 1) {
     return Promise.reject(
       responseHelper.error({
-        internal_error_identifier: `d_e_cs_1`,
+        internal_error_identifier: 'd_e_cs_1',
         api_error_identifier: 'something_went_wrong',
         debug_options: { kind: kind }
       })
@@ -151,10 +148,10 @@ const _validateKind = async function(kind) {
 
 Main()
   .then(function(data) {
-    console.error('\nMain data: ', data);
+    logger.win('\nMain data: ', data);
     process.exit(0);
   })
   .catch(function(err) {
-    console.error('\nMain error: ', err);
+    logger.error('\nMain error: ', err);
     process.exit(1);
   });
