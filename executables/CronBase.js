@@ -204,20 +204,37 @@ class CronBase {
   }
 
   /**
+   * Validate and sanitize.
+   *
+   * @private
+   */
+  _validateAndSanitize() {
+    throw new Error('Sub-class to implement.');
+  }
+
+  /**
+   * Start cron process
+   *
+   * @private
+   */
+  async _start() {
+    throw new Error('Sub-class to implement.');
+  }
+
+  /**
    * This function provides info whether the process has to exit.
+   *
+   * @private
    */
   _pendingTasksDone() {
     throw new Error('Sub-class to implement.');
   }
 
-  _start() {
-    throw new Error('Sub-class to implement.');
-  }
-
-  _validateAndSanitize() {
-    throw new Error('Sub-class to implement.');
-  }
-
+  /**
+   * Cron kind
+   *
+   * @private
+   */
   get _cronKind() {
     throw new Error('Sub-class to implement.');
   }

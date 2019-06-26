@@ -1,5 +1,4 @@
 /**
- *
  * Base class for hook processors
  *
  * @module executables/hookProcessors/EmailServiceAPICall
@@ -8,16 +7,14 @@
 const rootPrefix = '../..',
   CronBase = require(rootPrefix + '/executables/CronBase'),
   basicHelper = require(rootPrefix + '/helpers/basic'),
-  coreConstants = require(rootPrefix + '/config/coreConstants'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger');
 
 class HookProcessorsBase extends CronBase {
   /**
-   *
    * @constructor
    *
    * @param {Object} params
-   * @param {boolean} params.processFailed - boolean tells if this iteration is to retry failed hooks or to process fresh ones
+   * @param {boolean} [params.processFailed] - boolean tells if this iteration is to retry failed hooks or to process fresh ones
    *
    */
   constructor(params) {
@@ -40,7 +37,7 @@ class HookProcessorsBase extends CronBase {
   }
 
   /**
-   * Perform
+   * Start cron
    *
    * @returns
    */
@@ -57,10 +54,10 @@ class HookProcessorsBase extends CronBase {
       // Acquire lock
       await oThis._acquireLock();
 
-      // Fetch the locked hooks.
-
       if (oThis.processableHooksPresentFlag) {
         logger.log('Processing hooks...');
+
+        // Fetch the locked hooks.
         await oThis._fetchLockedHooks();
 
         // Process these Hooks.
@@ -72,8 +69,9 @@ class HookProcessorsBase extends CronBase {
         // For hooks which failed, mark them as failed
         await oThis.releaseLockAndUpdateStatusForNonProcessedHooks();
       } else {
-        logger.log('No processable hook present..\n Sleeping Now...');
-        await basicHelper.sleep(5000);
+        logger.log('No processable hook present..');
+        logger.log('Sleeping Now...');
+        await basicHelper.sleep(2000);
       }
     }
   }

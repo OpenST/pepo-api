@@ -10,7 +10,6 @@ const rootPrefix = '../..',
   SendTransactionalMail = require(rootPrefix + '/lib/email/hookProcessor/SendTransactionalMail'),
   EmailServiceAPICallHookModel = require(rootPrefix + '/app/models/mysql/EmailServiceAPICallHook'),
   emailServiceApiCallHookConstants = require(rootPrefix + '/lib/globalConstant/emailServiceApiCallHook'),
-  coreConstants = require(rootPrefix + '/config/coreConstants'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   cronProcessesConstants = require(rootPrefix + '/lib/globalConstant/cronProcesses');
 
@@ -50,17 +49,12 @@ class EmailServiceApiCall extends HookProcessorsBase {
   }
 
   /**
-   * Hook model class
+   * Run validations on input parameters.
    *
-   * @returns {*}
+   * @return {Promise<void>}
+   * @private
    */
-  get hookModelKlass() {
-    if (!ModelKlass) {
-      ModelKlass = EmailServiceAPICallHookModel;
-      return ModelKlass;
-    }
-    return ModelKlass;
-  }
+  async _validateAndSanitize() {}
 
   /**
    * Function which will process the hook.
@@ -128,6 +122,7 @@ class EmailServiceApiCall extends HookProcessorsBase {
    * This function provides info whether the process has to exit.
    *
    * @returns {boolean}
+   *
    * @private
    */
   _pendingTasksDone() {
@@ -135,14 +130,6 @@ class EmailServiceApiCall extends HookProcessorsBase {
 
     return oThis.canExit;
   }
-
-  /**
-   * Run validations on input parameters.
-   *
-   * @return {Promise<void>}
-   * @private
-   */
-  async _validateAndSanitize() {}
 
   /**
    * Get cron kind.
@@ -153,6 +140,19 @@ class EmailServiceApiCall extends HookProcessorsBase {
    */
   get _cronKind() {
     return cronProcessesConstants.emailServiceApiCallHookProcessor;
+  }
+
+  /**
+   *  Hook model class
+   *
+   * @returns {*}
+   */
+  get hookModelKlass() {
+    if (!ModelKlass) {
+      ModelKlass = EmailServiceAPICallHookModel;
+      return ModelKlass;
+    }
+    return ModelKlass;
   }
 }
 
