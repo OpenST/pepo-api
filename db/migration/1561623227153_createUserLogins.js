@@ -13,6 +13,7 @@ const upQuery =
   `created_at` int(11) NOT NULL,\n\
   `updated_at` int(11) NOT NULL, \n\
   PRIMARY KEY (`id`), \n\
+  INDEX idx_1 (`user_id`), \n\
   KEY `cuk_1` (`service`,`service_unique_id`) \n\
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
 
