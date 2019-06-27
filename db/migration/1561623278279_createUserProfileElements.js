@@ -9,6 +9,8 @@ const upQuery =
   `user_id` bigint(20) unsigned NOT NULL, \n\
   `data_kind` tinyint(4) NOT NULL, \n\
   `data` varchar(255) COLLATE utf8_unicode_ci NOT NULL DEFAULT '', \n\
+  `created_at` int(11) NOT NULL, \n\
+  `updated_at` int(11) NOT NULL, \n\
   PRIMARY KEY (`id`), \n\
   KEY `uk_1` (`user_id`) \n\
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";

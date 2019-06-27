@@ -10,6 +10,8 @@ const upQuery =
   `service` tinyint(4) NOT NULL, \n\
   `service_unique_id` varchar(255) COLLATE utf8_unicode_ci NOT NULL DEFAULT '', \n\
   `properties` tinyint(4) NOT NULL DEFAULT '0', \n\
+  `created_at` int(11) NOT NULL,\n\
+  `updated_at` int(11) NOT NULL, \n\
   PRIMARY KEY (`id`), \n\
   KEY `cuk_1` (`service`,`service_unique_id`) \n\
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
