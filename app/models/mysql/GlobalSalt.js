@@ -2,7 +2,7 @@ const rootPrefix = '../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
   coreConstants = require(rootPrefix + '/config/coreConstants'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
-  KmsWrapper = require(rootPrefix + '/lib/authentication/KmsWrapper'),
+  KmsWrapper = require(rootPrefix + '/lib/aws/KmsWrapper'),
   globalSaltConstants = require(rootPrefix + '/lib/globalConstant/globalSalt');
 
 // Declare variables.

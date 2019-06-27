@@ -1,7 +1,7 @@
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   UserModel = require(rootPrefix + '/app/models/mysql/User'),
-  KmsWrapper = require(rootPrefix + '/lib/authentication/KmsWrapper'),
+  KmsWrapper = require(rootPrefix + '/lib/aws/KmsWrapper'),
   TokenUserModel = require(rootPrefix + '/app/models/mysql/TokenUser'),
   SecureUserCache = require(rootPrefix + '/lib/cacheManagement/single/SecureUser'),
   UserByUserNameCache = require(rootPrefix + '/lib/cacheManagement/single/UserByUsername'),

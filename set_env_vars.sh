@@ -34,13 +34,18 @@ export PA_INFRA_MYSQL_DB='ost_infra_development'
 export PA_CACHE_DATA_SHA_KEY='066f7e6e833db143afee3dbafc888bcf'
 
 # AWS-KMS details
-export PA_KMS_AWS_ACCESS_KEY='AKIAJUDRALNURKAVS5IQ'
-export PA_KMS_AWS_SECRET_KEY='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'
+export PA_KMS_AWS_ACCESS_KEY='AKIAT7WAUYD3XA7WRZV4'
+export PA_KMS_AWS_SECRET_KEY='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'
 export PA_KMS_AWS_REGION='us-east-1'
-export PA_API_KEY_KMS_ARN='arn:aws:kms:us-east-1:604850698061:key'
-export PA_API_KEY_KMS_ID='eab8148d-fd9f-451d-9eb9-16c115645635'
-export PA_SECRET_ENC_KEY_KMS_ARN='arn:aws:kms:us-east-1:604850698061:key'
-export PA_SECRET_ENC_KEY_KMS_ID='eab8148d-fd9f-451d-9eb9-16c115645635'
+export PA_API_KEY_KMS_ID='74f6ceff-95be-4c43-b936-f0c2cf6863d0'
+export PA_SECRET_ENC_KEY_KMS_ID='ce7424c5-56cf-48ed-9202-49cbae0cf9d1'
+
+# S3 config details
+export PA_S3_AWS_ACCESS_KEY='AKIAT7WAUYD3XA7WRZV4'
+export PA_S3_AWS_SECRET_KEY='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'
+export PA_S3_AWS_REGION='us-east-1'
+export PA_S3_AWS_MASTER_FOLDER='d'
+export PA_S3_USER_ASSETS_BUCKET='uassets.stagingpepo.com'
 
 # ost-platform API credentials
 export PA_SA_API_END_POINT='https://api.stagingost.com/testnet/v2/'

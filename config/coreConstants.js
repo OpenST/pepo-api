@@ -94,20 +94,41 @@ class CoreConstants {
     return process.env.PA_KMS_AWS_REGION;
   }
 
-  get KMS_API_KEY_ARN() {
-    return process.env.PA_API_KEY_KMS_ARN;
-  }
-
   get KMS_API_KEY_ID() {
     return process.env.PA_API_KEY_KMS_ID;
   }
 
-  get KMS_SECRET_ENC_KEY_ARN() {
-    return process.env.PA_SECRET_ENC_KEY_KMS_ARN;
-  }
-
   get KMS_SECRET_ENC_KEY_ID() {
     return process.env.PA_SECRET_ENC_KEY_KMS_ID;
+  }
+
+  /**
+   * S3 AWS config
+   */
+  get S3_AWS_ACCESS_KEY() {
+    return process.env.PA_S3_AWS_ACCESS_KEY;
+  }
+
+  get S3_AWS_SECRET_KEY() {
+    return process.env.PA_S3_AWS_SECRET_KEY;
+  }
+
+  get S3_AWS_REGION() {
+    return process.env.PA_S3_AWS_REGION;
+  }
+
+  get S3_AWS_MASTER_FOLDER() {
+    return process.env.PA_S3_AWS_MASTER_FOLDER;
+  }
+
+  get S3_USER_ASSETS_BUCKET() {
+    return process.env.PA_S3_USER_ASSETS_BUCKET;
+  }
+
+  get S3_USER_ASSETS_FOLDER() {
+    const oThis = this;
+
+    return oThis.S3_AWS_MASTER_FOLDER + '/' + oThis.S3_USER_ASSETS_BUCKET;
   }
 
   // Encryption Secrets
