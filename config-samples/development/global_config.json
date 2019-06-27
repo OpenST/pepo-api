@@ -1,0 +1,12 @@
+{
+  "config": {
+    "memcached": {
+      "engine": "memcached",
+      "servers": [
+        "127.0.0.1:11211"
+      ],
+      "defaultTtl": 36000,
+      "consistentBehavior": "1"
+    }
+  }
+}
