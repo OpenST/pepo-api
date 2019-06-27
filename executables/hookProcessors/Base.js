@@ -71,7 +71,7 @@ class HookProcessorsBase extends CronBase {
       } else {
         logger.log('No processable hook present..');
         logger.log('Sleeping Now...');
-        await basicHelper.sleep(2000);
+        await basicHelper.sleep(5000);
       }
     }
   }
