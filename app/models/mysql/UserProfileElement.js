@@ -7,7 +7,6 @@ const dbName = 'pepo_api_' + coreConstants.environment;
 
 class UserProfileElementModel extends ModelBase {
   /**
-   * UserFeed model
    *
    * @constructor
    */
@@ -36,12 +35,12 @@ class UserProfileElementModel extends ModelBase {
     };
   }
 
-  /***
+  /**
    * Fetch user elements by user id
    *
-   * @param userIds {Array} - user ids
+   * @param userIds {array} - user ids
    *
-   * @return {Object}
+   * @return {Promise}
    */
   async fetchByUserIds(userIds) {
     const oThis = this;
@@ -56,13 +55,13 @@ class UserProfileElementModel extends ModelBase {
 
     let result = {};
 
-    for (let i = 0; i < dbRows.length; i++) {
-      let userId = dbRows[i].user_id;
+    for (let ind = 0; ind < dbRows.length; ind++) {
+      let userId = dbRows[ind].user_id;
 
       if (result.hasOwnProperty(userId)) {
-        result[userId].push(oThis.formatDbData(dbRows[i]));
+        result[userId].push(oThis.formatDbData(dbRows[ind]));
       } else {
-        result[userId] = [oThis.formatDbData(dbRows[i])];
+        result[userId] = [oThis.formatDbData(dbRows[ind])];
       }
     }
 
@@ -72,7 +71,7 @@ class UserProfileElementModel extends ModelBase {
   /**
    * Insert profile element
    *
-   * @return {Promise<void>}
+   * @return {Promise}
    */
   async insertElement(params) {
     const oThis = this,
