@@ -20,7 +20,7 @@ class UserModel extends ModelBase {
     oThis.tableName = 'users';
   }
 
-  /***
+  /**
    * Bitwise Config
    *
    * @return {Object}
@@ -103,7 +103,7 @@ class UserModel extends ModelBase {
   async fetchById(id) {
     const oThis = this;
 
-    let res = fetchByIds([id]);
+    let res = await oThis.fetchByIds([id]);
 
     return res[id] || {};
   }

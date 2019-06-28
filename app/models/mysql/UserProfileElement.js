@@ -39,15 +39,15 @@ class UserProfileElementModel extends ModelBase {
   /***
    * Fetch user elements by user id
    *
-   * @param userId {Integer} - id
+   * @param userIds {Array} - user ids
    *
    * @return {Object}
    */
-  async fetchByUserId(userId) {
+  async fetchByUserIds(userIds) {
     const oThis = this;
     let dbRows = await oThis
       .select('*')
-      .where({ user_id: userId })
+      .where({ user_id: userIds })
       .fire();
 
     if (dbRows.length === 0) {
@@ -57,7 +57,13 @@ class UserProfileElementModel extends ModelBase {
     let result = {};
 
     for (let i = 0; i < dbRows.length; i++) {
-      result[dbRows[i].id] = oThis.formatDbData(dbRows[i]);
+      let userId = dbRows[i].user_id;
+
+      if (result.hasOwnProperty(userId)) {
+        result[userId].push(oThis.formatDbData(dbRows[i]));
+      } else {
+        result[userId] = [oThis.formatDbData(dbRows[i])];
+      }
     }
 
     return result;

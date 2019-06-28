@@ -68,7 +68,7 @@ class EntityPermalink extends ModelBase {
       return {};
     }
 
-    return oThis.formatDbData(dbRows[0]);
+    return oThis._formatDbData(dbRows[0]);
   }
 
   /***
