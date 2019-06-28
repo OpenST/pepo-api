@@ -173,7 +173,7 @@ class CoreConstants {
   }
 
   get TWITTER_CONSUMER_SECRET() {
-    return process.env.TWITTER_CONSUMER_SECRET;
+    return process.env.PA_TWITTER_CONSUMER_SECRET;
   }
 
   get TWITTER_AUTH_CALLBACK_ROUTE() {

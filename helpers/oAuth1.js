@@ -101,7 +101,7 @@ class Oauth1Helper {
 
     oThis.requestType = params.requestType;
     oThis.url = params.url;
-    oThis.requestParams = params.requestParams;
+    oThis.requestParams = params.requestParams || {};
     oThis.oAuthCredentials = params.oAuthCredentials;
 
     oThis.oAuthConsumerKey = oThis.oAuthCredentials.oAuthConsumerKey;
@@ -110,7 +110,7 @@ class Oauth1Helper {
     oThis.oAuthToken = oThis.oAuthCredentials.oAuthToken;
     oThis.oAuthTokenSecret = oThis.oAuthCredentials.oAuthTokenSecret;
 
-    oThis.hasAccessToken = CommonValidator.isVarNullOrUndefined(oThis.oAuthTokenSecret);
+    oThis.hasAccessToken = !CommonValidator.isVarNullOrUndefined(oThis.oAuthTokenSecret);
 
     oThis.authorizationHeaders = {};
   }
