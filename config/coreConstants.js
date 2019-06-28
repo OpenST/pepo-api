@@ -166,6 +166,19 @@ class CoreConstants {
   get IP_ADDRESS() {
     return process.env.DEVOPS_IP_ADDRESS;
   }
+
+  //Twitter API key and secret
+  get TWITTER_CONSUMER_KEY() {
+    return process.env.PA_TWITTER_CONSUMER_KEY;
+  }
+
+  get TWITTER_CONSUMER_SECRET() {
+    return process.env.TWITTER_CONSUMER_SECRET;
+  }
+
+  get TWITTER_AUTH_CALLBACK_ROUTE() {
+    return process.env.PA_TWITTER_AUTH_CALLBACK_ROUTE;
+  }
 }
 
 module.exports = new CoreConstants();

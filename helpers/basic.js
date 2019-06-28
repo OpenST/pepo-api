@@ -459,6 +459,28 @@ class BasicHelper {
       setTimeout(resolve, ms);
     });
   }
+
+  /**
+   * Parses ampersand delimited key value pairs and returns a hash of key value pairs.
+   * Ex: [oauth_token=uEyX0AAAAAAA_NBNACBBa52afhY&oauth_token_secret=Mtwr1Dd3MAYLJ8yxJlJ69WIbsdKEjtnM&oauth_callback_confirmed=true]
+   * Response:
+   * {
+   *    oauth_token: 'uEyX0AAAAAAA_NBNACBBa52afhY',
+   *    oauth_token_secret: 'Mtwr1Dd3MAYLJ8yxJlJ69WIbsdKEjtnM',
+   *    oauth_callback_confirmed: 'true'
+   * }
+   *
+   * @param response
+   */
+  parseAmpersandSeparatedKeyValue(response) {
+    let finalResponse = {};
+    response.split('&').forEach(function(keyValPair) {
+      let val = keyValPair.split('=');
+      finalResponse[val[0]] = val[1];
+    });
+
+    return finalResponse;
+  }
 }
 
 module.exports = new BasicHelper();
