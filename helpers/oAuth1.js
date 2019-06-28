@@ -190,7 +190,7 @@ class Oauth1Helper {
       }
       authorizationHeaderStr = authorizationHeaderStr + key + '="' + val + '"';
     }
-    return { authorizationHeader: authorizationHeaderStr };
+    return { authorizationHeaderStr: authorizationHeaderStr };
   }
 
   /**
