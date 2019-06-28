@@ -1,6 +1,7 @@
 const rootPrefix = '../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
   coreConstants = require(rootPrefix + '/config/coreConstants');
+
 const dbName = 'pepo_api_' + coreConstants.environment;
 
 /**
@@ -10,8 +11,6 @@ const dbName = 'pepo_api_' + coreConstants.environment;
  */
 class ProfileText extends ModelBase {
   /**
-   * profile text model
-   *
    * @constructor
    */
   constructor() {
@@ -43,12 +42,12 @@ class ProfileText extends ModelBase {
     };
   }
 
-  /***
+  /**
    * Fetch profile text by id
    *
-   * @param id {Integer} - id
+   * @param id {integer} - id
    *
-   * @return {Object}
+   * @return {object}
    */
   async fetchById(id) {
     const oThis = this;
@@ -57,20 +56,21 @@ class ProfileText extends ModelBase {
     return dbRows[id] || {};
   }
 
-  /***
+  /**
    * Fetch profile text for given ids
    *
-   * @param Ids {Array} - Profile Text Ids
+   * @param ids {array} - Profile Text ids
    *
-   * @return {Object}
+   * @return {object}
    */
-  async fetchByIds(Ids) {
+  async fetchByIds(ids) {
     const oThis = this;
+
     let response = {};
 
     let dbRows = await oThis
       .select('*')
-      .where(['id IN (?)', Ids])
+      .where(['id IN (?)', ids])
       .fire();
 
     for (let index = 0; index < dbRows.length; index++) {
@@ -81,7 +81,7 @@ class ProfileText extends ModelBase {
     return response;
   }
 
-  /***
+  /**
    * Insert into profile texts
    *
    * @param params {object} - params
@@ -90,6 +90,7 @@ class ProfileText extends ModelBase {
    */
   async insertProfileText(params) {
     const oThis = this;
+
     let response = await oThis
       .insert({
         text: params.text

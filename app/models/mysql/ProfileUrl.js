@@ -2,6 +2,7 @@ const rootPrefix = '../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
   coreConstants = require(rootPrefix + '/config/coreConstants'),
   profileUrlConstant = require(rootPrefix + '/lib/globalConstant/profileUrl');
+
 const dbName = 'pepo_api_' + coreConstants.environment;
 
 /**
@@ -11,8 +12,6 @@ const dbName = 'pepo_api_' + coreConstants.environment;
  */
 class ProfileUrl extends ModelBase {
   /**
-   * profile url model
-   *
    * @constructor
    */
   constructor() {
@@ -29,7 +28,7 @@ class ProfileUrl extends ModelBase {
    * @param {object} dbRow
    * @param {number} dbRow.id
    * @param {string} dbRow.url
-   * @param {string} dbRow.kind
+   * @param {number} dbRow.kind
    * @param {string} dbRow.created_at
    * @param {string} dbRow.updated_at
    *
@@ -40,51 +39,52 @@ class ProfileUrl extends ModelBase {
     return {
       id: dbRow.id,
       url: dbRow.url,
-      kind: dbRow.kind,
+      kind: profileUrlConstant.kinds[dbRow.kind],
       createdAt: dbRow.created_at,
       updatedAt: dbRow.updated_at
     };
   }
 
-  /***
+  /**
    * Fetch profile url by id
    *
-   * @param id {Integer} - id
+   * @param id {integer} - id
    *
-   * @return {Object}
+   * @return {object}
    */
   async fetchById(id) {
     const oThis = this;
+
     let dbRows = await oThis.fetchByIds([id]);
 
     return dbRows[id] || {};
   }
 
-  /***
+  /**
    * Fetch profile url for given ids
    *
-   * @param Ids {Array} - Profile Text Ids
+   * @param ids {array} - Profile Text ids
    *
-   * @return {Object}
+   * @return {object}
    */
-  async fetchByIds(Ids) {
+  async fetchByIds(ids) {
     const oThis = this;
     let response = {};
 
     let dbRows = await oThis
       .select('*')
-      .where(['id IN (?)', Ids])
+      .where(['id IN (?)', ids])
       .fire();
 
     for (let index = 0; index < dbRows.length; index++) {
-      let formatDbRow = oThis.formatDbData(dbRows[index]);
+      let formatDbRow = oThis._formatDbData(dbRows[index]);
       response[formatDbRow.id] = formatDbRow;
     }
 
     return response;
   }
 
-  /***
+  /**
    * Insert into profile urls
    *
    * @param params {object} - params
@@ -93,6 +93,7 @@ class ProfileUrl extends ModelBase {
    */
   async insertProfileUrl(params) {
     const oThis = this;
+
     let response = await oThis
       .insert({
         url: params.url,

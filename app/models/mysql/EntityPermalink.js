@@ -2,6 +2,7 @@ const rootPrefix = '../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
   coreConstants = require(rootPrefix + '/config/coreConstants'),
   entityPermalinkConstant = require(rootPrefix + '/lib/globalConstant/entityPermalink');
+
 const dbName = 'pepo_api_' + coreConstants.environment;
 
 /**
@@ -11,7 +12,6 @@ const dbName = 'pepo_api_' + coreConstants.environment;
  */
 class EntityPermalink extends ModelBase {
   /**
-   * entity permalink model
    *
    * @constructor
    */
@@ -28,12 +28,12 @@ class EntityPermalink extends ModelBase {
    *
    * @param {object} dbRow
    * @param {number} dbRow.id
-   * @param {string} dbRow.entity_id
-   * @param {string} dbRow.entity_kind
+   * @param {number} dbRow.entity_id
+   * @param {number} dbRow.entity_kind
    * @param {string} dbRow.permalink
-   * @param {string} dbRow.status
-   * @param {string} dbRow.created_at
-   * @param {string} dbRow.updated_at
+   * @param {number} dbRow.status
+   * @param {number} dbRow.created_at
+   * @param {number} dbRow.updated_at
    *
    * @return {object}
    * @private
@@ -41,8 +41,8 @@ class EntityPermalink extends ModelBase {
   _formatDbData(dbRow) {
     return {
       id: dbRow.id,
-      entity_id: dbRow.entity_id,
-      entity_kind: dbRow.entity_kind,
+      entityId: dbRow.entity_id,
+      entityKind: dbRow.entity_kind,
       permalink: dbRow.permalink,
       status: dbRow.status,
       createdAt: dbRow.created_at,
@@ -50,18 +50,22 @@ class EntityPermalink extends ModelBase {
     };
   }
 
-  /***
+  /**
    * Fetch entity permalink by entity id
    *
-   * @param entityId {Integer} - entity id
+   * @param entityId {number} - entity id
    *
-   * @return {Object}
+   * @return {object}
    */
   async fetchByEntityId(entityId) {
     const oThis = this;
     let dbRows = await oThis
       .select('*')
-      .where(['entity_id = ?', entityId])
+      .where([
+        'entity_id = ? AND status = ?',
+        entityId,
+        entityPermalinkConstant.invertedStatuses[entityPermalinkConstant.currentEntityPermalinkStatus]
+      ])
       .fire();
 
     if (dbRows.length === 0) {
@@ -71,21 +75,26 @@ class EntityPermalink extends ModelBase {
     return oThis._formatDbData(dbRows[0]);
   }
 
-  /***
+  /**
    * Insert into entity permalink
    *
    * @param params {object} - params
+   * @param {number} params.entityId
+   * @param {number} params.entityKind
+   * @param {string} params.permalink
+   * @param {number} params.status
    *
    * @return {object}
    */
   async insertEntityPermalink(params) {
     const oThis = this;
+
     let response = await oThis
       .insert({
-        entity_kind: params.entity_kind,
-        entity_id: entityPermalinkConstant.invertedEntityKinds[params.entity_id],
+        entity_kind: entityPermalinkConstant.invertedEntityKinds[params.entityKind],
+        entity_id: params.entityId,
         permalink: params.permalink,
-        status: params.status
+        status: entityPermalinkConstant.invertedStatuses[params.status]
       })
       .fire();
 
