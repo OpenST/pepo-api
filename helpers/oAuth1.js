@@ -104,6 +104,8 @@ class Oauth1Helper {
     oThis.requestParams = params.requestParams || {};
     oThis.oAuthCredentials = params.oAuthCredentials;
 
+    oThis.extraAuthorizationHeader = params.authorizationHeader || {};
+
     oThis.oAuthConsumerKey = oThis.oAuthCredentials.oAuthConsumerKey;
     oThis.oAuthConsumerSecret = oThis.oAuthCredentials.oAuthConsumerSecret;
 
@@ -149,6 +151,8 @@ class Oauth1Helper {
       oauth_version: '1.0'
     };
 
+    Object.assign(oThis.authorizationHeaders, oThis.extraAuthorizationHeader);
+
     if (oThis.hasAccessToken) {
       oThis.authorizationHeaders['oauth_token'] = oThis.oAuthToken;
     }
@@ -181,14 +185,14 @@ class Oauth1Helper {
     let authorizationHeaderStr = null;
 
     for (let key in oThis.authorizationHeaders) {
-      let val = oThis.authorizationHeaders[key];
+      let val = encodeURIComponent(oThis.authorizationHeaders[key]);
 
       if (authorizationHeaderStr === null) {
         authorizationHeaderStr = 'OAuth ';
       } else {
         authorizationHeaderStr = authorizationHeaderStr + ',';
       }
-      authorizationHeaderStr = authorizationHeaderStr + key + '="' + val + '"';
+      authorizationHeaderStr = authorizationHeaderStr + encodeURIComponent(key) + '="' + val + '"';
     }
     return { authorizationHeaderStr: authorizationHeaderStr };
   }
