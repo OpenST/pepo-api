@@ -126,7 +126,7 @@ class Oauth1Helper {
     oThis._setAuthorizationHeader();
     oThis._setSignature();
 
-    return responseHelper.successWithData({ authorizationHeader: oThis.authorizationHeaders });
+    return responseHelper.successWithData(oThis._serviceResponse());
   }
 
   /**
@@ -171,6 +171,29 @@ class Oauth1Helper {
   }
 
   /**
+   * Set Authorization Headers
+   *
+   * @return {Object}
+   * @private
+   */
+  _serviceResponse() {
+    const oThis = this;
+    let authorizationHeaderStr = null;
+
+    for (let key in oThis.authorizationHeaders) {
+      let val = oThis.authorizationHeaders[key];
+
+      if (authorizationHeaderStr === null) {
+        authorizationHeaderStr = 'OAuth ';
+      } else {
+        authorizationHeaderStr = authorizationHeaderStr + ',';
+      }
+      authorizationHeaderStr = authorizationHeaderStr + key + '="' + val + '"';
+    }
+    return { authorizationHeader: authorizationHeaderStr };
+  }
+
+  /**
    * Get Signature Base String For Oauth Signature
    *
    * @return {String}
@@ -184,7 +207,7 @@ class Oauth1Helper {
     baseStr = baseStr + oThis.requestType.toUpperCase() + '&';
     baseStr = baseStr + oThis._getPercentEncodedString(oThis.url) + '&';
 
-    let allParams = Object.assign(oThis.authorizationHeaders, oThis.requestParams);
+    let allParams = Object.assign(oThis.requestParams, oThis.authorizationHeaders);
 
     Object.keys(allParams)
       .sort()
