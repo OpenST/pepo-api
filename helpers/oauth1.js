@@ -8,6 +8,7 @@ const uuid = require('uuid');
 
 const rootPrefix = '..',
   util = require(rootPrefix + '/lib/util'),
+  CommonValidator = require(rootPrefix + '/lib/validators/Common'),
   responseHelper = require(rootPrefix + '/lib/formatter/response');
 
 const BYTE_MAP = {
@@ -109,7 +110,7 @@ class Oauth1Helper {
     oThis.oauthToken = oThis.oAuthCredentials.oauthToken;
     oThis.oauthTokenSecret = oThis.oAuthCredentials.oauthTokenSecret;
 
-    oThis.hasAccessToken = oThis.oauthTokenSecret != null;
+    oThis.hasAccessToken = CommonValidator.isVarNullOrUndefined(oThis.oauthTokenSecret);
 
     oThis.authorizationHeaders = {};
   }
@@ -165,7 +166,7 @@ class Oauth1Helper {
     let signatureBaseString = oThis._getSignatureBaseString();
     let signingKey = oThis._getSigningKey();
 
-    let signature = util.createSha256Digest(signingKey, signatureBaseString);
+    let signature = util.createSha1DigestBase64(signingKey, signatureBaseString);
     oThis.authorizationHeaders['oauth_signature'] = signature;
   }
 
@@ -211,10 +212,10 @@ class Oauth1Helper {
   _getSigningKey() {
     const oThis = this;
 
-    let key = oThis._getPercentEncodedString(oThis.oauthConsumerSecret);
+    let key = oThis._getPercentEncodedString(oThis.oauthConsumerSecret) + '&';
 
     if (oThis.hasAccessToken) {
-      key = key + '&' + oThis._getPercentEncodedString(oThis.oauthTokenSecret);
+      key = key + oThis._getPercentEncodedString(oThis.oauthTokenSecret);
     }
 
     return key;
@@ -229,20 +230,25 @@ class Oauth1Helper {
   _getPercentEncodedString(srcString) {
     let bufferArray = [];
 
+    //Note: Long Integer Valies cannot be converted directly as there would be loss of precision
+    // convertToBigNumber
+    srcString = srcString.toString();
+
     for (var i = 0; i < srcString.length; i++) {
       const character = srcString.charAt(i);
       let bufferBytes = Buffer.from(character);
 
       for (var j = 0; j < bufferBytes.length; j++) {
         let bufferByte = bufferBytes.slice(j, j + 1);
-        let bufferHexStr = bufferByte.toString('hex');
+        let bufferHexStr = bufferByte.toString('hex').toUpperCase();
+
         if (BYTE_MAP[bufferHexStr]) {
           bufferArray.push(bufferByte);
         } else {
           bufferArray.push(percentBufferByte);
           for (var k = 0; k < bufferHexStr.length; k++) {
             const bufferHexCharacter = bufferHexStr.charAt(k);
-            bufferArray.push(Buffer.from(bufferHexCharacter.toUpperCase()));
+            bufferArray.push(Buffer.from(bufferHexCharacter));
           }
         }
       }
