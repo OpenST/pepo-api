@@ -1,6 +1,7 @@
 const rootPrefix = '../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
-  coreConstants = require(rootPrefix + '/config/coreConstants');
+  coreConstants = require(rootPrefix + '/config/coreConstants'),
+  entityPermalinkConstant = require(rootPrefix + '/lib/globalConstant/entityPermalink');
 const dbName = 'pepo_api_' + coreConstants.environment;
 
 /**
@@ -8,7 +9,7 @@ const dbName = 'pepo_api_' + coreConstants.environment;
  *
  * @class
  */
-class entityPermalink extends ModelBase {
+class EntityPermalink extends ModelBase {
   /**
    * entity permalink model
    *
@@ -69,6 +70,27 @@ class entityPermalink extends ModelBase {
 
     return oThis.formatDbData(dbRows[0]);
   }
+
+  /***
+   * Insert into entity permalink
+   *
+   * @param params {object} - params
+   *
+   * @return {object}
+   */
+  async insertEntityPermalink(params) {
+    const oThis = this;
+    let response = await oThis
+      .insert({
+        entity_kind: params.entity_kind,
+        entity_id: entityPermalinkConstant.invertedEntityKinds[params.entity_id],
+        permalink: params.permalink,
+        status: params.status
+      })
+      .fire();
+
+    return response.data;
+  }
 }
 
-module.exports = entityPermalink;
+module.exports = EntityPermalink;

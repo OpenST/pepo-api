@@ -1,6 +1,7 @@
 const rootPrefix = '../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
-  coreConstants = require(rootPrefix + '/config/coreConstants');
+  coreConstants = require(rootPrefix + '/config/coreConstants'),
+  profileUrlConstant = require(rootPrefix + '/lib/globalConstant/profileUrl');
 const dbName = 'pepo_api_' + coreConstants.environment;
 
 /**
@@ -8,7 +9,7 @@ const dbName = 'pepo_api_' + coreConstants.environment;
  *
  * @class
  */
-class profileUrls extends ModelBase {
+class ProfileUrl extends ModelBase {
   /**
    * profile url model
    *
@@ -82,6 +83,25 @@ class profileUrls extends ModelBase {
 
     return response;
   }
+
+  /***
+   * Insert into profile urls
+   *
+   * @param params {object} - params
+   *
+   * @return {object}
+   */
+  async insertProfileUrl(params) {
+    const oThis = this;
+    let response = await oThis
+      .insert({
+        url: params.url,
+        kind: profileUrlConstant.invertedKinds[params.kind]
+      })
+      .fire();
+
+    return response.data;
+  }
 }
 
-module.exports = profileUrls;
+module.exports = ProfileUrl;

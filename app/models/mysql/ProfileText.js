@@ -8,7 +8,7 @@ const dbName = 'pepo_api_' + coreConstants.environment;
  *
  * @class
  */
-class profileText extends ModelBase {
+class ProfileText extends ModelBase {
   /**
    * profile text model
    *
@@ -80,6 +80,24 @@ class profileText extends ModelBase {
 
     return response;
   }
+
+  /***
+   * Insert into profile texts
+   *
+   * @param params {object} - params
+   *
+   * @return {object}
+   */
+  async insertProfileText(params) {
+    const oThis = this;
+    let response = await oThis
+      .insert({
+        text: params.text
+      })
+      .fire();
+
+    return response.data;
+  }
 }
 
-module.exports = profileText;
+module.exports = ProfileText;
