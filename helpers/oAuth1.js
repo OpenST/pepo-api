@@ -1,7 +1,7 @@
 /**
- * Util class for oauth1
+ * Util class for oAuth1
  *
- * @module helpers/oath1
+ * @module helpers/oAuth1
  */
 
 const uuid = require('uuid');
@@ -86,7 +86,7 @@ const BYTE_MAP = {
 const percentBufferByte = Buffer.from('%');
 
 /**
- * Class for oauth1 helper.
+ * Class for oAuth1 helper.
  *
  * @class Oauth1Helper
  */
@@ -104,13 +104,13 @@ class Oauth1Helper {
     oThis.requestParams = params.requestParams;
     oThis.oAuthCredentials = params.oAuthCredentials;
 
-    oThis.oauthConsumerKey = oThis.oAuthCredentials.oauthConsumerKey;
-    oThis.oauthConsumerSecret = oThis.oAuthCredentials.oauthConsumerSecret;
+    oThis.oAuthConsumerKey = oThis.oAuthCredentials.oAuthConsumerKey;
+    oThis.oAuthConsumerSecret = oThis.oAuthCredentials.oAuthConsumerSecret;
 
-    oThis.oauthToken = oThis.oAuthCredentials.oauthToken;
-    oThis.oauthTokenSecret = oThis.oAuthCredentials.oauthTokenSecret;
+    oThis.oAuthToken = oThis.oAuthCredentials.oAuthToken;
+    oThis.oAuthTokenSecret = oThis.oAuthCredentials.oAuthTokenSecret;
 
-    oThis.hasAccessToken = CommonValidator.isVarNullOrUndefined(oThis.oauthTokenSecret);
+    oThis.hasAccessToken = CommonValidator.isVarNullOrUndefined(oThis.oAuthTokenSecret);
 
     oThis.authorizationHeaders = {};
   }
@@ -142,7 +142,7 @@ class Oauth1Helper {
     let nonce = uuid.v4();
 
     oThis.authorizationHeaders = {
-      oauth_consumer_key: oThis.oauthConsumerKey,
+      oauth_consumer_key: oThis.oAuthConsumerKey,
       oauth_nonce: nonce,
       oauth_signature_method: 'HMAC-SHA1',
       oauth_timestamp: currentTime,
@@ -150,7 +150,7 @@ class Oauth1Helper {
     };
 
     if (oThis.hasAccessToken) {
-      oThis.authorizationHeaders['oauth_token'] = oThis.oauthToken;
+      oThis.authorizationHeaders['oauth_token'] = oThis.oAuthToken;
     }
   }
 
@@ -235,10 +235,10 @@ class Oauth1Helper {
   _getSigningKey() {
     const oThis = this;
 
-    let key = oThis._getPercentEncodedString(oThis.oauthConsumerSecret) + '&';
+    let key = oThis._getPercentEncodedString(oThis.oAuthConsumerSecret) + '&';
 
     if (oThis.hasAccessToken) {
-      key = key + oThis._getPercentEncodedString(oThis.oauthTokenSecret);
+      key = key + oThis._getPercentEncodedString(oThis.oAuthTokenSecret);
     }
 
     return key;
