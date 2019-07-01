@@ -170,6 +170,10 @@ const v1Signature = {
         validatorMethods: ['validateString', 'validatePaginationIdentifier']
       }
     ]
+  },
+  [apiName.twitterRequestToken]: {
+    mandatory: [],
+    optional: []
   }
 };
 

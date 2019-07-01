@@ -15,6 +15,7 @@ const rootPrefix = '../../..',
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   feedsRoutes = require(rootPrefix + '/routes/api/v1/feeds'),
   cookieHelper = require(rootPrefix + '/lib/cookieHelper'),
+  oAuthRoutes = require(rootPrefix + '/routes/api/v1/oauth1/index'),
   ostTransactionRoutes = require(rootPrefix + '/routes/api/v1/ostTransactions');
 
 const errorConfig = basicHelper.fetchErrorConfig(apiVersions.v1);
@@ -46,5 +47,6 @@ router.use('/tokens', validateCookie, tokensRoutes);
 router.use('/ost-transactions', validateCookie, ostTransactionRoutes);
 router.use('/gifs', validateCookie, gifsRoutes);
 router.use('/feeds', validateCookie, feedsRoutes);
+router.use('/oAuth', oAuthRoutes);
 
 module.exports = router;
