@@ -76,6 +76,19 @@ node devops/exec/flushMemcache.js
 node executables/oneTimers/seedTokensTable.js --apiKey "__ABCD" --apiSecret "__WXYZ"
 ```
 
+## Subscribe for OST webhooks
+```bash
+node executables/oneTimers/webhooksSubscription.js
+```
+
+## Insert webhooks secret
+
+Note: Get the secret and webhooks id from above run(subscribe webhooks).
+
+```bash 
+node executables/oneTimers/insertWebhooksSecret.js --webhooksSecret "__WXYZ" --webhooksId "__ABCD"
+```
+
 * Seed Gif categories
 ```bash
 source set_env_vars.sh
