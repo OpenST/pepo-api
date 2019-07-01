@@ -128,7 +128,13 @@ class CoreConstants {
   get S3_USER_ASSETS_FOLDER() {
     const oThis = this;
 
-    return oThis.S3_AWS_MASTER_FOLDER + '/' + oThis.S3_USER_ASSETS_BUCKET;
+    return oThis.S3_AWS_MASTER_FOLDER + '/' + 'ua';
+  }
+
+  get S3_USER_PROFILE_IMAGES() {
+    const oThis = this;
+
+    return oThis.S3_USER_ASSETS_FOLDER + '/' + 'profile-images';
   }
 
   // Encryption Secrets
