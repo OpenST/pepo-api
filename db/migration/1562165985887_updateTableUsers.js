@@ -12,7 +12,14 @@ const upQuery =
       ADD COLUMN `user_name` varchar(50) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL AFTER `id`,\n\
       ADD COLUMN `profile_image_id` bigint(20)  NOT NULL AFTER `status`;';
 
-const downQuery = 'ALTER TABLE `users` DROP `user_name`, DROP `profile_image_id`;';
+const downQuery =
+  'ALTER TABLE `users` \n\
+      MODIFY `password` varchar(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NULL, \n\
+      DROP `name`,\n\
+      ADD COLUMN `first_name` varchar(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NULL AFTER `id`, \n\
+      ADD COLUMN `last_name` varchar(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NULL AFTER `id`, \n\
+      DROP `user_name`,\n\
+      DROP `profile_image_id`;';
 
 const migrationName = {
   dbName: dbName,
