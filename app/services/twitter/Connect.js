@@ -115,13 +115,16 @@ class TwitterConnect extends ServiceBase {
    */
   async _validateTwitterCredentials() {
     const oThis = this;
-
     logger.log('Start::Validate Twitter Credentials');
 
-    let twitterResp = new AccountTwitterRequestClass.verifyCredentials({
-      oAuthToken: oThis.token,
-      oAuthTokenSecret: oThis.secret
-    }).catch(function(err) {
+    let twitterResp = null;
+
+    try {
+      twitterResp = await new AccountTwitterRequestClass().verifyCredentials({
+        oAuthToken: oThis.token,
+        oAuthTokenSecret: oThis.secret
+      });
+    } catch {
       logger.error('Error while validate Credentials for twitter: ', err);
       return Promise.reject(
         responseHelper.paramValidationError({
@@ -130,7 +133,7 @@ class TwitterConnect extends ServiceBase {
           debug_options: {}
         })
       );
-    });
+    }
 
     if (twitterResp.isFailure()) {
       return Promise.reject(

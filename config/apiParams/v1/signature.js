@@ -192,6 +192,27 @@ const v1Signature = {
         validatorMethods: ['validateStringArray']
       }
     ]
+  },
+  [apiName.twitterLogin]: {
+    mandatory: [
+      {
+        parameter: 'token',
+        validatorMethods: ['validateNonBlankString']
+      },
+      {
+        parameter: 'secret',
+        validatorMethods: ['validateNonBlankString']
+      },
+      {
+        parameter: 'twitter_id',
+        validatorMethods: ['validateNonBlankString']
+      },
+      {
+        parameter: 'handle',
+        validatorMethods: ['validateNonBlankString']
+      }
+    ],
+    optional: []
   }
 };
 
