@@ -174,6 +174,24 @@ const v1Signature = {
   [apiName.twitterRequestToken]: {
     mandatory: [],
     optional: []
+  },
+  [apiName.uploadParams]: {
+    mandatory: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      }
+    ],
+    optional: [
+      {
+        parameter: 'videos',
+        validatorMethods: ['validateStringArray']
+      },
+      {
+        parameter: 'images',
+        validatorMethods: ['validateStringArray']
+      }
+    ]
   }
 };
 
