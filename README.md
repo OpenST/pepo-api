@@ -83,7 +83,7 @@ node executables/oneTimers/webhooksSubscription.js
 
 ## Insert webhooks secret
 
-Note: Get the secret and webhooks id from above run(subscribe webhooks).
+Note: Get the webhooks id from above run(subscribe webhooks). Secret has to be obtained from developer page
 
 ```bash 
 node executables/oneTimers/insertWebhooksSecret.js --webhooksSecret "__WXYZ" --webhooksId "__ABCD"
