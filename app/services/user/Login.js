@@ -40,6 +40,7 @@ class Login extends ServiceBase {
     oThis.userId = null;
     oThis.secureUser = null;
     oThis.tokenUser = null;
+    oThis.decryptedEncryptionSalt = null;
   }
 
   /**
@@ -126,6 +127,8 @@ class Login extends ServiceBase {
         })
       );
     }
+
+    oThis.decryptedEncryptionSalt = localCipher.decrypt(coreConstants.CACHE_SHA_KEY, oThis.secureUser.encryptionSaltLc);
 
     return Promise.resolve(responseHelper.successWithData({}));
   }
@@ -216,7 +219,7 @@ class Login extends ServiceBase {
   async _serviceResponse() {
     const oThis = this;
 
-    const userLoginCookieValue = new UserModel().getCookieValueFor(oThis.secureUser, {
+    const userLoginCookieValue = new UserModel().getCookieValueFor(oThis.secureUser, oThis.decryptedEncryptionSalt, {
       timestamp: Date.now() / 1000
     });
 

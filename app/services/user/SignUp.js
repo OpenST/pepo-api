@@ -47,6 +47,7 @@ class SignUp extends ServiceBase {
     oThis.userId = null;
     oThis.ostUserId = null;
     oThis.ostStatus = null;
+    oThis.decryptedEncryptionSalt = null;
   }
 
   /**
@@ -111,8 +112,9 @@ class SignUp extends ServiceBase {
 
     const KMSObject = new KmsWrapper(kmsGlobalConstant.userPasswordEncryptionPurpose);
     const kmsResp = await KMSObject.generateDataKey();
-    const decryptedEncryptionSalt = kmsResp.Plaintext,
-      encryptedEncryptionSalt = kmsResp.CiphertextBlob;
+    const encryptedEncryptionSalt = kmsResp.CiphertextBlob;
+
+    oThis.decryptedEncryptionSalt = kmsResp.Plaintext;
 
     const encryptedPassword = util.createSha256Digest(decryptedEncryptionSalt, oThis.password);
 
@@ -235,7 +237,7 @@ class SignUp extends ServiceBase {
     const secureUser = secureUserRes.data,
       tokenUser = tokenUserRes.data[oThis.userId];
 
-    const userLoginCookieValue = new UserModel().getCookieValueFor(secureUser, {
+    const userLoginCookieValue = new UserModel().getCookieValueFor(secureUser, oThis.decryptedEncryptionSalt, {
       timestamp: Date.now() / 1000
     });
 

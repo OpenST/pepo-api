@@ -4,6 +4,7 @@ const rootPrefix = '../../..',
   KmsWrapper = require(rootPrefix + '/lib/aws/KmsWrapper'),
   TokenUserModel = require(rootPrefix + '/app/models/mysql/TokenUser'),
   TwitterUserExtendedModel = require(rootPrefix + '/app/models/mysql/TwitterUserExtended'),
+  TwitterUserModel = require(rootPrefix + '/app/models/mysql/TwitterUser'),
   SecureUserCache = require(rootPrefix + '/lib/cacheManagement/single/SecureUser'),
   UserByUserNameCache = require(rootPrefix + '/lib/cacheManagement/single/UserByUsername'),
   TokenUserDetailByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TokenUserByUserIds'),
@@ -19,6 +20,7 @@ const rootPrefix = '../../..',
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   kmsGlobalConstant = require(rootPrefix + '/lib/globalConstant/kms'),
   ostPlatformSdk = require(rootPrefix + '/lib/ostPlatform/jsSdkWrapper'),
+  coreConstants = require(rootPrefix + '/config/coreConstants'),
   tokenUserConstants = require(rootPrefix + '/lib/globalConstant/tokenUser');
 
 /**
@@ -59,10 +61,12 @@ class TwitterConnect extends ServiceBase {
     oThis.twitterUserExtendedObj = null;
 
     oThis.encryptedEncryptionSalt = null;
-    oThis.encryptionSalt = null;
+    oThis.decryptedEncryptionSalt = null;
+    oThis.encryptedCookieToken = null;
+    oThis.encryptedScryptSalt = null;
+    oThis.encryptedSecret = null;
 
     oThis.userName = null;
-    oThis.name = null;
     oThis.email = null;
     oThis.profileImageId = null;
     oThis.link = null;
@@ -132,8 +136,10 @@ class TwitterConnect extends ServiceBase {
       return Promise.reject(userObjCacheResp);
     }
 
-    oThis.twitterUserObj = twitterUserObjCacheResp.data[oThis.twitterId] || null;
-    oThis.userId = oThis.twitterUserObj.userId;
+    if (twitterUserObjCacheResp.data[oThis.twitterId].userId) {
+      oThis.twitterUserObj = twitterUserObjCacheResp.data[oThis.twitterId];
+      oThis.userId = oThis.twitterUserObj.userId;
+    }
 
     logger.log('End::Fetch Twitter User');
     return responseHelper.successWithData({});
@@ -269,7 +275,7 @@ class TwitterConnect extends ServiceBase {
   /**
    * Generate Data Key from KMS.
    *
-   * @sets oThis.encryptedEncryptionSalt, oThis.encryptionSalt
+   * @sets oThis.encryptedEncryptionSalt, oThis.decryptedEncryptionSalt
    *
    * @return {Promise<Result>}
    *
@@ -282,8 +288,15 @@ class TwitterConnect extends ServiceBase {
     const KMSObject = new KmsWrapper(kmsGlobalConstant.userPasswordEncryptionPurpose);
     const kmsResp = await KMSObject.generateDataKey();
 
-    oThis.encryptionSalt = kmsResp.Plaintext;
+    oThis.decryptedEncryptionSalt = kmsResp.Plaintext;
     oThis.encryptedEncryptionSalt = kmsResp.CiphertextBlob;
+
+    let scryptSalt = localCipher.generateRandomIv(32);
+    let cookieToken = localCipher.generateRandomIv(32);
+
+    oThis.encryptedScryptSalt = localCipher.encrypt(oThis.decryptedEncryptionSalt, scryptSalt);
+    oThis.encryptedCookieToken = localCipher.encrypt(oThis.decryptedEncryptionSalt, cookieToken);
+    oThis.encryptedSecret = localCipher.encrypt(oThis.decryptedEncryptionSalt, oThis.secret);
 
     logger.log('End::Generate Data Key from KMS');
     return responseHelper.successWithData({});
@@ -357,7 +370,7 @@ class TwitterConnect extends ServiceBase {
       .update({
         token: oThis.token,
         secret: eSecretKms,
-        status: twitterUserExtendedConstants.invertedStatuses(invertedStatuses.activeStatus)
+        status: twitterUserExtendedConstants.invertedStatuses(twitterUserExtendedConstants.activeStatus)
       })
       .where({ id: oThis.twitterUserExtendedObj.id })
       .fire();
@@ -399,49 +412,7 @@ class TwitterConnect extends ServiceBase {
   }
 
   /**
-   * Create user.
-   *
-   * @sets oThis.userId
-   *
-   * @return {Promise<void>}
-   * @private
-   */
-  async _createUser() {
-    const oThis = this;
-
-    logger.log('Start::Create user');
-
-    let encryptedCookieToken = '';
-
-    let insertData = {
-      user_name: oThis.userName,
-      name: oThis.name,
-      cookie_token: encryptedCookieToken,
-      encryption_salt: encryptedEncryptionSalt,
-      mark_inactive_trigger_count: 0,
-      properties: 0,
-      status: userConstants.invertedStatuses[userConstants.activeStatus]
-    };
-    // Insert user in database.
-    const insertResponse = await new UserModel().insert(insertData).fire();
-
-    if (!insertResponse) {
-      logger.error('Error while inserting data in users table.');
-      return Promise.reject(new Error('Error while inserting data in users table.'));
-    }
-
-    oThis.userId = insertResponse.insertId;
-    insertData.id = insertResponse.insertId;
-
-    let formattedInsertData = new UserModel().formatDbData(insertData);
-    await UserModel.flushCache(formattedInsertData);
-
-    logger.log('End::Create user');
-    return Promise.resolve(responseHelper.successWithData({}));
-  }
-
-  /**
-   * Create token user.
+   * Create user in ost.
    *
    * @sets oThis.ostUserId, oThis.ostStatus
    *
@@ -467,6 +438,130 @@ class TwitterConnect extends ServiceBase {
   }
 
   /**
+   * Create user.
+   *
+   * @sets oThis.userId
+   *
+   * @return {Promise<void>}
+   * @private
+   */
+  async _createUser() {
+    const oThis = this;
+
+    logger.log('Start::Create user');
+
+    let propertyVal = new UserModel().setBitwise('properties', 0, userConstants.hasTwitterLoginProperty);
+
+    let insertData = {
+      user_name: oThis.userName,
+      name: oThis.userTwitterEntity.formattedName,
+      cookie_token: oThis.encryptedCookieToken,
+      encryption_salt: oThis.encryptedEncryptionSalt,
+      mark_inactive_trigger_count: 0,
+      properties: propertyVal,
+      status: userConstants.invertedStatuses[userConstants.activeStatus],
+      profile_image_id: oThis.profileImageId
+    };
+    // Insert user in database.
+    const insertResponse = await new UserModel().insert(insertData).fire();
+
+    if (!insertResponse) {
+      logger.error('Error while inserting data in users table.');
+      return Promise.reject(new Error('Error while inserting data in users table.'));
+    }
+
+    oThis.userId = insertResponse.insertId;
+    insertData.id = insertResponse.insertId;
+
+    let formattedInsertData = new UserModel().formatDbData(insertData);
+    await UserModel.flushCache(formattedInsertData);
+
+    logger.log('End::Create user');
+    return responseHelper.successWithData({});
+  }
+
+  /**
+   * Create Twitter User Extended Obj.
+   *
+   * @return {Promise<void>}
+   * @private
+   */
+  async _createTwitterUserExtended() {
+    const oThis = this;
+
+    logger.log('Start::Create Twitter User Extended Obj');
+
+    let insertData = {
+      twitter_user_id: oThis.twitterUserObj.id,
+      token: oThis.token,
+      secret: oThis.encryptedSecret,
+      status: twitterUserExtendedConstants.invertedStatuses(twitterUserExtendedConstants.activeStatus)
+    };
+    // Insert user in database.
+    const insertResponse = await new TwitterUserExtendedModel().insert(insertData).fire();
+
+    if (!insertResponse) {
+      logger.error('Error while inserting data in twitter users extended table.');
+      return Promise.reject(new Error('Error while inserting data in twitter users extended table.'));
+    }
+
+    insertData.id = insertResponse.insertId;
+
+    oThis.twitterUserExtendedObj = new TwitterUserExtendedModel().formatDbData(insertData);
+    await TwitterUserExtendedModel.flushCache(oThis.twitterUserExtendedObj);
+
+    logger.log('End::Create Twitter User Extended Obj');
+
+    return responseHelper.successWithData({});
+  }
+  /**
+   * Create or Update Twitter User Obj.
+   *
+   * @return {Promise<void>}
+   * @private
+   */
+  async _createUpdateTwitterUser() {
+    const oThis = this;
+
+    logger.log('Start::Create/Update Twitter User Obj');
+
+    if (oThis.twitterUserObj) {
+      await new TwitterUserModel()
+        .update({
+          user_id: oThis.userId
+        })
+        .where({ id: oThis.twitterUserObj.id })
+        .fire();
+
+      oThis.twitterUserObj.userId = oThis.userId;
+    } else {
+      let insertData = {
+        twitter_id: oThis.twitterId,
+        user_id: oThis.userId,
+        name: oThis.userTwitterEntity.formattedName,
+        email: oThis.userTwitterEntity.email,
+        profile_image_url: oThis.userTwitterEntity.profileImageUrl
+      };
+      // Insert user in database.
+      const insertResponse = await new TwitterUserModel().insert(insertData).fire();
+
+      if (!insertResponse) {
+        logger.error('Error while inserting data in twitter users table.');
+        return Promise.reject(new Error('Error while inserting data in twitter users table.'));
+      }
+
+      insertData.id = insertResponse.insertId;
+
+      oThis.twitterUserObj = new TwitterUserModel().formatDbData(insertData);
+    }
+
+    await TwitterUserModel.flushCache(oThis.twitterUserObj);
+
+    logger.log('End::Create/Update Twitter User Obj');
+    return responseHelper.successWithData({});
+  }
+
+  /**
    * Create token user
    *
    *
@@ -478,20 +573,12 @@ class TwitterConnect extends ServiceBase {
     const oThis = this;
 
     logger.log('Start::Creating token user');
-    const KMSObject = new KmsWrapper(kmsGlobalConstant.tokenUserScryptSaltPurpose);
-    const kmsResp = await KMSObject.generateDataKey();
-    const decryptedEncryptionSalt = kmsResp.Plaintext,
-      encryptedEncryptionSalt = kmsResp.CiphertextBlob,
-      scryptSalt = localCipher.generateRandomIv(32);
-
-    const encryptedScryptSalt = localCipher.encrypt(decryptedEncryptionSalt, scryptSalt);
 
     let insertData = {
       user_id: oThis.userId,
       ost_user_id: oThis.ostUserId,
       ost_token_holder_address: null,
-      scrypt_salt: encryptedScryptSalt,
-      encryption_salt: encryptedEncryptionSalt,
+      scrypt_salt: oThis.encryptedScryptSalt,
       properties: 0,
       ost_status: tokenUserConstants.invertedOstStatuses[oThis.ostStatus.toUpperCase()]
     };
@@ -500,14 +587,13 @@ class TwitterConnect extends ServiceBase {
 
     if (!insertResponse) {
       logger.error('Error while inserting data in token_users table.');
-
       return Promise.reject(new Error('Error while inserting data in token_users table.'));
     }
 
     insertData.id = insertResponse.insertId;
 
-    let formattedInsertData = new TokenUserModel().formatDbData(insertData);
-    await TokenUserModel.flushCache(formattedInsertData);
+    oThis.tokenUserObj = new TokenUserModel().formatDbData(insertData);
+    await TokenUserModel.flushCache(oThis.tokenUserObj);
 
     logger.log('End::Creating token user');
     return Promise.resolve(responseHelper.successWithData({}));
@@ -519,33 +605,10 @@ class TwitterConnect extends ServiceBase {
    * @return {Promise<void>}
    * @private
    */
-  async _serviceResponse1() {
-    const oThis = this;
-
-    const promisesArray = [];
-
-    promisesArray.push(new SecureUserCache({ id: oThis.userId }).fetch());
-    promisesArray.push(new TokenUserDetailByUserIdsCache({ userIds: [oThis.userId] }).fetch());
-
-    const promisesArrayResponse = await Promise.all(promisesArray);
-
-    const secureUserRes = promisesArrayResponse[0];
-    const tokenUserRes = promisesArrayResponse[1];
-
-    const secureUser = secureUserRes.data,
-      tokenUser = tokenUserRes.data[oThis.userId];
-  }
-
-  /**
-   * Service response.
-   *
-   * @return {Promise<void>}
-   * @private
-   */
   async _serviceResponse() {
     const oThis = this;
 
-    const userLoginCookieValue = new UserModel().getCookieValueFor(oThis.secureUserObj, {
+    const userLoginCookieValue = new UserModel().getCookieValueFor(oThis.secureUserObj, oThis.decryptedEncryptionSalt, {
       timestamp: Date.now() / 1000
     });
 

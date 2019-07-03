@@ -2,6 +2,7 @@ const rootPrefix = '../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
   userConstants = require(rootPrefix + '/lib/globalConstant/user'),
   util = require(rootPrefix + '/lib/util'),
+  localCipher = require(rootPrefix + '/lib/encryptors/localCipher'),
   coreConstants = require(rootPrefix + '/config/coreConstants');
 
 const dbName = 'pepo_api_' + coreConstants.environment;
@@ -204,10 +205,12 @@ class UserModel extends ModelBase {
    * @param options
    * @returns {string}
    */
-  getCookieValueFor(userObj, options) {
+  getCookieValueFor(userObj, decryptedEncryptionSalt, options) {
     const oThis = this;
 
-    return userObj.id + ':' + options.timestamp + ':' + oThis.getCookieTokenFor(userObj, options);
+    return (
+      userObj.id + ':' + options.timestamp + ':' + oThis.getCookieTokenFor(userObj, decryptedEncryptionSalt, options)
+    );
   }
 
   /**
@@ -217,8 +220,9 @@ class UserModel extends ModelBase {
    * @param options
    * @returns {String}
    */
-  getCookieTokenFor(userObj, options) {
-    let passwordEncrypted = userObj.password;
+  getCookieTokenFor(userObj, decryptedEncryptionSalt, options) {
+    let uniqueStr = localCipher.decrypt(decryptedEncryptionSalt, userObj.cookieToken);
+
     let stringToSign =
       userObj.id +
       ':' +
@@ -226,15 +230,9 @@ class UserModel extends ModelBase {
       ':' +
       coreConstants.PA_COOKIE_TOKEN_SECRET +
       ':' +
-      passwordEncrypted.substring(0, 16);
+      uniqueStr.substring(0, 16);
     let salt =
-      userObj.id +
-      ':' +
-      passwordEncrypted.slice(-16) +
-      ':' +
-      coreConstants.PA_COOKIE_TOKEN_SECRET +
-      ':' +
-      options.timestamp;
+      userObj.id + ':' + uniqueStr.slice(-16) + ':' + coreConstants.PA_COOKIE_TOKEN_SECRET + ':' + options.timestamp;
     let cookieToken = util.createSha256Digest(salt, stringToSign);
     return cookieToken;
   }
