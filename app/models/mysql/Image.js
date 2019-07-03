@@ -103,6 +103,22 @@ class Image extends ModelBase {
 
     return response.data;
   }
+
+  /**
+   * Flush cache.
+   *
+   * @param {object} params
+   * @param {number} params.id
+   *
+   * @returns {Promise<*>}
+   */
+  static async flushCache(params) {
+    const ImageByIds = require(rootPrefix + '/lib/cacheManagement/multi/ImageByIds');
+
+    await new ImageByIds({
+      ids: [params.id]
+    }).clear();
+  }
 }
 
 module.exports = Image;

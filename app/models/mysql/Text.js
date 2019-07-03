@@ -99,6 +99,22 @@ class Text extends ModelBase {
 
     return response.data;
   }
+
+  /**
+   * Flush cache.
+   *
+   * @param {object} params
+   * @param {number} params.id
+   *
+   * @returns {Promise<*>}
+   */
+  static async flushCache(params) {
+    const TextsByIds = require(rootPrefix + '/lib/cacheManagement/multi/TextsByIds');
+
+    await new TextsByIds({
+      ids: [params.id]
+    }).clear();
+  }
 }
 
 module.exports = Text;

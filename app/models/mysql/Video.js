@@ -106,6 +106,22 @@ class Video extends ModelBase {
 
     return response.data;
   }
+
+  /**
+   * Flush cache.
+   *
+   * @param {object} params
+   * @param {number} params.id
+   *
+   * @returns {Promise<*>}
+   */
+  static async flushCache(params) {
+    const VideoByIds = require(rootPrefix + '/lib/cacheManagement/multi/VideoByIds');
+
+    await new VideoByIds({
+      ids: [params.id]
+    }).clear();
+  }
 }
 
 module.exports = Video;

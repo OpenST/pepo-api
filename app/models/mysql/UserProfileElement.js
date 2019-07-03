@@ -46,7 +46,7 @@ class UserProfileElementModel extends ModelBase {
     const oThis = this;
     let dbRows = await oThis
       .select('*')
-      .where({ user_id: userIds })
+      .where(['user_id IN (?)', userIds])
       .fire();
 
     if (dbRows.length === 0) {
@@ -88,6 +88,23 @@ class UserProfileElementModel extends ModelBase {
       .fire();
 
     return response.data;
+  }
+
+  /**
+   * Flush cache.
+   *
+   * @param {object} params
+   * @param {number} params.userId
+   *
+   * @returns {Promise<*>}
+   */
+  static async flushCache(params) {
+    const UserProfileElementsByUserIds = require(rootPrefix +
+      '/lib/cacheManagement/multi/UserProfileElementsByUserIds');
+
+    await new UserProfileElementsByUserIds({
+      userIds: [params.userId]
+    }).clear();
   }
 }
 

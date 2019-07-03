@@ -103,6 +103,22 @@ class Url extends ModelBase {
 
     return response.data;
   }
+
+  /**
+   * Flush cache.
+   *
+   * @param {object} params
+   * @param {number} params.id
+   *
+   * @returns {Promise<*>}
+   */
+  static async flushCache(params) {
+    const UrlsByIds = require(rootPrefix + '/lib/cacheManagement/multi/UrlsByIds');
+
+    await new UrlsByIds({
+      ids: [params.id]
+    }).clear();
+  }
 }
 
 module.exports = Url;
