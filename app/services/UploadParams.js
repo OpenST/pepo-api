@@ -139,7 +139,7 @@ class UploadParams extends ServiceBase {
         resultHash[feFileName] = {
           postUrl: preSignedPostParams.url,
           postFields: preSignedPostParams.fields,
-          s3Url: preSignedPostParams.url + '/' + preSignedPostParams.fields.key
+          s3Url: oThis._getS3Url(preSignedPostParams)
         };
       }
 
@@ -150,7 +150,11 @@ class UploadParams extends ServiceBase {
   /**
    * Get random encoded file names.
    *
-   * @returns {Promise<void>}
+   * @param {string} fileType
+   * @param {string} extension
+   * @param {number} fileIndex
+   *
+   * @returns {{name: (string|*), resizeName: (string|*), original: (string|*)}}
    * @private
    */
   _getRandomEncodedFileNames(fileType, extension, fileIndex) {
@@ -196,8 +200,8 @@ class UploadParams extends ServiceBase {
   /**
    * Get content type.
    *
-   * @param intent
-   * @param fileExtension
+   * @param {string} intent
+   * @param {string} fileExtension
    *
    * @returns {string}
    * @private
@@ -213,6 +217,17 @@ class UploadParams extends ServiceBase {
       default:
         throw new Error('Unsupported file type.');
     }
+  }
+
+  /**
+   * Get s3 url.
+   *
+   * @param {hash} preSignedPostParams
+   *
+   * @private
+   */
+  _getS3Url(preSignedPostParams) {
+    return 'https://' + preSignedPostParams.fields.bucket + '.s3.amazonaws.com/' + preSignedPostParams.fields.key;
   }
 }
 
