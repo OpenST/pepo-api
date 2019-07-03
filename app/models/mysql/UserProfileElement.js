@@ -91,6 +91,24 @@ class UserProfileElementModel extends ModelBase {
   }
 
   /**
+   * Delete by user id and kind
+   *
+   * @param params
+   * @return {Promise<void>}
+   */
+  async deleteByUserIdAndKind(params) {
+    const oThis = this;
+
+    await oThis
+      .delete()
+      .where({
+        userId: params.userId,
+        data_kind: userProfileElementConst.invertedKinds[params.dataKind]
+      })
+      .fire();
+  }
+
+  /**
    * Flush cache.
    *
    * @param {object} params

@@ -101,6 +101,44 @@ class Text extends ModelBase {
   }
 
   /**
+   * Update text by id
+   *
+   * @param params
+   * @return {Promise<void>}
+   */
+  async updateById(params) {
+    const oThis = this;
+
+    let response = await oThis
+      .update({
+        text: params.text
+      })
+      .where({
+        id: params.id
+      })
+      .fire();
+
+    return response.data;
+  }
+
+  /**
+   * Delete by id
+   *
+   * @param params
+   * @return {Promise<void>}
+   */
+  async deleteById(params) {
+    const oThis = this;
+
+    await oThis
+      .delete()
+      .where({
+        id: params.id
+      })
+      .fire();
+  }
+
+  /**
    * Flush cache.
    *
    * @param {object} params
