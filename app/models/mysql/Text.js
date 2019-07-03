@@ -5,11 +5,11 @@ const rootPrefix = '../../..',
 const dbName = 'pepo_api_' + coreConstants.environment;
 
 /**
- * Class for profile text model.
+ * Class for text model.
  *
  * @class
  */
-class ProfileText extends ModelBase {
+class Text extends ModelBase {
   /**
    * @constructor
    */
@@ -18,7 +18,7 @@ class ProfileText extends ModelBase {
 
     const oThis = this;
 
-    oThis.tableName = 'profile_texts';
+    oThis.tableName = 'texts';
   }
 
   /**
@@ -43,7 +43,7 @@ class ProfileText extends ModelBase {
   }
 
   /**
-   * Fetch profile text by id
+   * Fetch text by id
    *
    * @param id {integer} - id
    *
@@ -57,9 +57,9 @@ class ProfileText extends ModelBase {
   }
 
   /**
-   * Fetch profile text for given ids
+   * Fetch text for given ids
    *
-   * @param ids {array} - Profile Text ids
+   * @param ids {array} - text ids
    *
    * @return {object}
    */
@@ -82,13 +82,13 @@ class ProfileText extends ModelBase {
   }
 
   /**
-   * Insert into profile texts
+   * Insert into texts
    *
    * @param params {object} - params
    *
    * @return {object}
    */
-  async insertProfileText(params) {
+  async insertText(params) {
     const oThis = this;
 
     let response = await oThis
@@ -101,4 +101,4 @@ class ProfileText extends ModelBase {
   }
 }
 
-module.exports = ProfileText;
+module.exports = Text;
