@@ -43,6 +43,7 @@ class UserModel extends ModelBase {
       firstName: dbRow.first_name,
       lastName: dbRow.last_name,
       password: dbRow.password,
+      cookieToken: dbRow.cookie_token,
       encryptionSalt: dbRow.encryption_salt,
       markInactiveTriggerCount: dbRow.mark_inactive_trigger_count,
       properties: dbRow.properties,

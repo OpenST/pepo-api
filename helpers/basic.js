@@ -481,6 +481,15 @@ class BasicHelper {
 
     return finalResponse;
   }
+
+  /**
+   * Json parsed response from twitter.
+   *
+   * @return {Object}
+   */
+  parseTwitterJsonResponse(response) {
+    return JSON.parse(response);
+  }
 }
 
 module.exports = new BasicHelper();
