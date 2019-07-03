@@ -154,11 +154,10 @@ class UploadParams extends ServiceBase {
    * @private
    */
   _getRandomEncodedFileNames(fileType, extension, fileIndex) {
-    const oThis = this;
+    const oThis = this,
+      version = oThis.currentUserId + '-' + util.createMd5Digest(oThis._getVersion(fileIndex));
 
     let name = null;
-
-    const version = oThis.currentUserId + '-' + util.createMd5Digest(oThis._getVersion(fileIndex));
 
     switch (fileType) {
       case s3UploadConstants.imageFileType:
