@@ -5,7 +5,8 @@ const dbName = 'pepo_api_' + coreConstants.environment;
 
 const upQuery = 'ALTER TABLE `token_users` DROP `encryption_salt`;';
 
-const downQuery = 'select 1;';
+const downQuery = 'ALTER TABLE `token_users`\n\
+  ADD COLUMN `encryption_salt` blob NOT NULL;';
 
 const migrationName = {
   dbName: dbName,
