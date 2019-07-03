@@ -130,7 +130,7 @@ class UploadParams extends ServiceBase {
       for (let index = 0; index < fileArray.length; index++) {
         const feFileName = fileArray[index],
           fileExtension = util.getFileExtension(feFileName),
-          contentType = util.getContentTypeForExtension(fileExtension),
+          contentType = oThis._getContent(intent, fileExtension),
           fileNames = oThis._getRandomEncodedFileNames(fileType, fileExtension, index),
           fileName = fileNames.name;
 
@@ -158,7 +158,7 @@ class UploadParams extends ServiceBase {
 
     let name = null;
 
-    const version = oThis.currentUserId + '-' + util.createMd5Digest(oThis.getVersion(fileIndex));
+    const version = oThis.currentUserId + '-' + util.createMd5Digest(oThis._getVersion(fileIndex));
 
     switch (fileType) {
       case s3UploadConstants.imageFileType:
@@ -182,9 +182,11 @@ class UploadParams extends ServiceBase {
    * Get version.
    *
    * @param {number} fileIndex
+   *
    * @returns {string}
+   * @private
    */
-  getVersion(fileIndex) {
+  _getVersion(fileIndex) {
     const oThis = this;
 
     return (
@@ -193,14 +195,25 @@ class UploadParams extends ServiceBase {
   }
 
   /**
-   * Get image name.
+   * Get content type.
+   *
+   * @param intent
+   * @param fileExtension
    *
    * @returns {string}
+   * @private
    */
-  getImageName() {
-    const oThis = this;
+  _getContent(intent, fileExtension) {
+    switch (intent) {
+      case s3UploadConstants.imageFileType:
+        return util.getImageContentTypeForExtension(fileExtension);
 
-    return oThis.currentUserId + '-' + new Date().getTime() + '-' + 'original.jpg';
+      case s3UploadConstants.videoFileType:
+        return util.getVideoContentTypeForExtension(fileExtension);
+
+      default:
+        throw new Error('Unsupported file type.');
+    }
   }
 }
 
