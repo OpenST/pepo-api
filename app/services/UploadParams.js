@@ -134,7 +134,7 @@ class UploadParams extends ServiceBase {
           fileNames = oThis._getRandomEncodedFileNames(fileType, fileExtension, index),
           fileName = fileNames.name;
 
-        const preSignedPostParams = new AwsS3wrapper(intent, fileName, contentType).createPresignedPostFor();
+        const preSignedPostParams = await new AwsS3wrapper(intent, fileName, contentType).createPresignedPostFor();
 
         resultHash[feFileName] = {
           postUrl: preSignedPostParams.url,
