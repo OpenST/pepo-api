@@ -96,8 +96,30 @@ class Image extends ModelBase {
 
     let response = await oThis
       .insert({
-        resolutions: params.resolutions,
+        resolutions: JSON.stringify(params.resolutions),
         status: imageConst.invertedStatuses[params.status]
+      })
+      .fire();
+
+    return response.data;
+  }
+
+  /**
+   * Update image by id and kind
+   *
+   * @param params
+   * @return {Promise<void>}
+   */
+  async updateByIdAndKind(params) {
+    const oThis = this;
+
+    let response = await oThis
+      .update({
+        resolutions: JSON.stringify(params.resolutions),
+        status: imageConst.invertedStatuses[params.status]
+      })
+      .where({
+        id: params.id
       })
       .fire();
 

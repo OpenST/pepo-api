@@ -105,6 +105,28 @@ class Url extends ModelBase {
   }
 
   /**
+   * Update url by id
+   *
+   * @param params
+   * @return {Promise<void>}
+   */
+  async updateByIdAndKind(params) {
+    const oThis = this;
+
+    let response = await oThis
+      .update({
+        url: params.url
+      })
+      .where({
+        id: params.id,
+        kind: urlConst.invertedKinds[params.kind]
+      })
+      .fire();
+
+    return response.data;
+  }
+
+  /**
    * Flush cache.
    *
    * @param {object} params
