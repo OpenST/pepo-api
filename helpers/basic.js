@@ -490,6 +490,22 @@ class BasicHelper {
   parseTwitterJsonResponse(response) {
     return JSON.parse(response);
   }
+
+  /**
+   * Gives random alphanumeric string
+   *
+   * @returns {string}
+   */
+  getRandomAlphaNumericString() {
+    return (
+      Math.random()
+        .toString(36)
+        .substring(2, 15) +
+      Math.random()
+        .toString(36)
+        .substring(2, 15)
+    );
+  }
 }
 
 module.exports = new BasicHelper();

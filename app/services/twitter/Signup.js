@@ -2,16 +2,23 @@ const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   UserModel = require(rootPrefix + '/app/models/mysql/User'),
   KmsWrapper = require(rootPrefix + '/lib/aws/KmsWrapper'),
+  CreateImage = require(rootPrefix + '/lib/user/image/Create'),
   TokenUserModel = require(rootPrefix + '/app/models/mysql/TokenUser'),
+  UserByUsernameCache = require(rootPrefix + '/lib/cacheManagement/single/UserByUsername'),
   TwitterUserExtendedModel = require(rootPrefix + '/app/models/mysql/TwitterUserExtended'),
   TwitterUserModel = require(rootPrefix + '/app/models/mysql/TwitterUser'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   userConstants = require(rootPrefix + '/lib/globalConstant/user'),
   twitterUserExtendedConstants = require(rootPrefix + '/lib/globalConstant/twitterUserExtended'),
   localCipher = require(rootPrefix + '/lib/encryptors/localCipher'),
+  imageConstants = require(rootPrefix + '/lib/globalConstant/image'),
+  userProfileElementConstants = require(rootPrefix + '/lib/globalConstant/userProfileElement.js'),
+  createErrorLogsEntry = require(rootPrefix + '/lib/errorLogs/createEntry'),
+  errorLogsConstants = require(rootPrefix + '/lib/globalConstant/errorLogs'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   kmsGlobalConstant = require(rootPrefix + '/lib/globalConstant/kms'),
   ostPlatformSdk = require(rootPrefix + '/lib/ostPlatform/jsSdkWrapper'),
+  basicHelper = require(rootPrefix + '/helpers/basic'),
   tokenUserConstants = require(rootPrefix + '/lib/globalConstant/tokenUser');
 
 /**
@@ -110,6 +117,72 @@ class TwitterSignup extends ServiceBase {
     logger.log('End::Perform Twitter Signup');
 
     return responseHelper.successWithData({});
+  }
+
+  /**
+   * This function saves original profile image url given by twitter
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _saveProfileImage() {
+    const oThis = this;
+
+    let createImageParams = {
+      userId: oThis.userId,
+      resolutions: {
+        original: {
+          url: oThis.userTwitterEntity.profileImageUrl
+        }
+      },
+      elementKind: userProfileElementConstants.profileImage,
+      status: imageConstants.notResized
+    };
+
+    await new CreateImage(createImageParams).perform();
+  }
+
+  /**
+   * Sets username
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _setUserName() {
+    const oThis = this;
+
+    let twitterHandle = oThis.userTwitterEntity.handle,
+      uniqueUserName = twitterHandle + basicHelper.getRandomAlphaNumericString(),
+      retryCount = 3;
+
+    while (retryCount > 0) {
+      let cacheResponse = await new UserByUsernameCache({ userName: uniqueUserName }).fetch();
+
+      if (cacheResponse.isFailure()) {
+        return Promise.reject(cacheResponse);
+      }
+
+      if (cacheResponse.data[uniqueUserName].id) {
+        uniqueUserName = twitterHandle + basicHelper.getRandomAlphaNumericString();
+        retryCount--;
+      } else {
+        oThis.userName = uniqueUserName;
+        retryCount = -1;
+      }
+    }
+
+    if (!oThis.userName) {
+      logger.error('Unique username not found.');
+      const errorObject = responseHelper.error({
+        internal_error_identifier: 'a_s_t_s_1',
+        api_error_identifier: 'something_went_wrong',
+        debug_options: {
+          twitterHandle: twitterHandle
+        }
+      });
+
+      await createErrorLogsEntry.perform(errorObject, errorLogsConstants.highSeverity);
+    }
   }
 
   /**
