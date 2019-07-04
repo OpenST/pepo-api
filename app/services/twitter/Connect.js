@@ -137,7 +137,7 @@ class TwitterConnect extends ServiceBase {
 
     if (twitterResp.isFailure()) {
       return Promise.reject(
-        responseHelper.paramValidationError({
+        responseHelper.error({
           internal_error_identifier: 's_t_c_vtc_2',
           api_error_identifier: 'unauthorized_api_request',
           debug_options: {}
@@ -149,7 +149,7 @@ class TwitterConnect extends ServiceBase {
 
     if (oThis.userTwitterEntity.idStr != oThis.twitterId || oThis.userTwitterEntity.handle != oThis.handle) {
       return Promise.reject(
-        responseHelper.paramValidationError({
+        responseHelper.error({
           internal_error_identifier: 's_t_c_vtc_3',
           api_error_identifier: 'unauthorized_api_request',
           debug_options: {}
