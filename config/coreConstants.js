@@ -134,7 +134,13 @@ class CoreConstants {
   get S3_USER_PROFILE_IMAGES() {
     const oThis = this;
 
-    return oThis.S3_USER_ASSETS_FOLDER + '/' + 'profile-images';
+    return oThis.S3_USER_ASSETS_FOLDER + '/' + 'images';
+  }
+
+  get S3_USER_VIDEOS() {
+    const oThis = this;
+
+    return oThis.S3_USER_ASSETS_FOLDER + '/' + 'videos';
   }
 
   // Encryption Secrets

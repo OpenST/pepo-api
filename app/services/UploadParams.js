@@ -3,6 +3,7 @@ const rootPrefix = '../..',
   AwsS3wrapper = require(rootPrefix + '/lib/aws/S3Wrapper'),
   CommonValidator = require(rootPrefix + '/lib/validators/Common'),
   util = require(rootPrefix + '/lib/util'),
+  coreConstants = require(rootPrefix + '/config/coreConstants'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   s3UploadConstants = require(rootPrefix + '/lib/globalConstant/s3Upload');
 
@@ -131,10 +132,14 @@ class UploadParams extends ServiceBase {
         const feFileName = fileArray[index],
           fileExtension = util.getFileExtension(feFileName),
           contentType = oThis._getContent(intent, fileExtension),
-          fileNames = oThis._getRandomEncodedFileNames(fileType, fileExtension, index),
-          fileName = fileNames.name;
+          fileName = oThis._getRandomEncodedFileNames(fileType, fileExtension, index);
 
-        const preSignedPostParams = await new AwsS3wrapper(intent, fileName, contentType).createPresignedPostFor();
+        const preSignedPostParams = await new AwsS3wrapper(
+          intent,
+          fileName,
+          contentType,
+          coreConstants.S3_AWS_REGION
+        ).createPresignedPostFor();
 
         resultHash[feFileName] = {
           postUrl: preSignedPostParams.url,
@@ -154,31 +159,14 @@ class UploadParams extends ServiceBase {
    * @param {string} extension
    * @param {number} fileIndex
    *
-   * @returns {{name: (string|*), resizeName: (string|*), original: (string|*)}}
+   * @returns {string}
    * @private
    */
   _getRandomEncodedFileNames(fileType, extension, fileIndex) {
     const oThis = this,
       version = oThis.currentUserId + '-' + util.createMd5Digest(oThis._getVersion(fileIndex));
 
-    let name = null;
-
-    switch (fileType) {
-      case s3UploadConstants.imageFileType:
-        name = version + '-original' + extension;
-        break;
-      case s3UploadConstants.videoFileType:
-        name = version + '-original' + extension;
-        break;
-      default:
-        throw new Error('Unsupported file type.');
-    }
-
-    return {
-      name: name,
-      resizeName: name,
-      original: name
-    };
+    return version + '-original' + extension;
   }
 
   /**
