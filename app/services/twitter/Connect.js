@@ -91,10 +91,10 @@ class TwitterConnect extends ServiceBase {
 
     logger.log('Start::Fetch Twitter User');
 
-    const twitterUserObjCacheResp = await new TwitterUserByTwitterIdsCache({ twitterIds: oThis.twitterId }).fetch();
+    const twitterUserObjCacheResp = await new TwitterUserByTwitterIdsCache({ twitterIds: [oThis.twitterId] }).fetch();
 
     if (twitterUserObjCacheResp.isFailure()) {
-      return Promise.reject(userObjCacheResp);
+      return Promise.reject(twitterUserObjCacheResp);
     }
 
     if (twitterUserObjCacheResp.data[oThis.twitterId].userId) {
@@ -124,7 +124,7 @@ class TwitterConnect extends ServiceBase {
         oAuthToken: oThis.token,
         oAuthTokenSecret: oThis.secret
       });
-    } catch {
+    } catch (err) {
       logger.error('Error while validate Credentials for twitter: ', err);
       return Promise.reject(
         responseHelper.paramValidationError({
@@ -180,9 +180,9 @@ class TwitterConnect extends ServiceBase {
     };
 
     if (!oThis.twitterUserObj || !oThis.twitterUserObj.userId) {
-      oThis.serviceResp = await new LoginTwitterClass(requestParams).perform();
-    } else {
       oThis.serviceResp = await new SignupTwitterClass(requestParams).perform();
+    } else {
+      oThis.serviceResp = await new LoginTwitterClass(requestParams).perform();
     }
 
     return;

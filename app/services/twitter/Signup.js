@@ -104,19 +104,24 @@ class TwitterSignup extends ServiceBase {
 
     await oThis._createUser();
 
-    let promiseResp1 = oThis._createUpdateTwitterUser().then(oThis._createTwitterUserExtended());
-    let promiseResp2 = promiseResp.then(oThis._createTokenUser());
-
-    promisesArray2.push(promiseResp1);
-    promisesArray2.push(promiseResp2);
-
-    await Promise.all(promisesArray2);
-
-    // await enqueueSignUpTask();
+    let promiseArray3 = [];
+    promiseArray3.push(oThis.twitterSpecificFunction());
+    promiseArray3.push(promiseResp.then(oThis._createTokenUser));
+    await Promise.all(promiseArray3);
 
     logger.log('End::Perform Twitter Signup');
 
     return responseHelper.successWithData({});
+  }
+
+  /**
+   *
+   * @returns {Promise<void>}
+   */
+  async twitterSpecificFunction() {
+    const oThis = this;
+    await oThis._createUpdateTwitterUser();
+    await oThis._createTwitterUserExtended();
   }
 
   /**
@@ -155,7 +160,7 @@ class TwitterSignup extends ServiceBase {
         return Promise.reject(cacheResponse);
       }
 
-      if (cacheResponse.data[uniqueUserName].id) {
+      if (cacheResponse.data[uniqueUserName]) {
         uniqueUserName = twitterHandle + basicHelper.getRandomAlphaNumericString();
         retryCount--;
       } else {
@@ -230,7 +235,7 @@ class TwitterSignup extends ServiceBase {
     oThis.ostUserId = createUserServiceResponse.data.user.id;
     oThis.ostStatus = createUserServiceResponse.data.user.status;
 
-    logger.log('End::Creating user in OST');
+    logger.log('End::Creating user in OST: ', oThis.ostStatus);
 
     return Promise.resolve(responseHelper.successWithData({}));
   }
@@ -289,13 +294,13 @@ class TwitterSignup extends ServiceBase {
   async _createTwitterUserExtended() {
     const oThis = this;
 
-    logger.log('Start::Create Twitter User Extended Obj');
+    logger.log('Start::Create Twitter User Extended Obj', oThis.twitterUserObj);
 
     let insertData = {
       twitter_user_id: oThis.twitterUserObj.id,
       token: oThis.token,
       secret: oThis.encryptedSecret,
-      status: twitterUserExtendedConstants.invertedStatuses(twitterUserExtendedConstants.activeStatus)
+      status: twitterUserExtendedConstants.invertedStatuses[twitterUserExtendedConstants.activeStatus]
     };
     // Insert user in database.
     const insertResponse = await new TwitterUserExtendedModel().insert(insertData).fire();
@@ -372,7 +377,7 @@ class TwitterSignup extends ServiceBase {
   async _createTokenUser() {
     const oThis = this;
 
-    logger.log('Start::Creating token user');
+    logger.log('Start::Creating token user', oThis.ostStatus);
 
     let insertData = {
       user_id: oThis.userId,
@@ -380,7 +385,7 @@ class TwitterSignup extends ServiceBase {
       ost_token_holder_address: null,
       scrypt_salt: oThis.encryptedScryptSalt,
       properties: 0,
-      ost_status: tokenUserConstants.invertedOstStatuses[oThis.ostStatus.toUpperCase()]
+      ost_status: tokenUserConstants.invertedOstStatuses[oThis.ostStatus]
     };
     // Insert token user in database.
     const insertResponse = await new TokenUserModel().insert(insertData).fire();
@@ -395,7 +400,7 @@ class TwitterSignup extends ServiceBase {
     oThis.tokenUserObj = new TokenUserModel().formatDbData(insertData);
     await TokenUserModel.flushCache(oThis.tokenUserObj);
 
-    logger.log('End::Creating token user');
+    logger.log('End::Creating token user', oThis.ostStatus);
     return Promise.resolve(responseHelper.successWithData({}));
   }
 
