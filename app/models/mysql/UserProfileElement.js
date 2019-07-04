@@ -57,11 +57,12 @@ class UserProfileElementModel extends ModelBase {
 
     for (let ind = 0; ind < dbRows.length; ind++) {
       let userId = dbRows[ind].user_id;
+      let formattedRow = oThis.formatDbData(dbRows[ind]);
 
       if (result.hasOwnProperty(userId)) {
-        result[userId].push(oThis.formatDbData(dbRows[ind]));
+        result[userId][formattedRow.dataKind] = formattedRow;
       } else {
-        result[userId] = [oThis.formatDbData(dbRows[ind])];
+        result[userId][formattedRow.dataKind] = formattedRow;
       }
     }
 
