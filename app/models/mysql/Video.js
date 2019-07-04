@@ -108,6 +108,29 @@ class Video extends ModelBase {
   }
 
   /**
+   * Update image by id
+   *
+   * @param params
+   * @return {Promise<void>}
+   */
+  async updateById(params) {
+    const oThis = this;
+
+    let response = await oThis
+      .update({
+        resolutions: JSON.stringify(params.resolutions),
+        status: videoConst.invertedStatuses[params.status],
+        poster_image_id: params.posterImageId
+      })
+      .where({
+        id: params.id
+      })
+      .fire();
+
+    return response.data;
+  }
+
+  /**
    * Flush cache.
    *
    * @param {object} params
