@@ -127,19 +127,11 @@ class TwitterSignup extends ServiceBase {
    */
   async _saveProfileImage() {
     const oThis = this;
+    logger.log('Start::Save Profile Image');
 
-    let createImageParams = {
-      userId: oThis.userId,
-      resolutions: {
-        original: {
-          url: oThis.userTwitterEntity.profileImageUrl
-        }
-      },
-      elementKind: userProfileElementConstants.profileImage,
-      status: imageConstants.notResized
-    };
+    oThis.profileImageId = 1;
 
-    await new CreateImage(createImageParams).perform();
+    logger.log('End::Save Profile Image');
   }
 
   /**
@@ -150,9 +142,10 @@ class TwitterSignup extends ServiceBase {
    */
   async _setUserName() {
     const oThis = this;
+    logger.log('Start::Set User Name');
 
     let twitterHandle = oThis.userTwitterEntity.handle,
-      uniqueUserName = twitterHandle + basicHelper.getRandomAlphaNumericString(),
+      uniqueUserName = twitterHandle,
       retryCount = 3;
 
     while (retryCount > 0) {
@@ -167,7 +160,7 @@ class TwitterSignup extends ServiceBase {
         retryCount--;
       } else {
         oThis.userName = uniqueUserName;
-        retryCount = -1;
+        break;
       }
     }
 
@@ -183,6 +176,7 @@ class TwitterSignup extends ServiceBase {
 
       await createErrorLogsEntry.perform(errorObject, errorLogsConstants.highSeverity);
     }
+    logger.log('End::Set User Name');
   }
 
   /**

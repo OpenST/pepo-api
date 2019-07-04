@@ -498,7 +498,7 @@ class BasicHelper {
    */
   getRandomAlphaNumericString() {
     return (
-      Math.random()
+      Date.now()
         .toString(36)
         .substring(2, 15) +
       Math.random()
