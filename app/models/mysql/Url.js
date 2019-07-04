@@ -127,6 +127,24 @@ class Url extends ModelBase {
   }
 
   /**
+   * Delete by id
+   *
+   * @param params
+   * @return {Promise<void>}
+   */
+  async deleteByIdAndKind(params) {
+    const oThis = this;
+
+    await oThis
+      .delete()
+      .where({
+        id: params.id,
+        kind: urlConst.invertedKinds[params.kind]
+      })
+      .fire();
+  }
+
+  /**
    * Flush cache.
    *
    * @param {object} params
