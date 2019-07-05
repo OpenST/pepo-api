@@ -91,6 +91,11 @@ const v1ErrorConfig = {
     message: 'Invalid Privacy Type'
   },
   invalid_user_id: {
+    parameter: 'url',
+    code: 'invalid',
+    message: 'Invalid url.'
+  },
+  invalid_user_id: {
     parameter: 'user_id',
     code: 'invalid',
     message: 'Invalid user id.'
