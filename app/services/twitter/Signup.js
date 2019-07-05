@@ -19,6 +19,7 @@ const rootPrefix = '../../..',
   kmsGlobalConstant = require(rootPrefix + '/lib/globalConstant/kms'),
   ostPlatformSdk = require(rootPrefix + '/lib/ostPlatform/jsSdkWrapper'),
   basicHelper = require(rootPrefix + '/helpers/basic'),
+  CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   tokenUserConstants = require(rootPrefix + '/lib/globalConstant/tokenUser');
 
 /**
@@ -140,7 +141,9 @@ class TwitterSignup extends ServiceBase {
     const oThis = this;
     logger.log('Start::Save Profile Image');
 
-    oThis.profileImageId = 1;
+    if (oThis.userTwitterEntity.nonDefaultprofileImageUrl) {
+      oThis.profileImageId = 1;
+    }
 
     logger.log('End::Save Profile Image');
   }
@@ -325,6 +328,7 @@ class TwitterSignup extends ServiceBase {
 
     return responseHelper.successWithData({});
   }
+
   /**
    * Create or Update Twitter User Obj.
    *
@@ -348,12 +352,16 @@ class TwitterSignup extends ServiceBase {
     } else {
       let twitterEmail = oThis.userTwitterEntity.email;
 
+      if (!oThis.userTwitterEntity.email || !CommonValidators.isValidEmail(oThis.userTwitterEntity.email)) {
+        twitterEmail = null;
+      }
+
       let insertData = {
         twitter_id: oThis.userTwitterEntity.idStr,
         user_id: oThis.userId,
         name: oThis.userTwitterEntity.formattedName,
         email: twitterEmail,
-        profile_image_url: oThis.userTwitterEntity.profileImageUrl
+        profile_image_url: oThis.userTwitterEntity.nonDefaultprofileImageUrl
       };
       // Insert user in database.
       const insertResponse = await new TwitterUserModel().insert(insertData).fire();
