@@ -171,6 +171,7 @@ class TwitterConnect extends ServiceBase {
    */
   async _performAction() {
     const oThis = this;
+    logger.log('Start::Connect._performAction');
 
     let requestParams = {
       twitterUserObj: oThis.twitterUserObj,
@@ -184,6 +185,10 @@ class TwitterConnect extends ServiceBase {
     } else {
       oThis.serviceResp = await new LoginTwitterClass(requestParams).perform();
     }
+
+    logger.log('End::Connect._performAction');
+
+    return;
   }
 }
 
