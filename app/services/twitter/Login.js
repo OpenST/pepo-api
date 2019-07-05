@@ -166,7 +166,7 @@ class TwitterLogin extends ServiceBase {
 
     await TwitterUserExtendedModel.flushCache({
       id: twitterUserExtendedObj.id,
-      twitter_user_id: oThis.twitterUserObj.id
+      twitterUserid: oThis.twitterUserObj.id
     });
 
     logger.log('End::Update Twitter User Extended for login');
