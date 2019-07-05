@@ -23,7 +23,7 @@ class UploadParams extends ServiceBase {
     super(params);
     const oThis = this;
 
-    oThis.currentUserId = +params.current_user.id;
+    oThis.currentUserId = 1000; // +params.current_user.id; // TODO: This is temp commit.
     oThis.images = params.images || [];
     oThis.videos = params.videos || [];
 
@@ -134,12 +134,12 @@ class UploadParams extends ServiceBase {
           contentType = oThis._getContent(intent, fileExtension),
           fileName = oThis._getRandomEncodedFileNames(fileType, fileExtension, index);
 
-        const preSignedPostParams = await new AwsS3wrapper(
+        const preSignedPostParams = await AwsS3wrapper.createPresignedPostFor(
           intent,
           fileName,
           contentType,
           coreConstants.S3_AWS_REGION
-        ).createPresignedPostFor();
+        );
 
         resultHash[feFileName] = {
           postUrl: preSignedPostParams.url,
@@ -215,7 +215,9 @@ class UploadParams extends ServiceBase {
    * @private
    */
   _getS3Url(preSignedPostParams) {
-    return 'https://' + preSignedPostParams.fields.bucket + '.s3.amazonaws.com/' + preSignedPostParams.fields.key;
+    return (
+      'https://' + preSignedPostParams.fields.bucket + s3UploadConstants.s3UrlPrefix + preSignedPostParams.fields.key
+    );
   }
 }
 
