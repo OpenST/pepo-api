@@ -136,4 +136,12 @@ router.get('/:user_id/profile', sanitizer.sanitizeDynamicUrlParams, function(req
   Promise.resolve(routeHelper.perform(req, res, next, '/user/GetProfile', 'r_a_v1_u_6', null, dataFormatterFunc));
 });
 
+/* User profile */
+router.get('/:user_id/profile-image', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.getUserProfile;
+  req.decodedParams.user_id = req.params.user_id;
+
+  Promise.resolve(routeHelper.perform(req, res, next, '/user/SaveImage', 'r_a_v1_u_7', null));
+});
+
 module.exports = router;
