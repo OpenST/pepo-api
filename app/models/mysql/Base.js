@@ -1,5 +1,6 @@
 const rootPrefix = '../../..',
   MysqlQueryBuilders = require(rootPrefix + '/lib/queryBuilders/mysql'),
+  mysqlErrorConstants = require(rootPrefix + '/lib/globalConstant/mysqlErrorConstants'),
   mysqlWrapper = require(rootPrefix + '/lib/mysqlWrapper'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   util = require(rootPrefix + '/lib/util'),
@@ -165,6 +166,20 @@ class ModelBase extends MysqlQueryBuilders {
     }
 
     return safeData;
+  }
+
+  /**
+   *
+   * @param indexName
+   * @param mysqlErrorObject
+   * @returns {boolean}
+   */
+  static isDuplicateIndexViolation(indexName, mysqlErrorObject) {
+    const oThis = this;
+
+    return (
+      mysqlErrorObject.code === mysqlErrorConstants.duplicateError && mysqlErrorObject.sqlMessage.includes(indexName)
+    );
   }
 }
 

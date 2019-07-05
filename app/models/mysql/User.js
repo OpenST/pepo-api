@@ -253,6 +253,10 @@ class UserModel extends ModelBase {
       await new UserByUsernameCache({ userName: params.userName }).clear();
     }
   }
+
+  static get usernameUniqueIndexName() {
+    return 'uk_idx_1';
+  }
 }
 
 module.exports = UserModel;

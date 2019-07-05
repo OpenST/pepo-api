@@ -274,8 +274,30 @@ class TwitterSignup extends ServiceBase {
       status: userConstants.invertedStatuses[userConstants.activeStatus],
       profile_image_id: oThis.profileImageId
     };
-    // Insert user in database.
-    const insertResponse = await new UserModel().insert(insertData).fire();
+
+    let retryCount = 3,
+      caughtInException = true,
+      insertResponse = null;
+
+    while (retryCount > 0 && caughtInException) {
+      // Insert user in database.
+      retryCount--;
+      caughtInException = false;
+
+      insertResponse = await new UserModel()
+        .insert(insertData)
+        .fire()
+        .catch(function(err) {
+          logger.log('Error while inserting user data: ', err);
+          if (UserModel.isDuplicateIndexViolation(UserModel.usernameUniqueIndexName, err)) {
+            logger.log('Username conflict. Attempting with a modified username.');
+            caughtInException = true;
+            insertData.user_name = oThis.userName + '_' + basicHelper.getRandomAlphaNumericString();
+          } else {
+            return Promise.reject(err);
+          }
+        });
+    }
 
     if (!insertResponse) {
       logger.error('Error while inserting data in users table.');
