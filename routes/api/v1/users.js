@@ -110,4 +110,30 @@ router.get('/:user_id/feeds', sanitizer.sanitizeDynamicUrlParams, function(req, 
   Promise.resolve(routeHelper.perform(req, res, next, '/feed/User', 'r_a_v1_u_5', null, dataFormatterFunc));
 });
 
+/* User profile */
+router.get('/:user_id/profile', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.getUserProfile;
+  req.decodedParams.user_id = req.params.user_id;
+
+  const dataFormatterFunc = async function(serviceResponse) {
+    const wrapperFormatterRsp = await new FormatterComposer({
+      resultType: responseEntityKey.userProfile,
+      entityKindToResponseKeyMap: {
+        [entityType.userProfile]: responseEntityKey.userProfile,
+        [entityType.usersMap]: responseEntityKey.users,
+        [entityType.linksMap]: responseEntityKey.links,
+        [entityType.imagesMap]: responseEntityKey.images,
+        [entityType.videosMap]: responseEntityKey.videos
+        // TODO: @santhosh - Profile allowed actions entity
+        // TODO: @santhosh - tags entity
+      },
+      serviceData: serviceResponse.data
+    }).perform();
+
+    serviceResponse.data = wrapperFormatterRsp.data;
+  };
+
+  Promise.resolve(routeHelper.perform(req, res, next, '/user/GetProfile', 'r_a_v1_u_6', null, dataFormatterFunc));
+});
+
 module.exports = router;

@@ -213,6 +213,19 @@ const v1Signature = {
       }
     ],
     optional: []
+  },
+  [apiName.getUserProfile]: {
+    mandatory: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      },
+      {
+        parameter: 'user_id',
+        validatorMethods: ['validateInteger']
+      }
+    ],
+    optional: []
   }
 };
 
