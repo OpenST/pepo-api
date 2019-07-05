@@ -293,6 +293,7 @@ class TwitterSignup extends ServiceBase {
             logger.log('Username conflict. Attempting with a modified username.');
             caughtInException = true;
             insertData.user_name = oThis.userName + '_' + basicHelper.getRandomAlphaNumericString();
+            return null;
           } else {
             return Promise.reject(err);
           }
@@ -301,7 +302,15 @@ class TwitterSignup extends ServiceBase {
 
     if (!insertResponse) {
       logger.error('Error while inserting data in users table.');
-      return Promise.reject(new Error('Error while inserting data in users table.'));
+      return Promise.reject(
+        responseHelper.error({
+          internal_error_identifier: 'a_s_t_s_cu_2',
+          api_error_identifier: 'something_went_wrong',
+          debug_options: {
+            insertData: insertData
+          }
+        })
+      );
     }
 
     insertData.id = insertResponse.insertId;
