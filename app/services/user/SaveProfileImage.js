@@ -4,6 +4,7 @@ const rootPrefix = '../../..',
   CreateImageLib = require(rootPrefix + '/lib/user/image/Create'),
   UpdateImageLib = require(rootPrefix + '/lib/user/image/Update'),
   DeleteImageLib = require(rootPrefix + '/lib/user/image/Delete'),
+  responseHelper = require(rootPrefix + '/lib/formatter/response'),
   ImageConstants = require(rootPrefix + 'lib/globalConstant/image'),
   GetResolutionLib = require(rootPrefix + '/lib/user/image/GetResolution');
 
@@ -45,6 +46,8 @@ class SaveProfileImage extends ServiceBase {
     const oThis = this;
 
     return oThis._saveImageDetails();
+
+    return responseHelper.successWithData({});
   }
 
   /**
