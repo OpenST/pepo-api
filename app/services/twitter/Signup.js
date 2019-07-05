@@ -106,7 +106,13 @@ class TwitterSignup extends ServiceBase {
 
     let promiseArray3 = [];
     promiseArray3.push(oThis.twitterSpecificFunction());
-    promiseArray3.push(promiseResp.then(oThis._createTokenUser));
+
+    promiseArray3.push(
+      promiseResp.then(function(a) {
+        return oThis._createTokenUser();
+      })
+    );
+
     await Promise.all(promiseArray3);
 
     logger.log('End::Perform Twitter Signup');
@@ -340,11 +346,13 @@ class TwitterSignup extends ServiceBase {
 
       oThis.twitterUserObj.userId = oThis.userId;
     } else {
+      let twitterEmail = oThis.userTwitterEntity.email;
+
       let insertData = {
         twitter_id: oThis.userTwitterEntity.idStr,
         user_id: oThis.userId,
         name: oThis.userTwitterEntity.formattedName,
-        email: oThis.userTwitterEntity.email,
+        email: twitterEmail,
         profile_image_url: oThis.userTwitterEntity.profileImageUrl
       };
       // Insert user in database.

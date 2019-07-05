@@ -10,7 +10,7 @@ const upQuery =
       DROP `first_name`, \n\
       DROP `last_name`, \n\
       ADD COLUMN `user_name` varchar(50) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL AFTER `id`,\n\
-      ADD COLUMN `profile_image_id` bigint(20)  NOT NULL AFTER `status`,\n\
+      ADD COLUMN `profile_image_id` bigint(20) NULL AFTER `status`,\n\
       ADD UNIQUE  `uk_idx_1` (`user_name`);';
 
 const downQuery =
