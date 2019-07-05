@@ -41,8 +41,8 @@ class UserModel extends ModelBase {
     return {
       id: dbRow.id,
       userName: dbRow.user_name,
-      firstName: dbRow.first_name,
-      lastName: dbRow.last_name,
+      name: dbRow.name,
+      profileImageId: dbRow.profile_image_id,
       password: dbRow.password,
       cookieToken: dbRow.cookie_token,
       encryptionSalt: dbRow.encryption_salt,
@@ -64,8 +64,8 @@ class UserModel extends ModelBase {
     return [
       'id',
       'userName',
-      'firstName',
-      'lastName',
+      'name',
+      'profileImageId',
       'markInactiveTriggerCount',
       'properties',
       'status',
@@ -120,17 +120,7 @@ class UserModel extends ModelBase {
   async fetchByIds(ids) {
     const oThis = this;
     let dbRows = await oThis
-      .select([
-        'id',
-        'user_name',
-        'first_name',
-        'last_name',
-        'mark_inactive_trigger_count',
-        'properties',
-        'status',
-        'created_at',
-        'updated_at'
-      ])
+      .select(oThis.safeFormattedColumnNames())
       .where({ id: ids })
       .fire();
 
