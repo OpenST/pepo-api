@@ -127,7 +127,7 @@ class TwitterConnect extends ServiceBase {
     } catch (err) {
       logger.error('Error while validate Credentials for twitter: ', err);
       return Promise.reject(
-        responseHelper.paramValidationError({
+        responseHelper.error({
           internal_error_identifier: 's_t_c_vtc_1',
           api_error_identifier: 'unauthorized_api_request',
           debug_options: {}
@@ -184,8 +184,6 @@ class TwitterConnect extends ServiceBase {
     } else {
       oThis.serviceResp = await new LoginTwitterClass(requestParams).perform();
     }
-
-    return;
   }
 }
 
