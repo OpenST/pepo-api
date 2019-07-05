@@ -284,6 +284,8 @@ class TwitterSignup extends ServiceBase {
 
     insertData.id = insertResponse.insertId;
 
+    Object.assign(insertData, insertResponse.defaultUpdatedAttributes);
+
     oThis.secureUserObj = new UserModel().formatDbData(insertData);
 
     await UserModel.flushCache(oThis.secureUserObj);
@@ -320,6 +322,7 @@ class TwitterSignup extends ServiceBase {
     }
 
     insertData.id = insertResponse.insertId;
+    Object.assign(insertData, insertResponse.defaultUpdatedAttributes);
 
     let twitterUserExtendedObj = new TwitterUserExtendedModel().formatDbData(insertData);
     await TwitterUserExtendedModel.flushCache(twitterUserExtendedObj);
@@ -372,6 +375,7 @@ class TwitterSignup extends ServiceBase {
       }
 
       insertData.id = insertResponse.insertId;
+      Object.assign(insertData, insertResponse.defaultUpdatedAttributes);
 
       oThis.twitterUserObj = new TwitterUserModel().formatDbData(insertData);
     }
@@ -412,6 +416,7 @@ class TwitterSignup extends ServiceBase {
     }
 
     insertData.id = insertResponse.insertId;
+    Object.assign(insertData, insertResponse.defaultUpdatedAttributes);
 
     oThis.tokenUserObj = new TokenUserModel().formatDbData(insertData);
     await TokenUserModel.flushCache(oThis.tokenUserObj);

@@ -76,7 +76,9 @@ class TwitterLogin extends ServiceBase {
 
     const promisesArray = [];
 
-    var promiseRes = oThis._fetchSecureUser().then(oThis._updateTwitterUserExtended());
+    var promiseRes = oThis._fetchSecureUser().then(function(a) {
+      oThis._updateTwitterUserExtended();
+    });
 
     promisesArray.push(promiseRes);
     promisesArray.push(oThis._fetchTokenUser());
@@ -157,7 +159,7 @@ class TwitterLogin extends ServiceBase {
       .update({
         token: oThis.token,
         secret: eSecretKms,
-        status: twitterUserExtendedConstants.invertedStatuses(twitterUserExtendedConstants.activeStatus)
+        status: twitterUserExtendedConstants.invertedStatuses[twitterUserExtendedConstants.activeStatus]
       })
       .where({ id: twitterUserExtendedObj.id })
       .fire();

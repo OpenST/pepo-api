@@ -58,6 +58,7 @@ class ModelBase extends MysqlQueryBuilders {
           if (err) {
             onReject(err);
           } else {
+            result.defaultUpdatedAttributes = queryGenerator.data.defaultUpdatedAttributes;
             onResolve(result);
           }
         });
