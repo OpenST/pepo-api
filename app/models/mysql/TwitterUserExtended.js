@@ -74,7 +74,14 @@ class TwitterUserModel extends ModelBase {
    *
    * @returns {Promise<*>}
    */
-  static async flushCache(params) {}
+  static async flushCache(params) {
+    const SecureTwitterUserExtendedByTwitterUserIdCache = require(rootPrefix +
+      '/lib/cacheManagement/single/SecureTwitterUserExtendedByTwitterUserId');
+
+    await new SecureTwitterUserExtendedByTwitterUserIdCache({
+      twitterUserid: params.twitterUserid
+    }).clear();
+  }
 }
 
 module.exports = TwitterUserModel;
