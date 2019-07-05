@@ -340,6 +340,7 @@ class TwitterSignup extends ServiceBase {
 
     let insertData = {
       twitter_user_id: oThis.twitterUserObj.id,
+      user_id: oThis.userId,
       token: oThis.token,
       secret: oThis.encryptedSecret,
       status: twitterUserExtendedConstants.invertedStatuses[twitterUserExtendedConstants.activeStatus]

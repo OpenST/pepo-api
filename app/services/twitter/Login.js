@@ -72,12 +72,12 @@ class TwitterLogin extends ServiceBase {
    */
   async _performLogin() {
     const oThis = this;
-    logger.log('Start::Perform Twitter login');
+    logger.log('Start::Perform Twitter login', oThis.twitterUserObj);
 
     const promisesArray = [];
 
-    var promiseRes = oThis._fetchSecureUser().then(function(a) {
-      oThis._updateTwitterUserExtended();
+    let promiseRes = oThis._fetchSecureUser().then(function(a) {
+      return oThis._updateTwitterUserExtended();
     });
 
     promisesArray.push(promiseRes);
@@ -141,12 +141,12 @@ class TwitterLogin extends ServiceBase {
    */
   async _updateTwitterUserExtended() {
     const oThis = this;
-    logger.log('Start::Update Twitter User Extended for login');
+    logger.log('Start::Update Twitter User Extended for login', oThis.twitterUserObj);
 
     const eSecretKms = localCipher.encrypt(oThis.decryptedEncryptionSalt, oThis.secret);
 
     const SecureTwitterUserExtendedRes = await new SecureTwitterUserExtendedByTwitterUserIdCache({
-      twitterUserId: oThis.twitterUserObj.id
+      twitterUserid: oThis.twitterUserObj.id
     }).fetch();
 
     if (SecureTwitterUserExtendedRes.isFailure()) {

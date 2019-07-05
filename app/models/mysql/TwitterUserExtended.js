@@ -28,6 +28,7 @@ class TwitterUserModel extends ModelBase {
     return {
       id: dbRow.id,
       twitterUserId: dbRow.twitter_user_id,
+      userId: dbRow.user_id,
       token: dbRow.token,
       secret: dbRow.secret,
       status: twitterUserExtendedConstants.statuses[dbRow.status],
