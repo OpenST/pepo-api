@@ -169,8 +169,8 @@ class TwitterSignup extends ServiceBase {
         return Promise.reject(cacheResponse);
       }
 
-      if (cacheResponse.data[uniqueUserName]) {
-        uniqueUserName = twitterHandle + basicHelper.getRandomAlphaNumericString();
+      if (cacheResponse.data.id) {
+        uniqueUserName = twitterHandle + '_' + basicHelper.getRandomAlphaNumericString();
         retryCount--;
       } else {
         oThis.userName = uniqueUserName;
