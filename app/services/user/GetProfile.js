@@ -18,7 +18,7 @@ class GetUserProfile extends ServiceBase {
 
     const oThis = this;
 
-    oThis.userId = params.userId;
+    oThis.userId = params.user_id;
   }
 
   /**

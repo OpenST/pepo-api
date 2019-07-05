@@ -226,6 +226,51 @@ const v1Signature = {
       }
     ],
     optional: []
+  },
+  [apiName.saveFanVideo]: {
+    mandatory: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      },
+      {
+        parameter: 'user_id',
+        validatorMethods: ['validateInteger']
+      },
+      {
+        parameter: 's3_fan_video_url',
+        validatorMethods: ['validateGenericUrl']
+      },
+      {
+        parameter: 's3_video_poster_image_url',
+        validatorMethods: ['validateGenericUrl']
+      },
+      {
+        parameter: 'video_width',
+        validatorMethods: ['validateInteger']
+      },
+      {
+        parameter: 'video_height',
+        validatorMethods: ['validateInteger']
+      },
+      {
+        parameter: 'video_size',
+        validatorMethods: ['validateInteger']
+      },
+      {
+        parameter: 'image_width',
+        validatorMethods: ['validateInteger']
+      },
+      {
+        parameter: 'image_height',
+        validatorMethods: ['validateInteger']
+      },
+      {
+        parameter: 'image_size',
+        validatorMethods: ['validateInteger']
+      }
+    ],
+    optional: []
   }
 };
 

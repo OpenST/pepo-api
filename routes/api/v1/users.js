@@ -144,4 +144,12 @@ router.get('/:user_id/profile-image', sanitizer.sanitizeDynamicUrlParams, functi
   Promise.resolve(routeHelper.perform(req, res, next, '/user/SaveImage', 'r_a_v1_u_7', null));
 });
 
+/* Video save */
+router.get('/:user_id/fan-video', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.saveFanVideo;
+  req.decodedParams.user_id = req.params.user_id;
+
+  Promise.resolve(routeHelper.perform(req, res, next, '/user/FanVideo', 'r_a_v1_u_8', null));
+});
+
 module.exports = router;
