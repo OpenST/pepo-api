@@ -179,6 +179,24 @@ class CoreConstants {
     return process.env.DEVOPS_IP_ADDRESS;
   }
 
+  // Pepo-campaigns details
+
+  get PEPO_CAMPAIGN_BASE_URL() {
+    return process.env.PA_CAMPAIGN_BASE_URL;
+  }
+
+  get PEPO_CAMPAIGN_CLIENT_KEY() {
+    return process.env.PA_CAMPAIGN_CLIENT_KEY;
+  }
+
+  get PEPO_CAMPAIGN_CLIENT_SECRET() {
+    return process.env.PA_CAMPAIGN_CLIENT_SECRET;
+  }
+
+  get PEPO_CAMPAIGN_MASTER_LIST() {
+    return process.env.PA_CAMPAIGN_MASTER_LIST;
+  }
+
   //Twitter API key and secret
   get TWITTER_CONSUMER_KEY() {
     return process.env.PA_TWITTER_CONSUMER_KEY;
