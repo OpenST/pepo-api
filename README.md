@@ -104,8 +104,22 @@ Note: Get the webhooks id from above run(subscribe webhooks). Secret has to be o
 node executables/oneTimers/insertWebhooksSecret.js --webhooksSecret "__WXYZ" --webhooksId "__ABCD"
 ```
 
-* Seed Gif categories
+## Seed Gif categories
 ```bash
     source set_env_vars.sh
     node executables/oneTimers/populateGifCategories.js
+```
+
+## Background jobs
+* Factory process for processing background jobs
+```bash
+    # note: for topics to subscribe and prefetchcount, please see params column of the cron_processes table
+    source set_env_vars.sh
+    node executables/bgJobProcessor/Factory.js --cronProcessId 3
+```
+
+* Enqueue background job
+```js
+   let BgJob = require('./lib/BgJob');
+   BgJob.enqueue("bg.p1.example", {"k1": "v1"});
 ```

@@ -1,8 +1,26 @@
+const program = require('commander');
+
 const rootPrefix = '../..',
   BgJobProcessorBase = require(rootPrefix + '/executables/bgJobProcessor/Base'),
   bgJobConstant = require(rootPrefix + '/lib/globalConstant/bgJob'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   cronProcessesConstants = require(rootPrefix + '/lib/globalConstant/cronProcesses');
+
+program.option('--cronProcessId <cronProcessId>', 'Cron table process ID').parse(process.argv);
+
+program.on('--help', function() {
+  logger.log('');
+  logger.log('  Example:');
+  logger.log('');
+  logger.log('    node executables/bgJobProcessor/Factory.js --cronProcessId 3');
+  logger.log('');
+  logger.log('');
+});
+
+if (!program.cronProcessId) {
+  program.help();
+  process.exit(1);
+}
 
 class BgJobProcessorFactory extends BgJobProcessorBase {
   /**
@@ -45,7 +63,7 @@ class BgJobProcessorFactory extends BgJobProcessorBase {
 
 logger.step('BG JOB Processor Factory started.');
 
-new BgJobProcessorFactory({ cronProcessId: 3 }).perform();
+new BgJobProcessorFactory({ cronProcessId: +program.cronProcessId }).perform();
 
 setInterval(function() {
   logger.info('Ending the process. Sending SIGINT.');
