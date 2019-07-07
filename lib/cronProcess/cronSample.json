@@ -7,6 +7,7 @@
     "ncbhjc": "hwvtuc"
   },
   "bgJobRabbitmq": {
-    "topics": ["bg.#"]
+    "topics": ["bg.#"],
+    "prefetchCount": 1
   }
 }
