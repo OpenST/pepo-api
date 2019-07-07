@@ -28,6 +28,11 @@
     memcached -p 11211 -d
 ```
 
+* Start RabbitMQ
+```
+brew services start rabbitmq
+```
+
 # Installation Steps
 
 ## Run DB Migrations

@@ -27,6 +27,39 @@ class ConfigStrategyTemplate {
           consistentBehavior: 'consistentBehaviorEntity'
         }
       },
+      rabbitmqEntity: {
+        entityType: 'object',
+        entitiesPresent: {
+          username: 'usernameEntity',
+          password: 'passwordEntity',
+          host: 'hostEntity',
+          port: 'portEntity',
+          heartbeats: 'heartbeatsEntity',
+          clusterNodes: 'clusterNodesEntity'
+        }
+      },
+      heartbeatsEntity: {
+        entityType: 'string'
+      },
+      clusterNodesEntity: {
+        entityType: 'array',
+        entitiesPresent: 'clusterNodeEntity'
+      },
+      clusterNodeEntity: {
+        entityType: 'string'
+      },
+      hostEntity: {
+        entityType: 'string'
+      },
+      portEntity: {
+        entityType: 'string'
+      },
+      passwordEntity: {
+        entityType: 'string'
+      },
+      usernameEntity: {
+        entityType: 'string'
+      },
       engineEntity: {
         entityType: 'string'
       },
@@ -52,7 +85,7 @@ class ConfigStrategyTemplate {
   get rootLevelEntities() {
     return {
       [configStrategyConstants.memcached]: 'memcachedEntity',
-      [configStrategyConstants.inMemoryCache]: 'inMemoryCacheEntity'
+      [configStrategyConstants.bgJobRabbitmq]: 'rabbitmqEntity'
     };
   }
 }

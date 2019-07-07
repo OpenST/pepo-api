@@ -68,7 +68,7 @@ const _addConfig = async function(config) {
   } else {
     for (const kind in config) {
       await _validateKind(kind);
-      await _create(kind, config);
+      await _create(kind, { [kind]: config[kind] });
     }
   }
 };

@@ -7,6 +7,17 @@
       ],
       "defaultTtl": 36000,
       "consistentBehavior": "1"
+    },
+
+    "bgJobRabbitmq": {
+      "username": "guest",
+      "password": "guest",
+      "host": "127.0.0.1",
+      "port": "5672",
+      "heartbeats": "30",
+      "clusterNodes": [
+        "127.0.0.1"
+      ]
     }
   }
 }

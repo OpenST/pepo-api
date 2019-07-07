@@ -13,7 +13,8 @@ const rootPrefix = '../../..',
 
 // Declare variables.
 const errorConfig = basicHelper.fetchErrorConfig(apiVersions.v1),
-  dbName = 'pepo_api_config_' + coreConstants.environment;
+  dbName = 'pepo_api_config_' + coreConstants.environment,
+  kinds = configStrategyConstants.kinds;
 
 /**
  * Class for config strategy model.
@@ -138,9 +139,16 @@ class ConfigStrategyModel extends ModelBase {
     const hashToEncrypt = {},
       hashNotToEncrypt = configStrategyParams;
 
-    const encryptedKeysFound = false;
+    let encryptedKeysFound = false;
 
-    // TODO - currently we do not have any config strategy kinds with encrypted parameters
+    if (strategyKindName === configStrategyConstants.bgJobRabbitmq) {
+      const rmqPassword = hashNotToEncrypt[strategyKindName].password;
+
+      hashNotToEncrypt[strategyKindName].password = '{{rmqPassword}}';
+      hashToEncrypt.rmqPassword = rmqPassword;
+      encryptedKeysFound = true;
+    }
+
     return {
       hashToEncrypt: encryptedKeysFound ? hashToEncrypt : null,
       hashNotToEncrypt: hashNotToEncrypt
@@ -178,27 +186,9 @@ class ConfigStrategyModel extends ModelBase {
    * @private
    */
   _mergeConfigResult(strategyKind, configStrategyHash, decryptedJsonObj) {
-    /*
-    NOTE: Commented this code for later use.
-    if (
-      kinds[strategyKind] === configStrategyConstants.dynamodb ||
-      kinds[strategyKind] === configStrategyConstants.globalDynamodb ||
-      kinds[strategyKind] === configStrategyConstants.originDynamodb
-    ) {
-      configStrategyHash[kinds[strategyKind]].apiSecret = decryptedJsonObj.dynamoApiSecret;
-      configStrategyHash[kinds[strategyKind]].autoScaling.apiSecret = decryptedJsonObj.dynamoAutoscalingApiSecret;
-    } else if (kinds[strategyKind] === configStrategyConstants.elasticSearch) {
-      configStrategyHash[kinds[strategyKind]].apiSecret = decryptedJsonObj.esSecretKey;
-    } else if (
-      kinds[strategyKind] === configStrategyConstants.rabbitmq ||
-      kinds[strategyKind] === configStrategyConstants.globalRabbitmq ||
-      kinds[strategyKind] === configStrategyConstants.originRabbitmq ||
-      kinds[strategyKind] === configStrategyConstants.webhooksPreProcessorRabbitmq ||
-      kinds[strategyKind] === configStrategyConstants.webhooksProcessorRabbitmq
-    ) {
+    if (kinds[strategyKind] === configStrategyConstants.bgJobRabbitmq) {
       configStrategyHash[kinds[strategyKind]].password = decryptedJsonObj.rmqPassword;
     }
-    */
 
     return configStrategyHash;
   }
