@@ -340,10 +340,11 @@ class BgJobProcessorBase extends CronBase {
     const oThis = this;
 
     for (let i = 0; i < oThis.topics.length; i++) {
-      let topic = oThis.topics[i];
+      let topic = oThis.topics[i],
+        queueSuffix = oThis.queues[i];
       oThis.subscriptionTopicToDataMap[topic] = new RabbitmqSubscription({
         topic: topic,
-        queue: 'bg_' + oThis.cronProcessId + '_' + i,
+        queue: 'bg_' + queueSuffix,
         prefetchCount: oThis.prefetchCount
       });
     }

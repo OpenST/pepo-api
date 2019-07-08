@@ -8,6 +8,7 @@
   },
   "bgJobRabbitmq": {
     "topics": ["bg.#"],
+    "queues": ["example"],
     "prefetchCount": 1
   }
 }
