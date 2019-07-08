@@ -83,7 +83,7 @@ router.post('/logout', sanitizer.sanitizeDynamicUrlParams, function(req, res) {
 });
 
 /* Twitter Connect*/
-router.get('/twitter-login', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+router.post('/twitter-login', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.twitterLogin;
 
   const onServiceSuccess = async function(serviceResponse) {

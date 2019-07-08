@@ -171,10 +171,6 @@ const v1Signature = {
       }
     ]
   },
-  [apiName.twitterRequestToken]: {
-    mandatory: [],
-    optional: []
-  },
   [apiName.uploadParams]: {
     mandatory: [
       // {
