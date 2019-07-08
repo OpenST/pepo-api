@@ -44,7 +44,7 @@ class TwitterUserModel extends ModelBase {
    * @returns {Array}
    */
   safeFormattedColumnNames() {
-    return ['id', 'twitterUserId', 'status', 'createdAt', 'updatedAt'];
+    return ['id', 'userId', 'twitterUserId', 'status', 'createdAt', 'updatedAt'];
   }
 
   /***
