@@ -209,6 +209,14 @@ class CoreConstants {
   get TWITTER_AUTH_CALLBACK_ROUTE() {
     return process.env.PA_TWITTER_AUTH_CALLBACK_ROUTE;
   }
+
+  get PR_API_BASE_URL() {
+    return process.env.PR_API_BASE_URL;
+  }
+
+  get PR_INTERNAL_API_SECRET_KEY() {
+    return process.env.PR_INTERNAL_API_SECRET_KEY;
+  }
 }
 
 module.exports = new CoreConstants();
