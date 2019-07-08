@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "a8a13720-6130-439b-88ad-24399f8032fb",
+		"_postman_id": "832c5c34-e459-4275-859a-e48bbece42af",
 		"name": "pepo-api",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -55,6 +55,58 @@
 								"v1",
 								"auth",
 								"sign-up"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "twitter-login",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/x-www-form-urlencoded"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "token",
+									"value": "819112169035988992-DsgmadqWCPmgP1RoouNOOvBYWMEV19z",
+									"type": "text"
+								},
+								{
+									"key": "secret",
+									"value": "8YCRJPLmERw7hWEqB4lI16RZpCCQiSiuaxpv7D2W57Pq2",
+									"type": "text"
+								},
+								{
+									"key": "twitter_id",
+									"value": "819112169035988992",
+									"type": "text"
+								},
+								{
+									"key": "handle",
+									"value": "aman_barbaria",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{api_server}}/api/v1/auth/twitter-login",
+							"host": [
+								"{{api_server}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"twitter-login"
 							]
 						}
 					},
@@ -362,7 +414,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{api_server}}/api/v1/users/1001/feeds?",
+							"raw": "{{api_server}}/api/v1/users/1001/feeds",
 							"host": [
 								"{{api_server}}"
 							],
