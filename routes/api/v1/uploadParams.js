@@ -25,7 +25,7 @@ router.get('/', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
     serviceResponse.data = wrapperFormatterRsp.data;
   };
 
-  Promise.resolve(routeHelper.perform(req, res, next, '/uploadParams', 'r_a_v1_up_1', null, dataFormatterFunc));
+  Promise.resolve(routeHelper.perform(req, res, next, '/UploadParams', 'r_a_v1_up_1', null, dataFormatterFunc));
 });
 
 module.exports = router;
