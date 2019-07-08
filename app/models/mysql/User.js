@@ -120,7 +120,17 @@ class UserModel extends ModelBase {
   async fetchByIds(ids) {
     const oThis = this;
     let dbRows = await oThis
-      .select(oThis.safeFormattedColumnNames())
+      .select([
+        'id',
+        'user_name',
+        'name',
+        'profile_image_id',
+        'mark_inactive_trigger_count',
+        'properties',
+        'status',
+        'created_at',
+        'updated_at'
+      ])
       .where({ id: ids })
       .fire();
 
@@ -176,7 +186,7 @@ class UserModel extends ModelBase {
       .where(['status != ?', userConstants.invertedStatuses[userConstants.blockedStatus]])
       .limit(limit)
       .offset(offset)
-      .order_by('first_name ASC')
+      .order_by('name ASC')
       .fire();
 
     let response = [];
