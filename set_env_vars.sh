@@ -67,3 +67,7 @@ export PA_CAMPAIGN_MASTER_LIST="5346"
 export PA_TWITTER_CONSUMER_KEY='NEo4gEXzdQZaoTsqzpZvepfKb'
 export PA_TWITTER_CONSUMER_SECRET='iM5UMt4px8rwoqEoRV9gJGrJGtEoMUxOYkaWXSges7t4bk564t'
 export PA_TWITTER_AUTH_CALLBACK_ROUTE='https://pepo.com'
+
+# image resizer variables
+export PR_API_BASE_URL='http://127.0.0.1:9000'
+export PR_INTERNAL_API_SECRET_KEY='asdfghjkl'

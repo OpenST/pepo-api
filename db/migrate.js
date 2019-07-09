@@ -49,6 +49,7 @@ class DbMigrate {
       })
       .catch(function(err) {
         logger.error(err);
+        process.exit(1);
       });
   }
 

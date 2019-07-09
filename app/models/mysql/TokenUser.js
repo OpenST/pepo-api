@@ -43,7 +43,6 @@ class TokenUserModel extends ModelBase {
       ostUserId: dbRow.ost_user_id,
       ostTokenHolderAddress: dbRow.ost_token_holder_address,
       scryptSalt: dbRow.scrypt_salt,
-      encryptionSalt: dbRow.encryption_salt,
       properties: dbRow.properties,
       ostStatus: tokenUserConstants.ostStatuses[dbRow.ost_status],
       createdAt: dbRow.created_at,

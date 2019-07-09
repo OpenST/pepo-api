@@ -234,7 +234,9 @@ class TwitterSignup extends ServiceBase {
   async _createUserInOst() {
     const oThis = this;
 
-    logger.log('Start::Creating user in OST');
+    let a = Date.now();
+
+    logger.log('Start::Creating user in OST', a);
 
     const createUserServiceResponse = await ostPlatformSdk.createUser();
     if (!createUserServiceResponse.isSuccess()) {
@@ -244,7 +246,7 @@ class TwitterSignup extends ServiceBase {
     oThis.ostUserId = createUserServiceResponse.data.user.id;
     oThis.ostStatus = createUserServiceResponse.data.user.status;
 
-    logger.log('End::Creating user in OST: ', oThis.ostStatus);
+    logger.log('End::Creating user in OST: ', Date.now() - a);
 
     return Promise.resolve(responseHelper.successWithData({}));
   }
@@ -336,7 +338,7 @@ class TwitterSignup extends ServiceBase {
   async _createTwitterUserExtended() {
     const oThis = this;
 
-    logger.log('Start::Create Twitter User Extended Obj', oThis.twitterUserObj);
+    logger.log('Start::Create Twitter User Extended Obj');
 
     let insertData = {
       twitter_user_id: oThis.twitterUserObj.id,
@@ -429,7 +431,7 @@ class TwitterSignup extends ServiceBase {
   async _createTokenUser() {
     const oThis = this;
 
-    logger.log('Start::Creating token user', oThis.ostStatus);
+    logger.log('Start::Creating token user');
 
     let insertData = {
       user_id: oThis.userId,
@@ -453,7 +455,7 @@ class TwitterSignup extends ServiceBase {
     oThis.tokenUserObj = new TokenUserModel().formatDbData(insertData);
     await TokenUserModel.flushCache(oThis.tokenUserObj);
 
-    logger.log('End::Creating token user', oThis.ostStatus);
+    logger.log('End::Creating token user');
     return Promise.resolve(responseHelper.successWithData({}));
   }
 

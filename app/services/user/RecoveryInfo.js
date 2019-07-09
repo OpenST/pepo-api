@@ -70,9 +70,7 @@ class RecoveryInfo extends ServiceBase {
   async decryptScryptSalt(cacheData) {
     const oThis = this;
 
-    let encryptionSaltD = localCipher.decrypt(coreConstants.CACHE_SHA_KEY, cacheData['encryptionSaltLc']);
-
-    let scryptSaltD = localCipher.decrypt(encryptionSaltD, cacheData['scryptSalt']);
+    let scryptSaltD = localCipher.decrypt(coreConstants.CACHE_SHA_KEY, cacheData['scryptSaltLc']);
 
     return responseHelper.successWithData({ scryptSalt: scryptSaltD });
   }
