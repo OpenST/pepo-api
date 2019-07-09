@@ -99,6 +99,21 @@ const v1ErrorConfig = {
     parameter: 'user_id',
     code: 'invalid',
     message: 'Invalid user id.'
+  },
+  invalid_resolution: {
+    parameter: 'resolutions',
+    code: 'invalid',
+    message: 'Invalid resolutions.'
+  },
+  invalid_url: {
+    parameter: 'url',
+    code: 'invalid',
+    message: 'Invalid url.'
+  },
+  invalid_kind: {
+    parameter: 'kind',
+    code: 'invalid',
+    message: 'Invalid kind.'
   }
 };
 

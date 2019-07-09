@@ -97,6 +97,7 @@ class Image extends ModelBase {
     let response = await oThis
       .insert({
         resolutions: JSON.stringify(params.resolutions),
+        kind: imageConst.invertedKinds[params.kind],
         status: imageConst.invertedStatuses[params.status]
       })
       .fire();
