@@ -208,7 +208,7 @@
       "id": "123",
       "resolutions": {
         "original": {
-          "url": "https://uassets.stagingpepo.com.s3.amazonaws.com/d/ua/videos/1000-7ae73d3d74154790d6831bd3e7279f9f-original.mp4",
+          "url": "https://dbvoeb7t6hffk.cloudfront.net/d/ua/videos/1000-7ae73d3d74154790d6831bd3e7279f9f-original.mp4",
           "width": "573",
           "height": "1024",
           "size": "100000000000"
@@ -221,7 +221,7 @@
       "id": "124",
       "resolutions": {
         "original": {
-          "url": "https://uassets.stagingpepo.com.s3.amazonaws.com/d/ua/videos/1001-d5cde4531dcaa09d5e9981e5805b197f-original.mp4",
+          "url": "https://dbvoeb7t6hffk.cloudfront.net/d/ua/videos/1001-d5cde4531dcaa09d5e9981e5805b197f-original.mp4",
           "width": "573",
           "height": "1024",
           "size": "100000000000"
@@ -234,7 +234,7 @@
       "id": "125",
       "resolutions": {
         "original": {
-          "url": "https://uassets.stagingpepo.com.s3.amazonaws.com/d/ua/videos/1002-4a13513801c01f00868daa02f71f2550-original.mp4",
+          "url": "https://dbvoeb7t6hffk.cloudfront.net/d/ua/videos/1002-4a13513801c01f00868daa02f71f2550-original.mp4",
           "width": "573",
           "height": "1024",
           "size": "100000000000"
@@ -249,7 +249,7 @@
       "id": "1123",
       "resolutions": {
         "original": {
-          "url": "https://s3.amazonaws.com/uassets.stagingpepo.com/d/ua/images/1000-2ca7f2a35790739ee1aea30f424d5ef1-original.jpg",
+          "url": "https://dbvoeb7t6hffk.cloudfront.net/d/ua/images/1000-2ca7f2a35790739ee1aea30f424d5ef1-original.jpg",
           "width": 4000,
           "height": 6000,
           "size": 1755151
@@ -258,25 +258,25 @@
           "width": 750,
           "height": 1125,
           "size": 92689,
-          "url": "https://s3.amazonaws.com/uassets.stagingpepo.com/d/ua/images/1000-2ca7f2a35790739ee1aea30f424d5ef1-750w.jpg"
+          "url": "https://dbvoeb7t6hffk.cloudfront.net/d/ua/images/1000-2ca7f2a35790739ee1aea30f424d5ef1-750w.jpg"
         },
         "1500w": {
           "width": 1500,
           "height": 2250,
           "size": 290796,
-          "url": "https://s3.amazonaws.com/uassets.stagingpepo.com/d/ua/images/1000-2ca7f2a35790739ee1aea30f424d5ef1-1500w.jpg"
+          "url": "https://dbvoeb7t6hffk.cloudfront.net/d/ua/images/1000-2ca7f2a35790739ee1aea30f424d5ef1-1500w.jpg"
         },
         "2250w": {
           "width": 2250,
           "height": 3375,
           "size": 590368,
-          "url": "https://s3.amazonaws.com/uassets.stagingpepo.com/d/ua/images/1000-2ca7f2a35790739ee1aea30f424d5ef1-2250w.jpg"
+          "url": "https://dbvoeb7t6hffk.cloudfront.net/d/ua/images/1000-2ca7f2a35790739ee1aea30f424d5ef1-2250w.jpg"
         },
         "3000w": {
           "width": 3000,
           "height": 4500,
           "size": 1028567,
-          "url": "https://s3.amazonaws.com/uassets.stagingpepo.com/d/ua/images/1000-2ca7f2a35790739ee1aea30f424d5ef1-3000w.jpg"
+          "url": "https://dbvoeb7t6hffk.cloudfront.net/d/ua/images/1000-2ca7f2a35790739ee1aea30f424d5ef1-3000w.jpg"
         }
       },
       "uts": 1512121112
@@ -285,7 +285,7 @@
       "id": "1124",
       "resolutions": {
         "original": {
-          "url": "https://s3.amazonaws.com/uassets.stagingpepo.com/d/ua/images/1001-d5cde4531dcaa09d5e9981e5805b197f-original.jpg",
+          "url": "https://dbvoeb7t6hffk.cloudfront.net/d/ua/images/1001-d5cde4531dcaa09d5e9981e5805b197f-original.jpg",
           "width": 3000,
           "height": 4880,
           "size": 349471
@@ -294,31 +294,31 @@
           "width": 673,
           "height": 1095,
           "size": 48710,
-          "url": "https://s3.amazonaws.com/uassets.stagingpepo.com/d/ua/images/1001-d5cde4531dcaa09d5e9981e5805b197f-673w.jpg"
+          "url": "https://dbvoeb7t6hffk.cloudfront.net/d/ua/images/1001-d5cde4531dcaa09d5e9981e5805b197f-673w.jpg"
         },
         "1010w": {
           "width": 1010,
           "height": 1643,
           "size": 85830,
-          "url": "https://s3.amazonaws.com/uassets.stagingpepo.com/d/ua/images/1001-d5cde4531dcaa09d5e9981e5805b197f-1010w.jpg"
+          "url": "https://dbvoeb7t6hffk.cloudfront.net/d/ua/images/1001-d5cde4531dcaa09d5e9981e5805b197f-1010w.jpg"
         },
         "1346w": {
           "width": 1346,
           "height": 2189,
           "size": 127213,
-          "url": "https://s3.amazonaws.com/uassets.stagingpepo.com/d/ua/images/1001-d5cde4531dcaa09d5e9981e5805b197f-1346w.jpg"
+          "url": "https://dbvoeb7t6hffk.cloudfront.net/d/ua/images/1001-d5cde4531dcaa09d5e9981e5805b197f-1346w.jpg"
         },
         "2019w": {
           "width": 2019,
           "height": 3284,
           "size": 222804,
-          "url": "https://s3.amazonaws.com/uassets.stagingpepo.com/d/ua/images/1001-d5cde4531dcaa09d5e9981e5805b197f-2019w.jpg"
+          "url": "https://dbvoeb7t6hffk.cloudfront.net/d/ua/images/1001-d5cde4531dcaa09d5e9981e5805b197f-2019w.jpg"
         },
         "2692w": {
           "width": 2692,
           "height": 4379,
           "size": 327052,
-          "url": "https://s3.amazonaws.com/uassets.stagingpepo.com/d/ua/images/1001-d5cde4531dcaa09d5e9981e5805b197f-2692w.jpg"
+          "url": "https://dbvoeb7t6hffk.cloudfront.net/d/ua/images/1001-d5cde4531dcaa09d5e9981e5805b197f-2692w.jpg"
         }
       },
       "uts": 1512121109
@@ -327,7 +327,7 @@
       "id": "1125",
       "resolutions": {
         "original": {
-          "url": "https://uassets.stagingpepo.com.s3.amazonaws.com/d/ua/images/1002-1aba9b9b36cd561339d7549d19007520-original.jpg",
+          "url": "https://dbvoeb7t6hffk.cloudfront.net/d/ua/images/1002-1aba9b9b36cd561339d7549d19007520-original.jpg",
           "width": "573",
           "height": "1024",
           "size": "100000000000"
