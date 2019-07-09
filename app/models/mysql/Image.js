@@ -102,7 +102,7 @@ class Image extends ModelBase {
       })
       .fire();
 
-    return response.data;
+    return response;
   }
 
   /**
@@ -124,7 +124,7 @@ class Image extends ModelBase {
       })
       .fire();
 
-    return response.data;
+    return response;
   }
 
   /**

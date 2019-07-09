@@ -2,6 +2,7 @@ const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   UserModel = require(rootPrefix + '/app/models/mysql/User'),
   KmsWrapper = require(rootPrefix + '/lib/aws/KmsWrapper'),
+  GetResolution = require(rootPrefix + '/lib/user/image/GetResolution'),
   CreateImage = require(rootPrefix + '/lib/user/image/Create'),
   TokenUserModel = require(rootPrefix + '/app/models/mysql/TokenUser'),
   UserByUsernameCache = require(rootPrefix + '/lib/cacheManagement/single/UserByUsername'),
@@ -141,9 +142,44 @@ class TwitterSignup extends ServiceBase {
     const oThis = this;
     logger.log('Start::Save Profile Image');
 
-    if (oThis.userTwitterEntity.nonDefaultprofileImageUrl) {
-      oThis.profileImageId = 1;
+    if (!oThis.userTwitterEntity.nonDefaultprofileImageUrl) {
+      oThis.profileImageId = null;
+      logger.log('End::Save Profile Image. Default twitter profile pic.');
+      return;
     }
+
+    //Prepare and valdiate resolution
+    let getResolutionParams = {
+      resolutions: {
+        original: {
+          width: 0,
+          height: 0,
+          size: 0,
+          url: oThis.userTwitterEntity.profileImageUrl
+        }
+      },
+      isExternalUrl: true,
+      kind: imageConstants.profileImageKind,
+      status: imageConstants.notResized
+    };
+
+    let getResolutionResponse = new GetResolution(getResolutionParams).perform();
+
+    if (getResolutionResponse.isFailure()) {
+      logger.error('Invalid image resolution');
+      oThis.profileImageId = null;
+      logger.log('End::Save Profile Image ended abruptly because of invalid resolution');
+      return;
+    }
+
+    let createImageParams = {
+        resolutions: getResolutionResponse.data,
+        kind: imageConstants.profileImageKind,
+        status: imageConstants.notResized
+      },
+      createImageResponse = await new CreateImage(createImageParams).perform();
+
+    oThis.profileImageId = createImageResponse.insertId;
 
     logger.log('End::Save Profile Image');
   }
