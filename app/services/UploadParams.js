@@ -141,10 +141,12 @@ class UploadParams extends ServiceBase {
           coreConstants.S3_AWS_REGION
         );
 
+        const s3Url = oThis._getS3Url(intent, fileName);
+
         resultHash[feFileName] = {
           postUrl: preSignedPostParams.url,
           postFields: preSignedPostParams.fields,
-          s3Url: oThis._getS3Url(preSignedPostParams)
+          s3Url: s3Url
         };
       }
 
@@ -210,14 +212,22 @@ class UploadParams extends ServiceBase {
   /**
    * Get s3 url.
    *
-   * @param {hash} preSignedPostParams
+   * @param {string} intent
+   * @param {string} fileName
    *
    * @private
    */
-  _getS3Url(preSignedPostParams) {
-    return (
-      'https://' + preSignedPostParams.fields.bucket + s3UploadConstants.s3UrlPrefix + preSignedPostParams.fields.key
-    );
+  _getS3Url(intent, fileName) {
+    switch (intent) {
+      case s3UploadConstants.imageFileType:
+        return s3UploadConstants.getS3UrlPrefix() + coreConstants.IMAGES_S3_FOLDER + '/' + fileName;
+
+      case s3UploadConstants.videoFileType:
+        return s3UploadConstants.getS3UrlPrefix() + coreConstants.VIDEOS_S3_FOLDER + '/' + fileName;
+
+      default:
+        throw new Error('Unsupported file type.');
+    }
   }
 }
 
