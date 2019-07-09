@@ -101,7 +101,7 @@ class Url extends ModelBase {
       })
       .fire();
 
-    return response.data;
+    return response;
   }
 
   /**

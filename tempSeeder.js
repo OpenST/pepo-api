@@ -2,9 +2,11 @@ const rootPrefix = '.',
   ImagesModel = require(rootPrefix + '/app/models/mysql/Image'),
   VideosModel = require(rootPrefix + '/app/models/mysql/Video'),
   TextModel = require(rootPrefix + '/app/models/mysql/Text'),
+  UrlModel = require(rootPrefix + '/app/models/mysql/Url'),
   UserProfileElementModel = require(rootPrefix + '/app/models/mysql/UserProfileElement'),
   imageConst = require(rootPrefix + '/lib/globalConstant/image'),
   videoConst = require(rootPrefix + '/lib/globalConstant/video'),
+  urlConst = require(rootPrefix + '/lib/globalConstant/url'),
   userProfileElementConst = require(rootPrefix + '/lib/globalConstant/userProfileElement'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger');
 
@@ -38,6 +40,14 @@ const textArray = [
   'Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.',
   'Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.',
   'Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim insertId est laborum'
+];
+
+const urlArray = [
+  'https://www.youtube.com',
+  'https://www.facebook.com',
+  'https://www.baidu.com',
+  'https://www.yahoo.com',
+  'https://www.amazon.com'
 ];
 
 class TempSeeder {
@@ -118,6 +128,18 @@ class TempSeeder {
         insertUserProfileElementsRsp2 = await new UserProfileElementModel().insertElement(userProfileElementsParams2);
 
       logger.log('====== insertUserProfileElementsRsp2', insertUserProfileElementsRsp2);
+
+      const urlParams = { url: urlArray[index], kind: urlConst.twitterUrlKind },
+        urlResponse = await new UrlModel().insertUrl(urlParams);
+
+      const userProfileElementsParams3 = {
+          userId: 1000 + index,
+          dataKind: userProfileElementConst.linkIdKind,
+          data: urlResponse.insertId
+        },
+        insertUserProfileElementsRsp3 = await new UserProfileElementModel().insertElement(userProfileElementsParams3);
+
+      logger.log('====== insertUserProfileElementsRsp3', insertUserProfileElementsRsp3);
     }
   }
 }
