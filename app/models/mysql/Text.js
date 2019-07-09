@@ -97,7 +97,7 @@ class Text extends ModelBase {
       })
       .fire();
 
-    return response.data;
+    return response;
   }
 
   /**
