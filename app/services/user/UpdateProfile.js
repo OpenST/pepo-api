@@ -108,19 +108,23 @@ class UpdateProfile extends ServiceBase {
 
     console.log(cacheRsp.data[oThis.userId]);
     if (cacheRsp.isFailure() || Object.keys(cacheRsp.data[oThis.userId]).length <= 0) {
-      // return Promise.reject(responseHelper.error({
-      //   internal_error_identifier: 'a_s_u_up_2',
-      //   api_error_identifier: 'user_not_found',
-      //   debug_options: {}
-      // }));
+      return Promise.reject(
+        responseHelper.error({
+          internal_error_identifier: 'a_s_u_up_2',
+          api_error_identifier: 'user_not_found',
+          debug_options: {}
+        })
+      );
     }
 
     if (cacheRsp.data[oThis.userId].status != userConstants.activeStatus) {
-      // return Promise.reject(responseHelper.error({
-      //   internal_error_identifier: 'a_s_u_up_3',
-      //   api_error_identifier: 'user_not_active',
-      //   debug_options: {}
-      // }));
+      return Promise.reject(
+        responseHelper.error({
+          internal_error_identifier: 'a_s_u_up_3',
+          api_error_identifier: 'user_not_active',
+          debug_options: {}
+        })
+      );
     }
   }
 
