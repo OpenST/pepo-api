@@ -12,7 +12,7 @@ const upQuery =
   `created_at` int(11) NOT NULL, \n\
   `updated_at` int(11) NOT NULL, \n\
   PRIMARY KEY (`id`), \n\
-  KEY `uk_1` (`user_id`) \n\
+  KEY `cuk_1` (`user_id`,`data_kind`) \n\
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
 
 const downQuery = 'DROP TABLE user_profile_elements;';

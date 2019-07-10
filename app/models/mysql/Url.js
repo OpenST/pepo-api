@@ -145,6 +145,23 @@ class Url extends ModelBase {
   }
 
   /**
+   * Delete by id
+   *
+   * @param.id
+   * @return {Promise<void>}
+   */
+  async deleteById(params) {
+    const oThis = this;
+
+    await oThis
+      .delete()
+      .where({
+        id: params.id
+      })
+      .fire();
+  }
+
+  /**
    * Flush cache.
    *
    * @param {object} params

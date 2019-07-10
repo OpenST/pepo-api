@@ -93,13 +93,12 @@ class Text extends ModelBase {
   async insertText(params) {
     const oThis = this;
 
-    let response = await oThis
+    return oThis
       .insert({
-        text: params.text
+        text: params.text,
+        tag_ids: JSON.stringify(params.tagIds)
       })
       .fire();
-
-    return response;
   }
 
   /**
