@@ -90,6 +90,64 @@ class Tag extends ModelBase {
   }
 
   /**
+   * Get tags that starts with tag prefix.
+   *
+   * @param {object} params
+   * @param {number} params.page
+   * @param {number} params.limit
+   * @param {string} params.tagPrefix
+   *
+   * @returns {Promise<>}
+   */
+  async getTagsByPrefix(params) {
+    const oThis = this;
+
+    const page = params.page || 1,
+      limit = params.limit || 10,
+      offset = (page - 1) * limit;
+
+    const dbRows = await oThis
+      .select('*')
+      .where('name LIKE "' + params.tagPrefix + '%"')
+      .limit(limit)
+      .offset(offset)
+      .order_by('name ASC')
+      .fire();
+
+    let response = [];
+
+    for (let index = 0; index < dbRows.length; index++) {
+      response.push(dbRows[index].id);
+    }
+
+    return response;
+  }
+
+  /***
+   * Fetch tag for id.
+   *
+   * @param {array} ids  - ids
+   *
+   * @return {Object}
+   */
+  async fetchByIds(ids) {
+    const oThis = this;
+    let dbRows = await oThis
+      .select('*')
+      .where({ id: ids })
+      .fire();
+
+    let response = {};
+
+    for (let index = 0; index < dbRows.length; index++) {
+      let formatDbRow = oThis._formatDbData(dbRows[index]);
+      response[formatDbRow.id] = formatDbRow;
+    }
+
+    return response;
+  }
+
+  /**
    * Flush cache.
    *
    * @returns {Promise<*>}
