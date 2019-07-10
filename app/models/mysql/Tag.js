@@ -1,6 +1,7 @@
 const rootPrefix = '../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
-  coreConstants = require(rootPrefix + '/config/coreConstants');
+  coreConstants = require(rootPrefix + '/config/coreConstants'),
+  tagConstants = require(rootPrefix + '/lib/globalConstant/tag');
 
 const dbName = 'pepo_api_' + coreConstants.environment;
 
@@ -40,7 +41,7 @@ class Tag extends ModelBase {
       id: dbRow.id,
       name: dbRow.name,
       weight: dbRow.weight,
-      status: dbRow.status,
+      status: tagConstants.statuses[dbRow.status],
       createdAt: dbRow.created_at,
       updatedAt: dbRow.updated_at
     };

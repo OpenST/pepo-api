@@ -267,6 +267,20 @@ const v1Signature = {
       }
     ],
     optional: []
+  },
+  [apiName.getTags]: {
+    mandatory: [
+      {
+        parameter: 'tag',
+        validatorMethods: ['validateString']
+      }
+    ],
+    optional: [
+      {
+        parameter: paginationConstants.paginationIdentifierKey,
+        validatorMethods: ['validateString', 'validatePaginationIdentifier']
+      }
+    ]
   }
 };
 
