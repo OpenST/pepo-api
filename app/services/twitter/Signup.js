@@ -2,6 +2,7 @@ const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   UserModel = require(rootPrefix + '/app/models/mysql/User'),
   KmsWrapper = require(rootPrefix + '/lib/aws/KmsWrapper'),
+  BgJob = require(rootPrefix + '/lib/BgJob'),
   GetResolution = require(rootPrefix + '/lib/user/image/GetResolution'),
   CreateImage = require(rootPrefix + '/lib/user/image/Create'),
   TokenUserModel = require(rootPrefix + '/app/models/mysql/TokenUser'),
@@ -10,6 +11,7 @@ const rootPrefix = '../../..',
   TwitterUserModel = require(rootPrefix + '/app/models/mysql/TwitterUser'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   userConstants = require(rootPrefix + '/lib/globalConstant/user'),
+  bgJobConstants = require(rootPrefix + '/lib/globalConstant/bgJob'),
   twitterUserExtendedConstants = require(rootPrefix + '/lib/globalConstant/twitterUserExtended'),
   localCipher = require(rootPrefix + '/lib/encryptors/localCipher'),
   imageConstants = require(rootPrefix + '/lib/globalConstant/image'),
@@ -116,6 +118,8 @@ class TwitterSignup extends ServiceBase {
     );
 
     await Promise.all(promiseArray3);
+
+    await oThis._enqueAfterSignupJob();
 
     logger.log('End::Perform Twitter Signup');
 
@@ -493,6 +497,23 @@ class TwitterSignup extends ServiceBase {
 
     logger.log('End::Creating token user');
     return Promise.resolve(responseHelper.successWithData({}));
+  }
+
+  /**
+   * Enque after signup job.
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _enqueAfterSignupJob() {
+    const oThis = this;
+
+    let messagePayload = {
+      bio: oThis.userTwitterEntity.description,
+      twitterId: oThis.userTwitterEntity.idStr,
+      userId: oThis.userId
+    };
+    await BgJob.enqueue(bgJobConstants.afterSignUpJobTopic, messagePayload);
   }
 
   /**
