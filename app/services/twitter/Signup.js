@@ -159,12 +159,11 @@ class TwitterSignup extends ServiceBase {
           width: 0,
           height: 0,
           size: 0,
-          url: oThis.userTwitterEntity.profileImageUrl
+          url: oThis.userTwitterEntity.nonDefaultprofileImageUrl
         }
       },
       isExternalUrl: true,
-      kind: imageConstants.profileImageKind,
-      status: imageConstants.notResized
+      kind: imageConstants.profileImageKind
     };
 
     let getResolutionResponse = new GetResolution(getResolutionParams).perform();
