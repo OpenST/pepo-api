@@ -5,7 +5,7 @@ const rootPrefix = '../..',
   util = require(rootPrefix + '/lib/util'),
   coreConstants = require(rootPrefix + '/config/coreConstants'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
-  s3UploadConstants = require(rootPrefix + '/lib/globalConstant/s3Upload');
+  s3Constants = require(rootPrefix + '/lib/globalConstant/s3');
 
 class UploadParams extends ServiceBase {
   /**
@@ -99,15 +99,15 @@ class UploadParams extends ServiceBase {
     const oThis = this;
 
     oThis.workingMap = {
-      [s3UploadConstants.imageFileType]: {
-        [s3UploadConstants.files]: oThis.images,
-        [s3UploadConstants.fileType]: s3UploadConstants.imageFileType,
-        [s3UploadConstants.resultKey]: s3UploadConstants.imagesResultKey
+      [s3Constants.imageFileType]: {
+        [s3Constants.files]: oThis.images,
+        [s3Constants.fileType]: s3Constants.imageFileType,
+        [s3Constants.resultKey]: s3Constants.imagesResultKey
       },
-      [s3UploadConstants.videoFileType]: {
-        [s3UploadConstants.files]: oThis.videos,
-        [s3UploadConstants.fileType]: s3UploadConstants.videoFileType,
-        [s3UploadConstants.resultKey]: s3UploadConstants.videosResultKey
+      [s3Constants.videoFileType]: {
+        [s3Constants.files]: oThis.videos,
+        [s3Constants.fileType]: s3Constants.videoFileType,
+        [s3Constants.resultKey]: s3Constants.videosResultKey
       }
     };
   }
@@ -124,15 +124,14 @@ class UploadParams extends ServiceBase {
     for (let intent in oThis.workingMap) {
       let resultHash = {},
         intentHash = oThis.workingMap[intent],
-        fileType = intentHash[s3UploadConstants.fileType],
-        fileArray = intentHash[s3UploadConstants.files],
-        resultKey = intentHash[s3UploadConstants.resultKey];
+        fileArray = intentHash[s3Constants.files],
+        resultKey = intentHash[s3Constants.resultKey];
 
       for (let index = 0; index < fileArray.length; index++) {
         const feFileName = fileArray[index],
           fileExtension = util.getFileExtension(feFileName),
           contentType = oThis._getContent(intent, fileExtension),
-          fileName = oThis._getRandomEncodedFileNames(fileType, fileExtension, index);
+          fileName = oThis._getRandomEncodedFileNames(fileExtension);
 
         const preSignedPostParams = await AwsS3wrapper.createPresignedPostFor(
           intent,
@@ -141,7 +140,7 @@ class UploadParams extends ServiceBase {
           coreConstants.S3_AWS_REGION
         );
 
-        const s3Url = oThis._getS3Url(intent, fileName);
+        const s3Url = s3Constants.getS3Url(intent, fileName);
 
         resultHash[feFileName] = {
           postUrl: preSignedPostParams.url,
@@ -157,34 +156,16 @@ class UploadParams extends ServiceBase {
   /**
    * Get random encoded file names.
    *
-   * @param {string} fileType
    * @param {string} extension
-   * @param {number} fileIndex
    *
    * @returns {string}
    * @private
    */
-  _getRandomEncodedFileNames(fileType, extension, fileIndex) {
+  _getRandomEncodedFileNames(extension) {
     const oThis = this,
-      version = oThis.currentUserId + '-' + util.createMd5Digest(oThis._getVersion(fileIndex));
+      fileName = util.gets3FileName(oThis.currentUserId, 'original');
 
-    return version + '-original' + extension;
-  }
-
-  /**
-   * Get version.
-   *
-   * @param {number} fileIndex
-   *
-   * @returns {string}
-   * @private
-   */
-  _getVersion(fileIndex) {
-    const oThis = this;
-
-    return (
-      oThis.currentUserId + '-' + new Date().getTime() + '-' + Math.floor(Math.random() * 100000000) + '-' + fileIndex
-    );
+    return fileName + extension;
   }
 
   /**
@@ -198,32 +179,11 @@ class UploadParams extends ServiceBase {
    */
   _getContent(intent, fileExtension) {
     switch (intent) {
-      case s3UploadConstants.imageFileType:
+      case s3Constants.imageFileType:
         return util.getImageContentTypeForExtension(fileExtension);
 
-      case s3UploadConstants.videoFileType:
+      case s3Constants.videoFileType:
         return util.getVideoContentTypeForExtension(fileExtension);
-
-      default:
-        throw new Error('Unsupported file type.');
-    }
-  }
-
-  /**
-   * Get s3 url.
-   *
-   * @param {string} intent
-   * @param {string} fileName
-   *
-   * @private
-   */
-  _getS3Url(intent, fileName) {
-    switch (intent) {
-      case s3UploadConstants.imageFileType:
-        return s3UploadConstants.getS3UrlPrefix() + coreConstants.IMAGES_S3_FOLDER + '/' + fileName;
-
-      case s3UploadConstants.videoFileType:
-        return s3UploadConstants.getS3UrlPrefix() + coreConstants.VIDEOS_S3_FOLDER + '/' + fileName;
 
       default:
         throw new Error('Unsupported file type.');

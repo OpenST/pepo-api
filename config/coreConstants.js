@@ -131,13 +131,13 @@ class CoreConstants {
     return oThis.S3_AWS_MASTER_FOLDER + '/' + 'ua';
   }
 
-  get S3_USER_PROFILE_IMAGES() {
+  get S3_USER_IMAGES_FOLDER() {
     const oThis = this;
 
     return oThis.S3_USER_ASSETS_FOLDER + oThis.IMAGES_S3_FOLDER;
   }
 
-  get S3_USER_VIDEOS() {
+  get S3_USER_VIDEOS_FOLDER() {
     const oThis = this;
 
     return oThis.S3_USER_ASSETS_FOLDER + oThis.VIDEOS_S3_FOLDER;
