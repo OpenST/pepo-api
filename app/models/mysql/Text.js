@@ -27,6 +27,7 @@ class Text extends ModelBase {
    * @param {object} dbRow
    * @param {number} dbRow.id
    * @param {string} dbRow.text
+   * @param {string} dbRow.tag_ids
    * @param {string} dbRow.created_at
    * @param {string} dbRow.updated_at
    *
@@ -37,6 +38,7 @@ class Text extends ModelBase {
     return {
       id: dbRow.id,
       text: dbRow.text,
+      tagIds: dbRow.tag_ids,
       createdAt: dbRow.created_at,
       updatedAt: dbRow.updated_at
     };

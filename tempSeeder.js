@@ -26,6 +26,14 @@ const posterImageUrlArray = [
   '{{s3_ui}}/1004-41e5a8bd8ea1f46e9788fd5a7245caee-original.jpg'
 ];
 
+const coverImageUrlArray = [
+  '{{s3_ui}}/1000-7a45b5f19e9010c90bffaffb67f35dcd-original.jpg',
+  '{{s3_ui}}/1001-f1901d35beb6c874814a674553314f53-original.jpg',
+  '{{s3_ui}}/1002-84865392f3a27cd563ec5f8aa6b19052-original.jpg',
+  '{{s3_ui}}/1003-e299db5c248cb9c636e3e58ec72f0634-original.jpg',
+  '{{s3_ui}}/1004-41e5a8bd8ea1f46e9788fd5a72453542-original.jpg'
+];
+
 const videoUrlArray = [
   '{{s3_vi}}/1000-8377bc081a7f55461197359888d256ea-original.mp4',
   '{{s3_vi}}/1001-7a72300b86acd03d6f90e1914ca6cd78-original.mp4',
@@ -89,10 +97,46 @@ class TempSeeder {
               url: posterImageUrlArray[index]
             }
           },
-          kind: imageConst.coverImageKind,
+          kind: imageConst.posterImageKind,
           status: imageConst.notResized
         },
         posterImageResponse = await new ImagesModel().insertImage(posterImageParams);
+
+      const userProfileElementsParamsForPosterImage = {
+          userId: 1000 + index,
+          dataKind: userProfileElementConst.posterImageIdKind,
+          data: posterImageResponse.insertId
+        },
+        insertUserProfileElementsRspForPosterImage = await new UserProfileElementModel().insertElement(
+          userProfileElementsParamsForPosterImage
+        );
+
+      logger.log('====== insertUserProfileElementsRspForPosterImage', insertUserProfileElementsRspForPosterImage);
+
+      const coverImageParams = {
+          resolutions: {
+            original: {
+              width: 100,
+              height: 100,
+              size: 100,
+              url: coverImageUrlArray[index]
+            }
+          },
+          kind: imageConst.coverImageKind,
+          status: imageConst.notResized
+        },
+        coverImageResponse = await new ImagesModel().insertImage(coverImageParams);
+
+      const userProfileElementsParamsForCoverImage = {
+          userId: 1000 + index,
+          dataKind: userProfileElementConst.coverImageIdKind,
+          data: coverImageResponse.insertId
+        },
+        insertUserProfileElementsRspForCoverImage = await new UserProfileElementModel().insertElement(
+          userProfileElementsParamsForCoverImage
+        );
+
+      logger.log('====== insertUserProfileElementsRspForCoverImage', insertUserProfileElementsRspForCoverImage);
 
       const videoParams = {
           resolutions: {

@@ -134,7 +134,7 @@ class Tag extends ModelBase {
     const oThis = this;
     let dbRows = await oThis
       .select('*')
-      .where({ id: ids })
+      .where(['id IN (?)', ids])
       .fire();
 
     let response = {};
