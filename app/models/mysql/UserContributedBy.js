@@ -47,24 +47,29 @@ class UserContributedBy extends ModelBase {
   }
 
   /***
-   * Fetch user contributed by object for user id
+   * Fetch users contributed by object
+   * contributedByUserId paid to user ids
    *
-   * @param userId {String} - user id
+   * @param userIds {Array} - Array of user id
+   * @param contributedByUserId {Integer} - id of user who contributed to userId
    *
    * @return {Object}
    */
-  async fetchByUserId(userId) {
+  async fetchByUserIdsAndcontributedByUserId(userIds, contributedByUserId) {
     const oThis = this;
     let dbRows = await oThis
       .select('*')
-      .where({ user_id: userId })
+      .where({ user_id: userIds, contributedByUserId: contributedByUserId })
       .fire();
 
-    if (dbRows.length === 0) {
-      return {};
+    let response = {};
+
+    for (let index = 0; index < dbRows.length; index++) {
+      let formatDbRow = oThis.formatDbData(dbRows[index]);
+      response[formatDbRow.userId] = formatDbRow;
     }
 
-    return oThis.formatDbData(dbRows[0]);
+    return response;
   }
 
   /***
