@@ -56,7 +56,7 @@ class Tag extends ModelBase {
     const oThis = this;
 
     return oThis
-      .select('name, weight')
+      .select('*')
       .where({ name: names })
       .fire();
   }
@@ -145,6 +145,21 @@ class Tag extends ModelBase {
     }
 
     return response;
+  }
+
+  /**
+   * Update tag weights by 1
+   *
+   * @param tagIds
+   * @returns {Promise<any>}
+   */
+  updateTagWeights(tagIds) {
+    const oThis = this;
+
+    return oThis
+      .update(['weight=weight+1'])
+      .where({ id: tagIds })
+      .fire();
   }
 
   /**
