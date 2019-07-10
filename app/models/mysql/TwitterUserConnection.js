@@ -27,8 +27,8 @@ class TwitterUserConnection extends ModelBase {
   formatDbData(dbRow) {
     return {
       id: dbRow.id,
-      twitterUserId1: dbRow.twitter_user_id1,
-      twitterUserId2: dbRow.twitter_user_id2,
+      twitterUser1Id: dbRow.twitter_user1_id,
+      twitterUser2Id: dbRow.twitter_user2_id,
       properties: dbRow.properties,
       createdAt: dbRow.created_at,
       updatedAt: dbRow.updated_at
@@ -42,7 +42,7 @@ class TwitterUserConnection extends ModelBase {
    * @returns {Array}
    */
   safeFormattedColumnNames() {
-    return ['id', 'twitterUserId1', 'twitterUserId2', 'properties', 'createdAt', 'updatedAt'];
+    return ['id', 'twitterUser1Id', 'twitterUser2Id', 'properties', 'createdAt', 'updatedAt'];
   }
 
   /***
@@ -59,16 +59,16 @@ class TwitterUserConnection extends ModelBase {
   /***
    * Fetch twitter user connection object for twitter user id1 and twitter user id2
    *
-   * @param twitterUserId1 {String} - twitter user id 1
-   * @param twitterUserId2 {String} - twitter user id 2 (followed by twitter user id 1)
+   * @param twitterUser1Id {String} - twitter user id 1
+   * @param twitterUser2Id {String} - twitter user id 2 (followed by twitter user id 1)
    *
    * @return {Object}
    */
-  async fetchByTwitterUserId1AndTwitterUserId2(twitterUserId1, twitterUserId2) {
+  async fetchByTwitterUser1IdAndTwitterUser2Id(twitterUser1Id, twitterUser2Id) {
     const oThis = this;
     let dbRows = await oThis
       .select('*')
-      .where({ twitter_user_id1: twitterUserId1, twitter_user_id2: twitterUserId2 })
+      .where({ twitter_user1_id: twitterUser1Id, twitter_user2_id: twitterUser2Id })
       .fire();
 
     if (dbRows.length === 0) {
