@@ -5,11 +5,27 @@
  */
 
 const rootPrefix = '../..',
+  BgJob = require(rootPrefix + '/lib/BgJob'),
+  bgJobConstants = require(rootPrefix + '/lib/globalConstant/bgJob'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   responseHelper = require(rootPrefix + '/lib/formatter/response');
 
 class AfterSignUpJob {
-  constructor() {}
+  /**
+   * Construtor
+   *
+   * @param {Object} params
+   * @param {String} params.bio
+   * @param {String/Number} params.twitterId
+   * @param {Number} params.userId
+   */
+  constructor(params) {
+    const oThis = this;
+
+    oThis.bio = params.bio;
+    oThis.twitterId = params.twitterId;
+    oThis.userId = params.userId;
+  }
 
   /**
    * Perform
@@ -54,6 +70,12 @@ class AfterSignUpJob {
    */
   async _syncFriendsAndFollowers() {
     const oThis = this;
+
+    let messagePayload = {
+      twitterId: oThis.twitterId
+    };
+
+    await BgJob.enqueue(bgJobConstants.twitterFriendsSyncJobTopic, messagePayload);
   }
 }
 

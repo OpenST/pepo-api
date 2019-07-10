@@ -51,6 +51,10 @@ class BgJobProcessorFactory extends BgJobProcessorBase {
 
     if (messageParams.message.kind === bgJobConstant.exampleKind) {
       return new oThis._exampleProcessor(messageParams).perform();
+    } else if (messageParams.message.kind === bgJobConstant.afterSignUpJobTopic) {
+      return new oThis._afterSignupJobProcessor(messageParams.message.payload).perform();
+    } else if (messageParams.message.kind === bgJobConstant.twitterFriendsSyncJobTopic) {
+      return new oThis._twitterFriendsSyncJobProcessor(messageParams.message.payload).perform();
     } else {
       throw new Error('unrecognized messageParams: ' + JSON.stringify(messageParams));
     }
@@ -58,6 +62,14 @@ class BgJobProcessorFactory extends BgJobProcessorBase {
 
   get _exampleProcessor() {
     return require(rootPrefix + '/executables/bgJobProcessor/Example');
+  }
+
+  get _afterSignupJobProcessor() {
+    return require(rootPrefix + '/executables/bgJobProcessor/AfterSignUpJob');
+  }
+
+  get _twitterFriendsSyncJobProcessor() {
+    return require(rootPrefix + '/lib/twitterFriendSync/Start');
   }
 }
 
