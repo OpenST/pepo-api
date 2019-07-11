@@ -28,9 +28,9 @@ class UserStat extends ModelBase {
     return {
       id: dbRow.id,
       userId: dbRow.user_id,
-      totalContributedTo: dbRow.total_contributed_to,
       totalContributedBy: dbRow.total_contributed_by,
-      totalAmountRaised: dbRow.total_amoun_raised,
+      totalContributedTo: dbRow.total_contributed_to,
+      totalAmountRaised: dbRow.total_amount_raised,
       createdAt: dbRow.created_at,
       updatedAt: dbRow.updated_at
     };

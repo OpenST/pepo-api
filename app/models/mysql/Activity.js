@@ -41,6 +41,26 @@ class ActivityModel extends ModelBase {
   }
 
   /**
+   * List Of Formatted Column names that can be exposed by service
+   *
+   *
+   * @returns {Array}
+   */
+  safeFormattedColumnNames() {
+    return [
+      'id',
+      'entityType',
+      'entityId',
+      'extraData',
+      'status',
+      'publishedTs',
+      'displayTs',
+      'createdAt',
+      'updatedAt'
+    ];
+  }
+
+  /**
    * Fetch Activity by entityType and entityId
    *
    * @param {Integer} entityType

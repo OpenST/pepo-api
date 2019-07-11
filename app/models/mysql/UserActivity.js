@@ -38,6 +38,16 @@ class UserActivityModel extends ModelBase {
   }
 
   /**
+   * List Of Formatted Column names that can be exposed by service
+   *
+   *
+   * @returns {Array}
+   */
+  safeFormattedColumnNames() {
+    return ['id', 'userId', 'activityId', 'publishedTs', 'createdAt', 'updatedAt'];
+  }
+
+  /**
    * Flush cache.
    *
    * @param {object} params
