@@ -1,13 +1,13 @@
 const rootPrefix = '../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
-  videoContributedByConstants = require(rootPrefix + '/lib/globalConstant/videoContributedBy'),
+  userContributorConstants = require(rootPrefix + '/lib/globalConstant/userContributor'),
   coreConstants = require(rootPrefix + '/config/coreConstants');
 
 const dbName = 'pepo_api_' + coreConstants.environment;
 
-class VideoContributedBy extends ModelBase {
+class UserContributor extends ModelBase {
   /**
-   * Video Contributed By model
+   * User Contributor model
    *
    * @constructor
    */
@@ -16,7 +16,7 @@ class VideoContributedBy extends ModelBase {
 
     const oThis = this;
 
-    oThis.tableName = 'video_contributed_by';
+    oThis.tableName = 'user_contributors';
   }
 
   /**
@@ -27,10 +27,10 @@ class VideoContributedBy extends ModelBase {
   formatDbData(dbRow) {
     return {
       id: dbRow.id,
-      videoId: dbRow.video_id,
+      userId: dbRow.user_id,
       contributedByUserId: dbRow.contributed_by_user_id,
-      totalTransactions: dbRow.total_transactions,
       totalAmount: dbRow.total_amount,
+      totalTransactions: dbRow.total_transactions,
       createdAt: dbRow.created_at,
       updatedAt: dbRow.updated_at
     };
@@ -43,29 +43,33 @@ class VideoContributedBy extends ModelBase {
    * @returns {Array}
    */
   safeFormattedColumnNames() {
-    return ['id', 'videoId', 'contributedByUserId', 'totalTransactions', 'totalAmount', 'createdAt', 'updatedAt'];
+    return ['id', 'userId', 'contributedByUserId', 'totalTransactions', 'totalAmount', 'createdAt', 'updatedAt'];
   }
 
   /***
-   * Fetch videoDetail object for video id
+   * Fetch users contributed by object
+   * contributedByUserId paid to user ids
    *
-   * @param videoId {Integer} - video id
-   * @param contributedByUserId {Integer} - User Id who cntributed for the video
+   * @param userIds {Array} - Array of user id
+   * @param contributedByUserId {Integer} - id of user who contributed to userId
    *
    * @return {Object}
    */
-  async fetchByVideoIdAndContributedByUserId(videoId, contributedByUserId) {
+  async fetchByUserIdsAndcontributedByUserId(userIds, contributedByUserId) {
     const oThis = this;
     let dbRows = await oThis
       .select('*')
-      .where({ video_id: videoId, contributed_by_user_id: contributedByUserId })
+      .where({ user_id: userIds, contributedByUserId: contributedByUserId })
       .fire();
 
-    if (dbRows.length === 0) {
-      return {};
+    let response = {};
+
+    for (let index = 0; index < dbRows.length; index++) {
+      let formatDbRow = oThis.formatDbData(dbRows[index]);
+      response[formatDbRow.userId] = formatDbRow;
     }
 
-    return oThis.formatDbData(dbRows[0]);
+    return response;
   }
 
   /***
@@ -78,4 +82,4 @@ class VideoContributedBy extends ModelBase {
   static async flushCache(params) {}
 }
 
-module.exports = VideoContributedBy;
+module.exports = UserContributor;

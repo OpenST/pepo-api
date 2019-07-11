@@ -16,7 +16,7 @@ class VideoDetail extends ModelBase {
 
     const oThis = this;
 
-    oThis.tableName = 'video_detail';
+    oThis.tableName = 'video_details';
   }
 
   /**
@@ -27,10 +27,11 @@ class VideoDetail extends ModelBase {
   formatDbData(dbRow) {
     return {
       id: dbRow.id,
-      userId: dbRow.user_id,
+      creatorUserId: dbRow.creator_user_id,
       videoId: dbRow.video_id,
-      totalTransactions: dbRow.total_transactions,
+      totalContributedBy: dbRow.total_contributed_by,
       totalAmount: dbRow.total_amount,
+      totalTransactions: dbRow.total_transactions,
       createdAt: dbRow.created_at,
       updatedAt: dbRow.updated_at
     };
@@ -43,7 +44,16 @@ class VideoDetail extends ModelBase {
    * @returns {Array}
    */
   safeFormattedColumnNames() {
-    return ['id', 'userId', 'videoId', 'totalTransactions', 'totalAmount', 'createdAt', 'updatedAt'];
+    return [
+      'id',
+      'creatorUserId',
+      'videoId',
+      'totalContributedBy',
+      'totalTransactions',
+      'totalAmount',
+      'createdAt',
+      'updatedAt'
+    ];
   }
 
   /***
