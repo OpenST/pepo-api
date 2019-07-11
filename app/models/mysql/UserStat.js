@@ -93,14 +93,21 @@ class UserStat extends ModelBase {
     return response;
   }
 
-  /***
-   * Flush cache
+  /**
+   * Flush cache.
    *
    * @param {object} params
+   * @param {number} params.userId
    *
    * @returns {Promise<*>}
    */
-  static async flushCache(params) {}
+  static async flushCache(params) {
+    const UserStatByUserIds = require(rootPrefix + '/lib/cacheManagement/multi/UserStatByUserIds');
+
+    await new UserStatByUserIds({
+      userIds: [params.userId]
+    }).clear();
+  }
 }
 
 module.exports = UserStat;

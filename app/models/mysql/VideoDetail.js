@@ -78,13 +78,49 @@ class VideoDetail extends ModelBase {
   }
 
   /***
-   * Flush cache
+   * Fetch users contributed by object
+   * contributedByUserId paid to user ids
+   *
+   * @param videoIds {Array} - Array of video id
+   * @param userId {Integer} - id of user who clicked the video
+   *
+   * @return {Object}
+   */
+  async fetchByVideoIdsAndUserId(videoIds, userId) {
+    const oThis = this;
+    let dbRows = await oThis
+      .select('*')
+      .where({ video_id: videoIds, creator_user_id: userId })
+      .fire();
+
+    let response = {};
+
+    for (let index = 0; index < dbRows.length; index++) {
+      let formatDbRow = oThis.formatDbData(dbRows[index]);
+      response[formatDbRow.videoId] = formatDbRow;
+    }
+
+    return response;
+  }
+
+  /**
+   * Flush cache.
    *
    * @param {object} params
+   * @param {number} params.userId
+   * @param {number} params.videoId
    *
    * @returns {Promise<*>}
    */
-  static async flushCache(params) {}
+  static async flushCache(params) {
+    const VideoDetailsByVideoIdsAndUserId = require(rootPrefix +
+      '/lib/cacheManagement/multi/VideoDetailsByVideoIdsAndUserId');
+
+    await new VideoDetailsByVideoIdsAndUserId({
+      userId: params.userId,
+      videoIds: [params.videoId]
+    }).clear();
+  }
 }
 
 module.exports = VideoDetail;
