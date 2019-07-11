@@ -38,7 +38,13 @@ class GetTags extends ServiceBase {
 
     await oThis._getTags();
 
-    return oThis.finalResponse();
+    const responseMetaData = oThis._finalResponse();
+
+    return responseHelper.successWithData({
+      tagIds: oThis.tagIds,
+      tagsMap: oThis.tags,
+      meta: responseMetaData
+    });
   }
 
   /**
@@ -52,7 +58,7 @@ class GetTags extends ServiceBase {
 
     if (oThis.paginationIdentifier) {
       let parsedPaginationParams = oThis._parsePaginationParams(oThis.paginationIdentifier);
-      oThis.page = parsedPaginationParams.page; //override page
+      oThis.page = parsedPaginationParams.page; // Override page
     } else {
       oThis.page = 1;
     }
@@ -62,6 +68,7 @@ class GetTags extends ServiceBase {
   }
 
   /**
+   * Get tag ids.
    *
    * @returns {Promise<void>}
    * @private
@@ -93,12 +100,12 @@ class GetTags extends ServiceBase {
   }
 
   /**
-   * Service Response
+   * Get meta.
    *
    * @returns {Promise<*>}
    * @private
    */
-  finalResponse() {
+  _finalResponse() {
     const oThis = this;
 
     let nextPagePayloadKey = {},
@@ -110,14 +117,9 @@ class GetTags extends ServiceBase {
       };
     }
 
-    let responseMetaData = {
+    return {
       [pagination.nextPagePayloadKey]: nextPagePayloadKey
     };
-
-    return responseHelper.successWithData({
-      tags: oThis.tags,
-      meta: responseMetaData
-    });
   }
 
   /**

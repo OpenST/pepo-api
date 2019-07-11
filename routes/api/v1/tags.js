@@ -26,7 +26,7 @@ router.get('/', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
     serviceResponse.data = wrapperFormatterRsp.data;
   };
 
-  Promise.resolve(routeHelper.perform(req, res, next, '/tag/Get', 'r_a_v1_t_1', null, dataFormatterFunc));
+  Promise.resolve(routeHelper.perform(req, res, next, '/tags/Get', 'r_a_v1_t_1', null, dataFormatterFunc));
 });
 
 module.exports = router;
