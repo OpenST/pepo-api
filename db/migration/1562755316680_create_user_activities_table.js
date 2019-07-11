@@ -5,7 +5,7 @@ const dbName = 'pepo_api_' + coreConstants.environment;
 const upQuery =
   'CREATE TABLE `user_activities` ( \n\
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT, \n\
-  `user_id` unsigned bigint(20) NOT NULL, \n\
+  `user_id` bigint(20) unsigned NOT NULL, \n\
   `activity_id` bigint(20) unsigned NOT NULL , \n\
   `published_ts` int(11), \n\
   `display_ts` int(11) NOT NULL, \n\
