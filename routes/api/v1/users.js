@@ -124,7 +124,8 @@ router.get('/:user_id/profile', sanitizer.sanitizeDynamicUrlParams, function(req
         [entityType.linksMap]: responseEntityKey.links,
         [entityType.imagesMap]: responseEntityKey.images,
         [entityType.videosMap]: responseEntityKey.videos,
-        [entityType.tagsMap]: responseEntityKey.tags
+        [entityType.tagsMap]: responseEntityKey.tags,
+        [entityType.userProfileAllowedActions]: responseEntityKey.userProfileAllowedActions
         // TODO: @santhosh - Profile allowed actions entity
       },
       serviceData: serviceResponse.data
