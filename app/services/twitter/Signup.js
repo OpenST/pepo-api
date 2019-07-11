@@ -146,7 +146,7 @@ class TwitterSignup extends ServiceBase {
     const oThis = this;
     logger.log('Start::Save Profile Image');
 
-    if (!oThis.userTwitterEntity.nonDefaultprofileImageUrl) {
+    if (!oThis.userTwitterEntity.nonDefaultProfileImageUrl) {
       oThis.profileImageId = null;
       logger.log('End::Save Profile Image. Default twitter profile pic.');
       return;
@@ -159,7 +159,7 @@ class TwitterSignup extends ServiceBase {
           width: 0,
           height: 0,
           size: 0,
-          url: oThis.userTwitterEntity.nonDefaultprofileImageUrl
+          url: oThis.userTwitterEntity.nonDefaultProfileImageUrl
         }
       },
       isExternalUrl: true,
@@ -437,7 +437,7 @@ class TwitterSignup extends ServiceBase {
         user_id: oThis.userId,
         name: oThis.userTwitterEntity.formattedName,
         email: twitterEmail,
-        profile_image_url: oThis.userTwitterEntity.nonDefaultprofileImageUrl
+        profile_image_url: oThis.userTwitterEntity.nonDefaultProfileImageShortUrl
       };
       // Insert user in database.
       const insertResponse = await new TwitterUserModel().insert(insertData).fire();
