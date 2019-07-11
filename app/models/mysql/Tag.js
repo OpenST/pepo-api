@@ -5,11 +5,6 @@ const rootPrefix = '../../..',
 
 const dbName = 'pepo_api_' + coreConstants.environment;
 
-/**
- * Class for tag model.
- *
- * @class
- */
 class Tag extends ModelBase {
   /**
    * @constructor
@@ -79,6 +74,7 @@ class Tag extends ModelBase {
    *
    * @param caseStatement
    * @param tags
+   *
    * @returns {Promise<*>}
    */
   async updateTags(caseStatement, tags) {
@@ -112,7 +108,7 @@ class Tag extends ModelBase {
       .where('name LIKE "' + params.tagPrefix + '%"')
       .limit(limit)
       .offset(offset)
-      .order_by('name ASC')
+      .order_by('weight DESC')
       .fire();
 
     let response = [];
@@ -168,7 +164,15 @@ class Tag extends ModelBase {
    *
    * @returns {Promise<*>}
    */
-  static async flushCache(params) {}
+  static async flushCache(params) {
+    const TagPagination = require(rootPrefix + '/lib/cacheManagement/single/TagPagination');
+    await new TagPagination({
+      tagPrefix: [params.tagPrefix]
+    }).clear();
+
+    const TagByIds = require(rootPrefix + '/lib/cacheManagement/multi/Tag');
+    await new TagByIds({ ids: params.ids }).clear();
+  }
 }
 
 module.exports = Tag;

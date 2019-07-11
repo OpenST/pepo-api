@@ -39,7 +39,7 @@ class Video extends ModelBase {
   _formatDbData(dbRow) {
     return {
       id: dbRow.id,
-      resolutions: dbRow.resolutions,
+      resolutions: JSON.parse(dbRow.resolutions),
       posterImageId: dbRow.poster_image_id,
       status: videoConst.statuses[dbRow.status],
       createdAt: dbRow.created_at,

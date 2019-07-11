@@ -38,7 +38,7 @@ class Image extends ModelBase {
   _formatDbData(dbRow) {
     return {
       id: dbRow.id,
-      resolutions: dbRow.resolutions,
+      resolutions: JSON.parse(dbRow.resolutions),
       status: imageConst.statuses[dbRow.status],
       createdAt: dbRow.created_at,
       updatedAt: dbRow.updated_at
