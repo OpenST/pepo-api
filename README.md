@@ -47,11 +47,6 @@ brew services start rabbitmq
     node db/migrate.js
 ```
 
-* Clear cache.
-```bash
-    node devops/exec/flushMemcache.js
-```
-
 * [Only Development] Create `infra` database and `error_logs` table.
 ```bash
     source set_env_vars.sh
@@ -83,7 +78,7 @@ node devops/exec/flushMemcache.js
 
 * Seed Tokens Table.
 ```bash
-    node executables/oneTimers/seedTokensTable.js --apiKey "__ABCD" --apiSecret "__WXYZ"
+    node executables/oneTimers/seedTokensTable.js --apiKey "803ee2a07554b94d80fb4ba4eb08229c" --apiSecret "66fc5bce904f83a74aba10469505cd5ac51dfc886fc747ecbfba3fea254d3006"
 ```
 
 * [Only Development] Seed the cron processes using this script.
