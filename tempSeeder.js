@@ -79,15 +79,6 @@ class TempSeeder {
 
       logger.log('====== imageResponse', imageResponse);
 
-      const userProfileElementsParams = {
-          userId: 1000 + index,
-          dataKind: userProfileElementConst.profileImageIdKind,
-          data: imageResponse.insertId
-        },
-        insertUserProfileElementsRsp = await new UserProfileElementModel().insertElement(userProfileElementsParams);
-
-      logger.log('====== insertUserProfileElementsRsp', insertUserProfileElementsRsp);
-
       const posterImageParams = {
           resolutions: {
             original: {
@@ -101,17 +92,6 @@ class TempSeeder {
           status: imageConst.notResized
         },
         posterImageResponse = await new ImagesModel().insertImage(posterImageParams);
-
-      const userProfileElementsParamsForPosterImage = {
-          userId: 1000 + index,
-          dataKind: userProfileElementConst.posterImageIdKind,
-          data: posterImageResponse.insertId
-        },
-        insertUserProfileElementsRspForPosterImage = await new UserProfileElementModel().insertElement(
-          userProfileElementsParamsForPosterImage
-        );
-
-      logger.log('====== insertUserProfileElementsRspForPosterImage', insertUserProfileElementsRspForPosterImage);
 
       const coverImageParams = {
           resolutions: {
