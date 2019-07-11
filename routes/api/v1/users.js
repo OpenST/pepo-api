@@ -119,14 +119,13 @@ router.get('/:user_id/profile', sanitizer.sanitizeDynamicUrlParams, function(req
     const wrapperFormatterRsp = await new FormatterComposer({
       resultType: responseEntityKey.userProfile,
       entityKindToResponseKeyMap: {
-        // [entityType.userProfile]: responseEntityKey.userProfile,
+        [entityType.userProfile]: responseEntityKey.userProfile,
         [entityType.usersMap]: responseEntityKey.users,
         [entityType.linksMap]: responseEntityKey.links,
         [entityType.imagesMap]: responseEntityKey.images,
         [entityType.videosMap]: responseEntityKey.videos,
-        [entityType.bio]: responseEntityKey.bio
+        [entityType.tagsMap]: responseEntityKey.tags
         // TODO: @santhosh - Profile allowed actions entity
-        // TODO: @santhosh - tags entity
       },
       serviceData: serviceResponse.data
     }).perform();
