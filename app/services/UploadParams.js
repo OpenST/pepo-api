@@ -75,10 +75,21 @@ class UploadParams extends ServiceBase {
       }
     }
 
-    if (paramErrors.length > 0) {
+    if (oThis.images.length === 0 && oThis.videos.length === 0) {
       return Promise.reject(
         responseHelper.paramValidationError({
           internal_error_identifier: 'a_s_up_1',
+          api_error_identifier: 'invalid_api_params',
+          params_error_identifiers: paramErrors,
+          debug_options: {}
+        })
+      );
+    }
+
+    if (paramErrors.length > 0) {
+      return Promise.reject(
+        responseHelper.paramValidationError({
+          internal_error_identifier: 'a_s_up_2',
           api_error_identifier: 'invalid_api_params',
           params_error_identifiers: paramErrors,
           debug_options: {}
