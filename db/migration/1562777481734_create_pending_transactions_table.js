@@ -15,7 +15,7 @@ const upQuery =
   `updated_at` int(11) NOT NULL, \n\
   PRIMARY KEY (`id`), \n\
   INDEX idx_1 (`from_user_id`, `video_id`), \n\
-  INDEX idx_2 (`from_user_id`, `to_user_id`) \n\
+  INDEX idx_2 (`from_user_id`, `to_user_id`), \n\
   INDEX idx_3 (`ost_tx_id`) \n\
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci';
 
