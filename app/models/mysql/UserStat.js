@@ -55,16 +55,42 @@ class UserStat extends ModelBase {
    */
   async fetchByUserId(userId) {
     const oThis = this;
+
+    let dbRows = await oThis.fetchByUserIds([userId]);
+
+    return dbRows[id] || {};
+  }
+
+  /**
+   * Fetch videos for given ids
+   *
+   * @param ids {array} - image ids
+   *
+   * @return {object}
+   */
+
+  /***
+   * Fetch user stats object for given user_ids
+   *
+   * @param userIds {Array} - user ids
+   *
+   * @return {Object}
+   */
+  async fetchByUserIds(userIds) {
+    const oThis = this;
+    let response = {};
+
     let dbRows = await oThis
       .select('*')
-      .where({ user_id: userId })
+      .where(['user_id IN (?)', userIds])
       .fire();
 
-    if (dbRows.length === 0) {
-      return {};
+    for (let index = 0; index < dbRows.length; index++) {
+      let formatDbRow = oThis.formatDbData(dbRows[index]);
+      response[formatDbRow.userId] = formatDbRow;
     }
 
-    return oThis.formatDbData(dbRows[0]);
+    return response;
   }
 
   /***
