@@ -59,7 +59,7 @@ class UserContributor extends ModelBase {
     const oThis = this;
     let dbRows = await oThis
       .select('*')
-      .where({ user_id: userIds, contributedByUserId: contributedByUserId })
+      .where({ user_id: userIds, contributed_by_user_id: contributedByUserId })
       .fire();
 
     let response = {};
