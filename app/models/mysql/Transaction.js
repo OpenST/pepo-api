@@ -29,7 +29,7 @@ class Transaction extends ModelBase {
   formatDbData(dbRow) {
     return {
       id: dbRow.id,
-      ostTxid: dbRow.ost_tx_id,
+      ostTxId: dbRow.ost_tx_id,
       fromUserId: dbRow.from_user_id,
       videoId: dbRow.video_id,
       extraData: JSON.parse(dbRow.extra_data),
@@ -39,6 +39,29 @@ class Transaction extends ModelBase {
       createdAt: dbRow.created_at,
       updatedAt: dbRow.updated_at
     };
+  }
+
+  /**
+   * Fetch transactions by ost transaction id.
+   *
+   * @param {Array} ostTxIds
+   * @returns {Promise<void>}
+   */
+  async fetchByOstTxId(ostTxIds) {
+    const oThis = this;
+
+    let response = {},
+      dbRows = await oThis
+        .select(['*'])
+        .where(['ost_tx_id IN (?)', ostTxIds])
+        .fire();
+
+    for (let index = 0; index < dbRows.length; index++) {
+      let formatDbRows = oThis.formatDbData(dbRows[index]);
+      response[formatDbRows.ostTxid] = formatDbRows;
+    }
+
+    return response;
   }
 
   /**
@@ -70,10 +93,17 @@ class Transaction extends ModelBase {
    *
    * @param {object} params
    * @param {number} params.id
+   * @param {number} params.ostTxId
    *
    * @returns {Promise<*>}
    */
-  static async flushCache(params) {}
+  static async flushCache(params) {
+    const TransactionByOstTxId = require(rootPrefix + '/lib/cacheManagement/multi/TransactionByOstTxId');
+
+    await new TransactionByOstTxId({
+      ostTxIds: [params.ostTxId]
+    }).clear();
+  }
 }
 
 module.exports = Transaction;

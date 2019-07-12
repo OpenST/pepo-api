@@ -144,16 +144,16 @@ const v1Signature = {
       {
         parameter: 'current_user',
         validatorMethods: ['validateNonEmptyObject']
-      },
-      {
-        parameter: 'privacy_type',
-        validatorMethods: ['validateString', 'validateFeedPrivacyType']
       }
     ],
     optional: [
       {
         parameter: 'meta',
         validatorMethods: ['validateNonEmptyObject', 'validateOstTransactionMeta']
+      },
+      {
+        parameter: 'video_id',
+        validatorMethods: ['validateInteger']
       }
     ]
   },

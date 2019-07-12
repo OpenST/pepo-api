@@ -34,7 +34,7 @@ class Text extends ModelBase {
    * @return {object}
    * @private
    */
-  _formatDbData(dbRow) {
+  formatDbData(dbRow) {
     return {
       id: dbRow.id,
       text: dbRow.text,
@@ -76,7 +76,7 @@ class Text extends ModelBase {
       .fire();
 
     for (let index = 0; index < dbRows.length; index++) {
-      let formatDbRow = oThis._formatDbData(dbRows[index]);
+      let formatDbRow = oThis.formatDbData(dbRows[index]);
       response[formatDbRow.id] = formatDbRow;
     }
 

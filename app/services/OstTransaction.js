@@ -4,20 +4,25 @@
  * Note:-
  */
 
-const rootPrefix = '../../',
+const rootPrefix = '../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
-  commonValidator = require(rootPrefix + '/lib/validators/Common'),
-  TokenUserByUserId = require(rootPrefix + '/lib/cacheManagement/multi/TokenUserByUserIds'),
+  TextModel = require(rootPrefix + '/app/models/mysql/Text'),
+  ActivityModel = require(rootPrefix + '/app/models/mysql/Activity'),
+  TransactionModel = require(rootPrefix + '/app/models/mysql/Transaction'),
+  UserActivityModel = require(rootPrefix + '/app/models/mysql/UserActivity'),
   ExternalEntityModel = require(rootPrefix + '/app/models/mysql/ExternalEntity'),
+  PendingTransactionModel = require(rootPrefix + '/app/models/mysql/PendingTransaction'),
+  TokenUserByUserId = require(rootPrefix + '/lib/cacheManagement/multi/TokenUserByUserIds'),
+  TransactionByOstTxIdCache = require(rootPrefix + '/lib/cacheManagement/multi/TransactionByOstTxId'),
   TokenUserByOstUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TokenUserByOstUserIds'),
-  FeedModel = require(rootPrefix + '/app/models/mysql/Feed'),
-  UserFeedModel = require(rootPrefix + '/app/models/mysql/UserFeed'),
+  VideoDetailsByVideoIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/VideoDetailsByVideoIds'),
   ExternalEntitiesByEntityIdAndEntityKindCache = require(rootPrefix +
     '/lib/cacheManagement/single/ExternalEntitiyByEntityIdAndEntityKind'),
-  externalEntityConstants = require(rootPrefix + '/lib/globalConstant/externalEntity'),
-  feedConstants = require(rootPrefix + '/lib/globalConstant/feed'),
-  userFeedConstants = require(rootPrefix + '/lib/globalConstant/userFeed'),
-  responseHelper = require(rootPrefix + '/lib/formatter/response');
+  commonValidator = require(rootPrefix + '/lib/validators/Common'),
+  responseHelper = require(rootPrefix + '/lib/formatter/response'),
+  activityConstants = require(rootPrefix + '/lib/globalConstant/activity'),
+  transactionConstants = require(rootPrefix + '/lib/globalConstant/transaction'),
+  externalEntityConstants = require(rootPrefix + '/lib/globalConstant/externalEntity');
 
 class OstTransaction extends ServiceBase {
   /**
@@ -31,77 +36,108 @@ class OstTransaction extends ServiceBase {
 
     oThis.transaction = params.ost_transaction;
     oThis.userId = params.current_user.id;
-    oThis.privacyType = params.privacy_type.toUpperCase();
+
     oThis.giphyObject = params.meta.giphy;
     oThis.text = params.meta.text;
+    oThis.videoId = params.video_id;
 
-    // TODO - validate and set later
-    oThis.transactionUuid = oThis.transaction.id;
-    oThis.transactionStatus = oThis.transaction.status.toUpperCase();
+    oThis.ostTxId = oThis.transaction.id;
+    oThis.ostTransactionStatus = oThis.transaction.status.toUpperCase();
     oThis.transfersData = oThis.transaction.transfers;
+    oThis.fromOstUserId = oThis.transfersData[0].from_user_id;
 
+    oThis.textId = null;
+    oThis.transactionId = null;
+    oThis.transactionStatus = null;
+    oThis.giphyExternalEntityId = null;
     oThis.ostTxExternalEntityId = null;
     oThis.transactionExternalEntityId = null;
-    oThis.giphyExternalEntityId = null;
     oThis.toUserIdsArray = [];
     oThis.amountsArray = [];
   }
 
   /**
-   * perform - perform get token details
+   * AsyncPerform
    *
    * @return {Promise<void>}
    */
   async _asyncPerform() {
     const oThis = this;
 
-    //Cache hit at external entities table. Check if the transaction or giphy is already present.
-    let isOstTxPresent = await oThis._checkExternalEntities();
-    if (isOstTxPresent) {
-      //If transaction is already present in external entity id. It is a duplicate
-      return Promise.resolve(responseHelper.successWithData());
+    oThis._setStatuses();
+
+    let promiseArray1 = [];
+    promiseArray1.push(oThis._fetchGiphyExternalEntityId());
+    promiseArray1.push(oThis._fetchTransaction());
+    if (oThis._isTextPresent()) {
+      promiseArray1.push(oThis._insertText());
     }
 
-    await oThis._fetchOstUserId();
+    await Promise.all(promiseArray1);
 
-    //Insert in external entities.
-    await oThis._insertInExternalEntities();
+    console.log('====oThis.transactionId===', oThis.transactionId);
 
-    //Insert in feeds table
-    await oThis._insertInFeedsTable();
+    if (oThis.transactionId) {
+      console.log('=====111111111');
+      //update text id and giphy id if it is present
+      if (oThis._isGiphyPresent() && !oThis.giphyExternalEntityId) {
+        await oThis._insertGiphyInExternalEntities();
+      }
+      if (oThis.giphyExternalEntityId || oThis.textId) {
+        await oThis._updateGiphyAndTextInTransaction();
+      }
+    } else {
+      console.log('=====222222===');
+      let promiseArray2 = [];
+      promiseArray2.push(oThis._fetchOstUserIdAndValidate());
+      promiseArray2.push(oThis._fetchVideoDetailsAndValidate());
 
-    //Insert in user feeds
-    await oThis._insertInUserFeedsTable();
+      await Promise.all(promiseArray2);
 
+      //Insert in external entities, transactions and pending transactions
+      await oThis._insertGiphyAndTransaction();
+
+      //Insert in activity table
+      await oThis._insertInActivityTable();
+
+      //Insert in user activity table
+      await oThis._insertInUserActivityTable();
+    }
     return Promise.resolve(responseHelper.successWithData());
   }
 
   /**
-   * Check if transaction uuid or giphy is already present in external entities table
+   * Set statuses
+   *
+   * @private
+   */
+  _setStatuses() {
+    const oThis = this;
+
+    if (oThis.ostTransactionStatus === transactionConstants.successOstTransactionStatus) {
+      oThis.activityStatus = activityConstants.doneStatus;
+      oThis.transactionStatus = transactionConstants.doneStatus;
+    } else if (oThis.ostTransactionStatus === transactionConstants.failedOstTransactionStatus) {
+      oThis.activityStatus = activityConstants.failedStatus;
+      oThis.transactionStatus = transactionConstants.failedStatus;
+    } else if (transactionConstants.notFinalizedOstTransactionStatuses.indexOf(oThis.ostTransactionStatus) > -1) {
+      oThis.activityStatus = activityConstants.pendingStatus;
+      oThis.transactionStatus = transactionConstants.pendingStatus;
+    } else {
+      throw new Error(`Invalid Ost Transaction Status. ExternalEntityId -${oThis.ostTransactionStatus}`);
+    }
+  }
+
+  /**
+   * Fetch giphy external entity id from db
    *
    * @returns {Boolean}
    * @private
    */
-  async _checkExternalEntities() {
+  async _fetchGiphyExternalEntityId() {
     const oThis = this;
 
-    //Check if transaction uuid is present in external entities table.
-    let params = {
-        entityId: oThis.transactionUuid,
-        entityKind: externalEntityConstants.ostTransactionEntityKind
-      },
-      cacheResponse = await new ExternalEntitiesByEntityIdAndEntityKindCache(params).fetch();
-
-    if (cacheResponse.isFailure()) {
-      return Promise.reject(cacheResponse);
-    }
-
-    if (cacheResponse.data.id) {
-      return true;
-    }
-
     if (oThis._isGiphyPresent()) {
-      //Check if giphy entity is present in external entities table.
       let paramsForGiphy = {
           entityId: oThis.giphyObject.id,
           entityKind: externalEntityConstants.giphyEntityKind
@@ -116,8 +152,59 @@ class OstTransaction extends ServiceBase {
         oThis.giphyExternalEntityId = cacheResponseForGiphy.data.id;
       }
     }
+  }
 
-    return false;
+  /**
+   * Insert text
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _insertText() {
+    const oThis = this;
+
+    let insertData = {
+        text: oThis.text
+      },
+      insertResponse = await new TextModel().insertText(insertData);
+
+    oThis.textId = insertResponse.insertId;
+    insertData.id = insertResponse.insertId;
+
+    let formattedInsertData = new TextModel().formatDbData(insertData);
+    await TextModel.flushCache(formattedInsertData);
+
+    return Promise.resolve();
+  }
+
+  /**
+   * Fetch transaction from db.
+   *
+   * @returns {Promise<never>}
+   * @private
+   */
+  async _fetchTransaction() {
+    const oThis = this;
+
+    let transactionCacheResponse = await new TransactionByOstTxIdCache({ ostTxIds: [oThis.ostTxId] }).fetch();
+
+    if (transactionCacheResponse.isFailure()) {
+      return Promise.reject(
+        responseHelper.error({
+          internal_error_identifier: `a_s_ost_1`,
+          api_error_identifier: 'something_went_wrong',
+          debug_options: {
+            reason: 'Error while fetching data from TransactionByOstTxIdCache',
+            ostTxIds: oThis.ostTxId
+          }
+        })
+      );
+    }
+
+    console.log('==transactionCacheResponse==', transactionCacheResponse);
+
+    oThis.transactionId = transactionCacheResponse.data[oThis.ostTxId].id;
+    oThis.transactionObj = transactionCacheResponse.data[oThis.ostTxId];
   }
 
   /**
@@ -133,7 +220,7 @@ class OstTransaction extends ServiceBase {
   }
 
   /**
-   * This function check if the text is present or not
+   * This function checks if string is non empty
    *
    * @returns {boolean}
    * @private
@@ -141,7 +228,19 @@ class OstTransaction extends ServiceBase {
   _isTextPresent() {
     const oThis = this;
 
-    return !commonValidator.isVarNullOrUndefined(oThis.text) && oThis.text !== '';
+    return commonValidator.validateNonBlankString(oThis.text);
+  }
+
+  /**
+   * This function check if video is present in parameters
+   *
+   * @returns {boolean}
+   * @private
+   */
+  _isVideoIdPresent() {
+    const oThis = this;
+
+    return !commonValidator.isVarNullOrUndefined(oThis.videoId);
   }
 
   /**
@@ -149,7 +248,7 @@ class OstTransaction extends ServiceBase {
    *
    * @private
    */
-  async _fetchOstUserId() {
+  async _fetchOstUserIdAndValidate() {
     const oThis = this;
 
     let userIds = [oThis.userId];
@@ -174,9 +273,71 @@ class OstTransaction extends ServiceBase {
     if (!oThis.ostUserId) {
       return Promise.reject(
         responseHelper.error({
-          internal_error_identifier: `a_s_ot_b_5`,
+          internal_error_identifier: `a_s_ot_5`,
           api_error_identifier: 'something_went_wrong',
           debug_options: { userId: oThis.userId }
+        })
+      );
+    }
+
+    if (oThis.ostUserId !== oThis.fromOstUserId) {
+      return Promise.reject(
+        responseHelper.paramValidationError({
+          internal_error_identifier: 'a_s_ot_6',
+          api_error_identifier: 'invalid_api_params',
+          params_error_identifiers: ['invalid_from_user_id'],
+          debug_options: { transfers: oThis.transfersData }
+        })
+      );
+    }
+  }
+
+  /**
+   * Update giphy and text in transaction table
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _updateGiphyAndTextInTransaction() {
+    const oThis = this;
+
+    let updateData = {
+        text_id: oThis.textId,
+        giphy_id: oThis.giphyExternalEntityId
+      },
+      updateResponse = await new TransactionModel().update(updateData).fire();
+
+    let transactionObj = oThis.transactionObj;
+    transactionObj.textId = oThis.textId;
+    transactionObj.giphyId = oThis.giphyExternalEntityId;
+
+    await TransactionModel.flushCache(transactionObj);
+  }
+
+  /**
+   * Fetch video details and validate
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _fetchVideoDetailsAndValidate() {
+    const oThis = this;
+
+    let videoDetailsCacheResponse = await new VideoDetailsByVideoIdsCache({ videoIds: [oThis.videoId] }).fetch();
+
+    if (videoDetailsCacheResponse.isFailure()) {
+      return Promise.reject(videoDetailsCacheResponse);
+    }
+
+    let videoIdFromCache = videoDetailsCacheResponse.data[oThis.videoId].videoId;
+
+    if (videoIdFromCache != oThis.videoId) {
+      return Promise.reject(
+        responseHelper.paramValidationError({
+          internal_error_identifier: 'a_s_ot_7',
+          api_error_identifier: 'invalid_api_params',
+          params_error_identifiers: ['invalid_video_id'],
+          debug_options: { videoIdFromCache: videoIdFromCache }
         })
       );
     }
@@ -188,7 +349,7 @@ class OstTransaction extends ServiceBase {
    * @returns {Promise<void>}
    * @private
    */
-  async _insertInExternalEntities() {
+  async _insertGiphyAndTransaction() {
     const oThis = this;
 
     let promiseArray = [];
@@ -197,7 +358,11 @@ class OstTransaction extends ServiceBase {
       promiseArray.push(oThis._insertGiphyInExternalEntities());
     }
 
-    promiseArray.push(oThis._insertTransactionInExternalEntities());
+    promiseArray.push(oThis._insertTransaction());
+
+    if (oThis.transactionStatus === transactionConstants.pendingStatus) {
+      promiseArray.push(oThis._insertInPendingTransactions());
+    }
 
     await Promise.all(promiseArray);
   }
@@ -238,7 +403,7 @@ class OstTransaction extends ServiceBase {
    * @returns {Promise<*>}
    * @private
    */
-  async _insertTransactionInExternalEntities() {
+  async _insertTransaction() {
     const oThis = this;
 
     let toOstUserIdsArray = [];
@@ -265,29 +430,27 @@ class OstTransaction extends ServiceBase {
     }
 
     let extraData = {
-        kind: externalEntityConstants.extraData.userTransactionKind,
-        fromUserId: oThis.userId,
-        toUserIds: oThis.toUserIdsArray,
-        amounts: oThis.amountsArray,
-        ostTransactionStatus: oThis.transactionStatus,
-        minedTimestamp: null
-      },
-      entityKindInt = externalEntityConstants.invertedEntityKinds[externalEntityConstants.ostTransactionEntityKind],
-      entityId = oThis.transactionUuid;
-
-    let insertData = {
-      entity_kind: entityKindInt,
-      entity_id: entityId,
-      extra_data: JSON.stringify(extraData)
+      toUserIds: oThis.toUserIdsArray,
+      amounts: oThis.amountsArray
     };
 
-    let insertResponse = await new ExternalEntityModel().insert(insertData).fire();
+    let insertData = {
+      ost_tx_id: oThis.ostTxId,
+      from_user_id: oThis.userId,
+      video_id: oThis.videoId,
+      extra_data: JSON.stringify(extraData),
+      text_id: oThis.textId,
+      giphy_id: oThis.giphyExternalEntityId,
+      status: transactionConstants.invertedStatuses[oThis.transactionStatus]
+    };
 
-    oThis.transactionExternalEntityId = insertResponse.insertId;
+    let insertResponse = await new TransactionModel().insert(insertData).fire(); //Todo: catch to see if we get duplicate exception
+
+    oThis.transactionId = insertResponse.insertId;
     insertData.id = insertResponse.insertId;
 
-    let formattedInsertData = new ExternalEntityModel().formatDbData(insertData);
-    await ExternalEntityModel.flushCache(formattedInsertData);
+    let formattedInsertData = new TransactionModel().formatDbData(insertData);
+    await TransactionModel.flushCache(formattedInsertData);
 
     return Promise.resolve();
   }
@@ -298,50 +461,34 @@ class OstTransaction extends ServiceBase {
    * @returns {Promise<void>}
    * @private
    */
-  async _insertInFeedsTable() {
+  async _insertInActivityTable() {
     const oThis = this;
 
-    let currentTime = Math.floor(Date.now() / 1000),
+    let currentTime = null,
       extraData = {};
 
-    if (oThis.transactionStatus === externalEntityConstants.successOstTransactionStatus) {
-      oThis.feedStatus = feedConstants.publishedStatus;
-      oThis.publishedAtTs = currentTime;
-    } else if (oThis.transactionStatus === externalEntityConstants.failedOstTransactionStatus) {
-      oThis.feedStatus = feedConstants.failedStatus;
-      oThis.publishedAtTs = currentTime;
-    } else if (externalEntityConstants.notFinalizedOstTransactionStatuses.indexOf(oThis.transactionStatus) > -1) {
-      oThis.feedStatus = feedConstants.pendingStatus;
-      oThis.publishedAtTs = null;
-    } else {
-      throw new Error(`Invalid Ost Transaction Status. ExternalEntityId -${oThis.transactionExternalEntityId}`);
+    if (oThis.activityStatus !== activityConstants.pendingStatus) {
+      currentTime = Math.floor(Date.now() / 1000);
     }
 
-    if (oThis._isGiphyPresent()) {
-      extraData['giphyExternalEntityId'] = oThis.giphyExternalEntityId;
-    }
-
-    if (oThis._isTextPresent()) {
-      extraData['text'] = oThis.text;
-    }
+    oThis.publishedAtTs = currentTime;
 
     let insertData = {
-      kind: feedConstants.invertedKinds[feedConstants.transactionKind],
-      primary_external_entity_id: oThis.transactionExternalEntityId,
+      entity_type: activityConstants.transactionEntityType,
+      entity_id: oThis.transactionId,
       extra_data: JSON.stringify(extraData),
-      privacy_type: feedConstants.invertedPrivacyTypes[oThis.privacyType],
-      status: feedConstants.invertedStatuses[oThis.feedStatus],
+      status: activityConstants.invertedStatuses[oThis.activityStatus],
       published_ts: oThis.publishedAtTs,
       display_ts: null
     };
 
-    let insertResponse = await new FeedModel().insert(insertData).fire();
+    let insertResponse = await new ActivityModel().insert(insertData).fire();
 
-    oThis.feedId = insertResponse.insertId;
+    oThis.activityId = insertResponse.insertId;
     insertData.id = insertResponse.insertId;
 
-    let formattedInsertData = new FeedModel().formatDbData(insertData);
-    await FeedModel.flushCache(formattedInsertData);
+    let formattedInsertData = new ActivityModel().formatDbData(insertData);
+    await ActivityModel.flushCache(formattedInsertData);
   }
 
   /**
@@ -350,58 +497,57 @@ class OstTransaction extends ServiceBase {
    * @returns {Promise<void>}
    * @private
    */
-  async _insertInUserFeedsTable() {
+  async _insertInUserActivityTable() {
     const oThis = this;
 
     let insertData = {
       user_id: oThis.userId,
-      feed_id: oThis.feedId,
-      privacy_type: userFeedConstants.invertedPrivacyTypes[oThis.privacyType],
+      activity_id: oThis.activityId,
       published_ts: oThis.publishedAtTs
     };
 
-    await new UserFeedModel().insert(insertData).fire();
+    await new UserActivityModel().insert(insertData).fire();
 
-    if (oThis.feedStatus === feedConstants.publishedStatus) {
+    if (oThis.activityStatus === activityConstants.doneStatus) {
       //Insert entry for to user ids as well.
       for (let i = 0; i < oThis.toUserIdsArray.length; i++) {
-        let insertUserFeedData = {
+        let insertUserActivityData = {
           user_id: oThis.toUserIdsArray[i],
-          feed_id: oThis.feedId,
-          privacy_type: userFeedConstants.invertedPrivacyTypes[oThis.privacyType],
+          activity_id: oThis.activityId,
           published_ts: oThis.publishedAtTs
         };
 
-        await new UserFeedModel().insert(insertUserFeedData).fire();
+        await new UserActivityModel().insert(insertUserActivityData).fire();
       }
     }
   }
 
-  // /**
-  //  * Prepares response entity and returns it.
-  //  *
-  //  * @returns {{transactionUuid: *, fromUserId: (String|*), toUserIds: (Array|*), amounts: (Array|*), status: *}}
-  //  * @private
-  //  */
-  // async _prepareResponseEntities() {
-  //   const oThis = this;
-  //
-  //   let externalEntityByIdsCache = await new ExternalEntityByIds({ ids: [oThis.transactionExternalEntityId] }).fetch();
-  //
-  //   if (externalEntityByIdsCache.isFailure() || !externalEntityByIdsCache.data[oThis.transactionExternalEntityId].id) {
-  //     return Promise.reject(
-  //       responseHelper.error({
-  //         internal_error_identifier: 'a_s_ot_b_7',
-  //         api_error_identifier: 'something_went_wrong',
-  //         debug_options: { ids: [oThis.transactionExternalEntityId], msg: 'Error while fetching external entity' }
-  //       })
-  //     );
-  //   }
-  //
-  //   let response = externalEntityByIdsCache.data[oThis.transactionExternalEntityId];
-  //
-  //   return responseHelper.successWithData({ ostTransaction: response });
-  // }
+  /**
+   * Insert in pending transaction table.
+   *
+   * @returns {Promise<void>}
+   */
+  async _insertInPendingTransactions() {
+    const oThis = this;
+
+    let insertData = {
+      ost_tx_id: oThis.ostTxId,
+      from_user_id: oThis.userId,
+      video_id: oThis.videoId,
+      to_user_id: oThis.toUserIdsArray[0],
+      amount: oThis.amountsArray[0],
+      status: transactionConstants.invertedStatuses[oThis.transactionStatus]
+    };
+
+    let insertResponse = await new PendingTransactionModel().insert(insertData).fire(); //Todo: catch to see if we get duplicate exception
+
+    insertData.id = insertResponse.insertId;
+
+    let formattedInsertData = new PendingTransactionModel().formatDbData(insertData);
+    await PendingTransactionModel.flushCache(formattedInsertData);
+
+    return Promise.resolve();
+  }
 }
 
 module.exports = OstTransaction;

@@ -109,6 +109,16 @@ const v1ErrorConfig = {
     parameter: 'kind',
     code: 'invalid',
     message: 'Invalid kind.'
+  },
+  invalid_video_id: {
+    parameter: 'video_id',
+    code: 'invalid',
+    message: 'Invalid video id.'
+  },
+  invalid_from_user_id: {
+    parameter: 'from_user_id',
+    code: 'invalid',
+    message: 'Invalid from user id in transfers.'
   }
 };
 
