@@ -126,7 +126,8 @@ router.get('/:user_id/profile', sanitizer.sanitizeDynamicUrlParams, function(req
         [entityType.videosMap]: responseEntityKey.videos,
         [entityType.tagsMap]: responseEntityKey.tags,
         [entityType.userProfileAllowedActions]: responseEntityKey.userProfileAllowedActions,
-        [entityType.userStats]: responseEntityKey.userStats
+        [entityType.userStats]: responseEntityKey.userStats,
+        [entityType.videoDetailsMap]: responseEntityKey.videoDetails
       },
       serviceData: serviceResponse.data
     }).perform();
