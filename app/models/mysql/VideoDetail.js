@@ -104,6 +104,29 @@ class VideoDetail extends ModelBase {
   }
 
   /**
+   * Fetch video details by video ids.
+   *
+   * @param {Array} videoIds
+   * @returns {Promise<void>}
+   */
+  async fetchByVideoIds(videoIds) {
+    const oThis = this;
+    let dbRows = await oThis
+      .select('*')
+      .where({ video_id: videoIds })
+      .fire();
+
+    let response = {};
+
+    for (let index = 0; index < dbRows.length; index++) {
+      let formatDbRow = oThis.formatDbData(dbRows[index]);
+      response[formatDbRow.videoId] = formatDbRow;
+    }
+
+    return response;
+  }
+
+  /**
    * Flush cache.
    *
    * @param {object} params
