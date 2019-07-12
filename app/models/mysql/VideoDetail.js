@@ -136,8 +136,7 @@ class VideoDetail extends ModelBase {
    * @returns {Promise<*>}
    */
   static async flushCache(params) {
-    const VideoDetailsByVideoIdsAndUserId = require(rootPrefix +
-      '/lib/cacheManagement/multi/VideoDetailsByVideoIdsAndUserId');
+    const VideoDetailsByVideoIdsAndUserId = require(rootPrefix + '/lib/cacheManagement/multi/VideoDetailsByVideoIds');
 
     await new VideoDetailsByVideoIdsAndUserId({
       userId: params.userId,
