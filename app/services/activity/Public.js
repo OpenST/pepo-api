@@ -2,6 +2,7 @@ const rootPrefix = '../../..',
   ActivityModel = require(rootPrefix + '/app/models/mysql/Activity'),
   ActivityServiceBase = require(rootPrefix + '/app/services/activity/Base'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
+  logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination');
 
 /**
@@ -20,6 +21,7 @@ class PublicActivity extends ActivityServiceBase {
    */
   async _fetchActivityDetails() {
     const oThis = this;
+    logger.log(`start: _fetchActivityDetails`);
 
     const modelResp = await new ActivityModel().fetchPublicPublishedActivityIds({
       paginationTimestamp: oThis.paginationTimestamp,
@@ -30,7 +32,7 @@ class PublicActivity extends ActivityServiceBase {
     oThis.activityMap = modelResp.activityMap;
     oThis.lastActivityId = oThis.activityIds[oThis.activityIds.length - 1];
 
-    return responseHelper.successWithData({});
+    logger.log(`end: _fetchActivityDetails`);
   }
 
   /**
@@ -41,6 +43,7 @@ class PublicActivity extends ActivityServiceBase {
    */
   _finalResponse() {
     const oThis = this;
+    logger.log(`start: _finalResponse`);
 
     const nextPagePayloadKey = {};
 
@@ -55,12 +58,14 @@ class PublicActivity extends ActivityServiceBase {
       [paginationConstants.nextPagePayloadKey]: nextPagePayloadKey
     };
 
+    logger.log(`end: _finalResponse`);
+
     return {
       activityIds: oThis.activityIds,
       activityMap: oThis.activityMap,
       ostTransactionMap: oThis.ostTransactionMap,
       externalEntityGifMap: oThis.externalEntityGifMap,
-      usersMap: oThis.usersMap,
+      usersByIdMap: oThis.usersMap,
       tokenUsersByUserIdMap: oThis.tokenUsersByUserIdMap,
       meta: responseMetaData
     };

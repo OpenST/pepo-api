@@ -4,6 +4,7 @@ const rootPrefix = '../../..',
   UserCache = require(rootPrefix + '/lib/cacheManagement/multi/User'),
   ActivityByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/ActivityByIds'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
+  logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination');
 
 /**
@@ -43,6 +44,7 @@ class UserActivity extends ActivityServiceBase {
    */
   async _validateAndSanitizeParams() {
     const oThis = this;
+    logger.log(`start: _validateAndSanitizeParams`);
 
     if (!oThis.isCurrentUser) {
       const cacheResp = await new UserCache({ ids: [oThis.profileUserId] }).fetch();
@@ -74,6 +76,7 @@ class UserActivity extends ActivityServiceBase {
    */
   async _fetchActivityDetails() {
     const oThis = this;
+    logger.log(`start: _fetchActivityDetails`);
 
     let modelResp = {};
 
@@ -105,7 +108,7 @@ class UserActivity extends ActivityServiceBase {
 
     oThis.activityMap = cacheResp.data;
 
-    return responseHelper.successWithData({});
+    logger.log(`end: _fetchActivityDetails`);
   }
 
   /**
@@ -116,6 +119,7 @@ class UserActivity extends ActivityServiceBase {
    */
   _finalResponse() {
     const oThis = this;
+    logger.log(`start: _finalResponse`);
 
     const nextPagePayloadKey = {};
 
@@ -131,13 +135,15 @@ class UserActivity extends ActivityServiceBase {
       [paginationConstants.nextPagePayloadKey]: nextPagePayloadKey
     };
 
+    logger.log(`end: _finalResponse`);
+
     return {
       activityIds: oThis.activityIds,
       userActivityMap: oThis.userActivityMap,
       activityMap: oThis.activityMap,
       ostTransactionMap: oThis.ostTransactionMap,
       externalEntityGifMap: oThis.externalEntityGifMap,
-      usersMap: oThis.usersMap,
+      usersByIdMap: oThis.usersMap,
       tokenUsersByUserIdMap: oThis.tokenUsersByUserIdMap,
       meta: responseMetaData
     };

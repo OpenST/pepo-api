@@ -7,7 +7,7 @@ const rootPrefix = '../../..',
   TextsByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TextsByIds'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination'),
-  externalEntityConstants = require(rootPrefix + '/lib/globalConstant/externalEntity');
+  logger = require(rootPrefix + '/lib/logger/customConsoleLogger');
 
 /**
  * Base class for activity service.
@@ -58,7 +58,6 @@ class ActivityBase extends ServiceBase {
    */
   async _asyncPerform() {
     const oThis = this;
-
     await oThis._validateAndSanitizeParams();
 
     await oThis._fetchActivityDetails();
@@ -92,6 +91,8 @@ class ActivityBase extends ServiceBase {
   async _validateAndSanitizeParams() {
     const oThis = this;
 
+    logger.log(`start: _validateAndSanitizeParams`);
+
     if (oThis.paginationIdentifier) {
       const parsedPaginationParams = oThis._parsePaginationParams(oThis.paginationIdentifier);
 
@@ -101,7 +102,11 @@ class ActivityBase extends ServiceBase {
     }
 
     // Validate limit.
-    return oThis._validatePageSize();
+    let r = oThis._validatePageSize();
+
+    logger.log(`end: _validateAndSanitizeParams`);
+
+    return r;
   }
 
   /**
@@ -114,6 +119,7 @@ class ActivityBase extends ServiceBase {
    */
   async _fetchTransactions() {
     const oThis = this;
+    logger.log(`start: _fetchTransactions`);
 
     let ostTxIds = [];
 
@@ -150,6 +156,7 @@ class ActivityBase extends ServiceBase {
       oThis.userIds = oThis.userIds.concat(txExtraData.toUserIds);
     }
 
+    logger.log(`end: _fetchTransactions`);
     return responseHelper.successWithData({});
   }
 
@@ -163,6 +170,7 @@ class ActivityBase extends ServiceBase {
    */
   async _fetchTexts() {
     const oThis = this;
+    logger.log(`start: _fetchTexts`);
 
     oThis.textIds = [...new Set(oThis.textIds)]; // Removes duplication.
 
@@ -177,6 +185,7 @@ class ActivityBase extends ServiceBase {
     }
 
     oThis.textMap = cacheResp.data;
+    logger.log(`end: _fetchTexts`);
   }
 
   /**
@@ -189,6 +198,7 @@ class ActivityBase extends ServiceBase {
    */
   async _fetchExternalEntities() {
     const oThis = this;
+    logger.log(`start: _fetchExternalEntities`);
 
     oThis.externalEntityIds = [...new Set(oThis.externalEntityIds)]; // Removes duplication.
 
@@ -205,7 +215,7 @@ class ActivityBase extends ServiceBase {
 
     oThis.externalEntityGifMap = cacheResp.data;
 
-    return;
+    logger.log(`end: _fetchExternalEntities`);
   }
 
   /**
@@ -218,6 +228,7 @@ class ActivityBase extends ServiceBase {
    */
   async _fetchUsers() {
     const oThis = this;
+    logger.log(`start: _fetchUsers`);
 
     oThis.userIds = [...new Set(oThis.userIds)];
 
@@ -232,8 +243,7 @@ class ActivityBase extends ServiceBase {
     }
 
     oThis.usersMap = cacheResp.data;
-
-    return;
+    logger.log(`end: _fetchUsers`);
   }
 
   /**
@@ -246,6 +256,7 @@ class ActivityBase extends ServiceBase {
    */
   async _fetchTokenUser() {
     const oThis = this;
+    logger.log(`start: _fetchTokenUser`);
 
     if (oThis.userIds.length === 0) {
       return responseHelper.successWithData({});
@@ -259,7 +270,7 @@ class ActivityBase extends ServiceBase {
 
     oThis.tokenUsersByUserIdMap = cacheResp.data;
 
-    return Promise.resolve(responseHelper.successWithData({}));
+    logger.log(`end: _fetchTokenUser`);
   }
 
   /**
@@ -272,6 +283,7 @@ class ActivityBase extends ServiceBase {
    */
   _processActivityDetails() {
     const oThis = this;
+    logger.log(`start: _processActivityDetails`);
 
     oThis.paginationTimestamp = oThis.activityMap[oThis.lastActivityId].publishedTs;
 
@@ -300,7 +312,7 @@ class ActivityBase extends ServiceBase {
       };
     }
 
-    return responseHelper.successWithData({});
+    logger.log(`end: _processActivityDetails`);
   }
 
   /**
