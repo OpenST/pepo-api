@@ -1,4 +1,4 @@
-const rootPrefix = '../../..',
+const rootPrefix = '../../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   UserProfileElementsByUserIdCache = require(rootPrefix + '/lib/cacheManagement/multi/UserProfileElementsByUserIds'),
   userProfileElementConst = require(rootPrefix + '/lib/globalConstant/userProfileElement.js'),
@@ -15,7 +15,7 @@ const rootPrefix = '../../..',
  *
  * @class
  */
-class FanVideo extends ServiceBase {
+class AddFanVideo extends ServiceBase {
   /**
    * @constructor
    *
@@ -200,4 +200,4 @@ class FanVideo extends ServiceBase {
   }
 }
 
-module.exports = FanVideo;
+module.exports = AddFanVideo;
