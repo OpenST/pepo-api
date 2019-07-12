@@ -30,6 +30,7 @@ class Token extends ModelBase {
    * @param {string} dbRow.name
    * @param {string} dbRow.symbol
    * @param {number} dbRow.decimal
+   * @param {number} dbRow.aux_chain_id
    * @param {string} dbRow.ost_token_id
    * @param {string} dbRow.conversion_factor
    * @param {string} dbRow.company_token_holder_address
@@ -51,6 +52,7 @@ class Token extends ModelBase {
       symbol: dbRow.symbol,
       ostTokenId: dbRow.ost_token_id,
       decimal: dbRow.decimal,
+      auxChainId: dbRow.aux_chain_id,
       conversionFactor: dbRow.conversion_factor,
       companyTokenHolderAddress: dbRow.company_token_holder_address,
       ruleAddresses: dbRow.rule_addresses,
