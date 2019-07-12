@@ -86,20 +86,20 @@ router.get('/current', sanitizer.sanitizeDynamicUrlParams, function(req, res, ne
   Promise.resolve(routeHelper.perform(req, res, next, '/user/CurrentUser', 'r_a_v1_u_4', null, dataFormatterFunc));
 });
 
-/* User Feeds*/
+/* User Activities*/
 router.get('/:user_id/activities', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
-  req.decodedParams.apiName = apiName.userFeed;
+  req.decodedParams.apiName = apiName.userActivity;
   req.decodedParams.user_id = req.params.user_id;
 
   const dataFormatterFunc = async function(serviceResponse) {
     const wrapperFormatterRsp = await new FormatterComposer({
-      resultType: responseEntityKey.userFeed,
+      resultType: responseEntityKey.userActivity,
       entityKindToResponseKeyMap: {
-        [entityType.userFeedList]: responseEntityKey.userFeed,
+        [entityType.userActivityList]: responseEntityKey.userActivity,
         [entityType.ostTransactionMap]: responseEntityKey.ostTransaction,
         [entityType.externalEntityGifMap]: responseEntityKey.gifs,
         [entityType.usersMap]: responseEntityKey.users,
-        [entityType.feedListMeta]: responseEntityKey.meta
+        [entityType.activityListMeta]: responseEntityKey.meta
       },
       serviceData: serviceResponse.data
     }).perform();
