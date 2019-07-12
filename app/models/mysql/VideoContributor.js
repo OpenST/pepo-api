@@ -49,23 +49,31 @@ class VideoContributor extends ModelBase {
   /***
    * Fetch videoDetail object for video id
    *
-   * @param videoId {Integer} - video id
+   * @param {array} videoIds  - video id
    * @param contributedByUserId {Integer} - User Id who cntributed for the video
    *
    * @return {Object}
    */
-  async fetchByVideoIdAndContributedByUserId(videoId, contributedByUserId) {
+  async fetchByVideoIdAndContributedByUserId(videoIds, contributedByUserId) {
     const oThis = this;
+
     let dbRows = await oThis
       .select('*')
-      .where({ video_id: videoId, contributed_by_user_id: contributedByUserId })
+      .where({ video_id: videoIds, contributed_by_user_id: contributedByUserId })
       .fire();
 
     if (dbRows.length === 0) {
       return {};
     }
 
-    return oThis.formatDbData(dbRows[0]);
+    let response = {};
+
+    for (let index = 0; index < dbRows.length; index++) {
+      let formatDbRow = oThis.formatDbData(dbRows[index]);
+      response[formatDbRow.videoId] = formatDbRow;
+    }
+
+    return response;
   }
 
   /***
