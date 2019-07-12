@@ -87,7 +87,7 @@ router.get('/current', sanitizer.sanitizeDynamicUrlParams, function(req, res, ne
 });
 
 /* User Feeds*/
-router.get('/:user_id/feeds', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+router.get('/:user_id/activities', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.userFeed;
   req.decodedParams.user_id = req.params.user_id;
 
@@ -107,7 +107,7 @@ router.get('/:user_id/feeds', sanitizer.sanitizeDynamicUrlParams, function(req, 
     serviceResponse.data = wrapperFormatterRsp.data;
   };
 
-  Promise.resolve(routeHelper.perform(req, res, next, '/feed/User', 'r_a_v1_u_5', null, dataFormatterFunc));
+  Promise.resolve(routeHelper.perform(req, res, next, '/activity/User', 'r_a_v1_u_5', null, dataFormatterFunc));
 });
 
 /* User profile */

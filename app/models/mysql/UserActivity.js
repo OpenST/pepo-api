@@ -48,6 +48,98 @@ class UserActivityModel extends ModelBase {
   }
 
   /**
+   * Fetch activity ids for current user.
+   *
+   * @param {object} params
+   * @param {array} params.userId
+   * @param {number} params.limit
+   * @param {number} [params.paginationTimestamp]
+   *
+   * @returns Promise<object>
+   */
+  async _currentUserActivityIds(params) {
+    const oThis = this;
+
+    const activityIds = [];
+    const userActivityMap = {};
+
+    const paginationTimestamp = params.paginationTimestamp,
+      limit = params.limit;
+
+    const queryObject = oThis
+      .select('*')
+      .where({ user_id: params.userId })
+      .limit(limit)
+      .order_by(
+        'case when published_ts IS NULL then CURRENT_TIMESTAMP()\n' +
+          '              else published_ts\n' +
+          '         end desc'
+      );
+
+    if (paginationTimestamp) {
+      queryObject.where(['published_ts < ?', paginationTimestamp]);
+    }
+
+    const dbRows = await queryObject.fire();
+
+    if (dbRows.length === 0) {
+      return { activityIds: activityIds, userActivityMap: userActivityMap };
+    }
+
+    for (let index = 0; index < dbRows.length; index++) {
+      let formattedObj = oThis.formatDbData(dbRows[index]);
+      activityIds.push(formattedObj.activityId);
+      userActivityMap[formattedObj.activityId] = formattedObj;
+    }
+
+    return { activityIds: activityIds, userActivityMap: userActivityMap };
+  }
+
+  /**
+   * Fetch activity ids for other user.
+   *
+   * @param {object} params
+   * @param {array} params.userId
+   * @param {number} params.limit
+   * @param {number} [params.paginationTimestamp]
+   *
+   * @returns Promise<object>
+   */
+  async _otherUserActivityIds(params) {
+    const oThis = this;
+
+    const activityIds = [];
+    const userActivityMap = {};
+
+    const paginationTimestamp = params.paginationTimestamp,
+      limit = params.limit;
+
+    const queryObject = oThis
+      .select('*')
+      .where(['user_id = ? AND published_ts > 0', params.userId])
+      .limit(limit)
+      .order_by('published_ts desc');
+
+    if (paginationTimestamp) {
+      queryObject.where(['published_ts < ?', paginationTimestamp]);
+    }
+
+    const dbRows = await queryObject.fire();
+
+    if (dbRows.length === 0) {
+      return { activityIds: activityIds, userActivityMap: userActivityMap };
+    }
+
+    for (let index = 0; index < dbRows.length; index++) {
+      let formattedObj = oThis.formatDbData(dbRows[index]);
+      activityIds.push(formattedObj.activityId);
+      userActivityMap[formattedObj.activityId] = formattedObj;
+    }
+
+    return { activityIds: activityIds, userActivityMap: userActivityMap };
+  }
+
+  /**
    * Flush cache.
    *
    * @param {object} params

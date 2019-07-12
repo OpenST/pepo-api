@@ -113,7 +113,7 @@ const v1Signature = {
       }
     ]
   },
-  [apiName.userFeed]: {
+  [apiName.userActivity]: {
     mandatory: [
       {
         parameter: 'current_user',
@@ -157,7 +157,7 @@ const v1Signature = {
       }
     ]
   },
-  [apiName.publicFeed]: {
+  [apiName.publicActivity]: {
     mandatory: [
       {
         parameter: 'current_user',

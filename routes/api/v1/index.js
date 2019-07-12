@@ -14,6 +14,7 @@ const rootPrefix = '../../..',
   gifsRoutes = require(rootPrefix + '/routes/api/v1/gifs'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   feedsRoutes = require(rootPrefix + '/routes/api/v1/feeds'),
+  activitiesRoutes = require(rootPrefix + '/routes/api/v1/activities'),
   cookieHelper = require(rootPrefix + '/lib/cookieHelper'),
   tagRoutes = require(rootPrefix + '/routes/api/v1/tags'),
   uploadParamsRoutes = require(rootPrefix + '/routes/api/v1/uploadParams'),
@@ -48,6 +49,7 @@ router.use('/tokens', validateCookie, tokensRoutes);
 router.use('/ost-transactions', validateCookie, ostTransactionRoutes);
 router.use('/gifs', validateCookie, gifsRoutes);
 router.use('/feeds', feedsRoutes); // TODO - temp commit - removed validateCookie for feeds. Please revert.
+router.use('/activities', validateCookie, activitiesRoutes);
 router.use('/upload-params', uploadParamsRoutes);
 router.use('/tags', tagRoutes);
 

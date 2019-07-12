@@ -85,11 +85,6 @@ const v1ErrorConfig = {
     code: 'invalid',
     message: 'Invalid Ost Transaction'
   },
-  invalid_privacy_type: {
-    parameter: 'privacy_type',
-    code: 'invalid',
-    message: 'Invalid Privacy Type'
-  },
   invalid_user_id: {
     parameter: 'user_id',
     code: 'invalid',

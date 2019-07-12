@@ -61,6 +61,50 @@ class ActivityModel extends ModelBase {
   }
 
   /**
+   * Fetch public and published activity ids.
+   *
+   * @param {object} params
+   * @param {number/string} params.limit
+   * @param {number/string} [params.paginationTimestamp]
+   *
+   *  @returns {Promise<object>}
+   */
+  async fetchPublicPublishedActivityIds(params) {
+    const oThis = this;
+
+    const activityIds = [];
+    const activityMap = {};
+
+    const paginationTimestamp = params.paginationTimestamp,
+      limit = params.limit;
+
+    const queryObject = oThis
+      .select('*')
+      .where(['status = ?', activityConstants.invertedStatuses[activityConstants.doneStatus]])
+      .limit(limit)
+      .order_by('published_ts desc');
+
+    if (paginationTimestamp) {
+      queryObject.where(['published_ts < ?', paginationTimestamp]);
+    }
+
+    const dbRows = await queryObject.fire();
+
+    if (dbRows.length === 0) {
+      return { activityIds: activityIds, activityMap: activityMap };
+    }
+
+    for (let index = 0; index < dbRows.length; index++) {
+      const formatDbRow = oThis.formatDbData(dbRows[index]);
+
+      activityIds.push(formatDbRow.id);
+      activityMap[formatDbRow.id] = formatDbRow;
+    }
+
+    return { activityIds: activityIds, activityMap: activityMap };
+  }
+
+  /**
    * Fetch Activity by entityType and entityId
    *
    * @param {Integer} entityType

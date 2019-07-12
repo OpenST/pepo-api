@@ -42,6 +42,30 @@ class Transaction extends ModelBase {
   }
 
   /**
+   * Fetch transaction for given ids
+   *
+   * @param ids {array} - tx ids
+   *
+   * @return {object}
+   */
+  async fetchByIds(ids) {
+    const oThis = this;
+    let response = {};
+
+    let dbRows = await oThis
+      .select('*')
+      .where({ id: ids })
+      .fire();
+
+    for (let index = 0; index < dbRows.length; index++) {
+      let formatDbRow = oThis._formatDbData(dbRows[index]);
+      response[formatDbRow.id] = formatDbRow;
+    }
+
+    return response;
+  }
+
+  /**
    * Flush cache.
    *
    * @param {object} params
