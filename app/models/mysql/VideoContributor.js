@@ -62,10 +62,6 @@ class VideoContributor extends ModelBase {
       .where({ video_id: videoIds, contributed_by_user_id: contributedByUserId })
       .fire();
 
-    if (dbRows.length === 0) {
-      return {};
-    }
-
     let response = {};
 
     for (let index = 0; index < dbRows.length; index++) {
