@@ -46,6 +46,74 @@ class UserContributor extends ModelBase {
     return ['id', 'userId', 'contributedByUserId', 'totalTransactions', 'totalAmount', 'createdAt', 'updatedAt'];
   }
 
+  /**
+   * Fetch user ids
+   *
+   * @param {object} params
+   * @param {Array} params.contributedByUserId
+   * @param {number} [params.page]
+   * @param {number} [params.limit]
+   *
+   * @returns {Promise<*>}
+   */
+  async fetchPaginatedUserIdsForContributedByUserId(params) {
+    const oThis = this;
+
+    const page = params.page,
+      limit = params.limit,
+      offset = (page - 1) * limit;
+
+    let dbRows = await oThis
+      .select(['user_id'])
+      .where({ contributed_by_user_id: params.contributedByUserId })
+      .limit(limit)
+      .offset(offset)
+      .order_by('id DESC')
+      .fire();
+
+    let response = [];
+
+    for (let index = 0; index < dbRows.length; index++) {
+      response.push(dbRows[index].user_id);
+    }
+
+    return response;
+  }
+
+  /**
+   * Fetch contributed by user ids
+   *
+   * @param {object} params
+   * @param {Array} params.userId
+   * @param {number} [params.page]
+   * @param {number} [params.limit]
+   *
+   * @returns {Promise<*>}
+   */
+  async fetchPaginatedUserIdsForUserId(params) {
+    const oThis = this;
+
+    const page = params.page,
+      limit = params.limit,
+      offset = (page - 1) * limit;
+
+    let dbRows = await oThis
+      .select(['contributed_by_user_id'])
+      .where({ user_id: params.userId })
+      .limit(limit)
+      .offset(offset)
+      .order_by('id DESC')
+      .fire();
+
+    let response = [];
+
+    for (let index = 0; index < dbRows.length; index++) {
+      response.push(dbRows[index].contributed_by_user_id);
+    }
+
+    return response;
+  }
+
   /***
    * Fetch users contributed by object
    * contributedByUserId paid to user ids

@@ -55,8 +55,8 @@ class CurrentUser extends ServiceBase {
       return Promise.reject(usersByIdHashRes);
     }
 
-    let usersByIdHash = usersByIdHashRes.data;
-    oThis.user = usersByIdHash[oThis.userId];
+    let usersByIdMap = usersByIdHashRes.data;
+    oThis.user = usersByIdMap[oThis.userId];
 
     return Promise.resolve(responseHelper.successWithData({}));
   }

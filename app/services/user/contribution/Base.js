@@ -1,6 +1,5 @@
-const rootPrefix = '../../..',
+const rootPrefix = '../../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
-  UserPaginationCache = require(rootPrefix + '/lib/cacheManagement/single/UserPagination'),
   UserMultiCache = require(rootPrefix + '/lib/cacheManagement/multi/User'),
   TokenUserByUserIdsMultiCache = require(rootPrefix + '/lib/cacheManagement/multi/TokenUserByUserIds'),
   UserModel = require(rootPrefix + '/app/models/mysql/User'),
@@ -9,13 +8,13 @@ const rootPrefix = '../../..',
   responseHelper = require(rootPrefix + '/lib/formatter/response');
 
 /**
- * Class for User List
+ * Class for User Contribution Base
  *
  * @class
  */
-class UserList extends ServiceBase {
+class UserContributionBase extends ServiceBase {
   /**
-   * Constructor for user list
+   * Constructor for user contribution base
    *
    * @param params
    *
@@ -30,10 +29,10 @@ class UserList extends ServiceBase {
 
     oThis.limit = null;
     oThis.page = null;
-    oThis.userIds = [];
-    oThis.usersByIdHash = {};
-    oThis.tokenUsersByUserIdHash = {};
-    oThis.currentUserRemoved = false;
+
+    oThis.contributionUserIds = [];
+    oThis.usersByIdMap = {};
+    oThis.tokenUsersByUserIdMap = {};
   }
 
   /**
@@ -48,12 +47,6 @@ class UserList extends ServiceBase {
     await oThis._validateAndSanitizeParams();
 
     await oThis._fetchPaginatedUserIdsFromCache();
-
-    oThis._removeCurrentUserFromResponse();
-
-    if (oThis.userIds.length === 0) {
-      return responseHelper.successWithData(oThis.finalResponse());
-    }
 
     await oThis._fetchUsers();
 
@@ -77,50 +70,9 @@ class UserList extends ServiceBase {
     } else {
       oThis.page = 1;
     }
-    oThis.limit = pagination.defaultUserListPageSize;
+    oThis.limit = pagination.defaultUserContributionPageSize;
 
     return await oThis._validatePageSize();
-  }
-
-  /**
-   * Fetch token user details from cache
-   *
-   * @returns {Promise<void>}
-   * @private
-   */
-  async _fetchPaginatedUserIdsFromCache() {
-    const oThis = this;
-
-    const UserPaginationCacheObj = new UserPaginationCache({
-        limit: oThis.limit,
-        page: oThis.page
-      }),
-      userPaginationCacheRes = await UserPaginationCacheObj.fetch();
-
-    if (userPaginationCacheRes.isFailure()) {
-      return Promise.reject(userPaginationCacheRes);
-    }
-
-    oThis.userIds = userPaginationCacheRes.data;
-
-    return Promise.resolve(responseHelper.successWithData({}));
-  }
-
-  /**
-   * remove current user from final response
-   *
-   * @private
-   */
-  _removeCurrentUserFromResponse() {
-    const oThis = this;
-
-    const index = oThis.userIds.indexOf(oThis.currentUserId);
-
-    if (index > -1) {
-      oThis.userIds.splice(index, 1);
-      oThis.currentUserRemoved = true;
-    }
-    return Promise.resolve(responseHelper.successWithData({}));
   }
 
   /**
@@ -132,13 +84,19 @@ class UserList extends ServiceBase {
   async _fetchUsers() {
     const oThis = this;
 
-    let usersByIdHashRes = await new UserMultiCache({ ids: oThis.userIds }).fetch();
+    if (oThis.contributionUserIds.length < 1) {
+      return;
+    }
+
+    let usersByIdHashRes = await new UserMultiCache({ ids: oThis.contributionUserIds }).fetch();
 
     if (usersByIdHashRes.isFailure()) {
       return Promise.reject(usersByIdHashRes);
     }
 
-    oThis.usersByIdHash = usersByIdHashRes.data;
+    oThis.usersByIdMap = usersByIdHashRes.data;
+
+    console.log('HERE+++++++====', usersByIdHashRes);
 
     return Promise.resolve(responseHelper.successWithData({}));
   }
@@ -152,13 +110,17 @@ class UserList extends ServiceBase {
   async _fetchTokenUsers() {
     const oThis = this;
 
-    let tokenUsersByIdHashRes = await new TokenUserByUserIdsMultiCache({ userIds: oThis.userIds }).fetch();
+    if (oThis.contributionUserIds.length < 1) {
+      return;
+    }
+
+    let tokenUsersByIdHashRes = await new TokenUserByUserIdsMultiCache({ userIds: oThis.contributionUserIds }).fetch();
 
     if (tokenUsersByIdHashRes.isFailure()) {
       return Promise.reject(tokenUsersByIdHashRes);
     }
 
-    oThis.tokenUsersByUserIdHash = tokenUsersByIdHashRes.data;
+    oThis.tokenUsersByUserIdMap = tokenUsersByIdHashRes.data;
 
     return Promise.resolve(responseHelper.successWithData({}));
   }
@@ -172,14 +134,9 @@ class UserList extends ServiceBase {
   finalResponse() {
     const oThis = this;
 
-    let nextPagePayloadKey = {},
-      limit = oThis.limit;
+    let nextPagePayloadKey = {};
 
-    if (oThis.currentUserRemoved) {
-      limit = limit - 1;
-    }
-
-    if (oThis.userIds.length == limit) {
+    if (oThis.contributionUserIds.length == oThis.limit) {
       nextPagePayloadKey[pagination.paginationIdentifierKey] = {
         page: oThis.page + 1
       };
@@ -192,18 +149,18 @@ class UserList extends ServiceBase {
     let userHash = {},
       tokenUserHash = {};
 
-    for (let i = 0; i < oThis.userIds.length; i++) {
-      const userId = oThis.userIds[i],
-        user = oThis.usersByIdHash[userId],
-        tokenUser = oThis.tokenUsersByUserIdHash[userId];
+    for (let i = 0; i < oThis.contributionUserIds.length; i++) {
+      const userId = oThis.contributionUserIds[i],
+        user = oThis.usersByIdMap[userId],
+        tokenUser = oThis.tokenUsersByUserIdMap[userId];
       userHash[userId] = new UserModel().safeFormattedData(user);
       tokenUserHash[userId] = new TokenUserModel().safeFormattedData(tokenUser);
     }
 
     let finalResponse = {
-      usersByIdHash: userHash,
-      tokenUsersByUserIdHash: tokenUserHash,
-      userIds: oThis.userIds,
+      usersByIdMap: userHash,
+      tokenUsersByUserIdMap: tokenUserHash,
+      userIds: oThis.contributionUserIds,
       meta: responseMetaData
     };
 
@@ -216,7 +173,7 @@ class UserList extends ServiceBase {
    * @private
    */
   _defaultPageLimit() {
-    return pagination.defaultUserListPageSize;
+    return pagination.defaultUserContributionPageSize;
   }
 
   /**
@@ -225,7 +182,7 @@ class UserList extends ServiceBase {
    * @private
    */
   _minPageLimit() {
-    return pagination.minUserListPageSize;
+    return pagination.minUserContributionPageSize;
   }
 
   /**
@@ -234,7 +191,7 @@ class UserList extends ServiceBase {
    * @private
    */
   _maxPageLimit() {
-    return pagination.maxUserListPageSize;
+    return pagination.maxUserContributionPageSize;
   }
 
   /**
@@ -247,6 +204,16 @@ class UserList extends ServiceBase {
 
     return oThis.limit;
   }
+
+  /**
+   * Fetch user ids from cache
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _fetchPaginatedUserIdsFromCache() {
+    throw new Error('Sub-class to implement.');
+  }
 }
 
-module.exports = UserList;
+module.exports = UserContributionBase;
