@@ -6,7 +6,7 @@
       "kind": "FAN_UPDATE",
       "payload": {
         "video_id": "123",
-        "user_id": "1000"
+        "user_id": "3"
       }
     },
     {
@@ -27,8 +27,8 @@
     }
   ],
   "users": {
-    "1000": {
-      "id": "1000",
+    "3": {
+      "id": "3",
       "name": "Tejas Sangani",
       "ost_user_id": "fd37b3c0-d97e-423c-88e8-927814120fbb",
       "ost_token_holder_address": "0xea674fdde714fd979de3edf0f56aa9716b898ec8",
@@ -37,7 +37,7 @@
       "status": "ACTIVE",
       "username": "tejas",
       "uts": 1562672642,
-      "user_profile_id": "1000"
+      "user_profile_id": "3"
     },
     "1001": {
       "id": "1001",
@@ -97,9 +97,9 @@
     }
   },
   "user_profiles": {
-    "1000": {
-      "id": "1000",
-      "user_id": "1000",
+    "3": {
+      "id": "3",
+      "user_id": "3",
       "bio": {
         "text": "Hello, this is a #demo bio with tag.",
         "includes": {
@@ -164,8 +164,8 @@
     }
   },
   "user_stats": {
-    "1000": {
-      "id": "1000",
+    "3": {
+      "id": "3",
       "total_contributed_by": 11,
       "total_contributed_to": 2,
       "total_amount_raised_in_wei": "712000000000000000000",
@@ -357,7 +357,7 @@
     }
   },
   "current_user_user_contributions": {
-    "1000": "18000000000000000000"
+    "3": "18000000000000000000"
   },
   "current_user_video_contributions": {
     "123": "7000000000000000000"
