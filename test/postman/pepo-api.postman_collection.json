@@ -414,7 +414,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{api_server}}/api/v1/users/1000/feeds",
+							"raw": "{{api_server}}/api/v1/users/1000/profile",
 							"host": [
 								"{{api_server}}"
 							],
