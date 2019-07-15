@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "2916db1e-cb70-46bc-bc28-da3d9942b850",
+		"_postman_id": "4212db32-a4b8-4436-9bfe-7d52e6faa7d6",
 		"name": "pepo-api",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -307,19 +307,40 @@
 					"response": []
 				},
 				{
-					"name": "user-list",
+					"name": "user-contributed-to",
 					"request": {
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{api_server}}/api/v1/users",
+							"raw": "{{api_server}}/api/v1/users/contributed-to",
 							"host": [
 								"{{api_server}}"
 							],
 							"path": [
 								"api",
 								"v1",
-								"users"
+								"users",
+								"contributed-to"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "user-contributed-by",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{api_server}}/api/v1/users/contributed-by",
+							"host": [
+								"{{api_server}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"users",
+								"contributed-by"
 							]
 						}
 					},
@@ -671,7 +692,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{api_server}}/api/v1/users/1001/activities",
+							"raw": "{{api_server}}/api/v1/users/31/activities",
 							"host": [
 								"{{api_server}}"
 							],
@@ -679,7 +700,7 @@
 								"api",
 								"v1",
 								"users",
-								"1001",
+								"31",
 								"activities"
 							]
 						}
