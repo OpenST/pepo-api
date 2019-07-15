@@ -147,7 +147,36 @@ class UserContributor extends ModelBase {
    *
    * @returns {Promise<*>}
    */
-  static async flushCache(params) {}
+  static async flushCache(params, options) {
+    options = options || {};
+
+    if (options.isInsert) {
+      if (params.contributedByUserId) {
+        const UserContributorCache = require(rootPrefix +
+          '/lib/cacheManagement/single/UserContributorContributedByPagination');
+        await new UserContributorCache({
+          contributedByUserId: params.contributedByUserId
+        }).clear();
+      }
+
+      if (params.userId) {
+        const UserContributorByUserIdCache = require(rootPrefix +
+          '/lib/cacheManagement/single/UserContributorByUserIdPagination');
+        await new UserContributorByUserIdCache({
+          userId: params.userId
+        }).clear();
+      }
+    }
+
+    if (params.userId && params.contributedByUserId) {
+      const UserContributorMultiCache = require(rootPrefix +
+        '/lib/cacheManagement/multi/UserContributorByUserIdsAndContributedByUserId');
+      await new UserContributorByUserIdCache({
+        contributedByUserId: params.contributedByUserId,
+        userIds: [params.userId]
+      }).clear();
+    }
+  }
 }
 
 module.exports = UserContributor;
