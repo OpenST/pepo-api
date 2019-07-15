@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "d284afd9-bbeb-4eac-8eaf-da6d9535cf04",
+		"_postman_id": "96e76d2c-a71c-4370-9476-019da4e4d037",
 		"name": "pepo-api",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -386,6 +386,69 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "personal-user-feed",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{api_server}}/api/v1/users/1000/feeds",
+							"host": [
+								"{{api_server}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"users",
+								"1000",
+								"feeds"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "user-profile",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{api_server}}/api/v1/users/1000/feeds",
+							"host": [
+								"{{api_server}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"users",
+								"1000",
+								"feeds"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "other-user-feed",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{api_server}}/api/v1/users/1001/feeds",
+							"host": [
+								"{{api_server}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"users",
+								"1001",
+								"feeds"
+							]
+						}
+					},
+					"response": []
 				}
 			]
 		},
@@ -576,121 +639,22 @@
 			]
 		},
 		{
-			"name": "activity",
+			"name": "feeds",
 			"item": [
 				{
-					"name": "other-user-activities",
+					"name": "public-feed",
 					"request": {
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{api_server}}/api/v1/users/1001/activities",
+							"raw": "{{api_server}}/api/v1/feeds",
 							"host": [
 								"{{api_server}}"
 							],
 							"path": [
 								"api",
 								"v1",
-								"users",
-								"1001",
-								"activities"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "personal-user-activities",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{api_server}}/api/v1/users/32/activities",
-							"host": [
-								"{{api_server}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"users",
-								"32",
-								"activities"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "public",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{api_server}}/api/v1/activities",
-							"host": [
-								"{{api_server}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"activities"
-							]
-						}
-					},
-					"response": []
-				}
-			],
-			"event": [
-				{
-					"listen": "prerequest",
-					"script": {
-						"id": "b2cb1f83-5d4b-403b-8850-c4d91c4a009f",
-						"type": "text/javascript",
-						"exec": [
-							""
-						]
-					}
-				},
-				{
-					"listen": "test",
-					"script": {
-						"id": "640a9952-5ecb-45d1-81f9-184bc97531b0",
-						"type": "text/javascript",
-						"exec": [
-							""
-						]
-					}
-				}
-			]
-		},
-		{
-			"name": "tags",
-			"item": [
-				{
-					"name": "list",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{api_server}}/api/v1/tags?tag=w",
-							"host": [
-								"{{api_server}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"tags"
-							],
-							"query": [
-								{
-									"key": "tag",
-									"value": "w"
-								},
-								{
-									"key": "pagination_identifier",
-									"value": "eyJwYWdlIjoyfQ",
-									"disabled": true
-								}
+								"feeds"
 							]
 						}
 					},
