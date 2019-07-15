@@ -663,6 +663,94 @@
 			]
 		},
 		{
+			"name": "activity",
+			"item": [
+				{
+					"name": "other-user-activities",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{api_server}}/api/v1/users/1001/activities",
+							"host": [
+								"{{api_server}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"users",
+								"1001",
+								"activities"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "personal-user-activities",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{api_server}}/api/v1/users/32/activities",
+							"host": [
+								"{{api_server}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"users",
+								"32",
+								"activities"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "public",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{api_server}}/api/v1/activities",
+							"host": [
+								"{{api_server}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"activities"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "b2cb1f83-5d4b-403b-8850-c4d91c4a009f",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "640a9952-5ecb-45d1-81f9-184bc97531b0",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		},
+		{
 			"name": "tags",
 			"item": [
 				{
