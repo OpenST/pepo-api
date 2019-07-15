@@ -58,7 +58,7 @@ class Transaction extends ModelBase {
 
     for (let index = 0; index < dbRows.length; index++) {
       let formatDbRows = oThis.formatDbData(dbRows[index]);
-      response[formatDbRows.ostTxid] = formatDbRows;
+      response[formatDbRows.ostTxId] = formatDbRows;
     }
 
     return response;
@@ -103,6 +103,10 @@ class Transaction extends ModelBase {
     await new TransactionByOstTxId({
       ostTxIds: [params.ostTxId]
     }).clear();
+  }
+
+  static get transactionIdUniqueIndexName() {
+    return 'u_idx_1';
   }
 }
 

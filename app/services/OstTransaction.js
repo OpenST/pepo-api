@@ -69,41 +69,77 @@ class OstTransaction extends ServiceBase {
     let promiseArray1 = [];
     promiseArray1.push(oThis._fetchGiphyExternalEntityId());
     promiseArray1.push(oThis._fetchTransaction());
-    if (oThis._isTextPresent()) {
-      promiseArray1.push(oThis._insertText());
+    if (oThis._isVideoIdPresent()) {
+      promiseArray1.push(oThis._fetchVideoDetailsAndValidate());
     }
 
     await Promise.all(promiseArray1);
 
-    console.log('====oThis.transactionId===', oThis.transactionId);
-
     if (oThis.transactionId) {
-      console.log('=====111111111');
-      //update text id and giphy id if it is present
-      if (oThis._isGiphyPresent() && !oThis.giphyExternalEntityId) {
-        await oThis._insertGiphyInExternalEntities();
-      }
-      if (oThis.giphyExternalEntityId || oThis.textId) {
-        await oThis._updateGiphyAndTextInTransaction();
-      }
+      await oThis._updateTransaction();
     } else {
-      console.log('=====222222===');
-      let promiseArray2 = [];
-      promiseArray2.push(oThis._fetchOstUserIdAndValidate());
-      promiseArray2.push(oThis._fetchVideoDetailsAndValidate());
-
-      await Promise.all(promiseArray2);
-
-      //Insert in external entities, transactions and pending transactions
-      await oThis._insertGiphyAndTransaction();
-
-      //Insert in activity table
-      await oThis._insertInActivityTable();
-
-      //Insert in user activity table
-      await oThis._insertInUserActivityTable();
+      await oThis._insertInTransactionAndAssociatedTables();
     }
     return Promise.resolve(responseHelper.successWithData());
+  }
+
+  /**
+   * This function will be called only when transaction already exists in the table.
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _updateTransaction() {
+    const oThis = this;
+    let promiseArray = [];
+
+    //if table row has giphy or text id; return
+    if (oThis.transactionObj.giphyId || oThis.transactionObj.textId) {
+      return;
+    }
+
+    //if input param has giphy or text; update with insert text;
+    if (oThis._isGiphyPresent() && !oThis.giphyExternalEntityId) {
+      promiseArray.push(oThis._insertGiphyInExternalEntities());
+    }
+    if (oThis._isTextPresent()) {
+      promiseArray.push(oThis._insertText());
+    }
+
+    await Promise.all(promiseArray);
+
+    let updateData = {};
+    if (oThis._isGiphyPresent()) {
+      updateData.giphy_id = oThis.giphyExternalEntityId;
+    }
+    if (oThis._isTextPresent()) {
+      updateData.text_id = oThis.textId;
+    }
+
+    if (Object.keys(updateData).length !== 0) {
+      await oThis._updateGiphyAndTextInTransaction(updateData);
+    }
+  }
+
+  /**
+   * This function is called when transaction is not found in transaction table.
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _insertInTransactionAndAssociatedTables() {
+    const oThis = this;
+
+    await oThis._fetchOstUserIdAndValidate();
+
+    //Insert in external entities, transactions and pending transactions
+    await oThis._insertGiphyTextAndTransaction();
+
+    //Insert in activity table
+    await oThis._insertInActivityTable();
+
+    //Insert in user activity table
+    await oThis._insertInUserActivityTable();
   }
 
   /**
@@ -201,10 +237,10 @@ class OstTransaction extends ServiceBase {
       );
     }
 
-    console.log('==transactionCacheResponse==', transactionCacheResponse);
-
-    oThis.transactionId = transactionCacheResponse.data[oThis.ostTxId].id;
-    oThis.transactionObj = transactionCacheResponse.data[oThis.ostTxId];
+    if (transactionCacheResponse.data[oThis.ostTxId].id) {
+      oThis.transactionId = transactionCacheResponse.data[oThis.ostTxId].id;
+      oThis.transactionObj = transactionCacheResponse.data[oThis.ostTxId];
+    }
   }
 
   /**
@@ -298,14 +334,10 @@ class OstTransaction extends ServiceBase {
    * @returns {Promise<void>}
    * @private
    */
-  async _updateGiphyAndTextInTransaction() {
+  async _updateGiphyAndTextInTransaction(updateData) {
     const oThis = this;
 
-    let updateData = {
-        text_id: oThis.textId,
-        giphy_id: oThis.giphyExternalEntityId
-      },
-      updateResponse = await new TransactionModel().update(updateData).fire();
+    let updateResponse = await new TransactionModel().update(updateData).fire();
 
     let transactionObj = oThis.transactionObj;
     transactionObj.textId = oThis.textId;
@@ -337,7 +369,7 @@ class OstTransaction extends ServiceBase {
           internal_error_identifier: 'a_s_ot_7',
           api_error_identifier: 'invalid_api_params',
           params_error_identifiers: ['invalid_video_id'],
-          debug_options: { videoIdFromCache: videoIdFromCache }
+          debug_options: { videoIdFromCache: videoIdFromCache, videoId: oThis.videoId }
         })
       );
     }
@@ -349,7 +381,7 @@ class OstTransaction extends ServiceBase {
    * @returns {Promise<void>}
    * @private
    */
-  async _insertGiphyAndTransaction() {
+  async _insertGiphyTextAndTransaction() {
     const oThis = this;
 
     let promiseArray = [];
@@ -358,13 +390,21 @@ class OstTransaction extends ServiceBase {
       promiseArray.push(oThis._insertGiphyInExternalEntities());
     }
 
-    promiseArray.push(oThis._insertTransaction());
-
-    if (oThis.transactionStatus === transactionConstants.pendingStatus) {
-      promiseArray.push(oThis._insertInPendingTransactions());
+    if (oThis._isTextPresent()) {
+      promiseArray.push(oThis._insertText());
     }
 
     await Promise.all(promiseArray);
+
+    await oThis._fetchToUserIdsAndAmounts();
+
+    let promiseArray2 = [];
+
+    promiseArray2.push(oThis._insertTransaction());
+
+    promiseArray2.push(oThis._insertInPendingTransactions());
+
+    await Promise.all(promiseArray2);
   }
 
   /**
@@ -398,14 +438,13 @@ class OstTransaction extends ServiceBase {
   }
 
   /**
-   * This function prepares extra data for transaction external enntity and inserts a row in external entities table.
+   * This function fetches to user ids and inserts in to user ids array. It also prepares amounts array.
    *
-   * @returns {Promise<*>}
+   * @returns {Promise<never>}
    * @private
    */
-  async _insertTransaction() {
+  async _fetchToUserIdsAndAmounts() {
     const oThis = this;
-
     let toOstUserIdsArray = [];
 
     //Loop to prepare array of toOstUserIds which will be used to fetch user ids from multi cache.
@@ -428,6 +467,16 @@ class OstTransaction extends ServiceBase {
         oThis.amountsArray.push(oThis.transfersData[i].amount);
       }
     }
+  }
+
+  /**
+   * This function prepares extra data for transaction external enntity and inserts a row in external entities table.
+   *
+   * @returns {Promise<*>}
+   * @private
+   */
+  async _insertTransaction() {
+    const oThis = this;
 
     let extraData = {
       toUserIds: oThis.toUserIdsArray,
@@ -444,7 +493,37 @@ class OstTransaction extends ServiceBase {
       status: transactionConstants.invertedStatuses[oThis.transactionStatus]
     };
 
-    let insertResponse = await new TransactionModel().insert(insertData).fire(); //Todo: catch to see if we get duplicate exception
+    let insertResponse = await new TransactionModel()
+      .insert(insertData)
+      .fire()
+      .catch(async function(err) {
+        if (TransactionModel.isDuplicateIndexViolation(TransactionModel.transactionIdUniqueIndexName, err)) {
+          await oThis._fetchTransaction();
+          if (!oThis.transactionId) {
+            //Send error email from here.
+            return Promise.reject(
+              responseHelper.error({
+                internal_error_identifier: 'a_s_ost_2',
+                api_error_identifier: 'something_went_wrong',
+                debug_options: { insertData: insertData }
+              })
+            );
+          }
+
+          await oThis._updateTransaction();
+
+          return { insertId: oThis.transactionId };
+        } else {
+          //Insert failed due to some other reason.
+          return Promise.reject(
+            responseHelper.error({
+              internal_error_identifier: 'a_s_ost_3',
+              api_error_identifier: 'something_went_wrong',
+              debug_options: { Error: err }
+            })
+          );
+        }
+      });
 
     oThis.transactionId = insertResponse.insertId;
     insertData.id = insertResponse.insertId;
@@ -474,7 +553,7 @@ class OstTransaction extends ServiceBase {
     oThis.publishedAtTs = currentTime;
 
     let insertData = {
-      entity_type: activityConstants.transactionEntityType,
+      entity_type: activityConstants.invertedEntityTypes[activityConstants.transactionEntityType],
       entity_id: oThis.transactionId,
       extra_data: JSON.stringify(extraData),
       status: activityConstants.invertedStatuses[oThis.activityStatus],
@@ -500,10 +579,13 @@ class OstTransaction extends ServiceBase {
   async _insertInUserActivityTable() {
     const oThis = this;
 
+    let displayTimestamp = Math.floor(Date.now() / 1000);
+
     let insertData = {
       user_id: oThis.userId,
       activity_id: oThis.activityId,
-      published_ts: oThis.publishedAtTs
+      published_ts: oThis.publishedAtTs,
+      display_ts: displayTimestamp
     };
 
     await new UserActivityModel().insert(insertData).fire();
@@ -514,7 +596,8 @@ class OstTransaction extends ServiceBase {
         let insertUserActivityData = {
           user_id: oThis.toUserIdsArray[i],
           activity_id: oThis.activityId,
-          published_ts: oThis.publishedAtTs
+          published_ts: oThis.publishedAtTs,
+          display_ts: displayTimestamp
         };
 
         await new UserActivityModel().insert(insertUserActivityData).fire();
