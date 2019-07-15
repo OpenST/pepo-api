@@ -2,6 +2,7 @@ const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   UserMultiCache = require(rootPrefix + '/lib/cacheManagement/multi/User'),
+  PricePointsCache = require(rootPrefix + '/lib/cacheManagement/single/PricePoints'),
   TokenUserDetailByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TokenUserByUserIds'),
   UserModel = require(rootPrefix + '/app/models/mysql/User'),
   TokenUserModel = require(rootPrefix + '/app/models/mysql/TokenUser'),
@@ -20,6 +21,7 @@ class CurrentUser extends ServiceBase {
     const oThis = this;
 
     oThis.userId = params.current_user.id;
+    oThis.pricePoints = {};
   }
 
   /**
@@ -33,6 +35,8 @@ class CurrentUser extends ServiceBase {
     await oThis._fetchUser();
 
     await oThis._fetchTokenUser();
+
+    await oThis._fetchPricePoints();
 
     return Promise.resolve(oThis._serviceResponse());
   }
@@ -86,6 +90,24 @@ class CurrentUser extends ServiceBase {
   }
 
   /**
+   * Fetch price points.
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _fetchPricePoints() {
+    const oThis = this;
+
+    const pricePointsCacheRsp = await new PricePointsCache().fetch();
+
+    if (pricePointsCacheRsp.isFailure()) {
+      return Promise.reject(pricePointsCacheRsp);
+    }
+
+    oThis.pricePoints = pricePointsCacheRsp.data;
+  }
+
+  /**
    * Response for service
    *
    *
@@ -98,7 +120,8 @@ class CurrentUser extends ServiceBase {
 
     return responseHelper.successWithData({
       user: new UserModel().safeFormattedData(oThis.user),
-      tokenUser: new TokenUserModel().safeFormattedData(oThis.tokenUser)
+      tokenUser: new TokenUserModel().safeFormattedData(oThis.tokenUser),
+      pricePointsMap: oThis.pricePoints
     });
   }
 }

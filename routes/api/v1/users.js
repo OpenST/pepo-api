@@ -95,7 +95,8 @@ router.get('/current', sanitizer.sanitizeDynamicUrlParams, function(req, res, ne
     const wrapperFormatterRsp = await new FormatterComposer({
       resultType: responseEntityKey.loggedInUser,
       entityKindToResponseKeyMap: {
-        [entityType.user]: responseEntityKey.loggedInUser
+        [entityType.user]: responseEntityKey.loggedInUser,
+        [entityType.pricePointsMap]: responseEntityKey.pricePoints
       },
       serviceData: serviceResponse.data
     }).perform();
@@ -149,7 +150,8 @@ router.get('/:user_id/profile', sanitizer.sanitizeDynamicUrlParams, function(req
         [entityType.userStats]: responseEntityKey.userStats,
         [entityType.videoDetailsMap]: responseEntityKey.videoDetails,
         [entityType.currentUserUserContributionsMap]: responseEntityKey.currentUserUserContributions,
-        [entityType.currentUserVideoContributionsMap]: responseEntityKey.currentUserVideoContributions
+        [entityType.currentUserVideoContributionsMap]: responseEntityKey.currentUserVideoContributions,
+        [entityType.pricePointsMap]: responseEntityKey.pricePoints
       },
       serviceData: serviceResponse.data
     }).perform();
