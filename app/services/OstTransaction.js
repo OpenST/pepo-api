@@ -69,9 +69,7 @@ class OstTransaction extends ServiceBase {
     let promiseArray1 = [];
     promiseArray1.push(oThis._fetchGiphyExternalEntityId());
     promiseArray1.push(oThis._fetchTransaction());
-    if (oThis._isVideoIdPresent()) {
-      promiseArray1.push(oThis._fetchVideoDetailsAndValidate());
-    }
+    promiseArray1.push(oThis._fetchOstUserIdAndValidate());
 
     await Promise.all(promiseArray1);
 
@@ -129,8 +127,6 @@ class OstTransaction extends ServiceBase {
    */
   async _insertInTransactionAndAssociatedTables() {
     const oThis = this;
-
-    await oThis._fetchOstUserIdAndValidate();
 
     //Insert in external entities, transactions and pending transactions
     await oThis._insertGiphyTextAndTransaction();
@@ -394,9 +390,13 @@ class OstTransaction extends ServiceBase {
       promiseArray.push(oThis._insertText());
     }
 
-    await Promise.all(promiseArray);
+    if (oThis._isVideoIdPresent()) {
+      promiseArray.push(oThis._fetchVideoDetailsAndValidate());
+    }
 
-    await oThis._fetchToUserIdsAndAmounts();
+    promiseArray.push(oThis._fetchToUserIdsAndAmounts());
+
+    await Promise.all(promiseArray);
 
     let promiseArray2 = [];
 
