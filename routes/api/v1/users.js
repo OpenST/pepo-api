@@ -48,8 +48,8 @@ router.get('/recovery-info', sanitizer.sanitizeDynamicUrlParams, function(req, r
 });
 
 /* Contributed To Users List */
-router.get('/contributed-to', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
-  req.decodedParams.apiName = apiName.users;
+router.get('/contribution-to', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.contributionTo;
 
   const dataFormatterFunc = async function(serviceResponse) {
     const wrapperFormatterRsp = await new FormatterComposer({
@@ -64,12 +64,14 @@ router.get('/contributed-to', sanitizer.sanitizeDynamicUrlParams, function(req, 
     serviceResponse.data = wrapperFormatterRsp.data;
   };
 
-  Promise.resolve(routeHelper.perform(req, res, next, '/user/contribution/To', 'r_a_v1_u_3', null, dataFormatterFunc));
+  Promise.resolve(
+    routeHelper.perform(req, res, next, '/user/contribution/To', 'r_a_v1_u_ct_1', null, dataFormatterFunc)
+  );
 });
 
 /* Contributed By Users List */
-router.get('/contributed-by', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
-  req.decodedParams.apiName = apiName.users;
+router.get('/contribution-by', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.contributionBy;
 
   const dataFormatterFunc = async function(serviceResponse) {
     const wrapperFormatterRsp = await new FormatterComposer({
@@ -84,7 +86,31 @@ router.get('/contributed-by', sanitizer.sanitizeDynamicUrlParams, function(req, 
     serviceResponse.data = wrapperFormatterRsp.data;
   };
 
-  Promise.resolve(routeHelper.perform(req, res, next, '/user/contribution/By', 'r_a_v1_u_4', null, dataFormatterFunc));
+  Promise.resolve(
+    routeHelper.perform(req, res, next, '/user/contribution/By', 'r_a_v1_u_cb_1', null, dataFormatterFunc)
+  );
+});
+
+/* User Suggestion to Logged IN User */
+router.get('/contribution-suggestion', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.contributionSuggestion;
+
+  const dataFormatterFunc = async function(serviceResponse) {
+    const wrapperFormatterRsp = await new FormatterComposer({
+      resultType: responseEntityKey.users,
+      entityKindToResponseKeyMap: {
+        [entityType.users]: responseEntityKey.users,
+        [entityType.userListMeta]: responseEntityKey.meta
+      },
+      serviceData: serviceResponse.data
+    }).perform();
+
+    serviceResponse.data = wrapperFormatterRsp.data;
+  };
+
+  Promise.resolve(
+    routeHelper.perform(req, res, next, '/user/contribution/Suggestion', 'r_a_v1_u_cs_1', null, dataFormatterFunc)
+  );
 });
 
 /* Logged In User*/

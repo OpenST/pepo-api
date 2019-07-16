@@ -307,12 +307,12 @@
 					"response": []
 				},
 				{
-					"name": "user-contributed-to",
+					"name": "user-contribution-to",
 					"request": {
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{api_server}}/api/v1/users/contributed-to",
+							"raw": "{{api_server}}/api/v1/users/contribution-to",
 							"host": [
 								"{{api_server}}"
 							],
@@ -320,19 +320,19 @@
 								"api",
 								"v1",
 								"users",
-								"contributed-to"
+								"contribution-to"
 							]
 						}
 					},
 					"response": []
 				},
 				{
-					"name": "user-contributed-by",
+					"name": "user-contribution-by",
 					"request": {
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{api_server}}/api/v1/users/contributed-by",
+							"raw": "{{api_server}}/api/v1/users/contribution-by",
 							"host": [
 								"{{api_server}}"
 							],
@@ -340,7 +340,27 @@
 								"api",
 								"v1",
 								"users",
-								"contributed-by"
+								"contribution-by"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "user-contribution-suggestion",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{api_server}}/api/v1/users/contribution-suggestion",
+							"host": [
+								"{{api_server}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"users",
+								"contribution-suggestion"
 							]
 						}
 					},
