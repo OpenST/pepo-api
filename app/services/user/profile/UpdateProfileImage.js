@@ -34,6 +34,7 @@ class UpdateProfileImage extends UpdateProfileBase {
     oThis.width = oThis.params.width;
     oThis.height = oThis.params.height;
     oThis.size = oThis.params.size;
+    oThis.isExternalUrl = oThis.params.isExternalUrl;
     oThis.imageId = null;
   }
 
@@ -46,7 +47,13 @@ class UpdateProfileImage extends UpdateProfileBase {
   async _validateParams() {
     const oThis = this;
 
-    let resp = imageLib.validateImageObj(oThis.params);
+    let resp = imageLib.validateImageObj({
+      imageUrl: oThis.url,
+      size: oThis.size,
+      width: oThis.width,
+      height: oThis.height,
+      isExternalUrl: oThis.isExternalUrl
+    });
     if (resp.isFailure()) {
       return Promise.reject(resp);
     }
@@ -61,8 +68,14 @@ class UpdateProfileImage extends UpdateProfileBase {
   async _updateProfileElements() {
     const oThis = this;
 
-    oThis.params.kind = imageConstants.profileImageKind;
-    let resp = await imageLib.validateAndSave(oThis.params);
+    let resp = await imageLib.validateAndSave({
+      imageUrl: oThis.url,
+      size: oThis.size,
+      width: oThis.width,
+      height: oThis.height,
+      kind: imageConstants.profileImageKind,
+      isExternalUrl: oThis.isExternalUrl
+    });
     if (resp.isFailure()) {
       return Promise.reject(resp);
     }
