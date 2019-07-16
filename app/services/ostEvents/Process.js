@@ -62,7 +62,7 @@ class OstEventProcess extends ServiceBase {
     if (!oThis.ostEventId || !CommonValidators.validateInteger(oThis.ostEventId)) {
       return Promise.reject(
         responseHelper.error({
-          internal_error_identifier: 's_oe_c_vas_1',
+          internal_error_identifier: 's_oe_p_vas_1',
           api_error_identifier: 'something_went_wrong'
         })
       );

@@ -4,6 +4,7 @@ const rootPrefix = '../../../..',
   OstPricePointsModel = require(rootPrefix + '/app/models/mysql/OstPricePoints'),
   PricePointsCache = require(rootPrefix + '/lib/cacheManagement/single/PricePoints'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
+  responseHelper = require(rootPrefix + '/lib/formatter/response'),
   ostPricePointsConstants = require(rootPrefix + '/lib/globalConstant/ostPricePoints');
 
 /**
@@ -17,7 +18,7 @@ class PricePointsUpdateBase extends ServiceBase {
    *
    * @param {object} params
    * @param {object} params.data
-   * @param {object} params.data.price_points
+   * @param {object} params.data.price_point
    *
    * @augments ServiceBase
    *
@@ -28,7 +29,7 @@ class PricePointsUpdateBase extends ServiceBase {
 
     const oThis = this;
 
-    oThis.ostPricePoints = params.data.price_points;
+    oThis.ostPricePoints = params.data.price_point;
   }
 
   /**
@@ -43,11 +44,14 @@ class PricePointsUpdateBase extends ServiceBase {
     const oThis = this;
 
     const stakeCurrency = await oThis.fetchPepoStakeCurrency();
+
     oThis.ostPricePoints = oThis.ostPricePoints[stakeCurrency];
 
     await oThis._updatePricePoint();
 
     await oThis._clearPricePointsCache();
+
+    return Promise.resolve(responseHelper.successWithData({}));
   }
 
   /**
