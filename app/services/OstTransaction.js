@@ -48,6 +48,7 @@ class OstTransaction extends ServiceBase {
 
     oThis.textId = null;
     oThis.transactionId = null;
+    oThis.transactionObj = null;
     oThis.transactionStatus = null;
     oThis.giphyExternalEntityId = null;
     oThis.ostTxExternalEntityId = null;
@@ -130,6 +131,10 @@ class OstTransaction extends ServiceBase {
 
     //Insert in external entities, transactions and pending transactions
     await oThis._insertGiphyTextAndTransaction();
+
+    //todo: insert IN pendng after insertion in Transaction
+    //todo: error if tx status is not pending.
+    //todo: on index violation, dont complete the remainng task
 
     //Insert in activity table
     await oThis._insertInActivityTable();
@@ -333,7 +338,10 @@ class OstTransaction extends ServiceBase {
   async _updateGiphyAndTextInTransaction(updateData) {
     const oThis = this;
 
-    let updateResponse = await new TransactionModel().update(updateData).fire();
+    let updateResponse = await new TransactionModel()
+      .update(updateData)
+      .where({ id: oThis.transactionObj.id })
+      .fire();
 
     let transactionObj = oThis.transactionObj;
     transactionObj.textId = oThis.textId;
@@ -515,6 +523,7 @@ class OstTransaction extends ServiceBase {
           return { insertId: oThis.transactionId };
         } else {
           //Insert failed due to some other reason.
+          //Send error email from here.
           return Promise.reject(
             responseHelper.error({
               internal_error_identifier: 'a_s_ost_3',
@@ -525,6 +534,7 @@ class OstTransaction extends ServiceBase {
         }
       });
 
+    //todo: on isDuplicateIndexViolation return
     oThis.transactionId = insertResponse.insertId;
     insertData.id = insertResponse.insertId;
 
