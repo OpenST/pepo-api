@@ -11,6 +11,7 @@ const rootPrefix = '..',
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   basicHelper = require(rootPrefix + '/helpers/basic'),
+  sigIntConst = require(rootPrefix + '/lib/globalConstant/sigInt'),
   createErrorLogsEntry = require(rootPrefix + '/lib/errorLogs/createEntry');
 
 /**
@@ -117,6 +118,7 @@ class CronBase {
      * Handler for SIGINT and SIGTERM signals.
      */
     const handle = async function() {
+      sigIntConst.setSigIntStatus;
       // Rachin: Does this need to be called more than once?
       oThis._stopPickingUpNewTasks();
 
