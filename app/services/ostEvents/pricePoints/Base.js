@@ -1,0 +1,115 @@
+const rootPrefix = '../../../..',
+  ServiceBase = require(rootPrefix + '/app/services/Base'),
+  TokenModel = require(rootPrefix + '/app/models/mysql/Token'),
+  OstPricePointsModel = require(rootPrefix + '/app/models/mysql/OstPricePoints'),
+  PricePointsCache = require(rootPrefix + '/lib/cacheManagement/single/PricePoints'),
+  logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
+  ostPricePointsConstants = require(rootPrefix + '/lib/globalConstant/ostPricePoints');
+
+/**
+ * Class for Ost price points update base.
+ *
+ * @class PricePointsUpdateBase
+ */
+class PricePointsUpdateBase extends ServiceBase {
+  /**
+   * Constructor for Ost price points update base.
+   *
+   * @param {object} params
+   * @param {object} params.data
+   * @param {object} params.data.price_points
+   *
+   * @augments ServiceBase
+   *
+   * @constructor
+   */
+  constructor(params) {
+    super();
+
+    const oThis = this;
+
+    oThis.ostPricePoints = params.data.price_points;
+  }
+
+  /**
+   * Async perform.
+   *
+   * @sets oThis.ostPricePoints
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _asyncPerform() {
+    const oThis = this;
+
+    const stakeCurrency = await oThis.fetchPepoStakeCurrency();
+    oThis.ostPricePoints = oThis.ostPricePoints[stakeCurrency];
+
+    await oThis._updatePricePoint();
+
+    await oThis._clearPricePointsCache();
+  }
+
+  /**
+   * Fetch pepo stake currency.
+   *
+   * @returns {Promise<string>}
+   */
+  async fetchPepoStakeCurrency() {
+    const pepoTokenDetails = await new TokenModel().fetchToken();
+
+    return pepoTokenDetails.stakeCurrency;
+  }
+
+  /**
+   * Clear price points cache.
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _clearPricePointsCache() {
+    await new PricePointsCache().clear();
+  }
+
+  /**
+   * Returns quote currency.
+   */
+  get quoteCurrency() {
+    throw new Error('Sub-class to implement.');
+  }
+
+  /**
+   * Returns integer value of quote currency.
+   */
+  get quoteCurrencyInt() {
+    const oThis = this;
+
+    return ostPricePointsConstants.invertedQuoteCurrencies[oThis.quoteCurrency];
+  }
+
+  /**
+   * Update price point in ost price points table.
+   *
+   * @returns {Promise}
+   * @private
+   */
+  async _updatePricePoint() {
+    const oThis = this;
+
+    const insertResponse = await new OstPricePointsModel()
+      .insert({
+        quote_currency: oThis.quoteCurrencyInt,
+        conversion_rate: oThis.ostPricePoints[oThis.quoteCurrency],
+        timestamp: oThis.ostPricePoints.updated_timestamp
+      })
+      .fire();
+
+    if (!insertResponse) {
+      logger.error('Error while inserting price point in ost price points table.');
+
+      return Promise.reject(new Error(insertResponse));
+    }
+  }
+}
+
+module.exports = PricePointsUpdateBase;
