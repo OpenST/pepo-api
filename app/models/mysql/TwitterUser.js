@@ -72,6 +72,30 @@ class TwitterUserModel extends ModelBase {
   }
 
   /***
+   * Fetch twitter user object ids for twitter ids
+   *
+   * @param UserIds {Array} - Array of User Ids
+   *
+   * @return {Object}
+   */
+  async fetchByUserIds(userIds) {
+    const oThis = this;
+    let dbRows = await oThis
+      .select(['id', 'user_id'])
+      .where({ user_id: userIds })
+      .fire();
+
+    let response = {};
+
+    for (let index = 0; index < dbRows.length; index++) {
+      let formatDbRow = oThis.formatDbData(dbRows[index]);
+      response[formatDbRow.userId] = formatDbRow;
+    }
+
+    return response;
+  }
+
+  /***
    * Fetch twitter user objects for ids
    *
    * @param ids {Array} - ids

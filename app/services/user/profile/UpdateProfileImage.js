@@ -1,111 +1,91 @@
-const rootPrefix = '../../..',
-  ServiceBase = require(rootPrefix + '/app/services/Base'),
-  UserModel = require(rootPrefix + '/app/models/mysql/User'),
-  CreateImageLib = require(rootPrefix + '/lib/user/image/Create'),
-  UpdateImageLib = require(rootPrefix + '/lib/user/image/Update'),
-  DeleteImageLib = require(rootPrefix + '/lib/user/image/Delete'),
-  responseHelper = require(rootPrefix + '/lib/formatter/response'),
-  ImageConstants = require(rootPrefix + 'lib/globalConstant/image'),
-  GetResolutionLib = require(rootPrefix + '/lib/user/image/GetResolution');
+/** This module helps in updating profile image of user
+ * @module app/services/user/profile/UpdateProfileImage.js
+ */
+
+const rootPrefix = '../../../..',
+  UpdateProfileBase = require(rootPrefix + '/app/services/user/profile/Base'),
+  UserModelKlass = require(rootPrefix + '/app/models/mysql/User'),
+  imageConstants = require(rootPrefix + '/lib/globalConstant/image'),
+  imageLib = require(rootPrefix + '/lib/imageLib');
 
 /**
- * Class for user profile get
+ * Class to update profile image of user
  *
  * @class
  */
-class SaveProfileImage extends ServiceBase {
+class UpdateProfileImage extends UpdateProfileBase {
   /**
    * @constructor
    *
    * @param params
    * @param {number} params.user_id - user id
-   * @param {string} params.s3_profile_image_url - s3 profile image url
+   * @param {string} params.image_url - s3 profile image url
    * @param {string} params.width - width fo the image
    * @param {string} params.height - height fo the image
    * @param {string} params.size - size fo the image
+   * @param {boolean} params.isExternalUrl - image source is other than s3 upload
    */
   constructor(params) {
     super(params);
 
     const oThis = this;
 
-    oThis.params = params;
-    oThis.userId = params.user_id;
-    oThis.url = params.s3_profile_image_url;
-    oThis.width = params.width;
-    oThis.height = params.height;
-    oThis.size = params.size;
+    oThis.url = oThis.params.image_url;
+    oThis.width = oThis.params.width;
+    oThis.height = oThis.params.height;
+    oThis.size = oThis.params.size;
+    oThis.imageId = null;
   }
 
   /**
-   * Perform
+   * Validate Params
    *
-   * @return {Promise<void>}
+   * @returns {Promise<void>}
+   * @private
    */
-  async _asyncPerform() {
+  async _validateParams() {
     const oThis = this;
 
-    return oThis._saveImageDetails();
-
-    return responseHelper.successWithData({});
+    let resp = imageLib.validateImageObj(oThis.params);
+    if (resp.isFailure()) {
+      return Promise.reject(resp);
+    }
   }
 
   /**
-   * Save image details
+   * Update user profile image
    *
    * @return {Promise<void>}
    * @private
    */
-  async _saveImageDetails() {
+  async _updateProfileElements() {
     const oThis = this;
 
-    let UserRsp = new UserModel().fetchById(oThis.userId);
-
-    let getResolution = new GetResolutionLib(oThis.params);
-
-    if (UserRsp[oThis.userId] && oThis.url !== '') {
-      let updateProfileImageParams = {
-        userId: oThis.userId,
-        resolutions: getResolution,
-        entityKind: null,
-        status: new ImageConstants().notResized,
-        isProfileElement: true,
-        imageId: UserRsp[oThis.userId].profileImageId
-      };
-
-      await new UpdateImageLib(updateProfileImageParams).perform();
-    } else if (UserRsp[oThis.userId] && oThis.url === '') {
-      let deleteProfileImageParams = {
-        userId: oThis.userId,
-        isProfileElement: true,
-        imageId: UserRsp[oThis.userId].profileImageId
-      };
-
-      await new DeleteImageLib(deleteProfileImageParams).perform();
-
-      await new UserModel()
-        .update({ profile_image_id: null })
-        .where(['id = ?', oThis.userId])
-        .fire();
-    } else {
-      let createProfileImageParams = {
-        userId: oThis.userId,
-        resolutions: getResolution,
-        entityKind: null,
-        status: new ImageConstants().notResized,
-        isProfileElement: true
-      };
-
-      let insertRsp = await new CreateImageLib(createProfileImageParams).perform();
-
-      let profileImageId = insertRsp.insertId;
-
-      await new UserModel()
-        .update({ profile_image_id: profileImageId })
-        .where(['id = ?', oThis.userId])
-        .fire();
+    oThis.params.kind = imageConstants.profileImageKind;
+    let resp = await imageLib.validateAndSave(oThis.params);
+    if (resp.isFailure()) {
+      return Promise.reject(resp);
     }
+
+    oThis.imageId = Object.keys(resp.data)[0];
+  }
+
+  /**
+   * Update user
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _updateUser() {
+    const oThis = this;
+
+    await new UserModelKlass()
+      .update({
+        profile_image_id: oThis.imageId
+      })
+      .where({ id: oThis.userId })
+      .fire();
   }
 }
 
-module.exports = SaveProfileImage;
+module.exports = UpdateProfileImage;

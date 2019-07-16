@@ -7,7 +7,6 @@ const rootPrefix = '../../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   UsersCache = require(rootPrefix + '/lib/cacheManagement/multi/User'),
   userConstants = require(rootPrefix + '/lib/globalConstant/user'),
-  UserModelKlass = require(rootPrefix + '/app/models/mysql/User'),
   UserProfileElementsByUserIdCache = require(rootPrefix + '/lib/cacheManagement/multi/UserProfileElementsByUserIds'),
   responseHelper = require(rootPrefix + '/lib/formatter/response');
 
@@ -22,10 +21,6 @@ class UpdateProfileBase extends ServiceBase {
    *
    * @param params
    * @param {number} params.user_id
-   * @param {string} params.bio
-   * @param {string} params.name
-   * @param {string} params.username
-   * @param {string} params.link - Social link added by user
    */
   constructor(params) {
     super(params);
@@ -65,13 +60,15 @@ class UpdateProfileBase extends ServiceBase {
   async _validate() {
     const oThis = this;
 
+    await oThis._validateParams();
+
     let userMultiCache = new UsersCache({ ids: [oThis.userId] });
     let cacheRsp = await userMultiCache.fetch();
 
     if (cacheRsp.isFailure() || Object.keys(cacheRsp.data[oThis.userId]).length <= 0) {
       // return Promise.reject(
       //   responseHelper.error({
-      //     internal_error_identifier: 'a_s_u_up_2',
+      //     internal_error_identifier: 'a_s_u_p_b_1',
       //     api_error_identifier: 'user_not_found',
       //     debug_options: {}
       //   })
@@ -81,7 +78,7 @@ class UpdateProfileBase extends ServiceBase {
     if (cacheRsp.data[oThis.userId].status != userConstants.activeStatus) {
       // return Promise.reject(
       //   responseHelper.error({
-      //     internal_error_identifier: 'a_s_u_up_3',
+      //     internal_error_identifier: 'a_s_u_p_b_2',
       //     api_error_identifier: 'user_not_active',
       //     debug_options: {}
       //   })
@@ -110,6 +107,16 @@ class UpdateProfileBase extends ServiceBase {
     for (let kind in profileElements) {
       oThis.profileElements[kind] = profileElements[kind];
     }
+  }
+
+  /**
+   * Validate params
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _validateParams() {
+    throw 'sub-class to implement';
   }
 
   /**
