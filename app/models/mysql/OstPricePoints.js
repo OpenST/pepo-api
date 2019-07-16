@@ -5,7 +5,7 @@ const rootPrefix = '../../..',
 
 // Declare variables.
 const dbName = 'pepo_api_' + coreConstants.environment;
-const queryLimit = 2;
+const queryLimit = 20;
 
 /**
  * Class for ost price points model.

@@ -9,8 +9,8 @@ const rootPrefix = '../../..',
 
 class OstEventProcess extends ServiceBase {
   /**
-   * @param {Object} params
-   * @param {String} params.ostEventId: OST Event Table Id
+   * @param {object} params
+   * @param {string} params.ostEventId: OST Event Table Id
    *
    * @constructor
    */
@@ -25,7 +25,7 @@ class OstEventProcess extends ServiceBase {
   }
 
   /**
-   * perform - process Ost Event
+   * Perform - Process Ost Event.
    *
    * @return {Promise<void>}
    */
@@ -87,6 +87,7 @@ class OstEventProcess extends ServiceBase {
 
     if (!dbRows || !dbRows.id || dbRows.status != ostEventConstant.pendingStatus) {
       logger.error('Error while fetching data from ost events table. dbRows=', dbRows);
+
       return Promise.reject(dbRows);
     }
 
@@ -96,11 +97,9 @@ class OstEventProcess extends ServiceBase {
   }
 
   /**
-   * Update status of ost event row
-   *
+   * Update status of ost event row.
    *
    * @return {Promise<void>}
-   *
    * @private
    */
   async _updateOstEventStatus(ostEventStatus) {
@@ -110,7 +109,7 @@ class OstEventProcess extends ServiceBase {
     let ostEventstatus = ostEventConstant.invertedStatuses[ostEventStatus];
 
     if (!ostEventstatus) {
-      throw `Invalid ostEventstatus for Process. ostEventStatus=${ostEventStatus}`;
+      throw new Error(`Invalid ostEventstatus for Process. ostEventStatus=${ostEventStatus}`);
     }
 
     await new OstEventModel()
@@ -122,20 +121,18 @@ class OstEventProcess extends ServiceBase {
   }
 
   /**
-   * Use Factory To process Event
-   *
+   * Use Factory To process Event.
    *
    * @return {Promise<void>}
-   *
    * @private
    */
   async _processEvent() {
     const oThis = this;
     logger.log('Process Ost Event');
 
-    let r = await new OstEventProcessFactory({ ostEventObj: oThis.ostEventObj }).perform();
+    const response = await new OstEventProcessFactory({ ostEventObj: oThis.ostEventObj }).perform();
 
-    if (r.isSuccess()) {
+    if (response.isSuccess()) {
       await oThis._updateOstEventStatus(ostEventConstant.doneStatus);
     } else {
       await oThis._updateOstEventStatus(ostEventConstant.failedStatus);

@@ -102,19 +102,19 @@ class ServicesBase {
   }
 
   _currentPageLimit() {
-    throw new Error('Sub-class to implement');
+    throw new Error('Sub-class to implement.');
   }
 
   _defaultPageLimit() {
-    throw new Error('Sub-class to implement');
+    throw new Error('Sub-class to implement.');
   }
 
   _minPageLimit() {
-    throw new Error('Sub-class to implement');
+    throw new Error('Sub-class to implement.');
   }
 
   _maxPageLimit() {
-    throw new Error('Sub-class to implement');
+    throw new Error('Sub-class to implement.');
   }
 
   /**
@@ -124,7 +124,7 @@ class ServicesBase {
    * @returns {Promise<void>}
    */
   async _asyncPerform() {
-    throw new Error('sub-class to implement.');
+    throw new Error('Sub-class to implement.');
   }
 }
 
