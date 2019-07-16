@@ -69,6 +69,7 @@ class AddFanVideo extends UpdateProfileBase {
     const oThis = this;
 
     let resp = await videoLib.validateAndSave({
+      userId: oThis.userId,
       videoUrl: oThis.videoUrl,
       size: oThis.videoSize,
       width: oThis.videoWidth,
