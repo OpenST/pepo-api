@@ -94,15 +94,13 @@ class Image extends ModelBase {
   async insertImage(params) {
     const oThis = this;
 
-    let response = await oThis
+    return oThis
       .insert({
         resolutions: JSON.stringify(params.resolutions),
         kind: imageConst.invertedKinds[params.kind],
         status: imageConst.invertedStatuses[params.status]
       })
       .fire();
-
-    return response;
   }
 
   /**

@@ -44,7 +44,7 @@ class UpdateProfile extends UpdateProfileBase {
    * @returns {Promise<void>}
    * @private
    */
-  async _validate() {
+  async _validateParams() {
     const oThis = this;
 
     if (!oThis.name || !oThis.username) {
@@ -56,8 +56,6 @@ class UpdateProfile extends UpdateProfileBase {
         })
       );
     }
-
-    super._validate();
   }
 
   /**

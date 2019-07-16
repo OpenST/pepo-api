@@ -3,8 +3,7 @@ const rootPrefix = '../../..',
   UserModel = require(rootPrefix + '/app/models/mysql/User'),
   KmsWrapper = require(rootPrefix + '/lib/aws/KmsWrapper'),
   BgJob = require(rootPrefix + '/lib/BgJob'),
-  GetResolution = require(rootPrefix + '/lib/user/image/GetResolution'),
-  CreateImage = require(rootPrefix + '/lib/user/image/Create'),
+  imageLib = require(rootPrefix + '/lib/imageLib'),
   TokenUserModel = require(rootPrefix + '/app/models/mysql/TokenUser'),
   UserByUsernameCache = require(rootPrefix + '/lib/cacheManagement/single/UserByUsername'),
   TwitterUserExtendedModel = require(rootPrefix + '/app/models/mysql/TwitterUserExtended'),
@@ -15,7 +14,6 @@ const rootPrefix = '../../..',
   twitterUserExtendedConstants = require(rootPrefix + '/lib/globalConstant/twitterUserExtended'),
   localCipher = require(rootPrefix + '/lib/encryptors/localCipher'),
   imageConstants = require(rootPrefix + '/lib/globalConstant/image'),
-  userProfileElementConstants = require(rootPrefix + '/lib/globalConstant/userProfileElement.js'),
   createErrorLogsEntry = require(rootPrefix + '/lib/errorLogs/createEntry'),
   errorLogsConstants = require(rootPrefix + '/lib/globalConstant/errorLogs'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
@@ -152,37 +150,16 @@ class TwitterSignup extends ServiceBase {
       return;
     }
 
-    //Prepare and valdiate resolution
-    let getResolutionParams = {
-      resolutions: {
-        original: {
-          width: 0,
-          height: 0,
-          size: 0,
-          url: oThis.userTwitterEntity.nonDefaultProfileImageUrl
-        }
-      },
+    let resp = await imageLib.validateAndSave({
+      image_url: oThis.userTwitterEntity.nonDefaultProfileImageUrl,
       isExternalUrl: true,
       kind: imageConstants.profileImageKind
-    };
-
-    let getResolutionResponse = new GetResolution(getResolutionParams).perform();
-
-    if (getResolutionResponse.isFailure()) {
-      logger.error('Invalid image resolution');
-      oThis.profileImageId = null;
-      logger.log('End::Save Profile Image ended abruptly because of invalid resolution');
-      return;
+    });
+    if (resp.isFailure()) {
+      return Promise.reject(resp);
     }
 
-    let createImageParams = {
-        resolutions: getResolutionResponse.data,
-        kind: imageConstants.profileImageKind,
-        status: imageConstants.notResized
-      },
-      createImageResponse = await new CreateImage(createImageParams).perform();
-
-    oThis.profileImageId = createImageResponse.insertId;
+    oThis.profileImageId = Object.keys(resp.data)[0];
 
     logger.log('End::Save Profile Image');
   }
