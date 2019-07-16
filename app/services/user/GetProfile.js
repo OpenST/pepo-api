@@ -45,7 +45,7 @@ class GetUserProfile extends ServiceBase {
   async _fetchProfileDetails() {
     const oThis = this;
 
-    let getProfileObj = new GetProfile({ userId: [oThis.userId], currentUserId: oThis.currentUserId });
+    let getProfileObj = new GetProfile({ userIds: [oThis.userId], currentUserId: oThis.currentUserId });
 
     let response = await getProfileObj.perform();
 
