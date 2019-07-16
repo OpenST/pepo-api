@@ -17,8 +17,8 @@ class AddFanVideo extends UpdateProfileBase {
    *
    * @param params
    * @param params.user_id {number} - user id
-   * @param params.s3_fan_video_url {string} - s3 video url
-   * @param params.s3_video_poster_image_url {string} - s3 poster image url
+   * @param params.video_url {string} - s3 video url
+   * @param params.poster_image_url {string} - s3 poster image url
    * @param params.video_width {number} - video width
    * @param params.video_height {number} - video height
    * @param params.video_size {number} - video size
