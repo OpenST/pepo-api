@@ -2,6 +2,10 @@ const rootPrefix = '../../..',
   ActivityServiceBase = require(rootPrefix + '/app/services/activity/Base'),
   UserActivityModel = require(rootPrefix + '/app/models/mysql/UserActivity'),
   UserCache = require(rootPrefix + '/lib/cacheManagement/multi/User'),
+  UserActivityByUserIdForOthersPaginationCache = require(rootPrefix +
+    '/lib/cacheManagement/single/UserActivityByUserIdForOthersPagination'),
+  UserActivityByUserIdForSelfPaginationCache = require(rootPrefix +
+    '/lib/cacheManagement/single/UserActivityByUserIdForSelfPagination'),
   ActivityByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/ActivityByIds'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
@@ -78,7 +82,7 @@ class UserActivity extends ActivityServiceBase {
     const oThis = this;
     logger.log(`start: _fetchActivityDetails`);
 
-    let modelResp = {};
+    let userActivitycacheResp = {};
 
     const fetchActivityIdsParams = {
       limit: oThis._currentPageLimit(),
@@ -87,13 +91,17 @@ class UserActivity extends ActivityServiceBase {
     };
 
     if (oThis.isCurrentUser) {
-      modelResp = await new UserActivityModel()._currentUserActivityIds(fetchActivityIdsParams);
+      userActivitycacheResp = await new UserActivityByUserIdForSelfPaginationCache(fetchActivityIdsParams).fetch();
     } else {
-      modelResp = await new UserActivityModel()._otherUserActivityIds(fetchActivityIdsParams);
+      userActivitycacheResp = await new UserActivityByUserIdForOthersPaginationCache(fetchActivityIdsParams).fetch();
     }
 
-    oThis.activityIds = modelResp.activityIds;
-    oThis.userActivityMap = modelResp.userActivityMap;
+    if (userActivitycacheResp.isFailure()) {
+      return Promise.reject(userActivitycacheResp);
+    }
+
+    oThis.activityIds = userActivitycacheResp.data.activityIds;
+    oThis.userActivityMap = userActivitycacheResp.data.userActivityMap;
     oThis.lastActivityId = oThis.activityIds[oThis.activityIds.length - 1];
 
     if (oThis.activityIds.length === 0) {
