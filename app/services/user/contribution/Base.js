@@ -96,8 +96,6 @@ class UserContributionBase extends ServiceBase {
 
     oThis.usersByIdMap = usersByIdHashRes.data;
 
-    console.log('HERE+++++++====', usersByIdHashRes);
-
     return Promise.resolve(responseHelper.successWithData({}));
   }
 
