@@ -7,24 +7,17 @@
 const rootPrefix = '../..',
   WebhooksModel = require(rootPrefix + '/app/models/mysql/Webhook'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
-  webhookConstants = require(rootPrefix + '/lib/globalConstant/webhooks'),
-  jsSdkWrapper = require(rootPrefix + '/lib/ostPlatform/jsSdkWrapper');
+  jsSdkWrapper = require(rootPrefix + '/lib/ostPlatform/jsSdkWrapper'),
+  webhookConstants = require(rootPrefix + '/lib/globalConstant/webhooks');
 
 /**
- * Class for WebhooksSubscription
+ * Class for Webhooks subscription.
  *
- * @class
+ * @class WebhooksSubscription
  */
 class WebhooksSubscription {
   /**
-   * Constructor for WebhooksSubscription
-   *
-   * @constructor
-   */
-  constructor() {}
-
-  /**
-   * Perform
+   * Perform.
    *
    * @returns {Promise<void>}
    */
@@ -37,7 +30,7 @@ class WebhooksSubscription {
   }
 
   /**
-   * Function to subscribe for web hooks
+   * Function to subscribe for web hooks.
    *
    * @returns {Promise<never>}
    */
@@ -51,7 +44,10 @@ class WebhooksSubscription {
         'transactions/failure',
         'users/activation_initiate',
         'users/activation_success',
-        'users/activation_failure'
+        'users/activation_failure',
+        'price_points/usd_update',
+        'price_points/eur_update',
+        'price_points/gbp_update'
       ],
       url: webhookUrl,
       status: webhookConstants.active
@@ -63,24 +59,26 @@ class WebhooksSubscription {
 
     if (webhooksCreationResponse.isFailure()) {
       logger.error(webhooksCreationResponse);
+
       return Promise.reject(webhooksCreationResponse);
     }
 
-    let resultType = webhooksCreationResponse.data['result_type'];
+    const resultType = webhooksCreationResponse.data.result_type;
 
     oThis.webhooksData = webhooksCreationResponse.data[resultType];
 
-    logger.step('OST webhook id:', oThis.webhooksData.id);
+    logger.step('OST webhook id: ', oThis.webhooksData.id);
   }
 
   /**
-   * Function to seed webhooks table
+   * Function to seed webhooks table.
    *
    * @returns {Promise<never>}
    */
   async seedWebhooksDataInTable() {
-    const oThis = this,
-      currentTime = Math.floor(Date.now() / 1000);
+    const oThis = this;
+
+    const currentTime = Math.floor(Date.now() / 1000);
 
     // Insert user in database
     let insertResponse = await new WebhooksModel()
@@ -93,18 +91,17 @@ class WebhooksSubscription {
       .fire();
 
     if (!insertResponse) {
-      logger.error('Error while inserting data in webhooks table');
-      return Promise.reject(new Error('Error while inserting data in webhooks table'));
+      return Promise.reject(new Error('Error while inserting data in webhooks table.'));
     }
   }
 }
 
 new WebhooksSubscription()
   .perform()
-  .then(function(rsp) {
+  .then(function() {
     process.exit(0);
   })
   .catch(function(err) {
-    console.log(JSON.stringify(err));
+    logger.error(JSON.stringify(err));
     process.exit(1);
   });
