@@ -1,5 +1,6 @@
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
+  responseHelper = require(rootPrefix + '/lib/formatter/response'),
   GetProfile = require(rootPrefix + '/lib/user/profile/Get');
 
 /**
@@ -51,8 +52,23 @@ class GetUserProfile extends ServiceBase {
     if (response.isFailure()) {
       return Promise.reject(response);
     }
+    let profileResp = response.data;
 
-    return response;
+    return responseHelper.successWithData({
+      userProfileDetails: profileResp.userProfileDetails[oThis.userId],
+      userProfileAllowedActions: profileResp.userProfileAllowedActions[oThis.userId],
+      usersByIdMap: profileResp.usersByIdMap,
+      tokenUsersByUserIdMap: profileResp.tokenUsersByUserIdMap,
+      imageMap: profileResp.imageMap,
+      videoMap: profileResp.videoMap,
+      linkMap: profileResp.linkMap,
+      tags: profileResp.tags,
+      userStat: profileResp.userStat,
+      videoDetailsMap: profileResp.videoDetailsMap,
+      currentUserUserContributionsMap: profileResp.currentUserUserContributionsMap,
+      currentUserVideoContributionsMap: profileResp.currentUserVideoContributionsMap,
+      pricePointsMap: profileResp.pricePointsMap
+    });
   }
 }
 
