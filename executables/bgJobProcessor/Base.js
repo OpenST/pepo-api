@@ -232,8 +232,21 @@ class BgJobProcessorBase extends CronBase {
       .then(function() {
         onResolve();
       })
-      .catch(function(error) {
-        logger.error('e_r_msb_2', 'Error in process message from rmq.', 'Error: ', error, 'Params: ', messageParams);
+      .catch(async function(err) {
+        let errorObject = err;
+        logger.error('e_r_msb_2', 'Error in process message from rmq.', 'Error: ', err, 'Params: ', messageParams);
+        if (!responseHelper.isCustomResult(err)) {
+          errorObject = responseHelper.error({
+            internal_error_identifier: 'unhandled_catch_response:e_bjp_b_1',
+            api_error_identifier: 'unhandled_catch_response',
+            debug_options: { error: err.toString() }
+          });
+        }
+        logger.error(' In catch block of services/Base.js', err);
+
+        await createErrorLogsEntry.perform(errorObject, ErrorLogsConstants.highSeverity);
+
+        process.emit('SIGINT');
         onResolve();
       });
   }
