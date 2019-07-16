@@ -81,6 +81,12 @@ node devops/exec/flushMemcache.js
     node executables/oneTimers/seedTokensTable.js --apiKey "803ee2a07554b94d80fb4ba4eb08229c" --apiSecret "66fc5bce904f83a74aba10469505cd5ac51dfc886fc747ecbfba3fea254d3006"
 ```
 
+* Seed Ost Price Points Table.
+```bash
+    node executables/oneTimers/seedOstPricePointsTable.js --apiKey "803ee2a07554b94d80fb4ba4eb08229c" --apiSecret "66fc5bce904f83a74aba10469505cd5ac51dfc886fc747ecbfba3fea254d3006"
+
+```
+
 * [Only Development] Seed the cron processes using this script.
 ```bash
     source set_env_vars.sh
