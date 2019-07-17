@@ -8,6 +8,7 @@ const rootPrefix = '../../../..',
   UsersCache = require(rootPrefix + '/lib/cacheManagement/multi/User'),
   userConstants = require(rootPrefix + '/lib/globalConstant/user'),
   UserProfileElementsByUserIdCache = require(rootPrefix + '/lib/cacheManagement/multi/UserProfileElementsByUserIds'),
+  UserModelKlass = require(rootPrefix + '/app/models/mysql/User'),
   responseHelper = require(rootPrefix + '/lib/formatter/response');
 
 /**
@@ -48,6 +49,8 @@ class UpdateProfileBase extends ServiceBase {
 
     await oThis._updateUser();
 
+    await oThis._flushCaches();
+
     return responseHelper.successWithData({});
   }
 
@@ -66,23 +69,23 @@ class UpdateProfileBase extends ServiceBase {
     let cacheRsp = await userMultiCache.fetch();
 
     if (cacheRsp.isFailure() || Object.keys(cacheRsp.data[oThis.userId]).length <= 0) {
-      // return Promise.reject(
-      //   responseHelper.error({
-      //     internal_error_identifier: 'a_s_u_p_b_1',
-      //     api_error_identifier: 'user_not_found',
-      //     debug_options: {}
-      //   })
-      // );
+      return Promise.reject(
+        responseHelper.error({
+          internal_error_identifier: 'a_s_u_p_b_1',
+          api_error_identifier: 'user_not_found',
+          debug_options: {}
+        })
+      );
     }
 
     if (cacheRsp.data[oThis.userId].status != userConstants.activeStatus) {
-      // return Promise.reject(
-      //   responseHelper.error({
-      //     internal_error_identifier: 'a_s_u_p_b_2',
-      //     api_error_identifier: 'user_not_active',
-      //     debug_options: {}
-      //   })
-      // );
+      return Promise.reject(
+        responseHelper.error({
+          internal_error_identifier: 'a_s_u_p_b_2',
+          api_error_identifier: 'user_not_active',
+          debug_options: {}
+        })
+      );
     }
   }
 
@@ -107,6 +110,22 @@ class UpdateProfileBase extends ServiceBase {
     for (let kind in profileElements) {
       oThis.profileElements[kind] = profileElements[kind];
     }
+  }
+
+  /**
+   * Flush all caches
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _flushCaches() {
+    const oThis = this;
+
+    // Clear all users cache
+    await UserModelKlass.flushCache({ id: oThis.userId, userName: oThis.username });
+
+    // Clear user profile elements cache
+    new UserProfileElementsByUserIdCache({ usersIds: [oThis.userId] }).clear();
   }
 
   /**
