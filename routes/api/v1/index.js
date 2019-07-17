@@ -19,6 +19,7 @@ const rootPrefix = '../../..',
   cookieHelper = require(rootPrefix + '/lib/cookieHelper'),
   tagRoutes = require(rootPrefix + '/routes/api/v1/tags'),
   uploadParamsRoutes = require(rootPrefix + '/routes/api/v1/uploadParams'),
+  rotateTwitterAccountRoutes = require(rootPrefix + '/routes/api/v1/rotateTwitterAccount'),
   ostTransactionRoutes = require(rootPrefix + '/routes/api/v1/ostTransactions');
 
 const errorConfig = basicHelper.fetchErrorConfig(apiVersions.v1);
@@ -54,5 +55,6 @@ router.use('/feed', feedRoutes);
 router.use('/activities', validateCookie, activitiesRoutes);
 router.use('/upload-params', uploadParamsRoutes);
 router.use('/tags', tagRoutes);
+router.use('/rotate-twitter-account', rotateTwitterAccountRoutes);
 
 module.exports = router;
