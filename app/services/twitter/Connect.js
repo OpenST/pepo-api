@@ -119,6 +119,7 @@ class TwitterConnect extends ServiceBase {
 
     let twitterResp = null;
 
+    // TODO - try - catch will not handle rejections.
     try {
       twitterResp = await new AccountTwitterRequestClass().verifyCredentials({
         oAuthToken: oThis.token,
@@ -147,6 +148,7 @@ class TwitterConnect extends ServiceBase {
 
     oThis.userTwitterEntity = twitterResp.data.userEntity;
 
+    // validating the front end data
     if (oThis.userTwitterEntity.idStr != oThis.twitterId || oThis.userTwitterEntity.handle != oThis.handle) {
       return Promise.reject(
         responseHelper.error({
@@ -180,15 +182,16 @@ class TwitterConnect extends ServiceBase {
       secret: oThis.secret
     };
 
+    // twitterUserObj may or may not be present. also if present, it might not be of a Pepo user.
     if (!oThis.twitterUserObj || !oThis.twitterUserObj.userId) {
+      logger.log('Twitter::Connect signup');
       oThis.serviceResp = await new SignupTwitterClass(requestParams).perform();
     } else {
+      logger.log('Twitter::Connect login');
       oThis.serviceResp = await new LoginTwitterClass(requestParams).perform();
     }
 
     logger.log('End::Connect._performAction');
-
-    return;
   }
 }
 
