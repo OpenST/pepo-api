@@ -53,7 +53,7 @@ class AddFanVideo extends UpdateProfileBase {
   async _validateParams() {
     const oThis = this;
 
-    let resp = videoLib.validateVideoObj({ video_url: oThis.videoUrl, isExternalUrl: oThis.isExternalUrl });
+    let resp = videoLib.validateVideoObj({ videoUrl: oThis.videoUrl, isExternalUrl: oThis.isExternalUrl });
     if (resp.isFailure()) {
       return Promise.reject(resp);
     }
