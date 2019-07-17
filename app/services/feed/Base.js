@@ -4,10 +4,13 @@ const rootPrefix = '../../..',
   responseHelper = require(rootPrefix + '/lib/formatter/response');
 
 class PublicVideoFeed extends ServiceBase {
-  constructor() {
+  constructor(params) {
+    super(params);
+
     const oThis = this;
 
     oThis.feeds = [];
+    oThis.feedIds = [];
     oThis.userIds = [];
     oThis.videoIds = [];
     oThis.profileResponse = {};
@@ -18,13 +21,12 @@ class PublicVideoFeed extends ServiceBase {
     const oThis = this;
 
     await oThis._validateAndSanitizeParams();
+
+    await oThis._setFeedIds();
+
     await oThis._getFeeds();
 
     return oThis._prepareResponse();
-  }
-
-  async _validateAndSanitizeParams() {
-    return responseHelper.successWithData({});
   }
 
   async _getFeeds() {
@@ -84,27 +86,6 @@ class PublicVideoFeed extends ServiceBase {
     oThis.profileResponse = profileResp.data;
 
     return responseHelper.successWithData({});
-  }
-
-  _prepareResponse() {
-    const oThis = this;
-
-    return responseHelper.successWithData({
-      feedList: oThis.feeds,
-      userProfileDetails: oThis.profileResponse.userProfileDetails,
-      userProfileAllowedActions: oThis.profileResponse.userProfileAllowedActions,
-      usersByIdMap: oThis.profileResponse.usersByIdMap,
-      tokenUsersByUserIdMap: oThis.profileResponse.tokenUsersByUserIdMap,
-      imageMap: oThis.profileResponse.imageMap,
-      videoMap: oThis.profileResponse.videoMap,
-      linkMap: oThis.profileResponse.linkMap,
-      tags: oThis.profileResponse.tags,
-      userStat: oThis.profileResponse.userStat,
-      videoDetailsMap: oThis.profileResponse.videoDetailsMap,
-      currentUserUserContributionsMap: oThis.profileResponse.currentUserUserContributionsMap,
-      currentUserVideoContributionsMap: oThis.profileResponse.currentUserVideoContributionsMap,
-      pricePointsMap: oThis.profileResponse.pricePointsMap
-    });
   }
 }
 
