@@ -8,9 +8,10 @@ class PublicVideoFeed extends ServiceBase {
     const oThis = this;
 
     oThis.feeds = [];
-    oThis.users = {};
     oThis.userIds = [];
     oThis.videoIds = [];
+    oThis.profileResponse = {};
+    oThis.finalResponse = {};
   }
 
   async _asyncPerform() {
@@ -18,7 +19,8 @@ class PublicVideoFeed extends ServiceBase {
 
     await oThis._validateAndSanitizeParams();
     await oThis._getFeeds();
-    await oThis._getUsers();
+
+    return oThis._prepareResponse();
   }
 
   async _validateAndSanitizeParams() {
@@ -74,13 +76,35 @@ class PublicVideoFeed extends ServiceBase {
       videoIds: oThis.videoIds
     });
 
-    let response = await getProfileObj.perform();
+    let profileResp = await getProfileObj.perform();
 
-    if (response.isFailure()) {
-      return Promise.reject(response);
+    if (profileResp.isFailure()) {
+      return Promise.reject(profileResp);
     }
+    oThis.profileResponse = profileResp.data;
 
-    return response;
+    return responseHelper.successWithData({});
+  }
+
+  _prepareResponse() {
+    const oThis = this;
+
+    return responseHelper.successWithData({
+      feedList: oThis.feeds,
+      userProfileDetails: oThis.profileResponse.userProfileDetails,
+      userProfileAllowedActions: oThis.profileResponse.userProfileAllowedActions,
+      usersByIdMap: oThis.profileResponse.usersByIdMap,
+      tokenUsersByUserIdMap: oThis.profileResponse.tokenUsersByUserIdMap,
+      imageMap: oThis.profileResponse.imageMap,
+      videoMap: oThis.profileResponse.videoMap,
+      linkMap: oThis.profileResponse.linkMap,
+      tags: oThis.profileResponse.tags,
+      userStat: oThis.profileResponse.userStat,
+      videoDetailsMap: oThis.profileResponse.videoDetailsMap,
+      currentUserUserContributionsMap: oThis.profileResponse.currentUserUserContributionsMap,
+      currentUserVideoContributionsMap: oThis.profileResponse.currentUserVideoContributionsMap,
+      pricePointsMap: oThis.profileResponse.pricePointsMap
+    });
   }
 }
 
