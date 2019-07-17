@@ -74,13 +74,15 @@ class UpdateProfileImage extends UpdateProfileBase {
       width: oThis.width,
       height: oThis.height,
       kind: imageConstants.profileImageKind,
-      isExternalUrl: oThis.isExternalUrl
+      userId: oThis.userId,
+      isExternalUrl: oThis.isExternalUrl,
+      enqueueResizer: true
     });
     if (resp.isFailure()) {
       return Promise.reject(resp);
     }
 
-    oThis.imageId = Object.keys(resp.data)[0];
+    oThis.imageId = resp.data.insertId;
   }
 
   /**
