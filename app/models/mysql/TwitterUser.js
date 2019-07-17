@@ -81,7 +81,7 @@ class TwitterUserModel extends ModelBase {
   async fetchByUserIds(userIds) {
     const oThis = this;
     let dbRows = await oThis
-      .select(['id', 'user_id'])
+      .select('*')
       .where({ user_id: userIds })
       .fire();
 

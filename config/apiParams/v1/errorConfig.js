@@ -119,6 +119,11 @@ const v1ErrorConfig = {
     parameter: 'from_user_id',
     code: 'invalid',
     message: 'Invalid from user id in transfers.'
+  },
+  invalid_twitter_user: {
+    parameter: 'twitter_user',
+    code: 'invalid',
+    message: 'Invalid twitter user in rotate twitter account. This twitter user has rotated their twitter account.'
   }
 };
 

@@ -84,7 +84,7 @@ class UserModel extends ModelBase {
   async fetchByUserName(userName) {
     const oThis = this;
     let dbRows = await oThis
-      .select(['id', 'user_name'])
+      .select('*')
       .where(['user_name = ?', userName])
       .fire();
 

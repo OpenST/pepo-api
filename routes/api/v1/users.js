@@ -6,6 +6,8 @@ const rootPrefix = '../../..',
   routeHelper = require(rootPrefix + '/routes/helper'),
   apiName = require(rootPrefix + '/lib/globalConstant/apiName'),
   sanitizer = require(rootPrefix + '/helpers/sanitizer'),
+  coreConstants = require(rootPrefix + '/config/coreConstants'),
+  responseHelper = require(rootPrefix + '/lib/formatter/response'),
   entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
   responseEntityKey = require(rootPrefix + '/lib/globalConstant/responseEntityKey');
 
@@ -89,6 +91,23 @@ router.get('/contribution-by', sanitizer.sanitizeDynamicUrlParams, function(req,
   Promise.resolve(
     routeHelper.perform(req, res, next, '/user/contribution/By', 'r_a_v1_u_cb_1', null, dataFormatterFunc)
   );
+});
+
+/* Rotate twitter account */
+router.get('/rotate-twitter-account', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.rotateTwitterAccount;
+
+  if (coreConstants.environment === 'production') {
+    errorObject = responseHelper.error({
+      internal_error_identifier: 'r_a_v1_u_rta_1',
+      api_error_identifier: 'resource_not_found',
+      debug_options: {}
+    });
+    // 404 error
+    return responseHelper.renderApiResponse(errorObject, res, errorConfig);
+  }
+
+  Promise.resolve(routeHelper.perform(req, res, next, '/user/RotateTwitterAccount', 'r_a_v1_u_rta_2', null));
 });
 
 /* User Suggestion to Logged IN User */
