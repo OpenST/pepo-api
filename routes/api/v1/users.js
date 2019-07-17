@@ -93,23 +93,6 @@ router.get('/contribution-by', sanitizer.sanitizeDynamicUrlParams, function(req,
   );
 });
 
-/* Rotate twitter account */
-router.get('/rotate-twitter-account', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
-  req.decodedParams.apiName = apiName.rotateTwitterAccount;
-
-  if (coreConstants.environment === 'production') {
-    errorObject = responseHelper.error({
-      internal_error_identifier: 'r_a_v1_u_rta_1',
-      api_error_identifier: 'resource_not_found',
-      debug_options: {}
-    });
-    // 404 error
-    return responseHelper.renderApiResponse(errorObject, res, errorConfig);
-  }
-
-  Promise.resolve(routeHelper.perform(req, res, next, '/user/RotateTwitterAccount', 'r_a_v1_u_rta_2', null));
-});
-
 /* User Suggestion to Logged IN User */
 router.get('/contribution-suggestion', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.contributionSuggestion;
