@@ -45,8 +45,18 @@ class PublicVideoFeed extends ServiceBase {
       return Promise.reject(feedByIdsCacheResponse);
     }
 
-    oThis.feeds = feedByIdsCacheResponse.data;
+    const feedsData = feedByIdsCacheResponse.data;
 
+    for(let feedId in feedsData) {
+      let feedData = feedsData[feedId];
+      oThis.feeds.push(feedData);
+      oThis.userIds.push(feedData.actor);
+      if(feedData.) {
+      
+      }
+      oThis.videoIds.push(feedData.primaryExternalEntityId);
+    }
+    
     oThis.userIds = [1000, 1001, 1002];
     oThis.videoIds = [123, 124, 125];
   }
