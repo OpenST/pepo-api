@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "c0d34cd0-1a5e-4327-8bfb-9534b588e641",
+		"_postman_id": "0462d45a-b831-4937-b637-640907178536",
 		"name": "pepo-api",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -429,7 +429,7 @@
 									"type": "text"
 								},
 								{
-									"key": "username",
+									"key": "user_name",
 									"value": "pankaj",
 									"type": "text"
 								},

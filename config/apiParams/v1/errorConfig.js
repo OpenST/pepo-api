@@ -100,11 +100,6 @@ const v1ErrorConfig = {
     code: 'invalid',
     message: 'Invalid url.'
   },
-  invalid_username: {
-    parameter: 'username',
-    code: 'invalid',
-    message: 'Invalid username.'
-  },
   invalid_kind: {
     parameter: 'kind',
     code: 'invalid',
