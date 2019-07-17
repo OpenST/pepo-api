@@ -1,6 +1,5 @@
 const rootPrefix = '../../../..',
   UpdateProfileBase = require(rootPrefix + '/app/services/user/profile/Base'),
-  UserModelKlass = require(rootPrefix + '/app/models/mysql/User'),
   CommonValidator = require(rootPrefix + '/lib/validators/Common'),
   UserProfileElementModel = require(rootPrefix + '/app/models/mysql/UserProfileElement'),
   userProfileElementConst = require(rootPrefix + '/lib/globalConstant/userProfileElement'),
