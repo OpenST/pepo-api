@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "cb81ea5b-33de-49e6-9fef-c546f9eb25ef",
+		"_postman_id": "ed1d614c-d0fe-4f0a-acea-c6ce65a2b340",
 		"name": "pepo-api",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -499,7 +499,7 @@
 							]
 						},
 						"url": {
-							"raw": "{{api_server}}/api/v1/users/1/profile-image",
+							"raw": "{{api_server}}/api/v1/users/1/profile-image?",
 							"host": [
 								"{{api_server}}"
 							],
@@ -579,7 +579,7 @@
 							]
 						},
 						"url": {
-							"raw": "{{api_server}}/api/v1/users/1/fan-video",
+							"raw": "{{api_server}}/api/v1/users/1/fan-video?",
 							"host": [
 								"{{api_server}}"
 							],
@@ -644,6 +644,27 @@
 				},
 				{
 					"name": "user-profile",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{api_server}}/api/v1/users/1/profile",
+							"host": [
+								"{{api_server}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"users",
+								"1",
+								"profile"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "rotate-twitter-account",
 					"request": {
 						"method": "GET",
 						"header": [],
