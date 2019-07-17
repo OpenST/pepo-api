@@ -123,7 +123,7 @@ const v1ErrorConfig = {
   invalid_twitter_user: {
     parameter: 'twitter_user',
     code: 'invalid',
-    message: 'Invalid twitter user in rotate twitter account.'
+    message: 'Invalid twitter user in rotate twitter account. This twitter user has rotated their twitter account.'
   }
 };
 
