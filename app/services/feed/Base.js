@@ -1,6 +1,7 @@
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   GetProfile = require(rootPrefix + '/lib/user/profile/Get'),
+  FeedByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/FeedByIds'),
   responseHelper = require(rootPrefix + '/lib/formatter/response');
 
 class PublicVideoFeed extends ServiceBase {
@@ -29,35 +30,22 @@ class PublicVideoFeed extends ServiceBase {
     return oThis._prepareResponse();
   }
 
+  /**
+   * Get Feed details
+   *
+   * @returns {Promise<never>}
+   * @private
+   */
   async _getFeeds() {
     const oThis = this;
 
-    oThis.feeds = [
-      {
-        id: '1',
-        kind: 'FAN_UPDATE',
-        payload: {
-          video_id: '123',
-          user_id: '1000'
-        }
-      },
-      {
-        id: '2',
-        kind: 'FAN_UPDATE',
-        payload: {
-          video_id: '124',
-          user_id: '1001'
-        }
-      },
-      {
-        id: '3',
-        kind: 'FAN_UPDATE',
-        payload: {
-          video_id: '125',
-          user_id: '1002'
-        }
-      }
-    ];
+    const feedByIdsCacheResponse = await new FeedByIdsCache({ ids: oThis.feedIds }).fetch();
+
+    if (feedByIdsCacheResponse.isFailure()) {
+      return Promise.reject(feedByIdsCacheResponse);
+    }
+
+    oThis.feeds = feedByIdsCacheResponse.data;
 
     oThis.userIds = [1000, 1001, 1002];
     oThis.videoIds = [123, 124, 125];
