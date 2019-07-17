@@ -1,7 +1,7 @@
 const rootPrefix = '../../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
-  TokenModel = require(rootPrefix + '/app/models/mysql/Token'),
   OstPricePointsModel = require(rootPrefix + '/app/models/mysql/OstPricePoints'),
+  SecureTokenCache = require(rootPrefix + '/lib/cacheManagement/single/SecureToken'),
   PricePointsCache = require(rootPrefix + '/lib/cacheManagement/single/PricePoints'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
@@ -60,9 +60,13 @@ class PricePointsUpdateBase extends ServiceBase {
    * @returns {Promise<string>}
    */
   async fetchPepoStakeCurrency() {
-    const pepoTokenDetails = await new TokenModel().fetchToken();
+    const pepoTokenResponse = await new SecureTokenCache().fetch();
 
-    return pepoTokenDetails.stakeCurrency;
+    if (pepoTokenResponse.isFailure()) {
+      return Promise.reject(new Error('Could not fetch pepo token details.'));
+    }
+
+    return pepoTokenResponse.data.stakeCurrency;
   }
 
   /**
