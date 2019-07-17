@@ -256,10 +256,6 @@ const v1Signature = {
       {
         parameter: 'current_user',
         validatorMethods: ['validateNonEmptyObject']
-      },
-      {
-        parameter: 'user_name',
-        validatorMethods: ['validateString']
       }
     ],
     optional: []
