@@ -106,7 +106,7 @@ class Transaction extends ModelBase {
   }
 
   static get transactionIdUniqueIndexName() {
-    return 'u_idx_1';
+    return 'uidx_1';
   }
 }
 

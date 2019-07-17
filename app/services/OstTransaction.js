@@ -21,6 +21,8 @@ const rootPrefix = '../..',
   commonValidator = require(rootPrefix + '/lib/validators/Common'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   activityConstants = require(rootPrefix + '/lib/globalConstant/activity'),
+  createErrorLogsEntry = require(rootPrefix + '/lib/errorLogs/createEntry'),
+  errorLogsConstants = require(rootPrefix + '/lib/globalConstant/errorLogs'),
   transactionConstants = require(rootPrefix + '/lib/globalConstant/transaction'),
   externalEntityConstants = require(rootPrefix + '/lib/globalConstant/externalEntity');
 
@@ -65,7 +67,10 @@ class OstTransaction extends ServiceBase {
   async _asyncPerform() {
     const oThis = this;
 
-    oThis._setStatuses();
+    let setStatusResponse = oThis._setStatuses();
+    if (setStatusResponse.isFailure()) {
+      return Promise.reject(setStatusResponse);
+    }
 
     let promiseArray1 = [];
     promiseArray1.push(oThis._fetchGiphyExternalEntityId());
@@ -74,11 +79,11 @@ class OstTransaction extends ServiceBase {
 
     await Promise.all(promiseArray1);
 
-    if (oThis.transactionId) {
-      await oThis._updateTransaction();
-    } else {
-      await oThis._insertInTransactionAndAssociatedTables();
-    }
+    // if (oThis.transactionId) {
+    //   await oThis._updateTransaction();
+    // } else {
+    await oThis._insertInTransactionAndAssociatedTables();
+    //}
     return Promise.resolve(responseHelper.successWithData());
   }
 
@@ -132,15 +137,31 @@ class OstTransaction extends ServiceBase {
     //Insert in external entities, transactions and pending transactions
     await oThis._insertGiphyTextAndTransaction();
 
-    //todo: insert IN pendng after insertion in Transaction
-    //todo: error if tx status is not pending.
-    //todo: on index violation, dont complete the remainng task
+    let insertTransactionResponse = await oThis._insertTransaction();
+    if (insertTransactionResponse.isDuplicateIndexViolation) {
+      await oThis._fetchTransaction();
+      if (!oThis.transactionId) {
+        let errorObject = responseHelper.error({
+          internal_error_identifier: 'a_s_ost_2',
+          api_error_identifier: 'something_went_wrong',
+          debug_options: { ostTxId: oThis.ostTxId }
+        });
+        createErrorLogsEntry.perform(errorObject, errorLogsConstants.highSeverity);
+        return Promise.reject(errorObject);
+      }
 
-    //Insert in activity table
-    await oThis._insertInActivityTable();
+      await oThis._updateTransaction();
+    } else {
+      let promiseArray2 = [];
 
-    //Insert in user activity table
-    await oThis._insertInUserActivityTable();
+      promiseArray2.push(oThis._insertInPendingTransactions());
+
+      promiseArray2.push(oThis._insertInActivityTable());
+
+      await Promise.all(promiseArray2);
+
+      await oThis._insertInUserActivityTable();
+    }
   }
 
   /**
@@ -151,18 +172,24 @@ class OstTransaction extends ServiceBase {
   _setStatuses() {
     const oThis = this;
 
-    if (oThis.ostTransactionStatus === transactionConstants.successOstTransactionStatus) {
-      oThis.activityStatus = activityConstants.doneStatus;
-      oThis.transactionStatus = transactionConstants.doneStatus;
-    } else if (oThis.ostTransactionStatus === transactionConstants.failedOstTransactionStatus) {
-      oThis.activityStatus = activityConstants.failedStatus;
-      oThis.transactionStatus = transactionConstants.failedStatus;
-    } else if (transactionConstants.notFinalizedOstTransactionStatuses.indexOf(oThis.ostTransactionStatus) > -1) {
+    if (transactionConstants.notFinalizedOstTransactionStatuses.indexOf(oThis.ostTransactionStatus) > -1) {
       oThis.activityStatus = activityConstants.pendingStatus;
       oThis.transactionStatus = transactionConstants.pendingStatus;
     } else {
-      throw new Error(`Invalid Ost Transaction Status. ExternalEntityId -${oThis.ostTransactionStatus}`);
+      let errorObject = responseHelper.error({
+        internal_error_identifier: 'a_s_ost_4',
+        api_error_identifier: 'something_went_wrong',
+        debug_options: {
+          Error: 'Invalid ost transaction status. Only allowed ost status is CREATED ',
+          ostTransactionStatus: oThis.ostTransactionStatus
+        }
+      });
+      createErrorLogsEntry.perform(errorObject, errorLogsConstants.highSeverity);
+
+      return errorObject;
     }
+
+    return responseHelper.successWithData({});
   }
 
   /**
@@ -405,14 +432,6 @@ class OstTransaction extends ServiceBase {
     promiseArray.push(oThis._fetchToUserIdsAndAmounts());
 
     await Promise.all(promiseArray);
-
-    let promiseArray2 = [];
-
-    promiseArray2.push(oThis._insertTransaction());
-
-    promiseArray2.push(oThis._insertInPendingTransactions());
-
-    await Promise.all(promiseArray2);
   }
 
   /**
@@ -486,9 +505,12 @@ class OstTransaction extends ServiceBase {
   async _insertTransaction() {
     const oThis = this;
 
+    let isDuplicateIndexViolation = false;
+
     let extraData = {
       toUserIds: oThis.toUserIdsArray,
-      amounts: oThis.amountsArray
+      amounts: oThis.amountsArray,
+      kind: transactionConstants.extraData.userTransactionKind
     };
 
     let insertData = {
@@ -506,42 +528,29 @@ class OstTransaction extends ServiceBase {
       .fire()
       .catch(async function(err) {
         if (TransactionModel.isDuplicateIndexViolation(TransactionModel.transactionIdUniqueIndexName, err)) {
-          await oThis._fetchTransaction();
-          if (!oThis.transactionId) {
-            //Send error email from here.
-            return Promise.reject(
-              responseHelper.error({
-                internal_error_identifier: 'a_s_ost_2',
-                api_error_identifier: 'something_went_wrong',
-                debug_options: { insertData: insertData }
-              })
-            );
-          }
-
-          await oThis._updateTransaction();
-
-          return { insertId: oThis.transactionId };
+          isDuplicateIndexViolation = true;
         } else {
           //Insert failed due to some other reason.
           //Send error email from here.
-          return Promise.reject(
-            responseHelper.error({
-              internal_error_identifier: 'a_s_ost_3',
-              api_error_identifier: 'something_went_wrong',
-              debug_options: { Error: err }
-            })
-          );
+          let errorObject = responseHelper.error({
+            internal_error_identifier: 'a_s_ost_3',
+            api_error_identifier: 'something_went_wrong',
+            debug_options: { Error: err }
+          });
+          createErrorLogsEntry.perform(errorObject, errorLogsConstants.highSeverity);
+          return Promise.reject(errorObject);
         }
       });
 
-    //todo: on isDuplicateIndexViolation return
-    oThis.transactionId = insertResponse.insertId;
-    insertData.id = insertResponse.insertId;
+    if (!isDuplicateIndexViolation) {
+      oThis.transactionId = insertResponse.insertId;
+      insertData.id = insertResponse.insertId;
 
-    let formattedInsertData = new TransactionModel().formatDbData(insertData);
-    await TransactionModel.flushCache(formattedInsertData);
+      let formattedInsertData = new TransactionModel().formatDbData(insertData);
+      await TransactionModel.flushCache(formattedInsertData);
+    }
 
-    return Promise.resolve();
+    return { isDuplicateIndexViolation: isDuplicateIndexViolation };
   }
 
   /**
@@ -553,21 +562,14 @@ class OstTransaction extends ServiceBase {
   async _insertInActivityTable() {
     const oThis = this;
 
-    let currentTime = null,
-      extraData = {};
-
-    if (oThis.activityStatus !== activityConstants.pendingStatus) {
-      currentTime = Math.floor(Date.now() / 1000);
-    }
-
-    oThis.publishedAtTs = currentTime;
+    let extraData = {};
 
     let insertData = {
       entity_type: activityConstants.invertedEntityTypes[activityConstants.transactionEntityType],
       entity_id: oThis.transactionId,
       extra_data: JSON.stringify(extraData),
       status: activityConstants.invertedStatuses[oThis.activityStatus],
-      published_ts: oThis.publishedAtTs,
+      published_ts: null,
       display_ts: null
     };
 
@@ -594,25 +596,15 @@ class OstTransaction extends ServiceBase {
     let insertData = {
       user_id: oThis.userId,
       activity_id: oThis.activityId,
-      published_ts: oThis.publishedAtTs,
+      published_ts: null,
       display_ts: displayTimestamp
     };
 
-    await new UserActivityModel().insert(insertData).fire();
+    let insertResponse = await new UserActivityModel().insert(insertData).fire();
+    insertData.id = insertResponse.insertId;
 
-    if (oThis.activityStatus === activityConstants.doneStatus) {
-      //Insert entry for to user ids as well.
-      for (let i = 0; i < oThis.toUserIdsArray.length; i++) {
-        let insertUserActivityData = {
-          user_id: oThis.toUserIdsArray[i],
-          activity_id: oThis.activityId,
-          published_ts: oThis.publishedAtTs,
-          display_ts: displayTimestamp
-        };
-
-        await new UserActivityModel().insert(insertUserActivityData).fire();
-      }
-    }
+    let formattedInsertData = new UserActivityModel().formatDbData(insertData);
+    await UserActivityModel.flushCache(formattedInsertData);
   }
 
   /**
@@ -632,7 +624,7 @@ class OstTransaction extends ServiceBase {
       status: transactionConstants.invertedStatuses[oThis.transactionStatus]
     };
 
-    let insertResponse = await new PendingTransactionModel().insert(insertData).fire(); //Todo: catch to see if we get duplicate exception
+    let insertResponse = await new PendingTransactionModel().insert(insertData).fire();
 
     insertData.id = insertResponse.insertId;
 
