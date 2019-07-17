@@ -3,8 +3,6 @@ const rootPrefix = '../../../..',
   TokenUserByUserIdCache = require(rootPrefix + '/lib/cacheManagement/multi/TokenUserByUserIds'),
   TokenUserByOstUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TokenUserByOstUserIds'),
   TokenUserModel = require(rootPrefix + '/app/models/mysql/TokenUser'),
-  FeedModel = require(rootPrefix + '/app/models/mysql/Feed'),
-  UserFeedModel = require(rootPrefix + '/app/models/mysql/UserFeed'),
   ExternalEntityModel = require(rootPrefix + '/app/models/mysql/ExternalEntity'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   externalEntityConstants = require(rootPrefix + '/lib/globalConstant/externalEntity'),
@@ -195,48 +193,7 @@ class TransactionOstEventBase extends ServiceBase {
    */
   async _processForUserTransaction() {
     const oThis = this;
-    logger.log('Process on User Transaction of Transaction Webhook');
-
-    let feedObjRes = await new FeedModel().fetchByPrimaryExternalEntityId(oThis.externalEntityObj.id);
-
-    if (!feedObjRes.id) {
-      throw `Feed Object not found for externalEntityObj- ${oThis.externalEntityObj}`;
-    }
-
-    oThis.feedObj = feedObjRes;
-    oThis.privacyType = oThis.feedObj.privacyType;
-
-    if (oThis.feedObj.status === 'todo::change_me') {
-      return Promise.resolve(responseHelper.successWithData({}));
-    }
-
-    let userFeedObj = await new UserFeedModel().fetchByFeedId(oThis.feedObj.id);
-
-    if (!userFeedObj.id) {
-      throw `User Feed Object not found for externalEntityObj- ${oThis.externalEntityObj}`;
-    }
-
-    let published_ts = oThis._published_timestamp();
-
-    await new FeedModel()
-      .update({
-        published_ts: published_ts,
-        display_ts: oThis.ostTransactionMinedTimestamp,
-        status: 'todo::change_me'
-      })
-      .where(['id = ?', oThis.feedObj.id])
-      .fire();
-
-    await new UserFeedModel()
-      .update({
-        published_ts: published_ts
-      })
-      .where(['id = ?', userFeedObj.id])
-      .fire();
-
-    await FeedModel.flushCache({ id: oThis.feedObj.id });
-    //await UserFeedModel.flushCache({ id: userFeedObj.id });
-
+    //'todo::change_me'
     return Promise.resolve(responseHelper.successWithData({}));
   }
 
