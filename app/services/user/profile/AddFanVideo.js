@@ -84,9 +84,9 @@ class AddFanVideo extends UpdateProfileBase {
       return Promise.reject(resp);
     }
 
-    let videoObj = resp.data,
-      videoId = Object.keys(videoObj)[0],
-      coverImageId = videoObj[videoId].posterImageId;
+    let videoObj = resp.data.video,
+      videoId = resp.data.insertId,
+      coverImageId = videoObj.posterImageId;
 
     if (videoId) {
       await oThis._addProfileElement(videoId, userProfileElementConst.coverVideoIdKind);
