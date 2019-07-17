@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "4212db32-a4b8-4436-9bfe-7d52e6faa7d6",
+		"_postman_id": "cb81ea5b-33de-49e6-9fef-c546f9eb25ef",
 		"name": "pepo-api",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -409,6 +409,199 @@
 					"response": []
 				},
 				{
+					"name": "update-profile",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/x-www-form-urlencoded"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "name",
+									"value": "Pankaj Keswani",
+									"type": "text"
+								},
+								{
+									"key": "username",
+									"value": "pankaj",
+									"type": "text"
+								},
+								{
+									"key": "bio",
+									"value": "This is my bio, please save it with #cool",
+									"type": "text"
+								},
+								{
+									"key": "link",
+									"value": "https://www.facebook.com",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{api_server}}/api/v1/users/1/profile",
+							"host": [
+								"{{api_server}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"users",
+								"1",
+								"profile"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update-profile-image",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/x-www-form-urlencoded"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "image_url",
+									"value": "https://s3.amazonaws.com/uassets.stagingpepo.com/pepo-staging1000/ua/images/pankaj-profile.jpg",
+									"type": "text"
+								},
+								{
+									"key": "size",
+									"value": "1000",
+									"type": "text"
+								},
+								{
+									"key": "width",
+									"value": "100",
+									"type": "text"
+								},
+								{
+									"key": "height",
+									"value": "100",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{api_server}}/api/v1/users/1/profile-image",
+							"host": [
+								"{{api_server}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"users",
+								"1",
+								"profile-image"
+							],
+							"query": [
+								{
+									"key": "image_url",
+									"value": "https://s3.amazonaws.com/uassets.stagingpepo.com/pepo-staging1000/ua/images",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "add-fan-video",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/x-www-form-urlencoded"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "video_url",
+									"value": "https://s3.amazonaws.com/uassets.stagingpepo.com/pepo-staging1000/ua/videos/pankaj-profile.mp4",
+									"type": "text"
+								},
+								{
+									"key": "poster_image_url",
+									"value": "https://s3.amazonaws.com/uassets.stagingpepo.com/pepo-staging1000/ua/images/pankaj-profile-video-poster.jpg",
+									"type": "text"
+								},
+								{
+									"key": "video_size",
+									"value": "2000",
+									"type": "text"
+								},
+								{
+									"key": "video_height",
+									"value": "100",
+									"type": "text"
+								},
+								{
+									"key": "video_width",
+									"value": "100",
+									"type": "text"
+								},
+								{
+									"key": "image_size",
+									"value": "1000",
+									"type": "text"
+								},
+								{
+									"key": "image_height",
+									"value": "100",
+									"type": "text"
+								},
+								{
+									"key": "image_width",
+									"value": "100",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{api_server}}/api/v1/users/1/fan-video",
+							"host": [
+								"{{api_server}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"users",
+								"1",
+								"fan-video"
+							],
+							"query": [
+								{
+									"key": "image_url",
+									"value": "https://s3.amazonaws.com/uassets.stagingpepo.com/pepo-staging1000/ua/images",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "logged-in-user",
 					"request": {
 						"method": "GET",
@@ -455,7 +648,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{api_server}}/api/v1/users/1000/profile",
+							"raw": "{{api_server}}/api/v1/users/1/profile",
 							"host": [
 								"{{api_server}}"
 							],
@@ -463,7 +656,7 @@
 								"api",
 								"v1",
 								"users",
-								"1000",
+								"1",
 								"profile"
 							]
 						}
