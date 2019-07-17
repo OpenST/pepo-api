@@ -93,10 +93,9 @@ class TwitterSignup extends ServiceBase {
     const oThis = this;
     logger.log('Start::Perform Twitter Signup');
 
-    const promisesArray1 = [],
-      promisesArray2 = [];
+    const promisesArray1 = [];
 
-    let promiseResp = oThis._createUserInOst();
+    let createOstUserPromise = oThis._createUserInOst();
 
     promisesArray1.push(oThis._saveProfileImage());
     promisesArray1.push(oThis._setUserName());
@@ -106,16 +105,16 @@ class TwitterSignup extends ServiceBase {
 
     await oThis._createUser();
 
-    let promiseArray3 = [];
-    promiseArray3.push(oThis.twitterSpecificFunction());
+    let promiseArray2 = [];
+    promiseArray2.push(oThis.twitterSpecificFunction());
 
-    promiseArray3.push(
-      promiseResp.then(function(a) {
+    promiseArray2.push(
+      createOstUserPromise.then(function(a) {
         return oThis._createTokenUser();
       })
     );
 
-    await Promise.all(promiseArray3);
+    await Promise.all(promiseArray2);
 
     await oThis._enqueAfterSignupJob();
 
@@ -153,13 +152,14 @@ class TwitterSignup extends ServiceBase {
     let resp = await imageLib.validateAndSave({
       image_url: oThis.userTwitterEntity.nonDefaultProfileImageUrl,
       isExternalUrl: true,
-      kind: imageConstants.profileImageKind
+      kind: imageConstants.profileImageKind,
+      enqueueResizer: false
     });
     if (resp.isFailure()) {
       return Promise.reject(resp);
     }
 
-    oThis.profileImageId = Object.keys(resp.data)[0];
+    oThis.profileImageId = resp.data.insertId;
 
     logger.log('End::Save Profile Image');
   }

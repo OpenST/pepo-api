@@ -24,7 +24,7 @@ class UpdateProfile extends UpdateProfileBase {
    * @param {number} params.user_id
    * @param {string} params.bio
    * @param {string} params.name
-   * @param {string} params.username
+   * @param {string} params.user_name
    * @param {string} params.link - Social link added by user
    */
   constructor(params) {
@@ -34,7 +34,7 @@ class UpdateProfile extends UpdateProfileBase {
 
     oThis.bio = oThis.params.bio;
     oThis.name = oThis.params.name;
-    oThis.username = oThis.params.username;
+    oThis.username = oThis.params.user_name;
     oThis.link = oThis.params.link;
   }
 
@@ -51,7 +51,7 @@ class UpdateProfile extends UpdateProfileBase {
       return Promise.reject(
         responseHelper.error({
           internal_error_identifier: 'a_s_u_p_up_1',
-          api_error_identifier: 'invalid_username',
+          api_error_identifier: 'invalid_user_name',
           debug_options: {}
         })
       );

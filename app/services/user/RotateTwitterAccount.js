@@ -16,7 +16,6 @@ class RotateTwitterAccount extends ServiceBase {
    *
    * @param params
    * @param params.user_name {String} - user name
-   * @param params.current_user {object} - current_user
    */
   constructor(params) {
     super(params);
@@ -24,7 +23,6 @@ class RotateTwitterAccount extends ServiceBase {
     const oThis = this;
 
     oThis.userName = params.user_name;
-    oThis.currentUserId = +params.current_user.id;
     oThis.user = {};
     oThis.userId = null;
     oThis.currentUserTwitterUserId = null;

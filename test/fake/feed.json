@@ -35,7 +35,7 @@
       "ost_status": "ACTIVATED",
       "profile_image_id": null,
       "status": "ACTIVE",
-      "username": "tejas",
+      "user_name": "tejas",
       "uts": 1562672642,
       "user_profile_id": "3"
     },
@@ -47,7 +47,7 @@
       "ost_status": "ACTIVATED",
       "profile_image_id": null,
       "status": "ACTIVE",
-      "username": "kedar",
+      "user_name": "kedar",
       "uts": 1562672200,
       "user_profile_id": "1001"
     },
@@ -59,7 +59,7 @@
       "ost_status": "ACTIVATED",
       "profile_image_id": null,
       "status": "ACTIVE",
-      "username": "sunil",
+      "user_name": "sunil",
       "uts": 1562672100,
       "user_profile_id": "1002"
     }

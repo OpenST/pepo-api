@@ -254,10 +254,6 @@ const v1Signature = {
   [apiName.rotateTwitterAccount]: {
     mandatory: [
       {
-        parameter: 'current_user',
-        validatorMethods: ['validateNonEmptyObject']
-      },
-      {
         parameter: 'user_name',
         validatorMethods: ['validateString']
       }
@@ -355,7 +351,7 @@ const v1Signature = {
         validatorMethods: ['validateString']
       },
       {
-        parameter: 'username',
+        parameter: 'user_name',
         validatorMethods: ['validateString']
       }
     ],
