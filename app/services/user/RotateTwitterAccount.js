@@ -15,7 +15,6 @@ class RotateTwitterAccount extends ServiceBase {
    * @constructor
    *
    * @param params
-   * @param params.user_name {String} - user name
    * @param params.current_user {object} - current_user
    */
   constructor(params) {
@@ -23,10 +22,9 @@ class RotateTwitterAccount extends ServiceBase {
 
     const oThis = this;
 
-    oThis.userName = params.user_name;
-    oThis.currentUserId = +params.current_user.id;
+    oThis.userName = params.current_user.user_name;
+    oThis.userId = +params.current_user.id;
     oThis.user = {};
-    oThis.userId = null;
     oThis.currentUserTwitterUserId = null;
     oThis.currentUserTwitterUserId = null;
   }
@@ -39,8 +37,6 @@ class RotateTwitterAccount extends ServiceBase {
   async _asyncPerform() {
     const oThis = this;
 
-    await oThis._fetchUser();
-
     await oThis._fetchTwitterUser();
 
     await oThis._rotateTwitterAccount();
@@ -48,25 +44,6 @@ class RotateTwitterAccount extends ServiceBase {
     await oThis._clearTwitterUserCache();
 
     return responseHelper.successWithData({});
-  }
-
-  /**
-   * Fetch user.
-   *
-   * @return {Promise<void>}
-   * @private
-   */
-  async _fetchUser() {
-    const oThis = this;
-
-    const cacheRsp = await new UserByUserNameCache({ userName: oThis.userName }).fetch();
-
-    if (cacheRsp.isFailure()) {
-      return Promise.reject(cacheRsp);
-    }
-
-    oThis.user = cacheRsp.data;
-    oThis.userId = oThis.user.id;
   }
 
   /**
