@@ -596,8 +596,7 @@ class OstTransaction extends ServiceBase {
     let insertData = {
       user_id: oThis.userId,
       activity_id: oThis.activityId,
-      published_ts: null,
-      display_ts: displayTimestamp
+      published_ts: null
     };
 
     let insertResponse = await new UserActivityModel().insert(insertData).fire();
