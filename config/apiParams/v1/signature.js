@@ -262,11 +262,13 @@ const v1Signature = {
         validatorMethods: ['validateInteger']
       },
       {
-        parameter: 's3_fan_video_url',
+        parameter: 'video_url',
         validatorMethods: ['validateGenericUrl']
-      },
+      }
+    ],
+    optional: [
       {
-        parameter: 's3_video_poster_image_url',
+        parameter: 'poster_image_url',
         validatorMethods: ['validateGenericUrl']
       },
       {
@@ -293,8 +295,67 @@ const v1Signature = {
         parameter: 'image_size',
         validatorMethods: ['validateInteger']
       }
+    ]
+  },
+  [apiName.saveProfileImage]: {
+    mandatory: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      },
+      {
+        parameter: 'user_id',
+        validatorMethods: ['validateInteger']
+      },
+      {
+        parameter: 'image_url',
+        validatorMethods: ['validateGenericUrl']
+      }
     ],
-    optional: []
+    optional: [
+      {
+        parameter: 'width',
+        validatorMethods: ['validateInteger']
+      },
+      {
+        parameter: 'height',
+        validatorMethods: ['validateInteger']
+      },
+      {
+        parameter: 'size',
+        validatorMethods: ['validateInteger']
+      }
+    ]
+  },
+  [apiName.saveProfile]: {
+    mandatory: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      },
+      {
+        parameter: 'user_id',
+        validatorMethods: ['validateInteger']
+      },
+      {
+        parameter: 'name',
+        validatorMethods: ['validateString']
+      },
+      {
+        parameter: 'username',
+        validatorMethods: ['validateString']
+      }
+    ],
+    optional: [
+      {
+        parameter: 'bio',
+        validatorMethods: ['validateString']
+      },
+      {
+        parameter: 'link',
+        validatorMethods: ['validateString']
+      }
+    ]
   },
   [apiName.getTags]: {
     mandatory: [

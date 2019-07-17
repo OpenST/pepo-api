@@ -127,6 +127,24 @@ class VideoDetail extends ModelBase {
   }
 
   /**
+   * Insert new video
+   *
+   * @param params {object} - params
+   *
+   * @return {object}
+   */
+  insertVideo(params) {
+    const oThis = this;
+
+    return oThis
+      .insert({
+        creator_user_id: params.userId,
+        video_id: params.videoId
+      })
+      .fire();
+  }
+
+  /**
    * Flush cache.
    *
    * @param {object} params

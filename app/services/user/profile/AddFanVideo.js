@@ -1,203 +1,139 @@
 const rootPrefix = '../../../..',
-  ServiceBase = require(rootPrefix + '/app/services/Base'),
-  UserProfileElementsByUserIdCache = require(rootPrefix + '/lib/cacheManagement/multi/UserProfileElementsByUserIds'),
-  userProfileElementConst = require(rootPrefix + '/lib/globalConstant/userProfileElement.js'),
-  CreateImage = require(rootPrefix + '/lib/user/image/Create'),
-  UpdateImage = require(rootPrefix + '/lib/user/image/Update'),
-  CreateVideo = require(rootPrefix + '/lib/user/video/Create'),
-  UpdateVideo = require(rootPrefix + '/lib/user/video/Update'),
-  GetResolution = require(rootPrefix + '/lib/user/image/GetResolution'),
-  responseHelper = require(rootPrefix + '/lib/formatter/response'),
-  imageConst = require(rootPrefix + '/lib/globalConstant/image');
+  UpdateProfileBase = require(rootPrefix + '/app/services/user/profile/Base'),
+  UserModelKlass = require(rootPrefix + '/app/models/mysql/User'),
+  CommonValidator = require(rootPrefix + '/lib/validators/Common'),
+  UserProfileElementModel = require(rootPrefix + '/app/models/mysql/UserProfileElement'),
+  userProfileElementConst = require(rootPrefix + '/lib/globalConstant/userProfileElement'),
+  videoLib = require(rootPrefix + '/lib/videoLib');
 
 /**
  * Class for fan video and image save
  *
  * @class
  */
-class AddFanVideo extends ServiceBase {
+class AddFanVideo extends UpdateProfileBase {
   /**
    * @constructor
    *
    * @param params
    * @param params.user_id {number} - user id
-   * @param params.s3_fan_video_url {string} - s3 video url
-   * @param params.s3_video_poster_image_url {string} - s3 poster image url
+   * @param params.video_url {string} - s3 video url
+   * @param params.poster_image_url {string} - s3 poster image url
    * @param params.video_width {number} - video width
    * @param params.video_height {number} - video height
    * @param params.video_size {number} - video size
    * @param params.image_width {number} - image width
    * @param params.image_height {number} - image height
    * @param params.image_size {number} - image size
+   * @param {boolean} params.isExternalUrl - video source is other than s3 upload
    */
   constructor(params) {
     super(params);
 
     const oThis = this;
 
-    oThis.userId = params.user_id;
-    oThis.s3FanVideoUrl = params.s3_fan_video_url;
-    oThis.s3VidePosterImageUrl = params.s3_video_poster_image_url;
+    oThis.videoUrl = params.video_url;
+    oThis.posterImageUrl = params.poster_image_url;
     oThis.videoWidth = params.video_width;
     oThis.videoHeight = params.video_height;
     oThis.videoSize = params.video_size;
     oThis.imageWidth = params.image_width;
     oThis.imageHeight = params.image_height;
     oThis.imageSize = params.image_size;
-
-    oThis.posterImageId = null;
+    oThis.isExternalUrl = params.isExternalUrl;
+    oThis.videoId = null;
   }
 
   /**
-   * Perform
+   * Validate Params
    *
-   * @return {Promise<void>}
-   */
-  async _asyncPerform() {
-    const oThis = this;
-
-    await oThis._getUserProfileElements();
-
-    await oThis._saveImage();
-
-    await oThis._saveFanVideo();
-
-    return responseHelper.successWithData({});
-  }
-
-  /**
-   * Get user profile elements
-   *
-   * @return {Promise<void>}
+   * @returns {Promise<void>}
    * @private
    */
-  async _getUserProfileElements() {
+  async _validateParams() {
     const oThis = this;
 
-    let userProfileElementsByUserIdCache = new UserProfileElementsByUserIdCache({
-      usersIds: [oThis.userId]
-    });
-
-    let cacheRsp = await userProfileElementsByUserIdCache.fetch();
-
-    if (cacheRsp.isFailure()) {
-      return Promise.reject(cacheRsp);
-    }
-
-    oThis.profileElements = cacheRsp.data[oThis.userId];
-  }
-
-  /**
-   * Save poster image
-   *
-   * @return {Promise<void>}
-   * @private
-   */
-  async _saveImage() {
-    const oThis = this;
-
-    let getResolution = new GetResolution({
-      userId: oThis.userId,
-      url: oThis.s3VidePosterImageUrl,
-      width: oThis.imageWidth,
-      height: oThis.imageHeight,
-      size: oThis.imageSize
-    });
-
-    oThis.resolutions = await getResolution.perform();
-
-    if (oThis.profileElements.hasOwnProperty(userProfileElementConst.coverImageIdKind)) {
-      oThis.updateIntent = true;
-      await oThis._createImage();
-    } else {
-      await oThis._updateImage();
+    let resp = videoLib.validateVideoObj({ video_url: oThis.videoUrl, isExternalUrl: oThis.isExternalUrl });
+    if (resp.isFailure()) {
+      return Promise.reject(resp);
     }
   }
 
   /**
-   * Create image
+   * Update user profile video
    *
    * @return {Promise<void>}
    * @private
    */
-  async _createImage() {
+  async _updateProfileElements() {
     const oThis = this;
 
-    let createImageObj = new CreateImage({
+    let resp = await videoLib.validateAndSave({
       userId: oThis.userId,
-      resolutions: oThis.resolutions,
-      elementKind: userProfileElementConst.coverImageIdKind,
-      isProfileElement: true,
-      status: imageConst.notResized
-    });
-
-    let insertRsp = await createImageObj.perform();
-
-    oThis.posterImageId = insertRsp.insertId; // TODO: @santhosh - poster and cover will be different later
-  }
-
-  /**
-   * Update image
-   *
-   * @return {Promise<void>}
-   * @private
-   */
-  async _updateImage() {
-    const oThis = this;
-
-    let updateImageObj = new UpdateImage({
-      userId: oThis.userId,
-      resolutions: oThis.resolutions,
-      dataKind: userProfileElementConst.coverImageIdKind,
-      isProfileElement: true,
-      status: imageConst.notResized
-    });
-
-    await updateImageObj.perform();
-  }
-
-  /**
-   * Save fan video
-   *
-   * @return {Promise<void>}
-   * @private
-   */
-  async _saveFanVideo() {
-    const oThis = this;
-
-    let getResolution = new GetResolution({
-      userId: oThis.userId,
-      url: oThis.s3FanVideoUrl,
+      videoUrl: oThis.videoUrl,
+      size: oThis.videoSize,
       width: oThis.videoWidth,
       height: oThis.videoHeight,
-      size: oThis.videoSize
+      posterImageUrl: oThis.posterImageUrl,
+      posterImageSize: oThis.imageSize,
+      posterImageWidth: oThis.imageWidth,
+      posterImageHeight: oThis.imageHeight,
+      isExternalUrl: oThis.isExternalUrl
     });
+    if (resp.isFailure()) {
+      return Promise.reject(resp);
+    }
 
-    oThis.resolutions = await getResolution.perform();
+    let videoObj = resp.data,
+      videoId = Object.keys(videoObj)[0],
+      coverImageId = videoObj[videoId].posterImageId;
 
-    if (oThis.updateIntent) {
-      // TODO: @santhosh - cover and poster same for now
-      let posterImageId = oThis.profileElements[userProfileElementConst.coverImageIdKind].data;
+    if (videoId) {
+      await oThis._addProfileElement(videoId, userProfileElementConst.coverVideoIdKind);
+    }
 
-      let updateVideoObj = new UpdateVideo({
-        userId: oThis.userId,
-        resolutions: oThis.resolutions,
-        posterImageId: posterImageId,
-        status: imageConst.notResized
-      });
-
-      await updateVideoObj.perform();
-    } else {
-      let createVideoObj = new CreateVideo({
-        userId: oThis.userId,
-        resolutions: oThis.resolutions,
-        posterImageId: oThis.posterImageId,
-        status: imageConst.notResized
-      });
-
-      await createVideoObj.perform();
+    if (coverImageId) {
+      await oThis._addProfileElement(coverImageId, userProfileElementConst.coverImageIdKind);
     }
   }
+
+  /**
+   * Add entity in profile elements
+   *
+   * @param entityId
+   * @param entityKind
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _addProfileElement(entityId, entityKind) {
+    const oThis = this;
+
+    let profileElementObj = oThis.profileElements[entityKind];
+    if (CommonValidator.validateObject(profileElementObj)) {
+      await new UserProfileElementModel()
+        .update({
+          data: entityId
+        })
+        .where({ id: profileElementObj.id })
+        .fire();
+    } else {
+      await new UserProfileElementModel()
+        .insert({
+          user_id: oThis.userId,
+          data_kind: userProfileElementConst.invertedKinds[entityKind],
+          data: entityId
+        })
+        .fire();
+    }
+  }
+
+  /**
+   * Update user
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _updateUser() {}
 }
 
 module.exports = AddFanVideo;

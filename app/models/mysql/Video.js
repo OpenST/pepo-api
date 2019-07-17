@@ -93,18 +93,16 @@ class Video extends ModelBase {
    *
    * @return {object}
    */
-  async insertVideo(params) {
+  insertVideo(params) {
     const oThis = this;
 
-    let response = await oThis
+    return oThis
       .insert({
         resolutions: JSON.stringify(params.resolutions),
         poster_image_id: params.posterImageId,
         status: videoConst.invertedStatuses[params.status]
       })
       .fire();
-
-    return response;
   }
 
   /**
