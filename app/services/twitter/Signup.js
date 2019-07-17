@@ -95,18 +95,21 @@ class TwitterSignup extends ServiceBase {
 
     const promisesArray1 = [];
 
+    // starting the create user in ost in parallel.
+    // TODO - handle rejections
     let createOstUserPromise = oThis._createUserInOst();
 
     promisesArray1.push(oThis._saveProfileImage());
     promisesArray1.push(oThis._setUserName());
     promisesArray1.push(oThis._setKMSEncryptionSalt());
 
+    // TODO - handle rejections in individual promises.
     await Promise.all(promisesArray1);
 
     await oThis._createUser();
 
     let promiseArray2 = [];
-    promiseArray2.push(oThis.twitterSpecificFunction());
+    promiseArray2.push(oThis._twitterSpecificFunction());
 
     promiseArray2.push(
       createOstUserPromise.then(function(a) {
@@ -124,10 +127,12 @@ class TwitterSignup extends ServiceBase {
   }
 
   /**
+   * create or update twitter user
    *
-   * @returns {Promise<void>}
+   * @return {Promise<void>}
+   * @private
    */
-  async twitterSpecificFunction() {
+  async _twitterSpecificFunction() {
     const oThis = this;
     await oThis._createUpdateTwitterUser();
     await oThis._createTwitterUserExtended();
@@ -205,6 +210,8 @@ class TwitterSignup extends ServiceBase {
       });
 
       await createErrorLogsEntry.perform(errorObject, errorLogsConstants.highSeverity);
+
+      return Promise.reject(errorObject);
     }
     logger.log('End::Set User Name');
   }
@@ -342,6 +349,7 @@ class TwitterSignup extends ServiceBase {
     oThis.userId = oThis.secureUserObj.id;
 
     logger.log('End::Create user');
+
     return responseHelper.successWithData({});
   }
 
@@ -405,6 +413,7 @@ class TwitterSignup extends ServiceBase {
     } else {
       let twitterEmail = oThis.userTwitterEntity.email;
 
+      // email info is not mandatory to come from twitter.
       if (!oThis.userTwitterEntity.email || !CommonValidators.isValidEmail(oThis.userTwitterEntity.email)) {
         twitterEmail = null;
       }
