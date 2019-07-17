@@ -47,6 +47,8 @@ class TwitterConnect extends ServiceBase {
    * @return {Promise<void>}
    */
   async _asyncPerform() {
+    // TODO - we should stop 2 requests of connect coming back to back from the same user.
+    // TODO - we can use a shot lived memcache for the same.
     const oThis = this;
 
     await oThis._fetchTwitterUserAndValidateCredentials();
