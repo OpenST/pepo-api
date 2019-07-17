@@ -7,7 +7,6 @@ const rootPrefix = '../../../..',
   UserFeedModel = require(rootPrefix + '/app/models/mysql/UserFeed'),
   ExternalEntityModel = require(rootPrefix + '/app/models/mysql/ExternalEntity'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
-  feedConstants = require(rootPrefix + '/lib/globalConstant/feed'),
   externalEntityConstants = require(rootPrefix + '/lib/globalConstant/externalEntity'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger');
 
@@ -207,7 +206,7 @@ class TransactionOstEventBase extends ServiceBase {
     oThis.feedObj = feedObjRes;
     oThis.privacyType = oThis.feedObj.privacyType;
 
-    if (oThis.feedObj.status === feedConstants.invertedStatuses[oThis._feedStatus()]) {
+    if (oThis.feedObj.status === 'todo::change_me') {
       return Promise.resolve(responseHelper.successWithData({}));
     }
 
@@ -223,7 +222,7 @@ class TransactionOstEventBase extends ServiceBase {
       .update({
         published_ts: published_ts,
         display_ts: oThis.ostTransactionMinedTimestamp,
-        status: feedConstants.invertedStatuses[oThis._feedStatus()]
+        status: 'todo::change_me'
       })
       .where(['id = ?', oThis.feedObj.id])
       .fire();

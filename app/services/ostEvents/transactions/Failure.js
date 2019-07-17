@@ -3,7 +3,6 @@ const rootPrefix = '../../../..',
   TokenUserModel = require(rootPrefix + '/app/models/mysql/TokenUser'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   tokenUserConstants = require(rootPrefix + '/lib/globalConstant/tokenUser'),
-  feedConstants = require(rootPrefix + '/lib/globalConstant/feed'),
   externalEntityConstants = require(rootPrefix + '/lib/globalConstant/externalEntity'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger');
 
@@ -61,7 +60,7 @@ class FailureTransactionOstEvent extends TransactionOstEventBase {
    * @private
    */
   _feedStatus() {
-    return feedConstants.failedStatus;
+    return 'todo::change_me';
   }
 
   /**

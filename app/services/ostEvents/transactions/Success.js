@@ -4,7 +4,6 @@ const rootPrefix = '../../../..',
   UserFeedModel = require(rootPrefix + '/app/models/mysql/UserFeed'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   tokenUserConstants = require(rootPrefix + '/lib/globalConstant/tokenUser'),
-  feedConstants = require(rootPrefix + '/lib/globalConstant/feed'),
   externalEntityConstants = require(rootPrefix + '/lib/globalConstant/externalEntity'),
   userFeedConstants = require(rootPrefix + '/lib/globalConstant/userFeed'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger');
@@ -157,7 +156,7 @@ class SuccessTransactionOstEvent extends TransactionOstEventBase {
    * @private
    */
   _feedStatus() {
-    return feedConstants.publishedStatus;
+    return 'todo::change_me';
   }
 
   /**
