@@ -79,11 +79,11 @@ class OstTransaction extends ServiceBase {
 
     await Promise.all(promiseArray1);
 
-    // if (oThis.transactionId) {
-    //   await oThis._updateTransaction();
-    // } else {
-    await oThis._insertInTransactionAndAssociatedTables();
-    //}
+    if (oThis.transactionId) {
+      await oThis._updateTransaction();
+    } else {
+      await oThis._insertInTransactionAndAssociatedTables();
+    }
     return Promise.resolve(responseHelper.successWithData());
   }
 
