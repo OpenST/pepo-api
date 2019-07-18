@@ -1,7 +1,7 @@
 const rootPrefix = '../..',
-  coreConstants = require(rootPrefix + '/config/coreConstants');
+  database = require(rootPrefix + '/lib/globalConstant/database');
 
-const dbName = 'pepo_api_' + coreConstants.environment;
+const dbName = database.userDbName;
 
 const upQuery = 'ALTER TABLE `token_users` DROP `encryption_salt`;';
 

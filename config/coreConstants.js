@@ -28,56 +28,140 @@ class CoreConstants {
     return process.env.PA_COOKIE_DOMAIN;
   }
 
-  // MYSQL related details
-
-  get PEPO_API_MYSQL_DB() {
-    return process.env.PEPO_API_MYSQL_DB;
-  }
+  // MySql constants
 
   get MYSQL_CONNECTION_POOL_SIZE() {
     return process.env.PA_MYSQL_CONNECTION_POOL_SIZE;
   }
 
-  get MYSQL_HOST() {
-    return process.env.PA_MYSQL_HOST;
+  // Main db
+
+  get MAIN_DB_MYSQL_HOST() {
+    return process.env.PA_MAIN_DB_MYSQL_HOST;
   }
 
-  get MYSQL_USER() {
-    return process.env.PA_MYSQL_USER;
+  get MAIN_DB_MYSQL_USER() {
+    return process.env.PA_MAIN_DB_MYSQL_USER;
   }
 
-  get MYSQL_PASSWORD() {
-    return process.env.PA_MYSQL_PASSWORD;
+  get MAIN_DB_MYSQL_PASSWORD() {
+    return process.env.PA_MAIN_DB_MYSQL_PASSWORD;
   }
 
-  get CONFIG_ENV_MYSQL_HOST() {
-    return process.env.PA_CONFIG_ENV_MYSQL_HOST;
+  // User db
+
+  get USER_DB_MYSQL_HOST() {
+    return process.env.PA_USER_DB_MYSQL_HOST;
   }
 
-  get CONFIG_ENV_MYSQL_USER() {
-    return process.env.PA_CONFIG_ENV_MYSQL_USER;
+  get USER_DB_MYSQL_USER() {
+    return process.env.PA_USER_DB_MYSQL_USER;
   }
 
-  get CONFIG_ENV_MYSQL_PASSWORD() {
-    return process.env.PA_CONFIG_ENV_MYSQL_PASSWORD;
+  get USER_DB_MYSQL_PASSWORD() {
+    return process.env.PA_USER_DB_MYSQL_PASSWORD;
   }
 
-  // Mysql ost infra related details
+  // Big db
 
-  get INFRA_MYSQL_HOST() {
-    return process.env.PA_INFRA_MYSQL_HOST;
+  get BIG_DB_MYSQL_HOST() {
+    return process.env.PA_BIG_DB_MYSQL_HOST;
   }
 
-  get INFRA_MYSQL_USER() {
-    return process.env.PA_INFRA_MYSQL_USER;
+  get BIG_DB_MYSQL_USER() {
+    return process.env.PA_BIG_DB_MYSQL_USER;
   }
 
-  get INFRA_MYSQL_PASSWORD() {
-    return process.env.PA_INFRA_MYSQL_PASSWORD;
+  get BIG_DB_MYSQL_PASSWORD() {
+    return process.env.PA_BIG_DB_MYSQL_PASSWORD;
   }
 
-  get INFRA_MYSQL_DB() {
-    return process.env.PA_INFRA_MYSQL_DB;
+  // Entity db
+
+  get ENTITY_DB_MYSQL_HOST() {
+    return process.env.PA_ENTITY_DB_MYSQL_HOST;
+  }
+
+  get ENTITY_DB_MYSQL_USER() {
+    return process.env.PA_ENTITY_DB_MYSQL_USER;
+  }
+
+  get ENTITY_DB_MYSQL_PASSWORD() {
+    return process.env.PA_ENTITY_DB_MYSQL_PASSWORD;
+  }
+
+  // Twitter db
+
+  get TWITTER_DB_MYSQL_HOST() {
+    return process.env.PA_TWITTER_DB_MYSQL_HOST;
+  }
+
+  get TWITTER_DB_MYSQL_USER() {
+    return process.env.PA_TWITTER_DB_MYSQL_USER;
+  }
+
+  get TWITTER_DB_MYSQL_PASSWORD() {
+    return process.env.PA_TWITTER_DB_MYSQL_PASSWORD;
+  }
+
+  // Feed db
+
+  get FEED_DB_MYSQL_HOST() {
+    return process.env.PA_FEED_DB_MYSQL_HOST;
+  }
+
+  get FEED_DB_MYSQL_USER() {
+    return process.env.PA_FEED_DB_MYSQL_USER;
+  }
+
+  get FEED_DB_MYSQL_PASSWORD() {
+    return process.env.PA_FEED_DB_MYSQL_PASSWORD;
+  }
+
+  // Config db
+
+  get CONFIG_DB_MYSQL_HOST() {
+    return process.env.PA_CONFIG_DB_MYSQL_HOST;
+  }
+
+  get CONFIG_DB_MYSQL_USER() {
+    return process.env.PA_CONFIG_DB_MYSQL_USER;
+  }
+
+  get CONFIG_DB_MYSQL_PASSWORD() {
+    return process.env.PA_CONFIG_DB_MYSQL_PASSWORD;
+  }
+
+  // Ost db
+
+  get OST_DB_MYSQL_HOST() {
+    return process.env.PA_OST_DB_MYSQL_HOST;
+  }
+
+  get OST_DB_MYSQL_USER() {
+    return process.env.PA_OST_DB_MYSQL_USER;
+  }
+
+  get OST_DB_MYSQL_PASSWORD() {
+    return process.env.PA_OST_DB_MYSQL_PASSWORD;
+  }
+
+  // Infra db
+
+  get INFRA_DB_MYSQL_HOST() {
+    return process.env.PA_INFRA_DB_MYSQL_HOST;
+  }
+
+  get INFRA_DB_MYSQL_USER() {
+    return process.env.PA_INFRA_DB_MYSQL_USER;
+  }
+
+  get INFRA_DB_MYSQL_PASSWORD() {
+    return process.env.PA_INFRA_DB_MYSQL_PASSWORD;
+  }
+
+  get INFRA_DB_MYSQL_DB() {
+    return process.env.PA_INFRA_DB_MYSQL_DB;
   }
 
   // kms related constants

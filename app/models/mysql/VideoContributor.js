@@ -1,9 +1,8 @@
 const rootPrefix = '../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
-  videoContributorConstants = require(rootPrefix + '/lib/globalConstant/videoContributor'),
-  coreConstants = require(rootPrefix + '/config/coreConstants');
+  database = require(rootPrefix + '/lib/globalConstant/database');
 
-const dbName = 'pepo_api_' + coreConstants.environment;
+const dbName = database.userDbName;
 
 class VideoContributor extends ModelBase {
   /**

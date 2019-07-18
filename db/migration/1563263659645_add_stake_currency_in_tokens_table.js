@@ -1,7 +1,7 @@
 const rootPrefix = '../..',
-  coreConstants = require(rootPrefix + '/config/coreConstants');
+  database = require(rootPrefix + '/lib/globalConstant/database');
 
-const dbName = 'pepo_api_' + coreConstants.environment;
+const dbName = database.ostDbName;
 
 const upQuery = 'ALTER TABLE `tokens` \n\
       ADD COLUMN `stake_currency` VARCHAR(255) NOT NULL AFTER `symbol`;';

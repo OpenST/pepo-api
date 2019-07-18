@@ -1,7 +1,7 @@
 const rootPrefix = '../..',
-  coreConstants = require(rootPrefix + '/config/coreConstants');
+  database = require(rootPrefix + '/lib/globalConstant/database');
 
-const dbName = 'pepo_api_' + coreConstants.environment;
+const dbName = database.twitterDbName;
 
 const upQuery = 'ALTER TABLE `twitter_users` \n\
       ADD UNIQUE KEY `uk_user_id` (`user_id`);';

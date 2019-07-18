@@ -1,7 +1,7 @@
 const rootPrefix = '../..',
-  coreConstants = require(rootPrefix + '/config/coreConstants');
+  database = require(rootPrefix + '/lib/globalConstant/database');
 
-const dbName = 'pepo_api_' + coreConstants.environment;
+const dbName = database.entityDbName;
 
 const upQuery = 'ALTER TABLE `texts` ADD COLUMN `tag_ids` varchar(255) COLLATE utf8_unicode_ci NULL AFTER `text`;';
 

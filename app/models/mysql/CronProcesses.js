@@ -5,12 +5,12 @@
  * @module /app/models/mysql/cronProcesses
  */
 const rootPrefix = '../../..',
-  util = require(rootPrefix + '/lib/util'),
   coreConstants = require(rootPrefix + '/config/coreConstants'),
+  database = require(rootPrefix + '/lib/globalConstant/database'),
   ModelBaseKlass = require(rootPrefix + '/app/models/mysql/Base'),
   cronProcessesConstants = require(rootPrefix + '/lib/globalConstant/cronProcesses');
 
-const dbName = 'pepo_api_' + coreConstants.environment;
+const dbName = database.bigDbName;
 
 /**
  * Class for cron process model

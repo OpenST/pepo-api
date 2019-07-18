@@ -1,11 +1,11 @@
 const rootPrefix = '../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
-  coreConstants = require(rootPrefix + '/config/coreConstants'),
+  database = require(rootPrefix + '/lib/globalConstant/database'),
   ostPricePointsConstants = require(rootPrefix + '/lib/globalConstant/ostPricePoints');
 
 // Declare variables.
-const dbName = 'pepo_api_' + coreConstants.environment;
-const queryLimit = 20;
+const dbName = database.ostDbName,
+  queryLimit = 20;
 
 /**
  * Class for ost price points model.

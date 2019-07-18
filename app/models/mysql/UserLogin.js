@@ -1,10 +1,10 @@
 const rootPrefix = '../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
-  coreConstants = require(rootPrefix + '/config/coreConstants'),
+  database = require(rootPrefix + '/lib/globalConstant/database'),
   userLoginConstants = require(rootPrefix + '/lib/globalConstant/userLogin');
 
 // Declare variables.
-const dbName = 'pepo_api_' + coreConstants.environment;
+const dbName = database.userDbName;
 
 /**
  * Class for UserLogin model.

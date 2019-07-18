@@ -1,9 +1,8 @@
 const rootPrefix = '../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
-  twitterUserConstants = require(rootPrefix + '/lib/globalConstant/twitterUser'),
-  coreConstants = require(rootPrefix + '/config/coreConstants');
+  database = require(rootPrefix + '/lib/globalConstant/database');
 
-const dbName = 'pepo_api_' + coreConstants.environment;
+const dbName = database.twitterDbName;
 
 class TwitterUserModel extends ModelBase {
   /**

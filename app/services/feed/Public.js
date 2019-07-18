@@ -26,7 +26,6 @@ class PublicVideoFeed extends FeedBase {
 
     oThis.limit = oThis._defaultPageLimit();
     oThis.paginationTimestamp = null;
-    oThis.currentUserId = 0;
   }
 
   /**

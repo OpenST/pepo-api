@@ -15,6 +15,8 @@ class FeedBase extends ServiceBase {
 
     const oThis = this;
 
+    oThis.currentUserId = +params.current_user.id;
+
     oThis.feeds = [];
     oThis.feedsMap = {};
     oThis.feedIds = [];

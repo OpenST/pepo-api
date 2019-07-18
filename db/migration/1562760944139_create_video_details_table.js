@@ -1,7 +1,8 @@
 const rootPrefix = '../..',
-  coreConstants = require(rootPrefix + '/config/coreConstants');
+  database = require(rootPrefix + '/lib/globalConstant/database');
 
-const dbName = 'pepo_api_' + coreConstants.environment;
+const dbName = database.entityDbName;
+
 const upQuery =
   'CREATE TABLE `video_details` ( \n\
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT, \n\

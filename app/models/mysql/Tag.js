@@ -1,9 +1,9 @@
 const rootPrefix = '../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
-  coreConstants = require(rootPrefix + '/config/coreConstants'),
-  tagConstants = require(rootPrefix + '/lib/globalConstant/tag');
+  tagConstants = require(rootPrefix + '/lib/globalConstant/tag'),
+  database = require(rootPrefix + '/lib/globalConstant/database');
 
-const dbName = 'pepo_api_' + coreConstants.environment;
+const dbName = database.entityDbName;
 
 class Tag extends ModelBase {
   /**

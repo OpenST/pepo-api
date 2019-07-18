@@ -43,7 +43,6 @@ class TransactionOstEventBase extends ServiceBase {
     oThis.transactionObj = null;
     oThis.externalEntityObj = null;
     oThis.privacyType = null;
-    oThis.feedObj = null;
   }
 
   /**

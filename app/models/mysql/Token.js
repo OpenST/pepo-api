@@ -1,7 +1,8 @@
 const rootPrefix = '../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
-  coreConstants = require(rootPrefix + '/config/coreConstants');
-const dbName = 'pepo_api_' + coreConstants.environment;
+  database = require(rootPrefix + '/lib/globalConstant/database');
+
+const dbName = database.ostDbName;
 
 /**
  * Class for Token model.

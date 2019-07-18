@@ -1,9 +1,9 @@
 const rootPrefix = '../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
-  externalEntityConstants = require(rootPrefix + '/lib/globalConstant/externalEntity'),
-  coreConstants = require(rootPrefix + '/config/coreConstants');
+  database = require(rootPrefix + '/lib/globalConstant/database'),
+  externalEntityConstants = require(rootPrefix + '/lib/globalConstant/externalEntity');
 
-const dbName = 'pepo_api_' + coreConstants.environment;
+const dbName = database.entityDbName;
 
 class ExternalEntityModel extends ModelBase {
   /**

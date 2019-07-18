@@ -1,9 +1,9 @@
 const rootPrefix = '../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
-  coreConstants = require(rootPrefix + '/config/coreConstants');
+  database = require(rootPrefix + '/lib/globalConstant/database');
 
 // Declare variables.
-const dbName = 'pepo_api_' + coreConstants.environment;
+const dbName = database.ostDbName;
 
 /**
  * Class for webhook model.

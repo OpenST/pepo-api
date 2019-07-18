@@ -1,9 +1,9 @@
 const rootPrefix = '../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
-  coreConstants = require(rootPrefix + '/config/coreConstants'),
-  imageConst = require(rootPrefix + '/lib/globalConstant/image');
+  imageConst = require(rootPrefix + '/lib/globalConstant/image'),
+  database = require(rootPrefix + '/lib/globalConstant/database');
 
-const dbName = 'pepo_api_' + coreConstants.environment;
+const dbName = database.entityDbName;
 
 /**
  * Class for image model.

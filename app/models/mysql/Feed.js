@@ -1,9 +1,9 @@
 const rootPrefix = '../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
-  coreConstants = require(rootPrefix + '/config/coreConstants'),
+  database = require(rootPrefix + '/lib/globalConstant/database'),
   feedsConstants = require(rootPrefix + '/lib/globalConstant/feed');
 
-const dbName = 'pepo_api_' + coreConstants.environment;
+const dbName = database.feedDbName;
 
 class FeedModel extends ModelBase {
   /**

@@ -1,7 +1,7 @@
 const rootPrefix = '../..',
-  coreConstants = require(rootPrefix + '/config/coreConstants');
+  database = require(rootPrefix + '/lib/globalConstant/database');
 
-const dbName = 'pepo_api_' + coreConstants.environment;
+const dbName = database.feedDbName;
 
 const upQuery = 'ALTER TABLE `user_activities` \n\
       DROP COLUMN `display_ts`;';
