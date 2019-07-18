@@ -166,9 +166,9 @@ router.get('/:user_id/profile', sanitizer.sanitizeDynamicUrlParams, function(req
 
   const dataFormatterFunc = async function(serviceResponse) {
     const wrapperFormatterRsp = await new FormatterComposer({
-      resultType: responseEntityKey.userProfile,
+      resultType: responseEntityKey.userProfiles,
       entityKindToResponseKeyMap: {
-        [entityType.userProfile]: responseEntityKey.userProfile,
+        [entityType.userProfileMap]: responseEntityKey.userProfiles,
         [entityType.usersMap]: responseEntityKey.users,
         [entityType.linksMap]: responseEntityKey.links,
         [entityType.imagesMap]: responseEntityKey.images,
