@@ -57,12 +57,16 @@ class FeedModel extends ModelBase {
     const paginationTimestamp = params.paginationTimestamp,
       limit = params.limit;
 
-    const dbRows = await oThis
+    const queryObject = oThis
       .select('*')
-      .where(['pagination_identifier < ?', paginationTimestamp])
       .order_by('pagination_identifier desc')
-      .limit(limit)
-      .fire();
+      .limit(limit);
+
+    if (paginationTimestamp) {
+      queryObject.where(['pagination_identifier < ?', paginationTimestamp]);
+    }
+
+    const dbRows = await queryObject.fire();
 
     if (dbRows.length === 0) {
       return { feedIds: feedIds, feedDetails: feedDetails };

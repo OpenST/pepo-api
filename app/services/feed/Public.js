@@ -15,6 +15,9 @@ class PublicVideoFeed extends FeedBase {
 
     const oThis = this;
 
+    oThis.paginationIdentifier = params[paginationConstants.paginationIdentifierKey] || null;
+
+    console.log('--------oThis.paginationIdentifier-----', oThis.paginationIdentifier);
     oThis.feeds = [];
     oThis.userIds = [];
     oThis.videoIds = [];
@@ -23,6 +26,7 @@ class PublicVideoFeed extends FeedBase {
 
     oThis.limit = oThis._defaultPageLimit();
     oThis.paginationTimestamp = null;
+    oThis.currentUserId = 0;
   }
 
   /**
@@ -39,7 +43,7 @@ class PublicVideoFeed extends FeedBase {
 
       oThis.paginationTimestamp = parsedPaginationParams.pagination_timestamp; // Override paginationTimestamp number.
     } else {
-      oThis.paginationTimestamp = 1563260112;
+      oThis.paginationTimestamp = null;
     }
 
     // Validate limit.
@@ -60,6 +64,10 @@ class PublicVideoFeed extends FeedBase {
 
     oThis.feedIds = loggedOutFeedCacheResp.data.feedIds;
     oThis.feedsMap = loggedOutFeedCacheResp.data.feedDetails;
+
+    const lastFeedId = oThis.feedIds[oThis.feedIds.length - 1];
+    console.log('------lastFeedId------', oThis.feedIds, oThis.feedIds.length, lastFeedId);
+    oThis.nextPaginationTimestamp = oThis.feedsMap[lastFeedId].paginationIdentifier;
   }
 
   /**
@@ -70,6 +78,19 @@ class PublicVideoFeed extends FeedBase {
    */
   _prepareResponse() {
     const oThis = this;
+
+    const nextPagePayloadKey = {};
+
+    if (oThis.feeds.length >= oThis.limit) {
+      nextPagePayloadKey[paginationConstants.paginationIdentifierKey] = {
+        // TODO - think on how to remove duplicates.
+        pagination_timestamp: oThis.nextPaginationTimestamp
+      };
+    }
+
+    const responseMetaData = {
+      [paginationConstants.nextPagePayloadKey]: nextPagePayloadKey
+    };
 
     return responseHelper.successWithData({
       feedList: oThis.feeds,
@@ -85,7 +106,8 @@ class PublicVideoFeed extends FeedBase {
       videoDetailsMap: oThis.profileResponse.videoDetailsMap,
       currentUserUserContributionsMap: oThis.profileResponse.currentUserUserContributionsMap,
       currentUserVideoContributionsMap: oThis.profileResponse.currentUserVideoContributionsMap,
-      pricePointsMap: oThis.profileResponse.pricePointsMap
+      pricePointsMap: oThis.profileResponse.pricePointsMap,
+      meta: responseMetaData
     });
   }
 

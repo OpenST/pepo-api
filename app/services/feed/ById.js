@@ -14,6 +14,7 @@ class FeedById extends FeedBase {
 
     const oThis = this;
     oThis.feedId = params.feed_id;
+    oThis.currentUserId = params.currentUserId;
   }
 
   /**

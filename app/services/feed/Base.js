@@ -39,6 +39,8 @@ class FeedBase extends ServiceBase {
 
     await oThis._getFeeds();
 
+    await oThis._fetchProfileDetails();
+
     return oThis._prepareResponse();
   }
 

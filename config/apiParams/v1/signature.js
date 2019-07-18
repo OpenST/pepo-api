@@ -382,7 +382,12 @@ const v1Signature = {
   },
   [apiName.publicFeed]: {
     mandatory: [],
-    optional: []
+    optional: [
+      {
+        parameter: paginationConstants.paginationIdentifierKey,
+        validatorMethods: ['validateString', 'validatePaginationIdentifier']
+      }
+    ]
   }
 };
 

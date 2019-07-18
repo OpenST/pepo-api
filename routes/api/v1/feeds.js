@@ -26,14 +26,15 @@ router.get('/', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
         [entityType.feedList]: responseEntityKey.feedsEntity,
         [entityType.usersMap]: responseEntityKey.users,
         [entityType.userStats]: responseEntityKey.userStats,
-        [entityType.userProfile]: responseEntityKey.userProfile,
+        //        [entityType.userProfile]: responseEntityKey.userProfile,
         [entityType.tagsMap]: responseEntityKey.tags,
         [entityType.linksMap]: responseEntityKey.links,
         [entityType.imagesMap]: responseEntityKey.images,
         [entityType.videosMap]: responseEntityKey.videos,
         [entityType.videoDetailsMap]: responseEntityKey.videoDetails,
         [entityType.currentUserUserContributionsMap]: responseEntityKey.currentUserUserContributions,
-        [entityType.currentUserVideoContributionsMap]: responseEntityKey.currentUserVideoContributions
+        [entityType.currentUserVideoContributionsMap]: responseEntityKey.currentUserVideoContributions,
+        [entityType.feedListMeta]: responseEntityKey.meta
       },
       serviceData: serviceResponse.data
     }).perform();
