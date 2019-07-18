@@ -31,7 +31,7 @@ class FeedModel extends ModelBase {
       id: dbRow.id,
       primaryExternalEntityId: dbRow.primary_external_entity_id,
       kind: feedsConstants.kinds[dbRow.kind],
-      publishedTs: dbRow.published_ts,
+      paginationIdentifier: dbRow.pagination_identifier,
       actor: dbRow.actor,
       extraData: JSON.parse(dbRow.extra_data),
       createdAt: dbRow.created_at,
@@ -59,8 +59,8 @@ class FeedModel extends ModelBase {
 
     const dbRows = await oThis
       .select('*')
-      .where(['published_ts < ?', paginationTimestamp])
-      .order_by('published_ts desc')
+      .where(['pagination_identifier < ?', paginationTimestamp])
+      .order_by('pagination_identifier desc')
       .limit(limit)
       .fire();
 
