@@ -1,7 +1,8 @@
 const rootPrefix = '../../..',
   FeedBase = require(rootPrefix + '/app/services/feed/Base'),
   LoggedOutFeedCache = require(rootPrefix + '/lib/cacheManagement/single/LoggedOutFeed'),
-  responseHelper = require(rootPrefix + '/lib/formatter/response');
+  responseHelper = require(rootPrefix + '/lib/formatter/response'),
+  paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination');
 
 class PublicVideoFeed extends FeedBase {
   /**
@@ -19,6 +20,9 @@ class PublicVideoFeed extends FeedBase {
     oThis.videoIds = [];
     oThis.profileResponse = {};
     oThis.finalResponse = {};
+
+    oThis.limit = oThis._defaultPageLimit();
+    oThis.paginationTimestamp = null;
   }
 
   /**
@@ -28,7 +32,18 @@ class PublicVideoFeed extends FeedBase {
    * @private
    */
   async _validateAndSanitizeParams() {
-    return responseHelper.successWithData({});
+    const oThis = this;
+
+    if (oThis.paginationIdentifier) {
+      const parsedPaginationParams = oThis._parsePaginationParams(oThis.paginationIdentifier);
+
+      oThis.paginationTimestamp = parsedPaginationParams.pagination_timestamp; // Override paginationTimestamp number.
+    } else {
+      oThis.paginationTimestamp = 1563260112;
+    }
+
+    // Validate limit.
+    return oThis._validatePageSize();
   }
 
   /**
@@ -38,7 +53,10 @@ class PublicVideoFeed extends FeedBase {
    */
   async _setFeedIds() {
     const oThis = this,
-      loggedOutFeedCacheResp = await new LoggedOutFeedCache().fetch();
+      loggedOutFeedCacheResp = await new LoggedOutFeedCache({
+        limit: oThis.limit,
+        paginationTimestamp: oThis.paginationTimestamp
+      }).fetch();
 
     oThis.feedIds = loggedOutFeedCacheResp.data.feedIds;
     oThis.feedsMap = loggedOutFeedCacheResp.data.feedDetails;
@@ -69,6 +87,27 @@ class PublicVideoFeed extends FeedBase {
       currentUserVideoContributionsMap: oThis.profileResponse.currentUserVideoContributionsMap,
       pricePointsMap: oThis.profileResponse.pricePointsMap
     });
+  }
+
+  _currentPageLimit() {
+    return paginationConstants.defaultPublicFeedPageSize;
+  }
+
+  /**
+   * Default page limit.
+   *
+   * @private
+   */
+  _defaultPageLimit() {
+    return paginationConstants.defaultPublicFeedPageSize;
+  }
+
+  _minPageLimit() {
+    return paginationConstants.minPublicFeedPageSize;
+  }
+
+  _maxPageLimit() {
+    return paginationConstants.maxPublicFeedPageSize;
   }
 }
 
