@@ -1,18 +1,21 @@
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
-  ActivationInitiateClass = require(rootPrefix + '/app/services/ostEvents/users/ActivationInitiated'),
-  ActivationSuccessClass = require(rootPrefix + '/app/services/ostEvents/users/ActivationSuccess'),
-  ActivationFailureClass = require(rootPrefix + '/app/services/ostEvents/users/ActivationFailure'),
+  UsdPricePointUpdateClass = require(rootPrefix + '/app/services/ostEvents/pricePoints/Usd'),
+  EurPricePointUpdateClass = require(rootPrefix + '/app/services/ostEvents/pricePoints/Eur'),
+  GbpPricePointUpdateClass = require(rootPrefix + '/app/services/ostEvents/pricePoints/Gbp'),
   FailureTransactionClass = require(rootPrefix + '/app/services/ostEvents/transactions/Failure'),
   SuccessTransactionClass = require(rootPrefix + '/app/services/ostEvents/transactions/Success'),
+  ActivationSuccessClass = require(rootPrefix + '/app/services/ostEvents/users/ActivationSuccess'),
+  ActivationFailureClass = require(rootPrefix + '/app/services/ostEvents/users/ActivationFailure'),
+  ActivationInitiateClass = require(rootPrefix + '/app/services/ostEvents/users/ActivationInitiated'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
-  ostEventConstant = require(rootPrefix + '/lib/globalConstant/ostEvent'),
-  logger = require(rootPrefix + '/lib/logger/customConsoleLogger');
+  logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
+  ostEventConstants = require(rootPrefix + '/lib/globalConstant/ostEvent');
 
 class OstEventProcess extends ServiceBase {
   /**
-   * @param {Object} params
-   * @param {Object} params.ostEventObj: OST Event Table row
+   * @param {object} params
+   * @param {object} params.ostEventObj: OST Event Table row
    *
    * @augments ServiceBase
    *
@@ -20,6 +23,7 @@ class OstEventProcess extends ServiceBase {
    */
   constructor(params) {
     super(params);
+
     const oThis = this;
 
     oThis.ostEventObj = params.ostEventObj;
@@ -28,16 +32,19 @@ class OstEventProcess extends ServiceBase {
     oThis.ostEventTopic = oThis.eventData.topic;
 
     oThis.eventClassMapping = {
-      [ostEventConstant.usersActivationInitiateOstWebhookTopic]: ActivationInitiateClass,
-      [ostEventConstant.usersActivationSuccessOstWebhookTopic]: ActivationSuccessClass,
-      [ostEventConstant.usersActivationFailureOstWebhookTopic]: ActivationFailureClass,
-      [ostEventConstant.transactionsFailureOstWebhookTopic]: FailureTransactionClass,
-      [ostEventConstant.transactionsSuccessOstWebhookTopic]: SuccessTransactionClass
+      [ostEventConstants.usersActivationInitiateOstWebhookTopic]: ActivationInitiateClass,
+      [ostEventConstants.usersActivationSuccessOstWebhookTopic]: ActivationSuccessClass,
+      [ostEventConstants.usersActivationFailureOstWebhookTopic]: ActivationFailureClass,
+      [ostEventConstants.transactionsFailureOstWebhookTopic]: FailureTransactionClass,
+      [ostEventConstants.transactionsSuccessOstWebhookTopic]: SuccessTransactionClass,
+      [ostEventConstants.usdPricePointUpdatedOstWebhookTopic]: UsdPricePointUpdateClass,
+      [ostEventConstants.eurPricePointUpdatedOstWebhookTopic]: EurPricePointUpdateClass,
+      [ostEventConstants.gbpPricePointUpdatedOstWebhookTopic]: GbpPricePointUpdateClass
     };
   }
 
   /**
-   * perform - process Ost Event
+   * Perform - Process Ost Event.
    *
    * @return {Promise<void>}
    */
@@ -53,15 +60,14 @@ class OstEventProcess extends ServiceBase {
    * Validate param
    *
    * @return {Promise<void>}
-   *
    * @private
    */
   async _execute() {
     const oThis = this;
 
-    logger.log('execute class from Ost Event Factory');
+    logger.log('Execute method from Ost Event Factory.');
 
-    let eventProcessor = oThis.eventClassMapping[oThis.ostEventTopic];
+    const eventProcessor = oThis.eventClassMapping[oThis.ostEventTopic];
 
     if (!eventProcessor) {
       return Promise.reject(
@@ -73,7 +79,7 @@ class OstEventProcess extends ServiceBase {
       );
     }
 
-    let eventProcessResp = await new eventProcessor(oThis.eventData).perform();
+    const eventProcessResp = await new eventProcessor(oThis.eventData).perform();
 
     if (eventProcessResp.isFailure()) {
       return Promise.reject(

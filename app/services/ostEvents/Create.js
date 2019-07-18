@@ -1,15 +1,15 @@
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
-  responseHelper = require(rootPrefix + '/lib/formatter/response'),
   OstEventModel = require(rootPrefix + '/app/models/mysql/OstEvent'),
   ProcessOstEventClass = require(rootPrefix + '/app/services/ostEvents/Process'),
-  ostEventConstant = require(rootPrefix + '/lib/globalConstant/ostEvent'),
-  logger = require(rootPrefix + '/lib/logger/customConsoleLogger');
+  responseHelper = require(rootPrefix + '/lib/formatter/response'),
+  logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
+  ostEventConstant = require(rootPrefix + '/lib/globalConstant/ostEvent');
 
 class OstEventCreate extends ServiceBase {
   /**
-   * @param {Object} params
+   * @param {object} params
    *
    * @constructor
    */
@@ -26,9 +26,10 @@ class OstEventCreate extends ServiceBase {
   }
 
   /**
-   * perform - Validate Login Credentials
+   * Perform - Validate Login Credentials.
    *
    * @return {Promise<void>}
+   * @private
    */
   async _asyncPerform() {
     const oThis = this;
@@ -47,11 +48,9 @@ class OstEventCreate extends ServiceBase {
   }
 
   /**
-   * Validate Request
-   *
+   * Validate request.
    *
    * @return {Promise<void>}
-   *
    * @private
    */
   async _validateAndSanitizeParams() {
@@ -78,11 +77,9 @@ class OstEventCreate extends ServiceBase {
   }
 
   /**
-   * Create Entry In Ost Event Table
-   *
+   * Create entry in Ost Event Table.
    *
    * @return {Promise<void>}
-   *
    * @private
    */
   async _createEntryInOstEvent() {
@@ -102,6 +99,7 @@ class OstEventCreate extends ServiceBase {
 
     if (!insertResponse) {
       logger.error('Error while inserting data in ost_events table');
+
       return Promise.reject(insertResponse);
     }
 
@@ -111,15 +109,14 @@ class OstEventCreate extends ServiceBase {
   }
 
   /**
-   * Publish Ost Event ID
-   *
+   * Publish Ost Event ID.
    *
    * @return {Promise<void>}
-   *
    * @private
    */
   async _publishOstEvent() {
     const oThis = this;
+
     logger.log('Publish Ost Event');
 
     await new ProcessOstEventClass({ ostEventId: oThis.ostEventId }).perform();
