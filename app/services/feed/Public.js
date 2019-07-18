@@ -37,6 +37,12 @@ class PublicVideoFeed extends FeedBase {
   async _validateAndSanitizeParams() {
     const oThis = this;
 
+    if (oThis.currentUser) {
+      oThis.currentUserId = Number(oThis.currentUser.id);
+    } else {
+      oThis.currentUserId = 0;
+    }
+
     if (oThis.paginationIdentifier) {
       const parsedPaginationParams = oThis._parsePaginationParams(oThis.paginationIdentifier);
 
