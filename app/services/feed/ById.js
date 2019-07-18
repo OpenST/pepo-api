@@ -14,7 +14,6 @@ class FeedById extends FeedBase {
 
     const oThis = this;
     oThis.feedId = params.feed_id;
-    oThis.currentUserId = params.currentUserId;
   }
 
   /**
@@ -59,7 +58,7 @@ class FeedById extends FeedBase {
 
     return responseHelper.successWithData({
       feed: oThis.feeds[0], // for this service, feeds array will contain only one element
-      userProfileDetails: oThis.profileResponse.userProfileDetails,
+      userProfilesMap: oThis.profileResponse.userProfilesMap,
       userProfileAllowedActions: oThis.profileResponse.userProfileAllowedActions,
       usersByIdMap: oThis.profileResponse.usersByIdMap,
       tokenUsersByUserIdMap: oThis.profileResponse.tokenUsersByUserIdMap,

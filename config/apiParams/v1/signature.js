@@ -388,6 +388,19 @@ const v1Signature = {
         validatorMethods: ['validateString', 'validatePaginationIdentifier']
       }
     ]
+  },
+  [apiName.feedDetails]: {
+    mandatory: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      },
+      {
+        parameter: 'feed_id',
+        validatorMethods: ['validateInteger']
+      }
+    ],
+    optional: []
   }
 };
 

@@ -55,7 +55,7 @@ class GetUserProfile extends ServiceBase {
     let profileResp = response.data;
 
     return responseHelper.successWithData({
-      userProfileDetails: profileResp.userProfileDetails[oThis.userId],
+      userProfile: profileResp.userProfilesMap[oThis.userId],
       userProfileAllowedActions: profileResp.userProfileAllowedActions[oThis.userId],
       usersByIdMap: profileResp.usersByIdMap,
       tokenUsersByUserIdMap: profileResp.tokenUsersByUserIdMap,
