@@ -21,9 +21,9 @@ router.get('/', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
 
   const dataFormatterFunc = async function(serviceResponse) {
     const wrapperFormatterRsp = await new FormatterComposer({
-      resultType: responseEntityKey.publicFeed,
+      resultType: responseEntityKey.feedsEntity,
       entityKindToResponseKeyMap: {
-        [entityType.feedList]: responseEntityKey.userProfile,
+        [entityType.feedList]: responseEntityKey.feedsEntity,
         [entityType.usersMap]: responseEntityKey.users,
         [entityType.userStats]: responseEntityKey.userStats,
         [entityType.tagsMap]: responseEntityKey.tags,
