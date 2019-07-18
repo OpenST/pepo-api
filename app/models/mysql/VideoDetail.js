@@ -125,6 +125,44 @@ class VideoDetail extends ModelBase {
 
     return response;
   }
+  /**
+   * Update by user id.
+   *
+   * @returns {Promise<void>}
+   */
+  async updateByVideoId(videoId, totalAmount, totalContributedBy = 1, totalTransactions = 1) {
+    const oThis = this;
+
+    return oThis
+      .update([
+        'total_amount = total_amount + ?, total_transactions = total_transactions + ?, ' +
+          'total_contributed_by = total_contributed_by + ? ',
+        totalAmount,
+        totalTransactions,
+        totalContributedBy
+      ])
+      .where({ video_id: videoId })
+      .fire();
+  }
+
+  /**
+   * Insert into video details.
+   *
+   * @returns {Promise<void>}
+   */
+  async insertIntoVideoDetails(creatorUserId, videoId, totalAmount, totalTransactions = 1) {
+    const oThis = this;
+
+    return oThis
+      .insert({
+        creator_user_id: creatorUserId,
+        video_id: videoId,
+        total_contributed_by: 1,
+        total_amount: totalAmount,
+        total_transactions: totalTransactions
+      })
+      .fire();
+  }
 
   /**
    * Insert new video
@@ -158,6 +196,12 @@ class VideoDetail extends ModelBase {
 
     await new VideoDetailsByVideoIdsAndUserId({
       userId: params.userId,
+      videoIds: [params.videoId]
+    }).clear();
+
+    const VideoDetailsByVideoIds = require(rootPrefix + '/lib/cacheManagement/multi/VideoDetailsByVideoIds');
+
+    await new VideoDetailsByVideoIds({
       videoIds: [params.videoId]
     }).clear();
   }
