@@ -95,7 +95,7 @@ class TwitterSignup extends ServiceBase {
 
     const promisesArray1 = [];
 
-    // starting the create user in ost in parallel.
+    // Starting the create user in ost in parallel.
     // TODO - handle rejections
     let createOstUserPromise = oThis._createUserInOst();
 
