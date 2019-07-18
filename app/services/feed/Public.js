@@ -1,53 +1,90 @@
 const rootPrefix = '../../..',
-  FeedModel = require(rootPrefix + '/app/models/mysql/Feed'),
-  FeedServiceBase = require(rootPrefix + '/app/services/feed/Base'),
+  FeedBase = require(rootPrefix + '/app/services/feed/Base'),
+  LoggedOutFeedCache = require(rootPrefix + '/lib/cacheManagement/single/LoggedOutFeed'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination');
 
-/**
- * Class for public feed service.
- *
- * @class PublicFeed
- */
-class PublicFeed extends FeedServiceBase {
+class PublicVideoFeed extends FeedBase {
   /**
-   * Fetch feed ids.
+   * Constructor for Public Video Feed
    *
-   * @sets oThis.feedIds, oThis.feedIdToFeedDetailsMap
+   * @param params
+   */
+  constructor(params) {
+    super(params);
+
+    const oThis = this;
+
+    oThis.paginationIdentifier = params[paginationConstants.paginationIdentifierKey] || null;
+
+    console.log('--------oThis.paginationIdentifier-----', oThis.paginationIdentifier);
+    oThis.feeds = [];
+    oThis.userIds = [];
+    oThis.videoIds = [];
+    oThis.profileResponse = {};
+    oThis.finalResponse = {};
+
+    oThis.limit = oThis._defaultPageLimit();
+    oThis.paginationTimestamp = null;
+    oThis.currentUserId = 0;
+  }
+
+  /**
+   * Validate and Sanitize
    *
    * @returns {Promise<*|result>}
    * @private
    */
-  async _fetchFeedDetails() {
+  async _validateAndSanitizeParams() {
     const oThis = this;
 
-    const modelResp = await new FeedModel().fetchPublicPublishedFeedIds({
-      paginationTimestamp: oThis.paginationTimestamp,
-      limit: oThis._currentPageLimit()
-    });
+    if (oThis.paginationIdentifier) {
+      const parsedPaginationParams = oThis._parsePaginationParams(oThis.paginationIdentifier);
 
-    oThis.feedIds = modelResp.feedIds;
-    oThis.feedIdToFeedDetailsMap = modelResp.feedDetails;
-    oThis.lastFeedId = oThis.feedIds[oThis.feedIds.length - 1];
+      oThis.paginationTimestamp = parsedPaginationParams.pagination_timestamp; // Override paginationTimestamp number.
+    } else {
+      oThis.paginationTimestamp = null;
+    }
 
-    return responseHelper.successWithData({});
+    // Validate limit.
+    return oThis._validatePageSize();
   }
 
   /**
-   * Service response.
+   * Set feed ids
+   *
+   * @private
+   */
+  async _setFeedIds() {
+    const oThis = this,
+      loggedOutFeedCacheResp = await new LoggedOutFeedCache({
+        limit: oThis.limit,
+        paginationTimestamp: oThis.paginationTimestamp
+      }).fetch();
+
+    oThis.feedIds = loggedOutFeedCacheResp.data.feedIds;
+    oThis.feedsMap = loggedOutFeedCacheResp.data.feedDetails;
+
+    const lastFeedId = oThis.feedIds[oThis.feedIds.length - 1];
+    console.log('------lastFeedId------', oThis.feedIds, oThis.feedIds.length, lastFeedId);
+    oThis.nextPaginationTimestamp = oThis.feedsMap[lastFeedId].paginationIdentifier;
+  }
+
+  /**
+   * Prepare Response
    *
    * @returns {*|result}
    * @private
    */
-  _finalResponse() {
+  _prepareResponse() {
     const oThis = this;
 
     const nextPagePayloadKey = {};
 
-    if (oThis.feedIds.length >= oThis.limit) {
+    if (oThis.feeds.length >= oThis.limit) {
       nextPagePayloadKey[paginationConstants.paginationIdentifierKey] = {
         // TODO - think on how to remove duplicates.
-        pagination_timestamp: oThis.paginationTimestamp
+        pagination_timestamp: oThis.nextPaginationTimestamp
       };
     }
 
@@ -55,15 +92,27 @@ class PublicFeed extends FeedServiceBase {
       [paginationConstants.nextPagePayloadKey]: nextPagePayloadKey
     };
 
-    return {
-      feedIds: oThis.feedIds,
-      feedIdToFeedDetailsMap: oThis.feedIdToFeedDetailsMap,
-      ostTransactionMap: oThis.ostTransactionMap,
-      externalEntityGifMap: oThis.externalEntityGifMap,
-      usersByIdMap: oThis.usersByIdMap,
-      tokenUsersByUserIdMap: oThis.tokenUsersByUserIdMap,
+    return responseHelper.successWithData({
+      feedList: oThis.feeds,
+      userProfilesMap: oThis.profileResponse.userProfilesMap,
+      userProfileAllowedActions: oThis.profileResponse.userProfileAllowedActions,
+      usersByIdMap: oThis.profileResponse.usersByIdMap,
+      tokenUsersByUserIdMap: oThis.profileResponse.tokenUsersByUserIdMap,
+      imageMap: oThis.profileResponse.imageMap,
+      videoMap: oThis.profileResponse.videoMap,
+      linkMap: oThis.profileResponse.linkMap,
+      tags: oThis.profileResponse.tags,
+      userStat: oThis.profileResponse.userStat,
+      videoDetailsMap: oThis.profileResponse.videoDetailsMap,
+      currentUserUserContributionsMap: oThis.profileResponse.currentUserUserContributionsMap,
+      currentUserVideoContributionsMap: oThis.profileResponse.currentUserVideoContributionsMap,
+      pricePointsMap: oThis.profileResponse.pricePointsMap,
       meta: responseMetaData
-    };
+    });
+  }
+
+  _currentPageLimit() {
+    return paginationConstants.defaultPublicFeedPageSize;
   }
 
   /**
@@ -75,34 +124,13 @@ class PublicFeed extends FeedServiceBase {
     return paginationConstants.defaultPublicFeedPageSize;
   }
 
-  /**
-   * Min page limit.
-   *
-   * @private
-   */
   _minPageLimit() {
     return paginationConstants.minPublicFeedPageSize;
   }
 
-  /**
-   * Max page limit.
-   *
-   * @private
-   */
   _maxPageLimit() {
     return paginationConstants.maxPublicFeedPageSize;
   }
-
-  /**
-   * Current page limit.
-   *
-   * @private
-   */
-  _currentPageLimit() {
-    const oThis = this;
-
-    return oThis.limit;
-  }
 }
 
-module.exports = PublicFeed;
+module.exports = PublicVideoFeed;
