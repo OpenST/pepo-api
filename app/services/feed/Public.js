@@ -4,6 +4,11 @@ const rootPrefix = '../../..',
   responseHelper = require(rootPrefix + '/lib/formatter/response');
 
 class PublicVideoFeed extends FeedBase {
+  /**
+   * Constructor for Public Video Feed
+   *
+   * @param params
+   */
   constructor(params) {
     super(params);
 
@@ -16,10 +21,21 @@ class PublicVideoFeed extends FeedBase {
     oThis.finalResponse = {};
   }
 
+  /**
+   * Validate and Sanitize
+   *
+   * @returns {Promise<*|result>}
+   * @private
+   */
   async _validateAndSanitizeParams() {
     return responseHelper.successWithData({});
   }
 
+  /**
+   * Set feed ids
+   *
+   * @private
+   */
   async _setFeedIds() {
     const oThis = this,
       loggedOutFeedCacheResp = await new LoggedOutFeedCache().fetch();
@@ -28,6 +44,12 @@ class PublicVideoFeed extends FeedBase {
     oThis.feedsMap = loggedOutFeedCacheResp.data.feedDetails;
   }
 
+  /**
+   * Prepare Response
+   *
+   * @returns {*|result}
+   * @private
+   */
   _prepareResponse() {
     const oThis = this;
 

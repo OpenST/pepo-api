@@ -1,16 +1,22 @@
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   GetProfile = require(rootPrefix + '/lib/user/profile/Get'),
-  FeedByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/FeedByIds'),
+  feedConstants = require(rootPrefix + '/lib/globalConstant/feed'),
   responseHelper = require(rootPrefix + '/lib/formatter/response');
 
-class PublicVideoFeed extends ServiceBase {
+class FeedBase extends ServiceBase {
+  /**
+   * Constructor for feed base.
+   *
+   * @param params
+   */
   constructor(params) {
     super(params);
 
     const oThis = this;
 
     oThis.feeds = [];
+    oThis.feedsMap = {};
     oThis.feedIds = [];
     oThis.userIds = [];
     oThis.videoIds = [];
@@ -18,6 +24,12 @@ class PublicVideoFeed extends ServiceBase {
     oThis.finalResponse = {};
   }
 
+  /**
+   * Async perform for feed base.
+   *
+   * @returns {Promise<*>}
+   * @private
+   */
   async _asyncPerform() {
     const oThis = this;
 
@@ -31,7 +43,7 @@ class PublicVideoFeed extends ServiceBase {
   }
 
   /**
-   * Get Feed details
+   * Get Feed details.
    *
    * @returns {Promise<never>}
    * @private
@@ -39,30 +51,31 @@ class PublicVideoFeed extends ServiceBase {
   async _getFeeds() {
     const oThis = this;
 
-    const feedByIdsCacheResponse = await new FeedByIdsCache({ ids: oThis.feedIds }).fetch();
+    for (let i = 0; i < oThis.feedIds.length; i++) {
+      let feedData = oThis.feedsMap[oThis.feedIds[i]];
 
-    if (feedByIdsCacheResponse.isFailure()) {
-      return Promise.reject(feedByIdsCacheResponse);
-    }
-
-    const feedsData = feedByIdsCacheResponse.data;
-
-    for(let feedId in feedsData) {
-      let feedData = feedsData[feedId];
       oThis.feeds.push(feedData);
       oThis.userIds.push(feedData.actor);
-      if(feedData.) {
-      
+
+      if (feedData.kind === feedConstants.invertedKinds[feedConstants.fanUpdateKind]) {
+        oThis.videoIds.push(feedData.primaryExternalEntityId);
       }
-      oThis.videoIds.push(feedData.primaryExternalEntityId);
     }
-    
-    oThis.userIds = [1000, 1001, 1002];
-    oThis.videoIds = [123, 124, 125];
+
+    if (oThis.feeds.length === 0) {
+      return responseHelper.error({
+        internal_error_identifier: 'a_s_f_b_1',
+        api_error_identifier: 'resource_not_found',
+        debug_options: {
+          feedsArray: oThis.feeds,
+          userIds: oThis.userIds
+        }
+      });
+    }
   }
 
   /**
-   * Fetch profile details
+   * Fetch profile details.
    *
    * @return {Promise<void>}
    * @private
@@ -87,4 +100,4 @@ class PublicVideoFeed extends ServiceBase {
   }
 }
 
-module.exports = PublicVideoFeed;
+module.exports = FeedBase;
