@@ -1,5 +1,6 @@
 const rootPrefix = '../../..',
   FeedBase = require(rootPrefix + '/app/services/feed/Base'),
+  LoggedOutFeedCache = require(rootPrefix + '/lib/cacheManagement/single/LoggedOutFeed'),
   responseHelper = require(rootPrefix + '/lib/formatter/response');
 
 class PublicVideoFeed extends FeedBase {
@@ -19,9 +20,12 @@ class PublicVideoFeed extends FeedBase {
     return responseHelper.successWithData({});
   }
 
-  _setFeedIds() {
-    const oThis = this;
-    oThis.feedIds = [1, 2, 3, 4, 5];
+  async _setFeedIds() {
+    const oThis = this,
+      loggedOutFeedCacheResp = await new LoggedOutFeedCache().fetch();
+
+    oThis.feedIds = loggedOutFeedCacheResp.data.feedIds;
+    oThis.feedsMap = loggedOutFeedCacheResp.data.feedDetails;
   }
 
   _prepareResponse() {

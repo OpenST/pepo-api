@@ -48,11 +48,11 @@ class FeedModel extends ModelBase {
    *
    *  @returns {Promise<object>}
    */
-  async fetchPublicPublishedFeedIds(params) {
+  async getLoggedOutFeedIds(params) {
     const oThis = this;
 
-    const feedIds = [];
-    const feedDetails = {};
+    const feedIds = [],
+      feedDetails = {};
 
     const paginationTimestamp = params.paginationTimestamp,
       limit = params.limit;
