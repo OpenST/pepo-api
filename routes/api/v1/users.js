@@ -55,9 +55,9 @@ router.get('/contribution-to', sanitizer.sanitizeDynamicUrlParams, function(req,
 
   const dataFormatterFunc = async function(serviceResponse) {
     const wrapperFormatterRsp = await new FormatterComposer({
-      resultType: responseEntityKey.users,
+      resultType: responseEntityKey.contributionToUsers,
       entityKindToResponseKeyMap: {
-        [entityType.users]: responseEntityKey.users,
+        [entityType.users]: responseEntityKey.contributionToUsers,
         [entityType.userListMeta]: responseEntityKey.meta
       },
       serviceData: serviceResponse.data
@@ -77,9 +77,9 @@ router.get('/contribution-by', sanitizer.sanitizeDynamicUrlParams, function(req,
 
   const dataFormatterFunc = async function(serviceResponse) {
     const wrapperFormatterRsp = await new FormatterComposer({
-      resultType: responseEntityKey.users,
+      resultType: responseEntityKey.contributionByUsers,
       entityKindToResponseKeyMap: {
-        [entityType.users]: responseEntityKey.users,
+        [entityType.users]: responseEntityKey.contributionByUsers,
         [entityType.userListMeta]: responseEntityKey.meta
       },
       serviceData: serviceResponse.data
@@ -99,9 +99,9 @@ router.get('/contribution-suggestion', sanitizer.sanitizeDynamicUrlParams, funct
 
   const dataFormatterFunc = async function(serviceResponse) {
     const wrapperFormatterRsp = await new FormatterComposer({
-      resultType: responseEntityKey.users,
+      resultType: responseEntityKey.contributionSuggestions,
       entityKindToResponseKeyMap: {
-        [entityType.users]: responseEntityKey.users,
+        [entityType.users]: responseEntityKey.contributionSuggestions,
         [entityType.userListMeta]: responseEntityKey.meta
       },
       serviceData: serviceResponse.data
