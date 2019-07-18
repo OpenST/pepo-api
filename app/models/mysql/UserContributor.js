@@ -140,6 +140,52 @@ class UserContributor extends ModelBase {
     return response;
   }
 
+  /**
+   * Update by user id and contributed by user id.
+   *
+   * @param {number} userId  - user Id
+   * @param {number} contributedByUserId  - User Id who contributed for the video
+   * @param {number} totalAmount  - Total amount
+   * @param {number} totalTransactions  - totalTransactions
+   *
+   * @returns {Promise<*>}
+   */
+  async updateByUserIdAndContributedByUserId(userId, contributedByUserId, totalAmount, totalTransactions = 1) {
+    const oThis = this;
+
+    return oThis
+      .update([
+        'total_amount = total_amount + ? ,total_transactions = total_transactions + ? ',
+        totalAmount,
+        totalTransactions
+      ])
+      .where({ user_id: userId, contributed_by_user_id: contributedByUserId })
+      .fire();
+  }
+
+  /**
+   * Update by userId and contributed by user id.
+   *
+   * @param {number} userId  - user Id
+   * @param {number} contributedByUserId  - User Id who contributed for the video
+   * @param {number} totalAmount  - Total amount
+   * @param {number} totalTransactions  - totalTransactions
+   *
+   * @returns {Promise<*>}
+   */
+  async insertUserContributor(userId, contributedByUserId, totalAmount, totalTransactions = 1) {
+    const oThis = this;
+
+    return oThis
+      .insert({
+        user_id: userId,
+        contributed_by_user_id: contributedByUserId,
+        total_amount: totalAmount,
+        total_transactions: totalTransactions
+      })
+      .fire();
+  }
+
   /***
    * Flush cache
    *
@@ -171,7 +217,7 @@ class UserContributor extends ModelBase {
     if (params.userId && params.contributedByUserId) {
       const UserContributorMultiCache = require(rootPrefix +
         '/lib/cacheManagement/multi/UserContributorByUserIdsAndContributedByUserId');
-      await new UserContributorByUserIdCache({
+      await new UserContributorMultiCache({
         contributedByUserId: params.contributedByUserId,
         userIds: [params.userId]
       }).clear();
