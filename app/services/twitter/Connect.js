@@ -2,6 +2,7 @@ const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   TwitterUserByTwitterIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TwitterUserByTwitterIds'),
   AccountTwitterRequestClass = require(rootPrefix + '/lib/twitter/oAuth1.0/Account'),
+  ReplayAttackCache = require(rootPrefix + '/lib/cacheManagement/single/ReplayAttackOnTwitterConnect'),
   SignupTwitterClass = require(rootPrefix + '/app/services/twitter/Signup'),
   LoginTwitterClass = require(rootPrefix + '/app/services/twitter/Login'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
@@ -47,15 +48,45 @@ class TwitterConnect extends ServiceBase {
    * @return {Promise<void>}
    */
   async _asyncPerform() {
-    // TODO - we should stop 2 requests of connect coming back to back from the same user.
-    // TODO - we can use a shot lived memcache for the same.
     const oThis = this;
+
+    await oThis._validateDuplicateRequest();
 
     await oThis._fetchTwitterUserAndValidateCredentials();
 
     await oThis._performAction();
 
     return Promise.resolve(oThis.serviceResp);
+  }
+
+  /**
+   * Allow the api only if not recently used within 1 sec
+   *
+   * @return {Promise<Result>}
+   * @private
+   */
+  async _validateDuplicateRequest() {
+    const oThis = this;
+    logger.log('Start::_validateDuplicateRequest');
+
+    const TwitterConnectOnTwitterIdResp = await new ReplayAttackCache({ twitterId: oThis.twitterId }).fetch();
+
+    if (TwitterConnectOnTwitterIdResp.isFailure()) {
+      return Promise.reject(TwitterConnectOnTwitterIdResp);
+    }
+
+    if (TwitterConnectOnTwitterIdResp.data > 1) {
+      return Promise.reject(
+        responseHelper.error({
+          internal_error_identifier: 's_t_c_vdr_1',
+          api_error_identifier: 'could_not_proceed'
+        })
+      );
+    }
+
+    logger.log('End::_validateDuplicateRequest');
+
+    return responseHelper.successWithData({});
   }
 
   /**
