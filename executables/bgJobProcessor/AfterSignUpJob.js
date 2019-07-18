@@ -59,6 +59,7 @@ class AfterSignUpJob {
    * @private
    */
   async _processBio() {
+    // TODO - implement this
     const oThis = this;
   }
 

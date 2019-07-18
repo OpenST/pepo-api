@@ -59,6 +59,7 @@ class TwitterLogin extends ServiceBase {
   async _asyncPerform() {
     const oThis = this;
 
+    // TODO - Move the steps in here instead of inside _performLogin
     await oThis._performLogin();
 
     return Promise.resolve(oThis._serviceResponse());
@@ -76,11 +77,11 @@ class TwitterLogin extends ServiceBase {
 
     const promisesArray = [];
 
-    let promiseRes = oThis._fetchSecureUser().then(function(a) {
+    let updateTwitterUserPromise = oThis._fetchSecureUser().then(function(a) {
       return oThis._updateTwitterUserExtended();
     });
 
-    promisesArray.push(promiseRes);
+    promisesArray.push(updateTwitterUserPromise);
     promisesArray.push(oThis._fetchTokenUser());
 
     await Promise.all(promisesArray);
