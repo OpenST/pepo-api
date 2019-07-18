@@ -1,11 +1,12 @@
 const rootPrefix = '../../../..',
   TransactionOstEventBase = require(rootPrefix + '/app/services/ostEvents/transactions/Base'),
   TokenUserModel = require(rootPrefix + '/app/models/mysql/TokenUser'),
-  UserFeedModel = require(rootPrefix + '/app/models/mysql/UserFeed'),
+  UserActivityModel = require(rootPrefix + '/app/models/mysql/UserActivity'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   tokenUserConstants = require(rootPrefix + '/lib/globalConstant/tokenUser'),
-  externalEntityConstants = require(rootPrefix + '/lib/globalConstant/externalEntity'),
-  userFeedConstants = require(rootPrefix + '/lib/globalConstant/userFeed'),
+  activityConstants = require(rootPrefix + '/lib/globalConstant/activity'),
+  basicHelper = require(rootPrefix + '/helpers/basic'),
+  transactionConstants = require(rootPrefix + '/lib/globalConstant/transaction'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger');
 
 class SuccessTransactionOstEvent extends TransactionOstEventBase {
@@ -32,46 +33,65 @@ class SuccessTransactionOstEvent extends TransactionOstEventBase {
 
     await oThis._validateAndSanitizeParams();
 
-    await oThis._fetchExternalEntityObj();
+    let promiseArray = [];
 
-    if (oThis.externalEntityObj.extraData.kind === externalEntityConstants.extraData.userTransactionKind) {
-      await oThis._validateTransactionExternalEntityObj();
+    promiseArray.push(oThis._fetchTransaction());
+
+    promiseArray.push(oThis._setFromAndToUserId());
+
+    if (oThis._isVideoIdPresent()) {
+      promiseArray.push(oThis._fetchVideoAndValidate());
     }
 
-    await oThis._updateExternalEntityObj();
+    await Promise.all(promiseArray);
 
-    await oThis._updateOtherEntity();
+    if (oThis.transactionObj) {
+      await oThis._updateTransactionAndRelatedActivities();
+    } else {
+      let insertResponse = await oThis._insertInTransaction();
+      if (insertResponse.isDuplicateIndexViolation) {
+        basicHelper.sleep(500);
+        await oThis._fetchTransaction();
+        await oThis._updateTransactionAndRelatedActivities();
+      } else {
+        await oThis._insertInActivity();
+
+        let promiseArray2 = [];
+        promiseArray2.push(oThis._insertInUserActivity(oThis.fromUserId));
+        promiseArray2.push(oThis._insertInUserActivity(oThis.toUserId));
+
+        await Promise.all(promiseArray2);
+      }
+    }
+
+    //Todo: Update Stats
 
     return Promise.resolve(responseHelper.successWithData({}));
   }
 
   /**
-   * Validate external entity object
+   * This function is called when transaction exists in table. This function updates transaction and related activities.
    *
-   * @return {Promise<void>}
-   *
+   * @returns {Promise<void>}
    * @private
    */
-  async _validateTransactionExternalEntityObj() {
+  async _updateTransactionAndRelatedActivities() {
     const oThis = this;
-    logger.log('Validate external entity object');
 
-    if (oThis.externalEntityObj.entityId !== oThis.ostTransactionId) {
-      return Promise.reject(
-        responseHelper.error({
-          internal_error_identifier: 'a_s_oe_t_b_1',
-          api_error_identifier: 'something_went_wrong',
-          debug_options: { entityId: oThis.externalEntityObj.entityId }
-        })
-      );
-    }
+    await oThis._validateTransactionObj();
+    let promiseArray1 = [],
+      promiseArray2 = [];
 
-    // From user id will be same for all transfers in a transaction.
-    let fromOstUserId = oThis.ostTransaction.transfers[0].from_user_id,
-      ostUserIdToUserIdHashFrom = await oThis._getUserIdFromOstUserIds([fromOstUserId]),
-      fromUserId = ostUserIdToUserIdHashFrom[fromOstUserId];
+    promiseArray1.push(oThis._updateTransaction());
+    promiseArray1.push(oThis._updateActivity());
+    promiseArray1.push(oThis._removeEntryFromPendingTransactions());
 
-    await oThis._validateTransfers();
+    await Promise.all(promiseArray1);
+
+    promiseArray2.push(oThis._updateUserActivity(oThis.activityObj.id));
+    promiseArray2.push(oThis._insertInUserActivity(oThis.toUserId));
+
+    await Promise.all(promiseArray2);
   }
 
   /**
@@ -97,13 +117,13 @@ class SuccessTransactionOstEvent extends TransactionOstEventBase {
 
     let ostUserIdToUserIdsHash = await oThis._getUserIdFromOstUserIds(toOstUserIdsArray);
 
-    let extraData = oThis.externalEntityObj.extraData,
-      externalEntityToUserIdsArray = extraData.toUserIds,
-      externalEntityAmountArray = extraData.amounts;
+    let extraData = oThis.transactionObj.extraData,
+      transactionToUserIdsArray = extraData.toUserIds,
+      transactionAmountArray = extraData.amounts;
 
     for (let ostUserId in ostUserIdToAmountsHash) {
       let userId = ostUserIdToUserIdsHash[ostUserId],
-        indexOfUserIdInExtraData = externalEntityToUserIdsArray.indexOf(userId);
+        indexOfUserIdInExtraData = transactionToUserIdsArray.indexOf(userId);
 
       if (indexOfUserIdInExtraData < 0) {
         logger.error('Improper to-user id');
@@ -117,7 +137,7 @@ class SuccessTransactionOstEvent extends TransactionOstEventBase {
       }
 
       //Check if amounts are equal
-      if (ostUserIdToAmountsHash[ostUserId] !== externalEntityAmountArray[indexOfUserIdInExtraData]) {
+      if (ostUserIdToAmountsHash[ostUserId] !== transactionAmountArray[indexOfUserIdInExtraData]) {
         logger.error('Amount mismatch');
         return Promise.reject(
           responseHelper.error({
@@ -127,7 +147,7 @@ class SuccessTransactionOstEvent extends TransactionOstEventBase {
               ostUserId: ostUserId,
               userId: userId,
               amountInWebhooksData: ostUserIdToAmountsHash[ostUserId],
-              amountInExternalEntity: externalEntityAmountArray[indexOfUserIdInExtraData]
+              amountInExternalEntity: transactionAmountArray[indexOfUserIdInExtraData]
             }
           })
         );
@@ -144,19 +164,29 @@ class SuccessTransactionOstEvent extends TransactionOstEventBase {
    * @private
    */
   _validTransactionStatus() {
-    return externalEntityConstants.successOstTransactionStatus;
+    return transactionConstants.successOstTransactionStatus;
   }
 
   /**
-   * Transaction Status
+   * Activity Status
    *
    *
    * @return {String}
    *
    * @private
    */
-  _feedStatus() {
-    return 'todo::change_me';
+  _activityStatus() {
+    return activityConstants.doneStatus;
+  }
+
+  /**
+   * Transaction status
+   *
+   * @returns {string}
+   * @private
+   */
+  _transactionStatus() {
+    return transactionConstants.doneStatus;
   }
 
   /**
@@ -190,16 +220,21 @@ class SuccessTransactionOstEvent extends TransactionOstEventBase {
 
     await super._processForUserTransaction();
 
-    let insertRsp = await new UserFeedModel()
+    let insertRsp = await new UserActivityModel()
       .insert({
-        user_id: oThis.externalEntityObj.parsedExtraData.toUserIds[0],
-        feed_id: oThis.feedObj.id,
-        privacy_type: userFeedConstants.invertedPrivacyTypes[oThis.privacyType],
-        published_ts: oThis._published_timestamp()
+        user_id: oThis.transactionObj.extraData.toUserIds[0],
+        activity_id: oThis.activityObj.id,
+        published_ts: oThis.activityObj.publishedTs
       })
       .fire();
 
-    //await UserFeedModel.flushCache({ id: insertRsp.insertId });
+    let userActivityObj = {};
+    userActivityObj.id = insertRsp.insertId;
+    userActivityObj.userId = oThis.transactionObj.extraData.toUserIds[0];
+    userActivityObj.activityId = oThis.activityObj.id;
+    userActivityObj.publishedTs = oThis.activityObj.publishedTs;
+
+    await UserActivityModel.flushCache(userActivityObj);
 
     return Promise.resolve(responseHelper.successWithData({}));
   }

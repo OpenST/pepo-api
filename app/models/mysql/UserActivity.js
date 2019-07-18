@@ -140,6 +140,41 @@ class UserActivityModel extends ModelBase {
   }
 
   /**
+   * Fetch user activity by user id, published timestamp and activity id.
+   *
+   * @param userId
+   * @param publishedTs
+   * @param activityId
+   * @returns {Promise<*>}
+   */
+  async fetchUserActivityByUserIdPublishedTsAndActivityId(userId, publishedTs, activityId) {
+    const oThis = this;
+
+    let whereClause = [];
+
+    if (publishedTs) {
+      whereClause = ['published_ts = ?', publishedTs];
+    } else {
+      whereClause = ['published_ts IS NULL'];
+    }
+
+    let dbRows = await oThis
+      .select(['*'])
+      .where({
+        user_id: userId,
+        activity_id: activityId
+      })
+      .where(whereClause)
+      .fire();
+
+    if (dbRows.length === 0) {
+      return {};
+    }
+
+    return oThis.formatDbData(dbRows[0]);
+  }
+
+  /**
    * Flush cache.
    *
    * @param {object} params

@@ -133,7 +133,6 @@ class UserActivity extends ActivityServiceBase {
 
     if (oThis.activityIds.length >= oThis.limit) {
       nextPagePayloadKey[paginationConstants.paginationIdentifierKey] = {
-        // TODO - think on how to remove duplicates.
         pagination_timestamp: oThis.paginationTimestamp
       };
     }
