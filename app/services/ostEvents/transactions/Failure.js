@@ -3,7 +3,9 @@ const rootPrefix = '../../../..',
   TokenUserModel = require(rootPrefix + '/app/models/mysql/TokenUser'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   tokenUserConstants = require(rootPrefix + '/lib/globalConstant/tokenUser'),
-  externalEntityConstants = require(rootPrefix + '/lib/globalConstant/externalEntity'),
+  activityConstants = require(rootPrefix + '/lib/globalConstant/activity'),
+  basicHelper = require(rootPrefix + '/helpers/basic'),
+  transactionConstants = require(rootPrefix + '/lib/globalConstant/transaction'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger');
 
 class FailureTransactionOstEvent extends TransactionOstEventBase {
@@ -30,13 +32,54 @@ class FailureTransactionOstEvent extends TransactionOstEventBase {
 
     await oThis._validateAndSanitizeParams();
 
-    await oThis._fetchExternalEntityObj();
+    let promiseArray = [];
 
-    await oThis._updateExternalEntityObj();
+    promiseArray.push(oThis._fetchTransaction());
 
-    await oThis._updateOtherEntity();
+    promiseArray.push(oThis._setFromAndToUserId());
+
+    if (oThis._isVideoIdPresent()) {
+      promiseArray.push(oThis._fetchVideoAndValidate());
+    }
+
+    await Promise.all(promiseArray);
+
+    if (oThis.transactionObj) {
+      await oThis._updateTransactionAndRelatedActivities();
+    } else {
+      let insertResponse = await oThis._insertInTransaction();
+      if (insertResponse.isDuplicateIndexViolation) {
+        basicHelper.sleep(500);
+        await oThis._fetchTransaction();
+        await oThis._updateTransactionAndRelatedActivities();
+      } else {
+        await oThis._insertInActivity();
+        await oThis._insertInUserActivity(oThis.fromUserId);
+      }
+    }
 
     return Promise.resolve(responseHelper.successWithData({}));
+  }
+
+  /**
+   *
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _updateTransactionAndRelatedActivities() {
+    const oThis = this;
+
+    await oThis._validateTransactionObj();
+    let promiseArray1 = [];
+
+    promiseArray1.push(oThis._updateTransaction());
+    promiseArray1.push(oThis._updateActivity());
+    promiseArray1.push(oThis._removeEntryFromPendingTransactions());
+
+    await Promise.all(promiseArray1);
+
+    await oThis._updateUserActivity(oThis.activityObj.id);
   }
 
   /**
@@ -48,19 +91,29 @@ class FailureTransactionOstEvent extends TransactionOstEventBase {
    * @private
    */
   _validTransactionStatus() {
-    return externalEntityConstants.failedOstTransactionStatus;
+    return transactionConstants.failedOstTransactionStatus;
   }
 
   /**
-   * Transaction Status
+   * Activity Status
    *
    *
    * @return {String}
    *
    * @private
    */
-  _feedStatus() {
-    return 'todo::change_me';
+  _activityStatus() {
+    return activityConstants.failedStatus;
+  }
+
+  /**
+   * Transaction status
+   *
+   * @returns {string}
+   * @private
+   */
+  _transactionStatus() {
+    return transactionConstants.failedStatus;
   }
 
   /**
