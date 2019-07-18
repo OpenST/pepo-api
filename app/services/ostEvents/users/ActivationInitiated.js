@@ -23,9 +23,7 @@ class UserActivationInitiated extends UserOstEventBase {
 
     await oThis._fetchTokenUser();
 
-    await oThis._updateTokenUser();
-
-    return responseHelper.successWithData({});
+    return oThis._updateTokenUser();
   }
 
   /**

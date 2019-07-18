@@ -137,6 +137,8 @@ class UserActivationFailure extends UserOstEventBase {
     });
 
     await createErrorLogsEntry.perform(errorObject, errorLogsConstants.highSeverity);
+
+    return responseHelper.successWithData({});
   }
 }
 
