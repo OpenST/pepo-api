@@ -1,9 +1,8 @@
 const rootPrefix = '../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
-  userContributorConstants = require(rootPrefix + '/lib/globalConstant/userContributor'),
-  coreConstants = require(rootPrefix + '/config/coreConstants');
+  database = require(rootPrefix + '/lib/globalConstant/database');
 
-const dbName = 'pepo_api_' + coreConstants.environment;
+const dbName = database.userDbName;
 
 class UserContributor extends ModelBase {
   /**

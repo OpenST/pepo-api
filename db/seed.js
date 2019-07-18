@@ -1,8 +1,8 @@
 const rootPrefix = '..',
   ExecuteQuery = require(rootPrefix + '/db/ExecuteQuery'),
-  coreConstants = require(rootPrefix + '/config/coreConstants');
+  database = require(rootPrefix + '/lib/globalConstant/database');
 
-const dbName = 'pepo_api_' + coreConstants.environment;
+const dbName = database.mainDbName;
 const schemaMigrationQuery =
   'CREATE TABLE IF NOT EXISTS `schema_migrations` ' +
   '(`version` varchar(255) COLLATE utf8_unicode_ci NOT NULL, ' +

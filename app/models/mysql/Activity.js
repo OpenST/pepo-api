@@ -1,9 +1,9 @@
 const rootPrefix = '../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
-  coreConstants = require(rootPrefix + '/config/coreConstants'),
+  database = require(rootPrefix + '/lib/globalConstant/database'),
   activityConstants = require(rootPrefix + '/lib/globalConstant/activity');
 
-const dbName = 'pepo_api_' + coreConstants.environment;
+const dbName = database.feedDbName;
 
 class ActivityModel extends ModelBase {
   /**

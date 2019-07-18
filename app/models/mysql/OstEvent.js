@@ -1,9 +1,9 @@
 const rootPrefix = '../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
-  ostEventConstants = require(rootPrefix + '/lib/globalConstant/ostEvent'),
-  coreConstants = require(rootPrefix + '/config/coreConstants');
+  database = require(rootPrefix + '/lib/globalConstant/database'),
+  ostEventConstants = require(rootPrefix + '/lib/globalConstant/ostEvent');
 
-const dbName = 'pepo_api_' + coreConstants.environment;
+const dbName = database.ostDbName;
 
 class OstEventModel extends ModelBase {
   /**

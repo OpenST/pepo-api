@@ -1,7 +1,8 @@
 const rootPrefix = '../..',
-  coreConstants = require(rootPrefix + '/config/coreConstants');
+  database = require(rootPrefix + '/lib/globalConstant/database');
 
-const dbName = 'pepo_api_' + coreConstants.environment;
+const dbName = database.twitterDbName;
+
 const upQuery =
   'CREATE TABLE `twitter_users_extended` ( \n\
       `id` bigint(20) NOT NULL AUTO_INCREMENT, \n\

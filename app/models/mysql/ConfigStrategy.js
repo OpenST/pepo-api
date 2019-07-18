@@ -2,7 +2,7 @@ const rootPrefix = '../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
   SecureGlobalSaltCache = require(rootPrefix + '/lib/cacheManagement/single/SecureGlobalSalt'),
   basicHelper = require(rootPrefix + '/helpers/basic'),
-  coreConstants = require(rootPrefix + '/config/coreConstants'),
+  database = require(rootPrefix + '/lib/globalConstant/database'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   localCipher = require(rootPrefix + '/lib/encryptors/localCipher'),
@@ -11,9 +11,8 @@ const rootPrefix = '../../..',
   configStrategyValidator = require(rootPrefix + '/helpers/configStrategyValidator'),
   configStrategyConstants = require(rootPrefix + '/lib/globalConstant/configStrategy');
 
-// Declare variables.
-const errorConfig = basicHelper.fetchErrorConfig(apiVersions.v1),
-  dbName = 'pepo_api_config_' + coreConstants.environment,
+const dbName = database.configDbName,
+  errorConfig = basicHelper.fetchErrorConfig(apiVersions.v1),
   kinds = configStrategyConstants.kinds;
 
 /**

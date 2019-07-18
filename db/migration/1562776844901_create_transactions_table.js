@@ -1,7 +1,8 @@
 const rootPrefix = '../..',
-  coreConstants = require(rootPrefix + '/config/coreConstants');
+  database = require(rootPrefix + '/lib/globalConstant/database');
 
-const dbName = 'pepo_api_' + coreConstants.environment;
+const dbName = database.feedDbName;
+
 const upQuery =
   'CREATE TABLE `transactions` ( \n\
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT, \n\

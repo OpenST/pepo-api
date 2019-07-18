@@ -1,9 +1,9 @@
 const rootPrefix = '../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
-  tokenUserConstants = require(rootPrefix + '/lib/globalConstant/tokenUser'),
-  coreConstants = require(rootPrefix + '/config/coreConstants');
+  database = require(rootPrefix + '/lib/globalConstant/database'),
+  tokenUserConstants = require(rootPrefix + '/lib/globalConstant/tokenUser');
 
-const dbName = 'pepo_api_' + coreConstants.environment;
+const dbName = database.userDbName;
 
 class TokenUserModel extends ModelBase {
   /**

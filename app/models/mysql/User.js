@@ -1,11 +1,12 @@
 const rootPrefix = '../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
-  userConstants = require(rootPrefix + '/lib/globalConstant/user'),
   util = require(rootPrefix + '/lib/util'),
-  localCipher = require(rootPrefix + '/lib/encryptors/localCipher'),
-  coreConstants = require(rootPrefix + '/config/coreConstants');
+  coreConstants = require(rootPrefix + '/config/coreConstants'),
+  database = require(rootPrefix + '/lib/globalConstant/database'),
+  userConstants = require(rootPrefix + '/lib/globalConstant/user'),
+  localCipher = require(rootPrefix + '/lib/encryptors/localCipher');
 
-const dbName = 'pepo_api_' + coreConstants.environment;
+const dbName = database.userDbName;
 
 class UserModel extends ModelBase {
   /**
