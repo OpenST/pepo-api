@@ -3,6 +3,7 @@ const rootPrefix = '../../../..',
   TokenUserModel = require(rootPrefix + '/app/models/mysql/TokenUser'),
   UserActivityModel = require(rootPrefix + '/app/models/mysql/UserActivity'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
+  UpdateStats = require(rootPrefix + '/lib/UpdateStats'),
   tokenUserConstants = require(rootPrefix + '/lib/globalConstant/tokenUser'),
   activityConstants = require(rootPrefix + '/lib/globalConstant/activity'),
   basicHelper = require(rootPrefix + '/helpers/basic'),
@@ -64,7 +65,7 @@ class SuccessTransactionOstEvent extends TransactionOstEventBase {
       }
     }
 
-    //Todo: Update Stats
+    await oThis._updateStats();
 
     return Promise.resolve(responseHelper.successWithData({}));
   }
@@ -153,6 +154,30 @@ class SuccessTransactionOstEvent extends TransactionOstEventBase {
         );
       }
     }
+  }
+
+  /**
+   * Update stats after transaction
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _updateStats() {
+    const oThis = this;
+
+    let updateStatsParams = {
+      fromUserId: oThis.fromUserId,
+      toUserId: oThis.toUserId,
+      totalAmount: oThis.ostTransaction.transfers[0].amount
+    };
+
+    if (oThis._isVideoIdPresent()) {
+      updateStatsParams.videoId = oThis.videoId;
+    }
+
+    let updateStatsObj = new UpdateStats(updateStatsParams);
+
+    await updateStatsObj.perform();
   }
 
   /**
