@@ -496,7 +496,8 @@ class TwitterSignup extends ServiceBase {
     let messagePayload = {
       bio: oThis.userTwitterEntity.description,
       twitterId: oThis.userTwitterEntity.idStr,
-      userId: oThis.userId
+      userId: oThis.userId,
+      profileImageId: oThis.profileImageId
     };
     await BgJob.enqueue(bgJobConstants.afterSignUpJobTopic, messagePayload);
   }

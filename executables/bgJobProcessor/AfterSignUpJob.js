@@ -8,6 +8,7 @@ const rootPrefix = '../..',
   BgJob = require(rootPrefix + '/lib/BgJob'),
   bgJobConstants = require(rootPrefix + '/lib/globalConstant/bgJob'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
+  AddUpdateUserBioKlass = require(rootPrefix + '/lib/user/profile/AddUpdateBio'),
   responseHelper = require(rootPrefix + '/lib/formatter/response');
 
 class AfterSignUpJob {
@@ -18,6 +19,7 @@ class AfterSignUpJob {
    * @param {String} params.bio
    * @param {String/Number} params.twitterId
    * @param {Number} params.userId
+   * @param {Number} params.profileImageId
    */
   constructor(params) {
     const oThis = this;
@@ -25,6 +27,7 @@ class AfterSignUpJob {
     oThis.bio = params.bio;
     oThis.twitterId = params.twitterId;
     oThis.userId = params.userId;
+    oThis.profileImageId = params.profileImageId;
   }
 
   /**
@@ -38,6 +41,8 @@ class AfterSignUpJob {
     await oThis._validateAndSanitize();
 
     await oThis._processBio();
+
+    await oThis._enqueueProfileImageResizer();
 
     await oThis._syncFriendsAndFollowers();
   }
@@ -59,8 +64,12 @@ class AfterSignUpJob {
    * @private
    */
   async _processBio() {
-    // TODO - implement this
     const oThis = this;
+
+    await new AddUpdateUserBioKlass({
+      bio: oThis.bio,
+      userId: oThis.userId
+    }).perform();
   }
 
   /**
@@ -77,6 +86,22 @@ class AfterSignUpJob {
     };
 
     await BgJob.enqueue(bgJobConstants.twitterFriendsSyncJobTopic, messagePayload);
+  }
+
+  /**
+   * Enqueue profile image resizer
+   *
+   * @returns {Promise<void>}
+   */
+  async _enqueueProfileImageResizer() {
+    const oThis = this;
+
+    if (oThis.profileImageId) {
+      await BgJob.enqueue(bgJobConstants.imageResizer, {
+        userId: oThis.userId,
+        imageId: oThis.profileImageId
+      });
+    }
   }
 }
 
