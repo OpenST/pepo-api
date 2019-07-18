@@ -3,6 +3,8 @@ const rootPrefix = '../../../..',
   CommonValidator = require(rootPrefix + '/lib/validators/Common'),
   UserProfileElementModel = require(rootPrefix + '/app/models/mysql/UserProfileElement'),
   userProfileElementConst = require(rootPrefix + '/lib/globalConstant/userProfileElement'),
+  FeedModel = require(rootPrefix + '/app/models/mysql/Feed'),
+  feedsConstants = require(rootPrefix + '/lib/globalConstant/feed'),
   videoLib = require(rootPrefix + '/lib/videoLib');
 
 /**
@@ -84,11 +86,12 @@ class AddFanVideo extends UpdateProfileBase {
     }
 
     let videoObj = resp.data.video,
-      videoId = resp.data.insertId,
       coverImageId = videoObj.posterImageId;
 
-    if (videoId) {
-      await oThis._addProfileElement(videoId, userProfileElementConst.coverVideoIdKind);
+    oThis.videoId = resp.data.insertId;
+
+    if (oThis.videoId) {
+      await oThis._addProfileElement(oThis.videoId, userProfileElementConst.coverVideoIdKind);
     }
 
     if (coverImageId) {
@@ -132,7 +135,32 @@ class AddFanVideo extends UpdateProfileBase {
    * @returns {Promise<void>}
    * @private
    */
-  async _updateUser() {}
+  async _updateUser() {
+    // No update is required in user.
+
+    // Feed needs to be added for uploaded video
+    const oThis = this;
+    await oThis._addFeed();
+  }
+
+  /**
+   * Add feed for user video
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  _addFeed() {
+    const oThis = this;
+
+    return new FeedModel()
+      .insert({
+        primary_external_entity_id: oThis.videoId,
+        kind: feedsConstants.invertedKinds[feedsConstants.fanUpdateKind],
+        actor: oThis.userId,
+        pagination_identifier: Math.round(new Date() / 1000)
+      })
+      .fire();
+  }
 }
 
 module.exports = AddFanVideo;

@@ -29,13 +29,11 @@ class FeedModel extends ModelBase {
   formatDbData(dbRow) {
     return {
       id: dbRow.id,
-      kind: feedsConstants.kinds[dbRow.kind],
       primaryExternalEntityId: dbRow.primary_external_entity_id,
+      kind: feedsConstants.kinds[dbRow.kind],
+      paginationIdentifier: dbRow.pagination_identifier,
+      actor: dbRow.actor,
       extraData: JSON.parse(dbRow.extra_data),
-      privacyType: 'todo::change_me',
-      status: 'todo::change_me',
-      publishedTs: dbRow.published_ts,
-      displayTs: dbRow.display_ts,
       createdAt: dbRow.created_at,
       updatedAt: dbRow.updated_at
     };
@@ -46,31 +44,26 @@ class FeedModel extends ModelBase {
    *
    * @param {object} params
    * @param {number/string} params.limit
-   * @param {number/string} [params.paginationTimestamp]
+   * @param {number/string} params.paginationTimestamp
    *
    *  @returns {Promise<object>}
    */
-  async fetchPublicPublishedFeedIds(params) {
+  async getLoggedOutFeedIds(params) {
     const oThis = this;
 
-    const feedIds = [];
-    const feedDetails = {};
+    const feedIds = [],
+      feedDetails = {};
 
     const paginationTimestamp = params.paginationTimestamp,
       limit = params.limit;
 
     const queryObject = oThis
       .select('*')
-      .where([
-        'status = ? AND privacy_type = ?',
-        feedsConstants.invertedStatuses[feedsConstants.publishedStatus],
-        feedsConstants.invertedPrivacyTypes[feedsConstants.publicPrivacyType]
-      ])
-      .limit(limit)
-      .order_by('published_ts desc');
+      .order_by('pagination_identifier desc')
+      .limit(limit);
 
     if (paginationTimestamp) {
-      queryObject.where(['published_ts < ?', paginationTimestamp]);
+      queryObject.where(['pagination_identifier < ?', paginationTimestamp]);
     }
 
     const dbRows = await queryObject.fire();
@@ -159,13 +152,7 @@ class FeedModel extends ModelBase {
    *
    * @returns {Promise<*>}
    */
-  static async flushCache(params) {
-    const FeedByIds = require(rootPrefix + '/lib/cacheManagement/multi/FeedByIds');
-
-    await new FeedByIds({
-      ids: [params.id]
-    }).clear();
-  }
+  static async flushCache(params) {}
 }
 
 module.exports = FeedModel;
