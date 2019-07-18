@@ -3,6 +3,8 @@ const rootPrefix = '../../../..',
   UserOstEventBase = require(rootPrefix + '/app/services/ostEvents/users/Base'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
+  createErrorLogsEntry = require(rootPrefix + '/lib/errorLogs/createEntry'),
+  errorLogsConstants = require(rootPrefix + '/lib/globalConstant/errorLogs'),
   tokenUserConstants = require(rootPrefix + '/lib/globalConstant/tokenUser');
 
 /**
@@ -21,9 +23,13 @@ class UserActivationFailure extends UserOstEventBase {
 
     await oThis._validateAndSanitizeParams();
 
+    const promiseArray = [oThis._sendPagerDuty()];
+
     await oThis._fetchTokenUser();
 
     await oThis._updateTokenUser();
+
+    await Promise.all(promiseArray);
 
     return responseHelper.successWithData({});
   }
@@ -67,7 +73,11 @@ class UserActivationFailure extends UserOstEventBase {
   async _fetchTokenUser() {
     const oThis = this;
 
-    await super._fetchTokenUser();
+    const rsp = await super._fetchTokenUser();
+
+    if (rsp.isFailure()) {
+      return rsp;
+    }
 
     // This is an extra check just to be sure that the status is definitely not activated.
     if (oThis.tokenUserObj.ostStatus === tokenUserConstants.activatedOstStatus) {
@@ -109,6 +119,24 @@ class UserActivationFailure extends UserOstEventBase {
     await TokenUserModel.flushCache({ userId: oThis.tokenUserObj.userId });
 
     return responseHelper.successWithData({});
+  }
+
+  /**
+   * Send pager duty in case of user activation failure.
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _sendPagerDuty() {
+    const oThis = this;
+
+    const errorObject = responseHelper.error({
+      internal_error_identifier: 's_oe_u_af_spd_1',
+      api_error_identifier: 'user_activation_failed',
+      debug_options: { tokenUserObj: oThis.tokenUserObj, ostUser: oThis.ostUser }
+    });
+
+    await createErrorLogsEntry.perform(errorObject, errorLogsConstants.highSeverity);
   }
 }
 

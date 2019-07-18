@@ -93,5 +93,10 @@
     "http_code": "401",
     "code": "UNAUTHORIZED",
     "message": "Invalid login details."
+  },
+  "user_activation_failed": {
+    "http_code": "500",
+    "code": "INTERNAL_SERVER_ERROR",
+    "message": "User activation failed."
   }
 }

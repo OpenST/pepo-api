@@ -58,35 +58,6 @@ class UserActivationInitiated extends UserOstEventBase {
   }
 
   /**
-   * Fetch token user.
-   *
-   * @return {Promise<void>}
-   * @private
-   */
-  async _fetchTokenUser() {
-    const oThis = this;
-
-    const rsp = await super._fetchTokenUser();
-
-    if (rsp.isFailure()) {
-      return rsp;
-    }
-
-    if (oThis.tokenUserObj.ostStatus === tokenUserConstants.activatingOstStatus) {
-      // At this point, status of tokenUser would be createdOstStatus.
-      return Promise.reject(
-        responseHelper.error({
-          internal_error_identifier: 's_oe_u_ai_ftu_2',
-          api_error_identifier: 'something_went_wrong',
-          debug_options: { tokenUserObj: oThis.tokenUserObj, ostUser: oThis.ostUser }
-        })
-      );
-    }
-
-    return responseHelper.successWithData({});
-  }
-
-  /**
    * Update token user properties.
    *
    * @return {Promise<void>}
@@ -96,6 +67,13 @@ class UserActivationInitiated extends UserOstEventBase {
     const oThis = this;
 
     logger.log('Updating token user to user activating.');
+
+    if (
+      oThis.tokenUserObj.ostStatus === tokenUserConstants.activatingOstStatus ||
+      oThis.tokenUserObj.ostStatus === tokenUserConstants.activatedOstStatus
+    ) {
+      return responseHelper.successWithData({});
+    }
 
     await new TokenUserModel()
       .update({
