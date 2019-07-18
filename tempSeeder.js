@@ -127,7 +127,7 @@ class TempSeeder {
               url: videoUrlArray[index]
             }
           },
-          status: videoConst.notResized,
+          status: videoConst.activeStatus,
           posterImageId: posterImageResponse.insertId
         },
         videoResponse = await new VideosModel().insertVideo(videoParams);
