@@ -379,6 +379,10 @@ const v1Signature = {
         validatorMethods: ['validateString', 'validatePaginationIdentifier']
       }
     ]
+  },
+  [apiName.publicFeed]: {
+    mandatory: [],
+    optional: []
   }
 };
 
