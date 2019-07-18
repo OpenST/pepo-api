@@ -55,7 +55,9 @@ class UserActivationSuccess extends UserOstEventBase {
 
     await oThis._markTokenUserAirdropStartedProperty();
 
-    return oThis._createTransactionEntry();
+    await oThis._createTransactionEntry();
+
+    return responseHelper.successWithData({});
   }
 
   /**
