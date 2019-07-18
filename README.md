@@ -124,3 +124,9 @@ node executables/oneTimers/insertWebhooksSecret.js --webhooksSecret "__WXYZ" --w
    let BgJob = require('./lib/BgJob');
    BgJob.enqueue("bg.p1.example", {"k1": "v1"});
 ```
+
+* Seed tables for profile
+```js
+   node
+   profileSeeder = require('./tempSeeder.js');
+```
