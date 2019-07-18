@@ -50,7 +50,7 @@ class VideoContributor extends ModelBase {
    * Fetch videoDetail object for video id
    *
    * @param {array} videoIds  - video id
-   * @param contributedByUserId {Integer} - User Id who cntributed for the video
+   * @param {Integer} contributedByUserId  - User Id who contributed for the video
    *
    * @return {Object}
    */
@@ -72,6 +72,52 @@ class VideoContributor extends ModelBase {
     return response;
   }
 
+  /**
+   * Update by video id and contributed by user id.
+   *
+   * @param {number} videoId  - video id
+   * @param {number} contributedByUserId  - User Id who contributed for the video
+   * @param {number} totalAmount  - Total amount
+   * @param {number} totalTransactions  - totalTransactions
+   *
+   * @returns {Promise<*>}
+   */
+  async updateByVideoIdAndContributedByUserId(videoId, contributedByUserId, totalAmount, totalTransactions = 1) {
+    const oThis = this;
+
+    return oThis
+      .update([
+        'total_amount = total_amount + ? ,total_transactions = total_transactions + ? ',
+        totalAmount,
+        totalTransactions
+      ])
+      .where({ video_id: videoId, contributed_by_user_id: contributedByUserId })
+      .fire();
+  }
+
+  /**
+   * Update by video id and contributed by user id.
+   *
+   * @param {number} videoId  - video id
+   * @param {number} contributedByUserId  - User Id who contributed for the video
+   * @param {number} totalAmount  - Total amount
+   * @param {number} totalTransactions  - totalTransactions
+   *
+   * @returns {Promise<*>}
+   */
+  async insertVideoContributor(videoId, contributedByUserId, totalAmount, totalTransactions = 1) {
+    const oThis = this;
+
+    return oThis
+      .insert({
+        video_id: videoId,
+        contributed_by_user_id: contributedByUserId,
+        total_amount: totalAmount,
+        total_transactions: totalTransactions
+      })
+      .fire();
+  }
+
   /***
    * Flush cache
    *
@@ -79,7 +125,15 @@ class VideoContributor extends ModelBase {
    *
    * @returns {Promise<*>}
    */
-  static async flushCache(params) {}
+  static async flushCache(params) {
+    const VideoContributorByVideoIdsAndContributedByUserId = require(rootPrefix +
+      '/lib/cacheManagement/multi/VideoContributorByVideoIdsAndContributedByUserId');
+
+    await new VideoContributorByVideoIdsAndContributedByUserId({
+      contributedByUserId: params.id,
+      videoIds: params.videoIds
+    }).clear();
+  }
 }
 
 module.exports = VideoContributor;

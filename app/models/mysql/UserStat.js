@@ -94,18 +94,64 @@ class UserStat extends ModelBase {
   }
 
   /**
+   * Update user stats.
+   *
+   * @returns {Promise<void>}
+   */
+  async updateUserStat(userId, totalContributedBy, totalContributedTo, totalAmountRaised) {
+    const oThis = this;
+
+    return oThis
+      .update([
+        'total_amount_raised = total_amount_raised + ?, total_contributed_by = total_contributed_by + ?, total_contributed_to = total_contributed_to + ?',
+        totalAmountRaised,
+        totalContributedBy,
+        totalContributedTo
+      ])
+      .where({ user_id: userId })
+      .fire();
+  }
+
+  /**
+   * Create user stats.
+   *
+   * @returns {Promise<void>}
+   */
+  async createUserStat(userId, totalContributedBy, totalContributedTo, totalAmountRaised) {
+    const oThis = this;
+
+    return oThis
+      .insert({
+        user_id: userId,
+        total_contributed_by: totalContributedBy,
+        total_contributed_to: totalContributedTo,
+        total_amount_raised: totalAmountRaised
+      })
+      .fire();
+  }
+
+  /**
    * Flush cache.
    *
    * @param {object} params
-   * @param {number} params.userId
+   * @param {number} [params.userIds]
+   * @param {number} [params.userId]
    *
    * @returns {Promise<*>}
    */
   static async flushCache(params) {
     const UserStatByUserIds = require(rootPrefix + '/lib/cacheManagement/multi/UserStatByUserIds');
 
+    let userIds = null;
+
+    if (params.userIds) {
+      userIds = params.userIds;
+    } else {
+      userIds = [params.userId];
+    }
+
     await new UserStatByUserIds({
-      userIds: [params.userId]
+      userIds: userIds
     }).clear();
   }
 }

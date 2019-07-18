@@ -3,7 +3,9 @@ const rootPrefix = '../../..',
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   TwitterUserModel = require(rootPrefix + '/app/models/mysql/TwitterUser'),
   UserByUserNameCache = require(rootPrefix + '/lib/cacheManagement/single/UserByUsername'),
-  TwitterUserByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TwitterUserByUserIds');
+  TwitterUserByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TwitterUserByIds'),
+  TwitterUserByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TwitterUserByUserIds'),
+  TwitterUserByTwitterIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TwitterUserByTwitterIds');
 
 /**
  * Class for rotate twitter account
@@ -85,8 +87,17 @@ class RotateTwitterAccount extends ServiceBase {
     }
 
     //should always be present;
-    oThis.currentUserTwitterUserTwitterId = TwitterUserByUserIdsCacheResp.data[oThis.userId].twitterId;
     oThis.currentUserTwitterUserId = TwitterUserByUserIdsCacheResp.data[oThis.userId].id;
+
+    let TwitterUserByIdsCacheResp = await new TwitterUserByIdsCache({
+      ids: [oThis.currentUserTwitterUserId]
+    }).fetch();
+
+    if (TwitterUserByIdsCacheResp.isFailure()) {
+      return Promise.reject(TwitterUserByIdsCacheResp);
+    }
+
+    oThis.currentUserTwitterUserTwitterId = TwitterUserByIdsCacheResp.data[oThis.currentUserTwitterUserId].twitterId;
   }
 
   /**
@@ -112,18 +123,16 @@ class RotateTwitterAccount extends ServiceBase {
     }
     await new TwitterUserModel()
       .update({ twitter_id: oThis.currentUserTwitterUserId })
-      .where({ twitter_id: oThis.currentUserTwitterUserTwitterId })
+      .where({ id: oThis.currentUserTwitterUserId })
       .fire();
   }
 
   async _clearTwitterUserCache() {
     const oThis = this;
-    const TwitterUserByTwitterIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TwitterUserByTwitterIds');
     await new TwitterUserByTwitterIdsCache({
       twitterIds: [oThis.currentUserTwitterUserTwitterId]
     }).clear();
 
-    const TwitterUserByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TwitterUserByIds');
     await new TwitterUserByIdsCache({
       ids: [oThis.currentUserTwitterUserId]
     }).clear();

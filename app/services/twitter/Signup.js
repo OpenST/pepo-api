@@ -103,8 +103,17 @@ class TwitterSignup extends ServiceBase {
     promisesArray1.push(oThis._setUserName());
     promisesArray1.push(oThis._setKMSEncryptionSalt());
 
-    // TODO - handle rejections in individual promises.
-    await Promise.all(promisesArray1);
+    await Promise.all(promisesArray1).catch(function(err) {
+      logger.error('Error in _performSignup: ', err);
+
+      return Promise.reject(
+        responseHelper.error({
+          internal_error_identifier: 's_t_s_ps_1',
+          api_error_identifier: 'something_went_wrong',
+          debug_options: {}
+        })
+      );
+    });
 
     await oThis._createUser();
 
@@ -496,7 +505,8 @@ class TwitterSignup extends ServiceBase {
     let messagePayload = {
       bio: oThis.userTwitterEntity.description,
       twitterId: oThis.userTwitterEntity.idStr,
-      userId: oThis.userId
+      userId: oThis.userId,
+      profileImageId: oThis.profileImageId
     };
     await BgJob.enqueue(bgJobConstants.afterSignUpJobTopic, messagePayload);
   }

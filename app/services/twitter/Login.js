@@ -59,21 +59,7 @@ class TwitterLogin extends ServiceBase {
   async _asyncPerform() {
     const oThis = this;
 
-    // TODO - Move the steps in here instead of inside _performLogin
-    await oThis._performLogin();
-
-    return Promise.resolve(oThis._serviceResponse());
-  }
-
-  /**
-   * Perform For Login Via Twitter.
-   *
-   * @return {Promise<void>}
-   * @private
-   */
-  async _performLogin() {
-    const oThis = this;
-    logger.log('Start::Perform Twitter login', oThis.twitterUserObj);
+    logger.log('Start::_asyncPerform Twitter login');
 
     const promisesArray = [];
 
@@ -86,9 +72,9 @@ class TwitterLogin extends ServiceBase {
 
     await Promise.all(promisesArray);
 
-    logger.log('End::Perform Twitter Login');
+    logger.log('End::_asyncPerform Twitter Login');
 
-    return responseHelper.successWithData({});
+    return Promise.resolve(oThis._serviceResponse());
   }
 
   /**

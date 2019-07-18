@@ -151,6 +151,7 @@ class seedTokensTable {
       .insert({
         name: oThis.tokenData.name,
         symbol: oThis.tokenData.symbol,
+        stake_currency: oThis.tokenData.base_token,
         ost_token_id: oThis.tokenData.id,
         decimal: oThis.tokenData.decimals,
         aux_chain_id: oThis.tokenData.auxiliary_chains[0].chain_id,

@@ -32,6 +32,7 @@ class Token extends ModelBase {
    * @param {number} dbRow.decimal
    * @param {number} dbRow.aux_chain_id
    * @param {string} dbRow.ost_token_id
+   * @param {string} dbRow.stake_currency
    * @param {string} dbRow.conversion_factor
    * @param {string} dbRow.company_token_holder_address
    * @param {string} dbRow.rule_addresses
@@ -51,6 +52,7 @@ class Token extends ModelBase {
       name: dbRow.name,
       symbol: dbRow.symbol,
       ostTokenId: dbRow.ost_token_id,
+      stakeCurrency: dbRow.stake_currency,
       decimal: dbRow.decimal,
       auxChainId: dbRow.aux_chain_id,
       conversionFactor: dbRow.conversion_factor,
@@ -76,7 +78,7 @@ class Token extends ModelBase {
     const dbRow = await oThis.select('*').fire();
 
     if (dbRow.length === 0) {
-      return Promise.reject(new Error(`No entry found in tokens table.`));
+      return Promise.reject(new Error('No entry found in tokens table.'));
     }
 
     return oThis._formatDbData(dbRow[0]);
