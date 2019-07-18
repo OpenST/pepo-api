@@ -94,7 +94,7 @@ class PublicVideoFeed extends FeedBase {
 
     return responseHelper.successWithData({
       feedList: oThis.feeds,
-      userProfileDetails: oThis.profileResponse.userProfileDetails,
+      userProfilesMap: oThis.profileResponse.userProfilesMap,
       userProfileAllowedActions: oThis.profileResponse.userProfileAllowedActions,
       usersByIdMap: oThis.profileResponse.usersByIdMap,
       tokenUsersByUserIdMap: oThis.profileResponse.tokenUsersByUserIdMap,
