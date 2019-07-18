@@ -1,15 +1,30 @@
 const rootPrefix = '../../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
-  TokenUserByOstUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TokenUserByOstUserIds'),
   TokenUserDetailByUserIdCache = require(rootPrefix + '/lib/cacheManagement/multi/TokenUserByUserIds'),
+  TokenUserByOstUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TokenUserByOstUserIds'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   responseHelper = require(rootPrefix + '/lib/formatter/response');
 
+/**
+ * Class for users related webhooks processors base.
+ *
+ * @class UserOstEventBase
+ */
 class UserOstEventBase extends ServiceBase {
   /**
-   * @param params
+   * Constructor for users related webhooks processors base.
    *
+   * @param {object} params
+   * @param {object} params.data
+   * @param {object} params.data.user
+   * @param {number} params.data.user.id
+   * @param {string} params.data.user.token_holder_address
+   * @param {string} params.data.user.status
+   *
+   * @augments ServiceBase
+   *
+   * @constructor
    */
   constructor(params) {
     super(params);
@@ -21,6 +36,7 @@ class UserOstEventBase extends ServiceBase {
     oThis.ostUserid = oThis.ostUser.id;
     oThis.ostUserTokenHolderAddress = oThis.ostUser.token_holder_address;
     oThis.ostUserStatus = oThis.ostUser.status.toUpperCase();
+
     oThis.paramErrors = [];
   }
 
@@ -28,7 +44,6 @@ class UserOstEventBase extends ServiceBase {
    * Validate and sanitize params.
    *
    * @return {Promise<void>}
-   *
    * @private
    */
   async _validateAndSanitizeParams() {
@@ -40,20 +55,21 @@ class UserOstEventBase extends ServiceBase {
       oThis.paramErrors.push('invalid_user_id');
     }
 
-    return Promise.resolve(responseHelper.successWithData({}));
+    return responseHelper.successWithData({});
   }
 
   /**
    * Fetch token user.
    *
-   * @return {Promise<void>}
+   * @sets oThis.userId, oThis.tokenUserObj
    *
+   * @return {Promise<void>}
    * @private
    */
   async _fetchTokenUser() {
     const oThis = this;
 
-    logger.log('Fetch Token User');
+    logger.log('Fetching token user.');
 
     let tokenUserObjsRes = await new TokenUserByOstUserIdsCache({ ostUserIds: [oThis.ostUserid] }).fetch();
 
@@ -91,7 +107,7 @@ class UserOstEventBase extends ServiceBase {
       );
     }
 
-    return Promise.resolve(responseHelper.successWithData({}));
+    return responseHelper.successWithData({});
   }
 }
 
