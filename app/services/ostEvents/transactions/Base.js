@@ -112,10 +112,11 @@ class TransactionOstEventBase extends ServiceBase {
         debug_options: { reason: 'Transaction status need not to be updated.' }
       });
       await createErrorLogsEntry.perform(errorObject1, errorLogsConstants.mediumSeverity);
+      //Note: Returning error object with promise resolve in order to handle this condition gracefully and return with success.
       return Promise.resolve(errorObject1);
     }
 
-    return Promise.resolve(responseHelper.successWithData({}));
+    return responseHelper.successWithData({});
   }
 
   /**
@@ -155,7 +156,6 @@ class TransactionOstEventBase extends ServiceBase {
     }
 
     logger.log('End:: Validate for Transaction Webhook');
-    return Promise.resolve(responseHelper.successWithData({}));
   }
 
   /**
@@ -178,8 +178,6 @@ class TransactionOstEventBase extends ServiceBase {
     if (transactionCacheResponse.data[oThis.ostTxId].id) {
       oThis.transactionObj = transactionCacheResponse.data[oThis.ostTxId];
     }
-
-    return Promise.resolve(responseHelper.successWithData({}));
   }
 
   /**
@@ -288,7 +286,6 @@ class TransactionOstEventBase extends ServiceBase {
     await TransactionModel.flushCache(oThis.transactionObj);
 
     logger.log('End:: Update transaction table for Transaction Webhook');
-    return Promise.resolve(responseHelper.successWithData({}));
   }
 
   /**
@@ -317,7 +314,7 @@ class TransactionOstEventBase extends ServiceBase {
     }
 
     if (activityObjRes.status === activityConstants.invertedStatuses[oThis._activityStatus()]) {
-      return Promise.resolve(responseHelper.successWithData({}));
+      return responseHelper.successWithData({});
     }
 
     oThis.activityObj = activityObjRes;
@@ -339,7 +336,6 @@ class TransactionOstEventBase extends ServiceBase {
     await ActivityModel.flushCache(oThis.activityObj);
 
     logger.log('End:: Update Activity');
-    return Promise.resolve(responseHelper.successWithData({}));
   }
 
   /**
@@ -380,7 +376,6 @@ class TransactionOstEventBase extends ServiceBase {
     await UserActivityModel.flushCache(userActivityObj);
 
     logger.log('End:: Update User Activity');
-    return Promise.resolve(responseHelper.successWithData({}));
   }
 
   /**
@@ -407,7 +402,6 @@ class TransactionOstEventBase extends ServiceBase {
     await PendingTransactionModel.flushCache(pendingTransactionObj);
 
     logger.log('End:: Remove entry from pending transaction');
-    return Promise.resolve(responseHelper.successWithData({}));
   }
 
   /**
@@ -450,8 +444,7 @@ class TransactionOstEventBase extends ServiceBase {
     tokenUserObj.properties = propertyVal;
 
     await TokenUserModel.flushCache(tokenUserObj);
-
-    return Promise.resolve(responseHelper.successWithData({}));
+    logger.log('End:: Update token user to mark airdrops status');
   }
 
   /**
@@ -544,7 +537,6 @@ class TransactionOstEventBase extends ServiceBase {
     oThis.activityObj = formattedInsertData;
 
     logger.log('End:: Insert in Activity table');
-    return Promise.resolve(responseHelper.successWithData({}));
   }
 
   /**
@@ -572,7 +564,6 @@ class TransactionOstEventBase extends ServiceBase {
     await UserActivityModel.flushCache(formattedInsertData);
 
     logger.log('End:: Insert in User Activity table');
-    return Promise.resolve(responseHelper.successWithData({}));
   }
 
   /**

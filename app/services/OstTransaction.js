@@ -241,8 +241,6 @@ class OstTransaction extends ServiceBase {
 
     let formattedInsertData = new TextModel().formatDbData(insertData);
     await TextModel.flushCache(formattedInsertData);
-
-    return Promise.resolve();
   }
 
   /**
@@ -464,8 +462,6 @@ class OstTransaction extends ServiceBase {
 
     let formattedInsertData = new ExternalEntityModel().formatDbData(insertData);
     await ExternalEntityModel.flushCache(formattedInsertData);
-
-    return Promise.resolve();
   }
 
   /**
@@ -633,8 +629,6 @@ class OstTransaction extends ServiceBase {
 
     let formattedInsertData = new PendingTransactionModel().formatDbData(insertData);
     await PendingTransactionModel.flushCache(formattedInsertData);
-
-    return Promise.resolve();
   }
 }
 
