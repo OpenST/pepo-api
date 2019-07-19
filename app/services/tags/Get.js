@@ -17,7 +17,7 @@ class GetTags extends ServiceBase {
 
     const oThis = this;
 
-    oThis.tagPrefix = params.tag;
+    oThis.tagPrefix = params.q;
 
     oThis.paginationIdentifier = params[pagination.paginationIdentifierKey] || null;
     oThis.limit = null;

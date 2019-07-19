@@ -25,6 +25,8 @@ class FeedById extends FeedBase {
   async _validateAndSanitizeParams() {
     const oThis = this;
 
+    oThis.currentUserId = Number(oThis.currentUser.id);
+
     return responseHelper.successWithData({});
   }
 

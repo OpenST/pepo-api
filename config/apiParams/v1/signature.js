@@ -369,7 +369,7 @@ const v1Signature = {
   [apiName.getTags]: {
     mandatory: [
       {
-        parameter: 'tag',
+        parameter: 'q',
         validatorMethods: ['validateString']
       }
     ],

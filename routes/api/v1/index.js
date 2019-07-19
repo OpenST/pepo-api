@@ -51,7 +51,7 @@ router.use('/tokens', validateCookie, tokensRoutes);
 router.use('/ost-transactions', validateCookie, ostTransactionRoutes);
 router.use('/gifs', validateCookie, gifsRoutes);
 router.use('/feeds', feedsRoutes); // TODO - temp commit - removed validateCookie for feeds. Please revert.
-router.use('/feed', feedRoutes);
+router.use('/feed', validateCookie, feedRoutes);
 router.use('/activities', validateCookie, activitiesRoutes);
 router.use('/upload-params', uploadParamsRoutes);
 router.use('/tags', tagRoutes);
