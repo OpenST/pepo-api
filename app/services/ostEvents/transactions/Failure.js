@@ -45,6 +45,9 @@ class FailureTransactionOstEvent extends TransactionOstEventBase {
     await Promise.all(promiseArray);
 
     if (oThis.transactionObj) {
+      //todo: if transaction status is already updated dont do anything just send an email.
+      //todo: transaction object should always be present
+
       if (oThis.transactionObj.extraData.kind === transactionConstants.extraData.userTransactionKind) {
         await oThis._updateTransactionAndRelatedActivities();
       } else if (oThis.transactionObj.extraData.kind === transactionConstants.extraData.airdropKind) {
@@ -55,6 +58,7 @@ class FailureTransactionOstEvent extends TransactionOstEventBase {
       if (insertResponse.isDuplicateIndexViolation) {
         basicHelper.sleep(500);
         await oThis._fetchTransaction();
+        //todo: call the above function
         await oThis._updateTransactionAndRelatedActivities();
       } else {
         await oThis._insertInActivity();
@@ -141,23 +145,6 @@ class FailureTransactionOstEvent extends TransactionOstEventBase {
     propertyVal = new TokenUserModel().unSetBitwise('properties', propertyVal, tokenUserConstants.airdropDoneProperty);
 
     return propertyVal;
-  }
-
-  /**
-   * Update Feeds and User Feed
-   *
-   *
-   * @return {Promise<void>}
-   *
-   * @private
-   */
-  async _processForUserTransaction() {
-    const oThis = this;
-    logger.log('Process on User Transaction Fail of Transaction Failure Webhook');
-
-    await super._processForUserTransaction();
-
-    return Promise.resolve(responseHelper.successWithData({}));
   }
 }
 
