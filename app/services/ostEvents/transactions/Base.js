@@ -88,7 +88,38 @@ class TransactionOstEventBase extends ServiceBase {
   }
 
   /**
-   * perform -
+   * Validate Transaction obj
+   *
+   * @returns {Promise<*>}
+   * @private
+   */
+  async _validateTransactionObj() {
+    const oThis = this;
+    if (!oThis.transactionObj) {
+      let errorObject = responseHelper.error({
+        internal_error_identifier: 'a_s_oe_t_f_1',
+        api_error_identifier: 'something_went_wrong',
+        debug_options: { reason: 'Transaction obj was empty' }
+      });
+      await createErrorLogsEntry.perform(errorObject, errorLogsConstants.highSeverity);
+      return Promise.reject(errorObject);
+    }
+
+    if (oThis.transactionObj.status === oThis._transactionStatus()) {
+      let errorObject1 = responseHelper.error({
+        internal_error_identifier: 'a_s_oe_t_f_2',
+        api_error_identifier: 'something_went_wrong',
+        debug_options: { reason: 'Transaction status need not to be updated.' }
+      });
+      await createErrorLogsEntry.perform(errorObject1, errorLogsConstants.mediumSeverity);
+      return Promise.resolve(errorObject1);
+    }
+
+    return Promise.resolve(responseHelper.successWithData({}));
+  }
+
+  /**
+   * Async performer.
    *
    * @return {Promise<void>}
    */
@@ -97,10 +128,9 @@ class TransactionOstEventBase extends ServiceBase {
   }
 
   /**
-   * Validate Request
+   * Validate Request.
    *
    * @return {Promise<void>}
-   *
    * @private
    */
   async _validateAndSanitizeParams() {
@@ -132,7 +162,6 @@ class TransactionOstEventBase extends ServiceBase {
    * Get transaction
    *
    * @return {Promise<void>}
-   *
    * @private
    */
   async _fetchTransaction() {
@@ -196,40 +225,49 @@ class TransactionOstEventBase extends ServiceBase {
   }
 
   /**
-   * Validate external entity object
+   * Validate transfers
    *
    * @return {Promise<void>}
-   *
    * @private
    */
-  async _validateTransactionObj() {
+  async _validateTransfers() {
     const oThis = this;
-    logger.log('Validate external entity object');
+
+    const paramErrors = [];
+
+    logger.log('Validate transfers');
+
+    if (oThis.ostTransaction.transfers.length !== 1) {
+      paramErrors.push('invalid_transfers');
+    }
 
     // From user id will be same for all transfers in a transaction.
     if (oThis.fromUserId !== oThis.transactionObj.fromUserId) {
       logger.error('Mismatch in from user id in table and in webhook data.');
+      paramErrors.push('invalid_from_user_id');
+    }
+
+    if (oThis.toUserId !== oThis.transactionObj.extraData.toUserIds[0]) {
+      logger.error('Mismatch in to user id in table and in webhook data.');
+      paramErrors.push('invalid_to_user_id');
+    }
+
+    if (paramErrors.length > 0) {
       return Promise.reject(
-        responseHelper.error({
+        responseHelper.paramValidationError({
           internal_error_identifier: 'a_s_oe_t_b_1',
-          api_error_identifier: 'something_went_wrong',
-          debug_options: {
-            fromOstUserId: oThis.fromOstUserId,
-            trasnactionObjFromUserId: oThis.transactionObj.fromUserId,
-            transactionObj: JSON.stringify(oThis.transactionObj)
-          }
+          api_error_identifier: 'invalid_api_params',
+          params_error_identifiers: paramErrors,
+          debug_options: { transaction: oThis.transactionObj }
         })
       );
     }
-
-    //await oThis._validateTransfers();
   }
 
   /**
-   * Update ost transaction status in transaction table
+   * Update ost transaction status in transaction table.
    *
    * @return {Promise<void>}
-   *
    * @private
    */
   async _updateTransaction() {
@@ -274,7 +312,7 @@ class TransactionOstEventBase extends ServiceBase {
         api_error_identifier: 'something_went_wrong',
         debug_options: { reason: 'Activity object not found for transaction entity', entityId: oThis.transactionObj.id }
       });
-      createErrorLogsEntry.perform(errorObject, errorLogsConstants.highSeverity);
+      await createErrorLogsEntry.perform(errorObject, errorLogsConstants.highSeverity);
       return Promise.reject(errorObject);
     }
 
@@ -305,10 +343,9 @@ class TransactionOstEventBase extends ServiceBase {
   }
 
   /**
-   * Update User Activity
+   * Update user activity.
    *
    * @return {Promise<void>}
-   *
    * @private
    */
   async _updateUserActivity(activityId) {
@@ -327,7 +364,7 @@ class TransactionOstEventBase extends ServiceBase {
         api_error_identifier: 'something_went_wrong',
         debug_options: { reason: 'User activity object not found for activity id', activityId: activityId }
       });
-      createErrorLogsEntry.perform(errorObject, errorLogsConstants.highSeverity);
+      await createErrorLogsEntry.perform(errorObject, errorLogsConstants.highSeverity);
       return Promise.reject(errorObject);
     }
 
@@ -374,11 +411,9 @@ class TransactionOstEventBase extends ServiceBase {
   }
 
   /**
-   * Mark Airdrop Failed Property for Token USer
-   *
+   * Mark Airdrop Failed Property for Token User.
    *
    * @return {Promise<void>}
-   *
    * @private
    */
   async _processForAirdropTransaction() {
@@ -402,8 +437,8 @@ class TransactionOstEventBase extends ServiceBase {
       );
     }
 
-    let tokenUserObj = tokenUserObjRes.data[oThis.toUserId];
-    let propertyVal = oThis._getPropertyValForTokenUser(tokenUserObj.properties);
+    let tokenUserObj = tokenUserObjRes.data[oThis.toUserId],
+      propertyVal = oThis._getPropertyValForTokenUser(tokenUserObj.properties);
 
     await new TokenUserModel()
       .update({
@@ -413,13 +448,14 @@ class TransactionOstEventBase extends ServiceBase {
       .fire();
 
     tokenUserObj.properties = propertyVal;
+
     await TokenUserModel.flushCache(tokenUserObj);
 
     return Promise.resolve(responseHelper.successWithData({}));
   }
 
   /**
-   * insert in transaction table
+   * Insert in transaction table.
    *
    * @returns {Promise<{isDuplicateIndexViolation: boolean}>}
    * @private
@@ -459,7 +495,7 @@ class TransactionOstEventBase extends ServiceBase {
             api_error_identifier: 'something_went_wrong',
             debug_options: { Error: err }
           });
-          createErrorLogsEntry.perform(errorObject, errorLogsConstants.highSeverity);
+          await createErrorLogsEntry.perform(errorObject, errorLogsConstants.highSeverity);
           return Promise.reject(errorObject);
         }
       });
@@ -477,7 +513,7 @@ class TransactionOstEventBase extends ServiceBase {
   }
 
   /**
-   * Insert in Activity table
+   * Insert in activity table.
    *
    * @returns {Promise<void>}
    * @private
@@ -540,7 +576,7 @@ class TransactionOstEventBase extends ServiceBase {
   }
 
   /**
-   * fetch video and validate
+   * Fetch video and validate.
    *
    * @returns {Promise<never>}
    * @private
@@ -583,9 +619,7 @@ class TransactionOstEventBase extends ServiceBase {
   /**
    * Current Timestamp in Seconds
    *
-   *
    * @return {Integer}
-   *
    * @private
    */
   _publishedTimestamp() {
@@ -593,11 +627,9 @@ class TransactionOstEventBase extends ServiceBase {
   }
 
   /**
-   * Transaction Status
-   *
+   * Valid transaction status.
    *
    * @return {String}
-   *
    * @private
    */
   _validTransactionStatus() {
@@ -612,12 +644,11 @@ class TransactionOstEventBase extends ServiceBase {
   _transactionStatus() {
     throw `Unimplemented method _transactionStatus for TransactionOstEvent`;
   }
+
   /**
-   * Transaction Status
-   *
+   * Activity Status.
    *
    * @return {String}
-   *
    * @private
    */
   _activityStatus() {
@@ -625,11 +656,9 @@ class TransactionOstEventBase extends ServiceBase {
   }
 
   /**
-   * Get New Property Val for Token USer
-   *
+   * Get New Property Val for Token User.
    *
    * @return {Integer}
-   *
    * @private
    */
   _getPropertyValForTokenUser() {

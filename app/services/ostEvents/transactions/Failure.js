@@ -45,21 +45,13 @@ class FailureTransactionOstEvent extends TransactionOstEventBase {
     await Promise.all(promiseArray);
 
     if (oThis.transactionObj) {
-      //todo: if transaction status is already updated dont do anything just send an email.
-      //todo: transaction object should always be present
-
-      if (oThis.transactionObj.extraData.kind === transactionConstants.extraData.userTransactionKind) {
-        await oThis._updateTransactionAndRelatedActivities();
-      } else if (oThis.transactionObj.extraData.kind === transactionConstants.extraData.airdropKind) {
-        await oThis._processForAirdropTransaction();
-      }
+      await oThis._processTransaction();
     } else {
       let insertResponse = await oThis._insertInTransaction();
       if (insertResponse.isDuplicateIndexViolation) {
         basicHelper.sleep(500);
         await oThis._fetchTransaction();
-        //todo: call the above function
-        await oThis._updateTransactionAndRelatedActivities();
+        await oThis._processTransaction();
       } else {
         await oThis._insertInActivity();
         await oThis._insertInUserActivity(oThis.fromUserId);
@@ -67,6 +59,29 @@ class FailureTransactionOstEvent extends TransactionOstEventBase {
     }
 
     return Promise.resolve(responseHelper.successWithData({}));
+  }
+
+  /**
+   * Process transaction when transaction is found in database.
+   *
+   * @returns {Promise<any>}
+   * @private
+   */
+  async _processTransaction() {
+    const oThis = this;
+
+    let response = await oThis._validateTransactionObj();
+
+    if (response.isFailure()) {
+      //Transaction status need not be changed.
+      return Promise.resolve(responseHelper.successWithData({}));
+    }
+
+    if (oThis.transactionObj.extraData.kind === transactionConstants.extraData.userTransactionKind) {
+      await oThis._updateTransactionAndRelatedActivities();
+    } else if (oThis.transactionObj.extraData.kind === transactionConstants.extraData.airdropKind) {
+      await oThis._processForAirdropTransaction();
+    }
   }
 
   /**
@@ -78,7 +93,7 @@ class FailureTransactionOstEvent extends TransactionOstEventBase {
   async _updateTransactionAndRelatedActivities() {
     const oThis = this;
 
-    await oThis._validateTransactionObj();
+    await oThis._validateTransfers();
     let promiseArray1 = [];
 
     promiseArray1.push(oThis._updateTransaction());

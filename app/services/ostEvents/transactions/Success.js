@@ -47,19 +47,14 @@ class SuccessTransactionOstEvent extends TransactionOstEventBase {
 
     if (oThis.transactionObj) {
       //Transaction is found in db. All updates happen in this block.
-      if (oThis.transactionObj.extraData.kind === transactionConstants.extraData.userTransactionKind) {
-        await oThis._updateTransactionAndRelatedActivities();
-        await oThis._updateStats();
-      } else if (oThis.transactionObj.extraData.kind === transactionConstants.extraData.airdropKind) {
-        await oThis._processForAirdropTransaction();
-      }
+      await oThis._processTransaction();
     } else {
       //When transaction is not found in db. Thus all insertions will happen in this block.
       let insertResponse = await oThis._insertInTransaction();
       if (insertResponse.isDuplicateIndexViolation) {
         basicHelper.sleep(500);
         await oThis._fetchTransaction();
-        await oThis._updateTransactionAndRelatedActivities();
+        await oThis._processTransaction();
       } else {
         await oThis._insertInActivity();
 
@@ -76,6 +71,30 @@ class SuccessTransactionOstEvent extends TransactionOstEventBase {
   }
 
   /**
+   * Process transaction when transaction is found in the database.
+   *
+   * @returns {Promise<any>}
+   * @private
+   */
+  async _processTransaction() {
+    const oThis = this;
+
+    let response = await oThis._validateTransactionObj();
+
+    if (response.isFailure()) {
+      //Transaction status need not be changed.
+      return Promise.resolve(responseHelper.successWithData({}));
+    }
+
+    if (oThis.transactionObj.extraData.kind === transactionConstants.extraData.userTransactionKind) {
+      await oThis._updateTransactionAndRelatedActivities();
+      await oThis._updateStats();
+    } else if (oThis.transactionObj.extraData.kind === transactionConstants.extraData.airdropKind) {
+      await oThis._processForAirdropTransaction();
+    }
+  }
+
+  /**
    * This function is called when transaction exists in table. This function updates transaction and related activities.
    *
    * @returns {Promise<void>}
@@ -84,7 +103,7 @@ class SuccessTransactionOstEvent extends TransactionOstEventBase {
   async _updateTransactionAndRelatedActivities() {
     const oThis = this;
 
-    await oThis._validateTransactionObj();
+    await oThis._validateTransfers();
     let promiseArray1 = [],
       promiseArray2 = [];
 
@@ -125,8 +144,7 @@ class SuccessTransactionOstEvent extends TransactionOstEventBase {
   }
 
   /**
-   * Transaction Status
-   *
+   * Transaction Status.
    *
    * @return {String}
    *
@@ -137,8 +155,7 @@ class SuccessTransactionOstEvent extends TransactionOstEventBase {
   }
 
   /**
-   * Activity Status
-   *
+   * Activity Status.
    *
    * @return {String}
    *
@@ -149,7 +166,7 @@ class SuccessTransactionOstEvent extends TransactionOstEventBase {
   }
 
   /**
-   * Transaction status
+   * Transaction status.
    *
    * @returns {string}
    * @private
