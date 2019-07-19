@@ -61,7 +61,7 @@ class FeedBase extends ServiceBase {
       oThis.feeds.push(feedData);
       oThis.userIds.push(feedData.actor);
 
-      if (feedData.kind === feedConstants.invertedKinds[feedConstants.fanUpdateKind]) {
+      if (feedData.kind === feedConstants.fanUpdateKind) {
         oThis.videoIds.push(feedData.primaryExternalEntityId);
       }
     }
