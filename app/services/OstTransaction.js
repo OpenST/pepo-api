@@ -28,7 +28,11 @@ const rootPrefix = '../..',
 
 class OstTransaction extends ServiceBase {
   /**
-   * @param {Object} params
+   * @param {object} params
+   * @param {object} params.ost_transaction
+   * @param {object} params.current_user
+   * @param {object} params.meta
+   * @param {integer} params.video_id
    *
    * @constructor
    */
@@ -497,7 +501,7 @@ class OstTransaction extends ServiceBase {
   }
 
   /**
-   * This function prepares extra data for transaction external enntity and inserts a row in external entities table.
+   * This function prepares extra data for transaction external entity and inserts a row in external entities table.
    *
    * @returns {Promise<*>}
    * @private
