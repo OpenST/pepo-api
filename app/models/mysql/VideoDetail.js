@@ -129,8 +129,10 @@ class VideoDetail extends ModelBase {
    *
    * @returns {Promise<void>}
    */
-  async updateByVideoId(videoId, totalAmount, totalContributedBy = 1, totalTransactions = 1) {
+  async updateByVideoId(videoId, totalAmount, totalContributedBy = 1) {
     const oThis = this;
+
+    let totalTransactions = 1;
 
     return oThis
       .update([

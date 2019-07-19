@@ -145,12 +145,13 @@ class UserContributor extends ModelBase {
    * @param {number} userId  - user Id
    * @param {number} contributedByUserId  - User Id who contributed for the video
    * @param {number} totalAmount  - Total amount
-   * @param {number} totalTransactions  - totalTransactions
    *
    * @returns {Promise<*>}
    */
-  async updateByUserIdAndContributedByUserId(userId, contributedByUserId, totalAmount, totalTransactions = 1) {
+  async updateByUserIdAndContributedByUserId(userId, contributedByUserId, totalAmount) {
     const oThis = this;
+
+    let totalTransactions = 1;
 
     return oThis
       .update([
@@ -168,12 +169,13 @@ class UserContributor extends ModelBase {
    * @param {number} userId  - user Id
    * @param {number} contributedByUserId  - User Id who contributed for the video
    * @param {number} totalAmount  - Total amount
-   * @param {number} totalTransactions  - totalTransactions
    *
    * @returns {Promise<*>}
    */
-  async insertUserContributor(userId, contributedByUserId, totalAmount, totalTransactions = 1) {
+  async insertUserContributor(userId, contributedByUserId, totalAmount) {
     const oThis = this;
+
+    let totalTransactions = 1;
 
     return oThis
       .insert({

@@ -77,12 +77,13 @@ class VideoContributor extends ModelBase {
    * @param {number} videoId  - video id
    * @param {number} contributedByUserId  - User Id who contributed for the video
    * @param {number} totalAmount  - Total amount
-   * @param {number} totalTransactions  - totalTransactions
    *
    * @returns {Promise<*>}
    */
-  async updateByVideoIdAndContributedByUserId(videoId, contributedByUserId, totalAmount, totalTransactions = 1) {
+  async updateByVideoIdAndContributedByUserId(videoId, contributedByUserId, totalAmount) {
     const oThis = this;
+
+    let totalTransactions = 1;
 
     return oThis
       .update([
@@ -100,12 +101,13 @@ class VideoContributor extends ModelBase {
    * @param {number} videoId  - video id
    * @param {number} contributedByUserId  - User Id who contributed for the video
    * @param {number} totalAmount  - Total amount
-   * @param {number} totalTransactions  - totalTransactions
    *
    * @returns {Promise<*>}
    */
-  async insertVideoContributor(videoId, contributedByUserId, totalAmount, totalTransactions = 1) {
+  async insertVideoContributor(videoId, contributedByUserId, totalAmount) {
     const oThis = this;
+
+    let totalTransactions = 1;
 
     return oThis
       .insert({
