@@ -34,7 +34,6 @@ class TransactionOstEventBase extends ServiceBase {
 
     oThis.ostTxId = oThis.ostTransaction.id;
     oThis.ostTransactionStatus = oThis.ostTransaction.status;
-    oThis.videoId = JSON.parse(oThis.ostTransaction.meta_property.details).vid; //todo: check the format in which video id comes
     oThis.ostTransactionMinedTimestamp = oThis.ostTransaction.block_timestamp || null;
 
     oThis.publishedTs = null;
@@ -43,6 +42,49 @@ class TransactionOstEventBase extends ServiceBase {
     oThis.transactionObj = null;
     oThis.externalEntityObj = null;
     oThis.privacyType = null;
+    oThis.videoId = null;
+    oThis._parseAndSetVideoId();
+  }
+
+  /**
+   * Parses details in meta property and prepares a hash out of it.
+   * Note: It is expected that all key value pairs in details string will be separated by space. Key and value themselves are separated by '_'
+   * Eg string: 'key1_val1 key2_val2'
+   *
+   * @returns {{}}
+   * @private
+   */
+  _parseTransactionMetaDetails() {
+    const oThis = this;
+
+    let parsedHash = {};
+    if (!oThis.ostTransaction.meta_property.details) {
+      return parsedHash;
+    }
+
+    let detailsStringArray = oThis.ostTransaction.meta_property.details.split(' ');
+
+    for (let i = 0; i < detailsStringArray.length; i++) {
+      let detailsKeyValueArray = detailsStringArray[i].split('_');
+      parsedHash[detailsKeyValueArray[0]] = detailsKeyValueArray[1];
+    }
+
+    return parsedHash;
+  }
+
+  /**
+   * Sets Video id if video was associated with the transaction.
+   *
+   * @private
+   */
+  _parseAndSetVideoId() {
+    const oThis = this;
+
+    let parsedHash = oThis._parseTransactionMetaDetails();
+
+    if (parsedHash.vi) {
+      oThis.videoId = parsedHash.vi;
+    }
   }
 
   /**
@@ -169,7 +211,7 @@ class TransactionOstEventBase extends ServiceBase {
       logger.error('Mismatch in from user id in table and in webhook data.');
       return Promise.reject(
         responseHelper.error({
-          internal_error_identifier: 'a_s_oe_t_s_1',
+          internal_error_identifier: 'a_s_oe_t_b_1',
           api_error_identifier: 'something_went_wrong',
           debug_options: {
             fromOstUserId: oThis.fromOstUserId,
@@ -228,7 +270,7 @@ class TransactionOstEventBase extends ServiceBase {
 
     if (!activityObjRes.id) {
       let errorObject = responseHelper.error({
-        internal_error_identifier: 'a_s_oe_t_b_7',
+        internal_error_identifier: 'a_s_oe_t_b_2',
         api_error_identifier: 'something_went_wrong',
         debug_options: { reason: 'Activity object not found for transaction entity', entityId: oThis.transactionObj.id }
       });
@@ -281,7 +323,7 @@ class TransactionOstEventBase extends ServiceBase {
 
     if (!userActivityObj.id) {
       let errorObject = responseHelper.error({
-        internal_error_identifier: 'a_s_oe_t_b_8',
+        internal_error_identifier: 'a_s_oe_t_b_3',
         api_error_identifier: 'something_went_wrong',
         debug_options: { reason: 'User activity object not found for activity id', activityId: activityId }
       });
@@ -341,28 +383,26 @@ class TransactionOstEventBase extends ServiceBase {
    */
   async _processForAirdropTransaction() {
     const oThis = this;
-    logger.log('Update other entity for Transaction Webhook');
-
-    let toUserId = oThis.externalEntityObj.parsedExtraData.toUserIds[0];
+    logger.log('Start:: Update token user to mark airdrops status');
 
     let tokenUserObjRes = await new TokenUserByUserIdCache({
-      userIds: [toUserId]
+      userIds: [oThis.toUserId]
     }).fetch();
 
     if (tokenUserObjRes.isFailure()) {
       return Promise.reject(tokenUserObjRes);
     }
 
-    if (!tokenUserObjRes.data[toUserId].id) {
+    if (!tokenUserObjRes.data[oThis.toUserId].id) {
       return Promise.reject(
         responseHelper.error({
-          internal_error_identifier: 'a_s_oe_t_b_2',
+          internal_error_identifier: 'a_s_oe_t_b_4',
           api_error_identifier: 'resource_not_found'
         })
       );
     }
 
-    let tokenUserObj = tokenUserObjRes.data[toUserId];
+    let tokenUserObj = tokenUserObjRes.data[oThis.toUserId];
     let propertyVal = oThis._getPropertyValForTokenUser(tokenUserObj.properties);
 
     await new TokenUserModel()
@@ -372,7 +412,8 @@ class TransactionOstEventBase extends ServiceBase {
       .where(['id = ?', tokenUserObj.id])
       .fire();
 
-    await TokenUserModel.flushCache({ userId: tokenUserObj.userId });
+    tokenUserObj.properties = propertyVal;
+    await TokenUserModel.flushCache(tokenUserObj);
 
     return Promise.resolve(responseHelper.successWithData({}));
   }
@@ -414,7 +455,7 @@ class TransactionOstEventBase extends ServiceBase {
           //Insert failed due to some other reason.
           //Send error email from here.
           let errorObject = responseHelper.error({
-            internal_error_identifier: 'a_s_oe_t_b_9',
+            internal_error_identifier: 'a_s_oe_t_b_5',
             api_error_identifier: 'something_went_wrong',
             debug_options: { Error: err }
           });

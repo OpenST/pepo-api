@@ -55,6 +55,8 @@ class BgJobProcessorFactory extends BgJobProcessorBase {
       return new oThis._twitterFriendsSyncJobProcessor(messageParams.message.payload).perform();
     } else if (messageParams.message.kind === bgJobConstant.imageResizer) {
       return new oThis._imageResizer(messageParams.message.payload).perform();
+    } else if (messageParams.message.kind === bgJobConstant.ostWebhookJobTopic) {
+      return new oThis._ostWebhookJobTopic(messageParams.message.payload).perform();
     } else {
       throw new Error('unrecognized messageParams: ' + JSON.stringify(messageParams));
     }
@@ -70,6 +72,10 @@ class BgJobProcessorFactory extends BgJobProcessorBase {
 
   get _imageResizer() {
     return require(rootPrefix + '/lib/resize/image');
+  }
+
+  get _ostWebhookJobTopic() {
+    return require(rootPrefix + '/app/services/ostEvents/Process');
   }
 }
 
