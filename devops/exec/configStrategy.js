@@ -63,7 +63,7 @@ const _addConfig = async function(config) {
     for (let index = 0; index < kinds.length; index++) {
       const kind = kinds[index];
       await _validateKind(kind);
-      await _create(kind, config);
+      await _create(kind, { [kind]: config[kind] });
     }
   } else {
     for (const kind in config) {

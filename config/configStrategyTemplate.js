@@ -38,6 +38,23 @@ class ConfigStrategyTemplate {
           clusterNodes: 'clusterNodesEntity'
         }
       },
+      redshiftEntity: {
+        entityType: 'object',
+        entitiesPresent: {
+          user: 'userEntity',
+          database: 'databaseEntity',
+          password: 'passwordEntity',
+          port: 'portEntity',
+          host: 'hostEntity'
+        }
+      },
+
+      userEntity: {
+        entityType: 'string'
+      },
+      databaseEntity: {
+        entityType: 'string'
+      },
       heartbeatsEntity: {
         entityType: 'string'
       },
@@ -85,7 +102,8 @@ class ConfigStrategyTemplate {
   get rootLevelEntities() {
     return {
       [configStrategyConstants.memcached]: 'memcachedEntity',
-      [configStrategyConstants.bgJobRabbitmq]: 'rabbitmqEntity'
+      [configStrategyConstants.bgJobRabbitmq]: 'rabbitmqEntity',
+      [configStrategyConstants.redshift]: 'redshiftEntity'
     };
   }
 }

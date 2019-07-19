@@ -18,6 +18,14 @@
       "clusterNodes": [
         "127.0.0.1"
       ]
+    },
+
+    "redshift": {
+      "user": "analytics_user",
+      "database": "analytics",
+      "password": "gdhsD56Sw248jljt68dfTRaxMn",
+      "port": "5439",
+      "host": "redshift-instance.cl2x2qyuekxx.us-east-1.redshift.amazonaws.com"
     }
   }
 }
