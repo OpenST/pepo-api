@@ -41,7 +41,7 @@ class OstTransaction extends ServiceBase {
 
     oThis.giphyObject = params.meta.giphy;
     oThis.text = params.meta.text;
-    oThis.videoId = params.video_id;
+    oThis.videoId = params.meta.vi;
 
     oThis.ostTxId = oThis.transaction.id;
     oThis.ostTransactionStatus = oThis.transaction.status.toUpperCase();

@@ -45,7 +45,11 @@ class FailureTransactionOstEvent extends TransactionOstEventBase {
     await Promise.all(promiseArray);
 
     if (oThis.transactionObj) {
-      await oThis._updateTransactionAndRelatedActivities();
+      if (oThis.transactionObj.extraData.kind === transactionConstants.extraData.userTransactionKind) {
+        await oThis._updateTransactionAndRelatedActivities();
+      } else if (oThis.transactionObj.extraData.kind === transactionConstants.extraData.airdropKind) {
+        await oThis._processForAirdropTransaction();
+      }
     } else {
       let insertResponse = await oThis._insertInTransaction();
       if (insertResponse.isDuplicateIndexViolation) {
