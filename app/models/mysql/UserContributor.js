@@ -142,46 +142,45 @@ class UserContributor extends ModelBase {
   /**
    * Update by user id and contributed by user id.
    *
-   * @param {number} userId  - user Id
-   * @param {number} contributedByUserId  - User Id who contributed for the video
-   * @param {number} totalAmount  - Total amount
+   * @param {number} params.userId  - user Id
+   * @param {number} params.contributedByUserId  - User Id who contributed for the video
+   * @param {number} params.totalAmount  - Total amount
    *
    * @returns {Promise<*>}
    */
-  async updateByUserIdAndContributedByUserId(userId, contributedByUserId, totalAmount) {
-    const oThis = this;
-
-    let totalTransactions = 1;
+  async updateByUserIdAndContributedByUserId(params) {
+    const oThis = this,
+      totalTransactions = 1;
 
     return oThis
       .update([
         'total_amount = total_amount + ? ,total_transactions = total_transactions + ? ',
-        totalAmount,
+        params.totalAmount,
         totalTransactions
       ])
-      .where({ user_id: userId, contributed_by_user_id: contributedByUserId })
+      .where({ user_id: params.userId, contributed_by_user_id: params.contributedByUserId })
       .fire();
   }
 
   /**
    * Update by userId and contributed by user id.
    *
-   * @param {number} userId  - user Id
-   * @param {number} contributedByUserId  - User Id who contributed for the video
-   * @param {number} totalAmount  - Total amount
+   * @param {number} params.userId  - user Id
+   * @param {number} params.contributedByUserId  - User Id who contributed for the video
+   * @param {number} params.totalAmount  - Total amount
    *
    * @returns {Promise<*>}
    */
-  async insertUserContributor(userId, contributedByUserId, totalAmount) {
+  async insertUserContributor(params) {
     const oThis = this;
 
     let totalTransactions = 1;
 
     return oThis
       .insert({
-        user_id: userId,
-        contributed_by_user_id: contributedByUserId,
-        total_amount: totalAmount,
+        user_id: params.userId,
+        contributed_by_user_id: params.contributedByUserId,
+        total_amount: params.totalAmount,
         total_transactions: totalTransactions
       })
       .fire();

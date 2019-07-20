@@ -110,6 +110,7 @@ class VideoDetail extends ModelBase {
    */
   async fetchByVideoIds(videoIds) {
     const oThis = this;
+
     let dbRows = await oThis
       .select('*')
       .where({ video_id: videoIds })
@@ -124,44 +125,25 @@ class VideoDetail extends ModelBase {
 
     return response;
   }
+
   /**
-   * Update by user id.
+   * Update by video id.
    *
    * @returns {Promise<void>}
    */
-  async updateByVideoId(videoId, totalAmount, totalContributedBy = 1) {
-    const oThis = this;
-
-    let totalTransactions = 1;
+  async updateByVideoId(params) {
+    const oThis = this,
+      totalTransactions = 1;
 
     return oThis
       .update([
         'total_amount = total_amount + ?, total_transactions = total_transactions + ?, ' +
           'total_contributed_by = total_contributed_by + ? ',
-        totalAmount,
+        params.totalAmount,
         totalTransactions,
-        totalContributedBy
+        params.totalContributedBy
       ])
-      .where({ video_id: videoId })
-      .fire();
-  }
-
-  /**
-   * Insert into video details.
-   *
-   * @returns {Promise<void>}
-   */
-  async insertIntoVideoDetails(creatorUserId, videoId, totalAmount, totalTransactions = 1) {
-    const oThis = this;
-
-    return oThis
-      .insert({
-        creator_user_id: creatorUserId,
-        video_id: videoId,
-        total_contributed_by: 1,
-        total_amount: totalAmount,
-        total_transactions: totalTransactions
-      })
+      .where({ video_id: params.videoId })
       .fire();
   }
 
@@ -188,7 +170,7 @@ class VideoDetail extends ModelBase {
    *
    * @param {object} params
    * @param {number} params.userId
-   * @param {number} params.videoId
+   * @param {number} params.videoIds
    *
    * @returns {Promise<*>}
    */
@@ -197,13 +179,13 @@ class VideoDetail extends ModelBase {
 
     await new VideoDetailsByVideoIdsAndUserId({
       userId: params.userId,
-      videoIds: [params.videoId]
+      videoIds: params.videoIds
     }).clear();
 
     const VideoDetailsByVideoIds = require(rootPrefix + '/lib/cacheManagement/multi/VideoDetailsByVideoIds');
 
     await new VideoDetailsByVideoIds({
-      videoIds: [params.videoId]
+      videoIds: params.videoIds
     }).clear();
   }
 }
