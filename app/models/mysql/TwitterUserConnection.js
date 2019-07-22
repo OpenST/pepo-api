@@ -143,7 +143,14 @@ class TwitterUserConnection extends ModelBase {
    *
    * @returns {Promise<*>}
    */
-  static async flushCache(params) {}
+  static async flushCache(params) {
+    const TwitterUserConnectionByUser1Pagination = require(rootPrefix +
+      '/lib/cacheManagement/single/TwitterUserConnectionByUser1Pagination');
+
+    await new TwitterUserConnectionByUser1Pagination({
+      twitterUser1Id: params.twitterUser1Id
+    }).clear();
+  }
 }
 
 module.exports = TwitterUserConnection;

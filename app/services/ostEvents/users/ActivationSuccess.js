@@ -273,20 +273,24 @@ class UserActivationSuccess extends UserOstEventBase {
       kind: transactionConstants.extraData.airdropKind
     };
 
-    const insertResponse = await new TransactionModel()
-      .insert({
-        ost_tx_id: oThis.airdropTxResp.transaction.id,
-        from_user_id: 0,
-        extra_data: JSON.stringify(extraData),
-        status: transactionConstants.invertedStatuses[transactionConstants.pendingStatus]
-      })
-      .fire();
+    const insertData = {
+      ost_tx_id: oThis.airdropTxResp.transaction.id,
+      from_user_id: 0,
+      extra_data: JSON.stringify(extraData),
+      status: transactionConstants.invertedStatuses[transactionConstants.pendingStatus]
+    };
+
+    const insertResponse = await new TransactionModel().insert(insertData).fire();
 
     if (!insertResponse) {
       logger.error('Error while inserting data in transactions table.');
 
       return Promise.reject(insertResponse);
     }
+
+    insertData.id = insertResponse.insertId;
+
+    await TransactionModel.flushCache({ id: insertData.id, ostTxId: insertData.ost_tx_id });
 
     return responseHelper.successWithData({});
   }

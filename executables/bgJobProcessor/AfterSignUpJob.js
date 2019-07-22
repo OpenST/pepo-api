@@ -45,6 +45,9 @@ class AfterSignUpJob {
     await oThis._enqueueProfileImageResizer();
 
     await oThis._syncFriendsAndFollowers();
+
+    //todo: Update TwitterUserConnection for twitterUser2 and
+    // flush cache for some twitterUser1Ids
   }
 
   /**

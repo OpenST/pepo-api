@@ -280,10 +280,6 @@ class UserModel extends ModelBase {
     const UserCache = require(rootPrefix + '/lib/cacheManagement/multi/User');
     promisesArray.push(new UserCache({ ids: [params.id] }).clear());
 
-    const UserPaginationCache = require(rootPrefix +
-      '/lib/cacheManagement/single/UserContributorContributedByPagination');
-    promisesArray.push(new UserPaginationCache({ contributedByUserId: params.id }).clear());
-
     const SecureUserCache = require(rootPrefix + '/lib/cacheManagement/single/SecureUser');
     promisesArray.push(new SecureUserCache({ id: params.id }).clear());
 

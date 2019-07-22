@@ -141,7 +141,7 @@ class UserStat extends ModelBase {
     const UserStatByUserIds = require(rootPrefix + '/lib/cacheManagement/multi/UserStatByUserIds');
 
     await new UserStatByUserIds({
-      userIds: params.userIds
+      userIds: [params.userId]
     }).clear();
   }
 }

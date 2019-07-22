@@ -132,7 +132,7 @@ class VideoContributor extends ModelBase {
 
     await new VideoContributorByVideoIdsAndContributedByUserId({
       contributedByUserId: params.contributedByUserId,
-      videoIds: params.videoIds
+      videoIds: [params.videoId]
     }).clear();
   }
 }

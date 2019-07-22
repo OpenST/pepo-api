@@ -175,7 +175,13 @@ class ActivityModel extends ModelBase {
    *
    * @returns {Promise<*>}
    */
-  static async flushCache(params) {}
+  static async flushCache(params) {
+    const ActivityByIds = require(rootPrefix + '/lib/cacheManagement/multi/ActivityByIds');
+
+    await new ActivityByIds({
+      ids: [params.id]
+    }).clear();
+  }
 }
 
 module.exports = ActivityModel;
