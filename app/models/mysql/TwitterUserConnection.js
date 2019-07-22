@@ -57,6 +57,42 @@ class TwitterUserConnection extends ModelBase {
   }
 
   /***
+   * Fetch twitter user 1 ids for twitter user id2
+   *
+   * @param {object} params
+   * @param {Array} params.twitterUser2Id
+   * @param {number} [params.page]
+   * @param {number} [params.limit]
+   *
+   * @returns {Promise<*>}
+   */
+  async fetchByTwitterUser2Id(params) {
+    const oThis = this;
+
+    const page = params.page,
+      limit = params.limit,
+      twitterUser2Id = params.twitterUser2Id,
+      offset = (page - 1) * limit;
+
+    let dbRows = await oThis
+      .select(['twitter_user1_id', 'id'])
+      .where({ twitter_user2_id: twitterUser2Id })
+      .limit(limit)
+      .offset(offset)
+      .order_by('id DESC')
+      .fire();
+
+    let response = {};
+
+    for (let index = 0; index < dbRows.length; index++) {
+      let formatDbRow = oThis.formatDbData(dbRows[index]);
+      response[formatDbRow.id] = formatDbRow;
+    }
+
+    return response;
+  }
+
+  /***
    * Fetch twitter user connection object for twitter user id1 and twitter user id2
    *
    * @param twitterUser1Id {String} - twitter user id 1

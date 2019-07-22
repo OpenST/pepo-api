@@ -133,7 +133,7 @@ class TwitterUserModel extends ModelBase {
 
     const TwitterUserByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TwitterUserByIds');
     await new TwitterUserByIdsCache({
-      idds: [params.id]
+      ids: [params.id]
     }).clear();
 
     if (params.userId) {
