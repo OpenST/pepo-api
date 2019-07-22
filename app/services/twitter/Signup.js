@@ -503,6 +503,7 @@ class TwitterSignup extends ServiceBase {
 
     let messagePayload = {
       bio: oThis.userTwitterEntity.description,
+      twitterUserId: oThis.twitterUserObj.id,
       twitterId: oThis.userTwitterEntity.idStr,
       userId: oThis.userId,
       profileImageId: oThis.profileImageId

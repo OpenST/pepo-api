@@ -223,6 +223,15 @@ class UserContributor extends ModelBase {
       }).clear();
     }
   }
+
+  /**
+   * index name
+   *
+   * @returns {string}
+   */
+  static get userIdContributedByUniqueIndexName() {
+    return 'idx_1';
+  }
 }
 
 module.exports = UserContributor;
