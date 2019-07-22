@@ -17,7 +17,6 @@ class PublicVideoFeed extends FeedBase {
 
     oThis.paginationIdentifier = params[paginationConstants.paginationIdentifierKey] || null;
 
-    console.log('--------oThis.paginationIdentifier-----', oThis.paginationIdentifier);
     oThis.feeds = [];
     oThis.userIds = [];
     oThis.videoIds = [];
@@ -71,7 +70,6 @@ class PublicVideoFeed extends FeedBase {
     oThis.feedsMap = loggedOutFeedCacheResp.data.feedDetails;
 
     const lastFeedId = oThis.feedIds[oThis.feedIds.length - 1];
-    console.log('------lastFeedId------', oThis.feedIds, oThis.feedIds.length, lastFeedId);
     oThis.nextPaginationTimestamp = oThis.feedsMap[lastFeedId].paginationIdentifier;
   }
 
@@ -88,7 +86,6 @@ class PublicVideoFeed extends FeedBase {
 
     if (oThis.feeds.length >= oThis.limit) {
       nextPagePayloadKey[paginationConstants.paginationIdentifierKey] = {
-        // TODO - think on how to remove duplicates.
         pagination_timestamp: oThis.nextPaginationTimestamp
       };
     }
@@ -117,7 +114,7 @@ class PublicVideoFeed extends FeedBase {
   }
 
   _currentPageLimit() {
-    return paginationConstants.defaultPublicFeedPageSize;
+    return paginationConstants.defaultFeedsListPageSize;
   }
 
   /**
@@ -126,15 +123,15 @@ class PublicVideoFeed extends FeedBase {
    * @private
    */
   _defaultPageLimit() {
-    return paginationConstants.defaultPublicFeedPageSize;
+    return paginationConstants.defaultFeedsListPageSize;
   }
 
   _minPageLimit() {
-    return paginationConstants.minPublicFeedPageSize;
+    return paginationConstants.minFeedsListPageSize;
   }
 
   _maxPageLimit() {
-    return paginationConstants.maxPublicFeedPageSize;
+    return paginationConstants.maxFeedsListPageSize;
   }
 }
 
