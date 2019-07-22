@@ -98,17 +98,15 @@ class Transaction extends ModelBase {
    * @returns {Promise<*>}
    */
   static async flushCache(params) {
-    const TransactionByOstTxId = require(rootPrefix + '/lib/cacheManagement/multi/TransactionByOstTxId');
+    const promisesArray = [];
 
-    await new TransactionByOstTxId({
-      ostTxIds: [params.ostTxId]
-    }).clear();
+    const TransactionByOstTxId = require(rootPrefix + '/lib/cacheManagement/multi/TransactionByOstTxId');
+    promisesArray.push(new TransactionByOstTxId({ ostTxIds: [params.ostTxId] }).clear());
 
     const TransactionByIds = require(rootPrefix + '/lib/cacheManagement/multi/TransactionByIds');
+    promisesArray.push(new TransactionByIds({ ids: [params.id] }).clear());
 
-    await new TransactionByIds({
-      ids: [params.id]
-    }).clear();
+    await Promise.all(promisesArray);
   }
 
   static get transactionIdUniqueIndexName() {
