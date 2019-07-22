@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+  <title>pepo</title>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0"/>
+  <!--<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"-->
+        <!--integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"-->
+        <!--crossorigin="anonymous">-->
+  <style>
+    html,
+    body{
+      height: 100vh;
+      font-family: "Avenir next", sans-serif;
+    }
+    body{
+      margin: 0;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    main{
+      max-height: 100%;
+    }
+    video{
+      width: auto;
+      height: 100vh;
+    }
+    .mobileFrame{
+      position: absolute;
+      left: 0;
+      top: 0;
+      height: 100%;
+      width: 100%;
+    }
+    .bottomTitleMobile{
+      margin: 0;
+      text-align: center;
+      position: absolute;
+      bottom: 20px;
+      width: 100%;
+    }
+    .bottomTitleWeb{
+      display: none;
+    }
+    @media screen and (max-width: 767px){
+      main{
+        overflow: hidden;
+      }
+    }
+    @media screen and (min-width: 767px)  {
+      video{
+        height: 712px;
+        width: 356px;
+        transform: scale(0.95);
+      }
+      .mobileFrame {
+        background-image: url(https://d3attjoi5jlede.cloudfront.net/images/web/pepo-splashpage-frame.png);
+        background-repeat: no-repeat;
+        background-size: 100%;
+        height: 712px;
+        width: 356px;
+      }
+      .bottomTitleWeb{
+        display: block;
+        text-align: center;
+        margin-bottom: 0;
+        margin-top: 5px;
+      }
+      .bottomTitleMobile{
+        display: none;
+      }
+    }
+  </style>
+</head>
+
+<body contenteditable="false">
+  <main>
+    <div style="position: relative">
+      <video muted autoplay loop poster="http://d3attjoi5jlede.cloudfront.net/images/web/pepo-splashpage-cover.jpg">
+        <source src="http://d3attjoi5jlede.cloudfront.net/images/web/pepo-splashpage.mp4" type="video/mp4">
+        <source src="http://d3attjoi5jlede.cloudfront.net/images/web/pepo-splashpage.ogv" type="video/ogg">
+        <source src="http://d3attjoi5jlede.cloudfront.net/images/web/pepo-splashpage.webm" type="video/webm">
+      </video>
+      <div class="mobileFrame"></div>
+      <p class="bottomTitleMobile">An OST project</p>
+    </div>
+    <p class="bottomTitleWeb">An OST project</p>
+  </main>
+</body>
+</html>
