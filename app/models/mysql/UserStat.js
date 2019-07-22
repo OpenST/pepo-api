@@ -97,17 +97,17 @@ class UserStat extends ModelBase {
    *
    * @returns {Promise<void>}
    */
-  async updateUserStat(userId, totalContributedBy, totalContributedTo, totalAmountRaised) {
+  async updateUserStat(params) {
     const oThis = this;
 
     return oThis
       .update([
         'total_amount_raised = total_amount_raised + ?, total_contributed_by = total_contributed_by + ?, total_contributed_to = total_contributed_to + ?',
-        totalAmountRaised,
-        totalContributedBy,
-        totalContributedTo
+        params.totalAmountRaised,
+        params.totalContributedBy,
+        params.totalContributedTo
       ])
-      .where({ user_id: userId })
+      .where({ user_id: params.userId })
       .fire();
   }
 
@@ -116,15 +116,15 @@ class UserStat extends ModelBase {
    *
    * @returns {Promise<void>}
    */
-  async createUserStat(userId, totalContributedBy, totalContributedTo, totalAmountRaised) {
+  async createUserStat(params) {
     const oThis = this;
 
     return oThis
       .insert({
-        user_id: userId,
-        total_contributed_by: totalContributedBy,
-        total_contributed_to: totalContributedTo,
-        total_amount_raised: totalAmountRaised
+        user_id: params.userId,
+        total_contributed_by: params.totalContributedBy,
+        total_contributed_to: params.totalContributedTo,
+        total_amount_raised: params.totalAmountRaised
       })
       .fire();
   }
@@ -133,24 +133,15 @@ class UserStat extends ModelBase {
    * Flush cache.
    *
    * @param {object} params
-   * @param {number} [params.userIds]
-   * @param {number} [params.userId]
+   * @param {number} params.userIds
    *
    * @returns {Promise<*>}
    */
   static async flushCache(params) {
     const UserStatByUserIds = require(rootPrefix + '/lib/cacheManagement/multi/UserStatByUserIds');
 
-    let userIds = null;
-
-    if (params.userIds) {
-      userIds = params.userIds;
-    } else {
-      userIds = [params.userId];
-    }
-
     await new UserStatByUserIds({
-      userIds: userIds
+      userIds: params.userIds
     }).clear();
   }
 }

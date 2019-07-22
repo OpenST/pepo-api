@@ -389,6 +389,20 @@ const v1Signature = {
       }
     ]
   },
+  [apiName.userFeed]: {
+    mandatory: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      }
+    ],
+    optional: [
+      {
+        parameter: paginationConstants.paginationIdentifierKey,
+        validatorMethods: ['validateString', 'validatePaginationIdentifier']
+      }
+    ]
+  },
   [apiName.feedDetails]: {
     mandatory: [
       {

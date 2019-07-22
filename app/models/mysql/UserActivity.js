@@ -158,7 +158,7 @@ class UserActivityModel extends ModelBase {
     }
 
     let dbRows = await oThis
-      .select(['*'])
+      .select('*')
       .where({
         user_id: userId,
         activity_id: activityId

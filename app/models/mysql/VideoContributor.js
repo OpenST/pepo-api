@@ -74,44 +74,45 @@ class VideoContributor extends ModelBase {
   /**
    * Update by video id and contributed by user id.
    *
-   * @param {number} videoId  - video id
-   * @param {number} contributedByUserId  - User Id who contributed for the video
-   * @param {number} totalAmount  - Total amount
-   * @param {number} totalTransactions  - totalTransactions
+   * @param {number} params.videoId  - video id
+   * @param {number} params.contributedByUserId  - User Id who contributed for the video
+   * @param {number} params.totalAmount  - Total amount
    *
    * @returns {Promise<*>}
    */
-  async updateByVideoIdAndContributedByUserId(videoId, contributedByUserId, totalAmount, totalTransactions = 1) {
+  async updateByVideoIdAndContributedByUserId(params) {
     const oThis = this;
+
+    let totalTransactions = 1;
 
     return oThis
       .update([
         'total_amount = total_amount + ? ,total_transactions = total_transactions + ? ',
-        totalAmount,
+        params.totalAmount,
         totalTransactions
       ])
-      .where({ video_id: videoId, contributed_by_user_id: contributedByUserId })
+      .where({ video_id: params.videoId, contributed_by_user_id: params.contributedByUserId })
       .fire();
   }
 
   /**
    * Update by video id and contributed by user id.
    *
-   * @param {number} videoId  - video id
-   * @param {number} contributedByUserId  - User Id who contributed for the video
-   * @param {number} totalAmount  - Total amount
-   * @param {number} totalTransactions  - totalTransactions
+   * @param {number} params.videoId  - video id
+   * @param {number} params.contributedByUserId  - User Id who contributed for the video
+   * @param {number} params.totalAmount  - Total amount
    *
    * @returns {Promise<*>}
    */
-  async insertVideoContributor(videoId, contributedByUserId, totalAmount, totalTransactions = 1) {
-    const oThis = this;
+  async insertVideoContributor(params) {
+    const oThis = this,
+      totalTransactions = 1;
 
     return oThis
       .insert({
-        video_id: videoId,
-        contributed_by_user_id: contributedByUserId,
-        total_amount: totalAmount,
+        video_id: params.videoId,
+        contributed_by_user_id: params.contributedByUserId,
+        total_amount: params.totalAmount,
         total_transactions: totalTransactions
       })
       .fire();
@@ -121,7 +122,8 @@ class VideoContributor extends ModelBase {
    * Flush cache
    *
    * @param {object} params
-   *
+   * @param {number} params.contributedByUserId
+   * @param {array} params.videoIds
    * @returns {Promise<*>}
    */
   static async flushCache(params) {
@@ -129,7 +131,7 @@ class VideoContributor extends ModelBase {
       '/lib/cacheManagement/multi/VideoContributorByVideoIdsAndContributedByUserId');
 
     await new VideoContributorByVideoIdsAndContributedByUserId({
-      contributedByUserId: params.id,
+      contributedByUserId: params.contributedByUserId,
       videoIds: params.videoIds
     }).clear();
   }

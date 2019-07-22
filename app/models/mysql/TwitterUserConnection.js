@@ -124,14 +124,14 @@ class TwitterUserConnection extends ModelBase {
    *
    * @returns {Promise<void>}
    */
-  async updateTwitterUserConnection(twitterUser1Id, twitterUser2Id, propertiesVal) {
+  async updateTwitterUserConnection(params) {
     const oThis = this;
 
     return oThis
-      .update(['properties = properties | ?', propertiesVal])
+      .update(['properties = properties | ?', params.propertiesVal])
       .where({
-        twitter_user1_id: twitterUser1Id,
-        twitter_user2_id: twitterUser2Id
+        twitter_user1_id: params.twitterUser1Id,
+        twitter_user2_id: params.twitterUser2Id
       })
       .fire();
   }
