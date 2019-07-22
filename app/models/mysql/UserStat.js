@@ -144,6 +144,15 @@ class UserStat extends ModelBase {
       userIds: [params.userId]
     }).clear();
   }
+
+  /**
+   * Index name
+   *
+   * @returns {string}
+   */
+  static get userIdUniqueIndexName() {
+    return 'idx_1';
+  }
 }
 
 module.exports = UserStat;

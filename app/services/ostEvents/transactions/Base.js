@@ -585,7 +585,7 @@ class TransactionOstEventBase extends ServiceBase {
     if (videoIdFromCache != oThis.videoId) {
       return Promise.reject(
         responseHelper.paramValidationError({
-          internal_error_identifier: 'a_s_ot_7',
+          internal_error_identifier: 'a_s_oe_t_b_7',
           api_error_identifier: 'invalid_api_params',
           params_error_identifiers: ['invalid_video_id'],
           debug_options: { videoIdFromCache: videoIdFromCache, videoId: oThis.videoId }

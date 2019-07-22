@@ -135,6 +135,15 @@ class VideoContributor extends ModelBase {
       videoIds: [params.videoId]
     }).clear();
   }
+
+  /**
+   * Index name
+   *
+   * @returns {string}
+   */
+  static get videoIdContributedByUniqueIndexName() {
+    return 'uidx_1';
+  }
 }
 
 module.exports = VideoContributor;
