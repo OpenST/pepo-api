@@ -251,10 +251,6 @@ class UserModel extends ModelBase {
       ids: [params.id]
     }).clear();
 
-    const UserPaginationCache = require(rootPrefix +
-      '/lib/cacheManagement/single/UserContributorContributedByPagination');
-    await new UserPaginationCache().clear();
-
     const SecureUserCache = require(rootPrefix + '/lib/cacheManagement/single/SecureUser');
     await new SecureUserCache({
       id: params.id

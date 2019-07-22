@@ -181,7 +181,21 @@ class UserActivityModel extends ModelBase {
    *
    * @returns {Promise<*>}
    */
-  static async flushCache(params) {}
+  static async flushCache(params) {
+    const UserActivityByUserIdForOthersPagination = require(rootPrefix +
+      '/lib/cacheManagement/single/UserActivityByUserIdForOthersPagination');
+
+    await new UserActivityByUserIdForOthersPagination({
+      userId: [params.userId]
+    }).clear();
+
+    const UserActivityByUserIdForSelfPagination = require(rootPrefix +
+      '/lib/cacheManagement/single/UserActivityByUserIdForSelfPagination');
+
+    await new UserActivityByUserIdForSelfPagination({
+      userId: [params.userId]
+    }).clear();
+  }
 }
 
 module.exports = UserActivityModel;

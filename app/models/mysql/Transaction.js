@@ -103,6 +103,12 @@ class Transaction extends ModelBase {
     await new TransactionByOstTxId({
       ostTxIds: [params.ostTxId]
     }).clear();
+
+    const TransactionByIds = require(rootPrefix + '/lib/cacheManagement/multi/TransactionByIds');
+
+    await new TransactionByIds({
+      ids: [params.id]
+    }).clear();
   }
 
   static get transactionIdUniqueIndexName() {

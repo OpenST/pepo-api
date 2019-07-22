@@ -130,6 +130,18 @@ class TwitterUserModel extends ModelBase {
     await new TwitterUserByTwitterIdsCache({
       twitterIds: [params.twitterId]
     }).clear();
+
+    const TwitterUserByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TwitterUserByIds');
+    await new TwitterUserByIdsCache({
+      idds: [params.id]
+    }).clear();
+
+    if (params.userId) {
+      const TwitterUserByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TwitterUserByUserIds');
+      await new TwitterUserByUserIdsCache({
+        userIds: [params.userId]
+      }).clear();
+    }
   }
 }
 

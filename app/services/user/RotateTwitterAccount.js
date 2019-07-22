@@ -65,6 +65,7 @@ class RotateTwitterAccount extends ServiceBase {
       return Promise.reject(cacheRsp);
     }
 
+    //todo: Error if record not found
     oThis.user = cacheRsp.data;
     oThis.userId = oThis.user.id;
   }
@@ -85,6 +86,8 @@ class RotateTwitterAccount extends ServiceBase {
     if (TwitterUserByUserIdsCacheResp.isFailure()) {
       return Promise.reject(TwitterUserByUserIdsCacheResp);
     }
+
+    //todo: Error if record not found. We will support email logins in future
 
     //should always be present;
     oThis.currentUserTwitterUserId = TwitterUserByUserIdsCacheResp.data[oThis.userId].id;
@@ -129,6 +132,8 @@ class RotateTwitterAccount extends ServiceBase {
 
   async _clearTwitterUserCache() {
     const oThis = this;
+    //todo: clear cache on TwitterUserByTwitterIdsCache for previous twitter ID and call model flush cache
+
     await new TwitterUserByTwitterIdsCache({
       twitterIds: [oThis.currentUserTwitterUserTwitterId]
     }).clear();

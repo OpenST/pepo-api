@@ -288,6 +288,7 @@ class UserActivationSuccess extends UserOstEventBase {
       return Promise.reject(insertResponse);
     }
 
+    //todo: cache on Transactions Table Flush
     return responseHelper.successWithData({});
   }
 }
