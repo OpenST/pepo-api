@@ -105,15 +105,14 @@ class TransactionOstEventBase extends ServiceBase {
       return Promise.reject(errorObject);
     }
 
-    if (oThis.transactionObj.status === oThis._transactionStatus()) {
+    if (oThis.transactionObj.status !== transactionConstants.pendingStatus) {
       let errorObject1 = responseHelper.error({
         internal_error_identifier: 'a_s_oe_t_f_2',
         api_error_identifier: 'something_went_wrong',
-        debug_options: { reason: 'Transaction status need not to be updated.' }
+        debug_options: { reason: 'Transaction status is not pending.' }
       });
       await createErrorLogsEntry.perform(errorObject1, errorLogsConstants.mediumSeverity);
-      //Note: Returning error object with promise resolve in order to handle this condition gracefully and return with success.
-      return Promise.resolve(errorObject1);
+      return Promise.reject(errorObject1);
     }
 
     return responseHelper.successWithData({});
