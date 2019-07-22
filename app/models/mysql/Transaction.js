@@ -52,7 +52,7 @@ class Transaction extends ModelBase {
 
     let response = {},
       dbRows = await oThis
-        .select(['*'])
+        .select('*')
         .where(['ost_tx_id IN (?)', ostTxIds])
         .fire();
 
