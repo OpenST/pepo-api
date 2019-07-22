@@ -14,10 +14,10 @@ const rootPrefix = '../../..',
   gifsRoutes = require(rootPrefix + '/routes/api/v1/gifs'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   feedsRoutes = require(rootPrefix + '/routes/api/v1/feeds'),
-  feedRoutes = require(rootPrefix + '/routes/api/v1/feed'),
   activitiesRoutes = require(rootPrefix + '/routes/api/v1/activities'),
   cookieHelper = require(rootPrefix + '/lib/cookieHelper'),
   tagRoutes = require(rootPrefix + '/routes/api/v1/tags'),
+  commonValidator = require(rootPrefix + '/lib/validators/Common'),
   uploadParamsRoutes = require(rootPrefix + '/routes/api/v1/uploadParams'),
   rotateTwitterAccountRoutes = require(rootPrefix + '/routes/api/v1/rotateTwitterAccount'),
   ostTransactionRoutes = require(rootPrefix + '/routes/api/v1/ostTransactions');
@@ -29,18 +29,20 @@ router.use(cookieParser(coreConstant.COOKIE_SECRET));
 
 const validateCookie = async function(req, res, next) {
   let loginCookieValue = req.signedCookies[userConstant.loginCookieName];
-  let authResponse = await new LoginCookieAuth(loginCookieValue).perform().catch(function(r) {
-    return r;
-  });
+  if (!commonValidator.isVarNullOrUndefined(loginCookieValue)) {
+    let authResponse = await new LoginCookieAuth(loginCookieValue).perform().catch(function(r) {
+      return r;
+    });
 
-  if (authResponse.isFailure()) {
-    cookieHelper.deleteLoginCookie(res);
-  } else {
-    req.decodedParams.current_user = authResponse.data.current_user;
-    req.decodedParams.user_login_cookie_value = authResponse.data.user_login_cookie_value;
+    if (authResponse.isFailure()) {
+      cookieHelper.deleteLoginCookie(res);
+      return responseHelper.renderApiResponse(authResponse, res, errorConfig);
+    } else {
+      req.decodedParams.current_user = authResponse.data.current_user;
+      req.decodedParams.user_login_cookie_value = authResponse.data.user_login_cookie_value;
+    }
+    cookieHelper.setLoginCookie(res, authResponse.data.user_login_cookie_value);
   }
-
-  // cookieHelper.setLoginCookie(res, authResponse.data.user_login_cookie_value);
 
   next();
 };
@@ -60,8 +62,6 @@ const validateLoginRequired = async function(req, res, next) {
     );
   }
 
-  cookieHelper.setLoginCookie(res, req.decodedParams.user_login_cookie_value);
-
   next();
 };
 
@@ -70,8 +70,7 @@ router.use('/users', validateCookie, validateLoginRequired, usersRoutes);
 router.use('/tokens', validateCookie, validateLoginRequired, tokensRoutes);
 router.use('/ost-transactions', validateCookie, validateLoginRequired, ostTransactionRoutes);
 router.use('/gifs', validateCookie, validateLoginRequired, gifsRoutes);
-router.use('/feeds', feedsRoutes); // TODO - temp commit - removed validateCookie for feeds. Please revert.
-router.use('/feed', validateCookie, validateLoginRequired, feedRoutes);
+router.use('/feeds', validateCookie, feedsRoutes);
 router.use('/activities', validateCookie, validateLoginRequired, activitiesRoutes);
 router.use('/upload-params', uploadParamsRoutes);
 router.use('/tags', tagRoutes);
