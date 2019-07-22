@@ -380,41 +380,32 @@ const v1Signature = {
       }
     ]
   },
-  [apiName.publicFeed]: {
+  [apiName.feedsList]: {
     mandatory: [],
     optional: [
       {
         parameter: paginationConstants.paginationIdentifierKey,
         validatorMethods: ['validateString', 'validatePaginationIdentifier']
-      }
-    ]
-  },
-  [apiName.userFeed]: {
-    mandatory: [
+      },
       {
         parameter: 'current_user',
         validatorMethods: ['validateNonEmptyObject']
-      }
-    ],
-    optional: [
-      {
-        parameter: paginationConstants.paginationIdentifierKey,
-        validatorMethods: ['validateString', 'validatePaginationIdentifier']
       }
     ]
   },
   [apiName.feedDetails]: {
     mandatory: [
       {
-        parameter: 'current_user',
-        validatorMethods: ['validateNonEmptyObject']
-      },
-      {
         parameter: 'feed_id',
         validatorMethods: ['validateInteger']
       }
     ],
-    optional: []
+    optional: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      }
+    ]
   }
 };
 

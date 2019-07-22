@@ -9,10 +9,40 @@ const rootPrefix = '../../..',
   entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
   responseEntityKey = require(rootPrefix + '/lib/globalConstant/responseEntityKey');
 
+router.get('/:feed_id', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.feedDetails;
+  req.decodedParams.feed_id = req.params.feed_id;
+
+  const dataFormatterFunc = async function(serviceResponse) {
+    const wrapperFormatterRsp = await new FormatterComposer({
+      resultType: responseEntityKey.feed,
+      entityKindToResponseKeyMap: {
+        [entityType.feed]: responseEntityKey.feed,
+        [entityType.usersMap]: responseEntityKey.users,
+        [entityType.userStats]: responseEntityKey.userStats,
+        [entityType.userProfilesMap]: responseEntityKey.userProfiles,
+        [entityType.tagsMap]: responseEntityKey.tags,
+        [entityType.linksMap]: responseEntityKey.links,
+        [entityType.imagesMap]: responseEntityKey.images,
+        [entityType.videosMap]: responseEntityKey.videos,
+        [entityType.videoDetailsMap]: responseEntityKey.videoDetails,
+        [entityType.currentUserUserContributionsMap]: responseEntityKey.currentUserUserContributions,
+        [entityType.currentUserVideoContributionsMap]: responseEntityKey.currentUserVideoContributions
+      },
+      serviceData: serviceResponse.data
+    }).perform();
+
+    console.log('wrapperFormatterRsp-----', wrapperFormatterRsp);
+
+    serviceResponse.data = wrapperFormatterRsp.data;
+  };
+
+  Promise.resolve(routeHelper.perform(req, res, next, '/feed/ById', 'r_a_v1_f_1', null, dataFormatterFunc));
+});
+
 /* Content Feeds*/
 router.get('/', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
-  req.decodedParams.apiName = apiName.publicFeed;
-  req.decodedParams.user_id = req.params.user_id;
+  req.decodedParams.apiName = apiName.feedsList;
 
   const dataFormatterFunc = async function(serviceResponse) {
     const wrapperFormatterRsp = await new FormatterComposer({
