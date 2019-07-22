@@ -10,13 +10,13 @@ const rootPrefix = '../../..',
   responseEntityKey = require(rootPrefix + '/lib/globalConstant/responseEntityKey'),
   responseHelper = require(rootPrefix + '/lib/formatter/response');
 
+// router.get('/:feed_id', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+//   let r = responseHelper.successWithData(require(rootPrefix + '/test/fake/feed_details.json'));
+//
+//   Promise.resolve(responseHelper.renderApiResponse(r, res, {}));
+// });
+
 router.get('/:feed_id', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
-  let r = responseHelper.successWithData(require(rootPrefix + '/test/fake/feed_details.json'));
-
-  Promise.resolve(responseHelper.renderApiResponse(r, res, {}));
-});
-
-router.get('/new/:feed_id', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.feedDetails;
   req.decodedParams.feed_id = req.params.feed_id;
 
