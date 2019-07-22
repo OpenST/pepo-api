@@ -170,6 +170,7 @@ class BasicHelper {
    */
   convertHexToString(string) {
     const buf = new Buffer.from(string, 'hex');
+
     return buf.toString('utf8');
   }
 
@@ -182,6 +183,7 @@ class BasicHelper {
    */
   convertStringToHex(string) {
     const buf = new Buffer.from(string, 'utf8');
+
     return buf.toString('hex');
   }
 
@@ -453,7 +455,8 @@ class BasicHelper {
    * @returns {Promise<any>}
    */
   sleep(ms) {
-    console.log('Sleeping for ', ms, ' ms');
+    // eslint-disable-next-line no-console
+    console.log(`Sleeping for ${ms} ms.`);
 
     return new Promise(function(resolve) {
       setTimeout(resolve, ms);
@@ -473,9 +476,9 @@ class BasicHelper {
    * @param response
    */
   parseAmpersandSeparatedKeyValue(response) {
-    let finalResponse = {};
+    const finalResponse = {};
     response.split('&').forEach(function(keyValPair) {
-      let val = keyValPair.split('=');
+      const val = keyValPair.split('=');
       finalResponse[val[0]] = val[1];
     });
 

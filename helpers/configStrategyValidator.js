@@ -193,7 +193,7 @@ class ConfigStrategyValidator {
    *
    * @param {number} value
    *
-   * @returns {*|boolean}
+   * @returns {boolean}
    * @private
    */
   _validateNumberTypeEntity(value) {
