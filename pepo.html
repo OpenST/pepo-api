@@ -21,6 +21,22 @@
   <meta name="twitter:title" content="" />
   <meta name="twitter:description" content="" />
   <meta name="twitter:image" content="" />
+
+  <script type="text/javascript">
+    function generate_random_string(slength){
+      let random_string = '';
+      let random_ascii;
+      let ascii_low = 65;
+      let ascii_high = 90
+      for(let i = 0; i < slength; i++) {
+        random_ascii = Math.floor((Math.random() * (ascii_high - ascii_low)) + ascii_low);
+        random_string += String.fromCharCode(random_ascii)
+      }
+      return random_string
+    }
+    window.name = generate_random_string(10);
+  </script>
+  
   <style>
     html,
     body{
