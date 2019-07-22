@@ -25,10 +25,10 @@ class RotateTwitterAccount extends ServiceBase {
     const oThis = this;
 
     oThis.userName = params.user_name;
-    oThis.user = {};
     oThis.userId = null;
-    oThis.currentUserTwitterUserId = null;
-    oThis.currentUserTwitterUserId = null;
+    oThis.twitterUserObj = {};
+    oThis.twitterUserId = null;
+    oThis.twitterUserTwitterId = null;
   }
 
   /**
@@ -66,8 +66,17 @@ class RotateTwitterAccount extends ServiceBase {
     }
 
     //todo: Error if record not found
-    oThis.user = cacheRsp.data;
-    oThis.userId = oThis.user.id;
+    if (!cacheRsp.data.id) {
+      return Promise.reject(
+        responseHelper.error({
+          internal_error_identifier: 'a_s_u_rta_1',
+          api_error_identifier: 'user_not_found',
+          debug_options: {}
+        })
+      );
+    }
+
+    oThis.userId = cacheRsp.data.id;
   }
 
   /**
@@ -87,20 +96,41 @@ class RotateTwitterAccount extends ServiceBase {
       return Promise.reject(TwitterUserByUserIdsCacheResp);
     }
 
+    let twitterUserByUserIdObj = TwitterUserByUserIdsCacheResp.data[oThis.userId];
     //todo: Error if record not found. We will support email logins in future
+    if (!twitterUserByUserIdObj.id) {
+      return Promise.reject(
+        responseHelper.error({
+          internal_error_identifier: 'a_s_u_rta_2',
+          api_error_identifier: 'user_not_found',
+          debug_options: {}
+        })
+      );
+    }
 
     //should always be present;
-    oThis.currentUserTwitterUserId = TwitterUserByUserIdsCacheResp.data[oThis.userId].id;
+    oThis.twitterUserId = twitterUserByUserIdObj.id;
 
     let TwitterUserByIdsCacheResp = await new TwitterUserByIdsCache({
-      ids: [oThis.currentUserTwitterUserId]
+      ids: [oThis.twitterUserId]
     }).fetch();
 
     if (TwitterUserByIdsCacheResp.isFailure()) {
       return Promise.reject(TwitterUserByIdsCacheResp);
     }
 
-    oThis.currentUserTwitterUserTwitterId = TwitterUserByIdsCacheResp.data[oThis.currentUserTwitterUserId].twitterId;
+    oThis.twitterUserObj = TwitterUserByIdsCacheResp.data[oThis.twitterUserId];
+    if (!oThis.twitterUserObj.twitterId) {
+      return Promise.reject(
+        responseHelper.error({
+          internal_error_identifier: 'a_s_u_rta_3',
+          api_error_identifier: 'user_not_found',
+          debug_options: {}
+        })
+      );
+    }
+
+    oThis.twitterUserTwitterId = oThis.twitterUserObj.twitterId;
   }
 
   /**
@@ -111,40 +141,40 @@ class RotateTwitterAccount extends ServiceBase {
    */
   async _rotateTwitterAccount() {
     const oThis = this;
-    if (oThis.currentUserTwitterUserTwitterId === oThis.currentUserTwitterUserId) {
+    if (oThis.twitterUserTwitterId === oThis.twitterUserId) {
       return Promise.reject(
         responseHelper.paramValidationError({
-          internal_error_identifier: 'a_s_u_rta_1',
+          internal_error_identifier: 'a_s_u_rta_4',
           api_error_identifier: 'invalid_api_params',
           params_error_identifiers: ['invalid_twitter_user'],
           debug_options: {
-            currentUserTwitterUserTwitterId: oThis.currentUserTwitterUserTwitterId,
-            currentUserTwitterUserId: oThis.currentUserTwitterUserId
+            twitterUserTwitterId: oThis.twitterUserTwitterId,
+            twitterUserId: oThis.twitterUserId
           }
         })
       );
     }
     await new TwitterUserModel()
-      .update({ twitter_id: oThis.currentUserTwitterUserId })
-      .where({ id: oThis.currentUserTwitterUserId })
+      .update({ twitter_id: oThis.twitterUserId })
+      .where({ id: oThis.twitterUserId })
       .fire();
+    oThis.twitterUserObj.twitterId = oThis.twitterUserId;
   }
 
+  /**
+   * Clear twitter user cache
+   * @returns {Promise<void>}
+   * @private
+   */
   async _clearTwitterUserCache() {
     const oThis = this;
     //todo: clear cache on TwitterUserByTwitterIdsCache for previous twitter ID and call model flush cache
 
     await new TwitterUserByTwitterIdsCache({
-      twitterIds: [oThis.currentUserTwitterUserTwitterId]
+      twitterIds: [oThis.twitterUserTwitterId]
     }).clear();
 
-    await new TwitterUserByIdsCache({
-      ids: [oThis.currentUserTwitterUserId]
-    }).clear();
-
-    await new TwitterUserByUserIdsCache({
-      userIds: [oThis.userId]
-    }).clear();
+    await TwitterUserModel.flushCache(oThis.twitterUserObj);
   }
 }
 
