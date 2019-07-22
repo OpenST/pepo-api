@@ -6,11 +6,19 @@ const rootPrefix = '../../..',
   userConstants = require(rootPrefix + '/lib/globalConstant/user'),
   localCipher = require(rootPrefix + '/lib/encryptors/localCipher');
 
+// Declare variables names.
 const dbName = database.userDbName;
 
+/**
+ * Class for user model.
+ *
+ * @class UserModel
+ */
 class UserModel extends ModelBase {
   /**
-   * User model
+   * Constructor for user model.
+   *
+   * @augments ModelBase
    *
    * @constructor
    */
@@ -23,9 +31,9 @@ class UserModel extends ModelBase {
   }
 
   /**
-   * Bitwise Config
+   * Bitwise config.
    *
-   * @return {Object}
+   * @return {object}
    */
   get bitwiseConfig() {
     return {
@@ -34,8 +42,22 @@ class UserModel extends ModelBase {
   }
 
   /**
+   * Format db data.
    *
-   * @param dbRow
+   * @param {object} dbRow
+   * @param {string} dbRow.id
+   * @param {string} dbRow.user_name
+   * @param {string} dbRow.name
+   * @param {string} dbRow.profile_image_id
+   * @param {string} dbRow.password
+   * @param {string} dbRow.cookie_token
+   * @param {string} dbRow.encryption_salt
+   * @param {number} dbRow.mark_inactive_trigger_count
+   * @param {number} dbRow.properties
+   * @param {number} dbRow.status
+   * @param {number} dbRow.created_at
+   * @param {number} dbRow.updated_at
+   *
    * @return {object}
    */
   formatDbData(dbRow) {
@@ -56,10 +78,9 @@ class UserModel extends ModelBase {
   }
 
   /**
-   * List Of Formatted Column names that can be exposed by service
+   * List Of formatted column names that can be exposed by service.
    *
-   *
-   * @returns {Array}
+   * @returns {array}
    */
   safeFormattedColumnNames() {
     return [
@@ -75,16 +96,17 @@ class UserModel extends ModelBase {
     ];
   }
 
-  /***
-   * Fetch user for id
+  /**
+   * Fetch user by username.
    *
-   * @param userName {String} - user name
+   * @param {string} userName: user name
    *
-   * @return {Object}
+   * @return {object}
    */
   async fetchByUserName(userName) {
     const oThis = this;
-    let dbRows = await oThis
+
+    const dbRows = await oThis
       .select(['id', 'user_name'])
       .where(['user_name = ?', userName])
       .fire();
@@ -96,31 +118,32 @@ class UserModel extends ModelBase {
     return oThis.formatDbData(dbRows[0]);
   }
 
-  /***
-   * Fetch secure user for id
+  /**
+   * Fetch secure user by id.
    *
-   * @param id {String} - id
+   * @param {string} id
    *
-   * @return {Object}
+   * @return {object}
    */
   async fetchById(id) {
     const oThis = this;
 
-    let res = await oThis.fetchByIds([id]);
+    const res = await oThis.fetchByIds([id]);
 
     return res[id] || {};
   }
 
-  /***
-   * Fetch secure user for id
+  /**
+   * Fetch secure user by ids.
    *
-   * @param ids {Array} - ids
+   * @param {array} ids
    *
-   * @return {Object}
+   * @return {object}
    */
   async fetchByIds(ids) {
     const oThis = this;
-    let dbRows = await oThis
+
+    const dbRows = await oThis
       .select([
         'id',
         'user_name',
@@ -135,26 +158,27 @@ class UserModel extends ModelBase {
       .where({ id: ids })
       .fire();
 
-    let response = {};
+    const response = {};
 
     for (let index = 0; index < dbRows.length; index++) {
-      let formatDbRow = oThis.formatDbData(dbRows[index]);
+      const formatDbRow = oThis.formatDbData(dbRows[index]);
       response[formatDbRow.id] = formatDbRow;
     }
 
     return response;
   }
 
-  /***
-   * Fetch secure user for id
+  /**
+   * Fetch secure user by id.
    *
-   * @param id {Integer} - User Id
+   * @param {number} id: user id
    *
-   * @return {Object}
+   * @return {object}
    */
   async fetchSecureById(id) {
     const oThis = this;
-    let dbRows = await oThis
+
+    const dbRows = await oThis
       .select('*')
       .where(['id = ?', id])
       .fire();
@@ -162,6 +186,7 @@ class UserModel extends ModelBase {
     if (dbRows.length === 0) {
       return {};
     }
+
     return oThis.formatDbData(dbRows[0]);
   }
 
@@ -169,7 +194,7 @@ class UserModel extends ModelBase {
    * Fetch user ids
    *
    * @param {object} params
-   * @param {Array} params.userId
+   * @param {array} params.userId
    * @param {number} [params.page]
    * @param {number} [params.limit]
    *
@@ -182,7 +207,7 @@ class UserModel extends ModelBase {
       limit = params.limit || 10,
       offset = (page - 1) * limit;
 
-    let dbRows = await oThis
+    const dbRows = await oThis
       .select(['id'])
       .where(['status != ?', userConstants.invertedStatuses[userConstants.blockedStatus]])
       .limit(limit)
@@ -190,7 +215,7 @@ class UserModel extends ModelBase {
       .order_by('name ASC')
       .fire();
 
-    let response = [];
+    const response = [];
 
     for (let index = 0; index < dbRows.length; index++) {
       response.push(dbRows[index].id);
@@ -200,10 +225,12 @@ class UserModel extends ModelBase {
   }
 
   /**
-   * Get Cookie Value For
+   * Get cookie value.
    *
-   * @param userObj
-   * @param options
+   * @param {object} userObj
+   * @param {string} decryptedEncryptionSalt
+   * @param {object} options
+   *
    * @returns {string}
    */
   getCookieValueFor(userObj, decryptedEncryptionSalt, options) {
@@ -215,16 +242,18 @@ class UserModel extends ModelBase {
   }
 
   /**
-   * Get Cookie Token For
+   * Get cookie token.
    *
-   * @param userObj
-   * @param options
-   * @returns {String}
+   * @param {object} userObj
+   * @param {string} decryptedEncryptionSalt
+   * @param {object} options
+   *
+   * @returns {string}
    */
   getCookieTokenFor(userObj, decryptedEncryptionSalt, options) {
-    let uniqueStr = localCipher.decrypt(decryptedEncryptionSalt, userObj.cookieToken);
+    const uniqueStr = localCipher.decrypt(decryptedEncryptionSalt, userObj.cookieToken);
 
-    let stringToSign =
+    const stringToSign =
       userObj.id +
       ':' +
       options.timestamp +
@@ -232,13 +261,13 @@ class UserModel extends ModelBase {
       coreConstants.PA_COOKIE_TOKEN_SECRET +
       ':' +
       uniqueStr.substring(0, 16);
-    let salt =
+    const salt =
       userObj.id + ':' + uniqueStr.slice(-16) + ':' + coreConstants.PA_COOKIE_TOKEN_SECRET + ':' + options.timestamp;
-    let cookieToken = util.createSha256Digest(salt, stringToSign);
-    return cookieToken;
+
+    return util.createSha256Digest(salt, stringToSign);
   }
 
-  /***
+  /**
    * Flush cache
    *
    * @param {object} params
@@ -246,26 +275,31 @@ class UserModel extends ModelBase {
    * @returns {Promise<*>}
    */
   static async flushCache(params) {
+    const promisesArray = [];
+
     const UserCache = require(rootPrefix + '/lib/cacheManagement/multi/User');
-    await new UserCache({
-      ids: [params.id]
-    }).clear();
+    promisesArray.push(new UserCache({ ids: [params.id] }).clear());
 
     const UserPaginationCache = require(rootPrefix +
       '/lib/cacheManagement/single/UserContributorContributedByPagination');
-    await new UserPaginationCache().clear();
+    promisesArray.push(new UserPaginationCache({ contributedByUserId: params.id }).clear());
 
     const SecureUserCache = require(rootPrefix + '/lib/cacheManagement/single/SecureUser');
-    await new SecureUserCache({
-      id: params.id
-    }).clear();
+    promisesArray.push(new SecureUserCache({ id: params.id }).clear());
 
     if (params.userName) {
       const UserByUsernameCache = require(rootPrefix + '/lib/cacheManagement/single/UserByUsername');
-      await new UserByUsernameCache({ userName: params.userName }).clear();
+      promisesArray.push(new UserByUsernameCache({ userName: params.userName }).clear());
     }
+
+    await Promise.all(promisesArray);
   }
 
+  /**
+   * Get username unique index name.
+   *
+   * @returns {string}
+   */
   static get usernameUniqueIndexName() {
     return 'uk_idx_1';
   }
