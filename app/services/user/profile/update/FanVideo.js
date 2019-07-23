@@ -5,6 +5,7 @@ const rootPrefix = '../../../../..',
   userProfileElementConst = require(rootPrefix + '/lib/globalConstant/userProfileElement'),
   FeedModel = require(rootPrefix + '/app/models/mysql/Feed'),
   feedsConstants = require(rootPrefix + '/lib/globalConstant/feed'),
+  responseHelper = require(rootPrefix + '/lib/formatter/response'),
   videoLib = require(rootPrefix + '/lib/videoLib');
 
 /**
@@ -58,6 +59,18 @@ class UpdateFanVideo extends UpdateProfileBase {
     if (resp.isFailure()) {
       return Promise.reject(resp);
     }
+  }
+
+  /**
+   * Check whether update is required or not
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _isUpdateRequired() {
+    const oThis = this;
+
+    return responseHelper.successWithData({ noUpdates: false });
   }
 
   /**

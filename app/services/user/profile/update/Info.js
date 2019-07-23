@@ -4,6 +4,8 @@ const rootPrefix = '../../../../..',
   userProfileElementConst = require(rootPrefix + '/lib/globalConstant/userProfileElement'),
   AddUpdateUserBioKlass = require(rootPrefix + '/lib/user/profile/AddUpdateBio'),
   AddUpdateUserLinkKlass = require(rootPrefix + '/lib/user/profile/AddUpdateLink'),
+  TextCacheKlass = require(rootPrefix + '/lib/cacheManagement/multi/TextsByIds'),
+  UrlCacheKlass = require(rootPrefix + '/lib/cacheManagement/multi/UrlsByIds'),
   responseHelper = require(rootPrefix + '/lib/formatter/response');
 
 /**
@@ -31,6 +33,9 @@ class UpdateProfileInfo extends UpdateProfileBase {
     oThis.name = oThis.params.name;
     oThis.username = oThis.params.user_name;
     oThis.link = oThis.params.link;
+    oThis.userUpdateRequired = true;
+    oThis.bioUpdateRequired = true;
+    oThis.linkUpdateRequired = true;
   }
 
   /**
@@ -54,6 +59,49 @@ class UpdateProfileInfo extends UpdateProfileBase {
   }
 
   /**
+   * Check whether update is required or not
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _isUpdateRequired() {
+    const oThis = this;
+
+    // Check whether user update is required or not
+    if (oThis.userObj.name.toString() == oThis.name && oThis.userObj.userName.toString() == oThis.username) {
+      oThis.userUpdateRequired = false;
+    }
+
+    // If bio is present then check whether same bio is added or its updated
+    if (oThis.profileElements[userProfileElementConst.bioIdKind]) {
+      let textId = oThis.profileElements[userProfileElementConst.bioIdKind].data,
+        textResp = await new TextCacheKlass({ ids: [textId] }).fetch(),
+        textObj = textResp.data[textId];
+
+      if (textObj.text.toString() == oThis.bio.toString()) {
+        oThis.bioUpdateRequired = false;
+      }
+    }
+
+    // If link is present then check whether same link is added or its updated
+    if (oThis.profileElements[userProfileElementConst.linkIdKind]) {
+      let linkId = oThis.profileElements[userProfileElementConst.linkIdKind].data,
+        urlResp = await new UrlCacheKlass({ ids: [linkId] }).fetch(),
+        urlObj = urlResp.data[linkId];
+
+      if (urlObj.url.toString() == oThis.link.toString()) {
+        oThis.linkUpdateRequired = false;
+      }
+    }
+
+    if (!oThis.userUpdateRequired && !oThis.bioUpdateRequired && !oThis.linkUpdateRequired) {
+      return responseHelper.successWithData({ noUpdates: true });
+    } else {
+      return responseHelper.successWithData({ noUpdates: false });
+    }
+  }
+
+  /**
    * Method top update profile elements
    *
    * @returns {Promise<void>}
@@ -63,25 +111,34 @@ class UpdateProfileInfo extends UpdateProfileBase {
     const oThis = this;
 
     let promises = [];
-    // Update user bio
-    promises.push(
-      new AddUpdateUserBioKlass({
-        bio: oThis.bio,
-        userId: oThis.userId,
-        profileElementObj: oThis.profileElements[userProfileElementConst.bioIdKind]
-      }).perform()
-    );
 
-    // Update user social link
-    promises.push(
-      new AddUpdateUserLinkKlass({
-        url: oThis.link,
-        userId: oThis.userId,
-        profileElementObj: oThis.profileElements[userProfileElementConst.linkIdKind]
-      }).perform()
-    );
+    if (oThis.bioUpdateRequired) {
+      // Update user bio
+      promises.push(
+        new AddUpdateUserBioKlass({
+          bio: oThis.bio,
+          userId: oThis.userId,
+          profileElementObj: oThis.profileElements[userProfileElementConst.bioIdKind]
+        }).perform()
+      );
+    }
 
-    await Promise.all(promises);
+    if (oThis.linkUpdateRequired) {
+      // Update user social link
+      promises.push(
+        new AddUpdateUserLinkKlass({
+          url: oThis.link,
+          userId: oThis.userId,
+          profileElementObj: oThis.profileElements[userProfileElementConst.linkIdKind]
+        }).perform()
+      );
+    }
+
+    if (promises.length > 0) {
+      await Promise.all(promises);
+    }
+
+    return responseHelper.successWithData({});
   }
 
   /**
@@ -93,13 +150,15 @@ class UpdateProfileInfo extends UpdateProfileBase {
   async _updateUser() {
     const oThis = this;
 
-    await new UserModelKlass()
-      .update({
-        name: oThis.name,
-        user_name: oThis.username
-      })
-      .where({ id: oThis.userId })
-      .fire();
+    if (oThis.userUpdateRequired) {
+      await new UserModelKlass()
+        .update({
+          name: oThis.name,
+          user_name: oThis.username
+        })
+        .where({ id: oThis.userId })
+        .fire();
+    }
   }
 }
 

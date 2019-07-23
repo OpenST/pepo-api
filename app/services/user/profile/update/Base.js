@@ -25,6 +25,7 @@ class UpdateProfileBase extends ServiceBase {
 
     oThis.params = params;
     oThis.userId = params.user_id;
+    oThis.userObj = null;
     oThis.profileElements = {};
   }
 
@@ -39,6 +40,11 @@ class UpdateProfileBase extends ServiceBase {
     await oThis._validate();
 
     await oThis._fetchProfileElements();
+
+    let resp = await oThis._isUpdateRequired();
+    if (resp.isSuccess() && resp.data.noUpdates) {
+      return responseHelper.successWithData({});
+    }
 
     await oThis._updateProfileElements();
 
@@ -62,6 +68,7 @@ class UpdateProfileBase extends ServiceBase {
 
     let userMultiCache = new UsersCache({ ids: [oThis.userId] });
     let cacheRsp = await userMultiCache.fetch();
+    oThis.userObj = cacheRsp.data[oThis.userId];
 
     if (cacheRsp.isFailure() || Object.keys(cacheRsp.data[oThis.userId]).length <= 0) {
       return Promise.reject(
@@ -73,7 +80,7 @@ class UpdateProfileBase extends ServiceBase {
       );
     }
 
-    if (cacheRsp.data[oThis.userId].status != userConstants.activeStatus) {
+    if (oThis.userObj.status != userConstants.activeStatus) {
       return Promise.reject(
         responseHelper.error({
           internal_error_identifier: 'a_s_u_p_b_2',
@@ -130,6 +137,16 @@ class UpdateProfileBase extends ServiceBase {
    * @private
    */
   async _validateParams() {
+    throw 'sub-class to implement';
+  }
+
+  /**
+   * Check whether update is required or not.
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _isUpdateRequired() {
     throw 'sub-class to implement';
   }
 
