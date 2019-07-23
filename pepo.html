@@ -87,6 +87,11 @@
     .bottomTitleWeb{
       display: none;
     }
+    .copyRightColor{
+      color: #999999;
+      font-size: 12px;
+      text-decoration: none;
+    }
     @media screen and (max-width: 767px){
       main{
         overflow: hidden;
@@ -108,11 +113,20 @@
       .bottomTitleWeb{
         display: block;
         text-align: center;
-        margin-bottom: 0;
+        margin-bottom: 10px;
         margin-top: 5px;
+        color: #2A293A;
+        font-size: 16px;
       }
       .bottomTitleMobile{
         display: none;
+        color: #2A293A;
+        font-size: 14px;
+      }
+      .copyRightColor{
+        color: #999999;
+        font-size: 12px;
+        text-decoration: none;
       }
     }
   </style>
@@ -127,9 +141,13 @@
         <source src="https://d3attjoi5jlede.cloudfront.net/images/web/pepo-splashpage.webm" type="video/webm">
       </video>
       <div class="mobileFrame"></div>
-      <p class="bottomTitleMobile">An OST project</p>
+      <div class="bottomTitleMobileWrap">
+        <p class="bottomTitleMobile">An OST project</p>
+        <p class="bottomTitleMobile copyRightColor">Copyright © 2019 pepo.com Inc. All Rights Reserved.</p>
+      </div>
     </div>
     <p class="bottomTitleWeb">An OST project</p>
+    <p class="bottomTitleWeb copyRightColor">Copyright © 2019 <a href="https://ost.com/" target="_blank" class="copyRightColor">pepo.com</a> Inc. All Rights Reserved.</p>
   </main>
 </body>
 </html>
