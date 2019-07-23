@@ -116,7 +116,7 @@ node executables/oneTimers/insertWebhooksSecret.js --webhooksSecret "__WXYZ" --w
 ```bash
     # note: for topics to subscribe and prefetchcount, please see params column of the cron_processes table
     source set_env_vars.sh
-    node executables/bgJobProcessor/Factory.js --cronProcessId 3
+    node executables/bgJobProcessor/Processor.js --cronProcessId 3
 ```
 
 * Enqueue background job
