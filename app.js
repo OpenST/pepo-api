@@ -20,6 +20,7 @@ const responseHelper = require(rootPrefix + '/lib/formatter/response'),
 
 const apiRoutes = require(rootPrefix + '/routes/api/index'),
   ostWebhookRoutes = require(rootPrefix + '/routes/ostWebhook/index'),
+  webhookRoutes = require(rootPrefix + '/routes/webhooks/index'),
   elbHealthCheckerRoute = require(rootPrefix + '/routes/internal/elb_health_checker');
 
 const errorConfig = basicHelper.fetchErrorConfig(apiVersions.v1);
@@ -156,6 +157,8 @@ app.use('/api', sanitizer.sanitizeBodyAndQuery, assignParams, apiRoutes);
  * NOTE: OST webhooks where first assign params, validate signature and then sanitize the params
  */
 app.use('/ost-webhook', ostWebhookRoutes);
+
+app.use('/webhooks', webhookRoutes);
 
 // Catch 404 and forward to error handler
 app.use(function(req, res, next) {
