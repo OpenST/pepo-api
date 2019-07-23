@@ -133,7 +133,7 @@ class UserStat extends ModelBase {
    * Flush cache.
    *
    * @param {object} params
-   * @param {number} params.userIds
+   * @param {number} params.userId
    *
    * @returns {Promise<*>}
    */
