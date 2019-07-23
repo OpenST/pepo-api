@@ -21,11 +21,11 @@
     },
 
     "redshift": {
-      "user": "analytics_user",
-      "database": "analytics",
-      "password": "gdhsD56Sw248jljt68dfTRaxMn",
+      "user": "pepo_dev_read",
+      "database": "pepodb",
+      "password": "Pepo2Dev!ReadOn7y",
       "port": "5439",
-      "host": "redshift-instance.cl2x2qyuekxx.us-east-1.redshift.amazonaws.com"
+      "host": "pepo.cfwzkfyo2mfi.eu-west-1.redshift.amazonaws.com"
     }
   }
 }
