@@ -1,5 +1,5 @@
-const rootPrefix = '../../../..',
-  UpdateProfileBase = require(rootPrefix + '/app/services/user/profile/Base'),
+const rootPrefix = '../../../../..',
+  UpdateProfileBase = require(rootPrefix + '/app/services/user/profile/update/Base'),
   CommonValidator = require(rootPrefix + '/lib/validators/Common'),
   UserProfileElementModel = require(rootPrefix + '/app/models/mysql/UserProfileElement'),
   userProfileElementConst = require(rootPrefix + '/lib/globalConstant/userProfileElement'),
@@ -12,7 +12,7 @@ const rootPrefix = '../../../..',
  *
  * @class
  */
-class AddFanVideo extends UpdateProfileBase {
+class UpdateFanVideo extends UpdateProfileBase {
   /**
    * @constructor
    *
@@ -163,4 +163,4 @@ class AddFanVideo extends UpdateProfileBase {
   }
 }
 
-module.exports = AddFanVideo;
+module.exports = UpdateFanVideo;

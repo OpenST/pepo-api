@@ -203,7 +203,7 @@ router.post('/:user_id/fan-video', sanitizer.sanitizeDynamicUrlParams, function(
   req.decodedParams.apiName = apiName.saveFanVideo;
   req.decodedParams.user_id = req.params.user_id;
 
-  Promise.resolve(routeHelper.perform(req, res, next, '/user/profile/AddFanVideo', 'r_a_v1_u_9', null));
+  Promise.resolve(routeHelper.perform(req, res, next, '/user/profile/update/FanVideo', 'r_a_v1_u_9', null));
 });
 
 /* Profile image save */

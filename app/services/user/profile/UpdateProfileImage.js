@@ -1,9 +1,5 @@
-/** This module helps in updating profile image of user
- * @module app/services/user/profile/UpdateProfileImage.js
- */
-
 const rootPrefix = '../../../..',
-  UpdateProfileBase = require(rootPrefix + '/app/services/user/profile/Base'),
+  UpdateProfileBase = require(rootPrefix + '/app/services/user/profile/update/Base'),
   UserModelKlass = require(rootPrefix + '/app/models/mysql/User'),
   imageConstants = require(rootPrefix + '/lib/globalConstant/image'),
   imageLib = require(rootPrefix + '/lib/imageLib');

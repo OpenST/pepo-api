@@ -1,10 +1,5 @@
-/**
- * This module helps user to update their profile information
- * @module app/services/user/UpdateProfile.js
- */
-
 const rootPrefix = '../../../..',
-  UpdateProfileBase = require(rootPrefix + '/app/services/user/profile/Base'),
+  UpdateProfileBase = require(rootPrefix + '/app/services/user/profile/update/Base'),
   UserModelKlass = require(rootPrefix + '/app/models/mysql/User'),
   userProfileElementConst = require(rootPrefix + '/lib/globalConstant/userProfileElement'),
   AddUpdateUserBioKlass = require(rootPrefix + '/lib/user/profile/AddUpdateBio'),

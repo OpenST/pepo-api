@@ -1,9 +1,4 @@
-/**
- * This module helps user to update their profile information
- * @module app/services/user/UpdateProfile.js
- */
-
-const rootPrefix = '../../../..',
+const rootPrefix = '../../../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   UsersCache = require(rootPrefix + '/lib/cacheManagement/multi/User'),
   userConstants = require(rootPrefix + '/lib/globalConstant/user'),
