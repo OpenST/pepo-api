@@ -455,6 +455,21 @@ class TransactionOstEventBase extends ServiceBase {
   async _insertInTransaction() {
     const oThis = this;
 
+    if (!oThis.toUserId || !oThis.fromUserId) {
+      return Promise.reject(
+        responseHelper.error({
+          internal_error_identifier: 'a_s_oe_t_b_8',
+          api_error_identifier: 'something_went_wrong',
+          debug_options: {
+            Reason: 'Invalid from user id or to user id.',
+            fromUserId: oThis.fromUserId,
+            toUserId: oThis.toUserId,
+            ostTxId: oThis.ostTxId
+          }
+        })
+      );
+    }
+
     let isDuplicateIndexViolation = false;
 
     let extraData = {
