@@ -32,7 +32,7 @@ router.get('/:feed_id', sanitizer.sanitizeDynamicUrlParams, function(req, res, n
       serviceData: serviceResponse.data
     }).perform();
 
-    console.log('wrapperFormatterRsp-----', wrapperFormatterRsp);
+    //console.log('wrapperFormatterRsp-----', JSON.stringify(wrapperFormatterRsp));
 
     serviceResponse.data = wrapperFormatterRsp.data;
   };
@@ -64,7 +64,7 @@ router.get('/', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
       serviceData: serviceResponse.data
     }).perform();
 
-    console.log('wrapperFormatterRsp-----', wrapperFormatterRsp);
+    //console.log('wrapperFormatterRsp-----', JSON.stringify(wrapperFormatterRsp));
 
     serviceResponse.data = wrapperFormatterRsp.data;
   };

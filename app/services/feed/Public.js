@@ -70,7 +70,10 @@ class PublicVideoFeed extends FeedBase {
     oThis.feedsMap = loggedOutFeedCacheResp.data.feedDetails;
 
     const lastFeedId = oThis.feedIds[oThis.feedIds.length - 1];
-    oThis.nextPaginationTimestamp = oThis.feedsMap[lastFeedId].paginationIdentifier;
+
+    if (oThis.feedIds.length > 0) {
+      oThis.nextPaginationTimestamp = oThis.feedsMap[lastFeedId].paginationIdentifier;
+    }
   }
 
   /**
