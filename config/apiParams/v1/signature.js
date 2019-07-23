@@ -352,7 +352,7 @@ const v1Signature = {
       },
       {
         parameter: 'user_name',
-        validatorMethods: ['validateString,', 'validateUserName']
+        validatorMethods: ['validateString', 'validateUserName']
       }
     ],
     optional: [
