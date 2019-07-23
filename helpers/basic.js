@@ -506,6 +506,23 @@ class BasicHelper {
         .substring(2, 15)
     );
   }
+
+  /**
+   * Gives unique user name
+   *
+   * @param name
+   * @returns {string}
+   */
+  getUniqueUserName(name) {
+    return (
+      name.substring(0, 4) +
+      '_' +
+      Date.now().toString(36) +
+      Math.random()
+        .toString(36)
+        .substring(2, 4)
+    );
+  }
 }
 
 module.exports = new BasicHelper();
