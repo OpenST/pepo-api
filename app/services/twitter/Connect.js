@@ -130,7 +130,7 @@ class TwitterConnect extends ServiceBase {
       return Promise.reject(twitterUserObjCacheResp);
     }
 
-    if (twitterUserObjCacheResp.data[oThis.twitterId].userId) {
+    if (twitterUserObjCacheResp.data[oThis.twitterId].id) {
       oThis.twitterUserObj = twitterUserObjCacheResp.data[oThis.twitterId];
     }
 
