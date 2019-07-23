@@ -123,7 +123,7 @@ class CurrentUser extends ServiceBase {
 
     return responseHelper.successWithData({
       usersByIdMap: { [safeFormattedUserData.id]: safeFormattedUserData },
-      tokenUsersByUserIdMap: { [safeFormattedTokenUserData.id]: safeFormattedTokenUserData },
+      tokenUsersByUserIdMap: { [safeFormattedTokenUserData.userId]: safeFormattedTokenUserData },
       user: safeFormattedUserData,
       tokenUser: safeFormattedTokenUserData,
       pricePointsMap: oThis.pricePoints
