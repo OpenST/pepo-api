@@ -1,4 +1,4 @@
-const rootPrefix = '../../../..',
+const rootPrefix = '../../../../..',
   UpdateProfileBase = require(rootPrefix + '/app/services/user/profile/update/Base'),
   UserModelKlass = require(rootPrefix + '/app/models/mysql/User'),
   userProfileElementConst = require(rootPrefix + '/lib/globalConstant/userProfileElement'),
@@ -11,7 +11,7 @@ const rootPrefix = '../../../..',
  *
  * @class
  */
-class UpdateProfile extends UpdateProfileBase {
+class UpdateProfileInfo extends UpdateProfileBase {
   /**
    * @constructor
    *
@@ -103,4 +103,4 @@ class UpdateProfile extends UpdateProfileBase {
   }
 }
 
-module.exports = UpdateProfile;
+module.exports = UpdateProfileInfo;

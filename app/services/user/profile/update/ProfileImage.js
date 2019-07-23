@@ -1,4 +1,4 @@
-const rootPrefix = '../../../..',
+const rootPrefix = '../../../../..',
   UpdateProfileBase = require(rootPrefix + '/app/services/user/profile/update/Base'),
   UserModelKlass = require(rootPrefix + '/app/models/mysql/User'),
   imageConstants = require(rootPrefix + '/lib/globalConstant/image'),

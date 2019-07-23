@@ -211,7 +211,7 @@ router.post('/:user_id/profile-image', sanitizer.sanitizeDynamicUrlParams, funct
   req.decodedParams.apiName = apiName.saveProfileImage;
   req.decodedParams.user_id = req.params.user_id;
 
-  Promise.resolve(routeHelper.perform(req, res, next, '/user/profile/UpdateProfileImage', 'r_a_v1_u_10', null));
+  Promise.resolve(routeHelper.perform(req, res, next, '/user/profile/update/ProfileImage', 'r_a_v1_u_10', null));
 });
 
 /* Profile save */
@@ -219,7 +219,7 @@ router.post('/:user_id/profile', sanitizer.sanitizeDynamicUrlParams, function(re
   req.decodedParams.apiName = apiName.saveProfile;
   req.decodedParams.user_id = req.params.user_id;
 
-  Promise.resolve(routeHelper.perform(req, res, next, '/user/profile/UpdateProfile', 'r_a_v1_u_11', null));
+  Promise.resolve(routeHelper.perform(req, res, next, '/user/profile/update/Info', 'r_a_v1_u_11', null));
 });
 
 module.exports = router;
