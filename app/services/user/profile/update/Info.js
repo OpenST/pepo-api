@@ -49,9 +49,10 @@ class UpdateProfileInfo extends UpdateProfileBase {
 
     if (!oThis.name || !oThis.username) {
       return Promise.reject(
-        responseHelper.error({
+        responseHelper.paramValidationError({
           internal_error_identifier: 'a_s_u_p_up_1',
-          api_error_identifier: 'invalid_user_name',
+          api_error_identifier: 'invalid_params',
+          params_error_identifiers: ['invalid_user_name'],
           debug_options: {}
         })
       );

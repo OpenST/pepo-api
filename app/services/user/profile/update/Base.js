@@ -17,6 +17,7 @@ class UpdateProfileBase extends ServiceBase {
    *
    * @param params
    * @param {number} params.user_id
+   * @param {Object} params.current_user
    */
   constructor(params) {
     super(params);
@@ -25,6 +26,7 @@ class UpdateProfileBase extends ServiceBase {
 
     oThis.params = params;
     oThis.userId = params.user_id;
+    oThis.currentUser = params.current_user;
     oThis.userObj = null;
     oThis.profileElements = {};
   }
@@ -64,6 +66,17 @@ class UpdateProfileBase extends ServiceBase {
   async _validate() {
     const oThis = this;
 
+    if (oThis.currentUser.id != oThis.userId) {
+      return Promise.reject(
+        responseHelper.paramValidationError({
+          internal_error_identifier: 'a_s_u_p_b_1',
+          api_error_identifier: 'unauthorized_api_request',
+          params_error_identifiers: [],
+          debug_options: {}
+        })
+      );
+    }
+
     await oThis._validateParams();
 
     let userMultiCache = new UsersCache({ ids: [oThis.userId] });
@@ -72,9 +85,10 @@ class UpdateProfileBase extends ServiceBase {
 
     if (cacheRsp.isFailure() || Object.keys(cacheRsp.data[oThis.userId]).length <= 0) {
       return Promise.reject(
-        responseHelper.error({
-          internal_error_identifier: 'a_s_u_p_b_1',
-          api_error_identifier: 'user_not_found',
+        responseHelper.paramValidationError({
+          internal_error_identifier: 'a_s_u_p_b_2',
+          api_error_identifier: 'invalid_params',
+          params_error_identifiers: ['user_not_found'],
           debug_options: {}
         })
       );
@@ -82,9 +96,10 @@ class UpdateProfileBase extends ServiceBase {
 
     if (oThis.userObj.status != userConstants.activeStatus) {
       return Promise.reject(
-        responseHelper.error({
-          internal_error_identifier: 'a_s_u_p_b_2',
-          api_error_identifier: 'user_not_active',
+        responseHelper.paramValidationError({
+          internal_error_identifier: 'a_s_u_p_b_3',
+          api_error_identifier: 'could_not_proceed',
+          params_error_identifiers: ['user_not_active'],
           debug_options: {}
         })
       );

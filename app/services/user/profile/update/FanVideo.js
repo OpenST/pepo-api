@@ -57,7 +57,14 @@ class UpdateFanVideo extends UpdateProfileBase {
 
     let resp = videoLib.validateVideoObj({ videoUrl: oThis.videoUrl, isExternalUrl: oThis.isExternalUrl });
     if (resp.isFailure()) {
-      return Promise.reject(resp);
+      return Promise.reject(
+        responseHelper.paramValidationError({
+          internal_error_identifier: 'a_s_u_p_fv_1',
+          api_error_identifier: 'invalid_params',
+          params_error_identifiers: ['invalid_video_url'],
+          debug_options: {}
+        })
+      );
     }
   }
 
