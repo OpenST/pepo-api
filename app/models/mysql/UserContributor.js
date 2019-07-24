@@ -1,12 +1,20 @@
 const rootPrefix = '../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
-  database = require(rootPrefix + '/lib/globalConstant/database');
+  databaseConstants = require(rootPrefix + '/lib/globalConstant/database');
 
-const dbName = database.userDbName;
+// Declare variables.
+const dbName = databaseConstants.userDbName;
 
+/**
+ * Class for user contributor model.
+ *
+ * @class UserContributor
+ */
 class UserContributor extends ModelBase {
   /**
-   * User Contributor model
+   * Constructor for user contributor model.
+   *
+   * @augments ModelBase
    *
    * @constructor
    */
@@ -19,8 +27,17 @@ class UserContributor extends ModelBase {
   }
 
   /**
+   * Format Db data.
    *
-   * @param dbRow
+   * @param {object} dbRow
+   * @param {number} dbRow.id
+   * @param {number} dbRow.user_id
+   * @param {number} dbRow.contributed_by_user_id
+   * @param {number} dbRow.total_amount
+   * @param {number} dbRow.total_transactions
+   * @param {number} dbRow.created_at
+   * @param {number} dbRow.updated_at
+   *
    * @return {object}
    */
   formatDbData(dbRow) {
@@ -36,10 +53,9 @@ class UserContributor extends ModelBase {
   }
 
   /**
-   * List Of Formatted Column names that can be exposed by service
+   * List of formatted column names that can be exposed by service.
    *
-   *
-   * @returns {Array}
+   * @returns {array}
    */
   safeFormattedColumnNames() {
     return ['id', 'userId', 'contributedByUserId', 'totalTransactions', 'totalAmount', 'createdAt', 'updatedAt'];
@@ -62,7 +78,7 @@ class UserContributor extends ModelBase {
       limit = params.limit,
       offset = (page - 1) * limit;
 
-    let dbRows = await oThis
+    const dbRows = await oThis
       .select(['user_id'])
       .where({ contributed_by_user_id: params.contributedByUserId })
       .limit(limit)
@@ -70,7 +86,7 @@ class UserContributor extends ModelBase {
       .order_by('id DESC')
       .fire();
 
-    let response = [];
+    const response = [];
 
     for (let index = 0; index < dbRows.length; index++) {
       response.push(dbRows[index].user_id);
@@ -96,7 +112,7 @@ class UserContributor extends ModelBase {
       limit = params.limit,
       offset = (page - 1) * limit;
 
-    let dbRows = await oThis
+    const dbRows = await oThis
       .select(['contributed_by_user_id'])
       .where({ user_id: params.userId })
       .limit(limit)
@@ -104,7 +120,7 @@ class UserContributor extends ModelBase {
       .order_by('id DESC')
       .fire();
 
-    let response = [];
+    const response = [];
 
     for (let index = 0; index < dbRows.length; index++) {
       response.push(dbRows[index].contributed_by_user_id);
@@ -113,26 +129,26 @@ class UserContributor extends ModelBase {
     return response;
   }
 
-  /***
+  /**
    * Fetch users contributed by object
    * contributedByUserId paid to user ids
    *
-   * @param userIds {Array} - Array of user id
-   * @param contributedByUserId {Integer} - id of user who contributed to userId
+   * @param {array} userIds: Array of user id
+   * @param {number} contributedByUserId: id of user who contributed to userId
    *
    * @return {Object}
    */
-  async fetchByUserIdsAndcontributedByUserId(userIds, contributedByUserId) {
+  async fetchByUserIdsAndContributedByUserId(userIds, contributedByUserId) {
     const oThis = this;
-    let dbRows = await oThis
+    const dbRows = await oThis
       .select('*')
       .where({ user_id: userIds, contributed_by_user_id: contributedByUserId })
       .fire();
 
-    let response = {};
+    const response = {};
 
     for (let index = 0; index < dbRows.length; index++) {
-      let formatDbRow = oThis.formatDbData(dbRows[index]);
+      const formatDbRow = oThis.formatDbData(dbRows[index]);
       response[formatDbRow.userId] = formatDbRow;
     }
 
@@ -142,9 +158,9 @@ class UserContributor extends ModelBase {
   /**
    * Update by user id and contributed by user id.
    *
-   * @param {number} params.userId  - user Id
-   * @param {number} params.contributedByUserId  - User Id who contributed for the video
-   * @param {number} params.totalAmount  - Total amount
+   * @param {number} params.userId: user Id
+   * @param {number} params.contributedByUserId: User Id who contributed for the video
+   * @param {number} params.totalAmount: Total amount
    *
    * @returns {Promise<*>}
    */
@@ -165,9 +181,9 @@ class UserContributor extends ModelBase {
   /**
    * Update by userId and contributed by user id.
    *
-   * @param {number} params.userId  - user Id
-   * @param {number} params.contributedByUserId  - User Id who contributed for the video
-   * @param {number} params.totalAmount  - Total amount
+   * @param {number} params.userId: user Id
+   * @param {number} params.contributedByUserId: User Id who contributed for the video
+   * @param {number} params.totalAmount: Total amount
    *
    * @returns {Promise<*>}
    */
@@ -198,9 +214,6 @@ class UserContributor extends ModelBase {
    * @returns {Promise<*>}
    */
   static async flushCache(params, options = {}) {
-    console.log('===params=======', params);
-    console.log('===options=======', options);
-
     if (options.isInsert) {
       if (params.contributedByUserId) {
         const UserContributorCache = require(rootPrefix +
@@ -220,7 +233,6 @@ class UserContributor extends ModelBase {
     }
 
     if (params.userId && params.contributedByUserId) {
-      console.log('=======Inside cache clear--------');
       const UserContributorMultiCache = require(rootPrefix +
         '/lib/cacheManagement/multi/UserContributorByUserIdsAndContributedByUserId');
       await new UserContributorMultiCache({
