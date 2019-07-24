@@ -1018,7 +1018,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{api_server}}/api/v1/tags?tag=w",
+							"raw": "{{api_server}}/api/v1/tags?q=w",
 							"host": [
 								"{{api_server}}"
 							],
@@ -1029,7 +1029,7 @@
 							],
 							"query": [
 								{
-									"key": "tag",
+									"key": "q",
 									"value": "w"
 								}
 							]
