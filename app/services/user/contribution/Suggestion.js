@@ -45,7 +45,7 @@ class UserContributionSuggestion extends ContributionBase {
     const twitterUserIds = userPaginationCacheRes.data;
 
     if (twitterUserIds.length === 0) {
-      return;
+      return responseHelper.successWithData({});
     }
 
     const twitterUserByIdsCacheRes = await new TwitterUserByIdsCache({
