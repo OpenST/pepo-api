@@ -174,7 +174,7 @@ class UserContributor extends ModelBase {
   async insertUserContributor(params) {
     const oThis = this;
 
-    let totalTransactions = 1;
+    const totalTransactions = 1;
 
     return oThis
       .insert({
@@ -186,15 +186,20 @@ class UserContributor extends ModelBase {
       .fire();
   }
 
-  /***
-   * Flush cache
+  /**
+   * Flush cache.
    *
    * @param {object} params
+   * @param {string} params.contributedByUserId
+   * @param {string} params.userId
+   * @param {object} [options]
+   * @param {string} [options.isInsert]
    *
    * @returns {Promise<*>}
    */
-  static async flushCache(params, options) {
-    options = options || {};
+  static async flushCache(params, options = {}) {
+    console.log('===params=======', params);
+    console.log('===options=======', options);
 
     if (options.isInsert) {
       if (params.contributedByUserId) {
@@ -215,6 +220,7 @@ class UserContributor extends ModelBase {
     }
 
     if (params.userId && params.contributedByUserId) {
+      console.log('=======Inside cache clear--------');
       const UserContributorMultiCache = require(rootPrefix +
         '/lib/cacheManagement/multi/UserContributorByUserIdsAndContributedByUserId');
       await new UserContributorMultiCache({
@@ -225,7 +231,7 @@ class UserContributor extends ModelBase {
   }
 
   /**
-   * index name
+   * Index name.
    *
    * @returns {string}
    */
