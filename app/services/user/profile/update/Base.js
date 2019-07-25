@@ -4,7 +4,8 @@ const rootPrefix = '../../../../..',
   userConstants = require(rootPrefix + '/lib/globalConstant/user'),
   UserProfileElementsByUserIdCache = require(rootPrefix + '/lib/cacheManagement/multi/UserProfileElementsByUserIds'),
   UserModelKlass = require(rootPrefix + '/app/models/mysql/User'),
-  responseHelper = require(rootPrefix + '/lib/formatter/response');
+  responseHelper = require(rootPrefix + '/lib/formatter/response'),
+  CommonValidators = require(rootPrefix + '/lib/validators/Common');
 
 /**
  * Class to Update user Profile
@@ -81,9 +82,8 @@ class UpdateProfileBase extends ServiceBase {
 
     let userMultiCache = new UsersCache({ ids: [oThis.userId] });
     let cacheRsp = await userMultiCache.fetch();
-    oThis.userObj = cacheRsp.data[oThis.userId];
 
-    if (cacheRsp.isFailure() || Object.keys(cacheRsp.data[oThis.userId]).length <= 0) {
+    if (cacheRsp.isFailure() || !CommonValidators.validateNonEmptyObject(cacheRsp.data[oThis.userId])) {
       return Promise.reject(
         responseHelper.paramValidationError({
           internal_error_identifier: 'a_s_u_p_b_2',
@@ -94,7 +94,9 @@ class UpdateProfileBase extends ServiceBase {
       );
     }
 
-    if (oThis.userObj.status != userConstants.activeStatus) {
+    oThis.userObj = cacheRsp.data[oThis.userId];
+
+    if (oThis.userObj.status !== userConstants.activeStatus) {
       return Promise.reject(
         responseHelper.paramValidationError({
           internal_error_identifier: 'a_s_u_p_b_3',
@@ -138,6 +140,7 @@ class UpdateProfileBase extends ServiceBase {
   async _flushCaches() {
     const oThis = this;
 
+    // TODO - Pankaj - avoid user cache flush
     // Clear all users cache
     await UserModelKlass.flushCache({ id: oThis.userId, userName: oThis.username });
 
@@ -152,7 +155,7 @@ class UpdateProfileBase extends ServiceBase {
    * @private
    */
   async _validateParams() {
-    throw 'sub-class to implement';
+    throw new Error('sub-class to implement');
   }
 
   /**
@@ -162,7 +165,7 @@ class UpdateProfileBase extends ServiceBase {
    * @private
    */
   async _isUpdateRequired() {
-    throw 'sub-class to implement';
+    throw new Error('sub-class to implement');
   }
 
   /**
@@ -172,7 +175,7 @@ class UpdateProfileBase extends ServiceBase {
    * @private
    */
   async _updateProfileElements() {
-    throw 'Sub-class to implement';
+    throw new Error('sub-class to implement');
   }
 
   /**
@@ -182,7 +185,7 @@ class UpdateProfileBase extends ServiceBase {
    * @private
    */
   async _updateUser() {
-    throw 'sub-class to implement';
+    throw new Error('sub-class to implement');
   }
 }
 
