@@ -59,7 +59,9 @@ router.get('/', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
         [entityType.videoDetailsMap]: responseEntityKey.videoDetails,
         [entityType.currentUserUserContributionsMap]: responseEntityKey.currentUserUserContributions,
         [entityType.currentUserVideoContributionsMap]: responseEntityKey.currentUserVideoContributions,
-        [entityType.feedListMeta]: responseEntityKey.meta
+        [entityType.feedListMeta]: responseEntityKey.meta,
+        [entityType.pricePointsMap]: responseEntityKey.pricePoints,
+        [entityType.token]: responseEntityKey.token
       },
       serviceData: serviceResponse.data
     }).perform();

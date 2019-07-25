@@ -1,6 +1,7 @@
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   GetProfile = require(rootPrefix + '/lib/user/profile/Get'),
+  GetTokenService = require(rootPrefix + '/app/services/token/Get'),
   feedConstants = require(rootPrefix + '/lib/globalConstant/feed'),
   responseHelper = require(rootPrefix + '/lib/formatter/response');
 
@@ -24,6 +25,7 @@ class FeedBase extends ServiceBase {
     oThis.videoIds = [];
     oThis.profileResponse = {};
     oThis.finalResponse = {};
+    oThis.tokenDetails = {};
   }
 
   /**
@@ -42,6 +44,8 @@ class FeedBase extends ServiceBase {
     await oThis._getFeeds();
 
     await oThis._fetchProfileDetails();
+
+    await oThis._setTokenDetails();
 
     return oThis._prepareResponse();
   }
@@ -99,6 +103,27 @@ class FeedBase extends ServiceBase {
       return Promise.reject(profileResp);
     }
     oThis.profileResponse = profileResp.data;
+
+    return responseHelper.successWithData({});
+  }
+
+  /**
+   * Fetch token details.
+   *
+   * @return {Promise<void>}
+   * @private
+   */
+  async _setTokenDetails() {
+    const oThis = this;
+
+    let getTokenServiceObj = new GetTokenService({});
+
+    let tokenResp = await getTokenServiceObj.perform();
+
+    if (tokenResp.isFailure()) {
+      return Promise.reject(tokenResp);
+    }
+    oThis.tokenDetails = tokenResp.data.tokenDetails;
 
     return responseHelper.successWithData({});
   }

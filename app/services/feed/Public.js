@@ -112,6 +112,7 @@ class PublicVideoFeed extends FeedBase {
       currentUserUserContributionsMap: oThis.profileResponse.currentUserUserContributionsMap,
       currentUserVideoContributionsMap: oThis.profileResponse.currentUserVideoContributionsMap,
       pricePointsMap: oThis.profileResponse.pricePointsMap,
+      tokenDetails: oThis.tokenDetails,
       meta: responseMetaData
     });
   }
