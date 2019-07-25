@@ -13,15 +13,15 @@ class GetUserProfile extends ServiceBase {
    * @constructor
    *
    * @param params
-   * @param params.userId {String} - user id
-   * @param params.currentUser {object} - current_user
+   * @param params.profile_user_id {String} - Profile user id
+   * @param params.current_user {object} - current_user
    */
   constructor(params) {
     super(params);
 
     const oThis = this;
 
-    oThis.userId = +params.user_id;
+    oThis.profileUserId = +params.profile_user_id;
     oThis.currentUserId = +params.current_user.id;
   }
 
@@ -45,7 +45,7 @@ class GetUserProfile extends ServiceBase {
   async _fetchProfileDetails() {
     const oThis = this;
 
-    let getProfileObj = new GetProfile({ userIds: [oThis.userId], currentUserId: oThis.currentUserId });
+    let getProfileObj = new GetProfile({ userIds: [oThis.profileUserId], currentUserId: oThis.currentUserId });
 
     let response = await getProfileObj.perform();
 
@@ -55,8 +55,8 @@ class GetUserProfile extends ServiceBase {
     let profileResp = response.data;
 
     return responseHelper.successWithData({
-      userProfile: profileResp.userProfilesMap[oThis.userId],
-      userProfileAllowedActions: profileResp.userProfileAllowedActions[oThis.userId],
+      userProfile: profileResp.userProfilesMap[oThis.profileUserId],
+      userProfileAllowedActions: profileResp.userProfileAllowedActions[oThis.profileUserId],
       usersByIdMap: profileResp.usersByIdMap,
       tokenUsersByUserIdMap: profileResp.tokenUsersByUserIdMap,
       imageMap: profileResp.imageMap,

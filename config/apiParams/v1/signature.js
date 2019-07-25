@@ -245,7 +245,7 @@ const v1Signature = {
         validatorMethods: ['validateNonEmptyObject']
       },
       {
-        parameter: 'user_id',
+        parameter: 'profile_user_id',
         validatorMethods: ['validateInteger']
       }
     ],
@@ -267,7 +267,7 @@ const v1Signature = {
         validatorMethods: ['validateNonEmptyObject']
       },
       {
-        parameter: 'user_id',
+        parameter: 'profile_user_id',
         validatorMethods: ['validateInteger']
       },
       {
@@ -313,7 +313,7 @@ const v1Signature = {
         validatorMethods: ['validateNonEmptyObject']
       },
       {
-        parameter: 'user_id',
+        parameter: 'profile_user_id',
         validatorMethods: ['validateInteger']
       },
       {
@@ -337,14 +337,13 @@ const v1Signature = {
     ]
   },
   [apiName.saveProfile]: {
-    // TODO: Pankaj - change user_id to profile_user_id?
     mandatory: [
       {
         parameter: 'current_user',
         validatorMethods: ['validateNonEmptyObject']
       },
       {
-        parameter: 'user_id',
+        parameter: 'profile_user_id',
         validatorMethods: ['validateInteger']
       },
       {

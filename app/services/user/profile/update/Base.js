@@ -17,7 +17,7 @@ class UpdateProfileBase extends ServiceBase {
    * @constructor
    *
    * @param params
-   * @param {number} params.user_id
+   * @param {number} params.profile_user_id
    * @param {Object} params.current_user
    */
   constructor(params) {
@@ -26,10 +26,11 @@ class UpdateProfileBase extends ServiceBase {
     const oThis = this;
 
     oThis.params = params;
-    oThis.userId = params.user_id;
+    oThis.userId = params.profile_user_id;
     oThis.currentUser = params.current_user;
     oThis.userObj = null;
     oThis.profileElements = {};
+    oThis.flushUserCache = true;
   }
 
   /**
@@ -140,9 +141,10 @@ class UpdateProfileBase extends ServiceBase {
   async _flushCaches() {
     const oThis = this;
 
-    // TODO - Pankaj - avoid user cache flush
     // Clear all users cache
-    await UserModelKlass.flushCache({ id: oThis.userId, userName: oThis.username });
+    if (oThis.flushUserCache) {
+      await UserModelKlass.flushCache({ id: oThis.userId, userName: oThis.username });
+    }
 
     // Clear user profile elements cache
     new UserProfileElementsByUserIdCache({ usersIds: [oThis.userId] }).clear();

@@ -44,6 +44,7 @@ class UpdateFanVideo extends UpdateProfileBase {
     oThis.imageSize = params.image_size;
     oThis.isExternalUrl = params.isExternalUrl;
     oThis.videoId = null;
+    oThis.flushUserCache = false;
   }
 
   /**

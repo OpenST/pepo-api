@@ -160,9 +160,9 @@ router.get('/:user_id/activities', sanitizer.sanitizeDynamicUrlParams, function(
 });
 
 /* User profile */
-router.get('/:user_id/profile', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+router.get('/:profile_user_id/profile', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.getUserProfile;
-  req.decodedParams.user_id = req.params.user_id;
+  req.decodedParams.profile_user_id = req.params.profile_user_id;
 
   const dataFormatterFunc = async function(serviceResponse) {
     const wrapperFormatterRsp = await new FormatterComposer({
@@ -191,25 +191,25 @@ router.get('/:user_id/profile', sanitizer.sanitizeDynamicUrlParams, function(req
 });
 
 /* Video save */
-router.post('/:user_id/fan-video', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+router.post('/:profile_user_id/fan-video', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.saveFanVideo;
-  req.decodedParams.user_id = req.params.user_id;
+  req.decodedParams.profile_user_id = req.params.profile_user_id;
 
   Promise.resolve(routeHelper.perform(req, res, next, '/user/profile/update/FanVideo', 'r_a_v1_u_9', null));
 });
 
 /* Profile image save */
-router.post('/:user_id/profile-image', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+router.post('/:profile_user_id/profile-image', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.saveProfileImage;
-  req.decodedParams.user_id = req.params.user_id;
+  req.decodedParams.profile_user_id = req.params.profile_user_id;
 
   Promise.resolve(routeHelper.perform(req, res, next, '/user/profile/update/ProfileImage', 'r_a_v1_u_10', null));
 });
 
 /* Profile save */
-router.post('/:user_id/profile', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+router.post('/:profile_user_id/profile', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.saveProfile;
-  req.decodedParams.user_id = req.params.user_id;
+  req.decodedParams.profile_user_id = req.params.profile_user_id;
 
   Promise.resolve(routeHelper.perform(req, res, next, '/user/profile/update/Info', 'r_a_v1_u_11', null));
 });
