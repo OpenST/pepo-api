@@ -33,7 +33,7 @@ class UserOstEventBase extends ServiceBase {
 
     oThis.ostUser = params.data.user;
 
-    oThis.ostUserid = oThis.ostUser.id;
+    oThis.ostUserId = oThis.ostUser.id;
     oThis.ostUserTokenHolderAddress = oThis.ostUser.token_holder_address;
     oThis.ostUserStatus = oThis.ostUser.status.toUpperCase();
 
@@ -51,7 +51,7 @@ class UserOstEventBase extends ServiceBase {
 
     logger.log('Validate user params.');
 
-    if (!CommonValidators.validateUuidV4(oThis.ostUserid)) {
+    if (!CommonValidators.validateUuidV4(oThis.ostUserId)) {
       oThis.paramErrors.push('invalid_user_id');
     }
 
@@ -71,13 +71,13 @@ class UserOstEventBase extends ServiceBase {
 
     logger.log('Fetching token user.');
 
-    let tokenUserObjsRes = await new TokenUserByOstUserIdsCache({ ostUserIds: [oThis.ostUserid] }).fetch();
+    let tokenUserObjsRes = await new TokenUserByOstUserIdsCache({ ostUserIds: [oThis.ostUserId] }).fetch();
 
     if (tokenUserObjsRes.isFailure()) {
       return Promise.reject(tokenUserObjsRes);
     }
 
-    const tokenUserObjRes = tokenUserObjsRes.data[oThis.ostUserid];
+    const tokenUserObjRes = tokenUserObjsRes.data[oThis.ostUserId];
 
     if (!tokenUserObjRes.userId) {
       return Promise.reject(

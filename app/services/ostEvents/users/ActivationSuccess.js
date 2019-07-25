@@ -268,7 +268,7 @@ class UserActivationSuccess extends UserOstEventBase {
     logger.log('Creating entry in transactions table.');
 
     const extraData = {
-      toUserIds: [oThis.tokenUserObj.ostTokenHolderAddress],
+      toUserIds: [oThis.tokenUserObj.ostUserId],
       amounts: [tokenConstants.airdropAmount],
       kind: transactionConstants.extraData.airdropKind
     };
