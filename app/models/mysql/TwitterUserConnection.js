@@ -158,7 +158,12 @@ class TwitterUserConnection extends ModelBase {
   /**
    * Create twitter user connection.
    *
-   * @returns {Promise<void>}
+   * @param params
+   * @param {integer} params.twitterUser1Id
+   * @param {integer} params.twitterUser2Id
+   * @param {integer} params.propertiesVal
+   *
+   * @returns {Promise<*>}
    */
   async updateTwitterUserConnection(params) {
     const oThis = this;
