@@ -1,15 +1,12 @@
 const sanitizeHtml = require('sanitize-html');
 
 class SanitizeRecursively {
-  constructor() {}
-
   /**
-   * Recursively sanitize
+   * Recursively sanitize.
    *
-   * @param params
+   * @param {object} params
    *
    * @returns {*}
-   *
    * @private
    */
   sanitize_params_recursively(params) {
@@ -18,10 +15,10 @@ class SanitizeRecursively {
     if (typeof params === 'string') {
       params = oThis._sanitizeString(params);
     } else if (typeof params === 'boolean' || typeof params === 'number' || params === null) {
-      // do nothing and return param as is
+      // Do nothing and return param as is.
     } else if (params instanceof Array) {
-      for (let i in params) {
-        params[i] = oThis.sanitize_params_recursively(params[i]);
+      for (const index in params) {
+        params[index] = oThis.sanitize_params_recursively(params[index]);
       }
     } else if (params instanceof Object) {
       Object.keys(params).forEach(function(key) {
@@ -30,9 +27,11 @@ class SanitizeRecursively {
     } else if (!params) {
       params = oThis._sanitizeString(params);
     } else {
+      // eslint-disable-next-line no-console
       console.error('Invalid params type: ', typeof params);
       params = '';
     }
+
     return params;
   }
 
@@ -51,8 +50,6 @@ class SanitizeRecursively {
 const sanitizeRecursively = new SanitizeRecursively();
 
 class Sanitizer {
-  constructor() {}
-
   /**
    * Sanitize Request body and request query params
    *
@@ -65,6 +62,7 @@ class Sanitizer {
   sanitizeBodyAndQuery(req, res, next) {
     req.body = sanitizeRecursively.sanitize_params_recursively(req.body);
     req.query = sanitizeRecursively.sanitize_params_recursively(req.query);
+
     return next();
   }
 
@@ -74,18 +72,21 @@ class Sanitizer {
    * @param req
    * @param res
    * @param next
+   *
    * @returns {*}
    */
   sanitizeDynamicUrlParams(req, res, next) {
     req.params = sanitizeRecursively.sanitize_params_recursively(req.params);
+
     return next();
   }
 
   /**
-   * Sanitize Object
+   * Sanitize object
    *
-   * @param {Object} params
-   * @returns {Object}
+   * @param {object} params
+   *
+   * @returns {object}
    */
   sanitizeParams(params) {
     return sanitizeRecursively.sanitize_params_recursively(params);

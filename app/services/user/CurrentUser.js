@@ -118,9 +118,14 @@ class CurrentUser extends ServiceBase {
   async _serviceResponse() {
     const oThis = this;
 
+    const safeFormattedUserData = new UserModel().safeFormattedData(oThis.user);
+    const safeFormattedTokenUserData = new TokenUserModel().safeFormattedData(oThis.tokenUser);
+
     return responseHelper.successWithData({
-      user: new UserModel().safeFormattedData(oThis.user),
-      tokenUser: new TokenUserModel().safeFormattedData(oThis.tokenUser),
+      usersByIdMap: { [safeFormattedUserData.id]: safeFormattedUserData },
+      tokenUsersByUserIdMap: { [safeFormattedTokenUserData.userId]: safeFormattedTokenUserData },
+      user: safeFormattedUserData,
+      tokenUser: safeFormattedTokenUserData,
       pricePointsMap: oThis.pricePoints
     });
   }

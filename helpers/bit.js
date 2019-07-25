@@ -1,13 +1,7 @@
 /**
- * Util class to handle bit wise operations
+ * Class to handle bit wise operations.
  *
- * @module helpers/bit
- */
-
-/**
- * Class for basic helper.
- *
- * @class BasicHelper
+ * @class BitHelper
  */
 class BitHelper {
   getBit(number, bitPosition) {
@@ -20,6 +14,7 @@ class BitHelper {
 
   unsetBit(number, bitPosition) {
     const mask = ~(1 << bitPosition);
+
     return number & mask;
   }
 }
