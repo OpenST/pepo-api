@@ -65,13 +65,16 @@ const validateLoginRequired = async function(req, res, next) {
   next();
 };
 
+// NOTE:- use 'validateLoginRequired' function if you want to use route in logged in only
+
 router.use('/auth', authRoutes);
 router.use('/users', validateCookie, validateLoginRequired, usersRoutes);
 router.use('/tokens', validateCookie, validateLoginRequired, tokensRoutes);
 router.use('/ost-transactions', validateCookie, validateLoginRequired, ostTransactionRoutes);
 router.use('/gifs', validateCookie, validateLoginRequired, gifsRoutes);
-router.use('/feeds', validateCookie, feedsRoutes);
 router.use('/activities', validateCookie, validateLoginRequired, activitiesRoutes);
+
+router.use('/feeds', validateCookie, feedsRoutes);
 router.use('/upload-params', validateCookie, uploadParamsRoutes);
 router.use('/tags', validateCookie, tagRoutes);
 router.use('/rotate-twitter-account', rotateTwitterAccountRoutes);
