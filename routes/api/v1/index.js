@@ -75,8 +75,8 @@ router.use('/gifs', validateCookie, validateLoginRequired, gifsRoutes);
 router.use('/activities', validateCookie, validateLoginRequired, activitiesRoutes);
 
 router.use('/feeds', validateCookie, feedsRoutes);
-router.use('/upload-params', validateCookie, uploadParamsRoutes);
-router.use('/tags', validateCookie, tagRoutes);
+router.use('/upload-params', validateCookie, validateLoginRequired, uploadParamsRoutes);
+router.use('/tags', validateCookie, validateLoginRequired, tagRoutes);
 router.use('/rotate-twitter-account', rotateTwitterAccountRoutes);
 
 module.exports = router;
