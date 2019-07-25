@@ -73,10 +73,13 @@ router.use('/tokens', validateCookie, validateLoginRequired, tokensRoutes);
 router.use('/ost-transactions', validateCookie, validateLoginRequired, ostTransactionRoutes);
 router.use('/gifs', validateCookie, validateLoginRequired, gifsRoutes);
 router.use('/activities', validateCookie, validateLoginRequired, activitiesRoutes);
-
-router.use('/feeds', validateCookie, feedsRoutes);
 router.use('/upload-params', validateCookie, validateLoginRequired, uploadParamsRoutes);
 router.use('/tags', validateCookie, validateLoginRequired, tagRoutes);
+
+// TEMP route - only for QA - TODO - remove later after talking with SOMA
 router.use('/rotate-twitter-account', rotateTwitterAccountRoutes);
+
+// Login not mandatory for following
+router.use('/feeds', validateCookie, feedsRoutes);
 
 module.exports = router;
