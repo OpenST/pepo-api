@@ -201,10 +201,10 @@ const v1Signature = {
   },
   [apiName.uploadParams]: {
     mandatory: [
-      // {
-      //   parameter: 'current_user',
-      //   validatorMethods: ['validateNonEmptyObject']
-      // } // TODO: Temp commit
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      }
     ],
     optional: [
       {
