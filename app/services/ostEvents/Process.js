@@ -35,8 +35,8 @@ class OstEventProcess extends ServiceBase {
     await oThis._validateAndSanitizeParams();
     await oThis._fetchOstEvent();
 
+    // TODO - Ankit - remove try catch from here.
     try {
-      await oThis._updateOstEventStatus(ostEventConstant.startedStatus);
       await oThis._processEvent();
     } catch (err) {
       logger.error('In catch block of ost events process, Err-', err);
@@ -83,15 +83,15 @@ class OstEventProcess extends ServiceBase {
     const oThis = this;
     logger.log('fetch entry for Ost Event process');
 
-    let dbRows = await new OstEventModel().fetchById(oThis.ostEventId);
+    let dbRow = await new OstEventModel().fetchById(oThis.ostEventId);
 
-    if (!dbRows || !dbRows.id || dbRows.status != ostEventConstant.pendingStatus) {
-      logger.error('Error while fetching data from ost events table. dbRows=', dbRows);
+    if (!dbRow || !dbRow.id || dbRow.status !== ostEventConstant.pendingStatus) {
+      logger.error('Error while fetching data from ost events table. dbRows=', dbRow);
 
-      return Promise.reject(dbRows);
+      return Promise.reject(dbRow);
     }
 
-    oThis.ostEventObj = dbRows;
+    oThis.ostEventObj = dbRow;
 
     return Promise.resolve(responseHelper.successWithData({}));
   }
@@ -128,10 +128,14 @@ class OstEventProcess extends ServiceBase {
    */
   async _processEvent() {
     const oThis = this;
+
+    await oThis._updateOstEventStatus(ostEventConstant.startedStatus);
+
     logger.log('Process Ost Event');
 
     const response = await new OstEventProcessFactory({ ostEventObj: oThis.ostEventObj }).perform();
 
+    // TODO - Ankit - use catch here and mark as failed if in catch
     if (response.isSuccess()) {
       await oThis._updateOstEventStatus(ostEventConstant.doneStatus);
     } else {
