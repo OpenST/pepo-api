@@ -110,16 +110,15 @@ class Text extends ModelBase {
   async updateById(params) {
     const oThis = this;
 
-    let response = await oThis
+    return oThis
       .update({
-        text: params.text
+        text: params.text,
+        tag_ids: JSON.stringify(params.tagIds)
       })
       .where({
         id: params.id
       })
       .fire();
-
-    return response.data;
   }
 
   /**

@@ -123,7 +123,7 @@ class UpdateProfileInfo extends UpdateProfileBase {
           bio: oThis.bio,
           userId: oThis.userId,
           profileElementObj: oThis.profileElements[userProfileElementConst.bioIdKind],
-          flushCache: false
+          flushCache: 0
         })
           .perform()
           .then(function(resp) {
@@ -139,7 +139,7 @@ class UpdateProfileInfo extends UpdateProfileBase {
           url: oThis.link,
           userId: oThis.userId,
           profileElementObj: oThis.profileElements[userProfileElementConst.linkIdKind],
-          flushCache: false
+          flushCache: 0
         }).perform()
       );
     }

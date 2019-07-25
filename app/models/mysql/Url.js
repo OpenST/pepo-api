@@ -110,20 +110,17 @@ class Url extends ModelBase {
    * @param params
    * @return {Promise<void>}
    */
-  async updateByIdAndKind(params) {
+  async updateById(params) {
     const oThis = this;
 
-    let response = await oThis
+    return oThis
       .update({
         url: params.url
       })
       .where({
-        id: params.id,
-        kind: urlConst.invertedKinds[params.kind]
+        id: params.id
       })
       .fire();
-
-    return response.data;
   }
 
   /**

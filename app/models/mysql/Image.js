@@ -113,28 +113,6 @@ class Image extends ModelBase {
   }
 
   /**
-   * Update image by id and kind
-   *
-   * @param params
-   * @return {Promise<void>}
-   */
-  async updateByIdAndKind(params) {
-    const oThis = this;
-
-    let response = await oThis
-      .update({
-        resolutions: JSON.stringify(params.resolutions),
-        status: imageConst.invertedStatuses[params.status]
-      })
-      .where({
-        id: params.id
-      })
-      .fire();
-
-    return response;
-  }
-
-  /**
    * Delete by id
    *
    * @param params
