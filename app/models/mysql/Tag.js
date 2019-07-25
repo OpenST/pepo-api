@@ -148,13 +148,14 @@ class Tag extends ModelBase {
    * Update tag weights by 1
    *
    * @param tagIds
+   * @param weightToAdd
    * @returns {Promise<any>}
    */
-  updateTagWeights(tagIds) {
+  updateTagWeights(tagIds, weightToAdd) {
     const oThis = this;
 
     return oThis
-      .update(['weight=weight+1'])
+      .update(['weight=weight+?', weightToAdd])
       .where({ id: tagIds })
       .fire();
   }

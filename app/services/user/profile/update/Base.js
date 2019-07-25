@@ -54,6 +54,8 @@ class UpdateProfileBase extends ServiceBase {
 
     await oThis._updateUser();
 
+    await oThis._extraUpdates();
+
     await oThis._flushCaches();
 
     return responseHelper.successWithData({});
@@ -189,6 +191,14 @@ class UpdateProfileBase extends ServiceBase {
   async _updateUser() {
     throw new Error('sub-class to implement');
   }
+
+  /**
+   * Any other updates which needs to be done.
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _extraUpdates() {}
 }
 
 module.exports = UpdateProfileBase;

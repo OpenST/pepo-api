@@ -76,7 +76,8 @@ class FeedById extends FeedBase {
       videoDetailsMap: oThis.profileResponse.videoDetailsMap,
       currentUserUserContributionsMap: oThis.profileResponse.currentUserUserContributionsMap,
       currentUserVideoContributionsMap: oThis.profileResponse.currentUserVideoContributionsMap,
-      pricePointsMap: oThis.profileResponse.pricePointsMap
+      pricePointsMap: oThis.profileResponse.pricePointsMap,
+      tokenDetails: oThis.tokenDetails
     });
   }
 }

@@ -6,6 +6,8 @@ const rootPrefix = '../../../../..',
   AddUpdateUserLinkKlass = require(rootPrefix + '/lib/user/profile/AddUpdateLink'),
   TextCacheKlass = require(rootPrefix + '/lib/cacheManagement/multi/TextsByIds'),
   UrlCacheKlass = require(rootPrefix + '/lib/cacheManagement/multi/UrlsByIds'),
+  AssociateTagsToUser = require(rootPrefix + '/lib/user/profile/AssociateTags'),
+  userTagConstants = require(rootPrefix + '/lib/globalConstant/userTag'),
   responseHelper = require(rootPrefix + '/lib/formatter/response');
 
 /**
@@ -36,6 +38,7 @@ class UpdateProfileInfo extends UpdateProfileBase {
     oThis.userUpdateRequired = true;
     oThis.bioUpdateRequired = true;
     oThis.linkUpdateRequired = true;
+    oThis.tagIds = [];
   }
 
   /**
@@ -119,8 +122,13 @@ class UpdateProfileInfo extends UpdateProfileBase {
         new AddUpdateUserBioKlass({
           bio: oThis.bio,
           userId: oThis.userId,
-          profileElementObj: oThis.profileElements[userProfileElementConst.bioIdKind]
-        }).perform()
+          profileElementObj: oThis.profileElements[userProfileElementConst.bioIdKind],
+          flushCache: false
+        })
+          .perform()
+          .then(function(resp) {
+            oThis.tagIds = resp.data.tagIds;
+          })
       );
     }
 
@@ -130,7 +138,8 @@ class UpdateProfileInfo extends UpdateProfileBase {
         new AddUpdateUserLinkKlass({
           url: oThis.link,
           userId: oThis.userId,
-          profileElementObj: oThis.profileElements[userProfileElementConst.linkIdKind]
+          profileElementObj: oThis.profileElements[userProfileElementConst.linkIdKind],
+          flushCache: false
         }).perform()
       );
     }
@@ -159,6 +168,24 @@ class UpdateProfileInfo extends UpdateProfileBase {
         })
         .where({ id: oThis.userId })
         .fire();
+    }
+  }
+
+  /**
+   * Extra updates which needs to be done.
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _extraUpdates() {
+    const oThis = this;
+
+    if (oThis.bioUpdateRequired) {
+      await new AssociateTagsToUser({
+        userId: oThis.userId,
+        tagIds: oThis.tagIds,
+        tagAddedKind: userTagConstants.selfAddedKind
+      }).perform();
     }
   }
 }

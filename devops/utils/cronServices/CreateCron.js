@@ -57,10 +57,10 @@ class CreateCron {
         dbParams = cron.db_params;
 
       if (!cron.identifier) {
-        const result = await new InsertCrons().perform({
+        const result = await new InsertCrons({
           cronKindName: dbParams.kind,
           cronParams: dbParams.cron_params
-        });
+        }).perform();
 
         if (result.insertId) {
           cron.identifier = result.insertId;

@@ -123,7 +123,8 @@ router.get('/current', sanitizer.sanitizeDynamicUrlParams, function(req, res, ne
       entityKindToResponseKeyMap: {
         [entityType.loggedInUser]: responseEntityKey.loggedInUser,
         [entityType.pricePointsMap]: responseEntityKey.pricePoints,
-        [entityType.usersMap]: responseEntityKey.users
+        [entityType.usersMap]: responseEntityKey.users,
+        [entityType.token]: responseEntityKey.token
       },
       serviceData: serviceResponse.data
     }).perform();

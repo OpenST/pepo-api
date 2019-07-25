@@ -3,6 +3,7 @@ const rootPrefix = '../../..',
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   UserMultiCache = require(rootPrefix + '/lib/cacheManagement/multi/User'),
   PricePointsCache = require(rootPrefix + '/lib/cacheManagement/single/PricePoints'),
+  GetTokenService = require(rootPrefix + '/app/services/token/Get'),
   TokenUserDetailByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TokenUserByUserIds'),
   UserModel = require(rootPrefix + '/app/models/mysql/User'),
   TokenUserModel = require(rootPrefix + '/app/models/mysql/TokenUser'),
@@ -22,6 +23,7 @@ class CurrentUser extends ServiceBase {
 
     oThis.userId = params.current_user.id;
     oThis.pricePoints = {};
+    oThis.tokenDetails = {};
   }
 
   /**
@@ -37,6 +39,8 @@ class CurrentUser extends ServiceBase {
     await oThis._fetchTokenUser();
 
     await oThis._fetchPricePoints();
+
+    await oThis._setTokenDetails();
 
     return Promise.resolve(oThis._serviceResponse());
   }
@@ -108,6 +112,25 @@ class CurrentUser extends ServiceBase {
   }
 
   /**
+   * Fetch token details.
+   *
+   * @return {Promise<void>}
+   * @private
+   */
+  async _setTokenDetails() {
+    const oThis = this;
+
+    let getTokenServiceObj = new GetTokenService({});
+
+    let tokenResp = await getTokenServiceObj.perform();
+
+    if (tokenResp.isFailure()) {
+      return Promise.reject(tokenResp);
+    }
+    oThis.tokenDetails = tokenResp.data.tokenDetails;
+  }
+
+  /**
    * Response for service
    *
    *
@@ -126,7 +149,8 @@ class CurrentUser extends ServiceBase {
       tokenUsersByUserIdMap: { [safeFormattedTokenUserData.userId]: safeFormattedTokenUserData },
       user: safeFormattedUserData,
       tokenUser: safeFormattedTokenUserData,
-      pricePointsMap: oThis.pricePoints
+      pricePointsMap: oThis.pricePoints,
+      tokenDetails: oThis.tokenDetails
     });
   }
 }
