@@ -158,7 +158,15 @@ class UpdateFanVideo extends UpdateProfileBase {
    */
   async _updateUser() {
     // No update is required in user.
+  }
 
+  /**
+   * Other updates
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _extraUpdates() {
     // Feed needs to be added for uploaded video
     const oThis = this;
     await oThis._addFeed();
