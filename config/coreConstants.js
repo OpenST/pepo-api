@@ -309,6 +309,10 @@ class CoreConstants {
   get PR_INTERNAL_API_SECRET_KEY() {
     return process.env.PR_INTERNAL_API_SECRET_KEY;
   }
+
+  get PA_CDN_URL() {
+    return process.env.PA_CDN_URL;
+  }
 }
 
 module.exports = new CoreConstants();

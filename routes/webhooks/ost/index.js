@@ -12,17 +12,17 @@ const rootPrefix = '../../..',
 const router = express.Router();
 
 const validateV2Signature = async function(req, res, next) {
-  // let authResponse;
-  //
-  // authResponse = await new OstWebhookAuth({ webhookParams: req.body, requestHeaders: req.headers })
-  //   .perform()
-  //   .catch(function(r) {
-  //     return r;
-  //   });
-  //
-  // if (authResponse.isFailure()) {
-  //   return responseHelper.renderApiResponse(authResponse, res, errorConfig);
-  // }
+  let authResponse;
+
+  authResponse = await new OstWebhookAuth({ webhookParams: req.body, requestHeaders: req.headers })
+    .perform()
+    .catch(function(r) {
+      return r;
+    });
+
+  if (authResponse.isFailure()) {
+    return responseHelper.renderApiResponse(authResponse, res, errorConfig);
+  }
 
   next();
 };

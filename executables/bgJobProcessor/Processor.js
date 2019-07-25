@@ -1,25 +1,39 @@
-const OSTBase = require('@ostdotcom/base');
+const OSTBase = require('@ostdotcom/base'),
+  program = require('commander');
 
 const rootPrefix = '../..',
   CronBase = require(rootPrefix + '/executables/CronBase'),
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   ErrorLogsConstants = require(rootPrefix + '/lib/globalConstant/errorLogs'),
-  logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
+  RabbitmqSubscription = require(rootPrefix + '/lib/entity/RabbitSubscription'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
+  logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   rabbitmqProvider = require(rootPrefix + '/lib/providers/bgJobRabbitmq'),
   createErrorLogsEntry = require(rootPrefix + '/lib/errorLogs/createEntry'),
   machineKindConstant = require(rootPrefix + '/lib/globalConstant/machineKind'),
-  RabbitmqSubscription = require(rootPrefix + '/lib/entity/RabbitSubscription'),
-  cronProcessesConstant = require(rootPrefix + '/lib/globalConstant/cronProcesses');
+  cronProcessesConstant = require(rootPrefix + '/lib/globalConstant/cronProcesses'),
+  cronProcessesConstants = require(rootPrefix + '/lib/globalConstant/cronProcesses'),
+  bgJobProcessorFactory = require(rootPrefix + '/executables/bgJobProcessor/factory');
 
-/**
- * Class for multi subscription base.
- *
- * @class BgJobProcessorBase
- */
-class BgJobProcessorBase extends CronBase {
+program.option('--cronProcessId <cronProcessId>', 'Cron table process ID').parse(process.argv);
+
+program.on('--help', function() {
+  logger.log('');
+  logger.log('  Example:');
+  logger.log('');
+  logger.log('    node executables/bgJobProcessor/Processor.js --cronProcessId 3');
+  logger.log('');
+  logger.log('');
+});
+
+if (!program.cronProcessId) {
+  program.help();
+  process.exit(1);
+}
+
+class Processor extends CronBase {
   /**
-   * Constructor for multi subscription base.
+   * Constructor for BgJobProcessor.
    *
    * @param {Object} params
    * @param {Number} params.cronProcessId
@@ -32,6 +46,23 @@ class BgJobProcessorBase extends CronBase {
     const oThis = this;
 
     oThis.subscriptionTopicToDataMap = {};
+  }
+
+  /**
+   * Start the actual functionality of the cron.
+   *
+   * @returns {Promise<void>}
+   *
+   * @private
+   */
+  async _start() {
+    const oThis = this;
+
+    oThis._prepareSubscriptionData();
+
+    await oThis._startSubscription();
+
+    return true;
   }
 
   /**
@@ -118,23 +149,6 @@ class BgJobProcessorBase extends CronBase {
     });
 
     createErrorLogsEntry.perform(errorObject, ErrorLogsConstants.highSeverity);
-  }
-
-  /**
-   * Start the actual functionality of the cron.
-   *
-   * @returns {Promise<void>}
-   *
-   * @private
-   */
-  async _start() {
-    const oThis = this;
-
-    oThis._prepareSubscriptionData();
-
-    await oThis._startSubscription();
-
-    return true;
   }
 
   /**
@@ -364,6 +378,23 @@ class BgJobProcessorBase extends CronBase {
   }
 
   /**
+   * Process message.
+   *
+   * @param {object} messageParams
+   * @param {string} messageParams.kind: kind of the bg job
+   * @param {object} messageParams.payload
+   *
+   * @returns {Promise<>}
+   *
+   * @private
+   */
+  _processMessage(messageParams) {
+    logger.log('Message params =====', messageParams);
+
+    return bgJobProcessorFactory.getInstance(messageParams).perform();
+  }
+
+  /**
    * Cron kind
    *
    * @return {string}
@@ -372,15 +403,13 @@ class BgJobProcessorBase extends CronBase {
   get _cronKind() {
     return cronProcessesConstant.bgJobRabbitmq;
   }
-
-  /**
-   * Process message
-   *
-   * @private
-   */
-  _processMessage() {
-    throw '_processMessage sub class to implement.';
-  }
 }
 
-module.exports = BgJobProcessorBase;
+logger.step('BG JOB Processor Factory started.');
+
+new Processor({ cronProcessId: +program.cronProcessId }).perform();
+
+setInterval(function() {
+  logger.info('Ending the process. Sending SIGINT.');
+  process.emit('SIGINT');
+}, cronProcessesConstants.continuousCronRestartInterval);

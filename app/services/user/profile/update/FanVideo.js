@@ -1,10 +1,11 @@
-const rootPrefix = '../../../..',
-  UpdateProfileBase = require(rootPrefix + '/app/services/user/profile/Base'),
+const rootPrefix = '../../../../..',
+  UpdateProfileBase = require(rootPrefix + '/app/services/user/profile/update/Base'),
   CommonValidator = require(rootPrefix + '/lib/validators/Common'),
   UserProfileElementModel = require(rootPrefix + '/app/models/mysql/UserProfileElement'),
   userProfileElementConst = require(rootPrefix + '/lib/globalConstant/userProfileElement'),
   FeedModel = require(rootPrefix + '/app/models/mysql/Feed'),
   feedsConstants = require(rootPrefix + '/lib/globalConstant/feed'),
+  responseHelper = require(rootPrefix + '/lib/formatter/response'),
   videoLib = require(rootPrefix + '/lib/videoLib');
 
 /**
@@ -12,7 +13,7 @@ const rootPrefix = '../../../..',
  *
  * @class
  */
-class AddFanVideo extends UpdateProfileBase {
+class UpdateFanVideo extends UpdateProfileBase {
   /**
    * @constructor
    *
@@ -56,8 +57,27 @@ class AddFanVideo extends UpdateProfileBase {
 
     let resp = videoLib.validateVideoObj({ videoUrl: oThis.videoUrl, isExternalUrl: oThis.isExternalUrl });
     if (resp.isFailure()) {
-      return Promise.reject(resp);
+      return Promise.reject(
+        responseHelper.paramValidationError({
+          internal_error_identifier: 'a_s_u_p_fv_1',
+          api_error_identifier: 'invalid_params',
+          params_error_identifiers: ['invalid_video_url'],
+          debug_options: {}
+        })
+      );
     }
+  }
+
+  /**
+   * Check whether update is required or not
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _isUpdateRequired() {
+    const oThis = this;
+
+    return responseHelper.successWithData({ noUpdates: false });
   }
 
   /**
@@ -163,4 +183,4 @@ class AddFanVideo extends UpdateProfileBase {
   }
 }
 
-module.exports = AddFanVideo;
+module.exports = UpdateFanVideo;

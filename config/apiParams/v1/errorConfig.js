@@ -129,6 +129,16 @@ const v1ErrorConfig = {
     parameter: 'transfers',
     code: 'invalid',
     message: 'Invalid transfers.'
+  },
+  invalid_video_url: {
+    parameter: 'video_url',
+    code: 'invalid',
+    message: 'Invalid video url.'
+  },
+  invalid_image_url: {
+    parameter: 'image_url',
+    code: 'invalid',
+    message: 'Invalid image url.'
   }
 };
 

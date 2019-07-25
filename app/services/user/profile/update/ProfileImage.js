@@ -1,11 +1,8 @@
-/** This module helps in updating profile image of user
- * @module app/services/user/profile/UpdateProfileImage.js
- */
-
-const rootPrefix = '../../../..',
-  UpdateProfileBase = require(rootPrefix + '/app/services/user/profile/Base'),
+const rootPrefix = '../../../../..',
+  UpdateProfileBase = require(rootPrefix + '/app/services/user/profile/update/Base'),
   UserModelKlass = require(rootPrefix + '/app/models/mysql/User'),
   imageConstants = require(rootPrefix + '/lib/globalConstant/image'),
+  responseHelper = require(rootPrefix + '/lib/formatter/response'),
   imageLib = require(rootPrefix + '/lib/imageLib');
 
 /**
@@ -55,8 +52,27 @@ class UpdateProfileImage extends UpdateProfileBase {
       isExternalUrl: oThis.isExternalUrl
     });
     if (resp.isFailure()) {
-      return Promise.reject(resp);
+      return Promise.reject(
+        responseHelper.paramValidationError({
+          internal_error_identifier: 'a_s_u_p_pi_1',
+          api_error_identifier: 'invalid_params',
+          params_error_identifiers: ['invalid_image_url'],
+          debug_options: {}
+        })
+      );
     }
+  }
+
+  /**
+   * Check whether update is required or not
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _isUpdateRequired() {
+    const oThis = this;
+
+    return responseHelper.successWithData({ noUpdates: false });
   }
 
   /**

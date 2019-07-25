@@ -1,31 +1,19 @@
 const rootPrefix = '../../../..',
   ContributionBase = require(rootPrefix + '/app/services/user/contribution/Base'),
+  TwitterUserByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TwitterUserByIds'),
+  TwitterUserByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TwitterUserByUserIds'),
   TwitterUserConnectionByUser1PaginationCache = require(rootPrefix +
     '/lib/cacheManagement/single/TwitterUserConnectionByUser1Pagination'),
-  TwitterUserByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TwitterUserByUserIds'),
-  TwitterUserByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TwitterUserByIds'),
   responseHelper = require(rootPrefix + '/lib/formatter/response');
 
 /**
- * Class for User Suggestion(A list of users who should be suggested to the current user)
+ * Class for user suggestion (A list of users who should be suggested to the current user).
  *
- * @class
+ * @class UserContributionSuggestion
  */
 class UserContributionSuggestion extends ContributionBase {
   /**
-   * Constructor for user contribution base
-   *
-   * @param params
-   *
-   */
-  constructor(params) {
-    super(params);
-
-    const oThis = this;
-  }
-
-  /**
-   * Fetch user Ids from cache
+   * Fetch user ids from cache.
    *
    * @returns {Promise<void>}
    * @private
@@ -33,49 +21,47 @@ class UserContributionSuggestion extends ContributionBase {
   async _fetchPaginatedUserIdsFromCache() {
     const oThis = this;
 
-    let TwitterUserByUserIdsCacheResp = await new TwitterUserByUserIdsCache({
+    const twitterUserByUserIdsCacheResp = await new TwitterUserByUserIdsCache({
       userIds: [oThis.currentUserId]
     }).fetch();
 
-    if (TwitterUserByUserIdsCacheResp.isFailure()) {
-      return Promise.reject(TwitterUserByUserIdsCacheResp);
+    if (twitterUserByUserIdsCacheResp.isFailure()) {
+      return Promise.reject(twitterUserByUserIdsCacheResp);
     }
 
-    //should always be present;
-    let currentUserTwitterUserId = TwitterUserByUserIdsCacheResp.data[oThis.currentUserId].id;
+    // Should always be present.
+    const currentUserTwitterUserId = twitterUserByUserIdsCacheResp.data[oThis.currentUserId].id;
 
-    const UserSuggestionPaginationCacheObj = new TwitterUserConnectionByUser1PaginationCache({
-        limit: oThis.limit,
-        page: oThis.page,
-        twitterUser1Id: currentUserTwitterUserId
-      }),
-      userPaginationCacheRes = await UserSuggestionPaginationCacheObj.fetch();
+    const userPaginationCacheRes = await new TwitterUserConnectionByUser1PaginationCache({
+      limit: oThis.limit,
+      page: oThis.page,
+      twitterUser1Id: currentUserTwitterUserId
+    }).fetch();
 
     if (userPaginationCacheRes.isFailure()) {
       return Promise.reject(userPaginationCacheRes);
     }
 
-    let twitterUserIds = userPaginationCacheRes.data;
+    const twitterUserIds = userPaginationCacheRes.data;
 
     if (twitterUserIds.length === 0) {
-      return;
+      return responseHelper.successWithData({});
     }
 
-    const TwitterUserByIdsCacheObj = new TwitterUserByIdsCache({
-        ids: twitterUserIds
-      }),
-      TwitterUserByIdsCacheRes = await TwitterUserByIdsCacheObj.fetch();
+    const twitterUserByIdsCacheRes = await new TwitterUserByIdsCache({
+      ids: twitterUserIds
+    }).fetch();
 
-    if (TwitterUserByIdsCacheRes.isFailure()) {
-      return Promise.reject(TwitterUserByIdsCacheRes);
+    if (twitterUserByIdsCacheRes.isFailure()) {
+      return Promise.reject(twitterUserByIdsCacheRes);
     }
 
-    for (let twitterUserId in TwitterUserByIdsCacheRes.data) {
-      let contributionUserId = TwitterUserByIdsCacheRes.data[twitterUserId].userId;
+    for (const twitterUserId in twitterUserByIdsCacheRes.data) {
+      const contributionUserId = twitterUserByIdsCacheRes.data[twitterUserId].userId;
       oThis.contributionUserIds.push(contributionUserId);
     }
 
-    return Promise.resolve(responseHelper.successWithData({}));
+    return responseHelper.successWithData({});
   }
 }
 

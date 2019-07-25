@@ -337,6 +337,7 @@ const v1Signature = {
     ]
   },
   [apiName.saveProfile]: {
+    // TODO: Pankaj - change user_id to profile_user_id?
     mandatory: [
       {
         parameter: 'current_user',
@@ -352,7 +353,7 @@ const v1Signature = {
       },
       {
         parameter: 'user_name',
-        validatorMethods: ['validateString']
+        validatorMethods: ['validateString', 'validateUserName']
       }
     ],
     optional: [

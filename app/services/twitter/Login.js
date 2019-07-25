@@ -63,7 +63,7 @@ class TwitterLogin extends ServiceBase {
 
     const promisesArray = [];
 
-    let updateTwitterUserPromise = oThis._fetchSecureUser().then(function(a) {
+    const updateTwitterUserPromise = oThis._fetchSecureUser().then(function() {
       return oThis._updateTwitterUserExtended();
     });
 

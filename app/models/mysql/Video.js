@@ -1,6 +1,7 @@
 const rootPrefix = '../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
   videoConst = require(rootPrefix + '/lib/globalConstant/video'),
+  s3Constants = require(rootPrefix + '/lib/globalConstant/s3.js'),
   database = require(rootPrefix + '/lib/globalConstant/database');
 
 const dbName = database.entityDbName;
@@ -80,6 +81,11 @@ class Video extends ModelBase {
 
     for (let index = 0; index < dbRows.length; index++) {
       let formatDbRow = oThis._formatDbData(dbRows[index]);
+      for (let resolutionKind in formatDbRow.resolutions) {
+        let shortUrl = formatDbRow.resolutions[resolutionKind].url,
+          longUrl = s3Constants.shortToLongUrlForResponse(shortUrl);
+        formatDbRow.resolutions[resolutionKind].url = longUrl;
+      }
       response[formatDbRow.id] = formatDbRow;
     }
 

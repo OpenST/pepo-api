@@ -1,15 +1,11 @@
-/**
- * This module helps user to update their profile information
- * @module app/services/user/UpdateProfile.js
- */
-
-const rootPrefix = '../../../..',
+const rootPrefix = '../../../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   UsersCache = require(rootPrefix + '/lib/cacheManagement/multi/User'),
   userConstants = require(rootPrefix + '/lib/globalConstant/user'),
   UserProfileElementsByUserIdCache = require(rootPrefix + '/lib/cacheManagement/multi/UserProfileElementsByUserIds'),
   UserModelKlass = require(rootPrefix + '/app/models/mysql/User'),
-  responseHelper = require(rootPrefix + '/lib/formatter/response');
+  responseHelper = require(rootPrefix + '/lib/formatter/response'),
+  CommonValidators = require(rootPrefix + '/lib/validators/Common');
 
 /**
  * Class to Update user Profile
@@ -22,6 +18,7 @@ class UpdateProfileBase extends ServiceBase {
    *
    * @param params
    * @param {number} params.user_id
+   * @param {Object} params.current_user
    */
   constructor(params) {
     super(params);
@@ -30,6 +27,8 @@ class UpdateProfileBase extends ServiceBase {
 
     oThis.params = params;
     oThis.userId = params.user_id;
+    oThis.currentUser = params.current_user;
+    oThis.userObj = null;
     oThis.profileElements = {};
   }
 
@@ -44,6 +43,11 @@ class UpdateProfileBase extends ServiceBase {
     await oThis._validate();
 
     await oThis._fetchProfileElements();
+
+    let resp = await oThis._isUpdateRequired();
+    if (resp.isSuccess() && resp.data.noUpdates) {
+      return responseHelper.successWithData({});
+    }
 
     await oThis._updateProfileElements();
 
@@ -63,26 +67,41 @@ class UpdateProfileBase extends ServiceBase {
   async _validate() {
     const oThis = this;
 
-    await oThis._validateParams();
-
-    let userMultiCache = new UsersCache({ ids: [oThis.userId] });
-    let cacheRsp = await userMultiCache.fetch();
-
-    if (cacheRsp.isFailure() || Object.keys(cacheRsp.data[oThis.userId]).length <= 0) {
+    if (oThis.currentUser.id != oThis.userId) {
       return Promise.reject(
-        responseHelper.error({
+        responseHelper.paramValidationError({
           internal_error_identifier: 'a_s_u_p_b_1',
-          api_error_identifier: 'user_not_found',
+          api_error_identifier: 'unauthorized_api_request',
+          params_error_identifiers: [],
           debug_options: {}
         })
       );
     }
 
-    if (cacheRsp.data[oThis.userId].status != userConstants.activeStatus) {
+    await oThis._validateParams();
+
+    let userMultiCache = new UsersCache({ ids: [oThis.userId] });
+    let cacheRsp = await userMultiCache.fetch();
+
+    if (cacheRsp.isFailure() || !CommonValidators.validateNonEmptyObject(cacheRsp.data[oThis.userId])) {
       return Promise.reject(
-        responseHelper.error({
+        responseHelper.paramValidationError({
           internal_error_identifier: 'a_s_u_p_b_2',
-          api_error_identifier: 'user_not_active',
+          api_error_identifier: 'invalid_params',
+          params_error_identifiers: ['user_not_found'],
+          debug_options: {}
+        })
+      );
+    }
+
+    oThis.userObj = cacheRsp.data[oThis.userId];
+
+    if (oThis.userObj.status !== userConstants.activeStatus) {
+      return Promise.reject(
+        responseHelper.paramValidationError({
+          internal_error_identifier: 'a_s_u_p_b_3',
+          api_error_identifier: 'could_not_proceed',
+          params_error_identifiers: ['user_not_active'],
           debug_options: {}
         })
       );
@@ -121,6 +140,7 @@ class UpdateProfileBase extends ServiceBase {
   async _flushCaches() {
     const oThis = this;
 
+    // TODO - Pankaj - avoid user cache flush
     // Clear all users cache
     await UserModelKlass.flushCache({ id: oThis.userId, userName: oThis.username });
 
@@ -135,7 +155,17 @@ class UpdateProfileBase extends ServiceBase {
    * @private
    */
   async _validateParams() {
-    throw 'sub-class to implement';
+    throw new Error('sub-class to implement');
+  }
+
+  /**
+   * Check whether update is required or not.
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _isUpdateRequired() {
+    throw new Error('sub-class to implement');
   }
 
   /**
@@ -145,7 +175,7 @@ class UpdateProfileBase extends ServiceBase {
    * @private
    */
   async _updateProfileElements() {
-    throw 'Sub-class to implement';
+    throw new Error('sub-class to implement');
   }
 
   /**
@@ -155,7 +185,7 @@ class UpdateProfileBase extends ServiceBase {
    * @private
    */
   async _updateUser() {
-    throw 'sub-class to implement';
+    throw new Error('sub-class to implement');
   }
 }
 

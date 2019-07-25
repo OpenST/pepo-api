@@ -1,7 +1,8 @@
 const rootPrefix = '../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
   imageConst = require(rootPrefix + '/lib/globalConstant/image'),
-  database = require(rootPrefix + '/lib/globalConstant/database');
+  database = require(rootPrefix + '/lib/globalConstant/database'),
+  shortToLongUrl = require(rootPrefix + '/lib/shortToLongUrl');
 
 const dbName = database.entityDbName;
 
@@ -40,6 +41,7 @@ class Image extends ModelBase {
       id: dbRow.id,
       resolutions: JSON.parse(dbRow.resolutions),
       status: imageConst.statuses[dbRow.status],
+      kind: imageConst.kinds[dbRow.kind],
       createdAt: dbRow.created_at,
       updatedAt: dbRow.updated_at
     };
@@ -78,6 +80,13 @@ class Image extends ModelBase {
 
     for (let index = 0; index < dbRows.length; index++) {
       let formatDbRow = oThis._formatDbData(dbRows[index]);
+
+      for (let resolution in formatDbRow.resolutions) {
+        const shortUrl = formatDbRow.resolutions[resolution].url;
+
+        formatDbRow.resolutions[resolution].url = shortToLongUrl.getFullUrl(shortUrl);
+      }
+
       response[formatDbRow.id] = formatDbRow;
     }
 

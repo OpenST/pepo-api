@@ -199,7 +199,7 @@ class TwitterSignup extends ServiceBase {
       }
 
       if (cacheResponse.data.id) {
-        uniqueUserName = twitterHandle + '_' + basicHelper.getRandomAlphaNumericString();
+        uniqueUserName = basicHelper.getUniqueUserName(uniqueUserName);
         retryCount--;
       } else {
         oThis.userName = uniqueUserName;
@@ -325,7 +325,7 @@ class TwitterSignup extends ServiceBase {
           if (UserModel.isDuplicateIndexViolation(UserModel.usernameUniqueIndexName, err)) {
             logger.log('Username conflict. Attempting with a modified username.');
             caughtInException = true;
-            insertData.user_name = oThis.userName + '_' + basicHelper.getRandomAlphaNumericString();
+            insertData.user_name = basicHelper.getUniqueUserName(oThis.userName);
             return null;
           } else {
             return Promise.reject(err);
