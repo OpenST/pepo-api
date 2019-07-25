@@ -8,7 +8,7 @@ const v1ErrorConfig = {
   invalid_user_name: {
     parameter: 'user_name',
     code: 'invalid',
-    message: 'User Name can contain alphanumeric, _, -, . and should be min 4 characters and max 25 characters'
+    message: 'User Name can contain alphanumeric and underscore and should be min 1 characters and max 15 characters'
   },
   invalid_password: {
     parameter: 'password',
