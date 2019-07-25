@@ -33,17 +33,14 @@ class OstEventProcess extends ServiceBase {
     const oThis = this;
 
     await oThis._validateAndSanitizeParams();
+
     await oThis._fetchOstEvent();
 
-    // TODO - Ankit - remove try catch from here.
-    try {
-      await oThis._processEvent();
-    } catch (err) {
-      logger.error('In catch block of ost events process, Err-', err);
-      await oThis._updateOstEventStatus(ostEventConstant.failedStatus);
-    }
+    await oThis._updateOstEventStatus(ostEventConstant.startedStatus);
 
-    return Promise.resolve(responseHelper.successWithData({}));
+    await oThis._processEvent();
+
+    return responseHelper.successWithData({});
   }
 
   /**
@@ -129,20 +126,26 @@ class OstEventProcess extends ServiceBase {
   async _processEvent() {
     const oThis = this;
 
-    await oThis._updateOstEventStatus(ostEventConstant.startedStatus);
-
     logger.log('Process Ost Event');
 
-    const response = await new OstEventProcessFactory({ ostEventObj: oThis.ostEventObj }).perform();
+    const response = await new OstEventProcessFactory({ ostEventObj: oThis.ostEventObj })
+      .perform()
+      .catch(async function(err) {
+        logger.error(err);
+        return responseHelper.error({
+          internal_error_identifier: 's_oe_p_vas_2',
+          api_error_identifier: 'something_went_wrong',
+          debug_options: { Error: err }
+        });
+      });
 
-    // TODO - Ankit - use catch here and mark as failed if in catch
     if (response.isSuccess()) {
       await oThis._updateOstEventStatus(ostEventConstant.doneStatus);
     } else {
       await oThis._updateOstEventStatus(ostEventConstant.failedStatus);
     }
 
-    return Promise.resolve(responseHelper.successWithData({}));
+    return responseHelper.successWithData({});
   }
 }
 
