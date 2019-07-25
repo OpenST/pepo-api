@@ -72,8 +72,8 @@ router.use('/ost-transactions', validateCookie, validateLoginRequired, ostTransa
 router.use('/gifs', validateCookie, validateLoginRequired, gifsRoutes);
 router.use('/feeds', validateCookie, feedsRoutes);
 router.use('/activities', validateCookie, validateLoginRequired, activitiesRoutes);
-router.use('/upload-params', uploadParamsRoutes);
-router.use('/tags', tagRoutes);
+router.use('/upload-params', validateCookie, uploadParamsRoutes);
+router.use('/tags', validateCookie, tagRoutes);
 router.use('/rotate-twitter-account', rotateTwitterAccountRoutes);
 
 module.exports = router;

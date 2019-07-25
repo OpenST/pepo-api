@@ -3,9 +3,11 @@ const rootPrefix = '../..',
   AwsS3wrapper = require(rootPrefix + '/lib/aws/S3Wrapper'),
   CommonValidator = require(rootPrefix + '/lib/validators/Common'),
   util = require(rootPrefix + '/lib/util'),
+  shortToLongUrl = require(rootPrefix + '/lib/shortToLongUrl'),
+  s3Constants = require(rootPrefix + '/lib/globalConstant/s3'),
   coreConstants = require(rootPrefix + '/config/coreConstants'),
-  responseHelper = require(rootPrefix + '/lib/formatter/response'),
-  s3Constants = require(rootPrefix + '/lib/globalConstant/s3');
+  logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
+  responseHelper = require(rootPrefix + '/lib/formatter/response');
 
 class UploadParams extends ServiceBase {
   /**
@@ -23,7 +25,7 @@ class UploadParams extends ServiceBase {
     super(params);
     const oThis = this;
 
-    oThis.currentUserId = 1000; // +params.current_user.id; // TODO: This is temp commit.
+    oThis.currentUserId = +params.current_user.id;
     oThis.images = params.images || [];
     oThis.videos = params.videos || [];
 
@@ -151,17 +153,40 @@ class UploadParams extends ServiceBase {
           coreConstants.S3_AWS_REGION
         );
 
-        const s3Url = s3Constants.getS3Url(intent, fileName);
+        const s3Url = s3Constants.getS3Url(intent, fileName),
+          cdnUrl = oThis._getCdnUrl(s3Url);
+
+        logger.log('==== cdnUrl', cdnUrl);
 
         resultHash[feFileName] = {
           postUrl: preSignedPostParams.url,
           postFields: preSignedPostParams.fields,
-          s3Url: s3Url
+          s3Url: s3Url,
+          cdnUrl: cdnUrl
         };
       }
 
       oThis.apiResponse[resultKey] = resultHash;
     }
+  }
+
+  /**
+   * Get cdn url.
+   *
+   * @param {string} s3Url
+   * @private
+   */
+  _getCdnUrl(s3Url) {
+    let splittedUrlArray = s3Url.split('/'),
+      fileName = splittedUrlArray.pop(),
+      baseUrl = splittedUrlArray.join('/'),
+      shortEntity = s3Constants.LongUrlToShortUrlMap[baseUrl];
+
+    const shortUrl = shortEntity + '/' + fileName;
+
+    logger.log('==== shortUrl', shortUrl);
+
+    return shortToLongUrl.getFullUrl(shortUrl);
   }
 
   /**
