@@ -92,7 +92,8 @@ router.post('/twitter-login', sanitizer.sanitizeDynamicUrlParams, function(req, 
     const wrapperFormatterRsp = await new FormatterComposer({
       resultType: responseEntityKey.loggedInUser,
       entityKindToResponseKeyMap: {
-        [entityType.user]: responseEntityKey.loggedInUser
+        [entityType.loggedInUser]: responseEntityKey.loggedInUser,
+        [entityType.usersMap]: responseEntityKey.users
       },
       serviceData: serviceResponse.data
     }).perform();
@@ -100,7 +101,7 @@ router.post('/twitter-login', sanitizer.sanitizeDynamicUrlParams, function(req, 
     serviceResponse.data = wrapperFormatterRsp.data;
   };
 
-  const onServiceFailure = async function(serviceResponse) {
+  const onServiceFailure = async function() {
     cookieHelper.deleteLoginCookie(res);
   };
 
