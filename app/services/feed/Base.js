@@ -66,16 +66,16 @@ class FeedBase extends ServiceBase {
       }
     }
 
-    if (oThis.feeds.length === 0) {
-      return responseHelper.error({
-        internal_error_identifier: 'a_s_f_b_1',
-        api_error_identifier: 'resource_not_found',
-        debug_options: {
-          feedsArray: oThis.feeds,
-          userIds: oThis.userIds
-        }
-      });
-    }
+    // if (oThis.feeds.length === 0) {
+    //   return responseHelper.error({
+    //     internal_error_identifier: 'a_s_f_b_1',
+    //     api_error_identifier: 'resource_not_found',
+    //     debug_options: {
+    //       feedsArray: oThis.feeds,
+    //       userIds: oThis.userIds
+    //     }
+    //   });
+    // }
   }
 
   /**
