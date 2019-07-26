@@ -27,20 +27,6 @@ class OstEventProcess extends ServiceBase {
     const oThis = this;
 
     oThis.ostEventObj = params.ostEventObj;
-    oThis.eventData = JSON.parse(oThis.ostEventObj.eventData);
-
-    oThis.ostEventTopic = oThis.eventData.topic;
-
-    oThis.eventClassMapping = {
-      [ostEventConstants.usersActivationInitiateOstWebhookTopic]: ActivationInitiateClass,
-      [ostEventConstants.usersActivationSuccessOstWebhookTopic]: ActivationSuccessClass,
-      [ostEventConstants.usersActivationFailureOstWebhookTopic]: ActivationFailureClass,
-      [ostEventConstants.transactionsFailureOstWebhookTopic]: FailureTransactionClass,
-      [ostEventConstants.transactionsSuccessOstWebhookTopic]: SuccessTransactionClass,
-      [ostEventConstants.usdPricePointUpdatedOstWebhookTopic]: UsdPricePointUpdateClass,
-      [ostEventConstants.eurPricePointUpdatedOstWebhookTopic]: EurPricePointUpdateClass,
-      [ostEventConstants.gbpPricePointUpdatedOstWebhookTopic]: GbpPricePointUpdateClass
-    };
   }
 
   /**
@@ -51,9 +37,35 @@ class OstEventProcess extends ServiceBase {
   async _asyncPerform() {
     const oThis = this;
 
+    await oThis._extractEventTopic();
+
     await oThis._execute();
 
-    return Promise.resolve(responseHelper.successWithData({}));
+    return responseHelper.successWithData({});
+  }
+
+  /**
+   * Extract event topic
+   *
+   * @returns {Promise<never>}
+   * @private
+   */
+  async _extractEventTopic() {
+    const oThis = this;
+
+    try {
+      oThis.eventData = JSON.parse(oThis.ostEventObj.eventData);
+      oThis.ostEventTopic = oThis.eventData.topic;
+    } catch (err) {
+      logger.error('Error in JSON Parse: ', err);
+      return Promise.reject(
+        responseHelper.error({
+          internal_error_identifier: 's_oe_f_e_3',
+          api_error_identifier: 'something_went_wrong',
+          debug_options: { Error: err }
+        })
+      );
+    }
   }
 
   /**
@@ -64,34 +76,60 @@ class OstEventProcess extends ServiceBase {
    */
   async _execute() {
     const oThis = this;
+    let eventProcessResponse = null;
 
-    logger.log('Execute method from Ost Event Factory.');
-
-    const eventProcessor = oThis.eventClassMapping[oThis.ostEventTopic];
-
-    if (!eventProcessor) {
-      return Promise.reject(
-        responseHelper.error({
-          internal_error_identifier: 's_oe_f_e_1',
-          api_error_identifier: 'something_went_wrong',
-          debug_options: { ostEventObjId: oThis.ostEventObj.id, msg: 'Invalid Topic of ost event' }
-        })
-      );
+    switch (oThis.ostEventTopic) {
+      case ostEventConstants.usersActivationInitiateOstWebhookTopic:
+        let ActivationInitiateClass = require(rootPrefix + '/app/services/ostEvents/users/ActivationInitiated');
+        eventProcessResponse = await new ActivationInitiateClass(oThis.eventData).perform();
+        break;
+      case ostEventConstants.usersActivationSuccessOstWebhookTopic:
+        let ActivationSuccessClass = require(rootPrefix + '/app/services/ostEvents/users/ActivationSuccess');
+        eventProcessResponse = await new ActivationSuccessClass(oThis.eventData).perform();
+        break;
+      case ostEventConstants.usersActivationFailureOstWebhookTopic:
+        let ActivationFailureClass = require(rootPrefix + '/app/services/ostEvents/users/ActivationFailure');
+        eventProcessResponse = await new ActivationFailureClass(oThis.eventData).perform();
+        break;
+      case ostEventConstants.transactionsFailureOstWebhookTopic:
+        let TransactionFailureClass = require(rootPrefix + '/app/services/ostEvents/transactions/Failure');
+        eventProcessResponse = await new TransactionFailureClass(oThis.eventData).perform();
+        break;
+      case ostEventConstants.transactionsSuccessOstWebhookTopic:
+        let TransactionSuccessClass = require(rootPrefix + '/app/services/ostEvents/transactions/Success');
+        eventProcessResponse = await new TransactionSuccessClass(oThis.eventData).perform();
+        break;
+      case ostEventConstants.usdPricePointUpdatedOstWebhookTopic:
+        let PricePointsUsdClass = require(rootPrefix + '/app/services/ostEvents/pricePoints/Usd');
+        eventProcessResponse = await new PricePointsUsdClass(oThis.eventData).perform();
+        break;
+      case ostEventConstants.eurPricePointUpdatedOstWebhookTopic:
+        let PricePointsEurClass = require(rootPrefix + '/app/services/ostEvents/pricePoints/Eur');
+        eventProcessResponse = await new PricePointsEurClass(oThis.eventData).perform();
+        break;
+      case ostEventConstants.gbpPricePointUpdatedOstWebhookTopic:
+        let PricePointsGbpClass = require(rootPrefix + '/app/services/ostEvents/pricePoints/Gbp');
+        eventProcessResponse = await new PricePointsGbpClass(oThis.eventData).perform();
+        break;
+      default:
+        return Promise.reject(
+          responseHelper.error({
+            internal_error_identifier: 's_oe_f_e_1',
+            api_error_identifier: 'something_went_wrong',
+            debug_options: { ostEventObjId: oThis.ostEventObj.id, msg: 'Invalid Topic of ost event' }
+          })
+        );
     }
 
-    const eventProcessResp = await new eventProcessor(oThis.eventData).perform();
-
-    if (eventProcessResp.isFailure()) {
+    if (eventProcessResponse.isFailure()) {
       return Promise.reject(
         responseHelper.error({
           internal_error_identifier: 's_oe_f_e_2',
           api_error_identifier: 'something_went_wrong',
-          debug_options: { eventProcessResp: eventProcessResp, ostEventObj: oThis.ostEventObj }
+          debug_options: { eventProcessResp: eventProcessResponse, ostEventObj: oThis.ostEventObj }
         })
       );
     }
-
-    return Promise.resolve(responseHelper.successWithData({}));
   }
 }
 
