@@ -174,6 +174,7 @@ class TwitterUserConnection extends ModelBase {
         twitter_user1_id: params.twitterUser1Id,
         twitter_user2_id: params.twitterUser2Id
       })
+      .where(['properties != properties | ?', params.propertiesVal])
       .fire();
   }
 
