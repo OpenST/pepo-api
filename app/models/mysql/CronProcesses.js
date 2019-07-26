@@ -1,25 +1,22 @@
-'use strict';
-/**
- * Model to get cron process and its details.
- *
- * @module /app/models/mysql/cronProcesses
- */
 const rootPrefix = '../../..',
+  ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
   coreConstants = require(rootPrefix + '/config/coreConstants'),
-  database = require(rootPrefix + '/lib/globalConstant/database'),
-  ModelBaseKlass = require(rootPrefix + '/app/models/mysql/Base'),
+  databaseConstants = require(rootPrefix + '/lib/globalConstant/database'),
   cronProcessesConstants = require(rootPrefix + '/lib/globalConstant/cronProcesses');
 
-const dbName = database.bigDbName;
+// Declare variables.
+const dbName = databaseConstants.bigDbName;
 
 /**
- * Class for cron process model
+ * Class for cron process model.
  *
- * @class
+ * @class CronProcessesModel
  */
-class CronProcessesModel extends ModelBaseKlass {
+class CronProcessesModel extends ModelBase {
   /**
-   * Constructor for cron process model
+   * Constructor for cron process model.
+   *
+   * @augments ModelBase
    *
    * @constructor
    */
@@ -34,36 +31,34 @@ class CronProcessesModel extends ModelBaseKlass {
   /**
    * This method gets the response for the id passed.
    *
-   * @param {Number} id
+   * @param {number} id
    *
    * @returns {Promise<>}
    */
-  get(id) {
+  async get(id) {
     const oThis = this;
 
-    let response = oThis
+    return oThis
       .select(['kind', 'ip_address', 'group_id', 'params', 'status', 'last_started_at', 'last_ended_at'])
       .where({ id: id })
       .fire();
-
-    return Promise.resolve(response);
   }
 
   /**
    * This method inserts an entry in the table.
    *
-   * @param {Object} params
-   * @param {String} params.kind
-   * @param {String} params.ip_address
-   * @param {Number} params.chain_id
-   * @param {String} params.params
-   * @param {String} params.status
-   * @param {Number} params.lastStartTime
-   * @param {Number} params.lastEndTime
+   * @param {object} params
+   * @param {string} params.kind
+   * @param {string} params.ip_address
+   * @param {number} params.chain_id
+   * @param {string} params.params
+   * @param {string} params.status
+   * @param {number} params.lastStartTime
+   * @param {number} params.lastEndTime
    *
-   * @returns {*}
+   * @returns {Promise<*>}
    */
-  insertRecord(params) {
+  async insertRecord(params) {
     const oThis = this;
 
     // Perform validations.
@@ -73,7 +68,7 @@ class CronProcessesModel extends ModelBaseKlass {
       !params.hasOwnProperty('status') ||
       !params.hasOwnProperty('chain_id')
     ) {
-      throw 'Mandatory parameters are missing.';
+      throw new Error('Mandatory parameters are missing.');
     }
 
     if (typeof params.kind !== 'string' || typeof params.ip_address !== 'string' || typeof params.status !== 'string') {
@@ -88,11 +83,12 @@ class CronProcessesModel extends ModelBaseKlass {
   /**
    * This method updates the last start time and status of an entry.
    *
-   * @param {Object} params
-   * @param {Number} params.id
-   * @param {String} params.kind
-   * @param {String} params.newLastStartTime
-   * @param {String} params.newStatus
+   * @param {object} params
+   * @param {number} params.id
+   * @param {string} params.kind
+   * @param {string} params.newLastStartTime
+   * @param {string} params.newStatus
+   *
    * @returns {Promise<*>}
    */
   async updateLastStartTimeAndStatus(params) {
@@ -105,7 +101,9 @@ class CronProcessesModel extends ModelBaseKlass {
       !params.hasOwnProperty('newStatus') ||
       !params.hasOwnProperty('kind')
     ) {
-      throw 'Mandatory parameters are missing. Expected an object with the following keys: {id, kind, newLastStartTime, newStatus}';
+      throw new Error(
+        'Mandatory parameters are missing. Expected an object with the following keys: {id, kind, newLastStartTime, newStatus}'
+      );
     }
 
     params.newStatus = cronProcessesConstants.invertedStatuses[params.newStatus];
@@ -124,10 +122,11 @@ class CronProcessesModel extends ModelBaseKlass {
   /**
    * This method updates the last end time and status of an entry.
    *
-   * @param {Object} params
-   * @param {Number} params.id
-   * @param {Number} params.newLastEndTime
-   * @param {String} params.newStatus
+   * @param {object} params
+   * @param {number} params.id
+   * @param {number} params.newLastEndTime
+   * @param {string} params.newStatus
+   *
    * @returns {Promise<*>}
    */
   async updateLastEndTimeAndStatus(params) {
@@ -135,7 +134,9 @@ class CronProcessesModel extends ModelBaseKlass {
 
     // Perform validations.
     if (!params.id || !params.newLastEndTime || !params.newStatus) {
-      throw 'Mandatory parameters are missing. Expected an object with the following keys: {id, newLastEndTime, newStatus}';
+      throw new Error(
+        'Mandatory parameters are missing. Expected an object with the following keys: {id, newLastEndTime, newStatus}'
+      );
     }
     params.newStatus = cronProcessesConstants.invertedStatuses[params.newStatus];
 

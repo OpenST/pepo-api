@@ -1,13 +1,18 @@
 const rootPrefix = '../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
-  database = require(rootPrefix + '/lib/globalConstant/database'),
+  databaseConstants = require(rootPrefix + '/lib/globalConstant/database'),
   emailServiceApiCallHookConstants = require(rootPrefix + '/lib/globalConstant/emailServiceApiCallHook');
 
-const dbName = database.bigDbName;
+const dbName = databaseConstants.bigDbName;
 
+/**
+ * Class for email service api call hook model.
+ *
+ * @class EmailServiceAPICallHook
+ */
 class EmailServiceAPICallHook extends ModelBase {
   /**
-   * Email Service API Call Hook model.
+   * Constructor for email service api call hook model.
    *
    * @augments ModelBase
    *
@@ -22,13 +27,16 @@ class EmailServiceAPICallHook extends ModelBase {
   }
 
   /**
-   * Format Db data
+   * Format Db data.
    *
-   * @param dbRow
+   * @param {object} dbRow
+   *
    * @return {object}
    */
   formatDbData(dbRow) {
-    return {
+    const oThis = this;
+
+    const formattedData = {
       id: dbRow.id,
       receiverEntityId: dbRow.receiver_entity_id,
       receiverEntityKind: dbRow.receiver_entity_kind,
@@ -45,12 +53,15 @@ class EmailServiceAPICallHook extends ModelBase {
       createdAt: dbRow.created_at,
       updatedAt: dbRow.updated_at
     };
+
+    return oThis.sanitizeFormattedData(formattedData);
   }
 
   /**
-   * Function to acquire lock on fresh hooks
+   * Function to acquire lock on fresh hooks.
    *
-   * @param lockIdentifier
+   * @param {string} lockIdentifier
+   *
    * @returns {Promise<any>}
    */
   async acquireLocksOnFreshHooks(lockIdentifier) {
@@ -72,9 +83,10 @@ class EmailServiceAPICallHook extends ModelBase {
   }
 
   /**
-   * Function to acquire lock on failed hooks
+   * Function to acquire lock on failed hooks.
    *
-   * @param lockIdentifier
+   * @param {string} lockIdentifier
+   *
    * @returns {Promise<any>}
    */
   async acquireLocksOnFailedHooks(lockIdentifier) {
@@ -96,17 +108,18 @@ class EmailServiceAPICallHook extends ModelBase {
   }
 
   /**
-   * Function to fetch locked hooks
+   * Function to fetch locked hooks.
    *
-   * @param lockIdentifier
+   * @param {string} lockIdentifier
+   *
    * @returns {Promise<void>}
    */
   async fetchLockedHooks(lockIdentifier) {
     const oThis = this;
 
-    let response = {};
+    const response = {};
 
-    let dbRows = await oThis
+    const dbRows = await oThis
       .select('*')
       .where(['lock_identifier = ?', lockIdentifier])
       .fire();
@@ -120,16 +133,17 @@ class EmailServiceAPICallHook extends ModelBase {
   }
 
   /**
-   * Mark status as processed
+   * Mark status as processed.
    *
-   * @param hookId
-   * @param successResponse
+   * @param {number} hookId
+   * @param {object} successResponse
+   *
    * @returns {Promise<void>}
    */
   async markStatusAsProcessed(hookId, successResponse) {
     const oThis = this;
 
-    let updateResponse = await oThis
+    await oThis
       .update({
         lock_identifier: null,
         locked_at: null,
@@ -141,17 +155,18 @@ class EmailServiceAPICallHook extends ModelBase {
   }
 
   /**
-   * Mark hook as failed
+   * Mark hook as failed.
    *
-   * @param hookId
-   * @param failedCount
-   * @param failedLogs
+   * @param {number} hookId
+   * @param {number} failedCount
+   * @param {object} failedLogs
+   *
    * @returns {Promise<void>}
    */
   async markFailedToBeRetried(hookId, failedCount, failedLogs) {
     const oThis = this;
 
-    let updateResponse = await oThis
+    await oThis
       .update({
         status: emailServiceApiCallHookConstants.invertedStatuses[emailServiceApiCallHookConstants.failedStatus],
         failed_count: failedCount + 1,
@@ -164,17 +179,18 @@ class EmailServiceAPICallHook extends ModelBase {
   }
 
   /**
-   * Mark hooks as ignored
+   * Mark hooks as ignored.
    *
-   * @param hookId
-   * @param failedCount
-   * @param failedLogs
+   * @param {number} hookId
+   * @param {number} failedCount
+   * @param {object} failedLogs
+   *
    * @returns {Promise<void>}
    */
   async markFailedToBeIgnored(hookId, failedCount, failedLogs) {
     const oThis = this;
 
-    let updateResponse = await oThis
+    await oThis
       .update({
         status: emailServiceApiCallHookConstants.invertedStatuses[emailServiceApiCallHookConstants.ignoredStatus],
         failed_count: failedCount + 1,

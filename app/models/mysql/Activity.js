@@ -3,11 +3,19 @@ const rootPrefix = '../../..',
   database = require(rootPrefix + '/lib/globalConstant/database'),
   activityConstants = require(rootPrefix + '/lib/globalConstant/activity');
 
+// Declare variables.
 const dbName = database.feedDbName;
 
+/**
+ * Class for activity model.
+ *
+ * @class ActivityModel
+ */
 class ActivityModel extends ModelBase {
   /**
-   * Constructor for Activity model.
+   * Constructor for activity model.
+   *
+   * @augments ModelBase
    *
    * @constructor
    */
@@ -23,11 +31,21 @@ class ActivityModel extends ModelBase {
    * Format db data.
    *
    * @param {object} dbRow
+   * @param {number} dbRow.id
+   * @param {number} dbRow.entity_type
+   * @param {string} dbRow.extra_data
+   * @param {number} dbRow.status
+   * @param {number} dbRow.published_ts
+   * @param {number} dbRow.display_ts
+   * @param {number} dbRow.created_at
+   * @param {number} dbRow.updated_at
    *
    * @return {object}
    */
   formatDbData(dbRow) {
-    return {
+    const oThis = this;
+
+    const formattedData = {
       id: dbRow.id,
       entityType: activityConstants.entityTypes[dbRow.entity_type],
       entityId: dbRow.entity_id,
@@ -38,13 +56,14 @@ class ActivityModel extends ModelBase {
       createdAt: dbRow.created_at,
       updatedAt: dbRow.updated_at
     };
+
+    return oThis.sanitizeFormattedData(formattedData);
   }
 
   /**
-   * List Of Formatted Column names that can be exposed by service
+   * List of formatted column names that can be exposed by service.
    *
-   *
-   * @returns {Array}
+   * @returns {array}
    */
   safeFormattedColumnNames() {
     return [
@@ -105,10 +124,10 @@ class ActivityModel extends ModelBase {
   }
 
   /**
-   * Fetch Activity by entityType and entityId
+   * Fetch activity by entityType and entityId.
    *
-   * @param {Integer} entityType
-   * @param {Integer} entityId
+   * @param {number} entityType
+   * @param {number} entityId
    *
    * @return {object}
    */
@@ -128,7 +147,7 @@ class ActivityModel extends ModelBase {
   }
 
   /**
-   * Fetch Activity by id.
+   * Fetch activity by id.
    *
    * @param {number} id: id
    *
@@ -147,7 +166,7 @@ class ActivityModel extends ModelBase {
    *
    * @param {array} ids: Activity Ids
    *
-   * @return {Object}
+   * @return {object}
    */
   async fetchByIds(ids) {
     const oThis = this;
@@ -178,9 +197,7 @@ class ActivityModel extends ModelBase {
   static async flushCache(params) {
     const ActivityByIds = require(rootPrefix + '/lib/cacheManagement/multi/ActivityByIds');
 
-    await new ActivityByIds({
-      ids: [params.id]
-    }).clear();
+    await new ActivityByIds({ ids: [params.id] }).clear();
   }
 }
 

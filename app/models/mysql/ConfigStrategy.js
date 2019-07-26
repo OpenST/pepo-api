@@ -11,6 +11,7 @@ const rootPrefix = '../../..',
   configStrategyValidator = require(rootPrefix + '/helpers/configStrategyValidator'),
   configStrategyConstants = require(rootPrefix + '/lib/globalConstant/configStrategy');
 
+// Declare variables.
 const dbName = database.configDbName,
   errorConfig = basicHelper.fetchErrorConfig(apiVersions.v1),
   kinds = configStrategyConstants.kinds;
