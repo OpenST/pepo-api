@@ -1,9 +1,9 @@
 const rootPrefix = '../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
-  database = require(rootPrefix + '/lib/globalConstant/database');
+  databaseConstants = require(rootPrefix + '/lib/globalConstant/database');
 
 // Declare variables.
-const dbName = database.ostDbName;
+const dbName = databaseConstants.ostDbName;
 
 /**
  * Class for webhook model.
@@ -41,7 +41,9 @@ class Webhook extends ModelBase {
    * @return {object}
    */
   formatDbData(dbRow) {
-    return {
+    const oThis = this;
+
+    const formattedData = {
       id: dbRow.id,
       ostId: dbRow.ost_id,
       status: dbRow.status,
@@ -50,6 +52,8 @@ class Webhook extends ModelBase {
       createdAt: dbRow.created_at,
       updatedAt: dbRow.updated_at
     };
+
+    return oThis.sanitizeFormattedData(formattedData);
   }
 
   /**

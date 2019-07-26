@@ -1,12 +1,20 @@
 const rootPrefix = '../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
-  database = require(rootPrefix + '/lib/globalConstant/database');
+  databaseConstants = require(rootPrefix + '/lib/globalConstant/database');
 
-const dbName = database.userDbName;
+// Declare variables.
+const dbName = databaseConstants.userDbName;
 
+/**
+ * Class for video contributor model.
+ *
+ * @class VideoContributor
+ */
 class VideoContributor extends ModelBase {
   /**
-   * Video Contributor model
+   * Constructor for video contributor model.
+   *
+   * @augments ModelBase
    *
    * @constructor
    */
@@ -19,12 +27,23 @@ class VideoContributor extends ModelBase {
   }
 
   /**
+   * Format Db data.
    *
-   * @param dbRow
+   * @param {object} dbRow
+   * @param {number} dbRow.id
+   * @param {number} dbRow.video_id
+   * @param {number} dbRow.contributed_by_user_id
+   * @param {number} dbRow.total_amount
+   * @param {number} dbRow.total_transactions
+   * @param {number} dbRow.created_at
+   * @param {number} dbRow.updated_at
+   *
    * @return {object}
    */
   formatDbData(dbRow) {
-    return {
+    const oThis = this;
+
+    const formattedData = {
       id: dbRow.id,
       videoId: dbRow.video_id,
       contributedByUserId: dbRow.contributed_by_user_id,
@@ -33,38 +52,39 @@ class VideoContributor extends ModelBase {
       createdAt: dbRow.created_at,
       updatedAt: dbRow.updated_at
     };
+
+    return oThis.sanitizeFormattedData(formattedData);
   }
 
   /**
-   * List Of Formatted Column names that can be exposed by service
+   * List of formatted column names that can be exposed by service.
    *
-   *
-   * @returns {Array}
+   * @returns {array}
    */
   safeFormattedColumnNames() {
     return ['id', 'videoId', 'contributedByUserId', 'totalTransactions', 'totalAmount', 'createdAt', 'updatedAt'];
   }
 
-  /***
-   * Fetch videoDetail object for video id
+  /**
+   * Fetch videoDetail object for video id.
    *
-   * @param {array} videoIds  - video id
-   * @param {Integer} contributedByUserId  - User Id who contributed for the video
+   * @param {array} videoIds: video id
+   * @param {integer} contributedByUserId: User Id who contributed for the video
    *
-   * @return {Object}
+   * @return {object}
    */
   async fetchByVideoIdAndContributedByUserId(videoIds, contributedByUserId) {
     const oThis = this;
 
-    let dbRows = await oThis
+    const dbRows = await oThis
       .select('*')
       .where({ video_id: videoIds, contributed_by_user_id: contributedByUserId })
       .fire();
 
-    let response = {};
+    const response = {};
 
     for (let index = 0; index < dbRows.length; index++) {
-      let formatDbRow = oThis.formatDbData(dbRows[index]);
+      const formatDbRow = oThis.formatDbData(dbRows[index]);
       response[formatDbRow.videoId] = formatDbRow;
     }
 
@@ -74,16 +94,16 @@ class VideoContributor extends ModelBase {
   /**
    * Update by video id and contributed by user id.
    *
-   * @param {number} params.videoId  - video id
-   * @param {number} params.contributedByUserId  - User Id who contributed for the video
-   * @param {number} params.totalAmount  - Total amount
+   * @param {number} params.videoId: video id
+   * @param {number} params.contributedByUserId: User Id who contributed for the video
+   * @param {number} params.totalAmount: Total amount
    *
    * @returns {Promise<*>}
    */
   async updateByVideoIdAndContributedByUserId(params) {
     const oThis = this;
 
-    let totalTransactions = 1;
+    const totalTransactions = 1;
 
     return oThis
       .update([
@@ -98,15 +118,16 @@ class VideoContributor extends ModelBase {
   /**
    * Update by video id and contributed by user id.
    *
-   * @param {number} params.videoId  - video id
-   * @param {number} params.contributedByUserId  - User Id who contributed for the video
-   * @param {number} params.totalAmount  - Total amount
+   * @param {number} params.videoId: video id
+   * @param {number} params.contributedByUserId: User Id who contributed for the video
+   * @param {number} params.totalAmount: Total amount
    *
    * @returns {Promise<*>}
    */
   async insertVideoContributor(params) {
-    const oThis = this,
-      totalTransactions = 1;
+    const oThis = this;
+
+    const totalTransactions = 1;
 
     return oThis
       .insert({
@@ -118,12 +139,13 @@ class VideoContributor extends ModelBase {
       .fire();
   }
 
-  /***
-   * Flush cache
+  /**
+   * Flush cache.
    *
    * @param {object} params
    * @param {number} params.contributedByUserId
-   * @param {array} params.videoIds
+   * @param {array} params.videoId
+   *
    * @returns {Promise<*>}
    */
   static async flushCache(params) {
@@ -137,7 +159,7 @@ class VideoContributor extends ModelBase {
   }
 
   /**
-   * Index name
+   * Index name.
    *
    * @returns {string}
    */

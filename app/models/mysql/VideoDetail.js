@@ -1,12 +1,20 @@
 const rootPrefix = '../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
-  database = require(rootPrefix + '/lib/globalConstant/database');
+  databaseConstants = require(rootPrefix + '/lib/globalConstant/database');
 
-const dbName = database.entityDbName;
+// Declare variables.
+const dbName = databaseConstants.entityDbName;
 
+/**
+ * Class for video detail model.
+ *
+ * @class VideoDetail
+ */
 class VideoDetail extends ModelBase {
   /**
-   * video detail By model
+   * Constructor for video detail model.
+   *
+   * @augments ModelBase
    *
    * @constructor
    */
@@ -19,12 +27,24 @@ class VideoDetail extends ModelBase {
   }
 
   /**
+   * Format Db data.
    *
-   * @param dbRow
+   * @param {object} dbRow
+   * @param {number} dbRow.id
+   * @param {number} dbRow.creator_user_id
+   * @param {number} dbRow.video_id
+   * @param {number} dbRow.total_contributed_by
+   * @param {number} dbRow.total_amount
+   * @param {number} dbRow.total_transactions
+   * @param {number} dbRow.created_at
+   * @param {number} dbRow.updated_at
+   *
    * @return {object}
    */
   formatDbData(dbRow) {
-    return {
+    const oThis = this;
+
+    const formattedData = {
       id: dbRow.id,
       creatorUserId: dbRow.creator_user_id,
       videoId: dbRow.video_id,
@@ -34,13 +54,14 @@ class VideoDetail extends ModelBase {
       createdAt: dbRow.created_at,
       updatedAt: dbRow.updated_at
     };
+
+    return oThis.sanitizeFormattedData(formattedData);
   }
 
   /**
-   * List Of Formatted Column names that can be exposed by service
+   * List of formatted column names that can be exposed by service.
    *
-   *
-   * @returns {Array}
+   * @returns {array}
    */
   safeFormattedColumnNames() {
     return [
@@ -55,16 +76,17 @@ class VideoDetail extends ModelBase {
     ];
   }
 
-  /***
-   * Fetch videoDetail object for video id
+  /**
+   * Fetch videoDetail object for video id.
    *
-   * @param videoId {Integer} - video id
+   * @param {integer} videoId: video id
    *
-   * @return {Object}
+   * @return {object}
    */
   async fetchByVideoId(videoId) {
     const oThis = this;
-    let dbRows = await oThis
+
+    const dbRows = await oThis
       .select('*')
       .where({ video_id: videoId })
       .fire();
@@ -76,26 +98,27 @@ class VideoDetail extends ModelBase {
     return oThis.formatDbData(dbRows[0]);
   }
 
-  /***
+  /**
    * Fetch users contributed by object
    * contributedByUserId paid to user ids
    *
-   * @param videoIds {Array} - Array of video id
-   * @param userId {Integer} - id of user who clicked the video
+   * @param {array} videoIds: Array of video id
+   * @param {integer} userId: id of user who clicked the video
    *
-   * @return {Object}
+   * @return {object}
    */
   async fetchByVideoIdsAndUserId(videoIds, userId) {
     const oThis = this;
-    let dbRows = await oThis
+
+    const dbRows = await oThis
       .select('*')
       .where({ video_id: videoIds, creator_user_id: userId })
       .fire();
 
-    let response = {};
+    const response = {};
 
     for (let index = 0; index < dbRows.length; index++) {
-      let formatDbRow = oThis.formatDbData(dbRows[index]);
+      const formatDbRow = oThis.formatDbData(dbRows[index]);
       response[formatDbRow.videoId] = formatDbRow;
     }
 
@@ -105,21 +128,22 @@ class VideoDetail extends ModelBase {
   /**
    * Fetch video details by video ids.
    *
-   * @param {Array} videoIds
+   * @param {array} videoIds
+   *
    * @returns {Promise<void>}
    */
   async fetchByVideoIds(videoIds) {
     const oThis = this;
 
-    let dbRows = await oThis
+    const dbRows = await oThis
       .select('*')
       .where({ video_id: videoIds })
       .fire();
 
-    let response = {};
+    const response = {};
 
     for (let index = 0; index < dbRows.length; index++) {
-      let formatDbRow = oThis.formatDbData(dbRows[index]);
+      const formatDbRow = oThis.formatDbData(dbRows[index]);
       response[formatDbRow.videoId] = formatDbRow;
     }
 
@@ -129,11 +153,17 @@ class VideoDetail extends ModelBase {
   /**
    * Update by video id.
    *
+   * @param {object} params
+   * @param {number} params.totalAmount
+   * @param {number} params.totalContributedBy
+   * @param {number} params.videoId
+   *
    * @returns {Promise<void>}
    */
   async updateByVideoId(params) {
-    const oThis = this,
-      totalTransactions = 1;
+    const oThis = this;
+
+    const totalTransactions = 1;
 
     return oThis
       .update([
@@ -148,9 +178,11 @@ class VideoDetail extends ModelBase {
   }
 
   /**
-   * Insert new video
+   * Insert new video.
    *
-   * @param params {object} - params
+   * @param {object} params
+   * @param {number} params.userId
+   * @param {number} params.videoId
    *
    * @return {object}
    */
@@ -177,9 +209,7 @@ class VideoDetail extends ModelBase {
   static async flushCache(params) {
     const VideoDetailsByVideoIds = require(rootPrefix + '/lib/cacheManagement/multi/VideoDetailsByVideoIds');
 
-    await new VideoDetailsByVideoIds({
-      videoIds: [params.videoId]
-    }).clear();
+    await new VideoDetailsByVideoIds({ videoIds: [params.videoId] }).clear();
   }
 }
 
