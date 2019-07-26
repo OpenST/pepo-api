@@ -1,13 +1,21 @@
 const rootPrefix = '../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
-  database = require(rootPrefix + '/lib/globalConstant/database'),
+  databaseConstants = require(rootPrefix + '/lib/globalConstant/database'),
   transactionConstants = require(rootPrefix + '/lib/globalConstant/transaction');
 
-const dbName = database.feedDbName;
+// Declare variables.
+const dbName = databaseConstants.feedDbName;
 
+/**
+ * Class for transaction model.
+ *
+ * @class Transaction
+ */
 class Transaction extends ModelBase {
   /**
-   * Constructor for Transaction model.
+   * Constructor for transaction model.
+   *
+   * @augments ModelBase
    *
    * @constructor
    */
@@ -27,7 +35,9 @@ class Transaction extends ModelBase {
    * @return {object}
    */
   formatDbData(dbRow) {
-    return {
+    const oThis = this;
+
+    const formattedData = {
       id: dbRow.id,
       ostTxId: dbRow.ost_tx_id,
       fromUserId: dbRow.from_user_id,
@@ -39,25 +49,28 @@ class Transaction extends ModelBase {
       createdAt: dbRow.created_at,
       updatedAt: dbRow.updated_at
     };
+
+    return oThis.sanitizeFormattedData(formattedData);
   }
 
   /**
    * Fetch transactions by ost transaction id.
    *
-   * @param {Array} ostTxIds
+   * @param {array} ostTxIds
+   *
    * @returns {Promise<void>}
    */
   async fetchByOstTxId(ostTxIds) {
     const oThis = this;
 
-    let response = {},
+    const response = {},
       dbRows = await oThis
         .select('*')
         .where(['ost_tx_id IN (?)', ostTxIds])
         .fire();
 
     for (let index = 0; index < dbRows.length; index++) {
-      let formatDbRows = oThis.formatDbData(dbRows[index]);
+      const formatDbRows = oThis.formatDbData(dbRows[index]);
       response[formatDbRows.ostTxId] = formatDbRows;
     }
 
@@ -67,21 +80,21 @@ class Transaction extends ModelBase {
   /**
    * Fetch transaction for given ids
    *
-   * @param ids {array} - tx ids
+   * @param {array} ids: tx ids
    *
    * @return {object}
    */
   async fetchByIds(ids) {
     const oThis = this;
-    let response = {};
+    const response = {};
 
-    let dbRows = await oThis
+    const dbRows = await oThis
       .select('*')
       .where({ id: ids })
       .fire();
 
     for (let index = 0; index < dbRows.length; index++) {
-      let formatDbRow = oThis.formatDbData(dbRows[index]);
+      const formatDbRow = oThis.formatDbData(dbRows[index]);
       response[formatDbRow.id] = formatDbRow;
     }
 
@@ -109,6 +122,11 @@ class Transaction extends ModelBase {
     await Promise.all(promisesArray);
   }
 
+  /**
+   * Get transaction id unique index name.
+   *
+   * @returns {string}
+   */
   static get transactionIdUniqueIndexName() {
     return 'uidx_1';
   }

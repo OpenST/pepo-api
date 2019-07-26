@@ -1,13 +1,21 @@
 const rootPrefix = '../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
-  database = require(rootPrefix + '/lib/globalConstant/database'),
+  databaseConstants = require(rootPrefix + '/lib/globalConstant/database'),
   twitterUserConnectionConstants = require(rootPrefix + '/lib/globalConstant/twitterUserConnection');
 
-const dbName = database.twitterDbName;
+// Declare variables.
+const dbName = databaseConstants.twitterDbName;
 
+/**
+ * Class for twitter user connection model.
+ *
+ * @class TwitterUserConnection
+ */
 class TwitterUserConnection extends ModelBase {
   /**
-   * Twitter User Connection model
+   * Constructor for twitter user connection model.
+   *
+   * @augments ModelBase
    *
    * @constructor
    */
@@ -20,12 +28,16 @@ class TwitterUserConnection extends ModelBase {
   }
 
   /**
+   * Format Db data.
    *
-   * @param dbRow
+   * @param {object} dbRow
+   *
    * @return {object}
    */
   formatDbData(dbRow) {
-    return {
+    const oThis = this;
+
+    const formattedData = {
       id: dbRow.id,
       twitterUser1Id: dbRow.twitter_user1_id,
       twitterUser2Id: dbRow.twitter_user2_id,
@@ -33,22 +45,23 @@ class TwitterUserConnection extends ModelBase {
       createdAt: dbRow.created_at,
       updatedAt: dbRow.updated_at
     };
+
+    return oThis.sanitizeFormattedData(formattedData);
   }
 
   /**
-   * List Of Formatted Column names that can be exposed by service
+   * List of formatted column names that can be exposed by service.
    *
-   *
-   * @returns {Array}
+   * @returns {array}
    */
   safeFormattedColumnNames() {
     return ['id', 'twitterUser1Id', 'twitterUser2Id', 'properties', 'createdAt', 'updatedAt'];
   }
 
-  /***
-   * Bitwise Config
+  /**
+   * Bitwise config.
    *
-   * @return {Object}
+   * @return {object}
    */
   get bitwiseConfig() {
     return {
@@ -56,11 +69,11 @@ class TwitterUserConnection extends ModelBase {
     };
   }
 
-  /***
+  /**
    * Fetch twitter user 1 ids for twitter user id2
    *
    * @param {object} params
-   * @param {Array} params.twitterUser2Id
+   * @param {array} params.twitterUser2Id
    * @param {number} [params.page]
    * @param {number} [params.limit]
    *
@@ -74,7 +87,7 @@ class TwitterUserConnection extends ModelBase {
       twitterUser2Id = params.twitterUser2Id,
       offset = (page - 1) * limit;
 
-    let dbRows = await oThis
+    const dbRows = await oThis
       .select(['twitter_user1_id', 'id'])
       .where({ twitter_user2_id: twitterUser2Id })
       .limit(limit)
@@ -82,27 +95,28 @@ class TwitterUserConnection extends ModelBase {
       .order_by('id DESC')
       .fire();
 
-    let response = {};
+    const response = {};
 
     for (let index = 0; index < dbRows.length; index++) {
-      let formatDbRow = oThis.formatDbData(dbRows[index]);
+      const formatDbRow = oThis.formatDbData(dbRows[index]);
       response[formatDbRow.id] = formatDbRow;
     }
 
     return response;
   }
 
-  /***
+  /**
    * Fetch twitter user connection object for twitter user id1 and twitter user id2
    *
-   * @param twitterUser1Id {String} - twitter user id 1
-   * @param twitterUser2Id {String} - twitter user id 2 (followed by twitter user id 1)
+   * @param {string} twitterUser1Id: twitter user id 1
+   * @param {string} twitterUser2Id: twitter user id 2 (followed by twitter user id 1)
    *
    * @return {Object}
    */
   async fetchByTwitterUser1IdAndTwitterUser2Id(twitterUser1Id, twitterUser2Id) {
     const oThis = this;
-    let dbRows = await oThis
+
+    const dbRows = await oThis
       .select('*')
       .where({ twitter_user1_id: twitterUser1Id, twitter_user2_id: twitterUser2Id })
       .fire();
@@ -118,7 +132,7 @@ class TwitterUserConnection extends ModelBase {
    * Fetch contributed by user ids
    *
    * @param {object} params
-   * @param {Array} params.twitterUser1Id
+   * @param {array} params.twitterUser1Id
    * @param {number} [params.page]
    * @param {number} [params.limit]
    *
@@ -127,8 +141,8 @@ class TwitterUserConnection extends ModelBase {
   async fetchPaginatedTwitterUser2IdsForTwitterUser1Id(params) {
     const oThis = this;
 
-    //NOTE: Has Contributed Property should not be set
-    let twitterUser2RegisteredVal = oThis.setBitwise(
+    // NOTE: Has Contributed Property should not be set
+    const twitterUser2RegisteredVal = oThis.setBitwise(
       'properties',
       0,
       twitterUserConnectionConstants.isTwitterUser2RegisteredProperty
@@ -138,7 +152,7 @@ class TwitterUserConnection extends ModelBase {
       limit = params.limit,
       offset = (page - 1) * limit;
 
-    let dbRows = await oThis
+    const dbRows = await oThis
       .select(['twitter_user2_id', 'id'])
       .where({ twitter_user1_id: params.twitterUser1Id, properties: twitterUser2RegisteredVal })
       .limit(limit)
@@ -146,7 +160,7 @@ class TwitterUserConnection extends ModelBase {
       .order_by('id DESC')
       .fire();
 
-    let response = [];
+    const response = [];
 
     for (let index = 0; index < dbRows.length; index++) {
       response.push(dbRows[index].twitter_user2_id);
@@ -158,7 +172,7 @@ class TwitterUserConnection extends ModelBase {
   /**
    * Create twitter user connection.
    *
-   * @param params
+   * @param {object} params
    * @param {integer} params.twitterUser1Id
    * @param {integer} params.twitterUser2Id
    * @param {integer} params.propertiesVal
@@ -178,10 +192,11 @@ class TwitterUserConnection extends ModelBase {
       .fire();
   }
 
-  /***
-   * Flush cache
+  /**
+   * Flush cache.
    *
    * @param {object} params
+   * @param {number} params.twitterUser1Id
    *
    * @returns {Promise<*>}
    */

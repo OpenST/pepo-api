@@ -1,16 +1,21 @@
 const rootPrefix = '../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
-  database = require(rootPrefix + '/lib/globalConstant/database');
+  databaseConstants = require(rootPrefix + '/lib/globalConstant/database');
 
-const dbName = database.entityDbName;
+// Declare variables.
+const dbName = databaseConstants.entityDbName;
 
 /**
  * Class for text model.
  *
- * @class
+ * @class Text
  */
 class Text extends ModelBase {
   /**
+   * Constructor for text model.
+   *
+   * @augments ModelBase
+   *
    * @constructor
    */
   constructor() {
@@ -35,25 +40,30 @@ class Text extends ModelBase {
    * @private
    */
   formatDbData(dbRow) {
-    return {
+    const oThis = this;
+
+    const formattedData = {
       id: dbRow.id,
       text: dbRow.text,
       tagIds: dbRow.tag_ids,
       createdAt: dbRow.created_at,
       updatedAt: dbRow.updated_at
     };
+
+    return oThis.sanitizeFormattedData(formattedData);
   }
 
   /**
    * Fetch text by id
    *
-   * @param id {integer} - id
+   * @param {number} id
    *
    * @return {object}
    */
   async fetchById(id) {
     const oThis = this;
-    let dbRows = await oThis.fetchByIds([id]);
+
+    const dbRows = await oThis.fetchByIds([id]);
 
     return dbRows[id] || {};
   }
@@ -61,22 +71,22 @@ class Text extends ModelBase {
   /**
    * Fetch text for given ids
    *
-   * @param ids {array} - text ids
+   * @param {array} ids: text ids
    *
    * @return {object}
    */
   async fetchByIds(ids) {
     const oThis = this;
 
-    let response = {};
+    const response = {};
 
-    let dbRows = await oThis
+    const dbRows = await oThis
       .select('*')
       .where(['id IN (?)', ids])
       .fire();
 
     for (let index = 0; index < dbRows.length; index++) {
-      let formatDbRow = oThis.formatDbData(dbRows[index]);
+      const formatDbRow = oThis.formatDbData(dbRows[index]);
       response[formatDbRow.id] = formatDbRow;
     }
 
@@ -84,9 +94,11 @@ class Text extends ModelBase {
   }
 
   /**
-   * Insert into texts
+   * Insert into texts table.
    *
-   * @param params {object} - params
+   * @param {object} params
+   * @param {string} params.text
+   * @param {array} params.tagIds
    *
    * @return {object}
    */
@@ -102,9 +114,12 @@ class Text extends ModelBase {
   }
 
   /**
-   * Update text by id
+   * Update text by id.
    *
-   * @param params
+   * @param {object} params
+   * @param {string} params.text
+   * @param {array} params.tagIds
+   *
    * @return {Promise<void>}
    */
   async updateById(params) {
@@ -122,9 +137,11 @@ class Text extends ModelBase {
   }
 
   /**
-   * Delete by id
+   * Delete by id.
    *
-   * @param params
+   * @param {object} params
+   * @param {number} params.id
+   *
    * @return {Promise<void>}
    */
   async deleteById(params) {

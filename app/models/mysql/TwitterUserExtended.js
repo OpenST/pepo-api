@@ -1,13 +1,21 @@
 const rootPrefix = '../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
-  database = require(rootPrefix + '/lib/globalConstant/database'),
+  databaseConstants = require(rootPrefix + '/lib/globalConstant/database'),
   twitterUserExtendedConstants = require(rootPrefix + '/lib/globalConstant/twitterUserExtended');
 
-const dbName = database.twitterDbName;
+// Declare variables.
+const dbName = databaseConstants.twitterDbName;
 
-class TwitterUserModel extends ModelBase {
+/**
+ * Class for twitter user extended model.
+ *
+ * @class TwitterUserExtendedModel
+ */
+class TwitterUserExtendedModel extends ModelBase {
   /**
-   * Twitter User Extended model
+   * Constructor for twitter user extended model.
+   *
+   * @augments ModelBase
    *
    * @constructor
    */
@@ -20,12 +28,16 @@ class TwitterUserModel extends ModelBase {
   }
 
   /**
+   * Format Db data.
    *
-   * @param dbRow
+   * @param {object} dbRow
+   *
    * @return {object}
    */
   formatDbData(dbRow) {
-    return {
+    const oThis = this;
+
+    const formattedData = {
       id: dbRow.id,
       twitterUserId: dbRow.twitter_user_id,
       userId: dbRow.user_id,
@@ -35,28 +47,30 @@ class TwitterUserModel extends ModelBase {
       createdAt: dbRow.created_at,
       updatedAt: dbRow.updated_at
     };
+
+    return oThis.sanitizeFormattedData(formattedData);
   }
 
   /**
-   * List Of Formatted Column names that can be exposed by service
+   * List of formatted column names that can be exposed by service.
    *
-   *
-   * @returns {Array}
+   * @returns {array}
    */
   safeFormattedColumnNames() {
     return ['id', 'userId', 'twitterUserId', 'status', 'createdAt', 'updatedAt'];
   }
 
-  /***
+  /**
    * Fetch Secure twitter user extended object for twitter user id
    *
-   * @param twitterUserIds {Integer} - twitter user id
+   * @param {number} twitterUserId: twitter user id
    *
-   * @return {Object}
+   * @return {object}
    */
   async fetchSecureByTwitterUserId(twitterUserId) {
     const oThis = this;
-    let dbRows = await oThis
+
+    const dbRows = await oThis
       .select('*')
       .where({ twitter_user_id: twitterUserId })
       .fire();
@@ -68,10 +82,11 @@ class TwitterUserModel extends ModelBase {
     return oThis.formatDbData(dbRows[0]);
   }
 
-  /***
-   * Flush cache
+  /**
+   * Flush cache.
    *
    * @param {object} params
+   * @param {number} params.twitterUserid
    *
    * @returns {Promise<*>}
    */
@@ -85,4 +100,4 @@ class TwitterUserModel extends ModelBase {
   }
 }
 
-module.exports = TwitterUserModel;
+module.exports = TwitterUserExtendedModel;

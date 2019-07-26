@@ -1,10 +1,10 @@
 const rootPrefix = '../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
-  database = require(rootPrefix + '/lib/globalConstant/database'),
+  databaseConstants = require(rootPrefix + '/lib/globalConstant/database'),
   tokenUserConstants = require(rootPrefix + '/lib/globalConstant/tokenUser');
 
 // Declare variables.
-const dbName = database.userDbName;
+const dbName = databaseConstants.userDbName;
 
 /**
  * Class for token user model.
@@ -55,7 +55,9 @@ class TokenUserModel extends ModelBase {
    * @return {object}
    */
   formatSecureDbData(dbRow) {
-    return {
+    const oThis = this;
+
+    const formattedData = {
       id: dbRow.id,
       userId: dbRow.user_id,
       ostUserId: dbRow.ost_user_id,
@@ -66,6 +68,8 @@ class TokenUserModel extends ModelBase {
       createdAt: dbRow.created_at,
       updatedAt: dbRow.updated_at
     };
+
+    return oThis.sanitizeFormattedData(formattedData);
   }
 
   /**
