@@ -80,7 +80,11 @@ class FailureTransactionOstEvent extends TransactionOstEventBase {
     if (oThis.transactionObj.extraData.kind === transactionConstants.extraData.userTransactionKind) {
       await oThis._updateTransactionAndRelatedActivities();
     } else if (oThis.transactionObj.extraData.kind === transactionConstants.extraData.airdropKind) {
-      await oThis._processForAirdropTransaction();
+      await oThis._validateToUserId();
+      let promiseArray = [];
+      promiseArray.push(oThis._updateTransaction());
+      promiseArray.push(oThis._processForAirdropTransaction());
+      await Promise.all(promiseArray);
     }
   }
 

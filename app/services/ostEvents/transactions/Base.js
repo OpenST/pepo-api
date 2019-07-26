@@ -222,6 +222,28 @@ class TransactionOstEventBase extends ServiceBase {
   }
 
   /**
+   * Validate to user id
+   *
+   * @returns {Promise<never>}
+   * @private
+   */
+  async _validateToUserId() {
+    const oThis = this;
+
+    if (oThis.toUserId !== oThis.transactionObj.extraData.toUserIds[0]) {
+      logger.error('Mismatch in to user id in table and in webhook data.');
+      return Promise.reject(
+        responseHelper.paramValidationError({
+          internal_error_identifier: 'a_s_oe_t_b_9',
+          api_error_identifier: 'invalid_api_params',
+          params_error_identifiers: ['invalid_to_user_id'],
+          debug_options: { transaction: oThis.transactionObj }
+        })
+      );
+    }
+  }
+
+  /**
    * Validate transfers
    *
    * @return {Promise<void>}
