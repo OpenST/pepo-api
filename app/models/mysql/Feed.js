@@ -1,13 +1,21 @@
 const rootPrefix = '../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
-  database = require(rootPrefix + '/lib/globalConstant/database'),
+  databaseConstants = require(rootPrefix + '/lib/globalConstant/database'),
   feedsConstants = require(rootPrefix + '/lib/globalConstant/feed');
 
-const dbName = database.feedDbName;
+// Declare variables.
+const dbName = databaseConstants.feedDbName;
 
+/**
+ * Class for feed model.
+ *
+ * @class FeedModel
+ */
 class FeedModel extends ModelBase {
   /**
    * Constructor for feed model.
+   *
+   * @augments ModelBase
    *
    * @constructor
    */
@@ -27,7 +35,9 @@ class FeedModel extends ModelBase {
    * @return {object}
    */
   formatDbData(dbRow) {
-    return {
+    const oThis = this;
+
+    const formattedData = {
       id: dbRow.id,
       primaryExternalEntityId: dbRow.primary_external_entity_id,
       kind: feedsConstants.kinds[dbRow.kind],
@@ -37,6 +47,8 @@ class FeedModel extends ModelBase {
       createdAt: dbRow.created_at,
       updatedAt: dbRow.updated_at
     };
+
+    return oThis.sanitizeFormattedData(formattedData);
   }
 
   /**
@@ -124,7 +136,7 @@ class FeedModel extends ModelBase {
    *
    * @param {array} ids: Feed Ids
    *
-   * @return {Object}
+   * @return {object}
    */
   async fetchByIds(ids) {
     const oThis = this;
@@ -152,7 +164,9 @@ class FeedModel extends ModelBase {
    *
    * @returns {Promise<*>}
    */
-  static async flushCache(params) {}
+  static async flushCache(params) {
+    // Do nothing for now.
+  }
 }
 
 module.exports = FeedModel;

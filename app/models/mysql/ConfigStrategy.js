@@ -2,17 +2,17 @@ const rootPrefix = '../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
   SecureGlobalSaltCache = require(rootPrefix + '/lib/cacheManagement/single/SecureGlobalSalt'),
   basicHelper = require(rootPrefix + '/helpers/basic'),
-  database = require(rootPrefix + '/lib/globalConstant/database'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   localCipher = require(rootPrefix + '/lib/encryptors/localCipher'),
   apiVersions = require(rootPrefix + '/lib/globalConstant/apiVersions'),
+  databaseConstants = require(rootPrefix + '/lib/globalConstant/database'),
   globalSaltConstants = require(rootPrefix + '/lib/globalConstant/globalSalt'),
   configStrategyValidator = require(rootPrefix + '/helpers/configStrategyValidator'),
   configStrategyConstants = require(rootPrefix + '/lib/globalConstant/configStrategy');
 
 // Declare variables.
-const dbName = database.configDbName,
+const dbName = databaseConstants.configDbName,
   errorConfig = basicHelper.fetchErrorConfig(apiVersions.v1),
   kinds = configStrategyConstants.kinds;
 

@@ -1,17 +1,21 @@
 const rootPrefix = '../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
-  database = require(rootPrefix + '/lib/globalConstant/database'),
+  databaseConstants = require(rootPrefix + '/lib/globalConstant/database'),
   entityPermalinkConstant = require(rootPrefix + '/lib/globalConstant/entityPermalink');
 
-const dbName = database.entityDbName;
+// Declare variables.
+const dbName = databaseConstants.entityDbName;
 
 /**
  * Class for entity permalink model.
  *
- * @class
+ * @class EntityPermalink
  */
 class EntityPermalink extends ModelBase {
   /**
+   * Constructor for entity permalink model.
+   *
+   * @augments ModelBase
    *
    * @constructor
    */
@@ -39,7 +43,9 @@ class EntityPermalink extends ModelBase {
    * @private
    */
   _formatDbData(dbRow) {
-    return {
+    const oThis = this;
+
+    const formattedData = {
       id: dbRow.id,
       entityId: dbRow.entity_id,
       entityKind: dbRow.entity_kind,
@@ -48,18 +54,21 @@ class EntityPermalink extends ModelBase {
       createdAt: dbRow.created_at,
       updatedAt: dbRow.updated_at
     };
+
+    return oThis.sanitizeFormattedData(formattedData);
   }
 
   /**
    * Fetch entity permalink by entity id
    *
-   * @param entityId {number} - entity id
+   * @param {number} entityId: entity id
    *
    * @return {object}
    */
   async fetchByEntityId(entityId) {
     const oThis = this;
-    let dbRows = await oThis
+
+    const dbRows = await oThis
       .select('*')
       .where([
         'entity_id = ? AND status = ?',
@@ -78,7 +87,7 @@ class EntityPermalink extends ModelBase {
   /**
    * Insert into entity permalink
    *
-   * @param params {object} - params
+   * @param {object} params: params
    * @param {number} params.entityId
    * @param {number} params.entityKind
    * @param {string} params.permalink
@@ -89,7 +98,7 @@ class EntityPermalink extends ModelBase {
   async insertEntityPermalink(params) {
     const oThis = this;
 
-    let response = await oThis
+    const response = await oThis
       .insert({
         entity_kind: entityPermalinkConstant.invertedEntityKinds[params.entityKind],
         entity_id: params.entityId,

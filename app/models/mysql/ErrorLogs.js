@@ -1,12 +1,18 @@
 const rootPrefix = '../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
-  database = require(rootPrefix + '/lib/globalConstant/database');
+  databaseConstants = require(rootPrefix + '/lib/globalConstant/database');
 
-const dbName = database.infraDbName;
+// Declare variables.
+const dbName = databaseConstants.infraDbName;
 
+/**
+ * Class for error logs model.
+ *
+ * @class ErrorLogs
+ */
 class ErrorLogs extends ModelBase {
   /**
-   * Error logs model.
+   * Constructor for error logs model.
    *
    * @augments ModelBase
    *

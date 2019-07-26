@@ -1,13 +1,21 @@
 const rootPrefix = '../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
-  database = require(rootPrefix + '/lib/globalConstant/database'),
+  databaseConstants = require(rootPrefix + '/lib/globalConstant/database'),
   externalEntityConstants = require(rootPrefix + '/lib/globalConstant/externalEntity');
 
-const dbName = database.entityDbName;
+// Declare variables.
+const dbName = databaseConstants.entityDbName;
 
+/**
+ * Class for external entity model.
+ *
+ * @class ExternalEntityModel
+ */
 class ExternalEntityModel extends ModelBase {
   /**
-   * External Entities model
+   * Constructor for external entity model.
+   *
+   * @augments ModelBase
    *
    * @constructor
    */
@@ -20,8 +28,9 @@ class ExternalEntityModel extends ModelBase {
   }
 
   /**
+   * Format Db data.
    *
-   * @param dbRow
+   * @param {object} dbRow
    * @param {number} dbRow.id
    * @param {number} dbRow.entity_kind
    * @param {string} dbRow.entity_id
@@ -32,7 +41,9 @@ class ExternalEntityModel extends ModelBase {
    * @return {object}
    */
   formatDbData(dbRow) {
-    return {
+    const oThis = this;
+
+    const formattedData = {
       id: dbRow.id,
       entityKind: externalEntityConstants.entityKinds[dbRow.entity_kind],
       entityId: dbRow.entity_id,
@@ -40,92 +51,104 @@ class ExternalEntityModel extends ModelBase {
       createdAt: dbRow.created_at,
       updatedAt: dbRow.updated_at
     };
+
+    return oThis.sanitizeFormattedData(formattedData);
   }
 
-  /***
+  /**
    * Fetch external entity by entity kind and entity id
    *
-   * @param entityKind {String} - entityKind
-   * @param entityId {String} - entityId
+   * @param {string} entityKind
+   * @param {number} entityId
    *
-   * @return {Object}
+   * @return {object}
    */
   async fetchByEntityKindAndEntityId(entityKind, entityId) {
     const oThis = this;
-    let entityKindInt = externalEntityConstants.invertedEntityKinds[entityKind];
-    let dbRows = await oThis
+
+    const dbRows = await oThis
       .select('*')
-      .where({ entity_kind: entityKindInt, entity_id: entityId })
+      .where({
+        entity_kind: externalEntityConstants.invertedEntityKinds[entityKind],
+        entity_id: entityId
+      })
       .fire();
 
     if (dbRows.length === 0) {
       return {};
     }
+
     return oThis.formatDbData(dbRows[0]);
   }
 
-  /***
+  /**
    * Fetch external entity by id
    *
-   * @param id {Integer} - id
+   * @param {number} id
    *
-   * @return {Object}
+   * @return {object}
    */
   async fetchById(id) {
     const oThis = this;
-    let dbRows = await oThis.fetchByIds([id]);
+
+    const dbRows = await oThis.fetchByIds([id]);
 
     return dbRows[id] || {};
   }
 
-  /***
-   * Fetch external entities for given ids
+  /**
+   * Fetch external entities for given ids.
    *
-   * @param Ids {Array} - External Entities Ids
+   * @param {array} ids: external entities ids.
    *
-   * @return {Object}
+   * @return {object}
    */
-  async fetchByIds(Ids) {
+  async fetchByIds(ids) {
     const oThis = this;
-    let response = {};
 
-    let dbRows = await oThis
+    const response = {};
+
+    const dbRows = await oThis
       .select('*')
-      .where(['id IN (?)', Ids])
+      .where(['id IN (?)', ids])
       .fire();
 
     for (let index = 0; index < dbRows.length; index++) {
-      let formatDbRow = oThis.formatDbData(dbRows[index]);
+      const formatDbRow = oThis.formatDbData(dbRows[index]);
       response[formatDbRow.id] = formatDbRow;
     }
 
     return response;
   }
 
-  /***
-   * Flush cache
+  /**
+   * Flush cache.
    *
    * @param {object} params
-   * @param {Integer} params.Id
+   * @param {number} params.id
+   * @param {number} params.entityId
+   * @param {string} params.entityKind
    *
    * @returns {Promise<*>}
    */
   static async flushCache(params) {
+    const promisesArray = [];
+
     const ExternalEntityByIds = require(rootPrefix + '/lib/cacheManagement/multi/ExternalEntityByIds');
-
-    await new ExternalEntityByIds({
-      ids: [params.id]
-    }).clear();
-
-    const ExternalEntitiyByEntityIdAndEntityKindCache = require(rootPrefix +
-      '/lib/cacheManagement/single/ExternalEntitiyByEntityIdAndEntityKind');
+    promisesArray.push(new ExternalEntityByIds({ ids: [params.id] }).clear());
 
     if (params.entityId && params.entityKind) {
-      await new ExternalEntitiyByEntityIdAndEntityKindCache({
-        entityId: params.entityId,
-        entityKind: params.entityKind
-      }).clear();
+      const ExternalEntityByEntityIdAndEntityKindCache = require(rootPrefix +
+        '/lib/cacheManagement/single/ExternalEntitiyByEntityIdAndEntityKind');
+      promisesArray.push(
+        new ExternalEntityByEntityIdAndEntityKindCache({
+          entityId: params.entityId,
+          entityKind: params.entityKind
+        }).clear()
+      );
     }
+
+    await Promise.all(promisesArray);
   }
 }
 

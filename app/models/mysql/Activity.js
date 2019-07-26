@@ -1,10 +1,10 @@
 const rootPrefix = '../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
-  database = require(rootPrefix + '/lib/globalConstant/database'),
+  databaseConstants = require(rootPrefix + '/lib/globalConstant/database'),
   activityConstants = require(rootPrefix + '/lib/globalConstant/activity');
 
 // Declare variables.
-const dbName = database.feedDbName;
+const dbName = databaseConstants.feedDbName;
 
 /**
  * Class for activity model.
