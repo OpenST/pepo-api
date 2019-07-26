@@ -1,13 +1,21 @@
 const rootPrefix = '../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
-  database = require(rootPrefix + '/lib/globalConstant/database'),
+  databaseConstants = require(rootPrefix + '/lib/globalConstant/database'),
   pendingTransactionConstants = require(rootPrefix + '/lib/globalConstant/pendingTransaction');
 
-const dbName = database.feedDbName;
+// Declare variables.
+const dbName = databaseConstants.feedDbName;
 
+/**
+ * Class for pending transaction model.
+ *
+ * @class PendingTransaction
+ */
 class PendingTransaction extends ModelBase {
   /**
-   * Constructor for Pending Transaction model.
+   * Constructor for pending transaction model.
+   *
+   * @augments ModelBase
    *
    * @constructor
    */
@@ -27,7 +35,9 @@ class PendingTransaction extends ModelBase {
    * @return {object}
    */
   formatDbData(dbRow) {
-    return {
+    const oThis = this;
+
+    const formattedData = {
       id: dbRow.id,
       ostTxid: dbRow.ost_tx_id,
       fromUserId: dbRow.from_user_id,
@@ -38,6 +48,8 @@ class PendingTransaction extends ModelBase {
       createdAt: dbRow.created_at,
       updatedAt: dbRow.updated_at
     };
+
+    return oThis.sanitizeFormattedData(formattedData);
   }
 
   /**

@@ -1,10 +1,10 @@
 const rootPrefix = '../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
-  database = require(rootPrefix + '/lib/globalConstant/database'),
+  databaseConstants = require(rootPrefix + '/lib/globalConstant/database'),
   ostPricePointsConstants = require(rootPrefix + '/lib/globalConstant/ostPricePoints');
 
 // Declare variables.
-const dbName = database.ostDbName,
+const dbName = databaseConstants.ostDbName,
   queryLimit = 20;
 
 /**
@@ -42,7 +42,9 @@ class OstPricePointsModel extends ModelBase {
    * @return {object}
    */
   formatDbData(dbRow) {
-    return {
+    const oThis = this;
+
+    const formattedData = {
       id: dbRow.id,
       quoteCurrency: ostPricePointsConstants.quoteCurrencies[dbRow.quote_currency],
       conversionRate: dbRow.conversion_rate,
@@ -50,6 +52,8 @@ class OstPricePointsModel extends ModelBase {
       createdAt: dbRow.created_at,
       updatedAt: dbRow.updated_at
     };
+
+    return oThis.sanitizeFormattedData(formattedData);
   }
 
   /**

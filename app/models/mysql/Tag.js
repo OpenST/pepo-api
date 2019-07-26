@@ -1,12 +1,22 @@
 const rootPrefix = '../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
   tagConstants = require(rootPrefix + '/lib/globalConstant/tag'),
-  database = require(rootPrefix + '/lib/globalConstant/database');
+  databaseConstants = require(rootPrefix + '/lib/globalConstant/database');
 
-const dbName = database.entityDbName;
+// Declare variables.
+const dbName = databaseConstants.entityDbName;
 
+/**
+ * Class for tag model.
+ *
+ * @class Tag
+ */
 class Tag extends ModelBase {
   /**
+   * Constructor for tag model.
+   *
+   * @augments ModelBase
+   *
    * @constructor
    */
   constructor() {
@@ -32,7 +42,9 @@ class Tag extends ModelBase {
    * @private
    */
   _formatDbData(dbRow) {
-    return {
+    const oThis = this;
+
+    const formattedData = {
       id: dbRow.id,
       name: dbRow.name,
       weight: dbRow.weight,
@@ -40,12 +52,15 @@ class Tag extends ModelBase {
       createdAt: dbRow.created_at,
       updatedAt: dbRow.updated_at
     };
+
+    return oThis.sanitizeFormattedData(formattedData);
   }
 
   /**
    * Get tags.
    *
    * @param {array} names
+   *
    * @returns {Promise<void>}
    */
   async getTags(names) {
@@ -61,7 +76,8 @@ class Tag extends ModelBase {
    * Insert tags.
    *
    * @param {array} insertArray
-   * @returns {Promise<void|Object<self>>}
+   *
+   * @returns {Promise<*>}
    */
   async insertTags(insertArray) {
     const oThis = this;
@@ -72,8 +88,8 @@ class Tag extends ModelBase {
   /**
    * Update tag weight.
    *
-   * @param caseStatement
-   * @param tags
+   * @param {string} caseStatement
+   * @param {string} tags
    *
    * @returns {Promise<*>}
    */
@@ -111,7 +127,7 @@ class Tag extends ModelBase {
       .order_by('weight DESC')
       .fire();
 
-    let response = [];
+    const response = [];
 
     for (let index = 0; index < dbRows.length; index++) {
       response.push(dbRows[index].id);
@@ -120,24 +136,25 @@ class Tag extends ModelBase {
     return response;
   }
 
-  /***
+  /**
    * Fetch tag for id.
    *
-   * @param {array} ids  - ids
+   * @param {array} ids
    *
-   * @return {Object}
+   * @return {object}
    */
   async fetchByIds(ids) {
     const oThis = this;
-    let dbRows = await oThis
+
+    const dbRows = await oThis
       .select('*')
       .where(['id IN (?)', ids])
       .fire();
 
-    let response = {};
+    const response = {};
 
     for (let index = 0; index < dbRows.length; index++) {
-      let formatDbRow = oThis._formatDbData(dbRows[index]);
+      const formatDbRow = oThis._formatDbData(dbRows[index]);
       response[formatDbRow.id] = formatDbRow;
     }
 
@@ -145,10 +162,11 @@ class Tag extends ModelBase {
   }
 
   /**
-   * Update tag weights by 1
+   * Update tag weights by weightToAdd
    *
-   * @param tagIds
-   * @param weightToAdd
+   * @param {array} tagIds
+   * @param {number} weightToAdd
+   *
    * @returns {Promise<any>}
    */
   updateTagWeights(tagIds, weightToAdd) {
@@ -166,13 +184,14 @@ class Tag extends ModelBase {
    * @returns {Promise<*>}
    */
   static async flushCache(params) {
+    const promisesArray = [];
     const TagPagination = require(rootPrefix + '/lib/cacheManagement/single/TagPagination');
-    await new TagPagination({
-      tagPrefix: [params.tagPrefix]
-    }).clear();
+    promisesArray.push(new TagPagination({ tagPrefix: [params.tagPrefix] }).clear());
 
     const TagByIds = require(rootPrefix + '/lib/cacheManagement/multi/Tag');
-    await new TagByIds({ ids: params.ids }).clear();
+    promisesArray.push(new TagByIds({ ids: params.ids }).clear());
+
+    await Promise.all(promisesArray);
   }
 }
 

@@ -1,12 +1,12 @@
 const rootPrefix = '../../..',
   KmsWrapper = require(rootPrefix + '/lib/aws/KmsWrapper'),
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
-  database = require(rootPrefix + '/lib/globalConstant/database'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
+  databaseConstants = require(rootPrefix + '/lib/globalConstant/database'),
   globalSaltConstants = require(rootPrefix + '/lib/globalConstant/globalSalt');
 
 // Declare variables.
-const dbName = database.bigDbName;
+const dbName = databaseConstants.bigDbName;
 
 /**
  * Class for global salt model.

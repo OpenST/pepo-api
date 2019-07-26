@@ -1,18 +1,23 @@
 const rootPrefix = '../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
+  shortToLongUrl = require(rootPrefix + '/lib/shortToLongUrl'),
   imageConst = require(rootPrefix + '/lib/globalConstant/image'),
-  database = require(rootPrefix + '/lib/globalConstant/database'),
-  shortToLongUrl = require(rootPrefix + '/lib/shortToLongUrl');
+  databaseConstants = require(rootPrefix + '/lib/globalConstant/database');
 
-const dbName = database.entityDbName;
+// Declare variables.
+const dbName = databaseConstants.entityDbName;
 
 /**
  * Class for image model.
  *
- * @class
+ * @class Image
  */
 class Image extends ModelBase {
   /**
+   * Constructor for image model.
+   *
+   * @augments ModelBase
+   *
    * @constructor
    */
   constructor() {
@@ -37,7 +42,9 @@ class Image extends ModelBase {
    * @private
    */
   _formatDbData(dbRow) {
-    return {
+    const oThis = this;
+
+    const formattedData = {
       id: dbRow.id,
       resolutions: JSON.parse(dbRow.resolutions),
       status: imageConst.statuses[dbRow.status],
@@ -45,19 +52,21 @@ class Image extends ModelBase {
       createdAt: dbRow.created_at,
       updatedAt: dbRow.updated_at
     };
+
+    return oThis.sanitizeFormattedData(formattedData);
   }
 
   /**
    * Fetch image by id
    *
-   * @param id {integer} - id
+   * @param {number} id
    *
    * @return {object}
    */
   async fetchById(id) {
     const oThis = this;
 
-    let dbRows = await oThis.fetchByIds([id]);
+    const dbRows = await oThis.fetchByIds([id]);
 
     return dbRows[id] || {};
   }
@@ -65,23 +74,24 @@ class Image extends ModelBase {
   /**
    * Fetch images for given ids
    *
-   * @param ids {array} - image ids
+   * @param {array} ids: image ids
    *
    * @return {object}
    */
   async fetchByIds(ids) {
     const oThis = this;
-    let response = {};
 
-    let dbRows = await oThis
+    const response = {};
+
+    const dbRows = await oThis
       .select('*')
       .where(['id IN (?)', ids])
       .fire();
 
     for (let index = 0; index < dbRows.length; index++) {
-      let formatDbRow = oThis._formatDbData(dbRows[index]);
+      const formatDbRow = oThis._formatDbData(dbRows[index]);
 
-      for (let resolution in formatDbRow.resolutions) {
+      for (const resolution in formatDbRow.resolutions) {
         const shortUrl = formatDbRow.resolutions[resolution].url;
 
         formatDbRow.resolutions[resolution].url = shortToLongUrl.getFullUrl(shortUrl);
@@ -94,9 +104,12 @@ class Image extends ModelBase {
   }
 
   /**
-   * Insert into images
+   * Insert into images.
    *
-   * @param params {object} - params
+   * @param {object} params
+   * @param {string} params.resolutions
+   * @param {number} params.kind
+   * @param {number} params.status
    *
    * @return {object}
    */
@@ -113,9 +126,11 @@ class Image extends ModelBase {
   }
 
   /**
-   * Delete by id
+   * Delete by id.
    *
-   * @param params
+   * @param {object} params
+   * @param {number} params.id
+   *
    * @return {Promise<void>}
    */
   async deleteById(params) {

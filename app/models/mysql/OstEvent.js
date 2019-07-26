@@ -1,13 +1,21 @@
 const rootPrefix = '../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
-  database = require(rootPrefix + '/lib/globalConstant/database'),
+  databaseConstants = require(rootPrefix + '/lib/globalConstant/database'),
   ostEventConstants = require(rootPrefix + '/lib/globalConstant/ostEvent');
 
-const dbName = database.ostDbName;
+// Declare variables.
+const dbName = databaseConstants.ostDbName;
 
+/**
+ * Class for ost events model.
+ *
+ * @class OstEventModel
+ */
 class OstEventModel extends ModelBase {
   /**
-   * ostEvent model
+   * Constructor for ost events model.
+   *
+   * @augments ModelBase
    *
    * @constructor
    */
@@ -20,12 +28,16 @@ class OstEventModel extends ModelBase {
   }
 
   /**
+   * Format Db data.
    *
-   * @param dbRow
+   * @param {object} dbRow
+   *
    * @return {object}
    */
   formatDbData(dbRow) {
-    return {
+    const oThis = this;
+
+    const formattedData = {
       id: dbRow.id,
       eventId: dbRow.event_id,
       status: ostEventConstants.statuses[dbRow.status],
@@ -33,18 +45,21 @@ class OstEventModel extends ModelBase {
       createdAt: dbRow.created_at,
       updatedAt: dbRow.updated_at
     };
+
+    return oThis.sanitizeFormattedData(formattedData);
   }
 
-  /***
+  /**
    * Fetch ost event for id
    *
-   * @param id {Integer} - id
+   * @param {number} id
    *
-   * @return {Object}
+   * @return {object}
    */
   async fetchById(id) {
     const oThis = this;
-    let dbRows = await oThis
+
+    const dbRows = await oThis
       .select('*')
       .where({ id: id })
       .fire();
@@ -52,19 +67,21 @@ class OstEventModel extends ModelBase {
     if (dbRows.length === 0) {
       return {};
     }
+
     return oThis.formatDbData(dbRows[0]);
   }
 
-  /***
+  /**
    * Fetch ost event for id
    *
-   * @param id {Integer} - id
+   * @param {number} eventId
    *
-   * @return {Object}
+   * @return {object}
    */
   async fetchByEventId(eventId) {
     const oThis = this;
-    let dbRows = await oThis
+
+    const dbRows = await oThis
       .select(['id'])
       .where({ event_id: eventId })
       .fire();
@@ -72,6 +89,7 @@ class OstEventModel extends ModelBase {
     if (dbRows.length === 0) {
       return {};
     }
+
     return oThis.formatDbData(dbRows[0]);
   }
 }
