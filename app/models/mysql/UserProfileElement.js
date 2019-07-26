@@ -1,12 +1,21 @@
 const rootPrefix = '../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
-  database = require(rootPrefix + '/lib/globalConstant/database'),
+  databaseConstants = require(rootPrefix + '/lib/globalConstant/database'),
   userProfileElementConst = require(rootPrefix + '/lib/globalConstant/userProfileElement');
 
-const dbName = database.userDbName;
+// Declare variables.
+const dbName = databaseConstants.userDbName;
 
+/**
+ * Class for user profile element model.
+ *
+ * @class UserProfileElementModel
+ */
 class UserProfileElementModel extends ModelBase {
   /**
+   * Constructor for user profile element model.
+   *
+   * @augments ModelBase
    *
    * @constructor
    */
@@ -19,13 +28,22 @@ class UserProfileElementModel extends ModelBase {
   }
 
   /**
-   * Format db data
+   * Format db data.
    *
-   * @param dbRow
+   * @param {object} dbRow
+   * @param {number} dbRow.id
+   * @param {number} dbRow.user_id
+   * @param {string} dbRow.data_kind
+   * @param {object} dbRow.data
+   * @param {number} dbRow.created_at
+   * @param {number} dbRow.updated_at
+   *
    * @return {object}
    */
   formatDbData(dbRow) {
-    return {
+    const oThis = this;
+
+    const formattedData = {
       id: dbRow.id,
       userId: dbRow.user_id,
       dataKind: userProfileElementConst.kinds[dbRow.data_kind],
@@ -33,18 +51,21 @@ class UserProfileElementModel extends ModelBase {
       createdAt: dbRow.created_at,
       updatedAt: dbRow.updated_at
     };
+
+    return oThis.sanitizeFormattedData(formattedData);
   }
 
   /**
-   * Fetch user elements by user id
+   * Fetch user elements by user id.
    *
-   * @param userIds {array} - user ids
+   * @param {array} userIds: user ids
    *
    * @return {Promise}
    */
   async fetchByUserIds(userIds) {
     const oThis = this;
-    let dbRows = await oThis
+
+    const dbRows = await oThis
       .select('*')
       .where(['user_id IN (?)', userIds])
       .fire();
@@ -53,13 +74,13 @@ class UserProfileElementModel extends ModelBase {
       return {};
     }
 
-    let result = {};
+    const result = {};
 
     for (let ind = 0; ind < dbRows.length; ind++) {
-      let userId = dbRows[ind].user_id;
+      const userId = dbRows[ind].user_id;
       result[userId] = result[userId] || {};
 
-      let formattedRow = oThis.formatDbData(dbRows[ind]);
+      const formattedRow = oThis.formatDbData(dbRows[ind]);
 
       if (result.hasOwnProperty(userId)) {
         result[userId][formattedRow.dataKind] = formattedRow;
@@ -74,13 +95,14 @@ class UserProfileElementModel extends ModelBase {
   /**
    * Insert profile element
    *
-   * @return {Promise}
+   * @return {Promise<*>}
    */
   async insertElement(params) {
-    const oThis = this,
-      currentTime = Math.floor(Date.now() / 1000);
+    const oThis = this;
 
-    let response = await oThis
+    const currentTime = Math.floor(Date.now() / 1000);
+
+    return oThis
       .insert({
         user_id: params.userId,
         data_kind: userProfileElementConst.invertedKinds[params.dataKind],
@@ -89,14 +111,15 @@ class UserProfileElementModel extends ModelBase {
         updated_at: currentTime
       })
       .fire();
-
-    return response;
   }
 
   /**
-   * Delete by user id and kind
+   * Delete by user id and kind.
    *
-   * @param params
+   * @param {object} params
+   * @param {number} params.userId
+   * @param {string} params.dataKind
+   *
    * @return {Promise<void>}
    */
   async deleteByUserIdAndKind(params) {
@@ -112,9 +135,11 @@ class UserProfileElementModel extends ModelBase {
   }
 
   /**
-   * Delete by id
+   * Delete by id.
    *
-   * @param.id
+   * @param {object} params
+   * @param {number} params.id
+   *
    * @return {Promise<void>}
    */
   async deleteById(params) {
@@ -140,9 +165,7 @@ class UserProfileElementModel extends ModelBase {
     const UserProfileElementsByUserIds = require(rootPrefix +
       '/lib/cacheManagement/multi/UserProfileElementsByUserIds');
 
-    await new UserProfileElementsByUserIds({
-      userIds: [params.userId]
-    }).clear();
+    await new UserProfileElementsByUserIds({ userIds: [params.userId] }).clear();
   }
 }
 

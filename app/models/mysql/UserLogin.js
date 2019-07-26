@@ -1,19 +1,19 @@
 const rootPrefix = '../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
-  database = require(rootPrefix + '/lib/globalConstant/database'),
+  databaseConstants = require(rootPrefix + '/lib/globalConstant/database'),
   userLoginConstants = require(rootPrefix + '/lib/globalConstant/userLogin');
 
 // Declare variables.
-const dbName = database.userDbName;
+const dbName = databaseConstants.userDbName;
 
 /**
- * Class for UserLogin model.
+ * Class for user login model.
  *
  * @class UserLogin
  */
 class UserLogin extends ModelBase {
   /**
-   * Constructor for UserLogin model.
+   * Constructor for user login model.
    *
    * @augments ModelBase
    *
@@ -42,7 +42,9 @@ class UserLogin extends ModelBase {
    * @return {object}
    */
   formatDbData(dbRow) {
-    return {
+    const oThis = this;
+
+    const formattedData = {
       id: dbRow.id,
       userId: dbRow.user_id,
       service: dbRow.service,
@@ -51,6 +53,8 @@ class UserLogin extends ModelBase {
       createdAt: dbRow.created_at,
       updatedAt: dbRow.updated_at
     };
+
+    return oThis.sanitizeFormattedData(formattedData);
   }
 
   /**
@@ -58,12 +62,13 @@ class UserLogin extends ModelBase {
    *
    * @param {string} service
    * @param {string} serviceUniqueId
+   *
    * @returns {Promise<*>}
    */
   async getUserIdByServiceAndServiceUniqueId(service, serviceUniqueId) {
     const oThis = this;
 
-    let dbRows = await oThis
+    const dbRows = await oThis
       .select('user_id')
       .where({
         service: userLoginConstants.invertedServiceTypes[service],

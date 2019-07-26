@@ -1,18 +1,23 @@
 const rootPrefix = '../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
-  videoConst = require(rootPrefix + '/lib/globalConstant/video'),
-  s3Constants = require(rootPrefix + '/lib/globalConstant/s3.js'),
-  database = require(rootPrefix + '/lib/globalConstant/database');
+  s3Constants = require(rootPrefix + '/lib/globalConstant/s3'),
+  videoConstants = require(rootPrefix + '/lib/globalConstant/video'),
+  databaseConstants = require(rootPrefix + '/lib/globalConstant/database');
 
-const dbName = database.entityDbName;
+// Declare variables.
+const dbName = databaseConstants.entityDbName;
 
 /**
  * Class for video model.
  *
- * @class
+ * @class Video
  */
 class Video extends ModelBase {
   /**
+   * Constructor for video model.
+   *
+   * @augments ModelBase
+   *
    * @constructor
    */
   constructor() {
@@ -38,53 +43,57 @@ class Video extends ModelBase {
    * @private
    */
   _formatDbData(dbRow) {
-    return {
+    const oThis = this;
+
+    const formattedData = {
       id: dbRow.id,
       resolutions: JSON.parse(dbRow.resolutions),
       posterImageId: dbRow.poster_image_id,
-      status: videoConst.statuses[dbRow.status],
+      status: videoConstants.statuses[dbRow.status],
       createdAt: dbRow.created_at,
       updatedAt: dbRow.updated_at
     };
+
+    return oThis.sanitizeFormattedData(formattedData);
   }
 
   /**
-   * Fetch video by id
+   * Fetch video by id.
    *
-   * @param id {integer} - id
+   * @param {integer} id
    *
    * @return {object}
    */
   async fetchById(id) {
     const oThis = this;
 
-    let dbRows = await oThis.fetchByIds([id]);
+    const dbRows = await oThis.fetchByIds([id]);
 
     return dbRows[id] || {};
   }
 
   /**
-   * Fetch videos for given ids
+   * Fetch videos for given ids.
    *
-   * @param ids {array} - image ids
+   * @param {array} ids
    *
    * @return {object}
    */
   async fetchByIds(ids) {
     const oThis = this;
-    let response = {};
 
-    let dbRows = await oThis
+    const response = {};
+
+    const dbRows = await oThis
       .select('*')
       .where(['id IN (?)', ids])
       .fire();
 
     for (let index = 0; index < dbRows.length; index++) {
-      let formatDbRow = oThis._formatDbData(dbRows[index]);
-      for (let resolutionKind in formatDbRow.resolutions) {
-        let shortUrl = formatDbRow.resolutions[resolutionKind].url,
-          longUrl = s3Constants.shortToLongUrlForResponse(shortUrl);
-        formatDbRow.resolutions[resolutionKind].url = longUrl;
+      const formatDbRow = oThis._formatDbData(dbRows[index]);
+      for (const resolutionKind in formatDbRow.resolutions) {
+        const shortUrl = formatDbRow.resolutions[resolutionKind].url;
+        formatDbRow.resolutions[resolutionKind].url = s3Constants.shortToLongUrlForResponse(shortUrl);
       }
       response[formatDbRow.id] = formatDbRow;
     }
@@ -95,7 +104,10 @@ class Video extends ModelBase {
   /**
    * Insert into videos
    *
-   * @param params {object} - params
+   * @param {object} params
+   * @param {object} params.resolutions
+   * @param {number} params.posterImageId
+   * @param {string} params.status
    *
    * @return {object}
    */
@@ -106,24 +118,29 @@ class Video extends ModelBase {
       .insert({
         resolutions: JSON.stringify(params.resolutions),
         poster_image_id: params.posterImageId,
-        status: videoConst.invertedStatuses[params.status]
+        status: videoConstants.invertedStatuses[params.status]
       })
       .fire();
   }
 
   /**
-   * Update image by id
+   * Update image by id.
    *
-   * @param params
+   * @param {object} params
+   * @param {number} params.id
+   * @param {object} params.resolutions
+   * @param {number} params.posterImageId
+   * @param {string} params.status
+   *
    * @return {Promise<void>}
    */
   async updateById(params) {
     const oThis = this;
 
-    let response = await oThis
+    const response = await oThis
       .update({
         resolutions: JSON.stringify(params.resolutions),
-        status: videoConst.invertedStatuses[params.status],
+        status: videoConstants.invertedStatuses[params.status],
         poster_image_id: params.posterImageId
       })
       .where({
@@ -145,9 +162,7 @@ class Video extends ModelBase {
   static async flushCache(params) {
     const VideoByIds = require(rootPrefix + '/lib/cacheManagement/multi/VideoByIds');
 
-    await new VideoByIds({
-      ids: [params.id]
-    }).clear();
+    await new VideoByIds({ ids: [params.id] }).clear();
   }
 }
 

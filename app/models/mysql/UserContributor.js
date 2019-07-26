@@ -41,7 +41,9 @@ class UserContributor extends ModelBase {
    * @return {object}
    */
   formatDbData(dbRow) {
-    return {
+    const oThis = this;
+
+    const formattedData = {
       id: dbRow.id,
       userId: dbRow.user_id,
       contributedByUserId: dbRow.contributed_by_user_id,
@@ -50,6 +52,8 @@ class UserContributor extends ModelBase {
       createdAt: dbRow.created_at,
       updatedAt: dbRow.updated_at
     };
+
+    return oThis.sanitizeFormattedData(formattedData);
   }
 
   /**
@@ -62,10 +66,10 @@ class UserContributor extends ModelBase {
   }
 
   /**
-   * Fetch user ids
+   * Fetch user ids.
    *
    * @param {object} params
-   * @param {Array} params.contributedByUserId
+   * @param {array} params.contributedByUserId
    * @param {number} [params.page]
    * @param {number} [params.limit]
    *
@@ -96,10 +100,10 @@ class UserContributor extends ModelBase {
   }
 
   /**
-   * Fetch contributed by user ids
+   * Fetch contributed by user ids.
    *
    * @param {object} params
-   * @param {Array} params.userId
+   * @param {array} params.userId
    * @param {number} [params.page]
    * @param {number} [params.limit]
    *
@@ -130,16 +134,16 @@ class UserContributor extends ModelBase {
   }
 
   /**
-   * Fetch users contributed by object
-   * contributedByUserId paid to user ids
+   * Fetch users contributed by object contributedByUserId paid to user ids.
    *
    * @param {array} userIds: Array of user id
    * @param {number} contributedByUserId: id of user who contributed to userId
    *
-   * @return {Object}
+   * @return {object}
    */
   async fetchByUserIdsAndContributedByUserId(userIds, contributedByUserId) {
     const oThis = this;
+
     const dbRows = await oThis
       .select('*')
       .where({ user_id: userIds, contributed_by_user_id: contributedByUserId })
@@ -214,32 +218,34 @@ class UserContributor extends ModelBase {
    * @returns {Promise<*>}
    */
   static async flushCache(params, options = {}) {
+    const promisesArray = [];
+
     if (options.isInsert) {
       if (params.contributedByUserId) {
         const UserContributorCache = require(rootPrefix +
           '/lib/cacheManagement/single/UserContributorContributedByPagination');
-        await new UserContributorCache({
-          contributedByUserId: params.contributedByUserId
-        }).clear();
+        promisesArray.push(new UserContributorCache({ contributedByUserId: params.contributedByUserId }).clear());
       }
 
       if (params.userId) {
         const UserContributorByUserIdCache = require(rootPrefix +
           '/lib/cacheManagement/single/UserContributorByUserIdPagination');
-        await new UserContributorByUserIdCache({
-          userId: params.userId
-        }).clear();
+        promisesArray.push(new UserContributorByUserIdCache({ userId: params.userId }).clear());
       }
     }
 
     if (params.userId && params.contributedByUserId) {
       const UserContributorMultiCache = require(rootPrefix +
         '/lib/cacheManagement/multi/UserContributorByUserIdsAndContributedByUserId');
-      await new UserContributorMultiCache({
-        contributedByUserId: params.contributedByUserId,
-        userIds: [params.userId]
-      }).clear();
+      promisesArray.push(
+        new UserContributorMultiCache({
+          contributedByUserId: params.contributedByUserId,
+          userIds: [params.userId]
+        }).clear()
+      );
     }
+
+    await Promise.all(promisesArray);
   }
 
   /**

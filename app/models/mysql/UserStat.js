@@ -1,12 +1,20 @@
 const rootPrefix = '../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
-  database = require(rootPrefix + '/lib/globalConstant/database');
+  databaseConstants = require(rootPrefix + '/lib/globalConstant/database');
 
-const dbName = database.userDbName;
+// Declare variables.
+const dbName = databaseConstants.userDbName;
 
+/**
+ * Class for user stat model.
+ *
+ * @class UserStat
+ */
 class UserStat extends ModelBase {
   /**
-   * User Stat model
+   * Constructor for user stat model.
+   *
+   * @augments ModelBase
    *
    * @constructor
    */
@@ -19,12 +27,23 @@ class UserStat extends ModelBase {
   }
 
   /**
+   * Format Db data.
    *
-   * @param dbRow
+   * @param {object} dbRow
+   * @param {number} dbRow.id
+   * @param {number} dbRow.user_id
+   * @param {number} dbRow.total_contributed_by
+   * @param {number} dbRow.total_contributed_to
+   * @param {number} dbRow.total_amount_raised
+   * @param {number} dbRow.created_at
+   * @param {number} dbRow.updated_at
+   *
    * @return {object}
    */
   formatDbData(dbRow) {
-    return {
+    const oThis = this;
+
+    const formattedData = {
       id: dbRow.id,
       userId: dbRow.user_id,
       totalContributedBy: dbRow.total_contributed_by,
@@ -33,59 +52,53 @@ class UserStat extends ModelBase {
       createdAt: dbRow.created_at,
       updatedAt: dbRow.updated_at
     };
+
+    return oThis.sanitizeFormattedData(formattedData);
   }
 
   /**
-   * List Of Formatted Column names that can be exposed by service
+   * List of formatted column names that can be exposed by service.
    *
-   *
-   * @returns {Array}
+   * @returns {array}
    */
   safeFormattedColumnNames() {
     return ['id', 'userId', 'totalContributedTo', 'totalContributedBy', 'totalAmountRaised', 'createdAt', 'updatedAt'];
   }
 
-  /***
-   * Fetch user stat object for user id
+  /**
+   * Fetch user stat object for user id.
    *
-   * @param userId {String} - user id
+   * @param {string} userId: user id
    *
-   * @return {Object}
+   * @return {object}
    */
   async fetchByUserId(userId) {
     const oThis = this;
 
-    let dbRows = await oThis.fetchByUserIds([userId]);
+    const dbRows = await oThis.fetchByUserIds([userId]);
 
-    return dbRows[id] || {};
+    return dbRows[userId] || {};
   }
 
   /**
-   * Fetch videos for given ids
+   * Fetch user stats object for given user_ids.
    *
-   * @param ids {array} - image ids
+   * @param {array} userIds: user ids
    *
    * @return {object}
    */
-
-  /***
-   * Fetch user stats object for given user_ids
-   *
-   * @param userIds {Array} - user ids
-   *
-   * @return {Object}
-   */
   async fetchByUserIds(userIds) {
     const oThis = this;
-    let response = {};
 
-    let dbRows = await oThis
+    const response = {};
+
+    const dbRows = await oThis
       .select('*')
       .where(['user_id IN (?)', userIds])
       .fire();
 
     for (let index = 0; index < dbRows.length; index++) {
-      let formatDbRow = oThis.formatDbData(dbRows[index]);
+      const formatDbRow = oThis.formatDbData(dbRows[index]);
       response[formatDbRow.userId] = formatDbRow;
     }
 
@@ -114,6 +127,12 @@ class UserStat extends ModelBase {
   /**
    * Create user stats.
    *
+   * @param {object} params
+   * @param {number} params.userId
+   * @param {number} params.totalContributedBy
+   * @param {number} params.totalContributedTo
+   * @param {number} params.totalAmountRaised
+   *
    * @returns {Promise<void>}
    */
   async createUserStat(params) {
@@ -140,9 +159,7 @@ class UserStat extends ModelBase {
   static async flushCache(params) {
     const UserStatByUserIds = require(rootPrefix + '/lib/cacheManagement/multi/UserStatByUserIds');
 
-    await new UserStatByUserIds({
-      userIds: [params.userId]
-    }).clear();
+    await new UserStatByUserIds({ userIds: [params.userId] }).clear();
   }
 
   /**

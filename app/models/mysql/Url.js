@@ -1,17 +1,22 @@
 const rootPrefix = '../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
-  urlConst = require(rootPrefix + '/lib/globalConstant/url'),
-  database = require(rootPrefix + '/lib/globalConstant/database');
+  urlConstants = require(rootPrefix + '/lib/globalConstant/url'),
+  databaseConstants = require(rootPrefix + '/lib/globalConstant/database');
 
-const dbName = database.entityDbName;
+// Declare variables.
+const dbName = databaseConstants.entityDbName;
 
 /**
  * Class for url model.
  *
- * @class
+ * @class Url
  */
 class Url extends ModelBase {
   /**
+   * Constructor for url model.
+   *
+   * @augments ModelBase
+   *
    * @constructor
    */
   constructor() {
@@ -36,48 +41,53 @@ class Url extends ModelBase {
    * @private
    */
   _formatDbData(dbRow) {
-    return {
+    const oThis = this;
+
+    const formattedData = {
       id: dbRow.id,
       url: dbRow.url,
-      kind: urlConst.kinds[dbRow.kind],
+      kind: urlConstants.kinds[dbRow.kind],
       createdAt: dbRow.created_at,
       updatedAt: dbRow.updated_at
     };
+
+    return oThis.sanitizeFormattedData(formattedData);
   }
 
   /**
-   * Fetch url by id
+   * Fetch url by id.
    *
-   * @param id {integer} - id
+   * @param {integer} id
    *
    * @return {object}
    */
   async fetchById(id) {
     const oThis = this;
 
-    let dbRows = await oThis.fetchByIds([id]);
+    const dbRows = await oThis.fetchByIds([id]);
 
     return dbRows[id] || {};
   }
 
   /**
-   * Fetch url for given ids
+   * Fetch url for given ids.
    *
-   * @param ids {array} - url ids
+   * @param {array} ids: url ids
    *
    * @return {object}
    */
   async fetchByIds(ids) {
     const oThis = this;
-    let response = {};
 
-    let dbRows = await oThis
+    const response = {};
+
+    const dbRows = await oThis
       .select('*')
       .where(['id IN (?)', ids])
       .fire();
 
     for (let index = 0; index < dbRows.length; index++) {
-      let formatDbRow = oThis._formatDbData(dbRows[index]);
+      const formatDbRow = oThis._formatDbData(dbRows[index]);
       response[formatDbRow.id] = formatDbRow;
     }
 
@@ -85,19 +95,21 @@ class Url extends ModelBase {
   }
 
   /**
-   * Insert into urls
+   * Insert into urls.
    *
-   * @param params {object} - params
+   * @param {object} params
+   * @param {string} params.url
+   * @param {string} params.kind
    *
    * @return {object}
    */
   async insertUrl(params) {
     const oThis = this;
 
-    let response = await oThis
+    const response = await oThis
       .insert({
         url: params.url,
-        kind: urlConst.invertedKinds[params.kind]
+        kind: urlConstants.invertedKinds[params.kind]
       })
       .fire();
 
@@ -105,9 +117,12 @@ class Url extends ModelBase {
   }
 
   /**
-   * Update url by id
+   * Update url by id.
    *
-   * @param params
+   * @param {object} params
+   * @param {string} params.url
+   * @param {number} params.id
+   *
    * @return {Promise<void>}
    */
   async updateById(params) {
@@ -124,9 +139,12 @@ class Url extends ModelBase {
   }
 
   /**
-   * Delete by id
+   * Delete by id.
    *
-   * @param params
+   * @param {object} params
+   * @param {number} params.id
+   * @param {string} params.kind
+   *
    * @return {Promise<void>}
    */
   async deleteByIdAndKind(params) {
@@ -136,15 +154,17 @@ class Url extends ModelBase {
       .delete()
       .where({
         id: params.id,
-        kind: urlConst.invertedKinds[params.kind]
+        kind: urlConstants.invertedKinds[params.kind]
       })
       .fire();
   }
 
   /**
-   * Delete by id
+   * Delete by id.
    *
-   * @param.id
+   * @param {object} params
+   * @param {number} params.id
+   *
    * @return {Promise<void>}
    */
   async deleteById(params) {

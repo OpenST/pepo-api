@@ -2,12 +2,12 @@ const rootPrefix = '../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
   util = require(rootPrefix + '/lib/util'),
   coreConstants = require(rootPrefix + '/config/coreConstants'),
-  database = require(rootPrefix + '/lib/globalConstant/database'),
   userConstants = require(rootPrefix + '/lib/globalConstant/user'),
-  localCipher = require(rootPrefix + '/lib/encryptors/localCipher');
+  localCipher = require(rootPrefix + '/lib/encryptors/localCipher'),
+  databaseConstants = require(rootPrefix + '/lib/globalConstant/database');
 
 // Declare variables names.
-const dbName = database.userDbName;
+const dbName = databaseConstants.userDbName;
 
 /**
  * Class for user model.
@@ -61,7 +61,9 @@ class UserModel extends ModelBase {
    * @return {object}
    */
   formatDbData(dbRow) {
-    return {
+    const oThis = this;
+
+    const formattedData = {
       id: dbRow.id,
       userName: dbRow.user_name,
       name: dbRow.name,
@@ -75,6 +77,8 @@ class UserModel extends ModelBase {
       createdAt: dbRow.created_at,
       updatedAt: dbRow.updated_at
     };
+
+    return oThis.sanitizeFormattedData(formattedData);
   }
 
   /**

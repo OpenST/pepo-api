@@ -1,13 +1,21 @@
 const rootPrefix = '../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
-  database = require(rootPrefix + '/lib/globalConstant/database'),
-  userTagConstants = require(rootPrefix + '/lib/globalConstant/userTag');
+  userTagConstants = require(rootPrefix + '/lib/globalConstant/userTag'),
+  databaseConstants = require(rootPrefix + '/lib/globalConstant/database');
 
-const dbName = database.userDbName;
+// Declare variables.
+const dbName = databaseConstants.userDbName;
 
+/**
+ * Class for user tag model.
+ *
+ * @class UserTag
+ */
 class UserTag extends ModelBase {
   /**
-   * User Stat model
+   * Constructor for user tag model.
+   *
+   * @augments ModelBase
    *
    * @constructor
    */
@@ -20,12 +28,22 @@ class UserTag extends ModelBase {
   }
 
   /**
+   * Format Db data.
    *
-   * @param dbRow
+   * @param {object} dbRow
+   * @param {number} dbRow.id
+   * @param {number} dbRow.user_id
+   * @param {number} dbRow.tag_id
+   * @param {string} dbRow.kind
+   * @param {number} dbRow.created_at
+   * @param {number} dbRow.updated_at
+   *
    * @return {object}
    */
   formatDbData(dbRow) {
-    return {
+    const oThis = this;
+
+    const formattedData = {
       id: dbRow.id,
       userId: dbRow.user_id,
       tagId: dbRow.tag_id,
@@ -33,25 +51,29 @@ class UserTag extends ModelBase {
       createdAt: dbRow.created_at,
       updatedAt: dbRow.updated_at
     };
+
+    return oThis.sanitizeFormattedData(formattedData);
   }
 
   /**
-   * Fetch user tags by user ids
+   * Fetch user tags by user ids.
    *
-   * @param userIds
+   * @param {array} userIds
+   *
    * @returns {Promise<void>}
    */
   async fetchByUserIds(userIds) {
     const oThis = this;
-    let response = {};
 
-    let dbRows = await oThis
+    const response = {};
+
+    const dbRows = await oThis
       .select('*')
       .where(['user_id IN (?)', userIds])
       .fire();
 
     for (let index = 0; index < dbRows.length; index++) {
-      let formatDbRow = oThis.formatDbData(dbRows[index]);
+      const formatDbRow = oThis.formatDbData(dbRows[index]);
       response[formatDbRow.userId] = response[formatDbRow.userId] || {
         [userTagConstants.selfAddedKind]: [],
         [userTagConstants.derivedKind]: []
@@ -73,9 +95,7 @@ class UserTag extends ModelBase {
   static async flushCache(params) {
     const UserTagsByUserIds = require(rootPrefix + '/lib/cacheManagement/multi/UserTagsByUserIds');
 
-    await new UserTagsByUserIds({
-      userIds: [params.userId]
-    }).clear();
+    await new UserTagsByUserIds({ userIds: [params.userId] }).clear();
   }
 }
 

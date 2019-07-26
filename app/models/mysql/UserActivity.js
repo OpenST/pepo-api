@@ -1,12 +1,20 @@
 const rootPrefix = '../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
-  database = require(rootPrefix + '/lib/globalConstant/database');
+  databaseConstants = require(rootPrefix + '/lib/globalConstant/database');
 
-const dbName = database.feedDbName;
+// Declare variables names.
+const dbName = databaseConstants.feedDbName;
 
+/**
+ * Class for user activity model.
+ *
+ * @class UserActivityModel
+ */
 class UserActivityModel extends ModelBase {
   /**
-   * Constructor for User Activity model.
+   * Constructor for user activity model.
+   *
+   * @augments ModelBase
    *
    * @constructor
    */
@@ -22,11 +30,18 @@ class UserActivityModel extends ModelBase {
    * Format db data.
    *
    * @param {object} dbRow
+   * @param {number} dbRow.user_id
+   * @param {number} dbRow.activity_id
+   * @param {number} dbRow.published_ts
+   * @param {number} dbRow.created_at
+   * @param {number} dbRow.updated_at
    *
    * @return {object}
    */
   formatDbData(dbRow) {
-    return {
+    const oThis = this;
+
+    const formattedData = {
       id: dbRow.id,
       userId: dbRow.user_id,
       activityId: dbRow.activity_id,
@@ -34,13 +49,14 @@ class UserActivityModel extends ModelBase {
       createdAt: dbRow.created_at,
       updatedAt: dbRow.updated_at
     };
+
+    return oThis.sanitizeFormattedData(formattedData);
   }
 
   /**
-   * List Of Formatted Column names that can be exposed by service
+   * List Of formatted column names that can be exposed by service.
    *
-   *
-   * @returns {Array}
+   * @returns {array}
    */
   safeFormattedColumnNames() {
     return ['id', 'userId', 'activityId', 'publishedTs', 'createdAt', 'updatedAt'];
@@ -86,7 +102,7 @@ class UserActivityModel extends ModelBase {
     }
 
     for (let index = 0; index < dbRows.length; index++) {
-      let formattedObj = oThis.formatDbData(dbRows[index]);
+      const formattedObj = oThis.formatDbData(dbRows[index]);
       activityIds.push(formattedObj.activityId);
       userActivityMap[formattedObj.activityId] = formattedObj;
     }
@@ -130,7 +146,7 @@ class UserActivityModel extends ModelBase {
     }
 
     for (let index = 0; index < dbRows.length; index++) {
-      let formattedObj = oThis.formatDbData(dbRows[index]);
+      const formattedObj = oThis.formatDbData(dbRows[index]);
       activityIds.push(formattedObj.activityId);
       userActivityMap[formattedObj.activityId] = formattedObj;
     }
@@ -141,9 +157,10 @@ class UserActivityModel extends ModelBase {
   /**
    * Fetch user activity by user id, published timestamp and activity id.
    *
-   * @param userId
-   * @param publishedTs
-   * @param activityId
+   * @param {number} userId
+   * @param {number} publishedTs
+   * @param {number} activityId
+   *
    * @returns {Promise<*>}
    */
   async fetchUserActivityByUserIdPublishedTsAndActivityId(userId, publishedTs, activityId) {
@@ -157,7 +174,7 @@ class UserActivityModel extends ModelBase {
       whereClause = ['published_ts IS NULL'];
     }
 
-    let dbRows = await oThis
+    const dbRows = await oThis
       .select('*')
       .where({
         user_id: userId,
@@ -178,23 +195,22 @@ class UserActivityModel extends ModelBase {
    *
    * @param {object} params
    * @param {number} params.id
+   * @param {number} params.userId
    *
    * @returns {Promise<*>}
    */
   static async flushCache(params) {
+    const promisesArray = [];
+
     const UserActivityByUserIdForOthersPagination = require(rootPrefix +
       '/lib/cacheManagement/single/UserActivityByUserIdForOthersPagination');
-
-    await new UserActivityByUserIdForOthersPagination({
-      userId: [params.userId]
-    }).clear();
+    promisesArray.push(new UserActivityByUserIdForOthersPagination({ userId: [params.userId] }).clear());
 
     const UserActivityByUserIdForSelfPagination = require(rootPrefix +
       '/lib/cacheManagement/single/UserActivityByUserIdForSelfPagination');
+    promisesArray.push(new UserActivityByUserIdForSelfPagination({ userId: [params.userId] }).clear());
 
-    await new UserActivityByUserIdForSelfPagination({
-      userId: [params.userId]
-    }).clear();
+    await Promise.all(promisesArray);
   }
 }
 
