@@ -528,9 +528,14 @@ class TwitterSignup extends ServiceBase {
 
     logger.log('End::Service Response for twitter Signup');
 
+    const safeFormattedUserData = new UserModel().safeFormattedData(oThis.secureUserObj);
+    const safeFormattedTokenUserData = new TokenUserModel().safeFormattedData(oThis.tokenUserObj);
+
     return responseHelper.successWithData({
-      user: new UserModel().safeFormattedData(oThis.secureUserObj),
-      tokenUser: new TokenUserModel().safeFormattedData(oThis.tokenUserObj),
+      usersByIdMap: { [safeFormattedUserData.id]: safeFormattedUserData },
+      tokenUsersByUserIdMap: { [safeFormattedTokenUserData.userId]: safeFormattedTokenUserData },
+      user: safeFormattedUserData,
+      tokenUser: safeFormattedTokenUserData,
       userLoginCookieValue: userLoginCookieValue
     });
   }
