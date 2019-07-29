@@ -1,29 +1,29 @@
-/**
- * Module for After sign up job
- *
- * @module executables/bgJobProcessor/AfterSignUpJob
- */
-
 const rootPrefix = '../..',
   BgJob = require(rootPrefix + '/lib/BgJob'),
-  bgJobConstants = require(rootPrefix + '/lib/globalConstant/bgJob'),
-  logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
+  TwitterUserConnectionModel = require(rootPrefix + '/app/models/mysql/TwitterUserConnection'),
   AddUpdateUserBioKlass = require(rootPrefix + '/lib/user/profile/AddUpdateBio'),
   TwitterUserConnectionByUser1PaginationCache = require(rootPrefix +
     '/lib/cacheManagement/single/TwitterUserConnectionByUser1Pagination'),
-  TwitterUserConnectionModel = require(rootPrefix + '/app/models/mysql/TwitterUserConnection'),
-  twitterUserConnectionConstants = require(rootPrefix + '/lib/globalConstant/twitterUserConnection'),
-  responseHelper = require(rootPrefix + '/lib/formatter/response');
+  bgJobConstants = require(rootPrefix + '/lib/globalConstant/bgJob'),
+  twitterUserConnectionConstants = require(rootPrefix + '/lib/globalConstant/twitterUserConnection');
 
+/**
+ * Class for after signup job.
+ *
+ * @class AfterSignUpJob
+ */
 class AfterSignUpJob {
   /**
-   * Construtor
+   * Constructor for after signup job.
    *
-   * @param {Object} params
-   * @param {String} params.bio
-   * @param {String/Number} params.twitterId
-   * @param {Number} params.userId
-   * @param {Number} params.profileImageId
+   * @param {object} params
+   * @param {string} params.bio
+   * @param {string/number} params.twitterId
+   * @param {string/number} params.twitterUserId
+   * @param {number} params.userId
+   * @param {number} params.profileImageId
+   *
+   * @constructor
    */
   constructor(params) {
     const oThis = this;
@@ -36,12 +36,13 @@ class AfterSignUpJob {
   }
 
   /**
-   * Perform
+   * Main performer for class.
    *
    * @returns {Promise<void>}
    */
   async perform() {
     const oThis = this;
+
     const promisesArray = [];
 
     await oThis._validateAndSanitize();
@@ -55,13 +56,13 @@ class AfterSignUpJob {
   }
 
   /**
-   * Validate and Sanitize
+   * Validate and sanitize.
    *
    * @returns {Promise<void>}
    * @private
    */
   async _validateAndSanitize() {
-    const oThis = this;
+    // Nothing to do.
   }
 
   /**
@@ -80,7 +81,7 @@ class AfterSignUpJob {
   }
 
   /**
-   * Sync users friends and followers
+   * Sync users friends and followers.
    *
    * @returns {Promise<void>}
    * @private
@@ -88,7 +89,7 @@ class AfterSignUpJob {
   async _syncFriendsAndFollowers() {
     const oThis = this;
 
-    let messagePayload = {
+    const messagePayload = {
       twitterId: oThis.twitterId
     };
 
@@ -104,10 +105,10 @@ class AfterSignUpJob {
   async _updateTwitterUserConnections() {
     const oThis = this;
 
-    let page = 1,
-      limit = 100;
+    const limit = 100;
+    let page = 1;
 
-    let queryParams = {
+    const queryParams = {
       limit: limit,
       twitterUser2Id: oThis.twitterUserId
     };
@@ -121,10 +122,10 @@ class AfterSignUpJob {
       const twitterUser1Ids = [],
         twitterUserConnectionIds = [];
 
-      queryParams['page'] = page;
-      let resp = await new TwitterUserConnectionModel().fetchByTwitterUser2Id(queryParams);
+      queryParams.page = page;
+      const resp = await new TwitterUserConnectionModel().fetchByTwitterUser2Id(queryParams);
 
-      for (let twitterUserConnectionId in resp) {
+      for (const twitterUserConnectionId in resp) {
         twitterUserConnectionIds.push(twitterUserConnectionId);
         twitterUser1Ids.push(resp[twitterUserConnectionId].twitterUser1Id);
       }
@@ -142,9 +143,9 @@ class AfterSignUpJob {
 
       const promisesArray = [];
 
-      for (let i = 0; i < twitterUser1Ids.length; i++) {
-        let twitterUser1Id = twitterUser1Ids[i];
-        let promiseResp = new TwitterUserConnectionByUser1PaginationCache({
+      for (let index = 0; index < twitterUser1Ids.length; index++) {
+        const twitterUser1Id = twitterUser1Ids[index];
+        const promiseResp = new TwitterUserConnectionByUser1PaginationCache({
           twitterUser1Id: twitterUser1Id
         }).clear();
 
@@ -153,12 +154,12 @@ class AfterSignUpJob {
 
       await Promise.all(promisesArray);
 
-      page = page + 1;
+      page += 1;
     }
   }
 
   /**
-   * Enqueue profile image resizer
+   * Enqueue profile image resizer.
    *
    * @returns {Promise<void>}
    */
