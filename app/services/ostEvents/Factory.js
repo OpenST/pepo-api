@@ -4,8 +4,15 @@ const rootPrefix = '../../..',
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   ostEventConstants = require(rootPrefix + '/lib/globalConstant/ostEvent');
 
+/**
+ * Class to process OST event.
+ *
+ * @class OstEventProcess
+ */
 class OstEventProcess extends ServiceBase {
   /**
+   * Constructor to process OST event.
+   *
    * @param {object} params
    * @param {object} params.ostEventObj: OST Event Table row
    *
@@ -37,7 +44,7 @@ class OstEventProcess extends ServiceBase {
   }
 
   /**
-   * Extract event topic
+   * Extract event topic.
    *
    * @returns {Promise<never>}
    * @private
@@ -50,6 +57,7 @@ class OstEventProcess extends ServiceBase {
       oThis.ostEventTopic = oThis.eventData.topic;
     } catch (err) {
       logger.error('Error in JSON Parse: ', err);
+
       return Promise.reject(
         responseHelper.error({
           internal_error_identifier: 's_oe_f_e_3',
@@ -61,7 +69,7 @@ class OstEventProcess extends ServiceBase {
   }
 
   /**
-   * Validate param
+   * Validate param.
    *
    * @return {Promise<void>}
    * @private
@@ -72,42 +80,42 @@ class OstEventProcess extends ServiceBase {
 
     switch (oThis.ostEventTopic) {
       case ostEventConstants.usersActivationInitiateOstWebhookTopic: {
-        let ActivationInitiateClass = require(rootPrefix + '/app/services/ostEvents/users/ActivationInitiated');
+        const ActivationInitiateClass = require(rootPrefix + '/app/services/ostEvents/users/ActivationInitiated');
         eventProcessResponse = await new ActivationInitiateClass(oThis.eventData).perform();
         break;
       }
       case ostEventConstants.usersActivationSuccessOstWebhookTopic: {
-        let ActivationSuccessClass = require(rootPrefix + '/app/services/ostEvents/users/ActivationSuccess');
+        const ActivationSuccessClass = require(rootPrefix + '/app/services/ostEvents/users/ActivationSuccess');
         eventProcessResponse = await new ActivationSuccessClass(oThis.eventData).perform();
         break;
       }
       case ostEventConstants.usersActivationFailureOstWebhookTopic: {
-        let ActivationFailureClass = require(rootPrefix + '/app/services/ostEvents/users/ActivationFailure');
+        const ActivationFailureClass = require(rootPrefix + '/app/services/ostEvents/users/ActivationFailure');
         eventProcessResponse = await new ActivationFailureClass(oThis.eventData).perform();
         break;
       }
       case ostEventConstants.transactionsFailureOstWebhookTopic: {
-        let TransactionFailureClass = require(rootPrefix + '/app/services/ostEvents/transactions/Failure');
+        const TransactionFailureClass = require(rootPrefix + '/app/services/ostEvents/transactions/Failure');
         eventProcessResponse = await new TransactionFailureClass(oThis.eventData).perform();
         break;
       }
       case ostEventConstants.transactionsSuccessOstWebhookTopic: {
-        let TransactionSuccessClass = require(rootPrefix + '/app/services/ostEvents/transactions/Success');
+        const TransactionSuccessClass = require(rootPrefix + '/app/services/ostEvents/transactions/Success');
         eventProcessResponse = await new TransactionSuccessClass(oThis.eventData).perform();
         break;
       }
       case ostEventConstants.usdPricePointUpdatedOstWebhookTopic: {
-        let PricePointsUsdClass = require(rootPrefix + '/app/services/ostEvents/pricePoints/Usd');
+        const PricePointsUsdClass = require(rootPrefix + '/app/services/ostEvents/pricePoints/Usd');
         eventProcessResponse = await new PricePointsUsdClass(oThis.eventData).perform();
         break;
       }
       case ostEventConstants.eurPricePointUpdatedOstWebhookTopic: {
-        let PricePointsEurClass = require(rootPrefix + '/app/services/ostEvents/pricePoints/Eur');
+        const PricePointsEurClass = require(rootPrefix + '/app/services/ostEvents/pricePoints/Eur');
         eventProcessResponse = await new PricePointsEurClass(oThis.eventData).perform();
         break;
       }
       case ostEventConstants.gbpPricePointUpdatedOstWebhookTopic: {
-        let PricePointsGbpClass = require(rootPrefix + '/app/services/ostEvents/pricePoints/Gbp');
+        const PricePointsGbpClass = require(rootPrefix + '/app/services/ostEvents/pricePoints/Gbp');
         eventProcessResponse = await new PricePointsGbpClass(oThis.eventData).perform();
         break;
       }
