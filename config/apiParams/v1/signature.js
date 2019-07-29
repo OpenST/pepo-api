@@ -149,7 +149,7 @@ const v1Signature = {
       },
       {
         parameter: 'user_id',
-        validatorMethods: ['validateInteger']
+        validatorMethods: ['validateNonZeroInteger']
       }
     ],
     optional: [
@@ -181,7 +181,7 @@ const v1Signature = {
       },
       {
         parameter: 'video_id',
-        validatorMethods: ['validateInteger']
+        validatorMethods: ['validateNonZeroInteger']
       }
     ]
   },
@@ -246,7 +246,7 @@ const v1Signature = {
       },
       {
         parameter: 'profile_user_id',
-        validatorMethods: ['validateInteger']
+        validatorMethods: ['validateNonZeroInteger']
       }
     ],
     optional: []
@@ -255,7 +255,7 @@ const v1Signature = {
     mandatory: [
       {
         parameter: 'user_name',
-        validatorMethods: ['validateString']
+        validatorMethods: ['validateString', 'validateUserName']
       }
     ],
     optional: []
@@ -268,7 +268,7 @@ const v1Signature = {
       },
       {
         parameter: 'profile_user_id',
-        validatorMethods: ['validateInteger']
+        validatorMethods: ['validateNonZeroInteger']
       },
       {
         parameter: 'video_url',
@@ -314,7 +314,7 @@ const v1Signature = {
       },
       {
         parameter: 'profile_user_id',
-        validatorMethods: ['validateInteger']
+        validatorMethods: ['validateNonZeroInteger']
       },
       {
         parameter: 'image_url',
@@ -344,11 +344,11 @@ const v1Signature = {
       },
       {
         parameter: 'profile_user_id',
-        validatorMethods: ['validateInteger']
+        validatorMethods: ['validateNonZeroInteger']
       },
       {
         parameter: 'name',
-        validatorMethods: ['validateString']
+        validatorMethods: ['validateString', 'validateName']
       },
       {
         parameter: 'user_name',
@@ -362,7 +362,7 @@ const v1Signature = {
       },
       {
         parameter: 'link',
-        validatorMethods: ['validateString']
+        validatorMethods: ['validateGenericUrl']
       }
     ]
   },

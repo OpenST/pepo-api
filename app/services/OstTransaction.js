@@ -20,6 +20,7 @@ const rootPrefix = '../..',
     '/lib/cacheManagement/single/ExternalEntitiyByEntityIdAndEntityKind'),
   commonValidator = require(rootPrefix + '/lib/validators/Common'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
+  CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   activityConstants = require(rootPrefix + '/lib/globalConstant/activity'),
   createErrorLogsEntry = require(rootPrefix + '/lib/errorLogs/createEntry'),
   errorLogsConstants = require(rootPrefix + '/lib/globalConstant/errorLogs'),
@@ -71,6 +72,8 @@ class OstTransaction extends ServiceBase {
   async _asyncPerform() {
     const oThis = this;
 
+    oThis._validateAndSanitizeParams();
+
     let setStatusResponse = oThis._setStatuses();
     if (setStatusResponse.isFailure()) {
       return Promise.reject(setStatusResponse);
@@ -89,6 +92,19 @@ class OstTransaction extends ServiceBase {
       await oThis._insertInTransactionAndAssociatedTables();
     }
     return Promise.resolve(responseHelper.successWithData());
+  }
+
+  /**
+   * Validate and sanitize
+   *
+   * @private
+   */
+  _validateAndSanitizeParams() {
+    const oThis = this;
+
+    if (oThis.text) {
+      oThis.text = CommonValidators.sanitizeText(oThis.text);
+    }
   }
 
   /**
