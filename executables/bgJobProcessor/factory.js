@@ -18,16 +18,26 @@ class Factory {
 
     logger.log('Factory get instance.');
 
-    if (messageParams.message.kind === bgJobConstants.afterSignUpJobTopic) {
-      return new oThis._afterSignupJobProcessor(messageParams.message.payload);
-    } else if (messageParams.message.kind === bgJobConstants.twitterFriendsSyncJobTopic) {
-      return new oThis._twitterFriendsSyncJobProcessor(messageParams.message.payload);
-    } else if (messageParams.message.kind === bgJobConstants.imageResizer) {
-      return new oThis._imageResizer(messageParams.message.payload);
-    } else if (messageParams.message.kind === bgJobConstants.ostWebhookJobTopic) {
-      return new oThis._ostWebhookJobTopic(messageParams.message.payload);
+    switch (messageParams.message.kind) {
+      case bgJobConstants.afterSignUpJobTopic: {
+        return new oThis._afterSignupJobProcessor(messageParams.message.payload);
+      }
+      case bgJobConstants.twitterFriendsSyncJobTopic: {
+        return new oThis._twitterFriendsSyncJobProcessor(messageParams.message.payload);
+      }
+      case bgJobConstants.imageResizer: {
+        return new oThis._imageResizer(messageParams.message.payload);
+      }
+      case bgJobConstants.videoResizer: {
+        return new oThis._videoResizer(messageParams.message.payload);
+      }
+      case bgJobConstants.ostWebhookJobTopic: {
+        return new oThis._ostWebhookJobTopic(messageParams.message.payload);
+      }
+      default: {
+        throw new Error(`Unrecognized messageParams: ${JSON.stringify(messageParams)}`);
+      }
     }
-    throw new Error(`Unrecognized messageParams: ${JSON.stringify(messageParams)}`);
   }
 
   get _afterSignupJobProcessor() {
@@ -40,6 +50,10 @@ class Factory {
 
   get _imageResizer() {
     return require(rootPrefix + '/lib/resize/Image');
+  }
+
+  get _videoResizer() {
+    return require(rootPrefix + '/lib/resize/Video');
   }
 
   get _ostWebhookJobTopic() {
