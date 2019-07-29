@@ -39,8 +39,8 @@ class CreateCron {
       if (responseHelper.isCustomResult(error)) {
         return error;
       }
-      logger.error('devops/utils/InsertCron.js::perform::catch', error);
-      return oThis._getRespError('do_u_cs_ic_p1');
+      logger.error('/lib/cronProcess/InsertCrons::perform::catch', error);
+      return oThis._getRespError('do_u_cs_cc_p1');
     });
   }
 
