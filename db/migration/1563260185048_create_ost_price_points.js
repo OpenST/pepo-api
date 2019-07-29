@@ -24,5 +24,3 @@ const createOstPricePointsTable = {
 };
 
 module.exports = createOstPricePointsTable;
-
-// db/migration/1563260185048_create_ost_price_points.js:29
