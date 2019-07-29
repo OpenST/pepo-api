@@ -21,7 +21,7 @@ class AfterSignUpJob {
    *
    * @param {Object} params
    * @param {String} params.bio
-   * @param {String/Number} params.twitterId
+   * @param {String/Number} params.twitterUserId
    * @param {Number} params.userId
    * @param {Number} params.profileImageId
    */
