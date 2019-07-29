@@ -272,13 +272,13 @@ const v1Signature = {
       },
       {
         parameter: 'video_url',
-        validatorMethods: ['validateGenericUrl']
+        validatorMethods: ['validateNonBlankGenericUrl']
       }
     ],
     optional: [
       {
         parameter: 'poster_image_url',
-        validatorMethods: ['validateGenericUrl']
+        validatorMethods: ['validateNonBlankGenericUrl']
       },
       {
         parameter: 'video_width',
@@ -318,7 +318,7 @@ const v1Signature = {
       },
       {
         parameter: 'image_url',
-        validatorMethods: ['validateGenericUrl']
+        validatorMethods: ['validateNonBlankGenericUrl']
       }
     ],
     optional: [
