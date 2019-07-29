@@ -1,24 +1,33 @@
 const rootPrefix = '../..',
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
-  bgJobConstant = require(rootPrefix + '/lib/globalConstant/bgJob');
+  bgJobConstants = require(rootPrefix + '/lib/globalConstant/bgJob');
 
+/**
+ * Class for background job processor factory.
+ *
+ * @class Factory
+ */
 class Factory {
+  /**
+   * Get factory instance.
+   *
+   * @param {object} messageParams
+   */
   getInstance(messageParams) {
     const oThis = this;
 
     logger.log('Factory get instance.');
 
-    if (messageParams.message.kind === bgJobConstant.afterSignUpJobTopic) {
+    if (messageParams.message.kind === bgJobConstants.afterSignUpJobTopic) {
       return new oThis._afterSignupJobProcessor(messageParams.message.payload);
-    } else if (messageParams.message.kind === bgJobConstant.twitterFriendsSyncJobTopic) {
+    } else if (messageParams.message.kind === bgJobConstants.twitterFriendsSyncJobTopic) {
       return new oThis._twitterFriendsSyncJobProcessor(messageParams.message.payload);
-    } else if (messageParams.message.kind === bgJobConstant.imageResizer) {
+    } else if (messageParams.message.kind === bgJobConstants.imageResizer) {
       return new oThis._imageResizer(messageParams.message.payload);
-    } else if (messageParams.message.kind === bgJobConstant.ostWebhookJobTopic) {
+    } else if (messageParams.message.kind === bgJobConstants.ostWebhookJobTopic) {
       return new oThis._ostWebhookJobTopic(messageParams.message.payload);
-    } else {
-      throw new Error('unrecognized messageParams: ' + JSON.stringify(messageParams));
     }
+    throw new Error(`Unrecognized messageParams: ${JSON.stringify(messageParams)}`);
   }
 
   get _afterSignupJobProcessor() {
@@ -30,7 +39,7 @@ class Factory {
   }
 
   get _imageResizer() {
-    return require(rootPrefix + '/lib/resize/image');
+    return require(rootPrefix + '/lib/resize/Image');
   }
 
   get _ostWebhookJobTopic() {
