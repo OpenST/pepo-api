@@ -8,6 +8,7 @@ const rootPrefix = '../../../../..',
   UrlCacheKlass = require(rootPrefix + '/lib/cacheManagement/multi/UrlsByIds'),
   AssociateTagsToUser = require(rootPrefix + '/lib/user/profile/AssociateTags'),
   userTagConstants = require(rootPrefix + '/lib/globalConstant/userTag'),
+  CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   responseHelper = require(rootPrefix + '/lib/formatter/response');
 
 /**
@@ -59,6 +60,10 @@ class UpdateProfileInfo extends UpdateProfileBase {
           debug_options: {}
         })
       );
+    }
+
+    if (oThis.bio) {
+      oThis.bio = CommonValidators.sanitizeText(oThis.bio);
     }
   }
 
