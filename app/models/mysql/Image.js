@@ -1,5 +1,7 @@
 const rootPrefix = '../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
+  util = require(rootPrefix + '/lib/util'),
+  s3Constants = require(rootPrefix + '/lib/globalConstant/s3'),
   shortToLongUrl = require(rootPrefix + '/lib/shortToLongUrl'),
   imageConst = require(rootPrefix + '/lib/globalConstant/image'),
   databaseConstants = require(rootPrefix + '/lib/globalConstant/database');
@@ -46,6 +48,7 @@ class Image extends ModelBase {
 
     const formattedData = {
       id: dbRow.id,
+      urlTemplate: dbRow.url_template,
       resolutions: JSON.parse(dbRow.resolutions),
       status: imageConst.statuses[dbRow.status],
       kind: imageConst.kinds[dbRow.kind],
@@ -54,6 +57,54 @@ class Image extends ModelBase {
     };
 
     return oThis.sanitizeFormattedData(formattedData);
+  }
+
+  /**
+   * Format resolutions hash
+   *
+   * @param resolution
+   * @returns {Object}
+   * @private
+   */
+  _formatResolution(resolution) {
+    const oThis = this;
+
+    const formattedData = {
+      url: resolution.u,
+      size: resolution.s,
+      height: resolution.h,
+      width: resolution.w
+    };
+
+    return oThis.sanitizeFormattedData(formattedData);
+  }
+
+  /**
+   * Formats the complete resolution hash
+   *
+   * @param resolutions
+   * @param urlTemplate
+   * @private
+   */
+  _formatResolutions(resolutions, urlTemplate) {
+    const oThis = this;
+
+    let responseResolutionHash = {};
+    for (const resolution in resolutions) {
+      let responseResolution = resolution;
+      if (resolution === 'o') {
+        responseResolution = 'original';
+        responseResolutionHash[responseResolution] = oThis._formatResolution(resolutions[resolution]);
+        responseResolutionHash[responseResolution].url = shortToLongUrl.getFullUrl(
+          responseResolutionHash[responseResolution].url
+        );
+      } else {
+        responseResolutionHash[responseResolution] = oThis._formatResolution(resolutions[resolution]);
+        responseResolutionHash[responseResolution].url = shortToLongUrl.getFullUrl(urlTemplate, responseResolution);
+      }
+    }
+
+    return responseResolutionHash;
   }
 
   /**
@@ -90,13 +141,7 @@ class Image extends ModelBase {
 
     for (let index = 0; index < dbRows.length; index++) {
       const formatDbRow = oThis._formatDbData(dbRows[index]);
-
-      for (const resolution in formatDbRow.resolutions) {
-        const shortUrl = formatDbRow.resolutions[resolution].url;
-
-        formatDbRow.resolutions[resolution].url = shortToLongUrl.getFullUrl(shortUrl);
-      }
-
+      formatDbRow.resolutions = oThis._formatResolutions(formatDbRow.resolutions, formatDbRow.urlTemplate);
       response[formatDbRow.id] = formatDbRow;
     }
 
@@ -108,6 +153,7 @@ class Image extends ModelBase {
    *
    * @param {object} params
    * @param {string} params.resolutions
+   * @param {number} params.userId
    * @param {number} params.kind
    * @param {number} params.status
    *
@@ -116,13 +162,85 @@ class Image extends ModelBase {
   async insertImage(params) {
     const oThis = this;
 
+    let urlTemplate =
+        s3Constants.imageShortUrlPrefix +
+        '/' +
+        util.getS3FileTemplatePrefix(params.userId) +
+        s3Constants.fileNameShortSizeSuffix +
+        '.jpg',
+      resolutions = oThis._formatResolutionsToInsert(params.resolutions);
+
     return oThis
       .insert({
-        resolutions: JSON.stringify(params.resolutions),
+        url_template: urlTemplate,
+        resolutions: JSON.stringify(resolutions),
         kind: imageConst.invertedKinds[params.kind],
         status: imageConst.invertedStatuses[params.status]
       })
       .fire();
+  }
+
+  /**
+   * Insert into images.
+   *
+   * @param {object} params
+   * @param {string} params.resolutions
+   * @param {number} params.status
+   * @param {number} params.id
+   *
+   * @return {object}
+   */
+  async updateImage(params) {
+    const oThis = this;
+
+    let resolutions = oThis._formatResolutionsToInsert(params.resolutions);
+
+    return oThis
+      .update({
+        resolutions: JSON.stringify(resolutions),
+        status: imageConst.invertedStatuses[params.status]
+      })
+      .where({ id: params.id })
+      .fire();
+  }
+
+  /**
+   * Format resolutions to insert
+   *
+   * @param resolutions
+   * @private
+   */
+  _formatResolutionsToInsert(resolutions) {
+    const oThis = this;
+
+    let responseResolutionHash = {};
+    for (const resolution in resolutions) {
+      if (resolution === 'original') {
+        responseResolutionHash['o'] = oThis._formatResolutionToInsert(resolutions[resolution]);
+        responseResolutionHash['o'].u = resolutions[resolution].url;
+      } else {
+        responseResolutionHash[resolution] = oThis._formatResolutionToInsert(resolutions[resolution]);
+      }
+    }
+    return responseResolutionHash;
+  }
+
+  /**
+   * Format resolution to insert
+   *
+   * @param resolution
+   * @private
+   */
+  _formatResolutionToInsert(resolution) {
+    const oThis = this;
+
+    const formattedData = {
+      s: resolution.size,
+      h: resolution.height,
+      w: resolution.width
+    };
+
+    return oThis.sanitizeFormattedData(formattedData);
   }
 
   /**
