@@ -4,47 +4,78 @@ const rootPrefix = '../..',
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   coreConstants = require(rootPrefix + '/config/coreConstants');
 
-const isQualityChanged = process.argv[2],
-  BATCH_SIZE = 10;
+const isQualityChanged = process.argv[2] || false;
 
 class ResizeImages {
   constructor() {
     const oThis = this;
-
-    oThis.count = 0;
   }
 
+  /**
+   * Perform
+   *
+   * @returns {Promise<void>}
+   */
   async perform() {
     const oThis = this;
 
-    console.log('isQualityChanged ', isQualityChanged);
+    logger.log('isQualityChanged ', isQualityChanged);
 
-    await oThis._getImageCount();
-
-    await oThis._resize();
+    await oThis._getImages();
   }
 
-  async _getImageCount() {
-    const oThis = this,
-      resp = await new ImageModel().select('count(*) as count').fire();
+  /**
+   * Get images
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _getImages() {
+    const oThis = this;
 
-    oThis.count = resp[0].count;
-    console.log('oThis.count ', oThis.count);
+    let page = 1,
+      limit = 10,
+      offset = null,
+      moreDataPresent = true;
+
+    while (moreDataPresent) {
+      offset = (page - 1) * limit;
+
+      const dbRows = await new ImageModel()
+        .select(['id'])
+        .limit(limit)
+        .offset(offset)
+        .order_by('id ASC')
+        .fire();
+
+      if (dbRows.length === 0) {
+        moreDataPresent = false;
+      } else {
+        await oThis._resize(dbRows);
+      }
+      page++;
+    }
   }
 
-  async _resize() {
+  /**
+   * Resize image rows
+   *
+   * @param imageRows
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _resize(imageRows) {
     const oThis = this;
 
     let promiseArray = [];
 
-    for (let index = 1; index < oThis.count; index++) {
-      promiseArray.push(new ResizeImageLib({ imageId: index, resizeAll: isQualityChanged }).perform());
-
-      if (promiseArray.length >= BATCH_SIZE || oThis.count === index) {
-        await Promise.all(promiseArray);
-        promiseArray = [];
-      }
+    for (let index = 0; index < imageRows.length; index++) {
+      promiseArray.push(
+        new ResizeImageLib({ userId: 1000, imageId: imageRows[index].id, resizeAll: isQualityChanged }).perform()
+      );
     }
+
+    await Promise.all(promiseArray);
   }
 }
 
