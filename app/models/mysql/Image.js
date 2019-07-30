@@ -62,10 +62,11 @@ class Image extends ModelBase {
   }
 
   /**
-   * Format resolutions hash
+   * Format resolutions hash.
    *
-   * @param resolution
-   * @returns {Object}
+   * @param {object} resolution
+   *
+   * @returns {object}
    * @private
    */
   _formatResolution(resolution) {
@@ -82,10 +83,13 @@ class Image extends ModelBase {
   }
 
   /**
-   * Formats the complete resolution hash
+   * Formats the complete resolution hash.
    *
-   * @param resolutions
-   * @param urlTemplate
+   * @param {object} resolutions
+   * @param {string} urlTemplate
+   *
+   * @returns {object}
+   *
    * @private
    */
   _formatResolutions(resolutions, urlTemplate) {
@@ -164,7 +168,7 @@ class Image extends ModelBase {
   async insertImage(params) {
     const oThis = this;
 
-    let fileExtension = util.getFileExtension(params.resolutions.original.url),
+    const fileExtension = util.getFileExtension(params.resolutions.original.url),
       urlTemplate =
         s3Constants.imageShortUrlPrefix +
         '/' +
@@ -196,7 +200,7 @@ class Image extends ModelBase {
   async updateImage(params) {
     const oThis = this;
 
-    let resolutions = oThis._formatResolutionsToInsert(params.resolutions);
+    const resolutions = oThis._formatResolutionsToInsert(params.resolutions);
 
     return oThis
       .update({
@@ -216,15 +220,16 @@ class Image extends ModelBase {
   _formatResolutionsToInsert(resolutions) {
     const oThis = this;
 
-    let responseResolutionHash = {};
+    const responseResolutionHash = {};
     for (const resolution in resolutions) {
       if (resolution === 'original') {
-        responseResolutionHash['o'] = oThis._formatResolutionToInsert(resolutions[resolution]);
-        responseResolutionHash['o'].u = resolutions[resolution].url;
+        responseResolutionHash.o = oThis._formatResolutionToInsert(resolutions[resolution]);
+        responseResolutionHash.o.u = resolutions[resolution].url;
       } else {
         responseResolutionHash[resolution] = oThis._formatResolutionToInsert(resolutions[resolution]);
       }
     }
+
     return responseResolutionHash;
   }
 
