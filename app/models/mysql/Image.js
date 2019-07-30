@@ -162,12 +162,13 @@ class Image extends ModelBase {
   async insertImage(params) {
     const oThis = this;
 
-    let urlTemplate =
+    let fileExtension = util.getFileExtension(params.resolutions.original.url),
+      urlTemplate =
         s3Constants.imageShortUrlPrefix +
         '/' +
         util.getS3FileTemplatePrefix(params.userId) +
         s3Constants.fileNameShortSizeSuffix +
-        '.jpg',
+        fileExtension,
       resolutions = oThis._formatResolutionsToInsert(params.resolutions);
 
     return oThis
