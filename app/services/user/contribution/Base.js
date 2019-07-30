@@ -2,6 +2,7 @@ const rootPrefix = '../../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   UserMultiCache = require(rootPrefix + '/lib/cacheManagement/multi/User'),
   TokenUserByUserIdsMultiCache = require(rootPrefix + '/lib/cacheManagement/multi/TokenUserByUserIds'),
+  ImageByIdCache = require(rootPrefix + '/lib/cacheManagement/multi/ImageByIds'),
   UserModel = require(rootPrefix + '/app/models/mysql/User'),
   TokenUserModel = require(rootPrefix + '/app/models/mysql/TokenUser'),
   pagination = require(rootPrefix + '/lib/globalConstant/pagination'),
@@ -30,6 +31,8 @@ class UserContributionBase extends ServiceBase {
     oThis.limit = null;
     oThis.page = null;
 
+    oThis.imageIds = [];
+    oThis.imageMap = {};
     oThis.contributionUserIds = [];
     oThis.usersByIdMap = {};
     oThis.tokenUsersByUserIdMap = {};
@@ -51,6 +54,8 @@ class UserContributionBase extends ServiceBase {
     await oThis._fetchUsers();
 
     await oThis._fetchTokenUsers();
+
+    await oThis._fetchImages();
 
     return responseHelper.successWithData(oThis.finalResponse());
   }
@@ -96,6 +101,13 @@ class UserContributionBase extends ServiceBase {
 
     oThis.usersByIdMap = usersByIdHashRes.data;
 
+    for (let id in oThis.usersByIdMap) {
+      const userObj = oThis.usersByIdMap[id];
+      if (userObj.profileImageId) {
+        oThis.imageIds.push(userObj.profileImageId);
+      }
+    }
+
     return Promise.resolve(responseHelper.successWithData({}));
   }
 
@@ -121,6 +133,28 @@ class UserContributionBase extends ServiceBase {
     oThis.tokenUsersByUserIdMap = tokenUsersByIdHashRes.data;
 
     return Promise.resolve(responseHelper.successWithData({}));
+  }
+
+  /**
+   * Fetch image.
+   *
+   * @return {Promise<never>}
+   * @private
+   */
+  async _fetchImages() {
+    const oThis = this;
+
+    if (oThis.imageIds.length < 1) {
+      return;
+    }
+
+    const cacheRsp = await new ImageByIdCache({ ids: oThis.imageIds }).fetch();
+
+    if (cacheRsp.isFailure()) {
+      return Promise.reject(cacheRsp);
+    }
+
+    oThis.imageMap = cacheRsp.data;
   }
 
   /**
@@ -159,6 +193,7 @@ class UserContributionBase extends ServiceBase {
       usersByIdMap: userHash,
       tokenUsersByUserIdMap: tokenUserHash,
       userIds: oThis.contributionUserIds,
+      imageMap: oThis.imageMap,
       meta: responseMetaData
     };
 

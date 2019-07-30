@@ -105,7 +105,7 @@ class UserActivity extends ActivityServiceBase {
     oThis.lastActivityId = oThis.activityIds[oThis.activityIds.length - 1];
 
     if (oThis.activityIds.length === 0) {
-      return responseHelper.successWithData(oThis._finalResponse());
+      return responseHelper.successWithData();
     }
 
     const cacheResp = await new ActivityByIdsCache({ ids: oThis.activityIds }).fetch();
@@ -152,6 +152,7 @@ class UserActivity extends ActivityServiceBase {
       externalEntityGifMap: oThis.externalEntityGifMap,
       usersByIdMap: oThis.usersMap,
       tokenUsersByUserIdMap: oThis.tokenUsersByUserIdMap,
+      imageMap: oThis.imageMap,
       meta: responseMetaData
     };
   }
