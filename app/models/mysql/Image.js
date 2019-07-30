@@ -274,9 +274,7 @@ class Image extends ModelBase {
   static async flushCache(params) {
     const ImageByIds = require(rootPrefix + '/lib/cacheManagement/multi/ImageByIds');
 
-    await new ImageByIds({
-      ids: [params.id]
-    }).clear();
+    await new ImageByIds({ ids: [params.id] }).clear();
   }
 }
 
