@@ -1,7 +1,5 @@
 const rootPrefix = '../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
-  util = require(rootPrefix + '/lib/util'),
-  s3Constants = require(rootPrefix + '/lib/globalConstant/s3'),
   shortToLongUrl = require(rootPrefix + '/lib/shortToLongUrl'),
   imageConst = require(rootPrefix + '/lib/globalConstant/image'),
   databaseConstants = require(rootPrefix + '/lib/globalConstant/database');
@@ -42,7 +40,7 @@ class Image extends ModelBase {
    * @param {string} dbRow.created_at
    * @param {string} dbRow.updated_at
    *
-   * @return {object}
+   * @returns {object}
    * @private
    */
   _formatDbData(dbRow) {
@@ -89,7 +87,6 @@ class Image extends ModelBase {
    * @param {string} urlTemplate
    *
    * @returns {object}
-   *
    * @private
    */
   _formatResolutions(resolutions, urlTemplate) {
@@ -118,7 +115,7 @@ class Image extends ModelBase {
    *
    * @param {number} id
    *
-   * @return {object}
+   * @returns {object}
    */
   async fetchById(id) {
     const oThis = this;
@@ -133,7 +130,7 @@ class Image extends ModelBase {
    *
    * @param {array} ids: image ids
    *
-   * @return {object}
+   * @returns {object}
    */
   async fetchByIds(ids) {
     const oThis = this;
@@ -162,12 +159,12 @@ class Image extends ModelBase {
    * @param {number} params.kind
    * @param {number} params.status
    *
-   * @return {object}
+   * @returns {object}
    */
   async insertImage(params) {
     const oThis = this;
 
-    let resolutions = oThis._formatResolutionsToInsert(params.resolutions);
+    const resolutions = oThis._formatResolutionsToInsert(params.resolutions);
 
     return oThis
       .insert({
@@ -187,7 +184,7 @@ class Image extends ModelBase {
    * @param {number} params.status
    * @param {number} params.id
    *
-   * @return {object}
+   * @returns {object}
    */
   async updateImage(params) {
     const oThis = this;
@@ -205,9 +202,11 @@ class Image extends ModelBase {
   }
 
   /**
-   * Format resolutions to insert
+   * Format resolutions to insert.
    *
-   * @param resolutions
+   * @param {object} resolutions
+   *
+   * @returns {object}
    * @private
    */
   _formatResolutionsToInsert(resolutions) {
@@ -229,7 +228,9 @@ class Image extends ModelBase {
   /**
    * Format resolution to insert
    *
-   * @param resolution
+   * @param {object} resolution
+   *
+   * @returns {object}
    * @private
    */
   _formatResolutionToInsert(resolution) {
@@ -257,9 +258,7 @@ class Image extends ModelBase {
 
     await oThis
       .delete()
-      .where({
-        id: params.id
-      })
+      .where({ id: params.id })
       .fire();
   }
 
