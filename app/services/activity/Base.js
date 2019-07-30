@@ -3,6 +3,7 @@ const rootPrefix = '../../..',
   UserMultiCache = require(rootPrefix + '/lib/cacheManagement/multi/User'),
   ExternalEntityByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/ExternalEntityByIds'),
   TokenUserDetailByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TokenUserByUserIds'),
+  ImageByIdCache = require(rootPrefix + '/lib/cacheManagement/multi/ImageByIds'),
   TransactionByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TransactionByIds'),
   TextsByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TextsByIds'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
@@ -34,6 +35,7 @@ class ActivityBase extends ServiceBase {
 
     oThis.paginationTimestamp = null;
     oThis.lastActivityId = null;
+    oThis.imageIds = [];
     oThis.activityIds = [];
     oThis.textIds = [];
     oThis.userIds = [];
@@ -44,6 +46,7 @@ class ActivityBase extends ServiceBase {
     oThis.externalEntityGifMap = {};
     oThis.tokenUsersByUserIdMap = {};
     oThis.usersMap = {};
+    oThis.imageMap = {};
 
     oThis.responseMetaData = {
       [paginationConstants.nextPagePayloadKey]: {}
@@ -74,6 +77,8 @@ class ActivityBase extends ServiceBase {
       oThis._fetchUsers(),
       oThis._fetchTokenUser()
     ]);
+
+    await oThis._fetchImages();
 
     oThis._processActivityDetails();
 
@@ -243,6 +248,14 @@ class ActivityBase extends ServiceBase {
     }
 
     oThis.usersMap = cacheResp.data;
+
+    for (let id in oThis.usersMap) {
+      const userObj = oThis.usersMap[id];
+      if (userObj.profileImageId) {
+        oThis.imageIds.push(userObj.profileImageId);
+      }
+    }
+
     logger.log(`end: _fetchUsers`);
   }
 
@@ -271,6 +284,28 @@ class ActivityBase extends ServiceBase {
     oThis.tokenUsersByUserIdMap = cacheResp.data;
 
     logger.log(`end: _fetchTokenUser`);
+  }
+
+  /**
+   * Fetch image.
+   *
+   * @return {Promise<never>}
+   * @private
+   */
+  async _fetchImages() {
+    const oThis = this;
+
+    if (oThis.imageIds.length < 1) {
+      return;
+    }
+
+    const cacheRsp = await new ImageByIdCache({ ids: oThis.imageIds }).fetch();
+
+    if (cacheRsp.isFailure()) {
+      return Promise.reject(cacheRsp);
+    }
+
+    oThis.imageMap = cacheRsp.data;
   }
 
   /**

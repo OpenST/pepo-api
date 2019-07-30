@@ -56,6 +56,7 @@ router.get('/contribution-to', sanitizer.sanitizeDynamicUrlParams, function(req,
       resultType: responseEntityKey.contributionToUsers,
       entityKindToResponseKeyMap: {
         [entityType.users]: responseEntityKey.contributionToUsers,
+        [entityType.imagesMap]: responseEntityKey.images,
         [entityType.userListMeta]: responseEntityKey.meta
       },
       serviceData: serviceResponse.data
@@ -78,6 +79,7 @@ router.get('/contribution-by', sanitizer.sanitizeDynamicUrlParams, function(req,
       resultType: responseEntityKey.contributionByUsers,
       entityKindToResponseKeyMap: {
         [entityType.users]: responseEntityKey.contributionByUsers,
+        [entityType.imagesMap]: responseEntityKey.images,
         [entityType.userListMeta]: responseEntityKey.meta
       },
       serviceData: serviceResponse.data
@@ -100,6 +102,7 @@ router.get('/contribution-suggestion', sanitizer.sanitizeDynamicUrlParams, funct
       resultType: responseEntityKey.contributionSuggestions,
       entityKindToResponseKeyMap: {
         [entityType.users]: responseEntityKey.contributionSuggestions,
+        [entityType.imagesMap]: responseEntityKey.images,
         [entityType.userListMeta]: responseEntityKey.meta
       },
       serviceData: serviceResponse.data
@@ -148,6 +151,7 @@ router.get('/:user_id/activities', sanitizer.sanitizeDynamicUrlParams, function(
         [entityType.ostTransactionMap]: responseEntityKey.ostTransaction,
         [entityType.externalEntityGifMap]: responseEntityKey.gifs,
         [entityType.usersMap]: responseEntityKey.users,
+        [entityType.imagesMap]: responseEntityKey.images,
         [entityType.activityListMeta]: responseEntityKey.meta
       },
       serviceData: serviceResponse.data

@@ -66,6 +66,7 @@ class PublicActivity extends ActivityServiceBase {
       externalEntityGifMap: oThis.externalEntityGifMap,
       usersByIdMap: oThis.usersMap,
       tokenUsersByUserIdMap: oThis.tokenUsersByUserIdMap,
+      imageMap: oThis.imageMap,
       meta: responseMetaData
     };
   }

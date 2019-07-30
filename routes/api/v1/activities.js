@@ -22,6 +22,7 @@ router.get('/', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
         [entityType.ostTransactionMap]: responseEntityKey.ostTransaction,
         [entityType.externalEntityGifMap]: responseEntityKey.gifs,
         [entityType.usersMap]: responseEntityKey.users,
+        [entityType.imagesMap]: responseEntityKey.images,
         [entityType.activityListMeta]: responseEntityKey.meta
       },
       serviceData: serviceResponse.data
