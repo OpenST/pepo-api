@@ -13,7 +13,7 @@ const rootPrefix = '../..',
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   KmsWrapper = require(rootPrefix + '/lib/aws/KmsWrapper'),
   localCipher = require(rootPrefix + '/lib/encryptors/localCipher'),
-  kmsGlobalConstant = require(rootPrefix + '/lib/globalConstant/kms.js'),
+  kmsGlobalConstant = require(rootPrefix + '/lib/globalConstant/kms'),
   TokenModel = require(rootPrefix + '/app/models/mysql/Token');
 
 program

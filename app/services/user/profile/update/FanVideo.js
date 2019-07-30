@@ -45,6 +45,8 @@ class UpdateFanVideo extends UpdateProfileBase {
     oThis.isExternalUrl = params.isExternalUrl;
     oThis.videoId = null;
     oThis.flushUserCache = false;
+
+    oThis.paginationTimestamp = Math.round(new Date() / 1000);
   }
 
   /**
@@ -178,7 +180,7 @@ class UpdateFanVideo extends UpdateProfileBase {
    * @returns {Promise<void>}
    * @private
    */
-  _addFeed() {
+  async _addFeed() {
     const oThis = this;
 
     return new FeedModel()
@@ -186,9 +188,17 @@ class UpdateFanVideo extends UpdateProfileBase {
         primary_external_entity_id: oThis.videoId,
         kind: feedsConstants.invertedKinds[feedsConstants.fanUpdateKind],
         actor: oThis.userId,
-        pagination_identifier: Math.round(new Date() / 1000)
+        pagination_identifier: oThis.paginationTimestamp
       })
       .fire();
+  }
+
+  async _flushCaches() {
+    const oThis = this;
+
+    await super._flushCaches();
+
+    await FeedModel.flushCache({ paginationTimestamp: oThis.paginationTimestamp });
   }
 }
 
