@@ -35,8 +35,10 @@ class Image extends ModelBase {
    *
    * @param {object} dbRow
    * @param {number} dbRow.id
+   * @param {string} dbRow.url_template
    * @param {string} dbRow.resolutions
    * @param {number} dbRow.status
+   * @param {number} dbRow.kind
    * @param {string} dbRow.created_at
    * @param {string} dbRow.updated_at
    *
@@ -89,7 +91,7 @@ class Image extends ModelBase {
   _formatResolutions(resolutions, urlTemplate) {
     const oThis = this;
 
-    let responseResolutionHash = {};
+    const responseResolutionHash = {};
     for (const resolution in resolutions) {
       let responseResolution = resolution;
       if (resolution === 'o') {
