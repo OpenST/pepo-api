@@ -88,7 +88,7 @@ class UserActivityModel extends ModelBase {
       .order_by(
         'case when published_ts IS NULL then CURRENT_TIMESTAMP()\n' +
           '              else published_ts\n' +
-          '         end desc'
+          '         end desc, id desc'
       );
 
     if (paginationTimestamp) {
