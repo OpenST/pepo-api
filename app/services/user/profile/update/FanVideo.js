@@ -180,10 +180,10 @@ class UpdateFanVideo extends UpdateProfileBase {
    * @returns {Promise<void>}
    * @private
    */
-  _addFeed() {
+  async _addFeed() {
     const oThis = this;
 
-    let insertResponse = new FeedModel()
+    return new FeedModel()
       .insert({
         primary_external_entity_id: oThis.videoId,
         kind: feedsConstants.invertedKinds[feedsConstants.fanUpdateKind],
