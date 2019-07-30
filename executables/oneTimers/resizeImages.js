@@ -38,7 +38,7 @@ class ResizeImages {
     let promiseArray = [];
 
     for (let index = 1; index < oThis.count; index++) {
-      promiseArray.push(new ResizeImageLib({ imageId: index }).perform());
+      promiseArray.push(new ResizeImageLib({ imageId: index, resizeAll: isQualityChanged }).perform());
 
       if (promiseArray.length >= BATCH_SIZE || oThis.count === index) {
         await Promise.all(promiseArray);

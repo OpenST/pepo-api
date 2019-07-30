@@ -98,6 +98,7 @@ class TwitterSignup extends ServiceBase {
     // starting the create user in ost in parallel.
     let createOstUserPromise = oThis._createUserInOst();
 
+    promisesArray1.push(oThis._saveProfileImage());
     promisesArray1.push(oThis._setUserName());
     promisesArray1.push(oThis._setKMSEncryptionSalt());
 
@@ -116,7 +117,6 @@ class TwitterSignup extends ServiceBase {
     await oThis._createUser();
 
     let promiseArray2 = [];
-    promiseArray2.push(oThis._saveProfileImage());
     promiseArray2.push(oThis._twitterSpecificFunction());
 
     promiseArray2.push(

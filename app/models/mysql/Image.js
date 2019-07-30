@@ -159,7 +159,6 @@ class Image extends ModelBase {
    *
    * @param {object} params
    * @param {string} params.resolutions
-   * @param {number} params.userId
    * @param {number} params.kind
    * @param {number} params.status
    *
@@ -168,18 +167,10 @@ class Image extends ModelBase {
   async insertImage(params) {
     const oThis = this;
 
-    const fileExtension = util.getFileExtension(params.resolutions.original.url),
-      urlTemplate =
-        s3Constants.imageShortUrlPrefix +
-        '/' +
-        util.getS3FileTemplatePrefix(params.userId) +
-        s3Constants.fileNameShortSizeSuffix +
-        fileExtension,
-      resolutions = oThis._formatResolutionsToInsert(params.resolutions);
+    let resolutions = oThis._formatResolutionsToInsert(params.resolutions);
 
     return oThis
       .insert({
-        url_template: urlTemplate,
         resolutions: JSON.stringify(resolutions),
         kind: imageConst.invertedKinds[params.kind],
         status: imageConst.invertedStatuses[params.status]
@@ -191,6 +182,7 @@ class Image extends ModelBase {
    * Insert into images.
    *
    * @param {object} params
+   * @param {string} params.urlTemplate
    * @param {string} params.resolutions
    * @param {number} params.status
    * @param {number} params.id
@@ -204,6 +196,7 @@ class Image extends ModelBase {
 
     return oThis
       .update({
+        url_template: params.urlTemplate,
         resolutions: JSON.stringify(resolutions),
         status: imageConst.invertedStatuses[params.status]
       })
