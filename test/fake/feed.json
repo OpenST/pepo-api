@@ -36,8 +36,7 @@
       "profile_image_id": null,
       "status": "ACTIVE",
       "user_name": "tejas",
-      "uts": 1562672642,
-      "user_profile_id": "3"
+      "uts": 1562672642
     },
     "1001": {
       "id": "1001",
@@ -48,8 +47,7 @@
       "profile_image_id": null,
       "status": "ACTIVE",
       "user_name": "kedar",
-      "uts": 1562672200,
-      "user_profile_id": "1001"
+      "uts": 1562672200
     },
     "1002": {
       "id": "1002",
@@ -60,8 +58,7 @@
       "profile_image_id": null,
       "status": "ACTIVE",
       "user_name": "sunil",
-      "uts": 1562672100,
-      "user_profile_id": "1002"
+      "uts": 1562672100
     }
   },
   "tags": {
