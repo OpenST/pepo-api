@@ -29,7 +29,7 @@ class CompressVideos {
   async _getVideos() {
     const oThis = this;
 
-    const limit = 1;
+    const limit = 10;
 
     let page = 1,
       offset = null,
@@ -67,12 +67,10 @@ class CompressVideos {
     const promiseArray = [];
 
     for (let index = 0; index < videoRows.length; index++) {
-      promiseArray.push(
-        new CompressVideoLib({
-          videoId: videoRows[index].id,
-          resizeAll: isQualityChanged
-        }).perform()
-      );
+      await new CompressVideoLib({
+        videoId: videoRows[index].id,
+        resizeAll: isQualityChanged
+      }).perform();
     }
 
     await Promise.all(promiseArray);
