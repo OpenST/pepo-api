@@ -1,7 +1,8 @@
 const rootPrefix = '../..',
   CompressVideoLib = require(rootPrefix + '/lib/resize/Video'),
   VideoModel = require(rootPrefix + '/app/models/mysql/Video'),
-  logger = require(rootPrefix + '/lib/logger/customConsoleLogger');
+  logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
+  videoConstants = require(rootPrefix + '/lib/globalConstant/video');
 
 const isQualityChanged = process.argv[2] || false;
 
@@ -41,6 +42,7 @@ class CompressVideos {
         .select(['id'])
         .limit(limit)
         .offset(offset)
+        .where(['status != ?', videoConstants.invertedStatuses[videoConstants.notCompressedStatus]])
         .order_by('id ASC')
         .fire();
 
