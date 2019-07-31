@@ -580,12 +580,14 @@ class OstTransaction extends ServiceBase {
 
     let extraData = {};
 
+    let publishedTimestamp = Math.floor(Date.now() / 1000);
+
     let insertData = {
       entity_type: activityConstants.invertedEntityTypes[activityConstants.transactionEntityType],
       entity_id: oThis.transactionId,
       extra_data: JSON.stringify(extraData),
       status: activityConstants.invertedStatuses[oThis.activityStatus],
-      published_ts: null,
+      published_ts: publishedTimestamp,
       display_ts: null
     };
 
@@ -607,12 +609,12 @@ class OstTransaction extends ServiceBase {
   async _insertInUserActivityTable() {
     const oThis = this;
 
-    let displayTimestamp = Math.floor(Date.now() / 1000);
+    let publishedTimestamp = Math.floor(Date.now() / 1000);
 
     let insertData = {
       user_id: oThis.userId,
       activity_id: oThis.activityId,
-      published_ts: null
+      published_ts: publishedTimestamp
     };
 
     let insertResponse = await new UserActivityModel().insert(insertData).fire();
