@@ -1,5 +1,5 @@
 const rootPrefix = '../..',
-  ImageModel = require(rootPrefix + '/app/models/mysql/Image'),
+  VideoModel = require(rootPrefix + '/app/models/mysql/Video'),
   util = require(rootPrefix + '/lib/util'),
   s3Constants = require(rootPrefix + '/lib/globalConstant/s3'),
   imageConst = require(rootPrefix + '/lib/globalConstant/image'),
@@ -7,7 +7,7 @@ const rootPrefix = '../..',
 
 const isQualityChanged = process.argv[2] || false;
 
-class BackPopulateImages {
+class BackPopulateVideos {
   /**
    * Perform.
    *
@@ -18,16 +18,16 @@ class BackPopulateImages {
 
     logger.log('isQualityChanged ', isQualityChanged);
 
-    await oThis._getImages();
+    await oThis._getVideos();
   }
 
   /**
-   * Get images.
+   * Get videos.
    *
    * @returns {Promise<void>}
    * @private
    */
-  async _getImages() {
+  async _getVideos() {
     const oThis = this;
 
     const limit = 10;
@@ -39,7 +39,7 @@ class BackPopulateImages {
     while (moreDataPresent) {
       offset = (page - 1) * limit;
 
-      const dbRows = await new ImageModel()
+      const dbRows = await new VideoModel()
         .select('*')
         .limit(limit)
         .offset(offset)
@@ -57,18 +57,18 @@ class BackPopulateImages {
   /**
    * Populate in new format.
    *
-   * @param {array} imageRows
+   * @param {array} videoRows
    *
    * @returns {Promise<void>}
    * @private
    */
-  async _populateInNewFormat(imageRows) {
+  async _populateInNewFormat(videoRows) {
     const oThis = this;
 
     const promiseArray = [];
 
-    for (let index = 0; index < imageRows.length; index++) {
-      promiseArray.push(oThis._updateResolutionInNewFormat(imageRows[index]));
+    for (let index = 0; index < videoRows.length; index++) {
+      promiseArray.push(oThis._updateResolutionInNewFormat(videoRows[index]));
     }
 
     await Promise.all(promiseArray);
@@ -101,7 +101,7 @@ class BackPopulateImages {
 
         const fileExtension = util.getFileExtension(resolutions.original.url);
         urlTemplate =
-          s3Constants.imageShortUrlPrefix +
+          s3Constants.videoShortUrlPrefix +
           '/' +
           util.getS3FileTemplatePrefix(userId) +
           s3Constants.fileNameShortSizeSuffix +
@@ -116,15 +116,15 @@ class BackPopulateImages {
       id: dbRow.id
     };
 
-    await new ImageModel().updateImage(paramsToUpdate);
-    await ImageModel.flushCache(paramsToUpdate);
+    await new VideoModel().updateVideo(paramsToUpdate);
+    await VideoModel.flushCache(paramsToUpdate);
   }
 }
 
-new BackPopulateImages()
+new BackPopulateVideos()
   .perform()
   .then(function() {
-    logger.win('All image rows back-populated successfully.');
+    logger.win('All video rows back-populated successfully.');
     process.exit(0);
   })
   .catch(function(err) {
