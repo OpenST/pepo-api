@@ -1,8 +1,8 @@
 const rootPrefix = '../..',
-  VideoModel = require(rootPrefix + '/app/models/mysql/Video'),
+  VideoModel = require(rootPrefix + '/app/models/mysql/TempVideo'),
   util = require(rootPrefix + '/lib/util'),
   s3Constants = require(rootPrefix + '/lib/globalConstant/s3'),
-  imageConst = require(rootPrefix + '/lib/globalConstant/image'),
+  videoConst = require(rootPrefix + '/lib/globalConstant/video'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger');
 
 const isQualityChanged = process.argv[2] || false;
@@ -83,23 +83,20 @@ class BackPopulateVideos {
    * @private
    */
   async _updateResolutionInNewFormat(dbRow) {
-    // Not back-populating those rows whose url template is present.
-    if (dbRow.url_template) {
-      return {};
-    }
+    console.log('=====dbRow====', dbRow);
 
     const resolutions = JSON.parse(dbRow.resolutions);
     let urlTemplate = null;
 
     for (const resolution in resolutions) {
-      if (resolution !== 'original') {
-        const url = resolutions[resolution].url,
+      if (resolution === 'o') {
+        const url = resolutions[resolution].u,
           splitUrlArray = url.split('/'),
           fileName = splitUrlArray.pop(),
           structuredFileName = fileName.split('-'),
           userId = structuredFileName[0];
 
-        const fileExtension = util.getFileExtension(resolutions.original.url);
+        const fileExtension = util.getFileExtension(resolutions.o.u);
         urlTemplate =
           s3Constants.videoShortUrlPrefix +
           '/' +
@@ -109,10 +106,12 @@ class BackPopulateVideos {
       }
     }
 
+    console.log('====urlTemplate===', urlTemplate);
+
     const paramsToUpdate = {
       urlTemplate: urlTemplate,
-      resolutions: { original: resolutions.original },
-      status: imageConst.statuses[dbRow.status],
+      resolutions: { o: resolutions },
+      status: videoConst.notCompressedStatus,
       id: dbRow.id
     };
 
