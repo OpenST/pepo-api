@@ -15,6 +15,8 @@ class UserContributionSuggestion extends ContributionBase {
   /**
    * Fetch user ids from cache.
    *
+   * @sets oThis.contributionUserIds
+   *
    * @returns {Promise<void>}
    * @private
    */
