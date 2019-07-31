@@ -1,7 +1,9 @@
 const rootPrefix = '../..',
-  ResizeImageLib = require(rootPrefix + '/lib/resize/Image'),
   ImageModel = require(rootPrefix + '/app/models/mysql/Image'),
-  logger = require(rootPrefix + '/lib/logger/customConsoleLogger');
+  imageConstants = require(rootPrefix + '/lib/globalConstant/image'),
+  ResizeImageLib = require(rootPrefix + '/lib/resize/Image'),
+  logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
+  coreConstants = require(rootPrefix + '/config/coreConstants');
 
 const isQualityChanged = process.argv[2] || false;
 
@@ -41,6 +43,7 @@ class ResizeImages {
         .select(['id'])
         .limit(limit)
         .offset(offset)
+        .where(['status != ?', imageConstants.invertedStatuses[imageConstants.notResized]])
         .order_by('id ASC')
         .fire();
 
