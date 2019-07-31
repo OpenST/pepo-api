@@ -1,6 +1,6 @@
 const rootPrefix = '../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
-  s3Constants = require(rootPrefix + '/lib/globalConstant/s3'),
+  shortToLongUrl = require(rootPrefix + '/lib/shortToLongUrl'),
   videoConstants = require(rootPrefix + '/lib/globalConstant/video'),
   databaseConstants = require(rootPrefix + '/lib/globalConstant/database');
 
@@ -33,6 +33,7 @@ class Video extends ModelBase {
    *
    * @param {object} dbRow
    * @param {number} dbRow.id
+   * @param {string} dbRow.url_template
    * @param {string} dbRow.resolutions
    * @param {number} dbRow.poster_image_id
    * @param {number} dbRow.status
@@ -47,6 +48,7 @@ class Video extends ModelBase {
 
     const formattedData = {
       id: dbRow.id,
+      urlTemplate: dbRow.url_template,
       resolutions: JSON.parse(dbRow.resolutions),
       posterImageId: dbRow.poster_image_id,
       status: videoConstants.statuses[dbRow.status],
@@ -58,11 +60,63 @@ class Video extends ModelBase {
   }
 
   /**
+   * Format resolutions hash.
+   *
+   * @param {object} resolution
+   *
+   * @returns {object}
+   * @private
+   */
+  _formatResolution(resolution) {
+    const oThis = this;
+
+    const formattedData = {
+      url: resolution.u,
+      size: resolution.s,
+      height: resolution.h,
+      width: resolution.w
+    };
+
+    return oThis.sanitizeFormattedData(formattedData);
+  }
+
+  /**
+   * Formats the complete resolution hash.
+   *
+   * @param {object} resolutions
+   * @param {string} urlTemplate
+   *
+   * @returns {object}
+   * @private
+   */
+  _formatResolutions(resolutions, urlTemplate) {
+    const oThis = this;
+
+    const responseResolutionHash = {};
+
+    for (const resolution in resolutions) {
+      let responseResolution = resolution;
+      if (resolution === 'o') {
+        responseResolution = 'original';
+        responseResolutionHash[responseResolution] = oThis._formatResolution(resolutions[resolution]);
+        responseResolutionHash[responseResolution].url = shortToLongUrl.getFullUrl(
+          responseResolutionHash[responseResolution].url
+        );
+      } else {
+        responseResolutionHash[responseResolution] = oThis._formatResolution(resolutions[resolution]);
+        responseResolutionHash[responseResolution].url = shortToLongUrl.getFullUrl(urlTemplate, responseResolution);
+      }
+    }
+
+    return responseResolutionHash;
+  }
+
+  /**
    * Fetch video by id.
    *
    * @param {integer} id
    *
-   * @return {object}
+   * @returns {object}
    */
   async fetchById(id) {
     const oThis = this;
@@ -77,7 +131,7 @@ class Video extends ModelBase {
    *
    * @param {array} ids
    *
-   * @return {object}
+   * @returns {object}
    */
   async fetchByIds(ids) {
     const oThis = this;
@@ -91,10 +145,7 @@ class Video extends ModelBase {
 
     for (let index = 0; index < dbRows.length; index++) {
       const formatDbRow = oThis._formatDbData(dbRows[index]);
-      for (const resolutionKind in formatDbRow.resolutions) {
-        const shortUrl = formatDbRow.resolutions[resolutionKind].url;
-        formatDbRow.resolutions[resolutionKind].url = s3Constants.shortToLongUrlForResponse(shortUrl);
-      }
+      formatDbRow.resolutions = oThis._formatResolutions(formatDbRow.resolutions, formatDbRow.urlTemplate);
       response[formatDbRow.id] = formatDbRow;
     }
 
@@ -102,21 +153,23 @@ class Video extends ModelBase {
   }
 
   /**
-   * Insert into videos
+   * Insert into videos.
    *
    * @param {object} params
    * @param {object} params.resolutions
    * @param {number} params.posterImageId
    * @param {string} params.status
    *
-   * @return {object}
+   * @return {Promise<object>}
    */
-  insertVideo(params) {
+  async insertVideo(params) {
     const oThis = this;
+
+    const resolutions = oThis._formatResolutionsToInsert(params.resolutions);
 
     return oThis
       .insert({
-        resolutions: JSON.stringify(params.resolutions),
+        resolutions: JSON.stringify(resolutions),
         poster_image_id: params.posterImageId,
         status: videoConstants.invertedStatuses[params.status]
       })
@@ -124,31 +177,74 @@ class Video extends ModelBase {
   }
 
   /**
-   * Update image by id.
+   * Update videos table.
    *
    * @param {object} params
-   * @param {number} params.id
+   * @param {number/string} params.id
+   * @param {string} params.urlTemplate
    * @param {object} params.resolutions
-   * @param {number} params.posterImageId
    * @param {string} params.status
    *
-   * @return {Promise<void>}
+   * @return {Promise<object>}
    */
-  async updateById(params) {
+  async updateVideo(params) {
     const oThis = this;
 
-    const response = await oThis
-      .update({
-        resolutions: JSON.stringify(params.resolutions),
-        status: videoConstants.invertedStatuses[params.status],
-        poster_image_id: params.posterImageId
-      })
-      .where({
-        id: params.id
-      })
-      .fire();
+    const resolutions = oThis._formatResolutionsToInsert(params.resolutions);
 
-    return response.data;
+    return oThis
+      .update({
+        url_template: params.urlTemplate,
+        resolutions: JSON.stringify(resolutions),
+        status: videoConstants.invertedStatuses[params.status]
+      })
+      .where({ id: params.id })
+      .fire();
+  }
+
+  /**
+   * Format resolutions to insert.
+   *
+   * @param {object} resolutions
+   *
+   * @returns {object}
+   * @private
+   */
+  _formatResolutionsToInsert(resolutions) {
+    const oThis = this;
+
+    const responseResolutionHash = {};
+
+    for (const resolution in resolutions) {
+      if (resolution === 'original') {
+        responseResolutionHash.o = oThis._formatResolutionToInsert(resolutions[resolution]);
+        responseResolutionHash.o.u = resolutions[resolution].url;
+      } else {
+        responseResolutionHash[resolution] = oThis._formatResolutionToInsert(resolutions[resolution]);
+      }
+    }
+
+    return responseResolutionHash;
+  }
+
+  /**
+   * Format resolution to insert.
+   *
+   * @param {object} resolution
+   *
+   * @returns {object}
+   * @private
+   */
+  _formatResolutionToInsert(resolution) {
+    const oThis = this;
+
+    const formattedData = {
+      s: resolution.size,
+      h: resolution.height,
+      w: resolution.width
+    };
+
+    return oThis.sanitizeFormattedData(formattedData);
   }
 
   /**
