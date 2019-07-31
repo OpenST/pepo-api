@@ -369,32 +369,36 @@ class TransactionOstEventBase extends ServiceBase {
     const oThis = this;
     logger.log('Start:: Update User Activity');
 
-    let userActivityObj = await new UserActivityModel().fetchUserActivityByUserIdPublishedTsAndActivityId(
-      oThis.fromUserId,
-      null,
-      activityId
-    );
+    /*
+    * Commenting following code as we don't need to update published ts. Published ts is inserted while creating transaction itself.
+    * */
 
-    if (!userActivityObj.id) {
-      let errorObject = responseHelper.error({
-        internal_error_identifier: 'a_s_oe_t_b_3',
-        api_error_identifier: 'something_went_wrong',
-        debug_options: { reason: 'User activity object not found for activity id', activityId: activityId }
-      });
-      await createErrorLogsEntry.perform(errorObject, errorLogsConstants.highSeverity);
-      return Promise.reject(errorObject);
-    }
-
-    await new UserActivityModel()
-      .update({
-        published_ts: oThis.activityObj.publishedTs
-      })
-      .where(['id = ?', userActivityObj.id])
-      .fire();
-
-    userActivityObj.publishedTs = oThis.activityObj.publishedTs;
-
-    await UserActivityModel.flushCache(userActivityObj);
+    // let userActivityObj = await new UserActivityModel().fetchUserActivityByUserIdPublishedTsAndActivityId(
+    //   oThis.fromUserId,
+    //   null,
+    //   activityId
+    // );
+    //
+    // if (!userActivityObj.id) {
+    //   let errorObject = responseHelper.error({
+    //     internal_error_identifier: 'a_s_oe_t_b_3',
+    //     api_error_identifier: 'something_went_wrong',
+    //     debug_options: { reason: 'User activity object not found for activity id', activityId: activityId }
+    //   });
+    //   await createErrorLogsEntry.perform(errorObject, errorLogsConstants.highSeverity);
+    //   return Promise.reject(errorObject);
+    // }
+    //
+    // await new UserActivityModel()
+    //   .update({
+    //     published_ts: oThis.activityObj.publishedTs
+    //   })
+    //   .where(['id = ?', userActivityObj.id])
+    //   .fire();
+    //
+    // userActivityObj.publishedTs = oThis.activityObj.publishedTs;
+    //
+    // await UserActivityModel.flushCache(userActivityObj);
 
     logger.log('End:: Update User Activity');
   }

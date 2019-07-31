@@ -7,6 +7,8 @@ const rootPrefix = '../../../../..',
   TextCacheKlass = require(rootPrefix + '/lib/cacheManagement/multi/TextsByIds'),
   UrlCacheKlass = require(rootPrefix + '/lib/cacheManagement/multi/UrlsByIds'),
   AssociateTagsToUser = require(rootPrefix + '/lib/user/profile/AssociateTags'),
+  createErrorLogsEntry = require(rootPrefix + '/lib/errorLogs/createEntry'),
+  errorLogsConstants = require(rootPrefix + '/lib/globalConstant/errorLogs'),
   userTagConstants = require(rootPrefix + '/lib/globalConstant/userTag'),
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   responseHelper = require(rootPrefix + '/lib/formatter/response');
@@ -172,7 +174,29 @@ class UpdateProfileInfo extends UpdateProfileBase {
           user_name: oThis.username
         })
         .where({ id: oThis.userId })
-        .fire();
+        .fire()
+        .catch(async function(err) {
+          if (UserModelKlass.isDuplicateIndexViolation(UserModelKlass.usernameUniqueIndexName, err)) {
+            return Promise.reject(
+              responseHelper.paramValidationError({
+                internal_error_identifier: 'a_s_u_p_up_2',
+                api_error_identifier: 'invalid_api_params',
+                params_error_identifiers: ['duplicate_user_name'],
+                debug_options: { user_name: oThis.username }
+              })
+            );
+          } else {
+            //Insert failed due to some other reason.
+            //Send error email from here.
+            let errorObject = responseHelper.error({
+              internal_error_identifier: 'a_s_u_p_up_3',
+              api_error_identifier: 'something_went_wrong',
+              debug_options: { Error: err }
+            });
+            await createErrorLogsEntry.perform(errorObject, errorLogsConstants.highSeverity);
+            return Promise.reject(errorObject);
+          }
+        });
     }
   }
 
