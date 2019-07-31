@@ -221,7 +221,6 @@ class Video extends ModelBase {
         responseResolutionHash.o.u = resolutions[resolution].url;
       } else {
         responseResolutionHash[resolution] = oThis._formatResolutionToInsert(resolutions[resolution]);
-        responseResolutionHash[resolution].u = resolutions[resolution].url;
       }
     }
 
