@@ -1,24 +1,29 @@
 const rootPrefix = '../../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
-  UserMultiCache = require(rootPrefix + '/lib/cacheManagement/multi/User'),
-  TokenUserByUserIdsMultiCache = require(rootPrefix + '/lib/cacheManagement/multi/TokenUserByUserIds'),
-  ImageByIdCache = require(rootPrefix + '/lib/cacheManagement/multi/ImageByIds'),
   UserModel = require(rootPrefix + '/app/models/mysql/User'),
   TokenUserModel = require(rootPrefix + '/app/models/mysql/TokenUser'),
-  pagination = require(rootPrefix + '/lib/globalConstant/pagination'),
-  responseHelper = require(rootPrefix + '/lib/formatter/response');
+  UserMultiCache = require(rootPrefix + '/lib/cacheManagement/multi/User'),
+  ImageByIdCache = require(rootPrefix + '/lib/cacheManagement/multi/ImageByIds'),
+  TokenUserByUserIdsMultiCache = require(rootPrefix + '/lib/cacheManagement/multi/TokenUserByUserIds'),
+  responseHelper = require(rootPrefix + '/lib/formatter/response'),
+  paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination');
 
 /**
- * Class for User Contribution Base
+ * Class for user contribution base.
  *
- * @class
+ * @class UserContributionBase
  */
 class UserContributionBase extends ServiceBase {
   /**
-   * Constructor for user contribution base
+   * Constructor for user contribution base.
    *
-   * @param params
+   * @param {object} params
+   * @param {number/string} params.current_user
+   * @param {string} [params.pagination_identifier]
    *
+   * @augments ServiceBase
+   *
+   * @constructor
    */
   constructor(params) {
     super(params);
@@ -26,7 +31,7 @@ class UserContributionBase extends ServiceBase {
     const oThis = this;
 
     oThis.currentUserId = params.current_user.id;
-    oThis.paginationIdentifier = params[pagination.paginationIdentifierKey] || null;
+    oThis.paginationIdentifier = params[paginationConstants.paginationIdentifierKey] || null;
 
     oThis.limit = null;
     oThis.page = null;
@@ -39,7 +44,7 @@ class UserContributionBase extends ServiceBase {
   }
 
   /**
-   * Async Perform
+   * Async perform.
    *
    * @returns {Promise<void>}
    * @private
@@ -61,7 +66,9 @@ class UserContributionBase extends ServiceBase {
   }
 
   /**
-   * Validate and sanitize specific params
+   * Validate and sanitize specific params.
+   *
+   * @sets oThis.page, oThis.limit
    *
    * @returns {Promise<never>}
    * @private
@@ -70,18 +77,20 @@ class UserContributionBase extends ServiceBase {
     const oThis = this;
 
     if (oThis.paginationIdentifier) {
-      let parsedPaginationParams = oThis._parsePaginationParams(oThis.paginationIdentifier);
-      oThis.page = parsedPaginationParams.page; //override page
+      const parsedPaginationParams = oThis._parsePaginationParams(oThis.paginationIdentifier);
+      oThis.page = parsedPaginationParams.page; // Override page
     } else {
       oThis.page = 1;
     }
-    oThis.limit = pagination.defaultUserContributionPageSize;
+    oThis.limit = paginationConstants.defaultUserContributionPageSize;
 
-    return await oThis._validatePageSize();
+    return oThis._validatePageSize();
   }
 
   /**
-   * Fetch users from cache
+   * Fetch users from cache.
+   *
+   * @sets oThis.usersByIdMap, oThis.imageIds
    *
    * @returns {Promise<void>}
    * @private
@@ -90,10 +99,10 @@ class UserContributionBase extends ServiceBase {
     const oThis = this;
 
     if (oThis.contributionUserIds.length < 1) {
-      return;
+      return responseHelper.successWithData({});
     }
 
-    let usersByIdHashRes = await new UserMultiCache({ ids: oThis.contributionUserIds }).fetch();
+    const usersByIdHashRes = await new UserMultiCache({ ids: oThis.contributionUserIds }).fetch();
 
     if (usersByIdHashRes.isFailure()) {
       return Promise.reject(usersByIdHashRes);
@@ -101,18 +110,20 @@ class UserContributionBase extends ServiceBase {
 
     oThis.usersByIdMap = usersByIdHashRes.data;
 
-    for (let id in oThis.usersByIdMap) {
+    for (const id in oThis.usersByIdMap) {
       const userObj = oThis.usersByIdMap[id];
       if (userObj.profileImageId) {
         oThis.imageIds.push(userObj.profileImageId);
       }
     }
 
-    return Promise.resolve(responseHelper.successWithData({}));
+    return responseHelper.successWithData({});
   }
 
   /**
-   * Fetch token user details from cache
+   * Fetch token user details from cache.
+   *
+   * @sets oThis.tokenUsersByUserIdMap
    *
    * @returns {Promise<void>}
    * @private
@@ -121,10 +132,12 @@ class UserContributionBase extends ServiceBase {
     const oThis = this;
 
     if (oThis.contributionUserIds.length < 1) {
-      return;
+      return responseHelper.successWithData({});
     }
 
-    let tokenUsersByIdHashRes = await new TokenUserByUserIdsMultiCache({ userIds: oThis.contributionUserIds }).fetch();
+    const tokenUsersByIdHashRes = await new TokenUserByUserIdsMultiCache({
+      userIds: oThis.contributionUserIds
+    }).fetch();
 
     if (tokenUsersByIdHashRes.isFailure()) {
       return Promise.reject(tokenUsersByIdHashRes);
@@ -132,13 +145,15 @@ class UserContributionBase extends ServiceBase {
 
     oThis.tokenUsersByUserIdMap = tokenUsersByIdHashRes.data;
 
-    return Promise.resolve(responseHelper.successWithData({}));
+    return responseHelper.successWithData({});
   }
 
   /**
-   * Fetch image.
+   * Fetch images.
    *
-   * @return {Promise<never>}
+   * @sets oThis.imageMap
+   *
+   * @return {Promise<*>}
    * @private
    */
   async _fetchImages() {
@@ -158,78 +173,80 @@ class UserContributionBase extends ServiceBase {
   }
 
   /**
-   * Service Response
+   * Service response.
    *
-   * @returns {Promise<void>}
+   * @returns {Promise<*>}
    * @private
    */
   finalResponse() {
     const oThis = this;
 
-    let nextPagePayloadKey = {};
+    const nextPagePayloadKey = {};
 
-    if (oThis.contributionUserIds.length == oThis.limit) {
-      nextPagePayloadKey[pagination.paginationIdentifierKey] = {
+    if (oThis.contributionUserIds.length === oThis.limit) {
+      nextPagePayloadKey[paginationConstants.paginationIdentifierKey] = {
         page: oThis.page + 1
       };
     }
 
-    let responseMetaData = {
-      [pagination.nextPagePayloadKey]: nextPagePayloadKey
+    const responseMetaData = {
+      [paginationConstants.nextPagePayloadKey]: nextPagePayloadKey
     };
 
-    let userHash = {},
+    const userHash = {},
       tokenUserHash = {};
 
-    for (let i = 0; i < oThis.contributionUserIds.length; i++) {
-      const userId = oThis.contributionUserIds[i],
+    for (let index = 0; index < oThis.contributionUserIds.length; index++) {
+      const userId = oThis.contributionUserIds[index],
         user = oThis.usersByIdMap[userId],
         tokenUser = oThis.tokenUsersByUserIdMap[userId];
       userHash[userId] = new UserModel().safeFormattedData(user);
       tokenUserHash[userId] = new TokenUserModel().safeFormattedData(tokenUser);
     }
 
-    let finalResponse = {
+    return {
       usersByIdMap: userHash,
       tokenUsersByUserIdMap: tokenUserHash,
       userIds: oThis.contributionUserIds,
       imageMap: oThis.imageMap,
       meta: responseMetaData
     };
-
-    return finalResponse;
   }
 
   /**
-   * _defaultPageLimit
+   * Returns default page limit.
    *
+   * @returns {number}
    * @private
    */
   _defaultPageLimit() {
-    return pagination.defaultUserContributionPageSize;
+    return paginationConstants.defaultUserContributionPageSize;
   }
 
   /**
-   * _minPageLimit
+   * Returns minimum page limit.
    *
+   * @returns {number}
    * @private
    */
   _minPageLimit() {
-    return pagination.minUserContributionPageSize;
+    return paginationConstants.minUserContributionPageSize;
   }
 
   /**
-   * _maxPageLimit
+   * Returns maximum page limit.
    *
+   * @returns {number}
    * @private
    */
   _maxPageLimit() {
-    return pagination.maxUserContributionPageSize;
+    return paginationConstants.maxUserContributionPageSize;
   }
 
   /**
-   * _currentPageLimit
+   * Returns current page limit.
    *
+   * @returns {number}
    * @private
    */
   _currentPageLimit() {
@@ -239,7 +256,7 @@ class UserContributionBase extends ServiceBase {
   }
 
   /**
-   * Fetch user ids from cache
+   * Fetch user ids from cache.
    *
    * @returns {Promise<void>}
    * @private
