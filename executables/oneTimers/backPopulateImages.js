@@ -2,20 +2,14 @@ const rootPrefix = '../..',
   ImageModel = require(rootPrefix + '/app/models/mysql/Image'),
   util = require(rootPrefix + '/lib/util'),
   s3Constants = require(rootPrefix + '/lib/globalConstant/s3'),
-  ResizeImageLib = require(rootPrefix + '/lib/resize/Image'),
   imageConst = require(rootPrefix + '/lib/globalConstant/image'),
-  logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
-  coreConstants = require(rootPrefix + '/config/coreConstants');
+  logger = require(rootPrefix + '/lib/logger/customConsoleLogger');
 
 const isQualityChanged = process.argv[2] || false;
 
 class BackPopulateImages {
-  constructor() {
-    const oThis = this;
-  }
-
   /**
-   * Perform
+   * Perform.
    *
    * @returns {Promise<void>}
    */
@@ -28,7 +22,7 @@ class BackPopulateImages {
   }
 
   /**
-   * Get images
+   * Get images.
    *
    * @returns {Promise<void>}
    * @private
@@ -36,8 +30,9 @@ class BackPopulateImages {
   async _getImages() {
     const oThis = this;
 
+    const limit = 10;
+
     let page = 1,
-      limit = 10,
       offset = null,
       moreDataPresent = true;
 
@@ -61,16 +56,17 @@ class BackPopulateImages {
   }
 
   /**
-   * Resize image rows
+   * Populate in new format.
    *
-   * @param imageRows
+   * @param {array} imageRows
+   *
    * @returns {Promise<void>}
    * @private
    */
   async _populateInNewFormat(imageRows) {
     const oThis = this;
 
-    let promiseArray = [];
+    const promiseArray = [];
 
     for (let index = 0; index < imageRows.length; index++) {
       promiseArray.push(oThis._updateResolutionInNewFormat(imageRows[index]));
@@ -79,26 +75,32 @@ class BackPopulateImages {
     await Promise.all(promiseArray);
   }
 
+  /**
+   * Update resolution in new format in table.
+   *
+   * @param {object} dbRow
+   *
+   * @returns {Promise<{}>}
+   * @private
+   */
   async _updateResolutionInNewFormat(dbRow) {
-    const oThis = this;
-
-    //Not back-populating those rows whose url template is present.
+    // Not back-populating those rows whose url template is present.
     if (dbRow.url_template) {
       return {};
     }
 
-    let resolutions = JSON.parse(dbRow.resolutions),
-      urlTemplate = null;
+    const resolutions = JSON.parse(dbRow.resolutions);
+    let urlTemplate = null;
 
-    for (let resolution in resolutions) {
+    for (const resolution in resolutions) {
       if (resolution !== 'original') {
-        let url = resolutions[resolution].url,
+        const url = resolutions[resolution].url,
           splitUrlArray = url.split('/'),
           fileName = splitUrlArray.pop(),
           structuredFileName = fileName.split('-'),
           userId = structuredFileName[0];
 
-        let fileExtension = util.getFileExtension(resolutions.original.url);
+        const fileExtension = util.getFileExtension(resolutions.original.url);
         urlTemplate =
           s3Constants.imageShortUrlPrefix +
           '/' +
@@ -108,7 +110,7 @@ class BackPopulateImages {
       }
     }
 
-    let paramsToUpdate = {
+    const paramsToUpdate = {
       urlTemplate: urlTemplate,
       resolutions: { original: resolutions.original },
       status: imageConst.statuses[dbRow.status],
@@ -122,10 +124,11 @@ class BackPopulateImages {
 
 new BackPopulateImages()
   .perform()
-  .then(function(rsp) {
+  .then(function() {
+    logger.win('All image rows back-populated successfully.');
     process.exit(0);
   })
   .catch(function(err) {
-    console.log(err);
+    logger.error('Error in back-populating. Error: ', err);
     process.exit(1);
   });
