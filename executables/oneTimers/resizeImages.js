@@ -1,9 +1,8 @@
 const rootPrefix = '../..',
   ImageModel = require(rootPrefix + '/app/models/mysql/Image'),
-  imageConstants = require(rootPrefix + '/lib/globalConstant/image'),
   ResizeImageLib = require(rootPrefix + '/lib/resize/Image'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
-  coreConstants = require(rootPrefix + '/config/coreConstants');
+  imageConstants = require(rootPrefix + '/lib/globalConstant/image');
 
 const isQualityChanged = process.argv[2] || false;
 
