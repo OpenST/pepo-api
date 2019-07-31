@@ -104,7 +104,6 @@ class Video extends ModelBase {
         );
       } else {
         responseResolutionHash[responseResolution] = oThis._formatResolution(resolutions[resolution]);
-        responseResolutionHash[responseResolution].url = shortToLongUrl.getFullUrl(urlTemplate, responseResolution);
       }
     }
 

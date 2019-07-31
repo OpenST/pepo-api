@@ -42,7 +42,7 @@ class CompressVideos {
         .select(['id'])
         .limit(limit)
         .offset(offset)
-        .where(['status != ?', videoConstants.invertedStatuses[videoConstants.notCompressedStatus]])
+        .where(['status = ?', videoConstants.invertedStatuses[videoConstants.notCompressedStatus]])
         .order_by('id ASC')
         .fire();
 
@@ -68,10 +68,10 @@ class CompressVideos {
 
     for (let index = 0; index < videoRows.length; index++) {
       promiseArray.push(
-        CompressVideoLib.perform({
+        new CompressVideoLib({
           videoId: videoRows[index].id,
           resizeAll: isQualityChanged
-        })
+        }).perform()
       );
     }
 
