@@ -68,9 +68,7 @@ class ResizeImages {
     const promiseArray = [];
 
     for (let index = 0; index < imageRows.length; index++) {
-      promiseArray.push(
-        new ResizeImageLib({ userId: 1000, imageId: imageRows[index].id, resizeAll: isQualityChanged }).perform()
-      );
+      promiseArray.push(new ResizeImageLib({ imageId: imageRows[index].id, resizeAll: isQualityChanged }).perform());
     }
 
     await Promise.all(promiseArray);

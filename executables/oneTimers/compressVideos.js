@@ -1,7 +1,8 @@
 const rootPrefix = '../..',
-  CompressVideoLib = require(rootPrefix + '/lib/resize/Video'),
+  BgJob = require(rootPrefix + '/lib/BgJob'),
   VideoModel = require(rootPrefix + '/app/models/mysql/Video'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
+  bgJobConstants = require(rootPrefix + '/lib/globalConstant/bgJob'),
   videoConstants = require(rootPrefix + '/lib/globalConstant/video');
 
 const isQualityChanged = process.argv[2] || false;
@@ -68,7 +69,10 @@ class CompressVideos {
 
     for (let index = 0; index < videoRows.length; index++) {
       promiseArray.push(
-        new CompressVideoLib({ userId: 1000, videoId: videoRows[index].id, resizeAll: isQualityChanged }).perform()
+        BgJob.enqueue(bgJobConstants.videoResizer, {
+          videoId: videoRows[index].id,
+          resizeAll: isQualityChanged
+        })
       );
     }
 
