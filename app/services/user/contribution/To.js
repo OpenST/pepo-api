@@ -7,23 +7,13 @@ const rootPrefix = '../../../..',
 /**
  * Class for User Contribution To(A list of users who were supported by current user)
  *
- * @class
+ * @class UserContributionTo
  */
 class UserContributionTo extends ContributionBase {
   /**
-   * Constructor for user contribution base
+   * Fetch user ids from cache.
    *
-   * @param params
-   *
-   */
-  constructor(params) {
-    super(params);
-
-    const oThis = this;
-  }
-
-  /**
-   * Fetch user Ids from cache
+   * @sets oThis.contributionUserIds
    *
    * @returns {Promise<void>}
    * @private
@@ -44,7 +34,7 @@ class UserContributionTo extends ContributionBase {
 
     oThis.contributionUserIds = userPaginationCacheRes.data;
 
-    return Promise.resolve(responseHelper.successWithData({}));
+    return responseHelper.successWithData({});
   }
 }
 
