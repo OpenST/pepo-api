@@ -1,11 +1,11 @@
 const rootPrefix = '../..',
-  ResizeImageLib = require(rootPrefix + '/lib/resize/Image'),
-  ImageModel = require(rootPrefix + '/app/models/mysql/Image'),
+  CompressVideoLib = require(rootPrefix + '/lib/resize/Video'),
+  VideoModel = require(rootPrefix + '/app/models/mysql/Video'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger');
 
 const isQualityChanged = process.argv[2] || false;
 
-class ResizeImages {
+class CompressVideos {
   /**
    * Perform.
    *
@@ -14,18 +14,18 @@ class ResizeImages {
   async perform() {
     const oThis = this;
 
-    logger.log('isQualityChanged ', isQualityChanged);
+    logger.log('isQualityChanged: ', isQualityChanged);
 
-    await oThis._getImages();
+    await oThis._getVideos();
   }
 
   /**
-   * Get images
+   * Get videos.
    *
    * @returns {Promise<void>}
    * @private
    */
-  async _getImages() {
+  async _getVideos() {
     const oThis = this;
 
     const limit = 10;
@@ -37,7 +37,7 @@ class ResizeImages {
     while (moreDataPresent) {
       offset = (page - 1) * limit;
 
-      const dbRows = await new ImageModel()
+      const dbRows = await new VideoModel()
         .select(['id'])
         .limit(limit)
         .offset(offset)
@@ -47,26 +47,26 @@ class ResizeImages {
       if (dbRows.length === 0) {
         moreDataPresent = false;
       } else {
-        await oThis._resize(dbRows);
+        await oThis._compress(dbRows);
       }
       page++;
     }
   }
 
   /**
-   * Resize image rows.
+   * Compress video rows.
    *
-   * @param {array} imageRows
+   * @param {array} videoRows
    *
    * @returns {Promise<void>}
    * @private
    */
-  async _resize(imageRows) {
+  async _compress(videoRows) {
     const promiseArray = [];
 
-    for (let index = 0; index < imageRows.length; index++) {
+    for (let index = 0; index < videoRows.length; index++) {
       promiseArray.push(
-        new ResizeImageLib({ userId: 1000, imageId: imageRows[index].id, resizeAll: isQualityChanged }).perform()
+        new CompressVideoLib({ userId: 1000, videoId: videoRows[index].id, resizeAll: isQualityChanged }).perform()
       );
     }
 
@@ -74,13 +74,13 @@ class ResizeImages {
   }
 }
 
-new ResizeImages()
+new CompressVideos()
   .perform()
   .then(function() {
-    logger.win('All images resized successfully.');
+    logger.win('All videos compressed successfully.');
     process.exit(0);
   })
   .catch(function(err) {
-    logger.error('Image resize failed. Error: ', err);
+    logger.error('Video compression failed. Error: ', err);
     process.exit(1);
   });
