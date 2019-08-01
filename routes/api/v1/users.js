@@ -48,8 +48,9 @@ router.get('/recovery-info', sanitizer.sanitizeDynamicUrlParams, function(req, r
 });
 
 /* Contributed To Users List */
-router.get('/contribution-to', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+router.get('/:profile_user_id/contribution-to', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.contributionTo;
+  req.decodedParams.profile_user_id = req.params.profile_user_id;
 
   const dataFormatterFunc = async function(serviceResponse) {
     const wrapperFormatterRsp = await new FormatterComposer({
@@ -71,8 +72,9 @@ router.get('/contribution-to', sanitizer.sanitizeDynamicUrlParams, function(req,
 });
 
 /* Contributed By Users List */
-router.get('/contribution-by', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+router.get('/:profile_user_id/contribution-by', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.contributionBy;
+  req.decodedParams.profile_user_id = req.params.profile_user_id;
 
   const dataFormatterFunc = async function(serviceResponse) {
     const wrapperFormatterRsp = await new FormatterComposer({
@@ -94,8 +96,9 @@ router.get('/contribution-by', sanitizer.sanitizeDynamicUrlParams, function(req,
 });
 
 /* User Suggestion to Logged IN User */
-router.get('/contribution-suggestion', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+router.get('/:profile_user_id/contribution-suggestion', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.contributionSuggestion;
+  req.decodedParams.profile_user_id = req.params.profile_user_id;
 
   const dataFormatterFunc = async function(serviceResponse) {
     const wrapperFormatterRsp = await new FormatterComposer({
