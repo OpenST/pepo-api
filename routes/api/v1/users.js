@@ -57,7 +57,8 @@ router.get('/contribution-to', sanitizer.sanitizeDynamicUrlParams, function(req,
       entityKindToResponseKeyMap: {
         [entityType.users]: responseEntityKey.contributionToUsers,
         [entityType.imagesMap]: responseEntityKey.images,
-        [entityType.userListMeta]: responseEntityKey.meta
+        [entityType.userListMeta]: responseEntityKey.meta,
+        [entityType.userContributionToStatsMap]: responseEntityKey.userContributionToStats
       },
       serviceData: serviceResponse.data
     }).perform();
@@ -80,7 +81,8 @@ router.get('/contribution-by', sanitizer.sanitizeDynamicUrlParams, function(req,
       entityKindToResponseKeyMap: {
         [entityType.users]: responseEntityKey.contributionByUsers,
         [entityType.imagesMap]: responseEntityKey.images,
-        [entityType.userListMeta]: responseEntityKey.meta
+        [entityType.userListMeta]: responseEntityKey.meta,
+        [entityType.userContributionByStatsMap]: responseEntityKey.userContributionByStats
       },
       serviceData: serviceResponse.data
     }).perform();
