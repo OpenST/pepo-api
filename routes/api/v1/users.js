@@ -219,7 +219,7 @@ router.post('/:profile_user_id/profile', sanitizer.sanitizeDynamicUrlParams, fun
 });
 
 /* Video history */
-router.post('/:profile_user_id/video-history', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+router.get('/:profile_user_id/video-history', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.userVideoList;
   req.decodedParams.profile_user_id = req.params.profile_user_id;
 
