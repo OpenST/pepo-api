@@ -97,11 +97,17 @@ class Video extends ModelBase {
     for (const resolution in resolutions) {
       let responseResolution = resolution;
       if (resolution === 'o') {
+        //If url is present then use that one or else make the url using template
         responseResolution = 'original';
         responseResolutionHash[responseResolution] = oThis._formatResolution(resolutions[resolution]);
-        responseResolutionHash[responseResolution].url = shortToLongUrl.getFullUrl(
-          responseResolutionHash[responseResolution].url
-        );
+        if (responseResolutionHash[responseResolution].url) {
+          responseResolutionHash[responseResolution].url = shortToLongUrl.getFullUrl(
+            responseResolutionHash[responseResolution].url,
+            responseResolution
+          );
+        } else {
+          responseResolutionHash[responseResolution].url = shortToLongUrl.getFullUrl(urlTemplate, responseResolution);
+        }
       } else {
         responseResolutionHash[responseResolution] = oThis._formatResolution(resolutions[resolution]);
         responseResolutionHash[responseResolution].url = shortToLongUrl.getFullUrl(urlTemplate, responseResolution);
@@ -190,7 +196,7 @@ class Video extends ModelBase {
   async updateVideo(params) {
     const oThis = this;
 
-    const resolutions = oThis._formatResolutionsToInsert(params.resolutions);
+    const resolutions = oThis._formatResolutionsToUpdate(params.resolutions);
 
     return oThis
       .update({
@@ -216,9 +222,31 @@ class Video extends ModelBase {
     const responseResolutionHash = {};
 
     for (const resolution in resolutions) {
+      //While inserting original url has to be present in original resolutions hash only.
       if (resolution === 'original') {
         responseResolutionHash.o = oThis._formatResolutionToInsert(resolutions[resolution]);
         responseResolutionHash.o.u = resolutions[resolution].url;
+      } else {
+        responseResolutionHash[resolution] = oThis._formatResolutionToInsert(resolutions[resolution]);
+      }
+    }
+
+    return responseResolutionHash;
+  }
+
+  /**
+   * Format resolutions to update.
+   *
+   * @param {object} resolutions
+   * @private
+   */
+  _formatResolutionsToUpdate(resolutions) {
+    const oThis = this;
+
+    const responseResolutionHash = {};
+    for (const resolution in resolutions) {
+      if (resolution === 'original') {
+        responseResolutionHash.o = oThis._formatResolutionToInsert(resolutions[resolution]);
       } else {
         responseResolutionHash[resolution] = oThis._formatResolutionToInsert(resolutions[resolution]);
       }

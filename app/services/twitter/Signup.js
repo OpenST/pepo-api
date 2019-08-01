@@ -163,7 +163,6 @@ class TwitterSignup extends ServiceBase {
     }
 
     let resp = await imageLib.validateAndSave({
-      userId: oThis.userId,
       imageUrl: oThis.userTwitterEntity.nonDefaultProfileImageUrl,
       isExternalUrl: true,
       kind: imageConstants.profileImageKind,

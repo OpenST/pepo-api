@@ -98,9 +98,15 @@ class Image extends ModelBase {
       if (resolution === 'o') {
         responseResolution = 'original';
         responseResolutionHash[responseResolution] = oThis._formatResolution(resolutions[resolution]);
-        responseResolutionHash[responseResolution].url = shortToLongUrl.getFullUrl(
-          responseResolutionHash[responseResolution].url
-        );
+        //If url is already present in original resolution hash. Then the same url is set in original resolutions hash.
+        //else we make the original url from url template.
+        if (responseResolutionHash[responseResolution].url) {
+          responseResolutionHash[responseResolution].url = shortToLongUrl.getFullUrl(
+            responseResolutionHash[responseResolution].url
+          );
+        } else {
+          responseResolutionHash[responseResolution].url = shortToLongUrl.getFullUrl(urlTemplate, responseResolution);
+        }
       } else {
         responseResolutionHash[responseResolution] = oThis._formatResolution(resolutions[resolution]);
         responseResolutionHash[responseResolution].url = shortToLongUrl.getFullUrl(urlTemplate, responseResolution);
@@ -189,7 +195,7 @@ class Image extends ModelBase {
   async updateImage(params) {
     const oThis = this;
 
-    const resolutions = oThis._formatResolutionsToInsert(params.resolutions);
+    const resolutions = oThis._formatResolutionsToUpdate(params.resolutions);
 
     return oThis
       .update({
@@ -214,9 +220,37 @@ class Image extends ModelBase {
 
     const responseResolutionHash = {};
     for (const resolution in resolutions) {
+      //While inserting original url has to be present in original resolutions hash only.
       if (resolution === 'original') {
         responseResolutionHash.o = oThis._formatResolutionToInsert(resolutions[resolution]);
         responseResolutionHash.o.u = resolutions[resolution].url;
+      } else {
+        responseResolutionHash[resolution] = oThis._formatResolutionToInsert(resolutions[resolution]);
+      }
+    }
+
+    return responseResolutionHash;
+  }
+
+  /**
+   * Format resolutions to update.
+   *
+   * @param {object} resolutions
+   * @private
+   */
+  _formatResolutionsToUpdate(resolutions) {
+    const oThis = this;
+
+    const responseResolutionHash = {};
+    for (const resolution in resolutions) {
+      if (resolution === 'original') {
+        if (resolutions[resolution].url.match(imageConst.twitterImageUrlPrefix[1])) {
+          //If the url is twitter url then url is to be stored in resolutions hash.
+          responseResolutionHash.o = oThis._formatResolutionToInsert(resolutions[resolution]);
+          responseResolutionHash.o.u = resolutions[resolution].url;
+        } else {
+          responseResolutionHash.o = oThis._formatResolutionToInsert(resolutions[resolution]);
+        }
       } else {
         responseResolutionHash[resolution] = oThis._formatResolutionToInsert(resolutions[resolution]);
       }
