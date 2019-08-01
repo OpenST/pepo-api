@@ -29,21 +29,16 @@ class CompressVideos {
   async _getVideos() {
     const oThis = this;
 
-    const limit = 10;
+    const limit = 1;
 
-    let page = 1,
-      offset = null,
-      moreDataPresent = true;
+    let moreDataPresent = true;
 
     while (moreDataPresent) {
-      offset = (page - 1) * limit;
-
       const dbRows = await new VideoModel()
         .select(['id'])
         .limit(limit)
-        .offset(offset)
         .where(['status = ?', videoConstants.invertedStatuses[videoConstants.notCompressedStatus]])
-        .order_by('id ASC')
+        .order_by('id DESC')
         .fire();
 
       if (dbRows.length === 0) {
@@ -51,7 +46,6 @@ class CompressVideos {
       } else {
         await oThis._compress(dbRows);
       }
-      page++;
     }
   }
 
