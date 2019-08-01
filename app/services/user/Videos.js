@@ -93,14 +93,16 @@ class UserVideos extends ServiceBase {
     let videoDetails = await videoDetailObj.fetchByCreatorUserId({
       creatorUserId: oThis.profileUserId,
       limit: oThis.limit,
-      paginationIdentifier: oThis.paginationTimestamp
+      paginationTimestamp: oThis.paginationTimestamp
     });
 
     for (let videoId in videoDetails) {
       let videoDetail = videoDetails[videoId];
       oThis.videoIds.push(videoDetail.videoId);
       oThis.videoDetails.push(videoDetail);
-      oThis.nextPaginationTimestamp = videoDetail.createdAt;
+      if (!oThis.nextPaginationTimestamp) {
+        oThis.nextPaginationTimestamp = videoDetail.createdAt;
+      }
     }
   }
 
@@ -166,6 +168,44 @@ class UserVideos extends ServiceBase {
   }
 
   /**
+   * Default Page Limit.
+   *
+   * @private
+   */
+  _defaultPageLimit() {
+    return paginationConstants.defaultTagListPageSize;
+  }
+
+  /**
+   * Min page limit.
+   *
+   * @private
+   */
+  _minPageLimit() {
+    return paginationConstants.minTagListPageSize;
+  }
+
+  /**
+   * Max page limit.
+   *
+   * @private
+   */
+  _maxPageLimit() {
+    return paginationConstants.maxTagListPageSize;
+  }
+
+  /**
+   * Current page limit.
+   *
+   * @private
+   */
+  _currentPageLimit() {
+    const oThis = this;
+
+    return oThis.limit;
+  }
+
+  /**
    * Prepare final response
    *
    * @return {Promise<*|result>}
@@ -176,21 +216,21 @@ class UserVideos extends ServiceBase {
 
     return responseHelper.successWithData({
       [entityType.userVideoList]: oThis.videoDetails,
-      [entityType.usersMap]: oThis.profileResponse.usersByIdMap,
-      [entityType.userStats]: oThis.profileResponse.userStat,
+      usersByIdMap: oThis.profileResponse.usersByIdMap,
+      userStat: oThis.profileResponse.userStat,
       [entityType.userProfilesMap]: oThis.profileResponse.userProfilesMap,
-      [entityType.tagsMap]: oThis.profileResponse.tags,
-      [entityType.linksMap]: oThis.profileResponse.linkMap,
-      [entityType.imagesMap]: oThis.profileResponse.imageMap,
-      [entityType.videosMap]: oThis.profileResponse.videoMap,
+      tags: oThis.profileResponse.tags,
+      linkMap: oThis.profileResponse.linkMap,
+      imageMap: oThis.profileResponse.imageMap,
+      videoMap: oThis.profileResponse.videoMap,
       [entityType.videoDetailsMap]: oThis.profileResponse.videoDetailsMap,
       [entityType.currentUserUserContributionsMap]: oThis.profileResponse.currentUserUserContributionsMap,
       [entityType.currentUserVideoContributionsMap]: oThis.profileResponse.currentUserVideoContributionsMap,
       [entityType.userProfileAllowedActions]: oThis.profileResponse.userProfileAllowedActions,
       tokenUsersByUserIdMap: oThis.profileResponse.tokenUsersByUserIdMap,
       [entityType.pricePointsMap]: oThis.profileResponse.pricePointsMap,
-      [entityType.token]: oThis.tokenDetails,
-      [entityType.userVideoListMeta]: oThis.responseMetaData
+      tokenDetails: oThis.tokenDetails,
+      meta: oThis.responseMetaData
     });
   }
 }
