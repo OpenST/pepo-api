@@ -393,6 +393,24 @@ const v1Signature = {
       }
     ]
   },
+  [apiName.userVideoList]: {
+    mandatory: [
+      {
+        parameter: 'profile_user_id',
+        validatorMethods: ['validateNonZeroInteger']
+      }
+    ],
+    optional: [
+      {
+        parameter: paginationConstants.paginationIdentifierKey,
+        validatorMethods: ['validateString', 'validatePaginationIdentifier']
+      },
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      }
+    ]
+  },
   [apiName.feedDetails]: {
     mandatory: [
       {
