@@ -5,7 +5,7 @@ const rootPrefix = '../../../..',
   responseHelper = require(rootPrefix + '/lib/formatter/response');
 
 /**
- * Class for User Contribution By(A list of users who supported the current user)
+ * Class for User Contribution By (A list of users who support the current user).
  *
  * @class UserContributionBy
  */
@@ -32,7 +32,8 @@ class UserContributionBy extends ContributionBase {
       return Promise.reject(userPaginationCacheRes);
     }
 
-    oThis.contributionUserIds = userPaginationCacheRes.data;
+    oThis.contributionUserIds = userPaginationCacheRes.data.contributedByUserIds;
+    oThis.contributionUsersByUserIdsMap = userPaginationCacheRes.data.contributionUsersByUserIdsMap;
 
     return responseHelper.successWithData({});
   }

@@ -40,6 +40,7 @@ class UserContributionBase extends ServiceBase {
     oThis.imageMap = {};
     oThis.contributionUserIds = [];
     oThis.usersByIdMap = {};
+    oThis.contributionUsersByUserIdsMap = {};
     oThis.tokenUsersByUserIdMap = {};
   }
 
@@ -175,7 +176,7 @@ class UserContributionBase extends ServiceBase {
   /**
    * Service response.
    *
-   * @returns {Promise<*>}
+   * @returns {object}
    * @private
    */
   finalResponse() {
@@ -209,7 +210,9 @@ class UserContributionBase extends ServiceBase {
       tokenUsersByUserIdMap: tokenUserHash,
       userIds: oThis.contributionUserIds,
       imageMap: oThis.imageMap,
-      meta: responseMetaData
+      meta: responseMetaData,
+      currentUserId: oThis.currentUserId,
+      contributionUsersByUserIdsMap: oThis.contributionUsersByUserIdsMap
     };
   }
 

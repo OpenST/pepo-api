@@ -83,20 +83,23 @@ class UserContributor extends ModelBase {
       offset = (page - 1) * limit;
 
     const dbRows = await oThis
-      .select(['user_id'])
+      .select(['user_id, total_amount, updated_at'])
       .where({ contributed_by_user_id: params.contributedByUserId })
       .limit(limit)
       .offset(offset)
       .order_by('id DESC')
       .fire();
 
-    const response = [];
+    const userIds = [];
+    const contributionUsersByUserIdsMap = {};
 
     for (let index = 0; index < dbRows.length; index++) {
-      response.push(dbRows[index].user_id);
+      const userContributor = dbRows[index];
+      userIds.push(userContributor.user_id);
+      contributionUsersByUserIdsMap[userContributor.user_id] = oThis.formatDbData(userContributor);
     }
 
-    return response;
+    return { userIds: userIds, contributionUsersByUserIdsMap: contributionUsersByUserIdsMap };
   }
 
   /**
@@ -117,20 +120,23 @@ class UserContributor extends ModelBase {
       offset = (page - 1) * limit;
 
     const dbRows = await oThis
-      .select(['contributed_by_user_id'])
+      .select(['contributed_by_user_id, total_amount, updated_at'])
       .where({ user_id: params.userId })
       .limit(limit)
       .offset(offset)
       .order_by('id DESC')
       .fire();
 
-    const response = [];
+    const contributedByUserIds = [];
+    const contributionUsersByUserIdsMap = {};
 
     for (let index = 0; index < dbRows.length; index++) {
-      response.push(dbRows[index].contributed_by_user_id);
+      const userContributor = dbRows[index];
+      contributedByUserIds.push(userContributor.contributed_by_user_id);
+      contributionUsersByUserIdsMap[userContributor.contributed_by_user_id] = oThis.formatDbData(userContributor);
     }
 
-    return response;
+    return { contributedByUserIds: contributedByUserIds, contributionUsersByUserIdsMap: contributionUsersByUserIdsMap };
   }
 
   /**
