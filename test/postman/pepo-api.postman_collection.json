@@ -312,7 +312,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{api_server}}/api/v1/users/contribution-to",
+							"raw": "{{api_server}}/api/v1/users/1066/contribution-to",
 							"host": [
 								"{{api_server}}"
 							],
@@ -332,7 +332,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{api_server}}/api/v1/users/contribution-by",
+							"raw": "{{api_server}}/api/v1/users/1066/contribution-by",
 							"host": [
 								"{{api_server}}"
 							],
@@ -352,7 +352,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{api_server}}/api/v1/users/contribution-suggestion",
+							"raw": "{{api_server}}/api/v1/users/1066/contribution-suggestion",
 							"host": [
 								"{{api_server}}"
 							],
