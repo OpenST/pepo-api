@@ -18,7 +18,9 @@ class UserContributionBase extends ServiceBase {
    * Constructor for user contribution base.
    *
    * @param {object} params
-   * @param {number/string} params.current_user
+   * @param {object} params.current_user
+   * @param {number/string} params.current_user.id
+   * @param {number/string} params.profile_user_id
    * @param {string} [params.pagination_identifier]
    *
    * @augments ServiceBase
@@ -31,6 +33,7 @@ class UserContributionBase extends ServiceBase {
     const oThis = this;
 
     oThis.currentUserId = params.current_user.id;
+    oThis.profileUserId = params.profile_user_id;
     oThis.paginationIdentifier = params[paginationConstants.paginationIdentifierKey] || null;
 
     oThis.limit = null;
