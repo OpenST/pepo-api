@@ -32,12 +32,13 @@ class UserContributionBase extends ServiceBase {
 
     const oThis = this;
 
-    oThis.currentUserId = params.current_user.id;
-    oThis.profileUserId = params.profile_user_id;
+    oThis.currentUserId = +params.current_user.id;
+    oThis.profileUserId = +params.profile_user_id;
     oThis.paginationIdentifier = params[paginationConstants.paginationIdentifierKey] || null;
 
     oThis.limit = null;
     oThis.page = null;
+    oThis.isProfileUserCurrentUser = false;
 
     oThis.imageIds = [];
     oThis.imageMap = {};
@@ -75,7 +76,7 @@ class UserContributionBase extends ServiceBase {
   /**
    * Validate and sanitize specific params.
    *
-   * @sets oThis.page, oThis.limit
+   * @sets oThis.page, oThis.limit, oThis.isProfileUserCurrentUser
    *
    * @returns {Promise<never>}
    * @private
@@ -90,6 +91,10 @@ class UserContributionBase extends ServiceBase {
       oThis.page = 1;
     }
     oThis.limit = paginationConstants.defaultUserContributionPageSize;
+
+    if (oThis.currentUserId === oThis.profileUserId) {
+      oThis.isProfileUserCurrentUser = true;
+    }
 
     return oThis._validatePageSize();
   }
