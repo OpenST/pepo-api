@@ -86,7 +86,7 @@ class UserContributionBy extends ContributionBase {
   async _fetchPendingTransactionsForCurrentUser() {
     const oThis = this;
 
-    const cacheResponse = new PendingTransactionsByToUserIdsAndFromUserIdCache({
+    const cacheResponse = await new PendingTransactionsByToUserIdsAndFromUserIdCache({
       fromUserId: oThis.currentUserId,
       toUserIds: [oThis.profileUserId]
     }).fetch();
