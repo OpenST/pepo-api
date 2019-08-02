@@ -3,21 +3,35 @@ const rootPrefix = '../../..',
   FeedByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/FeedByIds'),
   responseHelper = require(rootPrefix + '/lib/formatter/response');
 
+/**
+ * Class for feed details by id.
+ *
+ * @class FeedById
+ */
 class FeedById extends FeedBase {
   /**
-   * Constructor for Feed Details
+   * Constructor for feed details by id.
    *
-   * @param params
+   * @param {object} params
+   * @param {object} params.current_user
+   * @param {number/string} params.feed_id
+   *
+   * @augments FeedBase
+   *
+   * @constructor
    */
   constructor(params) {
     super(params);
 
     const oThis = this;
+
     oThis.feedId = params.feed_id;
   }
 
   /**
-   * Validate and Sanitize
+   * Validate and sanitize.
+   *
+   * @sets oThis.currentUserId
    *
    * @returns {Promise<*|result>}
    * @private
@@ -35,8 +49,11 @@ class FeedById extends FeedBase {
   }
 
   /**
-   * Set feed ids
+   * Set feed ids.
    *
+   * @sets oThis.feedIds, oThis.feedsMap
+   *
+   * @returns {Promise<*>}
    * @private
    */
   async _setFeedIds() {
@@ -54,7 +71,7 @@ class FeedById extends FeedBase {
   }
 
   /**
-   * Prepare Response
+   * Prepare response.
    *
    * @returns {*|result}
    * @private
@@ -63,7 +80,7 @@ class FeedById extends FeedBase {
     const oThis = this;
 
     return responseHelper.successWithData({
-      feed: oThis.feeds[0], // for this service, feeds array will contain only one element
+      feed: oThis.feeds[0], // For this service, feeds array will contain only one element.
       userProfilesMap: oThis.profileResponse.userProfilesMap,
       userProfileAllowedActions: oThis.profileResponse.userProfileAllowedActions,
       usersByIdMap: oThis.profileResponse.usersByIdMap,
