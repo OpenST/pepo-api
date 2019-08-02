@@ -6,7 +6,7 @@
   "cronProcessesMonitor": {
     "ncbhjc": "hwvtuc"
   },
-  "bgJobRabbitmq": {
+  "jobProcessor": {
     "topics": ["bg.#"],
     "queues": ["example"],
     "prefetchCount": 1
