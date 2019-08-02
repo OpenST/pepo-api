@@ -57,12 +57,8 @@ class UserContributionBy extends ContributionBase {
       return Promise.reject(userPaginationCacheRes);
     }
 
-    console.log('======userPaginationCacheRes=======', userPaginationCacheRes.data);
-
     oThis.contributionUserIds = userPaginationCacheRes.data.contributedByUserIds;
     oThis.contributionUsersByUserIdsMap = userPaginationCacheRes.data.contributionUsersByUserIdsMap;
-
-    console.log('==========oThis.contributionUsersByUserIdsMap=====111111=====', oThis.contributionUsersByUserIdsMap);
 
     if (oThis.contributionUsersByUserIdsMap[oThis.currentUserId]) {
       oThis.isCurrentUserAContributor = true;
@@ -71,8 +67,6 @@ class UserContributionBy extends ContributionBase {
     if (oThis.isCurrentUserAContributor) {
       await oThis._fetchPendingTransactionsForCurrentUser();
     }
-
-    console.log('==========oThis.contributionUsersByUserIdsMap=====2222222=====', oThis.contributionUsersByUserIdsMap);
 
     return responseHelper.successWithData({});
   }

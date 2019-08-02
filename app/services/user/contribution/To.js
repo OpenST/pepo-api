@@ -39,13 +39,9 @@ class UserContributionTo extends ContributionBase {
     oThis.contributionUserIds = userPaginationCacheRes.data.userIds;
     oThis.contributionUsersByUserIdsMap = userPaginationCacheRes.data.contributionUsersByUserIdsMap;
 
-    console.log('==========oThis.contributionUsersByUserIdsMap=====111111=====', oThis.contributionUsersByUserIdsMap);
-
     if (oThis.isProfileUserCurrentUser) {
       await oThis._fetchPendingTransactionsForProfileUser();
     }
-
-    console.log('==========oThis.contributionUsersByUserIdsMap=====2222222=====', oThis.contributionUsersByUserIdsMap);
 
     return responseHelper.successWithData({});
   }
