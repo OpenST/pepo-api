@@ -86,7 +86,7 @@ class TwitterUserExtendedModel extends ModelBase {
    * Flush cache.
    *
    * @param {object} params
-   * @param {number} params.twitterUserid
+   * @param {number} params.twitterUserId
    *
    * @returns {Promise<*>}
    */
@@ -95,7 +95,7 @@ class TwitterUserExtendedModel extends ModelBase {
       '/lib/cacheManagement/single/SecureTwitterUserExtendedByTwitterUserId');
 
     await new SecureTwitterUserExtendedByTwitterUserIdCache({
-      twitterUserid: params.twitterUserid
+      twitterUserId: params.twitterUserId
     }).clear();
   }
 }
