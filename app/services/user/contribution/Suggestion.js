@@ -13,6 +13,57 @@ const rootPrefix = '../../../..',
  */
 class UserContributionSuggestion extends ContributionBase {
   /**
+   * Constructor for user suggestion (A list of users who should be suggested to the current user).
+   *
+   * @param {object} params
+   * @param {object} params.current_user
+   * @param {number/string} params.current_user.id
+   * @param {number/string} params.profile_user_id
+   * @param {string} [params.pagination_identifier]
+   *
+   * @augments ContributionBase
+   *
+   * @constructor
+   */
+  constructor(params) {
+    super(params);
+
+    const oThis = this;
+
+    oThis.isProfileUserCurrentUser = false;
+  }
+
+  /**
+   * Validate and sanitize specific params.
+   *
+   * @sets oThis.isProfileUserCurrentUser
+   *
+   * @returns {Promise<*>}
+   * @private
+   */
+  async _validateAndSanitizeParams() {
+    const oThis = this;
+
+    oThis.isProfileUserCurrentUser = oThis.profileUserId === oThis.currentUserId;
+
+    if (!oThis.isProfileUserCurrentUser) {
+      return Promise.reject(
+        responseHelper.error({
+          internal_error_identifier: 'a_s_u_c_s_1',
+          api_error_identifier: 'resource_not_found',
+          debug_options: {
+            reason: 'Invalid userId',
+            profileUserId: oThis.profileUserId,
+            currentUserId: oThis.currentUserId
+          }
+        })
+      );
+    }
+
+    return super._validateAndSanitizeParams();
+  }
+
+  /**
    * Fetch user ids from cache.
    *
    * @sets oThis.contributionUserIds
