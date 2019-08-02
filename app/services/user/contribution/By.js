@@ -57,6 +57,8 @@ class UserContributionBy extends ContributionBase {
       return Promise.reject(userPaginationCacheRes);
     }
 
+    console.log('======userPaginationCacheRes=======', userPaginationCacheRes.data);
+
     oThis.contributionUserIds = userPaginationCacheRes.data.contributedByUserIds;
     oThis.contributionUsersByUserIdsMap = userPaginationCacheRes.data.contributionUsersByUserIdsMap;
 

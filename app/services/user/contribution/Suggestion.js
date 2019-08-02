@@ -13,38 +13,13 @@ const rootPrefix = '../../../..',
  */
 class UserContributionSuggestion extends ContributionBase {
   /**
-   * Constructor for user suggestion (A list of users who should be suggested to the current user).
-   *
-   * @param {object} params
-   * @param {object} params.current_user
-   * @param {number/string} params.current_user.id
-   * @param {number/string} params.profile_user_id
-   * @param {string} [params.pagination_identifier]
-   *
-   * @augments ContributionBase
-   *
-   * @constructor
-   */
-  constructor(params) {
-    super(params);
-
-    const oThis = this;
-
-    oThis.isProfileUserCurrentUser = false;
-  }
-
-  /**
    * Validate and sanitize specific params.
-   *
-   * @sets oThis.isProfileUserCurrentUser
    *
    * @returns {Promise<*>}
    * @private
    */
   async _validateAndSanitizeParams() {
     const oThis = this;
-
-    oThis.isProfileUserCurrentUser = oThis.profileUserId === oThis.currentUserId;
 
     if (!oThis.isProfileUserCurrentUser) {
       return Promise.reject(

@@ -15,43 +15,6 @@ const rootPrefix = '../../../..',
  */
 class UserContributionTo extends ContributionBase {
   /**
-   * Constructor for user contribution to (A list of users who were supported by current user).
-   *
-   * @param {object} params
-   * @param {object} params.current_user
-   * @param {number/string} params.current_user.id
-   * @param {number/string} params.profile_user_id
-   * @param {string} [params.pagination_identifier]
-   *
-   * @augments ContributionBase
-   *
-   * @constructor
-   */
-  constructor(params) {
-    super(params);
-
-    const oThis = this;
-
-    oThis.isProfileUserCurrentUser = false;
-  }
-
-  /**
-   * Validate and sanitize specific params.
-   *
-   * @sets oThis.isProfileUserCurrentUser
-   *
-   * @returns {Promise<*>}
-   * @private
-   */
-  async _validateAndSanitizeParams() {
-    const oThis = this;
-
-    oThis.isProfileUserCurrentUser = oThis.profileUserId === oThis.currentUserId;
-
-    return super._validateAndSanitizeParams();
-  }
-
-  /**
    * Fetch user ids from cache.
    *
    * @sets oThis.contributionUserIds, oThis.contributionUsersByUserIdsMap
@@ -100,7 +63,7 @@ class UserContributionTo extends ContributionBase {
 
     const cacheResponse = await new PendingTransactionsByToUserIdsAndFromUserIdCache({
       fromUserId: oThis.profileUserId,
-      toUserIds: [oThis.contributionUserIds]
+      toUserIds: oThis.contributionUserIds
     }).fetch();
 
     if (cacheResponse.isFailure()) {

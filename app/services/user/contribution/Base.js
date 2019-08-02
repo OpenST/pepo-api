@@ -1,6 +1,7 @@
 const rootPrefix = '../../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   UserModel = require(rootPrefix + '/app/models/mysql/User'),
+  CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   TokenUserModel = require(rootPrefix + '/app/models/mysql/TokenUser'),
   UserMultiCache = require(rootPrefix + '/lib/cacheManagement/multi/User'),
   ImageByIdCache = require(rootPrefix + '/lib/cacheManagement/multi/ImageByIds'),
@@ -38,6 +39,7 @@ class UserContributionBase extends ServiceBase {
 
     oThis.limit = null;
     oThis.page = null;
+    oThis.isProfileUserCurrentUser = oThis.profileUserId === oThis.currentUserId;
 
     oThis.imageIds = [];
     oThis.imageMap = {};
@@ -91,7 +93,41 @@ class UserContributionBase extends ServiceBase {
     }
     oThis.limit = paginationConstants.defaultUserContributionPageSize;
 
+    if (!oThis.isProfileUserCurrentUser) {
+      await oThis._validateProfileUserId();
+    }
+
     return oThis._validatePageSize();
+  }
+
+  /**
+   * Validate whether profile userId is correct or not.
+   *
+   * @returns {Promise<*>}
+   * @private
+   */
+  async _validateProfileUserId() {
+    const oThis = this;
+
+    const profileUserByIdResponse = await new UserMultiCache({ ids: [oThis.profileUserId] }).fetch();
+
+    if (profileUserByIdResponse.isFailure()) {
+      return Promise.reject(profileUserByIdResponse);
+    }
+
+    if (!CommonValidators.validateNonEmptyObject(profileUserByIdResponse.data[oThis.profileUserId])) {
+      return Promise.reject(
+        responseHelper.error({
+          internal_error_identifier: 'a_s_u_c_b_1',
+          api_error_identifier: 'resource_not_found',
+          debug_options: {
+            reason: 'Invalid userId',
+            profileUserId: oThis.profileUserId,
+            currentUserId: oThis.currentUserId
+          }
+        })
+      );
+    }
   }
 
   /**
