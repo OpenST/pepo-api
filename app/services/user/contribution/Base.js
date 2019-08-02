@@ -38,7 +38,6 @@ class UserContributionBase extends ServiceBase {
 
     oThis.limit = null;
     oThis.page = null;
-    oThis.isProfileUserCurrentUser = false;
 
     oThis.imageIds = [];
     oThis.imageMap = {};
@@ -76,7 +75,7 @@ class UserContributionBase extends ServiceBase {
   /**
    * Validate and sanitize specific params.
    *
-   * @sets oThis.page, oThis.limit, oThis.isProfileUserCurrentUser
+   * @sets oThis.page, oThis.limit
    *
    * @returns {Promise<never>}
    * @private
@@ -86,15 +85,11 @@ class UserContributionBase extends ServiceBase {
 
     if (oThis.paginationIdentifier) {
       const parsedPaginationParams = oThis._parsePaginationParams(oThis.paginationIdentifier);
-      oThis.page = parsedPaginationParams.page; // Override page
+      oThis.page = parsedPaginationParams.page; // Override page.
     } else {
       oThis.page = 1;
     }
     oThis.limit = paginationConstants.defaultUserContributionPageSize;
-
-    if (oThis.currentUserId === oThis.profileUserId) {
-      oThis.isProfileUserCurrentUser = true;
-    }
 
     return oThis._validatePageSize();
   }

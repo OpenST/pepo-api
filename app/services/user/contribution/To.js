@@ -4,16 +4,53 @@ const rootPrefix = '../../../..',
   ContributionBase = require(rootPrefix + '/app/services/user/contribution/Base'),
   UserContributorContributedByPaginationCache = require(rootPrefix +
     '/lib/cacheManagement/single/UserContributorContributedByPagination'),
-  PendingTransactionsByToUserIdsAndFromUserId = require(rootPrefix +
+  PendingTransactionsByToUserIdsAndFromUserIdCache = require(rootPrefix +
     '/lib/cacheManagement/multi/PendingTransactionsByToUserIdsAndFromUserId'),
   responseHelper = require(rootPrefix + '/lib/formatter/response');
 
 /**
- * Class for User Contribution To (A list of users who were supported by current user).
+ * Class for user contribution to (A list of users who were supported by current user).
  *
  * @class UserContributionTo
  */
 class UserContributionTo extends ContributionBase {
+  /**
+   * Constructor for user contribution to (A list of users who were supported by current user).
+   *
+   * @param {object} params
+   * @param {object} params.current_user
+   * @param {number/string} params.current_user.id
+   * @param {number/string} params.profile_user_id
+   * @param {string} [params.pagination_identifier]
+   *
+   * @augments ContributionBase
+   *
+   * @constructor
+   */
+  constructor(params) {
+    super(params);
+
+    const oThis = this;
+
+    oThis.isProfileUserCurrentUser = false;
+  }
+
+  /**
+   * Validate and sanitize specific params.
+   *
+   * @sets oThis.isProfileUserCurrentUser
+   *
+   * @returns {Promise<*>}
+   * @private
+   */
+  async _validateAndSanitizeParams() {
+    const oThis = this;
+
+    oThis.isProfileUserCurrentUser = oThis.profileUserId === oThis.currentUserId;
+
+    return super._validateAndSanitizeParams();
+  }
+
   /**
    * Fetch user ids from cache.
    *
@@ -39,23 +76,29 @@ class UserContributionTo extends ContributionBase {
     oThis.contributionUserIds = userPaginationCacheRes.data.userIds;
     oThis.contributionUsersByUserIdsMap = userPaginationCacheRes.data.contributionUsersByUserIdsMap;
 
+    console.log('==========oThis.contributionUsersByUserIdsMap=====111111=====', oThis.contributionUsersByUserIdsMap);
+
     if (oThis.isProfileUserCurrentUser) {
       await oThis._fetchPendingTransactionsForProfileUser();
     }
+
+    console.log('==========oThis.contributionUsersByUserIdsMap=====2222222=====', oThis.contributionUsersByUserIdsMap);
 
     return responseHelper.successWithData({});
   }
 
   /**
-   * Fetch pending transactions for profile user if profile userId is same as current userId.
+   * Fetch pending transactions for profile user if profileUserId is same as currentUserId.
    *
-   * @returns {Promise<Promise<never>|undefined>}
+   * @sets oThis.contributionUsersByUserIdsMap
+   *
+   * @returns {Promise<*>}
    * @private
    */
   async _fetchPendingTransactionsForProfileUser() {
     const oThis = this;
 
-    const cacheResponse = new PendingTransactionsByToUserIdsAndFromUserId({
+    const cacheResponse = new PendingTransactionsByToUserIdsAndFromUserIdCache({
       fromUserId: oThis.profileUserId,
       toUserIds: [oThis.contributionUserIds]
     }).fetch();
