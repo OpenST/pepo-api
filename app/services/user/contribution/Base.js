@@ -227,7 +227,7 @@ class UserContributionBase extends ServiceBase {
       userIds: oThis.contributionUserIds,
       imageMap: oThis.imageMap,
       meta: responseMetaData,
-      currentUserId: oThis.currentUserId,
+      profileUserId: oThis.profileUserId,
       contributionUsersByUserIdsMap: oThis.contributionUsersByUserIdsMap
     };
   }

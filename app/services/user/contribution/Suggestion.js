@@ -24,7 +24,7 @@ class UserContributionSuggestion extends ContributionBase {
     const oThis = this;
 
     const twitterUserByUserIdsCacheResp = await new TwitterUserByUserIdsCache({
-      userIds: [oThis.currentUserId]
+      userIds: [oThis.profileUserId]
     }).fetch();
 
     if (twitterUserByUserIdsCacheResp.isFailure()) {
@@ -32,7 +32,7 @@ class UserContributionSuggestion extends ContributionBase {
     }
 
     // Should always be present.
-    const currentUserTwitterUserId = twitterUserByUserIdsCacheResp.data[oThis.currentUserId].id;
+    const currentUserTwitterUserId = twitterUserByUserIdsCacheResp.data[oThis.profileUserId].id;
 
     const userPaginationCacheRes = await new TwitterUserConnectionByUser1PaginationCache({
       limit: oThis.limit,

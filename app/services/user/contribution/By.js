@@ -24,7 +24,7 @@ class UserContributionBy extends ContributionBase {
     const UserContributedByPaginationCacheObj = new UserContributorByUserIdPaginationCache({
         limit: oThis.limit,
         page: oThis.page,
-        userId: oThis.currentUserId
+        userId: oThis.profileUserId
       }),
       userPaginationCacheRes = await UserContributedByPaginationCacheObj.fetch();
 
