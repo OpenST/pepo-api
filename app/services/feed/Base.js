@@ -110,18 +110,22 @@ class FeedBase extends ServiceBase {
 
     for (let index = 0; index < oThis.feedIds.length; index++) {
       const feedId = oThis.feedIds[index];
-      const feedDetails = oThis.feedIdToFeedDetailsMap[feedId],
-        feedExtraData = feedDetails.extraData;
+      const feedObj = oThis.feedIdToFeedDetailsMap[feedId],
+        feedExtraData = feedObj.extraData;
 
       oThis.feedIdToFeedDetailsMap[feedId].payload = {
         text: feedExtraData.text || '',
-        ostTransactionId: feedDetails.primaryExternalEntityId,
+        ostTransactionId: feedObj.primaryExternalEntityId,
         gifDetailId: ''
       };
 
-      oThis.giphyKindExternalEntityIdToFeedIdMap[feedExtraData.giphyExternalEntityId] = feedId;
+      if (!oThis.giphyKindExternalEntityIdToFeedIdMap[feedExtraData.giphyExternalEntityId]) {
+        oThis.giphyKindExternalEntityIdToFeedIdMap[feedExtraData.giphyExternalEntityId] = [];
+      }
 
-      oThis.externalEntityIds.push(feedDetails.primaryExternalEntityId); // OST transaction ID.
+      oThis.giphyKindExternalEntityIdToFeedIdMap[feedExtraData.giphyExternalEntityId].push(feedId);
+
+      oThis.externalEntityIds.push(feedObj.primaryExternalEntityId); // OST transaction ID.
       if (feedExtraData.giphyExternalEntityId) {
         oThis.externalEntityIds.push(feedExtraData.giphyExternalEntityId); // GIF external entity table ID.
       }
@@ -165,16 +169,16 @@ class FeedBase extends ServiceBase {
       const externalEntityTableId = oThis.externalEntityIds[externalEntityIdIndex];
 
       // Fetch external entity details.
-      const externalEntityDetails = externalEntityIdToDetailsMap[externalEntityTableId];
+      const externalEntityObj = externalEntityIdToDetailsMap[externalEntityTableId];
 
-      const externalEntityExtraData = externalEntityDetails.extraData;
-      const externalEntityTableEntityId = externalEntityDetails.entityId;
+      const externalEntityExtraData = externalEntityObj.extraData;
+      const externalEntityTableEntityId = externalEntityObj.entityId;
 
       if (!externalEntityExtraData) {
         return Promise.reject(new Error('External data for external entity is null'));
       }
 
-      switch (externalEntityDetails.entityKind) {
+      switch (externalEntityObj.entityKind) {
         case externalEntityConstants.ostTransactionEntityKind: {
           oThis.ostTransactionMap[externalEntityTableId] = {
             id: externalEntityTableId,
@@ -192,11 +196,15 @@ class FeedBase extends ServiceBase {
           break;
         }
         case externalEntityConstants.giphyEntityKind: {
-          oThis.externalEntityGifMap[externalEntityTableId] = externalEntityDetails;
+          oThis.externalEntityGifMap[externalEntityTableId] = externalEntityObj;
 
           // Insert entityId in feed details payload.
-          const feedId = oThis.giphyKindExternalEntityIdToFeedIdMap[externalEntityTableId];
-          oThis.feedIdToFeedDetailsMap[feedId].payload.gifDetailId = externalEntityTableEntityId;
+          const feedIds = oThis.giphyKindExternalEntityIdToFeedIdMap[externalEntityTableId];
+
+          for (let i = 0; i < feedIds.length; i++) {
+            let feedId = feedIds[i];
+            oThis.feedIdToFeedDetailsMap[feedId].payload.gifDetailId = externalEntityTableEntityId;
+          }
 
           break;
         }

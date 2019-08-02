@@ -90,8 +90,8 @@
     "message": "Addresses already exists."
   },
   "invalid_login_details": {
-    "http_code": "500",
-    "code": "INTERNAL_SERVER_ERROR",
+    "http_code": "401",
+    "code": "UNAUTHORIZED",
     "message": "Invalid login details."
   }
 }
