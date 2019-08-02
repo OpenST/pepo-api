@@ -119,7 +119,7 @@ class UserContributionBase extends ServiceBase {
       return Promise.reject(
         responseHelper.error({
           internal_error_identifier: 'a_s_u_c_b_1',
-          api_error_identifier: 'resource_not_found',
+          api_error_identifier: 'unauthorized_api_request',
           debug_options: {
             reason: 'Invalid userId',
             profileUserId: oThis.profileUserId,
