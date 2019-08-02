@@ -406,6 +406,15 @@ const v1Signature = {
         validatorMethods: ['validateNonEmptyObject']
       }
     ]
+  },
+  [apiName.websocketDetails]: {
+    mandatory: [
+      {
+        parameter: 'user_id',
+        validatorMethods: ['validateInteger']
+      }
+    ],
+    optional: []
   }
 };
 

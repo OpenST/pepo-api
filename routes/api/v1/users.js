@@ -221,4 +221,26 @@ router.post('/:profile_user_id/profile', sanitizer.sanitizeDynamicUrlParams, fun
   Promise.resolve(routeHelper.perform(req, res, next, '/user/profile/update/Info', 'r_a_v1_u_11', null));
 });
 
+/* User websocket details*/
+router.get('/:user_id/websocket-details', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.websocketDetails;
+  req.decodedParams.user_id = req.params.user_id;
+
+  const dataFormatterFunc = async function(serviceResponse) {
+    const wrapperFormatterRsp = await new FormatterComposer({
+      resultType: responseEntityKey.websocketDetails,
+      entityKindToResponseKeyMap: {
+        [entityType.websocketDetails]: responseEntityKey.websocketDetails
+      },
+      serviceData: serviceResponse.data
+    }).perform();
+
+    serviceResponse.data = wrapperFormatterRsp.data;
+  };
+
+  Promise.resolve(
+    routeHelper.perform(req, res, next, '/user/SocketConnectionDetails', 'r_a_v1_u_12', null, dataFormatterFunc)
+  );
+});
+
 module.exports = router;
