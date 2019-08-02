@@ -60,9 +60,12 @@ class UserContributionBase extends ServiceBase {
 
     await oThis._fetchPaginatedUserIdsFromCache();
 
-    await oThis._fetchUsers();
+    const promisesArray = [];
 
-    await oThis._fetchTokenUsers();
+    promisesArray.push(oThis._fetchUsers());
+    promisesArray.push(oThis._fetchTokenUsers());
+
+    await Promise.all(promisesArray);
 
     await oThis._fetchImages();
 
@@ -89,6 +92,16 @@ class UserContributionBase extends ServiceBase {
     oThis.limit = paginationConstants.defaultUserContributionPageSize;
 
     return oThis._validatePageSize();
+  }
+
+  /**
+   * Fetch user ids from cache.
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _fetchPaginatedUserIdsFromCache() {
+    throw new Error('Sub-class to implement.');
   }
 
   /**
@@ -259,16 +272,6 @@ class UserContributionBase extends ServiceBase {
     const oThis = this;
 
     return oThis.limit;
-  }
-
-  /**
-   * Fetch user ids from cache.
-   *
-   * @returns {Promise<void>}
-   * @private
-   */
-  async _fetchPaginatedUserIdsFromCache() {
-    throw new Error('Sub-class to implement.');
   }
 }
 

@@ -13,7 +13,7 @@ class GetUserProfile extends ServiceBase {
    * Constructor to get user profile.
    *
    * @param {object} params
-   * @param {string} params.profile_user_id: Profile user id
+   * @param {string/number} params.profile_user_id
    * @param {object} params.current_user
    * @param {string/number} params.current_user.id
    *
