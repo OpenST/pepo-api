@@ -125,9 +125,10 @@ class UserSocketConnectionDetails extends ModelBase {
    * @returns {Promise<*>}
    */
   static async flushCache(params) {
-    const UserStatByUserIds = require(rootPrefix + '/lib/cacheManagement/multi/UserStatByUserIds');
+    const UserSocketConnectionDetailsCache = require(rootPrefix +
+      '/lib/cacheManagement/multi/UserSocketConDetailsByUserIds');
 
-    await new UserStatByUserIds({ userIds: [params.userId] }).clear();
+    await new UserSocketConnectionDetailsCache({ userIds: [params.userId] }).clear();
   }
 }
 
