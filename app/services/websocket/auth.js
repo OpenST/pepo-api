@@ -30,8 +30,16 @@ class Auth extends ServiceBase {
 
     oThis.userId = params.user_id;
     oThis.authKey = params.auth_key;
+
+    oThis.userSocketConnectionDetails = null;
   }
 
+  /**
+   * Async perform
+   *
+   * @returns {Promise<*|result>}
+   * @private
+   */
   async _asyncPerform() {
     const oThis = this;
 
@@ -39,11 +47,17 @@ class Auth extends ServiceBase {
 
     await oThis._verifyAuthKeyValidity();
 
-    await oThis._markAuthKeyNull();
+    await oThis._modifySocketConnectionDetails();
 
     return responseHelper.successWithData({});
   }
 
+  /**
+   * Fetch user socket connection
+   *
+   * @returns {Promise<never>}
+   * @private
+   */
   async _fetchUserSocketConnection() {
     const oThis = this;
 
@@ -53,30 +67,62 @@ class Auth extends ServiceBase {
       return Promise.reject(cacheRsp);
     }
 
-    if (cacheRsp.data[oThis.userId].id) {
-      return oThis._unauthorizedResponse();
+    //Reject if the no entry is found for user id.
+    if (!cacheRsp.data[oThis.userId].id) {
+      return Promise.reject(
+        responseHelper.error({
+          internal_error_identifier: 'a_s_ws_a_1',
+          api_error_identifier: 'unauthorized_api_request',
+          debug_options: {
+            userId: oThis.userId
+          }
+        })
+      );
     }
 
     oThis.userSocketConnectionDetails = cacheRsp.data[oThis.userId];
   }
 
+  /**
+   * Verify auth key validity
+   *
+   * @returns {Promise<never>}
+   * @private
+   */
   async _verifyAuthKeyValidity() {
     const oThis = this;
 
+    //If auth key is expired or auth key doesn't matches.
     if (
       basicHelper.getCurrentTimestampInSeconds() > oThis.userSocketConnectionDetails.authKeyExpiryAt ||
       oThis.authKey !== oThis.userSocketConnectionDetails.authKey
     ) {
-      return oThis._unauthorizedResponse();
+      return Promise.reject(
+        responseHelper.error({
+          internal_error_identifier: 'a_s_ws_a_2',
+          api_error_identifier: 'unauthorized_api_request',
+          debug_options: {
+            userId: oThis.userId
+          }
+        })
+      );
     }
   }
 
-  async _markAuthKeyNull() {
+  /**
+   * Modify socket connection details.
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _modifySocketConnectionDetails() {
     const oThis = this;
 
     await new UserSocketConnectionDetailsModel()
       .update({
-        auth_key: null
+        auth_key: null,
+        auth_key_expiry_at: null,
+        expiry_at: basicHelper.getCurrentTimestampInSeconds() + 30 * 60
       })
       .where({
         user_id: oThis.userId
@@ -84,19 +130,6 @@ class Auth extends ServiceBase {
       .fire();
 
     await UserSocketConnectionDetailsModel.flushCache({ userId: oThis.userId });
-  }
-
-  _unauthorizedResponse() {
-    const oThis = this;
-    return Promise.resolve(
-      responseHelper.error({
-        internal_error_identifier: 'a_s_ws_a_1',
-        api_error_identifier: 'unauthorized_api_request',
-        debug_options: {
-          userId: oThis.userId
-        }
-      })
-    );
   }
 }
 

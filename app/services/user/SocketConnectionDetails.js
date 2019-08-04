@@ -192,8 +192,13 @@ class SocketConnectionDetails extends ServiceBase {
 
     oThis._setAuthKeyExpiryTimestamp();
 
+    await oThis._createAuthKey();
+
+    await oThis._fetchAndSetEndPointIdentifier();
+
     await new UserSocketConnectionDetailsModel()
       .update({
+        auth_key: oThis.authKey,
         auth_key_expiry_at: oThis.authKeyExpiryAt
       })
       .where({
@@ -214,9 +219,10 @@ class SocketConnectionDetails extends ServiceBase {
     let response = {
       userId: oThis.userSocketConnectionDetails.userId,
       socketEndpoint: oThis.socketEndPoint,
-      authKey: oThis.userSocketConnectionDetails.authKey
+      authKey: oThis.authKey
     };
 
+    console.log('-response---', response);
     return response;
   }
 }

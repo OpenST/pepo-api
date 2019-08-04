@@ -33,6 +33,7 @@ class UserSocketConnectionDetails extends ModelBase {
    * @param {number} dbRow.id
    * @param {number} dbRow.user_id
    * @param {number} dbRow.auth_key
+   * @param {number} dbRow.auth_key_expiry_at
    * @param {number} dbRow.socket_endpoint_identifier
    * @param {number} dbRow.expiry_at
    * @param {number} dbRow.created_at
@@ -48,6 +49,7 @@ class UserSocketConnectionDetails extends ModelBase {
       userId: dbRow.user_id,
       authKey: dbRow.auth_key,
       socketEndpointIdentifier: dbRow.socket_endpoint_identifier,
+      authKeyExpiryAt: dbRow.auth_key_expiry_at,
       expiryAt: dbRow.expiry_at,
       createdAt: dbRow.created_at,
       updatedAt: dbRow.updated_at
@@ -62,7 +64,16 @@ class UserSocketConnectionDetails extends ModelBase {
    * @returns {array}
    */
   safeFormattedColumnNames() {
-    return ['id', 'userId', 'authKey', 'socketEndpointIdentifier', 'expiryAt', 'createdAt', 'updatedAt'];
+    return [
+      'id',
+      'userId',
+      'authKey',
+      'socketEndpointIdentifier',
+      'authKeyExpiryAt',
+      'expiryAt',
+      'createdAt',
+      'updatedAt'
+    ];
   }
 
   /**
