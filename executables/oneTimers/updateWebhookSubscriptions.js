@@ -8,8 +8,8 @@ const program = require('commander');
 
 const rootPrefix = '../..',
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
-  webhookConstants = require(rootPrefix + '/lib/globalConstant/webhooks'),
-  jsSdkWrapper = require(rootPrefix + '/lib/ostPlatform/jsSdkWrapper');
+  jsSdkWrapper = require(rootPrefix + '/lib/ostPlatform/jsSdkWrapper'),
+  webhookConstants = require(rootPrefix + '/lib/globalConstant/webhooks');
 
 program.option('--webhooksId <webhooksId>', 'Webhooks Id').parse(process.argv);
 
@@ -69,7 +69,10 @@ class UpdateWebhookSubscriptions {
         'transactions/failure',
         'users/activation_initiate',
         'users/activation_success',
-        'users/activation_failure'
+        'users/activation_failure',
+        'price_points/usd_update',
+        'price_points/eur_update',
+        'price_points/gbp_update'
       ];
 
     const params = {
@@ -84,10 +87,11 @@ class UpdateWebhookSubscriptions {
 
     if (webhooksCreationResponse.isFailure()) {
       logger.error(webhooksCreationResponse);
+
       return Promise.reject(webhooksCreationResponse);
     }
 
-    let resultType = webhooksCreationResponse.data['result_type'];
+    let resultType = webhooksCreationResponse.data.result_type;
 
     oThis.webhooksData = webhooksCreationResponse.data[resultType];
 
@@ -99,10 +103,10 @@ new UpdateWebhookSubscriptions({
   webhooksId: program.webhooksId
 })
   .perform()
-  .then(function(rsp) {
+  .then(function() {
     process.exit(0);
   })
   .catch(function(err) {
-    console.log(JSON.stringify(err));
+    logger.error(JSON.stringify(err));
     process.exit(1);
   });

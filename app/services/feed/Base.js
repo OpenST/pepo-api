@@ -1,55 +1,37 @@
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
-  UserMultiCache = require(rootPrefix + '/lib/cacheManagement/multi/User'),
-  ExternalEntityByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/ExternalEntityByIds'),
-  TokenUserDetailByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TokenUserByUserIds'),
-  responseHelper = require(rootPrefix + '/lib/formatter/response'),
-  paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination'),
-  externalEntityConstants = require(rootPrefix + '/lib/globalConstant/externalEntity');
+  GetProfile = require(rootPrefix + '/lib/user/profile/Get'),
+  GetTokenService = require(rootPrefix + '/app/services/token/Get'),
+  feedConstants = require(rootPrefix + '/lib/globalConstant/feed'),
+  responseHelper = require(rootPrefix + '/lib/formatter/response');
 
-/**
- * Base class for feed service.
- *
- * @class FeedBase
- */
 class FeedBase extends ServiceBase {
   /**
-   * Constructor for feed service base.
+   * Constructor for feed base.
    *
-   * @param {object} params
-   * @param {string} [params.limit.pagination_identifier]
-   *
-   * @augments ServiceBase
+   * @param params
    */
   constructor(params) {
     super(params);
 
     const oThis = this;
 
-    oThis.paginationIdentifier = params[paginationConstants.paginationIdentifierKey] || null;
+    oThis.currentUser = params.current_user;
 
-    oThis.limit = oThis._defaultPageLimit();
-
-    oThis.paginationTimestamp = null;
+    oThis.feeds = [];
+    oThis.feedsMap = {};
     oThis.feedIds = [];
-    oThis.lastFeedId = null;
-    oThis.feedIdToFeedDetailsMap = {};
-    oThis.giphyKindExternalEntityIdToFeedIdMap = {};
-    oThis.usersByIdMap = {};
     oThis.userIds = [];
-    oThis.externalEntityIds = [];
-    oThis.ostTransactionMap = {};
-    oThis.externalEntityGifMap = {};
-    oThis.tokenUsersByUserIdMap = {};
-    oThis.responseMetaData = {
-      [paginationConstants.nextPagePayloadKey]: {}
-    };
+    oThis.videoIds = [];
+    oThis.profileResponse = {};
+    oThis.finalResponse = {};
+    oThis.tokenDetails = {};
   }
 
   /**
-   * Async perform.
+   * Async perform for feed base.
    *
-   * @returns {Promise<void>}
+   * @returns {Promise<*>}
    * @private
    */
   async _asyncPerform() {
@@ -57,276 +39,93 @@ class FeedBase extends ServiceBase {
 
     await oThis._validateAndSanitizeParams();
 
-    await oThis._fetchFeedDetails();
+    await oThis._setFeedIds();
 
-    if (oThis.feedIds.length === 0) {
-      return responseHelper.successWithData(oThis._finalResponse());
-    }
+    await oThis._getFeeds();
 
-    oThis._processFeedDetails();
+    await oThis._fetchProfileDetails();
 
-    await oThis._fetchExternalEntities();
+    await oThis._setTokenDetails();
 
-    await Promise.all([oThis._fetchUsers(), oThis._fetchTokenUser()]);
-
-    return responseHelper.successWithData(oThis._finalResponse());
+    return oThis._prepareResponse();
   }
 
   /**
-   * Validate and sanitize specific params.
-   *
-   * @sets oThis.paginationTimestamp
+   * Get Feed details.
    *
    * @returns {Promise<never>}
    * @private
    */
-  async _validateAndSanitizeParams() {
+  async _getFeeds() {
     const oThis = this;
 
-    if (oThis.paginationIdentifier) {
-      const parsedPaginationParams = oThis._parsePaginationParams(oThis.paginationIdentifier);
+    for (let i = 0; i < oThis.feedIds.length; i++) {
+      let feedData = oThis.feedsMap[oThis.feedIds[i]];
 
-      oThis.paginationTimestamp = parsedPaginationParams.pagination_timestamp; // Override paginationTimestamp number.
-    } else {
-      oThis.paginationTimestamp = null;
-    }
+      oThis.feeds.push(feedData);
+      oThis.userIds.push(feedData.actor);
 
-    // Validate limit.
-    return oThis._validatePageSize();
-  }
-
-  /**
-   * Fetch feed details.
-   *
-   * @sets oThis.feedIdToFeedDetailsMap, oThis.externalEntityIds, oThis.giphyKindExternalEntityIdToFeedIdMap
-   *
-   * @returns {result}
-   * @private
-   */
-  _processFeedDetails() {
-    const oThis = this;
-
-    oThis.paginationTimestamp = oThis.feedIdToFeedDetailsMap[oThis.lastFeedId].publishedTs;
-
-    for (let index = 0; index < oThis.feedIds.length; index++) {
-      const feedId = oThis.feedIds[index];
-      const feedObj = oThis.feedIdToFeedDetailsMap[feedId],
-        feedExtraData = feedObj.extraData;
-
-      oThis.feedIdToFeedDetailsMap[feedId].payload = {
-        text: feedExtraData.text || '',
-        ostTransactionId: feedObj.primaryExternalEntityId,
-        gifDetailId: ''
-      };
-
-      if (!oThis.giphyKindExternalEntityIdToFeedIdMap[feedExtraData.giphyExternalEntityId]) {
-        oThis.giphyKindExternalEntityIdToFeedIdMap[feedExtraData.giphyExternalEntityId] = [];
-      }
-
-      oThis.giphyKindExternalEntityIdToFeedIdMap[feedExtraData.giphyExternalEntityId].push(feedId);
-
-      oThis.externalEntityIds.push(feedObj.primaryExternalEntityId); // OST transaction ID.
-      if (feedExtraData.giphyExternalEntityId) {
-        oThis.externalEntityIds.push(feedExtraData.giphyExternalEntityId); // GIF external entity table ID.
+      if (feedData.kind === feedConstants.fanUpdateKind) {
+        oThis.videoIds.push(feedData.primaryExternalEntityId);
       }
     }
 
-    oThis.externalEntityIds = [...new Set(oThis.externalEntityIds)]; // Removes duplication.
-
-    return responseHelper.successWithData({});
+    // if (oThis.feeds.length === 0) {
+    //   return responseHelper.error({
+    //     internal_error_identifier: 'a_s_f_b_1',
+    //     api_error_identifier: 'resource_not_found',
+    //     debug_options: {
+    //       feedsArray: oThis.feeds,
+    //       userIds: oThis.userIds
+    //     }
+    //   });
+    // }
   }
 
   /**
-   * Fetch external entities data.
-   *
-   * @sets  oThis.userIds
-   *
-   * @returns {Promise<void>}
-   * @private
-   */
-  async _fetchExternalEntities() {
-    const oThis = this;
-
-    if (oThis.externalEntityIds.length === 0) {
-      return responseHelper.successWithData({});
-    }
-
-    // Fetch external entity details.
-    const cacheResp = await new ExternalEntityByIdsCache({ ids: oThis.externalEntityIds }).fetch();
-
-    if (cacheResp.isFailure()) {
-      return Promise.reject(cacheResp);
-    }
-
-    const externalEntityIdToDetailsMap = cacheResp.data;
-
-    // Loop over external entity ids to ensure data is in order.
-    for (
-      let externalEntityIdIndex = 0;
-      externalEntityIdIndex < oThis.externalEntityIds.length;
-      externalEntityIdIndex++
-    ) {
-      const externalEntityTableId = oThis.externalEntityIds[externalEntityIdIndex];
-
-      // Fetch external entity details.
-      const externalEntityObj = externalEntityIdToDetailsMap[externalEntityTableId];
-
-      const externalEntityExtraData = externalEntityObj.extraData;
-      const externalEntityTableEntityId = externalEntityObj.entityId;
-
-      if (!externalEntityExtraData) {
-        return Promise.reject(new Error('External data for external entity is null'));
-      }
-
-      switch (externalEntityObj.entityKind) {
-        case externalEntityConstants.ostTransactionEntityKind: {
-          oThis.ostTransactionMap[externalEntityTableId] = {
-            id: externalEntityTableId,
-            entityId: externalEntityTableEntityId,
-            extraData: externalEntityExtraData
-          };
-          // OST Transaction is mapped with external entity table ID.
-
-          // Fetch users.
-          oThis.userIds.push(externalEntityExtraData.fromUserId);
-          for (let index = 0; index < externalEntityExtraData.toUserIds.length; index++) {
-            oThis.userIds.push(externalEntityExtraData.toUserIds[index]);
-          }
-
-          break;
-        }
-        case externalEntityConstants.giphyEntityKind: {
-          oThis.externalEntityGifMap[externalEntityTableId] = externalEntityObj;
-
-          // Insert entityId in feed details payload.
-          const feedIds = oThis.giphyKindExternalEntityIdToFeedIdMap[externalEntityTableId];
-
-          for (let i = 0; i < feedIds.length; i++) {
-            let feedId = feedIds[i];
-            oThis.feedIdToFeedDetailsMap[feedId].payload.gifDetailId = externalEntityTableEntityId;
-          }
-
-          break;
-        }
-        default: {
-          throw new Error('Invalid entity kind.');
-        }
-      }
-    }
-
-    oThis.userIds = [...new Set(oThis.userIds)]; // Removes duplication.
-
-    return responseHelper.successWithData({});
-  }
-
-  /**
-   * Fetch users from cache.
-   *
-   * @sets oThis.usersByIdMap
-   *
-   * @returns {Promise<void>}
-   * @private
-   */
-  async _fetchUsers() {
-    const oThis = this;
-
-    if (oThis.userIds.length === 0) {
-      return responseHelper.successWithData({});
-    }
-
-    const cacheResp = await new UserMultiCache({ ids: oThis.userIds }).fetch();
-
-    if (cacheResp.isFailure()) {
-      return Promise.reject(cacheResp);
-    }
-
-    oThis.usersByIdMap = cacheResp.data;
-
-    return responseHelper.successWithData({});
-  }
-
-  /**
-   * Fetch token user.
-   *
-   * @sets oThis.tokenUsersByUserIdMap
+   * Fetch profile details.
    *
    * @return {Promise<void>}
    * @private
    */
-  async _fetchTokenUser() {
+  async _fetchProfileDetails() {
     const oThis = this;
 
-    if (oThis.userIds.length === 0) {
-      return responseHelper.successWithData({});
+    let getProfileObj = new GetProfile({
+      userIds: oThis.userIds,
+      currentUserId: oThis.currentUserId,
+      videoIds: oThis.videoIds
+    });
+
+    let profileResp = await getProfileObj.perform();
+
+    if (profileResp.isFailure()) {
+      return Promise.reject(profileResp);
     }
+    oThis.profileResponse = profileResp.data;
 
-    const cacheResp = await new TokenUserDetailByUserIdsCache({ userIds: oThis.userIds }).fetch();
-
-    if (cacheResp.isFailure()) {
-      return Promise.reject(cacheResp);
-    }
-
-    oThis.tokenUsersByUserIdMap = cacheResp.data;
-
-    return Promise.resolve(responseHelper.successWithData({}));
+    return responseHelper.successWithData({});
   }
 
   /**
-   * Service response.
+   * Fetch token details.
    *
-   * @returns {*|result}
+   * @return {Promise<void>}
    * @private
    */
-  _finalResponse() {
-    throw new Error('Sub-class to implement.');
-  }
-
-  /**
-   * Fetch feed details map.
-   *
-   * @returns {Promise<void>}
-   * @private
-   */
-  async _fetchFeedDetails() {
-    throw new Error('Sub-class to implement.');
-  }
-
-  /**
-   * Default page limit.
-   *
-   * @private
-   */
-  _defaultPageLimit() {
-    throw new Error('Sub-class to implement.');
-  }
-
-  /**
-   * Min page limit.
-   *
-   * @private
-   */
-  _minPageLimit() {
-    throw new Error('Sub-class to implement.');
-  }
-
-  /**
-   * Max page limit.
-   *
-   * @private
-   */
-  _maxPageLimit() {
-    throw new Error('Sub-class to implement.');
-  }
-
-  /**
-   * Current page limit.
-   *
-   * @private
-   */
-  _currentPageLimit() {
+  async _setTokenDetails() {
     const oThis = this;
 
-    return oThis.limit;
+    let getTokenServiceObj = new GetTokenService({});
+
+    let tokenResp = await getTokenServiceObj.perform();
+
+    if (tokenResp.isFailure()) {
+      return Promise.reject(tokenResp);
+    }
+    oThis.tokenDetails = tokenResp.data.tokenDetails;
+
+    return responseHelper.successWithData({});
   }
 }
 

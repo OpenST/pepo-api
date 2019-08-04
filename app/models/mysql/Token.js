@@ -1,16 +1,20 @@
 const rootPrefix = '../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
-  coreConstants = require(rootPrefix + '/config/coreConstants');
-const dbName = 'pepo_api_' + coreConstants.environment;
+  databaseConstants = require(rootPrefix + '/lib/globalConstant/database');
+
+// Declare variables.
+const dbName = databaseConstants.ostDbName;
 
 /**
- * Class for Token model.
+ * Class for token model.
  *
- * @class
+ * @class Token
  */
 class Token extends ModelBase {
   /**
-   * Token model
+   * Constructor for token model.
+   *
+   * @augments ModelBase
    *
    * @constructor
    */
@@ -30,7 +34,9 @@ class Token extends ModelBase {
    * @param {string} dbRow.name
    * @param {string} dbRow.symbol
    * @param {number} dbRow.decimal
+   * @param {number} dbRow.aux_chain_id
    * @param {string} dbRow.ost_token_id
+   * @param {string} dbRow.stake_currency
    * @param {string} dbRow.conversion_factor
    * @param {string} dbRow.company_token_holder_address
    * @param {string} dbRow.rule_addresses
@@ -45,12 +51,16 @@ class Token extends ModelBase {
    * @private
    */
   _formatDbData(dbRow) {
-    return {
+    const oThis = this;
+
+    const formattedData = {
       id: dbRow.id,
       name: dbRow.name,
       symbol: dbRow.symbol,
       ostTokenId: dbRow.ost_token_id,
+      stakeCurrency: dbRow.stake_currency,
       decimal: dbRow.decimal,
+      auxChainId: dbRow.aux_chain_id,
       conversionFactor: dbRow.conversion_factor,
       companyTokenHolderAddress: dbRow.company_token_holder_address,
       ruleAddresses: dbRow.rule_addresses,
@@ -61,6 +71,8 @@ class Token extends ModelBase {
       createdAt: dbRow.created_at,
       updatedAt: dbRow.updated_at
     };
+
+    return oThis.sanitizeFormattedData(formattedData);
   }
 
   /**
@@ -74,7 +86,7 @@ class Token extends ModelBase {
     const dbRow = await oThis.select('*').fire();
 
     if (dbRow.length === 0) {
-      return Promise.reject(new Error(`No entry found in tokens table.`));
+      return Promise.reject(new Error('No entry found in tokens table.'));
     }
 
     return oThis._formatDbData(dbRow[0]);

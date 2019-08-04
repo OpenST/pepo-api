@@ -4,8 +4,8 @@ const express = require('express'),
 const rootPrefix = '../../..',
   FormatterComposer = require(rootPrefix + '/lib/formatter/Composer'),
   routeHelper = require(rootPrefix + '/routes/helper'),
-  apiName = require(rootPrefix + '/lib/globalConstant/apiName'),
   sanitizer = require(rootPrefix + '/helpers/sanitizer'),
+  apiName = require(rootPrefix + '/lib/globalConstant/apiName'),
   entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
   responseEntityKey = require(rootPrefix + '/lib/globalConstant/responseEntityKey');
 
@@ -47,15 +47,17 @@ router.get('/recovery-info', sanitizer.sanitizeDynamicUrlParams, function(req, r
   Promise.resolve(routeHelper.perform(req, res, next, '/user/RecoveryInfo', 'r_a_v1_u_2', null, dataFormatterFunc));
 });
 
-/* User List*/
-router.get('/', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
-  req.decodedParams.apiName = apiName.users;
+/* Contributed To Users List */
+router.get('/:profile_user_id/contribution-to', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.contributionTo;
+  req.decodedParams.profile_user_id = req.params.profile_user_id;
 
   const dataFormatterFunc = async function(serviceResponse) {
     const wrapperFormatterRsp = await new FormatterComposer({
-      resultType: responseEntityKey.users,
+      resultType: responseEntityKey.contributionToUsers,
       entityKindToResponseKeyMap: {
-        [entityType.users]: responseEntityKey.users,
+        [entityType.users]: responseEntityKey.contributionToUsers,
+        [entityType.imagesMap]: responseEntityKey.images,
         [entityType.userListMeta]: responseEntityKey.meta
       },
       serviceData: serviceResponse.data
@@ -64,7 +66,57 @@ router.get('/', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
     serviceResponse.data = wrapperFormatterRsp.data;
   };
 
-  Promise.resolve(routeHelper.perform(req, res, next, '/user/List', 'r_a_v1_u_3', null, dataFormatterFunc));
+  Promise.resolve(
+    routeHelper.perform(req, res, next, '/user/contribution/To', 'r_a_v1_u_ct_1', null, dataFormatterFunc)
+  );
+});
+
+/* Contributed By Users List */
+router.get('/:profile_user_id/contribution-by', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.contributionBy;
+  req.decodedParams.profile_user_id = req.params.profile_user_id;
+
+  const dataFormatterFunc = async function(serviceResponse) {
+    const wrapperFormatterRsp = await new FormatterComposer({
+      resultType: responseEntityKey.contributionByUsers,
+      entityKindToResponseKeyMap: {
+        [entityType.users]: responseEntityKey.contributionByUsers,
+        [entityType.imagesMap]: responseEntityKey.images,
+        [entityType.userListMeta]: responseEntityKey.meta
+      },
+      serviceData: serviceResponse.data
+    }).perform();
+
+    serviceResponse.data = wrapperFormatterRsp.data;
+  };
+
+  Promise.resolve(
+    routeHelper.perform(req, res, next, '/user/contribution/By', 'r_a_v1_u_cb_1', null, dataFormatterFunc)
+  );
+});
+
+/* User Suggestion to Logged IN User */
+router.get('/:profile_user_id/contribution-suggestion', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.contributionSuggestion;
+  req.decodedParams.profile_user_id = req.params.profile_user_id;
+
+  const dataFormatterFunc = async function(serviceResponse) {
+    const wrapperFormatterRsp = await new FormatterComposer({
+      resultType: responseEntityKey.contributionSuggestions,
+      entityKindToResponseKeyMap: {
+        [entityType.users]: responseEntityKey.contributionSuggestions,
+        [entityType.imagesMap]: responseEntityKey.images,
+        [entityType.userListMeta]: responseEntityKey.meta
+      },
+      serviceData: serviceResponse.data
+    }).perform();
+
+    serviceResponse.data = wrapperFormatterRsp.data;
+  };
+
+  Promise.resolve(
+    routeHelper.perform(req, res, next, '/user/contribution/Suggestion', 'r_a_v1_u_cs_1', null, dataFormatterFunc)
+  );
 });
 
 /* Logged In User*/
@@ -75,7 +127,10 @@ router.get('/current', sanitizer.sanitizeDynamicUrlParams, function(req, res, ne
     const wrapperFormatterRsp = await new FormatterComposer({
       resultType: responseEntityKey.loggedInUser,
       entityKindToResponseKeyMap: {
-        [entityType.user]: responseEntityKey.loggedInUser
+        [entityType.loggedInUser]: responseEntityKey.loggedInUser,
+        [entityType.pricePointsMap]: responseEntityKey.pricePoints,
+        [entityType.usersMap]: responseEntityKey.users,
+        [entityType.token]: responseEntityKey.token
       },
       serviceData: serviceResponse.data
     }).perform();
@@ -83,23 +138,24 @@ router.get('/current', sanitizer.sanitizeDynamicUrlParams, function(req, res, ne
     serviceResponse.data = wrapperFormatterRsp.data;
   };
 
-  Promise.resolve(routeHelper.perform(req, res, next, '/user/CurrentUser', 'r_a_v1_u_4', null, dataFormatterFunc));
+  Promise.resolve(routeHelper.perform(req, res, next, '/user/CurrentUser', 'r_a_v1_u_5', null, dataFormatterFunc));
 });
 
-/* User Feeds*/
-router.get('/:user_id/feeds', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
-  req.decodedParams.apiName = apiName.userFeed;
+/* User Activities*/
+router.get('/:user_id/activities', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.userActivity;
   req.decodedParams.user_id = req.params.user_id;
 
   const dataFormatterFunc = async function(serviceResponse) {
     const wrapperFormatterRsp = await new FormatterComposer({
-      resultType: responseEntityKey.userFeed,
+      resultType: responseEntityKey.userActivity,
       entityKindToResponseKeyMap: {
-        [entityType.userFeedList]: responseEntityKey.userFeed,
+        [entityType.userActivityList]: responseEntityKey.userActivity,
         [entityType.ostTransactionMap]: responseEntityKey.ostTransaction,
         [entityType.externalEntityGifMap]: responseEntityKey.gifs,
         [entityType.usersMap]: responseEntityKey.users,
-        [entityType.feedListMeta]: responseEntityKey.meta
+        [entityType.imagesMap]: responseEntityKey.images,
+        [entityType.activityListMeta]: responseEntityKey.meta
       },
       serviceData: serviceResponse.data
     }).perform();
@@ -107,7 +163,62 @@ router.get('/:user_id/feeds', sanitizer.sanitizeDynamicUrlParams, function(req, 
     serviceResponse.data = wrapperFormatterRsp.data;
   };
 
-  Promise.resolve(routeHelper.perform(req, res, next, '/feed/User', 'r_a_v1_u_5', null, dataFormatterFunc));
+  Promise.resolve(routeHelper.perform(req, res, next, '/activity/User', 'r_a_v1_u_6', null, dataFormatterFunc));
+});
+
+/* User profile */
+router.get('/:profile_user_id/profile', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.getUserProfile;
+  req.decodedParams.profile_user_id = req.params.profile_user_id;
+
+  const dataFormatterFunc = async function(serviceResponse) {
+    const wrapperFormatterRsp = await new FormatterComposer({
+      resultType: responseEntityKey.userProfile,
+      entityKindToResponseKeyMap: {
+        [entityType.userProfile]: responseEntityKey.userProfile,
+        [entityType.usersMap]: responseEntityKey.users,
+        [entityType.linksMap]: responseEntityKey.links,
+        [entityType.imagesMap]: responseEntityKey.images,
+        [entityType.videosMap]: responseEntityKey.videos,
+        [entityType.tagsMap]: responseEntityKey.tags,
+        [entityType.userProfileAllowedActions]: responseEntityKey.userProfileAllowedActions,
+        [entityType.userStats]: responseEntityKey.userStats,
+        [entityType.videoDetailsMap]: responseEntityKey.videoDetails,
+        [entityType.currentUserUserContributionsMap]: responseEntityKey.currentUserUserContributions,
+        [entityType.currentUserVideoContributionsMap]: responseEntityKey.currentUserVideoContributions,
+        [entityType.pricePointsMap]: responseEntityKey.pricePoints
+      },
+      serviceData: serviceResponse.data
+    }).perform();
+
+    serviceResponse.data = wrapperFormatterRsp.data;
+  };
+
+  Promise.resolve(routeHelper.perform(req, res, next, '/user/GetProfile', 'r_a_v1_u_7', null, dataFormatterFunc));
+});
+
+/* Video save */
+router.post('/:profile_user_id/fan-video', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.saveFanVideo;
+  req.decodedParams.profile_user_id = req.params.profile_user_id;
+
+  Promise.resolve(routeHelper.perform(req, res, next, '/user/profile/update/FanVideo', 'r_a_v1_u_9', null));
+});
+
+/* Profile image save */
+router.post('/:profile_user_id/profile-image', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.saveProfileImage;
+  req.decodedParams.profile_user_id = req.params.profile_user_id;
+
+  Promise.resolve(routeHelper.perform(req, res, next, '/user/profile/update/ProfileImage', 'r_a_v1_u_10', null));
+});
+
+/* Profile save */
+router.post('/:profile_user_id/profile', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.saveProfile;
+  req.decodedParams.profile_user_id = req.params.profile_user_id;
+
+  Promise.resolve(routeHelper.perform(req, res, next, '/user/profile/update/Info', 'r_a_v1_u_11', null));
 });
 
 module.exports = router;

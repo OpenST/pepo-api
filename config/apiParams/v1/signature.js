@@ -67,7 +67,35 @@ const v1Signature = {
     mandatory: [],
     optional: []
   },
-  [apiName.users]: {
+  [apiName.contributionBy]: {
+    mandatory: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      }
+    ],
+    optional: [
+      {
+        parameter: paginationConstants.paginationIdentifierKey,
+        validatorMethods: ['validateString', 'validatePaginationIdentifier']
+      }
+    ]
+  },
+  [apiName.contributionTo]: {
+    mandatory: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      }
+    ],
+    optional: [
+      {
+        parameter: paginationConstants.paginationIdentifierKey,
+        validatorMethods: ['validateString', 'validatePaginationIdentifier']
+      }
+    ]
+  },
+  [apiName.contributionSuggestion]: {
     mandatory: [
       {
         parameter: 'current_user',
@@ -113,7 +141,7 @@ const v1Signature = {
       }
     ]
   },
-  [apiName.userFeed]: {
+  [apiName.userActivity]: {
     mandatory: [
       {
         parameter: 'current_user',
@@ -121,7 +149,7 @@ const v1Signature = {
       },
       {
         parameter: 'user_id',
-        validatorMethods: ['validateInteger']
+        validatorMethods: ['validateNonZeroInteger']
       }
     ],
     optional: [
@@ -144,20 +172,20 @@ const v1Signature = {
       {
         parameter: 'current_user',
         validatorMethods: ['validateNonEmptyObject']
-      },
-      {
-        parameter: 'privacy_type',
-        validatorMethods: ['validateString', 'validateFeedPrivacyType']
       }
     ],
     optional: [
       {
         parameter: 'meta',
         validatorMethods: ['validateNonEmptyObject', 'validateOstTransactionMeta']
+      },
+      {
+        parameter: 'video_id',
+        validatorMethods: ['validateNonZeroInteger']
       }
     ]
   },
-  [apiName.publicFeed]: {
+  [apiName.publicActivity]: {
     mandatory: [
       {
         parameter: 'current_user',
@@ -168,6 +196,214 @@ const v1Signature = {
       {
         parameter: paginationConstants.paginationIdentifierKey,
         validatorMethods: ['validateString', 'validatePaginationIdentifier']
+      }
+    ]
+  },
+  [apiName.uploadParams]: {
+    mandatory: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      }
+    ],
+    optional: [
+      {
+        parameter: 'videos',
+        validatorMethods: ['validateStringArray']
+      },
+      {
+        parameter: 'images',
+        validatorMethods: ['validateStringArray']
+      }
+    ]
+  },
+  [apiName.twitterLogin]: {
+    mandatory: [
+      {
+        parameter: 'token',
+        validatorMethods: ['validateNonBlankString']
+      },
+      {
+        parameter: 'secret',
+        validatorMethods: ['validateNonBlankString']
+      },
+      {
+        parameter: 'twitter_id',
+        validatorMethods: ['validateNonBlankString']
+      },
+      {
+        parameter: 'handle',
+        validatorMethods: ['validateNonBlankString']
+      }
+    ],
+    optional: []
+  },
+  [apiName.getUserProfile]: {
+    mandatory: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      },
+      {
+        parameter: 'profile_user_id',
+        validatorMethods: ['validateNonZeroInteger']
+      }
+    ],
+    optional: []
+  },
+  [apiName.rotateTwitterAccount]: {
+    mandatory: [
+      {
+        parameter: 'user_name',
+        validatorMethods: ['validateString', 'validateUserName']
+      }
+    ],
+    optional: []
+  },
+  [apiName.saveFanVideo]: {
+    mandatory: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      },
+      {
+        parameter: 'profile_user_id',
+        validatorMethods: ['validateNonZeroInteger']
+      },
+      {
+        parameter: 'video_url',
+        validatorMethods: ['validateHttpBasedUrl']
+      }
+    ],
+    optional: [
+      {
+        parameter: 'poster_image_url',
+        validatorMethods: ['validateHttpBasedUrl']
+      },
+      {
+        parameter: 'video_width',
+        validatorMethods: ['validateInteger']
+      },
+      {
+        parameter: 'video_height',
+        validatorMethods: ['validateInteger']
+      },
+      {
+        parameter: 'video_size',
+        validatorMethods: ['validateInteger']
+      },
+      {
+        parameter: 'image_width',
+        validatorMethods: ['validateInteger']
+      },
+      {
+        parameter: 'image_height',
+        validatorMethods: ['validateInteger']
+      },
+      {
+        parameter: 'image_size',
+        validatorMethods: ['validateInteger']
+      }
+    ]
+  },
+  [apiName.saveProfileImage]: {
+    mandatory: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      },
+      {
+        parameter: 'profile_user_id',
+        validatorMethods: ['validateNonZeroInteger']
+      },
+      {
+        parameter: 'image_url',
+        validatorMethods: ['validateHttpBasedUrl']
+      }
+    ],
+    optional: [
+      {
+        parameter: 'width',
+        validatorMethods: ['validateInteger']
+      },
+      {
+        parameter: 'height',
+        validatorMethods: ['validateInteger']
+      },
+      {
+        parameter: 'size',
+        validatorMethods: ['validateInteger']
+      }
+    ]
+  },
+  [apiName.saveProfile]: {
+    mandatory: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      },
+      {
+        parameter: 'profile_user_id',
+        validatorMethods: ['validateNonZeroInteger']
+      },
+      {
+        parameter: 'name',
+        validatorMethods: ['validateString', 'validateName']
+      },
+      {
+        parameter: 'user_name',
+        validatorMethods: ['validateString', 'validateUserName']
+      }
+    ],
+    optional: [
+      {
+        parameter: 'bio',
+        validatorMethods: ['validateString']
+      },
+      {
+        parameter: 'link',
+        validatorMethods: ['validateGenericUrl']
+      }
+    ]
+  },
+  [apiName.getTags]: {
+    mandatory: [
+      {
+        parameter: 'q',
+        validatorMethods: ['validateString']
+      }
+    ],
+    optional: [
+      {
+        parameter: paginationConstants.paginationIdentifierKey,
+        validatorMethods: ['validateString', 'validatePaginationIdentifier']
+      }
+    ]
+  },
+  [apiName.feedsList]: {
+    mandatory: [],
+    optional: [
+      {
+        parameter: paginationConstants.paginationIdentifierKey,
+        validatorMethods: ['validateString', 'validatePaginationIdentifier']
+      },
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      }
+    ]
+  },
+  [apiName.feedDetails]: {
+    mandatory: [
+      {
+        parameter: 'feed_id',
+        validatorMethods: ['validateInteger']
+      }
+    ],
+    optional: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
       }
     ]
   }

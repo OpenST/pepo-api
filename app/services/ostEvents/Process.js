@@ -9,8 +9,8 @@ const rootPrefix = '../../..',
 
 class OstEventProcess extends ServiceBase {
   /**
-   * @param {Object} params
-   * @param {String} params.ostEventId: OST Event Table Id
+   * @param {object} params
+   * @param {string} params.ostEventId: OST Event Table Id
    *
    * @constructor
    */
@@ -25,7 +25,7 @@ class OstEventProcess extends ServiceBase {
   }
 
   /**
-   * perform - process Ost Event
+   * Perform - Process Ost Event.
    *
    * @return {Promise<void>}
    */
@@ -33,17 +33,14 @@ class OstEventProcess extends ServiceBase {
     const oThis = this;
 
     await oThis._validateAndSanitizeParams();
+
     await oThis._fetchOstEvent();
 
-    try {
-      await oThis._updateOstEventStatus(ostEventConstant.startedStatus);
-      await oThis._processEvent();
-    } catch (err) {
-      logger.error('In catch block of ost events process, Err-', err);
-      await oThis._updateOstEventStatus(ostEventConstant.failedStatus);
-    }
+    await oThis._updateOstEventStatus(ostEventConstant.startedStatus);
 
-    return Promise.resolve(responseHelper.successWithData({}));
+    await oThis._processEvent();
+
+    return responseHelper.successWithData({});
   }
 
   /**
@@ -62,7 +59,7 @@ class OstEventProcess extends ServiceBase {
     if (!oThis.ostEventId || !CommonValidators.validateInteger(oThis.ostEventId)) {
       return Promise.reject(
         responseHelper.error({
-          internal_error_identifier: 's_oe_c_vas_1',
+          internal_error_identifier: 's_oe_p_vas_1',
           api_error_identifier: 'something_went_wrong'
         })
       );
@@ -83,24 +80,23 @@ class OstEventProcess extends ServiceBase {
     const oThis = this;
     logger.log('fetch entry for Ost Event process');
 
-    let dbRows = await new OstEventModel().fetchById(oThis.ostEventId);
+    let dbRow = await new OstEventModel().fetchById(oThis.ostEventId);
 
-    if (!dbRows || !dbRows.id || dbRows.status != ostEventConstant.pendingStatus) {
-      logger.error('Error while fetching data from ost events table. dbRows=', dbRows);
-      return Promise.reject(dbRows);
+    if (!dbRow || !dbRow.id || dbRow.status !== ostEventConstant.pendingStatus) {
+      logger.error('Error while fetching data from ost events table. dbRows=', dbRow);
+
+      return Promise.reject(dbRow);
     }
 
-    oThis.ostEventObj = dbRows;
+    oThis.ostEventObj = dbRow;
 
     return Promise.resolve(responseHelper.successWithData({}));
   }
 
   /**
-   * Update status of ost event row
-   *
+   * Update status of ost event row.
    *
    * @return {Promise<void>}
-   *
    * @private
    */
   async _updateOstEventStatus(ostEventStatus) {
@@ -110,7 +106,7 @@ class OstEventProcess extends ServiceBase {
     let ostEventstatus = ostEventConstant.invertedStatuses[ostEventStatus];
 
     if (!ostEventstatus) {
-      throw `Invalid ostEventstatus for Process. ostEventStatus=${ostEventStatus}`;
+      throw new Error(`Invalid ostEventstatus for Process. ostEventStatus=${ostEventStatus}`);
     }
 
     await new OstEventModel()
@@ -122,26 +118,34 @@ class OstEventProcess extends ServiceBase {
   }
 
   /**
-   * Use Factory To process Event
-   *
+   * Use Factory To process Event.
    *
    * @return {Promise<void>}
-   *
    * @private
    */
   async _processEvent() {
     const oThis = this;
+
     logger.log('Process Ost Event');
 
-    let r = await new OstEventProcessFactory({ ostEventObj: oThis.ostEventObj }).perform();
+    const response = await new OstEventProcessFactory({ ostEventObj: oThis.ostEventObj })
+      .perform()
+      .catch(async function(err) {
+        logger.error(err);
+        return responseHelper.error({
+          internal_error_identifier: 's_oe_p_vas_2',
+          api_error_identifier: 'something_went_wrong',
+          debug_options: { Error: err }
+        });
+      });
 
-    if (r.isSuccess()) {
+    if (response.isSuccess()) {
       await oThis._updateOstEventStatus(ostEventConstant.doneStatus);
     } else {
       await oThis._updateOstEventStatus(ostEventConstant.failedStatus);
     }
 
-    return Promise.resolve(responseHelper.successWithData({}));
+    return responseHelper.successWithData({});
   }
 }
 

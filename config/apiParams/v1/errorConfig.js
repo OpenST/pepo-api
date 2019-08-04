@@ -8,7 +8,7 @@ const v1ErrorConfig = {
   invalid_user_name: {
     parameter: 'user_name',
     code: 'invalid',
-    message: 'User Name can contain alphanumeric, _, -, . and should be min 4 characters and max 25 characters'
+    message: 'User Name can contain alphanumeric and underscore and should be min 1 characters and max 15 characters'
   },
   invalid_password: {
     parameter: 'password',
@@ -85,15 +85,60 @@ const v1ErrorConfig = {
     code: 'invalid',
     message: 'Invalid Ost Transaction'
   },
-  invalid_privacy_type: {
-    parameter: 'privacy_type',
-    code: 'invalid',
-    message: 'Invalid Privacy Type'
-  },
   invalid_user_id: {
     parameter: 'user_id',
     code: 'invalid',
     message: 'Invalid user id.'
+  },
+  invalid_resolution: {
+    parameter: 'resolutions',
+    code: 'invalid',
+    message: 'Invalid resolutions.'
+  },
+  invalid_url: {
+    parameter: 'url',
+    code: 'invalid',
+    message: 'Invalid url.'
+  },
+  invalid_kind: {
+    parameter: 'kind',
+    code: 'invalid',
+    message: 'Invalid kind.'
+  },
+  invalid_video_id: {
+    parameter: 'video_id',
+    code: 'invalid',
+    message: 'Invalid video id.'
+  },
+  invalid_from_user_id: {
+    parameter: 'from_user_id',
+    code: 'invalid',
+    message: 'Invalid from user id in transfers.'
+  },
+  invalid_to_user_id: {
+    parameter: 'to_user_id',
+    code: 'invalid',
+    message: 'Invalid to user id in transfers.'
+  },
+  invalid_twitter_user: {
+    parameter: 'twitter_user',
+    code: 'invalid',
+    message: 'Invalid twitter user in rotate twitter account. This twitter user has rotated their twitter account.'
+  },
+  invalid_transfers: {
+    parameter: 'transfers',
+    code: 'invalid',
+    message: 'Invalid transfers.'
+  },
+  invalid_video_url: {
+    parameter: 'video_url',
+    code: 'invalid',
+    message: 'Invalid video url.'
+  },
+  invalid_image_url: {
+    parameter: 'image_url',
+    code: 'invalid',
+    message: 'Invalid image url.'
   }
 };
 

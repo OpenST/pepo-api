@@ -14,7 +14,12 @@ const rootPrefix = '../../..',
   gifsRoutes = require(rootPrefix + '/routes/api/v1/gifs'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   feedsRoutes = require(rootPrefix + '/routes/api/v1/feeds'),
+  activitiesRoutes = require(rootPrefix + '/routes/api/v1/activities'),
   cookieHelper = require(rootPrefix + '/lib/cookieHelper'),
+  tagRoutes = require(rootPrefix + '/routes/api/v1/tags'),
+  commonValidator = require(rootPrefix + '/lib/validators/Common'),
+  uploadParamsRoutes = require(rootPrefix + '/routes/api/v1/uploadParams'),
+  rotateTwitterAccountRoutes = require(rootPrefix + '/routes/api/v1/rotateTwitterAccount'),
   ostTransactionRoutes = require(rootPrefix + '/routes/api/v1/ostTransactions');
 
 const errorConfig = basicHelper.fetchErrorConfig(apiVersions.v1);
@@ -24,27 +29,57 @@ router.use(cookieParser(coreConstant.COOKIE_SECRET));
 
 const validateCookie = async function(req, res, next) {
   let loginCookieValue = req.signedCookies[userConstant.loginCookieName];
-  let authResponse = await new LoginCookieAuth(loginCookieValue).perform().catch(function(r) {
-    return r;
-  });
+  if (!commonValidator.isVarNullOrUndefined(loginCookieValue)) {
+    let authResponse = await new LoginCookieAuth(loginCookieValue).perform().catch(function(r) {
+      return r;
+    });
 
-  if (authResponse.isFailure()) {
-    cookieHelper.deleteLoginCookie(res);
-    return responseHelper.renderApiResponse(authResponse, res, errorConfig);
+    if (authResponse.isFailure()) {
+      cookieHelper.deleteLoginCookie(res);
+      return responseHelper.renderApiResponse(authResponse, res, errorConfig);
+    } else {
+      req.decodedParams.current_user = authResponse.data.current_user;
+      req.decodedParams.user_login_cookie_value = authResponse.data.user_login_cookie_value;
+    }
+    cookieHelper.setLoginCookie(res, authResponse.data.user_login_cookie_value);
   }
-
-  cookieHelper.setLoginCookie(res, authResponse.data.user_login_cookie_value);
-
-  req.decodedParams.current_user = authResponse.data.current_user;
 
   next();
 };
 
+const validateLoginRequired = async function(req, res, next) {
+  let currentUser = req.decodedParams.current_user;
+
+  if (!currentUser) {
+    cookieHelper.deleteLoginCookie(res);
+    return responseHelper.renderApiResponse(
+      responseHelper.error({
+        internal_error_identifier: 'r_a_v1_i_1',
+        api_error_identifier: 'unauthorized_api_request'
+      }),
+      res,
+      errorConfig
+    );
+  }
+
+  next();
+};
+
+// NOTE:- use 'validateLoginRequired' function if you want to use route in logged in only
+
 router.use('/auth', authRoutes);
-router.use('/users', validateCookie, usersRoutes);
-router.use('/tokens', validateCookie, tokensRoutes);
-router.use('/ost-transactions', validateCookie, ostTransactionRoutes);
-router.use('/gifs', validateCookie, gifsRoutes);
+router.use('/users', validateCookie, validateLoginRequired, usersRoutes);
+router.use('/tokens', validateCookie, validateLoginRequired, tokensRoutes);
+router.use('/ost-transactions', validateCookie, validateLoginRequired, ostTransactionRoutes);
+router.use('/gifs', validateCookie, validateLoginRequired, gifsRoutes);
+router.use('/activities', validateCookie, validateLoginRequired, activitiesRoutes);
+router.use('/upload-params', validateCookie, validateLoginRequired, uploadParamsRoutes);
+router.use('/tags', validateCookie, validateLoginRequired, tagRoutes);
+
+// TEMP route - only for QA - TODO - remove later after talking with SOMA
+router.use('/rotate-twitter-account', rotateTwitterAccountRoutes);
+
+// Login not mandatory for following
 router.use('/feeds', validateCookie, feedsRoutes);
 
 module.exports = router;

@@ -1,22 +1,16 @@
 const rootPrefix = '../../../..',
   TokenUserModel = require(rootPrefix + '/app/models/mysql/TokenUser'),
   UserOstEventBase = require(rootPrefix + '/app/services/ostEvents/users/Base'),
-  tokenUserConstants = require(rootPrefix + '/lib/globalConstant/tokenUser'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
-  logger = require(rootPrefix + '/lib/logger/customConsoleLogger');
+  logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
+  tokenUserConstants = require(rootPrefix + '/lib/globalConstant/tokenUser');
 
+/**
+ * Class for user activation initiated webhook processor.
+ *
+ * @class UserActivationInitiated
+ */
 class UserActivationInitiated extends UserOstEventBase {
-  /**
-   * @param {Object} params
-   *
-   * @augments UserOstEventBase
-   *
-   * @constructor
-   */
-  constructor(params) {
-    super(params);
-  }
-
   /**
    * Async performer.
    *
@@ -38,7 +32,6 @@ class UserActivationInitiated extends UserOstEventBase {
    * Validate and sanitize params.
    *
    * @return {Promise<void>}
-   *
    * @private
    */
   async _validateAndSanitizeParams() {
@@ -65,59 +58,33 @@ class UserActivationInitiated extends UserOstEventBase {
   }
 
   /**
-   * Fetch token user.
-   *
-   * @return {Promise<void>}
-   *
-   * @private
-   */
-  async _fetchTokenUser() {
-    const oThis = this;
-
-    const rsp = await super._fetchTokenUser();
-
-    if (rsp.isFailure()) {
-      return rsp;
-    }
-
-    if (oThis.tokenUserObj.ostStatus === tokenUserConstants.activatingOstStatus) {
-      return Promise.reject(
-        responseHelper.error({
-          internal_error_identifier: 's_oe_u_ai_ftu_2',
-          api_error_identifier: 'something_went_wrong',
-          debug_options: { tokenUserObj: oThis.tokenUserObj, ostUser: oThis.ostUser }
-        })
-      );
-    }
-
-    return Promise.resolve(responseHelper.successWithData({}));
-  }
-
-  /**
    * Update token user properties.
    *
    * @return {Promise<void>}
-   *
    * @private
    */
   async _updateTokenUser() {
     const oThis = this;
-    logger.log('Update Token User for user activating success');
 
-    if (oThis.tokenUserObj.ostStatus === tokenUserConstants.activatingOstStatus) {
-      return Promise.resolve(responseHelper.successWithData({}));
+    logger.log('Updating token user to user activating.');
+
+    if (
+      oThis.tokenUserObj.ostStatus === tokenUserConstants.activatingOstStatus ||
+      oThis.tokenUserObj.ostStatus === tokenUserConstants.activatedOstStatus
+    ) {
+      return responseHelper.successWithData({});
     }
 
     await new TokenUserModel()
       .update({
         ost_status: tokenUserConstants.invertedOstStatuses[oThis.ostUserStatus]
       })
-      .where(['id = ?', oThis.tokenUserObj.id])
+      .where({ id: oThis.tokenUserObj.id })
       .fire();
 
     await TokenUserModel.flushCache({ userId: oThis.tokenUserObj.userId });
 
-    return Promise.resolve(responseHelper.successWithData({}));
+    return responseHelper.successWithData({});
   }
 }
 

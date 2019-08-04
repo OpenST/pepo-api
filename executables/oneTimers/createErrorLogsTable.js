@@ -10,10 +10,10 @@ const rootPrefix = '../..',
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   coreConstants = require(rootPrefix + '/config/coreConstants');
 
-const mysqlHost = coreConstants.INFRA_MYSQL_HOST,
-  mysqlUser = coreConstants.INFRA_MYSQL_USER,
-  mysqlPassword = coreConstants.INFRA_MYSQL_PASSWORD,
-  ostInfraDBName = coreConstants.INFRA_MYSQL_DB;
+const mysqlHost = coreConstants.INFRA_DB_MYSQL_HOST,
+  mysqlUser = coreConstants.INFRA_DB_MYSQL_USER,
+  mysqlPassword = coreConstants.INFRA_DB_MYSQL_PASSWORD,
+  ostInfraDBName = coreConstants.INFRA_DB_MYSQL_DB;
 
 class CreateErrorLogsTable {
   constructor() {}

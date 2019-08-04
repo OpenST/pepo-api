@@ -10,9 +10,9 @@ const program = require('commander');
 const rootPrefix = '../..',
   WebhooksModel = require(rootPrefix + '/app/models/mysql/Webhook'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
-  KmsWrapper = require(rootPrefix + '/lib/authentication/KmsWrapper'),
+  KmsWrapper = require(rootPrefix + '/lib/aws/KmsWrapper'),
   localCipher = require(rootPrefix + '/lib/encryptors/localCipher'),
-  kmsGlobalConstant = require(rootPrefix + '/lib/globalConstant/kms.js');
+  kmsGlobalConstant = require(rootPrefix + '/lib/globalConstant/kms');
 
 program
   .option('--webhooksSecret <webhooksSecret>', 'Webhooks Secret')

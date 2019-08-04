@@ -1,18 +1,21 @@
 const rootPrefix = '../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
-  coreConstants = require(rootPrefix + '/config/coreConstants'),
+  databaseConstants = require(rootPrefix + '/lib/globalConstant/database'),
   gifCategoryConstant = require(rootPrefix + '/lib/globalConstant/gifCategory');
 
-const dbName = 'pepo_api_' + coreConstants.environment;
+// Declare variables.
+const dbName = databaseConstants.entityDbName;
 
 /**
  * Class for GifCategory model.
  *
- * @class
+ * @class GifCategory
  */
 class GifCategory extends ModelBase {
   /**
-   * GifCategory model
+   * Constructor for GifCategory model.
+   *
+   * @augments ModelBase
    *
    * @constructor
    */
@@ -40,7 +43,9 @@ class GifCategory extends ModelBase {
    * @private
    */
   _formatDbData(dbRow) {
-    return {
+    const oThis = this;
+
+    const formattedData = {
       id: dbRow.id,
       name: dbRow.name,
       gifId: dbRow.gif_id,
@@ -49,10 +54,12 @@ class GifCategory extends ModelBase {
       createdAt: dbRow.created_at,
       updatedAt: dbRow.updated_at
     };
+
+    return oThis.sanitizeFormattedData(formattedData);
   }
 
   /**
-   * Fetch All categories of Gifs
+   * Fetch all categories of gifs.
    *
    * @returns {Promise<*>}
    */
@@ -62,12 +69,12 @@ class GifCategory extends ModelBase {
     const dbRows = await oThis.select('*').fire();
 
     if (dbRows.length === 0) {
-      return Promise.reject(new Error(`No entry found in categories table.`));
+      return Promise.reject(new Error('No entry found in categories table.'));
     }
 
-    let formattedData = [];
-    for (let i = 0; i < dbRows.length; i++) {
-      formattedData.push(oThis._formatDbData(dbRows[i]));
+    const formattedData = [];
+    for (let index = 0; index < dbRows.length; index++) {
+      formattedData.push(oThis._formatDbData(dbRows[index]));
     }
 
     return formattedData;

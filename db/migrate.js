@@ -11,11 +11,11 @@ program
 
 const rootPrefix = '..',
   ExecuteQuery = require(rootPrefix + '/db/ExecuteQuery'),
-  coreConstants = require(rootPrefix + '/config/coreConstants'),
+  database = require(rootPrefix + '/lib/globalConstant/database'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger');
 
 const migrationFolder = __dirname + '/migration',
-  mainDbName = 'pepo_api_' + coreConstants.environment;
+  mainDbName = database.mainDbName;
 
 class DbMigrate {
   /**
@@ -49,6 +49,7 @@ class DbMigrate {
       })
       .catch(function(err) {
         logger.error(err);
+        process.exit(1);
       });
   }
 

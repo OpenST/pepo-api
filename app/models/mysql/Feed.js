@@ -1,13 +1,22 @@
 const rootPrefix = '../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
-  coreConstants = require(rootPrefix + '/config/coreConstants'),
+  databaseConstants = require(rootPrefix + '/lib/globalConstant/database'),
+  paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination'),
   feedsConstants = require(rootPrefix + '/lib/globalConstant/feed');
 
-const dbName = 'pepo_api_' + coreConstants.environment;
+// Declare variables.
+const dbName = databaseConstants.feedDbName;
 
+/**
+ * Class for feed model.
+ *
+ * @class FeedModel
+ */
 class FeedModel extends ModelBase {
   /**
    * Constructor for feed model.
+   *
+   * @augments ModelBase
    *
    * @constructor
    */
@@ -27,18 +36,20 @@ class FeedModel extends ModelBase {
    * @return {object}
    */
   formatDbData(dbRow) {
-    return {
+    const oThis = this;
+
+    const formattedData = {
       id: dbRow.id,
-      kind: feedsConstants.kinds[dbRow.kind],
       primaryExternalEntityId: dbRow.primary_external_entity_id,
+      kind: feedsConstants.kinds[dbRow.kind],
+      paginationIdentifier: dbRow.pagination_identifier,
+      actor: dbRow.actor,
       extraData: JSON.parse(dbRow.extra_data),
-      privacyType: feedsConstants.privacyTypes[dbRow.privacy_type],
-      status: feedsConstants.statuses[dbRow.status],
-      publishedTs: dbRow.published_ts,
-      displayTs: dbRow.display_ts,
       createdAt: dbRow.created_at,
       updatedAt: dbRow.updated_at
     };
+
+    return oThis.sanitizeFormattedData(formattedData);
   }
 
   /**
@@ -46,31 +57,26 @@ class FeedModel extends ModelBase {
    *
    * @param {object} params
    * @param {number/string} params.limit
-   * @param {number/string} [params.paginationTimestamp]
+   * @param {number/string} params.paginationTimestamp
    *
    *  @returns {Promise<object>}
    */
-  async fetchPublicPublishedFeedIds(params) {
+  async getLoggedOutFeedIds(params) {
     const oThis = this;
 
-    const feedIds = [];
-    const feedDetails = {};
+    const feedIds = [],
+      feedDetails = {};
 
     const paginationTimestamp = params.paginationTimestamp,
       limit = params.limit;
 
     const queryObject = oThis
       .select('*')
-      .where([
-        'status = ? AND privacy_type = ?',
-        feedsConstants.invertedStatuses[feedsConstants.publishedStatus],
-        feedsConstants.invertedPrivacyTypes[feedsConstants.publicPrivacyType]
-      ])
-      .limit(limit)
-      .order_by('published_ts desc');
+      .order_by('pagination_identifier desc')
+      .limit(limit);
 
     if (paginationTimestamp) {
-      queryObject.where(['published_ts < ?', paginationTimestamp]);
+      queryObject.where(['pagination_identifier < ?', paginationTimestamp]);
     }
 
     const dbRows = await queryObject.fire();
@@ -131,7 +137,7 @@ class FeedModel extends ModelBase {
    *
    * @param {array} ids: Feed Ids
    *
-   * @return {Object}
+   * @return {object}
    */
   async fetchByIds(ids) {
     const oThis = this;
@@ -155,15 +161,16 @@ class FeedModel extends ModelBase {
    * Flush cache.
    *
    * @param {object} params
-   * @param {number} params.id
+   * @param {number} params.paginationTimestamp
    *
    * @returns {Promise<*>}
    */
   static async flushCache(params) {
-    const FeedByIds = require(rootPrefix + '/lib/cacheManagement/multi/FeedByIds');
+    const LoggedOutFeed = require(rootPrefix + '/lib/cacheManagement/single/LoggedOutFeed');
 
-    await new FeedByIds({
-      ids: [params.id]
+    await new LoggedOutFeed({
+      limit: paginationConstants.defaultFeedsListPageSize,
+      paginationTimestamp: params.paginationTimestamp
     }).clear();
   }
 }
