@@ -237,15 +237,26 @@ class VideoDetail extends ModelBase {
    * Flush cache.
    *
    * @param {object} params
-   * @param {number} params.userId
-   * @param {number} params.videoId
+   * @param {number} [params.userId]
+   * @param {number} [params.videoId]
    *
    * @returns {Promise<*>}
    */
   static async flushCache(params) {
-    const VideoDetailsByVideoIds = require(rootPrefix + '/lib/cacheManagement/multi/VideoDetailsByVideoIds');
+    const promisesArray = [];
 
-    await new VideoDetailsByVideoIds({ videoIds: [params.videoId] }).clear();
+    if (params.videoId) {
+      const VideoDetailsByVideoIds = require(rootPrefix + '/lib/cacheManagement/multi/VideoDetailsByVideoIds');
+      promisesArray.push(new VideoDetailsByVideoIds({ videoIds: [params.videoId] }).clear());
+    }
+
+    if (params.userId) {
+      const VideoDetailsByUserIdCache = require(rootPrefix +
+        '/lib/cacheManagement/single/VideoDetailsByUserIdPagination');
+      promisesArray.push(new VideoDetailsByUserIdCache({ userId: params.userId }).clear());
+    }
+
+    await Promise.all(promisesArray);
   }
 }
 

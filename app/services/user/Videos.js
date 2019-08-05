@@ -4,7 +4,7 @@ const rootPrefix = '../../..',
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   GetTokenService = require(rootPrefix + '/app/services/token/Get'),
   UserMultiCache = require(rootPrefix + '/lib/cacheManagement/multi/User'),
-  VideoDetailsModel = require(rootPrefix + '/app/models/mysql/VideoDetail'),
+  VideoDetailsByUserIdCache = require(rootPrefix + '/lib/cacheManagement/single/VideoDetailsByUserIdPagination'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
   paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination');
@@ -136,13 +136,17 @@ class UserVideos extends ServiceBase {
   async _fetchVideoIds() {
     const oThis = this;
 
-    const videoDetailObj = new VideoDetailsModel({});
-
-    const videoDetails = await videoDetailObj.fetchByCreatorUserId({
-      creatorUserId: oThis.profileUserId,
+    const cacheResponse = await new VideoDetailsByUserIdCache({
+      userId: oThis.profileUserId,
       limit: oThis.limit,
       paginationTimestamp: oThis.paginationTimestamp
-    });
+    }).fetch();
+
+    if (cacheResponse.isFailure()) {
+      return Promise.reject(cacheResponse);
+    }
+
+    const videoDetails = cacheResponse.data;
 
     for (const videoId in videoDetails) {
       const videoDetail = videoDetails[videoId];
