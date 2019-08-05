@@ -1,9 +1,10 @@
 const rootPrefix = '../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
-  databaseConstants = require(rootPrefix + '/lib/globalConstant/database');
+  databaseConstants = require(rootPrefix + '/lib/globalConstant/database'),
+  socketConnectionConstants = require(rootPrefix + '/lib/globalConstant/socketConnection');
 
 // Declare variables.
-const dbName = databaseConstants.userDbName;
+const dbName = databaseConstants.socketDbName;
 
 /**
  * Class for UserSocketConnectionDetails model.
@@ -34,6 +35,7 @@ class UserSocketConnectionDetails extends ModelBase {
    * @param {number} dbRow.user_id
    * @param {number} dbRow.auth_key
    * @param {number} dbRow.auth_key_expiry_at
+   * @param {number} dbRow.status
    * @param {number} dbRow.socket_endpoint_identifier
    * @param {number} dbRow.expiry_at
    * @param {number} dbRow.created_at
@@ -50,6 +52,7 @@ class UserSocketConnectionDetails extends ModelBase {
       authKey: dbRow.auth_key,
       socketEndpointIdentifier: dbRow.socket_endpoint_identifier,
       authKeyExpiryAt: dbRow.auth_key_expiry_at,
+      status: socketConnectionConstants.statuses[dbRow.status],
       expiryAt: dbRow.expiry_at,
       createdAt: dbRow.created_at,
       updatedAt: dbRow.updated_at
@@ -70,6 +73,7 @@ class UserSocketConnectionDetails extends ModelBase {
       'authKey',
       'socketEndpointIdentifier',
       'authKeyExpiryAt',
+      'status',
       'expiryAt',
       'createdAt',
       'updatedAt'
