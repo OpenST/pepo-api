@@ -112,11 +112,25 @@ node executables/oneTimers/insertWebhooksSecret.js --webhooksSecret "__WXYZ" --w
 ```
 
 ## Background jobs
-* Factory process for processing background jobs
+* Factory process for processing background jobs.
 ```bash
     # note: for topics to subscribe and prefetchcount, please see params column of the cron_processes table
     source set_env_vars.sh
-    node executables/bgJobProcessor/Processor.js --cronProcessId 3
+    node executables/rabbitMqSubscribers/bgJobProcessor.js --cronProcessId 3
+```
+
+* Factory process for processing notification jobs.
+```bash
+    # note: for topics to subscribe and prefetchcount, please see params column of the cron_processes table
+    source set_env_vars.sh
+    node executables/rabbitMqSubscribers/notificationJobProcessor.js --cronProcessId 4
+```
+
+* Factory process for processing socket jobs.
+```bash
+    # note: for topics to subscribe and prefetchcount, please see params column of the cron_processes table
+    source set_env_vars.sh
+    node executables/rabbitMqSubscribers/socketJobProcessor.js --cronProcessId 5
 ```
 
 * Enqueue background job.
