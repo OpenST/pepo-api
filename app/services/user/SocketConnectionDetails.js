@@ -1,11 +1,16 @@
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
-  UserCacheByIds = require(rootPrefix + '/lib/cacheManagement/multi/User'),
   SecureUserCache = require(rootPrefix + '/lib/cacheManagement/single/SecureUser'),
   UserSocketConnectionDetailsModel = require(rootPrefix + '/app/models/mysql/UserSocketConnectionDetails'),
   UserSocketConDetailsByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/UserSocketConDetailsByUserIds'),
+  util = require(rootPrefix + '/lib/util'),
   basicHelper = require(rootPrefix + '/helpers/basic'),
-  responseHelper = require(rootPrefix + '/lib/formatter/response');
+  base64Helper = require(rootPrefix + '/lib/base64Helper'),
+  responseHelper = require(rootPrefix + '/lib/formatter/response'),
+  localCipher = require(rootPrefix + '/lib/encryptors/localCipher'),
+  configStrategy = require(rootPrefix + '/lib/providers/configStrategy'),
+  configStrategyConstants = require(rootPrefix + '/lib/globalConstant/configStrategy'),
+  socketConnectionConstants = require(rootPrefix + '/lib/globalConstant/socketConnection');
 
 /**
  * Class to get socket connection details
@@ -39,30 +44,17 @@ class SocketConnectionDetails extends ServiceBase {
   async _asyncPerform() {
     const oThis = this;
 
-    await oThis._fetchSocketConnectionDetailsFromCache();
-    if (!basicHelper.isEmptyObject(oThis.userSocketConnectionDetails)) {
-      //Todo: Check if connection is not established for that auth key.
+    await oThis._fetchConfigData();
 
-      await oThis._updateAuthKeyExpiry();
-    } else {
-      //Socket connection not found in cache. Thus create connection details and set in db.
+    let promiseArray = [];
+    promiseArray.push(oThis._createAuthKey());
+    promiseArray.push(oThis._fetchAndSetEndPointIdentifier());
 
-      /**
-       * 1. Create auth key,
-       * 2. fetch socket endpoint identifier,
-       * 3. Choose one socket identifier.
-       * 4. create auth key expiry ts.
-       * 5. mark expiry at as null.
-       * 6. return the formatted response.
-       */
+    await Promise.all(promiseArray);
 
-      await oThis._createAuthKey();
-      await oThis._fetchAndSetEndPointIdentifier();
-      oThis._setAuthKeyExpiryTimestamp();
-      await oThis._insertInUserConnectionDetails();
-    }
+    await oThis._insertInUserConnectionDetails();
 
-    return responseHelper.successWithData({ websocketDetails: oThis._formattedResponse() });
+    return responseHelper.successWithData({ websocketConnectionPayload: oThis._formattedResponse() });
   }
 
   /**
@@ -83,6 +75,22 @@ class SocketConnectionDetails extends ServiceBase {
     }
 
     oThis.userSocketConnectionDetails = socketConnectionDetailsCacheRsp.data[oThis.userId];
+  }
+
+  /**
+   * Creates auth key
+   *
+   * @private
+   */
+  async _createAuthKey() {
+    const oThis = this;
+    await oThis._fetchUser();
+
+    let cookieToken = oThis.userData.cookieToken,
+      currentTimeStamp = basicHelper.getCurrentTimestampInSeconds(),
+      stringToEncrypt = oThis.userId + cookieToken + currentTimeStamp;
+
+    oThis.authKey = util.createMd5Digest(stringToEncrypt);
   }
 
   /**
@@ -116,21 +124,6 @@ class SocketConnectionDetails extends ServiceBase {
   }
 
   /**
-   * Creates auth key
-   *
-   * @private
-   */
-  async _createAuthKey() {
-    const oThis = this;
-    await oThis._fetchUser();
-
-    let cookieToken = oThis.userData.cookieToken;
-    //Todo: Logic to prepare auth key
-
-    oThis.authKey = 'BHYU77343HTKGRO4680HJDKSN';
-  }
-
-  /**
    * Fetch websocket endpoint
    *
    * @returns {Promise<void>}
@@ -139,20 +132,24 @@ class SocketConnectionDetails extends ServiceBase {
   async _fetchAndSetEndPointIdentifier() {
     const oThis = this;
 
-    //Todo: Logic to fetch endpoint form config strategy
-    oThis.socketEndPointIdentifier = 1;
-    oThis.socketEndPoint = 'ws://localhost:4000';
+    oThis.socketEndPointIdentifier = Math.floor(Math.random() * oThis.webSocketsServerArray.length);
+    oThis.socketEndPoint = oThis.webSocketsServerArray[oThis.socketEndPointIdentifier];
   }
 
   /**
+   * This functions fetches config related to be used later in the file.
    *
-   *
+   * @returns {Promise<void>}
    * @private
    */
-  _setAuthKeyExpiryTimestamp() {
+  async _fetchConfigData() {
     const oThis = this;
 
-    oThis.authKeyExpiryAt = basicHelper.getCurrentTimestampInSeconds() + 30;
+    let constantsRsp = await configStrategy.getConfigForKind(configStrategyConstants.constants);
+    oThis.salt = constantsRsp.data.constants.salt;
+
+    let webSocketServerConfigRsp = await configStrategy.getConfigForKind(configStrategyConstants.webSocketConnections);
+    oThis.webSocketsServerArray = webSocketServerConfigRsp.data.webSocketConnections.endpoints;
   }
 
   /**
@@ -168,7 +165,9 @@ class SocketConnectionDetails extends ServiceBase {
       user_id: oThis.userId,
       auth_key: oThis.authKey,
       socket_endpoint_identifier: oThis.socketEndPointIdentifier,
-      auth_key_expiry_at: oThis.authKeyExpiryAt,
+      auth_key_expiry_at: oThis._authKeyExpiryAt,
+      status: socketConnectionConstants.invertedStatuses[socketConnectionConstants.created],
+      expiry_at: null,
       created_at: basicHelper.getCurrentTimestampInSeconds(),
       updated_at: basicHelper.getCurrentTimestampInSeconds()
     };
@@ -182,31 +181,32 @@ class SocketConnectionDetails extends ServiceBase {
   }
 
   /**
-   * update auth key expiry
+   * auth key expiry at
    *
-   * @returns {Promise<void>}
+   * @returns {number}
    * @private
    */
-  async _updateAuthKeyExpiry() {
+  get _authKeyExpiryAt() {
+    return basicHelper.getCurrentTimestampInSeconds() + 30;
+  }
+
+  /**
+   * prepare encrypted payload
+   *
+   * @private
+   */
+  _prepareEncryptedPayload() {
     const oThis = this;
 
-    oThis._setAuthKeyExpiryTimestamp();
+    let payload = {
+      user_id: oThis.userId,
+      websocket_connection_id: oThis.userSocketConnectionDetails,
+      auth_key: oThis.authKey
+    };
 
-    await oThis._createAuthKey();
+    let aesEncryptedData = localCipher.encrypt(oThis.salt, JSON.stringify(payload));
 
-    await oThis._fetchAndSetEndPointIdentifier();
-
-    await new UserSocketConnectionDetailsModel()
-      .update({
-        auth_key: oThis.authKey,
-        auth_key_expiry_at: oThis.authKeyExpiryAt
-      })
-      .where({
-        user_id: oThis.userId
-      })
-      .fire();
-
-    await UserSocketConnectionDetailsModel.flushCache(oThis.userId);
+    return base64Helper.encode(aesEncryptedData);
   }
 
   /**
@@ -216,13 +216,15 @@ class SocketConnectionDetails extends ServiceBase {
    */
   _formattedResponse() {
     const oThis = this;
-    let response = {
-      userId: oThis.userSocketConnectionDetails.userId,
-      socketEndpoint: oThis.socketEndPoint,
-      authKey: oThis.authKey
-    };
 
-    console.log('-response---', response);
+    let encryptedPayload = oThis._prepareEncryptedPayload(),
+      response = {
+        id: oThis.userSocketConnectionDetails.id,
+        uts: oThis.userSocketConnectionDetails.updatedAt,
+        socketEndPoint: oThis.socketEndPoint,
+        payload: encryptedPayload
+      };
+
     return response;
   }
 }

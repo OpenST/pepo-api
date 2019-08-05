@@ -228,9 +228,9 @@ router.get('/:user_id/websocket-details', sanitizer.sanitizeDynamicUrlParams, fu
 
   const dataFormatterFunc = async function(serviceResponse) {
     const wrapperFormatterRsp = await new FormatterComposer({
-      resultType: responseEntityKey.websocketDetails,
+      resultType: responseEntityKey.websocketConnectionPayload,
       entityKindToResponseKeyMap: {
-        [entityType.websocketDetails]: responseEntityKey.websocketDetails
+        [entityType.websocketConnectionPayload]: responseEntityKey.websocketConnectionPayload
       },
       serviceData: serviceResponse.data
     }).perform();
