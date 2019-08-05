@@ -48,6 +48,16 @@ class ConfigStrategyTemplate {
           host: 'hostEntity'
         }
       },
+      cassandraEntity: {
+        entityType: 'object',
+        entitiesPresent: {
+          username: 'usernameEntity',
+          password: 'passwordEntity',
+          contactPoints: 'contactPointsEntity',
+          localDataCenter: 'localDataCenterEntity',
+          keySpace: 'keySpaceEntity'
+        }
+      },
 
       userEntity: {
         entityType: 'string'
@@ -95,6 +105,19 @@ class ConfigStrategyTemplate {
       },
       namespaceEntity: {
         entityType: 'string'
+      },
+      contactPointsEntity: {
+        entityType: 'array',
+        entitiesPresent: 'contactPointEntity' // For an array entity this array will contain entity types which that array will hold.
+      },
+      contactPointEntity: {
+        entityType: 'string'
+      },
+      keySpaceEntity: {
+        entityType: 'string'
+      },
+      localDataCenterEntity: {
+        entityType: 'string'
       }
     };
   }
@@ -105,7 +128,8 @@ class ConfigStrategyTemplate {
       [configStrategyConstants.bgJobRabbitmq]: 'rabbitmqEntity',
       [configStrategyConstants.notificationRabbitmq]: 'rabbitmqEntity',
       [configStrategyConstants.socketRabbitmq]: 'rabbitmqEntity',
-      [configStrategyConstants.redshift]: 'redshiftEntity'
+      [configStrategyConstants.redshift]: 'redshiftEntity',
+      [configStrategyConstants.cassandra]: 'cassandraEntity'
     };
   }
 }

@@ -42,6 +42,14 @@
       ]
     },
 
+    "cassandra": {
+      "username": "cassandra",
+      "password": "cassandra",
+      "contactPoints": ["127.0.0.1:9042"],
+      "localDataCenter": "localDataCenter",
+      "keySpace": "pepo_api_development"
+    },
+
     "redshift": {
       "user": "pepo_dev_read",
       "database": "pepodb",
