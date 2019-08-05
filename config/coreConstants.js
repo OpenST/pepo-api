@@ -146,6 +146,20 @@ class CoreConstants {
     return process.env.PA_OST_DB_MYSQL_PASSWORD;
   }
 
+  // socket db
+
+  get SOCKET_DB_MYSQL_HOST() {
+    return process.env.PA_SOCKET_DB_MYSQL_HOST;
+  }
+
+  get SOCKET_DB_MYSQL_USER() {
+    return process.env.PA_SOCKET_DB_MYSQL_USER;
+  }
+
+  get SOCKET_DB_MYSQL_PASSWORD() {
+    return process.env.PA_SOCKET_DB_MYSQL_PASSWORD;
+  }
+
   // Infra db
 
   get INFRA_DB_MYSQL_HOST() {

@@ -1,7 +1,7 @@
 const rootPrefix = '../..',
   database = require(rootPrefix + '/lib/globalConstant/database');
 
-const dbName = database.userDbName;
+const dbName = database.socketDbName;
 
 const upQuery =
   'CREATE TABLE `user_socket_connection_details` ( \n\
