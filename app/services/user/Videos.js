@@ -1,7 +1,9 @@
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   GetProfile = require(rootPrefix + '/lib/user/profile/Get'),
+  CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   GetTokenService = require(rootPrefix + '/app/services/token/Get'),
+  UserMultiCache = require(rootPrefix + '/lib/cacheManagement/multi/User'),
   VideoDetailsModel = require(rootPrefix + '/app/models/mysql/VideoDetail'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
@@ -38,7 +40,7 @@ class UserVideos extends ServiceBase {
     oThis.limit = oThis._defaultPageLimit();
     oThis.paginationTimestamp = null;
     oThis.nextPaginationTimestamp = null;
-    oThis.videoIds = [];
+    oThis.videosCount = 0;
     oThis.videoDetails = [];
     oThis.tokenDetails = {};
   }
@@ -52,15 +54,18 @@ class UserVideos extends ServiceBase {
   async _asyncPerform() {
     const oThis = this;
 
-    await oThis._validateAndSanitizeParams();
+    let promisesArray = [];
+    promisesArray.push(oThis._validateAndSanitizeParams());
+    promisesArray.push(oThis._validateProfileUserId());
+    await Promise.all(promisesArray);
 
     await oThis._fetchVideoIds();
+    oThis._addResponseMetaData();
 
-    await oThis._addResponseMetaData();
-
-    await oThis._setTokenDetails();
-
-    await oThis._getVideos();
+    promisesArray = [];
+    promisesArray.push(oThis._setTokenDetails());
+    promisesArray.push(oThis._getVideos());
+    await Promise.all(promisesArray);
 
     return oThis._prepareResponse();
   }
@@ -76,11 +81,7 @@ class UserVideos extends ServiceBase {
   async _validateAndSanitizeParams() {
     const oThis = this;
 
-    if (oThis.currentUser) {
-      oThis.currentUserId = Number(oThis.currentUser.id);
-    } else {
-      oThis.currentUserId = 0;
-    }
+    oThis.currentUserId = oThis.currentUser ? Number(oThis.currentUser.id) : 0;
 
     if (oThis.paginationIdentifier) {
       const parsedPaginationParams = oThis._parsePaginationParams(oThis.paginationIdentifier);
@@ -92,6 +93,36 @@ class UserVideos extends ServiceBase {
 
     // Validate limit.
     return oThis._validatePageSize();
+  }
+
+  /**
+   * Validate whether profile userId is correct or not.
+   *
+   * @returns {Promise<*>}
+   * @private
+   */
+  async _validateProfileUserId() {
+    const oThis = this;
+
+    const profileUserByIdResponse = await new UserMultiCache({ ids: [oThis.profileUserId] }).fetch();
+
+    if (profileUserByIdResponse.isFailure()) {
+      return Promise.reject(profileUserByIdResponse);
+    }
+
+    if (!CommonValidators.validateNonEmptyObject(profileUserByIdResponse.data[oThis.profileUserId])) {
+      return Promise.reject(
+        responseHelper.error({
+          internal_error_identifier: 'a_s_u_v_1',
+          api_error_identifier: 'unauthorized_api_request',
+          debug_options: {
+            reason: 'Invalid userId',
+            profileUserId: oThis.profileUserId,
+            currentUserId: oThis.currentUserId
+          }
+        })
+      );
+    }
   }
 
   /**
@@ -115,12 +146,14 @@ class UserVideos extends ServiceBase {
 
     for (const videoId in videoDetails) {
       const videoDetail = videoDetails[videoId];
-      oThis.videoIds.push(videoDetail.videoId);
+      oThis.videosCount++;
       oThis.videoDetails.push(videoDetail);
       if (!oThis.nextPaginationTimestamp) {
         oThis.nextPaginationTimestamp = videoDetail.createdAt;
       }
     }
+
+    return responseHelper.successWithData({});
   }
 
   /**
@@ -128,15 +161,15 @@ class UserVideos extends ServiceBase {
    *
    * @sets oThis.responseMetaData
    *
-   * @return {Promise<void>}
+   * @return {Result}
    * @private
    */
-  async _addResponseMetaData() {
+  _addResponseMetaData() {
     const oThis = this;
 
     const nextPagePayloadKey = {};
 
-    if (oThis.videoIds.length >= oThis.limit) {
+    if (oThis.videosCount >= oThis.limit) {
       nextPagePayloadKey[paginationConstants.paginationIdentifierKey] = {
         pagination_timestamp: oThis.nextPaginationTimestamp
       };
@@ -145,6 +178,8 @@ class UserVideos extends ServiceBase {
     oThis.responseMetaData = {
       [paginationConstants.nextPagePayloadKey]: nextPagePayloadKey
     };
+
+    return responseHelper.successWithData({});
   }
 
   /**
@@ -152,7 +187,7 @@ class UserVideos extends ServiceBase {
    *
    * @sets oThis.tokenDetails
    *
-   * @return {Promise<void>}
+   * @return {Promise<*>}
    * @private
    */
   async _setTokenDetails() {
@@ -165,7 +200,10 @@ class UserVideos extends ServiceBase {
     if (tokenResp.isFailure()) {
       return Promise.reject(tokenResp);
     }
+
     oThis.tokenDetails = tokenResp.data.tokenDetails;
+
+    return responseHelper.successWithData({});
   }
 
   /**
@@ -173,7 +211,7 @@ class UserVideos extends ServiceBase {
    *
    * @sets oThis.profileResponse
    *
-   * @return {Promise<never>}
+   * @return {Promise<*>}
    * @private
    */
   async _getVideos() {
@@ -188,6 +226,8 @@ class UserVideos extends ServiceBase {
     }
 
     oThis.profileResponse = response.data;
+
+    return responseHelper.successWithData({});
   }
 
   /**
