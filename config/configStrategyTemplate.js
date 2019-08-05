@@ -55,7 +55,7 @@ class ConfigStrategyTemplate {
           password: 'passwordEntity',
           contactPoints: 'contactPointsEntity',
           localDataCenter: 'localDataCenterEntity',
-          keySpace: 'keySpaceEntity'
+          keyspace: 'keyspaceEntity'
         }
       },
 
@@ -113,7 +113,7 @@ class ConfigStrategyTemplate {
       contactPointEntity: {
         entityType: 'string'
       },
-      keySpaceEntity: {
+      keyspaceEntity: {
         entityType: 'string'
       },
       localDataCenterEntity: {
