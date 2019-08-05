@@ -119,14 +119,14 @@ node executables/oneTimers/insertWebhooksSecret.js --webhooksSecret "__WXYZ" --w
     node executables/bgJobProcessor/Processor.js --cronProcessId 3
 ```
 
-* Enqueue background job
+* Enqueue background job.
 ```js
-   let BgJob = require('./lib/BgJob');
-   BgJob.enqueue("bg.p1.example", {"k1": "v1"});
+   let bgJob = require('./lib/rabbitMqEnqueue/bgJob');
+   bgJob.enqueue("bg.p1.example", {"k1": "v1"});
 ```
 
-* Seed tables for profile
-```js
+* Seed tables for profile.
+```bash
    node
    profileSeeder = require('./tempSeeder.js');
 ```
