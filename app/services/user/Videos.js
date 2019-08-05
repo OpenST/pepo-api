@@ -7,14 +7,26 @@ const rootPrefix = '../../..',
   entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
   paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination');
 
+/**
+ * Class for user video details service.
+ *
+ * @class UserVideos
+ */
 class UserVideos extends ServiceBase {
   /**
-   * @constructor
+   * Constructor for user video details service.
    *
-   * @param params
+   * @param {object} params
+   * @param {string/number} params.profile_user_id
+   * @param {object} [params.current_user]
+   * @param {string} [params.pagination_identifier]
+   *
+   * @augments ServiceBase
+   *
+   * @constructor
    */
   constructor(params) {
-    super(params);
+    super();
 
     const oThis = this;
 
@@ -32,9 +44,10 @@ class UserVideos extends ServiceBase {
   }
 
   /**
-   * Perform
+   * Async perform.
    *
    * @return {Promise<void>}
+   * @private
    */
   async _asyncPerform() {
     const oThis = this;
@@ -53,7 +66,9 @@ class UserVideos extends ServiceBase {
   }
 
   /**
-   * Validate and Sanitize
+   * Validate and sanitize.
+   *
+   * @sets oThis.currentUserId, oThis.paginationTimestamp
    *
    * @returns {Promise<*|result>}
    * @private
@@ -80,7 +95,9 @@ class UserVideos extends ServiceBase {
   }
 
   /**
-   * Fetch video ids
+   * Fetch video ids.
+   *
+   * @sets oThis.nextPaginationTimestamp
    *
    * @return {Promise<void>}
    * @private
@@ -88,16 +105,16 @@ class UserVideos extends ServiceBase {
   async _fetchVideoIds() {
     const oThis = this;
 
-    let videoDetailObj = new VideoDetailsModel({});
+    const videoDetailObj = new VideoDetailsModel({});
 
-    let videoDetails = await videoDetailObj.fetchByCreatorUserId({
+    const videoDetails = await videoDetailObj.fetchByCreatorUserId({
       creatorUserId: oThis.profileUserId,
       limit: oThis.limit,
       paginationTimestamp: oThis.paginationTimestamp
     });
 
-    for (let videoId in videoDetails) {
-      let videoDetail = videoDetails[videoId];
+    for (const videoId in videoDetails) {
+      const videoDetail = videoDetails[videoId];
       oThis.videoIds.push(videoDetail.videoId);
       oThis.videoDetails.push(videoDetail);
       if (!oThis.nextPaginationTimestamp) {
@@ -107,7 +124,9 @@ class UserVideos extends ServiceBase {
   }
 
   /**
-   * Add next page meta data
+   * Add next page meta data.
+   *
+   * @sets oThis.responseMetaData
    *
    * @return {Promise<void>}
    * @private
@@ -131,15 +150,17 @@ class UserVideos extends ServiceBase {
   /**
    * Fetch token details.
    *
+   * @sets oThis.tokenDetails
+   *
    * @return {Promise<void>}
    * @private
    */
   async _setTokenDetails() {
     const oThis = this;
 
-    let getTokenServiceObj = new GetTokenService({});
+    const getTokenServiceObj = new GetTokenService({});
 
-    let tokenResp = await getTokenServiceObj.perform();
+    const tokenResp = await getTokenServiceObj.perform();
 
     if (tokenResp.isFailure()) {
       return Promise.reject(tokenResp);
@@ -148,7 +169,9 @@ class UserVideos extends ServiceBase {
   }
 
   /**
-   * Get videos
+   * Get videos.
+   *
+   * @sets oThis.profileResponse
    *
    * @return {Promise<never>}
    * @private
@@ -156,9 +179,9 @@ class UserVideos extends ServiceBase {
   async _getVideos() {
     const oThis = this;
 
-    let getProfileObj = new GetProfile({ userIds: [oThis.profileUserId], currentUserId: oThis.currentUserId });
+    const getProfileObj = new GetProfile({ userIds: [oThis.profileUserId], currentUserId: oThis.currentUserId });
 
-    let response = await getProfileObj.perform();
+    const response = await getProfileObj.perform();
 
     if (response.isFailure()) {
       return Promise.reject(response);
@@ -168,8 +191,9 @@ class UserVideos extends ServiceBase {
   }
 
   /**
-   * Default Page Limit.
+   * Returns default page limit.
    *
+   * @returns {number}
    * @private
    */
   _defaultPageLimit() {
@@ -177,8 +201,9 @@ class UserVideos extends ServiceBase {
   }
 
   /**
-   * Min page limit.
+   * Returns minimum page limit.
    *
+   * @returns {number}
    * @private
    */
   _minPageLimit() {
@@ -186,8 +211,9 @@ class UserVideos extends ServiceBase {
   }
 
   /**
-   * Max page limit.
+   * Returns maximum page limit.
    *
+   * @returns {number}
    * @private
    */
   _maxPageLimit() {
@@ -195,8 +221,9 @@ class UserVideos extends ServiceBase {
   }
 
   /**
-   * Current page limit.
+   * Returns current page limit.
    *
+   * @returns {number}
    * @private
    */
   _currentPageLimit() {
@@ -206,7 +233,7 @@ class UserVideos extends ServiceBase {
   }
 
   /**
-   * Prepare final response
+   * Prepare final response.
    *
    * @return {Promise<*|result>}
    * @private
