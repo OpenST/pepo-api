@@ -35,7 +35,7 @@ class ServicesBase {
   /**
    * Main performer method for the class.
    *
-   * @returns {Promise<T>}
+   * @returns {Promise<*>}
    */
   perform() {
     const oThis = this;
@@ -90,7 +90,7 @@ class ServicesBase {
     if (!limitVas[0]) {
       return Promise.reject(
         responseHelper.paramValidationError({
-          internal_error_identifier: 'a_s_b_5',
+          internal_error_identifier: 'a_s_b_2',
           api_error_identifier: 'invalid_api_params',
           params_error_identifiers: ['invalid_limit'],
           debug_options: {}
@@ -99,6 +99,42 @@ class ServicesBase {
     }
 
     oThis.limit = limitVas[1];
+  }
+
+  /**
+   * Validate whether profile userId is correct or not.
+   *
+   * @param {string/number} userId
+   *
+   * @returns {Promise<result>}
+   * @private
+   */
+  async _validateProfileUserId(userId) {
+    const oThis = this;
+
+    const UserMultiCache = require(rootPrefix + '/lib/cacheManagement/multi/User');
+
+    const profileUserByIdResponse = await new UserMultiCache({ ids: [userId] }).fetch();
+
+    if (profileUserByIdResponse.isFailure()) {
+      return Promise.reject(profileUserByIdResponse);
+    }
+
+    if (!CommonValidators.validateNonEmptyObject(profileUserByIdResponse.data[userId])) {
+      return Promise.reject(
+        responseHelper.error({
+          internal_error_identifier: 'a_s_b_3',
+          api_error_identifier: 'unauthorized_api_request',
+          debug_options: {
+            reason: 'Invalid userId',
+            profileUserId: userId,
+            currentUserId: oThis.currentUserId
+          }
+        })
+      );
+    }
+
+    return responseHelper.successWithData({});
   }
 
   _currentPageLimit() {
