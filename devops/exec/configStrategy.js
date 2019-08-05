@@ -37,10 +37,12 @@ const Main = async function() {
   oThis.config = configData.config;
 
   if (command.addConfigs) {
-    await new globalSaltModel().createEncryptionSalt(
-      kmsPurposeConstants.configStrategyEncryptionPurpose,
-      globalSaltConstant.configStrategyKind
-    );
+    if (!command.kind) {
+      await new globalSaltModel().createEncryptionSalt(
+        kmsPurposeConstants.configStrategyEncryptionPurpose,
+        globalSaltConstant.configStrategyKind
+      );
+    }
     await _addConfig(oThis.config);
   } else if (command.activateConfigs) {
     await _activateConfigStrategy(oThis.config);
