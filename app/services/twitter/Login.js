@@ -133,7 +133,7 @@ class TwitterLogin extends ServiceBase {
     const eSecretKms = localCipher.encrypt(oThis.decryptedEncryptionSalt, oThis.secret);
 
     const SecureTwitterUserExtendedRes = await new SecureTwitterUserExtendedByTwitterUserIdCache({
-      twitterUserid: oThis.twitterUserObj.id
+      twitterUserId: oThis.twitterUserObj.id
     }).fetch();
 
     if (SecureTwitterUserExtendedRes.isFailure()) {
@@ -153,7 +153,7 @@ class TwitterLogin extends ServiceBase {
 
     await TwitterUserExtendedModel.flushCache({
       id: twitterUserExtendedObj.id,
-      twitterUserid: oThis.twitterUserObj.id
+      twitterUserId: oThis.twitterUserObj.id
     });
 
     logger.log('End::Update Twitter User Extended for login');
