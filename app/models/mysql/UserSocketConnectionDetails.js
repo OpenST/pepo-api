@@ -121,6 +121,35 @@ class UserSocketConnectionDetails extends ModelBase {
   }
 
   /**
+   * Fetch active user socket connection details object for given user_ids.
+   *
+   * @param {array} userIds: user ids
+   *
+   * @return {object}
+   */
+  async fetchActiveByUserIds(userIds) {
+    const oThis = this;
+
+    const response = {};
+
+    const dbRows = await oThis
+      .select('*')
+      .where([
+        'user_id IN (?) AND status = ?',
+        userIds,
+        socketConnectionConstants.invertedStatuses[socketConnectionConstants.connected]
+      ])
+      .fire();
+
+    for (let index = 0; index < dbRows.length; index++) {
+      const formatDbRow = oThis.formatDbData(dbRows[index]);
+      response[formatDbRow.userId] = formatDbRow;
+    }
+
+    return response;
+  }
+
+  /**
    * Flush cache.
    *
    * @param {object} params
