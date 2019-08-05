@@ -8,12 +8,13 @@ const rootPrefix = '../..',
   RabbitmqSubscription = require(rootPrefix + '/lib/entity/RabbitSubscription'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
-  rabbitmqProvider = require(rootPrefix + '/lib/providers/bgJobRabbitmq'),
+  rabbitMqProvider = require(rootPrefix + '/lib/providers/rabbitMq'),
   createErrorLogsEntry = require(rootPrefix + '/lib/errorLogs/createEntry'),
   machineKindConstant = require(rootPrefix + '/lib/globalConstant/machineKind'),
   cronProcessesConstant = require(rootPrefix + '/lib/globalConstant/cronProcesses'),
   cronProcessesConstants = require(rootPrefix + '/lib/globalConstant/cronProcesses'),
-  bgJobProcessorFactory = require(rootPrefix + '/executables/bgJobProcessor/factory');
+  bgJobProcessorFactory = require(rootPrefix + '/executables/bgJobProcessor/factory'),
+  configStrategyConstants = require(rootPrefix + '/lib/globalConstant/configStrategy');
 
 program.option('--cronProcessId <cronProcessId>', 'Cron table process ID').parse(process.argv);
 
@@ -162,13 +163,16 @@ class Processor extends CronBase {
     const oThis = this;
 
     for (let i = 0; i < oThis.topics.length; i++) {
-      let subscriptionTopic = oThis.topics[i];
+      const subscriptionTopic = oThis.topics[i];
 
-      let rabbitmqSubscription = oThis.subscriptionTopicToDataMap[subscriptionTopic];
+      const rabbitmqSubscription = oThis.subscriptionTopicToDataMap[subscriptionTopic];
 
-      const ostNotification = await rabbitmqProvider.getInstance(machineKindConstant.cronKind);
+      const ostNotification = await rabbitMqProvider.getInstance(
+        configStrategyConstants.bgJobRabbitmq,
+        machineKindConstant.cronKind
+      );
 
-      // below condition is to save from multiple subscriptions by command messages.
+      // Below condition is to save from multiple subscriptions by command messages.
       if (!rabbitmqSubscription.isSubscribed()) {
         rabbitmqSubscription.markAsSubscribed();
 
@@ -191,6 +195,7 @@ class Processor extends CronBase {
                   messageParams = JSON.parse(params);
                 } catch (err) {
                   logger.error('--------Parsing failed--------------params-----', params);
+
                   return Promise.resolve({});
                 }
 
@@ -206,11 +211,13 @@ class Processor extends CronBase {
                     },
                     function(err) {
                       logger.error('---------------------reject err------', err.toString());
+
                       return Promise.resolve({});
                     }
                   )
                   .catch(function(error) {
                     logger.error('Error in execute transaction', error);
+
                     return Promise.resolve({});
                   });
               },
@@ -266,9 +273,10 @@ class Processor extends CronBase {
   }
 
   /**
-   * ost rmp error
+   * Ost rmq error.
    *
-   * @param err
+   * @param {object} err
+   *
    * @private
    */
   _ostRmqError(err) {
