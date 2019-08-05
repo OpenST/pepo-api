@@ -103,6 +103,8 @@ class ConfigStrategyTemplate {
     return {
       [configStrategyConstants.memcached]: 'memcachedEntity',
       [configStrategyConstants.bgJobRabbitmq]: 'rabbitmqEntity',
+      [configStrategyConstants.notificationRabbitmq]: 'rabbitmqEntity',
+      [configStrategyConstants.socketRabbitmq]: 'rabbitmqEntity',
       [configStrategyConstants.redshift]: 'redshiftEntity'
     };
   }

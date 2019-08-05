@@ -401,7 +401,7 @@ class Processor extends CronBase {
    * @private
    */
   get _cronKind() {
-    return cronProcessesConstant.bgJobRabbitmq;
+    return cronProcessesConstant.jobProcessor;
   }
 }
 

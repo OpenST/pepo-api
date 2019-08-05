@@ -72,6 +72,10 @@ const v1Signature = {
       {
         parameter: 'current_user',
         validatorMethods: ['validateNonEmptyObject']
+      },
+      {
+        parameter: 'profile_user_id',
+        validatorMethods: ['validateNonZeroInteger']
       }
     ],
     optional: [
@@ -86,6 +90,10 @@ const v1Signature = {
       {
         parameter: 'current_user',
         validatorMethods: ['validateNonEmptyObject']
+      },
+      {
+        parameter: 'profile_user_id',
+        validatorMethods: ['validateNonZeroInteger']
       }
     ],
     optional: [
@@ -100,6 +108,10 @@ const v1Signature = {
       {
         parameter: 'current_user',
         validatorMethods: ['validateNonEmptyObject']
+      },
+      {
+        parameter: 'profile_user_id',
+        validatorMethods: ['validateNonZeroInteger']
       }
     ],
     optional: [
@@ -382,6 +394,24 @@ const v1Signature = {
   },
   [apiName.feedsList]: {
     mandatory: [],
+    optional: [
+      {
+        parameter: paginationConstants.paginationIdentifierKey,
+        validatorMethods: ['validateString', 'validatePaginationIdentifier']
+      },
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      }
+    ]
+  },
+  [apiName.userVideoList]: {
+    mandatory: [
+      {
+        parameter: 'profile_user_id',
+        validatorMethods: ['validateNonZeroInteger']
+      }
+    ],
     optional: [
       {
         parameter: paginationConstants.paginationIdentifierKey,

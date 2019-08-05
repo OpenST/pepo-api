@@ -4,11 +4,22 @@ const rootPrefix = '../../..',
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination');
 
+/**
+ * Class for public video feed.
+ *
+ * @class PublicVideoFeed
+ */
 class PublicVideoFeed extends FeedBase {
   /**
-   * Constructor for Public Video Feed
+   * Constructor for public video feed.
    *
-   * @param params
+   * @param {object} params
+   * @param {object} params.current_user
+   * @param {string} [params.pagination_identifier]
+   *
+   * @augments FeedBase
+   *
+   * @constructor
    */
   constructor(params) {
     super(params);
@@ -28,7 +39,9 @@ class PublicVideoFeed extends FeedBase {
   }
 
   /**
-   * Validate and Sanitize
+   * Validate and sanitize.
+   *
+   * @sets oThis.currentUserId, oThis.paginationTimestamp
    *
    * @returns {Promise<*|result>}
    * @private
@@ -55,16 +68,20 @@ class PublicVideoFeed extends FeedBase {
   }
 
   /**
-   * Set feed ids
+   * Set feed ids.
    *
+   * @sets oThis.feedIds, oThis.feedsMap, oThis.nextPaginationTimestamp
+   *
+   * @returns {Promise<*>}
    * @private
    */
   async _setFeedIds() {
-    const oThis = this,
-      loggedOutFeedCacheResp = await new LoggedOutFeedCache({
-        limit: oThis.limit,
-        paginationTimestamp: oThis.paginationTimestamp
-      }).fetch();
+    const oThis = this;
+
+    const loggedOutFeedCacheResp = await new LoggedOutFeedCache({
+      limit: oThis.limit,
+      paginationTimestamp: oThis.paginationTimestamp
+    }).fetch();
 
     oThis.feedIds = loggedOutFeedCacheResp.data.feedIds;
     oThis.feedsMap = loggedOutFeedCacheResp.data.feedDetails;
@@ -77,7 +94,9 @@ class PublicVideoFeed extends FeedBase {
   }
 
   /**
-   * Prepare Response
+   * Prepare response.
+   *
+   * @sets oThis.feeds, oThis.profileResponse
    *
    * @returns {*|result}
    * @private
@@ -100,7 +119,7 @@ class PublicVideoFeed extends FeedBase {
     // TODO - temp code for curated feeds
     // TEMP CODE START - to show curated feeds on top(only in logged out mode)
     if (!oThis.currentUser && oThis.paginationTimestamp == null) {
-      let curatedFeed = {
+      const curatedFeed = {
         id: '9999',
         primaryExternalEntityId: '999',
         paginationIdentifier: 1564468241,
@@ -233,23 +252,42 @@ class PublicVideoFeed extends FeedBase {
     });
   }
 
+  /**
+   * Returns current page limit.
+   *
+   * @returns {number}
+   * @private
+   */
   _currentPageLimit() {
     return paginationConstants.defaultFeedsListPageSize;
   }
 
   /**
-   * Default page limit.
+   * Returns default page limit.
    *
+   * @returns {number}
    * @private
    */
   _defaultPageLimit() {
     return paginationConstants.defaultFeedsListPageSize;
   }
 
+  /**
+   * Returns minimum page limit.
+   *
+   * @returns {number}
+   * @private
+   */
   _minPageLimit() {
     return paginationConstants.minFeedsListPageSize;
   }
 
+  /**
+   * Returns maximum page limit.
+   *
+   * @returns {number}
+   * @private
+   */
   _maxPageLimit() {
     return paginationConstants.maxFeedsListPageSize;
   }
