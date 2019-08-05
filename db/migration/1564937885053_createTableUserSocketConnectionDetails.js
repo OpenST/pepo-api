@@ -10,11 +10,13 @@ const upQuery =
   `auth_key` varchar(255) COLLATE utf8_unicode_ci, \n\
   `socket_endpoint_identifier` tinyint(4) DEFAULT NULL, \n\
   `auth_key_expiry_at` int(11) DEFAULT NULL, \n\
+  `status` tinyint(4) NOT NULL, \n\
   `expiry_at` int(11) DEFAULT NULL, \n\
   `created_at` int(11) NOT NULL, \n\
   `updated_at` int(11) NOT NULL, \n\
   PRIMARY KEY (`id`), \n\
-  INDEX idx_1 (`user_id`) \n\
+  INDEX idx_1 (`user_id`), \n\
+  INDEX idx_2 (`user_id`, `status`)\n\
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci';
 
 const downQuery = 'drop table if exists `user_socket_connection_details`;';
