@@ -40,7 +40,7 @@ class FailureTransactionOstEvent extends TransactionOstEventBase {
     } else {
       const insertResponse = await oThis.insertInTransaction();
       if (insertResponse.isDuplicateIndexViolation) {
-        basicHelper.sleep(500);
+        await basicHelper.sleep(500);
         await oThis.fetchTransaction();
         await oThis._processTransaction();
       } else {

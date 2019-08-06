@@ -29,7 +29,6 @@ class SuccessTransactionOstEvent extends TransactionOstEventBase {
     const promiseArray = [];
 
     promiseArray.push(oThis.fetchTransaction());
-
     promiseArray.push(oThis.setFromAndToUserId());
 
     if (oThis.isVideoIdPresent()) {
@@ -45,7 +44,7 @@ class SuccessTransactionOstEvent extends TransactionOstEventBase {
       // When transaction is not found in db. Thus all insertions will happen in this block.
       const insertResponse = await oThis.insertInTransaction();
       if (insertResponse.isDuplicateIndexViolation) {
-        basicHelper.sleep(500);
+        await basicHelper.sleep(500);
         await oThis.fetchTransaction();
         await oThis._processTransaction();
       } else {
