@@ -17,11 +17,23 @@ const rootPrefix = '../../../..',
   errorLogsConstants = require(rootPrefix + '/lib/globalConstant/errorLogs'),
   transactionConstants = require(rootPrefix + '/lib/globalConstant/transaction');
 
+/**
+ * Class for transaction event ost base.
+ *
+ * @class TransactionOstEventBase
+ */
 class TransactionOstEventBase extends ServiceBase {
   /**
-   * @param {Object} params
-   * @param {String} params.data: contains the webhook event data
-   * @param {String} params.data.user: User entity result from ost
+   * Constructor for transaction event ost base.
+   *
+   * @param {object} params
+   * @param {string} params.data: contains the webhook event data
+   * @param {string} params.data.transaction: Transaction entity result from ost
+   * @param {string} params.data.transaction.id
+   * @param {string} params.data.transaction.status
+   * @param {string} [params.data.transaction.block_timestamp]
+   *
+   * @augments ServiceBase
    *
    * @constructor
    */
@@ -57,15 +69,15 @@ class TransactionOstEventBase extends ServiceBase {
   _parseTransactionMetaDetails() {
     const oThis = this;
 
-    let parsedHash = {};
+    const parsedHash = {};
     if (!oThis.ostTransaction.meta_property.details) {
       return parsedHash;
     }
 
-    let detailsStringArray = oThis.ostTransaction.meta_property.details.split(' ');
+    const detailsStringArray = oThis.ostTransaction.meta_property.details.split(' ');
 
-    for (let i = 0; i < detailsStringArray.length; i++) {
-      let detailsKeyValueArray = detailsStringArray[i].split('_');
+    for (let index = 0; index < detailsStringArray.length; index++) {
+      const detailsKeyValueArray = detailsStringArray[index].split('_');
       parsedHash[detailsKeyValueArray[0]] = detailsKeyValueArray[1];
     }
 
@@ -73,14 +85,14 @@ class TransactionOstEventBase extends ServiceBase {
   }
 
   /**
-   * Sets Video id if video was associated with the transaction.
+   * Sets video id if video was associated with the transaction.
    *
    * @private
    */
   _parseAndSetVideoId() {
     const oThis = this;
 
-    let parsedHash = oThis._parseTransactionMetaDetails();
+    const parsedHash = oThis._parseTransactionMetaDetails();
 
     if (parsedHash.vi) {
       oThis.videoId = parsedHash.vi;
@@ -88,30 +100,33 @@ class TransactionOstEventBase extends ServiceBase {
   }
 
   /**
-   * Validate Transaction obj
+   * Validate transaction object.
    *
    * @returns {Promise<*>}
    * @private
    */
   async _validateTransactionObj() {
     const oThis = this;
+
     if (!oThis.transactionObj) {
-      let errorObject = responseHelper.error({
+      const errorObject = responseHelper.error({
         internal_error_identifier: 'a_s_oe_t_f_1',
         api_error_identifier: 'something_went_wrong',
         debug_options: { reason: 'Transaction obj was empty' }
       });
       await createErrorLogsEntry.perform(errorObject, errorLogsConstants.highSeverity);
+
       return Promise.reject(errorObject);
     }
 
     if (oThis.transactionObj.status !== transactionConstants.pendingStatus) {
-      let errorObject1 = responseHelper.error({
+      const errorObject1 = responseHelper.error({
         internal_error_identifier: 'a_s_oe_t_f_2',
         api_error_identifier: 'something_went_wrong',
         debug_options: { reason: 'Transaction status is not pending.' }
       });
       await createErrorLogsEntry.perform(errorObject1, errorLogsConstants.mediumSeverity);
+
       return Promise.reject(errorObject1);
     }
 
@@ -122,13 +137,14 @@ class TransactionOstEventBase extends ServiceBase {
    * Async performer.
    *
    * @return {Promise<void>}
+   * @private
    */
   async _asyncPerform() {
-    throw `Unimplemented method _asyncPerform for TransactionOstEvent`;
+    throw new Error('Unimplemented method _asyncPerform for TransactionOstEvent.');
   }
 
   /**
-   * Validate Request.
+   * Validate request.
    *
    * @return {Promise<void>}
    * @private
@@ -137,7 +153,7 @@ class TransactionOstEventBase extends ServiceBase {
     const oThis = this;
 
     logger.log('Start:: Validate for Transaction Webhook');
-    let paramErrors = [];
+    const paramErrors = [];
 
     if (oThis.ostTransactionStatus !== oThis._validTransactionStatus()) {
       paramErrors.push('invalid_status');
@@ -168,7 +184,7 @@ class TransactionOstEventBase extends ServiceBase {
 
     logger.log('Start:: Fetch transaction from transaction table');
 
-    let transactionCacheResponse = await new TransactionByOstTxIdCache({ ostTxIds: [oThis.ostTxId] }).fetch();
+    const transactionCacheResponse = await new TransactionByOstTxIdCache({ ostTxIds: [oThis.ostTxId] }).fetch();
 
     if (transactionCacheResponse.isFailure()) {
       return Promise.reject(transactionCacheResponse);
@@ -182,22 +198,22 @@ class TransactionOstEventBase extends ServiceBase {
   /**
    * This function gives user id for the given ost user id(uuid).
    *
-   * @param ostUserIds
+   * @param {array} ostUserIds
+   *
    * @returns {Promise<void>}
+   * @private
    */
   async _getUserIdFromOstUserIds(ostUserIds) {
-    const oThis = this;
-
-    let tokenUserRsp = await new TokenUserByOstUserIdsCache({ ostUserIds: ostUserIds }).fetch();
+    const tokenUserRsp = await new TokenUserByOstUserIdsCache({ ostUserIds: ostUserIds }).fetch();
 
     if (tokenUserRsp.isFailure()) {
       return Promise.reject(tokenUserRsp);
     }
 
-    let ostUserIdToUserIdHash = {};
+    const ostUserIdToUserIdHash = {};
 
-    for (let i = 0; i < ostUserIds.length; i++) {
-      let ostUserId = ostUserIds[i];
+    for (let index = 0; index < ostUserIds.length; index++) {
+      const ostUserId = ostUserIds[index];
       ostUserIdToUserIdHash[ostUserId] = tokenUserRsp.data[ostUserId].userId;
     }
 
@@ -205,7 +221,9 @@ class TransactionOstEventBase extends ServiceBase {
   }
 
   /**
-   * Set from and to user ids
+   * Set from and to user ids.
+   *
+   * @sets oThis.fromUserId, oThis.toUserId
    *
    * @returns {Promise<void>}
    * @private
@@ -213,7 +231,7 @@ class TransactionOstEventBase extends ServiceBase {
   async _setFromAndToUserId() {
     const oThis = this;
 
-    let fromOstUserId = oThis.ostTransaction.transfers[0].from_user_id,
+    const fromOstUserId = oThis.ostTransaction.transfers[0].from_user_id,
       toOstUserId = oThis.ostTransaction.transfers[0].to_user_id,
       ostUserIdToUserIdHash = await oThis._getUserIdFromOstUserIds([fromOstUserId, toOstUserId]);
 
@@ -222,7 +240,7 @@ class TransactionOstEventBase extends ServiceBase {
   }
 
   /**
-   * Validate to user id
+   * Validate to user id.
    *
    * @returns {Promise<never>}
    * @private
@@ -232,6 +250,7 @@ class TransactionOstEventBase extends ServiceBase {
 
     if (oThis.toUserId !== oThis.transactionObj.extraData.toUserIds[0]) {
       logger.error('Mismatch in to user id in table and in webhook data.');
+
       return Promise.reject(
         responseHelper.paramValidationError({
           internal_error_identifier: 'a_s_oe_t_b_9',
@@ -244,7 +263,7 @@ class TransactionOstEventBase extends ServiceBase {
   }
 
   /**
-   * Validate transfers
+   * Validate transfers.
    *
    * @return {Promise<void>}
    * @private
@@ -286,6 +305,8 @@ class TransactionOstEventBase extends ServiceBase {
   /**
    * Update ost transaction status in transaction table.
    *
+   * @sets oThis.activityObj
+   *
    * @return {Promise<void>}
    * @private
    */
@@ -293,7 +314,7 @@ class TransactionOstEventBase extends ServiceBase {
     const oThis = this;
     logger.log('Start:: Update transaction table for Transaction Webhook');
 
-    let status = oThis._transactionStatus();
+    const status = oThis._transactionStatus();
 
     await new TransactionModel()
       .update({
@@ -310,7 +331,7 @@ class TransactionOstEventBase extends ServiceBase {
   }
 
   /**
-   * Update activity with published timestamp, display timestamp and status
+   * Update activity with published timestamp, display timestamp and status.
    *
    * @returns {Promise<any>}
    * @private
@@ -319,18 +340,19 @@ class TransactionOstEventBase extends ServiceBase {
     const oThis = this;
     logger.log('Start:: Update Activity');
 
-    let activityObjRes = await new ActivityModel().fetchByEntityTypeAndEntityId(
+    const activityObjRes = await new ActivityModel().fetchByEntityTypeAndEntityId(
       activityConstants.invertedEntityTypes[activityConstants.transactionEntityType],
       oThis.transactionObj.id
     );
 
     if (!activityObjRes.id) {
-      let errorObject = responseHelper.error({
+      const errorObject = responseHelper.error({
         internal_error_identifier: 'a_s_oe_t_b_2',
         api_error_identifier: 'something_went_wrong',
         debug_options: { reason: 'Activity object not found for transaction entity', entityId: oThis.transactionObj.id }
       });
       await createErrorLogsEntry.perform(errorObject, errorLogsConstants.highSeverity);
+
       return Promise.reject(errorObject);
     }
 
@@ -371,34 +393,36 @@ class TransactionOstEventBase extends ServiceBase {
 
     /*
     * Commenting following code as we don't need to update published ts. Published ts is inserted while creating transaction itself.
-    * */
+    */
 
-    // let userActivityObj = await new UserActivityModel().fetchUserActivityByUserIdPublishedTsAndActivityId(
-    //   oThis.fromUserId,
-    //   null,
-    //   activityId
-    // );
-    //
-    // if (!userActivityObj.id) {
-    //   let errorObject = responseHelper.error({
-    //     internal_error_identifier: 'a_s_oe_t_b_3',
-    //     api_error_identifier: 'something_went_wrong',
-    //     debug_options: { reason: 'User activity object not found for activity id', activityId: activityId }
-    //   });
-    //   await createErrorLogsEntry.perform(errorObject, errorLogsConstants.highSeverity);
-    //   return Promise.reject(errorObject);
-    // }
-    //
-    // await new UserActivityModel()
-    //   .update({
-    //     published_ts: oThis.activityObj.publishedTs
-    //   })
-    //   .where(['id = ?', userActivityObj.id])
-    //   .fire();
-    //
-    // userActivityObj.publishedTs = oThis.activityObj.publishedTs;
-    //
-    // await UserActivityModel.flushCache(userActivityObj);
+    /*
+    let userActivityObj = await new UserActivityModel().fetchUserActivityByUserIdPublishedTsAndActivityId(
+      oThis.fromUserId,
+      null,
+      activityId
+    );
+
+    if (!userActivityObj.id) {
+      let errorObject = responseHelper.error({
+        internal_error_identifier: 'a_s_oe_t_b_3',
+        api_error_identifier: 'something_went_wrong',
+        debug_options: { reason: 'User activity object not found for activity id', activityId: activityId }
+      });
+      await createErrorLogsEntry.perform(errorObject, errorLogsConstants.highSeverity);
+      return Promise.reject(errorObject);
+    }
+
+    await new UserActivityModel()
+      .update({
+        published_ts: oThis.activityObj.publishedTs
+      })
+      .where(['id = ?', userActivityObj.id])
+      .fire();
+
+    userActivityObj.publishedTs = oThis.activityObj.publishedTs;
+
+    await UserActivityModel.flushCache(userActivityObj);
+     */
 
     logger.log('End:: Update User Activity');
   }
@@ -413,16 +437,17 @@ class TransactionOstEventBase extends ServiceBase {
     const oThis = this;
     logger.log('Start:: Remove entry from pending transaction');
 
-    let deleteRsp = await new PendingTransactionModel()
+    await new PendingTransactionModel()
       .delete()
       .where({ ost_tx_id: oThis.ostTxId })
       .fire();
 
-    let pendingTransactionObj = {};
-    pendingTransactionObj.ostTxid = oThis.ostTxId;
-    pendingTransactionObj.fromUserId = oThis.fromUserId;
-    pendingTransactionObj.videoId = oThis.videoId;
-    pendingTransactionObj.toUserId = oThis.transactionObj.extraData.toUserIds[0];
+    const pendingTransactionObj = {
+      ostTxid: oThis.ostTxId,
+      fromUserId: oThis.fromUserId,
+      videoId: oThis.videoId,
+      toUserId: oThis.transactionObj.extraData.toUserIds[0]
+    };
 
     await PendingTransactionModel.flushCache(pendingTransactionObj);
 
@@ -430,7 +455,7 @@ class TransactionOstEventBase extends ServiceBase {
   }
 
   /**
-   * Mark Airdrop Failed Property for Token User.
+   * Mark airdrop failed property for token user.
    *
    * @return {Promise<void>}
    * @private
@@ -439,7 +464,7 @@ class TransactionOstEventBase extends ServiceBase {
     const oThis = this;
     logger.log('Start:: Update token user to mark airdrops status');
 
-    let tokenUserObjRes = await new TokenUserByUserIdCache({
+    const tokenUserObjRes = await new TokenUserByUserIdCache({
       userIds: [oThis.toUserId]
     }).fetch();
 
@@ -456,7 +481,7 @@ class TransactionOstEventBase extends ServiceBase {
       );
     }
 
-    let tokenUserObj = tokenUserObjRes.data[oThis.toUserId],
+    const tokenUserObj = tokenUserObjRes.data[oThis.toUserId],
       propertyVal = oThis._getPropertyValForTokenUser(tokenUserObj.properties);
 
     await new TokenUserModel()
@@ -474,6 +499,8 @@ class TransactionOstEventBase extends ServiceBase {
 
   /**
    * Insert in transaction table.
+   *
+   * @sets oThis.transactionObj
    *
    * @returns {Promise<{isDuplicateIndexViolation: boolean}>}
    * @private
@@ -498,13 +525,13 @@ class TransactionOstEventBase extends ServiceBase {
 
     let isDuplicateIndexViolation = false;
 
-    let extraData = {
+    const extraData = {
       toUserIds: [oThis.toUserId],
       amounts: [oThis.ostTransaction.transfers[0].amount],
       kind: transactionConstants.extraData.userTransactionKind
     };
 
-    let insertData = {
+    const insertData = {
       ost_tx_id: oThis.ostTxId,
       from_user_id: oThis.fromUserId,
       video_id: oThis.videoId,
@@ -514,21 +541,22 @@ class TransactionOstEventBase extends ServiceBase {
       status: transactionConstants.invertedStatuses[oThis._transactionStatus()]
     };
 
-    let insertResponse = await new TransactionModel()
+    const insertResponse = await new TransactionModel()
       .insert(insertData)
       .fire()
       .catch(async function(err) {
         if (TransactionModel.isDuplicateIndexViolation(TransactionModel.transactionIdUniqueIndexName, err)) {
           isDuplicateIndexViolation = true;
         } else {
-          //Insert failed due to some other reason.
-          //Send error email from here.
-          let errorObject = responseHelper.error({
+          // Insert failed due to some other reason.
+          // Send error email from here.
+          const errorObject = responseHelper.error({
             internal_error_identifier: 'a_s_oe_t_b_5',
             api_error_identifier: 'something_went_wrong',
             debug_options: { Error: err }
           });
           await createErrorLogsEntry.perform(errorObject, errorLogsConstants.highSeverity);
+
           return Promise.reject(errorObject);
         }
       });
@@ -536,7 +564,7 @@ class TransactionOstEventBase extends ServiceBase {
     if (!isDuplicateIndexViolation) {
       insertData.id = insertResponse.insertId;
 
-      let formattedInsertData = new TransactionModel().formatDbData(insertData);
+      const formattedInsertData = new TransactionModel().formatDbData(insertData);
       await TransactionModel.flushCache(formattedInsertData);
 
       oThis.transactionObj = formattedInsertData;
@@ -548,6 +576,8 @@ class TransactionOstEventBase extends ServiceBase {
   /**
    * Insert in activity table.
    *
+   * @sets oThis.publishedTs, oThis.activityObj
+   *
    * @returns {Promise<void>}
    * @private
    */
@@ -555,11 +585,11 @@ class TransactionOstEventBase extends ServiceBase {
     const oThis = this;
     logger.log('Start:: Insert in Activity table');
 
-    let extraData = {};
+    const extraData = {};
 
     oThis.publishedTs = oThis._publishedTimestamp();
 
-    let insertData = {
+    const insertData = {
       entity_type: activityConstants.invertedEntityTypes[activityConstants.transactionEntityType],
       entity_id: oThis.transactionObj.id,
       extra_data: JSON.stringify(extraData),
@@ -568,10 +598,10 @@ class TransactionOstEventBase extends ServiceBase {
       display_ts: oThis.publishedTs
     };
 
-    let insertResponse = await new ActivityModel().insert(insertData).fire();
+    const insertResponse = await new ActivityModel().insert(insertData).fire();
     insertData.id = insertResponse.insertId;
 
-    let formattedInsertData = new ActivityModel().formatDbData(insertData);
+    const formattedInsertData = new ActivityModel().formatDbData(insertData);
     await ActivityModel.flushCache(formattedInsertData);
 
     oThis.activityObj = formattedInsertData;
@@ -591,16 +621,16 @@ class TransactionOstEventBase extends ServiceBase {
 
     logger.log('Start:: Insert in User Activity table');
 
-    let insertData = {
+    const insertData = {
       user_id: userId,
       activity_id: oThis.activityObj.id,
       published_ts: oThis.activityObj.publishedTs
     };
 
-    let insertResponse = await new UserActivityModel().insert(insertData).fire();
+    const insertResponse = await new UserActivityModel().insert(insertData).fire();
     insertData.id = insertResponse.insertId;
 
-    let formattedInsertData = new UserActivityModel().formatDbData(insertData);
+    const formattedInsertData = new UserActivityModel().formatDbData(insertData);
     await UserActivityModel.flushCache(formattedInsertData);
 
     logger.log('End:: Insert in User Activity table');
@@ -615,15 +645,15 @@ class TransactionOstEventBase extends ServiceBase {
   async _fetchVideoAndValidate() {
     const oThis = this;
 
-    let videoDetailsCacheResponse = await new VideoDetailsByVideoIdsCache({ videoIds: [oThis.videoId] }).fetch();
+    const videoDetailsCacheResponse = await new VideoDetailsByVideoIdsCache({ videoIds: [oThis.videoId] }).fetch();
 
     if (videoDetailsCacheResponse.isFailure()) {
       return Promise.reject(videoDetailsCacheResponse);
     }
 
-    let videoIdFromCache = videoDetailsCacheResponse.data[oThis.videoId].videoId;
+    const videoIdFromCache = videoDetailsCacheResponse.data[oThis.videoId].videoId;
 
-    if (videoIdFromCache != oThis.videoId) {
+    if (+videoIdFromCache !== +oThis.videoId) {
       return Promise.reject(
         responseHelper.paramValidationError({
           internal_error_identifier: 'a_s_oe_t_b_7',
@@ -636,7 +666,7 @@ class TransactionOstEventBase extends ServiceBase {
   }
 
   /**
-   * This function check if video is present in parameters
+   * This function check if video is present in parameters.
    *
    * @returns {boolean}
    * @private
@@ -648,7 +678,7 @@ class TransactionOstEventBase extends ServiceBase {
   }
 
   /**
-   * Current Timestamp in Seconds
+   * Current timestamp in seconds.
    *
    * @return {Integer}
    * @private
@@ -664,7 +694,7 @@ class TransactionOstEventBase extends ServiceBase {
    * @private
    */
   _validTransactionStatus() {
-    throw `Unimplemented method validTransactionStatus for TransactionOstEvent`;
+    throw new Error('Unimplemented method validTransactionStatus for TransactionOstEvent.');
   }
 
   /**
@@ -673,27 +703,25 @@ class TransactionOstEventBase extends ServiceBase {
    * @private
    */
   _transactionStatus() {
-    throw `Unimplemented method _transactionStatus for TransactionOstEvent`;
+    throw new Error('Unimplemented method _transactionStatus for TransactionOstEvent.');
   }
 
   /**
-   * Activity Status.
+   * Activity status.
    *
-   * @return {String}
    * @private
    */
   _activityStatus() {
-    throw `Unimplemented method feedStatus for TransactionOstEvent`;
+    throw new Error('Unimplemented method feedStatus for TransactionOstEvent.');
   }
 
   /**
-   * Get New Property Val for Token User.
+   * Get new property value for token user.
    *
-   * @return {Integer}
    * @private
    */
   _getPropertyValForTokenUser() {
-    throw `Unimplemented method getPropertyValForTokenUser for TransactionOstEvent`;
+    throw new Error('Unimplemented method getPropertyValForTokenUser for TransactionOstEvent.');
   }
 }
 
