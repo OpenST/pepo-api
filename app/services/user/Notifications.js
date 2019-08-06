@@ -1,5 +1,6 @@
 const rootPrefix = '../../..',
-  ServiceBase = require(rootPrefix + '/app/services/Base');
+  ServiceBase = require(rootPrefix + '/app/services/Base'),
+  responseHelper = require(rootPrefix + '/lib/formatter/response');
 
 class GetUserNotifications extends ServiceBase {
   /**
@@ -25,6 +26,8 @@ class GetUserNotifications extends ServiceBase {
    */
   async _asyncPerform() {
     const oThis = this;
+
+    return responseHelper.successWithData({});
   }
 }
 
