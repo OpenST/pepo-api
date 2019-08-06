@@ -22,7 +22,7 @@
 <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
 <script>
   $(function () {
-    var socket = io('http://localhost:4000?auth_key_expiry_at=1567085683&payload=ZDRjYTBhYWJhNWY2ZTgyMzdiYWYxMDEzYTQ1YzA5ZTZiMTI3N2I4NzQ1OWMzM2RlNzUwMDM1Y2QwZTIwOTk4YTQyZDNhNmNkM2EyYjYyZDVhNzc3YTI3Mjg5OGU1MGU4NTI2YjM0N2I2OGQ0MDNkNTI1Yzk3ZDgwM2I3MTQ0OGNkN2FjNjY2ZDVkOTU5MzlmZmU2MTdjNzY1Zjc0ZjYzMw==');
+    var socket = io('http://localhost:4000?auth_key_expiry_at=1565099000&payload=OTcxNDdhYjIxZTJmZWUwOGQ5ZWI3ZjkxMGEwYjg4ZWQxZThmN2M2OTBiYmZiZGE3MzlkZWExMDE3YWY0MDRkMTUzMzkwNTdkODBlNjI2MGQ4MTczMjJjYjdmNDg0OWY3OWY5ODcwZDUyYTNiMDVjMjY4Y2I4NDI2ZTQ0NDI2NDc5OGU4OWY1OTUyY2U3YzRkMjQ1NzhhNTE3NGE3YmQ2Mg==');
     $('form').submit(function(e){
       e.preventDefault(); // prevents page reloading
       socket.emit('chat message', $('#m').val());

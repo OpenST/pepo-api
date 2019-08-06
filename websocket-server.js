@@ -42,7 +42,7 @@ io.on('connection', async function(socket) {
   if (websocketAuthRsp.isFailure()) {
     console.log('---Authentication Failed-----');
     io.emit('server-event', 'Authentication Failed !!');
-    socket.close();
+    socket.disconnect();
     return;
   }
 

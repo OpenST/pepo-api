@@ -159,7 +159,7 @@ class SocketConnectionDetails extends ServiceBase {
    * @private
    */
   get _authKeyExpiryAt() {
-    return basicHelper.getCurrentTimestampInSeconds() + 30;
+    return basicHelper.getCurrentTimestampInSeconds() + 3000;
   }
 
   /**

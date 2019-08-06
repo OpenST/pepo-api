@@ -70,13 +70,21 @@ class SocketJobProcessor extends RabbitMqProcessorBase {
    */
   _processMessage(messageParams) {
     const oThis = this,
-      socketObjects = oThis.userSocketObjMap[1000];
+      messageDetails = messageParams.message.payload,
+      userIds = messageDetails.userIds,
+      messagePayload = messageDetails.messagePayload;
 
     logger.log('Message params =====', messageParams);
 
-    for (let i = 0; i < socketObjects.length; i++) {
-      console.log('-------------------------------------');
-      socketObjects[i].emit('server-event', 'Mila kya????');
+    for (let j = 0; j < userIds.length; j++) {
+      let socketObjects = oThis.userSocketObjMap[userIds[j]];
+      if (!socketObjects || socketObjects.length == 0) {
+        continue;
+      }
+      for (let i = 0; i < socketObjects.length; i++) {
+        console.log('-------------------------------------');
+        socketObjects[i].emit('server-event', JSON.stringify(messagePayload));
+      }
     }
 
     return Promise.resolve({});
