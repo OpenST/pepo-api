@@ -2,6 +2,7 @@ const rootPrefix = '../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
   shortToLongUrl = require(rootPrefix + '/lib/shortToLongUrl'),
   imageConst = require(rootPrefix + '/lib/globalConstant/image'),
+  responseHelper = require(rootPrefix + '/lib/formatter/response'),
   databaseConstants = require(rootPrefix + '/lib/globalConstant/database');
 
 // Declare variables.
@@ -194,6 +195,20 @@ class Image extends ModelBase {
    */
   async updateImage(params) {
     const oThis = this;
+
+    // If twitter uel needs to be shorten
+    if (
+      params.shortenTwitterUrl &&
+      params.resolutions.original &&
+      params.resolutions.original.url.match(imageConst.twitterImageUrlPrefix[0])
+    ) {
+      const imageLib = require(rootPrefix + '/lib/imageLib');
+      const shortenedUrl = imageLib.shortenUrl({ imageUrl: params.resolutions.original.url, isExternalUrl: true });
+      if (shortenedUrl.isFailure()) {
+        return Promise.reject(responseHelper.error(shortenedUrl));
+      }
+      params.resolutions.original.url = shortenedUrl.data.shortUrl;
+    }
 
     const resolutions = oThis._formatResolutionsToUpdate(params.resolutions);
 
