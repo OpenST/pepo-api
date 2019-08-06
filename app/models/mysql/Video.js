@@ -97,8 +97,8 @@ class Video extends ModelBase {
     for (const resolution in resolutions) {
       let responseResolution = resolution;
       if (resolution === 'o') {
-        //If url is present then use that one or else make the url using template
-        responseResolution = 'original';
+        // If url is present then use that one or else make the url using template.
+        responseResolution = videoConstants.originalResolution;
         responseResolutionHash[responseResolution] = oThis._formatResolution(resolutions[resolution]);
         if (responseResolutionHash[responseResolution].url) {
           responseResolutionHash[responseResolution].url = shortToLongUrl.getFullUrl(
@@ -222,8 +222,8 @@ class Video extends ModelBase {
     const responseResolutionHash = {};
 
     for (const resolution in resolutions) {
-      //While inserting original url has to be present in original resolutions hash only.
-      if (resolution === 'original') {
+      // While inserting original url has to be present in original resolutions hash only.
+      if (resolution === videoConstants.originalResolution) {
         responseResolutionHash.o = oThis._formatResolutionToInsert(resolutions[resolution]);
         responseResolutionHash.o.u = resolutions[resolution].url;
       } else {
@@ -245,7 +245,7 @@ class Video extends ModelBase {
 
     const responseResolutionHash = {};
     for (const resolution in resolutions) {
-      if (resolution === 'original') {
+      if (resolution === videoConstants.originalResolution) {
         responseResolutionHash.o = oThis._formatResolutionToInsert(resolutions[resolution]);
       } else {
         responseResolutionHash[resolution] = oThis._formatResolutionToInsert(resolutions[resolution]);
