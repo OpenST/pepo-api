@@ -38,7 +38,7 @@ router.get('/:video_id', sanitizer.sanitizeDynamicUrlParams, function(req, res, 
     serviceResponse.data = wrapperFormatterRsp.data;
   };
 
-  Promise.resolve(routeHelper.perform(req, res, next, '/video/VideoById', 'r_a_v1_v_1', null, dataFormatterFunc));
+  Promise.resolve(routeHelper.perform(req, res, next, '/video/GetById', 'r_a_v1_v_1', null, dataFormatterFunc));
 });
 
 module.exports = router;
