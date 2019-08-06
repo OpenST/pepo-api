@@ -423,6 +423,20 @@ const v1Signature = {
       }
     ]
   },
+  [apiName.getVideo]: {
+    mandatory: [
+      {
+        parameter: 'video_id',
+        validatorMethods: ['validateNonZeroInteger']
+      }
+    ],
+    optional: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      }
+    ]
+  },
   [apiName.feedDetails]: {
     mandatory: [
       {
