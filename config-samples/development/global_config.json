@@ -46,7 +46,7 @@
       "username": "cassandra",
       "password": "cassandra",
       "contactPoints": ["127.0.0.1:9042"],
-      "localDataCenter": "localDataCenter"
+      "localDataCenter": "datacenter1"
     },
 
     "redshift": {

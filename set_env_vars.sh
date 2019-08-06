@@ -102,4 +102,8 @@ export PA_TWITTER_AUTH_CALLBACK_ROUTE='https://pepo.com'
 export PR_API_BASE_URL='http://127.0.0.1:9000'
 export PR_INTERNAL_API_SECRET_KEY='asdfghjkl'
 
+# replication variables for cassandra
+export REPLICATION_CLASS='SimpleStrategy'
+export REPLICATION_FACTOR='2'
+
 export PA_CDN_URL='https://dbvoeb7t6hffk.cloudfront.net'
