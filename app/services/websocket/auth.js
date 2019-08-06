@@ -224,7 +224,6 @@ class Auth extends ServiceBase {
 
     await new UserSocketConnectionDetailsModel()
       .update({
-        auth_key: null,
         auth_key_expiry_at: null,
         socket_server_id: oThis.socketServerIdentifier,
         socket_expiry_at: basicHelper.getCurrentTimestampInSeconds() + 30 * 60,
