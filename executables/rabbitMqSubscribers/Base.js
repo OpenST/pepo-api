@@ -8,9 +8,9 @@ const rootPrefix = '../..',
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   rabbitMqProvider = require(rootPrefix + '/lib/providers/rabbitMq'),
+  jobProcessorFactory = require(rootPrefix + '/lib/jobs/bg/factory'),
   createErrorLogsEntry = require(rootPrefix + '/lib/errorLogs/createEntry'),
-  machineKindConstant = require(rootPrefix + '/lib/globalConstant/machineKind'),
-  jobProcessorFactory = require(rootPrefix + '/executables/bgJobProcessor/factory');
+  machineKindConstant = require(rootPrefix + '/lib/globalConstant/machineKind');
 
 /**
  * Class for rabbitMq processor base.

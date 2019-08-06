@@ -42,6 +42,7 @@ class UserVideos extends ServiceBase {
     oThis.nextPaginationTimestamp = null;
     oThis.videosCount = 0;
     oThis.videoDetails = [];
+    oThis.videoIds = [];
     oThis.tokenDetails = {};
   }
 
@@ -152,6 +153,7 @@ class UserVideos extends ServiceBase {
       const videoDetail = videoDetails[videoId];
       oThis.videosCount++;
       oThis.videoDetails.push(videoDetail);
+      oThis.videoIds.push(videoDetail.videoId);
       if (!oThis.nextPaginationTimestamp) {
         oThis.nextPaginationTimestamp = videoDetail.createdAt;
       }
@@ -221,7 +223,11 @@ class UserVideos extends ServiceBase {
   async _getVideos() {
     const oThis = this;
 
-    const getProfileObj = new GetProfile({ userIds: [oThis.profileUserId], currentUserId: oThis.currentUserId });
+    const getProfileObj = new GetProfile({
+      userIds: [oThis.profileUserId],
+      currentUserId: oThis.currentUserId,
+      videoIds: oThis.videoIds
+    });
 
     const response = await getProfileObj.perform();
 
@@ -241,7 +247,7 @@ class UserVideos extends ServiceBase {
    * @private
    */
   _defaultPageLimit() {
-    return paginationConstants.defaultTagListPageSize;
+    return paginationConstants.defaultVideoListPageSize;
   }
 
   /**
@@ -251,7 +257,7 @@ class UserVideos extends ServiceBase {
    * @private
    */
   _minPageLimit() {
-    return paginationConstants.minTagListPageSize;
+    return paginationConstants.minVideoListPageSize;
   }
 
   /**
@@ -261,7 +267,7 @@ class UserVideos extends ServiceBase {
    * @private
    */
   _maxPageLimit() {
-    return paginationConstants.maxTagListPageSize;
+    return paginationConstants.maxVideoListPageSize;
   }
 
   /**
