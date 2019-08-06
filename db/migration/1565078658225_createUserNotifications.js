@@ -4,7 +4,7 @@ const rootPrefix = '../..',
 
 const dbName = '';
 
-let keySpace = cassandraKeyspaceConstant.cassandraKeyspaceName;
+const keySpace = cassandraKeyspaceConstant.cassandraKeyspaceName;
 
 const dbKind = DbKindConstant.cassandraDbKind;
 
