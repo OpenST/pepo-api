@@ -1,11 +1,10 @@
 const rootPrefix = '../../..',
-  ActivityServiceBase = require(rootPrefix + '/app/services/activity/Base'),
-  UserActivityModel = require(rootPrefix + '/app/models/mysql/UserActivity'),
   UserCache = require(rootPrefix + '/lib/cacheManagement/multi/User'),
-  UserActivityByUserIdForOthersPaginationCache = require(rootPrefix +
-    '/lib/cacheManagement/single/UserActivityByUserIdForOthersPagination'),
+  ActivityServiceBase = require(rootPrefix + '/app/services/activity/Base'),
   UserActivityByUserIdForSelfPaginationCache = require(rootPrefix +
     '/lib/cacheManagement/single/UserActivityByUserIdForSelfPagination'),
+  UserActivityByUserIdForOthersPaginationCache = require(rootPrefix +
+    '/lib/cacheManagement/single/UserActivityByUserIdForOthersPagination'),
   ActivityByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/ActivityByIds'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
@@ -27,6 +26,8 @@ class UserActivity extends ActivityServiceBase {
    * @param {string} [params.pagination_identifier]
    *
    * @augments ActivityServiceBase
+   *
+   * @constructor
    */
   constructor(params) {
     super(params);
@@ -48,7 +49,7 @@ class UserActivity extends ActivityServiceBase {
    */
   async _validateAndSanitizeParams() {
     const oThis = this;
-    logger.log(`start: _validateAndSanitizeParams`);
+    logger.log('start: _validateAndSanitizeParams');
 
     if (!oThis.isCurrentUser) {
       const cacheResp = await new UserCache({ ids: [oThis.profileUserId] }).fetch();
@@ -80,7 +81,7 @@ class UserActivity extends ActivityServiceBase {
    */
   async _fetchActivityDetails() {
     const oThis = this;
-    logger.log(`start: _fetchActivityDetails`);
+    logger.log('start: _fetchActivityDetails');
 
     let userActivitycacheResp = {};
 
@@ -116,7 +117,7 @@ class UserActivity extends ActivityServiceBase {
 
     oThis.activityMap = cacheResp.data;
 
-    logger.log(`end: _fetchActivityDetails`);
+    logger.log('end: _fetchActivityDetails');
   }
 
   /**
@@ -127,7 +128,7 @@ class UserActivity extends ActivityServiceBase {
    */
   _finalResponse() {
     const oThis = this;
-    logger.log(`start: _finalResponse`);
+    logger.log('start: _finalResponse');
 
     const nextPagePayloadKey = {};
 
@@ -142,7 +143,7 @@ class UserActivity extends ActivityServiceBase {
       [paginationConstants.nextPagePayloadKey]: nextPagePayloadKey
     };
 
-    logger.log(`end: _finalResponse`);
+    logger.log('end: _finalResponse');
 
     return {
       activityIds: oThis.activityIds,

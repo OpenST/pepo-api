@@ -144,7 +144,7 @@ router.get('/current', sanitizer.sanitizeDynamicUrlParams, function(req, res, ne
 });
 
 /* User Activities*/
-router.get('/:user_id/activities', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+router.get('/:profile_user_id/activities', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.userActivity;
   req.decodedParams.profile_user_id = req.params.profile_user_id;
 
