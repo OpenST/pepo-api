@@ -93,7 +93,7 @@ class UserContributionBase extends ServiceBase {
     oThis.limit = paginationConstants.defaultUserContributionPageSize;
 
     if (!oThis.isProfileUserCurrentUser) {
-      await oThis._validateProfileUserId(oThis.profileUserId);
+      await oThis._validateProfileUserId();
     }
 
     return oThis._validatePageSize();

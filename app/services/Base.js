@@ -104,30 +104,28 @@ class ServicesBase {
   /**
    * Validate whether profile userId is correct or not.
    *
-   * @param {string/number} userId
-   *
    * @returns {Promise<result>}
    * @private
    */
-  async _validateProfileUserId(userId) {
+  async _validateProfileUserId() {
     const oThis = this;
 
     const UserMultiCache = require(rootPrefix + '/lib/cacheManagement/multi/User');
 
-    const profileUserByIdResponse = await new UserMultiCache({ ids: [userId] }).fetch();
+    const profileUserByIdResponse = await new UserMultiCache({ ids: [oThis.profileUserId] }).fetch();
 
     if (profileUserByIdResponse.isFailure()) {
       return Promise.reject(profileUserByIdResponse);
     }
 
-    if (!CommonValidators.validateNonEmptyObject(profileUserByIdResponse.data[userId])) {
+    if (!CommonValidators.validateNonEmptyObject(profileUserByIdResponse.data[oThis.profileUserId])) {
       return Promise.reject(
         responseHelper.error({
           internal_error_identifier: 'a_s_b_3',
-          api_error_identifier: 'unauthorized_api_request',
+          api_error_identifier: 'resource_not_found',
           debug_options: {
             reason: 'Invalid userId',
-            profileUserId: userId,
+            profileUserId: oThis.profileUserId,
             currentUserId: oThis.currentUserId
           }
         })

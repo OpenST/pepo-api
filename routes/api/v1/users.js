@@ -146,7 +146,7 @@ router.get('/current', sanitizer.sanitizeDynamicUrlParams, function(req, res, ne
 /* User Activities*/
 router.get('/:user_id/activities', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.userActivity;
-  req.decodedParams.user_id = req.params.user_id;
+  req.decodedParams.profile_user_id = req.params.profile_user_id;
 
   const dataFormatterFunc = async function(serviceResponse) {
     const wrapperFormatterRsp = await new FormatterComposer({

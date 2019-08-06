@@ -54,7 +54,7 @@ class UserVideos extends ServiceBase {
 
     let promisesArray = [];
     promisesArray.push(oThis._validateAndSanitizeParams());
-    promisesArray.push(oThis._validateProfileUserId(oThis.profileUserId));
+    promisesArray.push(oThis._validateProfileUserId());
     await Promise.all(promisesArray);
 
     await oThis._fetchVideoIds();

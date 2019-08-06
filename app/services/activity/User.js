@@ -23,7 +23,7 @@ class UserActivity extends ActivityServiceBase {
    * @param {object} params
    * @param {object} params.current_user
    * @param {string/number} params.current_user.id
-   * @param {string/number} params.user_id
+   * @param {string/number} params.profile_user_id
    * @param {string} [params.pagination_identifier]
    *
    * @augments ActivityServiceBase
@@ -34,7 +34,7 @@ class UserActivity extends ActivityServiceBase {
     const oThis = this;
 
     oThis.currentUserId = +params.current_user.id;
-    oThis.profileUserId = +params.user_id;
+    oThis.profileUserId = +params.profile_user_id;
 
     oThis.isCurrentUser = oThis.currentUserId === oThis.profileUserId;
   }

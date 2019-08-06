@@ -160,7 +160,7 @@ const v1Signature = {
         validatorMethods: ['validateNonEmptyObject']
       },
       {
-        parameter: 'user_id',
+        parameter: 'profile_user_id',
         validatorMethods: ['validateNonZeroInteger']
       }
     ],
