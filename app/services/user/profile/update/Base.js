@@ -1,24 +1,28 @@
 const rootPrefix = '../../../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
-  UsersCache = require(rootPrefix + '/lib/cacheManagement/multi/User'),
-  userConstants = require(rootPrefix + '/lib/globalConstant/user'),
-  UserProfileElementsByUserIdCache = require(rootPrefix + '/lib/cacheManagement/multi/UserProfileElementsByUserIds'),
   UserModelKlass = require(rootPrefix + '/app/models/mysql/User'),
-  responseHelper = require(rootPrefix + '/lib/formatter/response'),
-  CommonValidators = require(rootPrefix + '/lib/validators/Common');
+  CommonValidators = require(rootPrefix + '/lib/validators/Common'),
+  UsersCache = require(rootPrefix + '/lib/cacheManagement/multi/User'),
+  UserProfileElementsByUserIdCache = require(rootPrefix + '/lib/cacheManagement/multi/UserProfileElementsByUserIds'),
+  userConstants = require(rootPrefix + '/lib/globalConstant/user'),
+  responseHelper = require(rootPrefix + '/lib/formatter/response');
 
 /**
- * Class to Update user Profile
+ * Base class to update user profile elements.
  *
- * @class
+ * @class UpdateProfileBase
  */
 class UpdateProfileBase extends ServiceBase {
   /**
-   * @constructor
+   * Constructor for base class to update user profile elements.
    *
-   * @param params
+   * @param {object} params
    * @param {number} params.profile_user_id
-   * @param {Object} params.current_user
+   * @param {object} params.current_user
+   *
+   * @augments ServiceBase
+   *
+   * @constructor
    */
   constructor(params) {
     super(params);
@@ -26,17 +30,19 @@ class UpdateProfileBase extends ServiceBase {
     const oThis = this;
 
     oThis.params = params;
-    oThis.userId = params.profile_user_id;
-    oThis.currentUser = params.current_user;
+    oThis.profileUserId = params.profile_user_id;
+    oThis.currentUserId = params.current_user.id;
+
     oThis.userObj = null;
     oThis.profileElements = {};
     oThis.flushUserCache = true;
   }
 
   /**
-   * Perform
+   * Async perform.
    *
-   * @return {Promise<void>}
+   * @returns {Promise<void>}
+   * @private
    */
   async _asyncPerform() {
     const oThis = this;
@@ -45,7 +51,7 @@ class UpdateProfileBase extends ServiceBase {
 
     await oThis._fetchProfileElements();
 
-    let resp = await oThis._isUpdateRequired();
+    const resp = await oThis._isUpdateRequired();
     if (resp.isSuccess() && resp.data.noUpdates) {
       return responseHelper.successWithData({});
     }
@@ -62,18 +68,20 @@ class UpdateProfileBase extends ServiceBase {
   }
 
   /**
-   * Validate if user can update profile
+   * Validate if user can update profile.
    *
-   * @returns {Promise<void>}
+   * @sets oThis.userObj
+   *
+   * @returns {Promise<*>}
    * @private
    */
   async _validate() {
     const oThis = this;
 
-    if (oThis.currentUser.id != oThis.userId) {
+    if (+oThis.currentUserId !== +oThis.profileUserId) {
       return Promise.reject(
         responseHelper.paramValidationError({
-          internal_error_identifier: 'a_s_u_p_b_1',
+          internal_error_identifier: 'a_s_u_p_u_b_1',
           api_error_identifier: 'unauthorized_api_request',
           params_error_identifiers: [],
           debug_options: {}
@@ -83,13 +91,13 @@ class UpdateProfileBase extends ServiceBase {
 
     await oThis._validateParams();
 
-    let userMultiCache = new UsersCache({ ids: [oThis.userId] });
-    let cacheRsp = await userMultiCache.fetch();
+    const userMultiCache = new UsersCache({ ids: [oThis.profileUserId] });
+    const cacheRsp = await userMultiCache.fetch();
 
-    if (cacheRsp.isFailure() || !CommonValidators.validateNonEmptyObject(cacheRsp.data[oThis.userId])) {
+    if (cacheRsp.isFailure() || !CommonValidators.validateNonEmptyObject(cacheRsp.data[oThis.profileUserId])) {
       return Promise.reject(
         responseHelper.paramValidationError({
-          internal_error_identifier: 'a_s_u_p_b_2',
+          internal_error_identifier: 'a_s_u_p_u_b_2',
           api_error_identifier: 'invalid_params',
           params_error_identifiers: ['user_not_found'],
           debug_options: {}
@@ -97,12 +105,12 @@ class UpdateProfileBase extends ServiceBase {
       );
     }
 
-    oThis.userObj = cacheRsp.data[oThis.userId];
+    oThis.userObj = cacheRsp.data[oThis.profileUserId];
 
     if (oThis.userObj.status !== userConstants.activeStatus) {
       return Promise.reject(
         responseHelper.paramValidationError({
-          internal_error_identifier: 'a_s_u_p_b_3',
+          internal_error_identifier: 'a_s_u_p_u_b_3',
           api_error_identifier: 'could_not_proceed',
           params_error_identifiers: ['user_not_active'],
           debug_options: {}
@@ -120,22 +128,24 @@ class UpdateProfileBase extends ServiceBase {
   async _fetchProfileElements() {
     const oThis = this;
 
-    const userProfileElementsByUserIdCacheObj = new UserProfileElementsByUserIdCache({ usersIds: [oThis.userId] }),
+    const userProfileElementsByUserIdCacheObj = new UserProfileElementsByUserIdCache({
+        usersIds: [oThis.profileUserId]
+      }),
       cacheRsp = await userProfileElementsByUserIdCacheObj.fetch();
 
     if (cacheRsp.isFailure()) {
       return;
     }
 
-    let profileElements = cacheRsp.data[oThis.userId];
+    const profileElements = cacheRsp.data[oThis.profileUserId];
 
-    for (let kind in profileElements) {
+    for (const kind in profileElements) {
       oThis.profileElements[kind] = profileElements[kind];
     }
   }
 
   /**
-   * Flush all caches
+   * Flush all caches.
    *
    * @returns {Promise<void>}
    * @private
@@ -147,17 +157,17 @@ class UpdateProfileBase extends ServiceBase {
 
     // Clear all users cache.
     if (oThis.flushUserCache) {
-      promisesArray.push(UserModelKlass.flushCache({ id: oThis.userId, userName: oThis.username }));
+      promisesArray.push(UserModelKlass.flushCache({ id: oThis.profileUserId, userName: oThis.username }));
     }
 
     // Clear user profile elements cache.
-    promisesArray.push(new UserProfileElementsByUserIdCache({ usersIds: [oThis.userId] }).clear());
+    promisesArray.push(new UserProfileElementsByUserIdCache({ usersIds: [oThis.profileUserId] }).clear());
 
     await Promise.all(promisesArray);
   }
 
   /**
-   * Validate params
+   * Validate params.
    *
    * @returns {Promise<void>}
    * @private
@@ -177,7 +187,7 @@ class UpdateProfileBase extends ServiceBase {
   }
 
   /**
-   * Method to update profile elements
+   * Method to update profile elements.
    *
    * @returns {Promise<void>}
    * @private
@@ -187,7 +197,7 @@ class UpdateProfileBase extends ServiceBase {
   }
 
   /**
-   * Update user
+   * Update user.
    *
    * @returns {Promise<void>}
    * @private
@@ -202,7 +212,9 @@ class UpdateProfileBase extends ServiceBase {
    * @returns {Promise<void>}
    * @private
    */
-  async _extraUpdates() {}
+  async _extraUpdates() {
+    // Do nothing.
+  }
 }
 
 module.exports = UpdateProfileBase;

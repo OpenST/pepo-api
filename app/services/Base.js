@@ -114,11 +114,10 @@ class ServicesBase {
 
     const profileUserByIdResponse = await new UserMultiCache({ ids: [oThis.profileUserId] }).fetch();
 
-    if (profileUserByIdResponse.isFailure()) {
-      return Promise.reject(profileUserByIdResponse);
-    }
-
-    if (!CommonValidators.validateNonEmptyObject(profileUserByIdResponse.data[oThis.profileUserId])) {
+    if (
+      profileUserByIdResponse.isFailure() ||
+      !CommonValidators.validateNonEmptyObject(profileUserByIdResponse.data[oThis.profileUserId])
+    ) {
       return Promise.reject(
         responseHelper.error({
           internal_error_identifier: 'a_s_b_3',

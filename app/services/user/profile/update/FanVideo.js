@@ -1,34 +1,39 @@
 const rootPrefix = '../../../../..',
-  UpdateProfileBase = require(rootPrefix + '/app/services/user/profile/update/Base'),
+  FeedModel = require(rootPrefix + '/app/models/mysql/Feed'),
   CommonValidator = require(rootPrefix + '/lib/validators/Common'),
+  UpdateProfileBase = require(rootPrefix + '/app/services/user/profile/update/Base'),
   UserProfileElementModel = require(rootPrefix + '/app/models/mysql/UserProfileElement'),
   userProfileElementConst = require(rootPrefix + '/lib/globalConstant/userProfileElement'),
-  FeedModel = require(rootPrefix + '/app/models/mysql/Feed'),
   VideoDetailsModel = require(rootPrefix + '/app/models/mysql/VideoDetail'),
-  feedsConstants = require(rootPrefix + '/lib/globalConstant/feed'),
+  videoLib = require(rootPrefix + '/lib/videoLib'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
-  videoLib = require(rootPrefix + '/lib/videoLib');
+  feedsConstants = require(rootPrefix + '/lib/globalConstant/feed');
 
 /**
- * Class for fan video and image save
+ * Class to update fan video and image save.
  *
- * @class
+ * @class UpdateFanVideo
  */
 class UpdateFanVideo extends UpdateProfileBase {
   /**
-   * @constructor
+   * Constructor to update fan video and image save.
    *
-   * @param params
-   * @param params.user_id {number} - user id
-   * @param params.video_url {string} - s3 video url
-   * @param params.poster_image_url {string} - s3 poster image url
-   * @param params.video_width {number} - video width
-   * @param params.video_height {number} - video height
-   * @param params.video_size {number} - video size
-   * @param params.image_width {number} - image width
-   * @param params.image_height {number} - image height
-   * @param params.image_size {number} - image size
-   * @param {boolean} params.isExternalUrl - video source is other than s3 upload
+   * @param {object} params
+   * @param {object} params.current_user
+   * @param {number} params.profile_user_id
+   * @param {string} params.video_url: s3 video url
+   * @param {string} params.poster_image_url: s3 poster image url
+   * @param {number} params.video_width: video width
+   * @param {number} params.video_height {number}: video height
+   * @param {number} params.video_size: video size
+   * @param {number} params.image_width: image width
+   * @param {number} params.image_height: image height
+   * @param {number} params.image_size: image size
+   * @param {boolean} params.isExternalUrl: video source is other than s3 upload
+   *
+   * @augments UpdateProfileBase
+   *
+   * @constructor
    */
   constructor(params) {
     super(params);
@@ -44,6 +49,7 @@ class UpdateFanVideo extends UpdateProfileBase {
     oThis.imageHeight = params.image_height;
     oThis.imageSize = params.image_size;
     oThis.isExternalUrl = params.isExternalUrl;
+
     oThis.videoId = null;
     oThis.flushUserCache = false;
 
@@ -51,7 +57,7 @@ class UpdateFanVideo extends UpdateProfileBase {
   }
 
   /**
-   * Validate Params
+   * Validate params.
    *
    * @returns {Promise<void>}
    * @private
@@ -59,7 +65,7 @@ class UpdateFanVideo extends UpdateProfileBase {
   async _validateParams() {
     const oThis = this;
 
-    let resp = videoLib.validateVideoObj({ videoUrl: oThis.videoUrl, isExternalUrl: oThis.isExternalUrl });
+    const resp = videoLib.validateVideoObj({ videoUrl: oThis.videoUrl, isExternalUrl: oThis.isExternalUrl });
     if (resp.isFailure()) {
       return Promise.reject(
         responseHelper.paramValidationError({
@@ -73,19 +79,19 @@ class UpdateFanVideo extends UpdateProfileBase {
   }
 
   /**
-   * Check whether update is required or not
+   * Check whether update is required or not.
    *
    * @returns {Promise<void>}
    * @private
    */
   async _isUpdateRequired() {
-    const oThis = this;
-
     return responseHelper.successWithData({ noUpdates: false });
   }
 
   /**
-   * Update user profile video
+   * Update user profile video.
+   *
+   * @sets oThis.videoId
    *
    * @return {Promise<void>}
    * @private
@@ -93,8 +99,8 @@ class UpdateFanVideo extends UpdateProfileBase {
   async _updateProfileElements() {
     const oThis = this;
 
-    let resp = await videoLib.validateAndSave({
-      userId: oThis.userId,
+    const resp = await videoLib.validateAndSave({
+      userId: oThis.profileUserId,
       videoUrl: oThis.videoUrl,
       size: oThis.videoSize,
       width: oThis.videoWidth,
@@ -109,7 +115,7 @@ class UpdateFanVideo extends UpdateProfileBase {
       return Promise.reject(resp);
     }
 
-    let videoObj = resp.data.video,
+    const videoObj = resp.data.video,
       coverImageId = videoObj.posterImageId;
 
     oThis.videoId = resp.data.insertId;
@@ -124,17 +130,18 @@ class UpdateFanVideo extends UpdateProfileBase {
   }
 
   /**
-   * Add entity in profile elements
+   * Add entity in profile elements.
    *
-   * @param entityId
-   * @param entityKind
+   * @param {number} entityId
+   * @param {string} entityKind
+   *
    * @returns {Promise<void>}
    * @private
    */
   async _addProfileElement(entityId, entityKind) {
     const oThis = this;
 
-    let profileElementObj = oThis.profileElements[entityKind];
+    const profileElementObj = oThis.profileElements[entityKind];
     if (CommonValidator.validateObject(profileElementObj)) {
       await new UserProfileElementModel()
         .update({
@@ -145,7 +152,7 @@ class UpdateFanVideo extends UpdateProfileBase {
     } else {
       await new UserProfileElementModel()
         .insert({
-          user_id: oThis.userId,
+          user_id: oThis.profileUserId,
           data_kind: userProfileElementConst.invertedKinds[entityKind],
           data: entityId
         })
@@ -154,7 +161,7 @@ class UpdateFanVideo extends UpdateProfileBase {
   }
 
   /**
-   * Update user
+   * Update user.
    *
    * @returns {Promise<void>}
    * @private
@@ -164,7 +171,7 @@ class UpdateFanVideo extends UpdateProfileBase {
   }
 
   /**
-   * Other updates
+   * Other updates.
    *
    * @returns {Promise<void>}
    * @private
@@ -176,7 +183,7 @@ class UpdateFanVideo extends UpdateProfileBase {
   }
 
   /**
-   * Add feed for user video
+   * Add feed for user video.
    *
    * @returns {Promise<void>}
    * @private
@@ -188,12 +195,18 @@ class UpdateFanVideo extends UpdateProfileBase {
       .insert({
         primary_external_entity_id: oThis.videoId,
         kind: feedsConstants.invertedKinds[feedsConstants.fanUpdateKind],
-        actor: oThis.userId,
+        actor: oThis.profileUserId,
         pagination_identifier: oThis.paginationTimestamp
       })
       .fire();
   }
 
+  /**
+   * Flush caches.
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
   async _flushCaches() {
     const oThis = this;
 
@@ -201,7 +214,7 @@ class UpdateFanVideo extends UpdateProfileBase {
 
     promisesArray.push(super._flushCaches());
     promisesArray.push(FeedModel.flushCache({ paginationTimestamp: oThis.paginationTimestamp }));
-    promisesArray.push(VideoDetailsModel.flushCache({ userId: oThis.userId }));
+    promisesArray.push(VideoDetailsModel.flushCache({ userId: oThis.profileUserId }));
 
     await Promise.all(promisesArray);
   }
