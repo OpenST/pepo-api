@@ -14,9 +14,11 @@ class GetVideoById extends ServiceBase {
    * @param params
    */
   constructor(params) {
+    super();
+
     const oThis = this;
 
-    oThis.videoId = params.videoId;
+    oThis.videoId = params.video_id;
     oThis.currentUser = params.current_user;
 
     oThis.currentUserId = null;
