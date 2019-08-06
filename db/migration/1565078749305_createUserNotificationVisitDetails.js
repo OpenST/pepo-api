@@ -1,10 +1,10 @@
 const rootPrefix = '../..',
-  keySpaceConstant = require(rootPrefix + '/lib/globalConstant/keySpace'),
+  cassandraKeyspaceConstant = require(rootPrefix + '/lib/globalConstant/cassandraKeyspace'),
   DbKindConstant = require(rootPrefix + '/lib/globalConstant/dbKind');
 
 const dbName = '';
 
-let keySpace = keySpaceConstant.mainKeySpace;
+let keySpace = cassandraKeyspaceConstant.cassandraKeyspaceName;
 
 const dbKind = DbKindConstant.cassandraDbKind;
 
