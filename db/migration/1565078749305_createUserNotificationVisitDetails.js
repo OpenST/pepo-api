@@ -11,7 +11,7 @@ const dbKind = DbKindConstant.cassandraDbKind;
 const upQuery = `CREATE TABLE ${keySpace}.user_notification_visit_details \n\
 ( \n\
   user_id bigint,\n\
-  unread_flag smallint,\n\
+  unread_flag boolean,\n\
   PRIMARY KEY ((user_id))\n\
 );`;
 

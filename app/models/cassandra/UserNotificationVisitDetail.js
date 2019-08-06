@@ -1,5 +1,6 @@
 const rootPrefix = '../../..',
   ModelBase = require(rootPrefix + '/app/models/cassandra/Base'),
+  cassandraClient = require(rootPrefix + '/lib/cassandraWrapper'),
   cassandraKeyspaceConstants = require(rootPrefix + '/lib/globalConstant/cassandraKeyspace'),
   userNotificationVisitDetailConstants = require(rootPrefix +
     '/lib/globalConstant/cassandra/userNotificationVisitDetail');
@@ -32,33 +33,60 @@ class UserNotificationVisitDetailModel extends ModelBase {
    * Format db data.
    *
    * @param {object} dbRow
-   * @param {number} dbRow.id
-   * @param {number} dbRow.entity_type
-   * @param {string} dbRow.extra_data
-   * @param {number} dbRow.status
-   * @param {number} dbRow.published_ts
-   * @param {number} dbRow.display_ts
-   * @param {number} dbRow.created_at
-   * @param {number} dbRow.updated_at
+   * @param {number} dbRow.user_id
+   * @param {number} dbRow.unread_flag
    *
    * @return {object}
    */
   formatDbData(dbRow) {
     const oThis = this;
 
-    // const formattedData = {
-    //   id: dbRow.id,
-    //   entityType: activityConstants.entityTypes[dbRow.entity_type],
-    //   entityId: dbRow.entity_id,
-    //   extraData: JSON.parse(dbRow.extra_data),
-    //   status: activityConstants.statuses[dbRow.status],
-    //   publishedTs: dbRow.published_ts,
-    //   displayTs: dbRow.display_ts,
-    //   createdAt: dbRow.created_at,
-    //   updatedAt: dbRow.updated_at
-    // };
-    //
-    // return oThis.sanitizeFormattedData(formattedData);
+    const formattedData = {
+      userId: dbRow.user_id.toString(10),
+      unreadFlag: dbRow.unread_flag
+    };
+
+    return oThis.sanitizeFormattedData(formattedData);
+  }
+
+  /**
+   * Fetch token user for given token user ids
+   *
+   * @param {array} userIds: token user ids
+   *
+   * @return {object}
+   */
+  async fetchByUserIds(userIds) {
+    const oThis = this;
+
+    const response = {};
+    let query = `select * from ${keyspace}.${oThis.tableName} where user_id in ?;`;
+    let params = [userIds];
+    const queryRsp = await oThis.fire(query, params);
+
+    const dbRows = queryRsp.rows;
+
+    for (let index = 0; index < dbRows.length; index++) {
+      const formatDbRow = oThis.formatDbData(dbRows[index]);
+      response[formatDbRow.userId] = formatDbRow;
+    }
+
+    return response;
+  }
+
+  /**
+   * Flush cache.
+   *
+   * @param {object} params
+   * @param {number} params.userId
+   *
+   * @returns {Promise<*>}
+   */
+  static async flushCache(params) {
+    const UserNotificationVisitDetailsByUserIds = require(rootPrefix +
+      '/lib/cacheManagement/multi/cassandra/UserNotificationVisitDetailsByUserIds');
+
+    await new UserNotificationVisitDetailsByUserIds({ userIds: [params.userId] }).clear();
   }
 }
 
