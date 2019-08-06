@@ -137,7 +137,7 @@ class UserSocketConnectionDetails extends ModelBase {
       .where([
         'user_id IN (?) AND status = ?',
         userIds,
-        socketConnectionConstants.invertedStatuses[socketConnectionConstants.connected]
+        socketConnectionConstants.invertedStatuses[socketConnectionConstants.connectedStatus]
       ])
       .fire();
 

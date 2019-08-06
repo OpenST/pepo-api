@@ -230,7 +230,7 @@ class Auth extends ServiceBase {
         auth_key_expiry_at: null,
         socket_server_id: oThis.socketServerIdentifier,
         socket_expiry_at: basicHelper.getCurrentTimestampInSeconds() + 30 * 60,
-        status: socketConnectionConstants.invertedStatuses[socketConnectionConstants.connected]
+        status: socketConnectionConstants.invertedStatuses[socketConnectionConstants.connectedStatus]
       })
       .where({
         user_id: oThis.userId,

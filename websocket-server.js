@@ -3,14 +3,13 @@ const http = require('http').Server(app);
 const io = require('socket.io')(http);
 const program = require('commander');
 
-const rootPrefix = '.';
-
-const WebsocketAuth = require(rootPrefix + '/app/services/websocket/auth'),
+const rootPrefix = '.',
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   socketConnectionConstants = require(rootPrefix + '/lib/globalConstant/socketConnection'),
-  UserSocketConnectionDetailsModel = require(rootPrefix + '/app/models/mysql/UserSocketConnectionDetails'),
-  socketJobProcessor = require(rootPrefix + '/executables/rabbitMqSubscribers/socketJobProcessor');
+  socketJobProcessor = require(rootPrefix + '/executables/rabbitMqSubscribers/socketJobProcessor'),
+  WebsocketAuth = require(rootPrefix + '/app/services/websocket/auth'),
+  UserSocketConnectionDetailsModel = require(rootPrefix + '/app/models/mysql/UserSocketConnectionDetails');
 
 const userSocketIdsMap = {},
   socketObjsMap = {};
@@ -87,7 +86,7 @@ async function onSocketDisconnect(socket) {
 
   await new UserSocketConnectionDetailsModel()
     .update({
-      status: socketConnectionConstants.invertedStatuses[socketConnectionConstants.expired]
+      status: socketConnectionConstants.invertedStatuses[socketConnectionConstants.expiredStatus]
     })
     .where({
       user_id: socket.userSocketConnDetailsId
