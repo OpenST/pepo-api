@@ -199,7 +199,7 @@ class UploadParams extends ServiceBase {
    */
   _getRandomEncodedFileNames(extension) {
     const oThis = this,
-      fileName = util.gets3FileName(oThis.currentUserId, 'original');
+      fileName = util.getS3FileName(oThis.currentUserId, 'original');
 
     return fileName + extension;
   }
