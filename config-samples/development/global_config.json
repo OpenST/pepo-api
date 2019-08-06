@@ -52,10 +52,6 @@
 
     "constants": {
       "salt": "asdfghjklqwertyuiop"
-    },
-
-    "webSocketConnections": {
-      "endpoints": ["http://localhost:4000"]
     }
   }
 }
