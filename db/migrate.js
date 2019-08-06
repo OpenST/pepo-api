@@ -48,6 +48,7 @@ class DbMigrate {
       ._asyncPerform()
       .then(function() {
         logger.win('Done!');
+        process.exit(0);
       })
       .catch(function(err) {
         logger.error(err);

@@ -1,29 +1,21 @@
 const rootPrefix = '../../../..',
-  TransactionOstEventBase = require(rootPrefix + '/app/services/ostEvents/transactions/Base'),
   TokenUserModel = require(rootPrefix + '/app/models/mysql/TokenUser'),
-  responseHelper = require(rootPrefix + '/lib/formatter/response'),
-  tokenUserConstants = require(rootPrefix + '/lib/globalConstant/tokenUser'),
-  activityConstants = require(rootPrefix + '/lib/globalConstant/activity'),
+  TransactionOstEventBase = require(rootPrefix + '/app/services/ostEvents/transactions/Base'),
   basicHelper = require(rootPrefix + '/helpers/basic'),
-  transactionConstants = require(rootPrefix + '/lib/globalConstant/transaction'),
-  logger = require(rootPrefix + '/lib/logger/customConsoleLogger');
+  responseHelper = require(rootPrefix + '/lib/formatter/response'),
+  logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
+  activityConstants = require(rootPrefix + '/lib/globalConstant/activity'),
+  tokenUserConstants = require(rootPrefix + '/lib/globalConstant/tokenUser'),
+  transactionConstants = require(rootPrefix + '/lib/globalConstant/transaction');
 
+/**
+ * Class for failure transaction ost event base service.
+ *
+ * @class FailureTransactionOstEvent
+ */
 class FailureTransactionOstEvent extends TransactionOstEventBase {
   /**
-   * @param {Object} params
-   * @param {String} params.data: contains the webhook event data
-   * @param {String} params.data.user: User entity result from ost
-   *
-   * @constructor
-   */
-  constructor(params) {
-    super(params);
-
-    const oThis = this;
-  }
-
-  /**
-   * perform - Validate Login Credentials
+   * Async perform.
    *
    * @return {Promise<void>}
    */
@@ -32,14 +24,13 @@ class FailureTransactionOstEvent extends TransactionOstEventBase {
 
     await oThis._validateAndSanitizeParams();
 
-    let promiseArray = [];
+    const promiseArray = [];
 
-    promiseArray.push(oThis._fetchTransaction());
+    promiseArray.push(oThis.fetchTransaction());
+    promiseArray.push(oThis.setFromAndToUserId());
 
-    promiseArray.push(oThis._setFromAndToUserId());
-
-    if (oThis._isVideoIdPresent()) {
-      promiseArray.push(oThis._fetchVideoAndValidate());
+    if (oThis.isVideoIdPresent()) {
+      promiseArray.push(oThis.fetchVideoAndValidate());
     }
 
     await Promise.all(promiseArray);
@@ -47,18 +38,18 @@ class FailureTransactionOstEvent extends TransactionOstEventBase {
     if (oThis.transactionObj) {
       await oThis._processTransaction();
     } else {
-      let insertResponse = await oThis._insertInTransaction();
+      const insertResponse = await oThis.insertInTransaction();
       if (insertResponse.isDuplicateIndexViolation) {
-        basicHelper.sleep(500);
-        await oThis._fetchTransaction();
+        await basicHelper.sleep(500);
+        await oThis.fetchTransaction();
         await oThis._processTransaction();
       } else {
-        await oThis._insertInActivity();
-        await oThis._insertInUserActivity(oThis.fromUserId);
+        await oThis.insertInActivity();
+        await oThis.insertInUserActivity(oThis.fromUserId);
       }
     }
 
-    return Promise.resolve(responseHelper.successWithData({}));
+    return responseHelper.successWithData({});
   }
 
   /**
@@ -70,26 +61,26 @@ class FailureTransactionOstEvent extends TransactionOstEventBase {
   async _processTransaction() {
     const oThis = this;
 
-    let response = await oThis._validateTransactionObj();
+    const response = await oThis.validateTransactionObj();
 
     if (response.isFailure()) {
-      //Transaction status need not be changed.
-      return Promise.resolve(responseHelper.successWithData({}));
+      // Transaction status need not be changed.
+      return responseHelper.successWithData({});
     }
 
     if (oThis.transactionObj.extraData.kind === transactionConstants.extraData.userTransactionKind) {
       await oThis._updateTransactionAndRelatedActivities();
     } else if (oThis.transactionObj.extraData.kind === transactionConstants.extraData.airdropKind) {
-      await oThis._validateToUserId();
-      let promiseArray = [];
-      promiseArray.push(oThis._updateTransaction());
-      promiseArray.push(oThis._processForAirdropTransaction());
+      await oThis.validateToUserId();
+      const promiseArray = [];
+      promiseArray.push(oThis.updateTransaction());
+      promiseArray.push(oThis.processForAirdropTransaction());
       await Promise.all(promiseArray);
     }
   }
 
   /**
-   *
+   * Update transaction and related activites.
    *
    * @returns {Promise<void>}
    * @private
@@ -97,24 +88,22 @@ class FailureTransactionOstEvent extends TransactionOstEventBase {
   async _updateTransactionAndRelatedActivities() {
     const oThis = this;
 
-    await oThis._validateTransfers();
-    let promiseArray1 = [];
+    await oThis.validateTransfers();
 
-    promiseArray1.push(oThis._updateTransaction());
-    promiseArray1.push(oThis._updateActivity());
-    promiseArray1.push(oThis._removeEntryFromPendingTransactions());
+    const promiseArray1 = [];
+    promiseArray1.push(oThis.updateTransaction());
+    promiseArray1.push(oThis.updateActivity());
+    promiseArray1.push(oThis.removeEntryFromPendingTransactions());
 
     await Promise.all(promiseArray1);
 
-    await oThis._updateUserActivity(oThis.activityObj.id);
+    await oThis.updateUserActivity(oThis.activityObj.id);
   }
 
   /**
-   * Transaction Status
+   * Return transaction status.
    *
-   *
-   * @return {String}
-   *
+   * @return {string}
    * @private
    */
   _validTransactionStatus() {
@@ -122,11 +111,9 @@ class FailureTransactionOstEvent extends TransactionOstEventBase {
   }
 
   /**
-   * Activity Status
+   * Activity status.
    *
-   *
-   * @return {String}
-   *
+   * @return {string}
    * @private
    */
   _activityStatus() {
@@ -134,7 +121,7 @@ class FailureTransactionOstEvent extends TransactionOstEventBase {
   }
 
   /**
-   * Transaction status
+   * Transaction status.
    *
    * @returns {string}
    * @private
@@ -144,15 +131,14 @@ class FailureTransactionOstEvent extends TransactionOstEventBase {
   }
 
   /**
-   * Get New Property Val for Token USer
+   * Get new property value for token user.
    *
+   * @param {number} propertyVal
    *
-   * @return {Integer}
-   *
+   * @returns {number}
    * @private
    */
   _getPropertyValForTokenUser(propertyVal) {
-    const oThis = this;
     logger.log('Get PropertyVal for Transaction Failure Webhook');
 
     propertyVal = new TokenUserModel().setBitwise('properties', propertyVal, tokenUserConstants.airdropFailedProperty);
