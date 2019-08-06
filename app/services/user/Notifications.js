@@ -1,12 +1,13 @@
 const rootPrefix = '../../..',
-  ServiceBase = require(rootPrefix + '/app/services/Base');
+  ServiceBase = require(rootPrefix + '/app/services/Base'),
+  responseHelper = require(rootPrefix + '/lib/formatter/response');
 
 class GetUserNotifications extends ServiceBase {
   /**
    * Constructor for user video details service.
    *
    * @param {object} params
-   * @param {string/number} params.user_id
+   * @param {string/number} params.profile_user_id
    * @param {object} [params.current_user]
    *
    * @augments ServiceBase
@@ -25,6 +26,8 @@ class GetUserNotifications extends ServiceBase {
    */
   async _asyncPerform() {
     const oThis = this;
+
+    return responseHelper.successWithData({});
   }
 }
 
