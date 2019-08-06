@@ -54,8 +54,7 @@ class ConfigStrategyTemplate {
           username: 'usernameEntity',
           password: 'passwordEntity',
           contactPoints: 'contactPointsEntity',
-          localDataCenter: 'localDataCenterEntity',
-          keyspace: 'keyspaceEntity'
+          localDataCenter: 'localDataCenterEntity'
         }
       },
 
@@ -111,9 +110,6 @@ class ConfigStrategyTemplate {
         entitiesPresent: 'contactPointEntity' // For an array entity this array will contain entity types which that array will hold.
       },
       contactPointEntity: {
-        entityType: 'string'
-      },
-      keyspaceEntity: {
         entityType: 'string'
       },
       localDataCenterEntity: {
