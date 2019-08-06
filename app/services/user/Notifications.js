@@ -7,7 +7,7 @@ class GetUserNotifications extends ServiceBase {
    * Constructor for user video details service.
    *
    * @param {object} params
-   * @param {string/number} params.user_id
+   * @param {string/number} params.profile_user_id
    * @param {object} [params.current_user]
    *
    * @augments ServiceBase

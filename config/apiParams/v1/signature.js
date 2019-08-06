@@ -454,7 +454,7 @@ const v1Signature = {
   [apiName.getUserNotifications]: {
     mandatory: [
       {
-        parameter: 'user_id',
+        parameter: 'profile_user_id',
         validatorMethods: ['validateNonZeroInteger']
       }
     ],

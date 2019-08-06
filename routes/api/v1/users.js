@@ -258,9 +258,9 @@ router.get('/:profile_user_id/video-history', sanitizer.sanitizeDynamicUrlParams
 });
 
 /* User notifications */
-router.get('/:user_id/notifications', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+router.get('/:profile_user_id/notifications', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.getUserNotifications;
-  req.decodedParams.user_id = req.params.user_id;
+  req.decodedParams.profile_user_id = req.params.profile_user_id;
 
   const dataFormatterFunc = async function(serviceResponse) {
     serviceResponse.data = dummyNotifications;
