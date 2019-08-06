@@ -24,7 +24,8 @@ class SocketJobProcessor extends RabbitMqProcessorBase {
 
     const oThis = this;
 
-    oThis.userSocketObjMap = params.userSocketObjMap;
+    oThis.userSocketIdsMap = params.userSocketIdsMap;
+    oThis.socketObjsMap = params.socketObjsMap;
   }
 
   /**
@@ -77,13 +78,14 @@ class SocketJobProcessor extends RabbitMqProcessorBase {
     logger.log('Message params =====', messageParams);
 
     for (let j = 0; j < userIds.length; j++) {
-      let socketObjects = oThis.userSocketObjMap[userIds[j]];
-      if (!socketObjects || socketObjects.length == 0) {
+      let socketObjectIds = oThis.userSocketIdsMap[userIds[j]];
+      if (!socketObjectIds || socketObjectIds.length == 0) {
         continue;
       }
-      for (let i = 0; i < socketObjects.length; i++) {
+      for (let i = 0; i < socketObjectIds.length; i++) {
         console.log('-------------------------------------');
-        socketObjects[i].emit('server-event', JSON.stringify(messagePayload));
+        let socketObj = oThis.socketObjsMap[socketObjectIds[i]];
+        socketObj.emit('server-event', JSON.stringify(messagePayload));
       }
     }
 

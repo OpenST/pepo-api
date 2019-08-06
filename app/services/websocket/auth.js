@@ -67,7 +67,10 @@ class Auth extends ServiceBase {
 
     await oThis._modifySocketConnectionDetails();
 
-    return responseHelper.successWithData({ userId: oThis.userId });
+    return responseHelper.successWithData({
+      userId: oThis.userId,
+      userSocketConnDetailsId: oThis.decryptedPayload.id
+    });
   }
 
   /**
