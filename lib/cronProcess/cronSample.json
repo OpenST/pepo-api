@@ -17,8 +17,8 @@
     "prefetchCount": 1
   },
   "socketJobProcessor": {
-    "topics": ["socket.#"],
-    "queues": ["example"],
+    "topics": ["socket.connections.5"],
+    "queues": ["socket_connections_5"],
     "prefetchCount": 1
   }
 }
