@@ -1,20 +1,25 @@
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
-  responseHelper = require(rootPrefix + '/lib/formatter/response'),
-  GetProfile = require(rootPrefix + '/lib/user/profile/Get');
+  GetProfile = require(rootPrefix + '/lib/user/profile/Get'),
+  responseHelper = require(rootPrefix + '/lib/formatter/response');
 
 /**
- * Class for user profile get
+ * Class to get user profile.
  *
- * @class
+ * @class GetUserProfile
  */
 class GetUserProfile extends ServiceBase {
   /**
-   * @constructor
+   * Constructor to get user profile.
    *
-   * @param params
-   * @param params.profile_user_id {String} - Profile user id
-   * @param params.current_user {object} - current_user
+   * @param {object} params
+   * @param {string/number} params.profile_user_id
+   * @param {object} params.current_user
+   * @param {string/number} params.current_user.id
+   *
+   * @augments ServiceBase
+   *
+   * @constructor
    */
   constructor(params) {
     super(params);
@@ -26,7 +31,7 @@ class GetUserProfile extends ServiceBase {
   }
 
   /**
-   * Perform
+   * Main performer for class.
    *
    * @return {Promise<void>}
    */
@@ -37,7 +42,7 @@ class GetUserProfile extends ServiceBase {
   }
 
   /**
-   * Fetch profile details
+   * Fetch profile details.
    *
    * @return {Promise<void>}
    * @private
@@ -45,14 +50,15 @@ class GetUserProfile extends ServiceBase {
   async _fetchProfileDetails() {
     const oThis = this;
 
-    let getProfileObj = new GetProfile({ userIds: [oThis.profileUserId], currentUserId: oThis.currentUserId });
+    const getProfileObj = new GetProfile({ userIds: [oThis.profileUserId], currentUserId: oThis.currentUserId });
 
-    let response = await getProfileObj.perform();
+    const response = await getProfileObj.perform();
 
     if (response.isFailure()) {
       return Promise.reject(response);
     }
-    let profileResp = response.data;
+
+    const profileResp = response.data;
 
     return responseHelper.successWithData({
       userProfile: profileResp.userProfilesMap[oThis.profileUserId],

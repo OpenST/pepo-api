@@ -54,12 +54,6 @@ class ConfigStrategyTemplate {
           salt: 'saltEntity'
         }
       },
-      webSocketConnectionsEntity: {
-        entityType: 'object',
-        entitiesPresent: {
-          endpoints: 'serversEntity'
-        }
-      },
 
       userEntity: {
         entityType: 'string'
@@ -118,9 +112,10 @@ class ConfigStrategyTemplate {
     return {
       [configStrategyConstants.memcached]: 'memcachedEntity',
       [configStrategyConstants.bgJobRabbitmq]: 'rabbitmqEntity',
+      [configStrategyConstants.notificationRabbitmq]: 'rabbitmqEntity',
+      [configStrategyConstants.socketRabbitmq]: 'rabbitmqEntity',
       [configStrategyConstants.redshift]: 'redshiftEntity',
-      [configStrategyConstants.constants]: 'constantsEntity',
-      [configStrategyConstants.webSocketConnections]: 'webSocketConnectionsEntity'
+      [configStrategyConstants.constants]: 'constantsEntity'
     };
   }
 }

@@ -53,9 +53,9 @@ class PendingTransaction extends ModelBase {
   }
 
   /**
-   * Fetch pending transactions by from user id and to user ids
+   * Fetch pending transactions by from user id and to user ids.
    *
-   * @param {number} toUserIds: to user ids
+   * @param {array} toUserIds: to user ids
    * @param {number} fromUserId: from user id
    *
    * @return {object}
@@ -65,7 +65,7 @@ class PendingTransaction extends ModelBase {
 
     const dbRows = await oThis
       .select('*')
-      .where({ to_user_id: toUserIds, from_user_id: fromUserId })
+      .where(['to_user_id IN (?) AND from_user_id = (?)', toUserIds, fromUserId])
       .fire();
 
     const response = {};

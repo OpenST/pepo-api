@@ -141,7 +141,11 @@ class ConfigStrategyModel extends ModelBase {
 
     let encryptedKeysFound = false;
 
-    if (strategyKindName === configStrategyConstants.bgJobRabbitmq) {
+    if (
+      strategyKindName === configStrategyConstants.bgJobRabbitmq ||
+      strategyKindName === configStrategyConstants.notificationRabbitmq ||
+      strategyKindName === configStrategyConstants.socketRabbitmq
+    ) {
       const rmqPassword = hashNotToEncrypt[strategyKindName].password;
 
       hashNotToEncrypt[strategyKindName].password = '{{rmqPassword}}';
@@ -192,7 +196,11 @@ class ConfigStrategyModel extends ModelBase {
    * @private
    */
   _mergeConfigResult(strategyKind, configStrategyHash, decryptedJsonObj) {
-    if (kinds[strategyKind] === configStrategyConstants.bgJobRabbitmq) {
+    if (
+      kinds[strategyKind] === configStrategyConstants.bgJobRabbitmq ||
+      kinds[strategyKind] === configStrategyConstants.notificationRabbitmq ||
+      kinds[strategyKind] === configStrategyConstants.socketRabbitmq
+    ) {
       configStrategyHash[kinds[strategyKind]].password = decryptedJsonObj.rmqPassword;
     } else if (kinds[strategyKind] === configStrategyConstants.redshift) {
       configStrategyHash[kinds[strategyKind]].password = decryptedJsonObj.redshiftPassword;

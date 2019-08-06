@@ -5,14 +5,24 @@ const rootPrefix = '../../..',
   feedConstants = require(rootPrefix + '/lib/globalConstant/feed'),
   responseHelper = require(rootPrefix + '/lib/formatter/response');
 
+/**
+ * Class for feed base.
+ *
+ * @class FeedBase
+ */
 class FeedBase extends ServiceBase {
   /**
    * Constructor for feed base.
    *
-   * @param params
+   * @param {object} params
+   * @param {object} params.current_user
+   *
+   * @augments ServiceBase
+   *
+   * @constructor
    */
   constructor(params) {
-    super(params);
+    super();
 
     const oThis = this;
 
@@ -51,7 +61,9 @@ class FeedBase extends ServiceBase {
   }
 
   /**
-   * Get Feed details.
+   * Get feed details.
+   *
+   * @sets oThis.feeds, oThis.userIds, oThis.videoIds
    *
    * @returns {Promise<never>}
    * @private
@@ -59,8 +71,8 @@ class FeedBase extends ServiceBase {
   async _getFeeds() {
     const oThis = this;
 
-    for (let i = 0; i < oThis.feedIds.length; i++) {
-      let feedData = oThis.feedsMap[oThis.feedIds[i]];
+    for (let index = 0; index < oThis.feedIds.length; index++) {
+      const feedData = oThis.feedsMap[oThis.feedIds[index]];
 
       oThis.feeds.push(feedData);
       oThis.userIds.push(feedData.actor);
@@ -85,19 +97,21 @@ class FeedBase extends ServiceBase {
   /**
    * Fetch profile details.
    *
+   * @sets oThis.profileResponse
+   *
    * @return {Promise<void>}
    * @private
    */
   async _fetchProfileDetails() {
     const oThis = this;
 
-    let getProfileObj = new GetProfile({
+    const getProfileObj = new GetProfile({
       userIds: oThis.userIds,
       currentUserId: oThis.currentUserId,
       videoIds: oThis.videoIds
     });
 
-    let profileResp = await getProfileObj.perform();
+    const profileResp = await getProfileObj.perform();
 
     if (profileResp.isFailure()) {
       return Promise.reject(profileResp);
@@ -110,15 +124,17 @@ class FeedBase extends ServiceBase {
   /**
    * Fetch token details.
    *
+   * @sets oThis.tokenDetails
+   *
    * @return {Promise<void>}
    * @private
    */
   async _setTokenDetails() {
     const oThis = this;
 
-    let getTokenServiceObj = new GetTokenService({});
+    const getTokenServiceObj = new GetTokenService({});
 
-    let tokenResp = await getTokenServiceObj.perform();
+    const tokenResp = await getTokenServiceObj.perform();
 
     if (tokenResp.isFailure()) {
       return Promise.reject(tokenResp);

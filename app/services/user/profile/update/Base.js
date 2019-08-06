@@ -143,13 +143,17 @@ class UpdateProfileBase extends ServiceBase {
   async _flushCaches() {
     const oThis = this;
 
-    // Clear all users cache
+    const promisesArray = [];
+
+    // Clear all users cache.
     if (oThis.flushUserCache) {
-      await UserModelKlass.flushCache({ id: oThis.userId, userName: oThis.username });
+      promisesArray.push(UserModelKlass.flushCache({ id: oThis.userId, userName: oThis.username }));
     }
 
-    // Clear user profile elements cache
-    new UserProfileElementsByUserIdCache({ usersIds: [oThis.userId] }).clear();
+    // Clear user profile elements cache.
+    promisesArray.push(new UserProfileElementsByUserIdCache({ usersIds: [oThis.userId] }).clear());
+
+    await Promise.all(promisesArray);
   }
 
   /**

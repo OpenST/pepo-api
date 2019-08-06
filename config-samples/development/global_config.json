@@ -20,6 +20,28 @@
       ]
     },
 
+    "notificationRabbitmq": {
+      "username": "guest",
+      "password": "guest",
+      "host": "127.0.0.1",
+      "port": "5672",
+      "heartbeats": "30",
+      "clusterNodes": [
+        "127.0.0.1"
+      ]
+    },
+
+    "socketRabbitmq": {
+      "username": "guest",
+      "password": "guest",
+      "host": "127.0.0.1",
+      "port": "5672",
+      "heartbeats": "30",
+      "clusterNodes": [
+        "127.0.0.1"
+      ]
+    },
+
     "redshift": {
       "user": "pepo_dev_read",
       "database": "pepodb",
