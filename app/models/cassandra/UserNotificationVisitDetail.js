@@ -34,7 +34,7 @@ class UserNotificationVisitDetailModel extends ModelBase {
    *
    * @param {object} dbRow
    * @param {number} dbRow.user_id
-   * @param {number} dbRow.unread_flag
+   * @param {boolean} dbRow.unread_flag
    *
    * @return {object}
    */
