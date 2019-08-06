@@ -1,7 +1,9 @@
 const rootPrefix = '../..',
-  database = require(rootPrefix + '/lib/globalConstant/database');
+  database = require(rootPrefix + '/lib/globalConstant/database'),
+  DbKindConstant = require(rootPrefix + '/lib/globalConstant/dbKind');
 
 const dbName = database.twitterDbName;
+const dbKind = DbKindConstant.sqlDbKind;
 
 const upQuery =
   'CREATE TABLE `twitter_users` ( \n\
@@ -22,7 +24,8 @@ const downQuery = 'drop table if exists `twitter_users`;';
 const createTwitterUsersTable = {
   dbName: dbName,
   up: [upQuery],
-  down: [downQuery]
+  down: [downQuery],
+  dbKind: dbKind
 };
 
 module.exports = createTwitterUsersTable;

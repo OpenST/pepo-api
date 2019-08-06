@@ -1,7 +1,9 @@
 const rootPrefix = '../..',
-  database = require(rootPrefix + '/lib/globalConstant/database');
+  database = require(rootPrefix + '/lib/globalConstant/database'),
+  DbKindConstant = require(rootPrefix + '/lib/globalConstant/dbKind');
 
 const dbName = database.bigDbName;
+const dbKind = DbKindConstant.sqlDbKind;
 
 const upQuery =
   'CREATE TABLE `cron_processes` (\n' +
@@ -23,7 +25,8 @@ const downQuery = 'drop table if exists `cron_processes`;';
 const CreateCronProcessesTable = {
   dbName: dbName,
   up: [upQuery],
-  down: [downQuery]
+  down: [downQuery],
+  dbKind: dbKind
 };
 
 module.exports = CreateCronProcessesTable;
