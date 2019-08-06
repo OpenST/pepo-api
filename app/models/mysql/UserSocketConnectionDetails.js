@@ -36,8 +36,8 @@ class UserSocketConnectionDetails extends ModelBase {
    * @param {number} dbRow.auth_key
    * @param {number} dbRow.auth_key_expiry_at
    * @param {number} dbRow.status
-   * @param {number} dbRow.socket_endpoint_identifier
-   * @param {number} dbRow.expiry_at
+   * @param {number} dbRow.socket_server_id
+   * @param {number} dbRow.socket_expiry_at
    * @param {number} dbRow.created_at
    * @param {number} dbRow.updated_at
    *
@@ -50,10 +50,10 @@ class UserSocketConnectionDetails extends ModelBase {
       id: dbRow.id,
       userId: dbRow.user_id,
       authKey: dbRow.auth_key,
-      socketEndpointIdentifier: dbRow.socket_endpoint_identifier,
+      socketServerId: dbRow.socket_server_id,
       authKeyExpiryAt: dbRow.auth_key_expiry_at,
       status: socketConnectionConstants.statuses[dbRow.status],
-      expiryAt: dbRow.expiry_at,
+      socketExpiryAt: dbRow.socket_expiry_at,
       createdAt: dbRow.created_at,
       updatedAt: dbRow.updated_at
     };
@@ -71,10 +71,10 @@ class UserSocketConnectionDetails extends ModelBase {
       'id',
       'userId',
       'authKey',
-      'socketEndpointIdentifier',
+      'socketServerId',
       'authKeyExpiryAt',
       'status',
-      'expiryAt',
+      'socketExpiryAt',
       'createdAt',
       'updatedAt'
     ];

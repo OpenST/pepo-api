@@ -51,7 +51,11 @@
     },
 
     "constants": {
-      "salt": "asdfghjklqwertyuiop"
+      "salt": "asdfghjklqwertyuiop",
+      "websocket": {
+        "endpoint": "127.0.0.1",
+        "protocol": "https"
+      }
     }
   }
 }
