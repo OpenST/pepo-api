@@ -103,9 +103,8 @@ class TransactionOstEventBase extends ServiceBase {
    * Validate transaction object.
    *
    * @returns {Promise<*>}
-   * @private
    */
-  async _validateTransactionObj() {
+  async validateTransactionObj() {
     const oThis = this;
 
     if (!oThis.transactionObj) {
@@ -174,12 +173,11 @@ class TransactionOstEventBase extends ServiceBase {
   }
 
   /**
-   * Get transaction
+   * Get transaction.
    *
-   * @return {Promise<void>}
-   * @private
+   * @returns {Promise<void>}
    */
-  async _fetchTransaction() {
+  async fetchTransaction() {
     const oThis = this;
 
     logger.log('Start:: Fetch transaction from transaction table');
@@ -226,9 +224,8 @@ class TransactionOstEventBase extends ServiceBase {
    * @sets oThis.fromUserId, oThis.toUserId
    *
    * @returns {Promise<void>}
-   * @private
    */
-  async _setFromAndToUserId() {
+  async setFromAndToUserId() {
     const oThis = this;
 
     const fromOstUserId = oThis.ostTransaction.transfers[0].from_user_id,
@@ -243,9 +240,8 @@ class TransactionOstEventBase extends ServiceBase {
    * Validate to user id.
    *
    * @returns {Promise<never>}
-   * @private
    */
-  async _validateToUserId() {
+  async validateToUserId() {
     const oThis = this;
 
     if (oThis.toUserId !== oThis.transactionObj.extraData.toUserIds[0]) {
@@ -265,10 +261,9 @@ class TransactionOstEventBase extends ServiceBase {
   /**
    * Validate transfers.
    *
-   * @return {Promise<void>}
-   * @private
+   * @returns {Promise<void>}
    */
-  async _validateTransfers() {
+  async validateTransfers() {
     const oThis = this;
 
     const paramErrors = [];
@@ -307,10 +302,9 @@ class TransactionOstEventBase extends ServiceBase {
    *
    * @sets oThis.activityObj
    *
-   * @return {Promise<void>}
-   * @private
+   * @returns {Promise<void>}
    */
-  async _updateTransaction() {
+  async updateTransaction() {
     const oThis = this;
     logger.log('Start:: Update transaction table for Transaction Webhook');
 
@@ -334,9 +328,8 @@ class TransactionOstEventBase extends ServiceBase {
    * Update activity with published timestamp, display timestamp and status.
    *
    * @returns {Promise<any>}
-   * @private
    */
-  async _updateActivity() {
+  async updateActivity() {
     const oThis = this;
     logger.log('Start:: Update Activity');
 
@@ -384,18 +377,14 @@ class TransactionOstEventBase extends ServiceBase {
   /**
    * Update user activity.
    *
-   * @return {Promise<void>}
-   * @private
+   * @returns {Promise<void>}
    */
-  async _updateUserActivity(activityId) {
+  async updateUserActivity(activityId) {
     const oThis = this;
+
     logger.log('Start:: Update User Activity');
 
-    /*
-    * Commenting following code as we don't need to update published ts. Published ts is inserted while creating transaction itself.
-    */
-
-    /*
+    /* NOTE: Commenting following code as we don't need to update published ts. Published ts is inserted while creating transaction itself.
     let userActivityObj = await new UserActivityModel().fetchUserActivityByUserIdPublishedTsAndActivityId(
       oThis.fromUserId,
       null,
@@ -428,12 +417,11 @@ class TransactionOstEventBase extends ServiceBase {
   }
 
   /**
-   * Remove entry from pending transactions
+   * Remove entry from pending transactions.
    *
    * @returns {Promise<void>}
-   * @private
    */
-  async _removeEntryFromPendingTransactions() {
+  async removeEntryFromPendingTransactions() {
     const oThis = this;
     logger.log('Start:: Remove entry from pending transaction');
 
@@ -457,10 +445,9 @@ class TransactionOstEventBase extends ServiceBase {
   /**
    * Mark airdrop failed property for token user.
    *
-   * @return {Promise<void>}
-   * @private
+   * @returns {Promise<void>}
    */
-  async _processForAirdropTransaction() {
+  async processForAirdropTransaction() {
     const oThis = this;
     logger.log('Start:: Update token user to mark airdrops status');
 
@@ -503,9 +490,8 @@ class TransactionOstEventBase extends ServiceBase {
    * @sets oThis.transactionObj
    *
    * @returns {Promise<{isDuplicateIndexViolation: boolean}>}
-   * @private
    */
-  async _insertInTransaction() {
+  async insertInTransaction() {
     const oThis = this;
 
     if (!oThis.toUserId || !oThis.fromUserId) {
@@ -579,9 +565,8 @@ class TransactionOstEventBase extends ServiceBase {
    * @sets oThis.publishedTs, oThis.activityObj
    *
    * @returns {Promise<void>}
-   * @private
    */
-  async _insertInActivity() {
+  async insertInActivity() {
     const oThis = this;
     logger.log('Start:: Insert in Activity table');
 
@@ -612,11 +597,11 @@ class TransactionOstEventBase extends ServiceBase {
   /**
    * Insert in user activity for the given user id.
    *
-   * @param userId
+   * @param {number} userId
+   *
    * @returns {Promise<void>}
-   * @private
    */
-  async _insertInUserActivity(userId) {
+  async insertInUserActivity(userId) {
     const oThis = this;
 
     logger.log('Start:: Insert in User Activity table');
@@ -640,9 +625,8 @@ class TransactionOstEventBase extends ServiceBase {
    * Fetch video and validate.
    *
    * @returns {Promise<never>}
-   * @private
    */
-  async _fetchVideoAndValidate() {
+  async fetchVideoAndValidate() {
     const oThis = this;
 
     const videoDetailsCacheResponse = await new VideoDetailsByVideoIdsCache({ videoIds: [oThis.videoId] }).fetch();
@@ -669,9 +653,8 @@ class TransactionOstEventBase extends ServiceBase {
    * This function check if video is present in parameters.
    *
    * @returns {boolean}
-   * @private
    */
-  _isVideoIdPresent() {
+  isVideoIdPresent() {
     const oThis = this;
 
     return !commonValidator.isVarNullOrUndefined(oThis.videoId);
