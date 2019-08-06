@@ -1,26 +1,8 @@
-const program = require('commander');
-
 const rootPrefix = '../..',
   RabbitMqProcessorBase = require(rootPrefix + '/executables/rabbitMqSubscribers/Base'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   cronProcessesConstants = require(rootPrefix + '/lib/globalConstant/cronProcesses'),
   configStrategyConstants = require(rootPrefix + '/lib/globalConstant/configStrategy');
-
-program.option('--cronProcessId <cronProcessId>', 'Cron table process ID').parse(process.argv);
-
-program.on('--help', function() {
-  logger.log('');
-  logger.log('  Example:');
-  logger.log('');
-  logger.log('    node executables/rabbitMqSubscribers/socketJobProcessor.js --cronProcessId 5');
-  logger.log('');
-  logger.log('');
-});
-
-if (!program.cronProcessId) {
-  program.help();
-  process.exit(1);
-}
 
 /**
  * Class for socket job processor.
@@ -29,13 +11,30 @@ if (!program.cronProcessId) {
  */
 class SocketJobProcessor extends RabbitMqProcessorBase {
   /**
+   * Constructor for rabbitMq processor base.
+   *
+   * @param {object} params
+   * @param {number} params.cronProcessId
+   * @param {number} params.socketObject - Socket connection object, where to emit message.
+   *
+   * @constructor
+   */
+  constructor(params) {
+    super(params);
+
+    const oThis = this;
+
+    oThis.userSocketObjMap = params.userSocketObjMap;
+  }
+
+  /**
    * Get rabbitMq config kind.
    *
    * @returns {string}
    * @private
    */
   get _rabbitMqConfigKind() {
-    return configStrategyConstants.notificationRabbitmq;
+    return configStrategyConstants.socketRabbitmq;
   }
 
   /**
@@ -55,13 +54,33 @@ class SocketJobProcessor extends RabbitMqProcessorBase {
    * @private
    */
   get _queuePrefix() {
-    return 'socket_';
+    return '';
+  }
+
+  /**
+   * Process message.
+   *
+   * @param {object} messageParams
+   * @param {string} messageParams.kind: kind of the bg job
+   * @param {object} messageParams.payload
+   *
+   * @returns {Promise<>}
+   *
+   * @private
+   */
+  _processMessage(messageParams) {
+    const oThis = this,
+      socketObjects = oThis.userSocketObjMap[1000];
+
+    logger.log('Message params =====', messageParams);
+
+    for (let i = 0; i < socketObjects.length; i++) {
+      console.log('-------------------------------------');
+      socketObjects[i].emit('server-event', 'Mila kya????');
+    }
+
+    return Promise.resolve({});
   }
 }
 
-new SocketJobProcessor({ cronProcessId: +program.cronProcessId }).perform();
-
-setInterval(function() {
-  logger.info('Ending the process. Sending SIGINT.');
-  process.emit('SIGINT');
-}, cronProcessesConstants.continuousCronRestartInterval);
+module.exports = SocketJobProcessor;

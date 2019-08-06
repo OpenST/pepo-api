@@ -209,7 +209,7 @@ class ProcessorBase extends CronBase {
                     }
                   )
                   .catch(function(error) {
-                    logger.error('Error in execute transaction', error);
+                    logger.error('Error in subscription', error);
 
                     return Promise.resolve({});
                   });
