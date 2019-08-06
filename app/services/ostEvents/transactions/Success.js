@@ -2,6 +2,10 @@ const rootPrefix = '../../../..',
   UpdateStats = require(rootPrefix + '/lib/UpdateStats'),
   TokenUserModel = require(rootPrefix + '/app/models/mysql/TokenUser'),
   TransactionOstEventBase = require(rootPrefix + '/app/services/ostEvents/transactions/Base'),
+  ProfileTransactionSendSuccessNotification = require(rootPrefix +
+    '/lib/userNotificationPublisher/ProfileTransactionSendSuccess'),
+  ProfileTransactionReceiveSuccessNotification = require(rootPrefix +
+    '/lib/userNotificationPublisher/ProfileTransactionReceiveSuccess'),
   basicHelper = require(rootPrefix + '/helpers/basic'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
@@ -81,6 +85,7 @@ class SuccessTransactionOstEvent extends TransactionOstEventBase {
     if (oThis.transactionObj.extraData.kind === transactionConstants.extraData.userTransactionKind) {
       await oThis._updateTransactionAndRelatedActivities();
       await oThis._updateStats();
+      await oThis._sendNotification();
     } else if (oThis.transactionObj.extraData.kind === transactionConstants.extraData.airdropKind) {
       await oThis.validateToUserId();
       const promiseArray = [];
@@ -137,6 +142,25 @@ class SuccessTransactionOstEvent extends TransactionOstEventBase {
     const updateStatsObj = new UpdateStats(updateStatsParams);
 
     await updateStatsObj.perform();
+  }
+
+  /**
+   * Send notification for successful transaction.
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _sendNotification() {
+    const oThis = this;
+
+    const promisesArray = [];
+
+    promisesArray.push(new ProfileTransactionSendSuccessNotification({ transaction: oThis.transactionObj }).perform());
+    promisesArray.push(
+      new ProfileTransactionReceiveSuccessNotification({ transaction: oThis.transactionObj }).perform()
+    );
+
+    await Promise.all(promisesArray);
   }
 
   /**
