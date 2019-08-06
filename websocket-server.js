@@ -32,8 +32,10 @@ app.get('/', function(req, res) {
 io.on('connection', async function(socket) {
   console.log('a user connected socket', socket.handshake.query);
 
-  let params = socket.handshake.query,
-    websocketAuthObj = new WebsocketAuth(params);
+  let params = socket.handshake.query;
+  params.socketServerIdentifier = program.cronProcessId;
+
+  let websocketAuthObj = new WebsocketAuth(params);
 
   let websocketAuthRsp = await websocketAuthObj.perform().catch(function(err) {
     console.log('--err---', err);
