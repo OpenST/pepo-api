@@ -35,9 +35,7 @@ io.on('connection', async function(socket) {
   let params = socket.handshake.query;
   params.socketServerIdentifier = program.cronProcessId;
 
-  let websocketAuthObj = new WebsocketAuth(params);
-
-  let websocketAuthRsp = await websocketAuthObj.perform().catch(function(err) {
+  let websocketAuthRsp = await new WebsocketAuth(params).perform().catch(function(err) {
     console.log('--err---', err);
   });
 
