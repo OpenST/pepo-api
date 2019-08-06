@@ -22,7 +22,7 @@
 <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
 <script>
   $(function () {
-    var socket = io('http://localhost:4000?user_id=1000&auth_key=BHYU77343HTKGRO4680HJDKSN');
+    var socket = io('http://localhost:4000?auth_key_expiry_at=1567085683&payload=ZDRjYTBhYWJhNWY2ZTgyMzdiYWYxMDEzYTQ1YzA5ZTZiMTI3N2I4NzQ1OWMzM2RlNzUwMDM1Y2QwZTIwOTk4YTQyZDNhNmNkM2EyYjYyZDVhNzc3YTI3Mjg5OGU1MGU4NTI2YjM0N2I2OGQ0MDNkNTI1Yzk3ZDgwM2I3MTQ0OGNkN2FjNjY2ZDVkOTU5MzlmZmU2MTdjNzY1Zjc0ZjYzMw==');
     $('form').submit(function(e){
       e.preventDefault(); // prevents page reloading
       socket.emit('chat message', $('#m').val());
