@@ -1,7 +1,8 @@
 const rootPrefix = '../..',
-  coreConstants = require(rootPrefix + '/config/coreConstants');
+  database = require(rootPrefix + '/lib/globalConstant/database');
 
-const dbName = 'pepo_api_' + coreConstants.environment;
+const dbName = database.entityDbName;
+
 const upQuery = 'ALTER TABLE `gif_categories` \n\
       ADD COLUMN `kind` tinyint(4) NOT NULL  AFTER `name`;';
 

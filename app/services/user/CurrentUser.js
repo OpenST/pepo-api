@@ -2,6 +2,8 @@ const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   UserMultiCache = require(rootPrefix + '/lib/cacheManagement/multi/User'),
+  PricePointsCache = require(rootPrefix + '/lib/cacheManagement/single/PricePoints'),
+  GetTokenService = require(rootPrefix + '/app/services/token/Get'),
   TokenUserDetailByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TokenUserByUserIds'),
   UserModel = require(rootPrefix + '/app/models/mysql/User'),
   TokenUserModel = require(rootPrefix + '/app/models/mysql/TokenUser'),
@@ -20,6 +22,8 @@ class CurrentUser extends ServiceBase {
     const oThis = this;
 
     oThis.userId = params.current_user.id;
+    oThis.pricePoints = {};
+    oThis.tokenDetails = {};
   }
 
   /**
@@ -33,6 +37,10 @@ class CurrentUser extends ServiceBase {
     await oThis._fetchUser();
 
     await oThis._fetchTokenUser();
+
+    await oThis._fetchPricePoints();
+
+    await oThis._setTokenDetails();
 
     return Promise.resolve(oThis._serviceResponse());
   }
@@ -55,8 +63,8 @@ class CurrentUser extends ServiceBase {
       return Promise.reject(usersByIdHashRes);
     }
 
-    let usersByIdHash = usersByIdHashRes.data;
-    oThis.user = usersByIdHash[oThis.userId];
+    let usersByIdMap = usersByIdHashRes.data;
+    oThis.user = usersByIdMap[oThis.userId];
 
     return Promise.resolve(responseHelper.successWithData({}));
   }
@@ -86,6 +94,43 @@ class CurrentUser extends ServiceBase {
   }
 
   /**
+   * Fetch price points.
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _fetchPricePoints() {
+    const oThis = this;
+
+    const pricePointsCacheRsp = await new PricePointsCache().fetch();
+
+    if (pricePointsCacheRsp.isFailure()) {
+      return Promise.reject(pricePointsCacheRsp);
+    }
+
+    oThis.pricePoints = pricePointsCacheRsp.data;
+  }
+
+  /**
+   * Fetch token details.
+   *
+   * @return {Promise<void>}
+   * @private
+   */
+  async _setTokenDetails() {
+    const oThis = this;
+
+    let getTokenServiceObj = new GetTokenService({});
+
+    let tokenResp = await getTokenServiceObj.perform();
+
+    if (tokenResp.isFailure()) {
+      return Promise.reject(tokenResp);
+    }
+    oThis.tokenDetails = tokenResp.data.tokenDetails;
+  }
+
+  /**
    * Response for service
    *
    *
@@ -96,9 +141,16 @@ class CurrentUser extends ServiceBase {
   async _serviceResponse() {
     const oThis = this;
 
+    const safeFormattedUserData = new UserModel().safeFormattedData(oThis.user);
+    const safeFormattedTokenUserData = new TokenUserModel().safeFormattedData(oThis.tokenUser);
+
     return responseHelper.successWithData({
-      user: new UserModel().safeFormattedData(oThis.user),
-      tokenUser: new TokenUserModel().safeFormattedData(oThis.tokenUser)
+      usersByIdMap: { [safeFormattedUserData.id]: safeFormattedUserData },
+      tokenUsersByUserIdMap: { [safeFormattedTokenUserData.userId]: safeFormattedTokenUserData },
+      user: safeFormattedUserData,
+      tokenUser: safeFormattedTokenUserData,
+      pricePointsMap: oThis.pricePoints,
+      tokenDetails: oThis.tokenDetails
     });
   }
 }

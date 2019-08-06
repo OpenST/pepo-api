@@ -1,0 +1,14 @@
+{
+  "emailServiceApiCallHookProcessor": {
+    "abcd": "1234",
+    "sequenceNumber": 1
+  },
+  "cronProcessesMonitor": {
+    "ncbhjc": "hwvtuc"
+  },
+  "bgJobRabbitmq": {
+    "topics": ["bg.#"],
+    "queues": ["example"],
+    "prefetchCount": 1
+  }
+}

@@ -28,54 +28,140 @@ class CoreConstants {
     return process.env.PA_COOKIE_DOMAIN;
   }
 
-  // Cache related details
-
-  get CACHE_ENGINE() {
-    return process.env.PA_CACHE_ENGINE;
-  }
-
-  get MEMCACHE_SERVERS() {
-    return process.env.PA_MEMCACHE_SERVERS.split(',');
-  }
-
-  // MYSQL related details
-
-  get PEPO_API_MYSQL_DB() {
-    return process.env.PEPO_API_MYSQL_DB;
-  }
+  // MySql constants
 
   get MYSQL_CONNECTION_POOL_SIZE() {
     return process.env.PA_MYSQL_CONNECTION_POOL_SIZE;
   }
 
-  get MYSQL_HOST() {
-    return process.env.PA_MYSQL_HOST;
+  // Main db
+
+  get MAIN_DB_MYSQL_HOST() {
+    return process.env.PA_MAIN_DB_MYSQL_HOST;
   }
 
-  get MYSQL_USER() {
-    return process.env.PA_MYSQL_USER;
+  get MAIN_DB_MYSQL_USER() {
+    return process.env.PA_MAIN_DB_MYSQL_USER;
   }
 
-  get MYSQL_PASSWORD() {
-    return process.env.PA_MYSQL_PASSWORD;
+  get MAIN_DB_MYSQL_PASSWORD() {
+    return process.env.PA_MAIN_DB_MYSQL_PASSWORD;
   }
 
-  // Mysql ost infra related details
+  // User db
 
-  get INFRA_MYSQL_HOST() {
-    return process.env.PA_INFRA_MYSQL_HOST;
+  get USER_DB_MYSQL_HOST() {
+    return process.env.PA_USER_DB_MYSQL_HOST;
   }
 
-  get INFRA_MYSQL_USER() {
-    return process.env.PA_INFRA_MYSQL_USER;
+  get USER_DB_MYSQL_USER() {
+    return process.env.PA_USER_DB_MYSQL_USER;
   }
 
-  get INFRA_MYSQL_PASSWORD() {
-    return process.env.PA_INFRA_MYSQL_PASSWORD;
+  get USER_DB_MYSQL_PASSWORD() {
+    return process.env.PA_USER_DB_MYSQL_PASSWORD;
   }
 
-  get INFRA_MYSQL_DB() {
-    return process.env.PA_INFRA_MYSQL_DB;
+  // Big db
+
+  get BIG_DB_MYSQL_HOST() {
+    return process.env.PA_BIG_DB_MYSQL_HOST;
+  }
+
+  get BIG_DB_MYSQL_USER() {
+    return process.env.PA_BIG_DB_MYSQL_USER;
+  }
+
+  get BIG_DB_MYSQL_PASSWORD() {
+    return process.env.PA_BIG_DB_MYSQL_PASSWORD;
+  }
+
+  // Entity db
+
+  get ENTITY_DB_MYSQL_HOST() {
+    return process.env.PA_ENTITY_DB_MYSQL_HOST;
+  }
+
+  get ENTITY_DB_MYSQL_USER() {
+    return process.env.PA_ENTITY_DB_MYSQL_USER;
+  }
+
+  get ENTITY_DB_MYSQL_PASSWORD() {
+    return process.env.PA_ENTITY_DB_MYSQL_PASSWORD;
+  }
+
+  // Twitter db
+
+  get TWITTER_DB_MYSQL_HOST() {
+    return process.env.PA_TWITTER_DB_MYSQL_HOST;
+  }
+
+  get TWITTER_DB_MYSQL_USER() {
+    return process.env.PA_TWITTER_DB_MYSQL_USER;
+  }
+
+  get TWITTER_DB_MYSQL_PASSWORD() {
+    return process.env.PA_TWITTER_DB_MYSQL_PASSWORD;
+  }
+
+  // Feed db
+
+  get FEED_DB_MYSQL_HOST() {
+    return process.env.PA_FEED_DB_MYSQL_HOST;
+  }
+
+  get FEED_DB_MYSQL_USER() {
+    return process.env.PA_FEED_DB_MYSQL_USER;
+  }
+
+  get FEED_DB_MYSQL_PASSWORD() {
+    return process.env.PA_FEED_DB_MYSQL_PASSWORD;
+  }
+
+  // Config db
+
+  get CONFIG_DB_MYSQL_HOST() {
+    return process.env.PA_CONFIG_DB_MYSQL_HOST;
+  }
+
+  get CONFIG_DB_MYSQL_USER() {
+    return process.env.PA_CONFIG_DB_MYSQL_USER;
+  }
+
+  get CONFIG_DB_MYSQL_PASSWORD() {
+    return process.env.PA_CONFIG_DB_MYSQL_PASSWORD;
+  }
+
+  // Ost db
+
+  get OST_DB_MYSQL_HOST() {
+    return process.env.PA_OST_DB_MYSQL_HOST;
+  }
+
+  get OST_DB_MYSQL_USER() {
+    return process.env.PA_OST_DB_MYSQL_USER;
+  }
+
+  get OST_DB_MYSQL_PASSWORD() {
+    return process.env.PA_OST_DB_MYSQL_PASSWORD;
+  }
+
+  // Infra db
+
+  get INFRA_DB_MYSQL_HOST() {
+    return process.env.PA_INFRA_DB_MYSQL_HOST;
+  }
+
+  get INFRA_DB_MYSQL_USER() {
+    return process.env.PA_INFRA_DB_MYSQL_USER;
+  }
+
+  get INFRA_DB_MYSQL_PASSWORD() {
+    return process.env.PA_INFRA_DB_MYSQL_PASSWORD;
+  }
+
+  get INFRA_DB_MYSQL_DB() {
+    return process.env.PA_INFRA_DB_MYSQL_DB;
   }
 
   // kms related constants
@@ -92,20 +178,61 @@ class CoreConstants {
     return process.env.PA_KMS_AWS_REGION;
   }
 
-  get KMS_API_KEY_ARN() {
-    return process.env.PA_API_KEY_KMS_ARN;
-  }
-
   get KMS_API_KEY_ID() {
     return process.env.PA_API_KEY_KMS_ID;
   }
 
-  get KMS_SECRET_ENC_KEY_ARN() {
-    return process.env.PA_SECRET_ENC_KEY_KMS_ARN;
-  }
-
   get KMS_SECRET_ENC_KEY_ID() {
     return process.env.PA_SECRET_ENC_KEY_KMS_ID;
+  }
+
+  /**
+   * S3 AWS config
+   */
+  get S3_AWS_ACCESS_KEY() {
+    return process.env.PA_S3_AWS_ACCESS_KEY;
+  }
+
+  get S3_AWS_SECRET_KEY() {
+    return process.env.PA_S3_AWS_SECRET_KEY;
+  }
+
+  get S3_AWS_REGION() {
+    return process.env.PA_S3_AWS_REGION;
+  }
+
+  get S3_AWS_MASTER_FOLDER() {
+    return process.env.PA_S3_AWS_MASTER_FOLDER;
+  }
+
+  get S3_USER_ASSETS_BUCKET() {
+    return process.env.PA_S3_USER_ASSETS_BUCKET;
+  }
+
+  get S3_USER_ASSETS_FOLDER() {
+    const oThis = this;
+
+    return oThis.S3_AWS_MASTER_FOLDER + '/' + 'ua';
+  }
+
+  get S3_USER_IMAGES_FOLDER() {
+    const oThis = this;
+
+    return oThis.S3_USER_ASSETS_FOLDER + oThis.IMAGES_S3_FOLDER;
+  }
+
+  get S3_USER_VIDEOS_FOLDER() {
+    const oThis = this;
+
+    return oThis.S3_USER_ASSETS_FOLDER + oThis.VIDEOS_S3_FOLDER;
+  }
+
+  get IMAGES_S3_FOLDER() {
+    return '/images';
+  }
+
+  get VIDEOS_S3_FOLDER() {
+    return '/videos';
   }
 
   // Encryption Secrets
@@ -142,6 +269,49 @@ class CoreConstants {
 
   get IP_ADDRESS() {
     return process.env.DEVOPS_IP_ADDRESS;
+  }
+
+  // Pepo-campaigns details
+
+  get PEPO_CAMPAIGN_BASE_URL() {
+    return process.env.PA_CAMPAIGN_BASE_URL;
+  }
+
+  get PEPO_CAMPAIGN_CLIENT_KEY() {
+    return process.env.PA_CAMPAIGN_CLIENT_KEY;
+  }
+
+  get PEPO_CAMPAIGN_CLIENT_SECRET() {
+    return process.env.PA_CAMPAIGN_CLIENT_SECRET;
+  }
+
+  get PEPO_CAMPAIGN_MASTER_LIST() {
+    return process.env.PA_CAMPAIGN_MASTER_LIST;
+  }
+
+  //Twitter API key and secret
+  get TWITTER_CONSUMER_KEY() {
+    return process.env.PA_TWITTER_CONSUMER_KEY;
+  }
+
+  get TWITTER_CONSUMER_SECRET() {
+    return process.env.PA_TWITTER_CONSUMER_SECRET;
+  }
+
+  get TWITTER_AUTH_CALLBACK_ROUTE() {
+    return process.env.PA_TWITTER_AUTH_CALLBACK_ROUTE;
+  }
+
+  get PR_API_BASE_URL() {
+    return process.env.PR_API_BASE_URL;
+  }
+
+  get PR_INTERNAL_API_SECRET_KEY() {
+    return process.env.PR_INTERNAL_API_SECRET_KEY;
+  }
+
+  get PA_CDN_URL() {
+    return process.env.PA_CDN_URL;
   }
 }
 

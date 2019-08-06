@@ -11,9 +11,9 @@ const program = require('commander'),
 const rootPrefix = '../..',
   coreConstants = require(rootPrefix + '/config/coreConstants'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
-  KmsWrapper = require(rootPrefix + '/lib/authentication/KmsWrapper'),
+  KmsWrapper = require(rootPrefix + '/lib/aws/KmsWrapper'),
   localCipher = require(rootPrefix + '/lib/encryptors/localCipher'),
-  kmsGlobalConstant = require(rootPrefix + '/lib/globalConstant/kms.js'),
+  kmsGlobalConstant = require(rootPrefix + '/lib/globalConstant/kms'),
   TokenModel = require(rootPrefix + '/app/models/mysql/Token');
 
 program
@@ -151,8 +151,10 @@ class seedTokensTable {
       .insert({
         name: oThis.tokenData.name,
         symbol: oThis.tokenData.symbol,
+        stake_currency: oThis.tokenData.base_token,
         ost_token_id: oThis.tokenData.id,
         decimal: oThis.tokenData.decimals,
+        aux_chain_id: oThis.tokenData.auxiliary_chains[0].chain_id,
         conversion_factor: oThis.tokenData.conversion_factor,
         company_token_holder_address: oThis.tokenData.auxiliary_chains[0].company_token_holders[0].toLowerCase(),
         rule_addresses: JSON.stringify(ruleAddresses),

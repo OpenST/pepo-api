@@ -11,9 +11,24 @@
 const rootPrefix = '../..',
   cache = require(rootPrefix + '/lib/providers/memcached');
 
-let cacheImplementer = cache.getInstance().cacheInstance;
+class FlushCache {
+  constructor() {}
 
-cacheImplementer.delAll().then(function() {
-  console.log('--------Flushed memcached--------');
-  process.exit(0);
-});
+  async perform() {
+    let cacheObject = await cache.getInstance();
+
+    cacheObject.cacheInstance.delAll().then(function() {
+      console.log('--------Flushed memcached--------');
+      process.exit(0);
+    });
+  }
+}
+
+let flushCache = new FlushCache();
+
+flushCache
+  .perform()
+  .then(function(rsp) {})
+  .catch(function(err) {
+    console.log('Error in flushing memcache: ', err);
+  });

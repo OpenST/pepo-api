@@ -1,5 +1,6 @@
 const rootPrefix = '..',
-  coreConstants = require(rootPrefix + '/config/coreConstants');
+  coreConstants = require(rootPrefix + '/config/coreConstants'),
+  database = require(rootPrefix + '/lib/globalConstant/database');
 
 const mysqlConfig = {
   commonNodeConfig: {
@@ -17,28 +18,98 @@ const mysqlConfig = {
     defaultSelector: 'RR'
   },
   clusters: {
-    cluster1: {
+    mainDbCluster: {
       master: {
-        host: coreConstants.MYSQL_HOST,
-        user: coreConstants.MYSQL_USER,
-        password: coreConstants.MYSQL_PASSWORD
+        host: coreConstants.MAIN_DB_MYSQL_HOST,
+        user: coreConstants.MAIN_DB_MYSQL_USER,
+        password: coreConstants.MAIN_DB_MYSQL_PASSWORD
       }
     },
-    cluster2: {
+    userDbCluster: {
       master: {
-        host: coreConstants.INFRA_MYSQL_HOST,
-        user: coreConstants.INFRA_MYSQL_USER,
-        password: coreConstants.INFRA_MYSQL_PASSWORD
+        host: coreConstants.USER_DB_MYSQL_HOST,
+        user: coreConstants.USER_DB_MYSQL_USER,
+        password: coreConstants.USER_DB_MYSQL_PASSWORD
+      }
+    },
+    bigDbCluster: {
+      master: {
+        host: coreConstants.BIG_DB_MYSQL_HOST,
+        user: coreConstants.BIG_DB_MYSQL_USER,
+        password: coreConstants.BIG_DB_MYSQL_PASSWORD
+      }
+    },
+    entityDbCluster: {
+      master: {
+        host: coreConstants.ENTITY_DB_MYSQL_HOST,
+        user: coreConstants.ENTITY_DB_MYSQL_USER,
+        password: coreConstants.ENTITY_DB_MYSQL_PASSWORD
+      }
+    },
+    twitterDbCluster: {
+      master: {
+        host: coreConstants.TWITTER_DB_MYSQL_HOST,
+        user: coreConstants.TWITTER_DB_MYSQL_USER,
+        password: coreConstants.TWITTER_DB_MYSQL_PASSWORD
+      }
+    },
+    feedDbCluster: {
+      master: {
+        host: coreConstants.FEED_DB_MYSQL_HOST,
+        user: coreConstants.FEED_DB_MYSQL_USER,
+        password: coreConstants.FEED_DB_MYSQL_PASSWORD
+      }
+    },
+    configDbCluster: {
+      master: {
+        host: coreConstants.CONFIG_DB_MYSQL_HOST,
+        user: coreConstants.CONFIG_DB_MYSQL_USER,
+        password: coreConstants.CONFIG_DB_MYSQL_PASSWORD
+      }
+    },
+    ostDbCluster: {
+      master: {
+        host: coreConstants.OST_DB_MYSQL_HOST,
+        user: coreConstants.OST_DB_MYSQL_USER,
+        password: coreConstants.OST_DB_MYSQL_PASSWORD
+      }
+    },
+    infraDbCluster: {
+      master: {
+        host: coreConstants.INFRA_DB_MYSQL_HOST,
+        user: coreConstants.INFRA_DB_MYSQL_USER,
+        password: coreConstants.INFRA_DB_MYSQL_PASSWORD
       }
     }
   },
   databases: {}
 };
 
-// Pepo API database.
-mysqlConfig.databases['pepo_api_' + coreConstants.environment] = ['cluster1'];
+// Main db
+mysqlConfig.databases[database.mainDbName] = ['mainDbCluster'];
 
-// infra database
-mysqlConfig['databases'][coreConstants.INFRA_MYSQL_DB] = ['cluster2'];
+// User db
+mysqlConfig.databases[database.userDbName] = ['userDbCluster'];
+
+// Big db
+mysqlConfig.databases[database.bigDbName] = ['bigDbCluster'];
+
+// Entity db
+mysqlConfig.databases[database.entityDbName] = ['entityDbCluster'];
+
+// Twitter db
+mysqlConfig.databases[database.twitterDbName] = ['twitterDbCluster'];
+
+// Feed db
+mysqlConfig.databases[database.feedDbName] = ['feedDbCluster'];
+
+// Config db
+mysqlConfig.databases[database.configDbName] = ['configDbCluster'];
+
+// Ost db
+mysqlConfig.databases[database.ostDbName] = ['ostDbCluster'];
+
+// Infra db
+mysqlConfig.databases[database.infraDbName] = ['infraDbCluster'];
 
 module.exports = mysqlConfig;

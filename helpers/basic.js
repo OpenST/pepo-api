@@ -170,6 +170,7 @@ class BasicHelper {
    */
   convertHexToString(string) {
     const buf = new Buffer.from(string, 'hex');
+
     return buf.toString('utf8');
   }
 
@@ -182,6 +183,7 @@ class BasicHelper {
    */
   convertStringToHex(string) {
     const buf = new Buffer.from(string, 'utf8');
+
     return buf.toString('hex');
   }
 
@@ -453,11 +455,76 @@ class BasicHelper {
    * @returns {Promise<any>}
    */
   sleep(ms) {
-    console.log('Sleeping for ', ms, ' ms');
+    // eslint-disable-next-line no-console
+    console.log(`Sleeping for ${ms} ms.`);
 
     return new Promise(function(resolve) {
       setTimeout(resolve, ms);
     });
+  }
+
+  /**
+   * Parses ampersand delimited key value pairs and returns a hash of key value pairs.
+   * Ex: [oauth_token=uEyX0AAAAAAA_NBNACBBa52afhY&oauth_token_secret=Mtwr1Dd3MAYLJ8yxJlJ69WIbsdKEjtnM&oauth_callback_confirmed=true]
+   * Response:
+   * {
+   *    oauth_token: 'uEyX0AAAAAAA_NBNACBBa52afhY',
+   *    oauth_token_secret: 'Mtwr1Dd3MAYLJ8yxJlJ69WIbsdKEjtnM',
+   *    oauth_callback_confirmed: 'true'
+   * }
+   *
+   * @param response
+   */
+  parseAmpersandSeparatedKeyValue(response) {
+    const finalResponse = {};
+    response.split('&').forEach(function(keyValPair) {
+      const val = keyValPair.split('=');
+      finalResponse[val[0]] = val[1];
+    });
+
+    return finalResponse;
+  }
+
+  /**
+   * Json parsed response from twitter.
+   *
+   * @return {Object}
+   */
+  parseTwitterJsonResponse(response) {
+    return JSON.parse(response);
+  }
+
+  /**
+   * Gives random alphanumeric string
+   *
+   * @returns {string}
+   */
+  getRandomAlphaNumericString() {
+    return (
+      Date.now()
+        .toString(36)
+        .substring(2, 15) +
+      Math.random()
+        .toString(36)
+        .substring(2, 15)
+    );
+  }
+
+  /**
+   * Gives unique user name
+   *
+   * @param name
+   * @returns {string}
+   */
+  getUniqueUserName(name) {
+    return (
+      name.substring(0, 4) +
+      '_' +
+      Date.now().toString(36) +
+      Math.random()
+        .toString(36)
+        .substring(2, 4)
+    );
   }
 }
 
