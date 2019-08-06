@@ -1,17 +1,17 @@
 const rootPrefix = '../..',
-  keySpaceConstant = require(rootPrefix + '/lib/globalConstant/keySpace'),
+  cassandraKeyspaceConstant = require(rootPrefix + '/lib/globalConstant/cassandraKeyspace'),
   DbKindConstant = require(rootPrefix + '/lib/globalConstant/dbKind');
 
 const dbName = '';
 
-let keySpace = keySpaceConstant.mainKeySpace;
+let keySpace = cassandraKeyspaceConstant.cassandraKeyspaceName;
 
 const dbKind = DbKindConstant.cassandraDbKind;
 
 const upQuery = `CREATE TABLE ${keySpace}.user_notification_visit_details \n\
 ( \n\
   user_id bigint,\n\
-  unread_flag smallint,\n\
+  unread_flag boolean,\n\
   PRIMARY KEY ((user_id))\n\
 );`;
 

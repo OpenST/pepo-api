@@ -50,20 +50,59 @@ class ModelBase {
    *
    * @return {Promise<any>}
    */
-  fire(query, params, options = {}) {
+  async fire(query, params, options = {}) {
     const oThis = this;
 
-    return new Promise(function(onResolve, onReject) {
-      const preQuery = Date.now();
-      const qry = oThis.onWriteConnection().execute(query, params, options, function(err, result) {
-        logger.info('(' + (Date.now() - preQuery) + ' ms)', qry.sql);
-        if (err) {
-          onReject(err);
-        } else {
-          onResolve(result);
-        }
-      });
-    });
+    // todo: print query and time in mili seconds here @tejas discuss this with @aman
+    return oThis.onWriteConnection().execute(query, params, options);
+  }
+
+  /**
+   * Bulk insert query
+   *
+   * @param query
+   * @param inputParams
+   * @returns {Promise<void>}
+   */
+  async bulkInsert(query, inputParams) {
+    const batchSize = 25,
+      promisesArray = [];
+
+    while (inputParams.length) {
+      const toBeProcessedParams = inputParams.splice(0, batchSize);
+      const queries = [];
+
+      for (let index = 0; index < toBeProcessedParams.length; index++) {
+        const queryObj = {
+          query: query,
+          params: toBeProcessedParams[index]
+        };
+        queries.push(queryObj);
+      }
+
+      promisesArray.push(cassandraClient.batch(queries));
+    }
+
+    await Promise.all(promisesArray);
+  }
+
+  /**
+   * Format final DB data.
+   *
+   * @param {object} formattedData
+   *
+   * @returns {object}
+   */
+  sanitizeFormattedData(formattedData) {
+    const finalResponse = {};
+
+    for (const key in formattedData) {
+      if (!CommonValidators.isVarUndefined(formattedData[key])) {
+        finalResponse[key] = formattedData[key];
+      }
+    }
+
+    return finalResponse;
   }
 }
 
