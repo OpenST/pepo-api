@@ -1,0 +1,31 @@
+const rootPrefix = '../../..',
+  ServiceBase = require(rootPrefix + '/app/services/Base');
+
+class GetUserNotifications extends ServiceBase {
+  /**
+   * Constructor for user video details service.
+   *
+   * @param {object} params
+   * @param {string/number} params.user_id
+   * @param {object} [params.current_user]
+   *
+   * @augments ServiceBase
+   *
+   * @constructor
+   */
+  constructor(params) {
+    super();
+  }
+
+  /**
+   * Async perform.
+   *
+   * @return {Promise<void>}
+   * @private
+   */
+  async _asyncPerform() {
+    const oThis = this;
+  }
+}
+
+module.exports = GetUserNotifications;

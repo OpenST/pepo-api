@@ -7,20 +7,25 @@ const rootPrefix = '../../..',
   paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination'),
   entityType = require(rootPrefix + '/lib/globalConstant/entityType');
 
-class UserVideoById extends ServiceBase {
+class GetVideoById extends ServiceBase {
   /**
    * @constructor
    *
    * @param params
    */
   constructor(params) {
+    super();
+
     const oThis = this;
 
-    oThis.videoId = params.videoId;
+    oThis.videoId = params.video_id;
     oThis.currentUser = params.current_user;
 
     oThis.currentUserId = null;
     oThis.creatorUserId = null;
+    oThis.responseMetaData = {};
+    oThis.tokenDetails = {};
+    oThis.profileResponse = {};
   }
 
   /**
@@ -97,7 +102,11 @@ class UserVideoById extends ServiceBase {
   async _getVideoDetailsForDisplay() {
     const oThis = this;
 
-    const getProfileObj = new GetProfile({ userIds: [oThis.creatorUserId], currentUserId: oThis.currentUserId });
+    const getProfileObj = new GetProfile({
+      userIds: [oThis.creatorUserId],
+      currentUserId: oThis.currentUserId,
+      videoIds: [oThis.videoId]
+    });
 
     const response = await getProfileObj.perform();
 
@@ -145,4 +154,4 @@ class UserVideoById extends ServiceBase {
   }
 }
 
-module.exports = UserVideoById;
+module.exports = GetVideoById;
