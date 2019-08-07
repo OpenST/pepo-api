@@ -57,6 +57,15 @@ class NotificationJobProcessor extends RabbitMqProcessorBase {
   get _queuePrefix() {
     return 'notification_';
   }
+
+  /**
+   * Returns job processor factory.
+   *
+   * @returns {any}
+   */
+  get jobProcessorFactory() {
+    return require(rootPrefix + '/lib/jobs/notification/factory');
+  }
 }
 
 new NotificationJobProcessor({ cronProcessId: +program.cronProcessId }).perform();

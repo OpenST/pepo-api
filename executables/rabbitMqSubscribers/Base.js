@@ -8,7 +8,6 @@ const rootPrefix = '../..',
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   rabbitMqProvider = require(rootPrefix + '/lib/providers/rabbitMq'),
-  jobProcessorFactory = require(rootPrefix + '/lib/jobs/bg/factory'),
   createErrorLogsEntry = require(rootPrefix + '/lib/errorLogs/createEntry'),
   machineKindConstant = require(rootPrefix + '/lib/globalConstant/machineKind');
 
@@ -395,9 +394,11 @@ class ProcessorBase extends CronBase {
    * @private
    */
   _processMessage(messageParams) {
+    const oThis = this;
+
     logger.log('Message params =====', messageParams);
 
-    return jobProcessorFactory.getInstance(messageParams).perform();
+    return oThis.jobProcessorFactory.getInstance(messageParams).perform();
   }
 
   /**
@@ -417,6 +418,15 @@ class ProcessorBase extends CronBase {
    * @private
    */
   get _rabbitMqConfigKind() {
+    throw new Error('Sub-class to implement.');
+  }
+
+  /**
+   * Returns job processor factory.
+   *
+   * @returns {any}
+   */
+  get jobProcessorFactory() {
     throw new Error('Sub-class to implement.');
   }
 }
