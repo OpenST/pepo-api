@@ -5,6 +5,7 @@
     You will need following for development environment setup.
     - [MySQL](https://www.mysql.com/downloads/)
     - [Memcached](https://memcached.org/)
+    - [Tracker](https://github.com/pepotech/pepo-tracker)
     - [Cassandra](https://cassandra.apache.org/)
     
 * Install and setup cassandra.
