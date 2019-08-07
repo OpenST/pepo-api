@@ -100,18 +100,40 @@ class PublicVideoFeed extends FeedBase {
     // TODO - temp code for curated feeds
     // TEMP CODE START - to show curated feeds on top(only in logged out mode)
     if (!oThis.currentUser && oThis.paginationTimestamp == null) {
-      let curatedFeed = {
-        id: '9999',
-        primaryExternalEntityId: '999',
-        paginationIdentifier: 1564468241,
-        kind: 'CURATED',
-        actor: 9999,
-        extraData: 'null',
-        createdAt: 1564468241,
-        updatedAt: 1564468241
-      };
+      let curatedFeeds = [
+        {
+          id: '9997',
+          primaryExternalEntityId: '997',
+          paginationIdentifier: 1564468241,
+          kind: 'CURATED',
+          actor: 9999,
+          extraData: 'null',
+          createdAt: 1564468241,
+          updatedAt: 1564468241
+        },
+        {
+          id: '9998',
+          primaryExternalEntityId: '998',
+          paginationIdentifier: 1564468241,
+          kind: 'CURATED',
+          actor: 9999,
+          extraData: 'null',
+          createdAt: 1564468241,
+          updatedAt: 1564468241
+        },
+        {
+          id: '9999',
+          primaryExternalEntityId: '999',
+          paginationIdentifier: 1564468241,
+          kind: 'CURATED',
+          actor: 9999,
+          extraData: 'null',
+          createdAt: 1564468241,
+          updatedAt: 1564468241
+        }
+      ];
 
-      oThis.feeds = [curatedFeed].concat(oThis.feeds);
+      oThis.feeds = [curatedFeeds].concat(oThis.feeds);
 
       oThis.profileResponse.userProfilesMap = Object.assign(oThis.profileResponse.userProfilesMap, {
         '9999': {
@@ -156,12 +178,44 @@ class PublicVideoFeed extends FeedBase {
       });
 
       oThis.profileResponse.videoMap = Object.assign(oThis.profileResponse.videoMap, {
+        '997': {
+          id: '997',
+          resolutions: {
+            original: {
+              url:
+                'https://dbvoeb7t6hffk.cloudfront.net/pepo-sandbox1000/ua/videos/1000-3be05bd1b1bbb4a8559f2932245e70f1-original.mp4',
+              size: 4573849,
+              height: 1280,
+              width: 720
+            }
+          },
+          posterImageId: '202',
+          status: 'active',
+          createdAt: 1564472456,
+          updatedAt: 1564472456
+        },
+        '998': {
+          id: '998',
+          resolutions: {
+            original: {
+              url:
+                'https://dbvoeb7t6hffk.cloudfront.net/pepo-sandbox1000/ua/videos/1000-744eff04466b1b3321b2f5e92527a53d-original.mp4',
+              size: 4573849,
+              height: 1280,
+              width: 720
+            }
+          },
+          posterImageId: '202',
+          status: 'active',
+          createdAt: 1564472456,
+          updatedAt: 1564472456
+        },
         '999': {
           id: '999',
           resolutions: {
             original: {
               url:
-                'https://dbvoeb7t6hffk.cloudfront.net/pepo-staging1000/ua/videos/1045-7dafe24a95fa04399cc68d268f05dda8-original.mp4',
+                'https://dbvoeb7t6hffk.cloudfront.net/pepo-sandbox1000/ua/videos/1000-2da3a523efbab1a3ea5793e62189c35d-original.mp4',
               size: 4573849,
               height: 1280,
               width: 720
@@ -175,12 +229,32 @@ class PublicVideoFeed extends FeedBase {
       });
 
       oThis.profileResponse.videoDetailsMap = Object.assign(oThis.profileResponse.videoDetailsMap, {
+        '997': {
+          id: '997',
+          creatorUserId: '9999',
+          videoId: '997',
+          totalContributedBy: 13,
+          totalAmount: '70001220000000000000',
+          totalTransactions: 2,
+          createdAt: 1564472456,
+          updatedAt: 1564472456
+        },
+        '998': {
+          id: '998',
+          creatorUserId: '9999',
+          videoId: '998',
+          totalContributedBy: 18,
+          totalAmount: '80001220000000000000',
+          totalTransactions: 2,
+          createdAt: 1564472456,
+          updatedAt: 1564472456
+        },
         '999': {
           id: '999',
           creatorUserId: '9999',
           videoId: '999',
           totalContributedBy: 25,
-          totalAmount: '9000122000000000000000',
+          totalAmount: '90001220000000000000',
           totalTransactions: 2,
           createdAt: 1564472456,
           updatedAt: 1564472456
