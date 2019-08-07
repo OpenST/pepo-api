@@ -22,6 +22,8 @@ class SocketConnectionDetails extends ServiceBase {
    *
    * @param params
    * @param params.user_id {String} - user id
+   * @param params.current_user {Object} - current user
+   * @param params.current_user.id {String} - current user id
    */
   constructor(params) {
     super(params);
@@ -29,6 +31,7 @@ class SocketConnectionDetails extends ServiceBase {
     const oThis = this;
 
     oThis.userId = params.user_id;
+    oThis.currentUserId = params.current_user.id;
 
     oThis.authKey = null;
     oThis.userData = null;
@@ -44,6 +47,17 @@ class SocketConnectionDetails extends ServiceBase {
   async _asyncPerform() {
     const oThis = this;
 
+    if (oThis.userId !== oThis.currentUserId) {
+      return responseHelper.paramValidationError({
+        internal_error_identifier: 'a_s_u_scd_3',
+        api_error_identifier: 'invalid_api_params',
+        params_error_identifiers: ['invalid_user_id'],
+        debug_options: {
+          userId: oThis.userId,
+          currentUserId: oThis.currentUserId
+        }
+      });
+    }
     let promiseArray = [];
 
     promiseArray.push(oThis._fetchConfigData());

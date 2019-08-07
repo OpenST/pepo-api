@@ -8,7 +8,7 @@ const upQuery =
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT, \n\
   `user_id` bigint(20) unsigned NOT NULL, \n\
   `auth_key` varchar(255) COLLATE utf8_unicode_ci, \n\
-  `socket_identifier` bigint(20) unsigned DEFAULT NULL, \n\
+  `socket_identifier` varchar(255) DEFAULT NULL, \n\
   `auth_key_expiry_at` int(11) DEFAULT NULL, \n\
   `status` tinyint(4) NOT NULL, \n\
   `socket_expiry_at` int(11) DEFAULT NULL, \n\
