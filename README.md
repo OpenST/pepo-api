@@ -130,12 +130,6 @@ Note: Get the webhooks id from above run(subscribe webhooks). Secret has to be o
     source set_env_vars.sh
     node executables/rabbitMqSubscribers/notificationJobProcessor.js --cronProcessId 4
 ```
-* Factory process for processing socket jobs.
-```bash
-    # note: for topics to subscribe and prefetchcount, please see params column of the cron_processes table
-    source set_env_vars.sh
-    node executables/rabbitMqSubscribers/socketJobProcessor.js --cronProcessId 5
-```
 
 * Enqueue background job
 ```bash
