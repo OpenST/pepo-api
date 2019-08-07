@@ -99,6 +99,42 @@ class VideoDetail extends ModelBase {
   }
 
   /**
+   * Fetch by creator user id
+   *
+   * @param {integer} params.limit: no of rows to fetch
+   * @param {integer} params.creatorUserId: creator user id
+   * @param {integer} params.paginationTimestamp: creator user id
+   * @return {Promise<void>}
+   */
+  async fetchByCreatorUserId(params) {
+    const oThis = this,
+      limit = params.limit,
+      creatorUserId = params.creatorUserId,
+      paginationTimestamp = params.paginationTimestamp;
+
+    const queryObject = oThis
+      .select('*')
+      .where({ creator_user_id: creatorUserId })
+      .order_by('id desc')
+      .limit(limit);
+
+    if (paginationTimestamp) {
+      queryObject.where(['created_at < ?', paginationTimestamp]);
+    }
+
+    let dbRows = await queryObject.fire();
+
+    let response = {};
+
+    for (let index = 0; index < dbRows.length; index++) {
+      const formatDbRow = oThis.formatDbData(dbRows[index]);
+      response[formatDbRow.videoId] = formatDbRow;
+    }
+
+    return response;
+  }
+
+  /**
    * Fetch users contributed by object
    * contributedByUserId paid to user ids
    *
@@ -201,15 +237,26 @@ class VideoDetail extends ModelBase {
    * Flush cache.
    *
    * @param {object} params
-   * @param {number} params.userId
-   * @param {number} params.videoId
+   * @param {number} [params.userId]
+   * @param {number} [params.videoId]
    *
    * @returns {Promise<*>}
    */
   static async flushCache(params) {
-    const VideoDetailsByVideoIds = require(rootPrefix + '/lib/cacheManagement/multi/VideoDetailsByVideoIds');
+    const promisesArray = [];
 
-    await new VideoDetailsByVideoIds({ videoIds: [params.videoId] }).clear();
+    if (params.videoId) {
+      const VideoDetailsByVideoIds = require(rootPrefix + '/lib/cacheManagement/multi/VideoDetailsByVideoIds');
+      promisesArray.push(new VideoDetailsByVideoIds({ videoIds: [params.videoId] }).clear());
+    }
+
+    if (params.userId) {
+      const VideoDetailsByUserIdCache = require(rootPrefix +
+        '/lib/cacheManagement/single/VideoDetailsByUserIdPagination');
+      promisesArray.push(new VideoDetailsByUserIdCache({ userId: params.userId }).clear());
+    }
+
+    await Promise.all(promisesArray);
   }
 }
 

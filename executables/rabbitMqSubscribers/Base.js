@@ -1,5 +1,4 @@
-const OSTBase = require('@ostdotcom/base'),
-  program = require('commander');
+const OSTBase = require('@ostdotcom/base');
 
 const rootPrefix = '../..',
   CronBase = require(rootPrefix + '/executables/CronBase'),
@@ -8,35 +7,21 @@ const rootPrefix = '../..',
   RabbitmqSubscription = require(rootPrefix + '/lib/entity/RabbitSubscription'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
-  rabbitmqProvider = require(rootPrefix + '/lib/providers/bgJobRabbitmq'),
+  rabbitMqProvider = require(rootPrefix + '/lib/providers/rabbitMq'),
   createErrorLogsEntry = require(rootPrefix + '/lib/errorLogs/createEntry'),
-  machineKindConstant = require(rootPrefix + '/lib/globalConstant/machineKind'),
-  cronProcessesConstant = require(rootPrefix + '/lib/globalConstant/cronProcesses'),
-  cronProcessesConstants = require(rootPrefix + '/lib/globalConstant/cronProcesses'),
-  bgJobProcessorFactory = require(rootPrefix + '/executables/bgJobProcessor/factory');
+  machineKindConstant = require(rootPrefix + '/lib/globalConstant/machineKind');
 
-program.option('--cronProcessId <cronProcessId>', 'Cron table process ID').parse(process.argv);
-
-program.on('--help', function() {
-  logger.log('');
-  logger.log('  Example:');
-  logger.log('');
-  logger.log('    node executables/bgJobProcessor/Processor.js --cronProcessId 3');
-  logger.log('');
-  logger.log('');
-});
-
-if (!program.cronProcessId) {
-  program.help();
-  process.exit(1);
-}
-
-class Processor extends CronBase {
+/**
+ * Class for rabbitMq processor base.
+ *
+ * @class ProcessorBase
+ */
+class ProcessorBase extends CronBase {
   /**
-   * Constructor for BgJobProcessor.
+   * Constructor for rabbitMq processor base.
    *
-   * @param {Object} params
-   * @param {Number} params.cronProcessId
+   * @param {object} params
+   * @param {number} params.cronProcessId
    *
    * @constructor
    */
@@ -51,7 +36,7 @@ class Processor extends CronBase {
   /**
    * Start the actual functionality of the cron.
    *
-   * @returns {Promise<void>}
+   * @returns {Promise<boolean>}
    *
    * @private
    */
@@ -68,22 +53,26 @@ class Processor extends CronBase {
   /**
    * Validate and sanitize params.
    *
+   * @sets oThis.prefetchCount
+   *
    * @private
    */
   _validateAndSanitize() {
     const oThis = this;
 
     if (!oThis.prefetchCount) {
-      let errMsg = 'Prefetch count un-available in cron params in the database.';
+      const errMsg = 'Prefetch count un-available in cron params in the database.';
       logger.error(errMsg);
+
       return Promise.reject(errMsg);
     }
 
     oThis.prefetchCount = parseInt(oThis.prefetchCount);
 
     if (!CommonValidators.validateNonZeroInteger(oThis.prefetchCount)) {
-      let errMsg = 'Prefetch count is not a valid integer.';
+      const errMsg = 'Prefetch count is not a valid integer.';
       logger.error(errMsg);
+
       return Promise.reject(errMsg);
     }
 
@@ -91,7 +80,7 @@ class Processor extends CronBase {
   }
 
   /**
-   * Get promise queue manager for subscription topic
+   * Get promise queue manager for subscription topic.
    *
    * @param subscriptionTopic {string}
    * @return {*}
@@ -99,16 +88,20 @@ class Processor extends CronBase {
   promiseQueueManager(subscriptionTopic) {
     const oThis = this;
 
-    let rabbitmqSubscription = oThis.subscriptionTopicToDataMap[subscriptionTopic];
+    const rabbitmqSubscription = oThis.subscriptionTopicToDataMap[subscriptionTopic];
 
     // Trying to ensure that there is only one _PromiseQueueManager.
-    if (rabbitmqSubscription.promiseQueueManager) return rabbitmqSubscription.promiseQueueManager;
+    if (rabbitmqSubscription.promiseQueueManager) {
+      return rabbitmqSubscription.promiseQueueManager;
+    }
 
-    let qm = new OSTBase.OSTPromise.QueueManager(
+    const qm = new OSTBase.OSTPromise.QueueManager(
       function(...args) {
-        // Promise executor should be a static method by itself. We declared an unnamed function
-        // which was a static method, and promiseExecutor was passed in the same scope as that
-        // of the class with oThis preserved.
+        /*
+        Promise executor should be a static method by itself. We declared an unnamed function
+        which was a static method, and promiseExecutor was passed in the same scope as that
+        of the class with oThis preserved.
+         */
         oThis._promiseExecutor(...args);
       },
       {
@@ -129,7 +122,7 @@ class Processor extends CronBase {
   /**
    * Callback to be executed in case of promise time out.
    *
-   * @param {Object} promiseContext
+   * @param {object} promiseContext
    *
    * @private
    */
@@ -139,7 +132,7 @@ class Processor extends CronBase {
     logger.error(`${oThis.cronProcessId}_promise_queue_manager:: a promise has timed out.`);
 
     const errorObject = responseHelper.error({
-      internal_error_identifier: 'promise_timedout:e_r_msb_1',
+      internal_error_identifier: 'promise_timedout:e_rms_b_1',
       api_error_identifier: 'promise_timedout',
       debug_options: {
         cronProcessId: oThis.cronProcessId,
@@ -152,7 +145,7 @@ class Processor extends CronBase {
   }
 
   /**
-   * Start subscription
+   * Start subscription.
    *
    * @return {Promise<void>}
    *
@@ -161,29 +154,32 @@ class Processor extends CronBase {
   async _startSubscription() {
     const oThis = this;
 
-    for (let i = 0; i < oThis.topics.length; i++) {
-      let subscriptionTopic = oThis.topics[i];
+    for (let index = 0; index < oThis.topics.length; index++) {
+      const subscriptionTopic = oThis.topics[index];
 
-      let rabbitmqSubscription = oThis.subscriptionTopicToDataMap[subscriptionTopic];
+      const rabbitMqSubscription = oThis.subscriptionTopicToDataMap[subscriptionTopic];
 
-      const ostNotification = await rabbitmqProvider.getInstance(machineKindConstant.cronKind);
+      const ostNotification = await rabbitMqProvider.getInstance(
+        oThis._rabbitMqConfigKind,
+        machineKindConstant.cronKind
+      );
 
-      // below condition is to save from multiple subscriptions by command messages.
-      if (!rabbitmqSubscription.isSubscribed()) {
-        rabbitmqSubscription.markAsSubscribed();
+      // Below condition is to save from multiple subscriptions by command messages.
+      if (!rabbitMqSubscription.isSubscribed()) {
+        rabbitMqSubscription.markAsSubscribed();
 
         oThis.promiseQueueManager(subscriptionTopic);
 
-        if (rabbitmqSubscription.consumerTag) {
-          process.emit('RESUME_CONSUME', rabbitmqSubscription.consumerTag);
+        if (rabbitMqSubscription.consumerTag) {
+          process.emit('RESUME_CONSUME', rabbitMqSubscription.consumerTag);
         } else {
           ostNotification.subscribeEvent
             .rabbit(
-              [rabbitmqSubscription.topic],
+              [rabbitMqSubscription.topic],
               {
-                queue: rabbitmqSubscription.queue,
+                queue: rabbitMqSubscription.queue,
                 ackRequired: oThis.ackRequired,
-                prefetch: rabbitmqSubscription.prefetchCount
+                prefetch: rabbitMqSubscription.prefetchCount
               },
               function(params) {
                 let messageParams = {};
@@ -191,6 +187,7 @@ class Processor extends CronBase {
                   messageParams = JSON.parse(params);
                 } catch (err) {
                   logger.error('--------Parsing failed--------------params-----', params);
+
                   return Promise.resolve({});
                 }
 
@@ -202,20 +199,22 @@ class Processor extends CronBase {
                         return Promise.resolve({});
                       }
 
-                      return rabbitmqSubscription.promiseQueueManager.createPromise(messageParams);
+                      return rabbitMqSubscription.promiseQueueManager.createPromise(messageParams);
                     },
                     function(err) {
                       logger.error('---------------------reject err------', err.toString());
+
                       return Promise.resolve({});
                     }
                   )
                   .catch(function(error) {
                     logger.error('Error in execute transaction', error);
+
                     return Promise.resolve({});
                   });
               },
               function(consumerTag) {
-                rabbitmqSubscription.setConsumerTag(consumerTag);
+                rabbitMqSubscription.setConsumerTag(consumerTag);
               }
             )
             .catch(function(error) {
@@ -230,9 +229,9 @@ class Processor extends CronBase {
   /**
    * This method executes the promises.
    *
-   * @param onResolve
-   * @param onReject
-   * @param {String} messageParams
+   * @param {function} onResolve
+   * @param {function} onReject
+   * @param {object} messageParams
    *
    * @returns {*}
    *
@@ -248,10 +247,10 @@ class Processor extends CronBase {
       })
       .catch(async function(err) {
         let errorObject = err;
-        logger.error('e_r_msb_2', 'Error in process message from rmq.', 'Error: ', err, 'Params: ', messageParams);
+        logger.error('e_rms_b_2', 'Error in process message from rmq.', 'Error: ', err, 'Params: ', messageParams);
         if (!responseHelper.isCustomResult(err)) {
           errorObject = responseHelper.error({
-            internal_error_identifier: 'unhandled_catch_response:e_bjp_b_1',
+            internal_error_identifier: 'unhandled_catch_response:e_rms_b_2',
             api_error_identifier: 'unhandled_catch_response',
             debug_options: { error: err.toString() }
           });
@@ -266,9 +265,10 @@ class Processor extends CronBase {
   }
 
   /**
-   * ost rmp error
+   * Ost rmq error.
    *
-   * @param err
+   * @param {object} err
+   *
    * @private
    */
   _ostRmqError(err) {
@@ -284,17 +284,18 @@ class Processor extends CronBase {
   _pendingTasksDone() {
     const oThis = this;
 
-    for (let topic in oThis.subscriptionTopicToDataMap) {
-      let rabbitmqSubscription = oThis.subscriptionTopicToDataMap[topic];
+    for (const topic in oThis.subscriptionTopicToDataMap) {
+      const rabbitmqSubscription = oThis.subscriptionTopicToDataMap[topic];
 
       if (!rabbitmqSubscription.promiseQueueManager) {
         continue;
       }
 
-      let pendingTaskCount = rabbitmqSubscription.promiseQueueManager.getPendingCount();
+      const pendingTaskCount = rabbitmqSubscription.promiseQueueManager.getPendingCount();
 
-      if (pendingTaskCount != 0) {
+      if (Number(pendingTaskCount) !== 0) {
         logger.info('Waiting for pending tasks. Count:', pendingTaskCount);
+
         return false;
       }
     }
@@ -308,51 +309,54 @@ class Processor extends CronBase {
   _stopPickingUpNewTasks() {
     const oThis = this;
 
-    // stopping consumption for all the topics
-    for (let topic in oThis.subscriptionTopicToDataMap) {
-      let rabbitmqSubscription = oThis.subscriptionTopicToDataMap[topic];
+    // Stopping consumption for all the topics.
+    for (const topic in oThis.subscriptionTopicToDataMap) {
+      const rabbitmqSubscription = oThis.subscriptionTopicToDataMap[topic];
 
       rabbitmqSubscription.stopConsumption();
     }
   }
 
   /**
-   * Timeout in milli seconds
+   * Timeout in milli seconds.
    *
-   * @return {number}
+   * @returns {number}
    */
   get timeoutInMilliSecs() {
-    return 3 * 60 * 1000; // By default the time out is 3 minutes
+    return 3 * 60 * 1000; // By default the time out is 3 minutes.
   }
 
   /**
-   * Ack required
+   * Ack required.
    *
-   * @return {number}
+   * @returns {number}
    */
   get ackRequired() {
     return 1;
   }
 
   /**
-   * Sequential executor
-   * @param messageParams
+   * Sequential executor.
+   *
+   * @param {object} messageParams
+   *
    * @return {Promise<void>}
    * @private
    */
 
+  // eslint-disable-next-line no-unused-vars
   async _sequentialExecutor(messageParams) {
     // Default behaviour - nothing to do.
     return responseHelper.successWithData({});
   }
 
   /**
-   * On max zombie count reached
+   * On max zombie count reached.
    *
    * @private
    */
   _onMaxZombieCountReached() {
-    logger.warn('e_r_sb_1', 'maxZombieCount reached. Triggering SIGTERM.');
+    logger.warn('e_rms_b_3', 'maxZombieCount reached. Triggering SIGTERM.');
     // Trigger gracefully shutdown of process.
     process.kill(process.pid, 'SIGTERM');
   }
@@ -366,12 +370,13 @@ class Processor extends CronBase {
   _prepareSubscriptionData() {
     const oThis = this;
 
-    for (let i = 0; i < oThis.topics.length; i++) {
-      let topic = oThis.topics[i],
-        queueSuffix = oThis.queues[i];
+    for (let index = 0; index < oThis.topics.length; index++) {
+      const topic = oThis.topics[index],
+        queueSuffix = oThis.queues[index]; // Parameter 'queues' is coming from input parameters.
+
       oThis.subscriptionTopicToDataMap[topic] = new RabbitmqSubscription({
         topic: topic,
-        queue: 'bg_' + queueSuffix,
+        queue: oThis._queuePrefix + queueSuffix,
         prefetchCount: oThis.prefetchCount
       });
     }
@@ -389,27 +394,43 @@ class Processor extends CronBase {
    * @private
    */
   _processMessage(messageParams) {
+    const oThis = this;
+
     logger.log('Message params =====', messageParams);
 
-    return bgJobProcessorFactory.getInstance(messageParams).perform();
+    return oThis.jobProcessorFactory.getInstance(messageParams).perform();
   }
 
   /**
-   * Cron kind
+   * Get cron kind.
    *
    * @return {string}
    * @private
    */
   get _cronKind() {
-    return cronProcessesConstant.bgJobRabbitmq;
+    throw new Error('Sub-class to implement.');
+  }
+
+  /**
+   * Get rabbitMq config kind.
+   *
+   * @returns {string}
+   * @private
+   */
+  get _rabbitMqConfigKind() {
+    throw new Error('Sub-class to implement.');
+  }
+
+  /**
+   * Returns job processor factory.
+   *
+   * @returns {any}
+   */
+  get jobProcessorFactory() {
+    throw new Error('Sub-class to implement.');
   }
 }
 
-logger.step('BG JOB Processor Factory started.');
+logger.step('RabbitMq ProcessorBase Factory started.');
 
-new Processor({ cronProcessId: +program.cronProcessId }).perform();
-
-setInterval(function() {
-  logger.info('Ending the process. Sending SIGINT.');
-  process.emit('SIGINT');
-}, cronProcessesConstants.continuousCronRestartInterval);
+module.exports = ProcessorBase;
