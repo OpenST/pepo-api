@@ -136,7 +136,7 @@ class SocketConnectionDetails extends ServiceBase {
     let insertObject = {
       user_id: oThis.userId,
       auth_key: oThis.authKey,
-      socket_server_id: null,
+      socket_identifier: null,
       auth_key_expiry_at: oThis._authKeyExpiryAt,
       status: socketConnectionConstants.invertedStatuses[socketConnectionConstants.createdStatus],
       socket_expiry_at: null,
