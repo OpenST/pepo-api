@@ -68,6 +68,7 @@ const validateLoginRequired = async function(req, res, next) {
 
 // NOTE:- use 'validateLoginRequired' function if you want to use route in logged in only
 
+router.use('/auth/twitter-disconnect', validateCookie, validateLoginRequired, authRoutes);
 router.use('/auth', authRoutes);
 router.use('/users', validateCookie, validateLoginRequired, usersRoutes);
 router.use('/videos', validateCookie, validateLoginRequired, videoRoutes);

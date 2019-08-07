@@ -464,6 +464,14 @@ const v1Signature = {
         validatorMethods: ['validateNonEmptyObject']
       }
     ]
+  },
+  [apiName.twitterDisconnect]: {
+    mandatory: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      }
+    ]
   }
 };
 
