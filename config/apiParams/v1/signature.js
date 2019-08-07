@@ -459,6 +459,20 @@ const v1Signature = {
       }
     ],
     optional: []
+  },
+  [apiName.getUserNotifications]: {
+    mandatory: [
+      {
+        parameter: 'profile_user_id',
+        validatorMethods: ['validateNonZeroInteger']
+      }
+    ],
+    optional: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      }
+    ]
   }
 };
 

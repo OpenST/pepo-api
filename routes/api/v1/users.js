@@ -7,6 +7,7 @@ const rootPrefix = '../../..',
   sanitizer = require(rootPrefix + '/helpers/sanitizer'),
   apiName = require(rootPrefix + '/lib/globalConstant/apiName'),
   entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
+  dummyNotifications = require(rootPrefix + '/test/fake/notifications.json'),
   responseEntityKey = require(rootPrefix + '/lib/globalConstant/responseEntityKey');
 
 /* Register Device*/
@@ -276,6 +277,18 @@ router.get('/:user_id/websocket-details', sanitizer.sanitizeDynamicUrlParams, fu
   Promise.resolve(
     routeHelper.perform(req, res, next, '/user/SocketConnectionDetails', 'r_a_v1_u_12', null, dataFormatterFunc)
   );
+});
+
+/* User notifications */
+router.get('/:profile_user_id/notifications', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.getUserNotifications;
+  req.decodedParams.profile_user_id = req.params.profile_user_id;
+
+  const dataFormatterFunc = async function(serviceResponse) {
+    serviceResponse.data = dummyNotifications;
+  };
+
+  Promise.resolve(routeHelper.perform(req, res, next, '/user/Notifications', 'r_a_v1_u_13', null, dataFormatterFunc));
 });
 
 module.exports = router;

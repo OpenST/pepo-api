@@ -1,0 +1,63 @@
+{
+  "result_type": "user_notifications",
+  "user_notifications": [
+    {
+      "id": "a123",
+      "uts": 1564481473,
+      "kind": "tx_received_success",
+      "heading": {
+        "text": "sunil supported you.",
+        "includes": {
+          "sunil": {
+            "kind": "users",
+            "id": "1067",
+            "attribute": "username"
+          }
+        }
+      },
+      "image_id": "217",
+      "timestamp": 1564481473,
+      "payload": {
+        "amount": "23000000000000000000",
+        "thanks_done": 0
+      }
+    }
+  ],
+  "users": {
+    "1067": {
+      "id": 1067,
+      "user_name": "sunil",
+      "name": "Sunil Khedar",
+      "status": "ACTIVE",
+      "uts": 1564481533,
+      "ost_user_id": "860851be-6c71-4d0c-9456-a1aa91ff3c1d",
+      "ost_token_holder_address": "0x0da7429162774a2e69ce1683f34737bf8c936a43",
+      "ost_status": "ACTIVATED",
+      "profile_image_id": "217"
+    }
+  },
+  "images": {
+    "217": {
+      "id": 217,
+      "resolutions": {
+        "original": {
+          "url": "https://dbvoeb7t6hffk.cloudfront.net/pepo-staging1000/ua/images/1067-0ecc967465a0bd6d3b7f377aa52bcf3d-original.jpg"
+        },
+        "480w": {
+          "size": 27496,
+          "height": 480,
+          "width": 480,
+          "url": "https://dbvoeb7t6hffk.cloudfront.net/pepo-staging1000/ua/images/1067-d9e8ad9e9532d8e8f95368235ed5b277-480w.jpg"
+        },
+        "144w": {
+          "size": 6602,
+          "height": 144,
+          "width": 144,
+          "url": "https://dbvoeb7t6hffk.cloudfront.net/pepo-staging1000/ua/images/1067-d9e8ad9e9532d8e8f95368235ed5b277-144w.jpg"
+        }
+      },
+      "status": "RESIZE_DONE",
+      "uts": 1564571561
+    }
+  }
+}

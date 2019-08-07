@@ -57,6 +57,15 @@ class BgJobProcessor extends RabbitMqProcessorBase {
   get _queuePrefix() {
     return 'bg_';
   }
+
+  /**
+   * Returns job processor factory.
+   *
+   * @returns {any}
+   */
+  get jobProcessorFactory() {
+    return require(rootPrefix + '/lib/jobs/bg/factory');
+  }
 }
 
 new BgJobProcessor({ cronProcessId: +program.cronProcessId }).perform();
