@@ -4,6 +4,7 @@ const io = require('socket.io')(http);
 const program = require('commander');
 
 const rootPrefix = '.',
+  basicHelper = require(rootPrefix + '/helpers/basic'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   socketConnectionConstants = require(rootPrefix + '/lib/globalConstant/socketConnection'),
@@ -11,6 +12,8 @@ const rootPrefix = '.',
   webSocketCustomCache = require(rootPrefix + '/lib/webSocket/customCache'),
   WebsocketAuth = require(rootPrefix + '/app/services/websocket/auth'),
   UserSocketConnectionDetailsModel = require(rootPrefix + '/app/models/mysql/UserSocketConnectionDetails');
+
+let socketIdentifier = null;
 
 program.option('--cronProcessId <cronProcessId>', 'Cron table process ID').parse(process.argv);
 
@@ -36,7 +39,7 @@ io.on('connection', async function(socket) {
   console.log('a user connected socket', socket.handshake.query);
 
   let params = socket.handshake.query;
-  params.socketServerIdentifier = program.cronProcessId;
+  params.socketIdentifier = socketIdentifier;
 
   let websocketAuthRsp = await new WebsocketAuth(params).perform().catch(function(err) {
     return responseHelper.error({
@@ -50,26 +53,32 @@ io.on('connection', async function(socket) {
     await onSocketDisconnect(socket);
   });
 
+  socket.conn.on('packet', async function(packet) {
+    if (packet.type === 'ping') {
+      console.log('received ping');
+      await onPingPacket(socket);
+    }
+  });
+
   if (websocketAuthRsp.isFailure()) {
+    socket.emit('server-event', 'Authentication Failed !!');
+    socket.disconnect();
     return responseHelper.error({
       internal_error_identifier: 'ws_s_2',
       api_error_identifier: 'something_went_wrong',
       debug_options: { websocketAuthRsp: websocketAuthRsp }
     });
-    socket.emit('server-event', 'Authentication Failed !!');
-    socket.disconnect();
-    return;
   }
 
   let userId = websocketAuthRsp.data.userId,
     userSocketConnDetailsId = websocketAuthRsp.data.userSocketConnDetailsId;
 
-  webSocketCustomCache.setIntoSocketObjsMap(userSocketConnDetailsId, socket);
-
-  webSocketCustomCache.setIntoUserSocketIdsMap(userId, userSocketConnDetailsId);
-
   socket.userId = userId;
   socket.userSocketConnDetailsId = userSocketConnDetailsId;
+
+  console.log('------------------userId---userSocketConnDetailsId------', userId, userSocketConnDetailsId);
+  webSocketCustomCache.setIntoSocketObjsMap(userSocketConnDetailsId, socket);
+  webSocketCustomCache.setIntoUserSocketIdsMap(userId, userSocketConnDetailsId);
 
   socket.emit('server-event', 'Authentication Successful !!');
 });
@@ -82,7 +91,9 @@ async function onSocketDisconnect(socket) {
   let userSocketConnDetailsId = socket.userSocketConnDetailsId,
     userId = socket.userId;
 
-  const oThis = this;
+  if (!userSocketConnDetailsId) {
+    return true;
+  }
 
   await new UserSocketConnectionDetailsModel()
     .update({
@@ -98,6 +109,41 @@ async function onSocketDisconnect(socket) {
   webSocketCustomCache.deleteFromSocketObjsMap(userSocketConnDetailsId);
 
   webSocketCustomCache.deleteFromUserSocketIdsMap(userId, userSocketConnDetailsId);
+
+  return true;
 }
 
-new socketJobProcessor({ cronProcessId: +program.cronProcessId }).perform();
+/**
+ * updates expiry at every new ping packet.
+ *
+ * @param socket
+ * @returns {Promise<void>}
+ */
+async function onPingPacket(socket) {
+  let incrementInterval = 60,
+    updateResponse = await new UserSocketConnectionDetailsModel()
+      .update(['socket_expiry_at = socket_expiry_at + ?', incrementInterval])
+      .where({
+        id: socket.userSocketConnDetailsId,
+        status: socketConnectionConstants.invertedStatuses[socketConnectionConstants.connectedStatus]
+      })
+      .where(['socket_expiry_at > ?', basicHelper.getCurrentTimestampInSeconds()])
+      .fire();
+
+  console.log('--updateResponse--', updateResponse);
+
+  //if nothing is updated then mark the socket as expired and call disconnect.
+  if (updateResponse.changedRows === 0) {
+    socket.disconnect();
+  }
+
+  await UserSocketConnectionDetailsModel.flushCache({ userId: socket.userId });
+}
+
+async function subscribeToRmq() {
+  let socketObj = new socketJobProcessor({ cronProcessId: +program.cronProcessId });
+  await socketObj.perform();
+  socketIdentifier = socketConnectionConstants.getSocketIdentifierFromTopic(socketObj.topics[0]);
+  console.log('---------socketObj.topics----=======', socketIdentifier);
+}
+subscribeToRmq();

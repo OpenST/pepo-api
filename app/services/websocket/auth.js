@@ -37,7 +37,7 @@ class Auth extends ServiceBase {
 
     oThis.authKeyExpiryAt = params.auth_key_expiry_at;
     oThis.payload = params.payload;
-    oThis.socketServerIdentifier = params.socketServerIdentifier;
+    oThis.socketIdentifier = params.socketIdentifier;
 
     oThis.salt = null;
     oThis.decryptedPayload = null;
@@ -228,7 +228,7 @@ class Auth extends ServiceBase {
     await new UserSocketConnectionDetailsModel()
       .update({
         auth_key_expiry_at: null,
-        socket_server_id: oThis.socketServerIdentifier,
+        socket_identifier: oThis.socketIdentifier,
         socket_expiry_at: basicHelper.getCurrentTimestampInSeconds() + 30 * 60,
         status: socketConnectionConstants.invertedStatuses[socketConnectionConstants.connectedStatus]
       })

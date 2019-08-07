@@ -71,15 +71,20 @@ class SocketJobProcessor extends RabbitMqProcessorBase {
       messagePayload = messageDetails.messagePayload;
 
     logger.log('Message params =====', messageParams);
+    logger.log('userIds ===------------==', userIds);
+
+    logger.log('webSocketCustomCache.userSocketIdsMap ===------------==', webSocketCustomCache.userSocketIdsMap);
 
     for (let j = 0; j < userIds.length; j++) {
-      let socketObjectIds = webSocketCustomCache.getFromUserSocketIdsMap[userIds[j]];
+      logger.log('userIds[j] ===------------==', j, userIds[j]);
+      let socketObjectIds = webSocketCustomCache.getFromUserSocketIdsMap(userIds[j]);
+      logger.log('socketObjectIds ===------------==', socketObjectIds);
       if (!socketObjectIds || socketObjectIds.length == 0) {
         continue;
       }
       for (let i = 0; i < socketObjectIds.length; i++) {
         console.log('-------------------------------------');
-        let socketObj = webSocketCustomCache.getFromSocketObjsMap[socketObjectIds[i]];
+        let socketObj = webSocketCustomCache.getFromSocketObjsMap(socketObjectIds[i]);
         socketObj.emit('server-event', JSON.stringify(messagePayload));
       }
     }
