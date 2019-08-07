@@ -1,6 +1,7 @@
 const rootPrefix = '../..',
   RabbitMqProcessorBase = require(rootPrefix + '/executables/rabbitMqSubscribers/Base'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
+  webSocketCustomCache = require(rootPrefix + '/lib/webSocket/customCache'),
   cronProcessesConstants = require(rootPrefix + '/lib/globalConstant/cronProcesses'),
   configStrategyConstants = require(rootPrefix + '/lib/globalConstant/configStrategy');
 
@@ -15,17 +16,11 @@ class SocketJobProcessor extends RabbitMqProcessorBase {
    *
    * @param {object} params
    * @param {number} params.cronProcessId
-   * @param {number} params.socketObject - Socket connection object, where to emit message.
    *
    * @constructor
    */
   constructor(params) {
     super(params);
-
-    const oThis = this;
-
-    oThis.userSocketIdsMap = params.userSocketIdsMap;
-    oThis.socketObjsMap = params.socketObjsMap;
   }
 
   /**
@@ -78,13 +73,13 @@ class SocketJobProcessor extends RabbitMqProcessorBase {
     logger.log('Message params =====', messageParams);
 
     for (let j = 0; j < userIds.length; j++) {
-      let socketObjectIds = oThis.userSocketIdsMap[userIds[j]];
+      let socketObjectIds = webSocketCustomCache.getFromUserSocketIdsMap[userIds[j]];
       if (!socketObjectIds || socketObjectIds.length == 0) {
         continue;
       }
       for (let i = 0; i < socketObjectIds.length; i++) {
         console.log('-------------------------------------');
-        let socketObj = oThis.socketObjsMap[socketObjectIds[i]];
+        let socketObj = webSocketCustomCache.getFromSocketObjsMap[socketObjectIds[i]];
         socketObj.emit('server-event', JSON.stringify(messagePayload));
       }
     }

@@ -8,11 +8,9 @@ const rootPrefix = '.',
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   socketConnectionConstants = require(rootPrefix + '/lib/globalConstant/socketConnection'),
   socketJobProcessor = require(rootPrefix + '/executables/rabbitMqSubscribers/socketJobProcessor'),
+  webSocketCustomCache = require(rootPrefix + '/lib/webSocket/customCache'),
   WebsocketAuth = require(rootPrefix + '/app/services/websocket/auth'),
   UserSocketConnectionDetailsModel = require(rootPrefix + '/app/models/mysql/UserSocketConnectionDetails');
-
-const userSocketIdsMap = {},
-  socketObjsMap = {};
 
 program.option('--cronProcessId <cronProcessId>', 'Cron table process ID').parse(process.argv);
 
@@ -41,11 +39,10 @@ io.on('connection', async function(socket) {
   params.socketServerIdentifier = program.cronProcessId;
 
   let websocketAuthRsp = await new WebsocketAuth(params).perform().catch(function(err) {
-    console.log('--------err----------', err);
     return responseHelper.error({
       internal_error_identifier: 'ws_s_1',
       api_error_identifier: 'something_went_wrong',
-      debug_options: {}
+      debug_options: { error: err }
     });
   });
 
@@ -54,7 +51,11 @@ io.on('connection', async function(socket) {
   });
 
   if (websocketAuthRsp.isFailure()) {
-    console.log('---Authentication Failed-----', websocketAuthRsp);
+    return responseHelper.error({
+      internal_error_identifier: 'ws_s_2',
+      api_error_identifier: 'something_went_wrong',
+      debug_options: { websocketAuthRsp: websocketAuthRsp }
+    });
     socket.emit('server-event', 'Authentication Failed !!');
     socket.disconnect();
     return;
@@ -63,10 +64,9 @@ io.on('connection', async function(socket) {
   let userId = websocketAuthRsp.data.userId,
     userSocketConnDetailsId = websocketAuthRsp.data.userSocketConnDetailsId;
 
-  socketObjsMap[userSocketConnDetailsId] = socket;
+  webSocketCustomCache.setIntoSocketObjsMap(userSocketConnDetailsId, socket);
 
-  userSocketIdsMap[userId] = userSocketIdsMap[userId] || [];
-  userSocketIdsMap[userId].push(userSocketConnDetailsId);
+  webSocketCustomCache.setIntoUserSocketIdsMap(userId, userSocketConnDetailsId);
 
   socket.userId = userId;
   socket.userSocketConnDetailsId = userSocketConnDetailsId;
@@ -75,12 +75,12 @@ io.on('connection', async function(socket) {
 });
 
 http.listen(4000, function() {
-  console.log('listening on *:4000');
+  console.log('listening on *:4000\n');
 });
 
 async function onSocketDisconnect(socket) {
-  console.log('--socketObj--------------userSocketConnDetailsId--', socket.userSocketConnDetailsId);
-  console.log('--socketObj--------------userId--', socket.userId);
+  let userSocketConnDetailsId = socket.userSocketConnDetailsId,
+    userId = socket.userId;
 
   const oThis = this;
 
@@ -89,15 +89,15 @@ async function onSocketDisconnect(socket) {
       status: socketConnectionConstants.invertedStatuses[socketConnectionConstants.expiredStatus]
     })
     .where({
-      user_id: socket.userSocketConnDetailsId
+      id: userSocketConnDetailsId
     })
     .fire();
 
-  await UserSocketConnectionDetailsModel.flushCache({ userId: oThis.userId });
+  await UserSocketConnectionDetailsModel.flushCache({ userId: userId });
+
+  webSocketCustomCache.deleteFromSocketObjsMap(userSocketConnDetailsId);
+
+  webSocketCustomCache.deleteFromUserSocketIdsMap(userId, userSocketConnDetailsId);
 }
 
-new socketJobProcessor({
-  cronProcessId: +program.cronProcessId,
-  userSocketIdsMap: userSocketIdsMap,
-  socketObjsMap: socketObjsMap
-}).perform();
+new socketJobProcessor({ cronProcessId: +program.cronProcessId }).perform();
