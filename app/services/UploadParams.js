@@ -150,7 +150,7 @@ class UploadParams extends ServiceBase {
           intent,
           fileName,
           contentType,
-          coreConstants.S3_AWS_REGION
+          coreConstants.AWS_REGION
         );
 
         const s3Url = s3Constants.getS3Url(intent, fileName),
@@ -199,7 +199,7 @@ class UploadParams extends ServiceBase {
    */
   _getRandomEncodedFileNames(extension) {
     const oThis = this,
-      fileName = util.gets3FileName(oThis.currentUserId, 'original');
+      fileName = util.getS3FileName(oThis.currentUserId, 'original');
 
     return fileName + extension;
   }
