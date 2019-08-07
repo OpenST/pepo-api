@@ -1,10 +1,22 @@
 {
   "PROFILE_TX_SEND_SUCCESS": {
-    "heading": "You gave {{users}}|{{user_id}}|{{username}}",
-    "template_vars": ["user_id"]
+    "notification": {
+      "headings": {
+        "1": {
+          "title": "You gave {{users}}|{{user_id}}|{{username}}",
+          "template_vars": ["user_id"]
+        }
+      }
+    }
   },
   "PROFILE_TX_RECEIVE_SUCCESS": {
-    "heading": "{{users}}|{{user_id}}|{{username}} supported you.",
-    "template_vars": ["user_id"]
+    "notification": {
+      "headings": {
+        "1": {
+          "title": "{{users}}|{{user_id}}|{{username}} supported you.",
+          "template_vars": ["user_id"]
+        }
+      }
+    }
   }
 }
