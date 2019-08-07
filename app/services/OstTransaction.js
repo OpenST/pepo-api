@@ -74,7 +74,7 @@ class OstTransaction extends ServiceBase {
 
     oThis._validateAndSanitizeParams();
 
-    let setStatusResponse = oThis._setStatuses();
+    let setStatusResponse = await oThis._setStatuses();
     if (setStatusResponse.isFailure()) {
       return Promise.reject(setStatusResponse);
     }
@@ -189,7 +189,7 @@ class OstTransaction extends ServiceBase {
    *
    * @private
    */
-  _setStatuses() {
+  async _setStatuses() {
     const oThis = this;
 
     if (transactionConstants.notFinalizedOstTransactionStatuses.indexOf(oThis.ostTransactionStatus) > -1) {
@@ -204,7 +204,7 @@ class OstTransaction extends ServiceBase {
           ostTransactionStatus: oThis.ostTransactionStatus
         }
       });
-      createErrorLogsEntry.perform(errorObject, errorLogsConstants.highSeverity);
+      await createErrorLogsEntry.perform(errorObject, errorLogsConstants.highSeverity);
 
       return errorObject;
     }

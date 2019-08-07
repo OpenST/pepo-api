@@ -5,6 +5,7 @@ const rootPrefix = '../../../../..',
   UserProfileElementModel = require(rootPrefix + '/app/models/mysql/UserProfileElement'),
   userProfileElementConst = require(rootPrefix + '/lib/globalConstant/userProfileElement'),
   VideoDetailsModel = require(rootPrefix + '/app/models/mysql/VideoDetail'),
+  VideoAddNotification = require(rootPrefix + '/lib/userNotificationPublisher/VideoAdd'),
   videoLib = require(rootPrefix + '/lib/videoLib'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   feedsConstants = require(rootPrefix + '/lib/globalConstant/feed');
@@ -122,6 +123,11 @@ class UpdateFanVideo extends UpdateProfileBase {
 
     if (oThis.videoId) {
       await oThis._addProfileElement(oThis.videoId, userProfileElementConst.coverVideoIdKind);
+
+      await new VideoAddNotification({
+        userId: oThis.profileUserId,
+        videoId: oThis.videoId
+      }).perform();
     }
 
     if (coverImageId) {
