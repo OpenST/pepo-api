@@ -3,6 +3,7 @@ const express = require('express'),
 
 const rootPrefix = '../../..',
   routeHelper = require(rootPrefix + '/routes/helper'),
+  basicHelper = require(rootPrefix + '/helpers/basic'),
   apiName = require(rootPrefix + '/lib/globalConstant/apiName'),
   sanitizer = require(rootPrefix + '/helpers/sanitizer'),
   coreConstants = require(rootPrefix + '/config/coreConstants'),
