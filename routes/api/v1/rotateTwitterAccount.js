@@ -6,10 +6,9 @@ const rootPrefix = '../../..',
   apiName = require(rootPrefix + '/lib/globalConstant/apiName'),
   sanitizer = require(rootPrefix + '/helpers/sanitizer'),
   coreConstants = require(rootPrefix + '/config/coreConstants'),
-  responseHelper = require(rootPrefix + '/lib/formatter/response'),
-  FormatterComposer = require(rootPrefix + '/lib/formatter/Composer'),
-  entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
-  responseEntityKey = require(rootPrefix + '/lib/globalConstant/responseEntityKey');
+  responseHelper = require(rootPrefix + '/lib/formatter/response');
+
+const errorConfig = basicHelper.fetchErrorConfig(apiVersions.v1);
 
 /* Rotate twitter account */
 router.get('/', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
