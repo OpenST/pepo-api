@@ -133,7 +133,7 @@ class PublicVideoFeed extends FeedBase {
         }
       ];
 
-      oThis.feeds = [curatedFeeds].concat(oThis.feeds);
+      oThis.feeds = curatedFeeds.concat(oThis.feeds);
 
       oThis.profileResponse.userProfilesMap = Object.assign(oThis.profileResponse.userProfilesMap, {
         '9999': {
