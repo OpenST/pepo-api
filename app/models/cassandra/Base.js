@@ -52,38 +52,21 @@ class ModelBase {
    */
   async fire(query, params, options = {}) {
     const oThis = this;
+    params = params || [];
 
-    // todo: print query and time in mili seconds here @tejas discuss this with @aman
     return oThis.onWriteConnection().execute(query, params, options);
   }
 
   /**
-   * Bulk insert query
+   * Batch fire the query.
    *
-   * @param query
-   * @param inputParams
-   * @returns {Promise<void>}
+   * @return {Promise<any>}
    */
-  async bulkInsert(query, inputParams) {
-    const batchSize = 25,
-      promisesArray = [];
+  async batchFire(query, params, options = {}) {
+    const oThis = this;
+    params = params || [];
 
-    while (inputParams.length) {
-      const toBeProcessedParams = inputParams.splice(0, batchSize);
-      const queries = [];
-
-      for (let index = 0; index < toBeProcessedParams.length; index++) {
-        const queryObj = {
-          query: query,
-          params: toBeProcessedParams[index]
-        };
-        queries.push(queryObj);
-      }
-
-      promisesArray.push(cassandraClient.batch(queries));
-    }
-
-    await Promise.all(promisesArray);
+    return oThis.onWriteConnection().batch(query, params, options);
   }
 
   /**

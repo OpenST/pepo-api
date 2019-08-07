@@ -50,9 +50,9 @@ class UserNotificationVisitDetailModel extends ModelBase {
   }
 
   /**
-   * Fetch token user for given token user ids
+   * Fetch user notifications for given user ids
    *
-   * @param {array} userIds: token user ids
+   * @param {array} userIds: user ids
    *
    * @return {object}
    */
