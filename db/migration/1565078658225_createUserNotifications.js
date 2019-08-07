@@ -11,16 +11,16 @@ const upQuery = `CREATE TABLE ${keySpace}.user_notifications \n\
   user_id bigint, \n\
   last_action_timestamp timestamp, \n\
   uuid uuid, \n\
-  kind smallint, \n\
-  landing_vars varchar, \n\
+  kind int, \n\
   subject_user_id bigint, \n\
-  heading varchar, \n\
   actor_ids SET<INT>, \n\
   actor_count INT, \n\
-  transaction_id varchar, \n\
-  video_id bigint, \n\
-  thank_you_flag boolean, \n\
-  thank_you_text varchar, \n\    
+  payload varchar, \n\
+  heading_version smallint, \n\
+  flag_1 tinyint, \n\
+  flag_2 tinyint, \n\
+  column_1 varchar, \n\
+  column_2 varchar, \n\
   PRIMARY KEY ((user_id), last_action_timestamp, uuid) \n\
 ) WITH CLUSTERING ORDER BY (last_action_timestamp DESC);`;
 
