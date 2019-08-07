@@ -189,15 +189,15 @@ class CoreConstants {
   /**
    * S3 AWS config
    */
-  get S3_AWS_ACCESS_KEY() {
+  get AWS_ACCESS_KEY() {
     return process.env.PA_S3_AWS_ACCESS_KEY;
   }
 
-  get S3_AWS_SECRET_KEY() {
+  get AWS_SECRET_KEY() {
     return process.env.PA_S3_AWS_SECRET_KEY;
   }
 
-  get S3_AWS_REGION() {
+  get AWS_REGION() {
     return process.env.PA_S3_AWS_REGION;
   }
 
@@ -302,12 +302,12 @@ class CoreConstants {
     return process.env.PA_TWITTER_AUTH_CALLBACK_ROUTE;
   }
 
-  get PR_API_BASE_URL() {
-    return process.env.PR_API_BASE_URL;
+  get PR_IMAGE_RESIZE_FUNCTION() {
+    return process.env.PR_LAMBDA_IMAGE_RESIZE_FUNCTION;
   }
 
-  get PR_INTERNAL_API_SECRET_KEY() {
-    return process.env.PR_INTERNAL_API_SECRET_KEY;
+  get PR_VIDEO_COMPRESS_FUNCTION() {
+    return process.env.PR_LAMBDA_VIDEO_COMPRESS_FUNCTION;
   }
 
   get PA_CDN_URL() {
