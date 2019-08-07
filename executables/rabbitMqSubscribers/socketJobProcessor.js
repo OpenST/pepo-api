@@ -57,6 +57,15 @@ class SocketJobProcessor extends RabbitMqProcessorBase {
   get _queuePrefix() {
     return 'socket_';
   }
+
+  /**
+   * Returns job processor factory.
+   *
+   * @returns {any}
+   */
+  get jobProcessorFactory() {
+    return require(rootPrefix + '/lib/jobs/socket/factory');
+  }
 }
 
 new SocketJobProcessor({ cronProcessId: +program.cronProcessId }).perform();
