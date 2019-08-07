@@ -5,6 +5,7 @@ const rootPrefix = '../../..',
   routeHelper = require(rootPrefix + '/routes/helper'),
   basicHelper = require(rootPrefix + '/helpers/basic'),
   apiName = require(rootPrefix + '/lib/globalConstant/apiName'),
+  apiVersions = require(rootPrefix + '/lib/globalConstant/apiVersions'),
   sanitizer = require(rootPrefix + '/helpers/sanitizer'),
   coreConstants = require(rootPrefix + '/config/coreConstants'),
   responseHelper = require(rootPrefix + '/lib/formatter/response');
