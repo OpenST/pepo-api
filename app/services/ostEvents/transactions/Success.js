@@ -2,6 +2,10 @@ const rootPrefix = '../../../..',
   UpdateStats = require(rootPrefix + '/lib/UpdateStats'),
   TokenUserModel = require(rootPrefix + '/app/models/mysql/TokenUser'),
   TransactionOstEventBase = require(rootPrefix + '/app/services/ostEvents/transactions/Base'),
+  VideoTransactionSendSuccessNotification = require(rootPrefix +
+    '/lib/userNotificationPublisher/VideoTransactionSendSuccess'),
+  VideoTransactionReceiveSuccessNotification = require(rootPrefix +
+    '/lib/userNotificationPublisher/VideoTransactionReceiveSuccess'),
   ProfileTransactionSendSuccessNotification = require(rootPrefix +
     '/lib/userNotificationPublisher/ProfileTransactionSendSuccess'),
   ProfileTransactionReceiveSuccessNotification = require(rootPrefix +
@@ -58,6 +62,8 @@ class SuccessTransactionOstEvent extends TransactionOstEventBase {
         promiseArray2.push(oThis.insertInUserActivity(oThis.fromUserId));
         promiseArray2.push(oThis.insertInUserActivity(oThis.toUserId));
 
+        promiseArray2.push(oThis._sendUserNotification());
+
         await Promise.all(promiseArray2);
         await oThis._updateStats();
       }
@@ -85,7 +91,6 @@ class SuccessTransactionOstEvent extends TransactionOstEventBase {
     if (oThis.transactionObj.extraData.kind === transactionConstants.extraData.userTransactionKind) {
       await oThis._updateTransactionAndRelatedActivities();
       await oThis._updateStats();
-      await oThis._sendNotification();
     } else if (oThis.transactionObj.extraData.kind === transactionConstants.extraData.airdropKind) {
       await oThis.validateToUserId();
       const promiseArray = [];
@@ -116,6 +121,8 @@ class SuccessTransactionOstEvent extends TransactionOstEventBase {
 
     promiseArray2.push(oThis.updateUserActivity(oThis.activityObj.id));
     promiseArray2.push(oThis.insertInUserActivity(oThis.toUserId));
+
+    promiseArray2.push(oThis._sendUserNotification());
 
     await Promise.all(promiseArray2);
   }
@@ -150,15 +157,32 @@ class SuccessTransactionOstEvent extends TransactionOstEventBase {
    * @returns {Promise<void>}
    * @private
    */
-  async _sendNotification() {
+  async _sendUserNotification() {
     const oThis = this;
 
     const promisesArray = [];
 
-    promisesArray.push(new ProfileTransactionSendSuccessNotification({ transaction: oThis.transactionObj }).perform());
-    promisesArray.push(
-      new ProfileTransactionReceiveSuccessNotification({ transaction: oThis.transactionObj }).perform()
-    );
+    if (oThis.videoId) {
+      promisesArray.push(
+        new VideoTransactionSendSuccessNotification({
+          transaction: oThis.transactionObj,
+          videoId: oThis.videoId
+        }).perform()
+      );
+      promisesArray.push(
+        new VideoTransactionReceiveSuccessNotification({
+          transaction: oThis.transactionObj,
+          videoId: oThis.videoId
+        }).perform()
+      );
+    } else {
+      promisesArray.push(
+        new ProfileTransactionSendSuccessNotification({ transaction: oThis.transactionObj }).perform()
+      );
+      promisesArray.push(
+        new ProfileTransactionReceiveSuccessNotification({ transaction: oThis.transactionObj }).perform()
+      );
+    }
 
     await Promise.all(promisesArray);
   }
