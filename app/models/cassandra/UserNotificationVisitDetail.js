@@ -50,31 +50,6 @@ class UserNotificationVisitDetailModel extends ModelBase {
   }
 
   /**
-   * Fetch user notifications for given user ids
-   *
-   * @param {array} userIds: user ids
-   *
-   * @return {object}
-   */
-  async fetchByUserIds(userIds) {
-    const oThis = this;
-
-    const response = {};
-    let query = `select * from ${keyspace}.${oThis.tableName} where user_id in ?;`;
-    let params = [userIds];
-    const queryRsp = await oThis.fire(query, params);
-
-    const dbRows = queryRsp.rows;
-
-    for (let index = 0; index < dbRows.length; index++) {
-      const formatDbRow = oThis.formatDbData(dbRows[index]);
-      response[formatDbRow.userId] = formatDbRow;
-    }
-
-    return response;
-  }
-
-  /**
    * Flush cache.
    *
    * @param {object} params
