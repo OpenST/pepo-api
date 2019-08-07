@@ -2,8 +2,6 @@ const rootPrefix = '../..',
   cassandraKeyspaceConstant = require(rootPrefix + '/lib/globalConstant/cassandraKeyspace'),
   DbKindConstant = require(rootPrefix + '/lib/globalConstant/dbKind');
 
-const dbName = '';
-
 const keySpace = cassandraKeyspaceConstant.cassandraKeyspaceName;
 
 const dbKind = DbKindConstant.cassandraDbKind;
@@ -21,13 +19,14 @@ const upQuery = `CREATE TABLE ${keySpace}.user_notifications \n\
   actor_count INT, \n\
   transaction_id varchar, \n\
   video_id bigint, \n\
+  thank_you_flag boolean, \n\
+  thank_you_text varchar, \n\    
   PRIMARY KEY ((user_id), last_action_timestamp, uuid) \n\
 ) WITH CLUSTERING ORDER BY (last_action_timestamp DESC);`;
 
 const downQuery = `drop table if exists ${keySpace}.user_notifications;`;
 
 const createUserNotifications = {
-  dbName: dbName,
   up: [upQuery],
   down: [downQuery],
   dbKind: dbKind,
