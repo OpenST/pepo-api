@@ -11,8 +11,7 @@
         "optional": {}
       }
     },
-    "optional": {
-    }
+    "optional": {}
   },
   "PROFILE_TX_RECEIVE_SUCCESS": {
     "mandatory": {
