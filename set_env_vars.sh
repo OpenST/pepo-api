@@ -99,8 +99,8 @@ export PA_TWITTER_CONSUMER_SECRET='iM5UMt4px8rwoqEoRV9gJGrJGtEoMUxOYkaWXSges7t4b
 export PA_TWITTER_AUTH_CALLBACK_ROUTE='https://pepo.com'
 
 # image resizer variables
-export PR_API_BASE_URL='http://127.0.0.1:9000'
-export PR_INTERNAL_API_SECRET_KEY='asdfghjkl'
+export PR_LAMBDA_IMAGE_RESIZE_FUNCTION='arn:aws:lambda:us-east-1:274208178423:function:pepoImageResizer'
+export PR_LAMBDA_VIDEO_COMPRESS_FUNCTION='arn:aws:lambda:us-east-1:274208178423:function:pepoVideoCompressor'
 
 # replication variables for cassandra
 export REPLICATION_CLASS='SimpleStrategy'
