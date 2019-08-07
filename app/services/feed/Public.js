@@ -254,9 +254,9 @@ class PublicVideoFeed extends FeedBase {
           id: '997',
           creatorUserId: '9999',
           videoId: '997',
-          totalContributedBy: 13,
-          totalAmount: '70001220000000000000',
-          totalTransactions: 2,
+          totalContributedBy: 0,
+          totalAmount: '0',
+          totalTransactions: 0,
           createdAt: 1564472456,
           updatedAt: 1564472456
         },
@@ -264,9 +264,9 @@ class PublicVideoFeed extends FeedBase {
           id: '998',
           creatorUserId: '9999',
           videoId: '998',
-          totalContributedBy: 18,
-          totalAmount: '80001220000000000000',
-          totalTransactions: 2,
+          totalContributedBy: 0,
+          totalAmount: '0',
+          totalTransactions: 0,
           createdAt: 1564472456,
           updatedAt: 1564472456
         },
@@ -274,9 +274,9 @@ class PublicVideoFeed extends FeedBase {
           id: '999',
           creatorUserId: '9999',
           videoId: '999',
-          totalContributedBy: 25,
-          totalAmount: '90001220000000000000',
-          totalTransactions: 2,
+          totalContributedBy: 0,
+          totalAmount: '0',
+          totalTransactions: 0,
           createdAt: 1564472456,
           updatedAt: 1564472456
         }
