@@ -1,5 +1,5 @@
 {
-  "profileTxSendSuccess": {
+  "PROFILE_TX_SEND_SUCCESS": {
     "heading": "You gave {{users}}|{{user_id}}|{{username}}",
     "template_vars": ["user_id"]
   }

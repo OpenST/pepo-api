@@ -83,10 +83,7 @@ class UserNotificationVisitDetailModel extends ModelBase {
    * @returns {Promise<*>}
    */
   static async flushCache(params) {
-    const UserNotificationVisitDetailsByUserIds = require(rootPrefix +
-      '/lib/cacheManagement/multi/cassandra/UserNotificationVisitDetailsByUserIds');
-
-    await new UserNotificationVisitDetailsByUserIds({ userIds: [params.userId] }).clear();
+    // Do nothing.
   }
 }
 
