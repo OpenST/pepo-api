@@ -100,18 +100,40 @@ class PublicVideoFeed extends FeedBase {
     // TODO - temp code for curated feeds
     // TEMP CODE START - to show curated feeds on top(only in logged out mode)
     if (!oThis.currentUser && oThis.paginationTimestamp == null) {
-      let curatedFeed = {
-        id: '9999',
-        primaryExternalEntityId: '999',
-        paginationIdentifier: 1564468241,
-        kind: 'CURATED',
-        actor: 9999,
-        extraData: 'null',
-        createdAt: 1564468241,
-        updatedAt: 1564468241
-      };
+      let curatedFeeds = [
+        {
+          id: '9997',
+          primaryExternalEntityId: '997',
+          paginationIdentifier: 1564468241,
+          kind: 'CURATED',
+          actor: 9999,
+          extraData: 'null',
+          createdAt: 1564468241,
+          updatedAt: 1564468241
+        },
+        {
+          id: '9998',
+          primaryExternalEntityId: '998',
+          paginationIdentifier: 1564468241,
+          kind: 'CURATED',
+          actor: 9999,
+          extraData: 'null',
+          createdAt: 1564468241,
+          updatedAt: 1564468241
+        },
+        {
+          id: '9999',
+          primaryExternalEntityId: '999',
+          paginationIdentifier: 1564468241,
+          kind: 'CURATED',
+          actor: 9999,
+          extraData: 'null',
+          createdAt: 1564468241,
+          updatedAt: 1564468241
+        }
+      ];
 
-      oThis.feeds = [curatedFeed].concat(oThis.feeds);
+      oThis.feeds = curatedFeeds.concat(oThis.feeds);
 
       oThis.profileResponse.userProfilesMap = Object.assign(oThis.profileResponse.userProfilesMap, {
         '9999': {
@@ -156,18 +178,71 @@ class PublicVideoFeed extends FeedBase {
       });
 
       oThis.profileResponse.videoMap = Object.assign(oThis.profileResponse.videoMap, {
+        '997': {
+          id: '997',
+          resolutions: {
+            original: {
+              url:
+                'https://dbvoeb7t6hffk.cloudfront.net/pepo-sandbox1000/ua/videos/1000-3be05bd1b1bbb4a8559f2932245e70f1-original.mp4',
+              size: 4573849,
+              height: 1280,
+              width: 720
+            },
+            '576w': {
+              url:
+                'https://dbvoeb7t6hffk.cloudfront.net/pepo-sandbox1000/ua/videos/1000-3be05bd1b1bbb4a8559f2932245e70f1-576w.mp4',
+              size: 1363148,
+              height: 1016,
+              width: 576
+            }
+          },
+          posterImageId: '9001',
+          status: 'active',
+          createdAt: 1564472456,
+          updatedAt: 1564472456
+        },
+        '998': {
+          id: '998',
+          resolutions: {
+            original: {
+              url:
+                'https://dbvoeb7t6hffk.cloudfront.net/pepo-sandbox1000/ua/videos/1000-744eff04466b1b3321b2f5e92527a53d-original.mp4',
+              size: 4573849,
+              height: 1280,
+              width: 720
+            },
+            '576w': {
+              url:
+                'https://dbvoeb7t6hffk.cloudfront.net/pepo-sandbox1000/ua/videos/1000-744eff04466b1b3321b2f5e92527a53d-576w.mp4',
+              size: 928768,
+              height: 1016,
+              width: 576
+            }
+          },
+          posterImageId: '9002',
+          status: 'active',
+          createdAt: 1564472456,
+          updatedAt: 1564472456
+        },
         '999': {
           id: '999',
           resolutions: {
             original: {
               url:
-                'https://dbvoeb7t6hffk.cloudfront.net/pepo-staging1000/ua/videos/1045-7dafe24a95fa04399cc68d268f05dda8-original.mp4',
+                'https://dbvoeb7t6hffk.cloudfront.net/pepo-sandbox1000/ua/videos/1000-2da3a523efbab1a3ea5793e62189c35d-original.mp4',
               size: 4573849,
               height: 1280,
               width: 720
+            },
+            '576w': {
+              url:
+                'https://dbvoeb7t6hffk.cloudfront.net/pepo-sandbox1000/ua/videos/1000-2da3a523efbab1a3ea5793e62189c35d-576w.mp4',
+              size: 1363148,
+              height: 1016,
+              width: 576
             }
           },
-          posterImageId: '202',
+          posterImageId: '9003',
           status: 'active',
           createdAt: 1564472456,
           updatedAt: 1564472456
@@ -175,32 +250,95 @@ class PublicVideoFeed extends FeedBase {
       });
 
       oThis.profileResponse.videoDetailsMap = Object.assign(oThis.profileResponse.videoDetailsMap, {
+        '997': {
+          id: '997',
+          creatorUserId: '9999',
+          videoId: '997',
+          totalContributedBy: 0,
+          totalAmount: '0',
+          totalTransactions: 0,
+          createdAt: 1564472456,
+          updatedAt: 1564472456
+        },
+        '998': {
+          id: '998',
+          creatorUserId: '9999',
+          videoId: '998',
+          totalContributedBy: 0,
+          totalAmount: '0',
+          totalTransactions: 0,
+          createdAt: 1564472456,
+          updatedAt: 1564472456
+        },
         '999': {
           id: '999',
           creatorUserId: '9999',
           videoId: '999',
-          totalContributedBy: 25,
-          totalAmount: '9000122000000000000000',
-          totalTransactions: 2,
+          totalContributedBy: 0,
+          totalAmount: '0',
+          totalTransactions: 0,
           createdAt: 1564472456,
           updatedAt: 1564472456
         }
       });
 
       oThis.profileResponse.imageMap = Object.assign(oThis.profileResponse.imageMap, {
-        '202': {
-          id: '202',
+        '9001': {
+          id: '9001',
           resolutions: {
             original: {
               url:
-                'https://dbvoeb7t6hffk.cloudfront.net/pepo-staging1000/ua/images/1072-b5227fd1b2e8a69568d8d8ec4aa31c42-original.jpg'
+                'https://dbvoeb7t6hffk.cloudfront.net/pepo-sandbox1000/ua/images/1000-3be05bd1b1bbb4a8559f2932245e70f1-original.jpg',
+              size: 23552
             },
-            '144w': {
-              width: 144,
-              height: 144,
-              size: 6612,
+            '288w': {
               url:
-                'https://dbvoeb7t6hffk.cloudfront.net/pepo-staging1000/ua/images/1072-cee6f2baef2099c404df52f9ac5b8577-144w.jpg'
+                'https://dbvoeb7t6hffk.cloudfront.net/pepo-sandbox1000/ua/images/1000-3be05bd1b1bbb4a8559f2932245e70f1-288w.jpg',
+              size: 23552,
+              height: 509,
+              width: 288
+            }
+          },
+          status: 'RESIZE_DONE',
+          kind: 'PROFILE_IMAGE',
+          createdAt: 1564044369,
+          updatedAt: 1564044369
+        },
+        '9002': {
+          id: '9002',
+          resolutions: {
+            original: {
+              url:
+                'https://dbvoeb7t6hffk.cloudfront.net/pepo-sandbox1000/ua/images/1000-744eff04466b1b3321b2f5e92527a53d-original.jpg',
+              size: 25600
+            },
+            '288w': {
+              url:
+                'https://dbvoeb7t6hffk.cloudfront.net/pepo-sandbox1000/ua/images/1000-744eff04466b1b3321b2f5e92527a53d-288w.jpg',
+              size: 25600,
+              height: 509,
+              width: 288
+            }
+          },
+          status: 'RESIZE_DONE',
+          kind: 'PROFILE_IMAGE',
+          createdAt: 1564044369,
+          updatedAt: 1564044369
+        },
+        '9003': {
+          id: '9003',
+          resolutions: {
+            original: {
+              url:
+                'https://dbvoeb7t6hffk.cloudfront.net/pepo-sandbox1000/ua/images/1000-2da3a523efbab1a3ea5793e62189c35d-original.jpg',
+              size: 14336
+            },
+            '288w': {
+              url:
+                'https://dbvoeb7t6hffk.cloudfront.net/pepo-sandbox1000/ua/images/1000-2da3a523efbab1a3ea5793e62189c35d-288w.jpg',
+              size: 14336,
+              height: 509,
+              width: 288
             }
           },
           status: 'RESIZE_DONE',
