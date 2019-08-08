@@ -10,7 +10,7 @@ const upQuery = `CREATE TABLE ${keySpace}.user_notifications \n\
 (  \n\
   user_id bigint, \n\
   last_action_timestamp timestamp, \n\
-  uuid uuid, \n\
+  uuid varchar, \n\
   kind int, \n\
   subject_user_id bigint, \n\
   actor_ids SET<INT>, \n\
