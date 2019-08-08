@@ -6,6 +6,7 @@
     - [MySQL](https://www.mysql.com/downloads/)
     - [Memcached](https://memcached.org/)
     - [RabbitMQ](https://www.rabbitmq.com/download.html)
+    - [Pepo-Tracker](https://github.com/pepotech/pepo-tracker)
 
 * Install all the packages.
 ```
