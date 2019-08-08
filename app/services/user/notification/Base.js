@@ -8,22 +8,20 @@ const rootPrefix = '../../../..',
   TokenUserByUserIdsMultiCache = require(rootPrefix + '/lib/cacheManagement/multi/TokenUserByUserIds'),
   NotificationResponseGet = require(rootPrefix + '/lib/notification/response/Get'),
   responseEntityKey = require(rootPrefix + '/lib/globalConstant/responseEntityKey'),
-  responseHelper = require(rootPrefix + '/lib/formatter/response'),
-  paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination');
+  responseHelper = require(rootPrefix + '/lib/formatter/response');
 
 /**
- * Class for user Notification List.
+ * Class for user Notification Base.
  *
  * @class UserNotification
  */
-class UserNotification extends ServiceBase {
+class UserNotificationBase extends ServiceBase {
   /**
    * Constructor for user contribution base.
    *
    * @param {object} params
    * @param {object} params.current_user
    * @param {number/string} params.current_user.id
-   * @param {string} [params.pagination_identifier]
    *
    * @augments ServiceBase
    *
@@ -33,12 +31,6 @@ class UserNotification extends ServiceBase {
     super(params);
 
     const oThis = this;
-
-    oThis.currentUserId = +params.current_user.id;
-    oThis.paginationIdentifier = params[paginationConstants.paginationIdentifierKey] || null;
-
-    oThis.limit = null;
-    oThis.page = null;
 
     oThis.userNotifications = [];
     oThis.userIds = [];
@@ -64,7 +56,7 @@ class UserNotification extends ServiceBase {
 
     await oThis._validateAndSanitizeParams();
 
-    await oThis._fetchPaginatedUserNotificationFromCache();
+    await oThis._setUserNotification();
 
     await oThis._setUserAndVideoIds();
 
@@ -82,29 +74,7 @@ class UserNotification extends ServiceBase {
     oThis._formatUserNotifications();
     //todo: update visitTime table. check if it will inser as well
     //send: last read time in response
-    return responseHelper.successWithData(oThis.finalResponse());
-  }
-
-  /**
-   * Validate and sanitize specific params.
-   *
-   * @sets oThis.page, oThis.limit
-   *
-   * @returns {Promise<never>}
-   * @private
-   */
-  async _validateAndSanitizeParams() {
-    const oThis = this;
-
-    if (oThis.paginationIdentifier) {
-      const parsedPaginationParams = oThis._parsePaginationParams(oThis.paginationIdentifier);
-      oThis.page = parsedPaginationParams.page; // Override page.
-    } else {
-      oThis.page = 1;
-    }
-    oThis.limit = paginationConstants.defaultUserNotificationPageSize;
-
-    return oThis._validatePageSize();
+    return responseHelper.successWithData(oThis._finalResponse());
   }
 
   /**
@@ -113,9 +83,19 @@ class UserNotification extends ServiceBase {
    * @returns {Promise<void>}
    * @private
    */
-  async _fetchPaginatedUserNotificationFromCache() {
-    const oThis = this;
-    //todo:
+  async _setUserNotification() {
+    throw new Error('Sub-class to implement.');
+  }
+
+  /**
+   * Validate and sanitize specific params.
+   *
+   *
+   * @returns {Promise<never>}
+   * @private
+   */
+  async _validateAndSanitizeParams() {
+    throw new Error('Sub-class to implement.');
   }
 
   /**
@@ -436,21 +416,8 @@ class UserNotification extends ServiceBase {
    * @returns {object}
    * @private
    */
-  finalResponse() {
+  _finalResponse() {
     const oThis = this;
-
-    const nextPagePayloadKey = {};
-
-    if (oThis.formattedUserNotifications.length === oThis.limit) {
-      nextPagePayloadKey[paginationConstants.paginationIdentifierKey] = {
-        last_action_timestamp:
-          oThis.formattedUserNotifications[oThis.formattedUserNotifications.length - 1].lastActionTimestamp
-      };
-    }
-
-    const responseMetaData = {
-      [paginationConstants.nextPagePayloadKey]: nextPagePayloadKey
-    };
 
     const userHash = {},
       tokenUserHash = {};
@@ -468,52 +435,9 @@ class UserNotification extends ServiceBase {
       tokenUsersByUserIdMap: tokenUserHash,
       imageMap: oThis.imageMap,
       videoMap: oThis.videoMap,
-      userNotificationList: oThis.formattedUserNotifications,
-      meta: responseMetaData
+      userNotificationList: oThis.formattedUserNotifications
     };
-  }
-
-  /**
-   * Returns default page limit.
-   *
-   * @returns {number}
-   * @private
-   */
-  _defaultPageLimit() {
-    return paginationConstants.defaultUserNotificationPageSize;
-  }
-
-  /**
-   * Returns minimum page limit.
-   *
-   * @returns {number}
-   * @private
-   */
-  _minPageLimit() {
-    return paginationConstants.defaultUserNotificationPageSize;
-  }
-
-  /**
-   * Returns maximum page limit.
-   *
-   * @returns {number}
-   * @private
-   */
-  _maxPageLimit() {
-    return paginationConstants.defaultUserNotificationPageSize;
-  }
-
-  /**
-   * Returns current page limit.
-   *
-   * @returns {number}
-   * @private
-   */
-  _currentPageLimit() {
-    const oThis = this;
-
-    return oThis.limit;
   }
 }
 
-module.exports = UserNotification;
+module.exports = UserNotificationBase;

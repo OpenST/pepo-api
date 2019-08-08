@@ -30,7 +30,7 @@ router.get('/', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   };
 
   Promise.resolve(
-    routeHelper.perform(req, res, next, '/user/notification/Get', 'r_a_v1_un_1', null, dataFormatterFunc)
+    routeHelper.perform(req, res, next, '/user/notification/List', 'r_a_v1_un_1', null, dataFormatterFunc)
   );
 });
 
