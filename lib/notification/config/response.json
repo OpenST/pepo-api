@@ -28,7 +28,7 @@
         }
       },
       "image": "actorImage",
-      "payload": ["amount", "thank_you_flag"],
+      "payload": ["amount", "thankYouFlag"],
       "supportingEntities": {
         "userIds": ["actorIds"],
         "videoIds": []
