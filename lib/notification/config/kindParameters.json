@@ -1,9 +1,9 @@
 {
   "PROFILE_TX_SEND_SUCCESS": {
     "mandatory": {
+      "subject_user_id":  1,
       "actor_ids":  1,
       "actor_count":  1,
-      "subject_user_id":  1,
       "payload": {
         "mandatory": {
           "transaction_id": 1
