@@ -3,13 +3,14 @@ const express = require('express'),
 
 const rootPrefix = '../../..',
   routeHelper = require(rootPrefix + '/routes/helper'),
+  basicHelper = require(rootPrefix + '/helpers/basic'),
   apiName = require(rootPrefix + '/lib/globalConstant/apiName'),
+  apiVersions = require(rootPrefix + '/lib/globalConstant/apiVersions'),
   sanitizer = require(rootPrefix + '/helpers/sanitizer'),
   coreConstants = require(rootPrefix + '/config/coreConstants'),
-  responseHelper = require(rootPrefix + '/lib/formatter/response'),
-  FormatterComposer = require(rootPrefix + '/lib/formatter/Composer'),
-  entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
-  responseEntityKey = require(rootPrefix + '/lib/globalConstant/responseEntityKey');
+  responseHelper = require(rootPrefix + '/lib/formatter/response');
+
+const errorConfig = basicHelper.fetchErrorConfig(apiVersions.v1);
 
 /* Rotate twitter account */
 router.get('/', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
