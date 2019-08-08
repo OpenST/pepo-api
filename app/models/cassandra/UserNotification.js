@@ -130,9 +130,10 @@ class UserNotificationModel extends ModelBase {
         case 'actor_count':
         case 'heading_version':
         case 'flag_1':
-        case 'flag_2':
+        case 'flag_2': {
           valuesArray.push(Number(insertParameters[key]));
           break;
+        }
         case 'uuid': {
           valuesArray.push(insertParameters[key]);
           break;
@@ -147,9 +148,10 @@ class UserNotificationModel extends ModelBase {
         }
         case 'payload':
         case 'column_1':
-        case 'column_2':
+        case 'column_2': {
           valuesArray.push(JSON.stringify(insertParameters[key]));
           break;
+        }
         default: {
           throw new Error('Invalid key name.');
         }
