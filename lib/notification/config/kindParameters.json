@@ -40,6 +40,8 @@
         "optional": {}
       }
     },
-    "optional": {}
+    "optional": {
+      "thank_you_flag": 1
+    }
   }
 }

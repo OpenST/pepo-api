@@ -1,11 +1,8 @@
 {
-  "column_1": {
-  },
-  "column_2": {
-  },
+  "column_1": {},
+  "column_2": {},
   "flag_1": {
-    "CONTRIBUTION_THANKS": "thank_you_flag"
+    "VIDEO_TX_SEND_SUCCESS": "thank_you_flag"
   },
-  "flag_2": {
-  }
+  "flag_2": {}
 }

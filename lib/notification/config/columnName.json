@@ -1,5 +1,8 @@
 {
   "video_id": "v_id",
   "transaction_id": "tx_id",
-  "thank_you_flag": "ty_f"
+  "user_id": "user_id",
+  "actor_ids": "actor_ids",
+  "actor_count": "actor_count",
+  "subject_user_id": "subject_user_id"
 }
