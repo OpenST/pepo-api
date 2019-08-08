@@ -40,8 +40,21 @@
         "optional": {}
       }
     },
-    "optional": {
-      "thank_you_flag": 1
-    }
+    "optional": {}
+  },
+  "VIDEO_TX_RECEIVE_SUCCESS": {
+    "mandatory": {
+      "actor_ids":  1,
+      "actor_count":  1,
+      "subject_user_id":  1,
+      "payload": {
+        "mandatory": {
+          "transaction_id": 1,
+          "video_id": 1
+        },
+        "optional": {}
+      }
+    },
+    "optional": {}
   }
 }
