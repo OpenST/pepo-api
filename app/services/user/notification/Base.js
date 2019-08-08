@@ -216,7 +216,7 @@ class UserNotificationBase extends ServiceBase {
   _getGoto(userNotification) {
     const oThis = this;
 
-    let resp = new NotificationResponseGet().getHeadingForNotification({ userNotification: userNotification });
+    let resp = new NotificationResponseGet().getGotoForNotification({ userNotification: userNotification });
 
     if (resp.isFailure()) {
       return Promise.reject(resp);
