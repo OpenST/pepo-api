@@ -7,5 +7,11 @@
   "actor_ids": "actor_ids",
   "actor_count": "actor_count",
   "video_id": "v_id",
-  "transaction_id": "tx_id"
+  "transaction_id": "tx_id",
+  "payload": "payload",
+  "flag_1": "flag_1",
+  "flag_2": "flag_2",
+  "column_1": "column_1",
+  "column_2": "column_2",
+  "heading_version": "heading_version"
 }
