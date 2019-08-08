@@ -4,7 +4,7 @@
     {
       "id": "a123",
       "uts": 1564481473,
-      "kind": "tx_received_success",
+      "kind": "PROFILE_TX_RECEIVE_SUCCESS",
       "heading": {
         "text": "sunil supported you.",
         "includes": {
@@ -15,11 +15,69 @@
           }
         }
       },
+      "goto": {
+        "pn": "p",
+        "v": {
+          "puid": 1067
+        }
+      },
       "image_id": "217",
       "timestamp": 1564481473,
       "payload": {
         "amount": "23000000000000000000",
         "thanks_done": 0
+      }
+    },
+    {
+      "id": "a124",
+      "uts": 1564481475,
+      "kind": "PROFILE_TX_SEND_SUCCESS",
+      "heading": {
+        "text": "You gave sunil",
+        "includes": {
+          "sunil": {
+            "kind": "users",
+            "id": "1067",
+            "attribute": "username"
+          }
+        }
+      },
+      "goto": {
+        "pn": "p",
+        "v": {
+          "puid": 1067
+        }
+      },
+      "image_id": "217",
+      "timestamp": 1564481475,
+      "payload": {
+        "amount": "33000000000000000000"
+      }
+    },
+    {
+      "id": "a125",
+      "uts": 1564481477,
+      "kind": "VIDEO_ADD",
+      "heading": {
+        "text": "Watch sunil new video",
+        "includes": {
+          "sunil": {
+            "kind": "users",
+            "id": "1067",
+            "attribute": "username"
+          }
+        }
+      },
+      "goto": {
+        "pn": "p",
+        "v": {
+          "puid": 1067
+        }
+      },
+      "image_id": "217",
+      "timestamp": 1564481477,
+      "payload": {
+        "videoId": "1"
       }
     }
   ],
@@ -58,6 +116,10 @@
       },
       "status": "RESIZE_DONE",
       "uts": 1564571561
+    }
+  },
+  "meta": {
+    "next_page_payload": {
     }
   }
 }

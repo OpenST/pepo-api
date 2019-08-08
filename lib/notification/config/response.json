@@ -1,0 +1,110 @@
+{
+  "PROFILE_TX_SEND_SUCCESS": {
+    "notification": {
+      "headings": {
+        "1": {
+          "title": "You gave {{subjectUsername}}.",
+          "templateVars": [
+            "subjectUsername"
+          ]
+        }
+      },
+      "image": "subjectImage",
+      "payload": ["amount"],
+      "supportingEntities": {
+        "userIds": ["subjectUserId"],
+        "videoIds": []
+      }
+    }
+  },
+  "PROFILE_TX_RECEIVE_SUCCESS": {
+    "notification": {
+      "headings": {
+        "1": {
+          "title": "{{actorUsername}} supported you.",
+          "templateVars": [
+            "actorUsername"
+          ]
+        }
+      },
+      "image": "actorImage",
+      "payload": ["amount", "thank_you_flag"],
+      "supportingEntities": {
+        "userIds": ["actorIds"],
+        "videoIds": []
+      }
+    }
+  },
+  "VIDEO_TX_SEND_SUCCESS": {
+    "notification": {
+      "headings": {
+        "1": {
+          "title": "You gave {{subjectUsername}}.",
+          "templateVars": [
+            "subjectUsername"
+          ]
+        }
+      },
+      "image": "subjectImage",
+      "payload": ["amount"],
+      "supportingEntities": {
+        "userIds": ["subjectUserId"],
+        "videoIds": []
+      }
+    }
+  },
+  "VIDEO_TX_RECEIVE_SUCCESS": {
+    "notification": {
+      "headings": {
+        "1": {
+          "title": "{{actorUsername}} supported you.",
+          "templateVars": [
+            "actorUsername"
+          ]
+        }
+      },
+      "image": "actorImage",
+      "payload": ["amount", "thank_you_flag"],
+      "supportingEntities": {
+        "userIds": ["actorIds"],
+        "videoIds": []
+      }
+    }
+  },
+  "VIDEO_ADD": {
+    "notification": {
+      "headings": {
+        "1": {
+          "title": "Watch {{actorUsername}} new video.",
+          "templateVars": [
+            "actorUsername"
+          ]
+        }
+      },
+      "image": "actorImage",
+      "payload": ["videoId"],
+      "supportingEntities": {
+        "userIds": ["actorIds"],
+        "videoIds": ["videoId"]
+      }
+    }
+  },
+  "contributionThanksKind": {
+    "notification": {
+      "headings": {
+        "1": {
+          "title": "{{actorUsername}} apprecitates your support.",
+          "templateVars": [
+            "actorUsername"
+          ]
+        }
+      },
+      "image": "actorImage",
+      "payload": ["thank_you_text"],
+      "supportingEntities": {
+        "userIds": ["actorIds"],
+        "videoIds": []
+      }
+    }
+  }
+}
