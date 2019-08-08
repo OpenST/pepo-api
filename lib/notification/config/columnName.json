@@ -1,8 +1,11 @@
 {
-  "video_id": "v_id",
-  "transaction_id": "tx_id",
   "user_id": "user_id",
+  "last_action_timestamp": "last_action_timestamp",
+  "uuid": "uuid",
+  "kind": "kind",
+  "subject_user_id": "subject_user_id",
   "actor_ids": "actor_ids",
   "actor_count": "actor_count",
-  "subject_user_id": "subject_user_id"
+  "video_id": "v_id",
+  "transaction_id": "tx_id"
 }
