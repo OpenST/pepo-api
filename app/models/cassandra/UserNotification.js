@@ -123,14 +123,16 @@ class UserNotificationModel extends ModelBase {
         valueString += ', ';
       }
 
+      //todo: can we avoid mapping here and instead only do for json stringify type?.
+
       switch (key) {
         case 'user_id':
         case 'last_action_timestamp':
         case 'subject_user_id':
         case 'actor_count':
         case 'heading_version':
-        case 'flag_1':
-        case 'flag_2': {
+        case 'flag1':
+        case 'flag2': {
           valuesArray.push(Number(insertParameters[key]));
           break;
         }
@@ -147,8 +149,8 @@ class UserNotificationModel extends ModelBase {
           break;
         }
         case 'payload':
-        case 'column_1':
-        case 'column_2': {
+        case 'column1':
+        case 'column2': {
           valuesArray.push(JSON.stringify(insertParameters[key]));
           break;
         }
