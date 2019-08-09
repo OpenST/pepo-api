@@ -285,6 +285,10 @@ class CoreConstants {
     return process.env.DEVOPS_IP_ADDRESS;
   }
 
+  get WS_SERVER_IDENTIFIER() {
+    return process.env.DEVOPS_WS_SERVER_IDENTIFIER;
+  }
+
   // Pepo-campaigns details
 
   get PEPO_CAMPAIGN_BASE_URL() {
