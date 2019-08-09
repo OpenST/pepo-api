@@ -48,6 +48,7 @@ async function startWebSocketServer() {
     });
 
     socket.on('disconnect', async function() {
+      logger.log('Socket on-disconnect called. ');
       await onSocketDisconnect(socket);
     });
 
@@ -79,6 +80,7 @@ async function startWebSocketServer() {
 
     logger.log('Authentication Successful for userId: ', userId);
     socket.emit('server-event', 'Authentication Successful !!');
+    logger.log('Emitted event for userId: ', userId);
   });
 
   http.listen(4000, function() {
@@ -95,12 +97,8 @@ async function onSocketDisconnect(socket) {
   }
 
   await new UserSocketConnectionDetailsModel()
-    .update({
-      status: socketConnectionConstants.invertedStatuses[socketConnectionConstants.expiredStatus]
-    })
-    .where({
-      id: userSocketConnDetailsId
-    })
+    .update({ status: socketConnectionConstants.invertedStatuses[socketConnectionConstants.expiredStatus] })
+    .where({ id: userSocketConnDetailsId })
     .fire();
 
   await UserSocketConnectionDetailsModel.flushCache({ userId: userId });
@@ -119,22 +117,28 @@ async function onSocketDisconnect(socket) {
  * @returns {Promise<void>}
  */
 async function onPingPacket(socket) {
-  let incrementInterval = 60,
-    updateResponse = await new UserSocketConnectionDetailsModel()
-      .update(['socket_expiry_at = socket_expiry_at + ?', incrementInterval])
-      .where({
-        id: socket.userSocketConnDetailsId,
-        status: socketConnectionConstants.invertedStatuses[socketConnectionConstants.connectedStatus]
-      })
-      .where(['socket_expiry_at > ?', basicHelper.getCurrentTimestampInSeconds()])
-      .fire();
+  // let incrementInterval = 60,
+  //   updateResponse = await new UserSocketConnectionDetailsModel()
+  //     .update(['socket_expiry_at = socket_expiry_at + ?', incrementInterval])
+  //     .where({
+  //       id: socket.userSocketConnDetailsId,
+  //       status: socketConnectionConstants.invertedStatuses[socketConnectionConstants.connectedStatus]
+  //     })
+  //     .where(['socket_expiry_at > ?', basicHelper.getCurrentTimestampInSeconds()])
+  //     .fire();
 
-  //if nothing is updated then mark the socket as expired and call disconnect.
-  if (updateResponse.changedRows === 0) {
+  let incrementInterval = 60;
+  if (socket.socketExpiryAt <= basicHelper.getCurrentTimestampInSeconds() - incrementInterval) {
     socket.disconnect();
   }
+  socket.socketExpiryAt = basicHelper.getCurrentTimestampInSeconds();
 
-  await UserSocketConnectionDetailsModel.flushCache({ userId: socket.userId });
+  // //if nothing is updated then mark the socket as expired and call disconnect.
+  // if (updateResponse.changedRows === 0) {
+  //   socket.disconnect();
+  // }
+  //
+  // await UserSocketConnectionDetailsModel.flushCache({ userId: socket.userId });
 }
 
 async function subscribeToRmq() {
