@@ -6,7 +6,7 @@ const rootPrefix = '../../../..',
   ImageByIdCache = require(rootPrefix + '/lib/cacheManagement/multi/ImageByIds'),
   VideoByIdCache = require(rootPrefix + '/lib/cacheManagement/multi/VideoByIds'),
   TokenUserByUserIdsMultiCache = require(rootPrefix + '/lib/cacheManagement/multi/TokenUserByUserIds'),
-  notificationResponseHelper = require(rootPrefix + '/lib/notification/response/helper'),
+  NotificationResponseHelper = require(rootPrefix + '/lib/notification/response/Helper'),
   responseEntityKey = require(rootPrefix + '/lib/globalConstant/responseEntityKey'),
   responseHelper = require(rootPrefix + '/lib/formatter/response');
 
@@ -111,10 +111,10 @@ class UserNotificationBase extends ServiceBase {
 
     for (let i = 0; i < oThis.userNotifications.length; i++) {
       let userNotification = oThis.userNotifications[i];
-      let flattenedUserNotification = notificationResponseHelper.getFlattenedObject(userNotification);
+      let flattenedUserNotification = NotificationResponseHelper.getFlattenedObject(userNotification);
       let formattedUserNotification = {};
 
-      formattedUserNotification['id'] = notificationResponseHelper.getEncryptIdForNotification(
+      formattedUserNotification['id'] = NotificationResponseHelper.getEncryptIdForNotification(
         flattenedUserNotification
       );
 
@@ -154,7 +154,7 @@ class UserNotificationBase extends ServiceBase {
       userNotification: userNotification
     };
 
-    let resp = notificationResponseHelper.getImageIdForNotification(params);
+    let resp = NotificationResponseHelper.getImageIdForNotification(params);
 
     if (resp.isFailure()) {
       return Promise.reject(resp);
@@ -174,7 +174,7 @@ class UserNotificationBase extends ServiceBase {
     const oThis = this;
     const payload = {};
 
-    let payloadArr = notificationResponseHelper.payloadNotificationConfigForKind(userNotification.kind);
+    let payloadArr = NotificationResponseHelper.payloadNotificationConfigForKind(userNotification.kind);
 
     for (let i = 0; i < payloadArr.length; i++) {
       const payloadKey = payloadArr[i];
@@ -201,7 +201,7 @@ class UserNotificationBase extends ServiceBase {
       userNotification: userNotification
     };
 
-    let resp = notificationResponseHelper.getHeadingForNotification(params);
+    let resp = NotificationResponseHelper.getHeadingForNotification(params);
 
     if (resp.isFailure()) {
       return Promise.reject(resp);
@@ -220,7 +220,7 @@ class UserNotificationBase extends ServiceBase {
   _getGoto(userNotification) {
     const oThis = this;
 
-    let resp = notificationResponseHelper.getGotoForNotification({ userNotification: userNotification });
+    let resp = NotificationResponseHelper.getGotoForNotification({ userNotification: userNotification });
 
     if (resp.isFailure()) {
       return Promise.reject(resp);
@@ -239,14 +239,18 @@ class UserNotificationBase extends ServiceBase {
     const oThis = this;
 
     for (let i = 0; i < oThis.userNotifications.length; i++) {
-      const uN = oThis.userNotifications[i];
+      const userNotification = oThis.userNotifications[i];
 
-      let supportingEntitiesConfig = notificationResponseHelper.getSupportingEntitiesConfigForKind({
-        userNotification: userNotification
-      });
+      let supportingEntitiesConfig = NotificationResponseHelper.getSupportingEntitiesConfigForKind(
+        userNotification.kind
+      );
 
-      oThis.userIds = oThis.userIds.concat(oThis._getUserIdsForNotifications(uN, supportingEntitiesConfig));
-      oThis.videoIds = oThis.videoIds.concat(oThis._getVideoIdsForNotifications(uN, supportingEntitiesConfig));
+      oThis.userIds = oThis.userIds.concat(
+        oThis._getUserIdsForNotifications(userNotification, supportingEntitiesConfig)
+      );
+      oThis.videoIds = oThis.videoIds.concat(
+        oThis._getVideoIdsForNotifications(userNotification, supportingEntitiesConfig)
+      );
     }
 
     oThis.userIds = new Set(oThis.userIds);

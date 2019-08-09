@@ -78,7 +78,7 @@ class UserNotification extends UserNotificationServiceBase {
       return Promise.reject(cacheResponse);
     }
 
-    oThis.userNotifications = cacheResponse.data[oThis.currentUserId];
+    oThis.userNotifications = cacheResponse.data;
   }
 
   /**

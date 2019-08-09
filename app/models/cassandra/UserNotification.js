@@ -61,11 +61,11 @@ class UserNotificationModel extends ModelBase {
     let resp = await oThis.fire(queryString, valuesArray);
     let dbRows = resp.rows;
 
-    let response = {};
+    let response = [];
 
     for (let index = 0; index < dbRows.length; index++) {
       const formatDbRow = oThis.formatDbData(dbRows[index]);
-      response[formatDbRow.userId] = formatDbRow;
+      response.push(formatDbRow);
     }
 
     return response;
