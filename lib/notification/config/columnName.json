@@ -6,12 +6,14 @@
   "subjectUserId": "subject_user_id",
   "actorIds": "actor_ids",
   "actorCount": "actor_count",
-  "video_Id": "v_id",
-  "transactionId": "tx_id",
   "payload": "payload",
-  "flag1": "flag_1",
-  "flag2": "flag_2",
-  "column1": "column_1",
-  "column2": "column_2",
-  "headingVersion": "heading_version"
+  "headingVersion": "heading_version",
+  "videoId": "vid",
+  "amount": "am",
+  "thankYouText": "tyt",
+  "transactionId": "txid",
+  "flag1": "flag1",
+  "flag2": "flag2",
+  "column1": "column1",
+  "column2": "column2"
 }
