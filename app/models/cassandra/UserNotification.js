@@ -212,7 +212,7 @@ class UserNotificationModel extends ModelBase {
         return value.toString();
       }
       default: {
-        throw new Error('Invalid key name.');
+        throw new Error(`Invalid key name.- ${key}`);
       }
     }
   }
