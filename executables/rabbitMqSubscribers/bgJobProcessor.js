@@ -2,9 +2,11 @@ const program = require('commander');
 
 const rootPrefix = '../..',
   RabbitMqProcessorBase = require(rootPrefix + '/executables/rabbitMqSubscribers/Base'),
+  rabbitMqProvider = require(rootPrefix + '/lib/providers/rabbitMq'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   cronProcessesConstants = require(rootPrefix + '/lib/globalConstant/cronProcesses'),
-  configStrategyConstants = require(rootPrefix + '/lib/globalConstant/configStrategy');
+  configStrategyConstants = require(rootPrefix + '/lib/globalConstant/configStrategy'),
+  machineKindConstant = require(rootPrefix + '/lib/globalConstant/machineKind');
 
 program.option('--cronProcessId <cronProcessId>', 'Cron table process ID').parse(process.argv);
 
@@ -29,13 +31,12 @@ if (!program.cronProcessId) {
  */
 class BgJobProcessor extends RabbitMqProcessorBase {
   /**
-   * Get rabbitMq config kind.
+   * Get rabbitMq provider.
    *
    * @returns {string}
-   * @private
    */
-  get _rabbitMqConfigKind() {
-    return configStrategyConstants.bgJobRabbitmq;
+  getRmqProvider() {
+    return rabbitMqProvider.getInstance(configStrategyConstants.bgJobRabbitmq, machineKindConstant.cronKind);
   }
 
   /**

@@ -1,9 +1,11 @@
 const rootPrefix = '../..',
   RabbitMqProcessorBase = require(rootPrefix + '/executables/rabbitMqSubscribers/Base'),
+  socketRabbitMqProvider = require(rootPrefix + '/lib/providers/socketRabbitMq'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   webSocketCustomCache = require(rootPrefix + '/lib/webSocket/customCache'),
   cronProcessesConstants = require(rootPrefix + '/lib/globalConstant/cronProcesses'),
-  configStrategyConstants = require(rootPrefix + '/lib/globalConstant/configStrategy');
+  configStrategyConstants = require(rootPrefix + '/lib/globalConstant/configStrategy'),
+  machineKindConstant = require(rootPrefix + '/lib/globalConstant/machineKind');
 
 /**
  * Class for socket job processor.
@@ -24,13 +26,18 @@ class SocketJobProcessor extends RabbitMqProcessorBase {
   }
 
   /**
-   * Get rabbitMq config kind.
+   * Get rabbitMq provider.
    *
    * @returns {string}
-   * @private
    */
-  get _rabbitMqConfigKind() {
-    return configStrategyConstants.socketRabbitmq;
+  getRmqProvider() {
+    const oThis = this;
+
+    return socketRabbitMqProvider.getInstance(
+      configStrategyConstants.socketRabbitmq,
+      oThis.rmqCId, // This is available in cronProcesses table's params column.
+      machineKindConstant.cronKind
+    );
   }
 
   /**

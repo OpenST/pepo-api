@@ -17,9 +17,11 @@ let socketIdentifier = null,
   cronProcessId = null;
 
 async function run() {
-  logger.step('fetching cronprocess Id');
+  logger.step('--------------------------Fetching cronProcessId--------------------------');
   cronProcessId = await processIdSelector.perform();
+  logger.step('--------------------------Subscribing to RMQ found in cronProcessId - ', cronProcessId);
   await subscribeToRmq();
+  logger.step('--------------------------Starting Websocket server--------------------------');
   await startWebSocketServer();
 }
 
@@ -77,7 +79,7 @@ async function startWebSocketServer() {
   });
 
   http.listen(4000, function() {
-    console.log('listening on *:4000\n');
+    logger.step('listening on *:4000\n');
   });
 }
 
@@ -124,8 +126,6 @@ async function onPingPacket(socket) {
       .where(['socket_expiry_at > ?', basicHelper.getCurrentTimestampInSeconds()])
       .fire();
 
-  console.log('--updateResponse--', updateResponse);
-
   //if nothing is updated then mark the socket as expired and call disconnect.
   if (updateResponse.changedRows === 0) {
     socket.disconnect();
@@ -135,10 +135,9 @@ async function onPingPacket(socket) {
 }
 
 async function subscribeToRmq() {
-  let socketObj = new socketJobProcessor({ cronProcessId: cronProcessId });
+  let socketObj = new socketJobProcessor({ cronProcessId: +cronProcessId });
   await socketObj.perform();
   socketIdentifier = socketConnectionConstants.getSocketIdentifierFromTopic(socketObj.topics[0]);
-  console.log('---------socketObj.topics-----------', socketIdentifier);
 }
 
 run();

@@ -159,10 +159,7 @@ class ProcessorBase extends CronBase {
 
       const rabbitMqSubscription = oThis.subscriptionTopicToDataMap[subscriptionTopic];
 
-      const ostNotification = await rabbitMqProvider.getInstance(
-        oThis._rabbitMqConfigKind,
-        machineKindConstant.cronKind
-      );
+      const ostNotification = await oThis.getRmqProvider();
 
       // Below condition is to save from multiple subscriptions by command messages.
       if (!rabbitMqSubscription.isSubscribed()) {
@@ -417,7 +414,7 @@ class ProcessorBase extends CronBase {
    * @returns {string}
    * @private
    */
-  get _rabbitMqConfigKind() {
+  getRmqProvider() {
     throw new Error('Sub-class to implement.');
   }
 

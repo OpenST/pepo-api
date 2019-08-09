@@ -48,6 +48,10 @@ class ConfigStrategyTemplate {
         }
       },
       multipleClustersEntity: {
+        entityType: 'array',
+        entitiesPresent: 'clusterEntity'
+      },
+      clusterEntity: {
         entityType: 'object',
         entitiesPresent: {
           id: 'socketRabbbitMqIdEntity',
@@ -134,7 +138,7 @@ class ConfigStrategyTemplate {
       [configStrategyConstants.memcached]: 'memcachedEntity',
       [configStrategyConstants.bgJobRabbitmq]: 'rabbitmqEntity',
       [configStrategyConstants.notificationRabbitmq]: 'rabbitmqEntity',
-      [configStrategyConstants.socketRabbitmq]: 'rabbitmqEntity',
+      [configStrategyConstants.socketRabbitmq]: 'rabbitmqListEntity',
       [configStrategyConstants.redshift]: 'redshiftEntity',
       [configStrategyConstants.constants]: 'constantsEntity'
     };

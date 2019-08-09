@@ -13,10 +13,5 @@
     "topics": ["notification.#"],
     "queues": ["example"],
     "prefetchCount": 1
-  },
-  "socketJobProcessor": {
-    "topics": ["socket.connections.5"],
-    "queues": ["socket_connections_5"],
-    "prefetchCount": 1
   }
 }

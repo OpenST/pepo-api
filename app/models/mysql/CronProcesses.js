@@ -29,6 +29,33 @@ class CronProcessesModel extends ModelBase {
   }
 
   /**
+   * Format Db data.
+   *
+   * @param {object} dbRow
+   * @param {number} dbRow.id
+   * @param {number} dbRow.entity_kind
+   * @param {string} dbRow.entity_id
+   * @param {string} dbRow.extra_data
+   * @param {number} dbRow.created_at
+   * @param {number} dbRow.updated_at
+   *
+   * @return {object}
+   */
+  formatDbData(dbRow) {
+    const oThis = this;
+
+    const formattedData = {
+      id: dbRow.id,
+      kind: cronProcessesConstants.kinds[dbRow.kind],
+      ipAddress: dbRow.ip_address,
+      params: JSON.parse(dbRow.params),
+      status: cronProcessesConstants.statuses[dbRow.status]
+    };
+
+    return oThis.sanitizeFormattedData(formattedData);
+  }
+
+  /**
    * This method gets the response for the id passed.
    *
    * @param {number} id
@@ -39,9 +66,34 @@ class CronProcessesModel extends ModelBase {
     const oThis = this;
 
     return oThis
-      .select(['kind', 'ip_address', 'group_id', 'params', 'status', 'last_started_at', 'last_ended_at'])
+      .select(['kind', 'ip_address', 'params', 'status', 'last_started_at', 'last_ended_at'])
       .where({ id: id })
       .fire();
+  }
+
+  /**
+   * This method gets the response for the array of ids passed.
+   *
+   * @param {array} ids
+   *
+   * @returns {Promise<>}
+   */
+  async getByIds(ids) {
+    const oThis = this;
+
+    const response = {};
+
+    const dbRows = await oThis
+      .select('*')
+      .where({ id: ids })
+      .fire();
+
+    for (let index = 0; index < dbRows.length; index++) {
+      const formatDbRow = oThis.formatDbData(dbRows[index]);
+      response[formatDbRow.id] = formatDbRow;
+    }
+
+    return response;
   }
 
   /**
