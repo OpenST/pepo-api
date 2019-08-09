@@ -189,7 +189,7 @@ class UserNotificationModel extends ModelBase {
         return Number(value);
       }
       case 'uuid': {
-        return value;
+        return value.toString();
       }
       case 'kind': {
         return Number(userNotificationConstants.invertedKinds[value]);
