@@ -38,6 +38,24 @@ class ConfigStrategyTemplate {
           clusterNodes: 'clusterNodesEntity'
         }
       },
+      rabbitmqListEntity: {
+        entityType: 'object',
+        entitiesPresent: {
+          username: 'usernameEntity',
+          password: 'passwordEntity',
+          heartbeats: 'heartbeatsEntity',
+          clusters: 'multipleClustersEntity'
+        }
+      },
+      multipleClustersEntity: {
+        entityType: 'object',
+        entitiesPresent: {
+          id: 'socketRabbbitMqIdEntity',
+          host: 'hostEntity',
+          port: 'portEntity',
+          clusterNodes: 'clusterNodesEntity'
+        }
+      },
       redshiftEntity: {
         entityType: 'object',
         entitiesPresent: {
@@ -55,6 +73,9 @@ class ConfigStrategyTemplate {
         }
       },
 
+      socketRabbbitMqIdEntity: {
+        entityType: 'string'
+      },
       userEntity: {
         entityType: 'string'
       },
