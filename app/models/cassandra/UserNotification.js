@@ -1,7 +1,9 @@
 const rootPrefix = '../../..',
   ModelBase = require(rootPrefix + '/app/models/cassandra/Base'),
   ParametersFormatter = require(rootPrefix + '/lib/notification/formatter/ParametersFormatter'),
+  cassandraWrapper = require(rootPrefix + '/lib/cassandraWrapper'),
   cassandraKeyspaceConstants = require(rootPrefix + '/lib/globalConstant/cassandraKeyspace'),
+  basicHelper = require(rootPrefix + '/helpers/basic'),
   userNotificationConstants = require(rootPrefix + '/lib/globalConstant/cassandra/userNotification');
 
 // Declare variables.
@@ -73,41 +75,41 @@ class UserNotificationModel extends ModelBase {
    *
    * @param {object} dbRow
    * @param {number} dbRow.user_id
-   * @param {number} dbRow.last_action_timestamp
+   * @param {number/string} dbRow.last_action_timestamp
    * @param {string} dbRow.uuid
    * @param {number} dbRow.kind
-   * @param {string} dbRow.landing_vars
    * @param {number} dbRow.subject_user_id
-   * @param {string} dbRow.heading
    * @param {number} dbRow.actor_ids
    * @param {number} dbRow.actor_count
-   * @param {string} dbRow.transaction_id
-   * @param {number} dbRow.video_id
-   * @param {boolean} dbRow.thank_you_flag
-   * @param {string} dbRow.thank_you_text
+   * @param {string} dbRow.payload
+   * @param {string} dbRow.column1
+   * @param {string} dbRow.column2
+   * @param {number} dbRow.flag1
+   * @param {number} dbRow.flag2
    *
-   * @return {object}
+   * @returns {object}
    */
   formatDbData(dbRow) {
     const oThis = this;
 
     const formattedData = {
-      userId: dbRow.user_id.toString(10),
-      lastActionTimestamp: dbRow.last_action_timestamp,
+      user_id: dbRow.user_id.toString(10),
+      last_action_timestamp: basicHelper.dateToMilliSecondsTimestamp(dbRow.last_action_timestamp),
       uuid: dbRow.uuid,
-      kind: dbRow.kind,
-      landingVars: dbRow.landing_vars,
-      subjectUserId: dbRow.subject_user_id,
-      heading: dbRow.heading,
-      actorIds: dbRow.actor_ids,
-      actorCount: dbRow.actor_count,
-      transactionId: dbRow.transaction_id,
-      videoId: dbRow.video_id,
-      thankYouFlag: dbRow.thank_you_flag,
-      thankYouText: dbRow.thank_you_text
+      kind: userNotificationConstants.kinds[dbRow.kind],
+      subject_user_id: dbRow.subject_user_id.toString(10),
+      actor_ids: [...dbRow.actor_ids],
+      actor_count: dbRow.actor_count,
+      payload: JSON.parse(dbRow.payload),
+      column1: dbRow.column1,
+      column2: dbRow.column2,
+      flag1: dbRow.flag1,
+      flag2: dbRow.flag2
     };
 
-    return oThis.sanitizeFormattedData(formattedData);
+    const sanitizedFormattedData = oThis.sanitizeFormattedData(formattedData);
+
+    return ParametersFormatter.formatDbData(sanitizedFormattedData);
   }
 
   /**
