@@ -1,7 +1,8 @@
 const rootPrefix = '../../..',
   ModelBase = require(rootPrefix + '/app/models/cassandra/Base'),
   cassandraWrapper = require(rootPrefix + '/lib/cassandraWrapper'),
-  cassandraKeyspaceConstants = require(rootPrefix + '/lib/globalConstant/cassandraKeyspace');
+  cassandraKeyspaceConstants = require(rootPrefix + '/lib/globalConstant/cassandraKeyspace'),
+  userNotificationConstants = require(rootPrefix + '/lib/globalConstant/cassandra/userNotification');
 
 // Declare variables.
 const keyspace = cassandraKeyspaceConstants.cassandraKeyspaceName;
@@ -125,16 +126,20 @@ class UserNotificationModel extends ModelBase {
       switch (key) {
         case 'user_id':
         case 'last_action_timestamp':
-        case 'kind':
         case 'subject_user_id':
         case 'actor_count':
         case 'heading_version':
         case 'flag_1':
-        case 'flag_2':
+        case 'flag_2': {
           valuesArray.push(Number(insertParameters[key]));
           break;
+        }
         case 'uuid': {
           valuesArray.push(insertParameters[key]);
+          break;
+        }
+        case 'kind': {
+          valuesArray.push(Number(userNotificationConstants.invertedKinds[insertParameters[key]]));
           break;
         }
         case 'actor_ids': {
@@ -143,9 +148,10 @@ class UserNotificationModel extends ModelBase {
         }
         case 'payload':
         case 'column_1':
-        case 'column_2':
+        case 'column_2': {
           valuesArray.push(JSON.stringify(insertParameters[key]));
           break;
+        }
         default: {
           throw new Error('Invalid key name.');
         }

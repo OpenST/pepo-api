@@ -66,6 +66,8 @@ class UserNotificationBase extends ServiceBase {
     promisesArray.push(oThis._fetchTokenUsers());
     promisesArray.push(oThis._fetchVideos());
 
+    await Promise.all(promisesArray);
+
     const promisesArray2 = [];
     promisesArray2.push(oThis._fetchImages());
 
@@ -384,6 +386,14 @@ class UserNotificationBase extends ServiceBase {
     }
 
     oThis.videoMap = cacheRsp.data;
+
+    for (let videoId in oThis.videoMap) {
+      let video = oThis.videoMap[videoId],
+        posterImageId = video.posterImageId;
+      if (posterImageId) {
+        oThis.imageIds.push(posterImageId);
+      }
+    }
   }
 
   /**
