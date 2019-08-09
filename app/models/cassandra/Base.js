@@ -51,6 +51,7 @@ class ModelBase {
    * @return {*}
    */
   get queryTableName() {
+    const oThis = this;
     return `${oThis.keyspace}.${oThis.tableName}`;
   }
 
