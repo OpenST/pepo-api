@@ -58,7 +58,9 @@ class UserNotificationModel extends ModelBase {
     valuesArray.push(limit);
     let queryString = `select * from ${oThis.queryTableName} where ${userIdkey}=?${lastActionTimestampClause} limit ?`;
 
-    let dbRows = await oThis.fire(queryString, valuesArray);
+    let resp = await oThis.fire(queryString, valuesArray);
+    let dbRows = resp.rows;
+
     let response = {};
 
     for (let index = 0; index < dbRows.length; index++) {
