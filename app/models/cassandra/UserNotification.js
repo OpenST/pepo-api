@@ -43,8 +43,8 @@ class UserNotificationModel extends ModelBase {
       userId = params.userId,
       lastActionTimestamp = params.lastActionTimestamp;
 
-    const userIdkey = ParametersFormatter.shortenColumnName('userId');
-    const lastActionTimestampKey = ParametersFormatter.shortenColumnName('lastActionTimestamp');
+    const userIdkey = ParametersFormatter.getColumnNameForQuery('userId');
+    const lastActionTimestampKey = ParametersFormatter.getColumnNameForQuery('lastActionTimestamp');
 
     let valuesArray = [userId];
 

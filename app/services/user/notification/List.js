@@ -129,7 +129,7 @@ class UserNotification extends UserNotificationServiceBase {
   _finalResponse() {
     const oThis = this;
 
-    const response = super._finalResponse().data;
+    const response = super._finalResponse();
 
     let nextPagePayloadKey = {};
 
@@ -147,7 +147,7 @@ class UserNotification extends UserNotificationServiceBase {
     response['meta'] = responseMetaData;
     response['userNotificationList'] = oThis.formattedUserNotifications;
 
-    return responseHelper.successWithData(response);
+    return response;
   }
 
   /**
