@@ -1,6 +1,6 @@
 const rootPrefix = '../../..',
   ModelBase = require(rootPrefix + '/app/models/cassandra/Base'),
-  cassandraWrapper = require(rootPrefix + '/lib/cassandraWrapper'),
+  ParametersFormatter = require(rootPrefix + '/lib/notification/formatter/ParametersFormatter'),
   cassandraKeyspaceConstants = require(rootPrefix + '/lib/globalConstant/cassandraKeyspace'),
   userNotificationConstants = require(rootPrefix + '/lib/globalConstant/cassandra/userNotification');
 
@@ -39,22 +39,26 @@ class UserNotificationModel extends ModelBase {
   async fetchPaginatedForUserId(params) {
     const oThis = this,
       limit = params.limit,
-      creatorUserId = params.creatorUserId,
+      userId = params.userId,
       lastActionTimestamp = params.lastActionTimestamp;
 
-    // const queryObject = oThis
-    //   .select('*')
-    //   .where({creator_user_id: creatorUserId})
-    //   .order_by('id desc')
-    //   .limit(limit);
-    //
-    // if (lastActionTimestamp) {
-    //   queryObject.where(['created_at < ?', lastActionTimestamp]);
-    // }
-    //
-    // let dbRows = await queryObject.fire();
-    //
-    // let response = {};
+    const userIdkey = ParametersFormatter.shortenColumnName('userId');
+    const lastActionTimestampKey = ParametersFormatter.shortenColumnName('lastActionTimestamp');
+
+    let valuesArray = [userId];
+
+    let lastActionTimestampClause = '';
+
+    if (lastActionTimestamp) {
+      lastActionTimestampClause = ` and ${lastActionTimestampKey} < ?`;
+      valuesArray.push(lastActionTimestamp);
+    }
+
+    valuesArray.push(limit);
+    let queryString = `select * from ${oThis.queryTableName} where ${userIdkey}=?${lastActionTimestampClause} limit ?`;
+
+    let dbRows = await oThis.fire(queryString, valuesArray);
+    let response = {};
 
     for (let index = 0; index < dbRows.length; index++) {
       const formatDbRow = oThis.formatDbData(dbRows[index]);
@@ -118,7 +122,7 @@ class UserNotificationModel extends ModelBase {
 
     const { queryString, valuesArray } = oThis.createInsertQueryString(insertParameters);
 
-    await cassandraWrapper.execute(queryString, valuesArray);
+    await oThis.fire(queryString, valuesArray);
   }
 
   /**
