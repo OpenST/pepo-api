@@ -1,5 +1,6 @@
 const rootPrefix = '../../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
+  CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   UserNotificationVisitDetailModel = require(rootPrefix + '/app/models/cassandra/UserNotificationVisitDetail'),
   responseHelper = require(rootPrefix + '/lib/formatter/response');
 
@@ -38,10 +39,35 @@ class UpdateUserNotificationVisitDetails extends ServiceBase {
     const oThis = this;
 
     // todo: validation
+    await oThis._validateParams();
 
     await oThis._updateUserNotificationVisitDetails();
 
     responseHelper.successWithData({});
+  }
+
+  async _validateParams() {
+    const oThis = this;
+    if (CommonValidators.isVarNullOrUndefined(oThis.userId)) {
+      return Promise.reject(
+        responseHelper.paramValidationError({
+          internal_error_identifier: 'a_s_u_n_uunvd_1',
+          api_error_identifier: 'invalid_api_params',
+          params_error_identifiers: ['invalid_user_id'],
+          debug_options: { userId: oThis.userId }
+        })
+      );
+    }
+    if (!CommonValidators.validateNonZeroInteger(oThis.lastVisitedAt)) {
+      return Promise.reject(
+        responseHelper.paramValidationError({
+          internal_error_identifier: 'a_s_u_n_uunvd_2',
+          api_error_identifier: 'invalid_api_params',
+          params_error_identifiers: ['invalid_last_visited_at'],
+          debug_options: { lastVisitedAt: oThis.lastVisitedAt }
+        })
+      );
+    }
   }
 
   /**
