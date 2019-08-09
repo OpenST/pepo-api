@@ -3,9 +3,7 @@
     "abcd": "1234",
     "sequenceNumber": 1
   },
-  "cronProcessesMonitor": {
-    "ncbhjc": "hwvtuc"
-  },
+  "cronProcessesMonitor": {},
   "bgJobProcessor": {
     "topics": ["bg.#"],
     "queues": ["example"],
