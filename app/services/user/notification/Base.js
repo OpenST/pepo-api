@@ -6,7 +6,7 @@ const rootPrefix = '../../../..',
   ImageByIdCache = require(rootPrefix + '/lib/cacheManagement/multi/ImageByIds'),
   VideoByIdCache = require(rootPrefix + '/lib/cacheManagement/multi/VideoByIds'),
   TokenUserByUserIdsMultiCache = require(rootPrefix + '/lib/cacheManagement/multi/TokenUserByUserIds'),
-  NotificationResponseGet = require(rootPrefix + '/lib/notification/response/Get'),
+  NotificationResponseHelper = require(rootPrefix + '/lib/notification/response/helper'),
   responseEntityKey = require(rootPrefix + '/lib/globalConstant/responseEntityKey'),
   responseHelper = require(rootPrefix + '/lib/formatter/response');
 
@@ -112,23 +112,26 @@ class UserNotificationBase extends ServiceBase {
 
     for (let i = 0; i < oThis.userNotifications.length; i++) {
       let userNotification = oThis.userNotifications[i];
+      let flattenedUserNotification = notificationResponseHelper.getFlattenedObject(userNotification);
       let formattedUserNotification = {};
 
-      formattedUserNotification['id'] = new NotificationResponseGet().getEncryptIdForNotification(userNotification);
+      formattedUserNotification['id'] = notificationResponseHelper.getEncryptIdForNotification(
+        flattenedUserNotification
+      );
 
       formattedUserNotification['kind'] = userNotification.kind;
       formattedUserNotification['timestamp'] = userNotification.timestamp;
 
-      let headingData = oThis._getHeading(userNotification);
+      let headingData = oThis._getHeading(flattenedUserNotification);
       formattedUserNotification['heading'] = headingData;
 
-      let gotoData = oThis._getGoto(userNotification);
+      let gotoData = oThis._getGoto(flattenedUserNotification);
       formattedUserNotification['goto'] = gotoData;
 
-      let imageId = oThis._getImageId(userNotification);
+      let imageId = oThis._getImageId(flattenedUserNotification);
       formattedUserNotification['imageId'] = imageId;
 
-      let payload = oThis._getPayload(userNotification);
+      let payload = oThis._getPayload(flattenedUserNotification);
       formattedUserNotification['payload'] = payload;
 
       oThis.formattedUserNotifications.push(formattedUserNotification);
@@ -152,7 +155,7 @@ class UserNotificationBase extends ServiceBase {
       userNotification: userNotification
     };
 
-    let resp = new NotificationResponseGet().getImageIdForNotification(params);
+    let resp = notificationResponseHelper.getImageIdForNotification(params);
 
     if (resp.isFailure()) {
       return Promise.reject(resp);
@@ -172,7 +175,7 @@ class UserNotificationBase extends ServiceBase {
     const oThis = this;
     const payload = {};
 
-    let payloadArr = new NotificationResponseGet().payloadNotificationConfigForKind(userNotification.kind);
+    let payloadArr = notificationResponseHelper.payloadNotificationConfigForKind(userNotification.kind);
 
     for (let i = 0; i < payloadArr.length; i++) {
       const payloadKey = payloadArr[i];
@@ -199,7 +202,7 @@ class UserNotificationBase extends ServiceBase {
       userNotification: userNotification
     };
 
-    let resp = new NotificationResponseGet().getHeadingForNotification(params);
+    let resp = notificationResponseHelper.getHeadingForNotification(params);
 
     if (resp.isFailure()) {
       return Promise.reject(resp);
@@ -218,7 +221,7 @@ class UserNotificationBase extends ServiceBase {
   _getGoto(userNotification) {
     const oThis = this;
 
-    let resp = new NotificationResponseGet().getGotoForNotification({ userNotification: userNotification });
+    let resp = notificationResponseHelper.getGotoForNotification({ userNotification: userNotification });
 
     if (resp.isFailure()) {
       return Promise.reject(resp);
@@ -239,7 +242,7 @@ class UserNotificationBase extends ServiceBase {
     for (let i = 0; i < oThis.userNotifications.length; i++) {
       const uN = oThis.userNotifications[i];
 
-      let supportingEntitiesConfig = new NotificationResponseGet().getSupportingEntitiesConfigForKind({
+      let supportingEntitiesConfig = notificationResponseHelper.getSupportingEntitiesConfigForKind({
         userNotification: userNotification
       });
 
