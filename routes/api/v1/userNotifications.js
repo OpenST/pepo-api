@@ -11,7 +11,7 @@ const rootPrefix = '../../..',
 
 /* Get Notifications*/
 router.get('/', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
-  req.decodedParams.apiName = apiName.userNotification;
+  req.decodedParams.apiName = apiName.getUserNotifications;
 
   const dataFormatterFunc = async function(serviceResponse) {
     const wrapperFormatterRsp = await new FormatterComposer({

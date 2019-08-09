@@ -18,6 +18,7 @@ const rootPrefix = '../../..',
   activitiesRoutes = require(rootPrefix + '/routes/api/v1/activities'),
   cookieHelper = require(rootPrefix + '/lib/cookieHelper'),
   tagRoutes = require(rootPrefix + '/routes/api/v1/tags'),
+  userNotificationsRoutes = require(rootPrefix + '/routes/api/v1/userNotifications'),
   commonValidator = require(rootPrefix + '/lib/validators/Common'),
   uploadParamsRoutes = require(rootPrefix + '/routes/api/v1/uploadParams'),
   rotateTwitterAccountRoutes = require(rootPrefix + '/routes/api/v1/rotateTwitterAccount'),
@@ -77,6 +78,7 @@ router.use('/gifs', validateCookie, validateLoginRequired, gifsRoutes);
 router.use('/activities', validateCookie, validateLoginRequired, activitiesRoutes);
 router.use('/upload-params', validateCookie, validateLoginRequired, uploadParamsRoutes);
 router.use('/tags', validateCookie, validateLoginRequired, tagRoutes);
+router.use('/notifications', validateCookie, validateLoginRequired, userNotificationsRoutes);
 
 // TEMP route - only for QA - TODO - remove later after talking with SOMA
 router.use('/rotate-twitter-account', rotateTwitterAccountRoutes);
