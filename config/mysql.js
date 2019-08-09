@@ -80,6 +80,13 @@ const mysqlConfig = {
         user: coreConstants.INFRA_DB_MYSQL_USER,
         password: coreConstants.INFRA_DB_MYSQL_PASSWORD
       }
+    },
+    adminDbCluster: {
+      master: {
+        host: coreConstants.ADMIN_DB_MYSQL_HOST,
+        user: coreConstants.ADMIN_DB_MYSQL_USER,
+        password: coreConstants.ADMIN_DB_MYSQL_PASSWORD
+      }
     }
   },
   databases: {}
@@ -108,6 +115,9 @@ mysqlConfig.databases[database.configDbName] = ['configDbCluster'];
 
 // Ost db
 mysqlConfig.databases[database.ostDbName] = ['ostDbCluster'];
+
+// Ost db
+mysqlConfig.databases[database.adminDbName] = ['adminDbCluster'];
 
 // Infra db
 mysqlConfig.databases[database.infraDbName] = ['infraDbCluster'];
