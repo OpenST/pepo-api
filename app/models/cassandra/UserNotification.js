@@ -26,7 +26,6 @@ class UserNotificationModel extends ModelBase {
     const oThis = this;
 
     oThis.tableName = 'user_notifications';
-    oThis.queryTableName = `${oThis.keyspace}.${oThis.tableName}`;
   }
 
   /**
