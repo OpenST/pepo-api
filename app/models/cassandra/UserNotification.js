@@ -1,7 +1,6 @@
 const rootPrefix = '../../..',
   ModelBase = require(rootPrefix + '/app/models/cassandra/Base'),
   ParametersFormatter = require(rootPrefix + '/lib/notification/formatter/ParametersFormatter'),
-  cassandraWrapper = require(rootPrefix + '/lib/cassandraWrapper'),
   cassandraKeyspaceConstants = require(rootPrefix + '/lib/globalConstant/cassandraKeyspace'),
   basicHelper = require(rootPrefix + '/helpers/basic'),
   userNotificationConstants = require(rootPrefix + '/lib/globalConstant/cassandra/userNotification');
