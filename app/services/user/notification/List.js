@@ -79,10 +79,10 @@ class UserNotification extends UserNotificationServiceBase {
 
     let nextPagePayloadKey = {};
 
-    if (response.userNotificationList.length === oThis.limit) {
+    if (oThis.formattedUserNotifications.length === oThis.limit) {
       nextPagePayloadKey[paginationConstants.paginationIdentifierKey] = {
         last_action_timestamp:
-          response.userNotificationList[response.userNotificationList.length - 1].lastActionTimestamp
+          oThis.formattedUserNotifications[oThis.formattedUserNotifications.length - 1].lastActionTimestamp
       };
     }
 
@@ -91,6 +91,8 @@ class UserNotification extends UserNotificationServiceBase {
     };
 
     response['meta'] = responseMetaData;
+    response['userNotificationList'] = oThis.formattedUserNotifications;
+
     return responseHelper.successWithData(response);
   }
 

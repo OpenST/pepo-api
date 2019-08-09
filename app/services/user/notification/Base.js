@@ -447,8 +447,7 @@ class UserNotificationBase extends ServiceBase {
       usersByIdMap: userHash,
       tokenUsersByUserIdMap: tokenUserHash,
       imageMap: oThis.imageMap,
-      videoMap: oThis.videoMap,
-      userNotificationList: oThis.formattedUserNotifications
+      videoMap: oThis.videoMap
     };
   }
 }
