@@ -8,10 +8,11 @@ class bulkInsertIntoUserNotificationVisitDetail {
   async perform() {
     const oThis = this;
     let inputParams = [];
-    let query = 'insert into pepo_api_development.user_notification_visit_details(user_id,unread_flag) values (?,?);';
-    const unUsedFlag = 0;
+    let query =
+      'insert into pepo_api_development.user_notification_visit_details(user_id,last_visited_at) values (?,?);';
+    const timestamp = Date.now();
     for (let index = 1; index <= 100; index++) {
-      let params = [index, unUsedFlag];
+      let params = [index, timestamp];
       inputParams.push(params);
     }
     await oThis.bulkInsert(query, inputParams);
