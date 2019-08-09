@@ -50,6 +50,19 @@ class UserNotificationVisitDetailModel extends ModelBase {
   }
 
   /**
+   * Update user notification visit details
+   *
+   * @param queryParams
+   * @returns {Promise<any>}
+   */
+  async updateLastVisitTime(queryParams) {
+    const oThis = this;
+    let query = 'update ' + oThis.queryTableName + ' set last_visited_at = ? where user_id = ?;';
+    let params = [queryParams.lastVisitedAt, queryParams.userId];
+    return oThis.fire(query, params);
+  }
+
+  /**
    * Flush cache.
    *
    * @param {object} params

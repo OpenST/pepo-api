@@ -46,11 +46,20 @@ class ModelBase {
   }
 
   /**
+   * Table name with keyspace
+   *
+   * @return {*}
+   */
+  get queryTableName() {
+    return `${oThis.keyspace}.${oThis.tableName}`;
+  }
+
+  /**
    * Fire the query.
    *
    * @return {Promise<any>}
    */
-  async fire(query, params, options = {}) {
+  async fire(query, params, options = { prepare: true }) {
     const oThis = this;
     params = params || [];
 
