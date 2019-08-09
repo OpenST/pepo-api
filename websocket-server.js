@@ -17,11 +17,14 @@ let socketIdentifier = null,
   cronProcessId = null;
 
 async function run() {
-  logger.step('--------------------------Fetching cronProcessId--------------------------');
+  logger.step('-------------------------- Fetching cronProcessId --------------------------');
   cronProcessId = await processIdSelector.perform();
-  logger.step('--------------------------Subscribing to RMQ found in cronProcessId - ', cronProcessId);
+  logger.step(
+    '-------------------------- Subscribing to RMQ -------------------------- cronProcessId: ',
+    cronProcessId
+  );
   await subscribeToRmq();
-  logger.step('--------------------------Starting Websocket server--------------------------');
+  logger.step('-------------------------- Starting Websocket server --------------------------');
   await startWebSocketServer();
 }
 
@@ -71,10 +74,10 @@ async function startWebSocketServer() {
     socket.userId = userId;
     socket.userSocketConnDetailsId = userSocketConnDetailsId;
 
-    console.log('------------------userId---userSocketConnDetailsId------', userId, userSocketConnDetailsId);
     webSocketCustomCache.setIntoSocketObjsMap(userSocketConnDetailsId, socket);
     webSocketCustomCache.setIntoUserSocketIdsMap(userId, userSocketConnDetailsId);
 
+    logger.log('Authentication Successful for userId: ', userId);
     socket.emit('server-event', 'Authentication Successful !!');
   });
 
