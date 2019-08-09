@@ -7,7 +7,7 @@ const rootPrefix = '../../..',
   sanitizer = require(rootPrefix + '/helpers/sanitizer'),
   apiName = require(rootPrefix + '/lib/globalConstant/apiName'),
   entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
-  dummyNotifications = require('./test/fake/notifications.json'),
+  dummyNotifications = require(rootPrefix + '/test/fake/notifications.json'),
   responseEntityKey = require(rootPrefix + '/lib/globalConstant/responseEntityKey');
 
 /* Register Device*/
