@@ -15,16 +15,16 @@ const rootPrefix = '../../..',
 /**
  * Class for websocket auth.
  *
- * @class Auth
+ * @class WebSocketAuth
  */
-class Auth extends ServiceBase {
+class WebSocketAuth extends ServiceBase {
   /**
    * Constructor for websocket auth
    *
    * @param {object} params
-   * @param {string} params.auth_key_expiry_at: Auth key expiry at
+   * @param {string} params.auth_key_expiry_at: WebSocketAuth key expiry at
    * @param {string} params.payload: Payload
-   * @param {string} params.socketServerIdentifier: SocketServerIdentifier
+   * @param {string} params.socketIdentifier: socketIdentifier
    *
    * @augments ServiceBase
    *
@@ -242,4 +242,4 @@ class Auth extends ServiceBase {
   }
 }
 
-module.exports = Auth;
+module.exports = WebSocketAuth;
