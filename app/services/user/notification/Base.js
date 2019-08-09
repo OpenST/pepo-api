@@ -73,9 +73,8 @@ class UserNotificationBase extends ServiceBase {
 
     await Promise.all(promisesArray2);
 
-    oThis._formatUserNotifications();
-    //todo: update visitTime table. check if it will inser as well
-    //send: last read time in response
+    await oThis._formatUserNotifications();
+
     return responseHelper.successWithData(oThis._finalResponse());
   }
 
@@ -107,7 +106,7 @@ class UserNotificationBase extends ServiceBase {
    * @returns {Promise<never>}
    * @private
    */
-  _formatUserNotifications() {
+  async _formatUserNotifications() {
     const oThis = this;
 
     for (let i = 0; i < oThis.userNotifications.length; i++) {

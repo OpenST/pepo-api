@@ -1,5 +1,7 @@
 const rootPrefix = '../../../..',
   UserNotificationServiceBase = require(rootPrefix + '/app/services/user/notification/Base'),
+  UpdateUserNotificationVisitDetailsService = require(rootPrefix +
+    '/app/services/user/notification/UpdateUserNotificationVisitDetails'),
   UserNotificationsByUserIdPagination = require(rootPrefix +
     '/lib/cacheManagement/single/UserNotificationsByUserIdPagination'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
@@ -80,12 +82,51 @@ class UserNotification extends UserNotificationServiceBase {
   }
 
   /**
+   * format notifications and update last visit time
+   *
+   *
+   * @returns {Promise<never>}
+   * @private
+   */
+  async _formatUserNotifications() {
+    const oThis = this;
+    await super._finalResponse();
+
+    await oThis._updateLatVisitedTime();
+  }
+
+  /**
+   * Update Notification centre last visit time
+   *
+   * @returns {object}
+   * @private
+   */
+  async _updateLatVisitedTime() {
+    const oThis = this;
+
+    if (oThis.lastActionTimestamp) {
+      return;
+    }
+
+    let latestTimestamp = (oThis.formattedUserNotifications[0] || {})['lastActionTimestamp'] || Date.now();
+
+    let updateParam = {
+      user_id: oThis.currentUserId,
+      last_visited_at: latestTimestamp
+    };
+
+    let obj = new UpdateUserNotificationVisitDetailsService({ updateParam });
+
+    await obj.perform();
+  }
+
+  /**
    * Service response.
    *
    * @returns {object}
    * @private
    */
-  finalResponse() {
+  _finalResponse() {
     const oThis = this;
 
     const response = super._finalResponse().data;
