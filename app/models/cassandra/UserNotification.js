@@ -29,6 +29,42 @@ class UserNotificationModel extends ModelBase {
   }
 
   /**
+   * Fetch by creator user id
+   *
+   * @param {integer} params.limit: no of rows to fetch
+   * @param {integer} params.creatorUserId: creator user id
+   * @param {integer} params.lastActionTimestamp: creator user id
+   * @return {Promise<void>}
+   */
+  async fetchPaginatedForUserId(params) {
+    const oThis = this,
+      limit = params.limit,
+      creatorUserId = params.creatorUserId,
+      lastActionTimestamp = params.lastActionTimestamp;
+
+    // const queryObject = oThis
+    //   .select('*')
+    //   .where({creator_user_id: creatorUserId})
+    //   .order_by('id desc')
+    //   .limit(limit);
+    //
+    // if (lastActionTimestamp) {
+    //   queryObject.where(['created_at < ?', lastActionTimestamp]);
+    // }
+    //
+    // let dbRows = await queryObject.fire();
+    //
+    // let response = {};
+
+    for (let index = 0; index < dbRows.length; index++) {
+      const formatDbRow = oThis.formatDbData(dbRows[index]);
+      response[formatDbRow.userId] = formatDbRow;
+    }
+
+    return response;
+  }
+
+  /**
    * Format db data.
    *
    * @param {object} dbRow
@@ -182,7 +218,17 @@ class UserNotificationModel extends ModelBase {
    *
    * @returns {Promise<*>}
    */
-  static async flushCache(params) {}
+  static async flushCache(params) {
+    const promisesArray = [];
+
+    if (params.userId) {
+      const UserNotificationsByUserIdPagination = require(rootPrefix +
+        '/lib/cacheManagement/single/UserNotificationsByUserIdPagination');
+      promisesArray.push(new UserNotificationsByUserIdPagination({ userId: [params.userId] }).clear());
+    }
+
+    await Promise.all(promisesArray);
+  }
 }
 
 module.exports = UserNotificationModel;

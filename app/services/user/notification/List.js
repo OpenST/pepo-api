@@ -1,5 +1,7 @@
 const rootPrefix = '../../../..',
   UserNotificationServiceBase = require(rootPrefix + '/app/services/user/notification/Base'),
+  UserNotificationsByUserIdPagination = require(rootPrefix +
+    '/lib/cacheManagement/single/UserNotificationsByUserIdPagination'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination');
 
@@ -63,7 +65,18 @@ class UserNotification extends UserNotificationServiceBase {
    */
   async _setUserNotification() {
     const oThis = this;
-    //todo:
+
+    const cacheResponse = await new UserNotificationsByUserIdPagination({
+      userId: oThis.currentUserId,
+      limit: oThis.limit,
+      lastActionTimestamp: oThis.lastActionTimestamp
+    }).fetch();
+
+    if (cacheResponse.isFailure()) {
+      return Promise.reject(cacheResponse);
+    }
+
+    oThis.userNotifications = cacheResponse.data[oThis.currentUserId];
   }
 
   /**
