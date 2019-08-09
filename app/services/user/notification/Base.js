@@ -6,7 +6,7 @@ const rootPrefix = '../../../..',
   ImageByIdCache = require(rootPrefix + '/lib/cacheManagement/multi/ImageByIds'),
   VideoByIdCache = require(rootPrefix + '/lib/cacheManagement/multi/VideoByIds'),
   TokenUserByUserIdsMultiCache = require(rootPrefix + '/lib/cacheManagement/multi/TokenUserByUserIds'),
-  NotificationResponseHelper = require(rootPrefix + '/lib/notification/response/helper'),
+  notificationResponseHelper = require(rootPrefix + '/lib/notification/response/helper'),
   responseEntityKey = require(rootPrefix + '/lib/globalConstant/responseEntityKey'),
   responseHelper = require(rootPrefix + '/lib/formatter/response');
 
