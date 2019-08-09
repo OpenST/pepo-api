@@ -102,6 +102,7 @@ class UserNotificationModel extends ModelBase {
       actor_ids: [...dbRow.actor_ids],
       actor_count: dbRow.actor_count,
       payload: JSON.parse(dbRow.payload),
+      headingVersion: dbRow.heading_version,
       column1: dbRow.column1,
       column2: dbRow.column2,
       flag1: dbRow.flag1,

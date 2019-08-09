@@ -119,7 +119,7 @@ class UserNotificationBase extends ServiceBase {
       );
 
       formattedUserNotification['kind'] = userNotification.kind;
-      formattedUserNotification['timestamp'] = userNotification.timestamp;
+      formattedUserNotification['timestamp'] = userNotification.lastActionTimestamp;
 
       let headingData = oThis._getHeading(flattenedUserNotification);
       formattedUserNotification['heading'] = headingData;
@@ -226,7 +226,7 @@ class UserNotificationBase extends ServiceBase {
       return Promise.reject(resp);
     }
 
-    return resp.data['goto'];
+    return resp.data;
   }
 
   /**
@@ -239,7 +239,7 @@ class UserNotificationBase extends ServiceBase {
     const oThis = this;
 
     for (let i = 0; i < oThis.userNotifications.length; i++) {
-      const userNotification = oThis.userNotifications[i];
+      let userNotification = NotificationResponseHelper.getFlattenedObject(oThis.userNotifications[i]);
 
       let supportingEntitiesConfig = NotificationResponseHelper.getSupportingEntitiesConfigForKind(
         userNotification.kind
@@ -248,13 +248,14 @@ class UserNotificationBase extends ServiceBase {
       oThis.userIds = oThis.userIds.concat(
         oThis._getUserIdsForNotifications(userNotification, supportingEntitiesConfig)
       );
+
       oThis.videoIds = oThis.videoIds.concat(
         oThis._getVideoIdsForNotifications(userNotification, supportingEntitiesConfig)
       );
     }
 
-    oThis.userIds = new Set(oThis.userIds);
-    oThis.videoIds = new Set(oThis.videoIds);
+    oThis.userIds = [...new Set(oThis.userIds)];
+    oThis.videoIds = [...new Set(oThis.videoIds)];
   }
 
   /**
@@ -276,7 +277,7 @@ class UserNotificationBase extends ServiceBase {
       if (Array.isArray(val)) {
         uIds = uIds.concat(val);
       } else {
-        uIds.push(val);
+        uIds.push(Number(val));
       }
     }
 
@@ -302,7 +303,7 @@ class UserNotificationBase extends ServiceBase {
       if (Array.isArray(val)) {
         vIds = vIds.concat(val);
       } else {
-        vIds.push(val);
+        vIds.push(Number(val));
       }
     }
 

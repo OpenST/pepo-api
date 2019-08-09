@@ -90,7 +90,7 @@ class UserNotification extends UserNotificationServiceBase {
    */
   async _formatUserNotifications() {
     const oThis = this;
-    await super._finalResponse();
+    await super._formatUserNotifications();
 
     await oThis._updateLatVisitedTime();
   }
@@ -117,7 +117,8 @@ class UserNotification extends UserNotificationServiceBase {
 
     let obj = new UpdateUserNotificationVisitDetailsService({ updateParam });
 
-    await obj.perform();
+    //NOTE: Code will not exit on its error.
+    // await obj.perform();
   }
 
   /**
