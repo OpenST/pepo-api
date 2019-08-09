@@ -16,7 +16,7 @@
         }
       },
       "goto": {
-        "pn": "p",
+        "pn": "cb",
         "v": {
           "puid": 1067
         }
@@ -25,13 +25,66 @@
       "timestamp": 1564481473,
       "payload": {
         "amount": "23000000000000000000",
-        "thanks_done": 0
+        "thank_you_flag": 0
       }
     },
     {
       "id": "a124",
       "uts": 1564481475,
       "kind": "PROFILE_TX_SEND_SUCCESS",
+      "heading": {
+        "text": "You gave sunil",
+        "includes": {
+          "sunil": {
+            "kind": "users",
+            "id": "1067",
+            "attribute": "username"
+          }
+        }
+      },
+      "goto": {
+        "pn": "p",
+        "v": {
+          "puid": 1067
+        }
+      },
+      "image_id": "217",
+      "timestamp": 1564481475,
+      "payload": {
+        "amount": "33000000000000000000"
+      }
+    },
+    {
+      "id": "a135",
+      "uts": 1564481473,
+      "kind": "VIDEO_TX_RECEIVE_SUCCESS",
+      "heading": {
+        "text": "sunil supported you.",
+        "includes": {
+          "sunil": {
+            "kind": "users",
+            "id": "1067",
+            "attribute": "username"
+          }
+        }
+      },
+      "goto": {
+        "pn": "cb",
+        "v": {
+          "puid": 1067
+        }
+      },
+      "image_id": "217",
+      "timestamp": 1564481473,
+      "payload": {
+        "amount": "23000000000000000000",
+        "thank_you_flag": 0
+      }
+    },
+    {
+      "id": "a130",
+      "uts": 1564481475,
+      "kind": "VIDEO_TX_SEND_SUCCESS",
       "heading": {
         "text": "You gave sunil",
         "includes": {
@@ -69,9 +122,9 @@
         }
       },
       "goto": {
-        "pn": "p",
+        "pn": "v",
         "v": {
-          "puid": 1067
+          "vid": 1843
         }
       },
       "image_id": "217",
@@ -83,7 +136,7 @@
     {
       "id": "a126",
       "uts": 1564481477,
-      "kind": "APPRECIATION_FOR_SUPPORT",
+      "kind": "CONTRIBUTION_THANKS",
       "heading": {
         "text": "sunil appreciates your support.",
         "includes": {
@@ -103,7 +156,7 @@
       "image_id": "217",
       "timestamp": 1564481477,
       "payload": {
-        "thanks_text": "Thanks for supporting me."
+        "thank_you_text": "Thanks for supporting me."
       }
     },
     {
@@ -111,7 +164,7 @@
       "uts": 1564481477,
       "kind": "SYSTEM_NOTIFICATION",
       "heading": {
-        "text": "Placeholder for a sytem notification.",
+        "text": "Placeholder for a system notification.",
         "includes": {}
       },
       "goto": {},
