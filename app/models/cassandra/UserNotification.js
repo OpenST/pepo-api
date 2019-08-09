@@ -123,41 +123,8 @@ class UserNotificationModel extends ModelBase {
         valueString += ', ';
       }
 
-      //todo: can we avoid mapping here and instead only do for json stringify type?.
-
-      switch (key) {
-        case 'user_id':
-        case 'last_action_timestamp':
-        case 'subject_user_id':
-        case 'actor_count':
-        case 'heading_version':
-        case 'flag1':
-        case 'flag2': {
-          valuesArray.push(Number(insertParameters[key]));
-          break;
-        }
-        case 'uuid': {
-          valuesArray.push(insertParameters[key]);
-          break;
-        }
-        case 'kind': {
-          valuesArray.push(Number(userNotificationConstants.invertedKinds[insertParameters[key]]));
-          break;
-        }
-        case 'actor_ids': {
-          valuesArray.push(new Set(insertParameters[key]));
-          break;
-        }
-        case 'payload':
-        case 'column1':
-        case 'column2': {
-          valuesArray.push(JSON.stringify(insertParameters[key]));
-          break;
-        }
-        default: {
-          throw new Error('Invalid key name.');
-        }
-      }
+      const formattedValue = oThis.formatParameters(key, insertParameters[key]);
+      valuesArray.push(formattedValue);
       queryString += key;
       valueString += '?';
     }
@@ -165,6 +132,47 @@ class UserNotificationModel extends ModelBase {
     queryString += `) ${valueString}`;
 
     return { queryString, valuesArray };
+  }
+
+  /**
+   * Format parameters for insertion.
+   *
+   * @param {string} key
+   * @param {string/number/object/set/array} value
+   *
+   * @returns {string|Set<unknown>|number|*}
+   */
+  formatParameters(key, value) {
+    switch (key) {
+      case 'user_id':
+      case 'last_action_timestamp':
+      case 'subject_user_id':
+      case 'actor_count':
+      case 'heading_version':
+      case 'flag1':
+      case 'flag2': {
+        return Number(value);
+      }
+      case 'uuid': {
+        return value;
+      }
+      case 'kind': {
+        return Number(userNotificationConstants.invertedKinds[value]);
+      }
+      case 'actor_ids': {
+        return new Set(value);
+      }
+      case 'payload': {
+        return JSON.stringify(value);
+      }
+      case 'column1':
+      case 'column2': {
+        return value.toString();
+      }
+      default: {
+        throw new Error('Invalid key name.');
+      }
+    }
   }
 
   /**
