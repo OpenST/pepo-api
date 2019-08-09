@@ -1,5 +1,6 @@
 const rootPrefix = '../../../..',
   UserNotificationServiceBase = require(rootPrefix + '/app/services/user/notification/Base'),
+  responseHelper = require(rootPrefix + '/lib/formatter/response'),
   paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination');
 
 /**
@@ -29,7 +30,7 @@ class UserNotification extends UserNotificationServiceBase {
     oThis.paginationIdentifier = params[paginationConstants.paginationIdentifierKey] || null;
 
     oThis.limit = null;
-    oThis.last_action_timestamp = null;
+    oThis.lastActionTimestamp = null;
   }
 
   /**
@@ -45,9 +46,9 @@ class UserNotification extends UserNotificationServiceBase {
 
     if (oThis.paginationIdentifier) {
       const parsedPaginationParams = oThis._parsePaginationParams(oThis.paginationIdentifier);
-      oThis.last_action_timestamp = parsedPaginationParams.last_action_timestamp;
+      oThis.lastActionTimestamp = parsedPaginationParams.last_action_timestamp;
     } else {
-      oThis.last_action_timestamp = null;
+      oThis.lastActionTimestamp = null;
     }
     oThis.limit = paginationConstants.defaultUserNotificationPageSize;
 
@@ -75,6 +76,8 @@ class UserNotification extends UserNotificationServiceBase {
     const oThis = this;
 
     const response = super._finalResponse().data;
+
+    let nextPagePayloadKey = {};
 
     if (response.userNotificationList.length === oThis.limit) {
       nextPagePayloadKey[paginationConstants.paginationIdentifierKey] = {
