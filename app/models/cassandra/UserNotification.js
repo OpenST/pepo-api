@@ -1,21 +1,21 @@
 const rootPrefix = '../../..',
   ModelBase = require(rootPrefix + '/app/models/cassandra/Base'),
   ParametersFormatter = require(rootPrefix + '/lib/notification/formatter/ParametersFormatter'),
-  cassandraKeyspaceConstants = require(rootPrefix + '/lib/globalConstant/cassandraKeyspace'),
   basicHelper = require(rootPrefix + '/helpers/basic'),
+  cassandraKeyspaceConstants = require(rootPrefix + '/lib/globalConstant/cassandraKeyspace'),
   userNotificationConstants = require(rootPrefix + '/lib/globalConstant/cassandra/userNotification');
 
 // Declare variables.
 const keyspace = cassandraKeyspaceConstants.cassandraKeyspaceName;
 
 /**
- * Class for UserNotification model.
+ * Class for user notification model.
  *
  * @class UserNotificationModel
  */
 class UserNotificationModel extends ModelBase {
   /**
-   * Constructor for activity model.
+   * Constructor for user notification model.
    *
    * @augments ModelBase
    *
@@ -30,12 +30,13 @@ class UserNotificationModel extends ModelBase {
   }
 
   /**
-   * Fetch by creator user id
+   * Fetch by creator user id.
    *
    * @param {integer} params.limit: no of rows to fetch
    * @param {integer} params.userId: creator user id
    * @param {integer} params.lastActionTimestamp: creator user id
-   * @return {Promise<void>}
+   *
+   * @returns {Promise<array>}
    */
   async fetchPaginatedForUserId(params) {
     const oThis = this;

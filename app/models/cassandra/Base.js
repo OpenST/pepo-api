@@ -25,7 +25,7 @@ class ModelBase {
   /**
    * Connection pool to use for read query.
    *
-   * @return {*}
+   * @returns {*}
    */
   onReadConnection() {
     /*
@@ -38,7 +38,7 @@ class ModelBase {
   /**
    * Connection pool to use for write query.
    *
-   * @return {*}
+   * @returns {*}
    */
   onWriteConnection() {
     return cassandraClient;
@@ -47,7 +47,7 @@ class ModelBase {
   /**
    * Table name with keyspace.
    *
-   * @return {*}
+   * @returns {*}
    */
   get queryTableName() {
     const oThis = this;
@@ -58,7 +58,7 @@ class ModelBase {
   /**
    * Fire the query.
    *
-   * @return {Promise<any>}
+   * @returns {Promise<any>}
    */
   async fire(query, params, options = { prepare: true }) {
     const oThis = this;
@@ -70,7 +70,7 @@ class ModelBase {
   /**
    * Batch fire the query.
    *
-   * @return {Promise<any>}
+   * @returns {Promise<any>}
    */
   async batchFire(query, params, options = {}) {
     const oThis = this;

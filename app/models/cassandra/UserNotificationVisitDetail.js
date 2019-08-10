@@ -33,7 +33,7 @@ class UserNotificationVisitDetailModel extends ModelBase {
    * @param {number} dbRow.user_id
    * @param {boolean} dbRow.unread_flag
    *
-   * @return {object}
+   * @returns {object}
    */
   formatDbData(dbRow) {
     const oThis = this;
@@ -47,14 +47,18 @@ class UserNotificationVisitDetailModel extends ModelBase {
   }
 
   /**
-   * Update user notification visit details
+   * Update user notification visit details.
    *
-   * @param queryParams
+   * @param {object} queryParams
+   * @param {string/number} queryParams.lastVisitedAt
+   * @param {string/number} queryParams.userId
+   *
    * @returns {Promise<any>}
    */
   async updateLastVisitTime(queryParams) {
     const oThis = this;
 
+    // TODO: Parameter type validation not required?
     const query = 'update ' + oThis.queryTableName + ' set last_visited_at = ? where user_id = ?;';
     const params = [queryParams.lastVisitedAt, queryParams.userId];
 
