@@ -1,9 +1,6 @@
 const rootPrefix = '../../..',
   ModelBase = require(rootPrefix + '/app/models/cassandra/Base'),
-  cassandraClient = require(rootPrefix + '/lib/cassandraWrapper'),
-  cassandraKeyspaceConstants = require(rootPrefix + '/lib/globalConstant/cassandraKeyspace'),
-  userNotificationVisitDetailConstants = require(rootPrefix +
-    '/lib/globalConstant/cassandra/userNotificationVisitDetail');
+  cassandraKeyspaceConstants = require(rootPrefix + '/lib/globalConstant/cassandraKeyspace');
 
 // Declare variables.
 const keyspace = cassandraKeyspaceConstants.cassandraKeyspaceName;
@@ -57,8 +54,10 @@ class UserNotificationVisitDetailModel extends ModelBase {
    */
   async updateLastVisitTime(queryParams) {
     const oThis = this;
-    let query = 'update ' + oThis.queryTableName + ' set last_visited_at = ? where user_id = ?;';
-    let params = [queryParams.lastVisitedAt, queryParams.userId];
+
+    const query = 'update ' + oThis.queryTableName + ' set last_visited_at = ? where user_id = ?;';
+    const params = [queryParams.lastVisitedAt, queryParams.userId];
+
     return oThis.fire(query, params);
   }
 

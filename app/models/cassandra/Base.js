@@ -1,7 +1,6 @@
 const rootPrefix = '../../..',
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
-  cassandraClient = require(rootPrefix + '/lib/cassandraWrapper'),
-  logger = require(rootPrefix + '/lib/logger/customConsoleLogger');
+  cassandraClient = require(rootPrefix + '/lib/cassandraWrapper');
 
 /**
  * Class for models base.
@@ -46,7 +45,7 @@ class ModelBase {
   }
 
   /**
-   * Table name with keyspace
+   * Table name with keyspace.
    *
    * @return {*}
    */

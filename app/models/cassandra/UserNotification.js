@@ -33,20 +33,21 @@ class UserNotificationModel extends ModelBase {
    * Fetch by creator user id
    *
    * @param {integer} params.limit: no of rows to fetch
-   * @param {integer} params.creatorUserId: creator user id
+   * @param {integer} params.userId: creator user id
    * @param {integer} params.lastActionTimestamp: creator user id
    * @return {Promise<void>}
    */
   async fetchPaginatedForUserId(params) {
-    const oThis = this,
-      limit = params.limit,
+    const oThis = this;
+
+    const limit = params.limit,
       userId = params.userId,
       lastActionTimestamp = params.lastActionTimestamp;
 
-    const userIdkey = ParametersFormatter.getColumnNameForQuery('userId');
+    const userIdKey = ParametersFormatter.getColumnNameForQuery('userId');
     const lastActionTimestampKey = ParametersFormatter.getColumnNameForQuery('lastActionTimestamp');
 
-    let valuesArray = [userId];
+    const valuesArray = [userId];
 
     let lastActionTimestampClause = '';
 
@@ -56,12 +57,14 @@ class UserNotificationModel extends ModelBase {
     }
 
     valuesArray.push(limit);
-    let queryString = `select * from ${oThis.queryTableName} where ${userIdkey}=?${lastActionTimestampClause} limit ?`;
+    const queryString = `select * from ${
+      oThis.queryTableName
+    } where ${userIdKey}=?${lastActionTimestampClause} limit ?`;
 
-    let resp = await oThis.fire(queryString, valuesArray);
-    let dbRows = resp.rows;
+    const resp = await oThis.fire(queryString, valuesArray);
+    const dbRows = resp.rows;
 
-    let response = [];
+    const response = [];
 
     for (let index = 0; index < dbRows.length; index++) {
       const formatDbRow = oThis.formatDbData(dbRows[index]);
@@ -83,6 +86,7 @@ class UserNotificationModel extends ModelBase {
    * @param {number} dbRow.actor_ids
    * @param {number} dbRow.actor_count
    * @param {string} dbRow.payload
+   * @param {number} dbRow.heading_version
    * @param {string} dbRow.column1
    * @param {string} dbRow.column2
    * @param {number} dbRow.flag1
