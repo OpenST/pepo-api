@@ -264,11 +264,11 @@ router.get('/:profile_user_id/notifications', sanitizer.sanitizeDynamicUrlParams
 
   let dummyResponse = JSON.stringify(dummyNotifications);
 
-  let current = Math.floor(Date.now() / 1000);
-  let todayTs = current - 60; // last hour
-  let yesterdayTs = current - 60 * 24 - 60 * 3; // last day
-  let lastWeekTs = current - 60 * 24 * 3 - 60; // last week
-  let earlierTs = current - 60 * 24 * 9 - 60; // earlier than last week
+  const current = Math.floor(Date.now() / 1000);
+  const todayTs = current - 60 * 60; // Last hour.
+  const yesterdayTs = current - 60 * 60 * 24 - 60 * 60 * 3; // Last day.
+  const lastWeekTs = current - 60 * 60 * 24 * 7 - 60 * 60; // This week.
+  const earlierTs = current - 60 * 60 * 24 * 9 - 60 * 60; // Earlier than last week.
 
   dummyResponse = dummyResponse.replace(new RegExp('"{{todayTs}}"', 'g'), todayTs);
   dummyResponse = dummyResponse.replace(new RegExp('"{{yesterdayTs}}"', 'g'), yesterdayTs);
