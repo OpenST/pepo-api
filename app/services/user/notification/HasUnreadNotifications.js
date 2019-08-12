@@ -67,7 +67,7 @@ class HasUnreadNotifications extends ServiceBase {
   /**
    * Check if user has unread notifications.
    *
-   * @returns {Promise{object}}
+   * @returns {Promise<object>}
    * @private
    */
   async _checkIfVisited() {
