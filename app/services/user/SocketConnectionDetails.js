@@ -153,7 +153,6 @@ class SocketConnectionDetails extends ServiceBase {
       socket_identifier: null,
       auth_key_expiry_at: oThis._authKeyExpiryAt,
       status: socketConnectionConstants.invertedStatuses[socketConnectionConstants.createdStatus],
-      socket_expiry_at: null,
       created_at: basicHelper.getCurrentTimestampInSeconds(),
       updated_at: basicHelper.getCurrentTimestampInSeconds()
     };
