@@ -96,13 +96,13 @@ class UserNotificationModel extends CassandraModelBase {
 
     /* eslint-disable */
     const formattedData = {
-      user_id: dbRow.user_id ? dbRow.user_id.toString(10) : undefined,
+      user_id: dbRow.user_id ? Number(dbRow.user_id) : undefined,
       last_action_timestamp: dbRow.last_action_timestamp
         ? basicHelper.dateToMilliSecondsTimestamp(dbRow.last_action_timestamp)
         : undefined,
       uuid: dbRow.uuid,
       kind: dbRow.kind ? userNotificationConstants.kinds[dbRow.kind] : undefined,
-      subject_user_id: dbRow.subject_user_id ? dbRow.subject_user_id.toString(10) : undefined,
+      subject_user_id: dbRow.subject_user_id ? Number(dbRow.subject_user_id) : undefined,
       actor_ids: dbRow.actor_ids ? [...dbRow.actor_ids] : undefined,
       actor_count: dbRow.actor_count,
       payload: dbRow.payload ? JSON.parse(dbRow.payload) : undefined,
