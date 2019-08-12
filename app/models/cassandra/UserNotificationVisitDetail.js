@@ -1,9 +1,7 @@
 const rootPrefix = '../../..',
   CassandraModelBase = require(rootPrefix + '/app/models/cassandra/Base'),
   cassandraKeyspaceConstants = require(rootPrefix + '/lib/globalConstant/cassandraKeyspace'),
-  basicHelper = require(rootPrefix + '/helpers/basic'),
-  userNotificationVisitDetailConstants = require(rootPrefix +
-    '/lib/globalConstant/cassandra/userNotificationVisitDetail');
+  basicHelper = require(rootPrefix + '/helpers/basic');
 
 // Declare variables.
 const keyspace = cassandraKeyspaceConstants.cassandraKeyspaceName;
@@ -41,10 +39,12 @@ class UserNotificationVisitDetailModel extends CassandraModelBase {
   formatDbData(dbRow) {
     const oThis = this;
 
+    /* eslint-disable */
     const formattedData = {
       userId: dbRow.user_id ? Number(dbRow.user_id) : undefined,
       lastVisitedAt: dbRow.last_visited_at ? basicHelper.dateToMilliSecondsTimestamp(dbRow.last_visited_at) : undefined
     };
+    /* eslint-enable */
 
     return oThis.sanitizeFormattedData(formattedData);
   }
@@ -75,18 +75,17 @@ class UserNotificationVisitDetailModel extends CassandraModelBase {
    */
   async fetchLastVisitedAt(queryParams) {
     const oThis = this;
-    let query = `select last_visited_at from ${oThis.queryTableName} where user_id = ?;`;
-    let params = [queryParams.userId];
+
+    const query = `select last_visited_at from ${oThis.queryTableName} where user_id = ?;`;
+    const params = [queryParams.userId];
 
     const queryRsp = await oThis.fire(query, params);
 
-    const dbRows = queryRsp.rows;
-
-    if (dbRows.length === 0) {
+    if (queryRsp.rows.length === 0) {
       return {};
     }
 
-    return oThis.formatDbData(dbRows[0]);
+    return oThis.formatDbData(queryRsp.rows[0]);
   }
 
   /**

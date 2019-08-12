@@ -35,7 +35,7 @@ class UserNotificationModel extends CassandraModelBase {
    * @param {integer} params.limit: no of rows to fetch
    * @param {integer} params.userId: creator user id
    * @param {integer} params.lastActionTimestamp: creator user id
-`   * @param {string} params.pageState: cassandra page state
+   * @param {string} params.pageState: cassandra page state
    *
    * @returns {Promise<object>}
    */
@@ -200,13 +200,11 @@ class UserNotificationModel extends CassandraModelBase {
 
     const queryRsp = await oThis.fire(query, params);
 
-    const dbRows = queryRsp.rows;
-
-    if (dbRows.length === 0) {
+    if (queryRsp.rows.length === 0) {
       return {};
     }
 
-    return oThis.formatDbData(dbRows[0]);
+    return oThis.formatDbData(queryRsp.rows[0]);
   }
 
   /**
