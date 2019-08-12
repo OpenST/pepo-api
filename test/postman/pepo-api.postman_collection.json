@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "d2f58fa0-9e9e-456c-beaf-60e4329bf08e",
+		"_postman_id": "4a29ba08-9208-42dc-8d61-c42b71dc775b",
 		"name": "pepo-api",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -1006,64 +1006,28 @@
 			]
 		},
 		{
-			"name": "activity",
+			"name": "notification",
 			"item": [
 				{
-					"name": "other-user-activities",
+					"name": "get",
 					"request": {
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{api_server}}/api/v1/users/31/activities",
+							"raw": "{{api_server}}/api/v1/notifications?pagination_identifier=eyJwYWdlX3N0YXRlIjoiMDAyZjAwMDgwMDAwMDE2Yzc2ZTNkYzRlMjQzMDY1NjEzODMwMzAzNDMzMmQ2MjM5NjMzMzJkMzQzNDM4MzcyZDM5MzczMDM2MmQ2MTYzMzUzOTYxNjIzMDYxMzg2NDMwMzRmMDdmZmZmZmY5ZjA3ZmZmZmZmOSJ9",
 							"host": [
 								"{{api_server}}"
 							],
 							"path": [
 								"api",
 								"v1",
-								"users",
-								"31",
-								"activities"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "personal-user-activities",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{api_server}}/api/v1/users/32/activities",
-							"host": [
-								"{{api_server}}"
+								"notifications"
 							],
-							"path": [
-								"api",
-								"v1",
-								"users",
-								"32",
-								"activities"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "public",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{api_server}}/api/v1/activities",
-							"host": [
-								"{{api_server}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"activities"
+							"query": [
+								{
+									"key": "pagination_identifier",
+									"value": "eyJwYWdlX3N0YXRlIjoiMDAyZjAwMDgwMDAwMDE2Yzc2ZTNkYzRlMjQzMDY1NjEzODMwMzAzNDMzMmQ2MjM5NjMzMzJkMzQzNDM4MzcyZDM5MzczMDM2MmQ2MTYzMzUzOTYxNjIzMDYxMzg2NDMwMzRmMDdmZmZmZmY5ZjA3ZmZmZmZmOSJ9"
+								}
 							]
 						}
 					},

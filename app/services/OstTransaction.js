@@ -7,9 +7,7 @@
 const rootPrefix = '../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   TextModel = require(rootPrefix + '/app/models/mysql/Text'),
-  ActivityModel = require(rootPrefix + '/app/models/mysql/Activity'),
   TransactionModel = require(rootPrefix + '/app/models/mysql/Transaction'),
-  UserActivityModel = require(rootPrefix + '/app/models/mysql/UserActivity'),
   ExternalEntityModel = require(rootPrefix + '/app/models/mysql/ExternalEntity'),
   PendingTransactionModel = require(rootPrefix + '/app/models/mysql/PendingTransaction'),
   TokenUserByUserId = require(rootPrefix + '/lib/cacheManagement/multi/TokenUserByUserIds'),
@@ -21,7 +19,6 @@ const rootPrefix = '../..',
   commonValidator = require(rootPrefix + '/lib/validators/Common'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
-  activityConstants = require(rootPrefix + '/lib/globalConstant/activity'),
   createErrorLogsEntry = require(rootPrefix + '/lib/errorLogs/createEntry'),
   errorLogsConstants = require(rootPrefix + '/lib/globalConstant/errorLogs'),
   transactionConstants = require(rootPrefix + '/lib/globalConstant/transaction'),
@@ -176,11 +173,7 @@ class OstTransaction extends ServiceBase {
 
       promiseArray2.push(oThis._insertInPendingTransactions());
 
-      promiseArray2.push(oThis._insertInActivityTable());
-
       await Promise.all(promiseArray2);
-
-      await oThis._insertInUserActivityTable();
     }
   }
 
@@ -193,7 +186,6 @@ class OstTransaction extends ServiceBase {
     const oThis = this;
 
     if (transactionConstants.notFinalizedOstTransactionStatuses.indexOf(oThis.ostTransactionStatus) > -1) {
-      oThis.activityStatus = activityConstants.pendingStatus;
       oThis.transactionStatus = transactionConstants.pendingStatus;
     } else {
       let errorObject = responseHelper.error({
@@ -567,61 +559,6 @@ class OstTransaction extends ServiceBase {
     }
 
     return { isDuplicateIndexViolation: isDuplicateIndexViolation };
-  }
-
-  /**
-   * This function enters data in feeds table
-   *
-   * @returns {Promise<void>}
-   * @private
-   */
-  async _insertInActivityTable() {
-    const oThis = this;
-
-    let extraData = {};
-
-    let publishedTimestamp = Math.floor(Date.now() / 1000);
-
-    let insertData = {
-      entity_type: activityConstants.invertedEntityTypes[activityConstants.transactionEntityType],
-      entity_id: oThis.transactionId,
-      extra_data: JSON.stringify(extraData),
-      status: activityConstants.invertedStatuses[oThis.activityStatus],
-      published_ts: publishedTimestamp,
-      display_ts: null
-    };
-
-    let insertResponse = await new ActivityModel().insert(insertData).fire();
-
-    oThis.activityId = insertResponse.insertId;
-    insertData.id = insertResponse.insertId;
-
-    let formattedInsertData = new ActivityModel().formatDbData(insertData);
-    await ActivityModel.flushCache(formattedInsertData);
-  }
-
-  /**
-   * This function inserts data in user feeds table.
-   *
-   * @returns {Promise<void>}
-   * @private
-   */
-  async _insertInUserActivityTable() {
-    const oThis = this;
-
-    let publishedTimestamp = Math.floor(Date.now() / 1000);
-
-    let insertData = {
-      user_id: oThis.userId,
-      activity_id: oThis.activityId,
-      published_ts: publishedTimestamp
-    };
-
-    let insertResponse = await new UserActivityModel().insert(insertData).fire();
-    insertData.id = insertResponse.insertId;
-
-    let formattedInsertData = new UserActivityModel().formatDbData(insertData);
-    await UserActivityModel.flushCache(formattedInsertData);
   }
 
   /**

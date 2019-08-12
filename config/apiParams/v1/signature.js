@@ -153,24 +153,6 @@ const v1Signature = {
       }
     ]
   },
-  [apiName.userActivity]: {
-    mandatory: [
-      {
-        parameter: 'current_user',
-        validatorMethods: ['validateNonEmptyObject']
-      },
-      {
-        parameter: 'profile_user_id',
-        validatorMethods: ['validateNonZeroInteger']
-      }
-    ],
-    optional: [
-      {
-        parameter: paginationConstants.paginationIdentifierKey,
-        validatorMethods: ['validateString', 'validatePaginationIdentifier']
-      }
-    ]
-  },
   [apiName.gifsCategories]: {
     mandatory: [],
     optional: []
@@ -194,20 +176,6 @@ const v1Signature = {
       {
         parameter: 'video_id',
         validatorMethods: ['validateNonZeroInteger']
-      }
-    ]
-  },
-  [apiName.publicActivity]: {
-    mandatory: [
-      {
-        parameter: 'current_user',
-        validatorMethods: ['validateNonEmptyObject']
-      }
-    ],
-    optional: [
-      {
-        parameter: paginationConstants.paginationIdentifierKey,
-        validatorMethods: ['validateString', 'validatePaginationIdentifier']
       }
     ]
   },
