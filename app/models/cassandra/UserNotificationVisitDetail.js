@@ -1,20 +1,20 @@
 const rootPrefix = '../../..',
-  ModelBase = require(rootPrefix + '/app/models/cassandra/Base'),
+  CassandraModelBase = require(rootPrefix + '/app/models/cassandra/Base'),
   cassandraKeyspaceConstants = require(rootPrefix + '/lib/globalConstant/cassandraKeyspace');
 
 // Declare variables.
 const keyspace = cassandraKeyspaceConstants.cassandraKeyspaceName;
 
 /**
- * Class for UserNotificationVisitDetail model.
+ * Class for user notification visit detail model.
  *
  * @class UserNotificationVisitDetailModel
  */
-class UserNotificationVisitDetailModel extends ModelBase {
+class UserNotificationVisitDetailModel extends CassandraModelBase {
   /**
-   * Constructor for activity model.
+   * Constructor for user notification visit detail model.
    *
-   * @augments ModelBase
+   * @augments CassandraModelBase
    *
    * @constructor
    */

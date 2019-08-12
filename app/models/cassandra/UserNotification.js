@@ -1,5 +1,5 @@
 const rootPrefix = '../../..',
-  ModelBase = require(rootPrefix + '/app/models/cassandra/Base'),
+  CassandraModelBase = require(rootPrefix + '/app/models/cassandra/Base'),
   ParametersFormatter = require(rootPrefix + '/lib/notification/formatter/ParametersFormatter'),
   basicHelper = require(rootPrefix + '/helpers/basic'),
   cassandraKeyspaceConstants = require(rootPrefix + '/lib/globalConstant/cassandraKeyspace'),
@@ -13,11 +13,11 @@ const keyspace = cassandraKeyspaceConstants.cassandraKeyspaceName;
  *
  * @class UserNotificationModel
  */
-class UserNotificationModel extends ModelBase {
+class UserNotificationModel extends CassandraModelBase {
   /**
    * Constructor for user notification model.
    *
-   * @augments ModelBase
+   * @augments CassandraModelBase
    *
    * @constructor
    */

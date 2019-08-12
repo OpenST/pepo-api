@@ -3,13 +3,13 @@ const rootPrefix = '../../..',
   cassandraClient = require(rootPrefix + '/lib/cassandraWrapper');
 
 /**
- * Class for models base.
+ * Class for cassandra model base.
  *
  * @class ModelBase
  */
 class ModelBase {
   /**
-   * Constructor for models base.
+   * Constructor for cassandra model base.
    *
    * @param {object} params
    * @param {string} params.keyspace
@@ -47,7 +47,7 @@ class ModelBase {
   /**
    * Table name with keyspace.
    *
-   * @returns {*}
+   * @returns {string}
    */
   get queryTableName() {
     const oThis = this;
@@ -58,11 +58,14 @@ class ModelBase {
   /**
    * Fire the query.
    *
+   * @param {string} query
+   * @param {array} [params]
+   * @param {object} [options]
+   *
    * @returns {Promise<any>}
    */
-  async fire(query, params, options = { prepare: true }) {
+  async fire(query, params = [], options = { prepare: true }) {
     const oThis = this;
-    params = params || [];
 
     return oThis.onWriteConnection().execute(query, params, options);
   }
@@ -70,11 +73,14 @@ class ModelBase {
   /**
    * Batch fire the query.
    *
+   * @param {string} query
+   * @param {array} [params]
+   * @param {object} [options]
+   *
    * @returns {Promise<any>}
    */
-  async batchFire(query, params, options = {}) {
+  async batchFire(query, params = [], options = {}) {
     const oThis = this;
-    params = params || [];
 
     return oThis.onWriteConnection().batch(query, params, options);
   }
