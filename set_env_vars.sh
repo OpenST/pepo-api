@@ -104,6 +104,6 @@ export PR_LAMBDA_VIDEO_COMPRESS_FUNCTION='arn:aws:lambda:us-east-1:274208178423:
 
 # replication variables for cassandra
 export REPLICATION_CLASS='SimpleStrategy'
-export REPLICATION_FACTOR='2'
+export REPLICATION_FACTOR='3'
 
 export PA_CDN_URL='https://dbvoeb7t6hffk.cloudfront.net'

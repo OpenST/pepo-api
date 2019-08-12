@@ -1,5 +1,6 @@
 const rootPrefix = '..',
   CassandraClient = require(rootPrefix + '/lib/cassandraWrapper'),
+  basicHelper = require(rootPrefix + '/helpers/basic'),
   coreConstants = require(rootPrefix + '/config/coreConstants'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger');
 
@@ -27,7 +28,7 @@ class ExecuteCassandraQuery {
     let params = {};
 
     // Create DB if not present
-    if (coreConstants.environment === 'development') {
+    if (basicHelper.isDevelopment()) {
       let dbCreationStatement =
         'CREATE KEYSPACE IF NOT EXISTS ' +
         oThis.keySpace +
@@ -43,11 +44,11 @@ class ExecuteCassandraQuery {
 
       logger.log(dbCreationStatement);
 
-      await CassandraClient.execute(dbCreationStatement, params);
+      await CassandraClient.execute(dbCreationStatement, params, { prepare: true });
     }
 
     // Execute the cassandra query
-    let queryResult = await CassandraClient.execute(oThis.cassandraQuery, params);
+    let queryResult = await CassandraClient.execute(oThis.cassandraQuery, params, { prepare: true });
     logger.log(oThis.cassandraQuery);
 
     return queryResult;
