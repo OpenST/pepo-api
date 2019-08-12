@@ -34,7 +34,7 @@ class OstTransaction extends ServiceBase {
     oThis.transaction = params.ost_transaction;
     oThis.userId = params.current_user.id;
 
-    params.meta = params.meta ? params.meta : {};
+    params.meta = params.meta || {};
 
     oThis.giphyObject = params.meta.giphy;
     oThis.text = params.meta.text;
