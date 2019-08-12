@@ -115,9 +115,11 @@ class UserVideos extends ServiceBase {
       return Promise.reject(cacheResponse);
     }
 
-    const videoDetails = cacheResponse.data;
+    const videoDetails = cacheResponse.data.videoDetails;
+    const videoIds = cacheResponse.data.videoIds;
 
-    for (const videoId in videoDetails) {
+    for (let ind = 0; ind < videoIds.length; ind++) {
+      let videoId = videoIds[ind];
       const videoDetail = videoDetails[videoId];
       oThis.videosCount++;
       oThis.videoDetails.push(videoDetail);

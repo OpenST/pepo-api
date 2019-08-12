@@ -172,10 +172,6 @@ const v1Signature = {
       {
         parameter: 'meta',
         validatorMethods: ['validateNonEmptyObject', 'validateOstTransactionMeta']
-      },
-      {
-        parameter: 'video_id',
-        validatorMethods: ['validateNonZeroInteger']
       }
     ]
   },

@@ -124,14 +124,17 @@ class VideoDetail extends ModelBase {
 
     let dbRows = await queryObject.fire();
 
-    let response = {};
+    let videoDetails = {};
+
+    let videoIds = [];
 
     for (let index = 0; index < dbRows.length; index++) {
       const formatDbRow = oThis.formatDbData(dbRows[index]);
-      response[formatDbRow.videoId] = formatDbRow;
+      videoDetails[formatDbRow.videoId] = formatDbRow;
+      videoIds.push(formatDbRow.videoId);
     }
 
-    return response;
+    return { videoIds: videoIds, videoDetails: videoDetails };
   }
 
   /**

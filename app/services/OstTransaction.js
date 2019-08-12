@@ -1,9 +1,3 @@
-/**
- * This service is for ost transaction
- *
- * Note:-
- */
-
 const rootPrefix = '../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   TextModel = require(rootPrefix + '/app/models/mysql/Text'),
@@ -29,8 +23,7 @@ class OstTransaction extends ServiceBase {
    * @param {object} params
    * @param {object} params.ost_transaction
    * @param {object} params.current_user
-   * @param {object} params.meta
-   * @param {integer} params.video_id
+   * @param {object} [params.meta]
    *
    * @constructor
    */
@@ -40,6 +33,8 @@ class OstTransaction extends ServiceBase {
 
     oThis.transaction = params.ost_transaction;
     oThis.userId = params.current_user.id;
+
+    params.meta = params.meta ? params.meta : {};
 
     oThis.giphyObject = params.meta.giphy;
     oThis.text = params.meta.text;
@@ -71,12 +66,12 @@ class OstTransaction extends ServiceBase {
 
     oThis._validateAndSanitizeParams();
 
-    let setStatusResponse = await oThis._setStatuses();
+    const setStatusResponse = await oThis._setStatuses();
     if (setStatusResponse.isFailure()) {
       return Promise.reject(setStatusResponse);
     }
 
-    let promiseArray1 = [];
+    const promiseArray1 = [];
     promiseArray1.push(oThis._fetchGiphyExternalEntityId());
     promiseArray1.push(oThis._fetchTransaction());
     promiseArray1.push(oThis._fetchOstUserIdAndValidate());
@@ -88,6 +83,7 @@ class OstTransaction extends ServiceBase {
     } else {
       await oThis._insertInTransactionAndAssociatedTables();
     }
+
     return Promise.resolve(responseHelper.successWithData());
   }
 
@@ -112,14 +108,14 @@ class OstTransaction extends ServiceBase {
    */
   async _updateTransaction() {
     const oThis = this;
-    let promiseArray = [];
+    const promiseArray = [];
 
-    //if table row has giphy or text id; return
+    // If table row has giphy or text id; return.
     if (oThis.transactionObj.giphyId || oThis.transactionObj.textId) {
       return;
     }
 
-    //if input param has giphy or text; update with insert text;
+    // If input param has giphy or text; update with insert text.
     if (oThis._isGiphyPresent() && !oThis.giphyExternalEntityId) {
       promiseArray.push(oThis._insertGiphyInExternalEntities());
     }
@@ -129,7 +125,7 @@ class OstTransaction extends ServiceBase {
 
     await Promise.all(promiseArray);
 
-    let updateData = {};
+    const updateData = {};
     if (oThis._isGiphyPresent()) {
       updateData.giphy_id = oThis.giphyExternalEntityId;
     }
@@ -151,25 +147,26 @@ class OstTransaction extends ServiceBase {
   async _insertInTransactionAndAssociatedTables() {
     const oThis = this;
 
-    //Insert in external entities, transactions and pending transactions
+    // Insert in external entities, transactions and pending transactions.
     await oThis._insertGiphyTextAndTransaction();
 
-    let insertTransactionResponse = await oThis._insertTransaction();
+    const insertTransactionResponse = await oThis._insertTransaction();
     if (insertTransactionResponse.isDuplicateIndexViolation) {
       await oThis._fetchTransaction();
       if (!oThis.transactionId) {
-        let errorObject = responseHelper.error({
+        const errorObject = responseHelper.error({
           internal_error_identifier: 'a_s_ost_2',
           api_error_identifier: 'something_went_wrong',
           debug_options: { ostTxId: oThis.ostTxId }
         });
         createErrorLogsEntry.perform(errorObject, errorLogsConstants.highSeverity);
+
         return Promise.reject(errorObject);
       }
 
       await oThis._updateTransaction();
     } else {
-      let promiseArray2 = [];
+      const promiseArray2 = [];
 
       promiseArray2.push(oThis._insertInPendingTransactions());
 
@@ -178,7 +175,7 @@ class OstTransaction extends ServiceBase {
   }
 
   /**
-   * Set statuses
+   * Set statuses.
    *
    * @private
    */
@@ -188,7 +185,7 @@ class OstTransaction extends ServiceBase {
     if (transactionConstants.notFinalizedOstTransactionStatuses.indexOf(oThis.ostTransactionStatus) > -1) {
       oThis.transactionStatus = transactionConstants.pendingStatus;
     } else {
-      let errorObject = responseHelper.error({
+      const errorObject = responseHelper.error({
         internal_error_identifier: 'a_s_ost_4',
         api_error_identifier: 'something_went_wrong',
         debug_options: {
@@ -205,7 +202,7 @@ class OstTransaction extends ServiceBase {
   }
 
   /**
-   * Fetch giphy external entity id from db
+   * Fetch giphy external entity id from db.
    *
    * @returns {Boolean}
    * @private
@@ -214,7 +211,7 @@ class OstTransaction extends ServiceBase {
     const oThis = this;
 
     if (oThis._isGiphyPresent()) {
-      let paramsForGiphy = {
+      const paramsForGiphy = {
           entityId: oThis.giphyObject.id,
           entityKind: externalEntityConstants.giphyEntityKind
         },
@@ -239,7 +236,7 @@ class OstTransaction extends ServiceBase {
   async _insertText() {
     const oThis = this;
 
-    let insertData = {
+    const insertData = {
         text: oThis.text
       },
       insertResponse = await new TextModel().insertText(insertData);
@@ -247,7 +244,7 @@ class OstTransaction extends ServiceBase {
     oThis.textId = insertResponse.insertId;
     insertData.id = insertResponse.insertId;
 
-    let formattedInsertData = new TextModel().formatDbData(insertData);
+    const formattedInsertData = new TextModel().formatDbData(insertData);
     await TextModel.flushCache(formattedInsertData);
   }
 
@@ -260,12 +257,12 @@ class OstTransaction extends ServiceBase {
   async _fetchTransaction() {
     const oThis = this;
 
-    let transactionCacheResponse = await new TransactionByOstTxIdCache({ ostTxIds: [oThis.ostTxId] }).fetch();
+    const transactionCacheResponse = await new TransactionByOstTxIdCache({ ostTxIds: [oThis.ostTxId] }).fetch();
 
     if (transactionCacheResponse.isFailure()) {
       return Promise.reject(
         responseHelper.error({
-          internal_error_identifier: `a_s_ost_1`,
+          internal_error_identifier: 'a_s_ost_1',
           api_error_identifier: 'something_went_wrong',
           debug_options: {
             reason: 'Error while fetching data from TransactionByOstTxIdCache',
@@ -325,18 +322,18 @@ class OstTransaction extends ServiceBase {
   async _fetchOstUserIdAndValidate() {
     const oThis = this;
 
-    let userIds = [oThis.userId];
+    const userIds = [oThis.userId];
 
-    let tokenUserDetailsResponse = await new TokenUserByUserId({ userIds: userIds }).fetch();
+    const tokenUserDetailsResponse = await new TokenUserByUserId({ userIds: userIds }).fetch();
 
     if (tokenUserDetailsResponse.isFailure()) {
       return Promise.reject(tokenUserDetailsResponse);
     }
 
-    let userIdToOstUserIdHash = {};
-    for (let i = 0; i < userIds.length; i++) {
-      let userId = userIds[i];
-      //Returning only those entries ost user ids whose data is available
+    const userIdToOstUserIdHash = {};
+    for (let index = 0; index < userIds.length; index++) {
+      const userId = userIds[index];
+      // Returning only those entries ost user ids whose data is available
       if (tokenUserDetailsResponse.data[userId].ostUserId) {
         userIdToOstUserIdHash[userId] = tokenUserDetailsResponse.data[userId].ostUserId;
       }
@@ -347,7 +344,7 @@ class OstTransaction extends ServiceBase {
     if (!oThis.ostUserId) {
       return Promise.reject(
         responseHelper.error({
-          internal_error_identifier: `a_s_ot_5`,
+          internal_error_identifier: 'a_s_ot_5',
           api_error_identifier: 'something_went_wrong',
           debug_options: { userId: oThis.userId }
         })
@@ -375,12 +372,12 @@ class OstTransaction extends ServiceBase {
   async _updateGiphyAndTextInTransaction(updateData) {
     const oThis = this;
 
-    let updateResponse = await new TransactionModel()
+    await new TransactionModel()
       .update(updateData)
       .where({ id: oThis.transactionObj.id })
       .fire();
 
-    let transactionObj = oThis.transactionObj;
+    const transactionObj = oThis.transactionObj;
     transactionObj.textId = oThis.textId;
     transactionObj.giphyId = oThis.giphyExternalEntityId;
 
@@ -396,13 +393,13 @@ class OstTransaction extends ServiceBase {
   async _fetchVideoDetailsAndValidate() {
     const oThis = this;
 
-    let videoDetailsCacheResponse = await new VideoDetailsByVideoIdsCache({ videoIds: [oThis.videoId] }).fetch();
+    const videoDetailsCacheResponse = await new VideoDetailsByVideoIdsCache({ videoIds: [oThis.videoId] }).fetch();
 
     if (videoDetailsCacheResponse.isFailure()) {
       return Promise.reject(videoDetailsCacheResponse);
     }
 
-    let videoIdFromCache = videoDetailsCacheResponse.data[oThis.videoId].videoId;
+    const videoIdFromCache = videoDetailsCacheResponse.data[oThis.videoId].videoId;
 
     if (videoIdFromCache != oThis.videoId) {
       return Promise.reject(
@@ -425,7 +422,7 @@ class OstTransaction extends ServiceBase {
   async _insertGiphyTextAndTransaction() {
     const oThis = this;
 
-    let promiseArray = [];
+    const promiseArray = [];
 
     if (oThis._isGiphyPresent() && !oThis.giphyExternalEntityId) {
       promiseArray.push(oThis._insertGiphyInExternalEntities());
@@ -453,22 +450,22 @@ class OstTransaction extends ServiceBase {
   async _insertGiphyInExternalEntities() {
     const oThis = this;
 
-    let entityKindInt = externalEntityConstants.invertedEntityKinds[externalEntityConstants.giphyEntityKind],
+    const entityKindInt = externalEntityConstants.invertedEntityKinds[externalEntityConstants.giphyEntityKind],
       entityId = oThis.giphyObject.id,
       extraData = oThis.giphyObject;
 
-    let insertData = {
+    const insertData = {
       entity_kind: entityKindInt,
       entity_id: entityId,
       extra_data: JSON.stringify(extraData)
     };
 
-    let insertResponse = await new ExternalEntityModel().insert(insertData).fire();
+    const insertResponse = await new ExternalEntityModel().insert(insertData).fire();
 
     oThis.giphyExternalEntityId = insertResponse.insertId;
     insertData.id = oThis.giphyExternalEntityId;
 
-    let formattedInsertData = new ExternalEntityModel().formatDbData(insertData);
+    const formattedInsertData = new ExternalEntityModel().formatDbData(insertData);
     await ExternalEntityModel.flushCache(formattedInsertData);
   }
 
@@ -480,26 +477,26 @@ class OstTransaction extends ServiceBase {
    */
   async _fetchToUserIdsAndAmounts() {
     const oThis = this;
-    let toOstUserIdsArray = [];
+    const toOstUserIdsArray = [];
 
-    //Loop to prepare array of toOstUserIds which will be used to fetch user ids from multi cache.
-    for (let i = 0; i < oThis.transfersData.length; i++) {
-      toOstUserIdsArray.push(oThis.transfersData[i].to_user_id);
+    // Loop to prepare array of toOstUserIds which will be used to fetch user ids from multi cache.
+    for (let index = 0; index < oThis.transfersData.length; index++) {
+      toOstUserIdsArray.push(oThis.transfersData[index].to_user_id);
     }
 
-    let TokenUserData = await new TokenUserByOstUserIdsCache({ ostUserIds: toOstUserIdsArray }).fetch();
+    const TokenUserData = await new TokenUserByOstUserIdsCache({ ostUserIds: toOstUserIdsArray }).fetch();
 
     if (TokenUserData.isFailure()) {
       return Promise.reject(TokenUserData);
     }
 
-    //A separate for loop is written in order to ensure user ids and amount's index correspond
-    //to each other in toUserIdsArray and amountsArray.
-    for (let i = 0; i < oThis.transfersData.length; i++) {
-      let toOstUserId = oThis.transfersData[i].to_user_id;
+    // A separate for loop is written in order to ensure user ids and amount's index correspond
+    // To each other in toUserIdsArray and amountsArray.
+    for (let index = 0; index < oThis.transfersData.length; index++) {
+      const toOstUserId = oThis.transfersData[index].to_user_id;
       if (TokenUserData.data[toOstUserId].userId) {
         oThis.toUserIdsArray.push(TokenUserData.data[toOstUserId].userId);
-        oThis.amountsArray.push(oThis.transfersData[i].amount);
+        oThis.amountsArray.push(oThis.transfersData[index].amount);
       }
     }
   }
@@ -515,13 +512,13 @@ class OstTransaction extends ServiceBase {
 
     let isDuplicateIndexViolation = false;
 
-    let extraData = {
+    const extraData = {
       toUserIds: oThis.toUserIdsArray,
       amounts: oThis.amountsArray,
       kind: transactionConstants.extraData.userTransactionKind
     };
 
-    let insertData = {
+    const insertData = {
       ost_tx_id: oThis.ostTxId,
       from_user_id: oThis.userId,
       video_id: oThis.videoId,
@@ -531,21 +528,22 @@ class OstTransaction extends ServiceBase {
       status: transactionConstants.invertedStatuses[oThis.transactionStatus]
     };
 
-    let insertResponse = await new TransactionModel()
+    const insertResponse = await new TransactionModel()
       .insert(insertData)
       .fire()
       .catch(async function(err) {
         if (TransactionModel.isDuplicateIndexViolation(TransactionModel.transactionIdUniqueIndexName, err)) {
           isDuplicateIndexViolation = true;
         } else {
-          //Insert failed due to some other reason.
-          //Send error email from here.
-          let errorObject = responseHelper.error({
+          // Insert failed due to some other reason.
+          // Send error email from here.
+          const errorObject = responseHelper.error({
             internal_error_identifier: 'a_s_ost_3',
             api_error_identifier: 'something_went_wrong',
             debug_options: { Error: err }
           });
           createErrorLogsEntry.perform(errorObject, errorLogsConstants.highSeverity);
+
           return Promise.reject(errorObject);
         }
       });
@@ -554,7 +552,7 @@ class OstTransaction extends ServiceBase {
       oThis.transactionId = insertResponse.insertId;
       insertData.id = insertResponse.insertId;
 
-      let formattedInsertData = new TransactionModel().formatDbData(insertData);
+      const formattedInsertData = new TransactionModel().formatDbData(insertData);
       await TransactionModel.flushCache(formattedInsertData);
     }
 
@@ -569,7 +567,7 @@ class OstTransaction extends ServiceBase {
   async _insertInPendingTransactions() {
     const oThis = this;
 
-    let insertData = {
+    const insertData = {
       ost_tx_id: oThis.ostTxId,
       from_user_id: oThis.userId,
       video_id: oThis.videoId,
@@ -578,11 +576,11 @@ class OstTransaction extends ServiceBase {
       status: transactionConstants.invertedStatuses[oThis.transactionStatus]
     };
 
-    let insertResponse = await new PendingTransactionModel().insert(insertData).fire();
+    const insertResponse = await new PendingTransactionModel().insert(insertData).fire();
 
     insertData.id = insertResponse.insertId;
 
-    let formattedInsertData = new PendingTransactionModel().formatDbData(insertData);
+    const formattedInsertData = new PendingTransactionModel().formatDbData(insertData);
     await PendingTransactionModel.flushCache(formattedInsertData);
   }
 }
