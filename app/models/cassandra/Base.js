@@ -64,8 +64,8 @@ class ModelBase {
    * @returns {*}
    */
   getDefaultOptions(options = {}) {
-    options.prepare = options.prepare ? options.prepare : true;
-    options.consistency = options.consistency ? options.consistency : cassandraConstants.defaultConsistencyLevel;
+    options.prepare = options.prepare || true;
+    options.consistency = options.consistency || cassandraConstants.defaultConsistencyLevel;
 
     return options;
   }
