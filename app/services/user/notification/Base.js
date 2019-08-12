@@ -5,13 +5,13 @@ const rootPrefix = '../../../..',
   UserMultiCache = require(rootPrefix + '/lib/cacheManagement/multi/User'),
   ImageByIdCache = require(rootPrefix + '/lib/cacheManagement/multi/ImageByIds'),
   VideoByIdCache = require(rootPrefix + '/lib/cacheManagement/multi/VideoByIds'),
-  TokenUserByUserIdsMultiCache = require(rootPrefix + '/lib/cacheManagement/multi/TokenUserByUserIds'),
   NotificationResponseHelper = require(rootPrefix + '/lib/notification/response/Helper'),
-  responseEntityKey = require(rootPrefix + '/lib/globalConstant/responseEntityKey'),
-  responseHelper = require(rootPrefix + '/lib/formatter/response');
+  TokenUserByUserIdsMultiCache = require(rootPrefix + '/lib/cacheManagement/multi/TokenUserByUserIds'),
+  responseHelper = require(rootPrefix + '/lib/formatter/response'),
+  responseEntityKey = require(rootPrefix + '/lib/globalConstant/responseEntityKey');
 
 /**
- * Class for user Notification Base.
+ * Class for user notification base.
  *
  * @class UserNotification
  */
@@ -100,8 +100,7 @@ class UserNotificationBase extends ServiceBase {
   }
 
   /**
-   * format notifications
-   *
+   * Format notifications.
    *
    * @returns {Promise<never>}
    * @private
@@ -109,75 +108,66 @@ class UserNotificationBase extends ServiceBase {
   async _formatUserNotifications() {
     const oThis = this;
 
-    for (let i = 0; i < oThis.userNotifications.length; i++) {
-      let userNotification = oThis.userNotifications[i];
-      let flattenedUserNotification = NotificationResponseHelper.getFlattenedObject(userNotification);
-      let formattedUserNotification = {};
+    for (let index = 0; index < oThis.userNotifications.length; index++) {
+      const userNotification = oThis.userNotifications[index];
+      const flattenedUserNotification = NotificationResponseHelper.getFlattenedObject(userNotification);
+      const formattedUserNotification = {};
 
-      formattedUserNotification['id'] = NotificationResponseHelper.getEncryptIdForNotification(
-        flattenedUserNotification
-      );
+      formattedUserNotification.id = NotificationResponseHelper.getEncryptIdForNotification(flattenedUserNotification);
 
-      formattedUserNotification['kind'] = userNotification.kind;
-      formattedUserNotification['timestamp'] = userNotification.lastActionTimestamp;
+      formattedUserNotification.kind = userNotification.kind;
+      formattedUserNotification.timestamp = userNotification.lastActionTimestamp;
 
-      let headingData = oThis._getHeading(flattenedUserNotification);
-      formattedUserNotification['heading'] = headingData;
+      formattedUserNotification.heading = await oThis._getHeading(flattenedUserNotification);
 
-      let gotoData = oThis._getGoto(flattenedUserNotification);
-      formattedUserNotification['goto'] = gotoData;
+      formattedUserNotification.goto = await oThis._getGoto(flattenedUserNotification);
 
-      let imageId = oThis._getImageId(flattenedUserNotification);
-      formattedUserNotification['imageId'] = imageId;
+      formattedUserNotification.imageId = await oThis._getImageId(flattenedUserNotification);
 
-      let payload = oThis._getPayload(flattenedUserNotification);
-      formattedUserNotification['payload'] = payload;
+      formattedUserNotification.payload = await oThis._getPayload(flattenedUserNotification);
 
       oThis.formattedUserNotifications.push(formattedUserNotification);
     }
   }
 
   /**
-   * Get ImageId for notifications
-   *
+   * Get image id for notifications.
    *
    * @returns {Promise<never>}
    * @private
    */
-  _getImageId(userNotification) {
+  async _getImageId(userNotification) {
     const oThis = this;
 
-    let params = {
+    const params = {
       supportingEntities: {
         [responseEntityKey.users]: oThis.usersByIdMap
       },
       userNotification: userNotification
     };
 
-    let resp = NotificationResponseHelper.getImageIdForNotification(params);
+    const resp = NotificationResponseHelper.getImageIdForNotification(params);
 
     if (resp.isFailure()) {
       return Promise.reject(resp);
     }
 
-    return resp.data['imageId'];
+    return resp.data.imageId;
   }
 
   /**
-   * Set payload for notifications
-   *
+   * Set payload for notifications.
    *
    * @returns {Promise<never>}
    * @private
    */
-  _getPayload(userNotification) {
-    const oThis = this;
+  async _getPayload(userNotification) {
     const payload = {};
 
-    let payloadArr = NotificationResponseHelper.payloadNotificationConfigForKind(userNotification.kind);
+    const payloadArr = NotificationResponseHelper.payloadNotificationConfigForKind(userNotification.kind);
 
-    for (let i = 0; i < payloadArr.length; i++) {
-      const payloadKey = payloadArr[i];
+    for (let index = 0; index < payloadArr.length; index++) {
+      const payloadKey = payloadArr[index];
       payload[payloadKey] = userNotification[payloadKey];
     }
 
@@ -185,42 +175,38 @@ class UserNotificationBase extends ServiceBase {
   }
 
   /**
-   * Set Heading for notifications
-   *
+   * Set heading for notifications.
    *
    * @returns {Promise<never>}
    * @private
    */
-  _getHeading(userNotification) {
+  async _getHeading(userNotification) {
     const oThis = this;
 
-    let params = {
+    const params = {
       supportingEntities: {
         [responseEntityKey.users]: oThis.usersByIdMap
       },
       userNotification: userNotification
     };
 
-    let resp = NotificationResponseHelper.getHeadingForNotification(params);
+    const resp = NotificationResponseHelper.getHeadingForNotification(params);
 
     if (resp.isFailure()) {
       return Promise.reject(resp);
     }
 
-    return resp.data['heading'];
+    return resp.data.heading;
   }
 
   /**
-   * Set Goto for notifications
-   *
+   * Set goto for notifications
    *
    * @returns {Promise<never>}
    * @private
    */
-  _getGoto(userNotification) {
-    const oThis = this;
-
-    let resp = NotificationResponseHelper.getGotoForNotification({ userNotification: userNotification });
+  async _getGoto(userNotification) {
+    const resp = NotificationResponseHelper.getGotoForNotification({ userNotification: userNotification });
 
     if (resp.isFailure()) {
       return Promise.reject(resp);
@@ -230,7 +216,9 @@ class UserNotificationBase extends ServiceBase {
   }
 
   /**
-   * find user ids in the notifications.
+   * Find user ids in the notifications.
+   *
+   * @sets oThis.userIds, oThis.videoIds
    *
    * @returns {Promise<void>}
    * @private
@@ -238,10 +226,10 @@ class UserNotificationBase extends ServiceBase {
   async _setUserAndVideoIds() {
     const oThis = this;
 
-    for (let i = 0; i < oThis.userNotifications.length; i++) {
-      let userNotification = NotificationResponseHelper.getFlattenedObject(oThis.userNotifications[i]);
+    for (let index = 0; index < oThis.userNotifications.length; index++) {
+      const userNotification = NotificationResponseHelper.getFlattenedObject(oThis.userNotifications[index]);
 
-      let supportingEntitiesConfig = NotificationResponseHelper.getSupportingEntitiesConfigForKind(
+      const supportingEntitiesConfig = NotificationResponseHelper.getSupportingEntitiesConfigForKind(
         userNotification.kind
       );
 
@@ -261,18 +249,17 @@ class UserNotificationBase extends ServiceBase {
   /**
    * Get  User Ids of supporting entity for a notifications
    *
-   * @returns {Promise<never>}
+   * @returns {Promise<array>}
    * @private
    */
   _getUserIdsForNotifications(userNotification, supportingEntitiesConfig) {
-    const oThis = this;
     let uIds = [];
 
-    let keysForUserId = supportingEntitiesConfig.userIds;
+    const keysForUserId = supportingEntitiesConfig.userIds;
 
-    for (let i = 0; i < keysForUserId.length; i++) {
-      let key = keysForUserId[i];
-      let val = userNotification[key];
+    for (let index = 0; index < keysForUserId.length; index++) {
+      const key = keysForUserId[index];
+      const val = userNotification[key];
 
       if (Array.isArray(val)) {
         uIds = uIds.concat(val);
@@ -287,18 +274,17 @@ class UserNotificationBase extends ServiceBase {
   /**
    * Get  Video Ids of supporting entity for a notifications
    *
-   * @returns {Promise<never>}
+   * @returns {Promise<array>}
    * @private
    */
   _getVideoIdsForNotifications(userNotification, supportingEntitiesConfig) {
-    const oThis = this;
     let vIds = [];
 
-    let keysForVideoId = supportingEntitiesConfig.userIds;
+    const keysForVideoId = supportingEntitiesConfig.userIds;
 
-    for (let i = 0; i < keysForVideoId.length; i++) {
-      let key = keysForVideoId[i];
-      let val = userNotification[key];
+    for (let index = 0; index < keysForVideoId.length; index++) {
+      const key = keysForVideoId[index];
+      const val = userNotification[key];
 
       if (Array.isArray(val)) {
         vIds = vIds.concat(val);
@@ -394,8 +380,8 @@ class UserNotificationBase extends ServiceBase {
 
     oThis.videoMap = cacheRsp.data;
 
-    for (let videoId in oThis.videoMap) {
-      let video = oThis.videoMap[videoId],
+    for (const videoId in oThis.videoMap) {
+      const video = oThis.videoMap[videoId],
         posterImageId = video.posterImageId;
       if (posterImageId) {
         oThis.imageIds.push(posterImageId);
