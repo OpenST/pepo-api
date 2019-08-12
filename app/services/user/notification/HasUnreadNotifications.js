@@ -77,11 +77,18 @@ class HasUnreadNotifications extends ServiceBase {
       userId: oThis.userId
     };
 
-    const userNotification = await new UserNotificationModel().fetchLatestLastActionTime(queryParams);
-    const lastActionTimestamp = userNotification.lastActionTimestamp || 0;
+    const promisesArray = [];
 
-    const userNotificationVisitDetails = await new UserNotificationVisitDetailModel().fetchLastVisitedAt(queryParams);
-    const lastVisitedAt = userNotificationVisitDetails.lastVisitedAt || 0;
+    promisesArray.push(new UserNotificationModel().fetchLatestLastActionTime(queryParams));
+    promisesArray.push(new UserNotificationVisitDetailModel().fetchLastVisitedAt(queryParams));
+
+    const promisesResponse = await Promise.all(promisesArray);
+
+    const userNotification = promisesResponse[0],
+      lastActionTimestamp = userNotification.lastActionTimestamp || 0;
+
+    const userNotificationVisitDetails = promisesResponse[1],
+      lastVisitedAt = userNotificationVisitDetails.lastVisitedAt || 0;
 
     const finalRsp = { unreadFlag: 0 };
     if (lastActionTimestamp && lastActionTimestamp > lastVisitedAt) {
