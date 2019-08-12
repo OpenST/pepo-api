@@ -4,6 +4,7 @@ const rootPrefix = '../../../../..',
   UserProfileElementModel = require(rootPrefix + '/app/models/mysql/UserProfileElement'),
   userProfileElementConst = require(rootPrefix + '/lib/globalConstant/userProfileElement'),
   FeedModel = require(rootPrefix + '/app/models/mysql/Feed'),
+  VideoDetailsModel = require(rootPrefix + '/app/models/mysql/VideoDetail'),
   feedsConstants = require(rootPrefix + '/lib/globalConstant/feed'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   videoLib = require(rootPrefix + '/lib/videoLib');
@@ -196,9 +197,13 @@ class UpdateFanVideo extends UpdateProfileBase {
   async _flushCaches() {
     const oThis = this;
 
-    await super._flushCaches();
+    const promisesArray = [];
 
-    await FeedModel.flushCache({ paginationTimestamp: oThis.paginationTimestamp });
+    promisesArray.push(super._flushCaches());
+    promisesArray.push(FeedModel.flushCache({ paginationTimestamp: oThis.paginationTimestamp }));
+    promisesArray.push(VideoDetailsModel.flushCache({ userId: oThis.userId }));
+
+    await Promise.all(promisesArray);
   }
 }
 

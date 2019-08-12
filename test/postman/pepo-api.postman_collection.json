@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "140d2c40-0391-48fb-8710-b69a76f2024f",
+		"_postman_id": "a46a5f7c-ab44-4397-a458-cb5493a6d665",
 		"name": "pepo-api",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -77,12 +77,12 @@
 							"urlencoded": [
 								{
 									"key": "token",
-									"value": "819112169035988992-DsgmadqWCPmgP1RoouNOOvBYWMEV19z",
+									"value": "819112169035988992-BWLGsfoJodpugIoICBTsYdLr7Agyk94",
 									"type": "text"
 								},
 								{
 									"key": "secret",
-									"value": "8YCRJPLmERw7hWEqB4lI16RZpCCQiSiuaxpv7D2W57Pq2",
+									"value": "3uthp75ekckxsTQG3SjrM60bPl1Z7zBYYFW7ltVoqD1VL",
 									"type": "text"
 								},
 								{
@@ -465,6 +465,62 @@
 					"response": []
 				},
 				{
+					"name": "video-history",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/x-www-form-urlencoded"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "name",
+									"value": "Pankaj Keswani",
+									"type": "text"
+								},
+								{
+									"key": "user_name",
+									"value": "pankaj",
+									"type": "text"
+								},
+								{
+									"key": "bio",
+									"value": "This is my bio, please save it with #cool",
+									"type": "text"
+								},
+								{
+									"key": "link",
+									"value": "https://www.facebook.com",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{api_server}}/api/v1/users/1/video-history",
+							"host": [
+								"{{api_server}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"users",
+								"1",
+								"video-history"
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "update-profile-image",
 					"request": {
 						"method": "POST",
@@ -711,6 +767,28 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "websocket-details",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{api_server}}/api/v1/users/1000/websocket-details",
+							"host": [
+								"{{api_server}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"users",
+								"1000",
+								"websocket-details"
+							]
+						},
+						"description": "GET websocket details"
+					},
+					"response": []
 				}
 			]
 		},
@@ -739,7 +817,8 @@
 								"{{api_server}}"
 							],
 							"path": [
-								"webhooks/ost",
+								"webhooks",
+								"ost",
 								"v2"
 							]
 						}
@@ -768,7 +847,8 @@
 								"{{api_server}}"
 							],
 							"path": [
-								"webhooks/ost",
+								"webhooks",
+								"ost",
 								"v2"
 							]
 						}
@@ -797,7 +877,8 @@
 								"{{api_server}}"
 							],
 							"path": [
-								"webhooks/ost",
+								"webhooks",
+								"ost",
 								"v2"
 							]
 						}
@@ -826,7 +907,8 @@
 								"{{api_server}}"
 							],
 							"path": [
-								"webhooks/ost",
+								"webhooks",
+								"ost",
 								"v2"
 							]
 						}
@@ -855,7 +937,8 @@
 								"{{api_server}}"
 							],
 							"path": [
-								"webhooks/ost",
+								"webhooks",
+								"ost",
 								"v2"
 							]
 						}
@@ -1055,6 +1138,67 @@
 									"key": "q",
 									"value": "w"
 								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "video",
+			"item": [
+				{
+					"name": "get-video",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/x-www-form-urlencoded"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "name",
+									"value": "Pankaj Keswani",
+									"type": "text"
+								},
+								{
+									"key": "user_name",
+									"value": "pankaj",
+									"type": "text"
+								},
+								{
+									"key": "bio",
+									"value": "This is my bio, please save it with #cool",
+									"type": "text"
+								},
+								{
+									"key": "link",
+									"value": "https://www.facebook.com",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{api_server}}/api/v1/users/1/video-history",
+							"host": [
+								"{{api_server}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"users",
+								"1",
+								"video-history"
 							]
 						}
 					},

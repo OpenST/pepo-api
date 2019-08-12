@@ -13,6 +13,32 @@ const rootPrefix = '../../../..',
  */
 class UserContributionSuggestion extends ContributionBase {
   /**
+   * Validate and sanitize specific params.
+   *
+   * @returns {Promise<*>}
+   * @private
+   */
+  async _validateAndSanitizeParams() {
+    const oThis = this;
+
+    if (!oThis.isProfileUserCurrentUser) {
+      return Promise.reject(
+        responseHelper.error({
+          internal_error_identifier: 'a_s_u_c_s_1',
+          api_error_identifier: 'unauthorized_api_request',
+          debug_options: {
+            reason: 'Invalid userId',
+            profileUserId: oThis.profileUserId,
+            currentUserId: oThis.currentUserId
+          }
+        })
+      );
+    }
+
+    return super._validateAndSanitizeParams();
+  }
+
+  /**
    * Fetch user ids from cache.
    *
    * @sets oThis.contributionUserIds
@@ -24,7 +50,7 @@ class UserContributionSuggestion extends ContributionBase {
     const oThis = this;
 
     const twitterUserByUserIdsCacheResp = await new TwitterUserByUserIdsCache({
-      userIds: [oThis.currentUserId]
+      userIds: [oThis.profileUserId]
     }).fetch();
 
     if (twitterUserByUserIdsCacheResp.isFailure()) {
@@ -32,7 +58,7 @@ class UserContributionSuggestion extends ContributionBase {
     }
 
     // Should always be present.
-    const currentUserTwitterUserId = twitterUserByUserIdsCacheResp.data[oThis.currentUserId].id;
+    const currentUserTwitterUserId = twitterUserByUserIdsCacheResp.data[oThis.profileUserId].id;
 
     const userPaginationCacheRes = await new TwitterUserConnectionByUser1PaginationCache({
       limit: oThis.limit,

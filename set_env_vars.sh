@@ -10,6 +10,7 @@ export PA_COOKIE_DOMAIN='127.0.0.1'
 export DEVOPS_APP_NAME='pepo-api';
 export DEVOPS_ENV_ID='dev1-sandbox';
 export DEVOPS_IP_ADDRESS='127.0.0.1';
+export DEVOPS_WS_SERVER_IDENTIFIER='1111';
 
 # Database details
 export PA_MYSQL_CONNECTION_POOL_SIZE='3'
@@ -53,6 +54,11 @@ export PA_CONFIG_DB_MYSQL_PASSWORD='root'
 export PA_OST_DB_MYSQL_HOST='127.0.0.1'
 export PA_OST_DB_MYSQL_USER='root'
 export PA_OST_DB_MYSQL_PASSWORD='root'
+
+#mysql socket db
+export PA_SOCKET_DB_MYSQL_HOST='127.0.0.1'
+export PA_SOCKET_DB_MYSQL_USER='root'
+export PA_SOCKET_DB_MYSQL_PASSWORD='root'
 
 # mysql - devops error logs infra details
 export PA_INFRA_DB_MYSQL_HOST='127.0.0.1'

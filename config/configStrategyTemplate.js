@@ -38,6 +38,28 @@ class ConfigStrategyTemplate {
           clusterNodes: 'clusterNodesEntity'
         }
       },
+      rabbitmqListEntity: {
+        entityType: 'object',
+        entitiesPresent: {
+          username: 'usernameEntity',
+          password: 'passwordEntity',
+          heartbeats: 'heartbeatsEntity',
+          clusters: 'multipleClustersEntity'
+        }
+      },
+      multipleClustersEntity: {
+        entityType: 'array',
+        entitiesPresent: 'clusterEntity'
+      },
+      clusterEntity: {
+        entityType: 'object',
+        entitiesPresent: {
+          id: 'socketRabbbitMqIdEntity',
+          host: 'hostEntity',
+          port: 'portEntity',
+          clusterNodes: 'clusterNodesEntity'
+        }
+      },
       redshiftEntity: {
         entityType: 'object',
         entitiesPresent: {
@@ -48,8 +70,20 @@ class ConfigStrategyTemplate {
           host: 'hostEntity'
         }
       },
+      constantsEntity: {
+        entityType: 'object',
+        entitiesPresent: {
+          salt: 'saltEntity'
+        }
+      },
 
+      socketRabbbitMqIdEntity: {
+        entityType: 'string'
+      },
       userEntity: {
+        entityType: 'string'
+      },
+      saltEntity: {
         entityType: 'string'
       },
       databaseEntity: {
@@ -103,7 +137,10 @@ class ConfigStrategyTemplate {
     return {
       [configStrategyConstants.memcached]: 'memcachedEntity',
       [configStrategyConstants.bgJobRabbitmq]: 'rabbitmqEntity',
-      [configStrategyConstants.redshift]: 'redshiftEntity'
+      [configStrategyConstants.notificationRabbitmq]: 'rabbitmqEntity',
+      [configStrategyConstants.socketRabbitmq]: 'rabbitmqListEntity',
+      [configStrategyConstants.redshift]: 'redshiftEntity',
+      [configStrategyConstants.constants]: 'constantsEntity'
     };
   }
 }

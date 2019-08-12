@@ -146,6 +146,20 @@ class CoreConstants {
     return process.env.PA_OST_DB_MYSQL_PASSWORD;
   }
 
+  // socket db
+
+  get SOCKET_DB_MYSQL_HOST() {
+    return process.env.PA_SOCKET_DB_MYSQL_HOST;
+  }
+
+  get SOCKET_DB_MYSQL_USER() {
+    return process.env.PA_SOCKET_DB_MYSQL_USER;
+  }
+
+  get SOCKET_DB_MYSQL_PASSWORD() {
+    return process.env.PA_SOCKET_DB_MYSQL_PASSWORD;
+  }
+
   // Infra db
 
   get INFRA_DB_MYSQL_HOST() {
@@ -269,6 +283,10 @@ class CoreConstants {
 
   get IP_ADDRESS() {
     return process.env.DEVOPS_IP_ADDRESS;
+  }
+
+  get WS_SERVER_IDENTIFIER() {
+    return process.env.DEVOPS_WS_SERVER_IDENTIFIER;
   }
 
   // Pepo-campaigns details

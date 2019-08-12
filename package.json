@@ -9,7 +9,7 @@
   "dependencies": {
     "@ostdotcom/base": "1.0.0",
     "@ostdotcom/cache": "1.0.6",
-    "@ostdotcom/notification": "1.0.7-beta.2",
+    "@ostdotcom/notification": "1.0.7-beta.3",
     "@ostdotcom/ost-sdk-js": "https://github.com/ostdotcom/ost-sdk-js.git#develop",
     "aws-sdk": "2.484.0",
     "bignumber.js": "4.1.0",
@@ -24,6 +24,7 @@
     "morgan": "1.9.1",
     "mysql": "2.16.0",
     "node-redshift": "0.1.5",
+    "socket.io": "2.2.0",
     "sanitize-html": "1.19.3"
   },
   "devDependencies": {

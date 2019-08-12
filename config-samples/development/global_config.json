@@ -20,12 +20,55 @@
       ]
     },
 
+    "notificationRabbitmq": {
+      "username": "guest",
+      "password": "guest",
+      "host": "127.0.0.1",
+      "port": "5672",
+      "heartbeats": "30",
+      "clusterNodes": [
+        "127.0.0.1"
+      ]
+    },
+
+    "socketRabbitmq": {
+      "username": "guest",
+      "password": "guest",
+      "heartbeats": "30",
+      "clusters": [
+        {
+          "id": "r1",
+          "host": "127.0.0.1",
+          "port": "5672",
+          "clusterNodes": [
+            "127.0.0.1"
+          ]
+        },
+        {
+          "id": "r2",
+          "host": "127.0.0.1",
+          "port": "5672",
+          "clusterNodes": [
+            "127.0.0.1"
+          ]
+        }
+      ]
+    },
+
     "redshift": {
       "user": "pepo_dev_read",
       "database": "pepodb",
       "password": "Pepo2Dev!ReadOn7y",
       "port": "5439",
       "host": "pepo.cfwzkfyo2mfi.eu-west-1.redshift.amazonaws.com"
+    },
+
+    "constants": {
+      "salt": "asdfghjklqwertyuiop",
+      "websocket": {
+        "endpoint": "127.0.0.1",
+        "protocol": "https"
+      }
     }
   }
 }

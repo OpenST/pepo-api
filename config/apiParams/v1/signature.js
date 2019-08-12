@@ -72,6 +72,10 @@ const v1Signature = {
       {
         parameter: 'current_user',
         validatorMethods: ['validateNonEmptyObject']
+      },
+      {
+        parameter: 'profile_user_id',
+        validatorMethods: ['validateNonZeroInteger']
       }
     ],
     optional: [
@@ -86,6 +90,10 @@ const v1Signature = {
       {
         parameter: 'current_user',
         validatorMethods: ['validateNonEmptyObject']
+      },
+      {
+        parameter: 'profile_user_id',
+        validatorMethods: ['validateNonZeroInteger']
       }
     ],
     optional: [
@@ -100,6 +108,10 @@ const v1Signature = {
       {
         parameter: 'current_user',
         validatorMethods: ['validateNonEmptyObject']
+      },
+      {
+        parameter: 'profile_user_id',
+        validatorMethods: ['validateNonZeroInteger']
       }
     ],
     optional: [
@@ -393,11 +405,70 @@ const v1Signature = {
       }
     ]
   },
+  [apiName.userVideoList]: {
+    mandatory: [
+      {
+        parameter: 'profile_user_id',
+        validatorMethods: ['validateNonZeroInteger']
+      }
+    ],
+    optional: [
+      {
+        parameter: paginationConstants.paginationIdentifierKey,
+        validatorMethods: ['validateString', 'validatePaginationIdentifier']
+      },
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      }
+    ]
+  },
+  [apiName.getVideo]: {
+    mandatory: [
+      {
+        parameter: 'video_id',
+        validatorMethods: ['validateNonZeroInteger']
+      }
+    ],
+    optional: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      }
+    ]
+  },
   [apiName.feedDetails]: {
     mandatory: [
       {
         parameter: 'feed_id',
         validatorMethods: ['validateInteger']
+      }
+    ],
+    optional: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      }
+    ]
+  },
+  [apiName.websocketDetails]: {
+    mandatory: [
+      {
+        parameter: 'user_id',
+        validatorMethods: ['validateInteger']
+      },
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      }
+    ],
+    optional: []
+  },
+  [apiName.getUserNotifications]: {
+    mandatory: [
+      {
+        parameter: 'profile_user_id',
+        validatorMethods: ['validateNonZeroInteger']
       }
     ],
     optional: [
