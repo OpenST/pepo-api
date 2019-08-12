@@ -1,6 +1,7 @@
 const rootPrefix = '../../..',
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
-  cassandraClient = require(rootPrefix + '/lib/cassandraWrapper');
+  cassandraClient = require(rootPrefix + '/lib/cassandraWrapper'),
+  cassandraConstants = require(rootPrefix + '/lib/globalConstant/cassandra/cassandra');
 
 /**
  * Class for cassandra model base.
@@ -56,6 +57,20 @@ class ModelBase {
   }
 
   /**
+   * Get default options.
+   *
+   * @param {object} options
+   *
+   * @returns {*}
+   */
+  getDefaultOptions(options = {}) {
+    options.prepare = options.prepare ? options.prepare : true;
+    options.consistency = options.consistency ? options.consistency : cassandraConstants.defaultConsistencyLevel;
+
+    return options;
+  }
+
+  /**
    * Fire the query.
    *
    * @param {string} query
@@ -64,10 +79,10 @@ class ModelBase {
    *
    * @returns {Promise<any>}
    */
-  async fire(query, params = [], options = { prepare: true }) {
+  async fire(query, params = [], options = {}) {
     const oThis = this;
 
-    return oThis.onWriteConnection().execute(query, params, options);
+    return oThis.onWriteConnection().execute(query, params, oThis.getDefaultOptions(options));
   }
 
   /**
@@ -82,7 +97,7 @@ class ModelBase {
   async batchFire(query, params = [], options = {}) {
     const oThis = this;
 
-    return oThis.onWriteConnection().batch(query, params, options);
+    return oThis.onWriteConnection().batch(query, params, oThis.getDefaultOptions(options));
   }
 
   /**
@@ -96,10 +111,10 @@ class ModelBase {
    *
    * @returns {Promise<any>}
    */
-  async eachRow(query, params = [], options, rowCallback, endCallback) {
+  async eachRow(query, params = [], options = {}, rowCallback, endCallback) {
     const oThis = this;
 
-    return oThis.onWriteConnection().eachRow(query, params, options, rowCallback, endCallback);
+    return oThis.onWriteConnection().eachRow(query, params, oThis.getDefaultOptions(options), rowCallback, endCallback);
   }
 
   /**
