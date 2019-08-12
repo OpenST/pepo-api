@@ -11,6 +11,7 @@ const rootPrefix = '.',
   socketJobProcessor = require(rootPrefix + '/executables/rabbitMqSubscribers/socketJobProcessor'),
   webSocketCustomCache = require(rootPrefix + '/lib/webSocket/customCache'),
   WebsocketAuth = require(rootPrefix + '/app/services/websocket/auth'),
+  websocketAutoDisconnect = require(rootPrefix + '/lib/webSocket/autoDisconnect'),
   UserSocketConnectionDetailsModel = require(rootPrefix + '/app/models/mysql/UserSocketConnectionDetails');
 
 let socketIdentifier = null,
@@ -96,12 +97,7 @@ async function onSocketDisconnect(socket) {
     return true;
   }
 
-  await new UserSocketConnectionDetailsModel()
-    .update({ status: socketConnectionConstants.invertedStatuses[socketConnectionConstants.expiredStatus] })
-    .where({ id: userSocketConnDetailsId })
-    .fire();
-
-  await UserSocketConnectionDetailsModel.flushCache({ userId: userId });
+  await new UserSocketConnectionDetailsModel()._markSocketConnectionDetailsAsExpired(userSocketConnDetailsId, userId);
 
   webSocketCustomCache.deleteFromSocketObjsMap(userSocketConnDetailsId);
 
@@ -147,4 +143,10 @@ async function subscribeToRmq() {
   socketIdentifier = socketConnectionConstants.getSocketIdentifierFromTopic(socketObj.topics[0]);
 }
 
+async function autoDisconnect() {
+  websocketAutoDisconnect.perform();
+  setTimeout(autoDisconnect, 60 * 1000);
+}
+
 run();
+//autoDisconnect();

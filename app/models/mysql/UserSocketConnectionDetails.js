@@ -150,6 +150,27 @@ class UserSocketConnectionDetails extends ModelBase {
   }
 
   /**
+   * Modify socket connection details.
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _markSocketConnectionDetailsAsExpired(userSocketConnDetailsId, userId) {
+    const oThis = this;
+
+    await new UserSocketConnectionDetailsModel()
+      .update({
+        status: socketConnectionConstants.invertedStatuses[socketConnectionConstants.expired]
+      })
+      .where({
+        id: userSocketConnDetailsId
+      })
+      .fire();
+
+    await UserSocketConnectionDetails.flushCache({ userId: userId });
+  }
+
+  /**
    * Flush cache.
    *
    * @param {object} params
