@@ -1,14 +1,15 @@
 const rootPrefix = '../../../..',
   UserNotificationServiceBase = require(rootPrefix + '/app/services/user/notification/Base'),
   responseHelper = require(rootPrefix + '/lib/formatter/response');
+
 /**
- * Class for user Notification Single.
+ * Class for single user notification.
  *
  * @class UserNotification
  */
 class UserNotificationSingle extends UserNotificationServiceBase {
   /**
-   * Constructor for user contribution base.
+   * Constructor for single user notification.
    *
    * @param {object} params
    * @param {object} params.current_user
@@ -36,19 +37,20 @@ class UserNotificationSingle extends UserNotificationServiceBase {
    * @private
    */
   async _validateAndSanitizeParams() {
-    const oThis = this;
-
-    return;
+    // Do nothing.
   }
 
   /**
    * Fetch user notifications from cache.
+   *
+   * @sets oThis.userNotifications
    *
    * @returns {Promise<void>}
    * @private
    */
   async _setUserNotification() {
     const oThis = this;
+
     oThis.userNotifications = [oThis.userNotification];
   }
 
@@ -61,9 +63,9 @@ class UserNotificationSingle extends UserNotificationServiceBase {
   finalResponse() {
     const oThis = this;
 
-    const response = super._finalResponse().data;
+    const response = super._finalResponse();
 
-    response['userNotification'] = oThis.formattedUserNotifications[0];
+    response.userNotification = oThis.formattedUserNotifications[0];
 
     return responseHelper.successWithData(response);
   }

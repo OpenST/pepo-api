@@ -87,6 +87,8 @@ class SayThankYou extends ServiceBase {
   /**
    * Decrypt notification id.
    *
+   * @sets oThis.decryptedNotificationParams
+   *
    * @returns {Promise<*>}
    * @private
    */
@@ -112,6 +114,8 @@ class SayThankYou extends ServiceBase {
   /**
    * Validate text.
    *
+   * @sets oThis.text
+   *
    * @returns {Promise<*>}
    * @private
    */
@@ -134,6 +138,8 @@ class SayThankYou extends ServiceBase {
 
   /**
    * Fetch and validate user notification.
+   *
+   * @sets oThis.userNotificationObj
    *
    * @returns {Promise<void>}
    * @private
