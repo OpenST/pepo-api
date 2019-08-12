@@ -1,5 +1,6 @@
 const rootPrefix = '../../../..',
   UserNotificationServiceBase = require(rootPrefix + '/app/services/user/notification/Base'),
+  CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   UpdateUserNotificationVisitDetailsService = require(rootPrefix +
     '/app/services/user/notification/UpdateUserNotificationVisitDetails'),
   UserNotificationsByUserIdPagination = require(rootPrefix +
