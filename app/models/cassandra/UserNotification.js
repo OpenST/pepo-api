@@ -35,8 +35,9 @@ class UserNotificationModel extends CassandraModelBase {
    * @param {integer} params.limit: no of rows to fetch
    * @param {integer} params.userId: creator user id
    * @param {integer} params.lastActionTimestamp: creator user id
+`   * @param {string} params.pageState: cassandra page state
    *
-   * @returns {Promise<array>}
+   * @returns {Promise<object>}
    */
   async fetchPaginatedForUserId(params) {
     const oThis = this;
@@ -50,7 +51,7 @@ class UserNotificationModel extends CassandraModelBase {
 
     const queryString = `select * from ${oThis.queryTableName} where ${userIdKey}=?`;
 
-    let options = {
+    const options = {
       prepare: true,
       fetchSize: limit,
       pageState: pageState
@@ -93,6 +94,7 @@ class UserNotificationModel extends CassandraModelBase {
   formatDbData(dbRow) {
     const oThis = this;
 
+    /* eslint-disable */
     const formattedData = {
       user_id: dbRow.user_id ? dbRow.user_id.toString(10) : undefined,
       last_action_timestamp: dbRow.last_action_timestamp
@@ -110,6 +112,7 @@ class UserNotificationModel extends CassandraModelBase {
       flag1: dbRow.flag1,
       flag2: dbRow.flag2
     };
+    /* eslint-enable */
 
     const sanitizedFormattedData = oThis.sanitizeFormattedData(formattedData);
 
@@ -187,16 +190,17 @@ class UserNotificationModel extends CassandraModelBase {
    */
   async fetchLatestLastActionTime(queryParams) {
     const oThis = this;
-    let lastActionTimestampKey = ParametersFormatter.getColumnNameForQuery('lastActionTimestamp'),
+
+    const lastActionTimestampKey = ParametersFormatter.getColumnNameForQuery('lastActionTimestamp'),
       userIdKey = ParametersFormatter.getColumnNameForQuery('userId');
 
-    let query = `select ${lastActionTimestampKey} from ${oThis.queryTableName} 
+    const query = `select ${lastActionTimestampKey} from ${oThis.queryTableName} 
       where ${userIdKey} = ? order by ${lastActionTimestampKey} desc limit 1;`;
-    let params = [queryParams.userId];
+    const params = [queryParams.userId];
 
     const queryRsp = await oThis.fire(query, params);
 
-    if (queryRsp.length == 0) {
+    if (queryRsp.length === 0) {
       return {};
     }
 
@@ -212,19 +216,19 @@ class UserNotificationModel extends CassandraModelBase {
    */
   async fetchUserNotification(queryParams) {
     const oThis = this;
-    let lastActionTimestampKey = ParametersFormatter.getColumnNameForQuery('lastActionTimestamp'),
+    const lastActionTimestampKey = ParametersFormatter.getColumnNameForQuery('lastActionTimestamp'),
       userIdKey = ParametersFormatter.getColumnNameForQuery('userId'),
       uuidKey = ParametersFormatter.getColumnNameForQuery('uuid');
 
-    let query = `select * from ${
+    const query = `select * from ${
       oThis.queryTableName
     } where ${userIdKey} = ? and ${lastActionTimestampKey} = ? and ${uuidKey} = ?;`;
-    let params = [queryParams.user_id, queryParams.last_action_timestamp, queryParams.uuid];
+    const params = [queryParams.user_id, queryParams.last_action_timestamp, queryParams.uuid];
     const queryRsp = await oThis.fire(query, params);
 
     const dbRows = queryRsp.rows;
 
-    if (dbRows.length == 0) {
+    if (dbRows.length === 0) {
       return {};
     }
 
@@ -245,8 +249,9 @@ class UserNotificationModel extends CassandraModelBase {
    */
   async updateThankYouFlag(queryParams) {
     const oThis = this;
+
     const kind = queryParams.kind;
-    let lastActionTimestampKey = ParametersFormatter.getColumnNameForQuery('lastActionTimestamp', kind),
+    const lastActionTimestampKey = ParametersFormatter.getColumnNameForQuery('lastActionTimestamp', kind),
       userIdKey = ParametersFormatter.getColumnNameForQuery('userId', kind),
       uuidKey = ParametersFormatter.getColumnNameForQuery('uuid', kind),
       thankYouFlagKey = ParametersFormatter.getColumnNameForQuery('thankYouFlag', kind);
