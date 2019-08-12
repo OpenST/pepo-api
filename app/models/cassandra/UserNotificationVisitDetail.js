@@ -80,11 +80,13 @@ class UserNotificationVisitDetailModel extends CassandraModelBase {
 
     const queryRsp = await oThis.fire(query, params);
 
-    if (queryRsp.length == 0) {
+    const dbRows = queryRsp.rows;
+
+    if (dbRows.length === 0) {
       return {};
     }
 
-    return oThis.formatDbData(queryRsp.rows[0]);
+    return oThis.formatDbData(dbRows[0]);
   }
 
   /**
