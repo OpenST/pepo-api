@@ -6,13 +6,13 @@ const rootPrefix = '../../../..',
   responseHelper = require(rootPrefix + '/lib/formatter/response');
 
 /**
- * Class to check is user has unread notifications.
+ * Class to check if user has unread notifications.
  *
  * @class HasUnreadNotifications
  */
 class HasUnreadNotifications extends ServiceBase {
   /**
-   * Constructor to check is user has unread notifications.
+   * Constructor to check if user has unread notifications.
    *
    * @param {object} params
    * @param {number} params.user_id
@@ -33,6 +33,7 @@ class HasUnreadNotifications extends ServiceBase {
    * Main performer for class.
    *
    * @return {Promise<void>}
+   * @private
    */
   async _asyncPerform() {
     const oThis = this;
@@ -42,8 +43,15 @@ class HasUnreadNotifications extends ServiceBase {
     return responseHelper.successWithData(await oThis._checkIfVisited());
   }
 
+  /**
+   * Validate parameters.
+   *
+   * @returns {Promise<*>}
+   * @private
+   */
   async _validateParams() {
     const oThis = this;
+
     if (CommonValidators.isVarNullOrUndefined(oThis.userId)) {
       return Promise.reject(
         responseHelper.paramValidationError({
@@ -57,36 +65,27 @@ class HasUnreadNotifications extends ServiceBase {
   }
 
   /**
-   * Check if user has unread notifications
+   * Check if user has unread notifications.
    *
-   * @returns {object}
+   * @returns {Promise{object}}
    * @private
    */
   async _checkIfVisited() {
     const oThis = this;
-    let finalRsp = {};
 
     const queryParams = {
       userId: oThis.userId
     };
 
-    let userNotification = await new UserNotificationModel().fetchLatestLastActionTime(queryParams);
-    let lastActionTimestamp = userNotification.lastActionTimestamp || 0;
+    const userNotification = await new UserNotificationModel().fetchLatestLastActionTime(queryParams);
+    const lastActionTimestamp = userNotification.lastActionTimestamp || 0;
 
-    let userNotificationVisitDetails = await new UserNotificationVisitDetailModel().fetchLastVisitedAt(queryParams);
-    let lastVisitedAt = userNotificationVisitDetails.lastVisitedAt || 0;
+    const userNotificationVisitDetails = await new UserNotificationVisitDetailModel().fetchLastVisitedAt(queryParams);
+    const lastVisitedAt = userNotificationVisitDetails.lastVisitedAt || 0;
 
-    if (lastActionTimestamp === 0) {
-      finalRsp['unreadFlag'] = 0;
-      return finalRsp;
-    }
-
-    if (lastActionTimestamp) {
-      if (lastActionTimestamp > lastVisitedAt) {
-        finalRsp['unreadFlag'] = 1;
-      } else {
-        finalRsp['unreadFlag'] = 0;
-      }
+    const finalRsp = { unreadFlag: 0 };
+    if (lastActionTimestamp && lastActionTimestamp > lastVisitedAt) {
+      finalRsp.unreadFlag = 1;
     }
 
     return finalRsp;
