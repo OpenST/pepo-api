@@ -181,7 +181,26 @@ class AdminModel extends ModelBase {
    * @returns {*}
    */
   cookieToken(adminObj) {
-    return util.createMd5Digest('ct-' + adminObj.id + '-' + adminObj.email);
+    return util.createMd5Digest('ct-' + adminObj.id + '-' + adminObj.password);
+  }
+
+  /**
+   * Flush cache
+   *
+   * @param {object} params
+   *
+   * @returns {Promise<*>}
+   */
+  static async flushCache(params) {
+    const promisesArray = [];
+
+    const AdminById = require(rootPrefix + '/lib/cacheManagement/single/AdminById');
+    promisesArray.push(new AdminById({ id: [params.id] }).clear());
+
+    const AdminByEmail = require(rootPrefix + '/lib/cacheManagement/single/AdminByEmail');
+    promisesArray.push(new AdminByEmail({ email: [params.email] }).clear());
+
+    await Promise.all(promisesArray);
   }
 }
 

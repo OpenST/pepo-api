@@ -4,13 +4,14 @@
  * @module app/services/admin/Login
  */
 const rootPrefix = '../../..',
-  KmsWrapper = require(rootPrefix + '/lib/aws/KmsWrapper'),
-  kmsConstants = require(rootPrefix + '/lib/globalConstant/kms'),
+  coreConstants = require(rootPrefix + '/config/coreConstants'),
+  localCipher = require(rootPrefix + '/lib/encryptors/localCipher'),
   util = require(rootPrefix + '/lib/util'),
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   AdminEmailCache = require(rootPrefix + '/lib/cacheManagement/single/AdminByEmail'),
   AdminModel = require(rootPrefix + '/app/models/mysql/Admin'),
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
+  adminConstants = require(rootPrefix + '/lib/globalConstant/admin'),
   responseHelper = require(rootPrefix + '/lib/formatter/response');
 
 /**
@@ -50,9 +51,7 @@ class AdminLogin extends ServiceBase {
 
     await oThis._validatePassword();
 
-    let resp = await oThis._generateCookie();
-
-    return responseHelper.successWithData(resp);
+    return oThis._generateCookie();
   }
 
   /**
@@ -89,10 +88,7 @@ class AdminLogin extends ServiceBase {
   async _validatePassword() {
     const oThis = this;
 
-    const kmsObject = new KmsWrapper(kmsConstants.userPasswordEncryptionPurpose),
-      decryptResponse = await kmsObject.decrypt(oThis.adminObj.encryptionSalt);
-
-    const decryptedEncryptionSalt = decryptResponse.Plaintext;
+    const decryptedEncryptionSalt = localCipher.decrypt(coreConstants.CACHE_SHA_KEY, oThis.adminObj.encryptionSalt);
 
     const generatedEncryptedPassword = util.createSha256Digest(decryptedEncryptionSalt, oThis.password);
 
@@ -106,14 +102,31 @@ class AdminLogin extends ServiceBase {
         })
       );
     }
+
+    if (oThis.adminObj.status != adminConstants.activeStatus) {
+      return Promise.reject(
+        responseHelper.paramValidationError({
+          internal_error_identifier: 's_am_l_3',
+          api_error_identifier: 'invalid_api_params',
+          params_error_identifiers: ['user_not_active'],
+          debug_options: {}
+        })
+      );
+    }
   }
 
-  async _generateCookie() {
+  /**
+   * Generate admin cookie
+   *
+   * @returns {Promise<*|result>}
+   * @private
+   */
+  _generateCookie() {
     const oThis = this;
 
     const formattedData = new AdminModel().safeFormattedData(oThis.adminObj);
 
-    const adminCookie = new AdminModel().getCookieValueFor(formattedData, {
+    let adminCookie = new AdminModel().getCookieValueFor(oThis.adminObj, {
       timestamp: Date.now() / 1000
     });
 
