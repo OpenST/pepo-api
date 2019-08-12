@@ -1,9 +1,7 @@
 const rootPrefix = '../../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
-  ActivityModel = require(rootPrefix + '/app/models/mysql/Activity'),
   TokenUserModel = require(rootPrefix + '/app/models/mysql/TokenUser'),
   TransactionModel = require(rootPrefix + '/app/models/mysql/Transaction'),
-  UserActivityModel = require(rootPrefix + '/app/models/mysql/UserActivity'),
   PendingTransactionModel = require(rootPrefix + '/app/models/mysql/PendingTransaction'),
   TokenUserByUserIdCache = require(rootPrefix + '/lib/cacheManagement/multi/TokenUserByUserIds'),
   TransactionByOstTxIdCache = require(rootPrefix + '/lib/cacheManagement/multi/TransactionByOstTxId'),
@@ -12,7 +10,6 @@ const rootPrefix = '../../../..',
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   commonValidator = require(rootPrefix + '/lib/validators/Common'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
-  activityConstants = require(rootPrefix + '/lib/globalConstant/activity'),
   createErrorLogsEntry = require(rootPrefix + '/lib/errorLogs/createEntry'),
   errorLogsConstants = require(rootPrefix + '/lib/globalConstant/errorLogs'),
   transactionConstants = require(rootPrefix + '/lib/globalConstant/transaction');
@@ -300,7 +297,6 @@ class TransactionOstEventBase extends ServiceBase {
   /**
    * Update ost transaction status in transaction table.
    *
-   * @sets oThis.activityObj
    *
    * @returns {Promise<void>}
    */
@@ -322,98 +318,6 @@ class TransactionOstEventBase extends ServiceBase {
     await TransactionModel.flushCache(oThis.transactionObj);
 
     logger.log('End:: Update transaction table for Transaction Webhook');
-  }
-
-  /**
-   * Update activity with published timestamp, display timestamp and status.
-   *
-   * @returns {Promise<any>}
-   */
-  async updateActivity() {
-    const oThis = this;
-    logger.log('Start:: Update Activity');
-
-    const activityObjRes = await new ActivityModel().fetchByEntityTypeAndEntityId(
-      activityConstants.invertedEntityTypes[activityConstants.transactionEntityType],
-      oThis.transactionObj.id
-    );
-
-    if (!activityObjRes.id) {
-      const errorObject = responseHelper.error({
-        internal_error_identifier: 'a_s_oe_t_b_2',
-        api_error_identifier: 'something_went_wrong',
-        debug_options: { reason: 'Activity object not found for transaction entity', entityId: oThis.transactionObj.id }
-      });
-      await createErrorLogsEntry.perform(errorObject, errorLogsConstants.highSeverity);
-
-      return Promise.reject(errorObject);
-    }
-
-    if (activityObjRes.status === activityConstants.invertedStatuses[oThis._activityStatus()]) {
-      return responseHelper.successWithData({});
-    }
-
-    oThis.activityObj = activityObjRes;
-
-    oThis.activityObj.publishedTs = oThis._publishedTimestamp();
-
-    await new ActivityModel()
-      .update({
-        published_ts: oThis.activityObj.publishedTs,
-        display_ts: oThis.ostTransactionMinedTimestamp,
-        status: activityConstants.invertedStatuses[oThis._activityStatus()]
-      })
-      .where(['id = ?', oThis.activityObj.id])
-      .fire();
-
-    oThis.activityObj.displayTs = oThis.ostTransactionMinedTimestamp;
-    oThis.activityObj.status = oThis._activityStatus();
-
-    await ActivityModel.flushCache(oThis.activityObj);
-
-    logger.log('End:: Update Activity');
-  }
-
-  /**
-   * Update user activity.
-   *
-   * @returns {Promise<void>}
-   */
-  async updateUserActivity(activityId) {
-    const oThis = this;
-
-    logger.log('Start:: Update User Activity');
-
-    /* NOTE: Commenting following code as we don't need to update published ts. Published ts is inserted while creating transaction itself.
-    let userActivityObj = await new UserActivityModel().fetchUserActivityByUserIdPublishedTsAndActivityId(
-      oThis.fromUserId,
-      null,
-      activityId
-    );
-
-    if (!userActivityObj.id) {
-      let errorObject = responseHelper.error({
-        internal_error_identifier: 'a_s_oe_t_b_3',
-        api_error_identifier: 'something_went_wrong',
-        debug_options: { reason: 'User activity object not found for activity id', activityId: activityId }
-      });
-      await createErrorLogsEntry.perform(errorObject, errorLogsConstants.highSeverity);
-      return Promise.reject(errorObject);
-    }
-
-    await new UserActivityModel()
-      .update({
-        published_ts: oThis.activityObj.publishedTs
-      })
-      .where(['id = ?', userActivityObj.id])
-      .fire();
-
-    userActivityObj.publishedTs = oThis.activityObj.publishedTs;
-
-    await UserActivityModel.flushCache(userActivityObj);
-     */
-
-    logger.log('End:: Update User Activity');
   }
 
   /**
@@ -560,68 +464,6 @@ class TransactionOstEventBase extends ServiceBase {
   }
 
   /**
-   * Insert in activity table.
-   *
-   * @sets oThis.publishedTs, oThis.activityObj
-   *
-   * @returns {Promise<void>}
-   */
-  async insertInActivity() {
-    const oThis = this;
-    logger.log('Start:: Insert in Activity table');
-
-    const extraData = {};
-
-    oThis.publishedTs = oThis._publishedTimestamp();
-
-    const insertData = {
-      entity_type: activityConstants.invertedEntityTypes[activityConstants.transactionEntityType],
-      entity_id: oThis.transactionObj.id,
-      extra_data: JSON.stringify(extraData),
-      status: activityConstants.invertedStatuses[oThis._activityStatus()],
-      published_ts: oThis.publishedTs,
-      display_ts: oThis.publishedTs
-    };
-
-    const insertResponse = await new ActivityModel().insert(insertData).fire();
-    insertData.id = insertResponse.insertId;
-
-    const formattedInsertData = new ActivityModel().formatDbData(insertData);
-    await ActivityModel.flushCache(formattedInsertData);
-
-    oThis.activityObj = formattedInsertData;
-
-    logger.log('End:: Insert in Activity table');
-  }
-
-  /**
-   * Insert in user activity for the given user id.
-   *
-   * @param {number} userId
-   *
-   * @returns {Promise<void>}
-   */
-  async insertInUserActivity(userId) {
-    const oThis = this;
-
-    logger.log('Start:: Insert in User Activity table');
-
-    const insertData = {
-      user_id: userId,
-      activity_id: oThis.activityObj.id,
-      published_ts: oThis.activityObj.publishedTs
-    };
-
-    const insertResponse = await new UserActivityModel().insert(insertData).fire();
-    insertData.id = insertResponse.insertId;
-
-    const formattedInsertData = new UserActivityModel().formatDbData(insertData);
-    await UserActivityModel.flushCache(formattedInsertData);
-
-    logger.log('End:: Insert in User Activity table');
-  }
-
-  /**
    * Fetch video and validate.
    *
    * @returns {Promise<never>}
@@ -687,15 +529,6 @@ class TransactionOstEventBase extends ServiceBase {
    */
   _transactionStatus() {
     throw new Error('Unimplemented method _transactionStatus for TransactionOstEvent.');
-  }
-
-  /**
-   * Activity status.
-   *
-   * @private
-   */
-  _activityStatus() {
-    throw new Error('Unimplemented method feedStatus for TransactionOstEvent.');
   }
 
   /**

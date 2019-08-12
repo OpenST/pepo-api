@@ -13,7 +13,6 @@ const rootPrefix = '../../../..',
   basicHelper = require(rootPrefix + '/helpers/basic'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
-  activityConstants = require(rootPrefix + '/lib/globalConstant/activity'),
   tokenUserConstants = require(rootPrefix + '/lib/globalConstant/tokenUser'),
   transactionConstants = require(rootPrefix + '/lib/globalConstant/transaction');
 
@@ -56,11 +55,7 @@ class SuccessTransactionOstEvent extends TransactionOstEventBase {
         await oThis.fetchTransaction();
         await oThis._processTransaction();
       } else {
-        await oThis.insertInActivity();
-
         const promiseArray2 = [];
-        promiseArray2.push(oThis.insertInUserActivity(oThis.fromUserId));
-        promiseArray2.push(oThis.insertInUserActivity(oThis.toUserId));
 
         promiseArray2.push(oThis._sendUserNotification());
 
@@ -114,13 +109,9 @@ class SuccessTransactionOstEvent extends TransactionOstEventBase {
       promiseArray2 = [];
 
     promiseArray1.push(oThis.updateTransaction());
-    promiseArray1.push(oThis.updateActivity());
     promiseArray1.push(oThis.removeEntryFromPendingTransactions());
 
     await Promise.all(promiseArray1);
-
-    promiseArray2.push(oThis.updateUserActivity(oThis.activityObj.id));
-    promiseArray2.push(oThis.insertInUserActivity(oThis.toUserId));
 
     promiseArray2.push(oThis._sendUserNotification());
 
@@ -195,16 +186,6 @@ class SuccessTransactionOstEvent extends TransactionOstEventBase {
    */
   _validTransactionStatus() {
     return transactionConstants.successOstTransactionStatus;
-  }
-
-  /**
-   * Activity status.
-   *
-   * @return {string}
-   * @private
-   */
-  _activityStatus() {
-    return activityConstants.doneStatus;
   }
 
   /**

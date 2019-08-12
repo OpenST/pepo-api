@@ -4,7 +4,6 @@ const rootPrefix = '../../../..',
   basicHelper = require(rootPrefix + '/helpers/basic'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
-  activityConstants = require(rootPrefix + '/lib/globalConstant/activity'),
   tokenUserConstants = require(rootPrefix + '/lib/globalConstant/tokenUser'),
   transactionConstants = require(rootPrefix + '/lib/globalConstant/transaction');
 
@@ -44,8 +43,7 @@ class FailureTransactionOstEvent extends TransactionOstEventBase {
         await oThis.fetchTransaction();
         await oThis._processTransaction();
       } else {
-        await oThis.insertInActivity();
-        await oThis.insertInUserActivity(oThis.fromUserId);
+        // await oThis._sendUserNotification();
       }
     }
 
@@ -92,12 +90,11 @@ class FailureTransactionOstEvent extends TransactionOstEventBase {
 
     const promiseArray1 = [];
     promiseArray1.push(oThis.updateTransaction());
-    promiseArray1.push(oThis.updateActivity());
     promiseArray1.push(oThis.removeEntryFromPendingTransactions());
 
-    await Promise.all(promiseArray1);
+    // promiseArray1.push(oThis._sendUserNotification());
 
-    await oThis.updateUserActivity(oThis.activityObj.id);
+    await Promise.all(promiseArray1);
   }
 
   /**
@@ -108,16 +105,6 @@ class FailureTransactionOstEvent extends TransactionOstEventBase {
    */
   _validTransactionStatus() {
     return transactionConstants.failedOstTransactionStatus;
-  }
-
-  /**
-   * Activity status.
-   *
-   * @return {string}
-   * @private
-   */
-  _activityStatus() {
-    return activityConstants.failedStatus;
   }
 
   /**
