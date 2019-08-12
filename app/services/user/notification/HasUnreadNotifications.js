@@ -71,10 +71,15 @@ class HasUnreadNotifications extends ServiceBase {
     };
 
     let userNotification = await new UserNotificationModel().fetchLatestLastActionTime(queryParams);
-    let lastActionTimestamp = userNotification.lastActionTimestamp;
+    let lastActionTimestamp = userNotification.lastActionTimestamp || 0;
 
     let userNotificationVisitDetails = await new UserNotificationVisitDetailModel().fetchLastVisitedAt(queryParams);
     let lastVisitedAt = userNotificationVisitDetails.lastVisitedAt || 0;
+
+    if (lastActionTimestamp === 0) {
+      finalRsp['unreadFlag'] = 0;
+      return finalRsp;
+    }
 
     if (lastActionTimestamp) {
       if (lastActionTimestamp > lastVisitedAt) {
