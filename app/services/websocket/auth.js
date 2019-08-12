@@ -229,7 +229,6 @@ class WebSocketAuth extends ServiceBase {
       .update({
         auth_key_expiry_at: null,
         socket_identifier: oThis.socketIdentifier,
-        socket_expiry_at: basicHelper.getCurrentTimestampInSeconds() + 30 * 60,
         status: socketConnectionConstants.invertedStatuses[socketConnectionConstants.connectedStatus]
       })
       .where({

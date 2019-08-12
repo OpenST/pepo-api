@@ -286,7 +286,7 @@ class CoreConstants {
   }
 
   get WS_SERVER_IDENTIFIER() {
-    return process.env.DEVOPS_WS_SERVER_IDENTIFIER;
+    return process.env.DEVOPS_SERVER_IDENTIFIER;
   }
 
   // Pepo-campaigns details

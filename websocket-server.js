@@ -15,7 +15,8 @@ const rootPrefix = '.',
   UserSocketConnectionDetailsModel = require(rootPrefix + '/app/models/mysql/UserSocketConnectionDetails');
 
 let socketIdentifier = null,
-  cronProcessId = null;
+  cronProcessId = null,
+  expiryExtentionTimeInMinutes = 1;
 
 async function run() {
   logger.step('-------------------------- Fetching cronProcessId --------------------------');
@@ -49,7 +50,7 @@ async function startWebSocketServer() {
     });
 
     socket.on('disconnect', async function() {
-      logger.log('Socket on-disconnect called. ');
+      logger.trace('Socket on-disconnect called. ');
       await onSocketDisconnect(socket);
     });
 
@@ -71,13 +72,16 @@ async function startWebSocketServer() {
     }
 
     let userId = websocketAuthRsp.data.userId,
-      userSocketConnDetailsId = websocketAuthRsp.data.userSocketConnDetailsId;
+      userSocketConnDetailsId = websocketAuthRsp.data.userSocketConnDetailsId,
+      socketExtentionTime = getSocketExtentionTime();
 
     socket.userId = userId;
     socket.userSocketConnDetailsId = userSocketConnDetailsId;
+    socket.socketExpiryAt = socketExtentionTime;
 
     webSocketCustomCache.setIntoSocketObjsMap(userSocketConnDetailsId, socket);
     webSocketCustomCache.setIntoUserSocketIdsMap(userId, userSocketConnDetailsId);
+    webSocketCustomCache.setTimeToSocketIds(socketExtentionTime, userSocketConnDetailsId);
 
     logger.log('Authentication Successful for userId: ', userId);
     socket.emit('server-event', 'Authentication Successful !!');
@@ -113,40 +117,34 @@ async function onSocketDisconnect(socket) {
  * @returns {Promise<void>}
  */
 async function onPingPacket(socket) {
-  // let incrementInterval = 60,
-  //   updateResponse = await new UserSocketConnectionDetailsModel()
-  //     .update(['socket_expiry_at = socket_expiry_at + ?', incrementInterval])
-  //     .where({
-  //       id: socket.userSocketConnDetailsId,
-  //       status: socketConnectionConstants.invertedStatuses[socketConnectionConstants.connectedStatus]
-  //     })
-  //     .where(['socket_expiry_at > ?', basicHelper.getCurrentTimestampInSeconds()])
-  //     .fire();
+  console.log('\nHERE==============');
 
-  let incrementInterval = 60;
-  if (socket.socketExpiryAt <= basicHelper.getCurrentTimestampInSeconds() - incrementInterval) {
-    socket.disconnect();
+  let userSocketConnDetailsId = socket.userSocketConnDetailsId,
+    currentTime = socket.socketExpiryAt,
+    newTime = getSocketExtentionTime();
+
+  if (currentTime < newTime) {
+    socket.socketExpiryAt = newTime;
+    webSocketCustomCache.deleteTimeToSocketIds(currentTime, userSocketConnDetailsId);
+    webSocketCustomCache.setTimeToSocketIds(newTime, userSocketConnDetailsId);
   }
-  socket.socketExpiryAt = basicHelper.getCurrentTimestampInSeconds();
-
-  // //if nothing is updated then mark the socket as expired and call disconnect.
-  // if (updateResponse.changedRows === 0) {
-  //   socket.disconnect();
-  // }
-  //
-  // await UserSocketConnectionDetailsModel.flushCache({ userId: socket.userId });
 }
 
 async function subscribeToRmq() {
-  let socketObj = new socketJobProcessor({ cronProcessId: +cronProcessId });
-  await socketObj.perform();
-  socketIdentifier = socketConnectionConstants.getSocketIdentifierFromTopic(socketObj.topics[0]);
+  let socketJobProcessorObj = new socketJobProcessor({ cronProcessId: +cronProcessId });
+  await socketJobProcessorObj.perform();
+  socketIdentifier = socketConnectionConstants.getSocketIdentifierFromTopic(socketJobProcessorObj.topics[0]);
+}
+
+function getSocketExtentionTime() {
+  return basicHelper.getCurrentTimestampInMinutes() + 2 * expiryExtentionTimeInMinutes;
 }
 
 async function autoDisconnect() {
+  console.log('\nautoDisconnect called========================TIME====', basicHelper.getCurrentTimestampInMinutes());
   websocketAutoDisconnect.perform();
   setTimeout(autoDisconnect, 60 * 1000);
 }
 
 run();
-//autoDisconnect();
+autoDisconnect();

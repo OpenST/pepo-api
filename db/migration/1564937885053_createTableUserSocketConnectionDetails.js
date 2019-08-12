@@ -11,7 +11,6 @@ const upQuery =
   `socket_identifier` varchar(255) DEFAULT NULL, \n\
   `auth_key_expiry_at` int(11) DEFAULT NULL, \n\
   `status` tinyint(4) NOT NULL, \n\
-  `socket_expiry_at` int(11) DEFAULT NULL, \n\
   `created_at` int(11) NOT NULL, \n\
   `updated_at` int(11) NOT NULL, \n\
   PRIMARY KEY (`id`), \n\

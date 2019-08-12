@@ -37,7 +37,6 @@ class UserSocketConnectionDetails extends ModelBase {
    * @param {number} dbRow.auth_key_expiry_at
    * @param {number} dbRow.status
    * @param {number} dbRow.socket_identifier
-   * @param {number} dbRow.socket_expiry_at
    * @param {number} dbRow.created_at
    * @param {number} dbRow.updated_at
    *
@@ -53,7 +52,6 @@ class UserSocketConnectionDetails extends ModelBase {
       socketIdentifier: dbRow.socket_identifier,
       authKeyExpiryAt: dbRow.auth_key_expiry_at,
       status: socketConnectionConstants.statuses[dbRow.status],
-      socketExpiryAt: dbRow.socket_expiry_at,
       createdAt: dbRow.created_at,
       updatedAt: dbRow.updated_at
     };
@@ -158,9 +156,9 @@ class UserSocketConnectionDetails extends ModelBase {
   async _markSocketConnectionDetailsAsExpired(userSocketConnDetailsId, userId) {
     const oThis = this;
 
-    await new UserSocketConnectionDetailsModel()
+    await oThis
       .update({
-        status: socketConnectionConstants.invertedStatuses[socketConnectionConstants.expired]
+        status: socketConnectionConstants.invertedStatuses[socketConnectionConstants.expiredStatus]
       })
       .where({
         id: userSocketConnDetailsId

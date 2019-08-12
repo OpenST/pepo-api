@@ -352,6 +352,15 @@ class BasicHelper {
   }
 
   /**
+   * Get current timestamp in minutes.
+   *
+   * @return {number}
+   */
+  getCurrentTimestampInMinutes() {
+    return Math.floor(new Date().getTime() / (60 * 1000));
+  }
+
+  /**
    * Checks whether the object is empty or not.
    *
    * @param {object} obj
