@@ -42,7 +42,7 @@ class UserNotificationVisitDetailModel extends CassandraModelBase {
     const oThis = this;
 
     const formattedData = {
-      userId: dbRow.user_id ? dbRow.user_id.toString(10) : undefined,
+      userId: dbRow.user_id ? Number(dbRow.user_id) : undefined,
       lastVisitedAt: dbRow.last_visited_at ? basicHelper.dateToMilliSecondsTimestamp(dbRow.last_visited_at) : undefined
     };
 
