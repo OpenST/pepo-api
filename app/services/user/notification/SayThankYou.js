@@ -17,7 +17,8 @@ class SayThankYou extends ServiceBase {
    *
    * @param {object} params
    * @param {string} params.text
-   * @param {string} params.id
+   * @param {string} params.notification_id
+   * @param {string} params.current_user.id
    *
    * @augments ServiceBase
    *
@@ -29,9 +30,8 @@ class SayThankYou extends ServiceBase {
     const oThis = this;
 
     oThis.text = params.text;
-    oThis.notificationId = params.id;
-    oThis.notificationId =
-      'eyJ1c2VyX2lkIjoxMDAwMSwibGFzdF9hY3Rpb25fdGltZXN0YW1wIjoxMjM1NDMyNDMyMSwidXVpZCI6ImMzN2Q2NjFkLTdlNjEtNDllYS05NmE1LTY4YzM0ZTgzZGIzYSJ9';
+    oThis.notificationId = params.notification_id;
+    oThis.currentUserId = +params.current_user.id;
     oThis.userNotificationObj = {};
     oThis.decryptedNotificationParams = {};
   }
@@ -44,9 +44,7 @@ class SayThankYou extends ServiceBase {
   async _asyncPerform() {
     const oThis = this;
 
-    oThis._validateText(oThis.text);
-
-    oThis._decryptNotificationId();
+    await oThis.validateAndSanitize();
 
     await oThis._fetchAndValidateUserNotification();
 
@@ -58,13 +56,51 @@ class SayThankYou extends ServiceBase {
   }
 
   /**
+   * Validate and sanitize params
+   *
+   * @returns {Promise<never>}
+   */
+  async validateAndSanitize() {
+    const oThis = this;
+    await oThis._decryptNotificationId();
+    if (oThis.decryptedNotificationParams.user_id !== oThis.currentUserId) {
+      return Promise.reject(
+        responseHelper.paramValidationError({
+          internal_error_identifier: 'a_s_u_n_1',
+          api_error_identifier: 'invalid_api_params',
+          params_error_identifiers: ['invalid_notification_id'],
+          debug_options: {
+            decryptedNotificationParams: oThis.decryptedNotificationParams,
+            currentUserId: oThis.currentUserId
+          }
+        })
+      );
+    }
+    await oThis._validateText(oThis.text);
+  }
+
+  /**
    * Decrypt notification id.
    *
    * @return {any}
    */
-  _decryptNotificationId() {
+  async _decryptNotificationId() {
     const oThis = this;
-    oThis.decryptedNotificationParams = JSON.parse(base64Helper.decode(oThis.notificationId));
+    try {
+      oThis.decryptedNotificationParams = JSON.parse(base64Helper.decode(oThis.notificationId));
+    } catch (e) {
+      return Promise.reject(
+        responseHelper.paramValidationError({
+          internal_error_identifier: 'a_s_u_n_5',
+          api_error_identifier: 'invalid_api_params',
+          params_error_identifiers: ['invalid_notification_id'],
+          debug_options: {
+            error: e,
+            notificationId: oThis.notificationId
+          }
+        })
+      );
+    }
   }
 
   /**
@@ -73,13 +109,13 @@ class SayThankYou extends ServiceBase {
    * @param text
    * @private
    */
-  _validateText(text) {
+  async _validateText(text) {
     const oThis = this;
     oThis.text = CommonValidators.sanitizeText(oThis.text);
-    if (!CommonValidators.validateMaxLengthMediumString(oThis.text)) {
+    if (!CommonValidators.validateMaxLengthMediumString(oThis.text) || oThis.text.length === 0) {
       return Promise.reject(
         responseHelper.paramValidationError({
-          internal_error_identifier: 'a_s_u_n_1',
+          internal_error_identifier: 'a_s_u_n_2',
           api_error_identifier: 'invalid_api_params',
           params_error_identifiers: ['invalid_text'],
           debug_options: { text: oThis.text }
@@ -99,13 +135,25 @@ class SayThankYou extends ServiceBase {
     oThis.userNotificationObj = await new UserNotificationModel().fetchUserNotification(
       oThis.decryptedNotificationParams
     );
-    //todo validate userNotificationObj must be present
+
+    if (!CommonValidators.validateNonEmptyObject(oThis.userNotificationObj)) {
+      return Promise.reject(
+        responseHelper.error({
+          internal_error_identifier: 'a_s_u_n_3',
+          api_error_identifier: 'resource_not_found',
+          debug_options: {
+            reason: 'Invalid user notification obj.',
+            userNotificationObj: oThis.userNotificationObj
+          }
+        })
+      );
+    }
 
     let thankYouFlag = oThis.userNotificationObj.thankYouFlag;
     if (thankYouFlag === 1) {
       return Promise.reject(
         responseHelper.paramValidationError({
-          internal_error_identifier: 'a_s_u_n_2',
+          internal_error_identifier: 'a_s_u_n_4',
           api_error_identifier: 'invalid_api_params',
           params_error_identifiers: ['invalid_thank_you_flag'],
           debug_options: { thankYouFlag: thankYouFlag }
@@ -131,7 +179,7 @@ class SayThankYou extends ServiceBase {
     await new UserNotificationModel().updateThankYouFlag(queryParams);
     oThis.userNotificationObj.thankYouFlag = 1;
 
-    // todo: flush cache on user Notification
+    await UserNotificationModel.flushCache(oThis.userNotificationObj);
   }
 
   /**

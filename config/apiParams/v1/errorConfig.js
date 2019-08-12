@@ -125,6 +125,11 @@ const v1ErrorConfig = {
     code: 'invalid',
     message: 'Invalid last visited at timestamp.'
   },
+  invalid_notification_id: {
+    parameter: 'notification_id',
+    code: 'invalid',
+    message: 'Invalid notification id.'
+  },
   invalid_from_user_id: {
     parameter: 'from_user_id',
     code: 'invalid',

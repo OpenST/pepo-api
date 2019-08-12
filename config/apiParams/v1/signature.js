@@ -436,8 +436,12 @@ const v1Signature = {
   [apiName.sayThankYou]: {
     mandatory: [
       {
-        parameter: 'id',
-        validatorMethods: ['validateString']
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      },
+      {
+        parameter: 'notification_id',
+        validatorMethods: ['validateString', 'validateNotificationId']
       },
       {
         parameter: 'text',
