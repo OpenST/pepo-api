@@ -136,7 +136,7 @@ class UserNotification extends UserNotificationServiceBase {
       last_visited_at: latestTimestamp
     };
 
-    let obj = new UpdateUserNotificationVisitDetailsService({ updateParam });
+    let obj = new UpdateUserNotificationVisitDetailsService(updateParam);
 
     await obj.perform();
   }
