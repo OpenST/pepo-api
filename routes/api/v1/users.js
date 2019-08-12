@@ -284,8 +284,21 @@ router.get('/:profile_user_id/notifications', sanitizer.sanitizeDynamicUrlParams
   req.decodedParams.apiName = apiName.getUserNotifications;
   req.decodedParams.profile_user_id = req.params.profile_user_id;
 
+  let dummyResponse = JSON.stringify(dummyNotifications);
+
+  const current = Math.floor(Date.now() / 1000);
+  const todayTs = current - 60 * 60; // Last hour.
+  const yesterdayTs = current - 60 * 60 * 24 - 60 * 60 * 3; // Last day.
+  const lastWeekTs = current - 60 * 60 * 24 * 7 - 60 * 60; // This week.
+  const earlierTs = current - 60 * 60 * 24 * 9 - 60 * 60; // Earlier than last week.
+
+  dummyResponse = dummyResponse.replace(new RegExp('"{{todayTs}}"', 'g'), todayTs);
+  dummyResponse = dummyResponse.replace(new RegExp('"{{yesterdayTs}}"', 'g'), yesterdayTs);
+  dummyResponse = dummyResponse.replace(new RegExp('"{{lastWeekTs}}"', 'g'), lastWeekTs);
+  dummyResponse = dummyResponse.replace(new RegExp('"{{earlierTs}}"', 'g'), earlierTs);
+
   const dataFormatterFunc = async function(serviceResponse) {
-    serviceResponse.data = dummyNotifications;
+    serviceResponse.data = JSON.parse(dummyResponse);
   };
 
   Promise.resolve(routeHelper.perform(req, res, next, '/user/Notifications', 'r_a_v1_u_13', null, dataFormatterFunc));
