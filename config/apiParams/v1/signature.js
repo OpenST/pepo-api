@@ -464,6 +464,19 @@ const v1Signature = {
         validatorMethods: ['validateNonEmptyObject']
       }
     ]
+  },
+  [apiName.adminLogin]: {
+    mandatory: [
+      {
+        parameter: 'email',
+        validatorMethods: ['isValidEmail']
+      },
+      {
+        parameter: 'password',
+        validatorMethods: ['validatePassword']
+      }
+    ],
+    optional: []
   }
 };
 

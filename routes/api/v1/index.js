@@ -4,11 +4,13 @@ const express = require('express'),
 
 const rootPrefix = '../../..',
   LoginCookieAuth = require(rootPrefix + '/lib/authentication/LoginCookie'),
+  AdminCookieAuth = require(rootPrefix + '/lib/authentication/AdminCookie'),
   authRoutes = require(rootPrefix + '/routes/api/v1/auth'),
   basicHelper = require(rootPrefix + '/helpers/basic'),
   coreConstant = require(rootPrefix + '/config/coreConstants'),
   apiVersions = require(rootPrefix + '/lib/globalConstant/apiVersions'),
   userConstant = require(rootPrefix + '/lib/globalConstant/user'),
+  adminConstants = require(rootPrefix + '/lib/globalConstant/admin'),
   usersRoutes = require(rootPrefix + '/routes/api/v1/users'),
   videoRoutes = require(rootPrefix + '/routes/api/v1/videos'),
   tokensRoutes = require(rootPrefix + '/routes/api/v1/tokens'),
@@ -18,6 +20,7 @@ const rootPrefix = '../../..',
   activitiesRoutes = require(rootPrefix + '/routes/api/v1/activities'),
   cookieHelper = require(rootPrefix + '/lib/cookieHelper'),
   tagRoutes = require(rootPrefix + '/routes/api/v1/tags'),
+  adminRoutes = require(rootPrefix + '/routes/api/v1/admin'),
   commonValidator = require(rootPrefix + '/lib/validators/Common'),
   uploadParamsRoutes = require(rootPrefix + '/routes/api/v1/uploadParams'),
   rotateTwitterAccountRoutes = require(rootPrefix + '/routes/api/v1/rotateTwitterAccount'),
@@ -66,6 +69,27 @@ const validateLoginRequired = async function(req, res, next) {
   next();
 };
 
+const validateAdminCookie = async function(req, res, next) {
+  // Cookie validation is not to be done for admin login request
+  if (req.url !== '/login') {
+    let adminCookieValue = req.signedCookies[adminConstants.loginCookieName];
+    let authResponse = await new AdminCookieAuth(adminCookieValue).perform().catch(function(r) {
+      return r;
+    });
+
+    if (authResponse.isFailure()) {
+      cookieHelper.deleteAdminCookie(res);
+      return responseHelper.renderApiResponse(authResponse, res, errorConfig);
+    } else {
+      req.decodedParams.current_admin = authResponse.data.current_admin;
+      req.decodedParams.admin_login_cookie_value = authResponse.data.admin_login_cookie_value;
+    }
+    cookieHelper.setAdminCookie(res, authResponse.data.admin_login_cookie_value);
+  }
+
+  next();
+};
+
 // NOTE:- use 'validateLoginRequired' function if you want to use route in logged in only
 
 router.use('/auth', authRoutes);
@@ -77,6 +101,7 @@ router.use('/gifs', validateCookie, validateLoginRequired, gifsRoutes);
 router.use('/activities', validateCookie, validateLoginRequired, activitiesRoutes);
 router.use('/upload-params', validateCookie, validateLoginRequired, uploadParamsRoutes);
 router.use('/tags', validateCookie, validateLoginRequired, tagRoutes);
+router.use('/admin', validateAdminCookie, adminRoutes);
 
 // TEMP route - only for QA - TODO - remove later after talking with SOMA
 router.use('/rotate-twitter-account', rotateTwitterAccountRoutes);
