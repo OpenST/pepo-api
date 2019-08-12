@@ -99,14 +99,16 @@ class UserNotificationModel extends CassandraModelBase {
     const oThis = this;
 
     const formattedData = {
-      user_id: dbRow.user_id.toString(10),
-      last_action_timestamp: basicHelper.dateToMilliSecondsTimestamp(dbRow.last_action_timestamp),
+      user_id: dbRow.user_id ? dbRow.user_id.toString(10) : undefined,
+      last_action_timestamp: dbRow.last_action_timestamp
+        ? basicHelper.dateToMilliSecondsTimestamp(dbRow.last_action_timestamp)
+        : undefined,
       uuid: dbRow.uuid,
-      kind: userNotificationConstants.kinds[dbRow.kind],
-      subject_user_id: dbRow.subject_user_id.toString(10),
-      actor_ids: [...dbRow.actor_ids],
+      kind: dbRow.kind ? userNotificationConstants.kinds[dbRow.kind] : undefined,
+      subject_user_id: dbRow.subject_user_id ? dbRow.subject_user_id.toString(10) : undefined,
+      actor_ids: dbRow.actor_ids ? [...dbRow.actor_ids] : undefined,
       actor_count: dbRow.actor_count,
-      payload: JSON.parse(dbRow.payload),
+      payload: dbRow.payload ? JSON.parse(dbRow.payload) : undefined,
       headingVersion: dbRow.heading_version,
       column1: dbRow.column1,
       column2: dbRow.column2,
@@ -180,6 +182,86 @@ class UserNotificationModel extends CassandraModelBase {
     queryString += `) ${valueString}`;
 
     return { queryString, valuesArray };
+  }
+
+  /**
+   * Fetch latest last action timestamp
+   *
+   * @param queryParams
+   * @returns {*}
+   */
+  async fetchLatestLastActionTime(queryParams) {
+    const oThis = this;
+    let lastActionTimestampKey = ParametersFormatter.getColumnNameForQuery('lastActionTimestamp'),
+      userIdKey = ParametersFormatter.getColumnNameForQuery('userId');
+
+    let query = `select ${lastActionTimestampKey} from ${oThis.queryTableName} 
+      where ${userIdKey} = ? order by ${lastActionTimestampKey} desc limit 1;`;
+    let params = [queryParams.userId];
+
+    const queryRsp = await oThis.fire(query, params);
+
+    if (queryRsp.length == 0) {
+      return {};
+    }
+
+    return oThis.formatDbData(queryRsp.rows[0]);
+  }
+
+  /**
+   * Fetch user notifications
+   *
+   * @param {object} queryParams: queryParams
+   *
+   * @return {object}
+   */
+  async fetchUserNotification(queryParams) {
+    const oThis = this;
+    let lastActionTimestampKey = ParametersFormatter.getColumnNameForQuery('lastActionTimestamp'),
+      userIdKey = ParametersFormatter.getColumnNameForQuery('userId'),
+      uuidKey = ParametersFormatter.getColumnNameForQuery('uuid');
+
+    let query = `select * from ${
+      oThis.queryTableName
+    } where ${userIdKey} = ? and ${lastActionTimestampKey} = ? and ${uuidKey} = ?;`;
+    let params = [queryParams.user_id, queryParams.last_action_timestamp, queryParams.uuid];
+    const queryRsp = await oThis.fire(query, params);
+
+    const dbRows = queryRsp.rows;
+
+    if (dbRows.length == 0) {
+      return {};
+    }
+
+    return oThis.formatDbData(dbRows[0]);
+  }
+
+  /**
+   * Update user notification thank you flag.
+   *
+   * @param {object} queryParams
+   * @param {number} queryParams.thankYouFlag
+   * @param {number} queryParams.userId
+   * @param {number} queryParams.lastActionTimestamp
+   * @param {string} queryParams.uuid
+   * @param {string} queryParams.kind
+   *
+   * @returns {Promise<any>}
+   */
+  async updateThankYouFlag(queryParams) {
+    const oThis = this;
+    const kind = queryParams.kind;
+    let lastActionTimestampKey = ParametersFormatter.getColumnNameForQuery('lastActionTimestamp', kind),
+      userIdKey = ParametersFormatter.getColumnNameForQuery('userId', kind),
+      uuidKey = ParametersFormatter.getColumnNameForQuery('uuid', kind),
+      thankYouFlagKey = ParametersFormatter.getColumnNameForQuery('thankYouFlag', kind);
+
+    const query = `update ${
+      oThis.queryTableName
+    } set ${thankYouFlagKey} = ? where ${userIdKey} = ? and ${lastActionTimestampKey} = ? and ${uuidKey} = ?;`;
+    const params = [queryParams.thankYouFlag, queryParams.userId, queryParams.lastActionTimestamp, queryParams.uuid];
+
+    return oThis.fire(query, params);
   }
 
   /**

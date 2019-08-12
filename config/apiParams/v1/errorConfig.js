@@ -110,6 +110,21 @@ const v1ErrorConfig = {
     code: 'invalid',
     message: 'Invalid video id.'
   },
+  invalid_text: {
+    parameter: 'text',
+    code: 'invalid',
+    message: 'Invalid text.'
+  },
+  invalid_thank_you_flag: {
+    parameter: 'thank_you_flag',
+    code: 'invalid',
+    message: 'Invalid thank you flag.'
+  },
+  invalid_last_visited_at: {
+    parameter: 'last_visited_at',
+    code: 'invalid',
+    message: 'Invalid last visited at timestamp.'
+  },
   invalid_from_user_id: {
     parameter: 'from_user_id',
     code: 'invalid',

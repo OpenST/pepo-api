@@ -27,23 +27,24 @@ class ExecuteCassandraQuery {
     let params = {};
 
     // Create DB if not present
+    if (coreConstants.environment === 'development') {
+      let dbCreationStatement =
+        'CREATE KEYSPACE IF NOT EXISTS ' +
+        oThis.keySpace +
+        ' WITH replication ={' +
+        "'class'" +
+        ":'" +
+        coreConstants.CASSANDRA_REPLICATION_CLASS +
+        "'," +
+        "'replication_factor'" +
+        ":'" +
+        coreConstants.CASSANDRA_REPLICATION_FACTOR +
+        "'};";
 
-    let dbCreationStatement =
-      'CREATE KEYSPACE IF NOT EXISTS ' +
-      oThis.keySpace +
-      ' WITH replication ={' +
-      "'class'" +
-      ":'" +
-      coreConstants.CASSANDRA_REPLICATION_CLASS +
-      "'," +
-      "'replication_factor'" +
-      ":'" +
-      coreConstants.CASSANDRA_REPLICATION_FACTOR +
-      "'};";
+      logger.log(dbCreationStatement);
 
-    logger.log(dbCreationStatement);
-
-    await CassandraClient.execute(dbCreationStatement, params);
+      await CassandraClient.execute(dbCreationStatement, params);
+    }
 
     // Execute the cassandra query
     let queryResult = await CassandraClient.execute(oThis.cassandraQuery, params);

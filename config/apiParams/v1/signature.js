@@ -459,6 +459,19 @@ const v1Signature = {
       }
     ],
     optional: []
+  },
+  [apiName.sayThankYou]: {
+    mandatory: [
+      {
+        parameter: 'id',
+        validatorMethods: ['validateString']
+      },
+      {
+        parameter: 'text',
+        validatorMethods: ['validateString']
+      }
+    ],
+    optional: []
   }
 };
 

@@ -117,8 +117,7 @@ class UserNotification extends UserNotificationServiceBase {
 
     let obj = new UpdateUserNotificationVisitDetailsService({ updateParam });
 
-    //NOTE: Code will not exit on its error.
-    // await obj.perform();
+    await obj.perform();
   }
 
   /**

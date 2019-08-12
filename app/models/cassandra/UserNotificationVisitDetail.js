@@ -1,6 +1,9 @@
 const rootPrefix = '../../..',
   CassandraModelBase = require(rootPrefix + '/app/models/cassandra/Base'),
-  cassandraKeyspaceConstants = require(rootPrefix + '/lib/globalConstant/cassandraKeyspace');
+  cassandraKeyspaceConstants = require(rootPrefix + '/lib/globalConstant/cassandraKeyspace'),
+  basicHelper = require(rootPrefix + '/helpers/basic'),
+  userNotificationVisitDetailConstants = require(rootPrefix +
+    '/lib/globalConstant/cassandra/userNotificationVisitDetail');
 
 // Declare variables.
 const keyspace = cassandraKeyspaceConstants.cassandraKeyspaceName;
@@ -31,7 +34,7 @@ class UserNotificationVisitDetailModel extends CassandraModelBase {
    *
    * @param {object} dbRow
    * @param {number} dbRow.user_id
-   * @param {boolean} dbRow.unread_flag
+   * @param {boolean} dbRow.last_visited_at
    *
    * @returns {object}
    */
@@ -39,8 +42,8 @@ class UserNotificationVisitDetailModel extends CassandraModelBase {
     const oThis = this;
 
     const formattedData = {
-      userId: dbRow.user_id.toString(10),
-      unreadFlag: dbRow.unread_flag
+      userId: dbRow.user_id ? dbRow.user_id.toString(10) : undefined,
+      lastVisitedAt: dbRow.last_visited_at ? basicHelper.dateToMilliSecondsTimestamp(dbRow.last_visited_at) : undefined
     };
 
     return oThis.sanitizeFormattedData(formattedData);
@@ -58,11 +61,30 @@ class UserNotificationVisitDetailModel extends CassandraModelBase {
   async updateLastVisitTime(queryParams) {
     const oThis = this;
 
-    // TODO: Parameter type validation not required?
     const query = 'update ' + oThis.queryTableName + ' set last_visited_at = ? where user_id = ?;';
     const params = [queryParams.lastVisitedAt, queryParams.userId];
 
     return oThis.fire(query, params);
+  }
+
+  /**
+   * Fetch latest last action timestamp
+   *
+   * @param queryParams
+   * @returns {*}
+   */
+  async fetchLastVisitedAt(queryParams) {
+    const oThis = this;
+    let query = `select last_visited_at from ${oThis.queryTableName} where user_id = ?;`;
+    let params = [queryParams.userId];
+
+    const queryRsp = await oThis.fire(query, params);
+
+    if (queryRsp.length == 0) {
+      return {};
+    }
+
+    return oThis.formatDbData(queryRsp.rows[0]);
   }
 
   /**

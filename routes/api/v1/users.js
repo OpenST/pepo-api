@@ -282,4 +282,11 @@ router.get('/:profile_user_id/notifications', sanitizer.sanitizeDynamicUrlParams
   Promise.resolve(routeHelper.perform(req, res, next, '/user/Notifications', 'r_a_v1_u_13', null, dataFormatterFunc));
 });
 
+/* Thank You*/
+router.post('/thank-you', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.sayThankYou;
+
+  Promise.resolve(routeHelper.perform(req, res, next, '/user/notification/SayThankYou', 'r_a_v1_u_14', null));
+});
+
 module.exports = router;

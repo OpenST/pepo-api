@@ -38,14 +38,19 @@ class UpdateUserNotificationVisitDetails extends ServiceBase {
   async _asyncPerform() {
     const oThis = this;
 
-    // todo: validation
     await oThis._validateParams();
 
     await oThis._updateUserNotificationVisitDetails();
 
-    responseHelper.successWithData({});
+    return responseHelper.successWithData({});
   }
 
+  /**
+   * Validate params
+   *
+   * @returns {Promise<never>}
+   * @private
+   */
   async _validateParams() {
     const oThis = this;
     if (CommonValidators.isVarNullOrUndefined(oThis.userId)) {
