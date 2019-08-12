@@ -1,6 +1,6 @@
 const rootPrefix = '../../../..',
-  UserNotificationServiceBase = require(rootPrefix + '/app/services/user/notification/Base'),
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
+  UserNotificationServiceBase = require(rootPrefix + '/app/services/user/notification/Base'),
   UpdateUserNotificationVisitDetailsService = require(rootPrefix +
     '/app/services/user/notification/UpdateUserNotificationVisitDetails'),
   UserNotificationsByUserIdPagination = require(rootPrefix +
@@ -9,13 +9,13 @@ const rootPrefix = '../../../..',
   paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination');
 
 /**
- * Class for user Notification List.
+ * Class for user notification list.
  *
  * @class UserNotification
  */
 class UserNotification extends UserNotificationServiceBase {
   /**
-   * Constructor for user contribution base.
+   * Constructor for user notification list.
    *
    * @param {object} params
    * @param {object} params.current_user
@@ -43,7 +43,7 @@ class UserNotification extends UserNotificationServiceBase {
   /**
    * Validate and sanitize specific params.
    *
-   * @sets oThis.last_action_timestamp, oThis.limit
+   * @sets oThis.limit, oThis.currentPageState, oThis.currentPageNumber
    *
    * @returns {Promise<never>}
    * @private
@@ -74,8 +74,6 @@ class UserNotification extends UserNotificationServiceBase {
     }
 
     oThis.limit = paginationConstants.defaultUserNotificationPageSize;
-
-    return;
   }
 
   /**
@@ -103,42 +101,40 @@ class UserNotification extends UserNotificationServiceBase {
   }
 
   /**
-   * format notifications and update last visit time
-   *
+   * Format notifications and update last visit time.
    *
    * @returns {Promise<never>}
    * @private
    */
   async _formatUserNotifications() {
     const oThis = this;
+
     await super._formatUserNotifications();
 
-    await oThis._updateLatVisitedTime();
+    await oThis._updateLastVisitedTime();
   }
 
   /**
-   * Update Notification centre last visit time
+   * Update notification centre last visit time.
    *
    * @returns {object}
    * @private
    */
-  async _updateLatVisitedTime() {
+  async _updateLastVisitedTime() {
     const oThis = this;
 
     if (oThis.currentPageState) {
       return;
     }
 
-    let latestTimestamp = (oThis.formattedUserNotifications[0] || {})['lastActionTimestamp'] || Date.now();
+    const latestTimestamp = (oThis.formattedUserNotifications[0] || {}).lastActionTimestamp || Date.now();
 
-    let updateParam = {
+    const updateParam = {
       user_id: oThis.currentUserId,
       last_visited_at: latestTimestamp
     };
 
-    let obj = new UpdateUserNotificationVisitDetailsService(updateParam);
-
-    await obj.perform();
+    await new UpdateUserNotificationVisitDetailsService(updateParam).perform();
   }
 
   /**
@@ -152,7 +148,7 @@ class UserNotification extends UserNotificationServiceBase {
 
     const response = super._finalResponse();
 
-    let nextPagePayloadKey = {};
+    const nextPagePayloadKey = {};
 
     if (oThis.nextPageState) {
       nextPagePayloadKey[paginationConstants.paginationIdentifierKey] = {
@@ -161,12 +157,10 @@ class UserNotification extends UserNotificationServiceBase {
       };
     }
 
-    const responseMetaData = {
+    response.meta = {
       [paginationConstants.nextPagePayloadKey]: nextPagePayloadKey
     };
-
-    response['meta'] = responseMetaData;
-    response['userNotificationList'] = oThis.formattedUserNotifications;
+    response.userNotificationList = oThis.formattedUserNotifications;
 
     return response;
   }

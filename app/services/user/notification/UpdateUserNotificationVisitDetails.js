@@ -83,10 +83,12 @@ class UpdateUserNotificationVisitDetails extends ServiceBase {
    */
   async _updateUserNotificationVisitDetails() {
     const oThis = this;
-    let queryParams = {
+
+    const queryParams = {
       userId: oThis.userId,
       lastVisitedAt: oThis.lastVisitedAt
     };
+
     return new UserNotificationVisitDetailModel().updateLastVisitTime(queryParams);
   }
 }
