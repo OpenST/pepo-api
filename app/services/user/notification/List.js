@@ -34,7 +34,9 @@ class UserNotification extends UserNotificationServiceBase {
     oThis.paginationIdentifier = params[paginationConstants.paginationIdentifierKey] || null;
 
     oThis.limit = null;
-    oThis.lastActionTimestamp = null;
+    oThis.currentPageState = null;
+    oThis.currentPageNumber = null;
+    oThis.nextPageState = null;
   }
 
   /**
@@ -50,10 +52,26 @@ class UserNotification extends UserNotificationServiceBase {
 
     if (oThis.paginationIdentifier) {
       const parsedPaginationParams = oThis._parsePaginationParams(oThis.paginationIdentifier);
-      oThis.lastActionTimestamp = parsedPaginationParams.last_action_timestamp;
+      oThis.currentPageState = parsedPaginationParams.page_state;
+      oThis.currentPageNumber = parsedPaginationParams.page;
     } else {
-      oThis.lastActionTimestamp = null;
+      oThis.currentPageState = null;
+      oThis.currentPageNumber = 1;
     }
+
+    if (oThis.currentPageState) {
+      if (!CommonValidators.validateNonZeroInteger(oThis.currentPageNumber) || oThis.currentPageNumber < 2) {
+        return Promise.reject(
+          responseHelper.paramValidationError({
+            internal_error_identifier: 'a_s_u_n_l_vas_1',
+            api_error_identifier: 'invalid_api_params',
+            params_error_identifiers: ['invalid_pagination_identifier'],
+            debug_options: { paginationIdentifier: oThis.paginationIdentifier }
+          })
+        );
+      }
+    }
+
     oThis.limit = paginationConstants.defaultUserNotificationPageSize;
 
     return;
@@ -71,14 +89,16 @@ class UserNotification extends UserNotificationServiceBase {
     const cacheResponse = await new UserNotificationsByUserIdPagination({
       userId: oThis.currentUserId,
       limit: oThis.limit,
-      lastActionTimestamp: oThis.lastActionTimestamp
+      pageState: oThis.currentPageState,
+      pageNumber: oThis.currentPageNumber
     }).fetch();
 
     if (cacheResponse.isFailure()) {
       return Promise.reject(cacheResponse);
     }
 
-    oThis.userNotifications = cacheResponse.data;
+    oThis.userNotifications = cacheResponse.data.userNotifications;
+    oThis.nextPageState = cacheResponse.data.pageState;
   }
 
   /**
@@ -104,7 +124,7 @@ class UserNotification extends UserNotificationServiceBase {
   async _updateLatVisitedTime() {
     const oThis = this;
 
-    if (oThis.lastActionTimestamp) {
+    if (oThis.currentPageState) {
       return;
     }
 
@@ -133,10 +153,10 @@ class UserNotification extends UserNotificationServiceBase {
 
     let nextPagePayloadKey = {};
 
-    if (oThis.formattedUserNotifications.length === oThis.limit) {
+    if (oThis.nextPageState) {
       nextPagePayloadKey[paginationConstants.paginationIdentifierKey] = {
-        last_action_timestamp:
-          oThis.formattedUserNotifications[oThis.formattedUserNotifications.length - 1].lastActionTimestamp
+        page_state: oThis.nextPageState,
+        page: oThis.currentPageNumber + 1
       };
     }
 

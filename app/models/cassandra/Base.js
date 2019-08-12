@@ -86,6 +86,23 @@ class ModelBase {
   }
 
   /**
+   * Batch fire the query.
+   *
+   * @param {string} query
+   * @param {array} [params]
+   * @param {object} [options]
+   * @param {object} [rowCallback]
+   * @param {object} [endCallback]
+   *
+   * @returns {Promise<any>}
+   */
+  async eachRow(query, params = [], options, rowCallback, endCallback) {
+    const oThis = this;
+
+    return oThis.onWriteConnection().eachRow(query, params, options, rowCallback, endCallback);
+  }
+
+  /**
    * Format final DB data.
    *
    * @param {object} formattedData

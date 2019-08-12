@@ -458,7 +458,12 @@ const v1Signature = {
         validatorMethods: ['validateNonEmptyObject']
       }
     ],
-    optional: []
+    optional: [
+      {
+        parameter: paginationConstants.paginationIdentifierKey,
+        validatorMethods: ['validateString', 'validatePaginationIdentifier']
+      }
+    ]
   },
   [apiName.sayThankYou]: {
     mandatory: [

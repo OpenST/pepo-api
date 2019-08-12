@@ -43,26 +43,21 @@ class UserNotificationModel extends CassandraModelBase {
 
     const limit = params.limit,
       userId = params.userId,
-      lastActionTimestamp = params.lastActionTimestamp;
+      pageState = params.pageState;
 
     const userIdKey = ParametersFormatter.getColumnNameForQuery('userId');
-    const lastActionTimestampKey = ParametersFormatter.getColumnNameForQuery('lastActionTimestamp');
-
     const valuesArray = [userId];
 
-    let lastActionTimestampClause = '';
+    const queryString = `select * from ${oThis.queryTableName} where ${userIdKey}=?`;
 
-    if (lastActionTimestamp) {
-      lastActionTimestampClause = ` and ${lastActionTimestampKey} < ?`;
-      valuesArray.push(lastActionTimestamp);
-    }
+    let options = {
+      prepare: true,
+      fetchSize: limit,
+      pageState: pageState
+    };
 
-    valuesArray.push(limit);
-    const queryString = `select * from ${
-      oThis.queryTableName
-    } where ${userIdKey}=?${lastActionTimestampClause} limit ?`;
+    const resp = await oThis.eachRow(queryString, valuesArray, options, null, null);
 
-    const resp = await oThis.fire(queryString, valuesArray);
     const dbRows = resp.rows;
 
     const response = [];
@@ -72,7 +67,7 @@ class UserNotificationModel extends CassandraModelBase {
       response.push(formatDbRow);
     }
 
-    return response;
+    return { userNotifications: response, pageState: resp.pageState };
   }
 
   /**
