@@ -144,31 +144,6 @@ router.get('/current', sanitizer.sanitizeDynamicUrlParams, function(req, res, ne
   Promise.resolve(routeHelper.perform(req, res, next, '/user/CurrentUser', 'r_a_v1_u_5', null, dataFormatterFunc));
 });
 
-/* User Activities*/
-router.get('/:user_id/activities', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
-  req.decodedParams.apiName = apiName.userActivity;
-  req.decodedParams.user_id = req.params.user_id;
-
-  const dataFormatterFunc = async function(serviceResponse) {
-    const wrapperFormatterRsp = await new FormatterComposer({
-      resultType: responseEntityKey.userActivity,
-      entityKindToResponseKeyMap: {
-        [entityType.userActivityList]: responseEntityKey.userActivity,
-        [entityType.ostTransactionMap]: responseEntityKey.ostTransaction,
-        [entityType.externalEntityGifMap]: responseEntityKey.gifs,
-        [entityType.usersMap]: responseEntityKey.users,
-        [entityType.imagesMap]: responseEntityKey.images,
-        [entityType.activityListMeta]: responseEntityKey.meta
-      },
-      serviceData: serviceResponse.data
-    }).perform();
-
-    serviceResponse.data = wrapperFormatterRsp.data;
-  };
-
-  Promise.resolve(routeHelper.perform(req, res, next, '/activity/User', 'r_a_v1_u_6', null, dataFormatterFunc));
-});
-
 /* User profile */
 router.get('/:profile_user_id/profile', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.getUserProfile;
@@ -302,6 +277,13 @@ router.get('/:profile_user_id/notifications', sanitizer.sanitizeDynamicUrlParams
   };
 
   Promise.resolve(routeHelper.perform(req, res, next, '/user/Notifications', 'r_a_v1_u_13', null, dataFormatterFunc));
+});
+
+/* Thank You*/
+router.post('/thank-you', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.sayThankYou;
+
+  Promise.resolve(routeHelper.perform(req, res, next, '/user/notification/SayThankYou', 'r_a_v1_u_14', null));
 });
 
 module.exports = router;

@@ -331,6 +331,14 @@ class CoreConstants {
   get PA_CDN_URL() {
     return process.env.PA_CDN_URL;
   }
+
+  get CASSANDRA_REPLICATION_CLASS() {
+    return process.env.REPLICATION_CLASS;
+  }
+
+  get CASSANDRA_REPLICATION_FACTOR() {
+    return process.env.REPLICATION_FACTOR;
+  }
 }
 
 module.exports = new CoreConstants();

@@ -108,4 +108,8 @@ export PA_TWITTER_AUTH_CALLBACK_ROUTE='https://pepo.com'
 export PR_LAMBDA_IMAGE_RESIZE_FUNCTION='arn:aws:lambda:us-east-1:274208178423:function:pepoImageResizer'
 export PR_LAMBDA_VIDEO_COMPRESS_FUNCTION='arn:aws:lambda:us-east-1:274208178423:function:pepoVideoCompressor'
 
+# replication variables for cassandra
+export REPLICATION_CLASS='SimpleStrategy'
+export REPLICATION_FACTOR='3'
+
 export PA_CDN_URL='https://dbvoeb7t6hffk.cloudfront.net'

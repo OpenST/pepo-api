@@ -1,7 +1,9 @@
 const rootPrefix = '../..',
-  database = require(rootPrefix + '/lib/globalConstant/database');
+  database = require(rootPrefix + '/lib/globalConstant/database'),
+  DbKindConstant = require(rootPrefix + '/lib/globalConstant/dbKind');
 
 const dbName = database.ostDbName;
+const dbKind = DbKindConstant.sqlDbKind;
 
 const createTokensTable = {
   dbName: dbName,
@@ -26,7 +28,8 @@ const createTokensTable = {
       UNIQUE KEY `uk_symbol` (`symbol`) \n\
     ) ENGINE=InnoDB AUTO_INCREMENT=1000 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;"
   ],
-  down: ['DROP TABLE tokens']
+  down: ['DROP TABLE tokens'],
+  dbKind: dbKind
 };
 
 module.exports = createTokensTable;

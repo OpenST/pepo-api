@@ -10,7 +10,7 @@
     "prefetchCount": 1
   },
   "notificationJobProcessor": {
-    "topics": ["notification.#"],
+    "topics": ["un.#"],
     "queues": ["example"],
     "prefetchCount": 1
   }

@@ -1,7 +1,9 @@
 const rootPrefix = '../..',
-  database = require(rootPrefix + '/lib/globalConstant/database');
+  database = require(rootPrefix + '/lib/globalConstant/database'),
+  DbKindConstant = require(rootPrefix + '/lib/globalConstant/dbKind');
 
 const dbName = database.ostDbName;
+const dbKind = DbKindConstant.sqlDbKind;
 
 const upQuery =
   "CREATE TABLE `webhooks` ( \n\
@@ -21,7 +23,8 @@ const downQuery = 'drop table if exists `webhooks`;';
 const createWebhooksTable = {
   dbName: dbName,
   up: [upQuery],
-  down: [downQuery]
+  down: [downQuery],
+  dbKind: dbKind
 };
 
 module.exports = createWebhooksTable;
