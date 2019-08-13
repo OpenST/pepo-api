@@ -4,6 +4,7 @@ const io = require('socket.io')(http);
 
 const rootPrefix = '.',
   basicHelper = require(rootPrefix + '/helpers/basic'),
+  webSocketServerHelper = require(rootPrefix + '/lib/webSocket/server'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   configStrategyProvider = require(rootPrefix + '/lib/providers/configStrategy'),
@@ -11,15 +12,11 @@ const rootPrefix = '.',
   processIdSelector = require(rootPrefix + '/lib/webSocket/processIdSelector'),
   socketConnectionConstants = require(rootPrefix + '/lib/globalConstant/socketConnection'),
   socketJobProcessor = require(rootPrefix + '/executables/rabbitMqSubscribers/socketJobProcessor'),
-  webSocketCustomCache = require(rootPrefix + '/lib/webSocket/customCache'),
   WebsocketAuth = require(rootPrefix + '/app/services/websocket/auth'),
-  websocketAutoDisconnect = require(rootPrefix + '/lib/webSocket/autoDisconnect'),
-  UserSocketConnectionDetailsModel = require(rootPrefix + '/app/models/mysql/UserSocketConnectionDetails');
+  websocketAutoDisconnect = require(rootPrefix + '/lib/webSocket/autoDisconnect');
 
 let socketIdentifier = null,
-  cronProcessId = null,
-  websocketPort = null,
-  expiryExtentionTimeInMinutes = 1;
+  cronProcessId = null;
 
 async function run() {
   const websocketConfigResponse = await configStrategyProvider.getConfigForKind(configStrategyConstants.websocket);
@@ -28,20 +25,18 @@ async function run() {
     return websocketConfigResponse;
   }
 
-  websocketPort = websocketConfigResponse.data[configStrategyConstants.websocket].port;
+  let websocketPort = websocketConfigResponse.data[configStrategyConstants.websocket].port;
 
   logger.step('-------------------------- Fetching cronProcessId --------------------------');
   cronProcessId = await processIdSelector.perform();
-  logger.step(
-    '-------------------------- Subscribing to RMQ -------------------------- cronProcessId: ',
-    cronProcessId
-  );
+  logger.step('-------------------------- Subscribing to RMQ -------- cronProcessId: ', cronProcessId);
   await subscribeToRmq();
   logger.step('-------------------------- Starting Websocket server --------------------------');
-  await startWebSocketServer();
+
+  await startWebSocketServer(websocketPort);
 }
 
-async function startWebSocketServer() {
+async function startWebSocketServer(websocketPort) {
   app.get('/', function(req, res) {
     res.sendFile(__dirname + '/index.html');
   });
@@ -60,17 +55,7 @@ async function startWebSocketServer() {
       });
     });
 
-    socket.on('disconnect', async function() {
-      logger.trace('Socket on-disconnect called. ');
-      await onSocketDisconnect(socket);
-    });
-
-    socket.conn.on('packet', async function(packet) {
-      if (packet.type === 'ping') {
-        console.log('received ping');
-        await onPingPacket(socket);
-      }
-    });
+    await webSocketServerHelper.associateEvents(socket);
 
     if (websocketAuthRsp.isFailure()) {
       socket.emit('server-event', 'Authentication Failed !!');
@@ -82,21 +67,11 @@ async function startWebSocketServer() {
       });
     }
 
-    let userId = websocketAuthRsp.data.userId,
-      userSocketConnDetailsId = websocketAuthRsp.data.userSocketConnDetailsId,
-      socketExtentionTime = getSocketExtentionTime();
-
-    socket.userId = userId;
-    socket.userSocketConnDetailsId = userSocketConnDetailsId;
-    socket.socketExpiryAt = socketExtentionTime;
-
-    webSocketCustomCache.setIntoSocketObjsMap(userSocketConnDetailsId, socket);
-    webSocketCustomCache.setIntoUserSocketIdsMap(userId, userSocketConnDetailsId);
-    webSocketCustomCache.setTimeToSocketIds(socketExtentionTime, userSocketConnDetailsId);
-
-    logger.log('Authentication Successful for userId: ', userId);
-    socket.emit('server-event', 'Authentication Successful !!');
-    logger.log('Emitted event for userId: ', userId);
+    webSocketServerHelper.onSocketConnection(
+      websocketAuthRsp.data.userId,
+      websocketAuthRsp.data.userSocketConnDetailsId,
+      socket
+    );
   });
 
   http.listen(websocketPort, function() {
@@ -104,51 +79,10 @@ async function startWebSocketServer() {
   });
 }
 
-async function onSocketDisconnect(socket) {
-  let userSocketConnDetailsId = socket.userSocketConnDetailsId,
-    userId = socket.userId;
-
-  if (!userSocketConnDetailsId) {
-    return true;
-  }
-
-  await new UserSocketConnectionDetailsModel()._markSocketConnectionDetailsAsExpired(userSocketConnDetailsId, userId);
-
-  webSocketCustomCache.deleteFromSocketObjsMap(userSocketConnDetailsId);
-
-  webSocketCustomCache.deleteFromUserSocketIdsMap(userId, userSocketConnDetailsId);
-
-  return true;
-}
-
-/**
- * updates expiry at every new ping packet.
- *
- * @param socket
- * @returns {Promise<void>}
- */
-async function onPingPacket(socket) {
-  console.log('\nHERE==============');
-
-  let userSocketConnDetailsId = socket.userSocketConnDetailsId,
-    currentTime = socket.socketExpiryAt,
-    newTime = getSocketExtentionTime();
-
-  if (currentTime < newTime) {
-    socket.socketExpiryAt = newTime;
-    webSocketCustomCache.deleteTimeToSocketIds(currentTime, userSocketConnDetailsId);
-    webSocketCustomCache.setTimeToSocketIds(newTime, userSocketConnDetailsId);
-  }
-}
-
 async function subscribeToRmq() {
   let socketJobProcessorObj = new socketJobProcessor({ cronProcessId: +cronProcessId });
   await socketJobProcessorObj.perform();
   socketIdentifier = socketConnectionConstants.getSocketIdentifierFromTopic(socketJobProcessorObj.topics[0]);
-}
-
-function getSocketExtentionTime() {
-  return basicHelper.getCurrentTimestampInMinutes() + 2 * expiryExtentionTimeInMinutes;
 }
 
 async function autoDisconnect() {
