@@ -2,6 +2,10 @@ const rootPrefix = '../../../..',
   TokenUserModel = require(rootPrefix + '/app/models/mysql/TokenUser'),
   TransactionOstEventBase = require(rootPrefix + '/app/services/ostEvents/transactions/Base'),
   basicHelper = require(rootPrefix + '/helpers/basic'),
+  VideoTransactionSendFailureNotification = require(rootPrefix +
+    '/lib/userNotificationPublisher/VideoTransactionSendFailure'),
+  ProfileTransactionSendFailureNotification = require(rootPrefix +
+    '/lib/userNotificationPublisher/ProfileTransactionSendFailure'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   tokenUserConstants = require(rootPrefix + '/lib/globalConstant/tokenUser'),
@@ -43,7 +47,7 @@ class FailureTransactionOstEvent extends TransactionOstEventBase {
         await oThis.fetchTransaction();
         await oThis._processTransaction();
       } else {
-        // await oThis._sendUserNotification();
+        await oThis._sendUserNotification();
       }
     }
 
@@ -92,9 +96,36 @@ class FailureTransactionOstEvent extends TransactionOstEventBase {
     promiseArray1.push(oThis.updateTransaction());
     promiseArray1.push(oThis.removeEntryFromPendingTransactions());
 
-    // promiseArray1.push(oThis._sendUserNotification());
-
     await Promise.all(promiseArray1);
+
+    await oThis._sendUserNotification();
+  }
+
+  /**
+   * Send notification for successful transaction.
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _sendUserNotification() {
+    const oThis = this;
+
+    const promisesArray = [];
+
+    if (oThis.videoId) {
+      promisesArray.push(
+        new VideoTransactionSendFailureNotification({
+          transaction: oThis.transactionObj,
+          videoId: oThis.videoId
+        }).perform()
+      );
+    } else {
+      promisesArray.push(
+        new ProfileTransactionSendFailureNotification({ transaction: oThis.transactionObj }).perform()
+      );
+    }
+
+    await Promise.all(promisesArray);
   }
 
   /**
