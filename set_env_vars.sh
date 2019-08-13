@@ -112,4 +112,7 @@ export PR_LAMBDA_VIDEO_COMPRESS_FUNCTION='arn:aws:lambda:us-east-1:274208178423:
 export REPLICATION_CLASS='SimpleStrategy'
 export REPLICATION_FACTOR='3'
 
+# Cassandra related variables.
+export DEFAULT_REPLICATION_LEVEL='localOne'
+
 export PA_CDN_URL='https://dbvoeb7t6hffk.cloudfront.net'

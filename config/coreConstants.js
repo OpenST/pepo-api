@@ -339,6 +339,10 @@ class CoreConstants {
   get CASSANDRA_REPLICATION_FACTOR() {
     return process.env.REPLICATION_FACTOR;
   }
+
+  get CASSANDRA_REPLICATION_LEVEL() {
+    return process.env.DEFAULT_REPLICATION_LEVEL;
+  }
 }
 
 module.exports = new CoreConstants();

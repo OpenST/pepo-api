@@ -60,6 +60,8 @@ class ModelBase {
    * Get default options.
    *
    * @param {object} options
+   * @param {boolean} options.prepare
+   * @param {number} options.consistency
    *
    * @returns {*}
    */
