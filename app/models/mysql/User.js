@@ -272,6 +272,50 @@ class UserModel extends ModelBase {
   }
 
   /**
+   * User search
+   *
+   * @param {integer} params.limit: limit
+   * @param {integer} params.query: query
+   * @param {integer} params.paginationTimestamp: pagination time stamp
+   *
+   * @return {Promise}
+   */
+  async search(params) {
+    const oThis = this;
+
+    let limit = params.limit,
+      query = params.query,
+      paginationTimestamp = params.paginationTimestamp;
+
+    const queryObject = await oThis
+      .select('*')
+      .where({ status: userConstants.invertedStatuses[userConstants.blockedStatus] })
+      .limit(limit)
+      .order_by('name asc');
+
+    if (query) {
+      queryObject.where(['user_name LIKE ? OR name LIKE ?', query, query]);
+    }
+
+    if (paginationTimestamp) {
+      queryObject.where(['created_at < ?', paginationTimestamp]);
+    }
+
+    let dbRows = await queryObject.fire();
+
+    let userDetails = {};
+    let userIds = [];
+
+    for (let ind = 0; ind < dbRows.length; ind++) {
+      let formattedRow = oThis.formatDbData(dbRows[ind]);
+      userIds.push(formattedRow.id);
+      userDetails[dbRows[ind].id] = formattedRow;
+    }
+
+    return { userIds: userIds, userDetails: userDetails };
+  }
+
+  /**
    * Flush cache
    *
    * @param {object} params
