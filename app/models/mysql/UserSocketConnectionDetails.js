@@ -65,17 +65,7 @@ class UserSocketConnectionDetails extends ModelBase {
    * @returns {array}
    */
   safeFormattedColumnNames() {
-    return [
-      'id',
-      'userId',
-      'authKey',
-      'socketServerId',
-      'authKeyExpiryAt',
-      'status',
-      'socketExpiryAt',
-      'createdAt',
-      'updatedAt'
-    ];
+    return ['id', 'userId', 'authKey', 'socketServerId', 'authKeyExpiryAt', 'status', 'createdAt', 'updatedAt'];
   }
 
   /**
@@ -153,7 +143,7 @@ class UserSocketConnectionDetails extends ModelBase {
    * @returns {Promise<void>}
    * @private
    */
-  async _markSocketConnectionDetailsAsExpired(userSocketConnDetailsId, userId) {
+  async _markSocketConnectionDetailsAsExpired(userSocketConnDetailsIds, userIds) {
     const oThis = this;
 
     await oThis
@@ -161,11 +151,11 @@ class UserSocketConnectionDetails extends ModelBase {
         status: socketConnectionConstants.invertedStatuses[socketConnectionConstants.expiredStatus]
       })
       .where({
-        id: userSocketConnDetailsId
+        id: userSocketConnDetailsIds
       })
       .fire();
 
-    await UserSocketConnectionDetails.flushCache({ userId: userId });
+    await UserSocketConnectionDetails.flushCache({ userIds: userIds });
   }
 
   /**
@@ -180,7 +170,7 @@ class UserSocketConnectionDetails extends ModelBase {
     const UserSocketConnectionDetailsCache = require(rootPrefix +
       '/lib/cacheManagement/multi/UserSocketConDetailsByUserIds');
 
-    await new UserSocketConnectionDetailsCache({ userIds: [params.userId] }).clear();
+    await new UserSocketConnectionDetailsCache({ userIds: params.userIds }).clear();
   }
 }
 

@@ -60,14 +60,13 @@ class ConfigStrategyTemplate {
           clusterNodes: 'clusterNodesEntity'
         }
       },
-      redshiftEntity: {
+      websocketEntity: {
         entityType: 'object',
         entitiesPresent: {
-          user: 'userEntity',
-          database: 'databaseEntity',
-          password: 'passwordEntity',
+          wsAuthSalt: 'saltEntity',
+          endpoint: 'hostEntity',
           port: 'portEntity',
-          host: 'hostEntity'
+          protocol: 'protocolEntity'
         }
       },
       cassandraEntity: {
@@ -79,13 +78,6 @@ class ConfigStrategyTemplate {
           localDataCenter: 'localDataCenterEntity'
         }
       },
-      constantsEntity: {
-        entityType: 'object',
-        entitiesPresent: {
-          salt: 'saltEntity'
-        }
-      },
-
       socketRabbbitMqIdEntity: {
         entityType: 'string'
       },
@@ -139,6 +131,9 @@ class ConfigStrategyTemplate {
       namespaceEntity: {
         entityType: 'string'
       },
+      protocolEntity: {
+        entityType: 'string'
+      },
       contactPointsEntity: {
         entityType: 'array',
         entitiesPresent: 'contactPointEntity' // For an array entity this array will contain entity types which that array will hold.
@@ -158,8 +153,7 @@ class ConfigStrategyTemplate {
       [configStrategyConstants.bgJobRabbitmq]: 'rabbitmqEntity',
       [configStrategyConstants.notificationRabbitmq]: 'rabbitmqEntity',
       [configStrategyConstants.socketRabbitmq]: 'rabbitmqListEntity',
-      [configStrategyConstants.redshift]: 'redshiftEntity',
-      [configStrategyConstants.constants]: 'constantsEntity',
+      [configStrategyConstants.websocket]: 'websocketEntity',
       [configStrategyConstants.cassandra]: 'cassandraEntity'
     };
   }

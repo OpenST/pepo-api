@@ -55,19 +55,18 @@
       ]
     },
 
+    "websocket": {
+      "wsAuthSalt": "asdfghjklqwertyuiop",
+      "endpoint": "127.0.0.1",
+      "port": "4000",
+      "protocol": "https"
+    },
+
     "cassandra": {
       "username": "cassandra",
       "password": "cassandra",
       "contactPoints": ["127.0.0.1:9042"],
       "localDataCenter": "datacenter1"
-    },
-
-    "constants": {
-      "salt": "asdfghjklqwertyuiop",
-      "websocket": {
-        "endpoint": "127.0.0.1",
-        "protocol": "https"
-      }
     }
   }
 }
