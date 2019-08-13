@@ -4,7 +4,7 @@ const io = require('socket.io')(http);
 
 const rootPrefix = '.',
   basicHelper = require(rootPrefix + '/helpers/basic'),
-  webSocketServerHelper = require(rootPrefix + '/lib/webSocket/server'),
+  webSocketServerHelper = require(rootPrefix + '/lib/webSocket/helper'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   configStrategyProvider = require(rootPrefix + '/lib/providers/configStrategy'),
@@ -13,10 +13,10 @@ const rootPrefix = '.',
   socketConnectionConstants = require(rootPrefix + '/lib/globalConstant/socketConnection'),
   socketJobProcessor = require(rootPrefix + '/executables/rabbitMqSubscribers/socketJobProcessor'),
   WebsocketAuth = require(rootPrefix + '/app/services/websocket/auth'),
+  webSocketCustomCache = require(rootPrefix + '/lib/webSocket/customCache'),
   websocketAutoDisconnect = require(rootPrefix + '/lib/webSocket/autoDisconnect');
 
-let socketIdentifier = null,
-  cronProcessId = null;
+let socketIdentifier = null;
 
 async function run() {
   const websocketConfigResponse = await configStrategyProvider.getConfigForKind(configStrategyConstants.websocket);
@@ -28,9 +28,9 @@ async function run() {
   let websocketPort = websocketConfigResponse.data[configStrategyConstants.websocket].port;
 
   logger.step('-------------------------- Fetching cronProcessId --------------------------');
-  cronProcessId = await processIdSelector.perform();
+  let cronProcessId = await processIdSelector.perform();
   logger.step('-------------------------- Subscribing to RMQ -------- cronProcessId: ', cronProcessId);
-  await subscribeToRmq();
+  await subscribeToRmq(cronProcessId);
   logger.step('-------------------------- Starting Websocket server --------------------------');
 
   await startWebSocketServer(websocketPort);
@@ -43,6 +43,18 @@ async function startWebSocketServer(websocketPort) {
 
   io.on('connection', async function(socket) {
     console.log('a user connected socket', socket.handshake.query);
+    let err = null;
+
+    if (webSocketCustomCache.checkStopConnectingSockets()) {
+      err = responseHelper.error({
+        internal_error_identifier: 'ws_s_3',
+        api_error_identifier: 'websocket_service_unavailable',
+        debug_options: {}
+      });
+      socket.emit('server-event', JSON.stringify(err));
+      socket.disconnect();
+      return true;
+    }
 
     let params = socket.handshake.query;
     params.socketIdentifier = socketIdentifier;
@@ -58,16 +70,17 @@ async function startWebSocketServer(websocketPort) {
     await webSocketServerHelper.associateEvents(socket);
 
     if (websocketAuthRsp.isFailure()) {
-      socket.emit('server-event', 'Authentication Failed !!');
-      socket.disconnect();
-      return responseHelper.error({
+      err = responseHelper.error({
         internal_error_identifier: 'ws_s_2',
-        api_error_identifier: 'something_went_wrong',
+        api_error_identifier: 'unauthorized_api_request',
         debug_options: { websocketAuthRsp: websocketAuthRsp }
       });
+      socket.emit('server-event', JSON.stringify(err));
+      socket.disconnect();
+      return true;
     }
 
-    webSocketServerHelper.onSocketConnection(
+    await webSocketServerHelper.onSocketConnection(
       websocketAuthRsp.data.userId,
       websocketAuthRsp.data.userSocketConnDetailsId,
       socket
@@ -79,7 +92,7 @@ async function startWebSocketServer(websocketPort) {
   });
 }
 
-async function subscribeToRmq() {
+async function subscribeToRmq(cronProcessId) {
   let socketJobProcessorObj = new socketJobProcessor({ cronProcessId: +cronProcessId });
   await socketJobProcessorObj.perform();
   socketIdentifier = socketConnectionConstants.getSocketIdentifierFromTopic(socketJobProcessorObj.topics[0]);

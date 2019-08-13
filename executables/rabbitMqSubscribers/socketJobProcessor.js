@@ -3,6 +3,7 @@ const rootPrefix = '../..',
   socketRabbitMqProvider = require(rootPrefix + '/lib/providers/socketRabbitMq'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   webSocketCustomCache = require(rootPrefix + '/lib/webSocket/customCache'),
+  webSocketServerHelper = require(rootPrefix + '/lib/webSocket/helper'),
   cronProcessesConstants = require(rootPrefix + '/lib/globalConstant/cronProcesses'),
   configStrategyConstants = require(rootPrefix + '/lib/globalConstant/configStrategy'),
   machineKindConstant = require(rootPrefix + '/lib/globalConstant/machineKind');
@@ -61,6 +62,22 @@ class SocketJobProcessor extends RabbitMqProcessorBase {
   }
 
   /**
+   * This function checks if there are any pending tasks left or not.
+   *
+   * @returns {Boolean}
+   */
+  _pendingTasksDone() {
+    let rmqTaskDone = super._pendingTasksDone();
+    let websocketTaskDone = webSocketServerHelper.pendingTasksDone();
+    console.log('rmqTaskDone-----', rmqTaskDone);
+    console.log('websocketTaskDone-----', websocketTaskDone);
+    if (rmqTaskDone && websocketTaskDone) {
+      return true;
+    }
+    return false;
+  }
+
+  /**
    * Process message.
    *
    * @param {object} messageParams
@@ -77,20 +94,14 @@ class SocketJobProcessor extends RabbitMqProcessorBase {
       userIds = messageDetails.userIds,
       messagePayload = messageDetails.messagePayload;
 
-    logger.log('Message params =====', messageParams);
-    logger.log('userIds ===------------==', userIds);
-
-    logger.log('webSocketCustomCache.userSocketIdsMap ===------------==', webSocketCustomCache.userSocketIdsMap);
-
     for (let j = 0; j < userIds.length; j++) {
-      logger.log('userIds[j] ===------------==', j, userIds[j]);
-      let socketObjectIds = webSocketCustomCache.getFromUserSocketIdsMap(userIds[j]);
-      logger.log('socketObjectIds ===------------==', socketObjectIds);
+      let socketObjectIds = webSocketCustomCache.getFromUserSocketConnDetailsIdsMap(userIds[j]);
+
       if (!socketObjectIds || socketObjectIds.length == 0) {
         continue;
       }
       for (let i = 0; i < socketObjectIds.length; i++) {
-        console.log('-------------------------------------');
+        logger.log('userIds[j] ===------------==', j, userIds[j]);
         let socketObj = webSocketCustomCache.getFromSocketObjsMap(socketObjectIds[i]);
         socketObj.emit('server-event', JSON.stringify(messagePayload));
       }

@@ -164,7 +164,7 @@ class SocketConnectionDetails extends ServiceBase {
 
     oThis.userSocketConnectionDetails = new UserSocketConnectionDetailsModel().formatDbData(insertObject);
 
-    await UserSocketConnectionDetailsModel.flushCache(oThis.userSocketConnectionDetails);
+    await UserSocketConnectionDetailsModel.flushCache({ userIds: [oThis.userSocketConnectionDetails.userId] });
   }
 
   /**

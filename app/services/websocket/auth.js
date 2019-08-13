@@ -237,7 +237,7 @@ class WebSocketAuth extends ServiceBase {
       })
       .fire();
 
-    await UserSocketConnectionDetailsModel.flushCache({ userId: oThis.userId });
+    await UserSocketConnectionDetailsModel.flushCache({ userIds: [oThis.userId] });
   }
 }
 
