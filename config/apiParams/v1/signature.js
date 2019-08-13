@@ -463,6 +463,10 @@ const v1Signature = {
     mandatory: [],
     optional: [
       {
+        parameter: 'includeVideos',
+        validatorMethods: ['validateBoolean']
+      },
+      {
         parameter: 'q',
         validatorMethods: ['validateString']
       },

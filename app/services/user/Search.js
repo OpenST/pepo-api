@@ -3,6 +3,7 @@ const rootPrefix = '../../..',
   ImageByIdCache = require(rootPrefix + '/lib/cacheManagement/multi/ImageByIds'),
   UserProfileElementsByUserIdCache = require(rootPrefix + '/lib/cacheManagement/multi/UserProfileElementsByUserIds'),
   VideoDetailsByVideoIds = require(rootPrefix + '/lib/cacheManagement/multi/VideoDetailsByVideoIds'),
+  TokenUserDetailByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TokenUserByUserIds'),
   UserModel = require(rootPrefix + '/app/models/mysql/User'),
   userProfileElementConst = require(rootPrefix + '/lib/globalConstant/userProfileElement'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
@@ -42,6 +43,7 @@ class UserSearch extends ServiceBase {
     oThis.userDetails = {};
     oThis.imageDetails = {};
     oThis.videoDetails = {};
+    oThis.tokenUsersByUserIdMap = {};
     oThis.searchResults = [];
     oThis.paginationTimestamp = null;
     oThis.nextPaginationTimestamp = null;
@@ -61,6 +63,8 @@ class UserSearch extends ServiceBase {
     await oThis._validateAndSanitizeParams();
 
     await oThis._fetchUserIds();
+
+    await oThis._fetchTokenUsers();
 
     await oThis._fetchProfileImages();
 
@@ -120,7 +124,7 @@ class UserSearch extends ServiceBase {
     oThis.userIds = userData.userIds;
     oThis.userDetails = userData.userDetails;
 
-    for (let ind = 0; ind < oThis.userIds; ind++) {
+    for (let ind = 0; ind < oThis.userIds.length; ind++) {
       let userId = oThis.userIds[ind];
       let userDetail = oThis.userDetails[userId];
 
@@ -133,6 +137,26 @@ class UserSearch extends ServiceBase {
 
       oThis.nextPaginationTimestamp = userDetail.createdAt;
     }
+  }
+
+  /**
+   * Fetch token users
+   *
+   * @sets oThis.tokenUsersByUserIdMap
+   *
+   * @return {Promise<void>}
+   * @private
+   */
+  async _fetchTokenUsers() {
+    const oThis = this;
+
+    const tokenUserRes = await new TokenUserDetailByUserIdsCache({ userIds: oThis.userIds }).fetch();
+
+    if (tokenUserRes.isFailure()) {
+      return Promise.reject(tokenUserRes);
+    }
+
+    oThis.tokenUsersByUserIdMap = tokenUserRes.data;
   }
 
   /**
@@ -162,7 +186,7 @@ class UserSearch extends ServiceBase {
 
     oThis.userToVideoMap = {};
 
-    let userProfileElementsByUserIdCache = new UserProfileElementsByUserIdCache({ userIds: oThis.userIds });
+    let userProfileElementsByUserIdCache = new UserProfileElementsByUserIdCache({ usersIds: oThis.userIds });
 
     let cacheRsp = await userProfileElementsByUserIdCache.fetch();
 
@@ -175,7 +199,7 @@ class UserSearch extends ServiceBase {
       oThis.userToVideoMap[userId] = videoId;
     }
 
-    for (let ind = 0; ind < oThis.searchResults; ind++) {
+    for (let ind = 0; ind < oThis.searchResults.length; ind++) {
       let userId = oThis.searchResults[ind].userId;
       oThis.searchResults[ind]['videoId'] = oThis.userToVideoMap[userId];
     }
@@ -236,11 +260,12 @@ class UserSearch extends ServiceBase {
       [entityType.userSearchList]: oThis.searchResults,
       usersByIdMap: oThis.userDetails,
       imageMap: oThis.imageDetails,
+      tokenUsersByUserIdMap: oThis.tokenUsersByUserIdMap,
       meta: oThis.responseMetaData
     };
 
     if (oThis.includeVideos) {
-      response[entityType.videoDetailsMap] = oThis.videoDetailsMap;
+      response[entityType.videoDetailsMap] = oThis.videoDetails;
     }
 
     return responseHelper.successWithData(response);

@@ -289,12 +289,14 @@ class UserModel extends ModelBase {
 
     const queryObject = await oThis
       .select('*')
-      .where({ status: userConstants.invertedStatuses[userConstants.blockedStatus] })
+      .where({ status: userConstants.invertedStatuses[userConstants.activeStatus] })
       .limit(limit)
-      .order_by('name asc');
+      .order_by('id desc');
+
+    let queryWithWildCards = '%' + query + '%';
 
     if (query) {
-      queryObject.where(['user_name LIKE ? OR name LIKE ?', query, query]);
+      queryObject.where(['user_name LIKE ? OR name LIKE ?', queryWithWildCards, queryWithWildCards]);
     }
 
     if (paginationTimestamp) {
