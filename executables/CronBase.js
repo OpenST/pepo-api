@@ -32,6 +32,8 @@ class CronBase {
   constructor(params) {
     const oThis = this;
 
+    oThis.cronStarted = false;
+
     oThis.cronProcessId = params.cronProcessId;
 
     oThis.stopPickingUpNewWork = false;
@@ -118,6 +120,10 @@ class CronBase {
      * Handler for SIGINT and SIGTERM signals.
      */
     const handle = async function() {
+      if (!oThis.cronStarted) {
+        logger.error(`Exit Cron as it did not start the process`);
+        process.exit(1);
+      }
       sigIntConst.setSigIntStatus;
       // Rachin: Does this need to be called more than once?
       oThis._stopPickingUpNewTasks();
@@ -186,6 +192,10 @@ class CronBase {
       id: oThis.cronProcessId, // Implicit string to int conversion.
       cronKind: oThis._cronKind
     });
+
+    if (response.isSuccess()) {
+      oThis.cronStarted = true;
+    }
 
     try {
       // Fetch params from the DB.
