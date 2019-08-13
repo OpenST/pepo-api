@@ -60,16 +60,6 @@ class ConfigStrategyTemplate {
           clusterNodes: 'clusterNodesEntity'
         }
       },
-      redshiftEntity: {
-        entityType: 'object',
-        entitiesPresent: {
-          user: 'userEntity',
-          database: 'databaseEntity',
-          password: 'passwordEntity',
-          port: 'portEntity',
-          host: 'hostEntity'
-        }
-      },
       websocketEntity: {
         entityType: 'object',
         entitiesPresent: {
@@ -145,7 +135,6 @@ class ConfigStrategyTemplate {
       [configStrategyConstants.bgJobRabbitmq]: 'rabbitmqEntity',
       [configStrategyConstants.notificationRabbitmq]: 'rabbitmqEntity',
       [configStrategyConstants.socketRabbitmq]: 'rabbitmqListEntity',
-      [configStrategyConstants.redshift]: 'redshiftEntity',
       [configStrategyConstants.websocket]: 'websocketEntity'
     };
   }
