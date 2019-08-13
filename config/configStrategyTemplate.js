@@ -70,10 +70,13 @@ class ConfigStrategyTemplate {
           host: 'hostEntity'
         }
       },
-      constantsEntity: {
+      websocketEntity: {
         entityType: 'object',
         entitiesPresent: {
-          salt: 'saltEntity'
+          wsAuthSalt: 'saltEntity',
+          endpoint: 'hostEntity',
+          port: 'portEntity',
+          protocol: 'protocolEntity'
         }
       },
 
@@ -129,6 +132,9 @@ class ConfigStrategyTemplate {
       },
       namespaceEntity: {
         entityType: 'string'
+      },
+      protocolEntity: {
+        entityType: 'string'
       }
     };
   }
@@ -140,7 +146,7 @@ class ConfigStrategyTemplate {
       [configStrategyConstants.notificationRabbitmq]: 'rabbitmqEntity',
       [configStrategyConstants.socketRabbitmq]: 'rabbitmqListEntity',
       [configStrategyConstants.redshift]: 'redshiftEntity',
-      [configStrategyConstants.constants]: 'constantsEntity'
+      [configStrategyConstants.websocket]: 'websocketEntity'
     };
   }
 }

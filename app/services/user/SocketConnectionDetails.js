@@ -37,6 +37,7 @@ class SocketConnectionDetails extends ServiceBase {
     oThis.userData = null;
     oThis.endpoint = null;
     oThis.protocol = null;
+    oThis.port = null;
   }
 
   /**
@@ -86,11 +87,12 @@ class SocketConnectionDetails extends ServiceBase {
     if (constantsRsp.isFailure()) {
       return Promise.reject(constantsRsp);
     }
-    oThis.salt = constantsRsp.data[configStrategyConstants.constants].salt;
 
-    let websocketConstants = constantsRsp.data[configStrategyConstants.constants].websocket;
-    oThis.endpoint = websocketConstants.endpoint;
-    oThis.protocol = websocketConstants.protocol;
+    let websocketConfig = constantsRsp.data[configStrategyConstants.websocket];
+    oThis.salt = websocketConfig.wsAuthSalt;
+    oThis.endpoint = websocketConfig.endpoint;
+    oThis.port = websocketConfig.port;
+    oThis.protocol = websocketConfig.protocol;
   }
 
   /**
@@ -189,6 +191,7 @@ class SocketConnectionDetails extends ServiceBase {
           id: oThis.userSocketConnectionDetails.id,
           uts: oThis.userSocketConnectionDetails.updatedAt,
           endpoint: oThis.endpoint,
+          port: oThis.port,
           protocol: oThis.protocol
         },
         authKeyExpiryAt: oThis.userSocketConnectionDetails.authKeyExpiryAt,

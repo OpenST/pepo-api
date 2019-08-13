@@ -6,6 +6,8 @@ const rootPrefix = '.',
   basicHelper = require(rootPrefix + '/helpers/basic'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
+  configStrategyProvider = require(rootPrefix + '/lib/providers/configStrategy'),
+  configStrategyConstants = require(rootPrefix + '/lib/globalConstant/configStrategy'),
   processIdSelector = require(rootPrefix + '/lib/webSocket/processIdSelector'),
   socketConnectionConstants = require(rootPrefix + '/lib/globalConstant/socketConnection'),
   socketJobProcessor = require(rootPrefix + '/executables/rabbitMqSubscribers/socketJobProcessor'),
@@ -16,9 +18,18 @@ const rootPrefix = '.',
 
 let socketIdentifier = null,
   cronProcessId = null,
+  websocketPort = null,
   expiryExtentionTimeInMinutes = 1;
 
 async function run() {
+  const websocketConfigResponse = await configStrategyProvider.getConfigForKind(configStrategyConstants.websocket);
+
+  if (websocketConfigResponse.isFailure()) {
+    return websocketConfigResponse;
+  }
+
+  websocketPort = websocketConfigResponse.data[configStrategyConstants.websocket].port;
+
   logger.step('-------------------------- Fetching cronProcessId --------------------------');
   cronProcessId = await processIdSelector.perform();
   logger.step(
@@ -88,8 +99,8 @@ async function startWebSocketServer() {
     logger.log('Emitted event for userId: ', userId);
   });
 
-  http.listen(4000, function() {
-    logger.step('listening on *:4000\n');
+  http.listen(websocketPort, function() {
+    logger.step('**** Listening on port ' + websocketPort);
   });
 }
 

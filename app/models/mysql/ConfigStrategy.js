@@ -157,6 +157,12 @@ class ConfigStrategyModel extends ModelBase {
       hashNotToEncrypt[strategyKindName].password = '{{redshiftPassword}}';
       hashToEncrypt.redshiftPassword = redshiftPassword;
       encryptedKeysFound = true;
+    } else if (strategyKindName === configStrategyConstants.websocket) {
+      const wsAuthSalt = hashNotToEncrypt[strategyKindName].wsAuthSalt;
+
+      hashNotToEncrypt[strategyKindName].wsAuthSalt = '{{wsAuthSalt}}';
+      hashToEncrypt.wsAuthSalt = wsAuthSalt;
+      encryptedKeysFound = true;
     }
 
     return {
@@ -204,6 +210,8 @@ class ConfigStrategyModel extends ModelBase {
       configStrategyHash[kinds[strategyKind]].password = decryptedJsonObj.rmqPassword;
     } else if (kinds[strategyKind] === configStrategyConstants.redshift) {
       configStrategyHash[kinds[strategyKind]].password = decryptedJsonObj.redshiftPassword;
+    } else if (kinds[strategyKind] === configStrategyConstants.websocket) {
+      configStrategyHash[kinds[strategyKind]].wsAuthSalt = decryptedJsonObj.wsAuthSalt;
     }
 
     return configStrategyHash;

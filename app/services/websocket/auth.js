@@ -106,11 +106,11 @@ class WebSocketAuth extends ServiceBase {
   async _fetchConfigData() {
     const oThis = this;
 
-    let constantsRsp = await configStrategy.getConfigForKind(configStrategyConstants.constants);
+    let constantsRsp = await configStrategy.getConfigForKind(configStrategyConstants.websocket);
     if (constantsRsp.isFailure()) {
       return Promise.reject(constantsRsp);
     }
-    oThis.salt = constantsRsp.data[configStrategyConstants.constants].salt;
+    oThis.salt = constantsRsp.data[configStrategyConstants.websocket].wsAuthSalt;
   }
 
   /**
