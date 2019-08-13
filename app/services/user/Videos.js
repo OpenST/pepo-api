@@ -124,6 +124,7 @@ class UserVideos extends ServiceBase {
       oThis.videosCount++;
       oThis.videoDetails.push(videoDetail);
       oThis.videoIds.push(videoDetail.videoId);
+
       oThis.nextPaginationTimestamp = videoDetail.createdAt;
     }
 
