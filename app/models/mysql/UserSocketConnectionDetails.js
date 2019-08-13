@@ -65,17 +65,7 @@ class UserSocketConnectionDetails extends ModelBase {
    * @returns {array}
    */
   safeFormattedColumnNames() {
-    return [
-      'id',
-      'userId',
-      'authKey',
-      'socketServerId',
-      'authKeyExpiryAt',
-      'status',
-      'socketExpiryAt',
-      'createdAt',
-      'updatedAt'
-    ];
+    return ['id', 'userId', 'authKey', 'socketServerId', 'authKeyExpiryAt', 'status', 'createdAt', 'updatedAt'];
   }
 
   /**
