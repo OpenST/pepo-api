@@ -83,7 +83,7 @@ class SocketConnectionDetails extends ServiceBase {
   async _fetchConfigData() {
     const oThis = this;
 
-    let constantsRsp = await configStrategy.getConfigForKind(configStrategyConstants.constants);
+    let constantsRsp = await configStrategy.getConfigForKind(configStrategyConstants.websocket);
     if (constantsRsp.isFailure()) {
       return Promise.reject(constantsRsp);
     }
