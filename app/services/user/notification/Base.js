@@ -110,21 +110,20 @@ class UserNotificationBase extends ServiceBase {
 
     for (let index = 0; index < oThis.userNotifications.length; index++) {
       const userNotification = oThis.userNotifications[index];
-      const flattenedUserNotification = NotificationResponseHelper.getFlattenedObject(userNotification);
       const formattedUserNotification = {};
 
-      formattedUserNotification.id = NotificationResponseHelper.getEncryptIdForNotification(flattenedUserNotification);
+      formattedUserNotification.id = NotificationResponseHelper.getEncryptIdForNotification(userNotification);
 
       formattedUserNotification.kind = userNotification.kind;
       formattedUserNotification.timestamp = userNotification.lastActionTimestamp;
 
-      formattedUserNotification.heading = await oThis._getHeading(flattenedUserNotification);
+      formattedUserNotification.heading = await oThis._getHeading(userNotification);
 
-      formattedUserNotification.goto = await oThis._getGoto(flattenedUserNotification);
+      formattedUserNotification.goto = await oThis._getGoto(userNotification);
 
-      formattedUserNotification.imageId = await oThis._getImageId(flattenedUserNotification);
+      formattedUserNotification.imageId = await oThis._getImageId(userNotification);
 
-      formattedUserNotification.payload = await oThis._getPayload(flattenedUserNotification);
+      formattedUserNotification.payload = await oThis._getPayload(userNotification);
 
       oThis.formattedUserNotifications.push(formattedUserNotification);
     }
@@ -162,16 +161,15 @@ class UserNotificationBase extends ServiceBase {
    * @private
    */
   async _getPayload(userNotification) {
-    const payload = {};
+    const oThis = this;
 
-    const payloadArr = NotificationResponseHelper.payloadNotificationConfigForKind(userNotification.kind);
+    const resp = NotificationResponseHelper.getPayloadDataForNotification({ userNotification: userNotification });
 
-    for (let index = 0; index < payloadArr.length; index++) {
-      const payloadKey = payloadArr[index];
-      payload[payloadKey] = userNotification[payloadKey];
+    if (resp.isFailure()) {
+      return Promise.reject(resp);
     }
 
-    return payload;
+    return resp.data.payload;
   }
 
   /**
@@ -258,8 +256,9 @@ class UserNotificationBase extends ServiceBase {
     const keysForUserId = supportingEntitiesConfig.userIds;
 
     for (let index = 0; index < keysForUserId.length; index++) {
-      const key = keysForUserId[index];
-      const val = userNotification[key];
+      const dataKeys = keysForUserId[index];
+
+      const val = NotificationResponseHelper.getKeyDataFromNotification(userNotification, dataKeys);
 
       if (Array.isArray(val)) {
         uIds = uIds.concat(val);
@@ -280,11 +279,12 @@ class UserNotificationBase extends ServiceBase {
   _getVideoIdsForNotifications(userNotification, supportingEntitiesConfig) {
     let vIds = [];
 
-    const keysForVideoId = supportingEntitiesConfig.userIds;
+    const keysForVideoId = supportingEntitiesConfig.videoIds;
 
     for (let index = 0; index < keysForVideoId.length; index++) {
-      const key = keysForVideoId[index];
-      const val = userNotification[key];
+      const dataKeys = keysForVideoId[index];
+
+      const val = NotificationResponseHelper.getKeyDataFromNotification(userNotification, dataKeys);
 
       if (Array.isArray(val)) {
         vIds = vIds.concat(val);
