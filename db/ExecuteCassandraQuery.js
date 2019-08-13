@@ -4,12 +4,19 @@ const rootPrefix = '..',
   coreConstants = require(rootPrefix + '/config/coreConstants'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger');
 
+/**
+ * Class for executing cassandra query.
+ *
+ * @class ExecuteCassandraQuery
+ */
 class ExecuteCassandraQuery {
   /**
-   * Constructor
+   * Constructor for executing cassandra query.
    *
-   * @param keySpace
-   * @param cassandraQuery
+   * @param {string} keySpace
+   * @param {string} cassandraQuery
+   *
+   * @constructor
    */
   constructor(keySpace, cassandraQuery) {
     const oThis = this;
@@ -19,17 +26,18 @@ class ExecuteCassandraQuery {
   }
 
   /**
-   * Perform
+   * Perform.
    *
    * @return {Promise<void>}
    */
   async perform() {
     const oThis = this;
-    let params = {};
+
+    const params = {};
 
     // Create DB if not present
     if (basicHelper.isDevelopment()) {
-      let dbCreationStatement =
+      const dbCreationStatement =
         'CREATE KEYSPACE IF NOT EXISTS ' +
         oThis.keySpace +
         ' WITH replication ={' +
@@ -47,8 +55,8 @@ class ExecuteCassandraQuery {
       await CassandraClient.execute(dbCreationStatement, params, { prepare: true });
     }
 
-    // Execute the cassandra query
-    let queryResult = await CassandraClient.execute(oThis.cassandraQuery, params, { prepare: true });
+    // Execute the cassandra query.
+    const queryResult = await CassandraClient.execute(oThis.cassandraQuery, params, { prepare: true });
     logger.log(oThis.cassandraQuery);
 
     return queryResult;
