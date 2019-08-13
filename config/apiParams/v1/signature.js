@@ -458,7 +458,6 @@ const v1Signature = {
       }
     ],
     optional: []
-    ]
   },
   [apiName.userSearch]: {
     mandatory: [],
