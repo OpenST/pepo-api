@@ -256,8 +256,9 @@ class UserNotificationBase extends ServiceBase {
     const keysForUserId = supportingEntitiesConfig.userIds;
 
     for (let index = 0; index < keysForUserId.length; index++) {
-      const key = keysForUserId[index];
-      const val = userNotification[key];
+      const dataKeys = keysForUserId[index];
+
+      const val = NotificationResponseHelper.getKeyDataFromNotification(userNotification, dataKeys);
 
       if (Array.isArray(val)) {
         uIds = uIds.concat(val);
@@ -278,11 +279,12 @@ class UserNotificationBase extends ServiceBase {
   _getVideoIdsForNotifications(userNotification, supportingEntitiesConfig) {
     let vIds = [];
 
-    const keysForVideoId = supportingEntitiesConfig.userIds;
+    const keysForVideoId = supportingEntitiesConfig.videoIds;
 
     for (let index = 0; index < keysForVideoId.length; index++) {
-      const key = keysForVideoId[index];
-      const val = userNotification[key];
+      const dataKeys = keysForVideoId[index];
+
+      const val = NotificationResponseHelper.getKeyDataFromNotification(userNotification, dataKeys);
 
       if (Array.isArray(val)) {
         vIds = vIds.concat(val);
