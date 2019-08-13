@@ -193,6 +193,10 @@ class CronBase {
       cronKind: oThis._cronKind
     });
 
+    if (response.isSuccess()) {
+      oThis.cronStarted = true;
+    }
+
     try {
       // Fetch params from the DB.
       const cronParams = JSON.parse(response.data.params);
