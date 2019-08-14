@@ -456,8 +456,15 @@ const v1Signature = {
         parameter: 'text',
         validatorMethods: ['validateString']
       }
-    ],
-    optional: []
+    ]
+  },
+  [apiName.twitterDisconnect]: {
+    mandatory: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      }
+    ]
   }
 };
 
