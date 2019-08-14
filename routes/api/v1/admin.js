@@ -46,4 +46,29 @@ router.post('/logout', sanitizer.sanitizeDynamicUrlParams, function(req, res) {
   Promise.resolve(responseHelper.renderApiResponse(responseObject, res, errorConfig));
 });
 
+/* admin users */
+router.get('/users', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.adminUserSearch;
+  req.decodedParams.includeVideos = true;
+
+  const dataFormatterFunc = async function(serviceResponse) {
+    const wrapperFormatterRsp = await new FormatterComposer({
+      resultType: responseEntityKey.searchResults,
+      entityKindToResponseKeyMap: {
+        [entityType.userSearchList]: responseEntityKey.searchResults,
+        [entityType.usersMap]: responseEntityKey.users,
+        [entityType.imagesMap]: responseEntityKey.images,
+        [entityType.videosMap]: responseEntityKey.videos,
+        [entityType.videoDetailsMap]: responseEntityKey.videoDetails,
+        [entityType.userSearchMeta]: responseEntityKey.meta
+      },
+      serviceData: serviceResponse.data
+    }).perform();
+
+    serviceResponse.data = wrapperFormatterRsp.data;
+  };
+
+  Promise.resolve(routeHelper.perform(req, res, next, '/user/Search', 'r_a_v1_ad_2', null, dataFormatterFunc));
+});
+
 module.exports = router;

@@ -68,7 +68,7 @@ class AdminResetPassword extends ServiceBase {
 
     let cacheResp = await new AdminEmailCache({ email: oThis.email }).fetch();
 
-    oThis.adminObj = cacheResp.data[oThis.email];
+    oThis.adminObj = cacheResp.data[oThis.email] || {};
   }
 
   /**

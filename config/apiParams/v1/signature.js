@@ -480,6 +480,24 @@ const v1Signature = {
     optional: []
   },
   [apiName.userSearch]: {
+    mandatory: [
+      {
+        parameter: 'q',
+        validatorMethods: ['validateString']
+      }
+    ],
+    optional: [
+      {
+        parameter: 'includeVideos',
+        validatorMethods: ['validateBoolean']
+      },
+      {
+        parameter: paginationConstants.paginationIdentifierKey,
+        validatorMethods: ['validateString', 'validatePaginationIdentifier']
+      }
+    ]
+  },
+  [apiName.adminUserSearch]: {
     mandatory: [],
     optional: [
       {
