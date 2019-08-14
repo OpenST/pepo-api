@@ -263,7 +263,7 @@ router.post('/thank-you', sanitizer.sanitizeDynamicUrlParams, function(req, res,
 /* user search */
 router.get('/search', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.userSearch;
-  req.decodedParams.includeVideos = true;
+  req.decodedParams.includeVideos = false;
 
   const dataFormatterFunc = async function(serviceResponse) {
     const wrapperFormatterRsp = await new FormatterComposer({
