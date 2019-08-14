@@ -7,6 +7,7 @@ const rootPrefix = '../../..',
   VideoDetailsByUserIdCache = require(rootPrefix + '/lib/cacheManagement/single/VideoDetailsByUserIdPagination'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
+  UserModel = require(rootPrefix + '/app/models/mysql/User'),
   paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination');
 
 /**
@@ -44,6 +45,7 @@ class UserVideos extends ServiceBase {
     oThis.videoDetails = [];
     oThis.videoIds = [];
     oThis.tokenDetails = {};
+    oThis.profileUserObj = null;
   }
 
   /**
@@ -124,6 +126,8 @@ class UserVideos extends ServiceBase {
         })
       );
     }
+
+    oThis.profileUserObj = profileUserByIdResponse.data[oThis.profileUserId];
   }
 
   /**
@@ -136,6 +140,11 @@ class UserVideos extends ServiceBase {
    */
   async _fetchVideoIds() {
     const oThis = this;
+
+    // If user's profile(not self) is not approved, videos would not be shown.
+    if (oThis.currentUserId != oThis.profileUserId && !UserModel.isUserApprovedCreator(oThis.profileUserObj)) {
+      return responseHelper.successWithData({});
+    }
 
     const cacheResponse = await new VideoDetailsByUserIdCache({
       userId: oThis.profileUserId,

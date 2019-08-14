@@ -7,6 +7,7 @@ const rootPrefix = '../../../../..',
   VideoDetailsModel = require(rootPrefix + '/app/models/mysql/VideoDetail'),
   feedsConstants = require(rootPrefix + '/lib/globalConstant/feed'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
+  UserModelKlass = require(rootPrefix + '/app/models/mysql/User'),
   videoLib = require(rootPrefix + '/lib/videoLib');
 
 /**
@@ -172,7 +173,11 @@ class UpdateFanVideo extends UpdateProfileBase {
   async _extraUpdates() {
     // Feed needs to be added for uploaded video
     const oThis = this;
-    await oThis._addFeed();
+
+    // Feed needs to be added only if user is an approved creator.
+    if (UserModelKlass.isUserApprovedCreator(oThis.userObj)) {
+      await oThis._addFeed();
+    }
   }
 
   /**
@@ -194,6 +199,12 @@ class UpdateFanVideo extends UpdateProfileBase {
       .fire();
   }
 
+  /**
+   * Flush cache
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
   async _flushCaches() {
     const oThis = this;
 

@@ -303,6 +303,17 @@ class UserModel extends ModelBase {
   static get usernameUniqueIndexName() {
     return 'uk_idx_1';
   }
+
+  /**
+   * Is user an approved creator
+   *
+   * @param userObj
+   * @returns {boolean}
+   */
+  static isUserApprovedCreator(userObj) {
+    const propertiesArray = new UserModel().getBitwiseArray('properties', userObj.properties);
+    return propertiesArray.indexOf(userConstants.isApprovedCreatorProperty) > -1;
+  }
 }
 
 module.exports = UserModel;
