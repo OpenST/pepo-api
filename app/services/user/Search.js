@@ -68,6 +68,10 @@ class UserSearch extends ServiceBase {
 
     await oThis._fetchTokenUsers();
 
+    await oThis._filterNonActiveUsers();
+
+    await oThis._prepareSearchResults();
+
     if (oThis.includeVideos) {
       await oThis._fetchVideoIds();
 
@@ -127,23 +131,6 @@ class UserSearch extends ServiceBase {
 
     oThis.userIds = userData.userIds;
     oThis.userDetails = userData.userDetails;
-
-    for (let ind = 0; ind < oThis.userIds.length; ind++) {
-      let userId = oThis.userIds[ind];
-      let userDetail = oThis.userDetails[userId];
-
-      oThis.searchResults.push({
-        id: ind,
-        updatedAt: userDetail.updatedAt,
-        userId: userId
-      });
-
-      if (userDetail.profileImageId) {
-        oThis.imageIds.push(userDetail.profileImageId);
-      }
-
-      oThis.nextPaginationTimestamp = userDetail.createdAt;
-    }
   }
 
   /**
@@ -164,6 +151,54 @@ class UserSearch extends ServiceBase {
     }
 
     oThis.tokenUsersByUserIdMap = tokenUserRes.data;
+  }
+
+  /**
+   * Filter non active users - no platform activation
+   *
+   * @return {Promise<void>}
+   * @private
+   */
+  async _filterNonActiveUsers() {
+    const oThis = this;
+
+    for (let ind = 0; ind < oThis.userIds.length; ) {
+      let userId = oThis.userIds[ind];
+      if (!oThis.tokenUsersByUserIdMap[userId].hasOwnProperty('userId')) {
+        oThis.userIds.splice(ind, 1);
+        delete oThis.userDetails[userId];
+        delete oThis.tokenUsersByUserIdMap[userId];
+      } else {
+        ind++; // Increment only if not deleted
+      }
+    }
+  }
+
+  /**
+   * Prepare search results
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _prepareSearchResults() {
+    const oThis = this;
+
+    for (let ind = 0; ind < oThis.userIds.length; ind++) {
+      let userId = oThis.userIds[ind];
+      let userDetail = oThis.userDetails[userId];
+
+      oThis.searchResults.push({
+        id: ind,
+        updatedAt: userDetail.updatedAt,
+        userId: userId
+      });
+
+      if (userDetail.profileImageId) {
+        oThis.imageIds.push(userDetail.profileImageId);
+      }
+
+      oThis.nextPaginationTimestamp = userDetail.createdAt;
+    }
   }
 
   /**
@@ -274,7 +309,7 @@ class UserSearch extends ServiceBase {
 
     const nextPagePayloadKey = {};
 
-    if (oThis.searchResults >= oThis.limit) {
+    if (oThis.searchResults.length >= oThis.limit) {
       nextPagePayloadKey[paginationConstants.paginationIdentifierKey] = {
         pagination_timestamp: oThis.nextPaginationTimestamp
       };
