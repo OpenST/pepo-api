@@ -1,26 +1,12 @@
-const program = require('commander');
-
 const rootPrefix = '../..',
   RabbitMqProcessorBase = require(rootPrefix + '/executables/rabbitMqSubscribers/Base'),
+  socketRabbitMqProvider = require(rootPrefix + '/lib/providers/socketRabbitMq'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
+  webSocketCustomCache = require(rootPrefix + '/lib/webSocket/customCache'),
+  webSocketServerHelper = require(rootPrefix + '/lib/webSocket/helper'),
   cronProcessesConstants = require(rootPrefix + '/lib/globalConstant/cronProcesses'),
-  configStrategyConstants = require(rootPrefix + '/lib/globalConstant/configStrategy');
-
-program.option('--cronProcessId <cronProcessId>', 'Cron table process ID').parse(process.argv);
-
-program.on('--help', function() {
-  logger.log('');
-  logger.log('  Example:');
-  logger.log('');
-  logger.log('    node executables/rabbitMqSubscribers/socketJobProcessor.js --cronProcessId 5');
-  logger.log('');
-  logger.log('');
-});
-
-if (!program.cronProcessId) {
-  program.help();
-  process.exit(1);
-}
+  configStrategyConstants = require(rootPrefix + '/lib/globalConstant/configStrategy'),
+  machineKindConstant = require(rootPrefix + '/lib/globalConstant/machineKind');
 
 /**
  * Class for socket job processor.
@@ -29,13 +15,30 @@ if (!program.cronProcessId) {
  */
 class SocketJobProcessor extends RabbitMqProcessorBase {
   /**
-   * Get rabbitMq config kind.
+   * Constructor for rabbitMq processor base.
+   *
+   * @param {object} params
+   * @param {number} params.cronProcessId
+   *
+   * @constructor
+   */
+  constructor(params) {
+    super(params);
+  }
+
+  /**
+   * Get rabbitMq provider.
    *
    * @returns {string}
-   * @private
    */
-  get _rabbitMqConfigKind() {
-    return configStrategyConstants.notificationRabbitmq;
+  getRmqProvider() {
+    const oThis = this;
+
+    return socketRabbitMqProvider.getInstance(
+      configStrategyConstants.socketRabbitmq,
+      oThis.rmqCId, // This is available in cronProcesses table's params column.
+      machineKindConstant.cronKind
+    );
   }
 
   /**
@@ -55,22 +58,57 @@ class SocketJobProcessor extends RabbitMqProcessorBase {
    * @private
    */
   get _queuePrefix() {
-    return 'socket_';
+    return '';
   }
 
   /**
-   * Returns job processor factory.
+   * This function checks if there are any pending tasks left or not.
    *
-   * @returns {any}
+   * @returns {Boolean}
    */
-  get jobProcessorFactory() {
-    return require(rootPrefix + '/lib/jobs/socket/factory');
+  _pendingTasksDone() {
+    let rmqTaskDone = super._pendingTasksDone();
+    let websocketTaskDone = webSocketServerHelper.pendingTasksDone();
+    console.log('rmqTaskDone-----', rmqTaskDone);
+    console.log('websocketTaskDone-----', websocketTaskDone);
+    if (rmqTaskDone && websocketTaskDone) {
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * Process message.
+   *
+   * @param {object} messageParams
+   * @param {string} messageParams.kind: kind of the bg job
+   * @param {object} messageParams.payload
+   *
+   * @returns {Promise<>}
+   *
+   * @private
+   */
+  _processMessage(messageParams) {
+    const oThis = this,
+      messageDetails = messageParams.message.payload,
+      userIds = messageDetails.userIds,
+      messagePayload = messageDetails.messagePayload;
+
+    for (let j = 0; j < userIds.length; j++) {
+      let socketObjectIds = webSocketCustomCache.getFromUserSocketConnDetailsIdsMap(userIds[j]);
+
+      if (!socketObjectIds || socketObjectIds.length == 0) {
+        continue;
+      }
+      for (let i = 0; i < socketObjectIds.length; i++) {
+        logger.log('userIds[j] ===------------==', j, userIds[j]);
+        let socketObj = webSocketCustomCache.getFromSocketObjsMap(socketObjectIds[i]);
+        socketObj.emit('server-event', JSON.stringify(messagePayload));
+      }
+    }
+
+    return Promise.resolve({});
   }
 }
 
-new SocketJobProcessor({ cronProcessId: +program.cronProcessId }).perform();
-
-setInterval(function() {
-  logger.info('Ending the process. Sending SIGINT.');
-  process.emit('SIGINT');
-}, cronProcessesConstants.continuousCronRestartInterval);
+module.exports = SocketJobProcessor;

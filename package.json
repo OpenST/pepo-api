@@ -23,8 +23,9 @@
     "jsonwebtoken": "8.4.0",
     "morgan": "1.9.1",
     "mysql": "2.16.0",
-    "node-redshift": "0.1.5",
-    "sanitize-html": "1.19.3"
+    "socket.io": "2.2.0",
+    "sanitize-html": "1.19.3",
+    "cassandra-driver": "4.1.0"
   },
   "devDependencies": {
     "eslint": "^5.16.0",

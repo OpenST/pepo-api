@@ -1,7 +1,9 @@
 const rootPrefix = '../..',
-  database = require(rootPrefix + '/lib/globalConstant/database');
+  database = require(rootPrefix + '/lib/globalConstant/database'),
+  DbKindConstant = require(rootPrefix + '/lib/globalConstant/dbKind');
 
 const dbName = database.ostDbName;
+const dbKind = DbKindConstant.sqlDbKind;
 
 const upQuery =
   "CREATE TABLE `ost_events` ( \n\
@@ -20,7 +22,8 @@ const downQuery = 'drop table if exists `ost_events`;';
 const createUsersTable = {
   dbName: dbName,
   up: [upQuery],
-  down: [downQuery]
+  down: [downQuery],
+  dbKind: dbKind
 };
 
 module.exports = createUsersTable;

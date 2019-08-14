@@ -1,0 +1,38 @@
+<!doctype html>
+<html>
+<head>
+    <title>Socket.IO chat</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font: 13px Helvetica, Arial; }
+        form { background: #000; padding: 3px; position: fixed; bottom: 0; width: 100%; }
+        form input { border: 0; padding: 10px; width: 90%; margin-right: .5%; }
+        form button { width: 9%; background: rgb(130, 224, 255); border: none; padding: 10px; }
+        #messages { list-style-type: none; margin: 0; padding: 0; }
+        #messages li { padding: 5px 10px; }
+        #messages li:nth-child(odd) { background: #eee; }
+    </style>
+</head>
+<body>
+<ul id="messages"></ul>
+<form action="">
+    <input id="m" autocomplete="off" /><button>Send</button>
+</form>
+<script src="/socket.io/socket.io.js"></script>
+<script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+<script>
+  $(function () {
+    var socket = io('http://localhost:4000?auth_key_expiry_at=1565688022&payload=YzY5N2VkYzMyNDNmZGU1OTM0YmE2MDE2ZjQwMTJkYjU5MjEzZDEzMjJlMTM4MTkzNzI5NDVjMWJmNGI3YmRkYjIwNmYyOTJkNTg2MDE3NTVhYzQyODFkYWE4ZjBhNmQ4MGQ0YzkwZTBiOGY3ZWU1OGMyY2I1ZDlmZTRkZGExMGJmMTE3YmY5NmE0NjE4OTU2ODY3NDU5ZjJhMTY1NTE2OA==');
+    $('form').submit(function(e){
+      e.preventDefault(); // prevents page reloading
+      socket.emit('chat message', $('#m').val());
+      $('#m').val('');
+      return false;
+    });
+    socket.on('server-event', function(msg){
+      $('#messages').append($('<li>').text(msg));
+    });
+  });
+</script>
+</body>
+</html>

@@ -1,7 +1,10 @@
 const rootPrefix = '../..',
-  database = require(rootPrefix + '/lib/globalConstant/database');
+  database = require(rootPrefix + '/lib/globalConstant/database'),
+  DbKindConstant = require(rootPrefix + '/lib/globalConstant/dbKind');
 
 const dbName = database.ostDbName;
+
+const dbKind = DbKindConstant.sqlDbKind;
 
 const upQuery = 'ALTER TABLE `tokens` \n\
       ADD COLUMN `stake_currency` VARCHAR(255) NOT NULL AFTER `symbol`;';
@@ -11,7 +14,8 @@ const downQuery = 'ALTER TABLE `tokens` DROP `stake_currency`;';
 const addStakeCurrencyInTokens = {
   dbName: dbName,
   up: [upQuery],
-  down: [downQuery]
+  down: [downQuery],
+  dbKind: dbKind
 };
 
 module.exports = addStakeCurrencyInTokens;

@@ -23,7 +23,6 @@ class UpdateProfileInfo extends UpdateProfileBase {
    * Constructor to update user profile.
    *
    * @param {object} params
-   * @param {number} params.user_id
    * @param {string} params.bio
    * @param {string} params.name
    * @param {string} params.user_name
@@ -139,7 +138,7 @@ class UpdateProfileInfo extends UpdateProfileBase {
       promises.push(
         new AddUpdateUserBioClass({
           bio: oThis.bio,
-          userId: oThis.userId,
+          userId: oThis.profileUserId,
           profileElementObj: oThis.profileElements[userProfileElementConst.bioIdKind],
           flushCache: 0
         })
@@ -155,7 +154,7 @@ class UpdateProfileInfo extends UpdateProfileBase {
       promises.push(
         new AddUpdateUserLinkClass({
           url: oThis.link,
-          userId: oThis.userId,
+          userId: oThis.profileUserId,
           profileElementObj: oThis.profileElements[userProfileElementConst.linkIdKind],
           flushCache: 0
         }).perform()
@@ -184,7 +183,7 @@ class UpdateProfileInfo extends UpdateProfileBase {
           name: oThis.name,
           user_name: oThis.username
         })
-        .where({ id: oThis.userId })
+        .where({ id: oThis.profileUserId })
         .fire()
         .catch(async function(err) {
           if (UserModelClass.isDuplicateIndexViolation(UserModelClass.usernameUniqueIndexName, err)) {
@@ -222,7 +221,7 @@ class UpdateProfileInfo extends UpdateProfileBase {
 
     if (oThis.bioUpdateRequired) {
       await new AssociateTagsToUser({
-        userId: oThis.userId,
+        userId: oThis.profileUserId,
         tagIds: oThis.tagIds,
         tagAddedKind: userTagConstants.selfAddedKind
       }).perform();

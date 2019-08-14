@@ -153,24 +153,6 @@ const v1Signature = {
       }
     ]
   },
-  [apiName.userActivity]: {
-    mandatory: [
-      {
-        parameter: 'current_user',
-        validatorMethods: ['validateNonEmptyObject']
-      },
-      {
-        parameter: 'user_id',
-        validatorMethods: ['validateNonZeroInteger']
-      }
-    ],
-    optional: [
-      {
-        parameter: paginationConstants.paginationIdentifierKey,
-        validatorMethods: ['validateString', 'validatePaginationIdentifier']
-      }
-    ]
-  },
   [apiName.gifsCategories]: {
     mandatory: [],
     optional: []
@@ -190,24 +172,6 @@ const v1Signature = {
       {
         parameter: 'meta',
         validatorMethods: ['validateNonEmptyObject', 'validateOstTransactionMeta']
-      },
-      {
-        parameter: 'video_id',
-        validatorMethods: ['validateNonZeroInteger']
-      }
-    ]
-  },
-  [apiName.publicActivity]: {
-    mandatory: [
-      {
-        parameter: 'current_user',
-        validatorMethods: ['validateNonEmptyObject']
-      }
-    ],
-    optional: [
-      {
-        parameter: paginationConstants.paginationIdentifierKey,
-        validatorMethods: ['validateString', 'validatePaginationIdentifier']
       }
     ]
   },
@@ -451,14 +415,51 @@ const v1Signature = {
       }
     ]
   },
+  [apiName.websocketDetails]: {
+    mandatory: [
+      {
+        parameter: 'user_id',
+        validatorMethods: ['validateInteger']
+      },
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      }
+    ],
+    optional: []
+  },
   [apiName.getUserNotifications]: {
     mandatory: [
       {
-        parameter: 'profile_user_id',
-        validatorMethods: ['validateNonZeroInteger']
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
       }
     ],
     optional: [
+      {
+        parameter: paginationConstants.paginationIdentifierKey,
+        validatorMethods: ['validateString', 'validatePaginationIdentifier']
+      }
+    ]
+  },
+  [apiName.sayThankYou]: {
+    mandatory: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      },
+      {
+        parameter: 'notification_id',
+        validatorMethods: ['validateString', 'validateNotificationId']
+      },
+      {
+        parameter: 'text',
+        validatorMethods: ['validateString']
+      }
+    ]
+  },
+  [apiName.twitterDisconnect]: {
+    mandatory: [
       {
         parameter: 'current_user',
         validatorMethods: ['validateNonEmptyObject']

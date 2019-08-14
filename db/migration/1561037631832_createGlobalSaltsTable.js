@@ -1,7 +1,9 @@
 const rootPrefix = '../..',
-  database = require(rootPrefix + '/lib/globalConstant/database');
+  database = require(rootPrefix + '/lib/globalConstant/database'),
+  DbKindConstant = require(rootPrefix + '/lib/globalConstant/dbKind');
 
 const dbName = database.bigDbName;
+const dbKind = DbKindConstant.sqlDbKind;
 
 const migrationName = {
   dbName: dbName,
@@ -18,7 +20,8 @@ const migrationName = {
   UNIQUE KEY `uk_1` (`kind`, `status`) \n\
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;'
   ],
-  down: ['DROP TABLE global_salts']
+  down: ['DROP TABLE global_salts'],
+  dbKind: dbKind
 };
 
 module.exports = migrationName;

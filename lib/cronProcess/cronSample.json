@@ -3,21 +3,14 @@
     "abcd": "1234",
     "sequenceNumber": 1
   },
-  "cronProcessesMonitor": {
-    "ncbhjc": "hwvtuc"
-  },
+  "cronProcessesMonitor": {},
   "bgJobProcessor": {
     "topics": ["bg.#"],
     "queues": ["example"],
     "prefetchCount": 1
   },
   "notificationJobProcessor": {
-    "topics": ["notification.#"],
-    "queues": ["example"],
-    "prefetchCount": 1
-  },
-  "socketJobProcessor": {
-    "topics": ["socket.#"],
+    "topics": ["un.#"],
     "queues": ["example"],
     "prefetchCount": 1
   }

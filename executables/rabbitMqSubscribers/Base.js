@@ -7,9 +7,7 @@ const rootPrefix = '../..',
   RabbitmqSubscription = require(rootPrefix + '/lib/entity/RabbitSubscription'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
-  rabbitMqProvider = require(rootPrefix + '/lib/providers/rabbitMq'),
-  createErrorLogsEntry = require(rootPrefix + '/lib/errorLogs/createEntry'),
-  machineKindConstant = require(rootPrefix + '/lib/globalConstant/machineKind');
+  createErrorLogsEntry = require(rootPrefix + '/lib/errorLogs/createEntry');
 
 /**
  * Class for rabbitMq processor base.
@@ -159,10 +157,7 @@ class ProcessorBase extends CronBase {
 
       const rabbitMqSubscription = oThis.subscriptionTopicToDataMap[subscriptionTopic];
 
-      const ostNotification = await rabbitMqProvider.getInstance(
-        oThis._rabbitMqConfigKind,
-        machineKindConstant.cronKind
-      );
+      const ostNotification = await oThis.getRmqProvider();
 
       // Below condition is to save from multiple subscriptions by command messages.
       if (!rabbitMqSubscription.isSubscribed()) {
@@ -208,7 +203,7 @@ class ProcessorBase extends CronBase {
                     }
                   )
                   .catch(function(error) {
-                    logger.error('Error in execute transaction', error);
+                    logger.error('Error in subscription', error);
 
                     return Promise.resolve({});
                   });
@@ -417,7 +412,7 @@ class ProcessorBase extends CronBase {
    * @returns {string}
    * @private
    */
-  get _rabbitMqConfigKind() {
+  getRmqProvider() {
     throw new Error('Sub-class to implement.');
   }
 

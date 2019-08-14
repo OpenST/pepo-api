@@ -1,9 +1,7 @@
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   GetProfile = require(rootPrefix + '/lib/user/profile/Get'),
-  CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   GetTokenService = require(rootPrefix + '/app/services/token/Get'),
-  UserMultiCache = require(rootPrefix + '/lib/cacheManagement/multi/User'),
   VideoDetailsByUserIdCache = require(rootPrefix + '/lib/cacheManagement/single/VideoDetailsByUserIdPagination'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
@@ -57,15 +55,15 @@ class UserVideos extends ServiceBase {
   async _asyncPerform() {
     const oThis = this;
 
-    let promisesArray = [];
-    promisesArray.push(oThis._validateAndSanitizeParams());
-    promisesArray.push(oThis._validateProfileUserId());
-    await Promise.all(promisesArray);
+    await oThis._validateAndSanitizeParams();
+
+    let resp = await oThis._validateProfileUserId();
+    oThis.profileUserObj = resp.data.userObject;
 
     await oThis._fetchVideoIds();
     oThis._addResponseMetaData();
 
-    promisesArray = [];
+    let promisesArray = [];
     promisesArray.push(oThis._setTokenDetails());
     promisesArray.push(oThis._getVideos());
     await Promise.all(promisesArray);
@@ -99,38 +97,6 @@ class UserVideos extends ServiceBase {
   }
 
   /**
-   * Validate whether profile userId is correct or not.
-   *
-   * @returns {Promise<*>}
-   * @private
-   */
-  async _validateProfileUserId() {
-    const oThis = this;
-
-    const profileUserByIdResponse = await new UserMultiCache({ ids: [oThis.profileUserId] }).fetch();
-
-    if (profileUserByIdResponse.isFailure()) {
-      return Promise.reject(profileUserByIdResponse);
-    }
-
-    if (!CommonValidators.validateNonEmptyObject(profileUserByIdResponse.data[oThis.profileUserId])) {
-      return Promise.reject(
-        responseHelper.error({
-          internal_error_identifier: 'a_s_u_v_1',
-          api_error_identifier: 'unauthorized_api_request',
-          debug_options: {
-            reason: 'Invalid userId',
-            profileUserId: oThis.profileUserId,
-            currentUserId: oThis.currentUserId
-          }
-        })
-      );
-    }
-
-    oThis.profileUserObj = profileUserByIdResponse.data[oThis.profileUserId];
-  }
-
-  /**
    * Fetch video ids.
    *
    * @sets oThis.nextPaginationTimestamp
@@ -156,16 +122,16 @@ class UserVideos extends ServiceBase {
       return Promise.reject(cacheResponse);
     }
 
-    const videoDetails = cacheResponse.data;
+    const videoDetails = cacheResponse.data.videoDetails;
+    const videoIds = cacheResponse.data.videoIds;
 
-    for (const videoId in videoDetails) {
+    for (let ind = 0; ind < videoIds.length; ind++) {
+      let videoId = videoIds[ind];
       const videoDetail = videoDetails[videoId];
       oThis.videosCount++;
       oThis.videoDetails.push(videoDetail);
       oThis.videoIds.push(videoDetail.videoId);
-      if (!oThis.nextPaginationTimestamp) {
-        oThis.nextPaginationTimestamp = videoDetail.createdAt;
-      }
+      oThis.nextPaginationTimestamp = videoDetail.createdAt;
     }
 
     return responseHelper.successWithData({});

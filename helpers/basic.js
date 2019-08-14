@@ -352,6 +352,15 @@ class BasicHelper {
   }
 
   /**
+   * Get current timestamp in minutes.
+   *
+   * @return {number}
+   */
+  getCurrentTimestampInMinutes() {
+    return Math.floor(new Date().getTime() / (60 * 1000));
+  }
+
+  /**
    * Checks whether the object is empty or not.
    *
    * @param {object} obj
@@ -428,7 +437,7 @@ class BasicHelper {
   }
 
   /**
-   * Convert date to timestamp.
+   * Convert date to timestamp in seconds.
    *
    * @param {string} dateStr
    *
@@ -436,6 +445,17 @@ class BasicHelper {
    */
   dateToSecondsTimestamp(dateStr) {
     return Math.floor(new Date(dateStr).getTime() / 1000);
+  }
+
+  /**
+   * Convert date to timestamp in milli-seconds..
+   *
+   * @param {string} dateStr
+   *
+   * @return {number} timestamp
+   */
+  dateToMilliSecondsTimestamp(dateStr) {
+    return new Date(dateStr).getTime();
   }
 
   /**

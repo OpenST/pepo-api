@@ -1,26 +1,31 @@
 const rootPrefix = '../../../../..',
-  UpdateProfileBase = require(rootPrefix + '/app/services/user/profile/update/Base'),
   UserModelKlass = require(rootPrefix + '/app/models/mysql/User'),
-  imageConstants = require(rootPrefix + '/lib/globalConstant/image'),
+  UpdateProfileBase = require(rootPrefix + '/app/services/user/profile/update/Base'),
+  imageLib = require(rootPrefix + '/lib/imageLib'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
-  imageLib = require(rootPrefix + '/lib/imageLib');
+  imageConstants = require(rootPrefix + '/lib/globalConstant/image');
 
 /**
- * Class to update profile image of user
+ * Class to update profile image of user.
  *
- * @class
+ * @class UpdateProfileImage
  */
 class UpdateProfileImage extends UpdateProfileBase {
   /**
-   * @constructor
+   * Constructor to update profile image of user.
    *
-   * @param params
-   * @param {number} params.user_id - user id
-   * @param {string} params.image_url - s3 profile image url
-   * @param {string} params.width - width fo the image
-   * @param {string} params.height - height fo the image
-   * @param {string} params.size - size fo the image
-   * @param {boolean} params.isExternalUrl - image source is other than s3 upload
+   * @param {object} params
+   * @param {number} params.profile_user_id
+   * @param {object} params.current_user
+   * @param {string} params.image_url: s3 profile image url
+   * @param {string} params.width: width fo the image
+   * @param {string} params.height: height fo the image
+   * @param {string} params.size: size fo the image
+   * @param {boolean} params.isExternalUrl: image source is other than s3 upload
+   *
+   * @augments UpdateProfileBase
+   *
+   * @constructor
    */
   constructor(params) {
     super(params);
@@ -32,19 +37,20 @@ class UpdateProfileImage extends UpdateProfileBase {
     oThis.height = oThis.params.height;
     oThis.size = oThis.params.size;
     oThis.isExternalUrl = oThis.params.isExternalUrl;
+
     oThis.imageId = null;
   }
 
   /**
-   * Validate Params
+   * Validate params.
    *
-   * @returns {Promise<void>}
+   * @returns {Promise<*>}
    * @private
    */
   async _validateParams() {
     const oThis = this;
 
-    let resp = imageLib.validateImageObj({
+    const resp = imageLib.validateImageObj({
       imageUrl: oThis.url,
       size: oThis.size,
       width: oThis.width,
@@ -64,19 +70,19 @@ class UpdateProfileImage extends UpdateProfileBase {
   }
 
   /**
-   * Check whether update is required or not
+   * Check whether update is required or not.
    *
-   * @returns {Promise<void>}
+   * @returns {Promise<result>}
    * @private
    */
   async _isUpdateRequired() {
-    const oThis = this;
-
     return responseHelper.successWithData({ noUpdates: false });
   }
 
   /**
-   * Update user profile image
+   * Update user profile image.
+   *
+   * @sets oThis.imageId
    *
    * @return {Promise<void>}
    * @private
@@ -84,13 +90,13 @@ class UpdateProfileImage extends UpdateProfileBase {
   async _updateProfileElements() {
     const oThis = this;
 
-    let resp = await imageLib.validateAndSave({
+    const resp = await imageLib.validateAndSave({
       imageUrl: oThis.url,
       size: oThis.size,
       width: oThis.width,
       height: oThis.height,
       kind: imageConstants.profileImageKind,
-      userId: oThis.userId,
+      userId: oThis.profileUserId,
       isExternalUrl: oThis.isExternalUrl,
       enqueueResizer: true
     });
@@ -102,7 +108,7 @@ class UpdateProfileImage extends UpdateProfileBase {
   }
 
   /**
-   * Update user
+   * Update user.
    *
    * @returns {Promise<void>}
    * @private
@@ -114,7 +120,7 @@ class UpdateProfileImage extends UpdateProfileBase {
       .update({
         profile_image_id: oThis.imageId
       })
-      .where({ id: oThis.userId })
+      .where({ id: oThis.profileUserId })
       .fire();
   }
 }
