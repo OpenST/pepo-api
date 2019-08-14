@@ -90,9 +90,9 @@ class HasUnreadNotifications extends ServiceBase {
     const userNotificationVisitDetails = promisesResponse[1],
       lastVisitedAt = userNotificationVisitDetails.lastVisitedAt || 0;
 
-    const finalRsp = { unreadFlag: 0 };
+    const finalRsp = { notificationUnread: { flag: 0 } };
     if (lastActionTimestamp && lastActionTimestamp > lastVisitedAt) {
-      finalRsp.unreadFlag = 1;
+      finalRsp.notificationUnread.flag = 1;
     }
 
     return finalRsp;
