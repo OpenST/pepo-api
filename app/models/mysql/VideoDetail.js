@@ -104,7 +104,7 @@ class VideoDetail extends ModelBase {
    * @param {integer} params.limit: no of rows to fetch
    * @param {integer} params.creatorUserId: creator user id
    * @param {integer} params.paginationTimestamp: creator user id
-   * @return {Promise<void>}
+   * @return {Promise}
    */
   async fetchByCreatorUserId(params) {
     const oThis = this,

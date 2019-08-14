@@ -478,6 +478,23 @@ const v1Signature = {
       }
     ],
     optional: []
+  },
+  [apiName.userSearch]: {
+    mandatory: [],
+    optional: [
+      {
+        parameter: 'includeVideos',
+        validatorMethods: ['validateBoolean']
+      },
+      {
+        parameter: 'q',
+        validatorMethods: ['validateString']
+      },
+      {
+        parameter: paginationConstants.paginationIdentifierKey,
+        validatorMethods: ['validateString', 'validatePaginationIdentifier']
+      }
+    ]
   }
 };
 
