@@ -438,6 +438,7 @@ class TwitterSignup extends ServiceBase {
 
       if (!insertResponse) {
         logger.error('Error while inserting data in twitter users table.');
+
         return Promise.reject(new Error('Error while inserting data in twitter users table.'));
       }
 
