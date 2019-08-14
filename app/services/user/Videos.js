@@ -123,7 +123,7 @@ class UserVideos extends ServiceBase {
     }
 
     const videoDetails = cacheResponse.data.videoDetails;
-    const videoIds = cacheResponse.data.videoIds;
+    const videoIds = cacheResponse.data.videoIds || [];
 
     for (let ind = 0; ind < videoIds.length; ind++) {
       let videoId = videoIds[ind];

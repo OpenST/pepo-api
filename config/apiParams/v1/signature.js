@@ -513,6 +513,15 @@ const v1Signature = {
         validatorMethods: ['validateString', 'validatePaginationIdentifier']
       }
     ]
+  },
+  [apiName.adminUserApprove]: {
+    mandatory: [
+      {
+        parameter: 'user_ids',
+        validatorMethods: ['validateArray']
+      }
+    ],
+    optional: []
   }
 };
 

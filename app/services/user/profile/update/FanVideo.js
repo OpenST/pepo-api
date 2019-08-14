@@ -8,8 +8,8 @@ const rootPrefix = '../../../../..',
   VideoAddNotification = require(rootPrefix + '/lib/userNotificationPublisher/VideoAdd'),
   videoLib = require(rootPrefix + '/lib/videoLib'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
-  feedsConstants = require(rootPrefix + '/lib/globalConstant/feed');
-UserModelKlass = require(rootPrefix + '/app/models/mysql/User');
+  feedsConstants = require(rootPrefix + '/lib/globalConstant/feed'),
+  UserModelKlass = require(rootPrefix + '/app/models/mysql/User');
 
 /**
  * Class to update fan video and image save.
@@ -124,11 +124,6 @@ class UpdateFanVideo extends UpdateProfileBase {
 
     if (oThis.videoId) {
       await oThis._addProfileElement(oThis.videoId, userProfileElementConst.coverVideoIdKind);
-
-      await new VideoAddNotification({
-        userId: oThis.profileUserId,
-        videoId: oThis.videoId
-      }).perform();
     }
 
     if (coverImageId) {
@@ -190,6 +185,11 @@ class UpdateFanVideo extends UpdateProfileBase {
     // Feed needs to be added only if user is an approved creator.
     if (UserModelKlass.isUserApprovedCreator(oThis.userObj)) {
       await oThis._addFeed();
+      // Notification would be published only if user is approved.
+      await new VideoAddNotification({
+        userId: oThis.profileUserId,
+        videoId: oThis.videoId
+      }).perform();
     }
   }
 

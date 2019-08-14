@@ -46,7 +46,7 @@ router.post('/logout', sanitizer.sanitizeDynamicUrlParams, function(req, res) {
   Promise.resolve(responseHelper.renderApiResponse(responseObject, res, errorConfig));
 });
 
-/* admin users */
+/* users list */
 router.get('/users', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.adminUserSearch;
   req.decodedParams.includeVideos = true;
@@ -68,6 +68,14 @@ router.get('/users', sanitizer.sanitizeDynamicUrlParams, function(req, res, next
   };
 
   Promise.resolve(routeHelper.perform(req, res, next, '/user/Search', 'r_a_v1_ad_2', null, dataFormatterFunc));
+});
+
+/* Approve user as creator */
+router.post('/users/:user_id/approve', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.adminUserApprove;
+  req.decodedParams.user_ids = [req.params.user_id];
+
+  Promise.resolve(routeHelper.perform(req, res, next, '/admin/ApproveUsers', 'r_a_v1_ad_3', null, null, null));
 });
 
 module.exports = router;

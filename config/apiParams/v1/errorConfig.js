@@ -45,6 +45,11 @@ const v1ErrorConfig = {
     code: 'invalid',
     message: 'User login has been disabled.'
   },
+  user_already_approved: {
+    parameter: 'user_id',
+    code: 'invalid',
+    message: 'User is already approved.'
+  },
   duplicate_user_name: {
     parameter: 'user_name',
     code: 'invalid',
