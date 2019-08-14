@@ -263,16 +263,16 @@ router.post('/thank-you', sanitizer.sanitizeDynamicUrlParams, function(req, res,
 /* user search */
 router.get('/search', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.userSearch;
-  req.decodedParams.q = req.params.q;
   req.decodedParams.includeVideos = true;
 
   const dataFormatterFunc = async function(serviceResponse) {
     const wrapperFormatterRsp = await new FormatterComposer({
       resultType: responseEntityKey.searchResults,
       entityKindToResponseKeyMap: {
-        [entityType.userSearchList]: responseEntityKey.userSearchList,
+        [entityType.userSearchList]: responseEntityKey.searchResults,
         [entityType.usersMap]: responseEntityKey.users,
         [entityType.imagesMap]: responseEntityKey.images,
+        [entityType.videosMap]: responseEntityKey.videos,
         [entityType.videoDetailsMap]: responseEntityKey.videoDetails,
         [entityType.userSearchMeta]: responseEntityKey.meta
       },

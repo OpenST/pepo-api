@@ -287,7 +287,7 @@ class UserModel extends ModelBase {
       query = params.query,
       paginationTimestamp = params.paginationTimestamp;
 
-    const queryObject = await oThis
+    const queryObject = oThis
       .select('*')
       .where({ status: userConstants.invertedStatuses[userConstants.activeStatus] })
       .limit(limit)

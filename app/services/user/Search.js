@@ -4,6 +4,7 @@ const rootPrefix = '../../..',
   UserProfileElementsByUserIdCache = require(rootPrefix + '/lib/cacheManagement/multi/UserProfileElementsByUserIds'),
   VideoDetailsByVideoIds = require(rootPrefix + '/lib/cacheManagement/multi/VideoDetailsByVideoIds'),
   TokenUserDetailByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TokenUserByUserIds'),
+  VideoByIdCache = require(rootPrefix + '/lib/cacheManagement/multi/VideoByIds'),
   UserModel = require(rootPrefix + '/app/models/mysql/User'),
   userProfileElementConst = require(rootPrefix + '/lib/globalConstant/userProfileElement'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
@@ -33,7 +34,7 @@ class UserSearch extends ServiceBase {
 
     const oThis = this;
 
-    oThis.query = params.q;
+    oThis.query = params.q ? params.q.toLowerCase() : null;
     oThis.currentUser = params.current_user;
     oThis.includeVideos = params.includeVideos;
 
@@ -42,6 +43,7 @@ class UserSearch extends ServiceBase {
     oThis.videoIds = [];
     oThis.userDetails = {};
     oThis.imageDetails = {};
+    oThis.videos = {};
     oThis.videoDetails = {};
     oThis.tokenUsersByUserIdMap = {};
     oThis.searchResults = [];
@@ -66,13 +68,15 @@ class UserSearch extends ServiceBase {
 
     await oThis._fetchTokenUsers();
 
-    await oThis._fetchProfileImages();
-
     if (oThis.includeVideos) {
       await oThis._fetchVideoIds();
 
+      await oThis._fetchVideos();
+
       await oThis._fetchVideoDetails();
     }
+
+    await oThis._fetchImages();
 
     await oThis._addResponseMetaData();
 
@@ -133,7 +137,10 @@ class UserSearch extends ServiceBase {
         updatedAt: userDetail.updatedAt,
         userId: userId
       });
-      oThis.imageIds.push(userDetail.profileImageId);
+
+      if (userDetail.profileImageId) {
+        oThis.imageIds.push(userDetail.profileImageId);
+      }
 
       oThis.nextPaginationTimestamp = userDetail.createdAt;
     }
@@ -160,22 +167,6 @@ class UserSearch extends ServiceBase {
   }
 
   /**
-   * Fetch profile image
-   *
-   * @returns {Promise<void>}
-   * @private
-   */
-  async _fetchProfileImages() {
-    const oThis = this;
-
-    let imageByIdCache = new ImageByIdCache({ ids: oThis.imageIds });
-
-    let imageData = await imageByIdCache.fetch();
-
-    oThis.imageDetails = imageData.data;
-  }
-
-  /**
    * Fetch video ids
    *
    * @returns {Promise<void>}
@@ -192,17 +183,50 @@ class UserSearch extends ServiceBase {
 
     let profileElements = cacheRsp.data;
 
+    // Fetch cover video id from profile elements
     for (let userId in profileElements) {
-      let videoId = profileElements[userId][userProfileElementConst.coverVideoIdKind].data;
-      oThis.videoIds.push(videoId);
+      let element = profileElements[userId];
 
-      oThis.userToVideoMap[userId] = videoId;
+      oThis.userToVideoMap[userId] = null;
+
+      if (element.hasOwnProperty(userProfileElementConst.coverVideoIdKind)) {
+        let videoId = element[userProfileElementConst.coverVideoIdKind].data;
+        oThis.videoIds.push(videoId);
+        oThis.userToVideoMap[userId] = videoId;
+      }
     }
 
     for (let ind = 0; ind < oThis.searchResults.length; ind++) {
       let userId = oThis.searchResults[ind].userId;
       oThis.searchResults[ind]['videoId'] = oThis.userToVideoMap[userId];
     }
+  }
+
+  /**
+   * Fetch videos
+   *
+   * @return {Promise<never>}
+   * @private
+   */
+  async _fetchVideos() {
+    const oThis = this;
+
+    let cacheRsp = await new VideoByIdCache({ ids: oThis.videoIds }).fetch();
+
+    if (cacheRsp.isFailure()) {
+      return Promise.reject(cacheRsp);
+    }
+
+    for (let videoId in cacheRsp.data) {
+      let video = cacheRsp.data[videoId],
+        posterImageId = video.posterImageId;
+
+      if (posterImageId) {
+        oThis.imageIds.push(posterImageId);
+      }
+    }
+
+    oThis.videos = cacheRsp.data;
   }
 
   /**
@@ -219,6 +243,22 @@ class UserSearch extends ServiceBase {
     let cacheRsp = await videoDetailsByVideoIds.fetch();
 
     oThis.videoDetails = cacheRsp.data;
+  }
+
+  /**
+   * Fetch images
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _fetchImages() {
+    const oThis = this;
+
+    let imageByIdCache = new ImageByIdCache({ ids: oThis.imageIds });
+
+    let imageData = await imageByIdCache.fetch();
+
+    oThis.imageDetails = imageData.data;
   }
 
   /**
@@ -265,6 +305,7 @@ class UserSearch extends ServiceBase {
     };
 
     if (oThis.includeVideos) {
+      response['videoMap'] = oThis.videos;
       response[entityType.videoDetailsMap] = oThis.videoDetails;
     }
 
