@@ -2,7 +2,6 @@ const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   ImageByIdCache = require(rootPrefix + '/lib/cacheManagement/multi/ImageByIds'),
   UserProfileElementsByUserIdCache = require(rootPrefix + '/lib/cacheManagement/multi/UserProfileElementsByUserIds'),
-  VideoDetailsByVideoIds = require(rootPrefix + '/lib/cacheManagement/multi/VideoDetailsByVideoIds'),
   TokenUserDetailByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TokenUserByUserIds'),
   VideoByIdCache = require(rootPrefix + '/lib/cacheManagement/multi/VideoByIds'),
   UserModel = require(rootPrefix + '/app/models/mysql/User'),
@@ -44,7 +43,6 @@ class UserSearch extends ServiceBase {
     oThis.userDetails = {};
     oThis.imageDetails = {};
     oThis.videos = {};
-    oThis.videoDetails = {};
     oThis.tokenUsersByUserIdMap = {};
     oThis.searchResults = [];
     oThis.paginationTimestamp = null;
@@ -76,8 +74,6 @@ class UserSearch extends ServiceBase {
       await oThis._fetchVideoIds();
 
       await oThis._fetchVideos();
-
-      await oThis._fetchVideoDetails();
     }
 
     await oThis._fetchImages();
@@ -265,22 +261,6 @@ class UserSearch extends ServiceBase {
   }
 
   /**
-   * Fetch video details
-   *
-   * @returns {Promise<void>}
-   * @private
-   */
-  async _fetchVideoDetails() {
-    const oThis = this;
-
-    let videoDetailsByVideoIds = new VideoDetailsByVideoIds({ videoIds: oThis.videoIds });
-
-    let cacheRsp = await videoDetailsByVideoIds.fetch();
-
-    oThis.videoDetails = cacheRsp.data;
-  }
-
-  /**
    * Fetch images
    *
    * @returns {Promise<void>}
@@ -341,7 +321,6 @@ class UserSearch extends ServiceBase {
 
     if (oThis.includeVideos) {
       response['videoMap'] = oThis.videos;
-      response[entityType.videoDetailsMap] = oThis.videoDetails;
     }
 
     return responseHelper.successWithData(response);
