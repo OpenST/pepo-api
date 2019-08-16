@@ -33,7 +33,8 @@ class UserSearch extends ServiceBase {
 
     const oThis = this;
 
-    oThis.query = params.q ? params.q.toLowerCase() : null;
+    oThis.query = params.q ? params.q.toLowerCase() : null; // lower case
+    oThis.query = oThis.query ? oThis.query.trim() : null; // trim spaces
     oThis.currentUser = params.current_user;
     oThis.includeVideos = params.includeVideos;
 
