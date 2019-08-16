@@ -1,9 +1,9 @@
 const rootPrefix = '../../..',
-  BgJob = require(rootPrefix + '/lib/BgJob'),
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   OstEventModel = require(rootPrefix + '/app/models/mysql/OstEvent'),
-  ProcessOstEventClass = require(rootPrefix + '/app/services/ostEvents/Process'),
+  // ProcessOstEventClass = require(rootPrefix + '/app/services/ostEvents/Process'),
+  bgJob = require(rootPrefix + '/lib/rabbitMqEnqueue/bgJob'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   bgJobConstants = require(rootPrefix + '/lib/globalConstant/bgJob'),
@@ -121,11 +121,11 @@ class OstEventCreate extends ServiceBase {
 
     logger.log('Publish Ost Event');
 
-    let messagePayload = {
+    const messagePayload = {
       ostEventId: oThis.ostEventId
     };
 
-    await BgJob.enqueue(bgJobConstants.ostWebhookJobTopic, messagePayload);
+    await bgJob.enqueue(bgJobConstants.ostWebhookJobTopic, messagePayload);
 
     //await new ProcessOstEventClass({ ostEventId: oThis.ostEventId }).perform();
 

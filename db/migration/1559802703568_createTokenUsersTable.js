@@ -1,7 +1,10 @@
 const rootPrefix = '../..',
-  database = require(rootPrefix + '/lib/globalConstant/database');
+  database = require(rootPrefix + '/lib/globalConstant/database'),
+  DbKindConstant = require(rootPrefix + '/lib/globalConstant/dbKind');
 
 const dbName = database.userDbName;
+const dbKind = DbKindConstant.sqlDbKind;
+
 const upQuery =
   "CREATE TABLE `token_users` ( \n\
   `id` bigint(20) NOT NULL AUTO_INCREMENT, \n\
@@ -24,7 +27,8 @@ const downQuery = 'drop table if exists `token_users`;';
 const createTokenUsersTable = {
   dbName: dbName,
   up: [upQuery],
-  down: [downQuery]
+  down: [downQuery],
+  dbKind: dbKind
 };
 
 module.exports = createTokenUsersTable;

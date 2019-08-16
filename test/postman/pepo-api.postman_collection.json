@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "140d2c40-0391-48fb-8710-b69a76f2024f",
+		"_postman_id": "c4287f75-a232-451f-87da-c2fe7c7e0daf",
 		"name": "pepo-api",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -77,12 +77,12 @@
 							"urlencoded": [
 								{
 									"key": "token",
-									"value": "819112169035988992-DsgmadqWCPmgP1RoouNOOvBYWMEV19z",
+									"value": "819112169035988992-BWLGsfoJodpugIoICBTsYdLr7Agyk94",
 									"type": "text"
 								},
 								{
 									"key": "secret",
-									"value": "8YCRJPLmERw7hWEqB4lI16RZpCCQiSiuaxpv7D2W57Pq2",
+									"value": "3uthp75ekckxsTQG3SjrM60bPl1Z7zBYYFW7ltVoqD1VL",
 									"type": "text"
 								},
 								{
@@ -180,6 +180,26 @@
 								"v1",
 								"auth",
 								"logout"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "twitter-disconnect",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{api_server}}/api/v1/auth/twitter-disconnect",
+							"host": [
+								"{{api_server}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"twitter-disconnect"
 							]
 						}
 					},
@@ -465,6 +485,62 @@
 					"response": []
 				},
 				{
+					"name": "video-history",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/x-www-form-urlencoded"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "name",
+									"value": "Pankaj Keswani",
+									"type": "text"
+								},
+								{
+									"key": "user_name",
+									"value": "pankaj",
+									"type": "text"
+								},
+								{
+									"key": "bio",
+									"value": "This is my bio, please save it with #cool",
+									"type": "text"
+								},
+								{
+									"key": "link",
+									"value": "https://www.facebook.com",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{api_server}}/api/v1/users/1/video-history",
+							"host": [
+								"{{api_server}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"users",
+								"1",
+								"video-history"
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "update-profile-image",
 					"request": {
 						"method": "POST",
@@ -605,6 +681,55 @@
 					"response": []
 				},
 				{
+					"name": "say-thank-you",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/x-www-form-urlencoded"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "notification_id",
+									"value": "'eyJ1c2VyX2lkIjoxMDAwMTEsImxhc3RfYWN0aW9uX3RpbWVzdGFtcCI6MTIzNTQzMjQzMjEsInV1aWQiOiJjMzdkNjYxZC03ZTYxLTQ5ZWEtOTZhNS02OGMzNGU4M2RiM2EifQ=='",
+									"type": "text"
+								},
+								{
+									"key": "text",
+									"value": "\"Thank You Tejas\"",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{api_server}}/api/v1/users/thank-you",
+							"host": [
+								"{{api_server}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"users",
+								"thank-you"
+							],
+							"query": [
+								{
+									"key": "image_url",
+									"value": "https://s3.amazonaws.com/uassets.stagingpepo.com/pepo-staging1000/ua/images",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "logged-in-user",
 					"request": {
 						"method": "GET",
@@ -711,6 +836,28 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "websocket-details",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{api_server}}/api/v1/users/1000/websocket-details",
+							"host": [
+								"{{api_server}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"users",
+								"1000",
+								"websocket-details"
+							]
+						},
+						"description": "GET websocket details"
+					},
+					"response": []
 				}
 			]
 		},
@@ -739,7 +886,8 @@
 								"{{api_server}}"
 							],
 							"path": [
-								"webhooks/ost",
+								"webhooks",
+								"ost",
 								"v2"
 							]
 						}
@@ -768,7 +916,8 @@
 								"{{api_server}}"
 							],
 							"path": [
-								"webhooks/ost",
+								"webhooks",
+								"ost",
 								"v2"
 							]
 						}
@@ -797,7 +946,8 @@
 								"{{api_server}}"
 							],
 							"path": [
-								"webhooks/ost",
+								"webhooks",
+								"ost",
 								"v2"
 							]
 						}
@@ -826,7 +976,8 @@
 								"{{api_server}}"
 							],
 							"path": [
-								"webhooks/ost",
+								"webhooks",
+								"ost",
 								"v2"
 							]
 						}
@@ -855,7 +1006,8 @@
 								"{{api_server}}"
 							],
 							"path": [
-								"webhooks/ost",
+								"webhooks",
+								"ost",
 								"v2"
 							]
 						}
@@ -945,64 +1097,28 @@
 			]
 		},
 		{
-			"name": "activity",
+			"name": "notification",
 			"item": [
 				{
-					"name": "other-user-activities",
+					"name": "get",
 					"request": {
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{api_server}}/api/v1/users/31/activities",
+							"raw": "{{api_server}}/api/v1/notifications?pagination_identifier=eyJwYWdlX3N0YXRlIjoiMDAyZjAwMDgwMDAwMDE2Yzc2ZTNkYzRlMjQzMDY1NjEzODMwMzAzNDMzMmQ2MjM5NjMzMzJkMzQzNDM4MzcyZDM5MzczMDM2MmQ2MTYzMzUzOTYxNjIzMDYxMzg2NDMwMzRmMDdmZmZmZmY5ZjA3ZmZmZmZmOSJ9",
 							"host": [
 								"{{api_server}}"
 							],
 							"path": [
 								"api",
 								"v1",
-								"users",
-								"31",
-								"activities"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "personal-user-activities",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{api_server}}/api/v1/users/32/activities",
-							"host": [
-								"{{api_server}}"
+								"notifications"
 							],
-							"path": [
-								"api",
-								"v1",
-								"users",
-								"32",
-								"activities"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "public",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{api_server}}/api/v1/activities",
-							"host": [
-								"{{api_server}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"activities"
+							"query": [
+								{
+									"key": "pagination_identifier",
+									"value": "eyJwYWdlX3N0YXRlIjoiMDAyZjAwMDgwMDAwMDE2Yzc2ZTNkYzRlMjQzMDY1NjEzODMwMzAzNDMzMmQ2MjM5NjMzMzJkMzQzNDM4MzcyZDM5MzczMDM2MmQ2MTYzMzUzOTYxNjIzMDYxMzg2NDMwMzRmMDdmZmZmZmY5ZjA3ZmZmZmZmOSJ9"
+								}
 							]
 						}
 					},
@@ -1061,6 +1177,96 @@
 					"response": []
 				}
 			]
+		},
+		{
+			"name": "video",
+			"item": [
+				{
+					"name": "get-video",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/x-www-form-urlencoded"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "name",
+									"value": "Pankaj Keswani",
+									"type": "text"
+								},
+								{
+									"key": "user_name",
+									"value": "pankaj",
+									"type": "text"
+								},
+								{
+									"key": "bio",
+									"value": "This is my bio, please save it with #cool",
+									"type": "text"
+								},
+								{
+									"key": "link",
+									"value": "https://www.facebook.com",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{api_server}}/api/v1/users/1/video-history",
+							"host": [
+								"{{api_server}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"users",
+								"1",
+								"video-history"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "upload-params",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{api_server}}/api/v1/upload-params?videos%5B%5D=anaghaTest1.mp4&images%5B%5D=anaghaTest.jpeg",
+					"host": [
+						"{{api_server}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"upload-params"
+					],
+					"query": [
+						{
+							"key": "videos%5B%5D",
+							"value": "anaghaTest1.mp4"
+						},
+						{
+							"key": "images%5B%5D",
+							"value": "anaghaTest.jpeg"
+						}
+					]
+				}
+			},
+			"response": []
 		}
 	]
 }

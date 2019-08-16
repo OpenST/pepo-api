@@ -18,7 +18,9 @@ class UserContributionBase extends ServiceBase {
    * Constructor for user contribution base.
    *
    * @param {object} params
-   * @param {number/string} params.current_user
+   * @param {object} params.current_user
+   * @param {number/string} params.current_user.id
+   * @param {number/string} params.profile_user_id
    * @param {string} [params.pagination_identifier]
    *
    * @augments ServiceBase
@@ -30,16 +32,19 @@ class UserContributionBase extends ServiceBase {
 
     const oThis = this;
 
-    oThis.currentUserId = params.current_user.id;
+    oThis.currentUserId = +params.current_user.id;
+    oThis.profileUserId = +params.profile_user_id;
     oThis.paginationIdentifier = params[paginationConstants.paginationIdentifierKey] || null;
 
     oThis.limit = null;
     oThis.page = null;
+    oThis.isProfileUserCurrentUser = oThis.profileUserId === oThis.currentUserId;
 
     oThis.imageIds = [];
     oThis.imageMap = {};
     oThis.contributionUserIds = [];
     oThis.usersByIdMap = {};
+    oThis.contributionUsersByUserIdsMap = {};
     oThis.tokenUsersByUserIdMap = {};
   }
 
@@ -56,9 +61,12 @@ class UserContributionBase extends ServiceBase {
 
     await oThis._fetchPaginatedUserIdsFromCache();
 
-    await oThis._fetchUsers();
+    const promisesArray = [];
 
-    await oThis._fetchTokenUsers();
+    promisesArray.push(oThis._fetchUsers());
+    promisesArray.push(oThis._fetchTokenUsers());
+
+    await Promise.all(promisesArray);
 
     await oThis._fetchImages();
 
@@ -78,13 +86,27 @@ class UserContributionBase extends ServiceBase {
 
     if (oThis.paginationIdentifier) {
       const parsedPaginationParams = oThis._parsePaginationParams(oThis.paginationIdentifier);
-      oThis.page = parsedPaginationParams.page; // Override page
+      oThis.page = parsedPaginationParams.page; // Override page.
     } else {
       oThis.page = 1;
     }
     oThis.limit = paginationConstants.defaultUserContributionPageSize;
 
+    if (!oThis.isProfileUserCurrentUser) {
+      await oThis._validateProfileUserId();
+    }
+
     return oThis._validatePageSize();
+  }
+
+  /**
+   * Fetch user ids from cache.
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _fetchPaginatedUserIdsFromCache() {
+    throw new Error('Sub-class to implement.');
   }
 
   /**
@@ -175,7 +197,7 @@ class UserContributionBase extends ServiceBase {
   /**
    * Service response.
    *
-   * @returns {Promise<*>}
+   * @returns {object}
    * @private
    */
   finalResponse() {
@@ -209,7 +231,9 @@ class UserContributionBase extends ServiceBase {
       tokenUsersByUserIdMap: tokenUserHash,
       userIds: oThis.contributionUserIds,
       imageMap: oThis.imageMap,
-      meta: responseMetaData
+      meta: responseMetaData,
+      profileUserId: oThis.profileUserId,
+      contributionUsersByUserIdsMap: oThis.contributionUsersByUserIdsMap
     };
   }
 
@@ -253,16 +277,6 @@ class UserContributionBase extends ServiceBase {
     const oThis = this;
 
     return oThis.limit;
-  }
-
-  /**
-   * Fetch user ids from cache.
-   *
-   * @returns {Promise<void>}
-   * @private
-   */
-  async _fetchPaginatedUserIdsFromCache() {
-    throw new Error('Sub-class to implement.');
   }
 }
 

@@ -1,6 +1,6 @@
 const rootPrefix = '../..',
   ImageModel = require(rootPrefix + '/app/models/mysql/Image'),
-  ResizeImageLib = require(rootPrefix + '/lib/resize/Image'),
+  ResizeImageLib = require(rootPrefix + '/lib/jobs/bg/resize/Image'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   imageConstants = require(rootPrefix + '/lib/globalConstant/image');
 

@@ -2,7 +2,7 @@ const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   UserModel = require(rootPrefix + '/app/models/mysql/User'),
   KmsWrapper = require(rootPrefix + '/lib/aws/KmsWrapper'),
-  BgJob = require(rootPrefix + '/lib/BgJob'),
+  bgJob = require(rootPrefix + '/lib/rabbitMqEnqueue/bgJob'),
   imageLib = require(rootPrefix + '/lib/imageLib'),
   TokenUserModel = require(rootPrefix + '/app/models/mysql/TokenUser'),
   UserByUsernameCache = require(rootPrefix + '/lib/cacheManagement/single/UserByUsername'),
@@ -438,6 +438,7 @@ class TwitterSignup extends ServiceBase {
 
       if (!insertResponse) {
         logger.error('Error while inserting data in twitter users table.');
+
         return Promise.reject(new Error('Error while inserting data in twitter users table.'));
       }
 
@@ -501,14 +502,14 @@ class TwitterSignup extends ServiceBase {
   async _enqueAfterSignupJob() {
     const oThis = this;
 
-    let messagePayload = {
+    const messagePayload = {
       bio: oThis.userTwitterEntity.description,
       twitterUserId: oThis.twitterUserObj.id,
       twitterId: oThis.userTwitterEntity.idStr,
       userId: oThis.userId,
       profileImageId: oThis.profileImageId
     };
-    await BgJob.enqueue(bgJobConstants.afterSignUpJobTopic, messagePayload);
+    await bgJob.enqueue(bgJobConstants.afterSignUpJobTopic, messagePayload);
   }
 
   /**

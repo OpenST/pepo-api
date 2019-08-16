@@ -10,13 +10,14 @@ const rootPrefix = '../../..',
   apiVersions = require(rootPrefix + '/lib/globalConstant/apiVersions'),
   userConstant = require(rootPrefix + '/lib/globalConstant/user'),
   usersRoutes = require(rootPrefix + '/routes/api/v1/users'),
+  videoRoutes = require(rootPrefix + '/routes/api/v1/videos'),
   tokensRoutes = require(rootPrefix + '/routes/api/v1/tokens'),
   gifsRoutes = require(rootPrefix + '/routes/api/v1/gifs'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   feedsRoutes = require(rootPrefix + '/routes/api/v1/feeds'),
-  activitiesRoutes = require(rootPrefix + '/routes/api/v1/activities'),
   cookieHelper = require(rootPrefix + '/lib/cookieHelper'),
   tagRoutes = require(rootPrefix + '/routes/api/v1/tags'),
+  userNotificationsRoutes = require(rootPrefix + '/routes/api/v1/userNotifications'),
   commonValidator = require(rootPrefix + '/lib/validators/Common'),
   uploadParamsRoutes = require(rootPrefix + '/routes/api/v1/uploadParams'),
   rotateTwitterAccountRoutes = require(rootPrefix + '/routes/api/v1/rotateTwitterAccount'),
@@ -67,14 +68,16 @@ const validateLoginRequired = async function(req, res, next) {
 
 // NOTE:- use 'validateLoginRequired' function if you want to use route in logged in only
 
+router.use('/auth/twitter-disconnect', validateCookie, validateLoginRequired, authRoutes);
 router.use('/auth', authRoutes);
 router.use('/users', validateCookie, validateLoginRequired, usersRoutes);
+router.use('/videos', validateCookie, validateLoginRequired, videoRoutes);
 router.use('/tokens', validateCookie, validateLoginRequired, tokensRoutes);
 router.use('/ost-transactions', validateCookie, validateLoginRequired, ostTransactionRoutes);
 router.use('/gifs', validateCookie, validateLoginRequired, gifsRoutes);
-router.use('/activities', validateCookie, validateLoginRequired, activitiesRoutes);
 router.use('/upload-params', validateCookie, validateLoginRequired, uploadParamsRoutes);
 router.use('/tags', validateCookie, validateLoginRequired, tagRoutes);
+router.use('/notifications', validateCookie, validateLoginRequired, userNotificationsRoutes);
 
 // TEMP route - only for QA - TODO - remove later after talking with SOMA
 router.use('/rotate-twitter-account', rotateTwitterAccountRoutes);

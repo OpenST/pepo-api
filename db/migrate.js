@@ -11,7 +11,9 @@ program
 
 const rootPrefix = '..',
   ExecuteQuery = require(rootPrefix + '/db/ExecuteQuery'),
+  ExecuteCassandraQuery = require(rootPrefix + '/db/ExecuteCassandraQuery'),
   database = require(rootPrefix + '/lib/globalConstant/database'),
+  DbKindConstant = require(rootPrefix + '/lib/globalConstant/dbKind'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger');
 
 const migrationFolder = __dirname + '/migration',
@@ -46,6 +48,7 @@ class DbMigrate {
       ._asyncPerform()
       .then(function() {
         logger.win('Done!');
+        process.exit(0);
       })
       .catch(function(err) {
         logger.error(err);
@@ -134,9 +137,9 @@ class DbMigrate {
     const versionInfo = require(migrationFolder + '/' + migrationFile);
 
     for (let index = 0; index < versionInfo.up.length; index++) {
-      const sql = versionInfo.up[index];
+      const query = versionInfo.up[index];
 
-      await new ExecuteQuery(versionInfo.dbName, sql).perform();
+      await oThis._ExecuteQueryForDbKind(versionInfo, query);
     }
 
     const insertVersionSql = "INSERT INTO `schema_migrations` (`version`) VALUES('" + version + "')";
@@ -165,9 +168,9 @@ class DbMigrate {
     const versionInfo = require(migrationFolder + '/' + migrationFile);
 
     for (let index = 0; index < versionInfo.down.length; index++) {
-      const sql = versionInfo.down[index];
+      const query = versionInfo.down[index];
 
-      await new ExecuteQuery(versionInfo.dbName, sql).perform();
+      await oThis._ExecuteQueryForDbKind(versionInfo, query);
     }
 
     const insertVersionSql = "DELETE FROM `schema_migrations` WHERE `version`='" + version + "'";
@@ -236,6 +239,25 @@ class DbMigrate {
 
     oThis.missingVersions.sort();
   }
+
+  /**
+   * Execute query for dbKind
+   *
+   * @param versionInfo
+   * @param query
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _ExecuteQueryForDbKind(versionInfo, query) {
+    let dbName = versionInfo.dbName;
+    let keySpace = versionInfo.keySpace;
+    let dbKind = versionInfo.dbKind;
+    if (dbKind == DbKindConstant.sqlDbKind) {
+      return new ExecuteQuery(dbName, query).perform();
+    } else if (dbKind == DbKindConstant.cassandraDbKind) {
+      return new ExecuteCassandraQuery(keySpace, query).perform();
+    }
+  }
 }
 
 if (program.generate) {
@@ -244,7 +266,9 @@ if (program.generate) {
     'const migrationName = {\n' +
     "  dbName: 'db name here',\n" +
     "  up: ['array of sql queries here'],\n" +
-    "  down: ['array of sql queries here']\n" +
+    "  down: ['array of sql queries here'],\n" +
+    "  dbKind: 'db kind here',\n" +
+    "  keySpace: 'keySpace here'\n" +
     '};\n' +
     '\n' +
     'module.exports = migrationName;';

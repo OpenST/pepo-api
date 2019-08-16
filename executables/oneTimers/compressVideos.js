@@ -1,5 +1,5 @@
 const rootPrefix = '../..',
-  CompressVideoLib = require(rootPrefix + '/lib/resize/Video'),
+  CompressVideoLib = require(rootPrefix + '/lib/jobs/bg/resize/Video'),
   VideoModel = require(rootPrefix + '/app/models/mysql/Video'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   videoConstants = require(rootPrefix + '/lib/globalConstant/video');

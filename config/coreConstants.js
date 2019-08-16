@@ -146,6 +146,20 @@ class CoreConstants {
     return process.env.PA_OST_DB_MYSQL_PASSWORD;
   }
 
+  // socket db
+
+  get SOCKET_DB_MYSQL_HOST() {
+    return process.env.PA_SOCKET_DB_MYSQL_HOST;
+  }
+
+  get SOCKET_DB_MYSQL_USER() {
+    return process.env.PA_SOCKET_DB_MYSQL_USER;
+  }
+
+  get SOCKET_DB_MYSQL_PASSWORD() {
+    return process.env.PA_SOCKET_DB_MYSQL_PASSWORD;
+  }
+
   // Infra db
 
   get INFRA_DB_MYSQL_HOST() {
@@ -271,6 +285,10 @@ class CoreConstants {
     return process.env.DEVOPS_IP_ADDRESS;
   }
 
+  get WS_SERVER_IDENTIFIER() {
+    return process.env.DEVOPS_SERVER_IDENTIFIER;
+  }
+
   // Pepo-campaigns details
 
   get PEPO_CAMPAIGN_BASE_URL() {
@@ -312,6 +330,18 @@ class CoreConstants {
 
   get PA_CDN_URL() {
     return process.env.PA_CDN_URL;
+  }
+
+  get CASSANDRA_REPLICATION_CLASS() {
+    return process.env.REPLICATION_CLASS;
+  }
+
+  get CASSANDRA_REPLICATION_FACTOR() {
+    return process.env.REPLICATION_FACTOR;
+  }
+
+  get CASSANDRA_REPLICATION_LEVEL() {
+    return process.env.DEFAULT_REPLICATION_LEVEL;
   }
 }
 

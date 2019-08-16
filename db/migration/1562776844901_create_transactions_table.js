@@ -1,7 +1,9 @@
 const rootPrefix = '../..',
-  database = require(rootPrefix + '/lib/globalConstant/database');
+  database = require(rootPrefix + '/lib/globalConstant/database'),
+  DbKindConstant = require(rootPrefix + '/lib/globalConstant/dbKind');
 
 const dbName = database.feedDbName;
+const dbKind = DbKindConstant.sqlDbKind;
 
 const upQuery =
   'CREATE TABLE `transactions` ( \n\
@@ -24,7 +26,8 @@ const downQuery = 'drop table if exists `transactions`;';
 const createTransactionsTable = {
   dbName: dbName,
   up: [upQuery],
-  down: [downQuery]
+  down: [downQuery],
+  dbKind: dbKind
 };
 
 module.exports = createTransactionsTable;

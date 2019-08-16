@@ -141,17 +141,27 @@ class ConfigStrategyModel extends ModelBase {
 
     let encryptedKeysFound = false;
 
-    if (strategyKindName === configStrategyConstants.bgJobRabbitmq) {
+    if (
+      strategyKindName === configStrategyConstants.bgJobRabbitmq ||
+      strategyKindName === configStrategyConstants.notificationRabbitmq ||
+      strategyKindName === configStrategyConstants.socketRabbitmq
+    ) {
       const rmqPassword = hashNotToEncrypt[strategyKindName].password;
 
       hashNotToEncrypt[strategyKindName].password = '{{rmqPassword}}';
       hashToEncrypt.rmqPassword = rmqPassword;
       encryptedKeysFound = true;
-    } else if (strategyKindName === configStrategyConstants.redshift) {
-      const redshiftPassword = hashNotToEncrypt[strategyKindName].password;
+    } else if (strategyKindName === configStrategyConstants.websocket) {
+      const wsAuthSalt = hashNotToEncrypt[strategyKindName].wsAuthSalt;
 
-      hashNotToEncrypt[strategyKindName].password = '{{redshiftPassword}}';
-      hashToEncrypt.redshiftPassword = redshiftPassword;
+      hashNotToEncrypt[strategyKindName].wsAuthSalt = '{{wsAuthSalt}}';
+      hashToEncrypt.wsAuthSalt = wsAuthSalt;
+      encryptedKeysFound = true;
+    } else if (strategyKindName === configStrategyConstants.cassandra) {
+      const cassandraPassword = hashNotToEncrypt[strategyKindName].password;
+
+      hashNotToEncrypt[strategyKindName].password = '{{cassandraPassword}}';
+      hashToEncrypt.cassandraPassword = cassandraPassword;
       encryptedKeysFound = true;
     }
 
@@ -192,10 +202,16 @@ class ConfigStrategyModel extends ModelBase {
    * @private
    */
   _mergeConfigResult(strategyKind, configStrategyHash, decryptedJsonObj) {
-    if (kinds[strategyKind] === configStrategyConstants.bgJobRabbitmq) {
+    if (
+      kinds[strategyKind] === configStrategyConstants.bgJobRabbitmq ||
+      kinds[strategyKind] === configStrategyConstants.notificationRabbitmq ||
+      kinds[strategyKind] === configStrategyConstants.socketRabbitmq
+    ) {
       configStrategyHash[kinds[strategyKind]].password = decryptedJsonObj.rmqPassword;
-    } else if (kinds[strategyKind] === configStrategyConstants.redshift) {
-      configStrategyHash[kinds[strategyKind]].password = decryptedJsonObj.redshiftPassword;
+    } else if (kinds[strategyKind] === configStrategyConstants.websocket) {
+      configStrategyHash[kinds[strategyKind]].wsAuthSalt = decryptedJsonObj.wsAuthSalt;
+    } else if (kinds[strategyKind] === configStrategyConstants.cassandra) {
+      configStrategyHash[kinds[strategyKind]].password = decryptedJsonObj.cassandraPassword;
     }
 
     return configStrategyHash;

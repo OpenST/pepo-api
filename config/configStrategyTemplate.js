@@ -38,18 +38,53 @@ class ConfigStrategyTemplate {
           clusterNodes: 'clusterNodesEntity'
         }
       },
-      redshiftEntity: {
+      rabbitmqListEntity: {
         entityType: 'object',
         entitiesPresent: {
-          user: 'userEntity',
-          database: 'databaseEntity',
+          username: 'usernameEntity',
           password: 'passwordEntity',
-          port: 'portEntity',
-          host: 'hostEntity'
+          heartbeats: 'heartbeatsEntity',
+          clusters: 'multipleClustersEntity'
         }
       },
-
+      multipleClustersEntity: {
+        entityType: 'array',
+        entitiesPresent: 'clusterEntity'
+      },
+      clusterEntity: {
+        entityType: 'object',
+        entitiesPresent: {
+          id: 'socketRabbbitMqIdEntity',
+          host: 'hostEntity',
+          port: 'portEntity',
+          clusterNodes: 'clusterNodesEntity'
+        }
+      },
+      websocketEntity: {
+        entityType: 'object',
+        entitiesPresent: {
+          wsAuthSalt: 'saltEntity',
+          endpoint: 'hostEntity',
+          port: 'portEntity',
+          protocol: 'protocolEntity'
+        }
+      },
+      cassandraEntity: {
+        entityType: 'object',
+        entitiesPresent: {
+          username: 'usernameEntity',
+          password: 'passwordEntity',
+          contactPoints: 'contactPointsEntity',
+          localDataCenter: 'localDataCenterEntity'
+        }
+      },
+      socketRabbbitMqIdEntity: {
+        entityType: 'string'
+      },
       userEntity: {
+        entityType: 'string'
+      },
+      saltEntity: {
         entityType: 'string'
       },
       databaseEntity: {
@@ -95,6 +130,19 @@ class ConfigStrategyTemplate {
       },
       namespaceEntity: {
         entityType: 'string'
+      },
+      protocolEntity: {
+        entityType: 'string'
+      },
+      contactPointsEntity: {
+        entityType: 'array',
+        entitiesPresent: 'contactPointEntity' // For an array entity this array will contain entity types which that array will hold.
+      },
+      contactPointEntity: {
+        entityType: 'string'
+      },
+      localDataCenterEntity: {
+        entityType: 'string'
       }
     };
   }
@@ -103,7 +151,10 @@ class ConfigStrategyTemplate {
     return {
       [configStrategyConstants.memcached]: 'memcachedEntity',
       [configStrategyConstants.bgJobRabbitmq]: 'rabbitmqEntity',
-      [configStrategyConstants.redshift]: 'redshiftEntity'
+      [configStrategyConstants.notificationRabbitmq]: 'rabbitmqEntity',
+      [configStrategyConstants.socketRabbitmq]: 'rabbitmqListEntity',
+      [configStrategyConstants.websocket]: 'websocketEntity',
+      [configStrategyConstants.cassandra]: 'cassandraEntity'
     };
   }
 }
