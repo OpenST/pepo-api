@@ -65,13 +65,13 @@ class RotateTwitterAccount extends ServiceBase {
       return Promise.reject(cacheRsp);
     }
 
-    //todo: Error if record not found
     if (!cacheRsp.data.id) {
       return Promise.reject(
-        responseHelper.error({
+        responseHelper.paramValidationError({
           internal_error_identifier: 'a_s_u_rta_1',
-          api_error_identifier: 'user_not_found',
-          debug_options: {}
+          api_error_identifier: 'invalid_api_params',
+          params_error_identifiers: ['user_not_found'],
+          debug_options: { userName: oThis.userName }
         })
       );
     }
@@ -88,7 +88,7 @@ class RotateTwitterAccount extends ServiceBase {
   async _fetchTwitterUser() {
     const oThis = this;
 
-    let TwitterUserByUserIdsCacheResp = await new TwitterUserByUserIdsCache({
+    const TwitterUserByUserIdsCacheResp = await new TwitterUserByUserIdsCache({
       userIds: [oThis.userId]
     }).fetch();
 
@@ -96,22 +96,22 @@ class RotateTwitterAccount extends ServiceBase {
       return Promise.reject(TwitterUserByUserIdsCacheResp);
     }
 
-    let twitterUserByUserIdObj = TwitterUserByUserIdsCacheResp.data[oThis.userId];
-    //todo: Error if record not found. We will support email logins in future
+    const twitterUserByUserIdObj = TwitterUserByUserIdsCacheResp.data[oThis.userId];
     if (!twitterUserByUserIdObj.id) {
       return Promise.reject(
-        responseHelper.error({
+        responseHelper.paramValidationError({
           internal_error_identifier: 'a_s_u_rta_2',
-          api_error_identifier: 'user_not_found',
-          debug_options: {}
+          api_error_identifier: 'invalid_api_params',
+          params_error_identifiers: ['user_not_found'],
+          debug_options: { userName: oThis.userName }
         })
       );
     }
 
-    //should always be present;
+    // Should always be present.
     oThis.twitterUserId = twitterUserByUserIdObj.id;
 
-    let TwitterUserByIdsCacheResp = await new TwitterUserByIdsCache({
+    const TwitterUserByIdsCacheResp = await new TwitterUserByIdsCache({
       ids: [oThis.twitterUserId]
     }).fetch();
 
@@ -122,10 +122,11 @@ class RotateTwitterAccount extends ServiceBase {
     oThis.twitterUserObj = TwitterUserByIdsCacheResp.data[oThis.twitterUserId];
     if (!oThis.twitterUserObj.twitterId) {
       return Promise.reject(
-        responseHelper.error({
+        responseHelper.paramValidationError({
           internal_error_identifier: 'a_s_u_rta_3',
-          api_error_identifier: 'user_not_found',
-          debug_options: {}
+          api_error_identifier: 'invalid_api_params',
+          params_error_identifiers: ['user_not_found'],
+          debug_options: { userName: oThis.userName }
         })
       );
     }
@@ -168,7 +169,6 @@ class RotateTwitterAccount extends ServiceBase {
    */
   async _clearTwitterUserCache() {
     const oThis = this;
-    //todo: clear cache on TwitterUserByTwitterIdsCache for previous twitter ID and call model flush cache
 
     await new TwitterUserByTwitterIdsCache({
       twitterIds: [oThis.twitterUserTwitterId]
