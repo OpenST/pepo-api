@@ -76,7 +76,7 @@ class UpdateProfileInfo extends UpdateProfileBase {
       oThis.bio = CommonValidators.sanitizeText(oThis.bio);
     }
 
-    if (!CommonValidators.validateHttpBasedUrl(oThis.link)) {
+    if (oThis.link && !CommonValidators.validateHttpBasedUrl(oThis.link)) {
       return Promise.reject(
         responseHelper.paramValidationError({
           internal_error_identifier: 'a_s_u_p_u_i_1',
