@@ -256,7 +256,7 @@ class DbMigrate {
       return new ExecuteQuery(dbName, query).perform();
     } else if (dbKind == DbKindConstant.cassandraDbKind) {
       return new ExecuteCassandraQuery(keySpace, query).perform();
-    }
+    } else throw new Error(`Invalid dbKind-${dbKind}`);
   }
 }
 
