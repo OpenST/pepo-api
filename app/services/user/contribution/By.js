@@ -6,6 +6,9 @@ const rootPrefix = '../../../..',
     '/lib/cacheManagement/single/UserContributorByUserIdPagination'),
   PendingTransactionsByToUserIdsAndFromUserIdCache = require(rootPrefix +
     '/lib/cacheManagement/multi/PendingTransactionsByToUserIdsAndFromUserId'),
+  UserContributorByUIdsAndCBUIdCache = require(rootPrefix +
+    '/lib/cacheManagement/multi/UserContributorByUserIdsAndContributedByUserId'),
+  basicHelper = require(rootPrefix + '/helpers/basic'),
   responseHelper = require(rootPrefix + '/lib/formatter/response');
 
 /**
@@ -81,6 +84,21 @@ class UserContributionBy extends ContributionBase {
     }
 
     if (!oThis.contributionUsersByUserIdsMap[oThis.currentUserId] && oThis.page == 1) {
+      // Note:Check if current user is not a contributor. Only then he should be added in the first page list
+
+      let cacheResp = await new UserContributorByUIdsAndCBUIdCache({
+        userIds: [oThis.profileUserId],
+        contributedByUserId: oThis.currentUserId
+      }).fetch();
+
+      if (cacheResp.isFailure()) {
+        return Promise.reject(cacheResp);
+      }
+
+      if (!basicHelper.isEmptyObject(cacheResp.data[oThis.profileUserId])) {
+        return responseHelper.successWithData({});
+      }
+
       oThis.contributionUsersByUserIdsMap[oThis.currentUserId] = {
         contributedByUserId: oThis.currentUserId,
         totalAmount: 0,
