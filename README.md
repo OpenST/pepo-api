@@ -37,9 +37,20 @@
   npm install
 ```
 
-## Source the ENV vars.
+## Seed config strategy
+
+* Global Configs Seed
 ```bash
   source set_env_vars.sh
+  node devops/exec/configStrategy.js --add-configs
+
+  # Note: For staging and production follow help
+```
+
+* Activate Global Configs
+```bash
+  source set_env_vars.sh
+  node devops/exec/configStrategy.js --activate-configs
 ```
 
 ## Run DB Migrations
@@ -57,27 +68,6 @@
 ```bash
   source set_env_vars.sh
   node executables/oneTimers/createErrorLogsTable.js
-```
-
-## Seed config strategy
-
-* Global Configs Seed
-```bash
-  source set_env_vars.sh
-  node devops/exec/configStrategy.js --add-configs
-
-  # Note: For staging and production follow help
-```
-
-* Activate Global Configs
-```bash
-  source set_env_vars.sh
-  node devops/exec/configStrategy.js --activate-configs
-```
-
-* Clear cache.
-```bash
-  node devops/exec/flushMemcache.js
 ```
 
 ## Seed ost platform specific info
@@ -127,4 +117,16 @@ Note: Get the webhooks id from above run(subscribe webhooks). Secret has to be o
   # note: for topics to subscribe and prefetchcount, please see params column of the cron_processes table
   source set_env_vars.sh
   node executables/rabbitMqSubscribers/notificationJobProcessor.js --cronProcessId 4
+```
+
+## Helper commands
+
+* Clear cache.
+```bash
+  node devops/exec/flushMemcache.js
+```
+
+* Source the ENV vars.
+```bash
+  source set_env_vars.sh
 ```
