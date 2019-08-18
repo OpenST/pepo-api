@@ -30,14 +30,14 @@
     
 * Refer [Pepo-Tracker](https://github.com/pepotech/pepo-tracker) readme for setting it up.
 
-* Install all the dependency npm packages
+## Install all the dependency npm packages
 ```bash
   rm -rf node_modules
   rm -rf package-lock.json
   npm install
 ```
 
-* Source the ENV vars.
+## Source the ENV vars.
 ```bash
   source set_env_vars.sh
 ```
