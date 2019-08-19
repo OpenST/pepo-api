@@ -128,10 +128,12 @@ class UserProfileElementModel extends ModelBase {
     await oThis
       .delete()
       .where({
-        userId: params.userId,
+        user_id: params.userId,
         data_kind: userProfileElementConst.invertedKinds[params.dataKind]
       })
       .fire();
+
+    return UserProfileElementModel.flushCache(params);
   }
 
   /**
@@ -165,7 +167,7 @@ class UserProfileElementModel extends ModelBase {
     const UserProfileElementsByUserIds = require(rootPrefix +
       '/lib/cacheManagement/multi/UserProfileElementsByUserIds');
 
-    await new UserProfileElementsByUserIds({ userIds: [params.userId] }).clear();
+    await new UserProfileElementsByUserIds({ usersIds: [params.userId] }).clear();
   }
 }
 

@@ -208,7 +208,6 @@ class Video extends ModelBase {
       .fire();
   }
 
-
   /**
    * Mark video deleted
    *
@@ -221,14 +220,15 @@ class Video extends ModelBase {
     const oThis = this;
 
     await oThis
-    .update({
-      status: videoConstants.invertedStatuses[videoConstants.deletedStatus]
-    })
-    .where({
-      id: params.videoId
-    }).fire();
+      .update({
+        status: videoConstants.invertedStatuses[videoConstants.deletedStatus]
+      })
+      .where({
+        id: params.id
+      })
+      .fire();
 
-    return Video.flushCache({ id: params.videoId });
+    return Video.flushCache({ id: params.id });
   }
 
   /**
