@@ -33,6 +33,7 @@ class VideoDetail extends ModelBase {
    * @param {number} dbRow.id
    * @param {number} dbRow.creator_user_id
    * @param {number} dbRow.video_id
+   * @param {number} dbRow.description_id
    * @param {number} dbRow.total_contributed_by
    * @param {number} dbRow.total_amount
    * @param {number} dbRow.total_transactions
@@ -48,6 +49,7 @@ class VideoDetail extends ModelBase {
       id: dbRow.id,
       creatorUserId: dbRow.creator_user_id,
       videoId: dbRow.video_id,
+      descriptionId: dbRow.description_id,
       totalContributedBy: dbRow.total_contributed_by,
       totalAmount: dbRow.total_amount,
       totalTransactions: dbRow.total_transactions,
@@ -68,6 +70,7 @@ class VideoDetail extends ModelBase {
       'id',
       'creatorUserId',
       'videoId',
+      'descriptionId',
       'totalContributedBy',
       'totalTransactions',
       'totalAmount',

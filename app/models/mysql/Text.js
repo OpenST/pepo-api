@@ -1,5 +1,6 @@
 const rootPrefix = '../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
+  textConstants = require(rootPrefix + '/lib/globalConstant/text'),
   databaseConstants = require(rootPrefix + '/lib/globalConstant/database');
 
 // Declare variables.
@@ -33,6 +34,8 @@ class Text extends ModelBase {
    * @param {number} dbRow.id
    * @param {string} dbRow.text
    * @param {string} dbRow.tag_ids
+   * @param {string} dbRow.link_ids
+   * @param {number} dbRow.kind
    * @param {string} dbRow.created_at
    * @param {string} dbRow.updated_at
    *
@@ -46,6 +49,8 @@ class Text extends ModelBase {
       id: dbRow.id,
       text: dbRow.text,
       tagIds: dbRow.tag_ids,
+      linkIds: dbRow.link_ids,
+      kind: textConstants.kinds[dbRow.kind],
       createdAt: dbRow.created_at,
       updatedAt: dbRow.updated_at
     };
