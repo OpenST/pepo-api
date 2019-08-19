@@ -4,6 +4,7 @@ const rootPrefix = '../../..',
   VideoDetailsByUserIdCache = require(rootPrefix + '/lib/cacheManagement/single/VideoDetailsByUserIdPagination'),
   UserProfileElementModel = require(rootPrefix + '/app/models/mysql/UserProfileElement'),
   VideosModel = require(rootPrefix + '/app/models/mysql/Video'),
+  VideoDetailsModel = require(rootPrefix + '/app/models/mysql/VideoDetail'),
   ActivityLogModel = require(rootPrefix + '/app/models/mysql/ActivityLog'),
   FeedModel = require(rootPrefix + '/app/models/mysql/Feed'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
@@ -41,11 +42,18 @@ class DeleteVideo extends ServiceBase {
 
     await oThis._fetchCreatorUserId();
 
+    // The video might have been deleted already
+    if (!oThis.creatorUserId) {
+      return responseHelper.successWithData({});
+    }
+
     await oThis._logAdminActivity();
 
     await oThis._deleteProfileElementIfRequired();
 
     await oThis._markVideoDeleted();
+
+    await oThis._deleteFromVideoDetails();
 
     await oThis._deleteVideoFeeds();
 
@@ -123,6 +131,23 @@ class DeleteVideo extends ServiceBase {
         dataKind: userProfileElementConst.coverVideoIdKind
       });
     }
+  }
+
+  /**
+   * Delete from video details
+   *
+   * @return {Promise<void>}
+   * @private
+   */
+  async _deleteFromVideoDetails() {
+    const oThis = this;
+
+    let videoDetailsObj = new VideoDetailsModel({});
+
+    await videoDetailsObj.deleteVideoDetails({
+      userId: oThis.creatorUserId,
+      videoId: oThis.videoId
+    });
   }
 
   /**
