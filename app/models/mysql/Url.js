@@ -179,6 +179,22 @@ class Url extends ModelBase {
   }
 
   /**
+   * Get url details.
+   *
+   * @param {array} url
+   *
+   * @returns {Promise<void>}
+   */
+  async getUrls(url) {
+    const oThis = this;
+
+    return oThis
+      .select('*')
+      .where({ name: url })
+      .fire();
+  }
+
+  /**
    * Flush cache.
    *
    * @param {object} params
