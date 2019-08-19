@@ -105,7 +105,7 @@ class UserContributionBy extends ContributionBase {
         updatedAt: Math.floor(Date.now() / 1000)
       };
 
-      oThis.contributionUserIds.push(oThis.currentUserId);
+      oThis.contributionUserIds.unshift(oThis.currentUserId);
     }
 
     // We need to update the contribution amount made by currentUserId to profileUserId.
