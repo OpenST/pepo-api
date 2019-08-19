@@ -75,6 +75,17 @@ class UpdateProfileInfo extends UpdateProfileBase {
     if (oThis.bio) {
       oThis.bio = CommonValidators.sanitizeText(oThis.bio);
     }
+
+    if (oThis.link && !CommonValidators.validateHttpBasedUrl(oThis.link)) {
+      return Promise.reject(
+        responseHelper.paramValidationError({
+          internal_error_identifier: 'a_s_u_p_u_i_1',
+          api_error_identifier: 'invalid_api_params',
+          params_error_identifiers: ['invalid_http_link'],
+          debug_options: { link: oThis.link }
+        })
+      );
+    }
   }
 
   /**
