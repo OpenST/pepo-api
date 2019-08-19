@@ -10,6 +10,7 @@ const rootPrefix = '../../..',
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination'),
   userProfileElementConst = require(rootPrefix + '/lib/globalConstant/userProfileElement'),
+  videoDetailsConst = require(rootPrefix + '/lib/globalConstant/videoDetail'),
   adminActivityLogConst = require(rootPrefix + '/lib/globalConstant/adminActivityLogs'),
   entityType = require(rootPrefix + '/lib/globalConstant/entityType');
 
@@ -42,8 +43,8 @@ class DeleteVideo extends ServiceBase {
 
     await oThis._fetchCreatorUserId();
 
-    // The video might have been deleted already
-    if (!oThis.creatorUserId) {
+    // Unknown video or already deleted
+    if (!oThis.creatorUserId || oThis.videoDetails[0].status == videoDetailsConst.deletedStatus) {
       return responseHelper.successWithData({});
     }
 
@@ -53,7 +54,7 @@ class DeleteVideo extends ServiceBase {
 
     await oThis._markVideoDeleted();
 
-    await oThis._deleteFromVideoDetails();
+    await oThis._markeVideoDetailDeleted();
 
     await oThis._deleteVideoFeeds();
 
@@ -139,12 +140,12 @@ class DeleteVideo extends ServiceBase {
    * @return {Promise<void>}
    * @private
    */
-  async _deleteFromVideoDetails() {
+  async _markeVideoDetailDeleted() {
     const oThis = this;
 
     let videoDetailsObj = new VideoDetailsModel({});
 
-    await videoDetailsObj.deleteVideoDetails({
+    await videoDetailsObj.markDeleted({
       userId: oThis.creatorUserId,
       videoId: oThis.videoId
     });

@@ -1,6 +1,7 @@
 const rootPrefix = '../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
-  databaseConstants = require(rootPrefix + '/lib/globalConstant/database');
+  databaseConstants = require(rootPrefix + '/lib/globalConstant/database'),
+  videoDetailsConst = require(rootPrefix + '/lib/globalConstant/videoDetail');
 
 // Declare variables.
 const dbName = databaseConstants.entityDbName;
@@ -51,6 +52,7 @@ class VideoDetail extends ModelBase {
       totalContributedBy: dbRow.total_contributed_by,
       totalAmount: dbRow.total_amount,
       totalTransactions: dbRow.total_transactions,
+      status: videoDetailsConst.statuses[dbRow.status],
       createdAt: dbRow.created_at,
       updatedAt: dbRow.updated_at
     };
@@ -71,6 +73,7 @@ class VideoDetail extends ModelBase {
       'totalContributedBy',
       'totalTransactions',
       'totalAmount',
+      'status',
       'createdAt',
       'updatedAt'
     ];
@@ -114,7 +117,10 @@ class VideoDetail extends ModelBase {
 
     const queryObject = oThis
       .select('*')
-      .where({ creator_user_id: creatorUserId })
+      .where({
+        creator_user_id: creatorUserId,
+        status: videoDetailsConst.invertedStatuses[videoDetailsConst.activeStatus]
+      })
       .order_by('id desc')
       .limit(limit);
 
@@ -245,11 +251,13 @@ class VideoDetail extends ModelBase {
    *
    * @return {object}
    */
-  async deleteVideoDetails(params) {
+  async markDeleted(params) {
     const oThis = this;
 
     await oThis
-      .delete()
+      .update({
+        status: videoDetailsConst.invertedStatuses[videoDetailsConst.deletedStatus]
+      })
       .where({
         creator_user_id: params.userId,
         video_id: params.videoId
