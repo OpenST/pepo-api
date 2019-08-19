@@ -78,4 +78,12 @@ router.post('/users/:user_id/approve', sanitizer.sanitizeDynamicUrlParams, funct
   Promise.resolve(routeHelper.perform(req, res, next, '/admin/ApproveUsers', 'r_a_v1_ad_3', null, null, null));
 });
 
+/* Delete video */
+router.post('/delete-video/:video_id', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.adminDeleteVideo;
+  req.decodedParams.video_id = req.params.video_id;
+
+  Promise.resolve(routeHelper.perform(req, res, next, '/video/Delete', 'r_a_v1_ad_4', null, null, null));
+});
+
 module.exports = router;

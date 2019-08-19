@@ -522,6 +522,19 @@ const v1Signature = {
       }
     ],
     optional: []
+  },
+  [apiName.adminDeleteVideo]: {
+    mandatory: [
+      {
+        parameter: 'video_id',
+        validatorMethods: ['validateNonZeroInteger']
+      },
+      {
+        parameter: 'current_admin',
+        validatorMethods: ['validateNonEmptyObject']
+      }
+    ],
+    optional: []
   }
 };
 

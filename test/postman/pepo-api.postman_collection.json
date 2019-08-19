@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "b9f3f12f-dd5c-424b-9b72-1aa34356beac",
+		"_postman_id": "949393f7-b1ce-4002-8fa0-a0abd476b0ec",
 		"name": "pepo-api",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -1270,6 +1270,48 @@
 			"item": [
 				{
 					"name": "login",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/x-www-form-urlencoded"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "email",
+									"value": "santhosh@ost.com",
+									"type": "text"
+								},
+								{
+									"key": "password",
+									"value": "5b300f84986e09ab",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{api_server}}/api/v1/admin/login",
+							"host": [
+								"{{api_server}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"admin",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete-video",
 					"request": {
 						"method": "POST",
 						"header": [
