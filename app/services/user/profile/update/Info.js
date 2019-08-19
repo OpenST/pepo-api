@@ -7,6 +7,7 @@ const rootPrefix = '../../../../..',
   TextCacheClass = require(rootPrefix + '/lib/cacheManagement/multi/TextsByIds'),
   AddUpdateUserLinkClass = require(rootPrefix + '/lib/user/profile/AddUpdateLink'),
   UpdateProfileBase = require(rootPrefix + '/app/services/user/profile/update/Base'),
+  UserByUsernameCache = require(rootPrefix + '/lib/cacheManagement/single/UserByUsername'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   userTagConstants = require(rootPrefix + '/lib/globalConstant/userTag'),
   createErrorLogsEntry = require(rootPrefix + '/lib/errorLogs/createEntry'),
@@ -43,6 +44,9 @@ class UpdateProfileInfo extends UpdateProfileBase {
     oThis.name = oThis.params.name;
     oThis.username = oThis.params.user_name;
     oThis.link = oThis.params.link;
+
+    oThis.flushUserCache = false;
+    oThis.flushUserProfileElementsCache = false;
 
     oThis.userUpdateRequired = true;
     oThis.bioUpdateRequired = true;
@@ -86,6 +90,39 @@ class UpdateProfileInfo extends UpdateProfileBase {
         })
       );
     }
+
+    await oThis._validateUserName();
+  }
+
+  /**
+   * Validate username.
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _validateUserName() {
+    const oThis = this;
+
+    if (oThis.userObj.userName.toString().toLowerCase() === oThis.username.toLowerCase()) {
+      return;
+    }
+
+    let cacheResponse = await new UserByUsernameCache({ userName: oThis.username }).fetch();
+
+    if (cacheResponse.isFailure()) {
+      return Promise.reject(cacheResponse);
+    }
+
+    if (cacheResponse.data.id) {
+      return Promise.reject(
+        responseHelper.paramValidationError({
+          internal_error_identifier: 'a_s_u_p_dun_1',
+          api_error_identifier: 'invalid_api_params',
+          params_error_identifiers: ['duplicate_user_name'],
+          debug_options: { user_name: oThis.username }
+        })
+      );
+    }
   }
 
   /**
@@ -98,7 +135,10 @@ class UpdateProfileInfo extends UpdateProfileBase {
     const oThis = this;
 
     // Check whether user update is required or not
-    if (oThis.userObj.name.toString() === oThis.name && oThis.userObj.userName.toString() === oThis.username) {
+    if (
+      oThis.userObj.name.toString() === oThis.name &&
+      oThis.userObj.userName.toString().toLowerCase() === oThis.username.toLowerCase()
+    ) {
       oThis.userUpdateRequired = false;
     }
 
@@ -154,10 +194,17 @@ class UpdateProfileInfo extends UpdateProfileBase {
           flushCache: 0
         })
           .perform()
-          .then(function(resp) {
+          .then(async function(resp) {
             oThis.tagIds = resp.data.tagIds;
+
+            await new AssociateTagsToUser({
+              userId: oThis.profileUserId,
+              tagIds: oThis.tagIds,
+              tagAddedKind: userTagConstants.selfAddedKind
+            }).perform();
           })
       );
+      oThis.flushUserProfileElementsCache = true;
     }
 
     if (oThis.linkUpdateRequired) {
@@ -170,6 +217,7 @@ class UpdateProfileInfo extends UpdateProfileBase {
           flushCache: 0
         }).perform()
       );
+      oThis.flushUserProfileElementsCache = true;
     }
 
     if (promises.length > 0) {
@@ -197,6 +245,8 @@ class UpdateProfileInfo extends UpdateProfileBase {
         .where({ id: oThis.profileUserId })
         .fire()
         .catch(async function(err) {
+          await oThis._flushCaches();
+
           if (UserModelClass.isDuplicateIndexViolation(UserModelClass.usernameUniqueIndexName, err)) {
             return Promise.reject(
               responseHelper.paramValidationError({
@@ -214,10 +264,13 @@ class UpdateProfileInfo extends UpdateProfileBase {
             api_error_identifier: 'something_went_wrong',
             debug_options: { Error: err }
           });
+
           await createErrorLogsEntry.perform(errorObject, errorLogsConstants.highSeverity);
 
           return Promise.reject(errorObject);
         });
+
+      oThis.flushUserCache = true;
     }
   }
 
@@ -229,14 +282,6 @@ class UpdateProfileInfo extends UpdateProfileBase {
    */
   async _extraUpdates() {
     const oThis = this;
-
-    if (oThis.bioUpdateRequired) {
-      await new AssociateTagsToUser({
-        userId: oThis.profileUserId,
-        tagIds: oThis.tagIds,
-        tagAddedKind: userTagConstants.selfAddedKind
-      }).perform();
-    }
   }
 }
 

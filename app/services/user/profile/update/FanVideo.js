@@ -53,6 +53,7 @@ class UpdateFanVideo extends UpdateProfileBase {
 
     oThis.videoId = null;
     oThis.flushUserCache = false;
+    oThis.flushUserProfileElementsCache = true;
 
     oThis.paginationTimestamp = Math.round(new Date() / 1000);
   }

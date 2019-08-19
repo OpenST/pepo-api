@@ -39,6 +39,8 @@ class UpdateProfileImage extends UpdateProfileBase {
     oThis.isExternalUrl = oThis.params.isExternalUrl;
 
     oThis.imageId = null;
+    oThis.flushUserCache = true;
+    oThis.flushUserProfileElementsCache = false;
   }
 
   /**
