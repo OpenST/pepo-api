@@ -1,0 +1,143 @@
+const rootPrefix = '../../..',
+  ServiceBase = require(rootPrefix + '/app/services/Base'),
+  VideoDetailsByVideoIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/VideoDetailsByVideoIds'),
+  VideoDetailsByUserIdCache = require(rootPrefix + '/lib/cacheManagement/single/VideoDetailsByUserIdPagination'),
+  UserProfileElementModel = require(rootPrefix + '/app/models/mysql/UserProfileElement'),
+  VideosModel = require(rootPrefix + '/app/models/mysql/Video'),
+  FeedModel = require(rootPrefix + '/app/models/mysql/Feed'),
+  responseHelper = require(rootPrefix + '/lib/formatter/response'),
+  paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination'),
+  userProfileElementConst = require(rootPrefix + '/lib/globalConstant/userProfileElement'),
+  entityType = require(rootPrefix + '/lib/globalConstant/entityType')
+
+;
+
+
+
+ class DeleteVideo extends ServiceBase {
+
+  /**
+   * @constructor
+   *
+   * @param params
+   */
+  constructor(params) {
+    super();
+
+    const oThis = this;
+
+    oThis.videoId = params.video_id;
+    oThis.currentUser = params.current_user;
+
+    oThis.currentUserId = null;
+    oThis.creatorUserId = null;
+  }
+
+  /**
+   * Async perform.
+   *
+   * @return {Promise<void>}
+   * @private
+   */
+  async _asyncPerform() {
+    const oThis = this;
+
+
+    await oThis._fetchCreatorUserId();
+    await oThis._deleteProfileElementIfRequired();
+
+    await oThis._markVideoDeleted();
+
+    await oThis._deleteVideoFeeds();
+
+    return responseHelper.successWithData({});
+
+  }
+
+
+  /**
+   * Fetch creator user id
+   *
+   * @sets oThis.creatorUserId
+   * @return {Promise<void>}
+   * @private
+   */
+  async _fetchCreatorUserId() {
+    const oThis = this;
+
+    let videoDetailsCacheResponse = await new VideoDetailsByVideoIdsCache({ videoIds: [oThis.videoId] }).fetch();
+
+    if (videoDetailsCacheResponse.isFailure()) {
+      return Promise.reject(videoDetailsCacheResponse);
+    }
+
+    oThis.videoDetails = [videoDetailsCacheResponse.data[oThis.videoId]];
+
+    oThis.creatorUserId = oThis.videoDetails[0].creatorUserId;
+
+    oThis.currentUserId = oThis.currentUser ? Number(oThis.currentUser.id) : 0;
+  }
+
+  /**
+   * Delete profile element if required
+   *
+   * @return {Promise<void>}
+   * @private
+   */
+  async _deleteProfileElementIfRequired() {
+  	const oThis = this;
+
+    const cacheResponse = await new VideoDetailsByUserIdCache({
+      userId: oThis.creatorUserId,
+      limit: paginationConstants.defaultVideoListPageSize,
+      paginationTimestamp: null
+    }).fetch();
+
+    if (cacheResponse.isFailure()) {
+      return Promise.reject(cacheResponse);
+    }
+
+    let videoIds = cacheResponse.data.videoIds || [];
+
+    if (videoIds[0] == oThis.videoId) {
+      let profileElementObj = new UserProfileElementModel({});
+
+      await profileElementObj.deleteByUserIdAndKind({
+      	userId: oThis.creatorUserId,
+      	dataKind: userProfileElementConst.coverVideoIdKind
+      });
+    }
+  }
+
+  /**
+   * Mark status in videos
+   *
+   * @return {Promise<void>}
+   * @private
+   */
+  async _markVideoDeleted() {
+  	const oThis = this;
+
+  	let videoObj = new VideosModel();
+
+  	return videoObj.markVideoDeleted({ id: oThis.videoId });
+  }
+
+  /**
+   * Delete video from feeds
+   *
+   * @return {Promise<void>}
+   * @private
+   */
+  async _deleteVideoFeeds() {
+  	const oThis = this;
+
+  	let feedObj= new FeedModel({});
+
+  	await feedObj.deleteByActor({
+  	  actor: oThis.creatorUserId
+  	});
+  }
+ }
+
+ module.exports = DeleteVideo;
