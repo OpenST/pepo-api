@@ -6,6 +6,9 @@ const rootPrefix = '../../../..',
     '/lib/cacheManagement/single/UserContributorByUserIdPagination'),
   PendingTransactionsByToUserIdsAndFromUserIdCache = require(rootPrefix +
     '/lib/cacheManagement/multi/PendingTransactionsByToUserIdsAndFromUserId'),
+  UserContributorByUIdsAndCBUIdCache = require(rootPrefix +
+    '/lib/cacheManagement/multi/UserContributorByUserIdsAndContributedByUserId'),
+  basicHelper = require(rootPrefix + '/helpers/basic'),
   responseHelper = require(rootPrefix + '/lib/formatter/response');
 
 /**
@@ -15,30 +18,9 @@ const rootPrefix = '../../../..',
  */
 class UserContributionBy extends ContributionBase {
   /**
-   * Constructor for user contribution by (A list of users who support the current user).
-   *
-   * @param {object} params
-   * @param {object} params.current_user
-   * @param {number/string} params.current_user.id
-   * @param {number/string} params.profile_user_id
-   * @param {string} [params.pagination_identifier]
-   *
-   * @augments ContributionBase
-   *
-   * @constructor
-   */
-  constructor(params) {
-    super(params);
-
-    const oThis = this;
-
-    oThis.isCurrentUserAContributor = false;
-  }
-
-  /**
    * Fetch user ids from cache.
    *
-   * @sets oThis.contributionUserIds, oThis.isCurrentUserAContributor
+   * @sets oThis.contributionUserIds
    *
    * @returns {Promise<void>}
    * @private
@@ -60,13 +42,7 @@ class UserContributionBy extends ContributionBase {
     oThis.contributionUserIds = userPaginationCacheRes.data.contributedByUserIds;
     oThis.contributionUsersByUserIdsMap = userPaginationCacheRes.data.contributionUsersByUserIdsMap;
 
-    if (oThis.contributionUsersByUserIdsMap[oThis.currentUserId]) {
-      oThis.isCurrentUserAContributor = true;
-    }
-
-    if (oThis.isCurrentUserAContributor) {
-      await oThis._fetchPendingTransactionsForCurrentUser();
-    }
+    await oThis._fetchPendingTransactionsForCurrentUser();
 
     return responseHelper.successWithData({});
   }
@@ -82,6 +58,13 @@ class UserContributionBy extends ContributionBase {
   async _fetchPendingTransactionsForCurrentUser() {
     const oThis = this;
 
+    if (
+      oThis.currentUserId == oThis.profileUserId ||
+      (oThis.page > 1 && !oThis.contributionUsersByUserIdsMap[oThis.currentUserId])
+    ) {
+      return responseHelper.successWithData({});
+    }
+
     const cacheResponse = await new PendingTransactionsByToUserIdsAndFromUserIdCache({
       fromUserId: oThis.currentUserId,
       toUserIds: [oThis.profileUserId]
@@ -95,6 +78,35 @@ class UserContributionBy extends ContributionBase {
 
     const userRows = pendingTransactionData[oThis.profileUserId];
     // There should only be one entity for the contribution to profileUserId by currentUserId
+
+    if (userRows.length == 0) {
+      return responseHelper.successWithData({});
+    }
+
+    if (!oThis.contributionUsersByUserIdsMap[oThis.currentUserId] && oThis.page == 1) {
+      // Note:Check if current user is not a contributor. Only then he should be added in the first page list
+
+      let cacheResp = await new UserContributorByUIdsAndCBUIdCache({
+        userIds: [oThis.profileUserId],
+        contributedByUserId: oThis.currentUserId
+      }).fetch();
+
+      if (cacheResp.isFailure()) {
+        return Promise.reject(cacheResp);
+      }
+
+      if (!basicHelper.isEmptyObject(cacheResp.data[oThis.profileUserId])) {
+        return responseHelper.successWithData({});
+      }
+
+      oThis.contributionUsersByUserIdsMap[oThis.currentUserId] = {
+        contributedByUserId: oThis.currentUserId,
+        totalAmount: 0,
+        updatedAt: Math.floor(Date.now() / 1000)
+      };
+
+      oThis.contributionUserIds.unshift(oThis.currentUserId);
+    }
 
     // We need to update the contribution amount made by currentUserId to profileUserId.
     let userContributionAmount = new BigNumber(oThis.contributionUsersByUserIdsMap[oThis.currentUserId].totalAmount);

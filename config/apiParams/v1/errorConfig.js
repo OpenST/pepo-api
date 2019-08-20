@@ -75,6 +75,11 @@ const v1ErrorConfig = {
     code: 'invalid',
     message: 'Invalid Query'
   },
+  invalid_http_link: {
+    parameter: 'link',
+    code: 'invalid',
+    message: 'Link should always start with http or https.'
+  },
   invalid_page_number: {
     parameter: 'page_number',
     code: 'invalid',
