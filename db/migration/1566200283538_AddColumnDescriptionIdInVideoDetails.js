@@ -6,7 +6,7 @@ const dbName = database.entityDbName;
 const dbKind = DbKindConstant.sqlDbKind;
 
 const upQuery = 'ALTER TABLE `video_details` \n\
-      ADD COLUMN `description_id` int(11) NOT NULL AFTER `video_id`;';
+      ADD COLUMN `description_id` int(11) AFTER `video_id`;';
 
 const downQuery = 'ALTER TABLE `video_details` DROP `description_id`;';
 
