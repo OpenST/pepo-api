@@ -279,6 +279,10 @@ const v1Signature = {
       {
         parameter: 'image_size',
         validatorMethods: ['validateInteger']
+      },
+      {
+        parameter: 'video_description',
+        validatorMethods: ['validateNonBlankString']
       }
     ]
   },

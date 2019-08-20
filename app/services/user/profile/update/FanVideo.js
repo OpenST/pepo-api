@@ -1,6 +1,7 @@
 const rootPrefix = '../../../../..',
   FeedModel = require(rootPrefix + '/app/models/mysql/Feed'),
   CommonValidator = require(rootPrefix + '/lib/validators/Common'),
+  AddVideoDescription = require(rootPrefix + '/lib/video/AddDescription'),
   UpdateProfileBase = require(rootPrefix + '/app/services/user/profile/update/Base'),
   UserProfileElementModel = require(rootPrefix + '/app/models/mysql/UserProfileElement'),
   userProfileElementConst = require(rootPrefix + '/lib/globalConstant/userProfileElement'),
@@ -32,6 +33,7 @@ class UpdateFanVideo extends UpdateProfileBase {
    * @param {number} params.image_height: image height
    * @param {number} params.image_size: image size
    * @param {boolean} params.isExternalUrl: video source is other than s3 upload
+   * @param {string} [params.video_description]: Video description
    *
    * @augments UpdateProfileBase
    *
@@ -51,6 +53,7 @@ class UpdateFanVideo extends UpdateProfileBase {
     oThis.imageHeight = params.image_height;
     oThis.imageSize = params.image_size;
     oThis.isExternalUrl = params.isExternalUrl;
+    oThis.videoDescription = params.video_description;
 
     oThis.videoId = null;
     oThis.flushUserCache = false;
@@ -114,14 +117,20 @@ class UpdateFanVideo extends UpdateProfileBase {
       posterImageHeight: oThis.imageHeight,
       isExternalUrl: oThis.isExternalUrl
     });
+
     if (resp.isFailure()) {
       return Promise.reject(resp);
     }
 
+    oThis.videoId = resp.data.insertId;
+
+    await new AddVideoDescription({
+      videoDescription: oThis.videoDescription,
+      videoId: oThis.videoId
+    }).perform();
+
     const videoObj = resp.data.video,
       coverImageId = videoObj.posterImageId;
-
-    oThis.videoId = resp.data.insertId;
 
     if (oThis.videoId) {
       await oThis._addProfileElement(oThis.videoId, userProfileElementConst.coverVideoIdKind);

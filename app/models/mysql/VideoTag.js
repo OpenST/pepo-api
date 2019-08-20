@@ -113,6 +113,20 @@ class VideoTag extends ModelBase {
   }
 
   /**
+   * Delete video tags by video ids.
+   *
+   * @returns {Promise<void>}
+   */
+  async deleteByVideoId(videoId) {
+    const oThis = this;
+
+    await oThis
+      .delete()
+      .where({ video_id: videoId })
+      .fire();
+  }
+
+  /**
    * Flush cache.
    *
    * @returns {Promise<*>}
