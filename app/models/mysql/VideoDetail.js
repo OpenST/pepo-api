@@ -271,6 +271,26 @@ class VideoDetail extends ModelBase {
   }
 
   /**
+   * Delete by id.
+   *
+   * @param {object} params
+   * @param {number} params.id
+   *
+   * @return {Promise<void>}
+   */
+
+  async deleteById(params) {
+    const oThis = this;
+
+    await oThis
+      .delete()
+      .where({
+        id: params.id
+      })
+      .fire();
+  }
+
+  /**
    * Flush cache.
    *
    * @param {object} params
