@@ -7,11 +7,6 @@ const rootPrefix = '../../..',
   TwitterUserByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TwitterUserByUserIds'),
   TwitterUserByTwitterIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TwitterUserByTwitterIds');
 
-/**
- * Class for rotate twitter account
- *
- * @class
- */
 class RotateTwitterAccount extends ServiceBase {
   /**
    * @constructor

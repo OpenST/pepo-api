@@ -1,4 +1,4 @@
-const rootPrefix = '../../..',
+const rootPrefix = '../../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   UserMultiCache = require(rootPrefix + '/lib/cacheManagement/multi/User'),
@@ -9,7 +9,7 @@ const rootPrefix = '../../..',
   TokenUserModel = require(rootPrefix + '/app/models/mysql/TokenUser'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger');
 
-class CurrentUser extends ServiceBase {
+class GetCurrentUser extends ServiceBase {
   /**
    * @param {Object} params
    * @param {String} params.current_user: User Name
@@ -155,4 +155,4 @@ class CurrentUser extends ServiceBase {
   }
 }
 
-module.exports = CurrentUser;
+module.exports = GetCurrentUser;

@@ -1,4 +1,4 @@
-const rootPrefix = '../../..',
+const rootPrefix = '../../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   GetProfile = require(rootPrefix + '/lib/user/profile/Get'),
   GetTokenService = require(rootPrefix + '/app/services/token/Get'),
@@ -8,12 +8,7 @@ const rootPrefix = '../../..',
   UserModel = require(rootPrefix + '/app/models/mysql/User'),
   paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination');
 
-/**
- * Class for user video details service.
- *
- * @class UserVideos
- */
-class UserVideos extends ServiceBase {
+class GetVideoList extends ServiceBase {
   /**
    * Constructor for user video details service.
    *
@@ -288,4 +283,4 @@ class UserVideos extends ServiceBase {
   }
 }
 
-module.exports = UserVideos;
+module.exports = GetVideoList;
