@@ -171,7 +171,7 @@ router.get('/:profile_user_id/profile', sanitizer.sanitizeDynamicUrlParams, func
     serviceResponse.data = wrapperFormatterRsp.data;
   };
 
-  Promise.resolve(routeHelper.perform(req, res, next, '/user/GetProfile', 'r_a_v1_u_7', null, dataFormatterFunc));
+  Promise.resolve(routeHelper.perform(req, res, next, '/user/profile/Get', 'r_a_v1_u_7', null, dataFormatterFunc));
 });
 
 /* Video save */
