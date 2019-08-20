@@ -1,10 +1,4 @@
-/**
- * This service gets recovery salt for user id
- *
- * Note:-
- */
-
-const rootPrefix = '../../..',
+const rootPrefix = '../../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   coreConstants = require(rootPrefix + '/config/coreConstants'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
@@ -40,6 +34,7 @@ class RecoveryInfo extends ServiceBase {
   }
 
   /**
+   * Fetch scrypt salt from token user cache
    *
    * @returns {Promise<*>}
    * @private
@@ -62,7 +57,7 @@ class RecoveryInfo extends ServiceBase {
   }
 
   /**
-   *
+   * Decrypt scrypt salt
    *
    * @param cacheData
    * @returns {Promise<void>}

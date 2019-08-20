@@ -35,7 +35,8 @@ class UpdateProfileBase extends ServiceBase {
 
     oThis.userObj = null;
     oThis.profileElements = {};
-    oThis.flushUserCache = true;
+    oThis.flushUserCache = false;
+    oThis.flushUserProfileElementsCache = false;
   }
 
   /**
@@ -89,8 +90,6 @@ class UpdateProfileBase extends ServiceBase {
       );
     }
 
-    await oThis._validateParams();
-
     const userMultiCache = new UsersCache({ ids: [oThis.profileUserId] });
     const cacheRsp = await userMultiCache.fetch();
 
@@ -117,6 +116,8 @@ class UpdateProfileBase extends ServiceBase {
         })
       );
     }
+
+    await oThis._validateParams();
   }
 
   /**
@@ -161,7 +162,9 @@ class UpdateProfileBase extends ServiceBase {
     }
 
     // Clear user profile elements cache.
-    promisesArray.push(new UserProfileElementsByUserIdCache({ usersIds: [oThis.profileUserId] }).clear());
+    if (oThis.flushUserProfileElementsCache) {
+      promisesArray.push(new UserProfileElementsByUserIdCache({ usersIds: [oThis.profileUserId] }).clear());
+    }
 
     await Promise.all(promisesArray);
   }

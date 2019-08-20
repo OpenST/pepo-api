@@ -178,6 +178,19 @@ class CoreConstants {
     return process.env.PA_INFRA_DB_MYSQL_DB;
   }
 
+  // Admin db
+  get ADMIN_DB_MYSQL_HOST() {
+    return process.env.PA_ADMIN_DB_MYSQL_HOST;
+  }
+
+  get ADMIN_DB_MYSQL_USER() {
+    return process.env.PA_ADMIN_DB_MYSQL_USER;
+  }
+
+  get ADMIN_DB_MYSQL_PASSWORD() {
+    return process.env.PA_ADMIN_DB_MYSQL_PASSWORD;
+  }
+
   // kms related constants
 
   get KMS_AWS_ACCESS_KEY() {

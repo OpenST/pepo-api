@@ -131,7 +131,7 @@ class ServicesBase {
       );
     }
 
-    return responseHelper.successWithData({});
+    return responseHelper.successWithData({ userObject: profileUserByIdResponse.data[oThis.profileUserId] });
   }
 
   _currentPageLimit() {
