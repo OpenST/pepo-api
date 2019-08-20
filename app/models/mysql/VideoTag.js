@@ -87,13 +87,13 @@ class VideoTag extends ModelBase {
   }
 
   /**
-   * Fetch video tags by video ids.
+   * Fetch video ids by tag ids.
    *
    * @param {array} tagIds
    *
    * @returns {Promise<void>}
    */
-  async fetchByTagIds(tagIds) {
+  async fetchVideoIdsByTagIds(tagIds) {
     const oThis = this;
 
     const dbRows = await oThis
@@ -101,14 +101,15 @@ class VideoTag extends ModelBase {
       .where({ tag_id: tagIds })
       .fire();
 
-    const response = {};
+    const tagIdToVideoIdMap = {};
 
     for (let index = 0; index < dbRows.length; index++) {
-      const formatDbRow = oThis.formatDbData(dbRows[index]);
-      response[formatDbRow.tagId] = formatDbRow;
+      let dbRow = dbRows[index];
+      tagIdToVideoIdMap[dbRow.tag_id] = tagIdToVideoIdMap[dbRow.tag_id] || [];
+      tagIdToVideoIdMap[dbRow.tag_id].push(dbRow.video_id);
     }
 
-    return response;
+    return tagIdToVideoIdMap;
   }
 
   /**
