@@ -35,6 +35,7 @@ class VideoDetail extends ModelBase {
    * @param {number} dbRow.creator_user_id
    * @param {number} dbRow.video_id
    * @param {number} dbRow.description_id
+   * @param {array} dbRow.link_ids
    * @param {number} dbRow.total_contributed_by
    * @param {number} dbRow.total_amount
    * @param {number} dbRow.total_transactions
@@ -51,6 +52,7 @@ class VideoDetail extends ModelBase {
       creatorUserId: dbRow.creator_user_id,
       videoId: dbRow.video_id,
       descriptionId: dbRow.description_id,
+      linkIds: dbRow.link_ids,
       totalContributedBy: dbRow.total_contributed_by,
       totalAmount: dbRow.total_amount,
       totalTransactions: dbRow.total_transactions,
@@ -73,6 +75,7 @@ class VideoDetail extends ModelBase {
       'creatorUserId',
       'videoId',
       'descriptionId',
+      'linkIds',
       'totalContributedBy',
       'totalTransactions',
       'totalAmount',
@@ -231,16 +234,26 @@ class VideoDetail extends ModelBase {
    * @param {object} params
    * @param {number} params.userId
    * @param {number} params.videoId
+   * @param {string} params.linkIds
+   * @param {string} params.status
    *
    * @return {object}
    */
   insertVideo(params) {
     const oThis = this;
 
+    let linkIds = null;
+
+    if (params.linkIds && params.linkIds.length > 0) {
+      linkIds = JSON.stringify(params.linkIds);
+    }
+
     return oThis
       .insert({
         creator_user_id: params.userId,
-        video_id: params.videoId
+        video_id: params.videoId,
+        link_ids: linkIds,
+        status: videoDetailsConst.invertedStatuses[params.status]
       })
       .fire();
   }

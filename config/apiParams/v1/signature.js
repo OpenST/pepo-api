@@ -283,6 +283,10 @@ const v1Signature = {
       {
         parameter: 'video_description',
         validatorMethods: ['validateNonBlankString']
+      },
+      {
+        parameter: 'link',
+        validatorMethods: ['validateGenericUrl']
       }
     ]
   },
