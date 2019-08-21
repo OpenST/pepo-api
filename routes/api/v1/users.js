@@ -153,6 +153,7 @@ router.get('/:profile_user_id/profile', sanitizer.sanitizeDynamicUrlParams, func
   req.decodedParams.profile_user_id = req.params.profile_user_id;
 
   const dataFormatterFunc = async function(serviceResponse) {
+    console.log('serviceResponse-------', serviceResponse);
     const wrapperFormatterRsp = await new FormatterComposer({
       resultType: responseEntityKey.userProfile,
       entityKindToResponseKeyMap: {

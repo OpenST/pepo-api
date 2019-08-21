@@ -9,6 +9,7 @@ const rootPrefix = '../../..',
   entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
   responseEntityKey = require(rootPrefix + '/lib/globalConstant/responseEntityKey');
 
+/* Single user feeds*/
 router.get('/:feed_id', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.feedDetails;
   req.decodedParams.feed_id = req.params.feed_id;
@@ -33,15 +34,13 @@ router.get('/:feed_id', sanitizer.sanitizeDynamicUrlParams, function(req, res, n
       serviceData: serviceResponse.data
     }).perform();
 
-    //console.log('wrapperFormatterRsp-----', JSON.stringify(wrapperFormatterRsp));
-
     serviceResponse.data = wrapperFormatterRsp.data;
   };
 
   Promise.resolve(routeHelper.perform(req, res, next, '/feed/ById', 'r_a_v1_f_1', null, dataFormatterFunc));
 });
 
-/* Content Feeds*/
+/* Public Feeds*/
 router.get('/', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.feedsList;
 
@@ -67,8 +66,6 @@ router.get('/', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
       },
       serviceData: serviceResponse.data
     }).perform();
-
-    //console.log('wrapperFormatterRsp-----', JSON.stringify(wrapperFormatterRsp));
 
     serviceResponse.data = wrapperFormatterRsp.data;
   };

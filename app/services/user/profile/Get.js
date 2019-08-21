@@ -71,6 +71,7 @@ class GetUserProfile extends ServiceBase {
       tags: profileResp.tags,
       userStat: profileResp.userStat,
       videoDetailsMap: profileResp.videoDetailsMap,
+      videoDescription: profileResp.videoDescription,
       currentUserUserContributionsMap: profileResp.currentUserUserContributionsMap,
       currentUserVideoContributionsMap: profileResp.currentUserVideoContributionsMap,
       pricePointsMap: profileResp.pricePointsMap
