@@ -109,7 +109,7 @@ class UpdateFanVideo extends UpdateProfileBase {
   async _updateProfileElements() {
     const oThis = this;
 
-    const linkId = await oThis._addLink();
+    const linkIds = await oThis._addLink();
 
     const resp = await videoLib.validateAndSave({
       userId: oThis.profileUserId,
@@ -122,7 +122,7 @@ class UpdateFanVideo extends UpdateProfileBase {
       posterImageWidth: oThis.imageWidth,
       posterImageHeight: oThis.imageHeight,
       isExternalUrl: oThis.isExternalUrl,
-      linkId: linkId
+      linkIds: linkIds
     });
 
     if (resp.isFailure()) {
@@ -195,7 +195,7 @@ class UpdateFanVideo extends UpdateProfileBase {
         kind: urlConstants.socialUrlKind
       });
 
-      return insertRsp.insertId;
+      return [insertRsp.insertId];
     }
 
     return null;
