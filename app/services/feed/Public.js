@@ -276,6 +276,8 @@ class PublicVideoFeed extends FeedBase {
           totalContributedBy: 0,
           totalAmount: '0',
           totalTransactions: 0,
+          description_id: null,
+          link_ids: null,
           createdAt: 1564472456,
           updatedAt: 1564472456
         },
@@ -286,6 +288,8 @@ class PublicVideoFeed extends FeedBase {
           totalContributedBy: 0,
           totalAmount: '0',
           totalTransactions: 0,
+          description_id: null,
+          link_ids: null,
           createdAt: 1564472456,
           updatedAt: 1564472456
         },
@@ -296,6 +300,8 @@ class PublicVideoFeed extends FeedBase {
           totalContributedBy: 0,
           totalAmount: '0',
           totalTransactions: 0,
+          description_id: null,
+          link_ids: null,
           createdAt: 1564472456,
           updatedAt: 1564472456
         }
