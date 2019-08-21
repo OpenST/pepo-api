@@ -276,8 +276,8 @@ class PublicVideoFeed extends FeedBase {
           totalContributedBy: 0,
           totalAmount: '0',
           totalTransactions: 0,
-          description_id: null,
-          link_ids: null,
+          descriptionId: null,
+          linkIds: null,
           createdAt: 1564472456,
           updatedAt: 1564472456
         },
@@ -288,8 +288,8 @@ class PublicVideoFeed extends FeedBase {
           totalContributedBy: 0,
           totalAmount: '0',
           totalTransactions: 0,
-          description_id: null,
-          link_ids: null,
+          descriptionId: null,
+          linkIds: null,
           createdAt: 1564472456,
           updatedAt: 1564472456
         },
@@ -300,8 +300,8 @@ class PublicVideoFeed extends FeedBase {
           totalContributedBy: 0,
           totalAmount: '0',
           totalTransactions: 0,
-          description_id: null,
-          link_ids: null,
+          descriptionId: null,
+          linkIds: null,
           createdAt: 1564472456,
           updatedAt: 1564472456
         }
@@ -372,6 +372,8 @@ class PublicVideoFeed extends FeedBase {
           updatedAt: 1564044369
         }
       });
+
+      oThis.profileResponse.videoDescriptions = null;
     }
 
     // TEMP CODE END - to show curated feeds on top(only in logged out mode)
