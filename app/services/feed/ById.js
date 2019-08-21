@@ -91,7 +91,7 @@ class FeedById extends FeedBase {
       tags: oThis.profileResponse.tags,
       userStat: oThis.profileResponse.userStat,
       videoDetailsMap: oThis.profileResponse.videoDetailsMap,
-      videoDescription: oThis.profileResponse.videoDescription,
+      videoDescriptionsMap: oThis.profileResponse.videoDescriptionMap,
       currentUserUserContributionsMap: oThis.profileResponse.currentUserUserContributionsMap,
       currentUserVideoContributionsMap: oThis.profileResponse.currentUserVideoContributionsMap,
       pricePointsMap: oThis.profileResponse.pricePointsMap,
