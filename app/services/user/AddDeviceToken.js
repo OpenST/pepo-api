@@ -16,8 +16,8 @@ class AddDeviceToken extends ServiceBase {
    * @param {object} params
    * @param {object} params.current_user
    * @param {number} params.device_id
-   * @param {string} params.device_type
-   * @param {string} params.token
+   * @param {string} params.device_kind
+   * @param {string} params.device_token
    *
    * @param {number} params.current_user.id
    *
@@ -32,8 +32,8 @@ class AddDeviceToken extends ServiceBase {
 
     oThis.currentUserId = +params.current_user.id;
     oThis.deviceId = params.device_id;
-    oThis.deviceType = params.device_type;
-    oThis.token = params.token;
+    oThis.deviceKind = params.device_kind;
+    oThis.deviceToken = params.device_token;
   }
 
   /**
@@ -59,14 +59,14 @@ class AddDeviceToken extends ServiceBase {
   async _validateAndSanitize() {
     const oThis = this;
 
-    oThis.deviceType = oThis.deviceType.toUpperCase();
+    oThis.deviceKind = oThis.deviceKind.toUpperCase();
 
-    if (!userDeviceConstants.invertedUserDeviceTypes[oThis.deviceType]) {
+    if (!userDeviceConstants.invertedUserDeviceKinds[oThis.deviceKind]) {
       return Promise.reject(
         responseHelper.error({
           internal_error_identifier: 'a_s_u_adt_1',
           api_error_identifier: 'invalid_device_type',
-          debug_options: { deviceType: oThis.deviceType }
+          debug_options: { deviceKind: oThis.deviceKind }
         })
       );
     }
@@ -84,8 +84,8 @@ class AddDeviceToken extends ServiceBase {
     const insertParams = {
       user_id: oThis.currentUserId,
       device_id: oThis.deviceId,
-      token: oThis.token,
-      device_type: userDeviceConstants.invertedUserDeviceTypes[oThis.deviceType]
+      device_token: oThis.deviceToken,
+      device_kind: userDeviceConstants.invertedUserDeviceKinds[oThis.deviceKind]
     };
 
     return new UserDeviceModel()
@@ -95,7 +95,7 @@ class AddDeviceToken extends ServiceBase {
         if (UserDeviceModel.isDuplicateIndexViolation(UserDeviceModel.userDeviceUniqueIndexName, err)) {
           await new UserDeviceModel()
             .update({
-              token: oThis.token
+              device_token: oThis.deviceToken
             })
             .where({
               user_id: oThis.currentUserId,

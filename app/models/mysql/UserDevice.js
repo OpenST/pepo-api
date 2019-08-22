@@ -34,8 +34,8 @@ class UserDevice extends ModelBase {
    * @param {number} dbRow.id
    * @param {number} dbRow.user_id
    * @param {number} dbRow.device_id
-   * @param {string} dbRow.token
-   * @param {string} dbRow.device_type
+   * @param {string} dbRow.device_token
+   * @param {string} dbRow.device_kind
    * @param {number} dbRow.created_at
    * @param {number} dbRow.updated_at
    *
@@ -48,8 +48,8 @@ class UserDevice extends ModelBase {
       id: dbRow.id,
       userId: dbRow.user_id,
       deviceId: dbRow.device_id,
-      token: dbRow.token,
-      deviceType: userDevicesConstants.userDeviceTypes[dbRow.device_type],
+      deviceToken: dbRow.device_token,
+      deviceKind: userDevicesConstants.userDeviceKinds[dbRow.device_kind],
       createdAt: dbRow.created_at,
       updatedAt: dbRow.updated_at
     };
@@ -63,7 +63,7 @@ class UserDevice extends ModelBase {
    * @returns {array}
    */
   safeFormattedColumnNames() {
-    return ['id', 'userId', 'deviceId', 'token', 'createdAt', 'deviceType', 'updatedAt'];
+    return ['id', 'userId', 'deviceId', 'deviceToken', 'deviceKind', 'createdAt', 'updatedAt'];
   }
 
   /**

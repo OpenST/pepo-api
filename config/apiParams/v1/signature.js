@@ -477,11 +477,11 @@ const v1Signature = {
         validatorMethods: ['validateNonZeroInteger']
       },
       {
-        parameter: 'device_type',
+        parameter: 'device_kind',
         validatorMethods: ['validateString']
       },
       {
-        parameter: 'token',
+        parameter: 'device_token',
         validatorMethods: ['validateString']
       }
     ]

@@ -11,7 +11,7 @@ const upQuery =
 	  `user_id` bigint(20) unsigned NOT NULL, \n\
 	  `device_id` bigint(20) unsigned NOT NULL, \n\
 	  `token` varchar(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL, \n\
-	  `device_type` tinyint(4) NOT NULL,\n\
+	  `device_kind` tinyint(4) NOT NULL,\n\
 	  `created_at` int(11) NOT NULL,\n\
     `updated_at` int(11) NOT NULL,\n\
 	  PRIMARY KEY (`id`), \n\
