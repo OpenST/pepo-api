@@ -92,11 +92,24 @@ class UserDevice extends ModelBase {
   }
 
   /**
+   * Index name
+   *
+   * @returns {string}
+   */
+  static get userDeviceUniqueIndexName() {
+    return 'uidx_1';
+  }
+
+  /**
    * Flush cache.
    *
    * @returns {Promise<*>}
    */
-  static async flushCache(params) {}
+  static async flushCache(params) {
+    const UserDeviceByUserIds = require(rootPrefix + '/lib/cacheManagement/multi/UserDeviceByUserIds');
+
+    await new UserDeviceByUserIds({ userIds: [params.userId] }).clear();
+  }
 }
 
 module.exports = UserDevice;

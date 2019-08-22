@@ -1,7 +1,7 @@
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   UserDeviceModel = require(rootPrefix + '/app/models/mysql/UserDevice'),
-  userDeviceConstants = require(rootPrefix + 'lib/globalConstant/userDevice'),
+  userDeviceConstants = require(rootPrefix + '/lib/globalConstant/userDevice'),
   responseHelper = require(rootPrefix + '/lib/formatter/response');
 
 /**
@@ -44,7 +44,32 @@ class AddDeviceToken extends ServiceBase {
   async _asyncPerform() {
     const oThis = this;
 
-    return oThis._insertIntoUserDevices();
+    await oThis._validateAndSanitize();
+
+    await oThis._insertIntoUserDevices();
+
+    return responseHelper.successWithData({});
+  }
+
+  /**
+   * Validate and sanitize params.
+   *
+   * @private
+   */
+  async _validateAndSanitize() {
+    const oThis = this;
+
+    oThis.deviceType = oThis.deviceType.toUpperCase();
+
+    if (!userDeviceConstants.invertedUserDeviceTypes[oThis.deviceType]) {
+      return Promise.reject(
+        responseHelper.error({
+          internal_error_identifier: 'a_s_u_adt_1',
+          api_error_identifier: 'invalid_device_type',
+          debug_options: { deviceType: oThis.deviceType }
+        })
+      );
+    }
   }
 
   /**
@@ -63,7 +88,25 @@ class AddDeviceToken extends ServiceBase {
       device_type: userDeviceConstants.invertedUserDeviceTypes[oThis.deviceType]
     };
 
-    return new UserDeviceModel().insert(insertParams).fire();
+    return new UserDeviceModel()
+      .insert(insertParams)
+      .fire()
+      .catch(async function(err) {
+        if (UserDeviceModel.isDuplicateIndexViolation(UserDeviceModel.userDeviceUniqueIndexName, err)) {
+          await new UserDeviceModel()
+            .update({
+              token: oThis.token
+            })
+            .where({
+              user_id: oThis.currentUserId,
+              device_id: oThis.deviceId
+            })
+            .fire();
+        }
+
+        // Flush cache.
+        await UserDeviceModel.flushCache({ userId: oThis.currentUserId });
+      });
   }
 }
 
