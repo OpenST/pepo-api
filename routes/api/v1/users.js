@@ -260,4 +260,12 @@ router.post('/thank-you', sanitizer.sanitizeDynamicUrlParams, function(req, res,
   Promise.resolve(routeHelper.perform(req, res, next, '/user/notification/SayThankYou', 'r_a_v1_u_14', null));
 });
 
+/* Add device token*/
+router.post('/:user_id/device-token', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.addDeviceToken;
+  req.decodedParams.user_id = req.params.user_id;
+
+  Promise.resolve(routeHelper.perform(req, res, next, '/user/AddDeviceToken', 'r_a_v1_u_15', null));
+});
+
 module.exports = router;

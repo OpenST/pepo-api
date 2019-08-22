@@ -465,6 +465,26 @@ const v1Signature = {
         validatorMethods: ['validateNonEmptyObject']
       }
     ]
+  },
+  [apiName.addDeviceToken]: {
+    mandatory: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      },
+      {
+        parameter: 'device_id',
+        validatorMethods: ['validateNonZeroInteger']
+      },
+      {
+        parameter: 'device_type',
+        validatorMethods: ['validateString']
+      },
+      {
+        parameter: 'token',
+        validatorMethods: ['validateString']
+      }
+    ]
   }
 };
 
