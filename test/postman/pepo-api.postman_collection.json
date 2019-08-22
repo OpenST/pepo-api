@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "949393f7-b1ce-4002-8fa0-a0abd476b0ec",
+		"_postman_id": "3fdd5076-e7a7-4863-9ee8-6c0c7706561b",
 		"name": "pepo-api",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -882,6 +882,96 @@
 							]
 						},
 						"description": "GET websocket details"
+					},
+					"response": []
+				},
+				{
+					"name": "add-fan-video",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/x-www-form-urlencoded"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "video_url",
+									"value": "https://s3.amazonaws.com/uassets.stagingpepo.com/pepo-staging1000/ua/videos/pankaj-profile.mp4",
+									"type": "text"
+								},
+								{
+									"key": "poster_image_url",
+									"value": "https://s3.amazonaws.com/uassets.stagingpepo.com/pepo-staging1000/ua/images/pankaj-profile-video-poster.jpg",
+									"type": "text"
+								},
+								{
+									"key": "video_size",
+									"value": "2000",
+									"type": "text"
+								},
+								{
+									"key": "video_height",
+									"value": "100",
+									"type": "text"
+								},
+								{
+									"key": "video_width",
+									"value": "100",
+									"type": "text"
+								},
+								{
+									"key": "image_size",
+									"value": "1000",
+									"type": "text"
+								},
+								{
+									"key": "image_height",
+									"value": "100",
+									"type": "text"
+								},
+								{
+									"key": "image_width",
+									"value": "100",
+									"type": "text"
+								},
+								{
+									"key": "video_description",
+									"value": "Testing video description #best",
+									"type": "text"
+								},
+								{
+									"key": "link",
+									"value": "www.tiktok.com/anagha",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{api_server}}/api/v1/users/1254/fan-video",
+							"host": [
+								"{{api_server}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"users",
+								"1254",
+								"fan-video"
+							],
+							"query": [
+								{
+									"key": "image_url",
+									"value": "https://s3.amazonaws.com/uassets.stagingpepo.com/pepo-staging1000/ua/images",
+									"disabled": true
+								}
+							]
+						}
 					},
 					"response": []
 				}
