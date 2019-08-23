@@ -14,5 +14,5 @@
     "queues": ["example"],
     "prefetchCount": 1
   },
-  "notificationHookProcessor": {}
+  "pushNotificationHookProcessor": {}
 }

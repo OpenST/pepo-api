@@ -135,7 +135,7 @@ class PushNotification extends HookProcessorsBase {
    * @private
    */
   get _cronKind() {
-    return cronProcessesConstants.pushNotificationProcessor;
+    return cronProcessesConstants.pushNotificationHookProcessor;
   }
 
   /**
