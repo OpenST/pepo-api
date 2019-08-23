@@ -15,8 +15,8 @@ const upQuery =
   '  `lock_identifier` decimal(22,10) DEFAULT NULL,\n' +
   '  `locked_at` int(11) DEFAULT NULL,\n' +
   "  `status` int(11) NOT NULL DEFAULT '1',\n" +
-  '  `ios_response` text COLLATE utf8_unicode_ci,\n' +
-  '  `android_response` text COLLATE utf8_unicode_ci,\n' +
+  '  `ios_response` blob NOT NULL,\n' +
+  '  `android_response` blob NOT NULL,\n' +
   '  `created_at` int(11) NOT NULL,\n' +
   '  `updated_at` int(11) NOT NULL,\n' +
   '  PRIMARY KEY (`id`),\n' +
