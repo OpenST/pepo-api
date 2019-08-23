@@ -38,8 +38,8 @@ class NotificationHook extends ModelBase {
 
     const formattedData = {
       id: dbRow.id,
-      recipients: dbRow.recipients,
-      pushNotificationPayload: dbRow.push_notification_payload,
+      recipients: JSON.parse(dbRow.recipients),
+      pushNotificationPayload: JSON.parse(dbRow.push_notification_payload),
       executionTimestamp: dbRow.execution_timestamp,
       lockIdentifier: dbRow.lock_identifier,
       lockedAt: dbRow.locked_at,

@@ -1,7 +1,7 @@
 /**
  * Base class for hook processors
  *
- * @module executables/hookProcessors/EmailServiceAPICall
+ * @module executables/hookProcessors/Base
  */
 
 const rootPrefix = '../..',
