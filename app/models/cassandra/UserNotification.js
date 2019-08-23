@@ -42,6 +42,10 @@ class UserNotificationModel extends CassandraModelBase {
     };
   }
 
+  get longToShortNamesMap() {
+    return userNotificationConstants.longToShortNamesMap;
+  }
+
   /**
    * Fetch by creator user id.
    *

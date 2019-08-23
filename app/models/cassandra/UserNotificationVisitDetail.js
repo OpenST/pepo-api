@@ -40,6 +40,10 @@ class UserNotificationVisitDetailModel extends CassandraModelBase {
     };
   }
 
+  get longToShortNamesMap() {
+    return userNotificationVisitConstants.longToShortNamesMap;
+  }
+
   /**
    * Format db data.
    *
