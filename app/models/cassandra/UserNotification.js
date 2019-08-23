@@ -30,6 +30,18 @@ class UserNotificationModel extends CassandraModelBase {
   }
 
   /**
+   * Keys for table user_notifications
+   *
+   * @returns {{partition: string[], sort: string[]}}
+   */
+  keyObject() {
+    return {
+      partition: ['user_id', 'last_action_timestamp', 'uuid'],
+      sort: ['last_action_timestamp']
+    };
+  }
+
+  /**
    * Fetch by creator user id.
    *
    * @param {integer} params.limit: no of rows to fetch

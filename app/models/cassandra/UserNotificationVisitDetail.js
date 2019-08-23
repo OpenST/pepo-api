@@ -28,6 +28,18 @@ class UserNotificationVisitDetailModel extends CassandraModelBase {
   }
 
   /**
+   * Keys for table user_notification_visit_details
+   *
+   * @returns {{partition: string[], sort: string[]}}
+   */
+  keyObject() {
+    return {
+      partition: ['user_id'],
+      sort: []
+    };
+  }
+
+  /**
    * Format db data.
    *
    * @param {object} dbRow
