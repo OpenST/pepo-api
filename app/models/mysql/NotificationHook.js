@@ -40,6 +40,7 @@ class NotificationHook extends ModelBase {
       id: dbRow.id,
       recipients: JSON.parse(dbRow.recipients),
       pushNotificationPayload: JSON.parse(dbRow.push_notification_payload),
+      eventType: notificationHookConstants.eventTypes[dbRow.event_type],
       executionTimestamp: dbRow.execution_timestamp,
       lockIdentifier: dbRow.lock_identifier,
       lockedAt: dbRow.locked_at,
