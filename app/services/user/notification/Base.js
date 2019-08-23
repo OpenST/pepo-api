@@ -12,6 +12,7 @@ const rootPrefix = '../../../..',
   videoConstants = require(rootPrefix + '/lib/globalConstant/video'),
   userNotificationConstants = require(rootPrefix + '/lib/globalConstant/cassandra/userNotification'),
   bgJobConstants = require(rootPrefix + '/lib/globalConstant/bgJob'),
+  UserNotificationModel = require(rootPrefix + '/app/models/cassandra/UserNotification'),
   responseEntityKey = require(rootPrefix + '/lib/globalConstant/responseEntityKey');
 
 /**
@@ -470,7 +471,10 @@ class UserNotificationBase extends ServiceBase {
     console.log('Notifications To Delete: ', oThis.notificationsToDelete);
 
     if (oThis.notificationsToDelete.length > 0) {
-      await bgJob.enqueue(bgJobConstants.deleteCassandraJobTopic, oThis.notificationsToDelete);
+      await bgJob.enqueue(bgJobConstants.deleteCassandraJobTopic, {
+        tableName: new UserNotificationModel().tableName,
+        elementsToDelete: oThis.notificationsToDelete
+      });
     }
   }
 
