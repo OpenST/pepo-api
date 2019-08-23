@@ -127,19 +127,20 @@ class NotificationHook extends ModelBase {
   /**
    * Mark status as processed.
    *
-   * @param {number} hookId
-   * @param {object} successResponse
-   *
+   * @param hookId
+   * @param iosResponse
+   * @param androidResponse
    * @returns {Promise<void>}
    */
-  async markStatusAsProcessed(hookId, successResponse) {
+  async markStatusAsProcessed(hookId, iosResponse, androidResponse) {
     const oThis = this;
 
     await oThis
       .update({
         lock_identifier: null,
         locked_at: null,
-        success_response: JSON.stringify(successResponse),
+        ios_response: JSON.stringify(iosResponse),
+        android_response: JSON.stringify(androidResponse),
         status: notificationHookConstants.invertedStatuses[notificationHookConstants.processedStatus]
       })
       .where(['id = ?', hookId])

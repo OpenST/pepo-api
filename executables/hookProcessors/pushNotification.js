@@ -5,7 +5,7 @@
  */
 const program = require('commander');
 
-const rootPrefix = '..',
+const rootPrefix = '../..',
   NotificationHookModel = require(rootPrefix + '/app/models/mysql/NotificationHook'),
   ErrorLogsConstants = require(rootPrefix + '/lib/globalConstant/errorLogs'),
   CronProcessModel = require(rootPrefix + '/app/models/mysql/CronProcesses'),
@@ -85,6 +85,7 @@ class PushNotification extends HookProcessorsBase {
         oThis.failedHookToBeRetried[oThis.hook.id] = response.data;
       }
     }
+    console.log('response-----------', oThis.successResponse);
   }
 
   /**
@@ -109,7 +110,11 @@ class PushNotification extends HookProcessorsBase {
 
     for (let hookId in oThis.hooksToBeProcessed) {
       if (oThis.successResponse[hookId]) {
-        await new NotificationHookModel().markStatusAsProcessed(hookId, oThis.successResponse[hookId]);
+        await new NotificationHookModel().markStatusAsProcessed(
+          hookId,
+          oThis.successResponse[hookId],
+          oThis.successResponse[hookId]
+        );
       }
     }
   }
