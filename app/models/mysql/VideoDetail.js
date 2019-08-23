@@ -1,6 +1,7 @@
 const rootPrefix = '../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
-  databaseConstants = require(rootPrefix + '/lib/globalConstant/database');
+  databaseConstants = require(rootPrefix + '/lib/globalConstant/database'),
+  videoDetailsConst = require(rootPrefix + '/lib/globalConstant/videoDetail');
 
 // Declare variables.
 const dbName = databaseConstants.entityDbName;
@@ -33,6 +34,8 @@ class VideoDetail extends ModelBase {
    * @param {number} dbRow.id
    * @param {number} dbRow.creator_user_id
    * @param {number} dbRow.video_id
+   * @param {number} dbRow.description_id
+   * @param {array} dbRow.link_ids
    * @param {number} dbRow.total_contributed_by
    * @param {number} dbRow.total_amount
    * @param {number} dbRow.total_transactions
@@ -48,9 +51,12 @@ class VideoDetail extends ModelBase {
       id: dbRow.id,
       creatorUserId: dbRow.creator_user_id,
       videoId: dbRow.video_id,
+      descriptionId: dbRow.description_id,
+      linkIds: dbRow.link_ids,
       totalContributedBy: dbRow.total_contributed_by,
       totalAmount: dbRow.total_amount,
       totalTransactions: dbRow.total_transactions,
+      status: videoDetailsConst.statuses[dbRow.status],
       createdAt: dbRow.created_at,
       updatedAt: dbRow.updated_at
     };
@@ -68,9 +74,12 @@ class VideoDetail extends ModelBase {
       'id',
       'creatorUserId',
       'videoId',
+      'descriptionId',
+      'linkIds',
       'totalContributedBy',
       'totalTransactions',
       'totalAmount',
+      'status',
       'createdAt',
       'updatedAt'
     ];
@@ -104,7 +113,7 @@ class VideoDetail extends ModelBase {
    * @param {integer} params.limit: no of rows to fetch
    * @param {integer} params.creatorUserId: creator user id
    * @param {integer} params.paginationTimestamp: creator user id
-   * @return {Promise<void>}
+   * @return {Promise}
    */
   async fetchByCreatorUserId(params) {
     const oThis = this,
@@ -114,7 +123,10 @@ class VideoDetail extends ModelBase {
 
     const queryObject = oThis
       .select('*')
-      .where({ creator_user_id: creatorUserId })
+      .where({
+        creator_user_id: creatorUserId,
+        status: videoDetailsConst.invertedStatuses[videoDetailsConst.activeStatus]
+      })
       .order_by('id desc')
       .limit(limit);
 
@@ -222,16 +234,71 @@ class VideoDetail extends ModelBase {
    * @param {object} params
    * @param {number} params.userId
    * @param {number} params.videoId
+   * @param {string} params.linkIds
+   * @param {string} params.status
    *
    * @return {object}
    */
   insertVideo(params) {
     const oThis = this;
 
+    let linkIds = null;
+
+    if (params.linkIds && params.linkIds.length > 0) {
+      linkIds = JSON.stringify(params.linkIds);
+    }
+
     return oThis
       .insert({
         creator_user_id: params.userId,
+        video_id: params.videoId,
+        link_ids: linkIds,
+        status: videoDetailsConst.invertedStatuses[params.status]
+      })
+      .fire();
+  }
+
+  /**
+   * Delete video details
+   *
+   * @param {object} params
+   * @param {number} params.userId
+   * @param {number} params.videoId
+   *
+   * @return {object}
+   */
+  async markDeleted(params) {
+    const oThis = this;
+
+    await oThis
+      .update({
+        status: videoDetailsConst.invertedStatuses[videoDetailsConst.deletedStatus]
+      })
+      .where({
+        creator_user_id: params.userId,
         video_id: params.videoId
+      })
+      .fire();
+
+    return VideoDetail.flushCache(params);
+  }
+
+  /**
+   * Delete by id.
+   *
+   * @param {object} params
+   * @param {number} params.id
+   *
+   * @return {Promise<void>}
+   */
+
+  async deleteById(params) {
+    const oThis = this;
+
+    await oThis
+      .delete()
+      .where({
+        id: params.id
       })
       .fire();
   }

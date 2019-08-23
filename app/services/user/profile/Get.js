@@ -1,4 +1,4 @@
-const rootPrefix = '../../..',
+const rootPrefix = '../../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   GetProfile = require(rootPrefix + '/lib/user/profile/Get'),
   responseHelper = require(rootPrefix + '/lib/formatter/response');
@@ -71,6 +71,7 @@ class GetUserProfile extends ServiceBase {
       tags: profileResp.tags,
       userStat: profileResp.userStat,
       videoDetailsMap: profileResp.videoDetailsMap,
+      videoDescriptionsMap: profileResp.videoDescriptionMap,
       currentUserUserContributionsMap: profileResp.currentUserUserContributionsMap,
       currentUserVideoContributionsMap: profileResp.currentUserVideoContributionsMap,
       pricePointsMap: profileResp.pricePointsMap

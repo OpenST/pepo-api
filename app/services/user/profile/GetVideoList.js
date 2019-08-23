@@ -1,18 +1,14 @@
-const rootPrefix = '../../..',
+const rootPrefix = '../../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   GetProfile = require(rootPrefix + '/lib/user/profile/Get'),
   GetTokenService = require(rootPrefix + '/app/services/token/Get'),
   VideoDetailsByUserIdCache = require(rootPrefix + '/lib/cacheManagement/single/VideoDetailsByUserIdPagination'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
+  UserModel = require(rootPrefix + '/app/models/mysql/User'),
   paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination');
 
-/**
- * Class for user video details service.
- *
- * @class UserVideos
- */
-class UserVideos extends ServiceBase {
+class GetVideoList extends ServiceBase {
   /**
    * Constructor for user video details service.
    *
@@ -42,6 +38,7 @@ class UserVideos extends ServiceBase {
     oThis.videoDetails = [];
     oThis.videoIds = [];
     oThis.tokenDetails = {};
+    oThis.profileUserObj = null;
   }
 
   /**
@@ -53,15 +50,15 @@ class UserVideos extends ServiceBase {
   async _asyncPerform() {
     const oThis = this;
 
-    let promisesArray = [];
-    promisesArray.push(oThis._validateAndSanitizeParams());
-    promisesArray.push(oThis._validateProfileUserId());
-    await Promise.all(promisesArray);
+    await oThis._validateAndSanitizeParams();
+
+    let resp = await oThis._validateProfileUserId();
+    oThis.profileUserObj = resp.data.userObject;
 
     await oThis._fetchVideoIds();
     oThis._addResponseMetaData();
 
-    promisesArray = [];
+    let promisesArray = [];
     promisesArray.push(oThis._setTokenDetails());
     promisesArray.push(oThis._getVideos());
     await Promise.all(promisesArray);
@@ -105,6 +102,11 @@ class UserVideos extends ServiceBase {
   async _fetchVideoIds() {
     const oThis = this;
 
+    // If user's profile(not self) is not approved, videos would not be shown.
+    if (oThis.currentUserId != oThis.profileUserId && !UserModel.isUserApprovedCreator(oThis.profileUserObj)) {
+      return responseHelper.successWithData({});
+    }
+
     const cacheResponse = await new VideoDetailsByUserIdCache({
       userId: oThis.profileUserId,
       limit: oThis.limit,
@@ -116,7 +118,7 @@ class UserVideos extends ServiceBase {
     }
 
     const videoDetails = cacheResponse.data.videoDetails;
-    const videoIds = cacheResponse.data.videoIds;
+    const videoIds = cacheResponse.data.videoIds || [];
 
     for (let ind = 0; ind < videoIds.length; ind++) {
       let videoId = videoIds[ind];
@@ -124,6 +126,7 @@ class UserVideos extends ServiceBase {
       oThis.videosCount++;
       oThis.videoDetails.push(videoDetail);
       oThis.videoIds.push(videoDetail.videoId);
+
       oThis.nextPaginationTimestamp = videoDetail.createdAt;
     }
 
@@ -269,6 +272,7 @@ class UserVideos extends ServiceBase {
       imageMap: oThis.profileResponse.imageMap,
       videoMap: oThis.profileResponse.videoMap,
       [entityType.videoDetailsMap]: oThis.profileResponse.videoDetailsMap,
+      [entityType.videoDescriptionsMap]: oThis.profileResponse.videoDescriptionMap,
       [entityType.currentUserUserContributionsMap]: oThis.profileResponse.currentUserUserContributionsMap,
       [entityType.currentUserVideoContributionsMap]: oThis.profileResponse.currentUserVideoContributionsMap,
       [entityType.userProfileAllowedActions]: oThis.profileResponse.userProfileAllowedActions,
@@ -280,4 +284,4 @@ class UserVideos extends ServiceBase {
   }
 }
 
-module.exports = UserVideos;
+module.exports = GetVideoList;

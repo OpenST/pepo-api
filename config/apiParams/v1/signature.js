@@ -279,6 +279,14 @@ const v1Signature = {
       {
         parameter: 'image_size',
         validatorMethods: ['validateInteger']
+      },
+      {
+        parameter: 'video_description',
+        validatorMethods: ['validateNonBlankString']
+      },
+      {
+        parameter: 'link',
+        validatorMethods: ['validateGenericUrl']
       }
     ]
   },
@@ -465,6 +473,76 @@ const v1Signature = {
         validatorMethods: ['validateNonEmptyObject']
       }
     ]
+  },
+  [apiName.adminLogin]: {
+    mandatory: [
+      {
+        parameter: 'email',
+        validatorMethods: ['isValidEmail']
+      },
+      {
+        parameter: 'password',
+        validatorMethods: ['validatePassword']
+      }
+    ],
+    optional: []
+  },
+  [apiName.userSearch]: {
+    mandatory: [
+      {
+        parameter: 'q',
+        validatorMethods: ['validateString']
+      }
+    ],
+    optional: [
+      {
+        parameter: 'includeVideos',
+        validatorMethods: ['validateBoolean']
+      },
+      {
+        parameter: paginationConstants.paginationIdentifierKey,
+        validatorMethods: ['validateString', 'validatePaginationIdentifier']
+      }
+    ]
+  },
+  [apiName.adminUserSearch]: {
+    mandatory: [],
+    optional: [
+      {
+        parameter: 'includeVideos',
+        validatorMethods: ['validateBoolean']
+      },
+      {
+        parameter: 'q',
+        validatorMethods: ['validateString']
+      },
+      {
+        parameter: paginationConstants.paginationIdentifierKey,
+        validatorMethods: ['validateString', 'validatePaginationIdentifier']
+      }
+    ]
+  },
+  [apiName.adminUserApprove]: {
+    mandatory: [
+      {
+        parameter: 'user_ids',
+        validatorMethods: ['validateArray']
+      }
+    ],
+    optional: []
+  },
+  [apiName.adminDeleteVideo]: {
+    mandatory: [
+      {
+        parameter: 'video_id',
+        validatorMethods: ['validateNonZeroInteger']
+      },
+      {
+        parameter: 'current_admin',
+        validatorMethods: ['validateNonEmptyObject']
+      }
+    ],
+    optional: []
   },
   [apiName.addDeviceToken]: {
     mandatory: [

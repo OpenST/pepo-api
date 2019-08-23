@@ -60,6 +60,11 @@ export PA_SOCKET_DB_MYSQL_HOST='127.0.0.1'
 export PA_SOCKET_DB_MYSQL_USER='root'
 export PA_SOCKET_DB_MYSQL_PASSWORD='root'
 
+# mysql admin db
+export PA_ADMIN_DB_MYSQL_HOST='127.0.0.1'
+export PA_ADMIN_DB_MYSQL_USER='root'
+export PA_ADMIN_DB_MYSQL_PASSWORD='root'
+
 # mysql - devops error logs infra details
 export PA_INFRA_DB_MYSQL_HOST='127.0.0.1'
 export PA_INFRA_DB_MYSQL_USER='root'

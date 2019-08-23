@@ -209,6 +209,29 @@ class Video extends ModelBase {
   }
 
   /**
+   * Mark video deleted
+   *
+   * @param {object} params
+   * @param {number/string} params.id
+   *
+   * @return {Promise<object>}
+   */
+  async markVideoDeleted(params) {
+    const oThis = this;
+
+    await oThis
+      .update({
+        status: videoConstants.invertedStatuses[videoConstants.deletedStatus]
+      })
+      .where({
+        id: params.id
+      })
+      .fire();
+
+    return Video.flushCache({ id: params.id });
+  }
+
+  /**
    * Format resolutions to insert.
    *
    * @param {object} resolutions

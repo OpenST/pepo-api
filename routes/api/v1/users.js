@@ -25,7 +25,9 @@ router.post('/register-device', sanitizer.sanitizeDynamicUrlParams, function(req
     serviceResponse.data = wrapperFormatterRsp.data;
   };
 
-  Promise.resolve(routeHelper.perform(req, res, next, '/user/RegisterDevice', 'r_a_v1_u_1', null, onServiceSuccess));
+  Promise.resolve(
+    routeHelper.perform(req, res, next, '/user/init/RegisterDevice', 'r_a_v1_u_1', null, onServiceSuccess)
+  );
 });
 
 /* Recovery Info Device*/
@@ -44,7 +46,9 @@ router.get('/recovery-info', sanitizer.sanitizeDynamicUrlParams, function(req, r
     serviceResponse.data = wrapperFormatterRsp.data;
   };
 
-  Promise.resolve(routeHelper.perform(req, res, next, '/user/RecoveryInfo', 'r_a_v1_u_2', null, dataFormatterFunc));
+  Promise.resolve(
+    routeHelper.perform(req, res, next, '/user/init/RecoveryInfo', 'r_a_v1_u_2', null, dataFormatterFunc)
+  );
 });
 
 /* Contributed To Users List */
@@ -140,7 +144,7 @@ router.get('/current', sanitizer.sanitizeDynamicUrlParams, function(req, res, ne
     serviceResponse.data = wrapperFormatterRsp.data;
   };
 
-  Promise.resolve(routeHelper.perform(req, res, next, '/user/CurrentUser', 'r_a_v1_u_5', null, dataFormatterFunc));
+  Promise.resolve(routeHelper.perform(req, res, next, '/user/init/GetCurrent', 'r_a_v1_u_5', null, dataFormatterFunc));
 });
 
 /* User profile */
@@ -153,6 +157,7 @@ router.get('/:profile_user_id/profile', sanitizer.sanitizeDynamicUrlParams, func
       resultType: responseEntityKey.userProfile,
       entityKindToResponseKeyMap: {
         [entityType.userProfile]: responseEntityKey.userProfile,
+        [entityType.videoDescriptionsMap]: responseEntityKey.videoDescriptions,
         [entityType.usersMap]: responseEntityKey.users,
         [entityType.linksMap]: responseEntityKey.links,
         [entityType.imagesMap]: responseEntityKey.images,
@@ -171,7 +176,7 @@ router.get('/:profile_user_id/profile', sanitizer.sanitizeDynamicUrlParams, func
     serviceResponse.data = wrapperFormatterRsp.data;
   };
 
-  Promise.resolve(routeHelper.perform(req, res, next, '/user/GetProfile', 'r_a_v1_u_7', null, dataFormatterFunc));
+  Promise.resolve(routeHelper.perform(req, res, next, '/user/profile/Get', 'r_a_v1_u_7', null, dataFormatterFunc));
 });
 
 /* Video save */
@@ -211,6 +216,7 @@ router.get('/:profile_user_id/video-history', sanitizer.sanitizeDynamicUrlParams
         [entityType.usersMap]: responseEntityKey.users,
         [entityType.userStats]: responseEntityKey.userStats,
         [entityType.userProfilesMap]: responseEntityKey.userProfiles,
+        [entityType.videoDescriptionsMap]: responseEntityKey.videoDescriptions,
         [entityType.tagsMap]: responseEntityKey.tags,
         [entityType.linksMap]: responseEntityKey.links,
         [entityType.imagesMap]: responseEntityKey.images,
@@ -228,7 +234,9 @@ router.get('/:profile_user_id/video-history', sanitizer.sanitizeDynamicUrlParams
     serviceResponse.data = wrapperFormatterRsp.data;
   };
 
-  Promise.resolve(routeHelper.perform(req, res, next, '/user/Videos', 'r_a_v1_u_12', null, dataFormatterFunc));
+  Promise.resolve(
+    routeHelper.perform(req, res, next, '/user/profile/GetVideoList', 'r_a_v1_u_12', null, dataFormatterFunc)
+  );
 });
 
 /* User websocket details*/
@@ -258,6 +266,29 @@ router.post('/thank-you', sanitizer.sanitizeDynamicUrlParams, function(req, res,
   req.decodedParams.apiName = apiName.sayThankYou;
 
   Promise.resolve(routeHelper.perform(req, res, next, '/user/notification/SayThankYou', 'r_a_v1_u_14', null));
+});
+
+/* user search */
+router.get('/search', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.userSearch;
+  req.decodedParams.includeVideos = false;
+
+  const dataFormatterFunc = async function(serviceResponse) {
+    const wrapperFormatterRsp = await new FormatterComposer({
+      resultType: responseEntityKey.searchResults,
+      entityKindToResponseKeyMap: {
+        [entityType.userSearchList]: responseEntityKey.searchResults,
+        [entityType.usersMap]: responseEntityKey.users,
+        [entityType.imagesMap]: responseEntityKey.images,
+        [entityType.userSearchMeta]: responseEntityKey.meta
+      },
+      serviceData: serviceResponse.data
+    }).perform();
+
+    serviceResponse.data = wrapperFormatterRsp.data;
+  };
+
+  Promise.resolve(routeHelper.perform(req, res, next, '/user/Search', 'r_a_v1_u_14', null, dataFormatterFunc));
 });
 
 /* Add device token*/

@@ -158,6 +158,26 @@ class FeedModel extends ModelBase {
   }
 
   /**
+   * Delete by actor
+   *
+   * @param {number} actor - actor id
+   *
+   * @return {object}
+   */
+  async deleteByActor(params) {
+    const oThis = this;
+
+    await oThis
+      .delete()
+      .where({
+        actor: params.actor
+      })
+      .fire();
+
+    return FeedModel.flushCache({});
+  }
+
+  /**
    * Flush cache.
    *
    * @param {object} params
