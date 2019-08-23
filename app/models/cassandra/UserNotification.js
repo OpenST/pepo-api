@@ -328,10 +328,13 @@ class UserNotificationModel extends CassandraModelBase {
   static async flushCache(params) {
     const promisesArray = [];
 
-    if (params.userId) {
+    const userId = params.userId || params['user_id'];
+    // From some places direct table column name can come
+
+    if (userId) {
       const UserNotificationsByUserIdPagination = require(rootPrefix +
         '/lib/cacheManagement/single/UserNotificationsByUserIdPagination');
-      promisesArray.push(new UserNotificationsByUserIdPagination({ userId: [params.userId] }).clear());
+      promisesArray.push(new UserNotificationsByUserIdPagination({ userId: [userId] }).clear());
     }
 
     await Promise.all(promisesArray);
