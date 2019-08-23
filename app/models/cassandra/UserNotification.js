@@ -35,9 +35,10 @@ class UserNotificationModel extends CassandraModelBase {
    * @returns {{partition: string[], sort: string[]}}
    */
   keyObject() {
+    const namesMap = userNotificationConstants.shortToLongNamesMap;
     return {
-      partition: ['user_id', 'last_action_timestamp', 'uuid'],
-      sort: ['last_action_timestamp']
+      partition: [namesMap['user_id'], namesMap['last_action_timestamp'], namesMap['uuid']],
+      sort: [namesMap['last_action_timestamp']]
     };
   }
 
@@ -327,9 +328,6 @@ class UserNotificationModel extends CassandraModelBase {
    */
   static async flushCache(params) {
     const promisesArray = [];
-
-    const userId = params.userId || params['user_id'];
-    // From some places direct table column name can come
 
     if (userId) {
       const UserNotificationsByUserIdPagination = require(rootPrefix +
