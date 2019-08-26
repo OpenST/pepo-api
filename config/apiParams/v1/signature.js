@@ -286,8 +286,8 @@ const v1Signature = {
       },
       {
         parameter: 'link',
-        validatorMethods: ['validateGenericUrl']
-      }
+        validatorMethods: ['validateString']
+      } // If link is invalid, consider empty string.
     ]
   },
   [apiName.saveProfileImage]: {

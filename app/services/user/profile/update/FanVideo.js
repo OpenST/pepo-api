@@ -75,6 +75,11 @@ class UpdateFanVideo extends UpdateProfileBase {
   async _validateParams() {
     const oThis = this;
 
+    // If url is not valid, consider link as null.
+    if (!CommonValidator.validateGenericUrl(oThis.link)) {
+      oThis.link = null;
+    }
+
     const resp = videoLib.validateVideoObj({ videoUrl: oThis.videoUrl, isExternalUrl: oThis.isExternalUrl });
     if (resp.isFailure()) {
       return Promise.reject(
