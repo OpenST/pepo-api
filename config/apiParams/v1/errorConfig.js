@@ -50,6 +50,11 @@ const v1ErrorConfig = {
     code: 'invalid',
     message: 'User is already approved.'
   },
+  user_already_deactivated: {
+    parameter: 'user_id',
+    code: 'invalid',
+    message: 'User is already deactivated.'
+  },
   duplicate_user_name: {
     parameter: 'user_name',
     code: 'invalid',

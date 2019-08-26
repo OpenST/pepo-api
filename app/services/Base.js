@@ -9,6 +9,7 @@ const rootPrefix = '../..',
   basicHelper = require(rootPrefix + '/helpers/basic'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
+  userConstants = require(rootPrefix + '/lib/globalConstant/user'),
   apiVersions = require(rootPrefix + '/lib/globalConstant/apiVersions');
 
 // Declare error config.
@@ -114,10 +115,9 @@ class ServicesBase {
 
     const profileUserByIdResponse = await new UserMultiCache({ ids: [oThis.profileUserId] }).fetch();
 
-    if (
-      profileUserByIdResponse.isFailure() ||
-      !CommonValidators.validateNonEmptyObject(profileUserByIdResponse.data[oThis.profileUserId])
-    ) {
+    let profileUserObj = profileUserByIdResponse.data[oThis.profileUserId];
+
+    if (profileUserByIdResponse.isFailure() || !CommonValidators.validateNonEmptyObject(profileUserObj)) {
       return Promise.reject(
         responseHelper.error({
           internal_error_identifier: 'a_s_b_3',
@@ -127,6 +127,17 @@ class ServicesBase {
             profileUserId: oThis.profileUserId,
             currentUserId: oThis.currentUserId
           }
+        })
+      );
+    }
+
+    if (profileUserObj.status === userConstants.inActiveStatus) {
+      return Promise.reject(
+        responseHelper.paramValidationError({
+          internal_error_identifier: 'a_s_b_4',
+          api_error_identifier: 'could_not_proceed',
+          params_error_identifiers: ['user_already_deactivated'],
+          debug_options: {}
         })
       );
     }

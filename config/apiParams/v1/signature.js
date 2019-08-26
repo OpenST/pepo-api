@@ -523,6 +523,15 @@ const v1Signature = {
     ],
     optional: []
   },
+  [apiName.adminUserDeactivate]: {
+    mandatory: [
+      {
+        parameter: 'user_ids',
+        validatorMethods: ['validateArray']
+      }
+    ],
+    optional: []
+  },
   [apiName.adminDeleteVideo]: {
     mandatory: [
       {
