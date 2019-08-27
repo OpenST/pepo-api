@@ -39,15 +39,12 @@ class NotificationHook extends ModelBase {
     const formattedData = {
       id: dbRow.id,
       recipients: JSON.parse(dbRow.recipients),
-      pushNotificationPayload: JSON.parse(dbRow.push_notification_payload),
+      rawNotificationPayload: JSON.parse(dbRow.raw_notification_payload),
       eventType: notificationHookConstants.eventTypes[dbRow.event_type],
       executionTimestamp: dbRow.execution_timestamp,
       lockIdentifier: dbRow.lock_identifier,
       lockedAt: dbRow.locked_at,
       status: notificationHookConstants.statuses[dbRow.status],
-      failedCount: dbRow.failed_count,
-      iosResponse: JSON.parse(dbRow.ios_response),
-      androidResponse: JSON.parse(dbRow.android_response),
       createdAt: dbRow.created_at,
       updatedAt: dbRow.updated_at
     };
@@ -93,7 +90,6 @@ class NotificationHook extends ModelBase {
         locked_at: Math.round(Date.now() / 1000)
       })
       .where('lock_identifier IS NULL')
-      .where(['failed_count <= ?', notificationHookConstants.retryLimitForFailedHooks])
       .where(['status = ?', notificationHookConstants.invertedStatuses[notificationHookConstants.failedStatus]])
       .limit(notificationHookConstants.batchSizeForHooksProcessor)
       .fire();
@@ -128,20 +124,16 @@ class NotificationHook extends ModelBase {
    * Mark status as processed.
    *
    * @param hookId
-   * @param iosResponse
-   * @param androidResponse
    * @returns {Promise<void>}
    */
-  async markStatusAsProcessed(hookId, iosResponse, androidResponse) {
+  async markStatusAsProcessed(hookId) {
     const oThis = this;
 
     await oThis
       .update({
         lock_identifier: null,
         locked_at: null,
-        ios_response: JSON.stringify(iosResponse),
-        android_response: JSON.stringify(androidResponse),
-        status: notificationHookConstants.invertedStatuses[notificationHookConstants.processedStatus]
+        status: notificationHookConstants.invertedStatuses[notificationHookConstants.successStatus]
       })
       .where(['id = ?', hookId])
       .fire();
@@ -162,7 +154,6 @@ class NotificationHook extends ModelBase {
     await oThis
       .update({
         status: notificationHookConstants.invertedStatuses[notificationHookConstants.failedStatus],
-        failed_count: failedCount + 1,
         lock_identifier: null,
         locked_at: null,
         failed_response: JSON.stringify(failedLogs)
@@ -186,7 +177,6 @@ class NotificationHook extends ModelBase {
     await oThis
       .update({
         status: notificationHookConstants.invertedStatuses[notificationHookConstants.ignoredStatus],
-        failed_count: failedCount + 1,
         lock_identifier: null,
         locked_at: null,
         failed_response: failedLogs

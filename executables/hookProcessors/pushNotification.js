@@ -108,13 +108,10 @@ class PushNotification extends HookProcessorsBase {
   async _updateStatusToProcessed() {
     const oThis = this;
 
+    // TODO @dhananjay - error handling.
     for (let hookId in oThis.hooksToBeProcessed) {
       if (oThis.successResponse[hookId]) {
-        await new NotificationHookModel().markStatusAsProcessed(
-          hookId,
-          oThis.successResponse[hookId],
-          oThis.successResponse[hookId]
-        );
+        await new NotificationHookModel().markStatusAsProcessed();
       }
     }
   }
