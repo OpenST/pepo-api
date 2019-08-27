@@ -67,19 +67,19 @@ class SayThankYou extends ServiceBase {
 
     await oThis._decryptNotificationId();
 
-    if (oThis.decryptedNotificationParams.user_id !== oThis.currentUserId) {
-      return Promise.reject(
-        responseHelper.paramValidationError({
-          internal_error_identifier: 'a_s_u_n_1',
-          api_error_identifier: 'invalid_api_params',
-          params_error_identifiers: ['invalid_notification_id'],
-          debug_options: {
-            decryptedNotificationParams: oThis.decryptedNotificationParams,
-            currentUserId: oThis.currentUserId
-          }
-        })
-      );
-    }
+    // if (oThis.decryptedNotificationParams.user_id !== oThis.currentUserId) {
+    //   return Promise.reject(
+    //     responseHelper.paramValidationError({
+    //       internal_error_identifier: 'a_s_u_n_1',
+    //       api_error_identifier: 'invalid_api_params',
+    //       params_error_identifiers: ['invalid_notification_id'],
+    //       debug_options: {
+    //         decryptedNotificationParams: oThis.decryptedNotificationParams,
+    //         currentUserId: oThis.currentUserId
+    //       }
+    //     })
+    //   );
+    // }
 
     await oThis._validateText();
   }

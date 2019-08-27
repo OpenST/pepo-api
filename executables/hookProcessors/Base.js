@@ -173,9 +173,14 @@ class HookProcessorsBase extends CronBase {
     let ModelKlass = oThis.hookModelKlass;
     for (let hookId in oThis.hooksToBeProcessed) {
       let failedCount = oThis.hooksToBeProcessed[hookId].failedCount;
+
+      console.log('oThis.failedHookToBeRetried----', oThis.failedHookToBeRetried);
+
       if (oThis.failedHookToBeRetried[hookId]) {
         await new ModelKlass().markFailedToBeRetried(hookId, failedCount, oThis.failedHookToBeRetried[hookId]);
       }
+
+      console.log('oThis.failedHookToBeIgnored----', oThis.failedHookToBeIgnored);
 
       if (oThis.failedHookToBeIgnored[hookId]) {
         await new ModelKlass().markFailedToBeRetried(hookId, failedCount, oThis.failedHookToBeRetried[hookId]);

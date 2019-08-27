@@ -143,20 +143,17 @@ class NotificationHook extends ModelBase {
    * Mark hook as failed.
    *
    * @param {number} hookId
-   * @param {number} failedCount
-   * @param {object} failedLogs
    *
    * @returns {Promise<void>}
    */
-  async markFailedToBeRetried(hookId, failedCount, failedLogs) {
+  async markFailedToBeRetried(hookId) {
     const oThis = this;
 
     await oThis
       .update({
         status: notificationHookConstants.invertedStatuses[notificationHookConstants.failedStatus],
         lock_identifier: null,
-        locked_at: null,
-        failed_response: JSON.stringify(failedLogs)
+        locked_at: null
       })
       .where(['id = ?', hookId])
       .fire();
@@ -171,15 +168,14 @@ class NotificationHook extends ModelBase {
    *
    * @returns {Promise<void>}
    */
-  async markFailedToBeIgnored(hookId, failedCount, failedLogs) {
+  async markFailedToBeIgnored(hookId) {
     const oThis = this;
 
     await oThis
       .update({
         status: notificationHookConstants.invertedStatuses[notificationHookConstants.ignoredStatus],
         lock_identifier: null,
-        locked_at: null,
-        failed_response: failedLogs
+        locked_at: null
       })
       .where(['id = ?', hookId])
       .fire();

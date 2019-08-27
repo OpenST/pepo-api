@@ -22,7 +22,7 @@ program.on('--help', function() {
   logger.log('');
   logger.log('  Example:');
   logger.log('');
-  logger.log('    node executables/hookProcessors/pushNotification.js --cronProcessId 3');
+  logger.log('    node executables/hookProcessors/pushNotification.js --cronProcessId 7');
   logger.log('');
   logger.log('');
 });
@@ -71,23 +71,17 @@ class PushNotification extends HookProcessorsBase {
     let HookProcessorKlass = oThis.getHookProcessorClass(),
       response = await new HookProcessorKlass({ hook: oThis.hook }).perform();
 
+    console.log('HookProcessorKlass-----------------response-----------', response);
+
     if (response.isSuccess()) {
       oThis.successResponse[oThis.hook.id] = response.data;
     } else {
-      // change this according to the sdk responses.
-      if (
-        response.data['error'] == 'VALIDATION_ERROR' &&
-        response.data['error_message'] &&
-        typeof response.data['error_message'] === 'object' &&
-        response.data['error_message']['subscription_status']
-      ) {
-        oThis.failedHookToBeIgnored[oThis.hook.id] = response.data;
+      if (response.data['exception']) {
+        logger.error('ERROR,exception----------------response------------------', response);
       } else {
-        // change this according to the sdk responses.
-        // oThis.failedHookToBeRetried[oThis.hook.id] = response.data;
+        logger.error('ERROR----------------response------------------', response);
       }
     }
-    console.log('response-----------', oThis.successResponse);
   }
 
   /**
@@ -109,6 +103,8 @@ class PushNotification extends HookProcessorsBase {
    */
   async _updateStatusToProcessed() {
     const oThis = this;
+
+    console.log('oThis.hooksToBeProcessed------', oThis.hooksToBeProcessed);
 
     // TODO @dhananjay - error handling.
     for (let hookId in oThis.hooksToBeProcessed) {
