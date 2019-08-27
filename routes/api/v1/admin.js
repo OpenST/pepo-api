@@ -49,7 +49,7 @@ router.post('/logout', sanitizer.sanitizeDynamicUrlParams, function(req, res) {
 /* users list */
 router.get('/users', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.adminUserSearch;
-  req.decodedParams.includeVideos = true;
+  req.decodedParams.include_admin_related_details = true;
 
   const dataFormatterFunc = async function(serviceResponse) {
     const wrapperFormatterRsp = await new FormatterComposer({
@@ -59,6 +59,7 @@ router.get('/users', sanitizer.sanitizeDynamicUrlParams, function(req, res, next
         [entityType.usersMap]: responseEntityKey.users,
         [entityType.imagesMap]: responseEntityKey.images,
         [entityType.videosMap]: responseEntityKey.videos,
+        [entityType.linksMap]: responseEntityKey.links,
         [entityType.userSearchMeta]: responseEntityKey.meta
       },
       serviceData: serviceResponse.data
@@ -92,6 +93,25 @@ router.post('/delete-video/:video_id', sanitizer.sanitizeDynamicUrlParams, funct
   req.decodedParams.video_id = req.params.video_id;
 
   Promise.resolve(routeHelper.perform(req, res, next, '/video/Delete', 'r_a_v1_ad_4', null, null, null));
+});
+
+/* Logged In Admin*/
+router.get('/current', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.loggedInAdmin;
+
+  const dataFormatterFunc = async function(serviceResponse) {
+    const wrapperFormatterRsp = await new FormatterComposer({
+      resultType: responseEntityKey.loggedInAdmin,
+      entityKindToResponseKeyMap: {
+        [entityType.admin]: responseEntityKey.loggedInAdmin
+      },
+      serviceData: serviceResponse.data
+    }).perform();
+
+    serviceResponse.data = wrapperFormatterRsp.data;
+  };
+
+  Promise.resolve(routeHelper.perform(req, res, next, '/admin/init/GetCurrent', 'r_a_v1_u_5', null, dataFormatterFunc));
 });
 
 module.exports = router;

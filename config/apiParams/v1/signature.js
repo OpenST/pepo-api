@@ -130,6 +130,15 @@ const v1Signature = {
     ],
     optional: []
   },
+  [apiName.loggedInAdmin]: {
+    mandatory: [
+      {
+        parameter: 'current_admin',
+        validatorMethods: ['validateNonEmptyObject']
+      }
+    ],
+    optional: []
+  },
   [apiName.gifsSearch]: {
     mandatory: [
       {
@@ -488,7 +497,7 @@ const v1Signature = {
     ],
     optional: [
       {
-        parameter: 'includeVideos',
+        parameter: 'include_admin_related_details',
         validatorMethods: ['validateBoolean']
       },
       {
@@ -501,7 +510,7 @@ const v1Signature = {
     mandatory: [],
     optional: [
       {
-        parameter: 'includeVideos',
+        parameter: 'include_admin_related_details',
         validatorMethods: ['validateBoolean']
       },
       {

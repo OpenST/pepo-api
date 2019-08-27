@@ -1,5 +1,6 @@
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
+  UrlByIdCache = require(rootPrefix + '/lib/cacheManagement/multi/UrlsByIds'),
   ImageByIdCache = require(rootPrefix + '/lib/cacheManagement/multi/ImageByIds'),
   UserProfileElementsByUserIdCache = require(rootPrefix + '/lib/cacheManagement/multi/UserProfileElementsByUserIds'),
   TokenUserDetailByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TokenUserByUserIds'),
@@ -22,7 +23,7 @@ class UserSearch extends ServiceBase {
    * @param {object} params
    * @param {string} [params.q]
    * @param {string} [params.current_user]
-   * @param {Boolean} [params.includeVideos] - true/false
+   * @param {Boolean} [params.include_admin_related_details] - true/false
    *
    * @augments ServiceBase
    *
@@ -36,7 +37,7 @@ class UserSearch extends ServiceBase {
     oThis.query = params.q ? params.q.toLowerCase() : null; // lower case
     oThis.query = oThis.query ? oThis.query.trim() : null; // trim spaces
     oThis.currentUser = params.current_user;
-    oThis.includeVideos = params.includeVideos;
+    oThis.includeAdminRelatedDetails = params.include_admin_related_details;
 
     oThis.userIds = [];
     oThis.imageIds = [];
@@ -44,6 +45,9 @@ class UserSearch extends ServiceBase {
     oThis.userDetails = {};
     oThis.imageDetails = {};
     oThis.videos = {};
+    oThis.links = {};
+    oThis.allLinkIds = [];
+    oThis.userToProfileElementMap = {};
     oThis.tokenUsersByUserIdMap = {};
     oThis.searchResults = [];
     oThis.paginationTimestamp = null;
@@ -71,10 +75,10 @@ class UserSearch extends ServiceBase {
 
     await oThis._prepareSearchResults();
 
-    if (oThis.includeVideos) {
-      await oThis._fetchVideoIds();
-
+    if (oThis.includeAdminRelatedDetails) {
+      await oThis._fetchProfileElements();
       await oThis._fetchVideos();
+      await oThis._fetchLink();
     }
 
     await oThis._fetchImages();
@@ -119,6 +123,8 @@ class UserSearch extends ServiceBase {
     const oThis = this;
 
     let userModelObj = new UserModel({});
+
+    // Todo: modify search query as discussed
 
     let userData = await userModelObj.search({
       query: oThis.query,
@@ -199,42 +205,6 @@ class UserSearch extends ServiceBase {
   }
 
   /**
-   * Fetch video ids
-   *
-   * @returns {Promise<void>}
-   * @private
-   */
-  async _fetchVideoIds() {
-    const oThis = this;
-
-    oThis.userToVideoMap = {};
-
-    let userProfileElementsByUserIdCache = new UserProfileElementsByUserIdCache({ usersIds: oThis.userIds });
-
-    let cacheRsp = await userProfileElementsByUserIdCache.fetch();
-
-    let profileElements = cacheRsp.data;
-
-    // Fetch cover video id from profile elements
-    for (let userId in profileElements) {
-      let element = profileElements[userId];
-
-      oThis.userToVideoMap[userId] = null;
-
-      if (element.hasOwnProperty(userProfileElementConst.coverVideoIdKind)) {
-        let videoId = element[userProfileElementConst.coverVideoIdKind].data;
-        oThis.videoIds.push(videoId);
-        oThis.userToVideoMap[userId] = videoId;
-      }
-    }
-
-    for (let ind = 0; ind < oThis.searchResults.length; ind++) {
-      let userId = oThis.searchResults[ind].userId;
-      oThis.searchResults[ind]['videoId'] = oThis.userToVideoMap[userId];
-    }
-  }
-
-  /**
    * Fetch videos
    *
    * @return {Promise<never>}
@@ -275,6 +245,100 @@ class UserSearch extends ServiceBase {
     let imageData = await imageByIdCache.fetch();
 
     oThis.imageDetails = imageData.data;
+  }
+
+  /**
+   * Fetch profile elements.
+   *
+   * @return {Promise<void>}
+   * @private
+   */
+  async _fetchProfileElements() {
+    const oThis = this;
+
+    const cacheRsp = await new UserProfileElementsByUserIdCache({ usersIds: oThis.userIds }).fetch();
+
+    if (cacheRsp.isFailure()) {
+      return Promise.reject(cacheRsp);
+    }
+    let profileElementsData = cacheRsp.data;
+
+    for (let userId in profileElementsData) {
+      let profileElements = profileElementsData[userId];
+
+      oThis.userToProfileElementMap[userId] = {};
+
+      for (let kind in profileElements) {
+        if (
+          oThis.includeAdminRelatedDetails &&
+          (kind === userProfileElementConst.linkIdKind || kind === userProfileElementConst.coverVideoIdKind)
+        ) {
+          await oThis._fetchElementData(userId, oThis.userDetails[userId], kind, profileElements[kind].data);
+        }
+      }
+    }
+
+    for (let ind = 0; ind < oThis.searchResults.length; ind++) {
+      let userId = oThis.searchResults[ind].userId;
+      oThis.searchResults[ind]['videoId'] = oThis.userToProfileElementMap[userId]['videoId']
+        ? oThis.userToProfileElementMap[userId]['videoId']
+        : null;
+      oThis.searchResults[ind]['linkId'] = oThis.userToProfileElementMap[userId]['linkId']
+        ? oThis.userToProfileElementMap[userId]['linkId']
+        : null;
+    }
+  }
+
+  /**
+   * Fetch element data
+   *
+   * @param {string} userId - profile element userId
+   * @param {Object} userObj - user object
+   * @param {string} kind - profile element kind
+   * @param {number} data - profile element data
+   * @return {Promise<void>}
+   * @private
+   */
+  async _fetchElementData(userId, userObj, kind, data) {
+    const oThis = this;
+
+    switch (kind) {
+      case userProfileElementConst.linkIdKind:
+        oThis.allLinkIds.push(data);
+        oThis.userToProfileElementMap[userId]['linkId'] = data;
+        return;
+
+      case userProfileElementConst.coverVideoIdKind:
+        oThis.videoIds.push(data);
+        oThis.userToProfileElementMap[userId]['videoId'] = data;
+        return;
+
+      default:
+        logger.error('Invalid profile element kind');
+    }
+  }
+
+  /**
+   * Fetch link
+   *
+   * @param linkId
+   * @return {Promise<never>}
+   * @private
+   */
+  async _fetchLink() {
+    const oThis = this;
+
+    if (oThis.allLinkIds.length == 0) {
+      return responseHelper.successWithData({});
+    }
+
+    let cacheRsp = await new UrlByIdCache({ ids: oThis.allLinkIds }).fetch();
+
+    if (cacheRsp.isFailure()) {
+      return Promise.reject(cacheRsp);
+    }
+
+    oThis.links = cacheRsp.data;
   }
 
   /**
@@ -320,8 +384,9 @@ class UserSearch extends ServiceBase {
       meta: oThis.responseMetaData
     };
 
-    if (oThis.includeVideos) {
+    if (oThis.includeAdminRelatedDetails) {
       response['videoMap'] = oThis.videos;
+      response['linkMap'] = oThis.links;
     }
 
     return responseHelper.successWithData(response);
