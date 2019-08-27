@@ -169,6 +169,11 @@ const v1ErrorConfig = {
     parameter: 'image_url',
     code: 'invalid',
     message: 'Invalid image url.'
+  },
+  invalid_device_kind: {
+    parameter: 'device_kind',
+    code: 'invalid',
+    message: 'Invalid device kind.'
   }
 };
 

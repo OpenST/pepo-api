@@ -551,16 +551,20 @@ const v1Signature = {
         validatorMethods: ['validateNonEmptyObject']
       },
       {
-        parameter: 'device_id',
+        parameter: 'user_id',
         validatorMethods: ['validateNonZeroInteger']
       },
       {
+        parameter: 'device_id',
+        validatorMethods: ['validateNonBlankString']
+      },
+      {
         parameter: 'device_kind',
-        validatorMethods: ['validateString']
+        validatorMethods: ['validateNonBlankString']
       },
       {
         parameter: 'device_token',
-        validatorMethods: ['validateString']
+        validatorMethods: ['validateNonBlankString']
       }
     ]
   }

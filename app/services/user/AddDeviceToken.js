@@ -1,8 +1,9 @@
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   UserDeviceModel = require(rootPrefix + '/app/models/mysql/UserDevice'),
-  userDeviceConstants = require(rootPrefix + '/lib/globalConstant/userDevice'),
-  responseHelper = require(rootPrefix + '/lib/formatter/response');
+  logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
+  responseHelper = require(rootPrefix + '/lib/formatter/response'),
+  userDeviceConstants = require(rootPrefix + '/lib/globalConstant/userDevice');
 
 /**
  * Class to add device token.
@@ -15,6 +16,7 @@ class AddDeviceToken extends ServiceBase {
    *
    * @param {object} params
    * @param {object} params.current_user
+   * @param {number} params.user_id
    * @param {number} params.device_id
    * @param {string} params.device_kind
    * @param {string} params.device_token
@@ -30,7 +32,10 @@ class AddDeviceToken extends ServiceBase {
 
     const oThis = this;
 
+    logger.log('params--------', params);
+
     oThis.currentUserId = +params.current_user.id;
+    oThis.userId = +params.user_id;
     oThis.deviceId = params.device_id;
     oThis.deviceKind = params.device_kind;
     oThis.deviceToken = params.device_token;
@@ -61,11 +66,23 @@ class AddDeviceToken extends ServiceBase {
 
     oThis.deviceKind = oThis.deviceKind.toUpperCase();
 
+    if (oThis.currentUserId !== oThis.userId) {
+      return Promise.reject(
+        responseHelper.paramValidationError({
+          internal_error_identifier: 'a_s_u_adt_1',
+          api_error_identifier: 'invalid_params',
+          params_error_identifiers: ['invalid_user_id'],
+          debug_options: { currentUserId: oThis.currentUserId }
+        })
+      );
+    }
+
     if (!userDeviceConstants.invertedUserDeviceKinds[oThis.deviceKind]) {
       return Promise.reject(
-        responseHelper.error({
-          internal_error_identifier: 'a_s_u_adt_1',
-          api_error_identifier: 'invalid_device_type',
+        responseHelper.paramValidationError({
+          internal_error_identifier: 'a_s_u_adt_2',
+          api_error_identifier: 'invalid_params',
+          params_error_identifiers: ['invalid_device_kind'],
           debug_options: { deviceKind: oThis.deviceKind }
         })
       );
