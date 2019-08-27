@@ -9,9 +9,10 @@ const upQuery =
   'CREATE TABLE `user_devices` ( \n\
     `id` bigint(20) NOT NULL AUTO_INCREMENT,\n\
 	  `user_id` bigint(20) unsigned NOT NULL, \n\
-	  `device_id` bigint(20) unsigned NOT NULL, \n\
+	  `device_id` varchar(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci, \n\
 	  `device_token` varchar(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL, \n\
 	  `device_kind` tinyint(4) NOT NULL,\n\
+	  `status` tinyint(4) NOT NULL,\n\
 	  `created_at` int(11) NOT NULL,\n\
     `updated_at` int(11) NOT NULL,\n\
 	  PRIMARY KEY (`id`), \n\
