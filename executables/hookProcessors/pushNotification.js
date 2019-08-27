@@ -74,6 +74,7 @@ class PushNotification extends HookProcessorsBase {
     if (response.isSuccess()) {
       oThis.successResponse[oThis.hook.id] = response.data;
     } else {
+      // change this according to the sdk responses.
       if (
         response.data['error'] == 'VALIDATION_ERROR' &&
         response.data['error_message'] &&
@@ -82,7 +83,8 @@ class PushNotification extends HookProcessorsBase {
       ) {
         oThis.failedHookToBeIgnored[oThis.hook.id] = response.data;
       } else {
-        oThis.failedHookToBeRetried[oThis.hook.id] = response.data;
+        // change this according to the sdk responses.
+        // oThis.failedHookToBeRetried[oThis.hook.id] = response.data;
       }
     }
     console.log('response-----------', oThis.successResponse);
