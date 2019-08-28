@@ -282,7 +282,7 @@ const v1Signature = {
       },
       {
         parameter: 'video_description',
-        validatorMethods: ['validateNonBlankString']
+        validatorMethods: ['validateString']
       },
       {
         parameter: 'link',
