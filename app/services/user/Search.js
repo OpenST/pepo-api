@@ -129,7 +129,8 @@ class UserSearch extends ServiceBase {
     let userData = await userModelObj.search({
       query: oThis.query,
       limit: oThis.limit,
-      paginationTimestamp: oThis.paginationTimestamp
+      paginationTimestamp: oThis.paginationTimestamp,
+      includeAdminRelatedDetails: oThis.includeAdminRelatedDetails
     });
 
     oThis.userIds = userData.userIds;

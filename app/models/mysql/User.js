@@ -277,6 +277,7 @@ class UserModel extends ModelBase {
    * @param {integer} params.limit: limit
    * @param {integer} params.query: query
    * @param {integer} params.paginationTimestamp: pagination time stamp
+   * @param {boolean} params.includeAdminRelatedDetails: flag for include admin related details
    *
    * @return {Promise}
    */
@@ -285,15 +286,19 @@ class UserModel extends ModelBase {
 
     let limit = params.limit,
       query = params.query,
-      paginationTimestamp = params.paginationTimestamp;
+      paginationTimestamp = params.paginationTimestamp,
+      includeAdminRelatedDetails = params.includeAdminRelatedDetails;
 
     const queryObject = oThis
       .select('*')
-      .where({ status: userConstants.invertedStatuses[userConstants.activeStatus] })
       .limit(limit)
       .order_by('id desc');
 
     let queryWithWildCards = '%' + query + '%';
+
+    if (!includeAdminRelatedDetails) {
+      queryObject.where({ status: userConstants.invertedStatuses[userConstants.activeStatus] });
+    }
 
     if (query) {
       queryObject.where(['user_name LIKE ? OR name LIKE ?', queryWithWildCards, queryWithWildCards]);
