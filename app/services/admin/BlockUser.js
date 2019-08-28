@@ -1,7 +1,7 @@
 /**
- * Module to deactivate users
+ * Module to block users
  *
- * @module app/services/admin/DeactivateUser
+ * @module app/services/admin/BlockUser
  */
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
@@ -11,16 +11,16 @@ const rootPrefix = '../../..',
   userConstants = require(rootPrefix + '/lib/globalConstant/user');
 
 /**
- * Class to deactivate users by admin
+ * Class to block users by admin
  *
  * @class
  */
-class DeactivateUser extends ServiceBase {
+class BlockUser extends ServiceBase {
   /**
-   * Constructor to deactivate users by admin
+   * Constructor to block users by admin
    *
    * @param params
-   * @param {Array} params.user_ids: User ids to be deactivated by admin.
+   * @param {Array} params.user_ids: User ids to be blocked by admin.
    */
   constructor(params) {
     super(params);
@@ -42,7 +42,7 @@ class DeactivateUser extends ServiceBase {
 
     await oThis._fetchUsers();
 
-    await oThis._deactivateUsers();
+    await oThis._blockUsers();
 
     await oThis._flushCache();
 
@@ -86,33 +86,22 @@ class DeactivateUser extends ServiceBase {
         );
       }
 
-      if (UserModelKlass.isUserDeactivatedCreator(userObj)) {
-        return Promise.reject(
-          responseHelper.paramValidationError({
-            internal_error_identifier: 'a_s_a_du_3',
-            api_error_identifier: 'could_not_proceed',
-            params_error_identifiers: ['user_already_deactivated'],
-            debug_options: {}
-          })
-        );
-      }
-
       oThis.userObjects[userId] = userObj;
     }
   }
 
   /**
-   * Deactivate users
+   * Block users
    *
    * @returns {Promise<void>}
    * @private
    */
-  async _deactivateUsers() {
+  async _blockUsers() {
     const oThis = this,
-      propertyVal = userConstants.invertedProperties[userConstants.isDeactivatedCreatorProperty];
+      statusVal = userConstants.invertedStatuses[userConstants.inActiveStatus];
 
     await new UserModelKlass()
-      .update(['properties = properties | ?', propertyVal])
+      .update(['status = ?', statusVal])
       .where({ id: oThis.userIds })
       .fire();
   }
@@ -134,4 +123,4 @@ class DeactivateUser extends ServiceBase {
   }
 }
 
-module.exports = DeactivateUser;
+module.exports = BlockUser;

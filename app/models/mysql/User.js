@@ -360,17 +360,6 @@ class UserModel extends ModelBase {
     const propertiesArray = new UserModel().getBitwiseArray('properties', userObj.properties);
     return propertiesArray.indexOf(userConstants.isApprovedCreatorProperty) > -1;
   }
-
-  /**
-   * Is user an deactivated creator
-   *
-   * @param userObj
-   * @returns {boolean}
-   */
-  static isUserDeactivatedCreator(userObj) {
-    const propertiesArray = new UserModel().getBitwiseArray('properties', userObj.properties);
-    return propertiesArray.indexOf(userConstants.isDeactivatedCreatorProperty) > -1;
-  }
 }
 
 module.exports = UserModel;
