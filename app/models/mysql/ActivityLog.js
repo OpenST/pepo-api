@@ -58,11 +58,12 @@ class ActivityLogModel extends ModelBase {
   }
 
   /**
-   * Insert activity log
+   * Insert action
    *
-   * @return {Promise<*>}
+   * @param params
+   * @returns {Promise<any>}
    */
-  async insertAction(params) {
+  insertAction(params) {
     const oThis = this;
 
     const currentTime = Math.floor(Date.now() / 1000);
@@ -70,7 +71,7 @@ class ActivityLogModel extends ModelBase {
     return oThis
       .insert({
         admin_id: params.adminId,
-        action: adminActivityLogConst.invertedActions[params.actionKind],
+        action: adminActivityLogConst.invertedActions[params.action],
         action_on: params.actionOn,
         extra_data: params.extraData,
         created_at: currentTime,

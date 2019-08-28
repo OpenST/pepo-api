@@ -75,8 +75,8 @@ class DeleteVideo extends ServiceBase {
     await activityLogObj.insertAction({
       adminId: oThis.currentAdminId,
       actionOn: oThis.creatorUserId,
-      actionKind: adminActivityLogConst.deleteVideo,
-      extraData: JSON.stringify({ video_id: oThis.videoId })
+      action: adminActivityLogConst.deleteUserVideo,
+      extraData: JSON.stringify({ vid: oThis.videoId })
     });
   }
 

@@ -22,7 +22,7 @@ const rootPrefix = '../../..',
  *
  * @class
  */
-class AdminApproveUsers extends ServiceBase {
+class ApproveUsersAsCreator extends ServiceBase {
   /**
    * Constructor to approve users by admin
    *
@@ -214,10 +214,10 @@ class AdminApproveUsers extends ServiceBase {
       await activityLogObj.insertAction({
         adminId: oThis.currentAdminId,
         actionOn: userId,
-        actionKind: adminActivityLogConst.approvedAsCreator
+        action: adminActivityLogConst.approvedAsCreator
       });
     }
   }
 }
 
-module.exports = AdminApproveUsers;
+module.exports = ApproveUsersAsCreator;

@@ -76,10 +76,10 @@ router.post('/users/:user_id/approve', sanitizer.sanitizeDynamicUrlParams, funct
   req.decodedParams.apiName = apiName.adminUserApprove;
   req.decodedParams.user_ids = [req.params.user_id];
 
-  Promise.resolve(routeHelper.perform(req, res, next, '/admin/ApproveUsers', 'r_a_v1_ad_3', null, null, null));
+  Promise.resolve(routeHelper.perform(req, res, next, '/admin/ApproveUsersAsCreator', 'r_a_v1_ad_3', null, null, null));
 });
 
-/* Deactivate user*/
+/* Block user*/
 router.post('/users/:user_id/block', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.adminUserBlock;
   req.decodedParams.user_ids = [req.params.user_id];
@@ -111,7 +111,7 @@ router.get('/current', sanitizer.sanitizeDynamicUrlParams, function(req, res, ne
     serviceResponse.data = wrapperFormatterRsp.data;
   };
 
-  Promise.resolve(routeHelper.perform(req, res, next, '/admin/init/GetCurrent', 'r_a_v1_u_5', null, dataFormatterFunc));
+  Promise.resolve(routeHelper.perform(req, res, next, '/admin/GetCurrent', 'r_a_v1_u_5', null, dataFormatterFunc));
 });
 
 module.exports = router;

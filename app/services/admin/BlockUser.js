@@ -30,8 +30,7 @@ class BlockUser extends ServiceBase {
 
     const oThis = this;
     oThis.userIds = params.user_ids;
-    oThis.currentAdmin = params.current_admin;
-    oThis.currentAdminId = oThis.currentAdmin.id;
+    oThis.currentAdminId = params.current_admin.id;
 
     oThis.userObjects = {};
   }
@@ -144,7 +143,7 @@ class BlockUser extends ServiceBase {
       await activityLogObj.insertAction({
         adminId: oThis.currentAdminId,
         actionOn: userId,
-        actionKind: adminActivityLogConst.blockUser
+        action: adminActivityLogConst.blockUser
       });
     }
   }

@@ -4,7 +4,7 @@ const rootPrefix = '../../../..',
   AdminByIdCache = require(rootPrefix + '/lib/cacheManagement/single/AdminById'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger');
 
-class GetCurrentUser extends ServiceBase {
+class GetCurrentAdmin extends ServiceBase {
   /**
    * @param {Object} params
    * @param {String} params.current_admin: User Admin
@@ -74,4 +74,4 @@ class GetCurrentUser extends ServiceBase {
   }
 }
 
-module.exports = GetCurrentUser;
+module.exports = GetCurrentAdmin;
