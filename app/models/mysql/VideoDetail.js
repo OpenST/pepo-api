@@ -228,6 +228,7 @@ class VideoDetail extends ModelBase {
    * @param {object} params
    * @param {number} params.userId
    * @param {number} params.videoId
+   * @param {String} params.status
    *
    * @return {object}
    */
@@ -237,7 +238,8 @@ class VideoDetail extends ModelBase {
     return oThis
       .insert({
         creator_user_id: params.userId,
-        video_id: params.videoId
+        video_id: params.videoId,
+        status: videoDetailsConst.invertedStatuses[params.status]
       })
       .fire();
   }
