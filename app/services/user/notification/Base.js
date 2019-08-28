@@ -7,9 +7,12 @@ const rootPrefix = '../../../..',
   VideoByIdCache = require(rootPrefix + '/lib/cacheManagement/multi/VideoByIds'),
   NotificationResponseHelper = require(rootPrefix + '/lib/notification/response/Helper'),
   TokenUserByUserIdsMultiCache = require(rootPrefix + '/lib/cacheManagement/multi/TokenUserByUserIds'),
+  bgJob = require(rootPrefix + '/lib/rabbitMqEnqueue/bgJob'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   videoConstants = require(rootPrefix + '/lib/globalConstant/video'),
   userNotificationConstants = require(rootPrefix + '/lib/globalConstant/cassandra/userNotification'),
+  bgJobConstants = require(rootPrefix + '/lib/globalConstant/bgJob'),
+  UserNotificationModel = require(rootPrefix + '/app/models/cassandra/UserNotification'),
   responseEntityKey = require(rootPrefix + '/lib/globalConstant/responseEntityKey');
 
 /**
@@ -466,7 +469,13 @@ class UserNotificationBase extends ServiceBase {
     const oThis = this;
 
     console.log('Notifications To Delete: ', oThis.notificationsToDelete);
-    // Background task is still pending to call
+
+    if (oThis.notificationsToDelete.length > 0) {
+      await bgJob.enqueue(bgJobConstants.deleteCassandraJobTopic, {
+        tableName: new UserNotificationModel().tableName,
+        elementsToDelete: oThis.notificationsToDelete
+      });
+    }
   }
 
   /**

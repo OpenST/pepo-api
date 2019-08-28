@@ -103,7 +103,7 @@ class SocketJobProcessor extends RabbitMqProcessorBase {
       for (let i = 0; i < socketObjectIds.length; i++) {
         logger.log('userIds[j] ===------------==', j, userIds[j]);
         let socketObj = webSocketCustomCache.getFromSocketObjsMap(socketObjectIds[i]);
-        socketObj.emit('server-event', JSON.stringify(messagePayload));
+        socketObj.emit('pepo-stream', JSON.stringify(messagePayload));
       }
     }
 
