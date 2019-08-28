@@ -73,14 +73,10 @@ class PushNotification extends HookProcessorsBase {
 
     console.log('HookProcessorKlass-----------------response-----------', response);
 
-    if (response.isSuccess()) {
-      oThis.successResponse[oThis.hook.id] = response.data;
+    if (response) {
+      oThis.successResponse[oThis.hook.id] = response;
     } else {
-      if (response.data['exception']) {
-        logger.error('ERROR,exception----------------response------------------', response);
-      } else {
-        logger.error('ERROR----------------response------------------', response);
-      }
+      logger.error('ERROR----------------response------------------', response);
     }
   }
 
