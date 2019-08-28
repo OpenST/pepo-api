@@ -24,6 +24,7 @@ class AdminResetPassword extends ServiceBase {
    *
    * @param {object} params
    * @param {string} params.email: Email
+   * @param {string} params.name: Name
    * @param {string} params.password: Password
    *
    */
@@ -32,6 +33,7 @@ class AdminResetPassword extends ServiceBase {
 
     const oThis = this;
     oThis.email = params.email;
+    oThis.name = params.name;
 
     oThis.adminObj = null;
     oThis.password = null;
@@ -108,6 +110,7 @@ class AdminResetPassword extends ServiceBase {
     } else {
       await new AdminModel()
         .insert({
+          name: oThis.name,
           email: oThis.email,
           password: oThis.encryptedPassword,
           encryption_salt: oThis.encryptionSalt,
