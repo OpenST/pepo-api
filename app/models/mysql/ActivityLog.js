@@ -32,9 +32,10 @@ class ActivityLogModel extends ModelBase {
    *
    * @param {object} dbRow
    * @param {number} dbRow.id
-   * @param {number} dbRow.user_id
-   * @param {string} dbRow.action_kind
-   * @param {object} dbRow.data
+   * @param {number} dbRow.admin_id
+   * @param {string} dbRow.action
+   * @param {number} dbRow.action_on
+   * @param {object} dbRow.extra_data
    * @param {number} dbRow.created_at
    * @param {number} dbRow.updated_at
    *
@@ -45,8 +46,10 @@ class ActivityLogModel extends ModelBase {
 
     const formattedData = {
       id: dbRow.id,
+      adminId: dbRow.admin_id,
       action: adminActivityLogConst.actions[dbRow.action],
-      data: dbRow.data,
+      actionOn: dbRow.action_on,
+      extraData: dbRow.extra_data,
       createdAt: dbRow.created_at,
       updatedAt: dbRow.updated_at
     };
@@ -68,7 +71,8 @@ class ActivityLogModel extends ModelBase {
       .insert({
         admin_id: params.adminId,
         action: adminActivityLogConst.invertedActions[params.actionKind],
-        data: params.data,
+        action_on: params.actionOn,
+        extra_data: params.extraData,
         created_at: currentTime,
         updated_at: currentTime
       })

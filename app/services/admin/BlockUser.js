@@ -8,6 +8,8 @@ const rootPrefix = '../../..',
   UserModelKlass = require(rootPrefix + '/app/models/mysql/User'),
   UsersCache = require(rootPrefix + '/lib/cacheManagement/multi/User'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
+  ActivityLogModel = require(rootPrefix + '/app/models/mysql/ActivityLog'),
+  adminActivityLogConst = require(rootPrefix + '/lib/globalConstant/adminActivityLogs'),
   userConstants = require(rootPrefix + '/lib/globalConstant/user');
 
 /**
@@ -21,12 +23,15 @@ class BlockUser extends ServiceBase {
    *
    * @param params
    * @param {Array} params.user_ids: User ids to be blocked by admin.
+   * @param {Array} params.current_admin: current admin.
    */
   constructor(params) {
     super(params);
 
     const oThis = this;
     oThis.userIds = params.user_ids;
+    oThis.currentAdmin = params.current_admin;
+    oThis.currentAdminId = oThis.currentAdmin.id;
 
     oThis.userObjects = {};
   }
@@ -45,6 +50,8 @@ class BlockUser extends ServiceBase {
     await oThis._blockUsers();
 
     await oThis._flushCache();
+
+    await oThis._logAdminActivity();
 
     return responseHelper.successWithData({});
   }
@@ -120,6 +127,26 @@ class BlockUser extends ServiceBase {
       promises.push(UserModelKlass.flushCache(oThis.userObjects[userId]));
     }
     await Promise.all(promises);
+  }
+
+  /**
+   * Log admin activity
+   *
+   * @return {Promise<void>}
+   * @private
+   */
+  async _logAdminActivity() {
+    const oThis = this;
+
+    let activityLogObj = new ActivityLogModel({});
+
+    for (let userId in oThis.userObjects) {
+      await activityLogObj.insertAction({
+        adminId: oThis.currentAdminId,
+        actionOn: userId,
+        actionKind: adminActivityLogConst.blockUser
+      });
+    }
   }
 }
 

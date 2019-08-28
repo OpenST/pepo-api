@@ -13,6 +13,8 @@ const rootPrefix = '../../..',
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   FeedModel = require(rootPrefix + '/app/models/mysql/Feed'),
   feedsConstants = require(rootPrefix + '/lib/globalConstant/feed'),
+  ActivityLogModel = require(rootPrefix + '/app/models/mysql/ActivityLog'),
+  adminActivityLogConst = require(rootPrefix + '/lib/globalConstant/adminActivityLogs'),
   userConstants = require(rootPrefix + '/lib/globalConstant/user');
 
 /**
@@ -26,12 +28,15 @@ class AdminApproveUsers extends ServiceBase {
    *
    * @param params
    * @param {Array} params.user_ids: User ids to be approved by admin.
+   * @param {Array} params.current_admin: current admin.
    */
   constructor(params) {
     super(params);
 
     const oThis = this;
     oThis.userIds = params.user_ids;
+    oThis.currentAdmin = params.current_admin;
+    oThis.currentAdminId = oThis.currentAdmin.id;
 
     oThis.userObjects = {};
   }
@@ -52,6 +57,8 @@ class AdminApproveUsers extends ServiceBase {
     await oThis._flushCache();
 
     await oThis._publishFanVideo();
+
+    await oThis._logAdminActivity();
 
     return responseHelper.successWithData({});
   }
@@ -190,6 +197,26 @@ class AdminApproveUsers extends ServiceBase {
         pagination_identifier: Math.round(new Date() / 1000)
       })
       .fire();
+  }
+
+  /**
+   * Log admin activity
+   *
+   * @return {Promise<void>}
+   * @private
+   */
+  async _logAdminActivity() {
+    const oThis = this;
+
+    let activityLogObj = new ActivityLogModel({});
+
+    for (let userId in oThis.userObjects) {
+      await activityLogObj.insertAction({
+        adminId: oThis.currentAdminId,
+        actionOn: userId,
+        actionKind: adminActivityLogConst.approvedAsCreator
+      });
+    }
   }
 }
 

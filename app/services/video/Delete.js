@@ -62,9 +62,8 @@ class DeleteVideo extends ServiceBase {
   }
 
   /**
-   * Fetch creator user id
+   * Log admin activity
    *
-   * @sets oThis.creatorUserId
    * @return {Promise<void>}
    * @private
    */
@@ -75,8 +74,9 @@ class DeleteVideo extends ServiceBase {
 
     await activityLogObj.insertAction({
       adminId: oThis.currentAdminId,
+      actionOn: oThis.creatorUserId,
       actionKind: adminActivityLogConst.deleteVideo,
-      data: oThis.creatorUserId
+      extraData: JSON.stringify({ video_id: oThis.videoId })
     });
   }
 

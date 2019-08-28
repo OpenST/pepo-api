@@ -528,15 +528,23 @@ const v1Signature = {
       {
         parameter: 'user_ids',
         validatorMethods: ['validateArray']
+      },
+      {
+        parameter: 'current_admin',
+        validatorMethods: ['validateNonEmptyObject']
       }
     ],
     optional: []
   },
-  [apiName.adminUserDeactivate]: {
+  [apiName.adminUserBlock]: {
     mandatory: [
       {
         parameter: 'user_ids',
         validatorMethods: ['validateArray']
+      },
+      {
+        parameter: 'current_admin',
+        validatorMethods: ['validateNonEmptyObject']
       }
     ],
     optional: []

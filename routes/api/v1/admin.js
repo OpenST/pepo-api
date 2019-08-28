@@ -81,7 +81,7 @@ router.post('/users/:user_id/approve', sanitizer.sanitizeDynamicUrlParams, funct
 
 /* Deactivate user*/
 router.post('/users/:user_id/block', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
-  req.decodedParams.apiName = apiName.adminUserDeactivate;
+  req.decodedParams.apiName = apiName.adminUserBlock;
   req.decodedParams.user_ids = [req.params.user_id];
 
   Promise.resolve(routeHelper.perform(req, res, next, '/admin/BlockUser', 'r_a_v1_ad_5', null, null, null));
