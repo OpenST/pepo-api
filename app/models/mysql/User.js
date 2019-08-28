@@ -277,7 +277,7 @@ class UserModel extends ModelBase {
    * @param {integer} params.limit: limit
    * @param {integer} params.query: query
    * @param {integer} params.paginationTimestamp: pagination time stamp
-   * @param {boolean} params.includeAdminRelatedDetails: flag for include admin related details
+   * @param {boolean} params.fetchAll: flag to fetch all users, active or inactive
    *
    * @return {Promise}
    */
@@ -286,8 +286,7 @@ class UserModel extends ModelBase {
 
     let limit = params.limit,
       query = params.query,
-      paginationTimestamp = params.paginationTimestamp,
-      includeAdminRelatedDetails = params.includeAdminRelatedDetails;
+      paginationTimestamp = params.paginationTimestamp;
 
     const queryObject = oThis
       .select('*')
@@ -296,7 +295,7 @@ class UserModel extends ModelBase {
 
     let queryWithWildCards = '%' + query + '%';
 
-    if (!includeAdminRelatedDetails) {
+    if (!params.fetchAll) {
       queryObject.where({ status: userConstants.invertedStatuses[userConstants.activeStatus] });
     }
 

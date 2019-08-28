@@ -23,7 +23,7 @@ class UserSearch extends ServiceBase {
    * @param {object} params
    * @param {string} [params.q]
    * @param {string} [params.current_user]
-   * @param {Boolean} [params.include_admin_related_details] - true/false
+   * @param {Boolean} [params.search_by_admin] - true/false
    *
    * @augments ServiceBase
    *
@@ -37,7 +37,7 @@ class UserSearch extends ServiceBase {
     oThis.query = params.q ? params.q.toLowerCase() : null; // lower case
     oThis.query = oThis.query ? oThis.query.trim() : null; // trim spaces
     oThis.currentUser = params.current_user;
-    oThis.includeAdminRelatedDetails = params.include_admin_related_details;
+    oThis.adminSearch = params.search_by_admin;
 
     oThis.userIds = [];
     oThis.imageIds = [];
@@ -71,11 +71,13 @@ class UserSearch extends ServiceBase {
 
     await oThis._fetchTokenUsers();
 
+    // TODO: This thing would not be required in ideal case,
+    // TODO: pepo user was created but platform was down and user was not created
     await oThis._filterNonActiveUsers();
 
     await oThis._prepareSearchResults();
 
-    if (oThis.includeAdminRelatedDetails) {
+    if (oThis.adminSearch) {
       await oThis._fetchProfileElements();
       await oThis._fetchVideos();
       await oThis._fetchLink();
@@ -124,13 +126,11 @@ class UserSearch extends ServiceBase {
 
     let userModelObj = new UserModel({});
 
-    // Todo: modify search query as discussed
-
     let userData = await userModelObj.search({
       query: oThis.query,
       limit: oThis.limit,
       paginationTimestamp: oThis.paginationTimestamp,
-      includeAdminRelatedDetails: oThis.includeAdminRelatedDetails
+      fetchAll: oThis.adminSearch
     });
 
     oThis.userIds = userData.userIds;
@@ -270,12 +270,7 @@ class UserSearch extends ServiceBase {
       oThis.userToProfileElementMap[userId] = {};
 
       for (let kind in profileElements) {
-        if (
-          oThis.includeAdminRelatedDetails &&
-          (kind === userProfileElementConst.linkIdKind || kind === userProfileElementConst.coverVideoIdKind)
-        ) {
-          await oThis._fetchElementData(userId, oThis.userDetails[userId], kind, profileElements[kind].data);
-        }
+        oThis._fetchElementData(userId, oThis.userDetails[userId], kind, profileElements[kind].data);
       }
     }
 
@@ -293,29 +288,25 @@ class UserSearch extends ServiceBase {
   /**
    * Fetch element data
    *
-   * @param {string} userId - profile element userId
-   * @param {Object} userObj - user object
-   * @param {string} kind - profile element kind
-   * @param {number} data - profile element data
-   * @return {Promise<void>}
+   * @param userId
+   * @param userObj
+   * @param kind
+   * @param data
    * @private
    */
-  async _fetchElementData(userId, userObj, kind, data) {
+  _fetchElementData(userId, userObj, kind, data) {
     const oThis = this;
 
     switch (kind) {
       case userProfileElementConst.linkIdKind:
         oThis.allLinkIds.push(data);
         oThis.userToProfileElementMap[userId]['linkId'] = data;
-        return;
+        break;
 
       case userProfileElementConst.coverVideoIdKind:
         oThis.videoIds.push(data);
         oThis.userToProfileElementMap[userId]['videoId'] = data;
-        return;
-
-      default:
-        logger.error('Invalid profile element kind');
+        break;
     }
   }
 
@@ -385,7 +376,7 @@ class UserSearch extends ServiceBase {
       meta: oThis.responseMetaData
     };
 
-    if (oThis.includeAdminRelatedDetails) {
+    if (oThis.adminSearch) {
       response['videoMap'] = oThis.videos;
       response['linkMap'] = oThis.links;
     }

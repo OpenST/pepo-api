@@ -507,12 +507,13 @@ const v1Signature = {
     ]
   },
   [apiName.adminUserSearch]: {
-    mandatory: [],
-    optional: [
+    mandatory: [
       {
-        parameter: 'include_admin_related_details',
+        parameter: 'search_by_admin',
         validatorMethods: ['validateBoolean']
-      },
+      }
+    ],
+    optional: [
       {
         parameter: 'q',
         validatorMethods: ['validateString']
