@@ -1,4 +1,4 @@
-const rootPrefix = '../../../..',
+const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   AdminByIdCache = require(rootPrefix + '/lib/cacheManagement/single/AdminById'),
