@@ -68,7 +68,7 @@ class PushNotification extends HookProcessorsBase {
     let HookProcessorKlass = oThis.getHookProcessorClass(),
       response = await new HookProcessorKlass({ hook: oThis.hook }).perform();
 
-    console.log('HookProcessorKlass-----------------response-----------', response);
+    logger.log('HookProcessorKlass::response  =========================', response);
 
     // TODO @dhananjay - error handling on basis of API responses.
     if (response) {
