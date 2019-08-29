@@ -7,11 +7,8 @@ const program = require('commander');
 
 const rootPrefix = '../..',
   NotificationHookModel = require(rootPrefix + '/app/models/mysql/NotificationHook'),
-  ErrorLogsConstants = require(rootPrefix + '/lib/globalConstant/errorLogs'),
-  CronProcessModel = require(rootPrefix + '/app/models/mysql/CronProcesses'),
   HookProcessorsBase = require(rootPrefix + '/executables/hookProcessors/Base'),
   PushNotificationProcessor = require(rootPrefix + '/lib/pushNotification/Processor'),
-  CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   cronProcessesConstants = require(rootPrefix + '/lib/globalConstant/cronProcesses'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger');
@@ -73,6 +70,7 @@ class PushNotification extends HookProcessorsBase {
 
     console.log('HookProcessorKlass-----------------response-----------', response);
 
+    // TODO @dhananjay - error handling on basis of API responses.
     if (response) {
       oThis.successResponse[oThis.hook.id] = response;
     } else {
@@ -100,12 +98,11 @@ class PushNotification extends HookProcessorsBase {
   async _updateStatusToProcessed() {
     const oThis = this;
 
-    console.log('oThis.hooksToBeProcessed------', oThis.hooksToBeProcessed);
-
-    // TODO @dhananjay - error handling.
     for (let hookId in oThis.hooksToBeProcessed) {
       if (oThis.successResponse[hookId]) {
-        await new NotificationHookModel().markStatusAsProcessed();
+        await new NotificationHookModel().markStatusAsProcessed(hookId);
+      } else {
+        await new NotificationHookModel().markFailedToBeRetried(hookId);
       }
     }
   }

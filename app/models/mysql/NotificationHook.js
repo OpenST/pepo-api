@@ -163,8 +163,6 @@ class NotificationHook extends ModelBase {
    * Mark hooks as ignored.
    *
    * @param {number} hookId
-   * @param {number} failedCount
-   * @param {object} failedLogs
    *
    * @returns {Promise<void>}
    */
