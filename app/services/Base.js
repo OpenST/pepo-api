@@ -136,7 +136,7 @@ class ServicesBase {
         responseHelper.paramValidationError({
           internal_error_identifier: 'a_s_b_4',
           api_error_identifier: 'could_not_proceed',
-          params_error_identifiers: ['user_already_deactivated'],
+          params_error_identifiers: ['user_inactive'],
           debug_options: {}
         })
       );

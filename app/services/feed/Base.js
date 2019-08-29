@@ -3,6 +3,7 @@ const rootPrefix = '../../..',
   GetProfile = require(rootPrefix + '/lib/user/profile/Get'),
   GetTokenService = require(rootPrefix + '/app/services/token/Get'),
   feedConstants = require(rootPrefix + '/lib/globalConstant/feed'),
+  CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   responseHelper = require(rootPrefix + '/lib/formatter/response');
 
 /**
@@ -54,6 +55,8 @@ class FeedBase extends ServiceBase {
     await oThis._getFeeds();
 
     await oThis._fetchProfileDetails();
+
+    oThis._filterInactiveUserFeeds();
 
     await oThis._setTokenDetails();
 
@@ -119,6 +122,25 @@ class FeedBase extends ServiceBase {
     oThis.profileResponse = profileResp.data;
 
     return responseHelper.successWithData({});
+  }
+
+  /**
+   * Filter out feeds of inactive users
+   *
+   * @private
+   */
+  _filterInactiveUserFeeds() {
+    const oThis = this;
+
+    for (let i = 0; i < oThis.feeds.length; i++) {
+      const feedData = oThis.feeds[i];
+
+      const profileObj = oThis.profileResponse[feedData.actor];
+      // Delete feeds whose user profile is not found.
+      if (!CommonValidators.validateNonEmptyObject(profileObj)) {
+        oThis.feeds.splice(i, 1);
+      }
+    }
   }
 
   /**

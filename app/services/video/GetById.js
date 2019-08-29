@@ -5,6 +5,7 @@ const rootPrefix = '../../..',
   GetProfile = require(rootPrefix + '/lib/user/profile/Get'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination'),
+  CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   entityType = require(rootPrefix + '/lib/globalConstant/entityType');
 
 class GetVideoById extends ServiceBase {
@@ -110,8 +111,15 @@ class GetVideoById extends ServiceBase {
 
     const response = await getProfileObj.perform();
 
-    if (response.isFailure()) {
-      return Promise.reject(response);
+    if (response.isFailure() || !CommonValidators.validateNonEmptyObject(response.data)) {
+      return Promise.reject(
+        responseHelper.paramValidationError({
+          internal_error_identifier: 'a_s_v_gbi_1',
+          api_error_identifier: 'could_not_proceed',
+          params_error_identifiers: ['user_inactive'],
+          debug_options: {}
+        })
+      );
     }
 
     oThis.profileResponse = response.data;

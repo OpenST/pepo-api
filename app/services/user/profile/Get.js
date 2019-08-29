@@ -1,6 +1,7 @@
 const rootPrefix = '../../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   GetProfile = require(rootPrefix + '/lib/user/profile/Get'),
+  CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   responseHelper = require(rootPrefix + '/lib/formatter/response');
 
 /**
@@ -54,8 +55,15 @@ class GetUserProfile extends ServiceBase {
 
     const response = await getProfileObj.perform();
 
-    if (response.isFailure()) {
-      return Promise.reject(response);
+    if (response.isFailure() || !CommonValidators.validateNonEmptyObject(response.data)) {
+      return Promise.reject(
+        responseHelper.paramValidationError({
+          internal_error_identifier: 'a_s_u_p_g_1',
+          api_error_identifier: 'could_not_proceed',
+          params_error_identifiers: ['user_inactive'],
+          debug_options: {}
+        })
+      );
     }
 
     const profileResp = response.data;

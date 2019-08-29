@@ -8,7 +8,7 @@ const rootPrefix = '../../..',
   UserModelKlass = require(rootPrefix + '/app/models/mysql/User'),
   UsersCache = require(rootPrefix + '/lib/cacheManagement/multi/User'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
-  ActivityLogModel = require(rootPrefix + '/app/models/mysql/ActivityLog'),
+  ActivityLogModel = require(rootPrefix + '/app/models/mysql/AdminActivityLog'),
   adminActivityLogConst = require(rootPrefix + '/lib/globalConstant/adminActivityLogs'),
   userConstants = require(rootPrefix + '/lib/globalConstant/user');
 
@@ -86,7 +86,7 @@ class BlockUser extends ServiceBase {
           responseHelper.paramValidationError({
             internal_error_identifier: 'a_s_a_du_2',
             api_error_identifier: 'could_not_proceed',
-            params_error_identifiers: ['user_not_active'],
+            params_error_identifiers: ['user_inactive'],
             debug_options: {}
           })
         );

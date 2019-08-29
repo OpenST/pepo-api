@@ -13,7 +13,7 @@ const rootPrefix = '../../..',
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   FeedModel = require(rootPrefix + '/app/models/mysql/Feed'),
   feedsConstants = require(rootPrefix + '/lib/globalConstant/feed'),
-  ActivityLogModel = require(rootPrefix + '/app/models/mysql/ActivityLog'),
+  ActivityLogModel = require(rootPrefix + '/app/models/mysql/AdminActivityLog'),
   adminActivityLogConst = require(rootPrefix + '/lib/globalConstant/adminActivityLogs'),
   userConstants = require(rootPrefix + '/lib/globalConstant/user');
 
@@ -94,7 +94,7 @@ class ApproveUsersAsCreator extends ServiceBase {
           responseHelper.paramValidationError({
             internal_error_identifier: 'a_s_a_au_2',
             api_error_identifier: 'could_not_proceed',
-            params_error_identifiers: ['user_not_active'],
+            params_error_identifiers: ['user_inactive'],
             debug_options: {}
           })
         );

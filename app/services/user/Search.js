@@ -9,6 +9,7 @@ const rootPrefix = '../../..',
   userProfileElementConst = require(rootPrefix + '/lib/globalConstant/userProfileElement'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
+  AdminActivityLogModel = require(rootPrefix + '/app/models/mysql/AdminActivityLog'),
   paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination');
 
 /**
@@ -54,6 +55,7 @@ class UserSearch extends ServiceBase {
     oThis.nextPaginationTimestamp = null;
     oThis.paginationIdentifier = params[paginationConstants.paginationIdentifierKey] || null;
     oThis.limit = oThis._defaultPageLimit();
+    oThis.lastAdminAction = {};
   }
 
   /**
@@ -81,6 +83,7 @@ class UserSearch extends ServiceBase {
       await oThis._fetchProfileElements();
       await oThis._fetchVideos();
       await oThis._fetchLink();
+      await oThis._fetchAdminActions();
     }
 
     await oThis._fetchImages();
@@ -424,6 +427,16 @@ class UserSearch extends ServiceBase {
     const oThis = this;
 
     return oThis.limit;
+  }
+
+  /**
+   * Fetch action taken on user by admin
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _fetchAdminActions() {
+    const oThis = this;
   }
 }
 

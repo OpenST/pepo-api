@@ -11,7 +11,7 @@ const dbName = databaseConstants.adminDbName;
  *
  * @class ActivityLogModel
  */
-class ActivityLogModel extends ModelBase {
+class AdminActivityLogModel extends ModelBase {
   /**
    * Constructor for user profile element model.
    *
@@ -81,4 +81,4 @@ class ActivityLogModel extends ModelBase {
   }
 }
 
-module.exports = ActivityLogModel;
+module.exports = AdminActivityLogModel;
