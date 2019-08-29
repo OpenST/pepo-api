@@ -10,6 +10,8 @@ const rootPrefix = '../../..',
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
   AdminActivityLogModel = require(rootPrefix + '/app/models/mysql/AdminActivityLog'),
+  CommonValidators = require(rootPrefix + '/lib/validators/Common'),
+  AdminModel = require(rootPrefix + '/app/models/mysql/Admin'),
   paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination');
 
 /**
@@ -23,7 +25,6 @@ class UserSearch extends ServiceBase {
    *
    * @param {object} params
    * @param {string} [params.q]
-   * @param {string} [params.current_user]
    * @param {Boolean} [params.search_by_admin] - true/false
    *
    * @augments ServiceBase
@@ -37,7 +38,6 @@ class UserSearch extends ServiceBase {
 
     oThis.query = params.q ? params.q.toLowerCase() : null; // lower case
     oThis.query = oThis.query ? oThis.query.trim() : null; // trim spaces
-    oThis.currentUser = params.current_user;
     oThis.adminSearch = params.search_by_admin;
 
     oThis.userIds = [];
@@ -81,9 +81,11 @@ class UserSearch extends ServiceBase {
 
     if (oThis.adminSearch) {
       await oThis._fetchProfileElements();
-      await oThis._fetchVideos();
-      await oThis._fetchLink();
-      await oThis._fetchAdminActions();
+
+      let promises = [];
+      promises.push(oThis._fetchVideos(), oThis._fetchLink(), oThis._fetchAdminActions());
+
+      await Promise.all(promises);
     }
 
     await oThis._fetchImages();
@@ -96,15 +98,13 @@ class UserSearch extends ServiceBase {
   /**
    * Validate and sanitize.
    *
-   * @sets oThis.currentUserId, oThis.paginationTimestamp
+   * @sets oThis.paginationTimestamp
    *
    * @returns {Promise<*|result>}
    * @private
    */
   async _validateAndSanitizeParams() {
     const oThis = this;
-
-    oThis.currentUserId = oThis.currentUser ? Number(oThis.currentUser.id) : 0;
 
     if (oThis.paginationIdentifier) {
       const parsedPaginationParams = oThis._parsePaginationParams(oThis.paginationIdentifier);
@@ -382,6 +382,7 @@ class UserSearch extends ServiceBase {
     if (oThis.adminSearch) {
       response['videoMap'] = oThis.videos;
       response['linkMap'] = oThis.links;
+      response['adminActions'] = oThis.lastAdminAction;
     }
 
     return responseHelper.successWithData(response);
@@ -437,6 +438,52 @@ class UserSearch extends ServiceBase {
    */
   async _fetchAdminActions() {
     const oThis = this;
+
+    let uids = oThis.userIds,
+      adminIdMap = {};
+
+    while (true) {
+      let rows = await new AdminActivityLogModel()
+        .select('*')
+        .where({ action_on: uids })
+        .limit(1)
+        .order_by('id DESC')
+        .fire();
+
+      for (let i = 0; i < rows.length; i++) {
+        const rec = rows[i];
+        oThis.lastAdminAction[rec.action_on] = oThis.lastAdminAction[rec.action_on] || rec;
+        adminIdMap[rec.admin_id] = 1;
+      }
+
+      uids = oThis.userIds.filter(function(val) {
+        return !oThis.lastAdminAction.hasOwnProperty(val);
+      });
+
+      // If all users data is fetched or no more rows present
+      if (uids.length <= 0 || rows.length < 1) {
+        break;
+      }
+    }
+
+    // Fetch admin and append data in last admin actions
+    if (CommonValidators.validateNonEmptyObject(oThis.lastAdminAction)) {
+      let admins = await new AdminModel()
+        .select('id, name')
+        .where({ id: Object.keys(adminIdMap) })
+        .fire();
+
+      for (let i = 0; i < admins.length; i++) {
+        adminIdMap[admins[i].id] = admins[i];
+      }
+
+      const adminActivityObj = new AdminActivityLogModel();
+      for (let userId in oThis.lastAdminAction) {
+        const laa = oThis.lastAdminAction[userId];
+        oThis.lastAdminAction[userId] = adminActivityObj.formatDbData(laa);
+        oThis.lastAdminAction[userId].adminName = adminIdMap[laa.admin_id].name;
+      }
+    }
   }
 }
 

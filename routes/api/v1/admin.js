@@ -65,6 +65,7 @@ router.get('/users', sanitizer.sanitizeDynamicUrlParams, function(req, res, next
       serviceData: serviceResponse.data
     }).perform();
 
+    wrapperFormatterRsp.data.adminActions = serviceResponse.data.adminActions;
     serviceResponse.data = wrapperFormatterRsp.data;
   };
 
