@@ -9,9 +9,11 @@ const rootPrefix = '../../..',
   UsersCache = require(rootPrefix + '/lib/cacheManagement/multi/User'),
   UserProfileElementsByUserIdCache = require(rootPrefix + '/lib/cacheManagement/multi/UserProfileElementsByUserIds'),
   userProfileElementConst = require(rootPrefix + '/lib/globalConstant/userProfileElement'),
-  VideoAddNotification = require(rootPrefix + '/lib/userNotificationPublisher/VideoAdd'),
-  responseHelper = require(rootPrefix + '/lib/formatter/response'),
   FeedModel = require(rootPrefix + '/app/models/mysql/Feed'),
+  bgJob = require(rootPrefix + '/lib/rabbitMqEnqueue/bgJob'),
+  bgJobConstants = require(rootPrefix + '/lib/globalConstant/bgJob'),
+  bgJobEventConstants = require(rootPrefix + '/lib/globalConstant/bgJobEvent'),
+  responseHelper = require(rootPrefix + '/lib/formatter/response'),
   feedsConstants = require(rootPrefix + '/lib/globalConstant/feed'),
   userConstants = require(rootPrefix + '/lib/globalConstant/user');
 
@@ -164,7 +166,15 @@ class AdminApproveUsers extends ServiceBase {
       if (profileElements && profileElements[userProfileElementConst.coverVideoIdKind]) {
         const videoId = profileElements[userProfileElementConst.coverVideoIdKind].data;
         promises.push(oThis._addFeed(videoId, userId));
-        promises.push(new VideoAddNotification({ userId: userId, videoId: videoId }).perform());
+        promises.push(
+          bgJob.enqueue(bgJobConstants.eventJobTopic, {
+            eventKind: bgJobEventConstants.videoAddEventKind,
+            eventPayload: {
+              userId: oThis.profileUserId,
+              videoId: oThis.videoId
+            }
+          })
+        );
       }
     }
 

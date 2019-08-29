@@ -4,17 +4,14 @@ const rootPrefix = '../../../..',
   TransactionOstEventBase = require(rootPrefix + '/app/services/ostEvents/transactions/Base'),
   VideoTransactionSendSuccessNotification = require(rootPrefix +
     '/lib/userNotificationPublisher/VideoTransactionSendSuccess'),
-  VideoTransactionReceiveSuccessNotification = require(rootPrefix +
-    '/lib/userNotificationPublisher/VideoTransactionReceiveSuccess'),
-  ProfileTransactionSendSuccessNotification = require(rootPrefix +
-    '/lib/userNotificationPublisher/ProfileTransactionSendSuccess'),
-  ProfileTransactionReceiveSuccessNotification = require(rootPrefix +
-    '/lib/userNotificationPublisher/ProfileTransactionReceiveSuccess'),
   basicHelper = require(rootPrefix + '/helpers/basic'),
+  bgJob = require(rootPrefix + '/lib/rabbitMqEnqueue/bgJob'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
+  bgJobConstants = require(rootPrefix + '/lib/globalConstant/bgJob'),
   tokenUserConstants = require(rootPrefix + '/lib/globalConstant/tokenUser'),
-  transactionConstants = require(rootPrefix + '/lib/globalConstant/transaction');
+  transactionConstants = require(rootPrefix + '/lib/globalConstant/transaction'),
+  bgJobEventConstants = require(rootPrefix + '/lib/globalConstant/bgJobEvent');
 
 /**
  * Class for success transaction ost event base service.
@@ -155,23 +152,41 @@ class SuccessTransactionOstEvent extends TransactionOstEventBase {
 
     if (oThis.videoId) {
       promisesArray.push(
-        new VideoTransactionSendSuccessNotification({
-          transaction: oThis.transactionObj,
-          videoId: oThis.videoId
-        }).perform()
+        bgJob.enqueue(bgJobConstants.eventJobTopic, {
+          eventKind: bgJobEventConstants.videoTxSendSuccessEventKind,
+          eventPayload: {
+            transaction: oThis.transactionObj,
+            videoId: oThis.videoId
+          }
+        })
       );
+
       promisesArray.push(
-        new VideoTransactionReceiveSuccessNotification({
-          transaction: oThis.transactionObj,
-          videoId: oThis.videoId
-        }).perform()
+        bgJob.enqueue(bgJobConstants.eventJobTopic, {
+          eventKind: bgJobEventConstants.videoTxReceiveSuccessEventKind,
+          eventPayload: {
+            transaction: oThis.transactionObj,
+            videoId: oThis.videoId
+          }
+        })
       );
     } else {
       promisesArray.push(
-        new ProfileTransactionSendSuccessNotification({ transaction: oThis.transactionObj }).perform()
+        bgJob.enqueue(bgJobConstants.eventJobTopic, {
+          eventKind: bgJobEventConstants.profileTxSendSuccessEventKind,
+          eventPayload: {
+            transaction: oThis.transactionObj
+          }
+        })
       );
+
       promisesArray.push(
-        new ProfileTransactionReceiveSuccessNotification({ transaction: oThis.transactionObj }).perform()
+        bgJob.enqueue(bgJobConstants.eventJobTopic, {
+          eventKind: bgJobEventConstants.profileTxReceiveSuccessEventKind,
+          eventPayload: {
+            transaction: oThis.transactionObj
+          }
+        })
       );
     }
 
