@@ -55,7 +55,7 @@ class GetUserProfile extends ServiceBase {
 
     const response = await getProfileObj.perform();
 
-    if (response.isFailure() || !CommonValidators.validateNonEmptyObject(response.data)) {
+    if (response.isFailure() || !CommonValidators.validateNonEmptyObject(response.data.userProfilesMap)) {
       return Promise.reject(
         responseHelper.paramValidationError({
           internal_error_identifier: 'a_s_u_p_g_1',

@@ -85,16 +85,15 @@ class FeedBase extends ServiceBase {
       }
     }
 
-    // if (oThis.feeds.length === 0) {
-    //   return responseHelper.error({
-    //     internal_error_identifier: 'a_s_f_b_1',
-    //     api_error_identifier: 'resource_not_found',
-    //     debug_options: {
-    //       feedsArray: oThis.feeds,
-    //       userIds: oThis.userIds
-    //     }
-    //   });
-    // }
+    if (!CommonValidators.validateNonEmptyObject(oThis.feeds[0])) {
+      return Promise.reject(
+        responseHelper.error({
+          internal_error_identifier: 'a_s_f_b_1',
+          api_error_identifier: 'resource_not_found',
+          debug_options: {}
+        })
+      );
+    }
   }
 
   /**
@@ -135,7 +134,8 @@ class FeedBase extends ServiceBase {
     for (let i = 0; i < oThis.feeds.length; i++) {
       const feedData = oThis.feeds[i];
 
-      const profileObj = oThis.profileResponse[feedData.actor];
+      const profileObj = oThis.profileResponse.userProfilesMap[feedData.actor];
+
       // Delete feeds whose user profile is not found.
       if (!CommonValidators.validateNonEmptyObject(profileObj)) {
         oThis.feeds.splice(i, 1);

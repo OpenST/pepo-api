@@ -6,6 +6,7 @@ const rootPrefix = '../../..',
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination'),
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
+  videoDetailsConstants = require(rootPrefix + '/lib/globalConstant/videoDetail'),
   entityType = require(rootPrefix + '/lib/globalConstant/entityType');
 
 class GetVideoById extends ServiceBase {
@@ -65,6 +66,21 @@ class GetVideoById extends ServiceBase {
 
     oThis.videoDetails = [videoDetailsCacheResponse.data[oThis.videoId]];
 
+    // If video not found or its not active
+    if (
+      !CommonValidators.validateNonEmptyObject(oThis.videoDetails[0]) ||
+      oThis.videoDetails[0].status === videoDetailsConstants.deletedStatus
+    ) {
+      return Promise.reject(
+        responseHelper.paramValidationError({
+          internal_error_identifier: 'a_s_v_gbi_1',
+          api_error_identifier: 'resource_not_found',
+          params_error_identifiers: ['invalid_video_id'],
+          debug_options: {}
+        })
+      );
+    }
+
     oThis.creatorUserId = oThis.videoDetails[0].creatorUserId;
 
     oThis.currentUserId = oThis.currentUser ? Number(oThis.currentUser.id) : 0;
@@ -111,10 +127,10 @@ class GetVideoById extends ServiceBase {
 
     const response = await getProfileObj.perform();
 
-    if (response.isFailure() || !CommonValidators.validateNonEmptyObject(response.data)) {
+    if (response.isFailure() || !CommonValidators.validateNonEmptyObject(response.data.userProfilesMap)) {
       return Promise.reject(
         responseHelper.paramValidationError({
-          internal_error_identifier: 'a_s_v_gbi_1',
+          internal_error_identifier: 'a_s_v_gbi_2',
           api_error_identifier: 'could_not_proceed',
           params_error_identifiers: ['user_inactive'],
           debug_options: {}

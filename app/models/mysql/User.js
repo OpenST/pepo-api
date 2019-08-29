@@ -73,6 +73,7 @@ class UserModel extends ModelBase {
       encryptionSalt: dbRow.encryption_salt,
       markInactiveTriggerCount: dbRow.mark_inactive_trigger_count,
       properties: dbRow.properties,
+      approvedCreator: UserModel.isUserApprovedCreator(dbRow),
       status: userConstants.statuses[dbRow.status],
       createdAt: dbRow.created_at,
       updatedAt: dbRow.updated_at
@@ -94,6 +95,7 @@ class UserModel extends ModelBase {
       'profileImageId',
       'markInactiveTriggerCount',
       'properties',
+      'approvedCreator',
       'status',
       'createdAt',
       'updatedAt'
