@@ -4,6 +4,7 @@ const rootPrefix = '../../..',
   GetTokenService = require(rootPrefix + '/app/services/token/Get'),
   feedConstants = require(rootPrefix + '/lib/globalConstant/feed'),
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
+  videoConstants = require(rootPrefix + '/lib/globalConstant/video'),
   responseHelper = require(rootPrefix + '/lib/formatter/response');
 
 /**
@@ -56,7 +57,7 @@ class FeedBase extends ServiceBase {
 
     await oThis._fetchProfileDetails();
 
-    oThis._filterInactiveUserFeeds();
+    await oThis._filterInactiveUserFeeds();
 
     await oThis._setTokenDetails();
 
@@ -128,18 +129,32 @@ class FeedBase extends ServiceBase {
    *
    * @private
    */
-  _filterInactiveUserFeeds() {
+  async _filterInactiveUserFeeds() {
     const oThis = this;
 
     for (let i = 0; i < oThis.feeds.length; i++) {
       const feedData = oThis.feeds[i];
 
-      const profileObj = oThis.profileResponse.userProfilesMap[feedData.actor];
+      const profileObj = oThis.profileResponse.userProfilesMap[feedData.actor],
+        videoEntityForFeed = oThis.profileResponse.videoMap[feedData.primaryExternalEntityId];
 
       // Delete feeds whose user profile is not found.
-      if (!CommonValidators.validateNonEmptyObject(profileObj)) {
+      if (
+        !CommonValidators.validateNonEmptyObject(profileObj) ||
+        videoEntityForFeed.status === videoConstants.deletedStatus
+      ) {
         oThis.feeds.splice(i, 1);
       }
+    }
+
+    if (oThis.feeds.length <= 0) {
+      return Promise.reject(
+        responseHelper.error({
+          internal_error_identifier: 'a_s_f_b_2',
+          api_error_identifier: 'resource_not_found',
+          debug_options: {}
+        })
+      );
     }
   }
 
