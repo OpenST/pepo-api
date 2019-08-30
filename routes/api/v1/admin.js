@@ -1,6 +1,7 @@
 const express = require('express'),
   router = express.Router(),
-  cookieParser = require('cookie-parser');
+  cookieParser = require('cookie-parser'),
+  csrf = require('csurf');
 
 const rootPrefix = '../../..',
   FormatterComposer = require(rootPrefix + '/lib/formatter/Composer'),
@@ -12,13 +13,14 @@ const rootPrefix = '../../..',
   responseEntityKey = require(rootPrefix + '/lib/globalConstant/responseEntityKey'),
   basicHelper = require(rootPrefix + '/helpers/basic'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
-  cookieHelper = require(rootPrefix + '/lib/cookieHelper');
+  cookieHelper = require(rootPrefix + '/lib/cookieHelper'),
+  csrfProtection = csrf({ cookie: true });
 
 // Node.js cookie parsing middleware.
 router.use(cookieParser(coreConstant.COOKIE_SECRET));
 
 /* Login admin*/
-router.post('/login', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+router.post('/login', csrfProtection, sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.adminLogin;
 
   const onServiceSuccess = async function(serviceResponse) {
@@ -35,7 +37,7 @@ router.post('/login', sanitizer.sanitizeDynamicUrlParams, function(req, res, nex
 });
 
 /* Logout admin*/
-router.post('/logout', sanitizer.sanitizeDynamicUrlParams, function(req, res) {
+router.post('/logout', csrfProtection, sanitizer.sanitizeDynamicUrlParams, function(req, res) {
   req.decodedParams.apiName = apiName.adminLogout;
 
   const errorConfig = basicHelper.fetchErrorConfig(req.decodedParams.apiVersion),
@@ -73,7 +75,7 @@ router.get('/users', sanitizer.sanitizeDynamicUrlParams, function(req, res, next
 });
 
 /* Approve user as creator */
-router.post('/users/:user_id/approve', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+router.post('/users/:user_id/approve', csrfProtection, sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.adminUserApprove;
   req.decodedParams.user_ids = [req.params.user_id];
 
@@ -81,7 +83,7 @@ router.post('/users/:user_id/approve', sanitizer.sanitizeDynamicUrlParams, funct
 });
 
 /* Block user*/
-router.post('/users/:user_id/block', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+router.post('/users/:user_id/block', csrfProtection, sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.adminUserBlock;
   req.decodedParams.user_ids = [req.params.user_id];
 
@@ -89,7 +91,7 @@ router.post('/users/:user_id/block', sanitizer.sanitizeDynamicUrlParams, functio
 });
 
 /* Delete video */
-router.post('/delete-video/:video_id', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+router.post('/delete-video/:video_id', csrfProtection, sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.adminDeleteVideo;
   req.decodedParams.video_id = req.params.video_id;
 

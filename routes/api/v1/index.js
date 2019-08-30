@@ -1,6 +1,7 @@
 const express = require('express'),
   router = express.Router(),
-  cookieParser = require('cookie-parser');
+  cookieParser = require('cookie-parser'),
+  csrf = require('csurf');
 
 const rootPrefix = '../../..',
   LoginCookieAuth = require(rootPrefix + '/lib/authentication/LoginCookie'),
@@ -24,7 +25,8 @@ const rootPrefix = '../../..',
   commonValidator = require(rootPrefix + '/lib/validators/Common'),
   uploadParamsRoutes = require(rootPrefix + '/routes/api/v1/uploadParams'),
   rotateTwitterAccountRoutes = require(rootPrefix + '/routes/api/v1/rotateTwitterAccount'),
-  ostTransactionRoutes = require(rootPrefix + '/routes/api/v1/ostTransactions');
+  ostTransactionRoutes = require(rootPrefix + '/routes/api/v1/ostTransactions'),
+  csrfProtection = csrf({ cookie: true });
 
 const errorConfig = basicHelper.fetchErrorConfig(apiVersions.v1);
 
@@ -89,6 +91,24 @@ const validateAdminCookie = async function(req, res, next) {
 
   next();
 };
+
+// Get CSRF token for post requests to change state by admin
+router.get('/', csrfProtection, function(req, res, next) {
+  res.cookie('XSRF-TOKEN', req.csrfToken());
+
+  let options = {
+    maxAge: 1000 * 5 * 60, // Cookie would expire after 5 minutes
+    httpOnly: true, // The cookie only accessible by the web server
+    signed: true, // Indicates if the cookie should be signed
+    path: '/',
+    domain: coreConstant.PA_COOKIE_DOMAIN
+  };
+
+  const errorConfig = basicHelper.fetchErrorConfig(req.decodedParams.apiVersion),
+    responseObject = responseHelper.successWithData({});
+
+  Promise.resolve(responseHelper.renderApiResponse(responseObject, res, errorConfig));
+});
 
 // NOTE:- use 'validateLoginRequired' function if you want to use route in logged in only
 
