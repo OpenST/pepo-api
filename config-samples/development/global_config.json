@@ -54,19 +54,30 @@
         }
       ]
     },
-
     "websocket": {
       "wsAuthSalt": "asdfghjklqwertyuiop",
       "endpoint": "127.0.0.1",
       "port": "4000",
       "protocol": "https"
     },
-
     "cassandra": {
       "username": "cassandra",
       "password": "cassandra",
       "contactPoints": ["127.0.0.1:9042"],
       "localDataCenter": "datacenter1"
+    },
+    "firebase": {
+      "type": "service_account",
+      "projectId": "pepo2-18368",
+      "privateKeyId": "7e73cc2e906e0ab551abe9454e7d4001ca32dfb7",
+      "privateKey": "-----BEGIN PRIVATE KEY-----\nMIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQDqZ24jHcoH2h38\nLaWOcThpQvSM4ChyJxelvPoDP2ehcVGgYQX+wTfbwxq8+3BETZmrM+dDFYxxN15u\nrpT7pDOhoJpe0gxk+spn/arrw3q0vgGpq3MEWjem6hg2W3wxzNSLa00Uif8LJTf5\n0G0L/K+9cCCyiVNuQMdy1lA6yiofWTF8JOH1ASxuEBqoR4QIVk1tmuLxhc2weVcK\nXiHqJ3P0S1XSd6aX7aNgX0axwMERNN0LsghLuofBEmpV1BEVwLAgDzpTL3iguyxf\nbFXMf+74JlJD5BF722/LUMj7ymHq6zPvtefcL1VMeMa02RC0v7iDM8oPYmUCJU6S\nfmtKclatAgMBAAECggEASq3UJYT2mkTP+8lRLw38QnDt97nsuN2ih4+q+YDoU8OG\nFXoDznOhh7bjnGThEinE9Qnuum0xltpkkA+38GoSdwJzXBVAlKVf+fyTyVQ4kj/c\nyMESPkc95sQ7HYpNCZKv/pEbeBk088iSSlkwfLqvBMQl7quYtI4X3QrRecFx5RVJ\n2f4z3vARbc8ASdeP2T5gK/w5KuCbDMoE3mIYGVbjd/9aoQWb3Bt8DbGRcHti2PYZ\ns9133XuYdKIm+/DbXU6OCFkcqSUwUxXEe8bOAvkD3fpyWiZDgLt1LL0KyAzJDXyb\nj01yJnGmZLyJeRQWUfJN6a02TWfhTw+tUuc8YVjggwKBgQD/MI2UgBYIINOlW7ze\nQZEiAqNl5sze24ZtCOtPRCws7jcHIOLx6BrUayBM6Rr6L7uAzPn8ngfPd3vVo9Sq\nJrCu+Mdfo+7FA+JdozZizs734HXUW2ueSzIcMPMkPSjCjaPc17WIxrWpJvaAcCzD\nvpGz9bNA6zwRLcCSZelNHX2IZwKBgQDrJfrysCUsh71UocZLTmDb0OxHuXRKpGhM\nHjZ/8ZmyIsDiFrlDTupwb+O8MN3kAhtd5o+8Pb62M0c+5iUZs2uy96IhcE0lj70r\nuhebMaPcP14k3/jqxR9G4tfQ+wiTUJSjVr1zz+p5XRHXETavCR12FQaQstU4LROF\nTlLVFOdLywKBgH76R9iWi1/sBaQIK8hj07Wannd8CoDxtsfWYlAE2f5ZYiQ35vT7\nyy3bSC086GGJEsGaPOHIOJaxG3tIk+8+ZTgLLhmW1p5NunthVRSBV1bb54WNH9Wa\nEQsaCEIF9JwqIlknNHskdQwACTQLnRqhXpqvLUymQDNEEshF0Xq/q9ENAoGAac6o\nMWVjBLt7TMaSRDZbTO2gM9HV6vQ5Xe7GVSGwJ8CNi+3vpMKwqLEgBwDyBvOPvtvM\n10XtN2yxZTMHhJ4AGwJkOKmgfQNFepR8pL9cXPFCelMxXOof3bSaqZUbUbYTe7++\n9Yqblcp0CZLcSTxPvl9NmfRuDp3xx6zrhqemP6sCgYBk3ml70tfwm26Rp6NMzfgA\n8FqxnlM5OYx5WTUsUVCZVYDRpYlaqea6vcXyBJoxSlfI7qNZc2Nhl+kxE72mxN3/\ngaRZVCAzqEUjfJ1HCW3p/DhBcLSNeB4tysFh+mAc3G9WG8ThOeFQr4XyV0Vr3uaB\nmx0ZICnRDQSLLJDxSahReA==\n-----END PRIVATE KEY-----\n",
+      "clientEmail": "firebase-adminsdk-3c7jx@pepo2-18368.iam.gserviceaccount.com",
+      "clientId": "102062276665744125076",
+      "authUri": "https://accounts.google.com/o/oauth2/auth",
+      "tokenUri": "https://oauth2.googleapis.com/token",
+      "authProviderx509CertUrl": "https://www.googleapis.com/oauth2/v1/certs",
+      "clientx509CertUrl": "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-3c7jx%40pepo2-18368.iam.gserviceaccount.com",
+      "databaseURL": "https://pepo2-18368.firebaseio.com"
     }
   }
 }
