@@ -65,6 +65,8 @@ class PushNotification extends HookProcessorsBase {
   async _processHook() {
     const oThis = this;
 
+    logger.step('_processHook called for: ', oThis.hook);
+
     let HookProcessorKlass = oThis.getHookProcessorClass(),
       response = await new HookProcessorKlass({ hook: oThis.hook }).perform();
 
