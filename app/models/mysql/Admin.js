@@ -35,6 +35,7 @@ class AdminModel extends ModelBase {
    *
    * @param {object} dbRow
    * @param {string} dbRow.id
+   * @param {string} dbRow.name
    * @param {string} dbRow.email
    * @param {string} dbRow.password
    * @param {string} dbRow.encryption_salt
@@ -49,6 +50,7 @@ class AdminModel extends ModelBase {
 
     const formattedData = {
       id: dbRow.id,
+      name: dbRow.name,
       email: dbRow.email,
       password: dbRow.password,
       encryptionSalt: dbRow.encryption_salt,
@@ -66,7 +68,7 @@ class AdminModel extends ModelBase {
    * @returns {array}
    */
   safeFormattedColumnNames() {
-    return ['id', 'email', 'status', 'createdAt', 'updatedAt'];
+    return ['id', 'name', 'email', 'status', 'createdAt', 'updatedAt'];
   }
 
   /**

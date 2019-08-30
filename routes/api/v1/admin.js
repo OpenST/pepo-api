@@ -49,7 +49,7 @@ router.post('/logout', sanitizer.sanitizeDynamicUrlParams, function(req, res) {
 /* users list */
 router.get('/users', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.adminUserSearch;
-  req.decodedParams.includeVideos = true;
+  req.decodedParams.search_by_admin = true;
 
   const dataFormatterFunc = async function(serviceResponse) {
     const wrapperFormatterRsp = await new FormatterComposer({
@@ -59,11 +59,13 @@ router.get('/users', sanitizer.sanitizeDynamicUrlParams, function(req, res, next
         [entityType.usersMap]: responseEntityKey.users,
         [entityType.imagesMap]: responseEntityKey.images,
         [entityType.videosMap]: responseEntityKey.videos,
+        [entityType.linksMap]: responseEntityKey.links,
         [entityType.userSearchMeta]: responseEntityKey.meta
       },
       serviceData: serviceResponse.data
     }).perform();
 
+    wrapperFormatterRsp.data.adminActions = serviceResponse.data.adminActions;
     serviceResponse.data = wrapperFormatterRsp.data;
   };
 
@@ -75,7 +77,15 @@ router.post('/users/:user_id/approve', sanitizer.sanitizeDynamicUrlParams, funct
   req.decodedParams.apiName = apiName.adminUserApprove;
   req.decodedParams.user_ids = [req.params.user_id];
 
-  Promise.resolve(routeHelper.perform(req, res, next, '/admin/ApproveUsers', 'r_a_v1_ad_3', null, null, null));
+  Promise.resolve(routeHelper.perform(req, res, next, '/admin/ApproveUsersAsCreator', 'r_a_v1_ad_3', null, null, null));
+});
+
+/* Block user*/
+router.post('/users/:user_id/block', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.adminUserBlock;
+  req.decodedParams.user_ids = [req.params.user_id];
+
+  Promise.resolve(routeHelper.perform(req, res, next, '/admin/BlockUser', 'r_a_v1_ad_5', null, null, null));
 });
 
 /* Delete video */
@@ -84,6 +94,25 @@ router.post('/delete-video/:video_id', sanitizer.sanitizeDynamicUrlParams, funct
   req.decodedParams.video_id = req.params.video_id;
 
   Promise.resolve(routeHelper.perform(req, res, next, '/video/Delete', 'r_a_v1_ad_4', null, null, null));
+});
+
+/* Logged In Admin*/
+router.get('/current', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.loggedInAdmin;
+
+  const dataFormatterFunc = async function(serviceResponse) {
+    const wrapperFormatterRsp = await new FormatterComposer({
+      resultType: responseEntityKey.loggedInAdmin,
+      entityKindToResponseKeyMap: {
+        [entityType.admin]: responseEntityKey.loggedInAdmin
+      },
+      serviceData: serviceResponse.data
+    }).perform();
+
+    serviceResponse.data = wrapperFormatterRsp.data;
+  };
+
+  Promise.resolve(routeHelper.perform(req, res, next, '/admin/GetCurrent', 'r_a_v1_u_5', null, dataFormatterFunc));
 });
 
 module.exports = router;

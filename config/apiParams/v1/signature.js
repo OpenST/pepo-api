@@ -130,6 +130,15 @@ const v1Signature = {
     ],
     optional: []
   },
+  [apiName.loggedInAdmin]: {
+    mandatory: [
+      {
+        parameter: 'current_admin',
+        validatorMethods: ['validateNonEmptyObject']
+      }
+    ],
+    optional: []
+  },
   [apiName.gifsSearch]: {
     mandatory: [
       {
@@ -496,7 +505,7 @@ const v1Signature = {
     ],
     optional: [
       {
-        parameter: 'includeVideos',
+        parameter: 'include_admin_related_details',
         validatorMethods: ['validateBoolean']
       },
       {
@@ -506,12 +515,13 @@ const v1Signature = {
     ]
   },
   [apiName.adminUserSearch]: {
-    mandatory: [],
-    optional: [
+    mandatory: [
       {
-        parameter: 'includeVideos',
+        parameter: 'search_by_admin',
         validatorMethods: ['validateBoolean']
-      },
+      }
+    ],
+    optional: [
       {
         parameter: 'q',
         validatorMethods: ['validateString']
@@ -527,6 +537,23 @@ const v1Signature = {
       {
         parameter: 'user_ids',
         validatorMethods: ['validateArray']
+      },
+      {
+        parameter: 'current_admin',
+        validatorMethods: ['validateNonEmptyObject']
+      }
+    ],
+    optional: []
+  },
+  [apiName.adminUserBlock]: {
+    mandatory: [
+      {
+        parameter: 'user_ids',
+        validatorMethods: ['validateArray']
+      },
+      {
+        parameter: 'current_admin',
+        validatorMethods: ['validateNonEmptyObject']
       }
     ],
     optional: []

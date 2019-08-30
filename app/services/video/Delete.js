@@ -5,13 +5,15 @@ const rootPrefix = '../../..',
   UserProfileElementModel = require(rootPrefix + '/app/models/mysql/UserProfileElement'),
   VideosModel = require(rootPrefix + '/app/models/mysql/Video'),
   VideoDetailsModel = require(rootPrefix + '/app/models/mysql/VideoDetail'),
-  ActivityLogModel = require(rootPrefix + '/app/models/mysql/ActivityLog'),
+  ActivityLogModel = require(rootPrefix + '/app/models/mysql/AdminActivityLog'),
   FeedModel = require(rootPrefix + '/app/models/mysql/Feed'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination'),
   userProfileElementConst = require(rootPrefix + '/lib/globalConstant/userProfileElement'),
   videoDetailsConst = require(rootPrefix + '/lib/globalConstant/videoDetail'),
-  adminActivityLogConst = require(rootPrefix + '/lib/globalConstant/adminActivityLogs');
+  adminActivityLogConst = require(rootPrefix + '/lib/globalConstant/adminActivityLogs'),
+  entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
+  feedConstants = require(rootPrefix + '/lib/globalConstant/feed');
 
 class DeleteVideo extends ServiceBase {
   /**
@@ -47,23 +49,22 @@ class DeleteVideo extends ServiceBase {
       return responseHelper.successWithData({});
     }
 
+    let promises = [];
+    promises.push(oThis._deleteProfileElementIfRequired());
+    promises.push(oThis._markVideoDeleted());
+    promises.push(oThis._markVideoDetailDeleted());
+    promises.push(oThis._deleteVideoFeeds());
+
+    await Promise.all(promises);
+
     await oThis._logAdminActivity();
-
-    await oThis._deleteProfileElementIfRequired();
-
-    await oThis._markVideoDeleted();
-
-    await oThis._markeVideoDetailDeleted();
-
-    await oThis._deleteVideoFeeds();
 
     return responseHelper.successWithData({});
   }
 
   /**
-   * Fetch creator user id
+   * Log admin activity
    *
-   * @sets oThis.creatorUserId
    * @return {Promise<void>}
    * @private
    */
@@ -74,8 +75,9 @@ class DeleteVideo extends ServiceBase {
 
     await activityLogObj.insertAction({
       adminId: oThis.currentAdminId,
-      actionKind: adminActivityLogConst.deleteVideo,
-      data: oThis.creatorUserId
+      actionOn: oThis.creatorUserId,
+      action: adminActivityLogConst.deleteUserVideo,
+      extraData: JSON.stringify({ vid: oThis.videoId })
     });
   }
 
@@ -96,6 +98,8 @@ class DeleteVideo extends ServiceBase {
     }
 
     oThis.videoDetails = [videoDetailsCacheResponse.data[oThis.videoId]];
+
+    console.log('The oThis.videoDetails is : ', oThis.videoDetails);
 
     oThis.creatorUserId = oThis.videoDetails[0].creatorUserId;
 
@@ -139,7 +143,7 @@ class DeleteVideo extends ServiceBase {
    * @return {Promise<void>}
    * @private
    */
-  async _markeVideoDetailDeleted() {
+  async _markVideoDetailDeleted() {
     const oThis = this;
 
     let videoDetailsObj = new VideoDetailsModel({});
@@ -173,9 +177,13 @@ class DeleteVideo extends ServiceBase {
 
     let feedObj = new FeedModel({});
 
-    await feedObj.deleteByActor({
-      actor: oThis.creatorUserId
-    });
+    await feedObj
+      .delete()
+      .where({
+        kind: feedConstants.invertedKinds[feedConstants.fanUpdateKind],
+        primary_external_entity_id: oThis.videoId
+      })
+      .fire();
   }
 }
 

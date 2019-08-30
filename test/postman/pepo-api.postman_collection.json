@@ -1495,6 +1495,58 @@
 					"response": []
 				},
 				{
+					"name": "logged-in-admin",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/x-www-form-urlencoded"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "email",
+									"value": "santhosh@ost.com",
+									"type": "text"
+								},
+								{
+									"key": "password",
+									"value": "5b300f84986e09ab",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{api_server}}/api/v1/admin/users?",
+							"host": [
+								"{{api_server}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"admin",
+								"users"
+							],
+							"query": [
+								{
+									"key": "q",
+									"value": "aman",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "logout",
 					"request": {
 						"method": "POST",
@@ -1538,6 +1590,39 @@
 				},
 				{
 					"name": "Approve user",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/x-www-form-urlencoded"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": []
+						},
+						"url": {
+							"raw": "{{api_server}}/api/v1/admin/users/1001/approve",
+							"host": [
+								"{{api_server}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"admin",
+								"users",
+								"1001",
+								"approve"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Deactivate user",
 					"request": {
 						"method": "POST",
 						"header": [
