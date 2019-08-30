@@ -13,8 +13,19 @@ const rootPrefix = '../../..',
   responseEntityKey = require(rootPrefix + '/lib/globalConstant/responseEntityKey'),
   basicHelper = require(rootPrefix + '/helpers/basic'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
-  cookieHelper = require(rootPrefix + '/lib/cookieHelper'),
-  csrfProtection = csrf({ cookie: true });
+  cookieHelper = require(rootPrefix + '/lib/cookieHelper');
+
+const csrfProtection = csrf({
+  cookie: {
+    maxAge: 1000 * 5 * 60, // Cookie would expire after 5 minutes
+    httpOnly: true, // The cookie only accessible by the web server
+    signed: true, // Indicates if the cookie should be signed
+    secure: true, // Marks the cookie to be used with HTTPS only
+    path: '/',
+    sameSite: 'strict', // sets the same site policy for the cookie
+    domain: coreConstant.PA_COOKIE_DOMAIN
+  }
+});
 
 // Node.js cookie parsing middleware.
 router.use(cookieParser(coreConstant.COOKIE_SECRET));

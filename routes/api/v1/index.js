@@ -115,7 +115,7 @@ router.get('/', csrfProtection, function(req, res, next) {
     domain: coreConstant.PA_COOKIE_DOMAIN
   };
 
-  res.cookie('XSRF-TOKEN', req.csrfToken(), options);
+  res.cookie('_csrf', req.csrfToken(), options);
 
   const errorConfig = basicHelper.fetchErrorConfig(req.decodedParams.apiVersion),
     responseObject = responseHelper.successWithData({});
