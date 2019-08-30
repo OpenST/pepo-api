@@ -25,8 +25,19 @@ const rootPrefix = '../../..',
   commonValidator = require(rootPrefix + '/lib/validators/Common'),
   uploadParamsRoutes = require(rootPrefix + '/routes/api/v1/uploadParams'),
   rotateTwitterAccountRoutes = require(rootPrefix + '/routes/api/v1/rotateTwitterAccount'),
-  ostTransactionRoutes = require(rootPrefix + '/routes/api/v1/ostTransactions'),
-  csrfProtection = csrf({ cookie: true });
+  ostTransactionRoutes = require(rootPrefix + '/routes/api/v1/ostTransactions');
+
+const csrfProtection = csrf({
+  cookie: {
+    maxAge: 1000 * 5 * 60, // Cookie would expire after 5 minutes
+    httpOnly: true, // The cookie only accessible by the web server
+    signed: true, // Indicates if the cookie should be signed
+    secure: true, // Marks the cookie to be used with HTTPS only
+    path: '/',
+    sameSite: 'strict', // sets the same site policy for the cookie
+    domain: coreConstant.PA_COOKIE_DOMAIN
+  }
+});
 
 const errorConfig = basicHelper.fetchErrorConfig(apiVersions.v1);
 
