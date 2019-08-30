@@ -105,15 +105,17 @@ const validateAdminCookie = async function(req, res, next) {
 
 // Get CSRF token for post requests to change state by admin
 router.get('/', csrfProtection, function(req, res, next) {
-  res.cookie('XSRF-TOKEN', req.csrfToken());
-
   let options = {
     maxAge: 1000 * 5 * 60, // Cookie would expire after 5 minutes
     httpOnly: true, // The cookie only accessible by the web server
     signed: true, // Indicates if the cookie should be signed
+    secure: true, // Marks the cookie to be used with HTTPS only
     path: '/',
+    sameSite: 'strict', // sets the same site policy for the cookie
     domain: coreConstant.PA_COOKIE_DOMAIN
   };
+
+  res.cookie('XSRF-TOKEN', req.csrfToken(), options);
 
   const errorConfig = basicHelper.fetchErrorConfig(req.decodedParams.apiVersion),
     responseObject = responseHelper.successWithData({});
