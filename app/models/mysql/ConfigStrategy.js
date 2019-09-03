@@ -164,14 +164,12 @@ class ConfigStrategyModel extends ModelBase {
       hashToEncrypt.cassandraPassword = cassandraPassword;
       encryptedKeysFound = true;
     } else if (strategyKindName === configStrategyConstants.firebase) {
-      const firebasePrivateKey = hashNotToEncrypt[strategyKindName].privateKey;
+      const privateKey = hashNotToEncrypt[strategyKindName].privateKey;
 
-      hashNotToEncrypt[strategyKindName].privatekey = '{{firebasePrivateKey}}';
-      hashToEncrypt.firebasePrivateKey = firebasePrivateKey;
+      hashNotToEncrypt[strategyKindName].privateKey = '{{privateKey}}';
+      hashToEncrypt.privateKey = privateKey;
       encryptedKeysFound = true;
     }
-
-    console.log('hashNotToEncrypt =======', hashNotToEncrypt);
 
     return {
       hashToEncrypt: encryptedKeysFound ? hashToEncrypt : null,
@@ -221,7 +219,7 @@ class ConfigStrategyModel extends ModelBase {
     } else if (kinds[strategyKind] === configStrategyConstants.cassandra) {
       configStrategyHash[kinds[strategyKind]].password = decryptedJsonObj.cassandraPassword;
     } else if (kinds[strategyKind] === configStrategyConstants.firebase) {
-      configStrategyHash[kinds[strategyKind]].privateKey = decryptedJsonObj.firebasePrivateKey;
+      configStrategyHash[kinds[strategyKind]].privateKey = decryptedJsonObj.privateKey;
     }
 
     return configStrategyHash;
