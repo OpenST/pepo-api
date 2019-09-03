@@ -73,10 +73,16 @@ class PushNotification extends HookProcessorsBase {
     logger.log('HookProcessorKlass::response  =========================', response);
 
     // TODO @dhananjay - error handling on basis of API responses.
-    if (response) {
-      oThis.successResponse[oThis.hook.id] = response;
+    if (response.isSuccess()) {
+      let formattedFirebaseAPIResponse = response.data;
+      if (formattedFirebaseAPIResponse.failureResponseCount > 0) {
+        await oThis._afterProcessHooks(oThis.hook, formattedFirebaseAPIResponse.responseMap);
+      } else {
+        oThis.successResponse[oThis.hook.id] = response;
+      }
     } else {
       logger.error('ERROR----------------response------------------', response);
+      oThis.failedHookToBeRetried[oThis.hook.id] = response.data;
     }
   }
 
@@ -103,23 +109,20 @@ class PushNotification extends HookProcessorsBase {
     for (let hookId in oThis.hooksToBeProcessed) {
       if (oThis.successResponse[hookId]) {
         await new NotificationHookModel().markStatusAsProcessed(hookId);
-      } else {
-        await new NotificationHookModel().markFailedToBeRetried(hookId);
       }
     }
   }
 
   /**
-   * This function provides info whether the process has to exit.
+   * After hooks process.
    *
-   * @returns {boolean}
-   *
+   * @param hook
+   * @param responseMap
+   * @returns {Promise<void>}
    * @private
    */
-  _pendingTasksDone() {
+  async _afterProcessHooks(hook, responseMap) {
     const oThis = this;
-
-    return oThis.canExit;
   }
 
   /**

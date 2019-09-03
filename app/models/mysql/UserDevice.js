@@ -92,6 +92,31 @@ class UserDevice extends ModelBase {
   }
 
   /**
+   * Fetch user devices by ids.
+   *
+   * @param {array} ids
+   *
+   * @returns {Promise<void>}
+   */
+  async fetchByIds(ids) {
+    const oThis = this;
+
+    const dbRows = await oThis
+      .select('*')
+      .where({ id: ids })
+      .fire();
+
+    const response = {};
+
+    for (let index = 0; index < dbRows.length; index++) {
+      const formatDbRow = oThis.formatDbData(dbRows[index]);
+      response[formatDbRow.id] = formatDbRow;
+    }
+
+    return response;
+  }
+
+  /**
    * Index name
    *
    * @returns {string}
@@ -106,9 +131,15 @@ class UserDevice extends ModelBase {
    * @returns {Promise<*>}
    */
   static async flushCache(params) {
-    const UserDeviceByUserIds = require(rootPrefix + '/lib/cacheManagement/multi/UserDeviceByUserIds');
+    const promisesArray = [];
 
-    await new UserDeviceByUserIds({ userIds: [params.userId] }).clear();
+    const UserDeviceByUserIds = require(rootPrefix + '/lib/cacheManagement/multi/UserDeviceByUserIds');
+    promisesArray.push(new UserDeviceByUserIds({ userIds: [params.userId] }).clear());
+
+    const UserDeviceByIds = require(rootPrefix + '/lib/cacheManagement/multi/UserDeviceByIds');
+    promisesArray.push(new UserDeviceByIds({ ids: params.id }).clear());
+
+    await Promise.all(promisesArray);
   }
 }
 

@@ -106,7 +106,7 @@ class AddDeviceToken extends ServiceBase {
       device_kind: userDeviceConstants.invertedUserDeviceKinds[oThis.deviceKind]
     };
 
-    return new UserDeviceModel()
+    await new UserDeviceModel()
       .insert(insertParams)
       .fire()
       .catch(async function(err) {
@@ -120,13 +120,13 @@ class AddDeviceToken extends ServiceBase {
               device_id: oThis.deviceId
             })
             .fire();
-
-          // Flush cache.
-          await UserDeviceModel.flushCache({ userId: oThis.currentUserId });
         } else {
           return Promise.reject(err);
         }
       });
+
+    // Flush cache.
+    await UserDeviceModel.flushCache({ userId: oThis.currentUserId });
   }
 }
 
