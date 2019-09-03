@@ -16,28 +16,25 @@ const rootPrefix = '../../../..',
   responseEntityKey = require(rootPrefix + '/lib/globalConstant/responseEntityKey');
 
 /**
- * Class for user notification base.
+ * Class for push notification.
  *
- * @class UserNotification
+ * @class PushNotification
  */
-class UserNotificationBase extends ServiceBase {
+class PushNotification {
   /**
-   * Constructor for user contribution base.
+   * Constructor for push contribution.
    *
    * @param {object} params
-   * @param {object} params.current_user
-   * @param {number/string} params.current_user.id
    *
    * @augments ServiceBase
    *
    * @constructor
    */
   constructor(params) {
-    super(params);
-
     const oThis = this;
 
-    oThis.userNotifications = [];
+    oThis.notificationHookPayloads = params.notificationHookPayloads;
+
     oThis.userIds = [];
     oThis.videoIds = [];
     oThis.imageIds = [];
@@ -47,9 +44,7 @@ class UserNotificationBase extends ServiceBase {
     oThis.videoMap = {};
     oThis.imageMap = {};
 
-    oThis.formattedUserNotifications = [];
-    oThis.notificationVideoMap = {};
-    oThis.notificationsToDelete = [];
+    oThis.formattedNotifications = [];
   }
 
   /**
@@ -62,8 +57,6 @@ class UserNotificationBase extends ServiceBase {
     const oThis = this;
 
     await oThis._validateAndSanitizeParams();
-
-    await oThis._setUserNotification();
 
     await oThis._setUserAndVideoIds();
 
@@ -78,21 +71,9 @@ class UserNotificationBase extends ServiceBase {
 
     await oThis._fetchImages();
 
-    await oThis._formatUserNotifications();
-
-    await oThis._enqueueBackgroundTasks();
+    await oThis._formatnotifications();
 
     return responseHelper.successWithData(oThis._finalResponse());
-  }
-
-  /**
-   * Fetch user notifications from cache.
-   *
-   * @returns {Promise<void>}
-   * @private
-   */
-  async _setUserNotification() {
-    throw new Error('Sub-class to implement.');
   }
 
   /**
@@ -103,50 +84,67 @@ class UserNotificationBase extends ServiceBase {
    * @private
    */
   async _validateAndSanitizeParams() {
-    throw new Error('Sub-class to implement.');
+    // Do nothing.
   }
 
   /**
-   * Format notifications.
+   * Format notificationHookPayloads.
    *
    * @returns {Promise<never>}
    * @private
    */
-  async _formatUserNotifications() {
+  async _formatnotifications() {
     const oThis = this;
 
-    for (let index = 0; index < oThis.userNotifications.length; index++) {
-      const userNotification = oThis.userNotifications[index];
-      const formattedUserNotification = {};
+    for (let index = 0; index < oThis.notificationHookPayloads.length; index++) {
+      const pushNotification = oThis.notificationHookPayloads[index];
+      const formattedPushNotification = {};
+      let imageId = await oThis._getImageId(pushNotification);
 
-      if (oThis._isNotificationBlocked(userNotification)) {
-        continue;
-      }
+      //todo: select resolution
+      let image = oThis.imageMap[imageId] || null;
 
-      formattedUserNotification.id = NotificationResponseHelper.getEncryptIdForNotification(userNotification);
+      let goto = await oThis._getGoto(pushNotification);
+      formattedPushNotification.data = JSON.stringify({ goto: goto });
 
-      formattedUserNotification.kind = userNotification.kind;
-      formattedUserNotification.timestamp = userNotification.lastActionTimestamp;
+      let heading = await oThis._getHeading(pushNotification);
+      formattedPushNotification.notification = {
+        title: heading.title,
+        body: heading.body,
+        image: image
+      };
 
-      formattedUserNotification.heading = await oThis._getHeading(userNotification);
+      formattedPushNotification.apns = {
+        payload: {
+          aps: {
+            'mutable-content': 1,
+            badge: 1
+          }
+        },
+        fcm_options: {
+          image: image
+        }
+      };
 
-      formattedUserNotification.goto = await oThis._getGoto(userNotification);
+      formattedPushNotification.android = {
+        collapse_key: 'abc',
+        notification: {
+          tag: 'unique tray2',
+          notification_count: 1
+        }
+      };
 
-      formattedUserNotification.imageId = await oThis._getImageId(userNotification);
-
-      formattedUserNotification.payload = await oThis._getPayload(userNotification);
-
-      oThis.formattedUserNotifications.push(formattedUserNotification);
+      oThis.formattedNotifications.push(formattedPushNotification);
     }
   }
 
   /**
-   * Get image id for notifications.
+   * Get image id for notificationHookPayloads.
    *
    * @returns {Promise<never>}
    * @private
    */
-  async _getImageId(userNotification) {
+  async _getImageId(pushNotification) {
     const oThis = this;
 
     const params = {
@@ -167,28 +165,7 @@ class UserNotificationBase extends ServiceBase {
   }
 
   /**
-   * Set payload for notifications.
-   *
-   * @returns {Promise<never>}
-   * @private
-   */
-  async _getPayload(userNotification) {
-    const oThis = this;
-
-    const resp = NotificationResponseHelper.getPayloadDataForNotification({
-      userNotification: userNotification,
-      notificationType: oThis._notificationType
-    });
-
-    if (resp.isFailure()) {
-      return Promise.reject(resp);
-    }
-
-    return resp.data.payload;
-  }
-
-  /**
-   * Set heading for notifications.
+   * Set heading for notificationHookPayloads.
    *
    * @returns {Promise<never>}
    * @private
@@ -203,7 +180,7 @@ class UserNotificationBase extends ServiceBase {
       userNotification: userNotification,
       notificationType: oThis._notificationType
     };
-
+    //todo: use a different heading for push notification
     const resp = NotificationResponseHelper.getHeadingForNotification(params);
 
     if (resp.isFailure()) {
@@ -214,7 +191,7 @@ class UserNotificationBase extends ServiceBase {
   }
 
   /**
-   * Set goto for notifications
+   * Set goto for notificationHookPayloads
    *
    * @returns {Promise<never>}
    * @private
@@ -233,7 +210,7 @@ class UserNotificationBase extends ServiceBase {
   }
 
   /**
-   * Find user ids in the notifications.
+   * Find user ids in the notificationHookPayloads.
    *
    * @sets oThis.userIds, oThis.videoIds
    *
@@ -243,9 +220,8 @@ class UserNotificationBase extends ServiceBase {
   async _setUserAndVideoIds() {
     const oThis = this;
 
-    for (let index = 0; index < oThis.userNotifications.length; index++) {
-      const userNotification = oThis.userNotifications[index];
-      // const userNotification = NotificationResponseHelper.getFlattenedObject(oThis.userNotifications[index]);
+    for (let index = 0; index < oThis.notificationHookPayloads.length; index++) {
+      const userNotification = oThis.notificationHookPayloads[index];
 
       const supportingEntitiesConfig = NotificationResponseHelper.getSupportingEntitiesConfigForKind(
         userNotification.kind,
@@ -272,11 +248,11 @@ class UserNotificationBase extends ServiceBase {
    * @private
    */
   get _notificationType() {
-    return 'notificationCentre';
+    return 'pushNotification';
   }
 
   /**
-   * Get  User Ids of supporting entity for a notifications
+   * Get  User Ids of supporting entity for a notificationHookPayloads
    *
    * @returns {Promise<array>}
    * @private
@@ -302,7 +278,7 @@ class UserNotificationBase extends ServiceBase {
   }
 
   /**
-   * Get  Video Ids of supporting entity for a notifications
+   * Get  Video Ids of supporting entity for a notificationHookPayloads
    *
    * @returns {Promise<array>}
    * @private
@@ -324,10 +300,6 @@ class UserNotificationBase extends ServiceBase {
       } else {
         vIds.push(Number(val));
       }
-    }
-
-    if (vIds.length > 0) {
-      oThis.notificationVideoMap[userNotification.uuid] = vIds;
     }
 
     return vIds;
@@ -451,54 +423,6 @@ class UserNotificationBase extends ServiceBase {
   }
 
   /**
-   * Check whether notification can be sent out or its blocked, due to some deleted entity
-   *
-   * @param userNotification
-   * @returns {boolean}
-   * @private
-   */
-  _isNotificationBlocked(userNotification) {
-    const oThis = this;
-
-    // For now only video entity can be deleted
-    // So if notification don't have videos then is allowed to be sent out
-    if (oThis.notificationVideoMap[userNotification.uuid]) {
-      for (let i = 0; i < oThis.notificationVideoMap[userNotification.uuid].length; i++) {
-        let vid = oThis.notificationVideoMap[userNotification.uuid][i];
-        // For now only delete notification of kind video add
-        if (
-          userNotification.kind == userNotificationConstants.videoAddKind &&
-          oThis.videoMap[vid].status == videoConstants.deletedStatus
-        ) {
-          oThis.notificationsToDelete.push(userNotification);
-          return true;
-        }
-      }
-    }
-
-    return false;
-  }
-
-  /**
-   * Enqueue background task
-   *
-   * @returns {Promise<void>}
-   * @private
-   */
-  async _enqueueBackgroundTasks() {
-    const oThis = this;
-
-    console.log('Notifications To Delete: ', oThis.notificationsToDelete);
-
-    if (oThis.notificationsToDelete.length > 0) {
-      await bgJob.enqueue(bgJobConstants.deleteCassandraJobTopic, {
-        tableName: new UserNotificationModel().tableName,
-        elementsToDelete: oThis.notificationsToDelete
-      });
-    }
-  }
-
-  /**
    * Service response.
    *
    * @returns {object}
@@ -527,4 +451,4 @@ class UserNotificationBase extends ServiceBase {
   }
 }
 
-module.exports = UserNotificationBase;
+module.exports = PushNotification;
