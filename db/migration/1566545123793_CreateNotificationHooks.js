@@ -8,7 +8,7 @@ const dbKind = DbKindConstant.sqlDbKind;
 const upQuery =
   'CREATE TABLE `notification_hooks` (\n' +
   '  `id` bigint(20) NOT NULL AUTO_INCREMENT,\n' +
-  '  `recipients` TEXT COLLATE utf8_unicode_ci NOT NULL,\n' +
+  '  `user_device_ids` TEXT COLLATE utf8_unicode_ci NOT NULL,\n' +
   '  `event_type` tinyint(4) NOT NULL,\n' +
   '  `raw_notification_payload` TEXT COLLATE utf8_unicode_ci NOT NULL,\n' +
   '  `status` int(11) NOT NULL ,\n' +
