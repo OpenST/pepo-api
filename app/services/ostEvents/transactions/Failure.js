@@ -4,11 +4,12 @@ const rootPrefix = '../../../..',
   basicHelper = require(rootPrefix + '/helpers/basic'),
   bgJob = require(rootPrefix + '/lib/rabbitMqEnqueue/bgJob'),
   bgJobConstants = require(rootPrefix + '/lib/globalConstant/bgJob'),
-  bgJobEventConstants = require(rootPrefix + '/lib/globalConstant/bgJobEvent'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   tokenUserConstants = require(rootPrefix + '/lib/globalConstant/tokenUser'),
-  transactionConstants = require(rootPrefix + '/lib/globalConstant/transaction');
+  transactionConstants = require(rootPrefix + '/lib/globalConstant/transaction'),
+  notificationJobEnqueue = require(rootPrefix + '/lib/rabbitMqEnqueue/notification'),
+  notificationJobConstants = require(rootPrefix + '/lib/globalConstant/notificationJob');
 
 /**
  * Class for failure transaction ost event base service.
@@ -113,21 +114,15 @@ class FailureTransactionOstEvent extends TransactionOstEventBase {
 
     if (oThis.videoId) {
       promisesArray.push(
-        bgJob.enqueue(bgJobConstants.eventJobTopic, {
-          eventKind: bgJobEventConstants.videoTxSendFailureEventKind,
-          eventPayload: {
-            transaction: oThis.transactionObj,
-            videoId: oThis.videoId
-          }
+        notificationJobEnqueue.enqueue(notificationJobConstants.videoTxSendFailure, {
+          transaction: oThis.transactionObj,
+          videoId: oThis.videoId
         })
       );
     } else {
       promisesArray.push(
-        bgJob.enqueue(bgJobConstants.eventJobTopic, {
-          eventKind: bgJobEventConstants.profileTxSendFailureEventKind,
-          eventPayload: {
-            transaction: oThis.transactionObj
-          }
+        notificationJobEnqueue.enqueue(notificationJobConstants.profileTxSendFailure, {
+          transaction: oThis.transactionObj
         })
       );
     }

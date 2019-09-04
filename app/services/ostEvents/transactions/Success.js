@@ -2,16 +2,13 @@ const rootPrefix = '../../../..',
   UpdateStats = require(rootPrefix + '/lib/UpdateStats'),
   TokenUserModel = require(rootPrefix + '/app/models/mysql/TokenUser'),
   TransactionOstEventBase = require(rootPrefix + '/app/services/ostEvents/transactions/Base'),
-  VideoTransactionSendSuccessNotification = require(rootPrefix +
-    '/lib/userNotificationPublisher/VideoTransactionSendSuccess'),
   basicHelper = require(rootPrefix + '/helpers/basic'),
-  bgJob = require(rootPrefix + '/lib/rabbitMqEnqueue/bgJob'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
-  bgJobConstants = require(rootPrefix + '/lib/globalConstant/bgJob'),
   tokenUserConstants = require(rootPrefix + '/lib/globalConstant/tokenUser'),
   transactionConstants = require(rootPrefix + '/lib/globalConstant/transaction'),
-  bgJobEventConstants = require(rootPrefix + '/lib/globalConstant/bgJobEvent');
+  notificationJobEnqueue = require(rootPrefix + '/lib/rabbitMqEnqueue/notification'),
+  notificationJobConstants = require(rootPrefix + '/lib/globalConstant/notificationJob');
 
 /**
  * Class for success transaction ost event base service.
@@ -152,40 +149,28 @@ class SuccessTransactionOstEvent extends TransactionOstEventBase {
 
     if (oThis.videoId) {
       promisesArray.push(
-        bgJob.enqueue(bgJobConstants.eventJobTopic, {
-          eventKind: bgJobEventConstants.videoTxSendSuccessEventKind,
-          eventPayload: {
-            transaction: oThis.transactionObj,
-            videoId: oThis.videoId
-          }
+        notificationJobEnqueue.enqueue(notificationJobConstants.videoTxSendSuccess, {
+          transaction: oThis.transactionObj,
+          videoId: oThis.videoId
         })
       );
 
       promisesArray.push(
-        bgJob.enqueue(bgJobConstants.eventJobTopic, {
-          eventKind: bgJobEventConstants.videoTxReceiveSuccessEventKind,
-          eventPayload: {
-            transaction: oThis.transactionObj,
-            videoId: oThis.videoId
-          }
+        notificationJobEnqueue.enqueue(notificationJobConstants.videoTxReceiveSuccess, {
+          transaction: oThis.transactionObj,
+          videoId: oThis.videoId
         })
       );
     } else {
       promisesArray.push(
-        bgJob.enqueue(bgJobConstants.eventJobTopic, {
-          eventKind: bgJobEventConstants.profileTxSendSuccessEventKind,
-          eventPayload: {
-            transaction: oThis.transactionObj
-          }
+        notificationJobEnqueue.enqueue(notificationJobConstants.profileTxSendSuccess, {
+          transaction: oThis.transactionObj
         })
       );
 
       promisesArray.push(
-        bgJob.enqueue(bgJobConstants.eventJobTopic, {
-          eventKind: bgJobEventConstants.profileTxReceiveSuccessEventKind,
-          eventPayload: {
-            transaction: oThis.transactionObj
-          }
+        notificationJobEnqueue.enqueue(notificationJobConstants.profileTxReceiveSuccess, {
+          transaction: oThis.transactionObj
         })
       );
     }

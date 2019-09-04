@@ -8,12 +8,11 @@ const rootPrefix = '../../../../..',
   UserProfileElementModel = require(rootPrefix + '/app/models/mysql/UserProfileElement'),
   VideoDetailsModel = require(rootPrefix + '/app/models/mysql/VideoDetail'),
   videoLib = require(rootPrefix + '/lib/videoLib'),
-  bgJob = require(rootPrefix + '/lib/rabbitMqEnqueue/bgJob'),
   urlConstants = require(rootPrefix + '/lib/globalConstant/url'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   feedsConstants = require(rootPrefix + '/lib/globalConstant/feed'),
-  bgJobConstants = require(rootPrefix + '/lib/globalConstant/bgJob'),
-  bgJobEventConstants = require(rootPrefix + '/lib/globalConstant/bgJobEvent'),
+  notificationJobEnqueue = require(rootPrefix + '/lib/rabbitMqEnqueue/notification'),
+  notificationJobConstants = require(rootPrefix + '/lib/globalConstant/notificationJob'),
   userProfileElementConst = require(rootPrefix + '/lib/globalConstant/userProfileElement');
 
 /**
@@ -227,25 +226,19 @@ class UpdateFanVideo extends UpdateProfileBase {
     // Feed needs to be added for uploaded video
     const oThis = this;
 
-    const messageParams = {
-      eventKind: bgJobEventConstants.videoAddEventKind,
-      eventPayload: {
-        userId: oThis.profileUserId,
-        videoId: oThis.videoId
-      }
-    };
+    await notificationJobEnqueue.enqueue(notificationJobConstants.videoAdd, {
+      userId: oThis.profileUserId,
+      videoId: oThis.videoId
+    });
 
     // Feed needs to be added only if user is an approved creator.
     if (UserModelKlass.isUserApprovedCreator(oThis.userObj)) {
       await oThis._addFeed();
 
       // Notification would be published only if user is approved.
-      await bgJob.enqueue(bgJobConstants.eventJobTopic, {
-        eventKind: bgJobEventConstants.videoAddEventKind,
-        eventPayload: {
-          userId: oThis.profileUserId,
-          videoId: oThis.videoId
-        }
+      await notificationJobEnqueue.enqueue(notificationJobConstants.videoAdd, {
+        userId: oThis.profileUserId,
+        videoId: oThis.videoId
       });
     }
   }

@@ -6,7 +6,8 @@ const rootPrefix = '../../../..',
   bgJob = require(rootPrefix + '/lib/rabbitMqEnqueue/bgJob'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   bgJobConstants = require(rootPrefix + '/lib/globalConstant/bgJob'),
-  bgJobEventConstants = require(rootPrefix + '/lib/globalConstant/bgJobEvent');
+  notificationJobEnqueue = require(rootPrefix + '/lib/rabbitMqEnqueue/notification'),
+  notificationJobConstants = require(rootPrefix + '/lib/globalConstant/notificationJob');
 
 /**
  * Class for thank you notification.
@@ -213,12 +214,9 @@ class SayThankYou extends ServiceBase {
     const oThis = this;
 
     // Notification would be published only if user is approved.
-    await bgJob.enqueue(bgJobConstants.eventJobTopic, {
-      eventKind: bgJobEventConstants.contributionThanksEventKind,
-      eventPayload: {
-        userNotification: oThis.userNotificationObj,
-        text: oThis.text
-      }
+    await notificationJobEnqueue.enqueue(notificationJobConstants.contributionThanks, {
+      userNotification: oThis.userNotificationObj,
+      text: oThis.text
     });
   }
 }
