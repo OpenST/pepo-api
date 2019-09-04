@@ -57,7 +57,13 @@ const validatePreLaunchInviteCookie = async function(req, res, next) {
 router.get('/twitter/request_token', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.twitterRequestToken;
 
-  Promise.resolve(routeHelper.perform(req, res, next, '/preLaunchInvite/RequestToken', 'r_a_w_pl_1', null, null));
+  const onServiceSuccess = async function(serviceResponse) {
+    cookieHelper.setPreLaunchDataCookie(res, serviceResponse.data.dataCookieValue);
+  };
+
+  Promise.resolve(
+    routeHelper.perform(req, res, next, '/preLaunchInvite/RequestToken', 'r_a_w_pl_1', null, onServiceSuccess)
+  );
 });
 
 /* Login preLaunch*/
@@ -71,6 +77,10 @@ router.post('/twitter-login', sanitizer.sanitizeDynamicUrlParams, function(req, 
   const onServiceFailure = async function(serviceResponse) {
     cookieHelper.deletePreLaunchInviteCookie(res);
   };
+
+  // get invitee code and oAuthtoken from cookie and sanitize
+  //set login cookie
+  //redirect to next page
 
   Promise.resolve(
     routeHelper.perform(

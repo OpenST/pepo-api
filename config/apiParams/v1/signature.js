@@ -5,7 +5,12 @@ const rootPrefix = '../../..',
 const v1Signature = {
   [apiName.twitterRequestToken]: {
     mandatory: [],
-    optional: []
+    optional: [
+      {
+        parameter: 'i',
+        validatorMethods: ['validateString']
+      }
+    ]
   },
   [apiName.signUp]: {
     mandatory: [

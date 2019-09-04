@@ -25,6 +25,7 @@ class PreLaunchTwitterConnect extends ServiceBase {
     super(params);
 
     const oThis = this;
+    oThis.inviteCode = params.i;
 
     oThis.twitterAuthTokenObj = {};
     oThis.twitterRespData = null;
@@ -42,7 +43,17 @@ class PreLaunchTwitterConnect extends ServiceBase {
 
     await oThis._insertTwitterTokens();
 
-    return Promise.resolve(responseHelper.successWithData({ oAuthToken: oThis.twitterAuthTokenObj.token }));
+    let dataCookieValue = JSON.stringify({
+      oAuthToken: oThis.twitterAuthTokenObj.token,
+      inviteCode: oThis.inviteCode
+    });
+
+    return Promise.resolve(
+      responseHelper.successWithData({
+        oAuthToken: oThis.twitterAuthTokenObj.token,
+        dataCookieValue: dataCookieValue
+      })
+    );
   }
 
   /**
