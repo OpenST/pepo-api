@@ -58,6 +58,15 @@ class TemporaryToken extends ModelBase {
   }
 
   /**
+   * List Of formatted column names that can be exposed by service.
+   *
+   * @returns {array}
+   */
+  safeFormattedColumnNames() {
+    return ['id', 'entityId', 'kind', 'token', 'status', 'createdAt', 'updatedAt'];
+  }
+
+  /**
    * Fetch temporary token by id.
    *
    * @param {string} id

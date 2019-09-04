@@ -119,6 +119,8 @@ export PA_TWITTER_AUTH_CALLBACK_ROUTE='https://pepo.com'
 export PR_LAMBDA_IMAGE_RESIZE_FUNCTION='arn:aws:lambda:us-east-1:274208178423:function:pepoImageResizer'
 export PR_LAMBDA_VIDEO_COMPRESS_FUNCTION='arn:aws:lambda:us-east-1:274208178423:function:pepoVideoCompressor'
 
+export PA_EMAIL_TOKENS_DECRIPTOR_KEY='3d3w6fs0983ab6b1e37d1c1fs64hm8g9'
+
 # Replication variables for cassandra. ONLY FOR DEVELOPMENT.
 export REPLICATION_CLASS='SimpleStrategy'
 export REPLICATION_FACTOR='3'

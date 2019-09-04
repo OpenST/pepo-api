@@ -46,6 +46,15 @@ const v1Signature = {
     ],
     optional: []
   },
+  [apiName.sendDoubleOptIn]: {
+    mandatory: [
+      {
+        parameter: 'pre_launch_invite_hook',
+        validatorMethods: ['validateNonEmptyObject']
+      }
+    ],
+    optional: []
+  },
   [apiName.registerDevice]: {
     mandatory: [
       {
