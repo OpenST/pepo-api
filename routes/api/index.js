@@ -20,8 +20,20 @@ const appendV1Version = function(req, res, next) {
   next();
 };
 
+/**
+ * Append Admin version
+ *
+ * @param req
+ * @param res
+ * @param next
+ */
+const appendAdminVersion = function(req, res, next) {
+  req.decodedParams.apiVersion = apiVersions.admin;
+  next();
+};
+
 router.use('/v1', appendV1Version, v1Routes);
 router.use('/web', appendV1Version, webRoutes);
-router.use('/admin', adminRoutes);
+router.use('/admin', appendAdminVersion, adminRoutes);
 
 module.exports = router;
