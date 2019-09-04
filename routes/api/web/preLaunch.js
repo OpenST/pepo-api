@@ -61,7 +61,7 @@ router.get('/twitter/request_token', sanitizer.sanitizeDynamicUrlParams, functio
 });
 
 /* Login preLaunch*/
-router.post('/twitter-login', csrfProtection, sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+router.post('/twitter-login', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.preLaunchInviteLogin;
 
   const onServiceSuccess = async function(serviceResponse) {
@@ -77,7 +77,7 @@ router.post('/twitter-login', csrfProtection, sanitizer.sanitizeDynamicUrlParams
       req,
       res,
       next,
-      '/preLaunchInvite/Login',
+      '/preLaunchInvite/Connect',
       'r_a_w_pl_1',
       null,
       onServiceSuccess,

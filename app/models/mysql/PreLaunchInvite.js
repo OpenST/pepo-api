@@ -1,5 +1,8 @@
 const rootPrefix = '../../..',
+  util = require(rootPrefix + '/lib/util'),
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
+  coreConstants = require(rootPrefix + '/config/coreConstants'),
+  localCipher = require(rootPrefix + '/lib/encryptors/localCipher'),
   databaseConstants = require(rootPrefix + '/lib/globalConstant/database'),
   preLaunchInviteConstant = require(rootPrefix + '/lib/globalConstant/preLaunchInvite');
 
@@ -36,6 +39,7 @@ class PreLaunchInvite extends ModelBase {
     return [
       'id',
       'twitterId',
+      'handle',
       'email',
       'name',
       'profileImageUrl',
@@ -54,6 +58,7 @@ class PreLaunchInvite extends ModelBase {
    * @param {object} dbRow
    * @param {number} dbRow.id
    * @param {number} dbRow.twitter_id
+   * @param {number} dbRow.handle
    * @param {string} dbRow.email
    * @param {string} dbRow.name
    * @param {string} dbRow.profile_image_url
@@ -74,6 +79,7 @@ class PreLaunchInvite extends ModelBase {
     const formattedData = {
       id: dbRow.id,
       twitterId: dbRow.twitter_id,
+      handle: dbRow.handle,
       email: dbRow.email,
       name: dbRow.name,
       profileImageUrl: dbRow.profile_image_url,
@@ -119,6 +125,7 @@ class PreLaunchInvite extends ModelBase {
       .select([
         'id',
         'twitter_id',
+        'handle',
         'email',
         'name',
         'profile_image_url',
@@ -250,7 +257,16 @@ class PreLaunchInvite extends ModelBase {
    * @returns {Promise<*>}
    */
   static async flushCache(params) {
-    // Do nothing.
+    const promisesArray = [];
+
+    const PreLaunchInviteByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/PreLaunchInviteByIds');
+    promisesArray.push(new PreLaunchInviteByIdsCache({ ids: [params.id] }).clear());
+
+    const PreLaunchInviteByTwitterIdsCache = require(rootPrefix +
+      '/lib/cacheManagement/multi/PreLaunchInviteByTwitterIds');
+    promisesArray.push(new PreLaunchInviteByTwitterIdsCache({ twitterIds: params.twitterId }).clear());
+
+    await Promise.all(promisesArray);
   }
 }
 

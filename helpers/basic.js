@@ -13,6 +13,7 @@ const rootPrefix = '..',
   apiErrorConfig = require(rootPrefix + '/config/apiParams/apiErrorConfig'),
   v1ParamErrorConfig = require(rootPrefix + '/config/apiParams/v1/errorConfig'),
   adminParamErrorConfig = require(rootPrefix + '/config/apiParams/admin/errorConfig'),
+  webParamErrorConfig = require(rootPrefix + '/config/apiParams/web/errorConfig'),
   internalParamErrorConfig = require(rootPrefix + '/config/apiParams/internal/errorConfig');
 
 /**
@@ -272,6 +273,10 @@ class BasicHelper {
         : internalParamErrorConfig;
     } else if (apiVersion === apiVersions.admin) {
       paramErrorConfig = dynamicErrorConfig ? Object.assign(dynamicErrorConfig, {}) : {};
+    } else if (apiVersion === apiVersions.web) {
+      paramErrorConfig = dynamicErrorConfig
+        ? Object.assign(dynamicErrorConfig, webParamErrorConfig)
+        : webParamErrorConfig;
     } else {
       throw new Error(`Unsupported API Version ${apiVersion}`);
     }
