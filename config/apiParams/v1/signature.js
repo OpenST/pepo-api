@@ -130,15 +130,6 @@ const v1Signature = {
     ],
     optional: []
   },
-  [apiName.loggedInAdmin]: {
-    mandatory: [
-      {
-        parameter: 'current_admin',
-        validatorMethods: ['validateNonEmptyObject']
-      }
-    ],
-    optional: []
-  },
   [apiName.gifsSearch]: {
     mandatory: [
       {
@@ -475,19 +466,6 @@ const v1Signature = {
       }
     ]
   },
-  [apiName.adminLogin]: {
-    mandatory: [
-      {
-        parameter: 'email',
-        validatorMethods: ['isValidEmail']
-      },
-      {
-        parameter: 'password',
-        validatorMethods: ['validatePassword']
-      }
-    ],
-    optional: []
-  },
   [apiName.userSearch]: {
     mandatory: [
       {
@@ -505,63 +483,6 @@ const v1Signature = {
         validatorMethods: ['validateString', 'validatePaginationIdentifier']
       }
     ]
-  },
-  [apiName.adminUserSearch]: {
-    mandatory: [
-      {
-        parameter: 'search_by_admin',
-        validatorMethods: ['validateBoolean']
-      }
-    ],
-    optional: [
-      {
-        parameter: 'q',
-        validatorMethods: ['validateString']
-      },
-      {
-        parameter: paginationConstants.paginationIdentifierKey,
-        validatorMethods: ['validateString', 'validatePaginationIdentifier']
-      }
-    ]
-  },
-  [apiName.adminUserApprove]: {
-    mandatory: [
-      {
-        parameter: 'user_ids',
-        validatorMethods: ['validateArray']
-      },
-      {
-        parameter: 'current_admin',
-        validatorMethods: ['validateNonEmptyObject']
-      }
-    ],
-    optional: []
-  },
-  [apiName.adminUserBlock]: {
-    mandatory: [
-      {
-        parameter: 'user_ids',
-        validatorMethods: ['validateArray']
-      },
-      {
-        parameter: 'current_admin',
-        validatorMethods: ['validateNonEmptyObject']
-      }
-    ],
-    optional: []
-  },
-  [apiName.adminDeleteVideo]: {
-    mandatory: [
-      {
-        parameter: 'video_id',
-        validatorMethods: ['validateNonZeroInteger']
-      },
-      {
-        parameter: 'current_admin',
-        validatorMethods: ['validateNonEmptyObject']
-      }
-    ],
-    optional: []
   }
 };
 
