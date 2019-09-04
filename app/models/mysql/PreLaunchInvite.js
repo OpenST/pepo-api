@@ -190,6 +190,59 @@ class PreLaunchInvite extends ModelBase {
   }
 
   /**
+   * Get cookie value.
+   *
+   * @param {object} preLaunchInviteObj
+   * @param {string} decryptedEncryptionSalt
+   * @param {object} options
+   *
+   * @returns {string}
+   */
+  getCookieValueFor(preLaunchInviteObj, decryptedEncryptionSalt, options) {
+    const oThis = this;
+
+    return (
+      preLaunchInviteObj.id +
+      ':' +
+      options.timestamp +
+      ':' +
+      oThis.getCookieTokenFor(preLaunchInviteObj, decryptedEncryptionSalt, options)
+    );
+  }
+
+  /**
+   * Get cookie token.
+   *
+   * @param {object} preLaunchInviteObj
+   * @param {string} decryptedEncryptionSalt
+   * @param {object} options
+   *
+   * @returns {string}
+   */
+  getCookieTokenFor(preLaunchInviteObj, decryptedEncryptionSalt, options) {
+    const uniqueStr = localCipher.decrypt(decryptedEncryptionSalt, preLaunchInviteObj.secret);
+
+    const stringToSign =
+      preLaunchInviteObj.id +
+      ':' +
+      options.timestamp +
+      ':' +
+      coreConstants.WEB_COOKIE_SECRET +
+      ':' +
+      uniqueStr.substring(0, 16);
+    const salt =
+      preLaunchInviteObj.id +
+      ':' +
+      uniqueStr.slice(-16) +
+      ':' +
+      coreConstants.PA_COOKIE_TOKEN_SECRET +
+      ':' +
+      options.timestamp;
+
+    return util.createSha256Digest(salt, stringToSign);
+  }
+
+  /**
    * Flush cache.
    *
    * @param {object} params
