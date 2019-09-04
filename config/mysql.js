@@ -81,6 +81,13 @@ const mysqlConfig = {
         password: coreConstants.SOCKET_DB_MYSQL_PASSWORD
       }
     },
+    fiatDbCluster: {
+      master: {
+        host: coreConstants.FIAT_DB_MYSQL_HOST,
+        user: coreConstants.FIAT_DB_MYSQL_USER,
+        password: coreConstants.FIAT_DB_MYSQL_PASSWORD
+      }
+    },
     infraDbCluster: {
       master: {
         host: coreConstants.INFRA_DB_MYSQL_HOST,
@@ -128,6 +135,9 @@ mysqlConfig.databases[database.adminDbName] = ['adminDbCluster'];
 
 // Socket db
 mysqlConfig.databases[database.socketDbName] = ['socketDbCluster'];
+
+// Transaction db
+mysqlConfig.databases[database.fiatDbName] = ['fiatDbCluster'];
 
 // Infra db
 mysqlConfig.databases[database.infraDbName] = ['infraDbCluster'];
