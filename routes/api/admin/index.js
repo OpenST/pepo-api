@@ -4,6 +4,8 @@ const express = require('express'),
   csrf = require('csurf');
 
 const rootPrefix = '../../..',
+  AdminCookieAuth = require(rootPrefix + '/lib/authentication/AdminCookie'),
+  adminConstants = require(rootPrefix + '/lib/globalConstant/admin'),
   FormatterComposer = require(rootPrefix + '/lib/formatter/Composer'),
   routeHelper = require(rootPrefix + '/routes/helper'),
   apiName = require(rootPrefix + '/lib/globalConstant/apiName'),
@@ -23,12 +25,36 @@ const csrfProtection = csrf({
     secure: true, // Marks the cookie to be used with HTTPS only
     path: '/',
     sameSite: 'strict', // sets the same site policy for the cookie
-    domain: coreConstant.PA_COOKIE_DOMAIN
+    domain: coreConstant.PA_COOKIE_DOMAIN,
+    key: adminConstants.csrfCookieName
   }
 });
 
 // Node.js cookie parsing middleware.
-router.use(cookieParser(coreConstant.COOKIE_SECRET));
+router.use(cookieParser(coreConstant.ADMIN_COOKIE_SECRET));
+
+const validateAdminCookie = async function(req, res, next) {
+  // Cookie validation is not to be done for admin login request
+  if (req.url !== '/login') {
+    let adminCookieValue = req.signedCookies[adminConstants.loginCookieName];
+    let authResponse = await new AdminCookieAuth(adminCookieValue).perform().catch(function(r) {
+      return r;
+    });
+
+    if (authResponse.isFailure()) {
+      cookieHelper.deleteAdminCookie(res);
+      return responseHelper.renderApiResponse(authResponse, res, errorConfig);
+    } else {
+      req.decodedParams.current_admin = authResponse.data.current_admin;
+      req.decodedParams.admin_login_cookie_value = authResponse.data.admin_login_cookie_value;
+    }
+    cookieHelper.setAdminCookie(res, authResponse.data.admin_login_cookie_value);
+  }
+
+  next();
+};
+
+router.use(validateAdminCookie);
 
 /* Login admin*/
 router.post('/login', csrfProtection, sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {

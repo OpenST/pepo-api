@@ -14,9 +14,6 @@ const rootPrefix = '../../..',
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   cookieHelper = require(rootPrefix + '/lib/cookieHelper');
 
-// Node.js cookie parsing middleware.
-router.use(cookieParser(coreConstant.COOKIE_SECRET));
-
 /* Logout user*/
 router.post('/logout', sanitizer.sanitizeDynamicUrlParams, function(req, res) {
   req.decodedParams.apiName = apiName.logout;
