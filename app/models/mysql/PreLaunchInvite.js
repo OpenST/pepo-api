@@ -31,6 +31,7 @@ class PreLaunchInvite extends ModelBase {
    * Format db data.
    *
    * @param {object} dbRow
+   * @param {number} dbRow.id
    * @param {number} dbRow.twitter_id
    * @param {string} dbRow.email
    * @param {string} dbRow.name
@@ -50,6 +51,7 @@ class PreLaunchInvite extends ModelBase {
     const oThis = this;
 
     const formattedData = {
+      id: dbRow.id,
       twitterId: dbRow.twitter_id,
       email: dbRow.email,
       name: dbRow.name,
