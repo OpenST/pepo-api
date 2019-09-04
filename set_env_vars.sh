@@ -113,7 +113,7 @@ export PA_CAMPAIGN_MASTER_LIST="5346"
 #Twitter API Key
 export PA_TWITTER_CONSUMER_KEY='NEo4gEXzdQZaoTsqzpZvepfKb'
 export PA_TWITTER_CONSUMER_SECRET='iM5UMt4px8rwoqEoRV9gJGrJGtEoMUxOYkaWXSges7t4bk564t'
-export PA_TWITTER_AUTH_CALLBACK_ROUTE='https://pepo.com/api/web/twitter-verify'
+export PA_TWITTER_AUTH_CALLBACK_ROUTE='https://pepo.com/api/web/preLaunch/twitter-verify'
 
 # image resizer variables
 export PR_LAMBDA_IMAGE_RESIZE_FUNCTION='arn:aws:lambda:us-east-1:274208178423:function:pepoImageResizer'
