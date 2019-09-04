@@ -187,12 +187,12 @@ class PushNotification extends UserNotificationServiceBase {
       notificationType: oThis._notificationType
     };
 
-    console.log('params-----', params);
+    console.log('params-----', JSON.stringify(params));
 
     //todo: use a different heading for push notification
     const resp = NotificationResponseHelper.getHeadingForPushNotification(params);
 
-    console.log('resp-----', resp);
+    console.log('resp-----', JSON.stringify(resp));
 
     if (resp.isFailure()) {
       return Promise.reject(resp);
