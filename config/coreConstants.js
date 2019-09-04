@@ -178,6 +178,20 @@ class CoreConstants {
     return process.env.PA_INFRA_DB_MYSQL_DB;
   }
 
+  // Fiat db.
+
+  get FIAT_DB_MYSQL_HOST() {
+    return process.env.PA_FIAT_DB_MYSQL_HOST;
+  }
+
+  get FIAT_DB_MYSQL_USER() {
+    return process.env.PA_FIAT_DB_MYSQL_USER;
+  }
+
+  get FIAT_DB_MYSQL_PASSWORD() {
+    return process.env.PA_FIAT_DB_MYSQL_PASSWORD;
+  }
+
   // Admin db
   get ADMIN_DB_MYSQL_HOST() {
     return process.env.PA_ADMIN_DB_MYSQL_HOST;
