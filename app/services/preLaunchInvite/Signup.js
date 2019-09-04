@@ -1,36 +1,26 @@
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
-  UserModel = require(rootPrefix + '/app/models/mysql/User'),
   KmsWrapper = require(rootPrefix + '/lib/aws/KmsWrapper'),
   bgJob = require(rootPrefix + '/lib/rabbitMqEnqueue/bgJob'),
-  imageLib = require(rootPrefix + '/lib/imageLib'),
-  TokenUserModel = require(rootPrefix + '/app/models/mysql/TokenUser'),
-  UserByUsernameCache = require(rootPrefix + '/lib/cacheManagement/single/UserByUsername'),
-  TwitterUserExtendedModel = require(rootPrefix + '/app/models/mysql/TwitterUserExtended'),
-  TwitterUserModel = require(rootPrefix + '/app/models/mysql/TwitterUser'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
-  userConstants = require(rootPrefix + '/lib/globalConstant/user'),
   bgJobConstants = require(rootPrefix + '/lib/globalConstant/bgJob'),
-  twitterUserExtendedConstants = require(rootPrefix + '/lib/globalConstant/twitterUserExtended'),
   localCipher = require(rootPrefix + '/lib/encryptors/localCipher'),
-  imageConstants = require(rootPrefix + '/lib/globalConstant/image'),
-  createErrorLogsEntry = require(rootPrefix + '/lib/errorLogs/createEntry'),
-  errorLogsConstants = require(rootPrefix + '/lib/globalConstant/errorLogs'),
+  PreLaunchInviteModel = require(rootPrefix + '/app/models/mysql/PreLaunchInvite'),
+  preLaunchInviteConstants = require(rootPrefix + '/lib/globalConstant/preLaunchInvite'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   kmsGlobalConstant = require(rootPrefix + '/lib/globalConstant/kms'),
-  ostPlatformSdk = require(rootPrefix + '/lib/ostPlatform/jsSdkWrapper'),
+  SendDoubleOptInService = require(rootPrefix + '/app/services/SendDoubleOptIn'),
   basicHelper = require(rootPrefix + '/helpers/basic'),
-  CommonValidators = require(rootPrefix + '/lib/validators/Common'),
-  tokenUserConstants = require(rootPrefix + '/lib/globalConstant/tokenUser');
+  CommonValidators = require(rootPrefix + '/lib/validators/Common');
 
 /**
- * Class for Twitter Signup service.
+ * Class for pre launch invite Signup service.
  *
- * @class TwitterConnect
+ * @class PreLaunchTwitterSignUp
  */
-class TwitterSignup extends ServiceBase {
+class PreLaunchTwitterSignUp extends ServiceBase {
   /**
-   * Constructor for signup service.
+   * Constructor for pre launch invite signup service.
    *
    * @param {object} params
    * @param {string} params.twitterUserObj: Twitter User Table Obj
@@ -52,22 +42,12 @@ class TwitterSignup extends ServiceBase {
     oThis.token = params.token;
     oThis.secret = params.secret;
 
-    oThis.userId = null;
-
-    oThis.secureUserObj = null;
-    oThis.tokenUserObj = null;
-
     oThis.encryptedEncryptionSalt = null;
     oThis.decryptedEncryptionSalt = null;
     oThis.encryptedCookieToken = null;
-    oThis.encryptedScryptSalt = null;
     oThis.encryptedSecret = null;
 
-    oThis.userName = null;
-    oThis.profileImageId = null;
-
-    oThis.ostUserId = null;
-    oThis.ostStatus = null;
+    oThis.preLaunchInviteObj = null;
   }
 
   /**
@@ -96,10 +76,7 @@ class TwitterSignup extends ServiceBase {
     const promisesArray1 = [];
 
     // starting the create user in ost in parallel.
-    let createOstUserPromise = oThis._createUserInOst();
 
-    promisesArray1.push(oThis._saveProfileImage());
-    promisesArray1.push(oThis._setUserName());
     promisesArray1.push(oThis._setKMSEncryptionSalt());
 
     await Promise.all(promisesArray1).catch(function(err) {
@@ -114,114 +91,16 @@ class TwitterSignup extends ServiceBase {
       );
     });
 
-    await oThis._createUser();
+    await oThis._createPreLaunchInvite();
 
-    let promiseArray2 = [];
-    promiseArray2.push(oThis._twitterSpecificFunction());
-
-    promiseArray2.push(
-      createOstUserPromise.then(function(a) {
-        return oThis._createTokenUser();
-      })
-    );
-
-    await Promise.all(promiseArray2);
-
-    await oThis._enqueAfterSignupJob();
+    // if email is present then enqueue for doptin creator
+    if (oThis.userTwitterEntity.email || CommonValidators.isValidEmail(oThis.userTwitterEntity.email)) {
+      oThis._sendDoubleOptIn();
+    }
 
     logger.log('End::Perform Twitter Signup');
 
     return responseHelper.successWithData({});
-  }
-
-  /**
-   * create or update twitter user
-   *
-   * @return {Promise<void>}
-   * @private
-   */
-  async _twitterSpecificFunction() {
-    const oThis = this;
-    await oThis._createUpdateTwitterUser();
-    await oThis._createTwitterUserExtended();
-  }
-
-  /**
-   * This function saves original profile image url given by twitter
-   *
-   * @returns {Promise<void>}
-   * @private
-   */
-  async _saveProfileImage() {
-    const oThis = this;
-    logger.log('Start::Save Profile Image');
-
-    if (!oThis.userTwitterEntity.nonDefaultProfileImageUrl) {
-      oThis.profileImageId = null;
-      logger.log('End::Save Profile Image. Default twitter profile pic.');
-      return;
-    }
-
-    let resp = await imageLib.validateAndSave({
-      imageUrl: oThis.userTwitterEntity.nonDefaultProfileImageUrl,
-      isExternalUrl: true,
-      kind: imageConstants.profileImageKind,
-      enqueueResizer: false
-    });
-    if (resp.isFailure()) {
-      return Promise.reject(resp);
-    }
-
-    oThis.profileImageId = resp.data.insertId;
-
-    logger.log('End::Save Profile Image');
-  }
-
-  /**
-   * Sets username
-   *
-   * @returns {Promise<void>}
-   * @private
-   */
-  async _setUserName() {
-    const oThis = this;
-    logger.log('Start::Set User Name');
-
-    let twitterHandle = oThis.userTwitterEntity.handle,
-      uniqueUserName = twitterHandle,
-      retryCount = 3;
-
-    while (retryCount > 0) {
-      let cacheResponse = await new UserByUsernameCache({ userName: uniqueUserName }).fetch();
-
-      if (cacheResponse.isFailure()) {
-        return Promise.reject(cacheResponse);
-      }
-
-      if (cacheResponse.data.id) {
-        uniqueUserName = basicHelper.getUniqueUserName(uniqueUserName);
-        retryCount--;
-      } else {
-        oThis.userName = uniqueUserName;
-        break;
-      }
-    }
-
-    if (!oThis.userName) {
-      logger.error('Unique username not found.');
-      const errorObject = responseHelper.error({
-        internal_error_identifier: 'a_s_t_s_1',
-        api_error_identifier: 'something_went_wrong',
-        debug_options: {
-          twitterHandle: twitterHandle
-        }
-      });
-
-      await createErrorLogsEntry.perform(errorObject, errorLogsConstants.highSeverity);
-
-      return Promise.reject(errorObject);
-    }
-    logger.log('End::Set User Name');
   }
 
   /**
@@ -243,10 +122,8 @@ class TwitterSignup extends ServiceBase {
     oThis.decryptedEncryptionSalt = kmsResp.Plaintext;
     oThis.encryptedEncryptionSalt = kmsResp.CiphertextBlob;
 
-    let scryptSalt = localCipher.generateRandomIv(32);
     let cookieToken = localCipher.generateRandomIv(32);
 
-    oThis.encryptedScryptSalt = localCipher.encrypt(oThis.decryptedEncryptionSalt, scryptSalt);
     oThis.encryptedCookieToken = localCipher.encrypt(oThis.decryptedEncryptionSalt, cookieToken);
     oThis.encryptedSecret = localCipher.encrypt(oThis.decryptedEncryptionSalt, oThis.secret);
 
@@ -255,242 +132,62 @@ class TwitterSignup extends ServiceBase {
   }
 
   /**
-   * Create user in ost.
-   *
-   * @sets oThis.ostUserId, oThis.ostStatus
+   * Create pre launch invite
    *
    * @return {Promise<void>}
    * @private
    */
-  async _createUserInOst() {
+  async _createPreLaunchInvite() {
     const oThis = this;
 
-    let a = Date.now();
-
-    logger.log('Start::Creating user in OST', a);
-
-    const createUserServiceResponse = await ostPlatformSdk.createUser();
-    if (!createUserServiceResponse.isSuccess()) {
-      return Promise.reject(createUserServiceResponse);
-    }
-
-    oThis.ostUserId = createUserServiceResponse.data.user.id;
-    oThis.ostStatus = createUserServiceResponse.data.user.status;
-
-    logger.log('End::Creating user in OST: ', Date.now() - a);
-
-    return Promise.resolve(responseHelper.successWithData({}));
-  }
-
-  /**
-   * Create user.
-   *
-   * @sets oThis.userId
-   *
-   * @return {Promise<void>}
-   * @private
-   */
-  async _createUser() {
-    const oThis = this;
-
-    logger.log('Start::Create user');
-
-    let propertyVal = new UserModel().setBitwise('properties', 0, userConstants.hasTwitterLoginProperty);
+    logger.log('Start::Creating pre launch invite');
 
     let insertData = {
-      user_name: oThis.userName,
-      name: oThis.userTwitterEntity.formattedName,
-      cookie_token: oThis.encryptedCookieToken,
       encryption_salt: oThis.encryptedEncryptionSalt,
-      mark_inactive_trigger_count: 0,
-      properties: propertyVal,
-      status: userConstants.invertedStatuses[userConstants.activeStatus],
-      profile_image_id: oThis.profileImageId
-    };
-
-    let retryCount = 3,
-      caughtInException = true,
-      insertResponse = null;
-
-    while (retryCount > 0 && caughtInException) {
-      // Insert user in database.
-      retryCount--;
-      caughtInException = false;
-
-      insertResponse = await new UserModel()
-        .insert(insertData)
-        .fire()
-        .catch(function(err) {
-          logger.log('Error while inserting user data: ', err);
-          if (UserModel.isDuplicateIndexViolation(UserModel.usernameUniqueIndexName, err)) {
-            logger.log('Username conflict. Attempting with a modified username.');
-            caughtInException = true;
-            insertData.user_name = basicHelper.getUniqueUserName(oThis.userName);
-            return null;
-          } else {
-            return Promise.reject(err);
-          }
-        });
-    }
-
-    if (!insertResponse) {
-      logger.error('Error while inserting data in users table.');
-      return Promise.reject(
-        responseHelper.error({
-          internal_error_identifier: 'a_s_t_s_cu_2',
-          api_error_identifier: 'something_went_wrong',
-          debug_options: {
-            insertData: insertData
-          }
-        })
-      );
-    }
-
-    insertData.id = insertResponse.insertId;
-
-    Object.assign(insertData, insertResponse.defaultUpdatedAttributes);
-
-    oThis.secureUserObj = new UserModel().formatDbData(insertData);
-
-    await UserModel.flushCache(oThis.secureUserObj);
-
-    oThis.userId = oThis.secureUserObj.id;
-
-    logger.log('End::Create user');
-
-    return responseHelper.successWithData({});
-  }
-
-  /**
-   * Create Twitter User Extended Obj.
-   *
-   * @return {Promise<void>}
-   * @private
-   */
-  async _createTwitterUserExtended() {
-    const oThis = this;
-
-    logger.log('Start::Create Twitter User Extended Obj');
-
-    let insertData = {
-      twitter_user_id: oThis.twitterUserObj.id,
-      user_id: oThis.userId,
+      twitter_id: oThis.userTwitterEntity.idStr,
+      handle: oThis.userTwitterEntity.handle,
+      email: oThis.userTwitterEntity.email,
+      name: oThis.userTwitterEntity.formattedName,
+      profile_image_url: oThis.userTwitterEntity.nonDefaultProfileImageUrl,
       token: oThis.token,
       secret: oThis.encryptedSecret,
-      status: twitterUserExtendedConstants.invertedStatuses[twitterUserExtendedConstants.activeStatus]
+      status: preLaunchInviteConstants.invertedStatuses[preLaunchInviteConstants.pendingStatus],
+      invite_code: oThis._createInviteCode(),
+      invited_user_count: 0
     };
-    // Insert user in database.
-    const insertResponse = await new TwitterUserExtendedModel().insert(insertData).fire();
+
+    let insertResponse = await new PreLaunchInviteModel().insert(insertData).fire();
 
     if (!insertResponse) {
-      logger.error('Error while inserting data in twitter users extended table.');
-      return Promise.reject(new Error('Error while inserting data in twitter users extended table.'));
+      logger.error('Error while inserting data in pre_launch_invites table.');
+      return Promise.reject(new Error('Error while inserting data in pre_launch_invites table.'));
     }
 
     insertData.id = insertResponse.insertId;
     Object.assign(insertData, insertResponse.defaultUpdatedAttributes);
 
-    let twitterUserExtendedObj = new TwitterUserExtendedModel().formatDbData(insertData);
-    await TwitterUserExtendedModel.flushCache(twitterUserExtendedObj);
+    oThis.preLaunchInviteObj = new PreLaunchInviteModel().formatDbData(insertData);
+    await PreLaunchInviteModel.flushCache(oThis.preLaunchInviteObj);
 
-    logger.log('End::Create Twitter User Extended Obj');
-
-    return responseHelper.successWithData({});
-  }
-
-  /**
-   * Create or Update Twitter User Obj.
-   *
-   * @return {Promise<void>}
-   * @private
-   */
-  async _createUpdateTwitterUser() {
-    const oThis = this;
-
-    logger.log('Start::Create/Update Twitter User Obj');
-
-    if (oThis.twitterUserObj) {
-      await new TwitterUserModel()
-        .update({
-          user_id: oThis.userId
-        })
-        .where({ id: oThis.twitterUserObj.id })
-        .fire();
-
-      oThis.twitterUserObj.userId = oThis.userId;
-    } else {
-      let twitterEmail = oThis.userTwitterEntity.email;
-
-      // email info is not mandatory to come from twitter.
-      if (!oThis.userTwitterEntity.email || !CommonValidators.isValidEmail(oThis.userTwitterEntity.email)) {
-        twitterEmail = null;
-      }
-
-      let insertData = {
-        twitter_id: oThis.userTwitterEntity.idStr,
-        user_id: oThis.userId,
-        name: oThis.userTwitterEntity.formattedName,
-        email: twitterEmail,
-        profile_image_url: oThis.userTwitterEntity.nonDefaultProfileImageShortUrl
-      };
-      // Insert user in database.
-      const insertResponse = await new TwitterUserModel().insert(insertData).fire();
-
-      if (!insertResponse) {
-        logger.error('Error while inserting data in twitter users table.');
-
-        return Promise.reject(new Error('Error while inserting data in twitter users table.'));
-      }
-
-      insertData.id = insertResponse.insertId;
-      Object.assign(insertData, insertResponse.defaultUpdatedAttributes);
-
-      oThis.twitterUserObj = new TwitterUserModel().formatDbData(insertData);
-    }
-
-    await TwitterUserModel.flushCache(oThis.twitterUserObj);
-
-    logger.log('End::Create/Update Twitter User Obj');
-    return responseHelper.successWithData({});
-  }
-
-  /**
-   * Create token user
-   *
-   *
-   * @return {Promise<void>}
-   *
-   * @private
-   */
-  async _createTokenUser() {
-    const oThis = this;
-
-    logger.log('Start::Creating token user');
-
-    let insertData = {
-      user_id: oThis.userId,
-      ost_user_id: oThis.ostUserId,
-      ost_token_holder_address: null,
-      scrypt_salt: oThis.encryptedScryptSalt,
-      properties: 0,
-      ost_status: tokenUserConstants.invertedOstStatuses[oThis.ostStatus]
-    };
-    // Insert token user in database.
-    const insertResponse = await new TokenUserModel().insert(insertData).fire();
-
-    if (!insertResponse) {
-      logger.error('Error while inserting data in token_users table.');
-      return Promise.reject(new Error('Error while inserting data in token_users table.'));
-    }
-
-    insertData.id = insertResponse.insertId;
-    Object.assign(insertData, insertResponse.defaultUpdatedAttributes);
-
-    oThis.tokenUserObj = new TokenUserModel().formatDbData(insertData);
-    await TokenUserModel.flushCache(oThis.tokenUserObj);
-
-    logger.log('End::Creating token user');
+    logger.log('End::Creating pre launch invite');
     return Promise.resolve(responseHelper.successWithData({}));
+  }
+
+  /**
+   * Create invite code
+   *
+   * @returns {string}
+   * @private
+   */
+  _createInviteCode() {
+    const oThis = this;
+
+    logger.log('Start::Creating invite code');
+
+    let inviteStringLength = preLaunchInviteConstants.defaultInviteCodeLength,
+      inviteString = basicHelper.getRandomAlphaNumericString().substring(0, inviteStringLength);
+
+    return inviteString.toUpperCase();
   }
 
   /**
@@ -513,6 +210,22 @@ class TwitterSignup extends ServiceBase {
   }
 
   /**
+   * Send double opt in
+   *
+   * @returns {Promise<*>}
+   * @private
+   */
+  async _sendDoubleOptIn() {
+    const oThis = this;
+
+    let sendDoubleOptInParams = {
+      pre_launch_invite_hook: oThis.preLaunchInviteObj
+    };
+
+    return await new SendDoubleOptInService(sendDoubleOptInParams).perform();
+  }
+
+  /**
    * Service response.
    *
    * @return {Promise<void>}
@@ -521,25 +234,25 @@ class TwitterSignup extends ServiceBase {
   async _serviceResponse() {
     const oThis = this;
 
-    logger.log('Start::Service Response for twitter Signup');
+    logger.log('Start::Service Response for PreLaunchInvite twitter SignUp');
 
-    const userLoginCookieValue = new UserModel().getCookieValueFor(oThis.secureUserObj, oThis.decryptedEncryptionSalt, {
-      timestamp: Date.now() / 1000
-    });
+    const preLaunchInviteLoginCookieValue = new PreLaunchInviteModel().getCookieValueFor(
+      oThis.preLaunchInviteObj,
+      oThis.decryptedEncryptionSalt,
+      {
+        timestamp: Date.now() / 1000
+      }
+    );
 
-    logger.log('End::Service Response for twitter Signup');
+    logger.log('End::Service Response for PreLaunchInvite twitter SignUp');
 
-    const safeFormattedUserData = new UserModel().safeFormattedData(oThis.secureUserObj);
-    const safeFormattedTokenUserData = new TokenUserModel().safeFormattedData(oThis.tokenUserObj);
+    const safeFormattedPreLaunchInviteData = new PreLaunchInviteModel().safeFormattedData(oThis.preLaunchInviteObj);
 
     return responseHelper.successWithData({
-      usersByIdMap: { [safeFormattedUserData.id]: safeFormattedUserData },
-      tokenUsersByUserIdMap: { [safeFormattedTokenUserData.userId]: safeFormattedTokenUserData },
-      user: safeFormattedUserData,
-      tokenUser: safeFormattedTokenUserData,
-      userLoginCookieValue: userLoginCookieValue
+      preLaunchInvite: safeFormattedPreLaunchInviteData,
+      preLaunchInviteLoginCookieValue: preLaunchInviteLoginCookieValue
     });
   }
 }
 
-module.exports = TwitterSignup;
+module.exports = PreLaunchTwitterSignUp;

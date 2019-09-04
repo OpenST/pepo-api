@@ -93,25 +93,6 @@ class SendDoubleOptIn extends ServiceBase {
   }
 
   /**
-   * Invalid url error
-   *
-   * @param code
-   * @returns {Promise<never>}
-   * @private
-   */
-  async _invalidUrlError(code) {
-    const oThis = this;
-
-    return Promise.reject(
-      responseHelper.error({
-        internal_error_identifier: code,
-        api_error_identifier: 'invalid_url',
-        debug_options: {}
-      })
-    );
-  }
-
-  /**
    * Create double opt in token
    *
    * @returns {Promise<never>}
@@ -133,6 +114,25 @@ class SendDoubleOptIn extends ServiceBase {
         status: temporaryTokenConstant.invertedStatuses[temporaryTokenConstant.activeStatus]
       })
       .fire();
+  }
+
+  /**
+   * Invalid url error
+   *
+   * @param code
+   * @returns {Promise<never>}
+   * @private
+   */
+  async _invalidUrlError(code) {
+    const oThis = this;
+
+    return Promise.reject(
+      responseHelper.error({
+        internal_error_identifier: code,
+        api_error_identifier: 'invalid_url',
+        debug_options: {}
+      })
+    );
   }
 }
 
