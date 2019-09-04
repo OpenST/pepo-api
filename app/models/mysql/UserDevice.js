@@ -50,6 +50,7 @@ class UserDevice extends ModelBase {
       deviceId: dbRow.device_id,
       deviceToken: dbRow.device_token,
       deviceKind: userDevicesConstants.userDeviceKinds[dbRow.device_kind],
+      status: userDevicesConstants.statuses[dbRow.status],
       createdAt: dbRow.created_at,
       updatedAt: dbRow.updated_at
     };
