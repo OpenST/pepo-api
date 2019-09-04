@@ -14,8 +14,11 @@ const rootPrefix = '../../..',
   entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
   responseEntityKey = require(rootPrefix + '/lib/globalConstant/responseEntityKey'),
   basicHelper = require(rootPrefix + '/helpers/basic'),
+  apiVersions = require(rootPrefix + '/lib/globalConstant/apiVersions'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   cookieHelper = require(rootPrefix + '/lib/cookieHelper');
+
+const errorConfig = basicHelper.fetchErrorConfig(apiVersions.v1);
 
 const csrfProtection = csrf({
   cookie: {
@@ -45,7 +48,7 @@ const validatePreLaunchInviteCookie = async function(req, res, next) {
       cookieHelper.deletePreLaunchInviteCookie(res);
       return responseHelper.renderApiResponse(authResponse, res, errorConfig);
     } else {
-      req.decodedParams.current_pre_launch_invite = authResponse.data.current_preLaunch;
+      req.decodedParams.current_pre_launch_invite = authResponse.data.current_pre_launch_invite;
     }
     cookieHelper.setPreLaunchInviteCookie(res, authResponse.data.preLaunchInviteLoginCookieValue);
   }
