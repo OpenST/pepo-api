@@ -1,19 +1,19 @@
 const rootPrefix = '../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
   databaseConstants = require(rootPrefix + '/lib/globalConstant/database'),
-  preLaunchInviteConstant = require(rootPrefix + '/lib/globalConstant/preLaunchInvite');
+  temporaryTokenConstant = require(rootPrefix + '/lib/globalConstant/temporaryToken');
 
 // Declare variables.
-const dbName = databaseConstants.userDbName;
+const dbName = databaseConstants.bigDbName;
 
 /**
- * Class for pre launch invite model.
+ * Class for temporary token model.
  *
- * @class PreLaunchInvite
+ * @class TemporaryToken
  */
-class PreLaunchInvite extends ModelBase {
+class TemporaryToken extends ModelBase {
   /**
-   * Constructor for pre launch invite model.
+   * Constructor for temporary token model.
    *
    * @augments ModelBase
    *
@@ -24,7 +24,7 @@ class PreLaunchInvite extends ModelBase {
 
     const oThis = this;
 
-    oThis.tableName = 'pre_launch_invites';
+    oThis.tableName = 'temporary_tokens';
   }
 
   /**
@@ -32,16 +32,10 @@ class PreLaunchInvite extends ModelBase {
    *
    * @param {object} dbRow
    * @param {number} dbRow.id
-   * @param {number} dbRow.twitter_id
-   * @param {string} dbRow.email
-   * @param {string} dbRow.name
-   * @param {string} dbRow.profile_image_url
+   * @param {number} dbRow.entity_id
+   * @param {number} dbRow.kind
    * @param {string} dbRow.token
-   * @param {string} dbRow.secret
    * @param {number} dbRow.status
-   * @param {number} dbRow.invitee_user_id
-   * @param {string} dbRow.invite_code
-   * @param {number} dbRow.invited_user_count
    * @param {number/string} dbRow.created_at
    * @param {number/string} dbRow.updated_at
    *
@@ -52,16 +46,10 @@ class PreLaunchInvite extends ModelBase {
 
     const formattedData = {
       id: dbRow.id,
-      twitterId: dbRow.twitter_id,
-      email: dbRow.email,
-      name: dbRow.name,
-      profileImageUrl: dbRow.profile_image_url,
+      entityId: dbRow.entity_id,
+      kind: temporaryTokenConstant.kinds[dbRow.kind],
       token: dbRow.token,
-      secret: dbRow.secret,
-      status: preLaunchInviteConstant.statuses[dbRow.status],
-      inviteeUserId: dbRow.invitee_user_id,
-      inviteCode: dbRow.invite_code,
-      invitedUserCount: dbRow.invited_user_count,
+      status: temporaryTokenConstant.statuses[dbRow.status],
       createdAt: dbRow.created_at,
       updatedAt: dbRow.updated_at
     };
@@ -70,7 +58,7 @@ class PreLaunchInvite extends ModelBase {
   }
 
   /**
-   * Fetch pre launch invite by id.
+   * Fetch temporary token by id.
    *
    * @param {string} id
    *
@@ -85,7 +73,7 @@ class PreLaunchInvite extends ModelBase {
   }
 
   /**
-   * Fetch pre launch invite by ids.
+   * Fetch temporary token by ids.
    *
    * @param {array} ids
    *
@@ -121,4 +109,4 @@ class PreLaunchInvite extends ModelBase {
   }
 }
 
-module.exports = PreLaunchInvite;
+module.exports = TemporaryToken;
