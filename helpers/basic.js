@@ -12,6 +12,7 @@ const rootPrefix = '..',
   apiVersions = require(rootPrefix + '/lib/globalConstant/apiVersions'),
   apiErrorConfig = require(rootPrefix + '/config/apiParams/apiErrorConfig'),
   v1ParamErrorConfig = require(rootPrefix + '/config/apiParams/v1/errorConfig'),
+  adminParamErrorConfig = require(rootPrefix + '/config/apiParams/admin/errorConfig'),
   internalParamErrorConfig = require(rootPrefix + '/config/apiParams/internal/errorConfig');
 
 /**
@@ -269,6 +270,8 @@ class BasicHelper {
       paramErrorConfig = dynamicErrorConfig
         ? Object.assign(dynamicErrorConfig, internalParamErrorConfig)
         : internalParamErrorConfig;
+    } else if (apiVersion === apiVersions.admin) {
+      paramErrorConfig = dynamicErrorConfig ? Object.assign(dynamicErrorConfig, {}) : {};
     } else {
       throw new Error(`Unsupported API Version ${apiVersion}`);
     }
@@ -497,7 +500,7 @@ class BasicHelper {
    */
   parseAmpersandSeparatedKeyValue(response) {
     const finalResponse = {};
-    response.split('&').forEach(function(keyValPair) {
+    response.split('&amp;').forEach(function(keyValPair) {
       const val = keyValPair.split('=');
       finalResponse[val[0]] = val[1];
     });

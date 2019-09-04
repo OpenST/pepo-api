@@ -37,26 +37,28 @@ const csrfProtection = csrf({
 router.use(cookieParser(coreConstant.WEB_COOKIE_SECRET));
 
 const validatePreLaunchInviteCookie = async function(req, res, next) {
-  // Cookie validation is not to be done for preLaunch login request
-  if (req.url !== '/twitter-login') {
-    let preLaunchCookieValue = req.signedCookies[preLaunchInviteConstants.loginCookieName];
-    let authResponse = await new PreLaunchInviteLoginCookieAuth(preLaunchCookieValue).perform().catch(function(r) {
-      return r;
-    });
+  let preLaunchCookieValue = req.signedCookies[preLaunchInviteConstants.loginCookieName];
+  let authResponse = await new PreLaunchInviteLoginCookieAuth(preLaunchCookieValue).perform().catch(function(r) {
+    return r;
+  });
 
-    if (authResponse.isFailure()) {
-      cookieHelper.deletePreLaunchInviteCookie(res);
-      return responseHelper.renderApiResponse(authResponse, res, errorConfig);
-    } else {
-      req.decodedParams.current_pre_launch_invite = authResponse.data.current_pre_launch_invite;
-    }
-    cookieHelper.setPreLaunchInviteCookie(res, authResponse.data.preLaunchInviteLoginCookieValue);
+  if (authResponse.isFailure()) {
+    cookieHelper.deletePreLaunchInviteCookie(res);
+    return responseHelper.renderApiResponse(authResponse, res, errorConfig);
+  } else {
+    req.decodedParams.current_pre_launch_invite = authResponse.data.current_pre_launch_invite;
   }
+  cookieHelper.setPreLaunchInviteCookie(res, authResponse.data.preLaunchInviteLoginCookieValue);
 
   next();
 };
 
-// router.use(validatePreLaunchInviteCookie);
+/* Request Token preLaunch*/
+router.get('/twitter/request_token', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.twitterRequestToken;
+
+  Promise.resolve(routeHelper.perform(req, res, next, '/preLaunchInvite/RequestToken', 'r_a_w_pl_1', null, null));
+});
 
 /* Login preLaunch*/
 router.post('/twitter-login', csrfProtection, sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
@@ -83,24 +85,5 @@ router.post('/twitter-login', csrfProtection, sanitizer.sanitizeDynamicUrlParams
     )
   );
 });
-
-// /* Logged In Pre Launch Invite User*/
-// router.get('/current', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
-//   req.decodedParams.apiName = apiName.loggedInAdmin;
-//
-//   const dataFormatterFunc = async function(serviceResponse) {
-//     const wrapperFormatterRsp = await new FormatterComposer({
-//       resultType: responseEntityKey.loggedInAdmin,
-//       entityKindToResponseKeyMap: {
-//         [entityType.admin]: responseEntityKey.loggedInAdmin
-//       },
-//       serviceData: serviceResponse.data
-//     }).perform();
-//
-//     serviceResponse.data = wrapperFormatterRsp.data;
-//   };
-//
-//   Promise.resolve(routeHelper.perform(req, res, next, '/admin/GetCurrent', 'r_a_w_pl_2', null, dataFormatterFunc));
-// });
 
 module.exports = router;
