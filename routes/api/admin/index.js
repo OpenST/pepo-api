@@ -8,6 +8,7 @@ const rootPrefix = '../../..',
   adminConstants = require(rootPrefix + '/lib/globalConstant/admin'),
   FormatterComposer = require(rootPrefix + '/lib/formatter/Composer'),
   routeHelper = require(rootPrefix + '/routes/helper'),
+  apiVersions = require(rootPrefix + '/lib/globalConstant/apiVersions'),
   apiName = require(rootPrefix + '/lib/globalConstant/apiName'),
   sanitizer = require(rootPrefix + '/helpers/sanitizer'),
   coreConstant = require(rootPrefix + '/config/coreConstants'),
@@ -16,6 +17,8 @@ const rootPrefix = '../../..',
   basicHelper = require(rootPrefix + '/helpers/basic'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   cookieHelper = require(rootPrefix + '/lib/cookieHelper');
+
+const errorConfig = basicHelper.fetchErrorConfig(apiVersions.admin);
 
 const csrfProtection = csrf({
   cookie: {
@@ -77,8 +80,7 @@ router.post('/login', csrfProtection, sanitizer.sanitizeDynamicUrlParams, functi
 router.post('/logout', csrfProtection, sanitizer.sanitizeDynamicUrlParams, function(req, res) {
   req.decodedParams.apiName = apiName.adminLogout;
 
-  const errorConfig = basicHelper.fetchErrorConfig(req.decodedParams.apiVersion),
-    responseObject = responseHelper.successWithData({});
+  const responseObject = responseHelper.successWithData({});
 
   cookieHelper.deleteAdminCookie(res);
 
