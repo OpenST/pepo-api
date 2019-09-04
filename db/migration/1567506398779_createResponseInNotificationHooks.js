@@ -7,9 +7,10 @@ const dbKind = DbKindConstant.sqlDbKind;
 
 const upQuery =
   'ALTER TABLE `notification_hooks` \n\
-      ADD COLUMN `response` text COLLATE utf8_unicode_ci AFTER `locked_at`;';
+      ADD COLUMN `retry_count` text COLLATE utf8_unicode_ci AFTER `locked_at`, \
+      ADD COLUMN `response` text COLLATE utf8_unicode_ci AFTER `retry_count`; ';
 
-const downQuery = 'ALTER TABLE `notification_hooks` DROP `response`;';
+const downQuery = 'ALTER TABLE `notification_hooks` DROP `response`, DROP `retry_count`;';
 
 const migrationName = {
   dbName: dbName,
