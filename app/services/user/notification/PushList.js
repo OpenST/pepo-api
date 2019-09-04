@@ -6,6 +6,7 @@ const rootPrefix = '../../../..',
   ImageByIdCache = require(rootPrefix + '/lib/cacheManagement/multi/ImageByIds'),
   VideoByIdCache = require(rootPrefix + '/lib/cacheManagement/multi/VideoByIds'),
   NotificationResponseHelper = require(rootPrefix + '/lib/notification/response/Helper'),
+  UserNotificationServiceBase = require(rootPrefix + '/app/services/user/notification/Base'),
   TokenUserByUserIdsMultiCache = require(rootPrefix + '/lib/cacheManagement/multi/TokenUserByUserIds'),
   bgJob = require(rootPrefix + '/lib/rabbitMqEnqueue/bgJob'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
@@ -20,7 +21,7 @@ const rootPrefix = '../../../..',
  *
  * @class PushNotification
  */
-class PushNotification {
+class PushNotification extends UserNotificationServiceBase {
   /**
    * Constructor for push contribution.
    *
@@ -31,6 +32,7 @@ class PushNotification {
    * @constructor
    */
   constructor(params) {
+    super(params);
     const oThis = this;
 
     oThis.notificationHookPayloads = params.notificationHookPayloads;
@@ -99,19 +101,21 @@ class PushNotification {
     for (let index = 0; index < oThis.notificationHookPayloads.length; index++) {
       const pushNotification = oThis.notificationHookPayloads[index];
       const formattedPushNotification = {};
-      let imageId = await oThis._getImageId(pushNotification);
+      //let imageId = await oThis._getImageId(pushNotification);
 
       //todo: select resolution
-      let image = oThis.imageMap[imageId] || null;
+      //let image = oThis.imageMap[imageId] || null;
 
       let goto = await oThis._getGoto(pushNotification);
+      console.log('----goto---goto-----goto------', goto);
+
       formattedPushNotification.data = JSON.stringify({ goto: goto });
 
       let heading = await oThis._getHeading(pushNotification);
       formattedPushNotification.notification = {
         title: heading.title,
         body: heading.body,
-        image: image
+        image: 'https://d3attjoi5jlede.cloudfront.net/images/web/fav/192x192.png' //image
       };
 
       formattedPushNotification.apns = {
@@ -122,7 +126,7 @@ class PushNotification {
           }
         },
         fcm_options: {
-          image: image
+          image: 'https://d3attjoi5jlede.cloudfront.net/images/web/fav/192x192.png' //image
         }
       };
 
@@ -173,6 +177,8 @@ class PushNotification {
   async _getHeading(userNotification) {
     const oThis = this;
 
+    console.log('userNotification----', userNotification, oThis.usersByIdMap);
+
     const params = {
       supportingEntities: {
         [responseEntityKey.users]: oThis.usersByIdMap
@@ -180,8 +186,13 @@ class PushNotification {
       userNotification: userNotification,
       notificationType: oThis._notificationType
     };
+
+    console.log('params-----', params);
+
     //todo: use a different heading for push notification
-    const resp = NotificationResponseHelper.getHeadingForNotification(params);
+    const resp = NotificationResponseHelper.getHeadingForPushNotification(params);
+
+    console.log('resp-----', resp);
 
     if (resp.isFailure()) {
       return Promise.reject(resp);
@@ -197,6 +208,8 @@ class PushNotification {
    * @private
    */
   async _getGoto(userNotification) {
+    const oThis = this;
+
     const resp = NotificationResponseHelper.getGotoForNotification({
       userNotification: userNotification,
       notificationType: oThis._notificationType
@@ -223,6 +236,8 @@ class PushNotification {
     for (let index = 0; index < oThis.notificationHookPayloads.length; index++) {
       const userNotification = oThis.notificationHookPayloads[index];
 
+      console.log('userNotification----', userNotification);
+
       const supportingEntitiesConfig = NotificationResponseHelper.getSupportingEntitiesConfigForKind(
         userNotification.kind,
         oThis._notificationType
@@ -242,9 +257,9 @@ class PushNotification {
   }
 
   /**
-   * notification type for notification config
+   * Notification type for notification config
    *
-   * @returns {Promise<void>}
+   * @returns {string}
    * @private
    */
   get _notificationType() {
