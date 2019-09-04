@@ -289,4 +289,25 @@ router.get('/search', sanitizer.sanitizeDynamicUrlParams, function(req, res, nex
   Promise.resolve(routeHelper.perform(req, res, next, '/user/Search', 'r_a_v1_u_14', null, dataFormatterFunc));
 });
 
+/* Available Products*/
+router.get('/available-products', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.getAvailableProducts;
+
+  const onServiceSuccess = async function(serviceResponse) {
+    const wrapperFormatterRsp = await new FormatterComposer({
+      resultType: responseEntityKey.products,
+      entityKindToResponseKeyMap: {
+        [entityType.products]: responseEntityKey.products
+      },
+      serviceData: serviceResponse.data
+    }).perform();
+
+    serviceResponse.data = wrapperFormatterRsp.data;
+  };
+
+  Promise.resolve(
+    routeHelper.perform(req, res, next, '/user/GetAvailableProducts', 'r_a_v1_u_15', null, onServiceSuccess)
+  );
+});
+
 module.exports = router;

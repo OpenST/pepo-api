@@ -562,6 +562,19 @@ const v1Signature = {
       }
     ],
     optional: []
+  },
+  [apiName.getAvailableProducts]: {
+    mandatory: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      },
+      {
+        parameter: 'os',
+        validatorMethods: ['validateString']
+      }
+    ],
+    optional: []
   }
 };
 
