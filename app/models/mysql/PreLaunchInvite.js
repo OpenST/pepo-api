@@ -17,7 +17,6 @@ class PreLaunchInvite extends ModelBase {
    *
    * @augments ModelBase
    *
-   * @constructor
    */
   constructor() {
     super({ dbName: dbName });
@@ -40,6 +39,7 @@ class PreLaunchInvite extends ModelBase {
       'name',
       'profileImageUrl',
       'status',
+      'adminStatus',
       'inviteeUserId',
       'inviteCode',
       'invitedUserCount',
@@ -80,6 +80,7 @@ class PreLaunchInvite extends ModelBase {
       token: dbRow.token,
       secret: dbRow.secret,
       status: preLaunchInviteConstant.statuses[dbRow.status],
+      adminStatus: preLaunchInviteConstant.adminStatuses[dbRow.admin_status],
       inviteeUserId: dbRow.invitee_user_id,
       inviteCode: dbRow.invite_code,
       invitedUserCount: dbRow.invited_user_count,
@@ -184,6 +185,94 @@ class PreLaunchInvite extends ModelBase {
     for (let index = 0; index < dbRows.length; index++) {
       const formatDbRow = oThis.formatDbData(dbRows[index]);
       response[formatDbRow.twitterId] = formatDbRow;
+    }
+
+    return response;
+  }
+
+  /**
+   * Whitelist user
+   *
+   * @param {Number} invite_id
+   *
+   * @return {object}
+   */
+  async whitelistUser(invite_id) {
+    const oThis = this;
+
+    const queryResponse = await oThis
+      .update({ status: preLaunchInviteConstant.invertedAdminStatuses[preLaunchInviteConstant.whitelistedStatus] })
+      .where({ id: invite_id })
+      .fire();
+
+    if (queryResponse.affectedRows === 1) {
+      logger.info(`User with ${invite_id} is now whitelisted`);
+
+      return responseHelper.successWithData({});
+    }
+
+    return queryResponse;
+  }
+
+  /**
+   * Search users for admin whitelisting
+   *
+   * @param {integer} params.limit: limit
+   * @param {integer} params.query: query
+   * @param {string}  params.sortBy: sort string
+   * @param {integer} params.pageNo: page no
+   *
+   * @return {object}
+   */
+  async search(params) {
+    const oThis = this;
+
+    let limit = params.limit,
+      query = params.query,
+      sortBy = params.sortBy,
+      pageNo = params.pageNo,
+      offset = (pageNo - 1) * limit;
+
+    let queryObject = oThis
+      .select([
+        'id',
+        'twitter_id',
+        'email',
+        'name',
+        'profile_image_url',
+        'status',
+        'admin_status',
+        'created_at',
+        'updated_at'
+      ])
+      .limit(limit)
+      .offset(offset);
+
+    if (sortBy == 'ASC') {
+      queryObject.order_by('id asc');
+    } else if (sortBy == 'DESC') {
+      queryObject.order_by('id desc');
+    } else if (sortBy == 'STS_DESC') {
+      queryObject.order_by('FIELD(admin_status, 2,1), id desc');
+    } else if (sortBy == 'STS_ASC') {
+      queryObject.order_by('FIELD(admin_status, 1,2), id desc');
+    } else {
+      queryObject.order_by('id desc');
+    }
+
+    let queryWithWildCards = '%' + query + '%';
+
+    if (query) {
+      queryObject.where(['handle LIKE ? OR name LIKE ?', queryWithWildCards, queryWithWildCards]);
+    }
+
+    let dbRows = await queryObject.fire();
+
+    const response = {};
+
+    for (let index = 0; index < dbRows.length; index++) {
+      const formatDbRow = oThis.formatDbData(dbRows[index]);
+      response[formatDbRow.id] = formatDbRow;
     }
 
     return response;
