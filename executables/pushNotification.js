@@ -5,12 +5,13 @@
  */
 const program = require('commander');
 
-const rootPrefix = '../..',
-  basicHelper = require(rootPrefix + '/helpers/basic'),
-  NotificationHookModel = require(rootPrefix + '/app/models/mysql/NotificationHook'),
+const rootPrefix = '..',
   CronBase = require(rootPrefix + '/executables/CronBase'),
+  NotificationHookModel = require(rootPrefix + '/app/models/mysql/NotificationHook'),
   PushNotificationProcessor = require(rootPrefix + '/lib/pushNotification/Processor'),
   cronProcessesConstants = require(rootPrefix + '/lib/globalConstant/cronProcesses'),
+  notificationHookConstants = require(rootPrefix + '/lib/globalConstant/notificationHook'),
+  basicHelper = require(rootPrefix + '/helpers/basic'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger');
 
@@ -20,7 +21,7 @@ program.on('--help', function() {
   logger.log('');
   logger.log('  Example:');
   logger.log('');
-  logger.log('    node executables/hookProcessors/pushNotification.js --cronProcessId 7');
+  logger.log('    node executables/pushNotification.js --cronProcessId 7');
   logger.log('');
   logger.log('');
 });
@@ -56,20 +57,11 @@ class PushNotification extends CronBase {
 
     oThis.hook = null;
     oThis.hooksToBeProcessed = {};
-    oThis.successResponse = {};
-    oThis.failedHookToBeRetried = {};
+    oThis.responsesMap = {};
 
     oThis.processableHooksPresentFlag = true;
     oThis.canExit = true;
   }
-
-  /**
-   * Run validations on input parameters.
-   *
-   * @return {Promise<void>}
-   * @private
-   */
-  async _validateAndSanitize() {}
 
   /**
    * Start cron
@@ -87,9 +79,6 @@ class PushNotification extends CronBase {
 
       oThis.canExit = false;
 
-      // Add validations here.
-      await oThis._validateAndSanitize();
-
       // Acquire lock
       await oThis._acquireLock();
 
@@ -101,12 +90,6 @@ class PushNotification extends CronBase {
 
         // Process these Hooks.
         await oThis._processHooks();
-
-        // Mark Hooks as processed
-        await oThis._updateStatusToProcessed();
-
-        // For hooks which failed, mark them as failed
-        await oThis.releaseLockAndUpdateStatusForNonProcessedHooks();
       } else {
         logger.log('No processable hook present..');
         logger.log('Sleeping Now...');
@@ -167,10 +150,10 @@ class PushNotification extends CronBase {
     for (let hookId in oThis.hooksToBeProcessed) {
       oThis.hook = oThis.hooksToBeProcessed[hookId];
 
+      console.log('oThis.hook--------', oThis.hook);
+
       await oThis._processHook().catch(function(err) {
-        oThis.failedHookToBeRetried[oThis.hook.id] = {
-          exception: err
-        };
+        // create error logs entry.
       });
     }
   }
@@ -200,27 +183,6 @@ class PushNotification extends CronBase {
   }
 
   /**
-   * Release lock and update status for non processed hooks
-   *
-   * @returns {Promise<void>}
-   */
-  async releaseLockAndUpdateStatusForNonProcessedHooks() {
-    const oThis = this;
-  }
-
-  /**
-   * This function provides info whether the process has to exit.
-   *
-   * @returns {boolean}
-   * @private
-   */
-  _pendingTasksDone() {
-    const oThis = this;
-
-    return oThis.canExit;
-  }
-
-  /**
    * Function which will process the hook.
    *
    * @returns {Promise<void>}
@@ -237,30 +199,21 @@ class PushNotification extends CronBase {
 
     if (pushNotificationProcessorRsp.isSuccess()) {
       let firebaseAPIResponse = pushNotificationProcessorRsp.data;
+      oThis.responsesMap[oThis.hook.id] = firebaseAPIResponse;
+
       if (firebaseAPIResponse.failureResponseCount > 0) {
         await oThis._afterProcessHook(oThis.hook, firebaseAPIResponse.responseMap);
       } else {
-        oThis.successResponse[oThis.hook.id] = pushNotificationProcessorRsp;
+        await new NotificationHookModel()
+          .update({
+            status: notificationHookConstants.invertedStatuses[notificationHookConstants.successStatus],
+            response: JSON.stringify(oThis.responsesMap)
+          })
+          .where({ id: oThis.hook.id })
+          .fire();
       }
     } else {
       logger.error('ERROR----------------response------------------', pushNotificationProcessorRsp);
-      oThis.failedHookToBeRetried[oThis.hook.id] = pushNotificationProcessorRsp.data;
-    }
-  }
-
-  /**
-   * Function which will mark the hook processed.
-   *
-   * @returns {Promise<void>}
-   * @private
-   */
-  async _updateStatusToProcessed() {
-    const oThis = this;
-
-    for (let hookId in oThis.hooksToBeProcessed) {
-      if (oThis.successResponse[hookId]) {
-        await new NotificationHookModel().markStatusAsProcessed(hookId);
-      }
     }
   }
 
@@ -275,19 +228,22 @@ class PushNotification extends CronBase {
   async _afterProcessHook(hook, userDeviceIdToResponseMap) {
     const oThis = this;
 
-    let userDevicesIdsToBeReinserted = [];
+    let userDevicesIdsToBeReinserted = [],
+      failureResponsesMap = {};
 
     for (let userDeviceId in userDeviceIdToResponseMap) {
       let response = userDeviceIdToResponseMap[userDeviceId];
       if (response.success === 'false') {
+        failureResponsesMap[userDeviceId] = response;
+
         switch (response.error.code) {
-          case 'messaging/invalid-argument':
+          case notificationHookConstants.invalidArgumentErrorCode:
             break;
 
-          case 'messaging/unregistered':
+          case notificationHookConstants.unregisteredErrorCode:
             break;
 
-          case 'messaging/third_party_auth_error':
+          case notificationHookConstants.thirdPartyAuthErrorCode:
             break;
 
           default:
@@ -295,6 +251,67 @@ class PushNotification extends CronBase {
         }
       }
     }
+
+    await oThis._reinsertIntoHooks(userDevicesIdsToBeReinserted, failureResponsesMap);
+  }
+
+  /**
+   *
+   *
+   * @param userDevicesIdsToBeReinserted
+   * @param failureResponsesMap
+   * @returns {Promise<any>}
+   * @private
+   */
+  async _reinsertIntoHooks(userDevicesIdsToBeReinserted, failureResponsesMap) {
+    const oThis = this;
+
+    let currentRetryCount = oThis.hook.retryCount,
+      statusToBeInserted = null;
+
+    if (currentRetryCount === notificationHookConstants.retryLimitForFailedHooks) {
+      statusToBeInserted = notificationHookConstants.invertedStatuses[notificationHookConstants.completelyFailedStatus];
+    } else {
+      statusToBeInserted = notificationHookConstants.invertedStatuses[notificationHookConstants.pendingStatus];
+    }
+
+    let insertParams = {
+      event_type: oThis.hook.eventType,
+      user_device_ids: JSON.stringify(userDevicesIdsToBeReinserted),
+      raw_notification_payload: oThis.hook.rawNotificationPayload,
+      execution_timestamp: Math.round(Date.now() / 1000),
+      lock_identifier: null,
+      locked_at: null,
+      retry_count: currentRetryCount + 1,
+      status: statusToBeInserted,
+      response: JSON.stringify(failureResponsesMap)
+    };
+
+    console.log('insertParams----', insertParams);
+
+    return new NotificationHookModel().insert(insertParams).fire();
+  }
+
+  /**
+   * Validate and sanitize params.
+   *
+   *
+   * @private
+   */
+  _validateAndSanitize() {
+    const oThis = this;
+  }
+
+  /**
+   * This function provides info whether the process has to exit.
+   *
+   * @returns {boolean}
+   * @private
+   */
+  _pendingTasksDone() {
+    const oThis = this;
+
+    return oThis.canExit;
   }
 
   /**

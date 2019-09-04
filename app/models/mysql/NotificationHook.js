@@ -38,13 +38,15 @@ class NotificationHook extends ModelBase {
 
     const formattedData = {
       id: dbRow.id,
-      recipients: JSON.parse(dbRow.recipients),
+      userDeviceIds: JSON.parse(dbRow.user_device_ids),
       rawNotificationPayload: JSON.parse(dbRow.raw_notification_payload),
       eventType: notificationHookConstants.eventTypes[dbRow.event_type],
       executionTimestamp: dbRow.execution_timestamp,
       lockIdentifier: dbRow.lock_identifier,
       lockedAt: dbRow.locked_at,
       status: notificationHookConstants.statuses[dbRow.status],
+      retryCount: dbRow.retry_count,
+      response: JSON.parse(dbRow.response),
       createdAt: dbRow.created_at,
       updatedAt: dbRow.updated_at
     };
@@ -90,6 +92,7 @@ class NotificationHook extends ModelBase {
         locked_at: Math.round(Date.now() / 1000)
       })
       .where('lock_identifier IS NULL')
+      .where(['retry_count <= ?', notificationHookConstants.retryLimitForFailedHooks])
       .where(['status = ?', notificationHookConstants.invertedStatuses[notificationHookConstants.failedStatus]])
       .limit(notificationHookConstants.batchSizeForHooksProcessor)
       .fire();
@@ -121,12 +124,12 @@ class NotificationHook extends ModelBase {
   }
 
   /**
-   * Mark status as processed.
+   * Mark status as processed successfully.
    *
    * @param hookId
    * @returns {Promise<void>}
    */
-  async markStatusAsProcessed(hookId) {
+  async markStatusAsProcessedSuccess(hookId) {
     const oThis = this;
 
     await oThis
@@ -140,7 +143,7 @@ class NotificationHook extends ModelBase {
   }
 
   /**
-   * Mark hook as failed.
+   * Mark failed hook as pending.
    *
    * @param {number} hookId
    *
@@ -151,7 +154,7 @@ class NotificationHook extends ModelBase {
 
     await oThis
       .update({
-        status: notificationHookConstants.invertedStatuses[notificationHookConstants.failedStatus],
+        status: notificationHookConstants.invertedStatuses[notificationHookConstants.pendingStatus],
         lock_identifier: null,
         locked_at: null
       })
