@@ -77,7 +77,7 @@ class UserDevice extends ModelBase {
     const oThis = this;
 
     const dbRows = await oThis
-      .select('*')
+      .select('id, user_id')
       .where({ user_id: userIds })
       .fire();
 
@@ -85,7 +85,9 @@ class UserDevice extends ModelBase {
 
     for (let index = 0; index < dbRows.length; index++) {
       const formatDbRow = oThis.formatDbData(dbRows[index]);
-      response[formatDbRow.userId] = formatDbRow;
+
+      response[formatDbRow.userId] = response[formatDbRow.userId] || [];
+      response[formatDbRow.userId].push(formatDbRow.id);
     }
 
     return response;
@@ -133,11 +135,11 @@ class UserDevice extends ModelBase {
   static async flushCache(params) {
     const promisesArray = [];
 
-    const UserDeviceByUserIds = require(rootPrefix + '/lib/cacheManagement/multi/UserDeviceByUserIds');
-    promisesArray.push(new UserDeviceByUserIds({ userIds: [params.userId] }).clear());
+    const UserDeviceIdsByUserIds = require(rootPrefix + '/lib/cacheManagement/multi/UserDeviceIdsByUserIds');
+    promisesArray.push(new UserDeviceIdsByUserIds({ userIds: [params.userId] }).clear());
 
     const UserDeviceByIds = require(rootPrefix + '/lib/cacheManagement/multi/UserDeviceByIds');
-    promisesArray.push(new UserDeviceByIds({ ids: params.id }).clear());
+    promisesArray.push(new UserDeviceByIds({ ids: [params.id] }).clear());
 
     await Promise.all(promisesArray);
   }

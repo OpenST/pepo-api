@@ -37,6 +37,20 @@ const v1Signature = {
     ],
     optional: []
   },
+  [apiName.logout]: {
+    mandatory: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      }
+    ],
+    optional: [
+      {
+        parameter: 'device_id',
+        validatorMethods: ['validateString']
+      }
+    ]
+  },
   [apiName.recoveryInfo]: {
     mandatory: [
       {
