@@ -497,7 +497,7 @@ class BasicHelper {
    */
   parseAmpersandSeparatedKeyValue(response) {
     const finalResponse = {};
-    response.split('&').forEach(function(keyValPair) {
+    response.split('&amp;').forEach(function(keyValPair) {
       const val = keyValPair.split('=');
       finalResponse[val[0]] = val[1];
     });

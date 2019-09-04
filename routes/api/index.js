@@ -3,7 +3,7 @@ const express = require('express');
 const rootPrefix = '../..',
   apiVersions = require(rootPrefix + '/lib/globalConstant/apiVersions'),
   v1Routes = require(rootPrefix + '/routes/api/v1/index'),
-  webRoutes = require(rootPrefix + '/routes/api/v1/web'),
+  webRoutes = require(rootPrefix + '/routes/api/web/index'),
   adminRoutes = require(rootPrefix + '/routes/api/admin/index');
 
 const router = express.Router();
@@ -21,7 +21,7 @@ const appendV1Version = function(req, res, next) {
 };
 
 router.use('/v1', appendV1Version, v1Routes);
-router.use('/web', webRoutes);
+router.use('/web', appendV1Version, webRoutes);
 router.use('/admin', adminRoutes);
 
 module.exports = router;
