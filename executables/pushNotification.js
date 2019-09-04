@@ -9,9 +9,13 @@ const rootPrefix = '..',
   CronBase = require(rootPrefix + '/executables/CronBase'),
   NotificationHookModel = require(rootPrefix + '/app/models/mysql/NotificationHook'),
   PushNotificationProcessor = require(rootPrefix + '/lib/pushNotification/Processor'),
+  UserDeviceModel = require(rootPrefix + '/app/models/mysql/UserDevice'),
   cronProcessesConstants = require(rootPrefix + '/lib/globalConstant/cronProcesses'),
   notificationHookConstants = require(rootPrefix + '/lib/globalConstant/notificationHook'),
+  userDeviceConstants = require(rootPrefix + '/lib/globalConstant/userDevice'),
   basicHelper = require(rootPrefix + '/helpers/basic'),
+  errorLogsConstants = require(rootPrefix + '/lib/globalConstant/errorLogs'),
+  createErrorLogsEntry = require(rootPrefix + '/lib/errorLogs/createEntry'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger');
 
@@ -57,7 +61,6 @@ class PushNotification extends CronBase {
 
     oThis.hook = null;
     oThis.hooksToBeProcessed = {};
-    oThis.responsesMap = {};
 
     oThis.processableHooksPresentFlag = true;
     oThis.canExit = true;
@@ -150,12 +153,164 @@ class PushNotification extends CronBase {
     for (let hookId in oThis.hooksToBeProcessed) {
       oThis.hook = oThis.hooksToBeProcessed[hookId];
 
-      console.log('oThis.hook--------', oThis.hook);
-
-      await oThis._processHook().catch(function(err) {
-        // create error logs entry.
+      await oThis._processHook().catch(async function(err) {
+        const errorIdentifierStr = `firebase_error:e_pn_1`,
+          debugOptions = {
+            error: err
+          };
+        await oThis._notifyErrorStates(errorIdentifierStr, debugOptions);
       });
     }
+  }
+
+  /**
+   * Function which will process the hook.
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _processHook() {
+    const oThis = this;
+
+    logger.step('_processHook called for: ', oThis.hook);
+
+    let pushNotificationProcessorRsp = await new PushNotificationProcessor({ hook: oThis.hook }).perform();
+
+    logger.log('HookProcessorKlass::response  =========================', pushNotificationProcessorRsp);
+
+    if (pushNotificationProcessorRsp.isSuccess()) {
+      let firebaseAPIResponse = pushNotificationProcessorRsp.data,
+        statusToBeInserted = null;
+
+      if (firebaseAPIResponse.failureResponseCount > 0) {
+        statusToBeInserted = notificationHookConstants.failedStatus;
+        await oThis._afterProcessHook(oThis.hook, firebaseAPIResponse.responseMap);
+      } else {
+        statusToBeInserted = notificationHookConstants.successStatus;
+      }
+
+      return new NotificationHookModel().updateStatusAndInsertResponse(
+        oThis.hook.id,
+        statusToBeInserted,
+        firebaseAPIResponse
+      );
+    } else {
+      logger.error('ERROR----------------response------------------', pushNotificationProcessorRsp);
+      const errorIdentifierStr = `firebase_error:e_pn_2`,
+        debugOptions = {
+          hootId: oThis.hook.id,
+          pushNotificationProcessorRsp: pushNotificationProcessorRsp
+        };
+      await oThis._notifyErrorStates(errorIdentifierStr, debugOptions);
+    }
+  }
+
+  /**
+   * After hooks process.
+   *
+   * @param hook
+   * @param userDeviceIdToResponseMap
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _afterProcessHook(hook, userDeviceIdToResponseMap) {
+    const oThis = this;
+
+    for (let userDeviceId in userDeviceIdToResponseMap) {
+      let response = userDeviceIdToResponseMap[userDeviceId];
+      if (response.success == false) {
+        switch (response.error.code) {
+          case notificationHookConstants.unregisteredErrorCode:
+            logger.error('Error::unregisteredErrorCode----------------------------', response.error.code);
+            await new UserDeviceModel()
+              .update({ status: userDeviceConstants.invertedStatuses[userDeviceConstants.expiredStatus] })
+              .where({
+                id: hook.id
+              })
+              .fire();
+
+            await UserDeviceModel.flushCache({ id: hook.id });
+
+            break;
+
+          case notificationHookConstants.serverUnavailableErrorCode:
+            logger.error('Error----------------------------', response.error.code);
+            logger.log('serverUnavailable...\nSleeping Now...');
+            await basicHelper.sleep(5000);
+            break;
+
+          case notificationHookConstants.invalidArgumentErrorCode:
+            logger.error('Error::invalidArgumentErrorCode----------------------------', response.error.code);
+            break;
+
+          case notificationHookConstants.tokenNotRegisteredErrorCode:
+            logger.error('Error::tokenNotRegisteredErrorCode----------------------------', response.error.code);
+            break;
+
+          default:
+            logger.error('Error::default----------------------------', response);
+
+            const errorIdentifierStr = `firebase_error:${response.error.code}:e_pn_3`,
+              debugOptions = {
+                notificationHooksRowId: hook.id,
+                userDeviceId: userDeviceId,
+                response: response
+              };
+            await oThis._notifyErrorStates(errorIdentifierStr, debugOptions);
+        }
+      }
+    }
+  }
+
+  /**
+   * Insert entry in error_logs table for firebase error state.
+   *
+   * @param {string} errorIdentifier: errorIdentifier
+   * @param {object} debugOptions:  debugOptions
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _notifyErrorStates(errorIdentifier, debugOptions) {
+    const errorObject = responseHelper.error({
+      internal_error_identifier: errorIdentifier,
+      api_error_identifier: 'firebase_error',
+      debug_options: debugOptions
+    });
+    await createErrorLogsEntry.perform(errorObject, errorLogsConstants.highSeverity);
+  }
+
+  /**
+   * Re-insert into hooks table.
+   *
+   * @param userDevicesIdsToBeReinserted
+   * @returns {Promise<any>}
+   * @private
+   */
+  async _reinsertIntoHooks(userDevicesIdsToBeReinserted) {
+    const oThis = this;
+
+    let currentRetryCount = oThis.hook.retryCount,
+      statusToBeInserted = null;
+
+    if (currentRetryCount === notificationHookConstants.retryLimitForFailedHooks) {
+      statusToBeInserted = notificationHookConstants.invertedStatuses[notificationHookConstants.completelyFailedStatus];
+    } else {
+      statusToBeInserted = notificationHookConstants.invertedStatuses[notificationHookConstants.pendingStatus];
+    }
+
+    let insertParams = {
+      user_device_ids: JSON.stringify(userDevicesIdsToBeReinserted),
+      raw_notification_payload: JSON.stringify(oThis.hook.rawNotificationPayload),
+      event_type: notificationHookConstants.invertedEventTypes[oThis.hook.eventType],
+      execution_timestamp: Math.round(Date.now() / 1000),
+      lock_identifier: null,
+      locked_at: null,
+      retry_count: currentRetryCount + 1,
+      status: statusToBeInserted
+    };
+
+    return new NotificationHookModel().insert(insertParams).fire();
   }
 
   /**
@@ -180,116 +335,6 @@ class PushNotification extends CronBase {
     const oThis = this;
 
     return new NotificationHookModel().acquireLocksOnFailedHooks();
-  }
-
-  /**
-   * Function which will process the hook.
-   *
-   * @returns {Promise<void>}
-   * @private
-   */
-  async _processHook() {
-    const oThis = this;
-
-    logger.step('_processHook called for: ', oThis.hook);
-
-    let pushNotificationProcessorRsp = await new PushNotificationProcessor({ hook: oThis.hook }).perform();
-
-    logger.log('HookProcessorKlass::response  =========================', pushNotificationProcessorRsp);
-
-    if (pushNotificationProcessorRsp.isSuccess()) {
-      let firebaseAPIResponse = pushNotificationProcessorRsp.data;
-      oThis.responsesMap[oThis.hook.id] = firebaseAPIResponse;
-
-      if (firebaseAPIResponse.failureResponseCount > 0) {
-        await oThis._afterProcessHook(oThis.hook, firebaseAPIResponse.responseMap);
-      } else {
-        await new NotificationHookModel()
-          .update({
-            status: notificationHookConstants.invertedStatuses[notificationHookConstants.successStatus],
-            response: JSON.stringify(oThis.responsesMap)
-          })
-          .where({ id: oThis.hook.id })
-          .fire();
-      }
-    } else {
-      logger.error('ERROR----------------response------------------', pushNotificationProcessorRsp);
-    }
-  }
-
-  /**
-   * After hooks process.
-   *
-   * @param hook
-   * @param userDeviceIdToResponseMap
-   * @returns {Promise<void>}
-   * @private
-   */
-  async _afterProcessHook(hook, userDeviceIdToResponseMap) {
-    const oThis = this;
-
-    let userDevicesIdsToBeReinserted = [],
-      failureResponsesMap = {};
-
-    for (let userDeviceId in userDeviceIdToResponseMap) {
-      let response = userDeviceIdToResponseMap[userDeviceId];
-      if (response.success === 'false') {
-        failureResponsesMap[userDeviceId] = response;
-
-        switch (response.error.code) {
-          case notificationHookConstants.invalidArgumentErrorCode:
-            break;
-
-          case notificationHookConstants.unregisteredErrorCode:
-            break;
-
-          case notificationHookConstants.thirdPartyAuthErrorCode:
-            break;
-
-          default:
-            userDevicesIdsToBeReinserted.push(userDeviceId);
-        }
-      }
-    }
-
-    await oThis._reinsertIntoHooks(userDevicesIdsToBeReinserted, failureResponsesMap);
-  }
-
-  /**
-   *
-   *
-   * @param userDevicesIdsToBeReinserted
-   * @param failureResponsesMap
-   * @returns {Promise<any>}
-   * @private
-   */
-  async _reinsertIntoHooks(userDevicesIdsToBeReinserted, failureResponsesMap) {
-    const oThis = this;
-
-    let currentRetryCount = oThis.hook.retryCount,
-      statusToBeInserted = null;
-
-    if (currentRetryCount === notificationHookConstants.retryLimitForFailedHooks) {
-      statusToBeInserted = notificationHookConstants.invertedStatuses[notificationHookConstants.completelyFailedStatus];
-    } else {
-      statusToBeInserted = notificationHookConstants.invertedStatuses[notificationHookConstants.pendingStatus];
-    }
-
-    let insertParams = {
-      event_type: oThis.hook.eventType,
-      user_device_ids: JSON.stringify(userDevicesIdsToBeReinserted),
-      raw_notification_payload: oThis.hook.rawNotificationPayload,
-      execution_timestamp: Math.round(Date.now() / 1000),
-      lock_identifier: null,
-      locked_at: null,
-      retry_count: currentRetryCount + 1,
-      status: statusToBeInserted,
-      response: JSON.stringify(failureResponsesMap)
-    };
-
-    console.log('insertParams----', insertParams);
-
-    return new NotificationHookModel().insert(insertParams).fire();
   }
 
   /**

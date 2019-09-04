@@ -124,6 +124,28 @@ class NotificationHook extends ModelBase {
   }
 
   /**
+   * Update status and insert responses.
+   *
+   * @param hookId
+   * @param status
+   * @param response
+   * @returns {Promise<void>}
+   */
+  async updateStatusAndInsertResponse(hookId, status, response) {
+    const oThis = this;
+
+    await oThis
+      .update({
+        lock_identifier: null,
+        locked_at: null,
+        status: notificationHookConstants.invertedStatuses[status],
+        response: JSON.stringify(response)
+      })
+      .where({ id: hookId })
+      .fire();
+  }
+
+  /**
    * Mark status as processed successfully.
    *
    * @param hookId
