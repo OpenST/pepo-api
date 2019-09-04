@@ -28,6 +28,27 @@ class PreLaunchInvite extends ModelBase {
   }
 
   /**
+   * List Of formatted column names that can be exposed by service.
+   *
+   * @returns {array}
+   */
+  safeFormattedColumnNames() {
+    return [
+      'id',
+      'twitterId',
+      'email',
+      'name',
+      'profileImageUrl',
+      'status',
+      'inviteeUserId',
+      'inviteCode',
+      'invitedUserCount',
+      'createdAt',
+      'updatedAt'
+    ];
+  }
+
+  /**
    * Format db data.
    *
    * @param {object} dbRow
@@ -95,7 +116,19 @@ class PreLaunchInvite extends ModelBase {
     const oThis = this;
 
     const dbRows = await oThis
-      .select('*')
+      .select([
+        'id',
+        'twitter_id',
+        'email',
+        'name',
+        'profile_image_url',
+        'status',
+        'invitee_user_id',
+        'invite_code',
+        'invited_user_count',
+        'created_at',
+        'updated_at'
+      ])
       .where({ id: ids })
       .fire();
 
@@ -104,6 +137,53 @@ class PreLaunchInvite extends ModelBase {
     for (let index = 0; index < dbRows.length; index++) {
       const formatDbRow = oThis.formatDbData(dbRows[index]);
       response[formatDbRow.id] = formatDbRow;
+    }
+
+    return response;
+  }
+
+  /**
+   * Fetch secure pre launch invite by id.
+   *
+   * @param {number} id: user id
+   *
+   * @return {object}
+   */
+  async fetchSecureById(id) {
+    const oThis = this;
+
+    const dbRows = await oThis
+      .select('*')
+      .where(['id = ?', id])
+      .fire();
+
+    if (dbRows.length === 0) {
+      return {};
+    }
+
+    return oThis.formatDbData(dbRows[0]);
+  }
+
+  /**
+   * Fetch pre launch invite by twitterIds.
+   *
+   * @param {array} twitterIds
+   *
+   * @return {object}
+   */
+  async fetchByTwitterIds(twitterIds) {
+    const oThis = this;
+
+    const dbRows = await oThis
+      .select(['id', 'twitter_id'])
+      .where({ twitter_id: twitterIds })
+      .fire();
+
+    const response = {};
+
+    for (let index = 0; index < dbRows.length; index++) {
+      const formatDbRow = oThis.formatDbData(dbRows[index]);
+      response[formatDbRow.twitterId] = formatDbRow;
     }
 
     return response;
