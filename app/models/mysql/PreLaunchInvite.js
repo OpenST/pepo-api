@@ -1,7 +1,6 @@
 const rootPrefix = '../../..',
   util = require(rootPrefix + '/lib/util'),
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
-  util = require(rootPrefix + '/lib/util'),
   coreConstants = require(rootPrefix + '/config/coreConstants'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
@@ -219,7 +218,14 @@ class PreLaunchInvite extends ModelBase {
     if (queryResponse.affectedRows === 1) {
       logger.info(`User with ${invite_id} is now whitelisted`);
 
-      // TODO: Flush caches here
+      const userObject = await oThis
+        .select('twitter_id')
+        .where({ id: invite_id })
+        .fire();
+
+      const twitterId = userObject[0].twitter_id;
+
+      await PreLaunchInvite.flushCache({ id: invite_id, twitterId: twitterId });
 
       return responseHelper.successWithData({});
     }
@@ -361,6 +367,10 @@ class PreLaunchInvite extends ModelBase {
 
   /**
    * Flush cache.
+   *
+   * @param {object} params
+   * @param {number} params.id
+   * @param {number} params.twitterId
    *
    * @returns {Promise<*>}
    */
