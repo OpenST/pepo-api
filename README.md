@@ -45,6 +45,11 @@
                        proxy_cookie_domain localhost pepodev.com;
                        proxy_pass http://localhost:4000/admin;
                }
+
+               location /builtAssets {
+                        proxy_cookie_domain localhost pepodev.com;
+                        proxy_pass http://localhost:4000;
+               }
    
                location / {
                        proxy_cookie_domain localhost pepodev.com;
