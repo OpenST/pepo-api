@@ -74,7 +74,9 @@ class SendDoubleOptIn extends ServiceBase {
       return Promise.reject(new Error('Error while inserting data into pre_launch_invites table.'));
     }
 
-    let doubleOptInTokenStr = `${insertResponse.insertId.toString()}:${temporaryDoubleOptInToken}`;
+    let doubleOptInTokenStr = `${insertResponse.insertId.toString()}:${temporaryDoubleOptInToken}:${Math.floor(
+      Date.now() / 1000
+    )}`;
     oThis.doubleOptInToken = localCipher.encrypt(coreConstants.PA_EMAIL_TOKENS_DECRIPTOR_KEY, doubleOptInTokenStr);
   }
 

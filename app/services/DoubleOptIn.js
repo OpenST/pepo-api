@@ -25,6 +25,7 @@ class SendDoubleOptIn extends ServiceBase {
     oThis.token = null;
     oThis.preLaunchInviteId = null;
     oThis.temporaryTokenObj = null;
+    oThis.tokenCreationTimestamp = null;
   }
 
   /**
@@ -55,12 +56,17 @@ class SendDoubleOptIn extends ServiceBase {
     let decryptedT = localCipher.decrypt(coreConstants.PA_EMAIL_TOKENS_DECRIPTOR_KEY, oThis.t),
       splitedT = decryptedT.split(':');
 
-    if (splitedT.length > 2) {
+    if (splitedT.length !== 3) {
       return oThis._invalidUrlError('a_s_do_1');
     }
 
     oThis.token = splitedT[1];
     oThis.preLaunchInviteId = parseInt(splitedT[0]);
+    oThis.tokenCreationTimestamp = splitedT[2];
+
+    if (Math.floor(Date.now() / 1000) - temporaryTokenConstant.tokenExpiryTimestamp > oThis.tokenCreationTimestamp) {
+      await oThis._markTokenAsInactive();
+    }
   }
 
   /**
@@ -93,9 +99,9 @@ class SendDoubleOptIn extends ServiceBase {
   }
 
   /**
-   * Create double opt in token
+   * Mark token as used
    *
-   * @returns {Promise<never>}
+   * @returns {Promise<void>}
    * @private
    */
   async _markTokenAsUsed() {
@@ -113,6 +119,20 @@ class SendDoubleOptIn extends ServiceBase {
         kind: temporaryTokenConstant.invertedKinds[temporaryTokenConstant.preLaunchInviteKind],
         status: temporaryTokenConstant.invertedStatuses[temporaryTokenConstant.activeStatus]
       })
+      .fire();
+  }
+
+  /**
+   * Mark token as in active
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _markTokenAsInactive() {
+    const oThis = this;
+
+    await new TemporaryTokenModel()
+      .update({ status: temporaryTokenConstant.invertedStatuses[temporaryTokenConstant.inActiveStatus] })
+      .where({ id: oThis.preLaunchInviteId })
       .fire();
   }
 
