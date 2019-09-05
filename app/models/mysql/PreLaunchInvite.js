@@ -68,6 +68,7 @@ class PreLaunchInvite extends ModelBase {
    * @param {string} dbRow.token
    * @param {string} dbRow.secret
    * @param {number} dbRow.status
+   * @param {number} dbRow.admin_status
    * @param {number} dbRow.invitee_user_id
    * @param {string} dbRow.invite_code
    * @param {number} dbRow.invited_user_count
@@ -203,29 +204,29 @@ class PreLaunchInvite extends ModelBase {
   /**
    * Whitelist user.
    *
-   * @param {number} invite_id
+   * @param {number} inviteId
    *
-   * @returns {Result}
+   * @returns {Promise<result>}
    */
-  async whitelistUser(invite_id) {
+  async whitelistUser(inviteId) {
     const oThis = this;
 
     const queryResponse = await oThis
       .update({ status: preLaunchInviteConstants.invertedAdminStatuses[preLaunchInviteConstants.whitelistedStatus] })
-      .where({ id: invite_id })
+      .where({ id: inviteId })
       .fire();
 
     if (queryResponse.affectedRows === 1) {
-      logger.info(`User with ${invite_id} is now whitelisted`);
+      logger.info(`User with ${inviteId} is now whitelisted`);
 
       const userObject = await oThis
         .select('twitter_id')
-        .where({ id: invite_id })
+        .where({ id: inviteId })
         .fire();
 
       const twitterId = userObject[0].twitter_id;
 
-      await PreLaunchInvite.flushCache({ id: invite_id, twitterId: twitterId });
+      await PreLaunchInvite.flushCache({ id: inviteId, twitterId: twitterId });
 
       return responseHelper.successWithData({});
     }
@@ -233,13 +234,14 @@ class PreLaunchInvite extends ModelBase {
     return responseHelper.error({
       internal_error_identifier: 'a_m_m_pli_1',
       api_error_identifier: 'something_went_wrong',
-      debug_options: { inviteId: invite_id }
+      debug_options: { inviteId: inviteId }
     });
   }
 
   /**
    * Search users for admin whitelisting.
    *
+   * @param {object} params
    * @param {integer} params.limit: limit
    * @param {integer} params.query: query
    * @param {string}  params.sortBy: sort string
@@ -318,6 +320,7 @@ class PreLaunchInvite extends ModelBase {
    * @param {object} preLaunchInviteObj
    * @param {string} decryptedEncryptionSalt
    * @param {object} options
+   * @param {number} options.timestamp
    *
    * @returns {string}
    */
@@ -339,6 +342,7 @@ class PreLaunchInvite extends ModelBase {
    * @param {object} preLaunchInviteObj
    * @param {string} decryptedEncryptionSalt
    * @param {object} options
+   * @param {number} options.timestamp
    *
    * @returns {string}
    */
