@@ -36,7 +36,7 @@ class ApproveUsersAsCreator extends ServiceBase {
 
     oThis.userIds = params.user_ids;
     oThis.currentAdmin = params.current_admin;
-    oThis.currentAdminId = oThis.currentAdmin.id;
+    oThis.currentAdminId = params.current_admin.id;
 
     oThis.userObjects = {};
   }

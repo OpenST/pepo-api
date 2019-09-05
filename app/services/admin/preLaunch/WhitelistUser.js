@@ -1,12 +1,6 @@
-/**
- * Module to whitelist users
- *
- * @module app/services/admin/preLaunc/WhitelistUser
- */
 const rootPrefix = '../../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
-  PreLaunchInviteModel = require(rootPrefix + '/app/models/mysql/PreLaunchInvite'),
-  responseHelper = require(rootPrefix + '/lib/formatter/response');
+  PreLaunchInviteModel = require(rootPrefix + '/app/models/mysql/PreLaunchInvite');
 
 /**
  * Class to whitelist users by admin.
@@ -36,15 +30,13 @@ class WhitelistUser extends ServiceBase {
   /**
    * Main performer for class.
    *
-   * @returns {Promise<void>}
+   * @returns {Promise<Result>}
    * @private
    */
   async _asyncPerform() {
     const oThis = this;
 
-    await new PreLaunchInviteModel().whitelistUser(oThis.inviteId);
-
-    return responseHelper.successWithData({});
+    return new PreLaunchInviteModel().whitelistUser(oThis.inviteId);
   }
 }
 

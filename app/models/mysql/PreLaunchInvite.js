@@ -197,11 +197,11 @@ class PreLaunchInvite extends ModelBase {
   }
 
   /**
-   * Whitelist user
+   * Whitelist user.
    *
-   * @param {Number} invite_id
+   * @param {number} invite_id
    *
-   * @returns {object}
+   * @returns {Result}
    */
   async whitelistUser(invite_id) {
     const oThis = this;
@@ -217,11 +217,15 @@ class PreLaunchInvite extends ModelBase {
       return responseHelper.successWithData({});
     }
 
-    return queryResponse;
+    return responseHelper.error({
+      internal_error_identifier: 'a_m_m_pli_1',
+      api_error_identifier: 'something_went_wrong',
+      debug_options: { inviteId: invite_id }
+    });
   }
 
   /**
-   * Search users for admin whitelisting
+   * Search users for admin whitelisting.
    *
    * @param {integer} params.limit: limit
    * @param {integer} params.query: query
