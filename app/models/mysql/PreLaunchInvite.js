@@ -274,19 +274,19 @@ class PreLaunchInvite extends ModelBase {
       .offset(offset);
 
     switch (sortBy) {
-      case 'ASC': {
+      case preLaunchInviteConstants.ascendingSortByValue: {
         queryObject.order_by('id asc');
         break;
       }
-      case 'DESC': {
+      case preLaunchInviteConstants.descendingSortByValue: {
         queryObject.order_by('id desc');
         break;
       }
-      case 'STS_ASC': {
+      case preLaunchInviteConstants.ascendingStatusSortByValue: {
         queryObject.order_by('FIELD(admin_status, 1,2), id desc');
         break;
       }
-      case 'STS_DESC': {
+      case preLaunchInviteConstants.descendingStatusSortByValue: {
         queryObject.order_by('FIELD(admin_status, 2,1), id desc');
         break;
       }
