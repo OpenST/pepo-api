@@ -42,6 +42,19 @@ const v1Signature = {
         validatorMethods: ['validateString']
       }
     ]
+  },
+  [apiName.preLaunchInviteSubscribeEmail]: {
+    mandatory: [
+      {
+        parameter: 'current_pre_launch_invite',
+        validatorMethods: ['validateNonEmptyObject']
+      },
+      {
+        parameter: 'email',
+        validatorMethods: ['validateString']
+      }
+    ],
+    optional: []
   }
 };
 

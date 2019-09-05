@@ -70,6 +70,16 @@ const webErrorConfig = {
     code: 'invalid',
     message: 'Invalid parameter status.'
   },
+  invalid_email: {
+    parameter: 'email',
+    code: 'invalid',
+    message: 'Invalid parameter email.'
+  },
+  email_already_doptin: {
+    parameter: 'email',
+    code: 'invalid',
+    message: 'Email is already Double Opt in.'
+  },
   invalid_pagination_identifier: {
     parameter: 'pagination_identifier',
     code: 'invalid',
