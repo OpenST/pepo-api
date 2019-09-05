@@ -1,7 +1,7 @@
 const rootPrefix = '../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
   databaseConstants = require(rootPrefix + '/lib/globalConstant/database'),
-  TwitterAuthTokenConstant = require(rootPrefix + '/lib/globalConstant/TwitterAuthToken');
+  TwitterAuthTokenConstant = require(rootPrefix + '/lib/globalConstant/twitterAuthToken');
 
 // Declare variables.
 const dbName = databaseConstants.twitterDbName;

@@ -3,7 +3,7 @@ const rootPrefix = '../../..',
   TwitterAuthTokenModel = require(rootPrefix + '/app/models/mysql/TwitterAuthToken'),
   ConnectService = require(rootPrefix + '/app/services/preLaunchInvite/Connect'),
   AuthorizationTwitterRequestClass = require(rootPrefix + '/lib/twitter/oAuth1.0/Authorization'),
-  twitterAuthTokenConstants = require(rootPrefix + '/app/models/mysql/TwitterAuthToken'),
+  twitterAuthTokenConstants = require(rootPrefix + '/lib/globalConstant/twitterAuthToken'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger');
 
