@@ -272,6 +272,7 @@ class GetVideoList extends ServiceBase {
       imageMap: oThis.profileResponse.imageMap,
       videoMap: oThis.profileResponse.videoMap,
       [entityType.videoDetailsMap]: oThis.profileResponse.videoDetailsMap,
+      [entityType.videoDescriptionsMap]: oThis.profileResponse.videoDescriptionMap,
       [entityType.currentUserUserContributionsMap]: oThis.profileResponse.currentUserUserContributionsMap,
       [entityType.currentUserVideoContributionsMap]: oThis.profileResponse.currentUserVideoContributionsMap,
       [entityType.userProfileAllowedActions]: oThis.profileResponse.userProfileAllowedActions,
