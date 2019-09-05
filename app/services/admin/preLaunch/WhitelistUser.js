@@ -9,26 +9,32 @@ const rootPrefix = '../../../..',
   responseHelper = require(rootPrefix + '/lib/formatter/response');
 
 /**
- * Class to whitelist users by admin
+ * Class to whitelist users by admin.
  *
- * @class
+ * @class WhitelistUser
  */
 class WhitelistUser extends ServiceBase {
   /**
-   * Constructor to whitelist users by admin
+   * Constructor to whitelist users by admin.
    *
-   * @param params
-   * @param {Integer} params.invite_id: pre launch invite id
+   * @param {object} params
+   *
+   * @param {number} params.invite_id: pre launch invite id
+   *
+   * @augments ServiceBase
+   *
+   * @constructor
    */
   constructor(params) {
-    super(params);
+    super();
 
     const oThis = this;
+
     oThis.inviteId = params.invite_id;
   }
 
   /**
-   * Main performer
+   * Main performer for class.
    *
    * @returns {Promise<void>}
    * @private
@@ -36,9 +42,9 @@ class WhitelistUser extends ServiceBase {
   async _asyncPerform() {
     const oThis = this;
 
-    let preLaunchInviteObj = new PreLaunchInviteModel({});
+    await new PreLaunchInviteModel().whitelistUser(oThis.inviteId);
 
-    await preLaunchInviteObj.whitelistUser();
+    return responseHelper.successWithData({});
   }
 }
 

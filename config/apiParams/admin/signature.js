@@ -81,6 +81,15 @@ const adminSignature = {
       }
     ],
     optional: []
+  },
+  [apiName.adminWhitelistUser]: {
+    mandatory: [
+      {
+        parameter: 'invite_id',
+        validatorMethods: ['validateNonZeroInteger']
+      }
+    ],
+    optional: []
   }
 };
 

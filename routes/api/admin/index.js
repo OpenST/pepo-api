@@ -156,4 +156,14 @@ router.get('/current', sanitizer.sanitizeDynamicUrlParams, function(req, res, ne
   Promise.resolve(routeHelper.perform(req, res, next, '/admin/GetCurrent', 'r_a_v1_u_5', null, dataFormatterFunc));
 });
 
+/* Whitelist user */
+router.post('/whitelist/:invite_id', csrfProtection, sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.adminWhitelistUser;
+  req.decodedParams.invite_id = req.params.invite_id;
+
+  Promise.resolve(
+    routeHelper.perform(req, res, next, '/admin/preLaunch/WhitelistUser', 'r_a_v1_ad_7', null, null, null)
+  );
+});
+
 module.exports = router;
