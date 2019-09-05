@@ -9,16 +9,17 @@ const dbKind = DbKindConstant.sqlDbKind;
 const upQuery =
   'CREATE TABLE `in_app_products` ( \n\
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT, \n\
-  `product_id` varchar(40) NOT NULL, \n\
-  `apple_id` varchar(40) NOT NULL, \n\
-  `google_id` varchar(40) NOT NULL, \n\
-  `price_point_in_usd` decimal(5,5) NOT NULL, \n\
-  `pepo_amount` decimal(5,5) NOT NULL, \n\
+  `apple_product_id` varchar(40) NOT NULL, \n\
+  `google_product_id` varchar(40) NOT NULL, \n\
+  `status` tinyint(4) NOT NULL,\n\
+  `lower_limit` decimal(5,5) NOT NULL, \n\
+  `upper_limit` decimal(5,5) NOT NULL, \n\
+  `amount_in_pepo` decimal(5,5) NOT NULL, \n\
   `amount_in_usd` decimal(5,5) NOT NULL, \n\
   `created_at` int(11) NOT NULL, \n\
   `updated_at` int(11) NOT NULL, \n\
   PRIMARY KEY (`id`), \n\
-  INDEX idx_1 (`price_point_in_usd`, `amount_in_usd`) \n\
+  INDEX idx_1 (`lower_limit`, `upper_limit`, `amount_in_usd`) \n\
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci';
 
 const downQuery = 'drop table if exists `in_app_products`;';
