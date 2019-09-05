@@ -43,7 +43,7 @@
    
                location /admin/ {
                        proxy_cookie_domain localhost pepodev.com;
-                       proxy_pass http://localhost:4000/admin;
+                       proxy_pass http://localhost:4000/admin/;
                }
 
                location /builtAssets {
