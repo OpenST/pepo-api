@@ -144,14 +144,16 @@ class PreLaunchInvite extends ModelBase {
       .where({ id: ids })
       .fire();
 
-    const response = {};
+    let inviteDetails = {};
+    let inviteIds = [];
 
-    for (let index = 0; index < dbRows.length; index++) {
-      const formatDbRow = oThis.formatDbData(dbRows[index]);
-      response[formatDbRow.id] = formatDbRow;
+    for (let ind = 0; ind < dbRows.length; ind++) {
+      let formattedRow = oThis.formatDbData(dbRows[ind]);
+      inviteIds.push(formattedRow.id);
+      inviteDetails[dbRows[ind].id] = formattedRow;
     }
 
-    return response;
+    return { inviteIds: inviteIds, inviteDetails: inviteDetails };
   }
 
   /**
