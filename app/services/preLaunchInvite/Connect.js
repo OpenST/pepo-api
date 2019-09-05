@@ -22,6 +22,7 @@ class PreLaunchTwitterConnect extends ServiceBase {
    * @param {string} params.secret: oAuth Secret
    * @param {string} params.twitter_id: Twitter_id
    * @param {string} params.handle: Handle
+   * @param {string} [params.invite_code]: invite code
    *
    * @augments ServiceBase
    *
@@ -36,6 +37,7 @@ class PreLaunchTwitterConnect extends ServiceBase {
     oThis.secret = params.secret;
     oThis.twitterId = params.twitter_id;
     oThis.handle = params.handle;
+    oThis.inviteCode = params.invite_code;
 
     oThis.userTwitterEntity = null;
     oThis.preLaunchInviteId = null;
@@ -214,7 +216,8 @@ class PreLaunchTwitterConnect extends ServiceBase {
       preLaunchInviteId: oThis.preLaunchInviteId,
       userTwitterEntity: oThis.userTwitterEntity,
       token: oThis.token,
-      secret: oThis.secret
+      secret: oThis.secret,
+      inviteCode: oThis.inviteCode
     };
 
     if (!oThis.preLaunchInviteId) {

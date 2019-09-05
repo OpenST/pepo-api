@@ -1,10 +1,10 @@
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   KmsWrapper = require(rootPrefix + '/lib/aws/KmsWrapper'),
-  bgJob = require(rootPrefix + '/lib/rabbitMqEnqueue/bgJob'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
-  bgJobConstants = require(rootPrefix + '/lib/globalConstant/bgJob'),
   localCipher = require(rootPrefix + '/lib/encryptors/localCipher'),
+  createErrorLogsEntry = require(rootPrefix + '/lib/errorLogs/createEntry'),
+  errorLogsConstants = require(rootPrefix + '/lib/globalConstant/errorLogs'),
   PreLaunchInviteModel = require(rootPrefix + '/app/models/mysql/PreLaunchInvite'),
   preLaunchInviteConstants = require(rootPrefix + '/lib/globalConstant/preLaunchInvite'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
@@ -27,6 +27,7 @@ class PreLaunchTwitterSignUp extends ServiceBase {
    * @param {string} params.userTwitterEntity: User Entity Of Twitter
    * @param {string} params.token: Oauth User Token
    * @param {string} params.secret: Oauth User secret
+   * @param {string} params.inviteCode: Invite Code
    *
    * @augments ServiceBase
    *
@@ -41,13 +42,17 @@ class PreLaunchTwitterSignUp extends ServiceBase {
     oThis.userTwitterEntity = params.userTwitterEntity;
     oThis.token = params.token;
     oThis.secret = params.secret;
+    oThis.inviteCode = params.inviteCode;
 
+    oThis.email = oThis.userTwitterEntity.email;
     oThis.encryptedEncryptionSalt = null;
     oThis.decryptedEncryptionSalt = null;
     oThis.encryptedCookieToken = null;
     oThis.encryptedSecret = null;
 
     oThis.preLaunchInviteObj = null;
+    oThis.InviterObj = null;
+    oThis.inviterId = null;
   }
 
   /**
@@ -79,6 +84,10 @@ class PreLaunchTwitterSignUp extends ServiceBase {
 
     promisesArray1.push(oThis._setKMSEncryptionSalt());
 
+    if (oThis.inviteCode) {
+      promisesArray1.push(oThis._fetchInviterDetails());
+    }
+
     await Promise.all(promisesArray1).catch(function(err) {
       logger.error('Error in _performSignup: ', err);
 
@@ -93,10 +102,16 @@ class PreLaunchTwitterSignUp extends ServiceBase {
 
     await oThis._createPreLaunchInvite();
 
-    // if email is present then enqueue for doptin creator
-    if (oThis.userTwitterEntity.email || CommonValidators.isValidEmail(oThis.userTwitterEntity.email)) {
-      oThis._sendDoubleOptIn();
+    if (oThis.inviteCode) {
+      await oThis._updateInvitedUserCount();
     }
+
+    // if email is present then enqueue for doptin creator
+    if (!CommonValidators.isVarNullOrUndefined(oThis.email) || CommonValidators.isValidEmail(oThis.email)) {
+      await oThis._sendDoubleOptIn();
+    }
+
+    await oThis._checkDuplicateEmail();
 
     logger.log('End::Perform Twitter Signup');
 
@@ -132,6 +147,22 @@ class PreLaunchTwitterSignUp extends ServiceBase {
   }
 
   /**
+   * Fetch inviter details
+   *
+   * @returns {Promise<*|result>}
+   * @private
+   */
+  async _fetchInviterDetails() {
+    const oThis = this;
+
+    oThis.inviterObj = await new PreLaunchInviteModel().fetchByInviteCode(oThis.inviteCode);
+
+    oThis.inviterId = oThis.inviterObj.inviteCode === oThis.inviteCode ? oThis.inviterObj.id : null;
+
+    return responseHelper.successWithData({});
+  }
+
+  /**
    * Create pre launch invite
    *
    * @return {Promise<void>}
@@ -142,16 +173,21 @@ class PreLaunchTwitterSignUp extends ServiceBase {
 
     logger.log('Start::Creating pre launch invite');
 
+    const status = oThis.email
+      ? preLaunchInviteConstants.invertedStatuses[preLaunchInviteConstants.doptinStatus]
+      : preLaunchInviteConstants.invertedStatuses[preLaunchInviteConstants.pendingStatus];
+
     let insertData = {
       encryption_salt: oThis.encryptedEncryptionSalt,
       twitter_id: oThis.userTwitterEntity.idStr,
       handle: oThis.userTwitterEntity.handle,
-      email: oThis.userTwitterEntity.email,
+      email: oThis.email,
       name: oThis.userTwitterEntity.formattedName,
       profile_image_url: oThis.userTwitterEntity.nonDefaultProfileImageUrl,
       token: oThis.token,
       secret: oThis.encryptedSecret,
-      status: preLaunchInviteConstants.invertedStatuses[preLaunchInviteConstants.pendingStatus],
+      status: status,
+      inviter_user_id: oThis.inviterId,
       invite_code: oThis._createInviteCode(),
       invited_user_count: 0
     };
@@ -191,22 +227,22 @@ class PreLaunchTwitterSignUp extends ServiceBase {
   }
 
   /**
-   * Enque after signup job.
+   * Update invited user count
    *
    * @returns {Promise<void>}
    * @private
    */
-  async _enqueAfterSignupJob() {
+  async _updateInvitedUserCount() {
     const oThis = this;
 
-    const messagePayload = {
-      bio: oThis.userTwitterEntity.description,
-      twitterUserId: oThis.twitterUserObj.id,
-      twitterId: oThis.userTwitterEntity.idStr,
-      userId: oThis.userId,
-      profileImageId: oThis.profileImageId
-    };
-    await bgJob.enqueue(bgJobConstants.afterSignUpJobTopic, messagePayload);
+    let invitedUserCount = oThis.inviterObj.invitedUserCount + 1;
+
+    await new PreLaunchInviteModel()
+      .update({ invited_user_count: invitedUserCount })
+      .where({ id: oThis.inviterId })
+      .fire();
+
+    await PreLaunchInviteModel.flushCache({ id: oThis.inviterId });
   }
 
   /**
@@ -222,7 +258,36 @@ class PreLaunchTwitterSignUp extends ServiceBase {
       pre_launch_invite_hook: oThis.preLaunchInviteObj
     };
 
-    return await new SendDoubleOptInService(sendDoubleOptInParams).perform();
+    await new SendDoubleOptInService(sendDoubleOptInParams).perform();
+  }
+
+  /**
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _checkDuplicateEmail() {
+    const oThis = this;
+
+    let preLaunchInvitesForEmail = await new PreLaunchInviteModel()
+      .select('count(*) as count')
+      .where({ email: oThis.email })
+      .fire();
+
+    if (preLaunchInvitesForEmail[0].count > 1) {
+      const errorObject = responseHelper.error({
+        internal_error_identifier: 'a_s_oe_t_b_5',
+        api_error_identifier: 'something_went_wrong',
+        debug_options: {
+          Reason: 'Duplicate Email in pre launch invite',
+          email: oThis.email,
+          inviterId: oThis.inviterId
+        }
+      });
+      await createErrorLogsEntry.perform(errorObject, errorLogsConstants.highSeverity);
+    }
+
+    return Promise.resolve(responseHelper.successWithData({}));
   }
 
   /**

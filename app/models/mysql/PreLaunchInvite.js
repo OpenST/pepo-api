@@ -44,7 +44,7 @@ class PreLaunchInvite extends ModelBase {
       'name',
       'profileImageUrl',
       'status',
-      'inviteeUserId',
+      'inviterUserId',
       'inviteCode',
       'invitedUserCount',
       'createdAt',
@@ -65,7 +65,7 @@ class PreLaunchInvite extends ModelBase {
    * @param {string} dbRow.token
    * @param {string} dbRow.secret
    * @param {number} dbRow.status
-   * @param {number} dbRow.invitee_user_id
+   * @param {number} dbRow.inviter_user_id
    * @param {string} dbRow.invite_code
    * @param {number} dbRow.invited_user_count
    * @param {number/string} dbRow.created_at
@@ -87,7 +87,7 @@ class PreLaunchInvite extends ModelBase {
       token: dbRow.token,
       secret: dbRow.secret,
       status: preLaunchInviteConstant.statuses[dbRow.status],
-      inviteeUserId: dbRow.invitee_user_id,
+      inviterUserId: dbRow.inviter_user_id,
       inviteCode: dbRow.invite_code,
       invitedUserCount: dbRow.invited_user_count,
       createdAt: dbRow.created_at,
@@ -131,7 +131,7 @@ class PreLaunchInvite extends ModelBase {
         'name',
         'profile_image_url',
         'status',
-        'invitee_user_id',
+        'inviter_user_id',
         'invite_code',
         'invited_user_count',
         'created_at',
@@ -195,6 +195,28 @@ class PreLaunchInvite extends ModelBase {
     }
 
     return response;
+  }
+
+  /**
+   * Fetch pre launch invite by invite code.
+   *
+   * @param {number} inviteCode: invite code
+   *
+   * @return {object}
+   */
+  async fetchByInviteCode(inviteCode) {
+    const oThis = this;
+
+    const dbRows = await oThis
+      .select('*')
+      .where(['invite_code = ?', inviteCode])
+      .fire();
+
+    if (dbRows.length === 0) {
+      return {};
+    }
+
+    return oThis.formatDbData(dbRows[0]);
   }
 
   /**
@@ -271,7 +293,7 @@ class PreLaunchInvite extends ModelBase {
     if (params.twitterId) {
       const PreLaunchInviteByTwitterIdsCache = require(rootPrefix +
         '/lib/cacheManagement/multi/PreLaunchInviteByTwitterIds');
-      promisesArray.push(new PreLaunchInviteByTwitterIdsCache({ twitterIds: params.twitterId }).clear());
+      promisesArray.push(new PreLaunchInviteByTwitterIdsCache({ twitterIds: [params.twitterId] }).clear());
     }
 
     await Promise.all(promisesArray);

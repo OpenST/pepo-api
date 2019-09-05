@@ -16,7 +16,7 @@ const upQuery =
     `token` varchar(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,\n\
     `secret` varchar(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,\n\
     `status` tinyint(4) NOT NULL,\n\
-    `invitee_user_id` bigint(20) NULL,\n\
+    `inviter_user_id` bigint(20) NULL,\n\
     `invite_code` varchar(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,\n\
     `invited_user_count` bigint(20) NOT NULL,\n\
     `created_at` int(11) NOT NULL, \n\
