@@ -47,7 +47,7 @@ class PreLaunchInvite extends ModelBase {
       'profileImageUrl',
       'status',
       'adminStatus',
-      'inviteeUserId',
+      'inviterUserId',
       'inviteCode',
       'invitedUserCount',
       'createdAt',
@@ -69,7 +69,7 @@ class PreLaunchInvite extends ModelBase {
    * @param {string} dbRow.secret
    * @param {number} dbRow.status
    * @param {number} dbRow.admin_status
-   * @param {number} dbRow.invitee_user_id
+   * @param {number} dbRow.inviter_user_id
    * @param {string} dbRow.invite_code
    * @param {number} dbRow.invited_user_count
    * @param {number/string} dbRow.created_at
@@ -82,6 +82,7 @@ class PreLaunchInvite extends ModelBase {
 
     const formattedData = {
       id: dbRow.id,
+      encryptionSalt: dbRow.encryption_salt,
       twitterId: dbRow.twitter_id,
       handle: dbRow.handle,
       email: dbRow.email,
@@ -91,7 +92,7 @@ class PreLaunchInvite extends ModelBase {
       secret: dbRow.secret,
       status: preLaunchInviteConstants.statuses[dbRow.status],
       adminStatus: preLaunchInviteConstants.adminStatuses[dbRow.admin_status],
-      inviteeUserId: dbRow.invitee_user_id,
+      inviteeUserId: dbRow.inviter_user_id,
       inviteCode: dbRow.invite_code,
       invitedUserCount: dbRow.invited_user_count,
       createdAt: dbRow.created_at,
@@ -135,7 +136,7 @@ class PreLaunchInvite extends ModelBase {
         'name',
         'profile_image_url',
         'status',
-        'invitee_user_id',
+        'inviter_user_id',
         'invite_code',
         'invited_user_count',
         'created_at',
@@ -307,6 +308,28 @@ class PreLaunchInvite extends ModelBase {
   }
 
   /**
+   * Fetch pre launch invite by invite code.
+   *
+   * @param {number} inviteCode: invite code
+   *
+   * @return {object}
+   */
+  async fetchByInviteCode(inviteCode) {
+    const oThis = this;
+
+    const dbRows = await oThis
+      .select('*')
+      .where(['invite_code = ?', inviteCode])
+      .fire();
+
+    if (dbRows.length === 0) {
+      return {};
+    }
+
+    return oThis.formatDbData(dbRows[0]);
+  }
+
+  /**
    * Get cookie value.
    *
    * @param {object} preLaunchInviteObj
@@ -373,12 +396,19 @@ class PreLaunchInvite extends ModelBase {
   static async flushCache(params) {
     const promisesArray = [];
 
-    const PreLaunchInviteByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/PreLaunchInviteByIds');
-    promisesArray.push(new PreLaunchInviteByIdsCache({ ids: [params.id] }).clear());
+    if (params.id) {
+      const PreLaunchInviteByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/PreLaunchInviteByIds');
+      promisesArray.push(new PreLaunchInviteByIdsCache({ ids: [params.id] }).clear());
 
-    const PreLaunchInviteByTwitterIdsCache = require(rootPrefix +
-      '/lib/cacheManagement/multi/PreLaunchInviteByTwitterIds');
-    promisesArray.push(new PreLaunchInviteByTwitterIdsCache({ twitterIds: params.twitterId }).clear());
+      const securePreLaunchInviteCache = require(rootPrefix + '/lib/cacheManagement/single/SecurePreLaunchInvite');
+      promisesArray.push(new securePreLaunchInviteCache({ id: params.id }).clear());
+    }
+
+    if (params.twitterId) {
+      const PreLaunchInviteByTwitterIdsCache = require(rootPrefix +
+        '/lib/cacheManagement/multi/PreLaunchInviteByTwitterIds');
+      promisesArray.push(new PreLaunchInviteByTwitterIdsCache({ twitterIds: [params.twitterId] }).clear());
+    }
 
     await Promise.all(promisesArray);
   }

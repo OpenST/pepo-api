@@ -34,6 +34,8 @@ class PreLaunchTwitterVerify extends ServiceBase {
     oThis.twitterAuthTokenObj = null;
     oThis.twitterAuthTokenObj = {};
     oThis.twitterRespData = null;
+
+    oThis.serviceResponse = null;
   }
 
   /**
@@ -52,18 +54,7 @@ class PreLaunchTwitterVerify extends ServiceBase {
 
     await oThis._connect();
 
-    let dataCookieValue = oThis.inviteCode
-      ? JSON.stringify({
-          i: oThis.inviteCode
-        })
-      : null;
-
-    return Promise.resolve(
-      responseHelper.successWithData({
-        oAuthToken: oThis.twitterAuthTokenObj.token,
-        dataCookieValue: dataCookieValue
-      })
-    );
+    return Promise.resolve(oThis.serviceResponse);
   }
 
   /**
@@ -104,7 +95,7 @@ class PreLaunchTwitterVerify extends ServiceBase {
    */
   async _fetchAccessToken() {
     const oThis = this;
-    logger.log('Start::_fetchRequestToken');
+    logger.log('Start::_fetchAccessToken');
 
     let twitterResp = null;
 
@@ -137,7 +128,7 @@ class PreLaunchTwitterVerify extends ServiceBase {
 
     oThis.twitterRespData = twitterResp.data;
 
-    logger.log('End::_fetchRequestToken');
+    logger.log('End::_fetchAccessToken');
 
     return responseHelper.successWithData({});
   }
@@ -173,7 +164,7 @@ class PreLaunchTwitterVerify extends ServiceBase {
    */
   async _connect() {
     const oThis = this;
-    logger.log('Start::PreLaunchTwitterConnect._performAction');
+    logger.log('Start::PreLaunchTwitterConnect._connect');
 
     let obj = new ConnectService({
       token: oThis.twitterRespData.oAuthToken,
@@ -183,9 +174,13 @@ class PreLaunchTwitterVerify extends ServiceBase {
       invite_code: oThis.inviteCode
     });
 
-    return await obj.perform();
+    oThis.serviceResponse = await obj.perform();
 
-    logger.log('End::PreLaunchTwitterConnect._performAction');
+    if (oThis.serviceResponse.isFailure()) {
+      return Promise.reject(oThis.serviceResponse);
+    }
+
+    logger.log('End::PreLaunchTwitterConnect._connect');
   }
 }
 

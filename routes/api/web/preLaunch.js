@@ -53,6 +53,13 @@ const validatePreLaunchInviteCookie = async function(req, res, next) {
   next();
 };
 
+/* Account Info */
+router.get('/account', validatePreLaunchInviteCookie, sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.preLaunchAccountGet;
+
+  Promise.resolve(routeHelper.perform(req, res, next, '/preLaunchInvite/Account', 'r_a_w_pl_1', null, null));
+});
+
 /* Request Token preLaunch*/
 router.get('/twitter/request_token', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.twitterRequestToken;
@@ -64,7 +71,7 @@ router.get('/twitter/request_token', sanitizer.sanitizeDynamicUrlParams, functio
   };
 
   Promise.resolve(
-    routeHelper.perform(req, res, next, '/preLaunchInvite/RequestToken', 'r_a_w_pl_1', null, onServiceSuccess)
+    routeHelper.perform(req, res, next, '/preLaunchInvite/RequestToken', 'r_a_w_pl_2', null, onServiceSuccess)
   );
 });
 
@@ -92,12 +99,23 @@ router.get('/twitter-login', sanitizer.sanitizeDynamicUrlParams, function(req, r
       res,
       next,
       '/preLaunchInvite/Verify',
-      'r_a_w_pl_1',
+      'r_a_w_pl_3',
       null,
       onServiceSuccess,
       onServiceFailure
     )
   );
+});
+
+/* Logout pre launch user*/
+router.get('/logout', sanitizer.sanitizeDynamicUrlParams, function(req, res) {
+  req.decodedParams.apiName = apiName.preLaunchLogout;
+
+  const responseObject = responseHelper.successWithData({});
+
+  cookieHelper.deletePreLaunchInviteCookie(res);
+
+  Promise.resolve(responseHelper.renderApiResponse(responseObject, res, errorConfig));
 });
 
 module.exports = router;
