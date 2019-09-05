@@ -108,8 +108,8 @@ class PushNotification extends UserNotificationServiceBase {
       console.log('----heading---heading-----heading------', heading);
 
       formattedPushNotification.notification = {
-        title: heading.title,
-        body: JSON.stringify(heading.body)
+        title: 'New notification from Pepo',
+        body: heading.title //JSON.stringify(heading.body)
         //image: 'https://d3attjoi5jlede.cloudfront.net/images/web/fav/192x192.png' //image
       };
 
@@ -126,10 +126,10 @@ class PushNotification extends UserNotificationServiceBase {
       };
 
       formattedPushNotification.android = {
-        collapse_key: 'abc',
+        // // collapse_key: 'abc',
         notification: {
-          tag: 'unique tray2',
-          notification_count: 1
+          //tag: 'unique tray2',
+          // // notification_count: 2
         }
       };
 
@@ -152,7 +152,7 @@ class PushNotification extends UserNotificationServiceBase {
       supportingEntities: {
         [responseEntityKey.users]: oThis.usersByIdMap
       },
-      userNotification: userNotification,
+      userNotification: pushNotification,
       notificationType: oThis._notificationType
     };
 
@@ -173,8 +173,6 @@ class PushNotification extends UserNotificationServiceBase {
    */
   async _getHeading(userNotification) {
     const oThis = this;
-
-    console.log('userNotification----', userNotification, oThis.usersByIdMap);
 
     const params = {
       supportingEntities: {
