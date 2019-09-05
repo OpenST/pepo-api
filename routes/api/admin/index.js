@@ -40,8 +40,8 @@ const validateAdminCookie = async function(req, res, next) {
   // Cookie validation is not to be done for admin login request
   if (req.url !== '/login') {
     const adminCookieValue = req.signedCookies[adminConstants.loginCookieName];
-    const authResponse = await new AdminCookieAuth(adminCookieValue).perform().catch(function(r) {
-      return r;
+    const authResponse = await new AdminCookieAuth(adminCookieValue).perform().catch(function(err) {
+      return err;
     });
 
     if (authResponse.isFailure()) {
