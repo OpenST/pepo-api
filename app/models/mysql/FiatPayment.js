@@ -160,7 +160,7 @@ class FiatPayment extends ModelBase {
    *
    * @returns {Promise<*>}
    */
-  static async flushCache(params) {
+  static async flushCache() {
     const promisesArray = [];
 
     await Promise.all(promisesArray);

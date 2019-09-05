@@ -33,16 +33,17 @@ class ProcessApplePay extends ProcessPaymentBase {
 
     let httpResponse = await HttpLibObj.post(JSON.stringify({ 'receipt-data': oThis.receipt.transactionReceipt }));
 
-    console.log('httpResponse------------------------', httpResponse);
-
     if (httpResponse.isFailure()) {
       return Promise.reject(httpResponse);
     }
+    console.log('httpResponse.data.responseData------------------------', httpResponse.data.responseData);
 
     await new FiatPaymentModel.update({
       decrepted_receipt: httpResponse.data.responseData,
       status: fiatPaymentConstants.paymentConfirmedStatus()
     }).fire();
+
+    FiatPaymentModel.flushCache();
 
     return httpResponse;
   }
