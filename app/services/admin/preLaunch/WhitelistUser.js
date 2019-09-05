@@ -12,7 +12,6 @@ class WhitelistUser extends ServiceBase {
    * Constructor to whitelist users by admin.
    *
    * @param {object} params
-   *
    * @param {number} params.invite_id: pre launch invite id
    *
    * @augments ServiceBase
