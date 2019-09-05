@@ -159,6 +159,12 @@ class PushNotification extends CronBase {
             error: err
           };
         await oThis._notifyErrorStates(errorIdentifierStr, debugOptions);
+
+        await new NotificationHookModel().updateStatusAndInsertResponse(
+          hookId,
+          notificationHookConstants.failedStatus,
+          err
+        );
       });
     }
   }

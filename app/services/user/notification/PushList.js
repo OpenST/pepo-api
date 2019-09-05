@@ -109,13 +109,13 @@ class PushNotification extends UserNotificationServiceBase {
       let goto = await oThis._getGoto(pushNotification);
       console.log('----goto---goto-----goto------', goto);
 
-      formattedPushNotification.data = JSON.stringify({ goto: goto });
-
       let heading = await oThis._getHeading(pushNotification);
+      console.log('----heading---heading-----heading------', heading);
+
       formattedPushNotification.notification = {
         title: heading.title,
-        body: heading.body,
-        image: 'https://d3attjoi5jlede.cloudfront.net/images/web/fav/192x192.png' //image
+        body: JSON.stringify(heading.body)
+        //image: 'https://d3attjoi5jlede.cloudfront.net/images/web/fav/192x192.png' //image
       };
 
       formattedPushNotification.apns = {
@@ -126,7 +126,7 @@ class PushNotification extends UserNotificationServiceBase {
           }
         },
         fcm_options: {
-          image: 'https://d3attjoi5jlede.cloudfront.net/images/web/fav/192x192.png' //image
+          //image: 'https://d3attjoi5jlede.cloudfront.net/images/web/fav/192x192.png' //image
         }
       };
 
@@ -137,6 +137,8 @@ class PushNotification extends UserNotificationServiceBase {
           notification_count: 1
         }
       };
+
+      formattedPushNotification.data = { goto: JSON.stringify(goto) };
 
       oThis.formattedNotifications.push(formattedPushNotification);
     }
@@ -187,12 +189,8 @@ class PushNotification extends UserNotificationServiceBase {
       notificationType: oThis._notificationType
     };
 
-    console.log('params-----', JSON.stringify(params));
-
     //todo: use a different heading for push notification
     const resp = NotificationResponseHelper.getHeadingForPushNotification(params);
-
-    console.log('resp-----', JSON.stringify(resp));
 
     if (resp.isFailure()) {
       return Promise.reject(resp);
@@ -235,8 +233,6 @@ class PushNotification extends UserNotificationServiceBase {
 
     for (let index = 0; index < oThis.notificationHookPayloads.length; index++) {
       const userNotification = oThis.notificationHookPayloads[index];
-
-      console.log('userNotification----', userNotification);
 
       const supportingEntitiesConfig = NotificationResponseHelper.getSupportingEntitiesConfigForKind(
         userNotification.kind,
@@ -458,6 +454,7 @@ class PushNotification extends UserNotificationServiceBase {
     }
 
     return {
+      formattedNotifications: oThis.formattedNotifications,
       usersByIdMap: userHash,
       tokenUsersByUserIdMap: tokenUserHash,
       imageMap: oThis.imageMap,
