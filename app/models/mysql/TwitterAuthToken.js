@@ -71,12 +71,19 @@ class TwitterAuthToken extends ModelBase {
    *
    * @return {object}
    */
-  async fetchById(id) {
+  async fetchByToken(token) {
     const oThis = this;
 
-    const res = await oThis.fetchByIds([id]);
+    const dbRows = await oThis
+      .select('*')
+      .where(['token = ?', token])
+      .fire();
 
-    return res[id] || {};
+    if (dbRows.length === 0) {
+      return {};
+    }
+
+    return oThis.formatDbData(dbRows[0]);
   }
 
   /**

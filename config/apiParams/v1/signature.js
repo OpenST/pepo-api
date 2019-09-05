@@ -3,15 +3,6 @@ const rootPrefix = '../../..',
   paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination');
 
 const v1Signature = {
-  [apiName.twitterRequestToken]: {
-    mandatory: [],
-    optional: [
-      {
-        parameter: 'i',
-        validatorMethods: ['validateString']
-      }
-    ]
-  },
   [apiName.signUp]: {
     mandatory: [
       {
