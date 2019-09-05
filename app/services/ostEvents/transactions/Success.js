@@ -85,8 +85,21 @@ class SuccessTransactionOstEvent extends TransactionOstEventBase {
       const promiseArray = [];
       promiseArray.push(oThis.updateTransaction());
       promiseArray.push(oThis.processForAirdropTransaction());
+      promiseArray.push(oThis._enqueueUserNotification());
       await Promise.all(promiseArray);
     }
+  }
+
+  /**
+   * Enqueue user notification.
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _enqueueUserNotification() {
+    const oThis = this;
+    // Notification would be published only if user is approved.
+    await notificationJobEnqueue.enqueue(notificationJobConstants.airdropDone, { transaction: oThis.transactionObj });
   }
 
   /**
