@@ -144,6 +144,11 @@ const adminErrorConfig = {
     parameter: 'image_url',
     code: 'invalid',
     message: 'Invalid image url.'
+  },
+  invalid_sort_by: {
+    parameter: 'sort_by',
+    code: 'invalid',
+    message: 'Invalid sort by.'
   }
 };
 

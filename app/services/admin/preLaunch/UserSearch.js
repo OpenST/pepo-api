@@ -1,13 +1,13 @@
 const rootPrefix = '../../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   PreLaunchInviteModel = require(rootPrefix + '/app/models/mysql/PreLaunchInvite'),
-  CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
-  paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination');
+  paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination'),
+  preLaunchInviteConstants = require(rootPrefix + '/lib/globalConstant/preLaunchInvite');
 
 /**
- * Class for invite user details by search
+ * Class for invite user details by search.
  *
  * @class InviteUserSearch
  */
@@ -17,6 +17,8 @@ class InviteUserSearch extends ServiceBase {
    *
    * @param {object} params
    * @param {string} [params.q]
+   * @param {string} [params.sort_by]
+   * @param {string} [params.pagination_identifier]
    *
    * @augments ServiceBase
    *
@@ -27,16 +29,14 @@ class InviteUserSearch extends ServiceBase {
 
     const oThis = this;
 
-    oThis.query = params.q ? params.q.toLowerCase() : null; // lower case
-    oThis.query = oThis.query ? oThis.query.trim() : null; // trim spaces
-
-    oThis.sortBy = oThis.sort_by;
+    oThis.query = params.q ? params.q.toLowerCase().trim() : null; // Lower case and trim spaces.
+    oThis.sortBy = params.sort_by || preLaunchInviteConstants.descendingSortByValue;
+    oThis.paginationIdentifier = params[paginationConstants.paginationIdentifierKey] || null;
 
     oThis.inviteIds = [];
     oThis.searchResults = [];
     oThis.pageNo = 1;
     oThis.nextpageNo = 2;
-    oThis.paginationIdentifier = params[paginationConstants.paginationIdentifierKey] || null;
     oThis.limit = oThis._defaultPageLimit();
   }
 
@@ -71,6 +71,17 @@ class InviteUserSearch extends ServiceBase {
   async _validateAndSanitizeParams() {
     const oThis = this;
 
+    if (!preLaunchInviteConstants.sortByValuesMap[oThis.sortBy]) {
+      return Promise.reject(
+        responseHelper.paramValidationError({
+          internal_error_identifier: 'a_s_a_pl_us_1',
+          api_error_identifier: 'invalid_api_params',
+          params_error_identifiers: ['invalid_sort_by'],
+          debug_options: { transfers: oThis.transfersData }
+        })
+      );
+    }
+
     if (oThis.paginationIdentifier) {
       const parsedPaginationParams = oThis._parsePaginationParams(oThis.paginationIdentifier);
 
@@ -84,7 +95,9 @@ class InviteUserSearch extends ServiceBase {
   }
 
   /**
-   * Fetch user ids
+   * Fetch user ids.
+   *
+   * @sets oThis.inviteIds, oThis.inviteDetails
    *
    * @returns {Promise<void>}
    * @private
@@ -92,9 +105,9 @@ class InviteUserSearch extends ServiceBase {
   async _fetchInviteIds() {
     const oThis = this;
 
-    let preLaunchInviteModelObj = new PreLaunchInviteModel({});
+    const preLaunchInviteModelObj = new PreLaunchInviteModel({});
 
-    let inviteData = await preLaunchInviteModelObj.search({
+    const inviteData = await preLaunchInviteModelObj.search({
       query: oThis.query,
       limit: oThis.limit,
       pageNo: oThis.pageNo,
@@ -106,7 +119,9 @@ class InviteUserSearch extends ServiceBase {
   }
 
   /**
-   * Prepare search results
+   * Prepare search results.
+   *
+   * @sets oThis.searchResults, oThis.nextpageNo
    *
    * @returns {Promise<void>}
    * @private
@@ -115,8 +130,8 @@ class InviteUserSearch extends ServiceBase {
     const oThis = this;
 
     for (let ind = 0; ind < oThis.inviteIds.length; ind++) {
-      let inviteId = oThis.inviteIds[ind];
-      let inviteDetail = oThis.inviteDetails[inviteId];
+      const inviteId = oThis.inviteIds[ind];
+      const inviteDetail = oThis.inviteDetails[inviteId];
 
       oThis.searchResults.push({
         id: ind,
@@ -150,8 +165,6 @@ class InviteUserSearch extends ServiceBase {
     oThis.responseMetaData = {
       [paginationConstants.nextPagePayloadKey]: nextPagePayloadKey
     };
-
-    return responseHelper.successWithData({});
   }
 
   /**
@@ -163,7 +176,7 @@ class InviteUserSearch extends ServiceBase {
   async _prepareResponse() {
     const oThis = this;
 
-    let response = {
+    const response = {
       [entityType.inviteUserSearchList]: oThis.searchResults,
       [entityType.inviteMap]: oThis.inviteDetails,
       meta: oThis.responseMetaData
