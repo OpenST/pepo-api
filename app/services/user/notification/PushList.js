@@ -8,12 +8,7 @@ const rootPrefix = '../../../..',
   NotificationResponseHelper = require(rootPrefix + '/lib/notification/response/Helper'),
   UserNotificationServiceBase = require(rootPrefix + '/app/services/user/notification/Base'),
   TokenUserByUserIdsMultiCache = require(rootPrefix + '/lib/cacheManagement/multi/TokenUserByUserIds'),
-  bgJob = require(rootPrefix + '/lib/rabbitMqEnqueue/bgJob'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
-  videoConstants = require(rootPrefix + '/lib/globalConstant/video'),
-  userNotificationConstants = require(rootPrefix + '/lib/globalConstant/cassandra/userNotification'),
-  bgJobConstants = require(rootPrefix + '/lib/globalConstant/bgJob'),
-  UserNotificationModel = require(rootPrefix + '/app/models/cassandra/UserNotification'),
   responseEntityKey = require(rootPrefix + '/lib/globalConstant/responseEntityKey');
 
 /**
