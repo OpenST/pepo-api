@@ -3,6 +3,10 @@ const rootPrefix = '../../..',
   paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination');
 
 const v1Signature = {
+  [apiName.preLaunchLogout]: {
+    mandatory: [],
+    optional: []
+  },
   [apiName.preLaunchAccountGet]: {
     mandatory: [
       {

@@ -107,4 +107,15 @@ router.get('/twitter-login', sanitizer.sanitizeDynamicUrlParams, function(req, r
   );
 });
 
+/* Logout pre launch user*/
+router.get('/logout', sanitizer.sanitizeDynamicUrlParams, function(req, res) {
+  req.decodedParams.apiName = apiName.preLaunchLogout;
+
+  const responseObject = responseHelper.successWithData({});
+
+  cookieHelper.deletePreLaunchInviteCookie(res);
+
+  Promise.resolve(responseHelper.renderApiResponse(responseObject, res, errorConfig));
+});
+
 module.exports = router;
