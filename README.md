@@ -30,6 +30,29 @@
     
 * Refer [Pepo-Tracker](https://github.com/pepotech/pepo-tracker) readme for setting it up.
 
+* [Only Development] Include following server block in `/usr/local/etc/nginx/nginx.conf`
+```bash
+   server {
+               listen       8080;
+               server_name  pepodev.com;
+   
+               location /api/ {
+                       proxy_cookie_domain localhost pepodev.com;
+                       proxy_pass http://localhost:3000/api/;
+               }
+   
+               location /admin {
+                       proxy_cookie_domain localhost pepodev.com;
+                       proxy_pass http://localhost:4000/admin;
+               }
+   
+               location / {
+                       proxy_cookie_domain localhost pepodev.com;
+                       proxy_pass http://localhost:5000;
+               }
+       }
+```
+
 ## Install all the dependency npm packages
 ```bash
   rm -rf node_modules

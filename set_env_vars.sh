@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Core ENV Details
 export PA_ENVIRONMENT='development'
-export PA_PORT=4000
+export PA_PORT=3000
 export PA_DEBUG_ENABLED='1';
 export PA_DOMAIN='www.pepo.com'
 export PA_COOKIE_DOMAIN='127.0.0.1'
