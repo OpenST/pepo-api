@@ -22,6 +22,7 @@ class PreLaunchInvite extends ModelBase {
    *
    * @augments ModelBase
    *
+   * @constructor
    */
   constructor() {
     super({ dbName: dbName });
@@ -32,7 +33,7 @@ class PreLaunchInvite extends ModelBase {
   }
 
   /**
-   * List Of formatted column names that can be exposed by service.
+   * List of formatted column names that can be exposed by service.
    *
    * @returns {array}
    */
@@ -101,7 +102,7 @@ class PreLaunchInvite extends ModelBase {
    *
    * @param {string} id
    *
-   * @return {object}
+   * @returns {object}
    */
   async fetchById(id) {
     const oThis = this;
@@ -116,7 +117,7 @@ class PreLaunchInvite extends ModelBase {
    *
    * @param {array} ids
    *
-   * @return {object}
+   * @returns {object}
    */
   async fetchByIds(ids) {
     const oThis = this;
@@ -153,7 +154,7 @@ class PreLaunchInvite extends ModelBase {
    *
    * @param {number} id: user id
    *
-   * @return {object}
+   * @returns {object}
    */
   async fetchSecureById(id) {
     const oThis = this;
@@ -175,7 +176,7 @@ class PreLaunchInvite extends ModelBase {
    *
    * @param {array} twitterIds
    *
-   * @return {object}
+   * @returns {object}
    */
   async fetchByTwitterIds(twitterIds) {
     const oThis = this;
@@ -200,7 +201,7 @@ class PreLaunchInvite extends ModelBase {
    *
    * @param {Number} invite_id
    *
-   * @return {object}
+   * @returns {object}
    */
   async whitelistUser(invite_id) {
     const oThis = this;
@@ -227,7 +228,7 @@ class PreLaunchInvite extends ModelBase {
    * @param {string}  params.sortBy: sort string
    * @param {integer} params.pageNo: page no
    *
-   * @return {object}
+   * @returns {object}
    */
   async search(params) {
     const oThis = this;
