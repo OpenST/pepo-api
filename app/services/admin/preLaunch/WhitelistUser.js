@@ -35,7 +35,13 @@ class WhitelistUser extends ServiceBase {
   async _asyncPerform() {
     const oThis = this;
 
-    return new PreLaunchInviteModel().whitelistUser(oThis.inviteId);
+    const updateResponse = await new PreLaunchInviteModel().whitelistUser(oThis.inviteId);
+
+    if (updateResponse.isFailure()) {
+      return updateResponse;
+    }
+
+    return PreLaunchInviteModel.flushCache({ id: oThis.inviteId });
   }
 }
 

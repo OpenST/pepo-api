@@ -224,8 +224,6 @@ class PreLaunchInvite extends ModelBase {
     if (queryResponse.affectedRows === 1) {
       logger.info(`User with ${inviteId} is now whitelisted`);
 
-      await PreLaunchInvite.flushCache({ id: inviteId });
-
       return responseHelper.successWithData({});
     }
 
@@ -241,8 +239,8 @@ class PreLaunchInvite extends ModelBase {
    *
    * @param {object} params
    * @param {integer} params.limit: limit
-   * @param {integer} params.query: query
-   * @param {string}  params.sortBy: sort string
+   * @param {integer} [params.query]: query
+   * @param {string}  [params.sortBy]: sort string
    * @param {integer} params.pageNo: page no
    *
    * @returns {object}

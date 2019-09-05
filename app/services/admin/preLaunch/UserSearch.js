@@ -36,7 +36,7 @@ class InviteUserSearch extends ServiceBase {
     oThis.inviteIds = [];
     oThis.searchResults = [];
     oThis.pageNo = 1;
-    oThis.nextpageNo = 2;
+    oThis.nextPageNo = 2;
     oThis.limit = oThis._defaultPageLimit();
   }
 
@@ -108,9 +108,7 @@ class InviteUserSearch extends ServiceBase {
   async _fetchInviteIds() {
     const oThis = this;
 
-    const preLaunchInviteModelObj = new PreLaunchInviteModel({});
-
-    const inviteData = await preLaunchInviteModelObj.search({
+    const inviteData = await new PreLaunchInviteModel().search({
       query: oThis.query,
       limit: oThis.limit,
       pageNo: oThis.pageNo,
@@ -124,7 +122,7 @@ class InviteUserSearch extends ServiceBase {
   /**
    * Prepare search results.
    *
-   * @sets oThis.searchResults, oThis.nextpageNo
+   * @sets oThis.searchResults, oThis.nextPageNo
    *
    * @returns {Promise<void>}
    * @private
@@ -143,7 +141,7 @@ class InviteUserSearch extends ServiceBase {
       });
     }
 
-    oThis.nextpageNo = oThis.pageNo + 1;
+    oThis.nextPageNo = oThis.pageNo + 1;
   }
 
   /**
@@ -161,7 +159,7 @@ class InviteUserSearch extends ServiceBase {
 
     if (oThis.searchResults.length >= oThis.limit) {
       nextPagePayloadKey[paginationConstants.paginationIdentifierKey] = {
-        page_no: oThis.nextpageNo
+        page_no: oThis.nextPageNo
       };
     }
 
