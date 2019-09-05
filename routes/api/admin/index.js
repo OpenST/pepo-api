@@ -166,4 +166,23 @@ router.post('/whitelist/:invite_id', csrfProtection, sanitizer.sanitizeDynamicUr
   );
 });
 
+/* Invite user list */
+router.get('/launch-invites/search', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.launchInviteSearch;
+
+  const dataFormatterFunc = async function(serviceResponse) {
+    const wrapperFormatterRsp = await new FormatterComposer({
+      resultType: responseEntityKey.loggedInAdmin,
+      entityKindToResponseKeyMap: {
+        [entityType.admin]: responseEntityKey.loggedInAdmin
+      },
+      serviceData: serviceResponse.data
+    }).perform();
+
+    serviceResponse.data = wrapperFormatterRsp.data;
+  };
+
+  Promise.resolve(routeHelper.perform(req, res, next, '/admin/GetCurrent', 'r_a_v1_u_5', null, dataFormatterFunc));
+});
+
 module.exports = router;

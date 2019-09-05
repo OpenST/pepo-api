@@ -90,6 +90,23 @@ const adminSignature = {
       }
     ],
     optional: []
+  },
+  [apiName.launchInviteSearch]: {
+    mandatory: [],
+    optional: [
+      {
+        parameter: 'q',
+        validatorMethods: ['validateString']
+      },
+      {
+        parameter: paginationConstants.paginationIdentifierKey,
+        validatorMethods: ['validateString', 'validatePaginationIdentifier']
+      },
+      {
+        parameter: 'sort_by',
+        validatorMethods: ['validateString']
+      }
+    ]
   }
 };
 
