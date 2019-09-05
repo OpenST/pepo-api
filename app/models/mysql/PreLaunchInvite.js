@@ -216,7 +216,7 @@ class PreLaunchInvite extends ModelBase {
 
     const queryResponse = await oThis
       .update({
-        status: preLaunchInviteConstants.invertedAdminStatuses[preLaunchInviteConstants.whitelistedStatus]
+        admin_status: preLaunchInviteConstants.invertedAdminStatuses[preLaunchInviteConstants.whitelistedStatus]
       })
       .where({ id: inviteId })
       .fire();
