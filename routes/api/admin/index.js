@@ -172,9 +172,10 @@ router.get('/launch-invites/search', sanitizer.sanitizeDynamicUrlParams, functio
 
   const dataFormatterFunc = async function(serviceResponse) {
     const wrapperFormatterRsp = await new FormatterComposer({
-      resultType: responseEntityKey.loggedInAdmin,
+      resultType: responseEntityKey.launchInviteSearchResults,
       entityKindToResponseKeyMap: {
-        [entityType.admin]: responseEntityKey.loggedInAdmin
+        [entityType.inviteUserSearchList]: responseEntityKey.launchInviteSearchResults,
+        [entityType.inviteMap]: responseEntityKey.invites
       },
       serviceData: serviceResponse.data
     }).perform();
@@ -182,7 +183,9 @@ router.get('/launch-invites/search', sanitizer.sanitizeDynamicUrlParams, functio
     serviceResponse.data = wrapperFormatterRsp.data;
   };
 
-  Promise.resolve(routeHelper.perform(req, res, next, '/admin/GetCurrent', 'r_a_v1_u_5', null, dataFormatterFunc));
+  Promise.resolve(
+    routeHelper.perform(req, res, next, '/admin/preLaunch/UserSearch', 'r_a_v1_u_8', null, dataFormatterFunc)
+  );
 });
 
 module.exports = router;
