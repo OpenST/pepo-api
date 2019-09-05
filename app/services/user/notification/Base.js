@@ -9,6 +9,7 @@ const rootPrefix = '../../../..',
   TokenUserByUserIdsMultiCache = require(rootPrefix + '/lib/cacheManagement/multi/TokenUserByUserIds'),
   bgJob = require(rootPrefix + '/lib/rabbitMqEnqueue/bgJob'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
+  userConstants = require(rootPrefix + '/lib/globalConstant/user'),
   videoConstants = require(rootPrefix + '/lib/globalConstant/video'),
   userNotificationConstants = require(rootPrefix + '/lib/globalConstant/cassandra/userNotification'),
   bgJobConstants = require(rootPrefix + '/lib/globalConstant/bgJob'),
@@ -460,19 +461,20 @@ class UserNotificationBase extends ServiceBase {
   _isNotificationBlocked(userNotification) {
     const oThis = this;
 
-    // For now only video entity can be deleted
-    // So if notification don't have videos then is allowed to be sent out
-    if (oThis.notificationVideoMap[userNotification.uuid]) {
-      for (let i = 0; i < oThis.notificationVideoMap[userNotification.uuid].length; i++) {
-        let vid = oThis.notificationVideoMap[userNotification.uuid][i];
-        // For now only delete notification of kind video add
-        if (
-          userNotification.kind == userNotificationConstants.videoAddKind &&
-          oThis.videoMap[vid].status == videoConstants.deletedStatus
-        ) {
-          oThis.notificationsToDelete.push(userNotification);
-          return true;
+    if (userNotification.kind == userNotificationConstants.videoAddKind) {
+      if (oThis.notificationVideoMap[userNotification.uuid]) {
+        for (let i = 0; i < oThis.notificationVideoMap[userNotification.uuid].length; i++) {
+          let vid = oThis.notificationVideoMap[userNotification.uuid][i];
+          if (oThis.videoMap[vid].status == videoConstants.deletedStatus) {
+            oThis.notificationsToDelete.push(userNotification);
+            return true;
+          }
         }
+      }
+
+      if (oThis.usersByIdMap[userNotification.actorIds[0]].status === userConstants.inActiveStatus) {
+        oThis.notificationsToDelete.push(userNotification);
+        return true;
       }
     }
 

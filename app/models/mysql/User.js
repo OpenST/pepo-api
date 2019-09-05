@@ -73,6 +73,7 @@ class UserModel extends ModelBase {
       encryptionSalt: dbRow.encryption_salt,
       markInactiveTriggerCount: dbRow.mark_inactive_trigger_count,
       properties: dbRow.properties,
+      approvedCreator: UserModel.isUserApprovedCreator(dbRow),
       status: userConstants.statuses[dbRow.status],
       createdAt: dbRow.created_at,
       updatedAt: dbRow.updated_at
@@ -94,6 +95,7 @@ class UserModel extends ModelBase {
       'profileImageId',
       'markInactiveTriggerCount',
       'properties',
+      'approvedCreator',
       'status',
       'createdAt',
       'updatedAt'
@@ -277,6 +279,7 @@ class UserModel extends ModelBase {
    * @param {integer} params.limit: limit
    * @param {integer} params.query: query
    * @param {integer} params.paginationTimestamp: pagination time stamp
+   * @param {boolean} params.fetchAll: flag to fetch all users, active or inactive
    *
    * @return {Promise}
    */
@@ -289,11 +292,14 @@ class UserModel extends ModelBase {
 
     const queryObject = oThis
       .select('*')
-      .where({ status: userConstants.invertedStatuses[userConstants.activeStatus] })
       .limit(limit)
       .order_by('id desc');
 
     let queryWithWildCards = '%' + query + '%';
+
+    if (!params.fetchAll) {
+      queryObject.where({ status: userConstants.invertedStatuses[userConstants.activeStatus] });
+    }
 
     if (query) {
       queryObject.where(['user_name LIKE ? OR name LIKE ?', queryWithWildCards, queryWithWildCards]);

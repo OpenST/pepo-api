@@ -13,6 +13,8 @@ const rootPrefix = '../../..',
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   feedsConstants = require(rootPrefix + '/lib/globalConstant/feed'),
   userConstants = require(rootPrefix + '/lib/globalConstant/user'),
+  ActivityLogModel = require(rootPrefix + '/app/models/mysql/AdminActivityLog'),
+  adminActivityLogConst = require(rootPrefix + '/lib/globalConstant/adminActivityLogs'),
   notificationJobEnqueue = require(rootPrefix + '/lib/rabbitMqEnqueue/notification'),
   notificationJobConstants = require(rootPrefix + '/lib/globalConstant/notificationJob');
 
@@ -21,18 +23,21 @@ const rootPrefix = '../../..',
  *
  * @class
  */
-class AdminApproveUsers extends ServiceBase {
+class ApproveUsersAsCreator extends ServiceBase {
   /**
    * Constructor to approve users by admin
    *
    * @param params
    * @param {Array} params.user_ids: User ids to be approved by admin.
+   * @param {Array} params.current_admin: current admin.
    */
   constructor(params) {
     super(params);
 
     const oThis = this;
     oThis.userIds = params.user_ids;
+    oThis.currentAdmin = params.current_admin;
+    oThis.currentAdminId = oThis.currentAdmin.id;
 
     oThis.userObjects = {};
   }
@@ -53,6 +58,8 @@ class AdminApproveUsers extends ServiceBase {
     await oThis._flushCache();
 
     await oThis._publishFanVideo();
+
+    await oThis._logAdminActivity();
 
     return responseHelper.successWithData({});
   }
@@ -88,7 +95,7 @@ class AdminApproveUsers extends ServiceBase {
           responseHelper.paramValidationError({
             internal_error_identifier: 'a_s_a_au_2',
             api_error_identifier: 'could_not_proceed',
-            params_error_identifiers: ['user_not_active'],
+            params_error_identifiers: ['user_inactive'],
             debug_options: {}
           })
         );
@@ -197,6 +204,26 @@ class AdminApproveUsers extends ServiceBase {
       })
       .fire();
   }
+
+  /**
+   * Log admin activity
+   *
+   * @return {Promise<void>}
+   * @private
+   */
+  async _logAdminActivity() {
+    const oThis = this;
+
+    let activityLogObj = new ActivityLogModel({});
+
+    for (let userId in oThis.userObjects) {
+      await activityLogObj.insertAction({
+        adminId: oThis.currentAdminId,
+        actionOn: userId,
+        action: adminActivityLogConst.approvedAsCreator
+      });
+    }
+  }
 }
 
-module.exports = AdminApproveUsers;
+module.exports = ApproveUsersAsCreator;

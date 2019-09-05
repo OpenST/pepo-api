@@ -11,7 +11,7 @@ const dbName = databaseConstants.adminDbName;
  *
  * @class ActivityLogModel
  */
-class ActivityLogModel extends ModelBase {
+class AdminActivityLogModel extends ModelBase {
   /**
    * Constructor for user profile element model.
    *
@@ -32,9 +32,10 @@ class ActivityLogModel extends ModelBase {
    *
    * @param {object} dbRow
    * @param {number} dbRow.id
-   * @param {number} dbRow.user_id
-   * @param {string} dbRow.action_kind
-   * @param {object} dbRow.data
+   * @param {number} dbRow.admin_id
+   * @param {string} dbRow.action
+   * @param {number} dbRow.action_on
+   * @param {object} dbRow.extra_data
    * @param {number} dbRow.created_at
    * @param {number} dbRow.updated_at
    *
@@ -45,8 +46,10 @@ class ActivityLogModel extends ModelBase {
 
     const formattedData = {
       id: dbRow.id,
+      adminId: dbRow.admin_id,
       action: adminActivityLogConst.actions[dbRow.action],
-      data: dbRow.data,
+      actionOn: dbRow.action_on,
+      extraData: dbRow.extra_data,
       createdAt: dbRow.created_at,
       updatedAt: dbRow.updated_at
     };
@@ -55,11 +58,12 @@ class ActivityLogModel extends ModelBase {
   }
 
   /**
-   * Insert activity log
+   * Insert action
    *
-   * @return {Promise<*>}
+   * @param params
+   * @returns {Promise<any>}
    */
-  async insertAction(params) {
+  insertAction(params) {
     const oThis = this;
 
     const currentTime = Math.floor(Date.now() / 1000);
@@ -67,8 +71,9 @@ class ActivityLogModel extends ModelBase {
     return oThis
       .insert({
         admin_id: params.adminId,
-        action: adminActivityLogConst.invertedActions[params.actionKind],
-        data: params.data,
+        action: adminActivityLogConst.invertedActions[params.action],
+        action_on: params.actionOn,
+        extra_data: params.extraData,
         created_at: currentTime,
         updated_at: currentTime
       })
@@ -76,4 +81,4 @@ class ActivityLogModel extends ModelBase {
   }
 }
 
-module.exports = ActivityLogModel;
+module.exports = AdminActivityLogModel;

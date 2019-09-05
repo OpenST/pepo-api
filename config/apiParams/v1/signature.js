@@ -296,7 +296,7 @@ const v1Signature = {
       },
       {
         parameter: 'video_description',
-        validatorMethods: ['validateNonBlankString']
+        validatorMethods: ['validateString']
       },
       {
         parameter: 'link',
@@ -488,19 +488,6 @@ const v1Signature = {
       }
     ]
   },
-  [apiName.adminLogin]: {
-    mandatory: [
-      {
-        parameter: 'email',
-        validatorMethods: ['isValidEmail']
-      },
-      {
-        parameter: 'password',
-        validatorMethods: ['validatePassword']
-      }
-    ],
-    optional: []
-  },
   [apiName.userSearch]: {
     mandatory: [
       {
@@ -510,7 +497,7 @@ const v1Signature = {
     ],
     optional: [
       {
-        parameter: 'includeVideos',
+        parameter: 'include_admin_related_details',
         validatorMethods: ['validateBoolean']
       },
       {

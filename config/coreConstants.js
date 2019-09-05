@@ -272,6 +272,14 @@ class CoreConstants {
     return process.env.PA_COOKIE_SECRET;
   }
 
+  get ADMIN_COOKIE_SECRET() {
+    return process.env.PA_PAD_COOKIE_SECRET;
+  }
+
+  get WEB_COOKIE_SECRET() {
+    return process.env.PA_PW_COOKIE_SECRET;
+  }
+
   get PA_COOKIE_TOKEN_SECRET() {
     return process.env.PA_COOKIE_TOKEN_SECRET;
   }

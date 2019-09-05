@@ -1,10 +1,10 @@
 /**
- * Module to define error config for API v1 errors.
+ * Module to define error config for API admin errors.
  *
- * @module config/apiParams/v1/errorConfig
+ * @module config/apiParams/admin/errorConfig
  */
 
-const v1ErrorConfig = {
+const adminErrorConfig = {
   invalid_user_name: {
     parameter: 'user_name',
     code: 'invalid',
@@ -130,36 +130,6 @@ const v1ErrorConfig = {
     code: 'invalid',
     message: 'Invalid text.'
   },
-  invalid_thank_you_flag: {
-    parameter: 'thank_you_flag',
-    code: 'invalid',
-    message: 'Invalid thank you flag.'
-  },
-  invalid_last_visited_at: {
-    parameter: 'last_visited_at',
-    code: 'invalid',
-    message: 'Invalid last visited at timestamp.'
-  },
-  invalid_notification_id: {
-    parameter: 'notification_id',
-    code: 'invalid',
-    message: 'Invalid notification id.'
-  },
-  invalid_from_user_id: {
-    parameter: 'from_user_id',
-    code: 'invalid',
-    message: 'Invalid from user id in transfers.'
-  },
-  invalid_to_user_id: {
-    parameter: 'to_user_id',
-    code: 'invalid',
-    message: 'Invalid to user id in transfers.'
-  },
-  invalid_twitter_user: {
-    parameter: 'twitter_user',
-    code: 'invalid',
-    message: 'Invalid twitter user in rotate twitter account. This twitter user has rotated their twitter account.'
-  },
   invalid_transfers: {
     parameter: 'transfers',
     code: 'invalid',
@@ -174,12 +144,7 @@ const v1ErrorConfig = {
     parameter: 'image_url',
     code: 'invalid',
     message: 'Invalid image url.'
-  },
-  invalid_device_kind: {
-    parameter: 'device_kind',
-    code: 'invalid',
-    message: 'Invalid device kind.'
   }
 };
 
-module.exports = v1ErrorConfig;
+module.exports = adminErrorConfig;
