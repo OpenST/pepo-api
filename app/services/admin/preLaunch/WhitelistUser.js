@@ -1,6 +1,7 @@
 const rootPrefix = '../../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
-  PreLaunchInviteModel = require(rootPrefix + '/app/models/mysql/PreLaunchInvite');
+  PreLaunchInviteModel = require(rootPrefix + '/app/models/mysql/PreLaunchInvite'),
+  responseHelper = require(rootPrefix + '/lib/formatter/response');
 
 /**
  * Class to whitelist users by admin.
@@ -41,7 +42,9 @@ class WhitelistUser extends ServiceBase {
       return updateResponse;
     }
 
-    return PreLaunchInviteModel.flushCache({ id: oThis.inviteId });
+    await PreLaunchInviteModel.flushCache({ id: oThis.inviteId });
+
+    return responseHelper.successWithData({});
   }
 }
 
