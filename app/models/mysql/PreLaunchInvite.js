@@ -1,12 +1,12 @@
 const rootPrefix = '../../..',
-  util = require(rootPrefix + '/lib/util'),
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
+  util = require(rootPrefix + '/lib/util'),
   coreConstants = require(rootPrefix + '/config/coreConstants'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   localCipher = require(rootPrefix + '/lib/encryptors/localCipher'),
   databaseConstants = require(rootPrefix + '/lib/globalConstant/database'),
-  preLaunchInviteConstant = require(rootPrefix + '/lib/globalConstant/preLaunchInvite');
+  preLaunchInviteConstants = require(rootPrefix + '/lib/globalConstant/preLaunchInvite');
 
 // Declare variables.
 const dbName = databaseConstants.userDbName;
@@ -88,8 +88,8 @@ class PreLaunchInvite extends ModelBase {
       profileImageUrl: dbRow.profile_image_url,
       token: dbRow.token,
       secret: dbRow.secret,
-      status: preLaunchInviteConstant.statuses[dbRow.status],
-      adminStatus: preLaunchInviteConstant.adminStatuses[dbRow.admin_status],
+      status: preLaunchInviteConstants.statuses[dbRow.status],
+      adminStatus: preLaunchInviteConstants.adminStatuses[dbRow.admin_status],
       inviteeUserId: dbRow.invitee_user_id,
       inviteCode: dbRow.invite_code,
       invitedUserCount: dbRow.invited_user_count,
@@ -211,7 +211,7 @@ class PreLaunchInvite extends ModelBase {
     const oThis = this;
 
     const queryResponse = await oThis
-      .update({ status: preLaunchInviteConstant.invertedAdminStatuses[preLaunchInviteConstant.whitelistedStatus] })
+      .update({ status: preLaunchInviteConstants.invertedAdminStatuses[preLaunchInviteConstants.whitelistedStatus] })
       .where({ id: invite_id })
       .fire();
 
