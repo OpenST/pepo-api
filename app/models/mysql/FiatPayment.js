@@ -1,5 +1,6 @@
 const rootPrefix = '../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
+  basicHelper = require(rootPrefix + '/helpers/basic'),
   databaseConstants = require(rootPrefix + '/lib/globalConstant/database'),
   fiatPaymentConstants = require(rootPrefix + '/lib/globalConstant/fiatPayment'),
   ostPricePointConstants = require(rootPrefix + '/lib/globalConstant/ostPricePoints');
@@ -147,6 +148,37 @@ class FiatPayment extends ModelBase {
       })
       .where({ id: id })
       .fire();
+  }
+
+  /**
+   * User ids
+   *
+   * @param {Array} userIds
+   * @returns {Promise<void>}
+   */
+  async fetchRecentMonthPayments(userIds) {
+    const oThis = this;
+
+    let currentTimestamp = basicHelper.getCurrentTimestampInSeconds(),
+      beforeOneMonthTimestamp = currentTimestamp - 2592000;
+
+    let queryResponse = await oThis
+        .select('*')
+        .where(['from_user_id IN (?) AND updated_at > ?', userIds, beforeOneMonthTimestamp])
+        .fire(),
+      responseData = {};
+
+    for (let i = 0; i < queryResponse.length; i++) {
+      const oThis = this;
+
+      if (!responseData[queryResponse[i].from_user_id]) {
+        responseData[queryResponse[i].from_user_id] = [];
+      }
+
+      responseData[queryResponse[i].from_user_id].push(oThis.formatDbData(queryResponse[i]));
+    }
+
+    return responseData;
   }
 
   /**
