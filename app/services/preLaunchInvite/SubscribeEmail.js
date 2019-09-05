@@ -160,6 +160,8 @@ class SubscribeEmail extends ServiceBase {
       .update({ status: doptinStatus })
       .where({ id: oThis.preLaunchInviteObj.id })
       .fire();
+
+    await PreLaunchInviteModel.flushCache(oThis.preLaunchInviteObj);
   }
 }
 
