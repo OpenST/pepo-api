@@ -1,10 +1,14 @@
 const express = require('express'),
   router = express.Router(),
-  cookieParser = require('cookie-parser');
+  cookieParser = require('cookie-parser'),
+  csrf = require('csurf');
 
 const rootPrefix = '../../..',
+  AdminCookieAuth = require(rootPrefix + '/lib/authentication/AdminCookie'),
+  adminConstants = require(rootPrefix + '/lib/globalConstant/admin'),
   FormatterComposer = require(rootPrefix + '/lib/formatter/Composer'),
   routeHelper = require(rootPrefix + '/routes/helper'),
+  apiVersions = require(rootPrefix + '/lib/globalConstant/apiVersions'),
   apiName = require(rootPrefix + '/lib/globalConstant/apiName'),
   sanitizer = require(rootPrefix + '/helpers/sanitizer'),
   coreConstant = require(rootPrefix + '/config/coreConstants'),
@@ -14,11 +18,49 @@ const rootPrefix = '../../..',
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   cookieHelper = require(rootPrefix + '/lib/cookieHelper');
 
+const errorConfig = basicHelper.fetchErrorConfig(apiVersions.admin);
+
+const csrfProtection = csrf({
+  cookie: {
+    maxAge: 1000 * 5 * 60, // Cookie would expire after 5 minutes
+    httpOnly: true, // The cookie only accessible by the web server
+    signed: true, // Indicates if the cookie should be signed
+    secure: true, // Marks the cookie to be used with HTTPS only
+    path: '/',
+    sameSite: 'strict', // sets the same site policy for the cookie
+    domain: coreConstant.PA_COOKIE_DOMAIN,
+    key: adminConstants.csrfCookieName
+  }
+});
+
 // Node.js cookie parsing middleware.
-router.use(cookieParser(coreConstant.COOKIE_SECRET));
+router.use(cookieParser(coreConstant.ADMIN_COOKIE_SECRET));
+
+const validateAdminCookie = async function(req, res, next) {
+  // Cookie validation is not to be done for admin login request
+  if (req.url !== '/login') {
+    let adminCookieValue = req.signedCookies[adminConstants.loginCookieName];
+    let authResponse = await new AdminCookieAuth(adminCookieValue).perform().catch(function(r) {
+      return r;
+    });
+
+    if (authResponse.isFailure()) {
+      cookieHelper.deleteAdminCookie(res);
+      return responseHelper.renderApiResponse(authResponse, res, errorConfig);
+    } else {
+      req.decodedParams.current_admin = authResponse.data.current_admin;
+      req.decodedParams.admin_login_cookie_value = authResponse.data.admin_login_cookie_value;
+    }
+    cookieHelper.setAdminCookie(res, authResponse.data.admin_login_cookie_value);
+  }
+
+  next();
+};
+
+router.use(validateAdminCookie);
 
 /* Login admin*/
-router.post('/login', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+router.post('/login', csrfProtection, sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.adminLogin;
 
   const onServiceSuccess = async function(serviceResponse) {
@@ -35,11 +77,10 @@ router.post('/login', sanitizer.sanitizeDynamicUrlParams, function(req, res, nex
 });
 
 /* Logout admin*/
-router.post('/logout', sanitizer.sanitizeDynamicUrlParams, function(req, res) {
+router.post('/logout', csrfProtection, sanitizer.sanitizeDynamicUrlParams, function(req, res) {
   req.decodedParams.apiName = apiName.adminLogout;
 
-  const errorConfig = basicHelper.fetchErrorConfig(req.decodedParams.apiVersion),
-    responseObject = responseHelper.successWithData({});
+  const responseObject = responseHelper.successWithData({});
 
   cookieHelper.deleteAdminCookie(res);
 
@@ -73,7 +114,7 @@ router.get('/users', sanitizer.sanitizeDynamicUrlParams, function(req, res, next
 });
 
 /* Approve user as creator */
-router.post('/users/:user_id/approve', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+router.post('/users/:user_id/approve', csrfProtection, sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.adminUserApprove;
   req.decodedParams.user_ids = [req.params.user_id];
 
@@ -81,7 +122,7 @@ router.post('/users/:user_id/approve', sanitizer.sanitizeDynamicUrlParams, funct
 });
 
 /* Block user*/
-router.post('/users/:user_id/block', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+router.post('/users/:user_id/block', csrfProtection, sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.adminUserBlock;
   req.decodedParams.user_ids = [req.params.user_id];
 
@@ -89,7 +130,7 @@ router.post('/users/:user_id/block', sanitizer.sanitizeDynamicUrlParams, functio
 });
 
 /* Delete video */
-router.post('/delete-video/:video_id', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+router.post('/delete-video/:video_id', csrfProtection, sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.adminDeleteVideo;
   req.decodedParams.video_id = req.params.video_id;
 

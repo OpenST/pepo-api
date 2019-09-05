@@ -37,6 +37,23 @@
   npm install
 ```
 
+## Seed DB
+* Create the main db and create schema_migrations table.
+```bash
+  node db/seed.js
+```
+
+* Run selective migrations
+```bash
+  source set_env_vars.sh
+
+  # create config_strategies table
+  node db/migrate.js --up 1561038407695
+  
+  # create global_salts table
+  node db/migrate.js --up 1561037631832
+```
+
 ## Seed config strategy
 
 * Global Configs Seed
@@ -54,10 +71,6 @@
 ```
 
 ## Run DB Migrations
-* Create the main db and create schema_migrations table.
-```bash
-  node db/seed.js
-```
 
 * Run all pending migrations.
 ```bash
