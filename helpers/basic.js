@@ -1,9 +1,3 @@
-/**
- * Perform basic validations
- *
- * @module helpers/basic
- */
-
 const BigNumber = require('bignumber.js');
 
 const rootPrefix = '..',
@@ -272,7 +266,9 @@ class BasicHelper {
         ? Object.assign(dynamicErrorConfig, internalParamErrorConfig)
         : internalParamErrorConfig;
     } else if (apiVersion === apiVersions.admin) {
-      paramErrorConfig = dynamicErrorConfig ? Object.assign(dynamicErrorConfig, {}) : {};
+      paramErrorConfig = dynamicErrorConfig
+        ? Object.assign(dynamicErrorConfig, adminParamErrorConfig)
+        : adminParamErrorConfig;
     } else if (apiVersion === apiVersions.web) {
       paramErrorConfig = dynamicErrorConfig
         ? Object.assign(dynamicErrorConfig, webParamErrorConfig)
@@ -294,7 +290,7 @@ class BasicHelper {
    *
    * @return {array}
    */
-  commaSeperatedStrToArray(str) {
+  commaSeparatedStrToArray(str) {
     return str.split(',').map((ele) => ele.trim());
   }
 

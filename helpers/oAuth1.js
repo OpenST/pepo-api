@@ -4,11 +4,11 @@
  * @module helpers/oAuth1
  */
 
-const uuid = require('uuid');
+const uuidV4 = require('uuid/v4');
 
 const rootPrefix = '..',
-  util = require(rootPrefix + '/lib/util'),
   CommonValidator = require(rootPrefix + '/lib/validators/Common'),
+  util = require(rootPrefix + '/lib/util'),
   responseHelper = require(rootPrefix + '/lib/formatter/response');
 
 const BYTE_MAP = {
@@ -92,9 +92,18 @@ const percentBufferByte = Buffer.from('%');
  */
 class Oauth1Helper {
   /**
-   * Constructor to set login cookie.
+   * Constructor for oAuth1 helper.
    *
-   * @param {string} cookieValue
+   * @param {object} params
+   * @param {string} params.requestType
+   * @param {string} params.url
+   * @param {object} params.requestParams
+   * @param {object} params.oAuthCredentials
+   * @param {string} params.oAuthCredentials.oAuthConsumerKey
+   * @param {string} params.oAuthCredentials.oAuthConsumerSecret
+   * @param {string} params.oAuthCredentials.oAuthToken
+   * @param {string} params.oAuthCredentials.oAuthTokenSecret
+   * @param {object} params.authorizationHeader
    */
   constructor(params) {
     const oThis = this;
@@ -140,8 +149,8 @@ class Oauth1Helper {
   _setAuthorizationHeader() {
     const oThis = this;
 
-    let currentTime = Math.floor(Date.now() / 1000);
-    let nonce = uuid.v4();
+    const currentTime = Math.floor(Date.now() / 1000);
+    const nonce = uuidV4();
 
     oThis.authorizationHeaders = {
       oauth_consumer_key: oThis.oAuthConsumerKey,
@@ -154,53 +163,55 @@ class Oauth1Helper {
     Object.assign(oThis.authorizationHeaders, oThis.extraAuthorizationHeader);
 
     if (oThis.hasAccessToken) {
-      oThis.authorizationHeaders['oauth_token'] = oThis.oAuthToken;
+      oThis.authorizationHeaders.oauth_token = oThis.oAuthToken;
     }
   }
 
   /**
-   * Set Signature in Authorization Headers
+   * Set signature in authorization headers.
    *
-   * @return {Null}
+   * @sets oThis.authorizationHeaders
+   *
    * @private
    */
   _setSignature() {
     const oThis = this;
 
-    let signatureBaseString = oThis._getSignatureBaseString();
-    let signingKey = oThis._getSigningKey();
+    const signatureBaseString = oThis._getSignatureBaseString();
+    const signingKey = oThis._getSigningKey();
 
-    let signature = util.createSha1DigestBase64(signingKey, signatureBaseString);
-    oThis.authorizationHeaders['oauth_signature'] = signature;
+    const signature = util.createSha1DigestBase64(signingKey, signatureBaseString);
+    oThis.authorizationHeaders.oauth_signature = signature;
   }
 
   /**
-   * Set Authorization Headers
+   * Set authorization headers.
    *
-   * @return {Object}
+   * @return {object}
    * @private
    */
   _serviceResponse() {
     const oThis = this;
     let authorizationHeaderStr = null;
 
-    for (let key in oThis.authorizationHeaders) {
-      let val = encodeURIComponent(oThis.authorizationHeaders[key]);
+    for (const key in oThis.authorizationHeaders) {
+      const val = encodeURIComponent(oThis.authorizationHeaders[key]);
 
       if (authorizationHeaderStr === null) {
         authorizationHeaderStr = 'OAuth ';
       } else {
-        authorizationHeaderStr = authorizationHeaderStr + ',';
+        authorizationHeaderStr += ',';
       }
       authorizationHeaderStr = authorizationHeaderStr + encodeURIComponent(key) + '="' + val + '"';
     }
+
     return { authorizationHeaderStr: authorizationHeaderStr };
   }
 
   /**
-   * Get Signature Base String For Oauth Signature
+   * Get signature base string for Oauth signature.
    *
-   * @return {String}
+   * @return {string}
    * @private
    */
   _getSignatureBaseString() {
@@ -211,29 +222,29 @@ class Oauth1Helper {
     baseStr = baseStr + oThis.requestType.toUpperCase() + '&';
     baseStr = baseStr + oThis._getPercentEncodedString(oThis.url) + '&';
 
-    let allParams = Object.assign(oThis.requestParams, oThis.authorizationHeaders);
+    const allParams = Object.assign(oThis.requestParams, oThis.authorizationHeaders);
 
     Object.keys(allParams)
       .sort()
       .forEach(function(key) {
-        let val = allParams[key];
+        const val = allParams[key];
         if (parameterString !== '') {
-          parameterString = parameterString + '&';
+          parameterString += '&';
         }
 
         parameterString =
           parameterString + oThis._getPercentEncodedString(key) + '=' + oThis._getPercentEncodedString(val);
       });
 
-    baseStr = baseStr + oThis._getPercentEncodedString(parameterString);
+    baseStr += oThis._getPercentEncodedString(parameterString);
 
     return baseStr;
   }
 
   /**
-   * Get Signing Key For Oauth Signature
+   * Get signing key for Oauth signature.
    *
-   * @return {String}
+   * @return {string}
    * @private
    */
   _getSigningKey() {
@@ -242,7 +253,7 @@ class Oauth1Helper {
     let key = oThis._getPercentEncodedString(oThis.oAuthConsumerSecret) + '&';
 
     if (oThis.hasAccessToken) {
-      key = key + oThis._getPercentEncodedString(oThis.oAuthTokenSecret);
+      key += oThis._getPercentEncodedString(oThis.oAuthTokenSecret);
     }
 
     return key;
@@ -255,25 +266,24 @@ class Oauth1Helper {
    * @private
    */
   _getPercentEncodedString(srcString) {
-    let bufferArray = [];
+    const bufferArray = [];
 
-    //Note: Long Integer Valies cannot be converted directly as there would be loss of precision
-    // convertToBigNumber
+    // Note: Long Integer values cannot be converted directly as there would be loss of precision convertToBigNumber.
     srcString = srcString.toString();
 
-    for (var i = 0; i < srcString.length; i++) {
+    for (let i = 0; i < srcString.length; i++) {
       const character = srcString.charAt(i);
-      let bufferBytes = Buffer.from(character);
+      const bufferBytes = Buffer.from(character);
 
-      for (var j = 0; j < bufferBytes.length; j++) {
-        let bufferByte = bufferBytes.slice(j, j + 1);
-        let bufferHexStr = bufferByte.toString('hex').toUpperCase();
+      for (let j = 0; j < bufferBytes.length; j++) {
+        const bufferByte = bufferBytes.slice(j, j + 1);
+        const bufferHexStr = bufferByte.toString('hex').toUpperCase();
 
         if (BYTE_MAP[bufferHexStr]) {
           bufferArray.push(bufferByte);
         } else {
           bufferArray.push(percentBufferByte);
-          for (var k = 0; k < bufferHexStr.length; k++) {
+          for (let k = 0; k < bufferHexStr.length; k++) {
             const bufferHexCharacter = bufferHexStr.charAt(k);
             bufferArray.push(Buffer.from(bufferHexCharacter));
           }
