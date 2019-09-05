@@ -34,8 +34,8 @@ class InviteUserSearch extends ServiceBase {
 
     oThis.inviteIds = [];
     oThis.searchResults = [];
-    oThis.pageNo = null;
-    oThis.nextpageNo = null;
+    oThis.pageNo = 1;
+    oThis.nextpageNo = 2;
     oThis.paginationIdentifier = params[paginationConstants.paginationIdentifierKey] || null;
     oThis.limit = oThis._defaultPageLimit();
   }
@@ -76,7 +76,7 @@ class InviteUserSearch extends ServiceBase {
 
       oThis.pageNo = parsedPaginationParams.page_no;
     } else {
-      oThis.pageNo = null;
+      oThis.pageNo = 1;
     }
 
     // Validate limit.

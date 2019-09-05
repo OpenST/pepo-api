@@ -22,10 +22,10 @@ const errorConfig = basicHelper.fetchErrorConfig(apiVersions.admin);
 
 const csrfProtection = csrf({
   cookie: {
-    maxAge: 1000 * 5 * 60, // Cookie would expire after 5 minutes.
-    httpOnly: true, // The cookie only accessible by the web server.
-    signed: true, // Indicates if the cookie should be signed.
-    secure: true, // Marks the cookie to be used with HTTPS only.
+    maxAge: 1000 * 5 * 60, // Cookie would expire after 5 minutes
+    httpOnly: true, // The cookie only accessible by the web server
+    signed: true, // Indicates if the cookie should be signed
+    secure: true, // Marks the cookie to be used with HTTPS only
     path: '/',
     sameSite: 'strict', // Sets the same site policy for the cookie.
     domain: coreConstant.PA_COOKIE_DOMAIN,
