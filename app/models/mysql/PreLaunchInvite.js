@@ -144,11 +144,11 @@ class PreLaunchInvite extends ModelBase {
       .where({ id: ids })
       .fire();
 
-    let inviteDetails = {};
-    let inviteIds = [];
+    const inviteDetails = {};
+    const inviteIds = [];
 
     for (let ind = 0; ind < dbRows.length; ind++) {
-      let formattedRow = oThis.formatDbData(dbRows[ind]);
+      const formattedRow = oThis.formatDbData(dbRows[ind]);
       inviteIds.push(formattedRow.id);
       inviteDetails[dbRows[ind].id] = formattedRow;
     }
@@ -261,17 +261,7 @@ class PreLaunchInvite extends ModelBase {
       offset = (pageNo - 1) * limit;
 
     const queryObject = oThis
-      .select([
-        'id',
-        'handle',
-        'email',
-        'name',
-        'profile_image_url',
-        'status',
-        'admin_status',
-        'created_at',
-        'updated_at'
-      ])
+      .select(['id', 'handle', 'email', 'name', 'profile_image_url', 'status', 'admin_status'])
       .limit(limit)
       .offset(offset);
 
