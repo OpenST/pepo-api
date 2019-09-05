@@ -23,7 +23,6 @@ class PreLaunchTwitterSignUp extends ServiceBase {
    * Constructor for pre launch invite signup service.
    *
    * @param {object} params
-   * @param {string} params.twitterUserObj: Twitter User Table Obj
    * @param {string} params.userTwitterEntity: User Entity Of Twitter
    * @param {string} params.token: Oauth User Token
    * @param {string} params.secret: Oauth User secret
@@ -38,7 +37,6 @@ class PreLaunchTwitterSignUp extends ServiceBase {
 
     const oThis = this;
 
-    oThis.twitterUserObj = params.twitterUserObj;
     oThis.userTwitterEntity = params.userTwitterEntity;
     oThis.token = params.token;
     oThis.secret = params.secret;
@@ -47,7 +45,6 @@ class PreLaunchTwitterSignUp extends ServiceBase {
     oThis.email = oThis.userTwitterEntity.email;
     oThis.encryptedEncryptionSalt = null;
     oThis.decryptedEncryptionSalt = null;
-    oThis.encryptedCookieToken = null;
     oThis.encryptedSecret = null;
 
     oThis.preLaunchInviteObj = null;
@@ -106,11 +103,6 @@ class PreLaunchTwitterSignUp extends ServiceBase {
       await oThis._updateInvitedUserCount();
     }
 
-    // if email is present then enqueue for doptin creator
-    if (!CommonValidators.isVarNullOrUndefined(oThis.email) || CommonValidators.isValidEmail(oThis.email)) {
-      await oThis._sendDoubleOptIn();
-    }
-
     await oThis._checkDuplicateEmail();
 
     logger.log('End::Perform Twitter Signup');
@@ -139,7 +131,6 @@ class PreLaunchTwitterSignUp extends ServiceBase {
 
     let cookieToken = localCipher.generateRandomIv(32);
 
-    oThis.encryptedCookieToken = localCipher.encrypt(oThis.decryptedEncryptionSalt, cookieToken);
     oThis.encryptedSecret = localCipher.encrypt(oThis.decryptedEncryptionSalt, oThis.secret);
 
     logger.log('End::Generate Data Key from KMS');
@@ -238,27 +229,11 @@ class PreLaunchTwitterSignUp extends ServiceBase {
     let invitedUserCount = oThis.inviterObj.invitedUserCount + 1;
 
     await new PreLaunchInviteModel()
-      .update({ invited_user_count: invitedUserCount })
+      .update('invited_user_count = invited_user_count + 1')
       .where({ id: oThis.inviterId })
       .fire();
 
     await PreLaunchInviteModel.flushCache(oThis.preLaunchInviteObj);
-  }
-
-  /**
-   * Send double opt in
-   *
-   * @returns {Promise<*>}
-   * @private
-   */
-  async _sendDoubleOptIn() {
-    const oThis = this;
-
-    let sendDoubleOptInParams = {
-      pre_launch_invite_hook: oThis.preLaunchInviteObj
-    };
-
-    await new SendDoubleOptInService(sendDoubleOptInParams).perform();
   }
 
   /**
