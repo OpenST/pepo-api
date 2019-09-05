@@ -108,7 +108,7 @@ router.get('/twitter-login', sanitizer.sanitizeDynamicUrlParams, function(req, r
 });
 
 /* Logout pre launch user*/
-router.get('/logout', sanitizer.sanitizeDynamicUrlParams, function(req, res) {
+router.post('/logout', sanitizer.sanitizeDynamicUrlParams, function(req, res) {
   req.decodedParams.apiName = apiName.preLaunchLogout;
 
   const responseObject = responseHelper.successWithData({});
