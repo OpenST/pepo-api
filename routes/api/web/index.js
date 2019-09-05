@@ -4,6 +4,6 @@ const express = require('express'),
 const rootPrefix = '../../..',
   preLaunchRoutes = require(rootPrefix + '/routes/api/web/preLaunch');
 
-router.use('/preLaunch', preLaunchRoutes);
+router.use('/prelaunch', preLaunchRoutes);
 
 module.exports = router;

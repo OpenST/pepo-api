@@ -3,8 +3,8 @@
 export PA_ENVIRONMENT='development'
 export PA_PORT=3000
 export PA_DEBUG_ENABLED='1';
-export PA_DOMAIN='www.pepo.com'
-export PA_COOKIE_DOMAIN='pepodev.com'
+export PA_DOMAIN='pepodev.com'
+export PA_COOKIE_DOMAIN='.pepodev.com'
 
 # Devops error logs framework
 export DEVOPS_APP_NAME='pepo-api';
@@ -113,7 +113,7 @@ export PA_CAMPAIGN_MASTER_LIST="5346"
 #Twitter API Key
 export PA_TWITTER_CONSUMER_KEY='NEo4gEXzdQZaoTsqzpZvepfKb'
 export PA_TWITTER_CONSUMER_SECRET='iM5UMt4px8rwoqEoRV9gJGrJGtEoMUxOYkaWXSges7t4bk564t'
-export PA_TWITTER_AUTH_CALLBACK_ROUTE='http://localhost:3000/new/twitter/auth'
+export PA_TWITTER_AUTH_CALLBACK_ROUTE='http://pepodev.com:8080/new/twitter/auth'
 
 # image resizer variables
 export PR_LAMBDA_IMAGE_RESIZE_FUNCTION='arn:aws:lambda:us-east-1:274208178423:function:pepoImageResizer'
