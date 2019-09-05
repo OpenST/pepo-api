@@ -278,12 +278,14 @@ class PushNotification extends CronBase {
    * @private
    */
   async _notifyErrorStates(errorIdentifier, debugOptions) {
+    logger.error('errorIdentifier----------', errorIdentifier);
+
     const errorObject = responseHelper.error({
       internal_error_identifier: errorIdentifier,
       api_error_identifier: 'firebase_error',
       debug_options: debugOptions
     });
-    await createErrorLogsEntry.perform(errorObject, errorLogsConstants.highSeverity);
+    // await createErrorLogsEntry.perform(errorObject, errorLogsConstants.highSeverity);
   }
 
   /**
