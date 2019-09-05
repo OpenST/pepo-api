@@ -53,6 +53,16 @@
        }
 ```
 
+* [Only Development] Include following line in `/etc/hosts` file
+```bash
+    127.0.0.1       pepodev.com
+```
+
+* [Only Development] Reload nginx
+```bash
+    sudo nginx -s reload
+```
+
 ## Install all the dependency npm packages
 ```bash
   rm -rf node_modules
