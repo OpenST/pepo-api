@@ -117,6 +117,13 @@ router.post(
   }
 );
 
+/* Double opt in email*/
+router.get('/double-opt-in', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.doubleOptIn;
+
+  Promise.resolve(routeHelper.perform(req, res, next, '/preLaunchInvite/DoubleOptIn', 'r_a_w_pl_5', null));
+});
+
 /* Logout pre launch user*/
 router.post('/logout', sanitizer.sanitizeDynamicUrlParams, function(req, res) {
   req.decodedParams.apiName = apiName.preLaunchLogout;

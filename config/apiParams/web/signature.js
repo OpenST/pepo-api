@@ -55,6 +55,15 @@ const v1Signature = {
       }
     ],
     optional: []
+  },
+  [apiName.doubleOptIn]: {
+    mandatory: [
+      {
+        parameter: 't',
+        validatorMethods: ['validateString']
+      }
+    ],
+    optional: []
   }
 };
 
