@@ -177,7 +177,8 @@ router.get('/launch-invites/search', sanitizer.sanitizeDynamicUrlParams, functio
       resultType: responseEntityKey.launchInviteSearchResults,
       entityKindToResponseKeyMap: {
         [entityType.inviteUserSearchList]: responseEntityKey.launchInviteSearchResults,
-        [entityType.inviteMap]: responseEntityKey.invites
+        [entityType.inviteMap]: responseEntityKey.invites,
+        [entityType.inviteUserSearchMeta]: responseEntityKey.meta
       },
       serviceData: serviceResponse.data
     }).perform();
