@@ -107,6 +107,19 @@ router.get('/twitter-login', sanitizer.sanitizeDynamicUrlParams, function(req, r
   );
 });
 
+/* Subscribe email*/
+router.post(
+  '/subscribe-email',
+  csrfProtection,
+  validatePreLaunchInviteCookie,
+  sanitizer.sanitizeDynamicUrlParams,
+  function(req, res, next) {
+    req.decodedParams.apiName = apiName.preLaunchInviteSubscribeEmail;
+
+    Promise.resolve(routeHelper.perform(req, res, next, '/preLaunchInvite/SubscribeEmail', 'r_a_w_pl_4', null));
+  }
+);
+
 /* Logout pre launch user*/
 router.post('/logout', sanitizer.sanitizeDynamicUrlParams, function(req, res) {
   req.decodedParams.apiName = apiName.preLaunchLogout;
