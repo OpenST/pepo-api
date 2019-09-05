@@ -236,7 +236,7 @@ class PreLaunchInvite extends ModelBase {
     let queryObject = oThis
       .select([
         'id',
-        'twitter_id',
+        'handle',
         'email',
         'name',
         'profile_image_url',
