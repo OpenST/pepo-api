@@ -35,8 +35,8 @@ class InviteUserSearch extends ServiceBase {
 
     oThis.inviteIds = [];
     oThis.searchResults = [];
-    oThis.pageNo = 1;
-    oThis.nextPageNo = 2;
+    oThis.pageNo = null;
+    oThis.nextPageNo = null;
     oThis.limit = oThis._defaultPageLimit();
   }
 
