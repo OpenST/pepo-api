@@ -22,12 +22,12 @@ const errorConfig = basicHelper.fetchErrorConfig(apiVersions.admin);
 
 const csrfProtection = csrf({
   cookie: {
-    maxAge: 1000 * 5 * 60, // Cookie would expire after 5 minutes
-    httpOnly: true, // The cookie only accessible by the web server
-    signed: true, // Indicates if the cookie should be signed
-    secure: true, // Marks the cookie to be used with HTTPS only
+    maxAge: 1000 * 5 * 60, // Cookie would expire after 5 minutes.
+    httpOnly: true, // The cookie only accessible by the web server.
+    signed: true, // Indicates if the cookie should be signed.
+    secure: true, // Marks the cookie to be used with HTTPS only.
     path: '/',
-    sameSite: 'strict', // sets the same site policy for the cookie
+    sameSite: 'strict', // Sets the same site policy for the cookie.
     domain: coreConstant.PA_COOKIE_DOMAIN,
     key: adminConstants.csrfCookieName
   }
@@ -39,18 +39,20 @@ router.use(cookieParser(coreConstant.ADMIN_COOKIE_SECRET));
 const validateAdminCookie = async function(req, res, next) {
   // Cookie validation is not to be done for admin login request
   if (req.url !== '/login') {
-    let adminCookieValue = req.signedCookies[adminConstants.loginCookieName];
-    let authResponse = await new AdminCookieAuth(adminCookieValue).perform().catch(function(r) {
+    const adminCookieValue = req.signedCookies[adminConstants.loginCookieName];
+    const authResponse = await new AdminCookieAuth(adminCookieValue).perform().catch(function(r) {
       return r;
     });
 
     if (authResponse.isFailure()) {
       cookieHelper.deleteAdminCookie(res);
+
       return responseHelper.renderApiResponse(authResponse, res, errorConfig);
-    } else {
-      req.decodedParams.current_admin = authResponse.data.current_admin;
-      req.decodedParams.admin_login_cookie_value = authResponse.data.admin_login_cookie_value;
     }
+
+    req.decodedParams.current_admin = authResponse.data.current_admin;
+    req.decodedParams.admin_login_cookie_value = authResponse.data.admin_login_cookie_value;
+
     cookieHelper.setAdminCookie(res, authResponse.data.admin_login_cookie_value);
   }
 
@@ -59,7 +61,7 @@ const validateAdminCookie = async function(req, res, next) {
 
 router.use(validateAdminCookie);
 
-/* Login admin*/
+/* Login admin */
 router.post('/login', csrfProtection, sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.adminLogin;
 
@@ -76,7 +78,7 @@ router.post('/login', csrfProtection, sanitizer.sanitizeDynamicUrlParams, functi
   );
 });
 
-/* Logout admin*/
+/* Logout admin */
 router.post('/logout', csrfProtection, sanitizer.sanitizeDynamicUrlParams, function(req, res) {
   req.decodedParams.apiName = apiName.adminLogout;
 
@@ -87,7 +89,7 @@ router.post('/logout', csrfProtection, sanitizer.sanitizeDynamicUrlParams, funct
   Promise.resolve(responseHelper.renderApiResponse(responseObject, res, errorConfig));
 });
 
-/* users list */
+/* Users list */
 router.get('/users', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.adminUserSearch;
   req.decodedParams.search_by_admin = true;
@@ -121,7 +123,7 @@ router.post('/users/:user_id/approve', csrfProtection, sanitizer.sanitizeDynamic
   Promise.resolve(routeHelper.perform(req, res, next, '/admin/ApproveUsersAsCreator', 'r_a_v1_ad_3', null, null, null));
 });
 
-/* Block user*/
+/* Block user */
 router.post('/users/:user_id/block', csrfProtection, sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.adminUserBlock;
   req.decodedParams.user_ids = [req.params.user_id];
@@ -137,7 +139,7 @@ router.post('/delete-video/:video_id', csrfProtection, sanitizer.sanitizeDynamic
   Promise.resolve(routeHelper.perform(req, res, next, '/video/Delete', 'r_a_v1_ad_4', null, null, null));
 });
 
-/* Logged In Admin*/
+/* Logged in Admin */
 router.get('/current', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.loggedInAdmin;
 
