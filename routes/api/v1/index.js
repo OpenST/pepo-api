@@ -12,6 +12,7 @@ const rootPrefix = '../../..',
   userConstant = require(rootPrefix + '/lib/globalConstant/user'),
   adminConstants = require(rootPrefix + '/lib/globalConstant/admin'),
   usersRoutes = require(rootPrefix + '/routes/api/v1/users'),
+  paymentsRoutes = require(rootPrefix + '/routes/api/v1/payments'),
   videoRoutes = require(rootPrefix + '/routes/api/v1/videos'),
   tokensRoutes = require(rootPrefix + '/routes/api/v1/tokens'),
   gifsRoutes = require(rootPrefix + '/routes/api/v1/gifs'),
@@ -95,6 +96,7 @@ const validateAdminCookie = async function(req, res, next) {
 router.use('/auth/twitter-disconnect', validateCookie, validateLoginRequired, authRoutes);
 router.use('/auth', authRoutes);
 router.use('/users', validateCookie, validateLoginRequired, usersRoutes);
+router.use('/payments', validateCookie, validateLoginRequired, paymentsRoutes);
 router.use('/videos', validateCookie, validateLoginRequired, videoRoutes);
 router.use('/tokens', validateCookie, validateLoginRequired, tokensRoutes);
 router.use('/ost-transactions', validateCookie, validateLoginRequired, ostTransactionRoutes);
