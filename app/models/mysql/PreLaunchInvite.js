@@ -1,5 +1,10 @@
 const rootPrefix = '../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
+  util = require(rootPrefix + '/lib/util'),
+  coreConstants = require(rootPrefix + '/config/coreConstants'),
+  logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
+  responseHelper = require(rootPrefix + '/lib/formatter/response'),
+  localCipher = require(rootPrefix + '/lib/encryptors/localCipher'),
   databaseConstants = require(rootPrefix + '/lib/globalConstant/database'),
   preLaunchInviteConstant = require(rootPrefix + '/lib/globalConstant/preLaunchInvite');
 
@@ -227,13 +232,13 @@ class PreLaunchInvite extends ModelBase {
   async search(params) {
     const oThis = this;
 
-    let limit = params.limit,
+    const limit = params.limit,
       query = params.query,
       sortBy = params.sortBy,
       pageNo = params.pageNo,
       offset = (pageNo - 1) * limit;
 
-    let queryObject = oThis
+    const queryObject = oThis
       .select([
         'id',
         'handle',
@@ -248,25 +253,36 @@ class PreLaunchInvite extends ModelBase {
       .limit(limit)
       .offset(offset);
 
-    if (sortBy == 'ASC') {
-      queryObject.order_by('id asc');
-    } else if (sortBy == 'DESC') {
-      queryObject.order_by('id desc');
-    } else if (sortBy == 'STS_DESC') {
-      queryObject.order_by('FIELD(admin_status, 2,1), id desc');
-    } else if (sortBy == 'STS_ASC') {
-      queryObject.order_by('FIELD(admin_status, 1,2), id desc');
-    } else {
-      queryObject.order_by('id desc');
+    switch (sortBy) {
+      case 'ASC': {
+        queryObject.order_by('id asc');
+        break;
+      }
+      case 'DESC': {
+        queryObject.order_by('id desc');
+        break;
+      }
+      case 'STS_ASC': {
+        queryObject.order_by('FIELD(admin_status, 1,2), id desc');
+        break;
+      }
+      case 'STS_DESC': {
+        queryObject.order_by('FIELD(admin_status, 2,1), id desc');
+        break;
+      }
+      default: {
+        queryObject.order_by('id desc');
+        break;
+      }
     }
 
-    let queryWithWildCards = '%' + query + '%';
+    const queryWithWildCards = '%' + query + '%';
 
     if (query) {
       queryObject.where(['handle LIKE ? OR name LIKE ?', queryWithWildCards, queryWithWildCards]);
     }
 
-    let dbRows = await queryObject.fire();
+    const dbRows = await queryObject.fire();
 
     const response = {};
 
@@ -334,11 +350,9 @@ class PreLaunchInvite extends ModelBase {
   /**
    * Flush cache.
    *
-   * @param {object} params
-   *
    * @returns {Promise<*>}
    */
-  static async flushCache(params) {
+  static async flushCache() {
     // Do nothing.
   }
 }
