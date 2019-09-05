@@ -3,9 +3,7 @@ const rootPrefix = '../../../..',
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   UserNotificationModel = require(rootPrefix + '/app/models/cassandra/UserNotification'),
   base64Helper = require(rootPrefix + '/lib/base64Helper'),
-  bgJob = require(rootPrefix + '/lib/rabbitMqEnqueue/bgJob'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
-  bgJobConstants = require(rootPrefix + '/lib/globalConstant/bgJob'),
   notificationJobEnqueue = require(rootPrefix + '/lib/rabbitMqEnqueue/notification'),
   notificationJobConstants = require(rootPrefix + '/lib/globalConstant/notificationJob');
 
@@ -70,19 +68,19 @@ class SayThankYou extends ServiceBase {
 
     await oThis._decryptNotificationId();
 
-    // if (oThis.decryptedNotificationParams.user_id !== oThis.currentUserId) {
-    //   return Promise.reject(
-    //     responseHelper.paramValidationError({
-    //       internal_error_identifier: 'a_s_u_n_1',
-    //       api_error_identifier: 'invalid_api_params',
-    //       params_error_identifiers: ['invalid_notification_id'],
-    //       debug_options: {
-    //         decryptedNotificationParams: oThis.decryptedNotificationParams,
-    //         currentUserId: oThis.currentUserId
-    //       }
-    //     })
-    //   );
-    // }
+    if (oThis.decryptedNotificationParams.user_id !== oThis.currentUserId) {
+      return Promise.reject(
+        responseHelper.paramValidationError({
+          internal_error_identifier: 'a_s_u_n_1',
+          api_error_identifier: 'invalid_api_params',
+          params_error_identifiers: ['invalid_notification_id'],
+          debug_options: {
+            decryptedNotificationParams: oThis.decryptedNotificationParams,
+            currentUserId: oThis.currentUserId
+          }
+        })
+      );
+    }
 
     await oThis._validateText();
   }
