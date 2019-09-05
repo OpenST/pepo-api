@@ -12,10 +12,10 @@ const upQuery =
   `apple_product_id` varchar(40) NOT NULL, \n\
   `google_product_id` varchar(40) NOT NULL, \n\
   `status` tinyint(4) NOT NULL,\n\
-  `lower_limit` decimal(5,5) NOT NULL, \n\
-  `upper_limit` decimal(5,5) NOT NULL, \n\
-  `amount_in_pepo` decimal(5,5) NOT NULL, \n\
-  `amount_in_usd` decimal(5,5) NOT NULL, \n\
+  `lower_limit` float(5,3) NOT NULL, \n\
+  `upper_limit` float(5,3) NOT NULL, \n\
+  `amount_in_pepo` float(5,3) NOT NULL, \n\
+  `amount_in_usd` float(5,3) NOT NULL, \n\
   `created_at` int(11) NOT NULL, \n\
   `updated_at` int(11) NOT NULL, \n\
   PRIMARY KEY (`id`), \n\
