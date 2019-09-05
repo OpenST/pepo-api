@@ -215,21 +215,16 @@ class PreLaunchInvite extends ModelBase {
     const oThis = this;
 
     const queryResponse = await oThis
-      .update({ status: preLaunchInviteConstants.invertedAdminStatuses[preLaunchInviteConstants.whitelistedStatus] })
+      .update({
+        status: preLaunchInviteConstants.invertedAdminStatuses[preLaunchInviteConstants.whitelistedStatus]
+      })
       .where({ id: inviteId })
       .fire();
 
     if (queryResponse.affectedRows === 1) {
       logger.info(`User with ${inviteId} is now whitelisted`);
 
-      const userObject = await oThis
-        .select('twitter_id')
-        .where({ id: inviteId })
-        .fire();
-
-      const twitterId = userObject[0].twitter_id;
-
-      await PreLaunchInvite.flushCache({ id: inviteId, twitterId: twitterId });
+      await PreLaunchInvite.flushCache({ id: inviteId });
 
       return responseHelper.successWithData({});
     }
@@ -297,11 +292,11 @@ class PreLaunchInvite extends ModelBase {
 
     const dbRows = await queryObject.fire();
 
-    let inviteDetails = {};
-    let inviteIds = [];
+    const inviteDetails = {};
+    const inviteIds = [];
 
     for (let ind = 0; ind < dbRows.length; ind++) {
-      let formattedRow = oThis.formatDbData(dbRows[ind]);
+      const formattedRow = oThis.formatDbData(dbRows[ind]);
       inviteIds.push(formattedRow.id);
       inviteDetails[dbRows[ind].id] = formattedRow;
     }
@@ -390,8 +385,8 @@ class PreLaunchInvite extends ModelBase {
    * Flush cache.
    *
    * @param {object} params
-   * @param {number} params.id
-   * @param {number} params.twitterId
+   * @param {number} [params.id]
+   * @param {number} [params.twitterId]
    *
    * @returns {Promise<*>}
    */
