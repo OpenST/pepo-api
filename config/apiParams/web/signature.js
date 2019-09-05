@@ -3,26 +3,32 @@ const rootPrefix = '../../..',
   paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination');
 
 const v1Signature = {
-  [apiName.preLaunchInviteLogin]: {
+  [apiName.twitterRequestToken]: {
+    mandatory: [],
+    optional: [
+      {
+        parameter: 'i',
+        validatorMethods: ['validateString']
+      }
+    ]
+  },
+  [apiName.preLaunchInviteVerify]: {
     mandatory: [
       {
-        parameter: 'token',
+        parameter: 'oauth_token',
         validatorMethods: ['validateNonBlankString']
       },
       {
-        parameter: 'secret',
-        validatorMethods: ['validateNonBlankString']
-      },
-      {
-        parameter: 'twitter_id',
-        validatorMethods: ['validateNonBlankString']
-      },
-      {
-        parameter: 'handle',
+        parameter: 'oauth_verifier',
         validatorMethods: ['validateNonBlankString']
       }
     ],
-    optional: []
+    optional: [
+      {
+        parameter: 'i',
+        validatorMethods: ['validateString']
+      }
+    ]
   }
 };
 

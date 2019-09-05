@@ -43,10 +43,11 @@ class PreLaunchTwitterConnect extends ServiceBase {
 
     await oThis._insertTwitterTokens();
 
-    let dataCookieValue = JSON.stringify({
-      oAuthToken: oThis.twitterAuthTokenObj.token,
-      inviteCode: oThis.inviteCode
-    });
+    let dataCookieValue = oThis.inviteCode
+      ? JSON.stringify({
+          i: oThis.inviteCode
+        })
+      : null;
 
     return Promise.resolve(
       responseHelper.successWithData({

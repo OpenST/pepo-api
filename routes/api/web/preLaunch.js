@@ -18,7 +18,7 @@ const rootPrefix = '../../..',
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   cookieHelper = require(rootPrefix + '/lib/cookieHelper');
 
-const errorConfig = basicHelper.fetchErrorConfig(apiVersions.v1);
+const errorConfig = basicHelper.fetchErrorConfig(apiVersions.web);
 
 const csrfProtection = csrf({
   cookie: {
@@ -58,7 +58,9 @@ router.get('/twitter/request_token', sanitizer.sanitizeDynamicUrlParams, functio
   req.decodedParams.apiName = apiName.twitterRequestToken;
 
   const onServiceSuccess = async function(serviceResponse) {
-    cookieHelper.setPreLaunchDataCookie(res, serviceResponse.data.dataCookieValue);
+    if (serviceResponse.data.dataCookieValue) {
+      cookieHelper.setPreLaunchDataCookie(res, serviceResponse.data.dataCookieValue);
+    }
   };
 
   Promise.resolve(
@@ -67,8 +69,14 @@ router.get('/twitter/request_token', sanitizer.sanitizeDynamicUrlParams, functio
 });
 
 /* Login preLaunch*/
-router.post('/twitter-login', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
-  req.decodedParams.apiName = apiName.preLaunchInviteLogin;
+router.get('/twitter-login', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.preLaunchInviteVerify;
+  let dataCookieValue = req.signedCookies[preLaunchInviteConstants.dataCookieName];
+
+  if (dataCookieValue) {
+    dataCookieValue = JSON.parse(dataCookieValue);
+    req.decodedParams.i = dataCookieValue.i;
+  }
 
   const onServiceSuccess = async function(serviceResponse) {
     cookieHelper.setPreLaunchInviteCookie(res, serviceResponse.data.preLaunchInviteLoginCookieValue);
@@ -78,16 +86,12 @@ router.post('/twitter-login', sanitizer.sanitizeDynamicUrlParams, function(req, 
     cookieHelper.deletePreLaunchInviteCookie(res);
   };
 
-  // get invitee code and oAuthtoken from cookie and sanitize
-  //set login cookie
-  //redirect to next page
-
   Promise.resolve(
     routeHelper.perform(
       req,
       res,
       next,
-      '/preLaunchInvite/Connect',
+      '/preLaunchInvite/Verify',
       'r_a_w_pl_1',
       null,
       onServiceSuccess,
