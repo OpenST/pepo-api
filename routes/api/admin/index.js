@@ -69,7 +69,7 @@ router.post('/login', csrfProtection, sanitizer.sanitizeDynamicUrlParams, functi
     cookieHelper.setAdminCookie(res, serviceResponse.data.adminCookieValue);
   };
 
-  const onServiceFailure = async function(serviceResponse) {
+  const onServiceFailure = async function() {
     cookieHelper.deleteAdminCookie(res);
   };
 
@@ -128,7 +128,7 @@ router.post('/users/:user_id/block', csrfProtection, sanitizer.sanitizeDynamicUr
   req.decodedParams.apiName = apiName.adminUserBlock;
   req.decodedParams.user_ids = [req.params.user_id];
 
-  Promise.resolve(routeHelper.perform(req, res, next, '/admin/BlockUser', 'r_a_v1_ad_5', null, null, null));
+  Promise.resolve(routeHelper.perform(req, res, next, '/admin/BlockUser', 'r_a_v1_ad_4', null, null, null));
 });
 
 /* Delete video */
@@ -136,7 +136,7 @@ router.post('/delete-video/:video_id', csrfProtection, sanitizer.sanitizeDynamic
   req.decodedParams.apiName = apiName.adminDeleteVideo;
   req.decodedParams.video_id = req.params.video_id;
 
-  Promise.resolve(routeHelper.perform(req, res, next, '/video/Delete', 'r_a_v1_ad_4', null, null, null));
+  Promise.resolve(routeHelper.perform(req, res, next, '/video/Delete', 'r_a_v1_ad_5', null, null, null));
 });
 
 /* Logged in Admin */
@@ -155,7 +155,7 @@ router.get('/current', sanitizer.sanitizeDynamicUrlParams, function(req, res, ne
     serviceResponse.data = wrapperFormatterRsp.data;
   };
 
-  Promise.resolve(routeHelper.perform(req, res, next, '/admin/GetCurrent', 'r_a_v1_u_5', null, dataFormatterFunc));
+  Promise.resolve(routeHelper.perform(req, res, next, '/admin/GetCurrent', 'r_a_v1_ad_6', null, dataFormatterFunc));
 });
 
 /* Whitelist user */
@@ -186,7 +186,7 @@ router.get('/launch-invites/search', sanitizer.sanitizeDynamicUrlParams, functio
   };
 
   Promise.resolve(
-    routeHelper.perform(req, res, next, '/admin/preLaunch/UserSearch', 'r_a_v1_u_8', null, dataFormatterFunc)
+    routeHelper.perform(req, res, next, '/admin/preLaunch/UserSearch', 'r_a_v1_ad_8', null, dataFormatterFunc)
   );
 });
 
