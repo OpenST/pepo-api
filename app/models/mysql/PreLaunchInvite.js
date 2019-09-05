@@ -78,6 +78,7 @@ class PreLaunchInvite extends ModelBase {
 
     const formattedData = {
       id: dbRow.id,
+      encryptionSalt: dbRow.encryption_salt,
       twitterId: dbRow.twitter_id,
       handle: dbRow.handle,
       email: dbRow.email,
@@ -259,12 +260,19 @@ class PreLaunchInvite extends ModelBase {
   static async flushCache(params) {
     const promisesArray = [];
 
-    const PreLaunchInviteByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/PreLaunchInviteByIds');
-    promisesArray.push(new PreLaunchInviteByIdsCache({ ids: [params.id] }).clear());
+    if (params.id) {
+      const PreLaunchInviteByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/PreLaunchInviteByIds');
+      promisesArray.push(new PreLaunchInviteByIdsCache({ ids: [params.id] }).clear());
 
-    const PreLaunchInviteByTwitterIdsCache = require(rootPrefix +
-      '/lib/cacheManagement/multi/PreLaunchInviteByTwitterIds');
-    promisesArray.push(new PreLaunchInviteByTwitterIdsCache({ twitterIds: params.twitterId }).clear());
+      const securePreLaunchInviteCache = require(rootPrefix + '/lib/cacheManagement/single/SecurePreLaunchInvite');
+      promisesArray.push(new securePreLaunchInviteCache({ id: params.id }).clear());
+    }
+
+    if (params.twitterId) {
+      const PreLaunchInviteByTwitterIdsCache = require(rootPrefix +
+        '/lib/cacheManagement/multi/PreLaunchInviteByTwitterIds');
+      promisesArray.push(new PreLaunchInviteByTwitterIdsCache({ twitterIds: params.twitterId }).clear());
+    }
 
     await Promise.all(promisesArray);
   }
