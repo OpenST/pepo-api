@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "ebf4241c-afe6-4ff4-a855-5eccb36c53a3",
+		"_postman_id": "955b542b-1217-4d2f-842e-b76a5732c918",
 		"name": "pepo-api",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -1526,6 +1526,38 @@
 								"users",
 								"1001",
 								"approve"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Whitelist user",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/x-www-form-urlencoded"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": []
+						},
+						"url": {
+							"raw": "{{api_server}}/api/v1/admin/whitelist/1001",
+							"host": [
+								"{{api_server}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"admin",
+								"whitelist",
+								"1001"
 							]
 						}
 					},
