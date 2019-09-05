@@ -284,9 +284,8 @@ class PreLaunchInvite extends ModelBase {
       }
     }
 
-    const queryWithWildCards = '%' + query + '%';
-
     if (query) {
+      const queryWithWildCards = '%' + query + '%';
       queryObject.where(['handle LIKE ? OR name LIKE ?', queryWithWildCards, queryWithWildCards]);
     }
 

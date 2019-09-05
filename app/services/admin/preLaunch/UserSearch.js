@@ -29,8 +29,8 @@ class InviteUserSearch extends ServiceBase {
 
     const oThis = this;
 
-    oThis.query = params.q ? params.q.toLowerCase().trim() : null; // Lower case and trim spaces.
-    oThis.sortBy = params.sort_by || preLaunchInviteConstants.descendingSortByValue;
+    oThis.query = params.q || null;
+    oThis.sortBy = params.sort_by || null;
     oThis.paginationIdentifier = params[paginationConstants.paginationIdentifierKey] || null;
 
     oThis.inviteIds = [];
@@ -70,6 +70,9 @@ class InviteUserSearch extends ServiceBase {
    */
   async _validateAndSanitizeParams() {
     const oThis = this;
+
+    oThis.query = oThis.query ? oThis.query.toLowerCase().trim() : null; // Lowercase and trim spaces.
+    oThis.sortBy = oThis.sortBy ? oThis.sortBy.toLowerCase() : preLaunchInviteConstants.descendingSortByValue;
 
     if (!preLaunchInviteConstants.sortByValuesMap[oThis.sortBy]) {
       return Promise.reject(
