@@ -9,7 +9,7 @@ const rootPrefix = '../../..',
   routeHelper = require(rootPrefix + '/routes/helper'),
   apiName = require(rootPrefix + '/lib/globalConstant/apiName'),
   sanitizer = require(rootPrefix + '/helpers/sanitizer'),
-  coreConstant = require(rootPrefix + '/config/coreConstants'),
+  coreConstants = require(rootPrefix + '/config/coreConstants'),
   basicHelper = require(rootPrefix + '/helpers/basic'),
   apiVersions = require(rootPrefix + '/lib/globalConstant/apiVersions'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
@@ -17,21 +17,8 @@ const rootPrefix = '../../..',
 
 const errorConfig = basicHelper.fetchErrorConfig(apiVersions.web);
 
-const csrfProtection = csrf({
-  cookie: {
-    maxAge: 1000 * 5 * 60, // Cookie would expire after 5 minutes
-    httpOnly: true, // The cookie only accessible by the web server
-    signed: true, // Indicates if the cookie should be signed
-    secure: basicHelper.isProduction(), // Marks the cookie to be used with HTTPS only
-    path: '/',
-    sameSite: 'strict', // sets the same site policy for the cookie
-    domain: coreConstant.PA_COOKIE_DOMAIN,
-    key: preLaunchInviteConstants.csrfCookieName
-  }
-});
-
 // Node.js cookie parsing middleware.
-router.use(cookieParser(coreConstant.WEB_COOKIE_SECRET));
+router.use(cookieParser(coreConstants.WEB_COOKIE_SECRET));
 
 const validatePreLaunchInviteCookie = async function(req, res, next) {
   let preLaunchCookieValue = req.signedCookies[preLaunchInviteConstants.loginCookieName];
@@ -107,7 +94,7 @@ router.get('/twitter-login', sanitizer.sanitizeDynamicUrlParams, function(req, r
 /* Subscribe email*/
 router.post(
   '/subscribe-email',
-  csrfProtection,
+  cookieHelper.setWebCsrf(),
   validatePreLaunchInviteCookie,
   sanitizer.sanitizeDynamicUrlParams,
   function(req, res, next) {

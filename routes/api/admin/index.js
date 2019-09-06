@@ -11,7 +11,7 @@ const rootPrefix = '../../..',
   apiVersions = require(rootPrefix + '/lib/globalConstant/apiVersions'),
   apiName = require(rootPrefix + '/lib/globalConstant/apiName'),
   sanitizer = require(rootPrefix + '/helpers/sanitizer'),
-  coreConstant = require(rootPrefix + '/config/coreConstants'),
+  coreConstants = require(rootPrefix + '/config/coreConstants'),
   entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
   responseEntityKey = require(rootPrefix + '/lib/globalConstant/responseEntityKey'),
   basicHelper = require(rootPrefix + '/helpers/basic'),
@@ -20,21 +20,8 @@ const rootPrefix = '../../..',
 
 const errorConfig = basicHelper.fetchErrorConfig(apiVersions.admin);
 
-const csrfProtection = csrf({
-  cookie: {
-    maxAge: 1000 * 5 * 60, // Cookie would expire after 5 minutes
-    httpOnly: true, // The cookie only accessible by the web server
-    signed: true, // Indicates if the cookie should be signed
-    secure: basicHelper.isProduction(), // Marks the cookie to be used with HTTPS only
-    path: '/',
-    sameSite: 'strict', // Sets the same site policy for the cookie
-    domain: coreConstant.PA_COOKIE_DOMAIN,
-    key: adminConstants.csrfCookieName
-  }
-});
-
 // Node.js cookie parsing middleware.
-router.use(cookieParser(coreConstant.ADMIN_COOKIE_SECRET));
+router.use(cookieParser(coreConstants.ADMIN_COOKIE_SECRET));
 
 const validateAdminCookie = async function(req, res, next) {
   // Cookie validation is not to be done for admin login request
@@ -62,7 +49,7 @@ const validateAdminCookie = async function(req, res, next) {
 router.use(validateAdminCookie);
 
 /* Login admin */
-router.post('/login', csrfProtection, sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+router.post('/login', cookieHelper.setAdminCsrf(), sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.adminLogin;
 
   const onServiceSuccess = async function(serviceResponse) {
@@ -79,7 +66,7 @@ router.post('/login', csrfProtection, sanitizer.sanitizeDynamicUrlParams, functi
 });
 
 /* Logout admin */
-router.post('/logout', csrfProtection, sanitizer.sanitizeDynamicUrlParams, function(req, res) {
+router.post('/logout', cookieHelper.setAdminCsrf(), sanitizer.sanitizeDynamicUrlParams, function(req, res) {
   req.decodedParams.apiName = apiName.adminLogout;
 
   const responseObject = responseHelper.successWithData({});
@@ -115,7 +102,11 @@ router.get('/users', sanitizer.sanitizeDynamicUrlParams, function(req, res, next
 });
 
 /* Approve user as creator */
-router.post('/users/:user_id/approve', csrfProtection, sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+router.post('/users/:user_id/approve', cookieHelper.setAdminCsrf(), sanitizer.sanitizeDynamicUrlParams, function(
+  req,
+  res,
+  next
+) {
   req.decodedParams.apiName = apiName.adminUserApprove;
   req.decodedParams.user_ids = [req.params.user_id];
 
@@ -123,7 +114,11 @@ router.post('/users/:user_id/approve', csrfProtection, sanitizer.sanitizeDynamic
 });
 
 /* Block user */
-router.post('/users/:user_id/block', csrfProtection, sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+router.post('/users/:user_id/block', cookieHelper.setAdminCsrf(), sanitizer.sanitizeDynamicUrlParams, function(
+  req,
+  res,
+  next
+) {
   req.decodedParams.apiName = apiName.adminUserBlock;
   req.decodedParams.user_ids = [req.params.user_id];
 
@@ -131,7 +126,11 @@ router.post('/users/:user_id/block', csrfProtection, sanitizer.sanitizeDynamicUr
 });
 
 /* Delete video */
-router.post('/delete-video/:video_id', csrfProtection, sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+router.post('/delete-video/:video_id', cookieHelper.setAdminCsrf(), sanitizer.sanitizeDynamicUrlParams, function(
+  req,
+  res,
+  next
+) {
   req.decodedParams.apiName = apiName.adminDeleteVideo;
   req.decodedParams.video_id = req.params.video_id;
 
@@ -158,7 +157,11 @@ router.get('/current', sanitizer.sanitizeDynamicUrlParams, function(req, res, ne
 });
 
 /* Whitelist user */
-router.post('/whitelist/:invite_id', csrfProtection, sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+router.post('/whitelist/:invite_id', cookieHelper.setAdminCsrf(), sanitizer.sanitizeDynamicUrlParams, function(
+  req,
+  res,
+  next
+) {
   req.decodedParams.apiName = apiName.adminWhitelistUser;
   req.decodedParams.invite_id = req.params.invite_id;
 

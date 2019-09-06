@@ -20,7 +20,7 @@ const v1Signature = {
     mandatory: [],
     optional: [
       {
-        parameter: 'i',
+        parameter: 'invite',
         validatorMethods: ['validateString']
       }
     ]
