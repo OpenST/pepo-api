@@ -199,7 +199,7 @@ class ApproveUsersAsCreator extends ServiceBase {
   /**
    * Log admin activity.
    *
-   * @return {Promise<void>}
+   * @returns {Promise<void>}
    * @private
    */
   async _logAdminActivity() {

@@ -43,7 +43,7 @@ class InviteUserSearch extends ServiceBase {
   /**
    * Async perform.
    *
-   * @return {Promise<void>}
+   * @returns {Promise<void>}
    * @private
    */
   async _asyncPerform() {
@@ -149,7 +149,7 @@ class InviteUserSearch extends ServiceBase {
    *
    * @sets oThis.responseMetaData
    *
-   * @return {Result}
+   * @returns {result}
    * @private
    */
   _addResponseMetaData() {
@@ -171,7 +171,7 @@ class InviteUserSearch extends ServiceBase {
   /**
    * Prepare final response.
    *
-   * @return {Promise<*|result>}
+   * @returns {Promise<*|result>}
    * @private
    */
   async _prepareResponse() {
