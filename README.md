@@ -177,6 +177,13 @@ Note: Get the webhooks id from above run(subscribe webhooks). Secret has to be o
   node devops/exec/flushMemcache.js
 ```
 
+## Create admin 
+```bash
+  R = require('./app/services/admin/ResetPassword.js')
+  r = new R({ email: 'pepo@ost.com', name: 'Pepo Api'})
+  r.perform().then(console.log)
+```
+
 * Source the ENV vars.
 ```bash
   source set_env_vars.sh

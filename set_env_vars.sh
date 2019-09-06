@@ -108,7 +108,7 @@ export PA_GIPHY_API_KEY='PbWiMCsT9RxXtatEtKp6w1vapdqNxhFQ'
 export PA_CAMPAIGN_CLIENT_KEY="3572cbc0d1895ed73e769d028eb50fec"
 export PA_CAMPAIGN_CLIENT_SECRET="b753c5acca25e22bedb5a58efc72891a"
 export PA_CAMPAIGN_BASE_URL="https://pepocampaigns.com/"
-export PA_CAMPAIGN_MASTER_LIST="64100"
+export PA_CAMPAIGN_MASTER_LIST="64194"
 
 #Twitter API Key
 export PA_TWITTER_CONSUMER_KEY='NEo4gEXzdQZaoTsqzpZvepfKb'
