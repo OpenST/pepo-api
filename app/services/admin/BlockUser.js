@@ -67,7 +67,7 @@ class BlockUser extends ServiceBase {
   async _fetchUsers() {
     const oThis = this;
 
-    const cacheRsp = await UsersCache({ ids: oThis.userIds }).fetch();
+    const cacheRsp = await new UsersCache({ ids: oThis.userIds }).fetch();
 
     if (cacheRsp.isFailure()) {
       return Promise.reject(
