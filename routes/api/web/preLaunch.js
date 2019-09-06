@@ -104,6 +104,19 @@ router.post(
   }
 );
 
+/* Subscribe email*/
+router.post(
+  '/creator',
+  cookieHelper.setWebCsrf(),
+  validatePreLaunchInviteCookie,
+  sanitizer.sanitizeDynamicUrlParams,
+  function(req, res, next) {
+    req.decodedParams.apiName = apiName.preLaunchInviteCreator;
+
+    Promise.resolve(routeHelper.perform(req, res, next, '/preLaunchInvite/Creator', 'r_a_w_pl_6', null));
+  }
+);
+
 /* Double opt in email*/
 router.get('/double-opt-in', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.doubleOptIn;

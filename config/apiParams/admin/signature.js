@@ -86,6 +86,15 @@ const adminSignature = {
     ],
     optional: []
   },
+  [apiName.adminApproveUser]: {
+    mandatory: [
+      {
+        parameter: 'invite_id',
+        validatorMethods: ['validateNonZeroInteger']
+      }
+    ],
+    optional: []
+  },
   [apiName.launchInviteSearch]: {
     mandatory: [],
     optional: [
