@@ -20,7 +20,7 @@ router.post('/whitelist/:invite_id', cookieHelper.setAdminCsrf(), sanitizer.sani
   req.decodedParams.invite_id = req.params.invite_id;
 
   Promise.resolve(
-    routeHelper.perform(req, res, next, '/admin/preLaunch/WhitelistUser', 'r_a_v1_ad_7', null, null, null)
+    routeHelper.perform(req, res, next, '/admin/preLaunch/WhitelistUser', 'r_a_v1_ad_pl_1', null, null, null)
   );
 });
 
@@ -33,7 +33,9 @@ router.post('/approve/:invite_id', cookieHelper.setAdminCsrf(), sanitizer.saniti
   req.decodedParams.apiName = apiName.adminApproveUser;
   req.decodedParams.invite_id = req.params.invite_id;
 
-  Promise.resolve(routeHelper.perform(req, res, next, '/admin/preLaunch/ApproveUser', 'r_a_v1_ad_8', null, null, null));
+  Promise.resolve(
+    routeHelper.perform(req, res, next, '/admin/preLaunch/ApproveUser', 'r_a_v1_ad_pl_2', null, null, null)
+  );
 });
 
 /* Invite user list */
@@ -55,7 +57,7 @@ router.get('/users/search', sanitizer.sanitizeDynamicUrlParams, function(req, re
   };
 
   Promise.resolve(
-    routeHelper.perform(req, res, next, '/admin/preLaunch/UserSearch', 'r_a_v1_ad_9', null, dataFormatterFunc)
+    routeHelper.perform(req, res, next, '/admin/preLaunch/UserSearch', 'r_a_v1_ad_pl_3', null, dataFormatterFunc)
   );
 });
 
