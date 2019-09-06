@@ -178,6 +178,7 @@ class PreLaunchTwitterSignUp extends ServiceBase {
       token: oThis.token,
       secret: oThis.encryptedSecret,
       status: status,
+      admin_status: preLaunchInviteConstants.invertedAdminStatuses[preLaunchInviteConstants.whitelistPendingStatus],
       inviter_user_id: oThis.inviterId,
       invite_code: oThis._createInviteCode(),
       invited_user_count: 0
