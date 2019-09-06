@@ -4,6 +4,7 @@ const rootPrefix = '../../../..',
   fiatPaymentConstants = require(rootPrefix + '/lib/globalConstant/fiatPayment'),
   bgJobConstants = require(rootPrefix + '/lib/globalConstant/bgJob'),
   bgJob = require(rootPrefix + '/lib/rabbitMqEnqueue/bgJob'),
+  ostPricePointConstants = require(rootPrefix + '/lib/globalConstant/ostPricePoints'),
   responseHelper = require(rootPrefix + '/lib/formatter/response');
 
 /**
@@ -29,7 +30,7 @@ class ProcessPaymentBase extends ServiceBase {
     const oThis = this;
 
     oThis.currentUser = params.current_user;
-    oThis.receipt = params.receipt;
+    oThis.receipt = JSON.parse(params.receipt);
 
     oThis.fiatPaymentId = null;
   }
@@ -39,13 +40,13 @@ class ProcessPaymentBase extends ServiceBase {
 
     await oThis._insertFiatPayment();
 
-    await oThis._validateRequestReceipt();
+    await oThis._serviceSpecificTasks();
 
     await bgJob.enqueue(bgJobConstants.validatePaymentReceiptJobTopic, {
       fiatPaymentId: oThis.fiatPaymentId
     });
 
-    return responseHelper.successWithData({});
+    return responseHelper.successWithData({ paymentReceipt: JSON.stringify(oThis.receipt) });
   }
 
   async _insertFiatPayment() {
@@ -53,14 +54,17 @@ class ProcessPaymentBase extends ServiceBase {
       receiptId = oThis.getReceiptId(),
       serviceKind = oThis.getServiceKind();
 
-    let fiatPaymentCreateResp = await new FiatPaymentModel.insert({
-      from_user_id: oThis.currentUser.id,
-      receipt_id: receiptId,
-      raw_receipt: JSON.stringify(oThis.receipt),
-      kind: fiatPaymentConstants.topUpKind,
-      service_kind: serviceKind,
-      status: fiatPaymentConstants.pendingStatus()
-    }).fire();
+    let fiatPaymentCreateResp = await new FiatPaymentModel()
+      .insert({
+        from_user_id: oThis.currentUser.id,
+        receipt_id: receiptId,
+        raw_receipt: JSON.stringify(oThis.receipt),
+        kind: fiatPaymentConstants.invertedKinds[fiatPaymentConstants.topUpKind],
+        service_kind: fiatPaymentConstants.invertedServiceKinds[serviceKind],
+        currency: ostPricePointConstants.invertedQuoteCurrencies[ostPricePointConstants.usdQuoteCurrency],
+        status: fiatPaymentConstants.invertedStatuses[fiatPaymentConstants.pendingStatus]
+      })
+      .fire();
 
     oThis.fiatPaymentId = fiatPaymentCreateResp.insertId;
 

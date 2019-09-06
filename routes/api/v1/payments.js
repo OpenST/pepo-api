@@ -49,3 +49,5 @@ router.post('/apple-pay-receipt', sanitizer.sanitizeDynamicUrlParams, function(r
     routeHelper.perform(req, res, next, '/payment/process/ApplePay', 'r_a_v1_p_2', null, onServiceSuccess)
   );
 });
+
+module.exports = router;

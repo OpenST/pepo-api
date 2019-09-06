@@ -58,7 +58,7 @@ class FiatPayment extends ModelBase {
       id: dbRow.id,
       receiptId: dbRow.receipt_id,
       rawReceipt: dbRow.raw_receipt ? JSON.parse(dbRow.raw_receipt) : null,
-      decreptedReceipt: dbRow.decrepted_receipt ? JSON.parse(dbRow.decrepted_receipt) : null,
+      decryptedReceipt: dbRow.decrypted_receipt ? JSON.parse(dbRow.decrypted_receipt) : null,
       fromUserId: dbRow.from_user_id,
       toUserId: dbRow.to_user_id,
       kind: fiatPaymentConstants.kinds[dbRow.kind],

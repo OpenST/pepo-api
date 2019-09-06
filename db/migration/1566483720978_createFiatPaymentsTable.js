@@ -11,7 +11,7 @@ const upQuery =
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,\n\
   `receipt_id` varchar(250) COLLATE utf8_unicode_ci DEFAULT NULL,\n\
   `raw_receipt` text COLLATE utf8_unicode_ci NOT NULL,\n\
-  `decrepted_receipt` text COLLATE utf8_unicode_ci,\n\
+  `decrypted_receipt` text COLLATE utf8_unicode_ci,\n\
   `from_user_id` bigint(20) unsigned NOT NULL,\n\
   `to_user_id` bigint(20) unsigned DEFAULT NULL,\n\
   `kind` tinyint(4) NOT NULL,\n\

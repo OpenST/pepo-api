@@ -174,6 +174,11 @@ const v1ErrorConfig = {
     parameter: 'image_url',
     code: 'invalid',
     message: 'Invalid image url.'
+  },
+  invalid_receipt: {
+    parameter: 'receipt',
+    code: 'invalid',
+    message: 'Invalid receipt.'
   }
 };
 
