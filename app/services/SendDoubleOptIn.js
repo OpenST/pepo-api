@@ -17,14 +17,14 @@ class SendDoubleOptIn extends ServiceBase {
    *
    * @param params
    *
-   * @param {string} params.pre_launch_invite_hook
+   * @param {string} params.pre_launch_invite_obj
    *
    */
   constructor(params) {
     super(params);
     const oThis = this;
 
-    oThis.preLaunchInviteHook = params.pre_launch_invite_hook;
+    oThis.preLaunchInviteObj = params.pre_launch_invite_obj;
     oThis.doubleOptInToken = null;
   }
 
@@ -36,7 +36,7 @@ class SendDoubleOptIn extends ServiceBase {
   async _asyncPerform() {
     const oThis = this;
 
-    if (oThis.preLaunchInviteHook.status === preLaunchInviteConstant.doptinStatus) {
+    if (oThis.preLaunchInviteObj.status === preLaunchInviteConstant.doptinStatus) {
       return responseHelper.successWithData({});
     }
 
@@ -44,7 +44,7 @@ class SendDoubleOptIn extends ServiceBase {
 
     await oThis._sendPreLaunchInviteDoubleOptInMail();
 
-    return responseHelper.successWithData({ uploadParamsMap: oThis.apiResponse });
+    return responseHelper.successWithData({});
   }
 
   /**
@@ -55,14 +55,14 @@ class SendDoubleOptIn extends ServiceBase {
    */
   async _createDoubleOptInToken() {
     const oThis = this;
-    let tokenString = `${oThis.preLaunchInviteHook.id}::${
-        oThis.preLaunchInviteHook.email
+    let tokenString = `${oThis.preLaunchInviteObj.id}::${
+        oThis.preLaunchInviteObj.email
       }::${Date.now()}::preLaunchInviteDoubleOptIn::${Math.random()}`,
       temporaryDoubleOptInToken = util.createMd5Digest(tokenString);
 
     let insertResponse = await new TemporaryTokenModel()
       .insert({
-        entity_id: oThis.preLaunchInviteHook.id,
+        entity_id: oThis.preLaunchInviteObj.id,
         kind: temporaryTokenConstant.invertedKinds[temporaryTokenConstant.preLaunchInviteKind],
         token: temporaryDoubleOptInToken,
         status: temporaryTokenConstant.invertedStatuses[temporaryTokenConstant.activeStatus]
@@ -74,10 +74,17 @@ class SendDoubleOptIn extends ServiceBase {
       return Promise.reject(new Error('Error while inserting data into pre_launch_invites table.'));
     }
 
-    let doubleOptInTokenStr = `${insertResponse.insertId.toString()}:${temporaryDoubleOptInToken}:${Math.floor(
-      Date.now() / 1000
-    )}`;
+    let doubleOptInTokenStr = `${insertResponse.insertId.toString()}:${temporaryDoubleOptInToken}`;
     oThis.doubleOptInToken = localCipher.encrypt(coreConstants.PA_EMAIL_TOKENS_DECRIPTOR_KEY, doubleOptInTokenStr);
+
+    await new TemporaryTokenModel()
+      .update({ status: temporaryTokenConstant.invertedStatuses[temporaryTokenConstant.inActiveStatus] })
+      .where({
+        entity_id: oThis.preLaunchInviteObj.id,
+        kind: temporaryTokenConstant.invertedKinds[temporaryTokenConstant.preLaunchInviteKind],
+        status: temporaryTokenConstant.invertedStatuses[temporaryTokenConstant.activeStatus]
+      })
+      .fire();
   }
 
   /**
@@ -91,19 +98,19 @@ class SendDoubleOptIn extends ServiceBase {
   async _sendPreLaunchInviteDoubleOptInMail() {
     const oThis = this;
 
-    if (oThis.doubleOptInToken) {
-      let transactionalMailParams = {
-        receiverEntityId: oThis.preLaunchInviteHook.id,
-        receiverEntityKind: emailServiceApiCallHookConstants.preLaunchInviteEntityKind,
-        templateName: emailServiceApiCallHookConstants.doubleOptInTemplateName,
-        templateVars: {
-          pepo_api_domain: 1,
-          doubleOptInToken: oThis.doubleOptInToken
-        }
-      };
+    // TODO:opt_in_email_link
 
-      await new SendTransactionalMail(transactionalMailParams).perform();
-    }
+    let transactionalMailParams = {
+      receiverEntityId: oThis.preLaunchInviteObj.id,
+      receiverEntityKind: emailServiceApiCallHookConstants.preLaunchInviteEntityKind,
+      templateName: emailServiceApiCallHookConstants.pepoDoubleOptInTemplateName,
+      templateVars: {
+        pepo_api_domain: 1,
+        opt_in_email_link: `${oThis.doubleOptInToken}?t=${oThis.doubleOptInToken}`
+      }
+    };
+
+    await new SendTransactionalMail(transactionalMailParams).perform();
   }
 }
 

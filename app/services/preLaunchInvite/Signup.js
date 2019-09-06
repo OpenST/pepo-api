@@ -9,9 +9,7 @@ const rootPrefix = '../../..',
   preLaunchInviteConstants = require(rootPrefix + '/lib/globalConstant/preLaunchInvite'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   kmsGlobalConstant = require(rootPrefix + '/lib/globalConstant/kms'),
-  SendDoubleOptInService = require(rootPrefix + '/app/services/SendDoubleOptIn'),
-  basicHelper = require(rootPrefix + '/helpers/basic'),
-  CommonValidators = require(rootPrefix + '/lib/validators/Common');
+  basicHelper = require(rootPrefix + '/helpers/basic');
 
 /**
  * Class for pre launch invite Signup service.
@@ -99,7 +97,7 @@ class PreLaunchTwitterSignUp extends ServiceBase {
 
     await oThis._createPreLaunchInvite();
 
-    if (oThis.inviteCode) {
+    if (oThis.inviterId) {
       await oThis._updateInvitedUserCount();
     }
 
@@ -148,7 +146,7 @@ class PreLaunchTwitterSignUp extends ServiceBase {
 
     oThis.inviterObj = await new PreLaunchInviteModel().fetchByInviteCode(oThis.inviteCode);
 
-    oThis.inviterId = oThis.inviterObj.inviteCode === oThis.inviteCode ? oThis.inviterObj.id : null;
+    oThis.inviterId = oThis.inviterObj.id ? oThis.inviterObj.id : null;
 
     return responseHelper.successWithData({});
   }
@@ -227,8 +225,6 @@ class PreLaunchTwitterSignUp extends ServiceBase {
   async _updateInvitedUserCount() {
     const oThis = this;
 
-    let invitedUserCount = oThis.inviterObj.invitedUserCount + 1;
-
     await new PreLaunchInviteModel()
       .update('invited_user_count = invited_user_count + 1')
       .where({ id: oThis.inviterId })
@@ -260,7 +256,7 @@ class PreLaunchTwitterSignUp extends ServiceBase {
           inviterId: oThis.inviterId
         }
       });
-      await createErrorLogsEntry.perform(errorObject, errorLogsConstants.highSeverity);
+      await createErrorLogsEntry.perform(errorObject, errorLogsConstants.mediumSeverity);
     }
 
     return Promise.resolve(responseHelper.successWithData({}));

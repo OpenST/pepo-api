@@ -23,7 +23,7 @@ class SendDoubleOptIn extends ServiceBase {
     oThis.t = params.t;
 
     oThis.token = null;
-    oThis.preLaunchInviteId = null;
+    oThis.temporaryTokenId = null;
     oThis.temporaryTokenObj = null;
     oThis.tokenCreationTimestamp = null;
   }
@@ -42,6 +42,8 @@ class SendDoubleOptIn extends ServiceBase {
 
     await oThis._markTokenAsUsed();
 
+    //todo: mark the user as doptin
+
     return responseHelper.successWithData({});
   }
 
@@ -53,20 +55,21 @@ class SendDoubleOptIn extends ServiceBase {
    */
   async _validate() {
     const oThis = this;
-    let decryptedT = localCipher.decrypt(coreConstants.PA_EMAIL_TOKENS_DECRIPTOR_KEY, oThis.t),
-      splitedT = decryptedT.split(':');
+    let splitedT = [];
 
-    if (splitedT.length !== 3) {
-      return oThis._invalidUrlError('a_s_do_1');
+    try {
+      let decryptedT = localCipher.decrypt(coreConstants.PA_EMAIL_TOKENS_DECRIPTOR_KEY, oThis.t);
+      splitedT = decryptedT.split(':');
+    } catch {
+      return oThis._invalidUrlError('a_s_do_v_1');
+    }
+
+    if (splitedT.length !== 2) {
+      return oThis._invalidUrlError('a_s_do_v_2');
     }
 
     oThis.token = splitedT[1];
-    oThis.preLaunchInviteId = parseInt(splitedT[0]);
-    oThis.tokenCreationTimestamp = splitedT[2];
-
-    if (Math.floor(Date.now() / 1000) - temporaryTokenConstant.tokenExpiryTimestamp > oThis.tokenCreationTimestamp) {
-      await oThis._markTokenAsInactive();
-    }
+    oThis.temporaryTokenId = parseInt(splitedT[0]);
   }
 
   /**
@@ -78,23 +81,29 @@ class SendDoubleOptIn extends ServiceBase {
   async _fetchPreLaunchInviteDoubleOptInToken() {
     const oThis = this;
 
-    oThis.temporaryTokenObj = await new TemporaryTokenModel().fetchById(oThis.preLaunchInviteId);
+    oThis.temporaryTokenObj = await new TemporaryTokenModel().fetchById(oThis.temporaryTokenId);
 
     if (!oThis.temporaryTokenObj.token) {
-      logger.error('Error while fetching data from temporary_tokens table.');
-      return Promise.reject(new Error('Error while fetching data from temporary_tokens table.'));
+      return oThis._invalidUrlError('a_s_do_fpiot_1');
     }
 
     if (oThis.temporaryTokenObj.token !== oThis.token) {
-      return oThis._invalidUrlError('a_s_do_2');
+      return oThis._invalidUrlError('a_s_do_fpiot_2');
     }
 
     if (oThis.temporaryTokenObj.status !== temporaryTokenConstant.activeStatus) {
-      return oThis._invalidUrlError('a_s_do_3');
+      return oThis._invalidUrlError('a_s_do_fpiot_3');
     }
 
     if (oThis.temporaryTokenObj.kind !== temporaryTokenConstant.preLaunchInviteKind) {
-      return oThis._invalidUrlError('a_s_do_4');
+      return oThis._invalidUrlError('a_s_do_fpiot_4');
+    }
+
+    if (
+      Math.floor(Date.now() / 1000) - temporaryTokenConstant.tokenExpiryTimestamp >
+      oThis.temporaryTokenObj.createdAt
+    ) {
+      return oThis._invalidUrlError('a_s_do_fpiot_4');
     }
   }
 
@@ -109,30 +118,7 @@ class SendDoubleOptIn extends ServiceBase {
 
     await new TemporaryTokenModel()
       .update({ status: temporaryTokenConstant.invertedStatuses[temporaryTokenConstant.usedStatus] })
-      .where({ id: oThis.preLaunchInviteId })
-      .fire();
-
-    await new TemporaryTokenModel()
-      .update({ status: temporaryTokenConstant.invertedStatuses[temporaryTokenConstant.inActiveStatus] })
-      .where({
-        entity_id: oThis.temporaryTokenObj.entityId,
-        kind: temporaryTokenConstant.invertedKinds[temporaryTokenConstant.preLaunchInviteKind],
-        status: temporaryTokenConstant.invertedStatuses[temporaryTokenConstant.activeStatus]
-      })
-      .fire();
-  }
-
-  /**
-   * Mark token as in active
-   * @returns {Promise<void>}
-   * @private
-   */
-  async _markTokenAsInactive() {
-    const oThis = this;
-
-    await new TemporaryTokenModel()
-      .update({ status: temporaryTokenConstant.invertedStatuses[temporaryTokenConstant.inActiveStatus] })
-      .where({ id: oThis.preLaunchInviteId })
+      .where({ id: oThis.temporaryTokenId })
       .fire();
   }
 
@@ -149,7 +135,7 @@ class SendDoubleOptIn extends ServiceBase {
     return Promise.reject(
       responseHelper.error({
         internal_error_identifier: code,
-        api_error_identifier: 'invalid_url',
+        api_error_identifier: 'invalid_api_params',
         debug_options: {}
       })
     );

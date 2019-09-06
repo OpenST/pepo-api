@@ -29,8 +29,6 @@ class SubscribeEmail extends ServiceBase {
     const oThis = this;
     oThis.email = params.email;
     oThis.securePreLaunchInviteObj = params.current_pre_launch_invite;
-
-    oThis.preLaunchInviteObj = null;
   }
 
   /**
@@ -43,13 +41,11 @@ class SubscribeEmail extends ServiceBase {
 
     await oThis._validate();
 
-    await oThis._sendDoubleOptIn();
-
-    if (oThis.email !== oThis.preLaunchInviteObj.email) {
+    if (oThis.email.toLowerCase() !== oThis.securePreLaunchInviteObj.email.toLowerCase()) {
       await oThis._updateEmail();
     }
 
-    await oThis._updateStatus();
+    await oThis._sendDoubleOptIn();
 
     return Promise.resolve(responseHelper.successWithData({}));
   }
@@ -99,15 +95,13 @@ class SubscribeEmail extends ServiceBase {
   async _fetchAndValidatePreLaunchInvite() {
     const oThis = this;
 
-    oThis.preLaunchInviteObj = await new PreLaunchInviteModel().fetchById(oThis.securePreLaunchInviteObj.id);
-
-    if (oThis.preLaunchInviteObj.status === preLaunchInviteConstants.doptinStatus) {
+    if (oThis.securePreLaunchInviteObj.status === preLaunchInviteConstants.doptinStatus) {
       return Promise.reject(
         responseHelper.paramValidationError({
           internal_error_identifier: 'a_s_pli_se_2',
           api_error_identifier: 'invalid_api_params',
           params_error_identifiers: ['email_already_doptin'],
-          debug_options: { email: oThis.email }
+          debug_options: { email: oThis.email, id: oThis.securePreLaunchInviteObj.id }
         })
       );
     }
@@ -125,7 +119,7 @@ class SubscribeEmail extends ServiceBase {
     const oThis = this;
 
     let sendDoubleOptInParams = {
-      pre_launch_invite_hook: oThis.preLaunchInviteObj
+      pre_launch_invite_obj: oThis.securePreLaunchInviteObj
     };
 
     await new SendDoubleOptInService(sendDoubleOptInParams).perform();
@@ -142,26 +136,10 @@ class SubscribeEmail extends ServiceBase {
 
     await new PreLaunchInviteModel()
       .update({ email: oThis.email })
-      .where({ id: oThis.preLaunchInviteObj.id })
-      .fire();
-  }
-
-  /**
-   * Update status
-   *
-   * @returns {Promise<void>}
-   * @private
-   */
-  async _updateStatus() {
-    const oThis = this;
-
-    let doptinStatus = preLaunchInviteConstants.invertedStatuses[preLaunchInviteConstants.doptinStatus];
-    await new PreLaunchInviteModel()
-      .update({ status: doptinStatus })
-      .where({ id: oThis.preLaunchInviteObj.id })
+      .where({ id: oThis.securePreLaunchInviteObj.id })
       .fire();
 
-    await PreLaunchInviteModel.flushCache(oThis.preLaunchInviteObj);
+    await PreLaunchInviteModel.flushCache(oThis.securePreLaunchInviteObj);
   }
 }
 

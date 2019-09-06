@@ -49,7 +49,7 @@ const v1Signature = {
   [apiName.sendDoubleOptIn]: {
     mandatory: [
       {
-        parameter: 'pre_launch_invite_hook',
+        parameter: 'pre_launch_invite_obj',
         validatorMethods: ['validateNonEmptyObject']
       }
     ],
