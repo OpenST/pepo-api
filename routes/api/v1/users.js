@@ -297,7 +297,8 @@ router.get('/available-products', sanitizer.sanitizeDynamicUrlParams, function(r
     const wrapperFormatterRsp = await new FormatterComposer({
       resultType: responseEntityKey.products,
       entityKindToResponseKeyMap: {
-        [entityType.products]: responseEntityKey.products
+        [entityType.products]: responseEntityKey.products,
+        [entityType.limitsData]: responseEntityKey.limitsData
       },
       serviceData: serviceResponse.data
     }).perform();

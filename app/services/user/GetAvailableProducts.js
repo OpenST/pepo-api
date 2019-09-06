@@ -27,9 +27,9 @@ class GetAvailableProducts extends ServiceBase {
     oThis.os = params.os;
 
     oThis.limitsData = {};
-    oThis.limitsData.monthlyLimitReached = 0;
-    oThis.limitsData.weeklyLimitReached = 0;
-    oThis.limitsData.dailyLimitReached = 0;
+    oThis.limitsData.monthly_limit_reached = 0;
+    oThis.limitsData.weekly_limit_reached = 0;
+    oThis.limitsData.daily_limit_reached = 0;
   }
 
   /**
@@ -39,6 +39,32 @@ class GetAvailableProducts extends ServiceBase {
    */
   async _asyncPerform() {
     const oThis = this;
+
+    let responseData1 = {
+      products: [
+        {
+          id: 'PROD.ID.1',
+          amount_in_usd: '1',
+          amount_in_pepo: '1000',
+          uts: '1567601491491'
+        },
+        {
+          id: 'PROD.ID.2',
+          amount_in_usd: '2',
+          amount_in_pepo: '2000',
+          uts: '1567601491491'
+        },
+        {
+          id: 'PROD.ID.3',
+          amount_in_usd: '3',
+          amount_in_pepo: '3000',
+          uts: '1567601491491'
+        }
+      ],
+      limits_data: oThis.limitsData
+    };
+
+    return responseHelper.successWithData(responseData1);
 
     let promiseArray = [];
     promiseArray.push(oThis._fetchAvailableProducts());
@@ -150,15 +176,15 @@ class GetAvailableProducts extends ServiceBase {
       );
 
     if (monthlyRemainingProductsCost <= 0) {
-      oThis.limitsData.monthlyLimitReached = 1;
+      oThis.limitsData.monthly_limit_reached = 1;
     }
 
     if (weeklyRemainingProductsCost <= 0) {
-      oThis.limitsData.weeklyLimitReached = 1;
+      oThis.limitsData.weekly_limit_reached = 1;
     }
 
     if (dailyRemainingProductsCost <= 0) {
-      oThis.limitsData.dailyLimitReached = 1;
+      oThis.limitsData.daily_limit_reached = 1;
     }
     return actualRemainingLimit;
   }
