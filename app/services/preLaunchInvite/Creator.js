@@ -35,7 +35,7 @@ class Creator extends ServiceBase {
   async _asyncPerform() {
     const oThis = this;
 
-    if (oThis.securePreLaunchInviteObj.creatorStatus === preLaunchInviteConstants.notAppliedCreator) {
+    if (oThis.securePreLaunchInviteObj.creatorStatus === preLaunchInviteConstants.notAppliedCreatorStatus) {
       await oThis._updateCreatorStatus();
     }
 
@@ -52,7 +52,9 @@ class Creator extends ServiceBase {
     const oThis = this;
 
     await new PreLaunchInviteModel()
-      .update({ creator_status: preLaunchInviteConstants.invertedCreators[preLaunchInviteConstants.appliedCreator] })
+      .update({
+        creator_status: preLaunchInviteConstants.invertedCreatorStatuses[preLaunchInviteConstants.appliedCreatorStatus]
+      })
       .where({ id: oThis.securePreLaunchInviteObj.id })
       .fire();
 
