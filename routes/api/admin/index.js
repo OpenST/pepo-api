@@ -1,23 +1,25 @@
 const express = require('express'),
-  router = express.Router(),
-  cookieParser = require('cookie-parser'),
-  csrf = require('csurf');
+  router = express.Router();
+
+const cookieParser = require('cookie-parser');
 
 const rootPrefix = '../../..',
-  AdminCookieAuth = require(rootPrefix + '/lib/authentication/AdminCookie'),
-  adminConstants = require(rootPrefix + '/lib/globalConstant/admin'),
   FormatterComposer = require(rootPrefix + '/lib/formatter/Composer'),
+  AdminCookieAuth = require(rootPrefix + '/lib/authentication/AdminCookie'),
   routeHelper = require(rootPrefix + '/routes/helper'),
-  apiVersions = require(rootPrefix + '/lib/globalConstant/apiVersions'),
-  apiName = require(rootPrefix + '/lib/globalConstant/apiName'),
-  sanitizer = require(rootPrefix + '/helpers/sanitizer'),
-  coreConstants = require(rootPrefix + '/config/coreConstants'),
-  entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
-  responseEntityKey = require(rootPrefix + '/lib/globalConstant/responseEntityKey'),
   basicHelper = require(rootPrefix + '/helpers/basic'),
+  sanitizer = require(rootPrefix + '/helpers/sanitizer'),
+  cookieHelper = require(rootPrefix + '/lib/cookieHelper'),
+  apiName = require(rootPrefix + '/lib/globalConstant/apiName'),
+  coreConstants = require(rootPrefix + '/config/coreConstants'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
-  cookieHelper = require(rootPrefix + '/lib/cookieHelper');
+  adminConstants = require(rootPrefix + '/lib/globalConstant/admin'),
+  entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
+  apiVersions = require(rootPrefix + '/lib/globalConstant/apiVersions'),
+  adminPreLaunchRoutes = require(rootPrefix + '/routes/api/admin/preLaunch/index'),
+  responseEntityKey = require(rootPrefix + '/lib/globalConstant/responseEntityKey');
 
+// Declare variables.
 const errorConfig = basicHelper.fetchErrorConfig(apiVersions.admin);
 
 // Node.js cookie parsing middleware.
@@ -157,41 +159,6 @@ router.get('/current', sanitizer.sanitizeDynamicUrlParams, function(req, res, ne
   Promise.resolve(routeHelper.perform(req, res, next, '/admin/GetCurrent', 'r_a_v1_ad_6', null, dataFormatterFunc));
 });
 
-/* Whitelist user */
-router.post('/whitelist/:invite_id', cookieHelper.setAdminCsrf(), sanitizer.sanitizeDynamicUrlParams, function(
-  req,
-  res,
-  next
-) {
-  req.decodedParams.apiName = apiName.adminWhitelistUser;
-  req.decodedParams.invite_id = req.params.invite_id;
-
-  Promise.resolve(
-    routeHelper.perform(req, res, next, '/admin/preLaunch/WhitelistUser', 'r_a_v1_ad_7', null, null, null)
-  );
-});
-
-/* Invite user list */
-router.get('/launch-invites/search', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
-  req.decodedParams.apiName = apiName.launchInviteSearch;
-
-  const dataFormatterFunc = async function(serviceResponse) {
-    const wrapperFormatterRsp = await new FormatterComposer({
-      resultType: responseEntityKey.launchInviteSearchResults,
-      entityKindToResponseKeyMap: {
-        [entityType.inviteUserSearchList]: responseEntityKey.launchInviteSearchResults,
-        [entityType.inviteMap]: responseEntityKey.invites,
-        [entityType.inviteUserSearchMeta]: responseEntityKey.meta
-      },
-      serviceData: serviceResponse.data
-    }).perform();
-
-    serviceResponse.data = wrapperFormatterRsp.data;
-  };
-
-  Promise.resolve(
-    routeHelper.perform(req, res, next, '/admin/preLaunch/UserSearch', 'r_a_v1_ad_8', null, dataFormatterFunc)
-  );
-});
+router.use('/pre-launch', adminPreLaunchRoutes);
 
 module.exports = router;
