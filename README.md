@@ -30,6 +30,44 @@
     
 * Refer [Pepo-Tracker](https://github.com/pepotech/pepo-tracker) readme for setting it up.
 
+* [Only Development] Include following server block in `/usr/local/etc/nginx/nginx.conf`
+```bash
+   server {
+               listen       8080;
+               server_name  pepodev.com;
+   
+               location /api/ {
+                       proxy_cookie_domain localhost pepodev.com;
+                       proxy_pass http://localhost:3000/api/;
+               }
+   
+               location /admin/ {
+                       proxy_cookie_domain localhost pepodev.com;
+                       proxy_pass http://localhost:4000/admin/;
+               }
+
+               location /builtAssets {
+                        proxy_cookie_domain localhost pepodev.com;
+                        proxy_pass http://localhost:4000;
+               }
+   
+               location / {
+                       proxy_cookie_domain localhost pepodev.com;
+                       proxy_pass http://localhost:5000;
+               }
+       }
+```
+
+* [Only Development] Include following line in `/etc/hosts` file
+```bash
+    127.0.0.1       pepodev.com
+```
+
+* [Only Development] Reload nginx
+```bash
+    sudo nginx -s reload
+```
+
 ## Install all the dependency npm packages
 ```bash
   rm -rf node_modules
@@ -137,6 +175,13 @@ Note: Get the webhooks id from above run(subscribe webhooks). Secret has to be o
 * Clear cache.
 ```bash
   node devops/exec/flushMemcache.js
+```
+
+## Create admin 
+```bash
+  R = require('./app/services/admin/ResetPassword.js')
+  r = new R({ email: 'pepo@ost.com', name: 'Pepo Api'})
+  r.perform().then(console.log)
 ```
 
 * Source the ENV vars.

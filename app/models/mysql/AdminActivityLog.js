@@ -58,9 +58,14 @@ class AdminActivityLogModel extends ModelBase {
   }
 
   /**
-   * Insert action
+   * Insert action.
    *
-   * @param params
+   * @param {object} params
+   * @param {number} params.adminId
+   * @param {string} params.action
+   * @param {number} params.actionOn
+   * @param {string} params.extraData
+   *
    * @returns {Promise<any>}
    */
   insertAction(params) {

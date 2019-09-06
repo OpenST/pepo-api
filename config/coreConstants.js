@@ -349,6 +349,10 @@ class CoreConstants {
     return process.env.PR_LAMBDA_VIDEO_COMPRESS_FUNCTION;
   }
 
+  get PA_EMAIL_TOKENS_DECRIPTOR_KEY() {
+    return process.env.PA_EMAIL_TOKENS_DECRIPTOR_KEY;
+  }
+
   get PA_CDN_URL() {
     return process.env.PA_CDN_URL;
   }

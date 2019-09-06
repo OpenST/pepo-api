@@ -7,6 +7,8 @@ const program = require('commander');
 
 const rootPrefix = '../..',
   HookProcessorsBase = require(rootPrefix + '/executables/hookProcessors/Base'),
+  AddContact = require(rootPrefix + '/lib/email/hookProcessor/AddContact'),
+  UpdateContact = require(rootPrefix + '/lib/email/hookProcessor/UpdateContact'),
   SendTransactionalMail = require(rootPrefix + '/lib/email/hookProcessor/SendTransactionalMail'),
   EmailServiceAPICallHookModel = require(rootPrefix + '/app/models/mysql/EmailServiceAPICallHook'),
   emailServiceApiCallHookConstants = require(rootPrefix + '/lib/globalConstant/emailServiceApiCallHook'),
@@ -93,6 +95,12 @@ class EmailServiceApiCall extends HookProcessorsBase {
     const oThis = this;
 
     switch (oThis.hook.eventType) {
+      case emailServiceApiCallHookConstants.addContactEventType: {
+        return AddContact;
+      }
+      case emailServiceApiCallHookConstants.updateContactEventType: {
+        return UpdateContact;
+      }
       case emailServiceApiCallHookConstants.sendTransactionalEmailEventType: {
         return SendTransactionalMail;
       }

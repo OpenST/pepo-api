@@ -3,8 +3,8 @@
 export PA_ENVIRONMENT='development'
 export PA_PORT=3000
 export PA_DEBUG_ENABLED='1';
-export PA_DOMAIN='www.pepo.com'
-export PA_COOKIE_DOMAIN='127.0.0.1'
+export PA_DOMAIN='http://pepodev.com:8080'
+export PA_COOKIE_DOMAIN='.pepodev.com'
 
 # Devops error logs framework
 export DEVOPS_APP_NAME='pepo-api';
@@ -105,19 +105,21 @@ export PA_PW_COOKIE_SECRET='aa5298d3a3fe181a3a52d085ee1525df5asa498337f8f3b76ca7
 export PA_GIPHY_API_KEY='PbWiMCsT9RxXtatEtKp6w1vapdqNxhFQ'
 
 # Pepo Campaigns Details
-export PA_CAMPAIGN_CLIENT_KEY="f395013cc8715f72ecef978248d933e6"
-export PA_CAMPAIGN_CLIENT_SECRET="818506e0d00c33f84099744461b41ac5"
-export PA_CAMPAIGN_BASE_URL="https://pepocampaigns.com/"
-export PA_CAMPAIGN_MASTER_LIST="5346"
+export PA_CAMPAIGN_CLIENT_KEY="3572cbc0d1895ed73e769d028eb50fec"
+export PA_CAMPAIGN_CLIENT_SECRET="b753c5acca25e22bedb5a58efc72891a"
+export PA_CAMPAIGN_BASE_URL="https://pepocampaigns.com"
+export PA_CAMPAIGN_MASTER_LIST="64194"
 
 #Twitter API Key
 export PA_TWITTER_CONSUMER_KEY='NEo4gEXzdQZaoTsqzpZvepfKb'
 export PA_TWITTER_CONSUMER_SECRET='iM5UMt4px8rwoqEoRV9gJGrJGtEoMUxOYkaWXSges7t4bk564t'
-export PA_TWITTER_AUTH_CALLBACK_ROUTE='https://pepo.com'
+export PA_TWITTER_AUTH_CALLBACK_ROUTE='http://pepodev.com:8080/twitter/auth'
 
 # image resizer variables
 export PR_LAMBDA_IMAGE_RESIZE_FUNCTION='arn:aws:lambda:us-east-1:274208178423:function:pepoImageResizer'
 export PR_LAMBDA_VIDEO_COMPRESS_FUNCTION='arn:aws:lambda:us-east-1:274208178423:function:pepoVideoCompressor'
+
+export PA_EMAIL_TOKENS_DECRIPTOR_KEY='3d3w6fs0983ab6b1e37d1c1fs64hm8g9'
 
 # Replication variables for cassandra. ONLY FOR DEVELOPMENT.
 export REPLICATION_CLASS='SimpleStrategy'

@@ -11,7 +11,7 @@ const rootPrefix = '../../..',
   apiVersions = require(rootPrefix + '/lib/globalConstant/apiVersions'),
   apiName = require(rootPrefix + '/lib/globalConstant/apiName'),
   sanitizer = require(rootPrefix + '/helpers/sanitizer'),
-  coreConstant = require(rootPrefix + '/config/coreConstants'),
+  coreConstants = require(rootPrefix + '/config/coreConstants'),
   entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
   responseEntityKey = require(rootPrefix + '/lib/globalConstant/responseEntityKey'),
   basicHelper = require(rootPrefix + '/helpers/basic'),
@@ -20,37 +20,26 @@ const rootPrefix = '../../..',
 
 const errorConfig = basicHelper.fetchErrorConfig(apiVersions.admin);
 
-const csrfProtection = csrf({
-  cookie: {
-    maxAge: 1000 * 5 * 60, // Cookie would expire after 5 minutes
-    httpOnly: true, // The cookie only accessible by the web server
-    signed: true, // Indicates if the cookie should be signed
-    secure: true, // Marks the cookie to be used with HTTPS only
-    path: '/',
-    sameSite: 'strict', // sets the same site policy for the cookie
-    domain: coreConstant.PA_COOKIE_DOMAIN,
-    key: adminConstants.csrfCookieName
-  }
-});
-
 // Node.js cookie parsing middleware.
-router.use(cookieParser(coreConstant.ADMIN_COOKIE_SECRET));
+router.use(cookieParser(coreConstants.ADMIN_COOKIE_SECRET));
 
 const validateAdminCookie = async function(req, res, next) {
   // Cookie validation is not to be done for admin login request
   if (req.url !== '/login') {
-    let adminCookieValue = req.signedCookies[adminConstants.loginCookieName];
-    let authResponse = await new AdminCookieAuth(adminCookieValue).perform().catch(function(r) {
-      return r;
+    const adminCookieValue = req.signedCookies[adminConstants.loginCookieName];
+    const authResponse = await new AdminCookieAuth(adminCookieValue).perform().catch(function(err) {
+      return err;
     });
 
     if (authResponse.isFailure()) {
       cookieHelper.deleteAdminCookie(res);
+
       return responseHelper.renderApiResponse(authResponse, res, errorConfig);
-    } else {
-      req.decodedParams.current_admin = authResponse.data.current_admin;
-      req.decodedParams.admin_login_cookie_value = authResponse.data.admin_login_cookie_value;
     }
+
+    req.decodedParams.current_admin = authResponse.data.current_admin;
+    req.decodedParams.admin_login_cookie_value = authResponse.data.admin_login_cookie_value;
+
     cookieHelper.setAdminCookie(res, authResponse.data.admin_login_cookie_value);
   }
 
@@ -59,15 +48,15 @@ const validateAdminCookie = async function(req, res, next) {
 
 router.use(validateAdminCookie);
 
-/* Login admin*/
-router.post('/login', csrfProtection, sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+/* Login admin */
+router.post('/login', cookieHelper.setAdminCsrf(), sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.adminLogin;
 
   const onServiceSuccess = async function(serviceResponse) {
     cookieHelper.setAdminCookie(res, serviceResponse.data.adminCookieValue);
   };
 
-  const onServiceFailure = async function(serviceResponse) {
+  const onServiceFailure = async function() {
     cookieHelper.deleteAdminCookie(res);
   };
 
@@ -76,8 +65,8 @@ router.post('/login', csrfProtection, sanitizer.sanitizeDynamicUrlParams, functi
   );
 });
 
-/* Logout admin*/
-router.post('/logout', csrfProtection, sanitizer.sanitizeDynamicUrlParams, function(req, res) {
+/* Logout admin */
+router.post('/logout', cookieHelper.setAdminCsrf(), sanitizer.sanitizeDynamicUrlParams, function(req, res) {
   req.decodedParams.apiName = apiName.adminLogout;
 
   const responseObject = responseHelper.successWithData({});
@@ -87,7 +76,7 @@ router.post('/logout', csrfProtection, sanitizer.sanitizeDynamicUrlParams, funct
   Promise.resolve(responseHelper.renderApiResponse(responseObject, res, errorConfig));
 });
 
-/* users list */
+/* Users list */
 router.get('/users', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.adminUserSearch;
   req.decodedParams.search_by_admin = true;
@@ -114,30 +103,42 @@ router.get('/users', sanitizer.sanitizeDynamicUrlParams, function(req, res, next
 });
 
 /* Approve user as creator */
-router.post('/users/:user_id/approve', csrfProtection, sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+router.post('/users/:user_id/approve', cookieHelper.setAdminCsrf(), sanitizer.sanitizeDynamicUrlParams, function(
+  req,
+  res,
+  next
+) {
   req.decodedParams.apiName = apiName.adminUserApprove;
   req.decodedParams.user_ids = [req.params.user_id];
 
   Promise.resolve(routeHelper.perform(req, res, next, '/admin/ApproveUsersAsCreator', 'r_a_v1_ad_3', null, null, null));
 });
 
-/* Block user*/
-router.post('/users/:user_id/block', csrfProtection, sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+/* Block user */
+router.post('/users/:user_id/block', cookieHelper.setAdminCsrf(), sanitizer.sanitizeDynamicUrlParams, function(
+  req,
+  res,
+  next
+) {
   req.decodedParams.apiName = apiName.adminUserBlock;
   req.decodedParams.user_ids = [req.params.user_id];
 
-  Promise.resolve(routeHelper.perform(req, res, next, '/admin/BlockUser', 'r_a_v1_ad_5', null, null, null));
+  Promise.resolve(routeHelper.perform(req, res, next, '/admin/BlockUser', 'r_a_v1_ad_4', null, null, null));
 });
 
 /* Delete video */
-router.post('/delete-video/:video_id', csrfProtection, sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+router.post('/delete-video/:video_id', cookieHelper.setAdminCsrf(), sanitizer.sanitizeDynamicUrlParams, function(
+  req,
+  res,
+  next
+) {
   req.decodedParams.apiName = apiName.adminDeleteVideo;
   req.decodedParams.video_id = req.params.video_id;
 
-  Promise.resolve(routeHelper.perform(req, res, next, '/video/Delete', 'r_a_v1_ad_4', null, null, null));
+  Promise.resolve(routeHelper.perform(req, res, next, '/video/Delete', 'r_a_v1_ad_5', null, null, null));
 });
 
-/* Logged In Admin*/
+/* Logged in Admin */
 router.get('/current', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.loggedInAdmin;
 
@@ -153,7 +154,44 @@ router.get('/current', sanitizer.sanitizeDynamicUrlParams, function(req, res, ne
     serviceResponse.data = wrapperFormatterRsp.data;
   };
 
-  Promise.resolve(routeHelper.perform(req, res, next, '/admin/GetCurrent', 'r_a_v1_u_5', null, dataFormatterFunc));
+  Promise.resolve(routeHelper.perform(req, res, next, '/admin/GetCurrent', 'r_a_v1_ad_6', null, dataFormatterFunc));
+});
+
+/* Whitelist user */
+router.post('/whitelist/:invite_id', cookieHelper.setAdminCsrf(), sanitizer.sanitizeDynamicUrlParams, function(
+  req,
+  res,
+  next
+) {
+  req.decodedParams.apiName = apiName.adminWhitelistUser;
+  req.decodedParams.invite_id = req.params.invite_id;
+
+  Promise.resolve(
+    routeHelper.perform(req, res, next, '/admin/preLaunch/WhitelistUser', 'r_a_v1_ad_7', null, null, null)
+  );
+});
+
+/* Invite user list */
+router.get('/launch-invites/search', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.launchInviteSearch;
+
+  const dataFormatterFunc = async function(serviceResponse) {
+    const wrapperFormatterRsp = await new FormatterComposer({
+      resultType: responseEntityKey.launchInviteSearchResults,
+      entityKindToResponseKeyMap: {
+        [entityType.inviteUserSearchList]: responseEntityKey.launchInviteSearchResults,
+        [entityType.inviteMap]: responseEntityKey.invites,
+        [entityType.inviteUserSearchMeta]: responseEntityKey.meta
+      },
+      serviceData: serviceResponse.data
+    }).perform();
+
+    serviceResponse.data = wrapperFormatterRsp.data;
+  };
+
+  Promise.resolve(
+    routeHelper.perform(req, res, next, '/admin/preLaunch/UserSearch', 'r_a_v1_ad_8', null, dataFormatterFunc)
+  );
 });
 
 module.exports = router;

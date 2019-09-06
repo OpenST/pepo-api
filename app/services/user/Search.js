@@ -217,6 +217,10 @@ class UserSearch extends ServiceBase {
   async _fetchVideos() {
     const oThis = this;
 
+    if (oThis.videoIds.length === 0) {
+      return responseHelper.successWithData({});
+    }
+
     let cacheRsp = await new VideoByIdCache({ ids: oThis.videoIds }).fetch();
 
     if (cacheRsp.isFailure()) {
@@ -441,6 +445,10 @@ class UserSearch extends ServiceBase {
 
     let uids = oThis.userIds,
       adminIdMap = {};
+
+    if (oThis.userIds.length === 0) {
+      return responseHelper.successWithData({});
+    }
 
     while (true) {
       let rows = await new AdminActivityLogModel()

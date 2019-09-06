@@ -81,7 +81,33 @@ const adminSignature = {
       }
     ],
     optional: []
+  },
+  [apiName.adminWhitelistUser]: {
+    mandatory: [
+      {
+        parameter: 'invite_id',
+        validatorMethods: ['validateNonZeroInteger']
+      }
+    ],
+    optional: []
+  },
+  [apiName.launchInviteSearch]: {
+    mandatory: [],
+    optional: [
+      {
+        parameter: 'q',
+        validatorMethods: ['validateString']
+      },
+      {
+        parameter: paginationConstants.paginationIdentifierKey,
+        validatorMethods: ['validateString', 'validatePaginationIdentifier']
+      },
+      {
+        parameter: 'sort_by',
+        validatorMethods: ['validateString']
+      }
+    ]
   }
-}
+};
 
 module.exports = adminSignature;

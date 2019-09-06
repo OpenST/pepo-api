@@ -1622,6 +1622,38 @@
 					"response": []
 				},
 				{
+					"name": "Whitelist user",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/x-www-form-urlencoded"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": []
+						},
+						"url": {
+							"raw": "{{api_server}}/api/v1/admin/whitelist/1001",
+							"host": [
+								"{{api_server}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"admin",
+								"whitelist",
+								"1001"
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "Deactivate user",
 					"request": {
 						"method": "POST",

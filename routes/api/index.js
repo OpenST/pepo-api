@@ -3,6 +3,7 @@ const express = require('express');
 const rootPrefix = '../..',
   apiVersions = require(rootPrefix + '/lib/globalConstant/apiVersions'),
   v1Routes = require(rootPrefix + '/routes/api/v1/index'),
+  webRoutes = require(rootPrefix + '/routes/api/web/index'),
   adminRoutes = require(rootPrefix + '/routes/api/admin/index');
 
 const router = express.Router();
@@ -31,7 +32,20 @@ const appendAdminVersion = function(req, res, next) {
   next();
 };
 
+/**
+ * Append web version
+ *
+ * @param req
+ * @param res
+ * @param next
+ */
+const appendWebVersion = function(req, res, next) {
+  req.decodedParams.apiVersion = apiVersions.web;
+  next();
+};
+
 router.use('/v1', appendV1Version, v1Routes);
+router.use('/web', appendWebVersion, webRoutes);
 router.use('/admin', appendAdminVersion, adminRoutes);
 
 module.exports = router;

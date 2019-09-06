@@ -1,48 +1,48 @@
-/**
- * Module to approve users by admin
- *
- * @module app/services/admin/ApproveUsers
- */
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
+  FeedModel = require(rootPrefix + '/app/models/mysql/Feed'),
   UserModelKlass = require(rootPrefix + '/app/models/mysql/User'),
   UsersCache = require(rootPrefix + '/lib/cacheManagement/multi/User'),
-  UserProfileElementsByUserIdCache = require(rootPrefix + '/lib/cacheManagement/multi/UserProfileElementsByUserIds'),
-  userProfileElementConst = require(rootPrefix + '/lib/globalConstant/userProfileElement'),
-  VideoAddNotification = require(rootPrefix + '/lib/userNotificationPublisher/VideoAdd'),
-  responseHelper = require(rootPrefix + '/lib/formatter/response'),
-  FeedModel = require(rootPrefix + '/app/models/mysql/Feed'),
-  feedsConstants = require(rootPrefix + '/lib/globalConstant/feed'),
   ActivityLogModel = require(rootPrefix + '/app/models/mysql/AdminActivityLog'),
+  VideoAddNotification = require(rootPrefix + '/lib/userNotificationPublisher/VideoAdd'),
+  UserProfileElementsByUserIdCache = require(rootPrefix + '/lib/cacheManagement/multi/UserProfileElementsByUserIds'),
+  userConstants = require(rootPrefix + '/lib/globalConstant/user'),
+  responseHelper = require(rootPrefix + '/lib/formatter/response'),
+  feedsConstants = require(rootPrefix + '/lib/globalConstant/feed'),
   adminActivityLogConst = require(rootPrefix + '/lib/globalConstant/adminActivityLogs'),
-  userConstants = require(rootPrefix + '/lib/globalConstant/user');
+  userProfileElementConst = require(rootPrefix + '/lib/globalConstant/userProfileElement');
 
 /**
- * Class to approve users by admin
+ * Class to approve users by admin.
  *
- * @class
+ * @class ApproveUsersAsCreator
  */
 class ApproveUsersAsCreator extends ServiceBase {
   /**
-   * Constructor to approve users by admin
+   * Constructor to approve users by admin.
    *
-   * @param params
-   * @param {Array} params.user_ids: User ids to be approved by admin.
-   * @param {Array} params.current_admin: current admin.
+   * @param {object} params
+   * @param {array} params.user_ids: User ids to be approved by admin.
+   * @param {object} params.current_admin: current admin.
+   *
+   * @augments ServiceBase
+   *
+   * @constructor
    */
   constructor(params) {
-    super(params);
+    super();
 
     const oThis = this;
+
     oThis.userIds = params.user_ids;
     oThis.currentAdmin = params.current_admin;
-    oThis.currentAdminId = oThis.currentAdmin.id;
+    oThis.currentAdminId = params.current_admin.id;
 
     oThis.userObjects = {};
   }
 
   /**
-   * Main performer
+   * Main performer for class.
    *
    * @returns {Promise<void>}
    * @private
@@ -64,7 +64,9 @@ class ApproveUsersAsCreator extends ServiceBase {
   }
 
   /**
-   * Fetch users
+   * Fetch users.
+   *
+   * @sets oThis.userObjects
    *
    * @returns {Promise<never>}
    * @private
@@ -86,8 +88,8 @@ class ApproveUsersAsCreator extends ServiceBase {
       );
     }
 
-    for (let userId in cacheRsp.data) {
-      let userObj = cacheRsp.data[userId];
+    for (const userId in cacheRsp.data) {
+      const userObj = cacheRsp.data[userId];
 
       if (userObj.status !== userConstants.activeStatus) {
         return Promise.reject(
@@ -116,7 +118,7 @@ class ApproveUsersAsCreator extends ServiceBase {
   }
 
   /**
-   * Approve users
+   * Approve users.
    *
    * @returns {Promise<void>}
    * @private
@@ -132,7 +134,7 @@ class ApproveUsersAsCreator extends ServiceBase {
   }
 
   /**
-   * Flush all users cache
+   * Flush all users cache.
    *
    * @returns {Promise<void>}
    * @private
@@ -140,15 +142,15 @@ class ApproveUsersAsCreator extends ServiceBase {
   async _flushCache() {
     const oThis = this;
 
-    let promises = [];
-    for (let userId in oThis.userObjects) {
+    const promises = [];
+    for (const userId in oThis.userObjects) {
       promises.push(UserModelKlass.flushCache(oThis.userObjects[userId]));
     }
     await Promise.all(promises);
   }
 
   /**
-   * Publish Fan video if any of approved users
+   * Publish fan video if any of approved users.
    *
    * @returns {Promise<void>}
    * @private
@@ -156,17 +158,13 @@ class ApproveUsersAsCreator extends ServiceBase {
   async _publishFanVideo() {
     const oThis = this;
 
-    const userProfileElementsByUserIdCacheObj = new UserProfileElementsByUserIdCache({
-        usersIds: oThis.userIds
-      }),
-      cacheRsp = await userProfileElementsByUserIdCacheObj.fetch();
-
+    const cacheRsp = await new UserProfileElementsByUserIdCache({ usersIds: oThis.userIds }).fetch();
     if (cacheRsp.isFailure()) {
-      return;
+      return cacheRsp;
     }
 
-    let promises = [];
-    for (let userId in oThis.userObjects) {
+    const promises = [];
+    for (const userId in oThis.userObjects) {
       const profileElements = cacheRsp.data[userId];
       if (profileElements && profileElements[userProfileElementConst.coverVideoIdKind]) {
         const videoId = profileElements[userProfileElementConst.coverVideoIdKind].data;
@@ -179,16 +177,15 @@ class ApproveUsersAsCreator extends ServiceBase {
   }
 
   /**
-   * Add feed entry for user video
+   * Add feed entry for user video.
    *
-   * @param videoId
-   * @param userId
+   * @param {number} videoId
+   * @param {number} userId
+   *
    * @returns {Promise<any>}
    * @private
    */
   async _addFeed(videoId, userId) {
-    const oThis = this;
-
     return new FeedModel()
       .insert({
         primary_external_entity_id: videoId,
@@ -200,17 +197,17 @@ class ApproveUsersAsCreator extends ServiceBase {
   }
 
   /**
-   * Log admin activity
+   * Log admin activity.
    *
-   * @return {Promise<void>}
+   * @returns {Promise<void>}
    * @private
    */
   async _logAdminActivity() {
     const oThis = this;
 
-    let activityLogObj = new ActivityLogModel({});
+    const activityLogObj = new ActivityLogModel({});
 
-    for (let userId in oThis.userObjects) {
+    for (const userId in oThis.userObjects) {
       await activityLogObj.insertAction({
         adminId: oThis.currentAdminId,
         actionOn: userId,

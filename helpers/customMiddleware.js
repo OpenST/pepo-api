@@ -1,8 +1,8 @@
-const uuid = require('uuid');
+const uuidV4 = require('uuid/v4');
 
 module.exports = function() {
   return function(req, res, next) {
-    req.id = uuid.v4();
+    req.id = uuidV4();
     req.startTime = process.hrtime();
     next();
   };

@@ -1,37 +1,36 @@
-/**
- * Module to reset Admin password
- *
- * @module app/services/admin/ResetPassword
- */
 const rootPrefix = '../../..',
   KmsWrapper = require(rootPrefix + '/lib/aws/KmsWrapper'),
-  kmsConstants = require(rootPrefix + '/lib/globalConstant/kms'),
-  util = require(rootPrefix + '/lib/util'),
   ServiceBase = require(rootPrefix + '/app/services/Base'),
-  AdminEmailCache = require(rootPrefix + '/lib/cacheManagement/single/AdminByEmail'),
   AdminModel = require(rootPrefix + '/app/models/mysql/Admin'),
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
-  adminConstants = require(rootPrefix + '/lib/globalConstant/admin'),
-  responseHelper = require(rootPrefix + '/lib/formatter/response');
+  AdminEmailCache = require(rootPrefix + '/lib/cacheManagement/single/AdminByEmail'),
+  util = require(rootPrefix + '/lib/util'),
+  kmsConstants = require(rootPrefix + '/lib/globalConstant/kms'),
+  responseHelper = require(rootPrefix + '/lib/formatter/response'),
+  adminConstants = require(rootPrefix + '/lib/globalConstant/admin');
 
 /**
- * Class to authenticate admin login
+ * Class to reset admin password.
  *
+ * @class AdminResetPassword
  */
 class AdminResetPassword extends ServiceBase {
   /**
-   * Constructor for admin login
+   * Constructor to reset admin password.
    *
    * @param {object} params
    * @param {string} params.email: Email
    * @param {string} params.name: Name
-   * @param {string} params.password: Password
    *
+   * @augments ServiceBase
+   *
+   * @constructor
    */
   constructor(params) {
-    super(params);
+    super();
 
     const oThis = this;
+
     oThis.email = params.email;
     oThis.name = params.name;
 
@@ -42,9 +41,9 @@ class AdminResetPassword extends ServiceBase {
   }
 
   /**
-   * Async perform class
+   * Async perform.
    *
-   * @returns {Promise<void>}
+   * @returns {Promise<result>}
    * @private
    */
   async _asyncPerform() {
@@ -60,7 +59,9 @@ class AdminResetPassword extends ServiceBase {
   }
 
   /**
-   * Fetch admin user if present
+   * Fetch admin user.
+   *
+   * @sets oThis.adminObj
    *
    * @returns {Promise<never>}
    * @private
@@ -68,15 +69,16 @@ class AdminResetPassword extends ServiceBase {
   async _fetchUser() {
     const oThis = this;
 
-    let cacheResp = await new AdminEmailCache({ email: oThis.email }).fetch();
+    const cacheResp = await new AdminEmailCache({ email: oThis.email }).fetch();
 
     oThis.adminObj = cacheResp.data[oThis.email] || {};
   }
 
   /**
-   * create new password for admin
+   * Create new password for admin.
    *
-   * @sets oThis.password
+   * @sets oThis.password, oThis.encryptionSalt, oThis.encryptedPassword
+   *
    * @returns {Promise<never>}
    * @private
    */
@@ -89,12 +91,11 @@ class AdminResetPassword extends ServiceBase {
       kmsResp = await kmsObject.generateDataKey();
 
     oThis.encryptionSalt = kmsResp.CiphertextBlob;
-
     oThis.encryptedPassword = util.createSha256Digest(kmsResp.Plaintext, oThis.password);
   }
 
   /**
-   * Add update admin
+   * Add or update admin.
    *
    * @returns {Promise<*|result>}
    * @private
