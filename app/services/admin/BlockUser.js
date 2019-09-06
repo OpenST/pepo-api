@@ -1,34 +1,34 @@
-/**
- * Module to block users
- *
- * @module app/services/admin/BlockUser
- */
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   UserModelKlass = require(rootPrefix + '/app/models/mysql/User'),
   UsersCache = require(rootPrefix + '/lib/cacheManagement/multi/User'),
-  responseHelper = require(rootPrefix + '/lib/formatter/response'),
   ActivityLogModel = require(rootPrefix + '/app/models/mysql/AdminActivityLog'),
-  adminActivityLogConst = require(rootPrefix + '/lib/globalConstant/adminActivityLogs'),
-  userConstants = require(rootPrefix + '/lib/globalConstant/user');
+  responseHelper = require(rootPrefix + '/lib/formatter/response'),
+  userConstants = require(rootPrefix + '/lib/globalConstant/user'),
+  adminActivityLogConst = require(rootPrefix + '/lib/globalConstant/adminActivityLogs');
 
 /**
- * Class to block users by admin
+ * Class to block users by admin.
  *
- * @class
+ * @class BlockUser
  */
 class BlockUser extends ServiceBase {
   /**
-   * Constructor to block users by admin
+   * Constructor to block users by admin.
    *
-   * @param params
-   * @param {Array} params.user_ids: User ids to be blocked by admin.
-   * @param {Array} params.current_admin: current admin.
+   * @param {object} params
+   * @param {array} params.user_ids: User ids to be blocked by admin.
+   * @param {object} params.current_admin: current admin.
+   *
+   * @augments ServiceBase
+   *
+   * @constructor
    */
   constructor(params) {
-    super(params);
+    super();
 
     const oThis = this;
+
     oThis.userIds = params.user_ids;
     oThis.currentAdminId = params.current_admin.id;
 
@@ -36,9 +36,9 @@ class BlockUser extends ServiceBase {
   }
 
   /**
-   * Main performer
+   * Async perform.
    *
-   * @returns {Promise<void>}
+   * @returns {Promise<result>}
    * @private
    */
   async _asyncPerform() {
@@ -48,15 +48,18 @@ class BlockUser extends ServiceBase {
 
     await oThis._blockUsers();
 
-    await oThis._flushCache();
-
-    await oThis._logAdminActivity();
+    const promisesArray = [];
+    promisesArray.push(oThis._flushCache());
+    promisesArray.push(oThis._logAdminActivity());
+    await Promise.all(promisesArray);
 
     return responseHelper.successWithData({});
   }
 
   /**
-   * Fetch users
+   * Fetch users.
+   *
+   * @sets oThis.userObjects
    *
    * @returns {Promise<never>}
    * @private
@@ -64,8 +67,7 @@ class BlockUser extends ServiceBase {
   async _fetchUsers() {
     const oThis = this;
 
-    const userMultiCache = new UsersCache({ ids: oThis.userIds });
-    const cacheRsp = await userMultiCache.fetch();
+    const cacheRsp = await UsersCache({ ids: oThis.userIds }).fetch();
 
     if (cacheRsp.isFailure()) {
       return Promise.reject(
@@ -78,8 +80,8 @@ class BlockUser extends ServiceBase {
       );
     }
 
-    for (let userId in cacheRsp.data) {
-      let userObj = cacheRsp.data[userId];
+    for (const userId in cacheRsp.data) {
+      const userObj = cacheRsp.data[userId];
 
       if (userObj.status !== userConstants.activeStatus) {
         return Promise.reject(
@@ -97,23 +99,22 @@ class BlockUser extends ServiceBase {
   }
 
   /**
-   * Block users
+   * Block users.
    *
    * @returns {Promise<void>}
    * @private
    */
   async _blockUsers() {
-    const oThis = this,
-      statusVal = userConstants.invertedStatuses[userConstants.inActiveStatus];
+    const oThis = this;
 
     await new UserModelKlass()
-      .update(['status = ?', statusVal])
+      .update({ status: userConstants.invertedStatuses[userConstants.inActiveStatus] })
       .where({ id: oThis.userIds })
       .fire();
   }
 
   /**
-   * Flush all users cache
+   * Flush all users cache.
    *
    * @returns {Promise<void>}
    * @private
@@ -121,15 +122,17 @@ class BlockUser extends ServiceBase {
   async _flushCache() {
     const oThis = this;
 
-    let promises = [];
-    for (let userId in oThis.userObjects) {
+    const promises = [];
+
+    for (const userId in oThis.userObjects) {
       promises.push(UserModelKlass.flushCache(oThis.userObjects[userId]));
     }
+
     await Promise.all(promises);
   }
 
   /**
-   * Log admin activity
+   * Log admin activity.
    *
    * @return {Promise<void>}
    * @private
@@ -137,15 +140,19 @@ class BlockUser extends ServiceBase {
   async _logAdminActivity() {
     const oThis = this;
 
-    let activityLogObj = new ActivityLogModel({});
+    const promisesArray = [];
 
-    for (let userId in oThis.userObjects) {
-      await activityLogObj.insertAction({
-        adminId: oThis.currentAdminId,
-        actionOn: userId,
-        action: adminActivityLogConst.blockUser
-      });
+    for (const userId in oThis.userObjects) {
+      promisesArray.push(
+        new ActivityLogModel().insertAction({
+          adminId: oThis.currentAdminId,
+          actionOn: userId,
+          action: adminActivityLogConst.blockUser
+        })
+      );
     }
+
+    await Promise.all(promisesArray);
   }
 }
 
