@@ -1,6 +1,8 @@
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
+  createErrorLogsEntry = require(rootPrefix + '/lib/errorLogs/createEntry'),
+  errorLogsConstants = require(rootPrefix + '/lib/globalConstant/errorLogs'),
   SendDoubleOptInService = require(rootPrefix + '/app/services/SendDoubleOptIn'),
   PreLaunchInviteModel = require(rootPrefix + '/app/models/mysql/PreLaunchInvite'),
   preLaunchInviteConstants = require(rootPrefix + '/lib/globalConstant/preLaunchInvite'),
