@@ -18,6 +18,7 @@ const rootPrefix = '../../..',
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
   jsSdkWrapper = require(rootPrefix + '/lib/ostPlatform/jsSdkWrapper'),
+  tokenUserConstants = require(rootPrefix + '/lib/globalConstant/tokenUser'),
   paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination'),
   userProfileElementConstants = require(rootPrefix + '/lib/globalConstant/userProfileElement');
 
@@ -189,9 +190,13 @@ class UserSearch extends ServiceBase {
   async _filterNonActiveUsers() {
     const oThis = this;
 
+    console.log('===oThis.userIds==11111==', oThis.userIds);
     for (let ind = 0; ind < oThis.userIds.length; ) {
       const userId = oThis.userIds[ind];
-      if (oThis.tokenUsersByUserIdMap[userId].hasOwnProperty('userId')) {
+      if (
+        oThis.tokenUsersByUserIdMap[userId].hasOwnProperty('userId') &&
+        oThis.tokenUsersByUserIdMap[userId].ostStatus === tokenUserConstants.activatedOstStatus
+      ) {
         ind++; // Increment only if not deleted
       } else {
         oThis.userIds.splice(ind, 1);
@@ -199,6 +204,8 @@ class UserSearch extends ServiceBase {
         delete oThis.tokenUsersByUserIdMap[userId];
       }
     }
+
+    console.log('===oThis.userIds==2222==', oThis.userIds);
   }
 
   /**
