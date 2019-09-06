@@ -269,16 +269,6 @@ class UserNotificationBase extends ServiceBase {
   }
 
   /**
-   * notification type for notification config
-   *
-   * @returns {Promise<void>}
-   * @private
-   */
-  get _notificationType() {
-    return 'notificationCentre';
-  }
-
-  /**
    * Get  User Ids of supporting entity for a notifications
    *
    * @returns {Promise<array>}
@@ -528,6 +518,10 @@ class UserNotificationBase extends ServiceBase {
       imageMap: oThis.imageMap,
       videoMap: oThis.videoMap
     };
+  }
+
+  get _notificationType() {
+    return userNotificationConstants.notificationCentreType;
   }
 }
 
