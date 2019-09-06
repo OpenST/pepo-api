@@ -97,6 +97,8 @@ router.get('/users', sanitizer.sanitizeDynamicUrlParams, function(req, res, next
     }).perform();
 
     wrapperFormatterRsp.data.adminActions = serviceResponse.data.adminActions;
+    wrapperFormatterRsp.data.userPepoStatsMap = serviceResponse.data.userPepoStatsMap;
+    wrapperFormatterRsp.data.userPepoCoinsMap = serviceResponse.data.userPepoCoinsMap;
     serviceResponse.data = wrapperFormatterRsp.data;
   };
 

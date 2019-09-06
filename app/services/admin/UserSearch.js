@@ -1,3 +1,5 @@
+const bigNumber = require('bignumber.js');
+
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   UserModel = require(rootPrefix + '/app/models/mysql/User'),
@@ -7,9 +9,12 @@ const rootPrefix = '../../..',
   ImageByIdCache = require(rootPrefix + '/lib/cacheManagement/multi/ImageByIds'),
   VideoByIdCache = require(rootPrefix + '/lib/cacheManagement/multi/VideoByIds'),
   AdminActivityLogModel = require(rootPrefix + '/app/models/mysql/AdminActivityLog'),
+  SecureTokenCache = require(rootPrefix + '/lib/cacheManagement/single/SecureToken'),
+  PricePointsCache = require(rootPrefix + '/lib/cacheManagement/single/PricePoints'),
   UserStatByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/UserStatByUserIds'),
   TokenUserDetailByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TokenUserByUserIds'),
   UserProfileElementsByUserIdCache = require(rootPrefix + '/lib/cacheManagement/multi/UserProfileElementsByUserIds'),
+  basicHelper = require(rootPrefix + '/helpers/basic'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
   jsSdkWrapper = require(rootPrefix + '/lib/ostPlatform/jsSdkWrapper'),
@@ -53,12 +58,15 @@ class UserSearch extends ServiceBase {
     oThis.allLinkIds = [];
     oThis.userToProfileElementMap = {};
     oThis.tokenUsersByUserIdMap = {};
-    oThis.userStatMap = {};
+    oThis.userStatsMap = {};
     oThis.searchResults = [];
     oThis.paginationTimestamp = null;
     oThis.nextPaginationTimestamp = null;
     oThis.lastAdminAction = {};
     oThis.userIdToBalanceMap = {};
+    oThis.pricePoints = {};
+    oThis.userPepoStatsMap = {};
+    oThis.userPepoCoinsMap = {};
   }
 
   /**
@@ -85,8 +93,16 @@ class UserSearch extends ServiceBase {
     await oThis._fetchProfileElements();
 
     const promisesArray = [];
-    promisesArray.push(oThis._fetchVideos(), oThis._fetchLink(), oThis._fetchAdminActions(), oThis._fetchUserStats());
+    promisesArray.push(
+      oThis._fetchVideos(),
+      oThis._fetchLink(),
+      oThis._fetchAdminActions(),
+      oThis._fetchUserStats(),
+      oThis._getUsersBalance()
+    );
     await Promise.all(promisesArray);
+
+    await oThis._prepareUserPepoStatsAndCoinsMap();
 
     await oThis._fetchImages();
 
@@ -359,7 +375,7 @@ class UserSearch extends ServiceBase {
   /**
    * Fetch user stats.
    *
-   * @sets oThis.userStatMap
+   * @sets oThis.userStatsMap
    *
    * @returns {Promise<never>}
    * @private
@@ -367,12 +383,16 @@ class UserSearch extends ServiceBase {
   async _fetchUserStats() {
     const oThis = this;
 
+    if (oThis.userIds.length === 0) {
+      return responseHelper.successWithData({});
+    }
+
     const cacheRsp = await new UserStatByUserIdsCache({ userIds: oThis.userIds }).fetch();
     if (cacheRsp.isFailure()) {
       return Promise.reject(cacheRsp);
     }
 
-    oThis.userStatMap = cacheRsp.data;
+    oThis.userStatsMap = cacheRsp.data;
   }
 
   /**
@@ -385,6 +405,10 @@ class UserSearch extends ServiceBase {
    */
   async _getUsersBalance() {
     const oThis = this;
+
+    if (oThis.userIds.length === 0) {
+      return responseHelper.successWithData({});
+    }
 
     const promisesArray = [];
     const ostUserIdToPepoUserId = {};
@@ -475,13 +499,13 @@ class UserSearch extends ServiceBase {
         return !oThis.lastAdminAction.hasOwnProperty(val);
       });
 
-      // If all users data is fetched or no more rows present
+      // If all users data is fetched or no more rows present.
       if (uids.length <= 0 || rows.length < 1) {
         break;
       }
     }
 
-    // Fetch admin and append data in last admin actions
+    // Fetch admin and append data in last admin actions.
     if (CommonValidators.validateNonEmptyObject(oThis.lastAdminAction)) {
       const admins = await new AdminModel()
         .select('id, name')
@@ -502,6 +526,84 @@ class UserSearch extends ServiceBase {
   }
 
   /**
+   * Fetch price points.
+   *
+   * @sets oThis.pricePoints
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _fetchPricePoints() {
+    const oThis = this;
+
+    const promisesArray = [];
+    promisesArray.push(new SecureTokenCache({}).fetch(), new PricePointsCache().fetch());
+    const promisesResponse = await Promise.all(promisesArray);
+
+    const tokenDetailsCacheResponse = promisesResponse[0];
+    if (tokenDetailsCacheResponse.isFailure()) {
+      return Promise.reject(tokenDetailsCacheResponse);
+    }
+
+    const stakeCurrency = tokenDetailsCacheResponse.data.stakeCurrency;
+
+    const pricePointsCacheRsp = promisesResponse[1];
+    if (pricePointsCacheRsp.isFailure()) {
+      return Promise.reject(pricePointsCacheRsp);
+    }
+
+    oThis.pricePoints = pricePointsCacheRsp.data[stakeCurrency];
+  }
+
+  /**
+   * Prepare user pepo stats map (referrals, supporting count, supporters count, balance)
+   * and user pepo coins map (received amount, spent amount, purchased amount, redeemed amount).
+   *
+   * @sets oThis.userPepoStatsMap, oThis.userPepoCoinsMap
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _prepareUserPepoStatsAndCoinsMap() {
+    const oThis = this;
+
+    await oThis._fetchPricePoints();
+
+    if (oThis.userIds.length === 0) {
+      return responseHelper.successWithData({});
+    }
+
+    for (let index = 0; index < oThis.userIds.length; index++) {
+      const userId = oThis.userIds[index];
+
+      const userStat = oThis.userStatsMap[userId];
+
+      const userBalanceInBigNumber = basicHelper.convertWeiToNormal(oThis.userIdToBalanceMap[userId]);
+      const userReceivedAmountInBigNumber = basicHelper.convertWeiToNormal(userStat.totalAmountRaised);
+      const userSpentAmountInBigNumber = userBalanceInBigNumber.minus(userReceivedAmountInBigNumber);
+
+      const usdPricePointInBigNumber = new bigNumber(oThis.pricePoints.USD);
+      const userBalanceInUsd = userBalanceInBigNumber.mul(usdPricePointInBigNumber).toString();
+      const userReceivedAmountInUsd = userReceivedAmountInBigNumber.mul(usdPricePointInBigNumber).toString();
+      const userSpentAmountInUsd = userSpentAmountInBigNumber.mul(usdPricePointInBigNumber).toString();
+
+      oThis.userPepoStatsMap[userId] = {
+        referrals: '0',
+        supporting: userStat.totalContributedTo,
+        supporters: userStat.totalContributedBy,
+        balance: userBalanceInUsd
+      };
+
+      oThis.userPepoCoinsMap[userId] = {
+        received: userReceivedAmountInUsd,
+        spent: userSpentAmountInUsd,
+        purchased: '0',
+        redeemed: '0'
+      };
+    }
+  }
+
+  /**
    * Prepare final response.
    *
    * @return {Promise<*|result>}
@@ -517,7 +619,9 @@ class UserSearch extends ServiceBase {
       videoMap: oThis.videos,
       imageMap: oThis.imageDetails,
       linkMap: oThis.links,
-      adminActions: oThis.lastAdminAction, // TODO: Add formatter for admin actions.
+      adminActions: oThis.lastAdminAction, // TODO: Add formatter for admin actions.,
+      userPepoStatsMap: oThis.userPepoStatsMap,
+      userPepoCoinsMap: oThis.userPepoCoinsMap,
       meta: oThis.responseMetaData
     };
 
