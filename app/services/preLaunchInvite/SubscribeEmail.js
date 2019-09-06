@@ -50,7 +50,36 @@ class SubscribeEmail extends ServiceBase {
 
     await oThis._sendDoubleOptIn();
 
+    await oThis._checkDuplicateEmail();
+
     return Promise.resolve(responseHelper.successWithData({}));
+  }
+
+  /**
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _checkDuplicateEmail() {
+    const oThis = this;
+
+    let preLaunchInvitesForEmail = await new PreLaunchInviteModel()
+      .select('count(*) as count')
+      .where({ email: oThis.email })
+      .fire();
+
+    if (preLaunchInvitesForEmail[0].count > 1) {
+      const errorObject = responseHelper.error({
+        internal_error_identifier: 'a_s_pli_cde_1',
+        api_error_identifier: 'something_went_wrong',
+        debug_options: {
+          Reason: 'Duplicate Email in pre launch invite',
+          email: oThis.email,
+          preLaunchInviteId: oThis.securePreLaunchInviteObj.id
+        }
+      });
+      await createErrorLogsEntry.perform(errorObject, errorLogsConstants.mediumSeverity);
+    }
   }
 
   /**

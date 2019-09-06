@@ -6,7 +6,10 @@ const rootPrefix = '../../..',
   createErrorLogsEntry = require(rootPrefix + '/lib/errorLogs/createEntry'),
   errorLogsConstants = require(rootPrefix + '/lib/globalConstant/errorLogs'),
   PreLaunchInviteModel = require(rootPrefix + '/app/models/mysql/PreLaunchInvite'),
+  AddContactInPepoCampaign = require(rootPrefix + '/lib/email/hookCreator/AddContact'),
   preLaunchInviteConstants = require(rootPrefix + '/lib/globalConstant/preLaunchInvite'),
+  SendTransactionalMail = require(rootPrefix + '/lib/email/hookCreator/SendTransactionalMail'),
+  emailServiceApiCallHookConstants = require(rootPrefix + '/lib/globalConstant/emailServiceApiCallHook'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   kmsGlobalConstant = require(rootPrefix + '/lib/globalConstant/kms'),
   basicHelper = require(rootPrefix + '/helpers/basic');
@@ -97,8 +100,13 @@ class PreLaunchTwitterSignUp extends ServiceBase {
 
     await oThis._createPreLaunchInvite();
 
+    if (oThis.preLaunchInviteObj.status === preLaunchInviteConstants.doptinStatus) {
+      await oThis._addContactInPepoCampaign();
+    }
+
     if (oThis.inviterId) {
       await oThis._updateInvitedUserCount();
+      await oThis._sendEmail();
     }
 
     await oThis._checkDuplicateEmail();
@@ -200,6 +208,24 @@ class PreLaunchTwitterSignUp extends ServiceBase {
   }
 
   /**
+   * Add contact in pepo campaign
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _addContactInPepoCampaign() {
+    const oThis = this;
+
+    let addContactParams = {
+      receiverEntityId: oThis.preLaunchInviteObj.id,
+      receiverEntityKind: emailServiceApiCallHookConstants.preLaunchInviteEntityKind,
+      customDescription: 'Contact add for pre launch invite on signup'
+    };
+
+    await new AddContactInPepoCampaign(addContactParams).perform();
+  }
+
+  /**
    * Create invite code
    *
    * @returns {string}
@@ -234,6 +260,29 @@ class PreLaunchTwitterSignUp extends ServiceBase {
   }
 
   /**
+   * Send email
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _sendEmail() {
+    const oThis = this;
+
+    let transactionMailParams = {
+      receiverEntityId: oThis.inviterId,
+      receiverEntityKind: emailServiceApiCallHookConstants.preLaunchInviteEntityKind,
+      customDescription: 'pre launch invite signup using invite code',
+      templateName: emailServiceApiCallHookConstants.userRefferedTemplateName,
+      templateVars: {
+        pepo_api_domain: 1,
+        twitter_handle: oThis.preLaunchInviteObj.handle
+      }
+    };
+
+    await new SendTransactionalMail(transactionMailParams).perform();
+  }
+
+  /**
    *
    * @returns {Promise<void>}
    * @private
@@ -253,7 +302,7 @@ class PreLaunchTwitterSignUp extends ServiceBase {
         debug_options: {
           Reason: 'Duplicate Email in pre launch invite',
           email: oThis.email,
-          inviterId: oThis.inviterId
+          preLaunchInviteId: oThis.preLaunchInviteObj.id
         }
       });
       await createErrorLogsEntry.perform(errorObject, errorLogsConstants.mediumSeverity);
