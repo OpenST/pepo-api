@@ -99,13 +99,15 @@ class SendDoubleOptIn extends ServiceBase {
   async _sendPreLaunchInviteDoubleOptInMail() {
     const oThis = this;
 
+    let link = encodeURIComponent(`${pageConstants.optInEmailLink}?t=${oThis.doubleOptInToken}`);
+
     let transactionalMailParams = {
       receiverEntityId: oThis.preLaunchInviteObj.id,
       receiverEntityKind: emailServiceApiCallHookConstants.preLaunchInviteEntityKind,
       templateName: emailServiceApiCallHookConstants.pepoDoubleOptInTemplateName,
       templateVars: {
         pepo_api_domain: 1,
-        opt_in_email_link: `${pageConstants.optInEmailLink}?t=${oThis.doubleOptInToken}`
+        opt_in_email_link: link
       }
     };
 
