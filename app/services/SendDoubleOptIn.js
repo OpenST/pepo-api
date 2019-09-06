@@ -56,6 +56,16 @@ class SendDoubleOptIn extends ServiceBase {
    */
   async _createDoubleOptInToken() {
     const oThis = this;
+
+    await new TemporaryTokenModel()
+      .update({ status: temporaryTokenConstant.invertedStatuses[temporaryTokenConstant.inActiveStatus] })
+      .where({
+        entity_id: oThis.preLaunchInviteObj.id,
+        kind: temporaryTokenConstant.invertedKinds[temporaryTokenConstant.preLaunchInviteKind],
+        status: temporaryTokenConstant.invertedStatuses[temporaryTokenConstant.activeStatus]
+      })
+      .fire();
+
     let tokenString = `${oThis.preLaunchInviteObj.id}::${
         oThis.preLaunchInviteObj.email
       }::${Date.now()}::preLaunchInviteDoubleOptIn::${Math.random()}`,
@@ -77,15 +87,6 @@ class SendDoubleOptIn extends ServiceBase {
 
     let doubleOptInTokenStr = `${insertResponse.insertId.toString()}:${temporaryDoubleOptInToken}`;
     oThis.doubleOptInToken = localCipher.encrypt(coreConstants.PA_EMAIL_TOKENS_DECRIPTOR_KEY, doubleOptInTokenStr);
-
-    await new TemporaryTokenModel()
-      .update({ status: temporaryTokenConstant.invertedStatuses[temporaryTokenConstant.inActiveStatus] })
-      .where({
-        entity_id: oThis.preLaunchInviteObj.id,
-        kind: temporaryTokenConstant.invertedKinds[temporaryTokenConstant.preLaunchInviteKind],
-        status: temporaryTokenConstant.invertedStatuses[temporaryTokenConstant.activeStatus]
-      })
-      .fire();
   }
 
   /**
