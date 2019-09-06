@@ -108,8 +108,6 @@ class AdminResetPassword extends ServiceBase {
         .update({ password: oThis.encryptedPassword, encryption_salt: oThis.encryptionSalt })
         .where({ id: oThis.adminObj.id })
         .fire();
-
-      await AdminModel.flushCache({ id: oThis.adminObj.id, email: oThis.email });
     } else {
       await new AdminModel()
         .insert({
@@ -121,6 +119,8 @@ class AdminResetPassword extends ServiceBase {
         })
         .fire();
     }
+
+    await AdminModel.flushCache({ id: oThis.adminObj.id, email: oThis.email });
   }
 }
 
