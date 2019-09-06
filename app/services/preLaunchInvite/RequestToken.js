@@ -25,7 +25,7 @@ class PreLaunchTwitterConnect extends ServiceBase {
     super(params);
 
     const oThis = this;
-    oThis.inviteCode = params.i;
+    oThis.inviteCode = params.invite;
 
     oThis.twitterAuthTokenObj = {};
     oThis.twitterRespData = null;
