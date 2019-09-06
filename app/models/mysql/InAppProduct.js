@@ -66,6 +66,26 @@ class InAppProduct extends ModelBase {
   }
 
   /**
+   * Get products for given price point
+   *
+   * @returns {Promise<void>}
+   */
+  async getProductsForGivenPricePoint(pricePoint) {
+    const oThis = this;
+
+    let queryResponse = await oThis
+      .select('*')
+      .where([
+        'lower_limit <= ? AND upper_limit > ? AND status = ?',
+        pricePoint,
+        pricePoint,
+        inAppProductsConst.invertedStatuses[inAppProductsConst.active]
+      ])
+      .fire();
+    console.log('---queryResponse-------', queryResponse);
+  }
+
+  /**
    * Flush cache.
    *
    * @param {object} params
