@@ -484,10 +484,6 @@ const v1Signature = {
     ],
     optional: [
       {
-        parameter: 'include_admin_related_details',
-        validatorMethods: ['validateBoolean']
-      },
-      {
         parameter: paginationConstants.paginationIdentifierKey,
         validatorMethods: ['validateString', 'validatePaginationIdentifier']
       }
