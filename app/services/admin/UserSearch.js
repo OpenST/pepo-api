@@ -190,7 +190,6 @@ class UserSearch extends ServiceBase {
   async _filterNonActiveUsers() {
     const oThis = this;
 
-    console.log('===oThis.userIds==11111==', oThis.userIds);
     for (let ind = 0; ind < oThis.userIds.length; ) {
       const userId = oThis.userIds[ind];
       if (
@@ -204,8 +203,6 @@ class UserSearch extends ServiceBase {
         delete oThis.tokenUsersByUserIdMap[userId];
       }
     }
-
-    console.log('===oThis.userIds==2222==', oThis.userIds);
   }
 
   /**
