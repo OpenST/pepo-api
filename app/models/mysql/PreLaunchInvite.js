@@ -45,6 +45,7 @@ class PreLaunchInvite extends ModelBase {
       'email',
       'name',
       'profileImageUrl',
+      'isCreator',
       'status',
       'adminStatus',
       'inviterUserId',
@@ -60,11 +61,13 @@ class PreLaunchInvite extends ModelBase {
    *
    * @param {object} dbRow
    * @param {number} dbRow.id
+   * @param {string} dbRow.encryption_salt
    * @param {number} dbRow.twitter_id
    * @param {number} dbRow.handle
    * @param {string} dbRow.email
    * @param {string} dbRow.name
    * @param {string} dbRow.profile_image_url
+   * @param {string} dbRow.is_creator
    * @param {string} dbRow.token
    * @param {string} dbRow.secret
    * @param {number} dbRow.status
@@ -88,6 +91,7 @@ class PreLaunchInvite extends ModelBase {
       email: dbRow.email,
       name: dbRow.name,
       profileImageUrl: dbRow.profile_image_url,
+      isCreator: dbRow.is_creator == true,
       token: dbRow.token,
       secret: dbRow.secret,
       status: preLaunchInviteConstants.statuses[dbRow.status],
@@ -255,7 +259,17 @@ class PreLaunchInvite extends ModelBase {
       offset = (pageNo - 1) * limit;
 
     const queryObject = oThis
-      .select(['id', 'handle', 'email', 'name', 'profile_image_url', 'status', 'admin_status', 'updated_at'])
+      .select([
+        'id',
+        'handle',
+        'email',
+        'name',
+        'profile_image_url',
+        'is_creator',
+        'status',
+        'admin_status',
+        'updated_at'
+      ])
       .limit(limit)
       .offset(offset);
 
