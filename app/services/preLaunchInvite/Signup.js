@@ -302,7 +302,7 @@ class PreLaunchTwitterSignUp extends ServiceBase {
         debug_options: {
           Reason: 'Duplicate Email in pre launch invite',
           email: oThis.email,
-          inviterId: oThis.inviterId
+          preLaunchInviteId: oThis.preLaunchInviteObj.id
         }
       });
       await createErrorLogsEntry.perform(errorObject, errorLogsConstants.mediumSeverity);
