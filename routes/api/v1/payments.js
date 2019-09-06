@@ -30,8 +30,8 @@ router.post('/google-pay-receipt', sanitizer.sanitizeDynamicUrlParams, function(
   );
 });
 
-router.post('/apple-pay-receipt', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
-  req.decodedParams.apiName = apiName.applePayReceipt;
+router.post('/confirm-pay-receipt', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.confirmPayReceipt;
 
   const onServiceSuccess = async function(serviceResponse) {
     const wrapperFormatterRsp = await new FormatterComposer({
@@ -46,7 +46,7 @@ router.post('/apple-pay-receipt', sanitizer.sanitizeDynamicUrlParams, function(r
   };
 
   Promise.resolve(
-    routeHelper.perform(req, res, next, '/payment/process/ApplePay', 'r_a_v1_p_2', null, onServiceSuccess)
+    routeHelper.perform(req, res, next, '/payment/process/Validator', 'r_a_v1_p_2', null, onServiceSuccess)
   );
 });
 

@@ -1,6 +1,4 @@
 const rootPrefix = '../../../..',
-  ProcessPaymentBase = require(rootPrefix + '/app/services/payment/process/Base'),
-  fiatPaymentConstants = require(rootPrefix + '/lib/globalConstant/fiatPayment'),
   responseHelper = require(rootPrefix + '/lib/formatter/response');
 
 /**
@@ -8,9 +6,20 @@ const rootPrefix = '../../../..',
  *
  * @class ProcessGooglePay
  */
-class ProcessGooglePay extends ProcessPaymentBase {
-  getServiceKind() {
-    return fiatPaymentConstants.googlePayKind;
+class ProcessGooglePay {
+  constructor(params) {
+    const oThis = this;
+
+    oThis.currentUser = params.currentUser;
+    oThis.paymentReceipt = params.paymentReceipt;
+    oThis.userId = params.userId;
+
+    oThis.receiptResponseData = null;
+    oThis.product = null;
+  }
+
+  async perform() {
+    return responseHelper.successWithData({});
   }
 }
 

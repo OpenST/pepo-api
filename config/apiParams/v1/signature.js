@@ -576,14 +576,22 @@ const v1Signature = {
     ],
     optional: []
   },
-  [apiName.applePayReceipt]: {
+  [apiName.confirmPayReceipt]: {
     mandatory: [
       {
         parameter: 'current_user',
         validatorMethods: ['validateNonEmptyObject']
       },
       {
-        parameter: 'receipt',
+        parameter: 'response',
+        validatorMethods: ['validateString']
+      },
+      {
+        parameter: 'os',
+        validatorMethods: ['validateString']
+      },
+      {
+        parameter: 'user_id',
         validatorMethods: ['validateString']
       }
     ],

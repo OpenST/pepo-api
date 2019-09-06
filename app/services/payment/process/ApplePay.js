@@ -1,5 +1,4 @@
 const rootPrefix = '../../../..',
-  ProcessPaymentBase = require(rootPrefix + '/app/services/payment/process/Base'),
   FiatPaymentModel = require(rootPrefix + '/app/models/mysql/FiatPayment'),
   fiatPaymentConstants = require(rootPrefix + '/lib/globalConstant/fiatPayment'),
   InAppProductsModel = require(rootPrefix + '/app/models/mysql/InAppProduct'),
@@ -13,26 +12,19 @@ const url = 'https://sandbox.itunes.apple.com/verifyReceipt';
  *
  * @class ProcessApplePay
  */
-class ProcessApplePay extends ProcessPaymentBase {
+class ProcessApplePay {
   constructor(params) {
-    super(params);
-
     const oThis = this;
+
+    oThis.currentUser = params.currentUser;
+    oThis.paymentReceipt = params.paymentReceipt;
+    oThis.userId = params.userId;
+
     oThis.receiptResponseData = null;
     oThis.product = null;
   }
 
-  getReceiptId() {
-    const oThis = this;
-
-    return oThis.receipt.transactionId;
-  }
-
-  getServiceKind() {
-    return fiatPaymentConstants.applePayKind;
-  }
-
-  async _serviceSpecificTasks() {
+  async perform() {
     const oThis = this,
       promiseArray = [];
 
@@ -58,7 +50,9 @@ class ProcessApplePay extends ProcessPaymentBase {
 
     let HttpLibObj = new HttpLibrary({ resource: url, header: header, noFormattingRequired: true });
 
-    let httpResponse = await HttpLibObj.post(JSON.stringify({ 'receipt-data': oThis.receipt.transactionReceipt }));
+    let httpResponse = await HttpLibObj.post(
+      JSON.stringify({ 'receipt-data': oThis.paymentReceipt.transactionReceipt })
+    );
 
     if (httpResponse.isFailure()) {
       return Promise.reject(httpResponse);
@@ -88,7 +82,7 @@ class ProcessApplePay extends ProcessPaymentBase {
 
     let productsData = await new InAppProductsModel()
       .select('*')
-      .where({ apple_product_id: oThis.receipt['productId'] })
+      .where({ apple_product_id: oThis.paymentReceipt['productId'] })
       .fire();
     oThis.product = productsData[0];
 
@@ -104,8 +98,8 @@ class ProcessApplePay extends ProcessPaymentBase {
     for (let i = 0; i < receiptResponseDataReceipts.length; i++) {
       let prodReceipt = receiptResponseDataReceipts[i];
       if (
-        prodReceipt['product_id'] == oThis.receipt['productId'] &&
-        prodReceipt['transaction_id'] == oThis.receipt['transactionId']
+        prodReceipt['product_id'] == oThis.paymentReceipt['productId'] &&
+        prodReceipt['transaction_id'] == oThis.paymentReceipt['transactionId']
       ) {
         quantity = prodReceipt['quantity'];
 
