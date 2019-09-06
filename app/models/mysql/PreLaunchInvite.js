@@ -45,7 +45,7 @@ class PreLaunchInvite extends ModelBase {
       'email',
       'name',
       'profileImageUrl',
-      'isCreator',
+      'creatorStatus',
       'status',
       'adminStatus',
       'inviterUserId',
@@ -67,7 +67,7 @@ class PreLaunchInvite extends ModelBase {
    * @param {string} dbRow.email
    * @param {string} dbRow.name
    * @param {string} dbRow.profile_image_url
-   * @param {string} dbRow.is_creator
+   * @param {string} dbRow.creator_status
    * @param {string} dbRow.token
    * @param {string} dbRow.secret
    * @param {number} dbRow.status
@@ -91,7 +91,7 @@ class PreLaunchInvite extends ModelBase {
       email: dbRow.email,
       name: dbRow.name,
       profileImageUrl: dbRow.profile_image_url,
-      isCreator: dbRow.is_creator == true,
+      creatorStatus: preLaunchInviteConstants.creatorStatuses[dbRow.creator_status],
       token: dbRow.token,
       secret: dbRow.secret,
       status: preLaunchInviteConstants.statuses[dbRow.status],
@@ -139,6 +139,7 @@ class PreLaunchInvite extends ModelBase {
         'email',
         'name',
         'profile_image_url',
+        'creator_status',
         'status',
         'inviter_user_id',
         'invite_code',
@@ -265,7 +266,7 @@ class PreLaunchInvite extends ModelBase {
         'email',
         'name',
         'profile_image_url',
-        'is_creator',
+        'creator_status',
         'status',
         'admin_status',
         'updated_at'

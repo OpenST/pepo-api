@@ -64,6 +64,15 @@ const v1Signature = {
       }
     ],
     optional: []
+  },
+  [apiName.preLaunchInviteCreator]: {
+    mandatory: [
+      {
+        parameter: 'current_pre_launch_invite',
+        validatorMethods: ['validateNonEmptyObject']
+      }
+    ],
+    optional: []
   }
 };
 
