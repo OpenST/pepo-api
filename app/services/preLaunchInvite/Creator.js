@@ -1,8 +1,8 @@
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   PreLaunchInviteModel = require(rootPrefix + '/app/models/mysql/PreLaunchInvite'),
+  responseHelper = require(rootPrefix + '/lib/formatter/response'),
   preLaunchInviteConstants = require(rootPrefix + '/lib/globalConstant/preLaunchInvite');
-responseHelper = require(rootPrefix + '/lib/formatter/response');
 
 /**
  * Class for mark Creator.
@@ -28,7 +28,7 @@ class Creator extends ServiceBase {
   }
 
   /**
-   * Perform: Perform.
+   * Async perform.
    *
    * @return {Promise<void>}
    */
@@ -39,11 +39,11 @@ class Creator extends ServiceBase {
       await oThis._updateCreatorStatus();
     }
 
-    return Promise.resolve(responseHelper.successWithData({}));
+    return responseHelper.successWithData({});
   }
 
   /**
-   * Update creator status
+   * Update creator status.
    *
    * @returns {Promise<void>}
    * @private
