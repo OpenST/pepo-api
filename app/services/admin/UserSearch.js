@@ -76,13 +76,12 @@ class UserSearch extends ServiceBase {
     // TODO: pepo user was created but platform was down and user was not created
     await oThis._filterNonActiveUsers();
 
-    await oThis._prepareSearchResults();
+    oThis._prepareSearchResults();
 
     await oThis._fetchProfileElements();
 
     const promisesArray = [];
     promisesArray.push(oThis._fetchVideos(), oThis._fetchLink(), oThis._fetchAdminActions());
-
     await Promise.all(promisesArray);
 
     await oThis._fetchImages();
@@ -187,10 +186,9 @@ class UserSearch extends ServiceBase {
    *
    * @sets oThis.searchResults, oThis.nextPaginationTimestamp
    *
-   * @returns {Promise<void>}
    * @private
    */
-  async _prepareSearchResults() {
+  _prepareSearchResults() {
     const oThis = this;
 
     for (let ind = 0; ind < oThis.userIds.length; ind++) {
@@ -381,6 +379,66 @@ class UserSearch extends ServiceBase {
   }
 
   /**
+   * Fetch action taken on user by admin
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _fetchAdminActions() {
+    const oThis = this;
+
+    const adminIdMap = {};
+    if (oThis.userIds.length === 0) {
+      return responseHelper.successWithData({});
+    }
+
+    let uids = oThis.userIds;
+
+    while (true) {
+      const rows = await new AdminActivityLogModel()
+        .select('*')
+        .where({ action_on: uids })
+        .limit(1)
+        .order_by('id DESC')
+        .fire();
+
+      for (let index = 0; index < rows.length; index++) {
+        const rec = rows[index];
+        oThis.lastAdminAction[rec.action_on] = oThis.lastAdminAction[rec.action_on] || rec;
+        adminIdMap[rec.admin_id] = 1;
+      }
+
+      uids = oThis.userIds.filter(function(val) {
+        return !oThis.lastAdminAction.hasOwnProperty(val);
+      });
+
+      // If all users data is fetched or no more rows present
+      if (uids.length <= 0 || rows.length < 1) {
+        break;
+      }
+    }
+
+    // Fetch admin and append data in last admin actions
+    if (CommonValidators.validateNonEmptyObject(oThis.lastAdminAction)) {
+      const admins = await new AdminModel()
+        .select('id, name')
+        .where({ id: Object.keys(adminIdMap) })
+        .fire();
+
+      for (let index = 0; index < admins.length; index++) {
+        adminIdMap[admins[index].id] = admins[index];
+      }
+
+      const adminActivityObj = new AdminActivityLogModel();
+      for (const userId in oThis.lastAdminAction) {
+        const laa = oThis.lastAdminAction[userId];
+        oThis.lastAdminAction[userId] = adminActivityObj.formatDbData(laa);
+        oThis.lastAdminAction[userId].adminName = adminIdMap[laa.admin_id].name;
+      }
+    }
+  }
+
+  /**
    * Prepare final response.
    *
    * @return {Promise<*|result>}
@@ -443,66 +501,6 @@ class UserSearch extends ServiceBase {
     const oThis = this;
 
     return oThis.limit;
-  }
-
-  /**
-   * Fetch action taken on user by admin
-   *
-   * @returns {Promise<void>}
-   * @private
-   */
-  async _fetchAdminActions() {
-    const oThis = this;
-
-    const adminIdMap = {};
-    let uids = oThis.userIds;
-
-    if (oThis.userIds.length === 0) {
-      return responseHelper.successWithData({});
-    }
-
-    while (true) {
-      const rows = await new AdminActivityLogModel()
-        .select('*')
-        .where({ action_on: uids })
-        .limit(1)
-        .order_by('id DESC')
-        .fire();
-
-      for (let index = 0; index < rows.length; index++) {
-        const rec = rows[index];
-        oThis.lastAdminAction[rec.action_on] = oThis.lastAdminAction[rec.action_on] || rec;
-        adminIdMap[rec.admin_id] = 1;
-      }
-
-      uids = oThis.userIds.filter(function(val) {
-        return !oThis.lastAdminAction.hasOwnProperty(val);
-      });
-
-      // If all users data is fetched or no more rows present
-      if (uids.length <= 0 || rows.length < 1) {
-        break;
-      }
-    }
-
-    // Fetch admin and append data in last admin actions
-    if (CommonValidators.validateNonEmptyObject(oThis.lastAdminAction)) {
-      const admins = await new AdminModel()
-        .select('id, name')
-        .where({ id: Object.keys(adminIdMap) })
-        .fire();
-
-      for (let index = 0; index < admins.length; index++) {
-        adminIdMap[admins[index].id] = admins[index];
-      }
-
-      const adminActivityObj = new AdminActivityLogModel();
-      for (const userId in oThis.lastAdminAction) {
-        const laa = oThis.lastAdminAction[userId];
-        oThis.lastAdminAction[userId] = adminActivityObj.formatDbData(laa);
-        oThis.lastAdminAction[userId].adminName = adminIdMap[laa.admin_id].name;
-      }
-    }
   }
 }
 
