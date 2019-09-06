@@ -1,5 +1,6 @@
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
+  UserNotificationsCountModel = require(rootPrefix + '/app/models/cassandra/UserNotificationsCount'),
   UserDeviceModel = require(rootPrefix + '/app/models/mysql/UserDevice'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
@@ -20,6 +21,7 @@ class AddDeviceToken extends ServiceBase {
    * @param {number} params.device_id
    * @param {string} params.device_kind
    * @param {string} params.device_token
+   * @param {string} params.user_timezone
    *
    * @param {number} params.current_user.id
    *
@@ -32,13 +34,14 @@ class AddDeviceToken extends ServiceBase {
 
     const oThis = this;
 
-    logger.log('params--------', params);
+    logger.log('AddDeviceToken::params--------', params);
 
     oThis.currentUserId = +params.current_user.id;
     oThis.userId = +params.user_id;
     oThis.deviceId = params.device_id;
     oThis.deviceKind = params.device_kind;
     oThis.deviceToken = params.device_token;
+    oThis.userTimeZone = params.user_timezone;
   }
 
   /**
@@ -52,6 +55,8 @@ class AddDeviceToken extends ServiceBase {
     await oThis._validateAndSanitize();
 
     await oThis._insertIntoUserDevices();
+
+    await oThis._resetUnreadNotificationsCount();
 
     return responseHelper.successWithData({});
   }
@@ -102,6 +107,7 @@ class AddDeviceToken extends ServiceBase {
       user_id: oThis.currentUserId,
       device_id: oThis.deviceId,
       device_token: oThis.deviceToken,
+      user_timezone: oThis.userTimeZone,
       status: userDeviceConstants.invertedStatuses[userDeviceConstants.activeStatus],
       device_kind: userDeviceConstants.invertedUserDeviceKinds[oThis.deviceKind]
     };
@@ -113,7 +119,8 @@ class AddDeviceToken extends ServiceBase {
         if (UserDeviceModel.isDuplicateIndexViolation(UserDeviceModel.userDeviceUniqueIndexName, err)) {
           await new UserDeviceModel()
             .update({
-              device_token: oThis.deviceToken
+              device_token: oThis.deviceToken,
+              user_timezone: oThis.userTimeZone
             })
             .where({
               user_id: oThis.currentUserId,
@@ -127,6 +134,18 @@ class AddDeviceToken extends ServiceBase {
 
     // Flush cache.
     await UserDeviceModel.flushCache({ userId: oThis.currentUserId });
+  }
+
+  /**
+   * Resets unread notifications counts to zero.
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _resetUnreadNotificationsCount() {
+    const oThis = this;
+
+    await UserNotificationsCountModel.resetUnreadNotificationCount({ userId: oThis.userId });
   }
 }
 

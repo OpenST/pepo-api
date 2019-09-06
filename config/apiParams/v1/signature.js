@@ -566,6 +566,10 @@ const v1Signature = {
       {
         parameter: 'device_token',
         validatorMethods: ['validateNonBlankString']
+      },
+      {
+        parameter: 'user_timezone',
+        validatorMethods: ['validateNonBlankString']
       }
     ]
   }
