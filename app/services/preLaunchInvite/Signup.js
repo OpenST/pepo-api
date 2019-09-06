@@ -9,10 +9,10 @@ const rootPrefix = '../../..',
   AddContactInPepoCampaign = require(rootPrefix + '/lib/email/hookCreator/AddContact'),
   preLaunchInviteConstants = require(rootPrefix + '/lib/globalConstant/preLaunchInvite'),
   SendTransactionalMail = require(rootPrefix + '/lib/email/hookCreator/SendTransactionalMail'),
-  emailServiceApiCallHookConstants = require(rootPrefix + '/lib/globalConstant/emailServiceApiCallHook');
-(logger = require(rootPrefix + '/lib/logger/customConsoleLogger')),
-  (kmsGlobalConstant = require(rootPrefix + '/lib/globalConstant/kms')),
-  (basicHelper = require(rootPrefix + '/helpers/basic'));
+  emailServiceApiCallHookConstants = require(rootPrefix + '/lib/globalConstant/emailServiceApiCallHook'),
+  logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
+  kmsGlobalConstant = require(rootPrefix + '/lib/globalConstant/kms'),
+  basicHelper = require(rootPrefix + '/helpers/basic');
 
 /**
  * Class for pre launch invite Signup service.
