@@ -43,21 +43,9 @@ class GetAvailableProducts extends ServiceBase {
     let responseData1 = {
       products: [
         {
-          id: 'PROD.ID.1',
+          id: 'pd1',
           amount_in_usd: '1',
           amount_in_pepo: '1000',
-          uts: '1567601491491'
-        },
-        {
-          id: 'PROD.ID.2',
-          amount_in_usd: '2',
-          amount_in_pepo: '2000',
-          uts: '1567601491491'
-        },
-        {
-          id: 'PROD.ID.3',
-          amount_in_usd: '3',
-          amount_in_pepo: '3000',
           uts: '1567601491491'
         }
       ],
