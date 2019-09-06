@@ -17,7 +17,9 @@ program.on('--help', function() {
   logger.log('');
   logger.log('  Example:');
   logger.log('');
-  logger.log('    node executables/oneTimers/updateWebhookSubscriptions.js --webhooksId "__ABCD"');
+  logger.log(
+    '    node executables/oneTimers/updateWebhookSubscriptions.js --webhooksId "951cbd04-0cfa-4ada-880e-3365d02917db"'
+  );
   logger.log('');
   logger.log('');
 });
@@ -72,7 +74,8 @@ class UpdateWebhookSubscriptions {
         'users/activation_failure',
         'price_points/usd_update',
         'price_points/eur_update',
-        'price_points/gbp_update'
+        'price_points/gbp_update',
+        'devices/recovery_initiate'
       ];
 
     const params = {
