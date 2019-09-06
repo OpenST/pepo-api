@@ -221,6 +221,8 @@ class UserNotificationBase extends ServiceBase {
    * @private
    */
   async _getGoto(userNotification) {
+    const oThis = this;
+
     const resp = NotificationResponseHelper.getGotoForNotification({
       userNotification: userNotification,
       notificationType: oThis._notificationType

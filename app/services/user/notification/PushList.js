@@ -33,8 +33,7 @@ class PushNotification extends UserNotificationServiceBase {
     oThis.notificationHookPayloads = params.notificationHookPayloads;
 
     oThis.userIds = [];
-    oThis.videoIds = [];
-    oThis.imageIds = [];
+    oThis.amount = null;
 
     oThis.usersByIdMap = {};
     oThis.tokenUsersByUserIdMap = {};
@@ -55,27 +54,22 @@ class PushNotification extends UserNotificationServiceBase {
 
     await oThis._validateAndSanitizeParams();
 
-    await oThis._setUserAndVideoIds();
+    await oThis._setUserAndAmount();
 
     const promisesArray = [];
 
     promisesArray.push(oThis._fetchUsers());
     promisesArray.push(oThis._fetchTokenUsers());
-    promisesArray.push(oThis._fetchVideos());
-    // Images are fetched later because video covers also needs to be fetched.
 
     await Promise.all(promisesArray);
 
-    await oThis._fetchImages();
-
-    await oThis._formatnotifications();
+    await oThis._formatNotifications();
 
     return responseHelper.successWithData(oThis._finalResponse());
   }
 
   /**
    * Validate and sanitize specific params.
-   *
    *
    * @returns {Promise<never>}
    * @private
@@ -90,27 +84,19 @@ class PushNotification extends UserNotificationServiceBase {
    * @returns {Promise<never>}
    * @private
    */
-  async _formatnotifications() {
+  async _formatNotifications() {
     const oThis = this;
 
     for (let index = 0; index < oThis.notificationHookPayloads.length; index++) {
       const pushNotification = oThis.notificationHookPayloads[index];
       const formattedPushNotification = {};
-      //let imageId = await oThis._getImageId(pushNotification);
 
-      //todo: select resolution
-      //let image = oThis.imageMap[imageId] || null;
-
-      let goto = await oThis._getGoto(pushNotification);
-      console.log('----goto---goto-----goto------', goto);
-
-      let heading = await oThis._getHeading(pushNotification);
-      console.log('----heading---heading-----heading------', heading);
+      let goto = await oThis._getGoto(pushNotification),
+        heading = await oThis._getHeading(pushNotification);
 
       formattedPushNotification.notification = {
         title: 'New notification from Pepo',
         body: heading.title //JSON.stringify(heading.body)
-        //image: 'https://d3attjoi5jlede.cloudfront.net/images/web/fav/192x192.png' //image
       };
 
       formattedPushNotification.apns = {
@@ -120,9 +106,7 @@ class PushNotification extends UserNotificationServiceBase {
             badge: 1
           }
         },
-        fcm_options: {
-          //image: 'https://d3attjoi5jlede.cloudfront.net/images/web/fav/192x192.png' //image
-        }
+        fcm_options: {}
       };
 
       formattedPushNotification.android = {
@@ -176,13 +160,13 @@ class PushNotification extends UserNotificationServiceBase {
 
     const params = {
       supportingEntities: {
-        [responseEntityKey.users]: oThis.usersByIdMap
+        [responseEntityKey.users]: oThis.usersByIdMap,
+        payload: { amount: oThis.amount }
       },
       userNotification: userNotification,
       notificationType: oThis._notificationType
     };
 
-    //todo: use a different heading for push notification
     const resp = NotificationResponseHelper.getHeadingForPushNotification(params);
 
     if (resp.isFailure()) {
@@ -221,7 +205,7 @@ class PushNotification extends UserNotificationServiceBase {
    * @returns {Promise<void>}
    * @private
    */
-  async _setUserAndVideoIds() {
+  async _setUserAndAmount() {
     const oThis = this;
 
     for (let index = 0; index < oThis.notificationHookPayloads.length; index++) {
@@ -236,13 +220,10 @@ class PushNotification extends UserNotificationServiceBase {
         oThis._getUserIdsForNotifications(userNotification, supportingEntitiesConfig)
       );
 
-      oThis.videoIds = oThis.videoIds.concat(
-        oThis._getVideoIdsForNotifications(userNotification, supportingEntitiesConfig)
-      );
+      oThis.amount = oThis._getAmountForNotification(userNotification, supportingEntitiesConfig);
     }
 
     oThis.userIds = [...new Set(oThis.userIds)];
-    oThis.videoIds = [...new Set(oThis.videoIds)];
   }
 
   /**
@@ -279,6 +260,28 @@ class PushNotification extends UserNotificationServiceBase {
     }
 
     return uIds;
+  }
+
+  /**
+   * Get amount for notification.
+   *
+   * @param userNotification
+   * @param supportingEntitiesConfig
+   * @returns {*}
+   * @private
+   */
+  _getAmountForNotification(userNotification, supportingEntitiesConfig) {
+    let val;
+
+    const keysForAmount = supportingEntitiesConfig.amount;
+
+    for (let index = 0; index < keysForAmount.length; index++) {
+      const dataKeys = keysForAmount[index];
+
+      val = NotificationResponseHelper.getKeyDataFromNotification(userNotification, dataKeys);
+    }
+
+    return val;
   }
 
   /**
