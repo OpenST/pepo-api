@@ -7,10 +7,12 @@ const rootPrefix = '../../..',
   ImageByIdCache = require(rootPrefix + '/lib/cacheManagement/multi/ImageByIds'),
   VideoByIdCache = require(rootPrefix + '/lib/cacheManagement/multi/VideoByIds'),
   AdminActivityLogModel = require(rootPrefix + '/app/models/mysql/AdminActivityLog'),
+  UserStatByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/UserStatByUserIds'),
   TokenUserDetailByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TokenUserByUserIds'),
   UserProfileElementsByUserIdCache = require(rootPrefix + '/lib/cacheManagement/multi/UserProfileElementsByUserIds'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
+  jsSdkWrapper = require(rootPrefix + '/lib/ostPlatform/jsSdkWrapper'),
   paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination'),
   userProfileElementConstants = require(rootPrefix + '/lib/globalConstant/userProfileElement');
 
@@ -51,10 +53,12 @@ class UserSearch extends ServiceBase {
     oThis.allLinkIds = [];
     oThis.userToProfileElementMap = {};
     oThis.tokenUsersByUserIdMap = {};
+    oThis.userStatMap = {};
     oThis.searchResults = [];
     oThis.paginationTimestamp = null;
     oThis.nextPaginationTimestamp = null;
     oThis.lastAdminAction = {};
+    oThis.userIdToBalanceMap = {};
   }
 
   /**
@@ -81,7 +85,7 @@ class UserSearch extends ServiceBase {
     await oThis._fetchProfileElements();
 
     const promisesArray = [];
-    promisesArray.push(oThis._fetchVideos(), oThis._fetchLink(), oThis._fetchAdminActions());
+    promisesArray.push(oThis._fetchVideos(), oThis._fetchLink(), oThis._fetchAdminActions(), oThis._fetchUserStats());
     await Promise.all(promisesArray);
 
     await oThis._fetchImages();
@@ -350,6 +354,65 @@ class UserSearch extends ServiceBase {
     }
 
     oThis.links = cacheRsp.data;
+  }
+
+  /**
+   * Fetch user stats.
+   *
+   * @sets oThis.userStatMap
+   *
+   * @returns {Promise<never>}
+   * @private
+   */
+  async _fetchUserStats() {
+    const oThis = this;
+
+    const cacheRsp = await new UserStatByUserIdsCache({ userIds: oThis.userIds }).fetch();
+    if (cacheRsp.isFailure()) {
+      return Promise.reject(cacheRsp);
+    }
+
+    oThis.userStatMap = cacheRsp.data;
+  }
+
+  /**
+   * Get users balance from OST Platform.
+   *
+   * @sets oThis.userIdToBalanceMap
+   *
+   * @returns {Promise<never>}
+   * @private
+   */
+  async _getUsersBalance() {
+    const oThis = this;
+
+    const promisesArray = [];
+    const ostUserIdToPepoUserId = {};
+
+    // Fetch balance from user.
+    for (let index = 0; index < oThis.userIds.length; index++) {
+      const userId = oThis.userIds[index],
+        ostUserId = oThis.tokenUsersByUserIdMap[userId].ostUserId;
+
+      ostUserIdToPepoUserId[ostUserId] = userId;
+
+      promisesArray.push(jsSdkWrapper.getUserBalance({ userId: ostUserId }));
+    }
+
+    const promisesResponse = await Promise.all(promisesArray);
+
+    // Store user's total balance with their pepo user id.
+    for (let index = 0; index < promisesResponse.length; index++) {
+      const platformResponse = promisesResponse[index];
+      if (platformResponse.isFailure()) {
+        return Promise.reject(platformResponse);
+      }
+
+      const userBalanceObject = platformResponse.data[platformResponse.data.result_type];
+      const userId = ostUserIdToPepoUserId[userBalanceObject.user_id];
+
+      oThis.userIdToBalanceMap[userId] = userBalanceObject.total_balance;
+    }
   }
 
   /**
