@@ -586,7 +586,7 @@ class UserSearch extends ServiceBase {
       const userStat = oThis.userStatsMap[userId];
 
       const userBalanceInBigNumber = basicHelper.convertWeiToNormal(oThis.userIdToBalanceMap[userId]);
-      const userReceivedAmountInBigNumber = basicHelper.convertWeiToNormal(userStat.totalAmountRaised);
+      const userReceivedAmountInBigNumber = basicHelper.convertWeiToNormal(userStat.totalAmountRaised || '0');
       const userSpentAmountInBigNumber = userBalanceInBigNumber.minus(userReceivedAmountInBigNumber);
 
       const usdPricePointInBigNumber = new bigNumber(oThis.pricePoints.USD);
@@ -596,8 +596,8 @@ class UserSearch extends ServiceBase {
 
       oThis.userPepoStatsMap[userId] = {
         referrals: '0',
-        supporting: userStat.totalContributedTo,
-        supporters: userStat.totalContributedBy,
+        supporting: userStat.totalContributedTo || '0',
+        supporters: userStat.totalContributedBy || '0',
         balance: userBalanceInUsd
       };
 
