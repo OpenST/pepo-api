@@ -41,7 +41,10 @@ class SubscribeEmail extends ServiceBase {
 
     await oThis._validate();
 
-    if (oThis.email.toLowerCase() !== oThis.securePreLaunchInviteObj.email.toLowerCase()) {
+    if (
+      !oThis.securePreLaunchInviteObj.email ||
+      oThis.email.toLowerCase() !== oThis.securePreLaunchInviteObj.email.toLowerCase()
+    ) {
       await oThis._updateEmail();
     }
 
