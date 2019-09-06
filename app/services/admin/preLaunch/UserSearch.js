@@ -63,7 +63,7 @@ class InviteUserSearch extends ServiceBase {
   /**
    * Validate and sanitize.
    *
-   * @sets oThis.pageNo
+   * @sets oThis.pageNo, oThis.query, oThis.sortBy
    *
    * @returns {Promise<*|result>}
    * @private
