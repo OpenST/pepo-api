@@ -1,47 +1,47 @@
-/**
- * Module to authenticate Admin login
- *
- * @module app/services/admin/Login
- */
 const rootPrefix = '../../..',
-  coreConstants = require(rootPrefix + '/config/coreConstants'),
-  localCipher = require(rootPrefix + '/lib/encryptors/localCipher'),
-  util = require(rootPrefix + '/lib/util'),
   ServiceBase = require(rootPrefix + '/app/services/Base'),
-  AdminEmailCache = require(rootPrefix + '/lib/cacheManagement/single/AdminByEmail'),
   AdminModel = require(rootPrefix + '/app/models/mysql/Admin'),
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
-  adminConstants = require(rootPrefix + '/lib/globalConstant/admin'),
-  responseHelper = require(rootPrefix + '/lib/formatter/response');
+  AdminEmailCache = require(rootPrefix + '/lib/cacheManagement/single/AdminByEmail'),
+  util = require(rootPrefix + '/lib/util'),
+  coreConstants = require(rootPrefix + '/config/coreConstants'),
+  responseHelper = require(rootPrefix + '/lib/formatter/response'),
+  localCipher = require(rootPrefix + '/lib/encryptors/localCipher'),
+  adminConstants = require(rootPrefix + '/lib/globalConstant/admin');
 
 /**
- * Class to authenticate admin login
+ * Class to authenticate admin login.
  *
+ * @class AdminLogin
  */
 class AdminLogin extends ServiceBase {
   /**
-   * Constructor for admin login
+   * Constructor to authenticate admin login.
    *
    * @param {object} params
    * @param {string} params.email: Email
    * @param {string} params.password: Password
    *
+   * @augments ServiceBase
+   *
+   * @constructor
    */
   constructor(params) {
-    super(params);
+    super();
 
     const oThis = this;
+
     oThis.email = params.email;
     oThis.password = params.password;
 
-    oThis.adminObj = null;
+    oThis.adminObj = {};
     oThis.cookie = null;
   }
 
   /**
-   * Async perform class
+   * Async perform.
    *
-   * @returns {Promise<void>}
+   * @returns {Promise<result>}
    * @private
    */
   async _asyncPerform() {
@@ -55,7 +55,9 @@ class AdminLogin extends ServiceBase {
   }
 
   /**
-   * Validate admin user present
+   * Validate admin user.
+   *
+   * @sets oThis.adminObj
    *
    * @returns {Promise<never>}
    * @private
@@ -63,7 +65,7 @@ class AdminLogin extends ServiceBase {
   async _validateUser() {
     const oThis = this;
 
-    let cacheResp = await new AdminEmailCache({ email: oThis.email }).fetch();
+    const cacheResp = await new AdminEmailCache({ email: oThis.email }).fetch();
 
     if (cacheResp.isFailure() || !CommonValidators.validateNonEmptyObject(cacheResp.data)) {
       return Promise.reject(
@@ -80,7 +82,7 @@ class AdminLogin extends ServiceBase {
   }
 
   /**
-   * Validate input password with DB password
+   * Validate input password with DB password.
    *
    * @returns {Promise<never>}
    * @private
@@ -103,7 +105,7 @@ class AdminLogin extends ServiceBase {
       );
     }
 
-    if (oThis.adminObj.status != adminConstants.activeStatus) {
+    if (oThis.adminObj.status !== adminConstants.activeStatus) {
       return Promise.reject(
         responseHelper.paramValidationError({
           internal_error_identifier: 's_am_l_3',
@@ -116,7 +118,7 @@ class AdminLogin extends ServiceBase {
   }
 
   /**
-   * Generate admin cookie
+   * Generate admin cookie.
    *
    * @returns {Promise<*|result>}
    * @private
@@ -126,7 +128,7 @@ class AdminLogin extends ServiceBase {
 
     const formattedData = new AdminModel().safeFormattedData(oThis.adminObj);
 
-    let adminCookie = new AdminModel().getCookieValueFor(oThis.adminObj, {
+    const adminCookie = new AdminModel().getCookieValueFor(oThis.adminObj, {
       timestamp: Date.now() / 1000
     });
 
