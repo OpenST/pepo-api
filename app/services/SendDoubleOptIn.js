@@ -2,6 +2,7 @@ const rootPrefix = '../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   util = require(rootPrefix + '/lib/util'),
   coreConstants = require(rootPrefix + '/config/coreConstants'),
+  pageConstants = require(rootPrefix + '/lib/globalConstant/page'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   localCipher = require(rootPrefix + '/lib/encryptors/localCipher'),
@@ -98,15 +99,13 @@ class SendDoubleOptIn extends ServiceBase {
   async _sendPreLaunchInviteDoubleOptInMail() {
     const oThis = this;
 
-    // TODO:opt_in_email_link
-
     let transactionalMailParams = {
       receiverEntityId: oThis.preLaunchInviteObj.id,
       receiverEntityKind: emailServiceApiCallHookConstants.preLaunchInviteEntityKind,
       templateName: emailServiceApiCallHookConstants.pepoDoubleOptInTemplateName,
       templateVars: {
         pepo_api_domain: 1,
-        opt_in_email_link: `${oThis.doubleOptInToken}?t=${oThis.doubleOptInToken}`
+        opt_in_email_link: `${pageConstants.optInEmailLink}?t=${oThis.doubleOptInToken}`
       }
     };
 

@@ -3,7 +3,7 @@
 export PA_ENVIRONMENT='development'
 export PA_PORT=3000
 export PA_DEBUG_ENABLED='1';
-export PA_DOMAIN='pepodev.com'
+export PA_DOMAIN='http://pepodev.com:8080'
 export PA_COOKIE_DOMAIN='.pepodev.com'
 
 # Devops error logs framework
@@ -107,7 +107,7 @@ export PA_GIPHY_API_KEY='PbWiMCsT9RxXtatEtKp6w1vapdqNxhFQ'
 # Pepo Campaigns Details
 export PA_CAMPAIGN_CLIENT_KEY="3572cbc0d1895ed73e769d028eb50fec"
 export PA_CAMPAIGN_CLIENT_SECRET="b753c5acca25e22bedb5a58efc72891a"
-export PA_CAMPAIGN_BASE_URL="https://pepocampaigns.com/"
+export PA_CAMPAIGN_BASE_URL="https://pepocampaigns.com"
 export PA_CAMPAIGN_MASTER_LIST="64194"
 
 #Twitter API Key

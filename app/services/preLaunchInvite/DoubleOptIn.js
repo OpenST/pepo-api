@@ -1,11 +1,14 @@
-const rootPrefix = '../..',
+const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   coreConstants = require(rootPrefix + '/config/coreConstants'),
-  logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   localCipher = require(rootPrefix + '/lib/encryptors/localCipher'),
+  PreLaunchInviteModel = require(rootPrefix + '/app/models/mysql/PreLaunchInvite'),
+  AddContactInPepoCampaign = require(rootPrefix + '/lib/email/hookCreator/AddContact'),
+  preLaunchInviteConstants = require(rootPrefix + '/lib/globalConstant/preLaunchInvite'),
   TemporaryTokenModel = require(rootPrefix + '/app/models/mysql/TemporaryToken'),
-  temporaryTokenConstant = require(rootPrefix + '/lib/globalConstant/temporaryToken');
+  temporaryTokenConstant = require(rootPrefix + '/lib/globalConstant/temporaryToken'),
+  emailServiceApiCallHookConstants = require(rootPrefix + '/lib/globalConstant/emailServiceApiCallHook');
 
 class SendDoubleOptIn extends ServiceBase {
   /**
@@ -40,9 +43,11 @@ class SendDoubleOptIn extends ServiceBase {
 
     await oThis._fetchPreLaunchInviteDoubleOptInToken();
 
-    await oThis._markTokenAsUsed();
+    await oThis._markPreLaunchInviteAsDoubleOptIn();
 
-    //todo: mark the user as doptin
+    await oThis._addContactInPepoCampaign();
+
+    await oThis._markTokenAsUsed();
 
     return responseHelper.successWithData({});
   }
@@ -103,7 +108,7 @@ class SendDoubleOptIn extends ServiceBase {
       Math.floor(Date.now() / 1000) - temporaryTokenConstant.tokenExpiryTimestamp >
       oThis.temporaryTokenObj.createdAt
     ) {
-      return oThis._invalidUrlError('a_s_do_fpiot_4');
+      return oThis._invalidUrlError('a_s_do_fpiot_5');
     }
   }
 
@@ -120,6 +125,41 @@ class SendDoubleOptIn extends ServiceBase {
       .update({ status: temporaryTokenConstant.invertedStatuses[temporaryTokenConstant.usedStatus] })
       .where({ id: oThis.temporaryTokenId })
       .fire();
+  }
+
+  /**
+   * Mark pre launch invite as double opt in
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _markPreLaunchInviteAsDoubleOptIn() {
+    const oThis = this;
+
+    await new PreLaunchInviteModel()
+      .update({ status: preLaunchInviteConstants.invertedStatuses[preLaunchInviteConstants.doptinStatus] })
+      .where({ id: oThis.temporaryTokenObj.entityId })
+      .fire();
+
+    await PreLaunchInviteModel.flushCache({ id: oThis.temporaryTokenObj.entityId });
+  }
+
+  /**
+   * Add contact in pepo campaign
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _addContactInPepoCampaign() {
+    const oThis = this;
+
+    let addContactParams = {
+      receiverEntityId: oThis.temporaryTokenObj.entityId,
+      receiverEntityKind: emailServiceApiCallHookConstants.preLaunchInviteEntityKind,
+      customDescription: 'Contact add for pre launch invite'
+    };
+
+    await new AddContactInPepoCampaign(addContactParams).perform();
   }
 
   /**
