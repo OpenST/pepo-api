@@ -240,6 +240,36 @@ class PreLaunchInvite extends ModelBase {
   }
 
   /**
+   * Approve user.
+   *
+   * @param {number} inviteId
+   *
+   * @returns {Promise<result>}
+   */
+  async approveUser(inviteId) {
+    const oThis = this;
+
+    const queryResponse = await oThis
+      .update({
+        creator_status: preLaunchInviteConstants.invertedCreatorStatuses[preLaunchInviteConstants.approvedCreatorStatus]
+      })
+      .where({ id: inviteId })
+      .fire();
+
+    if (queryResponse.affectedRows === 1) {
+      logger.info(`User with ${inviteId} is now approved`);
+
+      return responseHelper.successWithData({});
+    }
+
+    return responseHelper.error({
+      internal_error_identifier: 'a_m_m_pli_2',
+      api_error_identifier: 'something_went_wrong',
+      debug_options: { inviteId: inviteId }
+    });
+  }
+
+  /**
    * Search users for admin whitelisting.
    *
    * @param {object} params
