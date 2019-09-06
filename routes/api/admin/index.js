@@ -92,7 +92,6 @@ router.post('/logout', csrfProtection, sanitizer.sanitizeDynamicUrlParams, funct
 /* Users list */
 router.get('/users', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.adminUserSearch;
-  req.decodedParams.search_by_admin = true;
 
   const dataFormatterFunc = async function(serviceResponse) {
     const wrapperFormatterRsp = await new FormatterComposer({
@@ -112,7 +111,7 @@ router.get('/users', sanitizer.sanitizeDynamicUrlParams, function(req, res, next
     serviceResponse.data = wrapperFormatterRsp.data;
   };
 
-  Promise.resolve(routeHelper.perform(req, res, next, '/user/Search', 'r_a_v1_ad_2', null, dataFormatterFunc));
+  Promise.resolve(routeHelper.perform(req, res, next, '/admin/UserSearch', 'r_a_v1_ad_2', null, dataFormatterFunc));
 });
 
 /* Approve user as creator */

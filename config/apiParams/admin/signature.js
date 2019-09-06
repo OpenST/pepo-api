@@ -4,12 +4,7 @@ const rootPrefix = '../../..',
 
 const adminSignature = {
   [apiName.adminUserSearch]: {
-    mandatory: [
-      {
-        parameter: 'search_by_admin',
-        validatorMethods: ['validateBoolean']
-      }
-    ],
+    mandatory: [],
     optional: [
       {
         parameter: 'q',
