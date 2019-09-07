@@ -173,13 +173,25 @@ app.use(function(req, res, next) {
 
 // Error handler
 app.use(async function(err, req, res, next) {
-  logger.error('a_2', 'Something went wrong', err);
+  let errorObject = null;
 
-  let errorObject = responseHelper.error({
-    internal_error_identifier: 'a_2',
-    api_error_identifier: 'something_went_wrong',
-    debug_options: {}
-  });
+  if (err.code == 'EBADCSRFTOKEN') {
+    logger.error('a_3', 'Bad CSRF TOKEN', err);
+
+    errorObject = responseHelper.error({
+      internal_error_identifier: 'a_3',
+      api_error_identifier: 'forbidden_api_request',
+      debug_options: {}
+    });
+  } else {
+    logger.error('a_2', 'Something went wrong', err);
+
+    errorObject = responseHelper.error({
+      internal_error_identifier: 'a_2',
+      api_error_identifier: 'something_went_wrong',
+      debug_options: {}
+    });
+  }
 
   return responseHelper.renderApiResponse(errorObject, res, errorConfig);
 });
