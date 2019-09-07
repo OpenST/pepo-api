@@ -52,7 +52,7 @@ class SubscribeEmail extends ServiceBase {
 
     await oThis._sendDoubleOptIn();
 
-    await oThis._checkDuplicateEmail();
+    // await oThis._checkDuplicateEmail();
 
     return Promise.resolve(responseHelper.successWithData({}));
   }
