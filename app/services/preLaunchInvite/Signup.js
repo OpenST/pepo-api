@@ -256,7 +256,7 @@ class PreLaunchTwitterSignUp extends ServiceBase {
       .where({ id: oThis.inviterId })
       .fire();
 
-    await PreLaunchInviteModel.flushCache(oThis.preLaunchInviteObj);
+    await PreLaunchInviteModel.flushCache({ id: oThis.inviterId });
   }
 
   /**

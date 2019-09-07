@@ -368,6 +368,10 @@ class CoreConstants {
   get CASSANDRA_REPLICATION_LEVEL() {
     return process.env.DEFAULT_REPLICATION_LEVEL;
   }
+
+  get TWITTER_OAUTH_URL() {
+    return process.env.TWITTER_OAUTH_URL;
+  }
 }
 
 module.exports = new CoreConstants();
