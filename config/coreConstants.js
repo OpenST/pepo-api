@@ -178,6 +178,19 @@ class CoreConstants {
     return process.env.PA_INFRA_DB_MYSQL_DB;
   }
 
+  // Admin db
+  get ADMIN_DB_MYSQL_HOST() {
+    return process.env.PA_ADMIN_DB_MYSQL_HOST;
+  }
+
+  get ADMIN_DB_MYSQL_USER() {
+    return process.env.PA_ADMIN_DB_MYSQL_USER;
+  }
+
+  get ADMIN_DB_MYSQL_PASSWORD() {
+    return process.env.PA_ADMIN_DB_MYSQL_PASSWORD;
+  }
+
   // kms related constants
 
   get KMS_AWS_ACCESS_KEY() {
@@ -259,6 +272,14 @@ class CoreConstants {
     return process.env.PA_COOKIE_SECRET;
   }
 
+  get ADMIN_COOKIE_SECRET() {
+    return process.env.PA_PAD_COOKIE_SECRET;
+  }
+
+  get WEB_COOKIE_SECRET() {
+    return process.env.PA_PW_COOKIE_SECRET;
+  }
+
   get PA_COOKIE_TOKEN_SECRET() {
     return process.env.PA_COOKIE_TOKEN_SECRET;
   }
@@ -326,6 +347,10 @@ class CoreConstants {
 
   get PR_VIDEO_COMPRESS_FUNCTION() {
     return process.env.PR_LAMBDA_VIDEO_COMPRESS_FUNCTION;
+  }
+
+  get PA_EMAIL_TOKENS_DECRIPTOR_KEY() {
+    return process.env.PA_EMAIL_TOKENS_DECRIPTOR_KEY;
   }
 
   get PA_CDN_URL() {

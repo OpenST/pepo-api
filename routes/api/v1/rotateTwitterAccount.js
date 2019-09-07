@@ -26,7 +26,7 @@ router.get('/', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
     return responseHelper.renderApiResponse(errorObject, res, errorConfig);
   }
 
-  Promise.resolve(routeHelper.perform(req, res, next, '/user/RotateTwitterAccount', 'r_a_v1_rta_2', null));
+  Promise.resolve(routeHelper.perform(req, res, next, '/twitter/Rotate', 'r_a_v1_rta_2', null));
 });
 
 module.exports = router;

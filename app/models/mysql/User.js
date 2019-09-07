@@ -73,6 +73,7 @@ class UserModel extends ModelBase {
       encryptionSalt: dbRow.encryption_salt,
       markInactiveTriggerCount: dbRow.mark_inactive_trigger_count,
       properties: dbRow.properties,
+      approvedCreator: UserModel.isUserApprovedCreator(dbRow),
       status: userConstants.statuses[dbRow.status],
       createdAt: dbRow.created_at,
       updatedAt: dbRow.updated_at
@@ -94,6 +95,7 @@ class UserModel extends ModelBase {
       'profileImageId',
       'markInactiveTriggerCount',
       'properties',
+      'approvedCreator',
       'status',
       'createdAt',
       'updatedAt'
@@ -272,6 +274,56 @@ class UserModel extends ModelBase {
   }
 
   /**
+   * User search
+   *
+   * @param {integer} params.limit: limit
+   * @param {integer} params.query: query
+   * @param {integer} params.paginationTimestamp: pagination time stamp
+   * @param {boolean} params.fetchAll: flag to fetch all users, active or inactive
+   *
+   * @return {Promise}
+   */
+  async search(params) {
+    const oThis = this;
+
+    let limit = params.limit,
+      query = params.query,
+      paginationTimestamp = params.paginationTimestamp;
+
+    const queryObject = oThis
+      .select('*')
+      .limit(limit)
+      .order_by('id desc');
+
+    let queryWithWildCards = '%' + query + '%';
+
+    if (!params.fetchAll) {
+      queryObject.where({ status: userConstants.invertedStatuses[userConstants.activeStatus] });
+    }
+
+    if (query) {
+      queryObject.where(['user_name LIKE ? OR name LIKE ?', queryWithWildCards, queryWithWildCards]);
+    }
+
+    if (paginationTimestamp) {
+      queryObject.where(['created_at < ?', paginationTimestamp]);
+    }
+
+    let dbRows = await queryObject.fire();
+
+    let userDetails = {};
+    let userIds = [];
+
+    for (let ind = 0; ind < dbRows.length; ind++) {
+      let formattedRow = oThis.formatDbData(dbRows[ind]);
+      userIds.push(formattedRow.id);
+      userDetails[dbRows[ind].id] = formattedRow;
+    }
+
+    return { userIds: userIds, userDetails: userDetails };
+  }
+
+  /**
    * Flush cache
    *
    * @param {object} params
@@ -302,6 +354,17 @@ class UserModel extends ModelBase {
    */
   static get usernameUniqueIndexName() {
     return 'uk_idx_1';
+  }
+
+  /**
+   * Is user an approved creator
+   *
+   * @param userObj
+   * @returns {boolean}
+   */
+  static isUserApprovedCreator(userObj) {
+    const propertiesArray = new UserModel().getBitwiseArray('properties', userObj.properties);
+    return propertiesArray.indexOf(userConstants.isApprovedCreatorProperty) > -1;
   }
 }
 

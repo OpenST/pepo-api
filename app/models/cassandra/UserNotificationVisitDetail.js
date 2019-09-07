@@ -1,6 +1,7 @@
 const rootPrefix = '../../..',
   CassandraModelBase = require(rootPrefix + '/app/models/cassandra/Base'),
   cassandraKeyspaceConstants = require(rootPrefix + '/lib/globalConstant/cassandraKeyspace'),
+  userNotificationVisitConstants = require(rootPrefix + '/lib/globalConstant/cassandra/userNotificationVisitDetail'),
   basicHelper = require(rootPrefix + '/helpers/basic');
 
 // Declare variables.
@@ -25,6 +26,22 @@ class UserNotificationVisitDetailModel extends CassandraModelBase {
     const oThis = this;
 
     oThis.tableName = 'user_notification_visit_details';
+  }
+
+  /**
+   * Keys for table user_notification_visit_details
+   *
+   * @returns {{partition: string[], sort: string[]}}
+   */
+  keyObject() {
+    return {
+      partition: [userNotificationVisitConstants.shortToLongNamesMap['user_id']],
+      sort: []
+    };
+  }
+
+  get longToShortNamesMap() {
+    return userNotificationVisitConstants.longToShortNamesMap;
   }
 
   /**

@@ -176,8 +176,9 @@ class PublicVideoFeed extends FeedBase {
           name: 'Pepo Academy',
           profileImageId: '292',
           markInactiveTriggerCount: 0,
-          properties: 2,
+          properties: 6,
           status: 'ACTIVE',
+          approvedCreator: 1,
           createdAt: 1564660482,
           updatedAt: 1564660611
         }

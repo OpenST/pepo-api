@@ -7,7 +7,13 @@ const rootPrefix = '../../../..',
   VideoByIdCache = require(rootPrefix + '/lib/cacheManagement/multi/VideoByIds'),
   NotificationResponseHelper = require(rootPrefix + '/lib/notification/response/Helper'),
   TokenUserByUserIdsMultiCache = require(rootPrefix + '/lib/cacheManagement/multi/TokenUserByUserIds'),
+  bgJob = require(rootPrefix + '/lib/rabbitMqEnqueue/bgJob'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
+  userConstants = require(rootPrefix + '/lib/globalConstant/user'),
+  videoConstants = require(rootPrefix + '/lib/globalConstant/video'),
+  userNotificationConstants = require(rootPrefix + '/lib/globalConstant/cassandra/userNotification'),
+  bgJobConstants = require(rootPrefix + '/lib/globalConstant/bgJob'),
+  UserNotificationModel = require(rootPrefix + '/app/models/cassandra/UserNotification'),
   responseEntityKey = require(rootPrefix + '/lib/globalConstant/responseEntityKey');
 
 /**
@@ -43,6 +49,8 @@ class UserNotificationBase extends ServiceBase {
     oThis.imageMap = {};
 
     oThis.formattedUserNotifications = [];
+    oThis.notificationVideoMap = {};
+    oThis.notificationsToDelete = [];
   }
 
   /**
@@ -65,15 +73,15 @@ class UserNotificationBase extends ServiceBase {
     promisesArray.push(oThis._fetchUsers());
     promisesArray.push(oThis._fetchTokenUsers());
     promisesArray.push(oThis._fetchVideos());
+    // Images are fetched later because video covers also needs to be fetched.
 
     await Promise.all(promisesArray);
 
-    const promisesArray2 = [];
-    promisesArray2.push(oThis._fetchImages());
-
-    await Promise.all(promisesArray2);
+    await oThis._fetchImages();
 
     await oThis._formatUserNotifications();
+
+    await oThis._enqueueBackgroundTasks();
 
     return responseHelper.successWithData(oThis._finalResponse());
   }
@@ -111,6 +119,10 @@ class UserNotificationBase extends ServiceBase {
     for (let index = 0; index < oThis.userNotifications.length; index++) {
       const userNotification = oThis.userNotifications[index];
       const formattedUserNotification = {};
+
+      if (oThis._isNotificationBlocked(userNotification)) {
+        continue;
+      }
 
       formattedUserNotification.id = NotificationResponseHelper.getEncryptIdForNotification(userNotification);
 
@@ -277,6 +289,8 @@ class UserNotificationBase extends ServiceBase {
    * @private
    */
   _getVideoIdsForNotifications(userNotification, supportingEntitiesConfig) {
+    const oThis = this;
+
     let vIds = [];
 
     const keysForVideoId = supportingEntitiesConfig.videoIds;
@@ -291,6 +305,10 @@ class UserNotificationBase extends ServiceBase {
       } else {
         vIds.push(Number(val));
       }
+    }
+
+    if (vIds.length > 0) {
+      oThis.notificationVideoMap[userNotification.uuid] = vIds;
     }
 
     return vIds;
@@ -411,6 +429,55 @@ class UserNotificationBase extends ServiceBase {
     }
 
     oThis.imageMap = cacheRsp.data;
+  }
+
+  /**
+   * Check whether notification can be sent out or its blocked, due to some deleted entity
+   *
+   * @param userNotification
+   * @returns {boolean}
+   * @private
+   */
+  _isNotificationBlocked(userNotification) {
+    const oThis = this;
+
+    if (userNotification.kind == userNotificationConstants.videoAddKind) {
+      if (oThis.notificationVideoMap[userNotification.uuid]) {
+        for (let i = 0; i < oThis.notificationVideoMap[userNotification.uuid].length; i++) {
+          let vid = oThis.notificationVideoMap[userNotification.uuid][i];
+          if (oThis.videoMap[vid].status == videoConstants.deletedStatus) {
+            oThis.notificationsToDelete.push(userNotification);
+            return true;
+          }
+        }
+      }
+
+      if (oThis.usersByIdMap[userNotification.actorIds[0]].status === userConstants.inActiveStatus) {
+        oThis.notificationsToDelete.push(userNotification);
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  /**
+   * Enqueue background task
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _enqueueBackgroundTasks() {
+    const oThis = this;
+
+    console.log('Notifications To Delete: ', oThis.notificationsToDelete);
+
+    if (oThis.notificationsToDelete.length > 0) {
+      await bgJob.enqueue(bgJobConstants.deleteCassandraJobTopic, {
+        tableName: new UserNotificationModel().tableName,
+        elementsToDelete: oThis.notificationsToDelete
+      });
+    }
   }
 
   /**

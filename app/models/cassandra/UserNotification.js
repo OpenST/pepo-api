@@ -30,6 +30,23 @@ class UserNotificationModel extends CassandraModelBase {
   }
 
   /**
+   * Keys for table user_notifications
+   *
+   * @returns {{partition: string[], sort: string[]}}
+   */
+  keyObject() {
+    const namesMap = userNotificationConstants.shortToLongNamesMap;
+    return {
+      partition: [namesMap['user_id'], namesMap['last_action_timestamp'], namesMap['uuid']],
+      sort: [namesMap['last_action_timestamp']]
+    };
+  }
+
+  get longToShortNamesMap() {
+    return userNotificationConstants.longToShortNamesMap;
+  }
+
+  /**
    * Fetch by creator user id.
    *
    * @param {integer} params.limit: no of rows to fetch

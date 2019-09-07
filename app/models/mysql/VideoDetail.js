@@ -1,6 +1,7 @@
 const rootPrefix = '../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
-  databaseConstants = require(rootPrefix + '/lib/globalConstant/database');
+  databaseConstants = require(rootPrefix + '/lib/globalConstant/database'),
+  videoDetailsConst = require(rootPrefix + '/lib/globalConstant/videoDetail');
 
 // Declare variables.
 const dbName = databaseConstants.entityDbName;
@@ -51,6 +52,7 @@ class VideoDetail extends ModelBase {
       totalContributedBy: dbRow.total_contributed_by,
       totalAmount: dbRow.total_amount,
       totalTransactions: dbRow.total_transactions,
+      status: videoDetailsConst.statuses[dbRow.status],
       createdAt: dbRow.created_at,
       updatedAt: dbRow.updated_at
     };
@@ -71,6 +73,7 @@ class VideoDetail extends ModelBase {
       'totalContributedBy',
       'totalTransactions',
       'totalAmount',
+      'status',
       'createdAt',
       'updatedAt'
     ];
@@ -104,7 +107,7 @@ class VideoDetail extends ModelBase {
    * @param {integer} params.limit: no of rows to fetch
    * @param {integer} params.creatorUserId: creator user id
    * @param {integer} params.paginationTimestamp: creator user id
-   * @return {Promise<void>}
+   * @return {Promise}
    */
   async fetchByCreatorUserId(params) {
     const oThis = this,
@@ -114,7 +117,10 @@ class VideoDetail extends ModelBase {
 
     const queryObject = oThis
       .select('*')
-      .where({ creator_user_id: creatorUserId })
+      .where({
+        creator_user_id: creatorUserId,
+        status: videoDetailsConst.invertedStatuses[videoDetailsConst.activeStatus]
+      })
       .order_by('id desc')
       .limit(limit);
 
@@ -222,6 +228,7 @@ class VideoDetail extends ModelBase {
    * @param {object} params
    * @param {number} params.userId
    * @param {number} params.videoId
+   * @param {String} params.status
    *
    * @return {object}
    */
@@ -231,9 +238,35 @@ class VideoDetail extends ModelBase {
     return oThis
       .insert({
         creator_user_id: params.userId,
+        video_id: params.videoId,
+        status: videoDetailsConst.invertedStatuses[params.status]
+      })
+      .fire();
+  }
+
+  /**
+   * Delete video details
+   *
+   * @param {object} params
+   * @param {number} params.userId
+   * @param {number} params.videoId
+   *
+   * @return {object}
+   */
+  async markDeleted(params) {
+    const oThis = this;
+
+    await oThis
+      .update({
+        status: videoDetailsConst.invertedStatuses[videoDetailsConst.deletedStatus]
+      })
+      .where({
+        creator_user_id: params.userId,
         video_id: params.videoId
       })
       .fire();
+
+    return VideoDetail.flushCache(params);
   }
 
   /**

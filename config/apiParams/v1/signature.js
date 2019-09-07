@@ -46,6 +46,15 @@ const v1Signature = {
     ],
     optional: []
   },
+  [apiName.sendDoubleOptIn]: {
+    mandatory: [
+      {
+        parameter: 'pre_launch_invite_obj',
+        validatorMethods: ['validateNonEmptyObject']
+      }
+    ],
+    optional: []
+  },
   [apiName.registerDevice]: {
     mandatory: [
       {
@@ -463,6 +472,24 @@ const v1Signature = {
       {
         parameter: 'current_user',
         validatorMethods: ['validateNonEmptyObject']
+      }
+    ]
+  },
+  [apiName.userSearch]: {
+    mandatory: [
+      {
+        parameter: 'q',
+        validatorMethods: ['validateString']
+      }
+    ],
+    optional: [
+      {
+        parameter: 'include_admin_related_details',
+        validatorMethods: ['validateBoolean']
+      },
+      {
+        parameter: paginationConstants.paginationIdentifierKey,
+        validatorMethods: ['validateString', 'validatePaginationIdentifier']
       }
     ]
   }
