@@ -80,6 +80,10 @@ class UpdateFanVideo extends UpdateProfileBase {
       oThis.link = null;
     }
 
+    if (oThis.link) {
+      oThis.link = oThis.link.toLowerCase();
+    }
+
     const resp = videoLib.validateVideoObj({ videoUrl: oThis.videoUrl, isExternalUrl: oThis.isExternalUrl });
     if (resp.isFailure()) {
       return Promise.reject(
