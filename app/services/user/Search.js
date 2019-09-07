@@ -40,6 +40,7 @@ class UserSearch extends ServiceBase {
     oThis.query = oThis.query ? oThis.query.trim() : null; // trim spaces
     oThis.query = oThis.query ? oThis.query.replace(/_/g, '\\_') : null; // Escape underscore
     oThis.adminSearch = params.search_by_admin;
+    oThis.isOnlyNameSearch = true;
 
     oThis.userIds = [];
     oThis.imageIds = [];
@@ -115,6 +116,8 @@ class UserSearch extends ServiceBase {
       oThis.paginationTimestamp = null;
     }
 
+    oThis.isOnlyNameSearch = !CommonValidators.validateUserName(oThis.query);
+
     // Validate limit.
     return oThis._validatePageSize();
   }
@@ -134,7 +137,8 @@ class UserSearch extends ServiceBase {
       query: oThis.query,
       limit: oThis.limit,
       paginationTimestamp: oThis.paginationTimestamp,
-      fetchAll: oThis.adminSearch
+      fetchAll: oThis.adminSearch,
+      isOnlyNameSearch: oThis.isOnlyNameSearch
     });
 
     oThis.userIds = userData.userIds;
