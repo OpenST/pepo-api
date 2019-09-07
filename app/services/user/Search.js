@@ -38,6 +38,7 @@ class UserSearch extends ServiceBase {
 
     oThis.query = params.q ? params.q.toLowerCase() : null; // lower case
     oThis.query = oThis.query ? oThis.query.trim() : null; // trim spaces
+    oThis.query = oThis.query ? oThis.query.replace(/_/g, '\\_') : null; // Escape underscore
     oThis.adminSearch = params.search_by_admin;
 
     oThis.userIds = [];
