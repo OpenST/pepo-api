@@ -91,6 +91,10 @@ class UpdateProfileInfo extends UpdateProfileBase {
       );
     }
 
+    if (oThis.link) {
+      oThis.link = oThis.link.toLowerCase();
+    }
+
     await oThis._validateUserName();
   }
 
