@@ -321,8 +321,9 @@ router.get('/available-products', sanitizer.sanitizeDynamicUrlParams, function(r
 });
 
 /* user pending topups */
-router.get('/pending-topups', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+router.get('/:user_id/pending-topups', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.userTopUps;
+  req.decodedParams.user_id = req.params.user_id;
 
   const dataFormatterFunc = async function(serviceResponse) {
     const wrapperFormatterRsp = await new FormatterComposer({

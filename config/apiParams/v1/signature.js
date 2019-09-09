@@ -611,6 +611,19 @@ const v1Signature = {
       }
     ],
     optional: []
+  },
+  [apiName.userTopUps]: {
+    mandatory: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      },
+      {
+        parameter: 'user_id',
+        validatorMethods: ['validateString']
+      }
+    ],
+    optional: []
   }
 };
 
