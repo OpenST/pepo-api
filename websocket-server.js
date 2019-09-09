@@ -51,7 +51,7 @@ async function startWebSocketServer(websocketPort) {
         api_error_identifier: 'websocket_service_unavailable',
         debug_options: {}
       });
-      socket.emit('server-event', JSON.stringify(err));
+      socket.emit('pepo-stream', JSON.stringify(err));
       socket.disconnect();
       return true;
     }
@@ -75,7 +75,7 @@ async function startWebSocketServer(websocketPort) {
         api_error_identifier: 'unauthorized_api_request',
         debug_options: { websocketAuthRsp: websocketAuthRsp }
       });
-      socket.emit('server-event', JSON.stringify(err));
+      socket.emit('pepo-stream', JSON.stringify(err));
       socket.disconnect();
       return true;
     }

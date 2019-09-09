@@ -157,6 +157,7 @@ router.get('/:profile_user_id/profile', sanitizer.sanitizeDynamicUrlParams, func
       resultType: responseEntityKey.userProfile,
       entityKindToResponseKeyMap: {
         [entityType.userProfile]: responseEntityKey.userProfile,
+        [entityType.videoDescriptionsMap]: responseEntityKey.videoDescriptions,
         [entityType.usersMap]: responseEntityKey.users,
         [entityType.linksMap]: responseEntityKey.links,
         [entityType.imagesMap]: responseEntityKey.images,
@@ -215,6 +216,7 @@ router.get('/:profile_user_id/video-history', sanitizer.sanitizeDynamicUrlParams
         [entityType.usersMap]: responseEntityKey.users,
         [entityType.userStats]: responseEntityKey.userStats,
         [entityType.userProfilesMap]: responseEntityKey.userProfiles,
+        [entityType.videoDescriptionsMap]: responseEntityKey.videoDescriptions,
         [entityType.tagsMap]: responseEntityKey.tags,
         [entityType.linksMap]: responseEntityKey.links,
         [entityType.imagesMap]: responseEntityKey.images,

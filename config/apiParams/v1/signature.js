@@ -288,7 +288,15 @@ const v1Signature = {
       {
         parameter: 'image_size',
         validatorMethods: ['validateInteger']
-      }
+      },
+      {
+        parameter: 'video_description',
+        validatorMethods: ['validateString']
+      },
+      {
+        parameter: 'link',
+        validatorMethods: ['validateString']
+      } // If link is invalid, consider empty string.
     ]
   },
   [apiName.saveProfileImage]: {
