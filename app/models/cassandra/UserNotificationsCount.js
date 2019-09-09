@@ -87,18 +87,22 @@ class UserNotificationCountModel extends CassandraModelBase {
   }
 
   /**
-   * reset user notification count for user_id.
+   * reset(delete) user notification count for user_id.
    *
    * @param {object} queryParams
    * @param {string/number} queryParams.userId
+   * @param {string/number} queryParams.count
    *
    * @returns {Promise<any>}
    */
   async resetUnreadNotificationCount(queryParams) {
     const oThis = this;
 
-    const query = 'UPDATE ' + oThis.queryTableName + ' SET unread_notification_count = 0 WHERE user_id = ?;';
-    const params = [queryParams.userId];
+    const query =
+      'UPDATE ' +
+      oThis.queryTableName +
+      ' SET unread_notification_count = unread_notification_count - ? WHERE user_id = ?;';
+    const params = [queryParams.count, queryParams.userId];
 
     return oThis.fire(query, params);
   }
