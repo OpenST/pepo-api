@@ -129,6 +129,41 @@ router.post('/users/:user_id/block', cookieHelper.setAdminCsrf(), sanitizer.sani
   Promise.resolve(routeHelper.perform(req, res, next, '/admin/BlockUser', 'r_a_v1_ad_4', null, null, null));
 });
 
+/* Video history for admin - intentionally retained the same api name */
+router.get('/video-history/:profile_user_id', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.userVideoList;
+  req.decodedParams.profile_user_id = req.params.profile_user_id;
+
+  const dataFormatterFunc = async function(serviceResponse) {
+    const wrapperFormatterRsp = await new FormatterComposer({
+      resultType: responseEntityKey.userVideoList,
+      entityKindToResponseKeyMap: {
+        [entityType.userVideoList]: responseEntityKey.userVideoList,
+        [entityType.usersMap]: responseEntityKey.users,
+        [entityType.userStats]: responseEntityKey.userStats,
+        [entityType.userProfilesMap]: responseEntityKey.userProfiles,
+        [entityType.tagsMap]: responseEntityKey.tags,
+        [entityType.linksMap]: responseEntityKey.links,
+        [entityType.imagesMap]: responseEntityKey.images,
+        [entityType.videosMap]: responseEntityKey.videos,
+        [entityType.videoDetailsMap]: responseEntityKey.videoDetails,
+        [entityType.currentUserUserContributionsMap]: responseEntityKey.currentUserUserContributions,
+        [entityType.currentUserVideoContributionsMap]: responseEntityKey.currentUserVideoContributions,
+        [entityType.pricePointsMap]: responseEntityKey.pricePoints,
+        [entityType.token]: responseEntityKey.token,
+        [entityType.userVideoListMeta]: responseEntityKey.meta
+      },
+      serviceData: serviceResponse.data
+    }).perform();
+
+    serviceResponse.data = wrapperFormatterRsp.data;
+  };
+
+  Promise.resolve(
+    routeHelper.perform(req, res, next, '/user/profile/GetVideoList', 'r_a_v1_u_5', null, dataFormatterFunc)
+  );
+});
+
 /* Delete video */
 router.post('/delete-video/:video_id', cookieHelper.setAdminCsrf(), sanitizer.sanitizeDynamicUrlParams, function(
   req,
@@ -138,7 +173,7 @@ router.post('/delete-video/:video_id', cookieHelper.setAdminCsrf(), sanitizer.sa
   req.decodedParams.apiName = apiName.adminDeleteVideo;
   req.decodedParams.video_id = req.params.video_id;
 
-  Promise.resolve(routeHelper.perform(req, res, next, '/video/Delete', 'r_a_v1_ad_5', null, null, null));
+  Promise.resolve(routeHelper.perform(req, res, next, '/video/Delete', 'r_a_v1_ad_6', null, null, null));
 });
 
 /* Logged in Admin */
@@ -157,7 +192,7 @@ router.get('/current', sanitizer.sanitizeDynamicUrlParams, function(req, res, ne
     serviceResponse.data = wrapperFormatterRsp.data;
   };
 
-  Promise.resolve(routeHelper.perform(req, res, next, '/admin/GetCurrent', 'r_a_v1_ad_6', null, dataFormatterFunc));
+  Promise.resolve(routeHelper.perform(req, res, next, '/admin/GetCurrent', 'r_a_v1_ad_7', null, dataFormatterFunc));
 });
 
 router.use('/pre-launch', adminPreLaunchRoutes);
