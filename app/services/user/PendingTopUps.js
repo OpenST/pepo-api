@@ -128,7 +128,7 @@ class PendingTopUps extends ServiceBase {
         };
 
       if (ptu.transaction_id && oThis.transactionsMap[ptu.transaction_id]) {
-        row['transactionUuid'] = oThis.transactionsMap[ptu.transaction_id].ost_tx_id;
+        row['transactionUuid'] = oThis.transactionsMap[ptu.transaction_id].ostTxId;
       }
       response.push(row);
     }
