@@ -8,7 +8,8 @@ const rootPrefix = '../../../..',
   tokenUserConstants = require(rootPrefix + '/lib/globalConstant/tokenUser'),
   transactionConstants = require(rootPrefix + '/lib/globalConstant/transaction'),
   notificationJobEnqueue = require(rootPrefix + '/lib/rabbitMqEnqueue/notification'),
-  notificationJobConstants = require(rootPrefix + '/lib/globalConstant/notificationJob');
+  notificationJobConstants = require(rootPrefix + '/lib/globalConstant/notificationJob'),
+  fiatPaymentConstants = require(rootPrefix + '/lib/globalConstant/fiatPayment');
 
 /**
  * Class for success transaction ost event base service.
@@ -91,6 +92,7 @@ class SuccessTransactionOstEvent extends TransactionOstEventBase {
       await oThis.validateToUserId();
       const promiseArray = [];
       promiseArray.push(oThis.updateTransaction());
+      promiseArray.push(oThis.processForTopUpTransaction());
       promiseArray.push(oThis._enqueueUserNotification(notificationJobConstants.topupDone));
       await Promise.all(promiseArray);
     }
@@ -231,6 +233,10 @@ class SuccessTransactionOstEvent extends TransactionOstEventBase {
     propertyVal = new TokenUserModel().setBitwise('properties', propertyVal, tokenUserConstants.airdropDoneProperty);
 
     return propertyVal;
+  }
+
+  _getPaymentStatus() {
+    return fiatPaymentConstants.invertedStatuses[fiatPaymentConstants.pepoTransferSuccessStatus];
   }
 }
 

@@ -7,6 +7,7 @@ const rootPrefix = '../../../..',
   TransactionByOstTxIdCache = require(rootPrefix + '/lib/cacheManagement/multi/TransactionByOstTxId'),
   TokenUserByOstUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TokenUserByOstUserIds'),
   VideoDetailsByVideoIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/VideoDetailsByVideoIds'),
+  FiatPaymentModel = require(rootPrefix + '/app/models/mysql/FiatPayment'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   commonValidator = require(rootPrefix + '/lib/validators/Common'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
@@ -386,6 +387,19 @@ class TransactionOstEventBase extends ServiceBase {
 
     await TokenUserModel.flushCache(tokenUserObj);
     logger.log('End:: Update token user to mark airdrops status');
+  }
+
+  async processForTopUpTransaction() {
+    const oThis = this;
+
+    await new FiatPaymentModel()
+      .update({
+        status: oThis._getPaymentStatus()
+      })
+      .where({ transaction_id: oThis.transactionObj.id })
+      .fire();
+
+    return responseHelper.successWithData({});
   }
 
   /**

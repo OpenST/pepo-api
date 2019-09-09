@@ -9,7 +9,8 @@ const rootPrefix = '../../../..',
   tokenUserConstants = require(rootPrefix + '/lib/globalConstant/tokenUser'),
   transactionConstants = require(rootPrefix + '/lib/globalConstant/transaction'),
   notificationJobEnqueue = require(rootPrefix + '/lib/rabbitMqEnqueue/notification'),
-  notificationJobConstants = require(rootPrefix + '/lib/globalConstant/notificationJob');
+  notificationJobConstants = require(rootPrefix + '/lib/globalConstant/notificationJob'),
+  fiatPaymentConstants = require(rootPrefix + '/lib/globalConstant/fiatPayment');
 
 /**
  * Class for failure transaction ost event base service.
@@ -77,6 +78,13 @@ class FailureTransactionOstEvent extends TransactionOstEventBase {
       const promiseArray = [];
       promiseArray.push(oThis.updateTransaction());
       promiseArray.push(oThis.processForAirdropTransaction());
+      await Promise.all(promiseArray);
+    } else if (oThis.transactionObj.extraData.kind === transactionConstants.extraData.topUpKind) {
+      await oThis.validateToUserId();
+      const promiseArray = [];
+      promiseArray.push(oThis.updateTransaction());
+      promiseArray.push(oThis.processForTopUpTransaction());
+      promiseArray.push(oThis._enqueueUserNotification(notificationJobConstants.topupDone));
       await Promise.all(promiseArray);
     }
   }
@@ -170,6 +178,10 @@ class FailureTransactionOstEvent extends TransactionOstEventBase {
     propertyVal = new TokenUserModel().unSetBitwise('properties', propertyVal, tokenUserConstants.airdropDoneProperty);
 
     return propertyVal;
+  }
+
+  _getPaymentStatus() {
+    return fiatPaymentConstants.invertedStatuses[fiatPaymentConstants.pepoTransferFailedStatus];
   }
 }
 
