@@ -1,13 +1,14 @@
-const rootPrefix = '../../../..',
+const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   FiatPaymentModel = require(rootPrefix + '/app/models/mysql/FiatPayment'),
   fiatPaymentConstants = require(rootPrefix + '/lib/globalConstant/fiatPayment'),
-  ProcessApplePayPayment = require(rootPrefix + '/app/services/payment/process/ApplePay'),
-  ProcessGooglePayPayment = require(rootPrefix + '/app/services/payment/process/GooglePay'),
+  ProcessApplePayPayment = require(rootPrefix + '/lib/payment/ProcessApplePay'),
+  ProcessGooglePayPayment = require(rootPrefix + '/lib/payment/ProcessGooglePay'),
   bgJobConstants = require(rootPrefix + '/lib/globalConstant/bgJob'),
   bgJob = require(rootPrefix + '/lib/rabbitMqEnqueue/bgJob'),
   ostPricePointConstants = require(rootPrefix + '/lib/globalConstant/ostPricePoints'),
-  responseHelper = require(rootPrefix + '/lib/formatter/response');
+  responseHelper = require(rootPrefix + '/lib/formatter/response'),
+  mysqlErrorConstants = require(rootPrefix + '/lib/globalConstant/mysqlErrorConstants');
 
 /**
  * Class for feed base.
@@ -76,9 +77,14 @@ class PaymentProcessValidator extends ServiceBase {
         kind: fiatPaymentConstants.invertedKinds[fiatPaymentConstants.topUpKind],
         service_kind: fiatPaymentConstants.invertedServiceKinds[serviceKind],
         currency: ostPricePointConstants.invertedQuoteCurrencies[ostPricePointConstants.usdQuoteCurrency],
-        status: fiatPaymentConstants.invertedStatuses[fiatPaymentConstants.pendingStatus]
+        status: fiatPaymentConstants.invertedStatuses[fiatPaymentConstants.receiptValidationPendingStatus]
       })
-      .fire();
+      .fire()
+      .catch(async function(mysqlErrorObject) {
+        if (mysqlErrorObject.code === mysqlErrorConstants.duplicateError) {
+        } else {
+        }
+      });
 
     oThis.fiatPaymentId = fiatPaymentCreateResp.insertId;
 
@@ -88,6 +94,7 @@ class PaymentProcessValidator extends ServiceBase {
   async _serviceSpecificTasks() {
     const oThis = this,
       params = {
+        fiatPaymentId: oThis.fiatPaymentId,
         currentUser: oThis.currentUser,
         paymentReceipt: oThis.paymentReceipt,
         userId: oThis.userId

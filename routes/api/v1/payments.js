@@ -9,27 +9,6 @@ const rootPrefix = '../../..',
   entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
   responseEntityKey = require(rootPrefix + '/lib/globalConstant/responseEntityKey');
 
-/* Register Device*/
-router.post('/google-pay-receipt', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
-  req.decodedParams.apiName = apiName.googlePayReceipt;
-
-  const onServiceSuccess = async function(serviceResponse) {
-    const wrapperFormatterRsp = await new FormatterComposer({
-      resultType: responseEntityKey.paymentReceipt,
-      entityKindToResponseKeyMap: {
-        [entityType.paymentReceipt]: responseEntityKey.paymentReceipt
-      },
-      serviceData: serviceResponse.data
-    }).perform();
-
-    serviceResponse.data = wrapperFormatterRsp.data;
-  };
-
-  Promise.resolve(
-    routeHelper.perform(req, res, next, '/payment/process/GooglePay', 'r_a_v1_p_1', null, onServiceSuccess)
-  );
-});
-
 router.post('/confirm-pay-receipt', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.confirmPayReceipt;
 
@@ -46,7 +25,7 @@ router.post('/confirm-pay-receipt', sanitizer.sanitizeDynamicUrlParams, function
   };
 
   Promise.resolve(
-    routeHelper.perform(req, res, next, '/payment/process/Validator', 'r_a_v1_p_2', null, onServiceSuccess)
+    routeHelper.perform(req, res, next, '/payment/ProcessValidator', 'r_a_v1_p_2', null, onServiceSuccess)
   );
 });
 

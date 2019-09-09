@@ -563,19 +563,6 @@ const v1Signature = {
     ],
     optional: []
   },
-  [apiName.googlePayReceipt]: {
-    mandatory: [
-      {
-        parameter: 'current_user',
-        validatorMethods: ['validateNonEmptyObject']
-      },
-      {
-        parameter: 'receipt',
-        validatorMethods: ['validateString']
-      }
-    ],
-    optional: []
-  },
   [apiName.confirmPayReceipt]: {
     mandatory: [
       {
