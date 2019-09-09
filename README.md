@@ -170,6 +170,13 @@ Note: Get the webhooks id from above run(subscribe webhooks). Secret has to be o
   node executables/rabbitMqSubscribers/notificationJobProcessor.js --cronProcessId 4
 ```
 
+## Web-sockets
+* Start web-socket server.
+```bash
+  source set_env_vars.sh
+  node websocket-server.js
+```
+
 ## Helper commands
 
 * Clear cache.
