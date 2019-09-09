@@ -3,7 +3,6 @@ const rootPrefix = '../../..',
   util = require(rootPrefix + '/lib/util'),
   coreConstants = require(rootPrefix + '/config/coreConstants'),
   adminConstants = require(rootPrefix + '/lib/globalConstant/admin'),
-  localCipher = require(rootPrefix + '/lib/encryptors/localCipher'),
   databaseConstants = require(rootPrefix + '/lib/globalConstant/database');
 
 // Declare variables names.
@@ -139,7 +138,6 @@ class AdminModel extends ModelBase {
    * Get cookie value.
    *
    * @param {object} adminObj
-   * @param {string} decryptedEncryptionSalt
    * @param {object} options
    *
    * @returns {string}

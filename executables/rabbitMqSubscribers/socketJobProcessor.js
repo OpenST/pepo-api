@@ -69,8 +69,8 @@ class SocketJobProcessor extends RabbitMqProcessorBase {
   _pendingTasksDone() {
     let rmqTaskDone = super._pendingTasksDone();
     let websocketTaskDone = webSocketServerHelper.pendingTasksDone();
-    console.log('rmqTaskDone-----', rmqTaskDone);
-    console.log('websocketTaskDone-----', websocketTaskDone);
+    logger.log('rmqTaskDone-----', rmqTaskDone);
+    logger.log('websocketTaskDone-----', websocketTaskDone);
     if (rmqTaskDone && websocketTaskDone) {
       return true;
     }
@@ -103,7 +103,7 @@ class SocketJobProcessor extends RabbitMqProcessorBase {
       for (let i = 0; i < socketObjectIds.length; i++) {
         logger.log('userIds[j] ===------------==', j, userIds[j]);
         let socketObj = webSocketCustomCache.getFromSocketObjsMap(socketObjectIds[i]);
-        socketObj.emit('server-event', JSON.stringify(messagePayload));
+        socketObj.emit('pepo-stream', messagePayload);
       }
     }
 

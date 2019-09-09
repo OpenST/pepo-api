@@ -37,10 +37,33 @@ const v1Signature = {
     ],
     optional: []
   },
+  [apiName.logout]: {
+    mandatory: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      }
+    ],
+    optional: [
+      {
+        parameter: 'device_id',
+        validatorMethods: ['validateString']
+      }
+    ]
+  },
   [apiName.recoveryInfo]: {
     mandatory: [
       {
         parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      }
+    ],
+    optional: []
+  },
+  [apiName.sendDoubleOptIn]: {
+    mandatory: [
+      {
+        parameter: 'pre_launch_invite_obj',
         validatorMethods: ['validateNonEmptyObject']
       }
     ],
@@ -125,15 +148,6 @@ const v1Signature = {
     mandatory: [
       {
         parameter: 'current_user',
-        validatorMethods: ['validateNonEmptyObject']
-      }
-    ],
-    optional: []
-  },
-  [apiName.loggedInAdmin]: {
-    mandatory: [
-      {
-        parameter: 'current_admin',
         validatorMethods: ['validateNonEmptyObject']
       }
     ],
@@ -288,7 +302,15 @@ const v1Signature = {
       {
         parameter: 'image_size',
         validatorMethods: ['validateInteger']
-      }
+      },
+      {
+        parameter: 'video_description',
+        validatorMethods: ['validateString']
+      },
+      {
+        parameter: 'link',
+        validatorMethods: ['validateString']
+      } // If link is invalid, consider empty string.
     ]
   },
   [apiName.saveProfileImage]: {
@@ -475,19 +497,6 @@ const v1Signature = {
       }
     ]
   },
-  [apiName.adminLogin]: {
-    mandatory: [
-      {
-        parameter: 'email',
-        validatorMethods: ['isValidEmail']
-      },
-      {
-        parameter: 'password',
-        validatorMethods: ['validatePassword']
-      }
-    ],
-    optional: []
-  },
   [apiName.userSearch]: {
     mandatory: [
       {
@@ -497,23 +506,18 @@ const v1Signature = {
     ],
     optional: [
       {
-        parameter: 'include_admin_related_details',
-        validatorMethods: ['validateBoolean']
-      },
-      {
         parameter: paginationConstants.paginationIdentifierKey,
         validatorMethods: ['validateString', 'validatePaginationIdentifier']
       }
     ]
   },
   [apiName.adminUserSearch]: {
-    mandatory: [
-      {
-        parameter: 'search_by_admin',
-        validatorMethods: ['validateBoolean']
-      }
-    ],
+    mandatory: [],
     optional: [
+      {
+        parameter: 'includeVideos',
+        validatorMethods: ['validateBoolean']
+      },
       {
         parameter: 'q',
         validatorMethods: ['validateString']
@@ -529,23 +533,6 @@ const v1Signature = {
       {
         parameter: 'user_ids',
         validatorMethods: ['validateArray']
-      },
-      {
-        parameter: 'current_admin',
-        validatorMethods: ['validateNonEmptyObject']
-      }
-    ],
-    optional: []
-  },
-  [apiName.adminUserBlock]: {
-    mandatory: [
-      {
-        parameter: 'user_ids',
-        validatorMethods: ['validateArray']
-      },
-      {
-        parameter: 'current_admin',
-        validatorMethods: ['validateNonEmptyObject']
       }
     ],
     optional: []
@@ -562,6 +549,34 @@ const v1Signature = {
       }
     ],
     optional: []
+  },
+  [apiName.addDeviceToken]: {
+    mandatory: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      },
+      {
+        parameter: 'user_id',
+        validatorMethods: ['validateNonZeroInteger']
+      },
+      {
+        parameter: 'device_id',
+        validatorMethods: ['validateNonBlankString']
+      },
+      {
+        parameter: 'device_kind',
+        validatorMethods: ['validateNonBlankString']
+      },
+      {
+        parameter: 'device_token',
+        validatorMethods: ['validateNonBlankString']
+      },
+      {
+        parameter: 'user_timezone',
+        validatorMethods: ['validateNonBlankString']
+      }
+    ]
   },
   [apiName.confirmPayReceipt]: {
     mandatory: [

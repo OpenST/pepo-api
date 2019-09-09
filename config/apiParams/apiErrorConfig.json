@@ -4,6 +4,11 @@
     "code": "BAD_REQUEST",
     "message": "At least one parameter is invalid or missing. See \"err.error_data\" array for more details."
   },
+  "forbidden_api_request": {
+    "http_code": "403",
+    "code": "FORBIDDEN",
+    "message": "Invalid Request. Form tampered with "
+  },
   "unauthorized_api_request": {
     "http_code": "401",
     "code": "UNAUTHORIZED",

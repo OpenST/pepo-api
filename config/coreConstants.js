@@ -286,6 +286,14 @@ class CoreConstants {
     return process.env.PA_COOKIE_SECRET;
   }
 
+  get ADMIN_COOKIE_SECRET() {
+    return process.env.PA_PAD_COOKIE_SECRET;
+  }
+
+  get WEB_COOKIE_SECRET() {
+    return process.env.PA_PW_COOKIE_SECRET;
+  }
+
   get PA_COOKIE_TOKEN_SECRET() {
     return process.env.PA_COOKIE_TOKEN_SECRET;
   }
@@ -355,6 +363,10 @@ class CoreConstants {
     return process.env.PR_LAMBDA_VIDEO_COMPRESS_FUNCTION;
   }
 
+  get PA_EMAIL_TOKENS_DECRIPTOR_KEY() {
+    return process.env.PA_EMAIL_TOKENS_DECRIPTOR_KEY;
+  }
+
   get PA_CDN_URL() {
     return process.env.PA_CDN_URL;
   }
@@ -369,6 +381,10 @@ class CoreConstants {
 
   get CASSANDRA_REPLICATION_LEVEL() {
     return process.env.DEFAULT_REPLICATION_LEVEL;
+  }
+
+  get TWITTER_OAUTH_URL() {
+    return process.env.TWITTER_OAUTH_URL;
   }
 }
 

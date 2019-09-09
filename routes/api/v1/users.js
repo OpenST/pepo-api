@@ -157,6 +157,7 @@ router.get('/:profile_user_id/profile', sanitizer.sanitizeDynamicUrlParams, func
       resultType: responseEntityKey.userProfile,
       entityKindToResponseKeyMap: {
         [entityType.userProfile]: responseEntityKey.userProfile,
+        [entityType.videoDescriptionsMap]: responseEntityKey.videoDescriptions,
         [entityType.usersMap]: responseEntityKey.users,
         [entityType.linksMap]: responseEntityKey.links,
         [entityType.imagesMap]: responseEntityKey.images,
@@ -215,6 +216,7 @@ router.get('/:profile_user_id/video-history', sanitizer.sanitizeDynamicUrlParams
         [entityType.usersMap]: responseEntityKey.users,
         [entityType.userStats]: responseEntityKey.userStats,
         [entityType.userProfilesMap]: responseEntityKey.userProfiles,
+        [entityType.videoDescriptionsMap]: responseEntityKey.videoDescriptions,
         [entityType.tagsMap]: responseEntityKey.tags,
         [entityType.linksMap]: responseEntityKey.links,
         [entityType.imagesMap]: responseEntityKey.images,
@@ -266,10 +268,9 @@ router.post('/thank-you', sanitizer.sanitizeDynamicUrlParams, function(req, res,
   Promise.resolve(routeHelper.perform(req, res, next, '/user/notification/SayThankYou', 'r_a_v1_u_14', null));
 });
 
-/* user search */
+/* User search */
 router.get('/search', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.userSearch;
-  req.decodedParams.includeVideos = false;
 
   const dataFormatterFunc = async function(serviceResponse) {
     const wrapperFormatterRsp = await new FormatterComposer({
@@ -287,6 +288,14 @@ router.get('/search', sanitizer.sanitizeDynamicUrlParams, function(req, res, nex
   };
 
   Promise.resolve(routeHelper.perform(req, res, next, '/user/Search', 'r_a_v1_u_14', null, dataFormatterFunc));
+});
+
+/* Add device token*/
+router.post('/:user_id/device-token', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.addDeviceToken;
+  req.decodedParams.user_id = req.params.user_id;
+
+  Promise.resolve(routeHelper.perform(req, res, next, '/user/AddDeviceToken', 'r_a_v1_u_15', null));
 });
 
 /* Available Products*/

@@ -7,13 +7,13 @@ const rootPrefix = '../../..',
 const dbName = databaseConstants.socketDbName;
 
 /**
- * Class for UserSocketConnectionDetails model.
+ * Class for user socket connection details model.
  *
  * @class UserSocketConnectionDetails
  */
 class UserSocketConnectionDetails extends ModelBase {
   /**
-   * Constructor for UserSocketConnectionDetails model.
+   * Constructor for user socket connection details model.
    *
    * @augments ModelBase
    *
@@ -84,9 +84,9 @@ class UserSocketConnectionDetails extends ModelBase {
   }
 
   /**
-   * Fetch user socket connection details object for given user_ids.
+   * Fetch user socket connection details object for given userIds.
    *
-   * @param {array} userIds: user ids
+   * @param {array<string>} userIds: user ids
    *
    * @return {object}
    */
@@ -109,9 +109,9 @@ class UserSocketConnectionDetails extends ModelBase {
   }
 
   /**
-   * Fetch active user socket connection details object for given user_ids.
+   * Fetch active user socket connection details object for given userIds.
    *
-   * @param {array} userIds: user ids
+   * @param {array<string>} userIds: user ids
    *
    * @return {object}
    */
@@ -138,7 +138,10 @@ class UserSocketConnectionDetails extends ModelBase {
   }
 
   /**
-   * Modify socket connection details.
+   * Mark socket connection details as expired.
+   *
+   * @param {array<number>} userSocketConnDetailsIds
+   * @param {array<number>} userIds
    *
    * @returns {Promise<void>}
    * @private
@@ -162,7 +165,7 @@ class UserSocketConnectionDetails extends ModelBase {
    * Flush cache.
    *
    * @param {object} params
-   * @param {number} params.userId
+   * @param {array<number>} params.userIds
    *
    * @returns {Promise<*>}
    */

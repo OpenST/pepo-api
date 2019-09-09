@@ -1,76 +1,73 @@
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
-  responseHelper = require(rootPrefix + '/lib/formatter/response'),
   AdminByIdCache = require(rootPrefix + '/lib/cacheManagement/single/AdminById'),
+  responseHelper = require(rootPrefix + '/lib/formatter/response'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger');
 
+/**
+ * Class to get current admin.
+ *
+ * @class GetCurrentAdmin
+ */
 class GetCurrentAdmin extends ServiceBase {
   /**
-   * @param {Object} params
-   * @param {String} params.current_admin: User Admin
+   * Constructor to get current admin.
+   *
+   * @param {object} params
+   * @param {object} params.current_admin: User Admin
+   * @param {number} params.current_admin.id: User Admin Id.
+   *
+   * @augments ServiceBase
    *
    * @constructor
    */
   constructor(params) {
-    super(params);
+    super();
 
     const oThis = this;
 
     oThis.adminId = params.current_admin.id;
-    oThis.pricePoints = {};
-    oThis.tokenDetails = {};
+
+    oThis.currentAdmin = {};
   }
 
   /**
-   * perform
+   * Async perform.
    *
-   * @return {Promise<void>}
+   * @returns {Promise<result>}
+   * @private
    */
   async _asyncPerform() {
     const oThis = this;
 
     await oThis._fetchAdmin();
 
-    return Promise.resolve(oThis._serviceResponse());
+    return responseHelper.successWithData({
+      admin: oThis.currentAdmin
+    });
   }
 
   /**
-   * Fetch Secure user
+   * Fetch admin.
    *
+   * @sets oThis.currentAdmin
    *
-   * @return {Promise<void>}
-   *
+   * @returns {Promise<result>}
    * @private
    */
   async _fetchAdmin() {
     const oThis = this;
-    logger.log('fetch Admin');
+
+    logger.log('Fetching admin.');
 
     const cacheResponse = await new AdminByIdCache({ id: oThis.adminId }).fetch();
-
     if (cacheResponse.isFailure()) {
       return Promise.reject(cacheResponse);
     }
 
     oThis.currentAdmin = cacheResponse.data || {};
 
-    return Promise.resolve(responseHelper.successWithData({}));
-  }
-
-  /**
-   * Response for service
-   *
-   *
-   * @return {Promise<void>}
-   *
-   * @private
-   */
-  async _serviceResponse() {
-    const oThis = this;
-
-    return responseHelper.successWithData({
-      admin: oThis.currentAdmin
-    });
+    return responseHelper.successWithData({});
   }
 }
 

@@ -1,9 +1,3 @@
-/**
- * Perform basic validations
- *
- * @module helpers/basic
- */
-
 const BigNumber = require('bignumber.js');
 
 const rootPrefix = '..',
@@ -12,6 +6,8 @@ const rootPrefix = '..',
   apiVersions = require(rootPrefix + '/lib/globalConstant/apiVersions'),
   apiErrorConfig = require(rootPrefix + '/config/apiParams/apiErrorConfig'),
   v1ParamErrorConfig = require(rootPrefix + '/config/apiParams/v1/errorConfig'),
+  adminParamErrorConfig = require(rootPrefix + '/config/apiParams/admin/errorConfig'),
+  webParamErrorConfig = require(rootPrefix + '/config/apiParams/web/errorConfig'),
   internalParamErrorConfig = require(rootPrefix + '/config/apiParams/internal/errorConfig');
 
 /**
@@ -269,6 +265,14 @@ class BasicHelper {
       paramErrorConfig = dynamicErrorConfig
         ? Object.assign(dynamicErrorConfig, internalParamErrorConfig)
         : internalParamErrorConfig;
+    } else if (apiVersion === apiVersions.admin) {
+      paramErrorConfig = dynamicErrorConfig
+        ? Object.assign(dynamicErrorConfig, adminParamErrorConfig)
+        : adminParamErrorConfig;
+    } else if (apiVersion === apiVersions.web) {
+      paramErrorConfig = dynamicErrorConfig
+        ? Object.assign(dynamicErrorConfig, webParamErrorConfig)
+        : webParamErrorConfig;
     } else {
       throw new Error(`Unsupported API Version ${apiVersion}`);
     }
@@ -286,7 +290,7 @@ class BasicHelper {
    *
    * @return {array}
    */
-  commaSeperatedStrToArray(str) {
+  commaSeparatedStrToArray(str) {
     return str.split(',').map((ele) => ele.trim());
   }
 
@@ -497,7 +501,7 @@ class BasicHelper {
    */
   parseAmpersandSeparatedKeyValue(response) {
     const finalResponse = {};
-    response.split('&').forEach(function(keyValPair) {
+    response.split('&amp;').forEach(function(keyValPair) {
       const val = keyValPair.split('=');
       finalResponse[val[0]] = val[1];
     });

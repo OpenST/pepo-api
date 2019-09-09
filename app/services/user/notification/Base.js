@@ -154,7 +154,8 @@ class UserNotificationBase extends ServiceBase {
       supportingEntities: {
         [responseEntityKey.users]: oThis.usersByIdMap
       },
-      userNotification: userNotification
+      userNotification: userNotification,
+      notificationType: oThis._notificationType
     };
 
     const resp = NotificationResponseHelper.getImageIdForNotification(params);
@@ -175,7 +176,10 @@ class UserNotificationBase extends ServiceBase {
   async _getPayload(userNotification) {
     const oThis = this;
 
-    const resp = NotificationResponseHelper.getPayloadDataForNotification({ userNotification: userNotification });
+    const resp = NotificationResponseHelper.getPayloadDataForNotification({
+      userNotification: userNotification,
+      notificationType: oThis._notificationType
+    });
 
     if (resp.isFailure()) {
       return Promise.reject(resp);
@@ -197,7 +201,8 @@ class UserNotificationBase extends ServiceBase {
       supportingEntities: {
         [responseEntityKey.users]: oThis.usersByIdMap
       },
-      userNotification: userNotification
+      userNotification: userNotification,
+      notificationType: oThis._notificationType
     };
 
     const resp = NotificationResponseHelper.getHeadingForNotification(params);
@@ -216,7 +221,12 @@ class UserNotificationBase extends ServiceBase {
    * @private
    */
   async _getGoto(userNotification) {
-    const resp = NotificationResponseHelper.getGotoForNotification({ userNotification: userNotification });
+    const oThis = this;
+
+    const resp = NotificationResponseHelper.getGotoForNotification({
+      userNotification: userNotification,
+      notificationType: oThis._notificationType
+    });
 
     if (resp.isFailure()) {
       return Promise.reject(resp);
@@ -237,10 +247,12 @@ class UserNotificationBase extends ServiceBase {
     const oThis = this;
 
     for (let index = 0; index < oThis.userNotifications.length; index++) {
-      const userNotification = NotificationResponseHelper.getFlattenedObject(oThis.userNotifications[index]);
+      const userNotification = oThis.userNotifications[index];
+      // const userNotification = NotificationResponseHelper.getFlattenedObject(oThis.userNotifications[index]);
 
       const supportingEntitiesConfig = NotificationResponseHelper.getSupportingEntitiesConfigForKind(
-        userNotification.kind
+        userNotification.kind,
+        oThis._notificationType
       );
 
       oThis.userIds = oThis.userIds.concat(
@@ -506,6 +518,10 @@ class UserNotificationBase extends ServiceBase {
       imageMap: oThis.imageMap,
       videoMap: oThis.videoMap
     };
+  }
+
+  get _notificationType() {
+    return userNotificationConstants.notificationCentreType;
   }
 }
 

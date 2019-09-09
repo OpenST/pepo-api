@@ -179,6 +179,11 @@ const v1ErrorConfig = {
     parameter: 'receipt',
     code: 'invalid',
     message: 'Invalid receipt.'
+  },
+  invalid_device_kind: {
+    parameter: 'device_kind',
+    code: 'invalid',
+    message: 'Invalid device kind.'
   }
 };
 
