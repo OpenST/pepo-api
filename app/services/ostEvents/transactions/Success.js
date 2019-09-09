@@ -85,7 +85,13 @@ class SuccessTransactionOstEvent extends TransactionOstEventBase {
       const promiseArray = [];
       promiseArray.push(oThis.updateTransaction());
       promiseArray.push(oThis.processForAirdropTransaction());
-      promiseArray.push(oThis._enqueueUserNotification());
+      promiseArray.push(oThis._enqueueUserNotification(notificationJobConstants.airdropDone));
+      await Promise.all(promiseArray);
+    } else if (oThis.transactionObj.extraData.kind === transactionConstants.extraData.topUpKind) {
+      await oThis.validateToUserId();
+      const promiseArray = [];
+      promiseArray.push(oThis.updateTransaction());
+      promiseArray.push(oThis._enqueueUserNotification(notificationJobConstants.topupDone));
       await Promise.all(promiseArray);
     }
   }
@@ -96,10 +102,10 @@ class SuccessTransactionOstEvent extends TransactionOstEventBase {
    * @returns {Promise<void>}
    * @private
    */
-  async _enqueueUserNotification() {
+  async _enqueueUserNotification(topic) {
     const oThis = this;
     // Notification would be published only if user is approved.
-    await notificationJobEnqueue.enqueue(notificationJobConstants.airdropDone, { transaction: oThis.transactionObj });
+    await notificationJobEnqueue.enqueue(topic, { transaction: oThis.transactionObj });
   }
 
   /**
