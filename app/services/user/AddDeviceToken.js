@@ -119,6 +119,7 @@ class AddDeviceToken extends ServiceBase {
         if (UserDeviceModel.isDuplicateIndexViolation(UserDeviceModel.userDeviceUniqueIndexName, err)) {
           await new UserDeviceModel()
             .update({
+              status: userDeviceConstants.invertedStatuses[userDeviceConstants.activeStatus],
               device_token: oThis.deviceToken,
               user_timezone: oThis.userTimeZone
             })
@@ -145,7 +146,7 @@ class AddDeviceToken extends ServiceBase {
   async _resetUnreadNotificationsCount() {
     const oThis = this;
 
-    let queryRsp = await new UserNotificationsCountModel().fetchUnreadNotificationCount({ userIds: oThis.userId });
+    let queryRsp = await new UserNotificationsCountModel().fetchUnreadNotificationCount({ userIds: [oThis.userId] });
 
     console.log('queryRsp---', queryRsp);
 

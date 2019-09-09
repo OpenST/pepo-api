@@ -111,7 +111,7 @@ class UserNotificationCountModel extends CassandraModelBase {
    * Fetch unread notification count.
    *
    * @param queryParams
-   * @param {string/number} queryParams.userIds
+   * @param {Array} queryParams.userIds
    *
    * @returns {*}
    */
