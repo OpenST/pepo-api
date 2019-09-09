@@ -18,10 +18,6 @@ const rootPrefix = '../../..',
 router.post('/logout', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.logout;
 
-  const errorConfig = basicHelper.fetchErrorConfig(req.decodedParams.apiVersion);
-
-  cookieHelper.deleteLoginCookie(res);
-
   Promise.resolve(routeHelper.perform(req, res, next, '/Logout', 'r_a_v1_a_2', null));
 });
 
