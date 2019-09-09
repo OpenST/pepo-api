@@ -320,4 +320,23 @@ router.get('/available-products', sanitizer.sanitizeDynamicUrlParams, function(r
   );
 });
 
+/* user pending topups */
+router.get('/pending-topups', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.userTopUps;
+
+  const dataFormatterFunc = async function(serviceResponse) {
+    const wrapperFormatterRsp = await new FormatterComposer({
+      resultType: responseEntityKey.pendingTopups,
+      entityKindToResponseKeyMap: {
+        [entityType.userTopUpsList]: responseEntityKey.pendingTopups
+      },
+      serviceData: serviceResponse.data
+    }).perform();
+
+    serviceResponse.data = wrapperFormatterRsp.data;
+  };
+
+  Promise.resolve(routeHelper.perform(req, res, next, '/user/PendingTopUps', 'r_a_v1_u_16', null, dataFormatterFunc));
+});
+
 module.exports = router;
