@@ -56,7 +56,7 @@ class AddDeviceToken extends ServiceBase {
 
     await oThis._insertIntoUserDevices();
 
-    await oThis._resetUnreadNotificationsCount();
+    //await oThis._resetUnreadNotificationsCount();
 
     return responseHelper.successWithData({});
   }
@@ -145,7 +145,9 @@ class AddDeviceToken extends ServiceBase {
   async _resetUnreadNotificationsCount() {
     const oThis = this;
 
-    await UserNotificationsCountModel.resetUnreadNotificationCount({ userId: oThis.userId });
+    console.log('oThis.userId---', oThis.userId);
+
+    await new UserNotificationsCountModel().resetUnreadNotificationCount({ userId: oThis.userId });
   }
 }
 
