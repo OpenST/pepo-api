@@ -80,7 +80,7 @@ class UserNotificationCountModel extends CassandraModelBase {
     const query =
       'UPDATE ' +
       oThis.queryTableName +
-      ' SET unread_notification_count = unread_notification_count + 1 where user_id = ?;';
+      ' SET unread_notification_count = unread_notification_count + 1 WHERE user_id = ?;';
     const params = [queryParams.userId];
 
     return oThis.fire(query, params);
@@ -97,7 +97,7 @@ class UserNotificationCountModel extends CassandraModelBase {
   async resetUnreadNotificationCount(queryParams) {
     const oThis = this;
 
-    const query = 'UPDATE ' + oThis.queryTableName + ' SET unread_notification_count = 0 where user_id = ?;';
+    const query = 'UPDATE ' + oThis.queryTableName + ' SET unread_notification_count = 0 WHERE user_id = ?;';
     const params = [queryParams.userId];
 
     return oThis.fire(query, params);
@@ -115,7 +115,7 @@ class UserNotificationCountModel extends CassandraModelBase {
     const oThis = this,
       userIds = queryParams.userIds;
 
-    const query = `select unread_notification_count from ${oThis.queryTableName} where user_id IN ?;`;
+    const query = `SELECT unread_notification_count FROM ${oThis.queryTableName} WHERE user_id IN ?;`;
     const params = [userIds];
 
     const queryRsp = await oThis.fire(query, params);
