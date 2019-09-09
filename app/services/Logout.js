@@ -9,7 +9,7 @@ class Logout extends ServiceBase {
    * Constructor for Logout service.
    *
    * @param {object} params
-   * @param {object} params.current_user
+   * @param {object} [params.current_user]
    * @param {object} [params.device_id]
    *
    * @augments ServiceBase
@@ -44,7 +44,7 @@ class Logout extends ServiceBase {
   async _logoutUserDevices() {
     const oThis = this;
 
-    if (!oThis.deviceId) {
+    if (!oThis.deviceId || !oThis.currentUserId) {
       return responseHelper.successWithData({});
     }
 

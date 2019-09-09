@@ -67,10 +67,28 @@ const validateLoginRequired = async function(req, res, next) {
   next();
 };
 
+const validateCookieForLogout = async function(req, res, next) {
+  let loginCookieValue = req.signedCookies[userConstant.loginCookieName];
+  if (!commonValidator.isVarNullOrUndefined(loginCookieValue)) {
+    let authResponse = await new LoginCookieAuth(loginCookieValue).perform().catch(function(r) {
+      return r;
+    });
+
+    if (authResponse.isSuccess()) {
+      req.decodedParams.current_user = authResponse.data.current_user;
+      req.decodedParams.user_login_cookie_value = authResponse.data.user_login_cookie_value;
+    }
+  }
+
+  cookieHelper.deleteLoginCookie(res);
+
+  next();
+};
+
 // NOTE:- use 'validateLoginRequired' function if you want to use route in logged in only
 
 router.use('/auth/twitter-disconnect', validateCookie, validateLoginRequired, authRoutes);
-router.use('/auth/logout', validateCookie, authRoutes);
+router.use('/auth/logout', validateCookieForLogout, authRoutes);
 router.use('/auth', authRoutes);
 router.use('/users', validateCookie, validateLoginRequired, usersRoutes);
 router.use('/top-up', validateCookie, validateLoginRequired, topupRoutes);
