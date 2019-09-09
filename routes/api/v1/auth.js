@@ -15,15 +15,14 @@ const rootPrefix = '../../..',
   cookieHelper = require(rootPrefix + '/lib/cookieHelper');
 
 /* Logout user*/
-router.post('/logout', sanitizer.sanitizeDynamicUrlParams, function(req, res) {
+router.post('/logout', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.logout;
 
-  const errorConfig = basicHelper.fetchErrorConfig(req.decodedParams.apiVersion),
-    responseObject = responseHelper.successWithData({});
+  const errorConfig = basicHelper.fetchErrorConfig(req.decodedParams.apiVersion);
 
   cookieHelper.deleteLoginCookie(res);
 
-  Promise.resolve(responseHelper.renderApiResponse(responseObject, res, errorConfig));
+  Promise.resolve(routeHelper.perform(req, res, next, '/Logout', 'r_a_v1_a_2', null));
 });
 
 /* Twitter Connect*/

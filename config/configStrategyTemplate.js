@@ -78,6 +78,55 @@ class ConfigStrategyTemplate {
           localDataCenter: 'localDataCenterEntity'
         }
       },
+      firebaseEntity: {
+        entityType: 'object',
+        entitiesPresent: {
+          type: 'typeEntity',
+          projectId: 'projectIdEntity',
+          privateKeyId: 'privateKeyIdEntity',
+          privateKey: 'privateKeyEntity',
+          clientEmail: 'clientEmailEntity',
+          clientId: 'clientIdEntity',
+          authUri: 'authUriEntity',
+          tokenUri: 'tokenUriEntity',
+          authProviderx509CertUrl: 'authProviderx509CertUrlEntity',
+          clientx509CertUrl: 'clientx509CertUrlEntity',
+          databaseURL: 'databaseURLEntity'
+        }
+      },
+      typeEntity: {
+        entityType: 'string'
+      },
+      projectIdEntity: {
+        entityType: 'string'
+      },
+      privateKeyIdEntity: {
+        entityType: 'string'
+      },
+      privateKeyEntity: {
+        entityType: 'string'
+      },
+      clientEmailEntity: {
+        entityType: 'string'
+      },
+      clientIdEntity: {
+        entityType: 'string'
+      },
+      authUriEntity: {
+        entityType: 'string'
+      },
+      tokenUriEntity: {
+        entityType: 'string'
+      },
+      authProviderx509CertUrlEntity: {
+        entityType: 'string'
+      },
+      clientx509CertUrlEntity: {
+        entityType: 'string'
+      },
+      databaseURLEntity: {
+        entityType: 'string'
+      },
       socketRabbbitMqIdEntity: {
         entityType: 'string'
       },
@@ -154,7 +203,8 @@ class ConfigStrategyTemplate {
       [configStrategyConstants.notificationRabbitmq]: 'rabbitmqEntity',
       [configStrategyConstants.socketRabbitmq]: 'rabbitmqListEntity',
       [configStrategyConstants.websocket]: 'websocketEntity',
-      [configStrategyConstants.cassandra]: 'cassandraEntity'
+      [configStrategyConstants.cassandra]: 'cassandraEntity',
+      [configStrategyConstants.firebase]: 'firebaseEntity'
     };
   }
 }

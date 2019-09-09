@@ -2,9 +2,10 @@ const rootPrefix = '../../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   UserNotificationModel = require(rootPrefix + '/app/models/cassandra/UserNotification'),
-  ContributionThanksPublisher = require(rootPrefix + '/lib/userNotificationPublisher/ContributionThanks'),
   base64Helper = require(rootPrefix + '/lib/base64Helper'),
-  responseHelper = require(rootPrefix + '/lib/formatter/response');
+  responseHelper = require(rootPrefix + '/lib/formatter/response'),
+  notificationJobEnqueue = require(rootPrefix + '/lib/rabbitMqEnqueue/notification'),
+  notificationJobConstants = require(rootPrefix + '/lib/globalConstant/notificationJob');
 
 /**
  * Class for thank you notification.
@@ -210,11 +211,11 @@ class SayThankYou extends ServiceBase {
   async _enqueueUserNotification() {
     const oThis = this;
 
-    const params = {
+    // Notification would be published only if user is approved.
+    await notificationJobEnqueue.enqueue(notificationJobConstants.contributionThanks, {
       userNotification: oThis.userNotificationObj,
       text: oThis.text
-    };
-    await new ContributionThanksPublisher(params).perform();
+    });
   }
 }
 

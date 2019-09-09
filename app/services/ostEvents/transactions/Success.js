@@ -2,19 +2,13 @@ const rootPrefix = '../../../..',
   UpdateStats = require(rootPrefix + '/lib/UpdateStats'),
   TokenUserModel = require(rootPrefix + '/app/models/mysql/TokenUser'),
   TransactionOstEventBase = require(rootPrefix + '/app/services/ostEvents/transactions/Base'),
-  VideoTransactionSendSuccessNotification = require(rootPrefix +
-    '/lib/userNotificationPublisher/VideoTransactionSendSuccess'),
-  VideoTransactionReceiveSuccessNotification = require(rootPrefix +
-    '/lib/userNotificationPublisher/VideoTransactionReceiveSuccess'),
-  ProfileTransactionSendSuccessNotification = require(rootPrefix +
-    '/lib/userNotificationPublisher/ProfileTransactionSendSuccess'),
-  ProfileTransactionReceiveSuccessNotification = require(rootPrefix +
-    '/lib/userNotificationPublisher/ProfileTransactionReceiveSuccess'),
   basicHelper = require(rootPrefix + '/helpers/basic'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   tokenUserConstants = require(rootPrefix + '/lib/globalConstant/tokenUser'),
-  transactionConstants = require(rootPrefix + '/lib/globalConstant/transaction');
+  transactionConstants = require(rootPrefix + '/lib/globalConstant/transaction'),
+  notificationJobEnqueue = require(rootPrefix + '/lib/rabbitMqEnqueue/notification'),
+  notificationJobConstants = require(rootPrefix + '/lib/globalConstant/notificationJob');
 
 /**
  * Class for success transaction ost event base service.
@@ -91,8 +85,21 @@ class SuccessTransactionOstEvent extends TransactionOstEventBase {
       const promiseArray = [];
       promiseArray.push(oThis.updateTransaction());
       promiseArray.push(oThis.processForAirdropTransaction());
+      promiseArray.push(oThis._enqueueUserNotification());
       await Promise.all(promiseArray);
     }
+  }
+
+  /**
+   * Enqueue user notification.
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _enqueueUserNotification() {
+    const oThis = this;
+    // Notification would be published only if user is approved.
+    await notificationJobEnqueue.enqueue(notificationJobConstants.airdropDone, { transaction: oThis.transactionObj });
   }
 
   /**
@@ -155,23 +162,29 @@ class SuccessTransactionOstEvent extends TransactionOstEventBase {
 
     if (oThis.videoId) {
       promisesArray.push(
-        new VideoTransactionSendSuccessNotification({
+        notificationJobEnqueue.enqueue(notificationJobConstants.videoTxSendSuccess, {
           transaction: oThis.transactionObj,
           videoId: oThis.videoId
-        }).perform()
+        })
       );
+
       promisesArray.push(
-        new VideoTransactionReceiveSuccessNotification({
+        notificationJobEnqueue.enqueue(notificationJobConstants.videoTxReceiveSuccess, {
           transaction: oThis.transactionObj,
           videoId: oThis.videoId
-        }).perform()
+        })
       );
     } else {
       promisesArray.push(
-        new ProfileTransactionSendSuccessNotification({ transaction: oThis.transactionObj }).perform()
+        notificationJobEnqueue.enqueue(notificationJobConstants.profileTxSendSuccess, {
+          transaction: oThis.transactionObj
+        })
       );
+
       promisesArray.push(
-        new ProfileTransactionReceiveSuccessNotification({ transaction: oThis.transactionObj }).perform()
+        notificationJobEnqueue.enqueue(notificationJobConstants.profileTxReceiveSuccess, {
+          transaction: oThis.transactionObj
+        })
       );
     }
 

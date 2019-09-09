@@ -10,19 +10,23 @@ const rootPrefix = '../..',
   VideoDetailsByVideoIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/VideoDetailsByVideoIds'),
   ExternalEntitiesByEntityIdAndEntityKindCache = require(rootPrefix +
     '/lib/cacheManagement/single/ExternalEntitiyByEntityIdAndEntityKind'),
+  UserDeviceIdsByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/UserDeviceIdsByUserIds'),
   commonValidator = require(rootPrefix + '/lib/validators/Common'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   createErrorLogsEntry = require(rootPrefix + '/lib/errorLogs/createEntry'),
   errorLogsConstants = require(rootPrefix + '/lib/globalConstant/errorLogs'),
   transactionConstants = require(rootPrefix + '/lib/globalConstant/transaction'),
-  externalEntityConstants = require(rootPrefix + '/lib/globalConstant/externalEntity');
+  externalEntityConstants = require(rootPrefix + '/lib/globalConstant/externalEntity'),
+  notificationJobEnqueue = require(rootPrefix + '/lib/rabbitMqEnqueue/notification'),
+  notificationJobConstants = require(rootPrefix + '/lib/globalConstant/notificationJob');
 
 class OstTransaction extends ServiceBase {
   /**
    * @param {object} params
    * @param {object} params.ost_transaction
    * @param {object} params.current_user
+   * @param {object} [params.is_paper_plane]
    * @param {object} [params.meta]
    *
    * @constructor
@@ -33,6 +37,7 @@ class OstTransaction extends ServiceBase {
 
     oThis.transaction = params.ost_transaction;
     oThis.userId = params.current_user.id;
+    oThis.isPaperPlane = params.is_paper_plane;
 
     params.meta = params.meta || {};
 
@@ -44,6 +49,7 @@ class OstTransaction extends ServiceBase {
     oThis.ostTransactionStatus = oThis.transaction.status.toUpperCase();
     oThis.transfersData = oThis.transaction.transfers;
     oThis.fromOstUserId = oThis.transfersData[0].from_user_id;
+    oThis.toOstUserId = oThis.transfersData[0].to_user_id;
 
     oThis.textId = null;
     oThis.transactionId = null;
@@ -83,6 +89,10 @@ class OstTransaction extends ServiceBase {
     } else {
       await oThis._insertInTransactionAndAssociatedTables();
     }
+
+    await oThis._getUserIdFromOstUserIds();
+
+    await oThis._checkIfPushNotificationRequired();
 
     return Promise.resolve(responseHelper.successWithData());
   }
@@ -172,6 +182,63 @@ class OstTransaction extends ServiceBase {
 
       await Promise.all(promiseArray2);
     }
+  }
+
+  /**
+   * This function gives user id for the given ost user id(uuid).
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _getUserIdFromOstUserIds() {
+    const oThis = this;
+
+    const tokenUserRsp = await new TokenUserByOstUserIdsCache({
+      ostUserIds: [oThis.fromOstUserId, oThis.toOstUserId]
+    }).fetch();
+
+    if (tokenUserRsp.isFailure()) {
+      return Promise.reject(tokenUserRsp);
+    }
+
+    oThis.fromUserId = tokenUserRsp.data[oThis.fromOstUserId].userId;
+    oThis.toUserId = tokenUserRsp.data[oThis.toOstUserId].userId;
+  }
+
+  /**
+   * This function checks if push notification is required.
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _checkIfPushNotificationRequired() {
+    const oThis = this;
+
+    const userDeviceCacheRsp = await new UserDeviceIdsByUserIdsCache({ userIds: [oThis.toUserId] }).fetch();
+
+    if (userDeviceCacheRsp.isFailure()) {
+      return Promise.reject(userDeviceCacheRsp);
+    }
+
+    const userDeviceIds = userDeviceCacheRsp.data[oThis.toUserId];
+
+    if (Array.isArray(userDeviceIds) && userDeviceIds.length > 0) {
+      await oThis._enqueueUserNotification();
+    }
+  }
+
+  /**
+   * Enqueue user notification.
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _enqueueUserNotification() {
+    const oThis = this;
+    // Notification would be published only if user is approved.
+    await notificationJobEnqueue.enqueue(notificationJobConstants.paperPlaneTransaction, {
+      transaction: oThis.transactionObj
+    });
   }
 
   /**

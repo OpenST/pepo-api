@@ -3,14 +3,18 @@ const rootPrefix = '../../..',
   FeedModel = require(rootPrefix + '/app/models/mysql/Feed'),
   UserModelKlass = require(rootPrefix + '/app/models/mysql/User'),
   UsersCache = require(rootPrefix + '/lib/cacheManagement/multi/User'),
-  ActivityLogModel = require(rootPrefix + '/app/models/mysql/AdminActivityLog'),
-  VideoAddNotification = require(rootPrefix + '/lib/userNotificationPublisher/VideoAdd'),
   UserProfileElementsByUserIdCache = require(rootPrefix + '/lib/cacheManagement/multi/UserProfileElementsByUserIds'),
-  userConstants = require(rootPrefix + '/lib/globalConstant/user'),
+  userProfileElementConst = require(rootPrefix + '/lib/globalConstant/userProfileElement'),
+  VideoAddNotification = require(rootPrefix + '/lib/userNotificationPublisher/VideoAdd'),
+  ActivityLogModel = require(rootPrefix + '/app/models/mysql/AdminActivityLog'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
+  FeedModel = require(rootPrefix + '/app/models/mysql/Feed'),
   feedsConstants = require(rootPrefix + '/lib/globalConstant/feed'),
+  ActivityLogModel = require(rootPrefix + '/app/models/mysql/AdminActivityLog'),
   adminActivityLogConst = require(rootPrefix + '/lib/globalConstant/adminActivityLogs'),
-  userProfileElementConst = require(rootPrefix + '/lib/globalConstant/userProfileElement');
+  userConstants = require(rootPrefix + '/lib/globalConstant/user'),
+  notificationJobEnqueue = require(rootPrefix + '/lib/rabbitMqEnqueue/notification'),
+  notificationJobConstants = require(rootPrefix + '/lib/globalConstant/notificationJob');
 
 /**
  * Class to approve users by admin.
@@ -169,7 +173,12 @@ class ApproveUsersAsCreator extends ServiceBase {
       if (profileElements && profileElements[userProfileElementConst.coverVideoIdKind]) {
         const videoId = profileElements[userProfileElementConst.coverVideoIdKind].data;
         promises.push(oThis._addFeed(videoId, userId));
-        promises.push(new VideoAddNotification({ userId: userId, videoId: videoId }).perform());
+        promises.push(
+          notificationJobEnqueue.enqueue(notificationJobConstants.videoAdd, {
+            userId: oThis.profileUserId,
+            videoId: oThis.videoId
+          })
+        );
       }
     }
 

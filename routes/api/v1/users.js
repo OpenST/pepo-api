@@ -291,4 +291,12 @@ router.get('/search', sanitizer.sanitizeDynamicUrlParams, function(req, res, nex
   Promise.resolve(routeHelper.perform(req, res, next, '/user/Search', 'r_a_v1_u_14', null, dataFormatterFunc));
 });
 
+/* Add device token*/
+router.post('/:user_id/device-token', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.addDeviceToken;
+  req.decodedParams.user_id = req.params.user_id;
+
+  Promise.resolve(routeHelper.perform(req, res, next, '/user/AddDeviceToken', 'r_a_v1_u_15', null));
+});
+
 module.exports = router;
