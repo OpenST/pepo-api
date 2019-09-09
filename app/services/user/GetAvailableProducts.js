@@ -1,9 +1,11 @@
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   ProductsCache = require(rootPrefix + '/lib/cacheManagement/single/Products'),
-  FiatPaymentsByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/FiatPaymentsByUserIds'),
   InAppProductConstants = require(rootPrefix + '/lib/globalConstant/inAppProduct'),
-  responseHelper = require(rootPrefix + '/lib/formatter/response');
+  LifetimePurchaseByUserIdCache = require(rootPrefix + '/lib/cacheManagement/single/LifetimePurchaseByUserId'),
+  UserProfileElementsByUserId = require(rootPrefix + '/lib/cacheManagement/multi/UserProfileElementsByUserIds'),
+  responseHelper = require(rootPrefix + '/lib/formatter/response'),
+  userProfileElementConst = require(rootPrefix + '/lib/globalConstant/userProfileElement');
 
 /**
  * Class to get in app purchase products
@@ -27,9 +29,9 @@ class GetAvailableProducts extends ServiceBase {
     oThis.os = params.os;
 
     oThis.limitsData = {};
-    oThis.limitsData.monthly_limit_reached = 0;
-    oThis.limitsData.weekly_limit_reached = 0;
-    oThis.limitsData.daily_limit_reached = 0;
+    oThis.limitsData.lifetime_limit_reached = 0;
+    oThis.totalLifetimeSpends = null;
+    oThis.customPurchaseLimitOfUser = null;
   }
 
   /**
@@ -40,28 +42,14 @@ class GetAvailableProducts extends ServiceBase {
   async _asyncPerform() {
     const oThis = this;
 
-    let responseData1 = {
-      products: [
-        {
-          id: 'pd1',
-          amount_in_usd: '1',
-          amount_in_pepo: '1000',
-          uts: '1567601491491'
-        }
-      ],
-      limits_data: oThis.limitsData
-    };
-
-    return responseHelper.successWithData(responseData1);
-
     let promiseArray = [];
     promiseArray.push(oThis._fetchAvailableProducts());
     promiseArray.push(oThis._fetchUsersPurchaseData());
+    promiseArray.push(oThis._fetchUserPurchaseLimitData());
 
     await Promise.all(promiseArray);
 
-    let spendsData = oThis._getSpendsData(oThis.totalSpendsArray),
-      remainingLimit = oThis._calculateRemainingLimit(spendsData),
+    let remainingLimit = oThis._calculateRemainingLimit(oThis.totalLifetimeSpends),
       availableProducts = oThis._filterAvailableProducts(remainingLimit),
       formattedProductsArray = oThis._formatProductsData(availableProducts),
       responseData = {
@@ -99,82 +87,57 @@ class GetAvailableProducts extends ServiceBase {
   async _fetchUsersPurchaseData() {
     const oThis = this;
 
-    let cacheResponse = await new FiatPaymentsByUserIdsCache().fetch();
+    let cacheResponse = await new LifetimePurchaseByUserIdCache({ userId: [oThis.currentUser.id] }).fetch();
 
     if (cacheResponse.isFailure()) {
       return Promise.reject(cacheResponse);
     }
 
-    oThis.totalSpendsArray = cacheResponse.data[oThis.currentUser.id];
+    oThis.totalLifetimeSpends = cacheResponse.data[oThis.currentUser.id];
   }
 
   /**
-   * Get spends data
+   * Fetch user's purchase limit.
    *
-   * @param totalSpendsArray
-   * @returns {{monthlySpends: number, dailySpends: number, weeklySpends: number}}
+   * @returns {Promise<never>}
    * @private
    */
-  _getSpendsData(totalSpendsArray) {
+  async _fetchUserPurchaseLimitData() {
     const oThis = this;
 
-    let before24HoursTimeStamp = null,
-      before7DaysTimeStamp = null,
-      before30DaysTimeStamp = null,
-      spendsData = {
-        dailySpends: 0,
-        weeklySpends: 0,
-        monthlySpends: 0
-      };
+    let cacheResponse = await new UserProfileElementsByUserId({ usersIds: [oThis.currentUser.id] }).fetch();
 
-    for (let i = 0; i < totalSpendsArray.length; i++) {
-      let paymentDoneTimestamp = totalSpendsArray[i].createdAt;
-      if (paymentDoneTimestamp > before24HoursTimeStamp) {
-        spendsData.dailySpends = spendsData.dailySpends + totalSpendsArray[i].amount;
-        spendsData.weeklySpends = spendsData.weeklySpends + totalSpendsArray[i].amount;
-        spendsData.monthlySpends = spendsData.monthlySpends + totalSpendsArray[i].amount;
-      } else if (paymentDoneTimestamp > before7DaysTimeStamp && paymentDoneTimestamp < before24HoursTimeStamp) {
-        spendsData.weeklySpends = spendsData.weeklySpends + totalSpendsArray[i].amount;
-        spendsData.monthlySpends = spendsData.monthlySpends + totalSpendsArray[i].amount;
-      } else if (paymentDoneTimestamp > before30DaysTimeStamp && paymentDoneTimestamp < before7DaysTimeStamp) {
-        spendsData.monthlySpends = spendsData.monthlySpends + totalSpendsArray[i].amount;
-      }
+    if (cacheResponse.isFailure()) {
+      return Promise.reject(cacheResponse);
     }
 
-    return spendsData;
+    if (cacheResponse.data[oThis.currentUser.id][userProfileElementConst.lifetimePurchaseLimitKind]) {
+      oThis.customPurchaseLimitOfUser =
+        cacheResponse.data[oThis.currentUser.id][userProfileElementConst.lifetimePurchaseLimitKind].data;
+    }
   }
 
   /**
    * Calculates remaining limit using spends data
    *
-   * @param spendsData
+   * @param amountSpent
    * @returns {number}
    * @private
    */
-  _calculateRemainingLimit(spendsData) {
+  _calculateRemainingLimit(amountSpent) {
     const oThis = this;
 
-    let monthlyRemainingProductsCost = InAppProductConstants.monthlyLimit - spendsData.monthlySpends,
-      weeklyRemainingProductsCost = InAppProductConstants.weeklyLimit - spendsData.weeklySpends,
-      dailyRemainingProductsCost = InAppProductConstants.dailyLimit - spendsData.dailySpends,
-      actualRemainingLimit = Math.min(
-        monthlyRemainingProductsCost,
-        weeklyRemainingProductsCost,
-        dailyRemainingProductsCost
-      );
+    let remainingLimit = InAppProductConstants.lifetimeLimit - amountSpent;
 
-    if (monthlyRemainingProductsCost <= 0) {
-      oThis.limitsData.monthly_limit_reached = 1;
+    if (oThis.customPurchaseLimitOfUser) {
+      remainingLimit = oThis.customPurchaseLimitOfUser - amountSpent;
     }
 
-    if (weeklyRemainingProductsCost <= 0) {
-      oThis.limitsData.weekly_limit_reached = 1;
+    if (remainingLimit <= 0) {
+      oThis.limitsData.lifetime_limit_reached = 1;
     }
 
-    if (dailyRemainingProductsCost <= 0) {
-      oThis.limitsData.daily_limit_reached = 1;
-    }
-    return actualRemainingLimit;
+    return remainingLimit;
   }
 
   /**
@@ -190,8 +153,8 @@ class GetAvailableProducts extends ServiceBase {
     let productsArray = oThis.availableProducts.products,
       availableProductsArray = [];
 
-    for (let index = 0; index < productsArray; index++) {
-      if (productsArray[index].amountInUsd < remainingLimit) {
+    for (let index = 0; index < productsArray.length; index++) {
+      if (productsArray[index].amountInUsd <= remainingLimit) {
         availableProductsArray.push(productsArray[index]);
       }
     }

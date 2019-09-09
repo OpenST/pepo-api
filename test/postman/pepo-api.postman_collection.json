@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "3fdd5076-e7a7-4863-9ee8-6c0c7706561b",
+		"_postman_id": "f33599e3-87c9-4304-82f9-94ebdd9f903b",
 		"name": "pepo-api",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -77,22 +77,22 @@
 							"urlencoded": [
 								{
 									"key": "token",
-									"value": "819112169035988992-BWLGsfoJodpugIoICBTsYdLr7Agyk94",
+									"value": "3314410076-KgqysTVFwTln5KE1akmyDMepro4WNPSaZQwSsSO",
 									"type": "text"
 								},
 								{
 									"key": "secret",
-									"value": "3uthp75ekckxsTQG3SjrM60bPl1Z7zBYYFW7ltVoqD1VL",
+									"value": "d6apadYBdCzl28ozvgQestoTIdTJEIDe3R3ewDSBRBw7I",
 									"type": "text"
 								},
 								{
 									"key": "twitter_id",
-									"value": "819112169035988992",
+									"value": "3314410076",
 									"type": "text"
 								},
 								{
 									"key": "handle",
-									"value": "aman_barbaria",
+									"value": "singhankit2099",
 									"type": "text"
 								}
 							]

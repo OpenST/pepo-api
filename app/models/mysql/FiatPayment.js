@@ -182,6 +182,28 @@ class FiatPayment extends ModelBase {
   }
 
   /**
+   * Fetch life time payments
+   *
+   * @param userIds
+   * @returns {Promise<void>}
+   */
+  async fetchLifeTimePayments(userId) {
+    const oThis = this;
+
+    let totalAmount = 0,
+      queryResponse = await oThis
+        .select('sum(amount) as amount')
+        .where(['from_user_id = ?', userId])
+        .fire();
+
+    if (queryResponse[0].amount) {
+      totalAmount = queryResponse[0].amount;
+    }
+
+    return { amount: totalAmount };
+  }
+
+  /**
    * Flush cache.
    *
    * @param {object} params

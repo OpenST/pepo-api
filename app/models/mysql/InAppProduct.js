@@ -82,7 +82,14 @@ class InAppProduct extends ModelBase {
         inAppProductsConst.invertedStatuses[inAppProductsConst.active]
       ])
       .fire();
-    console.log('---queryResponse-------', queryResponse);
+
+    let responseData = [];
+    for (let i = 0; i < queryResponse.length; i++) {
+      let rowData = oThis._formatDbData(queryResponse[i]);
+      responseData.push(rowData);
+    }
+
+    return responseData;
   }
 
   /**
