@@ -10,7 +10,9 @@ const rootPrefix = '../..',
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   userConstants = require(rootPrefix + '/lib/globalConstant/user'),
-  apiVersions = require(rootPrefix + '/lib/globalConstant/apiVersions');
+  apiVersions = require(rootPrefix + '/lib/globalConstant/apiVersions'),
+  createErrorLogsEntry = require(rootPrefix + '/lib/errorLogs/createEntry'),
+  errorLogsConstants = require(rootPrefix + '/lib/globalConstant/errorLogs');
 
 // Declare error config.
 const errorConfig = basicHelper.fetchErrorConfig(apiVersions.v1);
@@ -51,8 +53,10 @@ class ServicesBase {
           debug_options: { error: err.toString() },
           error_config: errorConfig
         });
+
+        await createErrorLogsEntry.perform(errorObject, errorLogsConstants.mediumSeverity);
+        logger.error(' In catch block of services/Base.js', errorObject);
       }
-      logger.error(' In catch block of services/Base.js', err);
 
       return errorObject;
     });

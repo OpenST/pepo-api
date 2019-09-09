@@ -14,6 +14,8 @@ const responseHelper = require(rootPrefix + '/lib/formatter/response'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   customMiddleware = require(rootPrefix + '/helpers/customMiddleware'),
   apiVersions = require(rootPrefix + '/lib/globalConstant/apiVersions'),
+  createErrorLogsEntry = require(rootPrefix + '/lib/errorLogs/createEntry'),
+  errorLogsConstants = require(rootPrefix + '/lib/globalConstant/errorLogs'),
   basicHelper = require(rootPrefix + '/helpers/basic'),
   coreConstants = require(rootPrefix + '/config/coreConstants'),
   sanitizer = require(rootPrefix + '/helpers/sanitizer');
@@ -189,8 +191,11 @@ app.use(async function(err, req, res, next) {
     errorObject = responseHelper.error({
       internal_error_identifier: 'a_2',
       api_error_identifier: 'something_went_wrong',
-      debug_options: {}
+      debug_options: { err: err }
     });
+
+    await createErrorLogsEntry.perform(errorObject, errorLogsConstants.mediumSeverity);
+    logger.error(' In catch block of app.js', errorObject);
   }
 
   return responseHelper.renderApiResponse(errorObject, res, errorConfig);
