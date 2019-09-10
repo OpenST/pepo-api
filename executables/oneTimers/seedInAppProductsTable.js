@@ -49,7 +49,27 @@ class SeedInAppProductsTable {
   async perform() {
     const oThis = this;
 
-    await oThis._prepareDataAndInsert();
+    let variable = await oThis._getRunningId();
+
+    await oThis._prepareDataAndInsert(variable);
+  }
+
+  /**
+   * Get running id.
+   *
+   * @returns {Promise<number|*>}
+   * @private
+   */
+  async _getRunningId() {
+    const oThis = this;
+
+    let queryResponse = await new InAppProductsModel().select('MAX(id) AS id').fire();
+
+    if (!queryResponse[0] || !queryResponse[0].id) {
+      return 0;
+    }
+
+    return queryResponse[0].id;
   }
 
   /**
@@ -58,13 +78,13 @@ class SeedInAppProductsTable {
    * @returns {Promise<void>}
    * @private
    */
-  async _prepareDataAndInsert() {
+  async _prepareDataAndInsert(lastExistingId) {
     const oThis = this;
 
     let initialLowerLimit = 0.0,
-      range = 0.01,
+      range = 0.1,
       finalUpperLimit = 1.0,
-      variable = 0,
+      variable = parseInt(lastExistingId) + 1,
       precision = oThis.countDecimal(range);
 
     for (
@@ -89,8 +109,6 @@ class SeedInAppProductsTable {
         variable++;
 
         let insertResponse = await new InAppProductsModel().insert(insertData).fire();
-
-        console.log('---insertResponse---', insertResponse);
       }
     }
   }
