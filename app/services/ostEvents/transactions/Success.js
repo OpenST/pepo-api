@@ -2,6 +2,7 @@ const rootPrefix = '../../../..',
   UpdateStats = require(rootPrefix + '/lib/UpdateStats'),
   TokenUserModel = require(rootPrefix + '/app/models/mysql/TokenUser'),
   TransactionOstEventBase = require(rootPrefix + '/app/services/ostEvents/transactions/Base'),
+  UserDeviceIdsByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/UserDeviceIdsByUserIds'),
   basicHelper = require(rootPrefix + '/helpers/basic'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
@@ -58,6 +59,8 @@ class SuccessTransactionOstEvent extends TransactionOstEventBase {
       }
     }
 
+    await oThis._checkIfPushNotificationRequired();
+
     logger.log('Transaction Obj after receiving webhook: ', oThis.transactionObj);
 
     return Promise.resolve(responseHelper.successWithData({}));
@@ -87,7 +90,7 @@ class SuccessTransactionOstEvent extends TransactionOstEventBase {
       const promiseArray = [];
       promiseArray.push(oThis.updateTransaction());
       promiseArray.push(oThis.processForAirdropTransaction());
-      promiseArray.push(oThis._enqueueUserNotification());
+      promiseArray.push(oThis._enqueueUserNotification(notificationJobConstants.airdropDone));
       await Promise.all(promiseArray);
     }
   }
@@ -98,10 +101,10 @@ class SuccessTransactionOstEvent extends TransactionOstEventBase {
    * @returns {Promise<void>}
    * @private
    */
-  async _enqueueUserNotification() {
+  async _enqueueUserNotification(topic) {
     const oThis = this;
     // Notification would be published only if user is approved.
-    await notificationJobEnqueue.enqueue(notificationJobConstants.airdropDone, { transaction: oThis.transactionObj });
+    await notificationJobEnqueue.enqueue(topic, { transaction: oThis.transactionObj });
   }
 
   /**
@@ -149,6 +152,31 @@ class SuccessTransactionOstEvent extends TransactionOstEventBase {
     const updateStatsObj = new UpdateStats(updateStatsParams);
 
     await updateStatsObj.perform();
+  }
+
+  /**
+   * This function checks if push notification is required.
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _checkIfPushNotificationRequired() {
+    const oThis = this;
+
+    if (oThis.isPaperPlane) {
+      const toUserIds = oThis.transactionObj.extraData.toUserIds,
+        userDeviceCacheRsp = await new UserDeviceIdsByUserIdsCache({ userIds: toUserIds }).fetch();
+
+      if (userDeviceCacheRsp.isFailure()) {
+        return Promise.reject(userDeviceCacheRsp);
+      }
+
+      const userDeviceIds = userDeviceCacheRsp.data[toUserIds[0]];
+
+      if (Array.isArray(userDeviceIds) && userDeviceIds.length > 0) {
+        await oThis._enqueueUserNotification(notificationJobConstants.paperPlaneTransaction);
+      }
+    }
   }
 
   /**
