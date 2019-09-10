@@ -195,6 +195,10 @@ const v1Signature = {
       {
         parameter: 'meta',
         validatorMethods: ['validateNonEmptyObject', 'validateOstTransactionMeta']
+      },
+      {
+        parameter: 'is_paper_plane',
+        validatorMethods: ['validateBoolean']
       }
     ]
   },

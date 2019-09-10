@@ -89,9 +89,11 @@ class OstTransaction extends ServiceBase {
       await oThis._insertInTransactionAndAssociatedTables();
     }
 
-    await oThis._getUserIdFromOstUserIds();
+    if (oThis.isPaperPlane) {
+      await oThis._getUserIdFromOstUserIds();
 
-    await oThis._checkIfPushNotificationRequired();
+      await oThis._checkIfPushNotificationRequired();
+    }
 
     return Promise.resolve(responseHelper.successWithData());
   }
