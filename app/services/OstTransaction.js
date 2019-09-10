@@ -37,7 +37,6 @@ class OstTransaction extends ServiceBase {
 
     oThis.transaction = params.ost_transaction;
     oThis.userId = params.current_user.id;
-    oThis.isPaperPlane = params.is_paper_plane;
 
     params.meta = params.meta || {};
 
@@ -70,8 +69,6 @@ class OstTransaction extends ServiceBase {
   async _asyncPerform() {
     const oThis = this;
 
-    logger.log('oThis.transaction =====', oThis.transaction);
-
     oThis._validateAndSanitizeParams();
 
     const setStatusResponse = await oThis._setStatuses();
@@ -90,12 +87,6 @@ class OstTransaction extends ServiceBase {
       await oThis._updateTransaction();
     } else {
       await oThis._insertInTransactionAndAssociatedTables();
-    }
-
-    if (oThis.isPaperPlane) {
-      await oThis._getUserIdFromOstUserIds();
-
-      await oThis._checkIfPushNotificationRequired();
     }
 
     return Promise.resolve(responseHelper.successWithData());
@@ -186,63 +177,6 @@ class OstTransaction extends ServiceBase {
 
       await Promise.all(promiseArray2);
     }
-  }
-
-  /**
-   * This function gives user id for the given ost user id(uuid).
-   *
-   * @returns {Promise<void>}
-   * @private
-   */
-  async _getUserIdFromOstUserIds() {
-    const oThis = this;
-
-    const tokenUserRsp = await new TokenUserByOstUserIdsCache({
-      ostUserIds: [oThis.fromOstUserId, oThis.toOstUserId]
-    }).fetch();
-
-    if (tokenUserRsp.isFailure()) {
-      return Promise.reject(tokenUserRsp);
-    }
-
-    oThis.fromUserId = tokenUserRsp.data[oThis.fromOstUserId].userId;
-    oThis.toUserId = tokenUserRsp.data[oThis.toOstUserId].userId;
-  }
-
-  /**
-   * This function checks if push notification is required.
-   *
-   * @returns {Promise<void>}
-   * @private
-   */
-  async _checkIfPushNotificationRequired() {
-    const oThis = this;
-
-    const userDeviceCacheRsp = await new UserDeviceIdsByUserIdsCache({ userIds: [oThis.toUserId] }).fetch();
-
-    if (userDeviceCacheRsp.isFailure()) {
-      return Promise.reject(userDeviceCacheRsp);
-    }
-
-    const userDeviceIds = userDeviceCacheRsp.data[oThis.toUserId];
-
-    if (Array.isArray(userDeviceIds) && userDeviceIds.length > 0) {
-      await oThis._enqueueUserNotification();
-    }
-  }
-
-  /**
-   * Enqueue user notification.
-   *
-   * @returns {Promise<void>}
-   * @private
-   */
-  async _enqueueUserNotification() {
-    const oThis = this;
-    // Notification would be published only if user is approved.
-    await notificationJobEnqueue.enqueue(notificationJobConstants.paperPlaneTransaction, {
-      transaction: oThis.transactionObj
-    });
   }
 
   /**
