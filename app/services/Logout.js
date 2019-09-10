@@ -49,13 +49,12 @@ class Logout extends ServiceBase {
     }
 
     const userDeviceIdResp = await new UserDeviceModel()
-        .select('id')
-        .where({
-          user_id: oThis.currentUserId,
-          device_id: oThis.deviceId
-        })
-        .fire(),
-      userDeviceId = userDeviceIdResp[0].id;
+      .select('id')
+      .where({
+        user_id: oThis.currentUserId,
+        device_id: oThis.deviceId
+      })
+      .fire();
 
     await new UserDeviceModel()
       .update({ status: userDeviceConstants.invertedStatuses[userDeviceConstants.logoutStatus] })
@@ -65,7 +64,10 @@ class Logout extends ServiceBase {
       })
       .fire();
 
-    await UserDeviceModel.flushCache({ id: userDeviceId });
+    if (userDeviceIdResp && userDeviceIdResp[0] && userDeviceIdResp[0].id) {
+      const userDeviceId = userDeviceIdResp[0].id;
+      await UserDeviceModel.flushCache({ id: userDeviceId });
+    }
 
     return responseHelper.successWithData({});
   }
