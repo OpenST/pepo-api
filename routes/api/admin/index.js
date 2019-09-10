@@ -48,8 +48,8 @@ const validateAdminCookie = async function(req, res, next) {
   next();
 };
 
-// router.use(validateAdminCookie);
-// router.use(cookieHelper.setAdminCsrf());
+router.use(validateAdminCookie);
+router.use(cookieHelper.setAdminCsrf());
 
 /* Login admin */
 router.post('/login', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
