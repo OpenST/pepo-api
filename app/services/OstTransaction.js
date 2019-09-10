@@ -331,6 +331,7 @@ class OstTransaction extends ServiceBase {
 
     const transactionCacheResponse = await new TransactionByOstTxIdCache({ ostTxIds: [oThis.ostTxId] }).fetch();
 
+    logger.log('transactionCacheResponse =======', transactionCacheResponse);
     if (transactionCacheResponse.isFailure()) {
       return Promise.reject(
         responseHelper.error({
@@ -348,6 +349,8 @@ class OstTransaction extends ServiceBase {
       oThis.transactionId = transactionCacheResponse.data[oThis.ostTxId].id;
       oThis.transactionObj = transactionCacheResponse.data[oThis.ostTxId];
     }
+
+    logger.log('oThis.transactionObj =======', oThis.transactionObj);
   }
 
   /**
