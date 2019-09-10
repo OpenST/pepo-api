@@ -591,10 +591,6 @@ const v1Signature = {
       {
         parameter: 'os',
         validatorMethods: ['validateString']
-      },
-      {
-        parameter: 'user_id',
-        validatorMethods: ['validateString']
       }
     ],
     optional: []
