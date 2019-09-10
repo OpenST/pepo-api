@@ -2,8 +2,8 @@ const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   FiatPaymentModel = require(rootPrefix + '/app/models/mysql/FiatPayment'),
   fiatPaymentConstants = require(rootPrefix + '/lib/globalConstant/fiatPayment'),
-  ProcessApplePayPayment = require(rootPrefix + '/lib/payment/ProcessApplePay'),
-  ProcessGooglePayPayment = require(rootPrefix + '/lib/payment/ProcessGooglePay'),
+  ProcessApplePayPayment = require(rootPrefix + '/lib/payment/process/ApplePay.js'),
+  ProcessGooglePayPayment = require(rootPrefix + '/lib/payment/process/GooglePay'),
   bgJobConstants = require(rootPrefix + '/lib/globalConstant/bgJob'),
   bgJob = require(rootPrefix + '/lib/rabbitMqEnqueue/bgJob'),
   ostPricePointConstants = require(rootPrefix + '/lib/globalConstant/ostPricePoints'),
@@ -66,7 +66,7 @@ class PaymentProcessValidator extends ServiceBase {
 
   async _insertFiatPayment() {
     const oThis = this,
-      receiptId = oThis.getReceiptId(),
+      receiptId = oThis.paymentReceipt.transactionId,
       serviceKind = oThis.getServiceKind();
 
     let fiatPaymentCreateResp = await new FiatPaymentModel()
@@ -104,16 +104,6 @@ class PaymentProcessValidator extends ServiceBase {
       await new ProcessApplePayPayment(params).perform();
     } else if (oThis.os == 'android') {
       await new ProcessGooglePayPayment(params).perform();
-    }
-  }
-
-  getReceiptId() {
-    const oThis = this;
-
-    if (oThis.os == 'ios') {
-      return oThis.paymentReceipt.transactionId;
-    } else if (oThis.os == 'android') {
-      return 'Bad main batana.';
     }
   }
 

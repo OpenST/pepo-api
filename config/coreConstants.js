@@ -386,6 +386,14 @@ class CoreConstants {
   get TWITTER_OAUTH_URL() {
     return process.env.TWITTER_OAUTH_URL;
   }
+
+  get GOOGLE_INAPP_SERVICE_ACCOUNT_EMAIL() {
+    return process.env.PA_GOOGLE_INAPP_SERVICE_ACCOUNT_EMAIL;
+  }
+
+  get GOOGLE_INAPP_SERVICE_ACCOUNT_KEY() {
+    return process.env.PA_GOOGLE_INAPP_SERVICE_ACCOUNT_KEY;
+  }
 }
 
 module.exports = new CoreConstants();
