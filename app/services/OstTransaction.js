@@ -10,7 +10,6 @@ const rootPrefix = '../..',
   VideoDetailsByVideoIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/VideoDetailsByVideoIds'),
   ExternalEntitiesByEntityIdAndEntityKindCache = require(rootPrefix +
     '/lib/cacheManagement/single/ExternalEntitiyByEntityIdAndEntityKind'),
-  UserDeviceIdsByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/UserDeviceIdsByUserIds'),
   commonValidator = require(rootPrefix + '/lib/validators/Common'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),

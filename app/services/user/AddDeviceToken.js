@@ -107,7 +107,6 @@ class AddDeviceToken extends ServiceBase {
       user_id: oThis.currentUserId,
       device_id: oThis.deviceId,
       device_token: oThis.deviceToken,
-      user_timezone: oThis.userTimeZone,
       status: userDeviceConstants.invertedStatuses[userDeviceConstants.activeStatus],
       device_kind: userDeviceConstants.invertedUserDeviceKinds[oThis.deviceKind]
     };
@@ -120,8 +119,7 @@ class AddDeviceToken extends ServiceBase {
           await new UserDeviceModel()
             .update({
               status: userDeviceConstants.invertedStatuses[userDeviceConstants.activeStatus],
-              device_token: oThis.deviceToken,
-              user_timezone: oThis.userTimeZone
+              device_token: oThis.deviceToken
             })
             .where({
               user_id: oThis.currentUserId,
