@@ -48,8 +48,8 @@ const validateAdminCookie = async function(req, res, next) {
   next();
 };
 
-router.use(validateAdminCookie);
-router.use(cookieHelper.setAdminCsrf());
+// router.use(validateAdminCookie);
+// router.use(cookieHelper.setAdminCsrf());
 
 /* Login admin */
 router.post('/login', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
@@ -89,6 +89,7 @@ router.get('/users', sanitizer.sanitizeDynamicUrlParams, function(req, res, next
       entityKindToResponseKeyMap: {
         [entityType.userSearchList]: responseEntityKey.searchResults,
         [entityType.usersMap]: responseEntityKey.users,
+        [entityType.userStats]: responseEntityKey.userStats,
         [entityType.imagesMap]: responseEntityKey.images,
         [entityType.videosMap]: responseEntityKey.videos,
         [entityType.linksMap]: responseEntityKey.links,
@@ -97,8 +98,9 @@ router.get('/users', sanitizer.sanitizeDynamicUrlParams, function(req, res, next
       serviceData: serviceResponse.data
     }).perform();
 
-    wrapperFormatterRsp.data.admin_actions = serviceResponse.data.adminActions;
-    wrapperFormatterRsp.data.user_pepo_stats_map = serviceResponse.data.userPepoStatsMap;
+    // wrapperFormatterRsp.data.admin_actions = serviceResponse.data.adminActions;
+    // wrapperFormatterRsp.data.user_pepo_stats_map = serviceResponse.data.userPepoStatsMap;
+    wrapperFormatterRsp.data.user_view_link_map = serviceResponse.data.userViewLinkMap;
     wrapperFormatterRsp.data.user_pepo_coins_map = serviceResponse.data.userPepoCoinsMap;
     serviceResponse.data = wrapperFormatterRsp.data;
   };
