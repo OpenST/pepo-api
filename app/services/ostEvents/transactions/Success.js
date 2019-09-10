@@ -59,6 +59,8 @@ class SuccessTransactionOstEvent extends TransactionOstEventBase {
       }
     }
 
+    logger.log('Transaction Obj after receiving webhook: ', oThis.transactionObj);
+
     return Promise.resolve(responseHelper.successWithData({}));
   }
 
