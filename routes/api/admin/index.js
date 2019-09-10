@@ -195,6 +195,26 @@ router.get('/current', sanitizer.sanitizeDynamicUrlParams, function(req, res, ne
   Promise.resolve(routeHelper.perform(req, res, next, '/admin/GetCurrent', 'r_a_v1_ad_7', null, dataFormatterFunc));
 });
 
+/* Logged in Admin */
+router.get('/users/:user_id/balance', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.userBalance;
+  req.decodedParams.user_id = req.params.user_id;
+
+  const dataFormatterFunc = async function(serviceResponse) {
+    const wrapperFormatterRsp = await new FormatterComposer({
+      resultType: responseEntityKey.balance,
+      entityKindToResponseKeyMap: {
+        [entityType.balance]: responseEntityKey.balance
+      },
+      serviceData: serviceResponse.data
+    }).perform();
+
+    serviceResponse.data = wrapperFormatterRsp.data;
+  };
+
+  Promise.resolve(routeHelper.perform(req, res, next, '/user/GetBalance', 'r_a_v1_ad_8', null, dataFormatterFunc));
+});
+
 router.use('/pre-launch', adminPreLaunchRoutes);
 
 module.exports = router;
