@@ -14,6 +14,7 @@ const rootPrefix = '../..',
   commonValidator = require(rootPrefix + '/lib/validators/Common'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
+  logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   createErrorLogsEntry = require(rootPrefix + '/lib/errorLogs/createEntry'),
   errorLogsConstants = require(rootPrefix + '/lib/globalConstant/errorLogs'),
   transactionConstants = require(rootPrefix + '/lib/globalConstant/transaction'),
@@ -69,6 +70,8 @@ class OstTransaction extends ServiceBase {
    */
   async _asyncPerform() {
     const oThis = this;
+
+    logger.log('oThis.transaction =====', oThis.transaction);
 
     oThis._validateAndSanitizeParams();
 
