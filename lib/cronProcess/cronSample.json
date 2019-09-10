@@ -15,5 +15,8 @@
   },
   "pushNotificationHookProcessor": {
     "sequenceNumber": 1
+  },
+  "pushNotificationAggregator": {
+
   }
 }
