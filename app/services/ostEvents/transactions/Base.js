@@ -93,6 +93,8 @@ class TransactionOstEventBase extends ServiceBase {
 
     const parsedHash = oThis._parseTransactionMetaDetails();
 
+    logger.log('parsedHash =======', parsedHash);
+
     if (parsedHash.vi) {
       oThis.videoId = parsedHash.vi;
     }
