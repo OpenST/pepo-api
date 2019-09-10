@@ -100,7 +100,10 @@ class InAppProduct extends ModelBase {
    *
    * @returns {Promise<*>}
    */
-  static async flushCache(params) {}
+  static async flushCache(params) {
+    const GetAvailableProducts = require(rootPrefix + '/lib/cacheManagement/single/Products');
+    await new GetAvailableProducts().clear();
+  }
 }
 
 module.exports = InAppProduct;
