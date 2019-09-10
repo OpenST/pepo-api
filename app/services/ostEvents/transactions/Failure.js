@@ -84,7 +84,7 @@ class FailureTransactionOstEvent extends TransactionOstEventBase {
       const promiseArray = [];
       promiseArray.push(oThis.updateTransaction());
       promiseArray.push(oThis.processForTopUpTransaction());
-      promiseArray.push(oThis._enqueueUserNotification(notificationJobConstants.topupDone));
+      promiseArray.push(oThis._enqueueUserNotification(notificationJobConstants.topupFailed));
       await Promise.all(promiseArray);
     }
   }

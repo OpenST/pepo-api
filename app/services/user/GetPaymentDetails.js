@@ -1,11 +1,10 @@
 /**
  * This module helps to fetch pending topups request of user.
- * @module app/services/user/PendingTopUps
+ * @module app/services/user/GetPaymentDetails
  */
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
-  UserPendingTopupCache = require(rootPrefix + '/lib/cacheManagement/single/UserPendingTopups'),
-  fiatPaymentConstants = require(rootPrefix + '/lib/globalConstant/fiatPayment'),
+  UserPaymentsByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/UserPaymentsByIds'),
   entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
   TransactionCache = require(rootPrefix + '/lib/cacheManagement/multi/TransactionByIds'),
   responseHelper = require(rootPrefix + '/lib/formatter/response');
@@ -13,14 +12,14 @@ const rootPrefix = '../../..',
 /**
  * Class to fetch pending topups of user.
  *
- * @class PendingTopUps
+ * @class GetPaymentDetails
  */
-class PendingTopUps extends ServiceBase {
+class GetPaymentDetails extends ServiceBase {
   /**
    * Constructor to fetch pending topups of user.
    *
    * @param {object} params
-   * @param {Integer} [params.user_id]
+   * @param {Integer} [params.payment_id]
    * @param {Object} [params.current_user]  - current user
    *
    */
@@ -28,10 +27,10 @@ class PendingTopUps extends ServiceBase {
     super(params);
 
     const oThis = this;
-    oThis.userId = params.user_id;
+    oThis.paymentId = params.payment_id;
     oThis.currentUserId = params.current_user.id;
 
-    oThis.pendingTopUps = [];
+    oThis.paymentDetails = null;
     oThis.transactionsMap = {};
   }
 
@@ -44,19 +43,20 @@ class PendingTopUps extends ServiceBase {
   async _asyncPerform() {
     const oThis = this;
 
-    if (oThis.userId !== oThis.currentUserId) {
+    await oThis._fetchPaymentDetail();
+
+    if (oThis.paymentDetails.fromUserId !== oThis.currentUserId) {
       return responseHelper.paramValidationError({
-        internal_error_identifier: 'a_s_u_ptu_1',
-        api_error_identifier: 'invalid_api_params',
+        internal_error_identifier: 'a_s_u_gpd_1',
+        api_error_identifier: 'resource_not_found',
         params_error_identifiers: ['invalid_user_id'],
         debug_options: {
-          userId: oThis.userId,
-          currentUserId: oThis.currentUserId
+          userId: oThis.paymentDetails.fromUserId,
+          currentUserId: oThis.currentUserId,
+          paymentId: oThis.paymentId
         }
       });
     }
-
-    await oThis._fetchPaymentDetail();
 
     await oThis._fetchOstTransactions();
 
@@ -72,14 +72,14 @@ class PendingTopUps extends ServiceBase {
   async _fetchPaymentDetail() {
     const oThis = this;
 
-    const cacheObj = new UserPendingTopupCache({ userId: oThis.userId }),
+    const cacheObj = new UserPaymentsByIdsCache({ ids: [oThis.paymentId] }),
       cacheResp = await cacheObj.fetch();
 
     if (cacheResp.isFailure()) {
       return Promise.reject(cacheResp);
     }
 
-    oThis.pendingTopUps = cacheResp.data[oThis.userId] || [];
+    oThis.paymentDetails = cacheResp.data[oThis.paymentId];
   }
 
   /**
@@ -89,19 +89,13 @@ class PendingTopUps extends ServiceBase {
    * @private
    */
   async _fetchOstTransactions() {
-    const oThis = this;
+    const oThis = this,
+      txId = oThis.paymentDetails.transactionId;
 
-    let transactionIds = [];
-    for (let i = 0; i < oThis.pendingTopUps.length; i++) {
-      if (oThis.pendingTopUps[i].transactionId) {
-        transactionIds.push(oThis.pendingTopUps[i].transactionId);
-      }
-    }
+    if (txId) {
+      let resp = await new TransactionCache({ ids: [txId] }).fetch();
 
-    if (transactionIds.length > 0) {
-      let resp = await new TransactionCache({ ids: transactionIds }).fetch();
-
-      oThis.transactionsMap = resp.data;
+      oThis.transaction = resp.data[txId];
     }
   }
 
@@ -113,24 +107,12 @@ class PendingTopUps extends ServiceBase {
   _formatResponse() {
     const oThis = this;
 
-    let response = [];
-
-    for (let i = 0; i < oThis.pendingTopUps.length; i++) {
-      let ptu = oThis.pendingTopUps[i],
-        ostTxId = null;
-
-      if (ptu.transactionId && oThis.transactionsMap[ptu.transactionId]) {
-        ostTxId = oThis.transactionsMap[ptu.transactionId].ostTxId;
-      }
-
-      ptu['transactionUuid'] = ostTxId;
-      response.push(ptu);
-    }
+    oThis.paymentDetails['transactionUuid'] = oThis.transaction ? oThis.transaction.ostTxId : null;
 
     return responseHelper.successWithData({
-      [entityType.userTopUpsList]: response
+      [entityType.userTopUp]: oThis.paymentDetails
     });
   }
 }
 
-module.exports = PendingTopUps;
+module.exports = GetPaymentDetails;

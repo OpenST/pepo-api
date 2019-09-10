@@ -99,18 +99,6 @@ class SuccessTransactionOstEvent extends TransactionOstEventBase {
   }
 
   /**
-   * Enqueue user notification.
-   *
-   * @returns {Promise<void>}
-   * @private
-   */
-  async _enqueueUserNotification(topic) {
-    const oThis = this;
-    // Notification would be published only if user is approved.
-    await notificationJobEnqueue.enqueue(topic, { transaction: oThis.transactionObj });
-  }
-
-  /**
    * This function is called when transaction exists in table. This function updates transaction and related activities.
    *
    * @returns {Promise<void>}

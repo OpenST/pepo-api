@@ -204,6 +204,36 @@ class FiatPayment extends ModelBase {
   }
 
   /**
+   * Fetch user payment by status and user id.
+   *
+   * @param userId
+   * @param statuses
+   * @returns {Promise<void>}
+   */
+  async fetchUserPaymentByStatus(userId, statuses) {
+    const oThis = this;
+
+    let rows = await oThis
+        .select('*')
+        .where({
+          from_user_id: userId,
+          status: statuses
+        })
+        .fire(),
+      responseData = {};
+
+    responseData[userId] = [];
+
+    for (let i = 0; i < rows.length; i++) {
+      const oThis = this;
+
+      responseData[rows[i].from_user_id].push(oThis.formatDbData(rows[i]));
+    }
+
+    return responseData;
+  }
+
+  /**
    * Flush cache.
    *
    * @param {object} params

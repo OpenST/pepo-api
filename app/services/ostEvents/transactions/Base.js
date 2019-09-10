@@ -7,6 +7,7 @@ const rootPrefix = '../../../..',
   TransactionByOstTxIdCache = require(rootPrefix + '/lib/cacheManagement/multi/TransactionByOstTxId'),
   TokenUserByOstUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TokenUserByOstUserIds'),
   VideoDetailsByVideoIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/VideoDetailsByVideoIds'),
+  notificationJobEnqueue = require(rootPrefix + '/lib/rabbitMqEnqueue/notification'),
   FiatPaymentModel = require(rootPrefix + '/app/models/mysql/FiatPayment'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   commonValidator = require(rootPrefix + '/lib/validators/Common'),
@@ -503,6 +504,18 @@ class TransactionOstEventBase extends ServiceBase {
         })
       );
     }
+  }
+
+  /**
+   * Enqueue user notification.
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _enqueueUserNotification(topic) {
+    const oThis = this;
+    // Notification would be published only if user is approved.
+    await notificationJobEnqueue.enqueue(topic, { transaction: oThis.transactionObj });
   }
 
   /**

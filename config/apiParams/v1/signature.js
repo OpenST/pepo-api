@@ -620,7 +620,20 @@ const v1Signature = {
       },
       {
         parameter: 'user_id',
-        validatorMethods: ['validateString']
+        validatorMethods: ['validateNonZeroInteger']
+      }
+    ],
+    optional: []
+  },
+  [apiName.paymentDetails]: {
+    mandatory: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      },
+      {
+        parameter: 'payment_id',
+        validatorMethods: ['validateNonZeroInteger']
       }
     ],
     optional: []

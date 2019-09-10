@@ -184,6 +184,11 @@ const v1ErrorConfig = {
     parameter: 'device_kind',
     code: 'invalid',
     message: 'Invalid device kind.'
+  },
+  invalid_topup_id: {
+    parameter: 'topup_id',
+    code: 'invalid',
+    message: 'Invalid topup id.'
   }
 };
 

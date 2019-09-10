@@ -340,4 +340,26 @@ router.get('/:user_id/pending-topups', sanitizer.sanitizeDynamicUrlParams, funct
   Promise.resolve(routeHelper.perform(req, res, next, '/user/PendingTopUps', 'r_a_v1_u_16', null, dataFormatterFunc));
 });
 
+/* user pending topups */
+router.get('/topup/:payment_id', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.paymentDetails;
+  req.decodedParams.payment_id = req.params.payment_id;
+
+  const dataFormatterFunc = async function(serviceResponse) {
+    const wrapperFormatterRsp = await new FormatterComposer({
+      resultType: responseEntityKey.userTopupEntity,
+      entityKindToResponseKeyMap: {
+        [entityType.userTopUp]: responseEntityKey.userTopupEntity
+      },
+      serviceData: serviceResponse.data
+    }).perform();
+
+    serviceResponse.data = wrapperFormatterRsp.data;
+  };
+
+  Promise.resolve(
+    routeHelper.perform(req, res, next, '/user/GetPaymentDetails', 'r_a_v1_u_17', null, dataFormatterFunc)
+  );
+});
+
 module.exports = router;
