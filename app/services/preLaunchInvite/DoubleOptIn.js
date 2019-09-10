@@ -65,7 +65,7 @@ class SendDoubleOptIn extends ServiceBase {
     try {
       let decryptedT = localCipher.decrypt(coreConstants.PA_EMAIL_TOKENS_DECRIPTOR_KEY, oThis.t);
       splitedT = decryptedT.split(':');
-    } catch {
+    } catch (error) {
       return oThis._invalidUrlError('a_s_do_v_1');
     }
 

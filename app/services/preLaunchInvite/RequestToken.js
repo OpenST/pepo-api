@@ -4,6 +4,7 @@ const rootPrefix = '../../..',
   AuthorizationTwitterRequestClass = require(rootPrefix + '/lib/twitter/oAuth1.0/Authorization'),
   twitterAuthTokenConstants = require(rootPrefix + '/lib/globalConstant/twitterAuthToken'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
+  coreConstants = require(rootPrefix + '/config/coreConstants'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger');
 
 /**
@@ -49,9 +50,11 @@ class PreLaunchTwitterConnect extends ServiceBase {
         })
       : null;
 
+    let twitterRedirectUrl = coreConstants.TWITTER_OAUTH_URL + oThis.twitterAuthTokenObj.token;
+
     return Promise.resolve(
       responseHelper.successWithData({
-        oAuthToken: oThis.twitterAuthTokenObj.token,
+        twitterRedirectUrl: twitterRedirectUrl,
         dataCookieValue: dataCookieValue
       })
     );

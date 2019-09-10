@@ -1,6 +1,8 @@
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
+  createErrorLogsEntry = require(rootPrefix + '/lib/errorLogs/createEntry'),
+  errorLogsConstants = require(rootPrefix + '/lib/globalConstant/errorLogs'),
   SendDoubleOptInService = require(rootPrefix + '/app/services/SendDoubleOptIn'),
   PreLaunchInviteModel = require(rootPrefix + '/app/models/mysql/PreLaunchInvite'),
   preLaunchInviteConstants = require(rootPrefix + '/lib/globalConstant/preLaunchInvite'),
@@ -50,7 +52,7 @@ class SubscribeEmail extends ServiceBase {
 
     await oThis._sendDoubleOptIn();
 
-    await oThis._checkDuplicateEmail();
+    // await oThis._checkDuplicateEmail();
 
     return Promise.resolve(responseHelper.successWithData({}));
   }

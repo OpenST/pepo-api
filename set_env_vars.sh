@@ -129,3 +129,4 @@ export REPLICATION_FACTOR='3'
 export DEFAULT_REPLICATION_LEVEL='localOne'
 
 export PA_CDN_URL='https://dbvoeb7t6hffk.cloudfront.net'
+export TWITTER_OAUTH_URL='https://api.twitter.com/oauth/authorize?oauth_token='

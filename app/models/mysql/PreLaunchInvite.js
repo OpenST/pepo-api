@@ -45,7 +45,7 @@ class PreLaunchInvite extends ModelBase {
       'email',
       'name',
       'profileImageUrl',
-      'isCreator',
+      'creatorStatus',
       'status',
       'adminStatus',
       'inviterUserId',
@@ -67,7 +67,7 @@ class PreLaunchInvite extends ModelBase {
    * @param {string} dbRow.email
    * @param {string} dbRow.name
    * @param {string} dbRow.profile_image_url
-   * @param {string} dbRow.is_creator
+   * @param {string} dbRow.creator_status
    * @param {string} dbRow.token
    * @param {string} dbRow.secret
    * @param {number} dbRow.status
@@ -91,12 +91,12 @@ class PreLaunchInvite extends ModelBase {
       email: dbRow.email,
       name: dbRow.name,
       profileImageUrl: dbRow.profile_image_url,
-      isCreator: dbRow.is_creator == true,
+      creatorStatus: preLaunchInviteConstants.creatorStatuses[dbRow.creator_status],
       token: dbRow.token,
       secret: dbRow.secret,
       status: preLaunchInviteConstants.statuses[dbRow.status],
       adminStatus: preLaunchInviteConstants.adminStatuses[dbRow.admin_status],
-      inviteeUserId: dbRow.inviter_user_id,
+      inviterUserId: dbRow.inviter_user_id,
       inviteCode: dbRow.invite_code,
       invitedUserCount: dbRow.invited_user_count,
       createdAt: dbRow.created_at,
@@ -139,6 +139,8 @@ class PreLaunchInvite extends ModelBase {
         'email',
         'name',
         'profile_image_url',
+        'creator_status',
+        'admin_status',
         'status',
         'inviter_user_id',
         'invite_code',
@@ -149,16 +151,14 @@ class PreLaunchInvite extends ModelBase {
       .where({ id: ids })
       .fire();
 
-    const inviteDetails = {};
-    const inviteIds = [];
+    const response = {};
 
-    for (let ind = 0; ind < dbRows.length; ind++) {
-      const formattedRow = oThis.formatDbData(dbRows[ind]);
-      inviteIds.push(formattedRow.id);
-      inviteDetails[dbRows[ind].id] = formattedRow;
+    for (let index = 0; index < dbRows.length; index++) {
+      const formatDbRow = oThis.formatDbData(dbRows[index]);
+      response[formatDbRow.id] = formatDbRow;
     }
 
-    return { inviteIds: inviteIds, inviteDetails: inviteDetails };
+    return response;
   }
 
   /**
@@ -239,6 +239,36 @@ class PreLaunchInvite extends ModelBase {
   }
 
   /**
+   * Approve user.
+   *
+   * @param {number} inviteId
+   *
+   * @returns {Promise<result>}
+   */
+  async approveUser(inviteId) {
+    const oThis = this;
+
+    const queryResponse = await oThis
+      .update({
+        creator_status: preLaunchInviteConstants.invertedCreatorStatuses[preLaunchInviteConstants.approvedCreatorStatus]
+      })
+      .where({ id: inviteId })
+      .fire();
+
+    if (queryResponse.affectedRows === 1) {
+      logger.info(`User with ${inviteId} is now approved`);
+
+      return responseHelper.successWithData({});
+    }
+
+    return responseHelper.error({
+      internal_error_identifier: 'a_m_m_pli_2',
+      api_error_identifier: 'something_went_wrong',
+      debug_options: { inviteId: inviteId }
+    });
+  }
+
+  /**
    * Search users for admin whitelisting.
    *
    * @param {object} params
@@ -265,7 +295,7 @@ class PreLaunchInvite extends ModelBase {
         'email',
         'name',
         'profile_image_url',
-        'is_creator',
+        'creator_status',
         'status',
         'admin_status',
         'updated_at'

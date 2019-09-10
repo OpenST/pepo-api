@@ -109,7 +109,7 @@ class PreLaunchTwitterSignUp extends ServiceBase {
       await oThis._sendEmail();
     }
 
-    await oThis._checkDuplicateEmail();
+    // await oThis._checkDuplicateEmail();
 
     logger.log('End::Perform Twitter Signup');
 
@@ -256,7 +256,7 @@ class PreLaunchTwitterSignUp extends ServiceBase {
       .where({ id: oThis.inviterId })
       .fire();
 
-    await PreLaunchInviteModel.flushCache(oThis.preLaunchInviteObj);
+    await PreLaunchInviteModel.flushCache({ id: oThis.inviterId });
   }
 
   /**
@@ -297,7 +297,7 @@ class PreLaunchTwitterSignUp extends ServiceBase {
 
     if (preLaunchInvitesForEmail[0].count > 1) {
       const errorObject = responseHelper.error({
-        internal_error_identifier: 'a_s_oe_t_b_5',
+        internal_error_identifier: 'a_s_pli_su_cde_1',
         api_error_identifier: 'something_went_wrong',
         debug_options: {
           Reason: 'Duplicate Email in pre launch invite',
