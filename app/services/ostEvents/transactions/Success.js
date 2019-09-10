@@ -163,6 +163,8 @@ class SuccessTransactionOstEvent extends TransactionOstEventBase {
   async _checkIfPushNotificationRequired() {
     const oThis = this;
 
+    logger.log('oThis.isPaperPlane =========', oThis.isPaperPlane);
+
     if (oThis.isPaperPlane) {
       const toUserIds = oThis.transactionObj.extraData.toUserIds,
         userDeviceCacheRsp = await new UserDeviceIdsByUserIdsCache({ userIds: toUserIds }).fetch();
@@ -172,6 +174,8 @@ class SuccessTransactionOstEvent extends TransactionOstEventBase {
       }
 
       const userDeviceIds = userDeviceCacheRsp.data[toUserIds[0]];
+
+      logger.log('userDeviceIds =========', userDeviceIds);
 
       if (Array.isArray(userDeviceIds) && userDeviceIds.length > 0) {
         await oThis._enqueueUserNotification(notificationJobConstants.paperPlaneTransaction);

@@ -97,7 +97,7 @@ class TransactionOstEventBase extends ServiceBase {
       oThis.videoId = parsedHash.vi;
     }
 
-    if (parsedHash.ipp) {
+    if (parsedHash.ipp == 1) {
       oThis.isPaperPlane = true;
     }
   }
