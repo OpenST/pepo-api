@@ -49,9 +49,10 @@ const validateAdminCookie = async function(req, res, next) {
 };
 
 router.use(validateAdminCookie);
+router.use(cookieHelper.setAdminCsrf());
 
 /* Login admin */
-router.post('/login', cookieHelper.setAdminCsrf(), sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+router.post('/login', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.adminLogin;
 
   const onServiceSuccess = async function(serviceResponse) {
@@ -68,7 +69,7 @@ router.post('/login', cookieHelper.setAdminCsrf(), sanitizer.sanitizeDynamicUrlP
 });
 
 /* Logout admin */
-router.post('/logout', cookieHelper.setAdminCsrf(), sanitizer.sanitizeDynamicUrlParams, function(req, res) {
+router.post('/logout', sanitizer.sanitizeDynamicUrlParams, function(req, res) {
   req.decodedParams.apiName = apiName.adminLogout;
 
   const responseObject = responseHelper.successWithData({});
@@ -106,11 +107,7 @@ router.get('/users', sanitizer.sanitizeDynamicUrlParams, function(req, res, next
 });
 
 /* Approve user as creator */
-router.post('/users/:user_id/approve', cookieHelper.setAdminCsrf(), sanitizer.sanitizeDynamicUrlParams, function(
-  req,
-  res,
-  next
-) {
+router.post('/users/:user_id/approve', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.adminUserApprove;
   req.decodedParams.user_ids = [req.params.user_id];
 
@@ -118,11 +115,7 @@ router.post('/users/:user_id/approve', cookieHelper.setAdminCsrf(), sanitizer.sa
 });
 
 /* Block user */
-router.post('/users/:user_id/block', cookieHelper.setAdminCsrf(), sanitizer.sanitizeDynamicUrlParams, function(
-  req,
-  res,
-  next
-) {
+router.post('/users/:user_id/block', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.adminUserBlock;
   req.decodedParams.user_ids = [req.params.user_id];
 
@@ -165,11 +158,7 @@ router.get('/video-history/:profile_user_id', sanitizer.sanitizeDynamicUrlParams
 });
 
 /* Delete video */
-router.post('/delete-video/:video_id', cookieHelper.setAdminCsrf(), sanitizer.sanitizeDynamicUrlParams, function(
-  req,
-  res,
-  next
-) {
+router.post('/delete-video/:video_id', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.adminDeleteVideo;
   req.decodedParams.video_id = req.params.video_id;
 
