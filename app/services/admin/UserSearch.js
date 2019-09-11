@@ -8,9 +8,9 @@ const rootPrefix = '../../..',
   VideoByIdCache = require(rootPrefix + '/lib/cacheManagement/multi/VideoByIds'),
   SecureTokenCache = require(rootPrefix + '/lib/cacheManagement/single/SecureToken'),
   PricePointsCache = require(rootPrefix + '/lib/cacheManagement/single/PricePoints'),
+  TwitterUserByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TwitterUserByIds'),
   UserStatByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/UserStatByUserIds'),
   TokenUserDetailByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TokenUserByUserIds'),
-  TwitterUserByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TwitterUserByIds'),
   TwitterUserByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TwitterUserByUserIds'),
   UserProfileElementsByUserIdCache = require(rootPrefix + '/lib/cacheManagement/multi/UserProfileElementsByUserIds'),
   basicHelper = require(rootPrefix + '/helpers/basic'),
@@ -62,7 +62,7 @@ class UserSearch extends ServiceBase {
     oThis.paginationTimestamp = null;
     oThis.nextPaginationTimestamp = null;
     oThis.TwitterUserByIdsCacheResp = {};
-    oThis.TwitterUserByUserIdMap = {};
+    oThis.twitterUserByUserIdMap = {};
     oThis.pricePoints = {};
     oThis.userPepoCoinsMap = {};
   }
@@ -420,7 +420,7 @@ class UserSearch extends ServiceBase {
   }
 
   /**
-   * Fetch twitter user
+   * Fetch twitter user.
    *
    * @return {Promise<void>}
    * @private
@@ -428,20 +428,20 @@ class UserSearch extends ServiceBase {
   async _fetchTwitterUser() {
     const oThis = this;
 
-    let TwitterUserByUserIdsCacheResp = await new TwitterUserByUserIdsCache({
+    const twitterUserByUserIdsCacheResponse = await new TwitterUserByUserIdsCache({
       userIds: oThis.userIds
     }).fetch();
 
-    if (TwitterUserByUserIdsCacheResp.isFailure()) {
-      return Promise.reject(TwitterUserByUserIdsCacheResp);
+    if (twitterUserByUserIdsCacheResponse.isFailure()) {
+      return Promise.reject(twitterUserByUserIdsCacheResponse);
     }
 
-    TwitterUserByUserIdsCacheResp = TwitterUserByUserIdsCacheResp.data;
+    const twitterUserByUserIds = twitterUserByUserIdsCacheResponse.data;
 
-    let twitterUserIds = [];
+    const twitterUserIds = [];
 
-    for (let i = 0; i < oThis.userIds.length; i++) {
-      let twitterUserObj = TwitterUserByUserIdsCacheResp[oThis.userIds[i]];
+    for (let index = 0; index < oThis.userIds.length; index++) {
+      const twitterUserObj = twitterUserByUserIds[oThis.userIds[index]];
       twitterUserIds.push(twitterUserObj.id);
     }
 
@@ -456,10 +456,10 @@ class UserSearch extends ServiceBase {
     TwitterUserByIdsCacheResp = TwitterUserByIdsCacheResp.data;
 
     for (const id in TwitterUserByIdsCacheResp) {
-      let twitterUserObj = TwitterUserByIdsCacheResp[id];
-      let userId = twitterUserObj.userId;
+      const twitterUserObj = TwitterUserByIdsCacheResp[id];
+      const userId = twitterUserObj.userId;
 
-      oThis.TwitterUserByUserIdMap[userId] = twitterUserObj;
+      oThis.twitterUserByUserIdMap[userId] = twitterUserObj;
     }
 
     return responseHelper.successWithData({});
@@ -517,7 +517,7 @@ class UserSearch extends ServiceBase {
       videoMap: oThis.videos,
       imageMap: oThis.imageDetails,
       linkMap: oThis.links,
-      twitterUsersMap: oThis.TwitterUserByUserIdMap,
+      twitterUsersMap: oThis.twitterUserByUserIdMap,
       tokenDetails: oThis.tokenDetails,
       userStat: oThis.userStatsMap,
       userPepoCoinsMap: oThis.userPepoCoinsMap,
