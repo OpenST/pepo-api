@@ -3,7 +3,6 @@ const bigNumber = require('bignumber.js');
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   UserModel = require(rootPrefix + '/app/models/mysql/User'),
-  pageConstants = require(rootPrefix + '/lib/globalConstant/page'),
   UrlByIdCache = require(rootPrefix + '/lib/cacheManagement/multi/UrlsByIds'),
   ImageByIdCache = require(rootPrefix + '/lib/cacheManagement/multi/ImageByIds'),
   VideoByIdCache = require(rootPrefix + '/lib/cacheManagement/multi/VideoByIds'),
@@ -11,6 +10,8 @@ const rootPrefix = '../../..',
   PricePointsCache = require(rootPrefix + '/lib/cacheManagement/single/PricePoints'),
   UserStatByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/UserStatByUserIds'),
   TokenUserDetailByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TokenUserByUserIds'),
+  TwitterUserByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TwitterUserByIds'),
+  TwitterUserByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TwitterUserByUserIds'),
   UserProfileElementsByUserIdCache = require(rootPrefix + '/lib/cacheManagement/multi/UserProfileElementsByUserIds'),
   basicHelper = require(rootPrefix + '/helpers/basic'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
@@ -56,11 +57,12 @@ class UserSearch extends ServiceBase {
     oThis.userToProfileElementMap = {};
     oThis.tokenUsersByUserIdMap = {};
     oThis.userStatsMap = {};
-    oThis.userViewLinkMap = {};
-    oThis.tokenObj = {};
+    oThis.tokenDetails = {};
     oThis.searchResults = [];
     oThis.paginationTimestamp = null;
     oThis.nextPaginationTimestamp = null;
+    oThis.TwitterUserByIdsCacheResp = {};
+    oThis.TwitterUserByUserIdMap = {};
     oThis.pricePoints = {};
     oThis.userPepoCoinsMap = {};
   }
@@ -85,12 +87,10 @@ class UserSearch extends ServiceBase {
     await oThis._fetchProfileElements();
 
     const promisesArray = [];
-    promisesArray.push(oThis._fetchVideos(), oThis._fetchLink(), oThis._fetchUserStats());
+    promisesArray.push(oThis._fetchVideos(), oThis._fetchLink(), oThis._fetchUserStats(), oThis._fetchTwitterUser());
     await Promise.all(promisesArray);
 
     await oThis._prepareUserPepoStatsAndCoinsMap();
-
-    await oThis._getUsersViewLinks();
 
     await oThis._fetchImages();
 
@@ -403,13 +403,13 @@ class UserSearch extends ServiceBase {
     promisesArray.push(new SecureTokenCache({}).fetch(), new PricePointsCache().fetch());
     const promisesResponse = await Promise.all(promisesArray);
 
-    const tokenResponse = promisesResponse[0];
-    if (tokenResponse.isFailure()) {
-      return Promise.reject(tokenResponse);
+    oThis.tokenDetails = promisesResponse[0];
+    if (oThis.tokenDetails.isFailure()) {
+      return Promise.reject(oThis.tokenDetails);
     }
 
-    oThis.tokenObj = tokenResponse.data;
-    const stakeCurrency = oThis.tokenObj.stakeCurrency;
+    oThis.tokenDetails = oThis.tokenDetails.data;
+    const stakeCurrency = oThis.tokenDetails.stakeCurrency;
 
     const pricePointsCacheRsp = promisesResponse[1];
     if (pricePointsCacheRsp.isFailure()) {
@@ -420,30 +420,49 @@ class UserSearch extends ServiceBase {
   }
 
   /**
-   * Get users view links.
+   * Fetch twitter user
    *
-   * @sets oThis.userIdToBalanceMap
-   *
-   * @returns {Promise<never>}
+   * @return {Promise<void>}
    * @private
    */
-  async _getUsersViewLinks() {
+  async _fetchTwitterUser() {
     const oThis = this;
 
-    if (oThis.userIds.length === 0) {
-      return responseHelper.successWithData({});
+    let TwitterUserByUserIdsCacheResp = await new TwitterUserByUserIdsCache({
+      userIds: oThis.userIds
+    }).fetch();
+
+    if (TwitterUserByUserIdsCacheResp.isFailure()) {
+      return Promise.reject(TwitterUserByUserIdsCacheResp);
     }
 
-    for (let index = 0; index < oThis.userIds.length; index++) {
-      const userId = oThis.userIds[index],
-        ostTokenHolderAddress = oThis.tokenUsersByUserIdMap[userId].ostTokenHolderAddress;
+    TwitterUserByUserIdsCacheResp = TwitterUserByUserIdsCacheResp.data;
 
-      oThis.userViewLinkMap[userId] = pageConstants.viewUrlForUser(
-        oThis.tokenObj.auxChainId,
-        oThis.tokenObj.utilityBrandedToken,
-        ostTokenHolderAddress
-      );
+    let twitterUserIds = [];
+
+    for (let i = 0; i < oThis.userIds.length; i++) {
+      let twitterUserObj = TwitterUserByUserIdsCacheResp[oThis.userIds[i]];
+      twitterUserIds.push(twitterUserObj.id);
     }
+
+    let TwitterUserByIdsCacheResp = await new TwitterUserByIdsCache({
+      ids: twitterUserIds
+    }).fetch();
+
+    if (TwitterUserByIdsCacheResp.isFailure()) {
+      return Promise.reject(TwitterUserByIdsCacheResp);
+    }
+
+    TwitterUserByIdsCacheResp = TwitterUserByIdsCacheResp.data;
+
+    for (const id in TwitterUserByIdsCacheResp) {
+      let twitterUserObj = TwitterUserByIdsCacheResp[id];
+      let userId = twitterUserObj.userId;
+
+      oThis.TwitterUserByUserIdMap[userId] = twitterUserObj;
+    }
+
+    return responseHelper.successWithData({});
   }
 
   /**
@@ -498,8 +517,9 @@ class UserSearch extends ServiceBase {
       videoMap: oThis.videos,
       imageMap: oThis.imageDetails,
       linkMap: oThis.links,
+      twitterUsersMap: oThis.TwitterUserByUserIdMap,
+      tokenDetails: oThis.tokenDetails,
       userStat: oThis.userStatsMap,
-      userViewLinkMap: oThis.userViewLinkMap,
       userPepoCoinsMap: oThis.userPepoCoinsMap,
       meta: oThis.responseMetaData
     };

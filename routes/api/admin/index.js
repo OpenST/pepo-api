@@ -93,14 +93,13 @@ router.get('/users', sanitizer.sanitizeDynamicUrlParams, function(req, res, next
         [entityType.imagesMap]: responseEntityKey.images,
         [entityType.videosMap]: responseEntityKey.videos,
         [entityType.linksMap]: responseEntityKey.links,
+        [entityType.twitterUsersMap]: responseEntityKey.twitterUsers,
+        [entityType.token]: responseEntityKey.token,
         [entityType.userSearchMeta]: responseEntityKey.meta
       },
       serviceData: serviceResponse.data
     }).perform();
 
-    // wrapperFormatterRsp.data.admin_actions = serviceResponse.data.adminActions;
-    // wrapperFormatterRsp.data.user_pepo_stats_map = serviceResponse.data.userPepoStatsMap;
-    wrapperFormatterRsp.data.user_view_link_map = serviceResponse.data.userViewLinkMap;
     wrapperFormatterRsp.data.user_pepo_coins_map = serviceResponse.data.userPepoCoinsMap;
     serviceResponse.data = wrapperFormatterRsp.data;
   };
