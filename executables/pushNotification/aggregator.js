@@ -1,23 +1,21 @@
 /**
- * Example: node executables/aggregator.js --cronProcessId 27
+ * Example: node executables/pushNotification/aggregator.js --cronProcessId 7
  *
- * @module executables/aggregator
+ * @module executables/pushNotification/aggregator
  */
 
 const program = require('commander');
 
-const rootPrefix = '..',
+const rootPrefix = '../..',
   CronBase = require(rootPrefix + '/executables/CronBase'),
-  CommonValidators = require(rootPrefix + '/lib/validators/Common'),
-  ErrorLogsConstants = require(rootPrefix + '/lib/globalConstant/errorLogs'),
   AggregatedNotificationModel = require(rootPrefix + '/app/models/mysql/AggregatedNotification'),
   NotificationHookModel = require(rootPrefix + '/app/models/mysql/NotificationHook'),
   UserDeviceIdsByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/UserDeviceIdsByUserIds'),
   LocationsCache = require(rootPrefix + '/lib/cacheManagement/single/Locations'),
   notificationHookConstants = require(rootPrefix + '/lib/globalConstant/notificationHook'),
   aggregatedNotificationsConstants = require(rootPrefix + '/lib/globalConstant/aggregatedNotifications'),
-  createErrorLogsEntry = require(rootPrefix + '/lib/errorLogs/createEntry'),
   cronProcessesConstants = require(rootPrefix + '/lib/globalConstant/cronProcesses'),
+  commonValidators = require(rootPrefix + '/lib/validators/Common'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger');
 
@@ -27,7 +25,7 @@ program.on('--help', function() {
   logger.log('');
   logger.log('  Example:');
   logger.log('');
-  logger.log('    node executables/aggregator.js --cronProcessId 3');
+  logger.log('    node executables/pushNotification/aggregator --cronProcessId 7');
   logger.log('');
   logger.log('');
 });
@@ -178,14 +176,30 @@ class NotificationAggregator extends CronBase {
       insertColumnValues = [];
 
     for (let i = 0; i < oThis.recipientUserIds.length; i++) {
-      let userId = oThis.recipientUserIds[i],
+      let finalNotificationHookPayload = {},
+        userId = oThis.recipientUserIds[i],
         deviceIds = oThis.userIdToUserDeviceIdsMap[userId],
-        rawPayload = oThis.userIdToAggregatedDetailsMap[userId];
+        aggregatedNotificationsPayload = oThis.userIdToAggregatedDetailsMap[userId];
+
+      if (!aggregatedNotificationsPayload) {
+        continue;
+      }
+
+      let rawPayloadForMsgFormatter = aggregatedNotificationsPayload.extraData.payload,
+        peopleCount = rawPayloadForMsgFormatter.senders.length || 0,
+        txReceivedAmount = rawPayloadForMsgFormatter.amount || 0;
+
+      finalNotificationHookPayload = Object.assign(rawPayloadForMsgFormatter, {
+        peopleCount: peopleCount,
+        txReceivedAmount: txReceivedAmount
+      });
+
+      console.log('notificationHookPayload------------', JSON.stringify(finalNotificationHookPayload));
 
       let insertRow = [
         notificationHookConstants.invertedEventTypes[notificationHookConstants.aggregatedTxReceiveSuccessKind],
-        deviceIds,
-        rawPayload,
+        JSON.stringify(deviceIds),
+        JSON.stringify(finalNotificationHookPayload),
         Math.round(Date.now() / 1000),
         notificationHookConstants.invertedStatuses[notificationHookConstants.pendingStatus]
       ];
