@@ -196,20 +196,28 @@ class UserSearch extends ServiceBase {
 
     console.log('========oThis.userDetails=1111=====', JSON.stringify(oThis.userDetails));
     console.log('========oThis.tokenUsersByUserIdMap=1111=====', JSON.stringify(oThis.tokenUsersByUserIdMap));
+    const userIdsLength = oThis.userIds.length;
 
-    for (let ind = 0; ind < oThis.userIds.length; ind++) {
+    const newUserIdsArray = [];
+    console.log('====oThis.userIds===1111==', oThis.userIds);
+
+    for (let ind = 0; ind < userIdsLength; ind++) {
       const userId = oThis.userIds[ind];
+      console.log('====userId=====', userId);
       if (
         oThis.tokenUsersByUserIdMap[userId].hasOwnProperty('userId') &&
         oThis.tokenUsersByUserIdMap[userId].ostStatus === tokenUserConstants.activatedOstStatus
       ) {
-        ind++; // Increment only if not deleted
+        newUserIdsArray.push(userId);
       } else {
-        oThis.userIds.splice(ind, 1);
         delete oThis.userDetails[userId];
         delete oThis.tokenUsersByUserIdMap[userId];
       }
     }
+
+    oThis.userIds = newUserIdsArray;
+
+    console.log('====oThis.userIds===22222==', oThis.userIds);
 
     console.log('========oThis.userDetails=2222=====', JSON.stringify(oThis.userDetails));
     console.log('========oThis.tokenUsersByUserIdMap=22222=====', JSON.stringify(oThis.tokenUsersByUserIdMap));
