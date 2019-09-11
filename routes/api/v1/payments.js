@@ -14,9 +14,9 @@ router.post('/confirm-pay-receipt', sanitizer.sanitizeDynamicUrlParams, function
 
   const onServiceSuccess = async function(serviceResponse) {
     const wrapperFormatterRsp = await new FormatterComposer({
-      resultType: responseEntityKey.paymentReceipt,
+      resultType: responseEntityKey.userTopupEntity,
       entityKindToResponseKeyMap: {
-        [entityType.paymentReceipt]: responseEntityKey.paymentReceipt
+        [entityType.userTopUp]: responseEntityKey.userTopupEntity
       },
       serviceData: serviceResponse.data
     }).perform();

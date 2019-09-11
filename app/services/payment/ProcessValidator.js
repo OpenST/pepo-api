@@ -6,6 +6,7 @@ const rootPrefix = '../../..',
   ProcessGooglePayPayment = require(rootPrefix + '/lib/payment/process/GooglePay'),
   bgJobConstants = require(rootPrefix + '/lib/globalConstant/bgJob'),
   bgJob = require(rootPrefix + '/lib/rabbitMqEnqueue/bgJob'),
+  entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
   ostPricePointConstants = require(rootPrefix + '/lib/globalConstant/ostPricePoints'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   mysqlErrorConstants = require(rootPrefix + '/lib/globalConstant/mysqlErrorConstants');
@@ -57,7 +58,9 @@ class PaymentProcessValidator extends ServiceBase {
       fiatPaymentId: oThis.fiatPaymentId
     });
 
-    return responseHelper.successWithData({ paymentReceipt: JSON.stringify(oThis.paymentReceipt) });
+    await oThis._fetchFiatPayment();
+
+    return responseHelper.successWithData({ [entityType.userTopUp]: oThis.paymentDetail });
   }
 
   /**
@@ -128,6 +131,22 @@ class PaymentProcessValidator extends ServiceBase {
     } else if (oThis.os == 'android') {
       return fiatPaymentConstants.googlePayKind;
     }
+  }
+
+  /**
+   * Fetch fiat payment receipt
+   *
+   * @returns {Promise<*|result>}
+   * @private
+   */
+  async _fetchFiatPayment() {
+    const oThis = this;
+
+    let paymentObj = await new FiatPaymentModel().fetchByIds([oThis.fiatPaymentId]);
+
+    oThis.paymentDetail = paymentObj[oThis.fiatPaymentId];
+
+    return responseHelper.successWithData({});
   }
 }
 
