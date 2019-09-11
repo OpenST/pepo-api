@@ -533,11 +533,17 @@ class UserSearch extends ServiceBase {
 
     const nextPagePayloadKey = {};
 
+    console.log('====oThis.userIdsCount=====', oThis.userIdsCount);
+    console.log('====oThis.limit=====', oThis.limit);
+    console.log('====oThis.nextPaginationTimestamp=====', oThis.nextPaginationTimestamp);
+
     if (oThis.userIdsCount >= oThis.limit) {
       nextPagePayloadKey[paginationConstants.paginationIdentifierKey] = {
         pagination_timestamp: oThis.nextPaginationTimestamp
       };
     }
+
+    console.log('==nextPagePayloadKey====', nextPagePayloadKey);
 
     oThis.responseMetaData = {
       [paginationConstants.nextPagePayloadKey]: nextPagePayloadKey

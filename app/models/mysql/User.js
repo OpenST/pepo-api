@@ -293,7 +293,7 @@ class UserModel extends ModelBase {
       isOnlyNameSearch = params.isOnlyNameSearch;
 
     const queryObject = oThis
-      .select('id, user_name, name, properties, status, profile_image_id, updated_at')
+      .select('id, user_name, name, properties, status, profile_image_id, created_at, updated_at')
       .limit(limit)
       .order_by('id desc');
 
