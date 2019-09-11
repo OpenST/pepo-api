@@ -65,7 +65,6 @@ class UserSearch extends ServiceBase {
     oThis.searchResults = [];
     oThis.paginationTimestamp = null;
     oThis.nextPaginationTimestamp = null;
-    oThis.TwitterUserByIdsCacheResp = {};
     oThis.twitterUserByUserIdMap = {};
     oThis.pricePoints = {};
     oThis.userPepoCoinsMap = {};
@@ -195,6 +194,9 @@ class UserSearch extends ServiceBase {
   async _filterNonActiveUsers() {
     const oThis = this;
 
+    console.log('========oThis.userDetails=1111=====', JSON.stringify(oThis.userDetails));
+    console.log('========oThis.tokenUsersByUserIdMap=1111=====', JSON.stringify(oThis.tokenUsersByUserIdMap));
+
     for (let ind = 0; ind < oThis.userIds.length; ind++) {
       const userId = oThis.userIds[ind];
       if (
@@ -208,6 +210,9 @@ class UserSearch extends ServiceBase {
         delete oThis.tokenUsersByUserIdMap[userId];
       }
     }
+
+    console.log('========oThis.userDetails=2222=====', JSON.stringify(oThis.userDetails));
+    console.log('========oThis.tokenUsersByUserIdMap=22222=====', JSON.stringify(oThis.tokenUsersByUserIdMap));
   }
 
   /**
@@ -391,7 +396,7 @@ class UserSearch extends ServiceBase {
   /**
    * Fetch twitter user.
    *
-   * @return {Promise<void>}
+   * @return {Promise<result>}
    * @private
    */
   async _fetchTwitterUser() {
@@ -414,18 +419,18 @@ class UserSearch extends ServiceBase {
       twitterUserIds.push(twitterUserObj.id);
     }
 
-    let TwitterUserByIdsCacheResp = await new TwitterUserByIdsCache({
+    const twitterUserByIdsCacheResp = await new TwitterUserByIdsCache({
       ids: twitterUserIds
     }).fetch();
 
-    if (TwitterUserByIdsCacheResp.isFailure()) {
-      return Promise.reject(TwitterUserByIdsCacheResp);
+    if (twitterUserByIdsCacheResp.isFailure()) {
+      return Promise.reject(twitterUserByIdsCacheResp);
     }
 
-    TwitterUserByIdsCacheResp = TwitterUserByIdsCacheResp.data;
+    const twitterUserByIds = twitterUserByIdsCacheResp.data;
 
-    for (const id in TwitterUserByIdsCacheResp) {
-      const twitterUserObj = TwitterUserByIdsCacheResp[id];
+    for (const id in twitterUserByIds) {
+      const twitterUserObj = twitterUserByIds[id];
       const userId = twitterUserObj.userId;
 
       oThis.twitterUserByUserIdMap[userId] = twitterUserObj;
@@ -446,7 +451,7 @@ class UserSearch extends ServiceBase {
     const oThis = this;
 
     const promisesArray = [];
-    promisesArray.push(new SecureTokenCache({}).fetch(), new PricePointsCache().fetch());
+    promisesArray.push(new SecureTokenCache({}).fetch(), new PricePointsCache({}).fetch());
     const promisesResponse = await Promise.all(promisesArray);
 
     const tokenDetailsResponse = promisesResponse[0];
