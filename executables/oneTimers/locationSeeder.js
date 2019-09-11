@@ -1,3 +1,10 @@
+/**
+ * Locations table seeder.
+ *
+ * Usage: node ./executables/oneTimers/locationSeeder.js
+ *
+ */
+
 const rootPrefix = '../..',
   basicHelper = require(rootPrefix + '/helpers/basic'),
   LocationModel = require(rootPrefix + '/app/models/mysql/Location'),
@@ -12,7 +19,7 @@ command
   .option('--location-file-path <required>', 'Location json file absolute path')
   .parse(process.argv);
 
-const BATCH_SIZE = 2;
+const BATCH_SIZE = 25;
 
 class LocationSeeder {
   /**
@@ -50,8 +57,7 @@ class LocationSeeder {
   async _seed() {
     const oThis = this;
 
-    const promiseArray = [],
-      locationData = require(oThis.locationFilePath),
+    const locationData = require(oThis.locationFilePath),
       zoneInfoArray = locationData.zones;
 
     while (zoneInfoArray.length > 0) {
@@ -62,17 +68,11 @@ class LocationSeeder {
         bulkInsertVal.push([currentZones[i].gmtOffset, currentZones[i].zoneName]);
       }
 
-      promiseArray.push(
-        new LocationModel()
-          .insertMultiple(['gmt_offset', 'time_zone'], bulkInsertVal, {})
-          .onDuplicate({ updated_at: Math.round(new Date() / 1000) })
-          .fire()
-      );
+      await new LocationModel()
+        .insertMultiple(['gmt_offset', 'time_zone'], bulkInsertVal)
+        .onDuplicate({ updated_at: Math.round(new Date() / 1000) })
+        .fire();
     }
-
-    let pmsRsp = await Promise.all(promiseArray);
-
-    console.log('pmsRsp---', pmsRsp);
   }
 }
 
