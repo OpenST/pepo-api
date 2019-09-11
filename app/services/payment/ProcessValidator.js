@@ -40,10 +40,14 @@ class PaymentProcessValidator extends ServiceBase {
     oThis.fiatPaymentId = null;
   }
 
+  /**
+   * AsyncPerform
+   *
+   * @returns {Promise<*|result>}
+   * @private
+   */
   async _asyncPerform() {
     const oThis = this;
-
-    await oThis._validateAndSanitize();
 
     await oThis._insertFiatPayment();
 
@@ -56,14 +60,12 @@ class PaymentProcessValidator extends ServiceBase {
     return responseHelper.successWithData({ paymentReceipt: JSON.stringify(oThis.paymentReceipt) });
   }
 
-  async _validateAndSanitize() {
-    const oThis = this;
-
-    oThis.paymentReceipt = JSON.parse(oThis.paymentReceipt);
-
-    return responseHelper.successWithData({});
-  }
-
+  /**
+   * Insert in fiat payments
+   *
+   * @returns {Promise<*|result>}
+   * @private
+   */
   async _insertFiatPayment() {
     const oThis = this,
       receiptId = oThis.paymentReceipt.transactionId,
@@ -91,6 +93,12 @@ class PaymentProcessValidator extends ServiceBase {
     return responseHelper.successWithData({});
   }
 
+  /**
+   * Service specific tasks
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
   async _serviceSpecificTasks() {
     const oThis = this,
       params = {
@@ -107,6 +115,11 @@ class PaymentProcessValidator extends ServiceBase {
     }
   }
 
+  /**
+   * Get service kind
+   *
+   * @returns {string}
+   */
   getServiceKind() {
     const oThis = this;
 

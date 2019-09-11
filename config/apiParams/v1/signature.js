@@ -586,7 +586,7 @@ const v1Signature = {
       },
       {
         parameter: 'response',
-        validatorMethods: ['validateString']
+        validatorMethods: ['validateNonEmptyObject']
       },
       {
         parameter: 'os',
