@@ -391,7 +391,7 @@ class UserSearch extends ServiceBase {
   /**
    * Fetch price points.
    *
-   * @sets oThis.tokenObj, oThis.pricePoints
+   * @sets oThis.tokenDetails, oThis.pricePoints
    *
    * @returns {Promise<void>}
    * @private
@@ -403,12 +403,12 @@ class UserSearch extends ServiceBase {
     promisesArray.push(new SecureTokenCache({}).fetch(), new PricePointsCache().fetch());
     const promisesResponse = await Promise.all(promisesArray);
 
-    oThis.tokenDetails = promisesResponse[0];
-    if (oThis.tokenDetails.isFailure()) {
-      return Promise.reject(oThis.tokenDetails);
+    const tokenDetailsResponse = promisesResponse[0];
+    if (tokenDetailsResponse.isFailure()) {
+      return Promise.reject(tokenDetailsResponse);
     }
 
-    oThis.tokenDetails = oThis.tokenDetails.data;
+    oThis.tokenDetails = tokenDetailsResponse.data;
     const stakeCurrency = oThis.tokenDetails.stakeCurrency;
 
     const pricePointsCacheRsp = promisesResponse[1];
