@@ -111,8 +111,6 @@ class FiatPayment extends ModelBase {
   async fetchByReceiptIdAndKind(receiptId, serviceKind) {
     const oThis = this;
 
-    const response = {};
-
     const dbRows = await oThis
       .select('*')
       .where({ receipt_id: receiptId, service_kind: fiatPaymentConstants.invertedServiceKinds[serviceKind] })

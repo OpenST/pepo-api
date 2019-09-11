@@ -2,7 +2,7 @@ const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   FiatPaymentModel = require(rootPrefix + '/app/models/mysql/FiatPayment'),
   fiatPaymentConstants = require(rootPrefix + '/lib/globalConstant/fiatPayment'),
-  ProcessApplePayPayment = require(rootPrefix + '/lib/payment/process/ApplePay.js'),
+  ProcessApplePayPayment = require(rootPrefix + '/lib/payment/process/ApplePay'),
   ProcessGooglePayPayment = require(rootPrefix + '/lib/payment/process/GooglePay'),
   bgJobConstants = require(rootPrefix + '/lib/globalConstant/bgJob'),
   bgJob = require(rootPrefix + '/lib/rabbitMqEnqueue/bgJob'),
@@ -39,6 +39,7 @@ class PaymentProcessValidator extends ServiceBase {
     oThis.userId = params.user_id;
 
     oThis.fiatPaymentId = null;
+    oThis.paymentDetail = null;
   }
 
   /**
@@ -52,13 +53,15 @@ class PaymentProcessValidator extends ServiceBase {
 
     await oThis._insertFiatPayment();
 
-    await oThis._serviceSpecificTasks();
+    if (!oThis.paymentDetail) {
+      await oThis._serviceSpecificTasks();
 
-    await bgJob.enqueue(bgJobConstants.validatePaymentReceiptJobTopic, {
-      fiatPaymentId: oThis.fiatPaymentId
-    });
+      await bgJob.enqueue(bgJobConstants.validatePaymentReceiptJobTopic, {
+        fiatPaymentId: oThis.fiatPaymentId
+      });
 
-    await oThis._fetchFiatPayment();
+      await oThis._fetchFiatPayment();
+    }
 
     return responseHelper.successWithData({ [entityType.userTopUp]: oThis.paymentDetail });
   }
@@ -87,11 +90,21 @@ class PaymentProcessValidator extends ServiceBase {
       .fire()
       .catch(async function(mysqlErrorObject) {
         if (mysqlErrorObject.code === mysqlErrorConstants.duplicateError) {
+          oThis.paymentDetail = await new FiatPaymentModel().fetchByReceiptIdAndKind(receiptId, serviceKind);
         } else {
+          return Promise.reject(
+            responseHelper.error({
+              internal_error_identifier: 'a_s_p_pv_1',
+              api_error_identifier: 'something_went_wrong',
+              debug_options: { error: mysqlErrorObject }
+            })
+          );
         }
       });
 
-    oThis.fiatPaymentId = fiatPaymentCreateResp.insertId;
+    if (!oThis.paymentDetail) {
+      oThis.fiatPaymentId = fiatPaymentCreateResp.insertId;
+    }
 
     return responseHelper.successWithData({});
   }
