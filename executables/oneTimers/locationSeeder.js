@@ -65,7 +65,7 @@ class LocationSeeder {
         currentZones = zoneInfoArray.splice(0, BATCH_SIZE);
 
       for (let i = 0; i < currentZones.length; i++) {
-        bulkInsertVal.push([currentZones[i].gmtOffset, currentZones[i].zoneName]);
+        bulkInsertVal.push([currentZones[i].gmtOffset, currentZones[i].zoneName.toLowerCase()]);
       }
 
       await new LocationModel()
