@@ -88,7 +88,7 @@ router.get('/users', sanitizer.sanitizeDynamicUrlParams, function(req, res, next
       resultType: responseEntityKey.searchResults,
       entityKindToResponseKeyMap: {
         [entityType.userSearchList]: responseEntityKey.searchResults,
-        [entityType.usersMap]: responseEntityKey.users,
+        [entityType.adminUsersMap]: responseEntityKey.users,
         [entityType.userStats]: responseEntityKey.userStats,
         [entityType.imagesMap]: responseEntityKey.images,
         [entityType.videosMap]: responseEntityKey.videos,

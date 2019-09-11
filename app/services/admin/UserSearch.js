@@ -4,7 +4,6 @@ const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   UserModel = require(rootPrefix + '/app/models/mysql/User'),
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
-  tokenUserConstants = require(rootPrefix + '/lib/globalConstant/tokenUser'),
   UrlByIdCache = require(rootPrefix + '/lib/cacheManagement/multi/UrlsByIds'),
   ImageByIdCache = require(rootPrefix + '/lib/cacheManagement/multi/ImageByIds'),
   VideoByIdCache = require(rootPrefix + '/lib/cacheManagement/multi/VideoByIds'),
@@ -49,7 +48,6 @@ class UserSearch extends ServiceBase {
 
     oThis.limit = oThis._defaultPageLimit();
 
-    oThis.userIdsCount = 0;
     oThis.userIds = [];
     oThis.imageIds = [];
     oThis.videoIds = [];
@@ -84,10 +82,6 @@ class UserSearch extends ServiceBase {
     await oThis._fetchUserIds();
 
     await oThis._fetchTokenUsers();
-
-    // TODO: This thing would not be required in ideal case,
-    // TODO: pepo user was created but platform was down and user was not created
-    await oThis._filterNonActiveUsers();
 
     oThis._prepareSearchResults();
 
@@ -142,7 +136,7 @@ class UserSearch extends ServiceBase {
   /**
    * Fetch user ids.
    *
-   * @sets oThis.userIds, oThis.userDetails, oThis.userIdsCount
+   * @sets oThis.userIds, oThis.userDetails
    *
    * @returns {Promise<void>}
    * @private
@@ -162,7 +156,6 @@ class UserSearch extends ServiceBase {
 
     oThis.userIds = userData.userIds;
     oThis.userDetails = userData.userDetails;
-    oThis.userIdsCount = oThis.userIds.length;
   }
 
   /**
@@ -183,44 +176,6 @@ class UserSearch extends ServiceBase {
     }
 
     oThis.tokenUsersByUserIdMap = tokenUserRes.data;
-  }
-
-  /**
-   * Filter non active users - no platform activation.
-   *
-   * @return {Promise<void>}
-   * @private
-   */
-  async _filterNonActiveUsers() {
-    const oThis = this;
-
-    console.log('========oThis.userDetails=1111=====', JSON.stringify(oThis.userDetails));
-    console.log('========oThis.tokenUsersByUserIdMap=1111=====', JSON.stringify(oThis.tokenUsersByUserIdMap));
-    const userIdsLength = oThis.userIds.length;
-
-    const newUserIdsArray = [];
-    console.log('====oThis.userIds===1111==', oThis.userIds);
-
-    for (let ind = 0; ind < userIdsLength; ind++) {
-      const userId = oThis.userIds[ind];
-      console.log('====userId=====', userId);
-      if (
-        oThis.tokenUsersByUserIdMap[userId].hasOwnProperty('userId') &&
-        oThis.tokenUsersByUserIdMap[userId].ostStatus === tokenUserConstants.activatedOstStatus
-      ) {
-        newUserIdsArray.push(userId);
-      } else {
-        delete oThis.userDetails[userId];
-        delete oThis.tokenUsersByUserIdMap[userId];
-      }
-    }
-
-    oThis.userIds = newUserIdsArray;
-
-    console.log('====oThis.userIds===22222==', oThis.userIds);
-
-    console.log('========oThis.userDetails=2222=====', JSON.stringify(oThis.userDetails));
-    console.log('========oThis.tokenUsersByUserIdMap=22222=====', JSON.stringify(oThis.tokenUsersByUserIdMap));
   }
 
   /**
@@ -541,17 +496,11 @@ class UserSearch extends ServiceBase {
 
     const nextPagePayloadKey = {};
 
-    console.log('====oThis.userIdsCount=====', oThis.userIdsCount);
-    console.log('====oThis.limit=====', oThis.limit);
-    console.log('====oThis.nextPaginationTimestamp=====', oThis.nextPaginationTimestamp);
-
-    if (oThis.userIdsCount >= oThis.limit) {
+    if (oThis.searchResults.length >= oThis.limit) {
       nextPagePayloadKey[paginationConstants.paginationIdentifierKey] = {
         pagination_timestamp: oThis.nextPaginationTimestamp
       };
     }
-
-    console.log('==nextPagePayloadKey====', nextPagePayloadKey);
 
     oThis.responseMetaData = {
       [paginationConstants.nextPagePayloadKey]: nextPagePayloadKey
