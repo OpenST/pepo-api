@@ -6,8 +6,7 @@ export PA_DEBUG_ENABLED='1';
 export PA_DOMAIN='http://pepodev.com:8080'
 export PA_COOKIE_DOMAIN='.pepodev.com'
 
-export PA_VIEW_DOMAIN='http://view.ost.com'
-export PA_VIEW_SUBENV='testnet'
+export PA_VIEW_END_POINT='http://view.ost.com/testnet'
 
 # Devops error logs framework
 export DEVOPS_APP_NAME='pepo-api';

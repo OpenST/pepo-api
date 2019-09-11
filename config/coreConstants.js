@@ -30,12 +30,8 @@ class CoreConstants {
 
   // view constants
 
-  get PA_VIEW_DOMAIN() {
-    return process.env.PA_VIEW_DOMAIN;
-  }
-
-  get PA_VIEW_SUBENV() {
-    return process.env.PA_VIEW_SUBENV;
+  get PA_VIEW_END_POINT() {
+    return process.env.PA_VIEW_END_POINT;
   }
 
   // MySql constants
