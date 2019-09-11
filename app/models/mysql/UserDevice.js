@@ -79,10 +79,15 @@ class UserDevice extends ModelBase {
   async fetchByUserIds(userIds) {
     const oThis = this;
 
-    const dbRows = await oThis
-      .select('id, user_id')
-      .where({ user_id: userIds })
-      .fire();
+    const whereClause = [
+        'user_id IN (?) AND status = ?',
+        userIds,
+        userDevicesConstants.invertedStatuses[userDevicesConstants.logoutStatus]
+      ],
+      dbRows = await oThis
+        .select('id, user_id')
+        .where(whereClause)
+        .fire();
 
     const response = {};
 
