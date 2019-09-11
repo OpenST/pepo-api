@@ -28,11 +28,6 @@ class CoreConstants {
     return process.env.PA_COOKIE_DOMAIN;
   }
 
-  // View constants.
-  get PA_VIEW_END_POINT() {
-    return process.env.PA_VIEW_END_POINT;
-  }
-
   // MySql constants.
   get MYSQL_CONNECTION_POOL_SIZE() {
     return process.env.PA_MYSQL_CONNECTION_POOL_SIZE;
