@@ -129,13 +129,13 @@ class UserNotificationBase extends ServiceBase {
       formattedUserNotification.kind = userNotification.kind;
       formattedUserNotification.timestamp = userNotification.lastActionTimestamp;
 
-      formattedUserNotification.heading = await oThis._getHeading(userNotification);
-
-      formattedUserNotification.goto = await oThis._getGoto(userNotification);
+      formattedUserNotification.payload = await oThis._getPayload(userNotification);
 
       formattedUserNotification.imageId = await oThis._getImageId(userNotification);
 
-      formattedUserNotification.payload = await oThis._getPayload(userNotification);
+      formattedUserNotification.heading = await oThis._getHeading(userNotification, formattedUserNotification.payload);
+
+      formattedUserNotification.goto = await oThis._getGoto(userNotification);
 
       oThis.formattedUserNotifications.push(formattedUserNotification);
     }
@@ -194,13 +194,14 @@ class UserNotificationBase extends ServiceBase {
    * @returns {Promise<never>}
    * @private
    */
-  async _getHeading(userNotification) {
+  async _getHeading(userNotification, payload) {
     const oThis = this;
 
     const params = {
       supportingEntities: {
         [responseEntityKey.users]: oThis.usersByIdMap
       },
+      payload: payload,
       userNotification: userNotification,
       notificationType: oThis._notificationType
     };
