@@ -637,6 +637,14 @@ const v1Signature = {
       }
     ],
     optional: []
+  },
+  [apiName.resetBadge]: {
+    mandatory: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      }
+    ]
   }
 };
 
