@@ -11,7 +11,6 @@ const rootPrefix = '../..',
   ExternalEntitiesByEntityIdAndEntityKindCache = require(rootPrefix +
     '/lib/cacheManagement/single/ExternalEntitiyByEntityIdAndEntityKind'),
   UserDeviceIdsByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/UserDeviceIdsByUserIds'),
-  commonValidator = require(rootPrefix + '/lib/validators/Common'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   createErrorLogsEntry = require(rootPrefix + '/lib/errorLogs/createEntry'),
@@ -354,7 +353,7 @@ class OstTransaction extends ServiceBase {
   _isGiphyPresent() {
     const oThis = this;
 
-    return !commonValidator.isVarNullOrUndefined(oThis.giphyObject);
+    return !CommonValidators.isVarNullOrUndefined(oThis.giphyObject);
   }
 
   /**
@@ -366,7 +365,7 @@ class OstTransaction extends ServiceBase {
   _isTextPresent() {
     const oThis = this;
 
-    return commonValidator.validateNonBlankString(oThis.text);
+    return CommonValidators.validateNonBlankString(oThis.text);
   }
 
   /**
@@ -378,7 +377,7 @@ class OstTransaction extends ServiceBase {
   _isVideoIdPresent() {
     const oThis = this;
 
-    return !commonValidator.isVarNullOrUndefined(oThis.videoId);
+    return !CommonValidators.isVarNullOrUndefined(oThis.videoId);
   }
 
   /**
