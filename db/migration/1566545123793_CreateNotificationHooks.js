@@ -8,10 +8,10 @@ const dbKind = DbKindConstant.sqlDbKind;
 const upQuery =
   'CREATE TABLE `notification_hooks` (\n' +
   '  `id` bigint(20) NOT NULL AUTO_INCREMENT,\n' +
-  '  `user_device_ids` TEXT COLLATE utf8_unicode_ci NOT NULL,\n' +
+  '  `user_device_ids` text COLLATE utf8mb4_unicode_ci NOT NULL,\n' +
   '  `event_type` tinyint(4) NOT NULL,\n' +
-  '  `raw_notification_payload` TEXT COLLATE utf8mb4_unicode_ci NOT NULL,\n' +
-  '  `status` int(11) NOT NULL ,\n' +
+  '  `raw_notification_payload` text COLLATE utf8mb4_unicode_ci NOT NULL,\n' +
+  '  `status` int(11) NOT NULL,\n' +
   '  `execution_timestamp` int(11) NOT NULL,\n' +
   '  `lock_identifier` decimal(22,10) DEFAULT NULL,\n' +
   '  `locked_at` int(11) DEFAULT NULL,\n' +
