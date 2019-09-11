@@ -3,6 +3,8 @@ const bigNumber = require('bignumber.js');
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   UserModel = require(rootPrefix + '/app/models/mysql/User'),
+  CommonValidators = require(rootPrefix + '/lib/validators/Common'),
+  tokenUserConstants = require(rootPrefix + '/lib/globalConstant/tokenUser'),
   UrlByIdCache = require(rootPrefix + '/lib/cacheManagement/multi/UrlsByIds'),
   ImageByIdCache = require(rootPrefix + '/lib/cacheManagement/multi/ImageByIds'),
   VideoByIdCache = require(rootPrefix + '/lib/cacheManagement/multi/VideoByIds'),
@@ -43,6 +45,7 @@ class UserSearch extends ServiceBase {
 
     oThis.query = params.q || null;
     oThis.paginationIdentifier = params[paginationConstants.paginationIdentifierKey] || null;
+    oThis.isOnlyNameSearch = true;
 
     oThis.limit = oThis._defaultPageLimit();
 
@@ -82,6 +85,10 @@ class UserSearch extends ServiceBase {
 
     await oThis._fetchTokenUsers();
 
+    // TODO: This thing would not be required in ideal case,
+    // TODO: pepo user was created but platform was down and user was not created
+    await oThis._filterNonActiveUsers();
+
     oThis._prepareSearchResults();
 
     await oThis._fetchProfileElements();
@@ -120,6 +127,8 @@ class UserSearch extends ServiceBase {
       oThis.paginationTimestamp = null;
     }
 
+    oThis.isOnlyNameSearch = !CommonValidators.validateUserName(oThis.query);
+
     // Validate limit.
     return oThis._validatePageSize();
   }
@@ -141,6 +150,7 @@ class UserSearch extends ServiceBase {
       query: oThis.query,
       limit: oThis.limit,
       paginationTimestamp: oThis.paginationTimestamp,
+      isOnlyNameSearch: oThis.isOnlyNameSearch,
       fetchAll: true
     });
 
@@ -166,6 +176,30 @@ class UserSearch extends ServiceBase {
     }
 
     oThis.tokenUsersByUserIdMap = tokenUserRes.data;
+  }
+
+  /**
+   * Filter non active users - no platform activation.
+   *
+   * @return {Promise<void>}
+   * @private
+   */
+  async _filterNonActiveUsers() {
+    const oThis = this;
+
+    for (let ind = 0; ind < oThis.userIds.length; ) {
+      const userId = oThis.userIds[ind];
+      if (
+        oThis.tokenUsersByUserIdMap[userId].hasOwnProperty('userId') &&
+        oThis.tokenUsersByUserIdMap[userId].ostStatus === tokenUserConstants.activatedOstStatus
+      ) {
+        ind++; // Increment only if not deleted
+      } else {
+        oThis.userIds.splice(ind, 1);
+        delete oThis.userDetails[userId];
+        delete oThis.tokenUsersByUserIdMap[userId];
+      }
+    }
   }
 
   /**
