@@ -49,6 +49,7 @@ class UserSearch extends ServiceBase {
 
     oThis.limit = oThis._defaultPageLimit();
 
+    oThis.userIdsCount = 0;
     oThis.userIds = [];
     oThis.imageIds = [];
     oThis.videoIds = [];
@@ -94,14 +95,20 @@ class UserSearch extends ServiceBase {
     await oThis._fetchProfileElements();
 
     const promisesArray = [];
-    promisesArray.push(oThis._fetchVideos(), oThis._fetchLink(), oThis._fetchUserStats(), oThis._fetchTwitterUser());
+    promisesArray.push(
+      oThis._fetchVideos(),
+      oThis._fetchLink(),
+      oThis._fetchUserStats(),
+      oThis._fetchTwitterUser(),
+      oThis._fetchPricePoints()
+    );
     await Promise.all(promisesArray);
 
-    await oThis._prepareUserPepoStatsAndCoinsMap();
+    const promisesArray2 = [];
+    promisesArray2.push(oThis._prepareUserPepoStatsAndCoinsMap(), oThis._fetchImages());
+    await Promise.all(promisesArray2);
 
-    await oThis._fetchImages();
-
-    await oThis._addResponseMetaData();
+    oThis._addResponseMetaData();
 
     return oThis._prepareResponse();
   }
@@ -136,7 +143,7 @@ class UserSearch extends ServiceBase {
   /**
    * Fetch user ids.
    *
-   * @sets oThis.userIds, oThis.userDetails
+   * @sets oThis.userIds, oThis.userDetails, oThis.userIdsCount
    *
    * @returns {Promise<void>}
    * @private
@@ -156,6 +163,7 @@ class UserSearch extends ServiceBase {
 
     oThis.userIds = userData.userIds;
     oThis.userDetails = userData.userDetails;
+    oThis.userIdsCount = oThis.userIds.length;
   }
 
   /**
@@ -187,7 +195,7 @@ class UserSearch extends ServiceBase {
   async _filterNonActiveUsers() {
     const oThis = this;
 
-    for (let ind = 0; ind < oThis.userIds.length; ) {
+    for (let ind = 0; ind < oThis.userIds.length; ind++) {
       const userId = oThis.userIds[ind];
       if (
         oThis.tokenUsersByUserIdMap[userId].hasOwnProperty('userId') &&
@@ -228,54 +236,6 @@ class UserSearch extends ServiceBase {
 
       oThis.nextPaginationTimestamp = userDetail.createdAt;
     }
-  }
-
-  /**
-   * Fetch videos.
-   *
-   * @sets oThis.imageIds, oThis.videos
-   *
-   * @return {Promise<never>}
-   * @private
-   */
-  async _fetchVideos() {
-    const oThis = this;
-
-    if (oThis.videoIds.length === 0) {
-      return responseHelper.successWithData({});
-    }
-
-    const cacheRsp = await new VideoByIdCache({ ids: oThis.videoIds }).fetch();
-    if (cacheRsp.isFailure()) {
-      return Promise.reject(cacheRsp);
-    }
-
-    for (const videoId in cacheRsp.data) {
-      const video = cacheRsp.data[videoId],
-        posterImageId = video.posterImageId;
-
-      if (posterImageId) {
-        oThis.imageIds.push(posterImageId);
-      }
-    }
-
-    oThis.videos = cacheRsp.data;
-  }
-
-  /**
-   * Fetch images.
-   *
-   * @sets oThis.imageDetails
-   *
-   * @returns {Promise<void>}
-   * @private
-   */
-  async _fetchImages() {
-    const oThis = this;
-
-    const imageData = await new ImageByIdCache({ ids: oThis.imageIds }).fetch();
-
-    oThis.imageDetails = imageData.data;
   }
 
   /**
@@ -351,6 +311,38 @@ class UserSearch extends ServiceBase {
   }
 
   /**
+   * Fetch videos.
+   *
+   * @sets oThis.imageIds, oThis.videos
+   *
+   * @return {Promise<never>}
+   * @private
+   */
+  async _fetchVideos() {
+    const oThis = this;
+
+    if (oThis.videoIds.length === 0) {
+      return responseHelper.successWithData({});
+    }
+
+    const cacheRsp = await new VideoByIdCache({ ids: oThis.videoIds }).fetch();
+    if (cacheRsp.isFailure()) {
+      return Promise.reject(cacheRsp);
+    }
+
+    for (const videoId in cacheRsp.data) {
+      const video = cacheRsp.data[videoId],
+        posterImageId = video.posterImageId;
+
+      if (posterImageId) {
+        oThis.imageIds.push(posterImageId);
+      }
+    }
+
+    oThis.videos = cacheRsp.data;
+  }
+
+  /**
    * Fetch link.
    *
    * @sets oThis.links
@@ -394,63 +386,6 @@ class UserSearch extends ServiceBase {
     }
 
     oThis.userStatsMap = cacheRsp.data;
-  }
-
-  /**
-   * Add next page meta data.
-   *
-   * @sets oThis.responseMetaData
-   *
-   * @return {Result}
-   * @private
-   */
-  _addResponseMetaData() {
-    const oThis = this;
-
-    const nextPagePayloadKey = {};
-
-    if (oThis.searchResults.length >= oThis.limit) {
-      nextPagePayloadKey[paginationConstants.paginationIdentifierKey] = {
-        pagination_timestamp: oThis.nextPaginationTimestamp
-      };
-    }
-
-    oThis.responseMetaData = {
-      [paginationConstants.nextPagePayloadKey]: nextPagePayloadKey
-    };
-
-    return responseHelper.successWithData({});
-  }
-
-  /**
-   * Fetch price points.
-   *
-   * @sets oThis.tokenDetails, oThis.pricePoints
-   *
-   * @returns {Promise<void>}
-   * @private
-   */
-  async _fetchPricePoints() {
-    const oThis = this;
-
-    const promisesArray = [];
-    promisesArray.push(new SecureTokenCache({}).fetch(), new PricePointsCache().fetch());
-    const promisesResponse = await Promise.all(promisesArray);
-
-    const tokenDetailsResponse = promisesResponse[0];
-    if (tokenDetailsResponse.isFailure()) {
-      return Promise.reject(tokenDetailsResponse);
-    }
-
-    oThis.tokenDetails = tokenDetailsResponse.data;
-    const stakeCurrency = oThis.tokenDetails.stakeCurrency;
-
-    const pricePointsCacheRsp = promisesResponse[1];
-    if (pricePointsCacheRsp.isFailure()) {
-      return Promise.reject(pricePointsCacheRsp);
-    }
-
-    oThis.pricePoints = pricePointsCacheRsp.data[stakeCurrency];
   }
 
   /**
@@ -500,6 +435,37 @@ class UserSearch extends ServiceBase {
   }
 
   /**
+   * Fetch price points.
+   *
+   * @sets oThis.tokenDetails, oThis.pricePoints
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _fetchPricePoints() {
+    const oThis = this;
+
+    const promisesArray = [];
+    promisesArray.push(new SecureTokenCache({}).fetch(), new PricePointsCache().fetch());
+    const promisesResponse = await Promise.all(promisesArray);
+
+    const tokenDetailsResponse = promisesResponse[0];
+    if (tokenDetailsResponse.isFailure()) {
+      return Promise.reject(tokenDetailsResponse);
+    }
+
+    oThis.tokenDetails = tokenDetailsResponse.data;
+    const stakeCurrency = oThis.tokenDetails.stakeCurrency;
+
+    const pricePointsCacheRsp = promisesResponse[1];
+    if (pricePointsCacheRsp.isFailure()) {
+      return Promise.reject(pricePointsCacheRsp);
+    }
+
+    oThis.pricePoints = pricePointsCacheRsp.data[stakeCurrency];
+  }
+
+  /**
    * Prepare user pepo stats map (referrals, supporting count, supporters count, balance)
    * and user pepo coins map (received amount, spent amount, purchased amount, redeemed amount).
    *
@@ -510,8 +476,6 @@ class UserSearch extends ServiceBase {
    */
   async _prepareUserPepoStatsAndCoinsMap() {
     const oThis = this;
-
-    await oThis._fetchPricePoints();
 
     if (oThis.userIds.length === 0) {
       return responseHelper.successWithData({});
@@ -533,6 +497,46 @@ class UserSearch extends ServiceBase {
         redeemed: '0'
       };
     }
+  }
+
+  /**
+   * Fetch images.
+   *
+   * @sets oThis.imageDetails
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _fetchImages() {
+    const oThis = this;
+
+    const imageData = await new ImageByIdCache({ ids: oThis.imageIds }).fetch();
+
+    oThis.imageDetails = imageData.data;
+  }
+
+  /**
+   * Add next page meta data.
+   *
+   * @sets oThis.responseMetaData
+   *
+   * @returns {void}
+   * @private
+   */
+  _addResponseMetaData() {
+    const oThis = this;
+
+    const nextPagePayloadKey = {};
+
+    if (oThis.userIdsCount >= oThis.limit) {
+      nextPagePayloadKey[paginationConstants.paginationIdentifierKey] = {
+        pagination_timestamp: oThis.nextPaginationTimestamp
+      };
+    }
+
+    oThis.responseMetaData = {
+      [paginationConstants.nextPagePayloadKey]: nextPagePayloadKey
+    };
   }
 
   /**
