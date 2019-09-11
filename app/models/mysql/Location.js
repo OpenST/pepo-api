@@ -1,7 +1,5 @@
 const rootPrefix = '../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
-  imageConst = require(rootPrefix + '/lib/globalConstant/image'),
-  responseHelper = require(rootPrefix + '/lib/formatter/response'),
   databaseConstants = require(rootPrefix + '/lib/globalConstant/database');
 
 // Declare variables.
@@ -72,6 +70,27 @@ class LocationModel extends ModelBase {
       response[formatDbRow.gmtOffset] = response[formatDbRow.gmtOffset] || [];
       response[formatDbRow.gmtOffset].push(formatDbRow.id);
     }
+
+    return response;
+  }
+
+  /**
+   *
+   * @param timezone
+   * @returns {Promise<Object>}
+   */
+  async fetchByTimeZone(timezone) {
+    const oThis = this,
+      response = {};
+
+    const dbRow = await oThis
+      .select('*')
+      .where({
+        time_zone: timezone
+      })
+      .fire();
+
+    response[timezone] = oThis.formatDbData(dbRow[0]);
 
     return response;
   }
