@@ -15,7 +15,6 @@ const rootPrefix = '../../..',
   basicHelper = require(rootPrefix + '/helpers/basic'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
-  tokenUserConstants = require(rootPrefix + '/lib/globalConstant/tokenUser'),
   paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination'),
   userProfileElementConstants = require(rootPrefix + '/lib/globalConstant/userProfileElement');
 
@@ -80,10 +79,6 @@ class UserSearch extends ServiceBase {
     await oThis._fetchUserIds();
 
     await oThis._fetchTokenUsers();
-
-    // TODO: This thing would not be required in ideal case,
-    // TODO: pepo user was created but platform was down and user was not created
-    await oThis._filterNonActiveUsers();
 
     oThis._prepareSearchResults();
 
@@ -171,30 +166,6 @@ class UserSearch extends ServiceBase {
     }
 
     oThis.tokenUsersByUserIdMap = tokenUserRes.data;
-  }
-
-  /**
-   * Filter non active users - no platform activation.
-   *
-   * @return {Promise<void>}
-   * @private
-   */
-  async _filterNonActiveUsers() {
-    const oThis = this;
-
-    for (let ind = 0; ind < oThis.userIds.length; ) {
-      const userId = oThis.userIds[ind];
-      if (
-        oThis.tokenUsersByUserIdMap[userId].hasOwnProperty('userId') &&
-        oThis.tokenUsersByUserIdMap[userId].ostStatus === tokenUserConstants.activatedOstStatus
-      ) {
-        ind++; // Increment only if not deleted
-      } else {
-        oThis.userIds.splice(ind, 1);
-        delete oThis.userDetails[userId];
-        delete oThis.tokenUsersByUserIdMap[userId];
-      }
-    }
   }
 
   /**
@@ -420,7 +391,7 @@ class UserSearch extends ServiceBase {
   /**
    * Fetch price points.
    *
-   * @sets oThis.pricePoints
+   * @sets oThis.tokenObj, oThis.pricePoints
    *
    * @returns {Promise<void>}
    * @private
@@ -432,12 +403,12 @@ class UserSearch extends ServiceBase {
     promisesArray.push(new SecureTokenCache({}).fetch(), new PricePointsCache().fetch());
     const promisesResponse = await Promise.all(promisesArray);
 
-    oThis.tokenObj = promisesResponse[0];
-    if (oThis.tokenObj.isFailure()) {
-      return Promise.reject(oThis.tokenObj);
+    const tokenResponse = promisesResponse[0];
+    if (tokenResponse.isFailure()) {
+      return Promise.reject(tokenResponse);
     }
 
-    oThis.tokenObj = oThis.tokenObj.data;
+    oThis.tokenObj = tokenResponse.data;
     const stakeCurrency = oThis.tokenObj.stakeCurrency;
 
     const pricePointsCacheRsp = promisesResponse[1];
