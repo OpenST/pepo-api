@@ -20,8 +20,8 @@ class Logout extends ServiceBase {
     super(params);
 
     const oThis = this;
-    oThis.currentUserId = params.current_user.id;
-    oThis.deviceId = params.device_id;
+    // oThis.currentUserId = params.current_user.id || null;
+    // oThis.deviceId = params.device_id || null;
   }
 
   /**
@@ -32,7 +32,9 @@ class Logout extends ServiceBase {
   async _asyncPerform() {
     const oThis = this;
 
-    return oThis._logoutUserDevices();
+    return responseHelper.successWithData({});
+
+    //return oThis._logoutUserDevices();
   }
 
   /**
