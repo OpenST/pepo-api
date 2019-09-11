@@ -10,7 +10,7 @@ const upQuery =
   '  `id` bigint(20) NOT NULL AUTO_INCREMENT,\n' +
   '  `user_device_ids` TEXT COLLATE utf8_unicode_ci NOT NULL,\n' +
   '  `event_type` tinyint(4) NOT NULL,\n' +
-  '  `raw_notification_payload` TEXT COLLATE utf8_unicode_ci NOT NULL,\n' +
+  '  `raw_notification_payload` TEXT COLLATE utf8mb4_unicode_ci NOT NULL,\n' +
   '  `status` int(11) NOT NULL ,\n' +
   '  `execution_timestamp` int(11) NOT NULL,\n' +
   '  `lock_identifier` decimal(22,10) DEFAULT NULL,\n' +
@@ -20,7 +20,7 @@ const upQuery =
   '  PRIMARY KEY (`id`),\n' +
   '  KEY `idx_1` (`status`,`execution_timestamp`),\n' +
   '  KEY `idx_2` (`lock_identifier`)\n' +
-  ') ENGINE=InnoDB AUTO_INCREMENT=24 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;';
+  ') ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;';
 
 const downQuery = 'drop table if exists `notification_hooks`;';
 
