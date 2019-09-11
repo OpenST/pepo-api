@@ -4,6 +4,8 @@ const rootPrefix = '../../../..',
   basicHelper = require(rootPrefix + '/helpers/basic'),
   bgJob = require(rootPrefix + '/lib/rabbitMqEnqueue/bgJob'),
   bgJobConstants = require(rootPrefix + '/lib/globalConstant/bgJob'),
+  createErrorLogsEntry = require(rootPrefix + '/lib/errorLogs/createEntry'),
+  errorLogsConstants = require(rootPrefix + '/lib/globalConstant/errorLogs'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   tokenUserConstants = require(rootPrefix + '/lib/globalConstant/tokenUser'),
@@ -85,6 +87,18 @@ class FailureTransactionOstEvent extends TransactionOstEventBase {
       promiseArray.push(oThis.updateTransaction());
       promiseArray.push(oThis.processForTopUpTransaction());
       promiseArray.push(oThis._enqueueUserNotification(notificationJobConstants.topupFailed));
+
+      const errorObject = responseHelper.error({
+        internal_error_identifier: 'a_s_oe_t_1',
+        api_error_identifier: 'could_not_proceed',
+        debug_options: {
+          message: 'URGENT :: Topup of pepo could not be started after successful payment.',
+          transactionObj: JSON.stringify(oThis.transactionObj)
+        }
+      });
+      logger.error('Topup of pepo could not be started after successful payment.', errorObject);
+      await createErrorLogsEntry.perform(errorObject, errorLogsConstants.highSeverity);
+
       await Promise.all(promiseArray);
     }
   }

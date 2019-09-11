@@ -54,11 +54,13 @@ class PaymentProcessValidator extends ServiceBase {
     await oThis._insertFiatPayment();
 
     if (!oThis.paymentDetail) {
-      await oThis._serviceSpecificTasks();
+      let validationResp = await oThis._serviceSpecificTasks();
 
-      await bgJob.enqueue(bgJobConstants.validatePaymentReceiptJobTopic, {
-        fiatPaymentId: oThis.fiatPaymentId
-      });
+      if (validationResp && validationResp.data.productionSandbox === 0) {
+        await bgJob.enqueue(bgJobConstants.validatePaymentReceiptJobTopic, {
+          fiatPaymentId: oThis.fiatPaymentId
+        });
+      }
 
       await oThis._fetchFiatPayment();
     }
@@ -125,9 +127,9 @@ class PaymentProcessValidator extends ServiceBase {
       };
 
     if (oThis.os == 'ios') {
-      await new ProcessApplePayPayment(params).perform();
+      return new ProcessApplePayPayment(params).perform();
     } else if (oThis.os == 'android') {
-      await new ProcessGooglePayPayment(params).perform();
+      return new ProcessGooglePayPayment(params).perform();
     }
   }
 
