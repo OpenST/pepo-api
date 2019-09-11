@@ -33,11 +33,11 @@ class InviteUserSearch extends ServiceBase {
     oThis.sortBy = params.sort_by || null;
     oThis.paginationIdentifier = params[paginationConstants.paginationIdentifierKey] || null;
 
+    oThis.limit = oThis._defaultPageLimit();
     oThis.inviteIds = [];
     oThis.searchResults = [];
     oThis.pageNo = null;
     oThis.nextPageNo = null;
-    oThis.limit = oThis._defaultPageLimit();
     oThis.totalCount = 0;
   }
 
@@ -64,7 +64,7 @@ class InviteUserSearch extends ServiceBase {
   /**
    * Validate and sanitize.
    *
-   * @sets oThis.pageNo, oThis.query, oThis.sortBy
+   * @sets oThis.query, oThis.sortBy, oThis.pageNo
    *
    * @returns {Promise<*|result>}
    * @private
