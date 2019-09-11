@@ -4,9 +4,14 @@ const rootPrefix = '../..',
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   userDeviceConstants = require(rootPrefix + '/lib/globalConstant/userDevice');
 
+/**
+ * Class for logout service.
+ *
+ * @class Logout
+ */
 class Logout extends ServiceBase {
   /**
-   * Constructor for Logout service.
+   * Constructor for logout service.
    *
    * @param {object} params
    * @param {object} params.current_user
@@ -17,15 +22,16 @@ class Logout extends ServiceBase {
    * @constructor
    */
   constructor(params) {
-    super(params);
+    super();
 
     const oThis = this;
+
     oThis.currentUserId = params.current_user.id;
     oThis.deviceId = params.device_id;
   }
 
   /**
-   * Perform: Perform user creation.
+   * Async perform.
    *
    * @return {Promise<void>}
    */

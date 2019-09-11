@@ -1,9 +1,3 @@
-/**
- * This is base class for all services.
- *
- * @module app/services/Base
- */
-
 const rootPrefix = '../..',
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   basicHelper = require(rootPrefix + '/helpers/basic'),
@@ -34,7 +28,7 @@ class ServicesBase {
   }
 
   /**
-   * Main performer method for the class.
+   * Main performer for class.
    *
    * @returns {Promise<*>}
    */
@@ -115,7 +109,7 @@ class ServicesBase {
 
     const profileUserByIdResponse = await new UserMultiCache({ ids: [oThis.profileUserId] }).fetch();
 
-    let profileUserObj = profileUserByIdResponse.data[oThis.profileUserId];
+    const profileUserObj = profileUserByIdResponse.data[oThis.profileUserId];
 
     if (profileUserByIdResponse.isFailure() || !CommonValidators.validateNonEmptyObject(profileUserObj)) {
       return Promise.reject(
