@@ -274,11 +274,11 @@ class UserModel extends ModelBase {
   }
 
   /**
-   * User search
+   * User search.
    *
-   * @param {integer} params.limit: limit
-   * @param {integer} params.query: query
-   * @param {integer} params.paginationTimestamp: pagination time stamp
+   * @param {number} params.limit: limit
+   * @param {string} params.query: query
+   * @param {number} params.paginationTimestamp: pagination time stamp
    * @param {boolean} params.fetchAll: flag to fetch all users, active or inactive
    * @param {boolean} params.isOnlyNameSearch
    *
