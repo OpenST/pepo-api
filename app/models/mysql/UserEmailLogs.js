@@ -71,12 +71,34 @@ class UserEmailLogs extends ModelBase {
   async fetchEmailById(id) {
     const oThis = this;
 
-    const response = await oThis
-      .select('email')
-      .where({ id: id })
+    const res = await oThis.fetchEmailByIds([id]);
+
+    return res[id] || {};
+  }
+
+  /**
+   * Fetch email by ids.
+   *
+   * @param {array<number>} ids
+   *
+   * @returns {Promise<void>}
+   */
+  async fetchEmailByIds(ids) {
+    const oThis = this;
+
+    const dbRows = await oThis
+      .select('email, id')
+      .where({ id: ids })
       .fire();
 
-    return { email: response[0].email || null };
+    const response = {};
+
+    for (let index = 0; index < dbRows.length; index++) {
+      const formatDbRow = oThis.formatDbData(dbRows[index]);
+      response[formatDbRow.id] = formatDbRow;
+    }
+
+    return response;
   }
 }
 
