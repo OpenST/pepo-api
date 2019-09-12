@@ -166,8 +166,8 @@ class FiatPayment extends ModelBase {
    * Flush cache
    *
    * @param {object} params
-   * @param {array} params.referenceIds
-   * @param {array} params.ids
+   * @param {integer} params.fiatPaymentId
+   * @param {integer} params.userId
    *
    * @returns {Promise<*>}
    */
