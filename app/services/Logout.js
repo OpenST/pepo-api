@@ -2,6 +2,7 @@ const rootPrefix = '../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   UserDeviceModel = require(rootPrefix + '/app/models/mysql/UserDevice'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
+  logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   userDeviceConstants = require(rootPrefix + '/lib/globalConstant/userDevice');
 
 class Logout extends ServiceBase {
@@ -18,10 +19,10 @@ class Logout extends ServiceBase {
    */
   constructor(params) {
     super(params);
-
+    logger.log(' ==========   Logout params:', params);
     const oThis = this;
-    // oThis.currentUserId = params.current_user.id || null;
-    // oThis.deviceId = params.device_id || null;
+    oThis.currentUser = params.current_user;
+    oThis.deviceId = params.device_id;
   }
 
   /**
@@ -32,9 +33,7 @@ class Logout extends ServiceBase {
   async _asyncPerform() {
     const oThis = this;
 
-    return responseHelper.successWithData({});
-
-    //return oThis._logoutUserDevices();
+    return oThis._logoutUserDevices();
   }
 
   /**
@@ -46,14 +45,14 @@ class Logout extends ServiceBase {
   async _logoutUserDevices() {
     const oThis = this;
 
-    if (!oThis.deviceId || !oThis.currentUserId) {
+    if (!oThis.deviceId || !oThis.currentUser || !oThis.currentUser.id) {
       return responseHelper.successWithData({});
     }
 
     const userDeviceIdResp = await new UserDeviceModel()
       .select('id')
       .where({
-        user_id: oThis.currentUserId,
+        user_id: oThis.currentUser.id,
         device_id: oThis.deviceId
       })
       .fire();
@@ -61,7 +60,7 @@ class Logout extends ServiceBase {
     await new UserDeviceModel()
       .update({ status: userDeviceConstants.invertedStatuses[userDeviceConstants.logoutStatus] })
       .where({
-        user_id: oThis.currentUserId,
+        user_id: oThis.currentUser.id,
         device_id: oThis.deviceId
       })
       .fire();
