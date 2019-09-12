@@ -57,9 +57,7 @@ class UpdateEmail extends UpdateProfileBase {
 
     await oThis._createDoubleOptInToken();
 
-    const promisesArray = [];
-    promisesArray.push(oThis._updateUserEmailLogs(), oThis._sendPreLaunchInviteDoubleOptInMail());
-    await Promise.all(promisesArray);
+    await oThis._sendPreLaunchInviteDoubleOptInMail();
 
     return responseHelper.successWithData({});
   }
@@ -104,7 +102,8 @@ class UpdateEmail extends UpdateProfileBase {
 
     const insertResponse = await new UserEmailLogsModel()
       .insert({
-        email: oThis.email
+        email: oThis.email,
+        user_id: oThis.profileUserId
       })
       .fire();
 
@@ -146,23 +145,6 @@ class UpdateEmail extends UpdateProfileBase {
     const doubleOptInTokenStr = `${oThis.temporaryTokenId.toString()}:${temporaryDoubleOptInToken}`;
 
     oThis.doubleOptInToken = localCipher.encrypt(coreConstants.PA_EMAIL_TOKENS_DECRIPTOR_KEY, doubleOptInTokenStr);
-  }
-
-  /**
-   * Update user email logs table.
-   *
-   * @returns {Promise<void>}
-   * @private
-   */
-  async _updateUserEmailLogs() {
-    const oThis = this;
-
-    await new UserEmailLogsModel()
-      .update({
-        temporary_token_id: oThis.temporaryTokenId
-      })
-      .where({ id: oThis.userEmailLogsId })
-      .fire();
   }
 
   /**

@@ -32,7 +32,7 @@ class UserEmailLogs extends ModelBase {
    * @param {object} dbRow
    * @param {number} dbRow.id
    * @param {string} dbRow.email
-   * @param {number} dbRow.temporary_token_id
+   * @param {number} dbRow.user_id
    * @param {number/string} dbRow.created_at
    * @param {number/string} dbRow.updated_at
    *
@@ -44,7 +44,7 @@ class UserEmailLogs extends ModelBase {
     const formattedData = {
       id: dbRow.id,
       email: dbRow.email,
-      temporaryTokenId: dbRow.temporary_token_id,
+      userId: dbRow.user_id,
       createdAt: dbRow.created_at,
       updatedAt: dbRow.updated_at
     };
@@ -58,7 +58,7 @@ class UserEmailLogs extends ModelBase {
    * @returns {array}
    */
   safeFormattedColumnNames() {
-    return ['id', 'email', 'temporaryTokenId', 'createdAt', 'updatedAt'];
+    return ['id', 'email', 'userId', 'createdAt', 'updatedAt'];
   }
 
   /**
