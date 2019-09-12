@@ -218,7 +218,7 @@ class TwitterConnect extends ServiceBase {
     // fetch inviteCodeObj from cache
     //  if not present  give invalid_invite_code_error
     // if invite code of current prelaunch user, give error
-    // if limit reached give expired error
+    // if limit reached and not _isInviteCodeMandatory() give expired error
 
     //set inviter code id
     oThis.inviterCodeId = '';
