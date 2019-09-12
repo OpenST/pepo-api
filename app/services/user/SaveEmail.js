@@ -1,7 +1,7 @@
-const rootPrefix = '../../../../..',
+const rootPrefix = '../../../',
+  ServiceBase = require(rootPrefix + '/app/services/Base'),
   UserEmailLogsModel = require(rootPrefix + '/app/models/mysql/UserEmailLogs'),
   TemporaryTokenModel = require(rootPrefix + '/app/models/mysql/TemporaryToken'),
-  UpdateProfileBase = require(rootPrefix + '/app/services/user/profile/update/Base'),
   UserByEmailsCache = require(rootPrefix + '/lib/cacheManagement/multi/UserByEmails'),
   SendTransactionalMail = require(rootPrefix + '/lib/email/hookCreator/SendTransactionalMail'),
   util = require(rootPrefix + '/lib/util'),
@@ -11,29 +11,31 @@ const rootPrefix = '../../../../..',
   emailServiceApiCallHookConstants = require(rootPrefix + '/lib/globalConstant/emailServiceApiCallHook');
 
 /**
- * Class to update email id of user.
+ * Class to save email id of user.
  *
- * @class UpdateEmail
+ * @class SaveEmail
  */
-class UpdateEmail extends UpdateProfileBase {
+class SaveEmail extends ServiceBase {
   /**
-   * Constructor to update email id of user.
+   * Constructor to save email id of user.
    *
    * @param {object} params
    * @param {number} params.profile_user_id
    * @param {object} params.current_user
    * @param {string} params.email: email address of user
    *
-   * @augments UpdateProfileBase
+   * @augments ServiceBase
    *
    * @constructor
    */
   constructor(params) {
-    super(params);
+    super();
 
     const oThis = this;
 
-    oThis.email = oThis.params.email;
+    oThis.profileUserId = params.profile_user_id;
+    oThis.currentUserId = params.current_user.id;
+    oThis.email = params.email;
 
     oThis.userEmailLogsId = null;
     oThis.doubleOptInToken = null;
@@ -65,8 +67,19 @@ class UpdateEmail extends UpdateProfileBase {
    * @returns {Promise<*>}
    * @private
    */
-  async _validateParams() {
+  async _validate() {
     const oThis = this;
+
+    if (+oThis.currentUserId !== +oThis.profileUserId) {
+      return Promise.reject(
+        responseHelper.paramValidationError({
+          internal_error_identifier: 'a_s_u_p_u_b_1',
+          api_error_identifier: 'unauthorized_api_request',
+          params_error_identifiers: [],
+          debug_options: {}
+        })
+      );
+    }
 
     // Check if email is not already associated with some different user.
     const userDetailsResponse = await new UserByEmailsCache({ email: [oThis.email] }).fetch();
@@ -204,4 +217,4 @@ class UpdateEmail extends UpdateProfileBase {
   }
 }
 
-module.exports = UpdateEmail;
+module.exports = SaveEmail;
