@@ -135,6 +135,7 @@ class VerifyDoubleOptIn extends ServiceBase {
         break;
       }
       case temporaryTokenConstants.emailDoubleOptInKind: {
+        promisesArray.push(oThis._addEmailForUser());
         break;
       }
       default: {
@@ -183,6 +184,41 @@ class VerifyDoubleOptIn extends ServiceBase {
     };
 
     await new AddContactInPepoCampaign(addContactParams).perform();
+  }
+
+  /**
+   * Associate email for user.
+   *
+   * @returns {Promise<never>}
+   * @private
+   */
+  async _addEmailForUser() {
+    const oThis = this;
+
+    const UserEmailLogsModel = require(rootPrefix + '/app/models/mysql/UserEmailLogs');
+
+    // Fetch details from user email logs table.
+    const userEmailLogsDetails = await new UserEmailLogsModel()
+      .select('id, email')
+      .where({ id: oThis.temporaryTokenObj.entityId })
+      .fire();
+
+    if (userEmailLogsDetails.length !== 1) {
+      return oThis._invalidUrlError('a_s_do_aefu_1');
+    }
+
+    const userId = userEmailLogsDetails[0].id,
+      email = userEmailLogsDetails[0].email;
+
+    const UserModel = require(rootPrefix + '/app/models/mysql/User');
+
+    // Update email for user.
+    await new UserModel()
+      .update({ email: email })
+      .where({ id: userId })
+      .fire();
+
+    await UserModel.flushCache({ id: userId, email: email });
   }
 
   /**
