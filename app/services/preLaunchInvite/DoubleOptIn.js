@@ -1,8 +1,6 @@
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   TemporaryTokenModel = require(rootPrefix + '/app/models/mysql/TemporaryToken'),
-  PreLaunchInviteModel = require(rootPrefix + '/app/models/mysql/PreLaunchInvite'),
-  AddContactInPepoCampaign = require(rootPrefix + '/lib/email/hookCreator/AddContact'),
   coreConstants = require(rootPrefix + '/config/coreConstants'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   localCipher = require(rootPrefix + '/lib/encryptors/localCipher'),
@@ -51,11 +49,7 @@ class VerifyDoubleOptIn extends ServiceBase {
 
     await oThis._fetchDoubleOptInToken();
 
-    await oThis._markPreLaunchInviteAsDoubleOptIn();
-
-    await oThis._addContactInPepoCampaign();
-
-    await oThis._markTokenAsUsed();
+    await oThis._performKindSpecificOperations();
 
     return responseHelper.successWithData({});
   }
@@ -124,13 +118,44 @@ class VerifyDoubleOptIn extends ServiceBase {
   }
 
   /**
-   * Mark pre launch invite as double opt in
+   * Perform operations specific to temporary token kind.
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _performKindSpecificOperations() {
+    const oThis = this;
+
+    const promisesArray = [];
+
+    switch (oThis.temporaryTokenObj.kind) {
+      case temporaryTokenConstants.preLaunchInviteKind: {
+        promisesArray.push(oThis._markPreLaunchInviteAsDoubleOptIn());
+        promisesArray.push(oThis._addContactInPepoCampaign());
+        break;
+      }
+      case temporaryTokenConstants.emailDoubleOptInKind: {
+        break;
+      }
+      default: {
+        throw new Error('Invalid token kind.');
+      }
+    }
+
+    promisesArray.push(oThis._markTokenAsUsed());
+    await Promise.all(promisesArray);
+  }
+
+  /**
+   * Mark pre launch invite as double opt in.
    *
    * @returns {Promise<void>}
    * @private
    */
   async _markPreLaunchInviteAsDoubleOptIn() {
     const oThis = this;
+
+    const PreLaunchInviteModel = require(rootPrefix + '/app/models/mysql/PreLaunchInvite');
 
     await new PreLaunchInviteModel()
       .update({ status: preLaunchInviteConstants.invertedStatuses[preLaunchInviteConstants.doptinStatus] })
@@ -149,10 +174,12 @@ class VerifyDoubleOptIn extends ServiceBase {
   async _addContactInPepoCampaign() {
     const oThis = this;
 
+    const AddContactInPepoCampaign = require(rootPrefix + '/lib/email/hookCreator/AddContact');
+
     const addContactParams = {
       receiverEntityId: oThis.temporaryTokenObj.entityId,
       receiverEntityKind: emailServiceApiCallHookConstants.preLaunchInviteEntityKind,
-      customDescription: 'Contact add for pre launch invite'
+      customDescription: 'Contact add for pre launch invite.'
     };
 
     await new AddContactInPepoCampaign(addContactParams).perform();
