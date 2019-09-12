@@ -9,6 +9,26 @@ const rootPrefix = '../../..',
   entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
   responseEntityKey = require(rootPrefix + '/lib/globalConstant/responseEntityKey');
 
+// Get available products
+router.get('/products', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.getTopupProduct;
+
+  const onServiceSuccess = async function(serviceResponse) {
+    const wrapperFormatterRsp = await new FormatterComposer({
+      resultType: responseEntityKey.products,
+      entityKindToResponseKeyMap: {
+        [entityType.products]: responseEntityKey.products,
+        [entityType.limitsData]: responseEntityKey.limitsData
+      },
+      serviceData: serviceResponse.data
+    }).perform();
+
+    serviceResponse.data = wrapperFormatterRsp.data;
+  };
+
+  Promise.resolve(routeHelper.perform(req, res, next, '/topup/GetProduct', 'r_a_v1_u_15', null, onServiceSuccess));
+});
+
 // Create a topup using the payment receipt
 router.post('/', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.confirmPayReceipt;
@@ -28,26 +48,6 @@ router.post('/', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   Promise.resolve(
     routeHelper.perform(req, res, next, '/payment/ProcessValidator', 'r_a_v1_p_2', null, onServiceSuccess)
   );
-});
-
-// Get available products
-router.get('/products', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
-  req.decodedParams.apiName = apiName.getTopupProduct;
-
-  const onServiceSuccess = async function(serviceResponse) {
-    const wrapperFormatterRsp = await new FormatterComposer({
-      resultType: responseEntityKey.products,
-      entityKindToResponseKeyMap: {
-        [entityType.products]: responseEntityKey.products,
-        [entityType.limitsData]: responseEntityKey.limitsData
-      },
-      serviceData: serviceResponse.data
-    }).perform();
-
-    serviceResponse.data = wrapperFormatterRsp.data;
-  };
-
-  Promise.resolve(routeHelper.perform(req, res, next, '/topup/GetProduct', 'r_a_v1_u_15', null, onServiceSuccess));
 });
 
 // Get pending topups for the user
