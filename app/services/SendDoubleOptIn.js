@@ -1,15 +1,15 @@
 const rootPrefix = '../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
+  TemporaryTokenModel = require(rootPrefix + '/app/models/mysql/TemporaryToken'),
+  SendTransactionalMail = require(rootPrefix + '/lib/email/hookCreator/SendTransactionalMail'),
   util = require(rootPrefix + '/lib/util'),
   coreConstants = require(rootPrefix + '/config/coreConstants'),
-  pageConstants = require(rootPrefix + '/lib/globalConstant/page'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   localCipher = require(rootPrefix + '/lib/encryptors/localCipher'),
-  TemporaryTokenModel = require(rootPrefix + '/app/models/mysql/TemporaryToken'),
+  webPageConstants = require(rootPrefix + '/lib/globalConstant/webPage'),
   temporaryTokenConstant = require(rootPrefix + '/lib/globalConstant/temporaryToken'),
   preLaunchInviteConstant = require(rootPrefix + '/lib/globalConstant/preLaunchInvite'),
-  SendTransactionalMail = require(rootPrefix + '/lib/email/hookCreator/SendTransactionalMail'),
   emailServiceApiCallHookConstants = require(rootPrefix + '/lib/globalConstant/emailServiceApiCallHook');
 
 class SendDoubleOptIn extends ServiceBase {
@@ -100,7 +100,7 @@ class SendDoubleOptIn extends ServiceBase {
   async _sendPreLaunchInviteDoubleOptInMail() {
     const oThis = this;
 
-    let link = encodeURIComponent(`${pageConstants.optInEmailLink}?t=${oThis.doubleOptInToken}`);
+    let link = encodeURIComponent(`${webPageConstants.optInEmailLink}?t=${oThis.doubleOptInToken}`);
 
     let transactionalMailParams = {
       receiverEntityId: oThis.preLaunchInviteObj.id,

@@ -272,7 +272,7 @@ class PreLaunchTwitterSignUp extends ServiceBase {
       receiverEntityId: oThis.inviterId,
       receiverEntityKind: emailServiceApiCallHookConstants.preLaunchInviteEntityKind,
       customDescription: 'pre launch invite signup using invite code',
-      templateName: emailServiceApiCallHookConstants.userRefferedTemplateName,
+      templateName: emailServiceApiCallHookConstants.userReferredTemplateName,
       templateVars: {
         pepo_api_domain: 1,
         twitter_handle: oThis.preLaunchInviteObj.handle
