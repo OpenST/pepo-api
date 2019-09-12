@@ -60,6 +60,7 @@ class AddDeviceToken extends ServiceBase {
 
     promiseArray.push(oThis._insertIntoUserDevices());
     promiseArray.push(oThis._addLocationInUserProfileElements());
+    promiseArray.push(oThis._resetUnreadNotificationsCount());
 
     await Promise.all(promiseArray);
 
@@ -165,7 +166,8 @@ class AddDeviceToken extends ServiceBase {
   }
 
   /**
-   * Resets unread notifications counts to zero.
+   * Resets unread notifications counts to zero only in case of android.
+   * As android device is not able to get the badge count.
    *
    * @returns {Promise<void>}
    * @private
@@ -173,14 +175,16 @@ class AddDeviceToken extends ServiceBase {
   async _resetUnreadNotificationsCount() {
     const oThis = this;
 
-    let queryRsp = await new UserNotificationsCountModel().fetchUnreadNotificationCount({ userIds: [oThis.userId] });
+    if (oThis.deviceKind === userDeviceConstants.androidDeviceKind) {
+      let queryRsp = await new UserNotificationsCountModel().fetchUnreadNotificationCount({ userIds: [oThis.userId] });
 
-    console.log('queryRsp---', queryRsp);
+      console.log('queryRsp---', queryRsp);
 
-    return new UserNotificationsCountModel().resetUnreadNotificationCount({
-      userId: oThis.userId,
-      count: queryRsp[oThis.userId]
-    });
+      return new UserNotificationsCountModel().resetUnreadNotificationCount({
+        userId: oThis.userId,
+        count: queryRsp[oThis.userId]
+      });
+    }
   }
 }
 
