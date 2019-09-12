@@ -90,7 +90,7 @@ class FailureTransactionOstEvent extends TransactionOstEventBase {
       promiseArray.push(
         FiatPaymentModel.flushCache({
           fiatPaymentId: oThis.transactionObj.fiatPaymentId,
-          userId: oThis.transactionObj.toUserId
+          userId: oThis.toUserId
         })
       );
       promiseArray.push(oThis._enqueueUserNotification(notificationJobConstants.topupFailed));

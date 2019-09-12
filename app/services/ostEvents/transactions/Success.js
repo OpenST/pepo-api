@@ -103,7 +103,7 @@ class SuccessTransactionOstEvent extends TransactionOstEventBase {
       promiseArray.push(
         FiatPaymentModel.flushCache({
           fiatPaymentId: oThis.transactionObj.fiatPaymentId,
-          userId: oThis.transactionObj.toUserId
+          userId: oThis.toUserId
         })
       );
       await Promise.all(promiseArray);
