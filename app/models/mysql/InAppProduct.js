@@ -68,7 +68,8 @@ class InAppProduct extends ModelBase {
   /**
    * Get products for given price point
    *
-   * @returns {Promise<void>}
+   * @param pricePoint {float} - price point in USD unit - this is the value of one Pepo currently in USD.
+   * @return {Promise<Array>}
    */
   async getProductsForGivenPricePoint(pricePoint) {
     const oThis = this;
