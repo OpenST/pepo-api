@@ -60,46 +60,6 @@ class UserEmailLogs extends ModelBase {
   safeFormattedColumnNames() {
     return ['id', 'email', 'userId', 'createdAt', 'updatedAt'];
   }
-
-  /**
-   * Fetch user email log id.
-   *
-   * @param {string} id
-   *
-   * @return {object}
-   */
-  async fetchById(id) {
-    const oThis = this;
-
-    const res = await oThis.fetchByIds([id]);
-
-    return res[id] || {};
-  }
-
-  /**
-   * Fetch temporary token by ids.
-   *
-   * @param {array} ids
-   *
-   * @return {object}
-   */
-  async fetchByIds(ids) {
-    const oThis = this;
-
-    const dbRows = await oThis
-      .select('*')
-      .where({ id: ids })
-      .fire();
-
-    const response = {};
-
-    for (let index = 0; index < dbRows.length; index++) {
-      const formatDbRow = oThis.formatDbData(dbRows[index]);
-      response[formatDbRow.id] = formatDbRow;
-    }
-
-    return response;
-  }
 }
 
 module.exports = UserEmailLogs;
