@@ -3,6 +3,7 @@ const rootPrefix = '../../..',
   basicHelper = require(rootPrefix + '/helpers/basic'),
   databaseConstants = require(rootPrefix + '/lib/globalConstant/database'),
   fiatPaymentConstants = require(rootPrefix + '/lib/globalConstant/fiatPayment'),
+  UserPaymentsByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/UserPaymentsByIds'),
   ostPricePointConstants = require(rootPrefix + '/lib/globalConstant/ostPricePoints');
 
 // Declare variables.
@@ -240,10 +241,10 @@ class FiatPayment extends ModelBase {
    *
    * @returns {Promise<*>}
    */
-  static async flushCache() {
-    const promisesArray = [];
+  static async flushCache(paymentId) {
+    const cacheObj = new UserPaymentsByIdsCache({ ids: [paymentId] });
 
-    await Promise.all(promisesArray);
+    return cacheObj.clear();
   }
 }
 

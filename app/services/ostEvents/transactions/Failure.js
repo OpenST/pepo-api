@@ -1,5 +1,6 @@
 const rootPrefix = '../../../..',
   TokenUserModel = require(rootPrefix + '/app/models/mysql/TokenUser'),
+  FiatPaymentModel = require(rootPrefix + '/app/models/mysql/FiatPayment'),
   TransactionOstEventBase = require(rootPrefix + '/app/services/ostEvents/transactions/Base'),
   basicHelper = require(rootPrefix + '/helpers/basic'),
   bgJob = require(rootPrefix + '/lib/rabbitMqEnqueue/bgJob'),
@@ -86,6 +87,7 @@ class FailureTransactionOstEvent extends TransactionOstEventBase {
       const promiseArray = [];
       promiseArray.push(oThis.updateTransaction());
       promiseArray.push(oThis.processForTopUpTransaction());
+      promiseArray.push(FiatPaymentModel.flushCache(oThis.transactionObj.fiatPaymentId));
       promiseArray.push(oThis._enqueueUserNotification(notificationJobConstants.topupFailed));
 
       const errorObject = responseHelper.error({

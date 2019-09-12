@@ -403,7 +403,7 @@ class TransactionOstEventBase extends ServiceBase {
       .update({
         status: oThis._getPaymentStatus()
       })
-      .where({ transaction_id: oThis.transactionObj.id })
+      .where({ id: oThis.transactionObj.fiatPaymentId })
       .fire();
 
     return responseHelper.successWithData({});

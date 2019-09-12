@@ -1,6 +1,7 @@
 const rootPrefix = '../../../..',
   UpdateStats = require(rootPrefix + '/lib/UpdateStats'),
   TokenUserModel = require(rootPrefix + '/app/models/mysql/TokenUser'),
+  FiatPaymentModel = require(rootPrefix + '/app/models/mysql/FiatPayment'),
   TransactionOstEventBase = require(rootPrefix + '/app/services/ostEvents/transactions/Base'),
   UserDeviceIdsByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/UserDeviceIdsByUserIds'),
   basicHelper = require(rootPrefix + '/helpers/basic'),
@@ -99,6 +100,7 @@ class SuccessTransactionOstEvent extends TransactionOstEventBase {
       promiseArray.push(oThis.updateTransaction());
       promiseArray.push(oThis.processForTopUpTransaction());
       promiseArray.push(oThis._enqueueUserNotification(notificationJobConstants.topupDone));
+      promiseArray.push(FiatPaymentModel.flushCache(oThis.transactionObj.fiatPaymentId));
       await Promise.all(promiseArray);
     }
   }
