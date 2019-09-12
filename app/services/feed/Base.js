@@ -5,6 +5,8 @@ const rootPrefix = '../../..',
   feedConstants = require(rootPrefix + '/lib/globalConstant/feed'),
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   videoConstants = require(rootPrefix + '/lib/globalConstant/video'),
+  createErrorLogsEntry = require(rootPrefix + '/lib/errorLogs/createEntry'),
+  errorLogsConstants = require(rootPrefix + '/lib/globalConstant/errorLogs'),
   responseHelper = require(rootPrefix + '/lib/formatter/response');
 
 /**
@@ -143,6 +145,14 @@ class FeedBase extends ServiceBase {
         !CommonValidators.validateNonEmptyObject(profileObj) ||
         videoEntityForFeed.status === videoConstants.deletedStatus
       ) {
+        const errorObject = responseHelper.error({
+          internal_error_identifier: 'a_s_f_fiuf_1',
+          api_error_identifier: 'something_went_wrong',
+          debug_options: { feedData: feedData, msg: "FOUND DELETED VIDEO OR BLOCKED USER'S VIDEO IN FEED" }
+        });
+
+        createErrorLogsEntry.perform(errorObject, errorLogsConstants.mediumSeverity);
+
         oThis.feeds.splice(i, 1);
       }
     }

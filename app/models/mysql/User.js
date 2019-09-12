@@ -230,40 +230,6 @@ class UserModel extends ModelBase {
   }
 
   /**
-   * Fetch user ids
-   *
-   * @param {object} params
-   * @param {array} params.userId
-   * @param {number} [params.page]
-   * @param {number} [params.limit]
-   *
-   * @returns {Promise<*>}
-   */
-  async fetchPaginatedUsers(params) {
-    const oThis = this;
-
-    const page = params.page || 1,
-      limit = params.limit || 10,
-      offset = (page - 1) * limit;
-
-    const dbRows = await oThis
-      .select(['id'])
-      .where(['status != ?', userConstants.invertedStatuses[userConstants.blockedStatus]])
-      .limit(limit)
-      .offset(offset)
-      .order_by('name ASC')
-      .fire();
-
-    const response = [];
-
-    for (let index = 0; index < dbRows.length; index++) {
-      response.push(dbRows[index].id);
-    }
-
-    return response;
-  }
-
-  /**
    * Get cookie value.
    *
    * @param {object} userObj
@@ -386,8 +352,8 @@ class UserModel extends ModelBase {
     }
 
     if (params.email) {
-      const UserByEmailsCache = require(rootPrefix + '/lib/cacheManagement/multi/UserByEmails');
-      promisesArray.push(new UserByEmailsCache({ emails: [params.email] }).clear());
+      const UserIdByEmailCache = require(rootPrefix + '/lib/cacheManagement/single/UserIdByEmail');
+      promisesArray.push(new UserIdByEmailCache({ email: params.email }).clear());
     }
 
     await Promise.all(promisesArray);
