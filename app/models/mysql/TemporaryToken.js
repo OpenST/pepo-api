@@ -105,17 +105,6 @@ class TemporaryToken extends ModelBase {
 
     return response;
   }
-
-  /**
-   * Flush cache.
-   *
-   * @param {object} params
-   *
-   * @returns {Promise<*>}
-   */
-  static async flushCache(params) {
-    // Do nothing.
-  }
 }
 
 module.exports = TemporaryToken;
