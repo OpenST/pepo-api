@@ -9,7 +9,7 @@ const upQuery =
   'CREATE TABLE `user_email_logs` ( \n\
     `id` bigint(20) NOT NULL AUTO_INCREMENT, \n\
     `email` varchar(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NULL, \n\
-    `user_id` bigint(20) NULL, \n\
+    `user_id` bigint(20) NOT NULL, \n\
     `created_at` int(11) NOT NULL, \n\
     `updated_at` int(11) NOT NULL, \n\
     PRIMARY KEY (`id`), \n\
@@ -18,11 +18,11 @@ const upQuery =
 
 const downQuery = 'drop table if exists `user_email_logs`;';
 
-const createTemporaryTokens = {
+const createUserEmailLogs = {
   dbName: dbName,
   up: [upQuery],
   down: [downQuery],
   dbKind: dbKind
 };
 
-module.exports = createTemporaryTokens;
+module.exports = createUserEmailLogs;

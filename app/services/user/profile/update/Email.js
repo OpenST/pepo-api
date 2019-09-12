@@ -150,7 +150,8 @@ class UpdateEmail extends UpdateProfileBase {
         status: temporaryTokenConstants.invertedStatuses[temporaryTokenConstants.inActiveStatus]
       })
       .where({
-        entity_id: oThis.userEmailLogsId
+        entity_id: oThis.userEmailLogsId,
+        entity_kind: temporaryTokenConstants.invertedKinds[temporaryTokenConstants.emailDoubleOptInKind]
       })
       .fire();
   }

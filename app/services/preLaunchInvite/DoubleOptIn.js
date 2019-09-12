@@ -106,10 +106,6 @@ class VerifyDoubleOptIn extends ServiceBase {
       return oThis._invalidUrlError('a_s_do_fpiot_3');
     }
 
-    if (!temporaryTokenConstants.invertedKinds[oThis.temporaryTokenObj.kind]) {
-      return oThis._invalidUrlError('a_s_do_fpiot_4');
-    }
-
     if (
       Math.floor(Date.now() / 1000) - temporaryTokenConstants.tokenExpiryTimestamp >
       oThis.temporaryTokenObj.createdAt
