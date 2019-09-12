@@ -183,7 +183,7 @@ class FiatPayment extends ModelBase {
   /**
    * Fetch life time payments
    *
-   * @param userIds
+   * @param userId - user id for which the total purchase amount has to be summed.
    * @returns {Promise<void>}
    */
   async fetchLifeTimePayments(userId) {
@@ -191,12 +191,12 @@ class FiatPayment extends ModelBase {
 
     let totalAmount = 0,
       queryResponse = await oThis
-        .select('sum(amount) as amount')
+        .select('sum(amount) as total_purchase_amount')
         .where(['from_user_id = ?', userId])
         .fire();
 
-    if (queryResponse[0].amount) {
-      totalAmount = queryResponse[0].amount;
+    if (queryResponse[0].total_purchase_amount) {
+      totalAmount = queryResponse[0].total_purchase_amount;
     }
 
     return { amount: totalAmount };
