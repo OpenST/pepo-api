@@ -137,6 +137,7 @@ class GetTopupProduct extends ServiceBase {
 
     let remainingLimit = InAppProductConstants.lifetimeLimit - amountSpent;
 
+    // TODO - payments - following condition can mislead, if 0 comes as a value and I think 0 will be a valid value.
     if (oThis.customPurchaseLimitOfUser) {
       remainingLimit = oThis.customPurchaseLimitOfUser - amountSpent;
     }
@@ -178,6 +179,7 @@ class GetTopupProduct extends ServiceBase {
    * @private
    */
   _formatProductsData(productsArray) {
+    // TODO - payments - following formatting should be moved to formatter.
     const oThis = this,
       formattedProductsArray = [];
 
