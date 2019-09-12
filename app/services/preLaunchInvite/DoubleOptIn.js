@@ -1,29 +1,37 @@
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
+  TemporaryTokenModel = require(rootPrefix + '/app/models/mysql/TemporaryToken'),
+  PreLaunchInviteModel = require(rootPrefix + '/app/models/mysql/PreLaunchInvite'),
+  AddContactInPepoCampaign = require(rootPrefix + '/lib/email/hookCreator/AddContact'),
   coreConstants = require(rootPrefix + '/config/coreConstants'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   localCipher = require(rootPrefix + '/lib/encryptors/localCipher'),
-  PreLaunchInviteModel = require(rootPrefix + '/app/models/mysql/PreLaunchInvite'),
-  AddContactInPepoCampaign = require(rootPrefix + '/lib/email/hookCreator/AddContact'),
+  temporaryTokenConstants = require(rootPrefix + '/lib/globalConstant/temporaryToken'),
   preLaunchInviteConstants = require(rootPrefix + '/lib/globalConstant/preLaunchInvite'),
-  TemporaryTokenModel = require(rootPrefix + '/app/models/mysql/TemporaryToken'),
-  temporaryTokenConstant = require(rootPrefix + '/lib/globalConstant/temporaryToken'),
   emailServiceApiCallHookConstants = require(rootPrefix + '/lib/globalConstant/emailServiceApiCallHook');
 
-class SendDoubleOptIn extends ServiceBase {
+/**
+ * Class to verify double opt in token.
+ *
+ * @class VerifyDoubleOptIn
+ */
+class VerifyDoubleOptIn extends ServiceBase {
   /**
-   * @constructor
+   * Constructor to verify double opt in token.
    *
-   * @param params
-   *
+   * @param {object} params
    * @param {string} params.t
    *
+   * @augments ServiceBase
+   *
+   * @constructor
    */
   constructor(params) {
-    super(params);
+    super();
+
     const oThis = this;
 
-    oThis.t = params.t;
+    oThis.inputToken = params.t;
 
     oThis.token = null;
     oThis.temporaryTokenId = null;
@@ -32,7 +40,7 @@ class SendDoubleOptIn extends ServiceBase {
   }
 
   /**
-   * Async performer.
+   * Async perform.
    *
    * @return {Promise<void>}
    */
@@ -41,7 +49,7 @@ class SendDoubleOptIn extends ServiceBase {
 
     await oThis._validate();
 
-    await oThis._fetchPreLaunchInviteDoubleOptInToken();
+    await oThis._fetchDoubleOptInToken();
 
     await oThis._markPreLaunchInviteAsDoubleOptIn();
 
@@ -53,37 +61,40 @@ class SendDoubleOptIn extends ServiceBase {
   }
 
   /**
-   * Validate token
+   * Validate token.
+   *
+   * @sets oThis.token, oThis.temporaryTokenId
    *
    * @returns {Promise<never>}
    * @private
    */
   async _validate() {
     const oThis = this;
-    let splitedT = [];
+
+    let splitToken = [];
 
     try {
-      let decryptedT = localCipher.decrypt(coreConstants.PA_EMAIL_TOKENS_DECRIPTOR_KEY, oThis.t);
-      splitedT = decryptedT.split(':');
+      const decryptedT = localCipher.decrypt(coreConstants.PA_EMAIL_TOKENS_DECRIPTOR_KEY, oThis.inputToken);
+      splitToken = decryptedT.split(':');
     } catch (error) {
       return oThis._invalidUrlError('a_s_do_v_1');
     }
 
-    if (splitedT.length !== 2) {
+    if (splitToken.length !== 2) {
       return oThis._invalidUrlError('a_s_do_v_2');
     }
 
-    oThis.token = splitedT[1];
-    oThis.temporaryTokenId = parseInt(splitedT[0]);
+    oThis.temporaryTokenId = parseInt(splitToken[0]);
+    oThis.token = splitToken[1];
   }
 
   /**
-   * Fetch pre launch invite double opt in token
+   * Fetch double opt in token.
    *
    * @returns {Promise<never>}
    * @private
    */
-  async _fetchPreLaunchInviteDoubleOptInToken() {
+  async _fetchDoubleOptInToken() {
     const oThis = this;
 
     oThis.temporaryTokenObj = await new TemporaryTokenModel().fetchById(oThis.temporaryTokenId);
@@ -96,35 +107,20 @@ class SendDoubleOptIn extends ServiceBase {
       return oThis._invalidUrlError('a_s_do_fpiot_2');
     }
 
-    if (oThis.temporaryTokenObj.status !== temporaryTokenConstant.activeStatus) {
+    if (oThis.temporaryTokenObj.status !== temporaryTokenConstants.activeStatus) {
       return oThis._invalidUrlError('a_s_do_fpiot_3');
     }
 
-    if (oThis.temporaryTokenObj.kind !== temporaryTokenConstant.preLaunchInviteKind) {
+    if (!temporaryTokenConstants.invertedKinds[oThis.temporaryTokenObj.kind]) {
       return oThis._invalidUrlError('a_s_do_fpiot_4');
     }
 
     if (
-      Math.floor(Date.now() / 1000) - temporaryTokenConstant.tokenExpiryTimestamp >
+      Math.floor(Date.now() / 1000) - temporaryTokenConstants.tokenExpiryTimestamp >
       oThis.temporaryTokenObj.createdAt
     ) {
       return oThis._invalidUrlError('a_s_do_fpiot_5');
     }
-  }
-
-  /**
-   * Mark token as used
-   *
-   * @returns {Promise<void>}
-   * @private
-   */
-  async _markTokenAsUsed() {
-    const oThis = this;
-
-    await new TemporaryTokenModel()
-      .update({ status: temporaryTokenConstant.invertedStatuses[temporaryTokenConstant.usedStatus] })
-      .where({ id: oThis.temporaryTokenId })
-      .fire();
   }
 
   /**
@@ -145,7 +141,7 @@ class SendDoubleOptIn extends ServiceBase {
   }
 
   /**
-   * Add contact in pepo campaign
+   * Add contact in pepo campaign.
    *
    * @returns {Promise<void>}
    * @private
@@ -153,7 +149,7 @@ class SendDoubleOptIn extends ServiceBase {
   async _addContactInPepoCampaign() {
     const oThis = this;
 
-    let addContactParams = {
+    const addContactParams = {
       receiverEntityId: oThis.temporaryTokenObj.entityId,
       receiverEntityKind: emailServiceApiCallHookConstants.preLaunchInviteEntityKind,
       customDescription: 'Contact add for pre launch invite'
@@ -163,15 +159,29 @@ class SendDoubleOptIn extends ServiceBase {
   }
 
   /**
-   * Invalid url error
+   * Mark token as used.
    *
-   * @param code
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _markTokenAsUsed() {
+    const oThis = this;
+
+    await new TemporaryTokenModel()
+      .update({ status: temporaryTokenConstants.invertedStatuses[temporaryTokenConstants.usedStatus] })
+      .where({ id: oThis.temporaryTokenId })
+      .fire();
+  }
+
+  /**
+   * Invalid url error.
+   *
+   * @param {string} code
+   *
    * @returns {Promise<never>}
    * @private
    */
   async _invalidUrlError(code) {
-    const oThis = this;
-
     return Promise.reject(
       responseHelper.error({
         internal_error_identifier: code,
@@ -182,4 +192,4 @@ class SendDoubleOptIn extends ServiceBase {
   }
 }
 
-module.exports = SendDoubleOptIn;
+module.exports = VerifyDoubleOptIn;
