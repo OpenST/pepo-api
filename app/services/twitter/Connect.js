@@ -2,10 +2,14 @@ const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   TwitterUserByTwitterIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TwitterUserByTwitterIds'),
   AccountTwitterRequestClass = require(rootPrefix + '/lib/twitter/oAuth1.0/Account'),
+  PreLaunchInviteByTwitterIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/PreLaunchInviteByTwitterIds'),
+  PreLaunchInviteByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/PreLaunchInviteByIds'),
   ReplayAttackCache = require(rootPrefix + '/lib/cacheManagement/single/ReplayAttackOnTwitterConnect'),
   SignupTwitterClass = require(rootPrefix + '/app/services/twitter/Signup'),
   LoginTwitterClass = require(rootPrefix + '/app/services/twitter/Login'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
+  preLaunchInviteConstants = require(rootPrefix + '/lib/globalConstant/preLaunchInvite'),
+  basicHelper = require(rootPrefix + '/helpers/basic'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger');
 
 /**
@@ -23,6 +27,8 @@ class TwitterConnect extends ServiceBase {
    * @param {string} params.twitter_id: Twitter_id
    * @param {string} params.handle: Handle
    *
+   * @param {string} [params.invite]: invite_code
+   *
    * @augments ServiceBase
    *
    * @constructor
@@ -36,7 +42,10 @@ class TwitterConnect extends ServiceBase {
     oThis.secret = params.secret;
     oThis.twitterId = params.twitter_id;
     oThis.handle = params.handle;
+    oThis.inviteCode = params.invite_coee;
 
+    oThis.inviterCodeId = null;
+    oThis.preLaunchInviteObj = null;
     oThis.userTwitterEntity = null;
     oThis.twitterUserObj = null;
     oThis.serviceResp = null;
@@ -134,7 +143,149 @@ class TwitterConnect extends ServiceBase {
       oThis.twitterUserObj = twitterUserObjCacheResp.data[oThis.twitterId];
     }
 
+    if (oThis._isUserSignup()) {
+      const validationResp = oThis._validateInvite();
+
+      if (validationResp.isFailure()) {
+        return Promise.reject(validationResp);
+      }
+    }
+
     logger.log('End::Fetch Twitter User');
+    return responseHelper.successWithData({});
+  }
+
+  /**
+   * Valid pre launch Invite or user invite if user signup action
+   *
+   * @sets oThis.inviterCodeId
+   *
+   * @return {Promise<Result>}
+   * @private
+   */
+  async _validateInvite() {
+    const oThis = this;
+    logger.log('Start::Validate Invite');
+
+    await oThis._fetchPreLaunchInvite();
+
+    if (!oThis._isInviteCodeMandatory()) {
+      //if no inviter then check if it has a invite code else give prefernce to prelaunch inviter
+      if (!oThis.preLaunchInviteObj.inviterCodeId) {
+        await oThis._setAndValidateInviteCodeParam();
+        //  Note: Do not Validate Resp. If invald invite code still allow signup
+      } else {
+        oThis.inviterCodeId = oThis.preLaunchInviteObj.inviterCodeId;
+      }
+    } else {
+      //should always have a valid invite code
+      let inviteValidationResp = await oThis._setAndValidateInviteCodeParam();
+
+      if (inviteValidationResp.isFailure()) {
+        return Promise.reject(inviteValidationResp);
+      }
+    }
+
+    logger.log('End::Validate Invite');
+
+    return responseHelper.successWithData({});
+  }
+
+  /**
+   * Validate Invite Code
+   *
+   * @sets oThis.inviterCodeId
+   *
+   * @return {Promise<Result>}
+   * @private
+   */
+  async _setAndValidateInviteCodeParam() {
+    const oThis = this;
+    logger.log('Start::_validateInviteCodeParam');
+
+    //todo: missing_invite_code how to send
+
+    if (!oThis.inviteCode) {
+      responseHelper.paramValidationError({
+        internal_error_identifier: 's_t_c_savicp_1',
+        api_error_identifier: 'invalid_api_params',
+        params_error_identifiers: ['missing_invite_code'],
+        debug_options: {}
+      });
+    }
+
+    //todo:
+    // fetch inviteCodeObj from cache
+    //  if not present  give invalid_invite_code_error
+    // if invite code of current prelaunch user, give error
+    // if limit reached give expired error
+
+    //set inviter code id
+    oThis.inviterCodeId = '';
+
+    logger.log('End::_validateInviteCodeParam');
+    return responseHelper.successWithData({});
+  }
+
+  /**
+   * Fetch Pre Launch Invite Obj if present.
+   *
+   * @sets oThis.preLaunchInviteObj
+   *
+   * @return {Promise<Result>}
+   * @private
+   */
+  async _fetchPreLaunchInvite() {
+    const oThis = this;
+
+    logger.log('Start::Fetch PreLaunchInvite');
+
+    const preLaunchInviteCacheResp = await new PreLaunchInviteByTwitterIdsCache({
+      twitterIds: [oThis.twitterId]
+    }).fetch();
+
+    if (preLaunchInviteCacheResp.isFailure()) {
+      return Promise.reject(preLaunchInviteCacheResp);
+    }
+
+    if (preLaunchInviteCacheResp.data[oThis.twitterId].id) {
+      let preLaunchInviteId = preLaunchInviteCacheResp.data[oThis.twitterId].id;
+
+      let cacheRsp = await new PreLaunchInviteByIdsCache({ ids: [preLaunchInviteId] }).fetch();
+
+      if (cacheRsp.isFailure()) {
+        return cacheRsp;
+      }
+
+      oThis.preLaunchInviteObj = cacheRsp.data[preLaunchInviteId];
+    }
+
+    logger.log('End::Fetch PreLaunchInvite');
+    return responseHelper.successWithData({});
+  }
+
+  /**
+   * Check if whitelisted pre launch or has inviter id
+   *
+   * @return {Boolean}
+   * @private
+   */
+  _isInviteCodeMandatory() {
+    const oThis = this;
+
+    logger.log('Start::_isInviteCodeMandatory');
+
+    if (
+      !oThis.preLaunchInviteObj ||
+      (oThis.preLaunchInviteObj.adminStatus != preLaunchInviteConstants.whitelistedStatus &&
+        !oThis.preLaunchInviteObj.inviterCodeId)
+    ) {
+      return true;
+    }
+
+    return false;
+
+    logger.log('End::_isInviteCodeMandatory');
     return responseHelper.successWithData({});
   }
 
@@ -214,9 +365,9 @@ class TwitterConnect extends ServiceBase {
       secret: oThis.secret
     };
 
-    // twitterUserObj may or may not be present. also if present, it might not be of a Pepo user.
-    if (!oThis.twitterUserObj || !oThis.twitterUserObj.userId) {
+    if (oThis._isUserSignup()) {
       logger.log('Twitter::Connect signup');
+      //todo: in signup send preLaunch obj, inviter_code_id
       oThis.serviceResp = await new SignupTwitterClass(requestParams).perform();
     } else {
       logger.log('Twitter::Connect login');
@@ -224,6 +375,24 @@ class TwitterConnect extends ServiceBase {
     }
 
     logger.log('End::Connect._performAction');
+  }
+
+  /**
+   * is signup or login for twitter connect.
+   *
+   * @return {Boolean}
+   *
+   * @private
+   */
+  _isUserSignup() {
+    const oThis = this;
+
+    // twitterUserObj may or may not be present. also if present, it might not be of a Pepo user.
+    if (!oThis.twitterUserObj || !oThis.twitterUserObj.userId) {
+      return false;
+    }
+
+    return true;
   }
 }
 

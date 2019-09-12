@@ -38,6 +38,9 @@ class TwitterSignup extends ServiceBase {
    * @param {string} params.token: Oauth User Token
    * @param {string} params.secret: Oauth User secret
    *
+   * @param {string} params.inviterCodeId: invite code table id of inviter
+   * @param {string} params.preLaunchInviteObj: Pre Launch Invite Obj
+   *
    * @augments ServiceBase
    *
    * @constructor
@@ -51,6 +54,8 @@ class TwitterSignup extends ServiceBase {
     oThis.userTwitterEntity = params.userTwitterEntity;
     oThis.token = params.token;
     oThis.secret = params.secret;
+    oThis.inviterCodeId = params.inviterCodeId;
+    oThis.preLaunchInviteObj = params.preLaunchInviteObj;
 
     oThis.userId = null;
 
@@ -119,6 +124,8 @@ class TwitterSignup extends ServiceBase {
     let promiseArray2 = [];
     promiseArray2.push(oThis._twitterSpecificFunction());
 
+    promiseArray2.push(oThis._setInviteCodes());
+
     promiseArray2.push(
       createOstUserPromise.then(function(a) {
         return oThis._createTokenUser();
@@ -130,6 +137,33 @@ class TwitterSignup extends ServiceBase {
     await oThis._enqueAfterSignupJob();
 
     logger.log('End::Perform Twitter Signup');
+
+    return responseHelper.successWithData({});
+  }
+
+  /**
+   * create or update invite code for signed up User
+   *  update invite code for inviter_code_id
+   *
+   * @return {Promise<void>}
+   * @private
+   */
+  async _setInviteCodes() {
+    const oThis = this;
+
+    //todo:
+    if (oThis.preLaunchInviteObj) {
+      //  update user_id and inviter_code_id
+      //cache flush
+    } else {
+      //  create invite code
+      //cache flush
+    }
+
+    if (oThis.inviterCodeId) {
+      //  update invited_user_count = invited_user_count + 1
+      //cache flush
+    }
 
     return responseHelper.successWithData({});
   }
@@ -292,6 +326,9 @@ class TwitterSignup extends ServiceBase {
    */
   async _createUser() {
     const oThis = this;
+
+    //todo: creator_status from prelaunch obj if present
+    //todo: validate email from prelaunch obj if Doptin Done else from twitter and save on success else do nothing
 
     logger.log('Start::Create user');
 

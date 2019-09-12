@@ -235,7 +235,12 @@ const v1Signature = {
         validatorMethods: ['validateNonBlankString']
       }
     ],
-    optional: []
+    optional: [
+      {
+        parameter: 'invite',
+        validatorMethods: ['validateNonBlankString']
+      }
+    ]
   },
   [apiName.getUserProfile]: {
     mandatory: [
