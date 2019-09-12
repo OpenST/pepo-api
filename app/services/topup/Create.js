@@ -1,9 +1,9 @@
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   FiatPaymentModel = require(rootPrefix + '/app/models/mysql/FiatPayment'),
+  PaymentProcessingFactory = require(rootPrefix + '/lib/payment/process/Factory'),
   fiatPaymentConstants = require(rootPrefix + '/lib/globalConstant/fiatPayment'),
-  ProcessApplePayPayment = require(rootPrefix + '/lib/payment/process/ApplePay'),
-  ProcessGooglePayPayment = require(rootPrefix + '/lib/payment/process/GooglePay'),
+  productConstant = require(rootPrefix + '/lib/globalConstant/inAppProduct'),
   bgJobConstants = require(rootPrefix + '/lib/globalConstant/bgJob'),
   bgJob = require(rootPrefix + '/lib/rabbitMqEnqueue/bgJob'),
   entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
@@ -33,6 +33,7 @@ class CreateTopup extends ServiceBase {
     oThis.os = params.os;
     oThis.userId = params.user_id;
 
+    oThis.isAlreadyRecorded = false;
     oThis.fiatPaymentId = null;
     oThis.paymentDetail = null;
   }
@@ -48,24 +49,27 @@ class CreateTopup extends ServiceBase {
 
     await oThis._validateAndSanitize();
 
-    await oThis._insertFiatPayment();
+    await oThis._recordTopup();
 
-    if (!oThis.paymentDetail) {
-      let validationResp = await oThis._serviceSpecificTasks();
-
-      if (validationResp && validationResp.data.productionSandbox === 0) {
-        await bgJob.enqueue(bgJobConstants.validatePaymentReceiptJobTopic, {
-          fiatPaymentId: oThis.fiatPaymentId
-        });
-      }
-
-      await oThis._fetchFiatPayment();
+    if (oThis.isAlreadyRecorded) {
+      return oThis._apiResponse();
     }
 
-    return responseHelper.successWithData({ [entityType.userTopUp]: oThis.paymentDetail });
+    let processResp = await oThis._serviceSpecificTasks();
+
+    if (processResp && processResp.data.productionSandbox === 0) {
+      await bgJob.enqueue(bgJobConstants.validatePaymentReceiptJobTopic, {
+        fiatPaymentId: oThis.fiatPaymentId
+      });
+    }
+
+    await oThis._fetchFiatPayment();
+
+    return oThis._apiResponse();
   }
 
   /**
+   * Validate and sanitize
    *
    * @returns {*|result}
    * @private
@@ -73,6 +77,7 @@ class CreateTopup extends ServiceBase {
   _validateAndSanitize() {
     const oThis = this;
 
+    // checking if the logged in user is same as the userId coming in params
     if (oThis.userId !== oThis.currentUser.id) {
       return Promise.reject(
         responseHelper.paramValidationError({
@@ -87,6 +92,9 @@ class CreateTopup extends ServiceBase {
       );
     }
 
+    // TODO - payments - should we validate receipt, before recording?
+    // TODO - payments - if os comes incorrectly, then we should record and send alert to dev and return error.
+
     return responseHelper.successWithData({});
   }
 
@@ -96,10 +104,10 @@ class CreateTopup extends ServiceBase {
    * @returns {Promise<*|result>}
    * @private
    */
-  async _insertFiatPayment() {
+  async _recordTopup() {
     const oThis = this,
       receiptId = oThis.paymentReceipt.transactionId,
-      serviceKind = oThis.getServiceKind();
+      serviceKind = oThis._getServiceKind();
 
     let fiatPaymentCreateResp = await new FiatPaymentModel()
       .insert({
@@ -114,7 +122,9 @@ class CreateTopup extends ServiceBase {
       .fire()
       .catch(async function(mysqlErrorObject) {
         if (mysqlErrorObject.code === mysqlErrorConstants.duplicateError) {
+          oThis.isAlreadyRecorded = true;
           oThis.paymentDetail = await new FiatPaymentModel().fetchByReceiptIdAndServiceKind(receiptId, serviceKind);
+          oThis.fiatPaymentId = oThis.paymentDetail.id;
         } else {
           return Promise.reject(
             responseHelper.error({
@@ -126,11 +136,22 @@ class CreateTopup extends ServiceBase {
         }
       });
 
-    if (!oThis.paymentDetail) {
+    if (!oThis.isAlreadyRecorded) {
       oThis.fiatPaymentId = fiatPaymentCreateResp.insertId;
     }
 
     return responseHelper.successWithData({});
+  }
+
+  /**
+   * Api response
+   *
+   * @private
+   */
+  _apiResponse() {
+    const oThis = this;
+
+    return responseHelper.successWithData({ [entityType.userTopUp]: oThis.paymentDetail });
   }
 
   /**
@@ -148,11 +169,9 @@ class CreateTopup extends ServiceBase {
         userId: oThis.userId
       };
 
-    if (oThis.os == 'ios') {
-      return new ProcessApplePayPayment(params).perform();
-    } else if (oThis.os == 'android') {
-      return new ProcessGooglePayPayment(params).perform();
-    }
+    let paymentProcessor = PaymentProcessingFactory.getInstance(oThis.os, params);
+
+    return paymentProcessor.perform();
   }
 
   /**
@@ -160,12 +179,12 @@ class CreateTopup extends ServiceBase {
    *
    * @returns {string}
    */
-  getServiceKind() {
+  _getServiceKind() {
     const oThis = this;
 
-    if (oThis.os == 'ios') {
+    if (oThis.os === productConstant.ios) {
       return fiatPaymentConstants.applePayKind;
-    } else if (oThis.os == 'android') {
+    } else {
       return fiatPaymentConstants.googlePayKind;
     }
   }
@@ -173,7 +192,7 @@ class CreateTopup extends ServiceBase {
   /**
    * Fetch fiat payment receipt
    *
-   * @returns {Promise<*|result>}
+   * @return {Promise<void>}
    * @private
    */
   async _fetchFiatPayment() {
@@ -182,8 +201,6 @@ class CreateTopup extends ServiceBase {
     let paymentObj = await new FiatPaymentModel().fetchByIds([oThis.fiatPaymentId]);
 
     oThis.paymentDetail = paymentObj[oThis.fiatPaymentId];
-
-    return responseHelper.successWithData({});
   }
 }
 
