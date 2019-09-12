@@ -174,7 +174,8 @@ class FiatPayment extends ModelBase {
   static async flushCache(params) {
     let promiseArray = [],
       UserPaymentsByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/UserPaymentsByIds'),
-      LifetimePurchaseByUserIdCache = require(rootPrefix + '/lib/cacheManagement/single/LifetimePurchaseByUserId');
+      LifetimePurchaseByUserIdCache = require(rootPrefix + '/lib/cacheManagement/single/LifetimePurchaseByUserId'),
+      UserPendingTopupCache = require(rootPrefix + '/lib/cacheManagement/single/UserPendingTopups');
 
     if (params.fiatPaymentId) {
       const userPaymentsByIdsCacheObj = new UserPaymentsByIdsCache({ ids: [params.fiatPaymentId] });
@@ -184,6 +185,9 @@ class FiatPayment extends ModelBase {
     if (params.userId) {
       const lifetimePurchaseByUserIdCacheObj = new LifetimePurchaseByUserIdCache({ userId: params.userId });
       promiseArray.push(lifetimePurchaseByUserIdCacheObj.clear());
+
+      const userPendingTopupCacheObj = new UserPendingTopupCache({ userId: params.userId });
+      promiseArray.push(userPendingTopupCacheObj.clear());
     }
 
     return Promise.all(promiseArray);
