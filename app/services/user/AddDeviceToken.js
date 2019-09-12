@@ -1,10 +1,13 @@
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
+  UserProfileElementModel = require(rootPrefix + '/app/models/mysql/UserProfileElement'),
+  LocationByTimeZoneCache = require(rootPrefix + '/lib/cacheManagement/single/LocationByTimeZone'),
   UserNotificationsCountModel = require(rootPrefix + '/app/models/cassandra/UserNotificationsCount'),
   UserDeviceModel = require(rootPrefix + '/app/models/mysql/UserDevice'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
-  userDeviceConstants = require(rootPrefix + '/lib/globalConstant/userDevice');
+  userDeviceConstants = require(rootPrefix + '/lib/globalConstant/userDevice'),
+  userProfileElementConstants = require(rootPrefix + '/lib/globalConstant/userProfileElement');
 
 /**
  * Class to add device token.
@@ -50,13 +53,15 @@ class AddDeviceToken extends ServiceBase {
    * @return {Promise<void>}
    */
   async _asyncPerform() {
-    const oThis = this;
+    const oThis = this,
+      promiseArray = [];
 
     await oThis._validateAndSanitize();
 
-    await oThis._insertIntoUserDevices();
+    promiseArray.push(oThis._insertIntoUserDevices());
+    promiseArray.push(oThis._addLocationInUserProfileElements());
 
-    await oThis._resetUnreadNotificationsCount();
+    await Promise.all(promiseArray);
 
     return responseHelper.successWithData({});
   }
@@ -70,6 +75,7 @@ class AddDeviceToken extends ServiceBase {
     const oThis = this;
 
     oThis.deviceKind = oThis.deviceKind.toUpperCase();
+    oThis.userTimeZone = oThis.userTimeZone.toLowerCase();
 
     if (oThis.currentUserId !== oThis.userId) {
       return Promise.reject(
@@ -133,6 +139,29 @@ class AddDeviceToken extends ServiceBase {
 
     // Flush cache.
     await UserDeviceModel.flushCache({ userId: oThis.currentUserId });
+  }
+
+  /**
+   * Add location in user profile elements.
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _addLocationInUserProfileElements() {
+    const oThis = this,
+      locationByTimeZoneCacheRsp = await new LocationByTimeZoneCache({ timeZone: oThis.userTimeZone }).fetch();
+
+    if (locationByTimeZoneCacheRsp.isFailure()) {
+      return Promise.reject(locationByTimeZoneCacheRsp);
+    }
+
+    const locationId = locationByTimeZoneCacheRsp.data[oThis.userTimeZone].id;
+
+    await new UserProfileElementModel().insertElement({
+      userId: oThis.currentUserId,
+      dataKind: userProfileElementConstants.locationIdKind,
+      data: locationId
+    });
   }
 
   /**
