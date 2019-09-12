@@ -2,6 +2,7 @@ const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   TemporaryTokenModel = require(rootPrefix + '/app/models/mysql/TemporaryToken'),
   coreConstants = require(rootPrefix + '/config/coreConstants'),
+  logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   localCipher = require(rootPrefix + '/lib/encryptors/localCipher'),
   temporaryTokenConstants = require(rootPrefix + '/lib/globalConstant/temporaryToken'),
@@ -199,7 +200,7 @@ class VerifyDoubleOptIn extends ServiceBase {
 
     // Fetch details from user email logs table.
     const userEmailLogsDetails = await new UserEmailLogsModel()
-      .select('id, email')
+      .select('user_id, email')
       .where({ id: oThis.temporaryTokenObj.entityId })
       .fire();
 
@@ -207,7 +208,7 @@ class VerifyDoubleOptIn extends ServiceBase {
       return oThis._invalidUrlError('a_s_do_aefu_1');
     }
 
-    const userId = userEmailLogsDetails[0].id,
+    const userId = userEmailLogsDetails[0].user_id,
       email = userEmailLogsDetails[0].email;
 
     const UserModel = require(rootPrefix + '/app/models/mysql/User');
@@ -216,9 +217,28 @@ class VerifyDoubleOptIn extends ServiceBase {
     await new UserModel()
       .update({ email: email })
       .where({ id: userId })
-      .fire();
+      .fire()
+      .then(async function() {
+        await UserModel.flushCache({ id: userId, email: email });
+      })
+      .catch(function(err) {
+        logger.error(`Error while creating updating email in users table: ${err}`);
 
-    await UserModel.flushCache({ id: userId, email: email });
+        if (UserModel.isDuplicateIndexViolation(UserModel.emailUniqueIndexName, err)) {
+          logger.log('Email conflict.');
+
+          return Promise.reject(
+            responseHelper.paramValidationError({
+              internal_error_identifier: 'a_s_pli_doi_aefu_1',
+              api_error_identifier: 'invalid_params',
+              params_error_identifiers: ['already_associated_email'],
+              debug_options: {}
+            })
+          );
+        }
+
+        return Promise.reject(err);
+      });
   }
 
   /**

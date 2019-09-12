@@ -374,6 +374,15 @@ class UserModel extends ModelBase {
   }
 
   /**
+   * Get email unique index name.
+   *
+   * @returns {string}
+   */
+  static get emailUniqueIndexName() {
+    return 'uk_idx_2';
+  }
+
+  /**
    * Is user an approved creator
    *
    * @param userObj
