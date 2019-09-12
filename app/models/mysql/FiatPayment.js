@@ -245,6 +245,7 @@ class FiatPayment extends ModelBase {
   static async flushCache(paymentId) {
     const cacheObj = new UserPaymentsByIdsCache({ ids: [paymentId] });
 
+    // clear lifetime purchase by userId
     return cacheObj.clear();
   }
 }
