@@ -97,7 +97,6 @@ class UserModel extends ModelBase {
       'profileImageId',
       'markInactiveTriggerCount',
       'properties',
-      'email',
       'approvedCreator',
       'status',
       'createdAt',
@@ -211,7 +210,7 @@ class UserModel extends ModelBase {
     const oThis = this;
 
     const dbRows = await oThis
-      .select('id')
+      .select('id, email')
       .where({ email: emails })
       .fire();
 

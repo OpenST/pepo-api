@@ -82,7 +82,7 @@ class SaveEmail extends ServiceBase {
     }
 
     // Check if email is not already associated with some different user.
-    const userDetailsResponse = await new UserByEmailsCache({ email: [oThis.email] }).fetch();
+    const userDetailsResponse = await new UserByEmailsCache({ emails: [oThis.email] }).fetch();
     if (userDetailsResponse.isFailure()) {
       return Promise.reject(userDetailsResponse);
     }
@@ -163,7 +163,7 @@ class SaveEmail extends ServiceBase {
       })
       .where({
         entity_id: oThis.userEmailLogsId,
-        entity_kind: temporaryTokenConstants.invertedKinds[temporaryTokenConstants.emailDoubleOptInKind]
+        kind: temporaryTokenConstants.invertedKinds[temporaryTokenConstants.emailDoubleOptInKind]
       })
       .fire();
   }
