@@ -165,8 +165,11 @@ class FiatPayment extends ModelBase {
   /**
    * Flush cache
    *
-   * @param id - id of the record for which to flush cache
-   * @return {Promise<*>}
+   * @param {object} params
+   * @param {array} params.referenceIds
+   * @param {array} params.ids
+   *
+   * @returns {Promise<*>}
    */
   static async flushCache(params) {
     let promisrArray = [],
