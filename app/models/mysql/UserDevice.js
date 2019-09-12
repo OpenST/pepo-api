@@ -82,7 +82,7 @@ class UserDevice extends ModelBase {
     const whereClause = [
         'user_id IN (?) AND status = ?',
         userIds,
-        userDevicesConstants.invertedStatuses[userDevicesConstants.logoutStatus]
+        userDevicesConstants.invertedStatuses[userDevicesConstants.activeStatus]
       ],
       dbRows = await oThis
         .select('id, user_id')
