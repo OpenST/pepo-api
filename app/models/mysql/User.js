@@ -333,9 +333,12 @@ class UserModel extends ModelBase {
   }
 
   /**
-   * Flush cache
+   * Flush cache.
    *
    * @param {object} params
+   * @param {string/number} params.id
+   * @param {string} params.userName
+   * @param {string} params.email
    *
    * @returns {Promise<*>}
    */
@@ -351,6 +354,11 @@ class UserModel extends ModelBase {
     if (params.userName) {
       const UserByUsernameCache = require(rootPrefix + '/lib/cacheManagement/single/UserByUsername');
       promisesArray.push(new UserByUsernameCache({ userName: params.userName }).clear());
+    }
+
+    if (params.email) {
+      const UserIdByEmailCache = require(rootPrefix + '/lib/cacheManagement/single/UserIdByEmail');
+      promisesArray.push(new UserIdByEmailCache({ email: params.email }).clear());
     }
 
     await Promise.all(promisesArray);
@@ -373,6 +381,7 @@ class UserModel extends ModelBase {
    */
   static isUserApprovedCreator(userObj) {
     const propertiesArray = new UserModel().getBitwiseArray('properties', userObj.properties);
+
     return propertiesArray.indexOf(userConstants.isApprovedCreatorProperty) > -1;
   }
 }

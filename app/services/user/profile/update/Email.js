@@ -1,8 +1,8 @@
 const rootPrefix = '../../../../..',
-  UserModel = require(rootPrefix + '/app/models/mysql/User'),
   UserEmailLogsModel = require(rootPrefix + '/app/models/mysql/UserEmailLogs'),
   TemporaryTokenModel = require(rootPrefix + '/app/models/mysql/TemporaryToken'),
   UpdateProfileBase = require(rootPrefix + '/app/services/user/profile/update/Base'),
+  UserIdByEmailCache = require(rootPrefix + '/lib/cacheManagement/single/UserIdByEmail'),
   SendTransactionalMail = require(rootPrefix + '/lib/email/hookCreator/SendTransactionalMail'),
   util = require(rootPrefix + '/lib/util'),
   coreConstants = require(rootPrefix + '/config/coreConstants'),
@@ -71,13 +71,16 @@ class UpdateEmail extends UpdateProfileBase {
   async _validateParams() {
     const oThis = this;
 
-    // Check if email is not already associated with some different account.
-    const userDetails = await new UserModel()
-      .select('id')
-      .where({ email: oThis.email })
-      .fire();
+    // Check if email is not already associated with some different user.
+    const userDetailsResponse = await new UserIdByEmailCache({ email: oThis.email }).fetch();
+    if (userDetailsResponse.isFailure()) {
+      return Promise.reject(userDetailsResponse);
+    }
 
-    if (userDetails.length !== 0) {
+    const userId = userDetailsResponse.data.userId;
+
+    // If userId already exists, email is already associated with some different user.
+    if (userId) {
       return Promise.reject(
         responseHelper.paramValidationError({
           internal_error_identifier: 'a_s_u_p_u_e_1',
@@ -100,14 +103,57 @@ class UpdateEmail extends UpdateProfileBase {
   async _createUserEmailLogs() {
     const oThis = this;
 
-    const insertResponse = await new UserEmailLogsModel()
-      .insert({
-        email: oThis.email,
-        user_id: oThis.profileUserId
-      })
+    const userEmailLogDetails = await new UserEmailLogsModel()
+      .select('id')
+      .where({ user_id: oThis.profileUserId })
       .fire();
 
-    oThis.userEmailLogsId = insertResponse.insertId;
+    // If entry for user does not exist, create one.
+    if (userEmailLogDetails.length === 0) {
+      const insertResponse = await new UserEmailLogsModel()
+        .insert({
+          email: oThis.email,
+          user_id: oThis.profileUserId
+        })
+        .fire();
+
+      oThis.userEmailLogsId = insertResponse.insertId;
+    } else {
+      const promisesArray = [];
+
+      // Update email for already existing user.
+      promisesArray.push(
+        new UserEmailLogsModel()
+          .update({ email: oThis.email })
+          .where({ user_id: oThis.profileUserId })
+          .fire()
+      );
+
+      // Invalidate previous tokens for same user.
+      promisesArray.push(oThis._invalidatePreviousTokens());
+      await Promise.all(promisesArray);
+
+      oThis.userEmailLogsId = userEmailLogDetails[0].id;
+    }
+  }
+
+  /**
+   * Mark previous tokens as inactive.
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _invalidatePreviousTokens() {
+    const oThis = this;
+
+    await new TemporaryTokenModel()
+      .update({
+        status: temporaryTokenConstants.status[temporaryTokenConstants.inActiveStatus]
+      })
+      .where({
+        entity_id: oThis.userEmailLogsId
+      })
+      .fire();
   }
 
   /**
