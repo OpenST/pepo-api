@@ -581,7 +581,7 @@ const v1Signature = {
       }
     ]
   },
-  [apiName.confirmPayReceipt]: {
+  [apiName.createTopup]: {
     mandatory: [
       {
         parameter: 'current_user',

@@ -11,12 +11,7 @@ const rootPrefix = '../../..',
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   mysqlErrorConstants = require(rootPrefix + '/lib/globalConstant/mysqlErrorConstants');
 
-/**
- * Class for feed base.
- *
- * @class PaymentProcessValidator
- */
-class PaymentProcessValidator extends ServiceBase {
+class CreateTopup extends ServiceBase {
   /**
    * Constructor for feed base.
    *
@@ -190,4 +185,4 @@ class PaymentProcessValidator extends ServiceBase {
   }
 }
 
-module.exports = PaymentProcessValidator;
+module.exports = CreateTopup;
