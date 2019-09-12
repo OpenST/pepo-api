@@ -57,7 +57,7 @@ class CreateTopup extends ServiceBase {
 
     let processResp = await oThis._serviceSpecificTasks();
 
-    if (processResp && processResp.data.productionSandbox === 0) {
+    if (processResp && processResp.data.productionEnvSandboxReceipt === 0) {
       await bgJob.enqueue(bgJobConstants.validatePaymentReceiptJobTopic, {
         fiatPaymentId: oThis.fiatPaymentId
       });
