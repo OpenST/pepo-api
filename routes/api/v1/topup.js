@@ -32,7 +32,7 @@ router.post('/', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
 
 // Get available products
 router.get('/products', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
-  req.decodedParams.apiName = apiName.getAvailableProducts;
+  req.decodedParams.apiName = apiName.getTopupProduct;
 
   const onServiceSuccess = async function(serviceResponse) {
     const wrapperFormatterRsp = await new FormatterComposer({
@@ -47,9 +47,7 @@ router.get('/products', sanitizer.sanitizeDynamicUrlParams, function(req, res, n
     serviceResponse.data = wrapperFormatterRsp.data;
   };
 
-  Promise.resolve(
-    routeHelper.perform(req, res, next, '/user/GetAvailableProducts', 'r_a_v1_u_15', null, onServiceSuccess)
-  );
+  Promise.resolve(routeHelper.perform(req, res, next, '/topup/GetProduct', 'r_a_v1_u_15', null, onServiceSuccess));
 });
 
 // Get pending topups for the user

@@ -598,7 +598,7 @@ const v1Signature = {
     ],
     optional: []
   },
-  [apiName.getAvailableProducts]: {
+  [apiName.getTopupProduct]: {
     mandatory: [
       {
         parameter: 'current_user',
