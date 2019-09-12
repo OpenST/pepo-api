@@ -9,7 +9,7 @@ const upQuery =
   'CREATE TABLE `user_email_logs` ( \n\
     `id` bigint(20) NOT NULL AUTO_INCREMENT, \n\
     `email` varchar(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NULL, \n\
-    `temporary_token_id` bigint(20) NULL, \n\
+    `user_id` bigint(20) NULL, \n\
     `created_at` int(11) NOT NULL, \n\
     `updated_at` int(11) NOT NULL, \n\
     PRIMARY KEY (`id`) \n\
