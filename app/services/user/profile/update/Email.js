@@ -2,7 +2,7 @@ const rootPrefix = '../../../../..',
   UserEmailLogsModel = require(rootPrefix + '/app/models/mysql/UserEmailLogs'),
   TemporaryTokenModel = require(rootPrefix + '/app/models/mysql/TemporaryToken'),
   UpdateProfileBase = require(rootPrefix + '/app/services/user/profile/update/Base'),
-  UserIdByEmailCache = require(rootPrefix + '/lib/cacheManagement/single/UserIdByEmail'),
+  UserByEmailsCache = require(rootPrefix + '/lib/cacheManagement/multi/UserByEmails'),
   SendTransactionalMail = require(rootPrefix + '/lib/email/hookCreator/SendTransactionalMail'),
   util = require(rootPrefix + '/lib/util'),
   coreConstants = require(rootPrefix + '/config/coreConstants'),
@@ -72,12 +72,12 @@ class UpdateEmail extends UpdateProfileBase {
     const oThis = this;
 
     // Check if email is not already associated with some different user.
-    const userDetailsResponse = await new UserIdByEmailCache({ email: oThis.email }).fetch();
+    const userDetailsResponse = await new UserByEmailsCache({ email: [oThis.email] }).fetch();
     if (userDetailsResponse.isFailure()) {
       return Promise.reject(userDetailsResponse);
     }
 
-    const userId = userDetailsResponse.data.userId;
+    const userId = userDetailsResponse.data[oThis.email].id;
 
     // If userId already exists, email is already associated with some different user.
     if (userId) {

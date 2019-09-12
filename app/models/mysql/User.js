@@ -201,6 +201,35 @@ class UserModel extends ModelBase {
   }
 
   /**
+   * Fetch user ids by email ids.
+   *
+   * @param {array<string>} emails
+   *
+   * @returns {Promise<{}>}
+   */
+  async fetchUserIdsByEmails(emails) {
+    const oThis = this;
+
+    const dbRows = await oThis
+      .select('id')
+      .where({ email: emails })
+      .fire();
+
+    if (dbRows.length === 0) {
+      return {};
+    }
+
+    const response = {};
+
+    for (let index = 0; index < dbRows.length; index++) {
+      const formatDbRow = oThis.formatDbData(dbRows[index]);
+      response[formatDbRow.email] = formatDbRow;
+    }
+
+    return response;
+  }
+
+  /**
    * Fetch user ids
    *
    * @param {object} params
@@ -357,8 +386,8 @@ class UserModel extends ModelBase {
     }
 
     if (params.email) {
-      const UserIdByEmailCache = require(rootPrefix + '/lib/cacheManagement/single/UserIdByEmail');
-      promisesArray.push(new UserIdByEmailCache({ email: params.email }).clear());
+      const UserByEmailsCache = require(rootPrefix + '/lib/cacheManagement/multi/UserByEmails');
+      promisesArray.push(new UserByEmailsCache({ emails: [params.email] }).clear());
     }
 
     await Promise.all(promisesArray);
