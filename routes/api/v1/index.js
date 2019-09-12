@@ -10,7 +10,7 @@ const rootPrefix = '../../..',
   apiVersions = require(rootPrefix + '/lib/globalConstant/apiVersions'),
   userConstant = require(rootPrefix + '/lib/globalConstant/user'),
   usersRoutes = require(rootPrefix + '/routes/api/v1/users'),
-  paymentsRoutes = require(rootPrefix + '/routes/api/v1/payments'),
+  topupRoutes = require(rootPrefix + '/routes/api/v1/users'),
   videoRoutes = require(rootPrefix + '/routes/api/v1/videos'),
   tokensRoutes = require(rootPrefix + '/routes/api/v1/tokens'),
   gifsRoutes = require(rootPrefix + '/routes/api/v1/gifs'),
@@ -73,7 +73,7 @@ router.use('/auth/twitter-disconnect', validateCookie, validateLoginRequired, au
 router.use('/auth/logout', validateCookie, authRoutes);
 router.use('/auth', authRoutes);
 router.use('/users', validateCookie, validateLoginRequired, usersRoutes);
-router.use('/payments', validateCookie, validateLoginRequired, paymentsRoutes);
+router.use('/top-up', validateCookie, validateLoginRequired, topupRoutes);
 router.use('/videos', validateCookie, validateLoginRequired, videoRoutes);
 router.use('/tokens', validateCookie, validateLoginRequired, tokensRoutes);
 router.use('/ost-transactions', validateCookie, validateLoginRequired, ostTransactionRoutes);
