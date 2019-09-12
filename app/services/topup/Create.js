@@ -78,7 +78,7 @@ class CreateTopup extends ServiceBase {
     const oThis = this;
 
     // checking if the logged in user is same as the userId coming in params
-    if (oThis.userId !== oThis.currentUser.id) {
+    if (oThis.userId != oThis.currentUser.id) {
       return Promise.reject(
         responseHelper.paramValidationError({
           internal_error_identifier: 'a_s_p_pv_2',
