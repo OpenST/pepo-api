@@ -179,6 +179,11 @@ const v1ErrorConfig = {
     parameter: 'device_kind',
     code: 'invalid',
     message: 'Invalid device kind.'
+  },
+  already_associated_email: {
+    parameter: 'email',
+    code: 'invalid',
+    message: 'This email address is already associated with some different account.'
   }
 };
 
