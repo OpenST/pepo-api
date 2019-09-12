@@ -5,22 +5,9 @@ const rootPrefix = '../../..',
   fiatPaymentConstants = require(rootPrefix + '/lib/globalConstant/fiatPayment'),
   ostPricePointConstants = require(rootPrefix + '/lib/globalConstant/ostPricePoints');
 
-// Declare variables.
 const dbName = databaseConstants.fiatDbName;
 
-/**
- * Class for fiat payments model.
- *
- * @class FiatPayment
- */
 class FiatPayment extends ModelBase {
-  /**
-   * Constructor for fiat payments model.
-   *
-   * @augments ModelBase
-   *
-   * @constructor
-   */
   constructor() {
     super({ dbName: dbName });
 
@@ -76,18 +63,15 @@ class FiatPayment extends ModelBase {
   }
 
   /**
-   * Fetch fiat payment transaction for given ids.
+   * Fetch by ids
    *
-   * @param {array} ids: tx ids
-   *
-   * @return {object}
+   * @param ids {array} - array of ids
+   * @return {Promise<void>}
    */
   async fetchByIds(ids) {
-    const oThis = this;
+    const oThis = this,
+      response = {};
 
-    const response = {};
-
-    console.log('ids------------------', ids);
     const dbRows = await oThis
       .select('*')
       .where({ id: ids })
@@ -102,13 +86,14 @@ class FiatPayment extends ModelBase {
   }
 
   /**
-   * Fetch fiat payment transaction for given ids.
+   * Fetch by receipt id and service kind
    *
-   * @param {array} ids: tx ids
+   * @param receiptId - receipt id
+   * @param serviceKind - service kind
    *
-   * @return {object}
+   * @return {Promise<*>}
    */
-  async fetchByReceiptIdAndKind(receiptId, serviceKind) {
+  async fetchByReceiptIdAndServiceKind(receiptId, serviceKind) {
     const oThis = this;
 
     const dbRows = await oThis
@@ -121,62 +106,6 @@ class FiatPayment extends ModelBase {
     } else {
       return null;
     }
-  }
-
-  /**
-   * Update transaction status by referenceId.
-   *
-   * @param {number} referenceId
-   * @param {string} status
-   *
-   * @returns {Promise<any>}
-   */
-  async updateTransactionStatusById(id, status) {
-    const oThis = this;
-
-    const statusInt = fiatPaymentConstants.invertedStatuses[status];
-
-    if (!statusInt) {
-      return Promise.reject(new Error('Invalid fiat payment status.'));
-    }
-
-    await oThis
-      .update({
-        status: statusInt
-      })
-      .where({ id: id })
-      .fire();
-  }
-
-  /**
-   * User ids
-   *
-   * @param {Array} userIds
-   * @returns {Promise<void>}
-   */
-  async fetchRecentMonthPayments(userIds) {
-    const oThis = this;
-
-    let currentTimestamp = basicHelper.getCurrentTimestampInSeconds(),
-      beforeOneMonthTimestamp = currentTimestamp - 2592000;
-
-    let queryResponse = await oThis
-        .select('*')
-        .where(['from_user_id IN (?) AND updated_at > ?', userIds, beforeOneMonthTimestamp])
-        .fire(),
-      responseData = {};
-
-    for (let i = 0; i < queryResponse.length; i++) {
-      const oThis = this;
-
-      if (!responseData[queryResponse[i].from_user_id]) {
-        responseData[queryResponse[i].from_user_id] = [];
-      }
-
-      responseData[queryResponse[i].from_user_id].push(oThis.formatDbData(queryResponse[i]));
-    }
-
-    return responseData;
   }
 
   /**
@@ -203,13 +132,14 @@ class FiatPayment extends ModelBase {
   }
 
   /**
-   * Fetch user payment by status and user id.
+   * Fetch by user id and statuses
    *
-   * @param userId
-   * @param statuses
-   * @returns {Promise<void>}
+   * @param userId - user id for which the dfiat payment is to be fetched
+   * @param statuses {array} - array of statuses used for filtering
+   *
+   * @return {Promise<void>}
    */
-  async fetchUserPaymentByStatus(userId, statuses) {
+  async fetchByUserIdAndStatus(userId, statuses) {
     const oThis = this;
 
     let rows = await oThis
@@ -233,13 +163,10 @@ class FiatPayment extends ModelBase {
   }
 
   /**
-   * Flush cache.
+   * Flush cache
    *
-   * @param {object} params
-   * @param {array} params.referenceIds
-   * @param {array} params.ids
-   *
-   * @returns {Promise<*>}
+   * @param id - id of the record for which to flush cache
+   * @return {Promise<*>}
    */
   static async flushCache(params) {
     let promisrArray = [],

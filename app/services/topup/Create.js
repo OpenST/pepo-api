@@ -112,7 +112,7 @@ class CreateTopup extends ServiceBase {
       .fire()
       .catch(async function(mysqlErrorObject) {
         if (mysqlErrorObject.code === mysqlErrorConstants.duplicateError) {
-          oThis.paymentDetail = await new FiatPaymentModel().fetchByReceiptIdAndKind(receiptId, serviceKind);
+          oThis.paymentDetail = await new FiatPaymentModel().fetchByReceiptIdAndServiceKind(receiptId, serviceKind);
         } else {
           return Promise.reject(
             responseHelper.error({
