@@ -60,6 +60,24 @@ class UserEmailLogs extends ModelBase {
   safeFormattedColumnNames() {
     return ['id', 'email', 'userId', 'createdAt', 'updatedAt'];
   }
+
+  /**
+   * Fetch email by id.
+   *
+   * @param {number} id
+   *
+   * @returns {Promise<{email: (*|null)}>}
+   */
+  async fetchEmailById(id) {
+    const oThis = this;
+
+    const response = await oThis
+      .select('email')
+      .where({ id: id })
+      .fire();
+
+    return { email: response[0].email || null };
+  }
 }
 
 module.exports = UserEmailLogs;
