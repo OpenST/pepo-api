@@ -93,7 +93,7 @@ class GetTopupProduct extends ServiceBase {
   async _fetchUsersPurchaseData() {
     const oThis = this;
 
-    let cacheResponse = await new LifetimePurchaseByUserIdCache({ userId: [oThis.currentUser.id] }).fetch();
+    let cacheResponse = await new LifetimePurchaseByUserIdCache({ userId: oThis.currentUser.id }).fetch();
 
     if (cacheResponse.isFailure()) {
       return Promise.reject(cacheResponse);

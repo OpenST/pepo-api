@@ -241,13 +241,22 @@ class FiatPayment extends ModelBase {
    *
    * @returns {Promise<*>}
    */
-  static async flushCache(paymentId) {
-    let UserPaymentsByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/UserPaymentsByIds');
+  static async flushCache(params) {
+    let promisrArray = [],
+      UserPaymentsByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/UserPaymentsByIds'),
+      LifetimePurchaseByUserIdCache = require(rootPrefix + '/lib/cacheManagement/single/LifetimePurchaseByUserId');
 
-    const cacheObj = new UserPaymentsByIdsCache({ ids: [paymentId] });
+    if (params.fiatPaymentId) {
+      const userPaymentsByIdsCacheObj = new UserPaymentsByIdsCache({ ids: [params.fiatPaymentId] });
+      promisrArray.push(userPaymentsByIdsCacheObj.clear());
+    }
 
-    // clear lifetime purchase by userId
-    return cacheObj.clear();
+    if (params.userId) {
+      const lifetimePurchaseByUserIdCacheObj = new LifetimePurchaseByUserIdCache({ userId: params.userId });
+      promisrArray.push(lifetimePurchaseByUserIdCacheObj.clear());
+    }
+
+    return Promise.all(promisrArray);
   }
 }
 

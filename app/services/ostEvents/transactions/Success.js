@@ -100,7 +100,12 @@ class SuccessTransactionOstEvent extends TransactionOstEventBase {
       promiseArray.push(oThis.updateTransaction());
       promiseArray.push(oThis.processForTopUpTransaction());
       promiseArray.push(oThis._enqueueUserNotification(notificationJobConstants.topupDone));
-      promiseArray.push(FiatPaymentModel.flushCache(oThis.transactionObj.fiatPaymentId));
+      promiseArray.push(
+        FiatPaymentModel.flushCache({
+          fiatPaymentId: oThis.transactionObj.fiatPaymentId,
+          userId: oThis.transactionObj.toUserId
+        })
+      );
       await Promise.all(promiseArray);
     }
   }
