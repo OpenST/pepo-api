@@ -120,6 +120,7 @@ class UpdateEmail extends UpdateProfileBase {
       oThis.userEmailLogsId = insertResponse.insertId;
     } else {
       const promisesArray = [];
+      oThis.userEmailLogsId = userEmailLogDetails[0].id;
 
       // Update email for already existing user.
       promisesArray.push(
@@ -132,8 +133,6 @@ class UpdateEmail extends UpdateProfileBase {
       // Invalidate previous tokens for same user.
       promisesArray.push(oThis._invalidatePreviousTokens());
       await Promise.all(promisesArray);
-
-      oThis.userEmailLogsId = userEmailLogDetails[0].id;
     }
   }
 
@@ -148,7 +147,7 @@ class UpdateEmail extends UpdateProfileBase {
 
     await new TemporaryTokenModel()
       .update({
-        status: temporaryTokenConstants.status[temporaryTokenConstants.inActiveStatus]
+        status: temporaryTokenConstants.invertedStatuses[temporaryTokenConstants.inActiveStatus]
       })
       .where({
         entity_id: oThis.userEmailLogsId
