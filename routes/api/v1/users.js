@@ -203,6 +203,14 @@ router.post('/:profile_user_id/profile', sanitizer.sanitizeDynamicUrlParams, fun
   Promise.resolve(routeHelper.perform(req, res, next, '/user/profile/update/Info', 'r_a_v1_u_11', null));
 });
 
+/* Save email in profile. */
+router.post('/:profile_user_id/save-email', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.saveEmail;
+  req.decodedParams.profile_user_id = req.params.profile_user_id;
+
+  Promise.resolve(routeHelper.perform(req, res, next, '/user/profile/update/Email', 'r_a_v1_u_12', null));
+});
+
 /* Video history */
 router.get('/:profile_user_id/video-history', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.userVideoList;
@@ -235,7 +243,7 @@ router.get('/:profile_user_id/video-history', sanitizer.sanitizeDynamicUrlParams
   };
 
   Promise.resolve(
-    routeHelper.perform(req, res, next, '/user/profile/GetVideoList', 'r_a_v1_u_12', null, dataFormatterFunc)
+    routeHelper.perform(req, res, next, '/user/profile/GetVideoList', 'r_a_v1_u_13', null, dataFormatterFunc)
   );
 });
 
@@ -257,7 +265,7 @@ router.get('/:user_id/websocket-details', sanitizer.sanitizeDynamicUrlParams, fu
   };
 
   Promise.resolve(
-    routeHelper.perform(req, res, next, '/user/SocketConnectionDetails', 'r_a_v1_u_12', null, dataFormatterFunc)
+    routeHelper.perform(req, res, next, '/user/SocketConnectionDetails', 'r_a_v1_u_14', null, dataFormatterFunc)
   );
 });
 
@@ -287,7 +295,7 @@ router.get('/search', sanitizer.sanitizeDynamicUrlParams, function(req, res, nex
     serviceResponse.data = wrapperFormatterRsp.data;
   };
 
-  Promise.resolve(routeHelper.perform(req, res, next, '/user/Search', 'r_a_v1_u_14', null, dataFormatterFunc));
+  Promise.resolve(routeHelper.perform(req, res, next, '/user/Search', 'r_a_v1_u_15', null, dataFormatterFunc));
 });
 
 /* Add device token*/
@@ -295,7 +303,7 @@ router.post('/:user_id/device-token', sanitizer.sanitizeDynamicUrlParams, functi
   req.decodedParams.apiName = apiName.addDeviceToken;
   req.decodedParams.user_id = req.params.user_id;
 
-  Promise.resolve(routeHelper.perform(req, res, next, '/user/AddDeviceToken', 'r_a_v1_u_15', null));
+  Promise.resolve(routeHelper.perform(req, res, next, '/user/AddDeviceToken', 'r_a_v1_u_16', null));
 });
 
 module.exports = router;

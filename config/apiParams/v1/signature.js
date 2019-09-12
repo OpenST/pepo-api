@@ -378,6 +378,23 @@ const v1Signature = {
       }
     ]
   },
+  [apiName.saveEmail]: {
+    mandatory: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      },
+      {
+        parameter: 'profile_user_id',
+        validatorMethods: ['validateNonZeroInteger']
+      },
+      {
+        parameter: 'email',
+        validatorMethods: ['validateString', 'isValidEmail']
+      }
+    ],
+    optional: []
+  },
   [apiName.getTags]: {
     mandatory: [
       {
