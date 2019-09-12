@@ -54,6 +54,7 @@ class UserModel extends ModelBase {
    * @param {string} dbRow.encryption_salt
    * @param {number} dbRow.mark_inactive_trigger_count
    * @param {number} dbRow.properties
+   * @param {string} dbRow.email
    * @param {number} dbRow.status
    * @param {number} dbRow.created_at
    * @param {number} dbRow.updated_at
@@ -73,6 +74,7 @@ class UserModel extends ModelBase {
       encryptionSalt: dbRow.encryption_salt,
       markInactiveTriggerCount: dbRow.mark_inactive_trigger_count,
       properties: dbRow.properties,
+      email: dbRow.email,
       approvedCreator: UserModel.isUserApprovedCreator(dbRow),
       status: userConstants.statuses[dbRow.status],
       createdAt: dbRow.created_at,
@@ -95,6 +97,7 @@ class UserModel extends ModelBase {
       'profileImageId',
       'markInactiveTriggerCount',
       'properties',
+      'email',
       'approvedCreator',
       'status',
       'createdAt',
@@ -157,6 +160,7 @@ class UserModel extends ModelBase {
         'profile_image_id',
         'mark_inactive_trigger_count',
         'properties',
+        'email',
         'status',
         'created_at',
         'updated_at'

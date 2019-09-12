@@ -1,19 +1,18 @@
 const rootPrefix = '../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
-  databaseConstants = require(rootPrefix + '/lib/globalConstant/database'),
-  temporaryTokenConstants = require(rootPrefix + '/lib/globalConstant/temporaryToken');
+  databaseConstants = require(rootPrefix + '/lib/globalConstant/database');
 
 // Declare variables.
 const dbName = databaseConstants.bigDbName;
 
 /**
- * Class for temporary token model.
+ * Class for user email logs model.
  *
- * @class TemporaryToken
+ * @class UserEmailLogs
  */
-class TemporaryToken extends ModelBase {
+class UserEmailLogs extends ModelBase {
   /**
-   * Constructor for temporary token model.
+   * Constructor for user email logs model.
    *
    * @augments ModelBase
    *
@@ -24,7 +23,7 @@ class TemporaryToken extends ModelBase {
 
     const oThis = this;
 
-    oThis.tableName = 'temporary_tokens';
+    oThis.tableName = 'user_email_logs';
   }
 
   /**
@@ -32,10 +31,8 @@ class TemporaryToken extends ModelBase {
    *
    * @param {object} dbRow
    * @param {number} dbRow.id
-   * @param {number} dbRow.entity_id
-   * @param {number} dbRow.kind
-   * @param {string} dbRow.token
-   * @param {number} dbRow.status
+   * @param {string} dbRow.email
+   * @param {number} dbRow.temporary_token_id
    * @param {number/string} dbRow.created_at
    * @param {number/string} dbRow.updated_at
    *
@@ -46,10 +43,8 @@ class TemporaryToken extends ModelBase {
 
     const formattedData = {
       id: dbRow.id,
-      entityId: dbRow.entity_id,
-      kind: temporaryTokenConstants.kinds[dbRow.kind],
-      token: dbRow.token,
-      status: temporaryTokenConstants.statuses[dbRow.status],
+      email: dbRow.email,
+      temporaryTokenId: dbRow.temporary_token_id,
       createdAt: dbRow.created_at,
       updatedAt: dbRow.updated_at
     };
@@ -58,16 +53,16 @@ class TemporaryToken extends ModelBase {
   }
 
   /**
-   * List Of formatted column names that can be exposed by service.
+   * List of formatted column names that can be exposed by service.
    *
    * @returns {array}
    */
   safeFormattedColumnNames() {
-    return ['id', 'entityId', 'kind', 'token', 'status', 'createdAt', 'updatedAt'];
+    return ['id', 'email', 'temporaryTokenId', 'createdAt', 'updatedAt'];
   }
 
   /**
-   * Fetch temporary token by id.
+   * Fetch user email log id.
    *
    * @param {string} id
    *
@@ -105,17 +100,6 @@ class TemporaryToken extends ModelBase {
 
     return response;
   }
-
-  /**
-   * Flush cache.
-   *
-   * @param {object} params
-   *
-   * @returns {Promise<*>}
-   */
-  static async flushCache(params) {
-    // Do nothing.
-  }
 }
 
-module.exports = TemporaryToken;
+module.exports = UserEmailLogs;
