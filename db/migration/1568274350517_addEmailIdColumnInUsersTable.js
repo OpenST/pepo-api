@@ -7,7 +7,7 @@ const dbKind = dbKindConstants.sqlDbKind;
 
 const upQuery =
   'ALTER TABLE `users` \n\
-      ADD COLUMN `email` varchar(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NULL,\n\
+      ADD COLUMN `email` varchar(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NULL AFTER `properties`,\n\
       ADD UNIQUE  `uk_idx_2` (`email`);';
 
 const downQuery = 'ALTER TABLE `users` \n\
