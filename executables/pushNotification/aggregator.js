@@ -15,7 +15,6 @@ const rootPrefix = '../..',
   notificationHookConstants = require(rootPrefix + '/lib/globalConstant/notificationHook'),
   aggregatedNotificationsConstants = require(rootPrefix + '/lib/globalConstant/aggregatedNotifications'),
   cronProcessesConstants = require(rootPrefix + '/lib/globalConstant/cronProcesses'),
-  commonValidators = require(rootPrefix + '/lib/validators/Common'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger');
 
@@ -194,7 +193,7 @@ class NotificationAggregator extends CronBase {
         txReceivedAmount: txReceivedAmount
       });
 
-      console.log('notificationHookPayload------------', JSON.stringify(finalNotificationHookPayload));
+      logger.log('======= FinalNotificationHookPayload :::', JSON.stringify(finalNotificationHookPayload));
 
       let insertRow = [
         notificationHookConstants.invertedEventTypes[notificationHookConstants.aggregatedTxReceiveSuccessKind],
