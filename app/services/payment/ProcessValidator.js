@@ -51,6 +51,8 @@ class PaymentProcessValidator extends ServiceBase {
   async _asyncPerform() {
     const oThis = this;
 
+    await oThis._validateAndSanitize();
+
     await oThis._insertFiatPayment();
 
     if (!oThis.paymentDetail) {
@@ -66,6 +68,29 @@ class PaymentProcessValidator extends ServiceBase {
     }
 
     return responseHelper.successWithData({ [entityType.userTopUp]: oThis.paymentDetail });
+  }
+
+  /**
+   *
+   * @returns {*|result}
+   * @private
+   */
+  _validateAndSanitize() {
+    const oThis = this;
+
+    if (oThis.userId !== oThis.currentUser.id) {
+      return responseHelper.paramValidationError({
+        internal_error_identifier: 'a_s_p_pv_2',
+        api_error_identifier: 'invalid_api_params',
+        params_error_identifiers: ['invalid_user_id'],
+        debug_options: {
+          userId: oThis.userId,
+          currentUserId: oThis.currentUser.id
+        }
+      });
+    }
+
+    return responseHelper.successWithData({});
   }
 
   /**

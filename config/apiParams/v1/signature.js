@@ -616,10 +616,6 @@ const v1Signature = {
       {
         parameter: 'current_user',
         validatorMethods: ['validateNonEmptyObject']
-      },
-      {
-        parameter: 'user_id',
-        validatorMethods: ['validateNonZeroInteger']
       }
     ],
     optional: []

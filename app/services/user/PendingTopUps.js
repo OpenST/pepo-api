@@ -28,7 +28,6 @@ class PendingTopUps extends ServiceBase {
     super(params);
 
     const oThis = this;
-    oThis.userId = params.user_id;
     oThis.currentUserId = params.current_user.id;
 
     oThis.pendingTopUps = [];
@@ -43,18 +42,6 @@ class PendingTopUps extends ServiceBase {
    */
   async _asyncPerform() {
     const oThis = this;
-
-    if (oThis.userId !== oThis.currentUserId) {
-      return responseHelper.paramValidationError({
-        internal_error_identifier: 'a_s_u_ptu_1',
-        api_error_identifier: 'invalid_api_params',
-        params_error_identifiers: ['invalid_user_id'],
-        debug_options: {
-          userId: oThis.userId,
-          currentUserId: oThis.currentUserId
-        }
-      });
-    }
 
     await oThis._fetchPaymentDetail();
 
@@ -72,14 +59,14 @@ class PendingTopUps extends ServiceBase {
   async _fetchPaymentDetail() {
     const oThis = this;
 
-    const cacheObj = new UserPendingTopupCache({ userId: oThis.userId }),
+    const cacheObj = new UserPendingTopupCache({ userId: oThis.currentUserId }),
       cacheResp = await cacheObj.fetch();
 
     if (cacheResp.isFailure()) {
       return Promise.reject(cacheResp);
     }
 
-    oThis.pendingTopUps = cacheResp.data[oThis.userId] || [];
+    oThis.pendingTopUps = cacheResp.data[oThis.currentUserId] || [];
   }
 
   /**
