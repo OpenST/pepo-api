@@ -62,11 +62,11 @@ class InviteSeed {
     while (offset < totalRecords) {
       await oThis._fetchPreLaunchInvites(limit, offset);
 
-      await oThis._seedInviteCodesFromPreLaunchInvites();
+      await oThis.__seedInviteCodes();
 
       await oThis._fetchInviteCodes();
 
-      await oThis._seedPreLaunchInvitesFromInviteCodes();
+      await oThis._updatePreLaunchInvites();
 
       offset = offset + 10;
     }
@@ -129,7 +129,7 @@ class InviteSeed {
    * @returns {Promise<>}
    * @private
    */
-  async _seedInviteCodesFromPreLaunchInvites() {
+  async __seedInviteCodes() {
     const oThis = this;
 
     let bulkInsertVal = [];
@@ -175,7 +175,7 @@ class InviteSeed {
    * @returns {Promise<>}
    * @private
    */
-  async _seedPreLaunchInvitesFromInviteCodes() {
+  async _updatePreLaunchInvites() {
     const oThis = this;
 
     let preLaunchInviteByIdObj = {},
