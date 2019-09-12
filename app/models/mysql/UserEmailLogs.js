@@ -100,6 +100,46 @@ class UserEmailLogs extends ModelBase {
 
     return response;
   }
+
+  /**
+   * Fetch email and id by userId.
+   *
+   * @param {number} userId
+   *
+   * @returns {Promise<*|{}>}
+   */
+  async fetchByUserId(userId) {
+    const oThis = this;
+
+    const res = await oThis.fetchByUserIds([userId]);
+
+    return res[userId] || {};
+  }
+
+  /**
+   * Fetch email and id by userIds.
+   *
+   * @param {array<number>} userIds
+   *
+   * @returns {Promise<{}>}
+   */
+  async fetchByUserIds(userIds) {
+    const oThis = this;
+
+    const dbRows = await oThis
+      .select('email, id, user_id')
+      .where({ user_id: userIds })
+      .fire();
+
+    const response = {};
+
+    for (let index = 0; index < dbRows.length; index++) {
+      const formatDbRow = oThis.formatDbData(dbRows[index]);
+      response[formatDbRow.userId] = formatDbRow;
+    }
+
+    return response;
+  }
 }
 
 module.exports = UserEmailLogs;

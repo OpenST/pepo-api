@@ -103,13 +103,30 @@ class UpdateEmail extends UpdateProfileBase {
   async _createUserEmailLogs() {
     const oThis = this;
 
-    const userEmailLogDetails = await new UserEmailLogsModel()
-      .select('id')
-      .where({ user_id: oThis.profileUserId })
-      .fire();
+    const userEmailLogDetails = await new UserEmailLogsModel().fetchByUserId(oThis.profileUserId);
 
-    // If entry for user does not exist, create one.
-    if (userEmailLogDetails.length === 0) {
+    if (userEmailLogDetails.email && userEmailLogDetails.id) {
+      const promisesArray = [];
+
+      oThis.userEmailLogsId = userEmailLogDetails.id;
+      const previousEmail = userEmailLogDetails.email;
+
+      // Invalidate previous tokens for same user.
+      promisesArray.push(oThis._invalidatePreviousTokens());
+
+      if (previousEmail !== oThis.email) {
+        // Update email for already existing user.
+        promisesArray.push(
+          new UserEmailLogsModel()
+            .update({ email: oThis.email })
+            .where({ user_id: oThis.profileUserId })
+            .fire()
+        );
+      }
+
+      await Promise.all(promisesArray);
+    } else {
+      // If entry for user does not exist, create one.
       const insertResponse = await new UserEmailLogsModel()
         .insert({
           email: oThis.email,
@@ -118,21 +135,6 @@ class UpdateEmail extends UpdateProfileBase {
         .fire();
 
       oThis.userEmailLogsId = insertResponse.insertId;
-    } else {
-      const promisesArray = [];
-      oThis.userEmailLogsId = userEmailLogDetails[0].id;
-
-      // Update email for already existing user.
-      promisesArray.push(
-        new UserEmailLogsModel()
-          .update({ email: oThis.email })
-          .where({ user_id: oThis.profileUserId })
-          .fire()
-      );
-
-      // Invalidate previous tokens for same user.
-      promisesArray.push(oThis._invalidatePreviousTokens());
-      await Promise.all(promisesArray);
     }
   }
 
