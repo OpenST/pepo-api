@@ -5,9 +5,7 @@ const rootPrefix = '../../../../..',
   UserByEmailsCache = require(rootPrefix + '/lib/cacheManagement/multi/UserByEmails'),
   SendTransactionalMail = require(rootPrefix + '/lib/email/hookCreator/SendTransactionalMail'),
   util = require(rootPrefix + '/lib/util'),
-  coreConstants = require(rootPrefix + '/config/coreConstants'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
-  localCipher = require(rootPrefix + '/lib/encryptors/localCipher'),
   webPageConstants = require(rootPrefix + '/lib/globalConstant/webPage'),
   temporaryTokenConstants = require(rootPrefix + '/lib/globalConstant/temporaryToken'),
   emailServiceApiCallHookConstants = require(rootPrefix + '/lib/globalConstant/emailServiceApiCallHook');
@@ -37,7 +35,6 @@ class UpdateEmail extends UpdateProfileBase {
 
     oThis.email = oThis.params.email;
 
-    oThis.temporaryTokenId = null;
     oThis.userEmailLogsId = null;
     oThis.doubleOptInToken = null;
   }
@@ -161,7 +158,7 @@ class UpdateEmail extends UpdateProfileBase {
   /**
    * Create double opt in token.
    *
-   * @sets oThis.temporaryTokenId, oThis.doubleOptInToken
+   * @sets oThis.doubleOptInToken
    *
    * @returns {Promise<never>}
    * @private
@@ -175,24 +172,11 @@ class UpdateEmail extends UpdateProfileBase {
 
     const temporaryDoubleOptInToken = util.createMd5Digest(tokenString);
 
-    const insertResponse = await new TemporaryTokenModel()
-      .insert({
-        entity_id: oThis.userEmailLogsId,
-        kind: temporaryTokenConstants.invertedKinds[temporaryTokenConstants.emailDoubleOptInKind],
-        token: temporaryDoubleOptInToken,
-        status: temporaryTokenConstants.invertedStatuses[temporaryTokenConstants.activeStatus]
-      })
-      .fire();
-
-    if (!insertResponse) {
-      return Promise.reject(new Error('Error while inserting data into temporary_tokens table.'));
-    }
-
-    oThis.temporaryTokenId = insertResponse.insertId;
-
-    const doubleOptInTokenStr = `${oThis.temporaryTokenId.toString()}:${temporaryDoubleOptInToken}`;
-
-    oThis.doubleOptInToken = localCipher.encrypt(coreConstants.PA_EMAIL_TOKENS_DECRIPTOR_KEY, doubleOptInTokenStr);
+    oThis.doubleOptInToken = await new TemporaryTokenModel().createDoubleOptInToken({
+      entityId: oThis.userEmailLogsId,
+      kind: temporaryTokenConstants.emailDoubleOptInKind,
+      token: temporaryDoubleOptInToken
+    });
   }
 
   /**

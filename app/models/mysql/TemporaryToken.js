@@ -1,5 +1,7 @@
 const rootPrefix = '../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
+  coreConstants = require(rootPrefix + '/config/coreConstants'),
+  localCipher = require(rootPrefix + '/lib/encryptors/localCipher'),
   databaseConstants = require(rootPrefix + '/lib/globalConstant/database'),
   temporaryTokenConstants = require(rootPrefix + '/lib/globalConstant/temporaryToken');
 
@@ -104,6 +106,41 @@ class TemporaryToken extends ModelBase {
     }
 
     return response;
+  }
+
+  /**
+   * Create double opt in token with active status.
+   *
+   * @param {object} params
+   * @param {number} params.entityId
+   * @param {string} params.kind
+   * @param {string} params.token
+   *
+   * @returns {Promise<Request<KMS.EncryptResponse, AWSError>|*|any|ArrayBuffer>}
+   */
+  async createDoubleOptInToken(params) {
+    const oThis = this;
+
+    const entityId = params.entityId;
+    const kind = params.kind;
+    const token = params.token;
+
+    const insertResponse = await oThis
+      .insert({
+        entity_id: entityId,
+        kind: temporaryTokenConstants.invertedKinds[kind],
+        token: token,
+        status: temporaryTokenConstants.invertedStatuses[temporaryTokenConstants.activeStatus]
+      })
+      .fire();
+
+    if (!insertResponse) {
+      return Promise.reject(new Error('Error while inserting data into temporary_tokens table.'));
+    }
+
+    const doubleOptInTokenStr = `${insertResponse.insertId.toString()}:${token}`;
+
+    return localCipher.encrypt(coreConstants.PA_EMAIL_TOKENS_DECRIPTOR_KEY, doubleOptInTokenStr);
   }
 }
 
