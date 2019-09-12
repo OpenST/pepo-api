@@ -6,33 +6,14 @@
  */
 
 const rootPrefix = '../..',
-  basicHelper = require(rootPrefix + '/helpers/basic'),
   LocationModel = require(rootPrefix + '/app/models/mysql/Location'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger');
 
-const command = require('commander'),
-  path = require('path'),
-  appRootPath = path.resolve(__dirname, rootPrefix);
-
-command
-  .usage('[options]')
-  .option('--location-file-path <required>', 'Location json file absolute path')
-  .parse(process.argv);
+const momentTimezone = require('moment-timezone');
 
 const BATCH_SIZE = 25;
 
 class LocationSeeder {
-  /**
-   *
-   * @param {Object} params
-   * @param {String} params.locationFilePath
-   */
-  constructor(params) {
-    const oThis = this;
-
-    oThis.locationFilePath = params.locationFilePath;
-  }
-
   /**
    * Async performer.
    *
@@ -40,10 +21,6 @@ class LocationSeeder {
    */
   async perform() {
     const oThis = this;
-
-    if (oThis.locationFilePath === undefined) {
-      oThis.locationFilePath = `${appRootPath}/test/location.json`;
-    }
 
     return oThis._seed();
   }
@@ -55,17 +32,20 @@ class LocationSeeder {
    * @private
    */
   async _seed() {
-    const oThis = this;
+    const timezoneNames = momentTimezone.tz.names();
 
-    const locationData = require(oThis.locationFilePath),
-      zoneInfoArray = locationData.zones;
+    logger.log('timezoneNames =====', timezoneNames);
 
-    while (zoneInfoArray.length > 0) {
+    while (timezoneNames.length > 0) {
       const bulkInsertVal = [],
-        currentZones = zoneInfoArray.splice(0, BATCH_SIZE);
+        currentZones = timezoneNames.splice(0, BATCH_SIZE);
 
       for (let i = 0; i < currentZones.length; i++) {
-        bulkInsertVal.push([currentZones[i].gmtOffset, currentZones[i].zoneName.toLowerCase()]);
+        const gmtOffset = momentTimezone.tz(currentZones[i]).utcOffset() * 60;
+
+        logger.log('gmtOffset =====', gmtOffset);
+
+        bulkInsertVal.push([gmtOffset, currentZones[i].toLowerCase()]);
       }
 
       await new LocationModel()
@@ -76,7 +56,7 @@ class LocationSeeder {
   }
 }
 
-const locationSeeder = new LocationSeeder({ locationFilePath: command.locationFilePath });
+const locationSeeder = new LocationSeeder();
 
 locationSeeder
   .perform()
