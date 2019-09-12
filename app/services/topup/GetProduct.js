@@ -43,8 +43,14 @@ class GetTopupProduct extends ServiceBase {
     const oThis = this;
 
     let promiseArray = [];
+
+    // Fetch products for the current price point
     promiseArray.push(oThis._fetchAvailableProducts());
+
+    // Fetch the user purchase data from past
     promiseArray.push(oThis._fetchUsersPurchaseData());
+
+    // Fetch user purchase limit data
     promiseArray.push(oThis._fetchUserPurchaseLimitData());
 
     await Promise.all(promiseArray);
@@ -111,9 +117,11 @@ class GetTopupProduct extends ServiceBase {
       return Promise.reject(cacheResponse);
     }
 
-    if (cacheResponse.data[oThis.currentUser.id][userProfileElementConst.lifetimePurchaseLimitKind]) {
-      oThis.customPurchaseLimitOfUser =
-        cacheResponse.data[oThis.currentUser.id][userProfileElementConst.lifetimePurchaseLimitKind].data;
+    let lifetimePurchaseLimitForUser =
+      cacheResponse.data[oThis.currentUser.id][userProfileElementConst.lifetimePurchaseLimitKind];
+
+    if (lifetimePurchaseLimitForUser) {
+      oThis.customPurchaseLimitOfUser = lifetimePurchaseLimitForUser.data;
     }
   }
 

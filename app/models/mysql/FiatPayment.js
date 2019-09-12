@@ -181,12 +181,13 @@ class FiatPayment extends ModelBase {
   }
 
   /**
-   * Fetch life time payments
+   * Fetch life time purchase amount for a user id
    *
    * @param userId - user id for which the total purchase amount has to be summed.
+   *
    * @returns {Promise<void>}
    */
-  async fetchLifeTimePayments(userId) {
+  async fetchTotalPurchaseAmountFor(userId) {
     const oThis = this;
 
     let totalAmount = 0,
