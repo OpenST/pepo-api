@@ -285,7 +285,7 @@ class HookProcessor extends CronBase {
       api_error_identifier: 'firebase_error',
       debug_options: debugOptions
     });
-    await createErrorLogsEntry.perform(errorObject, errorLogsConstants.highSeverity);
+    await createErrorLogsEntry.perform(errorObject, errorLogsConstants.lowSeverity);
   }
 
   /**
