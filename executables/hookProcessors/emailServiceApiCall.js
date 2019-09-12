@@ -105,7 +105,7 @@ class EmailServiceApiCall extends HookProcessorsBase {
         return SendTransactionalMail;
       }
       default: {
-        throw new Error('Unsupported event type');
+        throw new Error('Unsupported event type.');
       }
     }
   }
