@@ -50,6 +50,8 @@ class PreLaunchInvite extends ModelBase {
       'adminStatus',
       'inviterUserId',
       'inviteCode',
+      'inviterCodeId',
+      'inviteCodeId',
       'invitedUserCount',
       'createdAt',
       'updatedAt'
@@ -74,6 +76,8 @@ class PreLaunchInvite extends ModelBase {
    * @param {number} dbRow.admin_status
    * @param {number} dbRow.inviter_user_id
    * @param {string} dbRow.invite_code
+   * @param {number} dbRow.inviter_code_id
+   * @param {number} dbRow.invite_code_id
    * @param {number} dbRow.invited_user_count
    * @param {number/string} dbRow.created_at
    * @param {number/string} dbRow.updated_at
@@ -98,6 +102,8 @@ class PreLaunchInvite extends ModelBase {
       adminStatus: preLaunchInviteConstants.adminStatuses[dbRow.admin_status],
       inviterUserId: dbRow.inviter_user_id,
       inviteCode: dbRow.invite_code,
+      inviterCodeId: dbRow.inviter_code_id,
+      inviteCodeId: dbRow.invite_code_id,
       invitedUserCount: dbRow.invited_user_count,
       createdAt: dbRow.created_at,
       updatedAt: dbRow.updated_at
@@ -144,6 +150,8 @@ class PreLaunchInvite extends ModelBase {
         'status',
         'inviter_user_id',
         'invite_code',
+        'inviter_code_id',
+        'invite_code_id',
         'invited_user_count',
         'created_at',
         'updated_at'
