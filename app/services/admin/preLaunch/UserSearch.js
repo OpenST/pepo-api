@@ -38,6 +38,7 @@ class InviteUserSearch extends ServiceBase {
     oThis.pageNo = null;
     oThis.nextPageNo = null;
     oThis.limit = oThis._defaultPageLimit();
+    oThis.totalCount = 0;
   }
 
   /**
@@ -117,6 +118,12 @@ class InviteUserSearch extends ServiceBase {
 
     oThis.inviteIds = inviteData.inviteIds;
     oThis.inviteDetails = inviteData.inviteDetails;
+
+    const totalCountResp = await new PreLaunchInviteModel().totalCount({
+      query: oThis.query
+    });
+
+    oThis.totalCount = totalCountResp.totalCount || 0;
   }
 
   /**
@@ -164,7 +171,8 @@ class InviteUserSearch extends ServiceBase {
     }
 
     oThis.responseMetaData = {
-      [paginationConstants.nextPagePayloadKey]: nextPagePayloadKey
+      [paginationConstants.nextPagePayloadKey]: nextPagePayloadKey,
+      [paginationConstants.totalNoKey]: oThis.totalCount
     };
   }
 
