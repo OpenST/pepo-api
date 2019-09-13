@@ -140,6 +140,19 @@ class UserEmailLogs extends ModelBase {
 
     return response;
   }
+
+  /**
+   * Flush cache.
+   *
+   * @param {object} params
+   * @param {number} params.userId
+   *
+   * @returns {Promise<void>}
+   */
+  static async flushCache(params) {
+    const UserEmailLogsByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/UserEmailLogsByUserIds');
+    await new UserEmailLogsByUserIdsCache({ userIds: [params.userId] }).clear();
+  }
 }
 
 module.exports = UserEmailLogs;

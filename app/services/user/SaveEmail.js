@@ -5,6 +5,7 @@ const rootPrefix = '../../../',
   TemporaryTokenModel = require(rootPrefix + '/app/models/mysql/TemporaryToken'),
   UserByEmailsCache = require(rootPrefix + '/lib/cacheManagement/multi/UserByEmails'),
   SendTransactionalMail = require(rootPrefix + '/lib/email/hookCreator/SendTransactionalMail'),
+  UserEmailLogsByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/UserEmailLogsByUserIds'),
   util = require(rootPrefix + '/lib/util'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   webPageConstants = require(rootPrefix + '/lib/globalConstant/webPage'),
@@ -145,7 +146,14 @@ class SaveEmail extends ServiceBase {
   async _createUserEmailLogs() {
     const oThis = this;
 
-    const userEmailLogDetails = await new UserEmailLogsModel().fetchByUserId(oThis.profileUserId);
+    const userEmailLogsResponse = await new UserEmailLogsByUserIdsCache({
+      userIds: [oThis.profileUserId]
+    }).fetch();
+    if (userEmailLogsResponse.isFailure()) {
+      return Promise.reject(userEmailLogsResponse);
+    }
+
+    const userEmailLogDetails = userEmailLogsResponse.data[oThis.profileUserId];
 
     if (userEmailLogDetails.email && userEmailLogDetails.id) {
       const promisesArray = [];
@@ -167,6 +175,7 @@ class SaveEmail extends ServiceBase {
       }
 
       await Promise.all(promisesArray);
+      await UserEmailLogsModel.flushCache({ userId: oThis.profileUserId });
     } else {
       // If entry for user does not exist, create one.
       const insertResponse = await new UserEmailLogsModel()
