@@ -133,7 +133,7 @@ class InvitedUsers extends ServiceBase {
   async _getInvitedUsers() {
     const oThis = this;
 
-    const queryResponse = await new InviteCodeModel().search({
+    const queryResponse = await new InviteCodeModel().getUserIdsByInviterUserId({
       inviterCodeId: oThis.inviterCodeId,
       limit: oThis.limit,
       paginationId: oThis.paginationId

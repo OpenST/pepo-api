@@ -182,7 +182,7 @@ class InviteCode extends ModelBase {
    *
    * @return {Promise<object>}
    */
-  async search(params) {
+  async getUserIdsByInviterUserId(params) {
     const oThis = this;
 
     const limit = params.limit,
