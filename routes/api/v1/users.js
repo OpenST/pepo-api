@@ -179,6 +179,25 @@ router.get('/:profile_user_id/profile', sanitizer.sanitizeDynamicUrlParams, func
   Promise.resolve(routeHelper.perform(req, res, next, '/user/profile/Get', 'r_a_v1_u_7', null, dataFormatterFunc));
 });
 
+/* Get email for current user. */
+router.get('/email', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.getEmail;
+
+  const dataFormatterFunc = async function(serviceResponse) {
+    const wrapperFormatterRsp = await new FormatterComposer({
+      resultType: responseEntityKey.email,
+      entityKindToResponseKeyMap: {
+        [entityType.email]: responseEntityKey.email
+      },
+      serviceData: serviceResponse.data
+    }).perform();
+
+    serviceResponse.data = wrapperFormatterRsp.data;
+  };
+
+  Promise.resolve(routeHelper.perform(req, res, next, '/user/GetEmail', 'r_a_v1_u_12', null, dataFormatterFunc));
+});
+
 /* Video save */
 router.post('/:profile_user_id/fan-video', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.saveFanVideo;
@@ -267,6 +286,14 @@ router.get('/:user_id/websocket-details', sanitizer.sanitizeDynamicUrlParams, fu
   Promise.resolve(
     routeHelper.perform(req, res, next, '/user/SocketConnectionDetails', 'r_a_v1_u_14', null, dataFormatterFunc)
   );
+});
+
+/* Reset badge count. */
+router.post('/:user_id/reset-badge', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.resetBadge;
+  req.decodedParams.user_id = req.params.user_id;
+
+  Promise.resolve(routeHelper.perform(req, res, next, '/user/ResetBadge', 'r_a_v1_u_16', null, null));
 });
 
 /* Thank You*/

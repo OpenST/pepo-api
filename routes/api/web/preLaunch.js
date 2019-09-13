@@ -138,7 +138,7 @@ router.get('/rotate-twitter-account', sanitizer.sanitizeDynamicUrlParams, functi
 router.get('/double-opt-in', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.doubleOptIn;
 
-  Promise.resolve(routeHelper.perform(req, res, next, '/preLaunchInvite/DoubleOptIn', 'r_a_w_pl_5', null));
+  Promise.resolve(routeHelper.perform(req, res, next, '/VerifyDoubleOptIn', 'r_a_w_pl_5', null));
 });
 
 /* Logout pre launch user*/

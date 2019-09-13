@@ -456,11 +456,16 @@ class TwitterSignup extends ServiceBase {
 
       oThis.twitterUserObj.userId = oThis.userId;
     } else {
-      let twitterEmail = oThis.userTwitterEntity.email;
+      let twitterEmail = oThis.userTwitterEntity.email,
+        twitterHandle = oThis.userTwitterEntity.handle;
 
       // email info is not mandatory to come from twitter.
       if (!oThis.userTwitterEntity.email || !CommonValidators.isValidEmail(oThis.userTwitterEntity.email)) {
         twitterEmail = null;
+      }
+
+      if (!oThis.userTwitterEntity.handle) {
+        twitterHandle = null;
       }
 
       let insertData = {
@@ -468,6 +473,7 @@ class TwitterSignup extends ServiceBase {
         user_id: oThis.userId,
         name: oThis.userTwitterEntity.formattedName,
         email: twitterEmail,
+        handle: twitterHandle,
         profile_image_url: oThis.userTwitterEntity.nonDefaultProfileImageShortUrl
       };
       // Insert user in database.

@@ -1,20 +1,17 @@
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   FeedModel = require(rootPrefix + '/app/models/mysql/Feed'),
-  UserModelKlass = require(rootPrefix + '/app/models/mysql/User'),
+  UserModel = require(rootPrefix + '/app/models/mysql/User'),
   UsersCache = require(rootPrefix + '/lib/cacheManagement/multi/User'),
+  ActivityLogModel = require(rootPrefix + '/app/models/mysql/AdminActivityLog'),
   UserProfileElementsByUserIdCache = require(rootPrefix + '/lib/cacheManagement/multi/UserProfileElementsByUserIds'),
-  userProfileElementConst = require(rootPrefix + '/lib/globalConstant/userProfileElement'),
-  VideoAddNotification = require(rootPrefix + '/lib/userNotificationPublisher/VideoAdd'),
-  ActivityLogModel = require(rootPrefix + '/app/models/mysql/AdminActivityLog'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
-  FeedModel = require(rootPrefix + '/app/models/mysql/Feed'),
-  feedsConstants = require(rootPrefix + '/lib/globalConstant/feed'),
-  ActivityLogModel = require(rootPrefix + '/app/models/mysql/AdminActivityLog'),
-  adminActivityLogConst = require(rootPrefix + '/lib/globalConstant/adminActivityLogs'),
   userConstants = require(rootPrefix + '/lib/globalConstant/user'),
+  feedsConstants = require(rootPrefix + '/lib/globalConstant/feed'),
   notificationJobEnqueue = require(rootPrefix + '/lib/rabbitMqEnqueue/notification'),
-  notificationJobConstants = require(rootPrefix + '/lib/globalConstant/notificationJob');
+  notificationJobConstants = require(rootPrefix + '/lib/globalConstant/notificationJob'),
+  adminActivityLogConstants = require(rootPrefix + '/lib/globalConstant/adminActivityLogs'),
+  userProfileElementConstants = require(rootPrefix + '/lib/globalConstant/userProfileElement');
 
 /**
  * Class to approve users by admin.
@@ -78,8 +75,7 @@ class ApproveUsersAsCreator extends ServiceBase {
   async _fetchUsers() {
     const oThis = this;
 
-    const userMultiCache = new UsersCache({ ids: oThis.userIds });
-    const cacheRsp = await userMultiCache.fetch();
+    const cacheRsp = await new UsersCache({ ids: oThis.userIds }).fetch();
 
     if (cacheRsp.isFailure()) {
       return Promise.reject(
@@ -106,7 +102,7 @@ class ApproveUsersAsCreator extends ServiceBase {
         );
       }
 
-      if (UserModelKlass.isUserApprovedCreator(userObj)) {
+      if (UserModel.isUserApprovedCreator(userObj)) {
         return Promise.reject(
           responseHelper.paramValidationError({
             internal_error_identifier: 'a_s_a_au_3',
@@ -128,10 +124,11 @@ class ApproveUsersAsCreator extends ServiceBase {
    * @private
    */
   async _approveUsers() {
-    const oThis = this,
-      propertyVal = userConstants.invertedProperties[userConstants.isApprovedCreatorProperty];
+    const oThis = this;
 
-    await new UserModelKlass()
+    const propertyVal = userConstants.invertedProperties[userConstants.isApprovedCreatorProperty];
+
+    await new UserModel()
       .update(['properties = properties | ?', propertyVal])
       .where({ id: oThis.userIds })
       .fire();
@@ -148,7 +145,7 @@ class ApproveUsersAsCreator extends ServiceBase {
 
     const promises = [];
     for (const userId in oThis.userObjects) {
-      promises.push(UserModelKlass.flushCache(oThis.userObjects[userId]));
+      promises.push(UserModel.flushCache(oThis.userObjects[userId]));
     }
     await Promise.all(promises);
   }
@@ -170,8 +167,8 @@ class ApproveUsersAsCreator extends ServiceBase {
     const promises = [];
     for (const userId in oThis.userObjects) {
       const profileElements = cacheRsp.data[userId];
-      if (profileElements && profileElements[userProfileElementConst.coverVideoIdKind]) {
-        const videoId = profileElements[userProfileElementConst.coverVideoIdKind].data;
+      if (profileElements && profileElements[userProfileElementConstants.coverVideoIdKind]) {
+        const videoId = profileElements[userProfileElementConstants.coverVideoIdKind].data;
         promises.push(oThis._addFeed(videoId, userId));
         promises.push(
           notificationJobEnqueue.enqueue(notificationJobConstants.videoAdd, {
@@ -220,7 +217,7 @@ class ApproveUsersAsCreator extends ServiceBase {
       await activityLogObj.insertAction({
         adminId: oThis.currentAdminId,
         actionOn: userId,
-        action: adminActivityLogConst.approvedAsCreator
+        action: adminActivityLogConstants.approvedAsCreator
       });
     }
   }
