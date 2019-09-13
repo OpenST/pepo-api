@@ -2,10 +2,22 @@ const rootPrefix = '../../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   UserNotificationModel = require(rootPrefix + '/app/models/cassandra/UserNotification'),
+  TwitterUserByTwitterIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TwitterUserByTwitterIds'),
+  TwitterUserByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TwitterUserByUserIds'),
+  SecureUserCache = require(rootPrefix + '/lib/cacheManagement/single/SecureUser'),
+  SecureTwitterUserExtendedByTwitterUserIdCache = require(rootPrefix +
+    '/lib/cacheManagement/single/SecureTwitterUserExtendedByTwitterUserId'),
+  TwitterUserExtendedModel = require(rootPrefix + '/app/models/mysql/TwitterUserExtended'),
+  TweetMessage = require(rootPrefix + '/lib/twitter/oAuth1.0/Tweet'),
+  userConstants = require(rootPrefix + '/lib/globalConstant/user'),
+  localCipher = require(rootPrefix + '/lib/encryptors/localCipher'),
   base64Helper = require(rootPrefix + '/lib/base64Helper'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   notificationJobEnqueue = require(rootPrefix + '/lib/rabbitMqEnqueue/notification'),
-  notificationJobConstants = require(rootPrefix + '/lib/globalConstant/notificationJob');
+  twitterUserExtendedConstants = require(rootPrefix + '/lib/globalConstant/twitterUserExtended'),
+  notificationJobConstants = require(rootPrefix + '/lib/globalConstant/notificationJob'),
+  coreConstants = require(rootPrefix + '/config/coreConstants'),
+  logger = require(rootPrefix + '/lib/logger/customConsoleLogger');
 
 /**
  * Class for thank you notification.
@@ -33,7 +45,12 @@ class SayThankYou extends ServiceBase {
     oThis.text = params.text;
     oThis.notificationId = params.notification_id;
     oThis.currentUserId = +params.current_user.id;
+    oThis.tweetNeeded = +params.tweet_needed;
 
+    oThis.secret = null;
+    oThis.decryptedEncryptionSalt = null;
+    oThis.twitterUserObj = null;
+    oThis.twitterUserExtendedObj = null;
     oThis.userNotificationObj = {};
     oThis.decryptedNotificationParams = {};
   }
@@ -55,7 +72,17 @@ class SayThankYou extends ServiceBase {
 
     await oThis._enqueueUserNotification();
 
-    return responseHelper.successWithData({});
+    if (oThis.tweetNeeded) {
+      await oThis._fetchTwitterUser();
+
+      await oThis._fetchSecureUser();
+
+      await oThis._fetchTwitterUserExtended();
+
+      return oThis._tweetThankYouMessage();
+    }
+
+    return responseHelper.successWithData({ refreshCurrentUser: false });
   }
 
   /**
@@ -215,6 +242,151 @@ class SayThankYou extends ServiceBase {
     await notificationJobEnqueue.enqueue(notificationJobConstants.contributionThanks, {
       userNotification: oThis.userNotificationObj,
       text: oThis.text
+    });
+  }
+
+  /**
+   * Fetch Twitter User Obj if present.
+   *
+   * @sets oThis.twitterUserObj
+   *
+   * @return {Promise<Result>}
+   * @private
+   */
+  async _fetchTwitterUser() {
+    const oThis = this;
+
+    logger.log('Start::Fetch Twitter User');
+
+    const twitterUserCacheRsp = await new TwitterUserByUserIdsCache({
+      userIds: [oThis.currentUserId]
+    }).fetch();
+
+    if (twitterUserCacheRsp.isFailure()) {
+      return Promise.reject(twitterUserCacheRsp);
+    }
+
+    oThis.twitterUserObj = twitterUserCacheRsp.data[oThis.currentUserId];
+
+    logger.log('End::Fetch Twitter User');
+    return responseHelper.successWithData({});
+  }
+
+  /**
+   * Fetch Secure User Obj.
+   *
+   * @sets oThis.decryptedEncryptionSalt, oThis.encryptedSaltLc
+   *
+   * @return {Promise<Result>}
+   *
+   * @private
+   */
+  async _fetchSecureUser() {
+    const oThis = this;
+
+    logger.log('Start::Fetching Secure User for Say Thank you');
+
+    const secureUserRes = await new SecureUserCache({ id: oThis.currentUserId }).fetch();
+
+    if (secureUserRes.isFailure()) {
+      return Promise.reject(secureUserRes);
+    }
+
+    let secureUserObj = secureUserRes.data;
+
+    if (secureUserObj.status !== userConstants.activeStatus) {
+      return Promise.reject(
+        responseHelper.paramValidationError({
+          internal_error_identifier: 's_t_c_fsu_1',
+          api_error_identifier: 'invalid_api_params',
+          params_error_identifiers: ['user_not_active'],
+          debug_options: {}
+        })
+      );
+    }
+
+    oThis.decryptedEncryptionSalt = localCipher.decrypt(coreConstants.CACHE_SHA_KEY, secureUserObj.encryptionSaltLc);
+
+    logger.log('End::Fetching Secure User for Say Thank you');
+
+    return responseHelper.successWithData({});
+  }
+
+  /**
+   * Fetch Twitter User Extended Obj if present.
+   *
+   * @sets oThis.twitterUserExtendedObj, oThis.secret
+   *
+   * @return {Promise<Result>}
+   * @private
+   */
+  async _fetchTwitterUserExtended() {
+    const oThis = this;
+
+    const secureTwitterUserExtendedRes = await new SecureTwitterUserExtendedByTwitterUserIdCache({
+      twitterUserId: oThis.twitterUserObj.id
+    }).fetch();
+
+    if (secureTwitterUserExtendedRes.isFailure()) {
+      return Promise.reject(secureTwitterUserExtendedRes);
+    }
+
+    oThis.twitterUserExtendedObj = secureTwitterUserExtendedRes.data;
+
+    oThis.secret = localCipher.decrypt(coreConstants.CACHE_SHA_KEY, oThis.twitterUserExtendedObj.secretLc);
+  }
+
+  /**
+   * Tweet thank you message.
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _tweetThankYouMessage() {
+    const oThis = this;
+
+    let tweetMessage = new TweetMessage({});
+
+    let tweetRsp = await tweetMessage.tweet({
+      tweetText: oThis.text,
+      oAuthToken: oThis.twitterUserExtendedObj.token,
+      oAuthTokenSecret: oThis.secret
+    });
+
+    if (tweetRsp.isFailure()) {
+      return oThis._invalidateTwitterCredentials();
+    }
+
+    return responseHelper.successWithData({ refreshCurrentUser: false });
+  }
+
+  /**
+   * Invalidate twitter credentials
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _invalidateTwitterCredentials() {
+    const oThis = this;
+
+    logger.log('Start::Update Twitter User Extended for say thank you', oThis.twitterUserObj);
+
+    await new TwitterUserExtendedModel()
+      .update({
+        status: twitterUserExtendedConstants.invertedStatuses[twitterUserExtendedConstants.expiredStatus]
+      })
+      .where({ id: oThis.twitterUserExtendedObj.id })
+      .fire();
+
+    await TwitterUserExtendedModel.flushCache({
+      id: oThis.twitterUserExtendedObj.id,
+      twitterUserId: oThis.twitterUserObj.id
+    });
+
+    logger.log('End::Update Twitter User Extended for say thank you', oThis.twitterUserObj);
+
+    return responseHelper.successWithData({
+      refreshCurrentUser: true
     });
   }
 }

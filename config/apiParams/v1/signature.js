@@ -240,7 +240,7 @@ const v1Signature = {
     ],
     optional: [
       {
-        parameter: 'invite',
+        parameter: 'invite_code',
         validatorMethods: ['validateNonBlankString']
       }
     ]
@@ -511,6 +511,10 @@ const v1Signature = {
       {
         parameter: 'text',
         validatorMethods: ['validateString']
+      },
+      {
+        parameter: 'tweet_needed',
+        validatorMethods: ['validateInteger']
       }
     ]
   },
@@ -615,7 +619,15 @@ const v1Signature = {
   [apiName.resetBadge]: {
     mandatory: [
       {
-        parameter: 'user_id',
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      }
+    ]
+  },
+  [apiName.share]: {
+    mandatory: [
+      {
+        parameter: 'video_id',
         validatorMethods: ['validateNonZeroInteger']
       },
       {
@@ -623,6 +635,35 @@ const v1Signature = {
         validatorMethods: ['validateNonEmptyObject']
       }
     ]
+  },
+  [apiName.fetchGoto]: {
+    mandatory: [
+      {
+        parameter: 'url',
+        validatorMethods: ['validateGenericUrl']
+      }
+    ]
+  },
+  [apiName.refreshTwitterConnect]: {
+    mandatory: [
+      {
+        parameter: 'token',
+        validatorMethods: ['validateNonBlankString']
+      },
+      {
+        parameter: 'secret',
+        validatorMethods: ['validateNonBlankString']
+      },
+      {
+        parameter: 'twitter_id',
+        validatorMethods: ['validateNonBlankString']
+      },
+      {
+        parameter: 'handle',
+        validatorMethods: ['validateNonBlankString']
+      }
+    ],
+    optional: []
   }
 };
 

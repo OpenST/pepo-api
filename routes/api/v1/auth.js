@@ -30,16 +30,27 @@ router.post('/twitter-login', sanitizer.sanitizeDynamicUrlParams, function(req, 
   req.decodedParams.apiName = apiName.twitterLogin;
 
   const onServiceSuccess = async function(serviceResponse) {
-    cookieHelper.setLoginCookie(res, serviceResponse.data.userLoginCookieValue);
-
-    const wrapperFormatterRsp = await new FormatterComposer({
-      resultType: responseEntityKey.loggedInUser,
-      entityKindToResponseKeyMap: {
-        [entityType.loggedInUser]: responseEntityKey.loggedInUser,
-        [entityType.usersMap]: responseEntityKey.users
-      },
-      serviceData: serviceResponse.data
-    }).perform();
+    let formatterParams = {};
+    if (serviceResponse.data.overwrittenFailure) {
+      formatterParams = {
+        resultType: responseEntityKey.goto,
+        entityKindToResponseKeyMap: {
+          [entityType.goto]: responseEntityKey.goto
+        },
+        serviceData: serviceResponse.data
+      };
+    } else {
+      cookieHelper.setLoginCookie(res, serviceResponse.data.userLoginCookieValue);
+      formatterParams = {
+        resultType: responseEntityKey.loggedInUser,
+        entityKindToResponseKeyMap: {
+          [entityType.loggedInUser]: responseEntityKey.loggedInUser,
+          [entityType.usersMap]: responseEntityKey.users
+        },
+        serviceData: serviceResponse.data
+      };
+    }
+    const wrapperFormatterRsp = await new FormatterComposer(formatterParams).perform();
 
     serviceResponse.data = wrapperFormatterRsp.data;
   };
@@ -67,5 +78,11 @@ router.post(
     Promise.resolve(routeHelper.perform(req, res, next, '/twitter/Disconnect', 'r_a_v1_a_4', null));
   }
 );
+
+router.post('/refresh-twitter-connect', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.refreshTwitterConnect;
+
+  Promise.resolve(routeHelper.perform(req, res, next, '/twitter/RefreshConnect', 'r_a_v1_a_5', null));
+});
 
 module.exports = router;
