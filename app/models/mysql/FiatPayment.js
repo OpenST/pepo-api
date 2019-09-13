@@ -21,6 +21,7 @@ class FiatPayment extends ModelBase {
    *
    * @param {object} dbRow
    * @param {number} dbRow.id
+   * @param {string} dbRow.receipt_id
    * @param {object} dbRow.raw_receipt
    * @param {string/number} dbRow.from_user_id
    * @param {string/number} dbRow.to_user_id

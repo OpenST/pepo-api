@@ -635,7 +635,12 @@ const v1Signature = {
         validatorMethods: ['validateNonZeroInteger']
       }
     ],
-    optional: []
+    optional: [
+      {
+        parameter: 'transaction_id',
+        validatorMethods: ['validateString']
+      }
+    ]
   },
   [apiName.resetBadge]: {
     mandatory: [

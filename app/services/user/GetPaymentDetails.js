@@ -21,6 +21,7 @@ class GetPaymentDetails extends ServiceBase {
    * @param {object} params
    * @param {Integer} [params.payment_id]
    * @param {Object} [params.current_user]  - current user
+   * @param {string} [params.transaction_id]  - transaction id of apple or google.
    *
    */
   constructor(params) {
@@ -29,6 +30,7 @@ class GetPaymentDetails extends ServiceBase {
     const oThis = this;
     oThis.paymentId = params.payment_id;
     oThis.currentUserId = params.current_user.id;
+    oThis.gatewayReceiptId = params.transaction_id;
 
     oThis.paymentDetails = null;
     oThis.transactionsMap = {};
@@ -45,17 +47,21 @@ class GetPaymentDetails extends ServiceBase {
 
     await oThis._fetchPaymentDetail();
 
-    if (oThis.paymentDetails.fromUserId !== oThis.currentUserId) {
-      return responseHelper.paramValidationError({
-        internal_error_identifier: 'a_s_u_gpd_1',
-        api_error_identifier: 'resource_not_found',
-        params_error_identifiers: ['invalid_user_id'],
-        debug_options: {
-          userId: oThis.paymentDetails.fromUserId,
-          currentUserId: oThis.currentUserId,
-          paymentId: oThis.paymentId
-        }
-      });
+    if (oThis.paymentDetails.receiptId != oThis.gatewayReceiptId) {
+      if (oThis.paymentDetails.fromUserId != oThis.currentUserId) {
+        return Promise.reject(
+          responseHelper.paramValidationError({
+            internal_error_identifier: 'a_s_u_gpd_1',
+            api_error_identifier: 'resource_not_found',
+            params_error_identifiers: ['invalid_user_id'],
+            debug_options: {
+              userId: oThis.paymentDetails.fromUserId,
+              currentUserId: oThis.currentUserId,
+              paymentId: oThis.paymentId
+            }
+          })
+        );
+      }
     }
 
     await oThis._fetchOstTransactions();
