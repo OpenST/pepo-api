@@ -59,8 +59,6 @@ class SuccessTransactionOstEvent extends TransactionOstEventBase {
       }
     }
 
-    await oThis._checkIfPushNotificationRequired();
-
     logger.log('Transaction Obj after receiving webhook: ', oThis.transactionObj);
 
     return Promise.resolve(responseHelper.successWithData({}));
@@ -163,6 +161,7 @@ class SuccessTransactionOstEvent extends TransactionOstEventBase {
   async _checkIfPushNotificationRequired() {
     const oThis = this;
 
+    //TODO:: Do ot check user devices here. Already validated in job
     logger.log('oThis.isPaperPlane =========', oThis.isPaperPlane);
 
     if (oThis.isPaperPlane) {
@@ -221,6 +220,8 @@ class SuccessTransactionOstEvent extends TransactionOstEventBase {
         })
       );
     }
+
+    promisesArray.push(oThis._checkIfPushNotificationRequired());
 
     await Promise.all(promisesArray);
   }

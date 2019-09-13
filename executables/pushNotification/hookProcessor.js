@@ -226,8 +226,12 @@ class HookProcessor extends CronBase {
       let response = userDeviceIdToResponseMap[userDeviceId];
       if (response.success == false) {
         switch (response.error.code) {
+          case notificationHookConstants.tokenNotRegisteredErrorCode:
           case notificationHookConstants.unregisteredErrorCode:
-            logger.error('Error::unregisteredErrorCode----------------------------', response.error.code);
+            logger.error(
+              'Error:: tokenNotRegisteredErrorCode/unregisteredErrorCode ---------------',
+              response.error.code
+            );
             await new UserDeviceModel()
               .update({ status: userDeviceConstants.invertedStatuses[userDeviceConstants.expiredStatus] })
               .where({
@@ -247,10 +251,6 @@ class HookProcessor extends CronBase {
 
           case notificationHookConstants.invalidArgumentErrorCode:
             logger.error('Error::invalidArgumentErrorCode----------------------------', response.error.code);
-            break;
-
-          case notificationHookConstants.tokenNotRegisteredErrorCode:
-            logger.error('Error::tokenNotRegisteredErrorCode----------------------------', response.error.code);
             break;
 
           default:
