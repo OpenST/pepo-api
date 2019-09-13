@@ -1,5 +1,6 @@
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
+  CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   ProductsCache = require(rootPrefix + '/lib/cacheManagement/single/Products'),
   InAppProductConstants = require(rootPrefix + '/lib/globalConstant/inAppProduct'),
   LifetimePurchaseByUserIdCache = require(rootPrefix + '/lib/cacheManagement/single/LifetimePurchaseByUserId'),
@@ -42,6 +43,8 @@ class GetTopupProduct extends ServiceBase {
   async _asyncPerform() {
     const oThis = this;
 
+    await oThis._validateAndSanitize();
+
     let promiseArray = [];
 
     // Fetch products for the current price point
@@ -56,14 +59,34 @@ class GetTopupProduct extends ServiceBase {
     await Promise.all(promiseArray);
 
     let remainingLimit = oThis._calculateRemainingLimit(oThis.totalLifetimeSpends),
-      availableProducts = oThis._filterAvailableProducts(remainingLimit),
-      formattedProductsArray = oThis._formatProductsData(availableProducts),
+      availableProductsArray = oThis._filterAvailableProducts(remainingLimit),
       responseData = {
-        products: formattedProductsArray,
+        products: availableProductsArray,
         limits_data: oThis.limitsData
       };
 
     return responseHelper.successWithData(responseData);
+  }
+
+  /**
+   * Validate and sanitize.
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _validateAndSanitize() {
+    const oThis = this;
+
+    if (oThis.os !== InAppProductConstants.ios && oThis.os !== InAppProductConstants.android) {
+      return Promise.reject(
+        responseHelper.paramValidationError({
+          internal_error_identifier: 'a_s_t_gp_1',
+          api_error_identifier: 'invalid_api_params',
+          params_error_identifiers: ['invalid_os'],
+          debug_options: { os: oThis.os }
+        })
+      );
+    }
   }
 
   /**
@@ -137,8 +160,7 @@ class GetTopupProduct extends ServiceBase {
 
     let remainingLimit = InAppProductConstants.lifetimeLimit - amountSpent;
 
-    // TODO - payments - following condition can mislead, if 0 comes as a value and I think 0 will be a valid value.
-    if (oThis.customPurchaseLimitOfUser) {
+    if (!CommonValidators.isVarNullOrUndefined(oThis.customPurchaseLimitOfUser)) {
       remainingLimit = oThis.customPurchaseLimitOfUser - amountSpent;
     }
 
@@ -163,46 +185,24 @@ class GetTopupProduct extends ServiceBase {
       availableProductsArray = [];
 
     for (let index = 0; index < productsArray.length; index++) {
+      //Check if products price is less than remaining limit
       if (productsArray[index].amountInUsd <= remainingLimit) {
-        availableProductsArray.push(productsArray[index]);
+        if (oThis.os === InAppProductConstants.ios) {
+          //If the os is ios, products with apple product id are only filtered.
+          if (productsArray[index].appleProductId) {
+            productsArray[index].id = productsArray[index].appleProductId;
+            availableProductsArray.push(productsArray[index]);
+          }
+        } else if (oThis.os === InAppProductConstants.android) {
+          //If the os is android, products with google product id are only filtered.
+          if (productsArray[index].googleProductId) {
+            productsArray[index].id = productsArray[index].googleProductId;
+            availableProductsArray.push(productsArray[index]);
+          }
+        }
       }
     }
-
     return availableProductsArray;
-  }
-
-  /**
-   * Format products array as expected by FE.
-   *
-   * @param productsArray
-   * @returns {[]}
-   * @private
-   */
-  _formatProductsData(productsArray) {
-    // TODO - payments - following formatting should be moved to formatter.
-    const oThis = this,
-      formattedProductsArray = [];
-
-    for (let i = 0; i < productsArray.length; i++) {
-      let formattedProductData = {};
-      if (oThis.os === InAppProductConstants.ios) {
-        if (!productsArray[i].appleProductId) {
-          continue;
-        }
-        formattedProductData.id = productsArray[i].appleProductId;
-      } else {
-        if (!productsArray[i].googleProductId) {
-          continue;
-        }
-        formattedProductData.id = productsArray[i].googleProductId;
-      }
-      formattedProductData.amount_in_usd = productsArray[i].amountInUsd;
-      formattedProductData.amount_in_pepo = productsArray[i].amountInPepo;
-      formattedProductData.uts = productsArray[i].updatedAt;
-      formattedProductsArray.push(formattedProductData);
-    }
-
-    return formattedProductsArray;
   }
 }
 

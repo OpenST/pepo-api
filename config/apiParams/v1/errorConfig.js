@@ -189,6 +189,11 @@ const v1ErrorConfig = {
     parameter: 'topup_id',
     code: 'invalid',
     message: 'Invalid topup id.'
+  },
+  invalid_os: {
+    parameter: 'os',
+    code: 'invalid',
+    message: 'Invalid os.'
   }
 };
 
