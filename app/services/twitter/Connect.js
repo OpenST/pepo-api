@@ -52,6 +52,7 @@ class TwitterConnect extends ServiceBase {
     oThis.twitterUserObj = null;
     oThis.serviceResp = null;
     oThis.inviterCodeObj = null;
+    oThis.prelaunchInviteObj = null;
     oThis.couldNotProceed = false;
   }
 
@@ -164,14 +165,14 @@ class TwitterConnect extends ServiceBase {
     logger.log('Start::Validate User signup allowed');
 
     let resp = await oThis._fetchPreLaunchInvite();
-    const preLaunchInviteObj = resp.data.preLaunchInviteObj;
+    oThis.prelaunchInviteObj = resp.data.preLaunchInviteObj;
 
     // If invite code is required, then check its validity
-    if (oThis._hasPrelaunchInvitedAccess(preLaunchInviteObj)) {
+    if (oThis._hasPrelaunchInvitedAccess()) {
       // If twitter account belongs to prelaunch invite, then use that inviter code if any
-      if (preLaunchInviteObj.inviterCodeId) {
+      if (oThis.prelaunchInviteObj.inviterCodeId) {
         // TODO: Replace this with cache built by Tejas
-        oThis.inviterCodeObj = await new InviteCodeModel().fetchById(preLaunchInviteObj.inviterCodeId);
+        oThis.inviterCodeObj = await new InviteCodeModel().fetchById(oThis.prelaunchInviteObj.inviterCodeId);
       } else {
         // Fetch inviter code object
         await oThis._fetchInviteCodeObject();
@@ -222,21 +223,22 @@ class TwitterConnect extends ServiceBase {
   /**
    * If twitter user has pre-launch invited access
    *
-   * @param preLaunchInviteObj
    * @returns {boolean}
    * @private
    */
-  _hasPrelaunchInvitedAccess(preLaunchInviteObj) {
+  _hasPrelaunchInvitedAccess() {
+    const oThis = this;
+
     let hasPrelaunchAccess = false;
 
     // If twitter account belongs to prelaunch invite
-    if (preLaunchInviteObj) {
+    if (oThis.prelaunchInviteObj) {
       // If prelaunch invite has been whitelisted by admin
       // OR
       // User has already accepted prelaunch invite of some other user
       if (
-        preLaunchInviteObj.adminStatus == preLaunchInviteConstants.whitelistedStatus ||
-        preLaunchInviteObj.inviterCodeId
+        oThis.prelaunchInviteObj.adminStatus == preLaunchInviteConstants.whitelistedStatus ||
+        oThis.prelaunchInviteObj.inviterCodeId
       ) {
         hasPrelaunchAccess = true;
       }
@@ -402,6 +404,7 @@ class TwitterConnect extends ServiceBase {
       if (oThis.inviterCodeObj) {
         requestParams.inviterCodeId = oThis.inviterCodeObj.id;
       }
+      requestParams.prelaunchInviteObj = oThis.prelaunchInviteObj;
       oThis.serviceResp = await new SignupTwitterClass(requestParams).perform();
     } else {
       logger.log('Twitter::Connect login');
@@ -459,6 +462,15 @@ class TwitterConnect extends ServiceBase {
             }
           }
         });
+      }
+    } else {
+      response.data[entityType.goto] = {};
+      if (response.data.openEmailAddFlow) {
+        // Notify app about email add flow
+        response.data[entityType.goto] = {
+          pn: pageNameConstants.AddEmailScreen,
+          v: {}
+        };
       }
     }
 
