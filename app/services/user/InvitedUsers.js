@@ -3,6 +3,7 @@ const rootPrefix = '../../..',
   UserCache = require(rootPrefix + '/lib/cacheManagement/multi/User'),
   InviteCodeModel = require(rootPrefix + ' /app/models/mysql/InviteCode'),
   InviteCodeByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/InviteCodeByUserIds'),
+  TokenUserDetailByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TokenUserByUserIds'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
   paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination');
@@ -38,6 +39,7 @@ class InvitedUsers extends ServiceBase {
     oThis.inviterCodeId = null;
     oThis.userIds = [];
     oThis.userDetails = {};
+    oThis.tokenUsersByUserIdMap = {};
     oThis.paginationId = null;
     oThis.nextPaginationId = null;
   }
@@ -57,7 +59,9 @@ class InvitedUsers extends ServiceBase {
 
     await oThis._searchInvitedUsers();
 
-    await oThis._fetchUserDetails();
+    const promisesArray = [oThis._fetchUserDetails(), oThis._fetchTokenUsers()];
+
+    await Promise.all(promisesArray);
 
     oThis._addResponseMetaData();
 
@@ -152,6 +156,25 @@ class InvitedUsers extends ServiceBase {
   }
 
   /**
+   * Fetch token users.
+   *
+   * @sets oThis.tokenUsersByUserIdMap
+   *
+   * @return {Promise<void>}
+   * @private
+   */
+  async _fetchTokenUsers() {
+    const oThis = this;
+
+    const tokenUsersResponse = await new TokenUserDetailByUserIdsCache({ userIds: oThis.userIds }).fetch();
+    if (tokenUsersResponse.isFailure()) {
+      return Promise.reject(tokenUsersResponse);
+    }
+
+    oThis.tokenUsersByUserIdMap = tokenUsersResponse.data;
+  }
+
+  /**
    * Add next page meta data.
    *
    * @sets oThis.responseMetaData
@@ -186,6 +209,7 @@ class InvitedUsers extends ServiceBase {
     const response = {
       [entityType.invitedUsersSearchList]: oThis.userIds,
       usersByIdMap: oThis.userDetails,
+      tokenUsersByUserIdMap: oThis.tokenUsersByUserIdMap,
       meta: oThis.responseMetaData
     };
 
