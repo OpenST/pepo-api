@@ -3,6 +3,7 @@ const uuidV4 = require('uuid/v4');
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   VideoByIdCache = require(rootPrefix + '/lib/cacheManagement/multi/VideoByIds'),
+  shareEntityConstants = require(rootPrefix + '/lib/globalConstant/shareEntity'),
   coreConstants = require(rootPrefix + '/config/coreConstants'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
@@ -23,6 +24,9 @@ class ShareDetails extends ServiceBase {
 
     oThis.videoId = params.video_id;
     oThis.currentUser = params.current_user;
+
+    oThis.videoLink = null;
+    oThis.shareMessage = null;
   }
 
   /**
@@ -34,13 +38,49 @@ class ShareDetails extends ServiceBase {
   async _asyncPerform() {
     const oThis = this;
 
+    await oThis._fetchVideo();
+
     oThis._createMessage();
 
     return oThis._prepareResponse();
   }
 
+  /**
+   * Fetch video.
+   *
+   * @returns {Promise<never>}
+   * @private
+   */
+  async _fetchVideo() {
+    const oThis = this;
+
+    const cacheRsp = await new VideoByIdCache({ ids: [oThis.videoId] }).fetch();
+
+    if (cacheRsp.isFailure()) {
+      return Promise.reject(cacheRsp);
+    }
+
+    let videoData = cacheRsp.data[oThis.videoId];
+
+    oThis.videoLink = videoData.resolutions.original.url;
+  }
+
+  /**
+   * Create Message.
+   *
+   * @private
+   */
   _createMessage() {
     const oThis = this;
+
+    let messagePrefix = 'Checkout this video ',
+      messageSuffix = ' via @thepepoapp';
+
+    if (oThis.currentUser) {
+      messagePrefix = 'Checkout my video ';
+    }
+
+    oThis.shareMessage = messagePrefix + oThis.videoLink + messageSuffix;
   }
 
   /**
@@ -52,17 +92,20 @@ class ShareDetails extends ServiceBase {
   async _prepareResponse() {
     const oThis = this;
 
-    let videoUrl = urlDomain + '/video/1006';
+    let fetchGotoUrl = urlDomain + '/' + shareEntityConstants.videoShareKind + '/' + oThis.videoId;
+
+    console.log('fetchGotoUrl------', fetchGotoUrl);
+    console.log('oThis.shareMessage-----', oThis.shareMessage);
 
     return responseHelper.successWithData({
       [entityType.share]: {
         id: uuidV4(),
-        uts: Math.round(new Date() / 1000),
-        url: videoUrl,
-        kind: 'VIDEO',
-        message: 'DUMMY_MESSAGE',
-        title: 'DUMMY_TITLE',
-        subject: 'DUMMY_SUBJECT'
+        kind: shareEntityConstants.videoShareKind,
+        url: fetchGotoUrl,
+        message: oThis.shareMessage,
+        // title: 'DUMMY_TITLE', //optional
+        // subject: 'DUMMY_SUBJECT', //optional
+        uts: Math.round(new Date() / 1000)
       }
     });
   }
