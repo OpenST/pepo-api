@@ -4,12 +4,17 @@ const rootPrefix = '../..',
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   userDeviceConstants = require(rootPrefix + '/lib/globalConstant/userDevice');
 
+/**
+ * Class for logout service.
+ *
+ * @class Logout
+ */
 class Logout extends ServiceBase {
   /**
-   * Constructor for Logout service.
+   * Constructor for logout service.
    *
    * @param {object} params
-   * @param {object} params.current_user
+   * @param {object} [params.current_user]
    * @param {object} [params.device_id]
    *
    * @augments ServiceBase
@@ -17,15 +22,16 @@ class Logout extends ServiceBase {
    * @constructor
    */
   constructor(params) {
-    super(params);
+    super();
 
     const oThis = this;
-    oThis.currentUserId = params.current_user.id;
+
+    oThis.currentUser = params.current_user;
     oThis.deviceId = params.device_id;
   }
 
   /**
-   * Perform: Perform user creation.
+   * Async perform.
    *
    * @return {Promise<void>}
    */
@@ -44,24 +50,30 @@ class Logout extends ServiceBase {
   async _logoutUserDevices() {
     const oThis = this;
 
-    if (!oThis.deviceId) {
+    if (!oThis.deviceId || !oThis.currentUser || !oThis.currentUser.id) {
       return responseHelper.successWithData({});
     }
 
     const userDeviceIdResp = await new UserDeviceModel()
-        .select('id')
-        .where({
-          user_id: oThis.currentUserId,
-          device_id: oThis.deviceId
-        })
-        .fire(),
+      .select('id')
+      .where({
+        user_id: oThis.currentUser.id,
+        device_id: oThis.deviceId
+      })
+      .fire();
+
+    let userDeviceId = null;
+
+    if (userDeviceIdResp[0] && userDeviceIdResp[0].id) {
       userDeviceId = userDeviceIdResp[0].id;
+    } else {
+      return responseHelper.successWithData({});
+    }
 
     await new UserDeviceModel()
       .update({ status: userDeviceConstants.invertedStatuses[userDeviceConstants.logoutStatus] })
       .where({
-        user_id: oThis.currentUserId,
-        device_id: oThis.deviceId
+        id: userDeviceId
       })
       .fire();
 

@@ -80,25 +80,29 @@ class UserNotificationCountModel extends CassandraModelBase {
     const query =
       'UPDATE ' +
       oThis.queryTableName +
-      ' SET unread_notification_count = unread_notification_count + 1 where user_id = ?;';
+      ' SET unread_notification_count = unread_notification_count + 1 WHERE user_id = ?;';
     const params = [queryParams.userId];
 
     return oThis.fire(query, params);
   }
 
   /**
-   * reset user notification count for user_id.
+   * reset(delete) user notification count for user_id.
    *
    * @param {object} queryParams
    * @param {string/number} queryParams.userId
+   * @param {string/number} queryParams.count
    *
    * @returns {Promise<any>}
    */
   async resetUnreadNotificationCount(queryParams) {
     const oThis = this;
 
-    const query = 'UPDATE ' + oThis.queryTableName + ' SET unread_notification_count = 0 where user_id = ?;';
-    const params = [queryParams.userId];
+    const query =
+      'UPDATE ' +
+      oThis.queryTableName +
+      ' SET unread_notification_count = unread_notification_count - ? WHERE user_id = ?;';
+    const params = [queryParams.count, queryParams.userId];
 
     return oThis.fire(query, params);
   }
@@ -107,7 +111,7 @@ class UserNotificationCountModel extends CassandraModelBase {
    * Fetch unread notification count.
    *
    * @param queryParams
-   * @param {string/number} queryParams.userIds
+   * @param {Array} queryParams.userIds
    *
    * @returns {*}
    */
@@ -115,20 +119,19 @@ class UserNotificationCountModel extends CassandraModelBase {
     const oThis = this,
       userIds = queryParams.userIds;
 
-    const query = `select unread_notification_count from ${oThis.queryTableName} where user_id IN ?;`;
+    const query = `SELECT user_id, unread_notification_count FROM ${oThis.queryTableName} WHERE user_id IN ?;`;
     const params = [userIds];
 
-    const queryRsp = await oThis.fire(query, params);
+    const queryRsp = await oThis.fire(query, params),
+      response = {};
 
-    let response = {},
-      stringifiedRsp = JSON.parse(JSON.stringify(queryRsp.rows));
-
-    if (stringifiedRsp.length === 0) {
-      return response;
+    if (queryRsp.rows.length === 0) {
+      return {};
     }
 
-    for (let i = 0; i < stringifiedRsp.length; i++) {
-      response[userIds[i]] = stringifiedRsp[i].unread_notification_count;
+    for (let i = 0; i < queryRsp.rows.length; i++) {
+      let formattedData = oThis.formatDbData(queryRsp.rows[i]);
+      response[formattedData.userId] = formattedData.unreadNotificationCount;
     }
 
     return response;

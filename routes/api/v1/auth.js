@@ -15,12 +15,12 @@ const rootPrefix = '../../..',
   cookieHelper = require(rootPrefix + '/lib/cookieHelper');
 
 /* Logout user*/
-router.post('/logout', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+router.post('/logout', cookieHelper.validateUserCookieWithoutError, sanitizer.sanitizeDynamicUrlParams, function(
+  req,
+  res,
+  next
+) {
   req.decodedParams.apiName = apiName.logout;
-
-  const errorConfig = basicHelper.fetchErrorConfig(req.decodedParams.apiVersion);
-
-  cookieHelper.deleteLoginCookie(res);
 
   Promise.resolve(routeHelper.perform(req, res, next, '/Logout', 'r_a_v1_a_2', null));
 });
@@ -54,12 +54,18 @@ router.post('/twitter-login', sanitizer.sanitizeDynamicUrlParams, function(req, 
 });
 
 /* Twitter Disconnect */
-router.post('/twitter-disconnect', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
-  req.decodedParams.apiName = apiName.twitterDisconnect;
+router.post(
+  '/twitter-disconnect',
+  cookieHelper.validateUserLoginCookieIfPresent,
+  cookieHelper.validateUserLoginRequired,
+  sanitizer.sanitizeDynamicUrlParams,
+  function(req, res, next) {
+    req.decodedParams.apiName = apiName.twitterDisconnect;
 
-  cookieHelper.deleteLoginCookie(res);
+    cookieHelper.deleteLoginCookie(res);
 
-  Promise.resolve(routeHelper.perform(req, res, next, '/twitter/Disconnect', 'r_a_v1_a_4', null));
-});
+    Promise.resolve(routeHelper.perform(req, res, next, '/twitter/Disconnect', 'r_a_v1_a_4', null));
+  }
+);
 
 module.exports = router;

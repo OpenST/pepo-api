@@ -35,6 +35,7 @@ class UserStat extends ModelBase {
    * @param {number} dbRow.total_contributed_by
    * @param {number} dbRow.total_contributed_to
    * @param {number} dbRow.total_amount_raised
+   * @param {number} dbRow.total_amount_spent
    * @param {number} dbRow.created_at
    * @param {number} dbRow.updated_at
    *
@@ -49,6 +50,7 @@ class UserStat extends ModelBase {
       totalContributedBy: dbRow.total_contributed_by,
       totalContributedTo: dbRow.total_contributed_to,
       totalAmountRaised: dbRow.total_amount_raised,
+      totalAmountSpent: dbRow.total_amount_spent,
       createdAt: dbRow.created_at,
       updatedAt: dbRow.updated_at
     };
@@ -62,7 +64,16 @@ class UserStat extends ModelBase {
    * @returns {array}
    */
   safeFormattedColumnNames() {
-    return ['id', 'userId', 'totalContributedTo', 'totalContributedBy', 'totalAmountRaised', 'createdAt', 'updatedAt'];
+    return [
+      'id',
+      'userId',
+      'totalContributedTo',
+      'totalContributedBy',
+      'totalAmountRaised',
+      'totalAmountSpent',
+      'createdAt',
+      'updatedAt'
+    ];
   }
 
   /**
@@ -115,8 +126,12 @@ class UserStat extends ModelBase {
 
     return oThis
       .update([
-        'total_amount_raised = total_amount_raised + ?, total_contributed_by = total_contributed_by + ?, total_contributed_to = total_contributed_to + ?',
+        'total_amount_raised = total_amount_raised + ?, ' +
+          'total_amount_spent = total_amount_spent + ?, ' +
+          'total_contributed_by = total_contributed_by + ?, ' +
+          'total_contributed_to = total_contributed_to + ?',
         params.totalAmountRaised,
+        params.totalAmountSpent,
         params.totalContributedBy,
         params.totalContributedTo
       ])
@@ -132,6 +147,7 @@ class UserStat extends ModelBase {
    * @param {number} params.totalContributedBy
    * @param {number} params.totalContributedTo
    * @param {number} params.totalAmountRaised
+   * @param {number} params.totalAmountSpent
    *
    * @returns {Promise<void>}
    */
@@ -143,7 +159,8 @@ class UserStat extends ModelBase {
         user_id: params.userId,
         total_contributed_by: params.totalContributedBy,
         total_contributed_to: params.totalContributedTo,
-        total_amount_raised: params.totalAmountRaised
+        total_amount_raised: params.totalAmountRaised,
+        total_amount_spent: params.totalAmountSpent
       })
       .fire();
   }

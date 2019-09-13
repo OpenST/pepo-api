@@ -5,18 +5,18 @@ const rootPrefix = '../..',
   util = require(rootPrefix + '/lib/util'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   webPageConstants = require(rootPrefix + '/lib/globalConstant/webPage'),
-  temporaryTokenConstant = require(rootPrefix + '/lib/globalConstant/temporaryToken'),
-  preLaunchInviteConstant = require(rootPrefix + '/lib/globalConstant/preLaunchInvite'),
+  temporaryTokenConstants = require(rootPrefix + '/lib/globalConstant/temporaryToken'),
+  preLaunchInviteConstants = require(rootPrefix + '/lib/globalConstant/preLaunchInvite'),
   emailServiceApiCallHookConstants = require(rootPrefix + '/lib/globalConstant/emailServiceApiCallHook');
 
 /**
- * Class to send double opt in token for pre launch.
+ * Class to send double opt in email.
  *
  * @class SendDoubleOptIn
  */
 class SendDoubleOptIn extends ServiceBase {
   /**
-   * Constructor to send double opt in token for pre launch.
+   * Constructor to send double opt in email.
    *
    * @param {object} params
    * @param {object} params.pre_launch_invite_obj
@@ -38,12 +38,13 @@ class SendDoubleOptIn extends ServiceBase {
   /**
    * Async perform.
    *
-   * @return {Promise<void>}
+   * @returns {Promise<void>}
+   * @private
    */
   async _asyncPerform() {
     const oThis = this;
 
-    if (oThis.preLaunchInviteObj.status === preLaunchInviteConstant.doptinStatus) {
+    if (oThis.preLaunchInviteObj.status === preLaunchInviteConstants.doptinStatus) {
       return responseHelper.successWithData({});
     }
 
@@ -66,11 +67,11 @@ class SendDoubleOptIn extends ServiceBase {
     const oThis = this;
 
     await new TemporaryTokenModel()
-      .update({ status: temporaryTokenConstant.invertedStatuses[temporaryTokenConstant.inActiveStatus] })
+      .update({ status: temporaryTokenConstants.invertedStatuses[temporaryTokenConstants.inActiveStatus] })
       .where({
         entity_id: oThis.preLaunchInviteObj.id,
-        kind: temporaryTokenConstant.invertedKinds[temporaryTokenConstant.preLaunchInviteKind],
-        status: temporaryTokenConstant.invertedStatuses[temporaryTokenConstant.activeStatus]
+        kind: temporaryTokenConstants.invertedKinds[temporaryTokenConstants.preLaunchInviteKind],
+        status: temporaryTokenConstants.invertedStatuses[temporaryTokenConstants.activeStatus]
       })
       .fire();
 
@@ -81,15 +82,13 @@ class SendDoubleOptIn extends ServiceBase {
 
     oThis.doubleOptInToken = await new TemporaryTokenModel().createDoubleOptInToken({
       entityId: oThis.preLaunchInviteObj.id,
-      kind: temporaryTokenConstant.preLaunchInviteKind,
+      kind: temporaryTokenConstants.preLaunchInviteKind,
       token: temporaryDoubleOptInToken
     });
   }
 
   /**
    * Send pre launch invite double opt in mail.
-   *
-   * @sets oThis.workingMap
    *
    * @returns {Promise<void>}
    * @private

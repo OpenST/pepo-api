@@ -8,6 +8,8 @@ const rootPrefix = '../../..',
 // Declare variables names.
 const dbName = databaseConstants.adminDbName;
 
+//todo: admin cache should be multi cache
+
 /**
  * Class for admin model.
  *

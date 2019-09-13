@@ -272,29 +272,30 @@ class UserModel extends ModelBase {
   }
 
   /**
-   * User search
+   * User search.
    *
-   * @param {integer} params.limit: limit
-   * @param {integer} params.query: query
-   * @param {integer} params.paginationTimestamp: pagination time stamp
+   * @param {number} params.limit: limit
+   * @param {string} params.query: query
+   * @param {number} params.paginationTimestamp: pagination time stamp
    * @param {boolean} params.fetchAll: flag to fetch all users, active or inactive
+   * @param {boolean} params.isOnlyNameSearch
    *
    * @return {Promise}
    */
   async search(params) {
     const oThis = this;
 
-    let limit = params.limit,
+    const limit = params.limit,
       query = params.query,
       paginationTimestamp = params.paginationTimestamp,
       isOnlyNameSearch = params.isOnlyNameSearch;
 
     const queryObject = oThis
-      .select('*')
+      .select('id, user_name, name, properties, status, profile_image_id, created_at, updated_at')
       .limit(limit)
       .order_by('id desc');
 
-    let queryWithWildCards = '%' + query + '%';
+    const queryWithWildCards = '%' + query + '%';
 
     if (!params.fetchAll) {
       queryObject.where({ status: userConstants.invertedStatuses[userConstants.activeStatus] });
@@ -312,13 +313,13 @@ class UserModel extends ModelBase {
       queryObject.where(['created_at < ?', paginationTimestamp]);
     }
 
-    let dbRows = await queryObject.fire();
+    const dbRows = await queryObject.fire();
 
-    let userDetails = {};
-    let userIds = [];
+    const userDetails = {};
+    const userIds = [];
 
     for (let ind = 0; ind < dbRows.length; ind++) {
-      let formattedRow = oThis.formatDbData(dbRows[ind]);
+      const formattedRow = oThis.formatDbData(dbRows[ind]);
       userIds.push(formattedRow.id);
       userDetails[dbRows[ind].id] = formattedRow;
     }
@@ -377,9 +378,10 @@ class UserModel extends ModelBase {
   }
 
   /**
-   * Is user an approved creator
+   * Is user an approved creator?
    *
-   * @param userObj
+   * @param {object} userObj
+   *
    * @returns {boolean}
    */
   static isUserApprovedCreator(userObj) {

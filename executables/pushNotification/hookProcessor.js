@@ -1,11 +1,11 @@
 /**
  * This class is to process push notification hooks.
  *
- * @module executables/hookProcessors/pushNotification
+ * @module executables/pushNotification/hookProcessor
  */
 const program = require('commander');
 
-const rootPrefix = '..',
+const rootPrefix = '../..',
   CronBase = require(rootPrefix + '/executables/CronBase'),
   NotificationHookModel = require(rootPrefix + '/app/models/mysql/NotificationHook'),
   PushNotificationProcessor = require(rootPrefix + '/lib/pushNotification/Processor'),
@@ -25,7 +25,7 @@ program.on('--help', function() {
   logger.log('');
   logger.log('  Example:');
   logger.log('');
-  logger.log('    node executables/pushNotification.js --cronProcessId 7');
+  logger.log('    node executables/pushNotification/hookProcessor.js --cronProcessId 7');
   logger.log('');
   logger.log('');
 });
@@ -38,11 +38,11 @@ if (!cronProcessId) {
 }
 
 /**
- * Class for PushNotification
+ * Class for HookProcessor
  *
  * @class
  */
-class PushNotification extends CronBase {
+class HookProcessor extends CronBase {
   /**
    * @constructor
    *
@@ -226,8 +226,12 @@ class PushNotification extends CronBase {
       let response = userDeviceIdToResponseMap[userDeviceId];
       if (response.success == false) {
         switch (response.error.code) {
+          case notificationHookConstants.tokenNotRegisteredErrorCode:
           case notificationHookConstants.unregisteredErrorCode:
-            logger.error('Error::unregisteredErrorCode----------------------------', response.error.code);
+            logger.error(
+              'Error:: tokenNotRegisteredErrorCode/unregisteredErrorCode ---------------',
+              response.error.code
+            );
             await new UserDeviceModel()
               .update({ status: userDeviceConstants.invertedStatuses[userDeviceConstants.expiredStatus] })
               .where({
@@ -247,10 +251,6 @@ class PushNotification extends CronBase {
 
           case notificationHookConstants.invalidArgumentErrorCode:
             logger.error('Error::invalidArgumentErrorCode----------------------------', response.error.code);
-            break;
-
-          case notificationHookConstants.tokenNotRegisteredErrorCode:
-            logger.error('Error::tokenNotRegisteredErrorCode----------------------------', response.error.code);
             break;
 
           default:
@@ -285,7 +285,7 @@ class PushNotification extends CronBase {
       api_error_identifier: 'firebase_error',
       debug_options: debugOptions
     });
-    // await createErrorLogsEntry.perform(errorObject, errorLogsConstants.highSeverity);
+    await createErrorLogsEntry.perform(errorObject, errorLogsConstants.lowSeverity);
   }
 
   /**
@@ -379,7 +379,7 @@ class PushNotification extends CronBase {
   }
 }
 
-new PushNotification({ cronProcessId: +cronProcessId }).perform();
+new HookProcessor({ cronProcessId: +cronProcessId }).perform();
 
 setInterval(function() {
   logger.info('Ending the process. Sending SIGINT.');

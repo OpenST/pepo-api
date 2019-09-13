@@ -272,6 +272,30 @@ class PreLaunchInvite extends ModelBase {
    * Search users for admin whitelisting.
    *
    * @param {object} params
+   * @param {integer} [params.query]: query
+   *
+   * @returns {object}
+   */
+  async totalCount(params) {
+    const oThis = this;
+
+    const query = params.query;
+
+    const queryObject = oThis.select('count(id) as totalCount');
+
+    if (query) {
+      const queryWithWildCards = '%' + query + '%';
+      queryObject.where(['handle LIKE ? OR name LIKE ?', queryWithWildCards, queryWithWildCards]);
+    }
+
+    const dbRows = await queryObject.fire();
+    return dbRows[0] || {};
+  }
+
+  /**
+   * Search users for admin whitelisting.
+   *
+   * @param {object} params
    * @param {integer} params.limit: limit
    * @param {integer} [params.query]: query
    * @param {string}  [params.sortBy]: sort string
@@ -298,6 +322,7 @@ class PreLaunchInvite extends ModelBase {
         'creator_status',
         'status',
         'admin_status',
+        'invited_user_count',
         'updated_at'
       ])
       .limit(limit)
