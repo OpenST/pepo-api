@@ -7,10 +7,15 @@ const rootPrefix = '../../..',
   sanitizer = require(rootPrefix + '/helpers/sanitizer'),
   apiName = require(rootPrefix + '/lib/globalConstant/apiName'),
   entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
+  cookieHelper = require(rootPrefix + '/lib/cookieHelper'),
   responseEntityKey = require(rootPrefix + '/lib/globalConstant/responseEntityKey');
 
 /* Single user feeds*/
-router.get('/:feed_id', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+router.get('/:feed_id', cookieHelper.validateUserLoginRequired, sanitizer.sanitizeDynamicUrlParams, function(
+  req,
+  res,
+  next
+) {
   req.decodedParams.apiName = apiName.feedDetails;
   req.decodedParams.feed_id = req.params.feed_id;
 

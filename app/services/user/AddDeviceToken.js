@@ -1,11 +1,14 @@
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
+  ResetBadge = require(rootPrefix + '/app/services/user/ResetBadge'),
   UserProfileElementModel = require(rootPrefix + '/app/models/mysql/UserProfileElement'),
   LocationByTimeZoneCache = require(rootPrefix + '/lib/cacheManagement/single/LocationByTimeZone'),
-  UserNotificationsCountModel = require(rootPrefix + '/app/models/cassandra/UserNotificationsCount'),
   UserDeviceModel = require(rootPrefix + '/app/models/mysql/UserDevice'),
+  UserProfileElementsByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/UserProfileElementsByUserIds'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
+  errorLogsConstants = require(rootPrefix + '/lib/globalConstant/errorLogs'),
+  createErrorLogsEntry = require(rootPrefix + '/lib/errorLogs/createEntry'),
   userDeviceConstants = require(rootPrefix + '/lib/globalConstant/userDevice'),
   userProfileElementConstants = require(rootPrefix + '/lib/globalConstant/userProfileElement');
 
@@ -110,36 +113,57 @@ class AddDeviceToken extends ServiceBase {
   async _insertIntoUserDevices() {
     const oThis = this;
 
-    const insertParams = {
-      user_id: oThis.currentUserId,
-      device_id: oThis.deviceId,
-      device_token: oThis.deviceToken,
-      status: userDeviceConstants.invertedStatuses[userDeviceConstants.activeStatus],
-      device_kind: userDeviceConstants.invertedUserDeviceKinds[oThis.deviceKind]
-    };
+    //todo: update based on device token
 
-    await new UserDeviceModel()
-      .insert(insertParams)
-      .fire()
-      .catch(async function(err) {
-        if (UserDeviceModel.isDuplicateIndexViolation(UserDeviceModel.userDeviceUniqueIndexName, err)) {
-          await new UserDeviceModel()
-            .update({
-              status: userDeviceConstants.invertedStatuses[userDeviceConstants.activeStatus],
-              device_token: oThis.deviceToken
-            })
-            .where({
-              user_id: oThis.currentUserId,
-              device_id: oThis.deviceId
-            })
-            .fire();
-        } else {
-          return Promise.reject(err);
-        }
-      });
+    //todo: get and update and the flush cache - Done
 
-    // Flush cache.
-    await UserDeviceModel.flushCache({ userId: oThis.currentUserId });
+    const userDeviceCacheRsp = await new UserDeviceModel()
+        .select('*')
+        .where({
+          user_id: oThis.currentUserId,
+          device_id: oThis.deviceId
+        })
+        .fire(),
+      userDeviceId = userDeviceCacheRsp[0].id;
+
+    if (userDeviceId) {
+      await new UserDeviceModel()
+        .update({
+          status: userDeviceConstants.invertedStatuses[userDeviceConstants.activeStatus],
+          device_token: oThis.deviceToken
+        })
+        .where({
+          id: userDeviceId
+        })
+        .fire();
+
+      await oThis._cacheFlush({ userId: oThis.currentUserId, id: userDeviceId });
+    } else {
+      const insertParams = {
+        user_id: oThis.currentUserId,
+        device_id: oThis.deviceId,
+        device_token: oThis.deviceToken,
+        status: userDeviceConstants.invertedStatuses[userDeviceConstants.activeStatus],
+        device_kind: userDeviceConstants.invertedUserDeviceKinds[oThis.deviceKind]
+      };
+
+      const userDeviceInsertRsp = await new UserDeviceModel().insert(insertParams).fire();
+
+      await oThis._cacheFlush({ userId: oThis.currentUserId, id: userDeviceInsertRsp.insertId });
+    }
+  }
+
+  /**
+   * Flush cache.
+   *
+   * @param params
+   * @param {integer} params.userId
+   * @param {integer} params.id
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _cacheFlush(params) {
+    await UserDeviceModel.flushCache({ userId: params.userId, id: params.id });
   }
 
   /**
@@ -150,19 +174,62 @@ class AddDeviceToken extends ServiceBase {
    */
   async _addLocationInUserProfileElements() {
     const oThis = this,
-      locationByTimeZoneCacheRsp = await new LocationByTimeZoneCache({ timeZone: oThis.userTimeZone }).fetch();
+      userProfileElementsCacheResp = await new UserProfileElementsByUserIdsCache({
+        usersIds: [oThis.currentUserId]
+      }).fetch();
+
+    if (userProfileElementsCacheResp.isFailure()) {
+      return Promise.reject(userProfileElementsCacheResp);
+    }
+
+    const userProfileElementsRspdata = userProfileElementsCacheResp.data[oThis.currentUserId];
+
+    //todo: update or insert in user profile. - Done
+    //todo: locationId if blank. default insert and email - Done
+
+    const locationByTimeZoneCacheRsp = await new LocationByTimeZoneCache({ timeZone: oThis.userTimeZone }).fetch();
 
     if (locationByTimeZoneCacheRsp.isFailure()) {
       return Promise.reject(locationByTimeZoneCacheRsp);
     }
 
-    const locationId = locationByTimeZoneCacheRsp.data[oThis.userTimeZone].id;
+    //use global constant
+    let defaultLocationId = 10;
 
-    await new UserProfileElementModel().insertElement({
-      userId: oThis.currentUserId,
-      dataKind: userProfileElementConstants.locationIdKind,
-      data: locationId
-    });
+    let locationId = locationByTimeZoneCacheRsp.data[oThis.userTimeZone].id;
+
+    if (!locationId) {
+      // Error email.
+      const errorObject = responseHelper.error({
+        internal_error_identifier: 'a_s_u_adt_3',
+        api_error_identifier: 'unknown_user_time_zone',
+        debug_options: { timeZone: oThis.userTimeZone }
+      });
+      await createErrorLogsEntry.perform(errorObject, errorLogsConstants.mediumSeverity);
+    }
+
+    // If user profile elements contains location id and it is same as that of cache then return, else insert.
+    if (userProfileElementsRspdata.locationId && userProfileElementsRspdata.locationId.id) {
+      if (userProfileElementsRspdata.locationId.id === locationId || !locationId) {
+        return responseHelper.successWithData({});
+      } else if (userProfileElementsRspdata.locationId.id !== locationId) {
+        await new UserProfileElementModel()
+          .update({ data: locationId })
+          .where({
+            user_id: oThis.currentUserId,
+            data_kind: userProfileElementConstants.invertedKinds[userProfileElementConstants.locationIdKind]
+          })
+          .fire();
+      }
+    } else {
+      await new UserProfileElementModel().insertElement({
+        user_id: oThis.currentUserId,
+        data_kind: userProfileElementConstants.invertedKinds[userProfileElementConstants.locationIdKind],
+        data: locationId || defaultLocationId
+      });
+    }
+
+    //  todo: flush cache
   }
 
   /**
@@ -174,16 +241,7 @@ class AddDeviceToken extends ServiceBase {
   async _resetUnreadNotificationsCount() {
     const oThis = this;
 
-    if (oThis.deviceKind === userDeviceConstants.androidDeviceKind) {
-      let queryRsp = await new UserNotificationsCountModel().fetchUnreadNotificationCount({ userIds: [oThis.userId] });
-
-      logger.log('Query response for unread notification count::: ', queryRsp);
-
-      return new UserNotificationsCountModel().resetUnreadNotificationCount({
-        userId: oThis.userId,
-        count: queryRsp[oThis.userId]
-      });
-    }
+    await new ResetBadge({ current_user: { id: oThis.currentUserId }, user_id: oThis.currentUserId }).perform();
   }
 }
 

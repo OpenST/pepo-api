@@ -645,6 +645,10 @@ const v1Signature = {
   [apiName.resetBadge]: {
     mandatory: [
       {
+        parameter: 'user_id',
+        validatorMethods: ['validateNonZeroInteger']
+      },
+      {
         parameter: 'current_user',
         validatorMethods: ['validateNonEmptyObject']
       }

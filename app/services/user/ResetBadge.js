@@ -15,6 +15,7 @@ class ResetBadge extends ServiceBase {
    *
    * @param {object} params
    * @param {object} params.current_user
+   * @param {number} params.user_id
    *
    * @augments ServiceBase
    *
@@ -25,9 +26,8 @@ class ResetBadge extends ServiceBase {
 
     const oThis = this;
 
-    logger.log('ResetBadge::params--------', params);
-
     oThis.currentUserId = +params.current_user.id;
+    oThis.userId = +params.user_id;
   }
 
   /**
@@ -38,9 +38,31 @@ class ResetBadge extends ServiceBase {
   async _asyncPerform() {
     const oThis = this;
 
+    await oThis._validateAndSanitize();
+
     await oThis._resetUnreadNotificationsCount();
 
     return responseHelper.successWithData({});
+  }
+
+  /**
+   * Validate and sanitize params.
+   *
+   * @private
+   */
+  async _validateAndSanitize() {
+    const oThis = this;
+
+    if (oThis.currentUserId !== oThis.userId) {
+      return Promise.reject(
+        responseHelper.paramValidationError({
+          internal_error_identifier: 'a_s_u_rb_1',
+          api_error_identifier: 'invalid_params',
+          params_error_identifiers: ['invalid_user_id'],
+          debug_options: { currentUserId: oThis.currentUserId }
+        })
+      );
+    }
   }
 
   /**
@@ -52,6 +74,7 @@ class ResetBadge extends ServiceBase {
   async _resetUnreadNotificationsCount() {
     const oThis = this;
 
+    //NOTE: Optimization- Try delete row for resetting the data
     let queryRsp = await new UserNotificationsCountModel().fetchUnreadNotificationCount({
       userIds: [oThis.currentUserId]
     });

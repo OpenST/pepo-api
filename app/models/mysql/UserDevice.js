@@ -143,11 +143,15 @@ class UserDevice extends ModelBase {
   static async flushCache(params) {
     const promisesArray = [];
 
-    const UserDeviceIdsByUserIds = require(rootPrefix + '/lib/cacheManagement/multi/UserDeviceIdsByUserIds');
-    promisesArray.push(new UserDeviceIdsByUserIds({ userIds: [params.userId] }).clear());
+    if (params.userId) {
+      const UserDeviceIdsByUserIds = require(rootPrefix + '/lib/cacheManagement/multi/UserDeviceIdsByUserIds');
+      promisesArray.push(new UserDeviceIdsByUserIds({ userIds: [params.userId] }).clear());
+    }
 
-    const UserDeviceByIds = require(rootPrefix + '/lib/cacheManagement/multi/UserDeviceByIds');
-    promisesArray.push(new UserDeviceByIds({ ids: [params.id] }).clear());
+    if (params.id) {
+      const UserDeviceByIds = require(rootPrefix + '/lib/cacheManagement/multi/UserDeviceByIds');
+      promisesArray.push(new UserDeviceByIds({ ids: [params.id] }).clear());
+    }
 
     await Promise.all(promisesArray);
   }
