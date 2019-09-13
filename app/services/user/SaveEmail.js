@@ -146,9 +146,7 @@ class SaveEmail extends ServiceBase {
   async _createUserEmailLogs() {
     const oThis = this;
 
-    const userEmailLogsResponse = await new UserEmailLogsByUserIdsCache({
-      userIds: [oThis.profileUserId]
-    }).fetch();
+    const userEmailLogsResponse = await new UserEmailLogsByUserIdsCache({ userIds: [oThis.profileUserId] }).fetch();
     if (userEmailLogsResponse.isFailure()) {
       return Promise.reject(userEmailLogsResponse);
     }

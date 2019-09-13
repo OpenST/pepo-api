@@ -572,6 +572,15 @@ const v1Signature = {
     ],
     optional: []
   },
+  [apiName.getEmail]: {
+    mandatory: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonZeroInteger']
+      }
+    ],
+    optional: []
+  },
   [apiName.addDeviceToken]: {
     mandatory: [
       {
