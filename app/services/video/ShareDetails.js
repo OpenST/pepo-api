@@ -46,7 +46,7 @@ class ShareDetails extends ServiceBase {
 
     oThis._createMessage();
 
-    return oThis._prepareResponse();
+    return responseHelper.successWithData(oThis._prepareResponse());
   }
 
   /**
@@ -128,7 +128,7 @@ class ShareDetails extends ServiceBase {
   async _prepareResponse() {
     const oThis = this;
 
-    return responseHelper.successWithData({
+    return {
       [entityType.share]: {
         id: uuidV4(),
         kind: shareEntityConstants.videoShareKind,
@@ -138,7 +138,7 @@ class ShareDetails extends ServiceBase {
         // subject: 'DUMMY_SUBJECT', //optional
         uts: Math.round(new Date() / 1000)
       }
-    });
+    };
   }
 
   /**
