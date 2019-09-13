@@ -1,6 +1,7 @@
 const rootPrefix = '../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   TextModel = require(rootPrefix + '/app/models/mysql/Text'),
+  CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   TransactionModel = require(rootPrefix + '/app/models/mysql/Transaction'),
   ExternalEntityModel = require(rootPrefix + '/app/models/mysql/ExternalEntity'),
   PendingTransactionModel = require(rootPrefix + '/app/models/mysql/PendingTransaction'),
@@ -8,36 +9,44 @@ const rootPrefix = '../..',
   TransactionByOstTxIdCache = require(rootPrefix + '/lib/cacheManagement/multi/TransactionByOstTxId'),
   TokenUserByOstUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TokenUserByOstUserIds'),
   VideoDetailsByVideoIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/VideoDetailsByVideoIds'),
+  UserDeviceIdsByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/UserDeviceIdsByUserIds'),
   ExternalEntitiesByEntityIdAndEntityKindCache = require(rootPrefix +
     '/lib/cacheManagement/single/ExternalEntitiyByEntityIdAndEntityKind'),
-  UserDeviceIdsByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/UserDeviceIdsByUserIds'),
-  commonValidator = require(rootPrefix + '/lib/validators/Common'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
-  CommonValidators = require(rootPrefix + '/lib/validators/Common'),
+  logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   createErrorLogsEntry = require(rootPrefix + '/lib/errorLogs/createEntry'),
   errorLogsConstants = require(rootPrefix + '/lib/globalConstant/errorLogs'),
   transactionConstants = require(rootPrefix + '/lib/globalConstant/transaction'),
-  externalEntityConstants = require(rootPrefix + '/lib/globalConstant/externalEntity'),
   notificationJobEnqueue = require(rootPrefix + '/lib/rabbitMqEnqueue/notification'),
+  externalEntityConstants = require(rootPrefix + '/lib/globalConstant/externalEntity'),
   notificationJobConstants = require(rootPrefix + '/lib/globalConstant/notificationJob');
 
+/**
+ * Class to perform ost transaction.
+ *
+ * @class OstTransaction
+ */
 class OstTransaction extends ServiceBase {
   /**
+   * Constructor to perform ost transaction.
+   *
    * @param {object} params
    * @param {object} params.ost_transaction
    * @param {object} params.current_user
    * @param {object} [params.is_paper_plane]
    * @param {object} [params.meta]
    *
+   * @augments ServiceBase
+   *
    * @constructor
    */
   constructor(params) {
-    super(params);
+    super();
+
     const oThis = this;
 
     oThis.transaction = params.ost_transaction;
     oThis.userId = params.current_user.id;
-    oThis.isPaperPlane = params.is_paper_plane;
 
     params.meta = params.meta || {};
 
@@ -63,7 +72,7 @@ class OstTransaction extends ServiceBase {
   }
 
   /**
-   * AsyncPerform
+   * Async perform.
    *
    * @return {Promise<void>}
    */
@@ -77,12 +86,12 @@ class OstTransaction extends ServiceBase {
       return Promise.reject(setStatusResponse);
     }
 
-    const promiseArray1 = [];
-    promiseArray1.push(oThis._fetchGiphyExternalEntityId());
-    promiseArray1.push(oThis._fetchTransaction());
-    promiseArray1.push(oThis._fetchOstUserIdAndValidate());
+    const promisesArray = [];
+    promisesArray.push(oThis._fetchGiphyExternalEntityId());
+    promisesArray.push(oThis._fetchTransaction());
+    promisesArray.push(oThis._fetchOstUserIdAndValidate());
 
-    await Promise.all(promiseArray1);
+    await Promise.all(promisesArray);
 
     if (oThis.transactionId) {
       await oThis._updateTransaction();
@@ -90,15 +99,13 @@ class OstTransaction extends ServiceBase {
       await oThis._insertInTransactionAndAssociatedTables();
     }
 
-    await oThis._getUserIdFromOstUserIds();
-
-    await oThis._checkIfPushNotificationRequired();
-
     return Promise.resolve(responseHelper.successWithData());
   }
 
   /**
-   * Validate and sanitize
+   * Validate and sanitize.
+   *
+   * @sets oThis.text
    *
    * @private
    */
@@ -118,6 +125,7 @@ class OstTransaction extends ServiceBase {
    */
   async _updateTransaction() {
     const oThis = this;
+
     const promiseArray = [];
 
     // If table row has giphy or text id; return.
@@ -143,7 +151,7 @@ class OstTransaction extends ServiceBase {
       updateData.text_id = oThis.textId;
     }
 
-    if (Object.keys(updateData).length !== 0) {
+    if (CommonValidators.validateNonEmptyObject(updateData)) {
       await oThis._updateGiphyAndTextInTransaction(updateData);
     }
   }
@@ -176,74 +184,16 @@ class OstTransaction extends ServiceBase {
 
       await oThis._updateTransaction();
     } else {
-      const promiseArray2 = [];
-
-      promiseArray2.push(oThis._insertInPendingTransactions());
-
-      await Promise.all(promiseArray2);
+      await oThis._insertInPendingTransactions();
     }
-  }
-
-  /**
-   * This function gives user id for the given ost user id(uuid).
-   *
-   * @returns {Promise<void>}
-   * @private
-   */
-  async _getUserIdFromOstUserIds() {
-    const oThis = this;
-
-    const tokenUserRsp = await new TokenUserByOstUserIdsCache({
-      ostUserIds: [oThis.fromOstUserId, oThis.toOstUserId]
-    }).fetch();
-
-    if (tokenUserRsp.isFailure()) {
-      return Promise.reject(tokenUserRsp);
-    }
-
-    oThis.fromUserId = tokenUserRsp.data[oThis.fromOstUserId].userId;
-    oThis.toUserId = tokenUserRsp.data[oThis.toOstUserId].userId;
-  }
-
-  /**
-   * This function checks if push notification is required.
-   *
-   * @returns {Promise<void>}
-   * @private
-   */
-  async _checkIfPushNotificationRequired() {
-    const oThis = this;
-
-    const userDeviceCacheRsp = await new UserDeviceIdsByUserIdsCache({ userIds: [oThis.toUserId] }).fetch();
-
-    if (userDeviceCacheRsp.isFailure()) {
-      return Promise.reject(userDeviceCacheRsp);
-    }
-
-    const userDeviceIds = userDeviceCacheRsp.data[oThis.toUserId];
-
-    if (Array.isArray(userDeviceIds) && userDeviceIds.length > 0) {
-      await oThis._enqueueUserNotification();
-    }
-  }
-
-  /**
-   * Enqueue user notification.
-   *
-   * @returns {Promise<void>}
-   * @private
-   */
-  async _enqueueUserNotification() {
-    const oThis = this;
-    // Notification would be published only if user is approved.
-    await notificationJobEnqueue.enqueue(notificationJobConstants.paperPlaneTransaction, {
-      transaction: oThis.transactionObj
-    });
   }
 
   /**
    * Set statuses.
    *
+   * @sets oThis.transactionStatus
+   *
+   * @returns {Promise<*|result>}
    * @private
    */
   async _setStatuses() {
@@ -271,7 +221,9 @@ class OstTransaction extends ServiceBase {
   /**
    * Fetch giphy external entity id from db.
    *
-   * @returns {Boolean}
+   * @sets oThis.giphyExternalEntityId
+   *
+   * @returns {boolean}
    * @private
    */
   async _fetchGiphyExternalEntityId() {
@@ -295,7 +247,9 @@ class OstTransaction extends ServiceBase {
   }
 
   /**
-   * Insert text
+   * Insert text.
+   *
+   * @sets oThis.textId
    *
    * @returns {Promise<void>}
    * @private
@@ -303,10 +257,8 @@ class OstTransaction extends ServiceBase {
   async _insertText() {
     const oThis = this;
 
-    const insertData = {
-        text: oThis.text
-      },
-      insertResponse = await new TextModel().insertText(insertData);
+    const insertData = { text: oThis.text };
+    const insertResponse = await new TextModel().insertText(insertData);
 
     oThis.textId = insertResponse.insertId;
     insertData.id = insertResponse.insertId;
@@ -318,6 +270,8 @@ class OstTransaction extends ServiceBase {
   /**
    * Fetch transaction from db.
    *
+   * @sets oThis.transactionId, oThis.transactionObj
+   *
    * @returns {Promise<never>}
    * @private
    */
@@ -326,6 +280,7 @@ class OstTransaction extends ServiceBase {
 
     const transactionCacheResponse = await new TransactionByOstTxIdCache({ ostTxIds: [oThis.ostTxId] }).fetch();
 
+    logger.log('transactionCacheResponse =======', transactionCacheResponse);
     if (transactionCacheResponse.isFailure()) {
       return Promise.reject(
         responseHelper.error({
@@ -343,10 +298,12 @@ class OstTransaction extends ServiceBase {
       oThis.transactionId = transactionCacheResponse.data[oThis.ostTxId].id;
       oThis.transactionObj = transactionCacheResponse.data[oThis.ostTxId];
     }
+
+    logger.log('oThis.transactionObj =======', oThis.transactionObj);
   }
 
   /**
-   * This function check if the giphy is present or not
+   * This function check if the giphy is present or not.
    *
    * @returns {boolean}
    * @private
@@ -354,11 +311,11 @@ class OstTransaction extends ServiceBase {
   _isGiphyPresent() {
     const oThis = this;
 
-    return !commonValidator.isVarNullOrUndefined(oThis.giphyObject);
+    return !CommonValidators.isVarNullOrUndefined(oThis.giphyObject);
   }
 
   /**
-   * This function checks if string is non empty
+   * This function checks if string is non empty.
    *
    * @returns {boolean}
    * @private
@@ -366,11 +323,11 @@ class OstTransaction extends ServiceBase {
   _isTextPresent() {
     const oThis = this;
 
-    return commonValidator.validateNonBlankString(oThis.text);
+    return CommonValidators.validateNonBlankString(oThis.text);
   }
 
   /**
-   * This function check if video is present in parameters
+   * This function check if video is present in parameters.
    *
    * @returns {boolean}
    * @private
@@ -378,12 +335,15 @@ class OstTransaction extends ServiceBase {
   _isVideoIdPresent() {
     const oThis = this;
 
-    return !commonValidator.isVarNullOrUndefined(oThis.videoId);
+    return !CommonValidators.isVarNullOrUndefined(oThis.videoId);
   }
 
   /**
-   * Fetch OST user id
+   * Fetch OST user id.
    *
+   * @sets oThis.ostUserId
+   *
+   * @returns {Promise<never>}
    * @private
    */
   async _fetchOstUserIdAndValidate() {
@@ -452,7 +412,7 @@ class OstTransaction extends ServiceBase {
   }
 
   /**
-   * Fetch video details and validate
+   * Fetch video details and validate.
    *
    * @returns {Promise<void>}
    * @private
@@ -481,7 +441,7 @@ class OstTransaction extends ServiceBase {
   }
 
   /**
-   * This function inserts data in external entities table
+   * This function inserts data in external entities table.
    *
    * @returns {Promise<void>}
    * @private
@@ -511,6 +471,8 @@ class OstTransaction extends ServiceBase {
   /**
    * This function prepares extra data for giphy and inserts a row in external entities table.
    *
+   * @sets oThis.giphyExternalEntityId
+   *
    * @returns {Promise<void>}
    * @private
    */
@@ -538,6 +500,8 @@ class OstTransaction extends ServiceBase {
 
   /**
    * This function fetches to user ids and inserts in to user ids array. It also prepares amounts array.
+   *
+   * @sets oThis.toUserIdsArray, oThis.amountsArray
    *
    * @returns {Promise<never>}
    * @private
@@ -570,6 +534,8 @@ class OstTransaction extends ServiceBase {
 
   /**
    * This function prepares extra data for transaction external entity and inserts a row in external entities table.
+   *
+   * @sets oThis.transactionId
    *
    * @returns {Promise<*>}
    * @private
@@ -630,6 +596,7 @@ class OstTransaction extends ServiceBase {
    * Insert in pending transaction table.
    *
    * @returns {Promise<void>}
+   * @private
    */
   async _insertInPendingTransactions() {
     const oThis = this;

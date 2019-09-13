@@ -3,7 +3,6 @@ const rootPrefix = '../../../..',
   UserDeviceIdsByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/UserDeviceIdsByUserIds'),
   TokenUserByOstUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TokenUserByOstUserIds'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
-  commonValidator = require(rootPrefix + '/lib/validators/Common'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   notificationJobEnqueue = require(rootPrefix + '/lib/rabbitMqEnqueue/notification'),
   notificationJobConstants = require(rootPrefix + '/lib/globalConstant/notificationJob');

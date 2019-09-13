@@ -51,7 +51,6 @@ class UserDevice extends ModelBase {
       userId: dbRow.user_id,
       deviceId: dbRow.device_id,
       deviceToken: dbRow.device_token,
-      userTimeZone: dbRow.user_timezone,
       deviceKind: userDevicesConstants.userDeviceKinds[dbRow.device_kind],
       status: userDevicesConstants.statuses[dbRow.status],
       createdAt: dbRow.created_at,
@@ -67,17 +66,7 @@ class UserDevice extends ModelBase {
    * @returns {array}
    */
   safeFormattedColumnNames() {
-    return [
-      'id',
-      'userId',
-      'deviceId',
-      'deviceToken',
-      'userTimeZone',
-      'deviceKind',
-      'status',
-      'createdAt',
-      'updatedAt'
-    ];
+    return ['id', 'userId', 'deviceId', 'deviceToken', 'deviceKind', 'status', 'createdAt', 'updatedAt'];
   }
 
   /**
@@ -90,10 +79,15 @@ class UserDevice extends ModelBase {
   async fetchByUserIds(userIds) {
     const oThis = this;
 
-    const dbRows = await oThis
-      .select('id, user_id')
-      .where({ user_id: userIds })
-      .fire();
+    const whereClause = [
+        'user_id IN (?) AND status = ?',
+        userIds,
+        userDevicesConstants.invertedStatuses[userDevicesConstants.activeStatus]
+      ],
+      dbRows = await oThis
+        .select('id, user_id')
+        .where(whereClause)
+        .fire();
 
     const response = {};
 
@@ -149,11 +143,15 @@ class UserDevice extends ModelBase {
   static async flushCache(params) {
     const promisesArray = [];
 
-    const UserDeviceIdsByUserIds = require(rootPrefix + '/lib/cacheManagement/multi/UserDeviceIdsByUserIds');
-    promisesArray.push(new UserDeviceIdsByUserIds({ userIds: [params.userId] }).clear());
+    if (params.userId) {
+      const UserDeviceIdsByUserIds = require(rootPrefix + '/lib/cacheManagement/multi/UserDeviceIdsByUserIds');
+      promisesArray.push(new UserDeviceIdsByUserIds({ userIds: [params.userId] }).clear());
+    }
 
-    const UserDeviceByIds = require(rootPrefix + '/lib/cacheManagement/multi/UserDeviceByIds');
-    promisesArray.push(new UserDeviceByIds({ ids: [params.id] }).clear());
+    if (params.id) {
+      const UserDeviceByIds = require(rootPrefix + '/lib/cacheManagement/multi/UserDeviceByIds');
+      promisesArray.push(new UserDeviceByIds({ ids: [params.id] }).clear());
+    }
 
     await Promise.all(promisesArray);
   }

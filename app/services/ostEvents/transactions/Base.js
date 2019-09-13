@@ -91,8 +91,14 @@ class TransactionOstEventBase extends ServiceBase {
 
     const parsedHash = oThis._parseTransactionMetaDetails();
 
+    logger.log('parsedHash =======', parsedHash);
+
     if (parsedHash.vi) {
       oThis.videoId = parsedHash.vi;
+    }
+
+    if (parsedHash.ipp == 1) {
+      oThis.isPaperPlane = true;
     }
   }
 

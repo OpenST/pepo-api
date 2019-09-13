@@ -91,7 +91,7 @@ class PreLaunchTwitterSignUp extends ServiceBase {
 
       return Promise.reject(
         responseHelper.error({
-          internal_error_identifier: 's_t_s_ps_1',
+          internal_error_identifier: 'a_s_pli_s_1',
           api_error_identifier: 'something_went_wrong',
           debug_options: {}
         })

@@ -146,6 +146,8 @@ class seedTokensTable {
       ruleAddresses[key] = value;
     }
 
+    let utilityBrandedTokenAddress = oThis.tokenData.auxiliary_chains[0].utility_branded_token;
+
     // Insert user in database
     let insertResponse = await new TokenModel()
       .insert({
@@ -157,6 +159,7 @@ class seedTokensTable {
         aux_chain_id: oThis.tokenData.auxiliary_chains[0].chain_id,
         conversion_factor: oThis.tokenData.conversion_factor,
         company_token_holder_address: oThis.tokenData.auxiliary_chains[0].company_token_holders[0].toLowerCase(),
+        utility_branded_token: utilityBrandedTokenAddress,
         rule_addresses: JSON.stringify(ruleAddresses),
         api_key: oThis.apiKey,
         api_secret: encryptedApiSecret,
