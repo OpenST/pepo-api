@@ -240,7 +240,7 @@ const v1Signature = {
     ],
     optional: [
       {
-        parameter: 'invite',
+        parameter: 'invite_code',
         validatorMethods: ['validateNonBlankString']
       }
     ]
@@ -619,26 +619,8 @@ const v1Signature = {
   [apiName.resetBadge]: {
     mandatory: [
       {
-        parameter: 'user_id',
-        validatorMethods: ['validateNonZeroInteger']
-      },
-      {
         parameter: 'current_user',
         validatorMethods: ['validateNonEmptyObject']
-      }
-    ]
-  },
-  [apiName.invitedUsersSearch]: {
-    mandatory: [
-      {
-        parameter: 'current_user',
-        validatorMethods: ['validateNonEmptyObject']
-      }
-    ],
-    optional: [
-      {
-        parameter: paginationConstants.paginationIdentifierKey,
-        validatorMethods: ['validateString', 'validatePaginationIdentifier']
       }
     ]
   },
@@ -682,6 +664,40 @@ const v1Signature = {
       }
     ],
     optional: []
+  },
+  [apiName.invitedUsersSearch]: {
+    mandatory: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      }
+    ],
+    optional: [
+      {
+        parameter: paginationConstants.paginationIdentifierKey,
+        validatorMethods: ['validateString', 'validatePaginationIdentifier']
+      }
+    ]
+  },
+  [apiName.share]: {
+    mandatory: [
+      {
+        parameter: 'video_id',
+        validatorMethods: ['validateNonZeroInteger']
+      },
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      }
+    ]
+  },
+  [apiName.fetchGoto]: {
+    mandatory: [
+      {
+        parameter: 'url',
+        validatorMethods: ['validateGenericUrl']
+      }
+    ]
   }
 };
 

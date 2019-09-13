@@ -194,6 +194,21 @@ const v1ErrorConfig = {
     parameter: 'email',
     code: 'invalid',
     message: 'This account already has an email address associated with it.'
+  },
+  invalid_invite_code: {
+    parameter: 'invalid_invite_code',
+    code: 'invalid_invite_code',
+    message: 'Invite code is invalid.'
+  },
+  missing_invite_code: {
+    parameter: 'missing_invite_code',
+    code: 'missing_invite_code',
+    message: 'Invitation is mandatory.'
+  },
+  expired_invite_code: {
+    parameter: 'expired_invite_code',
+    code: 'expired_invite_code',
+    message: 'Invitation has already expired.'
   }
 };
 

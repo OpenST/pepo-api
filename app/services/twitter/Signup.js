@@ -39,7 +39,6 @@ class TwitterSignup extends ServiceBase {
    * @param {string} params.secret: Oauth User secret
    *
    * @param {string} params.inviterCodeId: invite code table id of inviter
-   * @param {string} params.preLaunchInviteObj: Pre Launch Invite Obj
    *
    * @augments ServiceBase
    *
@@ -55,7 +54,6 @@ class TwitterSignup extends ServiceBase {
     oThis.token = params.token;
     oThis.secret = params.secret;
     oThis.inviterCodeId = params.inviterCodeId;
-    oThis.preLaunchInviteObj = params.preLaunchInviteObj;
 
     oThis.userId = null;
 
@@ -124,8 +122,6 @@ class TwitterSignup extends ServiceBase {
     let promiseArray2 = [];
     promiseArray2.push(oThis._twitterSpecificFunction());
 
-    promiseArray2.push(oThis._setInviteCodes());
-
     promiseArray2.push(
       createOstUserPromise.then(function(a) {
         return oThis._createTokenUser();
@@ -137,33 +133,6 @@ class TwitterSignup extends ServiceBase {
     await oThis._enqueAfterSignupJob();
 
     logger.log('End::Perform Twitter Signup');
-
-    return responseHelper.successWithData({});
-  }
-
-  /**
-   * create or update invite code for signed up User
-   *  update invite code for inviter_code_id
-   *
-   * @return {Promise<void>}
-   * @private
-   */
-  async _setInviteCodes() {
-    const oThis = this;
-
-    //todo:
-    if (oThis.preLaunchInviteObj) {
-      //  update user_id and inviter_code_id
-      //cache flush
-    } else {
-      //  create invite code
-      //cache flush
-    }
-
-    if (oThis.inviterCodeId) {
-      //  update invited_user_count = invited_user_count + 1
-      //cache flush
-    }
 
     return responseHelper.successWithData({});
   }
@@ -550,7 +519,8 @@ class TwitterSignup extends ServiceBase {
       twitterUserId: oThis.twitterUserObj.id,
       twitterId: oThis.userTwitterEntity.idStr,
       userId: oThis.userId,
-      profileImageId: oThis.profileImageId
+      profileImageId: oThis.profileImageId,
+      inviterCodeId: oThis.inviterCodeId
     };
     await bgJob.enqueue(bgJobConstants.afterSignUpJobTopic, messagePayload);
   }

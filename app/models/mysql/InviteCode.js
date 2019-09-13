@@ -109,6 +109,46 @@ class InviteCode extends ModelBase {
   }
 
   /**
+   * Fetch invite codes for given codes.
+   *
+   * @param {array} codes: invite codes
+   *
+   * @return {object}
+   */
+  async fetchByInviteCodes(codes) {
+    const oThis = this;
+
+    const response = {};
+
+    const dbRows = await oThis
+      .select('*')
+      .where(['code IN (?)', codes])
+      .fire();
+
+    for (let index = 0; index < dbRows.length; index++) {
+      const formatDbRow = oThis.formatDbData(dbRows[index]);
+      response[formatDbRow.code] = formatDbRow;
+    }
+
+    return response;
+  }
+
+  /**
+   * Update invited user count
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async updateInvitedUserCount(id) {
+    const oThis = this;
+
+    await oThis
+      .update('invited_user_count = invited_user_count + 1')
+      .where({ id: id })
+      .fire();
+  }
+
+  /**
    * Fetch invite code for given user ids.
    *
    * @param {array<number>} userIds

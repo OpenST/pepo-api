@@ -9,7 +9,11 @@ const rootPrefix = '../../..',
   LoginTwitterClass = require(rootPrefix + '/app/services/twitter/Login'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   preLaunchInviteConstants = require(rootPrefix + '/lib/globalConstant/preLaunchInvite'),
-  basicHelper = require(rootPrefix + '/helpers/basic'),
+  InviteCodeCache = require(rootPrefix + '/lib/cacheManagement/single/InviteCodeByCode'),
+  InviteCodeModel = require(rootPrefix + '/app/models/mysql/InviteCode'),
+  inviteCodeConstants = require(rootPrefix + '/lib/globalConstant/inviteCode'),
+  entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
+  pageNameConstants = require(rootPrefix + '/lib/globalConstant/pageName'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger');
 
 /**
@@ -27,7 +31,7 @@ class TwitterConnect extends ServiceBase {
    * @param {string} params.twitter_id: Twitter_id
    * @param {string} params.handle: Handle
    *
-   * @param {string} [params.invite]: invite_code
+   * @param {string} [params.invite_code]: invite_code
    *
    * @augments ServiceBase
    *
@@ -42,13 +46,13 @@ class TwitterConnect extends ServiceBase {
     oThis.secret = params.secret;
     oThis.twitterId = params.twitter_id;
     oThis.handle = params.handle;
-    oThis.inviteCode = params.invite_coee;
+    oThis.inviteCode = params.invite_code;
 
-    oThis.inviterCodeId = null;
-    oThis.preLaunchInviteObj = null;
     oThis.userTwitterEntity = null;
     oThis.twitterUserObj = null;
     oThis.serviceResp = null;
+    oThis.inviterCodeObj = null;
+    oThis.couldNotProceed = false;
   }
 
   /**
@@ -61,11 +65,16 @@ class TwitterConnect extends ServiceBase {
 
     await oThis._validateDuplicateRequest();
 
-    await oThis._fetchTwitterUserAndValidateCredentials();
+    let resp = await oThis._fetchTwitterUser();
+    if (oThis.couldNotProceed) {
+      return oThis._sendFlowCompleteGoto(resp);
+    }
+
+    await oThis._validateTwitterCredentials();
 
     await oThis._performAction();
 
-    return Promise.resolve(oThis.serviceResp);
+    return oThis._sendFlowCompleteGoto(oThis.serviceResp);
   }
 
   /**
@@ -99,28 +108,6 @@ class TwitterConnect extends ServiceBase {
   }
 
   /**
-   * Fetch Twitter User Obj if present and Validate Credentials.
-   *
-   * @return {Promise<Result>}
-   * @private
-   */
-  async _fetchTwitterUserAndValidateCredentials() {
-    const oThis = this;
-    logger.log('Start::TwitterUser And Validate Credentials');
-
-    const promisesArray = [];
-
-    promisesArray.push(oThis._fetchTwitterUser());
-    promisesArray.push(oThis._validateTwitterCredentials());
-
-    await Promise.all(promisesArray);
-
-    logger.log('End::TwitterUser And Validate Credentials');
-
-    return responseHelper.successWithData({});
-  }
-
-  /**
    * Fetch Twitter User Obj if present.
    *
    * @sets oThis.twitterUserObj
@@ -144,11 +131,22 @@ class TwitterConnect extends ServiceBase {
     }
 
     if (oThis._isUserSignup()) {
-      const validationResp = oThis._validateInvite();
+      let resp = await new Promise(function(onResolve, onReject) {
+        oThis
+          ._validateUserSignupAllowed()
+          .then(function(resp) {
+            if (resp.isFailure()) {
+              oThis.couldNotProceed = true;
+            }
+            onResolve(resp);
+          })
+          .catch(function(errorResponse) {
+            oThis.couldNotProceed = true;
+            onResolve(errorResponse);
+          });
+      });
 
-      if (validationResp.isFailure()) {
-        return Promise.reject(validationResp);
-      }
+      return resp;
     }
 
     logger.log('End::Fetch Twitter User');
@@ -156,81 +154,40 @@ class TwitterConnect extends ServiceBase {
   }
 
   /**
-   * Valid pre launch Invite or user invite if user signup action
-   *
-   * @sets oThis.inviterCodeId
+   * Validate user signup is allowed or not.
    *
    * @return {Promise<Result>}
    * @private
    */
-  async _validateInvite() {
+  async _validateUserSignupAllowed() {
     const oThis = this;
-    logger.log('Start::Validate Invite');
+    logger.log('Start::Validate User signup allowed');
 
-    await oThis._fetchPreLaunchInvite();
+    let resp = await oThis._fetchPreLaunchInvite();
+    const preLaunchInviteObj = resp.data.preLaunchInviteObj;
 
-    if (!oThis._isInviteCodeMandatory()) {
-      //if no inviter then check if it has a invite code else give prefernce to prelaunch inviter
-      if (!oThis.preLaunchInviteObj.inviterCodeId) {
-        await oThis._setAndValidateInviteCodeParam();
-        //  Note: Do not Validate Resp. If invald invite code still allow signup
+    // If invite code is required, then check its validity
+    if (oThis._hasPrelaunchInvitedAccess(preLaunchInviteObj)) {
+      // If twitter account belongs to prelaunch invite, then use that inviter code if any
+      if (preLaunchInviteObj.inviterCodeId) {
+        // TODO: Replace this with cache built by Tejas
+        oThis.inviterCodeObj = await new InviteCodeModel().fetchById(preLaunchInviteObj.inviterCodeId);
       } else {
-        oThis.inviterCodeId = oThis.preLaunchInviteObj.inviterCodeId;
+        // Fetch inviter code object
+        await oThis._fetchInviteCodeObject();
       }
     } else {
-      //should always have a valid invite code
-      let inviteValidationResp = await oThis._setAndValidateInviteCodeParam();
-
-      if (inviteValidationResp.isFailure()) {
-        return Promise.reject(inviteValidationResp);
-      }
+      await oThis._validateInviteCode();
     }
 
-    logger.log('End::Validate Invite');
+    logger.log('End::Validate User signup allowed');
 
-    return responseHelper.successWithData({});
-  }
-
-  /**
-   * Validate Invite Code
-   *
-   * @sets oThis.inviterCodeId
-   *
-   * @return {Promise<Result>}
-   * @private
-   */
-  async _setAndValidateInviteCodeParam() {
-    const oThis = this;
-    logger.log('Start::_validateInviteCodeParam');
-
-    //todo: missing_invite_code how to send
-
-    if (!oThis.inviteCode) {
-      responseHelper.paramValidationError({
-        internal_error_identifier: 's_t_c_savicp_1',
-        api_error_identifier: 'invalid_api_params',
-        params_error_identifiers: ['missing_invite_code'],
-        debug_options: {}
-      });
-    }
-
-    //todo:
-    // fetch inviteCodeObj from cache
-    //  if not present  give invalid_invite_code_error
-    // if invite code of current prelaunch user, give error
-    // if limit reached and not _isInviteCodeMandatory() give expired error
-
-    //set inviter code id
-    oThis.inviterCodeId = '';
-
-    logger.log('End::_validateInviteCodeParam');
     return responseHelper.successWithData({});
   }
 
   /**
    * Fetch Pre Launch Invite Obj if present.
    *
-   * @sets oThis.preLaunchInviteObj
    *
    * @return {Promise<Result>}
    * @private
@@ -238,16 +195,15 @@ class TwitterConnect extends ServiceBase {
   async _fetchPreLaunchInvite() {
     const oThis = this;
 
-    logger.log('Start::Fetch PreLaunchInvite');
-
     const preLaunchInviteCacheResp = await new PreLaunchInviteByTwitterIdsCache({
       twitterIds: [oThis.twitterId]
     }).fetch();
 
     if (preLaunchInviteCacheResp.isFailure()) {
-      return Promise.reject(preLaunchInviteCacheResp);
+      return preLaunchInviteCacheResp;
     }
 
+    let preLaunchInviteObj = null;
     if (preLaunchInviteCacheResp.data[oThis.twitterId].id) {
       let preLaunchInviteId = preLaunchInviteCacheResp.data[oThis.twitterId].id;
 
@@ -257,35 +213,111 @@ class TwitterConnect extends ServiceBase {
         return cacheRsp;
       }
 
-      oThis.preLaunchInviteObj = cacheRsp.data[preLaunchInviteId];
+      preLaunchInviteObj = cacheRsp.data[preLaunchInviteId];
     }
 
-    logger.log('End::Fetch PreLaunchInvite');
-    return responseHelper.successWithData({});
+    return responseHelper.successWithData({ preLaunchInviteObj: preLaunchInviteObj });
   }
 
   /**
-   * Check if whitelisted pre launch or has inviter id
+   * If twitter user has pre-launch invited access
    *
-   * @return {Boolean}
+   * @param preLaunchInviteObj
+   * @returns {boolean}
    * @private
    */
-  _isInviteCodeMandatory() {
-    const oThis = this;
+  _hasPrelaunchInvitedAccess(preLaunchInviteObj) {
+    let hasPrelaunchAccess = false;
 
-    logger.log('Start::_isInviteCodeMandatory');
-
-    if (
-      !oThis.preLaunchInviteObj ||
-      (oThis.preLaunchInviteObj.adminStatus != preLaunchInviteConstants.whitelistedStatus &&
-        !oThis.preLaunchInviteObj.inviterCodeId)
-    ) {
-      return true;
+    // If twitter account belongs to prelaunch invite
+    if (preLaunchInviteObj) {
+      // If prelaunch invite has been whitelisted by admin
+      // OR
+      // User has already accepted prelaunch invite of some other user
+      if (
+        preLaunchInviteObj.adminStatus == preLaunchInviteConstants.whitelistedStatus ||
+        preLaunchInviteObj.inviterCodeId
+      ) {
+        hasPrelaunchAccess = true;
+      }
     }
 
-    return false;
+    return hasPrelaunchAccess;
+  }
 
-    logger.log('End::_isInviteCodeMandatory');
+  /**
+   * Fetch inviter code row from cache
+   *
+   * Sets @inviterCodeObj
+   *
+   * @returns {Promise<never>}
+   * @private
+   */
+  async _fetchInviteCodeObject() {
+    const oThis = this;
+
+    let cacheResp = await new InviteCodeCache({ inviteCode: oThis.inviteCode }).fetch();
+    // Invite code used is not present
+    if (cacheResp.isFailure()) {
+      return Promise.reject(
+        responseHelper.paramValidationError({
+          internal_error_identifier: 's_t_c_vic_2',
+          api_error_identifier: 'could_not_proceed',
+          params_error_identifiers: ['something_went_wrong'],
+          debug_options: {}
+        })
+      );
+    }
+
+    oThis.inviterCodeObj = cacheResp.data[oThis.inviteCode];
+  }
+
+  /**
+   * Validate invite code passed, in case invite code is mandatory.
+   *
+   * @Sets oThis.inviterCodeObj
+   *
+   * @returns {Promise<*>}
+   * @private
+   */
+  async _validateInviteCode() {
+    const oThis = this;
+
+    // Invite code is required but not passed
+    if (!oThis.inviteCode) {
+      return Promise.reject(
+        responseHelper.error({
+          internal_error_identifier: inviteCodeConstants.missingInviteCodeError,
+          api_error_identifier: inviteCodeConstants.missingInviteCodeError
+        })
+      );
+    }
+
+    await oThis._fetchInviteCodeObject();
+
+    // Invite code used is not present
+    if (!oThis.inviterCodeObj || !oThis.inviterCodeObj.id) {
+      return Promise.reject(
+        responseHelper.error({
+          internal_error_identifier: inviteCodeConstants.invalidInviteCodeError,
+          api_error_identifier: inviteCodeConstants.invalidInviteCodeError
+        })
+      );
+    }
+
+    // If there is number of invites limit on invite code, and it has been reached
+    if (
+      oThis.inviterCodeObj.inviteLimit > 0 &&
+      oThis.inviterCodeObj.inviteLimit <= oThis.inviterCodeObj.invitedUserCount
+    ) {
+      return Promise.reject(
+        responseHelper.error({
+          internal_error_identifier: inviteCodeConstants.expiredInviteCodeError,
+          api_error_identifier: inviteCodeConstants.expiredInviteCodeError
+        })
+      );
+    }
+
     return responseHelper.successWithData({});
   }
 
@@ -367,7 +399,9 @@ class TwitterConnect extends ServiceBase {
 
     if (oThis._isUserSignup()) {
       logger.log('Twitter::Connect signup');
-      //todo: in signup send preLaunch obj, inviter_code_id
+      if (oThis.inviterCodeObj) {
+        requestParams.inviterCodeId = oThis.inviterCodeObj.id;
+      }
       oThis.serviceResp = await new SignupTwitterClass(requestParams).perform();
     } else {
       logger.log('Twitter::Connect login');
@@ -387,12 +421,48 @@ class TwitterConnect extends ServiceBase {
   _isUserSignup() {
     const oThis = this;
 
-    // twitterUserObj may or may not be present. also if present, it might not be of a Pepo user.
+    // twitterUserObj may or may not be present.
+    // Also if present, it might not be of a Pepo user.
     if (!oThis.twitterUserObj || !oThis.twitterUserObj.userId) {
       return false;
     }
 
     return true;
+  }
+
+  /**
+   * Send Goto after the flow completes, either in error or success
+   *
+   * @param response
+   * @private
+   */
+  _sendFlowCompleteGoto(response) {
+    const oThis = this;
+
+    // For some errors, success has to be sent to devices, with GOTO
+    if (response.isFailure()) {
+      // For these error codes only, success would go with some goto values
+      if (
+        [
+          inviteCodeConstants.invalidInviteCodeError,
+          inviteCodeConstants.missingInviteCodeError,
+          inviteCodeConstants.expiredInviteCodeError
+        ].includes(response.internalErrorCode)
+      ) {
+        return responseHelper.successWithData({
+          overwrittenFailure: 1,
+          [entityType.goto]: {
+            pn: pageNameConstants.inviteCodePageScreen,
+            v: {
+              [pageNameConstants.inviteCodeErrorParam]:
+                inviteCodeConstants.inviteCodeErrorGotoValues[response.internalErrorCode]
+            }
+          }
+        });
+      }
+    }
+
+    return response;
   }
 }
 
