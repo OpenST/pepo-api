@@ -33,7 +33,7 @@ class AggregatedNotification extends ModelBase {
    * @param {object} dbRow
    * @param {number} dbRow.id
    * @param {number} dbRow.user_id
-   * @param {number} dbRow.location_id
+   * @param {number} dbRow.send_time
    * @param {string} dbRow.extra_data
    * @param {string} dbRow.status
    * @param {number} dbRow.created_at
@@ -47,7 +47,7 @@ class AggregatedNotification extends ModelBase {
     const formattedData = {
       id: dbRow.id,
       userId: dbRow.user_id,
-      locationId: dbRow.location_id,
+      sendTime: dbRow.send_time,
       extraData: JSON.parse(dbRow.extra_data),
       status: aggregatedNotificationsConstants.statuses[dbRow.status],
       createdAt: dbRow.created_at,
@@ -63,25 +63,25 @@ class AggregatedNotification extends ModelBase {
    * @returns {array}
    */
   safeFormattedColumnNames() {
-    return ['id', 'userId', 'locationId', 'extraData', 'status', 'createdAt', 'updatedAt'];
+    return ['id', 'userId', 'sendTime', 'extraData', 'status', 'createdAt', 'updatedAt'];
   }
 
   /**
    * Fetch details.
    *
    * @param {Object} params
-   * @param {Array} params.locationIds
+   * @param {Array} params.sendTime
    *
    * @returns {Promise<void>}
    */
-  async fetchPendingByLocationIds(params) {
+  async fetchPendingBySendTime(params) {
     const oThis = this;
 
     const dbRows = await oThis
       .select('*')
       .where([
-        'location_id IN (?) AND status = ?',
-        params.locationIds,
+        'send_time <= ? AND status = ?',
+        params.sendTime,
         aggregatedNotificationsConstants.invertedStatuses[aggregatedNotificationsConstants.pendingStatus]
       ])
       .fire();

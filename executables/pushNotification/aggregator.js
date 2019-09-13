@@ -56,10 +56,10 @@ class NotificationAggregator extends CronBase {
 
     const oThis = this;
 
+    oThis.currentTimeInSec = parseInt(new Date().getTime() / 1000);
+
     oThis.userIdToAggregatedDetailsMap = {};
     oThis.recipientUserIds = [];
-    oThis.currentLocationIds = [];
-    oThis.userDeviceIds = [];
     oThis.userIdToUserDeviceIdsMap = {};
 
     oThis.canExit = true;
@@ -76,7 +76,9 @@ class NotificationAggregator extends CronBase {
 
     oThis.canExit = false;
 
-    await oThis._fetchLocationIds();
+    //todo: use pagination
+    //todo: not sent status
+
     await oThis._fetchAggregatedDetails();
 
     for (let userId in oThis.userIdToAggregatedDetailsMap) {
@@ -93,33 +95,6 @@ class NotificationAggregator extends CronBase {
   }
 
   /**
-   * Fetch location ids according to current run-time of cron.
-   *
-   * @returns {Promise<void>}
-   *
-   * @sets oThis.currentLocationIds
-   * @private
-   */
-  async _fetchLocationIds() {
-    const oThis = this;
-
-    let timeZoneOffsetInSeconds = new Date().getTimezoneOffset() * 60;
-
-    let locationsCacheRsp = await new LocationsCache().fetch();
-
-    if (locationsCacheRsp.isFailure()) {
-      return Promise.reject(locationsCacheRsp);
-    }
-
-    // NOTE - In 'getTimezoneOffset' function, offset is positive if the timezone is behind UTC and negative if it is ahead.
-    // For example, for time zone UTC+10:00, -600 will be returned.
-    let currentTimeZoneOffsetInSeconds = -timeZoneOffsetInSeconds,
-      locationsCacheData = locationsCacheRsp.data;
-
-    oThis.currentLocationIds = locationsCacheData[currentTimeZoneOffsetInSeconds];
-  }
-
-  /**
    * Fetch pending notification.
    * Fetch rows from aggregated_notifications table.
    *
@@ -132,8 +107,8 @@ class NotificationAggregator extends CronBase {
   async _fetchAggregatedDetails() {
     const oThis = this;
 
-    oThis.userIdToAggregatedDetailsMap = await new AggregatedNotificationModel().fetchPendingByLocationIds({
-      locationIds: oThis.currentLocationIds
+    oThis.userIdToAggregatedDetailsMap = await new AggregatedNotificationModel().fetchPendingBySendTime({
+      sendTime: oThis.currentTimeInSec
     });
   }
 
@@ -175,30 +150,22 @@ class NotificationAggregator extends CronBase {
       insertColumnValues = [];
 
     for (let i = 0; i < oThis.recipientUserIds.length; i++) {
-      let finalNotificationHookPayload = {},
-        userId = oThis.recipientUserIds[i],
+      let userId = oThis.recipientUserIds[i],
         deviceIds = oThis.userIdToUserDeviceIdsMap[userId],
         aggregatedNotificationsPayload = oThis.userIdToAggregatedDetailsMap[userId];
 
-      if (!aggregatedNotificationsPayload) {
+      if (!deviceIds || deviceIds.length < 1) {
         continue;
       }
 
-      let rawPayloadForMsgFormatter = aggregatedNotificationsPayload.extraData.payload,
-        peopleCount = rawPayloadForMsgFormatter.senders.length || 0,
-        txReceivedAmount = rawPayloadForMsgFormatter.amount || 0;
+      let rawPayloadForMsgFormatter = aggregatedNotificationsPayload.extraData.payload;
 
-      finalNotificationHookPayload = Object.assign(rawPayloadForMsgFormatter, {
-        peopleCount: peopleCount,
-        txReceivedAmount: txReceivedAmount
-      });
-
-      logger.log('======= FinalNotificationHookPayload :::', JSON.stringify(finalNotificationHookPayload));
+      logger.log('======= aggregatedNotificationsPayload :::', JSON.stringify(aggregatedNotificationsPayload));
 
       let insertRow = [
         notificationHookConstants.invertedEventTypes[notificationHookConstants.aggregatedTxReceiveSuccessKind],
         JSON.stringify(deviceIds),
-        JSON.stringify(finalNotificationHookPayload),
+        JSON.stringify(rawPayloadForMsgFormatter),
         Math.round(Date.now() / 1000),
         notificationHookConstants.invertedStatuses[notificationHookConstants.pendingStatus]
       ];
@@ -206,12 +173,7 @@ class NotificationAggregator extends CronBase {
       insertColumnValues.push(insertRow);
     }
 
-    promiseArray.push(
-      new NotificationHookModel()
-        .insertMultiple(insertColumnNames, insertColumnValues, {})
-        .onDuplicate({ status: notificationHookConstants.invertedStatuses[notificationHookConstants.pendingStatus] })
-        .fire()
-    );
+    promiseArray.push(new NotificationHookModel().insertMultiple(insertColumnNames, insertColumnValues, {}).fire());
 
     await Promise.all(promiseArray);
   }
