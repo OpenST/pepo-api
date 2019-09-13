@@ -1,6 +1,7 @@
 const rootPrefix = '../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   TemporaryTokenModel = require(rootPrefix + '/app/models/mysql/TemporaryToken'),
+  AddContactInPepoCampaign = require(rootPrefix + '/lib/email/hookCreator/AddContact'),
   coreConstants = require(rootPrefix + '/config/coreConstants'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
@@ -128,11 +129,14 @@ class VerifyDoubleOptIn extends ServiceBase {
     switch (oThis.temporaryTokenObj.kind) {
       case temporaryTokenConstants.preLaunchInviteKind: {
         promisesArray.push(oThis._markPreLaunchInviteAsDoubleOptIn());
-        promisesArray.push(oThis._addContactInPepoCampaign());
+        promisesArray.push(oThis._addContactInPepoCampaign(emailServiceApiCallHookConstants.preLaunchInviteEntityKind));
         break;
       }
       case temporaryTokenConstants.emailDoubleOptInKind: {
         promisesArray.push(oThis._addEmailForUser());
+        promisesArray.push(
+          oThis._addContactInPepoCampaign(emailServiceApiCallHookConstants.emailDoubleOptInEntityKind)
+        );
         break;
       }
       default: {
@@ -166,19 +170,32 @@ class VerifyDoubleOptIn extends ServiceBase {
   /**
    * Add contact in pepo campaign.
    *
+   * @param {string} receiverEntityKind
+   *
    * @returns {Promise<void>}
    * @private
    */
-  async _addContactInPepoCampaign() {
+  async _addContactInPepoCampaign(receiverEntityKind) {
     const oThis = this;
-
-    const AddContactInPepoCampaign = require(rootPrefix + '/lib/email/hookCreator/AddContact');
 
     const addContactParams = {
       receiverEntityId: oThis.temporaryTokenObj.entityId,
-      receiverEntityKind: emailServiceApiCallHookConstants.preLaunchInviteEntityKind,
-      customDescription: 'Contact add for pre launch invite.'
+      receiverEntityKind: receiverEntityKind
     };
+
+    switch (receiverEntityKind) {
+      case emailServiceApiCallHookConstants.preLaunchInviteEntityKind: {
+        addContactParams.customDescription = 'Contact add for pre launch invite.';
+        break;
+      }
+      case emailServiceApiCallHookConstants.emailDoubleOptInEntityKind: {
+        addContactParams.customDescription = 'Contact add for email double opt in.';
+        break;
+      }
+      default: {
+        throw new Error('Invalid kind.');
+      }
+    }
 
     await new AddContactInPepoCampaign(addContactParams).perform();
   }
