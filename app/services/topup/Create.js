@@ -113,7 +113,6 @@ class CreateTopup extends ServiceBase {
     }
 
     // TODO - payments - we should validate receipt - if invalid receipt, send pagerduty. Talk to Sunil.
-    // TODO - payments - if os comes incorrectly, then we should record and send alert to dev and return error.
 
     return responseHelper.successWithData({});
   }
