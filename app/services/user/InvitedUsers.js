@@ -1,7 +1,8 @@
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   UserCache = require(rootPrefix + '/lib/cacheManagement/multi/User'),
-  InviteCodeModel = require(rootPrefix + ' /app/models/mysql/InviteCode'),
+  InviteCodeModel = require(rootPrefix + '/app/models/mysql/InviteCode'),
+  ImageByIdCache = require(rootPrefix + '/lib/cacheManagement/multi/ImageByIds'),
   InviteCodeByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/InviteCodeByUserIds'),
   TokenUserDetailByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TokenUserByUserIds'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
@@ -18,8 +19,8 @@ class InvitedUsers extends ServiceBase {
    * Constructor for invited users of current user search.
    *
    * @param {object} params
-   * @param {object} params.currentUser
-   * @param {number} params.currentUser.id
+   * @param {object} params.current_user
+   * @param {number} params.current_user.id
    * @param {string} params.pagination_identifier
    *
    * @augments ServiceBase
@@ -31,14 +32,17 @@ class InvitedUsers extends ServiceBase {
 
     const oThis = this;
 
-    oThis.currentUserId = params.currentUser.id;
+    oThis.currentUserId = params.current_user.id;
     oThis.paginationIdentifier = params[paginationConstants.paginationIdentifierKey] || null;
 
     oThis.limit = oThis._defaultPageLimit();
 
     oThis.inviterCodeId = null;
     oThis.userIds = [];
+    oThis.imageIds = [];
+    oThis.searchResults = [];
     oThis.userDetails = {};
+    oThis.imageDetails = {};
     oThis.tokenUsersByUserIdMap = {};
     oThis.paginationId = null;
     oThis.nextPaginationId = null;
@@ -47,7 +51,7 @@ class InvitedUsers extends ServiceBase {
   /**
    * Async perform.
    *
-   * @returns {Promise<*|result>}
+   * @returns {Promise<result>}
    * @private
    */
   async _asyncPerform() {
@@ -57,11 +61,15 @@ class InvitedUsers extends ServiceBase {
 
     await oThis._fetchInviterId();
 
-    await oThis._searchInvitedUsers();
+    await oThis._getInvitedUsers();
 
     const promisesArray = [oThis._fetchUserDetails(), oThis._fetchTokenUsers()];
 
     await Promise.all(promisesArray);
+
+    oThis._prepareSearchResults();
+
+    await oThis._fetchImages();
 
     oThis._addResponseMetaData();
 
@@ -82,7 +90,7 @@ class InvitedUsers extends ServiceBase {
     if (oThis.paginationIdentifier) {
       const parsedPaginationParams = oThis._parsePaginationParams(oThis.paginationIdentifier);
 
-      oThis.paginationId = parsedPaginationParams.pagination_timestamp; // Override paginationTimestamp number.
+      oThis.paginationId = parsedPaginationParams.pagination_id; // Override paginationId number.
     } else {
       oThis.paginationId = null;
     }
@@ -115,33 +123,40 @@ class InvitedUsers extends ServiceBase {
   }
 
   /**
-   * Search invited users.
+   * Get invited users.
    *
-   * @sets oThis.userIds
+   * @sets oThis.userIds, oThis.nextPaginationId
    *
    * @returns {Promise<void>}
    * @private
    */
-  async _searchInvitedUsers() {
+  async _getInvitedUsers() {
     const oThis = this;
 
-    oThis.userIds = await new InviteCodeModel().search({
+    const queryResponse = await new InviteCodeModel().search({
       inviterCodeId: oThis.inviterCodeId,
       limit: oThis.limit,
       paginationId: oThis.paginationId
     });
+
+    oThis.userIds = queryResponse.userIds;
+    oThis.nextPaginationId = queryResponse.nextPaginationId;
   }
 
   /**
    * Fetch user details.
    *
-   * @sets oThis.userDetails, oThis.nextPaginationId
+   * @sets oThis.userDetails
    *
-   * @returns {Promise<never>}
+   * @returns {Promise<void>}
    * @private
    */
   async _fetchUserDetails() {
     const oThis = this;
+
+    if (oThis.userIds.length === 0) {
+      return;
+    }
 
     const userDetailsResponse = await new UserCache({ ids: oThis.userIds }).fetch();
     if (userDetailsResponse.isFailure()) {
@@ -149,10 +164,6 @@ class InvitedUsers extends ServiceBase {
     }
 
     oThis.userDetails = userDetailsResponse.data;
-
-    const lastUserId = oThis.userIds[oThis.userIds.length - 1];
-
-    oThis.nextPaginationId = oThis.userDetails[lastUserId].id;
   }
 
   /**
@@ -166,12 +177,63 @@ class InvitedUsers extends ServiceBase {
   async _fetchTokenUsers() {
     const oThis = this;
 
+    if (oThis.userIds.length === 0) {
+      return;
+    }
+
     const tokenUsersResponse = await new TokenUserDetailByUserIdsCache({ userIds: oThis.userIds }).fetch();
     if (tokenUsersResponse.isFailure()) {
       return Promise.reject(tokenUsersResponse);
     }
 
     oThis.tokenUsersByUserIdMap = tokenUsersResponse.data;
+  }
+
+  /**
+   * Prepare search results.
+   *
+   * @sets oThis.searchResults, oThis.imageIds
+   *
+   * @returns {void}
+   * @private
+   */
+  _prepareSearchResults() {
+    const oThis = this;
+
+    for (let index = 0; index < oThis.userIds.length; index++) {
+      const userId = oThis.userIds[index];
+      const userDetail = oThis.userDetails[userId];
+
+      oThis.searchResults.push({
+        id: index,
+        userId: userId,
+        updatedAt: userDetail.updatedAt
+      });
+
+      if (userDetail.profileImageId) {
+        oThis.imageIds.push(userDetail.profileImageId);
+      }
+    }
+  }
+
+  /**
+   * Fetch images.
+   *
+   * @sets oThis.imageDetails
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _fetchImages() {
+    const oThis = this;
+
+    if (oThis.imageIds.length === 0) {
+      return;
+    }
+
+    const imageData = await new ImageByIdCache({ ids: oThis.imageIds }).fetch();
+
+    oThis.imageDetails = imageData.data;
   }
 
   /**
@@ -200,16 +262,17 @@ class InvitedUsers extends ServiceBase {
   /**
    * Prepare final response.
    *
-   * @return {Promise<*|result>}
+   * @return {result}
    * @private
    */
-  async _prepareResponse() {
+  _prepareResponse() {
     const oThis = this;
 
     const response = {
-      [entityType.invitedUsersSearchList]: oThis.userIds,
+      [entityType.userSearchList]: oThis.searchResults,
       usersByIdMap: oThis.userDetails,
       tokenUsersByUserIdMap: oThis.tokenUsersByUserIdMap,
+      imageMap: oThis.imageDetails,
       meta: oThis.responseMetaData
     };
 

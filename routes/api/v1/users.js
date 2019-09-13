@@ -325,7 +325,7 @@ router.get('/search', sanitizer.sanitizeDynamicUrlParams, function(req, res, nex
   Promise.resolve(routeHelper.perform(req, res, next, '/user/Search', 'r_a_v1_u_15', null, dataFormatterFunc));
 });
 
-/* Invited users search. */
+/* Invited users list. */
 router.get('/invites', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.invitedUsersSearch;
 
@@ -333,7 +333,8 @@ router.get('/invites', sanitizer.sanitizeDynamicUrlParams, function(req, res, ne
     const wrapperFormatterRsp = await new FormatterComposer({
       resultType: responseEntityKey.searchResults,
       entityKindToResponseKeyMap: {
-        [entityType.invitedUsersSearchList]: responseEntityKey.searchResults,
+        [entityType.userSearchList]: responseEntityKey.searchResults,
+        [entityType.imagesMap]: responseEntityKey.images,
         [entityType.usersMap]: responseEntityKey.users,
         [entityType.invitedUsersListMeta]: responseEntityKey.meta
       },

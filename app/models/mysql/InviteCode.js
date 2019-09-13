@@ -180,7 +180,7 @@ class InviteCode extends ModelBase {
    * @param {number} params.inviterCodeId: inviterCodeId
    * @param {number} params.paginationId: pagination time stamp
    *
-   * @return {Promise<array>}
+   * @return {Promise<object>}
    */
   async search(params) {
     const oThis = this;
@@ -190,7 +190,7 @@ class InviteCode extends ModelBase {
       paginationId = params.paginationId;
 
     const queryObject = oThis
-      .select('user_id')
+      .select('id, user_id')
       .where({ inviter_code_id: inviterCodeId })
       .limit(limit)
       .order_by('id desc');
@@ -207,7 +207,9 @@ class InviteCode extends ModelBase {
       userIds.push(dbRows[index].user_id);
     }
 
-    return userIds;
+    const nextPaginationId = dbRows[dbRows.length - 1].id;
+
+    return { userIds: userIds, nextPaginationId: nextPaginationId };
   }
 
   /**
