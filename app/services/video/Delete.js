@@ -44,8 +44,10 @@ class DeleteVideo extends ServiceBase {
 
     await oThis._fetchCreatorUserId();
 
+    //todo::ADMIN creatorUserId will always be present?
     // Unknown video or already deleted
     if (!oThis.creatorUserId || oThis.videoDetails[0].status == videoDetailsConst.deletedStatus) {
+      //todo::ADMIN send error
       return responseHelper.successWithData({});
     }
 
@@ -88,6 +90,7 @@ class DeleteVideo extends ServiceBase {
    * @return {Promise<void>}
    * @private
    */
+  //todo::ADMIN function name change?
   async _fetchCreatorUserId() {
     const oThis = this;
 
@@ -103,6 +106,7 @@ class DeleteVideo extends ServiceBase {
 
     oThis.creatorUserId = oThis.videoDetails[0].creatorUserId;
 
+    //todo::ADMIN current Admin alway present?
     oThis.currentAdminId = oThis.currentAdmin ? Number(oThis.currentAdmin.id) : 0;
   }
 
@@ -115,6 +119,8 @@ class DeleteVideo extends ServiceBase {
   async _deleteProfileElementIfRequired() {
     const oThis = this;
 
+    //todo::ADMIN why fecth again? user profile element should not have video.
+
     const cacheResponse = await new VideoDetailsByUserIdCache({
       userId: oThis.creatorUserId,
       limit: paginationConstants.defaultVideoListPageSize,
@@ -125,6 +131,7 @@ class DeleteVideo extends ServiceBase {
       return Promise.reject(cacheResponse);
     }
 
+    //if deleted from profile element then there will be i
     let videoIds = cacheResponse.data.videoIds || [];
 
     if (videoIds[0] == oThis.videoId) {
@@ -184,6 +191,8 @@ class DeleteVideo extends ServiceBase {
         primary_external_entity_id: oThis.videoId
       })
       .fire();
+
+    //todo::ADMIN flush cache
   }
 }
 

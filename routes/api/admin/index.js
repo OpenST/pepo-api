@@ -153,7 +153,7 @@ router.get('/video-history/:profile_user_id', sanitizer.sanitizeDynamicUrlParams
     serviceResponse.data = wrapperFormatterRsp.data;
   };
 
-  //todo? send a admin view flag and change service ang get/profile lib
+  //todo::ADMIN send a admin view flag and change service ang get/profile lib
 
   Promise.resolve(
     routeHelper.perform(req, res, next, '/user/profile/GetVideoList', 'r_a_v1_u_5', null, dataFormatterFunc)
@@ -165,7 +165,7 @@ router.post('/delete-video/:video_id', sanitizer.sanitizeDynamicUrlParams, funct
   req.decodedParams.apiName = apiName.adminDeleteVideo;
   req.decodedParams.video_id = req.params.video_id;
 
-  //todo:: move to admin folder
+  //todo::ADMIN move to admin folder
   Promise.resolve(routeHelper.perform(req, res, next, '/video/Delete', 'r_a_v1_ad_6', null, null, null));
 });
 

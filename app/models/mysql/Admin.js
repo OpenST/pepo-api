@@ -121,6 +121,7 @@ class AdminModel extends ModelBase {
   async fetchByEmail(email) {
     const oThis = this;
 
+    //todo::ADMIN do not send all columns?
     const dbRows = await oThis
       .select('*')
       .where({ email: email })
