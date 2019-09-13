@@ -156,9 +156,6 @@ class SaveEmail extends ServiceBase {
       // Invalidate previous tokens for same user.
       promisesArray.push(oThis._invalidatePreviousTokens());
 
-      console.log('====previousEmail====', previousEmail);
-      console.log('====oThis.email====', oThis.email);
-
       if (previousEmail !== oThis.email) {
         // Update email for already existing user.
         promisesArray.push(

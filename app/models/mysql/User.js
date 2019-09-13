@@ -351,8 +351,8 @@ class UserModel extends ModelBase {
     }
 
     if (params.email) {
-      const UserIdByEmailCache = require(rootPrefix + '/lib/cacheManagement/single/UserIdByEmail');
-      promisesArray.push(new UserIdByEmailCache({ email: params.email }).clear());
+      const UserByEmailsCache = require(rootPrefix + '/lib/cacheManagement/multi/UserByEmails');
+      promisesArray.push(new UserByEmailsCache({ emails: [params.email] }).clear());
     }
 
     await Promise.all(promisesArray);
