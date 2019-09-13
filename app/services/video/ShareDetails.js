@@ -28,7 +28,6 @@ class ShareDetails extends ServiceBase {
     oThis.currentUser = params.current_user;
 
     oThis.videoLink = null;
-    oThis.creatorUserId = null;
     oThis.shareMessage = null;
   }
 
@@ -82,26 +81,6 @@ class ShareDetails extends ServiceBase {
   }
 
   /**
-   * Fetch video details.
-   *
-   * @returns {Promise<never>}
-   * @private
-   */
-  async _fetchVideoDetails() {
-    const oThis = this;
-
-    const cacheRsp = await new VideoDetailsByVideoIdsCache({ videoIds: [oThis.videoId] }).fetch();
-
-    if (cacheRsp.isFailure()) {
-      return Promise.reject(cacheRsp);
-    }
-
-    let videoDetails = cacheRsp.data[oThis.videoId];
-
-    oThis.creatorUserId = videoDetails.creatorUserId;
-  }
-
-  /**
    * Create Message.
    *
    * @private
@@ -111,10 +90,6 @@ class ShareDetails extends ServiceBase {
 
     let messagePrefix = 'Checkout this video ',
       messageSuffix = ' via @thepepoapp';
-
-    if (oThis.currentUser === oThis.creatorUserId) {
-      messagePrefix = 'Checkout my video ';
-    }
 
     oThis.shareMessage = messagePrefix + oThis.videoLink + messageSuffix;
   }
