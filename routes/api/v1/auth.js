@@ -68,4 +68,10 @@ router.post(
   }
 );
 
+router.post('/refresh-twitter-connect', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.refreshTwitterConnect;
+
+  Promise.resolve(routeHelper.perform(req, res, next, '/twitter/RefreshConnect', 'r_a_v1_a_5', null));
+});
+
 module.exports = router;
