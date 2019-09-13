@@ -83,7 +83,7 @@ class BackPopulateVideos {
    * @private
    */
   async _updateResolutionInNewFormat(dbRow) {
-    console.log('=====dbRow====', dbRow);
+    logger.log('=====dbRow====', dbRow);
 
     const resolutions = JSON.parse(dbRow.resolutions);
     let urlTemplate = null;
@@ -106,7 +106,7 @@ class BackPopulateVideos {
       }
     }
 
-    console.log('====urlTemplate===', urlTemplate);
+    logger.log('====urlTemplate===', urlTemplate);
 
     const paramsToUpdate = {
       urlTemplate: urlTemplate,

@@ -69,8 +69,8 @@ class SocketJobProcessor extends RabbitMqProcessorBase {
   _pendingTasksDone() {
     let rmqTaskDone = super._pendingTasksDone();
     let websocketTaskDone = webSocketServerHelper.pendingTasksDone();
-    console.log('rmqTaskDone-----', rmqTaskDone);
-    console.log('websocketTaskDone-----', websocketTaskDone);
+    logger.log('rmqTaskDone-----', rmqTaskDone);
+    logger.log('websocketTaskDone-----', websocketTaskDone);
     if (rmqTaskDone && websocketTaskDone) {
       return true;
     }

@@ -1,6 +1,5 @@
 {
   "emailServiceApiCallHookProcessor": {
-    "abcd": "1234",
     "sequenceNumber": 1
   },
   "cronProcessesMonitor": {},
@@ -13,5 +12,10 @@
     "topics": ["un.#"],
     "queues": ["example"],
     "prefetchCount": 1
+  },
+  "pushNotificationHookProcessor": {
+    "sequenceNumber": 1
+  },
+  "pushNotificationAggregator": {
   }
 }

@@ -129,13 +129,13 @@ class UserNotificationBase extends ServiceBase {
       formattedUserNotification.kind = userNotification.kind;
       formattedUserNotification.timestamp = userNotification.lastActionTimestamp;
 
-      formattedUserNotification.heading = await oThis._getHeading(userNotification);
-
-      formattedUserNotification.goto = await oThis._getGoto(userNotification);
+      formattedUserNotification.payload = await oThis._getPayload(userNotification);
 
       formattedUserNotification.imageId = await oThis._getImageId(userNotification);
 
-      formattedUserNotification.payload = await oThis._getPayload(userNotification);
+      formattedUserNotification.heading = await oThis._getHeading(userNotification, formattedUserNotification.payload);
+
+      formattedUserNotification.goto = await oThis._getGoto(userNotification);
 
       oThis.formattedUserNotifications.push(formattedUserNotification);
     }
@@ -154,7 +154,8 @@ class UserNotificationBase extends ServiceBase {
       supportingEntities: {
         [responseEntityKey.users]: oThis.usersByIdMap
       },
-      userNotification: userNotification
+      userNotification: userNotification,
+      notificationType: oThis._notificationType
     };
 
     const resp = NotificationResponseHelper.getImageIdForNotification(params);
@@ -175,7 +176,10 @@ class UserNotificationBase extends ServiceBase {
   async _getPayload(userNotification) {
     const oThis = this;
 
-    const resp = NotificationResponseHelper.getPayloadDataForNotification({ userNotification: userNotification });
+    const resp = NotificationResponseHelper.getPayloadDataForNotification({
+      userNotification: userNotification,
+      notificationType: oThis._notificationType
+    });
 
     if (resp.isFailure()) {
       return Promise.reject(resp);
@@ -190,14 +194,16 @@ class UserNotificationBase extends ServiceBase {
    * @returns {Promise<never>}
    * @private
    */
-  async _getHeading(userNotification) {
+  async _getHeading(userNotification, payload) {
     const oThis = this;
 
     const params = {
       supportingEntities: {
         [responseEntityKey.users]: oThis.usersByIdMap
       },
-      userNotification: userNotification
+      payload: payload,
+      userNotification: userNotification,
+      notificationType: oThis._notificationType
     };
 
     const resp = NotificationResponseHelper.getHeadingForNotification(params);
@@ -216,7 +222,12 @@ class UserNotificationBase extends ServiceBase {
    * @private
    */
   async _getGoto(userNotification) {
-    const resp = NotificationResponseHelper.getGotoForNotification({ userNotification: userNotification });
+    const oThis = this;
+
+    const resp = NotificationResponseHelper.getGotoForNotification({
+      userNotification: userNotification,
+      notificationType: oThis._notificationType
+    });
 
     if (resp.isFailure()) {
       return Promise.reject(resp);
@@ -237,10 +248,12 @@ class UserNotificationBase extends ServiceBase {
     const oThis = this;
 
     for (let index = 0; index < oThis.userNotifications.length; index++) {
-      const userNotification = NotificationResponseHelper.getFlattenedObject(oThis.userNotifications[index]);
+      const userNotification = oThis.userNotifications[index];
+      // const userNotification = NotificationResponseHelper.getFlattenedObject(oThis.userNotifications[index]);
 
       const supportingEntitiesConfig = NotificationResponseHelper.getSupportingEntitiesConfigForKind(
-        userNotification.kind
+        userNotification.kind,
+        oThis._notificationType
       );
 
       oThis.userIds = oThis.userIds.concat(
@@ -506,6 +519,10 @@ class UserNotificationBase extends ServiceBase {
       imageMap: oThis.imageMap,
       videoMap: oThis.videoMap
     };
+  }
+
+  get _notificationType() {
+    return userNotificationConstants.notificationCentreType;
   }
 }
 

@@ -13,16 +13,20 @@ const rootPrefix = '../..',
   commonValidator = require(rootPrefix + '/lib/validators/Common'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
+  logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   createErrorLogsEntry = require(rootPrefix + '/lib/errorLogs/createEntry'),
   errorLogsConstants = require(rootPrefix + '/lib/globalConstant/errorLogs'),
   transactionConstants = require(rootPrefix + '/lib/globalConstant/transaction'),
-  externalEntityConstants = require(rootPrefix + '/lib/globalConstant/externalEntity');
+  externalEntityConstants = require(rootPrefix + '/lib/globalConstant/externalEntity'),
+  notificationJobEnqueue = require(rootPrefix + '/lib/rabbitMqEnqueue/notification'),
+  notificationJobConstants = require(rootPrefix + '/lib/globalConstant/notificationJob');
 
 class OstTransaction extends ServiceBase {
   /**
    * @param {object} params
    * @param {object} params.ost_transaction
    * @param {object} params.current_user
+   * @param {object} [params.is_paper_plane]
    * @param {object} [params.meta]
    *
    * @constructor
@@ -44,6 +48,7 @@ class OstTransaction extends ServiceBase {
     oThis.ostTransactionStatus = oThis.transaction.status.toUpperCase();
     oThis.transfersData = oThis.transaction.transfers;
     oThis.fromOstUserId = oThis.transfersData[0].from_user_id;
+    oThis.toOstUserId = oThis.transfersData[0].to_user_id;
 
     oThis.textId = null;
     oThis.transactionId = null;
@@ -259,6 +264,7 @@ class OstTransaction extends ServiceBase {
 
     const transactionCacheResponse = await new TransactionByOstTxIdCache({ ostTxIds: [oThis.ostTxId] }).fetch();
 
+    logger.log('transactionCacheResponse =======', transactionCacheResponse);
     if (transactionCacheResponse.isFailure()) {
       return Promise.reject(
         responseHelper.error({
@@ -276,6 +282,8 @@ class OstTransaction extends ServiceBase {
       oThis.transactionId = transactionCacheResponse.data[oThis.ostTxId].id;
       oThis.transactionObj = transactionCacheResponse.data[oThis.ostTxId];
     }
+
+    logger.log('oThis.transactionObj =======', oThis.transactionObj);
   }
 
   /**

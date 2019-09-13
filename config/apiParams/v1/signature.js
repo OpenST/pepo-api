@@ -37,6 +37,19 @@ const v1Signature = {
     ],
     optional: []
   },
+  [apiName.logout]: {
+    mandatory: [],
+    optional: [
+      {
+        parameter: 'device_id',
+        validatorMethods: ['validateString']
+      },
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      }
+    ]
+  },
   [apiName.recoveryInfo]: {
     mandatory: [
       {
@@ -181,6 +194,10 @@ const v1Signature = {
       {
         parameter: 'meta',
         validatorMethods: ['validateNonEmptyObject', 'validateOstTransactionMeta']
+      },
+      {
+        parameter: 'is_paper_plane',
+        validatorMethods: ['validateBoolean']
       }
     ]
   },
@@ -492,12 +509,87 @@ const v1Signature = {
     ],
     optional: [
       {
-        parameter: 'include_admin_related_details',
+        parameter: paginationConstants.paginationIdentifierKey,
+        validatorMethods: ['validateString', 'validatePaginationIdentifier']
+      }
+    ]
+  },
+  [apiName.adminUserSearch]: {
+    mandatory: [],
+    optional: [
+      {
+        parameter: 'includeVideos',
         validatorMethods: ['validateBoolean']
+      },
+      {
+        parameter: 'q',
+        validatorMethods: ['validateString']
       },
       {
         parameter: paginationConstants.paginationIdentifierKey,
         validatorMethods: ['validateString', 'validatePaginationIdentifier']
+      }
+    ]
+  },
+  [apiName.adminUserApprove]: {
+    mandatory: [
+      {
+        parameter: 'user_ids',
+        validatorMethods: ['validateArray']
+      }
+    ],
+    optional: []
+  },
+  [apiName.adminDeleteVideo]: {
+    mandatory: [
+      {
+        parameter: 'video_id',
+        validatorMethods: ['validateNonZeroInteger']
+      },
+      {
+        parameter: 'current_admin',
+        validatorMethods: ['validateNonEmptyObject']
+      }
+    ],
+    optional: []
+  },
+  [apiName.addDeviceToken]: {
+    mandatory: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      },
+      {
+        parameter: 'user_id',
+        validatorMethods: ['validateNonZeroInteger']
+      },
+      {
+        parameter: 'device_id',
+        validatorMethods: ['validateNonBlankString']
+      },
+      {
+        parameter: 'device_kind',
+        validatorMethods: ['validateNonBlankString']
+      },
+      {
+        parameter: 'device_token',
+        validatorMethods: ['validateNonBlankString']
+      },
+      {
+        parameter: 'user_timezone',
+        validatorMethods: ['validateNonBlankString']
+      }
+    ]
+  },
+  [apiName.resetBadge]: {
+    mandatory: [
+      {
+        parameter: 'user_id',
+        validatorMethods: ['validateNonZeroInteger']
+      },
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
       }
     ]
   }

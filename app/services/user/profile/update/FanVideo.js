@@ -1,18 +1,19 @@
 const rootPrefix = '../../../../..',
   UrlModel = require(rootPrefix + '/app/models/mysql/Url'),
   FeedModel = require(rootPrefix + '/app/models/mysql/Feed'),
+  UserModelKlass = require(rootPrefix + '/app/models/mysql/User'),
   CommonValidator = require(rootPrefix + '/lib/validators/Common'),
   AddVideoDescription = require(rootPrefix + '/lib/video/AddDescription'),
   UpdateProfileBase = require(rootPrefix + '/app/services/user/profile/update/Base'),
   UserProfileElementModel = require(rootPrefix + '/app/models/mysql/UserProfileElement'),
-  userProfileElementConst = require(rootPrefix + '/lib/globalConstant/userProfileElement'),
   VideoDetailsModel = require(rootPrefix + '/app/models/mysql/VideoDetail'),
-  VideoAddNotification = require(rootPrefix + '/lib/userNotificationPublisher/VideoAdd'),
   videoLib = require(rootPrefix + '/lib/videoLib'),
   urlConstants = require(rootPrefix + '/lib/globalConstant/url'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   feedsConstants = require(rootPrefix + '/lib/globalConstant/feed'),
-  UserModelKlass = require(rootPrefix + '/app/models/mysql/User');
+  notificationJobEnqueue = require(rootPrefix + '/lib/rabbitMqEnqueue/notification'),
+  notificationJobConstants = require(rootPrefix + '/lib/globalConstant/notificationJob'),
+  userProfileElementConst = require(rootPrefix + '/lib/globalConstant/userProfileElement');
 
 /**
  * Class to update fan video and image save.
@@ -229,14 +230,20 @@ class UpdateFanVideo extends UpdateProfileBase {
     // Feed needs to be added for uploaded video
     const oThis = this;
 
+    await notificationJobEnqueue.enqueue(notificationJobConstants.videoAdd, {
+      userId: oThis.profileUserId,
+      videoId: oThis.videoId
+    });
+
     // Feed needs to be added only if user is an approved creator.
     if (UserModelKlass.isUserApprovedCreator(oThis.userObj)) {
       await oThis._addFeed();
+
       // Notification would be published only if user is approved.
-      await new VideoAddNotification({
+      await notificationJobEnqueue.enqueue(notificationJobConstants.videoAdd, {
         userId: oThis.profileUserId,
         videoId: oThis.videoId
-      }).perform();
+      });
     }
   }
 
