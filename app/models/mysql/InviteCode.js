@@ -109,6 +109,28 @@ class InviteCode extends ModelBase {
   }
 
   /**
+   * Fetch invite code by code.
+   *
+   * @param {string} code: code
+   *
+   * @return {object}
+   */
+  async fetchByCode(code) {
+    const oThis = this;
+
+    const dbRows = await oThis
+      .select('*')
+      .where(['code = ?', code])
+      .fire();
+
+    if (dbRows.length === 0) {
+      return {};
+    }
+
+    return oThis.formatDbData(dbRows[0]);
+  }
+
+  /**
    * Flush cache.
    *
    * @param {object} params
