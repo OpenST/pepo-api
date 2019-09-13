@@ -27,7 +27,6 @@ class ShareDetails extends ServiceBase {
     oThis.videoId = params.video_id;
     oThis.currentUser = params.current_user;
 
-    oThis.videoLink = null;
     oThis.shareMessage = null;
   }
 
@@ -74,10 +73,6 @@ class ShareDetails extends ServiceBase {
         })
       );
     }
-
-    let videoData = cacheRsp.data[oThis.videoId];
-
-    oThis.videoLink = videoData.resolutions.original.url;
   }
 
   /**
@@ -91,7 +86,7 @@ class ShareDetails extends ServiceBase {
     let messagePrefix = 'Checkout this video ',
       messageSuffix = ' via @thepepoapp';
 
-    oThis.shareMessage = messagePrefix + oThis.videoLink + messageSuffix;
+    oThis.shareMessage = messagePrefix + oThis._generateVideoShareUrl() + messageSuffix;
   }
 
   /**
