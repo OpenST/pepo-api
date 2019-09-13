@@ -1,4 +1,4 @@
-const rootPrefix = '../../..',
+const rootPrefix = '../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   TemporaryTokenModel = require(rootPrefix + '/app/models/mysql/TemporaryToken'),
   coreConstants = require(rootPrefix + '/config/coreConstants'),
