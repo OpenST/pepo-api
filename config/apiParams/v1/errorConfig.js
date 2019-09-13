@@ -184,6 +184,16 @@ const v1ErrorConfig = {
     parameter: 'email',
     code: 'invalid',
     message: 'This email address is already associated with some different account.'
+  },
+  same_account_email: {
+    parameter: 'email',
+    code: 'invalid',
+    message: 'This email address is already associated with the current account.'
+  },
+  email_already_added: {
+    parameter: 'email',
+    code: 'invalid',
+    message: 'This account already has an email address associated with it.'
   }
 };
 

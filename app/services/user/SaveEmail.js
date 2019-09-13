@@ -1,5 +1,6 @@
 const rootPrefix = '../../../',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
+  UserCache = require(rootPrefix + '/lib/cacheManagement/multi/User'),
   UserEmailLogsModel = require(rootPrefix + '/app/models/mysql/UserEmailLogs'),
   TemporaryTokenModel = require(rootPrefix + '/app/models/mysql/TemporaryToken'),
   UserByEmailsCache = require(rootPrefix + '/lib/cacheManagement/multi/UserByEmails'),
@@ -81,6 +82,37 @@ class SaveEmail extends ServiceBase {
       );
     }
 
+    // Check if the current user does not already have an email associated with it.
+    const userResponse = await new UserCache({ ids: [oThis.profileUserId] }).fetch();
+    if (userResponse.isFailure()) {
+      return Promise.reject(userResponse);
+    }
+
+    const userDetails = userResponse.data[oThis.profileUserId];
+
+    // If email already exists, don't let user update email.
+    if (userDetails.email) {
+      if (userDetails.email === oThis.email) {
+        return Promise.reject(
+          responseHelper.paramValidationError({
+            internal_error_identifier: 'a_s_u_p_u_e_2',
+            api_error_identifier: 'invalid_params',
+            params_error_identifiers: ['same_account_email'],
+            debug_options: {}
+          })
+        );
+      }
+
+      return Promise.reject(
+        responseHelper.paramValidationError({
+          internal_error_identifier: 'a_s_u_p_u_e_3',
+          api_error_identifier: 'invalid_params',
+          params_error_identifiers: ['email_already_added'],
+          debug_options: {}
+        })
+      );
+    }
+
     // Check if email is not already associated with some different user.
     const userDetailsResponse = await new UserByEmailsCache({ emails: [oThis.email] }).fetch();
     if (userDetailsResponse.isFailure()) {
@@ -93,7 +125,7 @@ class SaveEmail extends ServiceBase {
     if (userId) {
       return Promise.reject(
         responseHelper.paramValidationError({
-          internal_error_identifier: 'a_s_u_p_u_e_1',
+          internal_error_identifier: 'a_s_u_p_u_e_4',
           api_error_identifier: 'invalid_params',
           params_error_identifiers: ['already_associated_email'],
           debug_options: {}
@@ -123,6 +155,9 @@ class SaveEmail extends ServiceBase {
 
       // Invalidate previous tokens for same user.
       promisesArray.push(oThis._invalidatePreviousTokens());
+
+      console.log('====previousEmail====', previousEmail);
+      console.log('====oThis.email====', oThis.email);
 
       if (previousEmail !== oThis.email) {
         // Update email for already existing user.
