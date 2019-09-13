@@ -134,6 +134,43 @@ class InviteCode extends ModelBase {
   }
 
   /**
+   * Invited user search.
+   *
+   * @param {number} params.limit: limit
+   * @param {number} params.inviterCodeId: inviterCodeId
+   * @param {number} params.paginationId: pagination time stamp
+   *
+   * @return {Promise<array>}
+   */
+  async search(params) {
+    const oThis = this;
+
+    const limit = params.limit,
+      inviterCodeId = params.inviterCodeId,
+      paginationId = params.paginationId;
+
+    const queryObject = oThis
+      .select('user_id')
+      .where({ inviter_code_id: inviterCodeId })
+      .limit(limit)
+      .order_by('id desc');
+
+    if (paginationId) {
+      queryObject.where(['id < ?', paginationId]);
+    }
+
+    const dbRows = await queryObject.fire();
+
+    const userIds = [];
+
+    for (let index = 0; index < dbRows.length; index++) {
+      userIds.push(dbRows[index].user_id);
+    }
+
+    return userIds;
+  }
+
+  /**
    * Flush cache.
    *
    * @param {object} params
