@@ -129,16 +129,17 @@ class CreateTopup extends ServiceBase {
       receiptId = oThis.paymentReceipt.transactionId,
       serviceKind = oThis._getServiceKind();
 
+    let createParams = {
+      from_user_id: oThis.currentUser.id,
+      receipt_id: receiptId,
+      raw_receipt: JSON.stringify(oThis.paymentReceipt),
+      kind: fiatPaymentConstants.invertedKinds[fiatPaymentConstants.topUpKind],
+      service_kind: fiatPaymentConstants.invertedServiceKinds[serviceKind],
+      currency: ostPricePointConstants.invertedQuoteCurrencies[ostPricePointConstants.usdQuoteCurrency],
+      status: fiatPaymentConstants.invertedStatuses[fiatPaymentConstants.receiptValidationPendingStatus]
+    };
     let fiatPaymentCreateResp = await new FiatPaymentModel()
-      .insert({
-        from_user_id: oThis.currentUser.id,
-        receipt_id: receiptId,
-        raw_receipt: JSON.stringify(oThis.paymentReceipt),
-        kind: fiatPaymentConstants.invertedKinds[fiatPaymentConstants.topUpKind],
-        service_kind: fiatPaymentConstants.invertedServiceKinds[serviceKind],
-        currency: ostPricePointConstants.invertedQuoteCurrencies[ostPricePointConstants.usdQuoteCurrency],
-        status: fiatPaymentConstants.invertedStatuses[fiatPaymentConstants.receiptValidationPendingStatus]
-      })
+      .insert(createParams)
       .fire()
       .catch(async function(mysqlErrorObject) {
         if (mysqlErrorObject.code === mysqlErrorConstants.duplicateError) {
@@ -146,13 +147,17 @@ class CreateTopup extends ServiceBase {
           oThis.paymentDetail = await new FiatPaymentModel().fetchByReceiptIdAndServiceKind(receiptId, serviceKind);
           oThis.fiatPaymentId = oThis.paymentDetail.id;
         } else {
-          return Promise.reject(
-            responseHelper.error({
-              internal_error_identifier: 'a_s_p_pv_1',
-              api_error_identifier: 'something_went_wrong',
-              debug_options: { error: mysqlErrorObject }
-            })
-          );
+          let errorResp = responseHelper.error({
+            internal_error_identifier: 'a_s_p_pv_1',
+            api_error_identifier: 'something_went_wrong',
+            debug_options: {
+              error: JSON.stringify(mysqlErrorObject),
+              errorMessage: 'Could not store topup.',
+              createParams: JSON.stringify(createParams)
+            }
+          });
+          await createErrorLogsEntry.perform(errorResp, errorLogsConstants.highSeverity);
+          return Promise.reject(errorResp);
         }
       });
 
