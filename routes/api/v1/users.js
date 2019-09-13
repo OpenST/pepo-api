@@ -355,4 +355,24 @@ router.post('/:user_id/device-token', sanitizer.sanitizeDynamicUrlParams, functi
   Promise.resolve(routeHelper.perform(req, res, next, '/user/AddDeviceToken', 'r_a_v1_u_17', null));
 });
 
+/* Get Invite Code*/
+router.get('/get-invite-code', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.getInviteCode;
+
+  const dataFormatterFunc = async function(serviceResponse) {
+    const wrapperFormatterRsp = await new FormatterComposer({
+      resultType: responseEntityKey.inviteDetails,
+      entityKindToResponseKeyMap: {
+        [entityType.inviteCode]: responseEntityKey.inviteDetails,
+        [entityType.share]: responseEntityKey.share
+      },
+      serviceData: serviceResponse.data
+    }).perform();
+
+    serviceResponse.data = wrapperFormatterRsp.data;
+  };
+
+  Promise.resolve(routeHelper.perform(req, res, next, '/user/GetInviteCode', 'r_a_v1_u_18', null, dataFormatterFunc));
+});
+
 module.exports = router;

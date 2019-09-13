@@ -59,6 +59,15 @@ const v1Signature = {
     ],
     optional: []
   },
+  [apiName.getInviteCode]: {
+    mandatory: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      }
+    ],
+    optional: []
+  },
   [apiName.sendDoubleOptIn]: {
     mandatory: [
       {
