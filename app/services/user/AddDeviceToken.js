@@ -117,14 +117,16 @@ class AddDeviceToken extends ServiceBase {
 
     //todo: get and update and the flush cache - Done
 
-    const userDeviceCacheRsp = await new UserDeviceModel()
-        .select('*')
-        .where({
-          user_id: oThis.currentUserId,
-          device_id: oThis.deviceId
-        })
-        .fire(),
-      userDeviceId = userDeviceCacheRsp[0].id;
+    const userDevices = await new UserDeviceModel()
+      .select('*')
+      .where({ user_id: oThis.currentUserId, device_id: oThis.deviceId })
+      .fire();
+
+    let userDeviceId = null;
+
+    if (userDevices[0] && userDevices[0].id) {
+      userDeviceId = userDevices[0].id;
+    }
 
     if (userDeviceId) {
       await new UserDeviceModel()
