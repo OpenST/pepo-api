@@ -577,6 +577,30 @@ const v1Signature = {
         validatorMethods: ['validateNonBlankString']
       }
     ]
+  },
+  [apiName.resetBadge]: {
+    mandatory: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      }
+    ]
+  },
+  [apiName.share]: {
+    mandatory: [
+      {
+        parameter: 'video_id',
+        validatorMethods: ['validateNonZeroInteger']
+      }
+    ]
+  },
+  [apiName.fetchGoto]: {
+    mandatory: [
+      {
+        parameter: 'url',
+        validatorMethods: ['validateGenericUrl']
+      }
+    ]
   }
 };
 
