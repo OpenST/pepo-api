@@ -102,7 +102,7 @@ class UserProfileElementModel extends ModelBase {
 
     const currentTime = Math.floor(Date.now() / 1000);
 
-    return oThis
+    await oThis
       .insert({
         user_id: params.userId,
         data_kind: userProfileElementConst.invertedKinds[params.dataKind],
@@ -111,6 +111,8 @@ class UserProfileElementModel extends ModelBase {
         updated_at: currentTime
       })
       .fire();
+
+    return UserProfileElementModel.flushCache(params);
   }
 
   /**

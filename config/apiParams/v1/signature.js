@@ -38,16 +38,15 @@ const v1Signature = {
     optional: []
   },
   [apiName.logout]: {
-    mandatory: [
-      {
-        parameter: 'current_user',
-        validatorMethods: ['validateNonEmptyObject']
-      }
-    ],
+    mandatory: [],
     optional: [
       {
         parameter: 'device_id',
         validatorMethods: ['validateString']
+      },
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
       }
     ]
   },
@@ -195,6 +194,10 @@ const v1Signature = {
       {
         parameter: 'meta',
         validatorMethods: ['validateNonEmptyObject', 'validateOstTransactionMeta']
+      },
+      {
+        parameter: 'is_paper_plane',
+        validatorMethods: ['validateBoolean']
       }
     ]
   },
@@ -584,6 +587,10 @@ const v1Signature = {
   },
   [apiName.resetBadge]: {
     mandatory: [
+      {
+        parameter: 'user_id',
+        validatorMethods: ['validateNonZeroInteger']
+      },
       {
         parameter: 'current_user',
         validatorMethods: ['validateNonEmptyObject']

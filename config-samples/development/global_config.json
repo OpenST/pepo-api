@@ -68,16 +68,16 @@
     },
     "firebase": {
       "type": "service_account",
-      "projectId": "pepo2-18368",
-      "privateKeyId": "c993b9f9a18d8d22af704e7af1b78db570129bca",
-      "privateKey": "-----BEGIN PRIVATE KEY-----\nMIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQCuc/2wYEUDiOL3\nrP9QrXZptXjqBy3TI4rq0E5Qe1+pOf81pYgDWC5ElnNfN/pl5SVZGyifI3ssBWGv\n8dCnu5DP7Qi7p7/bH2InbrdHlNrcL/ysx3efs6TfT11GltAoW8yEUxzZRpeHnfWQ\n2MEvbPPcejLT0U/ZEuBaqfjlQvFBNfFQCwO82l/3f4yi33gpRgUSOsyKr1ytUlpy\nHYQdK2YDPraRPd93p60m2R9j4+sh/cgAjdV5OjsMm5tV/K2zlFtOjZiF3yYDVJOy\nGlEgLkZWE2ehMP7upJkxJaWvEhkxRUKSfZ7LGBpgu03SiHOgyiuF8nCPj7/1jVIK\n3tw3Fv2FAgMBAAECggEADFfeokUdfPOJg5a09eNgFnilloFth5vjL1wPvngMO7AD\n06rjpcDufSHcBeezCtScwOJADIp5I5M55zYH2mZWB7Awxv5Gf92Hl1ypESKCHcQz\nb5Ipb55JUxeNdPokvkZIgTBUQTdSb2EIx/feK1ndI0NuJziPGr/QKfoOx0HmSgPF\n8zVaKaUfXO/5DEOKV3zCQ3B6pOPRvIpbhziKS17I2TcFBn1IGkevnmt2fgV52x+P\nmHJEbBsKE80I/+LY4vSux5obQCoCMCvitckMVXHPYKrsxiQOXR+bwzhl+B/+LYib\nait2NhgvGipQFEf8xGHQH9b8bR1RynWSZ/Djg0p/AQKBgQDtxOQZEfyZIrQJLyJg\nVUkLDfrhc8AfM1vilz+Nbigl62bQ4n02QABSkiVnjYGtZW86xGOJUYMDSGQaR0Mc\nnxoWvGDYqu8QXCK77GHOPPYlQXOHp/xhCJEN+xvVsYtN0kDjwzLjB9MLwtf2kaUR\nWJktskPoWDJglP2g4U0vCkB+wQKBgQC71Ek8UgVOJJt7tbwtIwpn7MzqS9qApRM6\nUjkjkqGhXq7A/xA9CKDKJo6tpwRWxJgeRC2P3/mRYMfiZM2CZ8939DsOdOYgr05k\nWbEbWFzoWv+GssT1SIORPPxUysrZa4+py28mVsOVTiUGZWCJvEMSYir03DrtjN+V\n6p2TjHUzxQKBgBmuxdCrb7R+2iGP1M/BBpXKGcpWfW8hVhCAs92sA2wtJDr16/57\nJU3F+YJY96PqK/yWEAZaJqOpIx7viaFC0keYa4Gb3RzQRvQzkVD8pr3Zdwg1Lf6x\nNTHkaNpJRjnOtzGi+REq3DIOBtPcYY8hGdKkyc8ED9T84vSIwZSOL+9BAoGAIehd\n3DTWXlf/daLGOMPFoiM+juForaafRP0I8aIL6azFEXQ6QzpmhHfXdAPdpahR6czX\nCM0fKZ52Fympa+w/qOD/NEnoLWhYV4dVkKEwDIY48OEe60TO84414zzEx+FCCx39\nj8dEAZUc2/27IsJIvW3ZYWDMhovS5SZ4keVeVx0CgYAmdrRzdTGK5DcKpRGBatoT\nEclIn4oEH+QT/hXMHk2cOFvprt9nGnUkhisYokx/ufsJbjXfDXn4uxQug8kStufJ\nqcIsYpPZp+4NMIVIcEoUI6zlvoP30ZSTRBNrbB6GpMjC36pg29T/u055bQ7Q5tAO\nTaL9oa8AoF2BLsk9SUkddQ==\n-----END PRIVATE KEY-----\n",
-      "clientEmail": "firebase-adminsdk-fue40@pepo2-18368.iam.gserviceaccount.com",
-      "clientId": "105010870333743231979",
+      "projectId": "pepo-staging-60d8e",
+      "privateKeyId": "8a683cea929a6d4eb0c93b31df74b8fc6e22eafb",
+      "privateKey": "-----BEGIN PRIVATE KEY-----\nMIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQDSTkGxDlEdIvKN\nl6Mc8Izz2m/w6c+uYdjreke7VxdNdgjftNigQvk5mErqvKidrQ3/VbrIyIoklDfF\n2X+tpqVbh30dXkOMpDowAApVDb+NTilt7CtJimhbJbnvONO1XSxu9+5RQH7w0ldo\nnFSMg+1B3XAi+VvKdY1GzQFCdVjcZ3ljuvAtZ0EVRsP7+eR4KekB1tJP+gqJV14q\nKlMzTYPCvTIT5/9D1mwGkTUguo6iHNylWgSk5Z1VE4cmowwvLel26k0nf425QTr1\nhsG70mbPHQN5/Y43OELVeHj8MYTOiY5ioAH0HntjvBmDYu+E0LJ7StTdLRy+zPto\nhr5wok7/AgMBAAECggEAISh/iQgF1/8zmQmIiT6QKr6NGcHzob4Bspb0CmCf5vGu\nUn80DIiivOb7IOmf+ERZyaFdstyTk1LfPE2fqOR2e+jv3BqJsfoOxpSrDF//jKr/\nMzqiVJUDASQAnewqzRSktdZXd+4gVZ4EdBT567G9Tb45OPpx84j3PmuCQFU6Ln3E\nyy3q3pV0aA3nbaobPxSwsc9B5nUvBGkg7slFflZkCAojC7jw+pZFgjuAh57IGSdg\nwT7s+uKscUj1Bolftwrt0dd2a646sW7yxJyZxZ3Q1lQr3eoi0tLNs3u3NbDm0Ydd\njolV1nrU8T7fWL3URGAH0FnvsJ8AwhJ1Ct5b9qso4QKBgQD0wKeL6s4w/2iFDJbw\nkPH/Rt+jG7/O/6sdQKN+C0ao0PHTk4org+gGJJtIYbtYFTCzIlsETo0qVrkJdESj\nok7gQ5Kj7Dq/sX/EorCQV4nGn+dfAnOlDEr/fotyN/CBtUAIrzvfXeVarN9y9ptr\nekviyDOD7Nw4+ILjvzPJ+x2tUQKBgQDb+FvCGGw+v7fCIR8Yo86mTiFVdrJa0Fow\ntiNnVqf7kADbMoxvsfoKM+QqwT5lc33XZFUjbGEJucQyvXucpErcMKjkSqNP6L8N\n1WRK9ELqjiwACH9DmO/gToqnDP2WM7exzXtdYegUDWfSYu4XGbLQVZJZBr61OHJ/\nYuD4JlvjTwKBgHgS7B/gmje/le9wNbzf31l109GZk4hiNfir9YmozomTuJAsGeUv\nWW1qGCRyjg6wlqvLdwut3eOfmDfjKql8v2WWwSJaipfw5NX7WtP1nkoruL8L3OBk\nH4co9hCbEQsReNDJ5321+wd5OEaWZblczk38Ggnm8kOg59YDv8yfvfeBAoGAJvKu\nrItOfz3K96CNtPssF941oMBHjDTgA0f8tMtvKuewfx9QJmbI8w2FFNzqg2QToBOv\nz3ndJK+zwZgzTuT4LEyhWuqsR/XZ/kUOYQcm4gkSWV8nyXxG3NyLSFDQhcvadqz/\nbuVrBkHpZCMILSbrtl+wbfr3wXahL1T+qHGCS5kCgYBSSVl15K3ka/dUfceuaq9H\n98wLh15+BLohRmqX3uRB1aq8Yoz4h8gO76j2rjFfHhKeUjJPVgU6D91YlXV6vn9M\nVSrha4rjnIr5tYbbgGCHiCjNVSjgB7n5XJtaoq3o9ybzp27h3BaXI7QrVcDRlBFD\ntGPUYJ8FLNdp8YjTTEQ6Uw==\n-----END PRIVATE KEY-----\n",
+      "clientEmail": "firebase-adminsdk-7tlqq@pepo-staging-60d8e.iam.gserviceaccount.com",
+      "clientId": "115874933303568447080",
       "authUri": "https://accounts.google.com/o/oauth2/auth",
       "tokenUri": "https://oauth2.googleapis.com/token",
       "authProviderx509CertUrl": "https://www.googleapis.com/oauth2/v1/certs",
-      "clientx509CertUrl": "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-fue40%40pepo2-18368.iam.gserviceaccount.com",
-      "databaseURL": "https://pepo2-18368.firebaseio.com"
+      "clientx509CertUrl": "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-7tlqq%40pepo-staging-60d8e.iam.gserviceaccount.com",
+      "databaseURL": "https://pepo-staging-60d8e.firebaseio.com"
     }
   }
 }
