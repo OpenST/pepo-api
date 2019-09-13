@@ -16,6 +16,8 @@ const rootPrefix = '../../..',
   cookieHelper = require(rootPrefix + '/lib/cookieHelper'),
   tagRoutes = require(rootPrefix + '/routes/api/v1/tags'),
   userNotificationsRoutes = require(rootPrefix + '/routes/api/v1/userNotifications'),
+  fetchGotoRoutes = require(rootPrefix + '/routes/api/v1/fetchGoto'),
+  commonValidator = require(rootPrefix + '/lib/validators/Common'),
   uploadParamsRoutes = require(rootPrefix + '/routes/api/v1/uploadParams'),
   rotateTwitterAccountRoutes = require(rootPrefix + '/routes/api/v1/rotateTwitterAccount'),
   ostTransactionRoutes = require(rootPrefix + '/routes/api/v1/ostTransactions');
@@ -43,5 +45,6 @@ router.use('/gifs', gifsRoutes);
 router.use('/upload-params', uploadParamsRoutes);
 router.use('/tags', tagRoutes);
 router.use('/notifications', userNotificationsRoutes);
+router.use('/fetch-goto', fetchGotoRoutes);
 
 module.exports = router;

@@ -637,6 +637,22 @@ const v1Signature = {
         validatorMethods: ['validateString', 'validatePaginationIdentifier']
       }
     ]
+  },
+  [apiName.share]: {
+    mandatory: [
+      {
+        parameter: 'video_id',
+        validatorMethods: ['validateNonZeroInteger']
+      }
+    ]
+  },
+  [apiName.fetchGoto]: {
+    mandatory: [
+      {
+        parameter: 'url',
+        validatorMethods: ['validateGenericUrl']
+      }
+    ]
   }
 };
 
