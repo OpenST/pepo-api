@@ -623,6 +623,20 @@ const v1Signature = {
         validatorMethods: ['validateNonEmptyObject']
       }
     ]
+  },
+  [apiName.invitedUsersSearch]: {
+    mandatory: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      }
+    ],
+    optional: [
+      {
+        parameter: paginationConstants.paginationIdentifierKey,
+        validatorMethods: ['validateString', 'validatePaginationIdentifier']
+      }
+    ]
   }
 };
 
