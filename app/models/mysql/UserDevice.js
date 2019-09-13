@@ -127,6 +127,32 @@ class UserDevice extends ModelBase {
   }
 
   /**
+   * Fetch user devices ids by device tokens.
+   *
+   * @param {array} deviceTokens
+   *
+   * @returns {Promise<void>}
+   */
+  async fetchUserDeviceIdsByDeviceTokens(deviceTokens) {
+    const oThis = this;
+
+    const dbRows = await oThis
+      .select('id, device_token')
+      .where({ device_token: deviceTokens })
+      .fire();
+
+    const response = {};
+
+    for (let index = 0; index < dbRows.length; index++) {
+      const formatDbRow = oThis.formatDbData(dbRows[index]);
+      response[formatDbRow.deviceToken] = response[formatDbRow.deviceToken] || [];
+      response[formatDbRow.deviceToken].push(formatDbRow.id);
+    }
+
+    return response;
+  }
+
+  /**
    * Index name
    *
    * @returns {string}
@@ -151,6 +177,11 @@ class UserDevice extends ModelBase {
     if (params.id) {
       const UserDeviceByIds = require(rootPrefix + '/lib/cacheManagement/multi/UserDeviceByIds');
       promisesArray.push(new UserDeviceByIds({ ids: [params.id] }).clear());
+    }
+
+    if (params.deviceToken) {
+      const UserDeviceIdsByDeviceToken = require(rootPrefix + '/lib/cacheManagement/multi/UserDeviceIdsByDeviceToken');
+      promisesArray.push(new UserDeviceIdsByDeviceToken({ deviceTokens: [params.deviceToken] }).clear());
     }
 
     await Promise.all(promisesArray);
