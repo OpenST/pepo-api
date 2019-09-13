@@ -208,7 +208,7 @@ router.post('/:profile_user_id/save-email', sanitizer.sanitizeDynamicUrlParams, 
   req.decodedParams.apiName = apiName.saveEmail;
   req.decodedParams.profile_user_id = req.params.profile_user_id;
 
-  Promise.resolve(routeHelper.perform(req, res, next, '/user/profile/update/Email', 'r_a_v1_u_12', null));
+  Promise.resolve(routeHelper.perform(req, res, next, '/user/SaveEmail', 'r_a_v1_u_12', null));
 });
 
 /* Video history */

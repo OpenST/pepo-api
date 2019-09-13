@@ -1,29 +1,36 @@
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
+  TemporaryTokenModel = require(rootPrefix + '/app/models/mysql/TemporaryToken'),
   coreConstants = require(rootPrefix + '/config/coreConstants'),
+  logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   localCipher = require(rootPrefix + '/lib/encryptors/localCipher'),
-  PreLaunchInviteModel = require(rootPrefix + '/app/models/mysql/PreLaunchInvite'),
-  AddContactInPepoCampaign = require(rootPrefix + '/lib/email/hookCreator/AddContact'),
+  temporaryTokenConstants = require(rootPrefix + '/lib/globalConstant/temporaryToken'),
   preLaunchInviteConstants = require(rootPrefix + '/lib/globalConstant/preLaunchInvite'),
-  TemporaryTokenModel = require(rootPrefix + '/app/models/mysql/TemporaryToken'),
-  temporaryTokenConstant = require(rootPrefix + '/lib/globalConstant/temporaryToken'),
   emailServiceApiCallHookConstants = require(rootPrefix + '/lib/globalConstant/emailServiceApiCallHook');
 
-class SendDoubleOptIn extends ServiceBase {
+/**
+ * Class to verify double opt in token.
+ *
+ * @class VerifyDoubleOptIn
+ */
+class VerifyDoubleOptIn extends ServiceBase {
   /**
-   * @constructor
+   * Constructor to verify double opt in token.
    *
-   * @param params
-   *
+   * @param {object} params
    * @param {string} params.t
    *
+   * @augments ServiceBase
+   *
+   * @constructor
    */
   constructor(params) {
-    super(params);
+    super();
+
     const oThis = this;
 
-    oThis.t = params.t;
+    oThis.inputToken = params.t;
 
     oThis.token = null;
     oThis.temporaryTokenId = null;
@@ -32,7 +39,7 @@ class SendDoubleOptIn extends ServiceBase {
   }
 
   /**
-   * Async performer.
+   * Async perform.
    *
    * @return {Promise<void>}
    */
@@ -41,49 +48,48 @@ class SendDoubleOptIn extends ServiceBase {
 
     await oThis._validate();
 
-    await oThis._fetchPreLaunchInviteDoubleOptInToken();
+    await oThis._fetchDoubleOptInToken();
 
-    await oThis._markPreLaunchInviteAsDoubleOptIn();
-
-    await oThis._addContactInPepoCampaign();
-
-    await oThis._markTokenAsUsed();
+    await oThis._performKindSpecificOperations();
 
     return responseHelper.successWithData({});
   }
 
   /**
-   * Validate token
+   * Validate token.
+   *
+   * @sets oThis.token, oThis.temporaryTokenId
    *
    * @returns {Promise<never>}
    * @private
    */
   async _validate() {
     const oThis = this;
-    let splitedT = [];
+
+    let splitToken = [];
 
     try {
-      let decryptedT = localCipher.decrypt(coreConstants.PA_EMAIL_TOKENS_DECRIPTOR_KEY, oThis.t);
-      splitedT = decryptedT.split(':');
+      const decryptedT = localCipher.decrypt(coreConstants.PA_EMAIL_TOKENS_DECRIPTOR_KEY, oThis.inputToken);
+      splitToken = decryptedT.split(':');
     } catch (error) {
       return oThis._invalidUrlError('a_s_do_v_1');
     }
 
-    if (splitedT.length !== 2) {
+    if (splitToken.length !== 2) {
       return oThis._invalidUrlError('a_s_do_v_2');
     }
 
-    oThis.token = splitedT[1];
-    oThis.temporaryTokenId = parseInt(splitedT[0]);
+    oThis.temporaryTokenId = parseInt(splitToken[0]);
+    oThis.token = splitToken[1];
   }
 
   /**
-   * Fetch pre launch invite double opt in token
+   * Fetch double opt in token.
    *
    * @returns {Promise<never>}
    * @private
    */
-  async _fetchPreLaunchInviteDoubleOptInToken() {
+  async _fetchDoubleOptInToken() {
     const oThis = this;
 
     oThis.temporaryTokenObj = await new TemporaryTokenModel().fetchById(oThis.temporaryTokenId);
@@ -96,16 +102,12 @@ class SendDoubleOptIn extends ServiceBase {
       return oThis._invalidUrlError('a_s_do_fpiot_2');
     }
 
-    if (oThis.temporaryTokenObj.status !== temporaryTokenConstant.activeStatus) {
+    if (oThis.temporaryTokenObj.status !== temporaryTokenConstants.activeStatus) {
       return oThis._invalidUrlError('a_s_do_fpiot_3');
     }
 
-    if (oThis.temporaryTokenObj.kind !== temporaryTokenConstant.preLaunchInviteKind) {
-      return oThis._invalidUrlError('a_s_do_fpiot_4');
-    }
-
     if (
-      Math.floor(Date.now() / 1000) - temporaryTokenConstant.tokenExpiryTimestamp >
+      Math.floor(Date.now() / 1000) - temporaryTokenConstants.tokenExpiryTimestamp >
       oThis.temporaryTokenObj.createdAt
     ) {
       return oThis._invalidUrlError('a_s_do_fpiot_5');
@@ -113,28 +115,45 @@ class SendDoubleOptIn extends ServiceBase {
   }
 
   /**
-   * Mark token as used
+   * Perform operations specific to temporary token kind.
    *
    * @returns {Promise<void>}
    * @private
    */
-  async _markTokenAsUsed() {
+  async _performKindSpecificOperations() {
     const oThis = this;
 
-    await new TemporaryTokenModel()
-      .update({ status: temporaryTokenConstant.invertedStatuses[temporaryTokenConstant.usedStatus] })
-      .where({ id: oThis.temporaryTokenId })
-      .fire();
+    const promisesArray = [];
+
+    switch (oThis.temporaryTokenObj.kind) {
+      case temporaryTokenConstants.preLaunchInviteKind: {
+        promisesArray.push(oThis._markPreLaunchInviteAsDoubleOptIn());
+        promisesArray.push(oThis._addContactInPepoCampaign());
+        break;
+      }
+      case temporaryTokenConstants.emailDoubleOptInKind: {
+        promisesArray.push(oThis._addEmailForUser());
+        break;
+      }
+      default: {
+        throw new Error('Invalid token kind.');
+      }
+    }
+
+    promisesArray.push(oThis._markTokenAsUsed());
+    await Promise.all(promisesArray);
   }
 
   /**
-   * Mark pre launch invite as double opt in
+   * Mark pre launch invite as double opt in.
    *
    * @returns {Promise<void>}
    * @private
    */
   async _markPreLaunchInviteAsDoubleOptIn() {
     const oThis = this;
+
+    const PreLaunchInviteModel = require(rootPrefix + '/app/models/mysql/PreLaunchInvite');
 
     await new PreLaunchInviteModel()
       .update({ status: preLaunchInviteConstants.invertedStatuses[preLaunchInviteConstants.doptinStatus] })
@@ -145,7 +164,7 @@ class SendDoubleOptIn extends ServiceBase {
   }
 
   /**
-   * Add contact in pepo campaign
+   * Add contact in pepo campaign.
    *
    * @returns {Promise<void>}
    * @private
@@ -153,25 +172,95 @@ class SendDoubleOptIn extends ServiceBase {
   async _addContactInPepoCampaign() {
     const oThis = this;
 
-    let addContactParams = {
+    const AddContactInPepoCampaign = require(rootPrefix + '/lib/email/hookCreator/AddContact');
+
+    const addContactParams = {
       receiverEntityId: oThis.temporaryTokenObj.entityId,
       receiverEntityKind: emailServiceApiCallHookConstants.preLaunchInviteEntityKind,
-      customDescription: 'Contact add for pre launch invite'
+      customDescription: 'Contact add for pre launch invite.'
     };
 
     await new AddContactInPepoCampaign(addContactParams).perform();
   }
 
   /**
-   * Invalid url error
+   * Associate email for user.
    *
-   * @param code
+   * @returns {Promise<never>}
+   * @private
+   */
+  async _addEmailForUser() {
+    const oThis = this;
+
+    const UserEmailLogsModel = require(rootPrefix + '/app/models/mysql/UserEmailLogs');
+
+    // Fetch details from user email logs table.
+    const userEmailLogsDetails = await new UserEmailLogsModel()
+      .select('user_id, email')
+      .where({ id: oThis.temporaryTokenObj.entityId })
+      .fire();
+
+    if (userEmailLogsDetails.length !== 1) {
+      return oThis._invalidUrlError('a_s_do_aefu_1');
+    }
+
+    const userId = userEmailLogsDetails[0].user_id,
+      email = userEmailLogsDetails[0].email;
+
+    const UserModel = require(rootPrefix + '/app/models/mysql/User');
+
+    // Update email for user.
+    await new UserModel()
+      .update({ email: email })
+      .where({ id: userId })
+      .fire()
+      .then(async function() {
+        await UserModel.flushCache({ id: userId, email: email });
+      })
+      .catch(function(err) {
+        logger.error(`Error while creating updating email in users table: ${err}`);
+
+        if (UserModel.isDuplicateIndexViolation(UserModel.emailUniqueIndexName, err)) {
+          logger.log('Email conflict.');
+
+          return Promise.reject(
+            responseHelper.paramValidationError({
+              internal_error_identifier: 'a_s_pli_doi_aefu_1',
+              api_error_identifier: 'invalid_params',
+              params_error_identifiers: ['already_associated_email'],
+              debug_options: {}
+            })
+          );
+        }
+
+        return Promise.reject(err);
+      });
+  }
+
+  /**
+   * Mark token as used.
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _markTokenAsUsed() {
+    const oThis = this;
+
+    await new TemporaryTokenModel()
+      .update({ status: temporaryTokenConstants.invertedStatuses[temporaryTokenConstants.usedStatus] })
+      .where({ id: oThis.temporaryTokenId })
+      .fire();
+  }
+
+  /**
+   * Invalid url error.
+   *
+   * @param {string} code
+   *
    * @returns {Promise<never>}
    * @private
    */
   async _invalidUrlError(code) {
-    const oThis = this;
-
     return Promise.reject(
       responseHelper.error({
         internal_error_identifier: code,
@@ -182,4 +271,4 @@ class SendDoubleOptIn extends ServiceBase {
   }
 }
 
-module.exports = SendDoubleOptIn;
+module.exports = VerifyDoubleOptIn;

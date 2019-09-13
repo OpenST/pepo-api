@@ -62,32 +62,32 @@ class UserEmailLogs extends ModelBase {
   }
 
   /**
-   * Fetch user email log id.
+   * Fetch email by id.
    *
-   * @param {string} id
+   * @param {number} id
    *
-   * @return {object}
+   * @returns {Promise<{email: (*|null)}>}
    */
-  async fetchById(id) {
+  async fetchEmailById(id) {
     const oThis = this;
 
-    const res = await oThis.fetchByIds([id]);
+    const res = await oThis.fetchEmailByIds([id]);
 
     return res[id] || {};
   }
 
   /**
-   * Fetch temporary token by ids.
+   * Fetch email by ids.
    *
-   * @param {array} ids
+   * @param {array<number>} ids
    *
-   * @return {object}
+   * @returns {Promise<void>}
    */
-  async fetchByIds(ids) {
+  async fetchEmailByIds(ids) {
     const oThis = this;
 
     const dbRows = await oThis
-      .select('*')
+      .select('email, id')
       .where({ id: ids })
       .fire();
 
@@ -96,6 +96,46 @@ class UserEmailLogs extends ModelBase {
     for (let index = 0; index < dbRows.length; index++) {
       const formatDbRow = oThis.formatDbData(dbRows[index]);
       response[formatDbRow.id] = formatDbRow;
+    }
+
+    return response;
+  }
+
+  /**
+   * Fetch email and id by userId.
+   *
+   * @param {number} userId
+   *
+   * @returns {Promise<*|{}>}
+   */
+  async fetchByUserId(userId) {
+    const oThis = this;
+
+    const res = await oThis.fetchByUserIds([userId]);
+
+    return res[userId] || {};
+  }
+
+  /**
+   * Fetch email and id by userIds.
+   *
+   * @param {array<number>} userIds
+   *
+   * @returns {Promise<{}>}
+   */
+  async fetchByUserIds(userIds) {
+    const oThis = this;
+
+    const dbRows = await oThis
+      .select('email, id, user_id')
+      .where({ user_id: userIds })
+      .fire();
+
+    const response = {};
+
+    for (let index = 0; index < dbRows.length; index++) {
+      const formatDbRow = oThis.formatDbData(dbRows[index]);
+      response[formatDbRow.userId] = formatDbRow;
     }
 
     return response;

@@ -97,7 +97,6 @@ class UserModel extends ModelBase {
       'profileImageId',
       'markInactiveTriggerCount',
       'properties',
-      'email',
       'approvedCreator',
       'status',
       'createdAt',
@@ -201,34 +200,29 @@ class UserModel extends ModelBase {
   }
 
   /**
-   * Fetch user ids
+   * Fetch user ids by email ids.
    *
-   * @param {object} params
-   * @param {array} params.userId
-   * @param {number} [params.page]
-   * @param {number} [params.limit]
+   * @param {array<string>} emails
    *
-   * @returns {Promise<*>}
+   * @returns {Promise<{}>}
    */
-  async fetchPaginatedUsers(params) {
+  async fetchUserIdsByEmails(emails) {
     const oThis = this;
 
-    const page = params.page || 1,
-      limit = params.limit || 10,
-      offset = (page - 1) * limit;
-
     const dbRows = await oThis
-      .select(['id'])
-      .where(['status != ?', userConstants.invertedStatuses[userConstants.blockedStatus]])
-      .limit(limit)
-      .offset(offset)
-      .order_by('name ASC')
+      .select('id, email')
+      .where({ email: emails })
       .fire();
 
-    const response = [];
+    if (dbRows.length === 0) {
+      return {};
+    }
+
+    const response = {};
 
     for (let index = 0; index < dbRows.length; index++) {
-      response.push(dbRows[index].id);
+      const formatDbRow = oThis.formatDbData(dbRows[index]);
+      response[formatDbRow.email] = formatDbRow;
     }
 
     return response;
@@ -333,9 +327,12 @@ class UserModel extends ModelBase {
   }
 
   /**
-   * Flush cache
+   * Flush cache.
    *
    * @param {object} params
+   * @param {string/number} params.id
+   * @param {string} params.userName
+   * @param {string} params.email
    *
    * @returns {Promise<*>}
    */
@@ -353,6 +350,11 @@ class UserModel extends ModelBase {
       promisesArray.push(new UserByUsernameCache({ userName: params.userName }).clear());
     }
 
+    if (params.email) {
+      const UserByEmailsCache = require(rootPrefix + '/lib/cacheManagement/multi/UserByEmails');
+      promisesArray.push(new UserByEmailsCache({ emails: [params.email] }).clear());
+    }
+
     await Promise.all(promisesArray);
   }
 
@@ -366,6 +368,15 @@ class UserModel extends ModelBase {
   }
 
   /**
+   * Get email unique index name.
+   *
+   * @returns {string}
+   */
+  static get emailUniqueIndexName() {
+    return 'uk_idx_2';
+  }
+
+  /**
    * Is user an approved creator
    *
    * @param userObj
@@ -373,6 +384,7 @@ class UserModel extends ModelBase {
    */
   static isUserApprovedCreator(userObj) {
     const propertiesArray = new UserModel().getBitwiseArray('properties', userObj.properties);
+
     return propertiesArray.indexOf(userConstants.isApprovedCreatorProperty) > -1;
   }
 }
