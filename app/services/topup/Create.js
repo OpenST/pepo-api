@@ -6,9 +6,11 @@ const rootPrefix = '../../..',
   productConstant = require(rootPrefix + '/lib/globalConstant/inAppProduct'),
   bgJobConstants = require(rootPrefix + '/lib/globalConstant/bgJob'),
   bgJob = require(rootPrefix + '/lib/rabbitMqEnqueue/bgJob'),
-  entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
-  ostPricePointConstants = require(rootPrefix + '/lib/globalConstant/ostPricePoints'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
+  entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
+  createErrorLogsEntry = require(rootPrefix + '/lib/errorLogs/createEntry'),
+  errorLogsConstants = require(rootPrefix + '/lib/globalConstant/errorLogs'),
+  ostPricePointConstants = require(rootPrefix + '/lib/globalConstant/ostPricePoints'),
   mysqlErrorConstants = require(rootPrefix + '/lib/globalConstant/mysqlErrorConstants');
 
 class CreateTopup extends ServiceBase {
@@ -74,7 +76,7 @@ class CreateTopup extends ServiceBase {
    * @returns {*|result}
    * @private
    */
-  _validateAndSanitize() {
+  async _validateAndSanitize() {
     const oThis = this;
 
     // checking if the logged in user is same as the userId coming in params
@@ -88,6 +90,24 @@ class CreateTopup extends ServiceBase {
             userId: oThis.userId,
             currentUserId: oThis.currentUser.id
           }
+        })
+      );
+    }
+
+    if (oThis.os !== productConstant.ios && oThis.os !== productConstant.android) {
+      let errorObject = responseHelper.error({
+        internal_error_identifier: 'invalid_os:a_s_p_pv_3',
+        api_error_identifier: 'invalid_api_params',
+        debug_options: { os: oThis.os }
+      });
+      await createErrorLogsEntry.perform(errorObject, errorLogsConstants.mediumSeverity);
+
+      return Promise.reject(
+        responseHelper.paramValidationError({
+          internal_error_identifier: 'a_s_p_pv_3',
+          api_error_identifier: 'invalid_api_params',
+          params_error_identifiers: ['invalid_os'],
+          debug_options: { os: oThis.os }
         })
       );
     }
