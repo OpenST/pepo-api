@@ -9,14 +9,12 @@ const dbKind = dbKindConstants.sqlDbKind;
 const upQuery =
   'ALTER TABLE `pre_launch_invites` \n\
     CHANGE `invite_code` `invite_code` varchar(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NULL,\n\
-    CHANGE `invite_code_id` `invite_code_id` bigint(20) NOT NULL,\n\
-    DROP INDEX `uk_event_id`;';
+    CHANGE `invite_code_id` `invite_code_id` bigint(20) NOT NULL;';
 
 const downQuery =
   'ALTER TABLE `pre_launch_invites` \n\
     CHANGE `invite_code` `invite_code` varchar(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,\n\
-    CHANGE `invite_code_id` `invite_code_id` bigint(20) NULL,\n\
-    ADD UNIQUE KEY `uk_event_id` (`invite_code`);';
+    CHANGE `invite_code_id` `invite_code_id` bigint(20) NULL;';
 
 const changeColumnsInPreLaunchInvite = {
   dbName: dbName,
