@@ -50,7 +50,7 @@ class InviteSeed {
 
     oThis.preLaunchInviteId = command.preLaunchInviteId ? command.preLaunchInviteId : 0;
 
-    let limit = 10,
+    let limit = 100,
       offset = 0;
 
     let preLaunchInviteRsp = await new PreLaunchInviteModel()
@@ -68,7 +68,7 @@ class InviteSeed {
 
       await oThis._updatePreLaunchInvites();
 
-      offset = offset + 10;
+      offset = offset + 100;
     }
   }
 
