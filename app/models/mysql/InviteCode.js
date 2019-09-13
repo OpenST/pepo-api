@@ -109,15 +109,43 @@ class InviteCode extends ModelBase {
   }
 
   /**
+   * Fetch invite code for given user ids.
+   *
+   * @param {array<number>} userIds
+   *
+   * @returns {object}
+   */
+  async fetchByUserIds(userIds) {
+    const oThis = this;
+
+    const response = {};
+
+    const dbRows = await oThis
+      .select('*')
+      .where(['user_id IN (?)', userIds])
+      .fire();
+
+    for (let index = 0; index < dbRows.length; index++) {
+      const formatDbRow = oThis.formatDbData(dbRows[index]);
+      response[formatDbRow.userId] = formatDbRow;
+    }
+
+    return response;
+  }
+
+  /**
    * Flush cache.
    *
    * @param {object} params
-   * @param {number} params.id
+   * @param {number} params.userId
    *
    * @returns {Promise<*>}
    */
   static async flushCache(params) {
-    // do nothing.
+    if (params.userId) {
+      const InviteCodeByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/InviteCodeByUserIds');
+      await new InviteCodeByUserIdsCache({ userIds: [params.userId] }).clear();
+    }
   }
 }
 
