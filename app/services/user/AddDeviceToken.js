@@ -225,8 +225,8 @@ class AddDeviceToken extends ServiceBase {
       }
     } else {
       await new UserProfileElementModel().insertElement({
-        user_id: oThis.currentUserId,
-        data_kind: userProfileElementConstants.invertedKinds[userProfileElementConstants.locationIdKind],
+        userId: oThis.currentUserId,
+        dataKind: userProfileElementConstants.invertedKinds[userProfileElementConstants.locationIdKind],
         data: locationId || defaultLocationId
       });
     }

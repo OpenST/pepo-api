@@ -282,8 +282,6 @@ class OstTransaction extends ServiceBase {
       oThis.transactionId = transactionCacheResponse.data[oThis.ostTxId].id;
       oThis.transactionObj = transactionCacheResponse.data[oThis.ostTxId];
     }
-
-    logger.log('oThis.transactionObj =======', oThis.transactionObj);
   }
 
   /**
