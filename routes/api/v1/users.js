@@ -326,7 +326,7 @@ router.get('/search', sanitizer.sanitizeDynamicUrlParams, function(req, res, nex
 });
 
 /* Invited users search. */
-router.get('/invited-users', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+router.get('/invites', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.invitedUsersSearch;
 
   const dataFormatterFunc = async function(serviceResponse) {
