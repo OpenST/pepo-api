@@ -257,7 +257,7 @@ router.get('/:user_id/websocket-details', sanitizer.sanitizeDynamicUrlParams, fu
   };
 
   Promise.resolve(
-    routeHelper.perform(req, res, next, '/user/SocketConnectionDetails', 'r_a_v1_u_12', null, dataFormatterFunc)
+    routeHelper.perform(req, res, next, '/user/SocketConnectionDetails', 'r_a_v1_u_13', null, dataFormatterFunc)
   );
 });
 
@@ -287,7 +287,7 @@ router.get('/search', sanitizer.sanitizeDynamicUrlParams, function(req, res, nex
     serviceResponse.data = wrapperFormatterRsp.data;
   };
 
-  Promise.resolve(routeHelper.perform(req, res, next, '/user/Search', 'r_a_v1_u_14', null, dataFormatterFunc));
+  Promise.resolve(routeHelper.perform(req, res, next, '/user/Search', 'r_a_v1_u_15', null, dataFormatterFunc));
 });
 
 /* Add device token*/
@@ -295,7 +295,7 @@ router.post('/:user_id/device-token', sanitizer.sanitizeDynamicUrlParams, functi
   req.decodedParams.apiName = apiName.addDeviceToken;
   req.decodedParams.user_id = req.params.user_id;
 
-  Promise.resolve(routeHelper.perform(req, res, next, '/user/AddDeviceToken', 'r_a_v1_u_15', null));
+  Promise.resolve(routeHelper.perform(req, res, next, '/user/AddDeviceToken', 'r_a_v1_u_16', null));
 });
 
 module.exports = router;

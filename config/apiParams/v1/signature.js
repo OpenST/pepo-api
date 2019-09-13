@@ -486,6 +486,10 @@ const v1Signature = {
       {
         parameter: 'text',
         validatorMethods: ['validateString']
+      },
+      {
+        parameter: 'tweet_needed',
+        validatorMethods: ['validateInteger']
       }
     ]
   },
@@ -601,6 +605,27 @@ const v1Signature = {
         validatorMethods: ['validateGenericUrl']
       }
     ]
+  },
+  [apiName.refreshTwitterConnect]: {
+    mandatory: [
+      {
+        parameter: 'token',
+        validatorMethods: ['validateNonBlankString']
+      },
+      {
+        parameter: 'secret',
+        validatorMethods: ['validateNonBlankString']
+      },
+      {
+        parameter: 'twitter_id',
+        validatorMethods: ['validateNonBlankString']
+      },
+      {
+        parameter: 'handle',
+        validatorMethods: ['validateNonBlankString']
+      }
+    ],
+    optional: []
   }
 };
 
