@@ -69,7 +69,7 @@ class SayThankYou extends ServiceBase {
       return tweetByUserId.perform();
     }
 
-    return responseHelper.successWithData({ refreshCurrentUser: false });
+    return responseHelper.successWithData({ refresh_current_user: false });
   }
 
   /**
