@@ -33,6 +33,7 @@ router.use('/auth', authRoutes);
 
 // Login not mandatory for following
 router.use('/feeds', cookieHelper.validateUserLoginCookieIfPresent, feedsRoutes);
+router.use('/fetch-goto', cookieHelper.validateUserLoginCookieIfPresent, fetchGotoRoutes);
 
 router.use(cookieHelper.validateUserLoginCookieIfPresent, cookieHelper.validateUserLoginRequired);
 
@@ -44,6 +45,5 @@ router.use('/gifs', gifsRoutes);
 router.use('/upload-params', uploadParamsRoutes);
 router.use('/tags', tagRoutes);
 router.use('/notifications', userNotificationsRoutes);
-router.use('/fetch-goto', fetchGotoRoutes);
 
 module.exports = router;
