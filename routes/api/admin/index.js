@@ -165,7 +165,7 @@ router.post('/delete-video/:video_id', sanitizer.sanitizeDynamicUrlParams, funct
   req.decodedParams.apiName = apiName.adminDeleteVideo;
   req.decodedParams.video_id = req.params.video_id;
 
-  Promise.resolve(routeHelper.perform(req, res, next, '/admin/Delete', 'r_a_v1_ad_6', null, null, null));
+  Promise.resolve(routeHelper.perform(req, res, next, '/admin/DeleteVideo', 'r_a_v1_ad_6', null, null, null));
 });
 
 /* Logged in Admin */
