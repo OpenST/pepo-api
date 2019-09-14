@@ -55,16 +55,16 @@ class SayThankYou extends ServiceBase {
   async _asyncPerform() {
     const oThis = this;
 
-    // await oThis.validateAndSanitize();
+    await oThis.validateAndSanitize();
 
-    // await oThis._fetchAndValidateUserNotification();
+    await oThis._fetchAndValidateUserNotification();
 
-    // await oThis._updateUserNotification();
+    await oThis._updateUserNotification();
 
-    // await oThis._enqueueUserNotification();
+    await oThis._enqueueUserNotification();
 
     if (oThis.tweetNeeded) {
-      let tweetByUserId = new TweetByUserId({ text: oThis.text, userId: oThis.currentUserId });
+      let tweetByUserId = new TweetByUserId({ text: oThis.text + 'via @thepepoapp', userId: oThis.currentUserId });
 
       return tweetByUserId.perform();
     }
