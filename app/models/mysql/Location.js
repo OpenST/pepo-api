@@ -76,6 +76,31 @@ class LocationModel extends ModelBase {
 
   /**
    *
+   * @param ids
+   * @returns {Promise<Object>}
+   */
+  async fetchByIds(ids) {
+    const oThis = this,
+      response = {};
+
+    const dbRows = await oThis
+      .select('*')
+      .where({
+        id: ids
+      })
+      .fire();
+
+    for (let index = 0; index < dbRows.length; index++) {
+      const formatDbRow = oThis.formatDbData(dbRows[index]);
+
+      response[formatDbRow.id] = formatDbRow;
+    }
+
+    return response;
+  }
+
+  /**
+   *
    * @param timezone
    * @returns {Promise<Object>}
    */

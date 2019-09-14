@@ -1,5 +1,6 @@
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
+  UserModel = require(rootPrefix + '/app/models/mysql/User'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   TwitterUserModel = require(rootPrefix + '/app/models/mysql/TwitterUser'),
   UserByUserNameCache = require(rootPrefix + '/lib/cacheManagement/single/UserByUsername'),
@@ -41,6 +42,8 @@ class RotateTwitterAccount extends ServiceBase {
     await oThis._rotateTwitterAccount();
 
     await oThis._clearTwitterUserCache();
+
+    await oThis._markUserEmailAsNull();
 
     return responseHelper.successWithData({});
   }
@@ -155,6 +158,23 @@ class RotateTwitterAccount extends ServiceBase {
       .where({ id: oThis.twitterUserId })
       .fire();
     oThis.twitterUserObj.twitterId = oThis.twitterUserId;
+  }
+
+  /**
+   * Mark user email as null
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _markUserEmailAsNull() {
+    const oThis = this;
+
+    await new UserModel()
+      .update({ email: null })
+      .where({ id: oThis.userId })
+      .fire();
+
+    await UserModel.flushCache({ id: oThis.userId });
   }
 
   /**

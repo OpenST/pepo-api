@@ -230,11 +230,6 @@ class UpdateFanVideo extends UpdateProfileBase {
     // Feed needs to be added for uploaded video
     const oThis = this;
 
-    await notificationJobEnqueue.enqueue(notificationJobConstants.videoAdd, {
-      userId: oThis.profileUserId,
-      videoId: oThis.videoId
-    });
-
     // Feed needs to be added only if user is an approved creator.
     if (UserModelKlass.isUserApprovedCreator(oThis.userObj)) {
       await oThis._addFeed();

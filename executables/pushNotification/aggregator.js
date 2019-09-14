@@ -8,14 +8,17 @@ const program = require('commander');
 
 const rootPrefix = '../..',
   CronBase = require(rootPrefix + '/executables/CronBase'),
+  UserModel = require(rootPrefix + '/app/models/mysql/User'),
   AggregatedNotificationModel = require(rootPrefix + '/app/models/mysql/AggregatedNotification'),
   NotificationHookModel = require(rootPrefix + '/app/models/mysql/NotificationHook'),
   UserDeviceIdsByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/UserDeviceIdsByUserIds'),
-  LocationsCache = require(rootPrefix + '/lib/cacheManagement/single/Locations'),
+  UserMultiCache = require(rootPrefix + '/lib/cacheManagement/multi/User'),
   notificationHookConstants = require(rootPrefix + '/lib/globalConstant/notificationHook'),
   aggregatedNotificationsConstants = require(rootPrefix + '/lib/globalConstant/aggregatedNotifications'),
   cronProcessesConstants = require(rootPrefix + '/lib/globalConstant/cronProcesses'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
+  sigIntConstant = require(rootPrefix + '/lib/globalConstant/sigInt'),
+  userConstants = require(rootPrefix + '/lib/globalConstant/user'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger');
 
 program.option('--cronProcessId <cronProcessId>', 'Cron table process ID').parse(process.argv);
@@ -56,11 +59,7 @@ class NotificationAggregator extends CronBase {
 
     const oThis = this;
 
-    oThis.userIdToAggregatedDetailsMap = {};
-    oThis.recipientUserIds = [];
-    oThis.currentLocationIds = [];
-    oThis.userDeviceIds = [];
-    oThis.userIdToUserDeviceIdsMap = {};
+    oThis.page = 1;
 
     oThis.canExit = true;
   }
@@ -76,16 +75,27 @@ class NotificationAggregator extends CronBase {
 
     oThis.canExit = false;
 
-    await oThis._fetchLocationIds();
-    await oThis._fetchAggregatedDetails();
+    while (sigIntConstant.getSigIntStatus != 1) {
+      oThis._initParams();
 
-    for (let userId in oThis.userIdToAggregatedDetailsMap) {
-      oThis.recipientUserIds.push(userId);
+      await oThis._fetchAggregatedDetails();
+
+      for (let userId in oThis.userIdToAggregatedDetailsMap) {
+        oThis.recipientUserIds.push(userId);
+      }
+
+      if (oThis.recipientUserIds.length < 1) {
+        oThis.canExit = true;
+        return responseHelper.successWithData({});
+      }
+
+      await oThis._getUsers();
+      await oThis._fetchDeviceIdsForRecipients();
+      await oThis._insertIntoNotificationHook();
+      await oThis._resetDataForSentUsers();
+
+      oThis.page = oThis.page + 1;
     }
-
-    await oThis._fetchDeviceIdsForRecipients();
-    await oThis._insertIntoNotificationHook();
-    await oThis._resetDataForSentUsers();
 
     oThis.canExit = true;
 
@@ -93,30 +103,21 @@ class NotificationAggregator extends CronBase {
   }
 
   /**
-   * Fetch location ids according to current run-time of cron.
+   * Init params for current iteration
    *
-   * @returns {Promise<void>}
-   *
-   * @sets oThis.currentLocationIds
    * @private
    */
-  async _fetchLocationIds() {
+  _initParams() {
     const oThis = this;
 
-    let timeZoneOffsetInSeconds = new Date().getTimezoneOffset() * 60;
+    oThis.currentTimeInSec = parseInt(new Date().getTime() / 1000);
 
-    let locationsCacheRsp = await new LocationsCache().fetch();
+    oThis.whitelistedUserIds = [];
+    oThis.notificationSentUserIds = [];
 
-    if (locationsCacheRsp.isFailure()) {
-      return Promise.reject(locationsCacheRsp);
-    }
-
-    // NOTE - In 'getTimezoneOffset' function, offset is positive if the timezone is behind UTC and negative if it is ahead.
-    // For example, for time zone UTC+10:00, -600 will be returned.
-    let currentTimeZoneOffsetInSeconds = -timeZoneOffsetInSeconds,
-      locationsCacheData = locationsCacheRsp.data;
-
-    oThis.currentLocationIds = locationsCacheData[currentTimeZoneOffsetInSeconds];
+    oThis.userIdToAggregatedDetailsMap = {};
+    oThis.recipientUserIds = [];
+    oThis.userIdToUserDeviceIdsMap = {};
   }
 
   /**
@@ -132,9 +133,36 @@ class NotificationAggregator extends CronBase {
   async _fetchAggregatedDetails() {
     const oThis = this;
 
-    oThis.userIdToAggregatedDetailsMap = await new AggregatedNotificationModel().fetchPendingByLocationIds({
-      locationIds: oThis.currentLocationIds
-    });
+    let queryParams = {
+      page: oThis.page,
+      limit: 50,
+      sendTime: oThis.currentTimeInSec
+    };
+
+    oThis.userIdToAggregatedDetailsMap = await new AggregatedNotificationModel().fetchPendingBySendTime(queryParams);
+  }
+
+  /**
+   * Fetch whitelistedUserIds (active creators can receive this notification)
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _getUsers() {
+    const oThis = this;
+
+    const userByIdResponse = await new UserMultiCache({ ids: oThis.recipientUserIds }).fetch();
+
+    if (userByIdResponse.isFailure()) {
+      return Promise.reject(UserByIdResponse);
+    }
+
+    for (let userId in userByIdResponse.data) {
+      let userObj = userByIdResponse.data[userId];
+      if (userObj && userObj.status == userConstants.activeStatus && UserModel.isUserApprovedCreator(userObj)) {
+        oThis.whitelistedUserIds.push(userId);
+      }
+    }
   }
 
   /**
@@ -146,7 +174,7 @@ class NotificationAggregator extends CronBase {
   async _fetchDeviceIdsForRecipients() {
     const oThis = this;
 
-    const userDeviceCacheRsp = await new UserDeviceIdsByUserIdsCache({ userIds: oThis.recipientUserIds }).fetch();
+    const userDeviceCacheRsp = await new UserDeviceIdsByUserIdsCache({ userIds: oThis.whitelistedUserIds }).fetch();
 
     if (userDeviceCacheRsp.isFailure()) {
       return Promise.reject(userDeviceCacheRsp);
@@ -174,31 +202,21 @@ class NotificationAggregator extends CronBase {
       ],
       insertColumnValues = [];
 
-    for (let i = 0; i < oThis.recipientUserIds.length; i++) {
-      let finalNotificationHookPayload = {},
-        userId = oThis.recipientUserIds[i],
+    for (let i = 0; i < oThis.whitelistedUserIds.length; i++) {
+      let userId = oThis.whitelistedUserIds[i],
         deviceIds = oThis.userIdToUserDeviceIdsMap[userId],
         aggregatedNotificationsPayload = oThis.userIdToAggregatedDetailsMap[userId];
 
-      if (!aggregatedNotificationsPayload) {
+      if (!deviceIds || deviceIds.length < 1) {
         continue;
       }
 
-      let rawPayloadForMsgFormatter = aggregatedNotificationsPayload.extraData.payload,
-        peopleCount = rawPayloadForMsgFormatter.senders.length || 0,
-        txReceivedAmount = rawPayloadForMsgFormatter.amount || 0;
-
-      finalNotificationHookPayload = Object.assign(rawPayloadForMsgFormatter, {
-        peopleCount: peopleCount,
-        txReceivedAmount: txReceivedAmount
-      });
-
-      logger.log('======= FinalNotificationHookPayload :::', JSON.stringify(finalNotificationHookPayload));
+      oThis.notificationSentUserIds.push(userId);
 
       let insertRow = [
         notificationHookConstants.invertedEventTypes[notificationHookConstants.aggregatedTxReceiveSuccessKind],
         JSON.stringify(deviceIds),
-        JSON.stringify(finalNotificationHookPayload),
+        JSON.stringify(aggregatedNotificationsPayload.extraData),
         Math.round(Date.now() / 1000),
         notificationHookConstants.invertedStatuses[notificationHookConstants.pendingStatus]
       ];
@@ -206,14 +224,11 @@ class NotificationAggregator extends CronBase {
       insertColumnValues.push(insertRow);
     }
 
-    promiseArray.push(
-      new NotificationHookModel()
-        .insertMultiple(insertColumnNames, insertColumnValues, {})
-        .onDuplicate({ status: notificationHookConstants.invertedStatuses[notificationHookConstants.pendingStatus] })
-        .fire()
-    );
+    if (insertColumnValues.length > 0) {
+      promiseArray.push(new NotificationHookModel().insertMultiple(insertColumnNames, insertColumnValues, {}).fire());
 
-    await Promise.all(promiseArray);
+      await Promise.all(promiseArray);
+    }
   }
 
   /**
@@ -225,14 +240,38 @@ class NotificationAggregator extends CronBase {
   async _resetDataForSentUsers() {
     const oThis = this;
 
-    await new AggregatedNotificationModel()
-      .update({
-        extra_data: null,
-        status: aggregatedNotificationsConstants.invertedStatuses[aggregatedNotificationsConstants.sentStatus]
-      })
-      .where({
-        user_id: oThis.recipientUserIds
-      });
+    if (oThis.notificationSentUserIds.length > 0) {
+      await new AggregatedNotificationModel()
+        .update({
+          extra_data: null,
+          status: aggregatedNotificationsConstants.invertedStatuses[aggregatedNotificationsConstants.sentStatus]
+        })
+        .where({
+          user_id: oThis.notificationSentUserIds
+        })
+        .fire();
+    }
+
+    let inactiveUserIds = [];
+
+    for (let i = 0; i < oThis.recipientUserIds.length; i++) {
+      let userId = oThis.recipientUserIds[i];
+      if (oThis.notificationSentUserIds.indexOf(userId) == -1) {
+        inactiveUserIds.push(userId);
+      }
+    }
+
+    if (inactiveUserIds.length > 0) {
+      await new AggregatedNotificationModel()
+        .update({
+          extra_data: null,
+          status: aggregatedNotificationsConstants.invertedStatuses[aggregatedNotificationsConstants.inactiveStatus]
+        })
+        .where({
+          user_id: inactiveUserIds
+        })
+        .fire();
+    }
   }
 
   /**

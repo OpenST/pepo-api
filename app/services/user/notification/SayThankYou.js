@@ -2,10 +2,15 @@ const rootPrefix = '../../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   UserNotificationModel = require(rootPrefix + '/app/models/cassandra/UserNotification'),
+  TwitterUserByTwitterIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TwitterUserByTwitterIds'),
+  TweetByUserId = require(rootPrefix + '/lib/twitter/actions/TweetByUserId'),
+  localCipher = require(rootPrefix + '/lib/encryptors/localCipher'),
   base64Helper = require(rootPrefix + '/lib/base64Helper'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   notificationJobEnqueue = require(rootPrefix + '/lib/rabbitMqEnqueue/notification'),
-  notificationJobConstants = require(rootPrefix + '/lib/globalConstant/notificationJob');
+  notificationJobConstants = require(rootPrefix + '/lib/globalConstant/notificationJob'),
+  coreConstants = require(rootPrefix + '/config/coreConstants'),
+  logger = require(rootPrefix + '/lib/logger/customConsoleLogger');
 
 /**
  * Class for thank you notification.
@@ -33,7 +38,10 @@ class SayThankYou extends ServiceBase {
     oThis.text = params.text;
     oThis.notificationId = params.notification_id;
     oThis.currentUserId = +params.current_user.id;
+    oThis.tweetNeeded = +params.tweet_needed;
 
+    oThis.twitterUserObj = null;
+    oThis.twitterUserExtendedObj = null;
     oThis.userNotificationObj = {};
     oThis.decryptedNotificationParams = {};
   }
@@ -55,7 +63,13 @@ class SayThankYou extends ServiceBase {
 
     await oThis._enqueueUserNotification();
 
-    return responseHelper.successWithData({});
+    if (oThis.tweetNeeded) {
+      let tweetByUserId = new TweetByUserId({ text: oThis.text + 'via @thepepoapp', userId: oThis.currentUserId });
+
+      return tweetByUserId.perform();
+    }
+
+    return responseHelper.successWithData({ refresh_current_user: false });
   }
 
   /**

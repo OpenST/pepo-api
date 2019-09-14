@@ -6,6 +6,9 @@ const rootPrefix = '../../..',
   createErrorLogsEntry = require(rootPrefix + '/lib/errorLogs/createEntry'),
   errorLogsConstants = require(rootPrefix + '/lib/globalConstant/errorLogs'),
   PreLaunchInviteModel = require(rootPrefix + '/app/models/mysql/PreLaunchInvite'),
+  InviteCodeModel = require(rootPrefix + '/app/models/mysql/InviteCode'),
+  InviteCodeByCodeCache = require(rootPrefix + '/lib/cacheManagement/single/InviteCodeByCode'),
+  inviteCodeConstants = require(rootPrefix + '/lib/globalConstant/inviteCode'),
   AddContactInPepoCampaign = require(rootPrefix + '/lib/email/hookCreator/AddContact'),
   preLaunchInviteConstants = require(rootPrefix + '/lib/globalConstant/preLaunchInvite'),
   SendTransactionalMail = require(rootPrefix + '/lib/email/hookCreator/SendTransactionalMail'),
@@ -49,8 +52,9 @@ class PreLaunchTwitterSignUp extends ServiceBase {
     oThis.encryptedSecret = null;
 
     oThis.preLaunchInviteObj = null;
-    oThis.InviterObj = null;
-    oThis.inviterId = null;
+    oThis.inviteCodeObj = {};
+    oThis.inviterCodeId = null;
+    oThis.inviterPreLaunchInviteId = null;
   }
 
   /**
@@ -83,7 +87,7 @@ class PreLaunchTwitterSignUp extends ServiceBase {
     promisesArray1.push(oThis._setKMSEncryptionSalt());
 
     if (oThis.inviteCode) {
-      promisesArray1.push(oThis._fetchInviterDetails());
+      promisesArray1.push(oThis._fetchInviteCodeDetails());
     }
 
     await Promise.all(promisesArray1).catch(function(err) {
@@ -98,13 +102,16 @@ class PreLaunchTwitterSignUp extends ServiceBase {
       );
     });
 
+    await oThis._createEntryInInviteCode();
+
     await oThis._createPreLaunchInvite();
 
     if (oThis.preLaunchInviteObj.status === preLaunchInviteConstants.doptinStatus) {
       await oThis._addContactInPepoCampaign();
     }
 
-    if (oThis.inviterId) {
+    if (oThis.inviterCodeId) {
+      await oThis._fetchInviterPreLaunchInvite();
       await oThis._updateInvitedUserCount();
       await oThis._sendEmail();
     }
@@ -144,19 +151,53 @@ class PreLaunchTwitterSignUp extends ServiceBase {
   }
 
   /**
-   * Fetch inviter details
+   * Fetch invite code details
    *
    * @returns {Promise<*|result>}
    * @private
    */
-  async _fetchInviterDetails() {
+  async _fetchInviteCodeDetails() {
     const oThis = this;
 
-    oThis.inviterObj = await new PreLaunchInviteModel().fetchByInviteCode(oThis.inviteCode);
+    let cacheResp = await new InviteCodeByCodeCache({ inviteCode: [oThis.inviteCode] }).fetch(),
+      inviterInviteCodeObj = cacheResp.data[oThis.inviteCode];
 
-    oThis.inviterId = oThis.inviterObj.id ? oThis.inviterObj.id : null;
+    oThis.inviterCodeId = inviterInviteCodeObj.id;
 
     return responseHelper.successWithData({});
+  }
+
+  /**
+   * Create entry in invite code
+   *
+   * @returns {Promise<*>}
+   * @private
+   */
+  async _createEntryInInviteCode() {
+    const oThis = this;
+
+    logger.log('Start::Creating invite code');
+
+    let insertData = {
+      code: oThis._createInviteCode(),
+      invite_limit: inviteCodeConstants.inviteMaxLimit
+    };
+
+    let insertResponse = await new InviteCodeModel().insert(insertData).fire();
+
+    if (!insertResponse) {
+      logger.error('Error while inserting data in invite_codes table.');
+      return Promise.reject(new Error('Error while inserting data in invite_codes table.'));
+    }
+
+    insertData.id = insertResponse.insertId;
+    Object.assign(insertData, insertResponse.defaultUpdatedAttributes);
+
+    oThis.inviteCodeObj = new InviteCodeModel().formatDbData(insertData);
+    await InviteCodeModel.flushCache(oThis.inviteCodeObj);
+
+    logger.log('End::Creating invite code');
+    return Promise.resolve(responseHelper.successWithData({}));
   }
 
   /**
@@ -185,8 +226,8 @@ class PreLaunchTwitterSignUp extends ServiceBase {
       secret: oThis.encryptedSecret,
       status: status,
       admin_status: preLaunchInviteConstants.invertedAdminStatuses[preLaunchInviteConstants.whitelistPendingStatus],
-      inviter_user_id: oThis.inviterId,
-      invite_code: oThis._createInviteCode(),
+      inviter_code_id: oThis.inviterCodeId,
+      invite_code_id: oThis.inviteCodeObj.id,
       invited_user_count: 0
     };
 
@@ -234,12 +275,25 @@ class PreLaunchTwitterSignUp extends ServiceBase {
   _createInviteCode() {
     const oThis = this;
 
-    logger.log('Start::Creating invite code');
+    logger.log('Start::Creating random invite code');
 
     let inviteStringLength = preLaunchInviteConstants.defaultInviteCodeLength,
       inviteString = basicHelper.getRandomAlphaNumericString().substring(0, inviteStringLength);
 
     return inviteString.toUpperCase();
+  }
+
+  /**
+   * Fetch inviter pre launch invite
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _fetchInviterPreLaunchInvite() {
+    const oThis = this;
+
+    let InviterPreLaunchInviteObj = await new PreLaunchInviteModel().fetchByInviteCodeId(oThis.inviterCodeId);
+    oThis.inviterPreLaunchInviteId = InviterPreLaunchInviteObj.id;
   }
 
   /**
@@ -253,10 +307,10 @@ class PreLaunchTwitterSignUp extends ServiceBase {
 
     await new PreLaunchInviteModel()
       .update('invited_user_count = invited_user_count + 1')
-      .where({ id: oThis.inviterId })
+      .where({ id: oThis.inviterPreLaunchInviteId })
       .fire();
 
-    await PreLaunchInviteModel.flushCache({ id: oThis.inviterId });
+    await PreLaunchInviteModel.flushCache({ id: oThis.inviterPreLaunchInviteId });
   }
 
   /**
@@ -269,10 +323,10 @@ class PreLaunchTwitterSignUp extends ServiceBase {
     const oThis = this;
 
     let transactionMailParams = {
-      receiverEntityId: oThis.inviterId,
+      receiverEntityId: oThis.inviterPreLaunchInviteId,
       receiverEntityKind: emailServiceApiCallHookConstants.preLaunchInviteEntityKind,
       customDescription: 'pre launch invite signup using invite code',
-      templateName: emailServiceApiCallHookConstants.userRefferedTemplateName,
+      templateName: emailServiceApiCallHookConstants.userReferredTemplateName,
       templateVars: {
         pepo_api_domain: 1,
         twitter_handle: oThis.preLaunchInviteObj.handle

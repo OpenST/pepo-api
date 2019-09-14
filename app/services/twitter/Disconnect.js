@@ -1,4 +1,5 @@
 const rootPrefix = '../../..',
+  Logout = require(rootPrefix + '/app/services/Logout'),
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   UserModel = require(rootPrefix + '/app/models/mysql/User'),
   SecureUserCache = require(rootPrefix + '/lib/cacheManagement/single/SecureUser'),
@@ -16,6 +17,7 @@ class TwitterDisconnect extends ServiceBase {
    *
    * @param {object} params
    * @param {object} params.current_user
+   * @param {object} params.device_id
    *
    * @augments ServiceBase
    *
@@ -26,6 +28,7 @@ class TwitterDisconnect extends ServiceBase {
 
     const oThis = this;
     oThis.currentUserId = params.current_user.id;
+    oThis.deviceId = params.device_id;
   }
 
   /**
@@ -42,6 +45,8 @@ class TwitterDisconnect extends ServiceBase {
     await oThis._markTokenNull();
 
     await oThis._rotateCookieToken();
+
+    await oThis._logoutUserDevices();
 
     return responseHelper.successWithData({});
   }
@@ -122,6 +127,18 @@ class TwitterDisconnect extends ServiceBase {
 
     // Clear secure user cache.
     await new SecureUserCache({ id: oThis.currentUserId }).clear();
+  }
+
+  /**
+   * Logout user devices.
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _logoutUserDevices() {
+    const oThis = this;
+
+    await new Logout({ current_user: { id: oThis.currentUserId }, device_id: oThis.deviceId }).perform();
   }
 }
 
