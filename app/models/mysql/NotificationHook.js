@@ -92,6 +92,7 @@ class NotificationHook extends ModelBase {
         locked_at: Math.round(Date.now() / 1000)
       })
       .where('lock_identifier IS NULL')
+      .where(['execution_timestamp < ?', Math.round(Date.now() / 1000)])
       .where(['retry_count <= ?', notificationHookConstants.retryLimitForFailedHooks])
       .where(['status = ?', notificationHookConstants.invertedStatuses[notificationHookConstants.failedStatus]])
       .limit(notificationHookConstants.batchSizeForHooksProcessor)
@@ -131,18 +132,23 @@ class NotificationHook extends ModelBase {
    * @param response
    * @returns {Promise<void>}
    */
-  async updateStatusAndInsertResponse(hookId, status, response) {
+  async updateStatusAndInsertResponse(hookId, status, response, increaseRetryCount = false) {
     const oThis = this;
 
-    await oThis
+    let obj = oThis
       .update({
         lock_identifier: null,
         locked_at: null,
         status: notificationHookConstants.invertedStatuses[status],
         response: JSON.stringify(response)
       })
-      .where({ id: hookId })
-      .fire();
+      .where({ id: hookId });
+
+    if (increaseRetryCount) {
+      obj.update(['retry_count = retry_count + ? ', 1]);
+    }
+
+    await obj.fire();
   }
 
   /**
@@ -177,26 +183,6 @@ class NotificationHook extends ModelBase {
     await oThis
       .update({
         status: notificationHookConstants.invertedStatuses[notificationHookConstants.pendingStatus],
-        lock_identifier: null,
-        locked_at: null
-      })
-      .where(['id = ?', hookId])
-      .fire();
-  }
-
-  /**
-   * Mark hooks as ignored.
-   *
-   * @param {number} hookId
-   *
-   * @returns {Promise<void>}
-   */
-  async markFailedToBeIgnored(hookId) {
-    const oThis = this;
-
-    await oThis
-      .update({
-        status: notificationHookConstants.invertedStatuses[notificationHookConstants.ignoredStatus],
         lock_identifier: null,
         locked_at: null
       })
