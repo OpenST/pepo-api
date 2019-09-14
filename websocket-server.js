@@ -1,6 +1,9 @@
 const app = require('express')();
 const http = require('http').Server(app);
-const io = require('socket.io')(http);
+const io = require('socket.io')(http, {
+  pingInterval: 30000, // how many ms before sending a new ping packet [30 seconds]
+  pingTimeout: 60000 // how many ms without a pong packet to consider the connection closed [60 seconds]
+});
 
 const rootPrefix = '.',
   basicHelper = require(rootPrefix + '/helpers/basic'),

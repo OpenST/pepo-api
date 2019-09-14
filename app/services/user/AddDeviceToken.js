@@ -126,7 +126,7 @@ class AddDeviceToken extends ServiceBase {
     const userDeviceCacheData = userDeviceIdsCacheRsp.data[oThis.deviceToken],
       updateUserDeviceIds = [];
 
-    if (userDeviceCacheData.id) {
+    if (userDeviceCacheData && userDeviceCacheData.id) {
       const promiseArray = [];
 
       await new UserDeviceModel()
@@ -146,8 +146,6 @@ class AddDeviceToken extends ServiceBase {
 
       return Promise.all(promiseArray);
     }
-
-    //todo if user is updated
 
     const userDevices = await new UserDeviceModel()
       .select('*')

@@ -54,6 +54,7 @@ class UserModel extends ModelBase {
    * @param {string} dbRow.encryption_salt
    * @param {number} dbRow.mark_inactive_trigger_count
    * @param {number} dbRow.properties
+   * @param {string} dbRow.email
    * @param {number} dbRow.status
    * @param {number} dbRow.created_at
    * @param {number} dbRow.updated_at
@@ -73,6 +74,7 @@ class UserModel extends ModelBase {
       encryptionSalt: dbRow.encryption_salt,
       markInactiveTriggerCount: dbRow.mark_inactive_trigger_count,
       properties: dbRow.properties,
+      email: dbRow.email,
       approvedCreator: UserModel.isUserApprovedCreator(dbRow),
       status: userConstants.statuses[dbRow.status],
       createdAt: dbRow.created_at,
@@ -157,6 +159,7 @@ class UserModel extends ModelBase {
         'profile_image_id',
         'mark_inactive_trigger_count',
         'properties',
+        'email',
         'status',
         'created_at',
         'updated_at'
@@ -197,34 +200,29 @@ class UserModel extends ModelBase {
   }
 
   /**
-   * Fetch user ids
+   * Fetch user ids by email ids.
    *
-   * @param {object} params
-   * @param {array} params.userId
-   * @param {number} [params.page]
-   * @param {number} [params.limit]
+   * @param {array<string>} emails
    *
-   * @returns {Promise<*>}
+   * @returns {Promise<{}>}
    */
-  async fetchPaginatedUsers(params) {
+  async fetchUserIdsByEmails(emails) {
     const oThis = this;
 
-    const page = params.page || 1,
-      limit = params.limit || 10,
-      offset = (page - 1) * limit;
-
     const dbRows = await oThis
-      .select(['id'])
-      .where(['status != ?', userConstants.invertedStatuses[userConstants.blockedStatus]])
-      .limit(limit)
-      .offset(offset)
-      .order_by('name ASC')
+      .select('id, email')
+      .where({ email: emails })
       .fire();
 
-    const response = [];
+    if (dbRows.length === 0) {
+      return {};
+    }
+
+    const response = {};
 
     for (let index = 0; index < dbRows.length; index++) {
-      response.push(dbRows[index].id);
+      const formatDbRow = oThis.formatDbData(dbRows[index]);
+      response[formatDbRow.email] = formatDbRow;
     }
 
     return response;
@@ -330,9 +328,12 @@ class UserModel extends ModelBase {
   }
 
   /**
-   * Flush cache
+   * Flush cache.
    *
    * @param {object} params
+   * @param {string/number} params.id
+   * @param {string} params.userName
+   * @param {string} params.email
    *
    * @returns {Promise<*>}
    */
@@ -350,6 +351,11 @@ class UserModel extends ModelBase {
       promisesArray.push(new UserByUsernameCache({ userName: params.userName }).clear());
     }
 
+    if (params.email) {
+      const UserByEmailsCache = require(rootPrefix + '/lib/cacheManagement/multi/UserByEmails');
+      promisesArray.push(new UserByEmailsCache({ emails: [params.email] }).clear());
+    }
+
     await Promise.all(promisesArray);
   }
 
@@ -360,6 +366,15 @@ class UserModel extends ModelBase {
    */
   static get usernameUniqueIndexName() {
     return 'uk_idx_1';
+  }
+
+  /**
+   * Get email unique index name.
+   *
+   * @returns {string}
+   */
+  static get emailUniqueIndexName() {
+    return 'uk_idx_2';
   }
 
   /**

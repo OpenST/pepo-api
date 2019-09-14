@@ -1,13 +1,18 @@
 const rootPrefix = '../../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   GetProfile = require(rootPrefix + '/lib/user/profile/Get'),
+  UserModel = require(rootPrefix + '/app/models/mysql/User'),
   GetTokenService = require(rootPrefix + '/app/services/token/Get'),
   VideoDetailsByUserIdCache = require(rootPrefix + '/lib/cacheManagement/single/VideoDetailsByUserIdPagination'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
-  UserModel = require(rootPrefix + '/app/models/mysql/User'),
   paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination');
 
+/**
+ * Class for user video details service.
+ *
+ * @class GetVideoList
+ */
 class GetVideoList extends ServiceBase {
   /**
    * Constructor for user video details service.
@@ -15,6 +20,7 @@ class GetVideoList extends ServiceBase {
    * @param {object} params
    * @param {string/number} params.profile_user_id
    * @param {object} [params.current_user]
+   * @param {boolean} [params.is_admin]
    * @param {string} [params.pagination_identifier]
    *
    * @augments ServiceBase
@@ -28,10 +34,12 @@ class GetVideoList extends ServiceBase {
 
     oThis.profileUserId = +params.profile_user_id;
     oThis.currentUser = params.current_user;
+    oThis.isAdmin = params.is_admin || false;
     oThis.paginationIdentifier = params[paginationConstants.paginationIdentifierKey] || null;
 
-    oThis.currentUserId = null;
     oThis.limit = oThis._defaultPageLimit();
+
+    oThis.currentUserId = null;
     oThis.paginationTimestamp = null;
     oThis.nextPaginationTimestamp = null;
     oThis.videosCount = 0;
@@ -44,6 +52,8 @@ class GetVideoList extends ServiceBase {
   /**
    * Async perform.
    *
+   * @sets oThis.profileUserObj
+   *
    * @return {Promise<void>}
    * @private
    */
@@ -52,13 +62,20 @@ class GetVideoList extends ServiceBase {
 
     await oThis._validateAndSanitizeParams();
 
-    let resp = await oThis._validateProfileUserId();
+    let resp = null;
+
+    if (oThis.isAdmin) {
+      resp = await oThis._validateInactiveProfileUserId();
+    } else {
+      resp = await oThis._validateProfileUserId();
+    }
     oThis.profileUserObj = resp.data.userObject;
 
     await oThis._fetchVideoIds();
+
     oThis._addResponseMetaData();
 
-    let promisesArray = [];
+    const promisesArray = [];
     promisesArray.push(oThis._setTokenDetails());
     promisesArray.push(oThis._getVideos());
     await Promise.all(promisesArray);
@@ -94,7 +111,7 @@ class GetVideoList extends ServiceBase {
   /**
    * Fetch video ids.
    *
-   * @sets oThis.nextPaginationTimestamp
+   * @sets oThis.videosCount, oThis.videoDetails, oThis.videoIds, oThis.nextPaginationTimestamp
    *
    * @return {Promise<void>}
    * @private
@@ -102,9 +119,12 @@ class GetVideoList extends ServiceBase {
   async _fetchVideoIds() {
     const oThis = this;
 
-    // If user's profile(not self) is not approved, videos would not be shown.
-    if (oThis.currentUserId != oThis.profileUserId && !UserModel.isUserApprovedCreator(oThis.profileUserObj)) {
-      return responseHelper.successWithData({});
+    // If not an admin, only then perform further validations.
+    if (!oThis.isAdmin) {
+      // If user's profile(not self) is not approved, videos would not be shown.
+      if (oThis.currentUserId != oThis.profileUserId && !UserModel.isUserApprovedCreator(oThis.profileUserObj)) {
+        return responseHelper.successWithData({});
+      }
     }
 
     const cacheResponse = await new VideoDetailsByUserIdCache({
@@ -112,7 +132,6 @@ class GetVideoList extends ServiceBase {
       limit: oThis.limit,
       paginationTimestamp: oThis.paginationTimestamp
     }).fetch();
-
     if (cacheResponse.isFailure()) {
       return Promise.reject(cacheResponse);
     }
@@ -121,7 +140,7 @@ class GetVideoList extends ServiceBase {
     const videoIds = cacheResponse.data.videoIds || [];
 
     for (let ind = 0; ind < videoIds.length; ind++) {
-      let videoId = videoIds[ind];
+      const videoId = videoIds[ind];
       const videoDetail = videoDetails[videoId];
       oThis.videosCount++;
       oThis.videoDetails.push(videoDetail);
@@ -164,16 +183,13 @@ class GetVideoList extends ServiceBase {
    *
    * @sets oThis.tokenDetails
    *
-   * @return {Promise<*>}
+   * @return {Promise<result>}
    * @private
    */
   async _setTokenDetails() {
     const oThis = this;
 
-    const getTokenServiceObj = new GetTokenService({});
-
-    const tokenResp = await getTokenServiceObj.perform();
-
+    const tokenResp = await new GetTokenService().perform();
     if (tokenResp.isFailure()) {
       return Promise.reject(tokenResp);
     }
@@ -188,7 +204,7 @@ class GetVideoList extends ServiceBase {
    *
    * @sets oThis.profileResponse
    *
-   * @return {Promise<*>}
+   * @return {Promise<result>}
    * @private
    */
   async _getVideos() {
@@ -197,11 +213,11 @@ class GetVideoList extends ServiceBase {
     const getProfileObj = new GetProfile({
       userIds: [oThis.profileUserId],
       currentUserId: oThis.currentUserId,
-      videoIds: oThis.videoIds
+      videoIds: oThis.videoIds,
+      isAdmin: oThis.isAdmin
     });
 
     const response = await getProfileObj.perform();
-
     if (response.isFailure()) {
       return Promise.reject(response);
     }
@@ -209,6 +225,36 @@ class GetVideoList extends ServiceBase {
     oThis.profileResponse = response.data;
 
     return responseHelper.successWithData({});
+  }
+
+  /**
+   * Prepare final response.
+   *
+   * @return {Promise<result>}
+   * @private
+   */
+  async _prepareResponse() {
+    const oThis = this;
+
+    return responseHelper.successWithData({
+      [entityType.userVideoList]: oThis.videoDetails,
+      usersByIdMap: oThis.profileResponse.usersByIdMap,
+      userStat: oThis.profileResponse.userStat,
+      [entityType.userProfilesMap]: oThis.profileResponse.userProfilesMap,
+      tags: oThis.profileResponse.tags,
+      linkMap: oThis.profileResponse.linkMap,
+      imageMap: oThis.profileResponse.imageMap,
+      videoMap: oThis.profileResponse.videoMap,
+      [entityType.videoDetailsMap]: oThis.profileResponse.videoDetailsMap,
+      [entityType.videoDescriptionsMap]: oThis.profileResponse.videoDescriptionMap,
+      [entityType.currentUserUserContributionsMap]: oThis.profileResponse.currentUserUserContributionsMap,
+      [entityType.currentUserVideoContributionsMap]: oThis.profileResponse.currentUserVideoContributionsMap,
+      [entityType.userProfileAllowedActions]: oThis.profileResponse.userProfileAllowedActions,
+      tokenUsersByUserIdMap: oThis.profileResponse.tokenUsersByUserIdMap,
+      [entityType.pricePointsMap]: oThis.profileResponse.pricePointsMap,
+      tokenDetails: oThis.tokenDetails,
+      meta: oThis.responseMetaData
+    });
   }
 
   /**
@@ -251,36 +297,6 @@ class GetVideoList extends ServiceBase {
     const oThis = this;
 
     return oThis.limit;
-  }
-
-  /**
-   * Prepare final response.
-   *
-   * @return {Promise<*|result>}
-   * @private
-   */
-  async _prepareResponse() {
-    const oThis = this;
-
-    return responseHelper.successWithData({
-      [entityType.userVideoList]: oThis.videoDetails,
-      usersByIdMap: oThis.profileResponse.usersByIdMap,
-      userStat: oThis.profileResponse.userStat,
-      [entityType.userProfilesMap]: oThis.profileResponse.userProfilesMap,
-      tags: oThis.profileResponse.tags,
-      linkMap: oThis.profileResponse.linkMap,
-      imageMap: oThis.profileResponse.imageMap,
-      videoMap: oThis.profileResponse.videoMap,
-      [entityType.videoDetailsMap]: oThis.profileResponse.videoDetailsMap,
-      [entityType.videoDescriptionsMap]: oThis.profileResponse.videoDescriptionMap,
-      [entityType.currentUserUserContributionsMap]: oThis.profileResponse.currentUserUserContributionsMap,
-      [entityType.currentUserVideoContributionsMap]: oThis.profileResponse.currentUserVideoContributionsMap,
-      [entityType.userProfileAllowedActions]: oThis.profileResponse.userProfileAllowedActions,
-      tokenUsersByUserIdMap: oThis.profileResponse.tokenUsersByUserIdMap,
-      [entityType.pricePointsMap]: oThis.profileResponse.pricePointsMap,
-      tokenDetails: oThis.tokenDetails,
-      meta: oThis.responseMetaData
-    });
   }
 }
 

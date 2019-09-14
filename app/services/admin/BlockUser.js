@@ -53,6 +53,8 @@ class BlockUser extends ServiceBase {
     promisesArray.push(oThis._logAdminActivity());
     await Promise.all(promisesArray);
 
+    //todo::ADMIN delete feeds??
+
     return responseHelper.successWithData({});
   }
 

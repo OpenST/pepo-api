@@ -59,6 +59,15 @@ const v1Signature = {
     ],
     optional: []
   },
+  [apiName.getInviteCode]: {
+    mandatory: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      }
+    ],
+    optional: []
+  },
   [apiName.sendDoubleOptIn]: {
     mandatory: [
       {
@@ -238,7 +247,12 @@ const v1Signature = {
         validatorMethods: ['validateNonBlankString']
       }
     ],
-    optional: []
+    optional: [
+      {
+        parameter: 'invite_code',
+        validatorMethods: ['validateNonBlankString']
+      }
+    ]
   },
   [apiName.getUserProfile]: {
     mandatory: [
@@ -376,6 +390,23 @@ const v1Signature = {
       }
     ]
   },
+  [apiName.saveEmail]: {
+    mandatory: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      },
+      {
+        parameter: 'profile_user_id',
+        validatorMethods: ['validateNonZeroInteger']
+      },
+      {
+        parameter: 'email',
+        validatorMethods: ['validateString', 'isValidEmail']
+      }
+    ],
+    optional: []
+  },
   [apiName.getTags]: {
     mandatory: [
       {
@@ -489,6 +520,10 @@ const v1Signature = {
       {
         parameter: 'text',
         validatorMethods: ['validateString']
+      },
+      {
+        parameter: 'tweet_needed',
+        validatorMethods: ['validateInteger']
       }
     ]
   },
@@ -555,6 +590,15 @@ const v1Signature = {
       {
         parameter: 'current_admin',
         validatorMethods: ['validateNonEmptyObject']
+      }
+    ],
+    optional: []
+  },
+  [apiName.getEmail]: {
+    mandatory: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonZeroInteger']
       }
     ],
     optional: []
@@ -657,6 +701,74 @@ const v1Signature = {
       {
         parameter: 'current_user',
         validatorMethods: ['validateNonEmptyObject']
+      }
+    ]
+  },
+  [apiName.share]: {
+    mandatory: [
+      {
+        parameter: 'video_id',
+        validatorMethods: ['validateNonZeroInteger']
+      },
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      }
+    ]
+  },
+  [apiName.refreshTwitterConnect]: {
+    mandatory: [
+      {
+        parameter: 'token',
+        validatorMethods: ['validateNonBlankString']
+      },
+      {
+        parameter: 'secret',
+        validatorMethods: ['validateNonBlankString']
+      },
+      {
+        parameter: 'twitter_id',
+        validatorMethods: ['validateNonBlankString']
+      },
+      {
+        parameter: 'handle',
+        validatorMethods: ['validateNonBlankString']
+      }
+    ],
+    optional: []
+  },
+  [apiName.tweetInfo]: {
+    mandatory: [
+      {
+        parameter: 'receiver_user_id',
+        validatorMethods: ['validateNonZeroInteger']
+      },
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      }
+    ],
+    optional: []
+  },
+  [apiName.invitedUsersSearch]: {
+    mandatory: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      }
+    ],
+    optional: [
+      {
+        parameter: paginationConstants.paginationIdentifierKey,
+        validatorMethods: ['validateString', 'validatePaginationIdentifier']
+      }
+    ]
+  },
+  [apiName.fetchGoto]: {
+    mandatory: [
+      {
+        parameter: 'url',
+        validatorMethods: ['validateGenericUrl']
       }
     ]
   }

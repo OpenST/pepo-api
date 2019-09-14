@@ -102,16 +102,15 @@ class ServicesBase {
   }
 
   /**
-   * Validate whether profile userId is correct or not.
+   * Fetch profile user.
    *
-   * @returns {Promise<result>}
+   * @returns {Promise<object>}
    * @private
    */
-  async _validateProfileUserId() {
+  async _fetchProfileUser() {
     const oThis = this;
 
     const UserMultiCache = require(rootPrefix + '/lib/cacheManagement/multi/User');
-
     const profileUserByIdResponse = await new UserMultiCache({ ids: [oThis.profileUserId] }).fetch();
 
     const profileUserObj = profileUserByIdResponse.data[oThis.profileUserId];
@@ -130,6 +129,20 @@ class ServicesBase {
       );
     }
 
+    return profileUserObj;
+  }
+
+  /**
+   * Validate whether profile userId is correct or not.
+   *
+   * @returns {Promise<result>}
+   * @private
+   */
+  async _validateProfileUserId() {
+    const oThis = this;
+
+    const profileUserObj = await oThis._fetchProfileUser();
+
     if (profileUserObj.status === userConstants.inActiveStatus) {
       return Promise.reject(
         responseHelper.paramValidationError({
@@ -141,7 +154,21 @@ class ServicesBase {
       );
     }
 
-    return responseHelper.successWithData({ userObject: profileUserByIdResponse.data[oThis.profileUserId] });
+    return responseHelper.successWithData({ userObject: profileUserObj });
+  }
+
+  /**
+   * Validate whether profile userId is correct or not. Inactive users are also valid.
+   *
+   * @returns {Promise<result>}
+   * @private
+   */
+  async _validateInactiveProfileUserId() {
+    const oThis = this;
+
+    const profileUserObj = await oThis._fetchProfileUser();
+
+    return responseHelper.successWithData({ userObject: profileUserObj });
   }
 
   _currentPageLimit() {

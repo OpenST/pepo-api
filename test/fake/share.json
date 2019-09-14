@@ -1,0 +1,12 @@
+{
+  "result_type": "share",
+  "share": {
+    "id": 123,
+    "uts": 1568373293,
+    "kind": "VIDEO",
+    "url": "https://dbvoeb7t6hffk.cloudfront.net/pepo-sandbox1000/ua/videos/1000-3be05bd1b1bbb4a8559f2932245e70f1-576w.mp4",
+    "message": "DUMMY_MESSAGE",
+    "title": "DUMMY_TITLE",
+    "subject": "DUMMY_SUBJECT"
+  }
+}

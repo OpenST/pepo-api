@@ -39,7 +39,7 @@ class EntityPermalink extends ModelBase {
    * @param {number} dbRow.created_at
    * @param {number} dbRow.updated_at
    *
-   * @return {object}
+   * @returns {object}
    * @private
    */
   _formatDbData(dbRow) {
@@ -63,7 +63,7 @@ class EntityPermalink extends ModelBase {
    *
    * @param {number} entityId: entity id
    *
-   * @return {object}
+   * @returns {object}
    */
   async fetchByEntityId(entityId) {
     const oThis = this;
@@ -93,7 +93,7 @@ class EntityPermalink extends ModelBase {
    * @param {string} params.permalink
    * @param {number} params.status
    *
-   * @return {object}
+   * @returns {object}
    */
   async insertEntityPermalink(params) {
     const oThis = this;

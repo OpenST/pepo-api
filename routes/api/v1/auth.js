@@ -31,12 +31,12 @@ router.post('/twitter-login', sanitizer.sanitizeDynamicUrlParams, function(req, 
 
   const onServiceSuccess = async function(serviceResponse) {
     cookieHelper.setLoginCookie(res, serviceResponse.data.userLoginCookieValue);
-
     const wrapperFormatterRsp = await new FormatterComposer({
       resultType: responseEntityKey.loggedInUser,
       entityKindToResponseKeyMap: {
         [entityType.loggedInUser]: responseEntityKey.loggedInUser,
-        [entityType.usersMap]: responseEntityKey.users
+        [entityType.usersMap]: responseEntityKey.users,
+        [entityType.goto]: responseEntityKey.goto
       },
       serviceData: serviceResponse.data
     }).perform();
@@ -67,5 +67,11 @@ router.post(
     Promise.resolve(routeHelper.perform(req, res, next, '/twitter/Disconnect', 'r_a_v1_a_4', null));
   }
 );
+
+router.post('/refresh-twitter-connect', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.refreshTwitterConnect;
+
+  Promise.resolve(routeHelper.perform(req, res, next, '/twitter/RefreshConnect', 'r_a_v1_a_5', null));
+});
 
 module.exports = router;
