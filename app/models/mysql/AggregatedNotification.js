@@ -77,13 +77,21 @@ class AggregatedNotification extends ModelBase {
   async fetchPendingBySendTime(params) {
     const oThis = this;
 
+    const sendTime = params.sendTime,
+      page = params.page || 1,
+      limit = params.limit || 50,
+      offset = (page - 1) * limit;
+
     const dbRows = await oThis
       .select('*')
       .where([
         'send_time <= ? AND status = ?',
-        params.sendTime,
+        sendTime,
         aggregatedNotificationsConstants.invertedStatuses[aggregatedNotificationsConstants.pendingStatus]
       ])
+      .limit(limit)
+      .offset(offset)
+      .order_by('send_time ASC')
       .fire();
 
     const response = {};

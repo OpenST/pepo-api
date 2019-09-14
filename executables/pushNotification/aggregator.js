@@ -8,14 +8,17 @@ const program = require('commander');
 
 const rootPrefix = '../..',
   CronBase = require(rootPrefix + '/executables/CronBase'),
+  UserModel = require(rootPrefix + '/app/models/mysql/User'),
   AggregatedNotificationModel = require(rootPrefix + '/app/models/mysql/AggregatedNotification'),
   NotificationHookModel = require(rootPrefix + '/app/models/mysql/NotificationHook'),
   UserDeviceIdsByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/UserDeviceIdsByUserIds'),
-  LocationsCache = require(rootPrefix + '/lib/cacheManagement/single/Locations'),
+  UserMultiCache = require(rootPrefix + '/lib/cacheManagement/multi/User'),
   notificationHookConstants = require(rootPrefix + '/lib/globalConstant/notificationHook'),
   aggregatedNotificationsConstants = require(rootPrefix + '/lib/globalConstant/aggregatedNotifications'),
   cronProcessesConstants = require(rootPrefix + '/lib/globalConstant/cronProcesses'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
+  sigIntConstant = require(rootPrefix + '/lib/globalConstant/sigInt'),
+  userConstants = require(rootPrefix + '/lib/globalConstant/user'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger');
 
 program.option('--cronProcessId <cronProcessId>', 'Cron table process ID').parse(process.argv);
@@ -56,11 +59,7 @@ class NotificationAggregator extends CronBase {
 
     const oThis = this;
 
-    oThis.currentTimeInSec = parseInt(new Date().getTime() / 1000);
-
-    oThis.userIdToAggregatedDetailsMap = {};
-    oThis.recipientUserIds = [];
-    oThis.userIdToUserDeviceIdsMap = {};
+    oThis.page = 1;
 
     oThis.canExit = true;
   }
@@ -76,27 +75,48 @@ class NotificationAggregator extends CronBase {
 
     oThis.canExit = false;
 
-    //todo: use pagination
-    //todo: not sent status
+    while (sigIntConstant.getSigIntStatus != 1) {
+      oThis._initParams();
 
-    await oThis._fetchAggregatedDetails();
+      await oThis._fetchAggregatedDetails();
 
-    for (let userId in oThis.userIdToAggregatedDetailsMap) {
-      oThis.recipientUserIds.push(userId);
+      for (let userId in oThis.userIdToAggregatedDetailsMap) {
+        oThis.recipientUserIds.push(userId);
+      }
+
+      if (oThis.recipientUserIds.length < 1) {
+        oThis.canExit = true;
+        return responseHelper.successWithData({});
+      }
+
+      await oThis._getUsers();
+      await oThis._fetchDeviceIdsForRecipients();
+      await oThis._insertIntoNotificationHook();
+      await oThis._resetDataForSentUsers();
+
+      oThis.page = oThis.page + 1;
     }
-
-    if (oThis.recipientUserIds.length < 1) {
-      oThis.canExit = true;
-      return responseHelper.successWithData({});
-    }
-
-    await oThis._fetchDeviceIdsForRecipients();
-    await oThis._insertIntoNotificationHook();
-    await oThis._resetDataForSentUsers();
 
     oThis.canExit = true;
 
     return responseHelper.successWithData({});
+  }
+
+  /**
+   * Init params for current iteration
+   *
+   * @private
+   */
+  _initParams() {
+    const oThis = this;
+
+    oThis.currentTimeInSec = parseInt(new Date().getTime() / 1000);
+
+    oThis.whitelistedUserIds = [];
+
+    oThis.userIdToAggregatedDetailsMap = {};
+    oThis.recipientUserIds = [];
+    oThis.userIdToUserDeviceIdsMap = {};
   }
 
   /**
@@ -112,9 +132,36 @@ class NotificationAggregator extends CronBase {
   async _fetchAggregatedDetails() {
     const oThis = this;
 
-    oThis.userIdToAggregatedDetailsMap = await new AggregatedNotificationModel().fetchPendingBySendTime({
+    let queryParams = {
+      page: oThis.page,
+      limit: 50,
       sendTime: oThis.currentTimeInSec
-    });
+    };
+
+    oThis.userIdToAggregatedDetailsMap = await new AggregatedNotificationModel().fetchPendingBySendTime(queryParams);
+  }
+
+  /**
+   * Fetch whitelistedUserIds (active creators can receive this notification)
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _getUsers() {
+    const oThis = this;
+
+    const userByIdResponse = await new UserMultiCache({ ids: oThis.recipientUserIds }).fetch();
+
+    if (userByIdResponse.isFailure()) {
+      return Promise.reject(UserByIdResponse);
+    }
+
+    for (let userId in userByIdResponse.data) {
+      let userObj = userByIdResponse.data[userId];
+      if (userObj && userObj.status == userConstants.activeStatus && UserModel.isUserApprovedCreator(userObj)) {
+        oThis.whitelistedUserIds.push(userId);
+      }
+    }
   }
 
   /**
@@ -126,7 +173,7 @@ class NotificationAggregator extends CronBase {
   async _fetchDeviceIdsForRecipients() {
     const oThis = this;
 
-    const userDeviceCacheRsp = await new UserDeviceIdsByUserIdsCache({ userIds: oThis.recipientUserIds }).fetch();
+    const userDeviceCacheRsp = await new UserDeviceIdsByUserIdsCache({ userIds: oThis.whitelistedUserIds }).fetch();
 
     if (userDeviceCacheRsp.isFailure()) {
       return Promise.reject(userDeviceCacheRsp);
@@ -154,8 +201,8 @@ class NotificationAggregator extends CronBase {
       ],
       insertColumnValues = [];
 
-    for (let i = 0; i < oThis.recipientUserIds.length; i++) {
-      let userId = oThis.recipientUserIds[i],
+    for (let i = 0; i < oThis.whitelistedUserIds.length; i++) {
+      let userId = oThis.whitelistedUserIds[i],
         deviceIds = oThis.userIdToUserDeviceIdsMap[userId],
         aggregatedNotificationsPayload = oThis.userIdToAggregatedDetailsMap[userId];
 
