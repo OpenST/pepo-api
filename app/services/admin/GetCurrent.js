@@ -1,5 +1,7 @@
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
+  AdminModel = require(rootPrefix + '/app/models/mysql/Admin'),
+  CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   AdminByIdCache = require(rootPrefix + '/lib/cacheManagement/single/AdminById'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger');
@@ -52,7 +54,7 @@ class GetCurrentAdmin extends ServiceBase {
    *
    * @sets oThis.currentAdmin
    *
-   * @returns {Promise<result>}
+   * @returns {Promise<void>}
    * @private
    */
   async _fetchAdmin() {
@@ -61,13 +63,18 @@ class GetCurrentAdmin extends ServiceBase {
     logger.log('Fetching admin.');
 
     const cacheResponse = await new AdminByIdCache({ id: oThis.adminId }).fetch();
-    if (cacheResponse.isFailure()) {
-      return Promise.reject(cacheResponse);
+    if (cacheResponse.isFailure() || !CommonValidators.validateNonEmptyObject(cacheResponse.data)) {
+      return Promise.reject(
+        responseHelper.paramValidationError({
+          internal_error_identifier: 's_am_gc_1',
+          api_error_identifier: 'invalid_api_params',
+          params_error_identifiers: ['user_not_found'],
+          debug_options: {}
+        })
+      );
     }
 
-    oThis.currentAdmin = cacheResponse.data || {};
-
-    return responseHelper.successWithData({});
+    oThis.currentAdmin = new AdminModel().safeFormattedData(cacheResponse.data);
   }
 }
 
