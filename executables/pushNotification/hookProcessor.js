@@ -55,9 +55,12 @@ class HookProcessor extends CronBase {
     const oThis = this;
 
     oThis.processFailed = params.processFailed;
-    oThis.currentTimeStamp = Math.round(Date.now() / 1000);
 
-    oThis.lockIdentifier = oThis.currentTimeStamp;
+    if (oThis.processFailed) {
+      oThis.increaseRetryCount = true;
+    } else {
+      oThis.increaseRetryCount = false;
+    }
 
     oThis.hook = null;
     oThis.hooksToBeProcessed = {};
@@ -75,6 +78,9 @@ class HookProcessor extends CronBase {
     const oThis = this;
 
     while (true) {
+      oThis.currentTimeStamp = Math.round(Date.now() / 1000);
+      oThis.lockIdentifier = oThis.currentTimeStamp;
+
       if (oThis.stopPickingUpNewWork) {
         oThis.canExit = true;
         break;
@@ -163,7 +169,8 @@ class HookProcessor extends CronBase {
         await new NotificationHookModel().updateStatusAndInsertResponse(
           hookId,
           notificationHookConstants.failedStatus,
-          err
+          err,
+          oThis.increaseRetryCount
         );
       });
     }
@@ -198,16 +205,11 @@ class HookProcessor extends CronBase {
       return new NotificationHookModel().updateStatusAndInsertResponse(
         oThis.hook.id,
         statusToBeInserted,
-        firebaseAPIResponse
+        firebaseAPIResponse,
+        oThis.increaseRetryCount
       );
     } else {
-      logger.error('ERROR----------------response------------------', pushNotificationProcessorRsp);
-      const errorIdentifierStr = `firebase_error:e_pn_2`,
-        debugOptions = {
-          hootId: oThis.hook.id,
-          pushNotificationProcessorRsp: pushNotificationProcessorRsp
-        };
-      await oThis._notifyErrorStates(errorIdentifierStr, debugOptions);
+      return Promise.reject(pushNotificationProcessorRsp);
     }
   }
 
@@ -232,14 +234,15 @@ class HookProcessor extends CronBase {
               'Error:: tokenNotRegisteredErrorCode/unregisteredErrorCode ---------------',
               response.error.code
             );
+
             await new UserDeviceModel()
               .update({ status: userDeviceConstants.invertedStatuses[userDeviceConstants.expiredStatus] })
               .where({
-                id: hook.id
+                id: userDeviceId
               })
               .fire();
 
-            await UserDeviceModel.flushCache({ id: hook.id });
+            await UserDeviceModel.flushCache({ id: userDeviceId });
 
             break;
 
@@ -248,11 +251,6 @@ class HookProcessor extends CronBase {
             logger.log('serverUnavailable...\nSleeping Now...');
             await basicHelper.sleep(5000);
             break;
-
-          case notificationHookConstants.invalidArgumentErrorCode:
-            logger.error('Error::invalidArgumentErrorCode----------------------------', response.error.code);
-            break;
-
           default:
             logger.error('Error::default----------------------------', response);
 
@@ -285,7 +283,7 @@ class HookProcessor extends CronBase {
       api_error_identifier: 'firebase_error',
       debug_options: debugOptions
     });
-    await createErrorLogsEntry.perform(errorObject, errorLogsConstants.lowSeverity);
+    await createErrorLogsEntry.perform(errorObject, errorLogsConstants.mediumSeverity);
   }
 
   /**
@@ -342,7 +340,7 @@ class HookProcessor extends CronBase {
   async _acquireLockOnFailedHooks() {
     const oThis = this;
 
-    return new NotificationHookModel().acquireLocksOnFailedHooks();
+    return new NotificationHookModel().acquireLocksOnFailedHooks(oThis.lockIdentifier);
   }
 
   /**
