@@ -1,7 +1,9 @@
 const rootPrefix = '../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
+  coreConstants = require(rootPrefix + '/config/coreConstants'),
+  localCipher = require(rootPrefix + '/lib/encryptors/localCipher'),
   databaseConstants = require(rootPrefix + '/lib/globalConstant/database'),
-  temporaryTokenConstant = require(rootPrefix + '/lib/globalConstant/temporaryToken');
+  temporaryTokenConstants = require(rootPrefix + '/lib/globalConstant/temporaryToken');
 
 // Declare variables.
 const dbName = databaseConstants.bigDbName;
@@ -47,9 +49,9 @@ class TemporaryToken extends ModelBase {
     const formattedData = {
       id: dbRow.id,
       entityId: dbRow.entity_id,
-      kind: temporaryTokenConstant.kinds[dbRow.kind],
+      kind: temporaryTokenConstants.kinds[dbRow.kind],
       token: dbRow.token,
-      status: temporaryTokenConstant.statuses[dbRow.status],
+      status: temporaryTokenConstants.statuses[dbRow.status],
       createdAt: dbRow.created_at,
       updatedAt: dbRow.updated_at
     };
@@ -107,14 +109,38 @@ class TemporaryToken extends ModelBase {
   }
 
   /**
-   * Flush cache.
+   * Create double opt in token with active status.
    *
    * @param {object} params
+   * @param {number} params.entityId
+   * @param {string} params.kind
+   * @param {string} params.token
    *
-   * @returns {Promise<*>}
+   * @returns {Promise<Request<KMS.EncryptResponse, AWSError>|*|any|ArrayBuffer>}
    */
-  static async flushCache(params) {
-    // Do nothing.
+  async createDoubleOptInToken(params) {
+    const oThis = this;
+
+    const entityId = params.entityId;
+    const kind = params.kind;
+    const token = params.token;
+
+    const insertResponse = await oThis
+      .insert({
+        entity_id: entityId,
+        kind: temporaryTokenConstants.invertedKinds[kind],
+        token: token,
+        status: temporaryTokenConstants.invertedStatuses[temporaryTokenConstants.activeStatus]
+      })
+      .fire();
+
+    if (!insertResponse) {
+      return Promise.reject(new Error('Error while inserting data into temporary_tokens table.'));
+    }
+
+    const doubleOptInTokenStr = `${insertResponse.insertId.toString()}:${token}`;
+
+    return localCipher.encrypt(coreConstants.PA_EMAIL_TOKENS_DECRIPTOR_KEY, doubleOptInTokenStr);
   }
 }
 

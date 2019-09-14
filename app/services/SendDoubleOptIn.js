@@ -3,11 +3,8 @@ const rootPrefix = '../..',
   TemporaryTokenModel = require(rootPrefix + '/app/models/mysql/TemporaryToken'),
   SendTransactionalMail = require(rootPrefix + '/lib/email/hookCreator/SendTransactionalMail'),
   util = require(rootPrefix + '/lib/util'),
-  coreConstants = require(rootPrefix + '/config/coreConstants'),
-  pageConstants = require(rootPrefix + '/lib/globalConstant/page'),
-  logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
-  localCipher = require(rootPrefix + '/lib/encryptors/localCipher'),
+  webPageConstants = require(rootPrefix + '/lib/globalConstant/webPage'),
   temporaryTokenConstants = require(rootPrefix + '/lib/globalConstant/temporaryToken'),
   preLaunchInviteConstants = require(rootPrefix + '/lib/globalConstant/preLaunchInvite'),
   emailServiceApiCallHookConstants = require(rootPrefix + '/lib/globalConstant/emailServiceApiCallHook');
@@ -83,24 +80,11 @@ class SendDoubleOptIn extends ServiceBase {
       }::${Date.now()}::preLaunchInviteDoubleOptIn::${Math.random()}`,
       temporaryDoubleOptInToken = util.createMd5Digest(tokenString);
 
-    const insertResponse = await new TemporaryTokenModel()
-      .insert({
-        entity_id: oThis.preLaunchInviteObj.id,
-        kind: temporaryTokenConstants.invertedKinds[temporaryTokenConstants.preLaunchInviteKind],
-        token: temporaryDoubleOptInToken,
-        status: temporaryTokenConstants.invertedStatuses[temporaryTokenConstants.activeStatus]
-      })
-      .fire();
-
-    if (!insertResponse) {
-      logger.error('Error while inserting data into pre_launch_invites table.');
-
-      return Promise.reject(new Error('Error while inserting data into pre_launch_invites table.'));
-    }
-
-    const doubleOptInTokenStr = `${insertResponse.insertId.toString()}:${temporaryDoubleOptInToken}`;
-
-    oThis.doubleOptInToken = localCipher.encrypt(coreConstants.PA_EMAIL_TOKENS_DECRIPTOR_KEY, doubleOptInTokenStr);
+    oThis.doubleOptInToken = await new TemporaryTokenModel().createDoubleOptInToken({
+      entityId: oThis.preLaunchInviteObj.id,
+      kind: temporaryTokenConstants.preLaunchInviteKind,
+      token: temporaryDoubleOptInToken
+    });
   }
 
   /**
@@ -112,7 +96,7 @@ class SendDoubleOptIn extends ServiceBase {
   async _sendPreLaunchInviteDoubleOptInMail() {
     const oThis = this;
 
-    const link = encodeURIComponent(`${pageConstants.optInEmailLink}?t=${oThis.doubleOptInToken}`);
+    const link = encodeURIComponent(`${webPageConstants.optInEmailLink}?t=${oThis.doubleOptInToken}`);
 
     const transactionalMailParams = {
       receiverEntityId: oThis.preLaunchInviteObj.id,

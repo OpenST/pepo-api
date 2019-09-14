@@ -21,7 +21,9 @@ const rootPrefix = '../../..',
   ostPlatformSdk = require(rootPrefix + '/lib/ostPlatform/jsSdkWrapper'),
   basicHelper = require(rootPrefix + '/helpers/basic'),
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
-  tokenUserConstants = require(rootPrefix + '/lib/globalConstant/tokenUser');
+  tokenUserConstants = require(rootPrefix + '/lib/globalConstant/tokenUser'),
+  UserByEmailCache = require(rootPrefix + '/lib/cacheManagement/multi/UserByEmails'),
+  prelaunchInviteConstants = require(rootPrefix + '/lib/globalConstant/preLaunchInvite');
 
 /**
  * Class for Twitter Signup service.
@@ -38,6 +40,9 @@ class TwitterSignup extends ServiceBase {
    * @param {string} params.token: Oauth User Token
    * @param {string} params.secret: Oauth User secret
    *
+   * @param {string} params.inviterCodeId: invite code table id of inviter
+   * @param {object} params.prelaunchInviteObj: prelaunch invite object, if user was part of pre-launch program
+   *
    * @augments ServiceBase
    *
    * @constructor
@@ -51,6 +56,8 @@ class TwitterSignup extends ServiceBase {
     oThis.userTwitterEntity = params.userTwitterEntity;
     oThis.token = params.token;
     oThis.secret = params.secret;
+    oThis.inviterCodeId = params.inviterCodeId;
+    oThis.prelaunchInviteObj = params.prelaunchInviteObj || {};
 
     oThis.userId = null;
 
@@ -68,6 +75,7 @@ class TwitterSignup extends ServiceBase {
 
     oThis.ostUserId = null;
     oThis.ostStatus = null;
+    oThis.userOptedInEmail = null;
   }
 
   /**
@@ -100,6 +108,7 @@ class TwitterSignup extends ServiceBase {
 
     promisesArray1.push(oThis._saveProfileImage());
     promisesArray1.push(oThis._setUserName());
+    promisesArray1.push(oThis._emailToSet());
     promisesArray1.push(oThis._setKMSEncryptionSalt());
 
     await Promise.all(promisesArray1).catch(function(err) {
@@ -295,17 +304,16 @@ class TwitterSignup extends ServiceBase {
 
     logger.log('Start::Create user');
 
-    let propertyVal = new UserModel().setBitwise('properties', 0, userConstants.hasTwitterLoginProperty);
-
     let insertData = {
       user_name: oThis.userName,
       name: oThis.userTwitterEntity.formattedName,
       cookie_token: oThis.encryptedCookieToken,
       encryption_salt: oThis.encryptedEncryptionSalt,
       mark_inactive_trigger_count: 0,
-      properties: propertyVal,
+      properties: oThis._userPropertiesToSet(),
       status: userConstants.invertedStatuses[userConstants.activeStatus],
-      profile_image_id: oThis.profileImageId
+      profile_image_id: oThis.profileImageId,
+      email: oThis.userOptedInEmail
     };
 
     let retryCount = 3,
@@ -513,7 +521,9 @@ class TwitterSignup extends ServiceBase {
       twitterUserId: oThis.twitterUserObj.id,
       twitterId: oThis.userTwitterEntity.idStr,
       userId: oThis.userId,
-      profileImageId: oThis.profileImageId
+      profileImageId: oThis.profileImageId,
+      inviterCodeId: oThis.inviterCodeId,
+      userInviteCodeId: oThis.prelaunchInviteObj.inviteCodeId
     };
     await bgJob.enqueue(bgJobConstants.afterSignUpJobTopic, messagePayload);
   }
@@ -543,8 +553,65 @@ class TwitterSignup extends ServiceBase {
       tokenUsersByUserIdMap: { [safeFormattedTokenUserData.userId]: safeFormattedTokenUserData },
       user: safeFormattedUserData,
       tokenUser: safeFormattedTokenUserData,
-      userLoginCookieValue: userLoginCookieValue
+      userLoginCookieValue: userLoginCookieValue,
+      openEmailAddFlow: oThis.userOptedInEmail ? 0 : 1
     });
+  }
+
+  /**
+   * Properties to set for user
+   *
+   * @returns {number}
+   * @private
+   */
+  _userPropertiesToSet() {
+    const oThis = this;
+
+    let propertyVal = new UserModel().setBitwise('properties', 0, userConstants.hasTwitterLoginProperty);
+
+    // If user was part of prelaunch program and was approved as creator
+    if (
+      CommonValidators.validateNonEmptyObject(oThis.prelaunchInviteObj) &&
+      oThis.prelaunchInviteObj.creatorStatus ==
+        prelaunchInviteConstants.invertedCreatorStatuses[prelaunchInviteConstants.approvedCreatorStatus]
+    ) {
+      propertyVal = new UserModel().setBitwise('properties', propertyVal, userConstants.isApprovedCreatorProperty);
+    }
+
+    return propertyVal;
+  }
+
+  /**
+   * Email of user to set
+   *
+   * @Sets oThis.userOptedInEmail
+   *
+   * @returns {Promise<*>}
+   * @private
+   */
+  async _emailToSet() {
+    const oThis = this;
+
+    // Check if email is received from twitter
+    if (oThis.userTwitterEntity.email && CommonValidators.isValidEmail(oThis.userTwitterEntity.email)) {
+      oThis.userOptedInEmail = oThis.userTwitterEntity.email;
+    } else if (
+      CommonValidators.validateNonEmptyObject(oThis.prelaunchInviteObj) &&
+      oThis.prelaunchInviteObj.status ==
+        prelaunchInviteConstants.invertedStatuses[prelaunchInviteConstants.doptinStatus]
+    ) {
+      // If user was part of prelaunch program and has double opted in for email, then use it
+      oThis.userOptedInEmail = oThis.prelaunchInviteObj.email;
+    }
+
+    // Check if that email is already used or not
+    if (oThis.userOptedInEmail) {
+      let emailCacheResp = await new UserByEmailCache({ emails: [oThis.userOptedInEmail] }).fetch();
+      if (CommonValidators.validateNonEmptyObject(emailCacheResp.data[oThis.userOptedInEmail])) {
+        // Email is already used, so cannot be added.
+        oThis.userOptedInEmail = null;
+      }
+    }
   }
 }
 
