@@ -2,7 +2,6 @@ const rootPrefix = '../../../..',
   UpdateStats = require(rootPrefix + '/lib/UpdateStats'),
   TokenUserModel = require(rootPrefix + '/app/models/mysql/TokenUser'),
   TransactionOstEventBase = require(rootPrefix + '/app/services/ostEvents/transactions/Base'),
-  UserDeviceIdsByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/UserDeviceIdsByUserIds'),
   basicHelper = require(rootPrefix + '/helpers/basic'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
@@ -153,36 +152,6 @@ class SuccessTransactionOstEvent extends TransactionOstEventBase {
   }
 
   /**
-   * This function checks if push notification is required.
-   *
-   * @returns {Promise<void>}
-   * @private
-   */
-  async _checkIfPushNotificationRequired() {
-    const oThis = this;
-
-    //TODO:: Do ot check user devices here. Already validated in job
-    logger.log('oThis.isPaperPlane =========', oThis.isPaperPlane);
-
-    if (oThis.isPaperPlane) {
-      const toUserIds = oThis.transactionObj.extraData.toUserIds,
-        userDeviceCacheRsp = await new UserDeviceIdsByUserIdsCache({ userIds: toUserIds }).fetch();
-
-      if (userDeviceCacheRsp.isFailure()) {
-        return Promise.reject(userDeviceCacheRsp);
-      }
-
-      const userDeviceIds = userDeviceCacheRsp.data[toUserIds[0]];
-
-      logger.log('userDeviceIds =========', userDeviceIds);
-
-      if (Array.isArray(userDeviceIds) && userDeviceIds.length > 0) {
-        await oThis._enqueueUserNotification(notificationJobConstants.paperPlaneTransaction);
-      }
-    }
-  }
-
-  /**
    * Send notification for successful transaction.
    *
    * @returns {Promise<void>}
@@ -221,7 +190,13 @@ class SuccessTransactionOstEvent extends TransactionOstEventBase {
       );
     }
 
-    promisesArray.push(oThis._checkIfPushNotificationRequired());
+    if (oThis.isPaperPlane) {
+      promisesArray.push(
+        notificationJobEnqueue.enqueue(notificationJobConstants.paperPlaneTransaction, {
+          transaction: oThis.transactionObj
+        })
+      );
+    }
 
     await Promise.all(promisesArray);
   }

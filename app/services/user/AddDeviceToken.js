@@ -4,6 +4,9 @@ const rootPrefix = '../../..',
   UserProfileElementModel = require(rootPrefix + '/app/models/mysql/UserProfileElement'),
   LocationByTimeZoneCache = require(rootPrefix + '/lib/cacheManagement/single/LocationByTimeZone'),
   UserDeviceModel = require(rootPrefix + '/app/models/mysql/UserDevice'),
+  UserDeviceByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/UserDeviceByIds'),
+  UserDeviceByUserIdDeviceTokenCache = require(rootPrefix +
+    '/lib/cacheManagement/single/UserDeviceByUserIdDeviceToken'),
   UserProfileElementsByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/UserProfileElementsByUserIds'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
@@ -39,8 +42,6 @@ class AddDeviceToken extends ServiceBase {
     super(params);
 
     const oThis = this;
-
-    logger.log('AddDeviceToken::params--------', params);
 
     oThis.currentUserId = +params.current_user.id;
     oThis.userId = +params.user_id;
@@ -113,18 +114,49 @@ class AddDeviceToken extends ServiceBase {
   async _insertIntoUserDevices() {
     const oThis = this;
 
-    //todo: update based on device token
+    const userDeviceIdsCacheRsp = await new UserDeviceByUserIdDeviceTokenCache({
+      userId: oThis.currentUserId,
+      deviceToken: oThis.deviceToken
+    }).fetch();
 
-    //todo: get and update and the flush cache - Done
+    if (userDeviceIdsCacheRsp.isFailure()) {
+      return Promise.reject(userDeviceIdsCacheRsp);
+    }
 
-    const userDeviceCacheRsp = await new UserDeviceModel()
-        .select('*')
-        .where({
-          user_id: oThis.currentUserId,
+    const userDeviceCacheData = userDeviceIdsCacheRsp.data[oThis.deviceToken],
+      updateUserDeviceIds = [];
+
+    if (userDeviceCacheData && userDeviceCacheData.id) {
+      const promiseArray = [];
+
+      await new UserDeviceModel()
+        .update({
+          status: userDeviceConstants.invertedStatuses[userDeviceConstants.activeStatus],
           device_id: oThis.deviceId
         })
-        .fire(),
-      userDeviceId = userDeviceCacheRsp[0].id;
+        .where({
+          id: userDeviceCacheData.id
+        })
+        .fire();
+
+      promiseArray.push(new UserDeviceByIdsCache({ ids: updateUserDeviceIds }).clear());
+      promiseArray.push(
+        new UserDeviceByUserIdDeviceTokenCache({ userId: oThis.currentUserId, deviceToken: oThis.deviceToken }).clear()
+      );
+
+      return Promise.all(promiseArray);
+    }
+
+    const userDevices = await new UserDeviceModel()
+      .select('*')
+      .where({ user_id: oThis.currentUserId, device_id: oThis.deviceId })
+      .fire();
+
+    let userDeviceId = null;
+
+    if (userDevices[0] && userDevices[0].id) {
+      userDeviceId = userDevices[0].id;
+    }
 
     if (userDeviceId) {
       await new UserDeviceModel()
@@ -182,19 +214,13 @@ class AddDeviceToken extends ServiceBase {
       return Promise.reject(userProfileElementsCacheResp);
     }
 
-    const userProfileElementsRspdata = userProfileElementsCacheResp.data[oThis.currentUserId];
-
-    //todo: update or insert in user profile. - Done
-    //todo: locationId if blank. default insert and email - Done
+    const userProfileElementsRspData = userProfileElementsCacheResp.data[oThis.currentUserId];
 
     const locationByTimeZoneCacheRsp = await new LocationByTimeZoneCache({ timeZone: oThis.userTimeZone }).fetch();
 
     if (locationByTimeZoneCacheRsp.isFailure()) {
       return Promise.reject(locationByTimeZoneCacheRsp);
     }
-
-    //use global constant
-    let defaultLocationId = 10;
 
     let locationId = locationByTimeZoneCacheRsp.data[oThis.userTimeZone].id;
 
@@ -205,31 +231,29 @@ class AddDeviceToken extends ServiceBase {
         api_error_identifier: 'unknown_user_time_zone',
         debug_options: { timeZone: oThis.userTimeZone }
       });
-      await createErrorLogsEntry.perform(errorObject, errorLogsConstants.mediumSeverity);
+      return createErrorLogsEntry.perform(errorObject, errorLogsConstants.mediumSeverity);
+
+      // TODO: Return from here. - Done
     }
 
     // If user profile elements contains location id and it is same as that of cache then return, else insert.
-    if (userProfileElementsRspdata.locationId && userProfileElementsRspdata.locationId.id) {
-      if (userProfileElementsRspdata.locationId.id === locationId || !locationId) {
-        return responseHelper.successWithData({});
-      } else if (userProfileElementsRspdata.locationId.id !== locationId) {
-        await new UserProfileElementModel()
-          .update({ data: locationId })
-          .where({
-            user_id: oThis.currentUserId,
-            data_kind: userProfileElementConstants.invertedKinds[userProfileElementConstants.locationIdKind]
-          })
-          .fire();
-      }
+    if (userProfileElementsRspData.locationId && userProfileElementsRspData.locationId.id !== locationId) {
+      await new UserProfileElementModel()
+        .update({ data: locationId })
+        .where({
+          user_id: oThis.currentUserId,
+          data_kind: userProfileElementConstants.invertedKinds[userProfileElementConstants.locationIdKind]
+        })
+        .fire();
     } else {
       await new UserProfileElementModel().insertElement({
-        user_id: oThis.currentUserId,
-        data_kind: userProfileElementConstants.invertedKinds[userProfileElementConstants.locationIdKind],
-        data: locationId || defaultLocationId
+        userId: oThis.currentUserId,
+        dataKind: userProfileElementConstants.locationIdKind,
+        data: locationId
       });
     }
 
-    //  todo: flush cache
+    return UserProfileElementModel.flushCache({ userId: oThis.currentUserId });
   }
 
   /**
