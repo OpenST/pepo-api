@@ -634,6 +634,10 @@ const v1Signature = {
   [apiName.resetBadge]: {
     mandatory: [
       {
+        parameter: 'user_id',
+        validatorMethods: ['validateNonZeroInteger']
+      },
+      {
         parameter: 'current_user',
         validatorMethods: ['validateNonEmptyObject']
       }
@@ -648,14 +652,6 @@ const v1Signature = {
       {
         parameter: 'current_user',
         validatorMethods: ['validateNonEmptyObject']
-      }
-    ]
-  },
-  [apiName.fetchGoto]: {
-    mandatory: [
-      {
-        parameter: 'url',
-        validatorMethods: ['validateGenericUrl']
       }
     ]
   },
@@ -680,6 +676,19 @@ const v1Signature = {
     ],
     optional: []
   },
+  [apiName.tweetInfo]: {
+    mandatory: [
+      {
+        parameter: 'receiver_user_id',
+        validatorMethods: ['validateNonZeroInteger']
+      },
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      }
+    ],
+    optional: []
+  },
   [apiName.invitedUsersSearch]: {
     mandatory: [
       {
@@ -691,18 +700,6 @@ const v1Signature = {
       {
         parameter: paginationConstants.paginationIdentifierKey,
         validatorMethods: ['validateString', 'validatePaginationIdentifier']
-      }
-    ]
-  },
-  [apiName.share]: {
-    mandatory: [
-      {
-        parameter: 'video_id',
-        validatorMethods: ['validateNonZeroInteger']
-      },
-      {
-        parameter: 'current_user',
-        validatorMethods: ['validateNonEmptyObject']
       }
     ]
   },

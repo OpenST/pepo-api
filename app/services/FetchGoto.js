@@ -1,5 +1,6 @@
 const rootPrefix = '../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
+  shareEntityConstants = require(rootPrefix + '/lib/globalConstant/shareEntity'),
   commonValidators = require(rootPrefix + '/lib/validators/Common'),
   pageNameConstant = require(rootPrefix + '/lib/globalConstant/pageName'),
   entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
@@ -103,7 +104,7 @@ class FetchGoto extends ServiceBase {
       urlData = splittedPaths[2];
 
     // for now, this service only supports for video/:video_id route
-    if (urlKind === 'video') {
+    if (urlKind === shareEntityConstants.videoShareKind.toLowerCase()) {
       return responseHelper.successWithData({ urlKind: urlKind, urlData: urlData });
     } else {
       return responseHelper.error({

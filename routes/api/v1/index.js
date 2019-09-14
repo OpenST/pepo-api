@@ -32,6 +32,7 @@ router.use('/auth', authRoutes);
 
 // Login not mandatory for following
 router.use('/feeds', cookieHelper.validateUserLoginCookieIfPresent, feedsRoutes);
+router.use('/fetch-goto', cookieHelper.validateUserLoginCookieIfPresent, fetchGotoRoutes);
 
 router.use(cookieHelper.validateUserLoginCookieIfPresent, cookieHelper.validateUserLoginRequired);
 
