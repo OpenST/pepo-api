@@ -20,6 +20,7 @@ class GetVideoList extends ServiceBase {
    * @param {object} params
    * @param {string/number} params.profile_user_id
    * @param {object} [params.current_user]
+   * @param {boolean} [params.is_admin]
    * @param {string} [params.pagination_identifier]
    *
    * @augments ServiceBase
@@ -33,10 +34,12 @@ class GetVideoList extends ServiceBase {
 
     oThis.profileUserId = +params.profile_user_id;
     oThis.currentUser = params.current_user;
+    oThis.isAdmin = params.is_admin || false;
     oThis.paginationIdentifier = params[paginationConstants.paginationIdentifierKey] || null;
 
-    oThis.currentUserId = null;
     oThis.limit = oThis._defaultPageLimit();
+
+    oThis.currentUserId = null;
     oThis.paginationTimestamp = null;
     oThis.nextPaginationTimestamp = null;
     oThis.videosCount = 0;
@@ -59,7 +62,13 @@ class GetVideoList extends ServiceBase {
 
     await oThis._validateAndSanitizeParams();
 
-    const resp = await oThis._validateProfileUserId();
+    let resp = null;
+
+    if (oThis.isAdmin) {
+      resp = await oThis._validateInactiveProfileUserId();
+    } else {
+      resp = await oThis._validateProfileUserId();
+    }
     oThis.profileUserObj = resp.data.userObject;
 
     await oThis._fetchVideoIds();
@@ -110,9 +119,12 @@ class GetVideoList extends ServiceBase {
   async _fetchVideoIds() {
     const oThis = this;
 
-    // If user's profile(not self) is not approved, videos would not be shown.
-    if (oThis.currentUserId != oThis.profileUserId && !UserModel.isUserApprovedCreator(oThis.profileUserObj)) {
-      return responseHelper.successWithData({});
+    // If not an admin, only then perform further validations.
+    if (!oThis.isAdmin) {
+      // If user's profile(not self) is not approved, videos would not be shown.
+      if (oThis.currentUserId != oThis.profileUserId && !UserModel.isUserApprovedCreator(oThis.profileUserObj)) {
+        return responseHelper.successWithData({});
+      }
     }
 
     const cacheResponse = await new VideoDetailsByUserIdCache({
@@ -120,7 +132,6 @@ class GetVideoList extends ServiceBase {
       limit: oThis.limit,
       paginationTimestamp: oThis.paginationTimestamp
     }).fetch();
-
     if (cacheResponse.isFailure()) {
       return Promise.reject(cacheResponse);
     }
@@ -202,7 +213,8 @@ class GetVideoList extends ServiceBase {
     const getProfileObj = new GetProfile({
       userIds: [oThis.profileUserId],
       currentUserId: oThis.currentUserId,
-      videoIds: oThis.videoIds
+      videoIds: oThis.videoIds,
+      isAdmin: oThis.isAdmin
     });
 
     const response = await getProfileObj.perform();

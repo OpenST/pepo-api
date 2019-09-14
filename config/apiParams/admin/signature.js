@@ -117,6 +117,10 @@ const adminSignature = {
       {
         parameter: 'profile_user_id',
         validatorMethods: ['validateNonZeroInteger']
+      },
+      {
+        parameter: 'is_admin',
+        validatorMethods: ['validateBoolean']
       }
     ],
     optional: [

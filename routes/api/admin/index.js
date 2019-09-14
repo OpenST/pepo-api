@@ -127,6 +127,7 @@ router.post('/users/:user_id/block', sanitizer.sanitizeDynamicUrlParams, functio
 router.get('/video-history/:profile_user_id', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.userVideoList;
   req.decodedParams.profile_user_id = req.params.profile_user_id;
+  req.decodedParams.is_admin = true;
 
   const dataFormatterFunc = async function(serviceResponse) {
     const wrapperFormatterRsp = await new FormatterComposer({
