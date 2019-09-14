@@ -59,7 +59,7 @@ class CreateTopup extends ServiceBase {
 
     let processResp = await oThis._serviceSpecificTasks();
 
-    if (processResp && processResp.data.productionEnvSandboxReceipt === 0) {
+    if (processResp.isSuccess() && processResp.data.productionEnvSandboxReceipt === 0) {
       await bgJob.enqueue(bgJobConstants.validatePaymentReceiptJobTopic, {
         fiatPaymentId: oThis.fiatPaymentId
       });
@@ -112,8 +112,6 @@ class CreateTopup extends ServiceBase {
       );
     }
 
-    // TODO - payments - we should validate receipt - if invalid receipt, send pagerduty. Talk to Sunil.
-
     return responseHelper.successWithData({});
   }
 
@@ -129,9 +127,9 @@ class CreateTopup extends ServiceBase {
       serviceKind = oThis._getServiceKind();
 
     let createParams = {
-      from_user_id: oThis.currentUser.id,
       receipt_id: receiptId,
       raw_receipt: JSON.stringify(oThis.paymentReceipt),
+      from_user_id: oThis.currentUser.id,
       kind: fiatPaymentConstants.invertedKinds[fiatPaymentConstants.topUpKind],
       service_kind: fiatPaymentConstants.invertedServiceKinds[serviceKind],
       currency: ostPricePointConstants.invertedQuoteCurrencies[ostPricePointConstants.usdQuoteCurrency],
@@ -188,7 +186,6 @@ class CreateTopup extends ServiceBase {
     const oThis = this,
       params = {
         fiatPaymentId: oThis.fiatPaymentId,
-        currentUser: oThis.currentUser,
         paymentReceipt: oThis.paymentReceipt,
         userId: oThis.userId
       };
@@ -208,7 +205,7 @@ class CreateTopup extends ServiceBase {
 
     if (oThis.os === productConstant.ios) {
       return fiatPaymentConstants.applePayKind;
-    } else {
+    } else if (oThis.os === productConstant.android) {
       return fiatPaymentConstants.googlePayKind;
     }
   }

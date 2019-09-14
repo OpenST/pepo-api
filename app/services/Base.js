@@ -56,8 +56,8 @@ class ServicesBase {
 
         await createErrorLogsEntry.perform(errorObject, errorLogsConstants.mediumSeverity);
         logger.error(' In catch block of services/Base.js Error is: ', err);
-        logger.error(' In catch block of services/Base.js', errorObject);
       }
+      logger.error(' In catch block of services/Base.js', errorObject.getDebugData());
 
       return errorObject;
     });
