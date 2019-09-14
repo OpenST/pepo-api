@@ -45,32 +45,26 @@ router.get('/:video_id', sanitizer.sanitizeDynamicUrlParams, function(req, res, 
 
 /* Video share */
 router.get('/:video_id/share', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
-  // TEMP CODE starts
-  let r = responseHelper.successWithData(require(rootPrefix + '/test/fake/share.json'));
-  Promise.resolve(responseHelper.renderApiResponse(r, res, {}));
-  // TEMP CODE ends
+  req.decodedParams.apiName = apiName.share;
+  req.decodedParams.video_id = req.params.video_id;
 
-  // req.decodedParams.apiName = apiName.share;
-  // req.decodedParams.video_id = req.params.video_id;
-  //
-  // const dataFormatterFunc = async function(serviceResponse) {
-  //
-  //   console.log('serviceResponse---', JSON.stringify(serviceResponse) );
-  //
-  //   const wrapperFormatterRsp = await new FormatterComposer({
-  //     resultType: responseEntityKey.share,
-  //     entityKindToResponseKeyMap: {
-  //       [entityType.share]: responseEntityKey.share
-  //     },
-  //     serviceData: serviceResponse.data
-  //   }).perform();
-  //
-  //   console.log('wrapperFormatterRsp-----', JSON.stringify(wrapperFormatterRsp));
-  //
-  //   serviceResponse.data = wrapperFormatterRsp.data;
-  // };
-  //
-  // Promise.resolve(routeHelper.perform(req, res, next, '/video/ShareDetails', 'r_a_v1_v_2', null, dataFormatterFunc));
+  const dataFormatterFunc = async function(serviceResponse) {
+    console.log('serviceResponse---', JSON.stringify(serviceResponse));
+
+    const wrapperFormatterRsp = await new FormatterComposer({
+      resultType: responseEntityKey.share,
+      entityKindToResponseKeyMap: {
+        [entityType.share]: responseEntityKey.share
+      },
+      serviceData: serviceResponse.data
+    }).perform();
+
+    console.log('wrapperFormatterRsp-----', JSON.stringify(wrapperFormatterRsp));
+
+    serviceResponse.data = wrapperFormatterRsp.data;
+  };
+
+  Promise.resolve(routeHelper.perform(req, res, next, '/video/ShareDetails', 'r_a_v1_v_2', null, dataFormatterFunc));
 });
 
 module.exports = router;
