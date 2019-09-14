@@ -230,7 +230,7 @@ class InviteCode extends ModelBase {
 
     if (params.code) {
       const InviteCodeByCodeCache = require(rootPrefix + '/lib/cacheManagement/single/InviteCodeByCode');
-      promises.push(new InviteCodeByCodeCache({ code: params.code }).clear());
+      promises.push(new InviteCodeByCodeCache({ inviteCode: params.code }).clear());
     }
 
     if (params.id) {

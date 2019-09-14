@@ -10,7 +10,7 @@ const rootPrefix = '../../..',
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   preLaunchInviteConstants = require(rootPrefix + '/lib/globalConstant/preLaunchInvite'),
   InviteCodeCache = require(rootPrefix + '/lib/cacheManagement/single/InviteCodeByCode'),
-  InviteCodeModel = require(rootPrefix + '/app/models/mysql/InviteCode'),
+  InviteCodeByIdCache = require(rootPrefix + '/lib/cacheManagement/single/InviteCodeById'),
   entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
   pageNameConstants = require(rootPrefix + '/lib/globalConstant/pageName'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger');
@@ -151,8 +151,8 @@ class TwitterConnect extends ServiceBase {
     if (oThis._hasPrelaunchInvitedAccess()) {
       // If twitter account belongs to prelaunch invite, then use that inviter code if any
       if (oThis.prelaunchInviteObj.inviterCodeId) {
-        // TODO: Replace this with cache built by Tejas
-        oThis.inviterCodeObj = await new InviteCodeModel().fetchById(oThis.prelaunchInviteObj.inviterCodeId);
+        let cacheResp = await new InviteCodeByIdCache({ id: oThis.prelaunchInviteObj.inviterCodeId }).fetch();
+        oThis.inviterCodeObj = cacheResp.data[oThis.prelaunchInviteObj.inviterCodeId];
       } else {
         // Fetch inviter code object
         await oThis._fetchInviteCodeObject();

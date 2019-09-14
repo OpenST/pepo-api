@@ -7,6 +7,7 @@ const rootPrefix = '../../..',
   errorLogsConstants = require(rootPrefix + '/lib/globalConstant/errorLogs'),
   PreLaunchInviteModel = require(rootPrefix + '/app/models/mysql/PreLaunchInvite'),
   InviteCodeModel = require(rootPrefix + '/app/models/mysql/InviteCode'),
+  InviteCodeByCodeCache = require(rootPrefix + '/lib/cacheManagement/single/InviteCodeByCode'),
   inviteCodeConstants = require(rootPrefix + '/lib/globalConstant/inviteCode'),
   AddContactInPepoCampaign = require(rootPrefix + '/lib/email/hookCreator/AddContact'),
   preLaunchInviteConstants = require(rootPrefix + '/lib/globalConstant/preLaunchInvite'),
@@ -158,10 +159,10 @@ class PreLaunchTwitterSignUp extends ServiceBase {
   async _fetchInviteCodeDetails() {
     const oThis = this;
 
-    // TODO: get from cache written by pankaj
-    let inviterInviteCodeObj = await new InviteCodeModel().fetchByInviteCodes([oThis.inviteCode]);
+    let cacheResp = await new InviteCodeByCodeCache({ inviteCode: [oThis.inviteCode] }).fetch(),
+      inviterInviteCodeObj = cacheResp.data[oThis.inviteCode];
 
-    oThis.inviterCodeId = inviterInviteCodeObj[oThis.inviteCode].id;
+    oThis.inviterCodeId = inviterInviteCodeObj.id;
 
     return responseHelper.successWithData({});
   }
