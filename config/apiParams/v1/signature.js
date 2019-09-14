@@ -228,6 +228,17 @@ const v1Signature = {
       }
     ]
   },
+
+  [apiName.getRedemptionProductUrl]: {
+    mandatory: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      }
+    ],
+    optional: []
+  },
+
   [apiName.twitterLogin]: {
     mandatory: [
       {
