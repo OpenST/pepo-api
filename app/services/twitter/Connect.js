@@ -53,7 +53,6 @@ class TwitterConnect extends ServiceBase {
     oThis.serviceResp = null;
     oThis.inviterCodeObj = null;
     oThis.prelaunchInviteObj = null;
-    oThis.couldNotProceed = false;
   }
 
   /**
@@ -66,10 +65,7 @@ class TwitterConnect extends ServiceBase {
 
     await oThis._validateDuplicateRequest();
 
-    let resp = await oThis._fetchTwitterUser();
-    if (oThis.couldNotProceed) {
-      return oThis._sendFlowCompleteGoto(resp);
-    }
+    await oThis._fetchTwitterUserAndValidateAccess();
 
     await oThis._validateTwitterCredentials();
 
@@ -109,14 +105,14 @@ class TwitterConnect extends ServiceBase {
   }
 
   /**
-   * Fetch Twitter User Obj if present.
+   * Fetch Twitter User Obj if present, and if signup then validate its access to Pepo.
    *
    * @sets oThis.twitterUserObj
    *
    * @return {Promise<Result>}
    * @private
    */
-  async _fetchTwitterUser() {
+  async _fetchTwitterUserAndValidateAccess() {
     const oThis = this;
 
     logger.log('Start::Fetch Twitter User');
@@ -132,22 +128,7 @@ class TwitterConnect extends ServiceBase {
     }
 
     if (oThis._isUserSignup()) {
-      let resp = await new Promise(function(onResolve, onReject) {
-        oThis
-          ._validateUserSignupAllowed()
-          .then(function(resp) {
-            if (resp.isFailure()) {
-              oThis.couldNotProceed = true;
-            }
-            onResolve(resp);
-          })
-          .catch(function(errorResponse) {
-            oThis.couldNotProceed = true;
-            onResolve(errorResponse);
-          });
-      });
-
-      return resp;
+      await oThis._validateUserSignupAllowed();
     }
 
     logger.log('End::Fetch Twitter User');
@@ -288,9 +269,10 @@ class TwitterConnect extends ServiceBase {
     // Invite code is required but not passed
     if (!oThis.inviteCode) {
       return Promise.reject(
-        responseHelper.error({
-          internal_error_identifier: inviteCodeConstants.missingInviteCodeError,
-          api_error_identifier: inviteCodeConstants.missingInviteCodeError
+        responseHelper.paramValidationError({
+          internal_error_identifier: 's_t_c_vic_1',
+          api_error_identifier: 'invalid_api_params',
+          params_error_identifiers: ['missing_invite_code']
         })
       );
     }
@@ -300,22 +282,24 @@ class TwitterConnect extends ServiceBase {
     // Invite code used is not present
     if (!oThis.inviterCodeObj || !oThis.inviterCodeObj.id) {
       return Promise.reject(
-        responseHelper.error({
-          internal_error_identifier: inviteCodeConstants.invalidInviteCodeError,
-          api_error_identifier: inviteCodeConstants.invalidInviteCodeError
+        responseHelper.paramValidationError({
+          internal_error_identifier: 's_t_c_vic_2',
+          api_error_identifier: 'invalid_api_params',
+          params_error_identifiers: ['invalid_invite_code']
         })
       );
     }
 
     // If there is number of invites limit on invite code, and it has been reached
     if (
-      oThis.inviterCodeObj.inviteLimit > 0 &&
+      oThis.inviterCodeObj.inviteLimit >= 0 &&
       oThis.inviterCodeObj.inviteLimit <= oThis.inviterCodeObj.invitedUserCount
     ) {
       return Promise.reject(
-        responseHelper.error({
-          internal_error_identifier: inviteCodeConstants.expiredInviteCodeError,
-          api_error_identifier: inviteCodeConstants.expiredInviteCodeError
+        responseHelper.paramValidationError({
+          internal_error_identifier: 's_t_c_vic_3',
+          api_error_identifier: 'invalid_api_params',
+          params_error_identifiers: ['expired_invite_code']
         })
       );
     }
@@ -442,28 +426,7 @@ class TwitterConnect extends ServiceBase {
   _sendFlowCompleteGoto(response) {
     const oThis = this;
 
-    // For some errors, success has to be sent to devices, with GOTO
-    if (response.isFailure()) {
-      // For these error codes only, success would go with some goto values
-      if (
-        [
-          inviteCodeConstants.invalidInviteCodeError,
-          inviteCodeConstants.missingInviteCodeError,
-          inviteCodeConstants.expiredInviteCodeError
-        ].includes(response.internalErrorCode)
-      ) {
-        return responseHelper.successWithData({
-          overwrittenFailure: 1,
-          [entityType.goto]: {
-            pn: pageNameConstants.inviteCodePageScreen,
-            v: {
-              [pageNameConstants.inviteCodeErrorParam]:
-                inviteCodeConstants.inviteCodeErrorGotoValues[response.internalErrorCode]
-            }
-          }
-        });
-      }
-    } else {
+    if (response.isSuccess()) {
       response.data[entityType.goto] = {};
       if (response.data.openEmailAddFlow) {
         // Notify app about email add flow
