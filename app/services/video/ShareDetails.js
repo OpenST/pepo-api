@@ -3,6 +3,7 @@ const uuidV4 = require('uuid/v4');
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   VideoByIdCache = require(rootPrefix + '/lib/cacheManagement/multi/VideoByIds'),
+  UserMultiCache = require(rootPrefix + '/lib/cacheManagement/multi/User'),
   VideoDetailsByVideoIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/VideoDetailsByVideoIds'),
   shareEntityConstants = require(rootPrefix + '/lib/globalConstant/shareEntity'),
   coreConstants = require(rootPrefix + '/config/coreConstants'),
@@ -28,6 +29,7 @@ class ShareDetails extends ServiceBase {
     oThis.currentUser = params.current_user;
 
     oThis.shareMessage = null;
+    oThis.creatorUserName = null;
   }
 
   /**
@@ -40,7 +42,7 @@ class ShareDetails extends ServiceBase {
     const oThis = this;
 
     await oThis._fetchVideo();
-    await oThis._fetchVideoDetails();
+    await oThis._fetchCreatorUserName();
 
     oThis._createMessage();
 
@@ -76,6 +78,37 @@ class ShareDetails extends ServiceBase {
   }
 
   /**
+   * Fetch video creator user name.
+   *
+   * @returns {Promise<never>}
+   *
+   * @sets oThis.creatorUserName
+   * @private
+   */
+  async _fetchCreatorUserName() {
+    const oThis = this;
+
+    const videoDetailsCacheRsp = await new VideoDetailsByVideoIdsCache({ videoIds: [oThis.videoId] }).fetch();
+
+    if (videoDetailsCacheRsp.isFailure()) {
+      return Promise.reject(videoDetailsCacheRsp);
+    }
+
+    let videoDetails = videoDetailsCacheRsp.data[oThis.videoId],
+      creatorUserId = videoDetails.creatorUserId;
+
+    const userMultiCacheRsp = await new UserMultiCache({ ids: [creatorUserId] }).fetch();
+
+    if (userMultiCacheRsp.isFailure()) {
+      return Promise.reject(userMultiCacheRsp);
+    }
+
+    let userDetails = userMultiCacheRsp.data[creatorUserId];
+
+    oThis.creatorUserName = userDetails.name;
+  }
+
+  /**
    * Create Message.
    *
    * @private
@@ -83,10 +116,7 @@ class ShareDetails extends ServiceBase {
   _createMessage() {
     const oThis = this;
 
-    let messagePrefix = 'Checkout this video ',
-      messageSuffix = ' via @thepepoapp';
-
-    oThis.shareMessage = messagePrefix + oThis._generateVideoShareUrl() + messageSuffix;
+    oThis.shareMessage = `Checkout ${oThis.creatorUserName}'s latest videos on Pepo! ${oThis._generateVideoShareUrl()}`;
   }
 
   /**
@@ -95,7 +125,7 @@ class ShareDetails extends ServiceBase {
    * @returns {Promise<*|result>}
    * @private
    */
-  async _prepareResponse() {
+  _prepareResponse() {
     const oThis = this;
 
     return {
@@ -104,8 +134,8 @@ class ShareDetails extends ServiceBase {
         kind: shareEntityConstants.videoShareKind,
         url: oThis._generateVideoShareUrl(),
         message: oThis.shareMessage,
-        // title: 'DUMMY_TITLE', //optional
-        // subject: 'DUMMY_SUBJECT', //optional
+        title: 'DUMMY_TITLE', //optional
+        subject: 'DUMMY_SUBJECT', //optional
         uts: Math.round(new Date() / 1000)
       }
     };
