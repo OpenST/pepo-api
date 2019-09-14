@@ -1,25 +1,35 @@
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
-  VideoDetailsByVideoIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/VideoDetailsByVideoIds'),
-  VideoDetailsByUserIdCache = require(rootPrefix + '/lib/cacheManagement/single/VideoDetailsByUserIdPagination'),
-  UserProfileElementModel = require(rootPrefix + '/app/models/mysql/UserProfileElement'),
+  FeedModel = require(rootPrefix + '/app/models/mysql/Feed'),
   VideosModel = require(rootPrefix + '/app/models/mysql/Video'),
   VideoDetailsModel = require(rootPrefix + '/app/models/mysql/VideoDetail'),
   ActivityLogModel = require(rootPrefix + '/app/models/mysql/AdminActivityLog'),
-  FeedModel = require(rootPrefix + '/app/models/mysql/Feed'),
+  UserProfileElementModel = require(rootPrefix + '/app/models/mysql/UserProfileElement'),
+  VideoDetailsByVideoIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/VideoDetailsByVideoIds'),
+  VideoDetailsByUserIdCache = require(rootPrefix + '/lib/cacheManagement/single/VideoDetailsByUserIdPagination'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
+  feedConstants = require(rootPrefix + '/lib/globalConstant/feed'),
   paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination'),
-  userProfileElementConst = require(rootPrefix + '/lib/globalConstant/userProfileElement'),
-  videoDetailsConst = require(rootPrefix + '/lib/globalConstant/videoDetail'),
-  adminActivityLogConst = require(rootPrefix + '/lib/globalConstant/adminActivityLogs'),
-  entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
-  feedConstants = require(rootPrefix + '/lib/globalConstant/feed');
+  videoDetailsConstants = require(rootPrefix + '/lib/globalConstant/videoDetail'),
+  adminActivityLogConstants = require(rootPrefix + '/lib/globalConstant/adminActivityLogs'),
+  userProfileElementConstants = require(rootPrefix + '/lib/globalConstant/userProfileElement');
 
+/**
+ * Class to delete video.
+ *
+ * @class DeleteVideo
+ */
 class DeleteVideo extends ServiceBase {
   /**
-   * @constructor
+   * Constructor to delete video.
    *
-   * @param params
+   * @param {object} params
+   * @param {number} params.video_id
+   * @param {object} params.current_admin
+   *
+   * @augments ServiceBase
+   *
+   * @constructor
    */
   constructor(params) {
     super();
@@ -29,7 +39,7 @@ class DeleteVideo extends ServiceBase {
     oThis.videoId = params.video_id;
     oThis.currentAdmin = params.current_admin;
 
-    oThis.currentAdminId = null;
+    oThis.currentAdminId = Number(oThis.currentAdmin.id);
     oThis.creatorUserId = null;
   }
 
@@ -44,14 +54,17 @@ class DeleteVideo extends ServiceBase {
 
     await oThis._fetchCreatorUserId();
 
-    //todo::ADMIN creatorUserId will always be present?
     // Unknown video or already deleted
-    if (!oThis.creatorUserId || oThis.videoDetails[0].status == videoDetailsConst.deletedStatus) {
-      //todo::ADMIN send error
-      return responseHelper.successWithData({});
+    if (!oThis.creatorUserId || oThis.videoDetails[0].status === videoDetailsConstants.deletedStatus) {
+      responseHelper.paramValidationError({
+        internal_error_identifier: 'a_s_v_d_1',
+        api_error_identifier: 'invalid_api_params',
+        params_error_identifiers: ['invalid_video_id'],
+        debug_options: { transfers: oThis.transfersData }
+      });
     }
 
-    let promises = [];
+    const promises = [];
     promises.push(oThis._deleteProfileElementIfRequired());
     promises.push(oThis._markVideoDeleted());
     promises.push(oThis._markVideoDetailDeleted());
@@ -65,7 +78,7 @@ class DeleteVideo extends ServiceBase {
   }
 
   /**
-   * Log admin activity
+   * Log admin activity.
    *
    * @return {Promise<void>}
    * @private
@@ -73,45 +86,36 @@ class DeleteVideo extends ServiceBase {
   async _logAdminActivity() {
     const oThis = this;
 
-    let activityLogObj = new ActivityLogModel({});
-
-    await activityLogObj.insertAction({
+    await new ActivityLogModel().insertAction({
       adminId: oThis.currentAdminId,
       actionOn: oThis.creatorUserId,
-      action: adminActivityLogConst.deleteUserVideo,
+      action: adminActivityLogConstants.deleteUserVideo,
       extraData: JSON.stringify({ vid: oThis.videoId })
     });
   }
 
   /**
-   * Fetch creator user id
+   * Fetch creator user id.
    *
-   * @sets oThis.creatorUserId
+   * @sets oThis.videoDetails, oThis.creatorUserId
+   *
    * @return {Promise<void>}
    * @private
    */
-  //todo::ADMIN function name change?
   async _fetchCreatorUserId() {
     const oThis = this;
 
-    let videoDetailsCacheResponse = await new VideoDetailsByVideoIdsCache({ videoIds: [oThis.videoId] }).fetch();
-
+    const videoDetailsCacheResponse = await new VideoDetailsByVideoIdsCache({ videoIds: [oThis.videoId] }).fetch();
     if (videoDetailsCacheResponse.isFailure()) {
       return Promise.reject(videoDetailsCacheResponse);
     }
 
     oThis.videoDetails = [videoDetailsCacheResponse.data[oThis.videoId]];
-
-    console.log('The oThis.videoDetails is : ', oThis.videoDetails);
-
     oThis.creatorUserId = oThis.videoDetails[0].creatorUserId;
-
-    //todo::ADMIN current Admin alway present?
-    oThis.currentAdminId = oThis.currentAdmin ? Number(oThis.currentAdmin.id) : 0;
   }
 
   /**
-   * Delete profile element if required
+   * Delete profile element if required.
    *
    * @return {Promise<void>}
    * @private
@@ -119,7 +123,7 @@ class DeleteVideo extends ServiceBase {
   async _deleteProfileElementIfRequired() {
     const oThis = this;
 
-    //todo::ADMIN why fecth again? user profile element should not have video.
+    // Todo::@Shlok why fetch again? user profile element should not have video. Ask Pankaj
 
     const cacheResponse = await new VideoDetailsByUserIdCache({
       userId: oThis.creatorUserId,
@@ -131,38 +135,36 @@ class DeleteVideo extends ServiceBase {
       return Promise.reject(cacheResponse);
     }
 
-    //if deleted from profile element then there will be i
-    let videoIds = cacheResponse.data.videoIds || [];
+    // If deleted from profile element then there will be i
+    const videoIds = cacheResponse.data.videoIds || [];
 
     if (videoIds[0] == oThis.videoId) {
-      let profileElementObj = new UserProfileElementModel({});
+      const profileElementObj = new UserProfileElementModel({});
 
       await profileElementObj.deleteByUserIdAndKind({
         userId: oThis.creatorUserId,
-        dataKind: userProfileElementConst.coverVideoIdKind
+        dataKind: userProfileElementConstants.coverVideoIdKind
       });
     }
   }
 
   /**
-   * Delete from video details
+   * Delete from video details.
    *
-   * @return {Promise<void>}
+   * @return {Promise<*>}
    * @private
    */
   async _markVideoDetailDeleted() {
     const oThis = this;
 
-    let videoDetailsObj = new VideoDetailsModel({});
-
-    await videoDetailsObj.markDeleted({
+    return new VideoDetailsModel().markDeleted({
       userId: oThis.creatorUserId,
       videoId: oThis.videoId
     });
   }
 
   /**
-   * Mark status in videos
+   * Mark status in videos.
    *
    * @return {Promise<void>}
    * @private
@@ -174,7 +176,7 @@ class DeleteVideo extends ServiceBase {
   }
 
   /**
-   * Delete video from feeds
+   * Delete video from feeds.
    *
    * @return {Promise<void>}
    * @private
@@ -182,17 +184,13 @@ class DeleteVideo extends ServiceBase {
   async _deleteVideoFeeds() {
     const oThis = this;
 
-    let feedObj = new FeedModel({});
-
-    await feedObj
+    return new FeedModel()
       .delete()
       .where({
         kind: feedConstants.invertedKinds[feedConstants.fanUpdateKind],
         primary_external_entity_id: oThis.videoId
       })
       .fire();
-
-    //todo::ADMIN flush cache
   }
 }
 
