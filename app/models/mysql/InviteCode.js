@@ -217,14 +217,23 @@ class InviteCode extends ModelBase {
    *
    * @param {object} params
    * @param {number} [params.userId]
+   * @param {string} [params.code]
    *
    * @returns {Promise<*>}
    */
   static async flushCache(params) {
+    let promises = [];
     if (params.userId) {
       const InviteCodeByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/InviteCodeByUserIds');
-      await new InviteCodeByUserIdsCache({ userIds: [params.userId] }).clear();
+      promises.push(new InviteCodeByUserIdsCache({ userIds: [params.userId] }).clear());
     }
+
+    if (params.code) {
+      const InviteCodeByCodeCache = require(rootPrefix + '/lib/cacheManagement/single/InviteCodeByCode');
+      promises.push(new InviteCodeByCodeCache({ code: params.code }).clear());
+    }
+
+    await Promise.all(promises);
   }
 }
 

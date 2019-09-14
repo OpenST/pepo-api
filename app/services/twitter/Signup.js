@@ -57,7 +57,7 @@ class TwitterSignup extends ServiceBase {
     oThis.token = params.token;
     oThis.secret = params.secret;
     oThis.inviterCodeId = params.inviterCodeId;
-    oThis.prelaunchInviteObj = params.prelaunchInviteObj;
+    oThis.prelaunchInviteObj = params.prelaunchInviteObj || {};
 
     oThis.userId = null;
 
@@ -522,7 +522,8 @@ class TwitterSignup extends ServiceBase {
       twitterId: oThis.userTwitterEntity.idStr,
       userId: oThis.userId,
       profileImageId: oThis.profileImageId,
-      inviterCodeId: oThis.inviterCodeId
+      inviterCodeId: oThis.inviterCodeId,
+      userInviteCodeId: oThis.prelaunchInviteObj.inviteCodeId
     };
     await bgJob.enqueue(bgJobConstants.afterSignUpJobTopic, messagePayload);
   }
@@ -570,7 +571,7 @@ class TwitterSignup extends ServiceBase {
 
     // If user was part of prelaunch program and was approved as creator
     if (
-      oThis.prelaunchInviteObj &&
+      CommonValidators.validateNonEmptyObject(oThis.prelaunchInviteObj) &&
       oThis.prelaunchInviteObj.creatorStatus ==
         prelaunchInviteConstants.invertedCreatorStatuses[prelaunchInviteConstants.approvedCreatorStatus]
     ) {
@@ -595,7 +596,7 @@ class TwitterSignup extends ServiceBase {
     if (oThis.userTwitterEntity.email && CommonValidators.isValidEmail(oThis.userTwitterEntity.email)) {
       oThis.userOptedInEmail = oThis.userTwitterEntity.email;
     } else if (
-      oThis.prelaunchInviteObj &&
+      CommonValidators.validateNonEmptyObject(oThis.prelaunchInviteObj) &&
       oThis.prelaunchInviteObj.status ==
         prelaunchInviteConstants.invertedStatuses[prelaunchInviteConstants.doptinStatus]
     ) {

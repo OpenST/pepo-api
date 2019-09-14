@@ -11,7 +11,6 @@ const rootPrefix = '../../..',
   preLaunchInviteConstants = require(rootPrefix + '/lib/globalConstant/preLaunchInvite'),
   InviteCodeCache = require(rootPrefix + '/lib/cacheManagement/single/InviteCodeByCode'),
   InviteCodeModel = require(rootPrefix + '/app/models/mysql/InviteCode'),
-  inviteCodeConstants = require(rootPrefix + '/lib/globalConstant/inviteCode'),
   entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
   pageNameConstants = require(rootPrefix + '/lib/globalConstant/pageName'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger');
