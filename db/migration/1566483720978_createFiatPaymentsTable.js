@@ -15,10 +15,10 @@ const upQuery =
   `from_user_id` bigint(20) unsigned NOT NULL,\n\
   `to_user_id` bigint(20) unsigned DEFAULT NULL,\n\
   `kind` tinyint(4) NOT NULL,\n\
-  `service_kind` tinyint(4) DEFAULT NULL,\n\
+  `service_kind` tinyint(4) NOT NULL,\n\
   `currency` tinyint(4) NOT NULL,\n\
   `amount` decimal(30,0) NOT NULL DEFAULT '0',\n\
-  `pepo_amount` decimal(30,0) DEFAULT '0',\n\
+  `pepo_amount_in_wei` decimal(30,0) DEFAULT '0',\n\
   `transaction_id` bigint(20) unsigned DEFAULT NULL,\n\
   `status` tinyint(4) NOT NULL,\n\
   `created_at` int(11) NOT NULL,\n\

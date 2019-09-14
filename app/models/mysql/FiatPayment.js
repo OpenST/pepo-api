@@ -29,7 +29,7 @@ class FiatPayment extends ModelBase {
    * @param {number} dbRow.service_kind
    * @param {number} dbRow.currency
    * @param {number} dbRow.amount
-   * @param {number} dbRow.pepo_amount
+   * @param {number} dbRow.pepo_amount_in_wei
    * @param {number} dbRow.card_detail_id
    * @param {number} dbRow.risk_score
    * @param {number} dbRow.transaction_id
@@ -53,7 +53,7 @@ class FiatPayment extends ModelBase {
       serviceKind: fiatPaymentConstants.serviceKinds[dbRow.service_kind],
       currency: ostPricePointConstants.quoteCurrencies[dbRow.currency],
       amount: dbRow.amount,
-      pepoAmount: dbRow.pepo_amount,
+      pepoAmountInWei: dbRow.pepo_amount_in_wei,
       transactionId: dbRow.transaction_id,
       status: fiatPaymentConstants.statuses[dbRow.status],
       createdAt: dbRow.created_at,

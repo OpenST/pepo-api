@@ -10,6 +10,7 @@ const program = require('commander');
 const rootPrefix = '../..',
   InAppProductsModel = require(rootPrefix + '/app/models/mysql/InAppProduct'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
+  basicHelper = require(rootPrefix + '/helpers/basic'),
   inAppProductsConstants = require(rootPrefix + '/lib/globalConstant/inAppProduct');
 
 program.on('--help', function() {
@@ -103,7 +104,7 @@ class SeedInAppProductsTable {
           status: inAppProductsConstants.invertedStatuses[inAppProductsConstants.active],
           lower_limit: lowerLimit,
           upper_limit: upperLimit,
-          amount_in_pepo: (oThis.usdAmountsArray[index] * lowerLimit).toFixed(2),
+          pepo_amount_in_wei: basicHelper.convertToLowerUnit(oThis.usdAmountsArray[index] * lowerLimit, 18),
           amount_in_usd: parseFloat(oThis.usdAmountsArray[index])
         };
         variable++;

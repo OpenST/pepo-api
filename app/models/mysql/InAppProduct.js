@@ -38,7 +38,7 @@ class InAppProduct extends ModelBase {
    * @param {string} dbRow.status
    * @param {string} dbRow.lower_limit
    * @param {string} dbRow.upper_limit
-   * @param {string} dbRow.amount_in_pepo
+   * @param {string} dbRow.pepo_amount_in_wei
    * @param {number} dbRow.amount_in_usd
    * @param {string} dbRow.created_at
    * @param {string} dbRow.updated_at
@@ -56,7 +56,7 @@ class InAppProduct extends ModelBase {
       status: inAppProductsConst.statuses[dbRow.status],
       lowerLimit: dbRow.lower_limit,
       upperLimit: dbRow.upper_limit,
-      amountInPepo: dbRow.amount_in_pepo,
+      pepoAmountInWei: dbRow.pepo_amount_in_wei,
       amountInUsd: dbRow.amount_in_usd,
       createdAt: dbRow.created_at,
       updatedAt: dbRow.updated_at
