@@ -113,6 +113,7 @@ class NotificationAggregator extends CronBase {
     oThis.currentTimeInSec = parseInt(new Date().getTime() / 1000);
 
     oThis.whitelistedUserIds = [];
+    oThis.notificationSentUserIds = [];
 
     oThis.userIdToAggregatedDetailsMap = {};
     oThis.recipientUserIds = [];
@@ -210,6 +211,8 @@ class NotificationAggregator extends CronBase {
         continue;
       }
 
+      oThis.notificationSentUserIds.push(userId);
+
       let insertRow = [
         notificationHookConstants.invertedEventTypes[notificationHookConstants.aggregatedTxReceiveSuccessKind],
         JSON.stringify(deviceIds),
@@ -243,7 +246,19 @@ class NotificationAggregator extends CronBase {
         status: aggregatedNotificationsConstants.invertedStatuses[aggregatedNotificationsConstants.sentStatus]
       })
       .where({
-        user_id: oThis.recipientUserIds
+        user_id: oThis.notificationSentUserIds
+      })
+      .fire();
+
+    let inactiveUsers = oThis.recipientUserIds - oThis.notificationSentUserIds;
+
+    await new AggregatedNotificationModel()
+      .update({
+        extra_data: null,
+        status: aggregatedNotificationsConstants.invertedStatuses[aggregatedNotificationsConstants.inactiveStatus]
+      })
+      .where({
+        user_id: inactiveUsers
       })
       .fire();
   }
