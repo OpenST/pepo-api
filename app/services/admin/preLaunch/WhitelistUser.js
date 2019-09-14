@@ -37,7 +37,6 @@ class WhitelistUser extends ServiceBase {
     const oThis = this;
 
     const updateResponse = await new PreLaunchInviteModel().whitelistUser(oThis.inviteId);
-
     if (updateResponse.isFailure()) {
       return updateResponse;
     }
