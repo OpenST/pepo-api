@@ -269,7 +269,7 @@ router.post('/:user_id/reset-badge', sanitizer.sanitizeDynamicUrlParams, functio
   Promise.resolve(routeHelper.perform(req, res, next, '/user/ResetBadge', 'r_a_v1_u_16', null, null));
 });
 
-/* Thank You*/
+/* Thank You */
 router.post('/thank-you', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.sayThankYou;
 
@@ -298,12 +298,37 @@ router.get('/search', sanitizer.sanitizeDynamicUrlParams, function(req, res, nex
   Promise.resolve(routeHelper.perform(req, res, next, '/user/Search', 'r_a_v1_u_15', null, dataFormatterFunc));
 });
 
-/* Add device token*/
+/* Add device token */
 router.post('/:user_id/device-token', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.addDeviceToken;
   req.decodedParams.user_id = req.params.user_id;
 
   Promise.resolve(routeHelper.perform(req, res, next, '/user/AddDeviceToken', 'r_a_v1_u_16', null));
+});
+
+/* Fetch twitter info for tweet */
+router.get('/tweet-info', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.tweetInfo;
+
+  const dataFormatterFunc = async function(serviceResponse) {
+    const wrapperFormatterRsp = await new FormatterComposer({
+      resultType: responseEntityKey.loggedInUser,
+      entityKindToResponseKeyMap: {
+        [entityType.loggedInUser]: responseEntityKey.loggedInUser,
+        [entityType.pricePointsMap]: responseEntityKey.pricePoints,
+        [entityType.usersMap]: responseEntityKey.users,
+        [entityType.token]: responseEntityKey.token,
+        [entityType.secureTwitterUsersMap]: responseEntityKey.secureTwitterUsers
+      },
+      serviceData: serviceResponse.data
+    }).perform();
+
+    serviceResponse.data = wrapperFormatterRsp.data;
+  };
+
+  Promise.resolve(
+    routeHelper.perform(req, res, next, '/user/notification/TweetInfo', 'r_a_v1_u_17', null, dataFormatterFunc)
+  );
 });
 
 module.exports = router;

@@ -637,6 +637,19 @@ const v1Signature = {
       }
     ],
     optional: []
+  },
+  [apiName.tweetInfo]: {
+    mandatory: [
+      {
+        parameter: 'receiver_user_id',
+        validatorMethods: ['validateNonZeroInteger']
+      },
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      }
+    ],
+    optional: []
   }
 };
 
