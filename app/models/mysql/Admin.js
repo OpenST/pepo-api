@@ -113,10 +113,11 @@ class AdminModel extends ModelBase {
   }
 
   /**
-   * Fetch admin by email
+   * Fetch admin by email.
    *
-   * @param email
-   * @returns {Promise<void>}
+   * @param {string} email
+   *
+   * @returns {Promise<object>}
    */
   async fetchByEmail(email) {
     const oThis = this;
@@ -161,6 +162,7 @@ class AdminModel extends ModelBase {
    */
   getCookieTokenFor(adminObj, options) {
     const oThis = this;
+
     const uniqueStr = oThis.cookieToken(adminObj);
 
     const stringToSign =
@@ -188,20 +190,26 @@ class AdminModel extends ModelBase {
   }
 
   /**
-   * Flush cache
+   * Flush cache.
    *
    * @param {object} params
+   * @param {number} params.id
+   * @param {string} params.email
    *
    * @returns {Promise<*>}
    */
   static async flushCache(params) {
     const promisesArray = [];
 
-    const AdminById = require(rootPrefix + '/lib/cacheManagement/single/AdminById');
-    promisesArray.push(new AdminById({ id: [params.id] }).clear());
+    if (params.id) {
+      const AdminById = require(rootPrefix + '/lib/cacheManagement/single/AdminById');
+      promisesArray.push(new AdminById({ id: params.id }).clear());
+    }
 
-    const AdminByEmail = require(rootPrefix + '/lib/cacheManagement/single/AdminByEmail');
-    promisesArray.push(new AdminByEmail({ email: [params.email] }).clear());
+    if (params.email) {
+      const AdminByEmail = require(rootPrefix + '/lib/cacheManagement/single/AdminByEmail');
+      promisesArray.push(new AdminByEmail({ email: params.email }).clear());
+    }
 
     await Promise.all(promisesArray);
   }
