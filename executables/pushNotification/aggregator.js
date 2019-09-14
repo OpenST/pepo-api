@@ -240,27 +240,38 @@ class NotificationAggregator extends CronBase {
   async _resetDataForSentUsers() {
     const oThis = this;
 
-    await new AggregatedNotificationModel()
-      .update({
-        extra_data: null,
-        status: aggregatedNotificationsConstants.invertedStatuses[aggregatedNotificationsConstants.sentStatus]
-      })
-      .where({
-        user_id: oThis.notificationSentUserIds
-      })
-      .fire();
+    if (oThis.notificationSentUserIds.length > 0) {
+      await new AggregatedNotificationModel()
+        .update({
+          extra_data: null,
+          status: aggregatedNotificationsConstants.invertedStatuses[aggregatedNotificationsConstants.sentStatus]
+        })
+        .where({
+          user_id: oThis.notificationSentUserIds
+        })
+        .fire();
+    }
 
-    let inactiveUsers = oThis.recipientUserIds - oThis.notificationSentUserIds;
+    let inactiveUserIds = [];
 
-    await new AggregatedNotificationModel()
-      .update({
-        extra_data: null,
-        status: aggregatedNotificationsConstants.invertedStatuses[aggregatedNotificationsConstants.inactiveStatus]
-      })
-      .where({
-        user_id: inactiveUsers
-      })
-      .fire();
+    for (let i = 0; i < oThis.recipientUserIds.length; i++) {
+      let userId = oThis.recipientUserIds[i];
+      if (oThis.notificationSentUserIds.indexOf(userId) == -1) {
+        inactiveUserIds.push(userId);
+      }
+    }
+
+    if (inactiveUserIds.length > 0) {
+      await new AggregatedNotificationModel()
+        .update({
+          extra_data: null,
+          status: aggregatedNotificationsConstants.invertedStatuses[aggregatedNotificationsConstants.inactiveStatus]
+        })
+        .where({
+          user_id: inactiveUserIds
+        })
+        .fire();
+    }
   }
 
   /**
