@@ -2,7 +2,8 @@ const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   AdminModel = require(rootPrefix + '/app/models/mysql/Admin'),
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
-  AdminEmailCache = require(rootPrefix + '/lib/cacheManagement/single/AdminByEmail'),
+  AdminByIdCache = require(rootPrefix + '/lib/cacheManagement/single/AdminById'),
+  AdminByEmailsCache = require(rootPrefix + '/lib/cacheManagement/multi/AdminByEmails'),
   util = require(rootPrefix + '/lib/util'),
   coreConstants = require(rootPrefix + '/config/coreConstants'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
@@ -65,8 +66,7 @@ class AdminLogin extends ServiceBase {
   async _validateUser() {
     const oThis = this;
 
-    const cacheResp = await new AdminEmailCache({ email: oThis.email }).fetch();
-
+    const cacheResp = await new AdminByEmailsCache({ emails: [oThis.email] }).fetch();
     if (cacheResp.isFailure() || !CommonValidators.validateNonEmptyObject(cacheResp.data)) {
       return Promise.reject(
         responseHelper.paramValidationError({
@@ -78,7 +78,25 @@ class AdminLogin extends ServiceBase {
       );
     }
 
-    oThis.adminObj = cacheResp.data[oThis.email];
+    const adminId = cacheResp.data[oThis.email].id;
+
+    if (!adminId) {
+      return Promise.reject(
+        responseHelper.paramValidationError({
+          internal_error_identifier: 's_am_l_2',
+          api_error_identifier: 'invalid_api_params',
+          params_error_identifiers: ['user_not_found'],
+          debug_options: {}
+        })
+      );
+    }
+
+    const adminByIdCacheResponse = await new AdminByIdCache({ id: adminId }).fetch();
+    if (adminByIdCacheResponse.isFailure()) {
+      return Promise.reject(adminByIdCacheResponse);
+    }
+
+    oThis.adminObj = adminByIdCacheResponse.data[adminId];
   }
 
   /**

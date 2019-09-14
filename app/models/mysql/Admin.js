@@ -122,9 +122,8 @@ class AdminModel extends ModelBase {
   async fetchByEmail(email) {
     const oThis = this;
 
-    //todo::ADMIN do not send all columns?
     const dbRows = await oThis
-      .select('*')
+      .select('id, email')
       .where({ email: email })
       .fire();
 
@@ -202,13 +201,13 @@ class AdminModel extends ModelBase {
     const promisesArray = [];
 
     if (params.id) {
-      const AdminById = require(rootPrefix + '/lib/cacheManagement/single/AdminById');
-      promisesArray.push(new AdminById({ id: params.id }).clear());
+      const AdminByIdCache = require(rootPrefix + '/lib/cacheManagement/single/AdminById');
+      promisesArray.push(new AdminByIdCache({ id: params.id }).clear());
     }
 
     if (params.email) {
-      const AdminByEmail = require(rootPrefix + '/lib/cacheManagement/single/AdminByEmail');
-      promisesArray.push(new AdminByEmail({ email: params.email }).clear());
+      const AdminByEmailsCache = require(rootPrefix + '/lib/cacheManagement/multi/AdminByEmails');
+      promisesArray.push(new AdminByEmailsCache({ emails: [params.email] }).clear());
     }
 
     await Promise.all(promisesArray);

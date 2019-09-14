@@ -3,7 +3,8 @@ const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   AdminModel = require(rootPrefix + '/app/models/mysql/Admin'),
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
-  AdminEmailCache = require(rootPrefix + '/lib/cacheManagement/single/AdminByEmail'),
+  AdminByIdCache = require(rootPrefix + '/lib/cacheManagement/single/AdminById'),
+  AdminByEmailsCache = require(rootPrefix + '/lib/cacheManagement/multi/AdminByEmails'),
   util = require(rootPrefix + '/lib/util'),
   kmsConstants = require(rootPrefix + '/lib/globalConstant/kms'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
@@ -34,7 +35,7 @@ class AdminResetPassword extends ServiceBase {
     oThis.email = params.email;
     oThis.name = params.name;
 
-    oThis.adminObj = null;
+    oThis.adminObj = {};
     oThis.password = null;
     oThis.encryptionSalt = null;
     oThis.encryptedPassword = null;
@@ -53,7 +54,7 @@ class AdminResetPassword extends ServiceBase {
 
     await oThis._createPassword();
 
-    await oThis._addUpdateAdmin();
+    await oThis._addOrUpdateAdmin();
 
     return responseHelper.successWithData({ password: oThis.password });
   }
@@ -63,15 +64,29 @@ class AdminResetPassword extends ServiceBase {
    *
    * @sets oThis.adminObj
    *
-   * @returns {Promise<never>}
+   * @returns {Promise<*>}
    * @private
    */
   async _fetchUser() {
     const oThis = this;
 
-    const cacheResp = await new AdminEmailCache({ email: oThis.email }).fetch();
+    const cacheResp = await new AdminByEmailsCache({ emails: [oThis.email] }).fetch();
+    if (cacheResp.isFailure()) {
+      return Promise.reject(cacheResp);
+    }
 
-    oThis.adminObj = cacheResp.data[oThis.email] || {};
+    const adminId = cacheResp.data[oThis.email].id;
+
+    if (!adminId) {
+      return;
+    }
+
+    const adminByIdCacheResponse = await new AdminByIdCache({ id: adminId }).fetch();
+    if (adminByIdCacheResponse.isFailure()) {
+      return Promise.reject(adminByIdCacheResponse);
+    }
+
+    oThis.adminObj = adminByIdCacheResponse.data[adminId];
   }
 
   /**
@@ -100,7 +115,7 @@ class AdminResetPassword extends ServiceBase {
    * @returns {Promise<*|result>}
    * @private
    */
-  async _addUpdateAdmin() {
+  async _addOrUpdateAdmin() {
     const oThis = this;
 
     if (CommonValidators.validateNonEmptyObject(oThis.adminObj)) {
