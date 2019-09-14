@@ -379,18 +379,18 @@ class PreLaunchInvite extends ModelBase {
   }
 
   /**
-   * Fetch pre launch invite by invite code.
+   * Fetch pre launch invite by invite code id.
    *
-   * @param {number} inviteCode: invite code
+   * @param {number} inviteCodeId: invite code id
    *
    * @return {object}
    */
-  async fetchByInviteCode(inviteCode) {
+  async fetchByInviteCodeId(inviteCodeId) {
     const oThis = this;
 
     const dbRows = await oThis
       .select('*')
-      .where(['invite_code = ?', inviteCode])
+      .where(['invite_code_id = ?', inviteCodeId])
       .fire();
 
     if (dbRows.length === 0) {

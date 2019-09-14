@@ -233,6 +233,11 @@ class InviteCode extends ModelBase {
       promises.push(new InviteCodeByCodeCache({ code: params.code }).clear());
     }
 
+    if (params.id) {
+      const InviteCodeByIdCache = require(rootPrefix + '/lib/cacheManagement/single/InviteCodeById');
+      promises.push(new InviteCodeByIdCache({ id: params.id }).clear());
+    }
+
     await Promise.all(promises);
   }
 }
