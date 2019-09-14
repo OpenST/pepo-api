@@ -151,7 +151,9 @@ class FeedBase extends ServiceBase {
           debug_options: { feedData: feedData, msg: "FOUND DELETED VIDEO OR BLOCKED USER'S VIDEO IN FEED" }
         });
 
-        createErrorLogsEntry.perform(errorObject, errorLogsConstants.mediumSeverity);
+        if (videoEntityForFeed.status === videoConstants.deletedStatus) {
+          createErrorLogsEntry.perform(errorObject, errorLogsConstants.mediumSeverity);
+        }
 
         oThis.feeds.splice(i, 1);
       }
