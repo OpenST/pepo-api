@@ -409,7 +409,7 @@ class TwitterConnect extends ServiceBase {
 
     // twitterUserObj may or may not be present.
     // Also if present, it might not be of a Pepo user.
-    if (!oThis.twitterUserObj || !oThis.twitterUserObj.userId) {
+    if (oThis.twitterUserObj && oThis.twitterUserObj.userId) {
       return false;
     }
 
