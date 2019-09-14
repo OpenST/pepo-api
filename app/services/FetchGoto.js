@@ -104,7 +104,7 @@ class FetchGoto extends ServiceBase {
       urlData = splittedPaths[2];
 
     // for now, this service only supports for video/:video_id route
-    if (urlKind === shareEntityConstants.videoShareKind) {
+    if (urlKind === shareEntityConstants.videoShareKind.toLowerCase()) {
       return responseHelper.successWithData({ urlKind: urlKind, urlData: urlData });
     } else {
       return responseHelper.error({

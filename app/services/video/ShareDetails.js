@@ -150,7 +150,7 @@ class ShareDetails extends ServiceBase {
   _generateVideoShareUrl() {
     const oThis = this;
 
-    return urlDomain + '/' + shareEntityConstants.videoShareKind + '/' + oThis.videoId;
+    return urlDomain + '/' + shareEntityConstants.videoShareKind.toLowerCase() + '/' + oThis.videoId;
   }
 }
 
