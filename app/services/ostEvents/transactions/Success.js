@@ -190,7 +190,6 @@ class SuccessTransactionOstEvent extends TransactionOstEventBase {
       );
     }
 
-    //TODO:: Don't check user devices here. Already validated in job
     if (oThis.isPaperPlane) {
       promisesArray.push(
         notificationJobEnqueue.enqueue(notificationJobConstants.paperPlaneTransaction, {

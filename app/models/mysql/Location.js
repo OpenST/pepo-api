@@ -89,8 +89,6 @@ class LocationModel extends ModelBase {
       })
       .fire();
 
-    const response = {};
-
     for (let index = 0; index < dbRows.length; index++) {
       const formatDbRow = oThis.formatDbData(dbRows[index]);
 

@@ -5,7 +5,8 @@ const rootPrefix = '../../..',
   LocationByTimeZoneCache = require(rootPrefix + '/lib/cacheManagement/single/LocationByTimeZone'),
   UserDeviceModel = require(rootPrefix + '/app/models/mysql/UserDevice'),
   UserDeviceByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/UserDeviceByIds'),
-  UserDeviceIdsByDeviceTokenCache = require(rootPrefix + '/lib/cacheManagement/multi/UserDeviceIdsByDeviceToken'),
+  UserDeviceByUserIdDeviceTokenCache = require(rootPrefix +
+    '/lib/cacheManagement/single/UserDeviceByUserIdDeviceToken'),
   UserProfileElementsByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/UserProfileElementsByUserIds'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
@@ -41,8 +42,6 @@ class AddDeviceToken extends ServiceBase {
     super(params);
 
     const oThis = this;
-
-    logger.log('AddDeviceToken::params--------', params);
 
     oThis.currentUserId = +params.current_user.id;
     oThis.userId = +params.user_id;
@@ -115,34 +114,19 @@ class AddDeviceToken extends ServiceBase {
   async _insertIntoUserDevices() {
     const oThis = this;
 
-    //todo: update based on device token - Done
-
-    const userDeviceIdsCacheRsp = await new UserDeviceIdsByDeviceTokenCache({
-      deviceTokens: [oThis.deviceToken]
+    const userDeviceIdsCacheRsp = await new UserDeviceByUserIdDeviceTokenCache({
+      userId: oThis.currentUserId,
+      deviceToken: oThis.deviceToken
     }).fetch();
 
     if (userDeviceIdsCacheRsp.isFailure()) {
       return Promise.reject(userDeviceIdsCacheRsp);
     }
 
-    const userDeviceIds = userDeviceIdsCacheRsp.data[oThis.deviceToken];
+    const userDeviceCacheData = userDeviceIdsCacheRsp.data[oThis.deviceToken],
+      updateUserDeviceIds = [];
 
-    const userDevicesRsp = await new UserDeviceByIdsCache({ ids: userDeviceIds }).fetch();
-
-    if (userDevicesRsp.isFailure()) {
-      return Promise.reject(userDevicesRsp);
-    }
-
-    const userDevicesRspData = userDevicesRsp.data,
-      updateDeviceIds = [];
-
-    for (let index = 0; index < userDeviceIds.length; index++) {
-      if (userDevicesRspData[userDeviceIds[index]].deviceId !== oThis.deviceId) {
-        updateDeviceIds.push(userDeviceIds[index]);
-      }
-    }
-
-    if (updateDeviceIds.length > 0) {
+    if (userDeviceCacheData.id) {
       const promiseArray = [];
 
       await new UserDeviceModel()
@@ -151,14 +135,16 @@ class AddDeviceToken extends ServiceBase {
           device_id: oThis.deviceId
         })
         .where({
-          id: updateDeviceIds
+          id: userDeviceCacheData.id
         })
         .fire();
 
-      promiseArray.push(new UserDeviceByIdsCache({ ids: updateDeviceIds }).clear());
-      promiseArray.push(new UserDeviceIdsByDeviceTokenCache({ deviceTokens: [oThis.deviceToken] }).clear());
+      promiseArray.push(new UserDeviceByIdsCache({ ids: updateUserDeviceIds }).clear());
+      promiseArray.push(
+        new UserDeviceByUserIdDeviceTokenCache({ userId: oThis.currentUserId, deviceToken: oThis.deviceToken }).clear()
+      );
 
-      await Promise.all(promiseArray);
+      return Promise.all(promiseArray);
     }
 
     //todo if user is updated
@@ -175,7 +161,6 @@ class AddDeviceToken extends ServiceBase {
     }
 
     if (userDeviceId) {
-      //todo: update if token same
       await new UserDeviceModel()
         .update({
           status: userDeviceConstants.invertedStatuses[userDeviceConstants.activeStatus],
@@ -231,10 +216,7 @@ class AddDeviceToken extends ServiceBase {
       return Promise.reject(userProfileElementsCacheResp);
     }
 
-    const userProfileElementsRspdata = userProfileElementsCacheResp.data[oThis.currentUserId];
-
-    //todo: update or insert in user profile. - Done
-    //todo: locationId if blank. default insert and email - Done
+    const userProfileElementsRspData = userProfileElementsCacheResp.data[oThis.currentUserId];
 
     const locationByTimeZoneCacheRsp = await new LocationByTimeZoneCache({ timeZone: oThis.userTimeZone }).fetch();
 
@@ -251,22 +233,20 @@ class AddDeviceToken extends ServiceBase {
         api_error_identifier: 'unknown_user_time_zone',
         debug_options: { timeZone: oThis.userTimeZone }
       });
-      await createErrorLogsEntry.perform(errorObject, errorLogsConstants.mediumSeverity);
+      return createErrorLogsEntry.perform(errorObject, errorLogsConstants.mediumSeverity);
+
+      // TODO: Return from here. - Done
     }
 
     // If user profile elements contains location id and it is same as that of cache then return, else insert.
-    if (userProfileElementsRspdata.locationId && userProfileElementsRspdata.locationId.id) {
-      if (userProfileElementsRspdata.locationId.id === locationId || !locationId) {
-        return responseHelper.successWithData({});
-      } else if (userProfileElementsRspdata.locationId.id !== locationId) {
-        await new UserProfileElementModel()
-          .update({ data: locationId })
-          .where({
-            user_id: oThis.currentUserId,
-            data_kind: userProfileElementConstants.invertedKinds[userProfileElementConstants.locationIdKind]
-          })
-          .fire();
-      }
+    if (userProfileElementsRspData.locationId && userProfileElementsRspData.locationId.id !== locationId) {
+      await new UserProfileElementModel()
+        .update({ data: locationId })
+        .where({
+          user_id: oThis.currentUserId,
+          data_kind: userProfileElementConstants.invertedKinds[userProfileElementConstants.locationIdKind]
+        })
+        .fire();
     } else {
       await new UserProfileElementModel().insertElement({
         userId: oThis.currentUserId,
@@ -275,7 +255,6 @@ class AddDeviceToken extends ServiceBase {
       });
     }
 
-    //  todo: flush cache - Done
     return UserProfileElementModel.flushCache({ userId: oThis.currentUserId });
   }
 
