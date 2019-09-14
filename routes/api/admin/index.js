@@ -127,6 +127,7 @@ router.post('/users/:user_id/block', sanitizer.sanitizeDynamicUrlParams, functio
 router.get('/video-history/:profile_user_id', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.userVideoList;
   req.decodedParams.profile_user_id = req.params.profile_user_id;
+  req.decodedParams.is_admin = true;
 
   const dataFormatterFunc = async function(serviceResponse) {
     const wrapperFormatterRsp = await new FormatterComposer({
@@ -153,7 +154,7 @@ router.get('/video-history/:profile_user_id', sanitizer.sanitizeDynamicUrlParams
     serviceResponse.data = wrapperFormatterRsp.data;
   };
 
-  //todo? send a admin view flag and change service ang get/profile lib
+  //todo::ADMIN send a admin view flag and change service ang get/profile lib
 
   Promise.resolve(
     routeHelper.perform(req, res, next, '/user/profile/GetVideoList', 'r_a_v1_u_5', null, dataFormatterFunc)
@@ -165,8 +166,7 @@ router.post('/delete-video/:video_id', sanitizer.sanitizeDynamicUrlParams, funct
   req.decodedParams.apiName = apiName.adminDeleteVideo;
   req.decodedParams.video_id = req.params.video_id;
 
-  //todo:: move to admin folder
-  Promise.resolve(routeHelper.perform(req, res, next, '/video/Delete', 'r_a_v1_ad_6', null, null, null));
+  Promise.resolve(routeHelper.perform(req, res, next, '/admin/DeleteVideo', 'r_a_v1_ad_6', null, null, null));
 });
 
 /* Logged in Admin */

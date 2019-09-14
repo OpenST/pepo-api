@@ -1,8 +1,8 @@
 const rootPrefix = '../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
+  feedsConstants = require(rootPrefix + '/lib/globalConstant/feed'),
   databaseConstants = require(rootPrefix + '/lib/globalConstant/database'),
-  paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination'),
-  feedsConstants = require(rootPrefix + '/lib/globalConstant/feed');
+  paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination');
 
 // Declare variables.
 const dbName = databaseConstants.feedDbName;
@@ -160,7 +160,8 @@ class FeedModel extends ModelBase {
   /**
    * Delete by actor
    *
-   * @param {number} actor - actor id
+   * @param {object} params
+   * @param {number} params.actor
    *
    * @return {object}
    */
@@ -186,9 +187,9 @@ class FeedModel extends ModelBase {
    * @returns {Promise<*>}
    */
   static async flushCache(params) {
-    const LoggedOutFeed = require(rootPrefix + '/lib/cacheManagement/single/LoggedOutFeed');
+    const LoggedOutFeedCache = require(rootPrefix + '/lib/cacheManagement/single/LoggedOutFeed');
 
-    await new LoggedOutFeed({
+    await new LoggedOutFeedCache({
       limit: paginationConstants.defaultFeedsListPageSize,
       paginationTimestamp: params.paginationTimestamp
     }).clear();
