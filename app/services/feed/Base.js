@@ -143,6 +143,7 @@ class FeedBase extends ServiceBase {
       // Delete feeds whose user profile is not found.
       if (
         !CommonValidators.validateNonEmptyObject(profileObj) ||
+        !CommonValidators.validateNonEmptyObject(videoEntityForFeed) ||
         videoEntityForFeed.status === videoConstants.deletedStatus
       ) {
         const errorObject = responseHelper.error({
@@ -151,7 +152,10 @@ class FeedBase extends ServiceBase {
           debug_options: { feedData: feedData, msg: "FOUND DELETED VIDEO OR BLOCKED USER'S VIDEO IN FEED" }
         });
 
-        if (videoEntityForFeed.status === videoConstants.deletedStatus) {
+        if (
+          CommonValidators.validateNonEmptyObject(videoEntityForFeed) &&
+          videoEntityForFeed.status === videoConstants.deletedStatus
+        ) {
           createErrorLogsEntry.perform(errorObject, errorLogsConstants.mediumSeverity);
         }
 
