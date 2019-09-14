@@ -80,10 +80,9 @@ class LocationModel extends ModelBase {
    * @returns {Promise<Object>}
    */
   async fetchByIds(ids) {
-    const oThis = this,
-      response = {};
+    const oThis = this;
 
-    const dbRow = await oThis
+    const dbRows = await oThis
       .select('*')
       .where({
         id: ids
