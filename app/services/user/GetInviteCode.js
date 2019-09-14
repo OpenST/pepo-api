@@ -83,7 +83,7 @@ class GetInviteCode extends ServiceBase {
   async _prepareResponse() {
     const oThis = this;
 
-    const inviteUrl = coreConstants.PA_DOMAIN + '/?invite=' + oThis.inviteCodeDetails.code;
+    let inviteUrl = shareEntityConstants.inviteShareUrl + oThis.inviteCodeDetails.code;
 
     const response = {
       [entityType.share]: {
