@@ -201,8 +201,7 @@ class TweetInfo extends ServiceBase {
 
     let userTwitterEntity = twitterResp.data.userEntity;
 
-    // validating the front end data
-    if (userTwitterEntity.idStr != twitterId || userTwitterEntity.handle != handle) {
+    if (userTwitterEntity.idStr != twitterId) {
       // Check if this needs to be errored out
       responseHelper.error({
         internal_error_identifier: 's_u_n_ti_vtc_3',
@@ -273,6 +272,8 @@ class TweetInfo extends ServiceBase {
       .fire();
 
     await TwitterUserModel.flushCache(oThis.twitterUsersMap[oThis.receiverUserId]);
+
+    oThis.serviceResponse['twitterUsersMap'] = oThis.twitterUsersMap;
   }
 
   /**
