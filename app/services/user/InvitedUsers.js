@@ -10,13 +10,13 @@ const rootPrefix = '../../..',
   paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination');
 
 /**
- * Class for invited users of current user search.
+ * Class to get invited users of current user.
  *
  * @class InvitedUsers
  */
 class InvitedUsers extends ServiceBase {
   /**
-   * Constructor for invited users of current user search.
+   * Constructor to get invited users of current user.
    *
    * @param {object} params
    * @param {object} params.current_user
@@ -171,7 +171,7 @@ class InvitedUsers extends ServiceBase {
    *
    * @sets oThis.tokenUsersByUserIdMap
    *
-   * @return {Promise<void>}
+   * @returns {Promise<void>}
    * @private
    */
   async _fetchTokenUsers() {
@@ -262,7 +262,7 @@ class InvitedUsers extends ServiceBase {
   /**
    * Prepare final response.
    *
-   * @return {result}
+   * @returns {result}
    * @private
    */
   _prepareResponse() {

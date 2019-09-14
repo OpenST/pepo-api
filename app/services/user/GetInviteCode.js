@@ -77,7 +77,7 @@ class GetInviteCode extends ServiceBase {
   /**
    * Prepare final response.
    *
-   * @return {Promise<*|result>}
+   * @returns {Promise<*|result>}
    * @private
    */
   async _prepareResponse() {

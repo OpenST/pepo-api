@@ -48,7 +48,7 @@ class InviteCode extends ModelBase {
    * @param {string} dbRow.created_at
    * @param {string} dbRow.updated_at
    *
-   * @return {object}
+   * @returns {object}
    * @private
    */
   formatDbData(dbRow) {
@@ -73,7 +73,7 @@ class InviteCode extends ModelBase {
    *
    * @param {integer} id
    *
-   * @return {object}
+   * @returns {object}
    */
   async fetchById(id) {
     const oThis = this;
@@ -88,7 +88,7 @@ class InviteCode extends ModelBase {
    *
    * @param {array} ids: invite code ids
    *
-   * @return {object}
+   * @returns {object}
    */
   async fetchByIds(ids) {
     const oThis = this;
@@ -113,7 +113,7 @@ class InviteCode extends ModelBase {
    *
    * @param {array} codes: invite codes
    *
-   * @return {object}
+   * @returns {object}
    */
   async fetchByInviteCodes(codes) {
     const oThis = this;
@@ -180,7 +180,7 @@ class InviteCode extends ModelBase {
    * @param {number} params.inviterCodeId: inviterCodeId
    * @param {number} params.paginationId: pagination time stamp
    *
-   * @return {Promise<object>}
+   * @returns {Promise<object>}
    */
   async getUserIdsByInviterUserId(params) {
     const oThis = this;
@@ -216,7 +216,7 @@ class InviteCode extends ModelBase {
    * Flush cache.
    *
    * @param {object} params
-   * @param {number} params.userId
+   * @param {number} [params.userId]
    *
    * @returns {Promise<*>}
    */
