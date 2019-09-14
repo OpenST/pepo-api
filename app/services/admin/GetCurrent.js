@@ -74,7 +74,7 @@ class GetCurrentAdmin extends ServiceBase {
       );
     }
 
-    oThis.currentAdmin = new AdminModel().safeFormattedData(cacheResponse.data);
+    oThis.currentAdmin = new AdminModel().safeFormattedData(cacheResponse.data[oThis.adminId]);
   }
 }
 

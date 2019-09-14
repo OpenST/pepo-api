@@ -84,7 +84,7 @@ class AdminModel extends ModelBase {
 
     const res = await oThis.fetchByIds([id]);
 
-    return res[id] || {};
+    return res || {};
   }
 
   /**
