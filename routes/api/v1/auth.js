@@ -15,7 +15,7 @@ const rootPrefix = '../../..',
   cookieHelper = require(rootPrefix + '/lib/cookieHelper');
 
 /* Logout user*/
-router.post('/logout', cookieHelper.validateUserCookieWithoutError, sanitizer.sanitizeDynamicUrlParams, function(
+router.post('/logout', cookieHelper.parseUserCookieForLogout, sanitizer.sanitizeDynamicUrlParams, function(
   req,
   res,
   next
