@@ -2,20 +2,20 @@ const uuidV4 = require('uuid/v4');
 
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
-  coreConstants = require(rootPrefix + '/config/coreConstants'),
-  shareEntityConstants = require(rootPrefix + '/lib/globalConstant/shareEntity'),
   InviteCodeByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/InviteCodeByUserIds'),
+  coreConstants = require(rootPrefix + '/config/coreConstants'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
-  entityType = require(rootPrefix + '/lib/globalConstant/entityType');
+  entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
+  shareEntityConstants = require(rootPrefix + '/lib/globalConstant/shareEntity');
 
 /**
- * Class for invited users of current user search.
+ * Class to get invite code for current user.
  *
  * @class GetInviteCode
  */
 class GetInviteCode extends ServiceBase {
   /**
-   * Constructor for invited users of current user search.
+   * Constructor to get invite code for current user.
    *
    * @param {object} params
    * @param {object} params.currentUser
@@ -71,7 +71,7 @@ class GetInviteCode extends ServiceBase {
     }
 
     oThis.inviteCodeDetails = inviteCodeByUserIdCacheResponse.data[oThis.currentUserId];
-    oThis.inviteCodeDetails['shareId'] = oThis.shareId;
+    oThis.inviteCodeDetails.shareId = oThis.shareId;
   }
 
   /**
@@ -83,7 +83,7 @@ class GetInviteCode extends ServiceBase {
   async _prepareResponse() {
     const oThis = this;
 
-    let inviteUrl = coreConstants.PA_DOMAIN + '/?invite=' + oThis.inviteCodeDetails.code;
+    const inviteUrl = coreConstants.PA_DOMAIN + '/?invite=' + oThis.inviteCodeDetails.code;
 
     const response = {
       [entityType.share]: {
@@ -91,8 +91,8 @@ class GetInviteCode extends ServiceBase {
         kind: shareEntityConstants.inviteShareKind,
         url: inviteUrl,
         message: 'DUMMY_MESSAGE',
-        title: 'DUMMY_TITLE', //optional
-        subject: 'DUMMY_SUBJECT', //optional
+        title: 'DUMMY_TITLE', // Optional.
+        subject: 'DUMMY_SUBJECT', // Optional.
         uts: Math.round(new Date() / 1000)
       },
       [entityType.inviteCode]: oThis.inviteCodeDetails

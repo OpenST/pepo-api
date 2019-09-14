@@ -111,7 +111,7 @@ class VerifyDoubleOptIn extends ServiceBase {
       Math.floor(Date.now() / 1000) - temporaryTokenConstants.tokenExpiryTimestamp >
       oThis.temporaryTokenObj.createdAt
     ) {
-      return oThis._invalidUrlError('a_s_do_fpiot_5');
+      return oThis._invalidUrlError('a_s_do_fpiot_4');
     }
   }
 
