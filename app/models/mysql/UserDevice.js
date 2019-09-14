@@ -98,6 +98,11 @@ class UserDevice extends ModelBase {
       response[formatDbRow.userId].push(formatDbRow.id);
     }
 
+    for (let index = 0; index < userIds.length; index++) {
+      let userId = userIds[index];
+      response[userId] = response[userId] || [];
+    }
+
     return response;
   }
 

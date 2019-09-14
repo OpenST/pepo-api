@@ -85,6 +85,11 @@ class NotificationAggregator extends CronBase {
       oThis.recipientUserIds.push(userId);
     }
 
+    if (oThis.recipientUserIds.length < 1) {
+      oThis.canExit = true;
+      return responseHelper.successWithData({});
+    }
+
     await oThis._fetchDeviceIdsForRecipients();
     await oThis._insertIntoNotificationHook();
     await oThis._resetDataForSentUsers();
@@ -158,14 +163,10 @@ class NotificationAggregator extends CronBase {
         continue;
       }
 
-      let rawPayloadForMsgFormatter = aggregatedNotificationsPayload.extraData.payload;
-
-      logger.log('======= aggregatedNotificationsPayload :::', JSON.stringify(aggregatedNotificationsPayload));
-
       let insertRow = [
         notificationHookConstants.invertedEventTypes[notificationHookConstants.aggregatedTxReceiveSuccessKind],
         JSON.stringify(deviceIds),
-        JSON.stringify(rawPayloadForMsgFormatter),
+        JSON.stringify(aggregatedNotificationsPayload.extraData),
         Math.round(Date.now() / 1000),
         notificationHookConstants.invertedStatuses[notificationHookConstants.pendingStatus]
       ];
@@ -173,9 +174,11 @@ class NotificationAggregator extends CronBase {
       insertColumnValues.push(insertRow);
     }
 
-    promiseArray.push(new NotificationHookModel().insertMultiple(insertColumnNames, insertColumnValues, {}).fire());
+    if (insertColumnValues.length > 0) {
+      promiseArray.push(new NotificationHookModel().insertMultiple(insertColumnNames, insertColumnValues, {}).fire());
 
-    await Promise.all(promiseArray);
+      await Promise.all(promiseArray);
+    }
   }
 
   /**
@@ -194,7 +197,8 @@ class NotificationAggregator extends CronBase {
       })
       .where({
         user_id: oThis.recipientUserIds
-      });
+      })
+      .fire();
   }
 
   /**
