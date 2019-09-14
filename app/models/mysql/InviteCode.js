@@ -139,7 +139,14 @@ class InviteCode extends ModelBase {
    * @returns {Promise<*>}
    */
   static async flushCache(params) {
-    // do nothing.
+    const promisesArray = [];
+
+    if (params.id) {
+      const InviteCodeByIdCache = require(rootPrefix + '/lib/cacheManagement/single/InviteCodeById');
+      promisesArray.push(new InviteCodeByIdCache({ id: params.id }).clear());
+    }
+
+    await Promise.all(promisesArray);
   }
 }
 
