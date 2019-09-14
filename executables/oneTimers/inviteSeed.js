@@ -11,6 +11,7 @@ const rootPrefix = '../..',
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   PreLaunchInviteModel = require(rootPrefix + '/app/models/mysql/PreLaunchInvite'),
   InviteCodeModel = require(rootPrefix + '/app/models/mysql/InviteCode'),
+  inviteCodeConstants = require(rootPrefix + '/lib/globalConstant/inviteCode'),
   preLaunchInviteConstant = require(rootPrefix + '/lib/globalConstant/preLaunchInvite');
 
 command
@@ -66,7 +67,7 @@ class InviteSeed {
 
       await oThis._fetchInviteCodes();
 
-      await oThis._updatePreLaunchInvites();
+      await oThis._updatePreLaunchInvitesAndInviteCodes();
 
       offset = offset + 100;
     }
@@ -136,7 +137,10 @@ class InviteSeed {
 
     for (let inviteCode in oThis.preLaunchInvitesByInviteCode) {
       let preLaunchInviteObj = oThis.preLaunchInvitesByInviteCode[inviteCode],
-        inivteLimit = preLaunchInviteObj.creatorStatus === preLaunchInviteConstant.approvedCreatorStatus ? -1 : 50;
+        inivteLimit =
+          preLaunchInviteObj.creatorStatus === preLaunchInviteConstant.approvedCreatorStatus
+            ? inviteCodeConstants.infiniteInviteLimitForNonCreator
+            : inviteCodeConstants.defaultInviteLimitForNonCreator;
 
       bulkInsertVal.push([inviteCode, inivteLimit]);
     }
@@ -175,7 +179,7 @@ class InviteSeed {
    * @returns {Promise<>}
    * @private
    */
-  async _updatePreLaunchInvites() {
+  async _updatePreLaunchInvitesAndInviteCodes() {
     const oThis = this;
 
     let preLaunchInviteByIdObj = {},
@@ -207,6 +211,11 @@ class InviteSeed {
       await new PreLaunchInviteModel()
         .update(updateData)
         .where({ invite_code: inviteCode })
+        .fire();
+
+      await new InviteCodeModel()
+        .update({ inviter_code_id: inviterCodeId })
+        .where({ code: inviteCode })
         .fire();
     }
   }
