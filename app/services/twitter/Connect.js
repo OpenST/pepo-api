@@ -426,7 +426,7 @@ class TwitterConnect extends ServiceBase {
     const oThis = this;
 
     if (response.isSuccess()) {
-      response.data[entityType.goto] = { pn: null };
+      response.data[entityType.goto] = { pn: null, v: null };
       if (response.data.openEmailAddFlow) {
         // Notify app about email add flow
         response.data[entityType.goto] = {
