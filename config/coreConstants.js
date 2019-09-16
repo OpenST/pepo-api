@@ -17,7 +17,7 @@ class CoreConstants {
   }
 
   get APP_NAME() {
-    return process.env.DEVOPS_APP_NAME;
+    return process.env.PA_DEVOPS_APP_NAME;
   }
 
   get PA_DOMAIN() {
@@ -294,15 +294,15 @@ class CoreConstants {
 
   // DevOps error logs framework details.
   get ENV_IDENTIFIER() {
-    return process.env.DEVOPS_ENV_ID;
+    return process.env.PA_DEVOPS_ENV_ID;
   }
 
   get IP_ADDRESS() {
-    return process.env.DEVOPS_IP_ADDRESS;
+    return process.env.PA_DEVOPS_IP_ADDRESS;
   }
 
   get WS_SERVER_IDENTIFIER() {
-    return process.env.DEVOPS_SERVER_IDENTIFIER;
+    return process.env.PA_DEVOPS_SERVER_IDENTIFIER;
   }
 
   // Pepo-campaigns details.
