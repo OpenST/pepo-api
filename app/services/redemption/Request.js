@@ -6,6 +6,7 @@ const rootPrefix = '../../..',
   GetBalance = require(rootPrefix + '/app/services/user/GetBalance'),
   UserMultiCache = require(rootPrefix + '/lib/cacheManagement/multi/User'),
   OstPricePointModel = require(rootPrefix + '/app/models/mysql/OstPricePoints'),
+  TwitterUserByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TwitterUserByIds'),
   SendTransactionalMail = require(rootPrefix + '/lib/email/hookCreator/SendTransactionalMail'),
   TokenUserByUserIdCache = require(rootPrefix + '/lib/cacheManagement/multi/TokenUserByUserIds'),
   RedemptionProductsCache = require(rootPrefix + '/lib/cacheManagement/single/RedemptionProducts'),
@@ -19,13 +20,17 @@ const rootPrefix = '../../..',
 /**
  * Class to request redemption for user.
  *
- * @class
+ * @class RequestRedemption
  */
 class RequestRedemption extends ServiceBase {
   /**
    * Constructor to request redemption for user.
    *
-   * @param params
+   * @param {object} params
+   * @param {object} params.current_user
+   * @param {number} params.product_id
+   * @param {string} params.price_point
+   * @param {string} params.pepo_amount_in_wei
    *
    * @augments ServiceBase
    *
@@ -41,15 +46,22 @@ class RequestRedemption extends ServiceBase {
     oThis.pricePoint = params.price_point;
     oThis.pepoAmountInWei = params.pepo_amount_in_wei;
 
+    oThis.currentUserId = oThis.currentUser.id;
+
     oThis.productLink = null;
     oThis.dollarValue = null;
     oThis.redemptionReceiverUsername = null;
     oThis.currentUserTokenHolderAddress = null;
+    oThis.currentUserEmailAddress = null;
+    oThis.currentUserUserName = null;
     oThis.redemptionReceiverTokenHolderAddress = null;
+    oThis.currentUserTwitterHandle = null;
   }
 
   /**
    * Async perform.
+   *
+   * @sets oThis.redemptionId
    *
    * @return {Promise<any>}
    * @private
@@ -60,18 +72,17 @@ class RequestRedemption extends ServiceBase {
     await oThis._validateAndSanitize();
 
     const promisesArray = [];
-    promisesArray.push(oThis._getUserDetails());
-    promisesArray.push(oThis._getTokenUserDetails());
+    promisesArray.push(oThis._getUserDetails(), oThis._getTokenUserDetails(), oThis._getCurrentUserTwitterHandle());
     await Promise.all(promisesArray);
+
+    oThis.redemptionId = uuidV4();
 
     await oThis._sendEmail();
 
-    const redemptionId = uuidV4();
-
     return responseHelper.successWithData({
       redemption: {
-        id: redemptionId,
-        userId: oThis.currentUser.id,
+        id: oThis.redemptionId,
+        userId: oThis.currentUserId,
         productId: oThis.productId,
         uts: parseInt(Date.now() / 1000)
       }
@@ -94,6 +105,7 @@ class RequestRedemption extends ServiceBase {
 
     const userBalanceValidationResponse = promisesResponse[0];
     const pricePointValidationResponse = promisesResponse[1];
+    const productValidationResponse = promisesResponse[2];
 
     // Validate if user's balance is greater than the pepo amount in wei.
     if (!userBalanceValidationResponse) {
@@ -106,8 +118,17 @@ class RequestRedemption extends ServiceBase {
     }
 
     // Validate product id.
-    if (!oThis.productLink) {
+    if (!productValidationResponse) {
       paramErrors.push('invalid_product_id');
+    }
+
+    // Validate if product value is correct or not.
+    const productValueInUsd = basicHelper.getUSDAmountForPepo(oThis.pricePoint, oThis.pepoAmountInWei);
+
+    const productValueInUsdInWei = basicHelper.toNormalPrecisionFiat(productValueInUsd, 18).toString();
+
+    if (productValueInUsdInWei !== oThis.dollarValue) {
+      paramErrors.push('invalid_pepo_amount_in_wei', 'invalid_price_point');
     }
 
     if (paramErrors.length > 0) {
@@ -132,7 +153,7 @@ class RequestRedemption extends ServiceBase {
     const oThis = this;
 
     // Validate pepo amount in wei < = balance.
-    const balanceResponse = await new GetBalance({ user_id: oThis.currentUser.id }).perform();
+    const balanceResponse = await new GetBalance({ user_id: oThis.currentUserId }).perform();
     if (balanceResponse.isFailure()) {
       return Promise.reject(balanceResponse);
     }
@@ -163,18 +184,18 @@ class RequestRedemption extends ServiceBase {
       ])
       .fire();
 
-    let result = false;
+    let validationResult = false;
     for (let index = 0; index < dbRows.length; index++) {
       const pricePointEntity = dbRows[index];
 
-      if (pricePointEntity.conversion_rate === oThis.pricePoint) {
-        result = true;
+      if (new BigNumber(pricePointEntity.conversion_rate).eq(new BigNumber(oThis.pricePoint))) {
+        validationResult = true;
       }
 
-      result = false;
+      validationResult = false;
     }
 
-    return result;
+    return validationResult;
   }
 
   /**
@@ -182,7 +203,7 @@ class RequestRedemption extends ServiceBase {
    *
    * @sets oThis.productLink, oThis.dollarValue
    *
-   * @returns {Promise<never>}
+   * @returns {Promise<boolean>}
    * @private
    */
   async _getProductDetails() {
@@ -195,20 +216,24 @@ class RequestRedemption extends ServiceBase {
 
     const redemptionProducts = redemptionProductsCacheResponse.data.products;
 
+    let validationResult = false;
     for (let index = 0; index < redemptionProducts.length; index++) {
       const redemptionProduct = redemptionProducts[index];
 
-      if (redemptionProduct.id === oThis.productId) {
+      if (+redemptionProduct.id === +oThis.productId) {
+        validationResult = true;
         oThis.productLink = redemptionProduct.images.landscape;
         oThis.dollarValue = redemptionProduct.dollarValue;
       }
     }
+
+    return validationResult;
   }
 
   /**
    * Get user details.
    *
-   * @sets oThis.redemptionReceiverUsername
+   * @sets oThis.currentUserEmailAddress, oThis.currentUserUserName, oThis.redemptionReceiverUsername
    *
    * @returns {Promise<never>}
    * @private
@@ -216,14 +241,19 @@ class RequestRedemption extends ServiceBase {
   async _getUserDetails() {
     const oThis = this;
 
-    const userDetailsCacheRsp = await new UserMultiCache({ ids: [coreConstants.PEPO_REDEMPTION_USER_ID] }).fetch();
+    const userDetailsCacheRsp = await new UserMultiCache({
+      ids: [oThis.currentUserId, coreConstants.PEPO_REDEMPTION_USER_ID]
+    }).fetch();
     if (userDetailsCacheRsp.isFailure()) {
       return Promise.reject(userDetailsCacheRsp);
     }
 
-    const userDetails = userDetailsCacheRsp.data[coreConstants.PEPO_REDEMPTION_USER_ID];
+    const currentUserDetails = userDetailsCacheRsp.data[oThis.currentUserId];
+    const redemptionUserDetails = userDetailsCacheRsp.data[coreConstants.PEPO_REDEMPTION_USER_ID];
 
-    oThis.redemptionReceiverUsername = userDetails[coreConstants.PEPO_REDEMPTION_USER_ID].userName;
+    oThis.currentUserEmailAddress = currentUserDetails.email || '';
+    oThis.currentUserUserName = currentUserDetails.userName;
+    oThis.redemptionReceiverUsername = redemptionUserDetails.userName;
   }
 
   /**
@@ -238,16 +268,44 @@ class RequestRedemption extends ServiceBase {
     const oThis = this;
 
     const tokenUserCacheResponse = await new TokenUserByUserIdCache({
-      userIds: [oThis.currentUser.id, coreConstants.PEPO_REDEMPTION_USER_ID]
+      userIds: [oThis.currentUserId, coreConstants.PEPO_REDEMPTION_USER_ID]
     }).fetch();
 
     if (tokenUserCacheResponse.isFailure()) {
       return Promise.reject(tokenUserCacheResponse);
     }
 
-    oThis.currentUserTokenHolderAddress = tokenUserCacheResponse.data[oThis.currentUser.id].ostTokenHolderAddress;
+    oThis.currentUserTokenHolderAddress = tokenUserCacheResponse.data[oThis.currentUserId].ostTokenHolderAddress;
     oThis.redemptionReceiverTokenHolderAddress =
       tokenUserCacheResponse.data[coreConstants.PEPO_REDEMPTION_USER_ID].ostTokenHolderAddress;
+  }
+
+  /**
+   * Get current user twitter handle.
+   *
+   * @sets oThis.currentUserTwitterHandle
+   *
+   * @returns {Promise<never>}
+   * @private
+   */
+  async _getCurrentUserTwitterHandle() {
+    const oThis = this;
+
+    const twitterUserByUserIdsCacheResponse = await new TwitterUserByUserIdsCache({
+      userIds: [oThis.currentUserId]
+    }).fetch();
+    if (twitterUserByUserIdsCacheResponse.isFailure()) {
+      return Promise.reject(twitterUserByUserIdsCacheResponse);
+    }
+
+    const currentUserTwitterId = twitterUserByUserIdsCacheResponse.data[oThis.currentUserId].id;
+
+    const twitterUserByUserIdCacheResponse = await new TwitterUserByIdsCache({ ids: [currentUserTwitterId] }).fetch();
+    if (twitterUserByUserIdCacheResponse.isFailure()) {
+      return Promise.reject(twitterUserByUserIdCacheResponse);
+    }
+
+    oThis.currentUserTwitterHandle = twitterUserByUserIdCacheResponse.data[currentUserTwitterId].handle || '';
   }
 
   /**
@@ -261,19 +319,22 @@ class RequestRedemption extends ServiceBase {
 
     const transactionalMailParams = {
       receiverEntityId: coreConstants.PEPO_REDEMPTION_USER_ID,
-      receiverEntityKind: emailServiceApiCallHookConstants.emailDoubleOptInEntityKind,
+      receiverEntityKind: emailServiceApiCallHookConstants.redemptionReceiverEntityKind,
       templateName: emailServiceApiCallHookConstants.userRedemptionTemplateName,
       templateVars: {
-        username: oThis.currentUser.userName,
-        user_id: oThis.currentUser.id,
+        username: oThis.currentUserUserName,
+        user_id: oThis.currentUserId,
         user_token_holder_address: oThis.currentUserTokenHolderAddress,
-        user_twitter_handle: '',
+        user_twitter_handle: oThis.currentUserTwitterHandle,
+        user_email: oThis.currentUserEmailAddress,
         product_id: oThis.productId,
         product_link: oThis.productLink,
         product_dollar_value: oThis.dollarValue,
-        pepo_amount: basicHelper.convertWeiToNormal(oThis.pepoAmountInWei),
+        pepo_amount: basicHelper.convertWeiToNormal(oThis.pepoAmountInWei).toString(10),
         redemption_receiver_username: oThis.redemptionReceiverUsername,
-        redemption_receiver_token_holder_address: oThis.redemptionReceiverTokenHolderAddress
+        redemption_receiver_token_holder_address: oThis.redemptionReceiverTokenHolderAddress,
+        redemption_id: oThis.redemptionId,
+        pepo_api_domain: 1
       }
     };
 
