@@ -18,6 +18,7 @@ const rootPrefix = '../../..',
   fetchGotoRoutes = require(rootPrefix + '/routes/api/v1/fetchGoto'),
   uploadParamsRoutes = require(rootPrefix + '/routes/api/v1/uploadParams'),
   rotateTwitterAccountRoutes = require(rootPrefix + '/routes/api/v1/rotateTwitterAccount'),
+  reportIssueRoutes = require(rootPrefix + '/routes/api/v1/reportIssue'),
   ostTransactionRoutes = require(rootPrefix + '/routes/api/v1/ostTransactions');
 
 const errorConfig = basicHelper.fetchErrorConfig(apiVersions.v1);
@@ -28,6 +29,7 @@ router.use(cookieParser(coreConstant.COOKIE_SECRET));
 // TEMP route - only for QA - TODO - remove later after talking with SOMA
 router.use('/rotate-twitter-account', rotateTwitterAccountRoutes);
 
+router.use('/report-issue', reportIssueRoutes);
 router.use('/auth', authRoutes);
 
 // Login not mandatory for following

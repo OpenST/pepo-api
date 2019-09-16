@@ -5,6 +5,11 @@
  */
 
 const v1ErrorConfig = {
+  invalid_app_name: {
+    parameter: 'app_name',
+    code: 'invalid',
+    message: 'App Name is Invalid'
+  },
   invalid_user_name: {
     parameter: 'user_name',
     code: 'invalid',
