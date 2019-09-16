@@ -203,11 +203,12 @@ class InviteCode extends ModelBase {
 
     const userIds = [];
 
+    let nextPaginationId = null;
+
     for (let index = 0; index < dbRows.length; index++) {
       userIds.push(dbRows[index].user_id);
+      nextPaginationId = dbRows[index].id;
     }
-
-    const nextPaginationId = dbRows[dbRows.length - 1].id;
 
     return { userIds: userIds, nextPaginationId: nextPaginationId };
   }

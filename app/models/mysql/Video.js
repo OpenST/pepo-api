@@ -209,14 +209,14 @@ class Video extends ModelBase {
   }
 
   /**
-   * Mark video deleted
+   * Mark videos deleted.
    *
    * @param {object} params
-   * @param {number/string} params.id
+   * @param {array<number/string>} params.ids
    *
    * @return {Promise<object>}
    */
-  async markVideoDeleted(params) {
+  async markVideosDeleted(params) {
     const oThis = this;
 
     await oThis
@@ -224,11 +224,15 @@ class Video extends ModelBase {
         status: videoConstants.invertedStatuses[videoConstants.deletedStatus]
       })
       .where({
-        id: params.id
+        id: params.ids
       })
       .fire();
 
-    return Video.flushCache({ id: params.id });
+    const promisesArray = [];
+    for (let index = 0; index < params.ids.length; index++) {
+      promisesArray.push(Video.flushCache({ id: params.ids[index] }));
+    }
+    await Promise.all(promisesArray);
   }
 
   /**

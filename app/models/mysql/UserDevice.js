@@ -91,16 +91,13 @@ class UserDevice extends ModelBase {
 
     const response = {};
 
-    for (let index = 0; index < dbRows.length; index++) {
-      const formatDbRow = oThis.formatDbData(dbRows[index]);
-
-      response[formatDbRow.userId] = response[formatDbRow.userId] || [];
-      response[formatDbRow.userId].push(formatDbRow.id);
+    for (let index = 0; index < userIds.length; index++) {
+      response[userIds[index]] = [];
     }
 
-    for (let index = 0; index < userIds.length; index++) {
-      let userId = userIds[index];
-      response[userId] = response[userId] || [];
+    for (let index = 0; index < dbRows.length; index++) {
+      const formatDbRow = oThis.formatDbData(dbRows[index]);
+      response[formatDbRow.userId].push(formatDbRow.id);
     }
 
     return response;
