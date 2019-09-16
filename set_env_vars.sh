@@ -130,3 +130,6 @@ export DEFAULT_REPLICATION_LEVEL='localOne'
 
 export PA_CDN_URL='https://dbvoeb7t6hffk.cloudfront.net'
 export TWITTER_OAUTH_URL='https://api.twitter.com/oauth/authorize?oauth_token='
+
+# Pepo twitter handle
+export PA_PEPO_TWITTER_HANDLE='thepepoapp'

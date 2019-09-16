@@ -354,6 +354,10 @@ class CoreConstants {
   get TWITTER_OAUTH_URL() {
     return process.env.TWITTER_OAUTH_URL;
   }
+
+  get PEPO_TWITTER_HANDLE() {
+    return process.env.PA_PEPO_TWITTER_HANDLE;
+  }
 }
 
 module.exports = new CoreConstants();

@@ -64,7 +64,10 @@ class SayThankYou extends ServiceBase {
     await oThis._enqueueUserNotification();
 
     if (oThis.tweetNeeded) {
-      let tweetByUserId = new TweetByUserId({ text: oThis.text + 'via @thepepoapp', userId: oThis.currentUserId });
+      let tweetByUserId = new TweetByUserId({
+        text: oThis.text + '\nvia @' + coreConstants.PEPO_TWITTER_HANDLE,
+        userId: oThis.currentUserId
+      });
 
       return tweetByUserId.perform();
     }
