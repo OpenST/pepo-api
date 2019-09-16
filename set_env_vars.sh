@@ -7,10 +7,10 @@ export PA_DOMAIN='http://pepodev.com:8080'
 export PA_COOKIE_DOMAIN='.pepodev.com'
 
 # Devops error logs framework
-export DEVOPS_APP_NAME='pepo-api';
-export DEVOPS_ENV_ID='dev1-sandbox';
-export DEVOPS_IP_ADDRESS='127.0.0.1';
-export DEVOPS_SERVER_IDENTIFIER='1111';
+export PA_DEVOPS_APP_NAME='pepo-api';
+export PA_DEVOPS_ENV_ID='dev1-sandbox';
+export PA_DEVOPS_IP_ADDRESS='127.0.0.1';
+export PA_DEVOPS_SERVER_IDENTIFIER='1111';
 
 # Database details
 export PA_MYSQL_CONNECTION_POOL_SIZE='3'
