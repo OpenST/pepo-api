@@ -36,6 +36,7 @@ class PublicVideoFeed extends FeedBase {
 
     oThis.limit = oThis._defaultPageLimit();
     oThis.paginationTimestamp = null;
+    oThis.nextPaginationTimestamp = null;
   }
 
   /**
@@ -88,7 +89,7 @@ class PublicVideoFeed extends FeedBase {
 
     const lastFeedId = oThis.feedIds[oThis.feedIds.length - 1];
 
-    if (oThis.feedIds.length > 0) {
+    if (oThis.feedIds.length > 0 && oThis.feedIds.length >= oThis.limit) {
       oThis.nextPaginationTimestamp = oThis.feedsMap[lastFeedId].paginationIdentifier;
     }
   }
@@ -106,7 +107,7 @@ class PublicVideoFeed extends FeedBase {
 
     const nextPagePayloadKey = {};
 
-    if (oThis.feeds.length >= oThis.limit) {
+    if (oThis.nextPaginationTimestamp) {
       nextPagePayloadKey[paginationConstants.paginationIdentifierKey] = {
         pagination_timestamp: oThis.nextPaginationTimestamp
       };
