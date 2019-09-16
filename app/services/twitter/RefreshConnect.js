@@ -127,6 +127,8 @@ class RefreshConnect extends ServiceBase {
 
     let twitterResp = null;
 
+    //todo: change error response unauthorized_api_request?
+
     twitterResp = await new AccountTwitterRequestClass()
       .verifyCredentials({
         oAuthToken: oThis.token,

@@ -56,15 +56,8 @@ class TweetInfo extends ServiceBase {
 
     await oThis._fetchTwitterUsers();
 
-    let currenUserValidationRsp = await oThis._fetchAndValidateUser(oThis.currentUserId);
-
-    if (currenUserValidationRsp.isSuccess()) {
-      let currentUserValidationData = currenUserValidationRsp.data;
-
-      if (currentUserValidationData.hasOwnProperty('twitterAuthValid') && !currentUserValidationData.twitterAuthValid) {
-        await oThis._expireCurrentUserTwitterAuthIfRequired(currentUserValidationData.twitterExtendedId);
-      }
-    }
+    //todo: do not make two twitter api calls
+    await oThis._fetchAndValidateUser(oThis.currentUserId);
 
     await oThis._fetchReceiverHandle();
 
@@ -139,11 +132,8 @@ class TweetInfo extends ServiceBase {
       let validateRsp = await oThis._validateTwitterCredentials(twitterId, handle);
 
       if (validateRsp.isFailure()) {
-        return responseHelper.successWithData({ twitterAuthValid: false, twitterExtendedId: twitterExtendedData.id });
+        await oThis._expireCurrentUserTwitterAuthIfRequired(twitterExtendedData.id);
       }
-    } else {
-      // Send this response to skip expiration in DB(already expired)
-      return responseHelper.successWithData({ twitterAuthValid: false, twitterExtendedId: twitterExtendedData.id });
     }
 
     return responseHelper.successWithData({});
@@ -271,6 +261,8 @@ class TweetInfo extends ServiceBase {
     if (lookupRsp.isFailure()) {
       oThis.twitterUsersMap[oThis.receiverUserId].handle = null;
     }
+
+    //todo: user twitter entity as in signup
 
     await new TwitterUserModel()
       .update({ handle: lookupRsp.data[twitterId].userData['screen_name'] })
