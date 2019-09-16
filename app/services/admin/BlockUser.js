@@ -176,9 +176,6 @@ class BlockUser extends ServiceBase {
         }
       }
     }
-
-    console.log('===oThis.userIdToVideoIds=====', oThis.userIdToVideoIds);
-    console.log('===oThis.videoIdsToBeDeleted=====', oThis.videoIdsToBeDeleted);
   }
 
   /**
