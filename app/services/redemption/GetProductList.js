@@ -1,5 +1,6 @@
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
+  RedemptionProduct = require(rootPrefix + '/app/models/mysql/redemption/Product'),
   responseHelper = require(rootPrefix + '/lib/formatter/response');
 
 class GetRedemptionInfo extends ServiceBase {
@@ -19,22 +20,7 @@ class GetRedemptionInfo extends ServiceBase {
   async _asyncPerform() {
     const oThis = this;
 
-    let uts = parseInt(Date.now() / 1000);
-
-    let redemptionProducts = [
-      {
-        id: 1,
-        kind: 'AMAZON',
-        status: 'ACTIVE',
-        uts: uts
-      },
-      {
-        id: 2,
-        kind: 'STARBUCKS',
-        status: 'ACTIVE',
-        uts: uts
-      }
-    ];
+    let redemptionProducts = await new RedemptionProduct().getAll();
 
     return Promise.resolve(responseHelper.successWithData({ redemption_products: redemptionProducts }));
   }

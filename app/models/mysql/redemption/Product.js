@@ -30,6 +30,26 @@ class RedemptionProductModel extends ModelBase {
 
     return oThis.sanitizeFormattedData(formattedData);
   }
+
+  /**
+   * Get all products
+   *
+   * @return {Promise<Array>}
+   */
+  async getAll() {
+    const oThis = this;
+
+    const dbRows = await oThis.select('*').fire();
+
+    const response = [];
+
+    for (let index = 0; index < dbRows.length; index++) {
+      const formatDbRow = oThis.formatDbData(dbRows[index]);
+      response.push(formatDbRow);
+    }
+
+    return response;
+  }
 }
 
 module.exports = RedemptionProductModel;
