@@ -32,8 +32,7 @@ class GetRedemptionInfo extends ServiceBase {
     return Promise.resolve(
       responseHelper.successWithData({
         redemption_products: redemptionProductsRsp.data['products'],
-        // balance_in_higer_unit: '1000000000000000000',
-        balance_in_higer_unit: getUserBalanceResponse.data.balance
+        balance: getUserBalanceResponse.data.balance
       })
     );
   }
