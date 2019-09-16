@@ -205,6 +205,16 @@ class TweetInfo extends ServiceBase {
       });
     }
 
+    // Update handle in DB - to be in sync with the latest one
+    if (userTwitterEntity.handle != handle) {
+      await new TwitterUserModel()
+        .update({ handle: userTwitterEntity.handle })
+        .where({ id: oThis.twitterUsersMap[oThis.currentUserId].id })
+        .fire();
+
+      await TwitterUserModel.flushCache(oThis.twitterUsersMap[oThis.currentUserId]);
+    }
+
     logger.log('End::Validate Twitter Credentials');
 
     return responseHelper.successWithData({});
