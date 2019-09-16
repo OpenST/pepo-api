@@ -27,8 +27,6 @@ class ApproveUser extends ServiceBase {
     const oThis = this;
 
     oThis.inviteId = params.invite_id;
-
-    oThis.securePreLaunchInviteObj = null;
   }
 
   /**
