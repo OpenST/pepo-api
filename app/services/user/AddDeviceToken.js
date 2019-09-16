@@ -179,7 +179,27 @@ class AddDeviceToken extends ServiceBase {
         device_kind: userDeviceConstants.invertedUserDeviceKinds[oThis.deviceKind]
       };
 
-      const userDeviceInsertRsp = await new UserDeviceModel().insert(insertParams).fire();
+      let isDuplicateIndexViolation = false;
+
+      const userDeviceInsertRsp = await new UserDeviceModel()
+        .insert(insertParams)
+        .fire()
+        .catch(async function(err) {
+          if (UserDeviceModel.isDuplicateIndexViolation(UserDeviceModel.userDeviceUniqueIndexName, err)) {
+            isDuplicateIndexViolation = true;
+          } else {
+            // Insert failed due to some other reason.
+            // Send error email from here.
+            const errorObject = responseHelper.error({
+              internal_error_identifier: 'a_s_u_adt_4',
+              api_error_identifier: 'something_went_wrong',
+              debug_options: { Error: err }
+            });
+            await createErrorLogsEntry.perform(errorObject, errorLogsConstants.highSeverity);
+
+            return Promise.reject(errorObject);
+          }
+        });
 
       await oThis._cacheFlush({ userId: oThis.currentUserId, id: userDeviceInsertRsp.insertId });
     }
@@ -232,8 +252,6 @@ class AddDeviceToken extends ServiceBase {
         debug_options: { timeZone: oThis.userTimeZone }
       });
       return createErrorLogsEntry.perform(errorObject, errorLogsConstants.mediumSeverity);
-
-      // TODO: Return from here. - Done
     }
 
     // If user profile elements contains location id and it is same as that of cache then return, else insert.

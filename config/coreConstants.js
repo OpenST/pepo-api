@@ -369,6 +369,10 @@ class CoreConstants {
     return process.env.TWITTER_OAUTH_URL;
   }
 
+  get PEPO_TWITTER_HANDLE() {
+    return process.env.PA_PEPO_TWITTER_HANDLE;
+  }
+
   get GOOGLE_INAPP_SERVICE_ACCOUNT_EMAIL() {
     return process.env.PA_GOOGLE_INAPP_SERVICE_ACCOUNT_EMAIL;
   }

@@ -172,7 +172,7 @@ class DeleteVideo extends ServiceBase {
   async _markVideoDeleted() {
     const oThis = this;
 
-    return new VideosModel().markVideoDeleted({ id: oThis.videoId });
+    return new VideosModel().markVideosDeleted({ ids: [oThis.videoId] });
   }
 
   /**

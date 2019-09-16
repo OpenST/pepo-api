@@ -331,9 +331,9 @@ router.get('/invites', sanitizer.sanitizeDynamicUrlParams, function(req, res, ne
 
   const dataFormatterFunc = async function(serviceResponse) {
     const wrapperFormatterRsp = await new FormatterComposer({
-      resultType: responseEntityKey.searchResults,
+      resultType: responseEntityKey.invitedUsers,
       entityKindToResponseKeyMap: {
-        [entityType.userSearchList]: responseEntityKey.searchResults,
+        [entityType.userSearchList]: responseEntityKey.invitedUsers,
         [entityType.imagesMap]: responseEntityKey.images,
         [entityType.usersMap]: responseEntityKey.users,
         [entityType.invitedUsersListMeta]: responseEntityKey.meta

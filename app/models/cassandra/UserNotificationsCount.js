@@ -80,8 +80,8 @@ class UserNotificationCountModel extends CassandraModelBase {
     const query =
       'UPDATE ' +
       oThis.queryTableName +
-      ' SET unread_notification_count = unread_notification_count + 1 WHERE user_id = ?;';
-    const params = [queryParams.userId];
+      ' SET unread_notification_count = unread_notification_count + 1 WHERE user_id in ?;';
+    const params = [queryParams.userIds];
 
     return oThis.fire(query, params);
   }

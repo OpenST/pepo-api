@@ -136,11 +136,17 @@ class TweetInfo extends ServiceBase {
     oThis.secret = localCipher.decrypt(coreConstants.CACHE_SHA_KEY, twitterExtendedData.secretLc);
 
     if (twitterExtendedData.status == twitterUserExtendedConstants.activeStatus) {
-      return oThis._validateTwitterCredentials(twitterId, handle);
+      let validateRsp = await oThis._validateTwitterCredentials(twitterId, handle);
+
+      if (validateRsp.isFailure()) {
+        return responseHelper.successWithData({ twitterAuthValid: false, twitterExtendedId: twitterExtendedData.id });
+      }
     } else {
       // Send this response to skip expiration in DB(already expired)
       return responseHelper.successWithData({ twitterAuthValid: false, twitterExtendedId: twitterExtendedData.id });
     }
+
+    return responseHelper.successWithData({});
   }
 
   /**
@@ -184,7 +190,7 @@ class TweetInfo extends ServiceBase {
       })
       .catch(function(err) {
         logger.error('Error while validating Credentials for twitter: ', err);
-        responseHelper.error({
+        return responseHelper.error({
           internal_error_identifier: 's_u_n_ti_vtc_1',
           api_error_identifier: 'unauthorized_api_request',
           debug_options: {}
@@ -192,7 +198,7 @@ class TweetInfo extends ServiceBase {
       });
 
     if (twitterResp.isFailure()) {
-      responseHelper.error({
+      return responseHelper.error({
         internal_error_identifier: 's_u_n_ti_vtc_2',
         api_error_identifier: 'unauthorized_api_request',
         debug_options: {}
@@ -201,10 +207,9 @@ class TweetInfo extends ServiceBase {
 
     let userTwitterEntity = twitterResp.data.userEntity;
 
-    // validating the front end data
-    if (userTwitterEntity.idStr != twitterId || userTwitterEntity.handle != handle) {
+    if (userTwitterEntity.idStr != twitterId) {
       // Check if this needs to be errored out
-      responseHelper.error({
+      return responseHelper.error({
         internal_error_identifier: 's_u_n_ti_vtc_3',
         api_error_identifier: 'unauthorized_api_request',
         debug_options: {}
@@ -237,7 +242,7 @@ class TweetInfo extends ServiceBase {
 
     await TwitterUserExtendedModel.flushCache({
       id: twitterExtendedId,
-      twitterUserId: oThis.twitterUsersMap[oThis.currentUserId]
+      twitterUserId: oThis.twitterUsersMap[oThis.currentUserId].id
     });
 
     logger.log('End::Update Twitter User Extended for say thank you', oThis.twitterUsersMap[oThis.currentUserId]);
@@ -273,6 +278,8 @@ class TweetInfo extends ServiceBase {
       .fire();
 
     await TwitterUserModel.flushCache(oThis.twitterUsersMap[oThis.receiverUserId]);
+
+    oThis.serviceResponse['twitterUsersMap'] = oThis.twitterUsersMap;
   }
 
   /**

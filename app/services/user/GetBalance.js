@@ -1,29 +1,36 @@
 const rootPrefix = '../../..',
-  jsSdkWrapper = require(rootPrefix + '/lib/ostPlatform/jsSdkWrapper'),
-  logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   TokenUserDetailByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TokenUserByUserIds'),
-  responseHelper = require(rootPrefix + '/lib/formatter/response');
+  logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
+  responseHelper = require(rootPrefix + '/lib/formatter/response'),
+  jsSdkWrapper = require(rootPrefix + '/lib/ostPlatform/jsSdkWrapper'),
+  tokenUserConstants = require(rootPrefix + '/lib/globalConstant/tokenUser');
 
+/**
+ * Class to get balance for user.
+ *
+ * @class GetBalance
+ */
 class GetBalance extends ServiceBase {
   /**
-   * Constructor for get balance
+   * Constructor to get balance for user.
    *
-   * @param {String} params.user_id: user id
+   * @param {string} params.user_id: user id
    *
    * @constructor
    */
   constructor(params) {
-    super(params);
+    super();
 
     const oThis = this;
+
     oThis.userId = params.user_id;
 
     oThis.ostUserId = null;
   }
 
   /**
-   * Async Perform
+   * Async perform.
    *
    * @returns {Promise<void>}
    * @private
@@ -37,7 +44,7 @@ class GetBalance extends ServiceBase {
   }
 
   /**
-   * Function to fetch token user data.
+   * Fetch token user data.
    *
    * @returns {Promise<void>}
    * @private
@@ -45,24 +52,30 @@ class GetBalance extends ServiceBase {
   async _fetchTokenUserData() {
     const oThis = this;
 
-    let tokenUserData = await new TokenUserDetailByUserIdsCache({ userIds: [oThis.userId] }).fetch();
-
-    if (tokenUserData.isFailure()) {
-      return Promise.reject(tokenUserData);
+    const tokenUserResponse = await new TokenUserDetailByUserIdsCache({ userIds: [oThis.userId] }).fetch();
+    if (tokenUserResponse.isFailure()) {
+      return Promise.reject(tokenUserResponse);
     }
 
-    oThis.ostUserId = tokenUserData.data[oThis.userId].ostUserId;
+    const tokenUserData = tokenUserResponse.data[oThis.userId];
+
+    oThis.ostUserId = tokenUserData.ostUserId;
 
     if (!oThis.ostUserId) {
-      logger.error('Error while fetching data from token user cache');
+      logger.error('Error while fetching data from token user cache.');
+
       return Promise.reject(tokenUserData);
     }
 
-    return responseHelper.successWithData({});
+    if (tokenUserData.ostStatus !== tokenUserConstants.activatedOstStatus) {
+      logger.error('Token holder is not deployed for the user.');
+
+      return Promise.reject(tokenUserData);
+    }
   }
 
   /**
-   * Request platform to get balance using platform's sdk
+   * Request platform to get balance using platform's sdk.
    *
    * @returns {Promise<void>}
    * @private
@@ -70,19 +83,18 @@ class GetBalance extends ServiceBase {
   async _requestPlatformToGetBalance() {
     const oThis = this;
 
-    let paramsForPlatform = {
+    const paramsForPlatform = {
       userId: oThis.ostUserId
     };
 
-    let platformResponse = await jsSdkWrapper.getUserBalance(paramsForPlatform);
-
+    const platformResponse = await jsSdkWrapper.getUserBalance(paramsForPlatform);
     if (platformResponse.isFailure()) {
       logger.error(platformResponse);
 
       return Promise.reject(platformResponse);
     }
 
-    let resultType = platformResponse.data['result_type'],
+    const resultType = platformResponse.data.result_type,
       returnData = {
         balance: platformResponse.data[resultType]
       };

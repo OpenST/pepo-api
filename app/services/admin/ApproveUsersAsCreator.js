@@ -172,8 +172,8 @@ class ApproveUsersAsCreator extends ServiceBase {
         promises.push(oThis._addFeed(videoId, userId));
         promises.push(
           notificationJobEnqueue.enqueue(notificationJobConstants.videoAdd, {
-            userId: oThis.profileUserId,
-            videoId: oThis.videoId
+            userId: userId,
+            videoId: videoId
           })
         );
       }
