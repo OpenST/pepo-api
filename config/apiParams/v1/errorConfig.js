@@ -214,6 +214,21 @@ const v1ErrorConfig = {
     parameter: 'invite_code',
     code: 'invalid',
     message: 'Invitation is expired.'
+  },
+  invalid_pepo_amount_in_wei: {
+    parameter: 'pepo_amount_in_wei',
+    code: 'invalid',
+    message: 'Invalid pepo amount in wei.'
+  },
+  invalid_price_point: {
+    parameter: 'price_point',
+    code: 'invalid',
+    message: 'Invite price point.'
+  },
+  invalid_product_id: {
+    parameter: 'product_id',
+    code: 'invalid',
+    message: 'Invite product id.'
   }
 };
 
