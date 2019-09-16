@@ -500,6 +500,24 @@ const v1Signature = {
         validatorMethods: ['validateString', 'validatePaginationIdentifier']
       }
     ]
+  },
+  [apiName.reportIssue]: {
+    mandatory: [
+      {
+        parameter: 'app_name',
+        validatorMethods: ['validateString']
+      }
+    ],
+    optional: [
+      {
+        parameter: 'kind',
+        validatorMethods: ['validateString']
+      },
+      {
+        parameter: 'error_data',
+        validatorMethods: ['validateNonEmptyObject']
+      }
+    ]
   }
 };
 
