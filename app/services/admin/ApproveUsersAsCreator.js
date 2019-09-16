@@ -2,7 +2,10 @@ const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   FeedModel = require(rootPrefix + '/app/models/mysql/Feed'),
   UserModel = require(rootPrefix + '/app/models/mysql/User'),
+  logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   UsersCache = require(rootPrefix + '/lib/cacheManagement/multi/User'),
+  InviteCodeModel = require(rootPrefix + '/app/models/mysql/InviteCode'),
+  inviteCodeConstants = require(rootPrefix + '/lib/globalConstant/inviteCode'),
   ActivityLogModel = require(rootPrefix + '/app/models/mysql/AdminActivityLog'),
   UserProfileElementsByUserIdCache = require(rootPrefix + '/lib/cacheManagement/multi/UserProfileElementsByUserIds'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
@@ -54,6 +57,8 @@ class ApproveUsersAsCreator extends ServiceBase {
     await oThis._fetchUsers();
 
     await oThis._approveUsers();
+
+    await oThis._markInviteLimitAsInfinite();
 
     await oThis._flushCache();
 
@@ -132,6 +137,39 @@ class ApproveUsersAsCreator extends ServiceBase {
       .update(['properties = properties | ?', propertyVal])
       .where({ id: oThis.userIds })
       .fire();
+  }
+
+  /**
+   * Mark invite limit as infinite
+   *
+   * @returns {Promise<*>}
+   * @private
+   */
+  async _markInviteLimitAsInfinite() {
+    const oThis = this;
+
+    for (const userId in oThis.userObjects) {
+      const queryResponse = await new InviteCodeModel()
+        .update({
+          invite_limit: inviteCodeConstants.infiniteInviteLimit
+        })
+        .where({ user_id: userId })
+        .fire();
+
+      if (queryResponse.affectedRows === 1) {
+        logger.info(`User with ${userId} has now infinite invites`);
+
+        await InviteCodeModel.flushCache({ userId: userId });
+      } else {
+        return responseHelper.error({
+          internal_error_identifier: 'a_s_auac_1',
+          api_error_identifier: 'something_went_wrong',
+          debug_options: { userId: userId }
+        });
+      }
+    }
+
+    return responseHelper.successWithData({});
   }
 
   /**

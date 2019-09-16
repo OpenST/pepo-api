@@ -153,11 +153,9 @@ class TwitterConnect extends ServiceBase {
       if (oThis.prelaunchInviteObj.inviterCodeId) {
         let cacheResp = await new InviteCodeByIdCache({ id: oThis.prelaunchInviteObj.inviterCodeId }).fetch();
         oThis.inviterCodeObj = cacheResp.data[oThis.prelaunchInviteObj.inviterCodeId];
-      } else {
-        // Fetch inviter code object
-        await oThis._fetchInviteCodeObject();
       }
     } else {
+      // Validate invite code for users, who don't have prelaunch access
       await oThis._validateInviteCode();
     }
 
@@ -235,7 +233,7 @@ class TwitterConnect extends ServiceBase {
    * @returns {Promise<never>}
    * @private
    */
-  async _fetchInviteCodeObject() {
+  async _fetchInviterCodeObject() {
     const oThis = this;
 
     let cacheResp = await new InviteCodeCache({ inviteCode: oThis.inviteCode }).fetch();
@@ -276,7 +274,7 @@ class TwitterConnect extends ServiceBase {
       );
     }
 
-    await oThis._fetchInviteCodeObject();
+    await oThis._fetchInviterCodeObject();
 
     // Invite code used is not present
     if (!oThis.inviterCodeObj || !oThis.inviterCodeObj.id) {

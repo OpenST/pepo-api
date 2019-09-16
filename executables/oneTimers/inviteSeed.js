@@ -11,6 +11,7 @@ const rootPrefix = '../..',
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   PreLaunchInviteModel = require(rootPrefix + '/app/models/mysql/PreLaunchInvite'),
   InviteCodeModel = require(rootPrefix + '/app/models/mysql/InviteCode'),
+  inviteCodeConstants = require(rootPrefix + '/lib/globalConstant/inviteCode'),
   preLaunchInviteConstant = require(rootPrefix + '/lib/globalConstant/preLaunchInvite');
 
 command
@@ -52,21 +53,18 @@ class InviteSeed {
 
     let limit = 100,
       offset = 0;
-
-    let preLaunchInviteRsp = await new PreLaunchInviteModel()
-      .select('count(*) as count')
-      .where(['id > (?)', oThis.preLaunchInviteId])
-      .fire();
-    let totalRecords = parseInt(preLaunchInviteRsp[0].count);
-
-    while (offset < totalRecords) {
+    while (true) {
       await oThis._fetchPreLaunchInvites(limit, offset);
+      // No more records present to migrate
+      if (!CommonValidators.validateNonEmptyObject(oThis.preLaunchInvitesByInviteCode)) {
+        break;
+      }
 
-      await oThis.__seedInviteCodes();
+      await oThis._seedInviteCodes();
 
       await oThis._fetchInviteCodes();
 
-      await oThis._updatePreLaunchInvites();
+      await oThis._updatePreLaunchInvitesAndInviteCodes();
 
       offset = offset + 100;
     }
@@ -87,8 +85,6 @@ class InviteSeed {
     oThis.preLaunchInvitesById = {};
     oThis.inviterInviteCodes = [];
 
-    let inviterCode = null;
-
     let preLaunchInvitesData = await new PreLaunchInviteModel()
       .select('*')
       .where(['id > (?)', oThis.preLaunchInviteId])
@@ -106,7 +102,8 @@ class InviteSeed {
       let preLaunchInviteObj = oThis.preLaunchInvitesByInviteCode[inviteCode],
         inviterUserId = preLaunchInviteObj.inviterUserId;
 
-      if (!CommonValidators.isVarNullOrUndefined(inviterUserId)) {
+      if (inviterUserId) {
+        let inviterCode = null;
         if (CommonValidators.validateNonEmptyObject(oThis.preLaunchInvitesById[inviterUserId])) {
           let preLaunchInviteByIdObj = oThis.preLaunchInvitesById[inviterUserId],
             inviterCode = preLaunchInviteByIdObj.inviteCode;
@@ -115,10 +112,10 @@ class InviteSeed {
           inviterCode = preLaunchInviteObj.inviteCode;
           oThis.preLaunchInvitesById[preLaunchInviteObj.id] = preLaunchInviteObj;
         }
-      }
 
-      if (!CommonValidators.isVarNullOrUndefined(inviterCode)) {
-        oThis.inviterInviteCodes.push(inviterCode);
+        if (inviterCode) {
+          oThis.inviterInviteCodes.push(inviterCode);
+        }
       }
     }
   }
@@ -129,16 +126,19 @@ class InviteSeed {
    * @returns {Promise<>}
    * @private
    */
-  async __seedInviteCodes() {
+  async _seedInviteCodes() {
     const oThis = this;
 
     let bulkInsertVal = [];
 
     for (let inviteCode in oThis.preLaunchInvitesByInviteCode) {
       let preLaunchInviteObj = oThis.preLaunchInvitesByInviteCode[inviteCode],
-        inivteLimit = preLaunchInviteObj.creatorStatus === preLaunchInviteConstant.approvedCreatorStatus ? -1 : 50;
+        inviteLimit =
+          preLaunchInviteObj.creatorStatus === preLaunchInviteConstant.approvedCreatorStatus
+            ? inviteCodeConstants.infiniteInviteLimitForCreator
+            : inviteCodeConstants.defaultInviteLimitForNonCreator;
 
-      bulkInsertVal.push([inviteCode, inivteLimit]);
+      bulkInsertVal.push([inviteCode, inviteLimit]);
     }
 
     await new InviteCodeModel().insertMultiple(['code', 'invite_limit'], bulkInsertVal).fire();
@@ -175,17 +175,17 @@ class InviteSeed {
    * @returns {Promise<>}
    * @private
    */
-  async _updatePreLaunchInvites() {
+  async _updatePreLaunchInvitesAndInviteCodes() {
     const oThis = this;
 
-    let preLaunchInviteByIdObj = {},
-      inviterInviteCode = null;
-
     for (let inviteCode in oThis.preLaunchInvitesByInviteCode) {
-      let inviterCodeId = null;
+      let inviterCodeId = null,
+        preLaunchInviteByIdObj = {},
+        inviterInviteCode = null;
+
       let preLaunchInviteByInviteCodeObj = oThis.preLaunchInvitesByInviteCode[inviteCode];
 
-      if (!CommonValidators.isVarNullOrUndefined(preLaunchInviteByInviteCodeObj.inviterUserId)) {
+      if (preLaunchInviteByInviteCodeObj.inviterUserId) {
         if (
           CommonValidators.validateNonEmptyObject(
             oThis.preLaunchInvitesById[preLaunchInviteByInviteCodeObj.inviterUserId]
@@ -204,10 +204,22 @@ class InviteSeed {
         invite_code_id: inviteCodeId
       };
 
-      await new PreLaunchInviteModel()
-        .update(updateData)
-        .where({ invite_code: inviteCode })
-        .fire();
+      let promises = [];
+      promises.push(
+        new PreLaunchInviteModel()
+          .update(updateData)
+          .where({ invite_code: inviteCode })
+          .fire()
+      );
+
+      promises.push(
+        new InviteCodeModel()
+          .update({ inviter_code_id: inviterCodeId })
+          .where({ code: inviteCode })
+          .fire()
+      );
+
+      await Promise.all(promises);
     }
   }
 }
