@@ -260,7 +260,10 @@ class PreLaunchTwitterSignUp extends ServiceBase {
     let addContactParams = {
       receiverEntityId: oThis.preLaunchInviteObj.id,
       receiverEntityKind: emailServiceApiCallHookConstants.preLaunchInviteEntityKind,
-      customDescription: 'Contact add for pre launch invite on signup'
+      customDescription: 'Contact add for pre launch invite on signup',
+      customAttributes: {
+        [emailServiceApiCallHookConstants.preLaunchAttribute]: 1
+      }
     };
 
     await new AddContactInPepoCampaign(addContactParams).perform();

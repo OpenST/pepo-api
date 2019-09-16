@@ -156,7 +156,10 @@ class SendDoubleOptIn extends ServiceBase {
     let addContactParams = {
       receiverEntityId: oThis.temporaryTokenObj.entityId,
       receiverEntityKind: emailServiceApiCallHookConstants.preLaunchInviteEntityKind,
-      customDescription: 'Contact add for pre launch invite'
+      customDescription: 'Contact add for pre launch invite',
+      customAttributes: {
+        [emailServiceApiCallHookConstants.preLaunchAttribute]: 1
+      }
     };
 
     await new AddContactInPepoCampaign(addContactParams).perform();
