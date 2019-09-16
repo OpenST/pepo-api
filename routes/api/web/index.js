@@ -3,7 +3,7 @@ const express = require('express'),
 
 const rootPrefix = '../../..',
   preLaunchRoutes = require(rootPrefix + '/routes/api/web/preLaunch'),
-  redemptionsRoutes = require(rootPrefix + '/routes/api/web/redemption');
+  redemptionsRoutes = require(rootPrefix + '/routes/api/web/redemptions');
 
 router.use('/prelaunch', preLaunchRoutes);
 

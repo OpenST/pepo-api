@@ -239,6 +239,20 @@ const v1Signature = {
     optional: []
   },
 
+  [apiName.requestRedemption]: {
+    mandatory: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      },
+      {
+        parameter: 'product_id',
+        validatorMethods: ['validateNonZeroInteger']
+      }
+    ],
+    optional: []
+  },
+
   [apiName.twitterLogin]: {
     mandatory: [
       {
