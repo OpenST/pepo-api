@@ -88,7 +88,9 @@ class TweetInfo extends ServiceBase {
 
     let twitterUserIds = [];
     for (let userId in twitterUserByUserIdsCacheResponse.data) {
-      twitterUserIds.push(twitterUserByUserIdsCacheResponse.data[userId].id);
+      if (twitterUserByUserIdsCacheResponse.data[userId].id) {
+        twitterUserIds.push(twitterUserByUserIdsCacheResponse.data[userId].id);
+      }
     }
 
     const twitterUserByIdsCacheResp = await new TwitterUserByIdsCache({
@@ -103,6 +105,17 @@ class TweetInfo extends ServiceBase {
       let twitterUser = twitterUserByIdsCacheResp.data[id];
 
       oThis.twitterUsersMap[twitterUser.userId] = twitterUser;
+    }
+
+    if (!oThis.twitterUsersMap.hasOwnProperty(oThis.receiverUserId)) {
+      return Promise.reject(
+        responseHelper.paramValidationError({
+          internal_error_identifier: 's_u_n_ti_ftu_1',
+          api_error_identifier: 'invalid_api_params',
+          params_error_identifiers: ['invalid_receiver_id'],
+          debug_options: {}
+        })
+      );
     }
 
     logger.log('End::Fetch Twitter Users');

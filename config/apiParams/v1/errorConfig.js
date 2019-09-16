@@ -214,6 +214,11 @@ const v1ErrorConfig = {
     parameter: 'invite_code',
     code: 'invalid',
     message: 'Invitation is expired.'
+  },
+  invalid_receiver_id: {
+    parameter: 'receiver_user_id',
+    code: 'invalid',
+    message: 'Receiver user id is not associated with any user.'
   }
 };
 
