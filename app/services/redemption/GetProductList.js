@@ -28,6 +28,7 @@ class GetRedemptionInfo extends ServiceBase {
     return Promise.resolve(
       responseHelper.successWithData({
         redemption_products: redemptionProducts,
+        // balance: '1000000000000000000',
         balance: getUserBalanceResponse.data.balance
       })
     );

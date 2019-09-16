@@ -18,8 +18,7 @@ router.get('/info', sanitizer.sanitizeDynamicUrlParams, function(req, res, next)
     const wrapperFormatterRsp = await new FormatterComposer({
       resultType: responseEntityKey.redemptionInfo,
       entityKindToResponseKeyMap: {
-        [entityType.redemptionInfo]: responseEntityKey.redemptionInfo,
-        [entityType.balance]: responseEntityKey.balance
+        [entityType.redemptionInfo]: responseEntityKey.redemptionInfo
       },
       serviceData: serviceResponse.data
     }).perform();
