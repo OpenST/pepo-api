@@ -56,7 +56,6 @@ class TweetInfo extends ServiceBase {
 
     await oThis._fetchTwitterUsers();
 
-    //todo: do not make two twitter api calls
     await oThis._fetchAndValidateUser(oThis.currentUserId);
 
     await oThis._fetchReceiverHandle();
@@ -262,10 +261,8 @@ class TweetInfo extends ServiceBase {
       oThis.twitterUsersMap[oThis.receiverUserId].handle = null;
     }
 
-    //todo: user twitter entity as in signup
-
     await new TwitterUserModel()
-      .update({ handle: lookupRsp.data[twitterId].userData['screen_name'] })
+      .update({ handle: lookupRsp.data[twitterId].handle })
       .where({ id: oThis.twitterUsersMap[oThis.receiverUserId].id })
       .fire();
 
