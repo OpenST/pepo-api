@@ -371,6 +371,10 @@ class CoreConstants {
   get PEPO_TWITTER_HANDLE() {
     return process.env.PA_PEPO_TWITTER_HANDLE;
   }
+
+  get PEPO_REDEMPTION_USER_ID() {
+    return process.env.PA_PEPO_REDEMPTION_USER_ID;
+  }
 }
 
 module.exports = new CoreConstants();
