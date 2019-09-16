@@ -562,10 +562,13 @@ class BasicHelper {
     const oThis = this;
 
     let usdInOnePepo = oThis.getUSDAmountForPepo(usdInOneOst, '1'),
-      pepoInOneUSD = new BigNumber(1).div(new BigNumber(usdInOnePepo)),
-      totalPepoBn = new BigNumber(pepoInOneUSD).mul(new BigNumber(amountUSD));
+      pepoInOneUSD = oThis.convertToBigNumber(1).div(oThis.convertToBigNumber(usdInOnePepo)),
+      totalPepoBn = oThis.convertToBigNumber(pepoInOneUSD).mul(oThis.convertToBigNumber(amountUSD));
 
-    return totalPepoBn.toString(10);
+    return oThis
+      .convertToWei(totalPepoBn)
+      .round(0)
+      .toString(10);
   }
 
   /**
@@ -576,11 +579,13 @@ class BasicHelper {
    * @returns {string}
    */
   getUSDAmountForPepo(usdInOneOst, amountPepo) {
+    const oThis = this;
+
     let pepoInOneOST = 1;
 
-    let ostInOnePepo = new BigNumber(1).div(new BigNumber(pepoInOneOST)),
-      usdInOnePepo = new BigNumber(ostInOnePepo).mul(new BigNumber(usdInOneOst)),
-      totalUSDBn = new BigNumber(usdInOnePepo).mul(new BigNumber(amountPepo));
+    let ostInOnePepo = oThis.convertToBigNumber(1).div(oThis.convertToBigNumber(pepoInOneOST)),
+      usdInOnePepo = oThis.convertToBigNumber(ostInOnePepo).mul(oThis.convertToBigNumber(usdInOneOst)),
+      totalUSDBn = oThis.convertToBigNumber(usdInOnePepo).mul(oThis.convertToBigNumber(amountPepo));
 
     return totalUSDBn.toString(10);
   }
