@@ -5,6 +5,7 @@ const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   GetBalance = require(rootPrefix + '/app/services/user/GetBalance'),
   UserMultiCache = require(rootPrefix + '/lib/cacheManagement/multi/User'),
+  OstPricePointModel = require(rootPrefix + '/app/models/mysql/OstPricePoints'),
   SendTransactionalMail = require(rootPrefix + '/lib/email/hookCreator/SendTransactionalMail'),
   TokenUserByUserIdCache = require(rootPrefix + '/lib/cacheManagement/multi/TokenUserByUserIds'),
   RedemptionProductsCache = require(rootPrefix + '/lib/cacheManagement/single/RedemptionProducts'),
@@ -12,81 +13,99 @@ const rootPrefix = '../../..',
   basicHelper = require(rootPrefix + '/helpers/basic'),
   coreConstants = require(rootPrefix + '/config/coreConstants'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
+  ostPricePointConstants = require(rootPrefix + '/lib/globalConstant/ostPricePoints'),
   emailServiceApiCallHookConstants = require(rootPrefix + '/lib/globalConstant/emailServiceApiCallHook');
 
-class GetRedemptionInfo extends ServiceBase {
+/**
+ * Class to request redemption for user.
+ *
+ * @class
+ */
+class RequestRedemption extends ServiceBase {
+  /**
+   * Constructor to request redemption for user.
+   *
+   * @param params
+   *
+   * @augments ServiceBase
+   *
+   * @constructor
+   */
   constructor(params) {
-    super(params);
+    super();
 
     const oThis = this;
+
     oThis.currentUser = params.current_user;
     oThis.productId = params.product_id;
     oThis.pricePoint = params.price_point;
     oThis.pepoAmountInWei = params.pepo_amount_in_wei;
 
     oThis.productLink = null;
+    oThis.dollarValue = null;
+    oThis.redemptionReceiverUsername = null;
+    oThis.currentUserTokenHolderAddress = null;
+    oThis.redemptionReceiverTokenHolderAddress = null;
   }
 
   /**
-   * async perform
+   * Async perform.
    *
    * @return {Promise<any>}
    * @private
    */
   async _asyncPerform() {
-    const oThis = this,
-      promiseArray = [];
+    const oThis = this;
 
     await oThis._validateAndSanitize();
 
-    promiseArray.push(oThis._getUserDetails());
-    promiseArray.push(oThis._getTokenUserDetails());
-    await Promise.all(promiseArray);
+    const promisesArray = [];
+    promisesArray.push(oThis._getUserDetails());
+    promisesArray.push(oThis._getTokenUserDetails());
+    await Promise.all(promisesArray);
 
     await oThis._sendEmail();
 
-    let redemptionId = uuidV4();
+    const redemptionId = uuidV4();
 
-    return Promise.resolve(
-      responseHelper.successWithData({
-        redemption: {
-          id: redemptionId,
-          userId: oThis.currentUser.id,
-          productId: oThis.productId,
-          uts: parseInt(Date.now() / 1000)
-        }
-      })
-    );
+    return responseHelper.successWithData({
+      redemption: {
+        id: redemptionId,
+        userId: oThis.currentUser.id,
+        productId: oThis.productId,
+        uts: parseInt(Date.now() / 1000)
+      }
+    });
   }
 
   /**
    * Validate and sanitize params.
    *
+   * @returns {Promise<never>}
    * @private
    */
   async _validateAndSanitize() {
-    const oThis = this,
-      paramErrors = [];
+    const oThis = this;
 
-    // Validate pepo amount in wei < = balance.
-    const balanceResponse = await new GetBalance({ user_id: oThis.currentUser.id }).perform();
+    const paramErrors = [];
+    const promisesArray = [oThis._validateUserBalance(), oThis._validatePricePoint(), oThis._getProductDetails()];
 
-    if (balanceResponse.isFailure()) {
-      return Promise.reject(balanceResponse);
-    }
+    const promisesResponse = await Promise.all(promisesArray);
 
-    const pepoAmountInBn = new BigNumber(oThis.pepoAmountInWei),
-      balanceInBn = new BigNumber(balanceResponse.data.balance.total_balance);
+    const userBalanceValidationResponse = promisesResponse[0];
+    const pricePointValidationResponse = promisesResponse[1];
 
-    if (pepoAmountInBn.gt(balanceInBn)) {
+    // Validate if user's balance is greater than the pepo amount in wei.
+    if (!userBalanceValidationResponse) {
       paramErrors.push('invalid_pepo_amount_in_wei');
     }
 
     // Validate price points.
+    if (!pricePointValidationResponse) {
+      paramErrors.push('invalid_price_point');
+    }
 
     // Validate product id.
-    await oThis._getProductDetails();
-
     if (!oThis.productLink) {
       paramErrors.push('invalid_product_id');
     }
@@ -104,7 +123,92 @@ class GetRedemptionInfo extends ServiceBase {
   }
 
   /**
+   * Fetch and validate if pepo amount in wei is lesser than the user balance or not.
+   *
+   * @returns {Promise<boolean>}
+   * @private
+   */
+  async _validateUserBalance() {
+    const oThis = this;
+
+    // Validate pepo amount in wei < = balance.
+    const balanceResponse = await new GetBalance({ user_id: oThis.currentUser.id }).perform();
+    if (balanceResponse.isFailure()) {
+      return Promise.reject(balanceResponse);
+    }
+
+    const pepoAmountInBn = new BigNumber(oThis.pepoAmountInWei),
+      balanceInBn = new BigNumber(balanceResponse.data.balance.total_balance);
+
+    return !pepoAmountInBn.gt(balanceInBn);
+  }
+
+  /**
+   * Validate price point.
+   *
+   * @returns {Promise<boolean>}
+   * @private
+   */
+  async _validatePricePoint() {
+    const oThis = this;
+
+    const currentTimeInSeconds = Math.round(Date.now() / 1000);
+
+    const dbRows = await new OstPricePointModel()
+      .select('conversion_rate')
+      .where([
+        'created_at > (?) AND quote_currency = (?)',
+        currentTimeInSeconds - 3600,
+        ostPricePointConstants.invertedQuoteCurrencies[ostPricePointConstants.usdQuoteCurrency]
+      ])
+      .fire();
+
+    let result = false;
+    for (let index = 0; index < dbRows.length; index++) {
+      const pricePointEntity = dbRows[index];
+
+      if (pricePointEntity.conversion_rate === oThis.pricePoint) {
+        result = true;
+      }
+
+      result = false;
+    }
+
+    return result;
+  }
+
+  /**
+   * Get redemption product details.
+   *
+   * @sets oThis.productLink, oThis.dollarValue
+   *
+   * @returns {Promise<never>}
+   * @private
+   */
+  async _getProductDetails() {
+    const oThis = this;
+
+    const redemptionProductsCacheResponse = await new RedemptionProductsCache().fetch();
+    if (redemptionProductsCacheResponse.isFailure()) {
+      return Promise.reject(redemptionProductsCacheResponse);
+    }
+
+    const redemptionProducts = redemptionProductsCacheResponse.data.products;
+
+    for (let index = 0; index < redemptionProducts.length; index++) {
+      const redemptionProduct = redemptionProducts[index];
+
+      if (redemptionProduct.id === oThis.productId) {
+        oThis.productLink = redemptionProduct.images.landscape;
+        oThis.dollarValue = redemptionProduct.dollarValue;
+      }
+    }
+  }
+
+  /**
    * Get user details.
+   *
+   * @sets oThis.redemptionReceiverUsername
    *
    * @returns {Promise<never>}
    * @private
@@ -113,18 +217,19 @@ class GetRedemptionInfo extends ServiceBase {
     const oThis = this;
 
     const userDetailsCacheRsp = await new UserMultiCache({ ids: [coreConstants.PEPO_REDEMPTION_USER_ID] }).fetch();
-
     if (userDetailsCacheRsp.isFailure()) {
       return Promise.reject(userDetailsCacheRsp);
     }
 
-    const userDetailsCacheRspData = userDetailsCacheRsp.data;
+    const userDetails = userDetailsCacheRsp.data[coreConstants.PEPO_REDEMPTION_USER_ID];
 
-    oThis.redemptionReceiverUsername = userDetailsCacheRspData[coreConstants.PEPO_REDEMPTION_USER_ID].userName;
+    oThis.redemptionReceiverUsername = userDetails[coreConstants.PEPO_REDEMPTION_USER_ID].userName;
   }
 
   /**
    * Get token user details.
+   *
+   * @sets oThis.currentUserTokenHolderAddress, oThis.redemptionReceiverTokenHolderAddress
    *
    * @returns {Promise<never>}
    * @private
@@ -132,45 +237,17 @@ class GetRedemptionInfo extends ServiceBase {
   async _getTokenUserDetails() {
     const oThis = this;
 
-    const tokenUserObjRes = await new TokenUserByUserIdCache({
+    const tokenUserCacheResponse = await new TokenUserByUserIdCache({
       userIds: [oThis.currentUser.id, coreConstants.PEPO_REDEMPTION_USER_ID]
     }).fetch();
 
-    if (tokenUserObjRes.isFailure()) {
-      return Promise.reject(tokenUserObjRes);
+    if (tokenUserCacheResponse.isFailure()) {
+      return Promise.reject(tokenUserCacheResponse);
     }
 
-    oThis.currentUserTokenHolderAddress = tokenUserObjRes.data[oThis.currentUser.id].ostTokenHolderAddress;
+    oThis.currentUserTokenHolderAddress = tokenUserCacheResponse.data[oThis.currentUser.id].ostTokenHolderAddress;
     oThis.redemptionReceiverTokenHolderAddress =
-      tokenUserObjRes.data[coreConstants.PEPO_REDEMPTION_USER_ID].ostTokenHolderAddress;
-  }
-
-  /**
-   * Get redemption product details.
-   *
-   * @returns {Promise<never>}
-   * @private
-   */
-  async _getProductDetails() {
-    const oThis = this;
-
-    const redemptionProductsCacheRsp = await new RedemptionProductsCache().fetch();
-
-    if (redemptionProductsCacheRsp.isFailure()) {
-      return Promise.reject(redemptionProductsCacheRsp);
-    }
-
-    const redemptionProducts = redemptionProductsCacheRsp.data['products'];
-
-    for (let index = 0; index < redemptionProducts.length; index++) {
-      const redemptionProduct = redemptionProducts[index];
-
-      if (redemptionProduct.id === oThis.productId) {
-        oThis.productLink = redemptionProduct.images.landscape;
-        oThis.dollarValue = redemptionProduct.dollarValue;
-        return;
-      }
-    }
+      tokenUserCacheResponse.data[coreConstants.PEPO_REDEMPTION_USER_ID].ostTokenHolderAddress;
   }
 
   /**
@@ -204,4 +281,4 @@ class GetRedemptionInfo extends ServiceBase {
   }
 }
 
-module.exports = GetRedemptionInfo;
+module.exports = RequestRedemption;
