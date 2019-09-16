@@ -301,6 +301,17 @@ class TwitterConnect extends ServiceBase {
       );
     }
 
+    //To prevent PreLaunch Users from using his own invite code
+    if (oThis.prelaunchInviteObj && oThis.prelaunchInviteObj.inviteCodeId == oThis.inviterCodeObj.id) {
+      return Promise.reject(
+        responseHelper.paramValidationError({
+          internal_error_identifier: 's_t_c_vic_4',
+          api_error_identifier: 'invalid_api_params',
+          params_error_identifiers: ['invalid_invite_code']
+        })
+      );
+    }
+
     return responseHelper.successWithData({});
   }
 
