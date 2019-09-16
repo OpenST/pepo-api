@@ -268,7 +268,7 @@ class TwitterConnect extends ServiceBase {
 
     // Invite code is required but not passed
     if (!oThis.inviteCode) {
-      responseHelper.paramValidationError({
+      return responseHelper.paramValidationError({
         internal_error_identifier: 's_t_c_vic_1',
         api_error_identifier: 'invalid_api_params',
         params_error_identifiers: ['missing_invite_code']
@@ -279,7 +279,7 @@ class TwitterConnect extends ServiceBase {
 
     // Invite code used is not present
     if (!inviterCodeRow || !inviterCodeRow.id) {
-      responseHelper.paramValidationError({
+      return responseHelper.paramValidationError({
         internal_error_identifier: 's_t_c_vic_2',
         api_error_identifier: 'invalid_api_params',
         params_error_identifiers: ['invalid_invite_code']
@@ -288,7 +288,7 @@ class TwitterConnect extends ServiceBase {
 
     // If there is number of invites limit on invite code, and it has been reached
     if (inviterCodeRow.inviteLimit >= 0 && inviterCodeRow.inviteLimit <= inviterCodeRow.invitedUserCount) {
-      responseHelper.paramValidationError({
+      return responseHelper.paramValidationError({
         internal_error_identifier: 's_t_c_vic_3',
         api_error_identifier: 'invalid_api_params',
         params_error_identifiers: ['expired_invite_code']
@@ -297,7 +297,7 @@ class TwitterConnect extends ServiceBase {
 
     //To prevent PreLaunch Users from using his own invite code
     if (oThis.prelaunchInviteObj && oThis.prelaunchInviteObj.inviteCodeId == inviterCodeRow.id) {
-      responseHelper.paramValidationError({
+      return responseHelper.paramValidationError({
         internal_error_identifier: 's_t_c_vic_4',
         api_error_identifier: 'invalid_api_params',
         params_error_identifiers: ['invalid_invite_code']
