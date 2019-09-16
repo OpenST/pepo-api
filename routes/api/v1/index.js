@@ -21,6 +21,7 @@ const rootPrefix = '../../..',
   commonValidator = require(rootPrefix + '/lib/validators/Common'),
   uploadParamsRoutes = require(rootPrefix + '/routes/api/v1/uploadParams'),
   rotateTwitterAccountRoutes = require(rootPrefix + '/routes/api/v1/rotateTwitterAccount'),
+  reportIssueRoutes = require(rootPrefix + '/routes/api/v1/reportIssue'),
   ostTransactionRoutes = require(rootPrefix + '/routes/api/v1/ostTransactions');
 
 const errorConfig = basicHelper.fetchErrorConfig(apiVersions.v1);
@@ -67,7 +68,7 @@ const validateLoginRequired = async function(req, res, next) {
 };
 
 // NOTE:- use 'validateLoginRequired' function if you want to use route in logged in only
-
+router.use('/report-issue', reportIssueRoutes);
 router.use('/auth/twitter-disconnect', validateCookie, validateLoginRequired, authRoutes);
 router.use('/auth', authRoutes);
 router.use('/users', validateCookie, validateLoginRequired, usersRoutes);
