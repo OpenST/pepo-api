@@ -25,9 +25,9 @@ class RedemptionProductModel extends ModelBase {
       status: redemptionConstant.statuses[dbRow.status],
       kind: dbRow.kind,
       images: JSON.parse(dbRow.images),
-      dollar_value: dbRow.dollar_value,
-      created_at: dbRow.created_at,
-      updated_at: dbRow.updated_at
+      dollarValue: dbRow.dollar_value,
+      createdAt: dbRow.created_at,
+      updatedAt: dbRow.updated_at
     };
 
     return oThis.sanitizeFormattedData(formattedData);
