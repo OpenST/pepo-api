@@ -6,14 +6,14 @@ const dbName = database.redemptionDbName;
 const dbKind = DbKindConstant.sqlDbKind;
 
 const upQuery =
-  "INSERT INTO `products` (`id`, `kind`, `status`, `created_at`, `updated_at`) \n\
+  'INSERT INTO `products` (`id`, `kind`, `images`, `dollar_value`, `status`, `created_at`, `updated_at`) \n\
 VALUES \n\
-(1, 'AMAZON', 1, 1568608359, 1568608359), \n\
-  (2, 'STARBUCKS', 1, 1568608359, 1568608359), \n\
-  (3, 'NETFLIX', 1, 1568608359, 1568608359), \n\
-  (4, 'AIRBNB', 1, 1568608359, 1568608359), \n\
-  (5, 'CREATOR_PARTNERS', 1, 1568608359, 1568608359), \n\
-  (6, 'UBER', 1, 1568608359, 1568608359);";
+(1, \'AMAZON\', \'{"square":"https://d3attjoi5jlede.cloudfront.net/images/web/redemption/redemption-amazon-1x1.png","landscape":"https://d3attjoi5jlede.cloudfront.net/images/web/redemption/redemption-amazon-16x9.png"}\', 10.00, 1, 1568608359, 1568608359), \n\
+  (2, \'STARBUCKS\', \'{"square":"https://d3attjoi5jlede.cloudfront.net/images/web/redemption/redemption-starbucks-1x1.png","landscape":"https://d3attjoi5jlede.cloudfront.net/images/web/redemption/redemption-starbucks-16x9.png"}\', 10.00, 1, 1568608359, 1568608359), \n\
+  (3, \'NETFLIX\', \'{"square":"https://d3attjoi5jlede.cloudfront.net/images/web/redemption/redemption-netflix-1x1.png","landscape":"https://d3attjoi5jlede.cloudfront.net/images/web/redemption/redemption-netflix-16x9.png"}\', 10.00, 1, 1568608359, 1568608359), \n\
+  (4, \'AIRBNB\', \'{"square":"https://d3attjoi5jlede.cloudfront.net/images/web/redemption/redemption-airbnb-1x1.png","landscape":"https://d3attjoi5jlede.cloudfront.net/images/web/redemption/redemption-airbnb-16x9.png"}\', 10.00, 1, 1568608359, 1568608359), \n\
+  (5, \'CREATOR_PARTNERS\', \'{"square":"https://d3attjoi5jlede.cloudfront.net/images/web/redemption/redemption-creator-partners-1x1.png","landscape":"https://d3attjoi5jlede.cloudfront.net/images/web/redemption/redemption-creator-partners-16x9.png"}\', 10.00, 1, 1568608359, 1568608359), \n\
+  (6, \'UBER\', \'{"square":"https://d3attjoi5jlede.cloudfront.net/images/web/redemption/redemption-uber-1x1.png","landscape":"https://d3attjoi5jlede.cloudfront.net/images/web/redemption/redemption-uber-16x9.png"}\', 10.00, 1, 1568608359, 1568608359);';
 
 const populateRedemptionProductsMigration = {
   dbName: dbName,
