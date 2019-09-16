@@ -103,9 +103,12 @@ class VideoTag extends ModelBase {
 
     const tagIdToVideoIdMap = {};
 
+    for (let index = 0; index < tagIds.length; index++) {
+      tagIdToVideoIdMap[tagIds[index]] = [];
+    }
+
     for (let index = 0; index < dbRows.length; index++) {
       let dbRow = dbRows[index];
-      tagIdToVideoIdMap[dbRow.tag_id] = tagIdToVideoIdMap[dbRow.tag_id] || [];
       tagIdToVideoIdMap[dbRow.tag_id].push(dbRow.video_id);
     }
 
