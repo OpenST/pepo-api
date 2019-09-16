@@ -550,6 +550,40 @@ class BasicHelper {
         .substring(2, 4)
     );
   }
+
+  /**
+   * Get pepo amount for some amount in usd.
+   *
+   * @param usdInOneOst
+   * @param amountUSD
+   * @returns {string}
+   */
+  getPepoAmountForUSD(usdInOneOst, amountUSD) {
+    const oThis = this;
+
+    let usdInOnePepo = oThis.getUSDAmountForPepo(usdInOneOst, '1'),
+      pepoInOneUSD = new BigNumber(1).div(new BigNumber(usdInOnePepo)),
+      totalPepoBn = new BigNumber(pepoInOneUSD).mul(new BigNumber(amountUSD));
+
+    return totalPepoBn.toString(10);
+  }
+
+  /**
+   * Get usd amount for some pepo amount.
+   *
+   * @param usdInOneOst
+   * @param amountPepo
+   * @returns {string}
+   */
+  getUSDAmountForPepo(usdInOneOst, amountPepo) {
+    let pepoInOneOST = 1;
+
+    let ostInOnePepo = new BigNumber(1).div(new BigNumber(pepoInOneOST)),
+      usdInOnePepo = new BigNumber(ostInOnePepo).mul(new BigNumber(usdInOneOst)),
+      totalUSDBn = new BigNumber(usdInOnePepo).mul(new BigNumber(amountPepo));
+
+    return totalUSDBn.toString(10);
+  }
 }
 
 module.exports = new BasicHelper();
