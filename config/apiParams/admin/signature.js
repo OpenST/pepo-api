@@ -20,7 +20,7 @@ const adminSignature = {
     mandatory: [
       {
         parameter: 'user_ids',
-        validatorMethods: ['validateArray']
+        validatorMethods: ['validateIntegerArray']
       },
       {
         parameter: 'current_admin',
@@ -33,7 +33,7 @@ const adminSignature = {
     mandatory: [
       {
         parameter: 'user_ids',
-        validatorMethods: ['validateArray']
+        validatorMethods: ['validateIntegerArray']
       },
       {
         parameter: 'current_admin',
