@@ -6,10 +6,7 @@ const dbName = database.userDbName;
 
 const dbKind = dbKindConstants.sqlDbKind;
 
-const upQuery =
-  'ALTER TABLE `pre_launch_invites` \n\
-    CHANGE `invite_code` `invite_code` varchar(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NULL,\n\
-    CHANGE `invite_code_id` `invite_code_id` bigint(20) NOT NULL;';
+const upQuery = 'select *from pre_launch_invites';
 
 const downQuery =
   'ALTER TABLE `pre_launch_invites` \n\
