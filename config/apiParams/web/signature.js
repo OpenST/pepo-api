@@ -25,6 +25,17 @@ const v1Signature = {
       }
     ]
   },
+
+  [apiName.getRedemptionProducts]: {
+    mandatory: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      }
+    ],
+    optional: []
+  },
+
   [apiName.preLaunchInviteVerify]: {
     mandatory: [
       {

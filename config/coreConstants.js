@@ -180,6 +180,19 @@ class CoreConstants {
     return process.env.PA_ADMIN_DB_MYSQL_PASSWORD;
   }
 
+  // Redemption db.
+  get REDEMPTION_DB_MYSQL_HOST() {
+    return process.env.PA_REDEMPTION_DB_MYSQL_HOST;
+  }
+
+  get REDEMPTION_DB_MYSQL_USER() {
+    return process.env.PA_REDEMPTION_DB_MYSQL_USER;
+  }
+
+  get REDEMPTION_DB_MYSQL_PASSWORD() {
+    return process.env.PA_REDEMPTION_DB_MYSQL_PASSWORD;
+  }
+
   // KMS related constants.
   get KMS_AWS_ACCESS_KEY() {
     return process.env.PA_KMS_AWS_ACCESS_KEY;
