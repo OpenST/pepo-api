@@ -122,18 +122,16 @@ class ShareDetails extends ServiceBase {
   _createMessage() {
     const oThis = this;
 
-    oThis.shareMessage = `:hot_pepper: Checkout ${
+    oThis.shareMessage = `🌶️ Checkout ${
       oThis.creatorUserName
     }'s latest video on Pepo! ${oThis._generateVideoShareUrl()}`;
   }
-
   /**
    * Prepare final response.
    *
    * @returns {Promise<*|result>}
    * @private
-   */
-  _prepareResponse() {
+   */ _prepareResponse() {
     const oThis = this;
 
     return {
@@ -148,18 +146,15 @@ class ShareDetails extends ServiceBase {
       }
     };
   }
-
   /**
    * Generate video share url.
    *
    * @returns {string}
    * @private
-   */
-  _generateVideoShareUrl() {
+   */ _generateVideoShareUrl() {
     const oThis = this;
 
     return urlDomain + '/' + gotoConstants.videoShareGotoKind + '/' + oThis.videoId;
   }
 }
-
 module.exports = ShareDetails;
