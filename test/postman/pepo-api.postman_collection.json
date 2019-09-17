@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "c9e8884b-945b-43ae-a338-49796baddf44",
+		"_postman_id": "2cfac8e0-8f31-4fd8-9a09-d03cd21f392c",
 		"name": "pepo-api",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -844,6 +844,27 @@
 				},
 				{
 					"name": "user-profile",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{api_server}}/api/v1/users/1/profile",
+							"host": [
+								"{{api_server}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"users",
+								"1",
+								"profile"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get-invite-code",
 					"request": {
 						"method": "GET",
 						"header": [],
