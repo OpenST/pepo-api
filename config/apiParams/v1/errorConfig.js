@@ -180,10 +180,25 @@ const v1ErrorConfig = {
     code: 'invalid',
     message: 'Invalid image url.'
   },
+  invalid_receipt: {
+    parameter: 'receipt',
+    code: 'invalid',
+    message: 'Invalid receipt.'
+  },
   invalid_device_kind: {
     parameter: 'device_kind',
     code: 'invalid',
     message: 'Invalid device kind.'
+  },
+  invalid_topup_id: {
+    parameter: 'topup_id',
+    code: 'invalid',
+    message: 'Invalid topup id.'
+  },
+  invalid_os: {
+    parameter: 'os',
+    code: 'invalid',
+    message: 'Invalid os.'
   },
   already_associated_email: {
     parameter: 'email',

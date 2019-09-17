@@ -656,6 +656,67 @@ const v1Signature = {
       }
     ]
   },
+  [apiName.createTopup]: {
+    mandatory: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      },
+      {
+        parameter: 'response',
+        validatorMethods: ['validateNonEmptyObject']
+      },
+      {
+        parameter: 'os',
+        validatorMethods: ['validateString']
+      },
+      {
+        parameter: 'user_id',
+        validatorMethods: ['validateNonZeroInteger']
+      }
+    ],
+    optional: []
+  },
+  [apiName.getTopupProduct]: {
+    mandatory: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      },
+      {
+        parameter: 'os',
+        validatorMethods: ['validateString']
+      }
+    ],
+    optional: []
+  },
+  [apiName.userTopUps]: {
+    mandatory: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      }
+    ],
+    optional: []
+  },
+  [apiName.paymentDetails]: {
+    mandatory: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      },
+      {
+        parameter: 'payment_id',
+        validatorMethods: ['validateNonZeroInteger']
+      }
+    ],
+    optional: [
+      {
+        parameter: 'transaction_id',
+        validatorMethods: ['validateString']
+      }
+    ]
+  },
   [apiName.resetBadge]: {
     mandatory: [
       {

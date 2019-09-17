@@ -8,6 +8,7 @@ const rootPrefix = '../../..',
   coreConstant = require(rootPrefix + '/config/coreConstants'),
   apiVersions = require(rootPrefix + '/lib/globalConstant/apiVersions'),
   usersRoutes = require(rootPrefix + '/routes/api/v1/users'),
+  topupRoutes = require(rootPrefix + '/routes/api/v1/topup'),
   videoRoutes = require(rootPrefix + '/routes/api/v1/videos'),
   tokensRoutes = require(rootPrefix + '/routes/api/v1/tokens'),
   gifsRoutes = require(rootPrefix + '/routes/api/v1/gifs'),
@@ -48,6 +49,7 @@ router.use('/gifs', gifsRoutes);
 router.use('/upload-params', uploadParamsRoutes);
 router.use('/tags', tagRoutes);
 router.use('/notifications', userNotificationsRoutes);
+router.use('/top-up', topupRoutes);
 router.use('/fetch-goto', fetchGotoRoutes);
 
 module.exports = router;

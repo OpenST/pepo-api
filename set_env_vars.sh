@@ -70,6 +70,11 @@ export PA_REDEMPTION_DB_MYSQL_HOST='127.0.0.1'
 export PA_REDEMPTION_DB_MYSQL_USER='root'
 export PA_REDEMPTION_DB_MYSQL_PASSWORD='root'
 
+#mysql transaction db
+export PA_FIAT_DB_MYSQL_HOST='127.0.0.1'
+export PA_FIAT_DB_MYSQL_USER='root'
+export PA_FIAT_DB_MYSQL_PASSWORD='root'
+
 # mysql - devops error logs infra details
 export PA_INFRA_DB_MYSQL_HOST='127.0.0.1'
 export PA_INFRA_DB_MYSQL_USER='root'
@@ -138,3 +143,7 @@ export TWITTER_OAUTH_URL='https://api.twitter.com/oauth/authorize?oauth_token='
 
 # Pepo twitter handle
 export PA_PEPO_TWITTER_HANDLE='thepepoapp'
+
+export PA_GOOGLE_INAPP_SERVICE_ACCOUNT_KEY=''
+#Value for PA_GOOGLE_INAPP_SERVICE_ACCOUNT_KEY should be escaped first with escape() function. This is done so as to avoid /n being escaped automatically.
+export PA_GOOGLE_INAPP_SERVICE_ACCOUNT_EMAIL=''

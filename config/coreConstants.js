@@ -167,7 +167,21 @@ class CoreConstants {
     return process.env.PA_INFRA_DB_MYSQL_DB;
   }
 
-  // Admin db.
+  // Fiat db.
+
+  get FIAT_DB_MYSQL_HOST() {
+    return process.env.PA_FIAT_DB_MYSQL_HOST;
+  }
+
+  get FIAT_DB_MYSQL_USER() {
+    return process.env.PA_FIAT_DB_MYSQL_USER;
+  }
+
+  get FIAT_DB_MYSQL_PASSWORD() {
+    return process.env.PA_FIAT_DB_MYSQL_PASSWORD;
+  }
+
+  // Admin db
   get ADMIN_DB_MYSQL_HOST() {
     return process.env.PA_ADMIN_DB_MYSQL_HOST;
   }
@@ -370,6 +384,14 @@ class CoreConstants {
 
   get PEPO_TWITTER_HANDLE() {
     return process.env.PA_PEPO_TWITTER_HANDLE;
+  }
+
+  get GOOGLE_INAPP_SERVICE_ACCOUNT_EMAIL() {
+    return process.env.PA_GOOGLE_INAPP_SERVICE_ACCOUNT_EMAIL;
+  }
+
+  get GOOGLE_INAPP_SERVICE_ACCOUNT_KEY() {
+    return process.env.PA_GOOGLE_INAPP_SERVICE_ACCOUNT_KEY;
   }
 }
 
