@@ -11,7 +11,7 @@ const rootPrefix = '../../..',
 
 // Get available products
 router.get('/products', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
-  req.decodedParams.apiName = apiName.getTopupProduct;
+  req.decodedParams.apiName = apiName.getTopupProducts;
 
   const onServiceSuccess = async function(serviceResponse) {
     const wrapperFormatterRsp = await new FormatterComposer({
@@ -26,7 +26,7 @@ router.get('/products', sanitizer.sanitizeDynamicUrlParams, function(req, res, n
     serviceResponse.data = wrapperFormatterRsp.data;
   };
 
-  Promise.resolve(routeHelper.perform(req, res, next, '/topup/GetProduct', 'r_a_v1_u_15', null, onServiceSuccess));
+  Promise.resolve(routeHelper.perform(req, res, next, '/topup/GetProduct', 'r_a_v1_tu_1', null, onServiceSuccess));
 });
 
 // Create a topup using the payment receipt
@@ -45,12 +45,12 @@ router.post('/', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
     serviceResponse.data = wrapperFormatterRsp.data;
   };
 
-  Promise.resolve(routeHelper.perform(req, res, next, '/topup/Create', 'r_a_v1_p_2', null, onServiceSuccess));
+  Promise.resolve(routeHelper.perform(req, res, next, '/topup/Create', 'r_a_v1_tu_2', null, onServiceSuccess));
 });
 
 // Get pending topups for the user
 router.get('/pending', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
-  req.decodedParams.apiName = apiName.userTopUps;
+  req.decodedParams.apiName = apiName.getPendingTopups;
   req.decodedParams.user_id = req.params.user_id;
 
   const dataFormatterFunc = async function(serviceResponse) {
@@ -65,12 +65,12 @@ router.get('/pending', sanitizer.sanitizeDynamicUrlParams, function(req, res, ne
     serviceResponse.data = wrapperFormatterRsp.data;
   };
 
-  Promise.resolve(routeHelper.perform(req, res, next, '/user/PendingTopUps', 'r_a_v1_u_16', null, dataFormatterFunc));
+  Promise.resolve(routeHelper.perform(req, res, next, '/topup/GetPending', 'r_a_v1_tu_3', null, dataFormatterFunc));
 });
 
 // Get topup entity using payment id / topup id
 router.get('/:payment_id', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
-  req.decodedParams.apiName = apiName.paymentDetails;
+  req.decodedParams.apiName = apiName.getTopupById;
   req.decodedParams.payment_id = req.params.payment_id;
 
   const dataFormatterFunc = async function(serviceResponse) {
@@ -86,7 +86,7 @@ router.get('/:payment_id', sanitizer.sanitizeDynamicUrlParams, function(req, res
   };
 
   Promise.resolve(
-    routeHelper.perform(req, res, next, '/user/GetPaymentDetails', 'r_a_v1_u_17', null, dataFormatterFunc)
+    routeHelper.perform(req, res, next, '/user/GetPaymentDetails', 'r_a_v1_tu_4', null, dataFormatterFunc)
   );
 });
 

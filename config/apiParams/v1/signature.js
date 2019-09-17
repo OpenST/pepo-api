@@ -667,6 +667,21 @@ const v1Signature = {
       }
     ]
   },
+
+  [apiName.getTopupProducts]: {
+    mandatory: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      },
+      {
+        parameter: 'os',
+        validatorMethods: ['validateString']
+      }
+    ],
+    optional: []
+  },
+
   [apiName.createTopup]: {
     mandatory: [
       {
@@ -688,20 +703,8 @@ const v1Signature = {
     ],
     optional: []
   },
-  [apiName.getTopupProduct]: {
-    mandatory: [
-      {
-        parameter: 'current_user',
-        validatorMethods: ['validateNonEmptyObject']
-      },
-      {
-        parameter: 'os',
-        validatorMethods: ['validateString']
-      }
-    ],
-    optional: []
-  },
-  [apiName.userTopUps]: {
+
+  [apiName.getPendingTopups]: {
     mandatory: [
       {
         parameter: 'current_user',
@@ -710,7 +713,8 @@ const v1Signature = {
     ],
     optional: []
   },
-  [apiName.paymentDetails]: {
+
+  [apiName.getTopupById]: {
     mandatory: [
       {
         parameter: 'current_user',
@@ -728,6 +732,7 @@ const v1Signature = {
       }
     ]
   },
+
   [apiName.resetBadge]: {
     mandatory: [
       {

@@ -1,21 +1,11 @@
-/**
- * This module helps to fetch pending topups request of user.
- * @module app/services/user/PendingTopUps
- */
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
-  UserPendingTopupCache = require(rootPrefix + '/lib/cacheManagement/single/UserPendingTopups'),
-  fiatPaymentConstants = require(rootPrefix + '/lib/globalConstant/fiatPayment'),
-  entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
   TransactionCache = require(rootPrefix + '/lib/cacheManagement/multi/TransactionByIds'),
-  responseHelper = require(rootPrefix + '/lib/formatter/response');
+  UserPendingTopupCache = require(rootPrefix + '/lib/cacheManagement/single/UserPendingTopups'),
+  responseHelper = require(rootPrefix + '/lib/formatter/response'),
+  entityType = require(rootPrefix + '/lib/globalConstant/entityType');
 
-/**
- * Class to fetch pending topups of user.
- *
- * @class PendingTopUps
- */
-class PendingTopUps extends ServiceBase {
+class GetPendingTopup extends ServiceBase {
   /**
    * Constructor to fetch pending topups of user.
    *
@@ -28,7 +18,7 @@ class PendingTopUps extends ServiceBase {
     super(params);
 
     const oThis = this;
-    oThis.currentUserId = params.current_user.id;
+    oThis.currentUserId = +params.current_user.id;
 
     oThis.pendingTopUps = [];
     oThis.transactionsMap = {};
@@ -120,4 +110,4 @@ class PendingTopUps extends ServiceBase {
   }
 }
 
-module.exports = PendingTopUps;
+module.exports = GetPendingTopup;
