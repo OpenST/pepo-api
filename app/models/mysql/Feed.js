@@ -183,16 +183,38 @@ class FeedModel extends ModelBase {
    *
    * @param {object} params
    * @param {number} params.paginationTimestamp
+   * @param {number} params.id
+   * @param {array<number>} params.ids
    *
    * @returns {Promise<*>}
    */
   static async flushCache(params) {
-    const LoggedOutFeedCache = require(rootPrefix + '/lib/cacheManagement/single/LoggedOutFeed');
+    const promisesArray = [];
 
-    await new LoggedOutFeedCache({
-      limit: paginationConstants.defaultFeedsListPageSize,
-      paginationTimestamp: params.paginationTimestamp
-    }).clear();
+    if (params.paginationTimestamp) {
+      const LoggedOutFeedCache = require(rootPrefix + '/lib/cacheManagement/single/LoggedOutFeed');
+
+      promisesArray.push(
+        new LoggedOutFeedCache({
+          limit: paginationConstants.defaultFeedsListPageSize,
+          paginationTimestamp: params.paginationTimestamp
+        }).clear()
+      );
+    }
+
+    if (params.id) {
+      const FeedByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/FeedByIds');
+
+      promisesArray.push(new FeedByIdsCache({ ids: [params.id] }).clear());
+    }
+
+    if (params.ids) {
+      const FeedByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/FeedByIds');
+
+      promisesArray.push(new FeedByIdsCache({ ids: params.id }).clear());
+    }
+
+    await Promise.all(promisesArray);
   }
 }
 

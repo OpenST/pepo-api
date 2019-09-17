@@ -228,11 +228,7 @@ class Video extends ModelBase {
       })
       .fire();
 
-    const promisesArray = [];
-    for (let index = 0; index < params.ids.length; index++) {
-      promisesArray.push(Video.flushCache({ id: params.ids[index] }));
-    }
-    await Promise.all(promisesArray);
+    await Video.flushCache({ ids: params.ids });
   }
 
   /**
@@ -306,14 +302,25 @@ class Video extends ModelBase {
    * Flush cache.
    *
    * @param {object} params
-   * @param {number} params.id
+   * @param {number} [params.id]
+   * @param {array<number>} [params.ids]
    *
    * @returns {Promise<*>}
    */
   static async flushCache(params) {
+    const promisesArray = [];
+
     const VideoByIds = require(rootPrefix + '/lib/cacheManagement/multi/VideoByIds');
 
-    await new VideoByIds({ ids: [params.id] }).clear();
+    if (params.id) {
+      promisesArray.push(new VideoByIds({ ids: [params.id] }).clear());
+    }
+
+    if (params.ids) {
+      promisesArray.push(new VideoByIds({ ids: params.ids }).clear());
+    }
+
+    await Promise.all(promisesArray);
   }
 }
 
