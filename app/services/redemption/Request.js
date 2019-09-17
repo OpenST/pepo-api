@@ -191,8 +191,6 @@ class RequestRedemption extends ServiceBase {
       if (new BigNumber(pricePointEntity.conversion_rate).eq(new BigNumber(oThis.pricePoint))) {
         validationResult = true;
       }
-
-      validationResult = false;
     }
 
     return validationResult;
