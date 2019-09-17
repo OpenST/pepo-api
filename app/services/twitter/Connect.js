@@ -7,12 +7,13 @@ const rootPrefix = '../../..',
   ReplayAttackCache = require(rootPrefix + '/lib/cacheManagement/single/ReplayAttackOnTwitterConnect'),
   SignupTwitterClass = require(rootPrefix + '/app/services/twitter/Signup'),
   LoginTwitterClass = require(rootPrefix + '/app/services/twitter/Login'),
+  FetchGotoClass = require(rootPrefix + '/app/services/FetchGoto'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   preLaunchInviteConstants = require(rootPrefix + '/lib/globalConstant/preLaunchInvite'),
   InviteCodeCache = require(rootPrefix + '/lib/cacheManagement/single/InviteCodeByCode'),
   InviteCodeByIdCache = require(rootPrefix + '/lib/cacheManagement/single/InviteCodeById'),
   entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
-  pageNameConstants = require(rootPrefix + '/lib/globalConstant/pageName'),
+  gotoConstants = require(rootPrefix + '/lib/globalConstant/goto'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger');
 
 /**
@@ -425,17 +426,19 @@ class TwitterConnect extends ServiceBase {
    * @param response
    * @private
    */
-  _sendFlowCompleteGoto(response) {
+  async _sendFlowCompleteGoto(response) {
     const oThis = this;
 
     if (response.isSuccess()) {
       response.data[entityType.goto] = { pn: null, v: null };
       if (response.data.openEmailAddFlow) {
+        let fetchGotoRsp = await new FetchGotoClass({ gotoKind: gotoConstants.addEmailScreenGotoKind }).perform();
+
+        if (fetchGotoRsp.isFailure()) {
+          return Promise.reject(fetchGotoRsp);
+        }
         // Notify app about email add flow
-        response.data[entityType.goto] = {
-          pn: pageNameConstants.AddEmailScreen,
-          v: {}
-        };
+        Object.assign(response.data[entityType.goto], fetchGotoRsp.data[entityType.goto]);
       }
     }
 

@@ -50,6 +50,5 @@ router.use('/upload-params', uploadParamsRoutes);
 router.use('/tags', tagRoutes);
 router.use('/notifications', userNotificationsRoutes);
 router.use('/top-up', topupRoutes);
-router.use('/fetch-goto', fetchGotoRoutes);
 
 module.exports = router;

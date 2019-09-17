@@ -801,10 +801,19 @@ const v1Signature = {
     ]
   },
   [apiName.fetchGoto]: {
-    mandatory: [
+    mandatory: [],
+    optional: [
       {
         parameter: 'url',
         validatorMethods: ['validateGenericUrl']
+      },
+      {
+        parameter: 'gotoKind',
+        validatorMethods: ['validateString']
+      },
+      {
+        parameter: 'gotoValue',
+        validatorMethods: ['validateString']
       }
     ]
   },

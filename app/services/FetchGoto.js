@@ -2,7 +2,8 @@ const rootPrefix = '../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   shareEntityConstants = require(rootPrefix + '/lib/globalConstant/shareEntity'),
   commonValidators = require(rootPrefix + '/lib/validators/Common'),
-  pageNameConstant = require(rootPrefix + '/lib/globalConstant/pageName'),
+  pageNameConstants = require(rootPrefix + '/lib/globalConstant/pageName'),
+  gotoConstants = require(rootPrefix + '/lib/globalConstant/goto'),
   entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
   coreConstants = require(rootPrefix + '/config/coreConstants'),
   responseHelper = require(rootPrefix + '/lib/formatter/response');
@@ -14,7 +15,9 @@ class FetchGoto extends ServiceBase {
    * Constructor for FetchGoto service.
    *
    * @param {object} params
-   * @param {object} params.url
+   * @param {object} [params.url]
+   * @param {object} [params.gotoKind]
+   * @param {object} [params.gotoValue]
    *
    * @augments ServiceBase
    *
@@ -25,7 +28,10 @@ class FetchGoto extends ServiceBase {
 
     const oThis = this;
     oThis.url = params.url;
+    oThis.inputGotoKind = params.gotoKind;
+    oThis.inputGotoValue = params.gotoValue;
 
+    oThis.gotoValues = {};
     oThis.goto = null;
   }
 
@@ -37,17 +43,78 @@ class FetchGoto extends ServiceBase {
   async _asyncPerform() {
     const oThis = this;
 
+    if (oThis.url) {
+      await oThis._fetchGotoByUrl();
+    } else if (oThis.inputGotoKind) {
+      await oThis._fetchGotoByGotoKind();
+    } else {
+      return Promise.reject(
+        responseHelper.paramValidationError({
+          internal_error_identifier: 'a_s_fgt_1',
+          api_error_identifier: 'invalid_params',
+          params_error_identifiers: [],
+          debug_options: {
+            url: oThis.url,
+            inputGotoKind: oThis.inputGotoKind
+          }
+        })
+      );
+    }
+
+    oThis._fetchGotoFromConfig();
+
+    return responseHelper.successWithData(oThis._prepareResponse());
+  }
+
+  /**
+   * Fetch goto by input url.
+   *
+   * @returns {Promise<never>}
+   * @private
+   */
+  async _fetchGotoByUrl() {
+    const oThis = this;
+
+    oThis.url = oThis.url.toLowerCase();
+
     await oThis._fetchAndValidateUrlDomain();
 
     let urlHandlerResponse = oThis._urlHandler();
-
     if (urlHandlerResponse.isFailure()) {
       return Promise.reject(urlHandlerResponse);
     }
 
-    oThis._fetchGoto(urlHandlerResponse.data.urlData);
+    oThis.gotoValues = {
+      gotoKind: urlHandlerResponse.data.gotoKind,
+      gotoData: urlHandlerResponse.data.gotoData
+    };
+  }
 
-    return responseHelper.successWithData(oThis._prepareResponse());
+  /**
+   * Fetch goto by goto kinds.
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _fetchGotoByGotoKind() {
+    const oThis = this;
+
+    if (!Object.keys(gotoConstants.invertedGotoKinds).includes(oThis.inputGotoKind)) {
+      return Promise.reject(
+        responseHelper.error({
+          internal_error_identifier: 'a_s_fgt_2',
+          api_error_identifier: 'resource_not_found',
+          debug_options: {
+            inputGotoKind: oThis.inputGotoKind
+          }
+        })
+      );
+    }
+
+    oThis.gotoValues = {
+      gotoKind: oThis.inputGotoKind,
+      gotoData: oThis.inputGotoValue
+    };
   }
 
   /**
@@ -56,32 +123,18 @@ class FetchGoto extends ServiceBase {
    * @returns {Promise<never>}
    * @private
    */
-  _fetchAndValidateUrlDomain() {
+  async _fetchAndValidateUrlDomain() {
     const oThis = this;
 
-    if (commonValidators.isVarNullOrUndefined(oThis.url.match(currentPepoApiDomain))) {
-      return Promise.reject(
-        responseHelper.error({
-          internal_error_identifier: 'a_s_fgt_2',
-          api_error_identifier: 'resource_not_found',
-          debug_options: {
-            url: oThis.url,
-            urlDomain: currentPepoApiDomain
-          }
-        })
-      );
-    }
+    let currentUrlDomainMatch = oThis.url.match(currentPepoApiDomain);
 
-    let inputUrlDomain = oThis.url.match(currentPepoApiDomain)[0];
-
-    if (inputUrlDomain !== currentPepoApiDomain) {
+    if (!currentUrlDomainMatch || !currentUrlDomainMatch[0]) {
       return Promise.reject(
         responseHelper.error({
           internal_error_identifier: 'a_s_fgt_3',
           api_error_identifier: 'resource_not_found',
           debug_options: {
-            inputUrlDomain: inputUrlDomain,
-            urlDomain: currentPepoApiDomain
+            url: oThis.url
           }
         })
       );
@@ -97,15 +150,15 @@ class FetchGoto extends ServiceBase {
   _urlHandler() {
     const oThis = this;
 
-    let splitUrlParts = oThis.url.split(currentPepoApiDomain),
-      splittedPaths = splitUrlParts[1].split('/');
+    let splittedUrlPath = oThis.url.split(currentPepoApiDomain),
+      splittedParts = splittedUrlPath[1].split('/');
 
-    let urlKind = splittedPaths[1],
-      urlData = splittedPaths[2];
+    let urlKind = splittedParts[1],
+      urlData = splittedParts[2];
 
     // for now, this service only supports for video/:video_id route
-    if (urlKind === shareEntityConstants.videoShareKind.toLowerCase()) {
-      return responseHelper.successWithData({ urlKind: urlKind, urlData: urlData });
+    if (urlKind === gotoConstants.videoShareGotoKind) {
+      return responseHelper.successWithData({ gotoKind: urlKind, gotoData: urlData });
     } else {
       return responseHelper.error({
         internal_error_identifier: 'a_s_fgt_4',
@@ -118,23 +171,37 @@ class FetchGoto extends ServiceBase {
   }
 
   /**
-   * Fetch go to.
+   * Fetch goto for given kind.
    *
    * @private
    *
    * @sets oThis.goto
    */
-  _fetchGoto(value) {
+  _fetchGotoFromConfig() {
     const oThis = this;
 
-    oThis.goto = {
-      pn: pageNameConstant.videoPageName,
-      v: {
-        [pageNameConstant.videoIdParam]: value
+    let gotoConfig = {
+      [gotoConstants.videoShareGotoKind]: {
+        pn: pageNameConstants.videoPageName,
+        v: {
+          [pageNameConstants.videoIdParam]: oThis.gotoValues.gotoData
+        }
+      },
+      [gotoConstants.addEmailScreenGotoKind]: {
+        pn: pageNameConstants.addEmailScreen,
+        v: {}
       }
     };
+
+    oThis.goto = gotoConfig[oThis.gotoValues.gotoKind];
   }
 
+  /**
+   * Prepare Response.
+   *
+   * @returns {{}}
+   * @private
+   */
   _prepareResponse() {
     const oThis = this;
 

@@ -98,7 +98,7 @@ class ShareDetails extends ServiceBase {
       creatorUserId = videoDetails.creatorUserId;
 
     // Video is of current user, so no need for query
-    if (creatorUserId == oThis.currentUser.id) {
+    if (creatorUserId === oThis.currentUser.id) {
       oThis.creatorUserName = oThis.currentUser.name;
     } else {
       const userMultiCacheRsp = await new UserMultiCache({ ids: [creatorUserId] }).fetch();
@@ -121,7 +121,9 @@ class ShareDetails extends ServiceBase {
   _createMessage() {
     const oThis = this;
 
-    oThis.shareMessage = `Checkout ${oThis.creatorUserName}'s latest videos on Pepo! ${oThis._generateVideoShareUrl()}`;
+    oThis.shareMessage = `:hot_pepper: Checkout ${
+      oThis.creatorUserName
+    }'s latest video on Pepo! ${oThis._generateVideoShareUrl()}`;
   }
 
   /**
@@ -133,15 +135,14 @@ class ShareDetails extends ServiceBase {
   _prepareResponse() {
     const oThis = this;
 
-    // TODO: Dhananjay, confirm whether title and subject is required.
     return {
       [entityType.share]: {
         id: uuidV4(),
         kind: shareEntityConstants.videoShareKind,
         url: oThis._generateVideoShareUrl(),
         message: oThis.shareMessage,
-        title: 'DUMMY_TITLE', //optional
-        subject: 'DUMMY_SUBJECT', //optional
+        title: 'DUMMY_TITLE',
+        subject: 'DUMMY_SUBJECT',
         uts: Math.round(new Date() / 1000)
       }
     };
@@ -156,7 +157,7 @@ class ShareDetails extends ServiceBase {
   _generateVideoShareUrl() {
     const oThis = this;
 
-    return urlDomain + '/' + shareEntityConstants.videoShareKind.toLowerCase() + '/' + oThis.videoId;
+    return urlDomain + '/' + shareEntityConstants.videoShareGotoKind + '/' + oThis.videoId;
   }
 }
 
