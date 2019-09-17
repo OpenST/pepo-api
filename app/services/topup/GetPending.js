@@ -105,7 +105,7 @@ class GetPendingTopup extends ServiceBase {
     }
 
     return responseHelper.successWithData({
-      [entityType.userTopUpsList]: response
+      [entityType.topupList]: response
     });
   }
 }

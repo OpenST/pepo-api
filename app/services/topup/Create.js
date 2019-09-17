@@ -184,7 +184,7 @@ class CreateTopup extends ServiceBase {
   _apiResponse() {
     const oThis = this;
 
-    return responseHelper.successWithData({ [entityType.userTopUp]: oThis.paymentDetail });
+    return responseHelper.successWithData({ [entityType.topup]: oThis.paymentDetail });
   }
 
   /**

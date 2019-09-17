@@ -1,7 +1,3 @@
-/**
- * This module helps to fetch pending topups request of user.
- * @module app/services/user/GetPaymentDetails
- */
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   UserPaymentsByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/UserPaymentsByIds'),
@@ -9,12 +5,7 @@ const rootPrefix = '../../..',
   TransactionCache = require(rootPrefix + '/lib/cacheManagement/multi/TransactionByIds'),
   responseHelper = require(rootPrefix + '/lib/formatter/response');
 
-/**
- * Class to fetch pending topups of user.
- *
- * @class GetPaymentDetails
- */
-class GetPaymentDetails extends ServiceBase {
+class GetTopup extends ServiceBase {
   /**
    * Constructor to fetch pending topups of user.
    *
@@ -29,11 +20,11 @@ class GetPaymentDetails extends ServiceBase {
 
     const oThis = this;
     oThis.paymentId = params.payment_id;
-    oThis.currentUserId = params.current_user.id;
+    oThis.currentUserId = +params.current_user.id;
     oThis.gatewayReceiptId = params.transaction_id;
 
-    oThis.paymentDetails = null;
-    oThis.transactionsMap = {};
+    oThis.topupDbRecord = null;
+    oThis.transaction = null;
   }
 
   /**
@@ -47,30 +38,15 @@ class GetPaymentDetails extends ServiceBase {
 
     await oThis._fetchPaymentDetail();
 
-    if (oThis.paymentDetails.receiptId != oThis.gatewayReceiptId) {
-      if (oThis.paymentDetails.fromUserId != oThis.currentUserId) {
-        return Promise.reject(
-          responseHelper.paramValidationError({
-            internal_error_identifier: 'a_s_u_gpd_1',
-            api_error_identifier: 'resource_not_found',
-            params_error_identifiers: ['invalid_user_id'],
-            debug_options: {
-              userId: oThis.paymentDetails.fromUserId,
-              currentUserId: oThis.currentUserId,
-              paymentId: oThis.paymentId
-            }
-          })
-        );
-      }
-    }
+    await oThis._validateAccess();
 
-    await oThis._fetchOstTransactions();
+    await oThis._fetchOstTransaction();
 
     return oThis._formatResponse();
   }
 
   /**
-   * Fetch Pending top ups of user
+   * Fetch the topup record using the id
    *
    * @returns {Promise<never>}
    * @private
@@ -85,7 +61,36 @@ class GetPaymentDetails extends ServiceBase {
       return Promise.reject(cacheResp);
     }
 
-    oThis.paymentDetails = cacheResp.data[oThis.paymentId];
+    oThis.topupDbRecord = cacheResp.data[oThis.paymentId];
+  }
+
+  /**
+   * Validate access
+   *
+   * @return {Promise<never>}
+   * @private
+   */
+  async _validateAccess() {
+    const oThis = this;
+
+    // if receiptId is passed correctly, then no need to validate further. We assume that the receipt id is hard to guess.
+    if (oThis.topupDbRecord.receiptId == oThis.gatewayReceiptId) return;
+
+    // else we check that the topup user id is same as the current user.
+    if (oThis.topupDbRecord.fromUserId != oThis.currentUserId) {
+      return Promise.reject(
+        responseHelper.paramValidationError({
+          internal_error_identifier: 'a_s_u_gpd_1',
+          api_error_identifier: 'resource_not_found',
+          params_error_identifiers: ['invalid_user_id'],
+          debug_options: {
+            userId: oThis.topupDbRecord.fromUserId,
+            currentUserId: oThis.currentUserId,
+            paymentId: oThis.paymentId
+          }
+        })
+      );
+    }
   }
 
   /**
@@ -94,9 +99,9 @@ class GetPaymentDetails extends ServiceBase {
    * @returns {Promise<void>}
    * @private
    */
-  async _fetchOstTransactions() {
+  async _fetchOstTransaction() {
     const oThis = this,
-      txId = oThis.paymentDetails.transactionId;
+      txId = oThis.topupDbRecord.transactionId;
 
     if (txId) {
       let resp = await new TransactionCache({ ids: [txId] }).fetch();
@@ -113,12 +118,12 @@ class GetPaymentDetails extends ServiceBase {
   _formatResponse() {
     const oThis = this;
 
-    oThis.paymentDetails['transactionUuid'] = oThis.transaction ? oThis.transaction.ostTxId : null;
+    oThis.topupDbRecord['transactionUuid'] = oThis.transaction ? oThis.transaction.ostTxId : null;
 
     return responseHelper.successWithData({
-      [entityType.userTopUp]: oThis.paymentDetails
+      [entityType.topup]: oThis.topupDbRecord
     });
   }
 }
 
-module.exports = GetPaymentDetails;
+module.exports = GetTopup;

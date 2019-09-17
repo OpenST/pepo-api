@@ -15,10 +15,10 @@ router.get('/products', sanitizer.sanitizeDynamicUrlParams, function(req, res, n
 
   const onServiceSuccess = async function(serviceResponse) {
     const wrapperFormatterRsp = await new FormatterComposer({
-      resultType: responseEntityKey.products,
+      resultType: responseEntityKey.topupProducts,
       entityKindToResponseKeyMap: {
-        [entityType.products]: responseEntityKey.products,
-        [entityType.limitsData]: responseEntityKey.limitsData
+        [entityType.topupProducts]: responseEntityKey.topupProducts,
+        [entityType.topupLimitsData]: responseEntityKey.topupLimitsData
       },
       serviceData: serviceResponse.data
     }).perform();
@@ -35,9 +35,9 @@ router.post('/', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
 
   const onServiceSuccess = async function(serviceResponse) {
     const wrapperFormatterRsp = await new FormatterComposer({
-      resultType: responseEntityKey.userTopupEntity,
+      resultType: responseEntityKey.topup,
       entityKindToResponseKeyMap: {
-        [entityType.userTopUp]: responseEntityKey.userTopupEntity
+        [entityType.topup]: responseEntityKey.topup
       },
       serviceData: serviceResponse.data
     }).perform();
@@ -57,7 +57,7 @@ router.get('/pending', sanitizer.sanitizeDynamicUrlParams, function(req, res, ne
     const wrapperFormatterRsp = await new FormatterComposer({
       resultType: responseEntityKey.pendingTopups,
       entityKindToResponseKeyMap: {
-        [entityType.userTopUpsList]: responseEntityKey.pendingTopups
+        [entityType.topupList]: responseEntityKey.pendingTopups
       },
       serviceData: serviceResponse.data
     }).perform();
@@ -75,9 +75,9 @@ router.get('/:payment_id', sanitizer.sanitizeDynamicUrlParams, function(req, res
 
   const dataFormatterFunc = async function(serviceResponse) {
     const wrapperFormatterRsp = await new FormatterComposer({
-      resultType: responseEntityKey.userTopupEntity,
+      resultType: responseEntityKey.topup,
       entityKindToResponseKeyMap: {
-        [entityType.userTopUp]: responseEntityKey.userTopupEntity
+        [entityType.topup]: responseEntityKey.topup
       },
       serviceData: serviceResponse.data
     }).perform();
@@ -85,9 +85,7 @@ router.get('/:payment_id', sanitizer.sanitizeDynamicUrlParams, function(req, res
     serviceResponse.data = wrapperFormatterRsp.data;
   };
 
-  Promise.resolve(
-    routeHelper.perform(req, res, next, '/user/GetPaymentDetails', 'r_a_v1_tu_4', null, dataFormatterFunc)
-  );
+  Promise.resolve(routeHelper.perform(req, res, next, '/topup/Get', 'r_a_v1_tu_4', null, dataFormatterFunc));
 });
 
 module.exports = router;
