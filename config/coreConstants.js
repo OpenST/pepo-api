@@ -393,6 +393,10 @@ class CoreConstants {
   get GOOGLE_INAPP_SERVICE_ACCOUNT_KEY() {
     return process.env.PA_GOOGLE_INAPP_SERVICE_ACCOUNT_KEY;
   }
+
+  get PEPO_REDEMPTION_USER_ID() {
+    return process.env.PA_PEPO_REDEMPTION_USER_ID;
+  }
 }
 
 module.exports = new CoreConstants();

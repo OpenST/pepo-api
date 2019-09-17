@@ -143,6 +143,7 @@ export TWITTER_OAUTH_URL='https://api.twitter.com/oauth/authorize?oauth_token='
 
 # Pepo twitter handle
 export PA_PEPO_TWITTER_HANDLE='thepepoapp'
+export PA_PEPO_REDEMPTION_USER_ID='1001'
 
 export PA_GOOGLE_INAPP_SERVICE_ACCOUNT_KEY=''
 #Value for PA_GOOGLE_INAPP_SERVICE_ACCOUNT_KEY should be escaped first with escape() function. This is done so as to avoid /n being escaped automatically.

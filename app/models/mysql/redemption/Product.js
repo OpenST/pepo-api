@@ -1,14 +1,24 @@
 const rootPrefix = '../../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
-  util = require(rootPrefix + '/lib/util'),
-  coreConstants = require(rootPrefix + '/config/coreConstants'),
-  redemptionConstant = require(rootPrefix + '/lib/globalConstant/admin'),
+  redemptionConstants = require(rootPrefix + '/lib/globalConstant/admin'),
   databaseConstants = require(rootPrefix + '/lib/globalConstant/database');
 
 // Declare variables names.
 const dbName = databaseConstants.redemptionDbName;
 
+/**
+ * Class for redemption product model.
+ *
+ * @class RedemptionProductModel
+ */
 class RedemptionProductModel extends ModelBase {
+  /**
+   * Constructor for redemption product model.
+   *
+   * @augments ModelBase
+   *
+   * @constructor
+   */
   constructor() {
     super({ dbName: dbName });
 
@@ -22,8 +32,10 @@ class RedemptionProductModel extends ModelBase {
 
     const formattedData = {
       id: dbRow.id,
-      status: redemptionConstant.statuses[dbRow.status],
+      status: redemptionConstants.statuses[dbRow.status],
       kind: dbRow.kind,
+      images: JSON.parse(dbRow.images),
+      dollarValue: dbRow.dollar_value,
       createdAt: dbRow.created_at,
       updatedAt: dbRow.updated_at
     };

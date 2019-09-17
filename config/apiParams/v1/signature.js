@@ -248,6 +248,14 @@ const v1Signature = {
       {
         parameter: 'product_id',
         validatorMethods: ['validateNonZeroInteger']
+      },
+      {
+        parameter: 'price_point',
+        validatorMethods: ['validateNonBlankString']
+      },
+      {
+        parameter: 'pepo_amount_in_wei',
+        validatorMethods: ['validateNonZeroWeiValue']
       }
     ],
     optional: []
