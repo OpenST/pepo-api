@@ -634,7 +634,7 @@ const v1Signature = {
     mandatory: [
       {
         parameter: 'current_user',
-        validatorMethods: ['validateNonZeroInteger']
+        validatorMethods: ['validateNonEmptyObject']
       }
     ],
     optional: []
