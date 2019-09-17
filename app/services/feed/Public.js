@@ -36,6 +36,7 @@ class PublicVideoFeed extends FeedBase {
 
     oThis.limit = oThis._defaultPageLimit();
     oThis.paginationTimestamp = null;
+    oThis.nextPaginationTimestamp = null;
   }
 
   /**
@@ -88,7 +89,7 @@ class PublicVideoFeed extends FeedBase {
 
     const lastFeedId = oThis.feedIds[oThis.feedIds.length - 1];
 
-    if (oThis.feedIds.length > 0) {
+    if (oThis.feedIds.length > 0 && oThis.feedIds.length >= oThis.limit) {
       oThis.nextPaginationTimestamp = oThis.feedsMap[lastFeedId].paginationIdentifier;
     }
   }
@@ -106,7 +107,7 @@ class PublicVideoFeed extends FeedBase {
 
     const nextPagePayloadKey = {};
 
-    if (oThis.feeds.length >= oThis.limit) {
+    if (oThis.nextPaginationTimestamp) {
       nextPagePayloadKey[paginationConstants.paginationIdentifierKey] = {
         pagination_timestamp: oThis.nextPaginationTimestamp
       };
@@ -277,6 +278,8 @@ class PublicVideoFeed extends FeedBase {
           totalContributedBy: 0,
           totalAmount: '0',
           totalTransactions: 0,
+          descriptionId: null,
+          linkIds: null,
           createdAt: 1564472456,
           updatedAt: 1564472456
         },
@@ -287,6 +290,8 @@ class PublicVideoFeed extends FeedBase {
           totalContributedBy: 0,
           totalAmount: '0',
           totalTransactions: 0,
+          descriptionId: null,
+          linkIds: null,
           createdAt: 1564472456,
           updatedAt: 1564472456
         },
@@ -297,6 +302,8 @@ class PublicVideoFeed extends FeedBase {
           totalContributedBy: 0,
           totalAmount: '0',
           totalTransactions: 0,
+          descriptionId: null,
+          linkIds: null,
           createdAt: 1564472456,
           updatedAt: 1564472456
         }
@@ -367,6 +374,8 @@ class PublicVideoFeed extends FeedBase {
           updatedAt: 1564044369
         }
       });
+
+      oThis.profileResponse.videoDescriptions = null;
     }
 
     // TEMP CODE END - to show curated feeds on top(only in logged out mode)
@@ -383,6 +392,7 @@ class PublicVideoFeed extends FeedBase {
       tags: oThis.profileResponse.tags,
       userStat: oThis.profileResponse.userStat,
       videoDetailsMap: oThis.profileResponse.videoDetailsMap,
+      videoDescriptionsMap: oThis.profileResponse.videoDescriptionMap,
       currentUserUserContributionsMap: oThis.profileResponse.currentUserUserContributionsMap,
       currentUserVideoContributionsMap: oThis.profileResponse.currentUserVideoContributionsMap,
       pricePointsMap: oThis.profileResponse.pricePointsMap,

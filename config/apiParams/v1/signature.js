@@ -288,7 +288,15 @@ const v1Signature = {
       {
         parameter: 'image_size',
         validatorMethods: ['validateInteger']
-      }
+      },
+      {
+        parameter: 'video_description',
+        validatorMethods: ['validateString']
+      },
+      {
+        parameter: 'link',
+        validatorMethods: ['validateString']
+      } // If link is invalid, consider empty string.
     ]
   },
   [apiName.saveProfileImage]: {
@@ -490,6 +498,24 @@ const v1Signature = {
       {
         parameter: paginationConstants.paginationIdentifierKey,
         validatorMethods: ['validateString', 'validatePaginationIdentifier']
+      }
+    ]
+  },
+  [apiName.reportIssue]: {
+    mandatory: [
+      {
+        parameter: 'app_name',
+        validatorMethods: ['validateString']
+      }
+    ],
+    optional: [
+      {
+        parameter: 'kind',
+        validatorMethods: ['validateString']
+      },
+      {
+        parameter: 'error_data',
+        validatorMethods: ['validateNonEmptyObject']
       }
     ]
   }
