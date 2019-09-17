@@ -1,6 +1,7 @@
 const rootPrefix = '../../../..',
   UpdateStats = require(rootPrefix + '/lib/UpdateStats'),
   TokenUserModel = require(rootPrefix + '/app/models/mysql/TokenUser'),
+  FiatPaymentModel = require(rootPrefix + '/app/models/mysql/FiatPayment'),
   TransactionOstEventBase = require(rootPrefix + '/app/services/ostEvents/transactions/Base'),
   basicHelper = require(rootPrefix + '/helpers/basic'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
@@ -8,7 +9,8 @@ const rootPrefix = '../../../..',
   tokenUserConstants = require(rootPrefix + '/lib/globalConstant/tokenUser'),
   transactionConstants = require(rootPrefix + '/lib/globalConstant/transaction'),
   notificationJobEnqueue = require(rootPrefix + '/lib/rabbitMqEnqueue/notification'),
-  notificationJobConstants = require(rootPrefix + '/lib/globalConstant/notificationJob');
+  notificationJobConstants = require(rootPrefix + '/lib/globalConstant/notificationJob'),
+  fiatPaymentConstants = require(rootPrefix + '/lib/globalConstant/fiatPayment');
 
 /**
  * Class for success transaction ost event base service.
@@ -88,6 +90,19 @@ class SuccessTransactionOstEvent extends TransactionOstEventBase {
       promiseArray.push(oThis.updateTransaction());
       promiseArray.push(oThis.processForAirdropTransaction());
       promiseArray.push(oThis._enqueueUserNotification(notificationJobConstants.airdropDone));
+      await Promise.all(promiseArray);
+    } else if (oThis.transactionObj.extraData.kind === transactionConstants.extraData.topUpKind) {
+      await oThis.validateToUserId();
+      const promiseArray = [];
+      promiseArray.push(oThis.updateTransaction());
+      promiseArray.push(oThis.processForTopUpTransaction());
+      promiseArray.push(oThis._enqueueUserNotification(notificationJobConstants.topupDone));
+      promiseArray.push(
+        FiatPaymentModel.flushCache({
+          fiatPaymentId: oThis.transactionObj.fiatPaymentId,
+          userId: oThis.toUserId
+        })
+      );
       await Promise.all(promiseArray);
     }
   }
@@ -235,6 +250,10 @@ class SuccessTransactionOstEvent extends TransactionOstEventBase {
     propertyVal = new TokenUserModel().setBitwise('properties', propertyVal, tokenUserConstants.airdropDoneProperty);
 
     return propertyVal;
+  }
+
+  _getPaymentStatus() {
+    return fiatPaymentConstants.invertedStatuses[fiatPaymentConstants.pepoTransferSuccessStatus];
   }
 }
 

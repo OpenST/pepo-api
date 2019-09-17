@@ -58,7 +58,7 @@ class SaveEmail extends ServiceBase {
 
     await oThis._createDoubleOptInToken();
 
-    await oThis._sendPreLaunchInviteDoubleOptInMail();
+    await oThis._sendEmailDoubleOptInMail();
 
     return responseHelper.successWithData({});
   }
@@ -237,7 +237,7 @@ class SaveEmail extends ServiceBase {
    * @returns {Promise<void>}
    * @private
    */
-  async _sendPreLaunchInviteDoubleOptInMail() {
+  async _sendEmailDoubleOptInMail() {
     const oThis = this;
 
     const link = encodeURIComponent(`${webPageConstants.optInEmailLink}?t=${oThis.doubleOptInToken}`);

@@ -65,7 +65,9 @@ class CronBase {
           api_error_identifier: 'unhandled_catch_response',
           debug_options: {
             cronProcessId: oThis.cronProcessId,
-            cronName: oThis._cronKind
+            cronName: oThis._cronKind,
+            error: err.toString(),
+            stack: err.stack
           }
         });
       }

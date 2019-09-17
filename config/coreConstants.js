@@ -17,7 +17,7 @@ class CoreConstants {
   }
 
   get APP_NAME() {
-    return process.env.DEVOPS_APP_NAME;
+    return process.env.PA_DEVOPS_APP_NAME;
   }
 
   get PA_DOMAIN() {
@@ -167,7 +167,21 @@ class CoreConstants {
     return process.env.PA_INFRA_DB_MYSQL_DB;
   }
 
-  // Admin db.
+  // Fiat db.
+
+  get FIAT_DB_MYSQL_HOST() {
+    return process.env.PA_FIAT_DB_MYSQL_HOST;
+  }
+
+  get FIAT_DB_MYSQL_USER() {
+    return process.env.PA_FIAT_DB_MYSQL_USER;
+  }
+
+  get FIAT_DB_MYSQL_PASSWORD() {
+    return process.env.PA_FIAT_DB_MYSQL_PASSWORD;
+  }
+
+  // Admin db
   get ADMIN_DB_MYSQL_HOST() {
     return process.env.PA_ADMIN_DB_MYSQL_HOST;
   }
@@ -294,15 +308,15 @@ class CoreConstants {
 
   // DevOps error logs framework details.
   get ENV_IDENTIFIER() {
-    return process.env.DEVOPS_ENV_ID;
+    return process.env.PA_DEVOPS_ENV_ID;
   }
 
   get IP_ADDRESS() {
-    return process.env.DEVOPS_IP_ADDRESS;
+    return process.env.PA_DEVOPS_IP_ADDRESS;
   }
 
   get WS_SERVER_IDENTIFIER() {
-    return process.env.DEVOPS_SERVER_IDENTIFIER;
+    return process.env.PA_DEVOPS_SERVER_IDENTIFIER;
   }
 
   // Pepo-campaigns details.
@@ -370,6 +384,14 @@ class CoreConstants {
 
   get PEPO_TWITTER_HANDLE() {
     return process.env.PA_PEPO_TWITTER_HANDLE;
+  }
+
+  get GOOGLE_INAPP_SERVICE_ACCOUNT_EMAIL() {
+    return process.env.PA_GOOGLE_INAPP_SERVICE_ACCOUNT_EMAIL;
+  }
+
+  get GOOGLE_INAPP_SERVICE_ACCOUNT_KEY() {
+    return process.env.PA_GOOGLE_INAPP_SERVICE_ACCOUNT_KEY;
   }
 
   get PEPO_REDEMPTION_USER_ID() {

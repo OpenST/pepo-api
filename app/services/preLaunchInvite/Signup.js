@@ -113,6 +113,7 @@ class PreLaunchTwitterSignUp extends ServiceBase {
     if (oThis.inviterCodeId) {
       await oThis._fetchInviterPreLaunchInvite();
       await oThis._updateInvitedUserCount();
+      await oThis._updateInviteCodeInviterCodeId();
       await oThis._sendEmail();
     }
 
@@ -260,7 +261,10 @@ class PreLaunchTwitterSignUp extends ServiceBase {
     let addContactParams = {
       receiverEntityId: oThis.preLaunchInviteObj.id,
       receiverEntityKind: emailServiceApiCallHookConstants.preLaunchInviteEntityKind,
-      customDescription: 'Contact add for pre launch invite on signup'
+      customDescription: 'Contact add for pre launch invite on signup',
+      customAttributes: {
+        [emailServiceApiCallHookConstants.preLaunchAttribute]: 1
+      }
     };
 
     await new AddContactInPepoCampaign(addContactParams).perform();
@@ -311,6 +315,22 @@ class PreLaunchTwitterSignUp extends ServiceBase {
       .fire();
 
     await PreLaunchInviteModel.flushCache({ id: oThis.inviterPreLaunchInviteId });
+  }
+
+  /**
+   * Update invite code inviter code it
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _updateInviteCodeInviterCodeId() {
+    const oThis = this;
+
+    await new InviteCodeModel()
+      .update({ inviter_code_id: oThis.inviterCodeId })
+      .where({ id: oThis.inviteCodeObj.id })
+      .fire();
+
+    await InviteCodeModel.flushCache({ id: oThis.inviteCodeObj.id });
   }
 
   /**

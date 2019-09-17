@@ -18,8 +18,8 @@ class GetInviteCode extends ServiceBase {
    * Constructor to get invite code for current user.
    *
    * @param {object} params
-   * @param {object} params.currentUser
-   * @param {number} params.currentUser.id
+   * @param {object} params.current_user
+   * @param {number} params.current_user.id
    *
    * @augments ServiceBase
    *
@@ -30,7 +30,7 @@ class GetInviteCode extends ServiceBase {
 
     const oThis = this;
 
-    oThis.currentUserId = params.currentUser.id;
+    oThis.currentUserId = params.current_user.id;
 
     oThis.shareId = uuidV4();
 

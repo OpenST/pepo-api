@@ -61,7 +61,7 @@ class TwitterSignup extends ServiceBase {
 
     oThis.userId = null;
 
-    oThis.secureUserObj = null;
+    oThis.userObj = null;
     oThis.tokenUserObj = null;
 
     oThis.encryptedEncryptionSalt = null;
@@ -358,11 +358,11 @@ class TwitterSignup extends ServiceBase {
 
     Object.assign(insertData, insertResponse.defaultUpdatedAttributes);
 
-    oThis.secureUserObj = new UserModel().formatDbData(insertData);
+    oThis.userObj = new UserModel().formatDbData(insertData);
 
-    await UserModel.flushCache(oThis.secureUserObj);
+    await UserModel.flushCache(oThis.userObj);
 
-    oThis.userId = oThis.secureUserObj.id;
+    oThis.userId = oThis.userObj.id;
 
     logger.log('End::Create user');
 
@@ -523,7 +523,8 @@ class TwitterSignup extends ServiceBase {
       userId: oThis.userId,
       profileImageId: oThis.profileImageId,
       inviterCodeId: oThis.inviterCodeId,
-      userInviteCodeId: oThis.prelaunchInviteObj.inviteCodeId
+      userInviteCodeId: oThis.prelaunchInviteObj.inviteCodeId,
+      isCreator: UserModel.isUserApprovedCreator(oThis.userObj)
     };
     await bgJob.enqueue(bgJobConstants.afterSignUpJobTopic, messagePayload);
   }
@@ -539,13 +540,13 @@ class TwitterSignup extends ServiceBase {
 
     logger.log('Start::Service Response for twitter Signup');
 
-    const userLoginCookieValue = new UserModel().getCookieValueFor(oThis.secureUserObj, oThis.decryptedEncryptionSalt, {
+    const userLoginCookieValue = new UserModel().getCookieValueFor(oThis.userObj, oThis.decryptedEncryptionSalt, {
       timestamp: Date.now() / 1000
     });
 
     logger.log('End::Service Response for twitter Signup');
 
-    const safeFormattedUserData = new UserModel().safeFormattedData(oThis.secureUserObj);
+    const safeFormattedUserData = new UserModel().safeFormattedData(oThis.userObj);
     const safeFormattedTokenUserData = new TokenUserModel().safeFormattedData(oThis.tokenUserObj);
 
     return responseHelper.successWithData({

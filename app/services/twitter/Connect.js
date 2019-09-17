@@ -154,11 +154,14 @@ class TwitterConnect extends ServiceBase {
         let cacheResp = await new InviteCodeByIdCache({ id: oThis.prelaunchInviteObj.inviterCodeId }).fetch();
         oThis.inviterCodeObj = cacheResp.data[oThis.prelaunchInviteObj.inviterCodeId];
       } else {
-        // Fetch inviter code object
-        await oThis._fetchInviteCodeObject();
+        await oThis._validateInviteCode();
       }
     } else {
-      await oThis._validateInviteCode();
+      // Validate invite code for users, who don't have prelaunch access
+      let inviteValidationResp = await oThis._validateInviteCode();
+      if (inviteValidationResp.isFailure()) {
+        return Promise.reject(inviteValidationResp);
+      }
     }
 
     logger.log('End::Validate User signup allowed');
@@ -230,12 +233,10 @@ class TwitterConnect extends ServiceBase {
   /**
    * Fetch inviter code row from cache
    *
-   * Sets @inviterCodeObj
-   *
    * @returns {Promise<never>}
    * @private
    */
-  async _fetchInviteCodeObject() {
+  async _fetchInviterCodeObject() {
     const oThis = this;
 
     let cacheResp = await new InviteCodeCache({ inviteCode: oThis.inviteCode }).fetch();
@@ -251,7 +252,7 @@ class TwitterConnect extends ServiceBase {
       );
     }
 
-    oThis.inviterCodeObj = cacheResp.data[oThis.inviteCode];
+    return cacheResp.data[oThis.inviteCode];
   }
 
   /**
@@ -267,41 +268,43 @@ class TwitterConnect extends ServiceBase {
 
     // Invite code is required but not passed
     if (!oThis.inviteCode) {
-      return Promise.reject(
-        responseHelper.paramValidationError({
-          internal_error_identifier: 's_t_c_vic_1',
-          api_error_identifier: 'invalid_api_params',
-          params_error_identifiers: ['missing_invite_code']
-        })
-      );
+      return responseHelper.paramValidationError({
+        internal_error_identifier: 's_t_c_vic_1',
+        api_error_identifier: 'invalid_api_params',
+        params_error_identifiers: ['missing_invite_code']
+      });
     }
 
-    await oThis._fetchInviteCodeObject();
+    let inviterCodeRow = await oThis._fetchInviterCodeObject();
 
     // Invite code used is not present
-    if (!oThis.inviterCodeObj || !oThis.inviterCodeObj.id) {
-      return Promise.reject(
-        responseHelper.paramValidationError({
-          internal_error_identifier: 's_t_c_vic_2',
-          api_error_identifier: 'invalid_api_params',
-          params_error_identifiers: ['invalid_invite_code']
-        })
-      );
+    if (!inviterCodeRow || !inviterCodeRow.id) {
+      return responseHelper.paramValidationError({
+        internal_error_identifier: 's_t_c_vic_2',
+        api_error_identifier: 'invalid_api_params',
+        params_error_identifiers: ['invalid_invite_code']
+      });
     }
 
     // If there is number of invites limit on invite code, and it has been reached
-    if (
-      oThis.inviterCodeObj.inviteLimit >= 0 &&
-      oThis.inviterCodeObj.inviteLimit <= oThis.inviterCodeObj.invitedUserCount
-    ) {
-      return Promise.reject(
-        responseHelper.paramValidationError({
-          internal_error_identifier: 's_t_c_vic_3',
-          api_error_identifier: 'invalid_api_params',
-          params_error_identifiers: ['expired_invite_code']
-        })
-      );
+    if (inviterCodeRow.inviteLimit >= 0 && inviterCodeRow.inviteLimit <= inviterCodeRow.invitedUserCount) {
+      return responseHelper.paramValidationError({
+        internal_error_identifier: 's_t_c_vic_3',
+        api_error_identifier: 'invalid_api_params',
+        params_error_identifiers: ['expired_invite_code']
+      });
     }
+
+    //To prevent PreLaunch Users from using his own invite code
+    if (oThis.prelaunchInviteObj && oThis.prelaunchInviteObj.inviteCodeId == inviterCodeRow.id) {
+      return responseHelper.paramValidationError({
+        internal_error_identifier: 's_t_c_vic_4',
+        api_error_identifier: 'invalid_api_params',
+        params_error_identifiers: ['invalid_invite_code']
+      });
+    }
+
+    oThis.inviterCodeObj = inviterCodeRow;
 
     return responseHelper.successWithData({});
   }

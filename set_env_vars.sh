@@ -7,10 +7,10 @@ export PA_DOMAIN='http://pepodev.com:8080'
 export PA_COOKIE_DOMAIN='.pepodev.com'
 
 # Devops error logs framework
-export DEVOPS_APP_NAME='pepo-api';
-export DEVOPS_ENV_ID='dev1-sandbox';
-export DEVOPS_IP_ADDRESS='127.0.0.1';
-export DEVOPS_SERVER_IDENTIFIER='1111';
+export PA_DEVOPS_APP_NAME='pepo-api';
+export PA_DEVOPS_ENV_ID='dev1-sandbox';
+export PA_DEVOPS_IP_ADDRESS='127.0.0.1';
+export PA_DEVOPS_SERVER_IDENTIFIER='1111';
 
 # Database details
 export PA_MYSQL_CONNECTION_POOL_SIZE='3'
@@ -69,6 +69,11 @@ export PA_ADMIN_DB_MYSQL_PASSWORD='root'
 export PA_REDEMPTION_DB_MYSQL_HOST='127.0.0.1'
 export PA_REDEMPTION_DB_MYSQL_USER='root'
 export PA_REDEMPTION_DB_MYSQL_PASSWORD='root'
+
+#mysql transaction db
+export PA_FIAT_DB_MYSQL_HOST='127.0.0.1'
+export PA_FIAT_DB_MYSQL_USER='root'
+export PA_FIAT_DB_MYSQL_PASSWORD='root'
 
 # mysql - devops error logs infra details
 export PA_INFRA_DB_MYSQL_HOST='127.0.0.1'
@@ -139,3 +144,7 @@ export TWITTER_OAUTH_URL='https://api.twitter.com/oauth/authorize?oauth_token='
 # Pepo twitter handle
 export PA_PEPO_TWITTER_HANDLE='thepepoapp'
 export PA_PEPO_REDEMPTION_USER_ID='1001'
+
+export PA_GOOGLE_INAPP_SERVICE_ACCOUNT_KEY=''
+#Value for PA_GOOGLE_INAPP_SERVICE_ACCOUNT_KEY should be escaped first with escape() function. This is done so as to avoid /n being escaped automatically.
+export PA_GOOGLE_INAPP_SERVICE_ACCOUNT_EMAIL=''

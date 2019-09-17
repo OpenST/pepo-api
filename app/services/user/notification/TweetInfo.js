@@ -56,15 +56,7 @@ class TweetInfo extends ServiceBase {
 
     await oThis._fetchTwitterUsers();
 
-    let currenUserValidationRsp = await oThis._fetchAndValidateUser(oThis.currentUserId);
-
-    if (currenUserValidationRsp.isSuccess()) {
-      let currentUserValidationData = currenUserValidationRsp.data;
-
-      if (currentUserValidationData.hasOwnProperty('twitterAuthValid') && !currentUserValidationData.twitterAuthValid) {
-        await oThis._expireCurrentUserTwitterAuthIfRequired(currentUserValidationData.twitterExtendedId);
-      }
-    }
+    await oThis._fetchAndValidateUser(oThis.currentUserId);
 
     await oThis._fetchReceiverHandle();
 
@@ -96,7 +88,9 @@ class TweetInfo extends ServiceBase {
 
     let twitterUserIds = [];
     for (let userId in twitterUserByUserIdsCacheResponse.data) {
-      twitterUserIds.push(twitterUserByUserIdsCacheResponse.data[userId].id);
+      if (twitterUserByUserIdsCacheResponse.data[userId].id) {
+        twitterUserIds.push(twitterUserByUserIdsCacheResponse.data[userId].id);
+      }
     }
 
     const twitterUserByIdsCacheResp = await new TwitterUserByIdsCache({
@@ -111,6 +105,17 @@ class TweetInfo extends ServiceBase {
       let twitterUser = twitterUserByIdsCacheResp.data[id];
 
       oThis.twitterUsersMap[twitterUser.userId] = twitterUser;
+    }
+
+    if (!oThis.twitterUsersMap.hasOwnProperty(oThis.receiverUserId)) {
+      return Promise.reject(
+        responseHelper.paramValidationError({
+          internal_error_identifier: 's_u_n_ti_ftu_1',
+          api_error_identifier: 'invalid_api_params',
+          params_error_identifiers: ['invalid_receiver_id'],
+          debug_options: {}
+        })
+      );
     }
 
     logger.log('End::Fetch Twitter Users');
@@ -139,11 +144,8 @@ class TweetInfo extends ServiceBase {
       let validateRsp = await oThis._validateTwitterCredentials(twitterId, handle);
 
       if (validateRsp.isFailure()) {
-        return responseHelper.successWithData({ twitterAuthValid: false, twitterExtendedId: twitterExtendedData.id });
+        await oThis._expireCurrentUserTwitterAuthIfRequired(twitterExtendedData.id);
       }
-    } else {
-      // Send this response to skip expiration in DB(already expired)
-      return responseHelper.successWithData({ twitterAuthValid: false, twitterExtendedId: twitterExtendedData.id });
     }
 
     return responseHelper.successWithData({});
@@ -216,6 +218,16 @@ class TweetInfo extends ServiceBase {
       });
     }
 
+    // Update handle in DB - to be in sync with the latest one
+    if (userTwitterEntity.handle != handle) {
+      await new TwitterUserModel()
+        .update({ handle: userTwitterEntity.handle })
+        .where({ id: oThis.twitterUsersMap[oThis.currentUserId].id })
+        .fire();
+
+      await TwitterUserModel.flushCache(oThis.twitterUsersMap[oThis.currentUserId]);
+    }
+
     logger.log('End::Validate Twitter Credentials');
 
     return responseHelper.successWithData({});
@@ -273,7 +285,7 @@ class TweetInfo extends ServiceBase {
     }
 
     await new TwitterUserModel()
-      .update({ handle: lookupRsp.data[twitterId].userData['screen_name'] })
+      .update({ handle: lookupRsp.data[twitterId].handle })
       .where({ id: oThis.twitterUsersMap[oThis.receiverUserId].id })
       .fire();
 

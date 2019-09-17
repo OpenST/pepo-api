@@ -44,13 +44,14 @@ class ServicesBase {
         errorObject = responseHelper.error({
           internal_error_identifier: 'a_s_b_1',
           api_error_identifier: 'something_went_wrong',
-          debug_options: { error: err.toString() },
+          debug_options: { error: err.toString(), stack: err.stack },
           error_config: errorConfig
         });
 
         await createErrorLogsEntry.perform(errorObject, errorLogsConstants.mediumSeverity);
-        logger.error(' In catch block of services/Base.js', errorObject);
+        logger.error(' In catch block of services/Base.js Error is: ', err);
       }
+      logger.error(' In catch block of services/Base.js', errorObject.getDebugData());
 
       return errorObject;
     });

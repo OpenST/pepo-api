@@ -17,8 +17,8 @@ const rootPrefix = '../..',
   createErrorLogsEntry = require(rootPrefix + '/lib/errorLogs/createEntry'),
   errorLogsConstants = require(rootPrefix + '/lib/globalConstant/errorLogs'),
   transactionConstants = require(rootPrefix + '/lib/globalConstant/transaction'),
-  notificationJobEnqueue = require(rootPrefix + '/lib/rabbitMqEnqueue/notification'),
   externalEntityConstants = require(rootPrefix + '/lib/globalConstant/externalEntity'),
+  notificationJobEnqueue = require(rootPrefix + '/lib/rabbitMqEnqueue/notification'),
   notificationJobConstants = require(rootPrefix + '/lib/globalConstant/notificationJob');
 
 /**
