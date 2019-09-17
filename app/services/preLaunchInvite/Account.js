@@ -39,7 +39,7 @@ class PreLaunchAccount extends ServiceBase {
 
     await oThis._fetchPreLaunchInviteDetails();
 
-    await oThis._fetchInviterCodeDetails();
+    await oThis._fetchInviteCodeDetails();
 
     return oThis._prepareResponse();
   }
@@ -70,7 +70,7 @@ class PreLaunchAccount extends ServiceBase {
    * @returns {Promise<never>}
    * @private
    */
-  async _fetchInviterCodeDetails() {
+  async _fetchInviteCodeDetails() {
     const oThis = this;
 
     const inviteCodeByIdCacheResponse = await new InviteCodeByIdCache({
