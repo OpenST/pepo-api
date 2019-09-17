@@ -872,7 +872,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{api_server}}/api/v1/users/1/profile",
+							"raw": "{{api_server}}/api/v1/users/get-invite-code",
 							"host": [
 								"{{api_server}}"
 							],
@@ -880,8 +880,7 @@
 								"api",
 								"v1",
 								"users",
-								"1",
-								"profile"
+								"get-invite-code"
 							]
 						}
 					},

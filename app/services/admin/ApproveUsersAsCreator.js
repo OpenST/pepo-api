@@ -7,6 +7,7 @@ const rootPrefix = '../../..',
   InviteCodeModel = require(rootPrefix + '/app/models/mysql/InviteCode'),
   inviteCodeConstants = require(rootPrefix + '/lib/globalConstant/inviteCode'),
   ActivityLogModel = require(rootPrefix + '/app/models/mysql/AdminActivityLog'),
+  InviteCodeByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/InviteCodeByUserIds'),
   UserProfileElementsByUserIdCache = require(rootPrefix + '/lib/cacheManagement/multi/UserProfileElementsByUserIds'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   userConstants = require(rootPrefix + '/lib/globalConstant/user'),
@@ -149,6 +150,16 @@ class ApproveUsersAsCreator extends ServiceBase {
     const oThis = this;
 
     for (const userId in oThis.userObjects) {
+      const inviteCodeByUserIdCacheResponse = await new InviteCodeByUserIdsCache({
+        userIds: [userId]
+      }).fetch();
+
+      if (inviteCodeByUserIdCacheResponse.isFailure()) {
+        return Promise.reject(inviteCodeByUserIdCacheResponse);
+      }
+
+      let inviteCodeObj = inviteCodeByUserIdCacheResponse.data[userId];
+
       const queryResponse = await new InviteCodeModel()
         .update({
           invite_limit: inviteCodeConstants.infiniteInviteLimit
@@ -159,7 +170,7 @@ class ApproveUsersAsCreator extends ServiceBase {
       if (queryResponse.affectedRows === 1) {
         logger.info(`User with ${userId} has now infinite invites`);
 
-        await InviteCodeModel.flushCache({ userId: userId });
+        await InviteCodeModel.flushCache(inviteCodeObj);
       } else {
         return responseHelper.error({
           internal_error_identifier: 'a_s_auac_1',

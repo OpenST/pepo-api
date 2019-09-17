@@ -186,15 +186,9 @@ class InviteSeed {
       let preLaunchInviteByInviteCodeObj = oThis.preLaunchInvitesByInviteCode[inviteCode];
 
       if (preLaunchInviteByInviteCodeObj.inviterUserId) {
-        if (
-          CommonValidators.validateNonEmptyObject(
-            oThis.preLaunchInvitesById[preLaunchInviteByInviteCodeObj.inviterUserId]
-          )
-        ) {
-          preLaunchInviteByIdObj = oThis.preLaunchInvitesById[preLaunchInviteByInviteCodeObj.inviterUserId];
-          inviterInviteCode = preLaunchInviteByIdObj.inviteCode;
-          inviterCodeId = oThis.inviteCodesByCode[inviterInviteCode].id;
-        }
+        preLaunchInviteByIdObj = oThis.preLaunchInvitesById[preLaunchInviteByInviteCodeObj.inviterUserId];
+        inviterInviteCode = preLaunchInviteByIdObj.inviteCode;
+        inviterCodeId = oThis.inviteCodesByCode[inviterInviteCode].id;
       }
 
       let inviteCodeId = oThis.inviteCodesByCode[inviteCode].id;

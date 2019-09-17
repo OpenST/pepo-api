@@ -173,7 +173,6 @@ class SaveEmail extends ServiceBase {
       }
 
       await Promise.all(promisesArray);
-      await UserEmailLogsModel.flushCache({ userId: oThis.profileUserId });
     } else {
       // If entry for user does not exist, create one.
       const insertResponse = await new UserEmailLogsModel()
@@ -185,6 +184,7 @@ class SaveEmail extends ServiceBase {
 
       oThis.userEmailLogsId = insertResponse.insertId;
     }
+    await UserEmailLogsModel.flushCache({ userId: oThis.profileUserId });
   }
 
   /**
