@@ -4,6 +4,7 @@ const rootPrefix = '../../../..',
   InviteCodeModel = require(rootPrefix + '/app/models/mysql/InviteCode'),
   inviteCodeConstants = require(rootPrefix + '/lib/globalConstant/inviteCode'),
   PreLaunchInviteModel = require(rootPrefix + '/app/models/mysql/PreLaunchInvite'),
+  InviteCodeByIdCache = require(rootPrefix + '/lib/cacheManagement/single/InviteCodeById'),
   PreLaunchInviteByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/PreLaunchInviteByIds'),
   responseHelper = require(rootPrefix + '/lib/formatter/response');
 
@@ -70,6 +71,16 @@ class ApproveUser extends ServiceBase {
     let preLaunchInviteObj = cacheRsp.data[oThis.inviteId],
       inviteCodeId = preLaunchInviteObj.inviteCodeId;
 
+    const inviteCodeByIdCacheResponse = await new InviteCodeByIdCache({
+      id: inviteCodeId
+    }).fetch();
+
+    if (inviteCodeByIdCacheResponse.isFailure()) {
+      return Promise.reject(inviteCodeByIdCacheResponse);
+    }
+
+    let inviteCodeObj = inviteCodeByIdCacheResponse.data;
+
     const queryResponse = await new InviteCodeModel()
       .update({
         invite_limit: inviteCodeConstants.infiniteInviteLimit
@@ -80,7 +91,7 @@ class ApproveUser extends ServiceBase {
     if (queryResponse.affectedRows === 1) {
       logger.info(`User with ${oThis.inviteId} has now infinite invites`);
 
-      await InviteCodeModel.flushCache({ id: inviteCodeId });
+      await InviteCodeModel.flushCache(inviteCodeObj);
 
       return responseHelper.successWithData({});
     }
