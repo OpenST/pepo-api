@@ -161,6 +161,12 @@ const v1ErrorConfig = {
     message: 'Invalid text.'
   },
 
+  invalid_thank_you_message: {
+    parameter: 'text',
+    code: 'invalid',
+    message: 'Message length exceeded 255 characters.'
+  },
+
   invalid_thank_you_flag: {
     parameter: 'thank_you_flag',
     code: 'invalid',

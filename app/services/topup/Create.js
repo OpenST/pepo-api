@@ -112,6 +112,9 @@ class CreateTopup extends ServiceBase {
       );
     }
 
+    // we are not validating the keys inside paymentReceipt in _validateAndSanitize
+    // because Apple and Google will keep changing it.
+
     return responseHelper.successWithData({});
   }
 
@@ -123,11 +126,11 @@ class CreateTopup extends ServiceBase {
    */
   async _recordTopup() {
     const oThis = this,
-      receiptId = oThis.paymentReceipt.transactionId,
+      serviceReceiptId = oThis.paymentReceipt.transactionId,
       serviceKind = oThis._getServiceKind();
 
     let createParams = {
-      receipt_id: receiptId,
+      receipt_id: serviceReceiptId,
       raw_receipt: JSON.stringify(oThis.paymentReceipt),
       from_user_id: oThis.currentUser.id,
       kind: fiatPaymentConstants.invertedKinds[fiatPaymentConstants.topUpKind],
@@ -139,9 +142,13 @@ class CreateTopup extends ServiceBase {
       .insert(createParams)
       .fire()
       .catch(async function(mysqlErrorObject) {
+        // duplicate is handled here.
         if (mysqlErrorObject.code === mysqlErrorConstants.duplicateError) {
           oThis.isAlreadyRecorded = true;
-          oThis.paymentDetail = await new FiatPaymentModel().fetchByReceiptIdAndServiceKind(receiptId, serviceKind);
+          oThis.paymentDetail = await new FiatPaymentModel().fetchByReceiptIdAndServiceKind(
+            serviceReceiptId,
+            serviceKind
+          );
           oThis.fiatPaymentId = oThis.paymentDetail.id;
         } else {
           let errorResp = responseHelper.error({
