@@ -52,7 +52,7 @@ class DeleteVideo extends ServiceBase {
         internal_error_identifier: 'a_s_v_d_1',
         api_error_identifier: 'invalid_api_params',
         params_error_identifiers: ['invalid_video_id'],
-        debug_options: { transfers: oThis.transfersData }
+        debug_options: { videoDetails: oThis.videoDetails }
       });
     }
 

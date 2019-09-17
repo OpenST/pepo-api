@@ -51,7 +51,7 @@ class BlockUser extends ServiceBase {
     const oThis = this;
 
     if (oThis.userIdsLength === 0) {
-      return;
+      return responseHelper.successWithData({});
     }
 
     await oThis._fetchUsers();
