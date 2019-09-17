@@ -1,12 +1,10 @@
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
-  ActivityLogModel = require(rootPrefix + '/app/models/mysql/AdminActivityLog'),
   VideoDetailsByVideoIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/VideoDetailsByVideoIds'),
   bgJob = require(rootPrefix + '/lib/rabbitMqEnqueue/bgJob'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   bgJobConstants = require(rootPrefix + '/lib/globalConstant/bgJob'),
-  videoDetailsConstants = require(rootPrefix + '/lib/globalConstant/videoDetail'),
-  adminActivityLogConstants = require(rootPrefix + '/lib/globalConstant/adminActivityLogs');
+  videoDetailsConstants = require(rootPrefix + '/lib/globalConstant/videoDetail');
 
 /**
  * Class to delete video.
@@ -58,12 +56,10 @@ class DeleteVideo extends ServiceBase {
       });
     }
 
-    const promisesArray = [];
-    promisesArray.push(
-      bgJob.enqueue(bgJobConstants.deleteUserVideosJobTopic, { userId: oThis.creatorUserId, videoIds: [oThis.videoId] })
-    );
-    promisesArray.push(oThis._logAdminActivity());
-    await Promise.all(promisesArray);
+    await bgJob.enqueue(bgJobConstants.deleteUserVideosJobTopic, {
+      userId: oThis.creatorUserId,
+      videoIds: [oThis.videoId]
+    });
 
     return responseHelper.successWithData({});
   }
@@ -86,23 +82,6 @@ class DeleteVideo extends ServiceBase {
 
     oThis.videoDetails = [videoDetailsCacheResponse.data[oThis.videoId]];
     oThis.creatorUserId = oThis.videoDetails[0].creatorUserId;
-  }
-
-  /**
-   * Log admin activity.
-   *
-   * @return {Promise<void>}
-   * @private
-   */
-  async _logAdminActivity() {
-    const oThis = this;
-
-    await new ActivityLogModel().insertAction({
-      adminId: oThis.currentAdminId,
-      actionOn: oThis.creatorUserId,
-      action: adminActivityLogConstants.deleteUserVideo,
-      extraData: JSON.stringify({ vids: [oThis.videoId] })
-    });
   }
 }
 
