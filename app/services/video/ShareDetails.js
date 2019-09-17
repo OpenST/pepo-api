@@ -97,15 +97,20 @@ class ShareDetails extends ServiceBase {
     let videoDetails = videoDetailsCacheRsp.data[oThis.videoId],
       creatorUserId = videoDetails.creatorUserId;
 
-    const userMultiCacheRsp = await new UserMultiCache({ ids: [creatorUserId] }).fetch();
+    // Video is of current user, so no need for query
+    if (creatorUserId == oThis.currentUser.id) {
+      oThis.creatorUserName = oThis.currentUser.name;
+    } else {
+      const userMultiCacheRsp = await new UserMultiCache({ ids: [creatorUserId] }).fetch();
 
-    if (userMultiCacheRsp.isFailure()) {
-      return Promise.reject(userMultiCacheRsp);
+      if (userMultiCacheRsp.isFailure()) {
+        return Promise.reject(userMultiCacheRsp);
+      }
+
+      let userDetails = userMultiCacheRsp.data[creatorUserId];
+
+      oThis.creatorUserName = userDetails.name;
     }
-
-    let userDetails = userMultiCacheRsp.data[creatorUserId];
-
-    oThis.creatorUserName = userDetails.name;
   }
 
   /**
@@ -128,6 +133,7 @@ class ShareDetails extends ServiceBase {
   _prepareResponse() {
     const oThis = this;
 
+    // TODO: Dhananjay, confirm whether title and subject is required.
     return {
       [entityType.share]: {
         id: uuidV4(),
