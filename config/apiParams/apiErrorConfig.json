@@ -1,6 +1,6 @@
 {
   "invalid_api_params": {
-    "http_code": "400",
+    "http_code": "200",
     "code": "BAD_REQUEST",
     "message": "At least one parameter is invalid or missing. See \"err.error_data\" array for more details."
   },
@@ -45,17 +45,17 @@
     "message": "Something went wrong."
   },
   "invalid_params": {
-    "http_code": "400",
+    "http_code": "200",
     "code": "BAD_REQUEST",
     "message": "At least one parameter is invalid or missing. See \"err.error_data\" array for more details."
   },
   "invalid_api_version": {
-    "http_code": "400",
+    "http_code": "200",
     "code": "BAD_REQUEST",
     "message": "At least one parameter is invalid or missing. See \"err.error_data\" array for more details."
   },
   "invalid_api_name": {
-    "http_code": "400",
+    "http_code": "200",
     "code": "BAD_REQUEST",
     "message": "At least one parameter is invalid or missing. See \"err.error_data\" array for more details."
   },

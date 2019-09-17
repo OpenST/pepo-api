@@ -1,12 +1,15 @@
 const rootPrefix = '../../../../..',
+  UrlModel = require(rootPrefix + '/app/models/mysql/Url'),
   FeedModel = require(rootPrefix + '/app/models/mysql/Feed'),
   CommonValidator = require(rootPrefix + '/lib/validators/Common'),
+  AddVideoDescription = require(rootPrefix + '/lib/video/AddDescription'),
   UpdateProfileBase = require(rootPrefix + '/app/services/user/profile/update/Base'),
   UserProfileElementModel = require(rootPrefix + '/app/models/mysql/UserProfileElement'),
   userProfileElementConst = require(rootPrefix + '/lib/globalConstant/userProfileElement'),
   VideoDetailsModel = require(rootPrefix + '/app/models/mysql/VideoDetail'),
   VideoAddNotification = require(rootPrefix + '/lib/userNotificationPublisher/VideoAdd'),
   videoLib = require(rootPrefix + '/lib/videoLib'),
+  urlConstants = require(rootPrefix + '/lib/globalConstant/url'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   feedsConstants = require(rootPrefix + '/lib/globalConstant/feed'),
   UserModelKlass = require(rootPrefix + '/app/models/mysql/User');
@@ -32,6 +35,8 @@ class UpdateFanVideo extends UpdateProfileBase {
    * @param {number} params.image_height: image height
    * @param {number} params.image_size: image size
    * @param {boolean} params.isExternalUrl: video source is other than s3 upload
+   * @param {string} [params.video_description]: Video description
+   * @param {string} [params.link]: Link
    *
    * @augments UpdateProfileBase
    *
@@ -51,6 +56,8 @@ class UpdateFanVideo extends UpdateProfileBase {
     oThis.imageHeight = params.image_height;
     oThis.imageSize = params.image_size;
     oThis.isExternalUrl = params.isExternalUrl;
+    oThis.videoDescription = params.video_description;
+    oThis.link = params.link;
 
     oThis.videoId = null;
     oThis.flushUserCache = false;
@@ -67,6 +74,15 @@ class UpdateFanVideo extends UpdateProfileBase {
    */
   async _validateParams() {
     const oThis = this;
+
+    // If url is not valid, consider link as null.
+    if (!CommonValidator.validateHttpBasedUrl(oThis.link)) {
+      oThis.link = null;
+    }
+
+    if (oThis.link) {
+      oThis.link = oThis.link.toLowerCase();
+    }
 
     const resp = videoLib.validateVideoObj({ videoUrl: oThis.videoUrl, isExternalUrl: oThis.isExternalUrl });
     if (resp.isFailure()) {
@@ -102,6 +118,8 @@ class UpdateFanVideo extends UpdateProfileBase {
   async _updateProfileElements() {
     const oThis = this;
 
+    const linkIds = await oThis._addLink();
+
     const resp = await videoLib.validateAndSave({
       userId: oThis.profileUserId,
       videoUrl: oThis.videoUrl,
@@ -112,16 +130,23 @@ class UpdateFanVideo extends UpdateProfileBase {
       posterImageSize: oThis.imageSize,
       posterImageWidth: oThis.imageWidth,
       posterImageHeight: oThis.imageHeight,
-      isExternalUrl: oThis.isExternalUrl
+      isExternalUrl: oThis.isExternalUrl,
+      linkIds: linkIds
     });
+
     if (resp.isFailure()) {
       return Promise.reject(resp);
     }
 
+    oThis.videoId = resp.data.insertId;
+
+    await new AddVideoDescription({
+      videoDescription: oThis.videoDescription,
+      videoId: oThis.videoId
+    }).perform();
+
     const videoObj = resp.data.video,
       coverImageId = videoObj.posterImageId;
-
-    oThis.videoId = resp.data.insertId;
 
     if (oThis.videoId) {
       await oThis._addProfileElement(oThis.videoId, userProfileElementConst.coverVideoIdKind);
@@ -163,6 +188,27 @@ class UpdateFanVideo extends UpdateProfileBase {
     }
   }
 
+  /**
+   * Add link in urls table.
+   *
+   * @returns {Promise<*>}
+   * @private
+   */
+  async _addLink() {
+    const oThis = this;
+
+    if (oThis.link) {
+      // If new url is added then insert in 2 tables
+      let insertRsp = await new UrlModel({}).insertUrl({
+        url: oThis.link,
+        kind: urlConstants.socialUrlKind
+      });
+
+      return [insertRsp.insertId];
+    }
+
+    return null;
+  }
   /**
    * Update user.
    *

@@ -288,7 +288,8 @@ class UserModel extends ModelBase {
 
     let limit = params.limit,
       query = params.query,
-      paginationTimestamp = params.paginationTimestamp;
+      paginationTimestamp = params.paginationTimestamp,
+      isOnlyNameSearch = params.isOnlyNameSearch;
 
     const queryObject = oThis
       .select('*')
@@ -301,7 +302,11 @@ class UserModel extends ModelBase {
       queryObject.where({ status: userConstants.invertedStatuses[userConstants.activeStatus] });
     }
 
-    if (query) {
+    if (query && isOnlyNameSearch) {
+      queryObject.where(['name LIKE ?', queryWithWildCards]);
+    }
+
+    if (query && !isOnlyNameSearch) {
       queryObject.where(['user_name LIKE ? OR name LIKE ?', queryWithWildCards, queryWithWildCards]);
     }
 

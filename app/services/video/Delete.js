@@ -12,6 +12,7 @@ const rootPrefix = '../../..',
   userProfileElementConst = require(rootPrefix + '/lib/globalConstant/userProfileElement'),
   videoDetailsConst = require(rootPrefix + '/lib/globalConstant/videoDetail'),
   adminActivityLogConst = require(rootPrefix + '/lib/globalConstant/adminActivityLogs'),
+  entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
   feedConstants = require(rootPrefix + '/lib/globalConstant/feed');
 
 class DeleteVideo extends ServiceBase {
@@ -162,9 +163,7 @@ class DeleteVideo extends ServiceBase {
   async _markVideoDeleted() {
     const oThis = this;
 
-    let videoObj = new VideosModel();
-
-    return videoObj.markVideoDeleted({ id: oThis.videoId });
+    return new VideosModel().markVideoDeleted({ id: oThis.videoId });
   }
 
   /**
