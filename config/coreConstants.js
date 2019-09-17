@@ -386,14 +386,6 @@ class CoreConstants {
     return process.env.PA_PEPO_TWITTER_HANDLE;
   }
 
-  get GOOGLE_INAPP_SERVICE_ACCOUNT_EMAIL() {
-    return process.env.PA_GOOGLE_INAPP_SERVICE_ACCOUNT_EMAIL;
-  }
-
-  get GOOGLE_INAPP_SERVICE_ACCOUNT_KEY() {
-    return process.env.PA_GOOGLE_INAPP_SERVICE_ACCOUNT_KEY;
-  }
-
   get PEPO_REDEMPTION_USER_ID() {
     return process.env.PA_PEPO_REDEMPTION_USER_ID;
   }

@@ -9,9 +9,10 @@ const Util = require('util'),
 
 const rootPrefix = '../..',
   coreConstants = require(rootPrefix + '/config/coreConstants'),
-  REQUEST_URL =
-    'https://www.googleapis.com/androidpublisher/v3/applications/com.pepo.staging/purchases/voidedpurchases',
+  inAppPurchaseConstants = require(rootPrefix + '/lib/globalConstant/inAppPurchase'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger');
+
+const REQUEST_URL = inAppPurchaseConstants.googleReceiptValidationRequestUrl;
 
 class GooglePayVoidOrders {
   /**
@@ -21,10 +22,10 @@ class GooglePayVoidOrders {
    */
   async perform() {
     let authClient = new GoogleAuthLibrary.JWT(
-      coreConstants.GOOGLE_INAPP_SERVICE_ACCOUNT_EMAIL,
+      inAppPurchaseConstants.googleInAppServiceAccountEmail,
       null,
-      unescape(coreConstants.GOOGLE_INAPP_SERVICE_ACCOUNT_KEY),
-      ['https://www.googleapis.com/auth/androidpublisher']
+      unescape(inAppPurchaseConstants.googleInAppServiceAccountKey),
+      [inAppPurchaseConstants.googleAndroidPublisherScopeEndpoint]
     );
 
     let url = Util.format(REQUEST_URL);

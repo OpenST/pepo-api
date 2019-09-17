@@ -61,8 +61,11 @@ class CreateTopup extends ServiceBase {
 
     await oThis._fetchFiatPayment();
 
-    // TODO Payments - check for receipt validation status
-    if (processResp.isSuccess() && processResp.data.productionEnvSandboxReceipt === 0) {
+    if (
+      processResp.isSuccess() &&
+      processResp.data.productionEnvSandboxReceipt === 0 &&
+      oThis.paymentDetail.status === fiatPaymentConstants.receiptValidationSuccessStatus
+    ) {
       await bgJob.enqueue(bgJobConstants.validatePaymentReceiptJobTopic, {
         fiatPaymentId: oThis.fiatPaymentId
       });
