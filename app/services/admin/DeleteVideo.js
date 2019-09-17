@@ -58,6 +58,7 @@ class DeleteVideo extends ServiceBase {
 
     await bgJob.enqueue(bgJobConstants.deleteUserVideosJobTopic, {
       userId: oThis.creatorUserId,
+      currentAdminId: oThis.currentAdminId,
       videoIds: [oThis.videoId]
     });
 
