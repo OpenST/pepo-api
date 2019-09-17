@@ -1,8 +1,10 @@
 const rootPrefix = '../../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
+  logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
+  InviteCodeModel = require(rootPrefix + '/app/models/mysql/InviteCode'),
+  inviteCodeConstants = require(rootPrefix + '/lib/globalConstant/inviteCode'),
   PreLaunchInviteModel = require(rootPrefix + '/app/models/mysql/PreLaunchInvite'),
   PreLaunchInviteByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/PreLaunchInviteByIds'),
-  preLaunchInviteConstants = require(rootPrefix + '/lib/globalConstant/preLaunchInvite'),
   responseHelper = require(rootPrefix + '/lib/formatter/response');
 
 /**
@@ -46,18 +48,18 @@ class ApproveUser extends ServiceBase {
 
     await PreLaunchInviteModel.flushCache({ id: oThis.inviteId });
 
-    await oThis._whitelistIfRequired();
+    await oThis._markInviteLimitAsInfinite();
 
     return responseHelper.successWithData({});
   }
 
   /**
-   * White list if required
+   * Mark invite limit as infinite
    *
-   * @returns {Promise<Result>}
+   * @returns {Promise<*>}
    * @private
    */
-  async _whitelistIfRequired() {
+  async _markInviteLimitAsInfinite() {
     const oThis = this;
 
     const cacheRsp = await new PreLaunchInviteByIdsCache({ ids: [oThis.inviteId] }).fetch();
@@ -65,16 +67,29 @@ class ApproveUser extends ServiceBase {
       return cacheRsp;
     }
 
-    if (cacheRsp.data[oThis.inviteId].adminStatus === preLaunchInviteConstants.whitelistPendingStatus) {
-      const updateResponse = await new PreLaunchInviteModel().whitelistUser(oThis.inviteId);
-      if (updateResponse.isFailure()) {
-        return Promise.reject(updateResponse);
-      }
+    let preLaunchInviteObj = cacheRsp.data[oThis.inviteId],
+      inviteCodeId = preLaunchInviteObj.inviteCodeId;
 
-      await PreLaunchInviteModel.flushCache({ id: oThis.inviteId });
+    const queryResponse = await new InviteCodeModel()
+      .update({
+        invite_limit: inviteCodeConstants.infiniteInviteLimitForCreator
+      })
+      .where({ id: inviteCodeId })
+      .fire();
+
+    if (queryResponse.affectedRows === 1) {
+      logger.info(`User with ${oThis.inviteId} has now infinite invites`);
+
+      await InviteCodeModel.flushCache({ id: inviteCodeId });
+
+      return responseHelper.successWithData({});
     }
 
-    return responseHelper.successWithData({});
+    return responseHelper.error({
+      internal_error_identifier: 'a_s_a_pl_au_1',
+      api_error_identifier: 'something_went_wrong',
+      debug_options: { inviteId: oThis.inviteId, inviteCodeId: inviteCodeId }
+    });
   }
 }
 
