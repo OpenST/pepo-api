@@ -124,11 +124,9 @@ class RequestRedemption extends ServiceBase {
     }
 
     // Validate if product value is correct or not.
-    const productValueInUsd = basicHelper.getUSDAmountForPepo(oThis.pricePoint, oThis.pepoAmountInWei);
+    const productValueValidation = oThis._validateProductValue();
 
-    const productValueInUsdInWei = basicHelper.toNormalPrecisionFiat(productValueInUsd, 18).toString();
-
-    if (productValueInUsdInWei !== oThis.dollarValue) {
+    if (!productValueValidation) {
       paramErrors.push('invalid_pepo_amount_in_wei', 'invalid_price_point');
     }
 
@@ -142,6 +140,22 @@ class RequestRedemption extends ServiceBase {
         })
       );
     }
+  }
+
+  /**
+   * Validate if product value is correct or not.
+   *
+   * @returns {boolean}
+   * @private
+   */
+  _validateProductValue() {
+    const oThis = this;
+
+    const productValueInUsdInWei = basicHelper.getUSDAmountForPepo(oThis.pricePoint, oThis.pepoAmountInWei);
+
+    const productValueInUsd = basicHelper.toNormalPrecisionFiat(productValueInUsdInWei, 18).toString();
+
+    return productValueInUsd === oThis.dollarValue;
   }
 
   /**
