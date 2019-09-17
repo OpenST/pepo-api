@@ -6,6 +6,7 @@ const rootPrefix = '../../..',
   UserMultiCache = require(rootPrefix + '/lib/cacheManagement/multi/User'),
   VideoDetailsByVideoIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/VideoDetailsByVideoIds'),
   shareEntityConstants = require(rootPrefix + '/lib/globalConstant/shareEntity'),
+  gotoConstants = require(rootPrefix + '/lib/globalConstant/goto'),
   coreConstants = require(rootPrefix + '/config/coreConstants'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   commonValidator = require(rootPrefix + '/lib/validators/Common'),
@@ -157,7 +158,7 @@ class ShareDetails extends ServiceBase {
   _generateVideoShareUrl() {
     const oThis = this;
 
-    return urlDomain + '/' + shareEntityConstants.videoShareGotoKind + '/' + oThis.videoId;
+    return urlDomain + '/' + gotoConstants.videoShareGotoKind + '/' + oThis.videoId;
   }
 }
 
