@@ -50,6 +50,7 @@ class RequestRedemption extends ServiceBase {
 
     oThis.productLink = null;
     oThis.dollarValue = null;
+    oThis.productKind = null;
     oThis.redemptionReceiverUsername = null;
     oThis.currentUserTokenHolderAddress = null;
     oThis.currentUserEmailAddress = null;
@@ -222,6 +223,7 @@ class RequestRedemption extends ServiceBase {
         validationResult = true;
         oThis.productLink = redemptionProduct.images.landscape;
         oThis.dollarValue = redemptionProduct.dollarValue;
+        oThis.productKind = redemptionProduct.kind;
       }
     }
 
@@ -328,6 +330,7 @@ class RequestRedemption extends ServiceBase {
         user_email: oThis.currentUserEmailAddress,
         // Product details.
         product_id: oThis.productId,
+        product_kind: oThis.productKind,
         product_link: oThis.productLink,
         product_dollar_value: oThis.dollarValue,
         // Redemption details.
