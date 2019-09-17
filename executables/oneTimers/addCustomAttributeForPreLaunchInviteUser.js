@@ -10,7 +10,7 @@ const command = require('commander');
 const rootPrefix = '../..',
   PreLaunchInviteModel = require(rootPrefix + '/app/models/mysql/PreLaunchInvite'),
   emailServiceApiCallHookConstants = require(rootPrefix + '/lib/globalConstant/emailServiceApiCallHook'),
-  AddContactInPepoCampaign = require(rootPrefix + '/lib/email/hookCreator/AddContact'),
+  UpdateContactInPepoCampaign = require(rootPrefix + '/lib/email/hookCreator/UpdateContact'),
   preLaunchInviteConstant = require(rootPrefix + '/lib/globalConstant/preLaunchInvite');
 
 command
@@ -89,31 +89,31 @@ class addCustomAttributeForPreLaunchInviteUser {
 
     for (let index = 0; index < preLaunchInvitesData.length; index++) {
       const preLaunchInviteObj = new PreLaunchInviteModel().formatDbData(preLaunchInvitesData[index]);
-      await oThis._addContactInPepoCampaign(preLaunchInviteObj.id);
+      await oThis._updateContactInPepoCampaign(preLaunchInviteObj.id);
     }
 
     oThis.totalRecords = preLaunchInvitesData.length;
   }
 
   /**
-   * Add contact in pepo campaign
+   * Update contact in pepo campaign
    *
    * @returns {Promise<void>}
    * @private
    */
-  async _addContactInPepoCampaign(receiverEntityId) {
+  async _updateContactInPepoCampaign(receiverEntityId) {
     const oThis = this;
 
-    let addContactParams = {
+    let updateContactParams = {
       receiverEntityId: receiverEntityId,
       receiverEntityKind: emailServiceApiCallHookConstants.preLaunchInviteEntityKind,
-      customDescription: 'Contact add for pre launch invite',
+      customDescription: 'Contact update for pre launch invite',
       customAttributes: {
         [emailServiceApiCallHookConstants.preLaunchAttribute]: 1
       }
     };
 
-    await new AddContactInPepoCampaign(addContactParams).perform();
+    await new UpdateContactInPepoCampaign(updateContactParams).perform();
   }
 }
 
