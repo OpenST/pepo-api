@@ -553,7 +553,9 @@ const v1Signature = {
       {
         parameter: 'text',
         validatorMethods: ['validateString']
-      },
+      }
+    ],
+    optional: [
       {
         parameter: 'tweet_needed',
         validatorMethods: ['validateInteger']

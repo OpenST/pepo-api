@@ -2,15 +2,12 @@ const rootPrefix = '../../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   UserNotificationModel = require(rootPrefix + '/app/models/cassandra/UserNotification'),
-  TwitterUserByTwitterIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TwitterUserByTwitterIds'),
   TweetByUserId = require(rootPrefix + '/lib/twitter/actions/TweetByUserId'),
-  localCipher = require(rootPrefix + '/lib/encryptors/localCipher'),
   base64Helper = require(rootPrefix + '/lib/base64Helper'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   notificationJobEnqueue = require(rootPrefix + '/lib/rabbitMqEnqueue/notification'),
   notificationJobConstants = require(rootPrefix + '/lib/globalConstant/notificationJob'),
-  coreConstants = require(rootPrefix + '/config/coreConstants'),
-  logger = require(rootPrefix + '/lib/logger/customConsoleLogger');
+  coreConstants = require(rootPrefix + '/config/coreConstants');
 
 /**
  * Class for thank you notification.
@@ -25,6 +22,7 @@ class SayThankYou extends ServiceBase {
    * @param {string} params.text
    * @param {string} params.notification_id
    * @param {string} params.current_user.id
+   * @param {integer} params.tweet_needed
    *
    * @augments ServiceBase
    *
@@ -38,7 +36,7 @@ class SayThankYou extends ServiceBase {
     oThis.text = params.text;
     oThis.notificationId = params.notification_id;
     oThis.currentUserId = +params.current_user.id;
-    oThis.tweetNeeded = +params.tweet_needed;
+    oThis.tweetNeeded = +params.tweet_needed || 0;
 
     oThis.twitterUserObj = null;
     oThis.twitterUserExtendedObj = null;
