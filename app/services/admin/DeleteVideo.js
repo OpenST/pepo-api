@@ -1,18 +1,11 @@
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
-  FeedModel = require(rootPrefix + '/app/models/mysql/Feed'),
-  VideosModel = require(rootPrefix + '/app/models/mysql/Video'),
-  VideoDetailsModel = require(rootPrefix + '/app/models/mysql/VideoDetail'),
+  DeleteUserVideos = require(rootPrefix + '/lib/video/DeleteUserVideos'),
   ActivityLogModel = require(rootPrefix + '/app/models/mysql/AdminActivityLog'),
-  UserProfileElementModel = require(rootPrefix + '/app/models/mysql/UserProfileElement'),
   VideoDetailsByVideoIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/VideoDetailsByVideoIds'),
-  VideoDetailsByUserIdCache = require(rootPrefix + '/lib/cacheManagement/single/VideoDetailsByUserIdPagination'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
-  feedConstants = require(rootPrefix + '/lib/globalConstant/feed'),
-  paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination'),
   videoDetailsConstants = require(rootPrefix + '/lib/globalConstant/videoDetail'),
-  adminActivityLogConstants = require(rootPrefix + '/lib/globalConstant/adminActivityLogs'),
-  userProfileElementConstants = require(rootPrefix + '/lib/globalConstant/userProfileElement');
+  adminActivityLogConstants = require(rootPrefix + '/lib/globalConstant/adminActivityLogs');
 
 /**
  * Class to delete video.
@@ -54,7 +47,7 @@ class DeleteVideo extends ServiceBase {
 
     await oThis._fetchCreatorUserId();
 
-    // Unknown video or already deleted
+    // Unknown video or already deleted.
     if (!oThis.creatorUserId || oThis.videoDetails[0].status === videoDetailsConstants.deletedStatus) {
       responseHelper.paramValidationError({
         internal_error_identifier: 'a_s_v_d_1',
@@ -64,34 +57,12 @@ class DeleteVideo extends ServiceBase {
       });
     }
 
-    const promises = [];
-    promises.push(oThis._deleteProfileElementIfRequired());
-    promises.push(oThis._markVideoDeleted());
-    promises.push(oThis._markVideoDetailDeleted());
-    promises.push(oThis._deleteVideoFeeds());
-
-    await Promise.all(promises);
-
-    await oThis._logAdminActivity();
+    const promisesArray = [];
+    promisesArray.push(new DeleteUserVideos({ userId: oThis.creatorUserId, videoIds: [oThis.videoId] }));
+    promisesArray.push(oThis._logAdminActivity());
+    await Promise.all(promisesArray);
 
     return responseHelper.successWithData({});
-  }
-
-  /**
-   * Log admin activity.
-   *
-   * @return {Promise<void>}
-   * @private
-   */
-  async _logAdminActivity() {
-    const oThis = this;
-
-    await new ActivityLogModel().insertAction({
-      adminId: oThis.currentAdminId,
-      actionOn: oThis.creatorUserId,
-      action: adminActivityLogConstants.deleteUserVideo,
-      extraData: JSON.stringify({ vid: oThis.videoId })
-    });
   }
 
   /**
@@ -115,82 +86,20 @@ class DeleteVideo extends ServiceBase {
   }
 
   /**
-   * Delete profile element if required.
+   * Log admin activity.
    *
    * @return {Promise<void>}
    * @private
    */
-  async _deleteProfileElementIfRequired() {
+  async _logAdminActivity() {
     const oThis = this;
 
-    // Todo::@Shlok why fetch again? user profile element should not have video. Ask Pankaj
-
-    const cacheResponse = await new VideoDetailsByUserIdCache({
-      userId: oThis.creatorUserId,
-      limit: paginationConstants.defaultVideoListPageSize,
-      paginationTimestamp: null
-    }).fetch();
-
-    if (cacheResponse.isFailure()) {
-      return Promise.reject(cacheResponse);
-    }
-
-    // If deleted from profile element then there will be i
-    const videoIds = cacheResponse.data.videoIds || [];
-
-    if (videoIds[0] == oThis.videoId) {
-      const profileElementObj = new UserProfileElementModel({});
-
-      await profileElementObj.deleteByUserIdAndKind({
-        userId: oThis.creatorUserId,
-        dataKind: userProfileElementConstants.coverVideoIdKind
-      });
-    }
-  }
-
-  /**
-   * Delete from video details.
-   *
-   * @return {Promise<*>}
-   * @private
-   */
-  async _markVideoDetailDeleted() {
-    const oThis = this;
-
-    return new VideoDetailsModel().markDeleted({
-      userId: oThis.creatorUserId,
-      videoId: oThis.videoId
+    await new ActivityLogModel().insertAction({
+      adminId: oThis.currentAdminId,
+      actionOn: oThis.creatorUserId,
+      action: adminActivityLogConstants.deleteUserVideo,
+      extraData: JSON.stringify({ vid: oThis.videoId })
     });
-  }
-
-  /**
-   * Mark status in videos.
-   *
-   * @return {Promise<void>}
-   * @private
-   */
-  async _markVideoDeleted() {
-    const oThis = this;
-
-    return new VideosModel().markVideosDeleted({ ids: [oThis.videoId] });
-  }
-
-  /**
-   * Delete video from feeds.
-   *
-   * @return {Promise<void>}
-   * @private
-   */
-  async _deleteVideoFeeds() {
-    const oThis = this;
-
-    return new FeedModel()
-      .delete()
-      .where({
-        kind: feedConstants.invertedKinds[feedConstants.fanUpdateKind],
-        primary_external_entity_id: oThis.videoId
-      })
-      .fire();
   }
 }
 
