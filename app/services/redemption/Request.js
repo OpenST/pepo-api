@@ -322,18 +322,21 @@ class RequestRedemption extends ServiceBase {
       receiverEntityKind: emailServiceApiCallHookConstants.redemptionReceiverEntityKind,
       templateName: emailServiceApiCallHookConstants.userRedemptionTemplateName,
       templateVars: {
+        // User details.
         username: oThis.currentUserUserName,
         user_id: oThis.currentUserId,
         user_token_holder_address: oThis.currentUserTokenHolderAddress,
         user_twitter_handle: oThis.currentUserTwitterHandle,
         user_email: oThis.currentUserEmailAddress,
+        // Product details.
         product_id: oThis.productId,
         product_link: oThis.productLink,
         product_dollar_value: oThis.dollarValue,
+        // Redemption details.
+        redemption_id: oThis.redemptionId,
         pepo_amount: basicHelper.convertWeiToNormal(oThis.pepoAmountInWei).toString(10),
         redemption_receiver_username: oThis.redemptionReceiverUsername,
         redemption_receiver_token_holder_address: oThis.redemptionReceiverTokenHolderAddress,
-        redemption_id: oThis.redemptionId,
         pepo_api_domain: 1
       }
     };
