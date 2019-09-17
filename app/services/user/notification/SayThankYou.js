@@ -147,7 +147,7 @@ class SayThankYou extends ServiceBase {
         responseHelper.paramValidationError({
           internal_error_identifier: 'a_s_u_n_2',
           api_error_identifier: 'invalid_api_params',
-          params_error_identifiers: ['invalid_text'],
+          params_error_identifiers: ['invalid_thank_you_message'],
           debug_options: { text: oThis.text }
         })
       );
