@@ -1,14 +1,12 @@
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
-  FeedModel = require(rootPrefix + '/app/models/mysql/Feed'),
   UserModel = require(rootPrefix + '/app/models/mysql/User'),
-  VideoModel = require(rootPrefix + '/app/models/mysql/Video'),
   UsersCache = require(rootPrefix + '/lib/cacheManagement/multi/User'),
-  VideoDetailModel = require(rootPrefix + '/app/models/mysql/VideoDetail'),
   AdminActivityLogModel = require(rootPrefix + '/app/models/mysql/AdminActivityLog'),
+  bgJob = require(rootPrefix + '/lib/rabbitMqEnqueue/bgJob'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
-  feedConstants = require(rootPrefix + '/lib/globalConstant/feed'),
   userConstants = require(rootPrefix + '/lib/globalConstant/user'),
+  bgJobConstants = require(rootPrefix + '/lib/globalConstant/bgJob'),
   adminActivityLogConstants = require(rootPrefix + '/lib/globalConstant/adminActivityLogs');
 
 /**
@@ -36,6 +34,8 @@ class BlockUser extends ServiceBase {
     oThis.userIds = params.user_ids;
     oThis.currentAdminId = params.current_admin.id;
 
+    oThis.userIdsLength = oThis.userIds.length;
+
     oThis.userObjects = {};
     oThis.userIdToVideoIds = {};
     oThis.videoIdsToBeDeleted = [];
@@ -44,22 +44,22 @@ class BlockUser extends ServiceBase {
   /**
    * Async perform.
    *
-   * @returns {Promise<result>}
+   * @returns {Promise<*|result>}
    * @private
    */
   async _asyncPerform() {
     const oThis = this;
 
+    if (oThis.userIdsLength === 0) {
+      return responseHelper.successWithData({});
+    }
+
     await oThis._fetchUsers();
 
     await oThis._blockUsers();
 
-    let promisesArray = [];
-    promisesArray.push(oThis._flushCache(), oThis._logAdminActivity(), oThis._fetchVideoIdsForUsers());
-    await Promise.all(promisesArray);
-
-    promisesArray = [];
-    promisesArray.push(oThis._markVideoDeleted(), oThis._markVideoDetailDeleted(), oThis._deleteVideoFeeds());
+    const promisesArray = [];
+    promisesArray.push(oThis._flushCache(), oThis._enqueueToBackgroundJob(), oThis._logAdminActivity());
     await Promise.all(promisesArray);
 
     return responseHelper.successWithData({});
@@ -70,7 +70,7 @@ class BlockUser extends ServiceBase {
    *
    * @sets oThis.userObjects
    *
-   * @returns {Promise<never>}
+   * @returns {Promise<*>}
    * @private
    */
   async _fetchUsers() {
@@ -130,115 +130,36 @@ class BlockUser extends ServiceBase {
   async _flushCache() {
     const oThis = this;
 
-    const promises = [];
+    const promisesArray = [];
 
     for (const userId in oThis.userObjects) {
-      promises.push(UserModel.flushCache(oThis.userObjects[userId]));
-    }
-
-    await Promise.all(promises);
-  }
-
-  /**
-   * Fetch video ids for users.
-   *
-   * @sets oThis.userIdToVideoIds, oThis.videoIdsToBeDeleted
-   *
-   * @returns {Promise<void>}
-   * @private
-   */
-  async _fetchVideoIdsForUsers() {
-    const oThis = this;
-
-    const promisesArray = [];
-
-    for (let index = 0; index < oThis.userIds.length; index++) {
-      // Fetch videoIds for user.
-      promisesArray.push(
-        new VideoDetailModel()
-          .select('video_id')
-          .where({ creator_user_id: oThis.userIds[index] })
-          .fire()
-      );
-    }
-
-    const promisesResponse = await Promise.all(promisesArray);
-
-    for (let index = 0; index < oThis.userIds.length; index++) {
-      const userId = oThis.userIds[index];
-      const dbRows = promisesResponse[index];
-
-      if (dbRows.length > 0) {
-        oThis.userIdToVideoIds[userId] = [];
-        for (let dbRowIndex = 0; dbRowIndex < dbRows.length; dbRowIndex++) {
-          oThis.userIdToVideoIds[userId].push(dbRows[dbRowIndex].video_id);
-          oThis.videoIdsToBeDeleted.push(dbRows[dbRowIndex].video_id);
-        }
-      }
-    }
-  }
-
-  /**
-   * Mark status in videos.
-   *
-   * @return {Promise<*>}
-   * @private
-   */
-  async _markVideoDeleted() {
-    const oThis = this;
-
-    if (oThis.videoIdsToBeDeleted.length === 0) {
-      return;
-    }
-
-    return new VideoModel().markVideosDeleted({ ids: oThis.videoIdsToBeDeleted });
-  }
-
-  /**
-   * Delete from video details.
-   *
-   * @return {Promise<*>}
-   * @private
-   */
-  async _markVideoDetailDeleted() {
-    const oThis = this;
-
-    const promisesArray = [];
-
-    for (const userId in oThis.userIdToVideoIds) {
-      for (let index = 0; index < oThis.userIdToVideoIds[userId].length; index++) {
-        promisesArray.push(
-          new VideoDetailModel().markDeleted({
-            userId: userId,
-            videoId: oThis.userIdToVideoIds[userId][index]
-          })
-        );
-      }
+      promisesArray.push(UserModel.flushCache(oThis.userObjects[userId]));
     }
 
     await Promise.all(promisesArray);
   }
 
   /**
-   * Delete video from feeds.
+   * Enqueue job to delete videos.
    *
-   * @return {Promise<*>}
+   * @returns {Promise<void>}
    * @private
    */
-  async _deleteVideoFeeds() {
+  async _enqueueToBackgroundJob() {
     const oThis = this;
 
-    if (oThis.videoIdsToBeDeleted.length === 0) {
-      return;
+    const promisesArray = [];
+
+    for (let index = 0; index < oThis.userIdsLength; index++) {
+      promisesArray.push(
+        bgJob.enqueue(bgJobConstants.deleteUserVideosJobTopic, {
+          userId: oThis.userIds[index],
+          currentAdminId: oThis.currentAdminId
+        })
+      );
     }
 
-    return new FeedModel()
-      .delete()
-      .where({
-        kind: feedConstants.invertedKinds[feedConstants.fanUpdateKind],
-        primary_external_entity_id: oThis.videoIdsToBeDeleted
-      })
-      .fire();
+    await Promise.all(promisesArray);
   }
 
   /**
@@ -252,11 +173,11 @@ class BlockUser extends ServiceBase {
 
     const promisesArray = [];
 
-    for (const userId in oThis.userObjects) {
+    for (let index = 0; index < oThis.userIdsLength; index++) {
       promisesArray.push(
         new AdminActivityLogModel().insertAction({
           adminId: oThis.currentAdminId,
-          actionOn: userId,
+          actionOn: oThis.userIds[index],
           action: adminActivityLogConstants.blockUser
         })
       );
