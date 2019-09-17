@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "2cfac8e0-8f31-4fd8-9a09-d03cd21f392c",
+		"_postman_id": "16bbe70c-d734-44da-afb2-28278e21a144",
 		"name": "pepo-api",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -205,7 +205,8 @@
 					},
 					"response": []
 				}
-			]
+			],
+			"protocolProfileBehavior": {}
 		},
 		{
 			"name": "gifs",
@@ -276,7 +277,8 @@
 					},
 					"response": []
 				}
-			]
+			],
+			"protocolProfileBehavior": {}
 		},
 		{
 			"name": "token",
@@ -301,7 +303,8 @@
 					},
 					"response": []
 				}
-			]
+			],
+			"protocolProfileBehavior": {}
 		},
 		{
 			"name": "users",
@@ -1190,7 +1193,8 @@
 					},
 					"response": []
 				}
-			]
+			],
+			"protocolProfileBehavior": {}
 		},
 		{
 			"name": "webhook",
@@ -1345,7 +1349,8 @@
 					},
 					"response": []
 				}
-			]
+			],
+			"protocolProfileBehavior": {}
 		},
 		{
 			"name": "transaction",
@@ -1381,7 +1386,8 @@
 					},
 					"response": []
 				}
-			]
+			],
+			"protocolProfileBehavior": {}
 		},
 		{
 			"name": "feeds",
@@ -1425,7 +1431,8 @@
 					},
 					"response": []
 				}
-			]
+			],
+			"protocolProfileBehavior": {}
 		},
 		{
 			"name": "notification",
@@ -1477,7 +1484,8 @@
 						]
 					}
 				}
-			]
+			],
+			"protocolProfileBehavior": {}
 		},
 		{
 			"name": "tags",
@@ -1507,7 +1515,8 @@
 					},
 					"response": []
 				}
-			]
+			],
+			"protocolProfileBehavior": {}
 		},
 		{
 			"name": "video",
@@ -1567,8 +1576,30 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "share",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{api_server}}/api/v1/videos/1009/share",
+							"host": [
+								"{{api_server}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"videos",
+								"1009",
+								"share"
+							]
+						}
+					},
+					"response": []
 				}
-			]
+			],
+			"protocolProfileBehavior": {}
 		},
 		{
 			"name": "admin",
@@ -1901,7 +1932,8 @@
 					},
 					"response": []
 				}
-			]
+			],
+			"protocolProfileBehavior": {}
 		},
 		{
 			"name": "payments",
@@ -1937,7 +1969,8 @@
 					},
 					"response": []
 				}
-			]
+			],
+			"protocolProfileBehavior": {}
 		},
 		{
 			"name": "top-up",
@@ -1998,7 +2031,33 @@
 					},
 					"response": []
 				}
-			]
+			],
+			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "fetch-goto",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{api_server}}/api/v1/fetch-goto?url=https://stagingpepo.com/video/1009",
+					"host": [
+						"{{api_server}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"fetch-goto"
+					],
+					"query": [
+						{
+							"key": "url",
+							"value": "https://stagingpepo.com/video/1009"
+						}
+					]
+				}
+			},
+			"response": []
 		},
 		{
 			"name": "upload-params",
@@ -2029,5 +2088,6 @@
 			},
 			"response": []
 		}
-	]
+	],
+	"protocolProfileBehavior": {}
 }
