@@ -1,4 +1,9 @@
 {
+  "entity_not_found": {
+    "http_code": "200",
+    "code": "NOT_FOUND",
+    "message": "Resource not found."
+  },
   "invalid_api_params": {
     "http_code": "200",
     "code": "BAD_REQUEST",
