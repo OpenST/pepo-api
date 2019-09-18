@@ -121,7 +121,11 @@ class FiatPayment extends ModelBase {
     let totalAmount = 0,
       queryResponse = await oThis
         .select('sum(amount) as total_purchase_amount')
-        .where(['from_user_id = ?', userId])
+        .where([
+          'from_user_id = ? AND status = ?',
+          userId,
+          fiatPaymentConstants.invertedStatuses[fiatPaymentConstants.pepoTransferSuccessStatus]
+        ])
         .fire();
 
     if (queryResponse[0].total_purchase_amount) {
