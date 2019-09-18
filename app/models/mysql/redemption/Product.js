@@ -27,6 +27,20 @@ class RedemptionProductModel extends ModelBase {
     oThis.tableName = 'products';
   }
 
+  /**
+   * Format Db data.
+   *
+   * @param {object} dbRow
+   * @param {number} dbRow.id
+   * @param {number} dbRow.status
+   * @param {string} dbRow.kind
+   * @param {string} dbRow.images
+   * @param {decimal} dbRow.dollar_value
+   * @param {number} dbRow.created_at
+   * @param {number} dbRow.updated_at
+   *
+   * @returns {{}}
+   */
   formatDbData(dbRow) {
     const oThis = this;
 
