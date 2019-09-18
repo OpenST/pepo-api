@@ -1,6 +1,5 @@
 const rootPrefix = '../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
-  basicHelper = require(rootPrefix + '/helpers/basic'),
   databaseConstants = require(rootPrefix + '/lib/globalConstant/database'),
   fiatPaymentConstants = require(rootPrefix + '/lib/globalConstant/fiatPayment'),
   ostPricePointConstants = require(rootPrefix + '/lib/globalConstant/ostPricePoints');
