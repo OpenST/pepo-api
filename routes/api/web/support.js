@@ -68,7 +68,7 @@ router.get(
   function(req, res, next) {
     req.decodedParams.apiName = apiName.validateSupportUrl;
 
-    Promise.resolve(routeHelper.perform(req, res, next, '/support/validate', 'r_a_w_s_1', null));
+    Promise.resolve(routeHelper.perform(req, res, next, '/support/Validate', 'r_a_w_s_1', null));
   }
 );
 
