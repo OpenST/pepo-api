@@ -3,8 +3,8 @@ const bigNumber = require('bignumber.js');
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   UserModel = require(rootPrefix + '/app/models/mysql/User'),
-  VideoDetailModel = require(rootPrefix + '/app/models/mysql/VideoDetail'),
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
+  VideoDetailModel = require(rootPrefix + '/app/models/mysql/VideoDetail'),
   UrlByIdCache = require(rootPrefix + '/lib/cacheManagement/multi/UrlsByIds'),
   ImageByIdCache = require(rootPrefix + '/lib/cacheManagement/multi/ImageByIds'),
   VideoByIdCache = require(rootPrefix + '/lib/cacheManagement/multi/VideoByIds'),
@@ -12,8 +12,10 @@ const rootPrefix = '../../..',
   PricePointsCache = require(rootPrefix + '/lib/cacheManagement/single/PricePoints'),
   TwitterUserByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TwitterUserByIds'),
   UserStatByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/UserStatByUserIds'),
-  TokenUserDetailByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TokenUserByUserIds'),
+  InviteCodeByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/InviteCodeByUserIds'),
   TwitterUserByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TwitterUserByUserIds'),
+  TokenUserDetailByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TokenUserByUserIds'),
+  LifetimePurchaseByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/LifetimePurchaseByUserIds'),
   UserProfileElementsByUserIdCache = require(rootPrefix + '/lib/cacheManagement/multi/UserProfileElementsByUserIds'),
   basicHelper = require(rootPrefix + '/helpers/basic'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
@@ -67,6 +69,7 @@ class UserSearch extends ServiceBase {
     oThis.twitterUserByUserIdMap = {};
     oThis.pricePoints = {};
     oThis.userPepoCoinsMap = {};
+    oThis.lifetimePurchasesMap = {};
   }
 
   /**
@@ -97,7 +100,8 @@ class UserSearch extends ServiceBase {
         oThis._fetchLink(),
         oThis._fetchUserStats(),
         oThis._fetchTwitterUser(),
-        oThis._fetchPricePoints()
+        oThis._fetchPricePoints(),
+        oThis._fetchLifetimePurchases()
       );
       await Promise.all(promisesArray);
     }
@@ -389,6 +393,35 @@ class UserSearch extends ServiceBase {
     }
 
     oThis.userStatsMap = cacheRsp.data;
+
+    await oThis._fetchInviterCodeDetails();
+  }
+
+  /**
+   * Fetch referral count from invite codes
+   *
+   *
+   * @returns {Promise<never>}
+   * @private
+   */
+  async _fetchInviterCodeDetails() {
+    const oThis = this;
+
+    const inviteCodeByUserIdCacheResponse = await new InviteCodeByUserIdsCache({
+      userIds: oThis.userIds
+    }).fetch();
+
+    if (inviteCodeByUserIdCacheResponse.isFailure()) {
+      return Promise.reject(inviteCodeByUserIdCacheResponse);
+    }
+
+    oThis.inviteCodes = inviteCodeByUserIdCacheResponse.data;
+
+    for (const userId in oThis.inviteCodes) {
+      if (!oThis.inviteCodes[userId].hasOwnProperty('id')) {
+        delete oThis.inviteCodes[userId];
+      }
+    }
   }
 
   /**
@@ -469,6 +502,25 @@ class UserSearch extends ServiceBase {
   }
 
   /**
+   * Fetch lifetime purchases for user.
+   *
+   * @sets oThis.lifetimePurchasesMap
+   *
+   * @returns {Promise<never>}
+   * @private
+   */
+  async _fetchLifetimePurchases() {
+    const oThis = this;
+
+    const cacheResponse = await new LifetimePurchaseByUserIdsCache({ userIds: oThis.userIds }).fetch();
+    if (cacheResponse.isFailure()) {
+      return Promise.reject(cacheResponse);
+    }
+
+    oThis.lifetimePurchasesMap = cacheResponse.data;
+  }
+
+  /**
    * Prepare user pepo stats map (referrals, supporting count, supporters count, balance)
    * and user pepo coins map (received amount, spent amount, purchased amount, redeemed amount).
    *
@@ -496,7 +548,7 @@ class UserSearch extends ServiceBase {
 
       oThis.userPepoCoinsMap[userId] = {
         received: userReceivedAmountInUsd,
-        purchased: '0',
+        purchased: oThis.lifetimePurchasesMap[userId].amount,
         redeemed: '0'
       };
     }
@@ -565,6 +617,7 @@ class UserSearch extends ServiceBase {
       twitterUsersMap: oThis.twitterUserByUserIdMap,
       tokenDetails: oThis.tokenDetails,
       userStat: oThis.userStatsMap,
+      inviteCodesMap: oThis.inviteCodes,
       userPepoCoinsMap: oThis.userPepoCoinsMap,
       meta: oThis.responseMetaData
     };

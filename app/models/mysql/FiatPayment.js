@@ -4,9 +4,22 @@ const rootPrefix = '../../..',
   fiatPaymentConstants = require(rootPrefix + '/lib/globalConstant/fiatPayment'),
   ostPricePointConstants = require(rootPrefix + '/lib/globalConstant/ostPricePoints');
 
+// Declare variables.
 const dbName = databaseConstants.fiatDbName;
 
+/**
+ * Class for fiat payment model.
+ *
+ * @class FiatPayment
+ */
 class FiatPayment extends ModelBase {
+  /**
+   * Constructor for fiat payment model.
+   *
+   * @augments ModelBase
+   *
+   * @constructor
+   */
   constructor() {
     super({ dbName: dbName });
 
@@ -21,7 +34,8 @@ class FiatPayment extends ModelBase {
    * @param {object} dbRow
    * @param {number} dbRow.id
    * @param {string} dbRow.receipt_id
-   * @param {object} dbRow.raw_receipt
+   * @param {string} dbRow.raw_receipt
+   * @param {string} dbRow.decrypted_receipt
    * @param {string/number} dbRow.from_user_id
    * @param {string/number} dbRow.to_user_id
    * @param {number} dbRow.kind
@@ -63,14 +77,16 @@ class FiatPayment extends ModelBase {
   }
 
   /**
-   * Fetch by ids
+   * Fetch by ids.
    *
-   * @param ids {array} - array of ids
+   * @param {array} ids
+   *
    * @return {Promise<void>}
    */
   async fetchByIds(ids) {
-    const oThis = this,
-      response = {};
+    const oThis = this;
+
+    const response = {};
 
     const dbRows = await oThis
       .select('*')
@@ -86,10 +102,10 @@ class FiatPayment extends ModelBase {
   }
 
   /**
-   * Fetch by receipt id and service kind
+   * Fetch by receipt id and service kind.
    *
-   * @param receiptId - receipt id
-   * @param serviceKind - service kind
+   * @param receiptId: receipt id
+   * @param serviceKind: service kind
    *
    * @return {Promise<*>}
    */
@@ -103,50 +119,57 @@ class FiatPayment extends ModelBase {
 
     if (dbRows[0]) {
       return oThis.formatDbData(dbRows[0]);
-    } else {
-      return null;
     }
+
+    return null;
   }
 
   /**
-   * Fetch life time purchase amount for a user id
+   * Fetch life time purchase amount and total pepo amount purchased for a user id.
    *
-   * @param userId - user id for which the total purchase amount has to be summed.
+   * @param {array} userIds: user id sfor which the total purchase amount and total pepo amount has to be summed.
    *
    * @returns {Promise<void>}
    */
-  async fetchTotalPurchaseAmountFor(userId) {
+  async fetchTotalPurchaseAmountFor(userIds) {
     const oThis = this;
 
-    let totalAmount = 0,
-      queryResponse = await oThis
-        .select('sum(amount) as total_purchase_amount')
-        .where([
-          'from_user_id = ? AND status = ?',
-          userId,
-          fiatPaymentConstants.invertedStatuses[fiatPaymentConstants.pepoTransferSuccessStatus]
-        ])
-        .fire();
+    const queryResponse = await oThis
+      .select('from_user_id, sum(amount) as total_purchase_amount')
+      .where([
+        'from_user_id IN (?) AND status = ?',
+        userIds,
+        fiatPaymentConstants.invertedStatuses[fiatPaymentConstants.pepoTransferSuccessStatus]
+      ])
+      .group_by(['from_user_id'])
+      .fire();
 
-    if (queryResponse[0].total_purchase_amount) {
-      totalAmount = queryResponse[0].total_purchase_amount;
+    const response = {};
+
+    for (let index = 0; index < userIds.length; index++) {
+      response[userIds[index]] = { amount: 0 };
     }
 
-    return { amount: totalAmount };
+    for (let index = 0; index < queryResponse.length; index++) {
+      const dbRow = queryResponse[index];
+      response[dbRow.from_user_id] = { amount: dbRow.total_purchase_amount };
+    }
+
+    return response;
   }
 
   /**
-   * Fetch by user id and statuses
+   * Fetch by user id and statuses.
    *
-   * @param userId - user id for which the dfiat payment is to be fetched
-   * @param statuses {array} - array of statuses used for filtering
+   * @param {number} userId: user id for which the fiat payment is to be fetched
+   * @param {array} statuses: array of statuses used for filtering
    *
    * @return {Promise<void>}
    */
   async fetchByUserIdAndStatus(userId, statuses) {
     const oThis = this;
 
-    let rows = await oThis
+    const rows = await oThis
         .select('*')
         .where({
           from_user_id: userId,
@@ -157,17 +180,15 @@ class FiatPayment extends ModelBase {
 
     responseData[userId] = [];
 
-    for (let i = 0; i < rows.length; i++) {
-      const oThis = this;
-
-      responseData[rows[i].from_user_id].push(oThis.formatDbData(rows[i]));
+    for (let index = 0; index < rows.length; index++) {
+      responseData[rows[index].from_user_id].push(oThis.formatDbData(rows[index]));
     }
 
     return responseData;
   }
 
   /**
-   * Flush cache
+   * Flush cache.
    *
    * @param {object} params
    * @param {integer} params.fiatPaymentId
@@ -176,18 +197,20 @@ class FiatPayment extends ModelBase {
    * @returns {Promise<*>}
    */
   static async flushCache(params) {
-    let promiseArray = [],
-      UserPaymentsByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/UserPaymentsByIds'),
-      LifetimePurchaseByUserIdCache = require(rootPrefix + '/lib/cacheManagement/single/LifetimePurchaseByUserId'),
-      UserPendingTopupCache = require(rootPrefix + '/lib/cacheManagement/single/UserPendingTopups');
+    const promiseArray = [];
 
     if (params.fiatPaymentId) {
+      const UserPaymentsByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/UserPaymentsByIds');
       const userPaymentsByIdsCacheObj = new UserPaymentsByIdsCache({ ids: [params.fiatPaymentId] });
       promiseArray.push(userPaymentsByIdsCacheObj.clear());
     }
 
     if (params.userId) {
-      const lifetimePurchaseByUserIdCacheObj = new LifetimePurchaseByUserIdCache({ userId: params.userId });
+      const LifetimePurchaseByUserIdsCache = require(rootPrefix +
+          '/lib/cacheManagement/multi/LifetimePurchaseByUserIds'),
+        UserPendingTopupCache = require(rootPrefix + '/lib/cacheManagement/single/UserPendingTopups');
+
+      const lifetimePurchaseByUserIdCacheObj = new LifetimePurchaseByUserIdsCache({ userIds: [params.userId] });
       promiseArray.push(lifetimePurchaseByUserIdCacheObj.clear());
 
       const userPendingTopupCacheObj = new UserPendingTopupCache({ userId: params.userId });

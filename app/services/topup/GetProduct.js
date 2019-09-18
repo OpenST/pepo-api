@@ -3,24 +3,28 @@ const rootPrefix = '../../..',
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   ProductsCache = require(rootPrefix + '/lib/cacheManagement/single/Products'),
   InAppProductConstants = require(rootPrefix + '/lib/globalConstant/inAppProduct'),
-  LifetimePurchaseByUserIdCache = require(rootPrefix + '/lib/cacheManagement/single/LifetimePurchaseByUserId'),
+  LifetimePurchaseByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/LifetimePurchaseByUserIds'),
   UserProfileElementsByUserId = require(rootPrefix + '/lib/cacheManagement/multi/UserProfileElementsByUserIds'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
   userProfileElementConst = require(rootPrefix + '/lib/globalConstant/userProfileElement');
 
 /**
- * Class to get in app purchase products
+ * Class to get in app purchase products.
  *
- * @class
+ * @class GetTopupProduct
  */
 class GetTopupProduct extends ServiceBase {
   /**
-   * @constructor
+   * Constructor to get in app purchase products.
    *
-   * @param params
-   * @param params.current_user {Object} - Current user
-   * @param params.os {String} - os (android/ios)
+   * @param {object} params
+   * @param {object} params.current_user: Current user
+   * @param {string} params.os: (android/ios)
+   *
+   * @augments ServiceBase
+   *
+   * @constructor
    */
   constructor(params) {
     super(params);
@@ -37,7 +41,7 @@ class GetTopupProduct extends ServiceBase {
   }
 
   /**
-   * Perform
+   * Async perform.
    *
    * @return {Promise<void>}
    */
@@ -46,20 +50,20 @@ class GetTopupProduct extends ServiceBase {
 
     await oThis._validateAndSanitize();
 
-    let promiseArray = [];
+    const promiseArray = [];
 
-    // Fetch products for the current price point
+    // Fetch products for the current price point.
     promiseArray.push(oThis._fetchAvailableProducts());
 
-    // Fetch the user purchase data from past
+    // Fetch the user purchase data from past.
     promiseArray.push(oThis._fetchUsersPurchaseData());
 
-    // Fetch user purchase limit data
+    // Fetch user purchase limit data.
     promiseArray.push(oThis._fetchUserPurchaseLimitData());
 
     await Promise.all(promiseArray);
 
-    let remainingLimit = oThis._calculateRemainingLimit(oThis.totalLifetimeSpends),
+    const remainingLimit = oThis._calculateRemainingLimit(oThis.totalLifetimeSpends),
       availableProductsArray = oThis._filterAvailableProducts(remainingLimit),
       responseData = {};
 
@@ -91,7 +95,9 @@ class GetTopupProduct extends ServiceBase {
   }
 
   /**
-   * Fetch available products
+   * Fetch available products.
+   *
+   * @sets oThis.availableProducts
    *
    * @returns {Promise<void>}
    * @private
@@ -99,8 +105,7 @@ class GetTopupProduct extends ServiceBase {
   async _fetchAvailableProducts() {
     const oThis = this;
 
-    let cacheResponse = await new ProductsCache().fetch();
-
+    const cacheResponse = await new ProductsCache().fetch();
     if (cacheResponse.isFailure()) {
       return Promise.reject(cacheResponse);
     }
@@ -109,7 +114,9 @@ class GetTopupProduct extends ServiceBase {
   }
 
   /**
-   * Fetch user purchase data
+   * Fetch user purchase data.
+   *
+   * @sets oThis.totalLifetimeSpends
    *
    * @returns {Promise<never>}
    * @private
@@ -117,17 +124,18 @@ class GetTopupProduct extends ServiceBase {
   async _fetchUsersPurchaseData() {
     const oThis = this;
 
-    let cacheResponse = await new LifetimePurchaseByUserIdCache({ userId: oThis.currentUser.id }).fetch();
-
+    const cacheResponse = await new LifetimePurchaseByUserIdsCache({ userIds: [oThis.currentUser.id] }).fetch();
     if (cacheResponse.isFailure()) {
       return Promise.reject(cacheResponse);
     }
 
-    oThis.totalLifetimeSpends = cacheResponse.data[oThis.currentUser.id];
+    oThis.totalLifetimeSpends = cacheResponse.data[oThis.currentUser.id].amount;
   }
 
   /**
    * Fetch user's purchase limit.
+   *
+   * @sets oThis.customPurchaseLimitOfUser
    *
    * @returns {Promise<never>}
    * @private
@@ -135,13 +143,12 @@ class GetTopupProduct extends ServiceBase {
   async _fetchUserPurchaseLimitData() {
     const oThis = this;
 
-    let cacheResponse = await new UserProfileElementsByUserId({ usersIds: [oThis.currentUser.id] }).fetch();
-
+    const cacheResponse = await new UserProfileElementsByUserId({ usersIds: [oThis.currentUser.id] }).fetch();
     if (cacheResponse.isFailure()) {
       return Promise.reject(cacheResponse);
     }
 
-    let lifetimePurchaseLimitForUser =
+    const lifetimePurchaseLimitForUser =
       cacheResponse.data[oThis.currentUser.id][userProfileElementConst.lifetimePurchaseLimitKind];
 
     if (lifetimePurchaseLimitForUser) {
@@ -150,9 +157,10 @@ class GetTopupProduct extends ServiceBase {
   }
 
   /**
-   * Calculates remaining limit using spends data
+   * Calculates remaining limit using spends data.
    *
-   * @param amountSpent
+   * @param {number} amountSpent
+   *
    * @returns {number}
    * @private
    */
@@ -173,29 +181,30 @@ class GetTopupProduct extends ServiceBase {
   }
 
   /**
-   * Filter outs products which a user can buy after considering limits
+   * Filter outs products which a user can buy after considering limits.
    *
-   * @param remainingLimit
+   * @param {number} remainingLimit
+   *
    * @returns {[]}
    * @private
    */
   _filterAvailableProducts(remainingLimit) {
     const oThis = this;
 
-    let productsArray = oThis.availableProducts.products,
+    const productsArray = oThis.availableProducts.products,
       availableProductsArray = [];
 
     for (let index = 0; index < productsArray.length; index++) {
-      //Check if products price is less than remaining limit
+      // Check if products price is less than remaining limit.
       if (productsArray[index].amountInUsd <= remainingLimit) {
         if (oThis.os === InAppProductConstants.ios) {
-          //If the os is ios, products with apple product id are only filtered.
+          // If the os is ios, products with apple product id are only filtered.
           if (productsArray[index].appleProductId) {
             productsArray[index].id = productsArray[index].appleProductId;
             availableProductsArray.push(productsArray[index]);
           }
         } else if (oThis.os === InAppProductConstants.android) {
-          //If the os is android, products with google product id are only filtered.
+          // If the os is android, products with google product id are only filtered.
           if (productsArray[index].googleProductId) {
             productsArray[index].id = productsArray[index].googleProductId;
             availableProductsArray.push(productsArray[index]);
@@ -203,6 +212,7 @@ class GetTopupProduct extends ServiceBase {
         }
       }
     }
+
     return availableProductsArray;
   }
 }

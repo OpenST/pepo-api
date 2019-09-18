@@ -95,6 +95,7 @@ router.get('/users', sanitizer.sanitizeDynamicUrlParams, function(req, res, next
         [entityType.linksMap]: responseEntityKey.links,
         [entityType.twitterUsersMap]: responseEntityKey.twitterUsers,
         [entityType.token]: responseEntityKey.token,
+        [entityType.inviteCodesMap]: responseEntityKey.inviteCodes,
         [entityType.userSearchMeta]: responseEntityKey.meta
       },
       serviceData: serviceResponse.data
