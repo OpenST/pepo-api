@@ -135,7 +135,7 @@ class FiatPayment extends ModelBase {
     const oThis = this;
 
     const queryResponse = await oThis
-      .select('sum(amount) as total_purchase_amount, sum(pepo_amount_in_wei) as total_pepo_amount_in_wei')
+      .select('from_user_id, sum(amount) as total_purchase_amount')
       .where([
         'from_user_id IN (?) AND status = ?',
         userIds,
@@ -147,15 +147,12 @@ class FiatPayment extends ModelBase {
     const response = {};
 
     for (let index = 0; index < userIds.length; index++) {
-      response[userIds[index]] = { amount: 0, pepoAmountInWei: '' };
+      response[userIds[index]] = 0;
     }
 
     for (let index = 0; index < queryResponse.length; index++) {
       const dbRow = queryResponse[index];
-      response[dbRow.from_user_id] = {
-        amount: dbRow.total_purchase_amount,
-        pepoAmountInWei: dbRow.total_pepo_amount_in_wei
-      };
+      response[dbRow.from_user_id] = dbRow.total_purchase_amount;
     }
 
     return response;

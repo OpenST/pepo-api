@@ -128,7 +128,7 @@ class GetTopupProduct extends ServiceBase {
       return Promise.reject(cacheResponse);
     }
 
-    oThis.totalLifetimeSpends = cacheResponse.data[oThis.currentUser.id].amount;
+    oThis.totalLifetimeSpends = cacheResponse.data[oThis.currentUser.id];
   }
 
   /**

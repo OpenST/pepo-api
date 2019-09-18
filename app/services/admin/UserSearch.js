@@ -548,9 +548,7 @@ class UserSearch extends ServiceBase {
 
       oThis.userPepoCoinsMap[userId] = {
         received: userReceivedAmountInUsd,
-        purchased: basicHelper
-          .convertWeiToNormal(oThis.lifetimePurchasesMap[userId].pepoAmountInWei || '0')
-          .toString(10),
+        purchased: basicHelper.convertWeiToNormal(oThis.lifetimePurchasesMap[userId] || '0').toString(10),
         redeemed: '0'
       };
     }
