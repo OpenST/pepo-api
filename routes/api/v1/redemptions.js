@@ -31,25 +31,4 @@ router.get('/info', sanitizer.sanitizeDynamicUrlParams, function(req, res, next)
   );
 });
 
-// request for redemption of a product
-router.post('/', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
-  req.decodedParams.apiName = apiName.requestRedemption;
-
-  const dataFormatterFunc = async function(serviceResponse) {
-    const wrapperFormatterRsp = await new FormatterComposer({
-      resultType: responseEntityKey.redemption,
-      entityKindToResponseKeyMap: {
-        [entityType.redemption]: responseEntityKey.redemption
-      },
-      serviceData: serviceResponse.data
-    }).perform();
-
-    serviceResponse.data = wrapperFormatterRsp.data;
-  };
-
-  Promise.resolve(
-    routeHelper.perform(req, res, next, '/redemption/Request', 'r_a_v1_redemptions_2', null, dataFormatterFunc)
-  );
-});
-
 module.exports = router;
