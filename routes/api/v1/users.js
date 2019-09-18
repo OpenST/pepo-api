@@ -126,7 +126,7 @@ router.get('/:profile_user_id/contribution-suggestion', sanitizer.sanitizeDynami
 });
 
 /* User Activation Initiated Api call*/
-router.get('/activation-initiate', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+router.post('/activation-initiate', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.loggedInUser;
 
   const dataFormatterFunc = async function(serviceResponse) {
