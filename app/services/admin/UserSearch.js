@@ -14,6 +14,7 @@ const rootPrefix = '../../..',
   TokenUserDetailByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TokenUserByUserIds'),
   TwitterUserByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TwitterUserByUserIds'),
   UserProfileElementsByUserIdCache = require(rootPrefix + '/lib/cacheManagement/multi/UserProfileElementsByUserIds'),
+  InviteCodeByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/InviteCodeByUserIds'),
   basicHelper = require(rootPrefix + '/helpers/basic'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
@@ -354,6 +355,33 @@ class UserSearch extends ServiceBase {
     }
 
     oThis.userStatsMap = cacheRsp.data;
+
+    await oThis._fetchInviterCodeDetails();
+  }
+
+  /**
+   * Fetch referral count from invite codes
+   *
+   *
+   * @returns {Promise<never>}
+   * @private
+   */
+  async _fetchInviterCodeDetails() {
+    const oThis = this;
+
+    const inviteCodeByUserIdCacheResponse = await new InviteCodeByUserIdsCache({
+      userIds: oThis.userIds
+    }).fetch();
+
+    if (inviteCodeByUserIdCacheResponse.isFailure()) {
+      return Promise.reject(inviteCodeByUserIdCacheResponse);
+    }
+
+    let inviterCodeRsp = inviteCodeByUserIdCacheResponse.data;
+
+    for (let userId in inviterCodeRsp) {
+      oThis.userStatsMap[userId]['referralCount'] = inviterCodeRsp[userId].invitedUserCount;
+    }
   }
 
   /**
