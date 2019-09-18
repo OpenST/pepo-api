@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "a76b0fdb-318c-47f0-aef1-db770bb45842",
+		"_postman_id": "79791670-4607-4b8a-a535-1ec3a61413aa",
 		"name": "pepo-api",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -1594,9 +1594,41 @@
 			"name": "admin",
 			"item": [
 				{
-					"name": "login",
+					"name": "fetch-csrf",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "99fee1eb-c1f9-46c7-9f67-2f8e85469d56",
+								"exec": [
+									"const $ = cheerio.load(pm.response.text())",
+									"",
+									"pm.environment.set('csrf-token', $('meta[name=csrf-token]').attr('content'));"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
 					"request": {
-						"method": "POST",
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "username",
+									"value": "pepo",
+									"type": "string"
+								},
+								{
+									"key": "password",
+									"value": "Pepo-Admin-20!9*",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
 						"header": [
 							{
 								"key": "Content-Type",
@@ -1621,13 +1653,72 @@
 							]
 						},
 						"url": {
-							"raw": "{{api_server}}/api/v1/admin/login",
+							"raw": "{{api_server}}/admin/login",
+							"host": [
+								"{{api_server}}"
+							],
+							"path": [
+								"admin",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "login",
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "username",
+									"value": "pepo",
+									"type": "string"
+								},
+								{
+									"key": "password",
+									"value": "Pepo-Admin-20!9*",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/x-www-form-urlencoded"
+							},
+							{
+								"key": "csrf-token",
+								"value": "{{csrf-token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "email",
+									"value": "santhosh@ost.com",
+									"type": "text"
+								},
+								{
+									"key": "password",
+									"value": "4e9d759c9349bcef",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{api_server}}/api/admin/login",
 							"host": [
 								"{{api_server}}"
 							],
 							"path": [
 								"api",
-								"v1",
 								"admin",
 								"login"
 							]
@@ -1679,9 +1770,6 @@
 				},
 				{
 					"name": "users",
-					"protocolProfileBehavior": {
-						"disableBodyPruning": true
-					},
 					"request": {
 						"method": "GET",
 						"header": [
@@ -1692,37 +1780,20 @@
 								"value": "application/x-www-form-urlencoded"
 							}
 						],
-						"body": {
-							"mode": "urlencoded",
-							"urlencoded": [
-								{
-									"key": "email",
-									"value": "santhosh@ost.com",
-									"type": "text"
-								},
-								{
-									"key": "password",
-									"value": "5b300f84986e09ab",
-									"type": "text"
-								}
-							]
-						},
 						"url": {
-							"raw": "{{api_server}}/api/v1/admin/users?",
+							"raw": "{{api_server}}/api/admin/users?q=test",
 							"host": [
 								"{{api_server}}"
 							],
 							"path": [
 								"api",
-								"v1",
 								"admin",
 								"users"
 							],
 							"query": [
 								{
 									"key": "q",
-									"value": "aman",
-									"disabled": true
+									"value": "test"
 								}
 							]
 						}
@@ -1731,51 +1802,25 @@
 				},
 				{
 					"name": "logged-in-admin",
-					"protocolProfileBehavior": {
-						"disableBodyPruning": true
-					},
 					"request": {
 						"method": "GET",
 						"header": [
 							{
 								"key": "Content-Type",
 								"name": "Content-Type",
-								"type": "text",
-								"value": "application/x-www-form-urlencoded"
+								"value": "application/x-www-form-urlencoded",
+								"type": "text"
 							}
 						],
-						"body": {
-							"mode": "urlencoded",
-							"urlencoded": [
-								{
-									"key": "email",
-									"value": "santhosh@ost.com",
-									"type": "text"
-								},
-								{
-									"key": "password",
-									"value": "5b300f84986e09ab",
-									"type": "text"
-								}
-							]
-						},
 						"url": {
-							"raw": "{{api_server}}/api/v1/admin/users?",
+							"raw": "{{api_server}}/api/admin/current",
 							"host": [
 								"{{api_server}}"
 							],
 							"path": [
 								"api",
-								"v1",
 								"admin",
-								"users"
-							],
-							"query": [
-								{
-									"key": "q",
-									"value": "aman",
-									"disabled": true
-								}
+								"current"
 							]
 						}
 					},
@@ -1784,13 +1829,33 @@
 				{
 					"name": "logout",
 					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "username",
+									"value": "pepo",
+									"type": "string"
+								},
+								{
+									"key": "password",
+									"value": "Pepo-Admin-20!9*",
+									"type": "string"
+								}
+							]
+						},
 						"method": "POST",
 						"header": [
 							{
 								"key": "Content-Type",
 								"name": "Content-Type",
-								"type": "text",
-								"value": "application/x-www-form-urlencoded"
+								"value": "application/x-www-form-urlencoded",
+								"type": "text"
+							},
+							{
+								"key": "csrf-token",
+								"value": "{{csrf-token}}",
+								"type": "text"
 							}
 						],
 						"body": {
@@ -1809,13 +1874,12 @@
 							]
 						},
 						"url": {
-							"raw": "{{api_server}}/api/v1/admin/logout",
+							"raw": "{{api_server}}/api/admin/logout",
 							"host": [
 								"{{api_server}}"
 							],
 							"path": [
 								"api",
-								"v1",
 								"admin",
 								"logout"
 							]
@@ -1826,30 +1890,44 @@
 				{
 					"name": "Approve user",
 					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "username",
+									"value": "pepo",
+									"type": "string"
+								},
+								{
+									"key": "password",
+									"value": "Pepo-Admin-20!9*",
+									"type": "string"
+								}
+							]
+						},
 						"method": "POST",
 						"header": [
 							{
 								"key": "Content-Type",
-								"name": "Content-Type",
-								"type": "text",
-								"value": "application/x-www-form-urlencoded"
+								"value": "application/x-www-form-urlencoded",
+								"type": "text"
+							},
+							{
+								"key": "csrf-token",
+								"value": "{{csrf-token}}",
+								"type": "text"
 							}
 						],
-						"body": {
-							"mode": "urlencoded",
-							"urlencoded": []
-						},
 						"url": {
-							"raw": "{{api_server}}/api/v1/admin/users/1001/approve",
+							"raw": "{{api_server}}/api/admin/users/1414/approve",
 							"host": [
 								"{{api_server}}"
 							],
 							"path": [
 								"api",
-								"v1",
 								"admin",
 								"users",
-								"1001",
+								"1414",
 								"approve"
 							]
 						}
@@ -1863,9 +1941,13 @@
 						"header": [
 							{
 								"key": "Content-Type",
-								"name": "Content-Type",
-								"type": "text",
-								"value": "application/x-www-form-urlencoded"
+								"value": "application/x-www-form-urlencoded",
+								"type": "text"
+							},
+							{
+								"key": "csrf-token",
+								"value": "{{csrf-token}}",
+								"type": "text"
 							}
 						],
 						"body": {
@@ -1873,16 +1955,16 @@
 							"urlencoded": []
 						},
 						"url": {
-							"raw": "{{api_server}}/api/v1/admin/whitelist/1001",
+							"raw": "{{api_server}}/api/admin/pre-launch/whitelist/6636",
 							"host": [
 								"{{api_server}}"
 							],
 							"path": [
 								"api",
-								"v1",
 								"admin",
+								"pre-launch",
 								"whitelist",
-								"1001"
+								"6636"
 							]
 						}
 					},
@@ -1895,9 +1977,13 @@
 						"header": [
 							{
 								"key": "Content-Type",
-								"name": "Content-Type",
-								"type": "text",
-								"value": "application/x-www-form-urlencoded"
+								"value": "application/x-www-form-urlencoded",
+								"type": "text"
+							},
+							{
+								"key": "csrf-token",
+								"value": "{{csrf-token}}",
+								"type": "text"
 							}
 						],
 						"body": {
@@ -1905,17 +1991,16 @@
 							"urlencoded": []
 						},
 						"url": {
-							"raw": "{{api_server}}/api/v1/admin/users/1001/approve",
+							"raw": "{{api_server}}/api/admin/users/1410/block",
 							"host": [
 								"{{api_server}}"
 							],
 							"path": [
 								"api",
-								"v1",
 								"admin",
 								"users",
-								"1001",
-								"approve"
+								"1410",
+								"block"
 							]
 						}
 					},
