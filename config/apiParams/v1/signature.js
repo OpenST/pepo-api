@@ -161,33 +161,6 @@ const v1Signature = {
     ],
     optional: []
   },
-  [apiName.gifsSearch]: {
-    mandatory: [
-      {
-        parameter: 'query',
-        validatorMethods: ['validateString']
-      }
-    ],
-    optional: [
-      {
-        parameter: paginationConstants.paginationIdentifierKey,
-        validatorMethods: ['validateString']
-      }
-    ]
-  },
-  [apiName.gifsTrending]: {
-    mandatory: [],
-    optional: [
-      {
-        parameter: paginationConstants.paginationIdentifierKey,
-        validatorMethods: ['validateString']
-      }
-    ]
-  },
-  [apiName.gifsCategories]: {
-    mandatory: [],
-    optional: []
-  },
   [apiName.ostTransaction]: {
     mandatory: [
       {

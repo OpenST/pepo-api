@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "16bbe70c-d734-44da-afb2-28278e21a144",
+		"_postman_id": "f0740699-9f76-4eae-b4a0-7e8c29f79caf",
 		"name": "pepo-api",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -200,78 +200,6 @@
 								"v1",
 								"auth",
 								"twitter-disconnect"
-							]
-						}
-					},
-					"response": []
-				}
-			],
-			"protocolProfileBehavior": {}
-		},
-		{
-			"name": "gifs",
-			"item": [
-				{
-					"name": "gif-categories",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{api_server}}/api/v1/gifs/categories",
-							"host": [
-								"{{api_server}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"gifs",
-								"categories"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "gif-search",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{api_server}}/api/v1/gifs/search?query=love",
-							"host": [
-								"{{api_server}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"gifs",
-								"search"
-							],
-							"query": [
-								{
-									"key": "query",
-									"value": "love"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "gif-trending",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{api_server}}/api/v1/gifs/trending",
-							"host": [
-								"{{api_server}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"gifs",
-								"trending"
 							]
 						}
 					},
