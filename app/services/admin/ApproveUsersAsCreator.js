@@ -1,6 +1,7 @@
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   FeedModel = require(rootPrefix + '/app/models/mysql/Feed'),
+  VideoDetailModel = require(rootPrefix + '/app/models/mysql/VideoDetail'),
   UserModel = require(rootPrefix + '/app/models/mysql/User'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   UsersCache = require(rootPrefix + '/lib/cacheManagement/multi/User'),
@@ -208,21 +209,19 @@ class ApproveUsersAsCreator extends ServiceBase {
   async _publishFanVideo() {
     const oThis = this;
 
-    const cacheRsp = await new UserProfileElementsByUserIdCache({ usersIds: oThis.userIds }).fetch();
-    if (cacheRsp.isFailure()) {
-      return cacheRsp;
-    }
-
     const promises = [];
-    for (const userId in oThis.userObjects) {
-      const profileElements = cacheRsp.data[userId];
-      if (profileElements && profileElements[userProfileElementConstants.coverVideoIdKind]) {
-        const videoId = profileElements[userProfileElementConstants.coverVideoIdKind].data;
-        promises.push(oThis._addFeed(videoId, userId));
+    const dbRows = await new VideoDetailModel().fetchLatestVideoId(oThis.userIds);
+
+    for (let ind = 0; ind < oThis.userIds.length; ind++) {
+      const userId = oThis.userIds[ind];
+      const latestVideoId = dbRows[userId].latestVideoId;
+
+      if (latestVideoId) {
+        promises.push(oThis._addFeed(latestVideoId, userId));
         promises.push(
           notificationJobEnqueue.enqueue(notificationJobConstants.videoAdd, {
             userId: userId,
-            videoId: videoId
+            videoId: latestVideoId
           })
         );
       }

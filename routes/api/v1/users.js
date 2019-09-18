@@ -125,6 +125,30 @@ router.get('/:profile_user_id/contribution-suggestion', sanitizer.sanitizeDynami
   );
 });
 
+/* User Activation Initiated Api call*/
+router.post('/activation-initiate', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.loggedInUser;
+
+  const dataFormatterFunc = async function(serviceResponse) {
+    const wrapperFormatterRsp = await new FormatterComposer({
+      resultType: responseEntityKey.activationInitiate,
+      entityKindToResponseKeyMap: {
+        [entityType.loggedInUser]: responseEntityKey.loggedInUser,
+        [entityType.pricePointsMap]: responseEntityKey.pricePoints,
+        [entityType.usersMap]: responseEntityKey.users,
+        [entityType.token]: responseEntityKey.token
+      },
+      serviceData: serviceResponse.data
+    }).perform();
+
+    serviceResponse.data = wrapperFormatterRsp.data;
+  };
+
+  Promise.resolve(
+    routeHelper.perform(req, res, next, '/user/init/ActivationInitiate', 'r_a_v1_u_ai_1', null, dataFormatterFunc)
+  );
+});
+
 /* Logged In User*/
 router.get('/current', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.loggedInUser;
@@ -157,17 +181,13 @@ router.get('/:profile_user_id/profile', sanitizer.sanitizeDynamicUrlParams, func
       resultType: responseEntityKey.userProfile,
       entityKindToResponseKeyMap: {
         [entityType.userProfile]: responseEntityKey.userProfile,
-        [entityType.videoDescriptionsMap]: responseEntityKey.videoDescriptions,
         [entityType.usersMap]: responseEntityKey.users,
         [entityType.linksMap]: responseEntityKey.links,
         [entityType.imagesMap]: responseEntityKey.images,
-        [entityType.videosMap]: responseEntityKey.videos,
         [entityType.tagsMap]: responseEntityKey.tags,
         [entityType.userProfileAllowedActions]: responseEntityKey.userProfileAllowedActions,
         [entityType.userStats]: responseEntityKey.userStats,
-        [entityType.videoDetailsMap]: responseEntityKey.videoDetails,
         [entityType.currentUserUserContributionsMap]: responseEntityKey.currentUserUserContributions,
-        [entityType.currentUserVideoContributionsMap]: responseEntityKey.currentUserVideoContributions,
         [entityType.pricePointsMap]: responseEntityKey.pricePoints
       },
       serviceData: serviceResponse.data

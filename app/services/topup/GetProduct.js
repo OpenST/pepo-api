@@ -6,6 +6,7 @@ const rootPrefix = '../../..',
   LifetimePurchaseByUserIdCache = require(rootPrefix + '/lib/cacheManagement/single/LifetimePurchaseByUserId'),
   UserProfileElementsByUserId = require(rootPrefix + '/lib/cacheManagement/multi/UserProfileElementsByUserIds'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
+  entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
   userProfileElementConst = require(rootPrefix + '/lib/globalConstant/userProfileElement');
 
 /**
@@ -60,10 +61,10 @@ class GetTopupProduct extends ServiceBase {
 
     let remainingLimit = oThis._calculateRemainingLimit(oThis.totalLifetimeSpends),
       availableProductsArray = oThis._filterAvailableProducts(remainingLimit),
-      responseData = {
-        products: availableProductsArray,
-        limits_data: oThis.limitsData
-      };
+      responseData = {};
+
+    responseData[entityType.topupProducts] = availableProductsArray;
+    responseData[entityType.topupLimitsData] = oThis.limitsData;
 
     return responseHelper.successWithData(responseData);
   }
