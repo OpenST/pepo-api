@@ -127,34 +127,38 @@ class FiatPayment extends ModelBase {
   /**
    * Fetch life time purchase amount and total pepo amount purchased for a user id.
    *
-   * @param userId: user id for which the total purchase amount has to be summed.
+   * @param {array} userIds: user id sfor which the total purchase amount and total pepo amount has to be summed.
    *
    * @returns {Promise<void>}
    */
-  async fetchTotalPurchaseAmountFor(userId) {
+  async fetchTotalPurchaseAmountFor(userIds) {
     const oThis = this;
 
-    let totalAmount = 0,
-      totalPepoAmount = 0;
-
     const queryResponse = await oThis
-      .select('sum(amount) as total_purchase_amount AND sum(pepo_amount_in_wei) as total_pepo_amount_in_wei')
+      .select('sum(amount) as total_purchase_amount, sum(pepo_amount_in_wei) as total_pepo_amount_in_wei')
       .where([
-        'from_user_id = ? AND status = ?',
-        userId,
+        'from_user_id IN (?) AND status = ?',
+        userIds,
         fiatPaymentConstants.invertedStatuses[fiatPaymentConstants.pepoTransferSuccessStatus]
       ])
+      .group_by(['from_user_id'])
       .fire();
 
-    if (queryResponse[0].total_purchase_amount) {
-      totalAmount = queryResponse[0].total_purchase_amount;
+    const response = {};
+
+    for (let index = 0; index < userIds.length; index++) {
+      response[userIds[index]] = { amount: 0, pepoAmountInWei: '' };
     }
 
-    if (queryResponse[0].total_pepo_amount_in_wei) {
-      totalPepoAmount = queryResponse[0].total_pepo_amount_in_wei;
+    for (let index = 0; index < queryResponse.length; index++) {
+      const dbRow = queryResponse[index];
+      response[dbRow.from_user_id] = {
+        amount: dbRow.total_purchase_amount,
+        pepoAmountInWei: dbRow.total_pepo_amount_in_wei
+      };
     }
 
-    return { amount: totalAmount, pepoAmountInWei: totalPepoAmount };
+    return response;
   }
 
   /**
