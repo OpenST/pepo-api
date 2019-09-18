@@ -74,14 +74,10 @@ class GetUserProfile extends ServiceBase {
       usersByIdMap: profileResp.usersByIdMap,
       tokenUsersByUserIdMap: profileResp.tokenUsersByUserIdMap,
       imageMap: profileResp.imageMap,
-      videoMap: profileResp.videoMap,
       linkMap: profileResp.linkMap,
       tags: profileResp.tags,
       userStat: profileResp.userStat,
-      videoDetailsMap: profileResp.videoDetailsMap,
-      videoDescriptionsMap: profileResp.videoDescriptionMap,
       currentUserUserContributionsMap: profileResp.currentUserUserContributionsMap,
-      currentUserVideoContributionsMap: profileResp.currentUserVideoContributionsMap,
       pricePointsMap: profileResp.pricePointsMap
     });
   }

@@ -157,17 +157,13 @@ router.get('/:profile_user_id/profile', sanitizer.sanitizeDynamicUrlParams, func
       resultType: responseEntityKey.userProfile,
       entityKindToResponseKeyMap: {
         [entityType.userProfile]: responseEntityKey.userProfile,
-        [entityType.videoDescriptionsMap]: responseEntityKey.videoDescriptions,
         [entityType.usersMap]: responseEntityKey.users,
         [entityType.linksMap]: responseEntityKey.links,
         [entityType.imagesMap]: responseEntityKey.images,
-        [entityType.videosMap]: responseEntityKey.videos,
         [entityType.tagsMap]: responseEntityKey.tags,
         [entityType.userProfileAllowedActions]: responseEntityKey.userProfileAllowedActions,
         [entityType.userStats]: responseEntityKey.userStats,
-        [entityType.videoDetailsMap]: responseEntityKey.videoDetails,
         [entityType.currentUserUserContributionsMap]: responseEntityKey.currentUserUserContributions,
-        [entityType.currentUserVideoContributionsMap]: responseEntityKey.currentUserVideoContributions,
         [entityType.pricePointsMap]: responseEntityKey.pricePoints
       },
       serviceData: serviceResponse.data

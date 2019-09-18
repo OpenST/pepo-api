@@ -92,6 +92,40 @@ class VideoDetail extends ModelBase {
    *
    * @return {object}
    */
+  async fetchLatestVideoId(userIds) {
+    const oThis = this;
+
+    const dbRows = await oThis
+      .select('creator_user_id, max(id) as latest_video_id')
+      .where({
+        creator_user_id: userIds,
+        status: videoDetailsConst.invertedStatuses[videoDetailsConst.activeStatus]
+      })
+      .group_by(['creator_user_id'])
+      .fire();
+
+    let response = {};
+
+    for (let index = 0; index < userIds.length; index++) {
+      const userId = userIds[index];
+      response[userId] = {};
+    }
+
+    for (let index = 0; index < dbRows.length; index++) {
+      const dbRow = dbRows[index];
+      response[dbRow.creator_user_id] = { latestVideoId: dbRow.latest_video_id };
+    }
+
+    return response;
+  }
+
+  /**
+   * Fetch videoDetail object for video id.
+   *
+   * @param {integer} videoId: video id
+   *
+   * @return {object}
+   */
   async fetchByVideoId(videoId) {
     const oThis = this;
 
