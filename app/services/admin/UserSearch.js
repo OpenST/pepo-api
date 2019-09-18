@@ -378,11 +378,7 @@ class UserSearch extends ServiceBase {
       return Promise.reject(inviteCodeByUserIdCacheResponse);
     }
 
-    let inviterCodeRsp = inviteCodeByUserIdCacheResponse.data;
-
-    for (let userId in inviterCodeRsp) {
-      oThis.userStatsMap[userId]['referralCount'] = inviterCodeRsp[userId].invitedUserCount;
-    }
+    oThis.inviteCodes = inviteCodeByUserIdCacheResponse.data;
   }
 
   /**
@@ -555,6 +551,7 @@ class UserSearch extends ServiceBase {
       twitterUsersMap: oThis.twitterUserByUserIdMap,
       tokenDetails: oThis.tokenDetails,
       userStat: oThis.userStatsMap,
+      inviteCodesMap: oThis.inviteCodes,
       userPepoCoinsMap: oThis.userPepoCoinsMap,
       meta: oThis.responseMetaData
     };
