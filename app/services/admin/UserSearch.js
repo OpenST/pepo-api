@@ -414,6 +414,12 @@ class UserSearch extends ServiceBase {
     }
 
     oThis.inviteCodes = inviteCodeByUserIdCacheResponse.data;
+
+    for (let userId in oThis.inviteCodes) {
+      if (!oThis.inviteCodes[userId].hasOwnProperty('id')) {
+        delete oThis.inviteCodes[userId];
+      }
+    }
   }
 
   /**
