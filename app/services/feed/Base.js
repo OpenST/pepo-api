@@ -35,7 +35,22 @@ class FeedBase extends ServiceBase {
     oThis.feedIds = [];
     oThis.userIds = [];
     oThis.videoIds = [];
-    oThis.profileResponse = {};
+    oThis.profileResponse = {
+      userProfilesMap: {},
+      userProfileAllowedActions: {},
+      usersByIdMap: {},
+      tokenUsersByUserIdMap: {},
+      imageMap: {},
+      videoMap: {},
+      linkMap: {},
+      tags: {},
+      userStat: {},
+      videoDetailsMap: {},
+      videoDescriptionMap: {},
+      currentUserUserContributionsMap: {},
+      currentUserVideoContributionsMap: {},
+      pricePointsMap: {}
+    };
     oThis.finalResponse = {};
     oThis.tokenDetails = {};
   }

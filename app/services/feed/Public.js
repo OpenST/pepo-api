@@ -28,12 +28,6 @@ class PublicVideoFeed extends FeedBase {
 
     oThis.paginationIdentifier = params[paginationConstants.paginationIdentifierKey] || null;
 
-    oThis.feeds = [];
-    oThis.userIds = [];
-    oThis.videoIds = [];
-    oThis.profileResponse = {};
-    oThis.finalResponse = {};
-
     oThis.limit = oThis._defaultPageLimit();
     oThis.paginationTimestamp = null;
     oThis.nextPaginationTimestamp = null;
