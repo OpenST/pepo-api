@@ -128,7 +128,7 @@
   node executables/oneTimers/seedTokensTable.js --apiKey "803ee2a07554b94d80fb4ba4eb08229c" --apiSecret "66fc5bce904f83a74aba10469505cd5ac51dfc886fc747ecbfba3fea254d3006"
 ```
 
-* Update Utility Branded Token In Tokens Table.
+* Update Utility Branded Token In Tokens Table (execute this script for first time only).
 ```bash
   node executables/oneTimers/UpdateUtilityBrandedTokenInTokensTable.js --apiKey "803ee2a07554b94d80fb4ba4eb08229c" --apiSecret "66fc5bce904f83a74aba10469505cd5ac51dfc886fc747ecbfba3fea254d3006"
 ```
