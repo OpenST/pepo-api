@@ -3,7 +3,7 @@ const rootPrefix = '../../..',
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   ProductsCache = require(rootPrefix + '/lib/cacheManagement/single/Products'),
   InAppProductConstants = require(rootPrefix + '/lib/globalConstant/inAppProduct'),
-  LifetimePurchaseByUserIdCache = require(rootPrefix + '/lib/cacheManagement/single/LifetimePurchaseByUserId'),
+  LifetimePurchaseByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/LifetimePurchaseByUserIds'),
   UserProfileElementsByUserId = require(rootPrefix + '/lib/cacheManagement/multi/UserProfileElementsByUserIds'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   userProfileElementConst = require(rootPrefix + '/lib/globalConstant/userProfileElement');
@@ -123,7 +123,7 @@ class GetTopupProduct extends ServiceBase {
   async _fetchUsersPurchaseData() {
     const oThis = this;
 
-    const cacheResponse = await new LifetimePurchaseByUserIdCache({ userId: oThis.currentUser.id }).fetch();
+    const cacheResponse = await new LifetimePurchaseByUserIdsCache({ userIds: [oThis.currentUser.id] }).fetch();
     if (cacheResponse.isFailure()) {
       return Promise.reject(cacheResponse);
     }

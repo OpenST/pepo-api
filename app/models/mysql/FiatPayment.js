@@ -209,11 +209,11 @@ class FiatPayment extends ModelBase {
     }
 
     if (params.userId) {
-      const LifetimePurchaseByUserIdCache = require(rootPrefix +
-          '/lib/cacheManagement/single/LifetimePurchaseByUserId'),
+      const LifetimePurchaseByUserIdsCache = require(rootPrefix +
+          '/lib/cacheManagement/multi/LifetimePurchaseByUserIds'),
         UserPendingTopupCache = require(rootPrefix + '/lib/cacheManagement/single/UserPendingTopups');
 
-      const lifetimePurchaseByUserIdCacheObj = new LifetimePurchaseByUserIdCache({ userId: params.userId });
+      const lifetimePurchaseByUserIdCacheObj = new LifetimePurchaseByUserIdsCache({ userIds: [params.userId] });
       promiseArray.push(lifetimePurchaseByUserIdCacheObj.clear());
 
       const userPendingTopupCacheObj = new UserPendingTopupCache({ userId: params.userId });
