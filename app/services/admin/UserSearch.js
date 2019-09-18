@@ -548,7 +548,7 @@ class UserSearch extends ServiceBase {
 
       oThis.userPepoCoinsMap[userId] = {
         received: userReceivedAmountInUsd,
-        purchased: oThis.lifetimePurchasesMap[userId],
+        purchased: oThis.lifetimePurchasesMap[userId].amount,
         redeemed: '0'
       };
     }

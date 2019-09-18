@@ -147,12 +147,12 @@ class FiatPayment extends ModelBase {
     const response = {};
 
     for (let index = 0; index < userIds.length; index++) {
-      response[userIds[index]] = 0;
+      response[userIds[index]] = { amount: 0 };
     }
 
     for (let index = 0; index < queryResponse.length; index++) {
       const dbRow = queryResponse[index];
-      response[dbRow.from_user_id] = dbRow.total_purchase_amount;
+      response[dbRow.from_user_id] = { amount: dbRow.total_purchase_amount };
     }
 
     return response;
