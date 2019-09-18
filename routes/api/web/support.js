@@ -50,8 +50,8 @@ const validateTokenIfPresent = async function(req, res, next) {
 
     if (authResponse.isSuccess()) {
       req.decodedParams.current_user = authResponse.data.current_user;
-      // req.decodedParams.user_login_cookie_value = authResponse.data.user_login_cookie_value;
-      // cookieHelper.setLoginCookie(res, authResponse.data.user_login_cookie_value);
+      req.decodedParams.user_login_cookie_value = authResponse.data.user_login_cookie_value;
+      cookieHelper.setLoginCookie(res, authResponse.data.user_login_cookie_value);
     }
   }
 
