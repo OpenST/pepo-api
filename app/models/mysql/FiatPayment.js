@@ -125,7 +125,7 @@ class FiatPayment extends ModelBase {
   }
 
   /**
-   * Fetch life time purchase amount for a user id
+   * Fetch life time purchase amount and total pepo amount purchased for a user id.
    *
    * @param userId: user id for which the total purchase amount has to be summed.
    *
@@ -135,20 +135,26 @@ class FiatPayment extends ModelBase {
     const oThis = this;
 
     let totalAmount = 0,
-      queryResponse = await oThis
-        .select('sum(amount) as total_purchase_amount')
-        .where([
-          'from_user_id = ? AND status = ?',
-          userId,
-          fiatPaymentConstants.invertedStatuses[fiatPaymentConstants.pepoTransferSuccessStatus]
-        ])
-        .fire();
+      totalPepoAmount = 0;
+
+    const queryResponse = await oThis
+      .select('sum(amount) as total_purchase_amount AND sum(pepo_amount_in_wei) as total_pepo_amount_in_wei')
+      .where([
+        'from_user_id = ? AND status = ?',
+        userId,
+        fiatPaymentConstants.invertedStatuses[fiatPaymentConstants.pepoTransferSuccessStatus]
+      ])
+      .fire();
 
     if (queryResponse[0].total_purchase_amount) {
       totalAmount = queryResponse[0].total_purchase_amount;
     }
 
-    return { amount: totalAmount };
+    if (queryResponse[0].total_pepo_amount_in_wei) {
+      totalPepoAmount = queryResponse[0].total_pepo_amount_in_wei;
+    }
+
+    return { amount: totalAmount, pepoAmountInWei: totalPepoAmount };
   }
 
   /**
