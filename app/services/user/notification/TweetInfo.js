@@ -291,7 +291,7 @@ class TweetInfo extends ServiceBase {
 
     await TwitterUserModel.flushCache(oThis.twitterUsersMap[oThis.receiverUserId]);
 
-    oThis.serviceResponse['twitterUsersMap'] = oThis.twitterUsersMap;
+    oThis.serviceResponse['secureTwitterUsersMap'] = oThis.twitterUsersMap;
   }
 
   /**
