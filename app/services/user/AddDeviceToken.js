@@ -181,9 +181,12 @@ class AddDeviceToken extends ServiceBase {
 
       let isDuplicateIndexViolation = false;
 
-      const userDeviceInsertRsp = await new UserDeviceModel()
+      await new UserDeviceModel()
         .insert(insertParams)
         .fire()
+        .then(async function(userDeviceInsertRsp) {
+          await oThis._cacheFlush({ userId: oThis.currentUserId, id: userDeviceInsertRsp.insertId });
+        })
         .catch(async function(err) {
           if (UserDeviceModel.isDuplicateIndexViolation(UserDeviceModel.userDeviceUniqueIndexName, err)) {
             isDuplicateIndexViolation = true;
@@ -200,8 +203,6 @@ class AddDeviceToken extends ServiceBase {
             return Promise.reject(errorObject);
           }
         });
-
-      await oThis._cacheFlush({ userId: oThis.currentUserId, id: userDeviceInsertRsp.insertId });
     }
   }
 
