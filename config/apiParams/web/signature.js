@@ -36,6 +36,16 @@ const v1Signature = {
     optional: []
   },
 
+  [apiName.validateSupportUrl]: {
+    mandatory: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      }
+    ],
+    optional: []
+  },
+
   [apiName.preLaunchInviteVerify]: {
     mandatory: [
       {

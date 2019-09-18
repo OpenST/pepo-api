@@ -3,10 +3,13 @@ const express = require('express'),
 
 const rootPrefix = '../../..',
   preLaunchRoutes = require(rootPrefix + '/routes/api/web/preLaunch'),
-  redemptionsRoutes = require(rootPrefix + '/routes/api/web/redemptions');
+  redemptionsRoutes = require(rootPrefix + '/routes/api/web/redemptions'),
+  supportRoutes = require(rootPrefix + '/routes/api/web/support');
 
 router.use('/prelaunch', preLaunchRoutes);
 
 router.use('/redemptions', redemptionsRoutes);
+
+router.use('/support', supportRoutes);
 
 module.exports = router;
