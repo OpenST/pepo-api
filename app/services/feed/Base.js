@@ -85,16 +85,6 @@ class FeedBase extends ServiceBase {
         oThis.videoIds.push(feedData.primaryExternalEntityId);
       }
     }
-
-    if (!CommonValidators.validateNonEmptyObject(oThis.feeds[0])) {
-      return Promise.reject(
-        responseHelper.error({
-          internal_error_identifier: 'a_s_f_b_1',
-          api_error_identifier: 'resource_not_found',
-          debug_options: {}
-        })
-      );
-    }
   }
 
   /**
