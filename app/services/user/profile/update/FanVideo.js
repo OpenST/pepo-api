@@ -61,6 +61,7 @@ class UpdateFanVideo extends UpdateProfileBase {
     oThis.link = params.link;
 
     oThis.videoId = null;
+    oThis.addVideoParams = {};
     oThis.flushUserCache = false;
     oThis.flushUserProfileElementsCache = true;
 
@@ -85,7 +86,20 @@ class UpdateFanVideo extends UpdateProfileBase {
       oThis.link = oThis.link.toLowerCase();
     }
 
-    const resp = videoLib.validateVideoObj({ videoUrl: oThis.videoUrl, isExternalUrl: oThis.isExternalUrl });
+    oThis.addVideoParams = {
+      userId: oThis.profileUserId,
+      videoUrl: oThis.videoUrl,
+      size: oThis.videoSize,
+      width: oThis.videoWidth,
+      height: oThis.videoHeight,
+      posterImageUrl: oThis.posterImageUrl,
+      posterImageSize: oThis.imageSize,
+      posterImageWidth: oThis.imageWidth,
+      posterImageHeight: oThis.imageHeight,
+      isExternalUrl: oThis.isExternalUrl
+    };
+
+    const resp = videoLib.validateVideoObj(oThis.addVideoParams);
     if (resp.isFailure()) {
       return Promise.reject(
         responseHelper.paramValidationError({
@@ -121,19 +135,8 @@ class UpdateFanVideo extends UpdateProfileBase {
 
     const linkIds = await oThis._addLink();
 
-    const resp = await videoLib.validateAndSave({
-      userId: oThis.profileUserId,
-      videoUrl: oThis.videoUrl,
-      size: oThis.videoSize,
-      width: oThis.videoWidth,
-      height: oThis.videoHeight,
-      posterImageUrl: oThis.posterImageUrl,
-      posterImageSize: oThis.imageSize,
-      posterImageWidth: oThis.imageWidth,
-      posterImageHeight: oThis.imageHeight,
-      isExternalUrl: oThis.isExternalUrl,
-      linkIds: linkIds
-    });
+    oThis.addVideoParams.linkIds = linkIds;
+    const resp = await videoLib.validateAndSave(oThis.addVideoParams);
 
     if (resp.isFailure()) {
       return Promise.reject(resp);
