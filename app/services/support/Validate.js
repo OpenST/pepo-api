@@ -19,7 +19,12 @@ class ValidateSupportUrl extends ServiceBase {
   async _asyncPerform() {
     const oThis = this;
 
-    return Promise.resolve(responseHelper.successWithData({ userId: oThis.currentUser.id }));
+    return Promise.resolve(
+      responseHelper.successWithData({
+        userId: oThis.currentUser.id,
+        external_user_id: oThis.currentUser.externalUserId || oThis.currentUser.id
+      })
+    );
   }
 }
 

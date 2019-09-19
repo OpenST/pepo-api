@@ -1,3 +1,5 @@
+const uuidV4 = require('uuid/v4');
+
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   UserModel = require(rootPrefix + '/app/models/mysql/User'),
@@ -313,7 +315,8 @@ class TwitterSignup extends ServiceBase {
       properties: oThis._userPropertiesToSet(),
       status: userConstants.invertedStatuses[userConstants.activeStatus],
       profile_image_id: oThis.profileImageId,
-      email: oThis.userOptedInEmail
+      email: oThis.userOptedInEmail,
+      external_user_id: uuidV4()
     };
 
     let retryCount = 3,
