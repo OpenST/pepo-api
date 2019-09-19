@@ -35,7 +35,22 @@ class FeedBase extends ServiceBase {
     oThis.feedIds = [];
     oThis.userIds = [];
     oThis.videoIds = [];
-    oThis.profileResponse = {};
+    oThis.profileResponse = {
+      userProfilesMap: {},
+      userProfileAllowedActions: {},
+      usersByIdMap: {},
+      tokenUsersByUserIdMap: {},
+      imageMap: {},
+      videoMap: {},
+      linkMap: {},
+      tags: {},
+      userStat: {},
+      videoDetailsMap: {},
+      videoDescriptionMap: {},
+      currentUserUserContributionsMap: {},
+      currentUserVideoContributionsMap: {},
+      pricePointsMap: {}
+    };
     oThis.finalResponse = {};
     oThis.tokenDetails = {};
   }
@@ -57,9 +72,8 @@ class FeedBase extends ServiceBase {
 
     await oThis._fetchProfileDetails();
 
-    await oThis._filterInactiveUserFeeds();
-
-    await oThis._setTokenDetails();
+    const promisesArray = [oThis._filterInactiveUserFeeds(), oThis._setTokenDetails()];
+    await Promise.all(promisesArray);
 
     return oThis._prepareResponse();
   }
@@ -85,16 +99,6 @@ class FeedBase extends ServiceBase {
         oThis.videoIds.push(feedData.primaryExternalEntityId);
       }
     }
-
-    if (!CommonValidators.validateNonEmptyObject(oThis.feeds[0])) {
-      return Promise.reject(
-        responseHelper.error({
-          internal_error_identifier: 'a_s_f_b_1',
-          api_error_identifier: 'resource_not_found',
-          debug_options: {}
-        })
-      );
-    }
   }
 
   /**
@@ -108,6 +112,10 @@ class FeedBase extends ServiceBase {
   async _fetchProfileDetails() {
     const oThis = this;
 
+    if (oThis.userIds.length === 0) {
+      return responseHelper.successWithData({});
+    }
+
     const getProfileObj = new GetProfile({
       userIds: oThis.userIds,
       currentUserId: oThis.currentUserId,
@@ -119,21 +127,23 @@ class FeedBase extends ServiceBase {
     if (profileResp.isFailure()) {
       return Promise.reject(profileResp);
     }
+
     oThis.profileResponse = profileResp.data;
 
     return responseHelper.successWithData({});
   }
 
   /**
-   * Filter out feeds of inactive users
+   * Filter out feeds of inactive users.
    *
+   * @returns {Promise<never>}
    * @private
    */
   async _filterInactiveUserFeeds() {
     const oThis = this;
 
-    for (let i = 0; i < oThis.feeds.length; i++) {
-      const feedData = oThis.feeds[i];
+    for (let index = 0; index < oThis.feeds.length; index++) {
+      const feedData = oThis.feeds[index];
 
       const profileObj = oThis.profileResponse.userProfilesMap[feedData.actor],
         videoEntityForFeed = oThis.profileResponse.videoMap[feedData.primaryExternalEntityId];
@@ -143,18 +153,8 @@ class FeedBase extends ServiceBase {
         !CommonValidators.validateNonEmptyObject(profileObj) ||
         videoEntityForFeed.status === videoConstants.deletedStatus
       ) {
-        oThis.feeds.splice(i, 1);
+        oThis.feeds.splice(index, 1);
       }
-    }
-
-    if (oThis.feeds.length <= 0) {
-      return Promise.reject(
-        responseHelper.error({
-          internal_error_identifier: 'a_s_f_b_2',
-          api_error_identifier: 'resource_not_found',
-          debug_options: {}
-        })
-      );
     }
   }
 
@@ -176,6 +176,7 @@ class FeedBase extends ServiceBase {
     if (tokenResp.isFailure()) {
       return Promise.reject(tokenResp);
     }
+
     oThis.tokenDetails = tokenResp.data.tokenDetails;
 
     return responseHelper.successWithData({});
