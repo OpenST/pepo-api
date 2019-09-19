@@ -119,7 +119,7 @@ class ServicesBase {
       return Promise.reject(
         responseHelper.error({
           internal_error_identifier: 'a_s_b_3',
-          api_error_identifier: 'resource_not_found',
+          api_error_identifier: 'entity_not_found',
           debug_options: {
             reason: 'Invalid userId',
             profileUserId: oThis.profileUserId,
@@ -145,10 +145,9 @@ class ServicesBase {
 
     if (profileUserObj.status === userConstants.inActiveStatus) {
       return Promise.reject(
-        responseHelper.paramValidationError({
+        responseHelper.error({
           internal_error_identifier: 'a_s_b_4',
-          api_error_identifier: 'could_not_proceed',
-          params_error_identifiers: ['user_inactive'],
+          api_error_identifier: 'entity_not_found',
           debug_options: {}
         })
       );

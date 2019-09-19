@@ -1,4 +1,9 @@
 {
+  "entity_not_found": {
+    "http_code": "200",
+    "code": "NOT_FOUND",
+    "message": "Resource not found."
+  },
   "invalid_api_params": {
     "http_code": "200",
     "code": "BAD_REQUEST",
@@ -7,7 +12,7 @@
   "forbidden_api_request": {
     "http_code": "403",
     "code": "FORBIDDEN",
-    "message": "Invalid Request. Form tampered with "
+    "message": "Invalid Request. Form tampered with"
   },
   "unauthorized_api_request": {
     "http_code": "401",
