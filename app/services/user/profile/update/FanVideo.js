@@ -62,7 +62,7 @@ class UpdateFanVideo extends UpdateProfileBase {
 
     oThis.videoId = null;
     oThis.flushUserCache = false;
-    oThis.flushUserProfileElementsCache = true;
+    oThis.flushUserProfileElementsCache = false;
 
     oThis.paginationTimestamp = Math.round(new Date() / 1000);
   }
@@ -145,48 +145,6 @@ class UpdateFanVideo extends UpdateProfileBase {
       videoDescription: oThis.videoDescription,
       videoId: oThis.videoId
     }).perform();
-
-    const videoObj = resp.data.video,
-      coverImageId = videoObj.posterImageId;
-
-    if (oThis.videoId) {
-      await oThis._addProfileElement(oThis.videoId, userProfileElementConst.coverVideoIdKind);
-    }
-
-    if (coverImageId) {
-      await oThis._addProfileElement(coverImageId, userProfileElementConst.coverImageIdKind);
-    }
-  }
-
-  /**
-   * Add entity in profile elements.
-   *
-   * @param {number} entityId
-   * @param {string} entityKind
-   *
-   * @returns {Promise<void>}
-   * @private
-   */
-  async _addProfileElement(entityId, entityKind) {
-    const oThis = this;
-
-    const profileElementObj = oThis.profileElements[entityKind];
-    if (CommonValidator.validateObject(profileElementObj)) {
-      await new UserProfileElementModel()
-        .update({
-          data: entityId
-        })
-        .where({ id: profileElementObj.id })
-        .fire();
-    } else {
-      await new UserProfileElementModel()
-        .insert({
-          user_id: oThis.profileUserId,
-          data_kind: userProfileElementConst.invertedKinds[entityKind],
-          data: entityId
-        })
-        .fire();
-    }
   }
 
   /**

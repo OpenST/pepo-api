@@ -22,9 +22,6 @@ const rootPrefix = '../../..',
 // Declare variables.
 const errorConfig = basicHelper.fetchErrorConfig(apiVersions.admin);
 
-// Node.js cookie parsing middleware.
-router.use(cookieParser(coreConstants.ADMIN_COOKIE_SECRET));
-
 const validateAdminCookie = async function(req, res, next) {
   // Cookie validation is not to be done for admin login request
   if (req.url !== '/login') {
@@ -48,6 +45,8 @@ const validateAdminCookie = async function(req, res, next) {
   next();
 };
 
+// Node.js cookie parsing middleware.
+router.use(cookieParser(coreConstants.ADMIN_COOKIE_SECRET));
 router.use(validateAdminCookie);
 router.use(cookieHelper.setAdminCsrf());
 
@@ -95,6 +94,7 @@ router.get('/users', sanitizer.sanitizeDynamicUrlParams, function(req, res, next
         [entityType.linksMap]: responseEntityKey.links,
         [entityType.twitterUsersMap]: responseEntityKey.twitterUsers,
         [entityType.token]: responseEntityKey.token,
+        [entityType.inviteCodesMap]: responseEntityKey.inviteCodes,
         [entityType.userSearchMeta]: responseEntityKey.meta
       },
       serviceData: serviceResponse.data

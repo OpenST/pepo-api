@@ -4,6 +4,7 @@ const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   UserModel = require(rootPrefix + '/app/models/mysql/User'),
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
+  VideoDetailModel = require(rootPrefix + '/app/models/mysql/VideoDetail'),
   UrlByIdCache = require(rootPrefix + '/lib/cacheManagement/multi/UrlsByIds'),
   ImageByIdCache = require(rootPrefix + '/lib/cacheManagement/multi/ImageByIds'),
   VideoByIdCache = require(rootPrefix + '/lib/cacheManagement/multi/VideoByIds'),
@@ -11,8 +12,10 @@ const rootPrefix = '../../..',
   PricePointsCache = require(rootPrefix + '/lib/cacheManagement/single/PricePoints'),
   TwitterUserByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TwitterUserByIds'),
   UserStatByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/UserStatByUserIds'),
-  TokenUserDetailByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TokenUserByUserIds'),
+  InviteCodeByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/InviteCodeByUserIds'),
   TwitterUserByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TwitterUserByUserIds'),
+  TokenUserDetailByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TokenUserByUserIds'),
+  LifetimePurchaseByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/LifetimePurchaseByUserIds'),
   UserProfileElementsByUserIdCache = require(rootPrefix + '/lib/cacheManagement/multi/UserProfileElementsByUserIds'),
   basicHelper = require(rootPrefix + '/helpers/basic'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
@@ -66,6 +69,7 @@ class UserSearch extends ServiceBase {
     oThis.twitterUserByUserIdMap = {};
     oThis.pricePoints = {};
     oThis.userPepoCoinsMap = {};
+    oThis.lifetimePurchasesMap = {};
   }
 
   /**
@@ -81,21 +85,26 @@ class UserSearch extends ServiceBase {
 
     await oThis._fetchUserIds();
 
-    await oThis._fetchTokenUsers();
+    if (oThis.userIds.length > 0) {
+      await oThis._fetchTokenUsers();
 
-    oThis._prepareSearchResults();
+      oThis._prepareSearchResults();
 
-    await oThis._fetchProfileElements();
+      await oThis._fetchLatestVideos();
 
-    const promisesArray = [];
-    promisesArray.push(
-      oThis._fetchVideos(),
-      oThis._fetchLink(),
-      oThis._fetchUserStats(),
-      oThis._fetchTwitterUser(),
-      oThis._fetchPricePoints()
-    );
-    await Promise.all(promisesArray);
+      await oThis._fetchProfileElements();
+
+      const promisesArray = [];
+      promisesArray.push(
+        oThis._fetchVideos(),
+        oThis._fetchLink(),
+        oThis._fetchUserStats(),
+        oThis._fetchTwitterUser(),
+        oThis._fetchPricePoints(),
+        oThis._fetchLifetimePurchases()
+      );
+      await Promise.all(promisesArray);
+    }
 
     const promisesArray2 = [];
     promisesArray2.push(oThis._prepareUserPepoStatsAndCoinsMap(), oThis._fetchImages());
@@ -169,6 +178,10 @@ class UserSearch extends ServiceBase {
   async _fetchTokenUsers() {
     const oThis = this;
 
+    if (oThis.userIds.length === 0) {
+      return responseHelper.successWithData({});
+    }
+
     const tokenUserRes = await new TokenUserDetailByUserIdsCache({ userIds: oThis.userIds }).fetch();
 
     if (tokenUserRes.isFailure()) {
@@ -207,6 +220,37 @@ class UserSearch extends ServiceBase {
   }
 
   /**
+   * Fetch latest video ids of users.
+   *
+   * @sets oThis.videoIds
+   *
+   * @returns {Promise<number>}
+   * @private
+   */
+  async _fetchLatestVideos() {
+    const oThis = this;
+
+    if (oThis.userIds.length === 0) {
+      return responseHelper.successWithData({});
+    }
+
+    const dbRows = await new VideoDetailModel().fetchLatestVideoId(oThis.userIds);
+
+    for (let ind = 0; ind < oThis.userIds.length; ind++) {
+      const userId = oThis.userIds[ind];
+      oThis.userToProfileElementMap[userId] = oThis.userToProfileElementMap[userId] || {};
+
+      const latestVideoId = dbRows[userId].latestVideoId;
+      if (latestVideoId) {
+        oThis.userToProfileElementMap[userId].videoId = dbRows[userId].latestVideoId;
+        oThis.videoIds.push(dbRows[userId].latestVideoId);
+      }
+    }
+
+    return responseHelper.successWithData({});
+  }
+
+  /**
    * Fetch profile elements.
    *
    * @sets oThis.userToProfileElementMap
@@ -217,6 +261,10 @@ class UserSearch extends ServiceBase {
   async _fetchProfileElements() {
     const oThis = this;
 
+    if (oThis.userIds.length === 0) {
+      return responseHelper.successWithData({});
+    }
+
     const cacheRsp = await new UserProfileElementsByUserIdCache({ usersIds: oThis.userIds }).fetch();
     if (cacheRsp.isFailure()) {
       return Promise.reject(cacheRsp);
@@ -226,10 +274,8 @@ class UserSearch extends ServiceBase {
     for (const userId in profileElementsData) {
       const profileElements = profileElementsData[userId];
 
-      oThis.userToProfileElementMap[userId] = {};
-
       for (const kind in profileElements) {
-        oThis._fetchElementData(userId, oThis.userDetails[userId], kind, profileElements[kind].data);
+        oThis._fetchElementData(userId, kind, profileElements[kind].data);
       }
     }
 
@@ -248,27 +294,20 @@ class UserSearch extends ServiceBase {
    * Fetch element data.
    *
    * @param {number} userId
-   * @param {object} userObj
    * @param {string} kind
    * @param {object} data
    *
-   * @sets oThis.allLinkIds, oThis.userToProfileElementMap, oThis.videoIds
+   * @sets oThis.allLinkIds, oThis.userToProfileElementMap
    *
    * @private
    */
-  _fetchElementData(userId, userObj, kind, data) {
+  _fetchElementData(userId, kind, data) {
     const oThis = this;
 
     switch (kind) {
       case userProfileElementConstants.linkIdKind: {
         oThis.allLinkIds.push(data);
         oThis.userToProfileElementMap[userId].linkId = data;
-        break;
-      }
-
-      case userProfileElementConstants.coverVideoIdKind: {
-        oThis.videoIds.push(data);
-        oThis.userToProfileElementMap[userId].videoId = data;
         break;
       }
 
@@ -354,6 +393,35 @@ class UserSearch extends ServiceBase {
     }
 
     oThis.userStatsMap = cacheRsp.data;
+
+    await oThis._fetchInviterCodeDetails();
+  }
+
+  /**
+   * Fetch referral count from invite codes
+   *
+   *
+   * @returns {Promise<never>}
+   * @private
+   */
+  async _fetchInviterCodeDetails() {
+    const oThis = this;
+
+    const inviteCodeByUserIdCacheResponse = await new InviteCodeByUserIdsCache({
+      userIds: oThis.userIds
+    }).fetch();
+
+    if (inviteCodeByUserIdCacheResponse.isFailure()) {
+      return Promise.reject(inviteCodeByUserIdCacheResponse);
+    }
+
+    oThis.inviteCodes = inviteCodeByUserIdCacheResponse.data;
+
+    for (const userId in oThis.inviteCodes) {
+      if (!oThis.inviteCodes[userId].hasOwnProperty('id')) {
+        delete oThis.inviteCodes[userId];
+      }
+    }
   }
 
   /**
@@ -434,6 +502,25 @@ class UserSearch extends ServiceBase {
   }
 
   /**
+   * Fetch lifetime purchases for user.
+   *
+   * @sets oThis.lifetimePurchasesMap
+   *
+   * @returns {Promise<never>}
+   * @private
+   */
+  async _fetchLifetimePurchases() {
+    const oThis = this;
+
+    const cacheResponse = await new LifetimePurchaseByUserIdsCache({ userIds: oThis.userIds }).fetch();
+    if (cacheResponse.isFailure()) {
+      return Promise.reject(cacheResponse);
+    }
+
+    oThis.lifetimePurchasesMap = cacheResponse.data;
+  }
+
+  /**
    * Prepare user pepo stats map (referrals, supporting count, supporters count, balance)
    * and user pepo coins map (received amount, spent amount, purchased amount, redeemed amount).
    *
@@ -461,7 +548,7 @@ class UserSearch extends ServiceBase {
 
       oThis.userPepoCoinsMap[userId] = {
         received: userReceivedAmountInUsd,
-        purchased: '0',
+        purchased: oThis.lifetimePurchasesMap[userId].amount,
         redeemed: '0'
       };
     }
@@ -477,6 +564,10 @@ class UserSearch extends ServiceBase {
    */
   async _fetchImages() {
     const oThis = this;
+
+    if (oThis.imageIds.length === 0) {
+      return responseHelper.successWithData({});
+    }
 
     const imageData = await new ImageByIdCache({ ids: oThis.imageIds }).fetch();
 
@@ -526,6 +617,7 @@ class UserSearch extends ServiceBase {
       twitterUsersMap: oThis.twitterUserByUserIdMap,
       tokenDetails: oThis.tokenDetails,
       userStat: oThis.userStatsMap,
+      inviteCodesMap: oThis.inviteCodes,
       userPepoCoinsMap: oThis.userPepoCoinsMap,
       meta: oThis.responseMetaData
     };

@@ -5,17 +5,12 @@ const rootPrefix = '../../../..',
   FormatterComposer = require(rootPrefix + '/lib/formatter/Composer'),
   routeHelper = require(rootPrefix + '/routes/helper'),
   sanitizer = require(rootPrefix + '/helpers/sanitizer'),
-  cookieHelper = require(rootPrefix + '/lib/cookieHelper'),
   apiName = require(rootPrefix + '/lib/globalConstant/apiName'),
   entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
   responseEntityKey = require(rootPrefix + '/lib/globalConstant/responseEntityKey');
 
 /* Whitelist user */
-router.post('/whitelist/:invite_id', cookieHelper.setAdminCsrf(), sanitizer.sanitizeDynamicUrlParams, function(
-  req,
-  res,
-  next
-) {
+router.post('/whitelist/:invite_id', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.adminWhitelistUser;
   req.decodedParams.invite_id = req.params.invite_id;
 
@@ -25,11 +20,7 @@ router.post('/whitelist/:invite_id', cookieHelper.setAdminCsrf(), sanitizer.sani
 });
 
 /* Approve user */
-router.post('/approve/:invite_id', cookieHelper.setAdminCsrf(), sanitizer.sanitizeDynamicUrlParams, function(
-  req,
-  res,
-  next
-) {
+router.post('/approve/:invite_id', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.adminApproveUser;
   req.decodedParams.invite_id = req.params.invite_id;
 

@@ -72,10 +72,9 @@ class GetVideoById extends ServiceBase {
       oThis.videoDetails[0].status === videoDetailsConstants.deletedStatus
     ) {
       return Promise.reject(
-        responseHelper.paramValidationError({
+        responseHelper.error({
           internal_error_identifier: 'a_s_v_gbi_1',
-          api_error_identifier: 'resource_not_found',
-          params_error_identifiers: ['invalid_video_id'],
+          api_error_identifier: 'entity_not_found',
           debug_options: {}
         })
       );
@@ -129,10 +128,9 @@ class GetVideoById extends ServiceBase {
 
     if (response.isFailure() || !CommonValidators.validateNonEmptyObject(response.data.userProfilesMap)) {
       return Promise.reject(
-        responseHelper.paramValidationError({
+        responseHelper.error({
           internal_error_identifier: 'a_s_v_gbi_2',
-          api_error_identifier: 'could_not_proceed',
-          params_error_identifiers: ['user_inactive'],
+          api_error_identifier: 'entity_not_found',
           debug_options: {}
         })
       );

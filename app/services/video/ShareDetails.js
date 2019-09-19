@@ -59,6 +59,7 @@ class ShareDetails extends ServiceBase {
   async _fetchVideo() {
     const oThis = this;
 
+    //todo: deleted video or user check is missing
     const cacheRsp = await new VideoByIdCache({ ids: [oThis.videoId] }).fetch();
 
     if (cacheRsp.isFailure()) {
@@ -69,10 +70,8 @@ class ShareDetails extends ServiceBase {
       return Promise.reject(
         responseHelper.error({
           internal_error_identifier: 'a_s_v_sd_1',
-          api_error_identifier: 'resource_not_found',
-          debug_options: {
-            inputVideoId: oThis.videoId
-          }
+          api_error_identifier: 'entity_not_found',
+          debug_options: { inputVideoId: oThis.videoId }
         })
       );
     }
@@ -104,6 +103,7 @@ class ShareDetails extends ServiceBase {
     } else {
       const userMultiCacheRsp = await new UserMultiCache({ ids: [creatorUserId] }).fetch();
 
+      //todo: deleted video or user check is missing
       if (userMultiCacheRsp.isFailure()) {
         return Promise.reject(userMultiCacheRsp);
       }

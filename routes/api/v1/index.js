@@ -22,8 +22,6 @@ const rootPrefix = '../../..',
   reportIssueRoutes = require(rootPrefix + '/routes/api/v1/reportIssue'),
   ostTransactionRoutes = require(rootPrefix + '/routes/api/v1/ostTransactions');
 
-const errorConfig = basicHelper.fetchErrorConfig(apiVersions.v1);
-
 // Node.js cookie parsing middleware.
 router.use(cookieParser(coreConstant.COOKIE_SECRET));
 
@@ -32,10 +30,10 @@ router.use('/rotate-twitter-account', rotateTwitterAccountRoutes);
 
 router.use('/report-issue', reportIssueRoutes);
 router.use('/auth', authRoutes);
+router.use('/fetch-goto', fetchGotoRoutes);
 
 // Login not mandatory for following
 router.use('/feeds', cookieHelper.validateUserLoginCookieIfPresent, feedsRoutes);
-router.use('/fetch-goto', cookieHelper.validateUserLoginCookieIfPresent, fetchGotoRoutes);
 
 router.use(cookieHelper.validateUserLoginCookieIfPresent, cookieHelper.validateUserLoginRequired);
 
