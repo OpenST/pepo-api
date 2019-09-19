@@ -10,7 +10,7 @@
     "@ostdotcom/base": "1.0.0",
     "@ostdotcom/cache": "1.0.6",
     "@ostdotcom/notification": "1.0.7-beta.3",
-    "@ostdotcom/ost-sdk-js": "https://github.com/ostdotcom/ost-sdk-js.git#develop",
+    "@ostdotcom/ost-sdk-js": "2.2.1",
     "aws-sdk": "2.484.0",
     "bignumber.js": "4.1.0",
     "body-parser": "1.18.3",
