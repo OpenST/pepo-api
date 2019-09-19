@@ -464,7 +464,6 @@ class OstTransaction extends ServiceBase {
       video_id: oThis.videoId,
       extra_data: JSON.stringify(extraData),
       text_id: oThis.textId,
-      giphy_id: null, // remove this column from table using new migration later
       status: transactionConstants.invertedStatuses[oThis.transactionStatus]
     };
 
