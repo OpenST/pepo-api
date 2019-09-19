@@ -2,12 +2,12 @@ const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   GetProfile = require(rootPrefix + '/lib/user/profile/Get'),
   GetTokenService = require(rootPrefix + '/app/services/token/Get'),
-  feedConstants = require(rootPrefix + '/lib/globalConstant/feed'),
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
+  responseHelper = require(rootPrefix + '/lib/formatter/response'),
+  feedConstants = require(rootPrefix + '/lib/globalConstant/feed'),
   videoConstants = require(rootPrefix + '/lib/globalConstant/video'),
   createErrorLogsEntry = require(rootPrefix + '/lib/errorLogs/createEntry'),
-  errorLogsConstants = require(rootPrefix + '/lib/globalConstant/errorLogs'),
-  responseHelper = require(rootPrefix + '/lib/formatter/response');
+  errorLogsConstants = require(rootPrefix + '/lib/globalConstant/errorLogs');
 
 /**
  * Class for feed base.
