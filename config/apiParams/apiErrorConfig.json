@@ -12,7 +12,7 @@
   "forbidden_api_request": {
     "http_code": "403",
     "code": "FORBIDDEN",
-    "message": "Invalid Request. Form tampered with "
+    "message": "Invalid Request. Form tampered with"
   },
   "unauthorized_api_request": {
     "http_code": "401",

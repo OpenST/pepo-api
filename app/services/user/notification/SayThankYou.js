@@ -2,7 +2,8 @@ const rootPrefix = '../../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   UserNotificationModel = require(rootPrefix + '/app/models/cassandra/UserNotification'),
-  TweetByUserId = require(rootPrefix + '/lib/twitter/actions/TweetByUserId'),
+  bgJob = require(rootPrefix + '/lib/rabbitMqEnqueue/bgJob'),
+  bgJobConstants = require(rootPrefix + '/lib/globalConstant/bgJob'),
   base64Helper = require(rootPrefix + '/lib/base64Helper'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   notificationJobEnqueue = require(rootPrefix + '/lib/rabbitMqEnqueue/notification'),
@@ -62,15 +63,10 @@ class SayThankYou extends ServiceBase {
     await oThis._enqueueUserNotification();
 
     if (oThis.tweetNeeded) {
-      let tweetByUserId = new TweetByUserId({
-        text: oThis.text + '\nvia @' + coreConstants.PEPO_TWITTER_HANDLE,
-        userId: oThis.currentUserId
-      });
-
-      return tweetByUserId.perform();
+      await oThis._enqueueTweetBgJob();
     }
 
-    return responseHelper.successWithData({ refresh_current_user: false });
+    return responseHelper.successWithData({});
   }
 
   /**
@@ -230,6 +226,21 @@ class SayThankYou extends ServiceBase {
     await notificationJobEnqueue.enqueue(notificationJobConstants.contributionThanks, {
       userNotification: oThis.userNotificationObj,
       text: oThis.text
+    });
+  }
+
+  /**
+   * Enqueue tweet bg job.
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _enqueueTweetBgJob() {
+    const oThis = this;
+
+    await bgJob.enqueue(bgJobConstants.tweetJobTopic, {
+      text: oThis.text + '\nvia @' + coreConstants.PEPO_TWITTER_HANDLE,
+      userId: oThis.currentUserId
     });
   }
 }

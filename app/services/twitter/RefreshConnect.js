@@ -106,6 +106,16 @@ class RefreshConnect extends ServiceBase {
 
     if (twitterUserObjCacheResp.data[oThis.twitterId].id) {
       oThis.twitterUserObj = twitterUserObjCacheResp.data[oThis.twitterId];
+    } else {
+      logger.error('Error: Trying refresh for user not signed up');
+      return Promise.reject(
+        responseHelper.error({
+          internal_error_identifier: 's_t_rc_ftu_1',
+          api_error_identifier: 'invalid_api_params',
+          params_error_identifiers: ['invalid_twitter_id'],
+          debug_options: {}
+        })
+      );
     }
 
     oThis.userId = oThis.twitterUserObj.userId;
