@@ -172,16 +172,6 @@ class FeedBase extends ServiceBase {
         oThis.feeds.splice(index, 1);
       }
     }
-
-    if (oThis.feeds.length <= 0) {
-      return Promise.reject(
-        responseHelper.error({
-          internal_error_identifier: 'a_s_f_b_2',
-          api_error_identifier: 'entity_not_found',
-          debug_options: {}
-        })
-      );
-    }
   }
 
   /**
