@@ -1,5 +1,6 @@
 const rootPrefix = '../../..',
   FeedBase = require(rootPrefix + '/app/services/feed/Base'),
+  CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   FeedByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/FeedByIds'),
   responseHelper = require(rootPrefix + '/lib/formatter/response');
 
@@ -62,12 +63,43 @@ class FeedById extends FeedBase {
     oThis.feedIds = [oThis.feedId];
 
     const feedByIdsCacheResponse = await new FeedByIdsCache({ ids: oThis.feedIds }).fetch();
-
     if (feedByIdsCacheResponse.isFailure()) {
       return Promise.reject(feedByIdsCacheResponse);
     }
 
     oThis.feedsMap = feedByIdsCacheResponse.data;
+
+    if (!CommonValidators.validateNonEmptyObject(oThis.feedsMap[oThis.feedId])) {
+      return Promise.reject(
+        responseHelper.error({
+          internal_error_identifier: 'a_s_f_bi_1',
+          api_error_identifier: 'resource_not_found',
+          debug_options: { feedId: oThis.feedId }
+        })
+      );
+    }
+  }
+
+  /**
+   * Filter out feeds of inactive users.
+   *
+   * @returns {Promise<never>}
+   * @private
+   */
+  async _filterInactiveUserFeeds() {
+    const oThis = this;
+
+    await super._filterInactiveUserFeeds();
+
+    if (oThis.feeds.length <= 0) {
+      return Promise.reject(
+        responseHelper.error({
+          internal_error_identifier: 'a_s_f_bi_2',
+          api_error_identifier: 'resource_not_found',
+          debug_options: {}
+        })
+      );
+    }
   }
 
   /**
