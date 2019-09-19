@@ -9,6 +9,7 @@ const rootPrefix = '../../..',
   LoginCookieAuth = require(rootPrefix + '/lib/authentication/LoginCookie'),
   sanitizer = require(rootPrefix + '/helpers/sanitizer'),
   base64Helper = require(rootPrefix + '/lib/base64Helper'),
+  userConstant = require(rootPrefix + '/lib/globalConstant/user'),
   responseEntityKey = require(rootPrefix + '/lib/globalConstant/responseEntityKey'),
   entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
   cookieHelper = require(rootPrefix + '/lib/cookieHelper');
@@ -40,9 +41,11 @@ const validateTokenIfPresent = async function(req, res, next) {
     }
 
     // if code reaches here, you will need to validate the token
-    let authResponse = await new LoginCookieAuth(decodedToken).perform().catch(function(r) {
-      return r;
-    });
+    let authResponse = await new LoginCookieAuth(decodedToken, userConstant.shortLivedAuthTokenExpiry)
+      .perform()
+      .catch(function(r) {
+        return r;
+      });
 
     if (authResponse.isSuccess()) {
       req.decodedParams.current_user = authResponse.data.current_user;
