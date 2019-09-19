@@ -774,6 +774,10 @@ const v1Signature = {
       {
         parameter: 'handle',
         validatorMethods: ['validateNonBlankString']
+      },
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
       }
     ],
     optional: []
