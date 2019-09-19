@@ -85,15 +85,15 @@ class GetInviteCode extends ServiceBase {
     const inviteUrl = shareEntityConstants.inviteShareUrl + oThis.inviteCodeDetails.code;
 
     const response = {
-      [entityType.share]: {
-        id: oThis.shareId,
-        kind: shareEntityConstants.inviteShareKind,
-        url: inviteUrl,
-        message: 'DUMMY_MESSAGE',
-        title: 'DUMMY_TITLE', // Optional.
-        subject: 'DUMMY_SUBJECT', // Optional.
-        uts: Math.round(new Date() / 1000)
-      },
+      [entityType.share]: Object.assign(
+        {
+          id: oThis.shareId,
+          kind: shareEntityConstants.inviteShareKind,
+          url: inviteUrl,
+          uts: Math.round(new Date() / 1000)
+        },
+        shareEntityConstants.getInviteShareEntity(inviteUrl)
+      ),
       [entityType.inviteCode]: oThis.inviteCodeDetails
     };
 

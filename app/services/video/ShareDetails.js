@@ -135,15 +135,15 @@ class ShareDetails extends ServiceBase {
     const oThis = this;
 
     return {
-      [entityType.share]: {
-        id: uuidV4(),
-        kind: shareEntityConstants.videoShareKind,
-        url: oThis._generateVideoShareUrl(),
-        message: oThis.shareMessage,
-        title: 'DUMMY_TITLE',
-        subject: 'DUMMY_SUBJECT',
-        uts: Math.round(new Date() / 1000)
-      }
+      [entityType.share]: Object.assign(
+        {
+          id: uuidV4(),
+          kind: shareEntityConstants.videoShareKind,
+          url: oThis._generateVideoShareUrl(),
+          uts: Math.round(new Date() / 1000)
+        },
+        shareEntityConstants.getVideoShareEntity(oThis.creatorUserName, oThis._generateVideoShareUrl())
+      )
     };
   }
   /**
