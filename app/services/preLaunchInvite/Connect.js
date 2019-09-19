@@ -223,9 +223,15 @@ class PreLaunchTwitterConnect extends ServiceBase {
     if (!oThis.preLaunchInviteId) {
       logger.log('Twitter::PreLaunchTwitterConnect signup');
       oThis.serviceResp = await new SignupTwitterClass(requestParams).perform();
+      if (!oThis.serviceResp.isFailure()) {
+        oThis.serviceResp.data['newSignup'] = 1;
+      }
     } else {
       logger.log('Twitter::PreLaunchTwitterConnect login');
       oThis.serviceResp = await new LoginTwitterClass(requestParams).perform();
+      if (!oThis.serviceResp.isFailure()) {
+        oThis.serviceResp.data['newSignup'] = 0;
+      }
     }
 
     logger.log('End::PreLaunchTwitterConnect._performAction');
