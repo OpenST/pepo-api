@@ -100,7 +100,7 @@ class UserProfile extends ServiceBase {
       return Promise.reject(tokenUserResponse);
     }
 
-    const tokenUserData = tokenUserResponse.data[oThis.userId];
+    const tokenUserData = tokenUserResponse.data[oThis.profileUserId];
 
     oThis.ostUserId = tokenUserData.ostUserId;
 
@@ -163,7 +163,7 @@ class UserProfile extends ServiceBase {
 
     const resultType = platformResponse.data.result_type;
 
-    let balance = platformResponse.data[resultType].available_balance;
+    let balance = new BigNumber(platformResponse.data[resultType].available_balance);
 
     let pricePoint = oThis.pricePoints[oThis.stakeCurrency].USD;
 

@@ -191,7 +191,7 @@ router.get('/current', sanitizer.sanitizeDynamicUrlParams, function(req, res, ne
 /* User profile */
 router.get('/users/:user_id/profile', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.adminUserProfile;
-  req.decodedParams.user_id = req.params.user_id;
+  req.decodedParams.profile_user_id = req.params.user_id;
 
   const dataFormatterFunc = async function(serviceResponse) {
     const wrapperFormatterRsp = await new FormatterComposer({
