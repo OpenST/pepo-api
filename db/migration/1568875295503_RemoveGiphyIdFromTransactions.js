@@ -1,9 +1,9 @@
 const rootPrefix = '../..',
-  database = require(rootPrefix + '/lib/globalConstant/database'),
-  DbKindConstant = require(rootPrefix + '/lib/globalConstant/dbKind');
+  dbKindConstants = require(rootPrefix + '/lib/globalConstant/dbKind'),
+  databaseConstants = require(rootPrefix + '/lib/globalConstant/database');
 
-const dbName = database.feedDbName;
-const dbKind = DbKindConstant.sqlDbKind;
+const dbName = databaseConstants.feedDbName;
+const dbKind = dbKindConstants.sqlDbKind;
 
 const upQuery = 'ALTER TABLE `transactions` DROP `giphy_id`;';
 
