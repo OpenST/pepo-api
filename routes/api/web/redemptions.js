@@ -16,8 +16,6 @@ const rootPrefix = '../../..',
 const validateTokenIfPresent = async function(req, res, next) {
   let token = req.decodedParams.rt;
 
-  console.log('token', token);
-
   if (!commonValidator.isVarNullOrUndefined(token)) {
     let decodedToken = base64Helper.decode(token);
 
