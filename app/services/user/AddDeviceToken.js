@@ -258,7 +258,7 @@ class AddDeviceToken extends ServiceBase {
     logger.log('userProfileElementsRspData ===========', userProfileElementsRspData);
 
     // If user profile elements contains location id and it is same as that of cache then return, else insert.
-    if (userProfileElementsRspData.locationId && userProfileElementsRspData.locationId.id !== locationId) {
+    if (userProfileElementsRspData.locationId && userProfileElementsRspData.locationId.data !== locationId) {
       await new UserProfileElementModel()
         .update({ data: locationId })
         .where({
@@ -266,7 +266,7 @@ class AddDeviceToken extends ServiceBase {
           data_kind: userProfileElementConstants.invertedKinds[userProfileElementConstants.locationIdKind]
         })
         .fire();
-    } else {
+    } else if (!userProfileElementsRspData.locationId || !userProfileElementsRspData.locationId.id) {
       await new UserProfileElementModel().insertElement({
         userId: oThis.currentUserId,
         dataKind: userProfileElementConstants.locationIdKind,
