@@ -160,7 +160,7 @@ class PreLaunchTwitterSignUp extends ServiceBase {
   async _fetchInviteCodeDetails() {
     const oThis = this;
 
-    let cacheResp = await new InviteCodeByCodeCache({ inviteCode: [oThis.inviteCode] }).fetch(),
+    let cacheResp = await new InviteCodeByCodeCache({ inviteCode: oThis.inviteCode }).fetch(),
       inviterInviteCodeObj = cacheResp.data[oThis.inviteCode];
 
     oThis.inviterCodeId = inviterInviteCodeObj.id;

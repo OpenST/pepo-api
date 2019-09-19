@@ -13,11 +13,16 @@ const rootPrefix = '.',
   configStrategyProvider = require(rootPrefix + '/lib/providers/configStrategy'),
   configStrategyConstants = require(rootPrefix + '/lib/globalConstant/configStrategy'),
   processIdSelector = require(rootPrefix + '/lib/webSocket/processIdSelector'),
+  createErrorLogsEntry = require(rootPrefix + '/lib/errorLogs/createEntry'),
+  errorLogsConstants = require(rootPrefix + '/lib/globalConstant/errorLogs'),
   socketConnectionConstants = require(rootPrefix + '/lib/globalConstant/socketConnection'),
   socketJobProcessor = require(rootPrefix + '/executables/rabbitMqSubscribers/socketJobProcessor'),
   WebsocketAuth = require(rootPrefix + '/app/services/websocket/auth'),
   webSocketCustomCache = require(rootPrefix + '/lib/webSocket/customCache'),
   websocketAutoDisconnect = require(rootPrefix + '/lib/webSocket/autoDisconnect');
+
+const apiVersions = require(rootPrefix + '/lib/globalConstant/apiVersions'),
+  errorConfig = basicHelper.fetchErrorConfig(apiVersions.v1);
 
 let socketIdentifier = null;
 
@@ -107,5 +112,18 @@ async function autoDisconnect() {
   setTimeout(autoDisconnect, 60 * 1000);
 }
 
-run();
+run().catch(async function(err) {
+  logger.error('Could not start websocket-server: ', err);
+
+  let errorObject = responseHelper.error({
+    internal_error_identifier: 'Could not start websocket-server',
+    api_error_identifier: 'something_went_wrong',
+    debug_options: { error: err.toString(), stack: err.stack },
+    error_config: errorConfig
+  });
+
+  await createErrorLogsEntry.perform(errorObject, errorLogsConstants.highSeverity);
+
+  process.exit(1);
+});
 autoDisconnect();

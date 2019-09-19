@@ -255,6 +255,8 @@ class AddDeviceToken extends ServiceBase {
       return createErrorLogsEntry.perform(errorObject, errorLogsConstants.mediumSeverity);
     }
 
+    logger.log('userProfileElementsRspData ===========', userProfileElementsRspData);
+
     // If user profile elements contains location id and it is same as that of cache then return, else insert.
     if (userProfileElementsRspData.locationId && userProfileElementsRspData.locationId.id !== locationId) {
       await new UserProfileElementModel()

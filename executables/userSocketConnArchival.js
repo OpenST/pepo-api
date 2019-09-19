@@ -91,15 +91,16 @@ class CronProcessesMonitorExecutable extends CronBase {
   async _archiveWebSocketConnDetailsTable() {
     const oThis = this;
 
-    let moreDataPresent = true;
+    let moreDataPresent = true,
+      userIds = [];
 
     while (moreDataPresent) {
       let idsToBeDeleted = [],
         selectQueryRsp = await new UserSocketConnectionDetailsModel()
-          .select('id')
+          .select('id, user_id')
           .where(['created_at < ?', basicHelper.getCurrentTimestampInSeconds() - oneDayInSeconds])
           .where([
-            '(status = ? AND auth_key_expiry_at < ?) OR (status = ? AND auth_key_expiry_at IS NULL)',
+            '(status = ? AND auth_key_expiry_at < ?) OR (status = ?)',
             socketConnectionConstants.invertedStatuses[socketConnectionConstants.createdStatus],
             basicHelper.getCurrentTimestampInSeconds(),
             socketConnectionConstants.invertedStatuses[socketConnectionConstants.expiredStatus]
@@ -109,6 +110,7 @@ class CronProcessesMonitorExecutable extends CronBase {
 
       for (let i = 0; i < selectQueryRsp.length; i++) {
         idsToBeDeleted.push(selectQueryRsp[i].id);
+        userIds.push(selectQueryRsp[i].user_id);
       }
 
       logger.log('idsToBeDeleted: ', idsToBeDeleted);
@@ -121,6 +123,8 @@ class CronProcessesMonitorExecutable extends CronBase {
           .where(['id IN (?)', idsToBeDeleted])
           .fire();
       }
+
+      await UserSocketConnectionDetailsModel.flushCache({ userIds: userIds });
     }
   }
 
