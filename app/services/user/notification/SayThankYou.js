@@ -236,6 +236,8 @@ class SayThankYou extends ServiceBase {
    * @private
    */
   async _enqueueTweetBgJob() {
+    const oThis = this;
+
     await bgJob.enqueue(bgJobConstants.tweetJobTopic, {
       text: oThis.text + '\nvia @' + coreConstants.PEPO_TWITTER_HANDLE,
       userId: oThis.currentUserId
