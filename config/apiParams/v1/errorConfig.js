@@ -303,6 +303,12 @@ const v1ErrorConfig = {
     parameter: 'product_id',
     code: 'invalid',
     message: 'Invite product id.'
+  },
+
+  invalid_twitter_id: {
+    parameter: 'twitter_id',
+    code: 'invalid',
+    message: 'Invite twitter id.'
   }
 };
 

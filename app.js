@@ -54,6 +54,14 @@ const startRequestLogLine = function(req, res, next) {
 
   logger.step(message.join(''));
 
+  if (!basicHelper.isProduction()) {
+    logger.step(
+      '\nHEADERS FOR CURRENT REQUEST=====================================\n',
+      JSON.stringify(req.headers),
+      '\n========================================================'
+    );
+  }
+
   next();
 };
 

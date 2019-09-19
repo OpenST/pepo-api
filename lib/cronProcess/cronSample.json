@@ -17,5 +17,7 @@
     "sequenceNumber": 1
   },
   "pushNotificationAggregator": {
+  },
+  "userSocketConnArchival": {
   }
 }
