@@ -9,6 +9,7 @@ const rootPrefix = '../..',
   responseHelper = require(rootPrefix + '/lib/formatter/response');
 
 const currentPepoApiDomain = coreConstants.PA_DOMAIN;
+const urlParser = require('url');
 
 class FetchGoto extends ServiceBase {
   /**
@@ -16,8 +17,6 @@ class FetchGoto extends ServiceBase {
    *
    * @param {object} params
    * @param {object} [params.url]
-   * @param {object} [params.gotoKind]
-   * @param {object} [params.gotoValue]
    *
    * @augments ServiceBase
    *
@@ -27,12 +26,10 @@ class FetchGoto extends ServiceBase {
     super(params);
 
     const oThis = this;
-    oThis.url = params.url;
-    oThis.inputGotoKind = params.gotoKind;
-    oThis.inputGotoValue = params.gotoValue;
-
-    oThis.gotoValues = {};
-    oThis.goto = null;
+    oThis.url = params.url.toLowerCase();
+    oThis.parsedUrl = {};
+    oThis.gotoKind = null;
+    oThis.gotoParams = null;
   }
 
   /**
@@ -43,96 +40,34 @@ class FetchGoto extends ServiceBase {
   async _asyncPerform() {
     const oThis = this;
 
-    if (oThis.url) {
-      await oThis._fetchGotoByUrl();
-    } else if (oThis.inputGotoKind) {
-      await oThis._fetchGotoByGotoKind();
-    } else {
+    oThis.parsedUrl = urlParser.parse(oThis.url, true);
+    if (!commonValidators.validateNonEmptyObject(oThis.parsedUrl)) {
       return Promise.reject(
         responseHelper.paramValidationError({
           internal_error_identifier: 'a_s_fgt_1',
           api_error_identifier: 'invalid_params',
           params_error_identifiers: [],
           debug_options: {
-            url: oThis.url,
-            inputGotoKind: oThis.inputGotoKind
+            url: oThis.url
           }
         })
       );
     }
 
-    oThis._fetchGotoFromConfig();
+    await oThis._validateUrl();
 
-    return responseHelper.successWithData(oThis._prepareResponse());
+    oThis._fetchGotoKindAndParams();
   }
 
-  /**
-   * Fetch goto by input url.
-   *
-   * @returns {Promise<never>}
-   * @private
-   */
-  async _fetchGotoByUrl() {
+  async _validateUrl() {
     const oThis = this;
 
-    oThis.url = oThis.url.toLowerCase();
-
-    await oThis._fetchAndValidateUrlDomain();
-
-    let urlHandlerResponse = oThis._urlHandler();
-    if (urlHandlerResponse.isFailure()) {
-      return Promise.reject(urlHandlerResponse);
-    }
-
-    oThis.gotoValues = {
-      gotoKind: urlHandlerResponse.data.gotoKind,
-      gotoData: urlHandlerResponse.data.gotoData
-    };
-  }
-
-  /**
-   * Fetch goto by goto kinds.
-   *
-   * @returns {Promise<void>}
-   * @private
-   */
-  async _fetchGotoByGotoKind() {
-    const oThis = this;
-
-    if (!Object.keys(gotoConstants.invertedGotoKinds).includes(oThis.inputGotoKind)) {
+    // Protocol and host are unknown
+    if (!['http:', 'https:'].includes(oThis.parsedUrl.protocol) || !oThis.parsedUrl.host.match(currentPepoApiDomain)) {
       return Promise.reject(
         responseHelper.error({
           internal_error_identifier: 'a_s_fgt_2',
-          api_error_identifier: 'resource_not_found',
-          debug_options: {
-            inputGotoKind: oThis.inputGotoKind
-          }
-        })
-      );
-    }
-
-    oThis.gotoValues = {
-      gotoKind: oThis.inputGotoKind,
-      gotoData: oThis.inputGotoValue
-    };
-  }
-
-  /**
-   * Fetch and validate url domain.
-   *
-   * @returns {Promise<never>}
-   * @private
-   */
-  async _fetchAndValidateUrlDomain() {
-    const oThis = this;
-
-    let currentUrlDomainMatch = oThis.url.match(currentPepoApiDomain);
-
-    if (!currentUrlDomainMatch || !currentUrlDomainMatch[0]) {
-      return Promise.reject(
-        responseHelper.error({
-          internal_error_identifier: 'a_s_fgt_3',
-          api_error_identifier: 'resource_not_found',
+          api_error_identifier: 'NOT_FOUND',
           debug_options: {
             url: oThis.url
           }
@@ -147,53 +82,23 @@ class FetchGoto extends ServiceBase {
    * @returns {*}
    * @private
    */
-  _urlHandler() {
+  _fetchGotoKindAndParams() {
     const oThis = this;
 
-    let splittedUrlPath = oThis.url.split(currentPepoApiDomain),
-      splittedParts = splittedUrlPath[1].split('/');
+    let pathName = oThis.parsedUrl.pathname;
 
-    let urlKind = splittedParts[1],
-      urlData = splittedParts[2];
-
-    // for now, this service only supports for video/:video_id route
-    if (urlKind === gotoConstants.videoShareGotoKind) {
-      return responseHelper.successWithData({ gotoKind: urlKind, gotoData: urlData });
-    } else {
-      return responseHelper.error({
-        internal_error_identifier: 'a_s_fgt_4',
-        api_error_identifier: 'resource_not_found',
-        debug_options: {
-          url: oThis.url
-        }
-      });
-    }
-  }
-
-  /**
-   * Fetch goto for given kind.
-   *
-   * @private
-   *
-   * @sets oThis.goto
-   */
-  _fetchGotoFromConfig() {
-    const oThis = this;
-
-    let gotoConfig = {
-      [gotoConstants.videoShareGotoKind]: {
-        pn: pageNameConstants.videoPageName,
-        v: {
-          [pageNameConstants.videoIdParam]: oThis.gotoValues.gotoData
-        }
-      },
-      [gotoConstants.addEmailScreenGotoKind]: {
-        pn: pageNameConstants.addEmailScreen,
-        v: {}
+    // If url is of video
+    if (pathName.match(gotoConstants.videoGotoKind)) {
+      oThis.gotoParams = { videoId: pathName.split('/')[2] };
+      oThis.gotoKind = oThis.videoGotoKind;
+    } else if (pathName == '/') {
+      // Only pepo.com is shared, look for invite code if present
+      let queryParams = oThis.parsedUrl.query;
+      if (queryParams && queryParams['invite']) {
+        oThis.gotoParams = { inviteCode: queryParams['invite'] };
+        oThis.gotoKind = oThis.signupGotoKind;
       }
-    };
-
-    oThis.goto = gotoConfig[oThis.gotoValues.gotoKind];
+    }
   }
 
   /**
