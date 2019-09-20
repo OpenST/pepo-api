@@ -10,7 +10,7 @@ const rootPrefix = '../..',
   CronBase = require(rootPrefix + '/executables/CronBase'),
   UserModel = require(rootPrefix + '/app/models/mysql/User'),
   AggregatedNotificationModel = require(rootPrefix + '/app/models/mysql/AggregatedNotification'),
-  UserNotificationsCountModel = require(rootPrefix + '/app/models/cassandra/UserNotificationsCount'),
+  UserNotificationCountModel = require(rootPrefix + '/app/models/cassandra/UserNotificationCount'),
   NotificationHookModel = require(rootPrefix + '/app/models/mysql/NotificationHook'),
   UserDeviceIdsByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/UserDeviceIdsByUserIds'),
   UserMultiCache = require(rootPrefix + '/lib/cacheManagement/multi/User'),
@@ -228,7 +228,7 @@ class NotificationAggregator extends CronBase {
     if (insertColumnValues.length > 0) {
       promiseArray.push(new NotificationHookModel().insertMultiple(insertColumnNames, insertColumnValues, {}).fire());
       promiseArray.push(
-        new UserNotificationsCountModel().incrementUnreadNotificationCount({ userIds: oThis.notificationSentUserIds })
+        new UserNotificationCountModel().incrementUnreadNotificationCount({ userIds: oThis.notificationSentUserIds })
       );
       await Promise.all(promiseArray);
     }

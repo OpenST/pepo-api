@@ -42,7 +42,7 @@ class RefreshConnect extends ServiceBase {
     oThis.secret = params.secret;
     oThis.twitterId = params.twitter_id;
     oThis.handle = params.handle;
-    oThis.currentUserId = +oThis.current_user.id;
+    oThis.currentUserId = +params.current_user.id;
 
     oThis.userId = null;
     oThis.twitterUserObj = null;
