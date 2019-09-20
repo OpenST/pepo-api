@@ -2235,6 +2235,16 @@
 			"protocolProfileBehavior": {}
 		},
 		{
+			"name": "web",
+			"item": [],
+			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "device",
+			"item": [],
+			"protocolProfileBehavior": {}
+		},
+		{
 			"name": "fetch-goto",
 			"request": {
 				"method": "GET",
