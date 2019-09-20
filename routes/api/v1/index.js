@@ -36,11 +36,11 @@ router.use('/fetch-goto', fetchGotoRoutes);
 
 // Login not mandatory for following
 router.use('/feeds', cookieHelper.validateUserLoginCookieIfPresent, feedsRoutes);
+router.use('/videos', cookieHelper.validateUserLoginCookieIfPresent, videoRoutes);
 
 router.use(cookieHelper.validateUserLoginCookieIfPresent, cookieHelper.validateUserLoginRequired);
 
 router.use('/users', usersRoutes);
-router.use('/videos', videoRoutes);
 router.use('/tokens', tokensRoutes);
 router.use('/ost-transactions', ostTransactionRoutes);
 router.use('/redemptions', redemptionsRoutes);

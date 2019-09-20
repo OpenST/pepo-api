@@ -8,10 +8,15 @@ const rootPrefix = '../../..',
   apiName = require(rootPrefix + '/lib/globalConstant/apiName'),
   entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
+  cookieHelper = require(rootPrefix + '/lib/cookieHelper'),
   responseEntityKey = require(rootPrefix + '/lib/globalConstant/responseEntityKey');
 
 /* Video history */
-router.get('/:video_id', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+router.get('/:video_id', sanitizer.sanitizeDynamicUrlParams, cookieHelper.validateUserLoginRequired, function(
+  req,
+  res,
+  next
+) {
   req.decodedParams.apiName = apiName.getVideo;
   req.decodedParams.video_id = req.params.video_id;
 
