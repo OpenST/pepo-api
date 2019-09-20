@@ -160,9 +160,9 @@ class PreLaunchTwitterSignUp extends ServiceBase {
     const oThis = this;
 
     // TODO: get from cache written by pankaj
-    let inviterInviteCodeObj = await new InviteCodeModel().fetchByCode(oThis.inviteCode);
+    let inviterInviteCodeObj = await new InviteCodeModel().fetchByInviteCodes([oThis.inviteCode]);
 
-    oThis.inviterCodeId = inviterInviteCodeObj.id ? inviterInviteCodeObj.id : null;
+    oThis.inviterCodeId = inviterInviteCodeObj[oThis.inviteCode].id ? inviterInviteCodeObj[oThis.inviteCode].id : null;
 
     return responseHelper.successWithData({});
   }
@@ -180,7 +180,7 @@ class PreLaunchTwitterSignUp extends ServiceBase {
 
     let insertData = {
       code: oThis._createInviteCode(),
-      invite_limit: inviteCodeConstants.defaultInviteLimitForNonCreator
+      invite_limit: inviteCodeConstants.inviteMaxLimit
     };
 
     let insertResponse = await new InviteCodeModel().insert(insertData).fire();

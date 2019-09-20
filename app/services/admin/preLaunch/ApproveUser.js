@@ -84,7 +84,7 @@ class ApproveUser extends ServiceBase {
 
     const queryResponse = await new InviteCodeModel()
       .update({
-        invite_limit: inviteCodeConstants.infiniteInviteLimitForCreator
+        invite_limit: inviteCodeConstants.infiniteInviteLimit
       })
       .where({ id: inviteCodeId })
       .fire();
