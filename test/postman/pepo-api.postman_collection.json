@@ -199,89 +199,6 @@
 			"protocolProfileBehavior": {}
 		},
 		{
-			"name": "video",
-			"item": [
-				{
-					"name": "get-video",
-					"protocolProfileBehavior": {
-						"disableBodyPruning": true
-					},
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Content-Type",
-								"name": "Content-Type",
-								"type": "text",
-								"value": "application/x-www-form-urlencoded"
-							}
-						],
-						"body": {
-							"mode": "urlencoded",
-							"urlencoded": [
-								{
-									"key": "name",
-									"value": "Pankaj Keswani",
-									"type": "text"
-								},
-								{
-									"key": "user_name",
-									"value": "pankaj",
-									"type": "text"
-								},
-								{
-									"key": "bio",
-									"value": "This is my bio, please save it with #cool",
-									"type": "text"
-								},
-								{
-									"key": "link",
-									"value": "https://www.facebook.com",
-									"type": "text"
-								}
-							]
-						},
-						"url": {
-							"raw": "{{api_server}}/api/v1/users/1/video-history",
-							"host": [
-								"{{api_server}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"users",
-								"1",
-								"video-history"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "share",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{api_server}}/api/v1/videos/1009/share",
-							"host": [
-								"{{api_server}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"videos",
-								"1009",
-								"share"
-							]
-						}
-					},
-					"response": []
-				}
-			],
-			"protocolProfileBehavior": {}
-		},
-		{
 			"name": "admin",
 			"item": [
 				{
@@ -2027,6 +1944,97 @@
 										"v1",
 										"feeds",
 										"1002"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"protocolProfileBehavior": {},
+					"_postman_isSubFolder": true
+				},
+				{
+					"name": "video",
+					"item": [
+						{
+							"name": "get-video",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"type": "text",
+										"value": "application/x-www-form-urlencoded"
+									}
+								],
+								"body": {
+									"mode": "urlencoded",
+									"urlencoded": [
+										{
+											"key": "name",
+											"value": "Pankaj Keswani",
+											"type": "text"
+										},
+										{
+											"key": "user_name",
+											"value": "pankaj",
+											"type": "text"
+										},
+										{
+											"key": "bio",
+											"value": "This is my bio, please save it with #cool",
+											"type": "text"
+										},
+										{
+											"key": "link",
+											"value": "https://www.facebook.com",
+											"type": "text"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{api_server}}/api/v1/users/1400/video-history",
+									"host": [
+										"{{api_server}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"users",
+										"1400",
+										"video-history"
+									],
+									"query": [
+										{
+											"key": "pagination_identifier",
+											"value": "asdfgjery56718bnmasdjk",
+											"disabled": true
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "share",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{api_server}}/api/v1/videos/1009/share",
+									"host": [
+										"{{api_server}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"videos",
+										"1009",
+										"share"
 									]
 								}
 							},
