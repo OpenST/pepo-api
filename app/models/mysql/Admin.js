@@ -8,8 +8,6 @@ const rootPrefix = '../../..',
 // Declare variables names.
 const dbName = databaseConstants.adminDbName;
 
-//todo: admin cache should be multi cache
-
 /**
  * Class for admin model.
  *
@@ -64,7 +62,7 @@ class AdminModel extends ModelBase {
   }
 
   /**
-   * List Of formatted column names that can be exposed by service.
+   * List of formatted column names that can be exposed by service.
    *
    * @returns {array}
    */
