@@ -162,48 +162,6 @@
 			"protocolProfileBehavior": {}
 		},
 		{
-			"name": "transaction",
-			"item": [
-				{
-					"name": "ost-transaction",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"name": "Content-Type",
-								"value": "application/json",
-								"type": "text"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "\n{\n\t\"ost_transaction\": {\n            \"id\": \"8a15c59c-674c-449f-8f0e-dec613d4c6a1\",\n            \"transaction_hash\": null,\n            \"from\": null,\n            \"to\": \"0x5ca103d5db984993de179cab0ce112a7763db4d7\",\n            \"nonce\": null,\n            \"value\": null,\n            \"gas_price\": \"1000000000\",\n            \"gas_used\": null,\n            \"transaction_fee\": null,\n            \"block_confirmation\": null,\n            \"status\": \"CREATED\",\n            \"updated_timestamp\": 1560753926,\n            \"block_timestamp\": null,\n            \"block_number\": null,\n            \"rule_name\": null,\n            \"meta_property\": {},\n            \"transfers\": [\n                {\n                    \"from\": \"0x5ca103d5db984993de179cab0ce112a7763db4d7\",\n                    \"from_user_id\": \"1445\",\n                    \"to\": \"0x561f497a5d2b8529128086de4917aa1fa7e096c6\",\n                    \"to_user_id\": \"1451\",\n                    \"amount\": \"5\",\n                    \"kind\": \"transfer\"\n                }\n            ]\n        },\n\t\"meta\": {\n\t\t\"vi\":\"1\", \n\t\t\"text\": \"yaa\"\n\t}\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{api_server}}/api/v1/ost-transactions",
-							"host": [
-								"{{api_server}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"ost-transactions"
-							]
-						},
-						"description": "ost-transaction"
-					},
-					"response": []
-				}
-			],
-			"protocolProfileBehavior": {}
-		},
-		{
 			"name": "admin",
 			"item": [
 				{
@@ -2203,6 +2161,49 @@
 										"info"
 									]
 								}
+							},
+							"response": []
+						}
+					],
+					"protocolProfileBehavior": {},
+					"_postman_isSubFolder": true
+				},
+				{
+					"name": "transaction",
+					"item": [
+						{
+							"name": "ost-transaction",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "\n{\n\t\"ost_transaction\": {\n    \"to\": \"0x5be7824c25a6edb4d6d22a7ca6058c7a94723fe0\",\n    \"updated_timestamp\": 1568991096,\n    \"transfers\": [\n      {\n        \"amount\": \"1000000000000000000\",\n        \"to_user_id\": \"c0ea8567-e12a-4634-a3fb-9323c06dd810\",\n        \"kind\": \"transfer\",\n        \"to\": \"0x720fb10ac03f560905ab79b963cc5222b2b11528\",\n        \"from_user_id\": \"d6e634c3-f986-4d38-a9a4-a7c254c9a062\",\n        \"from\": \"0x5be7824c25a6edb4d6d22a7ca6058c7a94723fe0\"\n      }\n    ],\n    \"status\": \"CREATED\",\n    \"gas_price\": \"1000000000\",\n    \"id\": \"9b7c43ac-b0cd-4bbd-83f6-acad032b7935\",\n    \"meta_property\": {\n      \"name\": \"video\",\n      \"type\": \"user_to_user\",\n      \"details\": \"vi_2453\"\n    }\n  }\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{api_server}}/api/v1/ost-transactions",
+									"host": [
+										"{{api_server}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"ost-transactions"
+									]
+								},
+								"description": "ost-transaction"
 							},
 							"response": []
 						}
