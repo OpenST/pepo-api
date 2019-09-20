@@ -105,7 +105,7 @@ class FetchGoto extends ServiceBase {
       return Promise.reject(
         responseHelper.error({
           internal_error_identifier: 'a_s_fgt_2',
-          api_error_identifier: 'resource_not_found',
+          api_error_identifier: 'entity_not_found',
           debug_options: {
             inputGotoKind: oThis.inputGotoKind
           }
@@ -139,7 +139,7 @@ class FetchGoto extends ServiceBase {
       return Promise.reject(
         responseHelper.error({
           internal_error_identifier: 'a_s_fgt_3',
-          api_error_identifier: 'NOT_FOUND',
+          api_error_identifier: 'entity_not_found',
           debug_options: {
             url: oThis.url
           }
@@ -157,7 +157,8 @@ class FetchGoto extends ServiceBase {
   _urlHandler() {
     const oThis = this;
 
-    let pathName = oThis.parsedUrl.pathname;
+    let pathName = oThis.parsedUrl.pathname,
+      query = oThis.parsedUrl.query;
 
     // for now, this service only supports for video/:video_id route
     if (pathName.match(gotoConstants.videoShareGotoKind)) {
@@ -166,10 +167,20 @@ class FetchGoto extends ServiceBase {
         gotoKind: gotoConstants.videoShareGotoKind,
         gotoData: videoId
       });
+    } else if (pathName.match('terms') || pathName.match('privacy')) {
+      return responseHelper.successWithData({
+        gotoKind: gotoConstants.webViewGotoKind,
+        gotoData: oThis.url
+      });
+    } else if (pathName == '/' && query && query['invite']) {
+      return responseHelper.successWithData({
+        gotoKind: gotoConstants.signUpGotoKind,
+        gotoData: query['invite']
+      });
     } else {
       return responseHelper.error({
         internal_error_identifier: 'a_s_fgt_4',
-        api_error_identifier: 'NOT_FOUND',
+        api_error_identifier: 'entity_not_found',
         debug_options: {
           url: oThis.url
         }
@@ -196,6 +207,22 @@ class FetchGoto extends ServiceBase {
       },
       [gotoConstants.addEmailScreenGotoKind]: {
         pn: pageNameConstants.addEmailScreen,
+        v: {}
+      },
+      [gotoConstants.signUpGotoKind]: {
+        pn: pageNameConstants.signupScreen,
+        v: {
+          [pageNameConstants.inviteCodeParam]: oThis.gotoValues.gotoData
+        }
+      },
+      [gotoConstants.webViewGotoKind]: {
+        pn: pageNameConstants.webViewScreen,
+        v: {
+          [pageNameConstants.webViewUrlParam]: oThis.gotoValues.gotoData
+        }
+      },
+      [gotoConstants.invitedUsersGotoKind]: {
+        pn: pageNameConstants.invitedUsersListPage,
         v: {}
       }
     };
