@@ -73,7 +73,7 @@ class InviteCode extends ModelBase {
    *
    * @param {integer} id
    *
-   * @return {object}
+   * @returns {object}
    */
   async fetchById(id) {
     const oThis = this;
@@ -88,7 +88,7 @@ class InviteCode extends ModelBase {
    *
    * @param {array} ids: invite code ids
    *
-   * @return {object}
+   * @returns {object}
    */
   async fetchByIds(ids) {
     const oThis = this;
@@ -109,32 +109,102 @@ class InviteCode extends ModelBase {
   }
 
   /**
-   * Fetch invite code by code.
+   * Fetch invite codes for given codes.
    *
-   * @param {string} code: code
+   * @param {array} codes: invite codes
    *
-   * @return {object}
+   * @returns {object}
    */
-  async fetchByCode(code) {
+  async fetchByInviteCodes(codes) {
     const oThis = this;
+
+    const response = {};
 
     const dbRows = await oThis
       .select('*')
-      .where(['code = ?', code])
+      .where(['code IN (?)', codes])
       .fire();
 
-    if (dbRows.length === 0) {
-      return {};
+    for (let index = 0; index < dbRows.length; index++) {
+      const formatDbRow = oThis.formatDbData(dbRows[index]);
+      response[formatDbRow.code] = formatDbRow;
     }
 
-    return oThis.formatDbData(dbRows[0]);
+    return response;
+  }
+
+  /**
+   * Fetch invite code for given user ids.
+   *
+   * @param {array<number>} userIds
+   *
+   * @returns {object}
+   */
+  async fetchByUserIds(userIds) {
+    const oThis = this;
+
+    const response = {};
+
+    const dbRows = await oThis
+      .select('*')
+      .where(['user_id IN (?)', userIds])
+      .fire();
+
+    for (let index = 0; index < dbRows.length; index++) {
+      const formatDbRow = oThis.formatDbData(dbRows[index]);
+      response[formatDbRow.userId] = formatDbRow;
+    }
+
+    return response;
+  }
+
+  /**
+   * Invited user search.
+   *
+   * @param {number} params.limit: limit
+   * @param {number} params.inviterCodeId: inviterCodeId
+   * @param {number} params.paginationId: pagination time stamp
+   *
+   * @returns {Promise<object>}
+   */
+  async getUserIdsByInviterUserId(params) {
+    const oThis = this;
+
+    const limit = params.limit,
+      inviterCodeId = params.inviterCodeId,
+      paginationId = params.paginationId;
+
+    const queryObject = oThis
+      .select('id, user_id')
+      .where({ inviter_code_id: inviterCodeId })
+      .limit(limit)
+      .order_by('id desc');
+
+    if (paginationId) {
+      queryObject.where(['id < ?', paginationId]);
+    }
+
+    const dbRows = await queryObject.fire();
+
+    const userIds = [];
+
+    let nextPaginationId = null;
+
+    for (let index = 0; index < dbRows.length; index++) {
+      userIds.push(dbRows[index].user_id);
+      nextPaginationId = dbRows[index].id;
+    }
+
+    return { userIds: userIds, nextPaginationId: nextPaginationId };
   }
 
   /**
    * Flush cache.
    *
    * @param {object} params
-   * @param {number} params.id
+   * @param {number} [params.userId]
+   * @param {string} [params.code]
+   * @param {string/number} [params.id]
    *
    * @returns {Promise<*>}
    */
