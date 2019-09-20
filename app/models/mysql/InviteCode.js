@@ -48,7 +48,7 @@ class InviteCode extends ModelBase {
    * @param {string} dbRow.created_at
    * @param {string} dbRow.updated_at
    *
-   * @returns {object}
+   * @return {object}
    * @private
    */
   formatDbData(dbRow) {
@@ -208,7 +208,16 @@ class InviteCode extends ModelBase {
    *
    * @returns {Promise<*>}
    */
-  static async flushCache(params) {}
+  static async flushCache(params) {
+    const promisesArray = [];
+
+    if (params.id) {
+      const InviteCodeByIdCache = require(rootPrefix + '/lib/cacheManagement/single/InviteCodeById');
+      promisesArray.push(new InviteCodeByIdCache({ id: params.id }).clear());
+    }
+
+    await Promise.all(promisesArray);
+  }
 }
 
 module.exports = InviteCode;

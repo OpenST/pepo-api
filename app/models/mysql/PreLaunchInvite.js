@@ -258,7 +258,9 @@ class PreLaunchInvite extends ModelBase {
 
     const queryResponse = await oThis
       .update({
-        creator_status: preLaunchInviteConstants.invertedCreatorStatuses[preLaunchInviteConstants.approvedCreatorStatus]
+        creator_status:
+          preLaunchInviteConstants.invertedCreatorStatuses[preLaunchInviteConstants.approvedCreatorStatus],
+        admin_status: preLaunchInviteConstants.invertedAdminStatuses[preLaunchInviteConstants.whitelistedStatus]
       })
       .where({ id: inviteId })
       .fire();
