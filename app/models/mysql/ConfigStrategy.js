@@ -14,7 +14,7 @@ const rootPrefix = '../../..',
 // Declare variables.
 const dbName = databaseConstants.configDbName,
   errorConfig = basicHelper.fetchErrorConfig(apiVersions.v1),
-  kinds = configStrategyConstants.kinds;
+  configStrategyKinds = configStrategyConstants.kinds;
 
 /**
  * Class for config strategy model.
@@ -208,18 +208,28 @@ class ConfigStrategyModel extends ModelBase {
    * @private
    */
   _mergeConfigResult(strategyKind, configStrategyHash, decryptedJsonObj) {
-    if (
-      kinds[strategyKind] === configStrategyConstants.bgJobRabbitmq ||
-      kinds[strategyKind] === configStrategyConstants.notificationRabbitmq ||
-      kinds[strategyKind] === configStrategyConstants.socketRabbitmq
-    ) {
-      configStrategyHash[kinds[strategyKind]].password = decryptedJsonObj.rmqPassword;
-    } else if (kinds[strategyKind] === configStrategyConstants.websocket) {
-      configStrategyHash[kinds[strategyKind]].wsAuthSalt = decryptedJsonObj.wsAuthSalt;
-    } else if (kinds[strategyKind] === configStrategyConstants.cassandra) {
-      configStrategyHash[kinds[strategyKind]].password = decryptedJsonObj.cassandraPassword;
-    } else if (kinds[strategyKind] === configStrategyConstants.firebase) {
-      configStrategyHash[kinds[strategyKind]].privateKey = decryptedJsonObj.privateKey;
+    switch (configStrategyKinds[strategyKind]) {
+      case configStrategyConstants.bgJobRabbitmq:
+      case configStrategyConstants.notificationRabbitmq:
+      case configStrategyConstants.socketRabbitmq: {
+        configStrategyHash[configStrategyKinds[strategyKind]].password = decryptedJsonObj.rmqPassword;
+        break;
+      }
+      case configStrategyConstants.websocket: {
+        configStrategyHash[configStrategyKinds[strategyKind]].wsAuthSalt = decryptedJsonObj.wsAuthSalt;
+        break;
+      }
+      case configStrategyConstants.cassandra: {
+        configStrategyHash[configStrategyKinds[strategyKind]].password = decryptedJsonObj.cassandraPassword;
+        break;
+      }
+      case configStrategyConstants.firebase: {
+        configStrategyHash[configStrategyKinds[strategyKind]].privateKey = decryptedJsonObj.privateKey;
+        break;
+      }
+      default: {
+        // Do nothing.
+      }
     }
 
     return configStrategyHash;

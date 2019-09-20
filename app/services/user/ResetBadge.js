@@ -1,6 +1,6 @@
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
-  UserNotificationsCountModel = require(rootPrefix + '/app/models/cassandra/UserNotificationsCount'),
+  UserNotificationCountModel = require(rootPrefix + '/app/models/cassandra/UserNotificationCount'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   responseHelper = require(rootPrefix + '/lib/formatter/response');
 
@@ -75,13 +75,13 @@ class ResetBadge extends ServiceBase {
     const oThis = this;
 
     //NOTE: Optimization- Try delete row for resetting the data
-    let queryRsp = await new UserNotificationsCountModel().fetchUnreadNotificationCount({
+    let queryRsp = await new UserNotificationCountModel().fetchUnreadNotificationCount({
       userIds: [oThis.currentUserId]
     });
 
     logger.log('queryRsp ======', queryRsp);
 
-    return new UserNotificationsCountModel().resetUnreadNotificationCount({
+    return new UserNotificationCountModel().resetUnreadNotificationCount({
       userId: oThis.currentUserId,
       count: queryRsp[oThis.currentUserId]
     });

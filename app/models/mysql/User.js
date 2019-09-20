@@ -55,6 +55,7 @@ class UserModel extends ModelBase {
    * @param {number} dbRow.mark_inactive_trigger_count
    * @param {number} dbRow.properties
    * @param {string} dbRow.email
+   * @param {string} dbRow.external_user_id
    * @param {number} dbRow.status
    * @param {number} dbRow.created_at
    * @param {number} dbRow.updated_at
@@ -75,6 +76,7 @@ class UserModel extends ModelBase {
       markInactiveTriggerCount: dbRow.mark_inactive_trigger_count,
       properties: dbRow.properties,
       email: dbRow.email,
+      externalUserId: dbRow.external_user_id,
       approvedCreator: UserModel.isUserApprovedCreator(dbRow),
       status: userConstants.statuses[dbRow.status],
       createdAt: dbRow.created_at,
@@ -96,6 +98,7 @@ class UserModel extends ModelBase {
       'name',
       'profileImageId',
       'markInactiveTriggerCount',
+      'externalUserId',
       'properties',
       'approvedCreator',
       'status',

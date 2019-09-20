@@ -239,6 +239,16 @@ const v1Signature = {
     optional: []
   },
 
+  [apiName.getSupportUrl]: {
+    mandatory: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      }
+    ],
+    optional: []
+  },
+
   [apiName.requestRedemption]: {
     mandatory: [
       {
@@ -774,6 +784,10 @@ const v1Signature = {
       {
         parameter: 'handle',
         validatorMethods: ['validateNonBlankString']
+      },
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
       }
     ],
     optional: []

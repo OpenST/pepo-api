@@ -308,7 +308,19 @@ const v1ErrorConfig = {
   invalid_twitter_id: {
     parameter: 'twitter_id',
     code: 'invalid',
-    message: 'Invite twitter id.'
+    message: 'Invalid twitter id.'
+  },
+
+  invalid_twitter_secret: {
+    parameter: 'secret',
+    code: 'invalid',
+    message: 'Invalid twitter secret.'
+  },
+
+  invalid_receiver_user_id: {
+    parameter: 'receiver_user_id',
+    code: 'invalid',
+    message: 'Invalid receiver user id.'
   }
 };
 

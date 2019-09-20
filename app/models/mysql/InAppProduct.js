@@ -1,8 +1,7 @@
 const rootPrefix = '../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
-  inAppProductsConst = require(rootPrefix + '/lib/globalConstant/inAppProduct'),
-  responseHelper = require(rootPrefix + '/lib/formatter/response'),
-  databaseConstants = require(rootPrefix + '/lib/globalConstant/database');
+  databaseConstants = require(rootPrefix + '/lib/globalConstant/database'),
+  inAppProductsConstants = require(rootPrefix + '/lib/globalConstant/inAppProduct');
 
 // Declare variables.
 const dbName = databaseConstants.fiatDbName;
@@ -14,7 +13,7 @@ const dbName = databaseConstants.fiatDbName;
  */
 class InAppProduct extends ModelBase {
   /**
-   * Constructor for InAppProduct model.
+   * Constructor for in app products model.
    *
    * @augments ModelBase
    *
@@ -53,7 +52,7 @@ class InAppProduct extends ModelBase {
       id: dbRow.id,
       appleProductId: dbRow.apple_product_id,
       googleProductId: dbRow.google_product_id,
-      status: inAppProductsConst.statuses[dbRow.status],
+      status: inAppProductsConstants.statuses[dbRow.status],
       lowerLimit: dbRow.lower_limit,
       upperLimit: dbRow.upper_limit,
       pepoAmountInWei: dbRow.pepo_amount_in_wei,
@@ -66,27 +65,29 @@ class InAppProduct extends ModelBase {
   }
 
   /**
-   * Get products for given price point
+   * Get products for given price point.
    *
-   * @param pricePoint {float} - price point in USD unit - this is the value of one Pepo currently in USD.
+   * @param {float} pricePoint: price point in USD unit - this is the value of one Pepo currently in USD.
+   *
    * @return {Promise<Array>}
    */
   async getProductsForGivenPricePoint(pricePoint) {
     const oThis = this;
 
-    let queryResponse = await oThis
+    const queryResponse = await oThis
       .select('*')
       .where([
         'lower_limit <= ? AND upper_limit > ? AND status = ?',
         pricePoint,
         pricePoint,
-        inAppProductsConst.invertedStatuses[inAppProductsConst.active]
+        inAppProductsConstants.invertedStatuses[inAppProductsConstants.active]
       ])
       .fire();
 
-    let responseData = [];
-    for (let i = 0; i < queryResponse.length; i++) {
-      let rowData = oThis._formatDbData(queryResponse[i]);
+    const responseData = [];
+
+    for (let index = 0; index < queryResponse.length; index++) {
+      const rowData = oThis._formatDbData(queryResponse[index]);
       responseData.push(rowData);
     }
 
@@ -96,14 +97,11 @@ class InAppProduct extends ModelBase {
   /**
    * Flush cache.
    *
-   * @param {object} params
-   * @param {number} params.id
-   *
    * @returns {Promise<*>}
    */
-  static async flushCache(params) {
+  static async flushCache() {
     const GetTopupProduct = require(rootPrefix + '/lib/cacheManagement/single/Products');
-    await new GetTopupProduct().clear();
+    await new GetTopupProduct({}).clear();
   }
 }
 

@@ -58,9 +58,9 @@ class RedemptionProductModel extends ModelBase {
   }
 
   /**
-   * Get all products
+   * Get all products.
    *
-   * @return {Promise<Array>}
+   * @return {Promise<[]>}
    */
   async getAll() {
     const oThis = this;
