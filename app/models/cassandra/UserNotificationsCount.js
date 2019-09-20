@@ -110,14 +110,15 @@ class UserNotificationCountModel extends CassandraModelBase {
   /**
    * Fetch unread notification count.
    *
-   * @param queryParams
-   * @param {Array} queryParams.userIds
+   * @param {object} queryParams
+   * @param {array<number>} queryParams.userIds
    *
    * @returns {*}
    */
   async fetchUnreadNotificationCount(queryParams) {
-    const oThis = this,
-      userIds = queryParams.userIds;
+    const oThis = this;
+
+    const userIds = queryParams.userIds;
 
     const query = `SELECT user_id, unread_notification_count FROM ${oThis.queryTableName} WHERE user_id IN ?;`;
     const params = [userIds];
@@ -129,8 +130,8 @@ class UserNotificationCountModel extends CassandraModelBase {
       return {};
     }
 
-    for (let i = 0; i < queryRsp.rows.length; i++) {
-      let formattedData = oThis.formatDbData(queryRsp.rows[i]);
+    for (let index = 0; index < queryRsp.rows.length; index++) {
+      const formattedData = oThis.formatDbData(queryRsp.rows[index]);
       response[formattedData.userId] = formattedData.unreadNotificationCount;
     }
 

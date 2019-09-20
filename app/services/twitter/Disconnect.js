@@ -83,6 +83,7 @@ class TwitterDisconnect extends ServiceBase {
     await new TwitterUserExtendedModel()
       .update({
         token: null,
+        secret: null,
         status: twitterUserExtendedConstants.invertedStatuses[twitterUserExtendedConstants.expiredStatus]
       })
       .where({ twitter_user_id: oThis.twitterUserId })

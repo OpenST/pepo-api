@@ -112,7 +112,7 @@ class TweetInfo extends ServiceBase {
         responseHelper.paramValidationError({
           internal_error_identifier: 's_u_n_ti_ftu_1',
           api_error_identifier: 'invalid_api_params',
-          params_error_identifiers: ['invalid_receiver_id'],
+          params_error_identifiers: ['invalid_receiver_user_id'],
           debug_options: {}
         })
       );
@@ -192,17 +192,19 @@ class TweetInfo extends ServiceBase {
       })
       .catch(function(err) {
         logger.error('Error while validating Credentials for twitter: ', err);
-        return responseHelper.error({
+        return responseHelper.paramValidationError({
           internal_error_identifier: 's_u_n_ti_vtc_1',
-          api_error_identifier: 'unauthorized_api_request',
+          api_error_identifier: 'invalid_api_params',
+          params_error_identifiers: ['invalid_twitter_id'],
           debug_options: {}
         });
       });
 
     if (twitterResp.isFailure()) {
-      return responseHelper.error({
+      return responseHelper.paramValidationError({
         internal_error_identifier: 's_u_n_ti_vtc_2',
-        api_error_identifier: 'unauthorized_api_request',
+        api_error_identifier: 'invalid_api_params',
+        params_error_identifiers: ['invalid_twitter_id'],
         debug_options: {}
       });
     }
@@ -211,9 +213,10 @@ class TweetInfo extends ServiceBase {
 
     if (userTwitterEntity.idStr != twitterId) {
       // Check if this needs to be errored out
-      return responseHelper.error({
+      return responseHelper.paramValidationError({
         internal_error_identifier: 's_u_n_ti_vtc_3',
-        api_error_identifier: 'unauthorized_api_request',
+        api_error_identifier: 'invalid_api_params',
+        params_error_identifiers: ['invalid_twitter_id'],
         debug_options: {}
       });
     }
