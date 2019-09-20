@@ -46,7 +46,7 @@ class TwitterConnect extends ServiceBase {
     oThis.secret = params.secret;
     oThis.twitterId = params.twitter_id;
     oThis.handle = params.handle;
-    oThis.inviteCode = params.invite_code;
+    oThis.inviteCode = params.invite_code ? params.invite_code.toUpperCase() : null;
 
     oThis.userTwitterEntity = null;
     oThis.twitterUserObj = null;
