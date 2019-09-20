@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "52c0ee24-cd81-4aa3-9101-3c9780dd8e4f",
+		"_postman_id": "70b54f71-4e98-4806-9d10-1240aafe9930",
 		"name": "pepo-api",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -158,8 +158,7 @@
 					},
 					"response": []
 				}
-			],
-			"protocolProfileBehavior": {}
+			]
 		},
 		{
 			"name": "transaction",
@@ -195,8 +194,7 @@
 					},
 					"response": []
 				}
-			],
-			"protocolProfileBehavior": {}
+			]
 		},
 		{
 			"name": "admin",
@@ -638,13 +636,11 @@
 					},
 					"response": []
 				}
-			],
-			"protocolProfileBehavior": {}
+			]
 		},
 		{
 			"name": "web",
-			"item": [],
-			"protocolProfileBehavior": {}
+			"item": []
 		},
 		{
 			"name": "device",
@@ -814,7 +810,6 @@
 							"response": []
 						}
 					],
-					"protocolProfileBehavior": {},
 					"_postman_isSubFolder": true
 				},
 				{
@@ -841,7 +836,6 @@
 							"response": []
 						}
 					],
-					"protocolProfileBehavior": {},
 					"_postman_isSubFolder": true
 				},
 				{
@@ -1693,9 +1687,61 @@
 								}
 							},
 							"response": []
+						},
+						{
+							"name": "add-device-token",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"type": "text",
+										"value": "application/x-www-form-urlencoded"
+									}
+								],
+								"body": {
+									"mode": "urlencoded",
+									"urlencoded": [
+										{
+											"key": "device_id",
+											"value": "f2d880ba57d707fd",
+											"type": "text"
+										},
+										{
+											"key": "device_kind",
+											"value": "ANDROID",
+											"type": "text"
+										},
+										{
+											"key": "device_token",
+											"value": "exB_RViGQRY:APA91bFRBBtkmhQDZIEwL7inZJJxqUnOnZ2vFB7Sny_khZaB4DfukpHY1gD0SxdeBbQ7a-7V5VAavOzCWVN5OxQbryq9s2NPMc96E3ZR1Mwr_J7gb-heqhw-VnPWdN6Ej_PlVfY0PYgP",
+											"type": "text"
+										},
+										{
+											"key": "user_timezone",
+											"value": "asia/calcutta",
+											"type": "text"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{api_server}}/api/v1/users/1445/device-token",
+									"host": [
+										"{{api_server}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"users",
+										"1445",
+										"device-token"
+									]
+								}
+							},
+							"response": []
 						}
 					],
-					"protocolProfileBehavior": {},
 					"_postman_isSubFolder": true
 				},
 				{
@@ -1805,7 +1851,6 @@
 							"response": []
 						}
 					],
-					"protocolProfileBehavior": {},
 					"_postman_isSubFolder": true
 				},
 				{
@@ -1860,7 +1905,6 @@
 							}
 						}
 					],
-					"protocolProfileBehavior": {},
 					"_postman_isSubFolder": true
 				},
 				{
@@ -1897,7 +1941,6 @@
 							"response": []
 						}
 					],
-					"protocolProfileBehavior": {},
 					"_postman_isSubFolder": true
 				},
 				{
@@ -1909,7 +1952,7 @@
 								"method": "GET",
 								"header": [],
 								"url": {
-									"raw": "{{api_server}}/api/v1/feeds",
+									"raw": "{{api_server}}/api/v1/feeds?",
 									"host": [
 										"{{api_server}}"
 									],
@@ -1950,7 +1993,6 @@
 							"response": []
 						}
 					],
-					"protocolProfileBehavior": {},
 					"_postman_isSubFolder": true
 				},
 				{
@@ -1997,7 +2039,7 @@
 									]
 								},
 								"url": {
-									"raw": "{{api_server}}/api/v1/users/1400/video-history",
+									"raw": "{{api_server}}/api/v1/users/1400/video-history?",
 									"host": [
 										"{{api_server}}"
 									],
@@ -2041,11 +2083,9 @@
 							"response": []
 						}
 					],
-					"protocolProfileBehavior": {},
 					"_postman_isSubFolder": true
 				}
-			],
-			"protocolProfileBehavior": {}
+			]
 		},
 		{
 			"name": "fetch-goto",
@@ -2101,6 +2141,5 @@
 			},
 			"response": []
 		}
-	],
-	"protocolProfileBehavior": {}
+	]
 }
