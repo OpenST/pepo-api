@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "bc30db0c-7edd-45eb-bbad-aa14e1c31a8b",
+		"_postman_id": "7fa8db3d-d027-4286-9a65-ba2fa8ffbd09",
 		"name": "pepo-api",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -34,7 +34,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{api_server}}/api/v1/users/tweet-info?receiver_user_id=1414",
+							"raw": "{{api_server}}/api/v1/users/tweet-info?receiver_user_id=1014",
 							"host": [
 								"{{api_server}}"
 							],
@@ -47,7 +47,7 @@
 							"query": [
 								{
 									"key": "receiver_user_id",
-									"value": "1414"
+									"value": "1014"
 								}
 							]
 						}
@@ -60,7 +60,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{api_server}}/api/v1/users/1066/contribution-to",
+							"raw": "{{api_server}}/api/v1/users/1414/contribution-to",
 							"host": [
 								"{{api_server}}"
 							],
@@ -68,7 +68,7 @@
 								"api",
 								"v1",
 								"users",
-								"1066",
+								"1414",
 								"contribution-to"
 							]
 						}
@@ -102,7 +102,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{api_server}}/api/v1/users/1066/contribution-suggestion",
+							"raw": "{{api_server}}/api/v1/users/1445/contribution-suggestion",
 							"host": [
 								"{{api_server}}"
 							],
@@ -110,7 +110,7 @@
 								"api",
 								"v1",
 								"users",
-								"1066",
+								"1445",
 								"contribution-suggestion"
 							]
 						}
@@ -197,7 +197,7 @@
 							]
 						},
 						"url": {
-							"raw": "{{api_server}}/api/v1/users/1/profile",
+							"raw": "{{api_server}}/api/v1/users/1445/profile",
 							"host": [
 								"{{api_server}}"
 							],
@@ -205,7 +205,7 @@
 								"api",
 								"v1",
 								"users",
-								"1",
+								"1445",
 								"profile"
 							]
 						}
@@ -235,7 +235,7 @@
 							]
 						},
 						"url": {
-							"raw": "{{api_server}}/api/v1/users/1/save-email",
+							"raw": "{{api_server}}/api/v1/users/1445/save-email",
 							"host": [
 								"{{api_server}}"
 							],
@@ -243,7 +243,7 @@
 								"api",
 								"v1",
 								"users",
-								"1",
+								"1445",
 								"save-email"
 							]
 						}
@@ -291,7 +291,7 @@
 							]
 						},
 						"url": {
-							"raw": "{{api_server}}/api/v1/users/1/video-history",
+							"raw": "{{api_server}}/api/v1/users/1445/video-history",
 							"host": [
 								"{{api_server}}"
 							],
@@ -299,7 +299,7 @@
 								"api",
 								"v1",
 								"users",
-								"1",
+								"1445",
 								"video-history"
 							]
 						}
@@ -378,7 +378,7 @@
 							]
 						},
 						"url": {
-							"raw": "{{api_server}}/api/v1/users/1/profile-image?",
+							"raw": "{{api_server}}/api/v1/users/1445/profile-image?image_url=https://s3.amazonaws.com/uassets.stagingpepo.com/pepo-staging1000/ua/images",
 							"host": [
 								"{{api_server}}"
 							],
@@ -386,14 +386,13 @@
 								"api",
 								"v1",
 								"users",
-								"1",
+								"1445",
 								"profile-image"
 							],
 							"query": [
 								{
 									"key": "image_url",
-									"value": "https://s3.amazonaws.com/uassets.stagingpepo.com/pepo-staging1000/ua/images",
-									"disabled": true
+									"value": "https://s3.amazonaws.com/uassets.stagingpepo.com/pepo-staging1000/ua/images"
 								}
 							]
 						}
@@ -458,7 +457,7 @@
 							]
 						},
 						"url": {
-							"raw": "{{api_server}}/api/v1/users/1/fan-video?",
+							"raw": "{{api_server}}/api/v1/users/1445/fan-video?",
 							"host": [
 								"{{api_server}}"
 							],
@@ -466,7 +465,7 @@
 								"api",
 								"v1",
 								"users",
-								"1",
+								"1445",
 								"fan-video"
 							],
 							"query": [
@@ -556,33 +555,12 @@
 					"response": []
 				},
 				{
-					"name": "personal-user-feed",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{api_server}}/api/v1/users/1000/feeds",
-							"host": [
-								"{{api_server}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"users",
-								"1000",
-								"feeds"
-							]
-						}
-					},
-					"response": []
-				},
-				{
 					"name": "user-profile",
 					"request": {
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{api_server}}/api/v1/users/1/profile",
+							"raw": "{{api_server}}/api/v1/users/1222/profile",
 							"host": [
 								"{{api_server}}"
 							],
@@ -590,7 +568,7 @@
 								"api",
 								"v1",
 								"users",
-								"1",
+								"1222",
 								"profile"
 							]
 						}
@@ -669,61 +647,12 @@
 					"response": []
 				},
 				{
-					"name": "other-user-feed",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{api_server}}/api/v1/users/1001/feeds",
-							"host": [
-								"{{api_server}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"users",
-								"1001",
-								"feeds"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "pending-topups",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{api_server}}/api/v1/users/1002/pending-topups?",
-							"host": [
-								"{{api_server}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"users",
-								"1002",
-								"pending-topups"
-							],
-							"query": [
-								{
-									"key": "user_id",
-									"value": "1002",
-									"disabled": true
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
 					"name": "websocket-details",
 					"request": {
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{api_server}}/api/v1/users/1000/websocket-details",
+							"raw": "{{api_server}}/api/v1/users/1445/websocket-details",
 							"host": [
 								"{{api_server}}"
 							],
@@ -731,7 +660,7 @@
 								"api",
 								"v1",
 								"users",
-								"1000",
+								"1445",
 								"websocket-details"
 							]
 						},
@@ -856,34 +785,6 @@
 					"response": []
 				},
 				{
-					"name": "payment-details",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{api_server}}/api/v1/users/topup/1?",
-							"host": [
-								"{{api_server}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"users",
-								"topup",
-								"1"
-							],
-							"query": [
-								{
-									"key": "user_id",
-									"value": "1002",
-									"disabled": true
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
 					"name": "invites",
 					"protocolProfileBehavior": {
 						"disableBodyPruning": true
@@ -923,8 +824,7 @@
 					},
 					"response": []
 				}
-			],
-			"protocolProfileBehavior": {}
+			]
 		},
 		{
 			"name": "webhook",
@@ -1079,8 +979,7 @@
 					},
 					"response": []
 				}
-			],
-			"protocolProfileBehavior": {}
+			]
 		},
 		{
 			"name": "transaction",
@@ -1116,8 +1015,7 @@
 					},
 					"response": []
 				}
-			],
-			"protocolProfileBehavior": {}
+			]
 		},
 		{
 			"name": "feeds",
@@ -1161,8 +1059,7 @@
 					},
 					"response": []
 				}
-			],
-			"protocolProfileBehavior": {}
+			]
 		},
 		{
 			"name": "notification",
@@ -1214,8 +1111,7 @@
 						]
 					}
 				}
-			],
-			"protocolProfileBehavior": {}
+			]
 		},
 		{
 			"name": "tags",
@@ -1245,8 +1141,7 @@
 					},
 					"response": []
 				}
-			],
-			"protocolProfileBehavior": {}
+			]
 		},
 		{
 			"name": "video",
@@ -1328,8 +1223,7 @@
 					},
 					"response": []
 				}
-			],
-			"protocolProfileBehavior": {}
+			]
 		},
 		{
 			"name": "admin",
@@ -1511,12 +1405,7 @@
 									"value": "5b300f84986e09ab",
 									"type": "text"
 								}
-							],
-							"options": {
-								"raw": {
-									"language": "text"
-								}
-							}
+							]
 						},
 						"url": {
 							"raw": "{{api_server}}/api/admin/delete-video/1089",
@@ -1776,8 +1665,7 @@
 					},
 					"response": []
 				}
-			],
-			"protocolProfileBehavior": {}
+			]
 		},
 		{
 			"name": "top-up",
@@ -1878,13 +1766,11 @@
 					},
 					"response": []
 				}
-			],
-			"protocolProfileBehavior": {}
+			]
 		},
 		{
 			"name": "web",
-			"item": [],
-			"protocolProfileBehavior": {}
+			"item": []
 		},
 		{
 			"name": "device",
@@ -1933,12 +1819,7 @@
 											"type": "text",
 											"disabled": true
 										}
-									],
-									"options": {
-										"raw": {
-											"language": "text"
-										}
-									}
+									]
 								},
 								"url": {
 									"raw": "{{api_server}}/api/v1/auth/twitter-login",
@@ -1990,12 +1871,7 @@
 											"value": "singhankit2099",
 											"type": "text"
 										}
-									],
-									"options": {
-										"raw": {
-											"language": "text"
-										}
-									}
+									]
 								},
 								"url": {
 									"raw": "{{api_server}}/api/v1/auth/refresh-twitter-connect",
@@ -2064,7 +1940,6 @@
 							"response": []
 						}
 					],
-					"protocolProfileBehavior": {},
 					"_postman_isSubFolder": true
 				},
 				{
@@ -2091,11 +1966,9 @@
 							"response": []
 						}
 					],
-					"protocolProfileBehavior": {},
 					"_postman_isSubFolder": true
 				}
-			],
-			"protocolProfileBehavior": {}
+			]
 		},
 		{
 			"name": "fetch-goto",
@@ -2151,6 +2024,5 @@
 			},
 			"response": []
 		}
-	],
-	"protocolProfileBehavior": {}
+	]
 }
