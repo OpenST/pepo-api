@@ -824,7 +824,7 @@ const v1Signature = {
     optional: [
       {
         parameter: 'url',
-        validatorMethods: ['validateGenericUrl']
+        validatorMethods: ['validateNonBlankString']
       },
       {
         parameter: 'gotoKind',
