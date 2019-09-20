@@ -2,10 +2,13 @@ const uuidV4 = require('uuid/v4');
 
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
+  UserModel = require(rootPrefix + '/app/models/mysql/User'),
   VideoByIdCache = require(rootPrefix + '/lib/cacheManagement/multi/VideoByIds'),
   UserMultiCache = require(rootPrefix + '/lib/cacheManagement/multi/User'),
   VideoDetailsByVideoIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/VideoDetailsByVideoIds'),
   videoDetailsConstants = require(rootPrefix + '/lib/globalConstant/videoDetail'),
+  userConstants = require(rootPrefix + '/lib/globalConstant/user'),
+  videoConstants = require(rootPrefix + '/lib/globalConstant/video'),
   shareEntityConstants = require(rootPrefix + '/lib/globalConstant/shareEntity'),
   gotoConstants = require(rootPrefix + '/lib/globalConstant/goto'),
   coreConstants = require(rootPrefix + '/config/coreConstants'),
@@ -29,7 +32,7 @@ class ShareDetails extends ServiceBase {
     oThis.videoId = params.video_id;
     oThis.currentUser = params.current_user;
 
-    oThis.shareMessage = null;
+    oThis.messageObject = null;
     oThis.creatorUserName = null;
   }
 
@@ -42,10 +45,17 @@ class ShareDetails extends ServiceBase {
   async _asyncPerform() {
     const oThis = this;
 
-    await oThis._fetchVideo();
-    await oThis._fetchCreatorUserName();
-
-    oThis._createMessage();
+    //if this is a curated video,
+    if (oThis.videoId < 0) {
+      oThis.messageObject = shareEntityConstants.getVideoShareEntity(
+        oThis.creatorUserName,
+        oThis._generateVideoShareUrl()
+      );
+    } else {
+      oThis.messageObject = shareEntityConstants.getVideoShareEntityForCuratedVideos(oThis._generateVideoShareUrl());
+      await oThis._fetchVideo();
+      await oThis._fetchCreatorUserName();
+    }
 
     return responseHelper.successWithData(oThis._prepareResponse());
   }
@@ -59,14 +69,16 @@ class ShareDetails extends ServiceBase {
   async _fetchVideo() {
     const oThis = this;
 
-    //todo: deleted video or user check is missing
     const cacheRsp = await new VideoByIdCache({ ids: [oThis.videoId] }).fetch();
 
     if (cacheRsp.isFailure()) {
       return Promise.reject(cacheRsp);
     }
 
-    if (!commonValidator.validateNonEmptyObject(cacheRsp.data[oThis.videoId])) {
+    if (
+      !commonValidator.validateNonEmptyObject(cacheRsp.data[oThis.videoId]) ||
+      cacheRsp.data[oThis.videoId].status === videoConstants.deletedStatus
+    ) {
       return Promise.reject(
         responseHelper.error({
           internal_error_identifier: 'a_s_v_sd_1',
@@ -114,35 +126,40 @@ class ShareDetails extends ServiceBase {
     } else {
       const userMultiCacheRsp = await new UserMultiCache({ ids: [creatorUserId] }).fetch();
 
-      //todo: deleted video or user check is missing
       if (userMultiCacheRsp.isFailure()) {
         return Promise.reject(userMultiCacheRsp);
       }
 
       let userDetails = userMultiCacheRsp.data[creatorUserId];
 
+      if (
+        !userDetails ||
+        userDetails.status !== userConstants.activeStatus ||
+        !UserModel.isUserApprovedCreator(userDetails)
+      ) {
+        return Promise.reject(
+          responseHelper.paramValidationError({
+            internal_error_identifier: 'a_s_v_sd_3',
+            api_error_identifier: 'invalid_api_params',
+            params_error_identifiers: ['user_not_active'],
+            debug_options: {
+              creatorUserId: creatorUserId
+            }
+          })
+        );
+      }
+
       oThis.creatorUserName = userDetails.name;
     }
   }
 
   /**
-   * Create Message.
-   *
-   * @private
-   */
-  _createMessage() {
-    const oThis = this;
-
-    oThis.shareMessage = `🌶️ Checkout ${
-      oThis.creatorUserName
-    }'s latest video on Pepo! ${oThis._generateVideoShareUrl()}`;
-  }
-  /**
    * Prepare final response.
    *
    * @returns {Promise<*|result>}
    * @private
-   */ _prepareResponse() {
+   */
+  _prepareResponse() {
     const oThis = this;
 
     return {
@@ -150,10 +167,9 @@ class ShareDetails extends ServiceBase {
         {
           id: uuidV4(),
           kind: shareEntityConstants.videoShareKind,
-          url: oThis._generateVideoShareUrl(),
           uts: Math.round(new Date() / 1000)
         },
-        shareEntityConstants.getVideoShareEntity(oThis.creatorUserName, oThis._generateVideoShareUrl())
+        oThis.messageObject
       )
     };
   }
@@ -162,7 +178,8 @@ class ShareDetails extends ServiceBase {
    *
    * @returns {string}
    * @private
-   */ _generateVideoShareUrl() {
+   */
+  _generateVideoShareUrl() {
     const oThis = this;
 
     return urlDomain + '/' + gotoConstants.videoShareGotoKind + '/' + oThis.videoId;

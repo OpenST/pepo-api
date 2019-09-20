@@ -759,7 +759,7 @@ const v1Signature = {
     mandatory: [
       {
         parameter: 'video_id',
-        validatorMethods: ['validateNonZeroInteger']
+        validatorMethods: ['validateInteger']
       },
       {
         parameter: 'current_user',
