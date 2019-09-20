@@ -244,59 +244,6 @@
 			"protocolProfileBehavior": {}
 		},
 		{
-			"name": "notification",
-			"item": [
-				{
-					"name": "get",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{api_server}}/api/v1/notifications?pagination_identifier=eyJwYWdlX3N0YXRlIjoiMDAyZjAwMDgwMDAwMDE2Yzc2ZTNkYzRlMjQzMDY1NjEzODMwMzAzNDMzMmQ2MjM5NjMzMzJkMzQzNDM4MzcyZDM5MzczMDM2MmQ2MTYzMzUzOTYxNjIzMDYxMzg2NDMwMzRmMDdmZmZmZmY5ZjA3ZmZmZmZmOSJ9",
-							"host": [
-								"{{api_server}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"notifications"
-							],
-							"query": [
-								{
-									"key": "pagination_identifier",
-									"value": "eyJwYWdlX3N0YXRlIjoiMDAyZjAwMDgwMDAwMDE2Yzc2ZTNkYzRlMjQzMDY1NjEzODMwMzAzNDMzMmQ2MjM5NjMzMzJkMzQzNDM4MzcyZDM5MzczMDM2MmQ2MTYzMzUzOTYxNjIzMDYxMzg2NDMwMzRmMDdmZmZmZmY5ZjA3ZmZmZmZmOSJ9"
-								}
-							]
-						}
-					},
-					"response": []
-				}
-			],
-			"event": [
-				{
-					"listen": "prerequest",
-					"script": {
-						"id": "b2cb1f83-5d4b-403b-8850-c4d91c4a009f",
-						"type": "text/javascript",
-						"exec": [
-							""
-						]
-					}
-				},
-				{
-					"listen": "test",
-					"script": {
-						"id": "640a9952-5ecb-45d1-81f9-184bc97531b0",
-						"type": "text/javascript",
-						"exec": [
-							""
-						]
-					}
-				}
-			],
-			"protocolProfileBehavior": {}
-		},
-		{
 			"name": "video",
 			"item": [
 				{
@@ -1994,6 +1941,61 @@
 								}
 							},
 							"response": []
+						}
+					],
+					"protocolProfileBehavior": {},
+					"_postman_isSubFolder": true
+				},
+				{
+					"name": "notification",
+					"item": [
+						{
+							"name": "get",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{api_server}}/api/v1/notifications?",
+									"host": [
+										"{{api_server}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"notifications"
+									],
+									"query": [
+										{
+											"key": "pagination_identifier",
+											"value": "eyJwYWdlX3N0YXRlIjoiMDAyZjAwMDgwMDAwMDE2ZDQ4MzIyMjA0MjQzOTY1Mzk2NTY0MzEzMDMzMmQ2NjYyNjU2MzJkMzQzOTMwMzQyZDM4NjM2MTY2MmQ2NTMwMzY2MjYzMzc2MTMyMzQzMzM2NjZmMDdmZmZmZmViZjA3ZmZmZmZlYiIsInBhZ2UiOjJ9",
+											"disabled": true
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "b2cb1f83-5d4b-403b-8850-c4d91c4a009f",
+								"type": "text/javascript",
+								"exec": [
+									""
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"id": "640a9952-5ecb-45d1-81f9-184bc97531b0",
+								"type": "text/javascript",
+								"exec": [
+									""
+								]
+							}
 						}
 					],
 					"protocolProfileBehavior": {},
