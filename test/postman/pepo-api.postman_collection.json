@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "bcf32927-bb68-467a-81f8-b8c9d83a8adb",
+		"_postman_id": "52c0ee24-cd81-4aa3-9101-3c9780dd8e4f",
 		"name": "pepo-api",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -158,7 +158,8 @@
 					},
 					"response": []
 				}
-			]
+			],
+			"protocolProfileBehavior": {}
 		},
 		{
 			"name": "transaction",
@@ -194,51 +195,8 @@
 					},
 					"response": []
 				}
-			]
-		},
-		{
-			"name": "feeds",
-			"item": [
-				{
-					"name": "public-feed",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{api_server}}/api/v1/feeds",
-							"host": [
-								"{{api_server}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"feeds"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "feed-details",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{api_server}}/api/v1/feeds/1002",
-							"host": [
-								"{{api_server}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"feeds",
-								"1002"
-							]
-						}
-					},
-					"response": []
-				}
-			]
+			],
+			"protocolProfileBehavior": {}
 		},
 		{
 			"name": "video",
@@ -320,7 +278,8 @@
 					},
 					"response": []
 				}
-			]
+			],
+			"protocolProfileBehavior": {}
 		},
 		{
 			"name": "admin",
@@ -762,46 +721,13 @@
 					},
 					"response": []
 				}
-			]
+			],
+			"protocolProfileBehavior": {}
 		},
 		{
 			"name": "web",
-			"item": []
-		},
-		{
-			"name": "tags",
-			"item": [
-				{
-					"name": "search",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{api_server}}/api/v1/tags?q=pepo",
-							"host": [
-								"{{api_server}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"tags"
-							],
-							"query": [
-								{
-									"key": "q",
-									"value": "pepo"
-								},
-								{
-									"key": "pagination_identifier",
-									"value": "eyJwYWdlIjoyfQ==",
-									"disabled": true
-								}
-							]
-						}
-					},
-					"response": []
-				}
-			]
+			"item": [],
+			"protocolProfileBehavior": {}
 		},
 		{
 			"name": "device",
@@ -971,6 +897,7 @@
 							"response": []
 						}
 					],
+					"protocolProfileBehavior": {},
 					"_postman_isSubFolder": true
 				},
 				{
@@ -997,6 +924,7 @@
 							"response": []
 						}
 					],
+					"protocolProfileBehavior": {},
 					"_postman_isSubFolder": true
 				},
 				{
@@ -1850,6 +1778,7 @@
 							"response": []
 						}
 					],
+					"protocolProfileBehavior": {},
 					"_postman_isSubFolder": true
 				},
 				{
@@ -1959,6 +1888,7 @@
 							"response": []
 						}
 					],
+					"protocolProfileBehavior": {},
 					"_postman_isSubFolder": true
 				},
 				{
@@ -2013,9 +1943,101 @@
 							}
 						}
 					],
+					"protocolProfileBehavior": {},
+					"_postman_isSubFolder": true
+				},
+				{
+					"name": "tags",
+					"item": [
+						{
+							"name": "search",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{api_server}}/api/v1/tags?q=pepo",
+									"host": [
+										"{{api_server}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"tags"
+									],
+									"query": [
+										{
+											"key": "q",
+											"value": "pepo"
+										},
+										{
+											"key": "pagination_identifier",
+											"value": "eyJwYWdlIjoyfQ==",
+											"disabled": true
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"protocolProfileBehavior": {},
+					"_postman_isSubFolder": true
+				},
+				{
+					"name": "feeds",
+					"item": [
+						{
+							"name": "public-feed",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{api_server}}/api/v1/feeds",
+									"host": [
+										"{{api_server}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"feeds"
+									],
+									"query": [
+										{
+											"key": "pagination_identifier",
+											"value": "eyJwYWdpbmF0aW9uX3RpbWVzdGFtcCI6MTU2ODk2ODY2Nn0=",
+											"disabled": true
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "feed-details",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{api_server}}/api/v1/feeds/1002",
+									"host": [
+										"{{api_server}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"feeds",
+										"1002"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"protocolProfileBehavior": {},
 					"_postman_isSubFolder": true
 				}
-			]
+			],
+			"protocolProfileBehavior": {}
 		},
 		{
 			"name": "fetch-goto",
@@ -2071,5 +2093,6 @@
 			},
 			"response": []
 		}
-	]
+	],
+	"protocolProfileBehavior": {}
 }
