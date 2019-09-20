@@ -297,37 +297,6 @@
 			"protocolProfileBehavior": {}
 		},
 		{
-			"name": "tags",
-			"item": [
-				{
-					"name": "search",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{api_server}}/api/v1/tags?q=w",
-							"host": [
-								"{{api_server}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"tags"
-							],
-							"query": [
-								{
-									"key": "q",
-									"value": "w"
-								}
-							]
-						}
-					},
-					"response": []
-				}
-			],
-			"protocolProfileBehavior": {}
-		},
-		{
 			"name": "video",
 			"item": [
 				{
@@ -856,6 +825,42 @@
 		{
 			"name": "web",
 			"item": [],
+			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "tags",
+			"item": [
+				{
+					"name": "search",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{api_server}}/api/v1/tags?q=pepo",
+							"host": [
+								"{{api_server}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"tags"
+							],
+							"query": [
+								{
+									"key": "q",
+									"value": "pepo"
+								},
+								{
+									"key": "pagination_identifier",
+									"value": "eyJwYWdlIjoyfQ==",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			],
 			"protocolProfileBehavior": {}
 		},
 		{
