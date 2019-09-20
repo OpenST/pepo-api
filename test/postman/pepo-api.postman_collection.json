@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "79791670-4607-4b8a-a535-1ec3a61413aa",
+		"_postman_id": "bc30db0c-7edd-45eb-bbad-aa14e1c31a8b",
 		"name": "pepo-api",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -257,7 +257,8 @@
 					},
 					"response": []
 				}
-			]
+			],
+			"protocolProfileBehavior": {}
 		},
 		{
 			"name": "gifs",
@@ -328,7 +329,8 @@
 					},
 					"response": []
 				}
-			]
+			],
+			"protocolProfileBehavior": {}
 		},
 		{
 			"name": "token",
@@ -353,7 +355,8 @@
 					},
 					"response": []
 				}
-			]
+			],
+			"protocolProfileBehavior": {}
 		},
 		{
 			"name": "users",
@@ -1273,7 +1276,8 @@
 					},
 					"response": []
 				}
-			]
+			],
+			"protocolProfileBehavior": {}
 		},
 		{
 			"name": "webhook",
@@ -1428,7 +1432,8 @@
 					},
 					"response": []
 				}
-			]
+			],
+			"protocolProfileBehavior": {}
 		},
 		{
 			"name": "transaction",
@@ -1464,7 +1469,8 @@
 					},
 					"response": []
 				}
-			]
+			],
+			"protocolProfileBehavior": {}
 		},
 		{
 			"name": "feeds",
@@ -1508,7 +1514,8 @@
 					},
 					"response": []
 				}
-			]
+			],
+			"protocolProfileBehavior": {}
 		},
 		{
 			"name": "notification",
@@ -1560,7 +1567,8 @@
 						]
 					}
 				}
-			]
+			],
+			"protocolProfileBehavior": {}
 		},
 		{
 			"name": "tags",
@@ -1590,7 +1598,8 @@
 					},
 					"response": []
 				}
-			]
+			],
+			"protocolProfileBehavior": {}
 		},
 		{
 			"name": "video",
@@ -1672,7 +1681,8 @@
 					},
 					"response": []
 				}
-			]
+			],
+			"protocolProfileBehavior": {}
 		},
 		{
 			"name": "admin",
@@ -1813,13 +1823,32 @@
 				{
 					"name": "delete-video",
 					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "password",
+									"value": "Pepo-Admin-20!9*",
+									"type": "string"
+								},
+								{
+									"key": "username",
+									"value": "pepo",
+									"type": "string"
+								}
+							]
+						},
 						"method": "POST",
 						"header": [
 							{
 								"key": "Content-Type",
-								"name": "Content-Type",
-								"type": "text",
-								"value": "application/x-www-form-urlencoded"
+								"value": "application/x-www-form-urlencoded",
+								"type": "text"
+							},
+							{
+								"key": "csrf-token",
+								"value": "{{csrf-token}}",
+								"type": "text"
 							}
 						],
 						"body": {
@@ -1835,18 +1864,23 @@
 									"value": "5b300f84986e09ab",
 									"type": "text"
 								}
-							]
+							],
+							"options": {
+								"raw": {
+									"language": "text"
+								}
+							}
 						},
 						"url": {
-							"raw": "{{api_server}}/api/v1/admin/login",
+							"raw": "{{api_server}}/api/admin/delete-video/1089",
 							"host": [
 								"{{api_server}}"
 							],
 							"path": [
 								"api",
-								"v1",
 								"admin",
-								"login"
+								"delete-video",
+								"1089"
 							]
 						}
 					},
@@ -1878,6 +1912,11 @@
 								{
 									"key": "q",
 									"value": "test"
+								},
+								{
+									"key": "pagination_identifier",
+									"value": "eyJwYWdpbmF0aW9uX3RpbWVzdGFtcCI6MTU2ODg5MzMzM30=",
+									"disabled": true
 								}
 							]
 						}
@@ -2090,7 +2129,8 @@
 					},
 					"response": []
 				}
-			]
+			],
+			"protocolProfileBehavior": {}
 		},
 		{
 			"name": "top-up",
@@ -2191,7 +2231,8 @@
 					},
 					"response": []
 				}
-			]
+			],
+			"protocolProfileBehavior": {}
 		},
 		{
 			"name": "fetch-goto",
@@ -2247,5 +2288,6 @@
 			},
 			"response": []
 		}
-	]
+	],
+	"protocolProfileBehavior": {}
 }
