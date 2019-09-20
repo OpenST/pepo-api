@@ -329,7 +329,7 @@ class UserNotificationModel extends CassandraModelBase {
    * Flush cache.
    *
    * @param {object} params
-   * @param {number} params.userId
+   * @param {number} [params.userId]
    *
    * @returns {Promise<*>}
    */

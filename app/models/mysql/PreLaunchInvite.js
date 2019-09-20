@@ -299,6 +299,7 @@ class PreLaunchInvite extends ModelBase {
     }
 
     const dbRows = await queryObject.fire();
+
     return dbRows[0] || {};
   }
 

@@ -38,7 +38,7 @@ class Tag extends ModelBase {
    * @param {string} dbRow.created_at
    * @param {string} dbRow.updated_at
    *
-   * @return {object}
+   * @returns {object}
    * @private
    */
   _formatDbData(dbRow) {
@@ -169,7 +169,7 @@ class Tag extends ModelBase {
    *
    * @returns {Promise<any>}
    */
-  updateTagWeights(tagIds, weightToAdd) {
+  async updateTagWeights(tagIds, weightToAdd) {
     const oThis = this;
 
     return oThis
@@ -181,10 +181,15 @@ class Tag extends ModelBase {
   /**
    * Flush cache.
    *
+   * @param {object} params
+   * @param {string} params.tagPrefix
+   * @param {array} params.ids
+   *
    * @returns {Promise<*>}
    */
   static async flushCache(params) {
     const promisesArray = [];
+
     const TagPagination = require(rootPrefix + '/lib/cacheManagement/single/TagPagination');
     promisesArray.push(new TagPagination({ tagPrefix: [params.tagPrefix] }).clear());
 
