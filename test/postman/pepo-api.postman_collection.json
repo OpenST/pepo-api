@@ -6,261 +6,6 @@
 	},
 	"item": [
 		{
-			"name": "auth",
-			"item": [
-				{
-					"name": "sign-up",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"name": "Content-Type",
-								"value": "application/x-www-form-urlencoded",
-								"type": "text"
-							}
-						],
-						"body": {
-							"mode": "urlencoded",
-							"urlencoded": [
-								{
-									"key": "user_name",
-									"value": "ankit123",
-									"type": "text"
-								},
-								{
-									"key": "password",
-									"value": "12345678",
-									"type": "text"
-								},
-								{
-									"key": "first_name",
-									"value": "Ankit",
-									"type": "text"
-								},
-								{
-									"key": "last_name",
-									"value": "Singh",
-									"type": "text"
-								}
-							]
-						},
-						"url": {
-							"raw": "{{api_server}}/api/v1/auth/sign-up",
-							"host": [
-								"{{api_server}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"auth",
-								"sign-up"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "twitter-login",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"name": "Content-Type",
-								"type": "text",
-								"value": "application/x-www-form-urlencoded"
-							}
-						],
-						"body": {
-							"mode": "urlencoded",
-							"urlencoded": [
-								{
-									"key": "token",
-									"value": "3314410076-KgqysTVFwTln5KE1akmyDMepro4WNPSaZQwSsSO",
-									"type": "text"
-								},
-								{
-									"key": "secret",
-									"value": "d6apadYBdCzl28ozvgQestoTIdTJEIDe3R3ewDSBRBw7I",
-									"type": "text"
-								},
-								{
-									"key": "twitter_id",
-									"value": "3314410076",
-									"type": "text"
-								},
-								{
-									"key": "handle",
-									"value": "singhankit2099",
-									"type": "text"
-								}
-							]
-						},
-						"url": {
-							"raw": "{{api_server}}/api/v1/auth/twitter-login",
-							"host": [
-								"{{api_server}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"auth",
-								"twitter-login"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "login",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"name": "Content-Type",
-								"type": "text",
-								"value": "application/x-www-form-urlencoded"
-							}
-						],
-						"body": {
-							"mode": "urlencoded",
-							"urlencoded": [
-								{
-									"key": "user_name",
-									"value": "ankit123",
-									"type": "text"
-								},
-								{
-									"key": "password",
-									"value": "12345678",
-									"type": "text"
-								}
-							]
-						},
-						"url": {
-							"raw": "{{api_server}}/api/v1/auth/login",
-							"host": [
-								"{{api_server}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"auth",
-								"login"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "refresh-twitter-connect",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"name": "Content-Type",
-								"type": "text",
-								"value": "application/x-www-form-urlencoded"
-							}
-						],
-						"body": {
-							"mode": "urlencoded",
-							"urlencoded": [
-								{
-									"key": "token",
-									"value": "3314410076-KgqysTVFwTln5KE1akmyDMepro4WNPSaZQwSsSO",
-									"type": "text"
-								},
-								{
-									"key": "secret",
-									"value": "d6apadYBdCzl28ozvgQestoTIdTJEIDe3R3ewDSBRBw7I",
-									"type": "text"
-								},
-								{
-									"key": "twitter_id",
-									"value": "3314410076",
-									"type": "text"
-								},
-								{
-									"key": "handle",
-									"value": "singhankit2099",
-									"type": "text"
-								}
-							]
-						},
-						"url": {
-							"raw": "{{api_server}}/api/v1/auth/refresh-twitter-connect",
-							"host": [
-								"{{api_server}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"auth",
-								"refresh-twitter-connect"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "logout",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"name": "Content-Type",
-								"type": "text",
-								"value": "application/x-www-form-urlencoded"
-							}
-						],
-						"body": {
-							"mode": "urlencoded",
-							"urlencoded": []
-						},
-						"url": {
-							"raw": "{{api_server}}/api/v1/auth/logout",
-							"host": [
-								"{{api_server}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"auth",
-								"logout"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "twitter-disconnect",
-					"request": {
-						"method": "POST",
-						"header": [],
-						"url": {
-							"raw": "{{api_server}}/api/v1/auth/twitter-disconnect",
-							"host": [
-								"{{api_server}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"auth",
-								"twitter-disconnect"
-							]
-						}
-					},
-					"response": []
-				}
-			],
-			"protocolProfileBehavior": {}
-		},
-		{
 			"name": "gifs",
 			"item": [
 				{
@@ -2241,7 +1986,186 @@
 		},
 		{
 			"name": "device",
-			"item": [],
+			"item": [
+				{
+					"name": "auth",
+					"item": [
+						{
+							"name": "twitter-login",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"value": "text/plain",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "urlencoded",
+									"urlencoded": [
+										{
+											"key": "token",
+											"value": "3314410076-KgqysTVFwTln5KE1akmyDMepro4WNPSaZQwSsSO",
+											"type": "text"
+										},
+										{
+											"key": "secret",
+											"value": "d6apadYBdCzl28ozvgQestoTIdTJEIDe3R3ewDSBRBw7I",
+											"type": "text"
+										},
+										{
+											"key": "twitter_id",
+											"value": "3314410076",
+											"type": "text"
+										},
+										{
+											"key": "handle",
+											"value": "singhankit2099",
+											"type": "text"
+										},
+										{
+											"key": "invite_code",
+											"value": "QUK9IZ",
+											"type": "text",
+											"disabled": true
+										}
+									],
+									"options": {
+										"raw": {
+											"language": "text"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{api_server}}/api/v1/auth/twitter-login",
+									"host": [
+										"{{api_server}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"auth",
+										"twitter-login"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "refresh-twitter-connect",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"value": "text/plain",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "urlencoded",
+									"urlencoded": [
+										{
+											"key": "token",
+											"value": "3314410076-KgqysTVFwTln5KE1akmyDMepro4WNPSaZQwSsSO",
+											"type": "text"
+										},
+										{
+											"key": "secret",
+											"value": "d6apadYBdCzl28ozvgQestoTIdTJEIDe3R3ewDSBRBw7I",
+											"type": "text"
+										},
+										{
+											"key": "twitter_id",
+											"value": "3314410076",
+											"type": "text"
+										},
+										{
+											"key": "handle",
+											"value": "singhankit2099",
+											"type": "text"
+										}
+									],
+									"options": {
+										"raw": {
+											"language": "text"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{api_server}}/api/v1/auth/refresh-twitter-connect",
+									"host": [
+										"{{api_server}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"auth",
+										"refresh-twitter-connect"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "logout",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"type": "text",
+										"value": "application/x-www-form-urlencoded"
+									}
+								],
+								"body": {
+									"mode": "urlencoded",
+									"urlencoded": []
+								},
+								"url": {
+									"raw": "{{api_server}}/api/v1/auth/logout",
+									"host": [
+										"{{api_server}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"auth",
+										"logout"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "twitter-disconnect",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"url": {
+									"raw": "{{api_server}}/api/v1/auth/twitter-disconnect",
+									"host": [
+										"{{api_server}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"auth",
+										"twitter-disconnect"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"protocolProfileBehavior": {},
+					"_postman_isSubFolder": true
+				}
+			],
 			"protocolProfileBehavior": {}
 		},
 		{
