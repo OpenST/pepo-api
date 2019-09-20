@@ -184,7 +184,8 @@ class PreLaunchTwitterSignUp extends ServiceBase {
       invite_limit: inviteCodeConstants.inviteMaxLimit
     };
 
-    let insertResponse = await new InviteCodeModel().insert(insertData).fire();
+    let insertResponse = await new InviteCodeModel()._insert(insertData);
+    insertResponse = insertResponse.data;
 
     if (!insertResponse) {
       logger.error('Error while inserting data in invite_codes table.');
