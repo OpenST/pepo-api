@@ -3,40 +3,6 @@ const rootPrefix = '../../..',
   paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination');
 
 const v1Signature = {
-  [apiName.signUp]: {
-    mandatory: [
-      {
-        parameter: 'user_name',
-        validatorMethods: ['validateString', 'validateUserName']
-      },
-      {
-        parameter: 'first_name',
-        validatorMethods: ['validateString', 'validateName']
-      },
-      {
-        parameter: 'last_name',
-        validatorMethods: ['validateString', 'validateName']
-      },
-      {
-        parameter: 'password',
-        validatorMethods: ['validateString', 'validatePassword']
-      }
-    ],
-    optional: []
-  },
-  [apiName.login]: {
-    mandatory: [
-      {
-        parameter: 'user_name',
-        validatorMethods: ['validateString', 'validateUserName']
-      },
-      {
-        parameter: 'password',
-        validatorMethods: ['validateString', 'validatePassword']
-      }
-    ],
-    optional: []
-  },
   [apiName.logout]: {
     mandatory: [],
     optional: [
@@ -63,15 +29,6 @@ const v1Signature = {
     mandatory: [
       {
         parameter: 'current_user',
-        validatorMethods: ['validateNonEmptyObject']
-      }
-    ],
-    optional: []
-  },
-  [apiName.sendDoubleOptIn]: {
-    mandatory: [
-      {
-        parameter: 'pre_launch_invite_obj',
         validatorMethods: ['validateNonEmptyObject']
       }
     ],
@@ -599,46 +556,6 @@ const v1Signature = {
         validatorMethods: ['validateString', 'validatePaginationIdentifier']
       }
     ]
-  },
-  [apiName.adminUserSearch]: {
-    mandatory: [],
-    optional: [
-      {
-        parameter: 'includeVideos',
-        validatorMethods: ['validateBoolean']
-      },
-      {
-        parameter: 'q',
-        validatorMethods: ['validateString']
-      },
-      {
-        parameter: paginationConstants.paginationIdentifierKey,
-        validatorMethods: ['validateString', 'validatePaginationIdentifier']
-      }
-    ]
-  },
-
-  [apiName.adminUserApprove]: {
-    mandatory: [
-      {
-        parameter: 'user_ids',
-        validatorMethods: ['validateArray']
-      }
-    ],
-    optional: []
-  },
-  [apiName.adminDeleteVideo]: {
-    mandatory: [
-      {
-        parameter: 'video_id',
-        validatorMethods: ['validateNonZeroInteger']
-      },
-      {
-        parameter: 'current_admin',
-        validatorMethods: ['validateNonEmptyObject']
-      }
-    ],
-    optional: []
   },
   [apiName.getEmail]: {
     mandatory: [
