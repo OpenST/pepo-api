@@ -43,6 +43,8 @@ class AddDeviceToken extends ServiceBase {
 
     const oThis = this;
 
+    logger.log('=========== params ===========', params);
+
     oThis.currentUserId = +params.current_user.id;
     oThis.userId = +params.user_id;
     oThis.deviceId = params.device_id;
