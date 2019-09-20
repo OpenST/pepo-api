@@ -5,6 +5,7 @@ const rootPrefix = '../../..',
   VideoByIdCache = require(rootPrefix + '/lib/cacheManagement/multi/VideoByIds'),
   UserMultiCache = require(rootPrefix + '/lib/cacheManagement/multi/User'),
   VideoDetailsByVideoIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/VideoDetailsByVideoIds'),
+  videoDetailsConstants = require(rootPrefix + '/lib/globalConstant/videoDetail'),
   shareEntityConstants = require(rootPrefix + '/lib/globalConstant/shareEntity'),
   gotoConstants = require(rootPrefix + '/lib/globalConstant/goto'),
   coreConstants = require(rootPrefix + '/config/coreConstants'),
@@ -93,8 +94,19 @@ class ShareDetails extends ServiceBase {
       return Promise.reject(videoDetailsCacheRsp);
     }
 
-    let videoDetails = videoDetailsCacheRsp.data[oThis.videoId],
-      creatorUserId = videoDetails.creatorUserId;
+    let videoDetails = videoDetailsCacheRsp.data[oThis.videoId];
+
+    // Already deleted.
+    if (!videoDetails.creatorUserId || videoDetails.status === videoDetailsConstants.deletedStatus) {
+      responseHelper.paramValidationError({
+        internal_error_identifier: 'a_s_v_sd_2',
+        api_error_identifier: 'invalid_api_params',
+        params_error_identifiers: ['invalid_video_id'],
+        debug_options: { videoDetails: videoDetails }
+      });
+    }
+
+    let creatorUserId = videoDetails.creatorUserId;
 
     // Video is of current user, so no need for query
     if (creatorUserId === oThis.currentUser.id) {

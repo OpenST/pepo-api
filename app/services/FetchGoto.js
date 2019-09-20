@@ -8,7 +8,8 @@ const rootPrefix = '../..',
   coreConstants = require(rootPrefix + '/config/coreConstants'),
   responseHelper = require(rootPrefix + '/lib/formatter/response');
 
-const currentPepoApiDomain = coreConstants.PA_DOMAIN;
+const currentPepoApiDomain = 'stagingpepo.com'; //coreConstants.PA_DOMAIN;
+const urlParser = require('url');
 
 class FetchGoto extends ServiceBase {
   /**
@@ -33,6 +34,7 @@ class FetchGoto extends ServiceBase {
 
     oThis.gotoValues = {};
     oThis.goto = null;
+    oThis.parsedUrl = {};
   }
 
   /**
@@ -126,13 +128,18 @@ class FetchGoto extends ServiceBase {
   async _fetchAndValidateUrlDomain() {
     const oThis = this;
 
-    let currentUrlDomainMatch = oThis.url.match(currentPepoApiDomain);
+    oThis.parsedUrl = urlParser.parse(oThis.url, true);
 
-    if (!currentUrlDomainMatch || !currentUrlDomainMatch[0]) {
+    // If url is not correct or protocol is invalid or host is different from current domain
+    if (
+      !commonValidators.validateNonEmptyObject(oThis.parsedUrl) ||
+      !['http:', 'https:'].includes(oThis.parsedUrl.protocol) ||
+      !oThis.parsedUrl.host.match(currentPepoApiDomain)
+    ) {
       return Promise.reject(
         responseHelper.error({
           internal_error_identifier: 'a_s_fgt_3',
-          api_error_identifier: 'resource_not_found',
+          api_error_identifier: 'NOT_FOUND',
           debug_options: {
             url: oThis.url
           }
@@ -150,19 +157,19 @@ class FetchGoto extends ServiceBase {
   _urlHandler() {
     const oThis = this;
 
-    let splittedUrlPath = oThis.url.split(currentPepoApiDomain),
-      splittedParts = splittedUrlPath[1].split('/');
-
-    let urlKind = splittedParts[1],
-      urlData = splittedParts[2];
+    let pathName = oThis.parsedUrl.pathname;
 
     // for now, this service only supports for video/:video_id route
-    if (urlKind === gotoConstants.videoShareGotoKind) {
-      return responseHelper.successWithData({ gotoKind: urlKind, gotoData: urlData });
+    if (pathName.match(gotoConstants.videoShareGotoKind)) {
+      let videoId = pathName.split('/')[2];
+      return responseHelper.successWithData({
+        gotoKind: gotoConstants.videoShareGotoKind,
+        gotoData: videoId
+      });
     } else {
       return responseHelper.error({
         internal_error_identifier: 'a_s_fgt_4',
-        api_error_identifier: 'resource_not_found',
+        api_error_identifier: 'NOT_FOUND',
         debug_options: {
           url: oThis.url
         }
