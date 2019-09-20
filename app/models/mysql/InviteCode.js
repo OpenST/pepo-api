@@ -134,7 +134,7 @@ class InviteCode extends ModelBase {
   }
 
   /**
-   * Update invited user count
+   * Update invited user count.
    *
    * @returns {Promise<void>}
    * @private
@@ -219,11 +219,13 @@ class InviteCode extends ModelBase {
    * @param {object} params
    * @param {number} [params.userId]
    * @param {string} [params.code]
+   * @param {string/number} [params.id]
    *
    * @returns {Promise<*>}
    */
   static async flushCache(params) {
-    let promises = [];
+    const promises = [];
+
     if (params.userId) {
       const InviteCodeByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/InviteCodeByUserIds');
       promises.push(new InviteCodeByUserIdsCache({ userIds: [params.userId] }).clear());

@@ -104,8 +104,8 @@ class FiatPayment extends ModelBase {
   /**
    * Fetch by receipt id and service kind.
    *
-   * @param receiptId: receipt id
-   * @param serviceKind: service kind
+   * @param {string} receiptId: receipt id
+   * @param {number} serviceKind: service kind
    *
    * @return {Promise<*>}
    */
@@ -127,7 +127,7 @@ class FiatPayment extends ModelBase {
   /**
    * Fetch life time purchase amount and total pepo amount purchased for a user id.
    *
-   * @param {array} userIds: user id sfor which the total purchase amount and total pepo amount has to be summed.
+   * @param {array} userIds: user ids for which the total purchase amount and total pepo amount has to be summed.
    *
    * @returns {Promise<void>}
    */
@@ -191,8 +191,8 @@ class FiatPayment extends ModelBase {
    * Flush cache.
    *
    * @param {object} params
-   * @param {integer} params.fiatPaymentId
-   * @param {integer} params.userId
+   * @param {integer} [params.fiatPaymentId]
+   * @param {integer} [params.userId]
    *
    * @returns {Promise<*>}
    */
