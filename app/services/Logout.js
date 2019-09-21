@@ -2,6 +2,7 @@ const rootPrefix = '../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   UserDeviceModel = require(rootPrefix + '/app/models/mysql/UserDevice'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
+  logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   userDeviceConstants = require(rootPrefix + '/lib/globalConstant/userDevice');
 
 /**
@@ -25,7 +26,7 @@ class Logout extends ServiceBase {
     super();
 
     const oThis = this;
-
+    logger.log('======== Logout parameters:::::', params);
     oThis.currentUser = params.current_user;
     oThis.deviceId = params.device_id;
   }

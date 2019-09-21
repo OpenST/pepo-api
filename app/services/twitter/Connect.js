@@ -46,7 +46,7 @@ class TwitterConnect extends ServiceBase {
     oThis.secret = params.secret;
     oThis.twitterId = params.twitter_id;
     oThis.handle = params.handle;
-    oThis.inviteCode = params.invite_code;
+    oThis.inviteCode = params.invite_code ? params.invite_code.toUpperCase() : null;
 
     oThis.userTwitterEntity = null;
     oThis.twitterUserObj = null;
@@ -153,7 +153,7 @@ class TwitterConnect extends ServiceBase {
       // If twitter account belongs to prelaunch invite, then use that inviter code if any
       if (oThis.prelaunchInviteObj.inviterCodeId) {
         let cacheResp = await new InviteCodeByIdCache({ id: oThis.prelaunchInviteObj.inviterCodeId }).fetch();
-        oThis.inviterCodeObj = cacheResp.data[oThis.prelaunchInviteObj.inviterCodeId];
+        oThis.inviterCodeObj = cacheResp.data;
       } else {
         await oThis._validateInviteCode();
       }

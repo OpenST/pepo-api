@@ -9,6 +9,7 @@ const rootPrefix = '../../../../..',
   UpdateProfileBase = require(rootPrefix + '/app/services/user/profile/update/Base'),
   UserByUsernameCache = require(rootPrefix + '/lib/cacheManagement/single/UserByUsername'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
+  logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   userTagConstants = require(rootPrefix + '/lib/globalConstant/userTag'),
   createErrorLogsEntry = require(rootPrefix + '/lib/errorLogs/createEntry'),
   errorLogsConstants = require(rootPrefix + '/lib/globalConstant/errorLogs'),
@@ -37,6 +38,8 @@ class UpdateProfileInfo extends UpdateProfileBase {
    */
   constructor(params) {
     super(params);
+
+    logger.log('======= params for update info ========', params);
 
     const oThis = this;
 

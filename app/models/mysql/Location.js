@@ -75,13 +75,16 @@ class LocationModel extends ModelBase {
   }
 
   /**
+   * Fetch by ids.
    *
-   * @param ids
+   * @param {array<number>} ids
+   *
    * @returns {Promise<Object>}
    */
   async fetchByIds(ids) {
-    const oThis = this,
-      response = {};
+    const oThis = this;
+
+    const response = {};
 
     const dbRows = await oThis
       .select('*')
@@ -100,13 +103,16 @@ class LocationModel extends ModelBase {
   }
 
   /**
+   * Fetch by timezone.
    *
-   * @param timezone
+   * @param {string} timezone
+   *
    * @returns {Promise<Object>}
    */
   async fetchByTimeZone(timezone) {
-    const oThis = this,
-      response = {};
+    const oThis = this;
+
+    const response = {};
 
     const dbRow = await oThis
       .select('*')
@@ -123,12 +129,11 @@ class LocationModel extends ModelBase {
   /**
    * Flush cache.
    *
-   * @param {object} params
-   * @param {number} params.id
-   *
    * @returns {Promise<*>}
    */
-  static async flushCache(params) {}
+  static async flushCache() {
+    // Do nothing.
+  }
 }
 
 module.exports = LocationModel;

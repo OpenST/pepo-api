@@ -1,8 +1,7 @@
 const rootPrefix = '../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
   feedsConstants = require(rootPrefix + '/lib/globalConstant/feed'),
-  databaseConstants = require(rootPrefix + '/lib/globalConstant/database'),
-  paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination');
+  databaseConstants = require(rootPrefix + '/lib/globalConstant/database');
 
 // Declare variables.
 const dbName = databaseConstants.feedDbName;
@@ -158,7 +157,7 @@ class FeedModel extends ModelBase {
   }
 
   /**
-   * Delete by actor
+   * Delete by actor.
    *
    * @param {object} params
    * @param {number} params.actor
@@ -182,9 +181,8 @@ class FeedModel extends ModelBase {
    * Flush cache.
    *
    * @param {object} params
-   * @param {number} params.paginationTimestamp
-   * @param {number} params.id
-   * @param {array<number>} params.ids
+   * @param {number} [params.id]
+   * @param {array<number>} [params.ids]
    *
    * @returns {Promise<*>}
    */

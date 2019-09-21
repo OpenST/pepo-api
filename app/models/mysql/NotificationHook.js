@@ -127,15 +127,17 @@ class NotificationHook extends ModelBase {
   /**
    * Update status and insert responses.
    *
-   * @param hookId
-   * @param status
-   * @param response
+   * @param {number} hookId
+   * @param {string} status
+   * @param {object} response
+   * @param {boolean} increaseRetryCount
+   *
    * @returns {Promise<void>}
    */
   async updateStatusAndInsertResponse(hookId, status, response, increaseRetryCount = false) {
     const oThis = this;
 
-    let obj = oThis
+    const obj = oThis
       .update({
         lock_identifier: null,
         locked_at: null,
@@ -154,7 +156,8 @@ class NotificationHook extends ModelBase {
   /**
    * Mark status as processed successfully.
    *
-   * @param hookId
+   * @param {number} hookId
+   *
    * @returns {Promise<void>}
    */
   async markStatusAsProcessedSuccess(hookId) {

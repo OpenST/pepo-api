@@ -14,13 +14,13 @@ const v1ErrorConfig = {
   invalid_user_name: {
     parameter: 'user_name',
     code: 'invalid',
-    message: 'User Name can contain alphanumeric and underscore and should be min 1 characters and max 15 characters'
+    message: 'User Name can contain alphanumeric and underscore and should be min 1 characters and max 15 characters.'
   },
 
   invalid_password: {
     parameter: 'password',
     code: 'invalid',
-    message: 'Password should be min 8 characters and max 40 characters'
+    message: 'Password should be min 8 characters and max 40 characters.'
   },
 
   invalid_first_name: {
@@ -321,6 +321,12 @@ const v1ErrorConfig = {
     parameter: 'receiver_user_id',
     code: 'invalid',
     message: 'Invalid receiver user id.'
+  },
+
+  invalid_payment_id: {
+    parameter: 'payment_id',
+    code: 'invalid',
+    message: 'Invalid payment id.'
   }
 };
 

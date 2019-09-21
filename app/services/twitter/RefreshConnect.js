@@ -111,10 +111,9 @@ class RefreshConnect extends ServiceBase {
     } else {
       logger.error('Error: Trying refresh for user not signed up');
       return Promise.reject(
-        responseHelper.paramValidationError({
+        responseHelper.error({
           internal_error_identifier: 's_t_rc_ftu_1',
-          api_error_identifier: 'invalid_api_params',
-          params_error_identifiers: ['invalid_twitter_id'],
+          api_error_identifier: 'invalid_twitter_user',
           debug_options: {}
         })
       );
@@ -125,10 +124,9 @@ class RefreshConnect extends ServiceBase {
     if (oThis.currentUserId != oThis.userId) {
       logger.error('Error: Trying refresh from user other than current');
       return Promise.reject(
-        responseHelper.paramValidationError({
+        responseHelper.error({
           internal_error_identifier: 's_t_rc_ftu_2',
-          api_error_identifier: 'invalid_api_params',
-          params_error_identifiers: ['invalid_twitter_id'],
+          api_error_identifier: 'invalid_twitter_user',
           debug_options: {}
         })
       );
@@ -151,8 +149,6 @@ class RefreshConnect extends ServiceBase {
 
     let twitterResp = null;
 
-    //todo: change error response unauthorized_api_request?
-
     twitterResp = await new AccountTwitterRequestClass()
       .verifyCredentials({
         oAuthToken: oThis.token,
@@ -161,10 +157,9 @@ class RefreshConnect extends ServiceBase {
       .catch(function(err) {
         logger.error('Error while validating Credentials for twitter: ', err);
         return Promise.reject(
-          responseHelper.paramValidationError({
+          responseHelper.error({
             internal_error_identifier: 's_t_rc_vtc_1',
-            api_error_identifier: 'invalid_api_params',
-            params_error_identifiers: ['invalid_twitter_secret'],
+            api_error_identifier: 'invalid_twitter_user',
             debug_options: {}
           })
         );
@@ -172,10 +167,9 @@ class RefreshConnect extends ServiceBase {
 
     if (twitterResp.isFailure()) {
       return Promise.reject(
-        responseHelper.paramValidationError({
+        responseHelper.error({
           internal_error_identifier: 's_t_rc_vtc_2',
-          api_error_identifier: 'invalid_api_params',
-          params_error_identifiers: ['invalid_twitter_secret'],
+          api_error_identifier: 'invalid_twitter_user',
           debug_options: {}
         })
       );
@@ -186,10 +180,9 @@ class RefreshConnect extends ServiceBase {
     // validating the front end data
     if (userTwitterEntity.idStr != oThis.twitterId || userTwitterEntity.handle != oThis.handle) {
       return Promise.reject(
-        responseHelper.paramValidationError({
+        responseHelper.error({
           internal_error_identifier: 's_t_rc_vtc_3',
-          api_error_identifier: 'invalid_api_params',
-          params_error_identifiers: ['invalid_twitter_id'],
+          api_error_identifier: 'invalid_twitter_user',
           debug_options: {}
         })
       );
@@ -224,10 +217,9 @@ class RefreshConnect extends ServiceBase {
 
     if (secureUserObj.status !== userConstants.activeStatus) {
       return Promise.reject(
-        responseHelper.paramValidationError({
+        responseHelper.error({
           internal_error_identifier: 's_t_rc_fsu_1',
-          api_error_identifier: 'invalid_api_params',
-          params_error_identifiers: ['user_not_active'],
+          api_error_identifier: 'invalid_twitter_user',
           debug_options: {}
         })
       );

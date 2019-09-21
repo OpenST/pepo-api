@@ -1,19 +1,19 @@
 const rootPrefix = '../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
-  aggregatedNotificationsConstants = require(rootPrefix + '/lib/globalConstant/aggregatedNotifications'),
-  databaseConstants = require(rootPrefix + '/lib/globalConstant/database');
+  databaseConstants = require(rootPrefix + '/lib/globalConstant/database'),
+  aggregatedNotificationsConstants = require(rootPrefix + '/lib/globalConstant/aggregatedNotifications');
 
 // Declare variables.
 const dbName = databaseConstants.bigDbName;
 
 /**
- * Class for user device model.
+ * Class for aggregated notification model.
  *
  * @class AggregatedNotification
  */
 class AggregatedNotification extends ModelBase {
   /**
-   * Constructor for user device model.
+   * Constructor for aggregated notification model.
    *
    * @augments ModelBase
    *
@@ -69,8 +69,10 @@ class AggregatedNotification extends ModelBase {
   /**
    * Fetch details.
    *
-   * @param {Object} params
-   * @param {Array} params.sendTime
+   * @param {object} params
+   * @param {number} params.sendTime
+   * @param {number} [params.page]
+   * @param {number} [params.limit]
    *
    * @returns {Promise<void>}
    */
@@ -105,7 +107,7 @@ class AggregatedNotification extends ModelBase {
   }
 
   /**
-   * Index name
+   * Index name.
    *
    * @returns {string}
    */
@@ -118,7 +120,9 @@ class AggregatedNotification extends ModelBase {
    *
    * @returns {Promise<*>}
    */
-  static async flushCache(params) {}
+  static async flushCache() {
+    // Do nothing.
+  }
 }
 
 module.exports = AggregatedNotification;
