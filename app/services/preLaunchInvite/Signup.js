@@ -44,7 +44,7 @@ class PreLaunchTwitterSignUp extends ServiceBase {
     oThis.userTwitterEntity = params.userTwitterEntity;
     oThis.token = params.token;
     oThis.secret = params.secret;
-    oThis.inviteCode = params.inviteCode;
+    oThis.inviteCode = params.inviteCode ? params.inviteCode.toUpperCase() : null;
 
     oThis.email = oThis.userTwitterEntity.email;
     oThis.encryptedEncryptionSalt = null;
