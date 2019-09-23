@@ -51,6 +51,7 @@ async function startWebSocketServer(websocketPort) {
   });
 
   io.on('connection', async function(socket) {
+    // TODO - websocket - use logger.
     console.log('a user connected socket', socket.handshake.query);
     let err = null;
 
