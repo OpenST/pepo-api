@@ -121,7 +121,7 @@ class ShareDetails extends ServiceBase {
     let creatorUserId = videoDetails.creatorUserId;
 
     // Video is of current user, so no need for query
-    if (creatorUserId === oThis.currentUser.id) {
+    if (oThis.currentUser && creatorUserId === oThis.currentUser.id) {
       oThis.creatorUserName = oThis.currentUser.name;
     } else {
       const userMultiCacheRsp = await new UserMultiCache({ ids: [creatorUserId] }).fetch();
