@@ -44,13 +44,18 @@ async function run() {
   logger.step('# Attaching handlers');
   attachHandlers();
 
+  //** Uncomment the following lines to test websockets on local. **/
+  // app.get('/', function(req, res) {
+  //   res.sendFile(__dirname + '/index.html');
+  // });
+
   http.listen(websocketPort, function() {
     logger.step('# Listening on port ' + websocketPort);
   });
 }
 
 /**
- * Start subscribtion job for cron process id
+ * Start subscription job for cron process id
  *
  * @param cronProcessId
  * @return {Promise<void>}
@@ -66,8 +71,7 @@ async function subscribeToRmq(cronProcessId) {
  */
 function attachHandlers() {
   io.on('connection', async function(socket) {
-    // TODO - websocket - use logger.
-    console.log('a user connected socket', socket.handshake.query);
+    logger.log('a user connected socket', socket.handshake.query);
     let err = null;
 
     if (webSocketCustomCache.checkStopConnectingSockets()) {
@@ -114,7 +118,7 @@ function attachHandlers() {
 }
 
 async function autoDisconnect() {
-  console.log('\nautoDisconnect called========================TIME====', basicHelper.getCurrentTimestampInMinutes());
+  logger.log('\n#AutoDisconnect called at: ', basicHelper.getCurrentTimestampInMinutes());
   websocketAutoDisconnect.perform();
   setTimeout(autoDisconnect, 60 * 1000);
 }
