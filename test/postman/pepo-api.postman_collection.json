@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "80fd3cbc-7109-40ba-90e4-a181ebda2647",
+		"_postman_id": "5d2ff7a2-2f68-479a-8906-1719000362e3",
 		"name": "pepo-api",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -158,8 +158,7 @@
 					},
 					"response": []
 				}
-			],
-			"protocolProfileBehavior": {}
+			]
 		},
 		{
 			"name": "admin",
@@ -601,8 +600,7 @@
 					},
 					"response": []
 				}
-			],
-			"protocolProfileBehavior": {}
+			]
 		},
 		{
 			"name": "web",
@@ -684,11 +682,9 @@
 							"response": []
 						}
 					],
-					"protocolProfileBehavior": {},
 					"_postman_isSubFolder": true
 				}
-			],
-			"protocolProfileBehavior": {}
+			]
 		},
 		{
 			"name": "device",
@@ -858,7 +854,6 @@
 							"response": []
 						}
 					],
-					"protocolProfileBehavior": {},
 					"_postman_isSubFolder": true
 				},
 				{
@@ -885,7 +880,6 @@
 							"response": []
 						}
 					],
-					"protocolProfileBehavior": {},
 					"_postman_isSubFolder": true
 				},
 				{
@@ -1792,7 +1786,6 @@
 							"response": []
 						}
 					],
-					"protocolProfileBehavior": {},
 					"_postman_isSubFolder": true
 				},
 				{
@@ -1902,7 +1895,6 @@
 							"response": []
 						}
 					],
-					"protocolProfileBehavior": {},
 					"_postman_isSubFolder": true
 				},
 				{
@@ -1957,7 +1949,6 @@
 							}
 						}
 					],
-					"protocolProfileBehavior": {},
 					"_postman_isSubFolder": true
 				},
 				{
@@ -1994,7 +1985,6 @@
 							"response": []
 						}
 					],
-					"protocolProfileBehavior": {},
 					"_postman_isSubFolder": true
 				},
 				{
@@ -2047,75 +2037,11 @@
 							"response": []
 						}
 					],
-					"protocolProfileBehavior": {},
 					"_postman_isSubFolder": true
 				},
 				{
 					"name": "video",
 					"item": [
-						{
-							"name": "get-video",
-							"protocolProfileBehavior": {
-								"disableBodyPruning": true
-							},
-							"request": {
-								"method": "GET",
-								"header": [
-									{
-										"key": "Content-Type",
-										"name": "Content-Type",
-										"type": "text",
-										"value": "application/x-www-form-urlencoded"
-									}
-								],
-								"body": {
-									"mode": "urlencoded",
-									"urlencoded": [
-										{
-											"key": "name",
-											"value": "Pankaj Keswani",
-											"type": "text"
-										},
-										{
-											"key": "user_name",
-											"value": "pankaj",
-											"type": "text"
-										},
-										{
-											"key": "bio",
-											"value": "This is my bio, please save it with #cool",
-											"type": "text"
-										},
-										{
-											"key": "link",
-											"value": "https://www.facebook.com",
-											"type": "text"
-										}
-									]
-								},
-								"url": {
-									"raw": "{{api_server}}/api/v1/users/1400/video-history?",
-									"host": [
-										"{{api_server}}"
-									],
-									"path": [
-										"api",
-										"v1",
-										"users",
-										"1400",
-										"video-history"
-									],
-									"query": [
-										{
-											"key": "pagination_identifier",
-											"value": "asdfgjery56718bnmasdjk",
-											"disabled": true
-										}
-									]
-								}
-							},
-							"response": []
-						},
 						{
 							"name": "share",
 							"request": {
@@ -2138,7 +2064,6 @@
 							"response": []
 						}
 					],
-					"protocolProfileBehavior": {},
 					"_postman_isSubFolder": true
 				},
 				{
@@ -2165,7 +2090,6 @@
 							"response": []
 						}
 					],
-					"protocolProfileBehavior": {},
 					"_postman_isSubFolder": true
 				},
 				{
@@ -2185,12 +2109,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "\n{\n\t\"ost_transaction\": {\n    \"to\": \"0x5be7824c25a6edb4d6d22a7ca6058c7a94723fe0\",\n    \"updated_timestamp\": 1568991096,\n    \"transfers\": [\n      {\n        \"amount\": \"1000000000000000000\",\n        \"to_user_id\": \"c0ea8567-e12a-4634-a3fb-9323c06dd810\",\n        \"kind\": \"transfer\",\n        \"to\": \"0x720fb10ac03f560905ab79b963cc5222b2b11528\",\n        \"from_user_id\": \"d6e634c3-f986-4d38-a9a4-a7c254c9a062\",\n        \"from\": \"0x5be7824c25a6edb4d6d22a7ca6058c7a94723fe0\"\n      }\n    ],\n    \"status\": \"CREATED\",\n    \"gas_price\": \"1000000000\",\n    \"id\": \"9b7c43ac-b0cd-4bbd-83f6-acad032b7935\",\n    \"meta_property\": {\n      \"name\": \"video\",\n      \"type\": \"user_to_user\",\n      \"details\": \"vi_2453\"\n    }\n  }\n}",
-									"options": {
-										"raw": {
-											"language": "json"
-										}
-									}
+									"raw": "\n{\n\t\"ost_transaction\": {\n    \"to\": \"0x5be7824c25a6edb4d6d22a7ca6058c7a94723fe0\",\n    \"updated_timestamp\": 1568991096,\n    \"transfers\": [\n      {\n        \"amount\": \"1000000000000000000\",\n        \"to_user_id\": \"c0ea8567-e12a-4634-a3fb-9323c06dd810\",\n        \"kind\": \"transfer\",\n        \"to\": \"0x720fb10ac03f560905ab79b963cc5222b2b11528\",\n        \"from_user_id\": \"d6e634c3-f986-4d38-a9a4-a7c254c9a062\",\n        \"from\": \"0x5be7824c25a6edb4d6d22a7ca6058c7a94723fe0\"\n      }\n    ],\n    \"status\": \"CREATED\",\n    \"gas_price\": \"1000000000\",\n    \"id\": \"9b7c43ac-b0cd-4bbd-83f6-acad032b7935\",\n    \"meta_property\": {\n      \"name\": \"video\",\n      \"type\": \"user_to_user\",\n      \"details\": \"vi_2453\"\n    }\n  }\n}"
 								},
 								"url": {
 									"raw": "{{api_server}}/api/v1/ost-transactions",
@@ -2208,11 +2127,9 @@
 							"response": []
 						}
 					],
-					"protocolProfileBehavior": {},
 					"_postman_isSubFolder": true
 				}
-			],
-			"protocolProfileBehavior": {}
+			]
 		},
 		{
 			"name": "fetch-goto",
@@ -2268,6 +2185,5 @@
 			},
 			"response": []
 		}
-	],
-	"protocolProfileBehavior": {}
+	]
 }
