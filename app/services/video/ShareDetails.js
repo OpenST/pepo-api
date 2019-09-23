@@ -10,7 +10,6 @@ const rootPrefix = '../../..',
   coreConstants = require(rootPrefix + '/config/coreConstants'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   commonValidator = require(rootPrefix + '/lib/validators/Common'),
-  logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   entityType = require(rootPrefix + '/lib/globalConstant/entityType');
 
 const urlDomain = coreConstants.PA_DOMAIN;

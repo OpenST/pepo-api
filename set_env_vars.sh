@@ -111,9 +111,6 @@ export PA_PAD_COOKIE_SECRET='aa5298d3a3fe181a3a52d085ee1525df5asa498337f8f3b76ca
 # cookie signing secret for web cookie
 export PA_PW_COOKIE_SECRET='aa5298d3a3fe181a3a52d085ee1525df5asa498337f8f3b76ca7df0a5de32124'
 
-# Giphy Api Key
-export PA_GIPHY_API_KEY='PbWiMCsT9RxXtatEtKp6w1vapdqNxhFQ'
-
 # Pepo Campaigns Details
 export PA_CAMPAIGN_CLIENT_KEY="3572cbc0d1895ed73e769d028eb50fec"
 export PA_CAMPAIGN_CLIENT_SECRET="b753c5acca25e22bedb5a58efc72891a"

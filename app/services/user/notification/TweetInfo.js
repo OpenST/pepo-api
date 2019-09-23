@@ -109,10 +109,9 @@ class TweetInfo extends ServiceBase {
 
     if (!oThis.twitterUsersMap.hasOwnProperty(oThis.receiverUserId)) {
       return Promise.reject(
-        responseHelper.paramValidationError({
+        responseHelper.error({
           internal_error_identifier: 's_u_n_ti_ftu_1',
-          api_error_identifier: 'invalid_api_params',
-          params_error_identifiers: ['invalid_receiver_id'],
+          api_error_identifier: 'invalid_twitter_user',
           debug_options: {}
         })
       );
@@ -194,7 +193,7 @@ class TweetInfo extends ServiceBase {
         logger.error('Error while validating Credentials for twitter: ', err);
         return responseHelper.error({
           internal_error_identifier: 's_u_n_ti_vtc_1',
-          api_error_identifier: 'unauthorized_api_request',
+          api_error_identifier: 'invalid_twitter_user',
           debug_options: {}
         });
       });
@@ -202,7 +201,7 @@ class TweetInfo extends ServiceBase {
     if (twitterResp.isFailure()) {
       return responseHelper.error({
         internal_error_identifier: 's_u_n_ti_vtc_2',
-        api_error_identifier: 'unauthorized_api_request',
+        api_error_identifier: 'invalid_twitter_user',
         debug_options: {}
       });
     }
@@ -213,7 +212,7 @@ class TweetInfo extends ServiceBase {
       // Check if this needs to be errored out
       return responseHelper.error({
         internal_error_identifier: 's_u_n_ti_vtc_3',
-        api_error_identifier: 'unauthorized_api_request',
+        api_error_identifier: 'invalid_twitter_user',
         debug_options: {}
       });
     }

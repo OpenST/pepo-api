@@ -11,9 +11,9 @@ const rootPrefix = '../../..',
   topupRoutes = require(rootPrefix + '/routes/api/v1/topup'),
   videoRoutes = require(rootPrefix + '/routes/api/v1/videos'),
   tokensRoutes = require(rootPrefix + '/routes/api/v1/tokens'),
-  gifsRoutes = require(rootPrefix + '/routes/api/v1/gifs'),
   feedsRoutes = require(rootPrefix + '/routes/api/v1/feeds'),
   redemptionsRoutes = require(rootPrefix + '/routes/api/v1/redemptions'),
+  supportRoutes = require(rootPrefix + '/routes/api/v1/support'),
   cookieHelper = require(rootPrefix + '/lib/cookieHelper'),
   tagRoutes = require(rootPrefix + '/routes/api/v1/tags'),
   userNotificationsRoutes = require(rootPrefix + '/routes/api/v1/userNotifications'),
@@ -43,7 +43,7 @@ router.use('/videos', videoRoutes);
 router.use('/tokens', tokensRoutes);
 router.use('/ost-transactions', ostTransactionRoutes);
 router.use('/redemptions', redemptionsRoutes);
-router.use('/gifs', gifsRoutes);
+router.use('/support', supportRoutes);
 router.use('/upload-params', uploadParamsRoutes);
 router.use('/tags', tagRoutes);
 router.use('/notifications', userNotificationsRoutes);

@@ -149,12 +149,6 @@ Note: Get the webhooks id from above run(subscribe webhooks). Secret has to be o
   node executables/oneTimers/seedOstPricePointsTable.js --apiKey "803ee2a07554b94d80fb4ba4eb08229c" --apiSecret "66fc5bce904f83a74aba10469505cd5ac51dfc886fc747ecbfba3fea254d3006"
 ```
 
-## Seed gif categories
-```bash
-    source set_env_vars.sh
-    node executables/oneTimers/populateGifCategories.js
-```
-
 ## Start cron processes
 * [Only Development] Seed the cron processes using this script.
 ```bash

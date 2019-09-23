@@ -188,24 +188,28 @@ router.get('/current', sanitizer.sanitizeDynamicUrlParams, function(req, res, ne
   Promise.resolve(routeHelper.perform(req, res, next, '/admin/GetCurrent', 'r_a_v1_ad_7', null, dataFormatterFunc));
 });
 
-/* Logged in Admin */
-router.get('/users/:user_id/balance', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
-  req.decodedParams.apiName = apiName.userBalance;
-  req.decodedParams.user_id = req.params.user_id;
+/* User profile */
+router.get('/users/:user_id/profile', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.adminUserProfile;
+  req.decodedParams.profile_user_id = req.params.user_id;
 
   const dataFormatterFunc = async function(serviceResponse) {
     const wrapperFormatterRsp = await new FormatterComposer({
-      resultType: responseEntityKey.balance,
+      resultType: responseEntityKey.adminUserProfile,
       entityKindToResponseKeyMap: {
-        [entityType.balance]: responseEntityKey.balance
+        [entityType.userProfile]: responseEntityKey.adminUserProfile,
+        [entityType.usersMap]: responseEntityKey.users,
+        [entityType.imagesMap]: responseEntityKey.images
       },
       serviceData: serviceResponse.data
     }).perform();
 
+    wrapperFormatterRsp.data['balance'] = serviceResponse.data['balance'] || '0';
+
     serviceResponse.data = wrapperFormatterRsp.data;
   };
 
-  Promise.resolve(routeHelper.perform(req, res, next, '/user/GetBalance', 'r_a_v1_ad_8', null, dataFormatterFunc));
+  Promise.resolve(routeHelper.perform(req, res, next, '/admin/UserProfile', 'r_a_v1_ad_8', null, dataFormatterFunc));
 });
 
 router.use('/pre-launch', adminPreLaunchRoutes);

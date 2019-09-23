@@ -1,8 +1,7 @@
 const rootPrefix = '../../..',
   CassandraModelBase = require(rootPrefix + '/app/models/cassandra/Base'),
   cassandraKeyspaceConstants = require(rootPrefix + '/lib/globalConstant/cassandraKeyspace'),
-  userNotificationCountConstants = require(rootPrefix + '/lib/globalConstant/cassandra/userNotificationCount'),
-  basicHelper = require(rootPrefix + '/helpers/basic');
+  userNotificationCountConstants = require(rootPrefix + '/lib/globalConstant/cassandra/userNotificationCount');
 
 // Declare variables.
 const keyspace = cassandraKeyspaceConstants.cassandraKeyspaceName;
@@ -14,7 +13,7 @@ const keyspace = cassandraKeyspaceConstants.cassandraKeyspaceName;
  */
 class UserNotificationCountModel extends CassandraModelBase {
   /**
-   * Constructor for user notification visit detail model.
+   * Constructor for user notification visit count model.
    *
    * @augments CassandraModelBase
    *
@@ -29,13 +28,13 @@ class UserNotificationCountModel extends CassandraModelBase {
   }
 
   /**
-   * Keys for table user_notification_visit_details
+   * Keys for table user_notification_visit_details.
    *
    * @returns {{partition: string[], sort: string[]}}
    */
   keyObject() {
     return {
-      partition: [userNotificationCountConstants.shortToLongNamesMap['user_id']],
+      partition: [userNotificationCountConstants.shortToLongNamesMap.user_id],
       sort: []
     };
   }
@@ -70,7 +69,7 @@ class UserNotificationCountModel extends CassandraModelBase {
    * Increment user notification count by 1.
    *
    * @param {object} queryParams
-   * @param {string/number} queryParams.userId
+   * @param {array<string/number>} queryParams.userIds
    *
    * @returns {Promise<any>}
    */
@@ -87,7 +86,7 @@ class UserNotificationCountModel extends CassandraModelBase {
   }
 
   /**
-   * reset(delete) user notification count for user_id.
+   * Reset(delete) user notification count for user_id.
    *
    * @param {object} queryParams
    * @param {string/number} queryParams.userId
@@ -110,14 +109,15 @@ class UserNotificationCountModel extends CassandraModelBase {
   /**
    * Fetch unread notification count.
    *
-   * @param queryParams
-   * @param {Array} queryParams.userIds
+   * @param {object} queryParams
+   * @param {array<number>} queryParams.userIds
    *
    * @returns {*}
    */
   async fetchUnreadNotificationCount(queryParams) {
-    const oThis = this,
-      userIds = queryParams.userIds;
+    const oThis = this;
+
+    const userIds = queryParams.userIds;
 
     const query = `SELECT user_id, unread_notification_count FROM ${oThis.queryTableName} WHERE user_id IN ?;`;
     const params = [userIds];
@@ -129,8 +129,8 @@ class UserNotificationCountModel extends CassandraModelBase {
       return {};
     }
 
-    for (let i = 0; i < queryRsp.rows.length; i++) {
-      let formattedData = oThis.formatDbData(queryRsp.rows[i]);
+    for (let index = 0; index < queryRsp.rows.length; index++) {
+      const formattedData = oThis.formatDbData(queryRsp.rows[index]);
       response[formattedData.userId] = formattedData.unreadNotificationCount;
     }
 
@@ -140,12 +140,9 @@ class UserNotificationCountModel extends CassandraModelBase {
   /**
    * Flush cache.
    *
-   * @param {object} params
-   * @param {number} params.userId
-   *
    * @returns {Promise<*>}
    */
-  static async flushCache(params) {
+  static async flushCache() {
     // Do nothing.
   }
 }

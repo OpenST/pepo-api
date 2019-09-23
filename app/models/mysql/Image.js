@@ -192,6 +192,7 @@ class Image extends ModelBase {
    * @param {string} params.resolutions
    * @param {number} params.status
    * @param {number} params.id
+   * @param {number} params.userId
    *
    * @returns {object}
    */
@@ -205,7 +206,11 @@ class Image extends ModelBase {
       params.resolutions.original.url.match(imageConst.twitterImageUrlPrefix[0])
     ) {
       const imageLib = require(rootPrefix + '/lib/imageLib');
-      const shortenedUrl = imageLib.shortenUrl({ imageUrl: params.resolutions.original.url, isExternalUrl: true });
+      const shortenedUrl = imageLib.shortenUrl({
+        imageUrl: params.resolutions.original.url,
+        isExternalUrl: true,
+        userId: params.userId
+      });
       if (shortenedUrl.isFailure()) {
         return Promise.reject(responseHelper.error(shortenedUrl));
       }

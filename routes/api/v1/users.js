@@ -7,6 +7,7 @@ const rootPrefix = '../../..',
   sanitizer = require(rootPrefix + '/helpers/sanitizer'),
   apiName = require(rootPrefix + '/lib/globalConstant/apiName'),
   entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
+  logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   responseEntityKey = require(rootPrefix + '/lib/globalConstant/responseEntityKey');
 
 /* Register Device*/
@@ -127,7 +128,7 @@ router.get('/:profile_user_id/contribution-suggestion', sanitizer.sanitizeDynami
 
 /* User Activation Initiated Api call*/
 router.post('/activation-initiate', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
-  req.decodedParams.apiName = apiName.loggedInUser;
+  req.decodedParams.apiName = apiName.activationInitiate;
 
   const dataFormatterFunc = async function(serviceResponse) {
     const wrapperFormatterRsp = await new FormatterComposer({
@@ -238,7 +239,7 @@ router.post('/:profile_user_id/profile-image', sanitizer.sanitizeDynamicUrlParam
 router.post('/:profile_user_id/profile', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.saveProfile;
   req.decodedParams.profile_user_id = req.params.profile_user_id;
-
+  logger.log('req.decodedParams.name', req.decodedParams.name);
   Promise.resolve(routeHelper.perform(req, res, next, '/user/profile/update/Info', 'r_a_v1_u_11', null));
 });
 

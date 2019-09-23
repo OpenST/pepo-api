@@ -3,40 +3,6 @@ const rootPrefix = '../../..',
   paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination');
 
 const v1Signature = {
-  [apiName.signUp]: {
-    mandatory: [
-      {
-        parameter: 'user_name',
-        validatorMethods: ['validateString', 'validateUserName']
-      },
-      {
-        parameter: 'first_name',
-        validatorMethods: ['validateString', 'validateName']
-      },
-      {
-        parameter: 'last_name',
-        validatorMethods: ['validateString', 'validateName']
-      },
-      {
-        parameter: 'password',
-        validatorMethods: ['validateString', 'validatePassword']
-      }
-    ],
-    optional: []
-  },
-  [apiName.login]: {
-    mandatory: [
-      {
-        parameter: 'user_name',
-        validatorMethods: ['validateString', 'validateUserName']
-      },
-      {
-        parameter: 'password',
-        validatorMethods: ['validateString', 'validatePassword']
-      }
-    ],
-    optional: []
-  },
   [apiName.logout]: {
     mandatory: [],
     optional: [
@@ -63,15 +29,6 @@ const v1Signature = {
     mandatory: [
       {
         parameter: 'current_user',
-        validatorMethods: ['validateNonEmptyObject']
-      }
-    ],
-    optional: []
-  },
-  [apiName.sendDoubleOptIn]: {
-    mandatory: [
-      {
-        parameter: 'pre_launch_invite_obj',
         validatorMethods: ['validateNonEmptyObject']
       }
     ],
@@ -161,33 +118,6 @@ const v1Signature = {
     ],
     optional: []
   },
-  [apiName.gifsSearch]: {
-    mandatory: [
-      {
-        parameter: 'query',
-        validatorMethods: ['validateString']
-      }
-    ],
-    optional: [
-      {
-        parameter: paginationConstants.paginationIdentifierKey,
-        validatorMethods: ['validateString']
-      }
-    ]
-  },
-  [apiName.gifsTrending]: {
-    mandatory: [],
-    optional: [
-      {
-        parameter: paginationConstants.paginationIdentifierKey,
-        validatorMethods: ['validateString']
-      }
-    ]
-  },
-  [apiName.gifsCategories]: {
-    mandatory: [],
-    optional: []
-  },
   [apiName.ostTransaction]: {
     mandatory: [
       {
@@ -230,6 +160,16 @@ const v1Signature = {
   },
 
   [apiName.getRedemptionProductUrl]: {
+    mandatory: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      }
+    ],
+    optional: []
+  },
+
+  [apiName.getSupportUrl]: {
     mandatory: [
       {
         parameter: 'current_user',
@@ -355,11 +295,11 @@ const v1Signature = {
       },
       {
         parameter: 'video_description',
-        validatorMethods: ['validateString']
+        validatorMethods: ['validateString', 'validateStopWords']
       },
       {
         parameter: 'link',
-        validatorMethods: ['validateString']
+        validatorMethods: ['validateString', 'validateStopWords']
       } // If link is invalid, consider empty string.
     ]
   },
@@ -405,21 +345,21 @@ const v1Signature = {
       },
       {
         parameter: 'name',
-        validatorMethods: ['validateString', 'validateName']
+        validatorMethods: ['validateString', 'validateName', 'validateStopWords']
       },
       {
         parameter: 'user_name',
-        validatorMethods: ['validateString', 'validateUserName']
+        validatorMethods: ['validateString', 'validateUserName', 'validateStopWords']
       }
     ],
     optional: [
       {
         parameter: 'bio',
-        validatorMethods: ['validateString']
+        validatorMethods: ['validateString', 'validateStopWords']
       },
       {
         parameter: 'link',
-        validatorMethods: ['validateGenericUrl']
+        validatorMethods: ['validateGenericUrl', 'validateStopWords']
       }
     ]
   },
@@ -552,7 +492,7 @@ const v1Signature = {
       },
       {
         parameter: 'text',
-        validatorMethods: ['validateString']
+        validatorMethods: ['validateString', 'validateStopWords']
       }
     ],
     optional: [
@@ -589,46 +529,6 @@ const v1Signature = {
         validatorMethods: ['validateString', 'validatePaginationIdentifier']
       }
     ]
-  },
-  [apiName.adminUserSearch]: {
-    mandatory: [],
-    optional: [
-      {
-        parameter: 'includeVideos',
-        validatorMethods: ['validateBoolean']
-      },
-      {
-        parameter: 'q',
-        validatorMethods: ['validateString']
-      },
-      {
-        parameter: paginationConstants.paginationIdentifierKey,
-        validatorMethods: ['validateString', 'validatePaginationIdentifier']
-      }
-    ]
-  },
-
-  [apiName.adminUserApprove]: {
-    mandatory: [
-      {
-        parameter: 'user_ids',
-        validatorMethods: ['validateArray']
-      }
-    ],
-    optional: []
-  },
-  [apiName.adminDeleteVideo]: {
-    mandatory: [
-      {
-        parameter: 'video_id',
-        validatorMethods: ['validateNonZeroInteger']
-      },
-      {
-        parameter: 'current_admin',
-        validatorMethods: ['validateNonEmptyObject']
-      }
-    ],
-    optional: []
   },
   [apiName.getEmail]: {
     mandatory: [
@@ -774,6 +674,10 @@ const v1Signature = {
       {
         parameter: 'handle',
         validatorMethods: ['validateNonBlankString']
+      },
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
       }
     ],
     optional: []

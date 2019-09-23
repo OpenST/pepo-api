@@ -44,7 +44,7 @@ class PreLaunchTwitterSignUp extends ServiceBase {
     oThis.userTwitterEntity = params.userTwitterEntity;
     oThis.token = params.token;
     oThis.secret = params.secret;
-    oThis.inviteCode = params.inviteCode;
+    oThis.inviteCode = params.inviteCode ? params.inviteCode.toUpperCase() : null;
 
     oThis.email = oThis.userTwitterEntity.email;
     oThis.encryptedEncryptionSalt = null;
@@ -160,7 +160,7 @@ class PreLaunchTwitterSignUp extends ServiceBase {
   async _fetchInviteCodeDetails() {
     const oThis = this;
 
-    let cacheResp = await new InviteCodeByCodeCache({ inviteCode: [oThis.inviteCode] }).fetch(),
+    let cacheResp = await new InviteCodeByCodeCache({ inviteCode: oThis.inviteCode }).fetch(),
       inviterInviteCodeObj = cacheResp.data[oThis.inviteCode];
 
     oThis.inviterCodeId = inviterInviteCodeObj.id;

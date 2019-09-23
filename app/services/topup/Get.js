@@ -1,24 +1,34 @@
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
-  UserPaymentsByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/UserPaymentsByIds'),
-  entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
+  CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   TransactionCache = require(rootPrefix + '/lib/cacheManagement/multi/TransactionByIds'),
-  responseHelper = require(rootPrefix + '/lib/formatter/response');
+  UserPaymentsByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/UserPaymentsByIds'),
+  responseHelper = require(rootPrefix + '/lib/formatter/response'),
+  entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType');
 
+/**
+ * Class to fetch pending topups of user.
+ *
+ * @class GetTopup
+ */
 class GetTopup extends ServiceBase {
   /**
    * Constructor to fetch pending topups of user.
    *
    * @param {object} params
-   * @param {Integer} [params.payment_id]
-   * @param {Object} [params.current_user]  - current user
-   * @param {string} [params.transaction_id]  - transaction id of apple or google.
+   * @param {number} [params.payment_id]
+   * @param {object} [params.current_user]: current user
+   * @param {string} [params.transaction_id]: transaction id of apple or google.
    *
+   * @augments ServiceBase
+   *
+   * @constructor
    */
   constructor(params) {
     super(params);
 
     const oThis = this;
+
     oThis.paymentId = params.payment_id;
     oThis.currentUserId = +params.current_user.id;
     oThis.gatewayReceiptId = params.transaction_id;
@@ -28,7 +38,7 @@ class GetTopup extends ServiceBase {
   }
 
   /**
-   * Async Perform
+   * Async perform.
    *
    * @returns {Promise<void>}
    * @private
@@ -46,7 +56,9 @@ class GetTopup extends ServiceBase {
   }
 
   /**
-   * Fetch the topup record using the id
+   * Fetch the topup record using the id.
+   *
+   * @sets oThis.topupDbRecord
    *
    * @returns {Promise<never>}
    * @private
@@ -62,25 +74,42 @@ class GetTopup extends ServiceBase {
     }
 
     oThis.topupDbRecord = cacheResp.data[oThis.paymentId];
+
+    if (!CommonValidators.validateNonEmptyObject(oThis.topupDbRecord)) {
+      return Promise.reject(
+        responseHelper.paramValidationError({
+          internal_error_identifier: 'a_s_tu_g_1',
+          api_error_identifier: 'resource_not_found',
+          params_error_identifiers: ['invalid_payment_id'],
+          debug_options: {
+            topupDbRecord: oThis.topupDbRecord,
+            currentUserId: oThis.currentUserId,
+            paymentId: oThis.paymentId
+          }
+        })
+      );
+    }
   }
 
   /**
-   * Validate access
+   * Validate access.
    *
-   * @return {Promise<never>}
+   * @return {Promise<*>}
    * @private
    */
   async _validateAccess() {
     const oThis = this;
 
-    // if receiptId is passed correctly, then no need to validate further. We assume that the receipt id is hard to guess.
-    if (oThis.topupDbRecord.receiptId == oThis.gatewayReceiptId) return;
+    // If receiptId is passed correctly, then no need to validate further. We assume that the receipt id is hard to guess.
+    if (oThis.topupDbRecord.receiptId == oThis.gatewayReceiptId) {
+      return;
+    }
 
-    // else we check that the topup user id is same as the current user.
+    // Else we check that the topup user id is same as the current user.
     if (oThis.topupDbRecord.fromUserId != oThis.currentUserId) {
       return Promise.reject(
         responseHelper.paramValidationError({
-          internal_error_identifier: 'a_s_u_gpd_1',
+          internal_error_identifier: 'a_s_tu_g_2',
           api_error_identifier: 'resource_not_found',
           params_error_identifiers: ['invalid_user_id'],
           debug_options: {
@@ -94,34 +123,38 @@ class GetTopup extends ServiceBase {
   }
 
   /**
-   * Fetch Ost transactions
+   * Fetch ost transactions.
+   *
+   * @sets oThis.transaction
    *
    * @returns {Promise<void>}
    * @private
    */
   async _fetchOstTransaction() {
-    const oThis = this,
-      txId = oThis.topupDbRecord.transactionId;
+    const oThis = this;
+
+    const txId = oThis.topupDbRecord.transactionId;
 
     if (txId) {
-      let resp = await new TransactionCache({ ids: [txId] }).fetch();
+      const resp = await new TransactionCache({ ids: [txId] }).fetch();
 
       oThis.transaction = resp.data[txId];
     }
   }
 
   /**
-   * Format response
+   * Format response.
    *
+   * @returns {*|result}
    * @private
    */
   _formatResponse() {
     const oThis = this;
 
-    oThis.topupDbRecord['transactionUuid'] = oThis.transaction ? oThis.transaction.ostTxId : null;
+    oThis.topupDbRecord.transactionUuid = oThis.transaction ? oThis.transaction.ostTxId : null;
 
     return responseHelper.successWithData({
-      [entityType.topup]: oThis.topupDbRecord
+      [entityTypeConstants.topup]: oThis.topupDbRecord
     });
   }
 }

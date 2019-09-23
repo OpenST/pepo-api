@@ -1,3 +1,5 @@
+const uuidV4 = require('uuid/v4');
+
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   UserModel = require(rootPrefix + '/app/models/mysql/User'),
@@ -313,7 +315,8 @@ class TwitterSignup extends ServiceBase {
       properties: oThis._userPropertiesToSet(),
       status: userConstants.invertedStatuses[userConstants.activeStatus],
       profile_image_id: oThis.profileImageId,
-      email: oThis.userOptedInEmail
+      email: oThis.userOptedInEmail,
+      external_user_id: uuidV4()
     };
 
     let retryCount = 3,
@@ -573,8 +576,7 @@ class TwitterSignup extends ServiceBase {
     // If user was part of prelaunch program and was approved as creator
     if (
       CommonValidators.validateNonEmptyObject(oThis.prelaunchInviteObj) &&
-      oThis.prelaunchInviteObj.creatorStatus ==
-        prelaunchInviteConstants.invertedCreatorStatuses[prelaunchInviteConstants.approvedCreatorStatus]
+      oThis.prelaunchInviteObj.creatorStatus == prelaunchInviteConstants.approvedCreatorStatus
     ) {
       propertyVal = new UserModel().setBitwise('properties', propertyVal, userConstants.isApprovedCreatorProperty);
     }
@@ -598,8 +600,7 @@ class TwitterSignup extends ServiceBase {
       oThis.userOptedInEmail = oThis.userTwitterEntity.email;
     } else if (
       CommonValidators.validateNonEmptyObject(oThis.prelaunchInviteObj) &&
-      oThis.prelaunchInviteObj.status ==
-        prelaunchInviteConstants.invertedStatuses[prelaunchInviteConstants.doptinStatus]
+      oThis.prelaunchInviteObj.status == prelaunchInviteConstants.doptinStatus
     ) {
       // If user was part of prelaunch program and has double opted in for email, then use it
       oThis.userOptedInEmail = oThis.prelaunchInviteObj.email;

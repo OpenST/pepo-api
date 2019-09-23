@@ -7,41 +7,47 @@ const rootPrefix = '../../..',
   base64Helper = require(rootPrefix + '/lib/base64Helper'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   localCipher = require(rootPrefix + '/lib/encryptors/localCipher'),
-  configStrategy = require(rootPrefix + '/lib/providers/configStrategy'),
+  configStrategyProvider = require(rootPrefix + '/lib/providers/configStrategy'),
   configStrategyConstants = require(rootPrefix + '/lib/globalConstant/configStrategy'),
   socketConnectionConstants = require(rootPrefix + '/lib/globalConstant/socketConnection');
 
 /**
- * Class to get socket connection details
+ * Class to get socket connection details.
  *
- * @class
+ * @class SocketConnectionDetails
  */
 class SocketConnectionDetails extends ServiceBase {
   /**
-   * @constructor
+   * Constructor to get socket connection details.
    *
    * @param params
-   * @param params.user_id {String} - user id
-   * @param params.current_user {Object} - current user
-   * @param params.current_user.id {String} - current user id
+   * @param {string} params.user_id: user id
+   * @param {object} params.current_user: current user
+   * @param {string} params.current_user.id: current user id
+   *
+   * @augments ServiceBase
+   *
+   * @constructor
    */
   constructor(params) {
-    super(params);
+    super();
 
     const oThis = this;
 
     oThis.userId = params.user_id;
     oThis.currentUserId = params.current_user.id;
 
-    oThis.authKey = null;
-    oThis.userData = null;
+    oThis.salt = null;
     oThis.endpoint = null;
-    oThis.protocol = null;
     oThis.port = null;
+    oThis.protocol = null;
+    oThis.userData = null;
+    oThis.authKey = null;
+    oThis.userSocketConnectionDetails = null;
   }
 
   /**
-   * Perform
+   * Async perform.
    *
    * @return {Promise<void>}
    */
@@ -59,23 +65,22 @@ class SocketConnectionDetails extends ServiceBase {
         }
       });
     }
-    let promiseArray = [];
 
-    promiseArray.push(oThis._fetchConfigData());
-
-    promiseArray.push(oThis._fetchUser());
-
+    const promiseArray = [oThis._fetchConfigData(), oThis._fetchUser()];
     await Promise.all(promiseArray);
 
     await oThis._createAuthKey();
 
     await oThis._insertInUserConnectionDetails();
 
+    // TODO - websocket - is it double formatting.
     return responseHelper.successWithData({ websocketConnectionPayload: oThis._formattedResponse() });
   }
 
   /**
    * This functions fetches config related to be used later in the file.
+   *
+   * @sets oThis.salt, oThis.endpoint, oThis.port, oThis.protocol
    *
    * @returns {Promise<void>}
    * @private
@@ -83,12 +88,13 @@ class SocketConnectionDetails extends ServiceBase {
   async _fetchConfigData() {
     const oThis = this;
 
-    let constantsRsp = await configStrategy.getConfigForKind(configStrategyConstants.websocket);
+    const constantsRsp = await configStrategyProvider.getConfigForKind(configStrategyConstants.websocket);
     if (constantsRsp.isFailure()) {
       return Promise.reject(constantsRsp);
     }
 
-    let websocketConfig = constantsRsp.data[configStrategyConstants.websocket];
+    // The config related to websocket is actually endpoint details of NLB. Behind NLB, there are multiple socket servers.
+    const websocketConfig = constantsRsp.data[configStrategyConstants.websocket];
     oThis.salt = websocketConfig.wsAuthSalt;
     oThis.endpoint = websocketConfig.endpoint;
     oThis.port = websocketConfig.port;
@@ -96,15 +102,17 @@ class SocketConnectionDetails extends ServiceBase {
   }
 
   /**
-   * Fetch user
+   * Fetch user.
+   *
+   * @sets oThis.userData
    *
    * @returns {Promise<never>}
    * @private
    */
   async _fetchUser() {
     const oThis = this;
-    const cacheResp = await new SecureUserCache({ id: oThis.userId }).fetch();
 
+    const cacheResp = await new SecureUserCache({ id: oThis.userId }).fetch();
     if (cacheResp.isFailure()) {
       return Promise.reject(cacheResp);
     }
@@ -126,14 +134,16 @@ class SocketConnectionDetails extends ServiceBase {
   }
 
   /**
-   * Creates auth key
+   * Creates auth key.
+   *
+   * @sets oThis.authKey
    *
    * @private
    */
-  async _createAuthKey() {
+  _createAuthKey() {
     const oThis = this;
 
-    let cookieToken = oThis.userData.cookieToken,
+    const cookieToken = oThis.userData.cookieToken,
       currentTimeStamp = basicHelper.getCurrentTimestampInSeconds(),
       stringToEncrypt = oThis.userId + cookieToken + currentTimeStamp;
 
@@ -143,13 +153,15 @@ class SocketConnectionDetails extends ServiceBase {
   /**
    * Insert in user connection details.
    *
+   * @sets oThis.userSocketConnectionDetails
+   *
    * @returns {Promise<void>}
    * @private
    */
   async _insertInUserConnectionDetails() {
     const oThis = this;
 
-    let insertObject = {
+    const insertObject = {
       user_id: oThis.userId,
       auth_key: oThis.authKey,
       socket_identifier: null,
@@ -159,7 +171,7 @@ class SocketConnectionDetails extends ServiceBase {
       updated_at: basicHelper.getCurrentTimestampInSeconds()
     };
 
-    let insertResponse = await new UserSocketConnectionDetailsModel().insert(insertObject).fire();
+    const insertResponse = await new UserSocketConnectionDetailsModel().insert(insertObject).fire();
     insertObject.id = insertResponse.insertId;
 
     oThis.userSocketConnectionDetails = new UserSocketConnectionDetailsModel().formatDbData(insertObject);
@@ -168,7 +180,7 @@ class SocketConnectionDetails extends ServiceBase {
   }
 
   /**
-   * auth key expiry at
+   * Auth key expiry at.
    *
    * @returns {number}
    * @private
@@ -180,42 +192,44 @@ class SocketConnectionDetails extends ServiceBase {
   /**
    * This function returns formatted response.
    *
+   * @returns {object}
    * @private
    */
   _formattedResponse() {
     const oThis = this;
 
-    let encryptedPayload = oThis._prepareEncryptedPayload(),
-      response = {
-        websocketEndpoint: {
-          id: oThis.userSocketConnectionDetails.id,
-          uts: oThis.userSocketConnectionDetails.updatedAt,
-          endpoint: oThis.endpoint,
-          port: oThis.port,
-          protocol: oThis.protocol
-        },
-        authKeyExpiryAt: oThis.userSocketConnectionDetails.authKeyExpiryAt,
-        payload: encryptedPayload
-      };
+    const encryptedPayload = oThis._prepareEncryptedPayload();
+    const response = {
+      websocketEndpoint: {
+        id: oThis.userSocketConnectionDetails.id,
+        uts: oThis.userSocketConnectionDetails.updatedAt,
+        endpoint: oThis.endpoint,
+        port: oThis.port,
+        protocol: oThis.protocol
+      },
+      authKeyExpiryAt: oThis.userSocketConnectionDetails.authKeyExpiryAt,
+      payload: encryptedPayload
+    };
 
     return response;
   }
 
   /**
-   * prepare encrypted payload
+   * Prepare encrypted payload.
    *
+   * @returns {*}
    * @private
    */
   _prepareEncryptedPayload() {
     const oThis = this;
 
-    let payload = {
+    const payload = {
       id: oThis.userSocketConnectionDetails.id,
       auth_key: oThis.authKey,
       user_id: oThis.userId
     };
 
-    let aesEncryptedData = localCipher.encrypt(oThis.salt, JSON.stringify(payload));
+    const aesEncryptedData = localCipher.encrypt(oThis.salt, JSON.stringify(payload));
 
     return base64Helper.encode(aesEncryptedData);
   }

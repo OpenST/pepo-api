@@ -448,7 +448,6 @@ class TransactionOstEventBase extends ServiceBase {
       video_id: oThis.videoId,
       extra_data: JSON.stringify(extraData),
       text_id: null,
-      giphy_id: null,
       status: transactionConstants.invertedStatuses[oThis._transactionStatus()]
     };
 

@@ -26,6 +26,7 @@ class RefreshConnect extends ServiceBase {
    * @param {string} params.token: oAuth Token
    * @param {string} params.secret: oAuth Secret
    * @param {string} params.twitter_id: Twitter_id
+   * @param {object} params.current_user: Current user
    * @param {string} params.handle: Handle
    *
    * @augments ServiceBase
@@ -41,6 +42,7 @@ class RefreshConnect extends ServiceBase {
     oThis.secret = params.secret;
     oThis.twitterId = params.twitter_id;
     oThis.handle = params.handle;
+    oThis.currentUserId = +params.current_user.id;
 
     oThis.userId = null;
     oThis.twitterUserObj = null;
@@ -111,14 +113,24 @@ class RefreshConnect extends ServiceBase {
       return Promise.reject(
         responseHelper.error({
           internal_error_identifier: 's_t_rc_ftu_1',
-          api_error_identifier: 'invalid_api_params',
-          params_error_identifiers: ['invalid_twitter_id'],
+          api_error_identifier: 'invalid_twitter_user',
           debug_options: {}
         })
       );
     }
 
     oThis.userId = oThis.twitterUserObj.userId;
+
+    if (oThis.currentUserId != oThis.userId) {
+      logger.error('Error: Trying refresh from user other than current');
+      return Promise.reject(
+        responseHelper.error({
+          internal_error_identifier: 's_t_rc_ftu_2',
+          api_error_identifier: 'invalid_twitter_user',
+          debug_options: {}
+        })
+      );
+    }
 
     logger.log('End::Fetch Twitter User');
     return responseHelper.successWithData({});
@@ -137,8 +149,6 @@ class RefreshConnect extends ServiceBase {
 
     let twitterResp = null;
 
-    //todo: change error response unauthorized_api_request?
-
     twitterResp = await new AccountTwitterRequestClass()
       .verifyCredentials({
         oAuthToken: oThis.token,
@@ -149,7 +159,7 @@ class RefreshConnect extends ServiceBase {
         return Promise.reject(
           responseHelper.error({
             internal_error_identifier: 's_t_rc_vtc_1',
-            api_error_identifier: 'unauthorized_api_request',
+            api_error_identifier: 'invalid_twitter_user',
             debug_options: {}
           })
         );
@@ -159,7 +169,7 @@ class RefreshConnect extends ServiceBase {
       return Promise.reject(
         responseHelper.error({
           internal_error_identifier: 's_t_rc_vtc_2',
-          api_error_identifier: 'unauthorized_api_request',
+          api_error_identifier: 'invalid_twitter_user',
           debug_options: {}
         })
       );
@@ -172,7 +182,7 @@ class RefreshConnect extends ServiceBase {
       return Promise.reject(
         responseHelper.error({
           internal_error_identifier: 's_t_rc_vtc_3',
-          api_error_identifier: 'unauthorized_api_request',
+          api_error_identifier: 'invalid_twitter_user',
           debug_options: {}
         })
       );
@@ -207,10 +217,9 @@ class RefreshConnect extends ServiceBase {
 
     if (secureUserObj.status !== userConstants.activeStatus) {
       return Promise.reject(
-        responseHelper.paramValidationError({
+        responseHelper.error({
           internal_error_identifier: 's_t_rc_fsu_1',
-          api_error_identifier: 'invalid_api_params',
-          params_error_identifiers: ['user_not_active'],
+          api_error_identifier: 'invalid_twitter_user',
           debug_options: {}
         })
       );
