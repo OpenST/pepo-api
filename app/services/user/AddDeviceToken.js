@@ -125,11 +125,20 @@ class AddDeviceToken extends ServiceBase {
       return Promise.reject(userDeviceIdsCacheRsp);
     }
 
-    const userDeviceCacheData = userDeviceIdsCacheRsp.data[oThis.deviceToken],
-      updateUserDeviceIds = [];
+    const userDeviceCacheData = userDeviceIdsCacheRsp.data[oThis.deviceToken];
 
     if (userDeviceCacheData && userDeviceCacheData.id) {
-      const promiseArray = [];
+      const userDevicesResponse = await new UserDeviceByIdsCache({ ids: [userDeviceCacheData.id] }).fetch();
+
+      if (userDevicesResponse.isFailure()) {
+        return Promise.reject(userDevicesResponse);
+      }
+
+      const userDeviceObj = userDevicesResponse.data[userDeviceCacheData.id];
+
+      if (userDeviceObj.status == userDeviceConstants.activeStatus && userDeviceObj.deviceId == oThis.deviceId) {
+        return responseHelper.successWithData({});
+      }
 
       await new UserDeviceModel()
         .update({
@@ -137,16 +146,11 @@ class AddDeviceToken extends ServiceBase {
           device_id: oThis.deviceId
         })
         .where({
-          id: userDeviceCacheData.id
+          id: userDeviceObj.id
         })
         .fire();
 
-      promiseArray.push(new UserDeviceByIdsCache({ ids: updateUserDeviceIds }).clear());
-      promiseArray.push(
-        new UserDeviceByUserIdDeviceTokenCache({ userId: oThis.currentUserId, deviceToken: oThis.deviceToken }).clear()
-      );
-
-      return Promise.all(promiseArray);
+      await UserDeviceModel.flushCache(userDeviceObj);
     }
 
     const userDevices = await new UserDeviceModel()
@@ -259,16 +263,18 @@ class AddDeviceToken extends ServiceBase {
 
     logger.log('userProfileElementsRspData ===========', userProfileElementsRspData);
 
-    // If user profile elements contains location id and it is same as that of cache then return, else insert.
-    if (userProfileElementsRspData.locationId && userProfileElementsRspData.locationId.data !== locationId) {
-      await new UserProfileElementModel()
-        .update({ data: locationId })
-        .where({
-          user_id: oThis.currentUserId,
-          data_kind: userProfileElementConstants.invertedKinds[userProfileElementConstants.locationIdKind]
-        })
-        .fire();
-    } else if (!userProfileElementsRspData.locationId || !userProfileElementsRspData.locationId.id) {
+    const userProfileElementLocationObj = userProfileElementsRspData.locationId;
+
+    if (userProfileElementLocationObj && userProfileElementLocationObj.id) {
+      if (Number(userProfileElementLocationObj.data) === Number(locationId)) {
+        return responseHelper.successWithData({});
+      } else {
+        await new UserProfileElementModel()
+          .update({ data: locationId })
+          .where({ id: userProfileElementLocationObj.id })
+          .fire();
+      }
+    } else {
       await new UserProfileElementModel().insertElement({
         userId: oThis.currentUserId,
         dataKind: userProfileElementConstants.locationIdKind,

@@ -79,7 +79,15 @@ class ResetBadge extends ServiceBase {
       userIds: [oThis.currentUserId]
     });
 
-    logger.log('queryRsp ======', queryRsp);
+    logger.debug(
+      '\n\n\nHERE==========fetchUnreadNotificationCount1122============================',
+      JSON.stringify(queryRsp)
+    );
+
+    if (!queryRsp[oThis.currentUserId]) {
+      logger.win('NO USER NOTIFICATION ROW FOUND FOR =>', oThis.currentUserId);
+      return responseHelper.successWithData({});
+    }
 
     return new UserNotificationCountModel().resetUnreadNotificationCount({
       userId: oThis.currentUserId,
