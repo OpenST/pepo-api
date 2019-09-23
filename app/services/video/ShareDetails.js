@@ -110,19 +110,21 @@ class ShareDetails extends ServiceBase {
 
     // Already deleted.
     if (!videoDetails.creatorUserId || videoDetails.status === videoDetailsConstants.deletedStatus) {
-      responseHelper.paramValidationError({
-        internal_error_identifier: 'a_s_v_sd_2',
-        api_error_identifier: 'invalid_api_params',
-        params_error_identifiers: ['invalid_video_id'],
-        debug_options: { videoDetails: videoDetails }
-      });
+      return Promise.reject(
+        responseHelper.error({
+          internal_error_identifier: 'a_s_v_sd_2',
+          api_error_identifier: 'entity_not_found'
+        })
+      );
     }
 
     let creatorUserId = videoDetails.creatorUserId;
 
+    let userObj = {};
+
     // Video is of current user, so no need for query
     if (oThis.currentUser && creatorUserId === oThis.currentUser.id) {
-      oThis.creatorUserName = oThis.currentUser.name;
+      userObj = oThis.currentUser;
     } else {
       const userMultiCacheRsp = await new UserMultiCache({ ids: [creatorUserId] }).fetch();
 
@@ -130,27 +132,22 @@ class ShareDetails extends ServiceBase {
         return Promise.reject(userMultiCacheRsp);
       }
 
-      let userDetails = userMultiCacheRsp.data[creatorUserId];
-
-      if (
-        !userDetails ||
-        userDetails.status !== userConstants.activeStatus ||
-        !UserModel.isUserApprovedCreator(userDetails)
-      ) {
-        return Promise.reject(
-          responseHelper.paramValidationError({
-            internal_error_identifier: 'a_s_v_sd_3',
-            api_error_identifier: 'invalid_api_params',
-            params_error_identifiers: ['user_not_active'],
-            debug_options: {
-              creatorUserId: creatorUserId
-            }
-          })
-        );
-      }
-
-      oThis.creatorUserName = userDetails.name;
+      userObj = userMultiCacheRsp.data[creatorUserId];
     }
+
+    if (!userObj || userObj.status !== userConstants.activeStatus || !UserModel.isUserApprovedCreator(userObj)) {
+      return Promise.reject(
+        responseHelper.error({
+          internal_error_identifier: 'a_s_v_sd_3',
+          api_error_identifier: 'entity_not_found',
+          debug_options: {
+            creatorUserId: creatorUserId
+          }
+        })
+      );
+    }
+
+    oThis.creatorUserName = userObj.name;
   }
 
   /**
