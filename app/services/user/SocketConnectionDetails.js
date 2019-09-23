@@ -7,7 +7,7 @@ const rootPrefix = '../../..',
   base64Helper = require(rootPrefix + '/lib/base64Helper'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   localCipher = require(rootPrefix + '/lib/encryptors/localCipher'),
-  configStrategy = require(rootPrefix + '/lib/providers/configStrategy'),
+  configStrategyProvider = require(rootPrefix + '/lib/providers/configStrategy'),
   configStrategyConstants = require(rootPrefix + '/lib/globalConstant/configStrategy'),
   socketConnectionConstants = require(rootPrefix + '/lib/globalConstant/socketConnection');
 
@@ -88,7 +88,7 @@ class SocketConnectionDetails extends ServiceBase {
   async _fetchConfigData() {
     const oThis = this;
 
-    const constantsRsp = await configStrategy.getConfigForKind(configStrategyConstants.websocket);
+    const constantsRsp = await configStrategyProvider.getConfigForKind(configStrategyConstants.websocket);
     if (constantsRsp.isFailure()) {
       return Promise.reject(constantsRsp);
     }
