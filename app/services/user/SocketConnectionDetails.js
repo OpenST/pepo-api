@@ -12,21 +12,25 @@ const rootPrefix = '../../..',
   socketConnectionConstants = require(rootPrefix + '/lib/globalConstant/socketConnection');
 
 /**
- * Class to get socket connection details
+ * Class to get socket connection details.
  *
- * @class
+ * @class SocketConnectionDetails
  */
 class SocketConnectionDetails extends ServiceBase {
   /**
-   * @constructor
+   * Constructor to get socket connection details.
    *
    * @param params
-   * @param params.user_id {String} - user id
-   * @param params.current_user {Object} - current user
-   * @param params.current_user.id {String} - current user id
+   * @param {string} params.user_id: user id
+   * @param {object} params.current_user: current user
+   * @param {string} params.current_user.id: current user id
+   *
+   * @augments ServiceBase
+   *
+   * @constructor
    */
   constructor(params) {
-    super(params);
+    super();
 
     const oThis = this;
 
