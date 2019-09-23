@@ -74,7 +74,6 @@ class SocketConnectionDetails extends ServiceBase {
 
     await oThis._setUserSocketConnectionDetailsCache();
 
-    // TODO - websocket - is it double formatting.
     return responseHelper.successWithData({ websocketConnectionPayload: oThis._formattedResponse() });
   }
 
