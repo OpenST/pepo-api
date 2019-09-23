@@ -346,29 +346,4 @@ router.get('/search', sanitizer.sanitizeDynamicUrlParams, function(req, res, nex
   Promise.resolve(routeHelper.perform(req, res, next, '/user/Search', 'r_a_v1_u_15', null, dataFormatterFunc));
 });
 
-/* Fetch twitter info for tweet */
-router.get('/tweet-info', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
-  req.decodedParams.apiName = apiName.tweetInfo;
-
-  const dataFormatterFunc = async function(serviceResponse) {
-    const wrapperFormatterRsp = await new FormatterComposer({
-      resultType: responseEntityKey.loggedInUser,
-      entityKindToResponseKeyMap: {
-        [entityType.loggedInUser]: responseEntityKey.loggedInUser,
-        [entityType.pricePointsMap]: responseEntityKey.pricePoints,
-        [entityType.usersMap]: responseEntityKey.users,
-        [entityType.token]: responseEntityKey.token,
-        [entityType.secureTwitterUsersMap]: responseEntityKey.secureTwitterUsers
-      },
-      serviceData: serviceResponse.data
-    }).perform();
-
-    serviceResponse.data = wrapperFormatterRsp.data;
-  };
-
-  Promise.resolve(
-    routeHelper.perform(req, res, next, '/user/notification/TweetInfo', 'r_a_v1_u_17', null, dataFormatterFunc)
-  );
-});
-
 module.exports = router;
