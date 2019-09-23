@@ -71,6 +71,7 @@ class SocketConnectionDetails extends ServiceBase {
 
     await oThis._insertInUserConnectionDetails();
 
+    // TODO - websocket - is it double formatting.
     return responseHelper.successWithData({ websocketConnectionPayload: oThis._formattedResponse() });
   }
 
@@ -88,6 +89,7 @@ class SocketConnectionDetails extends ServiceBase {
       return Promise.reject(constantsRsp);
     }
 
+    // The config related to websocket is actually endpoint details of NLB. Behind NLB, there are multiple socket servers.
     let websocketConfig = constantsRsp.data[configStrategyConstants.websocket];
     oThis.salt = websocketConfig.wsAuthSalt;
     oThis.endpoint = websocketConfig.endpoint;

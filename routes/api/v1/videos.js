@@ -54,8 +54,6 @@ router.get('/:video_id/share', sanitizer.sanitizeDynamicUrlParams, function(req,
   req.decodedParams.video_id = req.params.video_id;
 
   const dataFormatterFunc = async function(serviceResponse) {
-    console.log('serviceResponse---', JSON.stringify(serviceResponse));
-
     const wrapperFormatterRsp = await new FormatterComposer({
       resultType: responseEntityKey.share,
       entityKindToResponseKeyMap: {
@@ -63,8 +61,6 @@ router.get('/:video_id/share', sanitizer.sanitizeDynamicUrlParams, function(req,
       },
       serviceData: serviceResponse.data
     }).perform();
-
-    console.log('wrapperFormatterRsp-----', JSON.stringify(wrapperFormatterRsp));
 
     serviceResponse.data = wrapperFormatterRsp.data;
   };

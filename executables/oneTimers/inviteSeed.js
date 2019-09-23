@@ -135,8 +135,8 @@ class InviteSeed {
       let preLaunchInviteObj = oThis.preLaunchInvitesByInviteCode[inviteCode],
         inviteLimit =
           preLaunchInviteObj.creatorStatus === preLaunchInviteConstant.approvedCreatorStatus
-            ? inviteCodeConstants.infiniteInviteLimitForCreator
-            : inviteCodeConstants.defaultInviteLimitForNonCreator;
+            ? inviteCodeConstants.infiniteInviteLimit
+            : inviteCodeConstants.inviteMaxLimit;
 
       bulkInsertVal.push([inviteCode, inviteLimit]);
     }

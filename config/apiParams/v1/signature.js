@@ -322,11 +322,11 @@ const v1Signature = {
       },
       {
         parameter: 'video_description',
-        validatorMethods: ['validateString']
+        validatorMethods: ['validateString', 'validateStopWords']
       },
       {
         parameter: 'link',
-        validatorMethods: ['validateString']
+        validatorMethods: ['validateString', 'validateStopWords']
       } // If link is invalid, consider empty string.
     ]
   },
@@ -372,21 +372,21 @@ const v1Signature = {
       },
       {
         parameter: 'name',
-        validatorMethods: ['validateString', 'validateName']
+        validatorMethods: ['validateString', 'validateName', 'validateStopWords']
       },
       {
         parameter: 'user_name',
-        validatorMethods: ['validateString', 'validateUserName']
+        validatorMethods: ['validateString', 'validateUserName', 'validateStopWords']
       }
     ],
     optional: [
       {
         parameter: 'bio',
-        validatorMethods: ['validateString']
+        validatorMethods: ['validateString', 'validateStopWords']
       },
       {
         parameter: 'link',
-        validatorMethods: ['validateGenericUrl']
+        validatorMethods: ['validateGenericUrl', 'validateStopWords']
       }
     ]
   },
@@ -519,7 +519,7 @@ const v1Signature = {
       },
       {
         parameter: 'text',
-        validatorMethods: ['validateString']
+        validatorMethods: ['validateString', 'validateStopWords']
       }
     ],
     optional: [
