@@ -35,21 +35,36 @@ async function run() {
 
   let websocketPort = websocketConfigResponse.data[configStrategyConstants.websocket].port;
 
-  logger.step('-------------------------- Fetching cronProcessId --------------------------');
+  logger.step('# Fetching cron process id.');
   let cronProcessId = await processIdSelector.perform();
-  logger.step('-------------------------- Subscribing to RMQ -------- cronProcessId: ', cronProcessId);
-  await subscribeToRmq(cronProcessId);
-  logger.step('-------------------------- Starting Websocket server --------------------------');
 
-  await startWebSocketServer(websocketPort);
+  logger.step('# Start subscribtion job for cron process id:', cronProcessId);
+  await subscribeToRmq(cronProcessId);
+
+  logger.step('# Attaching handlers');
+  attachHandlers();
+
+  http.listen(websocketPort, function() {
+    logger.step('# Listening on port ' + websocketPort);
+  });
 }
 
-async function startWebSocketServer(websocketPort) {
-  // TODO - websocket - is following route needed?
-  app.get('/', function(req, res) {
-    res.sendFile(__dirname + '/index.html');
-  });
+/**
+ * Start subscribtion job for cron process id
+ *
+ * @param cronProcessId
+ * @return {Promise<void>}
+ */
+async function subscribeToRmq(cronProcessId) {
+  let socketJobProcessorObj = new socketJobProcessor({ cronProcessId: +cronProcessId });
+  await socketJobProcessorObj.perform();
+  socketIdentifier = socketConnectionConstants.getSocketIdentifierFromTopic(socketJobProcessorObj.topics[0]);
+}
 
+/**
+ * Attach handlers
+ */
+function attachHandlers() {
   io.on('connection', async function(socket) {
     // TODO - websocket - use logger.
     console.log('a user connected socket', socket.handshake.query);
@@ -96,16 +111,6 @@ async function startWebSocketServer(websocketPort) {
       socket
     );
   });
-
-  http.listen(websocketPort, function() {
-    logger.step('**** Listening on port ' + websocketPort);
-  });
-}
-
-async function subscribeToRmq(cronProcessId) {
-  let socketJobProcessorObj = new socketJobProcessor({ cronProcessId: +cronProcessId });
-  await socketJobProcessorObj.perform();
-  socketIdentifier = socketConnectionConstants.getSocketIdentifierFromTopic(socketJobProcessorObj.topics[0]);
 }
 
 async function autoDisconnect() {
