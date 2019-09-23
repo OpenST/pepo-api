@@ -179,7 +179,7 @@ class ShareDetails extends ServiceBase {
   _generateVideoShareUrl() {
     const oThis = this;
 
-    return urlDomain + '/' + gotoConstants.videoShareGotoKind + '/' + oThis.videoId;
+    return urlDomain + '/' + gotoConstants.videoGotoKind + '/' + oThis.videoId;
   }
 }
 module.exports = ShareDetails;

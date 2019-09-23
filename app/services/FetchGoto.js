@@ -3,12 +3,13 @@ const rootPrefix = '../..',
   shareEntityConstants = require(rootPrefix + '/lib/globalConstant/shareEntity'),
   commonValidators = require(rootPrefix + '/lib/validators/Common'),
   pageNameConstants = require(rootPrefix + '/lib/globalConstant/pageName'),
+  gotoFactory = require(rootPrefix + '/lib/goTo/factory'),
   gotoConstants = require(rootPrefix + '/lib/globalConstant/goto'),
   entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
   coreConstants = require(rootPrefix + '/config/coreConstants'),
   responseHelper = require(rootPrefix + '/lib/formatter/response');
 
-const currentPepoApiDomain = 'stagingpepo.com'; //coreConstants.PA_DOMAIN;
+const currentPepoApiDomain = coreConstants.PA_DOMAIN;
 const urlParser = require('url');
 
 class FetchGoto extends ServiceBase {
@@ -17,8 +18,6 @@ class FetchGoto extends ServiceBase {
    *
    * @param {object} params
    * @param {object} [params.url]
-   * @param {object} [params.gotoKind]
-   * @param {object} [params.gotoValue]
    *
    * @augments ServiceBase
    *
@@ -28,109 +27,52 @@ class FetchGoto extends ServiceBase {
     super(params);
 
     const oThis = this;
-    oThis.url = params.url;
-    oThis.inputGotoKind = params.gotoKind;
-    oThis.inputGotoValue = params.gotoValue;
-
-    oThis.gotoValues = {};
-    oThis.goto = null;
+    oThis.url = params.url.toLowerCase();
     oThis.parsedUrl = {};
+    oThis.gotoKind = null;
+    oThis.gotoParams = null;
   }
 
   /**
-   * Perform: Perform for fetch goto.
+   * Main performer
    *
-   * @return {Promise<void>}
+   * @returns {Promise<*>}
+   * @private
    */
   async _asyncPerform() {
     const oThis = this;
 
-    if (oThis.url) {
-      await oThis._fetchGotoByUrl();
-    } else if (oThis.inputGotoKind) {
-      await oThis._fetchGotoByGotoKind();
-    } else {
+    oThis.parsedUrl = urlParser.parse(oThis.url, true);
+    if (!commonValidators.validateNonEmptyObject(oThis.parsedUrl)) {
       return Promise.reject(
         responseHelper.paramValidationError({
           internal_error_identifier: 'a_s_fgt_1',
           api_error_identifier: 'invalid_params',
           params_error_identifiers: [],
           debug_options: {
-            url: oThis.url,
-            inputGotoKind: oThis.inputGotoKind
+            url: oThis.url
           }
         })
       );
     }
 
-    oThis._fetchGotoFromConfig();
+    await oThis._validateUrl();
 
-    return responseHelper.successWithData(oThis._prepareResponse());
+    oThis._fetchGotoKindAndParams();
+
+    return oThis._prepareResponse();
   }
 
   /**
-   * Fetch goto by input url.
+   * Validate url
    *
    * @returns {Promise<never>}
    * @private
    */
-  async _fetchGotoByUrl() {
+  async _validateUrl() {
     const oThis = this;
 
-    oThis.url = oThis.url.toLowerCase();
-
-    await oThis._fetchAndValidateUrlDomain();
-
-    let urlHandlerResponse = oThis._urlHandler();
-    if (urlHandlerResponse.isFailure()) {
-      return Promise.reject(urlHandlerResponse);
-    }
-
-    oThis.gotoValues = {
-      gotoKind: urlHandlerResponse.data.gotoKind,
-      gotoData: urlHandlerResponse.data.gotoData
-    };
-  }
-
-  /**
-   * Fetch goto by goto kinds.
-   *
-   * @returns {Promise<void>}
-   * @private
-   */
-  async _fetchGotoByGotoKind() {
-    const oThis = this;
-
-    if (!Object.keys(gotoConstants.invertedGotoKinds).includes(oThis.inputGotoKind)) {
-      return Promise.reject(
-        responseHelper.error({
-          internal_error_identifier: 'a_s_fgt_2',
-          api_error_identifier: 'entity_not_found',
-          debug_options: {
-            inputGotoKind: oThis.inputGotoKind
-          }
-        })
-      );
-    }
-
-    oThis.gotoValues = {
-      gotoKind: oThis.inputGotoKind,
-      gotoData: oThis.inputGotoValue
-    };
-  }
-
-  /**
-   * Fetch and validate url domain.
-   *
-   * @returns {Promise<never>}
-   * @private
-   */
-  async _fetchAndValidateUrlDomain() {
-    const oThis = this;
-
-    oThis.parsedUrl = urlParser.parse(oThis.url, true);
-
-    // If url is not correct or protocol is invalid or host is different from current domain
+    // Protocol and host are unknown
     if (
       !commonValidators.validateNonEmptyObject(oThis.parsedUrl) ||
       !['http:', 'https:'].includes(oThis.parsedUrl.protocol) ||
@@ -138,7 +80,7 @@ class FetchGoto extends ServiceBase {
     ) {
       return Promise.reject(
         responseHelper.error({
-          internal_error_identifier: 'a_s_fgt_3',
+          internal_error_identifier: 'a_s_fgt_2',
           api_error_identifier: 'entity_not_found',
           debug_options: {
             url: oThis.url
@@ -149,85 +91,27 @@ class FetchGoto extends ServiceBase {
   }
 
   /**
-   * Url Handler.
+   * Fetch Goto kind and params from url
    *
-   * @returns {*}
    * @private
    */
-  _urlHandler() {
+  _fetchGotoKindAndParams() {
     const oThis = this;
 
     let pathName = oThis.parsedUrl.pathname,
       query = oThis.parsedUrl.query;
-
-    // for now, this service only supports for video/:video_id route
-    if (pathName.match(gotoConstants.videoShareGotoKind)) {
-      let videoId = pathName.split('/')[2];
-      return responseHelper.successWithData({
-        gotoKind: gotoConstants.videoShareGotoKind,
-        gotoData: videoId
-      });
-    } else if (pathName.match('terms') || pathName.match('privacy')) {
-      return responseHelper.successWithData({
-        gotoKind: gotoConstants.webViewGotoKind,
-        gotoData: oThis.url
-      });
+    if (pathName.match(gotoConstants.videoGotoKind)) {
+      oThis.gotoParams = { videoId: pathName.split('/')[2] };
+      oThis.gotoKind = gotoConstants.videoGotoKind;
+    } else if (pathName == '/terms' || pathName == '/privacy') {
+      oThis.gotoKind = gotoConstants.webViewGotoKind;
+      oThis.gotoParams = { url: oThis.url };
+    } else if (pathName == '/account') {
+      oThis.gotoKind = gotoConstants.invitedUsersGotoKind;
     } else if (pathName == '/' && query && query['invite']) {
-      return responseHelper.successWithData({
-        gotoKind: gotoConstants.signUpGotoKind,
-        gotoData: query['invite']
-      });
-    } else {
-      return responseHelper.error({
-        internal_error_identifier: 'a_s_fgt_4',
-        api_error_identifier: 'entity_not_found',
-        debug_options: {
-          url: oThis.url
-        }
-      });
+      oThis.gotoParams = { inviteCode: query['invite'] };
+      oThis.gotoKind = gotoConstants.signUpGotoKind;
     }
-  }
-
-  /**
-   * Fetch goto for given kind.
-   *
-   * @private
-   *
-   * @sets oThis.goto
-   */
-  _fetchGotoFromConfig() {
-    const oThis = this;
-
-    let gotoConfig = {
-      [gotoConstants.videoShareGotoKind]: {
-        pn: pageNameConstants.videoPageName,
-        v: {
-          [pageNameConstants.videoIdParam]: oThis.gotoValues.gotoData
-        }
-      },
-      [gotoConstants.addEmailScreenGotoKind]: {
-        pn: pageNameConstants.addEmailScreen,
-        v: {}
-      },
-      [gotoConstants.signUpGotoKind]: {
-        pn: pageNameConstants.signupScreen,
-        v: {
-          [pageNameConstants.inviteCodeParam]: oThis.gotoValues.gotoData
-        }
-      },
-      [gotoConstants.webViewGotoKind]: {
-        pn: pageNameConstants.webViewScreen,
-        v: {
-          [pageNameConstants.webViewUrlParam]: oThis.gotoValues.gotoData
-        }
-      },
-      [gotoConstants.invitedUsersGotoKind]: {
-        pn: pageNameConstants.invitedUsersListPage,
-        v: {}
-      }
-    };
-
-    oThis.goto = gotoConfig[oThis.gotoValues.gotoKind];
   }
 
   /**
@@ -239,9 +123,20 @@ class FetchGoto extends ServiceBase {
   _prepareResponse() {
     const oThis = this;
 
-    return {
-      [entityType.goto]: oThis.goto
-    };
+    if (oThis.gotoKind) {
+      let goto = gotoFactory.gotoFor(oThis.gotoKind, oThis.gotoParams);
+      return responseHelper.successWithData({
+        [entityType.goto]: goto
+      });
+    } else {
+      return responseHelper.error({
+        internal_error_identifier: 'a_s_fgt_4',
+        api_error_identifier: 'entity_not_found',
+        debug_options: {
+          url: oThis.url
+        }
+      });
+    }
   }
 }
 

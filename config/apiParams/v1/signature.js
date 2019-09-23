@@ -712,21 +712,13 @@ const v1Signature = {
     ]
   },
   [apiName.fetchGoto]: {
-    mandatory: [],
-    optional: [
+    mandatory: [
       {
         parameter: 'url',
-        validatorMethods: ['validateNonBlankString']
-      },
-      {
-        parameter: 'gotoKind',
-        validatorMethods: ['validateString']
-      },
-      {
-        parameter: 'gotoValue',
-        validatorMethods: ['validateString']
+        validatorMethods: ['validateGenericUrl']
       }
-    ]
+    ],
+    optional: []
   },
   [apiName.reportIssue]: {
     mandatory: [

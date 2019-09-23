@@ -7,7 +7,7 @@ const rootPrefix = '../../..',
   ReplayAttackCache = require(rootPrefix + '/lib/cacheManagement/single/ReplayAttackOnTwitterConnect'),
   SignupTwitterClass = require(rootPrefix + '/app/services/twitter/Signup'),
   LoginTwitterClass = require(rootPrefix + '/app/services/twitter/Login'),
-  FetchGotoClass = require(rootPrefix + '/app/services/FetchGoto'),
+  gotoFactory = require(rootPrefix + '/lib/goTo/factory'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   preLaunchInviteConstants = require(rootPrefix + '/lib/globalConstant/preLaunchInvite'),
   InviteCodeCache = require(rootPrefix + '/lib/cacheManagement/single/InviteCodeByCode'),
@@ -432,13 +432,7 @@ class TwitterConnect extends ServiceBase {
     if (response.isSuccess()) {
       response.data[entityType.goto] = { pn: null, v: null };
       if (response.data.openEmailAddFlow) {
-        let fetchGotoRsp = await new FetchGotoClass({ gotoKind: gotoConstants.addEmailScreenGotoKind }).perform();
-
-        if (fetchGotoRsp.isFailure()) {
-          return Promise.reject(fetchGotoRsp);
-        }
-        // Notify app about email add flow
-        Object.assign(response.data[entityType.goto], fetchGotoRsp.data[entityType.goto]);
+        response.data[entityType.goto] = gotoFactory.gotoFor(gotoConstants.addEmailScreenGotoKind);
       }
     }
 
