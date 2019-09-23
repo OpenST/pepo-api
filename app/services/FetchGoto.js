@@ -76,7 +76,7 @@ class FetchGoto extends ServiceBase {
     if (
       !commonValidators.validateNonEmptyObject(oThis.parsedUrl) ||
       !['http:', 'https:'].includes(oThis.parsedUrl.protocol) ||
-      !oThis.parsedUrl.host.match(currentPepoApiDomain)
+      !currentPepoApiDomain.match(oThis.parsedUrl.host)
     ) {
       return Promise.reject(
         responseHelper.error({
