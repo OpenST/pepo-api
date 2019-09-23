@@ -190,9 +190,7 @@ class Text extends ModelBase {
   static async flushCache(params) {
     const TextsByIds = require(rootPrefix + '/lib/cacheManagement/multi/TextsByIds');
 
-    await new TextsByIds({
-      ids: [params.id]
-    }).clear();
+    await new TextsByIds({ ids: [params.id] }).clear();
   }
 }
 
