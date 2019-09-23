@@ -158,6 +158,10 @@ class UpdateProfileInfo extends UpdateProfileBase {
       if (textObj.text.toString() === oThis.bio.toString()) {
         oThis.bioUpdateRequired = false;
       }
+    } else {
+      if (oThis.bio.toString() === '') {
+        oThis.bioUpdateRequired = false;
+      }
     }
 
     // If link is present then check whether same link is added or its updated.
@@ -167,6 +171,10 @@ class UpdateProfileInfo extends UpdateProfileBase {
         urlObj = urlResp.data[linkId];
 
       if (urlObj.url.toString() === oThis.link.toString()) {
+        oThis.linkUpdateRequired = false;
+      }
+    } else {
+      if (oThis.link.toString() === '') {
         oThis.linkUpdateRequired = false;
       }
     }
