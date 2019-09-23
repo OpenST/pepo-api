@@ -15,10 +15,10 @@ const rootPrefix = '..',
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   ErrorLogsConstants = require(rootPrefix + '/lib/globalConstant/errorLogs'),
   CronProcessModel = require(rootPrefix + '/app/models/mysql/CronProcesses'),
-  cronProcessesConstants = require(rootPrefix + '/lib/globalConstant/cronProcesses'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
-  createErrorLogsEntry = require(rootPrefix + '/lib/errorLogs/createEntry');
+  createErrorLogsEntry = require(rootPrefix + '/lib/errorLogs/createEntry'),
+  cronProcessesConstants = require(rootPrefix + '/lib/globalConstant/cronProcesses');
 
 program.option('--cronProcessId <cronProcessId>', 'Cron table process ID').parse(process.argv);
 
@@ -260,7 +260,9 @@ class CronProcessesMonitorExecutable extends CronBase {
    * @return {Promise<void>}
    * @private
    */
-  async _validateAndSanitize() {}
+  async _validateAndSanitize() {
+    // Do nothing.
+  }
 
   /**
    * Get cron kind.
