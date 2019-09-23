@@ -9,7 +9,7 @@ const rootPrefix = '../../..',
   entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
   responseEntityKey = require(rootPrefix + '/lib/globalConstant/responseEntityKey');
 
-/* Get Notifications*/
+/* Get notifications. */
 router.get('/', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.getUserNotifications;
 
@@ -32,6 +32,13 @@ router.get('/', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   Promise.resolve(
     routeHelper.perform(req, res, next, '/user/notification/List', 'r_a_v1_un_1', null, dataFormatterFunc)
   );
+});
+
+/* Add device token. */
+router.post('/device-token', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.addDeviceToken;
+
+  Promise.resolve(routeHelper.perform(req, res, next, '/notification/AddDeviceToken', 'r_a_v1_un_2', null));
 });
 
 module.exports = router;
