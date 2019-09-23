@@ -97,29 +97,6 @@ class UserNotificationList extends ServiceBase {
   }
 
   /**
-   * Fetch user notifications from cache.
-   *
-   * @returns {Promise<void>}
-   * @private
-   */
-  async _setUserNotifications() {
-    const oThis = this;
-
-    const cacheResponse = await new UserNotificationsByUserIdPagination({
-      userId: oThis.currentUserId,
-      limit: oThis.limit,
-      pageState: oThis.currentPageState,
-      pageNumber: oThis.currentPageNumber
-    }).fetch();
-    if (cacheResponse.isFailure()) {
-      return Promise.reject(cacheResponse);
-    }
-
-    oThis.userNotifications = cacheResponse.data.userNotifications;
-    oThis.nextPageState = cacheResponse.data.pageState;
-  }
-
-  /**
    * Validate and sanitize specific params.
    *
    * @sets oThis.limit, oThis.currentPageState, oThis.currentPageNumber
@@ -156,154 +133,26 @@ class UserNotificationList extends ServiceBase {
   }
 
   /**
-   * Update notification centre last visit time.
+   * Fetch user notifications from cache.
    *
-   * @returns {object}
+   * @returns {Promise<void>}
    * @private
    */
-  async _updateLastVisitedTime() {
+  async _setUserNotifications() {
     const oThis = this;
 
-    if (oThis.currentPageState) {
-      return;
+    const cacheResponse = await new UserNotificationsByUserIdPagination({
+      userId: oThis.currentUserId,
+      limit: oThis.limit,
+      pageState: oThis.currentPageState,
+      pageNumber: oThis.currentPageNumber
+    }).fetch();
+    if (cacheResponse.isFailure()) {
+      return Promise.reject(cacheResponse);
     }
 
-    const latestTimestamp = (oThis.formattedUserNotifications[0] || {}).lastActionTimestamp || Date.now();
-
-    const updateParam = {
-      user_id: oThis.currentUserId,
-      last_visited_at: latestTimestamp
-    };
-
-    await new UpdateUserNotificationVisitDetailsService(updateParam).perform();
-  }
-
-  /**
-   * Format notifications and update last visit time.
-   *
-   * @sets oThis.formattedUserNotifications
-   *
-   * @returns {Promise<never>}
-   * @private
-   */
-  async _formatUserNotifications() {
-    const oThis = this;
-
-    for (let index = 0; index < oThis.userNotifications.length; index++) {
-      const userNotification = oThis.userNotifications[index];
-
-      if (oThis._isNotificationBlocked(userNotification)) {
-        continue;
-      }
-      const formattedUserNotification = {
-        id: NotificationResponseHelper.getEncryptIdForNotification(userNotification),
-        kind: userNotification.kind,
-        timestamp: userNotification.lastActionTimestamp,
-        payload: await oThis._getPayload(userNotification),
-        imageId: await oThis._getImageId(userNotification),
-        goto: await oThis._getGoto(userNotification)
-      };
-      formattedUserNotification.heading = await oThis._getHeading(userNotification, formattedUserNotification.payload);
-
-      oThis.formattedUserNotifications.push(formattedUserNotification);
-    }
-
-    await oThis._updateLastVisitedTime();
-  }
-
-  /**
-   * Get image id for notifications.
-   *
-   * @returns {Promise<*>}
-   * @private
-   */
-  async _getImageId(userNotification) {
-    const oThis = this;
-
-    const params = {
-      supportingEntities: {
-        [responseEntityKey.users]: oThis.usersByIdMap
-      },
-      userNotification: userNotification,
-      notificationType: oThis._notificationType
-    };
-
-    const resp = NotificationResponseHelper.getImageIdForNotification(params);
-    if (resp.isFailure()) {
-      return Promise.reject(resp);
-    }
-
-    return resp.data.imageId;
-  }
-
-  /**
-   * Set payload for notifications.
-   *
-   * @returns {Promise<*>}
-   * @private
-   */
-  async _getPayload(userNotification) {
-    const oThis = this;
-
-    const resp = NotificationResponseHelper.getPayloadDataForNotification({
-      userNotification: userNotification,
-      notificationType: oThis._notificationType
-    });
-
-    if (resp.isFailure()) {
-      return Promise.reject(resp);
-    }
-
-    return resp.data.payload;
-  }
-
-  /**
-   * Set heading for notifications.
-   *
-   * @returns {Promise<never>}
-   * @private
-   */
-  async _getHeading(userNotification, payload) {
-    const oThis = this;
-
-    const params = {
-      supportingEntities: {
-        [responseEntityKey.users]: oThis.usersByIdMap
-      },
-      payload: payload,
-      userNotification: userNotification,
-      notificationType: oThis._notificationType
-    };
-
-    const resp = NotificationResponseHelper.getHeadingForNotification(params);
-    if (resp.isFailure()) {
-      return Promise.reject(resp);
-    }
-
-    return resp.data.heading;
-  }
-
-  /**
-   * Set goto for notifications.
-   *
-   * @param {object} userNotification
-   *
-   * @returns {Promise<never>}
-   * @private
-   */
-  async _getGoto(userNotification) {
-    const oThis = this;
-
-    const resp = NotificationResponseHelper.getGotoForNotification({
-      userNotification: userNotification,
-      notificationType: oThis._notificationType
-    });
-
-    if (resp.isFailure()) {
-      return Promise.reject(resp);
-    }
-
-    return resp.data;
+    oThis.userNotifications = cacheResponse.data.userNotifications;
+    oThis.nextPageState = cacheResponse.data.pageState;
   }
 
   /**
@@ -504,6 +353,157 @@ class UserNotificationList extends ServiceBase {
     }
 
     oThis.imageMap = cacheRsp.data;
+  }
+
+  /**
+   * Update notification centre last visit time.
+   *
+   * @returns {object}
+   * @private
+   */
+  async _updateLastVisitedTime() {
+    const oThis = this;
+
+    if (oThis.currentPageState) {
+      return;
+    }
+
+    const latestTimestamp = (oThis.formattedUserNotifications[0] || {}).lastActionTimestamp || Date.now();
+
+    const updateParam = {
+      user_id: oThis.currentUserId,
+      last_visited_at: latestTimestamp
+    };
+
+    await new UpdateUserNotificationVisitDetailsService(updateParam).perform();
+  }
+
+  /**
+   * Format notifications and update last visit time.
+   *
+   * @sets oThis.formattedUserNotifications
+   *
+   * @returns {Promise<never>}
+   * @private
+   */
+  async _formatUserNotifications() {
+    const oThis = this;
+
+    for (let index = 0; index < oThis.userNotifications.length; index++) {
+      const userNotification = oThis.userNotifications[index];
+
+      if (oThis._isNotificationBlocked(userNotification)) {
+        continue;
+      }
+      const formattedUserNotification = {
+        id: NotificationResponseHelper.getEncryptIdForNotification(userNotification),
+        kind: userNotification.kind,
+        timestamp: userNotification.lastActionTimestamp,
+        payload: await oThis._getPayload(userNotification),
+        imageId: await oThis._getImageId(userNotification),
+        goto: await oThis._getGoto(userNotification)
+      };
+      formattedUserNotification.heading = await oThis._getHeading(userNotification, formattedUserNotification.payload);
+
+      oThis.formattedUserNotifications.push(formattedUserNotification);
+    }
+
+    await oThis._updateLastVisitedTime();
+  }
+
+  /**
+   * Get image id for notifications.
+   *
+   * @returns {Promise<*>}
+   * @private
+   */
+  async _getImageId(userNotification) {
+    const oThis = this;
+
+    const params = {
+      supportingEntities: {
+        [responseEntityKey.users]: oThis.usersByIdMap
+      },
+      userNotification: userNotification,
+      notificationType: oThis._notificationType
+    };
+
+    const resp = NotificationResponseHelper.getImageIdForNotification(params);
+    if (resp.isFailure()) {
+      return Promise.reject(resp);
+    }
+
+    return resp.data.imageId;
+  }
+
+  /**
+   * Set payload for notifications.
+   *
+   * @returns {Promise<*>}
+   * @private
+   */
+  async _getPayload(userNotification) {
+    const oThis = this;
+
+    const resp = NotificationResponseHelper.getPayloadDataForNotification({
+      userNotification: userNotification,
+      notificationType: oThis._notificationType
+    });
+
+    if (resp.isFailure()) {
+      return Promise.reject(resp);
+    }
+
+    return resp.data.payload;
+  }
+
+  /**
+   * Set heading for notifications.
+   *
+   * @returns {Promise<never>}
+   * @private
+   */
+  async _getHeading(userNotification, payload) {
+    const oThis = this;
+
+    const params = {
+      supportingEntities: {
+        [responseEntityKey.users]: oThis.usersByIdMap
+      },
+      payload: payload,
+      userNotification: userNotification,
+      notificationType: oThis._notificationType
+    };
+
+    const resp = NotificationResponseHelper.getHeadingForNotification(params);
+    if (resp.isFailure()) {
+      return Promise.reject(resp);
+    }
+
+    return resp.data.heading;
+  }
+
+  /**
+   * Set goto for notifications.
+   *
+   * @param {object} userNotification
+   *
+   * @returns {Promise<never>}
+   * @private
+   */
+  async _getGoto(userNotification) {
+    const oThis = this;
+
+    const resp = NotificationResponseHelper.getGotoForNotification({
+      userNotification: userNotification,
+      notificationType: oThis._notificationType
+    });
+
+    if (resp.isFailure()) {
+      return Promise.reject(resp);
+    }
+
+    return resp.data;
   }
 
   /**
