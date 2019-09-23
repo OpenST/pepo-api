@@ -346,54 +346,12 @@ router.get('/search', sanitizer.sanitizeDynamicUrlParams, function(req, res, nex
   Promise.resolve(routeHelper.perform(req, res, next, '/user/Search', 'r_a_v1_u_15', null, dataFormatterFunc));
 });
 
-/* Invited users list. */
-router.get('/invites', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
-  req.decodedParams.apiName = apiName.invitedUsersSearch;
-
-  const dataFormatterFunc = async function(serviceResponse) {
-    const wrapperFormatterRsp = await new FormatterComposer({
-      resultType: responseEntityKey.invitedUsers,
-      entityKindToResponseKeyMap: {
-        [entityType.userSearchList]: responseEntityKey.invitedUsers,
-        [entityType.imagesMap]: responseEntityKey.images,
-        [entityType.usersMap]: responseEntityKey.users,
-        [entityType.invitedUsersListMeta]: responseEntityKey.meta
-      },
-      serviceData: serviceResponse.data
-    }).perform();
-
-    serviceResponse.data = wrapperFormatterRsp.data;
-  };
-
-  Promise.resolve(routeHelper.perform(req, res, next, '/user/InvitedUsers', 'r_a_v1_u_16', null, dataFormatterFunc));
-});
-
 /* Add device token */
 router.post('/:user_id/device-token', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.addDeviceToken;
   req.decodedParams.user_id = req.params.user_id;
 
   Promise.resolve(routeHelper.perform(req, res, next, '/user/AddDeviceToken', 'r_a_v1_u_17', null));
-});
-
-/* Get Invite Code*/
-router.get('/get-invite-code', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
-  req.decodedParams.apiName = apiName.getInviteCode;
-
-  const dataFormatterFunc = async function(serviceResponse) {
-    const wrapperFormatterRsp = await new FormatterComposer({
-      resultType: responseEntityKey.inviteDetails,
-      entityKindToResponseKeyMap: {
-        [entityType.inviteCode]: responseEntityKey.inviteDetails,
-        [entityType.share]: responseEntityKey.share
-      },
-      serviceData: serviceResponse.data
-    }).perform();
-
-    serviceResponse.data = wrapperFormatterRsp.data;
-  };
-
-  Promise.resolve(routeHelper.perform(req, res, next, '/user/GetInviteCode', 'r_a_v1_u_18', null, dataFormatterFunc));
 });
 
 /* Fetch twitter info for tweet */

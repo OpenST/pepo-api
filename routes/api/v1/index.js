@@ -4,10 +4,9 @@ const express = require('express'),
 
 const rootPrefix = '../../..',
   authRoutes = require(rootPrefix + '/routes/api/v1/auth'),
-  basicHelper = require(rootPrefix + '/helpers/basic'),
   coreConstant = require(rootPrefix + '/config/coreConstants'),
-  apiVersions = require(rootPrefix + '/lib/globalConstant/apiVersions'),
   usersRoutes = require(rootPrefix + '/routes/api/v1/users'),
+  invitesRoutes = require(rootPrefix + '/routes/api/v1/invites'),
   topupRoutes = require(rootPrefix + '/routes/api/v1/topup'),
   videoRoutes = require(rootPrefix + '/routes/api/v1/videos'),
   tokensRoutes = require(rootPrefix + '/routes/api/v1/tokens'),
@@ -39,6 +38,7 @@ router.use('/feeds', cookieHelper.validateUserLoginCookieIfPresent, feedsRoutes)
 router.use(cookieHelper.validateUserLoginCookieIfPresent, cookieHelper.validateUserLoginRequired);
 
 router.use('/users', usersRoutes);
+router.use('/invites', invitesRoutes);
 router.use('/videos', videoRoutes);
 router.use('/tokens', tokensRoutes);
 router.use('/ost-transactions', ostTransactionRoutes);
