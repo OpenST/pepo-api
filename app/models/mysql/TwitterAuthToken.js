@@ -114,11 +114,9 @@ class TwitterAuthToken extends ModelBase {
   /**
    * Flush cache.
    *
-   * @param {object} params
-   *
    * @returns {Promise<*>}
    */
-  static async flushCache(params) {
+  static async flushCache() {
     // Do nothing.
   }
 }

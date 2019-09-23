@@ -89,7 +89,7 @@ class SocketJobProcessor extends RabbitMqProcessorBase {
       }
       for (let ind = 0; ind < socketObjectIds.length; ind++) {
         logger.log('userIds[index] ===------------==', index, userIds[index]);
-        const socketObj = webSocketCustomCache.getFromSocketObjsMap(socketObjectIds[ind]);
+        const socketObj = webSocketCustomCache.getFromSocketIdToSocketObjMap(socketObjectIds[ind]);
         socketObj.emit('pepo-stream', messagePayload);
       }
     }
