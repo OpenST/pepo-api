@@ -45,6 +45,7 @@ async function run() {
 }
 
 async function startWebSocketServer(websocketPort) {
+  // TODO - websocket - is following route needed?
   app.get('/', function(req, res) {
     res.sendFile(__dirname + '/index.html');
   });
