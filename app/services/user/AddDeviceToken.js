@@ -136,21 +136,21 @@ class AddDeviceToken extends ServiceBase {
 
       const userDeviceObj = userDevicesResponse.data[userDeviceCacheData.id];
 
-      if (userDeviceObj.status == userDeviceConstants.activeStatus && userDeviceObj.deviceId == oThis.deviceId) {
-        return responseHelper.successWithData({});
+      if (userDeviceObj.status != userDeviceConstants.activeStatus || userDeviceObj.deviceId != oThis.deviceId) {
+        await new UserDeviceModel()
+          .update({
+            status: userDeviceConstants.invertedStatuses[userDeviceConstants.activeStatus],
+            device_id: oThis.deviceId
+          })
+          .where({
+            id: userDeviceObj.id
+          })
+          .fire();
+
+        await UserDeviceModel.flushCache(userDeviceObj);
       }
 
-      await new UserDeviceModel()
-        .update({
-          status: userDeviceConstants.invertedStatuses[userDeviceConstants.activeStatus],
-          device_id: oThis.deviceId
-        })
-        .where({
-          id: userDeviceObj.id
-        })
-        .fire();
-
-      await UserDeviceModel.flushCache(userDeviceObj);
+      return responseHelper.successWithData({});
     }
 
     const userDevices = await new UserDeviceModel()
