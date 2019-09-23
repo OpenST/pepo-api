@@ -106,6 +106,8 @@ class FetchGoto extends ServiceBase {
     } else if (pathName == '/terms' || pathName == '/privacy') {
       oThis.gotoKind = gotoConstants.webViewGotoKind;
       oThis.gotoParams = { url: oThis.url };
+    } else if (pathName == '/account') {
+      oThis.gotoKind = gotoConstants.invitedUsersGotoKind;
     } else if (pathName == '/' && query && query['invite']) {
       oThis.gotoParams = { inviteCode: query['invite'] };
       oThis.gotoKind = gotoConstants.signUpGotoKind;
