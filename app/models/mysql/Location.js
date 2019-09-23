@@ -121,6 +121,10 @@ class LocationModel extends ModelBase {
       })
       .fire();
 
+    if (dbRow.length === 0) {
+      return {};
+    }
+
     response[timezone] = oThis.formatDbData(dbRow[0]);
 
     return response;
