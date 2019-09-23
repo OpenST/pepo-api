@@ -233,7 +233,11 @@ class AddDeviceToken extends ServiceBase {
       return Promise.reject(locationByTimeZoneCacheRsp);
     }
 
-    const locationId = locationByTimeZoneCacheRsp.data[oThis.userTimeZone].id;
+    let locationId = null;
+
+    if (locationByTimeZoneCacheRsp.data[oThis.userTimeZone]) {
+      locationId = locationByTimeZoneCacheRsp.data[oThis.userTimeZone].id;
+    }
 
     if (!locationId) {
       // Error email.
