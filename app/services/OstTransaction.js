@@ -116,8 +116,6 @@ class OstTransaction extends ServiceBase {
   async _updateTransaction() {
     const oThis = this;
 
-    const promiseArray = [];
-
     // If table row has text id; return.
     if (oThis.transactionObj.textId) {
       return;
@@ -125,10 +123,8 @@ class OstTransaction extends ServiceBase {
 
     // If input param has text; update with insert text.
     if (oThis._isTextPresent()) {
-      promiseArray.push(oThis._insertText());
+      await oThis._insertText();
     }
-
-    await Promise.all(promiseArray);
 
     const updateData = {};
     if (oThis._isTextPresent()) {
