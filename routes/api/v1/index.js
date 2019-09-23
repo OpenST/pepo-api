@@ -17,6 +17,7 @@ const rootPrefix = '../../..',
   tagRoutes = require(rootPrefix + '/routes/api/v1/tags'),
   notificationsRoutes = require(rootPrefix + '/routes/api/v1/notifications'),
   fetchGotoRoutes = require(rootPrefix + '/routes/api/v1/fetchGoto'),
+  twitterRoutes = require(rootPrefix + '/routes/api/v1/twitter'),
   uploadParamsRoutes = require(rootPrefix + '/routes/api/v1/uploadParams'),
   rotateTwitterAccountRoutes = require(rootPrefix + '/routes/api/v1/rotateTwitterAccount'),
   reportIssueRoutes = require(rootPrefix + '/routes/api/v1/reportIssue'),
@@ -48,5 +49,6 @@ router.use('/upload-params', uploadParamsRoutes);
 router.use('/tags', tagRoutes);
 router.use('/notifications', notificationsRoutes);
 router.use('/top-up', topupRoutes);
+router.use('/twitter', twitterRoutes);
 
 module.exports = router;
