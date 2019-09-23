@@ -301,11 +301,6 @@ class CoreConstants {
     return process.env.PA_SA_API_END_POINT;
   }
 
-  // Giphy API details
-  get GIPHY_API_KEY() {
-    return process.env.PA_GIPHY_API_KEY;
-  }
-
   // DevOps error logs framework details.
   get ENV_IDENTIFIER() {
     return process.env.PA_DEVOPS_ENV_ID;
