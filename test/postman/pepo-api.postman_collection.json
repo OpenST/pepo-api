@@ -1175,28 +1175,7 @@
 								],
 								"body": {
 									"mode": "urlencoded",
-									"urlencoded": [
-										{
-											"key": "name",
-											"value": "Pankaj Keswani",
-											"type": "text"
-										},
-										{
-											"key": "user_name",
-											"value": "pankaj",
-											"type": "text"
-										},
-										{
-											"key": "bio",
-											"value": "This is my bio, please save it with #cool",
-											"type": "text"
-										},
-										{
-											"key": "link",
-											"value": "https://www.facebook.com",
-											"type": "text"
-										}
-									]
+									"urlencoded": []
 								},
 								"url": {
 									"raw": "{{api_server}}/api/v1/users/1445/video-history",
@@ -2058,6 +2037,26 @@
 										"videos",
 										"1009",
 										"share"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "get-video",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{api_server}}/api/v1/videos/1009",
+									"host": [
+										"{{api_server}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"videos",
+										"1009"
 									]
 								}
 							},
