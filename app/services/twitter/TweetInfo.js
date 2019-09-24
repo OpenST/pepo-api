@@ -189,11 +189,7 @@ class TweetInfo extends ServiceBase {
     });
 
     if (twitterResp.isFailure()) {
-      return responseHelper.error({
-        internal_error_identifier: 's_u_n_ti_vtc_2',
-        api_error_identifier: 'invalid_twitter_user',
-        debug_options: {}
-      });
+      return twitterResp;
     }
 
     let userTwitterEntity = twitterResp.data.userEntity;
