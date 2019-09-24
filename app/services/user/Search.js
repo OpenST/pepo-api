@@ -145,7 +145,7 @@ class UserSearch extends ServiceBase {
           userData = { userIds: [], userDetails: {} };
         } else {
           // Fetch curated users information.
-          const userDetailsCacheResponse = await new UserCache({ userIds: curatedUserIds }).fetch();
+          const userDetailsCacheResponse = await new UserCache({ ids: curatedUserIds }).fetch();
           if (userDetailsCacheResponse.isFailure()) {
             return Promise.reject(userDetailsCacheResponse);
           }
