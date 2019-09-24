@@ -6,6 +6,7 @@ const rootPrefix = '../../..',
   SecureUserCache = require(rootPrefix + '/lib/cacheManagement/single/SecureUser'),
   SecureTwitterUserExtendedByTwitterUserIdCache = require(rootPrefix +
     '/lib/cacheManagement/single/SecureTwitterUserExtendedByTwitterUserId'),
+  TwitterUserModel = require(rootPrefix + '/app/models/mysql/TwitterUser'),
   userConstants = require(rootPrefix + '/lib/globalConstant/user'),
   twitterUserExtendedConstants = require(rootPrefix + '/lib/globalConstant/twitterUserExtended'),
   localCipher = require(rootPrefix + '/lib/encryptors/localCipher'),
@@ -59,6 +60,8 @@ class RefreshConnect extends ServiceBase {
     await oThis._fetchTwitterUserAndValidateCredentials();
 
     await oThis._fetchSecureUser();
+
+    await oThis._updateHandleInTwitterUsers();
 
     await oThis._refreshConnect();
 
@@ -230,6 +233,27 @@ class RefreshConnect extends ServiceBase {
     logger.log('End::Fetching Secure User for Refresh Connect');
 
     return responseHelper.successWithData({});
+  }
+
+  /**
+   * Update handle in twitter users
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _updateHandleInTwitterUsers() {
+    const oThis = this;
+
+    let twitterUserObj = new TwitterUserModel();
+
+    await twitterUserObj
+      .update({
+        handle: oThis.handle
+      })
+      .where({
+        twitter_id: oThis.twitterId
+      })
+      .fire();
   }
 
   /**

@@ -2,6 +2,8 @@ const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   UserModel = require(rootPrefix + '/app/models/mysql/User'),
   TokenUserDetailByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TokenUserByUserIds'),
+  TwitterUserModel = require(rootPrefix + '/app/models/mysql/TwitterUser'),
+  AccountTwitterRequestClass = require(rootPrefix + '/lib/twitter/oAuth1.0/Account'),
   SecureUserCache = require(rootPrefix + '/lib/cacheManagement/single/SecureUser'),
   SecureTwitterUserExtendedByTwitterUserIdCache = require(rootPrefix +
     '/lib/cacheManagement/single/SecureTwitterUserExtendedByTwitterUserId'),
@@ -47,6 +49,7 @@ class TwitterLogin extends ServiceBase {
 
     oThis.secureUserObj = null;
     oThis.tokenUserObj = null;
+    oThis.handle = null;
 
     oThis.decryptedEncryptionSalt = null;
   }
@@ -61,11 +64,15 @@ class TwitterLogin extends ServiceBase {
 
     logger.log('Start::_asyncPerform Twitter login');
 
-    const promisesArray = [];
-
     const updateTwitterUserPromise = oThis._fetchSecureUser().then(function() {
       return oThis._updateTwitterUserExtended();
     });
+
+    await oThis._validateTwitterCredentials();
+
+    await oThis._updateHandleInTwitterUsers();
+
+    const promisesArray = [];
 
     promisesArray.push(updateTwitterUserPromise);
     promisesArray.push(oThis._fetchTokenUser());
@@ -159,6 +166,86 @@ class TwitterLogin extends ServiceBase {
     logger.log('End::Update Twitter User Extended for login');
 
     return responseHelper.successWithData({});
+  }
+
+  /**
+   * Verify Credentials and get profile data from twitter.
+   *
+   * @return {Promise<Result>}
+   * @private
+   */
+  async _validateTwitterCredentials() {
+    const oThis = this;
+    logger.log('Start::Validate Twitter Credentials');
+
+    let twitterResp = null;
+
+    twitterResp = await new AccountTwitterRequestClass()
+      .verifyCredentials({
+        oAuthToken: oThis.token,
+        oAuthTokenSecret: oThis.secret
+      })
+      .catch(function(err) {
+        logger.error('Error while validating Credentials for twitter: ', err);
+        return Promise.reject(
+          responseHelper.error({
+            internal_error_identifier: 's_t_l_vtc_1',
+            api_error_identifier: 'invalid_twitter_user',
+            debug_options: {}
+          })
+        );
+      });
+
+    if (twitterResp.isFailure()) {
+      return Promise.reject(
+        responseHelper.error({
+          internal_error_identifier: 's_t_l_vtc_2',
+          api_error_identifier: 'invalid_twitter_user',
+          debug_options: {}
+        })
+      );
+    }
+
+    let userTwitterEntity = twitterResp.data.userEntity;
+
+    if (userTwitterEntity.idStr != oThis.twitterUserObj.twitterId) {
+      return Promise.reject(
+        responseHelper.error({
+          internal_error_identifier: 's_t_l_vtc_3',
+          api_error_identifier: 'invalid_twitter_user',
+          debug_options: {}
+        })
+      );
+    }
+
+    oThis.handle = userTwitterEntity.handle;
+
+    logger.log('End::Validate Twitter Credentials');
+
+    return responseHelper.successWithData({});
+  }
+
+  /**
+   * Update handle in twitter users
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _updateHandleInTwitterUsers() {
+    const oThis = this;
+
+    let twitterUserObj = new TwitterUserModel();
+
+    await twitterUserObj
+      .update({
+        handle: oThis.handle
+      })
+      .where({
+        twitter_id: oThis.twitterUserObj.twitterId
+      })
+      .fire();
+
+    return TwitterUserModel.flushCache(oThis.twitterUserObj);
   }
 
   /**

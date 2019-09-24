@@ -36,7 +36,7 @@ class RetryPayment {
     }
 
     let processResp = null;
-    if ((fiatPayment.service_kind = fiatPaymentConstants.invertedServiceKinds[fiatPaymentConstants.applePayKind])) {
+    if (fiatPayment.service_kind == fiatPaymentConstants.invertedServiceKinds[fiatPaymentConstants.applePayKind]) {
       logger.step('Reprocessing Payment on Apple Apple Apple Apple pay');
       processResp = await new ApplePay({
         paymentReceipt: JSON.parse(fiatPayment.raw_receipt),
@@ -51,6 +51,8 @@ class RetryPayment {
         fiatPaymentId: fiatPaymentId
       }).perform();
     }
+
+    console.log('--processResp---', processResp);
 
     if (processResp.isSuccess() && processResp.data.productionEnvSandboxReceipt === 0) {
       logger.step('Enquing job to transfer pepo.');

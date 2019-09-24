@@ -168,6 +168,11 @@ class UserDevice extends ModelBase {
   /**
    * Flush cache.
    *
+   * @param {object} params
+   * @param {number} [params.userId]
+   * @param {number} [params.id]
+   * @param {string} [params.deviceToken]
+   *
    * @returns {Promise<*>}
    */
   static async flushCache(params) {

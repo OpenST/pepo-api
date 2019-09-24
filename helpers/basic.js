@@ -561,7 +561,7 @@ class BasicHelper {
   getPepoAmountForUSD(usdInOneOst, amountUSD) {
     const oThis = this;
 
-    let usdInOnePepo = oThis.getUSDAmountForPepo(usdInOneOst, '1'),
+    const usdInOnePepo = oThis.getUSDAmountForPepo(usdInOneOst, '1'),
       pepoInOneUSD = oThis.convertToBigNumber(1).div(oThis.convertToBigNumber(usdInOnePepo)),
       totalPepoBn = oThis.convertToBigNumber(pepoInOneUSD).mul(oThis.convertToBigNumber(amountUSD));
 
@@ -581,9 +581,9 @@ class BasicHelper {
   getUSDAmountForPepo(usdInOneOst, amountPepo) {
     const oThis = this;
 
-    let pepoInOneOST = 1;
+    const pepoInOneOST = 1;
 
-    let ostInOnePepo = oThis.convertToBigNumber(1).div(oThis.convertToBigNumber(pepoInOneOST)),
+    const ostInOnePepo = oThis.convertToBigNumber(1).div(oThis.convertToBigNumber(pepoInOneOST)),
       usdInOnePepo = oThis.convertToBigNumber(ostInOnePepo).mul(oThis.convertToBigNumber(usdInOneOst)),
       totalUSDBn = oThis.convertToBigNumber(usdInOnePepo).mul(oThis.convertToBigNumber(amountPepo));
 

@@ -123,5 +123,10 @@
     "http_code": "200",
     "code": "BAD_REQUEST",
     "message": "Invalid twitter account selected."
+  },
+  "invalid_receiver_user_id": {
+    "http_code": "200",
+    "code": "BAD_REQUEST",
+    "message": "Invalid receiver user id."
   }
 }

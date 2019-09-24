@@ -1,4 +1,4 @@
-const rootPrefix = '../../../..',
+const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   AccountTwitterRequestClass = require(rootPrefix + '/lib/twitter/oAuth1.0/Account'),
   TwitterUserByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TwitterUserByUserIds'),
@@ -6,7 +6,6 @@ const rootPrefix = '../../../..',
   TwitterUserByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TwitterUserByIds'),
   SecureTwitterUserExtendedByTwitterUserIdCache = require(rootPrefix +
     '/lib/cacheManagement/single/SecureTwitterUserExtendedByTwitterUserId'),
-  UsersTwitterRequestClass = require(rootPrefix + '/lib/twitter/oAuth1.0/Users'),
   CurrentUser = require(rootPrefix + '/app/services/user/init/GetCurrent'),
   TwitterUserModel = require(rootPrefix + '/app/models/mysql/TwitterUser'),
   localCipher = require(rootPrefix + '/lib/encryptors/localCipher'),
@@ -57,8 +56,6 @@ class TweetInfo extends ServiceBase {
     await oThis._fetchTwitterUsers();
 
     await oThis._fetchAndValidateUser(oThis.currentUserId);
-
-    await oThis._fetchReceiverHandle();
 
     await oThis._fetchCurrentUser();
 
@@ -111,11 +108,13 @@ class TweetInfo extends ServiceBase {
       return Promise.reject(
         responseHelper.error({
           internal_error_identifier: 's_u_n_ti_ftu_1',
-          api_error_identifier: 'invalid_twitter_user',
+          api_error_identifier: 'invalid_receiver_user_id',
           debug_options: {}
         })
       );
     }
+
+    oThis.serviceResponse['secureTwitterUsersMap'] = oThis.twitterUsersMap;
 
     logger.log('End::Fetch Twitter Users');
     return responseHelper.successWithData({});
@@ -257,40 +256,6 @@ class TweetInfo extends ServiceBase {
     });
 
     logger.log('End::Update Twitter User Extended for say thank you', oThis.twitterUsersMap[oThis.currentUserId]);
-  }
-
-  /**
-   * Fetch receiver twitter handle
-   *
-   *
-   * @return {Promise<Result>}
-   * @private
-   */
-  async _fetchReceiverHandle() {
-    const oThis = this;
-
-    let twitterUsers = new UsersTwitterRequestClass({});
-
-    let twitterId = oThis.twitterUsersMap[oThis.receiverUserId].twitterId;
-
-    let lookupRsp = await twitterUsers.lookup({
-      token: oThis.token,
-      secret: oThis.secret,
-      twitterIds: [twitterId]
-    });
-
-    if (lookupRsp.isFailure()) {
-      oThis.twitterUsersMap[oThis.receiverUserId].handle = null;
-    }
-
-    await new TwitterUserModel()
-      .update({ handle: lookupRsp.data[twitterId].handle })
-      .where({ id: oThis.twitterUsersMap[oThis.receiverUserId].id })
-      .fire();
-
-    await TwitterUserModel.flushCache(oThis.twitterUsersMap[oThis.receiverUserId]);
-
-    oThis.serviceResponse['secureTwitterUsersMap'] = oThis.twitterUsersMap;
   }
 
   /**

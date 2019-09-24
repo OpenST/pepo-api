@@ -546,10 +546,6 @@ const v1Signature = {
         validatorMethods: ['validateNonEmptyObject']
       },
       {
-        parameter: 'user_id',
-        validatorMethods: ['validateNonZeroInteger']
-      },
-      {
         parameter: 'device_id',
         validatorMethods: ['validateNonBlankString']
       },

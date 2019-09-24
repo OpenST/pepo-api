@@ -2,6 +2,7 @@ const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   SecureUserCache = require(rootPrefix + '/lib/cacheManagement/single/SecureUser'),
   UserSocketConnectionDetailsModel = require(rootPrefix + '/app/models/mysql/UserSocketConnectionDetails'),
+  UserSocketConnectionDetailsCache = require(rootPrefix + '/lib/cacheManagement/multi/UserSocketConDetailsByUserIds'),
   util = require(rootPrefix + '/lib/util'),
   basicHelper = require(rootPrefix + '/helpers/basic'),
   base64Helper = require(rootPrefix + '/lib/base64Helper'),
@@ -73,7 +74,8 @@ class SocketConnectionDetails extends ServiceBase {
 
     await oThis._insertInUserConnectionDetails();
 
-    // TODO - websocket - is it double formatting.
+    await oThis._setUserSocketConnectionDetailsCache();
+
     return responseHelper.successWithData({ websocketConnectionPayload: oThis._formattedResponse() });
   }
 
@@ -177,6 +179,20 @@ class SocketConnectionDetails extends ServiceBase {
     oThis.userSocketConnectionDetails = new UserSocketConnectionDetailsModel().formatDbData(insertObject);
 
     await UserSocketConnectionDetailsModel.flushCache({ userIds: [oThis.userSocketConnectionDetails.userId] });
+  }
+
+  /**
+   * Sets user socket connection details.
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _setUserSocketConnectionDetailsCache() {
+    const oThis = this,
+      userId = oThis.userSocketConnectionDetails.userId,
+      dataToSet = oThis.userSocketConnectionDetails;
+
+    await new UserSocketConnectionDetailsCache({ userIds: [userId] })._setCache(userId, dataToSet);
   }
 
   /**

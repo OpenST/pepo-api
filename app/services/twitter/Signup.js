@@ -282,6 +282,7 @@ class TwitterSignup extends ServiceBase {
 
     const createUserServiceResponse = await ostPlatformSdk.createUser();
     if (!createUserServiceResponse.isSuccess()) {
+      await createErrorLogsEntry.perform(createUserServiceResponse, errorLogsConstants.highSeverity);
       return Promise.reject(createUserServiceResponse);
     }
 
