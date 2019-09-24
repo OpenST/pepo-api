@@ -155,7 +155,7 @@ class NotificationAggregator extends CronBase {
     const userByIdResponse = await new UserMultiCache({ ids: oThis.recipientUserIds }).fetch();
 
     if (userByIdResponse.isFailure()) {
-      return Promise.reject(UserByIdResponse);
+      return Promise.reject(userByIdResponse);
     }
 
     for (let userId in userByIdResponse.data) {

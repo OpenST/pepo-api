@@ -41,6 +41,7 @@ class TwitterSignup extends ServiceBase {
    * @param {string} params.userTwitterEntity: User Entity Of Twitter
    * @param {string} params.token: Oauth User Token
    * @param {string} params.secret: Oauth User secret
+   * @param {Object} params.twitterRespHeaders: Headers sent by twitter
    *
    * @param {string} params.inviterCodeId: invite code table id of inviter
    * @param {object} params.prelaunchInviteObj: prelaunch invite object, if user was part of pre-launch program
@@ -59,6 +60,7 @@ class TwitterSignup extends ServiceBase {
     oThis.token = params.token;
     oThis.secret = params.secret;
     oThis.inviterCodeId = params.inviterCodeId;
+    oThis.twitterRespHeaders = params.twitterRespHeaders;
     oThis.prelaunchInviteObj = params.prelaunchInviteObj || {};
 
     oThis.userId = null;
@@ -78,6 +80,7 @@ class TwitterSignup extends ServiceBase {
     oThis.ostUserId = null;
     oThis.ostStatus = null;
     oThis.userOptedInEmail = null;
+    oThis.twitterUserExtended = null;
   }
 
   /**
@@ -384,11 +387,14 @@ class TwitterSignup extends ServiceBase {
 
     logger.log('Start::Create Twitter User Extended Obj');
 
+    let accessType = twitterUserExtendedConstants.getAccessLevelFromTwitterHeader(oThis.twitterRespHeaders);
+
     let insertData = {
       twitter_user_id: oThis.twitterUserObj.id,
       user_id: oThis.userId,
       token: oThis.token,
       secret: oThis.encryptedSecret,
+      access_type: twitterUserExtendedConstants.invertedAccessTypes[accessType],
       status: twitterUserExtendedConstants.invertedStatuses[twitterUserExtendedConstants.activeStatus]
     };
     // Insert user in database.
@@ -402,8 +408,8 @@ class TwitterSignup extends ServiceBase {
     insertData.id = insertResponse.insertId;
     Object.assign(insertData, insertResponse.defaultUpdatedAttributes);
 
-    let twitterUserExtendedObj = new TwitterUserExtendedModel().formatDbData(insertData);
-    await TwitterUserExtendedModel.flushCache(twitterUserExtendedObj);
+    oThis.twitterUserExtended = new TwitterUserExtendedModel().formatDbData(insertData);
+    await TwitterUserExtendedModel.flushCache(oThis.twitterUserExtended);
 
     logger.log('End::Create Twitter User Extended Obj');
 
@@ -421,26 +427,24 @@ class TwitterSignup extends ServiceBase {
 
     logger.log('Start::Create/Update Twitter User Obj');
 
+    let twitterHandle = oThis.userTwitterEntity.handle;
+
     if (oThis.twitterUserObj) {
       await new TwitterUserModel()
         .update({
-          user_id: oThis.userId
+          user_id: oThis.userId,
+          handle: twitterHandle
         })
         .where({ id: oThis.twitterUserObj.id })
         .fire();
 
       oThis.twitterUserObj.userId = oThis.userId;
     } else {
-      let twitterEmail = oThis.userTwitterEntity.email,
-        twitterHandle = oThis.userTwitterEntity.handle;
+      let twitterEmail = oThis.userTwitterEntity.email;
 
       // email info is not mandatory to come from twitter.
       if (!oThis.userTwitterEntity.email || !CommonValidators.isValidEmail(oThis.userTwitterEntity.email)) {
         twitterEmail = null;
-      }
-
-      if (!oThis.userTwitterEntity.handle) {
-        twitterHandle = null;
       }
 
       let insertData = {
@@ -552,6 +556,9 @@ class TwitterSignup extends ServiceBase {
 
     const safeFormattedUserData = new UserModel().safeFormattedData(oThis.userObj);
     const safeFormattedTokenUserData = new TokenUserModel().safeFormattedData(oThis.tokenUserObj);
+    const safeFormattedTwitterUserExtendedData = new TwitterUserExtendedModel().safeFormattedData(
+      oThis.twitterUserExtended
+    );
 
     return responseHelper.successWithData({
       usersByIdMap: { [safeFormattedUserData.id]: safeFormattedUserData },
@@ -559,7 +566,8 @@ class TwitterSignup extends ServiceBase {
       user: safeFormattedUserData,
       tokenUser: safeFormattedTokenUserData,
       userLoginCookieValue: userLoginCookieValue,
-      openEmailAddFlow: oThis.userOptedInEmail ? 0 : 1
+      openEmailAddFlow: oThis.userOptedInEmail ? 0 : 1,
+      twitterUserExtended: safeFormattedTwitterUserExtendedData
     });
   }
 
