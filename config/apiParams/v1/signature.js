@@ -517,13 +517,12 @@ const v1Signature = {
     ]
   },
   [apiName.userSearch]: {
-    mandatory: [
+    mandatory: [],
+    optional: [
       {
         parameter: 'q',
         validatorMethods: ['validateString']
-      }
-    ],
-    optional: [
+      },
       {
         parameter: paginationConstants.paginationIdentifierKey,
         validatorMethods: ['validateString', 'validatePaginationIdentifier']

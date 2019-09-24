@@ -1,21 +1,23 @@
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   UserModel = require(rootPrefix + '/app/models/mysql/User'),
+  UserCache = require(rootPrefix + '/lib/cacheManagement/multi/User'),
   ImageByIdCache = require(rootPrefix + '/lib/cacheManagement/multi/ImageByIds'),
   TokenUserDetailByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TokenUserByUserIds'),
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
+  coreConstants = require(rootPrefix + '/config/coreConstants'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
   paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination');
 
 /**
- * Class for user details by search.
+ * Class for user search.
  *
  * @class UserSearch
  */
 class UserSearch extends ServiceBase {
   /**
-   * Constructor for user search details search.
+   * Constructor for user search.
    *
    * @param {object} params
    * @param {string} [params.q]
@@ -29,12 +31,9 @@ class UserSearch extends ServiceBase {
 
     const oThis = this;
 
-    oThis.query = params.q ? params.q.toLowerCase() : null; // lower case
-    oThis.query = oThis.query ? oThis.query.trim() : null; // trim spaces
-    oThis.adminSearch = params.search_by_admin;
-    oThis.isOnlyNameSearch = true;
-
+    oThis.query = params.q || null;
     oThis.paginationIdentifier = params[paginationConstants.paginationIdentifierKey] || null;
+    oThis.isOnlyNameSearch = true;
 
     oThis.limit = oThis._defaultPageLimit();
 
@@ -87,7 +86,15 @@ class UserSearch extends ServiceBase {
   async _validateAndSanitizeParams() {
     const oThis = this;
 
-    oThis.query = oThis.query ? oThis.query.toLowerCase().trim() : null; // Lowercase and trim.
+    oThis.query = oThis.query
+      ? oThis.query
+          .toLowerCase()
+          .trim()
+          .replace(/_/g, '\\_')
+      : null;
+    // Lowercase, trim and escape underscore.
+
+    oThis.query = oThis.query.length > 0 ? oThis.query : null; // If query is empty string, make it as null.
 
     if (oThis.paginationIdentifier) {
       const parsedPaginationParams = oThis._parsePaginationParams(oThis.paginationIdentifier);
@@ -98,8 +105,6 @@ class UserSearch extends ServiceBase {
     }
 
     oThis.isOnlyNameSearch = !CommonValidators.validateUserName(oThis.query);
-
-    oThis.query = oThis.query ? oThis.query.replace(/_/g, '\\_') : null; // Escape underscore
 
     // Validate limit.
     return oThis._validatePageSize();
@@ -116,15 +121,39 @@ class UserSearch extends ServiceBase {
   async _fetchUserIds() {
     const oThis = this;
 
-    const userModelObj = new UserModel({});
+    let userData = {};
 
-    const userData = await userModelObj.search({
-      query: oThis.query,
-      limit: oThis.limit,
-      paginationTimestamp: oThis.paginationTimestamp,
-      isOnlyNameSearch: oThis.isOnlyNameSearch,
-      fetchAll: false
-    });
+    if (oThis.query) {
+      userData = await new UserModel().search({
+        query: oThis.query,
+        limit: oThis.limit,
+        paginationTimestamp: oThis.paginationTimestamp,
+        isOnlyNameSearch: oThis.isOnlyNameSearch,
+        fetchAll: false
+      });
+    } else {
+      // Display curated users in search.
+      const curatedUserIdsString = coreConstants.PEPO_USER_SEARCH_CURATED_USER_IDS;
+      if (curatedUserIdsString.length === 0) {
+        // Empty string.
+        userData = { userIds: [], userDetails: {} };
+      } else {
+        const curatedUserIds = JSON.parse(curatedUserIdsString);
+
+        if (curatedUserIds.length === 0) {
+          // Empty curated userIds array.
+          userData = { userIds: [], userDetails: {} };
+        } else {
+          // Fetch curated users information.
+          const userDetailsCacheResponse = await new UserCache({ userIds: curatedUserIds }).fetch();
+          if (userDetailsCacheResponse.isFailure()) {
+            return Promise.reject(userDetailsCacheResponse);
+          }
+
+          userData = { userIds: curatedUserIds, userDetails: userDetailsCacheResponse.data };
+        }
+      }
+    }
 
     oThis.userIds = userData.userIds;
     oThis.userDetails = userData.userDetails;
@@ -135,11 +164,15 @@ class UserSearch extends ServiceBase {
    *
    * @sets oThis.tokenUsersByUserIdMap
    *
-   * @return {Promise<void>}
+   * @return {Promise<*>}
    * @private
    */
   async _fetchTokenUsers() {
     const oThis = this;
+
+    if (oThis.userIds.length === 0) {
+      return;
+    }
 
     const tokenUserRes = await new TokenUserDetailByUserIdsCache({ userIds: oThis.userIds }).fetch();
 
@@ -205,11 +238,15 @@ class UserSearch extends ServiceBase {
    *
    * @sets oThis.imageDetails
    *
-   * @returns {Promise<void>}
+   * @returns {Promise<*>}
    * @private
    */
   async _fetchImages() {
     const oThis = this;
+
+    if (oThis.imageIds.length === 0) {
+      return;
+    }
 
     const imageData = await new ImageByIdCache({ ids: oThis.imageIds }).fetch();
 
