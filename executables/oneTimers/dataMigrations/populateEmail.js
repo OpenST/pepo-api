@@ -1,6 +1,8 @@
 const rootPrefix = '../../..',
   UserModel = require(rootPrefix + '/app/models/mysql/User'),
   TwitterUserModel = require(rootPrefix + '/app/models/mysql/TwitterUser'),
+  UserCache = require(rootPrefix + '/lib/cacheManagement/multi/User'),
+  SecureUserCache = require(rootPrefix + '/lib/cacheManagement/single/SecureUser'),
   PreLaunchInviteByTwitterIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/PreLaunchInviteByTwitterIds'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   preLaunchInviteConstants = require(rootPrefix + '/lib/globalConstant/preLaunchInvite');
@@ -142,7 +144,8 @@ class PopulateEmail {
    * @private
    */
   async _populateEmailInUsers() {
-    const oThis = this;
+    const oThis = this,
+      promiseArray = [];
 
     for (let userId in oThis.userIdToEmailsMap) {
       const email = oThis.userIdToEmailsMap[userId];
@@ -157,7 +160,14 @@ class PopulateEmail {
         .catch(async function(err) {
           logger.error('Error while updating users table is: ', err);
         });
+
+      promiseArray.push(new SecureUserCache({ id: userId }).clear());
     }
+
+    // Flush cache;
+    promiseArray.push(new UserCache({ ids: oThis.userIds }).clear());
+
+    await Promise.all(promiseArray);
   }
 }
 
