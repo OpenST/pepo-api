@@ -47,7 +47,7 @@ class ShareDetails extends ServiceBase {
 
     //if this is a curated video,
     if (oThis.videoId < 0) {
-      oThis.messageObject = shareEntityConstants.getVideoShareEntityForCuratedVideos(oThis._generateVideoShareUrl());
+      oThis.messageObject = shareEntityConstants.getVideoShareEntityForCuratedVideos(urlDomain);
     } else {
       await oThis._fetchVideo();
       await oThis._fetchCreatorUserName();

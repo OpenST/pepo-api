@@ -99,16 +99,17 @@ class FetchGoto extends ServiceBase {
     const oThis = this;
 
     let pathName = oThis.parsedUrl.pathname,
+      pathArray = pathName.split('/'),
       query = oThis.parsedUrl.query;
-    if (pathName.match(gotoConstants.videoGotoKind)) {
+    if (pathArray[1] == gotoConstants.videoGotoKind) {
       oThis.gotoParams = { videoId: pathName.split('/')[2] };
       oThis.gotoKind = gotoConstants.videoGotoKind;
-    } else if (pathName == '/terms' || pathName == '/privacy') {
+    } else if (pathArray[1] == 'terms' || pathArray[1] == 'privacy') {
       oThis.gotoKind = gotoConstants.webViewGotoKind;
       oThis.gotoParams = { url: oThis.url };
-    } else if (pathName == '/account') {
+    } else if (pathArray[1] == 'account') {
       oThis.gotoKind = gotoConstants.invitedUsersGotoKind;
-    } else if (pathName == '/' && query && query['invite']) {
+    } else if (!pathArray[1] && query && query['invite']) {
       oThis.gotoParams = { inviteCode: query['invite'] };
       oThis.gotoKind = gotoConstants.signUpGotoKind;
     }
