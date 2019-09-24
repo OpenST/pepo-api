@@ -133,5 +133,15 @@
     "http_code": "200",
     "code": "BAD_REQUEST",
     "message": "Duplicate tweet."
+  },
+  "twitter_unauthorized": {
+    "http_code": "500",
+    "code": "INTERNAL_SERVER_ERROR",
+    "message": "Unauthorized Twitter Account"
+  },
+  "twitter_rate_limit": {
+    "http_code": "500",
+    "code": "INTERNAL_SERVER_ERROR",
+    "message": "Twitter Rate Limit Reached"
   }
 }

@@ -3,7 +3,6 @@ const rootPrefix = '../../..',
   UserModel = require(rootPrefix + '/app/models/mysql/User'),
   TokenUserDetailByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TokenUserByUserIds'),
   TwitterUserModel = require(rootPrefix + '/app/models/mysql/TwitterUser'),
-  AccountTwitterRequestClass = require(rootPrefix + '/lib/twitter/oAuth1.0/Account'),
   SecureUserCache = require(rootPrefix + '/lib/cacheManagement/single/SecureUser'),
   SecureTwitterUserExtendedByTwitterUserIdCache = require(rootPrefix +
     '/lib/cacheManagement/single/SecureTwitterUserExtendedByTwitterUserId'),

@@ -105,16 +105,7 @@ class PreLaunchTwitterVerify extends ServiceBase {
       oAuthVerifier: oThis.oautVerifier
     };
 
-    twitterResp = await new AuthorizationTwitterRequestClass().accessToken(reqParams).catch(function(err) {
-      logger.error('Error while fetchRequestToken for twitter: ', err);
-      return Promise.reject(
-        responseHelper.error({
-          internal_error_identifier: 's_pli_v_vtc_1',
-          api_error_identifier: 'something_went_wrong',
-          debug_options: {}
-        })
-      );
-    });
+    twitterResp = await new AuthorizationTwitterRequestClass().accessToken(reqParams);
 
     if (twitterResp.isFailure()) {
       return Promise.reject(

@@ -153,21 +153,10 @@ class RefreshConnect extends ServiceBase {
 
     let twitterResp = null;
 
-    twitterResp = await new AccountTwitterRequestClass()
-      .verifyCredentials({
-        oAuthToken: oThis.token,
-        oAuthTokenSecret: oThis.secret
-      })
-      .catch(function(err) {
-        logger.error('Error while validating Credentials for twitter: ', err);
-        return Promise.reject(
-          responseHelper.error({
-            internal_error_identifier: 's_t_rc_vtc_1',
-            api_error_identifier: 'invalid_twitter_user',
-            debug_options: {}
-          })
-        );
-      });
+    twitterResp = await new AccountTwitterRequestClass().verifyCredentials({
+      oAuthToken: oThis.token,
+      oAuthTokenSecret: oThis.secret
+    });
 
     if (twitterResp.isFailure()) {
       return Promise.reject(
