@@ -30,6 +30,7 @@ class TwitterLogin extends ServiceBase {
    * @param {string} params.userTwitterEntity: User Entity Of Twitter
    * @param {string} params.token: Oauth User Token
    * @param {string} params.secret: Oauth User secret
+   * @param {Object} params.twitterRespHeaders: Headers sent by twitter
    *
    * @augments ServiceBase
    *
@@ -44,6 +45,7 @@ class TwitterLogin extends ServiceBase {
     oThis.userTwitterEntity = params.userTwitterEntity;
     oThis.token = params.token;
     oThis.secret = params.secret;
+    oThis.twitterRespHeaders = params.twitterRespHeaders;
 
     oThis.userId = oThis.twitterUserObj.userId;
 
@@ -52,6 +54,7 @@ class TwitterLogin extends ServiceBase {
     oThis.handle = null;
 
     oThis.decryptedEncryptionSalt = null;
+    oThis.twitterUserExtended = null;
   }
 
   /**
@@ -68,13 +71,11 @@ class TwitterLogin extends ServiceBase {
       return oThis._updateTwitterUserExtended();
     });
 
-    await oThis._validateTwitterCredentials();
-
-    await oThis._updateHandleInTwitterUsers();
-
     const promisesArray = [];
 
     promisesArray.push(updateTwitterUserPromise);
+
+    promisesArray.push(oThis._updateHandleInTwitterUsers());
     promisesArray.push(oThis._fetchTokenUser());
 
     await Promise.all(promisesArray);
@@ -147,80 +148,29 @@ class TwitterLogin extends ServiceBase {
       return Promise.reject(SecureTwitterUserExtendedRes);
     }
 
-    let twitterUserExtendedObj = SecureTwitterUserExtendedRes.data;
+    oThis.twitterUserExtended = SecureTwitterUserExtendedRes.data;
+
+    let accessType = twitterUserExtendedConstants.getAccessLevelFromTwitterHeader(oThis.twitterRespHeaders);
 
     await new TwitterUserExtendedModel()
       .update({
         token: oThis.token,
         secret: eSecretKms,
+        access_type: twitterUserExtendedConstants.invertedAccessTypes[accessType],
         status: twitterUserExtendedConstants.invertedStatuses[twitterUserExtendedConstants.activeStatus]
       })
-      .where({ id: twitterUserExtendedObj.id })
+      .where({ id: oThis.twitterUserExtended.id })
       .fire();
 
     await TwitterUserExtendedModel.flushCache({
-      id: twitterUserExtendedObj.id,
+      id: oThis.twitterUserExtended.id,
       twitterUserId: oThis.twitterUserObj.id
     });
 
+    oThis.twitterUserExtended.accessType = accessType;
+    oThis.twitterUserExtended.status = twitterUserExtendedConstants.activeStatus;
+
     logger.log('End::Update Twitter User Extended for login');
-
-    return responseHelper.successWithData({});
-  }
-
-  /**
-   * Verify Credentials and get profile data from twitter.
-   *
-   * @return {Promise<Result>}
-   * @private
-   */
-  async _validateTwitterCredentials() {
-    const oThis = this;
-    logger.log('Start::Validate Twitter Credentials');
-
-    let twitterResp = null;
-
-    twitterResp = await new AccountTwitterRequestClass()
-      .verifyCredentials({
-        oAuthToken: oThis.token,
-        oAuthTokenSecret: oThis.secret
-      })
-      .catch(function(err) {
-        logger.error('Error while validating Credentials for twitter: ', err);
-        return Promise.reject(
-          responseHelper.error({
-            internal_error_identifier: 's_t_l_vtc_1',
-            api_error_identifier: 'invalid_twitter_user',
-            debug_options: {}
-          })
-        );
-      });
-
-    if (twitterResp.isFailure()) {
-      return Promise.reject(
-        responseHelper.error({
-          internal_error_identifier: 's_t_l_vtc_2',
-          api_error_identifier: 'invalid_twitter_user',
-          debug_options: {}
-        })
-      );
-    }
-
-    let userTwitterEntity = twitterResp.data.userEntity;
-
-    if (userTwitterEntity.idStr != oThis.twitterUserObj.twitterId) {
-      return Promise.reject(
-        responseHelper.error({
-          internal_error_identifier: 's_t_l_vtc_3',
-          api_error_identifier: 'invalid_twitter_user',
-          debug_options: {}
-        })
-      );
-    }
-
-    oThis.handle = userTwitterEntity.handle;
-
-    logger.log('End::Validate Twitter Credentials');
 
     return responseHelper.successWithData({});
   }
@@ -234,11 +184,18 @@ class TwitterLogin extends ServiceBase {
   async _updateHandleInTwitterUsers() {
     const oThis = this;
 
+    if (
+      oThis.twitterUserObj.handle &&
+      oThis.twitterUserObj.handle.toLowerCase() === oThis.userTwitterEntity.handle.toLowerCase()
+    ) {
+      return responseHelper.successWithData({});
+    }
+
     let twitterUserObj = new TwitterUserModel();
 
     await twitterUserObj
       .update({
-        handle: oThis.handle
+        handle: oThis.userTwitterEntity.handle
       })
       .where({
         twitter_id: oThis.twitterUserObj.twitterId
@@ -293,13 +250,17 @@ class TwitterLogin extends ServiceBase {
 
     const safeFormattedUserData = new UserModel().safeFormattedData(oThis.secureUserObj);
     const safeFormattedTokenUserData = new TokenUserModel().safeFormattedData(oThis.tokenUserObj);
+    const safeFormattedTwitterUserExtendedData = new TwitterUserExtendedModel().safeFormattedData(
+      oThis.twitterUserExtended
+    );
 
     return responseHelper.successWithData({
       usersByIdMap: { [safeFormattedUserData.id]: safeFormattedUserData },
       tokenUsersByUserIdMap: { [safeFormattedTokenUserData.userId]: safeFormattedTokenUserData },
       user: safeFormattedUserData,
       tokenUser: safeFormattedTokenUserData,
-      userLoginCookieValue: userLoginCookieValue
+      userLoginCookieValue: userLoginCookieValue,
+      twitterUserExtended: safeFormattedTwitterUserExtendedData
     });
   }
 }

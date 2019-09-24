@@ -53,6 +53,7 @@ class TwitterConnect extends ServiceBase {
     oThis.serviceResp = null;
     oThis.inviterCodeObj = null;
     oThis.prelaunchInviteObj = null;
+    oThis.twitterRespHeaders = null;
   }
 
   /**
@@ -350,6 +351,8 @@ class TwitterConnect extends ServiceBase {
       );
     }
 
+    oThis.twitterRespHeaders = twitterResp.data.headers;
+
     oThis.userTwitterEntity = twitterResp.data.userEntity;
 
     // validating the front end data
@@ -382,6 +385,7 @@ class TwitterConnect extends ServiceBase {
     let requestParams = {
       twitterUserObj: oThis.twitterUserObj,
       userTwitterEntity: oThis.userTwitterEntity,
+      twitterRespHeaders: oThis.twitterRespHeaders,
       token: oThis.token,
       secret: oThis.secret
     };

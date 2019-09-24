@@ -11,6 +11,7 @@ const rootPrefix = '../../../..',
   twitterUserExtendedConstants = require(rootPrefix + '/lib/globalConstant/twitterUserExtended'),
   UserModel = require(rootPrefix + '/app/models/mysql/User'),
   TokenUserModel = require(rootPrefix + '/app/models/mysql/TokenUser'),
+  TwitterUserExtendedModel = require(rootPrefix + '/app/models/mysql/TwitterUserExtended'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger');
 
 class GetCurrentUser extends ServiceBase {
@@ -30,7 +31,7 @@ class GetCurrentUser extends ServiceBase {
     oThis.tokenDetails = {};
 
     oThis.twitterUserObj = null;
-    oThis.twitterAuthExpired = 1;
+    oThis.twitterUserExtended = null;
   }
 
   /**
@@ -51,7 +52,7 @@ class GetCurrentUser extends ServiceBase {
 
     await oThis._fetchTwitterUser();
 
-    await oThis._fetchTwitterAuthStatus();
+    await oThis.fetchTwitterUserExtended();
 
     return Promise.resolve(oThis._serviceResponse());
   }
@@ -169,14 +170,14 @@ class GetCurrentUser extends ServiceBase {
   }
 
   /**
-   * Fetch Twitter auth status
+   * Fetch Twitter user Extended
    *
-   * @sets oThis.twitterUserObj
+   * @sets oThis.twitterUserExtended
    *
    * @return {Promise<Result>}
    * @private
    */
-  async _fetchTwitterAuthStatus() {
+  async fetchTwitterUserExtended() {
     const oThis = this;
 
     const secureTwitterUserExtendedRes = await new SecureTwitterUserExtendedByTwitterUserIdCache({
@@ -187,13 +188,7 @@ class GetCurrentUser extends ServiceBase {
       return Promise.reject(secureTwitterUserExtendedRes);
     }
 
-    let twitterUserExtendedObj = secureTwitterUserExtendedRes.data;
-
-    if (twitterUserExtendedObj.status == twitterUserExtendedConstants.expiredStatus) {
-      oThis.twitterAuthExpired = 1;
-    } else if (twitterUserExtendedObj.status == twitterUserExtendedConstants.activeStatus) {
-      oThis.twitterAuthExpired = 0;
-    }
+    oThis.twitterUserExtended = secureTwitterUserExtendedRes.data;
   }
 
   /**
@@ -209,6 +204,9 @@ class GetCurrentUser extends ServiceBase {
 
     const safeFormattedUserData = new UserModel().safeFormattedData(oThis.user);
     const safeFormattedTokenUserData = new TokenUserModel().safeFormattedData(oThis.tokenUser);
+    const safeFormattedTwitterUserExtendedData = new TwitterUserExtendedModel().safeFormattedData(
+      oThis.twitterUserExtended
+    );
 
     return responseHelper.successWithData({
       usersByIdMap: { [safeFormattedUserData.id]: safeFormattedUserData },
@@ -217,7 +215,7 @@ class GetCurrentUser extends ServiceBase {
       tokenUser: safeFormattedTokenUserData,
       pricePointsMap: oThis.pricePoints,
       tokenDetails: oThis.tokenDetails,
-      twitterAuthExpired: oThis.twitterAuthExpired
+      twitterUserExtended: safeFormattedTwitterUserExtendedData
     });
   }
 }

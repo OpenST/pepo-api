@@ -34,7 +34,7 @@ router.get('/tweet-info', sanitizer.sanitizeDynamicUrlParams, function(req, res,
         [entityType.pricePointsMap]: responseEntityKey.pricePoints,
         [entityType.usersMap]: responseEntityKey.users,
         [entityType.token]: responseEntityKey.token,
-        [entityType.secureTwitterUsersMap]: responseEntityKey.secureTwitterUsers
+        [entityType.twitterUsersMap]: responseEntityKey.twitterUsers
       },
       serviceData: serviceResponse.data
     }).perform();

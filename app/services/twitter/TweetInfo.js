@@ -114,7 +114,7 @@ class TweetInfo extends ServiceBase {
       );
     }
 
-    oThis.serviceResponse['secureTwitterUsersMap'] = oThis.twitterUsersMap;
+    oThis.serviceResponse['twitterUsersMap'] = oThis.twitterUsersMap;
 
     logger.log('End::Fetch Twitter Users');
     return responseHelper.successWithData({});
@@ -224,6 +224,7 @@ class TweetInfo extends ServiceBase {
         .fire();
 
       await TwitterUserModel.flushCache(oThis.twitterUsersMap[oThis.currentUserId]);
+      oThis.serviceResponse['twitterUsersMap'][oThis.currentUserId].handle = userTwitterEntity.handle;
     }
 
     logger.log('End::Validate Twitter Credentials');
@@ -245,6 +246,7 @@ class TweetInfo extends ServiceBase {
 
     await new TwitterUserExtendedModel()
       .update({
+        access_type: twitterUserExtendedConstants.invertedAccessTypes[twitterUserExtendedConstants.noneAccessType],
         status: twitterUserExtendedConstants.invertedStatuses[twitterUserExtendedConstants.expiredStatus]
       })
       .where({ id: twitterExtendedId })
