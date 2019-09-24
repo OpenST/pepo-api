@@ -84,6 +84,7 @@ class TwitterDisconnect extends ServiceBase {
       .update({
         token: null,
         secret: null,
+        access_type: twitterUserExtendedConstants.invertedAccessTypes[twitterUserExtendedConstants.noneAccessType],
         status: twitterUserExtendedConstants.invertedStatuses[twitterUserExtendedConstants.expiredStatus]
       })
       .where({ twitter_user_id: oThis.twitterUserId })

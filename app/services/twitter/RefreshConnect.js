@@ -47,6 +47,7 @@ class RefreshConnect extends ServiceBase {
 
     oThis.userId = null;
     oThis.twitterUserObj = null;
+    oThis.twitterRespHeaders = null;
   }
 
   /**
@@ -152,21 +153,10 @@ class RefreshConnect extends ServiceBase {
 
     let twitterResp = null;
 
-    twitterResp = await new AccountTwitterRequestClass()
-      .verifyCredentials({
-        oAuthToken: oThis.token,
-        oAuthTokenSecret: oThis.secret
-      })
-      .catch(function(err) {
-        logger.error('Error while validating Credentials for twitter: ', err);
-        return Promise.reject(
-          responseHelper.error({
-            internal_error_identifier: 's_t_rc_vtc_1',
-            api_error_identifier: 'invalid_twitter_user',
-            debug_options: {}
-          })
-        );
-      });
+    twitterResp = await new AccountTwitterRequestClass().verifyCredentials({
+      oAuthToken: oThis.token,
+      oAuthTokenSecret: oThis.secret
+    });
 
     if (twitterResp.isFailure()) {
       return Promise.reject(
@@ -177,6 +167,8 @@ class RefreshConnect extends ServiceBase {
         })
       );
     }
+
+    oThis.twitterRespHeaders = twitterResp.data.headers;
 
     let userTwitterEntity = twitterResp.data.userEntity;
 
@@ -244,6 +236,10 @@ class RefreshConnect extends ServiceBase {
   async _updateHandleInTwitterUsers() {
     const oThis = this;
 
+    if (oThis.twitterUserObj.handle && oThis.twitterUserObj.handle.toLowerCase() === oThis.handle.toLowerCase()) {
+      return responseHelper.successWithData({});
+    }
+
     let twitterUserObj = new TwitterUserModel();
 
     await twitterUserObj
@@ -254,6 +250,9 @@ class RefreshConnect extends ServiceBase {
         twitter_id: oThis.twitterId
       })
       .fire();
+
+    oThis.twitterUserObj.handle = oThis.handle;
+    return TwitterUserModel.flushCache(oThis.twitterUserObj);
   }
 
   /**
@@ -277,11 +276,13 @@ class RefreshConnect extends ServiceBase {
     }
 
     let twitterUserExtendedObj = secureTwitterUserExtendedRes.data;
+    let accessType = twitterUserExtendedConstants.getAccessLevelFromTwitterHeader(oThis.twitterRespHeaders);
 
     await new TwitterUserExtendedModel()
       .update({
         token: oThis.token,
         secret: eSecretKms,
+        access_type: twitterUserExtendedConstants.invertedAccessTypes[accessType],
         status: twitterUserExtendedConstants.invertedStatuses[twitterUserExtendedConstants.activeStatus]
       })
       .where({ id: twitterUserExtendedObj.id })

@@ -92,7 +92,7 @@ router.get('/users', sanitizer.sanitizeDynamicUrlParams, function(req, res, next
         [entityType.imagesMap]: responseEntityKey.images,
         [entityType.videosMap]: responseEntityKey.videos,
         [entityType.linksMap]: responseEntityKey.links,
-        [entityType.twitterUsersMap]: responseEntityKey.twitterUsers,
+        [entityType.adminTwitterUsersMap]: responseEntityKey.twitterUsers,
         [entityType.token]: responseEntityKey.token,
         [entityType.inviteCodesMap]: responseEntityKey.inviteCodes,
         [entityType.userSearchMeta]: responseEntityKey.meta
