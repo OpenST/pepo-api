@@ -384,6 +384,10 @@ class CoreConstants {
   get PEPO_REDEMPTION_USER_ID() {
     return process.env.PA_PEPO_REDEMPTION_USER_ID;
   }
+
+  get PEPO_USER_SEARCH_CURATED_USER_IDS() {
+    return process.env.PA_USER_SEARCH_CURATED_USER_IDS;
+  }
 }
 
 module.exports = new CoreConstants();
