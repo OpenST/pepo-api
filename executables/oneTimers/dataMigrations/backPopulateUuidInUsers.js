@@ -1,4 +1,12 @@
-const rootPrefix = '../..',
+/**
+ * One timer to add custom attribute for active users.
+ *
+ * Usage: node executables/oneTimers/dataMigrations/backPopulateUuidInUsers.js
+ *
+ * @module executables/oneTimers/dataMigrations/backPopulateUuidInUsers
+ */
+
+const rootPrefix = '../../..',
   UserModel = require(rootPrefix + '/app/models/mysql/User'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger');
 
