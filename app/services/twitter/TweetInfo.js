@@ -135,10 +135,10 @@ class TweetInfo extends ServiceBase {
 
     let twitterExtendedData = await oThis._fetchTwitterUserExtended(twitterUserId);
 
-    oThis.token = twitterExtendedData.token;
-    oThis.secret = localCipher.decrypt(coreConstants.CACHE_SHA_KEY, twitterExtendedData.secretLc);
-
     if (twitterExtendedData.status == twitterUserExtendedConstants.activeStatus) {
+      oThis.token = twitterExtendedData.token;
+      oThis.secret = localCipher.decrypt(coreConstants.CACHE_SHA_KEY, twitterExtendedData.secretLc);
+
       let validateRsp = await oThis._validateTwitterCredentials(twitterId, handle);
 
       if (validateRsp.isFailure()) {
@@ -217,7 +217,7 @@ class TweetInfo extends ServiceBase {
     }
 
     // Update handle in DB - to be in sync with the latest one
-    if (userTwitterEntity.handle != handle) {
+    if (!handle || userTwitterEntity.handle.toLowerCase() != handle.toLowerCase()) {
       await new TwitterUserModel()
         .update({ handle: userTwitterEntity.handle })
         .where({ id: oThis.twitterUsersMap[oThis.currentUserId].id })
