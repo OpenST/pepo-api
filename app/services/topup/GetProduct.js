@@ -179,6 +179,7 @@ class GetTopupProduct extends ServiceBase {
     if (remainingLimit <= 0) {
       oThis.limitsData.limit_reached = 1;
     }
+    oThis.limitsData.limit = 0; //TEMP: REMOVE THIS AFTER 25 Sep 2019
 
     return remainingLimit;
   }
