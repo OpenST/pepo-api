@@ -35,7 +35,8 @@ class GetTopupProduct extends ServiceBase {
     oThis.os = params.os;
 
     oThis.limitsData = {};
-    oThis.limitsData.lifetime_limit_reached = 0;
+    oThis.limitsData.limit_reached = 0;
+    oThis.limitsData.limit = 0;
     oThis.totalLifetimeSpends = null;
     oThis.customPurchaseLimitOfUser = null;
   }
@@ -169,12 +170,14 @@ class GetTopupProduct extends ServiceBase {
 
     let remainingLimit = InAppProductConstants.lifetimeLimit - amountSpent;
 
+    oThis.limitsData.limit = InAppProductConstants.lifetimeLimit;
     if (!CommonValidators.isVarNullOrUndefined(oThis.customPurchaseLimitOfUser)) {
       remainingLimit = oThis.customPurchaseLimitOfUser - amountSpent;
+      oThis.limitsData.limit = oThis.customPurchaseLimitOfUser;
     }
 
     if (remainingLimit <= 0) {
-      oThis.limitsData.lifetime_limit_reached = 1;
+      oThis.limitsData.limit_reached = 1;
     }
 
     return remainingLimit;
