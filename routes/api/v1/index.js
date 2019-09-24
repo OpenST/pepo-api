@@ -4,10 +4,9 @@ const express = require('express'),
 
 const rootPrefix = '../../..',
   authRoutes = require(rootPrefix + '/routes/api/v1/auth'),
-  basicHelper = require(rootPrefix + '/helpers/basic'),
   coreConstant = require(rootPrefix + '/config/coreConstants'),
-  apiVersions = require(rootPrefix + '/lib/globalConstant/apiVersions'),
   usersRoutes = require(rootPrefix + '/routes/api/v1/users'),
+  invitesRoutes = require(rootPrefix + '/routes/api/v1/invites'),
   topupRoutes = require(rootPrefix + '/routes/api/v1/topup'),
   videoRoutes = require(rootPrefix + '/routes/api/v1/videos'),
   tokensRoutes = require(rootPrefix + '/routes/api/v1/tokens'),
@@ -16,8 +15,9 @@ const rootPrefix = '../../..',
   supportRoutes = require(rootPrefix + '/routes/api/v1/support'),
   cookieHelper = require(rootPrefix + '/lib/cookieHelper'),
   tagRoutes = require(rootPrefix + '/routes/api/v1/tags'),
-  userNotificationsRoutes = require(rootPrefix + '/routes/api/v1/userNotifications'),
+  notificationsRoutes = require(rootPrefix + '/routes/api/v1/notifications'),
   fetchGotoRoutes = require(rootPrefix + '/routes/api/v1/fetchGoto'),
+  twitterRoutes = require(rootPrefix + '/routes/api/v1/twitter'),
   uploadParamsRoutes = require(rootPrefix + '/routes/api/v1/uploadParams'),
   rotateTwitterAccountRoutes = require(rootPrefix + '/routes/api/v1/rotateTwitterAccount'),
   reportIssueRoutes = require(rootPrefix + '/routes/api/v1/reportIssue'),
@@ -40,13 +40,15 @@ router.use('/videos', cookieHelper.validateUserLoginCookieIfPresent, videoRoutes
 router.use(cookieHelper.validateUserLoginCookieIfPresent, cookieHelper.validateUserLoginRequired);
 
 router.use('/users', usersRoutes);
+router.use('/invites', invitesRoutes);
 router.use('/tokens', tokensRoutes);
 router.use('/ost-transactions', ostTransactionRoutes);
 router.use('/redemptions', redemptionsRoutes);
 router.use('/support', supportRoutes);
 router.use('/upload-params', uploadParamsRoutes);
 router.use('/tags', tagRoutes);
-router.use('/notifications', userNotificationsRoutes);
+router.use('/notifications', notificationsRoutes);
 router.use('/top-up', topupRoutes);
+router.use('/twitter', twitterRoutes);
 
 module.exports = router;

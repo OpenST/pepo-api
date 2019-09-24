@@ -10,9 +10,9 @@ const rootPrefix = '../../..',
 /**
  * Class to get invite code for current user.
  *
- * @class GetInviteCode
+ * @class GetCode
  */
-class GetInviteCode extends ServiceBase {
+class GetCode extends ServiceBase {
   /**
    * Constructor to get invite code for current user.
    *
@@ -101,4 +101,4 @@ class GetInviteCode extends ServiceBase {
   }
 }
 
-module.exports = GetInviteCode;
+module.exports = GetCode;

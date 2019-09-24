@@ -1,17 +1,17 @@
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   ResetBadge = require(rootPrefix + '/app/services/user/ResetBadge'),
-  UserProfileElementModel = require(rootPrefix + '/app/models/mysql/UserProfileElement'),
-  LocationByTimeZoneCache = require(rootPrefix + '/lib/cacheManagement/single/LocationByTimeZone'),
   UserDeviceModel = require(rootPrefix + '/app/models/mysql/UserDevice'),
+  UserProfileElementModel = require(rootPrefix + '/app/models/mysql/UserProfileElement'),
   UserDeviceByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/UserDeviceByIds'),
+  LocationByTimeZoneCache = require(rootPrefix + '/lib/cacheManagement/single/LocationByTimeZone'),
   UserDeviceByUserIdDeviceTokenCache = require(rootPrefix +
     '/lib/cacheManagement/single/UserDeviceByUserIdDeviceToken'),
   UserProfileElementsByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/UserProfileElementsByUserIds'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
-  errorLogsConstants = require(rootPrefix + '/lib/globalConstant/errorLogs'),
   createErrorLogsEntry = require(rootPrefix + '/lib/errorLogs/createEntry'),
+  errorLogsConstants = require(rootPrefix + '/lib/globalConstant/errorLogs'),
   userDeviceConstants = require(rootPrefix + '/lib/globalConstant/userDevice'),
   userProfileElementConstants = require(rootPrefix + '/lib/globalConstant/userProfileElement');
 
@@ -26,7 +26,6 @@ class AddDeviceToken extends ServiceBase {
    *
    * @param {object} params
    * @param {object} params.current_user
-   * @param {number} params.user_id
    * @param {number} params.device_id
    * @param {string} params.device_kind
    * @param {string} params.device_token
@@ -39,14 +38,11 @@ class AddDeviceToken extends ServiceBase {
    * @constructor
    */
   constructor(params) {
-    super(params);
+    super();
 
     const oThis = this;
 
-    logger.log('=========== params ===========', params);
-
     oThis.currentUserId = +params.current_user.id;
-    oThis.userId = +params.user_id;
     oThis.deviceId = params.device_id;
     oThis.deviceKind = params.device_kind;
     oThis.deviceToken = params.device_token;
@@ -54,20 +50,20 @@ class AddDeviceToken extends ServiceBase {
   }
 
   /**
-   * Main performer for class.
+   * Async perform.
    *
    * @return {Promise<void>}
    */
   async _asyncPerform() {
-    const oThis = this,
-      promiseArray = [];
+    const oThis = this;
 
     await oThis._validateAndSanitize();
 
-    promiseArray.push(oThis._insertIntoUserDevices());
-    promiseArray.push(oThis._addLocationInUserProfileElements());
-    promiseArray.push(oThis._resetUnreadNotificationsCount());
-
+    const promiseArray = [
+      oThis._insertIntoUserDevices(),
+      oThis._addLocationInUserProfileElements(),
+      oThis._resetUnreadNotificationsCount()
+    ];
     await Promise.all(promiseArray);
 
     return responseHelper.successWithData({});
@@ -76,6 +72,9 @@ class AddDeviceToken extends ServiceBase {
   /**
    * Validate and sanitize params.
    *
+   * @sets oThis.deviceKind, oThis.userTimeZone
+   *
+   * @returns {Promise<never>}
    * @private
    */
   async _validateAndSanitize() {
@@ -84,21 +83,10 @@ class AddDeviceToken extends ServiceBase {
     oThis.deviceKind = oThis.deviceKind.toUpperCase();
     oThis.userTimeZone = oThis.userTimeZone.toLowerCase();
 
-    if (oThis.currentUserId !== oThis.userId) {
-      return Promise.reject(
-        responseHelper.paramValidationError({
-          internal_error_identifier: 'a_s_u_adt_1',
-          api_error_identifier: 'invalid_params',
-          params_error_identifiers: ['invalid_user_id'],
-          debug_options: { currentUserId: oThis.currentUserId }
-        })
-      );
-    }
-
     if (!userDeviceConstants.invertedUserDeviceKinds[oThis.deviceKind]) {
       return Promise.reject(
         responseHelper.paramValidationError({
-          internal_error_identifier: 'a_s_u_adt_2',
+          internal_error_identifier: 'a_s_u_adt_1',
           api_error_identifier: 'invalid_params',
           params_error_identifiers: ['invalid_device_kind'],
           debug_options: { deviceKind: oThis.deviceKind }
@@ -110,7 +98,7 @@ class AddDeviceToken extends ServiceBase {
   /**
    * Insert into user devices table.
    *
-   * @returns {Promise<void>}
+   * @returns {Promise<result>}
    * @private
    */
   async _insertIntoUserDevices() {
@@ -120,7 +108,6 @@ class AddDeviceToken extends ServiceBase {
       userId: oThis.currentUserId,
       deviceToken: oThis.deviceToken
     }).fetch();
-
     if (userDeviceIdsCacheRsp.isFailure()) {
       return Promise.reject(userDeviceIdsCacheRsp);
     }
@@ -129,14 +116,13 @@ class AddDeviceToken extends ServiceBase {
 
     if (userDeviceCacheData && userDeviceCacheData.id) {
       const userDevicesResponse = await new UserDeviceByIdsCache({ ids: [userDeviceCacheData.id] }).fetch();
-
       if (userDevicesResponse.isFailure()) {
         return Promise.reject(userDevicesResponse);
       }
 
       const userDeviceObj = userDevicesResponse.data[userDeviceCacheData.id];
 
-      if (userDeviceObj.status != userDeviceConstants.activeStatus || userDeviceObj.deviceId != oThis.deviceId) {
+      if (userDeviceObj.status !== userDeviceConstants.activeStatus || userDeviceObj.deviceId != oThis.deviceId) {
         await new UserDeviceModel()
           .update({
             status: userDeviceConstants.invertedStatuses[userDeviceConstants.activeStatus],
@@ -185,8 +171,6 @@ class AddDeviceToken extends ServiceBase {
         device_kind: userDeviceConstants.invertedUserDeviceKinds[oThis.deviceKind]
       };
 
-      let isDuplicateIndexViolation = false;
-
       await new UserDeviceModel()
         .insert(insertParams)
         .fire()
@@ -195,7 +179,7 @@ class AddDeviceToken extends ServiceBase {
         })
         .catch(async function(err) {
           if (UserDeviceModel.isDuplicateIndexViolation(UserDeviceModel.userDeviceUniqueIndexName, err)) {
-            isDuplicateIndexViolation = true;
+            // Do nothing.
           } else {
             // Insert failed due to some other reason.
             // Send error email from here.
@@ -215,9 +199,10 @@ class AddDeviceToken extends ServiceBase {
   /**
    * Flush cache.
    *
-   * @param params
+   * @param {object} params
    * @param {integer} params.userId
    * @param {integer} params.id
+   *
    * @returns {Promise<void>}
    * @private
    */
@@ -232,11 +217,11 @@ class AddDeviceToken extends ServiceBase {
    * @private
    */
   async _addLocationInUserProfileElements() {
-    const oThis = this,
-      userProfileElementsCacheResp = await new UserProfileElementsByUserIdsCache({
-        usersIds: [oThis.currentUserId]
-      }).fetch();
+    const oThis = this;
 
+    const userProfileElementsCacheResp = await new UserProfileElementsByUserIdsCache({
+      usersIds: [oThis.currentUserId]
+    }).fetch();
     if (userProfileElementsCacheResp.isFailure()) {
       return Promise.reject(userProfileElementsCacheResp);
     }
@@ -244,12 +229,15 @@ class AddDeviceToken extends ServiceBase {
     const userProfileElementsRspData = userProfileElementsCacheResp.data[oThis.currentUserId];
 
     const locationByTimeZoneCacheRsp = await new LocationByTimeZoneCache({ timeZone: oThis.userTimeZone }).fetch();
-
     if (locationByTimeZoneCacheRsp.isFailure()) {
       return Promise.reject(locationByTimeZoneCacheRsp);
     }
 
-    let locationId = locationByTimeZoneCacheRsp.data[oThis.userTimeZone].id;
+    let locationId = null;
+
+    if (locationByTimeZoneCacheRsp.data[oThis.userTimeZone]) {
+      locationId = locationByTimeZoneCacheRsp.data[oThis.userTimeZone].id;
+    }
 
     if (!locationId) {
       // Error email.
@@ -258,6 +246,7 @@ class AddDeviceToken extends ServiceBase {
         api_error_identifier: 'unknown_user_time_zone',
         debug_options: { timeZone: oThis.userTimeZone }
       });
+
       return createErrorLogsEntry.perform(errorObject, errorLogsConstants.mediumSeverity);
     }
 
@@ -268,12 +257,11 @@ class AddDeviceToken extends ServiceBase {
     if (userProfileElementLocationObj && userProfileElementLocationObj.id) {
       if (Number(userProfileElementLocationObj.data) === Number(locationId)) {
         return responseHelper.successWithData({});
-      } else {
-        await new UserProfileElementModel()
-          .update({ data: locationId })
-          .where({ id: userProfileElementLocationObj.id })
-          .fire();
       }
+      await new UserProfileElementModel()
+        .update({ data: locationId })
+        .where({ id: userProfileElementLocationObj.id })
+        .fire();
     } else {
       await new UserProfileElementModel().insertElement({
         userId: oThis.currentUserId,

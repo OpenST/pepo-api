@@ -1,18 +1,14 @@
-/**
- * Module for cron base.
- *
- * @module executables/CronBase
- */
-
 const rootPrefix = '..',
   CronProcessHandler = require(rootPrefix + '/lib/CronProcessesHandler'),
-  ErrorLogsConstants = require(rootPrefix + '/lib/globalConstant/errorLogs'),
-  cronProcessHandlerObject = new CronProcessHandler(),
+  basicHelper = require(rootPrefix + '/helpers/basic'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
-  basicHelper = require(rootPrefix + '/helpers/basic'),
   sigIntConst = require(rootPrefix + '/lib/globalConstant/sigInt'),
-  createErrorLogsEntry = require(rootPrefix + '/lib/errorLogs/createEntry');
+  createErrorLogsEntry = require(rootPrefix + '/lib/errorLogs/createEntry'),
+  errorLogsConstants = require(rootPrefix + '/lib/globalConstant/errorLogs');
+
+// Declare variables.
+const cronProcessHandlerObject = new CronProcessHandler();
 
 /**
  * Class for sigint handler.
@@ -27,15 +23,17 @@ class CronBase {
   /**
    * Constructor for sigint handler.
    *
+   * @param {object} params
+   * @param {number} params.cronProcessId
+   *
    * @constructor
    */
   constructor(params) {
     const oThis = this;
 
-    oThis.cronStarted = false;
-
     oThis.cronProcessId = params.cronProcessId;
 
+    oThis.cronStarted = false;
     oThis.stopPickingUpNewWork = false;
 
     oThis.attachHandlers(); // Attaching handlers from sigint handler.
@@ -72,8 +70,8 @@ class CronBase {
         });
       }
 
-      // Severity is same for all the cron errors. Check if there is a way specific to the error
-      await createErrorLogsEntry.perform(errorObject, ErrorLogsConstants.highSeverity);
+      // Severity is same for all the cron errors. Check if there is a way specific to the error.
+      await createErrorLogsEntry.perform(errorObject, errorLogsConstants.highSeverity);
 
       process.emit('SIGINT');
     });
@@ -115,7 +113,7 @@ class CronBase {
           cronName: oThis._cronKind
         }
       });
-      await createErrorLogsEntry.perform(errorObject, ErrorLogsConstants.highSeverity);
+      await createErrorLogsEntry.perform(errorObject, errorLogsConstants.highSeverity);
     };
 
     /**
@@ -123,7 +121,7 @@ class CronBase {
      */
     const handle = async function() {
       if (!oThis.cronStarted) {
-        logger.error(`Exit Cron as it did not start the process`);
+        logger.error('Exit Cron as it did not start the process');
         process.exit(1);
       }
       sigIntConst.setSigIntStatus;
@@ -203,7 +201,7 @@ class CronBase {
       // Fetch params from the DB.
       const cronParams = JSON.parse(response.data.params);
 
-      // all the cron process params will be available in oThis object as attributes
+      // All the cron process params will be available in oThis object as attributes.
       for (const key in cronParams) {
         oThis[key] = cronParams[key];
       }
