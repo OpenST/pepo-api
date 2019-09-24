@@ -109,7 +109,7 @@ class SyncCreatorApproval {
     for (let userId in usersByIdMap) {
       let userObj = usersByIdMap[userId],
         isUserCreator = UserModel.isUserApprovedCreator(userObj),
-        isPreLaunchCreator = true,
+        isPreLaunchCreator = false,
         twitterId = userIdToTwitterIdMap[userId],
         preLaunchInviteByTwitterIdObj = {},
         preLaunchInviteObj = {};
@@ -123,8 +123,8 @@ class SyncCreatorApproval {
         }
 
         preLaunchInviteObj = cacheRsp.data[preLaunchInviteByTwitterIdObj.id];
-        if (preLaunchInviteObj.creatorStatus !== preLaunchInviteConstant.approvedCreatorStatus) {
-          isPreLaunchCreator = false;
+        if (preLaunchInviteObj.creatorStatus === preLaunchInviteConstant.approvedCreatorStatus) {
+          isPreLaunchCreator = true;
         }
 
         if (!isUserCreator && isPreLaunchCreator) {

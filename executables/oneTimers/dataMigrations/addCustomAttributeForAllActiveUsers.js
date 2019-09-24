@@ -24,7 +24,7 @@ command
  *
  * @class
  */
-class addCustomAttributeForPreLaunchInviteUser {
+class addCustomAttributeForAllActiveUsers {
   /**
    * constructor to add custom attribute for active users.
    */
@@ -119,7 +119,7 @@ class addCustomAttributeForPreLaunchInviteUser {
   }
 }
 
-new addCustomAttributeForPreLaunchInviteUser({})
+new addCustomAttributeForAllActiveUsers({})
   .perform()
   .then(function(rsp) {
     process.exit(0);

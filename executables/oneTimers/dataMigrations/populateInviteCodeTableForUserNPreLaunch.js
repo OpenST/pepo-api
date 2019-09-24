@@ -108,7 +108,7 @@ class PopulateInviteCodeTableForUserNPreLaunch {
       .select('*')
       .where({ twitter_id: preLaunchTwitterId })
       .fire();
-    if (twitterUserQueryRsp[0]) {
+    if (twitterUserQueryRsp[0] && twitterUserQueryRsp[0].id !== twitterUserQueryRsp[0].twitterId) {
       twitterId = twitterUserQueryRsp[0].user_id;
     }
     return twitterId;
