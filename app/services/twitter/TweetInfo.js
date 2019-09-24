@@ -141,7 +141,7 @@ class TweetInfo extends ServiceBase {
 
       let validateRsp = await oThis._validateTwitterCredentials(twitterId, handle);
 
-      if (validateRsp.isFailure()) {
+      if (validateRsp.isFailure() && validateRsp.apiErrorIdentifier === 'twitter_unauthorized') {
         await oThis._expireCurrentUserTwitterAuthIfRequired(twitterExtendedData.id);
       }
     }
