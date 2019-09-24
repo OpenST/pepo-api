@@ -94,7 +94,7 @@ class UserSearch extends ServiceBase {
       : null;
     // Lowercase, trim and escape underscore.
 
-    oThis.query = oThis.query.length > 0 ? oThis.query : null; // If query is empty string, make it as null.
+    oThis.query = oThis.query && oThis.query.length > 0 ? oThis.query : null; // If query is empty string, make it as null.
 
     if (oThis.paginationIdentifier) {
       const parsedPaginationParams = oThis._parsePaginationParams(oThis.paginationIdentifier);
