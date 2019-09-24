@@ -53,7 +53,7 @@ class CreateTopup extends ServiceBase {
 
     await oThis._recordTopup();
 
-    if (oThis.isAlreadyRecorded) {
+    if (oThis.isAlreadyRecorded && !oThis._needReValidation()) {
       return oThis._apiResponse();
     }
 
@@ -148,11 +148,13 @@ class CreateTopup extends ServiceBase {
       .catch(async function(mysqlErrorObject) {
         // duplicate is handled here.
         if (mysqlErrorObject.code === mysqlErrorConstants.duplicateError) {
-          oThis.isAlreadyRecorded = true;
           oThis.paymentDetail = await new FiatPaymentModel().fetchByReceiptIdAndServiceKind(
             serviceReceiptId,
             serviceKind
           );
+          if (!oThis._needReValidation()) {
+            oThis.isAlreadyRecorded = true;
+          }
           oThis.fiatPaymentId = oThis.paymentDetail.id;
         } else {
           let errorResp = responseHelper.error({
@@ -169,11 +171,36 @@ class CreateTopup extends ServiceBase {
         }
       });
 
-    if (!oThis.isAlreadyRecorded) {
+    if (!oThis.isAlreadyRecorded && !oThis.fiatPaymentId) {
       oThis.fiatPaymentId = fiatPaymentCreateResp.insertId;
     }
 
     return responseHelper.successWithData({});
+  }
+
+  /**
+   * Checks if the receipt needs re-validation.
+   *
+   * @returns {boolean}
+   * @private
+   */
+  _needReValidation() {
+    const oThis = this;
+
+    if (oThis.os === productConstant.android) {
+      if (oThis.paymentDetail.status != fiatPaymentConstants.receiptValidationPendingStatus) {
+        return false;
+      }
+
+      let previousReceiptResponse = oThis.paymentDetail.decryptedReceipt;
+
+      // according to https://developers.google.com/android-publisher/api-ref/purchases/products,
+      // purchaseState => 0 -> Purchased, 1 -> Canceled, 2 -> Pending
+      if (previousReceiptResponse.data.purchaseState != 2) {
+        return true;
+      }
+    }
+    return false;
   }
 
   /**
