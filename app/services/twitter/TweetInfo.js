@@ -114,7 +114,7 @@ class TweetInfo extends ServiceBase {
       );
     }
 
-    oThis.serviceResponse['secureTwitterUsersMap'] = oThis.twitterUsersMap;
+    oThis.serviceResponse['twitterUsersMap'] = oThis.twitterUsersMap;
 
     logger.log('End::Fetch Twitter Users');
     return responseHelper.successWithData({});
@@ -135,13 +135,13 @@ class TweetInfo extends ServiceBase {
 
     let twitterExtendedData = await oThis._fetchTwitterUserExtended(twitterUserId);
 
-    oThis.token = twitterExtendedData.token;
-    oThis.secret = localCipher.decrypt(coreConstants.CACHE_SHA_KEY, twitterExtendedData.secretLc);
-
     if (twitterExtendedData.status == twitterUserExtendedConstants.activeStatus) {
+      oThis.token = twitterExtendedData.token;
+      oThis.secret = localCipher.decrypt(coreConstants.CACHE_SHA_KEY, twitterExtendedData.secretLc);
+
       let validateRsp = await oThis._validateTwitterCredentials(twitterId, handle);
 
-      if (validateRsp.isFailure()) {
+      if (validateRsp.isFailure() && validateRsp.apiErrorIdentifier === 'twitter_unauthorized') {
         await oThis._expireCurrentUserTwitterAuthIfRequired(twitterExtendedData.id);
       }
     }
@@ -183,26 +183,13 @@ class TweetInfo extends ServiceBase {
 
     let twitterResp = null;
 
-    twitterResp = await new AccountTwitterRequestClass()
-      .verifyCredentials({
-        oAuthToken: oThis.token,
-        oAuthTokenSecret: oThis.secret
-      })
-      .catch(function(err) {
-        logger.error('Error while validating Credentials for twitter: ', err);
-        return responseHelper.error({
-          internal_error_identifier: 's_u_n_ti_vtc_1',
-          api_error_identifier: 'invalid_twitter_user',
-          debug_options: {}
-        });
-      });
+    twitterResp = await new AccountTwitterRequestClass().verifyCredentials({
+      oAuthToken: oThis.token,
+      oAuthTokenSecret: oThis.secret
+    });
 
     if (twitterResp.isFailure()) {
-      return responseHelper.error({
-        internal_error_identifier: 's_u_n_ti_vtc_2',
-        api_error_identifier: 'invalid_twitter_user',
-        debug_options: {}
-      });
+      return twitterResp;
     }
 
     let userTwitterEntity = twitterResp.data.userEntity;
@@ -217,13 +204,14 @@ class TweetInfo extends ServiceBase {
     }
 
     // Update handle in DB - to be in sync with the latest one
-    if (userTwitterEntity.handle != handle) {
+    if (!handle || userTwitterEntity.handle.toLowerCase() != handle.toLowerCase()) {
       await new TwitterUserModel()
         .update({ handle: userTwitterEntity.handle })
         .where({ id: oThis.twitterUsersMap[oThis.currentUserId].id })
         .fire();
 
       await TwitterUserModel.flushCache(oThis.twitterUsersMap[oThis.currentUserId]);
+      oThis.serviceResponse['twitterUsersMap'][oThis.currentUserId].handle = userTwitterEntity.handle;
     }
 
     logger.log('End::Validate Twitter Credentials');
@@ -245,6 +233,7 @@ class TweetInfo extends ServiceBase {
 
     await new TwitterUserExtendedModel()
       .update({
+        access_type: twitterUserExtendedConstants.invertedAccessTypes[twitterUserExtendedConstants.noneAccessType],
         status: twitterUserExtendedConstants.invertedStatuses[twitterUserExtendedConstants.expiredStatus]
       })
       .where({ id: twitterExtendedId })

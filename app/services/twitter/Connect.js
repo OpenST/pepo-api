@@ -53,6 +53,7 @@ class TwitterConnect extends ServiceBase {
     oThis.serviceResp = null;
     oThis.inviterCodeObj = null;
     oThis.prelaunchInviteObj = null;
+    oThis.twitterRespHeaders = null;
   }
 
   /**
@@ -324,21 +325,10 @@ class TwitterConnect extends ServiceBase {
 
     let twitterResp = null;
 
-    twitterResp = await new AccountTwitterRequestClass()
-      .verifyCredentials({
-        oAuthToken: oThis.token,
-        oAuthTokenSecret: oThis.secret
-      })
-      .catch(function(err) {
-        logger.error('Error while validate Credentials for twitter: ', err);
-        return Promise.reject(
-          responseHelper.error({
-            internal_error_identifier: 's_t_c_vtc_1',
-            api_error_identifier: 'unauthorized_api_request',
-            debug_options: {}
-          })
-        );
-      });
+    twitterResp = await new AccountTwitterRequestClass().verifyCredentials({
+      oAuthToken: oThis.token,
+      oAuthTokenSecret: oThis.secret
+    });
 
     if (twitterResp.isFailure()) {
       return Promise.reject(
@@ -349,6 +339,8 @@ class TwitterConnect extends ServiceBase {
         })
       );
     }
+
+    oThis.twitterRespHeaders = twitterResp.data.headers;
 
     oThis.userTwitterEntity = twitterResp.data.userEntity;
 
@@ -382,6 +374,7 @@ class TwitterConnect extends ServiceBase {
     let requestParams = {
       twitterUserObj: oThis.twitterUserObj,
       userTwitterEntity: oThis.userTwitterEntity,
+      twitterRespHeaders: oThis.twitterRespHeaders,
       token: oThis.token,
       secret: oThis.secret
     };
