@@ -1,5 +1,6 @@
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
+  CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   TwitterUserByTwitterIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TwitterUserByTwitterIds'),
   AccountTwitterRequestClass = require(rootPrefix + '/lib/twitter/oAuth1.0/Account'),
   PreLaunchInviteByTwitterIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/PreLaunchInviteByTwitterIds'),
@@ -12,6 +13,7 @@ const rootPrefix = '../../..',
   preLaunchInviteConstants = require(rootPrefix + '/lib/globalConstant/preLaunchInvite'),
   InviteCodeCache = require(rootPrefix + '/lib/cacheManagement/single/InviteCodeByCode'),
   InviteCodeByIdCache = require(rootPrefix + '/lib/cacheManagement/single/InviteCodeById'),
+  urlParser = require('url'),
   entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
   gotoConstants = require(rootPrefix + '/lib/globalConstant/goto'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger');
@@ -46,7 +48,7 @@ class TwitterConnect extends ServiceBase {
     oThis.secret = params.secret;
     oThis.twitterId = params.twitter_id;
     oThis.handle = params.handle;
-    oThis.inviteCode = params.invite_code ? params.invite_code.toUpperCase() : null;
+    oThis.inviteCode = params.invite_code;
 
     oThis.userTwitterEntity = null;
     oThis.twitterUserObj = null;
@@ -63,6 +65,25 @@ class TwitterConnect extends ServiceBase {
    */
   async _asyncPerform() {
     const oThis = this;
+
+    if (oThis.inviteCode) {
+      let validateResponse = await oThis._validateAndSanitizeInviteCode().catch(function(err) {
+        return Promise.reject(
+          responseHelper.paramValidationError({
+            internal_error_identifier: 's_t_c_vic_7',
+            api_error_identifier: 'invalid_api_params',
+            params_error_identifiers: ['invalid_invite_code'],
+            debug_options: { error: JSON.stringify(err) }
+          })
+        );
+      });
+
+      if (validateResponse.isFailure()) {
+        return Promise.reject(validateResponse);
+      }
+    } else {
+      oThis.inviteCode = null;
+    }
 
     await oThis._validateDuplicateRequest();
 
@@ -255,6 +276,32 @@ class TwitterConnect extends ServiceBase {
     }
 
     return cacheResp.data[oThis.inviteCode];
+  }
+
+  /**
+   * validate and sanitize invite code. Invite code can be a url or just an invite code.
+   *
+   * @returns {Promise<*|result>}
+   * @private
+   */
+  async _validateAndSanitizeInviteCode() {
+    const oThis = this;
+
+    if (CommonValidators.validateNonEmptyUrl(oThis.inviteCode)) {
+      let parsedUrl = urlParser.parse(oThis.inviteCode);
+      oThis.inviteCode = parsedUrl.query.split('=')[1];
+    }
+
+    if (!CommonValidators.validateInviteCode(oThis.inviteCode)) {
+      return responseHelper.paramValidationError({
+        internal_error_identifier: 's_t_c_vic_6',
+        api_error_identifier: 'invalid_api_params',
+        params_error_identifiers: ['invalid_invite_code']
+      });
+    }
+
+    oThis.inviteCode = oThis.inviteCode.toUpperCase();
+    return responseHelper.successWithData({});
   }
 
   /**
