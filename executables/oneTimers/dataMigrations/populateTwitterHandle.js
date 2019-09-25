@@ -1,9 +1,15 @@
+/**
+ * This script is used to populate twitter handle.
+ *
+ * Usage: node ./executables/oneTimers/dataMigrations/populateTwitterHandle.js
+ *
+ */
 const rootPrefix = '../../..',
   TwitterUserModel = require(rootPrefix + '/app/models/mysql/TwitterUser'),
   UsersWithoutOauthToken = require(rootPrefix + '/lib/twitter/oAuth1.0/UsersWithoutOauthToken'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger');
 
-const BATCH_SIZE = 5;
+const BATCH_SIZE = 3;
 
 class PopulateTwitterHandle {
   constructor() {}
@@ -19,19 +25,19 @@ class PopulateTwitterHandle {
     let offset = 0;
 
     while (true) {
-      const twitterIds = await oThis._getTwitterIds();
+      logger.info('===============BATCH============');
+      const twitterIds = await oThis._getTwitterIds(BATCH_SIZE, offset);
 
-      if (twitterIds.length === 0) {
+      // No more records present to migrate
+      if (oThis.totalRows === 0) {
         break;
       }
 
-      console.log('twitterIds ======', twitterIds);
+      logger.log('twitterIds ======', twitterIds);
 
       await oThis._getTwitterHandle(twitterIds);
 
-      break;
-
-      offset = offset + BATCH_SIZE;
+      offset = offset + BATCH_SIZE - twitterIds.length;
     }
   }
 
@@ -41,13 +47,18 @@ class PopulateTwitterHandle {
    * @returns {Promise<Array>}
    * @private
    */
-  async _getTwitterIds() {
-    const twitterIds = [];
+  async _getTwitterIds(limit, offset) {
+    const oThis = this,
+      twitterIds = [];
 
     const dbRows = await new TwitterUserModel()
       .select('id, twitter_id, handle')
       .where(['handle IS NULL'])
+      .limit(limit)
+      .offset(offset)
       .fire();
+
+    oThis.totalRows = dbRows.length;
 
     for (let index = 0; index < dbRows.length; index++) {
       let dbRow = new TwitterUserModel().formatDbData(dbRows[index]);
@@ -60,10 +71,19 @@ class PopulateTwitterHandle {
     return twitterIds;
   }
 
+  /**
+   * Get twitter handle.
+   *
+   * @param twitterIds
+   * @returns {Promise<never>}
+   * @private
+   */
   async _getTwitterHandle(twitterIds) {
-    const twitterResponse = await new UsersWithoutOauthToken().lookup({ twitterIds: twitterIds });
+    if (twitterIds.length === 0) {
+      return;
+    }
 
-    console.log('twitterResponse ======', twitterResponse);
+    const twitterResponse = await new UsersWithoutOauthToken().lookup({ twitterIds: twitterIds });
 
     if (twitterResponse.isFailure()) {
       return Promise.reject(twitterResponse);
@@ -75,15 +95,8 @@ class PopulateTwitterHandle {
       const twitterId = twitterIds[index],
         twitterData = twitterResponseData[twitterId];
 
-      // let a = new UserTwitterEntityClass(twitterData);
-      //
-      // console.log('a ======', a, '======', a.handle);
-
-      const twitterIdStr = twitterData.userData.id_str,
-        twitterHandle = twitterData.userData.screen_name;
-
-      console.log('twitterIdStr ======', twitterIdStr);
-      console.log('twitterHandle ======', twitterHandle);
+      const twitterIdStr = twitterData.idStr,
+        twitterHandle = twitterData.handle;
 
       await new TwitterUserModel()
         .update({
