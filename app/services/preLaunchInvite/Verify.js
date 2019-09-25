@@ -3,6 +3,7 @@ const rootPrefix = '../../..',
   ConnectService = require(rootPrefix + '/app/services/preLaunchInvite/Connect'),
   TwitterAuthTokenModel = require(rootPrefix + '/app/models/mysql/TwitterAuthToken'),
   AuthorizationTwitterRequestClass = require(rootPrefix + '/lib/twitter/oAuth1.0/Authorization'),
+  TwitterUserByTwitterIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TwitterUserByTwitterIds'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   twitterAuthTokenConstants = require(rootPrefix + '/lib/globalConstant/twitterAuthToken');
@@ -53,6 +54,8 @@ class PreLaunchTwitterVerify extends ServiceBase {
     await oThis._validateOauthToken();
 
     await oThis._fetchAccessToken();
+
+    await oThis._validateIfUserIsExistingAppUser();
 
     await oThis._updateTwitterAuthToken();
 
@@ -124,6 +127,34 @@ class PreLaunchTwitterVerify extends ServiceBase {
   }
 
   /**
+   * Validate if user is not already an existing application user.
+   *
+   * @returns {Promise<never>}
+   * @private
+   */
+  async _validateIfUserIsExistingAppUser() {
+    const oThis = this;
+
+    const twitterUserCacheResponse = await new TwitterUserByTwitterIdsCache({
+      twitterIds: [oThis.twitterRespData.userId]
+    }).fetch();
+    if (twitterUserCacheResponse.isFailure()) {
+      return Promise.reject(twitterUserCacheResponse);
+    }
+
+    const twitterUserData = twitterUserCacheResponse.data[oThis.twitterRespData.userId];
+    if (twitterUserData && twitterUserData.userId) {
+      return Promise.reject(
+        responseHelper.error({
+          internal_error_identifier: 's_pli_v_viueau_1',
+          api_error_identifier: 'already_registered_in_app',
+          debug_options: {}
+        })
+      );
+    }
+  }
+
+  /**
    * Update OauthToken status.
    *
    * @sets oThis.twitterAuthTokenObj
@@ -145,7 +176,7 @@ class PreLaunchTwitterVerify extends ServiceBase {
   }
 
   /**
-   * Call signup or login service as needed for twitter connect.
+   * Call sign-up or login service as needed for twitter connect.
    *
    * @sets oThis.serviceResponse
    *
