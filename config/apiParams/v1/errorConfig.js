@@ -327,6 +327,12 @@ const v1ErrorConfig = {
     parameter: 'payment_id',
     code: 'invalid',
     message: 'Invalid payment id.'
+  },
+
+  video_deleted: {
+    parameter: 'video_id',
+    code: 'invalid',
+    message: 'Video has been deleted.'
   }
 };
 
