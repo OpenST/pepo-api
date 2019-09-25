@@ -179,7 +179,7 @@ class HookProcessorsBase extends CronBase {
       }
 
       if (oThis.failedHookToBeIgnored[hookId]) {
-        await new ModelKlass().markFailedToBeRetried(hookId, failedCount, oThis.failedHookToBeRetried[hookId]);
+        await new ModelKlass().markFailedToBeIgnored(hookId, failedCount, oThis.failedHookToBeIgnored[hookId]);
       }
     }
   }
