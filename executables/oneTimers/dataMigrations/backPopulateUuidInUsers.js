@@ -17,6 +17,7 @@ class BackPopulateUuidInUsers {
     const oThis = this;
 
     oThis.usersMap = {};
+    oThis.totalRows = null;
   }
 
   /**
@@ -27,9 +28,31 @@ class BackPopulateUuidInUsers {
   async perform() {
     const oThis = this;
 
-    await oThis._fetchOldUserIds();
+    await oThis._performBatch();
+  }
 
-    await oThis._populateUuidForOldUsers();
+  /**
+   * Perform batch
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _performBatch() {
+    const oThis = this;
+
+    let limit = 10,
+      offset = 0;
+    while (true) {
+      await oThis._fetchOldUserIds(limit, offset);
+      // No more records present to migrate
+      if (oThis.totalRows === 0) {
+        break;
+      }
+
+      await oThis._populateUuidForOldUsers();
+
+      offset = offset + 10;
+    }
   }
 
   /**
@@ -38,7 +61,7 @@ class BackPopulateUuidInUsers {
    * @returns {Promise<void>}
    * @private
    */
-  async _fetchOldUserIds() {
+  async _fetchOldUserIds(limit, offset) {
     const oThis = this;
 
     let userObj = new UserModel();
@@ -46,12 +69,16 @@ class BackPopulateUuidInUsers {
     let responseRows = await userObj
       .select('*')
       .where(['external_user_id is NULL'])
+      .limit(limit)
+      .offset(offset)
       .fire();
 
     for (let i = 0; i < responseRows.length; i++) {
       let row = userObj.formatDbData(responseRows[i]);
       oThis.usersMap[row.id] = row;
     }
+
+    oThis.totalRows = responseRows.length;
 
     logger.info('=====Ids', Object.keys(oThis.usersMap));
   }
@@ -72,6 +99,8 @@ class BackPopulateUuidInUsers {
     }
 
     await Promise.all(promiseArray);
+
+    oThis.usersMap = {};
   }
 
   /**
