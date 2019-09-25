@@ -68,6 +68,10 @@ class GetTopupProduct extends ServiceBase {
       availableProductsArray = oThis._filterAvailableProducts(remainingLimit),
       responseData = {};
 
+    if (availableProductsArray.length === 0) {
+      oThis.limitsData.limit_reached = 1;
+    }
+
     responseData[entityType.topupProducts] = availableProductsArray;
     responseData[entityType.topupLimitsData] = oThis.limitsData;
 
@@ -175,11 +179,6 @@ class GetTopupProduct extends ServiceBase {
       remainingLimit = oThis.customPurchaseLimitOfUser - amountSpent;
       oThis.limitsData.limit = oThis.customPurchaseLimitOfUser;
     }
-
-    if (remainingLimit <= 0) {
-      oThis.limitsData.limit_reached = 1;
-    }
-    oThis.limitsData.limit = 0; //TEMP: REMOVE THIS AFTER 25 Sep 2019
 
     return remainingLimit;
   }

@@ -81,15 +81,24 @@ class GetVideoById extends ServiceBase {
     oThis.videoDetails = [videoDetailsCacheResponse.data[oThis.videoId]];
 
     // If video not found or its not active.
-    if (
-      !CommonValidators.validateNonEmptyObject(oThis.videoDetails[0]) ||
-      oThis.videoDetails[0].status === videoDetailsConstants.deletedStatus
-    ) {
+    if (!CommonValidators.validateNonEmptyObject(oThis.videoDetails[0])) {
       return Promise.reject(
-        responseHelper.error({
+        responseHelper.paramValidationError({
           internal_error_identifier: 'a_s_v_gbi_1',
-          api_error_identifier: 'entity_not_found',
-          debug_options: {}
+          api_error_identifier: 'resource_not_found',
+          params_error_identifiers: ['invalid_video_id'],
+          debug_options: { videoId: oThis.videoId }
+        })
+      );
+    }
+
+    if (oThis.videoDetails[0].status === videoDetailsConstants.deletedStatus) {
+      return Promise.reject(
+        responseHelper.paramValidationError({
+          internal_error_identifier: 'a_s_v_gbi_4',
+          api_error_identifier: 'resource_not_found',
+          params_error_identifiers: ['video_deleted'],
+          debug_options: { videoId: oThis.videoId }
         })
       );
     }

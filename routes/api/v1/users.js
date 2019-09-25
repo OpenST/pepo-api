@@ -189,7 +189,8 @@ router.get('/:profile_user_id/profile', sanitizer.sanitizeDynamicUrlParams, func
         [entityType.userProfileAllowedActions]: responseEntityKey.userProfileAllowedActions,
         [entityType.userStats]: responseEntityKey.userStats,
         [entityType.currentUserUserContributionsMap]: responseEntityKey.currentUserUserContributions,
-        [entityType.pricePointsMap]: responseEntityKey.pricePoints
+        [entityType.pricePointsMap]: responseEntityKey.pricePoints,
+        [entityType.twitterUsersMap]: responseEntityKey.twitterUsers
       },
       serviceData: serviceResponse.data
     }).perform();
