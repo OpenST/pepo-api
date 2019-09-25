@@ -1,8 +1,10 @@
 const rootPrefix = '../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
+  UserModel = require(rootPrefix + '/app/models/mysql/User'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   databaseConstants = require(rootPrefix + '/lib/globalConstant/database'),
-  inviteCodeConstants = require(rootPrefix + '/lib/globalConstant/inviteCode');
+  inviteCodeConstants = require(rootPrefix + '/lib/globalConstant/inviteCode'),
+  logger = require(rootPrefix + '/lib/logger/customConsoleLogger');
 
 // Declare variables.
 const dbName = databaseConstants.userDbName;
