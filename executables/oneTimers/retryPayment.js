@@ -41,14 +41,16 @@ class RetryPayment {
       processResp = await new ApplePay({
         paymentReceipt: JSON.parse(fiatPayment.raw_receipt),
         userId: fiatPayment.from_user_id,
-        fiatPaymentId: fiatPaymentId
+        fiatPaymentId: fiatPaymentId,
+        retryCount: fiatPayment.retry_count
       }).perform();
     } else {
       logger.step('Reprocessing Payment on Google Google Google Google pay');
       processResp = await new GooglePay({
         paymentReceipt: JSON.parse(fiatPayment.raw_receipt),
         userId: fiatPayment.from_user_id,
-        fiatPaymentId: fiatPaymentId
+        fiatPaymentId: fiatPaymentId,
+        retryCount: fiatPayment.retry_count
       }).perform();
     }
 
