@@ -30,7 +30,9 @@ class TwitterDisconnect extends ServiceBase {
 
     const oThis = this;
     oThis.currentUserId = params.current_user.id;
-    oThis.deviceId = params.device_id;
+
+    //NOTE: DO NOT ASK FOR DEVICE ID AS ALL DEVICES SHOULD BE LOGGED OUT
+    // oThis.deviceId = params.device_id;
 
     oThis.deviceIds = [];
     oThis.userDeviceIds = [];
@@ -191,7 +193,6 @@ class TwitterDisconnect extends ServiceBase {
 
     await new Logout({
       current_user: { id: oThis.currentUserId },
-      device_id: oThis.deviceId,
       deviceIds: oThis.deviceIds
     }).perform();
   }

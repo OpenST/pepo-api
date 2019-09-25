@@ -509,12 +509,7 @@ const v1Signature = {
         validatorMethods: ['validateNonEmptyObject']
       }
     ],
-    optional: [
-      {
-        parameter: 'device_id',
-        validatorMethods: ['validateString']
-      }
-    ]
+    optional: []
   },
   [apiName.userSearch]: {
     mandatory: [],

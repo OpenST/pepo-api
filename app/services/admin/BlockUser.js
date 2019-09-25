@@ -69,7 +69,7 @@ class BlockUser extends ServiceBase {
 
     // Flush cache after twitter disconnect
     const promisesArray = [];
-    promisesArray.push(oThis._flushCache(), oThis._enqueueToBackgroundJob(), oThis._logAdminActivity());
+    promisesArray.push(oThis._enqueueToBackgroundJob(), oThis._logAdminActivity());
     await Promise.all(promisesArray);
 
     return responseHelper.successWithData({});
@@ -125,10 +125,12 @@ class BlockUser extends ServiceBase {
   async _blockUsers() {
     const oThis = this;
 
-    return new UserModel()
+    await new UserModel()
       .update({ status: userConstants.invertedStatuses[userConstants.inActiveStatus] })
       .where({ id: oThis.userIds })
       .fire();
+
+    return oThis._flushCache();
   }
 
   /**

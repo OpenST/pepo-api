@@ -28,10 +28,10 @@ class Logout extends ServiceBase {
     super();
 
     const oThis = this;
-    logger.log('======== Logout parameters:::::', params);
     oThis.currentUser = params.current_user;
-    oThis.deviceId = params.device_id;
-    oThis.deviceIds = params.deviceIds;
+
+    oThis.deviceIdArray = params.device_id ? [params.device_id] : params.deviceIds;
+    oThis.deviceIdArray = oThis.deviceIdArray ? oThis.deviceIdArray : [];
   }
 
   /**
@@ -54,19 +54,15 @@ class Logout extends ServiceBase {
   async _logoutUserDevices() {
     const oThis = this;
 
-    if ((!oThis.deviceId && !oThis.deviceIds) || !oThis.currentUser || !oThis.currentUser.id) {
+    if (oThis.deviceIdArray.length === 0 || !oThis.currentUser || !oThis.currentUser.id) {
       return responseHelper.successWithData({});
-    }
-
-    if (!oThis.deviceIds) {
-      oThis.deviceIds = [oThis.deviceId];
     }
 
     const userDeviceIdResp = await new UserDeviceModel()
       .select('id')
       .where({
         user_id: oThis.currentUser.id,
-        device_id: oThis.deviceIds
+        device_id: oThis.deviceIdArray
       })
       .fire();
 
