@@ -5,6 +5,8 @@ const rootPrefix = '../../..',
   GetTokenService = require(rootPrefix + '/app/services/token/Get'),
   VideoDetailsByVideoIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/VideoDetailsByVideoIds'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
+  userConstants = require(rootPrefix + '/lib/globalConstant/user'),
+  logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
   paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination'),
   videoDetailsConstants = require(rootPrefix + '/lib/globalConstant/videoDetail');
@@ -149,6 +151,24 @@ class GetVideoById extends ServiceBase {
     }
 
     oThis.profileResponse = response.data;
+
+    let userResponse = oThis.profileResponse.usersByIdMap[oThis.creatorUserId];
+
+    logger.log('===== userResponse ======', userResponse);
+
+    if (
+      !CommonValidators.validateNonEmptyObject(userResponse) ||
+      !userResponse.approvedCreator ||
+      userResponse.status === userConstants.inActiveStatus
+    ) {
+      return Promise.reject(
+        responseHelper.error({
+          internal_error_identifier: 'a_s_v_gbi_3',
+          api_error_identifier: 'entity_not_found',
+          debug_options: {}
+        })
+      );
+    }
 
     // Aligning the response with video-history api.
     oThis.responseMetaData = {

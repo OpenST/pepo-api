@@ -72,7 +72,11 @@ class EmailServiceApiCall extends HookProcessorsBase {
       response = await new HookProcessorKlass({ hook: oThis.hook }).perform();
 
     if (response.isSuccess()) {
-      oThis.successResponse[oThis.hook.id] = response.data;
+      if (response.data.failedHookToBeIgnored) {
+        oThis.failedHookToBeIgnored[oThis.hook.id] = response.data;
+      } else {
+        oThis.successResponse[oThis.hook.id] = response.data;
+      }
     } else {
       if (
         response.data['error'] == 'VALIDATION_ERROR' &&
