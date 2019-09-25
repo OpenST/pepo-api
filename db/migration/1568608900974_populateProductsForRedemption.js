@@ -12,7 +12,7 @@ VALUES \n\
   (2, \'STARBUCKS\', \'{"square":"https://d3attjoi5jlede.cloudfront.net/images/web/redemption/redemption-starbucks-1x1.png","landscape":"https://d3attjoi5jlede.cloudfront.net/images/web/redemption/redemption-starbucks-16x9.png"}\', 10.00, 1, 1568608359, 1568608359), \n\
   (3, \'NETFLIX\', \'{"square":"https://d3attjoi5jlede.cloudfront.net/images/web/redemption/redemption-netflix-1x1.png","landscape":"https://d3attjoi5jlede.cloudfront.net/images/web/redemption/redemption-netflix-16x9.png"}\', 10.00, 1, 1568608359, 1568608359), \n\
   (4, \'AIRBNB\', \'{"square":"https://d3attjoi5jlede.cloudfront.net/images/web/redemption/redemption-airbnb-1x1.png","landscape":"https://d3attjoi5jlede.cloudfront.net/images/web/redemption/redemption-airbnb-16x9.png"}\', 10.00, 1, 1568608359, 1568608359), \n\
-  (5, \'CREATOR_PARTNERS\', \'{"square":"https://d3attjoi5jlede.cloudfront.net/images/web/redemption/redemption-creator-partners-1x1.png","landscape":"https://d3attjoi5jlede.cloudfront.net/images/web/redemption/redemption-creator-partners-16x9.png"}\', 10.00, 1, 1568608359, 1568608359), \n\
+  (5, \'GRAB\', \'{"square":"https://d3attjoi5jlede.cloudfront.net/images/web/redemption/redemption-grab-1x1.png","landscape":"https://d3attjoi5jlede.cloudfront.net/images/web/redemption/redemption-grab-16x9.png"}\', 10.00, 1, 1568608359, 1568608359), \n\
   (6, \'UBER\', \'{"square":"https://d3attjoi5jlede.cloudfront.net/images/web/redemption/redemption-uber-1x1.png","landscape":"https://d3attjoi5jlede.cloudfront.net/images/web/redemption/redemption-uber-16x9.png"}\', 10.00, 1, 1568608359, 1568608359);';
 
 const populateRedemptionProductsMigration = {
