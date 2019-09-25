@@ -67,13 +67,21 @@ router.get('/:video_id/share', sanitizer.sanitizeDynamicUrlParams, function(req,
   Promise.resolve(routeHelper.perform(req, res, next, '/video/ShareDetails', 'r_a_v1_v_2', null, dataFormatterFunc));
 });
 
-router.post('/:video_id/delete', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+router.post('/:video_id/delete', sanitizer.sanitizeDynamicUrlParams, cookieHelper.validateUserLoginRequired, function(
+  req,
+  res,
+  next
+) {
   let r = { success: true, data: {} };
 
   return res.status(200).json(r);
 });
 
-router.post('/:video_id/report', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+router.post('/:video_id/report', sanitizer.sanitizeDynamicUrlParams, cookieHelper.validateUserLoginRequired, function(
+  req,
+  res,
+  next
+) {
   let r = { success: true, data: {} };
 
   return res.status(200).json(r);
