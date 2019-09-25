@@ -83,10 +83,11 @@ class GetVideoById extends ServiceBase {
     // If video not found or its not active.
     if (!CommonValidators.validateNonEmptyObject(oThis.videoDetails[0])) {
       return Promise.reject(
-        responseHelper.error({
+        responseHelper.paramValidationError({
           internal_error_identifier: 'a_s_v_gbi_1',
-          api_error_identifier: 'entity_not_found',
-          debug_options: {}
+          api_error_identifier: 'invalid_api_params',
+          params_error_identifiers: ['invalid_video_id'],
+          debug_options: { videoId: oThis.videoId }
         })
       );
     }
