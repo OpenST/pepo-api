@@ -102,11 +102,8 @@ class FetchGoto extends ServiceBase {
       pathArray = pathName.split('/'),
       query = oThis.parsedUrl.query;
     if (pathArray[1] == gotoConstants.videoGotoKind) {
-      oThis.gotoParams = { videoId: pathName.split('/')[2] };
+      oThis.gotoParams = { videoId: pathArray[2] };
       oThis.gotoKind = gotoConstants.videoGotoKind;
-    } else if (pathArray[1] == 'terms' || pathArray[1] == 'privacy') {
-      oThis.gotoKind = gotoConstants.webViewGotoKind;
-      oThis.gotoParams = { url: oThis.url };
     } else if (pathArray[1] == 'account') {
       oThis.gotoKind = gotoConstants.invitedUsersGotoKind;
     } else if (!pathArray[1] && query && query['invite']) {
