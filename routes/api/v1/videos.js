@@ -7,7 +7,6 @@ const rootPrefix = '../../..',
   sanitizer = require(rootPrefix + '/helpers/sanitizer'),
   apiName = require(rootPrefix + '/lib/globalConstant/apiName'),
   entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
-  responseHelper = require(rootPrefix + '/lib/formatter/response'),
   cookieHelper = require(rootPrefix + '/lib/cookieHelper'),
   responseEntityKey = require(rootPrefix + '/lib/globalConstant/responseEntityKey');
 
@@ -66,6 +65,18 @@ router.get('/:video_id/share', sanitizer.sanitizeDynamicUrlParams, function(req,
   };
 
   Promise.resolve(routeHelper.perform(req, res, next, '/video/ShareDetails', 'r_a_v1_v_2', null, dataFormatterFunc));
+});
+
+router.post('/:video_id/delete', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  let r = { success: true, data: {} };
+
+  return res.status(200).json(r);
+});
+
+router.post('/:video_id/report', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  let r = { success: true, data: {} };
+
+  return res.status(200).json(r);
 });
 
 module.exports = router;

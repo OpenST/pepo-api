@@ -1,5 +1,6 @@
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
+  CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   TwitterUserByTwitterIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TwitterUserByTwitterIds'),
   AccountTwitterRequestClass = require(rootPrefix + '/lib/twitter/oAuth1.0/Account'),
   PreLaunchInviteByTwitterIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/PreLaunchInviteByTwitterIds'),
@@ -12,6 +13,7 @@ const rootPrefix = '../../..',
   preLaunchInviteConstants = require(rootPrefix + '/lib/globalConstant/preLaunchInvite'),
   InviteCodeCache = require(rootPrefix + '/lib/cacheManagement/single/InviteCodeByCode'),
   InviteCodeByIdCache = require(rootPrefix + '/lib/cacheManagement/single/InviteCodeById'),
+  urlParser = require('url'),
   entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
   gotoConstants = require(rootPrefix + '/lib/globalConstant/goto'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger');
@@ -46,13 +48,14 @@ class TwitterConnect extends ServiceBase {
     oThis.secret = params.secret;
     oThis.twitterId = params.twitter_id;
     oThis.handle = params.handle;
-    oThis.inviteCode = params.invite_code ? params.invite_code.toUpperCase() : null;
+    oThis.inviteCode = params.invite_code;
 
     oThis.userTwitterEntity = null;
     oThis.twitterUserObj = null;
     oThis.serviceResp = null;
     oThis.inviterCodeObj = null;
     oThis.prelaunchInviteObj = null;
+    oThis.twitterRespHeaders = null;
   }
 
   /**
@@ -62,6 +65,25 @@ class TwitterConnect extends ServiceBase {
    */
   async _asyncPerform() {
     const oThis = this;
+
+    if (oThis.inviteCode) {
+      let validateResponse = await oThis._validateAndSanitizeInviteCode().catch(function(err) {
+        return Promise.reject(
+          responseHelper.paramValidationError({
+            internal_error_identifier: 's_t_c_vic_7',
+            api_error_identifier: 'invalid_api_params',
+            params_error_identifiers: ['invalid_invite_code'],
+            debug_options: { error: JSON.stringify(err) }
+          })
+        );
+      });
+
+      if (validateResponse.isFailure()) {
+        return Promise.reject(validateResponse);
+      }
+    } else {
+      oThis.inviteCode = null;
+    }
 
     await oThis._validateDuplicateRequest();
 
@@ -257,6 +279,32 @@ class TwitterConnect extends ServiceBase {
   }
 
   /**
+   * validate and sanitize invite code. Invite code can be a url or just an invite code.
+   *
+   * @returns {Promise<*|result>}
+   * @private
+   */
+  async _validateAndSanitizeInviteCode() {
+    const oThis = this;
+
+    if (CommonValidators.validateNonEmptyUrl(oThis.inviteCode)) {
+      let parsedUrl = urlParser.parse(oThis.inviteCode);
+      oThis.inviteCode = parsedUrl.query.split('=')[1];
+    }
+
+    if (!CommonValidators.validateInviteCode(oThis.inviteCode)) {
+      return responseHelper.paramValidationError({
+        internal_error_identifier: 's_t_c_vic_6',
+        api_error_identifier: 'invalid_api_params',
+        params_error_identifiers: ['invalid_invite_code']
+      });
+    }
+
+    oThis.inviteCode = oThis.inviteCode.toUpperCase();
+    return responseHelper.successWithData({});
+  }
+
+  /**
    * Validate invite code passed, in case invite code is mandatory.
    *
    * @Sets oThis.inviterCodeObj
@@ -324,21 +372,10 @@ class TwitterConnect extends ServiceBase {
 
     let twitterResp = null;
 
-    twitterResp = await new AccountTwitterRequestClass()
-      .verifyCredentials({
-        oAuthToken: oThis.token,
-        oAuthTokenSecret: oThis.secret
-      })
-      .catch(function(err) {
-        logger.error('Error while validate Credentials for twitter: ', err);
-        return Promise.reject(
-          responseHelper.error({
-            internal_error_identifier: 's_t_c_vtc_1',
-            api_error_identifier: 'unauthorized_api_request',
-            debug_options: {}
-          })
-        );
-      });
+    twitterResp = await new AccountTwitterRequestClass().verifyCredentials({
+      oAuthToken: oThis.token,
+      oAuthTokenSecret: oThis.secret
+    });
 
     if (twitterResp.isFailure()) {
       return Promise.reject(
@@ -349,6 +386,8 @@ class TwitterConnect extends ServiceBase {
         })
       );
     }
+
+    oThis.twitterRespHeaders = twitterResp.data.headers;
 
     oThis.userTwitterEntity = twitterResp.data.userEntity;
 
@@ -382,6 +421,7 @@ class TwitterConnect extends ServiceBase {
     let requestParams = {
       twitterUserObj: oThis.twitterUserObj,
       userTwitterEntity: oThis.userTwitterEntity,
+      twitterRespHeaders: oThis.twitterRespHeaders,
       token: oThis.token,
       secret: oThis.secret
     };

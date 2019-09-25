@@ -123,5 +123,25 @@
     "http_code": "200",
     "code": "BAD_REQUEST",
     "message": "Invalid twitter account selected."
+  },
+  "invalid_receiver_user_id": {
+    "http_code": "200",
+    "code": "BAD_REQUEST",
+    "message": "Invalid receiver user id."
+  },
+  "duplicate_tweet": {
+    "http_code": "200",
+    "code": "BAD_REQUEST",
+    "message": "Duplicate tweet."
+  },
+  "twitter_unauthorized": {
+    "http_code": "500",
+    "code": "INTERNAL_SERVER_ERROR",
+    "message": "Unauthorized Twitter Account"
+  },
+  "twitter_rate_limit": {
+    "http_code": "500",
+    "code": "INTERNAL_SERVER_ERROR",
+    "message": "Twitter Rate Limit Reached"
   }
 }
