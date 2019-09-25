@@ -52,7 +52,7 @@ class CreateInviteCode {
   async _performBatch() {
     const oThis = this;
 
-    let limit = 10,
+    let limit = 25,
       offset = 0;
     while (true) {
       await oThis._fetchUsers(limit, offset);
@@ -61,7 +61,7 @@ class CreateInviteCode {
         break;
       }
 
-      offset = offset + 10;
+      offset = offset + limit;
     }
   }
 

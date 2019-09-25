@@ -45,7 +45,7 @@ class SyncCreatorApproval {
 
     oThis.currentAdminObj = await oThis._fetchAdmin();
 
-    let limit = 10,
+    let limit = 25,
       offset = 0;
     while (true) {
       await oThis._fetchUsers(limit, offset);
@@ -54,7 +54,7 @@ class SyncCreatorApproval {
         break;
       }
 
-      offset = offset + 10;
+      offset = offset + limit;
     }
 
     console.log('The oThis.errorLogs are : ', oThis.errorLogs);

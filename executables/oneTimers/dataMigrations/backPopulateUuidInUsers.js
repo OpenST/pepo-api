@@ -18,6 +18,7 @@ class BackPopulateUuidInUsers {
 
     oThis.usersMap = {};
     oThis.totalRows = null;
+    oThis.updatedRowsInBatch = null;
   }
 
   /**
@@ -43,6 +44,7 @@ class BackPopulateUuidInUsers {
     let limit = 25,
       offset = 0;
     while (true) {
+      oThis.updatedRowsInBatch = 0;
       await oThis._fetchOldUserIds(limit, offset);
       // No more records present to migrate
       if (oThis.totalRows === 0) {
@@ -51,7 +53,7 @@ class BackPopulateUuidInUsers {
 
       await oThis._populateUuidForOldUsers();
 
-      offset = offset + limit;
+      offset = offset + limit - oThis.updatedRowsInBatch;
     }
   }
 
@@ -119,6 +121,8 @@ class BackPopulateUuidInUsers {
       .update({ external_user_id: uuidV4() })
       .where({ id: params.id })
       .fire();
+
+    oThis.updatedRowsInBatch += 1;
 
     return UserModel.flushCache(params);
   }

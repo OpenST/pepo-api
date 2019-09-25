@@ -55,7 +55,7 @@ class addCustomAttributeForAllActiveUsers {
     oThis.userId = command.userId ? command.userId : 0;
     oThis.totalRecords = 0;
 
-    let limit = 100,
+    let limit = 25,
       offset = 0;
     while (true) {
       await oThis._fetchUsers(limit, offset);
@@ -64,7 +64,7 @@ class addCustomAttributeForAllActiveUsers {
         break;
       }
 
-      offset = offset + 100;
+      offset = offset + limit;
     }
   }
 

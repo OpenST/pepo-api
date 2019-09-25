@@ -37,7 +37,7 @@ class PopulateInviteCodeTableForUserNPreLaunch {
   async _performBatch() {
     const oThis = this;
 
-    let limit = 10,
+    let limit = 25,
       offset = 0;
     while (true) {
       await oThis._fetchPreLaunchUsers(limit, offset);
@@ -46,7 +46,7 @@ class PopulateInviteCodeTableForUserNPreLaunch {
         break;
       }
 
-      offset = offset + 10;
+      offset = offset + limit;
     }
 
     logger.log('The oThis.errorLogs are : ', oThis.errorLogs);
