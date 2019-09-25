@@ -1,7 +1,7 @@
 /**
  * One timer to add custom attribute for active users.
  *
- * Usage: node executables/oneTimers/dataMigrations/backPopulateUuidInUsers.js
+ * Usage: node executables/oneTimers/dataMigrations/backPopulateUuidInUsers
  *
  * @module executables/oneTimers/dataMigrations/backPopulateUuidInUsers
  */
@@ -40,7 +40,7 @@ class BackPopulateUuidInUsers {
   async _performBatch() {
     const oThis = this;
 
-    let limit = 10,
+    let limit = 25,
       offset = 0;
     while (true) {
       await oThis._fetchOldUserIds(limit, offset);
@@ -51,7 +51,7 @@ class BackPopulateUuidInUsers {
 
       await oThis._populateUuidForOldUsers();
 
-      offset = offset + 10;
+      offset = offset + limit;
     }
   }
 

@@ -1,3 +1,11 @@
+/**
+ * One timer to seed populate email.
+ *
+ * Usage: node executables/oneTimers/dataMigrations/populateEmail
+ *
+ * @module executables/oneTimers/dataMigrations/populateEmail
+ */
+
 const rootPrefix = '../../..',
   UserModel = require(rootPrefix + '/app/models/mysql/User'),
   TwitterUserModel = require(rootPrefix + '/app/models/mysql/TwitterUser'),
@@ -39,9 +47,9 @@ class PopulateEmail {
 
       await oThis._getPreLaunchInvites();
 
-      await oThis._populateEmailInUsers();
+      let affectedRows = await oThis._populateEmailInUsers();
 
-      offset = offset + BATCH_SIZE;
+      offset = offset + BATCH_SIZE - affectedRows;
     }
   }
 
@@ -140,12 +148,14 @@ class PopulateEmail {
   /**
    * Populate email in users.
    *
-   * @returns {Promise<void>}
+   * @returns {Promise<number>}
    * @private
    */
   async _populateEmailInUsers() {
     const oThis = this,
       promiseArray = [];
+
+    let affectedRows = 0;
 
     for (let userId in oThis.userIdToEmailsMap) {
       const email = oThis.userIdToEmailsMap[userId];
@@ -157,6 +167,9 @@ class PopulateEmail {
           id: userId
         })
         .fire()
+        .then(function() {
+          affectedRows = affectedRows + 1;
+        })
         .catch(async function(err) {
           logger.error('Error while updating users table is: ', err);
         });
@@ -168,6 +181,8 @@ class PopulateEmail {
     promiseArray.push(new UserCache({ ids: oThis.userIds }).clear());
 
     await Promise.all(promiseArray);
+
+    return affectedRows;
   }
 }
 
