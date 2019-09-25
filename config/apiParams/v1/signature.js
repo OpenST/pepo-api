@@ -644,8 +644,10 @@ const v1Signature = {
     mandatory: [
       {
         parameter: 'video_id',
-        validatorMethods: ['validateNonZeroInteger']
-      },
+        validatorMethods: ['validateInteger']
+      }
+    ],
+    optional: [
       {
         parameter: 'current_user',
         validatorMethods: ['validateNonEmptyObject']
@@ -705,21 +707,13 @@ const v1Signature = {
     ]
   },
   [apiName.fetchGoto]: {
-    mandatory: [],
-    optional: [
+    mandatory: [
       {
         parameter: 'url',
         validatorMethods: ['validateGenericUrl']
-      },
-      {
-        parameter: 'gotoKind',
-        validatorMethods: ['validateString']
-      },
-      {
-        parameter: 'gotoValue',
-        validatorMethods: ['validateString']
       }
-    ]
+    ],
+    optional: []
   },
   [apiName.reportIssue]: {
     mandatory: [
