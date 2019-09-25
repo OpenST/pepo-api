@@ -8,6 +8,7 @@ const program = require('commander');
 const rootPrefix = '../..',
   HookProcessorsBase = require(rootPrefix + '/executables/hookProcessors/Base'),
   AddContact = require(rootPrefix + '/lib/email/hookProcessor/AddContact'),
+  RemoveContact = require(rootPrefix + '/lib/email/hookProcessor/RemoveContact'),
   UpdateContact = require(rootPrefix + '/lib/email/hookProcessor/UpdateContact'),
   SendTransactionalMail = require(rootPrefix + '/lib/email/hookProcessor/SendTransactionalMail'),
   EmailServiceAPICallHookModel = require(rootPrefix + '/app/models/mysql/EmailServiceAPICallHook'),
@@ -103,6 +104,9 @@ class EmailServiceApiCall extends HookProcessorsBase {
       }
       case emailServiceApiCallHookConstants.sendTransactionalEmailEventType: {
         return SendTransactionalMail;
+      }
+      case emailServiceApiCallHookConstants.removeContactEventType: {
+        return RemoveContact;
       }
       default: {
         throw new Error('Unsupported event type.');
