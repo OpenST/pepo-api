@@ -1,31 +1,35 @@
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
-  TwitterAuthTokenModel = require(rootPrefix + '/app/models/mysql/TwitterAuthToken'),
   ConnectService = require(rootPrefix + '/app/services/preLaunchInvite/Connect'),
+  TwitterAuthTokenModel = require(rootPrefix + '/app/models/mysql/TwitterAuthToken'),
   AuthorizationTwitterRequestClass = require(rootPrefix + '/lib/twitter/oAuth1.0/Authorization'),
-  twitterAuthTokenConstants = require(rootPrefix + '/lib/globalConstant/twitterAuthToken'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
-  logger = require(rootPrefix + '/lib/logger/customConsoleLogger');
+  logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
+  twitterAuthTokenConstants = require(rootPrefix + '/lib/globalConstant/twitterAuthToken');
 
 /**
- * Class for Twitter PreLaunchTwitterConnect for Pre Launch Invite.
+ * Class for twitter prelaunch verification.
  *
  * @class PreLaunchTwitterVerify
  */
 class PreLaunchTwitterVerify extends ServiceBase {
   /**
-   * Constructor for Verify Twitter Login service.
+   * Constructor for twitter prelaunch verification.
    *
    * @param {object} params
+   * @param {string} params.i
+   * @param {string} params.oauth_token
+   * @param {string} params.oauth_verifier
    *
    * @augments ServiceBase
    *
    * @constructor
    */
   constructor(params) {
-    super(params);
+    super();
 
     const oThis = this;
+
     oThis.inviteCode = params.i;
     oThis.oauthToken = params.oauth_token;
     oThis.oautVerifier = params.oauth_verifier;
@@ -34,14 +38,14 @@ class PreLaunchTwitterVerify extends ServiceBase {
     oThis.twitterAuthTokenObj = null;
     oThis.twitterAuthTokenObj = {};
     oThis.twitterRespData = null;
-
     oThis.serviceResponse = null;
   }
 
   /**
-   * Perform: Perform user creation.
+   * Async perform.
    *
-   * @return {Promise<void>}
+   * @returns {Promise<void>}
+   * @private
    */
   async _asyncPerform() {
     const oThis = this;
@@ -54,15 +58,15 @@ class PreLaunchTwitterVerify extends ServiceBase {
 
     await oThis._connect();
 
-    return Promise.resolve(oThis.serviceResponse);
+    return oThis.serviceResponse;
   }
 
   /**
-   * get and validate OauthToken
+   * Get and validate OauthToken.
    *
    * @sets oThis.twitterAuthTokenObj
    *
-   * @return {Promise<Result>}
+   * @returns {Promise<void>}
    * @private
    */
   async _validateOauthToken() {
@@ -70,7 +74,7 @@ class PreLaunchTwitterVerify extends ServiceBase {
 
     oThis.twitterAuthTokenObj = await new TwitterAuthTokenModel().fetchByToken(oThis.oauthToken);
 
-    if (!oThis.twitterAuthTokenObj.id || oThis.twitterAuthTokenObj.status != twitterAuthTokenConstants.activeStatus) {
+    if (!oThis.twitterAuthTokenObj.id || oThis.twitterAuthTokenObj.status !== twitterAuthTokenConstants.activeStatus) {
       return Promise.reject(
         responseHelper.error({
           internal_error_identifier: 's_pli_v_vot_1',
@@ -81,36 +85,33 @@ class PreLaunchTwitterVerify extends ServiceBase {
     }
 
     oThis.oAuthTokenSecret = oThis.twitterAuthTokenObj.secret;
-
-    return responseHelper.successWithData({});
   }
 
   /**
-   * Verify Credentials from twitter.
+   * Verify credentials from twitter.
    *
    * @sets oThis.userTwitterEntity
    *
-   * @return {Promise<Result>}
+   * @returns {Promise<void>}
    * @private
    */
   async _fetchAccessToken() {
     const oThis = this;
+
     logger.log('Start::_fetchAccessToken');
 
-    let twitterResp = null;
-
-    let reqParams = {
+    const reqParams = {
       oAuthToken: oThis.oauthToken,
       oAuthTokenSecret: oThis.oAuthTokenSecret,
       oAuthVerifier: oThis.oautVerifier
     };
 
-    twitterResp = await new AuthorizationTwitterRequestClass().accessToken(reqParams);
+    const twitterResp = await new AuthorizationTwitterRequestClass().accessToken(reqParams);
 
     if (twitterResp.isFailure()) {
       return Promise.reject(
         responseHelper.error({
-          internal_error_identifier: 's_pli_v_vtc_2',
+          internal_error_identifier: 's_pli_v_fat_1',
           api_error_identifier: 'something_went_wrong',
           debug_options: {}
         })
@@ -120,16 +121,14 @@ class PreLaunchTwitterVerify extends ServiceBase {
     oThis.twitterRespData = twitterResp.data;
 
     logger.log('End::_fetchAccessToken');
-
-    return responseHelper.successWithData({});
   }
 
   /**
-   * update OauthToken status
+   * Update OauthToken status.
    *
    * @sets oThis.twitterAuthTokenObj
    *
-   * @return {Promise<Result>}
+   * @returns {Promise<void>}
    * @private
    */
   async _updateTwitterAuthToken() {
@@ -143,21 +142,22 @@ class PreLaunchTwitterVerify extends ServiceBase {
       .fire();
 
     oThis.twitterAuthTokenObj.status = twitterAuthTokenConstants.inactiveStatus;
-    return responseHelper.successWithData({});
   }
 
   /**
    * Call signup or login service as needed for twitter connect.
    *
-   * @return {void}
+   * @sets oThis.serviceResponse
    *
+   * @returns {void}
    * @private
    */
   async _connect() {
     const oThis = this;
+
     logger.log('Start::PreLaunchTwitterConnect._connect');
 
-    let obj = new ConnectService({
+    const obj = new ConnectService({
       token: oThis.twitterRespData.oAuthToken,
       secret: oThis.twitterRespData.oAuthTokenSecret,
       twitter_id: oThis.twitterRespData.userId,
