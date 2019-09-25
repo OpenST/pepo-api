@@ -146,8 +146,8 @@ class BlockUser extends ServiceBase {
       let userId = oThis.userIds[ind];
 
       let removeContactParams = {
-        receiverEntityId: emailServiceApiCallHookConstants.userEmailEntityKind,
-        receiverEntityKind: userId,
+        receiverEntityId: userId,
+        receiverEntityKind: emailServiceApiCallHookConstants.userEmailEntityKind,
         customDescription: 'Remove contact after block user.'
       };
 
