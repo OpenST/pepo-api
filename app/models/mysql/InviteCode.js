@@ -1,6 +1,5 @@
 const rootPrefix = '../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
-  UserModel = require(rootPrefix + '/app/models/mysql/User'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   databaseConstants = require(rootPrefix + '/lib/globalConstant/database'),
   inviteCodeConstants = require(rootPrefix + '/lib/globalConstant/inviteCode'),
@@ -236,15 +235,15 @@ class InviteCode extends ModelBase {
       retryCount--;
       caughtInException = false;
 
-      insertResponse = await oThis
+      insertResponse = await new InviteCode()
         .insert(insertData)
         .fire()
         .catch(function(err) {
           logger.log('Error while inserting invite_codes data: ', err);
-          if (UserModel.isDuplicateIndexViolation(UserModel.inviteCodeUniqueIndexName, err)) {
+          if (InviteCode.isDuplicateIndexViolation(InviteCode.inviteCodeUniqueIndexName, err)) {
             logger.log('Invite code conflict. Attempting with a modified invite code.');
             caughtInException = true;
-            insertData.code = inviteCodeConstants.generateInviteCode();
+            insertData.code = inviteCodeConstants.generateInviteCode;
             return null;
           } else {
             return Promise.reject(err);
