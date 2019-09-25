@@ -111,9 +111,9 @@ class PreLaunchTwitterSignUp extends ServiceBase {
     }
 
     if (oThis.inviterCodeId) {
+      await oThis._updateInviteCodeInviterCodeId();
       await oThis._fetchInviterPreLaunchInvite();
       await oThis._updateInvitedUserCount();
-      await oThis._updateInviteCodeInviterCodeId();
       await oThis._sendEmail();
     }
 
@@ -310,12 +310,14 @@ class PreLaunchTwitterSignUp extends ServiceBase {
   async _updateInvitedUserCount() {
     const oThis = this;
 
-    await new PreLaunchInviteModel()
-      .update('invited_user_count = invited_user_count + 1')
-      .where({ id: oThis.inviterPreLaunchInviteId })
-      .fire();
+    if (oThis.inviterPreLaunchInviteId) {
+      await new PreLaunchInviteModel()
+        .update('invited_user_count = invited_user_count + 1')
+        .where({ id: oThis.inviterPreLaunchInviteId })
+        .fire();
 
-    await PreLaunchInviteModel.flushCache({ id: oThis.inviterPreLaunchInviteId });
+      await PreLaunchInviteModel.flushCache({ id: oThis.inviterPreLaunchInviteId });
+    }
   }
 
   /**
@@ -343,18 +345,20 @@ class PreLaunchTwitterSignUp extends ServiceBase {
   async _sendEmail() {
     const oThis = this;
 
-    let transactionMailParams = {
-      receiverEntityId: oThis.inviterPreLaunchInviteId,
-      receiverEntityKind: emailServiceApiCallHookConstants.preLaunchInviteEntityKind,
-      customDescription: 'pre launch invite signup using invite code',
-      templateName: emailServiceApiCallHookConstants.userReferredTemplateName,
-      templateVars: {
-        pepo_api_domain: 1,
-        twitter_handle: oThis.preLaunchInviteObj.handle
-      }
-    };
+    if (oThis.inviterPreLaunchInviteId) {
+      let transactionMailParams = {
+        receiverEntityId: oThis.inviterPreLaunchInviteId,
+        receiverEntityKind: emailServiceApiCallHookConstants.preLaunchInviteEntityKind,
+        customDescription: 'pre launch invite signup using invite code',
+        templateName: emailServiceApiCallHookConstants.userReferredTemplateName,
+        templateVars: {
+          pepo_api_domain: 1,
+          twitter_handle: oThis.preLaunchInviteObj.handle
+        }
+      };
 
-    await new SendTransactionalMail(transactionMailParams).perform();
+      await new SendTransactionalMail(transactionMailParams).perform();
+    }
   }
 
   /**
