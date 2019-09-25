@@ -145,3 +145,6 @@ export PA_PEPO_REDEMPTION_USER_ID='1001'
 export PA_GOOGLE_INAPP_SERVICE_ACCOUNT_KEY=''
 #Value for PA_GOOGLE_INAPP_SERVICE_ACCOUNT_KEY should be escaped first with escape() function. This is done so as to avoid /n being escaped automatically.
 export PA_GOOGLE_INAPP_SERVICE_ACCOUNT_EMAIL=''
+
+# Feed related constants.
+export PA_USER_SEARCH_CURATED_USER_IDS='[1000]'

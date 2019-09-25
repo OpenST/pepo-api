@@ -509,21 +509,15 @@ const v1Signature = {
         validatorMethods: ['validateNonEmptyObject']
       }
     ],
-    optional: [
-      {
-        parameter: 'device_id',
-        validatorMethods: ['validateString']
-      }
-    ]
+    optional: []
   },
   [apiName.userSearch]: {
-    mandatory: [
+    mandatory: [],
+    optional: [
       {
         parameter: 'q',
         validatorMethods: ['validateString']
-      }
-    ],
-    optional: [
+      },
       {
         parameter: paginationConstants.paginationIdentifierKey,
         validatorMethods: ['validateString', 'validatePaginationIdentifier']
@@ -645,8 +639,10 @@ const v1Signature = {
     mandatory: [
       {
         parameter: 'video_id',
-        validatorMethods: ['validateNonZeroInteger']
-      },
+        validatorMethods: ['validateInteger']
+      }
+    ],
+    optional: [
       {
         parameter: 'current_user',
         validatorMethods: ['validateNonEmptyObject']
@@ -706,21 +702,13 @@ const v1Signature = {
     ]
   },
   [apiName.fetchGoto]: {
-    mandatory: [],
-    optional: [
+    mandatory: [
       {
         parameter: 'url',
         validatorMethods: ['validateGenericUrl']
-      },
-      {
-        parameter: 'gotoKind',
-        validatorMethods: ['validateString']
-      },
-      {
-        parameter: 'gotoValue',
-        validatorMethods: ['validateString']
       }
-    ]
+    ],
+    optional: []
   },
   [apiName.reportIssue]: {
     mandatory: [
