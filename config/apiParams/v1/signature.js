@@ -710,7 +710,7 @@ const v1Signature = {
     ],
     optional: []
   },
-  [apiName.reportIssue]: {
+  [apiName.reportIssueForWeb]: {
     mandatory: [
       {
         parameter: 'app_name',
@@ -750,15 +750,19 @@ const v1Signature = {
     ],
     optional: []
   },
-  [apiName.reportIssueForVideo]: {
+  [apiName.reportIssue]: {
     mandatory: [
-      {
-        parameter: 'video_id',
-        validatorMethods: ['validateNonZeroInteger']
-      },
       {
         parameter: 'current_user',
         validatorMethods: ['validateNonEmptyObject']
+      },
+      {
+        parameter: 'report_entity_id',
+        validatorMethods: ['validateNonZeroInteger']
+      },
+      {
+        parameter: 'report_entity_kind',
+        validatorMethods: ['validateNonBlankString']
       }
     ],
     optional: []
