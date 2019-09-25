@@ -1,6 +1,7 @@
 const rootPrefix = '../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   UserDeviceModel = require(rootPrefix + '/app/models/mysql/UserDevice'),
+  UserDeviceByIds = require(rootPrefix + '/lib/cacheManagement/multi/UserDeviceByIds'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   userDeviceConstants = require(rootPrefix + '/lib/globalConstant/userDevice');
@@ -17,6 +18,7 @@ class Logout extends ServiceBase {
    * @param {object} params
    * @param {object} [params.current_user]
    * @param {object} [params.device_id]
+   * @param {object} [params.deviceIds]
    *
    * @augments ServiceBase
    *
@@ -29,6 +31,7 @@ class Logout extends ServiceBase {
     logger.log('======== Logout parameters:::::', params);
     oThis.currentUser = params.current_user;
     oThis.deviceId = params.device_id;
+    oThis.deviceIds = params.deviceIds;
   }
 
   /**
@@ -51,34 +54,36 @@ class Logout extends ServiceBase {
   async _logoutUserDevices() {
     const oThis = this;
 
-    if (!oThis.deviceId || !oThis.currentUser || !oThis.currentUser.id) {
+    if ((!oThis.deviceId && !oThis.deviceIds) || !oThis.currentUser || !oThis.currentUser.id) {
       return responseHelper.successWithData({});
+    }
+
+    if (!oThis.deviceIds) {
+      oThis.deviceIds = [oThis.deviceId];
     }
 
     const userDeviceIdResp = await new UserDeviceModel()
       .select('id')
       .where({
         user_id: oThis.currentUser.id,
-        device_id: oThis.deviceId
+        device_id: oThis.deviceIds
       })
       .fire();
 
-    let userDeviceId = null;
+    let userDeviceIds = [];
 
-    if (userDeviceIdResp[0] && userDeviceIdResp[0].id) {
-      userDeviceId = userDeviceIdResp[0].id;
-    } else {
-      return responseHelper.successWithData({});
+    for (let ind = 0; ind < userDeviceIdResp.length; ind++) {
+      userDeviceIds.push(userDeviceIdResp[ind].id);
     }
 
     await new UserDeviceModel()
       .update({ status: userDeviceConstants.invertedStatuses[userDeviceConstants.logoutStatus] })
       .where({
-        id: userDeviceId
+        id: userDeviceIds
       })
       .fire();
 
-    await UserDeviceModel.flushCache({ id: userDeviceId });
+    await new UserDeviceByIds({ ids: userDeviceIds }).clear();
 
     return responseHelper.successWithData({});
   }

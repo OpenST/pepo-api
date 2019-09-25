@@ -4,7 +4,6 @@ const rootPrefix = '../../..',
   UsersCache = require(rootPrefix + '/lib/cacheManagement/multi/User'),
   AdminActivityLogModel = require(rootPrefix + '/app/models/mysql/AdminActivityLog'),
   RemoveContactInPepoCampaign = require(rootPrefix + '/lib/email/hookCreator/RemoveContact'),
-  UserDeviceIdsByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/UserDeviceIdsByUserIds'),
   TwitterDisconnect = require(rootPrefix + '/app/services/twitter/Disconnect'),
   bgJob = require(rootPrefix + '/lib/rabbitMqEnqueue/bgJob'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
@@ -41,6 +40,8 @@ class BlockUser extends ServiceBase {
     oThis.userIdsLength = oThis.userIds.length;
 
     oThis.userObjects = {};
+    oThis.devicesMap = {};
+    oThis.userDeviceIdsMap = {};
     oThis.userIdToVideoIds = {};
     oThis.videoIdsToBeDeleted = [];
   }
@@ -64,10 +65,9 @@ class BlockUser extends ServiceBase {
 
     await oThis._removeContactsInCampaigns();
 
-    await oThis._fetchDeviceIds();
-
     await oThis._disconnectTwitter();
 
+    // Flush cache after twitter disconnect
     const promisesArray = [];
     promisesArray.push(oThis._flushCache(), oThis._enqueueToBackgroundJob(), oThis._logAdminActivity());
     await Promise.all(promisesArray);
@@ -160,24 +160,6 @@ class BlockUser extends ServiceBase {
   }
 
   /**
-   * Fetch device ids
-   *
-   * @returns {Promise<never>}
-   * @private
-   */
-  async _fetchDeviceIds() {
-    const oThis = this;
-
-    const userDeviceCacheRsp = await new UserDeviceIdsByUserIdsCache({ userIds: oThis.userIds }).fetch();
-
-    if (userDeviceCacheRsp.isFailure()) {
-      return Promise.reject(userDeviceCacheRsp);
-    }
-
-    oThis.deviceIdsMap = userDeviceCacheRsp.data;
-  }
-
-  /**
    * Disconnect twitter for users
    *
    * @returns {Promise<void>}
@@ -189,17 +171,14 @@ class BlockUser extends ServiceBase {
     let promiseArray = [];
 
     for (let ind = 0; ind < oThis.userIds.length; ind++) {
-      let userId = oThis.userIds[ind],
-        deviceIds = oThis.deviceIdsMap[userId];
+      let userId = oThis.userIds[ind];
 
-      for (let ind2 = 0; ind2 < deviceIds.length; ind2++) {
-        let twitterDisconnectObj = new TwitterDisconnect({
-          current_user: oThis.userObjects[userId],
-          device_id: deviceIds[ind2]
-        });
+      let twitterDisconnectObj = new TwitterDisconnect({
+        current_user: oThis.userObjects[userId],
+        device_id: null
+      });
 
-        promiseArray.push(twitterDisconnectObj.perform());
-      }
+      promiseArray.push(twitterDisconnectObj.perform());
     }
 
     await Promise.all(promiseArray);
