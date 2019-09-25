@@ -3,11 +3,14 @@ const rootPrefix = '../../..',
   UserModel = require(rootPrefix + '/app/models/mysql/User'),
   UsersCache = require(rootPrefix + '/lib/cacheManagement/multi/User'),
   AdminActivityLogModel = require(rootPrefix + '/app/models/mysql/AdminActivityLog'),
+  RemoveContactInPepoCampaign = require(rootPrefix + '/lib/email/hookCreator/RemoveContact'),
+  TwitterDisconnect = require(rootPrefix + '/app/services/twitter/Disconnect'),
   bgJob = require(rootPrefix + '/lib/rabbitMqEnqueue/bgJob'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   userConstants = require(rootPrefix + '/lib/globalConstant/user'),
   bgJobConstants = require(rootPrefix + '/lib/globalConstant/bgJob'),
-  adminActivityLogConstants = require(rootPrefix + '/lib/globalConstant/adminActivityLogs');
+  adminActivityLogConstants = require(rootPrefix + '/lib/globalConstant/adminActivityLogs'),
+  emailServiceApiCallHookConstants = require(rootPrefix + '/lib/globalConstant/emailServiceApiCallHook');
 
 /**
  * Class to block users by admin.
@@ -37,6 +40,8 @@ class BlockUser extends ServiceBase {
     oThis.userIdsLength = oThis.userIds.length;
 
     oThis.userObjects = {};
+    oThis.devicesMap = {};
+    oThis.userDeviceIdsMap = {};
     oThis.userIdToVideoIds = {};
     oThis.videoIdsToBeDeleted = [];
   }
@@ -58,8 +63,13 @@ class BlockUser extends ServiceBase {
 
     await oThis._blockUsers();
 
+    await oThis._removeContactsInCampaigns();
+
+    await oThis._disconnectTwitter();
+
+    // Flush cache after twitter disconnect
     const promisesArray = [];
-    promisesArray.push(oThis._flushCache(), oThis._enqueueToBackgroundJob(), oThis._logAdminActivity());
+    promisesArray.push(oThis._enqueueToBackgroundJob(), oThis._logAdminActivity());
     await Promise.all(promisesArray);
 
     return responseHelper.successWithData({});
@@ -115,10 +125,65 @@ class BlockUser extends ServiceBase {
   async _blockUsers() {
     const oThis = this;
 
-    return new UserModel()
+    await new UserModel()
       .update({ status: userConstants.invertedStatuses[userConstants.inActiveStatus] })
       .where({ id: oThis.userIds })
       .fire();
+
+    return oThis._flushCache();
+  }
+
+  /**
+   * Remove contacts from campaigns list
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _removeContactsInCampaigns() {
+    const oThis = this;
+
+    let promiseArray = [];
+
+    for (let ind = 0; ind < oThis.userIds.length; ind++) {
+      let userId = oThis.userIds[ind];
+
+      let removeContactParams = {
+        receiverEntityId: userId,
+        receiverEntityKind: emailServiceApiCallHookConstants.userEmailEntityKind,
+        customDescription: 'Remove contact after block user.'
+      };
+
+      let removeContactObj = new RemoveContactInPepoCampaign(removeContactParams);
+
+      promiseArray.push(removeContactObj.perform());
+    }
+
+    await Promise.all(promiseArray);
+  }
+
+  /**
+   * Disconnect twitter for users
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _disconnectTwitter() {
+    const oThis = this;
+
+    let promiseArray = [];
+
+    for (let ind = 0; ind < oThis.userIds.length; ind++) {
+      let userId = oThis.userIds[ind];
+
+      let twitterDisconnectObj = new TwitterDisconnect({
+        current_user: oThis.userObjects[userId],
+        device_id: null
+      });
+
+      promiseArray.push(twitterDisconnectObj.perform());
+    }
+
+    await Promise.all(promiseArray);
   }
 
   /**

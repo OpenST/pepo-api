@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "80fd3cbc-7109-40ba-90e4-a181ebda2647",
+		"_postman_id": "77f636a8-b979-4d85-bbe1-ace999fb297b",
 		"name": "pepo-api",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -1417,7 +1417,7 @@
 								"method": "GET",
 								"header": [],
 								"url": {
-									"raw": "{{api_server}}/api/v1/users/search?q=aman",
+									"raw": "{{api_server}}/api/v1/users/search?",
 									"host": [
 										"{{api_server}}"
 									],
@@ -1430,7 +1430,8 @@
 									"query": [
 										{
 											"key": "q",
-											"value": "aman"
+											"value": "aman",
+											"disabled": true
 										}
 									]
 								}
