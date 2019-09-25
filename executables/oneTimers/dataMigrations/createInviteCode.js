@@ -96,7 +96,6 @@ class CreateInviteCode {
       let userId = user.id;
       usersByIdMap[userId] = user;
       let twitterId = await oThis._getTwitterId(userId);
-      console.log('The twitterId is : ', twitterId);
       twitterIds.push(twitterId);
       userIdToTwitterIdMap[userId] = twitterId;
       userIds.push(userId);
@@ -106,14 +105,14 @@ class CreateInviteCode {
       userIds: userIds
     }).fetch();
 
-    console.log('The userIds are : ', userIds);
+    logger.log('The userIds are : ', userIds);
 
     if (inviteCodeByUserIdCacheResponse.isFailure()) {
       return Promise.reject(inviteCodeByUserIdCacheResponse);
     }
     inviteCodeByUserIds = inviteCodeByUserIdCacheResponse.data;
 
-    console.log('The inviteCodeByUserIds is : ', inviteCodeByUserIds);
+    logger.log('The inviteCodeByUserIds is : ', inviteCodeByUserIds);
 
     const preLaunchInviteByTwitterIdsCacheResp = await new PreLaunchInviteByTwitterIdsCache({
       twitterIds: twitterIds
@@ -126,7 +125,7 @@ class CreateInviteCode {
     // this cache give only id, twitter_id for every object
     preLaunchInviteByTwitterIds = preLaunchInviteByTwitterIdsCacheResp.data;
 
-    console.log('The preLaunchInviteByTwitterIds is : ', preLaunchInviteByTwitterIds);
+    logger.log('The preLaunchInviteByTwitterIds is : ', preLaunchInviteByTwitterIds);
 
     for (let userId in usersByIdMap) {
       let userObj = usersByIdMap[userId],
@@ -138,7 +137,6 @@ class CreateInviteCode {
         !CommonValidators.validateNonEmptyObject(preLaunchInviteByTwitterIds[twitterId])
       ) {
         //insert into invite code
-        console.log('The inviteCodeByUserIds[userId] is : ', inviteCodeByUserIds[userId]);
         let inviteCode = inviteCodeConstants.generateInviteCode,
           inviteLimit = isCreator ? inviteCodeConstants.infiniteInviteLimit : inviteCodeConstants.inviteMaxLimit;
 

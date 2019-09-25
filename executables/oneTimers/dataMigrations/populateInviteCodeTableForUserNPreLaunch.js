@@ -49,7 +49,7 @@ class PopulateInviteCodeTableForUserNPreLaunch {
       offset = offset + 10;
     }
 
-    console.log('The oThis.errorLogs are : ', oThis.errorLogs);
+    logger.log('The oThis.errorLogs are : ', oThis.errorLogs);
   }
 
   /**
@@ -85,7 +85,7 @@ class PopulateInviteCodeTableForUserNPreLaunch {
           inviteLimit: inviteLimit
         };
 
-      console.log('The params.userId is : ', params.userId);
+      logger.log('The params.userId is : ', params.userId);
       if (params.userId) {
         await oThis._updateInviteCodeRecord(params);
       }

@@ -192,8 +192,6 @@ class SyncCreatorApproval {
 
     let rsp = await new ApprovePreLaunchUserService({ invite_id: preLaunchInviteId }).perform();
 
-    console.log('The rsp is : ', rsp);
-
     if (rsp.isFailure()) {
       oThis.errorLogs[preLaunchInviteId] = {
         preLaunchInviteId: preLaunchInviteId,
@@ -218,8 +216,6 @@ class SyncCreatorApproval {
       user_ids: [userId],
       current_admin: oThis.currentAdminObj
     }).perform();
-
-    console.log('The rsp is : ', rsp);
 
     if (rsp.isFailure()) {
       oThis.errorLogs[userId] = {
