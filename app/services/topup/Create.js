@@ -53,7 +53,7 @@ class CreateTopup extends ServiceBase {
 
     await oThis._recordTopup();
 
-    if (oThis.isAlreadyRecorded && !oThis._needReValidation()) {
+    if (oThis.isAlreadyRecorded) {
       return oThis._apiResponse();
     }
 
