@@ -96,7 +96,7 @@ class GetVideoById extends ServiceBase {
         responseHelper.paramValidationError({
           internal_error_identifier: 'a_s_v_gbi_4',
           api_error_identifier: 'invalid_api_params',
-          params_error_identifiers: 'video_deleted',
+          params_error_identifiers: ['video_deleted'],
           debug_options: { videoId: oThis.videoId }
         })
       );
