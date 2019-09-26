@@ -18,7 +18,6 @@ class BackPopulateUuidInUsers {
 
     oThis.usersMap = {};
     oThis.totalRows = null;
-    oThis.updatedRowsInBatch = null;
   }
 
   /**
@@ -41,19 +40,16 @@ class BackPopulateUuidInUsers {
   async _performBatch() {
     const oThis = this;
 
-    let limit = 25,
-      offset = 0;
+    let limit = 25;
+
     while (true) {
-      oThis.updatedRowsInBatch = 0;
-      await oThis._fetchOldUserIds(limit, offset);
+      await oThis._fetchOldUserIds(limit);
       // No more records present to migrate
       if (oThis.totalRows === 0) {
         break;
       }
 
       await oThis._populateUuidForOldUsers();
-
-      offset = offset + limit - oThis.updatedRowsInBatch;
     }
   }
 
@@ -63,7 +59,7 @@ class BackPopulateUuidInUsers {
    * @returns {Promise<void>}
    * @private
    */
-  async _fetchOldUserIds(limit, offset) {
+  async _fetchOldUserIds(limit) {
     const oThis = this;
 
     let userObj = new UserModel();
@@ -72,7 +68,6 @@ class BackPopulateUuidInUsers {
       .select('*')
       .where(['external_user_id is NULL'])
       .limit(limit)
-      .offset(offset)
       .order_by('id asc')
       .fire();
 
@@ -122,8 +117,6 @@ class BackPopulateUuidInUsers {
       .update({ external_user_id: uuidV4() })
       .where({ id: params.id })
       .fire();
-
-    oThis.updatedRowsInBatch += 1;
 
     return UserModel.flushCache(params);
   }
