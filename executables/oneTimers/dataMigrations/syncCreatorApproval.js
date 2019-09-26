@@ -5,6 +5,7 @@
  *
  * @module executables/oneTimers/dataMigrations/syncCreatorApproval
  */
+const command = require('commander');
 
 const rootPrefix = '../../..',
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
@@ -20,6 +21,12 @@ const rootPrefix = '../../..',
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   preLaunchInviteConstant = require(rootPrefix + '/lib/globalConstant/preLaunchInvite');
+
+command
+  .version('0.1.0')
+  .usage('[options]')
+  .option('-f, --userId <userId>', 'id of the users table')
+  .parse(process.argv);
 
 class SyncCreatorApproval {
   constructor() {
@@ -42,6 +49,8 @@ class SyncCreatorApproval {
    */
   async _performBatch() {
     const oThis = this;
+
+    oThis.userId = command.userId ? command.userId : 0;
 
     oThis.currentAdminObj = await oThis._fetchAdmin();
 
@@ -78,6 +87,7 @@ class SyncCreatorApproval {
 
     let usersData = await new UserModel()
       .select('*')
+      .where(['id > (?)', oThis.userId])
       .limit(limit)
       .offset(offset)
       .fire();

@@ -82,6 +82,7 @@ class addCustomAttributeForAllActiveUsers {
     let usersData = await new UserModel()
       .select('*')
       .where({ status: userConstants.invertedStatuses[userConstants.activeStatus] })
+      .where(['id > (?)', oThis.userId])
       .limit(limit)
       .offset(offset)
       .fire();

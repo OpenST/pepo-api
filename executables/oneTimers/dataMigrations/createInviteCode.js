@@ -5,6 +5,7 @@
  *
  * @module executables/oneTimers/dataMigrations/createInviteCode
  */
+const command = require('commander');
 
 const rootPrefix = '../../..',
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
@@ -16,6 +17,12 @@ const rootPrefix = '../../..',
   UserModel = require(rootPrefix + '/app/models/mysql/User'),
   inviteCodeConstants = require(rootPrefix + '/lib/globalConstant/inviteCode'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger');
+
+command
+  .version('0.1.0')
+  .usage('[options]')
+  .option('-f, --userId <userId>', 'id of the users table')
+  .parse(process.argv);
 
 /**
  * class for seed invite code tables for non pre launch user.
@@ -52,6 +59,8 @@ class CreateInviteCode {
   async _performBatch() {
     const oThis = this;
 
+    oThis.userId = command.userId ? command.userId : 0;
+
     let limit = 25,
       offset = 0;
     while (true) {
@@ -85,6 +94,7 @@ class CreateInviteCode {
 
     let usersData = await new UserModel()
       .select('*')
+      .where(['id > (?)', oThis.userId])
       .limit(limit)
       .offset(offset)
       .fire();
