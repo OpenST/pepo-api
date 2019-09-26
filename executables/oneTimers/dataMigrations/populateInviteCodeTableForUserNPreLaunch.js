@@ -63,13 +63,12 @@ class PopulateInviteCodeTableForUserNPreLaunch {
   async _fetchPreLaunchUsers(limit, offset) {
     const oThis = this;
 
-    let whereClause = ['invite_code IS NOT NULL'],
-      preLaunchInvitesData = await new PreLaunchInviteModel()
-        .select('*')
-        .where(whereClause)
-        .limit(limit)
-        .offset(offset)
-        .fire();
+    let preLaunchInvitesData = await new PreLaunchInviteModel()
+      .select('*')
+      .limit(limit)
+      .offset(offset)
+      .order_by('id asc')
+      .fire();
 
     for (let index = 0; index < preLaunchInvitesData.length; index++) {
       const preLaunchInviteObj = new PreLaunchInviteModel().formatDbData(preLaunchInvitesData[index]);

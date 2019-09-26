@@ -85,6 +85,7 @@ class addCustomAttributeForAllActiveUsers {
       .where(['id > (?)', oThis.userId])
       .limit(limit)
       .offset(offset)
+      .order_by('id asc')
       .fire();
 
     for (let index = 0; index < usersData.length; index++) {

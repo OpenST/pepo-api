@@ -9,7 +9,7 @@ const rootPrefix = '../../..',
   UsersWithoutOauthToken = require(rootPrefix + '/lib/twitter/oAuth1.0/UsersWithoutOauthToken'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger');
 
-const BATCH_SIZE = 25;
+const BATCH_SIZE = 100;
 
 class PopulateTwitterHandle {
   constructor() {}
@@ -56,6 +56,7 @@ class PopulateTwitterHandle {
       .where(['handle IS NULL'])
       .limit(limit)
       .offset(offset)
+      .order_by('id asc')
       .fire();
 
     oThis.totalRows = dbRows.length;

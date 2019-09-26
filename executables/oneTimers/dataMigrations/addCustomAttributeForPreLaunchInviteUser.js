@@ -85,6 +85,7 @@ class addCustomAttributeForPreLaunchInviteUser {
       .where({ status: preLaunchInviteConstant.invertedStatuses[preLaunchInviteConstant.doptinStatus] })
       .limit(limit)
       .offset(offset)
+      .order_by('id asc')
       .fire();
 
     for (let index = 0; index < preLaunchInvitesData.length; index++) {

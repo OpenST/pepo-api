@@ -73,6 +73,7 @@ class BackPopulateUuidInUsers {
       .where(['external_user_id is NULL'])
       .limit(limit)
       .offset(offset)
+      .order_by('id asc')
       .fire();
 
     for (let i = 0; i < responseRows.length; i++) {

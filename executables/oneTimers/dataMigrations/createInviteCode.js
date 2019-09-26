@@ -97,6 +97,7 @@ class CreateInviteCode {
       .where(['id > (?)', oThis.userId])
       .limit(limit)
       .offset(offset)
+      .order_by('id asc')
       .fire();
 
     oThis.totalRows = usersData.length;

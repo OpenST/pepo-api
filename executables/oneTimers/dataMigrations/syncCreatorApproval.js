@@ -10,6 +10,7 @@ const command = require('commander');
 const rootPrefix = '../../..',
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   AdminModel = require(rootPrefix + '/app/models/mysql/Admin'),
+  userConstants = require(rootPrefix + '/lib/globalConstant/user'),
   adminConstants = require(rootPrefix + '/lib/globalConstant/admin'),
   ApproveUserService = require(rootPrefix + '/app/services/admin/ApproveUsersAsCreator'),
   ApprovePreLaunchUserService = require(rootPrefix + '/app/services/admin/preLaunch/ApproveUser'),
@@ -88,8 +89,10 @@ class SyncCreatorApproval {
     let usersData = await new UserModel()
       .select('*')
       .where(['id > (?)', oThis.userId])
+      .where(['status NOT IN (?)', userConstants.invertedStatuses[userConstants.inActiveStatus]])
       .limit(limit)
       .offset(offset)
+      .order_by('id asc')
       .fire();
 
     oThis.totalRows = usersData.length;
