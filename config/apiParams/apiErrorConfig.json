@@ -146,7 +146,7 @@
   },
   "already_registered_in_app": {
     "http_code": "422",
-    "code": "INTERNAL_SERVER_ERROR",
+    "code": "ALREADY_REGISTERED_IN_APP",
     "message": "Twitter user is already registered in app."
   }
 }
