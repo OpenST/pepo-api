@@ -1,7 +1,7 @@
 /**
  * One timer to seed populate email.
  *
- * Usage: node executables/oneTimers/dataMigrations/populateEmail
+ * Usage: node executables/oneTimers/dataMigrations/populateEmail.js
  *
  * @module executables/oneTimers/dataMigrations/populateEmail
  */
@@ -69,6 +69,7 @@ class PopulateEmail {
       .where(['email IS NULL'])
       .limit(limit)
       .offset(offset)
+      .order_by('id asc')
       .fire();
 
     for (let index = 0; index < dbRows.length; index++) {
