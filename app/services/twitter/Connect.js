@@ -68,25 +68,6 @@ class TwitterConnect extends ServiceBase {
   async _asyncPerform() {
     const oThis = this;
 
-    if (oThis.inviteCode) {
-      let validateResponse = await oThis._validateAndSanitizeInviteCode().catch(function(err) {
-        return Promise.reject(
-          responseHelper.paramValidationError({
-            internal_error_identifier: 's_t_c_vic_7',
-            api_error_identifier: 'invalid_api_params',
-            params_error_identifiers: ['invalid_invite_code'],
-            debug_options: { error: JSON.stringify(err) }
-          })
-        );
-      });
-
-      if (validateResponse.isFailure()) {
-        return Promise.reject(validateResponse);
-      }
-    } else {
-      oThis.inviteCode = null;
-    }
-
     await oThis._validateDuplicateRequest();
 
     await oThis._fetchTwitterUserAndValidateAccess();
@@ -286,7 +267,7 @@ class TwitterConnect extends ServiceBase {
    * @returns {Promise<*|result>}
    * @private
    */
-  async _validateAndSanitizeInviteCode() {
+  _validateAndSanitizeInviteCode() {
     const oThis = this;
 
     if (CommonValidators.validateNonEmptyUrl(oThis.inviteCode)) {
@@ -337,6 +318,12 @@ class TwitterConnect extends ServiceBase {
         api_error_identifier: 'invalid_api_params',
         params_error_identifiers: ['missing_invite_code']
       });
+    }
+
+    let validateResponse = oThis._validateAndSanitizeInviteCode();
+
+    if (validateResponse.isFailure()) {
+      return validateResponse;
     }
 
     let inviterCodeRow = await oThis._fetchInviterCodeObject();
