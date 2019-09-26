@@ -10,6 +10,7 @@ const rootPrefix = '../../..',
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger');
 
 const BATCH_SIZE = 100;
+const NOT_FOUND_IDS = [];
 
 class PopulateTwitterHandle {
   constructor() {}
@@ -35,10 +36,11 @@ class PopulateTwitterHandle {
 
       logger.log('twitterIds ======', twitterIds);
 
-      await oThis._getTwitterHandle(twitterIds);
+      let total = await oThis._getTwitterHandle(twitterIds);
 
-      offset = offset + BATCH_SIZE - twitterIds.length;
+      offset = offset + BATCH_SIZE - total;
     }
+    console.log('NOT FOUND TWITTER IDS=====', NOT_FOUND_IDS);
   }
 
   /**
@@ -54,6 +56,7 @@ class PopulateTwitterHandle {
     const dbRows = await new TwitterUserModel()
       .select('id, twitter_id, handle')
       .where(['handle IS NULL'])
+      .where('id != twitter_id')
       .limit(limit)
       .offset(offset)
       .order_by('id asc')
@@ -80,8 +83,10 @@ class PopulateTwitterHandle {
    * @private
    */
   async _getTwitterHandle(twitterIds) {
+    let total = 0;
+
     if (twitterIds.length === 0) {
-      return;
+      return total;
     }
 
     const twitterResponse = await new UsersWithoutOauthToken().lookup({ twitterIds: twitterIds });
@@ -96,6 +101,12 @@ class PopulateTwitterHandle {
       const twitterId = twitterIds[index],
         twitterData = twitterResponseData[twitterId];
 
+      if (!twitterData) {
+        console.log('twitterData======', twitterData);
+        NOT_FOUND_IDS.push(twitterId);
+        continue;
+      }
+
       const twitterIdStr = twitterData.idStr,
         twitterHandle = twitterData.handle;
 
@@ -107,8 +118,10 @@ class PopulateTwitterHandle {
           twitter_id: twitterIdStr
         })
         .fire();
+      total += 1;
     }
 
+    return total;
     // Flush cache.
   }
 }
