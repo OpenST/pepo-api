@@ -47,11 +47,7 @@ class RetryPendingReceiptValidation extends CronBase {
 
     oThis._setCurrentTimeStamp();
 
-    oThis.canExit = false;
-
     await oThis._fetchRowsAndOperate();
-
-    oThis.canExit = true;
 
     return responseHelper.successWithData({});
   }
@@ -65,6 +61,8 @@ class RetryPendingReceiptValidation extends CronBase {
   _pendingTasksDone() {
     const oThis = this;
 
+    //Once sigint is received we will not process the next batch of rows.
+    oThis.areRowsRemainingToProcess = false;
     return oThis.canExit;
   }
 
@@ -106,10 +104,11 @@ class RetryPendingReceiptValidation extends CronBase {
   async _fetchRowsAndOperate() {
     const oThis = this;
 
-    let areRowsRemainingToProcess = true,
-      promiseArray = [];
+    oThis.areRowsRemainingToProcess = true;
+    let promiseArray = [];
 
-    while (areRowsRemainingToProcess) {
+    while (oThis.areRowsRemainingToProcess) {
+      oThis.canExit = false;
       let dbRows = await new FiatPaymentModel()
         .select('*')
         .where([
@@ -121,13 +120,14 @@ class RetryPendingReceiptValidation extends CronBase {
         .fire();
 
       if (dbRows.length === 0) {
-        areRowsRemainingToProcess = false;
+        oThis.areRowsRemainingToProcess = false;
       } else {
         for (let i = 0; i < dbRows.length; i++) {
           let formattedRow = new FiatPaymentModel().formatDbData(dbRows[i]);
           promiseArray.push(oThis._operateOnFetchedRow(formattedRow));
         }
         await Promise.all(promiseArray);
+        oThis.canExit = true;
       }
     }
   }
