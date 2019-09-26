@@ -7,7 +7,7 @@
  */
 const command = require('commander');
 
-const rootPrefix = '../..',
+const rootPrefix = '../../..',
   PreLaunchInviteModel = require(rootPrefix + '/app/models/mysql/PreLaunchInvite'),
   emailServiceApiCallHookConstants = require(rootPrefix + '/lib/globalConstant/emailServiceApiCallHook'),
   UpdateContactInPepoCampaign = require(rootPrefix + '/lib/email/hookCreator/UpdateContact'),
@@ -55,7 +55,7 @@ class addCustomAttributeForPreLaunchInviteUser {
     oThis.preLaunchInviteId = command.preLaunchInviteId ? command.preLaunchInviteId : 0;
     oThis.totalRecords = 0;
 
-    let limit = 100,
+    let limit = 25,
       offset = 0;
     while (true) {
       await oThis._fetchPreLaunchInvites(limit, offset);
@@ -64,7 +64,7 @@ class addCustomAttributeForPreLaunchInviteUser {
         break;
       }
 
-      offset = offset + 100;
+      offset = offset + limit;
     }
   }
 
@@ -85,6 +85,7 @@ class addCustomAttributeForPreLaunchInviteUser {
       .where({ status: preLaunchInviteConstant.invertedStatuses[preLaunchInviteConstant.doptinStatus] })
       .limit(limit)
       .offset(offset)
+      .order_by('id asc')
       .fire();
 
     for (let index = 0; index < preLaunchInvitesData.length; index++) {

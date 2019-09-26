@@ -100,6 +100,11 @@ router.get('/users', sanitizer.sanitizeDynamicUrlParams, function(req, res, next
       serviceData: serviceResponse.data
     }).perform();
 
+    if (wrapperFormatterRsp.isFailure()) {
+      console.log('----------/api/admin/users for query--', req.decodedParams.q);
+      console.log('----------/api/admin/users serviceResponse--', JSON.stringify(serviceResponse));
+    }
+
     wrapperFormatterRsp.data.user_pepo_coins_map = serviceResponse.data.userPepoCoinsMap;
     serviceResponse.data = wrapperFormatterRsp.data;
   };

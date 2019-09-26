@@ -45,6 +45,11 @@ router.get('/code', sanitizer.sanitizeDynamicUrlParams, function(req, res, next)
       serviceData: serviceResponse.data
     }).perform();
 
+    if (wrapperFormatterRsp.isFailure()) {
+      console.log('----------/api/v1/invites/code for userId--', req.decodedParams.current_user.id);
+      console.log('----------/api/v1/invites/code serviceResponse--', JSON.stringify(serviceResponse));
+    }
+
     serviceResponse.data = wrapperFormatterRsp.data;
   };
 

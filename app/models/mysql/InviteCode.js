@@ -1,6 +1,9 @@
 const rootPrefix = '../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
-  databaseConstants = require(rootPrefix + '/lib/globalConstant/database');
+  responseHelper = require(rootPrefix + '/lib/formatter/response'),
+  databaseConstants = require(rootPrefix + '/lib/globalConstant/database'),
+  inviteCodeConstants = require(rootPrefix + '/lib/globalConstant/inviteCode'),
+  logger = require(rootPrefix + '/lib/logger/customConsoleLogger');
 
 // Declare variables.
 const dbName = databaseConstants.userDbName;
@@ -215,6 +218,57 @@ class InviteCode extends ModelBase {
   }
 
   /**
+   * Create invite code
+   *
+   * @param insertData
+   * @returns {Promise<*>}
+   * @private
+   */
+  async _insert(insertData) {
+    const oThis = this;
+
+    let retryCount = 3,
+      caughtInException = true,
+      insertResponse = null;
+
+    while (retryCount > 0 && caughtInException) {
+      // Insert invite code in database.
+      retryCount--;
+      caughtInException = false;
+
+      insertResponse = await new InviteCode()
+        .insert(insertData)
+        .fire()
+        .catch(function(err) {
+          logger.log('Error while inserting invite_codes data: ', err);
+          if (InviteCode.isDuplicateIndexViolation(InviteCode.inviteCodeUniqueIndexName, err)) {
+            logger.log('Invite code conflict. Attempting with a modified invite code.');
+            caughtInException = true;
+            insertData.code = inviteCodeConstants.generateInviteCode;
+            return null;
+          } else {
+            return Promise.reject(err);
+          }
+        });
+    }
+
+    if (!insertResponse) {
+      logger.error('Error while inserting data in invite_codes table.');
+      return Promise.reject(
+        responseHelper.error({
+          internal_error_identifier: 'a_m_m_ic_2',
+          api_error_identifier: 'something_went_wrong',
+          debug_options: {
+            insertData: insertData
+          }
+        })
+      );
+    }
+
+    return responseHelper.successWithData(insertResponse);
+  }
+
+  /**
    * Flush cache.
    *
    * @param {object} params
@@ -243,6 +297,15 @@ class InviteCode extends ModelBase {
     }
 
     await Promise.all(promises);
+  }
+
+  /**
+   * Get inviteCode unique index name.
+   *
+   * @returns {string}
+   */
+  static get inviteCodeUniqueIndexName() {
+    return 'idx_2';
   }
 }
 
