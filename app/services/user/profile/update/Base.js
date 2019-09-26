@@ -25,7 +25,7 @@ class UpdateProfileBase extends ServiceBase {
    * @constructor
    */
   constructor(params) {
-    super(params);
+    super();
 
     const oThis = this;
 

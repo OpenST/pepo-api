@@ -57,7 +57,8 @@ class UpdateProfileImage extends UpdateProfileBase {
       size: oThis.size,
       width: oThis.width,
       height: oThis.height,
-      isExternalUrl: oThis.isExternalUrl
+      isExternalUrl: oThis.isExternalUrl,
+      userId: oThis.profileUserId
     });
     if (resp.isFailure()) {
       return Promise.reject(

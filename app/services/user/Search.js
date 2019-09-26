@@ -1,31 +1,26 @@
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
-  UrlByIdCache = require(rootPrefix + '/lib/cacheManagement/multi/UrlsByIds'),
-  ImageByIdCache = require(rootPrefix + '/lib/cacheManagement/multi/ImageByIds'),
-  UserProfileElementsByUserIdCache = require(rootPrefix + '/lib/cacheManagement/multi/UserProfileElementsByUserIds'),
-  TokenUserDetailByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TokenUserByUserIds'),
-  VideoByIdCache = require(rootPrefix + '/lib/cacheManagement/multi/VideoByIds'),
   UserModel = require(rootPrefix + '/app/models/mysql/User'),
-  userProfileElementConst = require(rootPrefix + '/lib/globalConstant/userProfileElement'),
+  UserCache = require(rootPrefix + '/lib/cacheManagement/multi/User'),
+  ImageByIdCache = require(rootPrefix + '/lib/cacheManagement/multi/ImageByIds'),
+  TokenUserDetailByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TokenUserByUserIds'),
+  CommonValidators = require(rootPrefix + '/lib/validators/Common'),
+  coreConstants = require(rootPrefix + '/config/coreConstants'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
-  AdminActivityLogModel = require(rootPrefix + '/app/models/mysql/AdminActivityLog'),
-  CommonValidators = require(rootPrefix + '/lib/validators/Common'),
-  AdminModel = require(rootPrefix + '/app/models/mysql/Admin'),
   paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination');
 
 /**
- * Class for user details by search
+ * Class for user search.
  *
  * @class UserSearch
  */
 class UserSearch extends ServiceBase {
   /**
-   * Constructor for user search details service.
+   * Constructor for user search.
    *
    * @param {object} params
    * @param {string} [params.q]
-   * @param {Boolean} [params.search_by_admin] - true/false
    *
    * @augments ServiceBase
    *
@@ -36,28 +31,20 @@ class UserSearch extends ServiceBase {
 
     const oThis = this;
 
-    oThis.query = params.q ? params.q.toLowerCase() : null; // lower case
-    oThis.query = oThis.query ? oThis.query.trim() : null; // trim spaces
-    oThis.query = oThis.query ? oThis.query.replace(/_/g, '\\_') : null; // Escape underscore
-    oThis.adminSearch = params.search_by_admin;
+    oThis.query = params.q || null;
+    oThis.paginationIdentifier = params[paginationConstants.paginationIdentifierKey] || null;
     oThis.isOnlyNameSearch = true;
+
+    oThis.limit = oThis._defaultPageLimit();
 
     oThis.userIds = [];
     oThis.imageIds = [];
-    oThis.videoIds = [];
     oThis.userDetails = {};
     oThis.imageDetails = {};
-    oThis.videos = {};
-    oThis.links = {};
-    oThis.allLinkIds = [];
-    oThis.userToProfileElementMap = {};
     oThis.tokenUsersByUserIdMap = {};
     oThis.searchResults = [];
     oThis.paginationTimestamp = null;
     oThis.nextPaginationTimestamp = null;
-    oThis.paginationIdentifier = params[paginationConstants.paginationIdentifierKey] || null;
-    oThis.limit = oThis._defaultPageLimit();
-    oThis.lastAdminAction = {};
   }
 
   /**
@@ -81,15 +68,6 @@ class UserSearch extends ServiceBase {
 
     await oThis._prepareSearchResults();
 
-    if (oThis.adminSearch) {
-      await oThis._fetchProfileElements();
-
-      let promises = [];
-      promises.push(oThis._fetchVideos(), oThis._fetchLink(), oThis._fetchAdminActions());
-
-      await Promise.all(promises);
-    }
-
     await oThis._fetchImages();
 
     await oThis._addResponseMetaData();
@@ -108,6 +86,16 @@ class UserSearch extends ServiceBase {
   async _validateAndSanitizeParams() {
     const oThis = this;
 
+    oThis.query = oThis.query
+      ? oThis.query
+          .toLowerCase()
+          .trim()
+          .replace(/_/g, '\\_')
+      : null;
+    // Lowercase, trim and escape underscore.
+
+    oThis.query = oThis.query && oThis.query.length > 0 ? oThis.query : null; // If query is empty string, make it as null.
+
     if (oThis.paginationIdentifier) {
       const parsedPaginationParams = oThis._parsePaginationParams(oThis.paginationIdentifier);
 
@@ -123,7 +111,9 @@ class UserSearch extends ServiceBase {
   }
 
   /**
-   * Fetch user ids
+   * Fetch user ids.
+   *
+   * @sets oThis.userIds, oThis.userDetails
    *
    * @returns {Promise<void>}
    * @private
@@ -131,30 +121,58 @@ class UserSearch extends ServiceBase {
   async _fetchUserIds() {
     const oThis = this;
 
-    let userModelObj = new UserModel({});
+    let userData = {};
 
-    let userData = await userModelObj.search({
-      query: oThis.query,
-      limit: oThis.limit,
-      paginationTimestamp: oThis.paginationTimestamp,
-      fetchAll: oThis.adminSearch,
-      isOnlyNameSearch: oThis.isOnlyNameSearch
-    });
+    if (oThis.query) {
+      userData = await new UserModel().search({
+        query: oThis.query,
+        limit: oThis.limit,
+        paginationTimestamp: oThis.paginationTimestamp,
+        isOnlyNameSearch: oThis.isOnlyNameSearch,
+        fetchAll: false
+      });
+    } else {
+      // Display curated users in search.
+      const curatedUserIdsString = coreConstants.PEPO_USER_SEARCH_CURATED_USER_IDS;
+      if (curatedUserIdsString.length === 0) {
+        // Empty string.
+        userData = { userIds: [], userDetails: {} };
+      } else {
+        const curatedUserIds = JSON.parse(curatedUserIdsString);
+
+        if (curatedUserIds.length === 0) {
+          // Empty curated userIds array.
+          userData = { userIds: [], userDetails: {} };
+        } else {
+          // Fetch curated users information.
+          const userDetailsCacheResponse = await new UserCache({ ids: curatedUserIds }).fetch();
+          if (userDetailsCacheResponse.isFailure()) {
+            return Promise.reject(userDetailsCacheResponse);
+          }
+
+          userData = { userIds: curatedUserIds, userDetails: userDetailsCacheResponse.data };
+        }
+      }
+    }
 
     oThis.userIds = userData.userIds;
     oThis.userDetails = userData.userDetails;
   }
 
   /**
-   * Fetch token users
+   * Fetch token users.
    *
    * @sets oThis.tokenUsersByUserIdMap
    *
-   * @return {Promise<void>}
+   * @return {Promise<*>}
    * @private
    */
   async _fetchTokenUsers() {
     const oThis = this;
+
+    if (oThis.userIds.length === 0) {
+      return;
+    }
 
     const tokenUserRes = await new TokenUserDetailByUserIdsCache({ userIds: oThis.userIds }).fetch();
 
@@ -166,7 +184,7 @@ class UserSearch extends ServiceBase {
   }
 
   /**
-   * Filter non active users - no platform activation
+   * Filter non active users - no platform activation.
    *
    * @return {Promise<void>}
    * @private
@@ -175,19 +193,21 @@ class UserSearch extends ServiceBase {
     const oThis = this;
 
     for (let ind = 0; ind < oThis.userIds.length; ) {
-      let userId = oThis.userIds[ind];
-      if (!oThis.tokenUsersByUserIdMap[userId].hasOwnProperty('userId')) {
+      const userId = oThis.userIds[ind];
+      if (oThis.tokenUsersByUserIdMap[userId].hasOwnProperty('userId')) {
+        ind++; // Increment only if not deleted
+      } else {
         oThis.userIds.splice(ind, 1);
         delete oThis.userDetails[userId];
         delete oThis.tokenUsersByUserIdMap[userId];
-      } else {
-        ind++; // Increment only if not deleted
       }
     }
   }
 
   /**
-   * Prepare search results
+   * Prepare search results.
+   *
+   * @sets oThis.searchResults, oThis.imageIds, oThis.nextPaginationTimestamp
    *
    * @returns {Promise<void>}
    * @private
@@ -196,8 +216,8 @@ class UserSearch extends ServiceBase {
     const oThis = this;
 
     for (let ind = 0; ind < oThis.userIds.length; ind++) {
-      let userId = oThis.userIds[ind];
-      let userDetail = oThis.userDetails[userId];
+      const userId = oThis.userIds[ind];
+      const userDetail = oThis.userDetails[userId];
 
       oThis.searchResults.push({
         id: ind,
@@ -214,135 +234,23 @@ class UserSearch extends ServiceBase {
   }
 
   /**
-   * Fetch videos
+   * Fetch images.
    *
-   * @return {Promise<never>}
-   * @private
-   */
-  async _fetchVideos() {
-    const oThis = this;
-
-    if (oThis.videoIds.length === 0) {
-      return responseHelper.successWithData({});
-    }
-
-    let cacheRsp = await new VideoByIdCache({ ids: oThis.videoIds }).fetch();
-
-    if (cacheRsp.isFailure()) {
-      return Promise.reject(cacheRsp);
-    }
-
-    for (let videoId in cacheRsp.data) {
-      let video = cacheRsp.data[videoId],
-        posterImageId = video.posterImageId;
-
-      if (posterImageId) {
-        oThis.imageIds.push(posterImageId);
-      }
-    }
-
-    oThis.videos = cacheRsp.data;
-  }
-
-  /**
-   * Fetch images
+   * @sets oThis.imageDetails
    *
-   * @returns {Promise<void>}
+   * @returns {Promise<*>}
    * @private
    */
   async _fetchImages() {
     const oThis = this;
 
-    let imageByIdCache = new ImageByIdCache({ ids: oThis.imageIds });
+    if (oThis.imageIds.length === 0) {
+      return;
+    }
 
-    let imageData = await imageByIdCache.fetch();
+    const imageData = await new ImageByIdCache({ ids: oThis.imageIds }).fetch();
 
     oThis.imageDetails = imageData.data;
-  }
-
-  /**
-   * Fetch profile elements.
-   *
-   * @return {Promise<void>}
-   * @private
-   */
-  async _fetchProfileElements() {
-    const oThis = this;
-
-    const cacheRsp = await new UserProfileElementsByUserIdCache({ usersIds: oThis.userIds }).fetch();
-
-    if (cacheRsp.isFailure()) {
-      return Promise.reject(cacheRsp);
-    }
-    let profileElementsData = cacheRsp.data;
-
-    for (let userId in profileElementsData) {
-      let profileElements = profileElementsData[userId];
-
-      oThis.userToProfileElementMap[userId] = {};
-
-      for (let kind in profileElements) {
-        oThis._fetchElementData(userId, oThis.userDetails[userId], kind, profileElements[kind].data);
-      }
-    }
-
-    for (let ind = 0; ind < oThis.searchResults.length; ind++) {
-      let userId = oThis.searchResults[ind].userId;
-      oThis.searchResults[ind]['videoId'] = oThis.userToProfileElementMap[userId]['videoId']
-        ? oThis.userToProfileElementMap[userId]['videoId']
-        : null;
-      oThis.searchResults[ind]['linkId'] = oThis.userToProfileElementMap[userId]['linkId']
-        ? oThis.userToProfileElementMap[userId]['linkId']
-        : null;
-    }
-  }
-
-  /**
-   * Fetch element data
-   *
-   * @param userId
-   * @param userObj
-   * @param kind
-   * @param data
-   * @private
-   */
-  _fetchElementData(userId, userObj, kind, data) {
-    const oThis = this;
-
-    switch (kind) {
-      case userProfileElementConst.linkIdKind:
-        oThis.allLinkIds.push(data);
-        oThis.userToProfileElementMap[userId]['linkId'] = data;
-        break;
-
-      case userProfileElementConst.coverVideoIdKind:
-        oThis.videoIds.push(data);
-        oThis.userToProfileElementMap[userId]['videoId'] = data;
-        break;
-    }
-  }
-
-  /**
-   * Fetch link
-   *
-   * @param linkId
-   * @return {Promise<never>}
-   * @private
-   */
-  async _fetchLink() {
-    const oThis = this;
-
-    if (oThis.allLinkIds.length == 0) {
-      return responseHelper.successWithData({});
-    }
-
-    let cacheRsp = await new UrlByIdCache({ ids: oThis.allLinkIds }).fetch();
-
-    if (cacheRsp.isFailure()) {
-      return Promise.reject(cacheRsp);
-    }
-
-    oThis.links = cacheRsp.data;
   }
 
   /**
@@ -380,19 +288,13 @@ class UserSearch extends ServiceBase {
   async _prepareResponse() {
     const oThis = this;
 
-    let response = {
+    const response = {
       [entityType.userSearchList]: oThis.searchResults,
       usersByIdMap: oThis.userDetails,
-      imageMap: oThis.imageDetails,
       tokenUsersByUserIdMap: oThis.tokenUsersByUserIdMap,
+      imageMap: oThis.imageDetails,
       meta: oThis.responseMetaData
     };
-
-    if (oThis.adminSearch) {
-      response['videoMap'] = oThis.videos;
-      response['linkMap'] = oThis.links;
-      response['adminActions'] = oThis.lastAdminAction;
-    }
 
     return responseHelper.successWithData(response);
   }
@@ -437,66 +339,6 @@ class UserSearch extends ServiceBase {
     const oThis = this;
 
     return oThis.limit;
-  }
-
-  /**
-   * Fetch action taken on user by admin
-   *
-   * @returns {Promise<void>}
-   * @private
-   */
-  async _fetchAdminActions() {
-    const oThis = this;
-
-    let uids = oThis.userIds,
-      adminIdMap = {};
-
-    if (oThis.userIds.length === 0) {
-      return responseHelper.successWithData({});
-    }
-
-    while (true) {
-      let rows = await new AdminActivityLogModel()
-        .select('*')
-        .where({ action_on: uids })
-        .limit(1)
-        .order_by('id DESC')
-        .fire();
-
-      for (let i = 0; i < rows.length; i++) {
-        const rec = rows[i];
-        oThis.lastAdminAction[rec.action_on] = oThis.lastAdminAction[rec.action_on] || rec;
-        adminIdMap[rec.admin_id] = 1;
-      }
-
-      uids = oThis.userIds.filter(function(val) {
-        return !oThis.lastAdminAction.hasOwnProperty(val);
-      });
-
-      // If all users data is fetched or no more rows present
-      if (uids.length <= 0 || rows.length < 1) {
-        break;
-      }
-    }
-
-    // Fetch admin and append data in last admin actions
-    if (CommonValidators.validateNonEmptyObject(oThis.lastAdminAction)) {
-      let admins = await new AdminModel()
-        .select('id, name')
-        .where({ id: Object.keys(adminIdMap) })
-        .fire();
-
-      for (let i = 0; i < admins.length; i++) {
-        adminIdMap[admins[i].id] = admins[i];
-      }
-
-      const adminActivityObj = new AdminActivityLogModel();
-      for (let userId in oThis.lastAdminAction) {
-        const laa = oThis.lastAdminAction[userId];
-        oThis.lastAdminAction[userId] = adminActivityObj.formatDbData(laa);
-        oThis.lastAdminAction[userId].adminName = adminIdMap[laa.admin_id].name;
-      }
-    }
   }
 }
 

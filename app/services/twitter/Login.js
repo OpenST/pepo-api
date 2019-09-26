@@ -2,6 +2,7 @@ const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   UserModel = require(rootPrefix + '/app/models/mysql/User'),
   TokenUserDetailByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TokenUserByUserIds'),
+  TwitterUserModel = require(rootPrefix + '/app/models/mysql/TwitterUser'),
   SecureUserCache = require(rootPrefix + '/lib/cacheManagement/single/SecureUser'),
   SecureTwitterUserExtendedByTwitterUserIdCache = require(rootPrefix +
     '/lib/cacheManagement/single/SecureTwitterUserExtendedByTwitterUserId'),
@@ -28,6 +29,7 @@ class TwitterLogin extends ServiceBase {
    * @param {string} params.userTwitterEntity: User Entity Of Twitter
    * @param {string} params.token: Oauth User Token
    * @param {string} params.secret: Oauth User secret
+   * @param {Object} params.twitterRespHeaders: Headers sent by twitter
    *
    * @augments ServiceBase
    *
@@ -42,13 +44,16 @@ class TwitterLogin extends ServiceBase {
     oThis.userTwitterEntity = params.userTwitterEntity;
     oThis.token = params.token;
     oThis.secret = params.secret;
+    oThis.twitterRespHeaders = params.twitterRespHeaders;
 
     oThis.userId = oThis.twitterUserObj.userId;
 
     oThis.secureUserObj = null;
     oThis.tokenUserObj = null;
+    oThis.handle = null;
 
     oThis.decryptedEncryptionSalt = null;
+    oThis.twitterUserExtended = null;
   }
 
   /**
@@ -61,13 +66,15 @@ class TwitterLogin extends ServiceBase {
 
     logger.log('Start::_asyncPerform Twitter login');
 
-    const promisesArray = [];
-
     const updateTwitterUserPromise = oThis._fetchSecureUser().then(function() {
       return oThis._updateTwitterUserExtended();
     });
 
+    const promisesArray = [];
+
     promisesArray.push(updateTwitterUserPromise);
+
+    promisesArray.push(oThis._updateHandleInTwitterUsers());
     promisesArray.push(oThis._fetchTokenUser());
 
     await Promise.all(promisesArray);
@@ -140,25 +147,61 @@ class TwitterLogin extends ServiceBase {
       return Promise.reject(SecureTwitterUserExtendedRes);
     }
 
-    let twitterUserExtendedObj = SecureTwitterUserExtendedRes.data;
+    oThis.twitterUserExtended = SecureTwitterUserExtendedRes.data;
+
+    let accessType = twitterUserExtendedConstants.getAccessLevelFromTwitterHeader(oThis.twitterRespHeaders);
 
     await new TwitterUserExtendedModel()
       .update({
         token: oThis.token,
         secret: eSecretKms,
+        access_type: twitterUserExtendedConstants.invertedAccessTypes[accessType],
         status: twitterUserExtendedConstants.invertedStatuses[twitterUserExtendedConstants.activeStatus]
       })
-      .where({ id: twitterUserExtendedObj.id })
+      .where({ id: oThis.twitterUserExtended.id })
       .fire();
 
     await TwitterUserExtendedModel.flushCache({
-      id: twitterUserExtendedObj.id,
+      id: oThis.twitterUserExtended.id,
       twitterUserId: oThis.twitterUserObj.id
     });
+
+    oThis.twitterUserExtended.accessType = accessType;
+    oThis.twitterUserExtended.status = twitterUserExtendedConstants.activeStatus;
 
     logger.log('End::Update Twitter User Extended for login');
 
     return responseHelper.successWithData({});
+  }
+
+  /**
+   * Update handle in twitter users
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _updateHandleInTwitterUsers() {
+    const oThis = this;
+
+    if (
+      oThis.twitterUserObj.handle &&
+      oThis.twitterUserObj.handle.toLowerCase() === oThis.userTwitterEntity.handle.toLowerCase()
+    ) {
+      return responseHelper.successWithData({});
+    }
+
+    let twitterUserObj = new TwitterUserModel();
+
+    await twitterUserObj
+      .update({
+        handle: oThis.userTwitterEntity.handle
+      })
+      .where({
+        twitter_id: oThis.twitterUserObj.twitterId
+      })
+      .fire();
+
+    return TwitterUserModel.flushCache(oThis.twitterUserObj);
   }
 
   /**
@@ -206,13 +249,17 @@ class TwitterLogin extends ServiceBase {
 
     const safeFormattedUserData = new UserModel().safeFormattedData(oThis.secureUserObj);
     const safeFormattedTokenUserData = new TokenUserModel().safeFormattedData(oThis.tokenUserObj);
+    const safeFormattedTwitterUserExtendedData = new TwitterUserExtendedModel().safeFormattedData(
+      oThis.twitterUserExtended
+    );
 
     return responseHelper.successWithData({
       usersByIdMap: { [safeFormattedUserData.id]: safeFormattedUserData },
       tokenUsersByUserIdMap: { [safeFormattedTokenUserData.userId]: safeFormattedTokenUserData },
       user: safeFormattedUserData,
       tokenUser: safeFormattedTokenUserData,
-      userLoginCookieValue: userLoginCookieValue
+      userLoginCookieValue: userLoginCookieValue,
+      twitterUserExtended: safeFormattedTwitterUserExtendedData
     });
   }
 }

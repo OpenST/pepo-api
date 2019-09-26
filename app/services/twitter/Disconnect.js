@@ -1,9 +1,12 @@
 const rootPrefix = '../../..',
+  Logout = require(rootPrefix + '/app/services/Logout'),
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   UserModel = require(rootPrefix + '/app/models/mysql/User'),
   SecureUserCache = require(rootPrefix + '/lib/cacheManagement/single/SecureUser'),
   TwitterUserExtendedModel = require(rootPrefix + '/app/models/mysql/TwitterUserExtended'),
   TwitterUserByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TwitterUserByUserIds'),
+  UserDeviceIdsByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/UserDeviceIdsByUserIds'),
+  UserDeviceByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/UserDeviceByIds'),
   coreConstants = require(rootPrefix + '/config/coreConstants'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
@@ -16,6 +19,7 @@ class TwitterDisconnect extends ServiceBase {
    *
    * @param {object} params
    * @param {object} params.current_user
+   * @param {object} params.device_id
    *
    * @augments ServiceBase
    *
@@ -26,6 +30,12 @@ class TwitterDisconnect extends ServiceBase {
 
     const oThis = this;
     oThis.currentUserId = params.current_user.id;
+
+    //NOTE: DO NOT ASK FOR DEVICE ID AS ALL DEVICES SHOULD BE LOGGED OUT
+    // oThis.deviceId = params.device_id;
+
+    oThis.deviceIds = [];
+    oThis.userDeviceIds = [];
   }
 
   /**
@@ -42,6 +52,12 @@ class TwitterDisconnect extends ServiceBase {
     await oThis._markTokenNull();
 
     await oThis._rotateCookieToken();
+
+    await oThis._fetchDeviceIds();
+
+    await oThis._fetchDevices();
+
+    await oThis._logoutUserDevices();
 
     return responseHelper.successWithData({});
   }
@@ -78,6 +94,8 @@ class TwitterDisconnect extends ServiceBase {
     await new TwitterUserExtendedModel()
       .update({
         token: null,
+        secret: null,
+        access_type: twitterUserExtendedConstants.invertedAccessTypes[twitterUserExtendedConstants.noneAccessType],
         status: twitterUserExtendedConstants.invertedStatuses[twitterUserExtendedConstants.expiredStatus]
       })
       .where({ twitter_user_id: oThis.twitterUserId })
@@ -122,6 +140,61 @@ class TwitterDisconnect extends ServiceBase {
 
     // Clear secure user cache.
     await new SecureUserCache({ id: oThis.currentUserId }).clear();
+  }
+
+  /**
+   * Fetch device ids
+   *
+   * @returns {Promise<never>}
+   * @private
+   */
+  async _fetchDeviceIds() {
+    const oThis = this;
+
+    const userDeviceCacheRsp = await new UserDeviceIdsByUserIdsCache({ userIds: [oThis.currentUserId] }).fetch();
+
+    if (userDeviceCacheRsp.isFailure()) {
+      return Promise.reject(userDeviceCacheRsp);
+    }
+
+    oThis.userDeviceIds = userDeviceCacheRsp.data[oThis.currentUserId];
+  }
+
+  /**
+   * Fetch device
+   *
+   * @returns {Promise<*|result|Result|Response>}
+   * @private
+   */
+  async _fetchDevices() {
+    const oThis = this;
+
+    let userDeviceByIdsCache = new UserDeviceByIdsCache({ ids: oThis.userDeviceIds });
+
+    let cacheRsp = await userDeviceByIdsCache.fetch();
+
+    if (cacheRsp.isFailure()) {
+      return Promise.reject(cacheRsp);
+    }
+
+    for (const id in cacheRsp.data) {
+      oThis.deviceIds.push(cacheRsp.data[id].deviceId);
+    }
+  }
+
+  /**
+   * Logout user devices.
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _logoutUserDevices() {
+    const oThis = this;
+
+    await new Logout({
+      current_user: { id: oThis.currentUserId },
+      deviceIds: oThis.deviceIds
+    }).perform();
   }
 }
 

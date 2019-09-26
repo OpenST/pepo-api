@@ -1,9 +1,3 @@
-/**
- * This is base class for all services.
- *
- * @module app/services/Base
- */
-
 const rootPrefix = '../..',
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   basicHelper = require(rootPrefix + '/helpers/basic'),
@@ -36,7 +30,7 @@ class ServicesBase {
   }
 
   /**
-   * Main performer method for the class.
+   * Main performer for class.
    *
    * @returns {Promise<*>}
    */
@@ -50,13 +44,14 @@ class ServicesBase {
         errorObject = responseHelper.error({
           internal_error_identifier: 'a_s_b_1',
           api_error_identifier: 'something_went_wrong',
-          debug_options: { error: err.toString() },
+          debug_options: { error: err.toString(), stack: err.stack },
           error_config: errorConfig
         });
 
         await createErrorLogsEntry.perform(errorObject, errorLogsConstants.mediumSeverity);
-        logger.error(' In catch block of services/Base.js', errorObject);
+        logger.error(' In catch block of services/Base.js Error is: ', err);
       }
+      logger.error(' In catch block of services/Base.js', JSON.stringify(errorObject));
 
       return errorObject;
     });
@@ -107,25 +102,24 @@ class ServicesBase {
   }
 
   /**
-   * Validate whether profile userId is correct or not.
+   * Fetch profile user.
    *
-   * @returns {Promise<result>}
+   * @returns {Promise<object>}
    * @private
    */
-  async _validateProfileUserId() {
+  async _fetchProfileUser() {
     const oThis = this;
 
     const UserMultiCache = require(rootPrefix + '/lib/cacheManagement/multi/User');
-
     const profileUserByIdResponse = await new UserMultiCache({ ids: [oThis.profileUserId] }).fetch();
 
-    let profileUserObj = profileUserByIdResponse.data[oThis.profileUserId];
+    const profileUserObj = profileUserByIdResponse.data[oThis.profileUserId];
 
     if (profileUserByIdResponse.isFailure() || !CommonValidators.validateNonEmptyObject(profileUserObj)) {
       return Promise.reject(
         responseHelper.error({
           internal_error_identifier: 'a_s_b_3',
-          api_error_identifier: 'resource_not_found',
+          api_error_identifier: 'entity_not_found',
           debug_options: {
             reason: 'Invalid userId',
             profileUserId: oThis.profileUserId,
@@ -135,18 +129,45 @@ class ServicesBase {
       );
     }
 
+    return profileUserObj;
+  }
+
+  /**
+   * Validate whether profile userId is correct or not.
+   *
+   * @returns {Promise<result>}
+   * @private
+   */
+  async _validateProfileUserId() {
+    const oThis = this;
+
+    const profileUserObj = await oThis._fetchProfileUser();
+
     if (profileUserObj.status === userConstants.inActiveStatus) {
       return Promise.reject(
-        responseHelper.paramValidationError({
+        responseHelper.error({
           internal_error_identifier: 'a_s_b_4',
-          api_error_identifier: 'could_not_proceed',
-          params_error_identifiers: ['user_inactive'],
+          api_error_identifier: 'entity_not_found',
           debug_options: {}
         })
       );
     }
 
-    return responseHelper.successWithData({ userObject: profileUserByIdResponse.data[oThis.profileUserId] });
+    return responseHelper.successWithData({ userObject: profileUserObj });
+  }
+
+  /**
+   * Validate whether profile userId is correct or not. Inactive users are also valid.
+   *
+   * @returns {Promise<result>}
+   * @private
+   */
+  async _validateInactiveProfileUserId() {
+    const oThis = this;
+
+    const profileUserObj = await oThis._fetchProfileUser();
+
+    return responseHelper.successWithData({ userObject: profileUserObj });
   }
 
   _currentPageLimit() {

@@ -1,7 +1,5 @@
 const express = require('express'),
-  router = express.Router(),
-  cookieParser = require('cookie-parser'),
-  csrf = require('csurf');
+  router = express.Router();
 
 const rootPrefix = '../../..',
   PreLaunchInviteLoginCookieAuth = require(rootPrefix + '/lib/authentication/PreLaunchInviteLoginCookie'),
@@ -16,9 +14,6 @@ const rootPrefix = '../../..',
   cookieHelper = require(rootPrefix + '/lib/cookieHelper');
 
 const errorConfig = basicHelper.fetchErrorConfig(apiVersions.web);
-
-// Node.js cookie parsing middleware.
-router.use(cookieParser(coreConstants.WEB_COOKIE_SECRET));
 
 const validatePreLaunchInviteCookie = async function(req, res, next) {
   let preLaunchCookieValue = req.signedCookies[preLaunchInviteConstants.loginCookieName];
@@ -92,30 +87,22 @@ router.get('/twitter-login', sanitizer.sanitizeDynamicUrlParams, function(req, r
 });
 
 /* Subscribe email*/
-router.post(
-  '/subscribe-email',
-  cookieHelper.setWebCsrf(),
-  validatePreLaunchInviteCookie,
-  sanitizer.sanitizeDynamicUrlParams,
-  function(req, res, next) {
-    req.decodedParams.apiName = apiName.preLaunchInviteSubscribeEmail;
+router.post('/subscribe-email', validatePreLaunchInviteCookie, sanitizer.sanitizeDynamicUrlParams, function(
+  req,
+  res,
+  next
+) {
+  req.decodedParams.apiName = apiName.preLaunchInviteSubscribeEmail;
 
-    Promise.resolve(routeHelper.perform(req, res, next, '/preLaunchInvite/SubscribeEmail', 'r_a_w_pl_4', null));
-  }
-);
+  Promise.resolve(routeHelper.perform(req, res, next, '/preLaunchInvite/SubscribeEmail', 'r_a_w_pl_4', null));
+});
 
 /* Subscribe email*/
-router.post(
-  '/creator',
-  cookieHelper.setWebCsrf(),
-  validatePreLaunchInviteCookie,
-  sanitizer.sanitizeDynamicUrlParams,
-  function(req, res, next) {
-    req.decodedParams.apiName = apiName.preLaunchInviteCreator;
+router.post('/creator', validatePreLaunchInviteCookie, sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.preLaunchInviteCreator;
 
-    Promise.resolve(routeHelper.perform(req, res, next, '/preLaunchInvite/Creator', 'r_a_w_pl_6', null));
-  }
-);
+  Promise.resolve(routeHelper.perform(req, res, next, '/preLaunchInvite/Creator', 'r_a_w_pl_6', null));
+});
 
 /* Rotate Twitter Account*/
 router.get('/rotate-twitter-account', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
@@ -138,7 +125,7 @@ router.get('/rotate-twitter-account', sanitizer.sanitizeDynamicUrlParams, functi
 router.get('/double-opt-in', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.doubleOptIn;
 
-  Promise.resolve(routeHelper.perform(req, res, next, '/preLaunchInvite/DoubleOptIn', 'r_a_w_pl_5', null));
+  Promise.resolve(routeHelper.perform(req, res, next, '/VerifyDoubleOptIn', 'r_a_w_pl_5', null));
 });
 
 /* Logout pre launch user*/

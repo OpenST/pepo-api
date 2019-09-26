@@ -1,8 +1,7 @@
 const rootPrefix = '../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
-  databaseConstants = require(rootPrefix + '/lib/globalConstant/database'),
-  paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination'),
-  feedsConstants = require(rootPrefix + '/lib/globalConstant/feed');
+  feedsConstants = require(rootPrefix + '/lib/globalConstant/feed'),
+  databaseConstants = require(rootPrefix + '/lib/globalConstant/database');
 
 // Declare variables.
 const dbName = databaseConstants.feedDbName;
@@ -157,20 +156,23 @@ class FeedModel extends ModelBase {
     return response;
   }
 
-
   /**
-   * Delete by actor 
+   * Delete by actor.
    *
-   * @param {number} actor - actor id 
+   * @param {object} params
+   * @param {number} params.actor
    *
    * @return {object}
    */
   async deleteByActor(params) {
     const oThis = this;
 
-    await oThis.delete().where({
-      actor: params.actor      
-    }).fire();
+    await oThis
+      .delete()
+      .where({
+        actor: params.actor
+      })
+      .fire();
 
     return FeedModel.flushCache({});
   }
@@ -179,17 +181,28 @@ class FeedModel extends ModelBase {
    * Flush cache.
    *
    * @param {object} params
-   * @param {number} params.paginationTimestamp
+   * @param {number} [params.id]
+   * @param {array<number>} [params.ids]
    *
    * @returns {Promise<*>}
    */
   static async flushCache(params) {
-    const LoggedOutFeed = require(rootPrefix + '/lib/cacheManagement/single/LoggedOutFeed');
+    const promisesArray = [];
 
-    await new LoggedOutFeed({
-      limit: paginationConstants.defaultFeedsListPageSize,
-      paginationTimestamp: params.paginationTimestamp
-    }).clear();
+    const LoggedOutFeedCache = require(rootPrefix + '/lib/cacheManagement/single/LoggedOutFeed');
+    promisesArray.push(new LoggedOutFeedCache({}).clear());
+
+    if (params.id) {
+      const FeedByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/FeedByIds');
+      promisesArray.push(new FeedByIdsCache({ ids: [params.id] }).clear());
+    }
+
+    if (params.ids) {
+      const FeedByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/FeedByIds');
+      promisesArray.push(new FeedByIdsCache({ ids: params.ids }).clear());
+    }
+
+    await Promise.all(promisesArray);
   }
 }
 

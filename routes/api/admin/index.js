@@ -22,9 +22,6 @@ const rootPrefix = '../../..',
 // Declare variables.
 const errorConfig = basicHelper.fetchErrorConfig(apiVersions.admin);
 
-// Node.js cookie parsing middleware.
-router.use(cookieParser(coreConstants.ADMIN_COOKIE_SECRET));
-
 const validateAdminCookie = async function(req, res, next) {
   // Cookie validation is not to be done for admin login request
   if (req.url !== '/login') {
@@ -48,10 +45,13 @@ const validateAdminCookie = async function(req, res, next) {
   next();
 };
 
+// Node.js cookie parsing middleware.
+router.use(cookieParser(coreConstants.ADMIN_COOKIE_SECRET));
 router.use(validateAdminCookie);
+router.use(cookieHelper.setAdminCsrf());
 
 /* Login admin */
-router.post('/login', cookieHelper.setAdminCsrf(), sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+router.post('/login', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.adminLogin;
 
   const onServiceSuccess = async function(serviceResponse) {
@@ -68,7 +68,7 @@ router.post('/login', cookieHelper.setAdminCsrf(), sanitizer.sanitizeDynamicUrlP
 });
 
 /* Logout admin */
-router.post('/logout', cookieHelper.setAdminCsrf(), sanitizer.sanitizeDynamicUrlParams, function(req, res) {
+router.post('/logout', sanitizer.sanitizeDynamicUrlParams, function(req, res) {
   req.decodedParams.apiName = apiName.adminLogout;
 
   const responseObject = responseHelper.successWithData({});
@@ -81,35 +81,39 @@ router.post('/logout', cookieHelper.setAdminCsrf(), sanitizer.sanitizeDynamicUrl
 /* Users list */
 router.get('/users', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.adminUserSearch;
-  req.decodedParams.search_by_admin = true;
 
   const dataFormatterFunc = async function(serviceResponse) {
     const wrapperFormatterRsp = await new FormatterComposer({
       resultType: responseEntityKey.searchResults,
       entityKindToResponseKeyMap: {
         [entityType.userSearchList]: responseEntityKey.searchResults,
-        [entityType.usersMap]: responseEntityKey.users,
+        [entityType.adminUsersMap]: responseEntityKey.users,
+        [entityType.userStats]: responseEntityKey.userStats,
         [entityType.imagesMap]: responseEntityKey.images,
         [entityType.videosMap]: responseEntityKey.videos,
         [entityType.linksMap]: responseEntityKey.links,
+        [entityType.adminTwitterUsersMap]: responseEntityKey.twitterUsers,
+        [entityType.token]: responseEntityKey.token,
+        [entityType.inviteCodesMap]: responseEntityKey.inviteCodes,
         [entityType.userSearchMeta]: responseEntityKey.meta
       },
       serviceData: serviceResponse.data
     }).perform();
 
-    wrapperFormatterRsp.data.adminActions = serviceResponse.data.adminActions;
+    if (wrapperFormatterRsp.isFailure()) {
+      console.log('----------/api/admin/users for query--', req.decodedParams.q);
+      console.log('----------/api/admin/users serviceResponse--', JSON.stringify(serviceResponse));
+    }
+
+    wrapperFormatterRsp.data.user_pepo_coins_map = serviceResponse.data.userPepoCoinsMap;
     serviceResponse.data = wrapperFormatterRsp.data;
   };
 
-  Promise.resolve(routeHelper.perform(req, res, next, '/user/Search', 'r_a_v1_ad_2', null, dataFormatterFunc));
+  Promise.resolve(routeHelper.perform(req, res, next, '/admin/UserSearch', 'r_a_v1_ad_2', null, dataFormatterFunc));
 });
 
 /* Approve user as creator */
-router.post('/users/:user_id/approve', cookieHelper.setAdminCsrf(), sanitizer.sanitizeDynamicUrlParams, function(
-  req,
-  res,
-  next
-) {
+router.post('/users/:user_id/approve', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.adminUserApprove;
   req.decodedParams.user_ids = [req.params.user_id];
 
@@ -117,27 +121,57 @@ router.post('/users/:user_id/approve', cookieHelper.setAdminCsrf(), sanitizer.sa
 });
 
 /* Block user */
-router.post('/users/:user_id/block', cookieHelper.setAdminCsrf(), sanitizer.sanitizeDynamicUrlParams, function(
-  req,
-  res,
-  next
-) {
+router.post('/users/:user_id/block', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.adminUserBlock;
   req.decodedParams.user_ids = [req.params.user_id];
 
   Promise.resolve(routeHelper.perform(req, res, next, '/admin/BlockUser', 'r_a_v1_ad_4', null, null, null));
 });
 
+/* Video history for admin - intentionally retained the same api name */
+router.get('/video-history/:profile_user_id', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.userVideoList;
+  req.decodedParams.profile_user_id = req.params.profile_user_id;
+  req.decodedParams.is_admin = true;
+
+  const dataFormatterFunc = async function(serviceResponse) {
+    const wrapperFormatterRsp = await new FormatterComposer({
+      resultType: responseEntityKey.userVideoList,
+      entityKindToResponseKeyMap: {
+        [entityType.userVideoList]: responseEntityKey.userVideoList,
+        [entityType.usersMap]: responseEntityKey.users,
+        [entityType.userStats]: responseEntityKey.userStats,
+        [entityType.userProfilesMap]: responseEntityKey.userProfiles,
+        [entityType.tagsMap]: responseEntityKey.tags,
+        [entityType.linksMap]: responseEntityKey.links,
+        [entityType.imagesMap]: responseEntityKey.images,
+        [entityType.videosMap]: responseEntityKey.videos,
+        [entityType.videoDetailsMap]: responseEntityKey.videoDetails,
+        [entityType.currentUserUserContributionsMap]: responseEntityKey.currentUserUserContributions,
+        [entityType.currentUserVideoContributionsMap]: responseEntityKey.currentUserVideoContributions,
+        [entityType.pricePointsMap]: responseEntityKey.pricePoints,
+        [entityType.token]: responseEntityKey.token,
+        [entityType.userVideoListMeta]: responseEntityKey.meta
+      },
+      serviceData: serviceResponse.data
+    }).perform();
+
+    serviceResponse.data = wrapperFormatterRsp.data;
+  };
+
+  //todo::ADMIN send a admin view flag and change service ang get/profile lib
+
+  Promise.resolve(
+    routeHelper.perform(req, res, next, '/user/profile/GetVideoList', 'r_a_v1_u_5', null, dataFormatterFunc)
+  );
+});
+
 /* Delete video */
-router.post('/delete-video/:video_id', cookieHelper.setAdminCsrf(), sanitizer.sanitizeDynamicUrlParams, function(
-  req,
-  res,
-  next
-) {
+router.post('/delete-video/:video_id', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.adminDeleteVideo;
   req.decodedParams.video_id = req.params.video_id;
 
-  Promise.resolve(routeHelper.perform(req, res, next, '/video/Delete', 'r_a_v1_ad_5', null, null, null));
+  Promise.resolve(routeHelper.perform(req, res, next, '/admin/DeleteVideo', 'r_a_v1_ad_6', null, null, null));
 });
 
 /* Logged in Admin */
@@ -156,7 +190,31 @@ router.get('/current', sanitizer.sanitizeDynamicUrlParams, function(req, res, ne
     serviceResponse.data = wrapperFormatterRsp.data;
   };
 
-  Promise.resolve(routeHelper.perform(req, res, next, '/admin/GetCurrent', 'r_a_v1_ad_6', null, dataFormatterFunc));
+  Promise.resolve(routeHelper.perform(req, res, next, '/admin/GetCurrent', 'r_a_v1_ad_7', null, dataFormatterFunc));
+});
+
+/* User profile */
+router.get('/users/:user_id/profile', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.adminUserProfile;
+  req.decodedParams.profile_user_id = req.params.user_id;
+
+  const dataFormatterFunc = async function(serviceResponse) {
+    const wrapperFormatterRsp = await new FormatterComposer({
+      resultType: responseEntityKey.adminUserProfile,
+      entityKindToResponseKeyMap: {
+        [entityType.userProfile]: responseEntityKey.adminUserProfile,
+        [entityType.usersMap]: responseEntityKey.users,
+        [entityType.imagesMap]: responseEntityKey.images
+      },
+      serviceData: serviceResponse.data
+    }).perform();
+
+    wrapperFormatterRsp.data['balance'] = serviceResponse.data['balance'] || '0';
+
+    serviceResponse.data = wrapperFormatterRsp.data;
+  };
+
+  Promise.resolve(routeHelper.perform(req, res, next, '/admin/UserProfile', 'r_a_v1_ad_8', null, dataFormatterFunc));
 });
 
 router.use('/pre-launch', adminPreLaunchRoutes);

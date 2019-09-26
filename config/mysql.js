@@ -81,6 +81,13 @@ const mysqlConfig = {
         password: coreConstants.SOCKET_DB_MYSQL_PASSWORD
       }
     },
+    fiatDbCluster: {
+      master: {
+        host: coreConstants.FIAT_DB_MYSQL_HOST,
+        user: coreConstants.FIAT_DB_MYSQL_USER,
+        password: coreConstants.FIAT_DB_MYSQL_PASSWORD
+      }
+    },
     infraDbCluster: {
       master: {
         host: coreConstants.INFRA_DB_MYSQL_HOST,
@@ -93,6 +100,13 @@ const mysqlConfig = {
         host: coreConstants.ADMIN_DB_MYSQL_HOST,
         user: coreConstants.ADMIN_DB_MYSQL_USER,
         password: coreConstants.ADMIN_DB_MYSQL_PASSWORD
+      }
+    },
+    redemptionDbCluster: {
+      master: {
+        host: coreConstants.REDEMPTION_DB_MYSQL_HOST,
+        user: coreConstants.REDEMPTION_DB_MYSQL_USER,
+        password: coreConstants.REDEMPTION_DB_MYSQL_PASSWORD
       }
     }
   },
@@ -126,8 +140,14 @@ mysqlConfig.databases[database.ostDbName] = ['ostDbCluster'];
 // Admin db
 mysqlConfig.databases[database.adminDbName] = ['adminDbCluster'];
 
+// Redemption db
+mysqlConfig.databases[database.redemptionDbName] = ['redemptionDbCluster'];
+
 // Socket db
 mysqlConfig.databases[database.socketDbName] = ['socketDbCluster'];
+
+// Transaction db
+mysqlConfig.databases[database.fiatDbName] = ['fiatDbCluster'];
 
 // Infra db
 mysqlConfig.databases[database.infraDbName] = ['infraDbCluster'];

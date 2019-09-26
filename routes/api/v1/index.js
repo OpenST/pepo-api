@@ -3,87 +3,54 @@ const express = require('express'),
   cookieParser = require('cookie-parser');
 
 const rootPrefix = '../../..',
-  LoginCookieAuth = require(rootPrefix + '/lib/authentication/LoginCookie'),
   authRoutes = require(rootPrefix + '/routes/api/v1/auth'),
-  basicHelper = require(rootPrefix + '/helpers/basic'),
   coreConstant = require(rootPrefix + '/config/coreConstants'),
-  apiVersions = require(rootPrefix + '/lib/globalConstant/apiVersions'),
-  userConstant = require(rootPrefix + '/lib/globalConstant/user'),
   usersRoutes = require(rootPrefix + '/routes/api/v1/users'),
+  invitesRoutes = require(rootPrefix + '/routes/api/v1/invites'),
+  topupRoutes = require(rootPrefix + '/routes/api/v1/topup'),
   videoRoutes = require(rootPrefix + '/routes/api/v1/videos'),
   tokensRoutes = require(rootPrefix + '/routes/api/v1/tokens'),
-  gifsRoutes = require(rootPrefix + '/routes/api/v1/gifs'),
-  responseHelper = require(rootPrefix + '/lib/formatter/response'),
   feedsRoutes = require(rootPrefix + '/routes/api/v1/feeds'),
+  redemptionsRoutes = require(rootPrefix + '/routes/api/v1/redemptions'),
+  supportRoutes = require(rootPrefix + '/routes/api/v1/support'),
   cookieHelper = require(rootPrefix + '/lib/cookieHelper'),
   tagRoutes = require(rootPrefix + '/routes/api/v1/tags'),
-  userNotificationsRoutes = require(rootPrefix + '/routes/api/v1/userNotifications'),
-  commonValidator = require(rootPrefix + '/lib/validators/Common'),
+  notificationsRoutes = require(rootPrefix + '/routes/api/v1/notifications'),
+  fetchGotoRoutes = require(rootPrefix + '/routes/api/v1/fetchGoto'),
+  twitterRoutes = require(rootPrefix + '/routes/api/v1/twitter'),
   uploadParamsRoutes = require(rootPrefix + '/routes/api/v1/uploadParams'),
   rotateTwitterAccountRoutes = require(rootPrefix + '/routes/api/v1/rotateTwitterAccount'),
   reportIssueRoutes = require(rootPrefix + '/routes/api/v1/reportIssue'),
+  miscellaneousRoutes = require(rootPrefix + '/routes/api/v1/miscellaneous'),
   ostTransactionRoutes = require(rootPrefix + '/routes/api/v1/ostTransactions');
-
-const errorConfig = basicHelper.fetchErrorConfig(apiVersions.v1);
 
 // Node.js cookie parsing middleware.
 router.use(cookieParser(coreConstant.COOKIE_SECRET));
 
-const validateCookie = async function(req, res, next) {
-  let loginCookieValue = req.signedCookies[userConstant.loginCookieName];
-  if (!commonValidator.isVarNullOrUndefined(loginCookieValue)) {
-    let authResponse = await new LoginCookieAuth(loginCookieValue).perform().catch(function(r) {
-      return r;
-    });
-
-    if (authResponse.isFailure()) {
-      cookieHelper.deleteLoginCookie(res);
-      return responseHelper.renderApiResponse(authResponse, res, errorConfig);
-    } else {
-      req.decodedParams.current_user = authResponse.data.current_user;
-      req.decodedParams.user_login_cookie_value = authResponse.data.user_login_cookie_value;
-    }
-    cookieHelper.setLoginCookie(res, authResponse.data.user_login_cookie_value);
-  }
-
-  next();
-};
-
-const validateLoginRequired = async function(req, res, next) {
-  let currentUser = req.decodedParams.current_user;
-
-  if (!currentUser) {
-    cookieHelper.deleteLoginCookie(res);
-    return responseHelper.renderApiResponse(
-      responseHelper.error({
-        internal_error_identifier: 'r_a_v1_i_1',
-        api_error_identifier: 'unauthorized_api_request'
-      }),
-      res,
-      errorConfig
-    );
-  }
-
-  next();
-};
-
-// NOTE:- use 'validateLoginRequired' function if you want to use route in logged in only
-router.use('/report-issue', reportIssueRoutes);
-router.use('/auth/twitter-disconnect', validateCookie, validateLoginRequired, authRoutes);
-router.use('/auth', authRoutes);
-router.use('/users', validateCookie, validateLoginRequired, usersRoutes);
-router.use('/videos', validateCookie, validateLoginRequired, videoRoutes);
-router.use('/tokens', validateCookie, validateLoginRequired, tokensRoutes);
-router.use('/ost-transactions', validateCookie, validateLoginRequired, ostTransactionRoutes);
-router.use('/gifs', validateCookie, validateLoginRequired, gifsRoutes);
-router.use('/upload-params', validateCookie, validateLoginRequired, uploadParamsRoutes);
-router.use('/tags', validateCookie, validateLoginRequired, tagRoutes);
-router.use('/notifications', validateCookie, validateLoginRequired, userNotificationsRoutes);
-
 // TEMP route - only for QA - TODO - remove later after talking with SOMA
 router.use('/rotate-twitter-account', rotateTwitterAccountRoutes);
 
+router.use('/report-issue', reportIssueRoutes);
+router.use('/auth', authRoutes);
+router.use('/fetch-goto', fetchGotoRoutes);
+
 // Login not mandatory for following
-router.use('/feeds', validateCookie, feedsRoutes);
+router.use('/feeds', cookieHelper.validateUserLoginCookieIfPresent, feedsRoutes);
+router.use('/videos', cookieHelper.validateUserLoginCookieIfPresent, videoRoutes);
+
+router.use(cookieHelper.validateUserLoginCookieIfPresent, cookieHelper.validateUserLoginRequired);
+
+router.use('/users', usersRoutes);
+router.use('/invites', invitesRoutes);
+router.use('/tokens', tokensRoutes);
+router.use('/ost-transactions', ostTransactionRoutes);
+router.use('/redemptions', redemptionsRoutes);
+router.use('/support', supportRoutes);
+router.use('/upload-params', uploadParamsRoutes);
+router.use('/tags', tagRoutes);
+router.use('/notifications', notificationsRoutes);
+router.use('/top-up', topupRoutes);
+router.use('/twitter', twitterRoutes);
+router.use('/', miscellaneousRoutes);
 
 module.exports = router;

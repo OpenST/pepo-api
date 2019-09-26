@@ -157,8 +157,6 @@ class PublicVideoFeed extends FeedBase {
             includes: {}
           },
           linkIds: [],
-          coverVideoId: '150',
-          coverImageId: '289',
           updatedAt: 1564659388
         }
       });

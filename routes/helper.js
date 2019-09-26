@@ -53,7 +53,7 @@ class RoutesHelper {
           errorObject = responseHelper.error({
             internal_error_identifier: `unhandled_catch_response:r_h:${errorCode}`,
             api_error_identifier: 'unhandled_catch_response',
-            debug_options: {}
+            debug_options: { error: error.toString(), stack: error.stack }
           });
           logger.error(errorCode, 'Something went wrong', error);
 

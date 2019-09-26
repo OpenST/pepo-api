@@ -7,10 +7,10 @@ export PA_DOMAIN='http://pepodev.com:8080'
 export PA_COOKIE_DOMAIN='.pepodev.com'
 
 # Devops error logs framework
-export DEVOPS_APP_NAME='pepo-api';
-export DEVOPS_ENV_ID='dev1-sandbox';
-export DEVOPS_IP_ADDRESS='127.0.0.1';
-export DEVOPS_SERVER_IDENTIFIER='1111';
+export PA_DEVOPS_APP_NAME='pepo-api';
+export PA_DEVOPS_ENV_ID='dev1-sandbox';
+export PA_DEVOPS_IP_ADDRESS='127.0.0.1';
+export PA_DEVOPS_SERVER_IDENTIFIER='1111';
 
 # Database details
 export PA_MYSQL_CONNECTION_POOL_SIZE='3'
@@ -65,6 +65,16 @@ export PA_ADMIN_DB_MYSQL_HOST='127.0.0.1'
 export PA_ADMIN_DB_MYSQL_USER='root'
 export PA_ADMIN_DB_MYSQL_PASSWORD='root'
 
+# mysql redemption db
+export PA_REDEMPTION_DB_MYSQL_HOST='127.0.0.1'
+export PA_REDEMPTION_DB_MYSQL_USER='root'
+export PA_REDEMPTION_DB_MYSQL_PASSWORD='root'
+
+#mysql transaction db
+export PA_FIAT_DB_MYSQL_HOST='127.0.0.1'
+export PA_FIAT_DB_MYSQL_USER='root'
+export PA_FIAT_DB_MYSQL_PASSWORD='root'
+
 # mysql - devops error logs infra details
 export PA_INFRA_DB_MYSQL_HOST='127.0.0.1'
 export PA_INFRA_DB_MYSQL_USER='root'
@@ -101,9 +111,6 @@ export PA_PAD_COOKIE_SECRET='aa5298d3a3fe181a3a52d085ee1525df5asa498337f8f3b76ca
 # cookie signing secret for web cookie
 export PA_PW_COOKIE_SECRET='aa5298d3a3fe181a3a52d085ee1525df5asa498337f8f3b76ca7df0a5de32124'
 
-# Giphy Api Key
-export PA_GIPHY_API_KEY='PbWiMCsT9RxXtatEtKp6w1vapdqNxhFQ'
-
 # Pepo Campaigns Details
 export PA_CAMPAIGN_CLIENT_KEY="3572cbc0d1895ed73e769d028eb50fec"
 export PA_CAMPAIGN_CLIENT_SECRET="b753c5acca25e22bedb5a58efc72891a"
@@ -130,3 +137,14 @@ export DEFAULT_REPLICATION_LEVEL='localOne'
 
 export PA_CDN_URL='https://dbvoeb7t6hffk.cloudfront.net'
 export TWITTER_OAUTH_URL='https://api.twitter.com/oauth/authorize?oauth_token='
+
+# Pepo twitter handle
+export PA_PEPO_TWITTER_HANDLE='thepepoapp'
+export PA_PEPO_REDEMPTION_USER_ID='1001'
+
+export PA_GOOGLE_INAPP_SERVICE_ACCOUNT_KEY=''
+#Value for PA_GOOGLE_INAPP_SERVICE_ACCOUNT_KEY should be escaped first with escape() function. This is done so as to avoid /n being escaped automatically.
+export PA_GOOGLE_INAPP_SERVICE_ACCOUNT_EMAIL=''
+
+# Feed related constants.
+export PA_USER_SEARCH_CURATED_USER_IDS='[1000]'

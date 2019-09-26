@@ -41,10 +41,10 @@ class Transaction extends ModelBase {
       id: dbRow.id,
       ostTxId: dbRow.ost_tx_id,
       fromUserId: dbRow.from_user_id,
+      fiatPaymentId: dbRow.fiat_payment_id,
       videoId: dbRow.video_id,
       extraData: JSON.parse(dbRow.extra_data),
       textId: dbRow.text_id,
-      giphyId: dbRow.giphy_id,
       status: transactionConstants.statuses[dbRow.status],
       createdAt: dbRow.created_at,
       updatedAt: dbRow.updated_at

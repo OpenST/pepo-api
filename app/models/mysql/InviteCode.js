@@ -1,6 +1,9 @@
 const rootPrefix = '../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
-  databaseConstants = require(rootPrefix + '/lib/globalConstant/database');
+  responseHelper = require(rootPrefix + '/lib/formatter/response'),
+  databaseConstants = require(rootPrefix + '/lib/globalConstant/database'),
+  inviteCodeConstants = require(rootPrefix + '/lib/globalConstant/inviteCode'),
+  logger = require(rootPrefix + '/lib/logger/customConsoleLogger');
 
 // Declare variables.
 const dbName = databaseConstants.userDbName;
@@ -48,7 +51,7 @@ class InviteCode extends ModelBase {
    * @param {string} dbRow.created_at
    * @param {string} dbRow.updated_at
    *
-   * @return {object}
+   * @returns {object}
    * @private
    */
   formatDbData(dbRow) {
@@ -134,6 +137,21 @@ class InviteCode extends ModelBase {
   }
 
   /**
+   * Update invited user count.
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async updateInvitedUserCount(id) {
+    const oThis = this;
+
+    await oThis
+      .update('invited_user_count = invited_user_count + 1')
+      .where({ id: id })
+      .fire();
+  }
+
+  /**
    * Fetch invite code for given user ids.
    *
    * @param {array<number>} userIds
@@ -187,15 +205,67 @@ class InviteCode extends ModelBase {
     const dbRows = await queryObject.fire();
 
     const userIds = [];
-
     let nextPaginationId = null;
 
     for (let index = 0; index < dbRows.length; index++) {
-      userIds.push(dbRows[index].user_id);
-      nextPaginationId = dbRows[index].id;
+      if (dbRows[index].user_id) {
+        userIds.push(dbRows[index].user_id);
+        nextPaginationId = dbRows[index].id;
+      }
     }
 
     return { userIds: userIds, nextPaginationId: nextPaginationId };
+  }
+
+  /**
+   * Create invite code
+   *
+   * @param insertData
+   * @returns {Promise<*>}
+   * @private
+   */
+  async _insert(insertData) {
+    const oThis = this;
+
+    let retryCount = 3,
+      caughtInException = true,
+      insertResponse = null;
+
+    while (retryCount > 0 && caughtInException) {
+      // Insert invite code in database.
+      retryCount--;
+      caughtInException = false;
+
+      insertResponse = await new InviteCode()
+        .insert(insertData)
+        .fire()
+        .catch(function(err) {
+          logger.log('Error while inserting invite_codes data: ', err);
+          if (InviteCode.isDuplicateIndexViolation(InviteCode.inviteCodeUniqueIndexName, err)) {
+            logger.log('Invite code conflict. Attempting with a modified invite code.');
+            caughtInException = true;
+            insertData.code = inviteCodeConstants.generateInviteCode;
+            return null;
+          } else {
+            return Promise.reject(err);
+          }
+        });
+    }
+
+    if (!insertResponse) {
+      logger.error('Error while inserting data in invite_codes table.');
+      return Promise.reject(
+        responseHelper.error({
+          internal_error_identifier: 'a_m_m_ic_2',
+          api_error_identifier: 'something_went_wrong',
+          debug_options: {
+            insertData: insertData
+          }
+        })
+      );
+    }
+
+    return responseHelper.successWithData(insertResponse);
   }
 
   /**
@@ -209,14 +279,33 @@ class InviteCode extends ModelBase {
    * @returns {Promise<*>}
    */
   static async flushCache(params) {
-    const promisesArray = [];
+    const promises = [];
+
+    if (params.userId) {
+      const InviteCodeByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/InviteCodeByUserIds');
+      promises.push(new InviteCodeByUserIdsCache({ userIds: [params.userId] }).clear());
+    }
+
+    if (params.code) {
+      const InviteCodeByCodeCache = require(rootPrefix + '/lib/cacheManagement/single/InviteCodeByCode');
+      promises.push(new InviteCodeByCodeCache({ inviteCode: params.code }).clear());
+    }
 
     if (params.id) {
       const InviteCodeByIdCache = require(rootPrefix + '/lib/cacheManagement/single/InviteCodeById');
-      promisesArray.push(new InviteCodeByIdCache({ id: params.id }).clear());
+      promises.push(new InviteCodeByIdCache({ id: params.id }).clear());
     }
 
-    await Promise.all(promisesArray);
+    await Promise.all(promises);
+  }
+
+  /**
+   * Get inviteCode unique index name.
+   *
+   * @returns {string}
+   */
+  static get inviteCodeUniqueIndexName() {
+    return 'idx_2';
   }
 }
 

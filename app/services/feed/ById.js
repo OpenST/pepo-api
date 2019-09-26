@@ -73,7 +73,7 @@ class FeedById extends FeedBase {
       return Promise.reject(
         responseHelper.error({
           internal_error_identifier: 'a_s_f_bi_1',
-          api_error_identifier: 'resource_not_found',
+          api_error_identifier: 'entity_not_found',
           debug_options: { feedId: oThis.feedId }
         })
       );
@@ -95,7 +95,7 @@ class FeedById extends FeedBase {
       return Promise.reject(
         responseHelper.error({
           internal_error_identifier: 'a_s_f_bi_2',
-          api_error_identifier: 'resource_not_found',
+          api_error_identifier: 'entity_not_found',
           debug_options: {}
         })
       );

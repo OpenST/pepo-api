@@ -119,6 +119,11 @@ class OstEventProcess extends ServiceBase {
         eventProcessResponse = await new PricePointsGbpClass(oThis.eventData).perform();
         break;
       }
+      case ostEventConstants.devicesRecoveryInitiateWebhookTopic: {
+        const RecoveryInitiateClass = require(rootPrefix + '/app/services/ostEvents/recovery/Initiate');
+        eventProcessResponse = await new RecoveryInitiateClass(oThis.eventData).perform();
+        break;
+      }
       default: {
         return Promise.reject(
           responseHelper.error({

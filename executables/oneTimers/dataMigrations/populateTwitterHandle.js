@@ -95,7 +95,7 @@ class PopulateTwitterHandle {
       return Promise.reject(twitterResponse);
     }
 
-    const twitterResponseData = twitterResponse.data;
+    const twitterResponseData = twitterResponse.data.response;
 
     for (let index = 0; index < twitterIds.length; index++) {
       const twitterId = twitterIds[index],

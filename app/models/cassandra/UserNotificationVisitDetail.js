@@ -1,8 +1,8 @@
 const rootPrefix = '../../..',
   CassandraModelBase = require(rootPrefix + '/app/models/cassandra/Base'),
+  basicHelper = require(rootPrefix + '/helpers/basic'),
   cassandraKeyspaceConstants = require(rootPrefix + '/lib/globalConstant/cassandraKeyspace'),
-  userNotificationVisitConstants = require(rootPrefix + '/lib/globalConstant/cassandra/userNotificationVisitDetail'),
-  basicHelper = require(rootPrefix + '/helpers/basic');
+  userNotificationVisitConstants = require(rootPrefix + '/lib/globalConstant/cassandra/userNotificationVisitDetail');
 
 // Declare variables.
 const keyspace = cassandraKeyspaceConstants.cassandraKeyspaceName;
@@ -29,13 +29,13 @@ class UserNotificationVisitDetailModel extends CassandraModelBase {
   }
 
   /**
-   * Keys for table user_notification_visit_details
+   * Keys for table user_notification_visit_details.
    *
    * @returns {{partition: string[], sort: string[]}}
    */
   keyObject() {
     return {
-      partition: [userNotificationVisitConstants.shortToLongNamesMap['user_id']],
+      partition: [userNotificationVisitConstants.shortToLongNamesMap.user_id],
       sort: []
     };
   }
@@ -108,12 +108,9 @@ class UserNotificationVisitDetailModel extends CassandraModelBase {
   /**
    * Flush cache.
    *
-   * @param {object} params
-   * @param {number} params.userId
-   *
    * @returns {Promise<*>}
    */
-  static async flushCache(params) {
+  static async flushCache() {
     // Do nothing.
   }
 }

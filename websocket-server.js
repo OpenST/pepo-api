@@ -13,11 +13,16 @@ const rootPrefix = '.',
   configStrategyProvider = require(rootPrefix + '/lib/providers/configStrategy'),
   configStrategyConstants = require(rootPrefix + '/lib/globalConstant/configStrategy'),
   processIdSelector = require(rootPrefix + '/lib/webSocket/processIdSelector'),
+  createErrorLogsEntry = require(rootPrefix + '/lib/errorLogs/createEntry'),
+  errorLogsConstants = require(rootPrefix + '/lib/globalConstant/errorLogs'),
   socketConnectionConstants = require(rootPrefix + '/lib/globalConstant/socketConnection'),
   socketJobProcessor = require(rootPrefix + '/executables/rabbitMqSubscribers/socketJobProcessor'),
   WebsocketAuth = require(rootPrefix + '/app/services/websocket/auth'),
   webSocketCustomCache = require(rootPrefix + '/lib/webSocket/customCache'),
   websocketAutoDisconnect = require(rootPrefix + '/lib/webSocket/autoDisconnect');
+
+const apiVersions = require(rootPrefix + '/lib/globalConstant/apiVersions'),
+  errorConfig = basicHelper.fetchErrorConfig(apiVersions.v1);
 
 let socketIdentifier = null;
 
@@ -30,22 +35,43 @@ async function run() {
 
   let websocketPort = websocketConfigResponse.data[configStrategyConstants.websocket].port;
 
-  logger.step('-------------------------- Fetching cronProcessId --------------------------');
+  logger.step('# Fetching cron process id.');
   let cronProcessId = await processIdSelector.perform();
-  logger.step('-------------------------- Subscribing to RMQ -------- cronProcessId: ', cronProcessId);
-  await subscribeToRmq(cronProcessId);
-  logger.step('-------------------------- Starting Websocket server --------------------------');
 
-  await startWebSocketServer(websocketPort);
+  logger.step('# Start subscribtion job for cron process id:', cronProcessId);
+  await subscribeToRmq(cronProcessId);
+
+  logger.step('# Attaching handlers');
+  attachHandlers();
+
+  //** Uncomment the following lines to test websockets on local. **/
+  // app.get('/', function(req, res) {
+  //   res.sendFile(__dirname + '/index.html');
+  // });
+
+  http.listen(websocketPort, function() {
+    logger.step('# Listening on port ' + websocketPort);
+  });
 }
 
-async function startWebSocketServer(websocketPort) {
-  app.get('/', function(req, res) {
-    res.sendFile(__dirname + '/index.html');
-  });
+/**
+ * Start subscription job for cron process id
+ *
+ * @param cronProcessId
+ * @return {Promise<void>}
+ */
+async function subscribeToRmq(cronProcessId) {
+  let socketJobProcessorObj = new socketJobProcessor({ cronProcessId: +cronProcessId });
+  await socketJobProcessorObj.perform();
+  socketIdentifier = socketConnectionConstants.getSocketIdentifierFromTopic(socketJobProcessorObj.topics[0]);
+}
 
+/**
+ * Attach handlers
+ */
+function attachHandlers() {
   io.on('connection', async function(socket) {
-    console.log('a user connected socket', socket.handshake.query);
+    logger.log('a user connected socket', socket.handshake.query);
     let err = null;
 
     if (webSocketCustomCache.checkStopConnectingSockets()) {
@@ -89,23 +115,26 @@ async function startWebSocketServer(websocketPort) {
       socket
     );
   });
-
-  http.listen(websocketPort, function() {
-    logger.step('**** Listening on port ' + websocketPort);
-  });
-}
-
-async function subscribeToRmq(cronProcessId) {
-  let socketJobProcessorObj = new socketJobProcessor({ cronProcessId: +cronProcessId });
-  await socketJobProcessorObj.perform();
-  socketIdentifier = socketConnectionConstants.getSocketIdentifierFromTopic(socketJobProcessorObj.topics[0]);
 }
 
 async function autoDisconnect() {
-  console.log('\nautoDisconnect called========================TIME====', basicHelper.getCurrentTimestampInMinutes());
+  logger.log('\n#AutoDisconnect called at: ', basicHelper.getCurrentTimestampInMinutes());
   websocketAutoDisconnect.perform();
   setTimeout(autoDisconnect, 60 * 1000);
 }
 
-run();
+run().catch(async function(err) {
+  logger.error('Could not start websocket-server: ', err);
+
+  let errorObject = responseHelper.error({
+    internal_error_identifier: 'Could not start websocket-server',
+    api_error_identifier: 'something_went_wrong',
+    debug_options: { error: err.toString(), stack: err.stack },
+    error_config: errorConfig
+  });
+
+  await createErrorLogsEntry.perform(errorObject, errorLogsConstants.highSeverity);
+
+  process.exit(1);
+});
 autoDisconnect();

@@ -82,11 +82,7 @@ class UserProfileElementModel extends ModelBase {
 
       const formattedRow = oThis.formatDbData(dbRows[ind]);
 
-      if (result.hasOwnProperty(userId)) {
-        result[userId][formattedRow.dataKind] = formattedRow;
-      } else {
-        result[userId][formattedRow.dataKind] = formattedRow;
-      }
+      result[userId][formattedRow.dataKind] = formattedRow;
     }
 
     return result;
@@ -102,34 +98,13 @@ class UserProfileElementModel extends ModelBase {
 
     const currentTime = Math.floor(Date.now() / 1000);
 
-    return oThis
+    await oThis
       .insert({
         user_id: params.userId,
         data_kind: userProfileElementConst.invertedKinds[params.dataKind],
         data: params.data,
         created_at: currentTime,
         updated_at: currentTime
-      })
-      .fire();
-  }
-
-  /**
-   * Delete by user id and kind.
-   *
-   * @param {object} params
-   * @param {number} params.userId
-   * @param {string} params.dataKind
-   *
-   * @return {Promise<void>}
-   */
-  async deleteByUserIdAndKind(params) {
-    const oThis = this;
-
-    await oThis
-      .delete()
-      .where({
-        user_id: params.userId,
-        data_kind: userProfileElementConst.invertedKinds[params.dataKind]
       })
       .fire();
 

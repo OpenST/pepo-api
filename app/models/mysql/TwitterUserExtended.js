@@ -43,6 +43,7 @@ class TwitterUserExtendedModel extends ModelBase {
       userId: dbRow.user_id,
       token: dbRow.token,
       secret: dbRow.secret,
+      accessType: twitterUserExtendedConstants.accessTypes[dbRow.access_type],
       status: twitterUserExtendedConstants.statuses[dbRow.status],
       createdAt: dbRow.created_at,
       updatedAt: dbRow.updated_at
@@ -57,7 +58,7 @@ class TwitterUserExtendedModel extends ModelBase {
    * @returns {array}
    */
   safeFormattedColumnNames() {
-    return ['id', 'userId', 'twitterUserId', 'status', 'createdAt', 'updatedAt'];
+    return ['id', 'userId', 'twitterUserId', 'accessType', 'status', 'createdAt', 'updatedAt'];
   }
 
   /**

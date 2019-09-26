@@ -7,13 +7,13 @@ const rootPrefix = '../../..',
 const dbName = databaseConstants.adminDbName;
 
 /**
- * Class for user profile element model.
+ * Class for admin activity log model.
  *
- * @class ActivityLogModel
+ * @class AdminActivityLogModel
  */
 class AdminActivityLogModel extends ModelBase {
   /**
-   * Constructor for user profile element model.
+   * Constructor for admin activity log model.
    *
    * @augments ModelBase
    *
@@ -68,7 +68,7 @@ class AdminActivityLogModel extends ModelBase {
    *
    * @returns {Promise<any>}
    */
-  insertAction(params) {
+  async insertAction(params) {
     const oThis = this;
 
     const currentTime = Math.floor(Date.now() / 1000);

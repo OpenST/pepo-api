@@ -2,9 +2,13 @@ const rootPrefix = '../../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   UserNotificationModel = require(rootPrefix + '/app/models/cassandra/UserNotification'),
-  ContributionThanksPublisher = require(rootPrefix + '/lib/userNotificationPublisher/ContributionThanks'),
+  bgJob = require(rootPrefix + '/lib/rabbitMqEnqueue/bgJob'),
+  bgJobConstants = require(rootPrefix + '/lib/globalConstant/bgJob'),
   base64Helper = require(rootPrefix + '/lib/base64Helper'),
-  responseHelper = require(rootPrefix + '/lib/formatter/response');
+  responseHelper = require(rootPrefix + '/lib/formatter/response'),
+  notificationJobEnqueue = require(rootPrefix + '/lib/rabbitMqEnqueue/notification'),
+  notificationJobConstants = require(rootPrefix + '/lib/globalConstant/notificationJob'),
+  coreConstants = require(rootPrefix + '/config/coreConstants');
 
 /**
  * Class for thank you notification.
@@ -19,6 +23,7 @@ class SayThankYou extends ServiceBase {
    * @param {string} params.text
    * @param {string} params.notification_id
    * @param {string} params.current_user.id
+   * @param {integer} params.tweet_needed
    *
    * @augments ServiceBase
    *
@@ -32,7 +37,10 @@ class SayThankYou extends ServiceBase {
     oThis.text = params.text;
     oThis.notificationId = params.notification_id;
     oThis.currentUserId = +params.current_user.id;
+    oThis.tweetNeeded = +params.tweet_needed || 0;
 
+    oThis.twitterUserObj = null;
+    oThis.twitterUserExtendedObj = null;
     oThis.userNotificationObj = {};
     oThis.decryptedNotificationParams = {};
   }
@@ -53,6 +61,10 @@ class SayThankYou extends ServiceBase {
     await oThis._updateUserNotification();
 
     await oThis._enqueueUserNotification();
+
+    if (oThis.tweetNeeded) {
+      await oThis._enqueueTweetBgJob();
+    }
 
     return responseHelper.successWithData({});
   }
@@ -210,11 +222,26 @@ class SayThankYou extends ServiceBase {
   async _enqueueUserNotification() {
     const oThis = this;
 
-    const params = {
+    // Notification would be published only if user is approved.
+    await notificationJobEnqueue.enqueue(notificationJobConstants.contributionThanks, {
       userNotification: oThis.userNotificationObj,
       text: oThis.text
-    };
-    await new ContributionThanksPublisher(params).perform();
+    });
+  }
+
+  /**
+   * Enqueue tweet bg job.
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _enqueueTweetBgJob() {
+    const oThis = this;
+
+    await bgJob.enqueue(bgJobConstants.tweetJobTopic, {
+      text: oThis.text + '\nvia @' + coreConstants.PEPO_TWITTER_HANDLE,
+      userId: oThis.currentUserId
+    });
   }
 }
 

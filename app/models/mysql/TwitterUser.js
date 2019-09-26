@@ -33,6 +33,7 @@ class TwitterUserModel extends ModelBase {
    * @param {number} dbRow.id
    * @param {number} dbRow.twitter_id
    * @param {string} dbRow.email
+   * @param {string} dbRow.handle
    * @param {string} dbRow.name
    * @param {string} dbRow.profile_image_url
    * @param {number} dbRow.user_id
@@ -48,6 +49,7 @@ class TwitterUserModel extends ModelBase {
       id: dbRow.id,
       twitterId: dbRow.twitter_id,
       email: dbRow.email,
+      handle: dbRow.handle,
       name: dbRow.name,
       profileImageUrl: dbRow.profile_image_url,
       userId: dbRow.user_id,
@@ -64,7 +66,7 @@ class TwitterUserModel extends ModelBase {
    * @returns {array}
    */
   safeFormattedColumnNames() {
-    return ['id', 'twitterId', 'email', 'name', 'profileImageUrl', 'userId', 'createdAt', 'updatedAt'];
+    return ['id', 'twitterId', 'email', 'handle', 'name', 'profileImageUrl', 'userId', 'createdAt', 'updatedAt'];
   }
 
   /**
@@ -103,7 +105,7 @@ class TwitterUserModel extends ModelBase {
     const oThis = this;
 
     const dbRows = await oThis
-      .select(['id', 'user_id'])
+      .select(['id', 'user_id', 'email'])
       .where({ user_id: userIds })
       .fire();
 

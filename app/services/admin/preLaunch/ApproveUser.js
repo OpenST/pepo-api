@@ -63,8 +63,7 @@ class ApproveUser extends ServiceBase {
   async _markInviteLimitAsInfinite() {
     const oThis = this;
 
-    let cacheRsp = await new PreLaunchInviteByIdsCache({ ids: [oThis.inviteId] }).fetch();
-
+    const cacheRsp = await new PreLaunchInviteByIdsCache({ ids: [oThis.inviteId] }).fetch();
     if (cacheRsp.isFailure()) {
       return cacheRsp;
     }

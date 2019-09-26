@@ -92,6 +92,40 @@ class VideoDetail extends ModelBase {
    *
    * @return {object}
    */
+  async fetchLatestVideoId(userIds) {
+    const oThis = this;
+
+    const dbRows = await oThis
+      .select('creator_user_id, max(id) as latest_video_id')
+      .where({
+        creator_user_id: userIds,
+        status: videoDetailsConst.invertedStatuses[videoDetailsConst.activeStatus]
+      })
+      .group_by(['creator_user_id'])
+      .fire();
+
+    let response = {};
+
+    for (let index = 0; index < userIds.length; index++) {
+      const userId = userIds[index];
+      response[userId] = {};
+    }
+
+    for (let index = 0; index < dbRows.length; index++) {
+      const dbRow = dbRows[index];
+      response[dbRow.creator_user_id] = { latestVideoId: dbRow.latest_video_id };
+    }
+
+    return response;
+  }
+
+  /**
+   * Fetch videoDetail object for video id.
+   *
+   * @param {integer} videoId: video id
+   *
+   * @return {object}
+   */
   async fetchByVideoId(videoId) {
     const oThis = this;
 
@@ -263,7 +297,7 @@ class VideoDetail extends ModelBase {
    *
    * @param {object} params
    * @param {number} params.userId
-   * @param {number} params.videoId
+   * @param {number} params.videoIds
    *
    * @return {object}
    */
@@ -276,7 +310,7 @@ class VideoDetail extends ModelBase {
       })
       .where({
         creator_user_id: params.userId,
-        video_id: params.videoId
+        video_id: params.videoIds
       })
       .fire();
 
@@ -309,21 +343,27 @@ class VideoDetail extends ModelBase {
    * @param {object} params
    * @param {number} [params.userId]
    * @param {number} [params.videoId]
+   * @param {number} [params.videoIds]
    *
    * @returns {Promise<*>}
    */
   static async flushCache(params) {
     const promisesArray = [];
 
+    if (params.userId) {
+      const VideoDetailsByUserIdCache = require(rootPrefix +
+        '/lib/cacheManagement/single/VideoDetailsByUserIdPagination');
+      promisesArray.push(new VideoDetailsByUserIdCache({ userId: params.userId }).clear());
+    }
+
     if (params.videoId) {
       const VideoDetailsByVideoIds = require(rootPrefix + '/lib/cacheManagement/multi/VideoDetailsByVideoIds');
       promisesArray.push(new VideoDetailsByVideoIds({ videoIds: [params.videoId] }).clear());
     }
 
-    if (params.userId) {
-      const VideoDetailsByUserIdCache = require(rootPrefix +
-        '/lib/cacheManagement/single/VideoDetailsByUserIdPagination');
-      promisesArray.push(new VideoDetailsByUserIdCache({ userId: params.userId }).clear());
+    if (params.videoIds) {
+      const VideoDetailsByVideoIds = require(rootPrefix + '/lib/cacheManagement/multi/VideoDetailsByVideoIds');
+      promisesArray.push(new VideoDetailsByVideoIds({ videoIds: params.videoIds }).clear());
     }
 
     await Promise.all(promisesArray);

@@ -7,6 +7,7 @@ const rootPrefix = '../../..',
   errorLogsConstants = require(rootPrefix + '/lib/globalConstant/errorLogs'),
   PreLaunchInviteModel = require(rootPrefix + '/app/models/mysql/PreLaunchInvite'),
   InviteCodeModel = require(rootPrefix + '/app/models/mysql/InviteCode'),
+  InviteCodeByCodeCache = require(rootPrefix + '/lib/cacheManagement/single/InviteCodeByCode'),
   inviteCodeConstants = require(rootPrefix + '/lib/globalConstant/inviteCode'),
   AddContactInPepoCampaign = require(rootPrefix + '/lib/email/hookCreator/AddContact'),
   preLaunchInviteConstants = require(rootPrefix + '/lib/globalConstant/preLaunchInvite'),
@@ -43,7 +44,7 @@ class PreLaunchTwitterSignUp extends ServiceBase {
     oThis.userTwitterEntity = params.userTwitterEntity;
     oThis.token = params.token;
     oThis.secret = params.secret;
-    oThis.inviteCode = params.inviteCode;
+    oThis.inviteCode = params.inviteCode ? params.inviteCode.toUpperCase() : null;
 
     oThis.email = oThis.userTwitterEntity.email;
     oThis.encryptedEncryptionSalt = null;
@@ -94,7 +95,7 @@ class PreLaunchTwitterSignUp extends ServiceBase {
 
       return Promise.reject(
         responseHelper.error({
-          internal_error_identifier: 's_t_s_ps_1',
+          internal_error_identifier: 'a_s_pli_s_1',
           api_error_identifier: 'something_went_wrong',
           debug_options: {}
         })
@@ -110,9 +111,9 @@ class PreLaunchTwitterSignUp extends ServiceBase {
     }
 
     if (oThis.inviterCodeId) {
+      await oThis._updateInviteCodeInviterCodeId();
       await oThis._fetchInviterPreLaunchInvite();
       await oThis._updateInvitedUserCount();
-      await oThis._updateInviteCodeInviterCodeId();
       await oThis._sendEmail();
     }
 
@@ -159,10 +160,10 @@ class PreLaunchTwitterSignUp extends ServiceBase {
   async _fetchInviteCodeDetails() {
     const oThis = this;
 
-    // TODO: get from cache written by pankaj
-    let inviterInviteCodeObj = await new InviteCodeModel().fetchByInviteCodes([oThis.inviteCode]);
+    let cacheResp = await new InviteCodeByCodeCache({ inviteCode: oThis.inviteCode }).fetch(),
+      inviterInviteCodeObj = cacheResp.data[oThis.inviteCode];
 
-    oThis.inviterCodeId = inviterInviteCodeObj[oThis.inviteCode].id ? inviterInviteCodeObj[oThis.inviteCode].id : null;
+    oThis.inviterCodeId = inviterInviteCodeObj.id;
 
     return responseHelper.successWithData({});
   }
@@ -183,7 +184,8 @@ class PreLaunchTwitterSignUp extends ServiceBase {
       invite_limit: inviteCodeConstants.inviteMaxLimit
     };
 
-    let insertResponse = await new InviteCodeModel().insert(insertData).fire();
+    let insertResponse = await new InviteCodeModel()._insert(insertData);
+    insertResponse = insertResponse.data;
 
     if (!insertResponse) {
       logger.error('Error while inserting data in invite_codes table.');
@@ -308,12 +310,14 @@ class PreLaunchTwitterSignUp extends ServiceBase {
   async _updateInvitedUserCount() {
     const oThis = this;
 
-    await new PreLaunchInviteModel()
-      .update('invited_user_count = invited_user_count + 1')
-      .where({ id: oThis.inviterPreLaunchInviteId })
-      .fire();
+    if (oThis.inviterPreLaunchInviteId) {
+      await new PreLaunchInviteModel()
+        .update('invited_user_count = invited_user_count + 1')
+        .where({ id: oThis.inviterPreLaunchInviteId })
+        .fire();
 
-    await PreLaunchInviteModel.flushCache({ id: oThis.inviterPreLaunchInviteId });
+      await PreLaunchInviteModel.flushCache({ id: oThis.inviterPreLaunchInviteId });
+    }
   }
 
   /**
@@ -341,18 +345,20 @@ class PreLaunchTwitterSignUp extends ServiceBase {
   async _sendEmail() {
     const oThis = this;
 
-    let transactionMailParams = {
-      receiverEntityId: oThis.inviterPreLaunchInviteId,
-      receiverEntityKind: emailServiceApiCallHookConstants.preLaunchInviteEntityKind,
-      customDescription: 'pre launch invite signup using invite code',
-      templateName: emailServiceApiCallHookConstants.userRefferedTemplateName,
-      templateVars: {
-        pepo_api_domain: 1,
-        twitter_handle: oThis.preLaunchInviteObj.handle
-      }
-    };
+    if (oThis.inviterPreLaunchInviteId) {
+      let transactionMailParams = {
+        receiverEntityId: oThis.inviterPreLaunchInviteId,
+        receiverEntityKind: emailServiceApiCallHookConstants.preLaunchInviteEntityKind,
+        customDescription: 'pre launch invite signup using invite code',
+        templateName: emailServiceApiCallHookConstants.userReferredTemplateName,
+        templateVars: {
+          pepo_api_domain: 1,
+          twitter_handle: oThis.preLaunchInviteObj.handle
+        }
+      };
 
-    await new SendTransactionalMail(transactionMailParams).perform();
+      await new SendTransactionalMail(transactionMailParams).perform();
+    }
   }
 
   /**
