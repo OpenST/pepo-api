@@ -18,7 +18,6 @@ router.get('/', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.fetchGoto;
 
   const dataFormatterFunc = async function(serviceResponse) {
-    console.log('serviceResponse---', JSON.stringify(serviceResponse));
     const wrapperFormatterRsp = await new FormatterComposer({
       resultType: responseEntityKey.goto,
       entityKindToResponseKeyMap: {
@@ -26,8 +25,6 @@ router.get('/', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
       },
       serviceData: serviceResponse.data
     }).perform();
-
-    console.log('wrapperFormatterRsp------', wrapperFormatterRsp);
 
     serviceResponse.data = wrapperFormatterRsp.data;
   };

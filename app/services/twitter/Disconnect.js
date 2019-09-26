@@ -127,10 +127,6 @@ class TwitterDisconnect extends ServiceBase {
     const cookieToken = localCipher.generateRandomIv(32);
     oThis.encryptedCookieToken = localCipher.encrypt(oThis.decryptedEncryptionSalt, cookieToken);
 
-    logger.log('oThis.decryptedEncryptionSalt', oThis.decryptedEncryptionSalt);
-    logger.log('cookieToken', cookieToken);
-    logger.log('oThis.encryptedCookieToken', oThis.encryptedCookieToken);
-
     await new UserModel()
       .update({
         cookie_token: oThis.encryptedCookieToken
