@@ -82,6 +82,7 @@ class InAppProduct extends ModelBase {
         pricePoint,
         inAppProductsConstants.invertedStatuses[inAppProductsConstants.active]
       ])
+      .order_by('amount_in_usd asc')
       .fire();
 
     const responseData = [];

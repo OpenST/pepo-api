@@ -72,19 +72,10 @@ router.post('/:video_id/delete', sanitizer.sanitizeDynamicUrlParams, cookieHelpe
   res,
   next
 ) {
-  let r = { success: true, data: {} };
+  req.decodedParams.apiName = apiName.deleteVideo;
+  req.decodedParams.video_id = req.params.video_id;
 
-  return res.status(200).json(r);
-});
-
-router.post('/:video_id/report', sanitizer.sanitizeDynamicUrlParams, cookieHelper.validateUserLoginRequired, function(
-  req,
-  res,
-  next
-) {
-  let r = { success: true, data: {} };
-
-  return res.status(200).json(r);
+  Promise.resolve(routeHelper.perform(req, res, next, '/video/Delete', 'r_a_v1_v_3', null, null));
 });
 
 module.exports = router;

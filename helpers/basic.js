@@ -313,6 +313,15 @@ class BasicHelper {
   }
 
   /**
+   * Check if environment is staging.
+   *
+   * @return {boolean}
+   */
+  isSandbox() {
+    return coreConstants.environment === 'sandbox';
+  }
+
+  /**
    * Check if environment is development.
    *
    * @return {boolean}

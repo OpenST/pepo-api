@@ -107,13 +107,25 @@ class UserProfile extends ServiceBase {
     if (!oThis.ostUserId) {
       logger.error('Error while fetching data from token user cache.');
 
-      return Promise.reject(tokenUserData);
+      return Promise.reject(
+        responseHelper.error({
+          internal_error_identifier: 'a_s_a_up_ftud_1',
+          api_error_identifier: 'could_not_proceed',
+          debug_options: { tokenUserData: tokenUserData }
+        })
+      );
     }
 
     if (tokenUserData.ostStatus !== tokenUserConstants.activatedOstStatus) {
       logger.error('Token holder is not deployed for the user.');
 
-      return Promise.reject(tokenUserData);
+      return Promise.reject(
+        responseHelper.error({
+          internal_error_identifier: 'a_s_a_up_ftud_2',
+          api_error_identifier: 'could_not_proceed',
+          debug_options: { tokenUserData: tokenUserData }
+        })
+      );
     }
   }
 
