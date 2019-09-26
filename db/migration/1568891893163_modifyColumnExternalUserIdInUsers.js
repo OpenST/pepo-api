@@ -6,15 +6,16 @@ const dbName = database.userDbName;
 const dbKind = DbKindConstant.sqlDbKind;
 
 const upQuery = 'ALTER TABLE `users` \n\
-      ADD COLUMN `external_user_id` varchar(50) AFTER `email`; ';
+      MODIFY `external_user_id` varchar(50) NOT NULL; ';
 
-const downQuery = 'ALTER TABLE `users` DROP `external_user_id`;';
+const downQuery = 'ALTER TABLE `users` \n\
+  MODIFY `external_user_id` varchar(50) NULL;';
 
-const addColumnExternalUserIdInUsersTable = {
+const modifyColumnExternalUserIdInUsers = {
   dbName: dbName,
   up: [upQuery],
   down: [downQuery],
   dbKind: dbKind
 };
 
-module.exports = addColumnExternalUserIdInUsersTable;
+module.exports = modifyColumnExternalUserIdInUsers;
