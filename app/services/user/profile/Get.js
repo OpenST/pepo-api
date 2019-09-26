@@ -77,7 +77,8 @@ class GetUserProfile extends ServiceBase {
       tags: profileResp.tags,
       userStat: profileResp.userStat,
       currentUserUserContributionsMap: profileResp.currentUserUserContributionsMap,
-      pricePointsMap: profileResp.pricePointsMap
+      pricePointsMap: profileResp.pricePointsMap,
+      twitterUsersMap: profileResp.twitterUsersMap
     });
   }
 }

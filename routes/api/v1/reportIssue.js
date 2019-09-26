@@ -12,7 +12,7 @@ const errorConfig = basicHelper.fetchErrorConfig(apiVersions.v1);
 
 /* Rotate twitter account */
 router.post('/', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
-  req.decodedParams.apiName = apiName.reportIssue;
+  req.decodedParams.apiName = apiName.reportIssueForWeb;
 
   Promise.resolve(routeHelper.perform(req, res, next, '/ReportIssue', 'r_a_v1_ri_1', null));
 });

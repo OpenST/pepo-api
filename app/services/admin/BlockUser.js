@@ -2,9 +2,9 @@ const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   UserModel = require(rootPrefix + '/app/models/mysql/User'),
   UsersCache = require(rootPrefix + '/lib/cacheManagement/multi/User'),
+  TwitterDisconnect = require(rootPrefix + '/app/services/twitter/Disconnect'),
   AdminActivityLogModel = require(rootPrefix + '/app/models/mysql/AdminActivityLog'),
   RemoveContactInPepoCampaign = require(rootPrefix + '/lib/email/hookCreator/RemoveContact'),
-  TwitterDisconnect = require(rootPrefix + '/app/services/twitter/Disconnect'),
   bgJob = require(rootPrefix + '/lib/rabbitMqEnqueue/bgJob'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   userConstants = require(rootPrefix + '/lib/globalConstant/user'),
@@ -63,13 +63,13 @@ class BlockUser extends ServiceBase {
 
     await oThis._blockUsers();
 
-    await oThis._removeContactsInCampaigns();
-
-    await oThis._disconnectTwitter();
-
-    // Flush cache after twitter disconnect
     const promisesArray = [];
-    promisesArray.push(oThis._enqueueToBackgroundJob(), oThis._logAdminActivity());
+    promisesArray.push(
+      oThis._removeContactsInCampaigns(),
+      oThis._disconnectTwitter(),
+      oThis._enqueueToBackgroundJob(),
+      oThis._logAdminActivity()
+    );
     await Promise.all(promisesArray);
 
     return responseHelper.successWithData({});
@@ -142,18 +142,17 @@ class BlockUser extends ServiceBase {
   async _removeContactsInCampaigns() {
     const oThis = this;
 
-    let promiseArray = [];
+    const promiseArray = [];
+
+    const removeContactParams = {
+      receiverEntityKind: emailServiceApiCallHookConstants.userEmailEntityKind,
+      customDescription: 'Remove contact after block user.'
+    };
 
     for (let ind = 0; ind < oThis.userIds.length; ind++) {
-      let userId = oThis.userIds[ind];
+      removeContactParams.receiverEntityId = oThis.userIds[ind];
 
-      let removeContactParams = {
-        receiverEntityId: userId,
-        receiverEntityKind: emailServiceApiCallHookConstants.userEmailEntityKind,
-        customDescription: 'Remove contact after block user.'
-      };
-
-      let removeContactObj = new RemoveContactInPepoCampaign(removeContactParams);
+      const removeContactObj = new RemoveContactInPepoCampaign(removeContactParams);
 
       promiseArray.push(removeContactObj.perform());
     }
@@ -170,12 +169,12 @@ class BlockUser extends ServiceBase {
   async _disconnectTwitter() {
     const oThis = this;
 
-    let promiseArray = [];
+    const promiseArray = [];
 
     for (let ind = 0; ind < oThis.userIds.length; ind++) {
-      let userId = oThis.userIds[ind];
+      const userId = oThis.userIds[ind];
 
-      let twitterDisconnectObj = new TwitterDisconnect({
+      const twitterDisconnectObj = new TwitterDisconnect({
         current_user: oThis.userObjects[userId],
         device_id: null
       });

@@ -48,7 +48,7 @@ class DeleteVideo extends ServiceBase {
 
     // Unknown video or already deleted.
     if (!oThis.creatorUserId || oThis.videoDetails[0].status === videoDetailsConstants.deletedStatus) {
-      responseHelper.paramValidationError({
+      return responseHelper.paramValidationError({
         internal_error_identifier: 'a_s_v_d_1',
         api_error_identifier: 'invalid_api_params',
         params_error_identifiers: ['invalid_video_id'],
