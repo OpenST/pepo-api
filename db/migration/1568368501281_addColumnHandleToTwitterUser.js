@@ -7,7 +7,7 @@ const dbKind = DbKindConstant.sqlDbKind;
 
 const upQuery =
   'ALTER TABLE `twitter_users` \n\
-      ADD COLUMN `handle` varchar(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NULL; ';
+      ADD COLUMN `handle` varchar(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NULL AFTER `email`; ';
 
 const downQuery = 'ALTER TABLE `twitter_users` DROP `handle`;';
 
