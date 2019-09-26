@@ -9,7 +9,7 @@ const rootPrefix = '../../..',
   UsersWithoutOauthToken = require(rootPrefix + '/lib/twitter/oAuth1.0/UsersWithoutOauthToken'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger');
 
-const BATCH_SIZE = 3;
+const BATCH_SIZE = 25;
 
 class PopulateTwitterHandle {
   constructor() {}
