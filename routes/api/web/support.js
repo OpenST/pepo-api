@@ -18,7 +18,7 @@ router.use(cookieParser(coreConstants.COOKIE_SECRET));
 /* Subscribe email*/
 router.get(
   '/',
-  cookieHelper.parseUserLoginCookieIfPresent,
+  cookieHelper.validateWebviewLoginCookieIfPresent,
   sanitizer.sanitizeDynamicUrlParams,
   cookieHelper.validateTokenIfPresent,
   cookieHelper.validateUserLoginRequired,
