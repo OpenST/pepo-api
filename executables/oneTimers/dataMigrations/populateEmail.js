@@ -32,7 +32,7 @@ class PopulateEmail {
 
     while (true) {
       oThis.userIdToEmailsMap = {};
-      oThis.userIdToTwitterIdsMap = {};
+      oThis.twitterIdToUserIdMap = {};
       oThis.userIds = [];
       oThis.twitterIds = [];
 
@@ -102,13 +102,13 @@ class PopulateEmail {
       } else if (twitterUser.email !== null) {
         oThis.userIdToEmailsMap[twitterUser.userId] = twitterUser.email;
       } else {
-        oThis.userIdToTwitterIdsMap[twitterUser.userId] = twitterUser.twitterId;
+        oThis.twitterIdToUserIdMap[twitterUser.twitterId] = twitterUser.userId;
         oThis.twitterIds.push(twitterUser.twitterId);
       }
     }
 
     logger.log('oThis.userIdToEmailsMap : =============', oThis.userIdToEmailsMap);
-    logger.log('oThis.userIdToTwitterIdsMap : =============', oThis.userIdToTwitterIdsMap);
+    logger.log('oThis.userIdToTwitterIdsMap : =============', oThis.twitterIdToUserIdMap);
     logger.log('oThis.twitterIds: ========', oThis.twitterIds);
   }
 
@@ -140,7 +140,7 @@ class PopulateEmail {
         preLaunchInvite = preLaunchInviteCacheRespData[twitterId];
 
       if (preLaunchInvite.status === preLaunchInviteConstants.doptinStatus) {
-        const userIdForTwitterId = oThis.userIdToTwitterIdsMap[twitterId];
+        const userIdForTwitterId = oThis.twitterIdToUserIdMap[twitterId];
         oThis.userIdToEmailsMap[userIdForTwitterId] = preLaunchInvite.email;
       }
     }
