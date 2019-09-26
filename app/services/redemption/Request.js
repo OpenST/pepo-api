@@ -14,6 +14,7 @@ const rootPrefix = '../../..',
   basicHelper = require(rootPrefix + '/helpers/basic'),
   coreConstants = require(rootPrefix + '/config/coreConstants'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
+  emailConstants = require(rootPrefix + '/lib/globalConstant/email'),
   ostPricePointConstants = require(rootPrefix + '/lib/globalConstant/ostPricePoints'),
   emailServiceApiCallHookConstants = require(rootPrefix + '/lib/globalConstant/emailServiceApiCallHook');
 
@@ -332,8 +333,8 @@ class RequestRedemption extends ServiceBase {
     const oThis = this;
 
     const transactionalMailParams = {
-      receiverEntityId: coreConstants.PEPO_REDEMPTION_USER_ID,
-      receiverEntityKind: emailServiceApiCallHookConstants.userEmailEntityKind,
+      receiverEntityId: 0,
+      receiverEntityKind: emailServiceApiCallHookConstants.hookParamsInternalEmailEntityKind,
       templateName: emailServiceApiCallHookConstants.userRedemptionTemplateName,
       templateVars: {
         // User details.
@@ -352,7 +353,8 @@ class RequestRedemption extends ServiceBase {
         pepo_amount: basicHelper.convertWeiToNormal(oThis.pepoAmountInWei).toString(10),
         redemption_receiver_username: oThis.redemptionReceiverUsername,
         redemption_receiver_token_holder_address: oThis.redemptionReceiverTokenHolderAddress,
-        pepo_api_domain: 1
+        pepo_api_domain: 1,
+        receiverEmail: emailConstants.redemptionRequest
       }
     };
 
