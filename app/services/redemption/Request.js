@@ -333,7 +333,7 @@ class RequestRedemption extends ServiceBase {
 
     const transactionalMailParams = {
       receiverEntityId: coreConstants.PEPO_REDEMPTION_USER_ID,
-      receiverEntityKind: emailServiceApiCallHookConstants.redemptionReceiverEntityKind,
+      receiverEntityKind: emailServiceApiCallHookConstants.userEmailEntityKind,
       templateName: emailServiceApiCallHookConstants.userRedemptionTemplateName,
       templateVars: {
         // User details.
