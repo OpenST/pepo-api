@@ -4,6 +4,7 @@ export PA_ENVIRONMENT='development'
 export PA_PORT=3000
 export PA_DEBUG_ENABLED='1';
 export PA_DOMAIN='http://pepodev.com:8080'
+export PA_WEB_DOMAIN='http://test:testpasswd@pepodev.com:8080'
 export PA_COOKIE_DOMAIN='.pepodev.com'
 
 # Devops error logs framework

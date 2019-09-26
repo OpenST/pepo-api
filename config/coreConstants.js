@@ -20,6 +20,10 @@ class CoreConstants {
     return process.env.PA_DEVOPS_APP_NAME;
   }
 
+  get PA_WEB_DOMAIN() {
+    return process.env.PA_WEB_DOMAIN;
+  }
+
   get PA_DOMAIN() {
     return process.env.PA_DOMAIN;
   }
