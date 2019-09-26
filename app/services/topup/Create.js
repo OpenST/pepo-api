@@ -193,15 +193,7 @@ class CreateTopup extends ServiceBase {
     const oThis = this;
 
     if (oThis.os === productConstant.android) {
-      if (oThis.paymentDetail.status != fiatPaymentConstants.receiptValidationPendingStatus) {
-        return false;
-      }
-
-      let previousReceiptResponse = oThis.paymentDetail.decryptedReceipt;
-
-      // according to https://developers.google.com/android-publisher/api-ref/purchases/products,
-      // purchaseState => 0 -> Purchased, 1 -> Canceled, 2 -> Pending
-      if (previousReceiptResponse.data.purchaseState != 2) {
+      if (oThis.paymentDetail.status == fiatPaymentConstants.receiptValidationPendingStatus) {
         return true;
       }
     }

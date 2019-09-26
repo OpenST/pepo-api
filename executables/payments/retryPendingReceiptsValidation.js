@@ -9,6 +9,8 @@ const rootPrefix = '../..',
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   bgJobConstants = require(rootPrefix + '/lib/globalConstant/bgJob'),
   paymentFactory = require(rootPrefix + '/lib/payment/process/Factory'),
+  createErrorLogsEntry = require(rootPrefix + '/lib/errorLogs/createEntry'),
+  errorLogsConstants = require(rootPrefix + '/lib/globalConstant/errorLogs'),
   fiatPaymentConstants = require(rootPrefix + '/lib/globalConstant/fiatPayment'),
   inAppProductsConstants = require(rootPrefix + '/lib/globalConstant/inAppProduct'),
   cronProcessesConstants = require(rootPrefix + '/lib/globalConstant/cronProcesses');
@@ -47,7 +49,11 @@ class RetryPendingReceiptValidation extends CronBase {
 
     oThis._setCurrentTimeStamp();
 
+    oThis.canExit = false;
+
     await oThis._fetchRowsAndOperate();
+
+    oThis.canExit = true;
 
     return responseHelper.successWithData({});
   }
@@ -108,7 +114,6 @@ class RetryPendingReceiptValidation extends CronBase {
     let promiseArray = [];
 
     while (oThis.areRowsRemainingToProcess) {
-      oThis.canExit = false;
       let dbRows = await new FiatPaymentModel()
         .select('*')
         .where([
@@ -127,7 +132,6 @@ class RetryPendingReceiptValidation extends CronBase {
           promiseArray.push(oThis._operateOnFetchedRow(formattedRow));
         }
         await Promise.all(promiseArray);
-        oThis.canExit = true;
       }
     }
   }
@@ -141,6 +145,13 @@ class RetryPendingReceiptValidation extends CronBase {
    */
   async _operateOnFetchedRow(dataRow) {
     const oThis = this;
+
+    let maxRetryTimeout = 2 * 24 * 60 * 60; //48 hours
+
+    if (dataRow.createdAt - oThis.currentTimeStamp > maxRetryTimeout) {
+      await oThis._markPermanentlyFailed(dataRow);
+      return responseHelper.successWithData({});
+    }
 
     let fiatPayment = dataRow,
       params = {
@@ -178,6 +189,8 @@ class RetryPendingReceiptValidation extends CronBase {
         fiatPaymentId: oThis.fiatPaymentId
       });
     }
+
+    return responseHelper.successWithData({});
   }
 
   /**
@@ -193,6 +206,27 @@ class RetryPendingReceiptValidation extends CronBase {
       paymentDetail = paymentObj[fiatPaymentId];
 
     return responseHelper.successWithData(paymentDetail);
+  }
+
+  async _markPermanentlyFailed(dataRow) {
+    const oThis = this;
+
+    await new FiatPaymentModel()
+      .update({ retry_after: null })
+      .where({ id: dataRow.id })
+      .fire();
+
+    let errorObject = responseHelper.error({
+      internal_error_identifier: 'payment_receipt_validation_limit_reached:e_p_rprv_1',
+      api_error_identifier: 'something_went_wrong',
+      debug_options: {
+        reason: 'pending receipt maximum retry reached',
+        dbRow: JSON.stringify(dataRow)
+      }
+    });
+
+    logger.error('Error: ', errorObject.getDebugData());
+    await createErrorLogsEntry.perform(errorObject, errorLogsConstants.highSeverity);
   }
 }
 
