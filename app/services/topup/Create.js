@@ -5,6 +5,7 @@ const rootPrefix = '../../..',
   fiatPaymentConstants = require(rootPrefix + '/lib/globalConstant/fiatPayment'),
   productConstant = require(rootPrefix + '/lib/globalConstant/inAppProduct'),
   bgJobConstants = require(rootPrefix + '/lib/globalConstant/bgJob'),
+  basicHelper = require(rootPrefix + '/helpers/basic'),
   bgJob = require(rootPrefix + '/lib/rabbitMqEnqueue/bgJob'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
@@ -38,6 +39,7 @@ class CreateTopup extends ServiceBase {
     oThis.isAlreadyRecorded = false;
     oThis.fiatPaymentId = null;
     oThis.paymentDetail = null;
+    oThis.retryCount = 0;
   }
 
   /**
@@ -140,7 +142,8 @@ class CreateTopup extends ServiceBase {
       kind: fiatPaymentConstants.invertedKinds[fiatPaymentConstants.topUpKind],
       service_kind: fiatPaymentConstants.invertedServiceKinds[serviceKind],
       currency: ostPricePointConstants.invertedQuoteCurrencies[ostPricePointConstants.usdQuoteCurrency],
-      status: fiatPaymentConstants.invertedStatuses[fiatPaymentConstants.receiptValidationPendingStatus]
+      status: fiatPaymentConstants.invertedStatuses[fiatPaymentConstants.receiptValidationPendingStatus],
+      retry_after: basicHelper.getCurrentTimestampInSeconds()
     };
     let fiatPaymentCreateResp = await new FiatPaymentModel()
       .insert(createParams)
@@ -156,6 +159,7 @@ class CreateTopup extends ServiceBase {
             oThis.isAlreadyRecorded = true;
           }
           oThis.fiatPaymentId = oThis.paymentDetail.id;
+          oThis.retryCount = oThis.paymentDetail.retryCount;
         } else {
           let errorResp = responseHelper.error({
             internal_error_identifier: 'a_s_p_pv_1',
@@ -173,6 +177,7 @@ class CreateTopup extends ServiceBase {
 
     if (!oThis.isAlreadyRecorded && !oThis.fiatPaymentId) {
       oThis.fiatPaymentId = fiatPaymentCreateResp.insertId;
+      oThis.retryCount = 0;
     }
 
     return responseHelper.successWithData({});
@@ -188,15 +193,7 @@ class CreateTopup extends ServiceBase {
     const oThis = this;
 
     if (oThis.os === productConstant.android) {
-      if (oThis.paymentDetail.status != fiatPaymentConstants.receiptValidationPendingStatus) {
-        return false;
-      }
-
-      let previousReceiptResponse = oThis.paymentDetail.decryptedReceipt;
-
-      // according to https://developers.google.com/android-publisher/api-ref/purchases/products,
-      // purchaseState => 0 -> Purchased, 1 -> Canceled, 2 -> Pending
-      if (previousReceiptResponse.data.purchaseState != 2) {
+      if (oThis.paymentDetail.status == fiatPaymentConstants.receiptValidationPendingStatus) {
         return true;
       }
     }
@@ -225,7 +222,8 @@ class CreateTopup extends ServiceBase {
       params = {
         fiatPaymentId: oThis.fiatPaymentId,
         paymentReceipt: oThis.paymentReceipt,
-        userId: oThis.userId
+        userId: oThis.userId,
+        retryCount: oThis.retryCount
       };
 
     let paymentProcessor = PaymentProcessingFactory.getInstance(oThis.os, params);
