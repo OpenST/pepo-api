@@ -26,7 +26,7 @@ class GetBalance extends ServiceBase {
 
     oThis.userId = params.user_id;
 
-    oThis.ostUserId = null;
+    oThis.tokenUserData = null;
   }
 
   /**
@@ -57,21 +57,7 @@ class GetBalance extends ServiceBase {
       return Promise.reject(tokenUserResponse);
     }
 
-    const tokenUserData = tokenUserResponse.data[oThis.userId];
-
-    oThis.ostUserId = tokenUserData.ostUserId;
-
-    if (!oThis.ostUserId) {
-      logger.error('Error while fetching data from token user cache.');
-
-      return Promise.reject(tokenUserData);
-    }
-
-    if (tokenUserData.ostStatus !== tokenUserConstants.activatedOstStatus) {
-      logger.error('Token holder is not deployed for the user.');
-
-      return Promise.reject(tokenUserData);
-    }
+    oThis.tokenUserData = tokenUserResponse.data[oThis.userId];
   }
 
   /**
@@ -83,23 +69,31 @@ class GetBalance extends ServiceBase {
   async _requestPlatformToGetBalance() {
     const oThis = this;
 
-    const paramsForPlatform = {
-      userId: oThis.ostUserId
-    };
+    let balance = 0;
 
-    const platformResponse = await jsSdkWrapper.getUserBalance(paramsForPlatform);
-    if (platformResponse.isFailure()) {
-      logger.error(platformResponse);
-
-      return Promise.reject(platformResponse);
-    }
-
-    const resultType = platformResponse.data.result_type,
-      returnData = {
-        balance: platformResponse.data[resultType]
+    if (
+      !oThis.tokenUserData ||
+      !oThis.tokenUserData.ostUserId ||
+      oThis.tokenUserData.ostStatus !== tokenUserConstants.activatedOstStatus
+    ) {
+      logger.error('USER TOKEN NOT SETUP');
+    } else {
+      const paramsForPlatform = {
+        userId: oThis.tokenUserData.ostUserId
       };
 
-    return responseHelper.successWithData(returnData);
+      const platformResponse = await jsSdkWrapper.getUserBalance(paramsForPlatform);
+      if (platformResponse.isFailure()) {
+        logger.error(platformResponse);
+
+        return Promise.reject(platformResponse);
+      }
+
+      const resultType = platformResponse.data.result_type;
+      balance = platformResponse.data[resultType];
+    }
+
+    return responseHelper.successWithData({ balance: balance });
   }
 }
 
