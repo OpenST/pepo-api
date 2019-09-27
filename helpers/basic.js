@@ -598,6 +598,17 @@ class BasicHelper {
 
     return totalUSDBn.toString(10);
   }
+
+  /**
+   * Is twitter id rotated?
+   *
+   * @param {string} twitterId
+   *
+   * @returns {boolean}
+   */
+  isTwitterIdRotated(twitterId) {
+    return twitterId[0] === '-';
+  }
 }
 
 module.exports = new BasicHelper();

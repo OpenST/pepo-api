@@ -11,6 +11,7 @@ const rootPrefix = '../../..',
   InviteCodeModel = require(rootPrefix + '/app/models/mysql/InviteCode'),
   TwitterUserModel = require(rootPrefix + '/app/models/mysql/TwitterUser'),
   InviteCodeByIdCache = require(rootPrefix + '/lib/cacheManagement/single/InviteCodeById'),
+  basicHelper = require(rootPrefix + '/helpers/basic'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   inviteCodeConstants = require(rootPrefix + '/lib/globalConstant/inviteCode'),
   preLaunchInviteConstant = require(rootPrefix + '/lib/globalConstant/preLaunchInvite');
@@ -107,9 +108,11 @@ class PopulateInviteCodeTableForUserNPreLaunch {
       .select('*')
       .where({ twitter_id: preLaunchTwitterId })
       .fire();
-    if (twitterUserQueryRsp[0] && twitterUserQueryRsp[0].id !== twitterUserQueryRsp[0].twitterId) {
+
+    if (twitterUserQueryRsp[0] && !basicHelper.isTwitterIdRotated(twitterUserQueryRsp[0].twitterId)) {
       twitterId = twitterUserQueryRsp[0].user_id;
     }
+
     return twitterId;
   }
 

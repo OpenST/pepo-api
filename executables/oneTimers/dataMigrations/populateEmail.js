@@ -13,6 +13,7 @@ const rootPrefix = '../../..',
   SecureUserCache = require(rootPrefix + '/lib/cacheManagement/single/SecureUser'),
   PreLaunchInviteByTwitterIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/PreLaunchInviteByTwitterIds'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
+  basicHelper = require(rootPrefix + '/helpers/basic'),
   preLaunchInviteConstants = require(rootPrefix + '/lib/globalConstant/preLaunchInvite');
 
 const BATCH_SIZE = 25;
@@ -96,7 +97,7 @@ class PopulateEmail {
     for (let index = 0; index < dbRows.length; index++) {
       const twitterUser = new TwitterUserModel().formatDbData(dbRows[index]);
 
-      if (twitterUser.id === twitterUser.twitterId) {
+      if (basicHelper.isTwitterIdRotated(twitterUser.twitterId)) {
         logger.info('Rotated twitter user id: ', twitterUser.id);
         // Do nothing
       } else if (twitterUser.email !== null) {
