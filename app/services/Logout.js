@@ -3,7 +3,6 @@ const rootPrefix = '../..',
   UserDeviceModel = require(rootPrefix + '/app/models/mysql/UserDevice'),
   UserDeviceByIds = require(rootPrefix + '/lib/cacheManagement/multi/UserDeviceByIds'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
-  logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   userDeviceConstants = require(rootPrefix + '/lib/globalConstant/userDevice');
 
 /**
