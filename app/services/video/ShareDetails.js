@@ -3,6 +3,7 @@ const uuidV4 = require('uuid/v4');
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   UserModel = require(rootPrefix + '/app/models/mysql/User'),
+  TextByIdCache = require(rootPrefix + '/lib/cacheManagement/multi/TextsByIds'),
   VideoByIdCache = require(rootPrefix + '/lib/cacheManagement/multi/VideoByIds'),
   UserMultiCache = require(rootPrefix + '/lib/cacheManagement/multi/User'),
   VideoDetailsByVideoIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/VideoDetailsByVideoIds'),
@@ -14,6 +15,7 @@ const rootPrefix = '../../..',
   coreConstants = require(rootPrefix + '/config/coreConstants'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   commonValidator = require(rootPrefix + '/lib/validators/Common'),
+  curatedFeedsJson = require(rootPrefix + '/test/curatedFeeds'),
   entityType = require(rootPrefix + '/lib/globalConstant/entityType');
 
 const urlDomain = coreConstants.PA_DOMAIN;
@@ -34,6 +36,7 @@ class ShareDetails extends ServiceBase {
 
     oThis.messageObject = null;
     oThis.creatorUserName = null;
+    oThis.videoDescriptionText = null;
   }
 
   /**
@@ -45,16 +48,40 @@ class ShareDetails extends ServiceBase {
   async _asyncPerform() {
     const oThis = this;
 
-    //if this is a curated video,
+    // If this is a curated video.
     if (oThis.videoId < 0) {
-      oThis.messageObject = shareEntityConstants.getVideoShareEntityForCuratedVideos(urlDomain);
+      const curatedFeeds = curatedFeedsJson.curatedFeeds;
+
+      let creatorUserId = null;
+
+      for (let index = 0; index < curatedFeeds.length; index++) {
+        const feed = curatedFeeds[index];
+
+        if (feed.id === oThis.videoId) {
+          creatorUserId = feed.actor;
+          break;
+        }
+      }
+
+      let userName = 'Pepo';
+
+      if (creatorUserId) {
+        const usersMap = curatedFeedsJson.usersByIdMap;
+        userName = usersMap[creatorUserId].userName;
+      }
+
+      oThis.messageObject = shareEntityConstants.getVideoShareEntityForCuratedVideos({
+        url: urlDomain,
+        creatorUserName: userName
+      });
     } else {
       await oThis._fetchVideo();
       await oThis._fetchCreatorUserName();
-      oThis.messageObject = shareEntityConstants.getVideoShareEntity(
-        oThis.creatorUserName,
-        oThis._generateVideoShareUrl()
-      );
+      oThis.messageObject = shareEntityConstants.getVideoShareEntity({
+        creatorUserName: oThis.creatorUserName,
+        url: oThis._generateVideoShareUrl(),
+        videoDescription: oThis.videoDescriptionText
+      });
     }
 
     return responseHelper.successWithData(oThis._prepareResponse());
@@ -107,6 +134,20 @@ class ShareDetails extends ServiceBase {
     }
 
     let videoDetails = videoDetailsCacheRsp.data[oThis.videoId];
+
+    if (videoDetails.descriptionId) {
+      const textCacheResp = await new TextByIdCache({ ids: [videoDetails.descriptionId] }).fetch();
+
+      if (textCacheResp.isFailure()) {
+        return Promise.reject(textCacheResp);
+      }
+
+      let videoDescription = textCacheResp.data[videoDetails.descriptionId];
+
+      if (videoDescription && videoDescription.text) {
+        oThis.videoDescriptionText = videoDescription.text;
+      }
+    }
 
     // Already deleted.
     if (!videoDetails.creatorUserId || videoDetails.status === videoDetailsConstants.deletedStatus) {
