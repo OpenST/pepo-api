@@ -69,7 +69,13 @@ class GetBalance extends ServiceBase {
   async _requestPlatformToGetBalance() {
     const oThis = this;
 
-    let balance = 0;
+    let balance = {
+      user_id: '',
+      total_balance: '0',
+      available_balance: '0',
+      unsettled_debit: '0',
+      updated_timestamp: Math.floor(new Date().getTime() / 1000)
+    };
 
     if (
       !oThis.tokenUserData ||
