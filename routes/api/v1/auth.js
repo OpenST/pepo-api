@@ -1,17 +1,13 @@
 const express = require('express'),
-  router = express.Router(),
-  cookieParser = require('cookie-parser');
+  router = express.Router();
 
 const rootPrefix = '../../..',
   FormatterComposer = require(rootPrefix + '/lib/formatter/Composer'),
   routeHelper = require(rootPrefix + '/routes/helper'),
   apiName = require(rootPrefix + '/lib/globalConstant/apiName'),
   sanitizer = require(rootPrefix + '/helpers/sanitizer'),
-  coreConstant = require(rootPrefix + '/config/coreConstants'),
   entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
   responseEntityKey = require(rootPrefix + '/lib/globalConstant/responseEntityKey'),
-  basicHelper = require(rootPrefix + '/helpers/basic'),
-  responseHelper = require(rootPrefix + '/lib/formatter/response'),
   cookieHelper = require(rootPrefix + '/lib/cookieHelper');
 
 /* Logout user*/

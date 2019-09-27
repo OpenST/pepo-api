@@ -19,7 +19,7 @@ const rootPrefix = '../../..',
   UserProfileElementsByUserIdCache = require(rootPrefix + '/lib/cacheManagement/multi/UserProfileElementsByUserIds'),
   basicHelper = require(rootPrefix + '/helpers/basic'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
-  entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
+  adminEntityType = require(rootPrefix + '/lib/globalConstant/adminEntityType'),
   paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination'),
   userProfileElementConstants = require(rootPrefix + '/lib/globalConstant/userProfileElement');
 
@@ -608,7 +608,7 @@ class UserSearch extends ServiceBase {
     const oThis = this;
 
     const response = {
-      [entityType.userSearchList]: oThis.searchResults,
+      [adminEntityType.userSearchList]: oThis.searchResults,
       usersByIdMap: oThis.userDetails,
       tokenUsersByUserIdMap: oThis.tokenUsersByUserIdMap,
       videoMap: oThis.videos,

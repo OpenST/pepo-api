@@ -6,12 +6,8 @@ const rootPrefix = '../../..',
   routeHelper = require(rootPrefix + '/routes/helper'),
   apiName = require(rootPrefix + '/lib/globalConstant/apiName'),
   sanitizer = require(rootPrefix + '/helpers/sanitizer'),
-  coreConstant = require(rootPrefix + '/config/coreConstants'),
   entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
-  responseEntityKey = require(rootPrefix + '/lib/globalConstant/responseEntityKey'),
-  basicHelper = require(rootPrefix + '/helpers/basic'),
-  responseHelper = require(rootPrefix + '/lib/formatter/response'),
-  cookieHelper = require(rootPrefix + '/lib/cookieHelper');
+  responseEntityKey = require(rootPrefix + '/lib/globalConstant/responseEntityKey');
 
 /* Fetch go-to */
 router.get('/', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
