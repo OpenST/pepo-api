@@ -156,7 +156,7 @@ class RetryPendingReceiptValidation extends CronBase {
     let fiatPayment = dataRow,
       params = {
         paymentReceipt: fiatPayment.rawReceipt,
-        userId: fiatPayment.userId,
+        userId: fiatPayment.fromUserId,
         fiatPaymentId: fiatPayment.id,
         retryCount: fiatPayment.retryCount
       },
