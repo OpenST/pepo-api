@@ -39,7 +39,7 @@ class CreateCron {
       if (responseHelper.isCustomResult(error)) {
         return error;
       }
-      logger.error('/lib/cronProcess/InsertCrons::perform::catch', error);
+      logger.error('/lib/cronProcess/InsertCrons::perform::catch', error, error.stack);
       return oThis._getRespError('do_u_cs_cc_p1');
     });
   }

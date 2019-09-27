@@ -9,6 +9,7 @@ const rootPrefix = '../../../../..',
   UpdateProfileBase = require(rootPrefix + '/app/services/user/profile/update/Base'),
   UserByUsernameCache = require(rootPrefix + '/lib/cacheManagement/single/UserByUsername'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
+  logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   userTagConstants = require(rootPrefix + '/lib/globalConstant/userTag'),
   createErrorLogsEntry = require(rootPrefix + '/lib/errorLogs/createEntry'),
   errorLogsConstants = require(rootPrefix + '/lib/globalConstant/errorLogs'),
@@ -37,6 +38,8 @@ class UpdateProfileInfo extends UpdateProfileBase {
    */
   constructor(params) {
     super(params);
+
+    logger.log('======= params for update info ========', params);
 
     const oThis = this;
 
@@ -80,15 +83,8 @@ class UpdateProfileInfo extends UpdateProfileBase {
       oThis.bio = CommonValidators.sanitizeText(oThis.bio);
     }
 
-    if (oThis.link && !CommonValidators.validateHttpBasedUrl(oThis.link)) {
-      return Promise.reject(
-        responseHelper.paramValidationError({
-          internal_error_identifier: 'a_s_u_p_u_i_1',
-          api_error_identifier: 'invalid_api_params',
-          params_error_identifiers: ['invalid_http_link'],
-          debug_options: { link: oThis.link }
-        })
-      );
+    if (oThis.link) {
+      oThis.link = oThis.link.toLowerCase();
     }
 
     await oThis._validateUserName();
@@ -151,6 +147,10 @@ class UpdateProfileInfo extends UpdateProfileBase {
       if (textObj.text.toString() === oThis.bio.toString()) {
         oThis.bioUpdateRequired = false;
       }
+    } else {
+      if (oThis.bio.toString() === '') {
+        oThis.bioUpdateRequired = false;
+      }
     }
 
     // If link is present then check whether same link is added or its updated.
@@ -160,6 +160,10 @@ class UpdateProfileInfo extends UpdateProfileBase {
         urlObj = urlResp.data[linkId];
 
       if (urlObj.url.toString() === oThis.link.toString()) {
+        oThis.linkUpdateRequired = false;
+      }
+    } else {
+      if (oThis.link.toString() === '') {
         oThis.linkUpdateRequired = false;
       }
     }

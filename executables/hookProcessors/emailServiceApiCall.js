@@ -8,6 +8,7 @@ const program = require('commander');
 const rootPrefix = '../..',
   HookProcessorsBase = require(rootPrefix + '/executables/hookProcessors/Base'),
   AddContact = require(rootPrefix + '/lib/email/hookProcessor/AddContact'),
+  RemoveContact = require(rootPrefix + '/lib/email/hookProcessor/RemoveContact'),
   UpdateContact = require(rootPrefix + '/lib/email/hookProcessor/UpdateContact'),
   SendTransactionalMail = require(rootPrefix + '/lib/email/hookProcessor/SendTransactionalMail'),
   EmailServiceAPICallHookModel = require(rootPrefix + '/app/models/mysql/EmailServiceAPICallHook'),
@@ -71,7 +72,11 @@ class EmailServiceApiCall extends HookProcessorsBase {
       response = await new HookProcessorKlass({ hook: oThis.hook }).perform();
 
     if (response.isSuccess()) {
-      oThis.successResponse[oThis.hook.id] = response.data;
+      if (response.data.failedHookToBeIgnored) {
+        oThis.failedHookToBeIgnored[oThis.hook.id] = response.data;
+      } else {
+        oThis.successResponse[oThis.hook.id] = response.data;
+      }
     } else {
       if (
         response.data['error'] == 'VALIDATION_ERROR' &&
@@ -104,8 +109,11 @@ class EmailServiceApiCall extends HookProcessorsBase {
       case emailServiceApiCallHookConstants.sendTransactionalEmailEventType: {
         return SendTransactionalMail;
       }
+      case emailServiceApiCallHookConstants.removeContactEventType: {
+        return RemoveContact;
+      }
       default: {
-        throw new Error('Unsupported event type');
+        throw new Error('Unsupported event type.');
       }
     }
   }

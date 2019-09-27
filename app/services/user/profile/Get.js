@@ -57,10 +57,9 @@ class GetUserProfile extends ServiceBase {
 
     if (response.isFailure() || !CommonValidators.validateNonEmptyObject(response.data.userProfilesMap)) {
       return Promise.reject(
-        responseHelper.paramValidationError({
+        responseHelper.error({
           internal_error_identifier: 'a_s_u_p_g_1',
-          api_error_identifier: 'could_not_proceed',
-          params_error_identifiers: ['user_inactive'],
+          api_error_identifier: 'entity_not_found',
           debug_options: {}
         })
       );
@@ -74,14 +73,12 @@ class GetUserProfile extends ServiceBase {
       usersByIdMap: profileResp.usersByIdMap,
       tokenUsersByUserIdMap: profileResp.tokenUsersByUserIdMap,
       imageMap: profileResp.imageMap,
-      videoMap: profileResp.videoMap,
       linkMap: profileResp.linkMap,
       tags: profileResp.tags,
       userStat: profileResp.userStat,
-      videoDetailsMap: profileResp.videoDetailsMap,
       currentUserUserContributionsMap: profileResp.currentUserUserContributionsMap,
-      currentUserVideoContributionsMap: profileResp.currentUserVideoContributionsMap,
-      pricePointsMap: profileResp.pricePointsMap
+      pricePointsMap: profileResp.pricePointsMap,
+      twitterUsersMap: profileResp.twitterUsersMap
     });
   }
 }

@@ -1,7 +1,7 @@
 /**
  * Base class for hook processors
  *
- * @module executables/hookProcessors/EmailServiceAPICall
+ * @module executables/hookProcessors/Base
  */
 
 const rootPrefix = '../..',
@@ -173,12 +173,13 @@ class HookProcessorsBase extends CronBase {
     let ModelKlass = oThis.hookModelKlass;
     for (let hookId in oThis.hooksToBeProcessed) {
       let failedCount = oThis.hooksToBeProcessed[hookId].failedCount;
+
       if (oThis.failedHookToBeRetried[hookId]) {
         await new ModelKlass().markFailedToBeRetried(hookId, failedCount, oThis.failedHookToBeRetried[hookId]);
       }
 
       if (oThis.failedHookToBeIgnored[hookId]) {
-        await new ModelKlass().markFailedToBeRetried(hookId, failedCount, oThis.failedHookToBeRetried[hookId]);
+        await new ModelKlass().markFailedToBeIgnored(hookId, failedCount, oThis.failedHookToBeIgnored[hookId]);
       }
     }
   }

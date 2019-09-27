@@ -50,7 +50,7 @@ class OstEventModel extends ModelBase {
   }
 
   /**
-   * Fetch ost event for id
+   * Fetch ost event for id.
    *
    * @param {number} id
    *
@@ -72,7 +72,7 @@ class OstEventModel extends ModelBase {
   }
 
   /**
-   * Fetch ost event for id
+   * Fetch ost event for id.
    *
    * @param {number} eventId
    *

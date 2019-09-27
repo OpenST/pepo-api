@@ -50,6 +50,8 @@ class PreLaunchInvite extends ModelBase {
       'adminStatus',
       'inviterUserId',
       'inviteCode',
+      'inviterCodeId',
+      'inviteCodeId',
       'invitedUserCount',
       'createdAt',
       'updatedAt'
@@ -74,6 +76,8 @@ class PreLaunchInvite extends ModelBase {
    * @param {number} dbRow.admin_status
    * @param {number} dbRow.inviter_user_id
    * @param {string} dbRow.invite_code
+   * @param {number} dbRow.inviter_code_id
+   * @param {number} dbRow.invite_code_id
    * @param {number} dbRow.invited_user_count
    * @param {number/string} dbRow.created_at
    * @param {number/string} dbRow.updated_at
@@ -98,6 +102,8 @@ class PreLaunchInvite extends ModelBase {
       adminStatus: preLaunchInviteConstants.adminStatuses[dbRow.admin_status],
       inviterUserId: dbRow.inviter_user_id,
       inviteCode: dbRow.invite_code,
+      inviterCodeId: dbRow.inviter_code_id,
+      inviteCodeId: dbRow.invite_code_id,
       invitedUserCount: dbRow.invited_user_count,
       createdAt: dbRow.created_at,
       updatedAt: dbRow.updated_at
@@ -144,6 +150,8 @@ class PreLaunchInvite extends ModelBase {
         'status',
         'inviter_user_id',
         'invite_code',
+        'inviter_code_id',
+        'invite_code_id',
         'invited_user_count',
         'created_at',
         'updated_at'
@@ -250,7 +258,9 @@ class PreLaunchInvite extends ModelBase {
 
     const queryResponse = await oThis
       .update({
-        creator_status: preLaunchInviteConstants.invertedCreatorStatuses[preLaunchInviteConstants.approvedCreatorStatus]
+        creator_status:
+          preLaunchInviteConstants.invertedCreatorStatuses[preLaunchInviteConstants.approvedCreatorStatus],
+        admin_status: preLaunchInviteConstants.invertedAdminStatuses[preLaunchInviteConstants.whitelistedStatus]
       })
       .where({ id: inviteId })
       .fire();
@@ -266,6 +276,31 @@ class PreLaunchInvite extends ModelBase {
       api_error_identifier: 'something_went_wrong',
       debug_options: { inviteId: inviteId }
     });
+  }
+
+  /**
+   * Search users for admin whitelisting.
+   *
+   * @param {object} params
+   * @param {integer} [params.query]: query
+   *
+   * @returns {object}
+   */
+  async totalCount(params) {
+    const oThis = this;
+
+    const query = params.query;
+
+    const queryObject = oThis.select('count(id) as totalCount');
+
+    if (query) {
+      const queryWithWildCards = '%' + query + '%';
+      queryObject.where(['handle LIKE ? OR name LIKE ?', queryWithWildCards, queryWithWildCards]);
+    }
+
+    const dbRows = await queryObject.fire();
+
+    return dbRows[0] || {};
   }
 
   /**
@@ -298,6 +333,7 @@ class PreLaunchInvite extends ModelBase {
         'creator_status',
         'status',
         'admin_status',
+        'invited_user_count',
         'updated_at'
       ])
       .limit(limit)
@@ -346,18 +382,18 @@ class PreLaunchInvite extends ModelBase {
   }
 
   /**
-   * Fetch pre launch invite by invite code.
+   * Fetch pre launch invite by invite code id.
    *
-   * @param {number} inviteCode: invite code
+   * @param {number} inviteCodeId: invite code id
    *
    * @return {object}
    */
-  async fetchByInviteCode(inviteCode) {
+  async fetchByInviteCodeId(inviteCodeId) {
     const oThis = this;
 
     const dbRows = await oThis
       .select('*')
-      .where(['invite_code = ?', inviteCode])
+      .where(['invite_code_id = ?', inviteCodeId])
       .fire();
 
     if (dbRows.length === 0) {

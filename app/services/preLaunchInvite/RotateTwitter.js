@@ -1,19 +1,28 @@
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
-  responseHelper = require(rootPrefix + '/lib/formatter/response'),
-  logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   PreLaunchInviteModel = require(rootPrefix + '/app/models/mysql/PreLaunchInvite'),
-  PreLaunchInviteByTwitterIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/PreLaunchInviteByTwitterIds');
+  basicHelper = require(rootPrefix + '/helpers/basic'),
+  responseHelper = require(rootPrefix + '/lib/formatter/response'),
+  logger = require(rootPrefix + '/lib/logger/customConsoleLogger');
 
+/**
+ * Class to rotate twitter account.
+ *
+ * @class RotateTwitterAccount
+ */
 class RotateTwitterAccount extends ServiceBase {
   /**
-   * @constructor
+   * Constructor to rotate twitter account.
    *
-   * @param params
-   * @param params.twitter_handle {string} - twitter handle
+   * @param {object} params
+   * @param {string} params.twitter_handle: twitter handle
+   *
+   * @augments ServiceBase
+   *
+   * @constructor
    */
   constructor(params) {
-    super(params);
+    super();
 
     const oThis = this;
 
@@ -21,13 +30,13 @@ class RotateTwitterAccount extends ServiceBase {
 
     oThis.preLaunchInviteObj = null;
     oThis.preLaunchInviteId = null;
-    oThis.preLaunchInviteTwitterId = null;
   }
 
   /**
-   * Perform
+   * Async perform.
    *
-   * @return {Promise<void>}
+   * @returns {Promise<void>}
+   * @private
    */
   async _asyncPerform() {
     const oThis = this;
@@ -40,17 +49,17 @@ class RotateTwitterAccount extends ServiceBase {
   }
 
   /**
-   * Fetch Twitter User Obj if present.
+   * Fetch twitter user object if present.
    *
-   * @sets oThis.preLaunchInviteId
+   * @sets oThis.preLaunchInviteObj, oThis.preLaunchInviteId
    *
-   * @return {Promise<Result>}
+   * @returns {Promise<void>}
    * @private
    */
   async _fetchPreLaunchInvite() {
     const oThis = this;
 
-    let fetchData = await new PreLaunchInviteModel()
+    const fetchData = await new PreLaunchInviteModel()
       .select('*')
       .where({ handle: oThis.twitterHandle })
       .fire();
@@ -63,30 +72,14 @@ class RotateTwitterAccount extends ServiceBase {
           internal_error_identifier: 'a_s_pli_rta_1',
           api_error_identifier: 'invalid_api_params',
           params_error_identifiers: ['user_not_found'],
-          debug_options: { twitterId: oThis.twitterId }
+          debug_options: { twitterHandle: oThis.twitterHandle }
         })
       );
     }
 
     oThis.preLaunchInviteId = oThis.preLaunchInviteObj.id;
 
-    if (oThis.preLaunchInviteObj.twitterId) {
-      oThis.preLaunchInviteTwitterId = oThis.preLaunchInviteObj.twitterId;
-    }
-
-    logger.log('End::Fetch PreLaunchInvite');
-    return responseHelper.successWithData({});
-  }
-
-  /**
-   * Rotate twitter account
-   *
-   * @returns {Promise<void>}
-   * @private
-   */
-  async _rotateTwitterAccount() {
-    const oThis = this;
-    if (oThis.preLaunchInviteId === oThis.twitterId) {
+    if (basicHelper.isTwitterIdRotated(oThis.preLaunchInviteObj.twitterId)) {
       return Promise.reject(
         responseHelper.paramValidationError({
           internal_error_identifier: 'a_s_pli_rta_2',
@@ -94,20 +87,33 @@ class RotateTwitterAccount extends ServiceBase {
           params_error_identifiers: ['invalid_twitter_user'],
           debug_options: {
             preLaunchInviteId: oThis.preLaunchInviteId,
-            twitterId: oThis.twitterId
+            twitterId: oThis.preLaunchInviteObj.twitterId
           }
         })
       );
     }
 
-    let rotatedTwitterHandle = oThis.twitterHandle + oThis.preLaunchInviteId.toString();
+    logger.log('End::Fetch PreLaunchInvite');
+  }
+
+  /**
+   * Rotate twitter account.
+   *
+   * @returns {Promise<*>}
+   * @private
+   */
+  async _rotateTwitterAccount() {
+    const oThis = this;
+
+    const rotatedTwitterHandle = oThis.twitterHandle + oThis.preLaunchInviteId.toString();
+    const negatedTwitterId = '-' + oThis.preLaunchInviteId.toString();
 
     await new PreLaunchInviteModel()
-      .update({ twitter_id: oThis.preLaunchInviteId, handle: rotatedTwitterHandle })
+      .update({ twitter_id: negatedTwitterId, handle: rotatedTwitterHandle })
       .where({ id: oThis.preLaunchInviteId })
       .fire();
 
-    await PreLaunchInviteModel.flushCache(oThis.preLaunchInviteObj);
+    return PreLaunchInviteModel.flushCache(oThis.preLaunchInviteObj);
   }
 }
 

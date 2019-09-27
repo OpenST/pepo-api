@@ -1,43 +1,50 @@
 const rootPrefix = '../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
-  util = require(rootPrefix + '/lib/util'),
-  coreConstants = require(rootPrefix + '/config/coreConstants'),
-  pageConstants = require(rootPrefix + '/lib/globalConstant/page'),
-  logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
-  responseHelper = require(rootPrefix + '/lib/formatter/response'),
-  localCipher = require(rootPrefix + '/lib/encryptors/localCipher'),
   TemporaryTokenModel = require(rootPrefix + '/app/models/mysql/TemporaryToken'),
-  temporaryTokenConstant = require(rootPrefix + '/lib/globalConstant/temporaryToken'),
-  preLaunchInviteConstant = require(rootPrefix + '/lib/globalConstant/preLaunchInvite'),
   SendTransactionalMail = require(rootPrefix + '/lib/email/hookCreator/SendTransactionalMail'),
+  util = require(rootPrefix + '/lib/util'),
+  responseHelper = require(rootPrefix + '/lib/formatter/response'),
+  webPageConstants = require(rootPrefix + '/lib/globalConstant/webPage'),
+  temporaryTokenConstants = require(rootPrefix + '/lib/globalConstant/temporaryToken'),
+  preLaunchInviteConstants = require(rootPrefix + '/lib/globalConstant/preLaunchInvite'),
   emailServiceApiCallHookConstants = require(rootPrefix + '/lib/globalConstant/emailServiceApiCallHook');
 
+/**
+ * Class to send double opt in email.
+ *
+ * @class SendDoubleOptIn
+ */
 class SendDoubleOptIn extends ServiceBase {
   /**
+   * Constructor to send double opt in email.
+   *
+   * @param {object} params
+   * @param {object} params.pre_launch_invite_obj
+   *
+   * @augments ServiceBase
+   *
    * @constructor
-   *
-   * @param params
-   *
-   * @param {string} params.pre_launch_invite_obj
-   *
    */
   constructor(params) {
-    super(params);
+    super();
+
     const oThis = this;
 
     oThis.preLaunchInviteObj = params.pre_launch_invite_obj;
+
     oThis.doubleOptInToken = null;
   }
 
   /**
-   * Async performer.
+   * Async perform.
    *
-   * @return {Promise<void>}
+   * @returns {Promise<void>}
+   * @private
    */
   async _asyncPerform() {
     const oThis = this;
 
-    if (oThis.preLaunchInviteObj.status === preLaunchInviteConstant.doptinStatus) {
+    if (oThis.preLaunchInviteObj.status === preLaunchInviteConstants.doptinStatus) {
       return responseHelper.successWithData({});
     }
 
@@ -49,7 +56,9 @@ class SendDoubleOptIn extends ServiceBase {
   }
 
   /**
-   * Create double opt in token
+   * Create double opt in token.
+   *
+   * @sets oThis.doubleOptInToken
    *
    * @returns {Promise<never>}
    * @private
@@ -58,41 +67,28 @@ class SendDoubleOptIn extends ServiceBase {
     const oThis = this;
 
     await new TemporaryTokenModel()
-      .update({ status: temporaryTokenConstant.invertedStatuses[temporaryTokenConstant.inActiveStatus] })
+      .update({ status: temporaryTokenConstants.invertedStatuses[temporaryTokenConstants.inActiveStatus] })
       .where({
         entity_id: oThis.preLaunchInviteObj.id,
-        kind: temporaryTokenConstant.invertedKinds[temporaryTokenConstant.preLaunchInviteKind],
-        status: temporaryTokenConstant.invertedStatuses[temporaryTokenConstant.activeStatus]
+        kind: temporaryTokenConstants.invertedKinds[temporaryTokenConstants.preLaunchInviteKind],
+        status: temporaryTokenConstants.invertedStatuses[temporaryTokenConstants.activeStatus]
       })
       .fire();
 
-    let tokenString = `${oThis.preLaunchInviteObj.id}::${
+    const tokenString = `${oThis.preLaunchInviteObj.id}::${
         oThis.preLaunchInviteObj.email
       }::${Date.now()}::preLaunchInviteDoubleOptIn::${Math.random()}`,
       temporaryDoubleOptInToken = util.createMd5Digest(tokenString);
 
-    let insertResponse = await new TemporaryTokenModel()
-      .insert({
-        entity_id: oThis.preLaunchInviteObj.id,
-        kind: temporaryTokenConstant.invertedKinds[temporaryTokenConstant.preLaunchInviteKind],
-        token: temporaryDoubleOptInToken,
-        status: temporaryTokenConstant.invertedStatuses[temporaryTokenConstant.activeStatus]
-      })
-      .fire();
-
-    if (!insertResponse) {
-      logger.error('Error while inserting data into pre_launch_invites table.');
-      return Promise.reject(new Error('Error while inserting data into pre_launch_invites table.'));
-    }
-
-    let doubleOptInTokenStr = `${insertResponse.insertId.toString()}:${temporaryDoubleOptInToken}`;
-    oThis.doubleOptInToken = localCipher.encrypt(coreConstants.PA_EMAIL_TOKENS_DECRIPTOR_KEY, doubleOptInTokenStr);
+    oThis.doubleOptInToken = await new TemporaryTokenModel().createDoubleOptInToken({
+      entityId: oThis.preLaunchInviteObj.id,
+      kind: temporaryTokenConstants.preLaunchInviteKind,
+      token: temporaryDoubleOptInToken
+    });
   }
 
   /**
    * Send pre launch invite double opt in mail.
-   *
-   * @sets oThis.workingMap
    *
    * @returns {Promise<void>}
    * @private
@@ -100,9 +96,9 @@ class SendDoubleOptIn extends ServiceBase {
   async _sendPreLaunchInviteDoubleOptInMail() {
     const oThis = this;
 
-    let link = encodeURIComponent(`${pageConstants.optInEmailLink}?t=${oThis.doubleOptInToken}`);
+    const link = encodeURIComponent(`${webPageConstants.optInEmailLink}?t=${oThis.doubleOptInToken}`);
 
-    let transactionalMailParams = {
+    const transactionalMailParams = {
       receiverEntityId: oThis.preLaunchInviteObj.id,
       receiverEntityKind: emailServiceApiCallHookConstants.preLaunchInviteEntityKind,
       templateName: emailServiceApiCallHookConstants.pepoDoubleOptInTemplateName,

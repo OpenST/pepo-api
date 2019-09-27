@@ -4,12 +4,7 @@ const rootPrefix = '../../..',
 
 const adminSignature = {
   [apiName.adminUserSearch]: {
-    mandatory: [
-      {
-        parameter: 'search_by_admin',
-        validatorMethods: ['validateBoolean']
-      }
-    ],
+    mandatory: [],
     optional: [
       {
         parameter: 'q',
@@ -25,7 +20,7 @@ const adminSignature = {
     mandatory: [
       {
         parameter: 'user_ids',
-        validatorMethods: ['validateArray']
+        validatorMethods: ['validateIntegerArray']
       },
       {
         parameter: 'current_admin',
@@ -38,7 +33,7 @@ const adminSignature = {
     mandatory: [
       {
         parameter: 'user_ids',
-        validatorMethods: ['validateArray']
+        validatorMethods: ['validateIntegerArray']
       },
       {
         parameter: 'current_admin',
@@ -116,6 +111,33 @@ const adminSignature = {
         validatorMethods: ['validateString']
       }
     ]
+  },
+  [apiName.userVideoList]: {
+    mandatory: [
+      {
+        parameter: 'profile_user_id',
+        validatorMethods: ['validateNonZeroInteger']
+      },
+      {
+        parameter: 'is_admin',
+        validatorMethods: ['validateBoolean']
+      }
+    ],
+    optional: [
+      {
+        parameter: paginationConstants.paginationIdentifierKey,
+        validatorMethods: ['validateString', 'validatePaginationIdentifier']
+      }
+    ]
+  },
+  [apiName.adminUserProfile]: {
+    mandatory: [
+      {
+        parameter: 'profile_user_id',
+        validatorMethods: ['validateNonZeroInteger']
+      }
+    ],
+    optional: []
   }
 };
 

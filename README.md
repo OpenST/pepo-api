@@ -128,6 +128,11 @@
   node executables/oneTimers/seedTokensTable.js --apiKey "803ee2a07554b94d80fb4ba4eb08229c" --apiSecret "66fc5bce904f83a74aba10469505cd5ac51dfc886fc747ecbfba3fea254d3006"
 ```
 
+* Update Utility Branded Token In Tokens Table (execute this script for first time only).
+```bash
+  node executables/oneTimers/UpdateUtilityBrandedTokenInTokensTable.js --apiKey "803ee2a07554b94d80fb4ba4eb08229c" --apiSecret "66fc5bce904f83a74aba10469505cd5ac51dfc886fc747ecbfba3fea254d3006"
+```
+
 * Subscribe for OST web-hooks
 ```bash
   node executables/oneTimers/webhooksSubscription.js
@@ -142,12 +147,6 @@ Note: Get the webhooks id from above run(subscribe webhooks). Secret has to be o
 * Seed Ost Price Points Table.
 ```bash
   node executables/oneTimers/seedOstPricePointsTable.js --apiKey "803ee2a07554b94d80fb4ba4eb08229c" --apiSecret "66fc5bce904f83a74aba10469505cd5ac51dfc886fc747ecbfba3fea254d3006"
-```
-
-## Seed gif categories
-```bash
-    source set_env_vars.sh
-    node executables/oneTimers/populateGifCategories.js
 ```
 
 ## Start cron processes
@@ -168,6 +167,19 @@ Note: Get the webhooks id from above run(subscribe webhooks). Secret has to be o
   # note: for topics to subscribe and prefetchcount, please see params column of the cron_processes table
   source set_env_vars.sh
   node executables/rabbitMqSubscribers/notificationJobProcessor.js --cronProcessId 4
+```
+
+## Web-sockets
+* Start web-socket server.
+```bash
+  source set_env_vars.sh
+  node websocket-server.js
+```
+
+## Seed locations table
+```bash
+    source set_env_vars.sh
+    node executables/oneTimers/locationSeeder.js
 ```
 
 ## Helper commands

@@ -9,31 +9,40 @@ const rootPrefix = '../..',
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   responseHelper = require(rootPrefix + '/lib/formatter/response');
 
+/**
+ * Class to upload current user params.
+ *
+ * @class UploadParams
+ */
 class UploadParams extends ServiceBase {
   /**
-   * @constructor
+   * Constructor to upload current user params.
    *
-   * @param params
+   * @param {object} params
    *
    * @param {string} params.current_user.id
-   *
    * @param {string} [params.images]
    * @param {string} [params.videos]
    *
+   * @augments ServiceBase
+   *
+   * @constructor
    */
   constructor(params) {
-    super(params);
+    super();
+
     const oThis = this;
 
     oThis.currentUserId = +params.current_user.id;
     oThis.images = params.images || [];
     oThis.videos = params.videos || [];
 
+    oThis.workingMap = {};
     oThis.apiResponse = {};
   }
 
   /**
-   * Async performer.
+   * Async perform.
    *
    * @return {Promise<void>}
    */
@@ -56,10 +65,9 @@ class UploadParams extends ServiceBase {
    * @private
    */
   async _validateAndSanitizeParams() {
-    const oThis = this,
-      paramErrors = [];
+    const oThis = this;
 
-    // Validate user id;
+    const paramErrors = [];
 
     if (oThis.images) {
       for (let index = 0; index < oThis.images.length; index++) {
@@ -128,14 +136,16 @@ class UploadParams extends ServiceBase {
   /**
    * Process map.
    *
+   * @sets oThis.apiResponse
+   *
    * @returns {Promise<void>}
    * @private
    */
   async _processWorkingMap() {
     const oThis = this;
 
-    for (let intent in oThis.workingMap) {
-      let resultHash = {},
+    for (const intent in oThis.workingMap) {
+      const resultHash = {},
         intentHash = oThis.workingMap[intent],
         fileArray = intentHash[s3Constants.files],
         resultKey = intentHash[s3Constants.resultKey];
@@ -177,7 +187,7 @@ class UploadParams extends ServiceBase {
    * @private
    */
   _getCdnUrl(s3Url) {
-    let splittedUrlArray = s3Url.split('/'),
+    const splittedUrlArray = s3Url.split('/'),
       fileName = splittedUrlArray.pop(),
       baseUrl = splittedUrlArray.join('/'),
       shortEntity = s3Constants.LongUrlToShortUrlMap[baseUrl];
@@ -198,8 +208,9 @@ class UploadParams extends ServiceBase {
    * @private
    */
   _getRandomEncodedFileNames(extension) {
-    const oThis = this,
-      fileName = util.getS3FileName(oThis.currentUserId, 'original');
+    const oThis = this;
+
+    const fileName = util.getS3FileName(oThis.currentUserId, 'original');
 
     return fileName + extension;
   }

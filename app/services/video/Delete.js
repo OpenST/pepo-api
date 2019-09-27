@@ -1,18 +1,11 @@
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   VideoDetailsByVideoIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/VideoDetailsByVideoIds'),
-  VideoDetailsByUserIdCache = require(rootPrefix + '/lib/cacheManagement/single/VideoDetailsByUserIdPagination'),
-  UserProfileElementModel = require(rootPrefix + '/app/models/mysql/UserProfileElement'),
-  VideosModel = require(rootPrefix + '/app/models/mysql/Video'),
-  VideoDetailsModel = require(rootPrefix + '/app/models/mysql/VideoDetail'),
-  ActivityLogModel = require(rootPrefix + '/app/models/mysql/AdminActivityLog'),
-  FeedModel = require(rootPrefix + '/app/models/mysql/Feed'),
+  DeleteUserVideosLib = require(rootPrefix + '/lib/video/DeleteUserVideos'),
+  videoDetailsConstants = require(rootPrefix + '/lib/globalConstant/videoDetail'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
-  paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination'),
-  userProfileElementConst = require(rootPrefix + '/lib/globalConstant/userProfileElement'),
-  videoDetailsConst = require(rootPrefix + '/lib/globalConstant/videoDetail'),
-  adminActivityLogConst = require(rootPrefix + '/lib/globalConstant/adminActivityLogs'),
-  feedConstants = require(rootPrefix + '/lib/globalConstant/feed');
+  commonValidator = require(rootPrefix + '/lib/validators/Common'),
+  entityType = require(rootPrefix + '/lib/globalConstant/entityType');
 
 class DeleteVideo extends ServiceBase {
   /**
@@ -24,11 +17,10 @@ class DeleteVideo extends ServiceBase {
     super();
 
     const oThis = this;
-
     oThis.videoId = params.video_id;
-    oThis.currentAdmin = params.current_admin;
+    oThis.currentUser = params.current_user;
 
-    oThis.currentAdminId = null;
+    oThis.videoDetails = null;
     oThis.creatorUserId = null;
   }
 
@@ -43,149 +35,66 @@ class DeleteVideo extends ServiceBase {
 
     await oThis._fetchCreatorUserId();
 
-    // Unknown video or already deleted
-    if (!oThis.creatorUserId || oThis.videoDetails[0].status == videoDetailsConst.deletedStatus) {
+    const deleteUserVideosRsp = await new DeleteUserVideosLib({
+      userId: oThis.creatorUserId,
+      videoIds: [oThis.videoId],
+      isUserAction: true
+    }).perform();
+
+    if (deleteUserVideosRsp && deleteUserVideosRsp.isSuccess()) {
       return responseHelper.successWithData({});
+    } else {
+      return Promise.reject(deleteUserVideosRsp);
     }
-
-    let promises = [];
-    promises.push(oThis._deleteProfileElementIfRequired());
-    promises.push(oThis._markVideoDeleted());
-    promises.push(oThis._markVideoDetailDeleted());
-    promises.push(oThis._deleteVideoFeeds());
-
-    await Promise.all(promises);
-
-    await oThis._logAdminActivity();
-
-    return responseHelper.successWithData({});
   }
 
   /**
-   * Log admin activity
+   * Fetch creator user id.
    *
-   * @return {Promise<void>}
-   * @private
-   */
-  async _logAdminActivity() {
-    const oThis = this;
-
-    let activityLogObj = new ActivityLogModel({});
-
-    await activityLogObj.insertAction({
-      adminId: oThis.currentAdminId,
-      actionOn: oThis.creatorUserId,
-      action: adminActivityLogConst.deleteUserVideo,
-      extraData: JSON.stringify({ vid: oThis.videoId })
-    });
-  }
-
-  /**
-   * Fetch creator user id
+   * @sets oThis.videoDetails, oThis.creatorUserId
    *
-   * @sets oThis.creatorUserId
-   * @return {Promise<void>}
+   * @returns {Promise<never>}
    * @private
    */
   async _fetchCreatorUserId() {
     const oThis = this;
 
-    let videoDetailsCacheResponse = await new VideoDetailsByVideoIdsCache({ videoIds: [oThis.videoId] }).fetch();
-
+    const videoDetailsCacheResponse = await new VideoDetailsByVideoIdsCache({ videoIds: [oThis.videoId] }).fetch();
     if (videoDetailsCacheResponse.isFailure()) {
       return Promise.reject(videoDetailsCacheResponse);
     }
 
-    oThis.videoDetails = [videoDetailsCacheResponse.data[oThis.videoId]];
+    let videoDetailsCacheData = videoDetailsCacheResponse.data;
 
-    console.log('The oThis.videoDetails is : ', oThis.videoDetails);
-
-    oThis.creatorUserId = oThis.videoDetails[0].creatorUserId;
-
-    oThis.currentAdminId = oThis.currentAdmin ? Number(oThis.currentAdmin.id) : 0;
-  }
-
-  /**
-   * Delete profile element if required
-   *
-   * @return {Promise<void>}
-   * @private
-   */
-  async _deleteProfileElementIfRequired() {
-    const oThis = this;
-
-    const cacheResponse = await new VideoDetailsByUserIdCache({
-      userId: oThis.creatorUserId,
-      limit: paginationConstants.defaultVideoListPageSize,
-      paginationTimestamp: null
-    }).fetch();
-
-    if (cacheResponse.isFailure()) {
-      return Promise.reject(cacheResponse);
+    // If video not found or its not active.
+    if (
+      !commonValidator.validateNonEmptyObject(videoDetailsCacheData[oThis.videoId]) ||
+      videoDetailsCacheData[oThis.videoId].status === videoDetailsConstants.deletedStatus
+    ) {
+      return Promise.reject(
+        responseHelper.error({
+          internal_error_identifier: 'a_s_v_dl_3',
+          api_error_identifier: 'entity_not_found',
+          debug_options: {
+            videoId: oThis.videoId
+          }
+        })
+      );
     }
 
-    let videoIds = cacheResponse.data.videoIds || [];
-
-    if (videoIds[0] == oThis.videoId) {
-      let profileElementObj = new UserProfileElementModel({});
-
-      await profileElementObj.deleteByUserIdAndKind({
-        userId: oThis.creatorUserId,
-        dataKind: userProfileElementConst.coverVideoIdKind
-      });
+    if (videoDetailsCacheData[oThis.videoId].creatorUserId !== oThis.currentUser.id) {
+      return Promise.reject(
+        responseHelper.paramValidationError({
+          internal_error_identifier: 'a_s_v_dl_4',
+          api_error_identifier: 'invalid_api_params',
+          params_error_identifiers: ['invalid_video_id'],
+          debug_options: { videoId: oThis.videoId }
+        })
+      );
     }
-  }
 
-  /**
-   * Delete from video details
-   *
-   * @return {Promise<void>}
-   * @private
-   */
-  async _markVideoDetailDeleted() {
-    const oThis = this;
-
-    let videoDetailsObj = new VideoDetailsModel({});
-
-    await videoDetailsObj.markDeleted({
-      userId: oThis.creatorUserId,
-      videoId: oThis.videoId
-    });
-  }
-
-  /**
-   * Mark status in videos
-   *
-   * @return {Promise<void>}
-   * @private
-   */
-  async _markVideoDeleted() {
-    const oThis = this;
-
-    let videoObj = new VideosModel();
-
-    return videoObj.markVideoDeleted({ id: oThis.videoId });
-  }
-
-  /**
-   * Delete video from feeds
-   *
-   * @return {Promise<void>}
-   * @private
-   */
-  async _deleteVideoFeeds() {
-    const oThis = this;
-
-    let feedObj = new FeedModel({});
-
-    await feedObj
-      .delete()
-      .where({
-        kind: feedConstants.invertedKinds[feedConstants.fanUpdateKind],
-        primary_external_entity_id: oThis.videoId
-      })
-      .fire();
+    oThis.videoDetails = videoDetailsCacheData[oThis.videoId];
+    oThis.creatorUserId = oThis.videoDetails.creatorUserId;
   }
 }
-
 module.exports = DeleteVideo;

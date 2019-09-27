@@ -85,7 +85,7 @@ const _addConfig = async function(config) {
  * @private
  */
 const _create = async function(kind, configParams) {
-  logger.step(`** Adding entry for ${kind} in config startegy`);
+  logger.step(`** Adding entry for ${kind} in config strategy.`);
 
   return new ConfigStrategyModel().create(kind, configParams);
 };

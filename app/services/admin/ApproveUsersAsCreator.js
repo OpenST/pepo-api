@@ -1,16 +1,22 @@
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   FeedModel = require(rootPrefix + '/app/models/mysql/Feed'),
-  UserModelKlass = require(rootPrefix + '/app/models/mysql/User'),
+  VideoDetailModel = require(rootPrefix + '/app/models/mysql/VideoDetail'),
+  UserModel = require(rootPrefix + '/app/models/mysql/User'),
+  logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   UsersCache = require(rootPrefix + '/lib/cacheManagement/multi/User'),
+  InviteCodeModel = require(rootPrefix + '/app/models/mysql/InviteCode'),
+  inviteCodeConstants = require(rootPrefix + '/lib/globalConstant/inviteCode'),
   ActivityLogModel = require(rootPrefix + '/app/models/mysql/AdminActivityLog'),
-  VideoAddNotification = require(rootPrefix + '/lib/userNotificationPublisher/VideoAdd'),
+  InviteCodeByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/InviteCodeByUserIds'),
   UserProfileElementsByUserIdCache = require(rootPrefix + '/lib/cacheManagement/multi/UserProfileElementsByUserIds'),
-  userConstants = require(rootPrefix + '/lib/globalConstant/user'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
+  userConstants = require(rootPrefix + '/lib/globalConstant/user'),
   feedsConstants = require(rootPrefix + '/lib/globalConstant/feed'),
-  adminActivityLogConst = require(rootPrefix + '/lib/globalConstant/adminActivityLogs'),
-  userProfileElementConst = require(rootPrefix + '/lib/globalConstant/userProfileElement');
+  notificationJobEnqueue = require(rootPrefix + '/lib/rabbitMqEnqueue/notification'),
+  notificationJobConstants = require(rootPrefix + '/lib/globalConstant/notificationJob'),
+  adminActivityLogConstants = require(rootPrefix + '/lib/globalConstant/adminActivityLogs'),
+  userProfileElementConstants = require(rootPrefix + '/lib/globalConstant/userProfileElement');
 
 /**
  * Class to approve users by admin.
@@ -54,6 +60,8 @@ class ApproveUsersAsCreator extends ServiceBase {
 
     await oThis._approveUsers();
 
+    await oThis._markInviteLimitAsInfinite();
+
     await oThis._flushCache();
 
     await oThis._publishFanVideo();
@@ -74,8 +82,7 @@ class ApproveUsersAsCreator extends ServiceBase {
   async _fetchUsers() {
     const oThis = this;
 
-    const userMultiCache = new UsersCache({ ids: oThis.userIds });
-    const cacheRsp = await userMultiCache.fetch();
+    const cacheRsp = await new UsersCache({ ids: oThis.userIds }).fetch();
 
     if (cacheRsp.isFailure()) {
       return Promise.reject(
@@ -102,7 +109,7 @@ class ApproveUsersAsCreator extends ServiceBase {
         );
       }
 
-      if (UserModelKlass.isUserApprovedCreator(userObj)) {
+      if (UserModel.isUserApprovedCreator(userObj)) {
         return Promise.reject(
           responseHelper.paramValidationError({
             internal_error_identifier: 'a_s_a_au_3',
@@ -124,13 +131,57 @@ class ApproveUsersAsCreator extends ServiceBase {
    * @private
    */
   async _approveUsers() {
-    const oThis = this,
-      propertyVal = userConstants.invertedProperties[userConstants.isApprovedCreatorProperty];
+    const oThis = this;
 
-    await new UserModelKlass()
+    const propertyVal = userConstants.invertedProperties[userConstants.isApprovedCreatorProperty];
+
+    await new UserModel()
       .update(['properties = properties | ?', propertyVal])
       .where({ id: oThis.userIds })
       .fire();
+  }
+
+  /**
+   * Mark invite limit as infinite
+   *
+   * @returns {Promise<*>}
+   * @private
+   */
+  async _markInviteLimitAsInfinite() {
+    const oThis = this;
+
+    for (const userId in oThis.userObjects) {
+      const inviteCodeByUserIdCacheResponse = await new InviteCodeByUserIdsCache({
+        userIds: [userId]
+      }).fetch();
+
+      if (inviteCodeByUserIdCacheResponse.isFailure()) {
+        return Promise.reject(inviteCodeByUserIdCacheResponse);
+      }
+
+      let inviteCodeObj = inviteCodeByUserIdCacheResponse.data[userId];
+
+      const queryResponse = await new InviteCodeModel()
+        .update({
+          invite_limit: inviteCodeConstants.infiniteInviteLimit
+        })
+        .where({ user_id: userId })
+        .fire();
+
+      if (queryResponse.affectedRows === 1) {
+        logger.info(`User with ${userId} has now infinite invites`);
+
+        await InviteCodeModel.flushCache(inviteCodeObj);
+      } else {
+        return responseHelper.error({
+          internal_error_identifier: 'a_s_auac_1',
+          api_error_identifier: 'something_went_wrong',
+          debug_options: { userId: userId }
+        });
+      }
+    }
+
+    return responseHelper.successWithData({});
   }
 
   /**
@@ -144,7 +195,7 @@ class ApproveUsersAsCreator extends ServiceBase {
 
     const promises = [];
     for (const userId in oThis.userObjects) {
-      promises.push(UserModelKlass.flushCache(oThis.userObjects[userId]));
+      promises.push(UserModel.flushCache(oThis.userObjects[userId]));
     }
     await Promise.all(promises);
   }
@@ -158,18 +209,21 @@ class ApproveUsersAsCreator extends ServiceBase {
   async _publishFanVideo() {
     const oThis = this;
 
-    const cacheRsp = await new UserProfileElementsByUserIdCache({ usersIds: oThis.userIds }).fetch();
-    if (cacheRsp.isFailure()) {
-      return cacheRsp;
-    }
-
     const promises = [];
-    for (const userId in oThis.userObjects) {
-      const profileElements = cacheRsp.data[userId];
-      if (profileElements && profileElements[userProfileElementConst.coverVideoIdKind]) {
-        const videoId = profileElements[userProfileElementConst.coverVideoIdKind].data;
-        promises.push(oThis._addFeed(videoId, userId));
-        promises.push(new VideoAddNotification({ userId: userId, videoId: videoId }).perform());
+    const dbRows = await new VideoDetailModel().fetchLatestVideoId(oThis.userIds);
+
+    for (let ind = 0; ind < oThis.userIds.length; ind++) {
+      const userId = oThis.userIds[ind];
+      const latestVideoId = dbRows[userId].latestVideoId;
+
+      if (latestVideoId) {
+        promises.push(oThis._addFeed(latestVideoId, userId));
+        promises.push(
+          notificationJobEnqueue.enqueue(notificationJobConstants.videoAdd, {
+            userId: userId,
+            videoId: latestVideoId
+          })
+        );
       }
     }
 
@@ -211,7 +265,7 @@ class ApproveUsersAsCreator extends ServiceBase {
       await activityLogObj.insertAction({
         adminId: oThis.currentAdminId,
         actionOn: userId,
-        action: adminActivityLogConst.approvedAsCreator
+        action: adminActivityLogConstants.approvedAsCreator
       });
     }
   }

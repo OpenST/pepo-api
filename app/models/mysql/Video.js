@@ -209,14 +209,14 @@ class Video extends ModelBase {
   }
 
   /**
-   * Mark video deleted
+   * Mark videos deleted.
    *
    * @param {object} params
-   * @param {number/string} params.id
+   * @param {array<number/string>} params.ids
    *
    * @return {Promise<object>}
    */
-  async markVideoDeleted(params) {
+  async markVideosDeleted(params) {
     const oThis = this;
 
     await oThis
@@ -224,11 +224,11 @@ class Video extends ModelBase {
         status: videoConstants.invertedStatuses[videoConstants.deletedStatus]
       })
       .where({
-        id: params.id
+        id: params.ids
       })
       .fire();
 
-    return Video.flushCache({ id: params.id });
+    await Video.flushCache({ ids: params.ids });
   }
 
   /**
@@ -302,14 +302,25 @@ class Video extends ModelBase {
    * Flush cache.
    *
    * @param {object} params
-   * @param {number} params.id
+   * @param {number} [params.id]
+   * @param {array<number>} [params.ids]
    *
    * @returns {Promise<*>}
    */
   static async flushCache(params) {
+    const promisesArray = [];
+
     const VideoByIds = require(rootPrefix + '/lib/cacheManagement/multi/VideoByIds');
 
-    await new VideoByIds({ ids: [params.id] }).clear();
+    if (params.id) {
+      promisesArray.push(new VideoByIds({ ids: [params.id] }).clear());
+    }
+
+    if (params.ids) {
+      promisesArray.push(new VideoByIds({ ids: params.ids }).clear());
+    }
+
+    await Promise.all(promisesArray);
   }
 }
 

@@ -3,6 +3,7 @@ const rootPrefix = '../../../..',
   OstPricePointsModel = require(rootPrefix + '/app/models/mysql/OstPricePoints'),
   SecureTokenCache = require(rootPrefix + '/lib/cacheManagement/single/SecureToken'),
   PricePointsCache = require(rootPrefix + '/lib/cacheManagement/single/PricePoints'),
+  AvailableProductsCache = require(rootPrefix + '/lib/cacheManagement/single/Products'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   ostPricePointsConstants = require(rootPrefix + '/lib/globalConstant/ostPricePoints');
@@ -51,6 +52,8 @@ class PricePointsUpdateBase extends ServiceBase {
 
     await oThis._clearPricePointsCache();
 
+    await oThis._clearAvailableProductsCache();
+
     return Promise.resolve(responseHelper.successWithData({}));
   }
 
@@ -77,6 +80,16 @@ class PricePointsUpdateBase extends ServiceBase {
    */
   async _clearPricePointsCache() {
     await new PricePointsCache().clear();
+  }
+
+  /**
+   * Clear available products cache.
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _clearAvailableProductsCache() {
+    await new AvailableProductsCache().clear();
   }
 
   /**

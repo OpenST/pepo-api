@@ -1,12 +1,12 @@
 const rootPrefix = '../..',
   RabbitMqProcessorBase = require(rootPrefix + '/executables/rabbitMqSubscribers/Base'),
-  socketRabbitMqProvider = require(rootPrefix + '/lib/providers/socketRabbitMq'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
-  webSocketCustomCache = require(rootPrefix + '/lib/webSocket/customCache'),
   webSocketServerHelper = require(rootPrefix + '/lib/webSocket/helper'),
+  webSocketCustomCache = require(rootPrefix + '/lib/webSocket/customCache'),
+  machineKindConstants = require(rootPrefix + '/lib/globalConstant/machineKind'),
+  socketRabbitMqProvider = require(rootPrefix + '/lib/providers/socketRabbitMq'),
   cronProcessesConstants = require(rootPrefix + '/lib/globalConstant/cronProcesses'),
-  configStrategyConstants = require(rootPrefix + '/lib/globalConstant/configStrategy'),
-  machineKindConstant = require(rootPrefix + '/lib/globalConstant/machineKind');
+  configStrategyConstants = require(rootPrefix + '/lib/globalConstant/configStrategy');
 
 /**
  * Class for socket job processor.
@@ -14,18 +14,6 @@ const rootPrefix = '../..',
  * @class SocketJobProcessor
  */
 class SocketJobProcessor extends RabbitMqProcessorBase {
-  /**
-   * Constructor for rabbitMq processor base.
-   *
-   * @param {object} params
-   * @param {number} params.cronProcessId
-   *
-   * @constructor
-   */
-  constructor(params) {
-    super(params);
-  }
-
   /**
    * Get rabbitMq provider.
    *
@@ -37,7 +25,7 @@ class SocketJobProcessor extends RabbitMqProcessorBase {
     return socketRabbitMqProvider.getInstance(
       configStrategyConstants.socketRabbitmq,
       oThis.rmqCId, // This is available in cronProcesses table's params column.
-      machineKindConstant.cronKind
+      machineKindConstants.cronKind
     );
   }
 
@@ -67,43 +55,42 @@ class SocketJobProcessor extends RabbitMqProcessorBase {
    * @returns {Boolean}
    */
   _pendingTasksDone() {
-    let rmqTaskDone = super._pendingTasksDone();
-    let websocketTaskDone = webSocketServerHelper.pendingTasksDone();
-    console.log('rmqTaskDone-----', rmqTaskDone);
-    console.log('websocketTaskDone-----', websocketTaskDone);
-    if (rmqTaskDone && websocketTaskDone) {
-      return true;
-    }
-    return false;
+    const rmqTaskDone = super._pendingTasksDone();
+    const websocketTaskDone = webSocketServerHelper.pendingTasksDone();
+    logger.log('rmqTaskDone-----', rmqTaskDone);
+    logger.log('websocketTaskDone-----', websocketTaskDone);
+
+    return !!(rmqTaskDone && websocketTaskDone);
   }
 
   /**
    * Process message.
    *
    * @param {object} messageParams
-   * @param {string} messageParams.kind: kind of the bg job
-   * @param {object} messageParams.payload
+   * @param {object} messageParams.message
+   * @param {object} messageParams.message.payload
+   * @param {array} messageParams.message.payload.userIds
+   * @param {object} messageParams.message.payload.messagePayload
    *
    * @returns {Promise<>}
    *
    * @private
    */
   _processMessage(messageParams) {
-    const oThis = this,
-      messageDetails = messageParams.message.payload,
+    const messageDetails = messageParams.message.payload,
       userIds = messageDetails.userIds,
       messagePayload = messageDetails.messagePayload;
 
-    for (let j = 0; j < userIds.length; j++) {
-      let socketObjectIds = webSocketCustomCache.getFromUserSocketConnDetailsIdsMap(userIds[j]);
+    for (let index = 0; index < userIds.length; index++) {
+      const socketObjectIds = webSocketCustomCache.getFromUserSocketConnDetailsIdsMap(userIds[index]);
 
-      if (!socketObjectIds || socketObjectIds.length == 0) {
+      if (!socketObjectIds || socketObjectIds.length === 0) {
         continue;
       }
-      for (let i = 0; i < socketObjectIds.length; i++) {
-        logger.log('userIds[j] ===------------==', j, userIds[j]);
-        let socketObj = webSocketCustomCache.getFromSocketObjsMap(socketObjectIds[i]);
-        socketObj.emit('server-event', JSON.stringify(messagePayload));
+      for (let ind = 0; ind < socketObjectIds.length; ind++) {
+        logger.log('userIds[index] ===------------==', index, userIds[index]);
+        const socketObj = webSocketCustomCache.getFromSocketIdToSocketObjMap(socketObjectIds[ind]);
+        socketObj.emit('pepo-stream', messagePayload);
       }
     }
 

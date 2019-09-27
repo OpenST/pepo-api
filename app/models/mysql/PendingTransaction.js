@@ -83,7 +83,7 @@ class PendingTransaction extends ModelBase {
   }
 
   /**
-   * Fetch pending transactions by from user id and video ids
+   * Fetch pending transactions by from user id and video ids.
    *
    * @param {number} videoIds: video ids
    * @param {number} fromUserId: from user id
@@ -116,7 +116,7 @@ class PendingTransaction extends ModelBase {
    * Flush cache.
    *
    * @param {object} params
-   * @param {number} params.fromUserId
+   * @param {number} [params.fromUserId]
    * @param {number} [params.toUserId]
    * @param {number} [params.videoId]
    *

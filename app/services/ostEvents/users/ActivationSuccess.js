@@ -2,6 +2,7 @@ const rootPrefix = '../../../..',
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   TokenUserModel = require(rootPrefix + '/app/models/mysql/TokenUser'),
   TransactionModel = require(rootPrefix + '/app/models/mysql/Transaction'),
+  CompanyToUserTransaction = require(rootPrefix + '/lib/transaction/CompanyToUser'),
   UserOstEventBase = require(rootPrefix + '/app/services/ostEvents/users/Base'),
   SecureTokenCache = require(rootPrefix + '/lib/cacheManagement/single/SecureToken'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
@@ -9,7 +10,8 @@ const rootPrefix = '../../../..',
   tokenConstants = require(rootPrefix + '/lib/globalConstant/token'),
   ostPlatformSdk = require(rootPrefix + '/lib/ostPlatform/jsSdkWrapper'),
   tokenUserConstants = require(rootPrefix + '/lib/globalConstant/tokenUser'),
-  transactionConstants = require(rootPrefix + '/lib/globalConstant/transaction');
+  transactionConstants = require(rootPrefix + '/lib/globalConstant/transaction'),
+  transactionTypesConstants = require(rootPrefix + '/lib/globalConstant/transactionTypes');
 
 /**
  * Class for user activation success.
@@ -51,11 +53,11 @@ class UserActivationSuccess extends UserOstEventBase {
 
     await oThis._updateTokenUser();
 
-    await oThis._startAirdrop();
+    await oThis._startAirdropAndCreateTransactionEntry();
 
     await oThis._markTokenUserAirdropStartedProperty();
 
-    await oThis._createTransactionEntry();
+    //await oThis._createTransactionEntry();
 
     return responseHelper.successWithData({});
   }
@@ -177,53 +179,30 @@ class UserActivationSuccess extends UserOstEventBase {
    * @return {Promise<void>}
    * @private
    */
-  async _startAirdrop() {
+  async _startAirdropAndCreateTransactionEntry() {
     const oThis = this;
 
     logger.log('Starting airdrop for user.');
 
-    const tokenDataRsp = await new SecureTokenCache().fetch();
-
-    if (tokenDataRsp.isFailure()) {
-      logger.error('Error while fetching token data.');
-
-      return Promise.reject(tokenDataRsp);
-    }
-
-    oThis.tokenData = tokenDataRsp.data;
-
-    const transferToAddress = oThis.tokenUserObj.ostTokenHolderAddress;
-    const ruleAddresses = JSON.parse(oThis.tokenData.ruleAddresses);
-
-    const executeParams = {
-      user_id: oThis.tokenData.ostCompanyUserId,
-      to: ruleAddresses['Direct Transfer'],
-      meta_property: {
-        details: 'Welcome',
-        type: 'company_to_user',
-        name: 'UserActivateAirdrop'
-      },
-      raw_calldata: JSON.stringify({
-        method: 'directTransfers',
-        parameters: [[transferToAddress], [tokenConstants.airdropAmount]]
-      })
+    const executePayTransactionParams = {
+      transferToAddress: oThis.tokenUserObj.ostTokenHolderAddress,
+      transferToUserId: oThis.tokenUserObj.userId,
+      amountInWei: tokenConstants.airdropAmount,
+      transactionKind: transactionConstants.extraData.airdropKind,
+      transactionMetaProperties: {
+        name: 'UserActivateAirdrop',
+        type: transactionTypesConstants.companyToUserTransactionType,
+        details: 'Welcome'
+      }
     };
 
-    logger.log('\n\n\n===executeParams===', JSON.stringify(executeParams));
-    let startAirdropResponse = null;
-    try {
-      startAirdropResponse = await ostPlatformSdk.executeTransaction(executeParams);
-    } catch (err) {
-      logger.error('Error in Activation airdrop OST Wrapper API call::->', err);
+    logger.log('\n===companyToUserParams===', JSON.stringify(executePayTransactionParams));
 
-      return Promise.reject(err);
+    const executionResponse = await new CompanyToUserTransaction(executePayTransactionParams).perform();
+
+    if (executionResponse.isFailure()) {
+      return Promise.reject(executionResponse);
     }
-
-    if (!startAirdropResponse.isSuccess()) {
-      return Promise.reject(startAirdropResponse);
-    }
-
-    oThis.airdropTxResp = startAirdropResponse.data;
 
     return responseHelper.successWithData({});
   }
