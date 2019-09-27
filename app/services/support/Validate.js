@@ -22,7 +22,7 @@ class ValidateSupportUrl extends ServiceBase {
     return Promise.resolve(
       responseHelper.successWithData({
         userId: oThis.currentUser.id,
-        external_user_id: oThis.currentUser.externalUserId || oThis.currentUser.id,
+        external_user_id: oThis.currentUser.externalUserId,
         user_name: oThis.currentUser.name
       })
     );
