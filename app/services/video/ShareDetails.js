@@ -7,6 +7,8 @@ const rootPrefix = '../../..',
   VideoByIdCache = require(rootPrefix + '/lib/cacheManagement/multi/VideoByIds'),
   UserMultiCache = require(rootPrefix + '/lib/cacheManagement/multi/User'),
   VideoDetailsByVideoIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/VideoDetailsByVideoIds'),
+  TwitterUserByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TwitterUserByUserIds'),
+  TwitterUserByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TwitterUserByIds'),
   videoDetailsConstants = require(rootPrefix + '/lib/globalConstant/videoDetail'),
   userConstants = require(rootPrefix + '/lib/globalConstant/user'),
   videoConstants = require(rootPrefix + '/lib/globalConstant/video'),
@@ -35,7 +37,8 @@ class ShareDetails extends ServiceBase {
     oThis.currentUser = params.current_user;
 
     oThis.messageObject = null;
-    oThis.creatorUserName = null;
+    oThis.creatorName = null;
+    oThis.twitterHandle = null;
     oThis.videoDescriptionText = null;
   }
 
@@ -72,15 +75,16 @@ class ShareDetails extends ServiceBase {
 
       oThis.messageObject = shareEntityConstants.getVideoShareEntityForCuratedVideos({
         url: urlDomain,
-        creatorUserName: userName
+        creatorName: userName
       });
     } else {
       await oThis._fetchVideo();
       await oThis._fetchCreatorUserName();
       oThis.messageObject = shareEntityConstants.getVideoShareEntity({
-        creatorUserName: oThis.creatorUserName,
+        creatorName: oThis.creatorName,
         url: oThis._generateVideoShareUrl(),
-        videoDescription: oThis.videoDescriptionText
+        videoDescription: oThis.videoDescriptionText,
+        handle: oThis.twitterHandle
       });
     }
 
@@ -121,7 +125,7 @@ class ShareDetails extends ServiceBase {
    *
    * @returns {Promise<never>}
    *
-   * @sets oThis.creatorUserName
+   * @sets oThis.creatorName
    * @private
    */
   async _fetchCreatorUserName() {
@@ -188,7 +192,41 @@ class ShareDetails extends ServiceBase {
       );
     }
 
-    oThis.creatorUserName = userObj.name;
+    oThis.creatorName = userObj.name;
+    await oThis._fetchTwitterHandle(userObj.id);
+  }
+
+  /**
+   * Fetch twitter handle.
+   *
+   * @returns {Promise<never>}
+   * @private
+   */
+  async _fetchTwitterHandle(userId) {
+    const oThis = this;
+
+    const twitterUserByUserIdsCacheResponse = await new TwitterUserByUserIdsCache({
+      userIds: [userId]
+    }).fetch();
+
+    if (twitterUserByUserIdsCacheResponse.isFailure()) {
+      return Promise.reject(twitterUserByUserIdsCacheResponse);
+    }
+
+    const twitterUserByUserIdsCacheData = twitterUserByUserIdsCacheResponse.data[userId];
+
+    if (!twitterUserByUserIdsCacheData || !twitterUserByUserIdsCacheData.id) {
+      return; // don't set oThis.twitterHandle, this returns share entity without 'twitterHandle'
+    }
+
+    let twitterUserId = twitterUserByUserIdsCacheData.id;
+
+    const twitterUserByUserIdCacheResponse = await new TwitterUserByIdsCache({ ids: [twitterUserId] }).fetch();
+    if (twitterUserByUserIdCacheResponse.isFailure()) {
+      return Promise.reject(twitterUserByUserIdCacheResponse);
+    }
+
+    oThis.twitterHandle = twitterUserByUserIdCacheResponse.data[twitterUserId].handle;
   }
 
   /**

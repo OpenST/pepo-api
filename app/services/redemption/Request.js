@@ -177,7 +177,7 @@ class RequestRedemption extends ServiceBase {
     const pepoAmountInBn = new BigNumber(oThis.pepoAmountInWei),
       balanceInBn = new BigNumber(balanceResponse.data.balance.total_balance);
 
-    return !pepoAmountInBn.gt(balanceInBn);
+    return !pepoAmountInBn.gte(balanceInBn);
   }
 
   /**
