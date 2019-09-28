@@ -96,7 +96,7 @@ class VideoDetail extends ModelBase {
     const oThis = this;
 
     const dbRows = await oThis
-      .select('creator_user_id, max(id) as latest_video_id')
+      .select('creator_user_id, max(video_id) as latest_video_id')
       .where({
         creator_user_id: userIds,
         status: videoDetailsConst.invertedStatuses[videoDetailsConst.activeStatus]
