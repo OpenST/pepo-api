@@ -109,7 +109,7 @@ class PopulateInviteCodeTableForUserNPreLaunch {
       .where({ twitter_id: preLaunchTwitterId })
       .fire();
 
-    if (twitterUserQueryRsp[0] && !basicHelper.isTwitterIdRotated(twitterUserQueryRsp[0].twitterId)) {
+    if (twitterUserQueryRsp[0] && !basicHelper.isTwitterIdRotated(twitterUserQueryRsp[0].twitter_id)) {
       twitterId = twitterUserQueryRsp[0].user_id;
     }
 
