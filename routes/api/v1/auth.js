@@ -25,6 +25,7 @@ router.post('/logout', cookieHelper.parseUserCookieForLogout, sanitizer.sanitize
 router.post('/twitter-login', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.twitterLogin;
 
+  console.log('----------------------------------------------------', JSON.stringify(req.decodedParams));
   const onServiceSuccess = async function(serviceResponse) {
     cookieHelper.setLoginCookie(res, serviceResponse.data.userLoginCookieValue);
     const wrapperFormatterRsp = await new FormatterComposer({
