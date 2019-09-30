@@ -609,6 +609,28 @@ class BasicHelper {
   isTwitterIdRotated(twitterId) {
     return twitterId[0] === '-';
   }
+
+  /**
+   * Get user profile url prefix for admin dashboard.
+   *
+   * @returns {string}
+   */
+  userProfilePrefixUrl() {
+    const oThis = this;
+
+    let urlPrefix;
+    if (oThis.isProduction()) {
+      urlPrefix = 'https://pepo.com/';
+    } else if (oThis.isSandbox()) {
+      urlPrefix = 'https://sandboxpepo.com/';
+    } else {
+      urlPrefix = 'https://stagingpepo.com/';
+    }
+
+    urlPrefix += 'admin/user-profile/';
+
+    return urlPrefix;
+  }
 }
 
 module.exports = new BasicHelper();

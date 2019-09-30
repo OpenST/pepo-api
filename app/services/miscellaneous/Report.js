@@ -1,27 +1,41 @@
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
-  SendTransactionalMail = require(rootPrefix + '/lib/email/hookCreator/SendTransactionalMail'),
-  VideoByIdCache = require(rootPrefix + '/lib/cacheManagement/multi/VideoByIds'),
+  CommonValidator = require(rootPrefix + '/lib/validators/Common'),
   UserMultiCache = require(rootPrefix + '/lib/cacheManagement/multi/User'),
+  VideoByIdCache = require(rootPrefix + '/lib/cacheManagement/multi/VideoByIds'),
+  SendTransactionalMail = require(rootPrefix + '/lib/email/hookCreator/SendTransactionalMail'),
   VideoDetailsByVideoIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/VideoDetailsByVideoIds'),
-  emailServiceApiCallHookConstants = require(rootPrefix + '/lib/globalConstant/emailServiceApiCallHook'),
-  videoConstants = require(rootPrefix + '/lib/globalConstant/video'),
-  reportEntityConstants = require(rootPrefix + '/lib/globalConstant/reportEntity'),
+  basicHelper = require(rootPrefix + '/helpers/basic'),
   userConstants = require(rootPrefix + '/lib/globalConstant/user'),
-  emailConstants = require(rootPrefix + '/lib/globalConstant/email'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
-  commonValidator = require(rootPrefix + '/lib/validators/Common');
+  videoConstants = require(rootPrefix + '/lib/globalConstant/video'),
+  emailConstants = require(rootPrefix + '/lib/globalConstant/email'),
+  reportEntityConstants = require(rootPrefix + '/lib/globalConstant/reportEntity'),
+  emailServiceApiCallHookConstants = require(rootPrefix + '/lib/globalConstant/emailServiceApiCallHook');
 
+/**
+ * Class to report for an entity.
+ *
+ * @class ReportForEntity
+ */
 class ReportForEntity extends ServiceBase {
   /**
-   * @constructor
+   * Constructor to report for an entity.
    *
-   * @param params
+   * @param {object} params
+   * @param {object} params.current_user
+   * @param {string} params.report_entity_kind
+   * @param {string} params.report_entity_id
+   *
+   * @augments ServiceBase
+   *
+   * @constructor
    */
   constructor(params) {
     super();
 
     const oThis = this;
+
     oThis.currentUser = params.current_user;
     oThis.reportEntityKind = params.report_entity_kind;
     oThis.reportEntityId = params.report_entity_id;
@@ -48,7 +62,9 @@ class ReportForEntity extends ServiceBase {
   }
 
   /**
-   * Report Handler.
+   * Report handler.
+   *
+   * @sets oThis.templateVars
    *
    * @returns {Promise<void>}
    * @private
@@ -57,7 +73,7 @@ class ReportForEntity extends ServiceBase {
     const oThis = this;
 
     switch (oThis.reportEntityKind) {
-      case reportEntityConstants.videoReportEntityKind:
+      case reportEntityConstants.videoReportEntityKind: {
         const promiseArray = [];
 
         promiseArray.push(oThis._fetchVideo());
@@ -72,12 +88,13 @@ class ReportForEntity extends ServiceBase {
           reporter_user_id: oThis.currentUser.id,
           reportee_user_name: oThis.reportedUserObj.name,
           reportee_user_id: oThis.reportedUserObj.id,
-          video_url: encodeURIComponent(oThis.videoUrl)
+          video_url: encodeURIComponent(oThis.videoUrl),
+          user_admin_url_prefix: basicHelper.userProfilePrefixUrl()
         };
 
         break;
-
-      case reportEntityConstants.userReportEntityKind:
+      }
+      case reportEntityConstants.userReportEntityKind: {
         oThis.reportedUserObj = await oThis._fetchUserFor(oThis.reportEntityId);
 
         oThis.templateVars = {
@@ -86,18 +103,22 @@ class ReportForEntity extends ServiceBase {
           reporter_user_name: oThis.currentUser.name,
           reporter_user_id: oThis.currentUser.id,
           reportee_user_name: oThis.reportedUserObj.name,
-          reportee_user_id: oThis.reportedUserObj.id
+          reportee_user_id: oThis.reportedUserObj.id,
+          user_admin_url_prefix: basicHelper.userProfilePrefixUrl()
         };
 
         break;
-
-      default:
+      }
+      default: {
         throw new Error('Unsupported report entity kind.');
+      }
     }
   }
 
   /**
    * Fetch video.
+   *
+   * @sets oThis.videoUrl
    *
    * @returns {Promise<never>}
    * @private
@@ -112,7 +133,7 @@ class ReportForEntity extends ServiceBase {
     }
 
     if (
-      !commonValidator.validateNonEmptyObject(cacheRsp.data[oThis.reportEntityId]) ||
+      !CommonValidator.validateNonEmptyObject(cacheRsp.data[oThis.reportEntityId]) ||
       cacheRsp.data[oThis.reportEntityId].status === videoConstants.deletedStatus
     ) {
       return Promise.reject(
@@ -130,9 +151,9 @@ class ReportForEntity extends ServiceBase {
   /**
    * Fetch video creator.
    *
-   * @returns {Promise<never>}
-   *
    * @sets oThis.reportedUserObj
+   *
+   * @returns {Promise<never>}
    * @private
    */
   async _fetchVideoCreator() {
@@ -144,10 +165,10 @@ class ReportForEntity extends ServiceBase {
       return Promise.reject(videoDetailsCacheRsp);
     }
 
-    let videoDetails = videoDetailsCacheRsp.data[oThis.reportEntityId];
+    const videoDetails = videoDetailsCacheRsp.data[oThis.reportEntityId];
 
-    let creatorUserId = videoDetails.creatorUserId;
-    // fetch user name for creator
+    const creatorUserId = videoDetails.creatorUserId;
+    // Fetch user name for creator.
     oThis.reportedUserObj = await oThis._fetchUserFor(creatorUserId);
   }
 
@@ -166,9 +187,9 @@ class ReportForEntity extends ServiceBase {
       return Promise.reject(userMultiCacheRsp);
     }
 
-    // if user is not active, no point is reporting.
+    // If user is not active, no point in reporting.
     if (
-      !commonValidator.validateNonEmptyObject(userMultiCacheRsp.data[userId]) ||
+      !CommonValidator.validateNonEmptyObject(userMultiCacheRsp.data[userId]) ||
       userMultiCacheRsp.data[userId].status === userConstants.inActiveStatus
     ) {
       return Promise.reject(
@@ -182,7 +203,7 @@ class ReportForEntity extends ServiceBase {
       );
     }
 
-    // if current user is trying to report himself/herself, error out.
+    // If current user is trying to report himself/herself, error out.
     if (userMultiCacheRsp.data[userId].id === oThis.currentUser.id) {
       return Promise.reject(
         responseHelper.error({
