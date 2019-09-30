@@ -141,6 +141,11 @@ class UserNotificationList extends ServiceBase {
   async _setUserNotifications() {
     const oThis = this;
 
+    // TEMP code fix for 128 cassandra driver issue
+    if (oThis.currentUserId == 128) {
+      return;
+    }
+
     const cacheResponse = await new UserNotificationsByUserIdPagination({
       userId: oThis.currentUserId,
       limit: oThis.limit,
