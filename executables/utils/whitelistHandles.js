@@ -99,9 +99,7 @@ class WhitelistHandles {
     while (unprocessedHandles.length > 0) {
       let handles = unprocessedHandles.splice(0, BATCH_SIZE);
 
-      let preLaunchInviteObj = new PreLaunchInviteModel();
-
-      let preLaunchInviteRowResp = await preLaunchInviteObj
+      let preLaunchInviteRowResp = await new PreLaunchInviteModel()
         .select(['id', 'handle', 'admin_status'])
         .where({ handle: handles })
         .fire();
@@ -144,12 +142,10 @@ class WhitelistHandles {
   async _whitelistUsers() {
     const oThis = this;
 
-    let preLaunchInviteObj = new PreLaunchInviteModel();
-
     while (oThis.toWhitelistPreLaunchInviteIds.length > 0) {
       let whiltelistIds = oThis.toWhitelistPreLaunchInviteIds.splice(0, BATCH_SIZE);
 
-      await preLaunchInviteObj
+      await new PreLaunchInviteModel()
         .update({
           admin_status: prelaunchInviteConstants.invertedAdminStatuses[prelaunchInviteConstants.whitelistedStatus]
         })
