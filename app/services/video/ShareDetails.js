@@ -216,7 +216,7 @@ class ShareDetails extends ServiceBase {
     const twitterUserByUserIdsCacheData = twitterUserByUserIdsCacheResponse.data[userId];
 
     if (!twitterUserByUserIdsCacheData || !twitterUserByUserIdsCacheData.id) {
-      return; // don't set oThis.twitterHandle, this returns share entity without 'twitterHandle'
+      return; // Don't set oThis.twitterHandle, this returns share entity without 'twitterHandle'
     }
 
     let twitterUserId = twitterUserByUserIdsCacheData.id;
