@@ -132,6 +132,64 @@ class FeedModel extends ModelBase {
   }
 
   /**
+   * Fetch new feeds ids after last visit time.
+   *
+   * @param {array} ids: Feed Ids
+   *
+   * @return {object}
+   */
+  async getNewFeedIdsAfterTime(params) {
+    const oThis = this,
+      lastVisitedAt = params.lastVisitedAt,
+      limit = params.limit;
+
+    const response = [];
+
+    const dbRows = await oThis
+      .select('id')
+      .where(['pagination_identifier > ?', lastVisitedAt])
+      .order_by('pagination_identifier desc')
+      .limit(limit)
+      .fire();
+
+    for (let index = 0; index < dbRows.length; index++) {
+      const formatDbRow = oThis.formatDbData(dbRows[index]);
+      response.push(formatDbRow.id);
+    }
+
+    return response;
+  }
+
+  /**
+   * Fetch new feeds ids after last visit time.
+   *
+   * @param {array} ids: Feed Ids
+   *
+   * @return {object}
+   */
+  async getOlderFeedIds(params) {
+    const oThis = this,
+      feedIds = params.feedIds,
+      limit = params.limit;
+
+    const response = [];
+
+    const dbRows = await oThis
+      .select('id')
+      .where(['id not in (?)', feedIds])
+      .order_by('pagination_identifier desc')
+      .limit(limit)
+      .fire();
+
+    for (let index = 0; index < dbRows.length; index++) {
+      const formatDbRow = oThis.formatDbData(dbRows[index]);
+      response.push(formatDbRow.id);
+    }
+
+    return response;
+  }
+
+  /**
    * Fetch feeds for given ids.
    *
    * @param {array} ids: Feed Ids

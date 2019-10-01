@@ -1,8 +1,14 @@
 const rootPrefix = '../../..',
   FeedBase = require(rootPrefix + '/app/services/feed/Base'),
+  FeedModel = require(rootPrefix + '/app/models/mysql/Feed'),
+  CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   LoggedOutFeedCache = require(rootPrefix + '/lib/cacheManagement/single/LoggedOutFeed'),
+  FeedByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/FeedByIds'),
+  PersonalizedFeedByUserIdCache = require(rootPrefix + '/lib/cacheManagement/single/PersonalizedFeedByUserId'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
+  basicHelper = require(rootPrefix + '/helpers/basic'),
   curatedFeedsJson = require(rootPrefix + '/test/curatedFeeds'),
+  feedConstants = require(rootPrefix + '/lib/globalConstant/feed'),
   paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination');
 
 /**
@@ -32,6 +38,15 @@ class PublicVideoFeed extends FeedBase {
     oThis.limit = oThis._defaultPageLimit();
     oThis.paginationTimestamp = null;
     oThis.nextPaginationTimestamp = null;
+    oThis.pageNumber = null;
+    oThis.nextPageNumber = null;
+
+    oThis.feedIdsLengthFromCache = 0;
+    oThis.lastVisitedAt = 0;
+    oThis.newFeedIds = [];
+    oThis.olderFeedIds = [];
+
+    oThis.userFeedIdsCacheData = null;
   }
 
   /**
@@ -55,8 +70,10 @@ class PublicVideoFeed extends FeedBase {
       const parsedPaginationParams = oThis._parsePaginationParams(oThis.paginationIdentifier);
 
       oThis.paginationTimestamp = parsedPaginationParams.pagination_timestamp; // Override paginationTimestamp number.
+      oThis.pageNumber = Number(parsedPaginationParams.page_no) || 1; // Override paginationTimestamp number.
     } else {
       oThis.paginationTimestamp = null;
+      oThis.pageNumber = 1;
     }
 
     // Validate limit.
@@ -72,6 +89,267 @@ class PublicVideoFeed extends FeedBase {
    * @private
    */
   async _setFeedIds() {
+    const oThis = this;
+
+    //CACHE IS SET
+    //   page 1-new data with 40 records
+    //   page 1-new data with 40 records and 10 unseen in cache
+    //   page 1-new data with 501 new records
+    //   page 1-no new data
+    //   page 2
+
+    //CACHE WAS CLEARED
+    //   page 1-new data
+    //   page 1-new data with 501 new records
+    //   page 1-no new data
+    //   page 2
+    //new feeds
+    //no new feeds
+
+    if (oThis.currentUserId) {
+      if (oThis.pageNumber > 1) {
+        await oThis.fetchFeedIdsForUserFromCache();
+
+        if (oThis.feedIdsLengthFromCache === 0) {
+          oThis.pageNumber = 1;
+          await oThis.fetchFeedIdsForFirstPage(false);
+        }
+      } else {
+        await oThis.fetchFeedIdsForFirstPage(true);
+      }
+
+      await oThis._setFeedDataForLoggedInUser();
+    } else {
+      await oThis._setFeedDataForLoggedOutUser();
+    }
+  }
+
+  /**
+   * Set feed ids for first page of logged in user.
+   *
+   * @returns {Promise<*>}
+   * @private
+   */
+  async fetchFeedIdsForFirstPage(getUserFeedIdsFromCache) {
+    const oThis = this;
+
+    let promises = [];
+
+    await oThis.getLastVisitTime();
+    promises.push(oThis.fetchNewFeedIds());
+
+    if (getUserFeedIdsFromCache) {
+      promises.push(oThis.fetchFeedIdsForUserFromCache());
+    }
+
+    await Promise.all(promises);
+
+    if (oThis.newFeedIds.length > 0) {
+      oThis.userFeedIdsCacheData['unseenFeedIds'] = oThis.newFeedIds.concat(
+        oThis.userFeedIdsCacheData['unseenFeedIds']
+      );
+
+      oThis.userFeedIdsCacheData['unseenFeedIds'] = [...new Set(oThis.userFeedIdsCacheData['unseenFeedIds'])];
+      oThis.userFeedIdsCacheData['unseenFeedIds'] = oThis.userFeedIdsCacheData['unseenFeedIds'].splice(
+        0,
+        feedConstants.getPersonalizedFeedMaxIdsCount
+      );
+    }
+
+    if (oThis.newFeedIds.length > 0 || oThis.userFeedIdsCacheData['seenFeedIds'].length === 0) {
+      await oThis.fetchOlderFeedIds();
+      oThis.userFeedIdsCacheData['seenFeedIds'] = oThis.olderFeedIds;
+    }
+
+    oThis.userFeedIdsCacheData['seenFeedIds'] = basicHelper.shuffleArray(oThis.userFeedIdsCacheData['seenFeedIds']);
+
+    oThis.feedIdsLengthFromCache =
+      oThis.userFeedIdsCacheData['seenFeedIds'].length + oThis.userFeedIdsCacheData['unseenFeedIds'].length;
+
+    return responseHelper.successWithData({});
+  }
+
+  /**
+   * Set older feed ids before last visit time.
+   *
+   * @sets oThis.olderFeedIds
+   *
+   * @returns {Promise<*>}
+   * @private
+   */
+  async fetchOlderFeedIds() {
+    const oThis = this,
+      limit = feedConstants.getPersonalizedFeedMaxIdsCount - oThis.userFeedIdsCacheData['unseenFeedIds'].length;
+
+    if (limit <= 0) {
+      return responseHelper.successWithData({});
+    }
+
+    const queryParams = {
+      feedIds: oThis.userFeedIdsCacheData['unseenFeedIds'],
+      limit: limit
+    };
+
+    oThis.olderFeedIds = await new FeedModel().getOlderFeedIds(queryParams);
+    return responseHelper.successWithData({});
+  }
+
+  /**
+   * Get feed last visit time of User.
+   *
+   * @sets oThis.lastVisitedAt
+   *
+   * @returns {Promise<*>}
+   * @private
+   */
+  async getLastVisitTime() {
+    const oThis = this;
+    oThis.lastVisitedAt = 0;
+
+    return responseHelper.successWithData({});
+  }
+
+  /**
+   * Set feed last visit time of User.
+   *
+   * @sets oThis.lastVisitedAt
+   *
+   * @returns {Promise<*>}
+   * @private
+   */
+  async updateFeedLastVisitTime() {
+    const oThis = this;
+
+    return responseHelper.successWithData({});
+  }
+
+  /**
+   * Get User feed ids for unseen and seen from cache.
+   *
+   * @sets oThis.userFeedIdsCacheData
+   *
+   * @returns {Promise<*>}
+   * @private
+   */
+  async setFeedIdsForUserInCache() {
+    const oThis = this;
+
+    const cacheResp = await new PersonalizedFeedByUserIdCache({ userId: oThis.currentUserId }).setCacheData(
+      oThis.userFeedIdsCacheData
+    );
+
+    if (cacheResp.isFailure()) {
+      return Promise.reject(cacheResp);
+    }
+
+    return responseHelper.successWithData({});
+  }
+
+  /**
+   * Get User feed ids for unseen and seen from cache.
+   *
+   * @sets oThis.userFeedIdsCacheData
+   *
+   * @returns {Promise<*>}
+   * @private
+   */
+  async fetchFeedIdsForUserFromCache() {
+    const oThis = this;
+
+    const cacheResp = await new PersonalizedFeedByUserIdCache({ userId: oThis.currentUserId }).fetch();
+
+    if (cacheResp.isFailure()) {
+      return Promise.reject(cacheResp);
+    }
+
+    if (CommonValidators.validateNonEmptyObject(cacheResp.data)) {
+      oThis.userFeedIdsCacheData = cacheResp.data;
+
+      oThis.feedIdsLengthFromCache =
+        oThis.userFeedIdsCacheData['seenFeedIds'].length + oThis.userFeedIdsCacheData['unseenFeedIds'].length;
+    } else {
+      oThis.userFeedIdsCacheData = { seenFeedIds: [], unseenFeedIds: [] };
+      oThis.feedIdsLengthFromCache = 0;
+    }
+  }
+
+  /**
+   * Set new feed ids since last visit time.
+   *
+   * @sets oThis.newFeedIds
+   *
+   * @returns {Promise<*>}
+   * @private
+   */
+  async fetchNewFeedIds() {
+    const oThis = this;
+
+    const queryParams = {
+      lastVisitedAt: oThis.lastVisitedAt,
+      limit: feedConstants.getPersonalizedFeedMaxIdsCount
+    };
+
+    oThis.newFeedIds = await new FeedModel().getNewFeedIdsAfterTime(queryParams);
+    await oThis.updateFeedLastVisitTime();
+  }
+
+  /**
+   * Set feed data for logged in users.
+   *
+   * @sets oThis.feedIds, oThis.feedsMap, oThis.nextPaginationTimestamp
+   *
+   * @returns {Promise<*>}
+   * @private
+   */
+  async _setFeedDataForLoggedInUser() {
+    const oThis = this;
+
+    let currentFeedIds = oThis.userFeedIdsCacheData['unseenFeedIds'].splice(0, oThis.limit);
+    let unseenLength = currentFeedIds.length;
+
+    if (unseenLength === 0 && oThis.feedIdsLengthFromCache <= (oThis.pageNumber - 1) * oThis.limit) {
+      return responseHelper.successWithData({});
+    }
+
+    let diff = oThis.limit - unseenLength;
+
+    if (diff > 0) {
+      let ids = oThis.userFeedIdsCacheData['seenFeedIds'].splice(0, diff);
+      currentFeedIds = currentFeedIds.concat(ids);
+    }
+
+    if (currentFeedIds.length > 0) {
+      oThis.userFeedIdsCacheData['seenFeedIds'] = oThis.userFeedIdsCacheData['seenFeedIds'].concat(currentFeedIds);
+
+      const feedByIdsCacheResponse = await new FeedByIdsCache({ ids: currentFeedIds }).fetch();
+
+      if (feedByIdsCacheResponse.isFailure()) {
+        return Promise.reject(feedByIdsCacheResponse);
+      }
+
+      oThis.feedsMap = feedByIdsCacheResponse.data;
+      oThis.feedIds = Object.keys(oThis.feedsMap);
+    } else {
+      oThis.feedsMap = {};
+      oThis.feedIds = [];
+    }
+
+    if (currentFeedIds.length >= oThis.limit) {
+      oThis.nextPageNumber = oThis.pageNumber + 1;
+    }
+
+    await oThis.setFeedIdsForUserInCache();
+  }
+
+  /**
+   * Set feed ids.
+   *
+   * @sets oThis.feedIds, oThis.feedsMap, oThis.nextPaginationTimestamp
+   *
+   * @returns {Promise<*>}
+   * @private
+   */
+  async _setFeedDataForLoggedOutUser() {
     const oThis = this;
 
     const loggedOutFeedCacheResp = await new LoggedOutFeedCache({
@@ -101,10 +379,18 @@ class PublicVideoFeed extends FeedBase {
 
     const nextPagePayloadKey = {};
 
-    if (oThis.nextPaginationTimestamp) {
-      nextPagePayloadKey[paginationConstants.paginationIdentifierKey] = {
-        pagination_timestamp: oThis.nextPaginationTimestamp
-      };
+    if (oThis.currentUserId) {
+      if (oThis.nextPageNumber) {
+        nextPagePayloadKey[paginationConstants.paginationIdentifierKey] = {
+          page_no: oThis.nextPageNumber
+        };
+      }
+    } else {
+      if (oThis.nextPaginationTimestamp) {
+        nextPagePayloadKey[paginationConstants.paginationIdentifierKey] = {
+          pagination_timestamp: oThis.nextPaginationTimestamp
+        };
+      }
     }
 
     const responseMetaData = {
@@ -112,7 +398,7 @@ class PublicVideoFeed extends FeedBase {
     };
 
     // TEMP CODE START - to show curated feeds on top(only in logged out mode)
-    if (!oThis.currentUser && oThis.paginationTimestamp == null) {
+    if (!oThis.currentUserId && oThis.paginationTimestamp == null) {
       const curatedFeeds = curatedFeedsJson.curatedFeeds;
 
       oThis.feeds = curatedFeeds.concat(oThis.feeds);
