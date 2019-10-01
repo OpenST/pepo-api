@@ -282,6 +282,8 @@ class UserModel extends ModelBase {
    * @param {number} params.paginationTimestamp: pagination time stamp
    * @param {boolean} params.fetchAll: flag to fetch all users, active or inactive
    * @param {boolean} params.isOnlyNameSearch
+   * @param {string} params.sortBy: order query by
+   * @param {string} params.filter: filter
    *
    * @return {Promise}
    */
@@ -295,8 +297,13 @@ class UserModel extends ModelBase {
 
     const queryObject = oThis
       .select('id, user_name, name, email, properties, status, profile_image_id, created_at, updated_at')
-      .limit(limit)
-      .order_by('id desc');
+      .limit(limit);
+
+    if (params.sortBy && params.sortBy === userConstants.ascendingSortByValue) {
+      queryObject.order_by('id asc');
+    } else {
+      queryObject.order_by('id desc');
+    }
 
     const queryWithWildCards = '%' + query + '%';
 
@@ -310,6 +317,25 @@ class UserModel extends ModelBase {
 
     if (query && !isOnlyNameSearch) {
       queryObject.where(['user_name LIKE ? OR name LIKE ?', queryWithWildCards, queryWithWildCards]);
+    }
+
+    // Filter users by creator statuses
+    let approvedPropertyVal = userConstants.invertedProperties[userConstants.isDeniedCreatorProperty],
+      deniedPropertyVal = userConstants.invertedProperties[userConstants.isDeniedCreatorProperty];
+    switch (params.filter) {
+      case userConstants.pendingCreatorFilterValue:
+        queryObject.where([
+          'properties != (properties | ?) AND properties != (properties | ?)',
+          approvedPropertyVal,
+          deniedPropertyVal
+        ]);
+        break;
+      case userConstants.approvedCreatorFilterValue:
+        queryObject.where(['properties = properties | ?', approvedPropertyVal]);
+        break;
+      case userConstants.deniedCreatorFilterValue:
+        queryObject.where(['properties = properties | ?', deniedPropertyVal]);
+        break;
     }
 
     if (paginationTimestamp) {

@@ -189,7 +189,7 @@ class UpdateFanVideo extends UpdateProfileBase {
       await new UserModelKlass()
         .update(['properties = properties ^ ?', propertyVal])
         .where({ id: oThis.profileUserId })
-        .where(['properties = properties & ?', propertyVal])
+        .where(['properties = properties | ?', propertyVal])
         .fire();
 
       oThis.flushUserCache = true;

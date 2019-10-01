@@ -13,6 +13,14 @@ const adminSignature = {
       {
         parameter: paginationConstants.paginationIdentifierKey,
         validatorMethods: ['validateString', 'validatePaginationIdentifier']
+      },
+      {
+        parameter: 'sort_by',
+        validatorMethods: ['validateString']
+      },
+      {
+        parameter: 'filter',
+        validatorMethods: ['validateString']
       }
     ]
   },
