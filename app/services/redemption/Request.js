@@ -15,6 +15,8 @@ const rootPrefix = '../../..',
   coreConstants = require(rootPrefix + '/config/coreConstants'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   emailConstants = require(rootPrefix + '/lib/globalConstant/email'),
+  bgJob = require(rootPrefix + '/lib/rabbitMqEnqueue/bgJob'),
+  bgJobConstants = require(rootPrefix + '/lib/globalConstant/bgJob'),
   ostPricePointConstants = require(rootPrefix + '/lib/globalConstant/ostPricePoints'),
   emailServiceApiCallHookConstants = require(rootPrefix + '/lib/globalConstant/emailServiceApiCallHook');
 
@@ -79,7 +81,9 @@ class RequestRedemption extends ServiceBase {
 
     oThis.redemptionId = uuidV4();
 
-    await oThis._sendEmail();
+    oThis._prepareSendMailParams();
+
+    await oThis._enqueAfterRedemptionJob();
 
     return responseHelper.successWithData({
       redemption: {
@@ -324,15 +328,15 @@ class RequestRedemption extends ServiceBase {
   }
 
   /**
-   * Send email for initiation of redemption request.
+   * Prepare send mail params
    *
-   * @returns {Promise<void>}
+   * sets oThis.transactionalMailParams
    * @private
    */
-  async _sendEmail() {
+  _prepareSendMailParams() {
     const oThis = this;
 
-    const transactionalMailParams = {
+    oThis.transactionalMailParams = {
       receiverEntityId: 0,
       receiverEntityKind: emailServiceApiCallHookConstants.hookParamsInternalEmailEntityKind,
       templateName: emailServiceApiCallHookConstants.userRedemptionTemplateName,
@@ -357,8 +361,23 @@ class RequestRedemption extends ServiceBase {
         receiverEmail: emailConstants.redemptionRequest
       }
     };
+  }
 
-    await new SendTransactionalMail(transactionalMailParams).perform();
+  /**
+   * Enque after signup job.
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _enqueAfterRedemptionJob() {
+    const oThis = this;
+
+    const messagePayload = {
+      transactionalMailParams: oThis.transactionalMailParams,
+      currentUserId: oThis.currentUserId,
+      productKind: oThis.productKind
+    };
+    await bgJob.enqueue(bgJobConstants.afterRedemptionJobTopic, messagePayload);
   }
 }
 

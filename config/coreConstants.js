@@ -392,6 +392,10 @@ class CoreConstants {
   get PEPO_USER_SEARCH_CURATED_USER_IDS() {
     return process.env.PA_USER_SEARCH_CURATED_USER_IDS;
   }
+
+  get PEPO_SLACK_OAUTH_TOKEN() {
+    return process.env.PA_SLACK_OAUTH_TOKEN;
+  }
 }
 
 module.exports = new CoreConstants();
