@@ -632,7 +632,7 @@ class UserSearch extends ServiceBase {
    * @private
    */
   _defaultPageLimit() {
-    return paginationConstants.defaultUserSearchPageSize;
+    return paginationConstants.defaultAdminUserSearchPageSize;
   }
 
   /**
@@ -642,7 +642,7 @@ class UserSearch extends ServiceBase {
    * @private
    */
   _minPageLimit() {
-    return paginationConstants.minUserSearchPageSize;
+    return paginationConstants.minAdminUserSearchPageSize;
   }
 
   /**
@@ -652,7 +652,7 @@ class UserSearch extends ServiceBase {
    * @private
    */
   _maxPageLimit() {
-    return paginationConstants.maxUserSearchPageSize;
+    return paginationConstants.maxAdminUserSearchPageSize;
   }
 
   /**
