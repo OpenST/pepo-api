@@ -2,7 +2,8 @@ const rootPrefix = '../../..',
   FeedBase = require(rootPrefix + '/app/services/feed/Base'),
   LoggedOutFeedCache = require(rootPrefix + '/lib/cacheManagement/single/LoggedOutFeed'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
-  curatedFeedsJson = require(rootPrefix + '/test/curatedFeeds'),
+  coreConstants = require(rootPrefix + '/config/coreConstants'),
+  FeedModel = require(rootPrefix + '/app/models/mysql/Feed'),
   paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination');
 
 /**
@@ -86,6 +87,25 @@ class PublicVideoFeed extends FeedBase {
       const lastFeedId = oThis.feedIds[oThis.feedIds.length - 1];
       oThis.nextPaginationTimestamp = oThis.feedsMap[lastFeedId].paginationIdentifier;
     }
+
+    let curatedFeedMap = {};
+    const curatedFeedIdsString = coreConstants.PEPO_CURATED_FEED_IDS,
+      curatedFeedIds = JSON.parse(curatedFeedIdsString);
+
+    if (!oThis.currentUser && oThis.paginationTimestamp == null) {
+      curatedFeedMap = await new FeedModel().fetchByIds(curatedFeedIds);
+
+      oThis.feedIds = curatedFeedIds.concat(oThis.feedIds);
+      oThis.feedsMap = Object.assign(oThis.feedsMap, curatedFeedMap);
+    } else {
+      for (let i = 0; i < oThis.feedIds; i++) {
+        let feedId = oThis.feedIds[i],
+          arrayIndex = oThis.feedIds.indexOf(feedId);
+
+        oThis.feedIds.splice(arrayIndex, 1);
+        delete oThis.feedsMap[feedId];
+      }
+    }
   }
 
   /**
@@ -110,39 +130,6 @@ class PublicVideoFeed extends FeedBase {
     const responseMetaData = {
       [paginationConstants.nextPagePayloadKey]: nextPagePayloadKey
     };
-
-    // TEMP CODE START - to show curated feeds on top(only in logged out mode)
-    if (!oThis.currentUser && oThis.paginationTimestamp == null) {
-      const curatedFeeds = curatedFeedsJson.curatedFeeds;
-
-      oThis.feeds = curatedFeeds.concat(oThis.feeds);
-
-      oThis.profileResponse.userProfilesMap = Object.assign(
-        oThis.profileResponse.userProfilesMap,
-        curatedFeedsJson.userProfilesMap
-      );
-
-      oThis.profileResponse.usersByIdMap = Object.assign(
-        oThis.profileResponse.usersByIdMap,
-        curatedFeedsJson.usersByIdMap
-      );
-
-      oThis.profileResponse.tokenUsersByUserIdMap = Object.assign(
-        oThis.profileResponse.tokenUsersByUserIdMap,
-        curatedFeedsJson.tokenUsersByUserIdMap
-      );
-
-      oThis.profileResponse.videoMap = Object.assign(oThis.profileResponse.videoMap, curatedFeedsJson.videoMap);
-
-      oThis.profileResponse.videoDetailsMap = Object.assign(
-        oThis.profileResponse.videoDetailsMap,
-        curatedFeedsJson.videoDetailsMap
-      );
-
-      oThis.profileResponse.imageMap = Object.assign(oThis.profileResponse.imageMap, curatedFeedsJson.imageMap);
-    }
-
-    // TEMP CODE END - to show curated feeds on top(only in logged out mode)
 
     return responseHelper.successWithData({
       feedList: oThis.feeds,
