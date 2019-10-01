@@ -22,7 +22,8 @@ class ReportForEntity extends ServiceBase {
     super();
 
     const oThis = this;
-    oThis.currentUser = params.current_user;
+    //current_user is optional
+    oThis.currentUser = params.current_user || {};
     oThis.reportEntityKind = params.report_entity_kind;
     oThis.reportEntityId = params.report_entity_id;
 
@@ -183,7 +184,10 @@ class ReportForEntity extends ServiceBase {
     }
 
     // if current user is trying to report himself/herself, error out.
-    if (userMultiCacheRsp.data[userId].id === oThis.currentUser.id) {
+    if (
+      commonValidator.validateNonEmptyObject(oThis.currentUser) &&
+      userMultiCacheRsp.data[userId].id === oThis.currentUser.id
+    ) {
       return Promise.reject(
         responseHelper.error({
           internal_error_identifier: 'a_s_m_rp_3',

@@ -89,6 +89,7 @@ class SuccessTransactionOstEvent extends TransactionOstEventBase {
       const promiseArray = [];
       promiseArray.push(oThis.updateTransaction());
       promiseArray.push(oThis.processForAirdropTransaction());
+      //TODO: USE AWAIT
       promiseArray.push(oThis._enqueueUserNotification(notificationJobConstants.airdropDone));
       await Promise.all(promiseArray);
     } else if (oThis.transactionObj.extraData.kind === transactionConstants.extraData.topUpKind) {
