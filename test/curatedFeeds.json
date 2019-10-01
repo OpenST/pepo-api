@@ -1,36 +1,5 @@
 {
-  "curatedFeeds": [
-    {
-      "id": "-1",
-      "primaryExternalEntityId": "-100",
-      "paginationIdentifier": 1564468241,
-      "kind": "CURATED",
-      "actor": -999,
-      "extraData": "null",
-      "createdAt": 1564468241,
-      "updatedAt": 1564468241
-    },
-    {
-      "id": "-2",
-      "primaryExternalEntityId": "-101",
-      "paginationIdentifier": 1564468241,
-      "kind": "CURATED",
-      "actor": -999,
-      "extraData": "null",
-      "createdAt": 1564468241,
-      "updatedAt": 1564468241
-    },
-    {
-      "id": "-3",
-      "primaryExternalEntityId": "-102",
-      "paginationIdentifier": 1564468241,
-      "kind": "CURATED",
-      "actor": -999,
-      "extraData": "null",
-      "createdAt": 1564468241,
-      "updatedAt": 1564468241
-    }
-  ],
+  "curatedFeeds": [],
   "userProfilesMap": {
     "-999": {
       "id": 1000,

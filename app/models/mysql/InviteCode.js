@@ -35,7 +35,17 @@ class InviteCode extends ModelBase {
    * @returns {array}
    */
   safeFormattedColumnNames() {
-    return ['id', 'code', 'inviteLimit', 'invitedUserCount', 'userId', 'inviterCodeId', 'createdAt', 'updatedAt'];
+    return [
+      'id',
+      'code',
+      'kind',
+      'inviteLimit',
+      'invitedUserCount',
+      'userId',
+      'inviterCodeId',
+      'createdAt',
+      'updatedAt'
+    ];
   }
 
   /**
@@ -44,6 +54,7 @@ class InviteCode extends ModelBase {
    * @param {object} dbRow
    * @param {number} dbRow.id
    * @param {string} dbRow.code
+   * @param {string} dbRow.kind
    * @param {number} dbRow.invite_limit
    * @param {number} dbRow.invited_user_count
    * @param {number} dbRow.user_id
@@ -60,6 +71,7 @@ class InviteCode extends ModelBase {
     const formattedData = {
       id: dbRow.id,
       code: dbRow.code,
+      kind: inviteCodeConstants.kinds[dbRow.kind],
       inviteLimit: dbRow.invite_limit,
       invitedUserCount: dbRow.invited_user_count,
       userId: dbRow.user_id,
