@@ -11,11 +11,11 @@ const upQuery =
 
 const downQuery = 'ALTER TABLE `twitter_users` DROP `handle`;';
 
-const addColumnTwitterHandleInTwitterUserTable = {
+const addColumnHandleInTwitterUser = {
   dbName: dbName,
   up: [upQuery],
   down: [downQuery],
   dbKind: dbKind
 };
 
-module.exports = addColumnTwitterHandleInTwitterUserTable;
+module.exports = addColumnHandleInTwitterUser;

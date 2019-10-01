@@ -503,13 +503,13 @@ const v1Signature = {
     ]
   },
   [apiName.twitterDisconnect]: {
-    mandatory: [
+    mandatory: [],
+    optional: [
       {
         parameter: 'current_user',
         validatorMethods: ['validateNonEmptyObject']
       }
-    ],
-    optional: []
+    ]
   },
   [apiName.userSearch]: {
     mandatory: [],

@@ -78,7 +78,7 @@ class UpdateFanVideo extends UpdateProfileBase {
     const oThis = this;
 
     // If url is not valid, consider link as null.
-    if (!CommonValidator.validateHttpBasedUrl(oThis.link)) {
+    if (!CommonValidator.validateGenericUrl(oThis.link)) {
       oThis.link = null;
     }
 

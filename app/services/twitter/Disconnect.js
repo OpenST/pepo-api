@@ -8,7 +8,6 @@ const rootPrefix = '../../..',
   UserDeviceIdsByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/UserDeviceIdsByUserIds'),
   UserDeviceByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/UserDeviceByIds'),
   coreConstants = require(rootPrefix + '/config/coreConstants'),
-  logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   localCipher = require(rootPrefix + '/lib/encryptors/localCipher'),
   twitterUserExtendedConstants = require(rootPrefix + '/lib/globalConstant/twitterUserExtended');
@@ -29,7 +28,7 @@ class TwitterDisconnect extends ServiceBase {
     super(params);
 
     const oThis = this;
-    oThis.currentUserId = params.current_user.id;
+    oThis.currentUserId = params.current_user ? params.current_user.id : null;
 
     //NOTE: DO NOT ASK FOR DEVICE ID AS ALL DEVICES SHOULD BE LOGGED OUT
     // oThis.deviceId = params.device_id;
@@ -46,6 +45,11 @@ class TwitterDisconnect extends ServiceBase {
    */
   async _asyncPerform() {
     const oThis = this;
+
+    // We cannot do logout without current user id
+    if (!oThis.currentUserId) {
+      return responseHelper.successWithData({});
+    }
 
     await oThis._getTwitterUserId();
 
@@ -126,10 +130,6 @@ class TwitterDisconnect extends ServiceBase {
     oThis.decryptedEncryptionSalt = localCipher.decrypt(coreConstants.CACHE_SHA_KEY, secureCacheData.encryptionSaltLc);
     const cookieToken = localCipher.generateRandomIv(32);
     oThis.encryptedCookieToken = localCipher.encrypt(oThis.decryptedEncryptionSalt, cookieToken);
-
-    logger.log('oThis.decryptedEncryptionSalt', oThis.decryptedEncryptionSalt);
-    logger.log('cookieToken', cookieToken);
-    logger.log('oThis.encryptedCookieToken', oThis.encryptedCookieToken);
 
     await new UserModel()
       .update({

@@ -3,9 +3,12 @@ const uuidV4 = require('uuid/v4');
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   UserModel = require(rootPrefix + '/app/models/mysql/User'),
+  TextByIdCache = require(rootPrefix + '/lib/cacheManagement/multi/TextsByIds'),
   VideoByIdCache = require(rootPrefix + '/lib/cacheManagement/multi/VideoByIds'),
   UserMultiCache = require(rootPrefix + '/lib/cacheManagement/multi/User'),
   VideoDetailsByVideoIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/VideoDetailsByVideoIds'),
+  TwitterUserByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TwitterUserByUserIds'),
+  TwitterUserByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TwitterUserByIds'),
   videoDetailsConstants = require(rootPrefix + '/lib/globalConstant/videoDetail'),
   userConstants = require(rootPrefix + '/lib/globalConstant/user'),
   videoConstants = require(rootPrefix + '/lib/globalConstant/video'),
@@ -14,6 +17,7 @@ const rootPrefix = '../../..',
   coreConstants = require(rootPrefix + '/config/coreConstants'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   commonValidator = require(rootPrefix + '/lib/validators/Common'),
+  curatedFeedsJson = require(rootPrefix + '/test/curatedFeeds'),
   entityType = require(rootPrefix + '/lib/globalConstant/entityType');
 
 const urlDomain = coreConstants.PA_DOMAIN;
@@ -33,7 +37,9 @@ class ShareDetails extends ServiceBase {
     oThis.currentUser = params.current_user;
 
     oThis.messageObject = null;
-    oThis.creatorUserName = null;
+    oThis.creatorName = null;
+    oThis.twitterHandle = null;
+    oThis.videoDescriptionText = null;
   }
 
   /**
@@ -45,16 +51,41 @@ class ShareDetails extends ServiceBase {
   async _asyncPerform() {
     const oThis = this;
 
-    //if this is a curated video,
+    // If this is a curated video.
     if (oThis.videoId < 0) {
-      oThis.messageObject = shareEntityConstants.getVideoShareEntityForCuratedVideos(urlDomain);
+      const curatedFeeds = curatedFeedsJson.curatedFeeds;
+
+      let creatorUserId = null;
+
+      for (let index = 0; index < curatedFeeds.length; index++) {
+        const feed = curatedFeeds[index];
+
+        if (feed.id === oThis.videoId) {
+          creatorUserId = feed.actor;
+          break;
+        }
+      }
+
+      let userName = 'Pepo';
+
+      if (creatorUserId) {
+        const usersMap = curatedFeedsJson.usersByIdMap;
+        userName = usersMap[creatorUserId].userName;
+      }
+
+      oThis.messageObject = shareEntityConstants.getVideoShareEntityForCuratedVideos({
+        url: urlDomain,
+        creatorName: userName
+      });
     } else {
       await oThis._fetchVideo();
       await oThis._fetchCreatorUserName();
-      oThis.messageObject = shareEntityConstants.getVideoShareEntity(
-        oThis.creatorUserName,
-        oThis._generateVideoShareUrl()
-      );
+      oThis.messageObject = shareEntityConstants.getVideoShareEntity({
+        creatorName: oThis.creatorName,
+        url: oThis._generateVideoShareUrl(),
+        videoDescription: oThis.videoDescriptionText,
+        handle: oThis.twitterHandle
+      });
     }
 
     return responseHelper.successWithData(oThis._prepareResponse());
@@ -94,7 +125,7 @@ class ShareDetails extends ServiceBase {
    *
    * @returns {Promise<never>}
    *
-   * @sets oThis.creatorUserName
+   * @sets oThis.creatorName
    * @private
    */
   async _fetchCreatorUserName() {
@@ -107,6 +138,20 @@ class ShareDetails extends ServiceBase {
     }
 
     let videoDetails = videoDetailsCacheRsp.data[oThis.videoId];
+
+    if (videoDetails.descriptionId) {
+      const textCacheResp = await new TextByIdCache({ ids: [videoDetails.descriptionId] }).fetch();
+
+      if (textCacheResp.isFailure()) {
+        return Promise.reject(textCacheResp);
+      }
+
+      let videoDescription = textCacheResp.data[videoDetails.descriptionId];
+
+      if (videoDescription && videoDescription.text) {
+        oThis.videoDescriptionText = videoDescription.text;
+      }
+    }
 
     // Already deleted.
     if (!videoDetails.creatorUserId || videoDetails.status === videoDetailsConstants.deletedStatus) {
@@ -147,7 +192,41 @@ class ShareDetails extends ServiceBase {
       );
     }
 
-    oThis.creatorUserName = userObj.name;
+    oThis.creatorName = userObj.name;
+    await oThis._fetchTwitterHandle(userObj.id);
+  }
+
+  /**
+   * Fetch twitter handle.
+   *
+   * @returns {Promise<never>}
+   * @private
+   */
+  async _fetchTwitterHandle(userId) {
+    const oThis = this;
+
+    const twitterUserByUserIdsCacheResponse = await new TwitterUserByUserIdsCache({
+      userIds: [userId]
+    }).fetch();
+
+    if (twitterUserByUserIdsCacheResponse.isFailure()) {
+      return Promise.reject(twitterUserByUserIdsCacheResponse);
+    }
+
+    const twitterUserByUserIdsCacheData = twitterUserByUserIdsCacheResponse.data[userId];
+
+    if (!twitterUserByUserIdsCacheData || !twitterUserByUserIdsCacheData.id) {
+      return; // don't set oThis.twitterHandle, this returns share entity without 'twitterHandle'
+    }
+
+    let twitterUserId = twitterUserByUserIdsCacheData.id;
+
+    const twitterUserByUserIdCacheResponse = await new TwitterUserByIdsCache({ ids: [twitterUserId] }).fetch();
+    if (twitterUserByUserIdCacheResponse.isFailure()) {
+      return Promise.reject(twitterUserByUserIdCacheResponse);
+    }
+
+    oThis.twitterHandle = twitterUserByUserIdCacheResponse.data[twitterUserId].handle;
   }
 
   /**

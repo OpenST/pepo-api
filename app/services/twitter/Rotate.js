@@ -6,21 +6,32 @@ const rootPrefix = '../../..',
   UserByUserNameCache = require(rootPrefix + '/lib/cacheManagement/single/UserByUsername'),
   TwitterUserByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TwitterUserByIds'),
   TwitterUserByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TwitterUserByUserIds'),
-  TwitterUserByTwitterIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TwitterUserByTwitterIds');
+  TwitterUserByTwitterIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TwitterUserByTwitterIds'),
+  basicHelper = require(rootPrefix + '/helpers/basic');
 
+/**
+ * Class to rotate twitter account.
+ *
+ * @class RotateTwitterAccount
+ */
 class RotateTwitterAccount extends ServiceBase {
   /**
-   * @constructor
+   * Constructor to rotate twitter account.
    *
-   * @param params
-   * @param params.user_name {String} - user name
+   * @param {object} params
+   * @param {string} params.user_name: user name
+   *
+   * @augments ServiceBase
+   *
+   * @constructor
    */
   constructor(params) {
-    super(params);
+    super();
 
     const oThis = this;
 
     oThis.userName = params.user_name;
+
     oThis.userId = null;
     oThis.twitterUserObj = {};
     oThis.twitterUserId = null;
@@ -28,7 +39,7 @@ class RotateTwitterAccount extends ServiceBase {
   }
 
   /**
-   * Perform
+   * Async perform.
    *
    * @return {Promise<void>}
    */
@@ -51,6 +62,8 @@ class RotateTwitterAccount extends ServiceBase {
   /**
    * Fetch user.
    *
+   * @sets oThis.userId
+   *
    * @return {Promise<void>}
    * @private
    */
@@ -58,7 +71,6 @@ class RotateTwitterAccount extends ServiceBase {
     const oThis = this;
 
     const cacheRsp = await new UserByUserNameCache({ userName: oThis.userName }).fetch();
-
     if (cacheRsp.isFailure()) {
       return Promise.reject(cacheRsp);
     }
@@ -78,7 +90,9 @@ class RotateTwitterAccount extends ServiceBase {
   }
 
   /**
-   * Fetch twitter user
+   * Fetch twitter user.
+   *
+   * @sets oThis.twitterUserId, oThis.twitterUserObj, oThis.twitterUserTwitterId
    *
    * @return {Promise<void>}
    * @private
@@ -86,15 +100,14 @@ class RotateTwitterAccount extends ServiceBase {
   async _fetchTwitterUser() {
     const oThis = this;
 
-    const TwitterUserByUserIdsCacheResp = await new TwitterUserByUserIdsCache({
+    const twitterUserByUserIdsCacheResp = await new TwitterUserByUserIdsCache({
       userIds: [oThis.userId]
     }).fetch();
-
-    if (TwitterUserByUserIdsCacheResp.isFailure()) {
-      return Promise.reject(TwitterUserByUserIdsCacheResp);
+    if (twitterUserByUserIdsCacheResp.isFailure()) {
+      return Promise.reject(twitterUserByUserIdsCacheResp);
     }
 
-    const twitterUserByUserIdObj = TwitterUserByUserIdsCacheResp.data[oThis.userId];
+    const twitterUserByUserIdObj = twitterUserByUserIdsCacheResp.data[oThis.userId];
     if (!twitterUserByUserIdObj.id) {
       return Promise.reject(
         responseHelper.paramValidationError({
@@ -109,15 +122,14 @@ class RotateTwitterAccount extends ServiceBase {
     // Should always be present.
     oThis.twitterUserId = twitterUserByUserIdObj.id;
 
-    const TwitterUserByIdsCacheResp = await new TwitterUserByIdsCache({
+    const twitterUserByIdsCacheResp = await new TwitterUserByIdsCache({
       ids: [oThis.twitterUserId]
     }).fetch();
-
-    if (TwitterUserByIdsCacheResp.isFailure()) {
-      return Promise.reject(TwitterUserByIdsCacheResp);
+    if (twitterUserByIdsCacheResp.isFailure()) {
+      return Promise.reject(twitterUserByIdsCacheResp);
     }
 
-    oThis.twitterUserObj = TwitterUserByIdsCacheResp.data[oThis.twitterUserId];
+    oThis.twitterUserObj = twitterUserByIdsCacheResp.data[oThis.twitterUserId];
     if (!oThis.twitterUserObj.twitterId) {
       return Promise.reject(
         responseHelper.paramValidationError({
@@ -133,14 +145,15 @@ class RotateTwitterAccount extends ServiceBase {
   }
 
   /**
-   * Rotate twitter account
+   * Rotate twitter account.
    *
    * @returns {Promise<void>}
    * @private
    */
   async _rotateTwitterAccount() {
     const oThis = this;
-    if (oThis.twitterUserTwitterId === oThis.twitterUserId) {
+
+    if (basicHelper.isTwitterIdRotated(oThis.twitterUserTwitterId)) {
       return Promise.reject(
         responseHelper.paramValidationError({
           internal_error_identifier: 'a_s_u_rta_4',
@@ -153,11 +166,29 @@ class RotateTwitterAccount extends ServiceBase {
         })
       );
     }
+
+    const negatedTwitterId = '-' + oThis.twitterUserId.toString();
+
     await new TwitterUserModel()
-      .update({ twitter_id: oThis.twitterUserId })
+      .update({ twitter_id: negatedTwitterId })
       .where({ id: oThis.twitterUserId })
       .fire();
-    oThis.twitterUserObj.twitterId = oThis.twitterUserId;
+  }
+
+  /**
+   * Clear twitter user cache.
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _clearTwitterUserCache() {
+    const oThis = this;
+
+    await new TwitterUserByTwitterIdsCache({
+      twitterIds: [oThis.twitterUserTwitterId]
+    }).clear();
+
+    await TwitterUserModel.flushCache(oThis.twitterUserObj);
   }
 
   /**
@@ -175,21 +206,6 @@ class RotateTwitterAccount extends ServiceBase {
       .fire();
 
     await UserModel.flushCache({ id: oThis.userId });
-  }
-
-  /**
-   * Clear twitter user cache
-   * @returns {Promise<void>}
-   * @private
-   */
-  async _clearTwitterUserCache() {
-    const oThis = this;
-
-    await new TwitterUserByTwitterIdsCache({
-      twitterIds: [oThis.twitterUserTwitterId]
-    }).clear();
-
-    await TwitterUserModel.flushCache(oThis.twitterUserObj);
   }
 }
 

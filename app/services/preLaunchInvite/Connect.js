@@ -1,21 +1,22 @@
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
-  PreLaunchInviteByTwitterIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/PreLaunchInviteByTwitterIds'),
+  LoginTwitterClass = require(rootPrefix + '/app/services/preLaunchInvite/Login'),
+  SignupTwitterClass = require(rootPrefix + '/app/services/preLaunchInvite/Signup'),
   AccountTwitterRequestClass = require(rootPrefix + '/lib/twitter/oAuth1.0/Account'),
   ReplayAttackCache = require(rootPrefix + '/lib/cacheManagement/single/ReplayAttackOnTwitterConnect'),
-  SignupTwitterClass = require(rootPrefix + '/app/services/preLaunchInvite/Signup'),
-  LoginTwitterClass = require(rootPrefix + '/app/services/preLaunchInvite/Login'),
+  TwitterUserByTwitterIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TwitterUserByTwitterIds'),
+  PreLaunchInviteByTwitterIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/PreLaunchInviteByTwitterIds'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger');
 
 /**
- * Class for Twitter PreLaunchTwitterConnect for Pre Launch Invite.
+ * Class for prelaunch invite twitter connect.
  *
  * @class PreLaunchTwitterConnect
  */
 class PreLaunchTwitterConnect extends ServiceBase {
   /**
-   * Constructor for signup service.
+   * Constructor for prelaunch invite twitter connect.
    *
    * @param {object} params
    * @param {string} params.token: oAuth Token
@@ -45,7 +46,7 @@ class PreLaunchTwitterConnect extends ServiceBase {
   }
 
   /**
-   * Perform: Perform user creation.
+   * Async perform.
    *
    * @return {Promise<void>}
    */
@@ -58,20 +59,21 @@ class PreLaunchTwitterConnect extends ServiceBase {
 
     await oThis._performAction();
 
-    return Promise.resolve(oThis.serviceResp);
+    return oThis.serviceResp;
   }
 
   /**
-   * Allow the api only if not recently used within 1 sec
+   * Allow the api only if not recently used within 1 sec.
    *
-   * @return {Promise<Result>}
+   * @return {Promise<*>}
    * @private
    */
   async _validateDuplicateRequest() {
     const oThis = this;
+
     logger.log('Start::_validateDuplicateRequest');
 
-    //Note: Reusing the same cache as in User Login
+    // Note: Reusing the same cache as in User Login.
     const TwitterConnectOnTwitterIdResp = await new ReplayAttackCache({ twitterId: oThis.twitterId }).fetch();
 
     if (TwitterConnectOnTwitterIdResp.isFailure()) {
@@ -88,38 +90,31 @@ class PreLaunchTwitterConnect extends ServiceBase {
     }
 
     logger.log('End::_validateDuplicateRequest');
-
-    return responseHelper.successWithData({});
   }
 
   /**
-   * Fetch Twitter User Obj if present and Validate Credentials.
+   * Fetch twitter user obj if present and validate credentials.
    *
-   * @return {Promise<Result>}
+   * @return {Promise<void>}
    * @private
    */
   async _fetchPreLaunchInvitesAndValidateCredentials() {
     const oThis = this;
+
     logger.log('Start::PreLaunchInvites And Validate Credentials');
 
-    const promisesArray = [];
-
-    promisesArray.push(oThis._fetchPreLaunchInvite());
-    promisesArray.push(oThis._validateTwitterCredentials());
-
+    const promisesArray = [oThis._fetchPreLaunchInvite(), oThis._validateTwitterCredentials()];
     await Promise.all(promisesArray);
 
     logger.log('End::PreLaunchInvites And Validate Credentials');
-
-    return responseHelper.successWithData({});
   }
 
   /**
-   * Fetch Twitter User Obj if present.
+   * Fetch prelaunch invite.
    *
    * @sets oThis.preLaunchInviteId
    *
-   * @return {Promise<Result>}
+   * @return {Promise<void>}
    * @private
    */
   async _fetchPreLaunchInvite() {
@@ -130,7 +125,6 @@ class PreLaunchTwitterConnect extends ServiceBase {
     const preLaunchInviteObjCacheResp = await new PreLaunchInviteByTwitterIdsCache({
       twitterIds: [oThis.twitterId]
     }).fetch();
-
     if (preLaunchInviteObjCacheResp.isFailure()) {
       return Promise.reject(preLaunchInviteObjCacheResp);
     }
@@ -140,24 +134,22 @@ class PreLaunchTwitterConnect extends ServiceBase {
     }
 
     logger.log('End::Fetch PreLaunchInvite');
-    return responseHelper.successWithData({});
   }
 
   /**
-   * Verify Credentials and get profile data from twitter.
+   * Verify credentials and get profile data from twitter.
    *
    * @sets oThis.userTwitterEntity
    *
-   * @return {Promise<Result>}
+   * @returns {Promise<void>}
    * @private
    */
   async _validateTwitterCredentials() {
     const oThis = this;
+
     logger.log('Start::Validate Twitter Credentials');
 
-    let twitterResp = null;
-
-    twitterResp = await new AccountTwitterRequestClass().verifyCredentials({
+    const twitterResp = await new AccountTwitterRequestClass().verifyCredentials({
       oAuthToken: oThis.token,
       oAuthTokenSecret: oThis.secret
     });
@@ -174,8 +166,8 @@ class PreLaunchTwitterConnect extends ServiceBase {
 
     oThis.userTwitterEntity = twitterResp.data.userEntity;
 
-    // validating the front end data
-    if (oThis.userTwitterEntity.idStr != oThis.twitterId || oThis.userTwitterEntity.handle != oThis.handle) {
+    // Validating the front end data.
+    if (oThis.userTwitterEntity.idStr !== oThis.twitterId || oThis.userTwitterEntity.handle !== oThis.handle) {
       return Promise.reject(
         responseHelper.error({
           internal_error_identifier: 's_pli_c_vtc_3',
@@ -186,22 +178,20 @@ class PreLaunchTwitterConnect extends ServiceBase {
     }
 
     logger.log('End::Validate Twitter Credentials');
-
-    return responseHelper.successWithData({});
   }
 
   /**
-   * Call signup or login service as needed for twitter connect.
+   * Call sign-up or login service as needed for twitter connect.
    *
-   * @return {void}
-   *
+   * @returns {Promise<void>}
    * @private
    */
   async _performAction() {
     const oThis = this;
+
     logger.log('Start::PreLaunchTwitterConnect._performAction');
 
-    let requestParams = {
+    const requestParams = {
       preLaunchInviteId: oThis.preLaunchInviteId,
       userTwitterEntity: oThis.userTwitterEntity,
       token: oThis.token,
@@ -209,21 +199,52 @@ class PreLaunchTwitterConnect extends ServiceBase {
       inviteCode: oThis.inviteCode
     };
 
-    if (!oThis.preLaunchInviteId) {
-      logger.log('Twitter::PreLaunchTwitterConnect signup');
-      oThis.serviceResp = await new SignupTwitterClass(requestParams).perform();
-      if (!oThis.serviceResp.isFailure()) {
-        oThis.serviceResp.data['newSignup'] = 1;
-      }
-    } else {
+    if (oThis.preLaunchInviteId) {
       logger.log('Twitter::PreLaunchTwitterConnect login');
       oThis.serviceResp = await new LoginTwitterClass(requestParams).perform();
       if (!oThis.serviceResp.isFailure()) {
-        oThis.serviceResp.data['newSignup'] = 0;
+        oThis.serviceResp.data.newSignup = 0;
+      }
+    } else {
+      logger.log('Twitter::PreLaunchTwitterConnect signup');
+
+      await oThis._validateIfUserIsExistingAppUser();
+
+      oThis.serviceResp = await new SignupTwitterClass(requestParams).perform();
+      if (!oThis.serviceResp.isFailure()) {
+        oThis.serviceResp.data.newSignup = 1;
       }
     }
 
     logger.log('End::PreLaunchTwitterConnect._performAction');
+  }
+
+  /**
+   * Validate if user is not already an existing application user.
+   *
+   * @returns {Promise<never>}
+   * @private
+   */
+  async _validateIfUserIsExistingAppUser() {
+    const oThis = this;
+
+    const twitterUserCacheResponse = await new TwitterUserByTwitterIdsCache({
+      twitterIds: [oThis.twitterId]
+    }).fetch();
+    if (twitterUserCacheResponse.isFailure()) {
+      return Promise.reject(twitterUserCacheResponse);
+    }
+
+    const twitterUserData = twitterUserCacheResponse.data[oThis.twitterId];
+    if (twitterUserData && twitterUserData.userId) {
+      return Promise.reject(
+        responseHelper.error({
+          internal_error_identifier: 's_pli_c_viueau_1',
+          api_error_identifier: 'already_registered_in_app',
+          debug_options: {}
+        })
+      );
+    }
   }
 }
 

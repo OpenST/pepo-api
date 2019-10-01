@@ -109,9 +109,16 @@ class FetchGoto extends ServiceBase {
       }
     } else if (pathArray[1] == 'account') {
       oThis.gotoKind = gotoConstants.invitedUsersGotoKind;
-    } else if (!pathArray[1] && query && query['invite']) {
-      oThis.gotoParams = { inviteCode: query['invite'] };
-      oThis.gotoKind = gotoConstants.signUpGotoKind;
+    } else if (!pathArray[1]) {
+      // If url is just 'pepo.com/' then look for invite code if any
+      if (query && query['invite']) {
+        oThis.gotoParams = { inviteCode: query['invite'] };
+        oThis.gotoKind = gotoConstants.signUpGotoKind;
+      }
+    } else {
+      // For now all other valid urls would give webView as goto
+      oThis.gotoParams = { url: oThis.url };
+      oThis.gotoKind = gotoConstants.webViewGotoKind;
     }
   }
 

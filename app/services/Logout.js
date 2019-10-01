@@ -3,7 +3,6 @@ const rootPrefix = '../..',
   UserDeviceModel = require(rootPrefix + '/app/models/mysql/UserDevice'),
   UserDeviceByIds = require(rootPrefix + '/lib/cacheManagement/multi/UserDeviceByIds'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
-  logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   userDeviceConstants = require(rootPrefix + '/lib/globalConstant/userDevice');
 
 /**
@@ -72,14 +71,16 @@ class Logout extends ServiceBase {
       userDeviceIds.push(userDeviceIdResp[ind].id);
     }
 
-    await new UserDeviceModel()
-      .update({ status: userDeviceConstants.invertedStatuses[userDeviceConstants.logoutStatus] })
-      .where({
-        id: userDeviceIds
-      })
-      .fire();
+    if (userDeviceIds.length > 0) {
+      await new UserDeviceModel()
+        .update({ status: userDeviceConstants.invertedStatuses[userDeviceConstants.logoutStatus] })
+        .where({
+          id: userDeviceIds
+        })
+        .fire();
 
-    await new UserDeviceByIds({ ids: userDeviceIds }).clear();
+      await new UserDeviceByIds({ ids: userDeviceIds }).clear();
+    }
 
     return responseHelper.successWithData({});
   }

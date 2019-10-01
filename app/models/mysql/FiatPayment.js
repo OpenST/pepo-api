@@ -36,6 +36,7 @@ class FiatPayment extends ModelBase {
    * @param {string} dbRow.receipt_id
    * @param {string} dbRow.raw_receipt
    * @param {string} dbRow.decrypted_receipt
+   * @param {string} dbRow.error_data
    * @param {string/number} dbRow.from_user_id
    * @param {string/number} dbRow.to_user_id
    * @param {number} dbRow.kind
@@ -47,6 +48,8 @@ class FiatPayment extends ModelBase {
    * @param {number} dbRow.risk_score
    * @param {number} dbRow.transaction_id
    * @param {number} dbRow.status
+   * @param {number} dbRow.retry_after
+   * @param {number} dbRow.retry_count
    * @param {number} dbRow.created_at
    * @param {number} dbRow.updated_at
    *
@@ -60,6 +63,7 @@ class FiatPayment extends ModelBase {
       receiptId: dbRow.receipt_id,
       rawReceipt: dbRow.raw_receipt ? JSON.parse(dbRow.raw_receipt) : null,
       decryptedReceipt: dbRow.decrypted_receipt ? JSON.parse(dbRow.decrypted_receipt) : null,
+      errorData: dbRow.error_data ? JSON.parse(dbRow.error_data) : null,
       fromUserId: dbRow.from_user_id,
       toUserId: dbRow.to_user_id,
       kind: fiatPaymentConstants.kinds[dbRow.kind],
@@ -69,6 +73,8 @@ class FiatPayment extends ModelBase {
       pepoAmountInWei: dbRow.pepo_amount_in_wei,
       transactionId: dbRow.transaction_id,
       status: fiatPaymentConstants.statuses[dbRow.status],
+      retryAfter: dbRow.retry_after,
+      retryCount: dbRow.retry_count,
       createdAt: dbRow.created_at,
       updatedAt: dbRow.updated_at
     };

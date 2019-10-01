@@ -4,12 +4,8 @@ const express = require('express'),
 const rootPrefix = '../../..',
   FormatterComposer = require(rootPrefix + '/lib/formatter/Composer'),
   routeHelper = require(rootPrefix + '/routes/helper'),
-  commonValidator = require(rootPrefix + '/lib/validators/Common'),
   apiName = require(rootPrefix + '/lib/globalConstant/apiName'),
-  LoginCookieAuth = require(rootPrefix + '/lib/authentication/LoginCookie'),
   sanitizer = require(rootPrefix + '/helpers/sanitizer'),
-  base64Helper = require(rootPrefix + '/lib/base64Helper'),
-  userConstant = require(rootPrefix + '/lib/globalConstant/user'),
   responseEntityKey = require(rootPrefix + '/lib/globalConstant/responseEntityKey'),
   entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
   cookieHelper = require(rootPrefix + '/lib/cookieHelper');
@@ -17,7 +13,7 @@ const rootPrefix = '../../..',
 /* Subscribe email*/
 router.get(
   '/products',
-  cookieHelper.parseUserLoginCookieIfPresent,
+  cookieHelper.parseWebviewLoginCookieIfPresent,
   sanitizer.sanitizeDynamicUrlParams,
   cookieHelper.validateTokenIfPresent,
   cookieHelper.validateUserLoginRequired,
@@ -28,7 +24,7 @@ router.get(
   }
 );
 
-router.use(cookieHelper.validateUserLoginCookieIfPresent, cookieHelper.validateUserLoginRequired);
+router.use(cookieHelper.validateWebviewLoginCookieIfPresent, cookieHelper.validateUserLoginRequired);
 
 // request for redemption of a product
 router.post('/', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
