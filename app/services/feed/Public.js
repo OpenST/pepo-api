@@ -153,7 +153,7 @@ class PublicVideoFeed extends FeedBase {
       oThis.userFeedIdsCacheData['unseenFeedIds'] = [...new Set(oThis.userFeedIdsCacheData['unseenFeedIds'])];
       oThis.userFeedIdsCacheData['unseenFeedIds'] = oThis.userFeedIdsCacheData['unseenFeedIds'].splice(
         0,
-        feedConstants.getPersonalizedFeedMaxIdsCount
+        feedConstants.personalizedFeedMaxIdsCount
       );
     }
 
@@ -180,7 +180,7 @@ class PublicVideoFeed extends FeedBase {
    */
   async fetchOlderFeedIds() {
     const oThis = this,
-      limit = feedConstants.getPersonalizedFeedMaxIdsCount - oThis.userFeedIdsCacheData['unseenFeedIds'].length;
+      limit = feedConstants.personalizedFeedMaxIdsCount - oThis.userFeedIdsCacheData['unseenFeedIds'].length;
 
     if (limit <= 0) {
       return responseHelper.successWithData({});
@@ -205,15 +205,15 @@ class PublicVideoFeed extends FeedBase {
    */
   async getLastVisitTime() {
     const oThis = this;
-    oThis.lastVisitedAt = 0;
 
     const queryParams = {
       userId: oThis.currentUserId
     };
 
-    const userNotificationVisitDetailsResp = new UserNotificationVisitDetailModel().fetchLatestSeenFeedTime(
+    const userNotificationVisitDetailsResp = await new UserNotificationVisitDetailModel().fetchLatestSeenFeedTime(
       queryParams
     );
+
     oThis.lastVisitedAt = Math.round((userNotificationVisitDetailsResp.latestSeenFeedTime || 0) / 1000);
 
     return responseHelper.successWithData({});
@@ -236,8 +236,6 @@ class PublicVideoFeed extends FeedBase {
     };
 
     return new UserNotificationVisitDetailModel().updateLatestSeenFeedTime(queryParams);
-
-    return responseHelper.successWithData({});
   }
 
   /**
@@ -303,7 +301,7 @@ class PublicVideoFeed extends FeedBase {
 
     const queryParams = {
       lastVisitedAt: oThis.lastVisitedAt,
-      limit: feedConstants.getPersonalizedFeedMaxIdsCount
+      limit: feedConstants.personalizedFeedMaxIdsCount
     };
 
     oThis.newFeedIds = await new FeedModel().getNewFeedIdsAfterTime(queryParams);

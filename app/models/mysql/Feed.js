@@ -43,7 +43,7 @@ class FeedModel extends ModelBase {
       kind: feedsConstants.kinds[dbRow.kind],
       paginationIdentifier: dbRow.pagination_identifier,
       actor: dbRow.actor,
-      extraData: JSON.parse(dbRow.extra_data),
+      extraData: dbRow.hasOwnProperty('extra_data') ? JSON.parse(dbRow.extra_data) : undefined,
       createdAt: dbRow.created_at,
       updatedAt: dbRow.updated_at
     };
@@ -174,12 +174,16 @@ class FeedModel extends ModelBase {
 
     const response = [];
 
-    const dbRows = await oThis
+    let queryObj = oThis
       .select('id')
-      .where(['id not in (?)', feedIds])
       .order_by('pagination_identifier desc')
-      .limit(limit)
-      .fire();
+      .limit(limit);
+
+    if (feedIds.length > 0) {
+      queryObj.where(['id not in (?)', feedIds]);
+    }
+
+    const dbRows = await queryObj.fire();
 
     for (let index = 0; index < dbRows.length; index++) {
       const formatDbRow = oThis.formatDbData(dbRows[index]);
