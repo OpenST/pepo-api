@@ -616,7 +616,7 @@ class BasicHelper {
    * @returns {string}
    */
   userProfilePrefixUrl() {
-    return coreConstants.PA_DOMAIN + '/admin/user-profile/';
+    return coreConstants.PA_DOMAIN + '/admin/user-profile';
   }
 }
 
