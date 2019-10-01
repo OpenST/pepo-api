@@ -17,10 +17,10 @@ const rootPrefix = '../../..',
   coreConstants = require(rootPrefix + '/config/coreConstants'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   commonValidator = require(rootPrefix + '/lib/validators/Common'),
-  curatedFeedsJson = require(rootPrefix + '/test/curatedFeeds'),
   entityType = require(rootPrefix + '/lib/globalConstant/entityType');
 
-const urlDomain = coreConstants.PA_DOMAIN;
+const urlDomain = coreConstants.PA_DOMAIN,
+  curatedFeedIdsString = coreConstants.PEPO_CURATED_FEED_IDS;
 
 class ShareDetails extends ServiceBase {
   /**
@@ -51,31 +51,15 @@ class ShareDetails extends ServiceBase {
   async _asyncPerform() {
     const oThis = this;
 
+    const curatedFeedIds = JSON.parse(curatedFeedIdsString);
+
     // If this is a curated video.
-    if (oThis.videoId < 0) {
-      const curatedFeeds = curatedFeedsJson.curatedFeeds;
-
-      let creatorUserId = null;
-
-      for (let index = 0; index < curatedFeeds.length; index++) {
-        const feed = curatedFeeds[index];
-
-        if (feed.id === oThis.videoId) {
-          creatorUserId = feed.actor;
-          break;
-        }
-      }
-
-      let userName = 'Pepo';
-
-      if (creatorUserId) {
-        const usersMap = curatedFeedsJson.usersByIdMap;
-        userName = usersMap[creatorUserId].userName;
-      }
+    if (curatedFeedIds.includes(oThis.videoId)) {
+      await oThis._fetchCreatorUserName();
 
       oThis.messageObject = shareEntityConstants.getVideoShareEntityForCuratedVideos({
         url: urlDomain,
-        creatorName: userName
+        creatorName: oThis.creatorName
       });
     } else {
       await oThis._fetchVideo();
@@ -153,6 +137,8 @@ class ShareDetails extends ServiceBase {
       }
     }
 
+    console.log('videoDetails---', videoDetails);
+
     // Already deleted.
     if (!videoDetails.creatorUserId || videoDetails.status === videoDetailsConstants.deletedStatus) {
       return Promise.reject(
@@ -216,10 +202,10 @@ class ShareDetails extends ServiceBase {
     const twitterUserByUserIdsCacheData = twitterUserByUserIdsCacheResponse.data[userId];
 
     if (!twitterUserByUserIdsCacheData || !twitterUserByUserIdsCacheData.id) {
-      return; // don't set oThis.twitterHandle, this returns share entity without 'twitterHandle'
+      return; // Don't set oThis.twitterHandle, this returns share entity without 'twitterHandle'
     }
 
-    let twitterUserId = twitterUserByUserIdsCacheData.id;
+    const twitterUserId = twitterUserByUserIdsCacheData.id;
 
     const twitterUserByUserIdCacheResponse = await new TwitterUserByIdsCache({ ids: [twitterUserId] }).fetch();
     if (twitterUserByUserIdCacheResponse.isFailure()) {
