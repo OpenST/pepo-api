@@ -5,6 +5,7 @@ const rootPrefix = '../../..',
   LoggedOutFeedCache = require(rootPrefix + '/lib/cacheManagement/single/LoggedOutFeed'),
   FeedByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/FeedByIds'),
   PersonalizedFeedByUserIdCache = require(rootPrefix + '/lib/cacheManagement/single/PersonalizedFeedByUserId'),
+  UserNotificationVisitDetailModel = require(rootPrefix + '/app/models/cassandra/UserNotificationVisitDetail'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   basicHelper = require(rootPrefix + '/helpers/basic'),
   curatedFeedsJson = require(rootPrefix + '/test/curatedFeeds'),
@@ -206,6 +207,15 @@ class PublicVideoFeed extends FeedBase {
     const oThis = this;
     oThis.lastVisitedAt = 0;
 
+    const queryParams = {
+      userId: oThis.currentUserId
+    };
+
+    const userNotificationVisitDetailsResp = new UserNotificationVisitDetailModel().fetchLatestSeenFeedTime(
+      queryParams
+    );
+    oThis.lastVisitedAt = Math.round((userNotificationVisitDetailsResp.latestSeenFeedTime || 0) / 1000);
+
     return responseHelper.successWithData({});
   }
 
@@ -219,6 +229,13 @@ class PublicVideoFeed extends FeedBase {
    */
   async updateFeedLastVisitTime() {
     const oThis = this;
+
+    const queryParams = {
+      userId: oThis.currentUserId,
+      latestSeenFeedTime: Date.now()
+    };
+
+    return new UserNotificationVisitDetailModel().updateLatestSeenFeedTime(queryParams);
 
     return responseHelper.successWithData({});
   }
