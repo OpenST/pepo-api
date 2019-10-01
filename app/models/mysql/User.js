@@ -392,6 +392,19 @@ class UserModel extends ModelBase {
 
     return propertiesArray.indexOf(userConstants.isApprovedCreatorProperty) > -1;
   }
+
+  /**
+   * Is user denied as creator.
+   *
+   * @param {object} userObj
+   *
+   * @returns {boolean}
+   */
+  static isUserDeniedCreator(userObj) {
+    const propertiesArray = new UserModel().getBitwiseArray('properties', userObj.properties);
+
+    return propertiesArray.indexOf(userConstants.isDeniedCreatorProperty) > -1;
+  }
 }
 
 module.exports = UserModel;

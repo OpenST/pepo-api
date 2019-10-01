@@ -125,6 +125,14 @@ router.post('/users/:user_id/approve', sanitizer.sanitizeDynamicUrlParams, funct
   Promise.resolve(routeHelper.perform(req, res, next, '/admin/ApproveUsersAsCreator', 'r_a_v1_ad_3', null, null, null));
 });
 
+/* Deny user as creator */
+router.post('/users/:user_id/deny', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.adminUserDeny;
+  req.decodedParams.user_ids = [req.params.user_id];
+
+  Promise.resolve(routeHelper.perform(req, res, next, '/admin/DenyUsersAsCreator', 'r_a_v1_ad_5', null, null, null));
+});
+
 /* Block user */
 router.post('/users/:user_id/block', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.adminUserBlock;

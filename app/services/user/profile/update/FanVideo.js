@@ -9,6 +9,7 @@ const rootPrefix = '../../../../..',
   VideoDetailsModel = require(rootPrefix + '/app/models/mysql/VideoDetail'),
   videoLib = require(rootPrefix + '/lib/videoLib'),
   urlConstants = require(rootPrefix + '/lib/globalConstant/url'),
+  userConstants = require(rootPrefix + '/lib/globalConstant/user'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   feedsConstants = require(rootPrefix + '/lib/globalConstant/feed'),
   notificationJobEnqueue = require(rootPrefix + '/lib/rabbitMqEnqueue/notification'),
@@ -171,6 +172,7 @@ class UpdateFanVideo extends UpdateProfileBase {
 
     return null;
   }
+
   /**
    * Update user.
    *
@@ -178,7 +180,20 @@ class UpdateFanVideo extends UpdateProfileBase {
    * @private
    */
   async _updateUser() {
-    // No update is required in user.
+    const oThis = this;
+
+    // Unset deny users as creator property if required.
+    if (oThis.userObj.properties & userConstants.invertedProperties[userConstants.isDeniedCreatorProperty]) {
+      const propertyVal = userConstants.invertedProperties[userConstants.isDeniedCreatorProperty];
+
+      await new UserModelKlass()
+        .update(['properties = properties ^ ?', propertyVal])
+        .where({ id: oThis.profileUserId })
+        .where(['properties = properties & ?', propertyVal])
+        .fire();
+
+      oThis.flushUserCache = true;
+    }
   }
 
   /**

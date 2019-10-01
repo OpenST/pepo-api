@@ -29,6 +29,19 @@ const adminSignature = {
     ],
     optional: []
   },
+  [apiName.adminUserDeny]: {
+    mandatory: [
+      {
+        parameter: 'user_ids',
+        validatorMethods: ['validateIntegerArray']
+      },
+      {
+        parameter: 'current_admin',
+        validatorMethods: ['validateNonEmptyObject']
+      }
+    ],
+    optional: []
+  },
   [apiName.adminUserBlock]: {
     mandatory: [
       {

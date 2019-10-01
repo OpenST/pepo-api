@@ -65,6 +65,12 @@ const v1ErrorConfig = {
     message: 'User is already approved.'
   },
 
+  user_already_denied_as_creator: {
+    parameter: 'user_id',
+    code: 'invalid',
+    message: 'User is already denied as creator.'
+  },
+
   user_inactive: {
     parameter: 'user_id',
     code: 'invalid',
