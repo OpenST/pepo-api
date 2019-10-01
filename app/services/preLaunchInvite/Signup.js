@@ -163,7 +163,9 @@ class PreLaunchTwitterSignUp extends ServiceBase {
     let cacheResp = await new InviteCodeByCodeCache({ inviteCode: oThis.inviteCode }).fetch(),
       inviterInviteCodeObj = cacheResp.data[oThis.inviteCode];
 
-    oThis.inviterCodeId = inviterInviteCodeObj.id;
+    if (inviterInviteCodeObj && inviteCodeConstants.userKind == inviterInviteCodeObj.kind) {
+      oThis.inviterCodeId = inviterInviteCodeObj.id;
+    }
 
     return responseHelper.successWithData({});
   }
@@ -181,6 +183,7 @@ class PreLaunchTwitterSignUp extends ServiceBase {
 
     let insertData = {
       code: oThis._createInviteCode(),
+      kind: inviteCodeConstants.invertedKinds[inviteCodeConstants.userKind],
       invite_limit: inviteCodeConstants.inviteMaxLimit
     };
 
