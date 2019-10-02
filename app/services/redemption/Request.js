@@ -112,21 +112,25 @@ class RequestRedemption extends ServiceBase {
       ids: [oThis.currentUserId, coreConstants.PEPO_REDEMPTION_USER_ID]
     }).fetch();
     if (userDetailsCacheRsp.isFailure()) {
-      return responseHelper.error({
-        internal_error_identifier: 'a_s_r_r_1',
-        api_error_identifier: 'something_went_wrong_bad_request',
-        debug_options: { error: userDetailsCacheRsp }
-      });
+      return Promise.reject(
+        responseHelper.error({
+          internal_error_identifier: 'a_s_r_r_1',
+          api_error_identifier: 'something_went_wrong_bad_request',
+          debug_options: { error: userDetailsCacheRsp }
+        })
+      );
     }
 
     const currentUserDetails = userDetailsCacheRsp.data[oThis.currentUserId];
 
     if (!currentUserDetails || !UserModel.isUserApprovedCreator(currentUserDetails)) {
-      return responseHelper.error({
-        internal_error_identifier: 'a_s_r_r_2',
-        api_error_identifier: 'redemption_user_not_approved_creator',
-        debug_options: {}
-      });
+      return Promise.reject(
+        responseHelper.error({
+          internal_error_identifier: 'a_s_r_r_2',
+          api_error_identifier: 'redemption_user_not_approved_creator',
+          debug_options: {}
+        })
+      );
     }
 
     const redemptionUserDetails = userDetailsCacheRsp.data[coreConstants.PEPO_REDEMPTION_USER_ID];
