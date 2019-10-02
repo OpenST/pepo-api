@@ -82,6 +82,24 @@ class PublicVideoFeed extends FeedBase {
   }
 
   /**
+   * Whether to shuffle feeds.
+   *
+   * @returns {Boolean}
+   * @private
+   */
+  _showShuffledFeeds() {
+    const oThis = this;
+
+    return (
+      oThis.currentUserId &&
+      (basicHelper.isDevelopment() ||
+        (basicHelper.isStaging() && [1754, 1603, 1009].indexOf(oThis.currentUserId) > -1) ||
+        (basicHelper.isSandbox() && [oThis.currentUserId].indexOf(oThis.currentUserId) > -1) ||
+        (basicHelper.isProduction() && [23, 56, 7, 12, 4].indexOf(oThis.currentUserId) > -1))
+    );
+  }
+
+  /**
    * Set feed ids.
    *
    * @sets oThis.feedIds, oThis.feedsMap, oThis.nextPaginationTimestamp
@@ -92,13 +110,7 @@ class PublicVideoFeed extends FeedBase {
   async _setFeedIds() {
     const oThis = this;
 
-    if (
-      oThis.currentUserId &&
-      (basicHelper.isDevelopment() ||
-        (basicHelper.isStaging() && [1754, 1603, 1009].indexOf(oThis.currentUserId) > -1) ||
-        (basicHelper.isSandbox() && [oThis.currentUserId].indexOf(oThis.currentUserId) > -1) ||
-        (basicHelper.isProduction() && [23, 56, 7, 12, 4].indexOf(oThis.currentUserId) > -1))
-    ) {
+    if (oThis._showShuffledFeeds()) {
       console.log(
         `PERSONALIZED FEED:${oThis.currentUserId} oThis.pageNumber================================`,
         oThis.pageNumber
@@ -476,7 +488,7 @@ class PublicVideoFeed extends FeedBase {
 
     const nextPagePayloadKey = {};
 
-    if (oThis.currentUserId) {
+    if (oThis._showShuffledFeeds()) {
       if (oThis.nextPageNumber) {
         nextPagePayloadKey[paginationConstants.paginationIdentifierKey] = {
           page_no: oThis.nextPageNumber
