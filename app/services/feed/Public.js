@@ -92,22 +92,11 @@ class PublicVideoFeed extends FeedBase {
   async _setFeedIds() {
     const oThis = this;
 
-    //CACHE IS SET
-    //   page 1-new data with 40 records
-    //   page 1-new data with 40 records and 10 unseen in cache
-    //   page 1-new data with 501 new records
-    //   page 1-no new data
-    //   page 2
-
-    //CACHE WAS CLEARED
-    //   page 1-new data
-    //   page 1-new data with 501 new records
-    //   page 1-no new data
-    //   page 2
-    //new feeds
-    //no new feeds
-
     if (oThis.currentUserId) {
+      console.log(
+        `PERSONALIZED FEED:${oThis.currentUserId} oThis.pageNumber================================`,
+        oThis.pageNumber
+      );
       if (oThis.pageNumber > 1) {
         await oThis.fetchFeedIdsForUserFromCache();
 
@@ -192,6 +181,10 @@ class PublicVideoFeed extends FeedBase {
     };
 
     oThis.olderFeedIds = await new FeedModel().getOlderFeedIds(queryParams);
+    console.log(
+      `PERSONALIZED FEED:${oThis.currentUserId} oThis.olderFeedIds================================`,
+      oThis.olderFeedIds
+    );
     return responseHelper.successWithData({});
   }
 
@@ -305,6 +298,10 @@ class PublicVideoFeed extends FeedBase {
     };
 
     oThis.newFeedIds = await new FeedModel().getNewFeedIdsAfterTime(queryParams);
+    console.log(
+      `PERSONALIZED FEED:${oThis.currentUserId} oThis.newFeedIds================================`,
+      oThis.newFeedIds
+    );
     await oThis.updateFeedLastVisitTime();
   }
 
@@ -349,9 +346,20 @@ class PublicVideoFeed extends FeedBase {
       oThis.feedIds = [];
     }
 
+    console.log(
+      `PERSONALIZED FEED:${oThis.currentUserId} currentFeedIds==============================oThis.limit======`,
+      currentFeedIds,
+      oThis.limit
+    );
+
     if (currentFeedIds.length >= oThis.limit) {
       oThis.nextPageNumber = oThis.pageNumber + 1;
     }
+
+    console.log(
+      `PERSONALIZED FEED:${oThis.currentUserId} oThis.nextPageNumber================================`,
+      oThis.nextPageNumber
+    );
 
     await oThis.setFeedIdsForUserInCache();
   }
