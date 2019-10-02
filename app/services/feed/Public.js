@@ -340,7 +340,15 @@ class PublicVideoFeed extends FeedBase {
       }
 
       oThis.feedsMap = feedByIdsCacheResponse.data;
-      oThis.feedIds = Object.keys(oThis.feedsMap);
+
+      const activeFeedIds = [];
+      for (let feedId in oThis.feedsMap) {
+        if (CommonValidators.validateNonEmptyObject(oThis.feedsMap[feedId])) {
+          activeFeedIds.push(feedId);
+        }
+      }
+
+      oThis.feedIds = activeFeedIds;
     } else {
       oThis.feedsMap = {};
       oThis.feedIds = [];
