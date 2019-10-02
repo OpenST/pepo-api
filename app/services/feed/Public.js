@@ -441,12 +441,16 @@ class PublicVideoFeed extends FeedBase {
   async _filterFeedData() {
     const oThis = this;
 
+    oThis.feedIds = [...new Set(oThis.feedIds)];
+
     const activeFeedIds = [];
-    for (const activeFeedId in oThis.feedsMap) {
-      if (CommonValidators.validateNonEmptyObject(oThis.feedsMap[activeFeedId])) {
-        activeFeedIds.push(activeFeedId);
+
+    for (let i = 0; i < oThis.feedIds.length; i++) {
+      const feedId = oThis.feedIds[i];
+      if (CommonValidators.validateNonEmptyObject(oThis.feedsMap[feedId])) {
+        activeFeedIds.push(feedId);
       } else {
-        delete oThis.feedsMap[activeFeedId];
+        delete oThis.feedsMap[feedId];
       }
     }
 
