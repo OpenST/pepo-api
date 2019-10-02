@@ -522,17 +522,12 @@ class UserNotificationList extends ServiceBase {
   _isNotificationBlocked(userNotification) {
     const oThis = this;
 
-    console.log('==userNotification=======', userNotification);
-    console.log('==oThis.notificationVideoMap======', JSON.stringify(oThis.notificationVideoMap));
-
     if (userNotification.kind === userNotificationConstants.videoAddKind) {
       if (oThis.notificationVideoMap[userNotification.uuid]) {
         for (let index = 0; index < oThis.notificationVideoMap[userNotification.uuid].length; index++) {
           const vid = oThis.notificationVideoMap[userNotification.uuid][index];
           if (oThis.videoMap[vid].status === videoConstants.deletedStatus) {
             oThis.notificationsToDelete.push(userNotification);
-
-            console.log('==oThis.notificationsToDelete=====11111====', oThis.notificationsToDelete);
 
             return true;
           }
@@ -542,13 +537,9 @@ class UserNotificationList extends ServiceBase {
       if (oThis.usersByIdMap[userNotification.actorIds[0]].status === userConstants.inActiveStatus) {
         oThis.notificationsToDelete.push(userNotification);
 
-        console.log('==oThis.notificationsToDelete=====22222====', oThis.notificationsToDelete);
-
         return true;
       }
     }
-
-    console.log('==oThis.notificationsToDelete=====333333====', oThis.notificationsToDelete);
 
     return false;
   }
@@ -563,7 +554,6 @@ class UserNotificationList extends ServiceBase {
     const oThis = this;
 
     if (oThis.notificationsToDelete.length > 0) {
-      console.log('==oThis.notificationsToDelete=====444444444====', oThis.notificationsToDelete);
       await bgJob.enqueue(bgJobConstants.deleteCassandraJobTopic, {
         tableName: new UserNotificationModel().tableName,
         elementsToDelete: oThis.notificationsToDelete
