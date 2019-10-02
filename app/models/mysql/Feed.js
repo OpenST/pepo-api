@@ -43,7 +43,7 @@ class FeedModel extends ModelBase {
       kind: feedsConstants.kinds[dbRow.kind],
       paginationIdentifier: dbRow.pagination_identifier,
       actor: dbRow.actor,
-      extraData: JSON.parse(dbRow.extra_data),
+      extraData: dbRow.hasOwnProperty('extra_data') ? JSON.parse(dbRow.extra_data) : undefined,
       createdAt: dbRow.created_at,
       updatedAt: dbRow.updated_at
     };
@@ -129,6 +129,68 @@ class FeedModel extends ModelBase {
     const dbRows = await oThis.fetchByIds([id]);
 
     return dbRows[id] || {};
+  }
+
+  /**
+   * Fetch new feeds ids after last visit time.
+   *
+   * @param {array} ids: Feed Ids
+   *
+   * @return {object}
+   */
+  async getNewFeedIdsAfterTime(params) {
+    const oThis = this,
+      lastVisitedAt = params.lastVisitedAt,
+      limit = params.limit;
+
+    const response = [];
+
+    const dbRows = await oThis
+      .select('id')
+      .where(['pagination_identifier > ?', lastVisitedAt])
+      .order_by('pagination_identifier desc')
+      .limit(limit)
+      .fire();
+
+    for (let index = 0; index < dbRows.length; index++) {
+      const formatDbRow = oThis.formatDbData(dbRows[index]);
+      response.push(formatDbRow.id);
+    }
+
+    return response;
+  }
+
+  /**
+   * Fetch new feeds ids after last visit time.
+   *
+   * @param {array} ids: Feed Ids
+   *
+   * @return {object}
+   */
+  async getOlderFeedIds(params) {
+    const oThis = this,
+      feedIds = params.feedIds,
+      limit = params.limit;
+
+    const response = [];
+
+    let queryObj = oThis
+      .select('id')
+      .order_by('pagination_identifier desc')
+      .limit(limit);
+
+    if (feedIds.length > 0) {
+      queryObj.where(['id not in (?)', feedIds]);
+    }
+
+    const dbRows = await queryObj.fire();
+
+    for (let index = 0; index < dbRows.length; index++) {
+      const formatDbRow = oThis.formatDbData(dbRows[index]);
+      response.push(formatDbRow.id);
+    }
+
+    return response;
   }
 
   /**
