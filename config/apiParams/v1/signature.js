@@ -753,10 +753,6 @@ const v1Signature = {
   [apiName.reportIssue]: {
     mandatory: [
       {
-        parameter: 'current_user',
-        validatorMethods: ['validateNonEmptyObject']
-      },
-      {
         parameter: 'report_entity_id',
         validatorMethods: ['validateNonZeroInteger']
       },
@@ -765,7 +761,12 @@ const v1Signature = {
         validatorMethods: ['validateNonBlankString']
       }
     ],
-    optional: []
+    optional: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      }
+    ]
   }
 };
 
