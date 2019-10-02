@@ -91,10 +91,10 @@ class UpdateUserNotificationVisitDetails extends ServiceBase {
 
     const queryParams = {
       userId: oThis.userId,
-      lastVisitedAt: oThis.lastVisitedAt
+      activityLastVisitedAt: oThis.lastVisitedAt
     };
 
-    return new UserNotificationVisitDetailModel().updateLastVisitTime(queryParams);
+    return new UserNotificationVisitDetailModel().updateActivityLastVisitTime(queryParams);
   }
 }
 
