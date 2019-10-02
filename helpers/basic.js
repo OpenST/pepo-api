@@ -609,6 +609,15 @@ class BasicHelper {
   isTwitterIdRotated(twitterId) {
     return twitterId[0] === '-';
   }
+
+  /**
+   * Get user profile url prefix for admin dashboard.
+   *
+   * @returns {string}
+   */
+  userProfilePrefixUrl() {
+    return coreConstants.PA_DOMAIN + '/admin/user-profile';
+  }
 }
 
 module.exports = new BasicHelper();

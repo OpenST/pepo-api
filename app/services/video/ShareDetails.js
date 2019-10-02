@@ -17,7 +17,6 @@ const rootPrefix = '../../..',
   coreConstants = require(rootPrefix + '/config/coreConstants'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   commonValidator = require(rootPrefix + '/lib/validators/Common'),
-  curatedFeedsJson = require(rootPrefix + '/test/curatedFeeds'),
   entityType = require(rootPrefix + '/lib/globalConstant/entityType');
 
 const urlDomain = coreConstants.PA_DOMAIN;
@@ -51,42 +50,14 @@ class ShareDetails extends ServiceBase {
   async _asyncPerform() {
     const oThis = this;
 
-    // If this is a curated video.
-    if (oThis.videoId < 0) {
-      const curatedFeeds = curatedFeedsJson.curatedFeeds;
-
-      let creatorUserId = null;
-
-      for (let index = 0; index < curatedFeeds.length; index++) {
-        const feed = curatedFeeds[index];
-
-        if (feed.id === oThis.videoId) {
-          creatorUserId = feed.actor;
-          break;
-        }
-      }
-
-      let userName = 'Pepo';
-
-      if (creatorUserId) {
-        const usersMap = curatedFeedsJson.usersByIdMap;
-        userName = usersMap[creatorUserId].userName;
-      }
-
-      oThis.messageObject = shareEntityConstants.getVideoShareEntityForCuratedVideos({
-        url: urlDomain,
-        creatorName: userName
-      });
-    } else {
-      await oThis._fetchVideo();
-      await oThis._fetchCreatorUserName();
-      oThis.messageObject = shareEntityConstants.getVideoShareEntity({
-        creatorName: oThis.creatorName,
-        url: oThis._generateVideoShareUrl(),
-        videoDescription: oThis.videoDescriptionText,
-        handle: oThis.twitterHandle
-      });
-    }
+    await oThis._fetchVideo();
+    await oThis._fetchCreatorUserName();
+    oThis.messageObject = shareEntityConstants.getVideoShareEntity({
+      creatorName: oThis.creatorName,
+      url: oThis._generateVideoShareUrl(),
+      videoDescription: oThis.videoDescriptionText,
+      handle: oThis.twitterHandle
+    });
 
     return responseHelper.successWithData(oThis._prepareResponse());
   }
@@ -216,10 +187,10 @@ class ShareDetails extends ServiceBase {
     const twitterUserByUserIdsCacheData = twitterUserByUserIdsCacheResponse.data[userId];
 
     if (!twitterUserByUserIdsCacheData || !twitterUserByUserIdsCacheData.id) {
-      return; // don't set oThis.twitterHandle, this returns share entity without 'twitterHandle'
+      return; // Don't set oThis.twitterHandle, this returns share entity without 'twitterHandle'
     }
 
-    let twitterUserId = twitterUserByUserIdsCacheData.id;
+    const twitterUserId = twitterUserByUserIdsCacheData.id;
 
     const twitterUserByUserIdCacheResponse = await new TwitterUserByIdsCache({ ids: [twitterUserId] }).fetch();
     if (twitterUserByUserIdCacheResponse.isFailure()) {
@@ -249,6 +220,7 @@ class ShareDetails extends ServiceBase {
       )
     };
   }
+
   /**
    * Generate video share url.
    *
@@ -261,4 +233,5 @@ class ShareDetails extends ServiceBase {
     return urlDomain + '/' + gotoConstants.videoGotoKind + '/' + oThis.videoId;
   }
 }
+
 module.exports = ShareDetails;

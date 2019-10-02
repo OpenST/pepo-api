@@ -10,6 +10,7 @@ const rootPrefix = '../../..',
   basicHelper = require(rootPrefix + '/helpers/basic'),
   curatedFeedsJson = require(rootPrefix + '/test/curatedFeeds'),
   feedConstants = require(rootPrefix + '/lib/globalConstant/feed'),
+  coreConstants = require(rootPrefix + '/config/coreConstants'),
   paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination');
 
 /**
@@ -395,6 +396,55 @@ class PublicVideoFeed extends FeedBase {
       const lastFeedId = oThis.feedIds[oThis.feedIds.length - 1];
       oThis.nextPaginationTimestamp = oThis.feedsMap[lastFeedId].paginationIdentifier;
     }
+
+    if (!oThis.currentUserId) {
+      await oThis._handleCuratedFeeds();
+    }
+  }
+
+  /**
+   * Update feed ids.
+   *
+   * @sets oThis.feedIds, oThis.feedsMap
+   *
+   * @returns {Promise<*>}
+   * @private
+   */
+  async _handleCuratedFeeds() {
+    const oThis = this;
+
+    let curatedFeedMap = {};
+    const curatedFeedIdsString = coreConstants.PEPO_CURATED_FEED_IDS,
+      curatedFeedIds = JSON.parse(curatedFeedIdsString);
+
+    if (oThis.paginationTimestamp == null) {
+      // Logged out mode and FIRST page.
+      curatedFeedMap = await new FeedModel().fetchByIds(curatedFeedIds);
+
+      const activeFeedIds = [];
+      for (const activeFeedId in curatedFeedMap) {
+        if (CommonValidators.validateNonEmptyObject(curatedFeedMap[activeFeedId])) {
+          activeFeedIds.push(activeFeedId);
+        } else {
+          delete curatedFeedMap[activeFeedId];
+        }
+      }
+
+      oThis.feedsMap = Object.assign(oThis.feedsMap, curatedFeedMap);
+      oThis.feedIds = activeFeedIds.concat(oThis.feedIds);
+      oThis.feedIds = [...new Set(oThis.feedIds)];
+    } else {
+      // Logged out mode and NOT FIRST page.
+      for (let index = 0; index < curatedFeedIds.length; index++) {
+        const curatedFeedId = curatedFeedIds[index],
+          arrayIndex = oThis.feedIds.indexOf(curatedFeedId);
+
+        if (arrayIndex >= 0) {
+          oThis.feedIds.splice(arrayIndex, 1);
+          delete oThis.feedsMap[curatedFeedId];
+        }
+      }
+    }
   }
 
   /**
@@ -427,39 +477,6 @@ class PublicVideoFeed extends FeedBase {
     const responseMetaData = {
       [paginationConstants.nextPagePayloadKey]: nextPagePayloadKey
     };
-
-    // TEMP CODE START - to show curated feeds on top(only in logged out mode)
-    if (!oThis.currentUserId && oThis.paginationTimestamp == null) {
-      const curatedFeeds = curatedFeedsJson.curatedFeeds;
-
-      oThis.feeds = curatedFeeds.concat(oThis.feeds);
-
-      oThis.profileResponse.userProfilesMap = Object.assign(
-        oThis.profileResponse.userProfilesMap,
-        curatedFeedsJson.userProfilesMap
-      );
-
-      oThis.profileResponse.usersByIdMap = Object.assign(
-        oThis.profileResponse.usersByIdMap,
-        curatedFeedsJson.usersByIdMap
-      );
-
-      oThis.profileResponse.tokenUsersByUserIdMap = Object.assign(
-        oThis.profileResponse.tokenUsersByUserIdMap,
-        curatedFeedsJson.tokenUsersByUserIdMap
-      );
-
-      oThis.profileResponse.videoMap = Object.assign(oThis.profileResponse.videoMap, curatedFeedsJson.videoMap);
-
-      oThis.profileResponse.videoDetailsMap = Object.assign(
-        oThis.profileResponse.videoDetailsMap,
-        curatedFeedsJson.videoDetailsMap
-      );
-
-      oThis.profileResponse.imageMap = Object.assign(oThis.profileResponse.imageMap, curatedFeedsJson.imageMap);
-    }
-
-    // TEMP CODE END - to show curated feeds on top(only in logged out mode)
 
     return responseHelper.successWithData({
       feedList: oThis.feeds,

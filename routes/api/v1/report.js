@@ -7,7 +7,7 @@ const rootPrefix = '../../..',
   apiName = require(rootPrefix + '/lib/globalConstant/apiName'),
   cookieHelper = require(rootPrefix + '/lib/cookieHelper');
 
-router.post('/report', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+router.post('/', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.reportIssue;
 
   Promise.resolve(routeHelper.perform(req, res, next, '/miscellaneous/Report', 'r_a_v1_msc_1', null, null));

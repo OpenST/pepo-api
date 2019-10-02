@@ -21,7 +21,7 @@ const rootPrefix = '../../..',
   uploadParamsRoutes = require(rootPrefix + '/routes/api/v1/uploadParams'),
   rotateTwitterAccountRoutes = require(rootPrefix + '/routes/api/v1/rotateTwitterAccount'),
   reportIssueRoutes = require(rootPrefix + '/routes/api/v1/reportIssue'),
-  miscellaneousRoutes = require(rootPrefix + '/routes/api/v1/miscellaneous'),
+  reportRoutes = require(rootPrefix + '/routes/api/v1/report'),
   ostTransactionRoutes = require(rootPrefix + '/routes/api/v1/ostTransactions');
 
 // Node.js cookie parsing middleware.
@@ -37,6 +37,7 @@ router.use('/fetch-goto', fetchGotoRoutes);
 // Login not mandatory for following
 router.use('/feeds', cookieHelper.validateUserLoginCookieIfPresent, feedsRoutes);
 router.use('/videos', cookieHelper.validateUserLoginCookieIfPresent, videoRoutes);
+router.use('/report', cookieHelper.validateUserLoginCookieIfPresent, reportRoutes);
 
 router.use(cookieHelper.validateUserLoginCookieIfPresent, cookieHelper.validateUserLoginRequired);
 
@@ -51,6 +52,5 @@ router.use('/tags', tagRoutes);
 router.use('/notifications', notificationsRoutes);
 router.use('/top-up', topupRoutes);
 router.use('/twitter', twitterRoutes);
-router.use('/', miscellaneousRoutes);
 
 module.exports = router;
