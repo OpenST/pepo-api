@@ -4,6 +4,7 @@ const uuidV4 = require('uuid/v4'),
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   GetBalance = require(rootPrefix + '/app/services/user/GetBalance'),
+  UserModel = require(rootPrefix + '/app/models/mysql/User'),
   UserMultiCache = require(rootPrefix + '/lib/cacheManagement/multi/User'),
   OstPricePointModel = require(rootPrefix + '/app/models/mysql/OstPricePoints'),
   TwitterUserByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TwitterUserByIds'),
@@ -72,10 +73,12 @@ class RequestRedemption extends ServiceBase {
   async _asyncPerform() {
     const oThis = this;
 
+    await oThis._validateAndSetUserDetails();
+
     await oThis._validateAndSanitize();
 
     const promisesArray = [];
-    promisesArray.push(oThis._getUserDetails(), oThis._getTokenUserDetails(), oThis._getCurrentUserTwitterHandle());
+    promisesArray.push(oThis._getTokenUserDetails(), oThis._getCurrentUserTwitterHandle());
     await Promise.all(promisesArray);
 
     oThis.redemptionId = uuidV4();
@@ -95,6 +98,45 @@ class RequestRedemption extends ServiceBase {
   }
 
   /**
+   * Validate and set user details.
+   *
+   * @sets oThis.currentUserEmailAddress, oThis.currentUserUserName, oThis.redemptionReceiverUsername
+   *
+   * @returns {Promise<never>}
+   * @private
+   */
+  async _validateAndSetUserDetails() {
+    const oThis = this;
+
+    const userDetailsCacheRsp = await new UserMultiCache({
+      ids: [oThis.currentUserId, coreConstants.PEPO_REDEMPTION_USER_ID]
+    }).fetch();
+    if (userDetailsCacheRsp.isFailure()) {
+      return responseHelper.error({
+        internal_error_identifier: 'a_s_r_r_1',
+        api_error_identifier: 'something_went_wrong_bad_request',
+        debug_options: { error: userDetailsCacheRsp }
+      });
+    }
+
+    const currentUserDetails = userDetailsCacheRsp.data[oThis.currentUserId];
+
+    if (!currentUserDetails || !UserModel.isUserApprovedCreator(currentUserDetails)) {
+      return responseHelper.error({
+        internal_error_identifier: 'a_s_r_r_2',
+        api_error_identifier: 'redemption_user_not_approved_creator',
+        debug_options: {}
+      });
+    }
+
+    const redemptionUserDetails = userDetailsCacheRsp.data[coreConstants.PEPO_REDEMPTION_USER_ID];
+
+    oThis.currentUserEmailAddress = currentUserDetails.email || '';
+    oThis.currentUserUserName = currentUserDetails.userName;
+    oThis.redemptionReceiverUsername = redemptionUserDetails.userName;
+  }
+
+  /**
    * Validate and sanitize params.
    *
    * @returns {Promise<never>}
@@ -103,63 +145,10 @@ class RequestRedemption extends ServiceBase {
   async _validateAndSanitize() {
     const oThis = this;
 
-    const paramErrors = [];
-    const promisesArray = [oThis._validateUserBalance(), oThis._validatePricePoint(), oThis._getProductDetails()];
-
-    const promisesResponse = await Promise.all(promisesArray);
-
-    const userBalanceValidationResponse = promisesResponse[0];
-    const pricePointValidationResponse = promisesResponse[1];
-    const productValidationResponse = promisesResponse[2];
-
-    // Validate if user's balance is greater than the pepo amount in wei.
-    if (!userBalanceValidationResponse) {
-      paramErrors.push('invalid_pepo_amount_in_wei');
-    }
-
-    // Validate price points.
-    if (!pricePointValidationResponse) {
-      paramErrors.push('invalid_price_point');
-    }
-
-    // Validate product id.
-    if (!productValidationResponse) {
-      paramErrors.push('invalid_product_id');
-    }
-
-    // Validate if product value is correct or not.
-    const productValueValidation = oThis._validateProductValue();
-
-    if (!productValueValidation) {
-      paramErrors.push('invalid_pepo_amount_in_wei', 'invalid_price_point');
-    }
-
-    if (paramErrors.length > 0) {
-      return Promise.reject(
-        responseHelper.paramValidationError({
-          internal_error_identifier: 'a_s_r_r_1',
-          api_error_identifier: 'invalid_api_params',
-          params_error_identifiers: paramErrors,
-          debug_options: { error: paramErrors }
-        })
-      );
-    }
-  }
-
-  /**
-   * Validate if product value is correct or not.
-   *
-   * @returns {boolean}
-   * @private
-   */
-  _validateProductValue() {
-    const oThis = this;
-
-    const productValueInUsdInWei = basicHelper.getUSDAmountForPepo(oThis.pricePoint, oThis.pepoAmountInWei);
-
-    const productValueInUsd = basicHelper.toNormalPrecisionFiat(productValueInUsdInWei, 18).toString();
-
-    return productValueInUsd === oThis.dollarValue;
+    await oThis._validateUserBalance();
+    await oThis._validatePricePoint();
+    await oThis._validateAndSetProductDetails();
+    await oThis._validateProductValue();
   }
 
   /**
@@ -180,7 +169,15 @@ class RequestRedemption extends ServiceBase {
     const pepoAmountInBn = new BigNumber(oThis.pepoAmountInWei),
       balanceInBn = new BigNumber(balanceResponse.data.balance.total_balance);
 
-    return !pepoAmountInBn.gte(balanceInBn);
+    if (pepoAmountInBn.gt(balanceInBn)) {
+      return Promise.reject(
+        responseHelper.error({
+          internal_error_identifier: 'a_s_r_r_3',
+          api_error_identifier: 'redemption_user_has_insufficient_balance',
+          debug_options: {}
+        })
+      );
+    }
   }
 
   /**
@@ -212,7 +209,15 @@ class RequestRedemption extends ServiceBase {
       }
     }
 
-    return validationResult;
+    if (!validationResult) {
+      return Promise.reject(
+        responseHelper.error({
+          internal_error_identifier: 'a_s_r_r_4',
+          api_error_identifier: 'something_went_wrong_bad_request',
+          debug_options: {}
+        })
+      );
+    }
   }
 
   /**
@@ -223,7 +228,7 @@ class RequestRedemption extends ServiceBase {
    * @returns {Promise<boolean>}
    * @private
    */
-  async _getProductDetails() {
+  async _validateAndSetProductDetails() {
     const oThis = this;
 
     const redemptionProductsCacheResponse = await new RedemptionProductsCache().fetch();
@@ -245,33 +250,40 @@ class RequestRedemption extends ServiceBase {
       }
     }
 
-    return validationResult;
+    if (!validationResult) {
+      return Promise.reject(
+        responseHelper.paramValidationError({
+          internal_error_identifier: 'a_s_r_r_5',
+          api_error_identifier: 'invalid_api_params',
+          params_error_identifiers: ['invalid_product_id'],
+          debug_options: {}
+        })
+      );
+    }
   }
 
   /**
-   * Get user details.
+   * Validate if product value is correct or not.
    *
-   * @sets oThis.currentUserEmailAddress, oThis.currentUserUserName, oThis.redemptionReceiverUsername
-   *
-   * @returns {Promise<never>}
+   * @returns {boolean}
    * @private
    */
-  async _getUserDetails() {
+  async _validateProductValue() {
     const oThis = this;
 
-    const userDetailsCacheRsp = await new UserMultiCache({
-      ids: [oThis.currentUserId, coreConstants.PEPO_REDEMPTION_USER_ID]
-    }).fetch();
-    if (userDetailsCacheRsp.isFailure()) {
-      return Promise.reject(userDetailsCacheRsp);
+    const productValueInUsdInWei = basicHelper.getUSDAmountForPepo(oThis.pricePoint, oThis.pepoAmountInWei);
+
+    const productValueInUsd = basicHelper.toNormalPrecisionFiat(productValueInUsdInWei, 18).toString();
+
+    if (productValueInUsd !== oThis.dollarValue) {
+      return Promise.reject(
+        responseHelper.error({
+          internal_error_identifier: 'a_s_r_r_6',
+          api_error_identifier: 'something_went_wrong_bad_request',
+          debug_options: {}
+        })
+      );
     }
-
-    const currentUserDetails = userDetailsCacheRsp.data[oThis.currentUserId];
-    const redemptionUserDetails = userDetailsCacheRsp.data[coreConstants.PEPO_REDEMPTION_USER_ID];
-
-    oThis.currentUserEmailAddress = currentUserDetails.email || '';
-    oThis.currentUserUserName = currentUserDetails.userName;
-    oThis.redemptionReceiverUsername = redemptionUserDetails.userName;
   }
 
   /**

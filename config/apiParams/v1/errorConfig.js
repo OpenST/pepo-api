@@ -287,22 +287,10 @@ const v1ErrorConfig = {
     message: 'Receiver user id is not associated with any user.'
   },
 
-  invalid_pepo_amount_in_wei: {
-    parameter: 'pepo_amount_in_wei',
-    code: 'invalid',
-    message: 'Invalid pepo amount in wei.'
-  },
-
-  invalid_price_point: {
-    parameter: 'price_point',
-    code: 'invalid',
-    message: 'Invite price point.'
-  },
-
   invalid_product_id: {
     parameter: 'product_id',
     code: 'invalid',
-    message: 'Invite product id.'
+    message: 'Invalid product id.'
   },
 
   invalid_twitter_id: {
