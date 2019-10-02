@@ -92,18 +92,23 @@ class PublicVideoFeed extends FeedBase {
     const curatedFeedIdsString = coreConstants.PEPO_CURATED_FEED_IDS,
       curatedFeedIds = JSON.parse(curatedFeedIdsString);
 
+    // To show curated feeds on top of first feed page (only in logged out mode).
     if (!oThis.currentUser && oThis.paginationTimestamp == null) {
+      // Logged out mode and FIRST page.
       curatedFeedMap = await new FeedModel().fetchByIds(curatedFeedIds);
 
       oThis.feedIds = curatedFeedIds.concat(oThis.feedIds);
       oThis.feedsMap = Object.assign(oThis.feedsMap, curatedFeedMap);
-    } else {
-      for (let i = 0; i < oThis.feedIds; i++) {
-        const feedId = oThis.feedIds[i],
-          arrayIndex = oThis.feedIds.indexOf(feedId);
+    } else if (!oThis.currentUser && oThis.paginationTimestamp) {
+      // Logged out mode and NOT FIRST page.
+      for (let index = 0; index < curatedFeedIds.length; index++) {
+        const curatedFeedId = curatedFeedIds[index],
+          arrayIndex = oThis.feedIds.indexOf(curatedFeedId);
 
-        oThis.feedIds.splice(arrayIndex, 1);
-        delete oThis.feedsMap[feedId];
+        if (arrayIndex >= 0) {
+          oThis.feedIds.splice(arrayIndex, 1);
+          delete oThis.feedsMap[curatedFeedId];
+        }
       }
     }
   }
