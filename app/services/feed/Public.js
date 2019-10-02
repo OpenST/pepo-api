@@ -1,6 +1,7 @@
 const rootPrefix = '../../..',
   FeedBase = require(rootPrefix + '/app/services/feed/Base'),
   LoggedOutFeedCache = require(rootPrefix + '/lib/cacheManagement/single/LoggedOutFeed'),
+  CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   coreConstants = require(rootPrefix + '/config/coreConstants'),
   FeedModel = require(rootPrefix + '/app/models/mysql/Feed'),
@@ -88,18 +89,43 @@ class PublicVideoFeed extends FeedBase {
       oThis.nextPaginationTimestamp = oThis.feedsMap[lastFeedId].paginationIdentifier;
     }
 
+    if (!oThis.currentUserId) {
+      await oThis._handleCuratedFeeds();
+    }
+  }
+
+  /**
+   * Update feed ids.
+   *
+   * @sets oThis.feedIds, oThis.feedsMap
+   *
+   * @returns {Promise<*>}
+   * @private
+   */
+  async _handleCuratedFeeds() {
+    const oThis = this;
+
     let curatedFeedMap = {};
     const curatedFeedIdsString = coreConstants.PEPO_CURATED_FEED_IDS,
       curatedFeedIds = JSON.parse(curatedFeedIdsString);
 
-    // To show curated feeds on top of first feed page (only in logged out mode).
-    if (!oThis.currentUser && oThis.paginationTimestamp == null) {
+    if (oThis.paginationTimestamp == null) {
       // Logged out mode and FIRST page.
       curatedFeedMap = await new FeedModel().fetchByIds(curatedFeedIds);
 
-      oThis.feedIds = curatedFeedIds.concat(oThis.feedIds);
+      const activeFeedIds = [];
+      for (const activeFeedId in curatedFeedMap) {
+        if (CommonValidators.validateNonEmptyObject(curatedFeedMap[activeFeedId])) {
+          activeFeedIds.push(activeFeedId);
+        } else {
+          delete curatedFeedMap[activeFeedId];
+        }
+      }
+
       oThis.feedsMap = Object.assign(oThis.feedsMap, curatedFeedMap);
-    } else if (!oThis.currentUser && oThis.paginationTimestamp) {
+      oThis.feedIds = activeFeedIds.concat(oThis.feedIds);
+      oThis.feedIds = [...new Set(oThis.feedIds)];
+    } else {
       // Logged out mode and NOT FIRST page.
       for (let index = 0; index < curatedFeedIds.length; index++) {
         const curatedFeedId = curatedFeedIds[index],

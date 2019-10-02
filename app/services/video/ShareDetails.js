@@ -19,8 +19,7 @@ const rootPrefix = '../../..',
   commonValidator = require(rootPrefix + '/lib/validators/Common'),
   entityType = require(rootPrefix + '/lib/globalConstant/entityType');
 
-const urlDomain = coreConstants.PA_DOMAIN,
-  curatedFeedIdsString = coreConstants.PEPO_CURATED_FEED_IDS;
+const urlDomain = coreConstants.PA_DOMAIN;
 
 class ShareDetails extends ServiceBase {
   /**
@@ -51,26 +50,14 @@ class ShareDetails extends ServiceBase {
   async _asyncPerform() {
     const oThis = this;
 
-    const curatedFeedIds = JSON.parse(curatedFeedIdsString);
-
-    // If this is a curated video.
-    if (curatedFeedIds.includes(oThis.videoId)) {
-      await oThis._fetchCreatorUserName();
-
-      oThis.messageObject = shareEntityConstants.getVideoShareEntityForCuratedVideos({
-        url: urlDomain,
-        creatorName: oThis.creatorName
-      });
-    } else {
-      await oThis._fetchVideo();
-      await oThis._fetchCreatorUserName();
-      oThis.messageObject = shareEntityConstants.getVideoShareEntity({
-        creatorName: oThis.creatorName,
-        url: oThis._generateVideoShareUrl(),
-        videoDescription: oThis.videoDescriptionText,
-        handle: oThis.twitterHandle
-      });
-    }
+    await oThis._fetchVideo();
+    await oThis._fetchCreatorUserName();
+    oThis.messageObject = shareEntityConstants.getVideoShareEntity({
+      creatorName: oThis.creatorName,
+      url: oThis._generateVideoShareUrl(),
+      videoDescription: oThis.videoDescriptionText,
+      handle: oThis.twitterHandle
+    });
 
     return responseHelper.successWithData(oThis._prepareResponse());
   }
@@ -233,6 +220,7 @@ class ShareDetails extends ServiceBase {
       )
     };
   }
+
   /**
    * Generate video share url.
    *
@@ -245,4 +233,5 @@ class ShareDetails extends ServiceBase {
     return urlDomain + '/' + gotoConstants.videoGotoKind + '/' + oThis.videoId;
   }
 }
+
 module.exports = ShareDetails;
