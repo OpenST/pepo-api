@@ -111,7 +111,7 @@ class BackPopulateVideos {
     const paramsToUpdate = {
       urlTemplate: urlTemplate,
       resolutions: { o: resolutions },
-      status: videoConst.notCompressedStatus,
+      compressionStatus: videoConst.notCompressedStatus,
       id: dbRow.id
     };
 

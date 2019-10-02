@@ -112,7 +112,7 @@ class BackPopulateImages {
     const paramsToUpdate = {
       urlTemplate: urlTemplate,
       resolutions: { original: resolutions.original },
-      status: imageConst.statuses[dbRow.status],
+      resizeStatus: imageConst.resizeStatuses[dbRow.resize_status],
       id: dbRow.id
     };
 
