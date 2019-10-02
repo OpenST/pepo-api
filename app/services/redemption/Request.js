@@ -346,6 +346,7 @@ class RequestRedemption extends ServiceBase {
         user_token_holder_address: oThis.currentUserTokenHolderAddress,
         user_twitter_handle: oThis.currentUserTwitterHandle,
         user_email: oThis.currentUserEmailAddress,
+        user_admin_url_prefix: basicHelper.userProfilePrefixUrl(),
         // Product details.
         product_id: oThis.productId,
         product_kind: oThis.productKind,
