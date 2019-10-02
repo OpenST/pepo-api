@@ -320,7 +320,7 @@ class UserModel extends ModelBase {
     }
 
     // Filter users by creator statuses
-    let approvedPropertyVal = userConstants.invertedProperties[userConstants.isDeniedCreatorProperty],
+    let approvedPropertyVal = userConstants.invertedProperties[userConstants.isApprovedCreatorProperty],
       deniedPropertyVal = userConstants.invertedProperties[userConstants.isDeniedCreatorProperty];
     switch (params.filter) {
       case userConstants.pendingCreatorFilterValue:
