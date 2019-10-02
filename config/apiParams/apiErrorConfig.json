@@ -157,7 +157,7 @@
   "redemption_user_not_approved_creator": {
     "http_code": "200",
     "code": "BAD_REQUEST",
-    "message": "1 approved video is required for redemption."
+    "message": "Atleast 1 approved video is required before your account is eligible for redemptions."
   },
   "redemption_user_has_insufficient_balance": {
     "http_code": "200",
