@@ -179,28 +179,6 @@ const v1Signature = {
     optional: []
   },
 
-  [apiName.requestRedemption]: {
-    mandatory: [
-      {
-        parameter: 'current_user',
-        validatorMethods: ['validateNonEmptyObject']
-      },
-      {
-        parameter: 'product_id',
-        validatorMethods: ['validateNonZeroInteger']
-      },
-      {
-        parameter: 'price_point',
-        validatorMethods: ['validateNonBlankString']
-      },
-      {
-        parameter: 'pepo_amount_in_wei',
-        validatorMethods: ['validateNonZeroWeiValue']
-      }
-    ],
-    optional: []
-  },
-
   [apiName.twitterLogin]: {
     mandatory: [
       {
