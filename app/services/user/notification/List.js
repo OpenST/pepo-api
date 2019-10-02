@@ -20,6 +20,7 @@ const rootPrefix = '../../../..',
   bgJobConstants = require(rootPrefix + '/lib/globalConstant/bgJob'),
   paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination'),
   responseEntityKey = require(rootPrefix + '/lib/globalConstant/responseEntityKey'),
+  UserBlockedListCache = require(rootPrefix + '/lib/cacheManagement/single/UserBlockedList'),
   userNotificationConstants = require(rootPrefix + '/lib/globalConstant/cassandra/userNotification');
 
 /**
@@ -56,6 +57,7 @@ class UserNotificationList extends ServiceBase {
     oThis.userIds = [];
     oThis.videoIds = [];
     oThis.imageIds = [];
+    oThis.blockedByUserList = [];
 
     oThis.usersByIdMap = {};
     oThis.tokenUsersByUserIdMap = {};
@@ -82,7 +84,12 @@ class UserNotificationList extends ServiceBase {
 
     await oThis._setUserAndVideoIds();
 
-    const promisesArray = [oThis._fetchUsers(), oThis._fetchTokenUsers(), oThis._fetchVideos()];
+    const promisesArray = [
+      oThis._fetchUsers(),
+      oThis._fetchTokenUsers(),
+      oThis._fetchVideos(),
+      oThis._fetchBlockedByUserList()
+    ];
     // Images are fetched later because video covers also needs to be fetched.
 
     await Promise.all(promisesArray);
@@ -361,6 +368,23 @@ class UserNotificationList extends ServiceBase {
   }
 
   /**
+   * Fetch list of users blocked by current user
+   *
+   * @returns {Promise<never>}
+   * @private
+   */
+  async _fetchBlockedByUserList() {
+    const oThis = this;
+
+    let cacheResp = await new UserBlockedListCache({ userId: oThis.currentUserId }).fetch();
+    if (cacheResp.isFailure()) {
+      return Promise.reject(cacheResp);
+    }
+
+    oThis.blockedByUserList = cacheResp.data[oThis.currentUserId];
+  }
+
+  /**
    * Update notification centre last visit time.
    *
    * @returns {object}
@@ -534,7 +558,9 @@ class UserNotificationList extends ServiceBase {
         }
       }
 
-      if (oThis.usersByIdMap[userNotification.actorIds[0]].status === userConstants.inActiveStatus) {
+      // If notification actor is inactive or in user's blocked list then don't show notification
+      let uId = userNotification.actorIds[0];
+      if (oThis.usersByIdMap[uId].status === userConstants.inActiveStatus || oThis.blockedByUserList.includes(uId)) {
         oThis.notificationsToDelete.push(userNotification);
 
         return true;
