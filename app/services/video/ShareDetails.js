@@ -137,8 +137,6 @@ class ShareDetails extends ServiceBase {
       }
     }
 
-    console.log('videoDetails---', videoDetails);
-
     // Already deleted.
     if (!videoDetails.creatorUserId || videoDetails.status === videoDetailsConstants.deletedStatus) {
       return Promise.reject(

@@ -99,7 +99,7 @@ class PublicVideoFeed extends FeedBase {
       oThis.feedsMap = Object.assign(oThis.feedsMap, curatedFeedMap);
     } else {
       for (let i = 0; i < oThis.feedIds; i++) {
-        let feedId = oThis.feedIds[i],
+        const feedId = oThis.feedIds[i],
           arrayIndex = oThis.feedIds.indexOf(feedId);
 
         oThis.feedIds.splice(arrayIndex, 1);
