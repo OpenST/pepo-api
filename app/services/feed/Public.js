@@ -113,6 +113,8 @@ class PublicVideoFeed extends FeedBase {
     } else {
       await oThis._setFeedDataForLoggedOutUser();
     }
+
+    await oThis._filterFeedData();
   }
 
   /**
@@ -341,15 +343,7 @@ class PublicVideoFeed extends FeedBase {
       }
 
       oThis.feedsMap = feedByIdsCacheResponse.data;
-
-      const activeFeedIds = [];
-      for (let feedId in oThis.feedsMap) {
-        if (CommonValidators.validateNonEmptyObject(oThis.feedsMap[feedId])) {
-          activeFeedIds.push(feedId);
-        }
-      }
-
-      oThis.feedIds = activeFeedIds;
+      oThis.feedIds = currentFeedIds;
     } else {
       oThis.feedsMap = {};
       oThis.feedIds = [];
@@ -421,18 +415,8 @@ class PublicVideoFeed extends FeedBase {
       // Logged out mode and FIRST page.
       curatedFeedMap = await new FeedModel().fetchByIds(curatedFeedIds);
 
-      const activeFeedIds = [];
-      for (const activeFeedId in curatedFeedMap) {
-        if (CommonValidators.validateNonEmptyObject(curatedFeedMap[activeFeedId])) {
-          activeFeedIds.push(activeFeedId);
-        } else {
-          delete curatedFeedMap[activeFeedId];
-        }
-      }
-
       oThis.feedsMap = Object.assign(oThis.feedsMap, curatedFeedMap);
-      oThis.feedIds = activeFeedIds.concat(oThis.feedIds);
-      oThis.feedIds = [...new Set(oThis.feedIds)];
+      oThis.feedIds = curatedFeedIds.concat(oThis.feedIds);
     } else {
       // Logged out mode and NOT FIRST page.
       for (let index = 0; index < curatedFeedIds.length; index++) {
@@ -445,6 +429,29 @@ class PublicVideoFeed extends FeedBase {
         }
       }
     }
+  }
+
+  /**
+   * Update feed ids to remove inactive feeds.
+   *
+   * @sets oThis.feedIds, oThis.feedsMap
+   *
+   * @returns {Promise<*>}
+   * @private
+   */
+  async _filterFeedData() {
+    const oThis = this;
+
+    const activeFeedIds = [];
+    for (const activeFeedId in oThis.feedsMap) {
+      if (CommonValidators.validateNonEmptyObject(oThis.feedsMap[activeFeedId])) {
+        activeFeedIds.push(activeFeedId);
+      } else {
+        delete oThis.feedsMap[activeFeedId];
+      }
+    }
+
+    oThis.feedIds = activeFeedIds;
   }
 
   /**
