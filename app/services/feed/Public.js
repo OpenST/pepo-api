@@ -8,7 +8,6 @@ const rootPrefix = '../../..',
   UserNotificationVisitDetailModel = require(rootPrefix + '/app/models/cassandra/UserNotificationVisitDetail'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   basicHelper = require(rootPrefix + '/helpers/basic'),
-  curatedFeedsJson = require(rootPrefix + '/test/curatedFeeds'),
   feedConstants = require(rootPrefix + '/lib/globalConstant/feed'),
   coreConstants = require(rootPrefix + '/config/coreConstants'),
   paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination');
