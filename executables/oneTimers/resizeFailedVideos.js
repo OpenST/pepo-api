@@ -53,9 +53,8 @@ class ResizeVideos {
         }
         logger.log('Failed Videos: ', idsArray);
         await oThis._getVideoDetails(idsArray);
+        await basicHelper.sleep(30000);
       }
-
-      await basicHelper.sleep(30000);
     }
   }
 
