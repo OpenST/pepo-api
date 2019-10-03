@@ -1,24 +1,35 @@
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
-  VideoDetailsByVideoIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/VideoDetailsByVideoIds'),
+  CommonValidator = require(rootPrefix + '/lib/validators/Common'),
   DeleteUserVideosLib = require(rootPrefix + '/lib/video/DeleteUserVideos'),
-  videoDetailsConstants = require(rootPrefix + '/lib/globalConstant/videoDetail'),
+  VideoDetailsByVideoIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/VideoDetailsByVideoIds'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
-  commonValidator = require(rootPrefix + '/lib/validators/Common'),
-  entityType = require(rootPrefix + '/lib/globalConstant/entityType');
+  videoDetailsConstants = require(rootPrefix + '/lib/globalConstant/videoDetail');
 
+/**
+ * Class to delete video by user.
+ *
+ * @class DeleteVideo
+ */
 class DeleteVideo extends ServiceBase {
   /**
-   * @constructor
+   * Constructor to delete video by user.
    *
-   * @param params
+   * @param {object} params
+   * @param {object} params.current_user
+   * @param {number} params.video_id
+   *
+   * @augments ServiceBase
+   *
+   * @constructor
    */
   constructor(params) {
     super();
 
     const oThis = this;
-    oThis.videoId = params.video_id;
+
     oThis.currentUser = params.current_user;
+    oThis.videoId = params.video_id;
 
     oThis.videoDetails = null;
     oThis.creatorUserId = null;
@@ -43,9 +54,9 @@ class DeleteVideo extends ServiceBase {
 
     if (deleteUserVideosRsp && deleteUserVideosRsp.isSuccess()) {
       return responseHelper.successWithData({});
-    } else {
-      return Promise.reject(deleteUserVideosRsp);
     }
+
+    return Promise.reject(deleteUserVideosRsp);
   }
 
   /**
@@ -64,11 +75,11 @@ class DeleteVideo extends ServiceBase {
       return Promise.reject(videoDetailsCacheResponse);
     }
 
-    let videoDetailsCacheData = videoDetailsCacheResponse.data;
+    const videoDetailsCacheData = videoDetailsCacheResponse.data;
 
     // If video not found or its not active.
     if (
-      !commonValidator.validateNonEmptyObject(videoDetailsCacheData[oThis.videoId]) ||
+      !CommonValidator.validateNonEmptyObject(videoDetailsCacheData[oThis.videoId]) ||
       videoDetailsCacheData[oThis.videoId].status === videoDetailsConstants.deletedStatus
     ) {
       return Promise.reject(
