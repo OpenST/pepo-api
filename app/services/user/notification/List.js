@@ -568,9 +568,14 @@ class UserNotificationList extends ServiceBase {
     }
 
     // If notification actor is in user's blocked list then don't show notification
-    if (oThis.blockedByUserInfo.hasBlocked[actorId] || oThis.blockedByUserInfo.blockedBy[actorId]) {
+    // Or subject is in user's blocked list
+    if (
+      oThis.blockedByUserInfo.hasBlocked[actorId] ||
+      oThis.blockedByUserInfo.blockedBy[actorId] ||
+      oThis.blockedByUserInfo.hasBlocked[userNotification.subjectUserId] ||
+      oThis.blockedByUserInfo.blockedBy[userNotification.subjectUserId]
+    ) {
       oThis.notificationsToDelete.push(userNotification);
-
       return true;
     }
 
