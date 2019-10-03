@@ -546,6 +546,7 @@ class UserNotificationList extends ServiceBase {
   _isNotificationBlocked(userNotification) {
     const oThis = this;
 
+    let actorId = userNotification.actorIds[0];
     if (userNotification.kind === userNotificationConstants.videoAddKind) {
       if (oThis.notificationVideoMap[userNotification.uuid]) {
         for (let index = 0; index < oThis.notificationVideoMap[userNotification.uuid].length; index++) {
@@ -558,17 +559,24 @@ class UserNotificationList extends ServiceBase {
         }
       }
 
-      // If notification actor is inactive or in user's blocked list then don't show notification
-      let uId = userNotification.actorIds[0];
-      if (
-        oThis.usersByIdMap[uId].status === userConstants.inActiveStatus ||
-        oThis.blockedByUserInfo.hasBlocked[uId] ||
-        oThis.blockedByUserInfo.blockedBy[uId]
-      ) {
+      // If notification actor is inactive
+      if (oThis.usersByIdMap[actorId].status === userConstants.inActiveStatus) {
         oThis.notificationsToDelete.push(userNotification);
 
         return true;
       }
+    }
+
+    // If notification actor is in user's blocked list then don't show notification
+    // Or subject is in user's blocked list
+    if (
+      oThis.blockedByUserInfo.hasBlocked[actorId] ||
+      oThis.blockedByUserInfo.blockedBy[actorId] ||
+      oThis.blockedByUserInfo.hasBlocked[userNotification.subjectUserId] ||
+      oThis.blockedByUserInfo.blockedBy[userNotification.subjectUserId]
+    ) {
+      oThis.notificationsToDelete.push(userNotification);
+      return true;
     }
 
     return false;
