@@ -218,6 +218,10 @@ class NotificationAggregator extends CronBase {
 
       oThis.notificationSentUserIds.push(userId);
 
+      aggregatedNotificationsPayload.extraData.headingVersion = oThis._getHeadingVersion(
+        aggregatedNotificationsPayload.extraData
+      );
+
       let insertRow = [
         notificationHookConstants.invertedEventTypes[notificationHookConstants.aggregatedTxReceiveSuccessKind],
         JSON.stringify(deviceIds),
@@ -236,6 +240,32 @@ class NotificationAggregator extends CronBase {
       );
       await Promise.all(promiseArray);
     }
+  }
+
+  /**
+   * Get heading version.
+   *
+   * @param notificationData
+   * @private
+   */
+  _getHeadingVersion(notificationData) {
+    if (notificationData.actorCount && notificationData.actorCount > 1) {
+      if (notificationData.payload && notificationData.payload.amountInEth) {
+        if (notificationData.payload.amountInEth > 1) {
+          return 1;
+        }
+        return 4;
+      }
+    } else if (notificationData.actorCount && notificationData.actorCount === 1) {
+      if (notificationData.payload && notificationData.payload.amountInEth) {
+        if (notificationData.payload.amountInEth > 1) {
+          return 2;
+        }
+        return 3;
+      }
+    }
+
+    return 1;
   }
 
   /**

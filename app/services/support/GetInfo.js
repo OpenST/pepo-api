@@ -9,24 +9,40 @@ const rootPrefix = '../../..',
   localCipher = require(rootPrefix + '/lib/encryptors/localCipher'),
   pageConstants = require(rootPrefix + '/lib/globalConstant/webPage');
 
+/**
+ * Class to get support info.
+ *
+ * @class GetSupportInfo
+ */
 class GetSupportInfo extends ServiceBase {
+  /**
+   * Constructor to get support info.
+   *
+   * @param {object} params
+   * @param {object} params.current_user
+   *
+   * @augments ServiceBase
+   *
+   * @constructor
+   */
   constructor(params) {
-    super(params);
+    super();
 
     const oThis = this;
+
     oThis.currentUser = params.current_user;
   }
 
   /**
-   * async perform
+   * Async perform.
    *
-   * @return {Promise<any>}
+   * @returns {Promise<any>}
    * @private
    */
   async _asyncPerform() {
     const oThis = this;
 
-    let token = await oThis._getEncryptedCookieValue(),
+    const token = await oThis._getEncryptedCookieValue(),
       urlToken = base64Helper.encode(token);
 
     const link = `${pageConstants.supportLink}?rt=${urlToken}`;
@@ -37,25 +53,24 @@ class GetSupportInfo extends ServiceBase {
       uts: parseInt(Date.now() / 1000)
     };
 
-    return Promise.resolve(responseHelper.successWithData({ supportInfo: supportInfo }));
+    return responseHelper.successWithData({ supportInfo: supportInfo });
   }
 
   /**
-   * Get encrypted cookie value
+   * Get encrypted cookie value.
    *
-   * @return {Promise<*>}
+   * @returns {Promise<*>}
    * @private
    */
   async _getEncryptedCookieValue() {
     const oThis = this;
 
     const secureUserRes = await new SecureUserCache({ id: oThis.currentUser.id }).fetch();
-
     if (secureUserRes.isFailure()) {
       return Promise.reject(secureUserRes);
     }
 
-    let secureUserObj = secureUserRes.data;
+    const secureUserObj = secureUserRes.data;
 
     if (secureUserObj.status !== userConstants.activeStatus) {
       return Promise.reject(
@@ -68,7 +83,7 @@ class GetSupportInfo extends ServiceBase {
       );
     }
 
-    let decryptedEncryptionSalt = localCipher.decrypt(coreConstants.CACHE_SHA_KEY, secureUserObj.encryptionSaltLc);
+    const decryptedEncryptionSalt = localCipher.decrypt(coreConstants.CACHE_SHA_KEY, secureUserObj.encryptionSaltLc);
 
     return new UserModel().getCookieValueFor(secureUserObj, decryptedEncryptionSalt, { timestamp: Date.now() / 1000 });
   }
