@@ -90,13 +90,7 @@ class PublicVideoFeed extends FeedBase {
   _showShuffledFeeds() {
     const oThis = this;
 
-    return (
-      oThis.currentUserId &&
-      (basicHelper.isDevelopment() ||
-        (basicHelper.isStaging() && [1754, 1603, 1009].indexOf(oThis.currentUserId) > -1) ||
-        (basicHelper.isSandbox() && [oThis.currentUserId].indexOf(oThis.currentUserId) > -1) ||
-        (basicHelper.isProduction() && [23, 56, 7, 12, 4].indexOf(oThis.currentUserId) > -1))
-    );
+    return oThis.currentUserId;
   }
 
   /**
