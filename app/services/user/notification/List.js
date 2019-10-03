@@ -562,8 +562,8 @@ class UserNotificationList extends ServiceBase {
       let uId = userNotification.actorIds[0];
       if (
         oThis.usersByIdMap[uId].status === userConstants.inActiveStatus ||
-        oThis.blockedByUserInfo.hasBlocked.indexOf(uId) > -1 ||
-        oThis.blockedByUserInfo.blockedBy.indexOf(uId) > -1
+        oThis.blockedByUserInfo.hasBlocked[uId] ||
+        oThis.blockedByUserInfo.blockedBy[uId]
       ) {
         oThis.notificationsToDelete.push(userNotification);
 
