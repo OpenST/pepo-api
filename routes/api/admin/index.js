@@ -4,7 +4,7 @@ const express = require('express'),
 const cookieParser = require('cookie-parser');
 
 const rootPrefix = '../../..',
-  FormatterComposer = require(rootPrefix + '/lib/formatter/Composer'),
+  AdminFormatterComposer = require(rootPrefix + '/lib/formatter/AdminComposer'),
   AdminCookieAuth = require(rootPrefix + '/lib/authentication/AdminCookie'),
   routeHelper = require(rootPrefix + '/routes/helper'),
   basicHelper = require(rootPrefix + '/helpers/basic'),
@@ -14,10 +14,10 @@ const rootPrefix = '../../..',
   coreConstants = require(rootPrefix + '/config/coreConstants'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   adminConstants = require(rootPrefix + '/lib/globalConstant/admin'),
-  entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
+  adminEntityType = require(rootPrefix + '/lib/globalConstant/adminEntityType'),
   apiVersions = require(rootPrefix + '/lib/globalConstant/apiVersions'),
   adminPreLaunchRoutes = require(rootPrefix + '/routes/api/admin/preLaunch/index'),
-  responseEntityKey = require(rootPrefix + '/lib/globalConstant/responseEntityKey');
+  adminResponseEntityKey = require(rootPrefix + '/lib/globalConstant/adminResponseEntity');
 
 // Declare variables.
 const errorConfig = basicHelper.fetchErrorConfig(apiVersions.admin);
@@ -83,20 +83,30 @@ router.get('/users', sanitizer.sanitizeDynamicUrlParams, function(req, res, next
   req.decodedParams.apiName = apiName.adminUserSearch;
 
   const dataFormatterFunc = async function(serviceResponse) {
-    const wrapperFormatterRsp = await new FormatterComposer({
-      resultType: responseEntityKey.searchResults,
-      entityKindToResponseKeyMap: {
-        [entityType.userSearchList]: responseEntityKey.searchResults,
-        [entityType.adminUsersMap]: responseEntityKey.users,
-        [entityType.userStats]: responseEntityKey.userStats,
-        [entityType.imagesMap]: responseEntityKey.images,
-        [entityType.videosMap]: responseEntityKey.videos,
-        [entityType.linksMap]: responseEntityKey.links,
-        [entityType.adminTwitterUsersMap]: responseEntityKey.twitterUsers,
-        [entityType.token]: responseEntityKey.token,
-        [entityType.inviteCodesMap]: responseEntityKey.inviteCodes,
-        [entityType.userSearchMeta]: responseEntityKey.meta
-      },
+    let entityTypeResponseKeyMap = {};
+
+    if (serviceResponse.data[adminEntityType.userSearchList].length == 0) {
+      entityTypeResponseKeyMap = {
+        [adminEntityType.userSearchList]: adminResponseEntityKey.searchResults
+      };
+    } else {
+      entityTypeResponseKeyMap = {
+        [adminEntityType.userSearchList]: adminResponseEntityKey.searchResults,
+        [adminEntityType.adminUsersMap]: adminResponseEntityKey.users,
+        [adminEntityType.userStats]: adminResponseEntityKey.userStats,
+        [adminEntityType.imagesMap]: adminResponseEntityKey.images,
+        [adminEntityType.videosMap]: adminResponseEntityKey.videos,
+        [adminEntityType.linksMap]: adminResponseEntityKey.links,
+        [adminEntityType.adminTwitterUsersMap]: adminResponseEntityKey.twitterUsers,
+        [adminEntityType.token]: adminResponseEntityKey.token,
+        [adminEntityType.inviteCodesMap]: adminResponseEntityKey.inviteCodes,
+        [adminEntityType.userSearchMeta]: adminResponseEntityKey.meta
+      };
+    }
+
+    const wrapperFormatterRsp = await new AdminFormatterComposer({
+      resultType: adminResponseEntityKey.searchResults,
+      entityKindToResponseKeyMap: entityTypeResponseKeyMap,
       serviceData: serviceResponse.data
     }).perform();
 
@@ -115,6 +125,14 @@ router.post('/users/:user_id/approve', sanitizer.sanitizeDynamicUrlParams, funct
   Promise.resolve(routeHelper.perform(req, res, next, '/admin/ApproveUsersAsCreator', 'r_a_v1_ad_3', null, null, null));
 });
 
+/* Deny user as creator */
+router.post('/users/:user_id/deny', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.adminUserDeny;
+  req.decodedParams.user_ids = [req.params.user_id];
+
+  Promise.resolve(routeHelper.perform(req, res, next, '/admin/DenyUsersAsCreator', 'r_a_v1_ad_5', null, null, null));
+});
+
 /* Block user */
 router.post('/users/:user_id/block', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.adminUserBlock;
@@ -130,31 +148,30 @@ router.get('/video-history/:profile_user_id', sanitizer.sanitizeDynamicUrlParams
   req.decodedParams.is_admin = true;
 
   const dataFormatterFunc = async function(serviceResponse) {
-    const wrapperFormatterRsp = await new FormatterComposer({
-      resultType: responseEntityKey.userVideoList,
+    const wrapperFormatterRsp = await new AdminFormatterComposer({
+      resultType: adminResponseEntityKey.userVideoList,
       entityKindToResponseKeyMap: {
-        [entityType.userVideoList]: responseEntityKey.userVideoList,
-        [entityType.usersMap]: responseEntityKey.users,
-        [entityType.userStats]: responseEntityKey.userStats,
-        [entityType.userProfilesMap]: responseEntityKey.userProfiles,
-        [entityType.tagsMap]: responseEntityKey.tags,
-        [entityType.linksMap]: responseEntityKey.links,
-        [entityType.imagesMap]: responseEntityKey.images,
-        [entityType.videosMap]: responseEntityKey.videos,
-        [entityType.videoDetailsMap]: responseEntityKey.videoDetails,
-        [entityType.currentUserUserContributionsMap]: responseEntityKey.currentUserUserContributions,
-        [entityType.currentUserVideoContributionsMap]: responseEntityKey.currentUserVideoContributions,
-        [entityType.pricePointsMap]: responseEntityKey.pricePoints,
-        [entityType.token]: responseEntityKey.token,
-        [entityType.userVideoListMeta]: responseEntityKey.meta
+        [adminEntityType.userVideoList]: adminResponseEntityKey.userVideoList,
+        [adminEntityType.adminUsersMap]: adminResponseEntityKey.users,
+        [adminEntityType.userStats]: adminResponseEntityKey.userStats,
+        [adminEntityType.userProfilesMap]: adminResponseEntityKey.userProfiles,
+        [adminEntityType.tagsMap]: adminResponseEntityKey.tags,
+        [adminEntityType.linksMap]: adminResponseEntityKey.links,
+        [adminEntityType.imagesMap]: adminResponseEntityKey.images,
+        [adminEntityType.videosMap]: adminResponseEntityKey.videos,
+        [adminEntityType.videoDetailsMap]: adminResponseEntityKey.videoDetails,
+        [adminEntityType.videoDescriptionsMap]: adminResponseEntityKey.videoDescriptions,
+        [adminEntityType.currentUserUserContributionsMap]: adminResponseEntityKey.currentUserUserContributions,
+        [adminEntityType.currentUserVideoContributionsMap]: adminResponseEntityKey.currentUserVideoContributions,
+        [adminEntityType.pricePointsMap]: adminResponseEntityKey.pricePoints,
+        [adminEntityType.token]: adminResponseEntityKey.token,
+        [adminEntityType.userVideoListMeta]: adminResponseEntityKey.meta
       },
       serviceData: serviceResponse.data
     }).perform();
 
     serviceResponse.data = wrapperFormatterRsp.data;
   };
-
-  //todo::ADMIN send a admin view flag and change service ang get/profile lib
 
   Promise.resolve(
     routeHelper.perform(req, res, next, '/user/profile/GetVideoList', 'r_a_v1_u_5', null, dataFormatterFunc)
@@ -174,10 +191,10 @@ router.get('/current', sanitizer.sanitizeDynamicUrlParams, function(req, res, ne
   req.decodedParams.apiName = apiName.loggedInAdmin;
 
   const dataFormatterFunc = async function(serviceResponse) {
-    const wrapperFormatterRsp = await new FormatterComposer({
-      resultType: responseEntityKey.loggedInAdmin,
+    const wrapperFormatterRsp = await new AdminFormatterComposer({
+      resultType: adminResponseEntityKey.loggedInAdmin,
       entityKindToResponseKeyMap: {
-        [entityType.admin]: responseEntityKey.loggedInAdmin
+        [adminEntityType.admin]: adminResponseEntityKey.loggedInAdmin
       },
       serviceData: serviceResponse.data
     }).perform();
@@ -194,12 +211,12 @@ router.get('/users/:user_id/profile', sanitizer.sanitizeDynamicUrlParams, functi
   req.decodedParams.profile_user_id = req.params.user_id;
 
   const dataFormatterFunc = async function(serviceResponse) {
-    const wrapperFormatterRsp = await new FormatterComposer({
-      resultType: responseEntityKey.adminUserProfile,
+    const wrapperFormatterRsp = await new AdminFormatterComposer({
+      resultType: adminResponseEntityKey.adminUserProfile,
       entityKindToResponseKeyMap: {
-        [entityType.userProfile]: responseEntityKey.adminUserProfile,
-        [entityType.usersMap]: responseEntityKey.users,
-        [entityType.imagesMap]: responseEntityKey.images
+        [adminEntityType.userProfile]: adminResponseEntityKey.adminUserProfile,
+        [adminEntityType.adminUsersMap]: adminResponseEntityKey.users,
+        [adminEntityType.imagesMap]: adminResponseEntityKey.images
       },
       serviceData: serviceResponse.data
     }).perform();
