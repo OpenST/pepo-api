@@ -98,13 +98,16 @@ class UserRelation extends ModelBase {
       ])
       .fire();
 
-    let userBlockList = { [userId]: [] };
+    let userBlockList = { [userId]: { hasBlocked: [], blockedBy: [] } };
     for (let index = 0; index < userRelationRows.length; index++) {
       let row = userRelationRows[index];
-      if (row.user1_id == userId) {
-        userBlockList[userId].push(row.user2_id);
-      } else {
-        userBlockList[userId].push(row.user1_id);
+      let userRelationsArr = new UserRelation().getBitwiseArray('relations', row.relations);
+      // If user has blocked the user
+      if (userRelationsArr.indexOf(userRelationConstants.blockedByUser1Relation) > -1) {
+        userBlockList[userId].hasBlocked.push(row.user2_id);
+      }
+      if (userRelationsArr.indexOf(userRelationConstants.blockedByUser2Relation) > -1) {
+        userBlockList[userId].blockedBy.push(row.user2_id);
       }
     }
 

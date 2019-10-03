@@ -57,7 +57,7 @@ class UserNotificationList extends ServiceBase {
     oThis.userIds = [];
     oThis.videoIds = [];
     oThis.imageIds = [];
-    oThis.blockedByUserList = [];
+    oThis.blockedByUserInfo = {};
 
     oThis.usersByIdMap = {};
     oThis.tokenUsersByUserIdMap = {};
@@ -88,7 +88,7 @@ class UserNotificationList extends ServiceBase {
       oThis._fetchUsers(),
       oThis._fetchTokenUsers(),
       oThis._fetchVideos(),
-      oThis._fetchBlockedByUserList()
+      oThis._fetchBlockedByUserInfo()
     ];
     // Images are fetched later because video covers also needs to be fetched.
 
@@ -373,7 +373,7 @@ class UserNotificationList extends ServiceBase {
    * @returns {Promise<never>}
    * @private
    */
-  async _fetchBlockedByUserList() {
+  async _fetchBlockedByUserInfo() {
     const oThis = this;
 
     let cacheResp = await new UserBlockedListCache({ userId: oThis.currentUserId }).fetch();
@@ -381,7 +381,7 @@ class UserNotificationList extends ServiceBase {
       return Promise.reject(cacheResp);
     }
 
-    oThis.blockedByUserList = cacheResp.data[oThis.currentUserId];
+    oThis.blockedByUserInfo = cacheResp.data[oThis.currentUserId];
   }
 
   /**
@@ -560,7 +560,11 @@ class UserNotificationList extends ServiceBase {
 
       // If notification actor is inactive or in user's blocked list then don't show notification
       let uId = userNotification.actorIds[0];
-      if (oThis.usersByIdMap[uId].status === userConstants.inActiveStatus || oThis.blockedByUserList.includes(uId)) {
+      if (
+        oThis.usersByIdMap[uId].status === userConstants.inActiveStatus ||
+        oThis.blockedByUserInfo.hasBlocked.indexOf(uId) > -1 ||
+        oThis.blockedByUserInfo.blockedBy.indexOf(uId) > -1
+      ) {
         oThis.notificationsToDelete.push(userNotification);
 
         return true;
