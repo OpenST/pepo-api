@@ -13,10 +13,31 @@ const adminSignature = {
       {
         parameter: paginationConstants.paginationIdentifierKey,
         validatorMethods: ['validateString', 'validatePaginationIdentifier']
+      },
+      {
+        parameter: 'sort_by',
+        validatorMethods: ['validateString']
+      },
+      {
+        parameter: 'filter',
+        validatorMethods: ['validateString']
       }
     ]
   },
   [apiName.adminUserApprove]: {
+    mandatory: [
+      {
+        parameter: 'user_ids',
+        validatorMethods: ['validateIntegerArray']
+      },
+      {
+        parameter: 'current_admin',
+        validatorMethods: ['validateNonEmptyObject']
+      }
+    ],
+    optional: []
+  },
+  [apiName.adminUserDeny]: {
     mandatory: [
       {
         parameter: 'user_ids',
