@@ -2,32 +2,45 @@ const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   TagMultiCache = require(rootPrefix + '/lib/cacheManagement/multi/Tag'),
   TagPaginationCache = require(rootPrefix + '/lib/cacheManagement/single/TagPagination'),
-  logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
-  pagination = require(rootPrefix + '/lib/globalConstant/pagination');
+  paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination');
 
+/**
+ * Class to get tags.
+ *
+ * @class GetTags
+ */
 class GetTags extends ServiceBase {
   /**
+   * Constructor to get tags.
+   *
    * @param {object} params
+   * @param {string} params.q
+   * @param {string} params.pagination_identifier
+   *
+   * @augments ServiceBase
    *
    * @constructor
    */
   constructor(params) {
-    super(params);
+    super();
 
     const oThis = this;
 
     oThis.tagPrefix = params.q;
+    oThis.paginationIdentifier = params[paginationConstants.paginationIdentifierKey] || null;
 
-    oThis.paginationIdentifier = params[pagination.paginationIdentifierKey] || null;
     oThis.limit = null;
     oThis.page = null;
+    oThis.tagIds = [];
+    oThis.tags = null;
   }
 
   /**
-   * Async performer.
+   * Async perform.
    *
-   * @return {Promise<void>}
+   * @returns {Promise<void>}
+   * @private
    */
   async _asyncPerform() {
     const oThis = this;
@@ -48,7 +61,9 @@ class GetTags extends ServiceBase {
   }
 
   /**
-   * Validate and sanitize specific params
+   * Validate and sanitize specific params.
+   *
+   * @sets oThis.page, oThis.limit
    *
    * @returns {Promise<never>}
    * @private
@@ -57,18 +72,20 @@ class GetTags extends ServiceBase {
     const oThis = this;
 
     if (oThis.paginationIdentifier) {
-      let parsedPaginationParams = oThis._parsePaginationParams(oThis.paginationIdentifier);
+      const parsedPaginationParams = oThis._parsePaginationParams(oThis.paginationIdentifier);
       oThis.page = parsedPaginationParams.page; // Override page
     } else {
       oThis.page = 1;
     }
-    oThis.limit = pagination.defaultTagListPageSize;
+    oThis.limit = paginationConstants.defaultTagListPageSize;
 
-    return await oThis._validatePageSize();
+    return oThis._validatePageSize();
   }
 
   /**
    * Get tag ids.
+   *
+   * @sets oThis.tagIds
    *
    * @returns {Promise<void>}
    * @private
@@ -87,6 +104,8 @@ class GetTags extends ServiceBase {
 
   /**
    * Get tags.
+   *
+   * @sets oThis.tags
    *
    * @returns {Promise<void>}
    * @private
@@ -108,50 +127,53 @@ class GetTags extends ServiceBase {
   _finalResponse() {
     const oThis = this;
 
-    let nextPagePayloadKey = {},
-      limit = oThis.limit;
+    const nextPagePayloadKey = {};
 
-    if (oThis.tagIds.length == limit) {
-      nextPagePayloadKey[pagination.paginationIdentifierKey] = {
+    if (oThis.tagIds.length === oThis.limit) {
+      nextPagePayloadKey[paginationConstants.paginationIdentifierKey] = {
         page: oThis.page + 1
       };
     }
 
     return {
-      [pagination.nextPagePayloadKey]: nextPagePayloadKey
+      [paginationConstants.nextPagePayloadKey]: nextPagePayloadKey
     };
   }
 
   /**
-   * Default Page Limit.
+   * Returns default page limit.
    *
+   * @returns {number}
    * @private
    */
   _defaultPageLimit() {
-    return pagination.defaultTagListPageSize;
+    return paginationConstants.defaultTagListPageSize;
   }
 
   /**
-   * Min page limit.
+   * Returns minimum page limit.
    *
+   * @returns {number}
    * @private
    */
   _minPageLimit() {
-    return pagination.minTagListPageSize;
+    return paginationConstants.minTagListPageSize;
   }
 
   /**
-   * Max page limit.
+   * Returns maximum page limit.
    *
+   * @returns {number}
    * @private
    */
   _maxPageLimit() {
-    return pagination.maxTagListPageSize;
+    return paginationConstants.maxTagListPageSize;
   }
 
   /**
-   * Current page limit.
+   * Returns current page limit.
    *
+   * @returns {number}
    * @private
    */
   _currentPageLimit() {
