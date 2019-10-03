@@ -69,7 +69,7 @@ class GetUserProfile extends ServiceBase {
 
     return responseHelper.successWithData({
       userProfile: profileResp.userProfilesMap[oThis.profileUserId],
-      userProfileAllowedActions: profileResp.userProfileAllowedActions[oThis.profileUserId],
+      userProfileAllowedActions: profileResp.userProfileAllowedActions,
       usersByIdMap: profileResp.usersByIdMap,
       tokenUsersByUserIdMap: profileResp.tokenUsersByUserIdMap,
       imageMap: profileResp.imageMap,
