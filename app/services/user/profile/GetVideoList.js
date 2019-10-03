@@ -6,6 +6,7 @@ const rootPrefix = '../../../..',
   VideoDetailsByUserIdCache = require(rootPrefix + '/lib/cacheManagement/single/VideoDetailsByUserIdPagination'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
+  UserBlockedListCache = require(rootPrefix + '/lib/cacheManagement/single/UserBlockedList'),
   paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination');
 
 /**
@@ -123,6 +124,15 @@ class GetVideoList extends ServiceBase {
     if (!oThis.isAdmin) {
       // If user's profile(not self) is not approved, videos would not be shown.
       if (oThis.currentUserId != oThis.profileUserId && !UserModel.isUserApprovedCreator(oThis.profileUserObj)) {
+        return responseHelper.successWithData({});
+      }
+      // Check for blocked user's list
+      let cacheResp = await new UserBlockedListCache({ userId: oThis.currentUserId }).fetch();
+      if (cacheResp.isFailure()) {
+        return Promise.reject(cacheResp);
+      }
+      let blockedByUserInfo = cacheResp.data[oThis.currentUserId];
+      if (blockedByUserInfo.hasBlocked[oThis.profileUserId] || blockedByUserInfo.blockedBy[oThis.profileUserId]) {
         return responseHelper.successWithData({});
       }
     }

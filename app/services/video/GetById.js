@@ -179,6 +179,17 @@ class GetVideoById extends ServiceBase {
       );
     }
 
+    // If video is not received back from user profile call
+    if (!oThis.profileResponse.videoMap[oThis.videoId]) {
+      return Promise.reject(
+        responseHelper.error({
+          internal_error_identifier: 'a_s_v_gbi_5',
+          api_error_identifier: 'entity_not_found',
+          debug_options: {}
+        })
+      );
+    }
+
     // Aligning the response with video-history api.
     oThis.responseMetaData = {
       [paginationConstants.nextPagePayloadKey]: {}
