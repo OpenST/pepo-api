@@ -340,7 +340,7 @@ class UserModel extends ModelBase {
 
     if (paginationTimestamp) {
       if (params.sortBy && params.sortBy === userConstants.ascendingSortByValue) {
-        queryObject.where(['created_at > ?', paginationTimestamp]);
+        queryObject.where(['created_at >= ?', paginationTimestamp]);
       } else {
         queryObject.where(['created_at < ?', paginationTimestamp]);
       }
