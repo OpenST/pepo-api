@@ -588,6 +588,9 @@ class TwitterSignup extends ServiceBase {
       oThis.prelaunchInviteObj.creatorStatus == prelaunchInviteConstants.approvedCreatorStatus
     ) {
       propertyVal = new UserModel().setBitwise('properties', propertyVal, userConstants.isApprovedCreatorProperty);
+    } else {
+      // Till user uploads video, its denied to be creator.
+      propertyVal = new UserModel().setBitwise('properties', propertyVal, userConstants.isDeniedCreatorProperty);
     }
 
     return propertyVal;
