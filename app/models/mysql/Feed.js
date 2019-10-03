@@ -138,23 +138,22 @@ class FeedModel extends ModelBase {
    *
    * @return {object}
    */
-  async getNewFeedIdsAfterTime(params) {
+  async getLatestFeedIds(params) {
     const oThis = this,
-      lastVisitedAt = params.lastVisitedAt,
       limit = params.limit;
 
-    const response = [];
+    const response = { feedIds: [], feedsMap: {} };
 
     const dbRows = await oThis
-      .select('id')
-      .where(['pagination_identifier > ?', lastVisitedAt])
+      .select('id, pagination_identifier')
       .order_by('pagination_identifier desc')
       .limit(limit)
       .fire();
 
     for (let index = 0; index < dbRows.length; index++) {
       const formatDbRow = oThis.formatDbData(dbRows[index]);
-      response.push(formatDbRow.id);
+      response['feedIds'].push(formatDbRow.id);
+      response['feedsMap'][formatDbRow.id] = formatDbRow.paginationIdentifier;
     }
 
     return response;
@@ -167,27 +166,30 @@ class FeedModel extends ModelBase {
    *
    * @return {object}
    */
-  async getOlderFeedIds(params) {
+  async getPersonalizedFeedIdsAfterCache(params) {
     const oThis = this,
-      feedIds = params.feedIds,
+      offset = params.offset,
+      previousFeedIds = params.previousFeedIds,
       limit = params.limit;
 
-    const response = [];
+    const response = { feedIds: [], feedsMap: {} };
 
     let queryObj = oThis
       .select('id')
       .order_by('pagination_identifier desc')
-      .limit(limit);
+      .limit(limit)
+      .offset(offset);
 
-    if (feedIds.length > 0) {
-      queryObj.where(['id not in (?)', feedIds]);
+    if (previousFeedIds.length > 0) {
+      queryObj = queryObj.where(['id not in (?)', previousFeedIds]);
     }
 
     const dbRows = await queryObj.fire();
 
     for (let index = 0; index < dbRows.length; index++) {
       const formatDbRow = oThis.formatDbData(dbRows[index]);
-      response.push(formatDbRow.id);
+      response['feedIds'].push(formatDbRow.id);
+      response['feedsMap'][formatDbRow.id] = formatDbRow.paginationIdentifier;
     }
 
     return response;
