@@ -50,16 +50,24 @@ class UserNotificationVisitDetailModel extends CassandraModelBase {
    * @param {object} dbRow
    * @param {number} dbRow.user_id
    * @param {boolean} dbRow.last_visited_at
+   * @param {boolean} dbRow.latest_seen_feed_time
    *
    * @returns {object}
    */
   formatDbData(dbRow) {
     const oThis = this;
 
+    //Note:-last_visited_at is for activity_last_visited_by.
+
     /* eslint-disable */
     const formattedData = {
       userId: dbRow.user_id ? Number(dbRow.user_id) : undefined,
-      lastVisitedAt: dbRow.last_visited_at ? basicHelper.dateToMilliSecondsTimestamp(dbRow.last_visited_at) : undefined
+      activityLastVisitedAt: dbRow.last_visited_at
+        ? basicHelper.dateToMilliSecondsTimestamp(dbRow.last_visited_at)
+        : undefined,
+      latestSeenFeedTime: dbRow.latest_seen_feed_time
+        ? basicHelper.dateToMilliSecondsTimestamp(dbRow.latest_seen_feed_time)
+        : undefined
     };
     /* eslint-enable */
 
@@ -70,18 +78,57 @@ class UserNotificationVisitDetailModel extends CassandraModelBase {
    * Update user notification visit details.
    *
    * @param {object} queryParams
-   * @param {string/number} queryParams.lastVisitedAt
+   * @param {string/number} queryParams.activityLastVisitedAt
    * @param {string/number} queryParams.userId
    *
    * @returns {Promise<any>}
    */
-  async updateLastVisitTime(queryParams) {
+  async updateActivityLastVisitTime(queryParams) {
     const oThis = this;
 
     const query = 'update ' + oThis.queryTableName + ' set last_visited_at = ? where user_id = ?;';
-    const params = [queryParams.lastVisitedAt, queryParams.userId];
+    const params = [queryParams.activityLastVisitedAt, queryParams.userId];
 
     return oThis.fire(query, params);
+  }
+
+  /**
+   * Update user notification visit details.
+   *
+   * @param {object} queryParams
+   * @param {string/number} queryParams.latestSeenFeedTime
+   * @param {string/number} queryParams.userId
+   *
+   * @returns {Promise<any>}
+   */
+  async updateLatestSeenFeedTime(queryParams) {
+    const oThis = this;
+
+    const query = 'update ' + oThis.queryTableName + ' set latest_seen_feed_time = ? where user_id = ?;';
+    const params = [queryParams.latestSeenFeedTime, queryParams.userId];
+
+    return oThis.fire(query, params);
+  }
+
+  /**
+   * Fetch latest seen feed timestamp
+   *
+   * @param queryParams
+   * @returns {*}
+   */
+  async fetchLatestSeenFeedTime(queryParams) {
+    const oThis = this;
+
+    const query = `select latest_seen_feed_time from ${oThis.queryTableName} where user_id = ?;`;
+    const params = [queryParams.userId];
+
+    const queryRsp = await oThis.fire(query, params);
+
+    if (queryRsp.rows.length === 0) {
+      return {};
+    }
+
+    return oThis.formatDbData(queryRsp.rows[0]);
   }
 
   /**
@@ -90,7 +137,7 @@ class UserNotificationVisitDetailModel extends CassandraModelBase {
    * @param queryParams
    * @returns {*}
    */
-  async fetchLastVisitedAt(queryParams) {
+  async fetchActivityLastVisitedAt(queryParams) {
     const oThis = this;
 
     const query = `select last_visited_at from ${oThis.queryTableName} where user_id = ?;`;

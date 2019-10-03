@@ -85,7 +85,7 @@ class HasUnreadNotifications extends ServiceBase {
     const promisesArray = [];
 
     promisesArray.push(new UserNotificationModel().fetchLatestLastActionTime(queryParams));
-    promisesArray.push(new UserNotificationVisitDetailModel().fetchLastVisitedAt(queryParams));
+    promisesArray.push(new UserNotificationVisitDetailModel().fetchActivityLastVisitedAt(queryParams));
 
     const promisesResponse = await Promise.all(promisesArray);
 
@@ -93,7 +93,7 @@ class HasUnreadNotifications extends ServiceBase {
       lastActionTimestamp = userNotification.lastActionTimestamp || 0;
 
     const userNotificationVisitDetails = promisesResponse[1],
-      lastVisitedAt = userNotificationVisitDetails.lastVisitedAt || 0;
+      lastVisitedAt = userNotificationVisitDetails.activityLastVisitedAt || 0;
 
     const finalRsp = { notificationUnread: { flag: 0 } };
     if (lastActionTimestamp && lastActionTimestamp > lastVisitedAt) {
