@@ -2,7 +2,7 @@ const rootPrefix = '../..',
   ImageModel = require(rootPrefix + '/app/models/mysql/Image'),
   util = require(rootPrefix + '/lib/util'),
   s3Constants = require(rootPrefix + '/lib/globalConstant/s3'),
-  imageConst = require(rootPrefix + '/lib/globalConstant/image'),
+  imageConstants = require(rootPrefix + '/lib/globalConstant/image'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger');
 
 const isQualityChanged = process.argv[2] || false;
@@ -112,7 +112,7 @@ class BackPopulateImages {
     const paramsToUpdate = {
       urlTemplate: urlTemplate,
       resolutions: { original: resolutions.original },
-      status: imageConst.statuses[dbRow.status],
+      resizeStatus: imageConstants.resizeStatuses[dbRow.resize_status],
       id: dbRow.id
     };
 

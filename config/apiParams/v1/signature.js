@@ -179,28 +179,6 @@ const v1Signature = {
     optional: []
   },
 
-  [apiName.requestRedemption]: {
-    mandatory: [
-      {
-        parameter: 'current_user',
-        validatorMethods: ['validateNonEmptyObject']
-      },
-      {
-        parameter: 'product_id',
-        validatorMethods: ['validateNonZeroInteger']
-      },
-      {
-        parameter: 'price_point',
-        validatorMethods: ['validateNonBlankString']
-      },
-      {
-        parameter: 'pepo_amount_in_wei',
-        validatorMethods: ['validateNonZeroWeiValue']
-      }
-    ],
-    optional: []
-  },
-
   [apiName.twitterLogin]: {
     mandatory: [
       {
@@ -376,6 +354,32 @@ const v1Signature = {
       {
         parameter: 'email',
         validatorMethods: ['validateString', 'isValidEmail']
+      }
+    ],
+    optional: []
+  },
+  [apiName.blockOtherUserForUser]: {
+    mandatory: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      },
+      {
+        parameter: 'profile_user_id',
+        validatorMethods: ['validateNonZeroInteger']
+      }
+    ],
+    optional: []
+  },
+  [apiName.unBlockOtherUserForUser]: {
+    mandatory: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      },
+      {
+        parameter: 'profile_user_id',
+        validatorMethods: ['validateNonZeroInteger']
       }
     ],
     optional: []

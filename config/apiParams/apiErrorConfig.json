@@ -22,7 +22,7 @@
   "api_under_maintenance": {
     "http_code": "503",
     "code": "SERVICE_UNAVAILABLE",
-    "message": "Sorry, we are down for maintaince. We'll be back up and running as soon as possible"
+    "message": "Sorry, we are down for maintenance. We'll be back up and running as soon as possible."
   },
   "resource_not_found": {
     "http_code": "404",
@@ -47,6 +47,11 @@
   "internal_server_error": {
     "http_code": "500",
     "code": "INTERNAL_SERVER_ERROR",
+    "message": "Something went wrong."
+  },
+  "something_went_wrong_bad_request": {
+    "http_code": "200",
+    "code": "BAD_REQUEST",
     "message": "Something went wrong."
   },
   "invalid_params": {
@@ -148,5 +153,15 @@
     "http_code": "422",
     "code": "ALREADY_REGISTERED_IN_APP",
     "message": "Twitter user is already registered in app."
+  },
+  "redemption_user_not_approved_creator": {
+    "http_code": "200",
+    "code": "BAD_REQUEST",
+    "message": "Atleast 1 approved video is required before your account is eligible for redemptions."
+  },
+  "redemption_user_has_insufficient_balance": {
+    "http_code": "200",
+    "code": "BAD_REQUEST",
+    "message": "Minimum redemption is $10. Please try again when you have more Pepo Coins."
   }
 }

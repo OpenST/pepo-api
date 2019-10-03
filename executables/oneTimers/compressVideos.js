@@ -37,7 +37,10 @@ class CompressVideos {
       const dbRows = await new VideoModel()
         .select(['id'])
         .limit(limit)
-        .where(['status = ?', videoConstants.invertedStatuses[videoConstants.notCompressedStatus]])
+        .where([
+          'compression_status = ?',
+          videoConstants.invertedCompressionStatuses[videoConstants.notCompressedStatus]
+        ])
         .order_by('id DESC')
         .fire();
 
