@@ -105,7 +105,7 @@ class TwitterUserModel extends ModelBase {
     const oThis = this;
 
     const dbRows = await oThis
-      .select(['id', 'user_id', 'email'])
+      .select(['id', 'user_id'])
       .where({ user_id: userIds })
       .fire();
 

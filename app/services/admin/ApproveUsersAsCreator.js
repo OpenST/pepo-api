@@ -120,6 +120,17 @@ class ApproveUsersAsCreator extends ServiceBase {
         );
       }
 
+      if (UserModel.isUserDeniedCreator(userObj)) {
+        return Promise.reject(
+          responseHelper.paramValidationError({
+            internal_error_identifier: 'a_s_a_au_4',
+            api_error_identifier: 'could_not_proceed',
+            params_error_identifiers: ['user_already_denied_as_creator'],
+            debug_options: {}
+          })
+        );
+      }
+
       oThis.userObjects[userId] = userObj;
     }
   }

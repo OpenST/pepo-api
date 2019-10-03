@@ -59,10 +59,28 @@ const v1ErrorConfig = {
     message: 'User login has been disabled.'
   },
 
+  user_not_blocked: {
+    parameter: 'profile_user_id',
+    code: 'invalid',
+    message: 'User profile is not blocked.'
+  },
+
+  self_profile_cannot_blocked: {
+    parameter: 'profile_user_id',
+    code: 'invalid',
+    message: 'Self User profile can not be blocked.'
+  },
+
   user_already_approved: {
     parameter: 'user_id',
     code: 'invalid',
     message: 'User is already approved.'
+  },
+
+  user_already_denied_as_creator: {
+    parameter: 'user_id',
+    code: 'invalid',
+    message: 'User is already denied as creator.'
   },
 
   user_inactive: {
