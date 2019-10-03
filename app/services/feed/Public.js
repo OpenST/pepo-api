@@ -164,6 +164,13 @@ class PublicVideoFeed extends FeedBase {
       console.log('==============================');
       console.log('HERE=====feedId,paginationIdentifier', feedId, paginationIdentifier);
 
+      let index = previousFeedIds.indexOf(feedId);
+
+      if (index > -1) {
+        previousFeedIds.splice(index, 1);
+        console.log('HERE=====remove from previous feeds previousFeedIds=========', previousFeedIds);
+      }
+
       if (
         cacheCount >= feedConstants.personalizedFeedMinIdsCount &&
         paginationIdentifier <= oThis.lastVisitedAt &&
@@ -187,12 +194,6 @@ class PublicVideoFeed extends FeedBase {
       } else if (oThis.userFeedIdsCacheData['unseenFeedIds'].indexOf(feedId) === -1) {
         newCacheData['seenFeedIds'].push(feedId);
         cacheCount++;
-      }
-
-      let index = previousFeedIds.indexOf(feedId);
-      if (index > -1) {
-        previousFeedIds.splice(index, 1);
-        console.log('HERE=====remove from previous feeds previousFeedIds=========', previousFeedIds);
       }
     }
 
@@ -385,8 +386,11 @@ class PublicVideoFeed extends FeedBase {
 
       await oThis.setFeedIdsForUserInCache();
     } else {
-      const previousFeedLength = oThis.userFeedIdsCacheData['previousFeedIds'];
-      let offset = (oThis.pageNumber - 1) * oThis.limit - previousFeedLength;
+      let roundedLimitCount = oThis.limit - (oThis.feedIdsLengthFromCache % oThis.limit);
+      roundedLimitCount = roundedLimitCount == oThis.limit ? 0 : roundedLimitCount;
+
+      const previousFeedLength = oThis.userFeedIdsCacheData['previousFeedIds'].length;
+      let offset = (oThis.pageNumber - 1) * oThis.limit - previousFeedLength - roundedLimitCount;
 
       console.log(
         `PERSONALIZED FEED:${
@@ -416,7 +420,6 @@ class PublicVideoFeed extends FeedBase {
       `PERSONALIZED FEED:${oThis.currentUserId} oThis.nextPageNumber================================`,
       oThis.nextPageNumber
     );
-
     return responseHelper.successWithData({});
   }
 

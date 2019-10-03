@@ -175,7 +175,7 @@ class FeedModel extends ModelBase {
     const response = { feedIds: [], feedsMap: {} };
 
     let queryObj = oThis
-      .select('id')
+      .select('*')
       .order_by('pagination_identifier desc')
       .limit(limit)
       .offset(offset);
