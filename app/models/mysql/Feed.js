@@ -189,7 +189,7 @@ class FeedModel extends ModelBase {
     for (let index = 0; index < dbRows.length; index++) {
       const formatDbRow = oThis.formatDbData(dbRows[index]);
       response['feedIds'].push(formatDbRow.id);
-      response['feedsMap'][formatDbRow.id] = formatDbRow.paginationIdentifier;
+      response['feedsMap'][formatDbRow.id] = formatDbRow;
     }
 
     return response;
