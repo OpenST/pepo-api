@@ -140,7 +140,7 @@ class PublicVideoFeed extends FeedBase {
     };
 
     let cacheCount = oThis.userFeedIdsCacheData['unseenFeedIds'].length;
-    const newCacheData = { seenFeedIds: [], unseenFeedIds: [] };
+    const newCacheData = {seenFeedIds: [], unseenFeedIds: []};
 
     let previousFeedIds = oThis.userFeedIdsCacheData['unseenFeedIds'].slice();
 
@@ -303,7 +303,7 @@ class PublicVideoFeed extends FeedBase {
   async setFeedIdsForUserInCache() {
     const oThis = this;
 
-    const cacheResp = await new PersonalizedFeedByUserIdCache({ userId: oThis.currentUserId }).setCacheData(
+    const cacheResp = await new PersonalizedFeedByUserIdCache({userId: oThis.currentUserId}).setCacheData(
       oThis.userFeedIdsCacheData
     );
 
@@ -325,7 +325,7 @@ class PublicVideoFeed extends FeedBase {
   async fetchFeedIdsForUserFromCache() {
     const oThis = this;
 
-    const cacheResp = await new PersonalizedFeedByUserIdCache({ userId: oThis.currentUserId }).fetch();
+    const cacheResp = await new PersonalizedFeedByUserIdCache({userId: oThis.currentUserId}).fetch();
 
     if (cacheResp.isFailure()) {
       return Promise.reject(cacheResp);
@@ -337,7 +337,7 @@ class PublicVideoFeed extends FeedBase {
       oThis.feedIdsLengthFromCache =
         oThis.userFeedIdsCacheData['seenFeedIds'].length + oThis.userFeedIdsCacheData['unseenFeedIds'].length;
     } else {
-      oThis.userFeedIdsCacheData = { seenFeedIds: [], unseenFeedIds: [], previousFeedIds: [] };
+      oThis.userFeedIdsCacheData = {seenFeedIds: [], unseenFeedIds: [], previousFeedIds: [], lastSentId: null};
       oThis.feedIdsLengthFromCache = 0;
     }
   }
@@ -354,22 +354,35 @@ class PublicVideoFeed extends FeedBase {
     const oThis = this;
 
     if (oThis.feedIdsLengthFromCache > (oThis.pageNumber - 1) * oThis.limit) {
-      console.log(`PERSONALIZED FEED:${oThis.currentUserId} GET DATA FROM CACHE ================================`);
+      const lastSentId = oThis.userFeedIdsCacheData['lastSentId'] || null;
+      console.log(`PERSONALIZED FEED:${oThis.currentUserId} GET DATA FROM CACHE =====lastSentId:${lastSentId}================`);
 
-      let currentFeedIds = oThis.userFeedIdsCacheData['unseenFeedIds'].splice(0, oThis.limit);
-      let unseenLength = currentFeedIds.length;
 
-      let diff = oThis.limit - unseenLength;
+      let unseenIndex = oThis.userFeedIdsCacheData['unseenFeedIds'].indexOf(lastSentId);
+      let seenIndex = oThis.userFeedIdsCacheData['seenFeedIds'].indexOf(lastSentId);
 
-      if (diff > 0) {
-        let ids = oThis.userFeedIdsCacheData['seenFeedIds'].splice(0, diff);
-        currentFeedIds = currentFeedIds.concat(ids);
+      unseenIndex = lastSentId ? unseenIndex : 0;
+
+      let currentFeedIds = [];
+
+      if (unseenIndex > -1) {
+        currentFeedIds = oThis.userFeedIdsCacheData['unseenFeedIds'].slice(unseenIndex, unseenIndex + oThis.limit);
+        let unseenLength = currentFeedIds.length;
+        let diff = oThis.limit - unseenLength;
+
+        if (diff > 0) {
+          let ids = oThis.userFeedIdsCacheData['seenFeedIds'].slice(0, diff);
+          currentFeedIds = currentFeedIds.concat(ids);
+        }
+      } else if (seenIndex > -1) {
+        currentFeedIds = oThis.userFeedIdsCacheData['seenFeedIds'].slice(unseenIndex, unseenIndex + oThis.limit);
+      } else {
+        throw new Error `INVALID CACHE DATA-oThis.userFeedIdsCacheData${JSON.stringify(oThis.userFeedIdsCacheData)}`;
       }
 
-      //currentFeedIds will always be present
-      oThis.userFeedIdsCacheData['seenFeedIds'] = oThis.userFeedIdsCacheData['seenFeedIds'].concat(currentFeedIds);
+      oThis.userFeedIdsCacheData['lastSentId'] = currentFeedIds[currentFeedIds.length - 1] || null;
 
-      const feedByIdsCacheResponse = await new FeedByIdsCache({ ids: currentFeedIds }).fetch();
+      const feedByIdsCacheResponse = await new FeedByIdsCache({ids: currentFeedIds}).fetch();
 
       if (feedByIdsCacheResponse.isFailure()) {
         return Promise.reject(feedByIdsCacheResponse);
@@ -395,7 +408,7 @@ class PublicVideoFeed extends FeedBase {
       console.log(
         `PERSONALIZED FEED:${
           oThis.currentUserId
-        } GET DATA FROM DB previousFeedLength,offset================================`,
+          } GET DATA FROM DB previousFeedLength,offset================================`,
         previousFeedLength,
         offset
       );
