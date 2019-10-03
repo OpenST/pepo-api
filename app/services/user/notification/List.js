@@ -20,6 +20,7 @@ const rootPrefix = '../../../..',
   bgJobConstants = require(rootPrefix + '/lib/globalConstant/bgJob'),
   paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination'),
   responseEntityKey = require(rootPrefix + '/lib/globalConstant/responseEntityKey'),
+  UserBlockedListCache = require(rootPrefix + '/lib/cacheManagement/single/UserBlockedList'),
   userNotificationConstants = require(rootPrefix + '/lib/globalConstant/cassandra/userNotification');
 
 /**
@@ -56,6 +57,7 @@ class UserNotificationList extends ServiceBase {
     oThis.userIds = [];
     oThis.videoIds = [];
     oThis.imageIds = [];
+    oThis.blockedByUserInfo = {};
 
     oThis.usersByIdMap = {};
     oThis.tokenUsersByUserIdMap = {};
@@ -82,7 +84,12 @@ class UserNotificationList extends ServiceBase {
 
     await oThis._setUserAndVideoIds();
 
-    const promisesArray = [oThis._fetchUsers(), oThis._fetchTokenUsers(), oThis._fetchVideos()];
+    const promisesArray = [
+      oThis._fetchUsers(),
+      oThis._fetchTokenUsers(),
+      oThis._fetchVideos(),
+      oThis._fetchBlockedByUserInfo()
+    ];
     // Images are fetched later because video covers also needs to be fetched.
 
     await Promise.all(promisesArray);
@@ -361,6 +368,23 @@ class UserNotificationList extends ServiceBase {
   }
 
   /**
+   * Fetch list of users blocked by current user
+   *
+   * @returns {Promise<never>}
+   * @private
+   */
+  async _fetchBlockedByUserInfo() {
+    const oThis = this;
+
+    let cacheResp = await new UserBlockedListCache({ userId: oThis.currentUserId }).fetch();
+    if (cacheResp.isFailure()) {
+      return Promise.reject(cacheResp);
+    }
+
+    oThis.blockedByUserInfo = cacheResp.data[oThis.currentUserId];
+  }
+
+  /**
    * Update notification centre last visit time.
    *
    * @returns {object}
@@ -522,6 +546,7 @@ class UserNotificationList extends ServiceBase {
   _isNotificationBlocked(userNotification) {
     const oThis = this;
 
+    let actorId = userNotification.actorIds[0];
     if (userNotification.kind === userNotificationConstants.videoAddKind) {
       if (oThis.notificationVideoMap[userNotification.uuid]) {
         for (let index = 0; index < oThis.notificationVideoMap[userNotification.uuid].length; index++) {
@@ -534,11 +559,24 @@ class UserNotificationList extends ServiceBase {
         }
       }
 
-      if (oThis.usersByIdMap[userNotification.actorIds[0]].status === userConstants.inActiveStatus) {
+      // If notification actor is inactive
+      if (oThis.usersByIdMap[actorId].status === userConstants.inActiveStatus) {
         oThis.notificationsToDelete.push(userNotification);
 
         return true;
       }
+    }
+
+    // If notification actor is in user's blocked list then don't show notification
+    // Or subject is in user's blocked list
+    if (
+      oThis.blockedByUserInfo.hasBlocked[actorId] ||
+      oThis.blockedByUserInfo.blockedBy[actorId] ||
+      oThis.blockedByUserInfo.hasBlocked[userNotification.subjectUserId] ||
+      oThis.blockedByUserInfo.blockedBy[userNotification.subjectUserId]
+    ) {
+      oThis.notificationsToDelete.push(userNotification);
+      return true;
     }
 
     return false;

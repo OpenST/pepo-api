@@ -2,30 +2,44 @@ const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   responseHelper = require(rootPrefix + '/lib/formatter/response');
 
+/**
+ * Class to validate support URL.
+ *
+ * @class ValidateSupportUrl
+ */
 class ValidateSupportUrl extends ServiceBase {
+  /**
+   * Constructor to validate support URL.
+   *
+   * @param {object} params
+   * @param {object} params.current_user
+   *
+   * @augments ServiceBase
+   *
+   * @constructor
+   */
   constructor(params) {
-    super(params);
+    super();
 
     const oThis = this;
+
     oThis.currentUser = params.current_user;
   }
 
   /**
-   * async perform
+   * Async perform.
    *
-   * @return {Promise<any>}
+   * @returns {Promise<any>}
    * @private
    */
   async _asyncPerform() {
     const oThis = this;
 
-    return Promise.resolve(
-      responseHelper.successWithData({
-        userId: oThis.currentUser.id,
-        external_user_id: oThis.currentUser.externalUserId,
-        user_name: oThis.currentUser.name
-      })
-    );
+    return responseHelper.successWithData({
+      userId: oThis.currentUser.id,
+      external_user_id: oThis.currentUser.externalUserId,
+      user_name: oThis.currentUser.name
+    });
   }
 }
 

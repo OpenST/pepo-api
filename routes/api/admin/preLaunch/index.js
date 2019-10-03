@@ -2,12 +2,12 @@ const express = require('express'),
   router = express.Router();
 
 const rootPrefix = '../../../..',
-  FormatterComposer = require(rootPrefix + '/lib/formatter/Composer'),
+  AdminFormatterComposer = require(rootPrefix + '/lib/formatter/AdminComposer'),
   routeHelper = require(rootPrefix + '/routes/helper'),
   sanitizer = require(rootPrefix + '/helpers/sanitizer'),
   apiName = require(rootPrefix + '/lib/globalConstant/apiName'),
-  entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
-  responseEntityKey = require(rootPrefix + '/lib/globalConstant/responseEntityKey');
+  adminEntityType = require(rootPrefix + '/lib/globalConstant/adminEntityType'),
+  adminResponseEntityKey = require(rootPrefix + '/lib/globalConstant/adminResponseEntity');
 
 /* Whitelist user */
 router.post('/whitelist/:invite_id', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
@@ -34,12 +34,12 @@ router.get('/users/search', sanitizer.sanitizeDynamicUrlParams, function(req, re
   req.decodedParams.apiName = apiName.launchInviteSearch;
 
   const dataFormatterFunc = async function(serviceResponse) {
-    const wrapperFormatterRsp = await new FormatterComposer({
-      resultType: responseEntityKey.launchInviteSearchResults,
+    const wrapperFormatterRsp = await new AdminFormatterComposer({
+      resultType: adminResponseEntityKey.launchInviteSearchResults,
       entityKindToResponseKeyMap: {
-        [entityType.inviteUserSearchList]: responseEntityKey.launchInviteSearchResults,
-        [entityType.inviteMap]: responseEntityKey.invites,
-        [entityType.inviteUserSearchMeta]: responseEntityKey.meta
+        [adminEntityType.inviteUserSearchList]: adminResponseEntityKey.launchInviteSearchResults,
+        [adminEntityType.inviteMap]: adminResponseEntityKey.invites,
+        [adminEntityType.inviteUserSearchMeta]: adminResponseEntityKey.meta
       },
       serviceData: serviceResponse.data
     }).perform();

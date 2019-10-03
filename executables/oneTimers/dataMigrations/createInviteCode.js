@@ -169,8 +169,6 @@ class CreateInviteCode {
    * @private
    */
   async _getTwitterId(userId) {
-    const oThis = this;
-
     const twitterUserCacheRsp = await new TwitterUserByUserIdsCache({
       userIds: [userId]
     }).fetch();
