@@ -189,9 +189,7 @@ class UserSearch extends ServiceBase {
   async _fetchUserIds() {
     const oThis = this;
 
-    const userModelObj = new UserModel({});
-
-    const userData = await userModelObj.search({
+    const userData = await new UserModel({}).search({
       query: oThis.query,
       limit: oThis.limit,
       paginationTimestamp: oThis.paginationTimestamp,

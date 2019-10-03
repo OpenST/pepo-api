@@ -160,6 +160,7 @@ router.get('/video-history/:profile_user_id', sanitizer.sanitizeDynamicUrlParams
         [adminEntityType.imagesMap]: adminResponseEntityKey.images,
         [adminEntityType.videosMap]: adminResponseEntityKey.videos,
         [adminEntityType.videoDetailsMap]: adminResponseEntityKey.videoDetails,
+        [adminEntityType.videoDescriptionsMap]: adminResponseEntityKey.videoDescriptions,
         [adminEntityType.currentUserUserContributionsMap]: adminResponseEntityKey.currentUserUserContributions,
         [adminEntityType.currentUserVideoContributionsMap]: adminResponseEntityKey.currentUserVideoContributions,
         [adminEntityType.pricePointsMap]: adminResponseEntityKey.pricePoints,
