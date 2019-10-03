@@ -59,6 +59,12 @@ const v1ErrorConfig = {
     message: 'User login has been disabled.'
   },
 
+  user_not_blocked: {
+    parameter: 'profile_user_id',
+    code: 'invalid',
+    message: 'User profile is not blocked.'
+  },
+
   user_already_approved: {
     parameter: 'user_id',
     code: 'invalid',

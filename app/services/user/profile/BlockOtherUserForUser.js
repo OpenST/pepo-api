@@ -27,7 +27,7 @@ class BlockOtherUserForUser extends ServiceBase {
   async _asyncPerform() {
     const oThis = this;
 
-    // await oThis._validateProfileUserId();
+    await oThis._validateProfileUserId();
 
     await oThis._updateUserRelations();
 
