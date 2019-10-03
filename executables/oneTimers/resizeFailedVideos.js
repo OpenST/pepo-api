@@ -36,8 +36,11 @@ class ResizeVideos {
       const dbRows = await new VideoModel()
         .select(['id'])
         .limit(limit)
-        .where(['compression_status = ?', videoConstants.invertedStatuses[videoConstants.compressionFailedStatus]])
-        .order_by('id DSC')
+        .where([
+          'compression_status = ?',
+          videoConstants.invertedCompressionStatuses[videoConstants.compressionFailedStatus]
+        ])
+        .order_by('id DESC')
         .fire();
 
       if (dbRows.length === 0) {
@@ -48,6 +51,7 @@ class ResizeVideos {
         for (let i = 0; i < dbRows.length; i++) {
           idsArray.push(dbRows[i].id);
         }
+        logger.log('Failed Videos: ', idsArray);
         await oThis._getVideoDetails(idsArray);
       }
 
@@ -66,7 +70,7 @@ class ResizeVideos {
     const oThis = this;
 
     const videoDetailsDbRow = await new VideoDetailsModels()
-      .select(['*'])
+      .select('*')
       .where(['video_id in (?)', idsArray])
       .fire();
 
@@ -78,6 +82,7 @@ class ResizeVideos {
       videoIdUserIdArray.push(detailsMap);
     }
 
+    logger.log('Video Id User Id Details Array: ', videoIdUserIdArray);
     await oThis._enqueueResizeVideoMessage(videoIdUserIdArray);
   }
 
