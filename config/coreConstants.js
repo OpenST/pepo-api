@@ -396,6 +396,10 @@ class CoreConstants {
   get PEPO_SLACK_OAUTH_TOKEN() {
     return process.env.PA_SLACK_OAUTH_TOKEN;
   }
+
+  get PEPO_CURATED_FEED_IDS() {
+    return process.env.PA_CURATED_FEED_IDS;
+  }
 }
 
 module.exports = new CoreConstants();
