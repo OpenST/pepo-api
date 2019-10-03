@@ -37,7 +37,7 @@ class ResizeVideos {
         .select(['id'])
         .limit(limit)
         .where([
-          'compression_status = ?',
+          'compression_status = ? OR poster_image_id IS NULL',
           videoConstants.invertedCompressionStatuses[videoConstants.compressionFailedStatus]
         ])
         .order_by('id DESC')
