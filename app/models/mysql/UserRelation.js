@@ -110,6 +110,15 @@ class UserRelation extends ModelBase {
 
     return userBlockList;
   }
+
+  /**
+   * Index name
+   *
+   * @returns {string}
+   */
+  static get userRelationUniqueIndexName() {
+    return 'uk_1';
+  }
 }
 
 module.exports = UserRelation;

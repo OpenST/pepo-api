@@ -347,4 +347,12 @@ router.get('/search', sanitizer.sanitizeDynamicUrlParams, function(req, res, nex
   Promise.resolve(routeHelper.perform(req, res, next, '/user/Search', 'r_a_v1_u_15', null, dataFormatterFunc));
 });
 
+/* Block other user's profile for current user. */
+router.post('/:profile_user_id/block', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.blockOtherUserForUser;
+  req.decodedParams.profile_user_id = req.params.profile_user_id;
+
+  Promise.resolve(routeHelper.perform(req, res, next, '/user/profile/BlockOtherUserForUser', 'r_a_v1_u_16', null));
+});
+
 module.exports = router;
