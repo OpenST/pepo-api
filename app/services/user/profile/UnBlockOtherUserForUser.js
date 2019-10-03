@@ -27,13 +27,36 @@ class UnBlockOtherUserForUser extends ServiceBase {
   async _asyncPerform() {
     const oThis = this;
 
-    await oThis._validateProfileUserId();
+    await oThis._validateParams();
 
     await oThis._updateUserRelations();
 
     await oThis._flushCache();
 
     return responseHelper.successWithData({});
+  }
+
+  /**
+   * Validate Params
+   *
+   * @returns {Promise<never>}
+   * @private
+   */
+  async _validateParams() {
+    const oThis = this;
+
+    if (oThis.currentUserId == oThis.profileUserId) {
+      return Promise.reject(
+        responseHelper.paramValidationError({
+          internal_error_identifier: 'a_s_u_p_ub_1',
+          api_error_identifier: 'could_not_proceed',
+          params_error_identifiers: ['self_profile_cannot_blocked'],
+          debug_options: {}
+        })
+      );
+    }
+
+    await oThis._validateProfileUserId();
   }
 
   /**
@@ -60,7 +83,7 @@ class UnBlockOtherUserForUser extends ServiceBase {
     if (userRelationsRows.length < 2) {
       return Promise.reject(
         responseHelper.paramValidationError({
-          internal_error_identifier: 'a_s_u_p_ub_1',
+          internal_error_identifier: 'a_s_u_p_ub_2',
           api_error_identifier: 'could_not_proceed',
           params_error_identifiers: ['user_not_blocked'],
           debug_options: {}

@@ -65,6 +65,12 @@ const v1ErrorConfig = {
     message: 'User profile is not blocked.'
   },
 
+  self_profile_cannot_blocked: {
+    parameter: 'profile_user_id',
+    code: 'invalid',
+    message: 'Self User profile can not be blocked.'
+  },
+
   user_already_approved: {
     parameter: 'user_id',
     code: 'invalid',
