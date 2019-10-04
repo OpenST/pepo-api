@@ -201,6 +201,7 @@ class ConfigStrategyTemplate {
       [configStrategyConstants.memcached]: 'memcachedEntity',
       [configStrategyConstants.bgJobRabbitmq]: 'rabbitmqEntity',
       [configStrategyConstants.notificationRabbitmq]: 'rabbitmqEntity',
+      [configStrategyConstants.pepoMobileEventRabbitmq]: 'rabbitmqEntity',
       [configStrategyConstants.socketRabbitmq]: 'rabbitmqListEntity',
       [configStrategyConstants.websocket]: 'websocketEntity',
       [configStrategyConstants.cassandra]: 'cassandraEntity',
