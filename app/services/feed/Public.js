@@ -48,7 +48,7 @@ class PublicVideoFeed extends FeedBase {
     oThis.userFeedIdsCacheData = null;
     oThis.currentFeedIds = [];
     oThis.setCacheData = false;
-    oThis.updateFeedLastVisitTimeNeeded = false;
+    oThis.latestSeenFeedTime = 0;
   }
 
   /**
@@ -169,6 +169,10 @@ class PublicVideoFeed extends FeedBase {
       console.log('==============================');
       console.log('HERE=====feedId,paginationIdentifier', feedId, paginationIdentifier);
 
+      if (i === 0 && paginationIdentifier > oThis.lastVisitedAt) {
+        oThis.latestSeenFeedTime = paginationIdentifier * 1000;
+      }
+
       if (
         cacheCount >= feedConstants.personalizedFeedMaxIdsCount ||
         (cacheCount >= feedConstants.personalizedFeedMinIdsCount &&
@@ -261,7 +265,6 @@ class PublicVideoFeed extends FeedBase {
     }
 
     await oThis.fetchFeedIdsForUser();
-    oThis.updateFeedLastVisitTimeNeeded = true;
 
     return responseHelper.successWithData({});
   }
@@ -303,7 +306,7 @@ class PublicVideoFeed extends FeedBase {
 
     const queryParams = {
       userId: oThis.currentUserId,
-      latestSeenFeedTime: Date.now()
+      latestSeenFeedTime: oThis.latestSeenFeedTime
     };
 
     return new UserNotificationVisitDetailModel().updateLatestSeenFeedTime(queryParams);
@@ -581,7 +584,7 @@ class PublicVideoFeed extends FeedBase {
       return Promise.reject(cacheResp);
     }
 
-    if (oThis.updateFeedLastVisitTimeNeeded) {
+    if (oThis.latestSeenFeedTime) {
       await oThis.updateFeedLastVisitTime();
     }
 
