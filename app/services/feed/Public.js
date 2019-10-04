@@ -160,19 +160,14 @@ class PublicVideoFeed extends FeedBase {
 
     console.log(`PERSONALIZED FEED:${oThis.currentUserId} queryResp================================`, queryResp);
 
+    let canBreak = false;
+
     for (let i = 0; i < queryResp['feedIds'].length; i++) {
       const feedId = queryResp['feedIds'][i];
 
       const paginationIdentifier = queryResp['feedsMap'][feedId];
       console.log('==============================');
       console.log('HERE=====feedId,paginationIdentifier', feedId, paginationIdentifier);
-
-      let index = previousFeedIds.indexOf(feedId);
-
-      if (index > -1) {
-        previousFeedIds.splice(index, 1);
-        console.log('HERE=====remove from previous feeds previousFeedIds=========', previousFeedIds);
-      }
 
       if (
         cacheCount >= feedConstants.personalizedFeedMaxIdsCount ||
@@ -181,7 +176,19 @@ class PublicVideoFeed extends FeedBase {
           paginationIdentifier < Date.now() / 1000 - feedConstants.personalizedFeedSeenVideosAgeInSeconds)
       ) {
         console.log('HERE=====BREAK=========');
-        break;
+        canBreak = true;
+      }
+
+      let index = previousFeedIds.indexOf(feedId);
+
+      if (index > -1) {
+        previousFeedIds.splice(index, 1);
+        console.log('HERE=====remove from previous feeds previousFeedIds=========', previousFeedIds);
+        continue;
+      } else {
+        if (canBreak) {
+          break;
+        }
       }
 
       if (oThis.lastVisitedAt < paginationIdentifier) {
