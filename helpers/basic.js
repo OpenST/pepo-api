@@ -619,7 +619,7 @@ class BasicHelper {
     return coreConstants.PA_DOMAIN + '/admin/user-profile';
   }
 
-  timeStampInMinutesToDate(unixTimestampInMinutes) {
+  timeStampInMinutesToDateTillSeconds(unixTimestampInMinutes) {
     const dateObject = new Date(unixTimestampInMinutes * 1000);
     const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     const year = dateObject.getFullYear();
@@ -630,6 +630,19 @@ class BasicHelper {
     const sec = dateObject.getSeconds();
 
     return date + ' ' + month + ' ' + year + ' ' + hour + ':' + min + ':' + sec;
+  }
+
+  timeStampInMinutesToDate(unixTimestampInMinutes) {
+    const dateObject = new Date(unixTimestampInMinutes * 1000);
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const year = dateObject.getFullYear();
+    const month = months[dateObject.getMonth()];
+    const date = dateObject.getDate();
+    const hour = dateObject.getHours();
+    const min = dateObject.getMinutes();
+    const sec = dateObject.getSeconds();
+
+    return date + ' ' + month + ' ' + year;
   }
 }
 
