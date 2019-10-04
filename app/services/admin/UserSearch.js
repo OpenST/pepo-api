@@ -19,8 +19,9 @@ const rootPrefix = '../../..',
   UserProfileElementsByUserIdCache = require(rootPrefix + '/lib/cacheManagement/multi/UserProfileElementsByUserIds'),
   basicHelper = require(rootPrefix + '/helpers/basic'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
-  entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
+  adminEntityType = require(rootPrefix + '/lib/globalConstant/adminEntityType'),
   paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination'),
+  userConstants = require(rootPrefix + '/lib/globalConstant/user'),
   userProfileElementConstants = require(rootPrefix + '/lib/globalConstant/userProfileElement');
 
 /**
@@ -35,6 +36,8 @@ class UserSearch extends ServiceBase {
    * @param {object} params
    * @param {string} [params.q]
    * @param {string} [params.pagination_identifier]
+   * @param {string} [params.sort_by]
+   * @param {string} [params.filter]
    *
    * @augments ServiceBase
    *
@@ -47,6 +50,8 @@ class UserSearch extends ServiceBase {
 
     oThis.query = params.q || null;
     oThis.paginationIdentifier = params[paginationConstants.paginationIdentifierKey] || null;
+    oThis.sortBy = params.sort_by ? params.sort_by.toLowerCase().trim() : userConstants.descendingSortByValue;
+    oThis.filter = params.filter ? params.filter.toLowerCase().trim() : null;
     oThis.isOnlyNameSearch = true;
 
     oThis.limit = oThis._defaultPageLimit();
@@ -136,6 +141,37 @@ class UserSearch extends ServiceBase {
       oThis.paginationTimestamp = null;
     }
 
+    // Sort sent is not from options
+    if (![userConstants.descendingSortByValue, userConstants.ascendingSortByValue].includes(oThis.sortBy)) {
+      return Promise.reject(
+        responseHelper.paramValidationError({
+          internal_error_identifier: 'a_s_a_us_1',
+          api_error_identifier: 'invalid_api_params',
+          params_error_identifiers: ['invalid_sort_by'],
+          debug_options: {}
+        })
+      );
+    }
+
+    // Filter sent is not from known filters
+    if (
+      oThis.filter &&
+      ![
+        userConstants.approvedCreatorFilterValue,
+        userConstants.deniedCreatorFilterValue,
+        userConstants.pendingCreatorFilterValue
+      ].includes(oThis.filter)
+    ) {
+      return Promise.reject(
+        responseHelper.paramValidationError({
+          internal_error_identifier: 'a_s_a_us_2',
+          api_error_identifier: 'invalid_api_params',
+          params_error_identifiers: ['invalid_filter'],
+          debug_options: {}
+        })
+      );
+    }
+
     oThis.isOnlyNameSearch = !CommonValidators.validateUserName(oThis.query);
 
     // Validate limit.
@@ -153,14 +189,14 @@ class UserSearch extends ServiceBase {
   async _fetchUserIds() {
     const oThis = this;
 
-    const userModelObj = new UserModel({});
-
-    const userData = await userModelObj.search({
+    const userData = await new UserModel({}).search({
       query: oThis.query,
       limit: oThis.limit,
       paginationTimestamp: oThis.paginationTimestamp,
       isOnlyNameSearch: oThis.isOnlyNameSearch,
-      fetchAll: true
+      fetchAll: true,
+      sortBy: oThis.sortBy,
+      filter: oThis.filter
     });
 
     oThis.userIds = userData.userIds;
@@ -608,7 +644,7 @@ class UserSearch extends ServiceBase {
     const oThis = this;
 
     const response = {
-      [entityType.userSearchList]: oThis.searchResults,
+      [adminEntityType.userSearchList]: oThis.searchResults,
       usersByIdMap: oThis.userDetails,
       tokenUsersByUserIdMap: oThis.tokenUsersByUserIdMap,
       videoMap: oThis.videos,
@@ -632,7 +668,7 @@ class UserSearch extends ServiceBase {
    * @private
    */
   _defaultPageLimit() {
-    return paginationConstants.defaultUserSearchPageSize;
+    return paginationConstants.defaultAdminUserSearchPageSize;
   }
 
   /**
@@ -642,7 +678,7 @@ class UserSearch extends ServiceBase {
    * @private
    */
   _minPageLimit() {
-    return paginationConstants.minUserSearchPageSize;
+    return paginationConstants.minAdminUserSearchPageSize;
   }
 
   /**
@@ -652,7 +688,7 @@ class UserSearch extends ServiceBase {
    * @private
    */
   _maxPageLimit() {
-    return paginationConstants.maxUserSearchPageSize;
+    return paginationConstants.maxAdminUserSearchPageSize;
   }
 
   /**

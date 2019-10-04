@@ -42,7 +42,7 @@ class ResizeImages {
         .select(['id'])
         .limit(limit)
         .offset(offset)
-        .where(['status != ?', imageConstants.invertedStatuses[imageConstants.notResized]])
+        .where(['resize_status != ?', imageConstants.invertedResizeStatuses[imageConstants.notResized]])
         .order_by('id ASC')
         .fire();
 

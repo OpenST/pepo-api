@@ -144,6 +144,7 @@ class FeedBase extends ServiceBase {
   async _filterInactiveUserFeeds() {
     const oThis = this;
 
+    let tempFeeds = [];
     for (let index = 0; index < oThis.feeds.length; index++) {
       const feedData = oThis.feeds[index];
 
@@ -168,10 +169,11 @@ class FeedBase extends ServiceBase {
         ) {
           createErrorLogsEntry.perform(errorObject, errorLogsConstants.mediumSeverity);
         }
-
-        oThis.feeds.splice(index, 1);
+      } else {
+        tempFeeds.push(feedData);
       }
     }
+    oThis.feeds = tempFeeds;
   }
 
   /**
