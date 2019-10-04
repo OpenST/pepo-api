@@ -65,7 +65,7 @@ class PepoMobileEventJobProcessor extends RabbitMqProcessorBase {
    * @returns {any}
    */
   get jobProcessorFactory() {
-    return require(rootPrefix + '/lib/jobs/pepoMobile/factory');
+    return require(rootPrefix + '/lib/jobs/pepoMobileEvent/factory');
   }
 }
 
