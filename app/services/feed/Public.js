@@ -332,7 +332,7 @@ class PublicVideoFeed extends FeedBase {
 
     let currentFeedIds = [];
 
-    if (oThis.lastVisitedAt > 0) {
+    if (oThis.lastVisitedAt > 0 || oThis.pageNumber > 1) {
       currentFeedIds = oThis.userFeedIdsCacheData['unseenFeedIds'].splice(0, oThis.limit);
     } else {
       currentFeedIds = oThis.userFeedIdsCacheData['unseenFeedIds'].slice(0, oThis.limit);
@@ -349,7 +349,7 @@ class PublicVideoFeed extends FeedBase {
     if (diff > 0) {
       let ids = [];
 
-      if (oThis.lastVisitedAt > 0) {
+      if (oThis.lastVisitedAt > 0 || oThis.pageNumber > 1) {
         ids = oThis.userFeedIdsCacheData['seenFeedIds'].splice(0, diff);
       } else {
         ids = oThis.userFeedIdsCacheData['seenFeedIds'].slice(0, diff);
@@ -359,7 +359,7 @@ class PublicVideoFeed extends FeedBase {
     }
 
     if (currentFeedIds.length > 0) {
-      if (oThis.lastVisitedAt > 0) {
+      if (oThis.lastVisitedAt > 0 || oThis.pageNumber > 1) {
         oThis.userFeedIdsCacheData['seenFeedIds'] = oThis.userFeedIdsCacheData['seenFeedIds'].concat(currentFeedIds);
       } else {
         //DO Nothing
