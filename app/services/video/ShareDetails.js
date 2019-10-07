@@ -35,6 +35,7 @@ class ShareDetails extends ServiceBase {
     oThis.videoId = params.video_id;
     oThis.currentUser = params.current_user;
 
+    oThis.isSelfVideoShare = false;
     oThis.messageObject = null;
     oThis.creatorName = null;
     oThis.twitterHandle = null;
@@ -51,12 +52,15 @@ class ShareDetails extends ServiceBase {
     const oThis = this;
 
     await oThis._fetchVideo();
+
     await oThis._fetchCreatorUserName();
+
     oThis.messageObject = shareEntityConstants.getVideoShareEntity({
       creatorName: oThis.creatorName,
       url: oThis._generateVideoShareUrl(),
       videoDescription: oThis.videoDescriptionText,
-      handle: oThis.twitterHandle
+      handle: oThis.twitterHandle,
+      isSelfVideoShare: oThis.isSelfVideoShare
     });
 
     return responseHelper.successWithData(oThis._prepareResponse());
@@ -141,6 +145,7 @@ class ShareDetails extends ServiceBase {
     // Video is of current user, so no need for query
     if (oThis.currentUser && creatorUserId === oThis.currentUser.id) {
       userObj = oThis.currentUser;
+      oThis.isSelfVideoShare = true;
     } else {
       const userMultiCacheRsp = await new UserMultiCache({ ids: [creatorUserId] }).fetch();
 
