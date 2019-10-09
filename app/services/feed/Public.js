@@ -49,6 +49,7 @@ class PublicVideoFeed extends FeedBase {
     oThis.currentFeedIds = [];
     oThis.setCacheData = false;
     oThis.latestSeenFeedTime = 0;
+    oThis.unseenFeedMap = {};
   }
 
   /**
@@ -142,10 +143,10 @@ class PublicVideoFeed extends FeedBase {
       limit: feedConstants.personalizedFeedMaxIdsCount
     };
 
-    let cacheCount = oThis.userFeedIdsCacheData['unseenFeedIds'].length;
-    const newCacheData = { seenFeedIds: [], unseenFeedIds: [] };
-
     let previousFeedIds = oThis.userFeedIdsCacheData['unseenFeedIds'].slice();
+
+    let cacheCount = previousFeedIds.length;
+    const newCacheData = { seenFeedIds: [], unseenFeedIds: [] };
 
     const queryResp = await new FeedModel().getLatestFeedIds(queryParams);
 
@@ -165,7 +166,9 @@ class PublicVideoFeed extends FeedBase {
     for (let i = 0; i < queryResp['feedIds'].length; i++) {
       const feedId = queryResp['feedIds'][i];
 
-      const paginationIdentifier = queryResp['feedsMap'][feedId];
+      const feedObj = queryResp['feedsMap'][feedId],
+        paginationIdentifier = feedObj.paginationIdentifier;
+
       console.log('==============================');
       console.log('HERE=====feedId,paginationIdentifier', feedId, paginationIdentifier);
 
@@ -174,10 +177,10 @@ class PublicVideoFeed extends FeedBase {
       }
 
       if (
-        cacheCount >= feedConstants.personalizedFeedMaxIdsCount ||
-        (cacheCount >= feedConstants.personalizedFeedMinIdsCount &&
-          paginationIdentifier <= oThis.lastVisitedAt &&
-          paginationIdentifier < Date.now() / 1000 - feedConstants.personalizedFeedSeenVideosAgeInSeconds)
+        paginationIdentifier <= oThis.lastVisitedAt &&
+        (cacheCount >= feedConstants.personalizedFeedMaxIdsCount ||
+          (cacheCount >= feedConstants.personalizedFeedMinIdsCount &&
+            paginationIdentifier < Date.now() / 1000 - feedConstants.personalizedFeedSeenVideosAgeInSeconds))
       ) {
         console.log('HERE=====BREAK=========');
         canBreak = true;
@@ -188,6 +191,8 @@ class PublicVideoFeed extends FeedBase {
       if (index > -1) {
         previousFeedIds.splice(index, 1);
         console.log('HERE=====remove from previous feeds previousFeedIds=========', previousFeedIds);
+        newCacheData['unseenFeedIds'].push(feedId);
+        oThis.unseenFeedMap[feedId] = feedObj;
         continue;
       } else {
         if (canBreak) {
@@ -197,44 +202,50 @@ class PublicVideoFeed extends FeedBase {
 
       if (oThis.lastVisitedAt < paginationIdentifier) {
         newCacheData['unseenFeedIds'].push(feedId);
-
-        //Note: Just To be sure cache merge does not have duplicate data.
-        let alreadyPresentIndex = oThis.userFeedIdsCacheData['unseenFeedIds'].indexOf(feedId);
-        if (alreadyPresentIndex === -1) {
-          cacheCount++;
-        } else {
-          oThis.userFeedIdsCacheData['unseenFeedIds'].splice(alreadyPresentIndex, 1);
-        }
-      } else if (oThis.userFeedIdsCacheData['unseenFeedIds'].indexOf(feedId) === -1) {
+        oThis.unseenFeedMap[feedId] = feedObj;
+      } else {
         newCacheData['seenFeedIds'].push(feedId);
-        cacheCount++;
       }
+      cacheCount++;
     }
 
     console.log('\n\n\n\n\n\n\n==============================\n\n\n\n');
     console.log('HERE=====oThis.newCacheData=========', newCacheData);
 
-    oThis.userFeedIdsCacheData['unseenFeedIds'] = newCacheData['unseenFeedIds'].concat(
-      oThis.userFeedIdsCacheData['unseenFeedIds']
-    );
-
+    oThis.userFeedIdsCacheData['unseenFeedIds'] = newCacheData['unseenFeedIds'].concat(previousFeedIds);
     oThis.userFeedIdsCacheData['seenFeedIds'] = newCacheData['seenFeedIds'];
-    oThis.feedIdsLengthFromCache = cacheCount;
 
-    if (cacheCount > feedConstants.personalizedFeedMaxIdsCount) {
-      let extraUnseen = feedConstants.personalizedFeedMaxIdsCount - oThis.userFeedIdsCacheData['unseenFeedIds'].length;
-      previousFeedIds = previousFeedIds.splice(previousFeedIds.length - extraUnseen);
+    if (previousFeedIds.length > 0) {
+      const feedByIdsCacheResponse = await new FeedByIdsCache({ ids: previousFeedIds }).fetch();
 
-      if (extraUnseen) {
-        oThis.userFeedIdsCacheData['unseenFeedIds'] = oThis.userFeedIdsCacheData['unseenFeedIds'].splice(
-          0,
-          feedConstants.personalizedFeedMaxIdsCount
-        );
+      if (feedByIdsCacheResponse.isFailure()) {
+        return Promise.reject(feedByIdsCacheResponse);
+      }
+
+      Object.assign(oThis.unseenFeedMap, feedByIdsCacheResponse.data);
+    }
+
+    //todo: call sort lib
+    //oThis.unseenFeedMap, oThis.userFeedIdsCacheData['unseenFeedIds'], oThis.currentUserId.
+    // Handle PASS By REFERENCE.
+
+    oThis.feedIdsLengthFromCache =
+      oThis.userFeedIdsCacheData['unseenFeedIds'].length + oThis.userFeedIdsCacheData['seenFeedIds'].length;
+
+    if (oThis.feedIdsLengthFromCache > feedConstants.personalizedFeedMaxIdsCount) {
+      let extraUnseenIds = oThis.userFeedIdsCacheData['unseenFeedIds'].splice(
+        feedConstants.personalizedFeedMaxIdsCount - 1
+      );
+
+      for (let feedId in extraUnseenIds) {
+        let index = previousFeedIds.indexOf(feedId);
+        if (index > -1) {
+          previousFeedIds.splice(index, 1);
+        }
       }
 
       let diff = feedConstants.personalizedFeedMaxIdsCount - oThis.userFeedIdsCacheData['unseenFeedIds'].length;
       oThis.userFeedIdsCacheData['seenFeedIds'] = oThis.userFeedIdsCacheData['seenFeedIds'].splice(0, diff);
-
       oThis.feedIdsLengthFromCache = feedConstants.personalizedFeedMaxIdsCount;
     }
 
