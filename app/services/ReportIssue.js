@@ -5,18 +5,18 @@ const rootPrefix = '../..',
   errorLogsConstants = require(rootPrefix + '/lib/globalConstant/errorLogs');
 
 /**
- * Class for Report Issue.
+ * Class for report issue.
  *
- * @class Logout
+ * @class ReportIssue
  */
 class ReportIssue extends ServiceBase {
   /**
    * Constructor for ReportIssue service.
    *
    * @param {object} params
-   * @param {String} [params.app_name]
-   * @param {String} [params.kind]
-   * @param {String} [params.error_data]
+   * @param {string} [params.app_name]
+   * @param {string} [params.kind]
+   * @param {string} [params.error_data]
    *
    * @augments ServiceBase
    *
@@ -29,14 +29,14 @@ class ReportIssue extends ServiceBase {
 
     oThis.appName = params.app_name;
     oThis.kind = params.kind;
-
     oThis.errorData = params.error_data;
   }
 
   /**
    * Async perform.
    *
-   * @return {Promise<void>}
+   * @returns {Promise<void>}
+   * @private
    */
   async _asyncPerform() {
     const oThis = this;
@@ -49,9 +49,12 @@ class ReportIssue extends ServiceBase {
   }
 
   /**
-   * Validate Params
+   * Validate params.
    *
-   * @return {Promise<void>}
+   * @sets oThis.appName, oThis.kind
+   *
+   * @returns {Promise<void>}
+   * @private
    */
   async _validateAndSanitize() {
     const oThis = this;
@@ -59,8 +62,8 @@ class ReportIssue extends ServiceBase {
     oThis.appName = oThis.appName.toLowerCase();
     oThis.kind = oThis.kind ? oThis.kind : 'a_s_ri';
 
-    let allowedAppNames = errorLogsConstants.appNames;
-    if (allowedAppNames.indexOf(oThis.appName) == -1) {
+    const allowedAppNames = errorLogsConstants.appNames;
+    if (allowedAppNames.indexOf(oThis.appName) === -1) {
       return Promise.reject(
         responseHelper.paramValidationError({
           internal_error_identifier: 'a_s_ri_1',
@@ -70,14 +73,12 @@ class ReportIssue extends ServiceBase {
         })
       );
     }
-
-    return responseHelper.successWithData({});
   }
 
   /**
-   * Create entry in Error logs.
+   * Create entry in error logs.
    *
-   * @returns {Promise<void>}
+   * @returns {Promise<*>}
    * @private
    */
   async _createErrorLogEntry() {
@@ -89,8 +90,7 @@ class ReportIssue extends ServiceBase {
       debug_options: oThis.errorData
     });
 
-    createErrorLogsEntry.perform(errorObject, errorLogsConstants.lowSeverity, oThis.appName);
-    return responseHelper.successWithData({});
+    return createErrorLogsEntry.perform(errorObject, errorLogsConstants.lowSeverity, oThis.appName);
   }
 }
 
