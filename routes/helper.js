@@ -1,9 +1,3 @@
-/**
- * Route helper class.
- *
- * @module routes/helper
- */
-
 const rootPrefix = '..',
   ApiParamsValidator = require(rootPrefix + '/lib/validators/ApiParams'),
   basicHelper = require(rootPrefix + '/helpers/basic'),
@@ -16,7 +10,7 @@ const rootPrefix = '..',
  */
 class RoutesHelper {
   /**
-   * Perform
+   * Perform.
    *
    * @param req
    * @param res
@@ -27,7 +21,7 @@ class RoutesHelper {
    * @param onServiceSuccess
    * @param onServiceFailure
    *
-   * @return {Promise<T>}
+   * @return {Promise<*>}
    */
   static perform(
     req,
@@ -63,7 +57,7 @@ class RoutesHelper {
   }
 
   /**
-   * Async Perform
+   * Async perform.
    *
    * @param req
    * @param res
@@ -86,8 +80,7 @@ class RoutesHelper {
   ) {
     req.decodedParams = req.decodedParams || {};
 
-    const oThis = this,
-      errorConfig = basicHelper.fetchErrorConfig(req.decodedParams.apiVersion);
+    const errorConfig = basicHelper.fetchErrorConfig(req.decodedParams.apiVersion);
 
     const apiParamsValidatorRsp = await new ApiParamsValidator({
       api_name: req.decodedParams.apiName,
@@ -101,9 +94,9 @@ class RoutesHelper {
       req.serviceParams = await afterValidationCallback(req.serviceParams);
     }
 
-    let handleResponse = async function(response) {
+    const handleResponse = async function(response) {
       if (response.isSuccess() && onServiceSuccess) {
-        // if required, this function could reformat data as per API version requirements.
+        // If required, this function could reformat data as per API version requirements.
         // NOTE: This method should modify response.data
         await onServiceSuccess(response);
       }
@@ -115,9 +108,7 @@ class RoutesHelper {
       responseHelper.renderApiResponse(response, res, errorConfig);
     };
 
-    let Service;
-
-    Service = require(rootPrefix + '/app/services' + serviceGetter);
+    const Service = require(rootPrefix + '/app/services' + serviceGetter);
 
     return new Service(req.serviceParams).perform().then(handleResponse);
   }
