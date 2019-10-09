@@ -3,6 +3,7 @@ const rootPrefix = '..',
   basicHelper = require(rootPrefix + '/helpers/basic'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   responseHelper = require(rootPrefix + '/lib/formatter/response');
+
 /**
  * Class for routes helper.
  *
