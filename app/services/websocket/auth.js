@@ -19,7 +19,7 @@ const rootPrefix = '../../..',
  */
 class WebSocketAuth extends ServiceBase {
   /**
-   * Constructor for websocket auth
+   * Constructor for websocket auth.
    *
    * @param {object} params
    * @param {string} params.auth_key_expiry_at: WebSocketAuth key expiry at
@@ -31,7 +31,7 @@ class WebSocketAuth extends ServiceBase {
    * @constructor
    */
   constructor(params) {
-    super(params);
+    super();
 
     const oThis = this;
 
@@ -45,7 +45,7 @@ class WebSocketAuth extends ServiceBase {
   }
 
   /**
-   * Async perform
+   * Async perform.
    *
    * @returns {Promise<*|result>}
    * @private
@@ -74,6 +74,25 @@ class WebSocketAuth extends ServiceBase {
   }
 
   /**
+   * This functions fetches config related to be used later in the file.
+   *
+   * @sets oThis.salt
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _fetchConfigData() {
+    const oThis = this;
+
+    const constantsRsp = await configStrategy.getConfigForKind(configStrategyConstants.websocket);
+    if (constantsRsp.isFailure()) {
+      return Promise.reject(constantsRsp);
+    }
+
+    oThis.salt = constantsRsp.data[configStrategyConstants.websocket].wsAuthSalt;
+  }
+
+  /**
    * Checks if the auth key is valid when this request was made.
    *
    * @returns {Promise<never>}
@@ -82,7 +101,8 @@ class WebSocketAuth extends ServiceBase {
   async _checkAuthKeyValidity() {
     const oThis = this;
 
-    let currentTimeStamp = basicHelper.getCurrentTimestampInSeconds();
+    const currentTimeStamp = basicHelper.getCurrentTimestampInSeconds();
+
     if (oThis.authKeyExpiryAt < currentTimeStamp) {
       return Promise.reject(
         responseHelper.error({
@@ -98,23 +118,9 @@ class WebSocketAuth extends ServiceBase {
   }
 
   /**
-   * This functions fetches config related to be used later in the file.
+   * Decrypt payload.
    *
-   * @returns {Promise<void>}
-   * @private
-   */
-  async _fetchConfigData() {
-    const oThis = this;
-
-    let constantsRsp = await configStrategy.getConfigForKind(configStrategyConstants.websocket);
-    if (constantsRsp.isFailure()) {
-      return Promise.reject(constantsRsp);
-    }
-    oThis.salt = constantsRsp.data[configStrategyConstants.websocket].wsAuthSalt;
-  }
-
-  /**
-   * Decrypt payload
+   * @sets oThis.decryptedPayload, oThis.userId
    *
    * @returns {Promise<void>}
    * @private
@@ -122,7 +128,7 @@ class WebSocketAuth extends ServiceBase {
   async _decryptPayload() {
     const oThis = this;
 
-    let base64DecodedPayload = base64Helper.decode(oThis.payload),
+    const base64DecodedPayload = base64Helper.decode(oThis.payload),
       decryptedPayload = localCipher.decrypt(oThis.salt, base64DecodedPayload);
 
     try {
@@ -143,7 +149,7 @@ class WebSocketAuth extends ServiceBase {
   }
 
   /**
-   * Check replay attack
+   * Check replay attack.
    *
    * @returns {Promise<void>}
    * @private
@@ -151,16 +157,19 @@ class WebSocketAuth extends ServiceBase {
   async _checkForReplayAttack() {
     const oThis = this;
 
-    let replayAttackCache = await new ReplayAttack({ authKey: oThis.decryptedPayload.auth_key }).fetch();
+    const replayAttackCacheResponse = await new ReplayAttack({ authKey: oThis.decryptedPayload.auth_key }).fetch();
 
-    if (replayAttackCache.isFailure()) {
+    if (replayAttackCacheResponse.isFailure()) {
       logger.log('Replay attack detected !!');
-      return Promise.reject(replayAttackCache);
+
+      return Promise.reject(replayAttackCacheResponse);
     }
   }
 
   /**
-   * Fetch user socket connection
+   * Fetch user socket connection.
+   *
+   * @sets oThis.userSocketConnectionDetails
    *
    * @returns {Promise<never>}
    * @private
@@ -168,13 +177,12 @@ class WebSocketAuth extends ServiceBase {
   async _fetchUserSocketConnection() {
     const oThis = this;
 
-    let cacheRsp = await new UserSocketConDetailsByUserIdsCache({ userIds: [oThis.userId] }).fetch();
-
+    const cacheRsp = await new UserSocketConDetailsByUserIdsCache({ userIds: [oThis.userId] }).fetch();
     if (cacheRsp.isFailure()) {
       return Promise.reject(cacheRsp);
     }
 
-    //Reject if the no entry is found for user id.
+    // Reject if the no entry is found for user id.
     if (!cacheRsp.data[oThis.userId].id) {
       return Promise.reject(
         responseHelper.error({
@@ -199,7 +207,7 @@ class WebSocketAuth extends ServiceBase {
   async _verifyAuthKeyValidity() {
     const oThis = this;
 
-    //If auth key is expired or auth key doesn't matches.
+    // If auth key is expired or auth key doesn't matches.
     if (
       basicHelper.getCurrentTimestampInSeconds() > oThis.userSocketConnectionDetails.authKeyExpiryAt ||
       oThis.decryptedPayload.auth_key !== oThis.userSocketConnectionDetails.authKey

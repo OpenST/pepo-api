@@ -1,7 +1,7 @@
 const rootPrefix = '../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
   databaseConstants = require(rootPrefix + '/lib/globalConstant/database'),
-  videoDetailsConst = require(rootPrefix + '/lib/globalConstant/videoDetail');
+  videoDetailsConstants = require(rootPrefix + '/lib/globalConstant/videoDetail');
 
 // Declare variables.
 const dbName = databaseConstants.entityDbName;
@@ -39,6 +39,7 @@ class VideoDetail extends ModelBase {
    * @param {number} dbRow.total_contributed_by
    * @param {number} dbRow.total_amount
    * @param {number} dbRow.total_transactions
+   * @param {number} dbRow.status
    * @param {number} dbRow.created_at
    * @param {number} dbRow.updated_at
    *
@@ -56,7 +57,7 @@ class VideoDetail extends ModelBase {
       totalContributedBy: dbRow.total_contributed_by,
       totalAmount: dbRow.total_amount,
       totalTransactions: dbRow.total_transactions,
-      status: videoDetailsConst.statuses[dbRow.status],
+      status: videoDetailsConstants.statuses[dbRow.status],
       createdAt: dbRow.created_at,
       updatedAt: dbRow.updated_at
     };
@@ -99,12 +100,12 @@ class VideoDetail extends ModelBase {
       .select('creator_user_id, max(video_id) as latest_video_id')
       .where({
         creator_user_id: userIds,
-        status: videoDetailsConst.invertedStatuses[videoDetailsConst.activeStatus]
+        status: videoDetailsConstants.invertedStatuses[videoDetailsConstants.activeStatus]
       })
       .group_by(['creator_user_id'])
       .fire();
 
-    let response = {};
+    const response = {};
 
     for (let index = 0; index < userIds.length; index++) {
       const userId = userIds[index];
@@ -159,7 +160,7 @@ class VideoDetail extends ModelBase {
       .select('*')
       .where({
         creator_user_id: creatorUserId,
-        status: videoDetailsConst.invertedStatuses[videoDetailsConst.activeStatus]
+        status: videoDetailsConstants.invertedStatuses[videoDetailsConstants.activeStatus]
       })
       .order_by('id desc')
       .limit(limit);
@@ -168,11 +169,11 @@ class VideoDetail extends ModelBase {
       queryObject.where(['created_at < ?', paginationTimestamp]);
     }
 
-    let dbRows = await queryObject.fire();
+    const dbRows = await queryObject.fire();
 
-    let videoDetails = {};
+    const videoDetails = {};
 
-    let videoIds = [];
+    const videoIds = [];
 
     for (let index = 0; index < dbRows.length; index++) {
       const formatDbRow = oThis.formatDbData(dbRows[index]);
@@ -287,7 +288,7 @@ class VideoDetail extends ModelBase {
         creator_user_id: params.userId,
         video_id: params.videoId,
         link_ids: linkIds,
-        status: videoDetailsConst.invertedStatuses[params.status]
+        status: videoDetailsConstants.invertedStatuses[params.status]
       })
       .fire();
   }
@@ -306,7 +307,7 @@ class VideoDetail extends ModelBase {
 
     await oThis
       .update({
-        status: videoDetailsConst.invertedStatuses[videoDetailsConst.deletedStatus]
+        status: videoDetailsConstants.invertedStatuses[videoDetailsConstants.deletedStatus]
       })
       .where({
         creator_user_id: params.userId,

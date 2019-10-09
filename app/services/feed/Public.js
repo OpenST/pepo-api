@@ -330,7 +330,14 @@ class PublicVideoFeed extends FeedBase {
   async _setFeedDataForLoggedInUser() {
     const oThis = this;
 
-    let currentFeedIds = oThis.userFeedIdsCacheData['unseenFeedIds'].splice(0, oThis.limit);
+    let currentFeedIds = [];
+
+    if (oThis.lastVisitedAt > 0 || oThis.pageNumber > 1) {
+      currentFeedIds = oThis.userFeedIdsCacheData['unseenFeedIds'].splice(0, oThis.limit);
+    } else {
+      currentFeedIds = oThis.userFeedIdsCacheData['unseenFeedIds'].slice(0, oThis.limit);
+    }
+
     let unseenLength = currentFeedIds.length;
 
     if (unseenLength === 0 && oThis.feedIdsLengthFromCache <= (oThis.pageNumber - 1) * oThis.limit) {
@@ -340,12 +347,23 @@ class PublicVideoFeed extends FeedBase {
     let diff = oThis.limit - unseenLength;
 
     if (diff > 0) {
-      let ids = oThis.userFeedIdsCacheData['seenFeedIds'].splice(0, diff);
+      let ids = [];
+
+      if (oThis.lastVisitedAt > 0 || oThis.pageNumber > 1) {
+        ids = oThis.userFeedIdsCacheData['seenFeedIds'].splice(0, diff);
+      } else {
+        ids = oThis.userFeedIdsCacheData['seenFeedIds'].slice(0, diff);
+      }
+
       currentFeedIds = currentFeedIds.concat(ids);
     }
 
     if (currentFeedIds.length > 0) {
-      oThis.userFeedIdsCacheData['seenFeedIds'] = oThis.userFeedIdsCacheData['seenFeedIds'].concat(currentFeedIds);
+      if (oThis.lastVisitedAt > 0 || oThis.pageNumber > 1) {
+        oThis.userFeedIdsCacheData['seenFeedIds'] = oThis.userFeedIdsCacheData['seenFeedIds'].concat(currentFeedIds);
+      } else {
+        //DO Nothing
+      }
 
       const feedByIdsCacheResponse = await new FeedByIdsCache({ ids: currentFeedIds }).fetch();
 
