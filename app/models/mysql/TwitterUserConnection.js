@@ -193,6 +193,30 @@ class TwitterUserConnection extends ModelBase {
   }
 
   /**
+   * Fetch twitter user connections by twitter user1 id and twitter user2 ids
+   * @param twitterUser2Ids
+   * @param twitterUser1Id
+   * @returns {Promise<void>}
+   */
+  async fetchTwitterUserConnectionByTwitterUser1IdAndTwitterUser2Ids(twitterUser2Ids, twitterUser1Id) {
+    const oThis = this;
+
+    const dbRows = await oThis
+      .select('*')
+      .where(['twitter_user2_id IN (?) AND twitter_user1_id = (?)', twitterUser2Ids, twitterUser1Id])
+      .fire();
+
+    const response = {};
+
+    for (let index = 0; index < dbRows.length; index++) {
+      const formatDbRow = oThis.formatDbData(dbRows[index]);
+      response[formatDbRow.twitterUser2Id] = formatDbRow;
+    }
+
+    return response;
+  }
+
+  /**
    * Flush cache.
    *
    * @param {object} params
