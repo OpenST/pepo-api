@@ -145,7 +145,7 @@ class FeedModel extends ModelBase {
     const response = { feedIds: [], feedsMap: {} };
 
     const dbRows = await oThis
-      .select('id, pagination_identifier')
+      .select('id, pagination_identifier, actor')
       .order_by('pagination_identifier desc')
       .limit(limit)
       .fire();
@@ -153,7 +153,7 @@ class FeedModel extends ModelBase {
     for (let index = 0; index < dbRows.length; index++) {
       const formatDbRow = oThis.formatDbData(dbRows[index]);
       response['feedIds'].push(formatDbRow.id);
-      response['feedsMap'][formatDbRow.id] = formatDbRow.paginationIdentifier;
+      response['feedsMap'][formatDbRow.id] = formatDbRow;
     }
 
     return response;
