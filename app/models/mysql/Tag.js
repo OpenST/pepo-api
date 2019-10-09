@@ -179,6 +179,22 @@ class Tag extends ModelBase {
   }
 
   /**
+   * Update video tag weights by weightToAdd
+   *
+   * @param tagIds
+   * @param weightToAdd
+   * @returns {Promise<any>}
+   */
+  async updateVideoTagWeights(tagIds, weightToAdd) {
+    const oThis = this;
+
+    return oThis
+      .update(['video_weight=video_weight+?', weightToAdd])
+      .where({ id: tagIds })
+      .fire();
+  }
+
+  /**
    * Flush cache.
    *
    * @param {object} params
