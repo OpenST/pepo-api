@@ -23,7 +23,7 @@ class ReportForEntity extends ServiceBase {
    * Constructor to report for an entity.
    *
    * @param {object} params
-   * @param {object} params.current_user
+   * @param {object} [params.current_user]
    * @param {string} params.report_entity_kind
    * @param {string} params.report_entity_id
    *
@@ -35,7 +35,7 @@ class ReportForEntity extends ServiceBase {
     super();
 
     const oThis = this;
-    //current_user is optional
+
     oThis.currentUser = params.current_user || {};
     oThis.reportEntityKind = params.report_entity_kind;
     oThis.reportEntityId = params.report_entity_id;
