@@ -217,6 +217,32 @@ class TwitterUserConnection extends ModelBase {
   }
 
   /**
+   * Is twitter connection registered?
+   *
+   * @param {object} twitterConnectionObj
+   *
+   * @returns {boolean}
+   */
+  static isRegisteredTwitterConnection(twitterConnectionObj) {
+    const propertiesArray = new TwitterUserConnection().getBitwiseArray('properties', twitterConnectionObj.properties);
+
+    return propertiesArray.indexOf(twitterUserConnectionConstants.isTwitterUser2RegisteredProperty) > -1;
+  }
+
+  /**
+   * Is twitter connection contributed?
+   *
+   * @param {object} twitterConnectionObj
+   *
+   * @returns {boolean}
+   */
+  static isContributedTwitterConnection(twitterConnectionObj) {
+    const propertiesArray = new TwitterUserConnection().getBitwiseArray('properties', twitterConnectionObj.properties);
+
+    return propertiesArray.indexOf(twitterUserConnectionConstants.isTwitterUser2ContributedToProperty) > -1;
+  }
+
+  /**
    * Flush cache.
    *
    * @param {object} params
