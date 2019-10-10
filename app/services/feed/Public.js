@@ -11,6 +11,7 @@ const rootPrefix = '../../..',
   basicHelper = require(rootPrefix + '/helpers/basic'),
   feedConstants = require(rootPrefix + '/lib/globalConstant/feed'),
   coreConstants = require(rootPrefix + '/config/coreConstants'),
+  logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination');
 
 /**
@@ -263,6 +264,7 @@ class PublicVideoFeed extends FeedBase {
 
       const sortResponse = await new SortUnseenFeedLib(sortParams).perform();
 
+      logger.log('======= Sort unseen feed response: ', sortResponse);
       if (sortResponse.isFailure()) {
         return Promise.reject(sortResponse);
       }
