@@ -413,8 +413,8 @@ class CoreConstants {
     return process.env.PA_GOOGLE_PROJECT_ID;
   }
 
-  get PA_USAGE_REPORT_SPREADSHEET_ID() {
-    return process.env.PA_USAGE_REPORT_SPREADSHEET_ID;
+  get PA_GOOGLE_USAGE_REPORT_SPREADSHEET_ID() {
+    return process.env.PA_GOOGLE_USAGE_REPORT_SPREADSHEET_ID;
   }
 }
 
