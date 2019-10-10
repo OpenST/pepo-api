@@ -266,7 +266,8 @@ class PublicVideoFeed extends FeedBase {
         return Promise.reject(sortResponse);
       }
 
-      for (let feedId in oThis.userFeedIdsCacheData['unseenFeedIds']) {
+      for (let i in oThis.userFeedIdsCacheData['unseenFeedIds']) {
+        const feedId = oThis.userFeedIdsCacheData['unseenFeedIds'][i];
         if (sortResponse.data['unseenFeedIds'].indexOf(feedId) === -1) {
           let index = previousFeedIds.indexOf(feedId);
 
