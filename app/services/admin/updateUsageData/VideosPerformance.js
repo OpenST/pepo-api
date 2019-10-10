@@ -31,24 +31,24 @@ class VideosPerformance extends UpdateUsageDataBase {
       bgJob.enqueue(oThis.kind, { queryStartTimeStampInSeconds: null, queryEndTimeStampInSeconds: null })
     ];
 
-    const queryStartTimeStampInSeconds = Math.round(Date.now() / 1000);
+    const queryEndTimeStampInSeconds = Math.round(Date.now() / 1000);
 
     // For 7 days.
-    const queryEndTimeStampInSecondsForSevenDays = queryStartTimeStampInSeconds - 7 * 24 * 60 * 60;
+    const queryStartTimeStampInSecondsForSevenDays = queryEndTimeStampInSeconds - 7 * 24 * 60 * 60;
     // For 24 hours.
-    const queryEndTimeStampInSecondsForTwentyFourHours = queryStartTimeStampInSeconds - 24 * 60 * 60;
+    const queryStartTimeStampInSecondsForTwentyFourHours = queryEndTimeStampInSeconds - 24 * 60 * 60;
 
     promisesArray.push(
       bgJob.enqueue(oThis.kind, {
-        queryStartTimeStampInSeconds: queryStartTimeStampInSeconds,
-        queryEndTimeStampInSeconds: queryEndTimeStampInSecondsForSevenDays
+        queryStartTimeStampInSeconds: queryStartTimeStampInSecondsForSevenDays,
+        queryEndTimeStampInSeconds: queryEndTimeStampInSeconds
       })
     );
 
     promisesArray.push(
       bgJob.enqueue(oThis.kind, {
-        queryStartTimeStampInSeconds: queryStartTimeStampInSeconds,
-        queryEndTimeStampInSeconds: queryEndTimeStampInSecondsForTwentyFourHours
+        queryStartTimeStampInSeconds: queryStartTimeStampInSecondsForTwentyFourHours,
+        queryEndTimeStampInSeconds: queryEndTimeStampInSeconds
       })
     );
 
