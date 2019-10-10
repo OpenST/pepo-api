@@ -27,8 +27,8 @@ class Logout extends ServiceBase {
     super();
 
     const oThis = this;
-    oThis.currentUser = params.current_user;
 
+    oThis.currentUser = params.current_user;
     oThis.deviceIdArray = params.device_id ? [params.device_id] : params.deviceIds;
     oThis.deviceIdArray = oThis.deviceIdArray ? oThis.deviceIdArray : [];
   }
@@ -65,7 +65,7 @@ class Logout extends ServiceBase {
       })
       .fire();
 
-    let userDeviceIds = [];
+    const userDeviceIds = [];
 
     for (let ind = 0; ind < userDeviceIdResp.length; ind++) {
       userDeviceIds.push(userDeviceIdResp[ind].id);
