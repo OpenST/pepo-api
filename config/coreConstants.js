@@ -393,6 +393,18 @@ class CoreConstants {
     return process.env.PA_USER_SEARCH_CURATED_USER_IDS;
   }
 
+  get PEPO_USER_SEARCH_TOP_USER_IDS() {
+    return process.env.PA_USER_SEARCH_TOP_USER_IDS;
+  }
+
+  get PEPO_TAG_SEARCH_CURATED_TAG_IDS() {
+    return process.env.PA_USER_SEARCH_CURATED_TAG_IDS;
+  }
+
+  get PEPO_TAG_SEARCH_TOP_TAG_IDS() {
+    return process.env.PA_USER_SEARCH_TOP_TAG_IDS;
+  }
+
   get PEPO_SLACK_OAUTH_TOKEN() {
     return process.env.PA_SLACK_OAUTH_TOKEN;
   }

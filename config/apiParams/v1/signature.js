@@ -385,13 +385,12 @@ const v1Signature = {
     optional: []
   },
   [apiName.getTags]: {
-    mandatory: [
+    mandatory: [],
+    optional: [
       {
         parameter: 'q',
         validatorMethods: ['validateString']
-      }
-    ],
-    optional: [
+      },
       {
         parameter: paginationConstants.paginationIdentifierKey,
         validatorMethods: ['validateString', 'validatePaginationIdentifier']
