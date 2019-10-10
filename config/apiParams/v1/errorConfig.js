@@ -339,6 +339,12 @@ const v1ErrorConfig = {
     parameter: 'video_id',
     code: 'invalid',
     message: 'Video has been deleted.'
+  },
+
+  invalid_tag_id: {
+    parameter: 'tag_id',
+    code: 'invalid',
+    message: 'Invalid tag id.'
   }
 };
 

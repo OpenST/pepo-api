@@ -29,4 +29,24 @@ router.get('/', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   Promise.resolve(routeHelper.perform(req, res, next, '/tags/Get', 'r_a_v1_t_1', null, dataFormatterFunc));
 });
 
+/* Get tag details */
+router.get('/:tag_id', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.tagDetails;
+  req.decodedParams.tag_id = req.params.tag_id;
+
+  const dataFormatterFunc = async function(serviceResponse) {
+    const wrapperFormatterRsp = await new FormatterComposer({
+      resultType: responseEntityKey.tag,
+      entityKindToResponseKeyMap: {
+        [entityType.tag]: responseEntityKey.tag
+      },
+      serviceData: serviceResponse.data
+    }).perform();
+
+    serviceResponse.data = wrapperFormatterRsp.data;
+  };
+
+  Promise.resolve(routeHelper.perform(req, res, next, '/tags/GetDetails', 'r_a_v1_t_2', null, dataFormatterFunc));
+});
+
 module.exports = router;

@@ -771,6 +771,19 @@ const v1Signature = {
         validatorMethods: ['validateNonEmptyObject']
       }
     ]
+  },
+  [apiName.tagDetails]: {
+    mandatory: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      },
+      {
+        parameter: 'tag_id',
+        validatorMethods: ['validateNonZeroInteger']
+      }
+    ],
+    optional: []
   }
 };
 
