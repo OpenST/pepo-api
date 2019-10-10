@@ -147,7 +147,8 @@ class UpdateFanVideo extends UpdateProfileBase {
 
     await new AddVideoDescription({
       videoDescription: oThis.videoDescription,
-      videoId: oThis.videoId
+      videoId: oThis.videoId,
+      isUserCreator: UserModelKlass.isUserApprovedCreator(oThis.userObj)
     }).perform();
   }
 
@@ -175,6 +176,7 @@ class UpdateFanVideo extends UpdateProfileBase {
 
   /**
    * Update user.
+   * If a new video is added and the user was denied in his previous attempt. This will put the user in approval status.
    *
    * @returns {Promise<void>}
    * @private

@@ -134,8 +134,11 @@ class VideoTag extends ModelBase {
    *
    * @returns {Promise<*>}
    */
-  static async flushCache() {
-    // Do nothing.
+  static async flushCache(params) {
+    if (params.tagIds) {
+      const VideoIdsByTagIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/VideoIdsByTagIds');
+      await new VideoIdsByTagIdsCache({ tagIds: params.tagIds }).clear();
+    }
   }
 }
 
