@@ -331,9 +331,9 @@ router.get('/search', sanitizer.sanitizeDynamicUrlParams, function(req, res, nex
 
   const dataFormatterFunc = async function(serviceResponse) {
     const wrapperFormatterRsp = await new FormatterComposer({
-      resultType: responseEntityKey.searchResults,
+      resultType: responseEntityKey.userSearchResults,
       entityKindToResponseKeyMap: {
-        [entityType.userSearchList]: responseEntityKey.searchResults,
+        [entityType.userSearchList]: responseEntityKey.userSearchResults,
         [entityType.usersMap]: responseEntityKey.users,
         [entityType.imagesMap]: responseEntityKey.images,
         [entityType.userSearchMeta]: responseEntityKey.meta
