@@ -229,7 +229,7 @@ class PublicVideoFeed extends FeedBase {
 
     if (oThis.feedIdsLengthFromCache > feedConstants.personalizedFeedMaxIdsCount) {
       let extraUnseenIds = oThis.userFeedIdsCacheData['unseenFeedIds'].splice(
-        feedConstants.personalizedFeedMaxIdsCount - 1
+        feedConstants.personalizedFeedMaxIdsCount
       );
 
       for (let i in extraUnseenIds) {
