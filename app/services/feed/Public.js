@@ -214,7 +214,7 @@ class PublicVideoFeed extends FeedBase {
     }
 
     console.log('\n\n\n==============================\n\n\n');
-    console.log(`PERSONALIZED FEED:${oThis.currentUserId} oThis.newCacheData: ${newCacheData}`);
+    console.log(`PERSONALIZED FEED:${oThis.currentUserId} oThis.newCacheData: ${JSON.stringify(newCacheData)}`);
 
     oThis.userFeedIdsCacheData['unseenFeedIds'] = newCacheData['unseenFeedIds'].concat(previousFeedIds);
     oThis.userFeedIdsCacheData['seenFeedIds'] = newCacheData['seenFeedIds'];
@@ -236,7 +236,7 @@ class PublicVideoFeed extends FeedBase {
         feedsMap: oThis.unseenFeedMap
       };
 
-      const sortResponse = new SortUnseenFeedLib(sortParams).perform();
+      const sortResponse = await new SortUnseenFeedLib(sortParams).perform();
 
       if (sortResponse.isFailure()) {
         return Promise.reject(sortResponse);
@@ -272,14 +272,19 @@ class PublicVideoFeed extends FeedBase {
 
     oThis.userFeedIdsCacheData['previousFeedIds'] = previousFeedIds;
     console.log(
-      `PERSONALIZED FEED:${oThis.currentUserId} BEFORE SHUFFLE oThis.userFeedIdsCacheData=========`,
-      oThis.userFeedIdsCacheData
+      `PERSONALIZED FEED:${oThis.currentUserId} BEFORE SHUFFLE oThis.userFeedIdsCacheData.seenFeedIds=========`,
+      oThis.userFeedIdsCacheData['seenFeedIds']
     );
 
     oThis.userFeedIdsCacheData['seenFeedIds'] = basicHelper.shuffleArray(oThis.userFeedIdsCacheData['seenFeedIds']);
     oThis.userFeedIdsCacheData['recentSeenFeedIds'] = [];
     oThis.userFeedIdsCacheData['removedFeedIds'] = [];
     oThis.userFeedIdsCacheData['nextRenderIndex'] = 0;
+
+    console.log(
+      `PERSONALIZED FEED:${oThis.currentUserId} DATA FOR oThis.userFeedIdsCacheData=========`,
+      oThis.userFeedIdsCacheData
+    );
   }
 
   /**
@@ -397,9 +402,7 @@ class PublicVideoFeed extends FeedBase {
     if (oThis.feedIdsLengthFromCache > (oThis.pageNumber - 1) * oThis.limit) {
       const nextRenderIndex = oThis.userFeedIdsCacheData['nextRenderIndex'] || 0;
       console.log(
-        `PERSONALIZED FEED:${
-          oThis.currentUserId
-        } GET DATA FROM CACHE =====nextRenderIndex:${nextRenderIndex}================`
+        `PERSONALIZED FEED:${oThis.currentUserId} =====current nextRenderIndex:${nextRenderIndex}================`
       );
 
       let unseenIdsLength = oThis.userFeedIdsCacheData['unseenFeedIds'].length;
