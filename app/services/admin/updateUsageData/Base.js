@@ -1,6 +1,5 @@
 const rootPrefix = '../../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
-  bgJob = require(rootPrefix + '/lib/rabbitMqEnqueue/bgJob'),
   responseHelper = require(rootPrefix + '/lib/formatter/response');
 
 /**
@@ -18,7 +17,7 @@ class UsageDataBase extends ServiceBase {
   async _asyncPerform() {
     const oThis = this;
 
-    await bgJob.enqueue(oThis.kind, {});
+    await oThis.enqueue();
 
     return responseHelper.successWithData({});
   }
@@ -27,6 +26,15 @@ class UsageDataBase extends ServiceBase {
    * Returns background job kind.
    */
   get kind() {
+    throw new Error('Sub-class to implement.');
+  }
+
+  /**
+   * Enqueue in rabbitMq.
+   *
+   * @returns {Promise<void>}
+   */
+  async enqueue() {
     throw new Error('Sub-class to implement.');
   }
 }
