@@ -231,7 +231,8 @@ class PublicVideoFeed extends FeedBase {
         feedConstants.personalizedFeedMaxIdsCount - 1
       );
 
-      for (let feedId in extraUnseenIds) {
+      for (let i in extraUnseenIds) {
+        const feedId = extraUnseenIds[i];
         let index = previousFeedIds.indexOf(feedId);
         if (index > -1) {
           previousFeedIds.splice(index, 1);
