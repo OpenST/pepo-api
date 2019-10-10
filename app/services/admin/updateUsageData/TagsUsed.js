@@ -1,5 +1,6 @@
 const rootPrefix = '../../../..',
   UpdateUsageDataBase = require(rootPrefix + '/app/services/admin/updateUsageData/Base'),
+  bgJob = require(rootPrefix + '/lib/rabbitMqEnqueue/bgJob'),
   bgJobConstants = require(rootPrefix + '/lib/globalConstant/bgJob');
 
 /**
@@ -15,6 +16,17 @@ class TagsUsed extends UpdateUsageDataBase {
    */
   get kind() {
     return bgJobConstants.updateTagsUsedUsageTopic;
+  }
+
+  /**
+   * Enqueue in rabbitMq.
+   *
+   * @returns {Promise<void>}
+   */
+  async enqueue() {
+    const oThis = this;
+
+    await bgJob.enqueue(oThis.kind, {});
   }
 }
 
