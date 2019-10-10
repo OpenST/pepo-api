@@ -6,6 +6,7 @@ const rootPrefix = '../../..',
   FeedByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/FeedByIds'),
   PersonalizedFeedByUserIdCache = require(rootPrefix + '/lib/cacheManagement/single/PersonalizedFeedByUserId'),
   UserNotificationVisitDetailModel = require(rootPrefix + '/app/models/cassandra/UserNotificationVisitDetail'),
+  SortUnseenFeedLib = require(rootPrefix + '/lib/feed/SortUnseen'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   basicHelper = require(rootPrefix + '/helpers/basic'),
   feedConstants = require(rootPrefix + '/lib/globalConstant/feed'),
@@ -169,8 +170,11 @@ class PublicVideoFeed extends FeedBase {
       const feedObj = queryResp['feedsMap'][feedId],
         paginationIdentifier = feedObj.paginationIdentifier;
 
-      console.log('==============================');
-      console.log('HERE=====feedId,paginationIdentifier', feedId, paginationIdentifier);
+      console.log(
+        `PERSONALIZED FEED:${
+          oThis.currentUserId
+        } Loop Iteration: ${i}, feedId: ${feedId} ,paginationIdentifier: ${paginationIdentifier} `
+      );
 
       if (i === 0 && paginationIdentifier > oThis.lastVisitedAt) {
         oThis.latestSeenFeedTime = paginationIdentifier * 1000;
@@ -182,7 +186,7 @@ class PublicVideoFeed extends FeedBase {
           (cacheCount >= feedConstants.personalizedFeedMinIdsCount &&
             paginationIdentifier < Date.now() / 1000 - feedConstants.personalizedFeedSeenVideosAgeInSeconds))
       ) {
-        console.log('HERE=====BREAK=========');
+        console.log(`PERSONALIZED FEED:${oThis.currentUserId} Break from loop set`);
         canBreak = true;
       }
 
@@ -190,7 +194,7 @@ class PublicVideoFeed extends FeedBase {
 
       if (index > -1) {
         previousFeedIds.splice(index, 1);
-        console.log('HERE=====remove from previous feeds previousFeedIds=========', previousFeedIds);
+        console.log(`PERSONALIZED FEED:${oThis.currentUserId} remove from previous feeds previousFeedIds`);
         newCacheData['unseenFeedIds'].push(feedId);
         oThis.unseenFeedMap[feedId] = feedObj;
         continue;
@@ -209,8 +213,8 @@ class PublicVideoFeed extends FeedBase {
       cacheCount++;
     }
 
-    console.log('\n\n\n\n\n\n\n==============================\n\n\n\n');
-    console.log('HERE=====oThis.newCacheData=========', newCacheData);
+    console.log('\n\n\n==============================\n\n\n');
+    console.log(`PERSONALIZED FEED:${oThis.currentUserId} oThis.newCacheData: ${newCacheData}`);
 
     oThis.userFeedIdsCacheData['unseenFeedIds'] = newCacheData['unseenFeedIds'].concat(previousFeedIds);
     oThis.userFeedIdsCacheData['seenFeedIds'] = newCacheData['seenFeedIds'];
@@ -225,9 +229,26 @@ class PublicVideoFeed extends FeedBase {
       Object.assign(oThis.unseenFeedMap, feedByIdsCacheResponse.data);
     }
 
-    //todo: call sort lib
-    //oThis.unseenFeedMap, oThis.userFeedIdsCacheData['unseenFeedIds'], oThis.currentUserId.
-    // Handle PASS By REFERENCE.
+    if (oThis.userFeedIdsCacheData['unseenFeedIds'].length > 0) {
+      let sortParams = {
+        currentUserId: oThis.currentUserId,
+        unseenFeedIds: oThis.userFeedIdsCacheData['unseenFeedIds'],
+        feedsMap: oThis.unseenFeedMap
+      };
+
+      const sortResponse = new SortUnseenFeedLib(sortParams).perform();
+
+      if (sortResponse.isFailure()) {
+        return Promise.reject(sortResponse);
+      }
+
+      oThis.userFeedIdsCacheData['unseenFeedIds'] = sortResponse.data['unseenFeedIds'];
+      console.log(
+        `PERSONALIZED FEED:${oThis.currentUserId} sorted unseenFeedIds: ${JSON.stringify(
+          oThis.userFeedIdsCacheData['unseenFeedIds']
+        )}`
+      );
+    }
 
     oThis.feedIdsLengthFromCache =
       oThis.userFeedIdsCacheData['unseenFeedIds'].length + oThis.userFeedIdsCacheData['seenFeedIds'].length;
@@ -250,11 +271,12 @@ class PublicVideoFeed extends FeedBase {
     }
 
     oThis.userFeedIdsCacheData['previousFeedIds'] = previousFeedIds;
-
-    console.log('HERE=====BEFORE SHUFFLE oThis.userFeedIdsCacheData=========', oThis.userFeedIdsCacheData);
+    console.log(
+      `PERSONALIZED FEED:${oThis.currentUserId} BEFORE SHUFFLE oThis.userFeedIdsCacheData=========`,
+      oThis.userFeedIdsCacheData
+    );
 
     oThis.userFeedIdsCacheData['seenFeedIds'] = basicHelper.shuffleArray(oThis.userFeedIdsCacheData['seenFeedIds']);
-
     oThis.userFeedIdsCacheData['recentSeenFeedIds'] = [];
     oThis.userFeedIdsCacheData['removedFeedIds'] = [];
     oThis.userFeedIdsCacheData['nextRenderIndex'] = 0;
