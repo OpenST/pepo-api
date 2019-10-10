@@ -6,11 +6,11 @@ const rootPrefix = '../../..',
   paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination');
 
 /**
- * Class to get tags.
+ * Class to search tags.
  *
- * @class GetTags
+ * @class TagSearch
  */
-class GetTags extends ServiceBase {
+class TagSearch extends ServiceBase {
   /**
    * Constructor to get tags.
    *
@@ -183,4 +183,4 @@ class GetTags extends ServiceBase {
   }
 }
 
-module.exports = GetTags;
+module.exports = TagSearch;
