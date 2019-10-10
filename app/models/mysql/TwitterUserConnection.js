@@ -247,16 +247,35 @@ class TwitterUserConnection extends ModelBase {
    *
    * @param {object} params
    * @param {number} params.twitterUser1Id
+   * @param {array} params.twitterUser2Id
    *
    * @returns {Promise<*>}
    */
   static async flushCache(params) {
-    const TwitterUserConnectionByUser1Pagination = require(rootPrefix +
-      '/lib/cacheManagement/single/TwitterUserConnectionByUser1Pagination');
+    const promisesArray = [];
 
-    await new TwitterUserConnectionByUser1Pagination({
-      twitterUser1Id: params.twitterUser1Id
-    }).clear();
+    if (params.twitterUser1Id) {
+      const TwitterUserConnectionByUser1Pagination = require(rootPrefix +
+        '/lib/cacheManagement/single/TwitterUserConnectionByUser1Pagination');
+      promisesArray.push(
+        new TwitterUserConnectionByUser1Pagination({
+          twitterUser1Id: params.twitterUser1Id
+        }).clear()
+      );
+
+      if (params.twitterUser2Id) {
+        const TwitterUserConnectionByTwitterUser2Ids = require(rootPrefix +
+          '/lib/cacheManagement/multi/TwitterUserConnectionByTwitterUser2Ids');
+        promisesArray.push(
+          new TwitterUserConnectionByTwitterUser2Ids({
+            twitterUser1Id: params.twitterUser1Id,
+            twitterUser2Ids: [params.twitterUser2Id]
+          }).clear()
+        );
+      }
+    }
+
+    await Promise.all(promisesArray);
   }
 }
 
