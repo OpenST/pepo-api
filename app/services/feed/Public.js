@@ -219,36 +219,9 @@ class PublicVideoFeed extends FeedBase {
     oThis.userFeedIdsCacheData['unseenFeedIds'] = newCacheData['unseenFeedIds'].concat(previousFeedIds);
     oThis.userFeedIdsCacheData['seenFeedIds'] = newCacheData['seenFeedIds'];
 
-    if (previousFeedIds.length > 0) {
-      const feedByIdsCacheResponse = await new FeedByIdsCache({ ids: previousFeedIds }).fetch();
-
-      if (feedByIdsCacheResponse.isFailure()) {
-        return Promise.reject(feedByIdsCacheResponse);
-      }
-
-      Object.assign(oThis.unseenFeedMap, feedByIdsCacheResponse.data);
-    }
-
-    if (oThis.userFeedIdsCacheData['unseenFeedIds'].length > 0) {
-      let sortParams = {
-        currentUserId: oThis.currentUserId,
-        unseenFeedIds: oThis.userFeedIdsCacheData['unseenFeedIds'],
-        feedsMap: oThis.unseenFeedMap
-      };
-
-      const sortResponse = await new SortUnseenFeedLib(sortParams).perform();
-
-      if (sortResponse.isFailure()) {
-        return Promise.reject(sortResponse);
-      }
-
-      oThis.userFeedIdsCacheData['unseenFeedIds'] = sortResponse.data['unseenFeedIds'];
-      console.log(
-        `PERSONALIZED FEED:${oThis.currentUserId} sorted unseenFeedIds: ${JSON.stringify(
-          oThis.userFeedIdsCacheData['unseenFeedIds']
-        )}`
-      );
-    }
+    oThis.userFeedIdsCacheData['recentSeenFeedIds'] = [];
+    oThis.userFeedIdsCacheData['removedFeedIds'] = [];
+    oThis.userFeedIdsCacheData['nextRenderIndex'] = 0;
 
     oThis.feedIdsLengthFromCache =
       oThis.userFeedIdsCacheData['unseenFeedIds'].length + oThis.userFeedIdsCacheData['seenFeedIds'].length;
@@ -270,6 +243,54 @@ class PublicVideoFeed extends FeedBase {
       oThis.feedIdsLengthFromCache = feedConstants.personalizedFeedMaxIdsCount;
     }
 
+    if (previousFeedIds.length > 0) {
+      const feedByIdsCacheResponse = await new FeedByIdsCache({ ids: previousFeedIds }).fetch();
+
+      if (feedByIdsCacheResponse.isFailure()) {
+        return Promise.reject(feedByIdsCacheResponse);
+      }
+
+      Object.assign(oThis.unseenFeedMap, feedByIdsCacheResponse.data);
+    }
+
+    if (oThis.userFeedIdsCacheData['unseenFeedIds'].length > 0) {
+      let sortParams = {
+        currentUserId: oThis.currentUserId,
+        unseenFeedIds: oThis.userFeedIdsCacheData['unseenFeedIds'].slice(),
+        feedsMap: oThis.unseenFeedMap
+      };
+
+      const sortResponse = await new SortUnseenFeedLib(sortParams).perform();
+
+      if (sortResponse.isFailure()) {
+        return Promise.reject(sortResponse);
+      }
+
+      for (let feedId in oThis.userFeedIdsCacheData['unseenFeedIds']) {
+        if (sortResponse.data['unseenFeedIds'].indexOf(feedId) === -1) {
+          let index = previousFeedIds.indexOf(feedId);
+
+          if (index === -1) {
+            oThis.userFeedIdsCacheData['removedFeedIds'].push(feedId);
+          } else {
+            previousFeedIds.splice(index, 1);
+          }
+        }
+      }
+
+      oThis.userFeedIdsCacheData['unseenFeedIds'] = sortResponse.data['unseenFeedIds'];
+      console.log(
+        `PERSONALIZED FEED:${oThis.currentUserId} sorted unseenFeedIds: ${JSON.stringify(
+          oThis.userFeedIdsCacheData['unseenFeedIds']
+        )}`
+      );
+    }
+
+    oThis.feedIdsLengthFromCache =
+      oThis.userFeedIdsCacheData['unseenFeedIds'].length +
+      oThis.userFeedIdsCacheData['seenFeedIds'].length +
+      This.userFeedIdsCacheData['removedFeedIds'].length;
+
     oThis.userFeedIdsCacheData['previousFeedIds'] = previousFeedIds;
     console.log(
       `PERSONALIZED FEED:${oThis.currentUserId} BEFORE SHUFFLE oThis.userFeedIdsCacheData.seenFeedIds=========`,
@@ -277,9 +298,6 @@ class PublicVideoFeed extends FeedBase {
     );
 
     oThis.userFeedIdsCacheData['seenFeedIds'] = basicHelper.shuffleArray(oThis.userFeedIdsCacheData['seenFeedIds']);
-    oThis.userFeedIdsCacheData['recentSeenFeedIds'] = [];
-    oThis.userFeedIdsCacheData['removedFeedIds'] = [];
-    oThis.userFeedIdsCacheData['nextRenderIndex'] = 0;
 
     console.log(
       `PERSONALIZED FEED:${oThis.currentUserId} DATA FOR oThis.userFeedIdsCacheData=========`,
