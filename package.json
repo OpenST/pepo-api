@@ -19,6 +19,7 @@
     "continuation-local-storage": "3.2.1",
     "cookie-parser": "1.4.4",
     "csurf": "1.10.0",
+    "csv-parser": "2.3.1",
     "express": "4.16.4",
     "firebase-admin": "8.4.0",
     "google-auth-library": "5.2.0",
