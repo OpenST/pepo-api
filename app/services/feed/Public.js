@@ -289,7 +289,7 @@ class PublicVideoFeed extends FeedBase {
     oThis.feedIdsLengthFromCache =
       oThis.userFeedIdsCacheData['unseenFeedIds'].length +
       oThis.userFeedIdsCacheData['seenFeedIds'].length +
-      This.userFeedIdsCacheData['removedFeedIds'].length;
+      oThis.userFeedIdsCacheData['removedFeedIds'].length;
 
     oThis.userFeedIdsCacheData['previousFeedIds'] = previousFeedIds;
     console.log(
