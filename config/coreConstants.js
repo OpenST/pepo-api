@@ -416,6 +416,10 @@ class CoreConstants {
   get PA_GOOGLE_USAGE_REPORT_SPREADSHEET_ID() {
     return process.env.PA_GOOGLE_USAGE_REPORT_SPREADSHEET_ID;
   }
+
+  get PA_GOOGLE_USAGE_REPORT_GROUP_IDS() {
+    return process.env.PA_GOOGLE_USAGE_REPORT_GROUP_IDS;
+  }
 }
 
 module.exports = new CoreConstants();

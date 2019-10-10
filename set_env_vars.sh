@@ -144,7 +144,7 @@ export PA_PEPO_TWITTER_HANDLE='thepepoapp'
 export PA_PEPO_REDEMPTION_USER_ID='1001'
 
 export PA_GOOGLE_INAPP_SERVICE_ACCOUNT_KEY=''
-#Value for PA_GOOGLE_INAPP_SERVICE_ACCOUNT_KEY should be escaped first with escape() function. This is done so as to avoid /n being escaped automatically.
+# Value for PA_GOOGLE_INAPP_SERVICE_ACCOUNT_KEY should be escaped first with escape() function. This is done so as to avoid /n being escaped automatically.
 export PA_GOOGLE_INAPP_SERVICE_ACCOUNT_EMAIL=''
 
 # Feed related constants.
@@ -159,3 +159,4 @@ export PA_GOOGLE_PRIVATE_KEY='"-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG
 export PA_GOOGLE_CLIENT_EMAIL='pepo-245@lateral-avatar-205714.iam.gserviceaccount.com'
 export PA_GOOGLE_PROJECT_ID='lateral-avatar-205714'
 export PA_GOOGLE_USAGE_REPORT_SPREADSHEET_ID='1DN9V6351pl9ct79XYGIasRmKTNIZKVzeO5dHJMexnCc'
+export PA_GOOGLE_USAGE_REPORT_GROUP_IDS='{"User data Lifetime": "1969769902", "User data Last 7 days": "262285918", "User data Last 24 hours": "1492159954", "Videos Stats Lifetime": "2079750882", "Videos Stats Last 7 days": "293576976", "Videos Stats Last 24 hrs": "920797104", "Tags Used": "1756942354"}'
