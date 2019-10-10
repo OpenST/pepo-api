@@ -26,12 +26,11 @@ class AddDeviceToken extends ServiceBase {
    *
    * @param {object} params
    * @param {object} params.current_user
+   * @param {number} params.current_user.id
    * @param {number} params.device_id
    * @param {string} params.device_kind
    * @param {string} params.device_token
    * @param {string} params.user_timezone
-   *
-   * @param {number} params.current_user.id
    *
    * @augments ServiceBase
    *
@@ -52,7 +51,8 @@ class AddDeviceToken extends ServiceBase {
   /**
    * Async perform.
    *
-   * @return {Promise<void>}
+   * @returns {Promise<void>}
+   * @private
    */
   async _asyncPerform() {
     const oThis = this;

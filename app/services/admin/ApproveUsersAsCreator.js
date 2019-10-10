@@ -9,14 +9,12 @@ const rootPrefix = '../../..',
   inviteCodeConstants = require(rootPrefix + '/lib/globalConstant/inviteCode'),
   ActivityLogModel = require(rootPrefix + '/app/models/mysql/AdminActivityLog'),
   InviteCodeByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/InviteCodeByUserIds'),
-  UserProfileElementsByUserIdCache = require(rootPrefix + '/lib/cacheManagement/multi/UserProfileElementsByUserIds'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   userConstants = require(rootPrefix + '/lib/globalConstant/user'),
   feedsConstants = require(rootPrefix + '/lib/globalConstant/feed'),
   notificationJobEnqueue = require(rootPrefix + '/lib/rabbitMqEnqueue/notification'),
   notificationJobConstants = require(rootPrefix + '/lib/globalConstant/notificationJob'),
-  adminActivityLogConstants = require(rootPrefix + '/lib/globalConstant/adminActivityLogs'),
-  userProfileElementConstants = require(rootPrefix + '/lib/globalConstant/userProfileElement');
+  adminActivityLogConstants = require(rootPrefix + '/lib/globalConstant/adminActivityLogs');
 
 /**
  * Class to approve users by admin.
@@ -170,7 +168,7 @@ class ApproveUsersAsCreator extends ServiceBase {
         return Promise.reject(inviteCodeByUserIdCacheResponse);
       }
 
-      let inviteCodeObj = inviteCodeByUserIdCacheResponse.data[userId];
+      const inviteCodeObj = inviteCodeByUserIdCacheResponse.data[userId];
 
       const queryResponse = await new InviteCodeModel()
         .update({
