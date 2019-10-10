@@ -159,6 +159,18 @@ const adminSignature = {
       }
     ],
     optional: []
+  },
+  [apiName.adminUpdateUserDataUsage]: {
+    mandatory: [],
+    optional: []
+  },
+  [apiName.adminUpdateVideosPerformanceUsage]: {
+    mandatory: [],
+    optional: []
+  },
+  [apiName.adminUpdateTagsUsedUsage]: {
+    mandatory: [],
+    optional: []
   }
 };
 
