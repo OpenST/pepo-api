@@ -49,4 +49,40 @@ router.get('/:tag_id', sanitizer.sanitizeDynamicUrlParams, function(req, res, ne
   Promise.resolve(routeHelper.perform(req, res, next, '/tags/GetDetails', 'r_a_v1_t_2', null, dataFormatterFunc));
 });
 
+/* Get videos list by tag id  */
+router.get('/:tag_id/videos', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.getVideoListByTagId;
+  req.decodedParams.tag_id = req.params.tag_id;
+
+  const dataFormatterFunc = async function(serviceResponse) {
+    console.log('serviceResponse----', serviceResponse);
+
+    const wrapperFormatterRsp = await new FormatterComposer({
+      resultType: responseEntityKey.tagVideoList,
+      entityKindToResponseKeyMap: {
+        [entityType.tagVideoList]: responseEntityKey.tagVideoList,
+        [entityType.usersMap]: responseEntityKey.users,
+        [entityType.userStats]: responseEntityKey.userStats,
+        [entityType.userProfilesMap]: responseEntityKey.userProfiles,
+        [entityType.videoDescriptionsMap]: responseEntityKey.videoDescriptions,
+        [entityType.tagsMap]: responseEntityKey.tags,
+        [entityType.linksMap]: responseEntityKey.links,
+        [entityType.imagesMap]: responseEntityKey.images,
+        [entityType.videosMap]: responseEntityKey.videos,
+        [entityType.videoDetailsMap]: responseEntityKey.videoDetails,
+        [entityType.currentUserUserContributionsMap]: responseEntityKey.currentUserUserContributions,
+        [entityType.currentUserVideoContributionsMap]: responseEntityKey.currentUserVideoContributions,
+        [entityType.pricePointsMap]: responseEntityKey.pricePoints,
+        [entityType.token]: responseEntityKey.token,
+        [entityType.tagVideoListMeta]: responseEntityKey.meta
+      },
+      serviceData: serviceResponse.data
+    }).perform();
+
+    serviceResponse.data = wrapperFormatterRsp.data;
+  };
+
+  Promise.resolve(routeHelper.perform(req, res, next, '/tags/GetVideoList', 'r_a_v1_t_3', null, dataFormatterFunc));
+});
+
 module.exports = router;

@@ -783,6 +783,19 @@ const v1Signature = {
       }
     ],
     optional: []
+  },
+  [apiName.getVideoListByTagId]: {
+    mandatory: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      },
+      {
+        parameter: 'tag_id',
+        validatorMethods: ['validateNonZeroInteger']
+      }
+    ],
+    optional: []
   }
 };
 

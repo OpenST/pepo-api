@@ -116,6 +116,45 @@ class VideoTag extends ModelBase {
   }
 
   /**
+   * Fetch by tag id
+   *
+   * @param {integer} params.tagId: tag id
+   * @param {integer} params.limit: no of rows to fetch
+   * @param {integer} params.paginationTimestamp:
+   * @return {Promise}
+   */
+  async fetchByTagId(params) {
+    const oThis = this,
+      limit = params.limit,
+      tagId = params.tagId,
+      paginationTimestamp = params.paginationTimestamp;
+
+    const queryObject = oThis
+      .select('*')
+      .where({
+        tag_id: tagId
+      })
+      .order_by('id desc')
+      .limit(limit);
+
+    if (paginationTimestamp) {
+      queryObject.where(['created_at < ?', paginationTimestamp]);
+    }
+
+    const dbRows = await queryObject.fire();
+
+    const videoTagsDetails = [];
+
+    for (let index = 0; index < dbRows.length; index++) {
+      const formatDbRow = oThis.formatDbData(dbRows[index]);
+
+      videoTagsDetails.push(formatDbRow);
+    }
+
+    return videoTagsDetails;
+  }
+
+  /**
    * Delete video tags by video ids.
    *
    * @returns {Promise<void>}
