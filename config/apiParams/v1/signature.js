@@ -771,6 +771,31 @@ const v1Signature = {
         validatorMethods: ['validateNonEmptyObject']
       }
     ]
+  },
+  [apiName.pepocornTopUpValidate]: {
+    mandatory: [
+      {
+        parameter: 'product_id',
+        validatorMethods: ['validateNonZeroInteger']
+      },
+      {
+        parameter: 'pepo_amount_in_wei',
+        validatorMethods: ['validateNonZeroWeiValue']
+      },
+      {
+        parameter: 'pepo_in_wei_per_step',
+        validatorMethods: ['validateNonZeroWeiValue']
+      },
+      {
+        parameter: 'pepocorn_amount',
+        validatorMethods: ['validateNonZeroInteger']
+      },
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      }
+    ],
+    optional: []
   }
 };
 
