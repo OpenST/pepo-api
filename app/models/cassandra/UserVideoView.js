@@ -75,18 +75,23 @@ class UserVideoViewModel extends CassandraModelBase {
    *
    * @param {object} queryParams
    * @param {number} queryParams.userId
-   * @param {number} queryParams.videoId
+   * @param {number} queryParams.videoIds
    * @param {number} queryParams.lastViewAt
    *
    * @returns {Promise<any>}
    */
-  async updateLastViewAt(queryParams) {
+  async updateLastViewAtForVideos(queryParams) {
     const oThis = this;
 
     const query = 'update ' + oThis.queryTableName + ' set last_view_at = ? where user_id = ? and video_id = ?;';
-    const params = [queryParams.lastViewAt, queryParams.userId, queryParams.videoId];
+    const queries = [];
 
-    return oThis.fire(query, params);
+    for (let i = 0; i < queryParams.videoIds.length; i++) {
+      const updateParam = [queryParams.lastViewAt, queryParams.userId, queryParams.videoIds[i]];
+      queries.push({ query: query, params: updateParam });
+    }
+
+    return oThis.batchFire(queries);
   }
 
   /**
