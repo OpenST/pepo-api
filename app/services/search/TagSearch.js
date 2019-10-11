@@ -18,6 +18,7 @@ class TagSearch extends ServiceBase {
    * @param {object} params
    * @param {string} params.q
    * @param {string} params.pagination_identifier
+   * @param {Boolean} [params.getTopResults]
    *
    * @augments ServiceBase
    *
@@ -30,6 +31,7 @@ class TagSearch extends ServiceBase {
 
     oThis.tagPrefix = params.q || null;
     oThis.paginationIdentifier = params[paginationConstants.paginationIdentifierKey] || null;
+    oThis.getTopResults = params.getTopResults || false;
 
     oThis.limit = null;
     oThis.page = null;
@@ -104,7 +106,9 @@ class TagSearch extends ServiceBase {
       oThis.tagIds = tagPaginationRsp.data;
     } else {
       // Display curated tags in search.
-      const curatedTagIdsString = coreConstants.PEPO_TAG_SEARCH_CURATED_TAG_IDS;
+      const curatedTagIdsString = oThis.getTopResults
+        ? coreConstants.PEPO_TAG_SEARCH_TOP_TAG_IDS
+        : coreConstants.PEPO_TAG_SEARCH_CURATED_TAG_IDS;
       if (curatedTagIdsString.length > 0) {
         oThis.tagIds = JSON.parse(curatedTagIdsString);
       }

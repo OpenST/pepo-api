@@ -21,6 +21,7 @@ class UserSearch extends ServiceBase {
    *
    * @param {object} params
    * @param {string} [params.q]
+   * @param {Boolean} [params.getTopResults]
    *
    * @augments ServiceBase
    *
@@ -34,6 +35,7 @@ class UserSearch extends ServiceBase {
     oThis.query = params.q || null;
     oThis.paginationIdentifier = params[paginationConstants.paginationIdentifierKey] || null;
     oThis.isOnlyNameSearch = true;
+    oThis.getTopResults = params.getTopResults || false;
 
     oThis.limit = oThis._defaultPageLimit();
 
@@ -133,7 +135,9 @@ class UserSearch extends ServiceBase {
       });
     } else {
       // Display curated users in search.
-      const curatedUserIdsString = coreConstants.PEPO_USER_SEARCH_CURATED_USER_IDS;
+      const curatedUserIdsString = oThis.getTopResults
+        ? coreConstants.PEPO_USER_SEARCH_TOP_USER_IDS
+        : coreConstants.PEPO_USER_SEARCH_CURATED_USER_IDS;
       if (curatedUserIdsString.length === 0) {
         // Empty string.
         userData = { userIds: [], userDetails: {} };

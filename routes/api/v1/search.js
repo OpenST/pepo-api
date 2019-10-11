@@ -15,9 +15,9 @@ router.get('/tags', sanitizer.sanitizeDynamicUrlParams, function(req, res, next)
 
   const dataFormatterFunc = async function(serviceResponse) {
     const wrapperFormatterRsp = await new FormatterComposer({
-      resultType: responseEntityKey.tag_search_results,
+      resultType: responseEntityKey.tagSearchResults,
       entityKindToResponseKeyMap: {
-        [entityType.tagList]: responseEntityKey.tag_search_results,
+        [entityType.tagList]: responseEntityKey.tagSearchResults,
         [entityType.tagListMeta]: responseEntityKey.meta
       },
       serviceData: serviceResponse.data
@@ -49,6 +49,31 @@ router.get('/users', sanitizer.sanitizeDynamicUrlParams, function(req, res, next
   };
 
   Promise.resolve(routeHelper.perform(req, res, next, '/search/UserSearch', 'r_a_v1_s_2', null, dataFormatterFunc));
+});
+
+/* Search users */
+router.get('/top', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.mixedTopSearch;
+
+  const dataFormatterFunc = async function(serviceResponse) {
+    console.log('Service Response: ', serviceResponse.data[entityType.searchCategoriesList]);
+    const wrapperFormatterRsp = await new FormatterComposer({
+      resultType: responseEntityKey.searchCategoriesResults,
+      entityKindToResponseKeyMap: {
+        [entityType.searchCategoriesList]: responseEntityKey.searchCategoriesResults,
+        [entityType.tagList]: responseEntityKey.tagSearchResults,
+        [entityType.userSearchList]: responseEntityKey.userSearchResults,
+        [entityType.usersMap]: responseEntityKey.users,
+        [entityType.imagesMap]: responseEntityKey.images,
+        [entityType.userSearchMeta]: responseEntityKey.meta
+      },
+      serviceData: serviceResponse.data
+    }).perform();
+
+    serviceResponse.data = wrapperFormatterRsp.data;
+  };
+
+  Promise.resolve(routeHelper.perform(req, res, next, '/search/TopMixed', 'r_a_v1_s_3', null, dataFormatterFunc));
 });
 
 module.exports = router;
