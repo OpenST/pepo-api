@@ -17,7 +17,11 @@ class CoreConstants {
   }
 
   get APP_NAME() {
-    return process.env.DEVOPS_APP_NAME;
+    return process.env.PA_DEVOPS_APP_NAME;
+  }
+
+  get PA_WEB_DOMAIN() {
+    return process.env.PA_WEB_DOMAIN;
   }
 
   get PA_DOMAIN() {
@@ -28,14 +32,12 @@ class CoreConstants {
     return process.env.PA_COOKIE_DOMAIN;
   }
 
-  // MySql constants
-
+  // MySql constants.
   get MYSQL_CONNECTION_POOL_SIZE() {
     return process.env.PA_MYSQL_CONNECTION_POOL_SIZE;
   }
 
   // Main db
-
   get MAIN_DB_MYSQL_HOST() {
     return process.env.PA_MAIN_DB_MYSQL_HOST;
   }
@@ -48,8 +50,7 @@ class CoreConstants {
     return process.env.PA_MAIN_DB_MYSQL_PASSWORD;
   }
 
-  // User db
-
+  // User db.
   get USER_DB_MYSQL_HOST() {
     return process.env.PA_USER_DB_MYSQL_HOST;
   }
@@ -62,8 +63,7 @@ class CoreConstants {
     return process.env.PA_USER_DB_MYSQL_PASSWORD;
   }
 
-  // Big db
-
+  // Big db.
   get BIG_DB_MYSQL_HOST() {
     return process.env.PA_BIG_DB_MYSQL_HOST;
   }
@@ -76,8 +76,7 @@ class CoreConstants {
     return process.env.PA_BIG_DB_MYSQL_PASSWORD;
   }
 
-  // Entity db
-
+  // Entity db.
   get ENTITY_DB_MYSQL_HOST() {
     return process.env.PA_ENTITY_DB_MYSQL_HOST;
   }
@@ -90,8 +89,7 @@ class CoreConstants {
     return process.env.PA_ENTITY_DB_MYSQL_PASSWORD;
   }
 
-  // Twitter db
-
+  // Twitter db.
   get TWITTER_DB_MYSQL_HOST() {
     return process.env.PA_TWITTER_DB_MYSQL_HOST;
   }
@@ -104,8 +102,7 @@ class CoreConstants {
     return process.env.PA_TWITTER_DB_MYSQL_PASSWORD;
   }
 
-  // Feed db
-
+  // Feed db.
   get FEED_DB_MYSQL_HOST() {
     return process.env.PA_FEED_DB_MYSQL_HOST;
   }
@@ -118,8 +115,7 @@ class CoreConstants {
     return process.env.PA_FEED_DB_MYSQL_PASSWORD;
   }
 
-  // Config db
-
+  // Config db.
   get CONFIG_DB_MYSQL_HOST() {
     return process.env.PA_CONFIG_DB_MYSQL_HOST;
   }
@@ -132,8 +128,7 @@ class CoreConstants {
     return process.env.PA_CONFIG_DB_MYSQL_PASSWORD;
   }
 
-  // Ost db
-
+  // Ost db.
   get OST_DB_MYSQL_HOST() {
     return process.env.PA_OST_DB_MYSQL_HOST;
   }
@@ -146,8 +141,7 @@ class CoreConstants {
     return process.env.PA_OST_DB_MYSQL_PASSWORD;
   }
 
-  // socket db
-
+  // Socket db.
   get SOCKET_DB_MYSQL_HOST() {
     return process.env.PA_SOCKET_DB_MYSQL_HOST;
   }
@@ -160,8 +154,7 @@ class CoreConstants {
     return process.env.PA_SOCKET_DB_MYSQL_PASSWORD;
   }
 
-  // Infra db
-
+  // Infra db.
   get INFRA_DB_MYSQL_HOST() {
     return process.env.PA_INFRA_DB_MYSQL_HOST;
   }
@@ -178,8 +171,47 @@ class CoreConstants {
     return process.env.PA_INFRA_DB_MYSQL_DB;
   }
 
-  // kms related constants
+  // Fiat db.
 
+  get FIAT_DB_MYSQL_HOST() {
+    return process.env.PA_FIAT_DB_MYSQL_HOST;
+  }
+
+  get FIAT_DB_MYSQL_USER() {
+    return process.env.PA_FIAT_DB_MYSQL_USER;
+  }
+
+  get FIAT_DB_MYSQL_PASSWORD() {
+    return process.env.PA_FIAT_DB_MYSQL_PASSWORD;
+  }
+
+  // Admin db
+  get ADMIN_DB_MYSQL_HOST() {
+    return process.env.PA_ADMIN_DB_MYSQL_HOST;
+  }
+
+  get ADMIN_DB_MYSQL_USER() {
+    return process.env.PA_ADMIN_DB_MYSQL_USER;
+  }
+
+  get ADMIN_DB_MYSQL_PASSWORD() {
+    return process.env.PA_ADMIN_DB_MYSQL_PASSWORD;
+  }
+
+  // Redemption db.
+  get REDEMPTION_DB_MYSQL_HOST() {
+    return process.env.PA_REDEMPTION_DB_MYSQL_HOST;
+  }
+
+  get REDEMPTION_DB_MYSQL_USER() {
+    return process.env.PA_REDEMPTION_DB_MYSQL_USER;
+  }
+
+  get REDEMPTION_DB_MYSQL_PASSWORD() {
+    return process.env.PA_REDEMPTION_DB_MYSQL_PASSWORD;
+  }
+
+  // KMS related constants.
   get KMS_AWS_ACCESS_KEY() {
     return process.env.PA_KMS_AWS_ACCESS_KEY;
   }
@@ -200,9 +232,7 @@ class CoreConstants {
     return process.env.PA_SECRET_ENC_KEY_KMS_ID;
   }
 
-  /**
-   * S3 AWS config
-   */
+  // S3 AWS config.
   get AWS_ACCESS_KEY() {
     return process.env.PA_S3_AWS_ACCESS_KEY;
   }
@@ -249,8 +279,7 @@ class CoreConstants {
     return '/videos';
   }
 
-  // Encryption Secrets
-
+  // Encryption secrets.
   get CACHE_SHA_KEY() {
     return process.env.PA_CACHE_DATA_SHA_KEY;
   }
@@ -259,38 +288,37 @@ class CoreConstants {
     return process.env.PA_COOKIE_SECRET;
   }
 
+  get ADMIN_COOKIE_SECRET() {
+    return process.env.PA_PAD_COOKIE_SECRET;
+  }
+
+  get WEB_COOKIE_SECRET() {
+    return process.env.PA_PW_COOKIE_SECRET;
+  }
+
   get PA_COOKIE_TOKEN_SECRET() {
     return process.env.PA_COOKIE_TOKEN_SECRET;
   }
 
-  // SaaS api details
-
+  // SaaS API details.
   get PA_SA_API_END_POINT() {
     return process.env.PA_SA_API_END_POINT;
   }
 
-  // Giphy api details
-
-  get GIPHY_API_KEY() {
-    return process.env.PA_GIPHY_API_KEY;
-  }
-
-  // Devops error logs framework details
-
+  // DevOps error logs framework details.
   get ENV_IDENTIFIER() {
-    return process.env.DEVOPS_ENV_ID;
+    return process.env.PA_DEVOPS_ENV_ID;
   }
 
   get IP_ADDRESS() {
-    return process.env.DEVOPS_IP_ADDRESS;
+    return process.env.PA_DEVOPS_IP_ADDRESS;
   }
 
   get WS_SERVER_IDENTIFIER() {
-    return process.env.DEVOPS_SERVER_IDENTIFIER;
+    return process.env.PA_DEVOPS_SERVER_IDENTIFIER;
   }
 
-  // Pepo-campaigns details
-
+  // Pepo-campaigns details.
   get PEPO_CAMPAIGN_BASE_URL() {
     return process.env.PA_CAMPAIGN_BASE_URL;
   }
@@ -307,7 +335,7 @@ class CoreConstants {
     return process.env.PA_CAMPAIGN_MASTER_LIST;
   }
 
-  //Twitter API key and secret
+  // Twitter API key and secret.
   get TWITTER_CONSUMER_KEY() {
     return process.env.PA_TWITTER_CONSUMER_KEY;
   }
@@ -328,10 +356,15 @@ class CoreConstants {
     return process.env.PR_LAMBDA_VIDEO_COMPRESS_FUNCTION;
   }
 
+  get PA_EMAIL_TOKENS_DECRIPTOR_KEY() {
+    return process.env.PA_EMAIL_TOKENS_DECRIPTOR_KEY;
+  }
+
   get PA_CDN_URL() {
     return process.env.PA_CDN_URL;
   }
 
+  // Cassandra related constants.
   get CASSANDRA_REPLICATION_CLASS() {
     return process.env.REPLICATION_CLASS;
   }
@@ -342,6 +375,50 @@ class CoreConstants {
 
   get CASSANDRA_REPLICATION_LEVEL() {
     return process.env.DEFAULT_REPLICATION_LEVEL;
+  }
+
+  get TWITTER_OAUTH_URL() {
+    return process.env.TWITTER_OAUTH_URL;
+  }
+
+  get PEPO_TWITTER_HANDLE() {
+    return process.env.PA_PEPO_TWITTER_HANDLE;
+  }
+
+  get PEPO_REDEMPTION_USER_ID() {
+    return process.env.PA_PEPO_REDEMPTION_USER_ID;
+  }
+
+  get PEPO_USER_SEARCH_CURATED_USER_IDS() {
+    return process.env.PA_USER_SEARCH_CURATED_USER_IDS;
+  }
+
+  get PEPO_SLACK_OAUTH_TOKEN() {
+    return process.env.PA_SLACK_OAUTH_TOKEN;
+  }
+
+  get PEPO_CURATED_FEED_IDS() {
+    return process.env.PA_CURATED_FEED_IDS;
+  }
+
+  get PA_GOOGLE_CLIENT_EMAIL() {
+    return process.env.PA_GOOGLE_CLIENT_EMAIL;
+  }
+
+  get PA_GOOGLE_PRIVATE_KEY() {
+    return process.env.PA_GOOGLE_PRIVATE_KEY;
+  }
+
+  get PA_GOOGLE_PROJECT_ID() {
+    return process.env.PA_GOOGLE_PROJECT_ID;
+  }
+
+  get PA_GOOGLE_USAGE_REPORT_SPREADSHEET_ID() {
+    return process.env.PA_GOOGLE_USAGE_REPORT_SPREADSHEET_ID;
+  }
+
+  get PA_GOOGLE_USAGE_REPORT_GROUP_IDS() {
+    return process.env.PA_GOOGLE_USAGE_REPORT_GROUP_IDS;
   }
 }
 

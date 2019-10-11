@@ -25,7 +25,7 @@ class UpdateProfileBase extends ServiceBase {
    * @constructor
    */
   constructor(params) {
-    super(params);
+    super();
 
     const oThis = this;
 
@@ -90,8 +90,8 @@ class UpdateProfileBase extends ServiceBase {
       );
     }
 
-    const userMultiCache = new UsersCache({ ids: [oThis.profileUserId] });
-    const cacheRsp = await userMultiCache.fetch();
+    const userMultiCache = new UsersCache({ ids: [oThis.profileUserId] }),
+      cacheRsp = await userMultiCache.fetch();
 
     if (cacheRsp.isFailure() || !CommonValidators.validateNonEmptyObject(cacheRsp.data[oThis.profileUserId])) {
       return Promise.reject(

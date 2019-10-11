@@ -137,6 +137,14 @@ class ModelBase {
 
     return finalResponse;
   }
+
+  /**
+   * Key object defined in Cassandra table
+   *
+   */
+  keyObject() {
+    throw "Model has to define key object for itself. eg: {partition: ['user_id'], sort: ['updated_timestamp']}";
+  }
 }
 
 module.exports = ModelBase;

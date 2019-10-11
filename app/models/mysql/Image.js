@@ -1,8 +1,8 @@
 const rootPrefix = '../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
   shortToLongUrl = require(rootPrefix + '/lib/shortToLongUrl'),
-  imageConst = require(rootPrefix + '/lib/globalConstant/image'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
+  imageConstants = require(rootPrefix + '/lib/globalConstant/image'),
   databaseConstants = require(rootPrefix + '/lib/globalConstant/database');
 
 // Declare variables.
@@ -37,6 +37,7 @@ class Image extends ModelBase {
    * @param {string} dbRow.url_template
    * @param {string} dbRow.resolutions
    * @param {number} dbRow.status
+   * @param {number} dbRow.resize_status
    * @param {number} dbRow.kind
    * @param {string} dbRow.created_at
    * @param {string} dbRow.updated_at
@@ -51,8 +52,9 @@ class Image extends ModelBase {
       id: dbRow.id,
       urlTemplate: dbRow.url_template,
       resolutions: JSON.parse(dbRow.resolutions),
-      status: imageConst.statuses[dbRow.status],
-      kind: imageConst.kinds[dbRow.kind],
+      status: imageConstants.statuses[dbRow.status],
+      resizeStatus: imageConstants.resizeStatuses[dbRow.resize_status],
+      kind: imageConstants.kinds[dbRow.kind],
       createdAt: dbRow.created_at,
       updatedAt: dbRow.updated_at
     };
@@ -97,7 +99,7 @@ class Image extends ModelBase {
     for (const resolution in resolutions) {
       let responseResolution = resolution;
       if (resolution === 'o') {
-        responseResolution = imageConst.originalResolution;
+        responseResolution = imageConstants.originalResolution;
         responseResolutionHash[responseResolution] = oThis._formatResolution(resolutions[resolution]);
         /*
         If url is already present in original resolution hash. Then the same url is set in original resolutions hash
@@ -166,7 +168,7 @@ class Image extends ModelBase {
    * @param {object} params
    * @param {string} params.resolutions
    * @param {number} params.kind
-   * @param {number} params.status
+   * @param {string} params.resizeStatus
    *
    * @returns {object}
    */
@@ -178,8 +180,9 @@ class Image extends ModelBase {
     return oThis
       .insert({
         resolutions: JSON.stringify(resolutions),
-        kind: imageConst.invertedKinds[params.kind],
-        status: imageConst.invertedStatuses[params.status]
+        kind: imageConstants.invertedKinds[params.kind],
+        status: imageConstants.invertedStatuses[imageConstants.activeStatus],
+        resize_status: imageConstants.invertedResizeStatuses[params.resizeStatus]
       })
       .fire();
   }
@@ -188,24 +191,30 @@ class Image extends ModelBase {
    * Insert into images.
    *
    * @param {object} params
+   * @param {boolean} [params.shortenTwitterUrl]
    * @param {string} params.urlTemplate
    * @param {string} params.resolutions
-   * @param {number} params.status
+   * @param {string} params.resizeStatus
    * @param {number} params.id
+   * @param {number} params.userId
    *
    * @returns {object}
    */
   async updateImage(params) {
     const oThis = this;
 
-    // If twitter uel needs to be shorten
+    // If twitter url needs to be shorten.
     if (
       params.shortenTwitterUrl &&
       params.resolutions.original &&
-      params.resolutions.original.url.match(imageConst.twitterImageUrlPrefix[0])
+      params.resolutions.original.url.match(imageConstants.twitterImageUrlPrefix[0])
     ) {
       const imageLib = require(rootPrefix + '/lib/imageLib');
-      const shortenedUrl = imageLib.shortenUrl({ imageUrl: params.resolutions.original.url, isExternalUrl: true });
+      const shortenedUrl = imageLib.shortenUrl({
+        imageUrl: params.resolutions.original.url,
+        isExternalUrl: true,
+        userId: params.userId
+      });
       if (shortenedUrl.isFailure()) {
         return Promise.reject(responseHelper.error(shortenedUrl));
       }
@@ -218,7 +227,7 @@ class Image extends ModelBase {
       .update({
         url_template: params.urlTemplate,
         resolutions: JSON.stringify(resolutions),
-        status: imageConst.invertedStatuses[params.status]
+        resize_status: imageConstants.invertedResizeStatuses[params.resizeStatus]
       })
       .where({ id: params.id })
       .fire();
@@ -238,7 +247,7 @@ class Image extends ModelBase {
     const responseResolutionHash = {};
     for (const resolution in resolutions) {
       // While inserting original url has to be present in original resolutions hash only.
-      if (resolution === imageConst.originalResolution) {
+      if (resolution === imageConstants.originalResolution) {
         responseResolutionHash.o = oThis._formatResolutionToInsert(resolutions[resolution]);
         responseResolutionHash.o.u = resolutions[resolution].url;
       } else {
@@ -260,8 +269,8 @@ class Image extends ModelBase {
 
     const responseResolutionHash = {};
     for (const resolution in resolutions) {
-      if (resolution === imageConst.originalResolution) {
-        if (resolutions[resolution].url.match(imageConst.twitterImageUrlPrefix[1])) {
+      if (resolution === imageConstants.originalResolution) {
+        if (resolutions[resolution].url.match(imageConstants.twitterImageUrlPrefix[1])) {
           // If the url is twitter url then url is to be stored in resolutions hash.
           responseResolutionHash.o = oThis._formatResolutionToInsert(resolutions[resolution]);
           responseResolutionHash.o.u = resolutions[resolution].url;

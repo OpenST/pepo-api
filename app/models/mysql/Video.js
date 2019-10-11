@@ -37,6 +37,7 @@ class Video extends ModelBase {
    * @param {string} dbRow.resolutions
    * @param {number} dbRow.poster_image_id
    * @param {number} dbRow.status
+   * @param {number} dbRow.compression_status
    * @param {string} dbRow.created_at
    * @param {string} dbRow.updated_at
    *
@@ -52,6 +53,7 @@ class Video extends ModelBase {
       resolutions: JSON.parse(dbRow.resolutions),
       posterImageId: dbRow.poster_image_id,
       status: videoConstants.statuses[dbRow.status],
+      compressionStatus: videoConstants.compressionStatuses[dbRow.compression_status],
       createdAt: dbRow.created_at,
       updatedAt: dbRow.updated_at
     };
@@ -165,6 +167,7 @@ class Video extends ModelBase {
    * @param {object} params.resolutions
    * @param {number} params.posterImageId
    * @param {string} params.status
+   * @param {string} params.compressionStatus
    *
    * @return {Promise<object>}
    */
@@ -177,7 +180,8 @@ class Video extends ModelBase {
       .insert({
         resolutions: JSON.stringify(resolutions),
         poster_image_id: params.posterImageId,
-        status: videoConstants.invertedStatuses[params.status]
+        status: videoConstants.invertedStatuses[params.status],
+        compression_status: videoConstants.invertedCompressionStatuses[params.compressionStatus]
       })
       .fire();
   }
@@ -189,7 +193,8 @@ class Video extends ModelBase {
    * @param {number/string} params.id
    * @param {string} params.urlTemplate
    * @param {object} params.resolutions
-   * @param {string} params.status
+   * @param {string} [params.status]
+   * @param {string} [params.compressionStatus]
    *
    * @return {Promise<object>}
    */
@@ -198,14 +203,46 @@ class Video extends ModelBase {
 
     const resolutions = oThis._formatResolutionsToUpdate(params.resolutions);
 
+    const updateParams = {
+      url_template: params.urlTemplate,
+      resolutions: JSON.stringify(resolutions)
+    };
+
+    if (params.status) {
+      updateParams.status = videoConstants.invertedStatuses[params.status];
+    }
+
+    if (params.compressionStatus) {
+      updateParams.compression_status = videoConstants.invertedCompressionStatuses[params.compressionStatus];
+    }
+
     return oThis
-      .update({
-        url_template: params.urlTemplate,
-        resolutions: JSON.stringify(resolutions),
-        status: videoConstants.invertedStatuses[params.status]
-      })
+      .update(updateParams)
       .where({ id: params.id })
       .fire();
+  }
+
+  /**
+   * Mark videos deleted.
+   *
+   * @param {object} params
+   * @param {array<number/string>} params.ids
+   *
+   * @return {Promise<object>}
+   */
+  async markVideosDeleted(params) {
+    const oThis = this;
+
+    await oThis
+      .update({
+        status: videoConstants.invertedStatuses[videoConstants.deletedStatus]
+      })
+      .where({
+        id: params.ids
+      })
+      .fire();
+
+    await Video.flushCache({ ids: params.ids });
   }
 
   /**
@@ -279,14 +316,25 @@ class Video extends ModelBase {
    * Flush cache.
    *
    * @param {object} params
-   * @param {number} params.id
+   * @param {number} [params.id]
+   * @param {array<number>} [params.ids]
    *
    * @returns {Promise<*>}
    */
   static async flushCache(params) {
+    const promisesArray = [];
+
     const VideoByIds = require(rootPrefix + '/lib/cacheManagement/multi/VideoByIds');
 
-    await new VideoByIds({ ids: [params.id] }).clear();
+    if (params.id) {
+      promisesArray.push(new VideoByIds({ ids: [params.id] }).clear());
+    }
+
+    if (params.ids) {
+      promisesArray.push(new VideoByIds({ ids: params.ids }).clear());
+    }
+
+    await Promise.all(promisesArray);
   }
 }
 

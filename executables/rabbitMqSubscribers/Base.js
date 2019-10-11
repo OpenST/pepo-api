@@ -247,7 +247,7 @@ class ProcessorBase extends CronBase {
           errorObject = responseHelper.error({
             internal_error_identifier: 'unhandled_catch_response:e_rms_b_2',
             api_error_identifier: 'unhandled_catch_response',
-            debug_options: { error: err.toString() }
+            debug_options: { error: err.toString(), stack: err.stack }
           });
         }
         logger.error(' In catch block of services/Base.js', err);

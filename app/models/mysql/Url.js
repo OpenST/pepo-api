@@ -179,6 +179,35 @@ class Url extends ModelBase {
   }
 
   /**
+   * Get url details.
+   *
+   * @param {array} url
+   *
+   * @returns {Promise<void>}
+   */
+  async getUrls(url) {
+    const oThis = this;
+
+    return oThis
+      .select('*')
+      .where({ url: url })
+      .fire();
+  }
+
+  /**
+   * Insert urls.
+   *
+   * @param {array} insertArray
+   *
+   * @returns {Promise<*>}
+   */
+  async insertUrls(insertArray) {
+    const oThis = this;
+
+    return oThis.insertMultiple(['url', 'kind'], insertArray, { touch: true }).fire();
+  }
+
+  /**
    * Flush cache.
    *
    * @param {object} params
@@ -189,9 +218,7 @@ class Url extends ModelBase {
   static async flushCache(params) {
     const UrlsByIds = require(rootPrefix + '/lib/cacheManagement/multi/UrlsByIds');
 
-    await new UrlsByIds({
-      ids: [params.id]
-    }).clear();
+    await new UrlsByIds({ ids: [params.id] }).clear();
   }
 }
 

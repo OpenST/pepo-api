@@ -84,12 +84,17 @@ class UpdateUserNotificationVisitDetails extends ServiceBase {
   async _updateUserNotificationVisitDetails() {
     const oThis = this;
 
+    // TEMP code fix for 128 cassandra driver issue
+    if (oThis.userId == 128) {
+      return;
+    }
+
     const queryParams = {
       userId: oThis.userId,
-      lastVisitedAt: oThis.lastVisitedAt
+      activityLastVisitedAt: oThis.lastVisitedAt
     };
 
-    return new UserNotificationVisitDetailModel().updateLastVisitTime(queryParams);
+    return new UserNotificationVisitDetailModel().updateActivityLastVisitTime(queryParams);
   }
 }
 

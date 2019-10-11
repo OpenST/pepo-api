@@ -82,11 +82,7 @@ class UserProfileElementModel extends ModelBase {
 
       const formattedRow = oThis.formatDbData(dbRows[ind]);
 
-      if (result.hasOwnProperty(userId)) {
-        result[userId][formattedRow.dataKind] = formattedRow;
-      } else {
-        result[userId][formattedRow.dataKind] = formattedRow;
-      }
+      result[userId][formattedRow.dataKind] = formattedRow;
     }
 
     return result;
@@ -102,7 +98,7 @@ class UserProfileElementModel extends ModelBase {
 
     const currentTime = Math.floor(Date.now() / 1000);
 
-    return oThis
+    await oThis
       .insert({
         user_id: params.userId,
         data_kind: userProfileElementConst.invertedKinds[params.dataKind],
@@ -111,27 +107,8 @@ class UserProfileElementModel extends ModelBase {
         updated_at: currentTime
       })
       .fire();
-  }
 
-  /**
-   * Delete by user id and kind.
-   *
-   * @param {object} params
-   * @param {number} params.userId
-   * @param {string} params.dataKind
-   *
-   * @return {Promise<void>}
-   */
-  async deleteByUserIdAndKind(params) {
-    const oThis = this;
-
-    await oThis
-      .delete()
-      .where({
-        userId: params.userId,
-        data_kind: userProfileElementConst.invertedKinds[params.dataKind]
-      })
-      .fire();
+    return UserProfileElementModel.flushCache(params);
   }
 
   /**
@@ -165,7 +142,7 @@ class UserProfileElementModel extends ModelBase {
     const UserProfileElementsByUserIds = require(rootPrefix +
       '/lib/cacheManagement/multi/UserProfileElementsByUserIds');
 
-    await new UserProfileElementsByUserIds({ userIds: [params.userId] }).clear();
+    await new UserProfileElementsByUserIds({ usersIds: [params.userId] }).clear();
   }
 }
 

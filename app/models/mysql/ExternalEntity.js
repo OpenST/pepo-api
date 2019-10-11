@@ -56,7 +56,7 @@ class ExternalEntityModel extends ModelBase {
   }
 
   /**
-   * Fetch external entity by entity kind and entity id
+   * Fetch external entity by entity kind and entity id.
    *
    * @param {string} entityKind
    * @param {number} entityId
@@ -82,7 +82,7 @@ class ExternalEntityModel extends ModelBase {
   }
 
   /**
-   * Fetch external entity by id
+   * Fetch external entity by id.
    *
    * @param {number} id
    *
@@ -126,8 +126,8 @@ class ExternalEntityModel extends ModelBase {
    *
    * @param {object} params
    * @param {number} params.id
-   * @param {number} params.entityId
-   * @param {string} params.entityKind
+   * @param {number} [params.entityId]
+   * @param {string} [params.entityKind]
    *
    * @returns {Promise<*>}
    */

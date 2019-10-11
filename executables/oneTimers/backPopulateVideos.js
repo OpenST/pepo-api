@@ -2,7 +2,7 @@ const rootPrefix = '../..',
   VideoModel = require(rootPrefix + '/app/models/mysql/TempVideo'),
   util = require(rootPrefix + '/lib/util'),
   s3Constants = require(rootPrefix + '/lib/globalConstant/s3'),
-  videoConst = require(rootPrefix + '/lib/globalConstant/video'),
+  videoConstants = require(rootPrefix + '/lib/globalConstant/video'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger');
 
 const isQualityChanged = process.argv[2] || false;
@@ -83,7 +83,7 @@ class BackPopulateVideos {
    * @private
    */
   async _updateResolutionInNewFormat(dbRow) {
-    console.log('=====dbRow====', dbRow);
+    logger.log('=====dbRow====', dbRow);
 
     const resolutions = JSON.parse(dbRow.resolutions);
     let urlTemplate = null;
@@ -106,12 +106,12 @@ class BackPopulateVideos {
       }
     }
 
-    console.log('====urlTemplate===', urlTemplate);
+    logger.log('====urlTemplate===', urlTemplate);
 
     const paramsToUpdate = {
       urlTemplate: urlTemplate,
       resolutions: { o: resolutions },
-      status: videoConst.notCompressedStatus,
+      compressionStatus: videoConstants.notCompressedStatus,
       id: dbRow.id
     };
 

@@ -30,6 +30,24 @@ class UserNotificationModel extends CassandraModelBase {
   }
 
   /**
+   * Keys for table user_notifications
+   *
+   * @returns {{partition: string[], sort: string[]}}
+   */
+  keyObject() {
+    const namesMap = userNotificationConstants.shortToLongNamesMap;
+
+    return {
+      partition: [namesMap.user_id, namesMap.last_action_timestamp, namesMap.uuid],
+      sort: [namesMap.last_action_timestamp]
+    };
+  }
+
+  get longToShortNamesMap() {
+    return userNotificationConstants.longToShortNamesMap;
+  }
+
+  /**
    * Fetch by creator user id.
    *
    * @param {integer} params.limit: no of rows to fetch
@@ -157,6 +175,7 @@ class UserNotificationModel extends CassandraModelBase {
    */
   createInsertQueryString(insertParameters) {
     const oThis = this;
+
     let queryString = `insert into ${oThis.queryTableName} (`,
       valueString = 'values (';
 
@@ -216,6 +235,7 @@ class UserNotificationModel extends CassandraModelBase {
    */
   async fetchUserNotification(queryParams) {
     const oThis = this;
+
     const lastActionTimestampKey = ParametersFormatter.getColumnNameForQuery('lastActionTimestamp'),
       userIdKey = ParametersFormatter.getColumnNameForQuery('userId'),
       uuidKey = ParametersFormatter.getColumnNameForQuery('uuid');
@@ -309,20 +329,16 @@ class UserNotificationModel extends CassandraModelBase {
    * Flush cache.
    *
    * @param {object} params
-   * @param {number} params.userId
+   * @param {number} [params.userId]
    *
    * @returns {Promise<*>}
    */
   static async flushCache(params) {
-    const promisesArray = [];
-
     if (params.userId) {
       const UserNotificationsByUserIdPagination = require(rootPrefix +
         '/lib/cacheManagement/single/UserNotificationsByUserIdPagination');
-      promisesArray.push(new UserNotificationsByUserIdPagination({ userId: [params.userId] }).clear());
+      await new UserNotificationsByUserIdPagination({ userId: params.userId }).clear();
     }
-
-    await Promise.all(promisesArray);
   }
 }
 

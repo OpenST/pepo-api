@@ -1,3 +1,5 @@
+const uuidV4 = require('uuid/v4');
+
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   UserModel = require(rootPrefix + '/app/models/mysql/User'),
@@ -21,7 +23,9 @@ const rootPrefix = '../../..',
   ostPlatformSdk = require(rootPrefix + '/lib/ostPlatform/jsSdkWrapper'),
   basicHelper = require(rootPrefix + '/helpers/basic'),
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
-  tokenUserConstants = require(rootPrefix + '/lib/globalConstant/tokenUser');
+  tokenUserConstants = require(rootPrefix + '/lib/globalConstant/tokenUser'),
+  UserByEmailCache = require(rootPrefix + '/lib/cacheManagement/multi/UserByEmails'),
+  prelaunchInviteConstants = require(rootPrefix + '/lib/globalConstant/preLaunchInvite');
 
 /**
  * Class for Twitter Signup service.
@@ -37,6 +41,10 @@ class TwitterSignup extends ServiceBase {
    * @param {string} params.userTwitterEntity: User Entity Of Twitter
    * @param {string} params.token: Oauth User Token
    * @param {string} params.secret: Oauth User secret
+   * @param {Object} params.twitterRespHeaders: Headers sent by twitter
+   *
+   * @param {string} params.inviterCodeId: invite code table id of inviter
+   * @param {object} params.prelaunchInviteObj: prelaunch invite object, if user was part of pre-launch program
    *
    * @augments ServiceBase
    *
@@ -51,10 +59,13 @@ class TwitterSignup extends ServiceBase {
     oThis.userTwitterEntity = params.userTwitterEntity;
     oThis.token = params.token;
     oThis.secret = params.secret;
+    oThis.inviterCodeId = params.inviterCodeId;
+    oThis.twitterRespHeaders = params.twitterRespHeaders;
+    oThis.prelaunchInviteObj = params.prelaunchInviteObj || {};
 
     oThis.userId = null;
 
-    oThis.secureUserObj = null;
+    oThis.userObj = null;
     oThis.tokenUserObj = null;
 
     oThis.encryptedEncryptionSalt = null;
@@ -68,6 +79,8 @@ class TwitterSignup extends ServiceBase {
 
     oThis.ostUserId = null;
     oThis.ostStatus = null;
+    oThis.userOptedInEmail = null;
+    oThis.twitterUserExtended = null;
   }
 
   /**
@@ -100,6 +113,7 @@ class TwitterSignup extends ServiceBase {
 
     promisesArray1.push(oThis._saveProfileImage());
     promisesArray1.push(oThis._setUserName());
+    promisesArray1.push(oThis._emailToSet());
     promisesArray1.push(oThis._setKMSEncryptionSalt());
 
     await Promise.all(promisesArray1).catch(function(err) {
@@ -271,6 +285,7 @@ class TwitterSignup extends ServiceBase {
 
     const createUserServiceResponse = await ostPlatformSdk.createUser();
     if (!createUserServiceResponse.isSuccess()) {
+      await createErrorLogsEntry.perform(createUserServiceResponse, errorLogsConstants.highSeverity);
       return Promise.reject(createUserServiceResponse);
     }
 
@@ -295,17 +310,17 @@ class TwitterSignup extends ServiceBase {
 
     logger.log('Start::Create user');
 
-    let propertyVal = new UserModel().setBitwise('properties', 0, userConstants.hasTwitterLoginProperty);
-
     let insertData = {
       user_name: oThis.userName,
       name: oThis.userTwitterEntity.formattedName,
       cookie_token: oThis.encryptedCookieToken,
       encryption_salt: oThis.encryptedEncryptionSalt,
       mark_inactive_trigger_count: 0,
-      properties: propertyVal,
+      properties: oThis._userPropertiesToSet(),
       status: userConstants.invertedStatuses[userConstants.activeStatus],
-      profile_image_id: oThis.profileImageId
+      profile_image_id: oThis.profileImageId,
+      email: oThis.userOptedInEmail,
+      external_user_id: uuidV4()
     };
 
     let retryCount = 3,
@@ -350,11 +365,11 @@ class TwitterSignup extends ServiceBase {
 
     Object.assign(insertData, insertResponse.defaultUpdatedAttributes);
 
-    oThis.secureUserObj = new UserModel().formatDbData(insertData);
+    oThis.userObj = new UserModel().formatDbData(insertData);
 
-    await UserModel.flushCache(oThis.secureUserObj);
+    await UserModel.flushCache(oThis.userObj);
 
-    oThis.userId = oThis.secureUserObj.id;
+    oThis.userId = oThis.userObj.id;
 
     logger.log('End::Create user');
 
@@ -372,11 +387,14 @@ class TwitterSignup extends ServiceBase {
 
     logger.log('Start::Create Twitter User Extended Obj');
 
+    let accessType = twitterUserExtendedConstants.getAccessLevelFromTwitterHeader(oThis.twitterRespHeaders);
+
     let insertData = {
       twitter_user_id: oThis.twitterUserObj.id,
       user_id: oThis.userId,
       token: oThis.token,
       secret: oThis.encryptedSecret,
+      access_type: twitterUserExtendedConstants.invertedAccessTypes[accessType],
       status: twitterUserExtendedConstants.invertedStatuses[twitterUserExtendedConstants.activeStatus]
     };
     // Insert user in database.
@@ -390,8 +408,8 @@ class TwitterSignup extends ServiceBase {
     insertData.id = insertResponse.insertId;
     Object.assign(insertData, insertResponse.defaultUpdatedAttributes);
 
-    let twitterUserExtendedObj = new TwitterUserExtendedModel().formatDbData(insertData);
-    await TwitterUserExtendedModel.flushCache(twitterUserExtendedObj);
+    oThis.twitterUserExtended = new TwitterUserExtendedModel().formatDbData(insertData);
+    await TwitterUserExtendedModel.flushCache(oThis.twitterUserExtended);
 
     logger.log('End::Create Twitter User Extended Obj');
 
@@ -409,10 +427,13 @@ class TwitterSignup extends ServiceBase {
 
     logger.log('Start::Create/Update Twitter User Obj');
 
+    let twitterHandle = oThis.userTwitterEntity.handle;
+
     if (oThis.twitterUserObj) {
       await new TwitterUserModel()
         .update({
-          user_id: oThis.userId
+          user_id: oThis.userId,
+          handle: twitterHandle
         })
         .where({ id: oThis.twitterUserObj.id })
         .fire();
@@ -431,6 +452,7 @@ class TwitterSignup extends ServiceBase {
         user_id: oThis.userId,
         name: oThis.userTwitterEntity.formattedName,
         email: twitterEmail,
+        handle: twitterHandle,
         profile_image_url: oThis.userTwitterEntity.nonDefaultProfileImageShortUrl
       };
       // Insert user in database.
@@ -507,7 +529,10 @@ class TwitterSignup extends ServiceBase {
       twitterUserId: oThis.twitterUserObj.id,
       twitterId: oThis.userTwitterEntity.idStr,
       userId: oThis.userId,
-      profileImageId: oThis.profileImageId
+      profileImageId: oThis.profileImageId,
+      inviterCodeId: oThis.inviterCodeId,
+      userInviteCodeId: oThis.prelaunchInviteObj.inviteCodeId,
+      isCreator: UserModel.isUserApprovedCreator(oThis.userObj)
     };
     await bgJob.enqueue(bgJobConstants.afterSignUpJobTopic, messagePayload);
   }
@@ -523,22 +548,84 @@ class TwitterSignup extends ServiceBase {
 
     logger.log('Start::Service Response for twitter Signup');
 
-    const userLoginCookieValue = new UserModel().getCookieValueFor(oThis.secureUserObj, oThis.decryptedEncryptionSalt, {
+    const userLoginCookieValue = new UserModel().getCookieValueFor(oThis.userObj, oThis.decryptedEncryptionSalt, {
       timestamp: Date.now() / 1000
     });
 
     logger.log('End::Service Response for twitter Signup');
 
-    const safeFormattedUserData = new UserModel().safeFormattedData(oThis.secureUserObj);
+    const safeFormattedUserData = new UserModel().safeFormattedData(oThis.userObj);
     const safeFormattedTokenUserData = new TokenUserModel().safeFormattedData(oThis.tokenUserObj);
+    const safeFormattedTwitterUserExtendedData = new TwitterUserExtendedModel().safeFormattedData(
+      oThis.twitterUserExtended
+    );
 
     return responseHelper.successWithData({
       usersByIdMap: { [safeFormattedUserData.id]: safeFormattedUserData },
       tokenUsersByUserIdMap: { [safeFormattedTokenUserData.userId]: safeFormattedTokenUserData },
       user: safeFormattedUserData,
       tokenUser: safeFormattedTokenUserData,
-      userLoginCookieValue: userLoginCookieValue
+      userLoginCookieValue: userLoginCookieValue,
+      openEmailAddFlow: oThis.userOptedInEmail ? 0 : 1,
+      twitterUserExtended: safeFormattedTwitterUserExtendedData
     });
+  }
+
+  /**
+   * Properties to set for user
+   *
+   * @returns {number}
+   * @private
+   */
+  _userPropertiesToSet() {
+    const oThis = this;
+
+    let propertyVal = new UserModel().setBitwise('properties', 0, userConstants.hasTwitterLoginProperty);
+
+    // If user was part of prelaunch program and was approved as creator
+    if (
+      CommonValidators.validateNonEmptyObject(oThis.prelaunchInviteObj) &&
+      oThis.prelaunchInviteObj.creatorStatus == prelaunchInviteConstants.approvedCreatorStatus
+    ) {
+      propertyVal = new UserModel().setBitwise('properties', propertyVal, userConstants.isApprovedCreatorProperty);
+    } else {
+      // Till user uploads video, its denied to be creator.
+      propertyVal = new UserModel().setBitwise('properties', propertyVal, userConstants.isDeniedCreatorProperty);
+    }
+
+    return propertyVal;
+  }
+
+  /**
+   * Email of user to set
+   *
+   * @Sets oThis.userOptedInEmail
+   *
+   * @returns {Promise<*>}
+   * @private
+   */
+  async _emailToSet() {
+    const oThis = this;
+
+    // Check if email is received from twitter
+    if (oThis.userTwitterEntity.email && CommonValidators.isValidEmail(oThis.userTwitterEntity.email)) {
+      oThis.userOptedInEmail = oThis.userTwitterEntity.email;
+    } else if (
+      CommonValidators.validateNonEmptyObject(oThis.prelaunchInviteObj) &&
+      oThis.prelaunchInviteObj.status == prelaunchInviteConstants.doptinStatus
+    ) {
+      // If user was part of prelaunch program and has double opted in for email, then use it
+      oThis.userOptedInEmail = oThis.prelaunchInviteObj.email;
+    }
+
+    // Check if that email is already used or not
+    if (oThis.userOptedInEmail) {
+      let emailCacheResp = await new UserByEmailCache({ emails: [oThis.userOptedInEmail] }).fetch();
+      if (CommonValidators.validateNonEmptyObject(emailCacheResp.data[oThis.userOptedInEmail])) {
+        // Email is already used, so cannot be added.
+        oThis.userOptedInEmail = null;
+      }
+    }
   }
 }
 

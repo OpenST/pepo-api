@@ -3,41 +3,29 @@ const rootPrefix = '../../..',
   paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination');
 
 const v1Signature = {
-  [apiName.signUp]: {
-    mandatory: [
+  [apiName.logout]: {
+    mandatory: [],
+    optional: [
       {
-        parameter: 'user_name',
-        validatorMethods: ['validateString', 'validateUserName']
+        parameter: 'device_id',
+        validatorMethods: ['validateString']
       },
       {
-        parameter: 'first_name',
-        validatorMethods: ['validateString', 'validateName']
-      },
-      {
-        parameter: 'last_name',
-        validatorMethods: ['validateString', 'validateName']
-      },
-      {
-        parameter: 'password',
-        validatorMethods: ['validateString', 'validatePassword']
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
       }
-    ],
-    optional: []
-  },
-  [apiName.login]: {
-    mandatory: [
-      {
-        parameter: 'user_name',
-        validatorMethods: ['validateString', 'validateUserName']
-      },
-      {
-        parameter: 'password',
-        validatorMethods: ['validateString', 'validatePassword']
-      }
-    ],
-    optional: []
+    ]
   },
   [apiName.recoveryInfo]: {
+    mandatory: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      }
+    ],
+    optional: []
+  },
+  [apiName.getInviteCode]: {
     mandatory: [
       {
         parameter: 'current_user',
@@ -130,33 +118,6 @@ const v1Signature = {
     ],
     optional: []
   },
-  [apiName.gifsSearch]: {
-    mandatory: [
-      {
-        parameter: 'query',
-        validatorMethods: ['validateString']
-      }
-    ],
-    optional: [
-      {
-        parameter: paginationConstants.paginationIdentifierKey,
-        validatorMethods: ['validateString']
-      }
-    ]
-  },
-  [apiName.gifsTrending]: {
-    mandatory: [],
-    optional: [
-      {
-        parameter: paginationConstants.paginationIdentifierKey,
-        validatorMethods: ['validateString']
-      }
-    ]
-  },
-  [apiName.gifsCategories]: {
-    mandatory: [],
-    optional: []
-  },
   [apiName.ostTransaction]: {
     mandatory: [
       {
@@ -172,6 +133,10 @@ const v1Signature = {
       {
         parameter: 'meta',
         validatorMethods: ['validateNonEmptyObject', 'validateOstTransactionMeta']
+      },
+      {
+        parameter: 'is_paper_plane',
+        validatorMethods: ['validateBoolean']
       }
     ]
   },
@@ -193,6 +158,27 @@ const v1Signature = {
       }
     ]
   },
+
+  [apiName.getRedemptionProductUrl]: {
+    mandatory: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      }
+    ],
+    optional: []
+  },
+
+  [apiName.getSupportUrl]: {
+    mandatory: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      }
+    ],
+    optional: []
+  },
+
   [apiName.twitterLogin]: {
     mandatory: [
       {
@@ -212,7 +198,12 @@ const v1Signature = {
         validatorMethods: ['validateNonBlankString']
       }
     ],
-    optional: []
+    optional: [
+      {
+        parameter: 'invite_code',
+        validatorMethods: ['validateNonBlankString']
+      }
+    ]
   },
   [apiName.getUserProfile]: {
     mandatory: [
@@ -279,7 +270,15 @@ const v1Signature = {
       {
         parameter: 'image_size',
         validatorMethods: ['validateInteger']
-      }
+      },
+      {
+        parameter: 'video_description',
+        validatorMethods: ['validateString', 'validateStopWords']
+      },
+      {
+        parameter: 'link',
+        validatorMethods: ['validateString', 'validateStopWords']
+      } // If link is invalid, consider empty string.
     ]
   },
   [apiName.saveProfileImage]: {
@@ -324,23 +323,66 @@ const v1Signature = {
       },
       {
         parameter: 'name',
-        validatorMethods: ['validateString', 'validateName']
+        validatorMethods: ['validateString', 'validateName', 'validateStopWords']
       },
       {
         parameter: 'user_name',
-        validatorMethods: ['validateString', 'validateUserName']
+        validatorMethods: ['validateString', 'validateUserName', 'validateStopWords']
       }
     ],
     optional: [
       {
         parameter: 'bio',
-        validatorMethods: ['validateString']
+        validatorMethods: ['validateString', 'validateStopWords']
       },
       {
         parameter: 'link',
-        validatorMethods: ['validateGenericUrl']
+        validatorMethods: ['validateGenericUrl', 'validateStopWords']
       }
     ]
+  },
+  [apiName.saveEmail]: {
+    mandatory: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      },
+      {
+        parameter: 'profile_user_id',
+        validatorMethods: ['validateNonZeroInteger']
+      },
+      {
+        parameter: 'email',
+        validatorMethods: ['validateString', 'isValidEmail']
+      }
+    ],
+    optional: []
+  },
+  [apiName.blockOtherUserForUser]: {
+    mandatory: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      },
+      {
+        parameter: 'profile_user_id',
+        validatorMethods: ['validateNonZeroInteger']
+      }
+    ],
+    optional: []
+  },
+  [apiName.unBlockOtherUserForUser]: {
+    mandatory: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      },
+      {
+        parameter: 'profile_user_id',
+        validatorMethods: ['validateNonZeroInteger']
+      }
+    ],
+    optional: []
   },
   [apiName.getTags]: {
     mandatory: [
@@ -454,12 +496,276 @@ const v1Signature = {
       },
       {
         parameter: 'text',
-        validatorMethods: ['validateString']
+        validatorMethods: ['validateString', 'validateStopWords']
+      }
+    ],
+    optional: [
+      {
+        parameter: 'tweet_needed',
+        validatorMethods: ['validateInteger']
       }
     ]
   },
   [apiName.twitterDisconnect]: {
+    mandatory: [],
+    optional: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      }
+    ]
+  },
+  [apiName.userSearch]: {
+    mandatory: [],
+    optional: [
+      {
+        parameter: 'q',
+        validatorMethods: ['validateString']
+      },
+      {
+        parameter: paginationConstants.paginationIdentifierKey,
+        validatorMethods: ['validateString', 'validatePaginationIdentifier']
+      }
+    ]
+  },
+  [apiName.getEmail]: {
     mandatory: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      }
+    ],
+    optional: []
+  },
+  [apiName.addDeviceToken]: {
+    mandatory: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      },
+      {
+        parameter: 'device_id',
+        validatorMethods: ['validateNonBlankString']
+      },
+      {
+        parameter: 'device_kind',
+        validatorMethods: ['validateNonBlankString']
+      },
+      {
+        parameter: 'device_token',
+        validatorMethods: ['validateNonBlankString']
+      },
+      {
+        parameter: 'user_timezone',
+        validatorMethods: ['validateNonBlankString']
+      }
+    ]
+  },
+
+  [apiName.getTopupProducts]: {
+    mandatory: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      },
+      {
+        parameter: 'os',
+        validatorMethods: ['validateString']
+      }
+    ],
+    optional: []
+  },
+
+  [apiName.createTopup]: {
+    mandatory: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      },
+      {
+        parameter: 'response',
+        validatorMethods: ['validateNonEmptyObject']
+      },
+      {
+        parameter: 'os',
+        validatorMethods: ['validateString']
+      },
+      {
+        parameter: 'user_id',
+        validatorMethods: ['validateNonZeroInteger']
+      }
+    ],
+    optional: []
+  },
+
+  [apiName.getPendingTopups]: {
+    mandatory: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      }
+    ],
+    optional: []
+  },
+
+  [apiName.getTopupById]: {
+    mandatory: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      },
+      {
+        parameter: 'payment_id',
+        validatorMethods: ['validateNonZeroInteger']
+      }
+    ],
+    optional: [
+      {
+        parameter: 'transaction_id',
+        validatorMethods: ['validateString']
+      }
+    ]
+  },
+
+  [apiName.resetBadge]: {
+    mandatory: [
+      {
+        parameter: 'user_id',
+        validatorMethods: ['validateNonZeroInteger']
+      },
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      }
+    ]
+  },
+  [apiName.share]: {
+    mandatory: [
+      {
+        parameter: 'video_id',
+        validatorMethods: ['validateInteger']
+      }
+    ],
+    optional: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      }
+    ]
+  },
+  [apiName.refreshTwitterConnect]: {
+    mandatory: [
+      {
+        parameter: 'token',
+        validatorMethods: ['validateNonBlankString']
+      },
+      {
+        parameter: 'secret',
+        validatorMethods: ['validateNonBlankString']
+      },
+      {
+        parameter: 'twitter_id',
+        validatorMethods: ['validateNonBlankString']
+      },
+      {
+        parameter: 'handle',
+        validatorMethods: ['validateNonBlankString']
+      },
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      }
+    ],
+    optional: []
+  },
+  [apiName.tweetInfo]: {
+    mandatory: [
+      {
+        parameter: 'receiver_user_id',
+        validatorMethods: ['validateNonZeroInteger']
+      },
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      }
+    ],
+    optional: []
+  },
+  [apiName.invitedUsersSearch]: {
+    mandatory: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      }
+    ],
+    optional: [
+      {
+        parameter: paginationConstants.paginationIdentifierKey,
+        validatorMethods: ['validateString', 'validatePaginationIdentifier']
+      }
+    ]
+  },
+  [apiName.fetchGoto]: {
+    mandatory: [
+      {
+        parameter: 'url',
+        validatorMethods: ['validateGenericUrl']
+      }
+    ],
+    optional: []
+  },
+  [apiName.reportIssueForWeb]: {
+    mandatory: [
+      {
+        parameter: 'app_name',
+        validatorMethods: ['validateString']
+      }
+    ],
+    optional: [
+      {
+        parameter: 'kind',
+        validatorMethods: ['validateString']
+      },
+      {
+        parameter: 'error_data',
+        validatorMethods: ['validateNonEmptyObject']
+      }
+    ]
+  },
+  [apiName.activationInitiate]: {
+    mandatory: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      }
+    ],
+    optional: []
+  },
+  [apiName.deleteVideo]: {
+    mandatory: [
+      {
+        parameter: 'video_id',
+        validatorMethods: ['validateNonZeroInteger']
+      },
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      }
+    ],
+    optional: []
+  },
+  [apiName.reportIssue]: {
+    mandatory: [
+      {
+        parameter: 'report_entity_id',
+        validatorMethods: ['validateNonZeroInteger']
+      },
+      {
+        parameter: 'report_entity_kind',
+        validatorMethods: ['validateNonBlankString']
+      }
+    ],
+    optional: [
       {
         parameter: 'current_user',
         validatorMethods: ['validateNonEmptyObject']

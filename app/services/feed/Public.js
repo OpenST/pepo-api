@@ -1,7 +1,15 @@
 const rootPrefix = '../../..',
   FeedBase = require(rootPrefix + '/app/services/feed/Base'),
+  FeedModel = require(rootPrefix + '/app/models/mysql/Feed'),
+  CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   LoggedOutFeedCache = require(rootPrefix + '/lib/cacheManagement/single/LoggedOutFeed'),
+  FeedByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/FeedByIds'),
+  PersonalizedFeedByUserIdCache = require(rootPrefix + '/lib/cacheManagement/single/PersonalizedFeedByUserId'),
+  UserNotificationVisitDetailModel = require(rootPrefix + '/app/models/cassandra/UserNotificationVisitDetail'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
+  basicHelper = require(rootPrefix + '/helpers/basic'),
+  feedConstants = require(rootPrefix + '/lib/globalConstant/feed'),
+  coreConstants = require(rootPrefix + '/config/coreConstants'),
   paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination');
 
 /**
@@ -28,14 +36,18 @@ class PublicVideoFeed extends FeedBase {
 
     oThis.paginationIdentifier = params[paginationConstants.paginationIdentifierKey] || null;
 
-    oThis.feeds = [];
-    oThis.userIds = [];
-    oThis.videoIds = [];
-    oThis.profileResponse = {};
-    oThis.finalResponse = {};
-
     oThis.limit = oThis._defaultPageLimit();
     oThis.paginationTimestamp = null;
+    oThis.nextPaginationTimestamp = null;
+    oThis.pageNumber = null;
+    oThis.nextPageNumber = null;
+
+    oThis.feedIdsLengthFromCache = 0;
+    oThis.lastVisitedAt = 0;
+    oThis.newFeedIds = [];
+    oThis.olderFeedIds = [];
+
+    oThis.userFeedIdsCacheData = null;
   }
 
   /**
@@ -59,12 +71,26 @@ class PublicVideoFeed extends FeedBase {
       const parsedPaginationParams = oThis._parsePaginationParams(oThis.paginationIdentifier);
 
       oThis.paginationTimestamp = parsedPaginationParams.pagination_timestamp; // Override paginationTimestamp number.
+      oThis.pageNumber = Number(parsedPaginationParams.page_no) || 1; // Override paginationTimestamp number.
     } else {
       oThis.paginationTimestamp = null;
+      oThis.pageNumber = 1;
     }
 
     // Validate limit.
     return oThis._validatePageSize();
+  }
+
+  /**
+   * Whether to shuffle feeds.
+   *
+   * @returns {Boolean}
+   * @private
+   */
+  _showShuffledFeeds() {
+    const oThis = this;
+
+    return oThis.currentUserId;
   }
 
   /**
@@ -78,6 +104,309 @@ class PublicVideoFeed extends FeedBase {
   async _setFeedIds() {
     const oThis = this;
 
+    if (oThis._showShuffledFeeds()) {
+      console.log(
+        `PERSONALIZED FEED:${oThis.currentUserId} oThis.pageNumber================================`,
+        oThis.pageNumber
+      );
+      if (oThis.pageNumber > 1) {
+        await oThis.fetchFeedIdsForUserFromCache();
+
+        if (oThis.feedIdsLengthFromCache === 0) {
+          oThis.pageNumber = 1;
+          await oThis.fetchFeedIdsForFirstPage(false);
+        }
+      } else {
+        await oThis.fetchFeedIdsForFirstPage(true);
+      }
+
+      await oThis._setFeedDataForLoggedInUser();
+    } else {
+      await oThis._setFeedDataForLoggedOutUser();
+    }
+
+    await oThis._filterFeedData();
+  }
+
+  /**
+   * Set feed ids for first page of logged in user.
+   *
+   * @returns {Promise<*>}
+   * @private
+   */
+  async fetchFeedIdsForFirstPage(getUserFeedIdsFromCache) {
+    const oThis = this;
+
+    let promises = [];
+
+    await oThis.getLastVisitTime();
+    promises.push(oThis.fetchNewFeedIds());
+
+    if (getUserFeedIdsFromCache) {
+      promises.push(oThis.fetchFeedIdsForUserFromCache());
+    }
+
+    await Promise.all(promises);
+
+    if (oThis.newFeedIds.length > 0) {
+      oThis.userFeedIdsCacheData['unseenFeedIds'] = oThis.newFeedIds.concat(
+        oThis.userFeedIdsCacheData['unseenFeedIds']
+      );
+
+      oThis.userFeedIdsCacheData['unseenFeedIds'] = [...new Set(oThis.userFeedIdsCacheData['unseenFeedIds'])];
+      oThis.userFeedIdsCacheData['unseenFeedIds'] = oThis.userFeedIdsCacheData['unseenFeedIds'].splice(
+        0,
+        feedConstants.personalizedFeedMaxIdsCount
+      );
+    }
+
+    if (oThis.newFeedIds.length > 0 || oThis.userFeedIdsCacheData['seenFeedIds'].length === 0) {
+      await oThis.fetchOlderFeedIds();
+      oThis.userFeedIdsCacheData['seenFeedIds'] = oThis.olderFeedIds;
+    }
+
+    oThis.userFeedIdsCacheData['seenFeedIds'] = basicHelper.shuffleArray(oThis.userFeedIdsCacheData['seenFeedIds']);
+
+    oThis.feedIdsLengthFromCache =
+      oThis.userFeedIdsCacheData['seenFeedIds'].length + oThis.userFeedIdsCacheData['unseenFeedIds'].length;
+
+    return responseHelper.successWithData({});
+  }
+
+  /**
+   * Set older feed ids before last visit time.
+   *
+   * @sets oThis.olderFeedIds
+   *
+   * @returns {Promise<*>}
+   * @private
+   */
+  async fetchOlderFeedIds() {
+    const oThis = this,
+      limit = feedConstants.personalizedFeedMaxIdsCount - oThis.userFeedIdsCacheData['unseenFeedIds'].length;
+
+    if (limit <= 0) {
+      return responseHelper.successWithData({});
+    }
+
+    const queryParams = {
+      feedIds: oThis.userFeedIdsCacheData['unseenFeedIds'],
+      limit: limit
+    };
+
+    oThis.olderFeedIds = await new FeedModel().getOlderFeedIds(queryParams);
+    console.log(
+      `PERSONALIZED FEED:${oThis.currentUserId} oThis.olderFeedIds================================`,
+      oThis.olderFeedIds
+    );
+    return responseHelper.successWithData({});
+  }
+
+  /**
+   * Get feed last visit time of User.
+   *
+   * @sets oThis.lastVisitedAt
+   *
+   * @returns {Promise<*>}
+   * @private
+   */
+  async getLastVisitTime() {
+    const oThis = this;
+
+    const queryParams = {
+      userId: oThis.currentUserId
+    };
+
+    const userNotificationVisitDetailsResp = await new UserNotificationVisitDetailModel().fetchLatestSeenFeedTime(
+      queryParams
+    );
+
+    oThis.lastVisitedAt = Math.round((userNotificationVisitDetailsResp.latestSeenFeedTime || 0) / 1000);
+
+    return responseHelper.successWithData({});
+  }
+
+  /**
+   * Set feed last visit time of User.
+   *
+   * @sets oThis.lastVisitedAt
+   *
+   * @returns {Promise<*>}
+   * @private
+   */
+  async updateFeedLastVisitTime() {
+    const oThis = this;
+
+    const queryParams = {
+      userId: oThis.currentUserId,
+      latestSeenFeedTime: Date.now()
+    };
+
+    return new UserNotificationVisitDetailModel().updateLatestSeenFeedTime(queryParams);
+  }
+
+  /**
+   * Get User feed ids for unseen and seen from cache.
+   *
+   * @sets oThis.userFeedIdsCacheData
+   *
+   * @returns {Promise<*>}
+   * @private
+   */
+  async setFeedIdsForUserInCache() {
+    const oThis = this;
+
+    const cacheResp = await new PersonalizedFeedByUserIdCache({ userId: oThis.currentUserId }).setCacheData(
+      oThis.userFeedIdsCacheData
+    );
+
+    if (cacheResp.isFailure()) {
+      return Promise.reject(cacheResp);
+    }
+
+    return responseHelper.successWithData({});
+  }
+
+  /**
+   * Get User feed ids for unseen and seen from cache.
+   *
+   * @sets oThis.userFeedIdsCacheData
+   *
+   * @returns {Promise<*>}
+   * @private
+   */
+  async fetchFeedIdsForUserFromCache() {
+    const oThis = this;
+
+    const cacheResp = await new PersonalizedFeedByUserIdCache({ userId: oThis.currentUserId }).fetch();
+
+    if (cacheResp.isFailure()) {
+      return Promise.reject(cacheResp);
+    }
+
+    if (CommonValidators.validateNonEmptyObject(cacheResp.data)) {
+      oThis.userFeedIdsCacheData = cacheResp.data;
+
+      oThis.feedIdsLengthFromCache =
+        oThis.userFeedIdsCacheData['seenFeedIds'].length + oThis.userFeedIdsCacheData['unseenFeedIds'].length;
+    } else {
+      oThis.userFeedIdsCacheData = { seenFeedIds: [], unseenFeedIds: [] };
+      oThis.feedIdsLengthFromCache = 0;
+    }
+  }
+
+  /**
+   * Set new feed ids since last visit time.
+   *
+   * @sets oThis.newFeedIds
+   *
+   * @returns {Promise<*>}
+   * @private
+   */
+  async fetchNewFeedIds() {
+    const oThis = this;
+
+    const queryParams = {
+      lastVisitedAt: oThis.lastVisitedAt,
+      limit: feedConstants.personalizedFeedMaxIdsCount
+    };
+
+    oThis.newFeedIds = await new FeedModel().getNewFeedIdsAfterTime(queryParams);
+    console.log(
+      `PERSONALIZED FEED:${oThis.currentUserId} oThis.newFeedIds================================`,
+      oThis.newFeedIds
+    );
+    await oThis.updateFeedLastVisitTime();
+  }
+
+  /**
+   * Set feed data for logged in users.
+   *
+   * @sets oThis.feedIds, oThis.feedsMap, oThis.nextPaginationTimestamp
+   *
+   * @returns {Promise<*>}
+   * @private
+   */
+  async _setFeedDataForLoggedInUser() {
+    const oThis = this;
+
+    let currentFeedIds = [];
+
+    if (oThis.lastVisitedAt > 0 || oThis.pageNumber > 1) {
+      currentFeedIds = oThis.userFeedIdsCacheData['unseenFeedIds'].splice(0, oThis.limit);
+    } else {
+      currentFeedIds = oThis.userFeedIdsCacheData['unseenFeedIds'].slice(0, oThis.limit);
+    }
+
+    let unseenLength = currentFeedIds.length;
+
+    if (unseenLength === 0 && oThis.feedIdsLengthFromCache <= (oThis.pageNumber - 1) * oThis.limit) {
+      return responseHelper.successWithData({});
+    }
+
+    let diff = oThis.limit - unseenLength;
+
+    if (diff > 0) {
+      let ids = [];
+
+      if (oThis.lastVisitedAt > 0 || oThis.pageNumber > 1) {
+        ids = oThis.userFeedIdsCacheData['seenFeedIds'].splice(0, diff);
+      } else {
+        ids = oThis.userFeedIdsCacheData['seenFeedIds'].slice(0, diff);
+      }
+
+      currentFeedIds = currentFeedIds.concat(ids);
+    }
+
+    if (currentFeedIds.length > 0) {
+      if (oThis.lastVisitedAt > 0 || oThis.pageNumber > 1) {
+        oThis.userFeedIdsCacheData['seenFeedIds'] = oThis.userFeedIdsCacheData['seenFeedIds'].concat(currentFeedIds);
+      } else {
+        //DO Nothing
+      }
+
+      const feedByIdsCacheResponse = await new FeedByIdsCache({ ids: currentFeedIds }).fetch();
+
+      if (feedByIdsCacheResponse.isFailure()) {
+        return Promise.reject(feedByIdsCacheResponse);
+      }
+
+      oThis.feedsMap = feedByIdsCacheResponse.data;
+      oThis.feedIds = currentFeedIds;
+    } else {
+      oThis.feedsMap = {};
+      oThis.feedIds = [];
+    }
+
+    console.log(
+      `PERSONALIZED FEED:${oThis.currentUserId} currentFeedIds==============================oThis.limit======`,
+      currentFeedIds,
+      oThis.limit
+    );
+
+    if (currentFeedIds.length >= oThis.limit) {
+      oThis.nextPageNumber = oThis.pageNumber + 1;
+    }
+
+    console.log(
+      `PERSONALIZED FEED:${oThis.currentUserId} oThis.nextPageNumber================================`,
+      oThis.nextPageNumber
+    );
+
+    await oThis.setFeedIdsForUserInCache();
+  }
+
+  /**
+   * Set feed ids.
+   *
+   * @sets oThis.feedIds, oThis.feedsMap, oThis.nextPaginationTimestamp
+   *
+   * @returns {Promise<*>}
+   * @private
+   */
+  async _setFeedDataForLoggedOutUser() {
+    const oThis = this;
+
     const loggedOutFeedCacheResp = await new LoggedOutFeedCache({
       limit: oThis.limit,
       paginationTimestamp: oThis.paginationTimestamp
@@ -86,11 +415,76 @@ class PublicVideoFeed extends FeedBase {
     oThis.feedIds = loggedOutFeedCacheResp.data.feedIds;
     oThis.feedsMap = loggedOutFeedCacheResp.data.feedDetails;
 
-    const lastFeedId = oThis.feedIds[oThis.feedIds.length - 1];
-
-    if (oThis.feedIds.length > 0) {
+    if (oThis.feedIds.length >= oThis.limit) {
+      const lastFeedId = oThis.feedIds[oThis.feedIds.length - 1];
       oThis.nextPaginationTimestamp = oThis.feedsMap[lastFeedId].paginationIdentifier;
     }
+
+    if (!oThis.currentUserId) {
+      await oThis._handleCuratedFeeds();
+    }
+  }
+
+  /**
+   * Update feed ids.
+   *
+   * @sets oThis.feedIds, oThis.feedsMap
+   *
+   * @returns {Promise<*>}
+   * @private
+   */
+  async _handleCuratedFeeds() {
+    const oThis = this;
+
+    let curatedFeedMap = {};
+    const curatedFeedIdsString = coreConstants.PEPO_CURATED_FEED_IDS,
+      curatedFeedIds = JSON.parse(curatedFeedIdsString);
+
+    if (oThis.paginationTimestamp == null) {
+      // Logged out mode and FIRST page.
+      curatedFeedMap = await new FeedModel().fetchByIds(curatedFeedIds);
+
+      oThis.feedsMap = Object.assign(oThis.feedsMap, curatedFeedMap);
+      oThis.feedIds = curatedFeedIds.concat(oThis.feedIds);
+    } else {
+      // Logged out mode and NOT FIRST page.
+      for (let index = 0; index < curatedFeedIds.length; index++) {
+        const curatedFeedId = curatedFeedIds[index],
+          arrayIndex = oThis.feedIds.indexOf(curatedFeedId);
+
+        if (arrayIndex >= 0) {
+          oThis.feedIds.splice(arrayIndex, 1);
+          delete oThis.feedsMap[curatedFeedId];
+        }
+      }
+    }
+  }
+
+  /**
+   * Update feed ids to remove inactive feeds.
+   *
+   * @sets oThis.feedIds, oThis.feedsMap
+   *
+   * @returns {Promise<*>}
+   * @private
+   */
+  async _filterFeedData() {
+    const oThis = this;
+
+    oThis.feedIds = [...new Set(oThis.feedIds)];
+
+    const activeFeedIds = [];
+
+    for (let i = 0; i < oThis.feedIds.length; i++) {
+      const feedId = oThis.feedIds[i];
+      if (CommonValidators.validateNonEmptyObject(oThis.feedsMap[feedId])) {
+        activeFeedIds.push(feedId);
+      } else {
+        delete oThis.feedsMap[feedId];
+      }
+    }
+
+    oThis.feedIds = activeFeedIds;
   }
 
   /**
@@ -106,269 +500,23 @@ class PublicVideoFeed extends FeedBase {
 
     const nextPagePayloadKey = {};
 
-    if (oThis.feeds.length >= oThis.limit) {
-      nextPagePayloadKey[paginationConstants.paginationIdentifierKey] = {
-        pagination_timestamp: oThis.nextPaginationTimestamp
-      };
+    if (oThis._showShuffledFeeds()) {
+      if (oThis.nextPageNumber) {
+        nextPagePayloadKey[paginationConstants.paginationIdentifierKey] = {
+          page_no: oThis.nextPageNumber
+        };
+      }
+    } else {
+      if (oThis.nextPaginationTimestamp) {
+        nextPagePayloadKey[paginationConstants.paginationIdentifierKey] = {
+          pagination_timestamp: oThis.nextPaginationTimestamp
+        };
+      }
     }
 
     const responseMetaData = {
       [paginationConstants.nextPagePayloadKey]: nextPagePayloadKey
     };
-
-    // TODO - temp code for curated feeds
-    // TEMP CODE START - to show curated feeds on top(only in logged out mode)
-    if (!oThis.currentUser && oThis.paginationTimestamp == null) {
-      const curatedFeeds = [
-        {
-          id: '-1',
-          primaryExternalEntityId: '-100',
-          paginationIdentifier: 1564468241,
-          kind: 'CURATED',
-          actor: -999,
-          extraData: 'null',
-          createdAt: 1564468241,
-          updatedAt: 1564468241
-        },
-        {
-          id: '-2',
-          primaryExternalEntityId: '-101',
-          paginationIdentifier: 1564468241,
-          kind: 'CURATED',
-          actor: -999,
-          extraData: 'null',
-          createdAt: 1564468241,
-          updatedAt: 1564468241
-        },
-        {
-          id: '-3',
-          primaryExternalEntityId: '-102',
-          paginationIdentifier: 1564468241,
-          kind: 'CURATED',
-          actor: -999,
-          extraData: 'null',
-          createdAt: 1564468241,
-          updatedAt: 1564468241
-        }
-      ];
-
-      oThis.feeds = curatedFeeds.concat(oThis.feeds);
-
-      oThis.profileResponse.userProfilesMap = Object.assign(oThis.profileResponse.userProfilesMap, {
-        '-999': {
-          id: 1000,
-          userId: -999,
-          bio: {
-            text: 'pepo.com',
-            includes: {}
-          },
-          linkIds: [],
-          coverVideoId: '150',
-          coverImageId: '289',
-          updatedAt: 1564659388
-        }
-      });
-
-      oThis.profileResponse.usersByIdMap = Object.assign(oThis.profileResponse.usersByIdMap, {
-        '-999': {
-          id: '-999',
-          userName: 'Pepo_Academy',
-          name: 'Pepo Academy',
-          profileImageId: '292',
-          markInactiveTriggerCount: 0,
-          properties: 2,
-          status: 'ACTIVE',
-          createdAt: 1564660482,
-          updatedAt: 1564660611
-        }
-      });
-
-      oThis.profileResponse.tokenUsersByUserIdMap = Object.assign(oThis.profileResponse.tokenUsersByUserIdMap, {
-        '-999': {
-          id: '-999',
-          userId: '-999',
-          ostUserId: '20600e85-c420-47c3-97cf-5f712c80b5b6',
-          ostTokenHolderAddress: '0xc7a62816475b6d385b36318f4fb4fa90ce114b9e',
-          properties: 7,
-          ostStatus: 'ACTIVATED',
-          createdAt: 1564050302,
-          updatedAt: 1564050422
-        }
-      });
-
-      oThis.profileResponse.videoMap = Object.assign(oThis.profileResponse.videoMap, {
-        '-100': {
-          id: '-100',
-          resolutions: {
-            original: {
-              url:
-                'https://dbvoeb7t6hffk.cloudfront.net/pepo-sandbox1000/ua/videos/1000-3be05bd1b1bbb4a8559f2932245e70f1-original.mp4',
-              size: 4573849,
-              height: 1280,
-              width: 720
-            },
-            '576w': {
-              url:
-                'https://dbvoeb7t6hffk.cloudfront.net/pepo-sandbox1000/ua/videos/1000-3be05bd1b1bbb4a8559f2932245e70f1-576w.mp4',
-              size: 1363148,
-              height: 1016,
-              width: 576
-            }
-          },
-          posterImageId: '-9001',
-          status: 'active',
-          createdAt: 1564472456,
-          updatedAt: 1564472456
-        },
-        '-101': {
-          id: '-101',
-          resolutions: {
-            original: {
-              url:
-                'https://dbvoeb7t6hffk.cloudfront.net/pepo-sandbox1000/ua/videos/1000-744eff04466b1b3321b2f5e92527a53d-original.mp4',
-              size: 4573849,
-              height: 1280,
-              width: 720
-            },
-            '576w': {
-              url:
-                'https://dbvoeb7t6hffk.cloudfront.net/pepo-sandbox1000/ua/videos/1000-744eff04466b1b3321b2f5e92527a53d-576w.mp4',
-              size: 928768,
-              height: 1016,
-              width: 576
-            }
-          },
-          posterImageId: '-9002',
-          status: 'active',
-          createdAt: 1564472456,
-          updatedAt: 1564472456
-        },
-        '-102': {
-          id: '-102',
-          resolutions: {
-            original: {
-              url:
-                'https://dbvoeb7t6hffk.cloudfront.net/pepo-sandbox1000/ua/videos/1000-2da3a523efbab1a3ea5793e62189c35d-original.mp4',
-              size: 4573849,
-              height: 1280,
-              width: 720
-            },
-            '576w': {
-              url:
-                'https://dbvoeb7t6hffk.cloudfront.net/pepo-sandbox1000/ua/videos/1000-2da3a523efbab1a3ea5793e62189c35d-576w.mp4',
-              size: 1363148,
-              height: 1016,
-              width: 576
-            }
-          },
-          posterImageId: '-9003',
-          status: 'active',
-          createdAt: 1564472456,
-          updatedAt: 1564472456
-        }
-      });
-
-      oThis.profileResponse.videoDetailsMap = Object.assign(oThis.profileResponse.videoDetailsMap, {
-        '-100': {
-          id: '-100',
-          creatorUserId: '-999',
-          videoId: '-100',
-          totalContributedBy: 0,
-          totalAmount: '0',
-          totalTransactions: 0,
-          createdAt: 1564472456,
-          updatedAt: 1564472456
-        },
-        '-101': {
-          id: '-101',
-          creatorUserId: '-999',
-          videoId: '-100',
-          totalContributedBy: 0,
-          totalAmount: '0',
-          totalTransactions: 0,
-          createdAt: 1564472456,
-          updatedAt: 1564472456
-        },
-        '-102': {
-          id: '-102',
-          creatorUserId: '-999',
-          videoId: '-100',
-          totalContributedBy: 0,
-          totalAmount: '0',
-          totalTransactions: 0,
-          createdAt: 1564472456,
-          updatedAt: 1564472456
-        }
-      });
-
-      oThis.profileResponse.imageMap = Object.assign(oThis.profileResponse.imageMap, {
-        '-9001': {
-          id: '-9001',
-          resolutions: {
-            original: {
-              url:
-                'https://dbvoeb7t6hffk.cloudfront.net/pepo-sandbox1000/ua/images/1000-3be05bd1b1bbb4a8559f2932245e70f1-original.jpg',
-              size: 23552
-            },
-            '288w': {
-              url:
-                'https://dbvoeb7t6hffk.cloudfront.net/pepo-sandbox1000/ua/images/1000-3be05bd1b1bbb4a8559f2932245e70f1-288w.jpg',
-              size: 23552,
-              height: 509,
-              width: 288
-            }
-          },
-          status: 'RESIZE_DONE',
-          kind: 'PROFILE_IMAGE',
-          createdAt: 1564044369,
-          updatedAt: 1564044369
-        },
-        '-9002': {
-          id: '-9002',
-          resolutions: {
-            original: {
-              url:
-                'https://dbvoeb7t6hffk.cloudfront.net/pepo-sandbox1000/ua/images/1000-744eff04466b1b3321b2f5e92527a53d-original.jpg',
-              size: 25600
-            },
-            '288w': {
-              url:
-                'https://dbvoeb7t6hffk.cloudfront.net/pepo-sandbox1000/ua/images/1000-744eff04466b1b3321b2f5e92527a53d-288w.jpg',
-              size: 25600,
-              height: 509,
-              width: 288
-            }
-          },
-          status: 'RESIZE_DONE',
-          kind: 'PROFILE_IMAGE',
-          createdAt: 1564044369,
-          updatedAt: 1564044369
-        },
-        '-9003': {
-          id: '-9003',
-          resolutions: {
-            original: {
-              url:
-                'https://dbvoeb7t6hffk.cloudfront.net/pepo-sandbox1000/ua/images/1000-2da3a523efbab1a3ea5793e62189c35d-original.jpg',
-              size: 14336
-            },
-            '288w': {
-              url:
-                'https://dbvoeb7t6hffk.cloudfront.net/pepo-sandbox1000/ua/images/1000-2da3a523efbab1a3ea5793e62189c35d-288w.jpg',
-              size: 14336,
-              height: 509,
-              width: 288
-            }
-          },
-          status: 'RESIZE_DONE',
-          kind: 'PROFILE_IMAGE',
-          createdAt: 1564044369,
-          updatedAt: 1564044369
-        }
-      });
-    }
-
-    // TEMP CODE END - to show curated feeds on top(only in logged out mode)
 
     return responseHelper.successWithData({
       feedList: oThis.feeds,
@@ -382,6 +530,7 @@ class PublicVideoFeed extends FeedBase {
       tags: oThis.profileResponse.tags,
       userStat: oThis.profileResponse.userStat,
       videoDetailsMap: oThis.profileResponse.videoDetailsMap,
+      videoDescriptionsMap: oThis.profileResponse.videoDescriptionMap,
       currentUserUserContributionsMap: oThis.profileResponse.currentUserUserContributionsMap,
       currentUserVideoContributionsMap: oThis.profileResponse.currentUserVideoContributionsMap,
       pricePointsMap: oThis.profileResponse.pricePointsMap,

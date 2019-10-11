@@ -1,9 +1,3 @@
-/**
- * Perform basic validations
- *
- * @module helpers/basic
- */
-
 const BigNumber = require('bignumber.js');
 
 const rootPrefix = '..',
@@ -12,6 +6,8 @@ const rootPrefix = '..',
   apiVersions = require(rootPrefix + '/lib/globalConstant/apiVersions'),
   apiErrorConfig = require(rootPrefix + '/config/apiParams/apiErrorConfig'),
   v1ParamErrorConfig = require(rootPrefix + '/config/apiParams/v1/errorConfig'),
+  adminParamErrorConfig = require(rootPrefix + '/config/apiParams/admin/errorConfig'),
+  webParamErrorConfig = require(rootPrefix + '/config/apiParams/web/errorConfig'),
   internalParamErrorConfig = require(rootPrefix + '/config/apiParams/internal/errorConfig');
 
 /**
@@ -269,6 +265,14 @@ class BasicHelper {
       paramErrorConfig = dynamicErrorConfig
         ? Object.assign(dynamicErrorConfig, internalParamErrorConfig)
         : internalParamErrorConfig;
+    } else if (apiVersion === apiVersions.admin) {
+      paramErrorConfig = dynamicErrorConfig
+        ? Object.assign(dynamicErrorConfig, adminParamErrorConfig)
+        : adminParamErrorConfig;
+    } else if (apiVersion === apiVersions.web) {
+      paramErrorConfig = dynamicErrorConfig
+        ? Object.assign(dynamicErrorConfig, webParamErrorConfig)
+        : webParamErrorConfig;
     } else {
       throw new Error(`Unsupported API Version ${apiVersion}`);
     }
@@ -286,7 +290,7 @@ class BasicHelper {
    *
    * @return {array}
    */
-  commaSeperatedStrToArray(str) {
+  commaSeparatedStrToArray(str) {
     return str.split(',').map((ele) => ele.trim());
   }
 
@@ -306,6 +310,15 @@ class BasicHelper {
    */
   isStaging() {
     return coreConstants.environment === 'staging';
+  }
+
+  /**
+   * Check if environment is staging.
+   *
+   * @return {boolean}
+   */
+  isSandbox() {
+    return coreConstants.environment === 'sandbox';
   }
 
   /**
@@ -497,7 +510,7 @@ class BasicHelper {
    */
   parseAmpersandSeparatedKeyValue(response) {
     const finalResponse = {};
-    response.split('&').forEach(function(keyValPair) {
+    response.split('&amp;').forEach(function(keyValPair) {
       const val = keyValPair.split('=');
       finalResponse[val[0]] = val[1];
     });
@@ -545,6 +558,91 @@ class BasicHelper {
         .toString(36)
         .substring(2, 4)
     );
+  }
+
+  /**
+   * Get pepo amount for some amount in usd.
+   *
+   * @param usdInOneOst
+   * @param amountUSD
+   * @returns {string}
+   */
+  getPepoAmountForUSD(usdInOneOst, amountUSD) {
+    const oThis = this;
+
+    const usdInOnePepo = oThis.getUSDAmountForPepo(usdInOneOst, '1'),
+      pepoInOneUSD = oThis.convertToBigNumber(1).div(oThis.convertToBigNumber(usdInOnePepo)),
+      totalPepoBn = oThis.convertToBigNumber(pepoInOneUSD).mul(oThis.convertToBigNumber(amountUSD));
+
+    return oThis
+      .convertToWei(totalPepoBn)
+      .round(0)
+      .toString(10);
+  }
+
+  /**
+   * Get usd amount for some pepo amount.
+   *
+   * @param usdInOneOst
+   * @param amountPepo
+   * @returns {string}
+   */
+  getUSDAmountForPepo(usdInOneOst, amountPepo) {
+    const oThis = this;
+
+    const pepoInOneOST = 1;
+
+    const ostInOnePepo = oThis.convertToBigNumber(1).div(oThis.convertToBigNumber(pepoInOneOST)),
+      usdInOnePepo = oThis.convertToBigNumber(ostInOnePepo).mul(oThis.convertToBigNumber(usdInOneOst)),
+      totalUSDBn = oThis.convertToBigNumber(usdInOnePepo).mul(oThis.convertToBigNumber(amountPepo));
+
+    return totalUSDBn.toString(10);
+  }
+
+  /**
+   * Is twitter id rotated?
+   *
+   * @param {string} twitterId
+   *
+   * @returns {boolean}
+   */
+  isTwitterIdRotated(twitterId) {
+    return twitterId[0] === '-';
+  }
+
+  /**
+   * Get user profile url prefix for admin dashboard.
+   *
+   * @returns {string}
+   */
+  userProfilePrefixUrl() {
+    return coreConstants.PA_DOMAIN + '/admin/user-profile';
+  }
+
+  timeStampInMinutesToDateTillSeconds(unixTimestampInMinutes) {
+    const dateObject = new Date(unixTimestampInMinutes * 1000);
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const year = dateObject.getFullYear();
+    const month = months[dateObject.getMonth()];
+    const date = dateObject.getDate();
+    const hour = dateObject.getHours();
+    const min = dateObject.getMinutes();
+    const sec = dateObject.getSeconds();
+
+    return date + ' ' + month + ' ' + year + ' ' + hour + ':' + min + ':' + sec;
+  }
+
+  timeStampInMinutesToDate(unixTimestampInMinutes) {
+    const dateObject = new Date(unixTimestampInMinutes * 1000);
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const year = dateObject.getFullYear();
+    const month = months[dateObject.getMonth()];
+    const date = dateObject.getDate();
+    const hour = dateObject.getHours();
+    const min = dateObject.getMinutes();
+    const sec = dateObject.getSeconds();
+
+    return date + ' ' + month + ' ' + year;
   }
 }
 

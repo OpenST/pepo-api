@@ -1,15 +1,19 @@
 const rootPrefix = '../../../..',
   TokenUserModel = require(rootPrefix + '/app/models/mysql/TokenUser'),
+  FiatPaymentModel = require(rootPrefix + '/app/models/mysql/FiatPayment'),
   TransactionOstEventBase = require(rootPrefix + '/app/services/ostEvents/transactions/Base'),
   basicHelper = require(rootPrefix + '/helpers/basic'),
-  VideoTransactionSendFailureNotification = require(rootPrefix +
-    '/lib/userNotificationPublisher/VideoTransactionSendFailure'),
-  ProfileTransactionSendFailureNotification = require(rootPrefix +
-    '/lib/userNotificationPublisher/ProfileTransactionSendFailure'),
+  bgJob = require(rootPrefix + '/lib/rabbitMqEnqueue/bgJob'),
+  bgJobConstants = require(rootPrefix + '/lib/globalConstant/bgJob'),
+  createErrorLogsEntry = require(rootPrefix + '/lib/errorLogs/createEntry'),
+  errorLogsConstants = require(rootPrefix + '/lib/globalConstant/errorLogs'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   tokenUserConstants = require(rootPrefix + '/lib/globalConstant/tokenUser'),
-  transactionConstants = require(rootPrefix + '/lib/globalConstant/transaction');
+  transactionConstants = require(rootPrefix + '/lib/globalConstant/transaction'),
+  notificationJobEnqueue = require(rootPrefix + '/lib/rabbitMqEnqueue/notification'),
+  notificationJobConstants = require(rootPrefix + '/lib/globalConstant/notificationJob'),
+  fiatPaymentConstants = require(rootPrefix + '/lib/globalConstant/fiatPayment');
 
 /**
  * Class for failure transaction ost event base service.
@@ -78,6 +82,31 @@ class FailureTransactionOstEvent extends TransactionOstEventBase {
       promiseArray.push(oThis.updateTransaction());
       promiseArray.push(oThis.processForAirdropTransaction());
       await Promise.all(promiseArray);
+    } else if (oThis.transactionObj.extraData.kind === transactionConstants.extraData.topUpKind) {
+      await oThis.validateToUserId();
+      const promiseArray = [];
+      promiseArray.push(oThis.updateTransaction());
+      promiseArray.push(oThis.processForTopUpTransaction());
+      promiseArray.push(
+        FiatPaymentModel.flushCache({
+          fiatPaymentId: oThis.transactionObj.fiatPaymentId,
+          userId: oThis.toUserId
+        })
+      );
+      promiseArray.push(oThis._enqueueUserNotification(notificationJobConstants.topupFailed));
+
+      const errorObject = responseHelper.error({
+        internal_error_identifier: 'a_s_oe_t_1',
+        api_error_identifier: 'could_not_proceed',
+        debug_options: {
+          message: 'URGENT :: Topup of pepo could not be started after successful payment.',
+          transactionObj: JSON.stringify(oThis.transactionObj)
+        }
+      });
+      logger.error('Topup of pepo could not be started after successful payment.', errorObject);
+      await createErrorLogsEntry.perform(errorObject, errorLogsConstants.highSeverity);
+
+      await Promise.all(promiseArray);
     }
   }
 
@@ -114,14 +143,16 @@ class FailureTransactionOstEvent extends TransactionOstEventBase {
 
     if (oThis.videoId) {
       promisesArray.push(
-        new VideoTransactionSendFailureNotification({
+        notificationJobEnqueue.enqueue(notificationJobConstants.videoTxSendFailure, {
           transaction: oThis.transactionObj,
           videoId: oThis.videoId
-        }).perform()
+        })
       );
     } else {
       promisesArray.push(
-        new ProfileTransactionSendFailureNotification({ transaction: oThis.transactionObj }).perform()
+        notificationJobEnqueue.enqueue(notificationJobConstants.profileTxSendFailure, {
+          transaction: oThis.transactionObj
+        })
       );
     }
 
@@ -168,6 +199,10 @@ class FailureTransactionOstEvent extends TransactionOstEventBase {
     propertyVal = new TokenUserModel().unSetBitwise('properties', propertyVal, tokenUserConstants.airdropDoneProperty);
 
     return propertyVal;
+  }
+
+  _getPaymentStatus() {
+    return fiatPaymentConstants.invertedStatuses[fiatPaymentConstants.pepoTransferFailedStatus];
   }
 }
 

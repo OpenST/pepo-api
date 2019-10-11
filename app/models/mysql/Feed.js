@@ -1,8 +1,7 @@
 const rootPrefix = '../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
-  databaseConstants = require(rootPrefix + '/lib/globalConstant/database'),
-  paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination'),
-  feedsConstants = require(rootPrefix + '/lib/globalConstant/feed');
+  feedsConstants = require(rootPrefix + '/lib/globalConstant/feed'),
+  databaseConstants = require(rootPrefix + '/lib/globalConstant/database');
 
 // Declare variables.
 const dbName = databaseConstants.feedDbName;
@@ -44,7 +43,7 @@ class FeedModel extends ModelBase {
       kind: feedsConstants.kinds[dbRow.kind],
       paginationIdentifier: dbRow.pagination_identifier,
       actor: dbRow.actor,
-      extraData: JSON.parse(dbRow.extra_data),
+      extraData: dbRow.hasOwnProperty('extra_data') ? JSON.parse(dbRow.extra_data) : undefined,
       createdAt: dbRow.created_at,
       updatedAt: dbRow.updated_at
     };
@@ -133,6 +132,68 @@ class FeedModel extends ModelBase {
   }
 
   /**
+   * Fetch new feeds ids after last visit time.
+   *
+   * @param {array} ids: Feed Ids
+   *
+   * @return {object}
+   */
+  async getNewFeedIdsAfterTime(params) {
+    const oThis = this,
+      lastVisitedAt = params.lastVisitedAt,
+      limit = params.limit;
+
+    const response = [];
+
+    const dbRows = await oThis
+      .select('id')
+      .where(['pagination_identifier > ?', lastVisitedAt])
+      .order_by('pagination_identifier desc')
+      .limit(limit)
+      .fire();
+
+    for (let index = 0; index < dbRows.length; index++) {
+      const formatDbRow = oThis.formatDbData(dbRows[index]);
+      response.push(formatDbRow.id);
+    }
+
+    return response;
+  }
+
+  /**
+   * Fetch new feeds ids after last visit time.
+   *
+   * @param {array} ids: Feed Ids
+   *
+   * @return {object}
+   */
+  async getOlderFeedIds(params) {
+    const oThis = this,
+      feedIds = params.feedIds,
+      limit = params.limit;
+
+    const response = [];
+
+    let queryObj = oThis
+      .select('id')
+      .order_by('pagination_identifier desc')
+      .limit(limit);
+
+    if (feedIds.length > 0) {
+      queryObj.where(['id not in (?)', feedIds]);
+    }
+
+    const dbRows = await queryObj.fire();
+
+    for (let index = 0; index < dbRows.length; index++) {
+      const formatDbRow = oThis.formatDbData(dbRows[index]);
+      response.push(formatDbRow.id);
+    }
+
+    return response;
+  }
+
+  /**
    * Fetch feeds for given ids.
    *
    * @param {array} ids: Feed Ids
@@ -158,20 +219,52 @@ class FeedModel extends ModelBase {
   }
 
   /**
+   * Delete by actor.
+   *
+   * @param {object} params
+   * @param {number} params.actor
+   *
+   * @return {object}
+   */
+  async deleteByActor(params) {
+    const oThis = this;
+
+    await oThis
+      .delete()
+      .where({
+        actor: params.actor
+      })
+      .fire();
+
+    return FeedModel.flushCache({});
+  }
+
+  /**
    * Flush cache.
    *
    * @param {object} params
-   * @param {number} params.paginationTimestamp
+   * @param {number} [params.id]
+   * @param {array<number>} [params.ids]
    *
    * @returns {Promise<*>}
    */
   static async flushCache(params) {
-    const LoggedOutFeed = require(rootPrefix + '/lib/cacheManagement/single/LoggedOutFeed');
+    const promisesArray = [];
 
-    await new LoggedOutFeed({
-      limit: paginationConstants.defaultFeedsListPageSize,
-      paginationTimestamp: params.paginationTimestamp
-    }).clear();
+    const LoggedOutFeedCache = require(rootPrefix + '/lib/cacheManagement/single/LoggedOutFeed');
+    promisesArray.push(new LoggedOutFeedCache({}).clear());
+
+    if (params.id) {
+      const FeedByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/FeedByIds');
+      promisesArray.push(new FeedByIdsCache({ ids: [params.id] }).clear());
+    }
+
+    if (params.ids) {
+      const FeedByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/FeedByIds');
+      promisesArray.push(new FeedByIdsCache({ ids: params.ids }).clear());
+    }
+
+    await Promise.all(promisesArray);
   }
 }
 

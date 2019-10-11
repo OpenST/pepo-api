@@ -1,17 +1,32 @@
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
+  GetProfile = require(rootPrefix + '/lib/user/profile/Get'),
+  CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   GetTokenService = require(rootPrefix + '/app/services/token/Get'),
   VideoDetailsByVideoIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/VideoDetailsByVideoIds'),
-  GetProfile = require(rootPrefix + '/lib/user/profile/Get'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
+  userConstants = require(rootPrefix + '/lib/globalConstant/user'),
+  logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
+  entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
   paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination'),
-  entityType = require(rootPrefix + '/lib/globalConstant/entityType');
+  videoDetailsConstants = require(rootPrefix + '/lib/globalConstant/videoDetail');
 
+/**
+ * Class to get video by id.
+ *
+ * @class GetVideoById
+ */
 class GetVideoById extends ServiceBase {
   /**
-   * @constructor
+   * Constructor to get video by id.
    *
-   * @param params
+   * @param {object} params
+   * @param {number} params.video_id
+   * @param {object} params.current_user
+   *
+   * @augments ServiceBase
+   *
+   * @constructor
    */
   constructor(params) {
     super();
@@ -21,6 +36,7 @@ class GetVideoById extends ServiceBase {
     oThis.videoId = params.video_id;
     oThis.currentUser = params.current_user;
 
+    oThis.videoDetails = null;
     oThis.currentUserId = null;
     oThis.creatorUserId = null;
     oThis.responseMetaData = {};
@@ -47,22 +63,45 @@ class GetVideoById extends ServiceBase {
   }
 
   /**
-   * Fetch creator user id
+   * Fetch creator user id.
    *
-   * @sets oThis.creatorUserId
+   * @sets oThis.videoDetails, oThis.creatorUserId, oThis.currentUserId
+   *
    * @return {Promise<void>}
    * @private
    */
   async _fetchCreatorUserId() {
     const oThis = this;
 
-    let videoDetailsCacheResponse = await new VideoDetailsByVideoIdsCache({ videoIds: [oThis.videoId] }).fetch();
-
+    const videoDetailsCacheResponse = await new VideoDetailsByVideoIdsCache({ videoIds: [oThis.videoId] }).fetch();
     if (videoDetailsCacheResponse.isFailure()) {
       return Promise.reject(videoDetailsCacheResponse);
     }
 
     oThis.videoDetails = [videoDetailsCacheResponse.data[oThis.videoId]];
+
+    // If video not found or its not active.
+    if (!CommonValidators.validateNonEmptyObject(oThis.videoDetails[0])) {
+      return Promise.reject(
+        responseHelper.paramValidationError({
+          internal_error_identifier: 'a_s_v_gbi_1',
+          api_error_identifier: 'resource_not_found',
+          params_error_identifiers: ['invalid_video_id'],
+          debug_options: { videoId: oThis.videoId }
+        })
+      );
+    }
+
+    if (oThis.videoDetails[0].status === videoDetailsConstants.deletedStatus) {
+      return Promise.reject(
+        responseHelper.paramValidationError({
+          internal_error_identifier: 'a_s_v_gbi_4',
+          api_error_identifier: 'resource_not_found',
+          params_error_identifiers: ['video_deleted'],
+          debug_options: { videoId: oThis.videoId }
+        })
+      );
+    }
 
     oThis.creatorUserId = oThis.videoDetails[0].creatorUserId;
 
@@ -74,7 +113,7 @@ class GetVideoById extends ServiceBase {
    *
    * @sets oThis.tokenDetails
    *
-   * @return {Promise<*>}
+   * @return {Promise<void>}
    * @private
    */
   async _setTokenDetails() {
@@ -89,12 +128,12 @@ class GetVideoById extends ServiceBase {
     }
 
     oThis.tokenDetails = tokenResp.data.tokenDetails;
-
-    return responseHelper.successWithData({});
   }
 
   /**
-   * Get video details for display - fetches all the details of user, video
+   * Get video details for display - fetches all the details of user, video.
+   *
+   * @sets oThis.profileResponse, oThis.responseMetaData
    *
    * @return {Promise<void>}
    * @private
@@ -110,13 +149,48 @@ class GetVideoById extends ServiceBase {
 
     const response = await getProfileObj.perform();
 
-    if (response.isFailure()) {
-      return Promise.reject(response);
+    if (response.isFailure() || !CommonValidators.validateNonEmptyObject(response.data.userProfilesMap)) {
+      return Promise.reject(
+        responseHelper.error({
+          internal_error_identifier: 'a_s_v_gbi_2',
+          api_error_identifier: 'entity_not_found',
+          debug_options: {}
+        })
+      );
     }
 
     oThis.profileResponse = response.data;
 
-    // Aligning the response with video-history api
+    let userResponse = oThis.profileResponse.usersByIdMap[oThis.creatorUserId];
+
+    logger.log('===== userResponse ======', userResponse);
+
+    if (
+      !CommonValidators.validateNonEmptyObject(userResponse) ||
+      !userResponse.approvedCreator ||
+      userResponse.status === userConstants.inActiveStatus
+    ) {
+      return Promise.reject(
+        responseHelper.error({
+          internal_error_identifier: 'a_s_v_gbi_3',
+          api_error_identifier: 'entity_not_found',
+          debug_options: {}
+        })
+      );
+    }
+
+    // If video is not received back from user profile call
+    if (!oThis.profileResponse.videoMap[oThis.videoId]) {
+      return Promise.reject(
+        responseHelper.error({
+          internal_error_identifier: 'a_s_v_gbi_5',
+          api_error_identifier: 'entity_not_found',
+          debug_options: {}
+        })
+      );
+    }
+
+    // Aligning the response with video-history api.
     oThis.responseMetaData = {
       [paginationConstants.nextPagePayloadKey]: {}
     };
@@ -143,6 +217,7 @@ class GetVideoById extends ServiceBase {
       imageMap: oThis.profileResponse.imageMap,
       videoMap: oThis.profileResponse.videoMap,
       [entityType.videoDetailsMap]: oThis.profileResponse.videoDetailsMap,
+      [entityType.videoDescriptionsMap]: oThis.profileResponse.videoDescriptionMap,
       [entityType.currentUserUserContributionsMap]: oThis.profileResponse.currentUserUserContributionsMap,
       [entityType.currentUserVideoContributionsMap]: oThis.profileResponse.currentUserVideoContributionsMap,
       [entityType.userProfileAllowedActions]: oThis.profileResponse.userProfileAllowedActions,
