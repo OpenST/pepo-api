@@ -48,6 +48,8 @@ class BackPopulateUserVideoView {
     const dbRows = await new UserModel().select('id').fire();
     let promises = [];
 
+    console.log('Total Users=====', dbRows.length);
+
     for (let index = 0; index < dbRows.length; index++) {
       const userId = dbRows[index].id;
       promises.push(oThis.populateVideoViewForUserId(userId));
