@@ -420,6 +420,14 @@ class CoreConstants {
   get PA_GOOGLE_USAGE_REPORT_GROUP_IDS() {
     return process.env.PA_GOOGLE_USAGE_REPORT_GROUP_IDS;
   }
+
+  get PA_VIDEO_PIXEL_DATA_S3_FILE_PATH() {
+    return process.env.PA_VIDEO_PIXEL_DATA_S3_FILE_PATH;
+  }
+
+  get PA_VIDEO_PIXEL_DATA_APP_FILE_PATH() {
+    return process.env.PA_VIDEO_PIXEL_DATA_APP_FILE_PATH;
+  }
 }
 
 module.exports = new CoreConstants();
