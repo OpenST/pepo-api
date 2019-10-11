@@ -301,8 +301,10 @@ class UserModel extends ModelBase {
 
     if (params.sortBy && params.sortBy === userConstants.ascendingSortByValue) {
       queryObject.order_by('id asc');
-    } else {
+    } else if (params.sortBy && params.sortBy === userConstants.descendingSortByValue) {
       queryObject.order_by('id desc');
+    } else {
+      queryObject.order_by('name');
     }
 
     const queryWithWildCards = query + '%',
