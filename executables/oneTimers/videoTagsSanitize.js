@@ -80,6 +80,7 @@ class VideoTagsSanitize {
               .update('video_weight = video_weight+1')
               .where({ id: userVideoTagIds })
               .fire();
+            await TagModel.flushCache({ ids: userVideoTagIds });
           }
         } else {
           logger.log("Removing from video tags for user's video ids: ", JSON.stringify(userVideoIds));
@@ -87,6 +88,7 @@ class VideoTagsSanitize {
             .delete()
             .where({ video_id: userVideoIds })
             .fire();
+          await VideoTagsModel.flushCache({ tagIds: userVideoIds });
 
           if (userTextIds.length > 0) {
             // 2. Remove tag ids from text table respective to text used.

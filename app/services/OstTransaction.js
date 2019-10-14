@@ -216,7 +216,7 @@ class OstTransaction extends ServiceBase {
     insertData.id = insertResponse.insertId;
 
     const formattedInsertData = new TextModel().formatDbData(insertData);
-    await TextModel.flushCache(formattedInsertData);
+    await TextModel.flushCache({ textIds: [formattedInsertData.id] });
   }
 
   /**
