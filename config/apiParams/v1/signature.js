@@ -797,7 +797,7 @@ const v1Signature = {
     ],
     optional: []
   },
-  [apiName.pepocornBalance]: {
+  [apiName.pepocornTopUpGetPepocornBalance]: {
     mandatory: [
       {
         parameter: 'current_user',
