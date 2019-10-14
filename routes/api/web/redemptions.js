@@ -26,7 +26,7 @@ router.get(
 
 router.use(cookieHelper.validateWebviewLoginCookieIfPresent, cookieHelper.validateUserLoginRequired);
 
-// request for redemption of a product
+// Request for redemption of a product
 router.post('/', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.requestRedemption;
 
