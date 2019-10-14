@@ -2,14 +2,13 @@ const BigNumber = require('bignumber.js');
 
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
-  CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   GetProfile = require(rootPrefix + '/lib/user/profile/Get'),
   SecureTokenCache = require(rootPrefix + '/lib/cacheManagement/single/SecureToken'),
   TokenUserDetailByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TokenUserByUserIds'),
-  tokenUserConstants = require(rootPrefix + '/lib/globalConstant/tokenUser'),
-  jsSdkWrapper = require(rootPrefix + '/lib/ostPlatform/jsSdkWrapper'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
-  logger = require(rootPrefix + '/lib/logger/customConsoleLogger');
+  logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
+  jsSdkWrapper = require(rootPrefix + '/lib/ostPlatform/jsSdkWrapper'),
+  tokenUserConstants = require(rootPrefix + '/lib/globalConstant/tokenUser');
 
 /**
  * Class to get user profile
@@ -21,6 +20,7 @@ class UserProfile extends ServiceBase {
    * Constructor to get current admin.
    *
    * @param {object} params
+   * @param {number/string} params.profile_user_id
    *
    * @augments ServiceBase
    *
@@ -48,11 +48,8 @@ class UserProfile extends ServiceBase {
   async _asyncPerform() {
     const oThis = this;
 
-    await oThis._getProfileInfo();
-
-    await oThis._fetchTokenUserData();
-
-    await oThis._fetchTokenDetails();
+    const promisesArray = [oThis._getProfileInfo(), oThis._fetchTokenUserData(), oThis._fetchTokenDetails()];
+    await Promise.all(promisesArray);
 
     await oThis._fetchBalance();
 
@@ -60,8 +57,9 @@ class UserProfile extends ServiceBase {
   }
 
   /**
-   * Fetch profile info
+   * Fetch profile info.
    *
+   * @sets oThis.profileResponse, oThis.pricePoints
    *
    * @returns {Promise<void>}
    * @private
@@ -81,13 +79,13 @@ class UserProfile extends ServiceBase {
     }
 
     oThis.profileResponse = response.data;
-
     oThis.pricePoints = oThis.profileResponse.pricePointsMap;
   }
 
   /**
-   * Fetch token user data
+   * Fetch token user data.
    *
+   * @sets oThis.ostUserId
    *
    * @returns {Promise<void>}
    * @private
@@ -95,12 +93,12 @@ class UserProfile extends ServiceBase {
   async _fetchTokenUserData() {
     const oThis = this;
 
-    const tokenUserResponse = await new TokenUserDetailByUserIdsCache({ userIds: [oThis.profileUserId] }).fetch();
-    if (tokenUserResponse.isFailure()) {
-      return Promise.reject(tokenUserResponse);
+    const tokenUserCacheResponse = await new TokenUserDetailByUserIdsCache({ userIds: [oThis.profileUserId] }).fetch();
+    if (tokenUserCacheResponse.isFailure()) {
+      return Promise.reject(tokenUserCacheResponse);
     }
 
-    const tokenUserData = tokenUserResponse.data[oThis.profileUserId];
+    const tokenUserData = tokenUserCacheResponse.data[oThis.profileUserId];
 
     oThis.ostUserId = tokenUserData.ostUserId;
 
@@ -130,7 +128,7 @@ class UserProfile extends ServiceBase {
   }
 
   /**
-   * Fetch token details
+   * Fetch token details.
    *
    * @sets oThis.stakeCurrency
    *
@@ -140,20 +138,20 @@ class UserProfile extends ServiceBase {
   async _fetchTokenDetails() {
     const oThis = this;
 
-    let tokenDetailsResponse = await new SecureTokenCache({}).fetch();
-
-    if (tokenDetailsResponse.isFailure()) {
-      return Promise.reject(tokenDetailsResponse);
+    const tokenDetailsCacheResponse = await new SecureTokenCache({}).fetch();
+    if (tokenDetailsCacheResponse.isFailure()) {
+      return Promise.reject(tokenDetailsCacheResponse);
     }
 
-    let tokenDetails = tokenDetailsResponse.data;
+    const tokenDetails = tokenDetailsCacheResponse.data;
 
     oThis.stakeCurrency = tokenDetails.stakeCurrency;
   }
 
   /**
-   * Fetch balance
+   * Fetch balance.
    *
+   * @sets oThis.balanceInUsd
    *
    * @returns {Promise<void>}
    * @private
@@ -174,18 +172,17 @@ class UserProfile extends ServiceBase {
     }
 
     const resultType = platformResponse.data.result_type;
-
-    let balance = new BigNumber(platformResponse.data[resultType].available_balance);
-
-    let pricePoint = oThis.pricePoints[oThis.stakeCurrency].USD;
-
+    const balance = new BigNumber(platformResponse.data[resultType].available_balance);
+    const pricePoint = oThis.pricePoints[oThis.stakeCurrency].USD;
     const usdPricePointInBigNumber = new BigNumber(pricePoint);
+
     oThis.balanceInUsd = balance.mul(usdPricePointInBigNumber).toString(10);
   }
 
   /**
-   * Prepare response
-   * @returns {Promise<void>}
+   * Prepare response.
+   *
+   * @returns {Promise<result>}
    * @private
    */
   async _prepareResponse() {

@@ -9,7 +9,6 @@ const rootPrefix = '../../..',
   entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
   responseEntityKey = require(rootPrefix + '/lib/globalConstant/responseEntityKey');
 
-// get the products url
 router.get('/info', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.getSupportUrl;
 

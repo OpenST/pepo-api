@@ -1,49 +1,40 @@
-/**
- * This service gets Token Details
- *
- * Note:-
- */
-
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
-  logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   SecureTokenCache = require(rootPrefix + '/lib/cacheManagement/single/SecureToken'),
+  logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   responseHelper = require(rootPrefix + '/lib/formatter/response');
 
+/**
+ * Class to get token details.
+ *
+ * @class GetTokens
+ */
 class GetTokens extends ServiceBase {
   /**
-   * @param {Object} params
+   * Async perform.
    *
-   * @constructor
-   */
-  constructor(params) {
-    super(params);
-  }
-
-  /**
-   * perform - perform get token details
-   *
-   * @return {Promise<void>}
+   * @returns {Promise<result>}
+   * @private
    */
   async _asyncPerform() {
     const oThis = this;
 
-    let tokenDetails = await oThis._fetchTokenDetails();
+    const tokenDetails = await oThis._fetchTokenDetails();
 
     return responseHelper.successWithData({ tokenDetails: tokenDetails });
   }
 
   /**
-   * fetch Token Details
+   * Fetch token details.
    *
    * @returns {Promise<*>}
    * @private
    */
   async _fetchTokenDetails() {
-    let tokenDetailsRsp = await new SecureTokenCache({}).fetch();
-
+    const tokenDetailsRsp = await new SecureTokenCache({}).fetch();
     if (tokenDetailsRsp.isFailure()) {
       logger.error('Error while fetching data from secure token cache');
+
       return Promise.reject(tokenDetailsRsp);
     }
 
