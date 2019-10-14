@@ -385,16 +385,36 @@ const v1Signature = {
     optional: []
   },
   [apiName.getTags]: {
-    mandatory: [
+    mandatory: [],
+    optional: [
       {
         parameter: 'q',
         validatorMethods: ['validateString']
-      }
-    ],
-    optional: [
+      },
       {
         parameter: paginationConstants.paginationIdentifierKey,
         validatorMethods: ['validateString', 'validatePaginationIdentifier']
+      },
+      {
+        parameter: 'getTopResults',
+        validatorMethods: ['validateBoolean']
+      }
+    ]
+  },
+  [apiName.mixedTopSearch]: {
+    mandatory: [],
+    optional: [
+      {
+        parameter: 'q',
+        validatorMethods: ['validateString']
+      },
+      {
+        parameter: paginationConstants.paginationIdentifierKey,
+        validatorMethods: ['validateString', 'validatePaginationIdentifier']
+      },
+      {
+        parameter: 'supported_entities',
+        validatorMethods: ['validateStringArray']
       }
     ]
   },
@@ -525,6 +545,10 @@ const v1Signature = {
       {
         parameter: paginationConstants.paginationIdentifierKey,
         validatorMethods: ['validateString', 'validatePaginationIdentifier']
+      },
+      {
+        parameter: 'getTopResults',
+        validatorMethods: ['validateBoolean']
       }
     ]
   },
@@ -771,6 +795,32 @@ const v1Signature = {
         validatorMethods: ['validateNonEmptyObject']
       }
     ]
+  },
+  [apiName.tagDetails]: {
+    mandatory: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      },
+      {
+        parameter: 'tag_id',
+        validatorMethods: ['validateNonZeroInteger']
+      }
+    ],
+    optional: []
+  },
+  [apiName.getVideoListByTagId]: {
+    mandatory: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      },
+      {
+        parameter: 'tag_id',
+        validatorMethods: ['validateNonZeroInteger']
+      }
+    ],
+    optional: []
   }
 };
 

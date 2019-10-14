@@ -301,22 +301,30 @@ class UserModel extends ModelBase {
 
     if (params.sortBy && params.sortBy === userConstants.ascendingSortByValue) {
       queryObject.order_by('id asc');
-    } else {
+    } else if (params.sortBy && params.sortBy === userConstants.descendingSortByValue) {
       queryObject.order_by('id desc');
+    } else {
+      queryObject.order_by('name');
     }
 
-    const queryWithWildCards = '%' + query + '%';
+    const queryWithWildCards = query + '%',
+      queryWithWildCardsSpaceIncluded = '% ' + query + '%';
 
     if (!params.fetchAll) {
       queryObject.where({ status: userConstants.invertedStatuses[userConstants.activeStatus] });
     }
 
     if (query && isOnlyNameSearch) {
-      queryObject.where(['name LIKE ?', queryWithWildCards]);
+      queryObject.where(['name LIKE ? OR name LIKE ?', queryWithWildCards, queryWithWildCardsSpaceIncluded]);
     }
 
     if (query && !isOnlyNameSearch) {
-      queryObject.where(['user_name LIKE ? OR name LIKE ?', queryWithWildCards, queryWithWildCards]);
+      queryObject.where([
+        'user_name LIKE ? OR name LIKE ? OR name LIKE ?',
+        queryWithWildCards,
+        queryWithWildCards,
+        queryWithWildCardsSpaceIncluded
+      ]);
     }
 
     // Filter users by creator statuses
