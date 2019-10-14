@@ -135,6 +135,15 @@ class PepocornBalancesModel extends ModelBase {
   }
 
   /**
+   * Index name
+   *
+   * @returns {string}
+   */
+  static get userIdUniqueIndexName() {
+    return 'un_idx_1';
+  }
+
+  /**
    * Flush cache.
    *
    * @param {object} params

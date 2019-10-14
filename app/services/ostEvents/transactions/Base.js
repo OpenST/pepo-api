@@ -3,10 +3,13 @@ const rootPrefix = '../../../..',
   TokenUserModel = require(rootPrefix + '/app/models/mysql/TokenUser'),
   TransactionModel = require(rootPrefix + '/app/models/mysql/Transaction'),
   PendingTransactionModel = require(rootPrefix + '/app/models/mysql/PendingTransaction'),
+  SecureTokenCache = require(rootPrefix + '/lib/cacheManagement/single/SecureToken'),
+  PepocornTransactionModel = require(rootPrefix + '/app/models/mysql/PepocornTransaction'),
   TokenUserByUserIdCache = require(rootPrefix + '/lib/cacheManagement/multi/TokenUserByUserIds'),
   TransactionByOstTxIdCache = require(rootPrefix + '/lib/cacheManagement/multi/TransactionByOstTxId'),
   TokenUserByOstUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TokenUserByOstUserIds'),
   VideoDetailsByVideoIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/VideoDetailsByVideoIds'),
+  ValidatePepocornTopUp = require(rootPrefix + '/app/services/pepocornTopUp/Validate'),
   notificationJobEnqueue = require(rootPrefix + '/lib/rabbitMqEnqueue/notification'),
   FiatPaymentModel = require(rootPrefix + '/app/models/mysql/FiatPayment'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
@@ -14,6 +17,7 @@ const rootPrefix = '../../../..',
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   createErrorLogsEntry = require(rootPrefix + '/lib/errorLogs/createEntry'),
   errorLogsConstants = require(rootPrefix + '/lib/globalConstant/errorLogs'),
+  pepocornTransactionConstants = require(rootPrefix + '/lib/globalConstant/redemption/pepocornTransaction'),
   transactionConstants = require(rootPrefix + '/lib/globalConstant/transaction');
 
 /**
@@ -47,14 +51,18 @@ class TransactionOstEventBase extends ServiceBase {
     oThis.ostTransactionStatus = oThis.ostTransaction.status;
     oThis.ostTransactionMinedTimestamp = oThis.ostTransaction.block_timestamp || null;
 
-    oThis.publishedTs = null;
     oThis.toUserId = null;
     oThis.fromUserId = null;
     oThis.transactionObj = null;
-    oThis.externalEntityObj = null;
-    oThis.privacyType = null;
+
     oThis.videoId = null;
-    oThis._parseAndSetVideoId();
+
+    oThis.pepocornAmount = null;
+    oThis.productId = null;
+    oThis.pepoUsdPricePoint = null;
+    oThis.isValidRedemption = null;
+
+    oThis._parseMetaAndSetData();
   }
 
   /**
@@ -65,22 +73,10 @@ class TransactionOstEventBase extends ServiceBase {
    * @returns {{}}
    * @private
    */
-  _parseTransactionMetaDetails() {
+  _parseTransactionMeta() {
     const oThis = this;
 
-    const parsedHash = {};
-    if (!oThis.ostTransaction.meta_property.details) {
-      return parsedHash;
-    }
-
-    const detailsStringArray = oThis.ostTransaction.meta_property.details.split(' ');
-
-    for (let index = 0; index < detailsStringArray.length; index++) {
-      const detailsKeyValueArray = detailsStringArray[index].split('_');
-      parsedHash[detailsKeyValueArray[0]] = detailsKeyValueArray[1];
-    }
-
-    return parsedHash;
+    return transactionConstants._parseTransactionMetaDetails(oThis.ostTransaction.meta_property);
   }
 
   /**
@@ -88,19 +84,25 @@ class TransactionOstEventBase extends ServiceBase {
    *
    * @private
    */
-  _parseAndSetVideoId() {
+  _parseMetaAndSetData() {
     const oThis = this;
 
-    const parsedHash = oThis._parseTransactionMetaDetails();
+    const parsedHash = oThis._parseTransactionMeta();
 
     logger.log('parsedHash =======', parsedHash);
 
-    if (parsedHash.vi) {
-      oThis.videoId = parsedHash.vi;
-    }
+    if (oThis._isRedemptionTransactionKind()) {
+      oThis.pepocornAmount = parsedHash.pepocornAmount;
+      oThis.productId = parsedHash.productId;
+      oThis.pepoUsdPricePoint = parsedHash.pepoUsdPricePoint;
+    } else {
+      if (parsedHash.videoId) {
+        oThis.videoId = parsedHash.videoId;
+      }
 
-    if (parsedHash.ipp == 1) {
-      oThis.isPaperPlane = true;
+      if (parsedHash.isPaperPlane == 1) {
+        oThis.isPaperPlane = true;
+      }
     }
   }
 
@@ -409,6 +411,23 @@ class TransactionOstEventBase extends ServiceBase {
     return responseHelper.successWithData({});
   }
 
+  async updatePepocornTransactionModel() {
+    const oThis = this;
+
+    await new PepocornTransactionModel()
+      .update({
+        status: pepocornTransactionConstants.invertedStatuses[oThis._getPepocornTransactionStatus()]
+      })
+      .where({ transaction_id: oThis.transactionObj.id })
+      .fire();
+
+    await PepocornTransactionModel.flushCache({
+      transactionId: oThis.transactionObj.id
+    });
+
+    return responseHelper.successWithData({});
+  }
+
   /**
    * Insert in transaction table.
    *
@@ -419,7 +438,7 @@ class TransactionOstEventBase extends ServiceBase {
   async insertInTransaction() {
     const oThis = this;
 
-    if (!oThis.toUserId || !oThis.fromUserId) {
+    if ((oThis._isRedemptionTransactionKind() && !oThis.fromUserId) || (!oThis.toUserId || !oThis.fromUserId)) {
       return Promise.reject(
         responseHelper.error({
           internal_error_identifier: 'a_s_oe_t_b_8',
@@ -436,10 +455,18 @@ class TransactionOstEventBase extends ServiceBase {
 
     let isDuplicateIndexViolation = false;
 
+    let txKind = null;
+
+    if (oThis._isRedemptionTransactionKind()) {
+      txKind = transactionConstants.extraData.redemptionKind;
+    } else {
+      txKind = transactionConstants.extraData.userTransactionKind;
+    }
+
     const extraData = {
       toUserIds: [oThis.toUserId],
       amounts: [oThis.ostTransaction.transfers[0].amount],
-      kind: transactionConstants.extraData.userTransactionKind
+      kind: txKind
     };
 
     const insertData = {
@@ -570,6 +597,105 @@ class TransactionOstEventBase extends ServiceBase {
    */
   _getPropertyValForTokenUser() {
     throw new Error('Unimplemented method getPropertyValForTokenUser for TransactionOstEvent.');
+  }
+
+  _getPepocornTransactionStatus() {
+    throw new Error('Unimplemented method _getPepocornTransactionStatus for TransactionOstEvent.');
+  }
+
+  /**
+   * This function validates if the parameters are correct.
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _validateTransactionDataForRedemption() {
+    const oThis = this;
+
+    //Note: Use params from ost event for validation.
+    //todo: tx time send as params;
+
+    const txTime = oThis.ostTransaction.block_timestamp || Date.now();
+
+    const validateParam = {
+      block_timestamp: txTime,
+      product_id: oThis.productId,
+      pepo_amount_in_wei: oThis.ostTransaction.transfers[0].amount,
+      pepocorn_amount: oThis.pepocornAmount,
+      pepo_usd_price_point: oThis.pepoUsdPricePoint
+    };
+
+    oThis.isValidRedemption = await new ValidatePepocornTopUp(validateParam)
+      .perform()
+      .then(async function(resp) {
+        return true;
+      })
+      .catch(async function(resp) {
+        const errorObject = responseHelper.error({
+          internal_error_identifier: 'a_s_oe_t_b_vtdfr_1',
+          api_error_identifier: 'something_went_wrong',
+          debug_options: validateParam
+        });
+
+        await createErrorLogsEntry.perform(errorObject, errorLogsConstants.highSeverity);
+        return false;
+      });
+  }
+
+  /**
+   * This function validates to user ids and inserts in to user ids array. It also prepares amounts array.
+   *
+   * @sets oThis.toUserIdsArray, oThis.amountsArray
+   *
+   * @returns {Promise<never>}
+   * @private
+   */
+  async _validateToUserIdForRedemption() {
+    const oThis = this;
+
+    if (oThis.ostTransaction.transfers.length != 1) {
+      const errorObject = responseHelper.error({
+        internal_error_identifier: 'a_s_oe_b_vtui_1',
+        api_error_identifier: 'something_went_wrong',
+        debug_options: { transfersData: oThis.ostTransaction.transfers }
+      });
+      await createErrorLogsEntry.perform(errorObject, errorLogsConstants.highSeverity);
+
+      return Promise.reject(errorObject);
+    }
+
+    const tokenDataRsp = await new SecureTokenCache().fetch();
+
+    if (tokenDataRsp.isFailure()) {
+      logger.error('Error while fetching token data.');
+
+      return Promise.reject(tokenDataRsp);
+    }
+
+    const tokenData = tokenDataRsp.data;
+
+    if (oThis.ostTransaction.transfers[0].to_user_id.toLowerCase() != tokenData.ostCompanyUserId.toLowerCase()) {
+      const errorObject = responseHelper.error({
+        internal_error_identifier: 'a_s_oe_b_vtui_2',
+        api_error_identifier: 'something_went_wrong',
+        debug_options: { transfersData: oThis.ostTransaction.transfers }
+      });
+      await createErrorLogsEntry.perform(errorObject, errorLogsConstants.highSeverity);
+
+      return Promise.reject(errorObject);
+    }
+  }
+
+  /**
+   * Return true if it is a pepocorn convert for redemption transaction.
+   *
+   * @returns {Boolean}
+   * @private
+   */
+  async _isRedemptionTransactionKind() {
+    const oThis = this;
+
+    return oThis.ostTransaction.meta_property.name == transactionConstants.redemptionMetaName;
   }
 }
 
