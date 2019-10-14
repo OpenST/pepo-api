@@ -1,6 +1,8 @@
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   UserModel = require(rootPrefix + '/app/models/mysql/User'),
+  TagModel = require(rootPrefix + '/app/models/mysql/Tag'),
+  UserTagsCacheKlass = require(rootPrefix + '/lib/cacheManagement/multi/UserTagsByUserIds'),
   UsersCache = require(rootPrefix + '/lib/cacheManagement/multi/User'),
   TwitterDisconnect = require(rootPrefix + '/app/services/twitter/Disconnect'),
   AdminActivityLogModel = require(rootPrefix + '/app/models/mysql/AdminActivityLog'),
@@ -8,6 +10,7 @@ const rootPrefix = '../../..',
   bgJob = require(rootPrefix + '/lib/rabbitMqEnqueue/bgJob'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   userConstants = require(rootPrefix + '/lib/globalConstant/user'),
+  userTagConstants = require(rootPrefix + '/lib/globalConstant/userTag'),
   bgJobConstants = require(rootPrefix + '/lib/globalConstant/bgJob'),
   adminActivityLogConstants = require(rootPrefix + '/lib/globalConstant/adminActivityLogs'),
   emailServiceApiCallHookConstants = require(rootPrefix + '/lib/globalConstant/emailServiceApiCallHook');
@@ -65,6 +68,7 @@ class BlockUser extends ServiceBase {
 
     const promisesArray = [];
     promisesArray.push(
+      oThis._decreseUserTagWeight(),
       oThis._removeContactsInCampaigns(),
       oThis._disconnectTwitter(),
       oThis._enqueueToBackgroundJob(),
@@ -131,6 +135,26 @@ class BlockUser extends ServiceBase {
       .fire();
 
     return oThis._flushCache();
+  }
+
+  /**
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _decreseUserTagWeight() {
+    const oThis = this;
+
+    let userTagCacheResp = await new UserTagsCacheKlass({ userIds: oThis.userIds }).fetch();
+
+    for (let uId in userTagCacheResp.data) {
+      let tagIds = userTagCacheResp.data[uId][userTagConstants.selfAddedKind] || [];
+
+      if (tagIds) {
+        await new TagModel().updateTagWeights(tagIds, -1);
+        TagModel.flushCache({ ids: tagIds });
+      }
+    }
   }
 
   /**

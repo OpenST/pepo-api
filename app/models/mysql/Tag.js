@@ -208,11 +208,15 @@ class Tag extends ModelBase {
   static async flushCache(params) {
     const promisesArray = [];
 
-    const TagPagination = require(rootPrefix + '/lib/cacheManagement/single/TagPagination');
-    promisesArray.push(new TagPagination({ tagPrefix: [params.tagPrefix] }).clear());
+    if (params.tagPrefix) {
+      const TagPagination = require(rootPrefix + '/lib/cacheManagement/single/TagPagination');
+      promisesArray.push(new TagPagination({ tagPrefix: [params.tagPrefix] }).clear());
+    }
 
-    const TagByIds = require(rootPrefix + '/lib/cacheManagement/multi/Tag');
-    promisesArray.push(new TagByIds({ ids: params.ids }).clear());
+    if (params.ids) {
+      const TagByIds = require(rootPrefix + '/lib/cacheManagement/multi/Tag');
+      promisesArray.push(new TagByIds({ ids: params.ids }).clear());
+    }
 
     await Promise.all(promisesArray);
   }
