@@ -45,6 +45,27 @@ router.post('/', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   Promise.resolve(routeHelper.perform(req, res, next, '/redemption/Request', 'r_a_w_r_2', null, dataFormatterFunc));
 });
 
+// Request for redemption of a product.
+router.post('/request', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.initiateRedemptionRequest;
+
+  const dataFormatterFunc = async function(serviceResponse) {
+    const wrapperFormatterRsp = await new FormatterComposer({
+      resultType: responseEntityKey.redemption,
+      entityKindToResponseKeyMap: {
+        [entityType.redemption]: responseEntityKey.redemption
+      },
+      serviceData: serviceResponse.data
+    }).perform();
+
+    serviceResponse.data = wrapperFormatterRsp.data;
+  };
+
+  Promise.resolve(
+    routeHelper.perform(req, res, next, '/redemption/InitiateRequest', 'r_a_w_r_3', null, dataFormatterFunc)
+  );
+});
+
 /* Get pepocorn balance. */
 router.get('/pepocorn-balance', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.redemptionPepocornBalance;

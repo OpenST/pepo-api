@@ -143,7 +143,7 @@ class PepocornBalancesModel extends ModelBase {
    *
    * @returns {Promise<void>}
    */
-  async flushCache(params) {
+  static async flushCache(params) {
     const PepocornBalanceByUserIds = require(rootPrefix + '/lib/cacheManagement/multi/PepocornBalanceByUserIds');
 
     if (params.userId) {

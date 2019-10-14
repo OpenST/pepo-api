@@ -67,7 +67,7 @@ class PepocornTransactionModel extends ModelBase {
    *
    * @returns {Promise<void>}
    */
-  async flushCache(params) {}
+  static async flushCache(params) {}
 }
 
-module.exports = PepocornBalancesModel;
+module.exports = PepocornTransactionModel;
