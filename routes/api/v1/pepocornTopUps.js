@@ -25,7 +25,7 @@ router.get('/info', sanitizer.sanitizeDynamicUrlParams, function(req, res, next)
     }).perform();
 
     serviceResponse.data = wrapperFormatterRsp.data;
-    serviceResponse.data['app_upgrade'] = pepocornProductConstants.appUpgradeEntity;
+    // serviceResponse.data['app_upgrade'] = pepocornProductConstants.appUpgradeEntity;
   };
 
   Promise.resolve(
