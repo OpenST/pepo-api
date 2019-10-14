@@ -56,6 +56,23 @@
                        proxy_pass http://localhost:5000;
                }
        }
+
+   server {
+                  listen       8080;
+                  server_name  store.pepodev.com;
+
+                  location /api/ {
+                       proxy_set_header        Host $host;
+                       proxy_cookie_domain localhost pepodev.com;
+                       proxy_pass http://localhost:3000/api/;
+                  }
+
+                  location / {
+                       proxy_set_header        Host $host;
+                       proxy_cookie_domain localhost pepodev.com;
+                       proxy_pass http://localhost:5000;
+                  }
+          }
 ```
 
 * [Only Development] Include following line in `/etc/hosts` file
