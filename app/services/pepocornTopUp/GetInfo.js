@@ -1,6 +1,6 @@
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
-  pepocornProductConstants = require(rootPrefix + '/lib/globalConstant/pepocornTopUp'),
+  pepocornProductConstants = require(rootPrefix + '/lib/globalConstant/pepocornProduct'),
   PricePointsCache = require(rootPrefix + '/lib/cacheManagement/single/PricePoints'),
   SecureTokenCache = require(rootPrefix + '/lib/cacheManagement/single/SecureToken'),
   entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
