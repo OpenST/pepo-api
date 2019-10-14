@@ -124,6 +124,15 @@ const v1Signature = {
       }
     ],
     optional: []
+  },
+  [apiName.redemptionPepocornBalance]: {
+    mandatory: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      }
+    ],
+    optional: []
   }
 };
 
