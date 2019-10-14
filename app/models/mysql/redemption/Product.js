@@ -1,6 +1,6 @@
 const rootPrefix = '../../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
-  redemptionConstants = require(rootPrefix + '/lib/globalConstant/admin'),
+  redemptionConstants = require(rootPrefix + '/lib/globalConstant/redemption'),
   databaseConstants = require(rootPrefix + '/lib/globalConstant/database');
 
 // Declare variables names.
@@ -54,7 +54,7 @@ class RedemptionProductModel extends ModelBase {
       dollarValue: dbRow.dollar_value,
       minDollarValue: dbRow.min_dollar_value,
       dollarStep: dbRow.dollar_step,
-      pepocornPerDollarStep: 1, // Need to be sent for all products but not a column
+      pepocornPerDollarStep: redemptionConstants.pepocornPerDollarStep, // Need to be sent for all products but not a column
       createdAt: dbRow.created_at,
       updatedAt: dbRow.updated_at
     };
