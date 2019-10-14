@@ -61,7 +61,7 @@ class PepocornBalancesModel extends ModelBase {
    *
    * @returns {Promise<any>}
    */
-  async insertAction(params) {
+  async insert(params) {
     const oThis = this;
 
     return oThis
@@ -122,7 +122,7 @@ class PepocornBalancesModel extends ModelBase {
     const response = {};
 
     const dbRows = await oThis
-      .select('*')
+      .select('user_id, balance, updated_at')
       .where(['user_id IN (?)', userIds])
       .fire();
 

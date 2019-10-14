@@ -49,10 +49,8 @@ class PepocornBalance extends ServiceBase {
     if (!CommonValidators.validateNonEmptyObject(pepoCornBalanceEntity)) {
       const currentTimeInSeconds = Math.floor(Date.now() / 1000);
       pepoCornBalanceEntity = {
-        id: oThis.currentUserId,
         userId: oThis.currentUserId,
         balance: 0,
-        createdAt: currentTimeInSeconds,
         updatedAt: currentTimeInSeconds
       };
     }
