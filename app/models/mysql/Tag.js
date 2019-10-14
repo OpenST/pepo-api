@@ -175,6 +175,7 @@ class Tag extends ModelBase {
     return oThis
       .update(['weight=weight+?', weightToAdd])
       .where({ id: tagIds })
+      .where(['weight > 0'])
       .fire();
   }
 
@@ -191,6 +192,7 @@ class Tag extends ModelBase {
     return oThis
       .update(['video_weight=video_weight+?', weightToAdd])
       .where({ id: tagIds })
+      .where(['video_weight > 0'])
       .fire();
   }
 
