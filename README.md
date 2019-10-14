@@ -78,6 +78,7 @@
 * [Only Development] Include following line in `/etc/hosts` file
 ```bash
     127.0.0.1       pepodev.com
+    127.0.0.1       store.pepodev.com
 ```
 
 * [Only Development] Reload nginx
