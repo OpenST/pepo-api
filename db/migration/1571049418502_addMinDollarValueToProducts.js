@@ -6,10 +6,10 @@ const dbName = database.redemptionDbName;
 const dbKind = DbKindConstant.sqlDbKind;
 
 const upQuery =
-  "ALTER TABLE PRODUCTS \n\
+  "ALTER TABLE products \n\
    ADD COLUMN min_dollar_value DECIMAL(21,2) NOT NULL DEFAULT '10.00' AFTER dollar_value;";
 
-const downQuery = 'ALTER TABLE PRODUCTS DROP COLUMN min_dollar_value;';
+const downQuery = 'ALTER TABLE products DROP COLUMN min_dollar_value;';
 
 const addMinDollarValueToProducts = {
   dbName: dbName,
