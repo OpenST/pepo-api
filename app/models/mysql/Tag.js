@@ -124,7 +124,7 @@ class Tag extends ModelBase {
       .where('name LIKE "' + params.tagPrefix + '%"')
       .limit(limit)
       .offset(offset)
-      .order_by('weight DESC')
+      .order_by('(weight+video_weight) DESC')
       .fire();
 
     const response = [];
