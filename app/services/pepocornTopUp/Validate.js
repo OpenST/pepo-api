@@ -15,7 +15,7 @@ class ValidatePepocornTopup extends ServiceBase {
    * @param {number} params.product_id
    * @param {number} params.pepo_amount_in_wei
    * @param {number} params.pepocorn_amount
-   * @param {number} params.pepo_in_wei_per_step
+   * @param {number} params.pepo_usd_price_point
    *
    * @param {number} params.current_user.id
    *
@@ -30,7 +30,7 @@ class ValidatePepocornTopup extends ServiceBase {
     oThis.productId = params.product_id;
     oThis.pepoAmount = params.pepo_amount_in_wei;
     oThis.pepocornAmount = params.pepocorn_amount;
-    oThis.pepoInWeiPerStep = params.pepo_in_wei_per_step;
+    oThis.pepoUsdPricePoint = params.pepo_usd_price_point;
     oThis.currentUserId = params.current_user.id;
   }
 

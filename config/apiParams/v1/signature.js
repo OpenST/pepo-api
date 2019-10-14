@@ -806,6 +806,15 @@ const v1Signature = {
     ],
     optional: []
   },
+  [apiName.pepocornTopUpInfo]: {
+    mandatory: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      }
+    ],
+    optional: []
+  },
   [apiName.pepocornTopUpGetPepocornBalance]: {
     mandatory: [
       {
