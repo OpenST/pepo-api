@@ -616,7 +616,7 @@ class OstTransaction extends ServiceBase {
    * @returns {Boolean}
    * @private
    */
-  async _transactionKind() {
+  _transactionKind() {
     const oThis = this;
     if (oThis._isUserTransactionKind()) {
       return transactionConstants.extraData.userTransactionKind;

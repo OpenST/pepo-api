@@ -123,6 +123,14 @@ class FailureTransactionOstEvent extends TransactionOstEventBase {
       await createErrorLogsEntry.perform(errorObject, errorLogsConstants.highSeverity);
 
       await Promise.all(promiseArray);
+    } else {
+      return Promise.reject(
+        responseHelper.error({
+          internal_error_identifier: 'a_s_oe_t_f_pt_1',
+          api_error_identifier: 'something_went_wrong',
+          debug_options: oThis.transactionObj.extraData
+        })
+      );
     }
   }
 
