@@ -38,22 +38,22 @@
    
                location /api/ {
                        proxy_cookie_domain localhost pepodev.com;
-                       proxy_pass http://localhost:3000/api/;
+                       proxy_pass http://pepodev.com:3000/api/;
                }
    
                location /admin/ {
                        proxy_cookie_domain localhost pepodev.com;
-                       proxy_pass http://localhost:4000/admin/;
+                       proxy_pass http://pepodev.com:4000/admin/;
                }
 
                location /builtAssets {
                         proxy_cookie_domain localhost pepodev.com;
-                        proxy_pass http://localhost:4000;
+                        proxy_pass http://pepodev.com:4000;
                }
    
                location / {
                        proxy_cookie_domain localhost pepodev.com;
-                       proxy_pass http://localhost:5000;
+                       proxy_pass http://pepodev.com:5000;
                }
        }
 
@@ -64,13 +64,13 @@
                   location /api/ {
                        proxy_set_header        Host $host;
                        proxy_cookie_domain localhost pepodev.com;
-                       proxy_pass http://localhost:3000/api/;
+                       proxy_pass http://store.pepodev.com:3000/api/;
                   }
 
                   location / {
                        proxy_set_header        Host $host;
                        proxy_cookie_domain localhost pepodev.com;
-                       proxy_pass http://localhost:5000;
+                       proxy_pass http://store.pepodev.com:5000;
                   }
           }
 ```

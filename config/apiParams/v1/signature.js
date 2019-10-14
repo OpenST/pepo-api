@@ -168,6 +168,15 @@ const v1Signature = {
     ],
     optional: []
   },
+  [apiName.getRedemptionWebViewProductUrl]: {
+    mandatory: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      }
+    ],
+    optional: []
+  },
 
   [apiName.getSupportUrl]: {
     mandatory: [
