@@ -1,5 +1,6 @@
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
+  CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   PepocornBalanceByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/PepocornBalanceByUserIds'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   entityType = require(rootPrefix + '/lib/globalConstant/entityType');
@@ -43,7 +44,18 @@ class PepocornBalance extends ServiceBase {
       return Promise.reject(cacheResponse);
     }
 
-    const pepoCornBalanceEntity = cacheResponse.data[oThis.currentUserId];
+    let pepoCornBalanceEntity = cacheResponse.data[oThis.currentUserId];
+
+    if (!CommonValidators.validateNonEmptyObject(pepoCornBalanceEntity)) {
+      const currentTimeInSeconds = Math.floor(Date.now() / 1000);
+      pepoCornBalanceEntity = {
+        id: oThis.currentUserId,
+        userId: oThis.currentUserId,
+        balance: 0,
+        createdAt: currentTimeInSeconds,
+        updatedAt: currentTimeInSeconds
+      };
+    }
 
     const serviceResponse = { [entityType.pepocornBalance]: pepoCornBalanceEntity };
 
