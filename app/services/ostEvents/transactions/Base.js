@@ -692,7 +692,7 @@ class TransactionOstEventBase extends ServiceBase {
    * @returns {Boolean}
    * @private
    */
-  async _isRedemptionTransactionKind() {
+  _isRedemptionTransactionKind() {
     const oThis = this;
 
     return oThis.ostTransaction.meta_property.name == transactionConstants.redemptionMetaName;
