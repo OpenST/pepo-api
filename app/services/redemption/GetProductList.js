@@ -3,7 +3,6 @@ const rootPrefix = '../../..',
   GetUserBalance = require(rootPrefix + '/app/services/user/GetBalance'),
   PricePointsCache = require(rootPrefix + '/lib/cacheManagement/single/PricePoints'),
   RedemptionCache = require(rootPrefix + '/lib/cacheManagement/single/RedemptionProducts'),
-  RedemptionProduct = require(rootPrefix + '/app/models/mysql/redemption/Product'),
   responseHelper = require(rootPrefix + '/lib/formatter/response');
 
 class GetRedemptionInfo extends ServiceBase {
@@ -35,7 +34,10 @@ class GetRedemptionInfo extends ServiceBase {
     //       square:"https://d3attjoi5jlede.cloudfront.net/images/web/redemption/redemption-amazon-1x1.png",
     //       landscape:"https://d3attjoi5jlede.cloudfront.net/images/web/redemption/redemption-amazon-16x9.png"
     //     },
-    //     dollar_value: 10
+    //     dollar_value: 10,
+    //     min_dollar_value: 10,
+    //     dollar_step: 1,
+    //     pepocorn_per_step: 1
     //   },
     //     { id: '2',
     //       status: 'ACTIVE',
