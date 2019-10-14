@@ -56,11 +56,29 @@
                        proxy_pass http://localhost:5000;
                }
        }
+
+   server {
+                  listen       8080;
+                  server_name  store.pepodev.com;
+
+                  location /api/ {
+                       proxy_set_header        Host $host;
+                       proxy_cookie_domain localhost pepodev.com;
+                       proxy_pass http://localhost:3000/api/;
+                  }
+
+                  location / {
+                       proxy_set_header        Host $host;
+                       proxy_cookie_domain localhost pepodev.com;
+                       proxy_pass http://localhost:5000;
+                  }
+          }
 ```
 
 * [Only Development] Include following line in `/etc/hosts` file
 ```bash
     127.0.0.1       pepodev.com
+    127.0.0.1       store.pepodev.com
 ```
 
 * [Only Development] Reload nginx
