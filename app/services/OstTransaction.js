@@ -329,7 +329,9 @@ class OstTransaction extends ServiceBase {
 
     //todo: tx time send as params;
 
+    const txTime = Date.now() / 1000;
     const validateParam = {
+      block_timestamp: txTime,
       product_id: oThis.productId,
       pepo_amount_in_wei: oThis.transfersData[0].amount,
       pepocorn_amount: oThis.pepocornAmount,
