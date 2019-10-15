@@ -3,6 +3,7 @@ const rootPrefix = '../../..',
   pepocornProductConstants = require(rootPrefix + '/lib/globalConstant/pepocornProduct'),
   PricePointsCache = require(rootPrefix + '/lib/cacheManagement/single/PricePoints'),
   SecureTokenCache = require(rootPrefix + '/lib/cacheManagement/single/SecureToken'),
+  pricePointConstants = require(rootPrefix + '/lib/globalConstant/ostPricePoints'),
   entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
   responseHelper = require(rootPrefix + '/lib/formatter/response');
 
@@ -29,6 +30,7 @@ class GetPepocornTopUpInfo extends ServiceBase {
     oThis.productInfo = {};
     oThis.pricePoints = {};
     oThis.companyTokenHolder = null;
+    oThis.stakeCurrency = null;
   }
 
   /**
@@ -39,12 +41,12 @@ class GetPepocornTopUpInfo extends ServiceBase {
   async _asyncPerform() {
     const oThis = this;
 
-    oThis._fetchProductInfo();
-
     let promises = [];
     promises.push(oThis._fetchPricePoints());
     promises.push(oThis._fetchCompanyTokenHolderAddress());
     await Promise.all(promises);
+
+    oThis._fetchProductInfo();
 
     return responseHelper.successWithData({
       [entityType.pepocornTopupInfo]: oThis.productInfo,
@@ -60,12 +62,18 @@ class GetPepocornTopUpInfo extends ServiceBase {
   _fetchProductInfo() {
     const oThis = this;
 
+    let usdPricePoint = oThis.pricePoints[oThis.stakeCurrency][pricePointConstants.usdQuoteCurrency],
+      pepoInOneStepFactor = pepocornProductConstants.pepoPerStepFactor(
+        pepocornProductConstants.productStepFactor,
+        usdPricePoint
+      );
     oThis.productInfo = {
       productId: pepocornProductConstants.productId,
       name: pepocornProductConstants.productName,
       productStepFactor: pepocornProductConstants.productStepFactor,
-      pepoInOneStepFactor: pepocornProductConstants.pepoInOneStepFactor,
-      dollarInOneStepFactor: pepocornProductConstants.dollarInOneStepFactor
+      pepoInOneStepFactor: pepoInOneStepFactor,
+      dollarInOneStepFactor: pepocornProductConstants.dollarInOneStepFactor,
+      companyTokenHolder: oThis.companyTokenHolder
     };
   }
 
@@ -104,6 +112,7 @@ class GetPepocornTopUpInfo extends ServiceBase {
     }
 
     oThis.companyTokenHolder = tokenDetailsRsp.data.companyTokenHolderAddress;
+    oThis.stakeCurrency = tokenDetailsRsp.data.stakeCurrency;
   }
 }
 
