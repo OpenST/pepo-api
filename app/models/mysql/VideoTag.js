@@ -174,9 +174,17 @@ class VideoTag extends ModelBase {
    * @returns {Promise<*>}
    */
   static async flushCache(params) {
+    let promiseArray = [];
     if (params.tagIds) {
       const VideoIdsByTagIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/VideoIdsByTagIds');
-      await new VideoIdsByTagIdsCache({ tagIds: params.tagIds }).clear();
+      promiseArray.push(new VideoIdsByTagIdsCache({ tagIds: params.tagIds }).clear());
+
+      const VideoIdsByTagIdPagination = require(rootPrefix + '/lib/cacheManagement/single/VideoTagsByTagIdPagination');
+      for (let i = 0; i < params.tagIds.length; i++) {
+        promiseArray.push(new VideoIdsByTagIdPagination({ tagId: params.tagIds[i] }).clear());
+      }
+
+      await Promise.all(promiseArray);
     }
   }
 }
