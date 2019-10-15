@@ -54,7 +54,7 @@ class RedemptionProductModel extends ModelBase {
       dollarValue: dbRow.dollar_value,
       minDollarValue: dbRow.min_dollar_value,
       dollarStep: dbRow.dollar_step,
-      pepocornPerDollarStep: redemptionConstants.pepocornPerDollarStep, // Need to be sent for all products but not a column
+      pepocornPerDollarStep: redemptionConstants.pepocornPerDollar, // Need to be sent for all products but not a column
       createdAt: dbRow.created_at,
       updatedAt: dbRow.updated_at
     };
