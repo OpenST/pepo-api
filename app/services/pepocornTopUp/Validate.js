@@ -76,17 +76,30 @@ class ValidatePepocornTopup extends ServiceBase {
       return Promise.reject(oThis._errorResponse('a_s_ptu_v_3'));
     }
 
-    // Validate pepo step factor
+    // Validate number of pepos can be given
+    if (!oThis._getPeposForPepocornAmount.eq(new BigNumber(oThis.pepoAmount))) {
+      return Promise.reject(oThis._errorResponse('a_s_ptu_v_4'));
+    }
+  }
+
+  /**
+   * Get pepos for pepocorn amount
+   *
+   * @returns {BigNumber}
+   * @private
+   */
+  _getPeposForPepocornAmount() {
+    const oThis = this;
+
     let pepoInWeiPerStepFactor = pepocornProductConstants.pepoPerStepFactor(
       pepocornProductConstants.productStepFactor,
       oThis.pepoUsdPricePoint
     );
-    let pepoInWei = new BigNumber(pepoInWeiPerStepFactor).mul(new BigNumber(oThis.pepocornAmount));
-    if (!pepoInWei.eq(new BigNumber(oThis.pepoAmount))) {
-      return Promise.reject(oThis._errorResponse('a_s_ptu_v_4'));
-    }
-    console.log('pepoInWeiCalStepFactor: ', pepoInWeiPerStepFactor);
-    console.log('pepoInWei: ', pepoInWei);
+
+    let numberOfSteps = new BigNumber(oThis.pepocornAmount).div(
+      new BigNumber(pepocornProductConstants.productStepFactor)
+    );
+    return new BigNumber(pepoInWeiPerStepFactor).mul(numberOfSteps);
   }
 
   /**
