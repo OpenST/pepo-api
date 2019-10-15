@@ -53,26 +53,6 @@ class PepocornBalancesModel extends ModelBase {
   }
 
   /**
-   * Insert action.
-   *
-   * @param {object} params
-   * @param {number} params.userId
-   * @param {number} params.balance
-   *
-   * @returns {Promise<any>}
-   */
-  async insert(params) {
-    const oThis = this;
-
-    return oThis
-      .insert({
-        user_id: params.userId,
-        balance: params.balance
-      })
-      .fire();
-  }
-
-  /**
    * Update balance of user.
    *
    * @param {object} params
