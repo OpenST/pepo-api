@@ -183,8 +183,8 @@ class VideoTag extends ModelBase {
     }
     if (tagIds.length > 0) {
       const VideoIdsByTagIdPagination = require(rootPrefix + '/lib/cacheManagement/single/VideoTagsByTagIdPagination');
-      for (let i = 0; i < params.tagIds.length; i++) {
-        promiseArray.push(new VideoIdsByTagIdPagination({ tagId: params.tagIds[i] }).clear());
+      for (let i = 0; i < tagIds.length; i++) {
+        promiseArray.push(new VideoIdsByTagIdPagination({ tagId: tagIds[i] }).clear());
       }
 
       await Promise.all(promiseArray);
