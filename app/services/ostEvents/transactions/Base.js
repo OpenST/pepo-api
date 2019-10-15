@@ -465,7 +465,10 @@ class TransactionOstEventBase extends ServiceBase {
   async insertInTransaction() {
     const oThis = this;
 
-    if ((oThis._isRedemptionTransactionKind() && !oThis.fromUserId) || (!oThis.toUserId || !oThis.fromUserId)) {
+    if (
+      (oThis._isRedemptionTransactionKind() && !oThis.fromUserId) ||
+      (!oThis._isRedemptionTransactionKind() && (!oThis.toUserId || !oThis.fromUserId))
+    ) {
       return Promise.reject(
         responseHelper.error({
           internal_error_identifier: 'a_s_oe_t_b_8',

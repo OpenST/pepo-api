@@ -589,7 +589,7 @@ class OstTransaction extends ServiceBase {
    * @returns {Boolean}
    * @private
    */
-  async _isUserTransactionKind() {
+  _isUserTransactionKind() {
     const oThis = this;
 
     return !oThis._isRedemptionTransactionKind();
@@ -601,7 +601,7 @@ class OstTransaction extends ServiceBase {
    * @returns {Boolean}
    * @private
    */
-  async _isRedemptionTransactionKind() {
+  _isRedemptionTransactionKind() {
     const oThis = this;
 
     return oThis.transaction.meta_property.name == transactionConstants.redemptionMetaName;
