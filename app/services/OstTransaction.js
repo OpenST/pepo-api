@@ -615,6 +615,7 @@ class OstTransaction extends ServiceBase {
    */
   _transactionKind() {
     const oThis = this;
+
     if (oThis._isUserTransactionKind()) {
       return transactionConstants.extraData.userTransactionKind;
     } else if (oThis._isRedemptionTransactionKind()) {
