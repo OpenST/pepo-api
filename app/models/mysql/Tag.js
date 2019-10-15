@@ -34,6 +34,7 @@ class Tag extends ModelBase {
    * @param {number} dbRow.id
    * @param {string} dbRow.name
    * @param {string} dbRow.weight
+   * @param {string} dbRow.video_weight
    * @param {string} dbRow.status
    * @param {string} dbRow.created_at
    * @param {string} dbRow.updated_at
@@ -48,6 +49,7 @@ class Tag extends ModelBase {
       id: dbRow.id,
       name: dbRow.name,
       weight: dbRow.weight,
+      videoWeight: dbRow.video_weight,
       status: tagConstants.statuses[dbRow.status],
       createdAt: dbRow.created_at,
       updatedAt: dbRow.updated_at
