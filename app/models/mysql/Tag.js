@@ -172,11 +172,13 @@ class Tag extends ModelBase {
   async updateTagWeights(tagIds, weightToAdd) {
     const oThis = this;
 
-    return oThis
-      .update(['weight=weight+?', weightToAdd])
-      .where({ id: tagIds })
-      .where(['weight > 0'])
-      .fire();
+    let queryObj = oThis.update(['weight=weight+?', weightToAdd]).where({ id: tagIds });
+
+    if (weightToAdd < 0) {
+      queryObj.where(['weight > 0']);
+    }
+
+    return queryObj.fire();
   }
 
   /**
@@ -189,11 +191,13 @@ class Tag extends ModelBase {
   async updateVideoTagWeights(tagIds, weightToAdd) {
     const oThis = this;
 
-    return oThis
-      .update(['video_weight=video_weight+?', weightToAdd])
-      .where({ id: tagIds })
-      .where(['video_weight > 0'])
-      .fire();
+    let queryObj = oThis.update(['video_weight=video_weight+?', weightToAdd]).where({ id: tagIds });
+
+    if (weightToAdd < 0) {
+      queryObj.where(['video_weight > 0']);
+    }
+
+    return queryObj.fire();
   }
 
   /**
