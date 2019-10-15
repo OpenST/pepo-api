@@ -442,7 +442,7 @@ class TransactionOstEventBase extends ServiceBase {
     const insertData = {
       user_id: oThis.fromUserId,
       kind: pepocornTransactionConstants.invertedKinds[pepocornTransactionConstants.creditKind],
-      pepocorn_amount: oThis.ostTransaction.transfers[0].amount,
+      pepocorn_amount: oThis.pepocornAmount,
       transaction_id: oThis.transactionObj.id,
       status: pepocornTransactionConstants.invertedStatuses[status]
     };
@@ -655,7 +655,12 @@ class TransactionOstEventBase extends ServiceBase {
     oThis.isValidRedemption = await new ValidatePepocornTopUp(validateParam)
       .perform()
       .then(async function(resp) {
-        return true;
+        if (resp.isFailure()) {
+          await createErrorLogsEntry.perform(resp, errorLogsConstants.highSeverity);
+          return false;
+        } else {
+          return true;
+        }
       })
       .catch(async function(resp) {
         const errorObject = responseHelper.error({
