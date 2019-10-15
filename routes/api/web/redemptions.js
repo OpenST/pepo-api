@@ -41,7 +41,7 @@ router.post('/', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
 
     serviceResponse.data = wrapperFormatterRsp.data;
   };
-
+  //move to pepo.com
   Promise.resolve(routeHelper.perform(req, res, next, '/redemption/Request', 'r_a_w_r_2', null, dataFormatterFunc));
 });
 
@@ -60,7 +60,7 @@ router.post('/request', sanitizer.sanitizeDynamicUrlParams, function(req, res, n
 
     serviceResponse.data = wrapperFormatterRsp.data;
   };
-
+  //move to store.pepo.com
   Promise.resolve(
     routeHelper.perform(req, res, next, '/redemption/InitiateRequest', 'r_a_w_r_3', null, dataFormatterFunc)
   );
