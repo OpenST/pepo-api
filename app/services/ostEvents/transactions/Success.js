@@ -194,6 +194,10 @@ class SuccessTransactionOstEvent extends TransactionOstEventBase {
   async _enqueueRedemptionNotification(topic) {
     const oThis = this;
 
+    if (!oThis.isValidRedemption) {
+      return;
+    }
+
     return notificationJobEnqueue.enqueue(notificationJobConstants.creditPepocornSuccess, {
       pepocornAmount: oThis.pepocornAmount,
       transaction: oThis.transactionObj
