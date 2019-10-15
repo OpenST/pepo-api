@@ -102,6 +102,7 @@ class SuccessTransactionOstEvent extends TransactionOstEventBase {
           user_id: oThis.fromUserId,
           balance: oThis.pepocornAmount
         })
+        .fire()
         .catch(async function(err) {
           if (PepocornBalanceModel.isDuplicateIndexViolation(PepocornBalanceModel.userIdUniqueIndexName, err)) {
             await new PepocornBalanceModel()
