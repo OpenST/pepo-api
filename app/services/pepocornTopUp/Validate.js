@@ -85,27 +85,6 @@ class ValidatePepocornTopup extends ServiceBase {
   }
 
   /**
-   * Get pepos for pepocorn amount.
-   *
-   * @returns {BigNumber}
-   * @private
-   */
-  _getPeposForPepocornAmount() {
-    const oThis = this;
-
-    const pepoInWeiPerStepFactor = pepocornProductConstants.pepoPerStepFactor(
-      pepocornProductConstants.productStepFactor,
-      oThis.pepoUsdPricePoint
-    );
-
-    const numberOfSteps = new BigNumber(oThis.pepocornAmount).div(
-      new BigNumber(pepocornProductConstants.productStepFactor)
-    );
-
-    return new BigNumber(pepoInWeiPerStepFactor).mul(numberOfSteps);
-  }
-
-  /**
    * Validate price point.
    *
    * @returns {Promise<void>}
@@ -138,6 +117,27 @@ class ValidatePepocornTopup extends ServiceBase {
     if (!validationResult) {
       return Promise.reject(oThis._errorResponse('a_s_ptu_v_2'));
     }
+  }
+
+  /**
+   * Get pepos for pepocorn amount.
+   *
+   * @returns {BigNumber}
+   * @private
+   */
+  _getPeposForPepocornAmount() {
+    const oThis = this;
+
+    const pepoInWeiPerStepFactor = pepocornProductConstants.pepoPerStepFactor(
+      pepocornProductConstants.productStepFactor,
+      oThis.pepoUsdPricePoint
+    );
+
+    const numberOfSteps = new BigNumber(oThis.pepocornAmount).div(
+      new BigNumber(pepocornProductConstants.productStepFactor)
+    );
+
+    return new BigNumber(pepoInWeiPerStepFactor).mul(numberOfSteps);
   }
 
   /**
