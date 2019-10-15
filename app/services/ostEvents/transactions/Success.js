@@ -60,18 +60,16 @@ class SuccessTransactionOstEvent extends TransactionOstEventBase {
         await oThis.fetchTransaction();
         await oThis._processTransaction();
       } else {
-        const promiseArray2 = [];
-
         if (oThis._isRedemptionTransactionKind()) {
-          // await oThis._sendRedemptionNotification();
           await oThis._insertInPepocornTransactions();
-          promiseArray2.push(oThis._creditPepoCornBalance());
+          await oThis._creditPepoCornBalance();
+          await oThis._enqueueRedemptionNotification();
         } else {
+          const promiseArray2 = [];
           promiseArray2.push(oThis._sendUserTransactionNotification());
           promiseArray2.push(oThis._updateStats());
+          await Promise.all(promiseArray2);
         }
-
-        await Promise.all(promiseArray2);
       }
     }
 
@@ -161,7 +159,7 @@ class SuccessTransactionOstEvent extends TransactionOstEventBase {
       promiseArray.push(oThis.updatePepocornTransactionModel());
       await Promise.all(promiseArray);
       await oThis._creditPepoCornBalance();
-      //await oThis._sendRedemptionNotification();
+      await oThis._enqueueRedemptionNotification();
     } else if (oThis.transactionObj.extraData.kind === transactionConstants.extraData.topUpKind) {
       await oThis.validateToUserId();
       const promiseArray = [];
@@ -184,6 +182,21 @@ class SuccessTransactionOstEvent extends TransactionOstEventBase {
         })
       );
     }
+  }
+
+  /**
+   * Enqueue Redemption notification.
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _enqueueRedemptionNotification(topic) {
+    const oThis = this;
+
+    return notificationJobEnqueue.enqueue(notificationJobConstants.creditPepocornSuccess, {
+      pepocornAmount: oThis.pepocornAmount,
+      transaction: oThis.transactionObj
+    });
   }
 
   /**
