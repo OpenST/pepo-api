@@ -46,7 +46,6 @@ class RequestRedemption extends ServiceBase {
 
     const oThis = this;
 
-    logger.log('params =======', params);
     oThis.currentUser = params.current_user;
     oThis.productId = params.product_id;
     oThis.dollarAmount = params.dollar_amount;
@@ -69,21 +68,20 @@ class RequestRedemption extends ServiceBase {
 
     await oThis._validateAndSanitize();
 
-    oThis._getPepocornAmount();
-
     const promisesArray = [];
     promisesArray.push(oThis._getTokenUserDetails(), oThis._getCurrentUserTwitterHandle());
     await Promise.all(promisesArray);
 
     oThis.redemptionId = uuidV4();
 
-    await oThis._debitPepocornBalance();
-
-    await oThis._insertPepocornTransactions();
-
     oThis._prepareSendMailParams();
 
-    await oThis._enqueAfterRedemptionJob();
+    const promisesArray2 = [];
+    promisesArray2.push(oThis._debitPepocornBalance());
+    promisesArray2.push(oThis._insertPepocornTransactions());
+    promisesArray2.push(oThis._enqueAfterRedemptionJob());
+
+    await Promise.all(promisesArray2);
 
     return responseHelper.successWithData({
       redemption: {
@@ -121,7 +119,7 @@ class RequestRedemption extends ServiceBase {
 
     const currentUserDetails = userDetailsCacheRsp.data[oThis.currentUserId];
 
-    console.log('currentUserDetails', currentUserDetails);
+    logger.log('currentUserDetails', currentUserDetails);
 
     if (!currentUserDetails || !UserModel.isUserApprovedCreator(currentUserDetails)) {
       return Promise.reject(
@@ -150,6 +148,7 @@ class RequestRedemption extends ServiceBase {
     const oThis = this;
     await oThis._validateProductId();
     await oThis._validateDollarAmount();
+    oThis._getPepocornAmount();
     await oThis._validatePepocornBalance();
   }
 
@@ -172,13 +171,14 @@ class RequestRedemption extends ServiceBase {
     const redemptionProducts = redemptionProductsCacheResponse.data.products;
 
     let validationResult = false;
+
     for (let index = 0; index < redemptionProducts.length; index++) {
       const redemptionProduct = redemptionProducts[index];
 
       if (+redemptionProduct.id === +oThis.productId && redemptionProduct.status === redemptionConstants.activeStatus) {
         validationResult = true;
 
-        console.log('redemptionProduct', redemptionProduct);
+        logger.log('redemptionProduct ======', redemptionProduct);
         oThis.productLink = redemptionProduct.images.landscape;
         oThis.productDollarValue = redemptionProduct.dollarValue;
         oThis.productKind = redemptionProduct.kind;
@@ -253,12 +253,12 @@ class RequestRedemption extends ServiceBase {
     const noOfDollarSteps = oThis.dollarAmount / oThis.productDollarStep,
       pepocornPerDollarStep = redemptionConstants.pepocornPerDollarStep;
 
-    console.log('oThis.noOfDollarSteps ====', noOfDollarSteps);
-    console.log('pepocornPerDollarStep ====', pepocornPerDollarStep);
+    logger.log('oThis.noOfDollarSteps ====', noOfDollarSteps);
+    logger.log('pepocornPerDollarStep ====', pepocornPerDollarStep);
 
     oThis.pepocornAmount = noOfDollarSteps * pepocornPerDollarStep;
 
-    console.log('oThis.pepocornAmount ====', oThis.pepocornAmount);
+    logger.log('oThis.pepocornAmount ====', oThis.pepocornAmount);
   }
 
   /**
@@ -273,13 +273,14 @@ class RequestRedemption extends ServiceBase {
 
     const pepocornBalance = pepoCornBalanceResponse[oThis.currentUserId].balance;
 
-    console.log('pepocornBalance ====', pepocornBalance);
+    logger.log('pepocornBalance ====', pepocornBalance);
+    logger.log('oThis.pepocornAmount ====', oThis.pepocornAmount);
 
-    if (oThis.pepocornAmount < pepocornBalance) {
+    if (oThis.pepocornAmount > pepocornBalance) {
       return Promise.reject(
         responseHelper.error({
           internal_error_identifier: 'a_s_r_ir_4',
-          api_error_identifier: 'invalid_api_params',
+          api_error_identifier: 'insufficient_pepocorn_balance',
           debug_options: {
             pepocornAmount: oThis.pepocornAmount,
             pepocornBalance: pepocornBalance
@@ -352,7 +353,7 @@ class RequestRedemption extends ServiceBase {
 
     await new PepocornBalanceModel({})
       .update([
-        'balance = CASE WHEN balance - ? > 0 THEN balance - ? ELSE balance END',
+        'balance = CASE WHEN balance - ? >= 0 THEN balance - ? ELSE balance END',
         oThis.pepocornAmount,
         oThis.pepocornAmount
       ])

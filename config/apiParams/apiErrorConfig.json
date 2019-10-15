@@ -163,5 +163,10 @@
     "http_code": "200",
     "code": "BAD_REQUEST",
     "message": "Minimum redemption is $10. Please try again when you have more Pepo Coins."
+  },
+  "insufficient_pepocorn_balance": {
+    "http_code": "200",
+    "code": "BAD_REQUEST",
+    "message": "Pepocorn balance is not sufficient."
   }
 }
