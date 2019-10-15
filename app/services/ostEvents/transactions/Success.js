@@ -124,6 +124,10 @@ class SuccessTransactionOstEvent extends TransactionOstEventBase {
           }
         });
     }
+
+    await PepocornBalanceModel.flushCache({
+      userId: oThis.fromUserId
+    });
   }
 
   /**
