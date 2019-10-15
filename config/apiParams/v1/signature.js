@@ -168,6 +168,15 @@ const v1Signature = {
     ],
     optional: []
   },
+  [apiName.getRedemptionWebViewProductUrl]: {
+    mandatory: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      }
+    ],
+    optional: []
+  },
 
   [apiName.getSupportUrl]: {
     mandatory: [
@@ -783,13 +792,32 @@ const v1Signature = {
         validatorMethods: ['validateNonZeroWeiValue']
       },
       {
-        parameter: 'pepo_in_wei_per_step',
+        parameter: 'pepo_usd_price_point',
         validatorMethods: ['validateNonZeroWeiValue']
       },
       {
         parameter: 'pepocorn_amount',
         validatorMethods: ['validateNonZeroInteger']
-      },
+      }
+    ],
+    optional: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      }
+    ]
+  },
+  [apiName.pepocornTopUpInfo]: {
+    mandatory: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      }
+    ],
+    optional: []
+  },
+  [apiName.pepocornTopUpGetPepocornBalance]: {
+    mandatory: [
       {
         parameter: 'current_user',
         validatorMethods: ['validateNonEmptyObject']

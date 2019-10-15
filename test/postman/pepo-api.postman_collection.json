@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "99f402fd-0241-4069-8d53-0a3196360c07",
+		"_postman_id": "05eca4db-32ed-432f-8b5c-b73214fdf0c1",
 		"name": "pepo-api",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -678,6 +678,26 @@
 											"key": "rt",
 											"value": "MTQ0NToxNTY4OTkwMDk3Ljg3MjpkYTFhMjg4NzY4ZTEwM2M1MGVjZmRjMGJhNDgxODljZjVmYzAyODFmODBiYzkwNjFjMTkwMmNiNDAxYjE2N2Zj"
 										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "pepocorn-balance",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{api_server}}/api/web/redemptions/pepocorn-balance",
+									"host": [
+										"{{api_server}}"
+									],
+									"path": [
+										"api",
+										"web",
+										"redemptions",
+										"pepocorn-balance"
 									]
 								}
 							},
@@ -2237,6 +2257,40 @@
 										"v1",
 										"twitter",
 										"refresh-token"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"protocolProfileBehavior": {},
+					"_postman_isSubFolder": true
+				},
+				{
+					"name": "pepocornTopUp",
+					"item": [
+						{
+							"name": "pepocorn-balance",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"value": "application/x-www-form-urlencoded",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{api_server}}/api/v1/pepocorn-topups/balance",
+									"host": [
+										"{{api_server}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"pepocorn-topups",
+										"balance"
 									]
 								}
 							},

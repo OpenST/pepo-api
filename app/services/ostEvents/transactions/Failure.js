@@ -36,8 +36,13 @@ class FailureTransactionOstEvent extends TransactionOstEventBase {
     promiseArray.push(oThis.fetchTransaction());
     promiseArray.push(oThis.setFromAndToUserId());
 
-    if (oThis.isVideoIdPresent()) {
-      promiseArray.push(oThis.fetchVideoAndValidate());
+    if (oThis._isRedemptionTransactionKind()) {
+      promiseArray.push(oThis._validateToUserIdForRedemption());
+      promiseArray.push(oThis._validateTransactionDataForRedemption());
+    } else {
+      if (oThis.isVideoIdPresent()) {
+        promiseArray.push(oThis.fetchVideoAndValidate());
+      }
     }
 
     await Promise.all(promiseArray);
@@ -51,7 +56,12 @@ class FailureTransactionOstEvent extends TransactionOstEventBase {
         await oThis.fetchTransaction();
         await oThis._processTransaction();
       } else {
-        await oThis._sendUserNotification();
+        if (oThis._isRedemptionTransactionKind()) {
+          // await oThis._sendRedemptionNotification();
+          await oThis._insertInPepocornTransactions();
+        } else {
+          await oThis._sendUserTransactionNotification();
+        }
       }
     }
 
@@ -82,6 +92,14 @@ class FailureTransactionOstEvent extends TransactionOstEventBase {
       promiseArray.push(oThis.updateTransaction());
       promiseArray.push(oThis.processForAirdropTransaction());
       await Promise.all(promiseArray);
+    } else if (oThis.transactionObj.extraData.kind === transactionConstants.extraData.redemptionKind) {
+      await oThis.validateTransfers();
+
+      const promiseArray = [];
+      promiseArray.push(oThis.updateTransaction());
+      promiseArray.push(oThis.updatePepocornTransactionModel());
+      await Promise.all(promiseArray);
+      // await oThis._sendRedemptionNotification();
     } else if (oThis.transactionObj.extraData.kind === transactionConstants.extraData.topUpKind) {
       await oThis.validateToUserId();
       const promiseArray = [];
@@ -107,6 +125,14 @@ class FailureTransactionOstEvent extends TransactionOstEventBase {
       await createErrorLogsEntry.perform(errorObject, errorLogsConstants.highSeverity);
 
       await Promise.all(promiseArray);
+    } else {
+      return Promise.reject(
+        responseHelper.error({
+          internal_error_identifier: 'a_s_oe_t_f_pt_1',
+          api_error_identifier: 'something_went_wrong',
+          debug_options: oThis.transactionObj.extraData
+        })
+      );
     }
   }
 
@@ -127,7 +153,7 @@ class FailureTransactionOstEvent extends TransactionOstEventBase {
 
     await Promise.all(promiseArray1);
 
-    await oThis._sendUserNotification();
+    await oThis._sendUserTransactionNotification();
   }
 
   /**
@@ -136,7 +162,7 @@ class FailureTransactionOstEvent extends TransactionOstEventBase {
    * @returns {Promise<void>}
    * @private
    */
-  async _sendUserNotification() {
+  async _sendUserTransactionNotification() {
     const oThis = this;
 
     const promisesArray = [];
@@ -203,6 +229,13 @@ class FailureTransactionOstEvent extends TransactionOstEventBase {
 
   _getPaymentStatus() {
     return fiatPaymentConstants.invertedStatuses[fiatPaymentConstants.pepoTransferFailedStatus];
+  }
+
+  _getPepocornTransactionStatus() {
+    //whatever be the case it will be completetly failed
+    return oThis.isValidRedemption
+      ? pepocornTransactionConstants.completelyFailedStatus
+      : pepocornTransactionConstants.completelyFailedStatus;
   }
 }
 

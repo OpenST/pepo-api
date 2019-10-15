@@ -124,6 +124,32 @@ const v1Signature = {
       }
     ],
     optional: []
+  },
+  [apiName.initiateRedemptionRequest]: {
+    mandatory: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      },
+      {
+        parameter: 'product_id',
+        validatorMethods: ['validateNonZeroInteger']
+      },
+      {
+        parameter: 'dollar_amount',
+        validatorMethods: ['validateNonZeroInteger']
+      }
+    ],
+    optional: []
+  },
+  [apiName.redemptionPepocornBalance]: {
+    mandatory: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      }
+    ],
+    optional: []
   }
 };
 
