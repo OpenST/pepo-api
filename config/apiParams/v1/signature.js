@@ -804,6 +804,10 @@ const v1Signature = {
       {
         parameter: 'current_user',
         validatorMethods: ['validateNonEmptyObject']
+      },
+      {
+        parameter: 'request_timestamp',
+        validatorMethods: ['validateNonNegativeNumber']
       }
     ]
   },
