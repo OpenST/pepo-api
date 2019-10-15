@@ -2,36 +2,37 @@ const BigNumber = require('bignumber.js');
 
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
-  pepocornProductConstants = require(rootPrefix + '/lib/globalConstant/pepocornProduct'),
   OstPricePointModel = require(rootPrefix + '/app/models/mysql/OstPricePoints'),
+  responseHelper = require(rootPrefix + '/lib/formatter/response'),
   ostPricePointConstants = require(rootPrefix + '/lib/globalConstant/ostPricePoints'),
-  responseHelper = require(rootPrefix + '/lib/formatter/response');
+  pepocornProductConstants = require(rootPrefix + '/lib/globalConstant/pepocornProduct');
 
 /**
- * Class to validate pepocorn topup request
+ * Class to validate pepocorn topup request.
  *
  * @class ValidatePepocornTopup
  */
 class ValidatePepocornTopup extends ServiceBase {
   /**
-   * Constructor to validate pepocorn topup request
+   * Constructor to validate pepocorn topup request.
    *
    * @param {object} params
    * @param {number} params.product_id
    * @param {number} params.pepo_amount_in_wei
    * @param {number} params.pepocorn_amount
    * @param {number} params.pepo_usd_price_point
-   *
-   * @param {number} params.current_user.id
+   * @param {object} [params.current_user]
+   * @param {number} [params.current_user.id]
    *
    * @augments ServiceBase
    *
    * @constructor
    */
   constructor(params) {
-    super(params);
+    super();
 
     const oThis = this;
+
     oThis.productId = params.product_id;
     oThis.pepoAmount = params.pepo_amount_in_wei;
     oThis.pepocornAmount = params.pepocorn_amount;
@@ -44,7 +45,8 @@ class ValidatePepocornTopup extends ServiceBase {
   /**
    * Async perform.
    *
-   * @return {Promise<void>}
+   * @returns {Promise<void>}
+   * @private
    */
   async _asyncPerform() {
     const oThis = this;
@@ -55,7 +57,7 @@ class ValidatePepocornTopup extends ServiceBase {
   }
 
   /**
-   * Validate input
+   * Validate input.
    *
    * @returns {Promise<void>}
    * @private
@@ -69,21 +71,21 @@ class ValidatePepocornTopup extends ServiceBase {
 
     await oThis._validatePricePoint();
 
-    // Pepocorn amount is not divisible by step factor
-    let pepocornAmountBN = new BigNumber(oThis.pepocornAmount),
+    // Pepocorn amount is not divisible by step factor.
+    const pepocornAmountBN = new BigNumber(oThis.pepocornAmount),
       stepFactorBN = new BigNumber(pepocornProductConstants.productStepFactor);
     if (!pepocornAmountBN.mod(stepFactorBN).eq(new BigNumber(0))) {
       return Promise.reject(oThis._errorResponse('a_s_ptu_v_3'));
     }
 
-    // Validate number of pepos can be given
+    // Validate number of pepos that can be given.
     if (!oThis._getPeposForPepocornAmount().eq(new BigNumber(oThis.pepoAmount))) {
       return Promise.reject(oThis._errorResponse('a_s_ptu_v_4'));
     }
   }
 
   /**
-   * Get pepos for pepocorn amount
+   * Get pepos for pepocorn amount.
    *
    * @returns {BigNumber}
    * @private
@@ -91,19 +93,20 @@ class ValidatePepocornTopup extends ServiceBase {
   _getPeposForPepocornAmount() {
     const oThis = this;
 
-    let pepoInWeiPerStepFactor = pepocornProductConstants.pepoPerStepFactor(
+    const pepoInWeiPerStepFactor = pepocornProductConstants.pepoPerStepFactor(
       pepocornProductConstants.productStepFactor,
       oThis.pepoUsdPricePoint
     );
 
-    let numberOfSteps = new BigNumber(oThis.pepocornAmount).div(
+    const numberOfSteps = new BigNumber(oThis.pepocornAmount).div(
       new BigNumber(pepocornProductConstants.productStepFactor)
     );
+
     return new BigNumber(pepoInWeiPerStepFactor).mul(numberOfSteps);
   }
 
   /**
-   * Validate price point
+   * Validate price point.
    *
    * @returns {Promise<void>}
    * @private
@@ -131,7 +134,7 @@ class ValidatePepocornTopup extends ServiceBase {
       }
     }
 
-    // If price point is not matched in last one hour
+    // If price point is not matched in last one hour.
     if (!validationResult) {
       return Promise.reject(oThis._errorResponse('a_s_ptu_v_2'));
     }
@@ -140,7 +143,8 @@ class ValidatePepocornTopup extends ServiceBase {
   /**
    * Error response to send.
    *
-   * @param errCode
+   * @param {string} errCode
+   *
    * @returns {Promise<never>}
    * @private
    */
