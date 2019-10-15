@@ -429,6 +429,33 @@ class TransactionOstEventBase extends ServiceBase {
   }
 
   /**
+   * Insert in Pepocorn transaction table.
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _insertInPepocornTransactions() {
+    const oThis = this;
+
+    const status = oThis._getPepocornTransactionStatus();
+
+    const insertData = {
+      user_id: oThis.fromUserId,
+      kind: pepocornTransactionConstants.invertedKinds[pepocornTransactionConstants.creditKind],
+      pepocorn_amount: oThis.ostTransaction.transfers[0].amount,
+      transaction_id: oThis.transactionObj.id,
+      status: pepocornTransactionConstants.invertedStatuses[status]
+    };
+
+    const insertResponse = await new PepocornTransactionModel().insert(insertData).fire();
+
+    insertData.id = insertResponse.insertId;
+
+    const formattedInsertData = new PepocornTransactionModel().formatDbData(insertData);
+    await PepocornTransactionModel.flushCache(formattedInsertData);
+  }
+
+  /**
    * Insert in transaction table.
    *
    * @sets oThis.transactionObj

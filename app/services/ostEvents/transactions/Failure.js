@@ -58,7 +58,7 @@ class FailureTransactionOstEvent extends TransactionOstEventBase {
       } else {
         if (oThis._isRedemptionTransactionKind()) {
           // await oThis._sendRedemptionNotification();
-          await oThis.updatePepocornTransactionModel();
+          await oThis._insertInPepocornTransactions();
         } else {
           await oThis._sendUserTransactionNotification();
         }
@@ -93,6 +93,8 @@ class FailureTransactionOstEvent extends TransactionOstEventBase {
       promiseArray.push(oThis.processForAirdropTransaction());
       await Promise.all(promiseArray);
     } else if (oThis.transactionObj.extraData.kind === transactionConstants.extraData.redemptionKind) {
+      await oThis.validateTransfers();
+
       const promiseArray = [];
       promiseArray.push(oThis.updateTransaction());
       promiseArray.push(oThis.updatePepocornTransactionModel());
