@@ -392,7 +392,8 @@ class RequestRedemption extends ServiceBase {
     const messagePayload = {
       transactionalMailParams: oThis.transactionalMailParams,
       currentUserId: oThis.currentUserId,
-      productKind: oThis.productKind
+      productKind: oThis.productKind,
+      newRequest: 0
     };
     await bgJob.enqueue(bgJobConstants.afterRedemptionJobTopic, messagePayload);
   }

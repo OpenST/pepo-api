@@ -416,6 +416,7 @@ class InitiateRequestRedemption extends ServiceBase {
         redemption_receiver_username: oThis.redemptionReceiverUsername,
         redemption_receiver_token_holder_address: oThis.redemptionReceiverTokenHolderAddress,
         pepo_api_domain: 1,
+        pepocorn_amount: oThis.pepocornAmount,
         receiverEmail: emailConstants.redemptionRequest
       }
     };
@@ -433,7 +434,8 @@ class InitiateRequestRedemption extends ServiceBase {
     const messagePayload = {
       transactionalMailParams: oThis.transactionalMailParams,
       currentUserId: oThis.currentUserId,
-      productKind: oThis.productKind
+      productKind: oThis.productKind,
+      newRequest: 1
     };
     await bgJob.enqueue(bgJobConstants.afterRedemptionJobTopic, messagePayload);
   }
