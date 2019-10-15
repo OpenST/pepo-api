@@ -70,7 +70,9 @@ class ValidatePepocornTopup extends ServiceBase {
     await oThis._validatePricePoint();
 
     // Pepocorn amount is not divisible by step factor
-    if (oThis.pepocornAmount % pepocornProductConstants.productStepFactor !== 0) {
+    let pepocornAmountBN = new BigNumber(oThis.pepocornAmount),
+      stepFactorBN = new BigNumber(pepocornProductConstants.productStepFactor);
+    if (!pepocornAmountBN.mod(stepFactorBN).eq(new BigNumber(0))) {
       await oThis._errorResponse('a_s_ptu_v_3');
     }
 
