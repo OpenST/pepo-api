@@ -640,12 +640,9 @@ class TransactionOstEventBase extends ServiceBase {
     const oThis = this;
 
     //Note: Use params from ost event for validation.
-    //todo: tx time send as params;
-
-    const txTime = oThis.ostTransaction.block_timestamp;
 
     const validateParam = {
-      block_timestamp: txTime,
+      request_timestamp: oThis.ostTransaction.block_timestamp,
       product_id: oThis.productId,
       pepo_amount_in_wei: oThis.ostTransaction.transfers[0].amount,
       pepocorn_amount: oThis.pepocornAmount,

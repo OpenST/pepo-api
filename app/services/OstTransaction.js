@@ -327,11 +327,8 @@ class OstTransaction extends ServiceBase {
   async _validateTransactionDataForRedemption() {
     const oThis = this;
 
-    //todo: tx time send as params;
-
-    const txTime = Date.now() / 1000;
     const validateParam = {
-      block_timestamp: txTime,
+      request_timestamp: oThis.transaction.updated_timestamp,
       product_id: oThis.productId,
       pepo_amount_in_wei: oThis.transfersData[0].amount,
       pepocorn_amount: oThis.pepocornAmount,
