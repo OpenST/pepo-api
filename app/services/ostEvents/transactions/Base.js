@@ -287,7 +287,8 @@ class TransactionOstEventBase extends ServiceBase {
       paramErrors.push('invalid_from_user_id');
     }
 
-    if (oThis.toUserId !== oThis.transactionObj.extraData.toUserIds[0]) {
+    //Note UserId is 0 for comapny token holder address
+    if ((oThis.toUserId || 0) !== oThis.transactionObj.extraData.toUserIds[0]) {
       logger.error('Mismatch in to user id in table and in webhook data.');
       paramErrors.push('invalid_to_user_id');
     }
