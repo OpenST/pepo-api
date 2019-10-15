@@ -6,7 +6,8 @@ const express = require('express'),
   morgan = require('morgan'),
   bodyParser = require('body-parser'),
   helmet = require('helmet'),
-  customUrlParser = require('url');
+  customUrlParser = require('url'),
+  URL = require('url').URL;
 
 const requestSharedNameSpace = createNamespace('pepoApiNameSpace');
 
@@ -21,10 +22,14 @@ const responseHelper = require(rootPrefix + '/lib/formatter/response'),
   sanitizer = require(rootPrefix + '/helpers/sanitizer');
 
 const apiRoutes = require(rootPrefix + '/routes/api/index'),
+  storeRoutes = require(rootPrefix + '/routes/storeApi/index'),
   webhookRoutes = require(rootPrefix + '/routes/webhooks/index'),
   elbHealthCheckerRoute = require(rootPrefix + '/routes/internal/elb_health_checker');
 
 const errorConfig = basicHelper.fetchErrorConfig(apiVersions.v1);
+
+const pepoApiHostName = new URL(coreConstants.PA_DOMAIN).hostname;
+const pepoStoreApiHostName = new URL(coreConstants.PA_STORE_DOMAIN).hostname;
 
 morgan.token('id', function getId(req) {
   return req.id;
@@ -160,7 +165,15 @@ app.use(setResponseHeader);
 /**
  * NOTE: API routes where first sanitize and then assign params
  */
-app.use('/api', sanitizer.sanitizeBodyAndQuery, assignParams, apiRoutes);
+app.use('/api', sanitizer.sanitizeBodyAndQuery, assignParams, function(request, response, next) {
+  if (request.hostname === pepoApiHostName) {
+    apiRoutes(request, response, next);
+  } else if (request.hostname === pepoStoreApiHostName) {
+    storeRoutes(request, response, next);
+  } else {
+    //  do nothing
+  }
+});
 
 /**
  * NOTE: OST webhooks where first assign params, validate signature and then sanitize the params
