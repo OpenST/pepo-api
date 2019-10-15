@@ -13,6 +13,7 @@ const rootPrefix = '../../../..',
   createErrorLogsEntry = require(rootPrefix + '/lib/errorLogs/createEntry'),
   errorLogsConstants = require(rootPrefix + '/lib/globalConstant/errorLogs'),
   notificationJobConstants = require(rootPrefix + '/lib/globalConstant/notificationJob'),
+  pepocornTransactionConstants = require(rootPrefix + '/lib/globalConstant/redemption/pepocornTransaction'),
   fiatPaymentConstants = require(rootPrefix + '/lib/globalConstant/fiatPayment');
 
 /**
