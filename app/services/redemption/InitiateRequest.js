@@ -25,17 +25,16 @@ const rootPrefix = '../../..',
 /**
  * Class to request redemption for user.
  *
- * @class RequestRedemption
+ * @class InitiateRequestRedemption
  */
-class RequestRedemption extends ServiceBase {
+class InitiateRequestRedemption extends ServiceBase {
   /**
    * Constructor to request redemption for user.
    *
    * @param {object} params
    * @param {object} params.current_user
    * @param {number} params.product_id
-   * @param {string} params.dollar_amount
-   * @param {string} params.pepocorn_per_dollar_step
+   * @param {number} params.dollar_amount
    *
    * @augments ServiceBase
    *
@@ -79,7 +78,7 @@ class RequestRedemption extends ServiceBase {
     const promisesArray2 = [];
     promisesArray2.push(oThis._debitPepocornBalance());
     promisesArray2.push(oThis._insertPepocornTransactions());
-    promisesArray2.push(oThis._enqueAfterRedemptionJob());
+    promisesArray2.push(oThis._enqueueAfterRedemptionJob());
 
     await Promise.all(promisesArray2);
 
@@ -190,7 +189,7 @@ class RequestRedemption extends ServiceBase {
     if (!validationResult) {
       return Promise.reject(
         responseHelper.paramValidationError({
-          internal_error_identifier: 'a_s_r_ir_5',
+          internal_error_identifier: 'a_s_r_ir_3',
           api_error_identifier: 'invalid_api_params',
           params_error_identifiers: ['invalid_product_id'],
           debug_options: {}
@@ -214,7 +213,7 @@ class RequestRedemption extends ServiceBase {
     if (oThis.dollarAmount < oThis.productMinDollarValue) {
       return Promise.reject(
         responseHelper.paramValidationError({
-          internal_error_identifier: 'a_s_r_ir_3',
+          internal_error_identifier: 'a_s_r_ir_4',
           api_error_identifier: 'invalid_api_params',
           params_error_identifiers: ['invalid_dollar_amount'],
           debug_options: {
@@ -230,7 +229,7 @@ class RequestRedemption extends ServiceBase {
     if (oThis.dollarAmount % oThis.productDollarStep !== 0) {
       return Promise.reject(
         responseHelper.paramValidationError({
-          internal_error_identifier: 'a_s_r_ir_4',
+          internal_error_identifier: 'a_s_r_ir_5',
           api_error_identifier: 'invalid_api_params',
           params_error_identifiers: ['invalid_dollar_amount'],
           debug_options: {
@@ -279,7 +278,7 @@ class RequestRedemption extends ServiceBase {
     if (oThis.pepocornAmount > pepocornBalance) {
       return Promise.reject(
         responseHelper.error({
-          internal_error_identifier: 'a_s_r_ir_4',
+          internal_error_identifier: 'a_s_r_ir_6',
           api_error_identifier: 'insufficient_pepocorn_balance',
           debug_options: {
             pepocornAmount: oThis.pepocornAmount,
@@ -428,7 +427,7 @@ class RequestRedemption extends ServiceBase {
    * @returns {Promise<void>}
    * @private
    */
-  async _enqueAfterRedemptionJob() {
+  async _enqueueAfterRedemptionJob() {
     const oThis = this;
 
     const messagePayload = {
@@ -440,4 +439,4 @@ class RequestRedemption extends ServiceBase {
   }
 }
 
-module.exports = RequestRedemption;
+module.exports = InitiateRequestRedemption;
