@@ -338,7 +338,12 @@ class OstTransaction extends ServiceBase {
     oThis.isValidRedemption = await new ValidatePepocornTopUp(validateParam)
       .perform()
       .then(async function(resp) {
-        return true;
+        if (resp.isFailure()) {
+          await createErrorLogsEntry.perform(resp, errorLogsConstants.highSeverity);
+          return false;
+        } else {
+          return true;
+        }
       })
       .catch(async function(resp) {
         const errorObject = responseHelper.error({
@@ -570,7 +575,7 @@ class OstTransaction extends ServiceBase {
     const insertData = {
       user_id: oThis.userId,
       kind: pepocornTransactionConstants.invertedKinds[pepocornTransactionConstants.creditKind],
-      pepocorn_amount: oThis.amountsArray[0],
+      pepocorn_amount: oThis.pepocornAmount,
       transaction_id: oThis.transactionId,
       status: pepocornTransactionConstants.invertedStatuses[status]
     };

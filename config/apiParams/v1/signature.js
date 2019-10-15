@@ -797,7 +797,7 @@ const v1Signature = {
       },
       {
         parameter: 'pepocorn_amount',
-        validatorMethods: ['validateNonZeroInteger']
+        validatorMethods: ['validateNonNegativeNumber']
       }
     ],
     optional: [

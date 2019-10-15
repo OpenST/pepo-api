@@ -5,6 +5,7 @@ const rootPrefix = '../../..',
   SecureTokenCache = require(rootPrefix + '/lib/cacheManagement/single/SecureToken'),
   pricePointConstants = require(rootPrefix + '/lib/globalConstant/ostPricePoints'),
   entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
+  logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   responseHelper = require(rootPrefix + '/lib/formatter/response');
 
 /**

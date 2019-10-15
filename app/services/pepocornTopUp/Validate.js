@@ -64,27 +64,42 @@ class ValidatePepocornTopup extends ServiceBase {
     const oThis = this;
 
     if (oThis.productId != pepocornProductConstants.productId) {
-      await oThis._errorResponse('a_s_ptu_v_1');
+      return Promise.reject(oThis._errorResponse('a_s_ptu_v_1'));
     }
 
     await oThis._validatePricePoint();
 
     // Pepocorn amount is not divisible by step factor
-    if (oThis.pepocornAmount % pepocornProductConstants.productStepFactor !== 0) {
-      await oThis._errorResponse('a_s_ptu_v_3');
+    let pepocornAmountBN = new BigNumber(oThis.pepocornAmount),
+      stepFactorBN = new BigNumber(pepocornProductConstants.productStepFactor);
+    if (!pepocornAmountBN.mod(stepFactorBN).eq(new BigNumber(0))) {
+      return Promise.reject(oThis._errorResponse('a_s_ptu_v_3'));
     }
 
-    // Validate pepo step factor
+    // Validate number of pepos can be given
+    if (!oThis._getPeposForPepocornAmount().eq(new BigNumber(oThis.pepoAmount))) {
+      return Promise.reject(oThis._errorResponse('a_s_ptu_v_4'));
+    }
+  }
+
+  /**
+   * Get pepos for pepocorn amount
+   *
+   * @returns {BigNumber}
+   * @private
+   */
+  _getPeposForPepocornAmount() {
+    const oThis = this;
+
     let pepoInWeiPerStepFactor = pepocornProductConstants.pepoPerStepFactor(
       pepocornProductConstants.productStepFactor,
       oThis.pepoUsdPricePoint
     );
-    let pepoInWei = new BigNumber(pepoInWeiPerStepFactor).mul(new BigNumber(oThis.pepocornAmount));
-    if (!pepoInWei.eq(new BigNumber(oThis.pepoAmount))) {
-      await oThis._errorResponse('a_s_ptu_v_4');
-    }
-    console.log('pepoInWeiCalStepFactor: ', pepoInWeiPerStepFactor);
-    console.log('pepoInWei: ', pepoInWei);
+
+    let numberOfSteps = new BigNumber(oThis.pepocornAmount).div(
+      new BigNumber(pepocornProductConstants.productStepFactor)
+    );
+    return new BigNumber(pepoInWeiPerStepFactor).mul(numberOfSteps);
   }
 
   /**
@@ -118,7 +133,7 @@ class ValidatePepocornTopup extends ServiceBase {
 
     // If price point is not matched in last one hour
     if (!validationResult) {
-      await oThis._errorResponse('a_s_ptu_v_2');
+      return Promise.reject(oThis._errorResponse('a_s_ptu_v_2'));
     }
   }
 
@@ -129,22 +144,20 @@ class ValidatePepocornTopup extends ServiceBase {
    * @returns {Promise<never>}
    * @private
    */
-  async _errorResponse(errCode) {
+  _errorResponse(errCode) {
     const oThis = this;
 
-    return Promise.reject(
-      responseHelper.error({
-        internal_error_identifier: errCode,
-        api_error_identifier: 'invalid_api_params',
-        debug_options: {
-          productId: oThis.productId,
-          pepoAmount: oThis.pepoAmount,
-          pepocornAmount: oThis.pepocornAmount,
-          pepoUsdPricePoint: oThis.pepoUsdPricePoint,
-          currentUserId: oThis.currentUserId
-        }
-      })
-    );
+    return responseHelper.error({
+      internal_error_identifier: errCode,
+      api_error_identifier: 'invalid_api_params',
+      debug_options: {
+        productId: oThis.productId,
+        pepoAmount: oThis.pepoAmount,
+        pepocornAmount: oThis.pepocornAmount,
+        pepoUsdPricePoint: oThis.pepoUsdPricePoint,
+        currentUserId: oThis.currentUserId
+      }
+    });
   }
 }
 
