@@ -10,6 +10,20 @@ const rootPrefix = '../../..',
   entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
   cookieHelper = require(rootPrefix + '/lib/cookieHelper');
 
+/* Redemption products list.*/
+router.get(
+  '/products',
+  cookieHelper.parseWebviewLoginCookieIfPresent,
+  sanitizer.sanitizeDynamicUrlParams,
+  cookieHelper.validateTokenIfPresent,
+  cookieHelper.validateUserLoginRequired,
+  function(req, res, next) {
+    req.decodedParams.apiName = apiName.getRedemptionProducts;
+
+    Promise.resolve(routeHelper.perform(req, res, next, '/redemption/GetProductList', 'r_a_w_r_p_1', null));
+  }
+);
+
 // Request for redemption of a product.
 router.post('/request', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.initiateRedemptionRequest;
