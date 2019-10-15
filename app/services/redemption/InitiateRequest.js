@@ -76,12 +76,11 @@ class InitiateRequestRedemption extends ServiceBase {
 
     oThis._prepareSendMailParams();
 
-    const promisesArray2 = [];
-    promisesArray2.push(oThis._debitPepocornBalance());
-    promisesArray2.push(oThis._insertPepocornTransactions());
-    promisesArray2.push(oThis._enqueueAfterRedemptionJob());
+    await oThis._debitPepocornBalance();
 
-    await Promise.all(promisesArray2);
+    await oThis._insertPepocornTransactions();
+
+    await oThis._enqueueAfterRedemptionJob();
 
     return responseHelper.successWithData({
       redemption: {
@@ -250,13 +249,7 @@ class InitiateRequestRedemption extends ServiceBase {
   _getPepocornAmount() {
     const oThis = this;
 
-    const noOfDollarSteps = oThis.dollarAmount / oThis.productDollarStep,
-      pepocornPerDollarStep = redemptionConstants.pepocornPerDollarStep;
-
-    logger.log('oThis.noOfDollarSteps ====', noOfDollarSteps);
-    logger.log('pepocornPerDollarStep ====', pepocornPerDollarStep);
-
-    oThis.pepocornAmount = noOfDollarSteps * pepocornPerDollarStep;
+    oThis.pepocornAmount = oThis.dollarAmount * redemptionConstants.pepocornPerDollar;
 
     logger.log('oThis.pepocornAmount ====', oThis.pepocornAmount);
   }
@@ -351,17 +344,25 @@ class InitiateRequestRedemption extends ServiceBase {
   async _debitPepocornBalance() {
     const oThis = this;
 
-    await new PepocornBalanceModel({})
-      .update([
-        'balance = CASE WHEN balance - ? >= 0 THEN balance - ? ELSE balance END',
-        oThis.pepocornAmount,
-        oThis.pepocornAmount
-      ])
+    const updatePepocornBalanceResp = await new PepocornBalanceModel({})
+      .update(['balance = balance - ?', oThis.pepocornAmount])
       .where({ user_id: oThis.currentUserId })
+      .where(['balance >= ?', oThis.pepocornAmount])
       .fire();
 
-    // Flush Cache.
-    await PepocornBalanceModel.flushCache({ userId: oThis.currentUserId });
+    if (updatePepocornBalanceResp.affectedRows === 0) {
+      return Promise.reject(
+        responseHelper.error({
+          internal_error_identifier: 'a_s_r_ir_6',
+          api_error_identifier: 'insufficient_pepocorn_balance',
+          debug_options: {
+            pepocornAmount: oThis.pepocornAmount
+          }
+        })
+      );
+    } else {
+      await PepocornBalanceModel.flushCache({ userId: oThis.currentUserId });
+    }
   }
 
   /**
@@ -446,7 +447,7 @@ class InitiateRequestRedemption extends ServiceBase {
   }
 
   /**
-   * Enque after signup job.
+   * Enqueue after sign-up job.
    *
    * @returns {Promise<void>}
    * @private
