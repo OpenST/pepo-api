@@ -424,7 +424,7 @@ class InitiateRequestRedemption extends ServiceBase {
   }
 
   /**
-   * Enque after signup job.
+   * Enqueue after sign-up job.
    *
    * @returns {Promise<void>}
    * @private
