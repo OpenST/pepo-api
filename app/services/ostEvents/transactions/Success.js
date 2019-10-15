@@ -335,6 +335,8 @@ class SuccessTransactionOstEvent extends TransactionOstEventBase {
   }
 
   _getPepocornTransactionStatus() {
+    const oThis = this;
+
     return oThis.isValidRedemption
       ? pepocornTransactionConstants.processedStatus
       : pepocornTransactionConstants.failedStatus;
