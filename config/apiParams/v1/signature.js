@@ -785,7 +785,7 @@ const v1Signature = {
     mandatory: [
       {
         parameter: 'product_id',
-        validatorMethods: ['validateNonZeroInteger']
+        validatorMethods: ['validateString']
       },
       {
         parameter: 'pepo_amount_in_wei',
@@ -793,7 +793,7 @@ const v1Signature = {
       },
       {
         parameter: 'pepo_usd_price_point',
-        validatorMethods: ['validateNonZeroWeiValue']
+        validatorMethods: ['validateNonNegativeNumber']
       },
       {
         parameter: 'pepocorn_amount',
