@@ -49,8 +49,6 @@ class ValidatePepocornTopup extends ServiceBase {
   async _asyncPerform() {
     const oThis = this;
 
-    await oThis._fetchPricePoints();
-
     await oThis._validateInput();
 
     return responseHelper.successWithData({});
