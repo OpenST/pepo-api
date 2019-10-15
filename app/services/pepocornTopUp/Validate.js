@@ -77,7 +77,7 @@ class ValidatePepocornTopup extends ServiceBase {
     }
 
     // Validate number of pepos can be given
-    if (!oThis._getPeposForPepocornAmount.eq(new BigNumber(oThis.pepoAmount))) {
+    if (!oThis._getPeposForPepocornAmount().eq(new BigNumber(oThis.pepoAmount))) {
       return Promise.reject(oThis._errorResponse('a_s_ptu_v_4'));
     }
   }
