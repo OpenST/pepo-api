@@ -1,3 +1,5 @@
+const BigNumber = require('bignumber.js');
+
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   pepocornProductConstants = require(rootPrefix + '/lib/globalConstant/pepocornProduct'),
@@ -75,11 +77,16 @@ class ValidatePepocornTopup extends ServiceBase {
     }
 
     // Validate pepo step factor
-    let pepoInWeiCalStepFactor = pepocornProductConstants.pepoPerStepFactor(
+    let pepoInWeiPerStepFactor = pepocornProductConstants.pepoPerStepFactor(
       pepocornProductConstants.productStepFactor,
       oThis.pepoUsdPricePoint
     );
-    console.log('pepoInWeiCalStepFactor: ', pepoInWeiCalStepFactor);
+    let pepoInWei = new BigNumber(pepoInWeiPerStepFactor).mul(new BigNumber(oThis.pepocornAmount));
+    if (!pepoInWei.eq(new BigNumber(oThis.pepoAmount))) {
+      await oThis._errorResponse('a_s_ptu_v_4');
+    }
+    console.log('pepoInWeiCalStepFactor: ', pepoInWeiPerStepFactor);
+    console.log('pepoInWei: ', pepoInWei);
   }
 
   /**
