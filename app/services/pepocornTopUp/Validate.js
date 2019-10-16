@@ -117,7 +117,7 @@ class ValidatePepocornTopup extends ServiceBase {
         ostPricePointConstants.invertedQuoteCurrencies[ostPricePointConstants.usdQuoteCurrency]
       ])
       .limit(20)
-      .order('created_at desc')
+      .order_by('created_at desc')
       .fire();
     for (let index = 0; index < dbRows.length; index++) {
       usdPricePoint = dbRows[index].conversion_rate;
