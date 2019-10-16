@@ -167,7 +167,7 @@
   "insufficient_pepocorn_balance": {
     "http_code": "200",
     "code": "BAD_REQUEST",
-    "message": "Pepocorn balance is not sufficient."
+    "message": "Sorry, you don't have enough Unicorns."
   },
   "pepocorn_price_point_changed": {
     "http_code": "200",
