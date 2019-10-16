@@ -39,7 +39,7 @@ class ValidatePepocornTopup extends ServiceBase {
     oThis.pepoAmount = params.pepo_amount_in_wei;
     oThis.pepocornAmount = params.pepocorn_amount;
     oThis.pepoUsdPricePoint = params.pepo_usd_price_point;
-    oThis.requestTimestamp = params.request_timestamp;
+    oThis.requestTimestamp = params.request_timestamp || Math.floor(new Date().getTime() / 1000);
     oThis.currentUserId = params.current_user ? params.current_user.id : null;
 
     oThis.pricePoints = null;
@@ -88,48 +88,45 @@ class ValidatePepocornTopup extends ServiceBase {
   }
 
   /**
-   * Validate price point.
+   * Validate price points
    *
-   * @returns {Promise<void>}
+   * @returns {Promise<*|result>}
    * @private
    */
   async _validatePricePoint() {
     const oThis = this;
 
-    let usdPricePoints = [];
-    // If request time is passed then fetch price points accordingly
-    if (oThis.requestTimestamp) {
-      const dbRows = await new OstPricePointModel()
-        .select('conversion_rate')
-        .where([
-          'created_at >= (?) AND created_at < (?) AND quote_currency = (?)',
-          Number(oThis.requestTimestamp) - 1800,
-          Number(oThis.requestTimestamp) + 1800,
-          ostPricePointConstants.invertedQuoteCurrencies[ostPricePointConstants.usdQuoteCurrency]
-        ])
-        .fire();
-      for (let index = 0; index < dbRows.length; index++) {
-        const pricePointEntity = dbRows[index];
-        usdPricePoints.push(pricePointEntity.conversion_rate);
-      }
-    } else {
-      const pricePointsCacheRsp = await new PricePointsCache().fetch();
+    // Validate price point matches with the cache.
+    const pricePointsCacheRsp = await new PricePointsCache().fetch();
 
-      if (pricePointsCacheRsp.isFailure()) {
-        return Promise.reject(pricePointsCacheRsp);
-      }
-      const usdPricePoint =
-        pricePointsCacheRsp.data[ostPricePointConstants.stakeCurrency][ostPricePointConstants.usdQuoteCurrency];
-      usdPricePoints.push(usdPricePoint);
+    if (pricePointsCacheRsp.isFailure()) {
+      return Promise.reject(pricePointsCacheRsp);
     }
-    // Price points in input should be present in array of price points fetched from Db.
-    for (let i = 0; i < usdPricePoints.length; i++) {
-      if (new BigNumber(usdPricePoints[i]).eq(new BigNumber(oThis.pepoUsdPricePoint))) {
-        return true;
+    let usdPricePoint =
+      pricePointsCacheRsp.data[ostPricePointConstants.stakeCurrency][ostPricePointConstants.usdQuoteCurrency];
+    if (new BigNumber(usdPricePoint).eq(new BigNumber(oThis.pepoUsdPricePoint))) {
+      return responseHelper.successWithData({});
+    }
+
+    // If price point doesn't match with the cache, will query db for last records and match
+    const dbRows = await new OstPricePointModel()
+      .select('conversion_rate')
+      .where([
+        'created_at <= (?) AND quote_currency = (?)',
+        oThis.requestTimestamp,
+        ostPricePointConstants.invertedQuoteCurrencies[ostPricePointConstants.usdQuoteCurrency]
+      ])
+      .limit(20)
+      .order('created_at desc')
+      .fire();
+    for (let index = 0; index < dbRows.length; index++) {
+      usdPricePoint = dbRows[index].conversion_rate;
+      if (new BigNumber(usdPricePoint).eq(new BigNumber(oThis.pepoUsdPricePoint))) {
+        return responseHelper.successWithData({});
       }
     }
 
-    // If price point is not matched the range fetched from db.
+    // If price point is not matched in the range fetched from db.
     return Promise.reject(oThis._errorResponse('a_s_ptu_v_2'));
   }
 
