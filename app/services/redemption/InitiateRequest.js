@@ -386,7 +386,7 @@ class InitiateRequestRedemption extends ServiceBase {
         kind: pepocornTransactionConstants.invertedKinds[pepocornTransactionConstants.debitKind],
         pepocorn_amount: oThis.pepocornAmount,
         redemption_id: oThis.redemptionId,
-        status: pepocornTransactionConstants.invertedStatuses[pepocornTransactionConstants.processingStatus]
+        status: pepocornTransactionConstants.invertedStatuses[pepocornTransactionConstants.processedStatus]
       })
       .fire();
   }
