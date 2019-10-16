@@ -81,6 +81,16 @@ class RedemptionProductModel extends ModelBase {
 
     return response;
   }
+
+  /**
+   * Flush cache.
+   *
+   * @returns {Promise<*>}
+   */
+  static async flushCache() {
+    const RedemptionProductsCache = require(rootPrefix + '/lib/cacheManagement/single/RedemptionProducts');
+    await new RedemptionProductsCache({}).clear();
+  }
 }
 
 module.exports = RedemptionProductModel;
