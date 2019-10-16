@@ -1,4 +1,5 @@
-const uuidV4 = require('uuid/v4');
+const uuidV4 = require('uuid/v4'),
+  BigNumber = require('bignumber.js');
 
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
@@ -211,31 +212,33 @@ class InitiateRequestRedemption extends ServiceBase {
     logger.log('oThis.dollarAmount =========', oThis.dollarAmount);
     logger.log('oThis.productMinDollarValue ======', oThis.productMinDollarValue);
 
-    if (oThis.dollarAmount < oThis.productMinDollarValue) {
+    const dollarAmountBN = new BigNumber(oThis.dollarAmount),
+      productMinDollarValueBN = new BigNumber(oThis.productMinDollarValue),
+      productDollarStepBN = new BigNumber(oThis.productDollarStep);
+
+    if (dollarAmountBN.lt(productMinDollarValueBN)) {
       return Promise.reject(
         responseHelper.paramValidationError({
           internal_error_identifier: 'a_s_r_ir_4',
           api_error_identifier: 'invalid_api_params',
           params_error_identifiers: ['invalid_dollar_amount'],
           debug_options: {
-            dollarAmount: oThis.dollarAmount,
-            dollarValue: oThis.productMinDollarValue
+            dollarAmountBN: dollarAmountBN,
+            productMinDollarValueBN: productMinDollarValueBN
           }
         })
       );
     }
 
-    logger.log('oThis.dollarAmount % oThis.productDollarStep ======', oThis.dollarAmount % oThis.productDollarStep);
-
-    if (oThis.dollarAmount % oThis.productDollarStep !== 0) {
+    if (!dollarAmountBN.mod(productDollarStepBN).eq(new BigNumber(0))) {
       return Promise.reject(
         responseHelper.paramValidationError({
           internal_error_identifier: 'a_s_r_ir_5',
           api_error_identifier: 'invalid_api_params',
           params_error_identifiers: ['invalid_dollar_amount'],
           debug_options: {
-            dollarAmount: oThis.dollarAmount,
-            dollarStep: oThis.productDollarStep
+            dollarAmountBN: dollarAmountBN,
+            productDollarStepBN: productDollarStepBN
           }
         })
       );
@@ -270,14 +273,17 @@ class InitiateRequestRedemption extends ServiceBase {
     logger.log('pepocornBalance ====', pepocornBalance);
     logger.log('oThis.pepocornAmount ====', oThis.pepocornAmount);
 
-    if (oThis.pepocornAmount > pepocornBalance) {
+    const pepocornAmountBN = new BigNumber(oThis.pepocornAmount),
+      pepocornBalanceBN = new BigNumber(pepocornBalance);
+
+    if (pepocornAmountBN.gt(pepocornBalanceBN)) {
       return Promise.reject(
         responseHelper.error({
           internal_error_identifier: 'a_s_r_ir_6',
           api_error_identifier: 'insufficient_pepocorn_balance',
           debug_options: {
-            pepocornAmount: oThis.pepocornAmount,
-            pepocornBalance: pepocornBalance
+            pepocornAmountBN: pepocornAmountBN.toString(10),
+            pepocornBalanceBN: pepocornBalanceBN.toString(10)
           }
         })
       );
