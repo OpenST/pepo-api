@@ -13,8 +13,6 @@ router.use(cookieParser(coreConstants.WEB_COOKIE_SECRET));
 //NOTE: CSRF COOKIE SHOULD NOT BE SET HERE. IT SHOULD ONLY BE SET AT WEB. DO NOT UNCOMMENT-AMAN
 // router.use(cookieHelper.setWebCsrf());
 
-router.use(cookieHelper.validateWebviewLoginCookieIfPresent, cookieHelper.validateUserLoginRequired);
-
 router.use('/redemptions', redemptionsRoutes);
 
 module.exports = router;
