@@ -164,7 +164,7 @@ class ValidatePepocornTopup extends ServiceBase {
 
     return responseHelper.error({
       internal_error_identifier: errCode,
-      api_error_identifier: 'invalid_api_params',
+      api_error_identifier: 'pepocorn_price_point_changed',
       debug_options: {
         productId: oThis.productId,
         pepoAmount: oThis.pepoAmount,
