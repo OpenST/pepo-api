@@ -52,7 +52,6 @@ class InitiateRequestRedemption extends ServiceBase {
     oThis.dollarAmount = params.dollar_amount;
 
     oThis.currentUserId = oThis.currentUser.id;
-    oThis.companyTokenHolderAddress = null;
   }
 
   /**
@@ -71,7 +70,7 @@ class InitiateRequestRedemption extends ServiceBase {
     await oThis._validateAndSanitize();
 
     const promisesArray = [];
-    promisesArray.push(oThis._getTokenUserDetails(), oThis._fetchTokenDetails(), oThis._getCurrentUserTwitterHandle());
+    promisesArray.push(oThis._getTokenUserDetails(), oThis._getCurrentUserTwitterHandle());
     await Promise.all(promisesArray);
 
     oThis.redemptionId = uuidV4();
@@ -393,27 +392,6 @@ class InitiateRequestRedemption extends ServiceBase {
   }
 
   /**
-   * Fetch token details.
-   *
-   * @sets oThis.companyTokenHolderAddress
-   *
-   * @returns {Promise<void>}
-   * @private
-   */
-  async _fetchTokenDetails() {
-    const oThis = this;
-
-    const tokenDetailsCacheResponse = await new SecureTokenCache({}).fetch();
-    if (tokenDetailsCacheResponse.isFailure()) {
-      return Promise.reject(tokenDetailsCacheResponse);
-    }
-
-    const tokenDetails = tokenDetailsCacheResponse.data;
-
-    oThis.companyTokenHolderAddress = tokenDetails.companyTokenHolderAddress;
-  }
-
-  /**
    * Prepare send mail params.
    *
    * @sets oThis.transactionalMailParams
@@ -447,7 +425,6 @@ class InitiateRequestRedemption extends ServiceBase {
         redemption_receiver_token_holder_address: oThis.redemptionReceiverTokenHolderAddress,
         pepo_api_domain: 1,
         pepocorn_amount: oThis.pepocornAmount,
-        pepo_beneficiary_address: oThis.companyTokenHolderAddress,
         receiverEmail: emailConstants.redemptionRequest
       }
     };
