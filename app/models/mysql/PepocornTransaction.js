@@ -34,9 +34,9 @@ class PepocornTransactionModel extends ModelBase {
    * @param {number} dbRow.id
    * @param {number} dbRow.user_id
    * @param {number} dbRow.kind
-   * @param {number} dbRow.pepocornAmount
-   * @param {number} dbRow.transactionId
-   * @param {number} dbRow.redemptionId
+   * @param {number} dbRow.pepocorn_amount
+   * @param {number} dbRow.transaction_id
+   * @param {number} dbRow.redemption_id
    * @param {number} dbRow.status
    * @param {number} dbRow.created_at
    * @param {number} dbRow.updated_at
