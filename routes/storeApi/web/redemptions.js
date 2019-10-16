@@ -13,9 +13,9 @@ const rootPrefix = '../../..',
 /* Redemption products list.*/
 router.get(
   '/products',
-  cookieHelper.parseWebviewLoginCookieIfPresent,
+  cookieHelper.parseStoreLoginCookieIfPresent,
   sanitizer.sanitizeDynamicUrlParams,
-  cookieHelper.validateTokenIfPresent,
+  cookieHelper.validateStoreTokenIfPresent,
   cookieHelper.validateUserLoginRequired,
   function(req, res, next) {
     req.decodedParams.apiName = apiName.getRedemptionProducts;
@@ -24,7 +24,7 @@ router.get(
   }
 );
 
-router.use(cookieHelper.validateWebviewLoginCookieIfPresent, cookieHelper.validateUserLoginRequired);
+router.use(cookieHelper.validateStoreLoginCookieIfPresent, cookieHelper.validateUserLoginRequired);
 
 // Request for redemption of a product.
 router.post('/request', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
@@ -41,7 +41,7 @@ router.post('/request', sanitizer.sanitizeDynamicUrlParams, function(req, res, n
 
     serviceResponse.data = wrapperFormatterRsp.data;
   };
-  //move to store.pepo.com
+
   Promise.resolve(
     routeHelper.perform(req, res, next, '/redemption/InitiateRequest', 'r_sa_w_r_1', null, dataFormatterFunc)
   );
