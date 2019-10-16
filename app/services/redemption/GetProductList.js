@@ -2,7 +2,7 @@ const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   GetUserBalance = require(rootPrefix + '/app/services/user/GetBalance'),
   PricePointsCache = require(rootPrefix + '/lib/cacheManagement/single/PricePoints'),
-  RedemptionCache = require(rootPrefix + '/lib/cacheManagement/single/RedemptionProducts'),
+  RedemptionProductsCache = require(rootPrefix + '/lib/cacheManagement/single/RedemptionProducts'),
   GetPepocornBalance = require(rootPrefix + '/lib/pepocorn/GetPepocornBalance'),
   responseHelper = require(rootPrefix + '/lib/formatter/response');
 
@@ -113,7 +113,7 @@ class GetRedemptionInfo extends ServiceBase {
     //
     // return responseHelper.successWithData(r);
 
-    let redemptionProductsRsp = await new RedemptionCache().fetch();
+    let redemptionProductsRsp = await new RedemptionProductsCache().fetch();
     if (redemptionProductsRsp.isFailure()) {
       return Promise.reject(redemptionProductsRsp);
     }
