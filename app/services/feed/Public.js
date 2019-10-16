@@ -37,6 +37,7 @@ class PublicVideoFeed extends FeedBase {
     const oThis = this;
 
     oThis.paginationIdentifier = params[paginationConstants.paginationIdentifierKey] || null;
+    oThis.headers = params.sanitized_headers;
 
     oThis.limit = oThis._defaultPageLimit();
     oThis.paginationTimestamp = null;
@@ -52,6 +53,28 @@ class PublicVideoFeed extends FeedBase {
     oThis.setCacheData = false;
     oThis.latestSeenFeedTime = 0;
     oThis.unseenFeedMap = {};
+  }
+
+  /**
+   * Returns true if older pepo builds which does not have video play event
+   *
+   * @returns {Boolean}
+   * @private
+   */
+  _isOlderBuildWithoutVideoPlayEvent() {
+    const oThis = this;
+    const appVersion = oThis.headers['x-pepo-app-version'] || '';
+
+    let res = false;
+
+    if (['0.9.0', '0.9.1'].indexOf(appVersion) > -1) {
+      res = true;
+    }
+
+    console.log(`PERSONALIZED FEED:${oThis.currentUserId}===============x-pepo-app-version============`, appVersion);
+    console.log(`PERSONALIZED FEED:${oThis.currentUserId}====isOlderBuildWithoutVideoPlayEvent=========`, res);
+
+    return res;
   }
 
   /**
@@ -259,7 +282,8 @@ class PublicVideoFeed extends FeedBase {
       let sortParams = {
         currentUserId: oThis.currentUserId,
         unseenFeedIds: oThis.userFeedIdsCacheData['unseenFeedIds'].slice(),
-        feedsMap: oThis.unseenFeedMap
+        feedsMap: oThis.unseenFeedMap,
+        isOlderBuildWithoutVideoPlayEvent: oThis._isOlderBuildWithoutVideoPlayEvent()
       };
 
       const sortResponse = await new SortUnseenFeedLib(sortParams).perform();

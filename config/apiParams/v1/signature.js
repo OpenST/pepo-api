@@ -399,7 +399,12 @@ const v1Signature = {
     ]
   },
   [apiName.feedsList]: {
-    mandatory: [],
+    mandatory: [
+      {
+        parameter: 'sanitized_headers',
+        validatorMethods: ['validateNonEmptyObject']
+      }
+    ],
     optional: [
       {
         parameter: paginationConstants.paginationIdentifierKey,

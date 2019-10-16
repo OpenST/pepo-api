@@ -82,6 +82,21 @@ class Sanitizer {
   }
 
   /**
+   * Sanitize headers
+   *
+   * @param req
+   * @param res
+   * @param next
+   *
+   * @returns {*}
+   */
+  sanitizeHeaderParams(req, res, next) {
+    req.sanitizedHeaders = sanitizeRecursively.sanitize_params_recursively(req.headers);
+
+    return next();
+  }
+
+  /**
    * Sanitize object
    *
    * @param {object} params
