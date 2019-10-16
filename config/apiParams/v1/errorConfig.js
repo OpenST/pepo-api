@@ -345,6 +345,12 @@ const v1ErrorConfig = {
     parameter: 'video_id',
     code: 'invalid',
     message: 'Video has been deleted.'
+  },
+
+  invalid_pepocorn_amount: {
+    parameter: 'pepocorn_amount',
+    code: 'invalid',
+    message: 'Pepocorn amount is invalid.'
   }
 };
 
