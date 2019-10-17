@@ -30,4 +30,24 @@ router.get('/info', sanitizer.sanitizeDynamicUrlParams, function(req, res, next)
   );
 });
 
+router.get('/webview-url', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.getRedemptionWebViewProductUrl;
+
+  const dataFormatterFunc = async function(serviceResponse) {
+    const wrapperFormatterRsp = await new FormatterComposer({
+      resultType: responseEntityKey.redemptionInfo,
+      entityKindToResponseKeyMap: {
+        [entityType.redemptionInfo]: responseEntityKey.redemptionInfo
+      },
+      serviceData: serviceResponse.data
+    }).perform();
+
+    serviceResponse.data = wrapperFormatterRsp.data;
+  };
+
+  Promise.resolve(
+    routeHelper.perform(req, res, next, '/redemption/GetWebViewUrl', 'r_a_v1_redemptions_2', null, dataFormatterFunc)
+  );
+});
+
 module.exports = router;
