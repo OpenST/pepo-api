@@ -20,6 +20,10 @@ class GetRedemptionInfo extends ServiceBase {
    *
    * @param {object} params
    * @param {object} params.current_user
+   * @param {string} params.pepo_device_os
+   * @param {string} params.pepo_device_os_version
+   * @param {string} params.pepo_build_number
+   * @param {string} params.pepo_app_version
    *
    * @augments ServiceBase
    *
@@ -31,6 +35,11 @@ class GetRedemptionInfo extends ServiceBase {
     const oThis = this;
 
     oThis.currentUser = params.current_user;
+
+    oThis.pepoDeviceOs = params.pepo_device_os;
+    oThis.pepoDeviceOsVersion = params.pepo_device_os_version;
+    oThis.pepoBuildNumber = params.pepo_build_number;
+    oThis.pepoAppVersion = params.pepo_app_version;
   }
 
   /**
@@ -45,7 +54,18 @@ class GetRedemptionInfo extends ServiceBase {
     const token = await oThis._getEncryptedCookieValue(),
       urlToken = base64Helper.encode(token);
 
-    const link = `${webPageConstants.redemptionProductLink}?rt=${urlToken}`;
+    let params = {
+      url: webPageConstants.redemptionProductLink,
+      urlToken: urlToken,
+      options: {
+        pdo: oThis.pepoDeviceOs,
+        pdov: oThis.pepoDeviceOsVersion,
+        pbn: oThis.pepoBuildNumber,
+        pav: oThis.pepoAppVersion
+      }
+    };
+
+    const link = webPageConstants._generateRedemptionUrl(params);
 
     const redemptionInfo = {
       id: 1,
