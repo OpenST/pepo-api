@@ -1,21 +1,24 @@
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
-  pepocornProductConstants = require(rootPrefix + '/lib/globalConstant/pepocornProduct'),
   PricePointsCache = require(rootPrefix + '/lib/cacheManagement/single/PricePoints'),
   SecureTokenCache = require(rootPrefix + '/lib/cacheManagement/single/SecureToken'),
-  pricePointConstants = require(rootPrefix + '/lib/globalConstant/ostPricePoints'),
+  logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
+  responseHelper = require(rootPrefix + '/lib/formatter/response'),
   entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
-  responseHelper = require(rootPrefix + '/lib/formatter/response');
+  pricePointConstants = require(rootPrefix + '/lib/globalConstant/ostPricePoints'),
+  pepocornProductConstants = require(rootPrefix + '/lib/globalConstant/pepocornProduct');
 
 /**
- * Class to get info for pepocorn topup
+ * Class to get info for pepocorn topup.
  *
  * @class GetPepocornTopUpInfo
  */
 class GetPepocornTopUpInfo extends ServiceBase {
   /**
-   * Constructor to get info for pepocorn topup
+   * Constructor to get info for pepocorn topup.
    *
+   * @param {object} params
+   * @param {object} params.current_user
    * @param {number} params.current_user.id
    *
    * @augments ServiceBase
@@ -23,10 +26,12 @@ class GetPepocornTopUpInfo extends ServiceBase {
    * @constructor
    */
   constructor(params) {
-    super(params);
+    super();
 
     const oThis = this;
+
     oThis.currentUserId = params.current_user.id;
+
     oThis.productInfo = {};
     oThis.pricePoints = {};
     oThis.companyTokenHolder = null;
@@ -36,14 +41,13 @@ class GetPepocornTopUpInfo extends ServiceBase {
   /**
    * Async perform.
    *
-   * @return {Promise<void>}
+   * @returns {Promise<void>}
+   * @private
    */
   async _asyncPerform() {
     const oThis = this;
 
-    let promises = [];
-    promises.push(oThis._fetchPricePoints());
-    promises.push(oThis._fetchCompanyTokenHolderAddress());
+    const promises = [oThis._fetchPricePoints(), oThis._fetchCompanyTokenHolderAddress()];
     await Promise.all(promises);
 
     oThis._fetchProductInfo();
@@ -55,30 +59,9 @@ class GetPepocornTopUpInfo extends ServiceBase {
   }
 
   /**
-   * Fetch product info
-   *
-   * @private
-   */
-  _fetchProductInfo() {
-    const oThis = this;
-
-    let usdPricePoint = oThis.pricePoints[oThis.stakeCurrency][pricePointConstants.usdQuoteCurrency],
-      pepoInOneStepFactor = pepocornProductConstants.pepoPerStepFactor(
-        pepocornProductConstants.productStepFactor,
-        usdPricePoint
-      );
-    oThis.productInfo = {
-      productId: pepocornProductConstants.productId,
-      name: pepocornProductConstants.productName,
-      productStepFactor: pepocornProductConstants.productStepFactor,
-      pepoInOneStepFactor: pepoInOneStepFactor,
-      dollarInOneStepFactor: pepocornProductConstants.dollarInOneStepFactor,
-      companyTokenHolder: oThis.companyTokenHolder
-    };
-  }
-
-  /**
    * Fetch price points.
+   *
+   * @sets oThis.pricePoints
    *
    * @returns {Promise<void>}
    * @private
@@ -87,7 +70,6 @@ class GetPepocornTopUpInfo extends ServiceBase {
     const oThis = this;
 
     const pricePointsCacheRsp = await new PricePointsCache().fetch();
-
     if (pricePointsCacheRsp.isFailure()) {
       return Promise.reject(pricePointsCacheRsp);
     }
@@ -96,7 +78,9 @@ class GetPepocornTopUpInfo extends ServiceBase {
   }
 
   /**
-   * Fetch company token holder address
+   * Fetch company token holder address.
+   *
+   * @sets oThis.companyTokenHolder, oThis.stakeCurrency
    *
    * @returns {Promise<never>}
    * @private
@@ -113,6 +97,32 @@ class GetPepocornTopUpInfo extends ServiceBase {
 
     oThis.companyTokenHolder = tokenDetailsRsp.data.companyTokenHolderAddress;
     oThis.stakeCurrency = tokenDetailsRsp.data.stakeCurrency;
+  }
+
+  /**
+   * Fetch product info.
+   *
+   * @sets oThis.productInfo
+   *
+   * @private
+   */
+  _fetchProductInfo() {
+    const oThis = this;
+
+    const usdPricePoint = oThis.pricePoints[oThis.stakeCurrency][pricePointConstants.usdQuoteCurrency],
+      pepoInOneStepFactor = pepocornProductConstants.pepoPerStepFactor(
+        pepocornProductConstants.productStepFactor,
+        usdPricePoint
+      );
+
+    oThis.productInfo = {
+      productId: pepocornProductConstants.productId,
+      name: pepocornProductConstants.productName,
+      productStepFactor: pepocornProductConstants.productStepFactor,
+      pepoInOneStepFactor: pepoInOneStepFactor,
+      dollarInOneStepFactor: pepocornProductConstants.dollarInOneStepFactor,
+      companyTokenHolder: oThis.companyTokenHolder
+    };
   }
 }
 

@@ -77,7 +77,7 @@ class FeedBase extends ServiceBase {
     const promisesArray = [oThis._filterInactiveUserFeeds(), oThis._setTokenDetails()];
     await Promise.all(promisesArray);
 
-    return oThis._prepareResponse();
+    return await oThis._prepareResponse();
   }
 
   /**

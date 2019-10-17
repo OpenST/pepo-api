@@ -440,7 +440,12 @@ const v1Signature = {
     ]
   },
   [apiName.feedsList]: {
-    mandatory: [],
+    mandatory: [
+      {
+        parameter: 'sanitized_headers',
+        validatorMethods: ['validateNonEmptyObject']
+      }
+    ],
     optional: [
       {
         parameter: paginationConstants.paginationIdentifierKey,
@@ -817,7 +822,7 @@ const v1Signature = {
     mandatory: [
       {
         parameter: 'product_id',
-        validatorMethods: ['validateNonZeroInteger']
+        validatorMethods: ['validateString']
       },
       {
         parameter: 'pepo_amount_in_wei',
@@ -825,17 +830,21 @@ const v1Signature = {
       },
       {
         parameter: 'pepo_usd_price_point',
-        validatorMethods: ['validateNonZeroWeiValue']
+        validatorMethods: ['validateNonNegativeNumber']
       },
       {
         parameter: 'pepocorn_amount',
-        validatorMethods: ['validateNonZeroInteger']
+        validatorMethods: ['validateNonNegativeNumber']
       }
     ],
     optional: [
       {
         parameter: 'current_user',
         validatorMethods: ['validateNonEmptyObject']
+      },
+      {
+        parameter: 'request_timestamp',
+        validatorMethods: ['validateNonNegativeNumber']
       }
     ]
   },

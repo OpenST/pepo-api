@@ -311,12 +311,6 @@ const v1ErrorConfig = {
     message: 'Invalid product id.'
   },
 
-  invalid_dollar_amount: {
-    parameter: 'dollar_amount',
-    code: 'invalid',
-    message: 'Invalid dollar amount.'
-  },
-
   invalid_twitter_id: {
     parameter: 'twitter_id',
     code: 'invalid',
@@ -345,6 +339,12 @@ const v1ErrorConfig = {
     parameter: 'video_id',
     code: 'invalid',
     message: 'Video has been deleted.'
+  },
+
+  invalid_pepocorn_amount: {
+    parameter: 'pepocorn_amount',
+    code: 'invalid',
+    message: 'Pepocorn amount is invalid.'
   }
 };
 

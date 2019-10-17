@@ -32,6 +32,10 @@ class CoreConstants {
     return process.env.PA_DOMAIN;
   }
 
+  get PA_STORE_DOMAIN() {
+    return process.env.PA_STORE_DOMAIN;
+  }
+
   get PA_COOKIE_DOMAIN() {
     return process.env.PA_COOKIE_DOMAIN;
   }

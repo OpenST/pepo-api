@@ -57,8 +57,8 @@ class FailureTransactionOstEvent extends TransactionOstEventBase {
         await oThis._processTransaction();
       } else {
         if (oThis._isRedemptionTransactionKind()) {
-          // await oThis._sendRedemptionNotification();
           await oThis._insertInPepocornTransactions();
+          await oThis._enqueueRedemptionNotification();
         } else {
           await oThis._sendUserTransactionNotification();
         }
@@ -99,7 +99,7 @@ class FailureTransactionOstEvent extends TransactionOstEventBase {
       promiseArray.push(oThis.updateTransaction());
       promiseArray.push(oThis.updatePepocornTransactionModel());
       await Promise.all(promiseArray);
-      // await oThis._sendRedemptionNotification();
+      await oThis._enqueueRedemptionNotification();
     } else if (oThis.transactionObj.extraData.kind === transactionConstants.extraData.topUpKind) {
       await oThis.validateToUserId();
       const promiseArray = [];
@@ -154,6 +154,21 @@ class FailureTransactionOstEvent extends TransactionOstEventBase {
     await Promise.all(promiseArray1);
 
     await oThis._sendUserTransactionNotification();
+  }
+
+  /**
+   * Enqueue Redemption notification.
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _enqueueRedemptionNotification(topic) {
+    const oThis = this;
+
+    return notificationJobEnqueue.enqueue(notificationJobConstants.creditPepocornFailure, {
+      pepocornAmount: oThis.pepocornAmount,
+      transaction: oThis.transactionObj
+    });
   }
 
   /**
@@ -232,10 +247,10 @@ class FailureTransactionOstEvent extends TransactionOstEventBase {
   }
 
   _getPepocornTransactionStatus() {
+    const oThis = this;
+
     //whatever be the case it will be completetly failed
-    return oThis.isValidRedemption
-      ? pepocornTransactionConstants.completelyFailedStatus
-      : pepocornTransactionConstants.completelyFailedStatus;
+    return pepocornTransactionConstants.completelyFailedStatus;
   }
 }
 

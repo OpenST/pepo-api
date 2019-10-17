@@ -287,7 +287,8 @@ class TransactionOstEventBase extends ServiceBase {
       paramErrors.push('invalid_from_user_id');
     }
 
-    if (oThis.toUserId !== oThis.transactionObj.extraData.toUserIds[0]) {
+    //Note UserId is 0 for comapny token holder address
+    if ((oThis.toUserId || 0) !== oThis.transactionObj.extraData.toUserIds[0]) {
       logger.error('Mismatch in to user id in table and in webhook data.');
       paramErrors.push('invalid_to_user_id');
     }
@@ -442,7 +443,7 @@ class TransactionOstEventBase extends ServiceBase {
     const insertData = {
       user_id: oThis.fromUserId,
       kind: pepocornTransactionConstants.invertedKinds[pepocornTransactionConstants.creditKind],
-      pepocorn_amount: oThis.ostTransaction.transfers[0].amount,
+      pepocorn_amount: oThis.pepocornAmount,
       transaction_id: oThis.transactionObj.id,
       status: pepocornTransactionConstants.invertedStatuses[status]
     };
@@ -465,7 +466,10 @@ class TransactionOstEventBase extends ServiceBase {
   async insertInTransaction() {
     const oThis = this;
 
-    if ((oThis._isRedemptionTransactionKind() && !oThis.fromUserId) || (!oThis.toUserId || !oThis.fromUserId)) {
+    if (
+      (oThis._isRedemptionTransactionKind() && !oThis.fromUserId) ||
+      (!oThis._isRedemptionTransactionKind() && (!oThis.toUserId || !oThis.fromUserId))
+    ) {
       return Promise.reject(
         responseHelper.error({
           internal_error_identifier: 'a_s_oe_t_b_8',
@@ -640,12 +644,9 @@ class TransactionOstEventBase extends ServiceBase {
     const oThis = this;
 
     //Note: Use params from ost event for validation.
-    //todo: tx time send as params;
-
-    const txTime = oThis.ostTransaction.block_timestamp;
 
     const validateParam = {
-      block_timestamp: txTime,
+      request_timestamp: oThis.ostTransaction.block_timestamp,
       product_id: oThis.productId,
       pepo_amount_in_wei: oThis.ostTransaction.transfers[0].amount,
       pepocorn_amount: oThis.pepocornAmount,
@@ -655,16 +656,15 @@ class TransactionOstEventBase extends ServiceBase {
     oThis.isValidRedemption = await new ValidatePepocornTopUp(validateParam)
       .perform()
       .then(async function(resp) {
-        return true;
+        if (resp.isFailure()) {
+          await createErrorLogsEntry.perform(resp, errorLogsConstants.highSeverity);
+          return false;
+        } else {
+          return true;
+        }
       })
       .catch(async function(resp) {
-        const errorObject = responseHelper.error({
-          internal_error_identifier: 'a_s_oe_t_b_vtdfr_1',
-          api_error_identifier: 'something_went_wrong',
-          debug_options: validateParam
-        });
-
-        await createErrorLogsEntry.perform(errorObject, errorLogsConstants.highSeverity);
+        await createErrorLogsEntry.perform(resp, errorLogsConstants.highSeverity);
         return false;
       });
   }

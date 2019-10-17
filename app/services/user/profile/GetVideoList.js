@@ -120,6 +120,7 @@ class GetVideoList extends ServiceBase {
   async _fetchVideoIds() {
     const oThis = this;
 
+    //todo: do we need to check blocked user list here???
     // If not an admin, only then perform further validations.
     if (!oThis.isAdmin) {
       // If user's profile(not self) is not approved, videos would not be shown.

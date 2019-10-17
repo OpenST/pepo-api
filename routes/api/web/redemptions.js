@@ -10,7 +10,7 @@ const rootPrefix = '../../..',
   entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
   cookieHelper = require(rootPrefix + '/lib/cookieHelper');
 
-/* Subscribe email*/
+/* Redemption products list.*/
 router.get(
   '/products',
   cookieHelper.parseWebviewLoginCookieIfPresent,
@@ -41,29 +41,8 @@ router.post('/', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
 
     serviceResponse.data = wrapperFormatterRsp.data;
   };
-
+  //move to pepo.com
   Promise.resolve(routeHelper.perform(req, res, next, '/redemption/Request', 'r_a_w_r_2', null, dataFormatterFunc));
-});
-
-/* Get pepocorn balance. */
-router.get('/pepocorn-balance', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
-  req.decodedParams.apiName = apiName.redemptionPepocornBalance;
-
-  const dataFormatterFunc = async function(serviceResponse) {
-    const wrapperFormatterRsp = await new FormatterComposer({
-      resultType: responseEntityKey.pepocornBalance,
-      entityKindToResponseKeyMap: {
-        [entityType.pepocornBalance]: responseEntityKey.pepocornBalance
-      },
-      serviceData: serviceResponse.data
-    }).perform();
-
-    serviceResponse.data = wrapperFormatterRsp.data;
-  };
-
-  Promise.resolve(
-    routeHelper.perform(req, res, next, '/redemption/PepocornBalance', 'r_a_w_r_3', null, dataFormatterFunc)
-  );
 });
 
 module.exports = router;

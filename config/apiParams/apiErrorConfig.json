@@ -167,6 +167,16 @@
   "insufficient_pepocorn_balance": {
     "http_code": "200",
     "code": "BAD_REQUEST",
-    "message": "Pepocorn balance is not sufficient."
+    "message": "Sorry, you don't have enough Unicorns."
+  },
+  "pepocorn_price_point_changed": {
+    "http_code": "200",
+    "code": "BAD_REQUEST",
+    "message": "Whoops! The cost of Unicorns changed. Please try again."
+  },
+  "min_redemption_amount": {
+    "http_code": "200",
+    "code": "BAD_REQUEST",
+    "message": "Minimum purchase required is $10."
   }
 }

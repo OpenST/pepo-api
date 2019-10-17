@@ -46,8 +46,9 @@ router.get('/:feed_id', cookieHelper.validateUserLoginRequired, sanitizer.saniti
 });
 
 /* Public Feeds*/
-router.get('/', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+router.get('/', sanitizer.sanitizeDynamicUrlParams, sanitizer.sanitizeHeaderParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.feedsList;
+  req.decodedParams.sanitized_headers = req.sanitizedHeaders;
 
   const dataFormatterFunc = async function(serviceResponse) {
     const wrapperFormatterRsp = await new FormatterComposer({

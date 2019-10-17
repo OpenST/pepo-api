@@ -327,11 +327,8 @@ class OstTransaction extends ServiceBase {
   async _validateTransactionDataForRedemption() {
     const oThis = this;
 
-    //todo: tx time send as params;
-
-    const txTime = Date.now() / 1000;
     const validateParam = {
-      block_timestamp: txTime,
+      request_timestamp: oThis.transaction.updated_timestamp,
       product_id: oThis.productId,
       pepo_amount_in_wei: oThis.transfersData[0].amount,
       pepocorn_amount: oThis.pepocornAmount,
@@ -341,16 +338,15 @@ class OstTransaction extends ServiceBase {
     oThis.isValidRedemption = await new ValidatePepocornTopUp(validateParam)
       .perform()
       .then(async function(resp) {
-        return true;
+        if (resp.isFailure()) {
+          await createErrorLogsEntry.perform(resp, errorLogsConstants.highSeverity);
+          return false;
+        } else {
+          return true;
+        }
       })
       .catch(async function(resp) {
-        const errorObject = responseHelper.error({
-          internal_error_identifier: 'a_s_ost_vtdfr_1',
-          api_error_identifier: 'something_went_wrong',
-          debug_options: validateParam
-        });
-
-        await createErrorLogsEntry.perform(errorObject, errorLogsConstants.highSeverity);
+        await createErrorLogsEntry.perform(resp, errorLogsConstants.highSeverity);
         return false;
       });
   }
@@ -573,7 +569,7 @@ class OstTransaction extends ServiceBase {
     const insertData = {
       user_id: oThis.userId,
       kind: pepocornTransactionConstants.invertedKinds[pepocornTransactionConstants.creditKind],
-      pepocorn_amount: oThis.amountsArray[0],
+      pepocorn_amount: oThis.pepocornAmount,
       transaction_id: oThis.transactionId,
       status: pepocornTransactionConstants.invertedStatuses[status]
     };
@@ -592,7 +588,7 @@ class OstTransaction extends ServiceBase {
    * @returns {Boolean}
    * @private
    */
-  async _isUserTransactionKind() {
+  _isUserTransactionKind() {
     const oThis = this;
 
     return !oThis._isRedemptionTransactionKind();
@@ -604,7 +600,7 @@ class OstTransaction extends ServiceBase {
    * @returns {Boolean}
    * @private
    */
-  async _isRedemptionTransactionKind() {
+  _isRedemptionTransactionKind() {
     const oThis = this;
 
     return oThis.transaction.meta_property.name == transactionConstants.redemptionMetaName;
@@ -618,6 +614,7 @@ class OstTransaction extends ServiceBase {
    */
   _transactionKind() {
     const oThis = this;
+
     if (oThis._isUserTransactionKind()) {
       return transactionConstants.extraData.userTransactionKind;
     } else if (oThis._isRedemptionTransactionKind()) {

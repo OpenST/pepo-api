@@ -13,6 +13,7 @@ const rootPrefix = '../../../..',
   createErrorLogsEntry = require(rootPrefix + '/lib/errorLogs/createEntry'),
   errorLogsConstants = require(rootPrefix + '/lib/globalConstant/errorLogs'),
   notificationJobConstants = require(rootPrefix + '/lib/globalConstant/notificationJob'),
+  pepocornTransactionConstants = require(rootPrefix + '/lib/globalConstant/redemption/pepocornTransaction'),
   fiatPaymentConstants = require(rootPrefix + '/lib/globalConstant/fiatPayment');
 
 /**
@@ -59,18 +60,16 @@ class SuccessTransactionOstEvent extends TransactionOstEventBase {
         await oThis.fetchTransaction();
         await oThis._processTransaction();
       } else {
-        const promiseArray2 = [];
-
         if (oThis._isRedemptionTransactionKind()) {
-          // await oThis._sendRedemptionNotification();
           await oThis._insertInPepocornTransactions();
-          promiseArray2.push(oThis._creditPepoCornBalance());
+          await oThis._creditPepoCornBalance();
+          await oThis._enqueueRedemptionNotification();
         } else {
+          const promiseArray2 = [];
           promiseArray2.push(oThis._sendUserTransactionNotification());
           promiseArray2.push(oThis._updateStats());
+          await Promise.all(promiseArray2);
         }
-
-        await Promise.all(promiseArray2);
       }
     }
 
@@ -103,6 +102,7 @@ class SuccessTransactionOstEvent extends TransactionOstEventBase {
           user_id: oThis.fromUserId,
           balance: oThis.pepocornAmount
         })
+        .fire()
         .catch(async function(err) {
           if (PepocornBalanceModel.isDuplicateIndexViolation(PepocornBalanceModel.userIdUniqueIndexName, err)) {
             await new PepocornBalanceModel()
@@ -124,6 +124,10 @@ class SuccessTransactionOstEvent extends TransactionOstEventBase {
           }
         });
     }
+
+    await PepocornBalanceModel.flushCache({
+      userId: oThis.fromUserId
+    });
   }
 
   /**
@@ -160,7 +164,7 @@ class SuccessTransactionOstEvent extends TransactionOstEventBase {
       promiseArray.push(oThis.updatePepocornTransactionModel());
       await Promise.all(promiseArray);
       await oThis._creditPepoCornBalance();
-      //await oThis._sendRedemptionNotification();
+      await oThis._enqueueRedemptionNotification();
     } else if (oThis.transactionObj.extraData.kind === transactionConstants.extraData.topUpKind) {
       await oThis.validateToUserId();
       const promiseArray = [];
@@ -183,6 +187,25 @@ class SuccessTransactionOstEvent extends TransactionOstEventBase {
         })
       );
     }
+  }
+
+  /**
+   * Enqueue Redemption notification.
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _enqueueRedemptionNotification(topic) {
+    const oThis = this;
+
+    if (!oThis.isValidRedemption) {
+      return;
+    }
+
+    return notificationJobEnqueue.enqueue(notificationJobConstants.creditPepocornSuccess, {
+      pepocornAmount: oThis.pepocornAmount,
+      transaction: oThis.transactionObj
+    });
   }
 
   /**
@@ -335,6 +358,8 @@ class SuccessTransactionOstEvent extends TransactionOstEventBase {
   }
 
   _getPepocornTransactionStatus() {
+    const oThis = this;
+
     return oThis.isValidRedemption
       ? pepocornTransactionConstants.processedStatus
       : pepocornTransactionConstants.failedStatus;
