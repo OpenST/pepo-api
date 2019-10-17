@@ -144,6 +144,7 @@ class ConfigStrategyModel extends ModelBase {
     if (
       strategyKindName === configStrategyConstants.bgJobRabbitmq ||
       strategyKindName === configStrategyConstants.notificationRabbitmq ||
+      strategyKindName === configStrategyConstants.pepoMobileEventRabbitmq ||
       strategyKindName === configStrategyConstants.socketRabbitmq
     ) {
       const rmqPassword = hashNotToEncrypt[strategyKindName].password;
@@ -211,6 +212,7 @@ class ConfigStrategyModel extends ModelBase {
     switch (configStrategyKinds[strategyKind]) {
       case configStrategyConstants.bgJobRabbitmq:
       case configStrategyConstants.notificationRabbitmq:
+      case configStrategyConstants.pepoMobileEventRabbitmq:
       case configStrategyConstants.socketRabbitmq: {
         configStrategyHash[configStrategyKinds[strategyKind]].password = decryptedJsonObj.rmqPassword;
         break;
