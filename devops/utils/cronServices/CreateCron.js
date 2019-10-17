@@ -56,7 +56,7 @@ class CreateCron {
       const cron = oThis.jsonData[i],
         dbParams = cron.db_params;
 
-      if (!cron.identifier) {
+      if (!cron.identifier && dbParams) {
         const result = await new InsertCrons({
           cronKindName: dbParams.kind,
           cronParams: dbParams.cron_params

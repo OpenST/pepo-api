@@ -163,5 +163,15 @@
     "http_code": "200",
     "code": "BAD_REQUEST",
     "message": "Minimum redemption is $10. Please try again when you have more Pepo Coins."
+  },
+  "insufficient_pepocorn_balance": {
+    "http_code": "200",
+    "code": "BAD_REQUEST",
+    "message": "Sorry, you don't have enough Unicorns."
+  },
+  "pepocorn_price_point_changed": {
+    "http_code": "200",
+    "code": "BAD_REQUEST",
+    "message": "Whoops! The cost of Unicorns changed. Please try again."
   }
 }

@@ -23,6 +23,7 @@ const rootPrefix = '../../..',
   rotateTwitterAccountRoutes = require(rootPrefix + '/routes/api/v1/rotateTwitterAccount'),
   reportIssueRoutes = require(rootPrefix + '/routes/api/v1/reportIssue'),
   reportRoutes = require(rootPrefix + '/routes/api/v1/report'),
+  pepocornTopUpRoutes = require(rootPrefix + '/routes/api/v1/pepocornTopUps'),
   ostTransactionRoutes = require(rootPrefix + '/routes/api/v1/ostTransactions');
 
 // Node.js cookie parsing middleware.
@@ -54,5 +55,6 @@ router.use('/search', searchRoutes);
 router.use('/notifications', notificationsRoutes);
 router.use('/top-up', topupRoutes);
 router.use('/twitter', twitterRoutes);
+router.use('/pepocorn-topups', pepocornTopUpRoutes);
 
 module.exports = router;

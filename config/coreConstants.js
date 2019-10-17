@@ -24,8 +24,16 @@ class CoreConstants {
     return process.env.PA_WEB_DOMAIN;
   }
 
+  get PA_STORE_WEB_DOMAIN() {
+    return process.env.PA_STORE_WEB_DOMAIN;
+  }
+
   get PA_DOMAIN() {
     return process.env.PA_DOMAIN;
+  }
+
+  get PA_STORE_DOMAIN() {
+    return process.env.PA_STORE_DOMAIN;
   }
 
   get PA_COOKIE_DOMAIN() {
@@ -411,6 +419,34 @@ class CoreConstants {
 
   get PEPO_CURATED_FEED_IDS() {
     return process.env.PA_CURATED_FEED_IDS;
+  }
+
+  get PA_GOOGLE_CLIENT_EMAIL() {
+    return process.env.PA_GOOGLE_CLIENT_EMAIL;
+  }
+
+  get PA_GOOGLE_PRIVATE_KEY() {
+    return process.env.PA_GOOGLE_PRIVATE_KEY;
+  }
+
+  get PA_GOOGLE_PROJECT_ID() {
+    return process.env.PA_GOOGLE_PROJECT_ID;
+  }
+
+  get PA_GOOGLE_USAGE_REPORT_SPREADSHEET_ID() {
+    return process.env.PA_GOOGLE_USAGE_REPORT_SPREADSHEET_ID;
+  }
+
+  get PA_GOOGLE_USAGE_REPORT_GROUP_IDS() {
+    return process.env.PA_GOOGLE_USAGE_REPORT_GROUP_IDS;
+  }
+
+  get PA_VIDEO_PIXEL_DATA_S3_FILE_PATH() {
+    return process.env.PA_VIDEO_PIXEL_DATA_S3_FILE_PATH;
+  }
+
+  get PA_VIDEO_PIXEL_DATA_APP_FILE_PATH() {
+    return process.env.PA_VIDEO_PIXEL_DATA_APP_FILE_PATH;
   }
 }
 

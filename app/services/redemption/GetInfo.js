@@ -36,7 +36,7 @@ class GetRedemptionInfo extends ServiceBase {
   /**
    * Async perform.
    *
-   * @return {Promise<any>}
+   * @returns {Promise<any>}
    * @private
    */
   async _asyncPerform() {
@@ -59,7 +59,7 @@ class GetRedemptionInfo extends ServiceBase {
   /**
    * Get encrypted cookie value.
    *
-   * @return {Promise<*>}
+   * @returns {Promise<*>}
    * @private
    */
   async _getEncryptedCookieValue() {

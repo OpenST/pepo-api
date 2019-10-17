@@ -29,7 +29,6 @@ class DenyUsersAsCreator extends ServiceBase {
 
     const oThis = this;
 
-    console.log('params =====', params);
     oThis.userIds = params.user_ids;
     oThis.currentAdmin = params.current_admin;
     oThis.currentAdminId = params.current_admin.id;

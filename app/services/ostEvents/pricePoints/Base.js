@@ -6,6 +6,8 @@ const rootPrefix = '../../../..',
   AvailableProductsCache = require(rootPrefix + '/lib/cacheManagement/single/Products'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
+  createErrorLogsEntry = require(rootPrefix + '/lib/errorLogs/createEntry'),
+  errorLogsConstants = require(rootPrefix + '/lib/globalConstant/errorLogs'),
   ostPricePointsConstants = require(rootPrefix + '/lib/globalConstant/ostPricePoints');
 
 /**
@@ -48,6 +50,12 @@ class PricePointsUpdateBase extends ServiceBase {
 
     oThis.ostPricePoints = oThis.ostPricePoints[stakeCurrency];
 
+    const validationResponse = await oThis.validatePricePoint();
+
+    if (validationResponse.isFailure()) {
+      return validationResponse;
+    }
+
     await oThis._updatePricePoint();
 
     await oThis._clearPricePointsCache();
@@ -55,6 +63,36 @@ class PricePointsUpdateBase extends ServiceBase {
     await oThis._clearAvailableProductsCache();
 
     return Promise.resolve(responseHelper.successWithData({}));
+  }
+
+  /**
+   * Validate if event is the latest price point for currency.
+   *
+   * @returns {Promise<string>}
+   */
+  async validatePricePoint() {
+    const oThis = this;
+
+    const queryResponse = await new OstPricePointsModel()
+      .select('*')
+      .where({ quote_currency: oThis.quoteCurrencyInt })
+      .order_by('timestamp DESC')
+      .limit(1)
+      .fire();
+
+    const dbRow = queryResponse[0];
+
+    if (dbRow && dbRow.timestamp && dbRow.timestamp >= oThis.ostPricePoints.updated_timestamp) {
+      const errorObject = responseHelper.error({
+        internal_error_identifier: 'a_s_oe_pp_b_vpp_1',
+        api_error_identifier: 'invalid_api_params',
+        debug_options: oThis.ostPricePoints
+      });
+      await createErrorLogsEntry.perform(errorObject, errorLogsConstants.mediumSeverity);
+      return errorObject;
+    }
+
+    return responseHelper.successWithData({});
   }
 
   /**
