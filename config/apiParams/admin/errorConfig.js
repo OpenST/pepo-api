@@ -50,6 +50,16 @@ const adminErrorConfig = {
     code: 'invalid',
     message: 'User is already approved.'
   },
+  user_already_denied_as_creator: {
+    parameter: 'user_id',
+    code: 'invalid',
+    message: 'User is already denied as creator.'
+  },
+  invalid_filter: {
+    parameter: 'filter',
+    code: 'invalid',
+    message: 'Invalid Filter.'
+  },
   user_inactive: {
     parameter: 'user_id',
     code: 'invalid',
