@@ -17,6 +17,7 @@ const rootPrefix = '../../..',
   adminEntityType = require(rootPrefix + '/lib/globalConstant/adminEntityType'),
   apiVersions = require(rootPrefix + '/lib/globalConstant/apiVersions'),
   adminPreLaunchRoutes = require(rootPrefix + '/routes/api/admin/preLaunch/index'),
+  adminUpdateUsageDataRoutes = require(rootPrefix + '/routes/api/admin/updateUsageData/index'),
   adminResponseEntityKey = require(rootPrefix + '/lib/globalConstant/adminResponseEntity');
 
 // Declare variables.
@@ -216,12 +217,11 @@ router.get('/users/:user_id/profile', sanitizer.sanitizeDynamicUrlParams, functi
       entityKindToResponseKeyMap: {
         [adminEntityType.userProfile]: adminResponseEntityKey.adminUserProfile,
         [adminEntityType.adminUsersMap]: adminResponseEntityKey.users,
-        [adminEntityType.imagesMap]: adminResponseEntityKey.images
+        [adminEntityType.imagesMap]: adminResponseEntityKey.images,
+        [adminEntityType.userBalance]: adminResponseEntityKey.userBalance
       },
       serviceData: serviceResponse.data
     }).perform();
-
-    wrapperFormatterRsp.data['balance'] = serviceResponse.data['balance'] || '0';
 
     serviceResponse.data = wrapperFormatterRsp.data;
   };
@@ -230,5 +230,6 @@ router.get('/users/:user_id/profile', sanitizer.sanitizeDynamicUrlParams, functi
 });
 
 router.use('/pre-launch', adminPreLaunchRoutes);
+router.use('/update-usage-data', adminUpdateUsageDataRoutes);
 
 module.exports = router;

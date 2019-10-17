@@ -33,7 +33,7 @@ class ApproveUser extends ServiceBase {
   }
 
   /**
-   * Main performer for class.
+   * Async perform.
    *
    * @returns {Promise<Result>}
    * @private
@@ -42,7 +42,6 @@ class ApproveUser extends ServiceBase {
     const oThis = this;
 
     const updateResponse = await new PreLaunchInviteModel().approveUser(oThis.inviteId);
-
     if (updateResponse.isFailure()) {
       return Promise.reject(updateResponse);
     }
@@ -68,7 +67,7 @@ class ApproveUser extends ServiceBase {
       return cacheRsp;
     }
 
-    let preLaunchInviteObj = cacheRsp.data[oThis.inviteId],
+    const preLaunchInviteObj = cacheRsp.data[oThis.inviteId],
       inviteCodeId = preLaunchInviteObj.inviteCodeId;
 
     const inviteCodeByIdCacheResponse = await new InviteCodeByIdCache({
@@ -79,7 +78,7 @@ class ApproveUser extends ServiceBase {
       return Promise.reject(inviteCodeByIdCacheResponse);
     }
 
-    let inviteCodeObj = inviteCodeByIdCacheResponse.data;
+    const inviteCodeObj = inviteCodeByIdCacheResponse.data;
 
     const queryResponse = await new InviteCodeModel()
       .update({
@@ -89,7 +88,7 @@ class ApproveUser extends ServiceBase {
       .fire();
 
     if (queryResponse.affectedRows === 1) {
-      logger.info(`User with ${oThis.inviteId} has now infinite invites`);
+      logger.info(`User with ${oThis.inviteId} has now infinite invites.`);
 
       await InviteCodeModel.flushCache(inviteCodeObj);
 

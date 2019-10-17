@@ -67,7 +67,7 @@ class RequestRedemption extends ServiceBase {
    *
    * @sets oThis.redemptionId
    *
-   * @return {Promise<any>}
+   * @returns {Promise<any>}
    * @private
    */
   async _asyncPerform() {
@@ -343,9 +343,10 @@ class RequestRedemption extends ServiceBase {
   }
 
   /**
-   * Prepare send mail params
+   * Prepare send mail params.
    *
-   * sets oThis.transactionalMailParams
+   * @sets oThis.transactionalMailParams
+   *
    * @private
    */
   _prepareSendMailParams() {
@@ -391,7 +392,8 @@ class RequestRedemption extends ServiceBase {
     const messagePayload = {
       transactionalMailParams: oThis.transactionalMailParams,
       currentUserId: oThis.currentUserId,
-      productKind: oThis.productKind
+      productKind: oThis.productKind,
+      newRequest: 0
     };
     await bgJob.enqueue(bgJobConstants.afterRedemptionJobTopic, messagePayload);
   }

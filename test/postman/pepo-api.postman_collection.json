@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "3e46d922-b7a7-48e2-82ba-76688b275b92",
+		"_postman_id": "cd818e61-e366-478c-999b-ed32f7ea4cc3",
 		"name": "pepo-api",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -158,8 +158,7 @@
 					},
 					"response": []
 				}
-			],
-			"protocolProfileBehavior": {}
+			]
 		},
 		{
 			"name": "admin",
@@ -601,8 +600,7 @@
 					},
 					"response": []
 				}
-			],
-			"protocolProfileBehavior": {}
+			]
 		},
 		{
 			"name": "web",
@@ -682,13 +680,31 @@
 								}
 							},
 							"response": []
+						},
+						{
+							"name": "pepocorn-balance",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{api_server}}/api/web/redemptions/pepocorn-balance",
+									"host": [
+										"{{api_server}}"
+									],
+									"path": [
+										"api",
+										"web",
+										"redemptions",
+										"pepocorn-balance"
+									]
+								}
+							},
+							"response": []
 						}
 					],
-					"protocolProfileBehavior": {},
 					"_postman_isSubFolder": true
 				}
-			],
-			"protocolProfileBehavior": {}
+			]
 		},
 		{
 			"name": "device",
@@ -806,7 +822,6 @@
 							"response": []
 						}
 					],
-					"protocolProfileBehavior": {},
 					"_postman_isSubFolder": true
 				},
 				{
@@ -833,7 +848,6 @@
 							"response": []
 						}
 					],
-					"protocolProfileBehavior": {},
 					"_postman_isSubFolder": true
 				},
 				{
@@ -1602,7 +1616,6 @@
 							"response": []
 						}
 					],
-					"protocolProfileBehavior": {},
 					"_postman_isSubFolder": true
 				},
 				{
@@ -1712,7 +1725,6 @@
 							"response": []
 						}
 					],
-					"protocolProfileBehavior": {},
 					"_postman_isSubFolder": true
 				},
 				{
@@ -1819,7 +1831,6 @@
 							}
 						}
 					],
-					"protocolProfileBehavior": {},
 					"_postman_isSubFolder": true
 				},
 				{
@@ -2011,7 +2022,6 @@
 							"response": []
 						}
 					],
-					"protocolProfileBehavior": {},
 					"_postman_isSubFolder": true
 				},
 				{
@@ -2064,7 +2074,6 @@
 							"response": []
 						}
 					],
-					"protocolProfileBehavior": {},
 					"_postman_isSubFolder": true
 				},
 				{
@@ -2176,7 +2185,6 @@
 							"response": []
 						}
 					],
-					"protocolProfileBehavior": {},
 					"_postman_isSubFolder": true
 				},
 				{
@@ -2188,7 +2196,7 @@
 								"method": "GET",
 								"header": [],
 								"url": {
-									"raw": "{{api_server}}/api/v1/redemptions/info",
+									"raw": "{{api_server}}/api/v1/redemptions/webview-url",
 									"host": [
 										"{{api_server}}"
 									],
@@ -2196,14 +2204,13 @@
 										"api",
 										"v1",
 										"redemptions",
-										"info"
+										"webview-url"
 									]
 								}
 							},
 							"response": []
 						}
 					],
-					"protocolProfileBehavior": {},
 					"_postman_isSubFolder": true
 				},
 				{
@@ -2223,12 +2230,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "\n{\n\t\"ost_transaction\": {\n    \"to\": \"0x5be7824c25a6edb4d6d22a7ca6058c7a94723fe0\",\n    \"updated_timestamp\": 1568991096,\n    \"transfers\": [\n      {\n        \"amount\": \"1000000000000000000\",\n        \"to_user_id\": \"c0ea8567-e12a-4634-a3fb-9323c06dd810\",\n        \"kind\": \"transfer\",\n        \"to\": \"0x720fb10ac03f560905ab79b963cc5222b2b11528\",\n        \"from_user_id\": \"d6e634c3-f986-4d38-a9a4-a7c254c9a062\",\n        \"from\": \"0x5be7824c25a6edb4d6d22a7ca6058c7a94723fe0\"\n      }\n    ],\n    \"status\": \"CREATED\",\n    \"gas_price\": \"1000000000\",\n    \"id\": \"9b7c43ac-b0cd-4bbd-83f6-acad032b7935\",\n    \"meta_property\": {\n      \"name\": \"video\",\n      \"type\": \"user_to_user\",\n      \"details\": \"vi_2453\"\n    }\n  }\n}",
-									"options": {
-										"raw": {
-											"language": "json"
-										}
-									}
+									"raw": "\n{\n\t\"ost_transaction\": {\n    \"to\": \"0x5be7824c25a6edb4d6d22a7ca6058c7a94723fe0\",\n    \"updated_timestamp\": 1568991096,\n    \"transfers\": [\n      {\n        \"amount\": \"1000000000000000000\",\n        \"to_user_id\": \"c0ea8567-e12a-4634-a3fb-9323c06dd810\",\n        \"kind\": \"transfer\",\n        \"to\": \"0x720fb10ac03f560905ab79b963cc5222b2b11528\",\n        \"from_user_id\": \"d6e634c3-f986-4d38-a9a4-a7c254c9a062\",\n        \"from\": \"0x5be7824c25a6edb4d6d22a7ca6058c7a94723fe0\"\n      }\n    ],\n    \"status\": \"CREATED\",\n    \"gas_price\": \"1000000000\",\n    \"id\": \"9b7c43ac-b0cd-4bbd-83f6-acad032b7935\",\n    \"meta_property\": {\n      \"name\": \"video\",\n      \"type\": \"user_to_user\",\n      \"details\": \"vi_2453\"\n    }\n  }\n}"
 								},
 								"url": {
 									"raw": "{{api_server}}/api/v1/ost-transactions",
@@ -2246,7 +2248,6 @@
 							"response": []
 						}
 					],
-					"protocolProfileBehavior": {},
 					"_postman_isSubFolder": true
 				},
 				{
@@ -2313,7 +2314,6 @@
 							"response": []
 						}
 					],
-					"protocolProfileBehavior": {},
 					"_postman_isSubFolder": true
 				},
 				{
@@ -2398,7 +2398,39 @@
 							"response": []
 						}
 					],
-					"protocolProfileBehavior": {},
+					"_postman_isSubFolder": true
+				},
+				{
+					"name": "pepocornTopUp",
+					"item": [
+						{
+							"name": "pepocorn-balance",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"value": "application/x-www-form-urlencoded",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{api_server}}/api/v1/pepocorn-topups/balance",
+									"host": [
+										"{{api_server}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"pepocorn-topups",
+										"balance"
+									]
+								}
+							},
+							"response": []
+						}
+					],
 					"_postman_isSubFolder": true
 				},
 				{
@@ -2483,8 +2515,7 @@
 					},
 					"response": []
 				}
-			],
-			"protocolProfileBehavior": {}
+			]
 		},
 		{
 			"name": "fetch-goto",
@@ -2540,6 +2571,5 @@
 			},
 			"response": []
 		}
-	],
-	"protocolProfileBehavior": {}
+	]
 }
