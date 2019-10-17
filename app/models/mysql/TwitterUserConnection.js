@@ -193,20 +193,89 @@ class TwitterUserConnection extends ModelBase {
   }
 
   /**
+   * Fetch twitter user connections by twitter user1 id and twitter user2 ids
+   * @param twitterUser2Ids
+   * @param twitterUser1Id
+   * @returns {Promise<void>}
+   */
+  async fetchTwitterUserConnectionByTwitterUser1IdAndTwitterUser2Ids(twitterUser2Ids, twitterUser1Id) {
+    const oThis = this;
+
+    const dbRows = await oThis
+      .select('*')
+      .where(['twitter_user2_id IN (?) AND twitter_user1_id = (?)', twitterUser2Ids, twitterUser1Id])
+      .fire();
+
+    const response = {};
+
+    for (let index = 0; index < dbRows.length; index++) {
+      const formatDbRow = oThis.formatDbData(dbRows[index]);
+      response[formatDbRow.twitterUser2Id] = formatDbRow;
+    }
+
+    return response;
+  }
+
+  /**
+   * Is twitter connection registered?
+   *
+   * @param {object} twitterConnectionObj
+   *
+   * @returns {boolean}
+   */
+  static isRegisteredTwitterConnection(twitterConnectionObj) {
+    const propertiesArray = new TwitterUserConnection().getBitwiseArray('properties', twitterConnectionObj.properties);
+
+    return propertiesArray.indexOf(twitterUserConnectionConstants.isTwitterUser2RegisteredProperty) > -1;
+  }
+
+  /**
+   * Is twitter connection contributed?
+   *
+   * @param {object} twitterConnectionObj
+   *
+   * @returns {boolean}
+   */
+  static isContributedTwitterConnection(twitterConnectionObj) {
+    const propertiesArray = new TwitterUserConnection().getBitwiseArray('properties', twitterConnectionObj.properties);
+
+    return propertiesArray.indexOf(twitterUserConnectionConstants.isTwitterUser2ContributedToProperty) > -1;
+  }
+
+  /**
    * Flush cache.
    *
    * @param {object} params
    * @param {number} params.twitterUser1Id
+   * @param {array} params.twitterUser2Id
    *
    * @returns {Promise<*>}
    */
   static async flushCache(params) {
-    const TwitterUserConnectionByUser1Pagination = require(rootPrefix +
-      '/lib/cacheManagement/single/TwitterUserConnectionByUser1Pagination');
+    const promisesArray = [];
 
-    await new TwitterUserConnectionByUser1Pagination({
-      twitterUser1Id: params.twitterUser1Id
-    }).clear();
+    if (params.twitterUser1Id) {
+      const TwitterUserConnectionByUser1Pagination = require(rootPrefix +
+        '/lib/cacheManagement/single/TwitterUserConnectionByUser1Pagination');
+      promisesArray.push(
+        new TwitterUserConnectionByUser1Pagination({
+          twitterUser1Id: params.twitterUser1Id
+        }).clear()
+      );
+
+      if (params.twitterUser2Id) {
+        const TwitterUserConnectionByTwitterUser2Ids = require(rootPrefix +
+          '/lib/cacheManagement/multi/TwitterUserConnectionByTwitterUser2Ids');
+        promisesArray.push(
+          new TwitterUserConnectionByTwitterUser2Ids({
+            twitterUser1Id: params.twitterUser1Id,
+            twitterUser2Ids: [params.twitterUser2Id]
+          }).clear()
+        );
+      }
+    }
+
+    await Promise.all(promisesArray);
   }
 }
 
