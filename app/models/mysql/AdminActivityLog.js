@@ -1,7 +1,7 @@
 const rootPrefix = '../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
   databaseConstants = require(rootPrefix + '/lib/globalConstant/database'),
-  adminActivityLogConst = require(rootPrefix + '/lib/globalConstant/adminActivityLogs.js');
+  adminActivityLogConstants = require(rootPrefix + '/lib/globalConstant/adminActivityLogs');
 
 // Declare variables.
 const dbName = databaseConstants.adminDbName;
@@ -47,7 +47,7 @@ class AdminActivityLogModel extends ModelBase {
     const formattedData = {
       id: dbRow.id,
       adminId: dbRow.admin_id,
-      action: adminActivityLogConst.actions[dbRow.action],
+      action: adminActivityLogConstants.actions[dbRow.action],
       actionOn: dbRow.action_on,
       extraData: dbRow.extra_data,
       createdAt: dbRow.created_at,
@@ -76,7 +76,7 @@ class AdminActivityLogModel extends ModelBase {
     return oThis
       .insert({
         admin_id: params.adminId,
-        action: adminActivityLogConst.invertedActions[params.action],
+        action: adminActivityLogConstants.invertedActions[params.action],
         action_on: params.actionOn,
         extra_data: params.extraData,
         created_at: currentTime,

@@ -1,6 +1,6 @@
 const rootPrefix = '../../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
-  redemptionConstants = require(rootPrefix + '/lib/globalConstant/admin'),
+  redemptionConstants = require(rootPrefix + '/lib/globalConstant/redemption'),
   databaseConstants = require(rootPrefix + '/lib/globalConstant/database');
 
 // Declare variables names.
@@ -36,6 +36,8 @@ class RedemptionProductModel extends ModelBase {
    * @param {string} dbRow.kind
    * @param {string} dbRow.images
    * @param {decimal} dbRow.dollar_value
+   * @param {decimal} dbRow.min_dollar_value
+   * @param {decimal} dbRow.dollar_step
    * @param {number} dbRow.created_at
    * @param {number} dbRow.updated_at
    *
@@ -50,6 +52,9 @@ class RedemptionProductModel extends ModelBase {
       kind: dbRow.kind,
       images: JSON.parse(dbRow.images),
       dollarValue: dbRow.dollar_value,
+      minDollarValue: dbRow.min_dollar_value,
+      dollarStep: dbRow.dollar_step,
+      pepocornPerDollar: redemptionConstants.pepocornPerDollar, // Need to be sent for all products but not a column
       createdAt: dbRow.created_at,
       updatedAt: dbRow.updated_at
     };
@@ -75,6 +80,16 @@ class RedemptionProductModel extends ModelBase {
     }
 
     return response;
+  }
+
+  /**
+   * Flush cache.
+   *
+   * @returns {Promise<*>}
+   */
+  static async flushCache() {
+    const RedemptionProductsCache = require(rootPrefix + '/lib/cacheManagement/single/RedemptionProducts');
+    await new RedemptionProductsCache({}).clear();
   }
 }
 

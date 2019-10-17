@@ -168,6 +168,15 @@ const v1Signature = {
     ],
     optional: []
   },
+  [apiName.getRedemptionWebViewProductUrl]: {
+    mandatory: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      }
+    ],
+    optional: []
+  },
 
   [apiName.getSupportUrl]: {
     mandatory: [
@@ -776,6 +785,54 @@ const v1Signature = {
         validatorMethods: ['validateNonEmptyObject']
       }
     ]
+  },
+  [apiName.pepocornTopUpValidate]: {
+    mandatory: [
+      {
+        parameter: 'product_id',
+        validatorMethods: ['validateString']
+      },
+      {
+        parameter: 'pepo_amount_in_wei',
+        validatorMethods: ['validateNonZeroWeiValue']
+      },
+      {
+        parameter: 'pepo_usd_price_point',
+        validatorMethods: ['validateNonNegativeNumber']
+      },
+      {
+        parameter: 'pepocorn_amount',
+        validatorMethods: ['validateNonNegativeNumber']
+      }
+    ],
+    optional: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      },
+      {
+        parameter: 'request_timestamp',
+        validatorMethods: ['validateNonNegativeNumber']
+      }
+    ]
+  },
+  [apiName.pepocornTopUpInfo]: {
+    mandatory: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      }
+    ],
+    optional: []
+  },
+  [apiName.pepocornTopUpGetPepocornBalance]: {
+    mandatory: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      }
+    ],
+    optional: []
   }
 };
 
