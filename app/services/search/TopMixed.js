@@ -4,6 +4,7 @@ const rootPrefix = '../../..',
   TagSearch = require(rootPrefix + '/app/services/search/TagSearch'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
+  responseEntity = require(rootPrefix + '/lib/globalConstant/responseEntityKey'),
   paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination');
 
 /**
@@ -30,7 +31,7 @@ class MixedTopSearch extends ServiceBase {
     const oThis = this;
     oThis.q = params.q || null;
     oThis.paginationIdentifier = params[paginationConstants.paginationIdentifierKey] || null;
-    oThis.supportedEntities = params.supported_entities || ['users', 'tags'];
+    oThis.supportedEntities = params.supported_entities || [responseEntity.users, responseEntity.tags];
 
     oThis.searchEntities = [];
     oThis.tagResponses = null;
@@ -49,10 +50,10 @@ class MixedTopSearch extends ServiceBase {
     await oThis._validateAndSanitizeParams();
 
     let promises = [];
-    if (oThis.supportedEntities.includes('users')) {
+    if (oThis.supportedEntities.includes(responseEntity.users)) {
       promises.push(oThis._getTopUserResults());
     }
-    if (oThis.supportedEntities.includes('tags')) {
+    if (oThis.supportedEntities.includes(responseEntity.tags)) {
       promises.push(oThis._getTopTagResults());
     }
     await Promise.all(promises);
@@ -125,7 +126,7 @@ class MixedTopSearch extends ServiceBase {
       response[entityType.searchCategoriesList].push({
         id: 'sc_tr',
         updatedAt: Math.round(new Date() / 1000),
-        kind: 'tag'
+        kind: responseEntity.tags
       });
       response.tagIds = oThis.tagResponses.tagIds;
       response.tagsMap = oThis.tagResponses.tagsMap;
@@ -136,7 +137,7 @@ class MixedTopSearch extends ServiceBase {
       response[entityType.searchCategoriesList].push({
         id: 'sc_ur',
         updatedAt: Math.round(new Date() / 1000),
-        kind: 'user'
+        kind: responseEntity.users
       });
       response[entityType.userSearchList] = oThis.userResponses[entityType.userSearchList];
       response.usersByIdMap = oThis.userResponses.usersByIdMap;
