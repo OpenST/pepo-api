@@ -189,11 +189,6 @@ const webErrorConfig = {
     parameter: 'product_id',
     code: 'invalid',
     message: 'Invalid product id.'
-  },
-  invalid_dollar_amount: {
-    parameter: 'dollar_amount',
-    code: 'invalid',
-    message: 'Invalid dollar amount.'
   }
 };
 
