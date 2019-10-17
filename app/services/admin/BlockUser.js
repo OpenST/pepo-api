@@ -150,7 +150,7 @@ class BlockUser extends ServiceBase {
     for (let uId in userTagCacheResp.data) {
       let tagIds = userTagCacheResp.data[uId][userTagConstants.selfAddedKind] || [];
 
-      if (tagIds) {
+      if (tagIds && tagIds.length > 0) {
         await new TagModel().updateTagWeights(tagIds, -1);
         TagModel.flushCache({ ids: tagIds });
       }

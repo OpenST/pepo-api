@@ -174,6 +174,10 @@ class Tag extends ModelBase {
   async updateTagWeights(tagIds, weightToAdd) {
     const oThis = this;
 
+    if (tagIds.length == 0) {
+      return true;
+    }
+
     let queryObj = oThis.update(['weight=weight+?', weightToAdd]).where({ id: tagIds });
 
     if (weightToAdd < 0) {
