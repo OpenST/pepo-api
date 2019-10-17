@@ -13,6 +13,11 @@ const rootPrefix = '../../..',
 router.get('/info', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.getRedemptionProductUrl;
 
+  req.decodedParams.pepo_device_os = req.headers['x-pepo-device-os'];
+  req.decodedParams.pepo_device_os_version = req.headers['x-pepo-device-os-version'];
+  req.decodedParams.pepo_build_number = req.headers['x-pepo-build-number'];
+  req.decodedParams.pepo_app_version = req.headers['x-pepo-app-version'];
+
   const dataFormatterFunc = async function(serviceResponse) {
     const wrapperFormatterRsp = await new FormatterComposer({
       resultType: responseEntityKey.redemptionInfo,
@@ -32,6 +37,11 @@ router.get('/info', sanitizer.sanitizeDynamicUrlParams, function(req, res, next)
 
 router.get('/webview-url', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.getRedemptionWebViewProductUrl;
+
+  req.decodedParams.pepo_device_os = req.headers['x-pepo-device-os'];
+  req.decodedParams.pepo_device_os_version = req.headers['x-pepo-device-os-version'];
+  req.decodedParams.pepo_build_number = req.headers['x-pepo-build-number'];
+  req.decodedParams.pepo_app_version = req.headers['x-pepo-app-version'];
 
   const dataFormatterFunc = async function(serviceResponse) {
     const wrapperFormatterRsp = await new FormatterComposer({
