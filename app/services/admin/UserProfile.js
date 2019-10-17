@@ -3,6 +3,7 @@ const BigNumber = require('bignumber.js');
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   GetProfile = require(rootPrefix + '/lib/user/profile/Get'),
+  GetPepocornBalance = require(rootPrefix + '/lib/pepocorn/GetPepocornBalance'),
   SecureTokenCache = require(rootPrefix + '/lib/cacheManagement/single/SecureToken'),
   TokenUserDetailByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TokenUserByUserIds'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
@@ -36,7 +37,9 @@ class UserProfile extends ServiceBase {
     oThis.ostUserId = null;
     oThis.profileResponse = {};
     oThis.stakeCurrency = null;
+    oThis.pepocornBalance = null;
     oThis.pricePoints = {};
+    oThis.balance = {};
   }
 
   /**
@@ -48,7 +51,12 @@ class UserProfile extends ServiceBase {
   async _asyncPerform() {
     const oThis = this;
 
-    const promisesArray = [oThis._getProfileInfo(), oThis._fetchTokenUserData(), oThis._fetchTokenDetails()];
+    const promisesArray = [
+      oThis._getProfileInfo(),
+      oThis._fetchTokenUserData(),
+      oThis._fetchTokenDetails(),
+      oThis._fetchPepocornBalance()
+    ];
     await Promise.all(promisesArray);
 
     await oThis._fetchBalance();
@@ -149,9 +157,26 @@ class UserProfile extends ServiceBase {
   }
 
   /**
+   * Fetch pepocorn balance for user.
+   *
+   * @sets oThis.pepocornBalance
+   *
+   * @returns {Promise<void>}
+   *
+   * @private
+   */
+  async _fetchPepocornBalance() {
+    const oThis = this;
+
+    const pepoCornBalanceObject = await new GetPepocornBalance({ userIds: [oThis.profileUserId] }).perform();
+
+    oThis.pepocornBalance = pepoCornBalanceObject[oThis.profileUserId].balance;
+  }
+
+  /**
    * Fetch balance.
    *
-   * @sets oThis.balanceInUsd
+   * @sets oThis.balance
    *
    * @returns {Promise<void>}
    * @private
@@ -176,7 +201,11 @@ class UserProfile extends ServiceBase {
     const pricePoint = oThis.pricePoints[oThis.stakeCurrency].USD;
     const usdPricePointInBigNumber = new BigNumber(pricePoint);
 
-    oThis.balanceInUsd = balance.mul(usdPricePointInBigNumber).toString(10);
+    oThis.balance = {
+      balanceInUsd: balance.mul(usdPricePointInBigNumber).toString(10),
+      balanceInPepo: balance.toString(10),
+      pepocornBalance: oThis.pepocornBalance
+    };
   }
 
   /**
@@ -193,7 +222,7 @@ class UserProfile extends ServiceBase {
       userProfile: oThis.profileResponse.userProfilesMap[oThis.profileUserId],
       imageMap: oThis.profileResponse.imageMap,
       tokenUsersByUserIdMap: oThis.profileResponse.tokenUsersByUserIdMap,
-      balance: oThis.balanceInUsd
+      userBalance: oThis.balance
     });
   }
 }

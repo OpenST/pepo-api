@@ -10,7 +10,7 @@ const rootPrefix = '../../..',
   entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
   cookieHelper = require(rootPrefix + '/lib/cookieHelper');
 
-/* Subscribe email*/
+/* Redemption products list.*/
 router.get(
   '/products',
   cookieHelper.parseWebviewLoginCookieIfPresent,
@@ -26,7 +26,7 @@ router.get(
 
 router.use(cookieHelper.validateWebviewLoginCookieIfPresent, cookieHelper.validateUserLoginRequired);
 
-// request for redemption of a product
+// Request for redemption of a product
 router.post('/', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.requestRedemption;
 
@@ -41,7 +41,7 @@ router.post('/', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
 
     serviceResponse.data = wrapperFormatterRsp.data;
   };
-
+  //move to pepo.com
   Promise.resolve(routeHelper.perform(req, res, next, '/redemption/Request', 'r_a_w_r_2', null, dataFormatterFunc));
 });
 

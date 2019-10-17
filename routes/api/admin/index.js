@@ -217,12 +217,11 @@ router.get('/users/:user_id/profile', sanitizer.sanitizeDynamicUrlParams, functi
       entityKindToResponseKeyMap: {
         [adminEntityType.userProfile]: adminResponseEntityKey.adminUserProfile,
         [adminEntityType.adminUsersMap]: adminResponseEntityKey.users,
-        [adminEntityType.imagesMap]: adminResponseEntityKey.images
+        [adminEntityType.imagesMap]: adminResponseEntityKey.images,
+        [adminEntityType.userBalance]: adminResponseEntityKey.userBalance
       },
       serviceData: serviceResponse.data
     }).perform();
-
-    wrapperFormatterRsp.data.balance = serviceResponse.data.balance || '0';
 
     serviceResponse.data = wrapperFormatterRsp.data;
   };
