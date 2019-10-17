@@ -31,7 +31,7 @@ class MixedTopSearch extends ServiceBase {
     const oThis = this;
     oThis.q = params.q || null;
     oThis.paginationIdentifier = params[paginationConstants.paginationIdentifierKey] || null;
-    oThis.supportedEntities = params.supported_entities || [responseEntity.users, responseEntity.tags];
+    oThis.supportedEntities = params.supported_entities || ['user', 'tag'];
 
     oThis.searchEntities = [];
     oThis.tagResponses = null;
@@ -50,10 +50,10 @@ class MixedTopSearch extends ServiceBase {
     await oThis._validateAndSanitizeParams();
 
     let promises = [];
-    if (oThis.supportedEntities.includes(responseEntity.users)) {
+    if (oThis.supportedEntities.includes('user')) {
       promises.push(oThis._getTopUserResults());
     }
-    if (oThis.supportedEntities.includes(responseEntity.tags)) {
+    if (oThis.supportedEntities.includes('tag')) {
       promises.push(oThis._getTopTagResults());
     }
     await Promise.all(promises);
@@ -126,7 +126,7 @@ class MixedTopSearch extends ServiceBase {
       response[entityType.searchCategoriesList].push({
         id: 'sc_tr',
         updatedAt: Math.round(new Date() / 1000),
-        kind: responseEntity.tags
+        kind: 'tag'
       });
       response.tagIds = oThis.tagResponses.tagIds;
       response.tagsMap = oThis.tagResponses.tagsMap;
@@ -137,7 +137,7 @@ class MixedTopSearch extends ServiceBase {
       response[entityType.searchCategoriesList].push({
         id: 'sc_ur',
         updatedAt: Math.round(new Date() / 1000),
-        kind: responseEntity.users
+        kind: 'user'
       });
       response[entityType.userSearchList] = oThis.userResponses[entityType.userSearchList];
       response.usersByIdMap = oThis.userResponses.usersByIdMap;
