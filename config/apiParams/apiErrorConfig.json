@@ -177,6 +177,6 @@
   "min_redemption_amount": {
     "http_code": "200",
     "code": "BAD_REQUEST",
-    "message": "Minimum purchase required is $10."
+    "message": "Minimum $10 required for redeeming."
   }
 }
