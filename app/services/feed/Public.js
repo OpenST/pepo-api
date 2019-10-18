@@ -51,43 +51,6 @@ class PublicVideoFeed extends FeedBase {
   }
 
   /**
-   * Returns unique Identifier of device for currennt request
-   *
-   * @returns {String}
-   * @private
-   */
-  _pepodeviceId() {
-    const oThis = this;
-    logger.log(
-      `===================PERSONALIZED FEED${oThis.currentUserId} x-pepo-device-id:`,
-      oThis.headers['x-pepo-device-id']
-    );
-
-    return oThis.headers['x-pepo-device-id'] || '';
-  }
-
-  /**
-   * Returns true if older pepo builds which does not have video play event
-   *
-   * @returns {Boolean}
-   * @private
-   */
-  _isOlderBuildWithoutVideoPlayEvent() {
-    const oThis = this;
-    const appVersion = oThis.headers['x-pepo-app-version'] || '';
-
-    let res = false;
-
-    if (['0.9.0', '0.9.1'].indexOf(appVersion) > -1) {
-      res = true;
-    }
-
-    logger.log(`===================PERSONALIZED FEED${oThis.currentUserId}=======x-pepo-app-version==`, appVersion);
-
-    return res;
-  }
-
-  /**
    * Validate and sanitize.
    *
    * @sets oThis.currentUserId, oThis.paginationTimestamp
@@ -120,18 +83,6 @@ class PublicVideoFeed extends FeedBase {
   }
 
   /**
-   * Whether to shuffle feeds.
-   *
-   * @returns {Boolean}
-   * @private
-   */
-  _showShuffledFeeds() {
-    const oThis = this;
-
-    return oThis.currentUserId;
-  }
-
-  /**
    * Set feed ids.
    *
    * @sets oThis.feedIds, oThis.feedsMap
@@ -142,6 +93,7 @@ class PublicVideoFeed extends FeedBase {
   async _setFeedIds() {
     const oThis = this;
 
+    // if logged in feed, then show shuffled feeds
     if (oThis._showShuffledFeeds()) {
       if (oThis.pageNumber > 1) {
         await oThis.fetchPersonalizedFeedDataforUser();
@@ -160,6 +112,85 @@ class PublicVideoFeed extends FeedBase {
     }
 
     await oThis._filterFeedData();
+  }
+
+  /**
+   * Prepare response.
+   *
+   * @sets oThis.feeds, oThis.profileResponse
+   *
+   * @returns {*|result}
+   * @private
+   */
+  async _prepareResponse() {
+    const oThis = this;
+
+    const nextPagePayloadKey = {};
+
+    if (oThis._showShuffledFeeds()) {
+      if (oThis.nextPageNumber) {
+        nextPagePayloadKey[paginationConstants.paginationIdentifierKey] = {
+          page_no: oThis.nextPageNumber
+        };
+      }
+    } else {
+      if (oThis.nextPaginationTimestamp) {
+        nextPagePayloadKey[paginationConstants.paginationIdentifierKey] = {
+          pagination_timestamp: oThis.nextPaginationTimestamp
+        };
+      }
+    }
+
+    const responseMetaData = {
+      [paginationConstants.nextPagePayloadKey]: nextPagePayloadKey
+    };
+
+    return responseHelper.successWithData({
+      feedList: oThis.feeds,
+      userProfilesMap: oThis.profileResponse.userProfilesMap,
+      userProfileAllowedActions: oThis.profileResponse.userProfileAllowedActions,
+      usersByIdMap: oThis.profileResponse.usersByIdMap,
+      tokenUsersByUserIdMap: oThis.profileResponse.tokenUsersByUserIdMap,
+      imageMap: oThis.profileResponse.imageMap,
+      videoMap: oThis.profileResponse.videoMap,
+      linkMap: oThis.profileResponse.linkMap,
+      tags: oThis.profileResponse.tags,
+      userStat: oThis.profileResponse.userStat,
+      videoDetailsMap: oThis.profileResponse.videoDetailsMap,
+      videoDescriptionsMap: oThis.profileResponse.videoDescriptionMap,
+      currentUserUserContributionsMap: oThis.profileResponse.currentUserUserContributionsMap,
+      currentUserVideoContributionsMap: oThis.profileResponse.currentUserVideoContributionsMap,
+      pricePointsMap: oThis.profileResponse.pricePointsMap,
+      tokenDetails: oThis.tokenDetails,
+      meta: responseMetaData
+    });
+  }
+
+  /**
+   * Get User feed ids for unseen and seen from cassandra.
+   *
+   * @sets oThis.userPersonalizedfeedData
+   *
+   * @returns {Promise<*>}
+   * @private
+   */
+  async fetchPersonalizedFeedDataforUser() {
+    const oThis = this;
+
+    const dbRow = await new UserPersonalizedDataModel().fetchJsonDataForKind({
+      userId: oThis.currentUserId,
+      kind: userPersonalizedDataConstants.feedDataKind,
+      uniqueId: oThis._pepodeviceId()
+    });
+
+    if (CommonValidators.validateNonEmptyObject(dbRow.jsonData)) {
+      oThis.userPersonalizedfeedData = dbRow.jsonData;
+    }
+
+    // logger.log(
+    //   `===================PERSONALIZED FEED:${oThis.currentUserId} Fetch Personalize Feed Data:`,
+    //   oThis.userPersonalizedfeedData
+    // );
   }
 
   /**
@@ -192,12 +223,14 @@ class PublicVideoFeed extends FeedBase {
       limit: feedConstants.personalizedFeedMaxIdsCount
     };
 
+    // fetch latest feeds
     const feedQueryResp = await new FeedModel().getLatestFeedIds(queryParams);
 
     const allVideoIds = [];
 
     let totalFeeds = feedQueryResp['feedIds'].length;
 
+    // collect non blocked video ids
     for (let i = 0; i < totalFeeds; i++) {
       const feedId = feedQueryResp['feedIds'][i];
       const feedObj = feedQueryResp['feedsMap'][feedId];
@@ -224,10 +257,11 @@ class PublicVideoFeed extends FeedBase {
         const feedId = feedQueryResp['feedIds'][i];
         const feedObj = feedQueryResp['feedsMap'][feedId];
         const paginationIdentifier = feedObj.paginationIdentifier;
-        const actorId = feedObj.actor;
         const userVideoViewObj = videoIdToUserVideoViewMap[Number(feedObj.primaryExternalEntityId)];
+        const actorId = feedObj.actor;
 
-        if (allVideoIds.indexOf(Number(feedObj.primaryExternalEntityId)) === -1) {
+        // skip the feeds due to videos from blocked users
+        if (blockedByUserInfo.hasBlocked[actorId] || blockedByUserInfo.blockedBy[actorId]) {
           logger.log(
             `====PERSONALIZED FEED:${oThis.currentUserId} blocked video === `,
             feedObj.primaryExternalEntityId
@@ -235,8 +269,12 @@ class PublicVideoFeed extends FeedBase {
           continue;
         }
 
+        // if seen
         if (userVideoViewObj && userVideoViewObj.lastViewAt) {
-          if (paginationIdentifier >= Date.now() / 1000 - feedConstants.personalizedFeedSeenVideosAgeInSeconds) {
+          let wasSeenRecently =
+            paginationIdentifier >= Date.now() / 1000 - feedConstants.personalizedFeedSeenVideosAgeInSeconds;
+
+          if (wasSeenRecently) {
             newPersonalizeData['shuffledSeenFeedIds'].push(feedId);
           } else {
             newPersonalizeData['seenFeedIds'].push(feedId);
@@ -288,30 +326,52 @@ class PublicVideoFeed extends FeedBase {
   }
 
   /**
-   * Get User feed ids for unseen and seen from cassandra.
+   * Returns unique Identifier of device for currennt request
    *
-   * @sets oThis.userPersonalizedfeedData
-   *
-   * @returns {Promise<*>}
+   * @returns {String}
    * @private
    */
-  async fetchPersonalizedFeedDataforUser() {
+  _pepodeviceId() {
     const oThis = this;
+    logger.log(
+      `===================PERSONALIZED FEED${oThis.currentUserId} x-pepo-device-id:`,
+      oThis.headers['x-pepo-device-id']
+    );
 
-    const dbRow = await new UserPersonalizedDataModel().fetchJsonDataForKind({
-      userId: oThis.currentUserId,
-      kind: userPersonalizedDataConstants.feedDataKind,
-      uniqueId: oThis._pepodeviceId()
-    });
+    return oThis.headers['x-pepo-device-id'] || '';
+  }
 
-    if (CommonValidators.validateNonEmptyObject(dbRow.jsonData)) {
-      oThis.userPersonalizedfeedData = dbRow.jsonData;
+  /**
+   * Returns true if older pepo builds which does not have video play event
+   *
+   * @returns {Boolean}
+   * @private
+   */
+  _isOlderBuildWithoutVideoPlayEvent() {
+    const oThis = this;
+    const appVersion = oThis.headers['x-pepo-app-version'] || '';
+
+    let res = false;
+
+    if (['0.9.0', '0.9.1'].indexOf(appVersion) > -1) {
+      res = true;
     }
 
-    // logger.log(
-    //   `===================PERSONALIZED FEED:${oThis.currentUserId} Fetch Personalize Feed Data:`,
-    //   oThis.userPersonalizedfeedData
-    // );
+    logger.log(`===================PERSONALIZED FEED${oThis.currentUserId}=======x-pepo-app-version==`, appVersion);
+
+    return res;
+  }
+
+  /**
+   * Whether to shuffle feeds.
+   *
+   * @returns {Boolean}
+   * @private
+   */
+  _showShuffledFeeds() {
+    const oThis = this;
+
+    return oThis.currentUserId;
   }
 
   /**
@@ -453,58 +513,6 @@ class PublicVideoFeed extends FeedBase {
     }
 
     oThis.feedIds = activeFeedIds;
-  }
-
-  /**
-   * Prepare response.
-   *
-   * @sets oThis.feeds, oThis.profileResponse
-   *
-   * @returns {*|result}
-   * @private
-   */
-  async _prepareResponse() {
-    const oThis = this;
-
-    const nextPagePayloadKey = {};
-
-    if (oThis._showShuffledFeeds()) {
-      if (oThis.nextPageNumber) {
-        nextPagePayloadKey[paginationConstants.paginationIdentifierKey] = {
-          page_no: oThis.nextPageNumber
-        };
-      }
-    } else {
-      if (oThis.nextPaginationTimestamp) {
-        nextPagePayloadKey[paginationConstants.paginationIdentifierKey] = {
-          pagination_timestamp: oThis.nextPaginationTimestamp
-        };
-      }
-    }
-
-    const responseMetaData = {
-      [paginationConstants.nextPagePayloadKey]: nextPagePayloadKey
-    };
-
-    return responseHelper.successWithData({
-      feedList: oThis.feeds,
-      userProfilesMap: oThis.profileResponse.userProfilesMap,
-      userProfileAllowedActions: oThis.profileResponse.userProfileAllowedActions,
-      usersByIdMap: oThis.profileResponse.usersByIdMap,
-      tokenUsersByUserIdMap: oThis.profileResponse.tokenUsersByUserIdMap,
-      imageMap: oThis.profileResponse.imageMap,
-      videoMap: oThis.profileResponse.videoMap,
-      linkMap: oThis.profileResponse.linkMap,
-      tags: oThis.profileResponse.tags,
-      userStat: oThis.profileResponse.userStat,
-      videoDetailsMap: oThis.profileResponse.videoDetailsMap,
-      videoDescriptionsMap: oThis.profileResponse.videoDescriptionMap,
-      currentUserUserContributionsMap: oThis.profileResponse.currentUserUserContributionsMap,
-      currentUserVideoContributionsMap: oThis.profileResponse.currentUserVideoContributionsMap,
-      pricePointsMap: oThis.profileResponse.pricePointsMap,
-      tokenDetails: oThis.tokenDetails,
-      meta: responseMetaData
-    });
   }
 
   /**

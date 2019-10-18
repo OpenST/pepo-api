@@ -38,7 +38,7 @@ class UserPersonalizedDataModel extends CassandraModelBase {
         userPersonalizedDataConstants.shortToLongNamesMap.user_id,
         userPersonalizedDataConstants.shortToLongNamesMap.kind
       ],
-      sort: []
+      sort: [userPersonalizedDataConstants.shortToLongNamesMap.unique_id]
     };
   }
 
