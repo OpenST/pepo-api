@@ -4,6 +4,7 @@ const rootPrefix = '../../..',
   TagSearch = require(rootPrefix + '/app/services/search/TagSearch'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
+  responseEntity = require(rootPrefix + '/lib/globalConstant/responseEntityKey'),
   paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination');
 
 /**
@@ -30,7 +31,7 @@ class MixedTopSearch extends ServiceBase {
     const oThis = this;
     oThis.q = params.q || null;
     oThis.paginationIdentifier = params[paginationConstants.paginationIdentifierKey] || null;
-    oThis.supportedEntities = params.supported_entities || ['users', 'tags'];
+    oThis.supportedEntities = params.supported_entities || ['user', 'tag'];
 
     oThis.searchEntities = [];
     oThis.tagResponses = null;
@@ -49,10 +50,10 @@ class MixedTopSearch extends ServiceBase {
     await oThis._validateAndSanitizeParams();
 
     let promises = [];
-    if (oThis.supportedEntities.includes('users')) {
+    if (oThis.supportedEntities.includes('user')) {
       promises.push(oThis._getTopUserResults());
     }
-    if (oThis.supportedEntities.includes('tags')) {
+    if (oThis.supportedEntities.includes('tag')) {
       promises.push(oThis._getTopTagResults());
     }
     await Promise.all(promises);

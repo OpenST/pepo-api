@@ -829,7 +829,12 @@ const v1Signature = {
         validatorMethods: ['validateNonZeroInteger']
       }
     ],
-    optional: []
+    optional: [
+      {
+        parameter: paginationConstants.paginationIdentifierKey,
+        validatorMethods: ['validateString', 'validatePaginationIdentifier']
+      }
+    ]
   },
   [apiName.pepocornTopUpValidate]: {
     mandatory: [
