@@ -58,9 +58,12 @@ class PublicVideoFeed extends FeedBase {
    */
   _pepodeviceId() {
     const oThis = this;
-    logger.log(`PERSONALIZED FEED:${oThis.currentUserId} x-pepo-device-id:`, oThis.headers['x-pepo-device-id']);
+    logger.log(
+      `===================PERSONALIZED FEED${oThis.currentUserId} x-pepo-device-id:`,
+      oThis.headers['x-pepo-device-id']
+    );
 
-    return oThis.headers['x-pepo-device-id'] || null;
+    return oThis.headers['x-pepo-device-id'] || '';
   }
 
   /**
@@ -79,7 +82,7 @@ class PublicVideoFeed extends FeedBase {
       res = true;
     }
 
-    logger.log(`PERSONALIZED FEED:${oThis.currentUserId}===============x-pepo-app-version============`, appVersion);
+    logger.log(`===================PERSONALIZED FEED${oThis.currentUserId}=======x-pepo-app-version==`, appVersion);
 
     return res;
   }
@@ -106,7 +109,7 @@ class PublicVideoFeed extends FeedBase {
 
       oThis.paginationTimestamp = parsedPaginationParams.pagination_timestamp; // Override paginationTimestamp number.
       oThis.pageNumber = Number(parsedPaginationParams.page_no) || 1; // Override paginationTimestamp number.
-      logger.log(`PERSONALIZED FEED:${oThis.currentUserId} Page Number:`, oThis.pageNumber);
+      logger.log(`===================PERSONALIZED FEED${oThis.currentUserId} Page Number:`, oThis.pageNumber);
     } else {
       oThis.paginationTimestamp = null;
       oThis.pageNumber = 1;
@@ -131,7 +134,7 @@ class PublicVideoFeed extends FeedBase {
   /**
    * Set feed ids.
    *
-   * @sets oThis.feedIds, oThis.feedsMap, oThis.nextPaginationTimestamp
+   * @sets oThis.feedIds, oThis.feedsMap
    *
    * @returns {Promise<*>}
    * @private
@@ -168,7 +171,7 @@ class PublicVideoFeed extends FeedBase {
   async fetchFeedIdsForFirstPage() {
     const oThis = this;
 
-    let lastPaginationTimestamp;
+    let lastPaginationTimestamp = 0;
 
     const newPersonalizeData = {
       unseenFeedIds: [],
@@ -189,7 +192,7 @@ class PublicVideoFeed extends FeedBase {
 
     const feedQueryResp = await new FeedModel().getLatestFeedIds(queryParams);
 
-    logger.debug(`PERSONALIZED FEED:${oThis.currentUserId} feedQueryResp === `, feedQueryResp);
+    logger.log(`===================PERSONALIZED FEED:${oThis.currentUserId} feedQueryResp === `, feedQueryResp);
 
     const allVideoIds = [];
 
@@ -200,45 +203,42 @@ class PublicVideoFeed extends FeedBase {
       const feedObj = feedQueryResp['feedsMap'][feedId];
       const actorId = feedObj.actor;
 
+      lastPaginationTimestamp = feedObj.paginationIdentifier;
       if (!blockedByUserInfo.hasBlocked[actorId] && blockedByUserInfo.blockedBy[actorId]) {
         allVideoIds.push(Number(feedObj.primaryExternalEntityId));
       }
     }
 
-    lastPaginationTimestamp = (feedQueryResp['feedsMap'][totalFeeds - 1] || {})['paginationIdentifier'] || 0;
+    if (allVideoIds.length > 0) {
+      const videoIdToUserVideoViewMap = await new UserVideoViewModel().fetchVideoViewDetails({
+        userId: oThis.currentUserId,
+        videoIds: allVideoIds
+      });
 
-    const videoIdToUserVideoViewMap = await new UserVideoViewModel().fetchVideoViewDetails({
-      userId: oThis.currentUserId,
-      videoIds: allVideoIds
-    });
+      for (let i = 0; i < feedQueryResp['feedIds'].length; i++) {
+        const feedId = feedQueryResp['feedIds'][i];
+        const feedObj = feedQueryResp['feedsMap'][feedId];
+        const paginationIdentifier = feedObj.paginationIdentifier;
+        const actorId = feedObj.actor;
+        const userVideoViewObj = videoIdToUserVideoViewMap[Number(feedObj.primaryExternalEntityId)];
 
-    for (let i = 0; i < feedQueryResp['feedIds'].length; i++) {
-      const feedId = feedQueryResp['feedIds'][i];
-      const feedObj = feedQueryResp['feedsMap'][feedId];
-      const paginationIdentifier = feedObj.paginationIdentifier;
-      const actorId = feedObj.actor;
-      const userVideoViewObj = videoIdToUserVideoViewMap[Number(feedObj.primaryExternalEntityId)];
-
-      if (
-        blockedByUserInfo.hasBlocked[actorId] ||
-        blockedByUserInfo.blockedBy[actorId] ||
-        allVideoIds.indexOf(Number(feedObj.primaryExternalEntityId)) === -1
-      ) {
-        logger.debug(
-          `PERSONALIZED FEED:${oThis.currentUserId} remove blocked video === `,
-          feedObj.primaryExternalEntityId
-        );
-        continue;
-      }
-
-      if (userVideoViewObj && userVideoViewObj.lastViewAt) {
-        if (paginationIdentifier >= Date.now() / 1000 - feedConstants.personalizedFeedSeenVideosAgeInSeconds) {
-          newPersonalizeData['shuffledSeenFeedIds'].push(feedId);
-        } else {
-          newPersonalizeData['seenFeedIds'].push(feedId);
+        if (allVideoIds.indexOf(Number(feedObj.primaryExternalEntityId)) === -1) {
+          logger.log(
+            `===================PERSONALIZED FEED:${oThis.currentUserId} remove blocked video === `,
+            feedObj.primaryExternalEntityId
+          );
+          continue;
         }
-      } else {
-        newPersonalizeData['unseenFeedIds'].push(feedId);
+
+        if (userVideoViewObj && userVideoViewObj.lastViewAt) {
+          if (paginationIdentifier >= Date.now() / 1000 - feedConstants.personalizedFeedSeenVideosAgeInSeconds) {
+            newPersonalizeData['shuffledSeenFeedIds'].push(feedId);
+          } else {
+            newPersonalizeData['seenFeedIds'].push(feedId);
+          }
+        } else {
+          newPersonalizeData['unseenFeedIds'].push(feedId);
+        }
       }
     }
 
@@ -249,7 +249,7 @@ class PublicVideoFeed extends FeedBase {
         feedsMap: feedQueryResp['feedsMap']
       };
 
-      logger.debug(`PERSONALIZED FEED:${oThis.currentUserId} sortParams === `, sortParams);
+      logger.log(`===================PERSONALIZED FEED:${oThis.currentUserId} sortParams === `, sortParams);
       const sortResponse = await new SortUnseenFeedLib(sortParams).perform();
 
       if (sortResponse.isFailure()) {
@@ -261,7 +261,10 @@ class PublicVideoFeed extends FeedBase {
 
     newPersonalizeData['shuffledSeenFeedIds'] = basicHelper.shuffleArray(newPersonalizeData['shuffledSeenFeedIds']);
 
-    logger.debug(`PERSONALIZED FEED:${oThis.currentUserId} newPersonalizeData === `, newPersonalizeData);
+    logger.log(
+      `===================PERSONALIZED FEED:${oThis.currentUserId} newPersonalizeData === `,
+      newPersonalizeData
+    );
 
     let allSortedFeedIds = newPersonalizeData['unseenFeedIds'].concat(newPersonalizeData['shuffledSeenFeedIds']);
     allSortedFeedIds = allSortedFeedIds.concat(newPersonalizeData['seenFeedIds']);
@@ -294,8 +297,8 @@ class PublicVideoFeed extends FeedBase {
       oThis.userPersonalizedfeedData = dbRow.jsonData;
     }
 
-    logger.debug(
-      `PERSONALIZED FEED:${oThis.currentUserId} Fetch Personalize Feed Data:`,
+    logger.log(
+      `===================PERSONALIZED FEED:${oThis.currentUserId} Fetch Personalize Feed Data:`,
       oThis.userPersonalizedfeedData
     );
   }
@@ -303,7 +306,7 @@ class PublicVideoFeed extends FeedBase {
   /**
    * Set feed data for logged in users.
    *
-   * @sets oThis.feedIds, oThis.feedsMap, oThis.nextPaginationTimestamp
+   * @sets oThis.feedIds, oThis.feedsMap
    *
    * @returns {Promise<*>}
    * @private
@@ -336,19 +339,28 @@ class PublicVideoFeed extends FeedBase {
         jsonData: oThis.userPersonalizedfeedData
       });
 
-      logger.debug(
-        `PERSONALIZED FEED:${oThis.currentUserId} Set Personalize Feed Data:`,
+      logger.log(
+        `===================PERSONALIZED FEED:${oThis.currentUserId} Set Personalize Feed Data:`,
         oThis.userPersonalizedfeedData
       );
     } else {
-      logger.debug(`PERSONALIZED FEED:${oThis.currentUserId} Fetchng From DB`);
+      if (oThis.pageNumber === 1) {
+        await new UserPersonalizedDataModel().updateJsonDataForUsers({
+          userId: oThis.currentUserId,
+          kind: userPersonalizedDataConstants.feedDataKind,
+          uniqueId: oThis._pepodeviceId(),
+          jsonData: oThis.userPersonalizedfeedData
+        });
+      }
+
+      logger.log(`===================PERSONALIZED FEED:${oThis.currentUserId} Fetching From DB`);
       let pagesFromCache = Math.ceil(allSortedFeedIds.length / oThis.limit);
       let offset = (oThis.pageNumber - 1 - pagesFromCache) * oThis.limit;
 
       const queryParams = {
         limit: oThis.limit,
         offset: offset,
-        paginationTimestamp: paginationTimestamp
+        paginationTimestamp: oThis.userPersonalizedfeedData.lastPaginationTimestamp
       };
 
       const queryResp = await new FeedModel().getPersonalizedFeedIdsAfterTimestamp(queryParams);

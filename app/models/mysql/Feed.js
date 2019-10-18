@@ -176,7 +176,7 @@ class FeedModel extends ModelBase {
 
     let queryObj = oThis
       .select('*')
-      .where('pagination_identifier < ?', paginationTimestamp)
+      .where(['pagination_identifier < ?', paginationTimestamp])
       .order_by('pagination_identifier desc')
       .limit(limit)
       .offset(offset);

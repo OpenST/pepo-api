@@ -84,19 +84,14 @@ class UserPersonalizedDataModel extends CassandraModelBase {
    */
   async updateJsonDataForUsers(queryParams) {
     const oThis = this;
+    const jsonData = JSON.stringify(queryParams.jsonData),
+      kindInt = userPersonalizedDataConstants.invertedKinds[queryParams.kind];
 
     const query =
       'update ' + oThis.queryTableName + ' set json_data = ? where user_id = ? and kind = ? and unique_id = ?;';
-    const queries = [];
+    const params = [jsonData, queryParams.userId, kindInt, queryParams.uniqueId];
 
-    let kindInt = userPersonalizedDataConstants.invertedKinds[queryParams.kind];
-
-    for (let i = 0; i < queryParams.videoIds.length; i++) {
-      const updateParam = [JSON.stringify(queryParams.jsonData), queryParams.userId, kindInt, queryParams.uniqueId];
-      queries.push({ query: query, params: updateParam });
-    }
-
-    return oThis.batchFire(queries);
+    return oThis.fire(query, params);
   }
 
   /**
