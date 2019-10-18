@@ -47,6 +47,7 @@ class UserSearch extends ServiceBase {
     oThis.searchResults = [];
     oThis.paginationTimestamp = null;
     oThis.nextPaginationTimestamp = null;
+    oThis.hasNextPage = false;
   }
 
   /**
@@ -133,6 +134,7 @@ class UserSearch extends ServiceBase {
         isOnlyNameSearch: oThis.isOnlyNameSearch,
         fetchAll: false
       });
+      oThis.hasNextPage = userData.userIds.length >= oThis.limit;
     } else {
       // Display curated users in search.
       const curatedUserIdsString = oThis.getTopResults
@@ -270,7 +272,7 @@ class UserSearch extends ServiceBase {
 
     const nextPagePayloadKey = {};
 
-    if (oThis.searchResults.length >= oThis.limit) {
+    if (oThis.hasNextPage) {
       nextPagePayloadKey[paginationConstants.paginationIdentifierKey] = {
         pagination_timestamp: oThis.nextPaginationTimestamp
       };
