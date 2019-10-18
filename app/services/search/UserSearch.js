@@ -90,6 +90,8 @@ class UserSearch extends ServiceBase {
   async _validateAndSanitizeParams() {
     const oThis = this;
 
+    oThis.isOnlyNameSearch = !CommonValidators.validateUserName(oThis.query);
+
     oThis.query = oThis.query
       ? oThis.query
           .toLowerCase()
@@ -109,8 +111,6 @@ class UserSearch extends ServiceBase {
     } else {
       oThis.paginationTimestamp = null;
     }
-
-    oThis.isOnlyNameSearch = !CommonValidators.validateUserName(oThis.query);
 
     // Validate limit.
     return oThis._validatePageSize();
