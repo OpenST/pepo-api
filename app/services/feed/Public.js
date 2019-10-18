@@ -194,8 +194,6 @@ class PublicVideoFeed extends FeedBase {
 
     const feedQueryResp = await new FeedModel().getLatestFeedIds(queryParams);
 
-    logger.log(`===================PERSONALIZED FEED:${oThis.currentUserId} feedQueryResp === `, feedQueryResp);
-
     const allVideoIds = [];
 
     let totalFeeds = feedQueryResp['feedIds'].length;
@@ -211,7 +209,10 @@ class PublicVideoFeed extends FeedBase {
       }
     }
 
-    logger.log(`===================PERSONALIZED FEED:${oThis.currentUserId} allVideoIds === `, allVideoIds);
+    logger.log(
+      `===================PERSONALIZED FEED:${oThis.currentUserId} all valid videoIds === `,
+      allVideoIds.length
+    );
 
     if (allVideoIds.length > 0) {
       const videoIdToUserVideoViewMap = await new UserVideoViewModel().fetchVideoViewDetails({
@@ -228,7 +229,7 @@ class PublicVideoFeed extends FeedBase {
 
         if (allVideoIds.indexOf(Number(feedObj.primaryExternalEntityId)) === -1) {
           logger.log(
-            `===================PERSONALIZED FEED:${oThis.currentUserId} remove blocked video === `,
+            `====PERSONALIZED FEED:${oThis.currentUserId} blocked video === `,
             feedObj.primaryExternalEntityId
           );
           continue;
@@ -253,7 +254,7 @@ class PublicVideoFeed extends FeedBase {
         feedsMap: feedQueryResp['feedsMap']
       };
 
-      logger.log(`===================PERSONALIZED FEED:${oThis.currentUserId} sortParams === `, sortParams);
+      // logger.log(`===================PERSONALIZED FEED:${oThis.currentUserId} sortParams === `, sortParams);
       const sortResponse = await new SortUnseenFeedLib(sortParams).perform();
 
       if (sortResponse.isFailure()) {
@@ -263,21 +264,27 @@ class PublicVideoFeed extends FeedBase {
       newPersonalizeData['unseenFeedIds'] = sortResponse.data['sortedFeedIds'];
     }
 
-    newPersonalizeData['shuffledSeenFeedIds'] = basicHelper.shuffleArray(newPersonalizeData['shuffledSeenFeedIds']);
+    // logger.log(
+    //   `===================PERSONALIZED FEED:${oThis.currentUserId} newPersonalizeData before shuffle=== `,
+    //   newPersonalizeData
+    // );
 
-    logger.log(
-      `===================PERSONALIZED FEED:${oThis.currentUserId} newPersonalizeData === `,
-      newPersonalizeData
-    );
+    newPersonalizeData['shuffledSeenFeedIds'] = basicHelper.shuffleArray(newPersonalizeData['shuffledSeenFeedIds']);
 
     let allSortedFeedIds = newPersonalizeData['unseenFeedIds'].concat(newPersonalizeData['shuffledSeenFeedIds']);
     allSortedFeedIds = allSortedFeedIds.concat(newPersonalizeData['seenFeedIds']);
 
     oThis.userPersonalizedfeedData = {
       allSortedFeedIds: allSortedFeedIds,
-      lastPaginationTimestamp: lastPaginationTimestamp,
-      nextRenderIndex: 0
+      lastPaginationTimestamp: lastPaginationTimestamp
     };
+
+    await new UserPersonalizedDataModel().updateJsonDataForUsers({
+      userId: oThis.currentUserId,
+      kind: userPersonalizedDataConstants.feedDataKind,
+      uniqueId: oThis._pepodeviceId(),
+      jsonData: oThis.userPersonalizedfeedData
+    });
   }
 
   /**
@@ -301,10 +308,10 @@ class PublicVideoFeed extends FeedBase {
       oThis.userPersonalizedfeedData = dbRow.jsonData;
     }
 
-    logger.log(
-      `===================PERSONALIZED FEED:${oThis.currentUserId} Fetch Personalize Feed Data:`,
-      oThis.userPersonalizedfeedData
-    );
+    // logger.log(
+    //   `===================PERSONALIZED FEED:${oThis.currentUserId} Fetch Personalize Feed Data:`,
+    //   oThis.userPersonalizedfeedData
+    // );
   }
 
   /**
@@ -320,11 +327,10 @@ class PublicVideoFeed extends FeedBase {
 
     const allSortedFeedIds = oThis.userPersonalizedfeedData.allSortedFeedIds;
 
-    if (allSortedFeedIds.length > (oThis.pageNumber - 1) * oThis.limit) {
-      const nextRenderIndex = oThis.userPersonalizedfeedData['nextRenderIndex'];
+    const renderStartIndex = (oThis.pageNumber - 1) * oThis.limit;
 
-      oThis.feedIds = allSortedFeedIds.slice(nextRenderIndex, nextRenderIndex + oThis.limit);
-      oThis.userPersonalizedfeedData['nextRenderIndex'] += oThis.feedIds.length;
+    if (allSortedFeedIds.length > renderStartIndex) {
+      oThis.feedIds = allSortedFeedIds.slice(renderStartIndex, renderStartIndex + oThis.limit);
 
       const feedByIdsCacheResponse = await new FeedByIdsCache({ ids: oThis.feedIds }).fetch();
 
@@ -335,28 +341,7 @@ class PublicVideoFeed extends FeedBase {
       oThis.feedsMap = feedByIdsCacheResponse.data;
 
       oThis.nextPageNumber = oThis.pageNumber + 1;
-
-      await new UserPersonalizedDataModel().updateJsonDataForUsers({
-        userId: oThis.currentUserId,
-        kind: userPersonalizedDataConstants.feedDataKind,
-        uniqueId: oThis._pepodeviceId(),
-        jsonData: oThis.userPersonalizedfeedData
-      });
-
-      logger.log(
-        `===================PERSONALIZED FEED:${oThis.currentUserId} Set Personalize Feed Data:`,
-        oThis.userPersonalizedfeedData
-      );
     } else {
-      if (oThis.pageNumber === 1) {
-        await new UserPersonalizedDataModel().updateJsonDataForUsers({
-          userId: oThis.currentUserId,
-          kind: userPersonalizedDataConstants.feedDataKind,
-          uniqueId: oThis._pepodeviceId(),
-          jsonData: oThis.userPersonalizedfeedData
-        });
-      }
-
       logger.log(`===================PERSONALIZED FEED:${oThis.currentUserId} Fetching From DB`);
       let pagesFromCache = Math.ceil(allSortedFeedIds.length / oThis.limit);
       let offset = (oThis.pageNumber - 1 - pagesFromCache) * oThis.limit;
