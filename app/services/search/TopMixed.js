@@ -126,7 +126,8 @@ class MixedTopSearch extends ServiceBase {
       response[entityType.searchCategoriesList].push({
         id: 'sc_tr',
         updatedAt: Math.round(new Date() / 1000),
-        kind: 'tag'
+        kind: 'tag',
+        title: oThis.q ? 'Tags' : null
       });
       response.tagIds = oThis.tagResponses.tagIds;
       response.tagsMap = oThis.tagResponses.tagsMap;
@@ -137,7 +138,8 @@ class MixedTopSearch extends ServiceBase {
       response[entityType.searchCategoriesList].push({
         id: 'sc_ur',
         updatedAt: Math.round(new Date() / 1000),
-        kind: 'user'
+        kind: 'user',
+        title: oThis.q ? 'People' : null
       });
       response[entityType.userSearchList] = oThis.userResponses[entityType.userSearchList];
       response.usersByIdMap = oThis.userResponses.usersByIdMap;
