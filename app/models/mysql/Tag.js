@@ -122,6 +122,7 @@ class Tag extends ModelBase {
     const dbRows = await oThis
       .select('*')
       .where('name LIKE "' + params.tagPrefix + '%"')
+      .where({ status: tagConstants.invertedStatuses[tagConstants.activeStatus] })
       .limit(limit)
       .offset(offset)
       .order_by('weight DESC')
