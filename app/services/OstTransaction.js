@@ -193,6 +193,27 @@ class OstTransaction extends ServiceBase {
   }
 
   /**
+   * Insert text.
+   *
+   * @sets oThis.textId
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _insertText() {
+    const oThis = this;
+
+    const insertData = { text: oThis.text };
+    const insertResponse = await new TextModel().insertText(insertData);
+
+    oThis.textId = insertResponse.insertId;
+    insertData.id = insertResponse.insertId;
+
+    const formattedInsertData = new TextModel().formatDbData(insertData);
+    await TextModel.flushCache({ textIds: [formattedInsertData.id] });
+  }
+
+  /**
    * Fetch transaction from db.
    *
    * @sets oThis.transactionId, oThis.transactionObj

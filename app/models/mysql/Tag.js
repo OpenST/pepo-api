@@ -34,6 +34,7 @@ class Tag extends ModelBase {
    * @param {number} dbRow.id
    * @param {string} dbRow.name
    * @param {string} dbRow.weight
+   * @param {string} dbRow.video_weight
    * @param {string} dbRow.status
    * @param {string} dbRow.created_at
    * @param {string} dbRow.updated_at
@@ -48,6 +49,7 @@ class Tag extends ModelBase {
       id: dbRow.id,
       name: dbRow.name,
       weight: dbRow.weight,
+      videoWeight: dbRow.video_weight,
       status: tagConstants.statuses[dbRow.status],
       createdAt: dbRow.created_at,
       updatedAt: dbRow.updated_at
@@ -125,7 +127,7 @@ class Tag extends ModelBase {
       .where({ status: tagConstants.invertedStatuses[tagConstants.activeStatus] })
       .limit(limit)
       .offset(offset)
-      .order_by('weight DESC')
+      .order_by('(weight+video_weight) DESC')
       .fire();
 
     const response = [];
@@ -173,10 +175,36 @@ class Tag extends ModelBase {
   async updateTagWeights(tagIds, weightToAdd) {
     const oThis = this;
 
-    return oThis
-      .update(['weight=weight+?', weightToAdd])
-      .where({ id: tagIds })
-      .fire();
+    if (tagIds.length == 0) {
+      return true;
+    }
+
+    let queryObj = oThis.update(['weight=weight+?', weightToAdd]).where({ id: tagIds });
+
+    if (weightToAdd < 0) {
+      queryObj.where(['weight > 0']);
+    }
+
+    return queryObj.fire();
+  }
+
+  /**
+   * Update video tag weights by weightToAdd
+   *
+   * @param tagIds
+   * @param weightToAdd
+   * @returns {Promise<any>}
+   */
+  async updateVideoTagWeights(tagIds, weightToAdd) {
+    const oThis = this;
+
+    let queryObj = oThis.update(['video_weight=video_weight+?', weightToAdd]).where({ id: tagIds });
+
+    if (weightToAdd < 0) {
+      queryObj.where(['video_weight > 0']);
+    }
+
+    return queryObj.fire();
   }
 
   /**
@@ -191,11 +219,15 @@ class Tag extends ModelBase {
   static async flushCache(params) {
     const promisesArray = [];
 
-    const TagPagination = require(rootPrefix + '/lib/cacheManagement/single/TagPagination');
-    promisesArray.push(new TagPagination({ tagPrefix: [params.tagPrefix] }).clear());
+    if (params.tagPrefix) {
+      const TagPagination = require(rootPrefix + '/lib/cacheManagement/single/TagPagination');
+      promisesArray.push(new TagPagination({ tagPrefix: [params.tagPrefix] }).clear());
+    }
 
-    const TagByIds = require(rootPrefix + '/lib/cacheManagement/multi/Tag');
-    promisesArray.push(new TagByIds({ ids: params.ids }).clear());
+    if (params.ids) {
+      const TagByIds = require(rootPrefix + '/lib/cacheManagement/multi/Tag');
+      promisesArray.push(new TagByIds({ ids: params.ids }).clear());
+    }
 
     await Promise.all(promisesArray);
   }
