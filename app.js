@@ -171,7 +171,7 @@ app.use('/api', sanitizer.sanitizeBodyAndQuery, assignParams, function(request, 
   } else if (request.hostname === pepoStoreApiHostName) {
     storeRoutes(request, response, next);
   } else {
-    //  do nothing
+    next();
   }
 });
 

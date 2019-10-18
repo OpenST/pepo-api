@@ -664,13 +664,7 @@ class TransactionOstEventBase extends ServiceBase {
         }
       })
       .catch(async function(resp) {
-        const errorObject = responseHelper.error({
-          internal_error_identifier: 'a_s_oe_t_b_vtdfr_1',
-          api_error_identifier: 'something_went_wrong',
-          debug_options: validateParam
-        });
-
-        await createErrorLogsEntry.perform(errorObject, errorLogsConstants.highSeverity);
+        await createErrorLogsEntry.perform(resp, errorLogsConstants.highSeverity);
         return false;
       });
   }

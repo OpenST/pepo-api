@@ -108,7 +108,7 @@ class FeedById extends FeedBase {
    * @returns {*|result}
    * @private
    */
-  _prepareResponse() {
+  async _prepareResponse() {
     const oThis = this;
 
     return responseHelper.successWithData({

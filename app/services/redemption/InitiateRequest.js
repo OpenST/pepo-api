@@ -217,10 +217,9 @@ class InitiateRequestRedemption extends ServiceBase {
 
     if (dollarAmountBN.lt(productMinDollarValueBN)) {
       return Promise.reject(
-        responseHelper.paramValidationError({
+        responseHelper.error({
           internal_error_identifier: 'a_s_r_ir_4',
-          api_error_identifier: 'invalid_api_params',
-          params_error_identifiers: ['invalid_dollar_amount'],
+          api_error_identifier: 'min_redemption_amount',
           debug_options: {
             dollarAmountBN: dollarAmountBN,
             productMinDollarValueBN: productMinDollarValueBN
@@ -231,10 +230,9 @@ class InitiateRequestRedemption extends ServiceBase {
 
     if (!dollarAmountBN.mod(productDollarStepBN).eq(new BigNumber(0))) {
       return Promise.reject(
-        responseHelper.paramValidationError({
+        responseHelper.error({
           internal_error_identifier: 'a_s_r_ir_5',
-          api_error_identifier: 'invalid_api_params',
-          params_error_identifiers: ['invalid_dollar_amount'],
+          api_error_identifier: 'min_redemption_amount',
           debug_options: {
             dollarAmountBN: dollarAmountBN,
             productDollarStepBN: productDollarStepBN
@@ -386,7 +384,7 @@ class InitiateRequestRedemption extends ServiceBase {
         kind: pepocornTransactionConstants.invertedKinds[pepocornTransactionConstants.debitKind],
         pepocorn_amount: oThis.pepocornAmount,
         redemption_id: oThis.redemptionId,
-        status: pepocornTransactionConstants.invertedStatuses[pepocornTransactionConstants.processingStatus]
+        status: pepocornTransactionConstants.invertedStatuses[pepocornTransactionConstants.processedStatus]
       })
       .fire();
   }
