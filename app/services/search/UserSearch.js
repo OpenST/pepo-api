@@ -100,7 +100,7 @@ class UserSearch extends ServiceBase {
 
     oThis.query = oThis.query && oThis.query.length > 0 ? oThis.query : null; // If query is empty string, make it as null.
 
-    oThis.q = basicHelper.filterSearchTerm(oThis.q);
+    oThis.query = basicHelper.filterSearchTerm(oThis.query);
 
     if (oThis.paginationIdentifier) {
       const parsedPaginationParams = oThis._parsePaginationParams(oThis.paginationIdentifier);

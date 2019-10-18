@@ -75,7 +75,7 @@ class TagSearch extends ServiceBase {
   async _validateAndSanitizeParams() {
     const oThis = this;
 
-    oThis.q = basicHelper.filterSearchTerm(oThis.q);
+    oThis.tagPrefix = basicHelper.filterSearchTerm(oThis.tagPrefix);
 
     if (oThis.paginationIdentifier) {
       const parsedPaginationParams = oThis._parsePaginationParams(oThis.paginationIdentifier);
