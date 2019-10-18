@@ -146,7 +146,7 @@ class TagSearch extends ServiceBase {
 
     const nextPagePayloadKey = {};
 
-    if (oThis.tagIds.length === oThis.limit) {
+    if (oThis.tagIds.length >= oThis.limit) {
       nextPagePayloadKey[paginationConstants.paginationIdentifierKey] = {
         page: oThis.page + 1
       };
