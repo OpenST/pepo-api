@@ -145,7 +145,7 @@ class FeedModel extends ModelBase {
     const response = { feedIds: [], feedsMap: {} };
 
     const dbRows = await oThis
-      .select('id, pagination_identifier, actor')
+      .select('id, pagination_identifier, primary_external_entity_id, actor')
       .order_by('pagination_identifier desc')
       .limit(limit)
       .fire();
@@ -160,29 +160,26 @@ class FeedModel extends ModelBase {
   }
 
   /**
-   * Fetch new feeds ids after last visit time.
+   * Fetch feeds ids after pagination Timestamp.
    *
    * @param {array} ids: Feed Ids
    *
    * @return {object}
    */
-  async getPersonalizedFeedIdsAfterCache(params) {
+  async getPersonalizedFeedIdsAfterTimestamp(params) {
     const oThis = this,
       offset = params.offset,
-      previousFeedIds = params.previousFeedIds,
+      paginationTimestamp = params.paginationTimestamp,
       limit = params.limit;
 
     const response = { feedIds: [], feedsMap: {} };
 
     let queryObj = oThis
       .select('*')
+      .where('pagination_identifier < ?', paginationTimestamp)
       .order_by('pagination_identifier desc')
       .limit(limit)
       .offset(offset);
-
-    if (previousFeedIds.length > 0) {
-      queryObj = queryObj.where(['id not in (?)', previousFeedIds]);
-    }
 
     const dbRows = await queryObj.fire();
 
