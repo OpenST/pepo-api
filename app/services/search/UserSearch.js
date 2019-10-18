@@ -8,6 +8,7 @@ const rootPrefix = '../../..',
   coreConstants = require(rootPrefix + '/config/coreConstants'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
+  basicHelper = require(rootPrefix + '/helpers/basic'),
   paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination');
 
 /**
@@ -98,6 +99,8 @@ class UserSearch extends ServiceBase {
     // Lowercase, trim and escape underscore.
 
     oThis.query = oThis.query && oThis.query.length > 0 ? oThis.query : null; // If query is empty string, make it as null.
+
+    oThis.q = basicHelper.filterSearchTerm(oThis.q);
 
     if (oThis.paginationIdentifier) {
       const parsedPaginationParams = oThis._parsePaginationParams(oThis.paginationIdentifier);

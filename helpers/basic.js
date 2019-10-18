@@ -655,6 +655,19 @@ class BasicHelper {
 
     return date + ' ' + month + ' ' + year;
   }
+
+  /**
+   * Filter search term
+   *
+   * @param searchTerm
+   * @returns {string|*}
+   */
+  filterSearchTerm(searchTerm) {
+    if (searchTerm && (searchTerm[0] == '#' || searchTerm[0] == '@')) {
+      return searchTerm.substr(1);
+    }
+    return searchTerm;
+  }
 }
 
 module.exports = new BasicHelper();

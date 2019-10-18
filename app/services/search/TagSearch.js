@@ -4,6 +4,7 @@ const rootPrefix = '../../..',
   TagPaginationCache = require(rootPrefix + '/lib/cacheManagement/single/TagPagination'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   coreConstants = require(rootPrefix + '/config/coreConstants'),
+  basicHelper = require(rootPrefix + '/helpers/basic'),
   paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination');
 
 /**
@@ -73,6 +74,8 @@ class TagSearch extends ServiceBase {
    */
   async _validateAndSanitizeParams() {
     const oThis = this;
+
+    oThis.q = basicHelper.filterSearchTerm(oThis.q);
 
     if (oThis.paginationIdentifier) {
       const parsedPaginationParams = oThis._parsePaginationParams(oThis.paginationIdentifier);

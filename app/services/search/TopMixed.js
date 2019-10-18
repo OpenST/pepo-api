@@ -4,7 +4,7 @@ const rootPrefix = '../../..',
   TagSearch = require(rootPrefix + '/app/services/search/TagSearch'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
-  responseEntity = require(rootPrefix + '/lib/globalConstant/responseEntityKey'),
+  basicHelper = require(rootPrefix + '/helpers/basic'),
   paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination');
 
 /**
@@ -71,6 +71,8 @@ class MixedTopSearch extends ServiceBase {
    */
   async _validateAndSanitizeParams() {
     const oThis = this;
+
+    oThis.q = basicHelper.filterSearchTerm(oThis.q);
 
     // This request cannot be paginated because it has mixed results
     // if (oThis.paginationIdentifier) {
