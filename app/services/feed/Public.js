@@ -186,6 +186,8 @@ class PublicVideoFeed extends FeedBase {
 
     let blockedByUserInfo = cacheResp.data[oThis.currentUserId];
 
+    logger.log(`===================PERSONALIZED FEED:${oThis.currentUserId} blockedByUserInfo === `, blockedByUserInfo);
+
     const queryParams = {
       limit: feedConstants.personalizedFeedMaxIdsCount
     };
@@ -204,10 +206,12 @@ class PublicVideoFeed extends FeedBase {
       const actorId = feedObj.actor;
 
       lastPaginationTimestamp = feedObj.paginationIdentifier;
-      if (!blockedByUserInfo.hasBlocked[actorId] && blockedByUserInfo.blockedBy[actorId]) {
+      if (!blockedByUserInfo.hasBlocked[actorId] && !blockedByUserInfo.blockedBy[actorId]) {
         allVideoIds.push(Number(feedObj.primaryExternalEntityId));
       }
     }
+
+    logger.log(`===================PERSONALIZED FEED:${oThis.currentUserId} allVideoIds === `, allVideoIds);
 
     if (allVideoIds.length > 0) {
       const videoIdToUserVideoViewMap = await new UserVideoViewModel().fetchVideoViewDetails({
