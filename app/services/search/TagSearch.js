@@ -5,6 +5,7 @@ const rootPrefix = '../../..',
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   coreConstants = require(rootPrefix + '/config/coreConstants'),
   basicHelper = require(rootPrefix + '/helpers/basic'),
+  commonValidator = require(rootPrefix + '/lib/validators/Common'),
   paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination');
 
 /**
@@ -99,7 +100,7 @@ class TagSearch extends ServiceBase {
   async _getTagIds() {
     const oThis = this;
 
-    if (oThis.tagPrefix) {
+    if (oThis.tagPrefix && commonValidator.validateNonBlankString(oThis.tagPrefix)) {
       const tagPaginationRsp = await new TagPaginationCache({
         limit: oThis.limit,
         page: oThis.page,

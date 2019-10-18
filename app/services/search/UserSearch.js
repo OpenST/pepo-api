@@ -129,7 +129,7 @@ class UserSearch extends ServiceBase {
 
     let userData = {};
 
-    if (oThis.query) {
+    if (oThis.query && CommonValidators.validateNonBlankString(oThis.query)) {
       userData = await new UserModel().search({
         query: oThis.query,
         limit: oThis.limit,
