@@ -173,5 +173,10 @@
     "http_code": "200",
     "code": "BAD_REQUEST",
     "message": "Whoops! The cost of Unicorns changed. Please try again."
+  },
+  "min_redemption_amount": {
+    "http_code": "200",
+    "code": "BAD_REQUEST",
+    "message": "Minimum $10 required for redeeming."
   }
 }

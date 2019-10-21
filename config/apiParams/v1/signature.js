@@ -164,6 +164,22 @@ const v1Signature = {
       {
         parameter: 'current_user',
         validatorMethods: ['validateNonEmptyObject']
+      },
+      {
+        parameter: 'pepo_device_os',
+        validatorMethods: ['validateNonBlankString']
+      },
+      {
+        parameter: 'pepo_device_os_version',
+        validatorMethods: ['validateNonBlankString']
+      },
+      {
+        parameter: 'pepo_build_number',
+        validatorMethods: ['validateNonBlankString']
+      },
+      {
+        parameter: 'pepo_app_version',
+        validatorMethods: ['validateNonBlankString']
       }
     ],
     optional: []
@@ -173,6 +189,22 @@ const v1Signature = {
       {
         parameter: 'current_user',
         validatorMethods: ['validateNonEmptyObject']
+      },
+      {
+        parameter: 'pepo_device_os',
+        validatorMethods: ['validateNonBlankString']
+      },
+      {
+        parameter: 'pepo_device_os_version',
+        validatorMethods: ['validateNonBlankString']
+      },
+      {
+        parameter: 'pepo_build_number',
+        validatorMethods: ['validateNonBlankString']
+      },
+      {
+        parameter: 'pepo_app_version',
+        validatorMethods: ['validateNonBlankString']
       }
     ],
     optional: []
@@ -428,7 +460,12 @@ const v1Signature = {
     ]
   },
   [apiName.feedsList]: {
-    mandatory: [],
+    mandatory: [
+      {
+        parameter: 'sanitized_headers',
+        validatorMethods: ['validateNonEmptyObject']
+      }
+    ],
     optional: [
       {
         parameter: paginationConstants.paginationIdentifierKey,
