@@ -9,14 +9,12 @@ const rootPrefix = '../../..',
   inviteCodeConstants = require(rootPrefix + '/lib/globalConstant/inviteCode'),
   ActivityLogModel = require(rootPrefix + '/app/models/mysql/AdminActivityLog'),
   InviteCodeByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/InviteCodeByUserIds'),
-  UserProfileElementsByUserIdCache = require(rootPrefix + '/lib/cacheManagement/multi/UserProfileElementsByUserIds'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   userConstants = require(rootPrefix + '/lib/globalConstant/user'),
   feedsConstants = require(rootPrefix + '/lib/globalConstant/feed'),
   notificationJobEnqueue = require(rootPrefix + '/lib/rabbitMqEnqueue/notification'),
   notificationJobConstants = require(rootPrefix + '/lib/globalConstant/notificationJob'),
-  adminActivityLogConstants = require(rootPrefix + '/lib/globalConstant/adminActivityLogs'),
-  userProfileElementConstants = require(rootPrefix + '/lib/globalConstant/userProfileElement');
+  adminActivityLogConstants = require(rootPrefix + '/lib/globalConstant/adminActivityLogs');
 
 /**
  * Class to approve users by admin.
@@ -120,17 +118,6 @@ class ApproveUsersAsCreator extends ServiceBase {
         );
       }
 
-      if (UserModel.isUserDeniedCreator(userObj)) {
-        return Promise.reject(
-          responseHelper.paramValidationError({
-            internal_error_identifier: 'a_s_a_au_4',
-            api_error_identifier: 'could_not_proceed',
-            params_error_identifiers: ['user_already_denied_as_creator'],
-            debug_options: {}
-          })
-        );
-      }
-
       oThis.userObjects[userId] = userObj;
     }
   }
@@ -170,7 +157,7 @@ class ApproveUsersAsCreator extends ServiceBase {
         return Promise.reject(inviteCodeByUserIdCacheResponse);
       }
 
-      let inviteCodeObj = inviteCodeByUserIdCacheResponse.data[userId];
+      const inviteCodeObj = inviteCodeByUserIdCacheResponse.data[userId];
 
       const queryResponse = await new InviteCodeModel()
         .update({

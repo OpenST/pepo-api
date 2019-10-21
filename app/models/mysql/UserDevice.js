@@ -1,7 +1,7 @@
 const rootPrefix = '../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
-  userDevicesConstants = require(rootPrefix + '/lib/globalConstant/userDevice'),
-  databaseConstants = require(rootPrefix + '/lib/globalConstant/database');
+  databaseConstants = require(rootPrefix + '/lib/globalConstant/database'),
+  userDevicesConstants = require(rootPrefix + '/lib/globalConstant/userDevice');
 
 // Declare variables.
 const dbName = databaseConstants.userDbName;

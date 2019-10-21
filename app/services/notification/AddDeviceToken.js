@@ -5,9 +5,9 @@ const rootPrefix = '../../..',
   UserProfileElementModel = require(rootPrefix + '/app/models/mysql/UserProfileElement'),
   UserDeviceByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/UserDeviceByIds'),
   LocationByTimeZoneCache = require(rootPrefix + '/lib/cacheManagement/single/LocationByTimeZone'),
+  UserProfileElementsByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/UserProfileElementsByUserIds'),
   UserDeviceByUserIdDeviceTokenCache = require(rootPrefix +
     '/lib/cacheManagement/single/UserDeviceByUserIdDeviceToken'),
-  UserProfileElementsByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/UserProfileElementsByUserIds'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   createErrorLogsEntry = require(rootPrefix + '/lib/errorLogs/createEntry'),
@@ -26,12 +26,11 @@ class AddDeviceToken extends ServiceBase {
    *
    * @param {object} params
    * @param {object} params.current_user
+   * @param {number} params.current_user.id
    * @param {number} params.device_id
    * @param {string} params.device_kind
    * @param {string} params.device_token
    * @param {string} params.user_timezone
-   *
-   * @param {number} params.current_user.id
    *
    * @augments ServiceBase
    *
@@ -52,7 +51,8 @@ class AddDeviceToken extends ServiceBase {
   /**
    * Async perform.
    *
-   * @return {Promise<void>}
+   * @returns {Promise<void>}
+   * @private
    */
   async _asyncPerform() {
     const oThis = this;
