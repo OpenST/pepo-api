@@ -90,6 +90,7 @@ class UserSearch extends ServiceBase {
   async _validateAndSanitizeParams() {
     const oThis = this;
 
+    oThis.query = basicHelper.filterSearchTerm(oThis.query);
     oThis.isOnlyNameSearch = !CommonValidators.validateUserName(oThis.query);
 
     oThis.query = oThis.query
@@ -101,8 +102,6 @@ class UserSearch extends ServiceBase {
     // Lowercase, trim and escape underscore.
 
     oThis.query = oThis.query && oThis.query.length > 0 ? oThis.query : null; // If query is empty string, make it as null.
-
-    oThis.query = basicHelper.filterSearchTerm(oThis.query);
 
     if (oThis.paginationIdentifier) {
       const parsedPaginationParams = oThis._parsePaginationParams(oThis.paginationIdentifier);
@@ -128,6 +127,8 @@ class UserSearch extends ServiceBase {
     const oThis = this;
 
     let userData = {};
+
+    console.log('\n\n\noThis.isOnlyNameSearch-------', oThis.isOnlyNameSearch);
 
     if (oThis.query) {
       userData = await new UserModel().search({
