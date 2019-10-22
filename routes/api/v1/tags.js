@@ -15,9 +15,9 @@ router.get('/', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
 
   const dataFormatterFunc = async function(serviceResponse) {
     const wrapperFormatterRsp = await new FormatterComposer({
-      resultType: responseEntityKey.tagSearchResults,
+      resultType: responseEntityKey.tags,
       entityKindToResponseKeyMap: {
-        [entityType.tagList]: responseEntityKey.tagSearchResults,
+        [entityType.tagList]: responseEntityKey.tags,
         [entityType.tagListMeta]: responseEntityKey.meta
       },
       serviceData: serviceResponse.data
