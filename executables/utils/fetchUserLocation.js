@@ -33,6 +33,7 @@ class FetchUserLocation {
     oThis.twitterIdToUsernameMap = {};
     oThis.nextPaginationTimestamp = null;
     oThis.locationData = {};
+    oThis.result = '';
   }
 
   async perform() {
@@ -60,7 +61,11 @@ class FetchUserLocation {
       await oThis._fetchLocations(twitterIdsBatch);
     }
 
-    return responseHelper.successWithData(oThis.locationData);
+    oThis.result = oThis.result.replace(/, /g, ' ');
+
+    console.log(oThis.result);
+
+    return responseHelper.successWithData({});
   }
 
   async _fetchUsers(paginationTimestamp) {
@@ -121,6 +126,8 @@ class FetchUserLocation {
       let twitterid = twitterIds[ind];
       if (lookupData.hasOwnProperty(twitterid)) {
         oThis.locationData[oThis.twitterIdToUsernameMap[twitterid]] = lookupData[twitterid].location;
+        let location = lookupData[twitterid].location;
+        oThis.result += oThis.twitterIdToUsernameMap[twitterid] + ',' + location + '\n';
       }
     }
   }
@@ -129,7 +136,7 @@ class FetchUserLocation {
 new FetchUserLocation()
   .perform()
   .then(function(resp) {
-    console.log(resp.data);
+    console.log('===Run success');
   })
   .catch(function(err) {
     console.error(err);
