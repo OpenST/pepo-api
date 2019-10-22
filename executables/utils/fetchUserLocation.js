@@ -7,7 +7,7 @@ const command = require('commander');
 
 const rootPrefix = '../..',
   UserModel = require(rootPrefix + '/app/models/mysql/User'),
-  TwitterUserByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TwitterUserByUserIds'),
+  TwitterUserModel = require(rootPrefix + '/app/models/mysql/TwitterUser'),
   UsersTwitterRequestClass = require(rootPrefix + '/lib/twitter/oAuth1.0/Users'),
   responseHelper = require(rootPrefix + '/lib/formatter/response');
 
@@ -93,19 +93,21 @@ class FetchUserLocation {
   async _fetchTwitterIds(userIds) {
     const oThis = this;
 
-    const twitterUserCacheRsp = await new TwitterUserByUserIdsCache({
-      userIds: userIds
-    }).fetch();
+    let Rows = await new TwitterUserModel()
+      .select('twitter_id, user_id')
+      .where({
+        user_id: userIds
+      })
+      .fire();
 
-    if (twitterUserCacheRsp.isFailure()) {
-      return Promise.reject(twitterUserCacheRsp);
-    }
+    for (let ind = 0; ind < Rows.length; ind++) {
+      let twitterId = Rows[ind].twitter_id,
+        userId = Rows[ind].user_id;
 
-    for (let userId in twitterUserCacheRsp.data) {
-      let twitterId = twitterUserCacheRsp.data[userId].id;
-      oThis.twitterIds.push(twitterId);
-      oThis.twitterIdToUsernameMap = oThis.twitterIdToUsernameMap || {};
-      oThis.twitterIdToUsernameMap[twitterId] = oThis.userIdToUsernameMap[userId];
+      if (twitterId > 0) {
+        oThis.twitterIds.push(twitterId);
+        oThis.twitterIdToUsernameMap[twitterId] = oThis.userIdToUsernameMap[userId];
+      }
     }
   }
 
@@ -128,6 +130,8 @@ class FetchUserLocation {
         oThis.locationData[oThis.twitterIdToUsernameMap[twitterid]] = lookupData[twitterid].location;
         let location = lookupData[twitterid].location;
         oThis.result += oThis.twitterIdToUsernameMap[twitterid] + ',' + location + '\n';
+      } else {
+        console.log(`====Missing twitter id ${twitterid} in lookup response`);
       }
     }
   }
