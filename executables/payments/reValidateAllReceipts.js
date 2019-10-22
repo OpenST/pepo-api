@@ -182,7 +182,7 @@ class ReValidateAllReceipts extends CronBase {
       return Promise.resolve();
     }
 
-    logger.log('Revaliation status for payment id: ', dataRow.id, ' is: ', paymentValidationResponse.data.status);
+    logger.log('Revalidation status for payment id: ', dataRow.id, ' is: ', paymentValidationResponse.data.status);
     if (
       paymentValidationResponse.data.status === fiatPaymentConstants.receiptValidationFailedStatus ||
       paymentValidationResponse.data.status === fiatPaymentConstants.receiptValidationCancelledStatus
