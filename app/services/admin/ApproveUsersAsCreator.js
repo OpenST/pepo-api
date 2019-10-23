@@ -1,20 +1,11 @@
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
-  FeedModel = require(rootPrefix + '/app/models/mysql/Feed'),
-  VideoDetailModel = require(rootPrefix + '/app/models/mysql/VideoDetail'),
   UserModel = require(rootPrefix + '/app/models/mysql/User'),
-  logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   UsersCache = require(rootPrefix + '/lib/cacheManagement/multi/User'),
-  InviteCodeModel = require(rootPrefix + '/app/models/mysql/InviteCode'),
-  inviteCodeConstants = require(rootPrefix + '/lib/globalConstant/inviteCode'),
-  ActivityLogModel = require(rootPrefix + '/app/models/mysql/AdminActivityLog'),
-  InviteCodeByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/InviteCodeByUserIds'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
-  userConstants = require(rootPrefix + '/lib/globalConstant/user'),
-  feedsConstants = require(rootPrefix + '/lib/globalConstant/feed'),
-  notificationJobEnqueue = require(rootPrefix + '/lib/rabbitMqEnqueue/notification'),
-  notificationJobConstants = require(rootPrefix + '/lib/globalConstant/notificationJob'),
-  adminActivityLogConstants = require(rootPrefix + '/lib/globalConstant/adminActivityLogs');
+  bgJob = require(rootPrefix + '/lib/rabbitMqEnqueue/bgJob'),
+  bgJobConstants = require(rootPrefix + '/lib/globalConstant/bgJob'),
+  userConstants = require(rootPrefix + '/lib/globalConstant/user');
 
 /**
  * Class to approve users by admin.
@@ -39,7 +30,6 @@ class ApproveUsersAsCreator extends ServiceBase {
     const oThis = this;
 
     oThis.userIds = params.user_ids;
-    oThis.currentAdmin = params.current_admin;
     oThis.currentAdminId = params.current_admin.id;
 
     oThis.userObjects = {};
@@ -58,13 +48,11 @@ class ApproveUsersAsCreator extends ServiceBase {
 
     await oThis._approveUsers();
 
-    await oThis._markInviteLimitAsInfinite();
-
-    await oThis._flushCache();
-
-    await oThis._publishFanVideo();
-
-    await oThis._logAdminActivity();
+    for (let i = 0; i < oThis.userIds.length; i++) {
+      let userId = oThis.userIds[i];
+      await UserModel.flushCache(oThis.userObjects[userId]);
+      await bgJob.enqueue(bgJobConstants.postUserApprovalJob, { userId: userId, currentAdminId: oThis.currentAdminId });
+    }
 
     return responseHelper.successWithData({});
   }
@@ -137,135 +125,6 @@ class ApproveUsersAsCreator extends ServiceBase {
       .update(['properties = properties | ?', propertyVal])
       .where({ id: oThis.userIds })
       .fire();
-  }
-
-  /**
-   * Mark invite limit as infinite
-   *
-   * @returns {Promise<*>}
-   * @private
-   */
-  async _markInviteLimitAsInfinite() {
-    const oThis = this;
-
-    for (const userId in oThis.userObjects) {
-      const inviteCodeByUserIdCacheResponse = await new InviteCodeByUserIdsCache({
-        userIds: [userId]
-      }).fetch();
-
-      if (inviteCodeByUserIdCacheResponse.isFailure()) {
-        return Promise.reject(inviteCodeByUserIdCacheResponse);
-      }
-
-      const inviteCodeObj = inviteCodeByUserIdCacheResponse.data[userId];
-
-      const queryResponse = await new InviteCodeModel()
-        .update({
-          invite_limit: inviteCodeConstants.infiniteInviteLimit
-        })
-        .where({ user_id: userId })
-        .fire();
-
-      if (queryResponse.affectedRows === 1) {
-        logger.info(`User with ${userId} has now infinite invites`);
-
-        await InviteCodeModel.flushCache(inviteCodeObj);
-      } else {
-        return responseHelper.error({
-          internal_error_identifier: 'a_s_auac_1',
-          api_error_identifier: 'something_went_wrong',
-          debug_options: { userId: userId }
-        });
-      }
-    }
-
-    return responseHelper.successWithData({});
-  }
-
-  /**
-   * Flush all users cache.
-   *
-   * @returns {Promise<void>}
-   * @private
-   */
-  async _flushCache() {
-    const oThis = this;
-
-    const promises = [];
-    for (const userId in oThis.userObjects) {
-      promises.push(UserModel.flushCache(oThis.userObjects[userId]));
-    }
-    await Promise.all(promises);
-  }
-
-  /**
-   * Publish fan video if any of approved users.
-   *
-   * @returns {Promise<void>}
-   * @private
-   */
-  async _publishFanVideo() {
-    const oThis = this;
-
-    const promises = [];
-    const dbRows = await new VideoDetailModel().fetchLatestVideoId(oThis.userIds);
-
-    for (let ind = 0; ind < oThis.userIds.length; ind++) {
-      const userId = oThis.userIds[ind];
-      const latestVideoId = dbRows[userId].latestVideoId;
-
-      if (latestVideoId) {
-        promises.push(oThis._addFeed(latestVideoId, userId));
-        promises.push(
-          notificationJobEnqueue.enqueue(notificationJobConstants.videoAdd, {
-            userId: userId,
-            videoId: latestVideoId
-          })
-        );
-      }
-    }
-
-    await Promise.all(promises);
-  }
-
-  /**
-   * Add feed entry for user video.
-   *
-   * @param {number} videoId
-   * @param {number} userId
-   *
-   * @returns {Promise<any>}
-   * @private
-   */
-  async _addFeed(videoId, userId) {
-    return new FeedModel()
-      .insert({
-        primary_external_entity_id: videoId,
-        kind: feedsConstants.invertedKinds[feedsConstants.fanUpdateKind],
-        actor: userId,
-        pagination_identifier: Math.round(new Date() / 1000)
-      })
-      .fire();
-  }
-
-  /**
-   * Log admin activity.
-   *
-   * @returns {Promise<void>}
-   * @private
-   */
-  async _logAdminActivity() {
-    const oThis = this;
-
-    const activityLogObj = new ActivityLogModel({});
-
-    for (const userId in oThis.userObjects) {
-      await activityLogObj.insertAction({
-        adminId: oThis.currentAdminId,
-        actionOn: userId,
-        action: adminActivityLogConstants.approvedAsCreator
-      });
-    }
   }
 }
 
