@@ -341,6 +341,12 @@ const v1ErrorConfig = {
     message: 'Video has been deleted.'
   },
 
+  invalid_tag_id: {
+    parameter: 'tag_id',
+    code: 'invalid',
+    message: 'Invalid tag id.'
+  },
+
   invalid_pepocorn_amount: {
     parameter: 'pepocorn_amount',
     code: 'invalid',

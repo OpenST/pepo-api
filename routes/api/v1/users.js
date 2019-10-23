@@ -331,9 +331,9 @@ router.get('/search', sanitizer.sanitizeDynamicUrlParams, function(req, res, nex
 
   const dataFormatterFunc = async function(serviceResponse) {
     const wrapperFormatterRsp = await new FormatterComposer({
-      resultType: responseEntityKey.searchResults,
+      resultType: responseEntityKey.userSearchResults,
       entityKindToResponseKeyMap: {
-        [entityType.userSearchList]: responseEntityKey.searchResults,
+        [entityType.userSearchList]: responseEntityKey.userSearchResults,
         [entityType.usersMap]: responseEntityKey.users,
         [entityType.imagesMap]: responseEntityKey.images,
         [entityType.userSearchMeta]: responseEntityKey.meta
@@ -344,7 +344,7 @@ router.get('/search', sanitizer.sanitizeDynamicUrlParams, function(req, res, nex
     serviceResponse.data = wrapperFormatterRsp.data;
   };
 
-  Promise.resolve(routeHelper.perform(req, res, next, '/user/Search', 'r_a_v1_u_15', null, dataFormatterFunc));
+  Promise.resolve(routeHelper.perform(req, res, next, '/search/UserSearch', 'r_a_v1_u_15', null, dataFormatterFunc));
 });
 
 /* Block other user's profile for current user. */
