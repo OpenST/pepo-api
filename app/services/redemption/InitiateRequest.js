@@ -216,10 +216,23 @@ class InitiateRequestRedemption extends ServiceBase {
       productDollarStepBN = new BigNumber(oThis.productDollarStep);
 
     if (dollarAmountBN.lt(productMinDollarValueBN)) {
+      let apiErrorIdentifier = null;
+
+      switch (oThis.productMinDollarValue) {
+        case 10:
+          apiErrorIdentifier = 'min_redemption_amount_10';
+          break;
+        case 25:
+          apiErrorIdentifier = 'min_redemption_amount_25';
+          break;
+        default:
+          throw new Error('Invalid Min Dollar Amount for Product.');
+      }
+
       return Promise.reject(
         responseHelper.error({
           internal_error_identifier: 'a_s_r_ir_4',
-          api_error_identifier: 'min_redemption_amount',
+          api_error_identifier: apiErrorIdentifier,
           debug_options: {
             dollarAmountBN: dollarAmountBN,
             productMinDollarValueBN: productMinDollarValueBN
@@ -232,7 +245,7 @@ class InitiateRequestRedemption extends ServiceBase {
       return Promise.reject(
         responseHelper.error({
           internal_error_identifier: 'a_s_r_ir_5',
-          api_error_identifier: 'min_redemption_amount',
+          api_error_identifier: 'invalid_dollar_step',
           debug_options: {
             dollarAmountBN: dollarAmountBN,
             productDollarStepBN: productDollarStepBN
