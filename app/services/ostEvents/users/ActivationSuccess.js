@@ -216,7 +216,7 @@ class UserActivationSuccess extends UserOstEventBase {
   async _markTokenUserAirdropStartedProperty() {
     const oThis = this;
 
-    logger.log('Marking token user airdrop done property.');
+    logger.log('Marking token user airdrop started property.');
 
     let propertyVal = oThis.tokenUserObj.properties;
     propertyVal = new TokenUserModel().setBitwise('properties', propertyVal, tokenUserConstants.airdropStartedProperty);

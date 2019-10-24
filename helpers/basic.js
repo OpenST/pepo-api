@@ -655,6 +655,44 @@ class BasicHelper {
 
     return date + ' ' + month + ' ' + year;
   }
+
+  /**
+   * subtract arr2 from arr1
+   * @param arr1
+   * @param arr2
+   * @returns {Array}
+   */
+  arrayDiff(arr1, arr2) {
+    const diffArray = [],
+      arrMap = {};
+
+    for (let i = 0; i < arr1.length; i++) {
+      arrMap[arr1[i]] = 1;
+    }
+
+    for (let i = 0; i < arr2.length; i++) {
+      delete arrMap[arr2[i]];
+    }
+
+    for (let arrEle in arrMap) {
+      diffArray.push(arrEle);
+    }
+
+    return diffArray;
+  }
+
+  /**
+   * Filter search term
+   *
+   * @param searchTerm
+   * @returns {string|*}
+   */
+  filterSearchTerm(searchTerm) {
+    if (searchTerm && (searchTerm[0] == '#' || searchTerm[0] == '@')) {
+      return searchTerm.substr(1);
+    }
+    return searchTerm;
+  }
 }
 
 module.exports = new BasicHelper();

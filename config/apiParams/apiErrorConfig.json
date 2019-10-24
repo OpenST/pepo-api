@@ -159,11 +159,6 @@
     "code": "BAD_REQUEST",
     "message": "Atleast 1 approved video is required before your account is eligible for redemptions."
   },
-  "redemption_user_has_insufficient_balance": {
-    "http_code": "200",
-    "code": "BAD_REQUEST",
-    "message": "Minimum redemption is $10. Please try again when you have more Pepo Coins."
-  },
   "insufficient_pepocorn_balance": {
     "http_code": "200",
     "code": "BAD_REQUEST",
@@ -174,9 +169,19 @@
     "code": "BAD_REQUEST",
     "message": "Whoops! The cost of Unicorns changed. Please try again."
   },
-  "min_redemption_amount": {
+  "min_redemption_amount_10": {
     "http_code": "200",
     "code": "BAD_REQUEST",
     "message": "Minimum $10 required for redeeming."
+  },
+  "min_redemption_amount_25": {
+    "http_code": "200",
+    "code": "BAD_REQUEST",
+    "message": "Minimum $25 required for redeeming."
+  },
+  "invalid_dollar_step": {
+    "http_code": "200",
+    "code": "BAD_REQUEST",
+    "message": "Please enter Integral dollar value. Decimals are not allowed."
   }
 }

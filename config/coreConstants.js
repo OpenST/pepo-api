@@ -36,6 +36,10 @@ class CoreConstants {
     return process.env.PA_STORE_DOMAIN;
   }
 
+  get PA_INVITE_DOMAIN() {
+    return process.env.PA_INVITE_DOMAIN;
+  }
+
   get PA_COOKIE_DOMAIN() {
     return process.env.PA_COOKIE_DOMAIN;
   }
@@ -399,6 +403,18 @@ class CoreConstants {
 
   get PEPO_USER_SEARCH_CURATED_USER_IDS() {
     return process.env.PA_USER_SEARCH_CURATED_USER_IDS;
+  }
+
+  get PEPO_USER_SEARCH_TOP_USER_IDS() {
+    return process.env.PA_USER_SEARCH_TOP_USER_IDS;
+  }
+
+  get PEPO_TAG_SEARCH_CURATED_TAG_IDS() {
+    return process.env.PA_CURATED_TAG_IDS;
+  }
+
+  get PEPO_TAG_SEARCH_TOP_TAG_IDS() {
+    return process.env.PA_TOP_TAG_IDS;
   }
 
   get PEPO_SLACK_OAUTH_TOKEN() {

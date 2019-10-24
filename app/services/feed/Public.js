@@ -4,12 +4,14 @@ const rootPrefix = '../../..',
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   LoggedOutFeedCache = require(rootPrefix + '/lib/cacheManagement/single/LoggedOutFeed'),
   FeedByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/FeedByIds'),
-  PersonalizedFeedByUserIdCache = require(rootPrefix + '/lib/cacheManagement/single/PersonalizedFeedByUserId'),
-  UserNotificationVisitDetailModel = require(rootPrefix + '/app/models/cassandra/UserNotificationVisitDetail'),
+  UserBlockedListCache = require(rootPrefix + '/lib/cacheManagement/single/UserBlockedList'),
+  UserVideoViewModel = require(rootPrefix + '/app/models/cassandra/UserVideoView'),
+  UserPersonalizedDataModel = require(rootPrefix + '/app/models/cassandra/UserPersonalizedData'),
   SortUnseenFeedLib = require(rootPrefix + '/lib/feed/SortUnseen'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   basicHelper = require(rootPrefix + '/helpers/basic'),
   feedConstants = require(rootPrefix + '/lib/globalConstant/feed'),
+  userPersonalizedDataConstants = require(rootPrefix + '/lib/globalConstant/cassandra/userPersonalizedData'),
   coreConstants = require(rootPrefix + '/config/coreConstants'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination');
@@ -45,36 +47,7 @@ class PublicVideoFeed extends FeedBase {
     oThis.pageNumber = null;
     oThis.nextPageNumber = null;
 
-    oThis.feedIdsLengthFromCache = 0;
-    oThis.lastVisitedAt = 0;
-
-    oThis.userFeedIdsCacheData = null;
-    oThis.currentFeedIds = [];
-    oThis.setCacheData = false;
-    oThis.latestSeenFeedTime = 0;
-    oThis.unseenFeedMap = {};
-  }
-
-  /**
-   * Returns true if older pepo builds which does not have video play event
-   *
-   * @returns {Boolean}
-   * @private
-   */
-  _isOlderBuildWithoutVideoPlayEvent() {
-    const oThis = this;
-    const appVersion = oThis.headers['x-pepo-app-version'] || '';
-
-    let res = false;
-
-    if (['0.9.0', '0.9.1'].indexOf(appVersion) > -1) {
-      res = true;
-    }
-
-    console.log(`PERSONALIZED FEED:${oThis.currentUserId}===============x-pepo-app-version============`, appVersion);
-    console.log(`PERSONALIZED FEED:${oThis.currentUserId}====isOlderBuildWithoutVideoPlayEvent=========`, res);
-
-    return res;
+    oThis.userPersonalizedfeedData = null;
   }
 
   /**
@@ -99,6 +72,7 @@ class PublicVideoFeed extends FeedBase {
 
       oThis.paginationTimestamp = parsedPaginationParams.pagination_timestamp; // Override paginationTimestamp number.
       oThis.pageNumber = Number(parsedPaginationParams.page_no) || 1; // Override paginationTimestamp number.
+      logger.log(`===================PERSONALIZED FEED${oThis.currentUserId} Page Number:`, oThis.pageNumber);
     } else {
       oThis.paginationTimestamp = null;
       oThis.pageNumber = 1;
@@ -106,6 +80,286 @@ class PublicVideoFeed extends FeedBase {
 
     // Validate limit.
     return oThis._validatePageSize();
+  }
+
+  /**
+   * Set feed ids.
+   *
+   * @sets oThis.feedIds, oThis.feedsMap
+   *
+   * @returns {Promise<*>}
+   * @private
+   */
+  async _setFeedIds() {
+    const oThis = this;
+
+    // if logged in feed, then show shuffled feeds
+    if (oThis._showShuffledFeeds()) {
+      if (oThis.pageNumber > 1) {
+        await oThis.fetchPersonalizedFeedDataforUser();
+
+        if (!oThis.userPersonalizedfeedData) {
+          oThis.pageNumber = 1;
+          await oThis.fetchFeedIdsForFirstPage();
+        }
+      } else {
+        await oThis.fetchFeedIdsForFirstPage();
+      }
+
+      await oThis._setFeedDataForLoggedInUser();
+    } else {
+      await oThis._setFeedDataForLoggedOutUser();
+    }
+
+    await oThis._filterFeedData();
+  }
+
+  /**
+   * Prepare response.
+   *
+   * @sets oThis.feeds, oThis.profileResponse
+   *
+   * @returns {*|result}
+   * @private
+   */
+  async _prepareResponse() {
+    const oThis = this;
+
+    const nextPagePayloadKey = {};
+
+    if (oThis._showShuffledFeeds()) {
+      if (oThis.nextPageNumber) {
+        nextPagePayloadKey[paginationConstants.paginationIdentifierKey] = {
+          page_no: oThis.nextPageNumber
+        };
+      }
+    } else {
+      if (oThis.nextPaginationTimestamp) {
+        nextPagePayloadKey[paginationConstants.paginationIdentifierKey] = {
+          pagination_timestamp: oThis.nextPaginationTimestamp
+        };
+      }
+    }
+
+    const responseMetaData = {
+      [paginationConstants.nextPagePayloadKey]: nextPagePayloadKey
+    };
+
+    return responseHelper.successWithData({
+      feedList: oThis.feeds,
+      userProfilesMap: oThis.profileResponse.userProfilesMap,
+      userProfileAllowedActions: oThis.profileResponse.userProfileAllowedActions,
+      usersByIdMap: oThis.profileResponse.usersByIdMap,
+      tokenUsersByUserIdMap: oThis.profileResponse.tokenUsersByUserIdMap,
+      imageMap: oThis.profileResponse.imageMap,
+      videoMap: oThis.profileResponse.videoMap,
+      linkMap: oThis.profileResponse.linkMap,
+      tags: oThis.profileResponse.tags,
+      userStat: oThis.profileResponse.userStat,
+      videoDetailsMap: oThis.profileResponse.videoDetailsMap,
+      videoDescriptionsMap: oThis.profileResponse.videoDescriptionMap,
+      currentUserUserContributionsMap: oThis.profileResponse.currentUserUserContributionsMap,
+      currentUserVideoContributionsMap: oThis.profileResponse.currentUserVideoContributionsMap,
+      pricePointsMap: oThis.profileResponse.pricePointsMap,
+      tokenDetails: oThis.tokenDetails,
+      meta: responseMetaData
+    });
+  }
+
+  /**
+   * Get User feed ids for unseen and seen from cassandra.
+   *
+   * @sets oThis.userPersonalizedfeedData
+   *
+   * @returns {Promise<*>}
+   * @private
+   */
+  async fetchPersonalizedFeedDataforUser() {
+    const oThis = this;
+
+    const dbRow = await new UserPersonalizedDataModel().fetchJsonDataForKind({
+      userId: oThis.currentUserId,
+      kind: userPersonalizedDataConstants.feedDataKind,
+      uniqueId: oThis._pepodeviceId()
+    });
+
+    if (CommonValidators.validateNonEmptyObject(dbRow.jsonData)) {
+      oThis.userPersonalizedfeedData = dbRow.jsonData;
+    }
+
+    // logger.log(
+    //   `===================PERSONALIZED FEED:${oThis.currentUserId} Fetch Personalize Feed Data:`,
+    //   oThis.userPersonalizedfeedData
+    // );
+  }
+
+  /**
+   * Set feed ids for first page of logged in user.
+   *
+   * @returns {Promise<*>}
+   * @private
+   */
+  async fetchFeedIdsForFirstPage() {
+    const oThis = this;
+
+    let lastPaginationTimestamp = 0;
+
+    const newPersonalizeData = {
+      unseenFeedIds: [],
+      shuffledSeenFeedIds: [],
+      seenFeedIds: []
+    };
+
+    let cacheResp = await new UserBlockedListCache({ userId: oThis.currentUserId }).fetch();
+    if (cacheResp.isFailure()) {
+      return Promise.reject(cacheResp);
+    }
+
+    let blockedByUserInfo = cacheResp.data[oThis.currentUserId];
+
+    logger.log(`===================PERSONALIZED FEED:${oThis.currentUserId} blockedByUserInfo === `, blockedByUserInfo);
+
+    const queryParams = {
+      limit: feedConstants.personalizedFeedMaxIdsCount
+    };
+
+    // fetch latest feeds
+    const feedQueryResp = await new FeedModel().getLatestFeedIds(queryParams);
+
+    const allVideoIds = [];
+
+    let totalFeeds = feedQueryResp['feedIds'].length;
+
+    // collect non blocked video ids
+    for (let i = 0; i < totalFeeds; i++) {
+      const feedId = feedQueryResp['feedIds'][i];
+      const feedObj = feedQueryResp['feedsMap'][feedId];
+      const actorId = feedObj.actor;
+
+      lastPaginationTimestamp = feedObj.paginationIdentifier;
+      if (!blockedByUserInfo.hasBlocked[actorId] && !blockedByUserInfo.blockedBy[actorId]) {
+        allVideoIds.push(Number(feedObj.primaryExternalEntityId));
+      }
+    }
+
+    logger.log(
+      `===================PERSONALIZED FEED:${oThis.currentUserId} all valid videoIds === `,
+      allVideoIds.length
+    );
+
+    if (allVideoIds.length > 0) {
+      const videoIdToUserVideoViewMap = await new UserVideoViewModel().fetchVideoViewDetails({
+        userId: oThis.currentUserId,
+        videoIds: allVideoIds
+      });
+
+      for (let i = 0; i < feedQueryResp['feedIds'].length; i++) {
+        const feedId = feedQueryResp['feedIds'][i];
+        const feedObj = feedQueryResp['feedsMap'][feedId];
+        const paginationIdentifier = feedObj.paginationIdentifier;
+        const userVideoViewObj = videoIdToUserVideoViewMap[Number(feedObj.primaryExternalEntityId)];
+        const actorId = feedObj.actor;
+
+        // skip the feeds due to videos from blocked users
+        if (blockedByUserInfo.hasBlocked[actorId] || blockedByUserInfo.blockedBy[actorId]) {
+          logger.log(
+            `====PERSONALIZED FEED:${oThis.currentUserId} blocked video === `,
+            feedObj.primaryExternalEntityId
+          );
+          continue;
+        }
+
+        // if seen
+        if (userVideoViewObj && userVideoViewObj.lastViewAt) {
+          let wasSeenRecently =
+            paginationIdentifier >= Date.now() / 1000 - feedConstants.personalizedFeedSeenVideosAgeInSeconds;
+
+          if (wasSeenRecently) {
+            newPersonalizeData['shuffledSeenFeedIds'].push(feedId);
+          } else {
+            newPersonalizeData['seenFeedIds'].push(feedId);
+          }
+        } else {
+          newPersonalizeData['unseenFeedIds'].push(feedId);
+        }
+      }
+    }
+
+    if (newPersonalizeData['unseenFeedIds'].length > 0 && !oThis._isOlderBuildWithoutVideoPlayEvent()) {
+      let sortParams = {
+        currentUserId: oThis.currentUserId,
+        unseenFeedIds: newPersonalizeData['unseenFeedIds'].slice(),
+        feedsMap: feedQueryResp['feedsMap']
+      };
+
+      // logger.log(`===================PERSONALIZED FEED:${oThis.currentUserId} sortParams === `, sortParams);
+      const sortResponse = await new SortUnseenFeedLib(sortParams).perform();
+
+      if (sortResponse.isFailure()) {
+        return Promise.reject(sortResponse);
+      }
+
+      newPersonalizeData['unseenFeedIds'] = sortResponse.data['sortedFeedIds'];
+    }
+
+    // logger.log(
+    //   `===================PERSONALIZED FEED:${oThis.currentUserId} newPersonalizeData before shuffle=== `,
+    //   newPersonalizeData
+    // );
+
+    newPersonalizeData['shuffledSeenFeedIds'] = basicHelper.shuffleArray(newPersonalizeData['shuffledSeenFeedIds']);
+
+    let allSortedFeedIds = newPersonalizeData['unseenFeedIds'].concat(newPersonalizeData['shuffledSeenFeedIds']);
+    allSortedFeedIds = allSortedFeedIds.concat(newPersonalizeData['seenFeedIds']);
+
+    oThis.userPersonalizedfeedData = {
+      allSortedFeedIds: allSortedFeedIds,
+      lastPaginationTimestamp: lastPaginationTimestamp
+    };
+
+    await new UserPersonalizedDataModel().updateJsonDataForUsers({
+      userId: oThis.currentUserId,
+      kind: userPersonalizedDataConstants.feedDataKind,
+      uniqueId: oThis._pepodeviceId(),
+      jsonData: oThis.userPersonalizedfeedData
+    });
+  }
+
+  /**
+   * Returns unique Identifier of device for currennt request
+   *
+   * @returns {String}
+   * @private
+   */
+  _pepodeviceId() {
+    const oThis = this;
+    logger.log(
+      `===================PERSONALIZED FEED${oThis.currentUserId} x-pepo-device-id:`,
+      oThis.headers['x-pepo-device-id']
+    );
+
+    return oThis.headers['x-pepo-device-id'] || '';
+  }
+
+  /**
+   * Returns true if older pepo builds which does not have video play event
+   *
+   * @returns {Boolean}
+   * @private
+   */
+  _isOlderBuildWithoutVideoPlayEvent() {
+    const oThis = this;
+    const appVersion = oThis.headers['x-pepo-app-version'] || '';
+
+    let res = false;
+
+    if (['0.9.0', '0.9.1'].indexOf(appVersion) > -1) {
+      res = true;
+    }
+
+    logger.log(`===================PERSONALIZED FEED${oThis.currentUserId}=======x-pepo-app-version==`, appVersion);
+
+    return res;
   }
 
   /**
@@ -121,323 +375,9 @@ class PublicVideoFeed extends FeedBase {
   }
 
   /**
-   * Set feed ids.
-   *
-   * @sets oThis.feedIds, oThis.feedsMap, oThis.nextPaginationTimestamp
-   *
-   * @returns {Promise<*>}
-   * @private
-   */
-  async _setFeedIds() {
-    const oThis = this;
-
-    if (oThis._showShuffledFeeds()) {
-      console.log(
-        `PERSONALIZED FEED:${oThis.currentUserId} oThis.pageNumber================================`,
-        oThis.pageNumber
-      );
-      if (oThis.pageNumber > 1) {
-        await oThis.fetchFeedIdsForUserFromCache();
-
-        if (oThis.feedIdsLengthFromCache === 0) {
-          oThis.pageNumber = 1;
-          await oThis.fetchFeedIdsForFirstPage(false);
-        }
-      } else {
-        await oThis.fetchFeedIdsForFirstPage(true);
-      }
-
-      await oThis._setFeedDataForLoggedInUser();
-    } else {
-      await oThis._setFeedDataForLoggedOutUser();
-    }
-
-    await oThis._filterFeedData();
-  }
-
-  /**
-   * Set feed ids for first page of logged in user.
-   *
-   * @returns {Promise<*>}
-   * @private
-   */
-  async fetchFeedIdsForUser() {
-    const oThis = this;
-
-    const queryParams = {
-      limit: feedConstants.personalizedFeedMaxIdsCount
-    };
-
-    let previousFeedIds = oThis.userFeedIdsCacheData['unseenFeedIds'].slice();
-
-    let cacheCount = previousFeedIds.length;
-    const newCacheData = { seenFeedIds: [], unseenFeedIds: [] };
-
-    const queryResp = await new FeedModel().getLatestFeedIds(queryParams);
-
-    console.log(
-      `PERSONALIZED FEED:${oThis.currentUserId} oThis.lastVisitedAt ================================`,
-      oThis.lastVisitedAt
-    );
-    console.log(
-      `PERSONALIZED FEED:${oThis.currentUserId} Seen Video Time min val================================`,
-      Date.now() / 1000 - feedConstants.personalizedFeedSeenVideosAgeInSeconds
-    );
-
-    console.log(`PERSONALIZED FEED:${oThis.currentUserId} queryResp================================`, queryResp);
-
-    let canBreak = false;
-
-    for (let i = 0; i < queryResp['feedIds'].length; i++) {
-      const feedId = queryResp['feedIds'][i];
-
-      const feedObj = queryResp['feedsMap'][feedId],
-        paginationIdentifier = feedObj.paginationIdentifier;
-
-      console.log(
-        `PERSONALIZED FEED:${
-          oThis.currentUserId
-        } Loop Iteration: ${i}, feedId: ${feedId} ,paginationIdentifier: ${paginationIdentifier} `
-      );
-
-      if (i === 0 && paginationIdentifier > oThis.lastVisitedAt) {
-        oThis.latestSeenFeedTime = paginationIdentifier * 1000;
-      }
-
-      if (
-        paginationIdentifier <= oThis.lastVisitedAt &&
-        (cacheCount >= feedConstants.personalizedFeedMaxIdsCount ||
-          (cacheCount >= feedConstants.personalizedFeedMinIdsCount &&
-            paginationIdentifier < Date.now() / 1000 - feedConstants.personalizedFeedSeenVideosAgeInSeconds))
-      ) {
-        console.log(`PERSONALIZED FEED:${oThis.currentUserId} Break from loop set`);
-        canBreak = true;
-      }
-
-      let index = previousFeedIds.indexOf(feedId);
-
-      if (index > -1) {
-        previousFeedIds.splice(index, 1);
-        console.log(`PERSONALIZED FEED:${oThis.currentUserId} remove from previous feeds previousFeedIds`);
-        newCacheData['unseenFeedIds'].push(feedId);
-        oThis.unseenFeedMap[feedId] = feedObj;
-        continue;
-      } else {
-        if (canBreak) {
-          break;
-        }
-      }
-
-      if (oThis.lastVisitedAt < paginationIdentifier) {
-        newCacheData['unseenFeedIds'].push(feedId);
-        oThis.unseenFeedMap[feedId] = feedObj;
-      } else {
-        newCacheData['seenFeedIds'].push(feedId);
-      }
-      cacheCount++;
-    }
-
-    console.log('\n\n\n==============================\n\n\n');
-    console.log(`PERSONALIZED FEED:${oThis.currentUserId} oThis.newCacheData: ${JSON.stringify(newCacheData)}`);
-
-    oThis.userFeedIdsCacheData['unseenFeedIds'] = newCacheData['unseenFeedIds'].concat(previousFeedIds);
-    oThis.userFeedIdsCacheData['seenFeedIds'] = newCacheData['seenFeedIds'];
-
-    oThis.userFeedIdsCacheData['recentSeenFeedIds'] = [];
-    oThis.userFeedIdsCacheData['removedFeedIds'] = [];
-    oThis.userFeedIdsCacheData['nextRenderIndex'] = 0;
-
-    oThis.feedIdsLengthFromCache =
-      oThis.userFeedIdsCacheData['unseenFeedIds'].length + oThis.userFeedIdsCacheData['seenFeedIds'].length;
-
-    if (oThis.feedIdsLengthFromCache > feedConstants.personalizedFeedMaxIdsCount) {
-      let extraUnseenIds = oThis.userFeedIdsCacheData['unseenFeedIds'].splice(
-        feedConstants.personalizedFeedMaxIdsCount
-      );
-
-      for (let i in extraUnseenIds) {
-        const feedId = extraUnseenIds[i];
-        let index = previousFeedIds.indexOf(feedId);
-        if (index > -1) {
-          previousFeedIds.splice(index, 1);
-        }
-      }
-
-      let diff = feedConstants.personalizedFeedMaxIdsCount - oThis.userFeedIdsCacheData['unseenFeedIds'].length;
-      oThis.userFeedIdsCacheData['seenFeedIds'] = oThis.userFeedIdsCacheData['seenFeedIds'].splice(0, diff);
-      oThis.feedIdsLengthFromCache = feedConstants.personalizedFeedMaxIdsCount;
-    }
-
-    if (previousFeedIds.length > 0) {
-      const feedByIdsCacheResponse = await new FeedByIdsCache({ ids: previousFeedIds }).fetch();
-
-      if (feedByIdsCacheResponse.isFailure()) {
-        return Promise.reject(feedByIdsCacheResponse);
-      }
-
-      Object.assign(oThis.unseenFeedMap, feedByIdsCacheResponse.data);
-    }
-
-    if (oThis.userFeedIdsCacheData['unseenFeedIds'].length > 0) {
-      let sortParams = {
-        currentUserId: oThis.currentUserId,
-        unseenFeedIds: oThis.userFeedIdsCacheData['unseenFeedIds'].slice(),
-        feedsMap: oThis.unseenFeedMap,
-        isOlderBuildWithoutVideoPlayEvent: oThis._isOlderBuildWithoutVideoPlayEvent()
-      };
-
-      const sortResponse = await new SortUnseenFeedLib(sortParams).perform();
-
-      logger.log('======= Sort unseen feed response: ', sortResponse);
-      if (sortResponse.isFailure()) {
-        return Promise.reject(sortResponse);
-      }
-
-      for (let i in oThis.userFeedIdsCacheData['unseenFeedIds']) {
-        const feedId = oThis.userFeedIdsCacheData['unseenFeedIds'][i];
-        if (sortResponse.data['unseenFeedIds'].indexOf(feedId) === -1) {
-          let index = previousFeedIds.indexOf(feedId);
-
-          if (index === -1) {
-            oThis.userFeedIdsCacheData['removedFeedIds'].push(feedId);
-          } else {
-            previousFeedIds.splice(index, 1);
-          }
-        }
-      }
-
-      oThis.userFeedIdsCacheData['unseenFeedIds'] = sortResponse.data['unseenFeedIds'];
-      console.log(
-        `PERSONALIZED FEED:${oThis.currentUserId} sorted unseenFeedIds: ${JSON.stringify(
-          oThis.userFeedIdsCacheData['unseenFeedIds']
-        )}`
-      );
-    }
-
-    oThis.feedIdsLengthFromCache =
-      oThis.userFeedIdsCacheData['unseenFeedIds'].length +
-      oThis.userFeedIdsCacheData['seenFeedIds'].length +
-      oThis.userFeedIdsCacheData['removedFeedIds'].length;
-
-    oThis.userFeedIdsCacheData['previousFeedIds'] = previousFeedIds;
-    console.log(
-      `PERSONALIZED FEED:${oThis.currentUserId} BEFORE SHUFFLE oThis.userFeedIdsCacheData.seenFeedIds=========`,
-      oThis.userFeedIdsCacheData['seenFeedIds']
-    );
-
-    oThis.userFeedIdsCacheData['seenFeedIds'] = basicHelper.shuffleArray(oThis.userFeedIdsCacheData['seenFeedIds']);
-
-    console.log(
-      `PERSONALIZED FEED:${oThis.currentUserId} DATA FOR oThis.userFeedIdsCacheData=========`,
-      oThis.userFeedIdsCacheData
-    );
-  }
-
-  /**
-   * Set feed ids for first page of logged in user.
-   *
-   * @returns {Promise<*>}
-   * @private
-   */
-  async fetchFeedIdsForFirstPage(getUserFeedIdsFromCache) {
-    const oThis = this;
-
-    await oThis.getLastVisitTime();
-
-    if (getUserFeedIdsFromCache) {
-      await oThis.fetchFeedIdsForUserFromCache();
-    }
-
-    await oThis.fetchFeedIdsForUser();
-
-    return responseHelper.successWithData({});
-  }
-
-  /**
-   * Get feed last visit time of User.
-   *
-   * @sets oThis.lastVisitedAt
-   *
-   * @returns {Promise<*>}
-   * @private
-   */
-  async getLastVisitTime() {
-    const oThis = this;
-
-    const queryParams = {
-      userId: oThis.currentUserId
-    };
-
-    const userNotificationVisitDetailsResp = await new UserNotificationVisitDetailModel().fetchLatestSeenFeedTime(
-      queryParams
-    );
-
-    oThis.lastVisitedAt = Math.round((userNotificationVisitDetailsResp.latestSeenFeedTime || 0) / 1000);
-
-    return responseHelper.successWithData({});
-  }
-
-  /**
-   * Set feed last visit time of User.
-   *
-   * @sets oThis.lastVisitedAt
-   *
-   * @returns {Promise<*>}
-   * @private
-   */
-  async updateFeedLastVisitTime() {
-    const oThis = this;
-
-    const queryParams = {
-      userId: oThis.currentUserId,
-      latestSeenFeedTime: oThis.latestSeenFeedTime
-    };
-
-    return new UserNotificationVisitDetailModel().updateLatestSeenFeedTime(queryParams);
-  }
-
-  /**
-   * Get User feed ids for unseen and seen from cache.
-   *
-   * @sets oThis.userFeedIdsCacheData
-   *
-   * @returns {Promise<*>}
-   * @private
-   */
-  async fetchFeedIdsForUserFromCache() {
-    const oThis = this;
-
-    const cacheResp = await new PersonalizedFeedByUserIdCache({ userId: oThis.currentUserId }).fetch();
-
-    if (cacheResp.isFailure()) {
-      return Promise.reject(cacheResp);
-    }
-
-    if (CommonValidators.validateNonEmptyObject(cacheResp.data)) {
-      oThis.userFeedIdsCacheData = cacheResp.data;
-
-      oThis.feedIdsLengthFromCache =
-        oThis.userFeedIdsCacheData['seenFeedIds'].length +
-        oThis.userFeedIdsCacheData['unseenFeedIds'].length +
-        oThis.userFeedIdsCacheData['recentSeenFeedIds'].length +
-        oThis.userFeedIdsCacheData['removedFeedIds'].length;
-    } else {
-      oThis.userFeedIdsCacheData = {
-        seenFeedIds: [],
-        unseenFeedIds: [],
-        recentSeenFeedIds: [],
-        removedFeedIds: [],
-        previousFeedIds: [],
-        nextRenderIndex: 0
-      };
-      oThis.feedIdsLengthFromCache = 0;
-    }
-  }
-
-  /**
    * Set feed data for logged in users.
    *
-   * @sets oThis.feedIds, oThis.feedsMap, oThis.nextPaginationTimestamp
+   * @sets oThis.feedIds, oThis.feedsMap
    *
    * @returns {Promise<*>}
    * @private
@@ -445,73 +385,34 @@ class PublicVideoFeed extends FeedBase {
   async _setFeedDataForLoggedInUser() {
     const oThis = this;
 
-    if (oThis.feedIdsLengthFromCache > (oThis.pageNumber - 1) * oThis.limit) {
-      const nextRenderIndex = oThis.userFeedIdsCacheData['nextRenderIndex'] || 0;
-      console.log(
-        `PERSONALIZED FEED:${oThis.currentUserId} =====current nextRenderIndex:${nextRenderIndex}================`
-      );
+    const allSortedFeedIds = oThis.userPersonalizedfeedData.allSortedFeedIds;
 
-      let unseenIdsLength = oThis.userFeedIdsCacheData['unseenFeedIds'].length;
+    const renderStartIndex = (oThis.pageNumber - 1) * oThis.limit;
 
-      if (unseenIdsLength > nextRenderIndex) {
-        oThis.currentFeedIds = oThis.userFeedIdsCacheData['unseenFeedIds'].slice(
-          nextRenderIndex,
-          nextRenderIndex + oThis.limit
-        );
-        let unseenLength = oThis.currentFeedIds.length;
-        let diff = oThis.limit - unseenLength;
+    if (allSortedFeedIds.length > renderStartIndex) {
+      oThis.feedIds = allSortedFeedIds.slice(renderStartIndex, renderStartIndex + oThis.limit);
 
-        if (diff > 0) {
-          let ids = oThis.userFeedIdsCacheData['seenFeedIds'].slice(0, diff);
-          oThis.currentFeedIds = oThis.currentFeedIds.concat(ids);
-        }
-      } else {
-        let seenIndex = nextRenderIndex - unseenIdsLength;
-        oThis.currentFeedIds = oThis.userFeedIdsCacheData['seenFeedIds'].slice(seenIndex, seenIndex + oThis.limit);
-      }
-
-      oThis.userFeedIdsCacheData['nextRenderIndex'] += oThis.currentFeedIds.length;
-
-      const feedByIdsCacheResponse = await new FeedByIdsCache({ ids: oThis.currentFeedIds }).fetch();
+      const feedByIdsCacheResponse = await new FeedByIdsCache({ ids: oThis.feedIds }).fetch();
 
       if (feedByIdsCacheResponse.isFailure()) {
         return Promise.reject(feedByIdsCacheResponse);
       }
 
       oThis.feedsMap = feedByIdsCacheResponse.data;
-      oThis.feedIds = oThis.currentFeedIds;
 
-      console.log(
-        `PERSONALIZED FEED:${oThis.currentUserId} oThis.currentFeedIds==============================oThis.limit======`,
-        oThis.currentFeedIds,
-        oThis.limit
-      );
-
-      //If From Cache always increment page no
       oThis.nextPageNumber = oThis.pageNumber + 1;
-      oThis.setCacheData = true;
     } else {
-      let roundedLimitCount = oThis.limit - (oThis.feedIdsLengthFromCache % oThis.limit);
-      roundedLimitCount = roundedLimitCount == oThis.limit ? 0 : roundedLimitCount;
-
-      const previousFeedLength = oThis.userFeedIdsCacheData['previousFeedIds'].length;
-      let offset = (oThis.pageNumber - 1) * oThis.limit - previousFeedLength - roundedLimitCount;
-
-      console.log(
-        `PERSONALIZED FEED:${
-          oThis.currentUserId
-        } GET DATA FROM DB previousFeedLength,offset================================`,
-        previousFeedLength,
-        offset
-      );
+      logger.log(`===================PERSONALIZED FEED:${oThis.currentUserId} Fetching From DB`);
+      let pagesFromCache = Math.ceil(allSortedFeedIds.length / oThis.limit);
+      let offset = (oThis.pageNumber - 1 - pagesFromCache) * oThis.limit;
 
       const queryParams = {
         limit: oThis.limit,
         offset: offset,
-        previousFeedIds: oThis.userFeedIdsCacheData['previousFeedIds']
+        paginationTimestamp: oThis.userPersonalizedfeedData.lastPaginationTimestamp
       };
 
-      const queryResp = await new FeedModel().getPersonalizedFeedIdsAfterCache(queryParams);
+      const queryResp = await new FeedModel().getPersonalizedFeedIdsAfterTimestamp(queryParams);
 
       oThis.feedsMap = queryResp.feedsMap;
       oThis.feedIds = queryResp.feedIds;
@@ -520,11 +421,6 @@ class PublicVideoFeed extends FeedBase {
         oThis.nextPageNumber = oThis.pageNumber + 1;
       }
     }
-
-    console.log(
-      `PERSONALIZED FEED:${oThis.currentUserId} oThis.nextPageNumber================================`,
-      oThis.nextPageNumber
-    );
     return responseHelper.successWithData({});
   }
 
@@ -617,116 +513,6 @@ class PublicVideoFeed extends FeedBase {
     }
 
     oThis.feedIds = activeFeedIds;
-  }
-
-  /**
-   * Get User feed ids for unseen and seen from cache.
-   *
-   * @sets oThis.userFeedIdsCacheData
-   *
-   * @returns {Promise<*>}
-   * @private
-   */
-  async setFeedIdsForUserInCache() {
-    const oThis = this;
-
-    let activeFeedIds = [];
-
-    for (let i = 0; i < oThis.feeds.length; i++) {
-      activeFeedIds.push(oThis.feeds[i].id);
-    }
-
-    for (let i = 0; i < oThis.currentFeedIds.length; i++) {
-      const feedId = oThis.currentFeedIds[i];
-
-      const index = activeFeedIds.indexOf(feedId);
-      if (index === -1) {
-        oThis.userFeedIdsCacheData['removedFeedIds'].push(feedId);
-        oThis.userFeedIdsCacheData['nextRenderIndex'] -= 1;
-
-        const unseenIndex = oThis.userFeedIdsCacheData['unseenFeedIds'].indexOf(feedId);
-        if (unseenIndex > -1) {
-          oThis.userFeedIdsCacheData['unseenFeedIds'].splice(unseenIndex, 1);
-        } else {
-          const seenIndex = oThis.userFeedIdsCacheData['seenFeedIds'].indexOf(feedId);
-          if (seenIndex > -1) {
-            oThis.userFeedIdsCacheData['seenFeedIds'].splice(seenIndex, 1);
-          } else {
-            throw new Error(`INVALID FEED DATA--userId:${oThis.currentUserId}====feedId:${feedId}`);
-          }
-        }
-      }
-    }
-
-    const cacheResp = await new PersonalizedFeedByUserIdCache({ userId: oThis.currentUserId }).setCacheData(
-      oThis.userFeedIdsCacheData
-    );
-
-    if (cacheResp.isFailure()) {
-      return Promise.reject(cacheResp);
-    }
-
-    if (oThis.latestSeenFeedTime) {
-      await oThis.updateFeedLastVisitTime();
-    }
-
-    return responseHelper.successWithData({});
-  }
-
-  /**
-   * Prepare response.
-   *
-   * @sets oThis.feeds, oThis.profileResponse
-   *
-   * @returns {*|result}
-   * @private
-   */
-  async _prepareResponse() {
-    const oThis = this;
-
-    const nextPagePayloadKey = {};
-
-    if (oThis.setCacheData) {
-      await oThis.setFeedIdsForUserInCache();
-    }
-
-    if (oThis._showShuffledFeeds()) {
-      if (oThis.nextPageNumber) {
-        nextPagePayloadKey[paginationConstants.paginationIdentifierKey] = {
-          page_no: oThis.nextPageNumber
-        };
-      }
-    } else {
-      if (oThis.nextPaginationTimestamp) {
-        nextPagePayloadKey[paginationConstants.paginationIdentifierKey] = {
-          pagination_timestamp: oThis.nextPaginationTimestamp
-        };
-      }
-    }
-
-    const responseMetaData = {
-      [paginationConstants.nextPagePayloadKey]: nextPagePayloadKey
-    };
-
-    return responseHelper.successWithData({
-      feedList: oThis.feeds,
-      userProfilesMap: oThis.profileResponse.userProfilesMap,
-      userProfileAllowedActions: oThis.profileResponse.userProfileAllowedActions,
-      usersByIdMap: oThis.profileResponse.usersByIdMap,
-      tokenUsersByUserIdMap: oThis.profileResponse.tokenUsersByUserIdMap,
-      imageMap: oThis.profileResponse.imageMap,
-      videoMap: oThis.profileResponse.videoMap,
-      linkMap: oThis.profileResponse.linkMap,
-      tags: oThis.profileResponse.tags,
-      userStat: oThis.profileResponse.userStat,
-      videoDetailsMap: oThis.profileResponse.videoDetailsMap,
-      videoDescriptionsMap: oThis.profileResponse.videoDescriptionMap,
-      currentUserUserContributionsMap: oThis.profileResponse.currentUserUserContributionsMap,
-      currentUserVideoContributionsMap: oThis.profileResponse.currentUserVideoContributionsMap,
-      pricePointsMap: oThis.profileResponse.pricePointsMap,
-      tokenDetails: oThis.tokenDetails,
-      meta: responseMetaData
-    });
   }
 
   /**

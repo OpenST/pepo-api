@@ -110,18 +110,22 @@ class Text extends ModelBase {
    * @return {object}
    */
   async insertText(params) {
-    const oThis = this,
-      tagIds = JSON.stringify(params.tagIds) || null,
-      linkIds = JSON.stringify(params.linkIds) || null;
+    const oThis = this;
 
-    return oThis
-      .insert({
-        text: params.text,
-        tag_ids: tagIds,
-        link_ids: linkIds,
-        kind: textConstants.invertedKinds[params.kind]
-      })
-      .fire();
+    let insertParams = {
+      text: params.text,
+      kind: textConstants.invertedKinds[params.kind]
+    };
+
+    if (params.tagIds) {
+      insertParams.tag_ids = JSON.stringify(params.tagIds);
+    }
+
+    if (params.linkIds) {
+      insertParams.link_ids = JSON.stringify(params.linkIds);
+    }
+
+    return oThis.insert(insertParams).fire();
   }
 
   /**
@@ -188,9 +192,9 @@ class Text extends ModelBase {
    * @returns {Promise<*>}
    */
   static async flushCache(params) {
-    const TextsByIds = require(rootPrefix + '/lib/cacheManagement/multi/TextsByIds');
+    const TextByIdCache = require(rootPrefix + '/lib/cacheManagement/multi/TextsByIds');
 
-    await new TextsByIds({ ids: [params.id] }).clear();
+    await new TextByIdCache({ ids: params.textIds }).clear();
   }
 }
 

@@ -121,6 +121,41 @@ class VideoDetail extends ModelBase {
   }
 
   /**
+   * Fetch all videoDetail objects for user ids.
+   *
+   * @param {integer} videoId: video id
+   *
+   * @return {object}
+   */
+  async fetchVideoIds(userIds) {
+    const oThis = this;
+
+    const dbRows = await oThis
+      .select('*')
+      .where({
+        creator_user_id: userIds,
+        status: videoDetailsConstants.invertedStatuses[videoDetailsConstants.activeStatus]
+      })
+      .order_by('video_id DESC')
+      .fire();
+
+    const response = {};
+
+    for (let index = 0; index < userIds.length; index++) {
+      const userId = userIds[index];
+      response[userId] = { videoIds: [], videoDetails: {} };
+    }
+
+    for (let index = 0; index < dbRows.length; index++) {
+      const dbRow = oThis.formatDbData(dbRows[index]);
+      response[dbRow.creatorUserId].videoIds.push(dbRow.videoId);
+      response[dbRow.creatorUserId].videoDetails[dbRow.videoId] = dbRow;
+    }
+
+    return response;
+  }
+
+  /**
    * Fetch videoDetail object for video id.
    *
    * @param {integer} videoId: video id
