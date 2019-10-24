@@ -8,6 +8,7 @@ const rootPrefix = '../../..',
   coreConstants = require(rootPrefix + '/config/coreConstants'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
+  basicHelper = require(rootPrefix + '/helpers/basic'),
   paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination');
 
 /**
@@ -21,6 +22,7 @@ class UserSearch extends ServiceBase {
    *
    * @param {object} params
    * @param {string} [params.q]
+   * @param {Boolean} [params.getTopResults]
    *
    * @augments ServiceBase
    *
@@ -34,6 +36,7 @@ class UserSearch extends ServiceBase {
     oThis.query = params.q || null;
     oThis.paginationIdentifier = params[paginationConstants.paginationIdentifierKey] || null;
     oThis.isOnlyNameSearch = true;
+    oThis.getTopResults = params.getTopResults || false;
 
     oThis.limit = oThis._defaultPageLimit();
 
@@ -45,6 +48,7 @@ class UserSearch extends ServiceBase {
     oThis.searchResults = [];
     oThis.paginationTimestamp = null;
     oThis.nextPaginationTimestamp = null;
+    oThis.hasNextPage = false;
   }
 
   /**
@@ -86,6 +90,9 @@ class UserSearch extends ServiceBase {
   async _validateAndSanitizeParams() {
     const oThis = this;
 
+    oThis.query = basicHelper.filterSearchTerm(oThis.query);
+    oThis.isOnlyNameSearch = !CommonValidators.validateUserName(oThis.query);
+
     oThis.query = oThis.query
       ? oThis.query
           .toLowerCase()
@@ -104,8 +111,6 @@ class UserSearch extends ServiceBase {
       oThis.paginationTimestamp = null;
     }
 
-    oThis.isOnlyNameSearch = !CommonValidators.validateUserName(oThis.query);
-
     // Validate limit.
     return oThis._validatePageSize();
   }
@@ -123,6 +128,8 @@ class UserSearch extends ServiceBase {
 
     let userData = {};
 
+    console.log('\n\n\noThis.isOnlyNameSearch-------', oThis.isOnlyNameSearch);
+
     if (oThis.query) {
       userData = await new UserModel().search({
         query: oThis.query,
@@ -131,9 +138,12 @@ class UserSearch extends ServiceBase {
         isOnlyNameSearch: oThis.isOnlyNameSearch,
         fetchAll: false
       });
+      oThis.hasNextPage = userData.userIds.length >= oThis.limit;
     } else {
       // Display curated users in search.
-      const curatedUserIdsString = coreConstants.PEPO_USER_SEARCH_CURATED_USER_IDS;
+      const curatedUserIdsString = oThis.getTopResults
+        ? coreConstants.PEPO_USER_SEARCH_TOP_USER_IDS
+        : coreConstants.PEPO_USER_SEARCH_CURATED_USER_IDS;
       if (curatedUserIdsString.length === 0) {
         // Empty string.
         userData = { userIds: [], userDetails: {} };
@@ -266,7 +276,7 @@ class UserSearch extends ServiceBase {
 
     const nextPagePayloadKey = {};
 
-    if (oThis.searchResults.length >= oThis.limit) {
+    if (oThis.hasNextPage) {
       nextPagePayloadKey[paginationConstants.paginationIdentifierKey] = {
         pagination_timestamp: oThis.nextPaginationTimestamp
       };

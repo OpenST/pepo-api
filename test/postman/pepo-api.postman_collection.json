@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "cd818e61-e366-478c-999b-ed32f7ea4cc3",
+		"_postman_id": "5d43c46e-3e51-491a-8aa0-b1f8017d0aca",
 		"name": "pepo-api",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -158,7 +158,8 @@
 					},
 					"response": []
 				}
-			]
+			],
+			"protocolProfileBehavior": {}
 		},
 		{
 			"name": "admin",
@@ -600,7 +601,8 @@
 					},
 					"response": []
 				}
-			]
+			],
+			"protocolProfileBehavior": {}
 		},
 		{
 			"name": "web",
@@ -702,9 +704,11 @@
 							"response": []
 						}
 					],
+					"protocolProfileBehavior": {},
 					"_postman_isSubFolder": true
 				}
-			]
+			],
+			"protocolProfileBehavior": {}
 		},
 		{
 			"name": "device",
@@ -822,6 +826,7 @@
 							"response": []
 						}
 					],
+					"protocolProfileBehavior": {},
 					"_postman_isSubFolder": true
 				},
 				{
@@ -848,6 +853,7 @@
 							"response": []
 						}
 					],
+					"protocolProfileBehavior": {},
 					"_postman_isSubFolder": true
 				},
 				{
@@ -1616,6 +1622,7 @@
 							"response": []
 						}
 					],
+					"protocolProfileBehavior": {},
 					"_postman_isSubFolder": true
 				},
 				{
@@ -1725,6 +1732,7 @@
 							"response": []
 						}
 					],
+					"protocolProfileBehavior": {},
 					"_postman_isSubFolder": true
 				},
 				{
@@ -1831,6 +1839,7 @@
 							}
 						}
 					],
+					"protocolProfileBehavior": {},
 					"_postman_isSubFolder": true
 				},
 				{
@@ -1865,8 +1874,164 @@
 								}
 							},
 							"response": []
+						},
+						{
+							"name": "get",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{api_server}}/api/v1/tags/66",
+									"host": [
+										"{{api_server}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"tags",
+										"66"
+									],
+									"query": [
+										{
+											"key": "pagination_identifier",
+											"value": "eyJwYWdlIjoyfQ==",
+											"disabled": true
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Videos",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{api_server}}/api/v1/tags/66/videos",
+									"host": [
+										"{{api_server}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"tags",
+										"66",
+										"videos"
+									],
+									"query": [
+										{
+											"key": "pagination_identifier",
+											"value": "eyJwYWdlIjoyfQ==",
+											"disabled": true
+										}
+									]
+								}
+							},
+							"response": []
 						}
 					],
+					"protocolProfileBehavior": {},
+					"_postman_isSubFolder": true
+				},
+				{
+					"name": "search",
+					"item": [
+						{
+							"name": "top",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{api_server}}/api/v1/search/top?q=pe",
+									"host": [
+										"{{api_server}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"search",
+										"top"
+									],
+									"query": [
+										{
+											"key": "pagination_identifier",
+											"value": "eyJwYWdlIjoyfQ==",
+											"disabled": true
+										},
+										{
+											"key": "q",
+											"value": "pe"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "users",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{api_server}}/api/v1/search/users?q=pe",
+									"host": [
+										"{{api_server}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"search",
+										"users"
+									],
+									"query": [
+										{
+											"key": "pagination_identifier",
+											"value": "eyJwYWdlIjoyfQ==",
+											"disabled": true
+										},
+										{
+											"key": "q",
+											"value": "pe"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "tags",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{api_server}}/api/v1/search/tags?q=pe",
+									"host": [
+										"{{api_server}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"search",
+										"tags"
+									],
+									"query": [
+										{
+											"key": "pagination_identifier",
+											"value": "eyJwYWdlIjoyfQ==",
+											"disabled": true
+										},
+										{
+											"key": "q",
+											"value": "pe"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"protocolProfileBehavior": {},
 					"_postman_isSubFolder": true
 				},
 				{
@@ -1919,6 +2084,7 @@
 							"response": []
 						}
 					],
+					"protocolProfileBehavior": {},
 					"_postman_isSubFolder": true
 				},
 				{
@@ -2030,6 +2196,7 @@
 							"response": []
 						}
 					],
+					"protocolProfileBehavior": {},
 					"_postman_isSubFolder": true
 				},
 				{
@@ -2039,7 +2206,28 @@
 							"name": "redemption-info",
 							"request": {
 								"method": "GET",
-								"header": [],
+								"header": [
+									{
+										"key": "x-pepo-device-os",
+										"value": "android",
+										"type": "text"
+									},
+									{
+										"key": "x-pepo-device-os-version",
+										"value": "7.0",
+										"type": "text"
+									},
+									{
+										"key": "x-pepo-build-number",
+										"value": "16",
+										"type": "text"
+									},
+									{
+										"key": "x-pepo-app-version",
+										"value": "0.9.3",
+										"type": "text"
+									}
+								],
 								"url": {
 									"raw": "{{api_server}}/api/v1/redemptions/webview-url",
 									"host": [
@@ -2056,6 +2244,7 @@
 							"response": []
 						}
 					],
+					"protocolProfileBehavior": {},
 					"_postman_isSubFolder": true
 				},
 				{
@@ -2093,6 +2282,7 @@
 							"response": []
 						}
 					],
+					"protocolProfileBehavior": {},
 					"_postman_isSubFolder": true
 				},
 				{
@@ -2159,6 +2349,7 @@
 							"response": []
 						}
 					],
+					"protocolProfileBehavior": {},
 					"_postman_isSubFolder": true
 				},
 				{
@@ -2243,6 +2434,7 @@
 							"response": []
 						}
 					],
+					"protocolProfileBehavior": {},
 					"_postman_isSubFolder": true
 				},
 				{
@@ -2276,6 +2468,7 @@
 							"response": []
 						}
 					],
+					"protocolProfileBehavior": {},
 					"_postman_isSubFolder": true
 				},
 				{
@@ -2360,7 +2553,8 @@
 					},
 					"response": []
 				}
-			]
+			],
+			"protocolProfileBehavior": {}
 		},
 		{
 			"name": "fetch-goto",
@@ -2416,5 +2610,7 @@
 			},
 			"response": []
 		}
-	]
+	],
+	"protocolProfileBehavior": {}
 }
+

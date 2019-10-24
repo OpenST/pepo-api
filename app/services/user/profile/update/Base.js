@@ -216,7 +216,7 @@ class UpdateProfileBase extends ServiceBase {
    * @private
    */
   async _extraUpdates() {
-    // Do nothing.
+    throw new Error('sub-class to implement');
   }
 }
 

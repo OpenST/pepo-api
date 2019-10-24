@@ -5,7 +5,6 @@ const rootPrefix = '../../../../..',
   CommonValidator = require(rootPrefix + '/lib/validators/Common'),
   AddVideoDescription = require(rootPrefix + '/lib/video/AddDescription'),
   UpdateProfileBase = require(rootPrefix + '/app/services/user/profile/update/Base'),
-  UserProfileElementModel = require(rootPrefix + '/app/models/mysql/UserProfileElement'),
   VideoDetailsModel = require(rootPrefix + '/app/models/mysql/VideoDetail'),
   videoLib = require(rootPrefix + '/lib/videoLib'),
   urlConstants = require(rootPrefix + '/lib/globalConstant/url'),
@@ -13,8 +12,7 @@ const rootPrefix = '../../../../..',
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   feedsConstants = require(rootPrefix + '/lib/globalConstant/feed'),
   notificationJobEnqueue = require(rootPrefix + '/lib/rabbitMqEnqueue/notification'),
-  notificationJobConstants = require(rootPrefix + '/lib/globalConstant/notificationJob'),
-  userProfileElementConst = require(rootPrefix + '/lib/globalConstant/userProfileElement');
+  notificationJobConstants = require(rootPrefix + '/lib/globalConstant/notificationJob');
 
 /**
  * Class to update fan video and image save.
@@ -147,7 +145,8 @@ class UpdateFanVideo extends UpdateProfileBase {
 
     await new AddVideoDescription({
       videoDescription: oThis.videoDescription,
-      videoId: oThis.videoId
+      videoId: oThis.videoId,
+      isUserCreator: UserModelKlass.isUserApprovedCreator(oThis.userObj)
     }).perform();
   }
 
@@ -175,6 +174,7 @@ class UpdateFanVideo extends UpdateProfileBase {
 
   /**
    * Update user.
+   * If a new video is added and the user was denied in his previous attempt. This will put the user in approval status.
    *
    * @returns {Promise<void>}
    * @private
