@@ -1,7 +1,7 @@
 /**
- * One timer to fetch user details.
+ * One timer to fetch user details by query string in video details.
  *
- * Usage: node executables/oneTimers/userDetailsByQueryStringInVideoDetails --words ""test", "yogesh""
+ * Usage: node executables/oneTimers/userDetailsByQueryStringInVideoDetails --words ""test", "good""
  *
  * @module  executables/oneTimers/userDetailsByQueryStringInVideoDetails
  */
@@ -18,7 +18,7 @@ program.on('--help', function() {
   logger.log('');
   logger.log('  Example:');
   logger.log('');
-  logger.log('    node executables/oneTimers/signupDetailsUsingInviteCodes.js --words ""test", "yogesh""');
+  logger.log(' node executables/oneTimers/userDetailsByQueryStringInVideoDetails --words ""test", "good""');
   logger.log('');
   logger.log('');
 });
@@ -61,7 +61,7 @@ class GetUserDetailsByQueryStringInVideoDetails {
   async fetchSignupDetails() {
     const oThis = this;
 
-    logger.log('Invite codes: ', oThis.words);
+    logger.log('Words to search: ', oThis.words);
 
     const wordsArray = basicHelper.commaSeparatedStrToArray(oThis.words);
 
