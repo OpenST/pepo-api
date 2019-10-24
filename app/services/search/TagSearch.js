@@ -3,20 +3,24 @@ const rootPrefix = '../../..',
   TagMultiCache = require(rootPrefix + '/lib/cacheManagement/multi/Tag'),
   TagPaginationCache = require(rootPrefix + '/lib/cacheManagement/single/TagPagination'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
+  coreConstants = require(rootPrefix + '/config/coreConstants'),
+  basicHelper = require(rootPrefix + '/helpers/basic'),
+  commonValidator = require(rootPrefix + '/lib/validators/Common'),
   paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination');
 
 /**
- * Class to get tags.
+ * Class to search tags.
  *
- * @class GetTags
+ * @class TagSearch
  */
-class GetTags extends ServiceBase {
+class TagSearch extends ServiceBase {
   /**
    * Constructor to get tags.
    *
    * @param {object} params
    * @param {string} params.q
    * @param {string} params.pagination_identifier
+   * @param {Boolean} [params.getTopResults]
    *
    * @augments ServiceBase
    *
@@ -27,13 +31,14 @@ class GetTags extends ServiceBase {
 
     const oThis = this;
 
-    oThis.tagPrefix = params.q;
+    oThis.tagPrefix = params.q || null;
     oThis.paginationIdentifier = params[paginationConstants.paginationIdentifierKey] || null;
+    oThis.getTopResults = params.getTopResults || false;
 
     oThis.limit = null;
     oThis.page = null;
     oThis.tagIds = [];
-    oThis.tags = null;
+    oThis.tags = {};
   }
 
   /**
@@ -71,6 +76,8 @@ class GetTags extends ServiceBase {
   async _validateAndSanitizeParams() {
     const oThis = this;
 
+    oThis.tagPrefix = basicHelper.filterSearchTerm(oThis.tagPrefix);
+
     if (oThis.paginationIdentifier) {
       const parsedPaginationParams = oThis._parsePaginationParams(oThis.paginationIdentifier);
       oThis.page = parsedPaginationParams.page; // Override page
@@ -93,13 +100,23 @@ class GetTags extends ServiceBase {
   async _getTagIds() {
     const oThis = this;
 
-    const tagPaginationRsp = await new TagPaginationCache({
-      limit: oThis.limit,
-      page: oThis.page,
-      tagPrefix: oThis.tagPrefix
-    }).fetch();
+    if (oThis.tagPrefix) {
+      const tagPaginationRsp = await new TagPaginationCache({
+        limit: oThis.limit,
+        page: oThis.page,
+        tagPrefix: oThis.tagPrefix
+      }).fetch();
 
-    oThis.tagIds = tagPaginationRsp.data;
+      oThis.tagIds = tagPaginationRsp.data;
+    } else {
+      // Display curated tags in search.
+      const curatedTagIdsString = oThis.getTopResults
+        ? coreConstants.PEPO_TAG_SEARCH_TOP_TAG_IDS
+        : coreConstants.PEPO_TAG_SEARCH_CURATED_TAG_IDS;
+      if (curatedTagIdsString.length > 0) {
+        oThis.tagIds = JSON.parse(curatedTagIdsString);
+      }
+    }
   }
 
   /**
@@ -112,6 +129,10 @@ class GetTags extends ServiceBase {
    */
   async _getTags() {
     const oThis = this;
+
+    if (oThis.tagIds.length == 0) {
+      return;
+    }
 
     const tagsResponse = await new TagMultiCache({ ids: oThis.tagIds }).fetch();
 
@@ -129,7 +150,7 @@ class GetTags extends ServiceBase {
 
     const nextPagePayloadKey = {};
 
-    if (oThis.tagIds.length === oThis.limit) {
+    if (oThis.tagIds.length >= oThis.limit) {
       nextPagePayloadKey[paginationConstants.paginationIdentifierKey] = {
         page: oThis.page + 1
       };
@@ -183,4 +204,4 @@ class GetTags extends ServiceBase {
   }
 }
 
-module.exports = GetTags;
+module.exports = TagSearch;
