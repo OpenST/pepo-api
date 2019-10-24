@@ -1,7 +1,7 @@
 /**
  * One timer to fetch signup details given invite codes.
  *
- * Usage: node executables/oneTimers/signupDetailsUsingInviteCodes.js --inviteCodes "["DEVCON5", "ETHJESUS"]"
+ * Usage: node executables/oneTimers/signupDetailsUsingInviteCodes.js --inviteCodes ""7ZKZYO", "JH063S""
  *
  * @module executables/oneTimers/signupDetailsUsingInviteCodes
  */
