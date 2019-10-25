@@ -237,8 +237,6 @@ class InviteCode extends ModelBase {
    * @private
    */
   async _insert(insertData) {
-    const oThis = this;
-
     let retryCount = 3,
       caughtInException = true,
       insertResponse = null;
@@ -257,15 +255,17 @@ class InviteCode extends ModelBase {
             logger.log('Invite code conflict. Attempting with a modified invite code.');
             caughtInException = true;
             insertData.code = inviteCodeConstants.generateInviteCode;
+
             return null;
-          } else {
-            return Promise.reject(err);
           }
+
+          return Promise.reject(err);
         });
     }
 
     if (!insertResponse) {
       logger.error('Error while inserting data in invite_codes table.');
+
       return Promise.reject(
         responseHelper.error({
           internal_error_identifier: 'a_m_m_ic_2',
