@@ -155,6 +155,7 @@ class TwitterConnect extends ServiceBase {
 
     // If invite code is required, then check its validity
     if (oThis._hasPrelaunchInvitedAccess()) {
+      logger.log('Hereeeeeeeeeeeeeeeeeeee In prelaunch');
       // If twitter account belongs to prelaunch invite, then use that inviter code if any
       if (oThis.prelaunchInviteObj.inviterCodeId) {
         let cacheResp = await new InviteCodeByIdCache({ id: oThis.prelaunchInviteObj.inviterCodeId }).fetch();
@@ -163,6 +164,7 @@ class TwitterConnect extends ServiceBase {
         await oThis._validateInviteCode();
       }
     } else {
+      logger.log('Hereeeeeeeeeeeeeeeeeeee', oThis.inviteCode);
       // Validate invite code for users, who don't have prelaunch access
       await oThis._validateInviteCode();
     }
@@ -302,6 +304,7 @@ class TwitterConnect extends ServiceBase {
     }
 
     oThis.inviteCode = oThis.inviteCode.toUpperCase();
+    logger.log('The invite code is : ', oThis.inviteCode);
     return responseHelper.successWithData({});
   }
 
@@ -332,6 +335,7 @@ class TwitterConnect extends ServiceBase {
     }
 
     let inviterCodeRow = await oThis._fetchInviterCodeObject();
+    logger.log('The inviterCodeRow is : ', inviterCodeRow);
 
     // Invite code used is not present
     if (!inviterCodeRow || !inviterCodeRow.id) {
