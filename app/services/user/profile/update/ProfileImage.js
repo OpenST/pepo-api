@@ -126,6 +126,16 @@ class UpdateProfileImage extends UpdateProfileBase {
       .where({ id: oThis.profileUserId })
       .fire();
   }
+
+  /**
+   * Extra updates which needs to be done.
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _extraUpdates() {
+    const oThis = this;
+  }
 }
 
 module.exports = UpdateProfileImage;

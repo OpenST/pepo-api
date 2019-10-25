@@ -4,7 +4,7 @@ const rootPrefix = '../../../../..',
   UrlCacheKlass = require(rootPrefix + '/lib/cacheManagement/multi/UrlsByIds'),
   AssociateTagsToUser = require(rootPrefix + '/lib/user/profile/AssociateTags'),
   AddUpdateUserBioClass = require(rootPrefix + '/lib/user/profile/AddUpdateBio'),
-  TextCacheClass = require(rootPrefix + '/lib/cacheManagement/multi/TextsByIds'),
+  TextByIdCache = require(rootPrefix + '/lib/cacheManagement/multi/TextsByIds'),
   AddUpdateUserLinkClass = require(rootPrefix + '/lib/user/profile/AddUpdateLink'),
   UpdateProfileBase = require(rootPrefix + '/app/services/user/profile/update/Base'),
   UserByUsernameCache = require(rootPrefix + '/lib/cacheManagement/single/UserByUsername'),
@@ -141,7 +141,7 @@ class UpdateProfileInfo extends UpdateProfileBase {
     // If bio is present then check whether same bio is added or its updated.
     if (oThis.profileElements[userProfileElementConst.bioIdKind]) {
       const textId = oThis.profileElements[userProfileElementConst.bioIdKind].data,
-        textResp = await new TextCacheClass({ ids: [textId] }).fetch(),
+        textResp = await new TextByIdCache({ ids: [textId] }).fetch(),
         textObj = textResp.data[textId];
 
       if (textObj.text.toString() === oThis.bio.toString()) {
