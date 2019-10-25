@@ -164,12 +164,7 @@ class TwitterConnect extends ServiceBase {
       }
     } else {
       // Validate invite code for users, who don't have prelaunch access
-      if (oThis.inviteCode) {
-        let inviteValidationResp = await oThis._validateInviteCode();
-        if (inviteValidationResp.isFailure()) {
-          return Promise.reject(inviteValidationResp);
-        }
-      }
+      await oThis._validateInviteCode();
     }
 
     logger.log('End::Validate User signup allowed');
@@ -322,13 +317,13 @@ class TwitterConnect extends ServiceBase {
     const oThis = this;
 
     // Invite code is required but not passed
-    // if (!oThis.inviteCode) {
-    //   return responseHelper.paramValidationError({
-    //     internal_error_identifier: 's_t_c_vic_1',
-    //     api_error_identifier: 'invalid_api_params',
-    //     params_error_identifiers: ['missing_invite_code']
-    //   });
-    // }
+    if (!oThis.inviteCode) {
+      return responseHelper.paramValidationError({
+        internal_error_identifier: 's_t_c_vic_1',
+        api_error_identifier: 'invalid_api_params',
+        params_error_identifiers: ['missing_invite_code']
+      });
+    }
 
     let validateResponse = oThis._validateAndSanitizeInviteCode();
 
