@@ -5,6 +5,7 @@ export PA_PORT=3000
 export PA_DEBUG_ENABLED='1';
 export PA_DOMAIN='http://pepodev.com:8080'
 export PA_STORE_DOMAIN='http://store.pepodev.com:8080';
+export PA_INVITE_DOMAIN='http://invite.pepodev.com:8080';
 export PA_WEB_DOMAIN='http://test:testpasswd@pepodev.com:8080'
 export PA_STORE_WEB_DOMAIN='http://test:testpasswd@store.pepodev.com:8080'
 export PA_COOKIE_DOMAIN='.pepodev.com'
@@ -151,6 +152,9 @@ export PA_GOOGLE_INAPP_SERVICE_ACCOUNT_EMAIL=''
 
 # Feed related constants.
 export PA_USER_SEARCH_CURATED_USER_IDS='[1000]'
+export PA_USER_SEARCH_TOP_USER_IDS='[1000]'
+export PA_CURATED_TAG_IDS='[1]'
+export PA_TOP_TAG_IDS='[1]'
 export PA_CURATED_FEED_IDS='[1000]'
 
 # Slack related constants.
