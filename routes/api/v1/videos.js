@@ -43,8 +43,6 @@ router.get('/:video_id', sanitizer.sanitizeDynamicUrlParams, cookieHelper.valida
     }).perform();
 
     serviceResponse.data = wrapperFormatterRsp.data;
-
-    console.log('=serviceResponse.data====', serviceResponse.data);
   };
 
   Promise.resolve(routeHelper.perform(req, res, next, '/video/GetById', 'r_a_v1_v_1', null, dataFormatterFunc));
