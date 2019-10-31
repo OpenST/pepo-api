@@ -1,6 +1,6 @@
 const rootPrefix = '../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
-  shareEntityConstants = require(rootPrefix + '/lib/globalConstant/shareEntity'),
+  TagModel = require(rootPrefix + '/app/models/mysql/Tag'),
   commonValidators = require(rootPrefix + '/lib/validators/Common'),
   pageNameConstants = require(rootPrefix + '/lib/globalConstant/pageName'),
   gotoFactory = require(rootPrefix + '/lib/goTo/factory'),
@@ -58,7 +58,7 @@ class FetchGoto extends ServiceBase {
 
     await oThis._validateUrl();
 
-    oThis._fetchGotoKindAndParams();
+    await oThis._fetchGotoKindAndParams();
 
     return oThis._prepareResponse();
   }
@@ -95,17 +95,29 @@ class FetchGoto extends ServiceBase {
    *
    * @private
    */
-  _fetchGotoKindAndParams() {
+  async _fetchGotoKindAndParams() {
     const oThis = this;
 
     let pathName = oThis.parsedUrl.pathname,
       pathArray = pathName.split('/'),
       query = oThis.parsedUrl.query;
+
     if (pathArray[1] == gotoConstants.videoGotoKind) {
       let videoId = Number(pathArray[2]);
       if (videoId) {
         oThis.gotoParams = { videoId: videoId };
         oThis.gotoKind = gotoConstants.videoGotoKind;
+      }
+    } else if (pathArray[1] == gotoConstants.tagGotoKind) {
+      let tagName = pathArray[2];
+
+      if (tagName) {
+        const tagsQueryRsp = await new TagModel().getTags([tagName]);
+        let tagDetails = tagsQueryRsp[0];
+        if (tagDetails) {
+          oThis.gotoParams = { tagId: tagDetails.id };
+          oThis.gotoKind = gotoConstants.tagGotoKind;
+        }
       }
     } else if (pathArray[1] == 'account') {
       oThis.gotoKind = gotoConstants.invitedUsersGotoKind;
