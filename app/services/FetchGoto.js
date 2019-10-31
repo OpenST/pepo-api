@@ -9,7 +9,9 @@ const rootPrefix = '../..',
   coreConstants = require(rootPrefix + '/config/coreConstants'),
   responseHelper = require(rootPrefix + '/lib/formatter/response');
 
-const currentPepoApiDomain = coreConstants.PA_DOMAIN;
+const currentPepoApiDomain = coreConstants.PA_DOMAIN,
+  currentPepoWebDomain = coreConstants.PA_WEB_DOMAIN;
+
 const urlParser = require('url');
 
 class FetchGoto extends ServiceBase {
@@ -115,8 +117,12 @@ class FetchGoto extends ServiceBase {
         const tagsQueryRsp = await new TagModel().getTags([tagName]);
         let tagDetails = tagsQueryRsp[0];
         if (tagDetails) {
-          oThis.gotoParams = { tagId: tagDetails.id };
           oThis.gotoKind = gotoConstants.tagGotoKind;
+          oThis.gotoParams = { tagId: tagDetails.id };
+        } else {
+          //TODO - change this after discussions.
+          oThis.gotoParams = { url: currentPepoWebDomain + '/' + '404' };
+          oThis.gotoKind = gotoConstants.webViewGotoKind;
         }
       }
     } else if (pathArray[1] == 'account') {
