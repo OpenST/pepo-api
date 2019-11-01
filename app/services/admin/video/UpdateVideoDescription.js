@@ -238,6 +238,7 @@ class UpdateVideoDescription extends ServiceBase {
   async _incrementWeightsAndAddVideoTags() {
     const oThis = this;
 
+    // TODO: @Shlok Shouldn't we insert tagIds in texts table in any case?
     if (oThis.isUserCreator) {
       return new IncrementWeightsAndAddVideoTags({ tagIds: oThis.tagIds, videoId: oThis.videoId }).perform();
     }
