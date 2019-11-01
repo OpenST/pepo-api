@@ -116,7 +116,7 @@ class UserActivationSuccess extends UserOstEventBase {
 
     if (
       oThis.tokenUserObj.ostStatus === tokenUserConstants.activatedOstStatus &&
-      oThis.tokenUserObj.ost_token_holder_address !== oThis.ostUserTokenHolderAddress
+      oThis.tokenUserObj.ostTokenHolderAddress !== oThis.ostUserTokenHolderAddress
     ) {
       return Promise.reject(
         responseHelper.error({
