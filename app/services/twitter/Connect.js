@@ -18,8 +18,8 @@ const rootPrefix = '../../..',
   gotoConstants = require(rootPrefix + '/lib/globalConstant/goto'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger');
 
-const currentPepoApiDomain = coreConstants.PA_DOMAIN,
-  urlParser = require('url');
+const urlParser = require('url');
+
 /**
  * Class for Twitter Connect service.
  *
@@ -273,11 +273,7 @@ class TwitterConnect extends ServiceBase {
     if (CommonValidators.validateNonEmptyUrl(oThis.inviteCode)) {
       let parsedUrl = urlParser.parse(oThis.inviteCode, true);
 
-      if (
-        !CommonValidators.validateNonEmptyObject(parsedUrl) ||
-        !['http:', 'https:'].includes(parsedUrl.protocol) ||
-        !currentPepoApiDomain.match(parsedUrl.host)
-      ) {
+      if (!CommonValidators.validateNonEmptyObject(parsedUrl) || !['http:', 'https:'].includes(parsedUrl.protocol)) {
         return responseHelper.paramValidationError({
           internal_error_identifier: 's_t_c_vic_8',
           api_error_identifier: 'invalid_api_params',
@@ -285,7 +281,19 @@ class TwitterConnect extends ServiceBase {
           debug_options: { parsedUrl: JSON.stringify(parsedUrl) }
         });
       }
-      oThis.inviteCode = parsedUrl.query.invite;
+
+      if (coreConstants.PA_DOMAIN.match(parsedUrl.host)) {
+        oThis.inviteCode = parsedUrl.query.invite;
+      } else if (coreConstants.PA_INVITE_DOMAIN.match(parsedUrl.host)) {
+        oThis.inviteCode = parsedUrl.pathname.split('/')[1];
+      } else {
+        return responseHelper.paramValidationError({
+          internal_error_identifier: 's_t_c_vic_9',
+          api_error_identifier: 'invalid_api_params',
+          params_error_identifiers: ['invalid_invite_code'],
+          debug_options: { parsedUrl: JSON.stringify(parsedUrl) }
+        });
+      }
     }
 
     if (!CommonValidators.validateInviteCode(oThis.inviteCode)) {

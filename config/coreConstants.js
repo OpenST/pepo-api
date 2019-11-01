@@ -36,6 +36,10 @@ class CoreConstants {
     return process.env.PA_STORE_DOMAIN;
   }
 
+  get PA_INVITE_DOMAIN() {
+    return process.env.PA_INVITE_DOMAIN;
+  }
+
   get PA_COOKIE_DOMAIN() {
     return process.env.PA_COOKIE_DOMAIN;
   }
