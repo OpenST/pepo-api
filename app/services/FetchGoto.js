@@ -1,6 +1,6 @@
 const rootPrefix = '../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
-  TagIdByTagNamesCache = require(rootPrefix + '/lib/cacheManagement/multi/TagIdByTagNames'),
+  TagIdByNamesCache = require(rootPrefix + '/lib/cacheManagement/multi/TagIdByNames'),
   commonValidators = require(rootPrefix + '/lib/validators/Common'),
   gotoFactory = require(rootPrefix + '/lib/goTo/factory'),
   gotoConstants = require(rootPrefix + '/lib/globalConstant/goto'),
@@ -114,7 +114,7 @@ class FetchGoto extends ServiceBase {
         urlForTagsErrorPage = currentPepoWebDomain + '/' + '404';
 
       if (tagName) {
-        const tagByTagNamesCacheRsp = await new TagIdByTagNamesCache({ tagNames: [tagName] }).fetch(),
+        const tagByTagNamesCacheRsp = await new TagIdByNamesCache({ names: [tagName] }).fetch(),
           tagByTagNamesCacheData = tagByTagNamesCacheRsp.data;
 
         if (commonValidators.validateInteger(tagByTagNamesCacheData[tagName])) {

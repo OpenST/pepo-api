@@ -71,7 +71,7 @@ class Tag extends ModelBase {
     const response = {};
 
     const dbRows = await oThis
-      .select('*')
+      .select(['id', 'name'])
       .where({ name: tagNames })
       .fire();
 
@@ -238,6 +238,7 @@ class Tag extends ModelBase {
    * @param {object} params
    * @param {string} params.tagPrefix
    * @param {array} params.ids
+   * @param {String} params.name
    *
    * @returns {Promise<*>}
    */
@@ -252,6 +253,11 @@ class Tag extends ModelBase {
     if (params.ids) {
       const TagByIds = require(rootPrefix + '/lib/cacheManagement/multi/Tag');
       promisesArray.push(new TagByIds({ ids: params.ids }).clear());
+    }
+
+    if (params.name) {
+      const TagIdByNames = require(rootPrefix + '/lib/cacheManagement/multi/TagIdByNames');
+      promisesArray.push(new TagIdByNames({ names: [params.name] }).clear());
     }
 
     await Promise.all(promisesArray);
