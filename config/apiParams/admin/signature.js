@@ -93,6 +93,23 @@ const adminSignature = {
     ],
     optional: []
   },
+  [apiName.adminUpdateVideoDescription]: {
+    mandatory: [
+      {
+        parameter: 'video_id',
+        validatorMethods: ['validateNonZeroInteger']
+      },
+      {
+        parameter: 'current_admin',
+        validatorMethods: ['validateNonEmptyObject']
+      },
+      {
+        parameter: 'video_description',
+        validatorMethods: ['validateString', 'validateStopWords']
+      }
+    ],
+    optional: []
+  },
   [apiName.adminLogin]: {
     mandatory: [
       {
