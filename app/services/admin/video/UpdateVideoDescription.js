@@ -4,6 +4,7 @@ const rootPrefix = '../../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   TextModel = require(rootPrefix + '/app/models/mysql/Text'),
   UserModel = require(rootPrefix + '/app/models/mysql/User'),
+  CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   VideoTagModel = require(rootPrefix + '/app/models/mysql/VideoTag'),
   UsersCache = require(rootPrefix + '/lib/cacheManagement/multi/User'),
   VideoDetailsModel = require(rootPrefix + '/app/models/mysql/VideoDetail'),
@@ -48,7 +49,7 @@ class UpdateVideoDescription extends ServiceBase {
 
     oThis.videoDetail = null;
     oThis.creatorUserId = null;
-    oThis.textId = null;
+    oThis.existingTextId = null;
 
     oThis.user = null;
     oThis.isUserCreator = null;
@@ -94,7 +95,7 @@ class UpdateVideoDescription extends ServiceBase {
   /**
    * Fetch the video details and the creator user id and performs validations on the video status.
    *
-   * @sets oThis.videoDetails, oThis.creatorUserId, oThis.textId
+   * @sets oThis.videoDetails, oThis.creatorUserId, oThis.existingTextId
    *
    * @returns {Promise<void>}
    * @private
@@ -109,7 +110,7 @@ class UpdateVideoDescription extends ServiceBase {
 
     oThis.videoDetail = videoDetailsCacheResponse.data[oThis.videoId];
     oThis.creatorUserId = oThis.videoDetail.creatorUserId;
-    oThis.textId = oThis.videoDetail.descriptionId || null;
+    oThis.existingTextId = oThis.videoDetail.descriptionId || null;
 
     if (!oThis.creatorUserId || oThis.videoDetail.status === videoDetailsConstants.deletedStatus) {
       return Promise.reject(
@@ -247,7 +248,7 @@ class UpdateVideoDescription extends ServiceBase {
   /**
    * Update video description.
    *
-   * @sets oThis.textId
+   * @sets oThis.existingTextId
    *
    * @returns {Promise<void>}
    * @private
@@ -255,38 +256,51 @@ class UpdateVideoDescription extends ServiceBase {
   async _updateVideoDescription() {
     const oThis = this;
 
-    // If textId already exists, we need to update the text model.
-    if (oThis.textId) {
-      const updateParams = {
-        id: oThis.textId,
-        tagIds: oThis.tagIds,
+    let newTextId = null;
+
+    if (CommonValidators.validateNonBlankString(oThis.text)) {
+      // If textId already exists, we need to update the text model.
+      if (oThis.existingTextId) {
+        const updateParams = {
+          id: oThis.existingTextId,
+          tagIds: oThis.tagIds,
+          linkIds: oThis.urlIds,
+          text: oThis.text
+        };
+
+        return new TextModel().updateById(updateParams);
+        // return so there is no update in video detail
+      }
+
+      const insertParams = {
+        text: oThis.text,
         linkIds: oThis.urlIds,
-        text: oThis.text
+        kind: textConstants.videoDescriptionKind
       };
 
-      return new TextModel().updateById(updateParams);
+      if (oThis.isUserCreator) {
+        insertParams.tagIds = oThis.tagIds;
+      }
+
+      // Create new entry in texts table.
+      const textRow = await new TextModel().insertText(insertParams);
+
+      newTextId = textRow.insertId;
+    } else {
+      if (oThis.existingTextId) {
+        await new TextModel().deleteById({ id: oThis.existingTextId });
+      }
+
+      newTextId = null;
     }
-
-    const insertParams = {
-      text: oThis.text,
-      linkIds: oThis.urlIds,
-      kind: textConstants.videoDescriptionKind
-    };
-
-    if (oThis.isUserCreator) {
-      insertParams.tagIds = oThis.tagIds;
-    }
-
-    // Create new entry in texts table.
-    const textRow = await new TextModel().insertText(insertParams);
-
-    oThis.textId = textRow.insertId;
 
     // Update video details table.
     await new VideoDetailsModel()
-      .update({ description_id: oThis.textId })
+      .update({ description_id: newTextId })
       .where({ video_id: oThis.videoId })
       .fire();
+
+    oThis.videoDetail.descriptionId = newTextId;
   }
 
   /**
@@ -300,8 +314,17 @@ class UpdateVideoDescription extends ServiceBase {
 
     const promisesArray = [VideoDetailsModel.flushCache({ userId: oThis.creatorUserId, videoId: oThis.videoId })];
 
+    const textIdsToFlush = [];
     if (oThis.videoDetail.descriptionId) {
-      promisesArray.push(TextModel.flushCache({ textIds: [oThis.videoDetail.descriptionId] }));
+      textIdsToFlush.push(oThis.videoDetail.descriptionId);
+    }
+
+    if (oThis.existingTextId) {
+      textIdsToFlush.push(oThis.existingTextId);
+    }
+
+    if (textIdsToFlush.length > 0) {
+      promisesArray.push(TextModel.flushCache({ textIds: textIdsToFlush }));
     }
 
     await Promise.all(promisesArray);
