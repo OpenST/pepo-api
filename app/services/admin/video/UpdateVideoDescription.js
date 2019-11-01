@@ -60,7 +60,7 @@ class UpdateVideoDescription extends ServiceBase {
   }
 
   /**
-   * Async performer.
+   * Async perform.
    *
    * @returns {Promise<void>}
    * @private

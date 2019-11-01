@@ -1,29 +1,29 @@
 const rootPrefix = '../../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   UrlModel = require(rootPrefix + '/app/models/mysql/Url'),
-  VideoDetailModel = require(rootPrefix + '/app/models/mysql/VideoDetail'),
-  VideoDetailsByVideoIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/VideoDetailsByVideoIds'),
   CommonValidator = require(rootPrefix + '/lib/validators/Common'),
-  videoDetailsConstants = require(rootPrefix + '/lib/globalConstant/videoDetail'),
   UsersCache = require(rootPrefix + '/lib/cacheManagement/multi/User'),
+  VideoDetailModel = require(rootPrefix + '/app/models/mysql/VideoDetail'),
   ActivityLogModel = require(rootPrefix + '/app/models/mysql/AdminActivityLog'),
+  VideoDetailsByVideoIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/VideoDetailsByVideoIds'),
+  urlConstants = require(rootPrefix + '/lib/globalConstant/url'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   userConstants = require(rootPrefix + '/lib/globalConstant/user'),
-  urlConstants = require(rootPrefix + '/lib/globalConstant/url'),
+  videoDetailsConstants = require(rootPrefix + '/lib/globalConstant/videoDetail'),
   adminActivityLogConstants = require(rootPrefix + '/lib/globalConstant/adminActivityLogs');
 
 /**
- * Class to deny users as creator by admin.
+ * Class to update link of video.
  *
  * @class UpdateLink
  */
 class UpdateLink extends ServiceBase {
   /**
-   * Constructor to deny users as creator by admin.
+   * Constructor to update link of video.
    *
    * @param {object} params
-   * @param {array} params.link: Link of Video by admin.
-   * @param {array} params.video_id: Edit Video Link by admin.
+   * @param {array} params.link: Link of video by admin.
+   * @param {array} params.video_id: Video id to edited.
    * @param {object} params.current_admin: current admin.
    *
    * @augments ServiceBase
@@ -47,7 +47,7 @@ class UpdateLink extends ServiceBase {
   }
 
   /**
-   * Main performer for class.
+   * Async perform.
    *
    * @returns {Promise<void>}
    * @private
@@ -70,6 +70,8 @@ class UpdateLink extends ServiceBase {
 
   /**
    * Validate params.
+   *
+   * @sets oThis.link
    *
    * @returns {Promise<void>}
    * @private
@@ -97,7 +99,7 @@ class UpdateLink extends ServiceBase {
    *
    * @sets oThis.videoDetails, oThis.creatorUserId
    *
-   * @return {Promise<void>}
+   * @returns {Promise<void>}
    * @private
    */
   async _fetchCreatorUserId() {
@@ -121,8 +123,6 @@ class UpdateLink extends ServiceBase {
         })
       );
     }
-
-    return responseHelper.successWithData({});
   }
 
   /**
@@ -130,7 +130,7 @@ class UpdateLink extends ServiceBase {
    *
    * @sets oThis.user
    *
-   * @returns {Promise<never>}
+   * @returns {Promise<void>}
    * @private
    */
   async _fetchUser() {
@@ -161,12 +161,12 @@ class UpdateLink extends ServiceBase {
         })
       );
     }
-
-    return responseHelper.successWithData({});
   }
 
   /**
-   * Update Link of video.
+   * Update link of video.
+   *
+   * @sets oThis.linkIds
    *
    * @returns {Promise<void>}
    * @private
@@ -175,6 +175,7 @@ class UpdateLink extends ServiceBase {
     const oThis = this;
 
     const response = await new UrlModel().insertUrl({ url: oThis.link, kind: urlConstants.socialUrlKind });
+
     oThis.linkIds = JSON.stringify([response.insertId]);
 
     await new VideoDetailModel()
@@ -183,6 +184,18 @@ class UpdateLink extends ServiceBase {
       .fire();
 
     await oThis._flushCache();
+  }
+
+  /**
+   * Flush cache.
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _flushCache() {
+    const oThis = this;
+
+    await VideoDetailModel.flushCache({ userId: oThis.creatorUserId, videoId: oThis.videoId });
   }
 
   /**
@@ -200,18 +213,6 @@ class UpdateLink extends ServiceBase {
       action: adminActivityLogConstants.updateUserVideoLink,
       extraData: JSON.stringify({ vid: oThis.videoId, linkIds: oThis.linkIds })
     });
-  }
-
-  /**
-   * Flush cache.
-   *
-   * @returns {Promise<void>}
-   * @private
-   */
-  async _flushCache() {
-    const oThis = this;
-
-    await VideoDetailModel.flushCache({ userId: oThis.creatorUserId, videoId: oThis.videoId });
   }
 }
 
