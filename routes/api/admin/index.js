@@ -187,6 +187,14 @@ router.post('/delete-video/:video_id', sanitizer.sanitizeDynamicUrlParams, funct
   Promise.resolve(routeHelper.perform(req, res, next, '/admin/DeleteVideo', 'r_a_v1_ad_6', null, null, null));
 });
 
+/* Update video Link*/
+router.post('/update-video/:video_id/link', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.adminUpdateVideoLink;
+  req.decodedParams.video_id = req.params.video_id;
+
+  Promise.resolve(routeHelper.perform(req, res, next, '/admin/video/UpdateLink', 'r_a_v1_ad_uvl_1', null, null, null));
+});
+
 /* Logged in Admin */
 router.get('/current', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.loggedInAdmin;
