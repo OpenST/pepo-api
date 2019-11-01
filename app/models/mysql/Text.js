@@ -112,7 +112,7 @@ class Text extends ModelBase {
   async insertText(params) {
     const oThis = this;
 
-    let insertParams = {
+    const insertParams = {
       text: params.text,
       kind: textConstants.invertedKinds[params.kind]
     };
@@ -132,7 +132,8 @@ class Text extends ModelBase {
    * Update text by id.
    *
    * @param {object} params
-   * @param {string} params.text
+   * @param {number} params.text
+   * @param {string} params.id
    * @param {array} [params.tagIds]
    * @param {array} [params.linkIds]
    *
