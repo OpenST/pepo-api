@@ -1,15 +1,15 @@
-const rootPrefix = '../../..',
+const rootPrefix = '../../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
+  UrlModel = require(rootPrefix + '/app/models/mysql/Url'),
+  VideoDetailModel = require(rootPrefix + '/app/models/mysql/VideoDetail'),
   VideoDetailsByVideoIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/VideoDetailsByVideoIds'),
   CommonValidator = require(rootPrefix + '/lib/validators/Common'),
-  bgJob = require(rootPrefix + '/lib/rabbitMqEnqueue/bgJob'),
-  bgJobConstants = require(rootPrefix + '/lib/globalConstant/bgJob'),
   videoDetailsConstants = require(rootPrefix + '/lib/globalConstant/videoDetail'),
-  UserModel = require(rootPrefix + '/app/models/mysql/User'),
   UsersCache = require(rootPrefix + '/lib/cacheManagement/multi/User'),
   ActivityLogModel = require(rootPrefix + '/app/models/mysql/AdminActivityLog'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   userConstants = require(rootPrefix + '/lib/globalConstant/user'),
+  urlConstants = require(rootPrefix + '/lib/globalConstant/url'),
   adminActivityLogConstants = require(rootPrefix + '/lib/globalConstant/adminActivityLogs');
 
 /**
@@ -79,12 +79,14 @@ class UpdateLink extends ServiceBase {
 
     // If url is not valid, consider link as null.
     if (!oThis.link || !CommonValidator.validateGenericUrl(oThis.link)) {
-      return responseHelper.paramValidationError({
-        internal_error_identifier: 'a_s_a_v_ul_vasp_1',
-        api_error_identifier: 'invalid_api_params',
-        params_error_identifiers: ['invalid_link'],
-        debug_options: { link: oThis.link }
-      });
+      return Promise.reject(
+        responseHelper.paramValidationError({
+          internal_error_identifier: 'a_s_a_v_ul_vasp_1',
+          api_error_identifier: 'invalid_api_params',
+          params_error_identifiers: ['invalid_link'],
+          debug_options: { link: oThis.link }
+        })
+      );
     }
 
     oThis.link = oThis.link.toLowerCase();
@@ -110,12 +112,14 @@ class UpdateLink extends ServiceBase {
     oThis.creatorUserId = oThis.videoDetail.creatorUserId;
 
     if (!oThis.creatorUserId || oThis.videoDetail.status === videoDetailsConstants.deletedStatus) {
-      return responseHelper.paramValidationError({
-        internal_error_identifier: 'a_s_a_v_ul_fcui_1',
-        api_error_identifier: 'invalid_api_params',
-        params_error_identifiers: ['invalid_video_id'],
-        debug_options: { videoDetails: oThis.videoDetail }
-      });
+      return Promise.reject(
+        responseHelper.paramValidationError({
+          internal_error_identifier: 'a_s_a_v_ul_fcui_1',
+          api_error_identifier: 'invalid_api_params',
+          params_error_identifiers: ['invalid_video_id'],
+          debug_options: { videoDetails: oThis.videoDetail }
+        })
+      );
     }
 
     return responseHelper.successWithData({});
@@ -207,7 +211,7 @@ class UpdateLink extends ServiceBase {
   async _flushCache() {
     const oThis = this;
 
-    await VideoDetailModel.flushCache({ userId: oThis.creatorUserId, videoId: videoId });
+    await VideoDetailModel.flushCache({ userId: oThis.creatorUserId, videoId: oThis.videoId });
   }
 }
 
