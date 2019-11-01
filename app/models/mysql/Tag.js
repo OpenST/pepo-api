@@ -59,6 +59,31 @@ class Tag extends ModelBase {
   }
 
   /**
+   * Get tags ids for given tag names.
+   *
+   * @param {array} tagNames
+   *
+   * @returns {Promise<void>}
+   */
+  async getTagIds(tagNames) {
+    const oThis = this;
+
+    const response = {};
+
+    const dbRows = await oThis
+      .select('*')
+      .where({ name: tagNames })
+      .fire();
+
+    for (let index = 0; index < dbRows.length; index++) {
+      const formatDbRow = oThis._formatDbData(dbRows[index]);
+      response[formatDbRow.name] = formatDbRow.id;
+    }
+
+    return response;
+  }
+
+  /**
    * Get tags.
    *
    * @param {array} names

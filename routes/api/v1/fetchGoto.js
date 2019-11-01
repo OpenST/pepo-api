@@ -23,7 +23,6 @@ router.get('/', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
     }).perform();
 
     serviceResponse.data = wrapperFormatterRsp.data;
-    console.log('serviceResponse----', JSON.stringify(serviceResponse));
   };
 
   Promise.resolve(routeHelper.perform(req, res, next, '/FetchGoto', 'r_a_v1_fgt_1', null, dataFormatterFunc));
