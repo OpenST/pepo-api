@@ -129,8 +129,6 @@ class FetchGoto extends ServiceBase {
         oThis.gotoParams = { inviteCode: query['invite'] };
         oThis.gotoKind = gotoConstants.signUpGotoKind;
       }
-    } else {
-      oThis._setWebViewGotoKindAndParams(oThis.url);
     }
   }
 
@@ -157,21 +155,6 @@ class FetchGoto extends ServiceBase {
         }
       });
     }
-  }
-
-  /**
-   * sets webview goto and params
-   *
-   * @sets oThis.gotoParams, oThis.gotoKind
-   *
-   * @param url
-   * @private
-   */
-  _setWebViewGotoKindAndParams(url) {
-    const oThis = this;
-
-    oThis.gotoKind = gotoConstants.webViewGotoKind;
-    oThis.gotoParams = { url: url };
   }
 }
 
