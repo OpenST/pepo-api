@@ -9,6 +9,7 @@ const rootPrefix = '../../../..',
   UsersCache = require(rootPrefix + '/lib/cacheManagement/multi/User'),
   VideoDetailsModel = require(rootPrefix + '/app/models/mysql/VideoDetail'),
   ActivityLogModel = require(rootPrefix + '/app/models/mysql/AdminActivityLog'),
+  TextByIdCache = require(rootPrefix + '/lib/cacheManagement/multi/TextsByIds'),
   IncrementWeightsAndAddVideoTags = require(rootPrefix + '/lib/video/IncrementWeightsAndAddVideoTags'),
   VideoDetailsByVideoIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/VideoDetailsByVideoIds'),
   DecrementWeightsAndRemoveVideoTags = require(rootPrefix + '/lib/video/DecrementWeightsAndRemoveVideoTags'),
@@ -50,6 +51,7 @@ class UpdateVideoDescription extends ServiceBase {
     oThis.videoDetail = null;
     oThis.creatorUserId = null;
     oThis.existingTextId = null;
+    oThis.existingLinkIds = [];
 
     oThis.user = null;
     oThis.isUserCreator = null;
@@ -71,14 +73,10 @@ class UpdateVideoDescription extends ServiceBase {
 
     await oThis._fetchVideoDetails();
 
-    await oThis._fetchCreatorUser();
+    let promiseArray = [oThis._fetchTextDetails(), oThis._fetchCreatorUser()];
+    await Promise.all(promiseArray);
 
-    const promiseArray = [
-      oThis._decrementVideoTagsWeightForExistingDescription(),
-      oThis._filterTags(),
-      oThis._filterUrls()
-    ];
-
+    promiseArray = [oThis._decrementVideoTagsWeightForExistingDescription(), oThis._filterTags(), oThis._filterUrls()];
     await Promise.all(promiseArray);
 
     await oThis._incrementWeightsAndAddVideoTags();
@@ -122,6 +120,31 @@ class UpdateVideoDescription extends ServiceBase {
         })
       );
     }
+  }
+
+  /**
+   * Fetch text details.
+   *
+   * @sets oThis.existingLinkIds
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _fetchTextDetails() {
+    const oThis = this;
+
+    if (!oThis.existingTextId) {
+      return;
+    }
+
+    const cacheRsp = await new TextByIdCache({ ids: [oThis.existingTextId] }).fetch();
+    if (cacheRsp.isFailure()) {
+      return Promise.reject(cacheRsp);
+    }
+
+    const textData = cacheRsp.data[oThis.existingTextId];
+
+    oThis.existingLinkIds = textData.linkIds ? JSON.parse(textData.linkIds) : [];
   }
 
   /**
@@ -224,7 +247,10 @@ class UpdateVideoDescription extends ServiceBase {
     const oThis = this;
 
     // Filter out urls from video description.
-    const filterUrlsResp = await new FilterUrls({ text: oThis.videoDescription }).perform(),
+    const filterUrlsResp = await new FilterUrls({
+        text: oThis.videoDescription,
+        existingLinkIds: oThis.existingLinkIds
+      }).perform(),
       videoDescriptionUrlsData = filterUrlsResp.data;
 
     oThis.urlIds = videoDescriptionUrlsData.urlIds;
@@ -239,7 +265,6 @@ class UpdateVideoDescription extends ServiceBase {
   async _incrementWeightsAndAddVideoTags() {
     const oThis = this;
 
-    // TODO: @Shlok Shouldn't we insert tagIds in texts table in any case?
     if (oThis.isUserCreator) {
       return new IncrementWeightsAndAddVideoTags({ tagIds: oThis.tagIds, videoId: oThis.videoId }).perform();
     }
