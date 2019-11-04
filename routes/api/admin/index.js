@@ -200,7 +200,9 @@ router.post('/update-video/:video_id/description', sanitizer.sanitizeDynamicUrlP
   req.decodedParams.apiName = apiName.adminUpdateVideoDescription;
   req.decodedParams.video_id = req.params.video_id;
 
-  Promise.resolve(routeHelper.perform(req, res, next, '/admin/video/UpdateLink', 'r_a_v1_ad_uvl_2', null, null, null));
+  Promise.resolve(
+    routeHelper.perform(req, res, next, '/admin/video/UpdateVideoDescription', 'r_a_v1_ad_uvl_2', null, null, null)
+  );
 });
 
 /* Logged in Admin */
