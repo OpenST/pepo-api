@@ -224,7 +224,7 @@ class UpdateVideoDescription extends ServiceBase {
     const oThis = this;
 
     // Filter out urls from video description.
-    const filterUrlsResp = await new FilterUrls(oThis.videoDescription).perform(),
+    const filterUrlsResp = await new FilterUrls({ text: oThis.videoDescription }).perform(),
       videoDescriptionUrlsData = filterUrlsResp.data;
 
     oThis.urlIds = videoDescriptionUrlsData.urlIds;
@@ -269,7 +269,7 @@ class UpdateVideoDescription extends ServiceBase {
         };
 
         return new TextModel().updateById(updateParams);
-        // return so there is no update in video detail
+        // Return here so there is no update in video detail.
       }
 
       const insertParams = {
