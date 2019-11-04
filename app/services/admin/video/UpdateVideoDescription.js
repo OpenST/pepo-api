@@ -9,7 +9,7 @@ const rootPrefix = '../../../..',
   UsersCache = require(rootPrefix + '/lib/cacheManagement/multi/User'),
   VideoDetailsModel = require(rootPrefix + '/app/models/mysql/VideoDetail'),
   ActivityLogModel = require(rootPrefix + '/app/models/mysql/AdminActivityLog'),
-  TextByIdCache = require(rootPrefix + '/lib/cacheManagement/multi/TextsByIds'),
+  TextsByIdCache = require(rootPrefix + '/lib/cacheManagement/multi/TextsByIds'),
   IncrementWeightsAndAddVideoTags = require(rootPrefix + '/lib/video/IncrementWeightsAndAddVideoTags'),
   VideoDetailsByVideoIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/VideoDetailsByVideoIds'),
   DecrementWeightsAndRemoveVideoTags = require(rootPrefix + '/lib/video/DecrementWeightsAndRemoveVideoTags'),
@@ -137,14 +137,14 @@ class UpdateVideoDescription extends ServiceBase {
       return;
     }
 
-    const cacheRsp = await new TextByIdCache({ ids: [oThis.existingTextId] }).fetch();
+    const cacheRsp = await new TextsByIdCache({ ids: [oThis.existingTextId] }).fetch();
     if (cacheRsp.isFailure()) {
       return Promise.reject(cacheRsp);
     }
 
     const textData = cacheRsp.data[oThis.existingTextId];
 
-    oThis.existingLinkIds = textData.linkIds ? JSON.parse(textData.linkIds) : [];
+    oThis.existingLinkIds = textData.linkIds || [];
   }
 
   /**
