@@ -224,7 +224,10 @@ class HookProcessor extends CronBase {
   async _afterProcessHook(hook, userDeviceIdToResponseMap) {
     const oThis = this;
 
+    let userDeviceIds = [];
+
     for (let userDeviceId in userDeviceIdToResponseMap) {
+      userDeviceIds.push(userDeviceId); // TODO: Temp Code. Remove after testing. - Anagha
       let response = userDeviceIdToResponseMap[userDeviceId];
       if (response.success == false) {
         switch (response.error.code) {
@@ -249,8 +252,10 @@ class HookProcessor extends CronBase {
           case notificationHookConstants.serverUnavailableErrorCode:
             logger.error('Error----------------------------', response.error.code);
             logger.log('serverUnavailable...\nSleeping Now...');
+            userDeviceIds.push(userDeviceId);
             await basicHelper.sleep(5000);
             break;
+
           default:
             logger.error('Error::default----------------------------', response);
 
@@ -263,6 +268,10 @@ class HookProcessor extends CronBase {
             await oThis._notifyErrorStates(errorIdentifierStr, debugOptions);
         }
       }
+    }
+
+    if (userDeviceIds.length) {
+      await oThis._reinsertIntoHooks(userDeviceIds);
     }
   }
 
@@ -309,7 +318,7 @@ class HookProcessor extends CronBase {
       user_device_ids: JSON.stringify(userDevicesIdsToBeReinserted),
       raw_notification_payload: JSON.stringify(oThis.hook.rawNotificationPayload),
       event_type: notificationHookConstants.invertedEventTypes[oThis.hook.eventType],
-      execution_timestamp: Math.round(Date.now() / 1000),
+      execution_timestamp: Math.round((Date.now() * 30 * 60 * 60) / 1000), // Retry after 30 minutes.
       lock_identifier: null,
       locked_at: null,
       retry_count: currentRetryCount + 1,
