@@ -8,8 +8,7 @@ const rootPrefix = '../..',
   coreConstants = require(rootPrefix + '/config/coreConstants'),
   responseHelper = require(rootPrefix + '/lib/formatter/response');
 
-const currentPepoApiDomain = coreConstants.PA_DOMAIN,
-  currentPepoWebDomain = coreConstants.PA_WEB_DOMAIN;
+const currentPepoApiDomain = coreConstants.PA_DOMAIN;
 
 const urlParser = require('url');
 
@@ -110,8 +109,7 @@ class FetchGoto extends ServiceBase {
         oThis.gotoKind = gotoConstants.videoGotoKind;
       }
     } else if (pathArray[1] == gotoConstants.tagGotoKind) {
-      let tagName = pathArray[2],
-        urlForTagsErrorPage = currentPepoWebDomain + '/' + '404';
+      let tagName = pathArray[2];
 
       if (tagName) {
         const tagByTagNamesCacheRsp = await new TagIdByNamesCache({ names: [tagName] }).fetch(),
@@ -121,11 +119,7 @@ class FetchGoto extends ServiceBase {
           let tagId = tagByTagNamesCacheData[tagName];
           oThis.gotoKind = gotoConstants.tagGotoKind;
           oThis.gotoParams = { tagId: tagId };
-        } else {
-          oThis._setWebViewGotoKindAndParams(urlForTagsErrorPage);
         }
-      } else {
-        oThis._setWebViewGotoKindAndParams(urlForTagsErrorPage);
       }
     } else if (pathArray[1] == 'account') {
       oThis.gotoKind = gotoConstants.invitedUsersGotoKind;
