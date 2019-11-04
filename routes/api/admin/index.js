@@ -179,7 +179,7 @@ router.get('/video-history/:profile_user_id', sanitizer.sanitizeDynamicUrlParams
   );
 });
 
-/* Delete video */
+/* Delete video. */
 router.post('/delete-video/:video_id', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.adminDeleteVideo;
   req.decodedParams.video_id = req.params.video_id;
@@ -187,7 +187,7 @@ router.post('/delete-video/:video_id', sanitizer.sanitizeDynamicUrlParams, funct
   Promise.resolve(routeHelper.perform(req, res, next, '/admin/DeleteVideo', 'r_a_v1_ad_6', null, null, null));
 });
 
-/* Update video Link*/
+/* Update video link. */
 router.post('/update-video/:video_id/link', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.adminUpdateVideoLink;
   req.decodedParams.video_id = req.params.video_id;
@@ -195,7 +195,7 @@ router.post('/update-video/:video_id/link', sanitizer.sanitizeDynamicUrlParams, 
   Promise.resolve(routeHelper.perform(req, res, next, '/admin/video/UpdateLink', 'r_a_v1_ad_uvl_1', null, null, null));
 });
 
-/* Update video Link*/
+/* Update video description. */
 router.post('/update-video/:video_id/description', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.adminUpdateVideoDescription;
   req.decodedParams.video_id = req.params.video_id;
