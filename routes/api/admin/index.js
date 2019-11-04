@@ -245,6 +245,26 @@ router.get('/users/:user_id/profile', sanitizer.sanitizeDynamicUrlParams, functi
   Promise.resolve(routeHelper.perform(req, res, next, '/admin/UserProfile', 'r_a_v1_ad_8', null, dataFormatterFunc));
 });
 
+/* Get tags */
+router.get('/tags', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.adminGetTags;
+
+  const dataFormatterFunc = async function(serviceResponse) {
+    const wrapperFormatterRsp = await new AdminFormatterComposer({
+      resultType: adminResponseEntityKey.tags,
+      entityKindToResponseKeyMap: {
+        [adminEntityType.tagList]: adminResponseEntityKey.tags,
+        [adminEntityType.tagListMeta]: adminResponseEntityKey.meta
+      },
+      serviceData: serviceResponse.data
+    }).perform();
+
+    serviceResponse.data = wrapperFormatterRsp.data;
+  };
+
+  Promise.resolve(routeHelper.perform(req, res, next, '/search/TagSearch', 'r_a_v1_ad_9', null, dataFormatterFunc));
+});
+
 router.use('/pre-launch', adminPreLaunchRoutes);
 router.use('/update-usage-data', adminUpdateUsageDataRoutes);
 

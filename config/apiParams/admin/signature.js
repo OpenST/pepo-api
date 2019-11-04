@@ -205,6 +205,23 @@ const adminSignature = {
   [apiName.adminUpdateTagsUsedUsage]: {
     mandatory: [],
     optional: []
+  },
+  [apiName.adminGetTags]: {
+    mandatory: [],
+    optional: [
+      {
+        parameter: 'q',
+        validatorMethods: ['validateString']
+      },
+      {
+        parameter: paginationConstants.paginationIdentifierKey,
+        validatorMethods: ['validateString', 'validatePaginationIdentifier']
+      },
+      {
+        parameter: 'getTopResults',
+        validatorMethods: ['validateBoolean']
+      }
+    ]
   }
 };
 
