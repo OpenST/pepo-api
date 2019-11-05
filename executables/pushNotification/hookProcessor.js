@@ -206,10 +206,9 @@ class HookProcessor extends CronBase {
           let currentRetryCount = oThis.hook.retryCount;
 
           if (currentRetryCount === notificationHookConstants.retryLimitForFailedHooks) {
-            statusToBeInserted =
-              notificationHookConstants.invertedStatuses[notificationHookConstants.completelyFailedStatus];
+            statusToBeInserted = notificationHookConstants.completelyFailedStatus;
           } else {
-            statusToBeInserted = notificationHookConstants.invertedStatuses[notificationHookConstants.pendingStatus];
+            statusToBeInserted = notificationHookConstants.pendingStatus;
           }
 
           oThis.increaseRetryCount = true;
