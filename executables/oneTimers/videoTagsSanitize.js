@@ -52,7 +52,7 @@ class VideoTagsSanitize {
           })
           .fire();
         for (let ut = 0; ut < userVideosDbResp.length; ut++) {
-          userVideoIds.push(userVideosDbResp[ut].id);
+          userVideoIds.push(userVideosDbResp[ut].video_id);
           userTextIds.push(userVideosDbResp[ut].description_id);
         }
         console.log(
@@ -76,10 +76,12 @@ class VideoTagsSanitize {
 
           logger.log("Incresing video_weight in Tags for user's userVideoTagIds: ", userVideoTagIds);
           if (userVideoTagIds && userVideoTagIds.length > 0) {
-            await new TagModel()
-              .update('video_weight = video_weight+1')
-              .where({ id: userVideoTagIds })
-              .fire();
+            for (let uvti = 0; uvti < userVideoTagIds.length; uvti++) {
+              await new TagModel()
+                .update('video_weight = video_weight+1')
+                .where({ id: userVideoTagIds[uvti] })
+                .fire();
+            }
             await TagModel.flushCache({ ids: userVideoTagIds });
           }
         } else {
