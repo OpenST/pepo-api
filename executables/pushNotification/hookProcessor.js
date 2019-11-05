@@ -196,7 +196,7 @@ class HookProcessor extends CronBase {
     if (pushNotificationProcessorRsp.isSuccess()) {
       let firebaseAPIResponse = pushNotificationProcessorRsp.data,
         statusToBeInserted = null,
-        executionTimestamp = null;
+        executionTimestamp = oThis.hook.executionTimestamp;
 
       if (firebaseAPIResponse.failureResponseCount > 0) {
         statusToBeInserted = notificationHookConstants.failedStatus;
