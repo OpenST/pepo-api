@@ -127,26 +127,23 @@ class NotificationHook extends ModelBase {
   /**
    * Update status and insert responses.
    *
-   * @param {number} hookId
-   * @param {string} status
-   * @param {object} response
-   * @param {boolean} increaseRetryCount
-   *
+   * @param params
    * @returns {Promise<void>}
    */
-  async updateStatusAndInsertResponse(hookId, status, response, increaseRetryCount = false) {
+  async updateStatusAndInsertResponse(params) {
     const oThis = this;
 
     const obj = oThis
       .update({
+        execution_timestamp: params.executionTimestamp || null,
         lock_identifier: null,
         locked_at: null,
-        status: notificationHookConstants.invertedStatuses[status],
-        response: JSON.stringify(response)
+        status: notificationHookConstants.invertedStatuses[params.status],
+        response: JSON.stringify(params.response)
       })
-      .where({ id: hookId });
+      .where({ id: params.hookId });
 
-    if (increaseRetryCount) {
+    if (params.increaseRetryCount) {
       obj.update(['retry_count = retry_count + ? ', 1]);
     }
 

@@ -166,19 +166,21 @@ class HookProcessor extends CronBase {
           };
         await oThis._notifyErrorStates(errorIdentifierStr, debugOptions);
 
-        await new NotificationHookModel().updateStatusAndInsertResponse(
-          hookId,
-          notificationHookConstants.failedStatus,
-          err,
-          oThis.increaseRetryCount
-        );
+        await new NotificationHookModel().updateStatusAndInsertResponse({
+          hookId: hookId,
+          status: notificationHookConstants.failedStatus,
+          response: err,
+          increaseRetryCount: oThis.increaseRetryCount
+        });
       });
     }
   }
 
   /**
-   * Function which will process the hook.
+   * After hooks process.
    *
+   * @param hook
+   * @param userDeviceIdToResponseMap
    * @returns {Promise<void>}
    * @private
    */
@@ -193,32 +195,47 @@ class HookProcessor extends CronBase {
 
     if (pushNotificationProcessorRsp.isSuccess()) {
       let firebaseAPIResponse = pushNotificationProcessorRsp.data,
-        statusToBeInserted = null;
+        statusToBeInserted = null,
+        executionTimestamp = null;
 
       if (firebaseAPIResponse.failureResponseCount > 0) {
         statusToBeInserted = notificationHookConstants.failedStatus;
-        await oThis._afterProcessHook(oThis.hook, firebaseAPIResponse.responseMap);
+        const userDeviceIds = await oThis._afterProcessHook(oThis.hook, firebaseAPIResponse.responseMap);
+
+        if (userDeviceIds.length) {
+          let currentRetryCount = oThis.hook.retryCount;
+
+          if (currentRetryCount === notificationHookConstants.retryLimitForFailedHooks) {
+            statusToBeInserted =
+              notificationHookConstants.invertedStatuses[notificationHookConstants.completelyFailedStatus];
+          } else {
+            statusToBeInserted = notificationHookConstants.invertedStatuses[notificationHookConstants.pendingStatus];
+          }
+
+          oThis.increaseRetryCount = true;
+          executionTimestamp = Math.round((Date.now() + 30 * 60 * 60) / 1000); // Retry after 30 minutes.
+        }
       } else {
         statusToBeInserted = notificationHookConstants.successStatus;
       }
 
-      return new NotificationHookModel().updateStatusAndInsertResponse(
-        oThis.hook.id,
-        statusToBeInserted,
-        firebaseAPIResponse,
-        oThis.increaseRetryCount
-      );
+      return new NotificationHookModel().updateStatusAndInsertResponse({
+        hookId: oThis.hook.id,
+        status: statusToBeInserted,
+        response: firebaseAPIResponse,
+        increaseRetryCount: oThis.increaseRetryCount,
+        executionTimestamp: executionTimestamp
+      });
     } else {
       return Promise.reject(pushNotificationProcessorRsp);
     }
   }
 
   /**
-   * After hooks process.
    *
    * @param hook
    * @param userDeviceIdToResponseMap
-   * @returns {Promise<void>}
+   * @returns {Promise<[]>}
    * @private
    */
   async _afterProcessHook(hook, userDeviceIdToResponseMap) {
@@ -269,9 +286,7 @@ class HookProcessor extends CronBase {
       }
     }
 
-    if (userDeviceIds.length) {
-      await oThis._updateFailedHooks(userDeviceIds);
-    }
+    return userDeviceIds;
   }
 
   /**
@@ -292,37 +307,6 @@ class HookProcessor extends CronBase {
       debug_options: debugOptions
     });
     await createErrorLogsEntry.perform(errorObject, errorLogsConstants.mediumSeverity);
-  }
-
-  /**
-   * Re-insert into hooks table.
-   *
-   * @param userDevicesIdsToBeReinserted
-   * @returns {Promise<any>}
-   * @private
-   */
-  async _updateFailedHooks(userDevicesIdsToBeReinserted) {
-    const oThis = this;
-
-    let currentRetryCount = oThis.hook.retryCount,
-      status = null;
-
-    if (currentRetryCount === notificationHookConstants.retryLimitForFailedHooks) {
-      status = notificationHookConstants.invertedStatuses[notificationHookConstants.completelyFailedStatus];
-    } else {
-      status = notificationHookConstants.invertedStatuses[notificationHookConstants.pendingStatus];
-    }
-
-    return new NotificationHookModel()
-      .update({
-        execution_timestamp: Math.round((Date.now() + 30 * 60 * 60) / 1000), // Retry after 30 minutes.
-        retry_count: currentRetryCount + 1,
-        status: status
-      })
-      .where({
-        id: oThis.hook.id
-      })
-      .fire();
   }
 
   /**
