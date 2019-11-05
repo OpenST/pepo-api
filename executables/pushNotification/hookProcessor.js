@@ -227,7 +227,6 @@ class HookProcessor extends CronBase {
     let userDeviceIds = [];
 
     for (let userDeviceId in userDeviceIdToResponseMap) {
-      userDeviceIds.push(userDeviceId); // TODO: Temp Code. Remove after testing. - Anagha
       let response = userDeviceIdToResponseMap[userDeviceId];
       if (response.success == false) {
         switch (response.error.code) {
