@@ -209,10 +209,9 @@ class HookProcessor extends CronBase {
             statusToBeInserted = notificationHookConstants.completelyFailedStatus;
           } else {
             statusToBeInserted = notificationHookConstants.pendingStatus;
+            oThis.increaseRetryCount = true;
+            executionTimestamp = Math.round((Date.now() + 30 * 60 * 1000) / 1000); // Retry after 30 minutes.
           }
-
-          oThis.increaseRetryCount = true;
-          executionTimestamp = Math.round((Date.now() + 30 * 60 * 1000) / 1000); // Retry after 30 minutes.
         }
       } else {
         statusToBeInserted = notificationHookConstants.successStatus;
