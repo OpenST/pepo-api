@@ -271,7 +271,7 @@ class HookProcessor extends CronBase {
     }
 
     if (userDeviceIds.length) {
-      await oThis._reinsertIntoHooks(userDeviceIds);
+      await oThis._updateFailedHooks(userDeviceIds);
     }
   }
 
@@ -302,30 +302,28 @@ class HookProcessor extends CronBase {
    * @returns {Promise<any>}
    * @private
    */
-  async _reinsertIntoHooks(userDevicesIdsToBeReinserted) {
+  async _updateFailedHooks(userDevicesIdsToBeReinserted) {
     const oThis = this;
 
     let currentRetryCount = oThis.hook.retryCount,
-      statusToBeInserted = null;
+      status = null;
 
     if (currentRetryCount === notificationHookConstants.retryLimitForFailedHooks) {
-      statusToBeInserted = notificationHookConstants.invertedStatuses[notificationHookConstants.completelyFailedStatus];
+      status = notificationHookConstants.invertedStatuses[notificationHookConstants.completelyFailedStatus];
     } else {
-      statusToBeInserted = notificationHookConstants.invertedStatuses[notificationHookConstants.pendingStatus];
+      status = notificationHookConstants.invertedStatuses[notificationHookConstants.pendingStatus];
     }
 
-    let insertParams = {
-      user_device_ids: JSON.stringify(userDevicesIdsToBeReinserted),
-      raw_notification_payload: JSON.stringify(oThis.hook.rawNotificationPayload),
-      event_type: notificationHookConstants.invertedEventTypes[oThis.hook.eventType],
-      execution_timestamp: Math.round((Date.now() + 30 * 60 * 60) / 1000), // Retry after 30 minutes.
-      lock_identifier: null,
-      locked_at: null,
-      retry_count: currentRetryCount + 1,
-      status: statusToBeInserted
-    };
-
-    return new NotificationHookModel().insert(insertParams).fire();
+    return new NotificationHookModel()
+      .update({
+        execution_timestamp: Math.round((Date.now() + 30 * 60 * 60) / 1000), // Retry after 30 minutes.
+        retry_count: currentRetryCount + 1,
+        status: status
+      })
+      .where({
+        id: oThis.hook.id
+      })
+      .fire();
   }
 
   /**
