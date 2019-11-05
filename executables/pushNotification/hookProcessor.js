@@ -207,6 +207,7 @@ class HookProcessor extends CronBase {
 
           if (currentRetryCount === notificationHookConstants.retryLimitForFailedHooks) {
             statusToBeInserted = notificationHookConstants.completelyFailedStatus;
+            await oThis._notifyErrorStates(notificationHookConstants.completelyFailedStatus, oThis.hook);
           } else {
             statusToBeInserted = notificationHookConstants.pendingStatus;
             oThis.increaseRetryCount = true;
@@ -267,7 +268,6 @@ class HookProcessor extends CronBase {
             logger.error('Error----------------------------', response.error.code);
             logger.log('serverUnavailable...\nSleeping Now...');
             userDeviceIds.push(userDeviceId);
-            await basicHelper.sleep(5000);
             break;
 
           default:
