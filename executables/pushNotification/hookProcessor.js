@@ -318,7 +318,7 @@ class HookProcessor extends CronBase {
       user_device_ids: JSON.stringify(userDevicesIdsToBeReinserted),
       raw_notification_payload: JSON.stringify(oThis.hook.rawNotificationPayload),
       event_type: notificationHookConstants.invertedEventTypes[oThis.hook.eventType],
-      execution_timestamp: Math.round((Date.now() * 30 * 60 * 60) / 1000), // Retry after 30 minutes.
+      execution_timestamp: Math.round((Date.now() + 30 * 60 * 60) / 1000), // Retry after 30 minutes.
       lock_identifier: null,
       locked_at: null,
       retry_count: currentRetryCount + 1,
