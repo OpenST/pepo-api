@@ -140,6 +140,7 @@ export REPLICATION_FACTOR='3'
 export DEFAULT_REPLICATION_LEVEL='localOne'
 
 export PA_CDN_URL='https://dbvoeb7t6hffk.cloudfront.net'
+export PA_CDN_DISTRIBUTION_ID='1234567890'
 export TWITTER_OAUTH_URL='https://api.twitter.com/oauth/authorize?oauth_token='
 
 # Pepo twitter handle
