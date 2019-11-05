@@ -1,3 +1,8 @@
+/*
+ *
+ * Usage: node executables/oneTimers/performPostVideoDeleteTasks.js
+ */
+
 const rootPrefix = '../..',
   VideoModel = require(rootPrefix + '/app/models/mysql/Video'),
   ImageModel = require(rootPrefix + '/app/models/mysql/Image'),
@@ -8,6 +13,9 @@ const rootPrefix = '../..',
   s3Constants = require(rootPrefix + '/lib/globalConstant/s3'),
   shortToLongUrl = require(rootPrefix + '/lib/shortToLongUrl'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger');
+
+const BATCH_SIZE = 10;
+const IMAGE_BATCH_SIZE = 5;
 
 class PerformPostVideoDeleteTasks {
   constructor() {
@@ -43,26 +51,30 @@ class PerformPostVideoDeleteTasks {
       pageNo = 1,
       Rows = ['dummy'];
 
-    const promiseArray = [];
+    let promiseArray = [];
 
     while (Rows.length > 0) {
-      offset = (pageNo - 1) * 50;
+      offset = (pageNo - 1) * BATCH_SIZE;
       Rows = await new VideoModel()
         .select('id, url_template, poster_image_id, resolutions')
         .where({ status: videoConstants.invertedStatuses[videoConstants.deletedStatus] })
-        .limit(50)
+        .limit(BATCH_SIZE)
         .offset(offset)
         .fire();
 
       pageNo += 1;
 
+      promiseArray = [];
       for (let ind = 0; ind < Rows.length; ind++) {
-        const formattedData = VideoModel._formatDbData(Rows[ind]);
+        const formattedData = new VideoModel()._formatDbData(Rows[ind]);
+
+        if (formattedData.posterImageId) {
+          oThis.imageIds.push(formattedData.posterImageId);
+        }
         promiseArray.push(oThis._changePermissionsForAllResolutions(formattedData, 'videos'));
+        await Promise.all(promiseArray);
       }
     }
-
-    await Promise.all(promiseArray);
   }
 
   /**
@@ -73,66 +85,66 @@ class PerformPostVideoDeleteTasks {
   async _changeS3PermissionsForImages() {
     const oThis = this;
 
-    const promiseArray = [];
+    let promiseArray = [];
     while (oThis.imageIds.length > 0) {
-      const imageIds = oThis.imageIds.splice(0, 50);
+      const imageIds = oThis.imageIds.splice(0, IMAGE_BATCH_SIZE);
 
       const Rows = await new ImageModel()
         .select('id, url_template, resolutions')
         .where({ id: imageIds })
         .fire();
 
+      promiseArray = [];
       for (let ind = 0; ind < Rows.length; ind++) {
-        const formattedData = VideoModel._formatDbData(Rows[ind]);
+        const formattedData = new ImageModel()._formatDbData(Rows[ind]);
         promiseArray.push(oThis._changePermissionsForAllResolutions(formattedData, 'images'));
       }
+      await Promise.all(promiseArray);
     }
-
-    await Promise.all(promiseArray);
   }
 
   /**
    * Change permissions for all resolutions of an entity
-   * @param entityHash
+   * @param entity
    * @param entityKind
    * @returns {Promise<void>}
    * @private
    */
-  async _changePermissionsForAllResolutions(entityHash, entityKind) {
+  async _changePermissionsForAllResolutions(entity, entityKind) {
     const oThis = this;
 
-    const promiseArray = [],
-      imageIds = [];
-    for (const entityId in entityHash) {
-      const entity = entityHash[entityId];
+    const promiseArray = [];
 
-      imageIds.push(entity.posterImageId);
+    if (!entity.urlTemplate) {
+      return;
+    }
 
-      if (!entity.urlTemplate) {
-        continue;
-      }
+    let pathPrefix = null;
 
-      let pathPrefix = null;
+    if (entityKind == 'images') {
+      pathPrefix = coreConstants.S3_USER_IMAGES_FOLDER;
+    } else {
+      pathPrefix = coreConstants.S3_USER_VIDEOS_FOLDER;
+    }
 
-      if (entityKind == 'images') {
-        pathPrefix = coreConstants.S3_USER_IMAGES_FOLDER;
-      } else {
-        pathPrefix = coreConstants.S3_USER_VIDEOS_FOLDER;
-      }
+    const resolutions = entity.resolutions,
+      urlTemplate = entity.urlTemplate.match(/\/.*/g)[0];
 
-      const resolutions = entity.resolutions,
-        urlTemplate = entity.urlTemplate.match(/\/.*/g)[0];
+    let entityKeyPattern = '/' + pathPrefix + entity.urlTemplate.match(/\/.-*/g)[0];
 
-      let entityKeyPattern = '/' + pathPrefix + entity.urlTemplate.match(/\/.-*/g)[0];
+    entityKeyPattern += '*'; // Select all with this pattern
+    oThis.entityKeys.push(entityKeyPattern);
 
-      entityKeyPattern += '*'; // Select all with this pattern
-      oThis.entityKeys.push(entityKeyPattern);
+    for (const size in resolutions) {
+      let sizeParsed = size == 'o' ? 'original' : size;
 
-      for (const size in resolutions) {
-        const bucket = coreConstants.S3_USER_ASSETS_BUCKET,
-          entityKey = pathPrefix + shortToLongUrl.replaceSizeInUrlTemplate(urlTemplate, size);
-        promiseArray.push(s3Wrapper.changeObjectPermissions(bucket, entityKey, s3Constants.privateAcl));
-      }
+      const bucket = coreConstants.S3_USER_ASSETS_BUCKET,
+        entityKey = pathPrefix + shortToLongUrl.replaceSizeInUrlTemplate(urlTemplate, sizeParsed);
+      promiseArray.push(
+        s3Wrapper.changeObjectPermissions(bucket, entityKey, s3Constants.privateAcl).catch(function(err) {
+          logger.error('===Error for', entityKey);
+        })
+      );
     }
 
     await Promise.all(promiseArray);
