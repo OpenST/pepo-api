@@ -19,7 +19,7 @@ class StopCron {
     const oThis = this;
 
     oThis.ids = ids;
-    oThis.status = cronProcessesConstants.stoppedStatus;
+    oThis.status = new CronProcessModel().invertedStatuses[cronProcessesConstants.stoppedStatus];
   }
 
   /**
