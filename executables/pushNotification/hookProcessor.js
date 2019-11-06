@@ -283,8 +283,7 @@ class HookProcessor extends CronBase {
             break;
 
           case notificationHookConstants.serverUnavailableErrorCode:
-            logger.error('Error----------------------------', response.error.code);
-            logger.log('serverUnavailable...\nSleeping Now...');
+            // If server is unavailable, collect user device ids for the same to retry.
             userDeviceIds.push(userDeviceId);
             break;
 
