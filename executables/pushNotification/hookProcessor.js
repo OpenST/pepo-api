@@ -170,7 +170,9 @@ class HookProcessor extends CronBase {
         await new NotificationHookModel()
           .update({
             status: notificationHookConstants.invertedStatuses[notificationHookConstants.failedStatus],
-            response: JSON.stringify(err)
+            response: JSON.stringify(err),
+            lock_identifier: null,
+            locked_at: null
           })
           .where({ id: hookId })
           .fire();
@@ -225,7 +227,9 @@ class HookProcessor extends CronBase {
           status: notificationHookConstants.invertedStatuses[statusToBeInserted],
           response: JSON.stringify(firebaseAPIResponse),
           execution_timestamp: executionTimestamp,
-          user_device_ids: JSON.stringify(userDeviceIds)
+          user_device_ids: JSON.stringify(userDeviceIds),
+          lock_identifier: null,
+          locked_at: null
         })
         .where({
           id: oThis.hook.id
