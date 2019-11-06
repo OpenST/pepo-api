@@ -76,4 +76,26 @@ router.get('/top', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) 
   Promise.resolve(routeHelper.perform(req, res, next, '/search/TopMixed', 'r_a_v1_s_3', null, dataFormatterFunc));
 });
 
+/* Search at-mention users */
+router.get('/at-mention', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.atMentionSearch;
+
+  const dataFormatterFunc = async function(serviceResponse) {
+    const wrapperFormatterRsp = await new FormatterComposer({
+      resultType: responseEntityKey.userSearchResults,
+      entityKindToResponseKeyMap: {
+        [entityType.userSearchList]: responseEntityKey.userSearchResults,
+        [entityType.usersMap]: responseEntityKey.users,
+        [entityType.imagesMap]: responseEntityKey.images,
+        [entityType.userSearchMeta]: responseEntityKey.meta
+      },
+      serviceData: serviceResponse.data
+    }).perform();
+
+    serviceResponse.data = wrapperFormatterRsp.data;
+  };
+
+  Promise.resolve(routeHelper.perform(req, res, next, '/search/UserSearch', 'r_a_v1_s_4', null, dataFormatterFunc));
+});
+
 module.exports = router;
