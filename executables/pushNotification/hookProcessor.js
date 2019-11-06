@@ -179,8 +179,6 @@ class HookProcessor extends CronBase {
   /**
    * After hooks process.
    *
-   * @param hook
-   * @param userDeviceIdToResponseMap
    * @returns {Promise<void>}
    * @private
    */
@@ -231,6 +229,7 @@ class HookProcessor extends CronBase {
   }
 
   /**
+   * Things to do after hook is processed.
    *
    * @param hook
    * @param userDeviceIdToResponseMap
@@ -320,7 +319,7 @@ class HookProcessor extends CronBase {
   }
 
   /**
-   * Acquire lock on failed hooks
+   * Acquire lock on failed hooks.
    *
    * @returns {Promise<void>}
    * @private
@@ -333,7 +332,6 @@ class HookProcessor extends CronBase {
 
   /**
    * Validate and sanitize params.
-   *
    *
    * @private
    */
@@ -357,7 +355,6 @@ class HookProcessor extends CronBase {
    * Get cron kind.
    *
    * @returns {string}
-   *
    * @private
    */
   get _cronKind() {
