@@ -164,14 +164,16 @@ class HookProcessor extends CronBase {
           debugOptions = {
             error: err
           };
+
         await oThis._notifyErrorStates(errorIdentifierStr, debugOptions);
 
-        await new NotificationHookModel().updateStatusAndInsertResponse({
-          hookId: hookId,
-          status: notificationHookConstants.failedStatus,
-          response: err,
-          increaseRetryCount: oThis.increaseRetryCount
-        });
+        await new NotificationHookModel()
+          .update({
+            status: notificationHookConstants.invertedStatuses[notificationHookConstants.failedStatus],
+            response: JSON.stringify(err)
+          })
+          .where({ id: hookId })
+          .fire();
       });
     }
   }
@@ -185,7 +187,7 @@ class HookProcessor extends CronBase {
   async _processHook() {
     const oThis = this;
 
-    logger.step('_processHook called for: ', oThis.hook);
+    logger.step('========= _processHook called for: ', oThis.hook);
 
     let pushNotificationProcessorRsp = await new PushNotificationProcessor({ hook: oThis.hook }).perform();
 
@@ -194,13 +196,14 @@ class HookProcessor extends CronBase {
     if (pushNotificationProcessorRsp.isSuccess()) {
       let firebaseAPIResponse = pushNotificationProcessorRsp.data,
         statusToBeInserted = null,
-        executionTimestamp = oThis.hook.executionTimestamp;
+        executionTimestamp = oThis.hook.executionTimestamp,
+        userDeviceIds = oThis.hook.userDeviceIds;
 
       if (firebaseAPIResponse.failureResponseCount > 0) {
         statusToBeInserted = notificationHookConstants.failedStatus;
-        const userDeviceIds = await oThis._afterProcessHook(oThis.hook, firebaseAPIResponse.responseMap);
+        const failedUserDeviceIds = await oThis._afterProcessHook(oThis.hook, firebaseAPIResponse.responseMap);
 
-        if (userDeviceIds.length) {
+        if (failedUserDeviceIds.length) {
           let currentRetryCount = oThis.hook.retryCount;
 
           if (currentRetryCount === notificationHookConstants.retryLimitForFailedHooks) {
@@ -209,20 +212,32 @@ class HookProcessor extends CronBase {
           } else {
             statusToBeInserted = notificationHookConstants.pendingStatus;
             oThis.increaseRetryCount = true;
-            executionTimestamp = Math.round((Date.now() + 30 * 60 * 1000) / 1000); // Retry after 30 minutes.
+            executionTimestamp = Math.round((Date.now() + 5 * 60 * 1000) / 1000); // Retry after 5 minutes.
+            userDeviceIds = failedUserDeviceIds;
           }
         }
       } else {
         statusToBeInserted = notificationHookConstants.successStatus;
       }
 
-      return new NotificationHookModel().updateStatusAndInsertResponse({
-        hookId: oThis.hook.id,
-        status: statusToBeInserted,
-        response: firebaseAPIResponse,
-        increaseRetryCount: oThis.increaseRetryCount,
-        executionTimestamp: executionTimestamp
-      });
+      const notificationHookObj = new NotificationHookModel()
+        .update({
+          status: notificationHookConstants.invertedStatuses[statusToBeInserted],
+          response: JSON.stringify(firebaseAPIResponse),
+          execution_timestamp: executionTimestamp,
+          user_device_ids: JSON.stringify(userDeviceIds)
+        })
+        .where({
+          id: oThis.hook.id
+        });
+
+      if (oThis.increaseRetryCount) {
+        notificationHookObj.update({
+          retry_count: oThis.hook.retryCount + 1
+        });
+      }
+
+      await notificationHookObj.fire();
     } else {
       return Promise.reject(pushNotificationProcessorRsp);
     }

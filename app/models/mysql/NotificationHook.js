@@ -125,32 +125,6 @@ class NotificationHook extends ModelBase {
   }
 
   /**
-   * Update status and insert responses.
-   *
-   * @param params
-   * @returns {Promise<void>}
-   */
-  async updateStatusAndInsertResponse(params) {
-    const oThis = this;
-
-    const obj = oThis
-      .update({
-        execution_timestamp: params.executionTimestamp || null,
-        lock_identifier: null,
-        locked_at: null,
-        status: notificationHookConstants.invertedStatuses[params.status],
-        response: JSON.stringify(params.response)
-      })
-      .where({ id: params.hookId });
-
-    if (params.increaseRetryCount) {
-      obj.update(['retry_count = retry_count + ? ', 1]);
-    }
-
-    await obj.fire();
-  }
-
-  /**
    * Mark status as processed successfully.
    *
    * @param {number} hookId
