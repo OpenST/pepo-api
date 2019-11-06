@@ -82,9 +82,9 @@ router.get('/at-mention', sanitizer.sanitizeDynamicUrlParams, function(req, res,
 
   const dataFormatterFunc = async function(serviceResponse) {
     const wrapperFormatterRsp = await new FormatterComposer({
-      resultType: responseEntityKey.userSearchResults,
+      resultType: responseEntityKey.mentionSearchResults,
       entityKindToResponseKeyMap: {
-        [entityType.userSearchList]: responseEntityKey.userSearchResults,
+        [entityType.userSearchList]: responseEntityKey.mentionSearchResults,
         [entityType.usersMap]: responseEntityKey.users,
         [entityType.imagesMap]: responseEntityKey.images,
         [entityType.userSearchMeta]: responseEntityKey.meta
