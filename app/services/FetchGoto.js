@@ -8,8 +8,7 @@ const rootPrefix = '../..',
   coreConstants = require(rootPrefix + '/config/coreConstants'),
   responseHelper = require(rootPrefix + '/lib/formatter/response');
 
-const currentPepoApiDomain = coreConstants.PA_DOMAIN,
-  currentPepoWebDomain = coreConstants.PA_WEB_DOMAIN;
+const currentPepoApiDomain = coreConstants.PA_DOMAIN;
 
 const urlParser = require('url');
 
@@ -110,8 +109,7 @@ class FetchGoto extends ServiceBase {
         oThis.gotoKind = gotoConstants.videoGotoKind;
       }
     } else if (pathArray[1] == gotoConstants.tagGotoKind) {
-      let tagName = pathArray[2],
-        urlForTagsErrorPage = currentPepoWebDomain + '/' + '404';
+      let tagName = pathArray[2];
 
       if (tagName) {
         const tagByTagNamesCacheRsp = await new TagIdByNamesCache({ names: [tagName] }).fetch(),
@@ -121,11 +119,7 @@ class FetchGoto extends ServiceBase {
           let tagId = tagByTagNamesCacheData[tagName];
           oThis.gotoKind = gotoConstants.tagGotoKind;
           oThis.gotoParams = { tagId: tagId };
-        } else {
-          oThis._setWebViewGotoKindAndParams(urlForTagsErrorPage);
         }
-      } else {
-        oThis._setWebViewGotoKindAndParams(urlForTagsErrorPage);
       }
     } else if (pathArray[1] == 'account') {
       oThis.gotoKind = gotoConstants.invitedUsersGotoKind;
@@ -135,8 +129,6 @@ class FetchGoto extends ServiceBase {
         oThis.gotoParams = { inviteCode: query['invite'] };
         oThis.gotoKind = gotoConstants.signUpGotoKind;
       }
-    } else {
-      oThis._setWebViewGotoKindAndParams(oThis.url);
     }
   }
 
@@ -163,21 +155,6 @@ class FetchGoto extends ServiceBase {
         }
       });
     }
-  }
-
-  /**
-   * sets webview goto and params
-   *
-   * @sets oThis.gotoParams, oThis.gotoKind
-   *
-   * @param url
-   * @private
-   */
-  _setWebViewGotoKindAndParams(url) {
-    const oThis = this;
-
-    oThis.gotoKind = gotoConstants.webViewGotoKind;
-    oThis.gotoParams = { url: url };
   }
 }
 
