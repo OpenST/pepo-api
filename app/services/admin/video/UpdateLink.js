@@ -55,9 +55,24 @@ class UpdateLink extends ServiceBase {
   async _asyncPerform() {
     const oThis = this;
 
-    await oThis._validateAndSanitizeParams();
-
     await oThis._fetchCreatorUserId();
+
+    // if admin wants to set link field blank
+    if (!CommonValidator.validateNonBlankString(oThis.link)) {
+      // delete link ids from urls table
+      let linkIdsToBeDeleted = oThis.videoDetail.linkIds;
+      await new UrlModel()
+        .delete()
+        .where({ id: linkIdsToBeDeleted })
+        .fire();
+
+      // remove association from video_details by setting linkIds empty array
+      await oThis._updateVideoDetails([], oThis.videoDetail.id);
+
+      return responseHelper.successWithData({});
+    } else {
+      await oThis._validateAndSanitizeLink();
+    }
 
     await oThis._fetchUser();
 
@@ -69,18 +84,18 @@ class UpdateLink extends ServiceBase {
   }
 
   /**
-   * Validate params.
+   * Validate link from params.
    *
    * @sets oThis.link
    *
    * @returns {Promise<void>}
    * @private
    */
-  async _validateAndSanitizeParams() {
+  async _validateAndSanitizeLink() {
     const oThis = this;
 
     // If url is not valid, consider link as null.
-    if (!oThis.link || !CommonValidator.validateGenericUrl(oThis.link)) {
+    if (!CommonValidator.validateGenericUrl(oThis.link)) {
       return Promise.reject(
         responseHelper.paramValidationError({
           internal_error_identifier: 'a_s_a_v_ul_vasp_1',
@@ -176,11 +191,22 @@ class UpdateLink extends ServiceBase {
 
     const response = await new UrlModel().insertUrl({ url: oThis.link, kind: urlConstants.socialUrlKind });
 
-    oThis.linkIds = JSON.stringify([response.insertId]);
+    oThis.linkIds = [response.insertId];
+
+    await oThis._updateVideoDetails(oThis.linkIds, oThis.videoDetail.id);
+  }
+
+  /**
+   * Update video details
+   *
+   * @returns {Promise<void>}
+   */
+  async _updateVideoDetails(linkIds, videoDetailsId) {
+    const oThis = this;
 
     await new VideoDetailModel()
-      .update({ link_ids: oThis.linkIds })
-      .where({ id: oThis.videoDetail.id })
+      .update({ link_ids: JSON.stringify(linkIds) })
+      .where({ id: videoDetailsId })
       .fire();
 
     await oThis._flushCache();
