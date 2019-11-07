@@ -52,6 +52,7 @@ class TwitterConnect extends ServiceBase {
     oThis.handle = params.handle;
     oThis.inviteCode = params.invite_code;
 
+    oThis.failedDueToKnownReason = false;
     oThis.userTwitterEntity = null;
     oThis.twitterUserObj = null;
     oThis.serviceResp = null;
@@ -143,7 +144,7 @@ class TwitterConnect extends ServiceBase {
   /**
    * Validate user signup is allowed or not.
    *
-   * @return {Promise<Result>}
+   * @return {Promise<Result/void>}
    * @private
    */
   async _validateUserSignupAllowed() {
@@ -155,7 +156,6 @@ class TwitterConnect extends ServiceBase {
 
     // If invite code is required, then check its validity
     if (oThis._hasPrelaunchInvitedAccess()) {
-      logger.log('Hereeeeeeeeeeeeeeeeeeee In prelaunch');
       // If twitter account belongs to prelaunch invite, then use that inviter code if any
       if (oThis.prelaunchInviteObj.inviterCodeId) {
         let cacheResp = await new InviteCodeByIdCache({ id: oThis.prelaunchInviteObj.inviterCodeId }).fetch();
@@ -163,10 +163,12 @@ class TwitterConnect extends ServiceBase {
       } else {
         await oThis._validateInviteCode();
       }
-    } else {
-      logger.log('Hereeeeeeeeeeeeeeeeeeee', oThis.inviteCode);
+    } else if (oThis.inviteCode) {
       // Validate invite code for users, who don't have prelaunch access
-      await oThis._validateInviteCode();
+      const inviteValidationResp = await oThis._validateInviteCode();
+      if (inviteValidationResp.isFailure()) {
+        return Promise.reject(inviteValidationResp);
+      }
     }
 
     logger.log('End::Validate User signup allowed');
@@ -284,6 +286,12 @@ class TwitterConnect extends ServiceBase {
       if (coreConstants.PA_DOMAIN.match(parsedUrl.host)) {
         oThis.inviteCode = parsedUrl.query.invite;
       } else if (coreConstants.PA_INVITE_DOMAIN.match(parsedUrl.host)) {
+        if (parsedUrl.pathname.split('/').length > 2) {
+          oThis.failedDueToKnownReason = true;
+
+          return responseHelper.successWithData({});
+        }
+
         oThis.inviteCode = parsedUrl.pathname.split('/')[1];
       } else {
         return responseHelper.paramValidationError({
@@ -332,6 +340,10 @@ class TwitterConnect extends ServiceBase {
 
     if (validateResponse.isFailure()) {
       return validateResponse;
+    }
+
+    if (oThis.failedDueToKnownReason) {
+      return responseHelper.successWithData({});
     }
 
     let inviterCodeRow = await oThis._fetchInviterCodeObject();
