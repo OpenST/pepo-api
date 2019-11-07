@@ -97,6 +97,7 @@ router.get('/users', sanitizer.sanitizeDynamicUrlParams, function(req, res, next
         [adminEntityType.userStats]: adminResponseEntityKey.userStats,
         [adminEntityType.imagesMap]: adminResponseEntityKey.images,
         [adminEntityType.videosMap]: adminResponseEntityKey.videos,
+        [adminEntityType.videoDescriptionsMap]: adminResponseEntityKey.videoDescriptions,
         [adminEntityType.linksMap]: adminResponseEntityKey.links,
         [adminEntityType.adminTwitterUsersMap]: adminResponseEntityKey.twitterUsers,
         [adminEntityType.token]: adminResponseEntityKey.token,

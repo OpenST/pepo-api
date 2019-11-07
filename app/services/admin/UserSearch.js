@@ -2,6 +2,7 @@ const bigNumber = require('bignumber.js');
 
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
+  GetProfile = require(rootPrefix + '/lib/user/profile/Get'),
   UserModel = require(rootPrefix + '/app/models/mysql/User'),
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   VideoDetailModel = require(rootPrefix + '/app/models/mysql/VideoDetail'),
@@ -99,13 +100,15 @@ class UserSearch extends ServiceBase {
 
       await oThis._fetchProfileElements();
 
+      await oThis._getProfileInfo();
+
       const promisesArray = [];
       promisesArray.push(
         oThis._fetchVideos(),
         oThis._fetchLink(),
         oThis._fetchUserStats(),
         oThis._fetchTwitterUser(),
-        oThis._fetchPricePoints(),
+        oThis._fetchPricePointsForStakeCurrency(),
         oThis._fetchLifetimePurchases()
       );
       await Promise.all(promisesArray);
@@ -507,14 +510,14 @@ class UserSearch extends ServiceBase {
   }
 
   /**
-   * Fetch price points.
+   * Fetch price points for given stake currency.
    *
    * @sets oThis.tokenDetails, oThis.pricePoints
    *
    * @returns {Promise<void>}
    * @private
    */
-  async _fetchPricePoints() {
+  async _fetchPricePointsForStakeCurrency() {
     const oThis = this;
 
     const promisesArray = [];
@@ -534,7 +537,7 @@ class UserSearch extends ServiceBase {
       return Promise.reject(pricePointsCacheRsp);
     }
 
-    oThis.pricePoints = pricePointsCacheRsp.data[stakeCurrency];
+    oThis.pricePoints = oThis.profileResponse.pricePointsMap[stakeCurrency];
   }
 
   /**
@@ -588,6 +591,31 @@ class UserSearch extends ServiceBase {
         redeemed: '0'
       };
     }
+  }
+
+  /**
+   * Fetch profile info.
+   *
+   * @sets oThis.profileResponse
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _getProfileInfo() {
+    const oThis = this;
+
+    const getProfileObj = new GetProfile({
+      userIds: oThis.userIds,
+      videoIds: oThis.videoIds,
+      isAdmin: true
+    });
+
+    const response = await getProfileObj.perform();
+    if (response.isFailure()) {
+      return Promise.reject(response);
+    }
+
+    oThis.profileResponse = response.data;
   }
 
   /**
@@ -650,6 +678,7 @@ class UserSearch extends ServiceBase {
       videoMap: oThis.videos,
       imageMap: oThis.imageDetails,
       linkMap: oThis.links,
+      videoDescriptionsMap: oThis.profileResponse.videoDescriptionMap,
       adminTwitterUsersMap: oThis.twitterUserByUserIdMap,
       tokenDetails: oThis.tokenDetails,
       userStat: oThis.userStatsMap,
