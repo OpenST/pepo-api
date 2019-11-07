@@ -314,7 +314,7 @@ const v1Signature = {
       },
       {
         parameter: 'video_description',
-        validatorMethods: ['validateString', 'validateStopWords']
+        validatorMethods: ['validateVideoDescription', 'validateStopWords']
       },
       {
         parameter: 'link',

@@ -105,7 +105,7 @@ const adminSignature = {
       },
       {
         parameter: 'video_description',
-        validatorMethods: ['validateString', 'validateStopWords']
+        validatorMethods: ['validateVideoDescription', 'validateStopWords']
       }
     ],
     optional: []
