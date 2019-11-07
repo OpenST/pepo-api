@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "e707dfe4-c3c4-42cf-bd0b-81c9059272fa",
+		"_postman_id": "3a18427c-bee0-4a5a-8fa4-4352c91a4474",
 		"name": "pepo-api",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -631,7 +631,7 @@
 									"value": "Hello. Simply #testing this service. https://ost.com"
 								}
 							],
-							"hash": "testing this service. https://ost.com"
+							"hash": "testing this service. https://ost.com#testing this service. https://ost.com"
 						}
 					},
 					"response": []
@@ -870,22 +870,22 @@
 									"urlencoded": [
 										{
 											"key": "token",
-											"value": "3314410076-KgqysTVFwTln5KE1akmyDMepro4WNPSaZQwSsSO",
+											"value": "1152149157206847488-ocfNpLMSQMykW21zUqT8COi4oEL0NP",
 											"type": "text"
 										},
 										{
 											"key": "secret",
-											"value": "d6apadYBdCzl28ozvgQestoTIdTJEIDe3R3ewDSBRBw7I",
+											"value": "ETwNn7XpyR2H4wrzcL1WcCp6YGmF0Vx1COA3hOpa74obw",
 											"type": "text"
 										},
 										{
 											"key": "twitter_id",
-											"value": "3314410076",
+											"value": "1152149157206847488",
 											"type": "text"
 										},
 										{
 											"key": "handle",
-											"value": "singhankit2099",
+											"value": "AnaghaMurtarkar",
 											"type": "text"
 										},
 										{
