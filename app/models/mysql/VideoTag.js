@@ -1,5 +1,6 @@
 const rootPrefix = '../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
+  videoTagConstants = require(rootPrefix + '/lib/globalConstant/videoTag'),
   databaseConstants = require(rootPrefix + '/lib/globalConstant/database');
 
 // Declare variables.
@@ -33,6 +34,7 @@ class VideoTag extends ModelBase {
    * @param {number} dbRow.id
    * @param {number} dbRow.tag_id
    * @param {number} dbRow.video_id
+   * @param {number} dbRow.video_kind
    * @param {number} dbRow.created_at
    * @param {number} dbRow.updated_at
    *
@@ -45,6 +47,7 @@ class VideoTag extends ModelBase {
       id: dbRow.id,
       tagId: dbRow.tag_id,
       videoId: dbRow.video_id,
+      videoKind: videoTagConstants.kinds[dbRow.video_kind],
       createdAt: dbRow.created_at,
       updatedAt: dbRow.updated_at
     };
@@ -58,7 +61,7 @@ class VideoTag extends ModelBase {
    * @returns {array}
    */
   safeFormattedColumnNames() {
-    return ['id', 'tagId', 'videoId', 'createdAt', 'updatedAt'];
+    return ['id', 'tagId', 'videoId', 'videoKind', 'createdAt', 'updatedAt'];
   }
 
   /**

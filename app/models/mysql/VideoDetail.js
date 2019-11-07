@@ -38,6 +38,8 @@ class VideoDetail extends ModelBase {
    * @param {array} dbRow.link_ids
    * @param {number} dbRow.total_contributed_by
    * @param {number} dbRow.total_amount
+   * @param {number} dbRow.per_reply_amount_in_wei
+   * @param {number} dbRow.total_replies
    * @param {number} dbRow.total_transactions
    * @param {number} dbRow.status
    * @param {number} dbRow.created_at
@@ -56,6 +58,8 @@ class VideoDetail extends ModelBase {
       linkIds: dbRow.link_ids,
       totalContributedBy: dbRow.total_contributed_by,
       totalAmount: dbRow.total_amount,
+      perReplyAmountInWei: dbRow.per_reply_amount_in_wei,
+      totalReplies: dbRow.total_replies,
       totalTransactions: dbRow.total_transactions,
       status: videoDetailsConstants.statuses[dbRow.status],
       createdAt: dbRow.created_at,
@@ -80,6 +84,8 @@ class VideoDetail extends ModelBase {
       'totalContributedBy',
       'totalTransactions',
       'totalAmount',
+      'perReplyAmountInWei',
+      'totalReplies',
       'status',
       'createdAt',
       'updatedAt'
