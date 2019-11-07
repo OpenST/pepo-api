@@ -7,17 +7,16 @@ const rootPrefix = '../..',
   VideoModel = require(rootPrefix + '/app/models/mysql/Video'),
   ImageModel = require(rootPrefix + '/app/models/mysql/Image'),
   s3Wrapper = require(rootPrefix + '/lib/aws/S3Wrapper'),
-  cloudfrontWrapper = require(rootPrefix + '/lib/aws/CloudfrontWrapper'),
   videoConstants = require(rootPrefix + '/lib/globalConstant/video'),
   coreConstants = require(rootPrefix + '/config/coreConstants'),
   s3Constants = require(rootPrefix + '/lib/globalConstant/s3'),
   shortToLongUrl = require(rootPrefix + '/lib/shortToLongUrl'),
-  basicHelper = require(rootPrefix + '/helpers/basic'),
+  bgJobConstants = require(rootPrefix + '/lib/globalConstant/bgJob'),
+  cdnCacheInvalidationEnqueue = require(rootPrefix + '/lib/rabbitMqEnqueue/cdnCacheInvalidation'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger');
 
 const BATCH_SIZE = 10;
 const IMAGE_BATCH_SIZE = 10;
-const CDN_BATCH_SIZE = 10;
 
 class PerformPostVideoDeleteTasks {
   constructor() {
@@ -38,7 +37,7 @@ class PerformPostVideoDeleteTasks {
 
     await oThis._changeS3PermissionsForImages();
 
-    await oThis._invalidateCdnCache();
+    await oThis._enqueueClearCdnCache();
   }
 
   /**
@@ -153,29 +152,25 @@ class PerformPostVideoDeleteTasks {
   }
 
   /**
-   * Invalidate cdn cache
+   * Clear cdn cache for deleted video and poster image
+   *
    * @returns {Promise<void>}
    * @private
    */
-  async _invalidateCdnCache() {
+  async _enqueueClearCdnCache() {
     const oThis = this;
 
-    while (1) {
-      const pathArray = oThis.entityKeys.splice(0, CDN_BATCH_SIZE);
+    const promiseArray = [];
 
-      if (pathArray.length == 0) {
-        return;
-      }
-
-      logger.info('====Invalidating for path wildcards', pathArray);
-
-      await cloudfrontWrapper.invalidateCache(pathArray).catch(function(err) {
-        logger.error('====Error for batch', pathArray);
-        logger.error(err);
-      });
-
-      await basicHelper.sleep(1000 * 60);
+    for (let ind = 0; ind < oThis.entityKeys.length; ind++) {
+      const path = oThis.entityKeys[ind];
+      const enqueueParams = {
+        pathArray: [path]
+      };
+      promiseArray.push(cdnCacheInvalidationEnqueue.enqueue(bgJobConstants.cdnCacheInvalidationTopic, enqueueParams));
     }
+
+    await Promise.all(promiseArray);
   }
 }
 
