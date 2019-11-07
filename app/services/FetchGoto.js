@@ -1,8 +1,7 @@
 const rootPrefix = '../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
-  shareEntityConstants = require(rootPrefix + '/lib/globalConstant/shareEntity'),
+  TagIdByNamesCache = require(rootPrefix + '/lib/cacheManagement/multi/TagIdByNames'),
   commonValidators = require(rootPrefix + '/lib/validators/Common'),
-  pageNameConstants = require(rootPrefix + '/lib/globalConstant/pageName'),
   gotoFactory = require(rootPrefix + '/lib/goTo/factory'),
   gotoConstants = require(rootPrefix + '/lib/globalConstant/goto'),
   entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
@@ -10,6 +9,7 @@ const rootPrefix = '../..',
   responseHelper = require(rootPrefix + '/lib/formatter/response');
 
 const currentPepoApiDomain = coreConstants.PA_DOMAIN;
+
 const urlParser = require('url');
 
 class FetchGoto extends ServiceBase {
@@ -58,7 +58,7 @@ class FetchGoto extends ServiceBase {
 
     await oThis._validateUrl();
 
-    oThis._fetchGotoKindAndParams();
+    await oThis._fetchGotoKindAndParams();
 
     return oThis._prepareResponse();
   }
@@ -95,17 +95,31 @@ class FetchGoto extends ServiceBase {
    *
    * @private
    */
-  _fetchGotoKindAndParams() {
+  async _fetchGotoKindAndParams() {
     const oThis = this;
 
     let pathName = oThis.parsedUrl.pathname,
       pathArray = pathName.split('/'),
       query = oThis.parsedUrl.query;
+
     if (pathArray[1] == gotoConstants.videoGotoKind) {
       let videoId = Number(pathArray[2]);
       if (videoId) {
         oThis.gotoParams = { videoId: videoId };
         oThis.gotoKind = gotoConstants.videoGotoKind;
+      }
+    } else if (pathArray[1] == gotoConstants.tagGotoKind) {
+      let tagName = pathArray[2];
+
+      if (tagName) {
+        const tagByTagNamesCacheRsp = await new TagIdByNamesCache({ names: [tagName] }).fetch(),
+          tagByTagNamesCacheData = tagByTagNamesCacheRsp.data;
+
+        if (commonValidators.validateInteger(tagByTagNamesCacheData[tagName])) {
+          let tagId = tagByTagNamesCacheData[tagName];
+          oThis.gotoKind = gotoConstants.tagGotoKind;
+          oThis.gotoParams = { tagId: tagId };
+        }
       }
     } else if (pathArray[1] == 'account') {
       oThis.gotoKind = gotoConstants.invitedUsersGotoKind;
@@ -115,10 +129,6 @@ class FetchGoto extends ServiceBase {
         oThis.gotoParams = { inviteCode: query['invite'] };
         oThis.gotoKind = gotoConstants.signUpGotoKind;
       }
-    } else {
-      // For now all other valid urls would give webView as goto
-      oThis.gotoParams = { url: oThis.url };
-      oThis.gotoKind = gotoConstants.webViewGotoKind;
     }
   }
 

@@ -59,6 +59,31 @@ class Tag extends ModelBase {
   }
 
   /**
+   * Get tags ids for given tag names.
+   *
+   * @param {array} tagNames
+   *
+   * @returns {Promise<void>}
+   */
+  async getTagIds(tagNames) {
+    const oThis = this;
+
+    const response = {};
+
+    const dbRows = await oThis
+      .select(['id', 'name'])
+      .where({ name: tagNames })
+      .fire();
+
+    for (let index = 0; index < dbRows.length; index++) {
+      const formatDbRow = oThis._formatDbData(dbRows[index]);
+      response[formatDbRow.name] = formatDbRow.id;
+    }
+
+    return response;
+  }
+
+  /**
    * Get tags.
    *
    * @param {array} names
@@ -213,6 +238,7 @@ class Tag extends ModelBase {
    * @param {object} params
    * @param {string} params.tagPrefix
    * @param {array} params.ids
+   * @param {String} params.name
    *
    * @returns {Promise<*>}
    */
@@ -227,6 +253,11 @@ class Tag extends ModelBase {
     if (params.ids) {
       const TagByIds = require(rootPrefix + '/lib/cacheManagement/multi/Tag');
       promisesArray.push(new TagByIds({ ids: params.ids }).clear());
+    }
+
+    if (params.name) {
+      const TagIdByNames = require(rootPrefix + '/lib/cacheManagement/multi/TagIdByNames');
+      promisesArray.push(new TagIdByNames({ names: [params.name] }).clear());
     }
 
     await Promise.all(promisesArray);
