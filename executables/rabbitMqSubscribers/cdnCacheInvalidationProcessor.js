@@ -99,9 +99,9 @@ class CdnCacheInvalidationProcessor extends RabbitMqProcessorBase {
       logger.error(err);
     });
 
-    await basicHelper.sleep(2000 * 60); // Wait for cache invalidation to complete - 2s
-
     oThis.cacheInvalidationInProgress = false;
+
+    await basicHelper.sleep(2000 * 60); // Wait for cache invalidation to complete - 2s
 
     return Promise.resolve({});
   }
