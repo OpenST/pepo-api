@@ -12,10 +12,12 @@ const rootPrefix = '../..',
   coreConstants = require(rootPrefix + '/config/coreConstants'),
   s3Constants = require(rootPrefix + '/lib/globalConstant/s3'),
   shortToLongUrl = require(rootPrefix + '/lib/shortToLongUrl'),
+  basicHelper = require(rootPrefix + '/helpers/basic'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger');
 
 const BATCH_SIZE = 10;
-const IMAGE_BATCH_SIZE = 5;
+const IMAGE_BATCH_SIZE = 10;
+const CDN_BATCH_SIZE = 10;
 
 class PerformPostVideoDeleteTasks {
   constructor() {
@@ -130,7 +132,7 @@ class PerformPostVideoDeleteTasks {
     const resolutions = entity.resolutions,
       urlTemplate = entity.urlTemplate.match(/\/.*/g)[0];
 
-    let entityKeyPattern = '/' + pathPrefix + entity.urlTemplate.match(/\/.-*/g)[0];
+    let entityKeyPattern = '/' + pathPrefix + entity.urlTemplate.match(/\/.*-/g)[0];
 
     entityKeyPattern += '*'; // Select all with this pattern
     oThis.entityKeys.push(entityKeyPattern);
@@ -157,14 +159,23 @@ class PerformPostVideoDeleteTasks {
    */
   async _invalidateCdnCache() {
     const oThis = this;
-    const promiseArray = [];
 
-    for (let ind = 0; ind < oThis.entityKeys.length; ind++) {
-      const path = oThis.entityKeys[ind];
-      promiseArray.push(cloudfrontWrapper.invalidateCache([path]));
+    while (1) {
+      const pathArray = oThis.entityKeys.splice(0, CDN_BATCH_SIZE);
+
+      if (pathArray.length == 0) {
+        return;
+      }
+
+      logger.info('====Invalidating for path wildcards', pathArray);
+
+      await cloudfrontWrapper.invalidateCache(pathArray).catch(function(err) {
+        logger.error('====Error for batch', pathArray);
+        logger.error(err);
+      });
+
+      await basicHelper.sleep(1000 * 60);
     }
-
-    await Promise.all(promiseArray);
   }
 }
 
