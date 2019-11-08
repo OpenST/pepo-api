@@ -38,7 +38,7 @@ class UpdateFanVideo extends UpdateProfileBase {
    * @param {boolean} params.isExternalUrl: video source is other than s3 upload
    * @param {string} [params.video_description]: Video description
    * @param {string} [params.link]: Link
-   * @param {string} [params.per_reply_amount_in_wei]: Per reply amount in wei.
+   * @param {string/number} [params.per_reply_amount_in_wei]: Per reply amount in wei.
    *
    * @augments UpdateProfileBase
    *
@@ -60,7 +60,7 @@ class UpdateFanVideo extends UpdateProfileBase {
     oThis.isExternalUrl = params.isExternalUrl;
     oThis.videoDescription = params.video_description;
     oThis.link = params.link;
-    oThis.perReplyAmountInWei = params.per_reply_amount_in_wei;
+    oThis.perReplyAmountInWei = params.per_reply_amount_in_wei || 0;
 
     oThis.videoId = null;
     oThis.addVideoParams = {};
@@ -99,7 +99,8 @@ class UpdateFanVideo extends UpdateProfileBase {
       posterImageWidth: oThis.imageWidth,
       posterImageHeight: oThis.imageHeight,
       isExternalUrl: oThis.isExternalUrl,
-      videoKind: videoConstants.userVideoKind
+      videoKind: videoConstants.userVideoKind,
+      perReplyAmountInWei: oThis.perReplyAmountInWei
     };
   }
 

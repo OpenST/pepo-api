@@ -310,14 +310,16 @@ class VideoDetail extends ModelBase {
    * @param {object} params
    * @param {number} params.userId
    * @param {number} params.videoId
-   * @param {string} params.linkIds
+   * @param {string} [params.linkIds]
    * @param {string} params.status
+   * @param {string/number} [params.perReplyAmountInWei]
    *
    * @return {object}
    */
   insertVideo(params) {
     const oThis = this;
 
+    const perReplyAmountInWei = params.perReplyAmountInWei || 0;
     let linkIds = null;
 
     if (params.linkIds && params.linkIds.length > 0) {
@@ -329,6 +331,7 @@ class VideoDetail extends ModelBase {
         creator_user_id: params.userId,
         video_id: params.videoId,
         link_ids: linkIds,
+        per_reply_amount_in_wei: perReplyAmountInWei,
         status: videoDetailsConstants.invertedStatuses[params.status]
       })
       .fire();
