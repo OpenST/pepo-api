@@ -1,6 +1,5 @@
 const rootPrefix = '../../../..',
   FilterTags = require(rootPrefix + '/lib/FilterOutTags'),
-  FilterUrls = require(rootPrefix + '/lib/FilterOutUrls'),
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   TextModel = require(rootPrefix + '/app/models/mysql/Text'),
   UserModel = require(rootPrefix + '/app/models/mysql/User'),
@@ -59,7 +58,7 @@ class UpdateVideoDescription extends ServiceBase {
     oThis.text = null;
     oThis.tagsIds = [];
 
-    oThis.urlIds = [];
+    oThis.urlIds = null;
   }
 
   /**
@@ -76,7 +75,7 @@ class UpdateVideoDescription extends ServiceBase {
     let promiseArray = [oThis._fetchTextDetails(), oThis._fetchCreatorUser()];
     await Promise.all(promiseArray);
 
-    promiseArray = [oThis._decrementVideoTagsWeightForExistingDescription(), oThis._filterTags(), oThis._filterUrls()];
+    promiseArray = [oThis._decrementVideoTagsWeightForExistingDescription(), oThis._filterTags()];
     await Promise.all(promiseArray);
 
     await oThis._incrementWeightsAndAddVideoTags();
@@ -233,27 +232,6 @@ class UpdateVideoDescription extends ServiceBase {
 
     oThis.text = videoDescriptionTagsData.text;
     oThis.tagIds = videoDescriptionTagsData.tagIds;
-  }
-
-  /**
-   * Filter urls.
-   *
-   * @sets oThis.urlIds
-   *
-   * @returns {Promise<void>}
-   * @private
-   */
-  async _filterUrls() {
-    const oThis = this;
-
-    // Filter out urls from video description.
-    const filterUrlsResp = await new FilterUrls({
-        text: oThis.videoDescription,
-        existingLinkIds: oThis.existingLinkIds
-      }).perform(),
-      videoDescriptionUrlsData = filterUrlsResp.data;
-
-    oThis.urlIds = videoDescriptionUrlsData.urlIds;
   }
 
   /**
