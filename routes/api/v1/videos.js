@@ -79,4 +79,10 @@ router.post('/:video_id/delete', sanitizer.sanitizeDynamicUrlParams, cookieHelpe
   Promise.resolve(routeHelper.perform(req, res, next, '/video/Delete', 'r_a_v1_v_3', null, null));
 });
 
+router.post('/validate-upload', cookieHelper.validateUserLoginRequired, function(req, res, next) {
+  req.decodedParams.apiName = apiName.validateUploadVideo;
+
+  Promise.resolve(routeHelper.perform(req, res, next, '/video/Validate', 'r_a_v1_v_3', null, null));
+});
+
 module.exports = router;

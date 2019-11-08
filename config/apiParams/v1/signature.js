@@ -322,6 +322,54 @@ const v1Signature = {
       } // If link is invalid, consider empty string.
     ]
   },
+  [apiName.validateUploadVideo]: {
+    mandatory: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      }
+    ],
+    optional: [
+      {
+        parameter: 'video_description',
+        validatorMethods: ['validateString', 'validateStopWords']
+      },
+      {
+        parameter: 'link',
+        validatorMethods: ['validateGenericUrl', 'validateStopWords']
+      },
+      {
+        parameter: 'per_reply_amount_in_wei',
+        validatorMethods: ['validateWeiValue']
+      }
+    ]
+  },
+  [apiName.validateUploadReply]: {
+    mandatory: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      },
+      {
+        parameter: 'parent_kind',
+        validatorMethods: ['validateString']
+      },
+      {
+        parameter: 'parent_id',
+        validatorMethods: ['validateNonZeroInteger']
+      }
+    ],
+    optional: [
+      {
+        parameter: 'video_description',
+        validatorMethods: ['validateString', 'validateStopWords']
+      },
+      {
+        parameter: 'link',
+        validatorMethods: ['validateGenericUrl', 'validateStopWords']
+      }
+    ]
+  },
   [apiName.saveProfileImage]: {
     mandatory: [
       {
