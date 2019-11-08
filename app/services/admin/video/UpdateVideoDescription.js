@@ -59,7 +59,7 @@ class UpdateVideoDescription extends ServiceBase {
     oThis.text = null;
     oThis.tagsIds = [];
 
-    oThis.urlIds = [];
+    oThis.urlIds = null;
   }
 
   /**
@@ -76,7 +76,7 @@ class UpdateVideoDescription extends ServiceBase {
     let promiseArray = [oThis._fetchTextDetails(), oThis._fetchCreatorUser()];
     await Promise.all(promiseArray);
 
-    promiseArray = [oThis._decrementVideoTagsWeightForExistingDescription(), oThis._filterTags(), oThis._filterUrls()];
+    promiseArray = [oThis._decrementVideoTagsWeightForExistingDescription(), oThis._filterTags()];
     await Promise.all(promiseArray);
 
     await oThis._incrementWeightsAndAddVideoTags();
@@ -252,6 +252,10 @@ class UpdateVideoDescription extends ServiceBase {
         existingLinkIds: oThis.existingLinkIds
       }).perform(),
       videoDescriptionUrlsData = filterUrlsResp.data;
+
+    if (videoDescriptionUrlsData.urlIds.length > 0) {
+      oThis.urlIds = videoDescriptionUrlsData.urlIds;
+    }
 
     oThis.urlIds = videoDescriptionUrlsData.urlIds;
   }
