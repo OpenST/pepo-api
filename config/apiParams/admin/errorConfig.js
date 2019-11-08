@@ -135,6 +135,11 @@ const adminErrorConfig = {
     code: 'invalid',
     message: 'Invalid video id.'
   },
+  invalid_link: {
+    parameter: 'link',
+    code: 'invalid',
+    message: 'Invalid link.'
+  },
   invalid_text: {
     parameter: 'text',
     code: 'invalid',

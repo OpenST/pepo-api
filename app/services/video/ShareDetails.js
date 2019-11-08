@@ -3,7 +3,7 @@ const uuidV4 = require('uuid/v4');
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   UserModel = require(rootPrefix + '/app/models/mysql/User'),
-  TextByIdCache = require(rootPrefix + '/lib/cacheManagement/multi/TextsByIds'),
+  TextsByIdCache = require(rootPrefix + '/lib/cacheManagement/multi/TextsByIds'),
   VideoByIdCache = require(rootPrefix + '/lib/cacheManagement/multi/VideoByIds'),
   UserMultiCache = require(rootPrefix + '/lib/cacheManagement/multi/User'),
   VideoDetailsByVideoIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/VideoDetailsByVideoIds'),
@@ -115,7 +115,7 @@ class ShareDetails extends ServiceBase {
     let videoDetails = videoDetailsCacheRsp.data[oThis.videoId];
 
     if (videoDetails.descriptionId) {
-      const textCacheResp = await new TextByIdCache({ ids: [videoDetails.descriptionId] }).fetch();
+      const textCacheResp = await new TextsByIdCache({ ids: [videoDetails.descriptionId] }).fetch();
 
       if (textCacheResp.isFailure()) {
         return Promise.reject(textCacheResp);
