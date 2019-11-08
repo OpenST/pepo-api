@@ -1,6 +1,5 @@
 const rootPrefix = '../../../..',
   FilterTags = require(rootPrefix + '/lib/FilterOutTags'),
-  FilterUrls = require(rootPrefix + '/lib/FilterOutUrls'),
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   TextModel = require(rootPrefix + '/app/models/mysql/Text'),
   UserModel = require(rootPrefix + '/app/models/mysql/User'),
@@ -233,31 +232,6 @@ class UpdateVideoDescription extends ServiceBase {
 
     oThis.text = videoDescriptionTagsData.text;
     oThis.tagIds = videoDescriptionTagsData.tagIds;
-  }
-
-  /**
-   * Filter urls.
-   *
-   * @sets oThis.urlIds
-   *
-   * @returns {Promise<void>}
-   * @private
-   */
-  async _filterUrls() {
-    const oThis = this;
-
-    // Filter out urls from video description.
-    const filterUrlsResp = await new FilterUrls({
-        text: oThis.videoDescription,
-        existingLinkIds: oThis.existingLinkIds
-      }).perform(),
-      videoDescriptionUrlsData = filterUrlsResp.data;
-
-    if (videoDescriptionUrlsData.urlIds.length > 0) {
-      oThis.urlIds = videoDescriptionUrlsData.urlIds;
-    }
-
-    oThis.urlIds = videoDescriptionUrlsData.urlIds;
   }
 
   /**
