@@ -38,7 +38,7 @@ if (!cronProcessId) {
 }
 
 /**
- * Class for HookProcessor
+ * Class for HookProcessor.
  *
  * @class
  */
@@ -70,7 +70,7 @@ class HookProcessor extends CronBase {
   }
 
   /**
-   * Start cron
+   * Start cron.
    *
    * @returns
    */
@@ -119,14 +119,14 @@ class HookProcessor extends CronBase {
     const oThis = this;
 
     if (oThis.processFailed) {
-      //Acquire Lock on failed hooks
+      // Acquire Lock on failed hooks.
       let acquireLockResponse = await oThis._acquireLockOnFailedHooks();
       if (acquireLockResponse.affectedRows === 0) {
         oThis.processableHooksPresentFlag = false;
         return;
       }
     } else {
-      //Acquire lock on fresh hooks
+      // Acquire lock on fresh hooks.
       let acquireLockResponse = await oThis._acquireLockOnFreshHooks();
       if (acquireLockResponse.affectedRows === 0) {
         oThis.processableHooksPresentFlag = false;
@@ -148,7 +148,7 @@ class HookProcessor extends CronBase {
   }
 
   /**
-   * Process the fetched hooks
+   * Process the fetched hooks.
    *
    * @returns {Promise<void>}
    * @private
@@ -181,6 +181,39 @@ class HookProcessor extends CronBase {
   }
 
   /**
+   * Re-insert into hooks table.
+   *
+   * @param userDevicesIdsToBeReinserted
+   * @returns {Promise<any>}
+   * @private
+   */
+  async _reinsertIntoHooks(userDevicesIdsToBeReinserted) {
+    const oThis = this;
+
+    let currentRetryCount = oThis.hook.retryCount,
+      statusToBeInserted = null;
+
+    if (currentRetryCount === notificationHookConstants.retryLimitForFailedHooks) {
+      statusToBeInserted = notificationHookConstants.invertedStatuses[notificationHookConstants.completelyFailedStatus];
+    } else {
+      statusToBeInserted = notificationHookConstants.invertedStatuses[notificationHookConstants.pendingStatus];
+    }
+
+    let insertParams = {
+      user_device_ids: JSON.stringify(userDevicesIdsToBeReinserted),
+      raw_notification_payload: JSON.stringify(oThis.hook.rawNotificationPayload),
+      event_type: notificationHookConstants.invertedEventTypes[oThis.hook.eventType],
+      execution_timestamp: Math.round((Date.now() + 5 * 60 * 60) / 1000), // Retry after 30 minutes.
+      lock_identifier: null,
+      locked_at: null,
+      retry_count: currentRetryCount + 1,
+      status: statusToBeInserted
+    };
+
+    return new NotificationHookModel().insert(insertParams).fire();
+  }
+
+  /**
    * After hooks process.
    *
    * @returns {Promise<void>}
@@ -197,51 +230,36 @@ class HookProcessor extends CronBase {
 
     if (pushNotificationProcessorRsp.isSuccess()) {
       let firebaseAPIResponse = pushNotificationProcessorRsp.data,
-        statusToBeInserted = null,
-        executionTimestamp = oThis.hook.executionTimestamp,
-        userDeviceIds = oThis.hook.userDeviceIds;
+        statusToBeInserted = null;
 
       if (firebaseAPIResponse.failureResponseCount > 0) {
         statusToBeInserted = notificationHookConstants.failedStatus;
-        const failedUserDeviceIds = await oThis._afterProcessHook(oThis.hook, firebaseAPIResponse.responseMap);
 
-        if (failedUserDeviceIds.length) {
+        await oThis._afterProcessHook(oThis.hook, firebaseAPIResponse.responseMap);
+
+        if (oThis.hook.userDeviceIds.length) {
           let currentRetryCount = oThis.hook.retryCount;
 
           if (currentRetryCount === notificationHookConstants.retryLimitForFailedHooks) {
             statusToBeInserted = notificationHookConstants.completelyFailedStatus;
             await oThis._notifyErrorStates(notificationHookConstants.completelyFailedStatus, oThis.hook);
-          } else {
-            statusToBeInserted = notificationHookConstants.pendingStatus;
-            oThis.increaseRetryCount = true;
-            executionTimestamp = Math.round((Date.now() + 5 * 60 * 1000) / 1000); // Retry after 5 minutes.
-            userDeviceIds = failedUserDeviceIds;
           }
         }
       } else {
         statusToBeInserted = notificationHookConstants.successStatus;
       }
 
-      const notificationHookObj = new NotificationHookModel()
+      await new NotificationHookModel()
         .update({
           status: notificationHookConstants.invertedStatuses[statusToBeInserted],
           response: JSON.stringify(firebaseAPIResponse),
-          execution_timestamp: executionTimestamp,
-          user_device_ids: JSON.stringify(userDeviceIds),
           lock_identifier: null,
           locked_at: null
         })
         .where({
           id: oThis.hook.id
-        });
-
-      if (oThis.increaseRetryCount) {
-        notificationHookObj.update({
-          retry_count: oThis.hook.retryCount + 1
-        });
-      }
-
-      await notificationHookObj.fire();
+        })
+        .fire();
     } else {
       return Promise.reject(pushNotificationProcessorRsp);
     }
@@ -301,7 +319,9 @@ class HookProcessor extends CronBase {
       }
     }
 
-    return userDeviceIds;
+    if (userDeviceIds.length) {
+      await oThis._reinsertIntoHooks(userDeviceIds);
+    }
   }
 
   /**
