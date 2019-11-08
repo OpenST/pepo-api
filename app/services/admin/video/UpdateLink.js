@@ -60,10 +60,10 @@ class UpdateLink extends ServiceBase {
     // if admin wants to set link field blank
     if (!CommonValidator.validateNonBlankString(oThis.link)) {
       // delete link ids from urls table
-      let linkIdsToBeDeleted = oThis.videoDetail.linkIds;
+      let linkIdToBeDeleted = oThis.videoDetail.linkIds;
       await new UrlModel()
         .delete()
-        .where({ id: linkIdsToBeDeleted })
+        .where({ id: linkIdToBeDeleted })
         .fire();
 
       // remove association from video_details by setting linkIds empty array
