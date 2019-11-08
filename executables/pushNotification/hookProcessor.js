@@ -237,7 +237,13 @@ class HookProcessor extends CronBase {
 
           if (currentRetryCount === notificationHookConstants.retryLimitForFailedHooks) {
             statusToBeInserted = notificationHookConstants.completelyFailedStatus;
-            await oThis._notifyErrorStates(notificationHookConstants.completelyFailedStatus, oThis.hook);
+
+            const errorObject = responseHelper.error({
+              internal_error_identifier: 'e_pn_2',
+              api_error_identifier: 'firebase_error',
+              debug_options: oThis.hook
+            });
+            await createErrorLogsEntry.perform(errorObject, errorLogsConstants.mediumSeverity);
           }
         }
       } else {
