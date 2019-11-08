@@ -202,6 +202,16 @@ Note: Get the webhooks id from above run(subscribe webhooks). Secret has to be o
   node executables/rabbitMqSubscribers/cdnCacheInvalidationProcessor.js --cronProcessId 6
 ```
 
+* Push Notifications related crons.
+```bash
+  # Hook processor cron
+  source set_env_vars.sh
+  node executables/pushNotification/hookProcessor.js --cronProcessId 8
+  # Aggragated push notifcations cron
+  source set_env_vars.sh
+  node executables/pushNotification/aggregator.js --cronProcessId 9
+```
+
 ## Web-sockets
 * Start web-socket server.
 ```bash
