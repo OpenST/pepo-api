@@ -598,6 +598,19 @@ const v1Signature = {
       }
     ]
   },
+  [apiName.atMentionSearch]: {
+    mandatory: [],
+    optional: [
+      {
+        parameter: 'q',
+        validatorMethods: ['validateString']
+      },
+      {
+        parameter: paginationConstants.paginationIdentifierKey,
+        validatorMethods: ['validateString', 'validatePaginationIdentifier']
+      }
+    ]
+  },
   [apiName.getEmail]: {
     mandatory: [
       {
