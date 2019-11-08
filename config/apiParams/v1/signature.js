@@ -309,6 +309,10 @@ const v1Signature = {
         validatorMethods: ['validateInteger']
       },
       {
+        parameter: 'per_reply_amount_in_wei',
+        validatorMethods: ['validateWeiValue']
+      },
+      {
         parameter: 'image_size',
         validatorMethods: ['validateInteger']
       },
