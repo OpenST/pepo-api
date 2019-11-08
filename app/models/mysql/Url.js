@@ -211,14 +211,21 @@ class Url extends ModelBase {
    * Flush cache.
    *
    * @param {object} params
-   * @param {number} params.id
+   * @param {number} [params.id]
+   * @param {array<number>} [params.ids]
    *
    * @returns {Promise<*>}
    */
   static async flushCache(params) {
     const UrlsByIds = require(rootPrefix + '/lib/cacheManagement/multi/UrlsByIds');
 
-    await new UrlsByIds({ ids: [params.id] }).clear();
+    if (params.id) {
+      await new UrlsByIds({ ids: [params.id] }).clear();
+    }
+
+    if (params.ids) {
+      await new UrlsByIds({ ids: params.ids }).clear();
+    }
   }
 }
 

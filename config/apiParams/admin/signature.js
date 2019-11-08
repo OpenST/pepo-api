@@ -76,6 +76,40 @@ const adminSignature = {
     ],
     optional: []
   },
+  [apiName.adminUpdateVideoLink]: {
+    mandatory: [
+      {
+        parameter: 'video_id',
+        validatorMethods: ['validateNonZeroInteger']
+      },
+      {
+        parameter: 'current_admin',
+        validatorMethods: ['validateNonEmptyObject']
+      },
+      {
+        parameter: 'link',
+        validatorMethods: ['validateString', 'validateStopWords']
+      }
+    ],
+    optional: []
+  },
+  [apiName.adminUpdateVideoDescription]: {
+    mandatory: [
+      {
+        parameter: 'video_id',
+        validatorMethods: ['validateNonZeroInteger']
+      },
+      {
+        parameter: 'current_admin',
+        validatorMethods: ['validateNonEmptyObject']
+      },
+      {
+        parameter: 'video_description',
+        validatorMethods: ['validateVideoDescription', 'validateStopWords']
+      }
+    ],
+    optional: []
+  },
   [apiName.adminLogin]: {
     mandatory: [
       {
@@ -171,6 +205,23 @@ const adminSignature = {
   [apiName.adminUpdateTagsUsedUsage]: {
     mandatory: [],
     optional: []
+  },
+  [apiName.adminGetTags]: {
+    mandatory: [],
+    optional: [
+      {
+        parameter: 'q',
+        validatorMethods: ['validateString']
+      },
+      {
+        parameter: paginationConstants.paginationIdentifierKey,
+        validatorMethods: ['validateString', 'validatePaginationIdentifier']
+      },
+      {
+        parameter: 'getTopResults',
+        validatorMethods: ['validateBoolean']
+      }
+    ]
   }
 };
 
