@@ -8,6 +8,7 @@ const rootPrefix = '../..',
   basicHelper = require(rootPrefix + '/helpers/basic'),
   cloudfrontWrapper = require(rootPrefix + '/lib/aws/CloudfrontWrapper'),
   cronProcessesConstants = require(rootPrefix + '/lib/globalConstant/cronProcesses'),
+  bgJobConstants = require(rootPrefix + '/lib/globalConstant/bgJob'),
   configStrategyConstants = require(rootPrefix + '/lib/globalConstant/configStrategy');
 
 program.option('--cronProcessId <cronProcessId>', 'Cron table process ID').parse(process.argv);
@@ -92,7 +93,11 @@ class CdnCacheInvalidationProcessor extends RabbitMqProcessorBase {
 
     oThis.cacheInvalidationInProgress = true;
 
+    const rabbitMqSubscription = oThis.subscriptionTopicToDataMap[oThis.topics[0]];
+
     logger.info('====Processing cache invalidation for paths', pathArray);
+
+    rabbitMqSubscription.stopConsumption();
 
     await cloudfrontWrapper.invalidateCache(pathArray).catch(function(err) {
       logger.error('====Error for batch', pathArray);
@@ -101,7 +106,9 @@ class CdnCacheInvalidationProcessor extends RabbitMqProcessorBase {
 
     oThis.cacheInvalidationInProgress = false;
 
-    await basicHelper.sleep(2000 * 60); // Wait for cache invalidation to complete - 2s
+    setTimeout(function() {
+      rabbitMqSubscription.resumeConsumption();
+    }, 2000 * 15);
 
     return Promise.resolve({});
   }
