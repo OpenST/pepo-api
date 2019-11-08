@@ -38,7 +38,7 @@ if (!cronProcessId) {
 }
 
 /**
- * Class for HookProcessor
+ * Class for HookProcessor.
  *
  * @class
  */
@@ -70,7 +70,7 @@ class HookProcessor extends CronBase {
   }
 
   /**
-   * Start cron
+   * Start cron.
    *
    * @returns
    */
@@ -119,14 +119,14 @@ class HookProcessor extends CronBase {
     const oThis = this;
 
     if (oThis.processFailed) {
-      //Acquire Lock on failed hooks
+      // Acquire Lock on failed hooks.
       let acquireLockResponse = await oThis._acquireLockOnFailedHooks();
       if (acquireLockResponse.affectedRows === 0) {
         oThis.processableHooksPresentFlag = false;
         return;
       }
     } else {
-      //Acquire lock on fresh hooks
+      // Acquire lock on fresh hooks.
       let acquireLockResponse = await oThis._acquireLockOnFreshHooks();
       if (acquireLockResponse.affectedRows === 0) {
         oThis.processableHooksPresentFlag = false;
@@ -148,7 +148,7 @@ class HookProcessor extends CronBase {
   }
 
   /**
-   * Process the fetched hooks
+   * Process the fetched hooks.
    *
    * @returns {Promise<void>}
    * @private
@@ -164,20 +164,52 @@ class HookProcessor extends CronBase {
           debugOptions = {
             error: err
           };
+
         await oThis._notifyErrorStates(errorIdentifierStr, debugOptions);
 
-        await new NotificationHookModel().updateStatusAndInsertResponse(
-          hookId,
-          notificationHookConstants.failedStatus,
-          err,
-          oThis.increaseRetryCount
-        );
+        await new NotificationHookModel()
+          .update({
+            status: notificationHookConstants.invertedStatuses[notificationHookConstants.failedStatus],
+            response: JSON.stringify(err),
+            lock_identifier: null,
+            locked_at: null
+          })
+          .where({ id: hookId })
+          .fire();
       });
     }
   }
 
   /**
-   * Function which will process the hook.
+   * Re-insert into hooks table.
+   *
+   * @param userDevicesIdsToBeReinserted
+   * @returns {Promise<any>}
+   * @private
+   */
+  async _reinsertIntoHooks(userDevicesIdsToBeReinserted) {
+    const oThis = this,
+      currentRetryCount = oThis.hook.retryCount;
+
+    if (currentRetryCount < notificationHookConstants.retryLimitForFailedHooks) {
+      const statusToBeInserted = notificationHookConstants.invertedStatuses[notificationHookConstants.pendingStatus];
+
+      const insertParams = {
+        user_device_ids: JSON.stringify(userDevicesIdsToBeReinserted),
+        raw_notification_payload: JSON.stringify(oThis.hook.rawNotificationPayload),
+        event_type: notificationHookConstants.invertedEventTypes[oThis.hook.eventType],
+        execution_timestamp: Math.round((Date.now() + 5 * 60 * 1000) / 1000), // Retry after 5 minutes.
+        lock_identifier: null,
+        locked_at: null,
+        retry_count: currentRetryCount + 1,
+        status: statusToBeInserted
+      };
+      return new NotificationHookModel().insert(insertParams).fire();
+    }
+  }
+
+  /**
+   * After hooks process.
    *
    * @returns {Promise<void>}
    * @private
@@ -185,7 +217,7 @@ class HookProcessor extends CronBase {
   async _processHook() {
     const oThis = this;
 
-    logger.step('_processHook called for: ', oThis.hook);
+    logger.step('========= _processHook called for: ', oThis.hook);
 
     let pushNotificationProcessorRsp = await new PushNotificationProcessor({ hook: oThis.hook }).perform();
 
@@ -197,32 +229,55 @@ class HookProcessor extends CronBase {
 
       if (firebaseAPIResponse.failureResponseCount > 0) {
         statusToBeInserted = notificationHookConstants.failedStatus;
+
         await oThis._afterProcessHook(oThis.hook, firebaseAPIResponse.responseMap);
+
+        if (oThis.hook.userDeviceIds.length) {
+          let currentRetryCount = oThis.hook.retryCount;
+
+          if (currentRetryCount === notificationHookConstants.retryLimitForFailedHooks) {
+            statusToBeInserted = notificationHookConstants.completelyFailedStatus;
+
+            const errorObject = responseHelper.error({
+              internal_error_identifier: 'e_pn_2',
+              api_error_identifier: 'firebase_error',
+              debug_options: oThis.hook
+            });
+            await createErrorLogsEntry.perform(errorObject, errorLogsConstants.mediumSeverity);
+          }
+        }
       } else {
         statusToBeInserted = notificationHookConstants.successStatus;
       }
 
-      return new NotificationHookModel().updateStatusAndInsertResponse(
-        oThis.hook.id,
-        statusToBeInserted,
-        firebaseAPIResponse,
-        oThis.increaseRetryCount
-      );
+      await new NotificationHookModel()
+        .update({
+          status: notificationHookConstants.invertedStatuses[statusToBeInserted],
+          response: JSON.stringify(firebaseAPIResponse),
+          lock_identifier: null,
+          locked_at: null
+        })
+        .where({
+          id: oThis.hook.id
+        })
+        .fire();
     } else {
       return Promise.reject(pushNotificationProcessorRsp);
     }
   }
 
   /**
-   * After hooks process.
+   * Things to do after hook is processed.
    *
    * @param hook
    * @param userDeviceIdToResponseMap
-   * @returns {Promise<void>}
+   * @returns {Promise<[]>}
    * @private
    */
   async _afterProcessHook(hook, userDeviceIdToResponseMap) {
     const oThis = this;
+
+    let userDeviceIds = [];
 
     for (let userDeviceId in userDeviceIdToResponseMap) {
       let response = userDeviceIdToResponseMap[userDeviceId];
@@ -247,10 +302,10 @@ class HookProcessor extends CronBase {
             break;
 
           case notificationHookConstants.serverUnavailableErrorCode:
-            logger.error('Error----------------------------', response.error.code);
-            logger.log('serverUnavailable...\nSleeping Now...');
-            await basicHelper.sleep(5000);
+            // If server is unavailable, collect user device ids for the same to retry.
+            userDeviceIds.push(userDeviceId);
             break;
+
           default:
             logger.error('Error::default----------------------------', response);
 
@@ -263,6 +318,10 @@ class HookProcessor extends CronBase {
             await oThis._notifyErrorStates(errorIdentifierStr, debugOptions);
         }
       }
+    }
+
+    if (userDeviceIds.length) {
+      await oThis._reinsertIntoHooks(userDeviceIds);
     }
   }
 
@@ -287,39 +346,6 @@ class HookProcessor extends CronBase {
   }
 
   /**
-   * Re-insert into hooks table.
-   *
-   * @param userDevicesIdsToBeReinserted
-   * @returns {Promise<any>}
-   * @private
-   */
-  async _reinsertIntoHooks(userDevicesIdsToBeReinserted) {
-    const oThis = this;
-
-    let currentRetryCount = oThis.hook.retryCount,
-      statusToBeInserted = null;
-
-    if (currentRetryCount === notificationHookConstants.retryLimitForFailedHooks) {
-      statusToBeInserted = notificationHookConstants.invertedStatuses[notificationHookConstants.completelyFailedStatus];
-    } else {
-      statusToBeInserted = notificationHookConstants.invertedStatuses[notificationHookConstants.pendingStatus];
-    }
-
-    let insertParams = {
-      user_device_ids: JSON.stringify(userDevicesIdsToBeReinserted),
-      raw_notification_payload: JSON.stringify(oThis.hook.rawNotificationPayload),
-      event_type: notificationHookConstants.invertedEventTypes[oThis.hook.eventType],
-      execution_timestamp: Math.round(Date.now() / 1000),
-      lock_identifier: null,
-      locked_at: null,
-      retry_count: currentRetryCount + 1,
-      status: statusToBeInserted
-    };
-
-    return new NotificationHookModel().insert(insertParams).fire();
-  }
-
-  /**
    * Acquire lock on fresh hooks.
    *
    * @returns {Promise<void>}
@@ -332,7 +358,7 @@ class HookProcessor extends CronBase {
   }
 
   /**
-   * Acquire lock on failed hooks
+   * Acquire lock on failed hooks.
    *
    * @returns {Promise<void>}
    * @private
@@ -345,7 +371,6 @@ class HookProcessor extends CronBase {
 
   /**
    * Validate and sanitize params.
-   *
    *
    * @private
    */
@@ -369,7 +394,6 @@ class HookProcessor extends CronBase {
    * Get cron kind.
    *
    * @returns {string}
-   *
    * @private
    */
   get _cronKind() {
