@@ -31,5 +31,7 @@
     "topics": ["cci.#"],
     "queues": ["example"],
     "prefetchCount": 1
+  },
+  "reValidateAllReceipts": {
   }
 }
