@@ -128,8 +128,6 @@ class UserSearch extends ServiceBase {
 
     let userData = {};
 
-    console.log('\n\n\noThis.isOnlyNameSearch-------', oThis.isOnlyNameSearch);
-
     if (oThis.query) {
       userData = await new UserModel().search({
         query: oThis.query,

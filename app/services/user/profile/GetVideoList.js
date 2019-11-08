@@ -3,10 +3,10 @@ const rootPrefix = '../../../..',
   GetProfile = require(rootPrefix + '/lib/user/profile/Get'),
   UserModel = require(rootPrefix + '/app/models/mysql/User'),
   GetTokenService = require(rootPrefix + '/app/services/token/Get'),
+  UserBlockedListCache = require(rootPrefix + '/lib/cacheManagement/single/UserBlockedList'),
   VideoDetailsByUserIdCache = require(rootPrefix + '/lib/cacheManagement/single/VideoDetailsByUserIdPagination'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
-  UserBlockedListCache = require(rootPrefix + '/lib/cacheManagement/single/UserBlockedList'),
   paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination');
 
 /**
@@ -120,19 +120,19 @@ class GetVideoList extends ServiceBase {
   async _fetchVideoIds() {
     const oThis = this;
 
-    //todo: do we need to check blocked user list here???
+    // Todo: do we need to check blocked user list here???
     // If not an admin, only then perform further validations.
     if (!oThis.isAdmin) {
       // If user's profile(not self) is not approved, videos would not be shown.
       if (oThis.currentUserId != oThis.profileUserId && !UserModel.isUserApprovedCreator(oThis.profileUserObj)) {
         return responseHelper.successWithData({});
       }
-      // Check for blocked user's list
-      let cacheResp = await new UserBlockedListCache({ userId: oThis.currentUserId }).fetch();
+      // Check for blocked user's list.
+      const cacheResp = await new UserBlockedListCache({ userId: oThis.currentUserId }).fetch();
       if (cacheResp.isFailure()) {
         return Promise.reject(cacheResp);
       }
-      let blockedByUserInfo = cacheResp.data[oThis.currentUserId];
+      const blockedByUserInfo = cacheResp.data[oThis.currentUserId];
       if (blockedByUserInfo.hasBlocked[oThis.profileUserId] || blockedByUserInfo.blockedBy[oThis.profileUserId]) {
         return responseHelper.successWithData({});
       }
