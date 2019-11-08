@@ -70,6 +70,7 @@ class UserSearch extends ServiceBase {
     oThis.userStatsMap = {};
     oThis.tokenDetails = {};
     oThis.searchResults = [];
+    oThis.videoDescriptionMap = {};
     oThis.paginationTimestamp = null;
     oThis.nextPaginationTimestamp = null;
     oThis.twitterUserByUserIdMap = {};
@@ -91,8 +92,6 @@ class UserSearch extends ServiceBase {
 
     await oThis._fetchUserIds();
 
-    await oThis._getProfileInfo();
-
     if (oThis.userIds.length > 0) {
       await oThis._fetchTokenUsers();
 
@@ -108,6 +107,7 @@ class UserSearch extends ServiceBase {
         oThis._fetchLink(),
         oThis._fetchUserStats(),
         oThis._fetchTwitterUser(),
+        oThis._getProfileInfo(),
         oThis._fetchPricePointsForStakeCurrency(),
         oThis._fetchLifetimePurchases()
       );
@@ -616,6 +616,7 @@ class UserSearch extends ServiceBase {
     }
 
     oThis.profileResponse = response.data;
+    oThis.videoDescriptionMap = oThis.profileResponse.videoDescriptionMap;
   }
 
   /**
