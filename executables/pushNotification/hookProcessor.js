@@ -188,26 +188,13 @@ class HookProcessor extends CronBase {
    * @private
    */
   async _reinsertIntoHooks(userDevicesIdsToBeReinserted) {
-    const oThis = this;
+    const oThis = this,
+      currentRetryCount = oThis.hook.retryCount;
 
-    let currentRetryCount = oThis.hook.retryCount,
-      statusToBeInserted = null;
+    if (currentRetryCount < notificationHookConstants.retryLimitForFailedHooks) {
+      const statusToBeInserted = notificationHookConstants.invertedStatuses[notificationHookConstants.pendingStatus];
 
-    if (currentRetryCount === notificationHookConstants.retryLimitForFailedHooks) {
-      statusToBeInserted = notificationHookConstants.invertedStatuses[notificationHookConstants.completelyFailedStatus];
-
-      return new NotificationHookModel()
-        .update({
-          status: statusToBeInserted,
-          lock_identifier: null,
-          locked_at: null
-        })
-        .where({ id: oThis.hook.id })
-        .fire();
-    } else {
-      statusToBeInserted = notificationHookConstants.invertedStatuses[notificationHookConstants.pendingStatus];
-
-      let insertParams = {
+      const insertParams = {
         user_device_ids: JSON.stringify(userDevicesIdsToBeReinserted),
         raw_notification_payload: JSON.stringify(oThis.hook.rawNotificationPayload),
         event_type: notificationHookConstants.invertedEventTypes[oThis.hook.eventType],
