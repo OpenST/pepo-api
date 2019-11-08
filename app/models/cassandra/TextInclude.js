@@ -68,6 +68,36 @@ class TextIncludeModel extends CassandraModelBase {
   }
 
   /**
+   * Fetch includes by text id
+   * @param textIds - ids of texts table
+   * @returns {Promise<{}>}
+   */
+  async fetchByTextIds(textIds) {
+    const oThis = this;
+    const query = `select * from ${oThis.queryTableName} where text_id in ?;`;
+    const params = [textIds];
+
+    const queryRsp = await oThis.fire(query, params);
+
+    if (queryRsp.rows.length === 0) {
+      return {};
+    }
+
+    const result = {};
+
+    for (let ind = 0; ind < queryRsp.rows.length; ind++) {
+      const row = queryRsp.rows[ind];
+
+      const formattedRow = oThis.formatDbData(row);
+
+      result[formattedRow.textId] = result[formattedRow.textId] || [];
+      result[formattedRow.textId].push(formattedRow);
+    }
+
+    return result;
+  }
+
+  /**
    * Fetch latest last action timestamp
    *
    * @param queryParams
