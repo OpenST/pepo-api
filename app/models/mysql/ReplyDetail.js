@@ -100,6 +100,48 @@ class ReplyDetail extends ModelBase {
   }
 
   /**
+   * Fetch by video id
+   *
+   * @param {integer} params.limit: no of rows to fetch
+   * @param {integer} params.videoId: video id
+   * @param {integer} params.paginationTimestamp: pagination timestamp
+   */
+  async fetchByVideoId(params) {
+    const oThis = this,
+      limit = params.limit,
+      videoId = params.videoId,
+      paginationTimestamp = params.paginationTimestamp;
+
+    const queryObject = oThis
+      .select('*')
+      .where({
+        entity_id: videoId,
+        entity_kind: replyDetailConstants.invertedEntityKinds[replyDetailConstants.videoEntityKind],
+        status: replyDetailConstants.invertedStatuses[replyDetailConstants.activeStatus]
+      })
+      .order_by('id desc')
+      .limit(limit);
+
+    if (paginationTimestamp) {
+      queryObject.where(['created_at < ?', paginationTimestamp]);
+    }
+
+    const dbRows = await queryObject.fire();
+
+    const replyDetails = {};
+
+    const replyIds = [];
+
+    for (let index = 0; index < dbRows.length; index++) {
+      const formatDbRow = oThis.formatDbData(dbRows[index]);
+      replyDetails[formatDbRow.id] = formatDbRow;
+      replyIds.push(formatDbRow.id);
+    }
+
+    return { replyDetails: replyDetails, replyIds: replyIds };
+  }
+
+  /**
    * Flush cache.
    *
    * @param {object} params
