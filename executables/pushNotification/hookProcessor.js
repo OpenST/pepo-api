@@ -214,7 +214,7 @@ class HookProcessor extends CronBase {
         execution_timestamp: Math.round((Date.now() + 5 * 60 * 1000) / 1000), // Retry after 5 minutes.
         lock_identifier: null,
         locked_at: null,
-        retry_count: currentRetryCount,
+        retry_count: currentRetryCount + 1,
         status: statusToBeInserted
       };
       return new NotificationHookModel().insert(insertParams).fire();
