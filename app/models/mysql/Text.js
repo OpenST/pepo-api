@@ -39,7 +39,7 @@ class Text extends ModelBase {
    * @param {string} dbRow.created_at
    * @param {string} dbRow.updated_at
    *
-   * @return {object}
+   * @returns {object}
    * @private
    */
   formatDbData(dbRow) {
@@ -48,8 +48,8 @@ class Text extends ModelBase {
     const formattedData = {
       id: dbRow.id,
       text: dbRow.text,
-      tagIds: dbRow.tag_ids,
-      linkIds: dbRow.link_ids,
+      tagIds: dbRow.tag_ids ? JSON.parse(dbRow.tag_ids) : null,
+      linkIds: dbRow.link_ids ? JSON.parse(dbRow.link_ids) : null,
       kind: textConstants.kinds[dbRow.kind],
       createdAt: dbRow.created_at,
       updatedAt: dbRow.updated_at
@@ -59,11 +59,11 @@ class Text extends ModelBase {
   }
 
   /**
-   * Fetch text by id
+   * Fetch text by id.
    *
    * @param {number} id
    *
-   * @return {object}
+   * @returns {object}
    */
   async fetchById(id) {
     const oThis = this;
@@ -74,11 +74,11 @@ class Text extends ModelBase {
   }
 
   /**
-   * Fetch text for given ids
+   * Fetch text for given ids.
    *
    * @param {array} ids: text ids
    *
-   * @return {object}
+   * @returns {object}
    */
   async fetchByIds(ids) {
     const oThis = this;
@@ -107,12 +107,12 @@ class Text extends ModelBase {
    * @param {array} params.linkIds
    * @param {string} params.kind
    *
-   * @return {object}
+   * @returns {object}
    */
   async insertText(params) {
     const oThis = this;
 
-    let insertParams = {
+    const insertParams = {
       text: params.text,
       kind: textConstants.invertedKinds[params.kind]
     };
@@ -132,11 +132,12 @@ class Text extends ModelBase {
    * Update text by id.
    *
    * @param {object} params
-   * @param {string} params.text
+   * @param {number} params.text
+   * @param {string} params.id
    * @param {array} [params.tagIds]
    * @param {array} [params.linkIds]
    *
-   * @return {Promise<void>}
+   * @returns {Promise<void>}
    */
   async updateById(params) {
     const oThis = this;
@@ -170,7 +171,7 @@ class Text extends ModelBase {
    * @param {object} params
    * @param {number} params.id
    *
-   * @return {Promise<void>}
+   * @returns {Promise<void>}
    */
   async deleteById(params) {
     const oThis = this;
@@ -187,7 +188,7 @@ class Text extends ModelBase {
    * Flush cache.
    *
    * @param {object} params
-   * @param {number} params.id
+   * @param {array<number>} params.textIds
    *
    * @returns {Promise<*>}
    */

@@ -35,7 +35,7 @@ class VideoDetail extends ModelBase {
    * @param {number} dbRow.creator_user_id
    * @param {number} dbRow.video_id
    * @param {number} dbRow.description_id
-   * @param {array} dbRow.link_ids
+   * @param {string} dbRow.link_ids
    * @param {number} dbRow.total_contributed_by
    * @param {number} dbRow.total_amount
    * @param {number} dbRow.per_reply_amount_in_wei
@@ -55,7 +55,7 @@ class VideoDetail extends ModelBase {
       creatorUserId: dbRow.creator_user_id,
       videoId: dbRow.video_id,
       descriptionId: dbRow.description_id,
-      linkIds: dbRow.link_ids,
+      linkIds: dbRow.link_ids ? JSON.parse(dbRow.link_ids) : null,
       totalContributedBy: dbRow.total_contributed_by,
       totalAmount: dbRow.total_amount,
       perReplyAmountInWei: dbRow.per_reply_amount_in_wei,
