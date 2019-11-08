@@ -68,32 +68,6 @@ class TextIncludeModel extends CassandraModelBase {
   }
 
   /**
-   * Separate entity identifier to find entity kind and id.
-   *
-   * @param entityIdentifier
-   * @returns {{entityKind: *, entityId: *}}
-   */
-  splitEntityIdentifier(entityIdentifier) {
-    let splittedArray = entityIdentifier.split('_');
-
-    return {
-      entityKind: splittedArray[0],
-      entityId: splittedArray[1]
-    };
-  }
-
-  /**
-   * Create entity identifier to find entity kind and id.
-   *
-   * @param entityKind
-   * @param entityId
-   * @returns {string}
-   */
-  createEntityIdentifier(entityKind, entityId) {
-    return entityKind + '_' + entityId;
-  }
-
-  /**
    * Fetch latest last action timestamp
    *
    * @param queryParams
@@ -112,6 +86,30 @@ class TextIncludeModel extends CassandraModelBase {
     }
 
     return oThis.formatDbData(queryRsp.rows[0]);
+  }
+
+  /**
+   *
+   *
+   * @param textId
+   * @param entityIdentifiers
+   * @param replaceableText
+   * @returns {Promise<void>}
+   */
+  async insertInTextIncludes(textId, entityIdentifiers, replaceableText) {
+    const oThis = this,
+      queries = [];
+
+    const query = `INSERT INTO ${oThis.tableName}(text_id, entity_identifier, replaceable_text) VALUES(?, ?, ?) `;
+
+    for (let i = 0; i < entityIdentifiers.length; i++) {
+      const updateParam = [textId, entityIdentifiers[i], replaceableText];
+      queries.push({ query: query, params: updateParam });
+    }
+
+    if (queries.length > 0) {
+      await oThis.batchFire(queries);
+    }
   }
 
   /**
