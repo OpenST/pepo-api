@@ -91,6 +91,8 @@ class UserSearch extends ServiceBase {
 
     await oThis._fetchUserIds();
 
+    await oThis._getProfileInfo();
+
     if (oThis.userIds.length > 0) {
       await oThis._fetchTokenUsers();
 
@@ -99,8 +101,6 @@ class UserSearch extends ServiceBase {
       await oThis._fetchLatestVideos();
 
       await oThis._fetchProfileElements();
-
-      await oThis._getProfileInfo();
 
       const promisesArray = [];
       promisesArray.push(
@@ -670,6 +670,8 @@ class UserSearch extends ServiceBase {
    */
   async _prepareResponse() {
     const oThis = this;
+
+    console.log('oThis.profileResponse.videoDescriptionMap----', oThis.profileResponse);
 
     const response = {
       [adminEntityType.userSearchList]: oThis.searchResults,
