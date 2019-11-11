@@ -8,6 +8,7 @@ const rootPrefix = '../../../..',
   ImageByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/ImageByIds'),
   TextsByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TextsByIds'),
   UserBlockedListCache = require(rootPrefix + '/lib/cacheManagement/single/UserBlockedList'),
+  TokenUserByUserIdsMultiCache = require(rootPrefix + '/lib/cacheManagement/multi/TokenUserByUserIds'),
   TextIncludesByTextIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TextIncludesByTextIds'),
   ReplyDetailsByVideoIdCache = require(rootPrefix + '/lib/cacheManagement/single/ReplyDetailsByVideoIdPagination'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
@@ -69,6 +70,8 @@ class GetReplyList extends ServiceBase {
     oThis.tags = {};
 
     oThis.images = {};
+
+    oThis.tokenUsersByUserIdMap = {};
   }
 
   /**
@@ -88,7 +91,7 @@ class GetReplyList extends ServiceBase {
       return oThis._prepareResponse();
     }
 
-    const promisesArray = [
+    let promisesArray = [
       oThis._fetchVideos(),
       oThis._fetchUsers(),
       oThis._fetchVideoDescriptions(),
@@ -97,7 +100,8 @@ class GetReplyList extends ServiceBase {
     ];
     await Promise.all(promisesArray);
 
-    await oThis._fetchImages();
+    promisesArray = [oThis._fetchImages(), oThis._fetchTokenUsers()];
+    await Promise.all(promisesArray);
 
     oThis._addResponseMetaData();
 
@@ -401,6 +405,38 @@ class GetReplyList extends ServiceBase {
   }
 
   /**
+   * Fetch token user details.
+   *
+   * @sets oThis.tokenUsersByUserIdMap
+   *
+   * @returns {Promise<*>}
+   * @private
+   */
+  async _fetchTokenUsers() {
+    const oThis = this;
+
+    if (oThis.userIds.length === 1) {
+      return;
+    }
+
+    const tokenUsersByIdHashResponse = await new TokenUserByUserIdsMultiCache({
+      userIds: oThis.userIds
+    }).fetch();
+
+    if (tokenUsersByIdHashResponse.isFailure()) {
+      return Promise.reject(
+        responseHelper.error({
+          internal_error_identifier: 'a_s_r_l_ftu_1',
+          api_error_identifier: 'something_went_wrong',
+          debug_options: { userIds: oThis.userIds }
+        })
+      );
+    }
+
+    oThis.tokenUsersByUserIdMap = tokenUsersByIdHashResponse.data;
+  }
+
+  /**
    * Add next page meta data.
    *
    * @sets oThis.responseMetaData
@@ -436,7 +472,13 @@ class GetReplyList extends ServiceBase {
     const oThis = this;
 
     return responseHelper.successWithData({
-      [entityType.userVideoList]: oThis.videoDetails,
+      [entityType.videoDetailsMap]: oThis.videoDetails,
+      [entityType.linksMap]: oThis.links,
+      videoMap: oThis.videos,
+      imageMap: oThis.images,
+      usersByIdMap: oThis.users,
+      tokenUsersByUserIdMap: oThis.tokenUsersByUserIdMap,
+      tags: oThis.tags,
       meta: oThis.responseMetaData
     });
   }
