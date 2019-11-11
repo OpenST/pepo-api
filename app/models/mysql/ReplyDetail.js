@@ -1,7 +1,6 @@
 const rootPrefix = '../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
   databaseConstants = require(rootPrefix + '/lib/globalConstant/database'),
-  videoDetailsConstants = require(rootPrefix + '/lib/globalConstant/videoDetail'),
   replyDetailConstants = require(rootPrefix + '/lib/globalConstant/replyDetail');
 
 // Declare variables.
@@ -39,7 +38,7 @@ class ReplyDetail extends ModelBase {
    * @param {number} dbRow.parent_kind
    * @param {number} dbRow.parent_id
    * @param {number} dbRow.description_id
-   * @param {array} dbRow.link_ids
+   * @param {string} dbRow.link_ids
    * @param {number} dbRow.transaction_id
    * @param {number} dbRow.total_contributed_by
    * @param {number} dbRow.total_amount
@@ -61,7 +60,7 @@ class ReplyDetail extends ModelBase {
       parentKind: replyDetailConstants.parentKinds[dbRow.parent_kind],
       parentId: dbRow.parent_id,
       descriptionId: dbRow.description_id,
-      linkIds: dbRow.link_ids,
+      linkIds: dbRow.link_ids ? JSON.parse(dbRow.link_ids) : null,
       transactionId: dbRow.transaction_id,
       totalContributedBy: dbRow.total_contributed_by,
       totalAmount: dbRow.total_amount,
@@ -100,22 +99,25 @@ class ReplyDetail extends ModelBase {
   }
 
   /**
-   * Fetch by video id
+   * Fetch by video id.
    *
    * @param {integer} params.limit: no of rows to fetch
    * @param {integer} params.videoId: video id
    * @param {integer} params.paginationTimestamp: pagination timestamp
+   *
+   * @returns Promise{object}
    */
   async fetchByVideoId(params) {
-    const oThis = this,
-      limit = params.limit,
+    const oThis = this;
+
+    const limit = params.limit,
       videoId = params.videoId,
       paginationTimestamp = params.paginationTimestamp;
 
     const queryObject = oThis
       .select('*')
       .where({
-        entity_id: videoId,
+        parent_id: videoId,
         entity_kind: replyDetailConstants.invertedEntityKinds[replyDetailConstants.videoEntityKind],
         status: replyDetailConstants.invertedStatuses[replyDetailConstants.activeStatus]
       })
@@ -129,7 +131,6 @@ class ReplyDetail extends ModelBase {
     const dbRows = await queryObject.fire();
 
     const replyDetails = {};
-
     const replyIds = [];
 
     for (let index = 0; index < dbRows.length; index++) {
@@ -145,10 +146,16 @@ class ReplyDetail extends ModelBase {
    * Flush cache.
    *
    * @param {object} params
+   * @param {number} params.videoId
    *
    * @returns {Promise<*>}
    */
-  static async flushCache(params) {}
+  static async flushCache(params) {
+    const ReplyDetailsByVideoIdPaginationCache = require(rootPrefix +
+      '/lib/cacheManagement/single/ReplyDetailsByVideoIdPagination');
+
+    await new ReplyDetailsByVideoIdPaginationCache({ videoId: params.videoId }).clear();
+  }
 }
 
 module.exports = ReplyDetail;
