@@ -100,22 +100,25 @@ class ReplyDetail extends ModelBase {
   }
 
   /**
-   * Fetch by video id
+   * Fetch by video id.
    *
    * @param {integer} params.limit: no of rows to fetch
    * @param {integer} params.videoId: video id
    * @param {integer} params.paginationTimestamp: pagination timestamp
+   *
+   * @returns Promise{object}
    */
   async fetchByVideoId(params) {
-    const oThis = this,
-      limit = params.limit,
+    const oThis = this;
+
+    const limit = params.limit,
       videoId = params.videoId,
       paginationTimestamp = params.paginationTimestamp;
 
     const queryObject = oThis
       .select('*')
       .where({
-        entity_id: videoId,
+        parent_id: videoId,
         entity_kind: replyDetailConstants.invertedEntityKinds[replyDetailConstants.videoEntityKind],
         status: replyDetailConstants.invertedStatuses[replyDetailConstants.activeStatus]
       })
@@ -129,7 +132,6 @@ class ReplyDetail extends ModelBase {
     const dbRows = await queryObject.fire();
 
     const replyDetails = {};
-
     const replyIds = [];
 
     for (let index = 0; index < dbRows.length; index++) {
