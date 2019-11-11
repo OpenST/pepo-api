@@ -147,10 +147,16 @@ class ReplyDetail extends ModelBase {
    * Flush cache.
    *
    * @param {object} params
+   * @param {number} params.videoId
    *
    * @returns {Promise<*>}
    */
-  static async flushCache(params) {}
+  static async flushCache(params) {
+    const ReplyDetailsByVideoIdPaginationCache = require(rootPrefix +
+      '/lib/cacheManagement/single/ReplyDetailsByVideoIdPagination');
+
+    await new ReplyDetailsByVideoIdPaginationCache({ videoId: params.videoId }).clear();
+  }
 }
 
 module.exports = ReplyDetail;
