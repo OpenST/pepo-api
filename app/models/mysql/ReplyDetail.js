@@ -55,8 +55,8 @@ class ReplyDetail extends ModelBase {
     const formattedData = {
       id: dbRow.id,
       creatorUserId: dbRow.creator_user_id,
-      entityId: dbRow.entity_id,
       entityKind: replyDetailConstants.entityKinds[dbRow.entity_kind],
+      entityId: dbRow.entity_id,
       parentKind: replyDetailConstants.parentKinds[dbRow.parent_kind],
       parentId: dbRow.parent_id,
       descriptionId: dbRow.description_id,
@@ -82,8 +82,8 @@ class ReplyDetail extends ModelBase {
     return [
       'id',
       'creatorUserId',
-      'entityId',
       'entityKind',
+      'entityId',
       'parentKind',
       'parentId',
       'descriptionId',
@@ -140,6 +140,43 @@ class ReplyDetail extends ModelBase {
     }
 
     return { replyDetails: replyDetails, replyIds: replyIds };
+  }
+
+  /**
+   * Insert new video.
+   *
+   * @param {object} params
+   * @param {number} params.userId
+   * @param {string} params.entityKind
+   * @param {number} params.entityId
+   * @param {string} params.parentKind
+   * @param {number} params.parentId
+   * @param {string} [params.linkIds]
+   * @param {string} params.status
+   *
+   * @returns {object}
+   */
+  insertVideo(params) {
+    const oThis = this;
+
+    const perReplyAmountInWei = params.perReplyAmountInWei || 0;
+    let linkIds = null;
+
+    if (params.linkIds && params.linkIds.length > 0) {
+      linkIds = JSON.stringify(params.linkIds);
+    }
+
+    return oThis
+      .insert({
+        creator_user_id: params.userId,
+        entity_kind: videoDetailsConstants.invertedEntityKinds[params.entityKind],
+        entity_id: params.entityId,
+        parent_kind: videoDetailsConstants.invertedParentKinds[params.parentKind],
+        parent_id: params.parentId,
+        link_ids: linkIds,
+        status: videoDetailsConstants.invertedStatuses[params.status]
+      })
+      .fire();
   }
 
   /**

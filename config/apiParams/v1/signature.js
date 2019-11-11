@@ -346,7 +346,7 @@ const v1Signature = {
         validatorMethods: ['validateNonEmptyObject']
       },
       {
-        parameter: 'video_id',
+        parameter: 'parent_video_id',
         validatorMethods: ['validateNonZeroInteger']
       },
       {
@@ -356,7 +356,7 @@ const v1Signature = {
     ],
     optional: [
       {
-        parameter: 'reply_id',
+        parameter: 'reply_detail_id',
         validatorMethods: ['validateNonZeroInteger']
       },
       {
@@ -382,10 +382,6 @@ const v1Signature = {
       {
         parameter: 'image_height',
         validatorMethods: ['validateInteger']
-      },
-      {
-        parameter: 'per_reply_amount_in_wei',
-        validatorMethods: ['validateWeiValue']
       },
       {
         parameter: 'image_size',

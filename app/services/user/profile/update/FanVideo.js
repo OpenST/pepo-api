@@ -132,7 +132,7 @@ class UpdateFanVideo extends UpdateProfileBase {
       return Promise.reject(resp);
     }
 
-    oThis.videoId = resp.data.insertId;
+    oThis.videoId = resp.data.videoId;
 
     await new AddVideoDescription({
       videoDescription: oThis.videoDescription,
