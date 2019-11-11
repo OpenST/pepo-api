@@ -34,6 +34,19 @@ const v1Signature = {
     ],
     optional: []
   },
+  [apiName.replyList]: {
+    mandatory: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      },
+      {
+        parameter: 'video_id',
+        validatorMethods: ['validateInteger']
+      }
+    ],
+    optional: []
+  },
   [apiName.registerDevice]: {
     mandatory: [
       {
