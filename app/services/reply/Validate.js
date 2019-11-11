@@ -1,6 +1,7 @@
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
+  replyDetailConstants = require(rootPrefix + '/lib/globalConstant/replyDetail'),
   VideoDetailsByVideoIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/VideoDetailsByVideoIds'),
   videoDetailsConstants = require(rootPrefix + '/lib/globalConstant/videoDetail'),
   UserBlockedListCache = require(rootPrefix + '/lib/cacheManagement/single/UserBlockedList');
@@ -48,20 +49,30 @@ class ValidateUploadVideoParams extends ServiceBase {
    */
   async _asyncPerform() {
     const oThis = this;
+    let videoDetails = {};
 
-    const videoDetailsCacheRsp = await new VideoDetailsByVideoIdsCache({ videoIds: [oThis.parentId] }).fetch();
+    if (oThis.parentKind.toUpperCase() === replyDetailConstants.videoEntityKind) {
+      const videoDetailsCacheRsp = await new VideoDetailsByVideoIdsCache({ videoIds: [oThis.parentId] }).fetch();
 
-    if (videoDetailsCacheRsp.isFailure()) {
-      return Promise.reject(videoDetailsCacheRsp);
-    }
+      if (videoDetailsCacheRsp.isFailure()) {
+        return Promise.reject(videoDetailsCacheRsp);
+      }
 
-    let videoDetails = videoDetailsCacheRsp.data[oThis.parentId];
+      videoDetails = videoDetailsCacheRsp.data[oThis.parentId];
 
-    if (videoDetails.status === videoDetailsConstants.deletedStatus) {
+      if (videoDetails.status === videoDetailsConstants.deletedStatus) {
+        return Promise.reject(
+          responseHelper.error({
+            internal_error_identifier: 'a_s_r_v_1',
+            api_error_identifier: 'entity_not_found'
+          })
+        );
+      }
+    } else {
       return Promise.reject(
         responseHelper.error({
-          internal_error_identifier: 'a_s_v_sd_2',
-          api_error_identifier: 'entity_not_found'
+          internal_error_identifier: 'a_s_r_v_2',
+          api_error_identifier: 'something_went_wrong'
         })
       );
     }
@@ -77,8 +88,9 @@ class ValidateUploadVideoParams extends ServiceBase {
     ) {
       return Promise.reject(
         responseHelper.error({
-          internal_error_identifier: 'a_s_v_sd_2',
-          api_error_identifier: 'entity_not_found'
+          internal_error_identifier: 'a_s_r_v_3',
+          api_error_identifier: 'unauthorized_api_request',
+          debug_options: { videoDetails: videoDetails }
         })
       );
     }

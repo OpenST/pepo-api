@@ -81,6 +81,8 @@ router.get('/users-mention', sanitizer.sanitizeDynamicUrlParams, function(req, r
       resultType: responseEntityKey.userSearchResults,
       entityKindToResponseKeyMap: {
         [entityType.users]: responseEntityKey.userSearchResults,
+        //[entityType.usersMap]: responseEntityKey.users,
+        [entityType.imagesMap]: responseEntityKey.images,
         [entityType.userListMeta]: responseEntityKey.meta
       },
       serviceData: serviceResponse.data
