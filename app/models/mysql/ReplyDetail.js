@@ -1,7 +1,6 @@
 const rootPrefix = '../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
   databaseConstants = require(rootPrefix + '/lib/globalConstant/database'),
-  videoDetailsConstants = require(rootPrefix + '/lib/globalConstant/videoDetail'),
   replyDetailConstants = require(rootPrefix + '/lib/globalConstant/replyDetail');
 
 // Declare variables.
