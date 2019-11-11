@@ -558,13 +558,14 @@ class GetReplyList extends ServiceBase {
     const oThis = this;
 
     return responseHelper.successWithData({
-      [entityType.videoDetailsMap]: oThis.videoDetails,
-      [entityType.linksMap]: oThis.links,
+      [entityType.videoReplyList]: oThis.videoReplies,
       videoMap: oThis.videos,
       imageMap: oThis.images,
+      [entityType.replyDetailsMap]: oThis.replyDetails,
       usersByIdMap: oThis.users,
       tokenUsersByUserIdMap: oThis.tokenUsersByUserIdMap,
       tags: oThis.tags,
+      [entityType.linksMap]: oThis.links,
       meta: oThis.responseMetaData
     });
   }
