@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "3a18427c-bee0-4a5a-8fa4-4352c91a4474",
+		"_postman_id": "78e58f81-1a0f-4e46-a503-226c4ae63d27",
 		"name": "pepo-api",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -1446,6 +1446,12 @@
 											"key": "image_width",
 											"value": "100",
 											"type": "text"
+										},
+										{
+											"key": "per_reply_amount_in_wei",
+											"value": "1000",
+											"type": "text",
+											"disabled": true
 										}
 									]
 								},
