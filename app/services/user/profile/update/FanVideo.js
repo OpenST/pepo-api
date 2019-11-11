@@ -99,7 +99,7 @@ class UpdateFanVideo extends UpdateProfileBase {
       posterImageWidth: oThis.imageWidth,
       posterImageHeight: oThis.imageHeight,
       isExternalUrl: oThis.isExternalUrl,
-      videoKind: videoConstants.userVideoKind,
+      videoKind: videoConstants.postVideoKind,
       perReplyAmountInWei: oThis.perReplyAmountInWei
     };
   }
