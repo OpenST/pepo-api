@@ -38,7 +38,7 @@ class ReplyDetail extends ModelBase {
    * @param {number} dbRow.parent_kind
    * @param {number} dbRow.parent_id
    * @param {number} dbRow.description_id
-   * @param {array} dbRow.link_ids
+   * @param {string} dbRow.link_ids
    * @param {number} dbRow.transaction_id
    * @param {number} dbRow.total_contributed_by
    * @param {number} dbRow.total_amount
@@ -60,7 +60,7 @@ class ReplyDetail extends ModelBase {
       parentKind: replyDetailConstants.parentKinds[dbRow.parent_kind],
       parentId: dbRow.parent_id,
       descriptionId: dbRow.description_id,
-      linkIds: dbRow.link_ids,
+      linkIds: dbRow.link_ids ? JSON.parse(dbRow.link_ids) : null,
       transactionId: dbRow.transaction_id,
       totalContributedBy: dbRow.total_contributed_by,
       totalAmount: dbRow.total_amount,
