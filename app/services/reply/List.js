@@ -90,12 +90,15 @@ class GetReplyList extends ServiceBase {
 
     await oThis._validateAndSanitizeParams();
 
-    let promisesArray = [oThis._fetchVideoDetails(), oThis._fetchUserBlockedList()];
-    await Promise.all(promisesArray);
+    let promisesArray = [];
+    if (!oThis.isAdmin) {
+      promisesArray = [oThis._fetchVideoDetails(), oThis._fetchUserBlockedList()];
+      await Promise.all(promisesArray);
 
-    const blockedCheckResponseForCurrentUser = oThis._performBlockedUserChecks(oThis.videoCreatorId);
-    if (blockedCheckResponseForCurrentUser.isFailure()) {
-      return oThis._prepareResponse();
+      const blockedCheckResponseForCurrentUser = oThis._performBlockedUserChecks(oThis.videoCreatorId);
+      if (blockedCheckResponseForCurrentUser.isFailure()) {
+        return oThis._prepareResponse();
+      }
     }
 
     await oThis._fetchVideoReplies();
