@@ -1,6 +1,6 @@
 const rootPrefix = '../../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
-  UserModel = require(rootPrefix + '/app/models/mysql/User'),
+  CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   UserCache = require(rootPrefix + '/lib/cacheManagement/multi/User'),
   TagByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/Tag'),
   UrlsByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/UrlsByIds'),
@@ -10,6 +10,7 @@ const rootPrefix = '../../../..',
   UserBlockedListCache = require(rootPrefix + '/lib/cacheManagement/single/UserBlockedList'),
   TokenUserByUserIdsMultiCache = require(rootPrefix + '/lib/cacheManagement/multi/TokenUserByUserIds'),
   TextIncludesByTextIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TextIncludesByTextIds'),
+  VideoDetailsByVideoIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/VideoDetailsByVideoIds'),
   ReplyDetailsByVideoIdCache = require(rootPrefix + '/lib/cacheManagement/single/ReplyDetailsByVideoIdPagination'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
@@ -49,6 +50,10 @@ class GetReplyList extends ServiceBase {
     oThis.currentUserId = null;
     oThis.paginationTimestamp = null;
 
+    oThis.videoCreatorId = null;
+
+    oThis.blockedUserInfoForCurrentUser = {};
+
     oThis.nextPaginationTimestamp = null;
     oThis.repliesCount = 0;
     oThis.replyDetails = {};
@@ -85,13 +90,21 @@ class GetReplyList extends ServiceBase {
 
     await oThis._validateAndSanitizeParams();
 
-    await oThis._fetchVideoReplies();
+    let promisesArray = [oThis._fetchVideoDetails(), oThis._fetchUserBlockedList()];
+    await Promise.all(promisesArray);
 
-    if (oThis.videoReplies.length === 0) {
+    const blockedCheckResponseForCurrentUser = oThis._performBlockedUserChecks(oThis.videoCreatorId);
+    if (blockedCheckResponseForCurrentUser.isFailure()) {
       return oThis._prepareResponse();
     }
 
-    let promisesArray = [
+    await oThis._fetchVideoReplies();
+
+    if (oThis.repliesCount === 0) {
+      return oThis._prepareResponse();
+    }
+
+    promisesArray = [
       oThis._fetchVideos(),
       oThis._fetchUsers(),
       oThis._fetchVideoDescriptions(),
@@ -134,7 +147,85 @@ class GetReplyList extends ServiceBase {
   }
 
   /**
-   * Fetch video ids.
+   * Fetch video details.
+   *
+   * @sets oThis.videoCreatorId
+   *
+   * @returns {Promise<never>}
+   * @private
+   */
+  async _fetchVideoDetails() {
+    const oThis = this;
+
+    const videoDetailsCacheResponse = await new VideoDetailsByVideoIdsCache({ videoIds: [oThis.videoId] }).fetch();
+    if (videoDetailsCacheResponse.isFailure()) {
+      return Promise.reject(
+        responseHelper.error({
+          internal_error_identifier: 'a_s_r_l_fvd_1',
+          api_error_identifier: 'something_went_wrong',
+          debug_options: { videoId: oThis.videoId }
+        })
+      );
+    }
+
+    const videoDetails = videoDetailsCacheResponse.data[oThis.videoId];
+    if (!CommonValidators.validateNonEmptyObject(videoDetails)) {
+      return Promise.reject(
+        responseHelper.paramValidationError({
+          internal_error_identifier: 'a_s_r_l_fvd_2',
+          api_error_identifier: 'invalid_api_params',
+          params_error_identifiers: ['invalid_video_id'],
+          debug_options: { videoId: oThis.videoId }
+        })
+      );
+    }
+
+    oThis.videoCreatorId = videoDetails.creatorUserId;
+  }
+
+  /**
+   * Fetch current user blocked details.
+   *
+   * @sets oThis.blockedUserInfoForCurrentUser
+   *
+   * @returns {Promise<result>}
+   * @private
+   */
+  async _fetchUserBlockedList() {
+    const oThis = this;
+
+    // Check for blocked user's list.
+    const blockedUserCacheResponse = await new UserBlockedListCache({ userId: oThis.currentUserId }).fetch();
+    if (blockedUserCacheResponse.isFailure()) {
+      return Promise.reject(blockedUserCacheResponse);
+    }
+
+    oThis.blockedUserInfoForCurrentUser = blockedUserCacheResponse.data[oThis.currentUserId];
+  }
+
+  /**
+   * Perform blocked user check with respect to current user.
+   *
+   * @param {number} compareWithUserId: UserId which needs to be compared with the currentUserId.
+   *
+   * @returns {result}
+   * @private
+   */
+  _performBlockedUserChecks(compareWithUserId) {
+    const oThis = this;
+
+    if (
+      oThis.blockedUserInfoForCurrentUser.hasBlocked[compareWithUserId] ||
+      oThis.blockedUserInfoForCurrentUser.blockedBy[compareWithUserId]
+    ) {
+      return responseHelper.error();
+    }
+
+    return responseHelper.success();
+  }
+
+  /**
+   * Fetch video reply details.
    *
    * @sets oThis.replyDetails, oThis.repliesCount, oThis.videoIds, oThis.userIds, oThis.descriptionIds, oThis.linkIds,
    *       oThis.nextPaginationTimestamp
@@ -144,22 +235,6 @@ class GetReplyList extends ServiceBase {
    */
   async _fetchVideoReplies() {
     const oThis = this;
-
-    if (!oThis.isAdmin) {
-      // If user's profile(not self) is not approved, videos would not be shown.
-      if (+oThis.currentUserId !== +oThis.profileUserId && !UserModel.isUserApprovedCreator(oThis.profileUserObj)) {
-        return responseHelper.successWithData({});
-      }
-      // Check for blocked user's list.
-      const cacheResp = await new UserBlockedListCache({ userId: oThis.currentUserId }).fetch();
-      if (cacheResp.isFailure()) {
-        return Promise.reject(cacheResp);
-      }
-      const blockedByUserInfo = cacheResp.data[oThis.currentUserId];
-      if (blockedByUserInfo.hasBlocked[oThis.profileUserId] || blockedByUserInfo.blockedBy[oThis.profileUserId]) {
-        return responseHelper.successWithData({});
-      }
-    }
 
     const cacheResponse = await new ReplyDetailsByVideoIdCache({
       videoId: oThis.videoId,
@@ -176,6 +251,14 @@ class GetReplyList extends ServiceBase {
     for (let index = 0; index < replyIds.length; index++) {
       const replyId = replyIds[index];
       const replyDetail = oThis.replyDetails[replyId];
+
+      const replyVideoCreatorId = replyDetail.creatorUserId;
+      const blockedCheckResponseForCurrentUser = oThis._performBlockedUserChecks(replyVideoCreatorId);
+      if (blockedCheckResponseForCurrentUser.isFailure()) {
+        delete oThis.replyDetails[replyId];
+        continue;
+      }
+
       oThis.repliesCount++;
 
       const videoReplyEntity = {
