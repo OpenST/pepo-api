@@ -693,7 +693,7 @@ class UserSearch extends ServiceBase {
       videoMap: oThis.videos,
       imageMap: oThis.imageDetails,
       linkMap: oThis.links,
-      videoDescriptionsMap: oThis.profileResponse.videoDescriptionMap,
+      videoDescriptionsMap: oThis.videoDescriptionMap,
       videoDetailsMap: oThis.videoDetailsMap,
       adminTwitterUsersMap: oThis.twitterUserByUserIdMap,
       tokenDetails: oThis.tokenDetails,
