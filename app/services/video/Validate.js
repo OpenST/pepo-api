@@ -30,9 +30,6 @@ class ValidateUploadVideoParams extends ServiceBase {
     oThis.videoDescription = params.video_description;
     oThis.perReplyAmountInWei = params.per_reply_amount_in_wei;
     oThis.link = params.link;
-
-    oThis.videoDetails = null;
-    oThis.creatorUserId = null;
   }
 
   /**

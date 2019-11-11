@@ -326,6 +326,68 @@ const v1Signature = {
       } // If link is invalid, consider empty string.
     ]
   },
+  [apiName.initiateReply]: {
+    mandatory: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      },
+      {
+        parameter: 'video_id',
+        validatorMethods: ['validateNonZeroInteger']
+      },
+      {
+        parameter: 'video_url',
+        validatorMethods: ['validateHttpBasedUrl']
+      }
+    ],
+    optional: [
+      {
+        parameter: 'reply_id',
+        validatorMethods: ['validateNonZeroInteger']
+      },
+      {
+        parameter: 'poster_image_url',
+        validatorMethods: ['validateHttpBasedUrl']
+      },
+      {
+        parameter: 'video_width',
+        validatorMethods: ['validateInteger']
+      },
+      {
+        parameter: 'video_height',
+        validatorMethods: ['validateInteger']
+      },
+      {
+        parameter: 'video_size',
+        validatorMethods: ['validateInteger']
+      },
+      {
+        parameter: 'image_width',
+        validatorMethods: ['validateInteger']
+      },
+      {
+        parameter: 'image_height',
+        validatorMethods: ['validateInteger']
+      },
+      {
+        parameter: 'per_reply_amount_in_wei',
+        validatorMethods: ['validateWeiValue']
+      },
+      {
+        parameter: 'image_size',
+        validatorMethods: ['validateInteger']
+      },
+      {
+        parameter: 'video_description',
+        validatorMethods: ['validateVideoDescription', 'validateStopWords']
+      },
+      {
+        parameter: 'link',
+        validatorMethods: ['validateString', 'validateStopWords']
+      } // If link is invalid, consider empty string.
+    ]
+  },
   [apiName.validateUploadVideo]: {
     mandatory: [
       {
@@ -336,7 +398,7 @@ const v1Signature = {
     optional: [
       {
         parameter: 'video_description',
-        validatorMethods: ['validateString', 'validateStopWords']
+        validatorMethods: ['validateVideoDescription', 'validateStopWords']
       },
       {
         parameter: 'link',
@@ -366,7 +428,7 @@ const v1Signature = {
     optional: [
       {
         parameter: 'video_description',
-        validatorMethods: ['validateString', 'validateStopWords']
+        validatorMethods: ['validateVideoDescription', 'validateStopWords']
       },
       {
         parameter: 'link',
