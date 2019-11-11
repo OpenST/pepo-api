@@ -82,12 +82,14 @@ router.get('/:video_id/replies', sanitizer.sanitizeDynamicUrlParams, function(re
   Promise.resolve(routeHelper.perform(req, res, next, '/reply/DummyList', 'r_a_v1_v_4', null));
 });
 
+// TODO: @ Shlok Remove the below route. Only made for testing.
 /* Reply List */
 router.get('/:video_id/replies_test', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.replyList;
   req.decodedParams.video_id = req.params.video_id;
 
   const dataFormatterFunc = async function(serviceResponse) {
+    console.log('=serviceResponse======', serviceResponse);
     const wrapperFormatterRsp = await new FormatterComposer({
       resultType: responseEntityKey.replies,
       entityKindToResponseKeyMap: {
@@ -104,6 +106,7 @@ router.get('/:video_id/replies_test', sanitizer.sanitizeDynamicUrlParams, functi
     }).perform();
 
     serviceResponse.data = wrapperFormatterRsp.data;
+    console.log('====serviceResponse==========11111=1===', serviceResponse);
   };
 
   Promise.resolve(routeHelper.perform(req, res, next, '/reply/List', 'r_a_v1_v_4', null, dataFormatterFunc));
