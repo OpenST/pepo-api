@@ -123,17 +123,17 @@ class TextIncludeModel extends CassandraModelBase {
    *
    * @param textId
    * @param entityIdentifiers
-   * @param replaceableText
+   * @param replaceableTexts
    * @returns {Promise<void>}
    */
-  async insertInTextIncludes(textId, entityIdentifiers, replaceableText) {
+  async insertInTextIncludes(textId, entityIdentifiers, replaceableTexts) {
     const oThis = this,
       queries = [];
 
     const query = `INSERT INTO ${oThis.queryTableName}(text_id, entity_identifier, replaceable_text) VALUES(?, ?, ?) `;
 
     for (let ind = 0; ind < entityIdentifiers.length; ind++) {
-      const updateParam = [textId, entityIdentifiers[ind], replaceableText];
+      const updateParam = [textId, entityIdentifiers[ind], replaceableTexts[ind]];
       queries.push({ query: query, params: updateParam });
     }
 
