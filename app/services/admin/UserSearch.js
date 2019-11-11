@@ -598,7 +598,7 @@ class UserSearch extends ServiceBase {
   /**
    * Fetch profile info.
    *
-   * @sets oThis.profileResponse
+   * @sets oThis.profileResponse, oThis.allLinkIds
    *
    * @returns {Promise<void>}
    * @private
@@ -620,6 +620,17 @@ class UserSearch extends ServiceBase {
     oThis.profileResponse = response.data;
     oThis.videoDescriptionMap = oThis.profileResponse.videoDescriptionMap;
     oThis.videoDetailsMap = oThis.profileResponse.videoDetailsMap;
+
+    // append video link to linkIds array
+    for (let ind = 0; ind < oThis.videoIds.length; ind++) {
+      const videoId = oThis.videoIds[ind];
+      const videoDetails = oThis.videoDetailsMap[videoId];
+
+      if (videoDetails.linkIds && videoDetails.linkIds.length > 0) {
+        let videoLinksToBeInserted = videoDetails.linkIds;
+        oThis.allLinkIds = oThis.allLinkIds.concat(videoLinksToBeInserted);
+      }
+    }
   }
 
   /**
