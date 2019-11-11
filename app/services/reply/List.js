@@ -1,4 +1,4 @@
-const rootPrefix = '../../../..',
+const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   UserCache = require(rootPrefix + '/lib/cacheManagement/multi/User'),
