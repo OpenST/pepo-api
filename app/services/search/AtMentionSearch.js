@@ -1,6 +1,7 @@
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   UserModel = require(rootPrefix + '/app/models/mysql/User'),
+  ImageByIdCache = require(rootPrefix + '/lib/cacheManagement/multi/ImageByIds'),
   TokenUserDetailByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TokenUserByUserIds'),
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
@@ -65,6 +66,8 @@ class UserAtMentionSearch extends ServiceBase {
     await oThis._filterNonActiveUsers();
 
     await oThis._prepareSearchResults();
+
+    await oThis._fetchImages();
 
     await oThis._addResponseMetaData();
 
@@ -203,8 +206,32 @@ class UserAtMentionSearch extends ServiceBase {
         userId: userId
       });
 
+      if (userDetail.profileImageId) {
+        oThis.imageIds.push(userDetail.profileImageId);
+      }
+
       oThis.nextPaginationTimestamp = userDetail.createdAt;
     }
+  }
+
+  /**
+   * Fetch images.
+   *
+   * @sets oThis.imageDetails
+   *
+   * @returns {Promise<*>}
+   * @private
+   */
+  async _fetchImages() {
+    const oThis = this;
+
+    if (oThis.imageIds.length === 0) {
+      return;
+    }
+
+    const imageData = await new ImageByIdCache({ ids: oThis.imageIds }).fetch();
+
+    oThis.imageDetails = imageData.data;
   }
 
   /**
@@ -249,6 +276,7 @@ class UserAtMentionSearch extends ServiceBase {
       usersByIdMap: oThis.userDetails,
       userIds: oThis.userIds,
       tokenUsersByUserIdMap: oThis.tokenUsersByUserIdMap,
+      imageMap: oThis.imageDetails,
       meta: oThis.responseMetaData
     };
 
