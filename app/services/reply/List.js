@@ -14,6 +14,7 @@ const rootPrefix = '../../..',
   ReplyDetailsByVideoIdCache = require(rootPrefix + '/lib/cacheManagement/single/ReplyDetailsByVideoIdPagination'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
+  videoDetailConstants = require(rootPrefix + '/lib/globalConstant/videoDetail'),
   paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination');
 
 /**
@@ -49,6 +50,7 @@ class GetReplyList extends ServiceBase {
 
     oThis.currentUserId = null;
     oThis.paginationTimestamp = null;
+    oThis.responseMetaData = {};
 
     oThis.videoCreatorId = null;
 
@@ -183,6 +185,17 @@ class GetReplyList extends ServiceBase {
       );
     }
 
+    if (videoDetails.status === videoDetailConstants.deletedStatus) {
+      return Promise.reject(
+        responseHelper.paramValidationError({
+          internal_error_identifier: 'a_s_r_l_fvd_3',
+          api_error_identifier: 'invalid_api_params',
+          params_error_identifiers: ['invalid_video_id'],
+          debug_options: { videoId: oThis.videoId }
+        })
+      );
+    }
+
     oThis.videoCreatorId = videoDetails.creatorUserId;
   }
 
@@ -224,7 +237,7 @@ class GetReplyList extends ServiceBase {
       return responseHelper.error();
     }
 
-    return responseHelper.success();
+    return responseHelper.successWithData({});
   }
 
   /**
