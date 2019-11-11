@@ -45,7 +45,7 @@ class VideoDetail extends ModelBase {
    * @param {number} dbRow.created_at
    * @param {number} dbRow.updated_at
    *
-   * @return {object}
+   * @returns {object}
    */
   formatDbData(dbRow) {
     const oThis = this;
@@ -95,9 +95,9 @@ class VideoDetail extends ModelBase {
   /**
    * Fetch videoDetail object for video id.
    *
-   * @param {integer} videoId: video id
+   * @param {array<integer>} userIds: User Ids.
    *
-   * @return {object}
+   * @returns Promise{object}
    */
   async fetchLatestVideoId(userIds) {
     const oThis = this;
@@ -129,9 +129,9 @@ class VideoDetail extends ModelBase {
   /**
    * Fetch all videoDetail objects for user ids.
    *
-   * @param {integer} videoId: video id
+   * @param {array<integer>} userIds: User Ids.
    *
-   * @return {object}
+   * @returns Promise{object}
    */
   async fetchVideoIds(userIds) {
     const oThis = this;
@@ -166,7 +166,7 @@ class VideoDetail extends ModelBase {
    *
    * @param {integer} videoId: video id
    *
-   * @return {object}
+   * @returns {object}
    */
   async fetchByVideoId(videoId) {
     const oThis = this;
@@ -184,16 +184,18 @@ class VideoDetail extends ModelBase {
   }
 
   /**
-   * Fetch by creator user id
+   * Fetch by creator user id.
    *
    * @param {integer} params.limit: no of rows to fetch
    * @param {integer} params.creatorUserId: creator user id
    * @param {integer} params.paginationTimestamp: creator user id
-   * @return {Promise}
+   *
+   * @returns {Promise}
    */
   async fetchByCreatorUserId(params) {
-    const oThis = this,
-      limit = params.limit,
+    const oThis = this;
+
+    const limit = params.limit,
       creatorUserId = params.creatorUserId,
       paginationTimestamp = params.paginationTimestamp;
 
@@ -226,13 +228,12 @@ class VideoDetail extends ModelBase {
   }
 
   /**
-   * Fetch users contributed by object
-   * contributedByUserId paid to user ids
+   * Fetch by video ids and user id.
    *
    * @param {array} videoIds: Array of video id
    * @param {integer} userId: id of user who clicked the video
    *
-   * @return {object}
+   * @returns {object}
    */
   async fetchByVideoIdsAndUserId(videoIds, userId) {
     const oThis = this;
@@ -314,7 +315,7 @@ class VideoDetail extends ModelBase {
    * @param {string} params.status
    * @param {string/number} [params.perReplyAmountInWei]
    *
-   * @return {object}
+   * @returns {object}
    */
   insertVideo(params) {
     const oThis = this;
@@ -344,7 +345,7 @@ class VideoDetail extends ModelBase {
    * @param {number} params.userId
    * @param {number} params.videoIds
    *
-   * @return {object}
+   * @returns {object}
    */
   async markDeleted(params) {
     const oThis = this;
@@ -368,7 +369,7 @@ class VideoDetail extends ModelBase {
    * @param {object} params
    * @param {number} params.id
    *
-   * @return {Promise<void>}
+   * @returns {Promise<void>}
    */
 
   async deleteById(params) {
