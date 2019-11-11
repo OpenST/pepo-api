@@ -48,6 +48,40 @@ router.get('/:video_id', sanitizer.sanitizeDynamicUrlParams, cookieHelper.valida
   Promise.resolve(routeHelper.perform(req, res, next, '/video/GetById', 'r_a_v1_v_1', null, dataFormatterFunc));
 });
 
+/* Reply List */
+router.get('/:video_id/replies', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.replyList;
+  req.decodedParams.video_id = req.params.video_id;
+
+  const dataFormatterFunc = async function(serviceResponse) {
+    const wrapperFormatterRsp = await new FormatterComposer({
+      resultType: responseEntityKey.replies,
+      entityKindToResponseKeyMap: {
+        [entityType.userVideoList]: responseEntityKey.userVideoList,
+        [entityType.usersMap]: responseEntityKey.users,
+        [entityType.userStats]: responseEntityKey.userStats,
+        [entityType.userProfilesMap]: responseEntityKey.userProfiles,
+        [entityType.videoDescriptionsMap]: responseEntityKey.videoDescriptions,
+        [entityType.tagsMap]: responseEntityKey.tags,
+        [entityType.linksMap]: responseEntityKey.links,
+        [entityType.imagesMap]: responseEntityKey.images,
+        [entityType.videosMap]: responseEntityKey.videos,
+        [entityType.videoDetailsMap]: responseEntityKey.videoDetails,
+        [entityType.currentUserUserContributionsMap]: responseEntityKey.currentUserUserContributions,
+        [entityType.currentUserVideoContributionsMap]: responseEntityKey.currentUserVideoContributions,
+        [entityType.pricePointsMap]: responseEntityKey.pricePoints,
+        [entityType.token]: responseEntityKey.token,
+        [entityType.userVideoListMeta]: responseEntityKey.meta
+      },
+      serviceData: serviceResponse.data
+    }).perform();
+
+    serviceResponse.data = wrapperFormatterRsp.data;
+  };
+
+  Promise.resolve(routeHelper.perform(req, res, next, '/reply/List', 'r_a_v1_v_4', null, dataFormatterFunc));
+});
+
 /* Video share */
 router.get('/:video_id/share', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.share;
@@ -77,6 +111,12 @@ router.post('/:video_id/delete', sanitizer.sanitizeDynamicUrlParams, cookieHelpe
   req.decodedParams.video_id = req.params.video_id;
 
   Promise.resolve(routeHelper.perform(req, res, next, '/video/Delete', 'r_a_v1_v_3', null, null));
+});
+
+router.post('/validate-upload', cookieHelper.validateUserLoginRequired, function(req, res, next) {
+  req.decodedParams.apiName = apiName.validateUploadVideo;
+
+  Promise.resolve(routeHelper.perform(req, res, next, '/video/Validate', 'r_a_v1_v_3', null, null));
 });
 
 module.exports = router;

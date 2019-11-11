@@ -309,6 +309,10 @@ const v1Signature = {
         validatorMethods: ['validateInteger']
       },
       {
+        parameter: 'per_reply_amount_in_wei',
+        validatorMethods: ['validateWeiValue']
+      },
+      {
         parameter: 'image_size',
         validatorMethods: ['validateInteger']
       },
@@ -320,6 +324,54 @@ const v1Signature = {
         parameter: 'link',
         validatorMethods: ['validateString', 'validateStopWords']
       } // If link is invalid, consider empty string.
+    ]
+  },
+  [apiName.validateUploadVideo]: {
+    mandatory: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      }
+    ],
+    optional: [
+      {
+        parameter: 'video_description',
+        validatorMethods: ['validateString', 'validateStopWords']
+      },
+      {
+        parameter: 'link',
+        validatorMethods: ['validateGenericUrl', 'validateStopWords']
+      },
+      {
+        parameter: 'per_reply_amount_in_wei',
+        validatorMethods: ['validateWeiValue']
+      }
+    ]
+  },
+  [apiName.validateUploadReply]: {
+    mandatory: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      },
+      {
+        parameter: 'parent_kind',
+        validatorMethods: ['validateString']
+      },
+      {
+        parameter: 'parent_id',
+        validatorMethods: ['validateNonZeroInteger']
+      }
+    ],
+    optional: [
+      {
+        parameter: 'video_description',
+        validatorMethods: ['validateString', 'validateStopWords']
+      },
+      {
+        parameter: 'link',
+        validatorMethods: ['validateGenericUrl', 'validateStopWords']
+      }
     ]
   },
   [apiName.saveProfileImage]: {
@@ -595,6 +647,19 @@ const v1Signature = {
       {
         parameter: 'getTopResults',
         validatorMethods: ['validateBoolean']
+      }
+    ]
+  },
+  [apiName.atMentionSearch]: {
+    mandatory: [],
+    optional: [
+      {
+        parameter: 'q',
+        validatorMethods: ['validateString']
+      },
+      {
+        parameter: paginationConstants.paginationIdentifierKey,
+        validatorMethods: ['validateString', 'validatePaginationIdentifier']
       }
     ]
   },

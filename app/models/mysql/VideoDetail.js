@@ -38,6 +38,8 @@ class VideoDetail extends ModelBase {
    * @param {string} dbRow.link_ids
    * @param {number} dbRow.total_contributed_by
    * @param {number} dbRow.total_amount
+   * @param {number} dbRow.per_reply_amount_in_wei
+   * @param {number} dbRow.total_replies
    * @param {number} dbRow.total_transactions
    * @param {number} dbRow.status
    * @param {number} dbRow.created_at
@@ -56,6 +58,8 @@ class VideoDetail extends ModelBase {
       linkIds: dbRow.link_ids ? JSON.parse(dbRow.link_ids) : null,
       totalContributedBy: dbRow.total_contributed_by,
       totalAmount: dbRow.total_amount,
+      perReplyAmountInWei: dbRow.per_reply_amount_in_wei,
+      totalReplies: dbRow.total_replies,
       totalTransactions: dbRow.total_transactions,
       status: videoDetailsConstants.statuses[dbRow.status],
       createdAt: dbRow.created_at,
@@ -80,6 +84,8 @@ class VideoDetail extends ModelBase {
       'totalContributedBy',
       'totalTransactions',
       'totalAmount',
+      'perReplyAmountInWei',
+      'totalReplies',
       'status',
       'createdAt',
       'updatedAt'
@@ -304,14 +310,16 @@ class VideoDetail extends ModelBase {
    * @param {object} params
    * @param {number} params.userId
    * @param {number} params.videoId
-   * @param {string} params.linkIds
+   * @param {string} [params.linkIds]
    * @param {string} params.status
+   * @param {string/number} [params.perReplyAmountInWei]
    *
    * @return {object}
    */
   insertVideo(params) {
     const oThis = this;
 
+    const perReplyAmountInWei = params.perReplyAmountInWei || 0;
     let linkIds = null;
 
     if (params.linkIds && params.linkIds.length > 0) {
@@ -323,6 +331,7 @@ class VideoDetail extends ModelBase {
         creator_user_id: params.userId,
         video_id: params.videoId,
         link_ids: linkIds,
+        per_reply_amount_in_wei: perReplyAmountInWei,
         status: videoDetailsConstants.invertedStatuses[params.status]
       })
       .fire();
