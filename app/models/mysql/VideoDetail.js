@@ -371,7 +371,6 @@ class VideoDetail extends ModelBase {
    *
    * @returns {Promise<void>}
    */
-
   async deleteById(params) {
     const oThis = this;
 
