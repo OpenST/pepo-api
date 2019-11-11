@@ -8,7 +8,6 @@ const rootPrefix = '../../../..',
   UsersCache = require(rootPrefix + '/lib/cacheManagement/multi/User'),
   VideoDetailsModel = require(rootPrefix + '/app/models/mysql/VideoDetail'),
   ActivityLogModel = require(rootPrefix + '/app/models/mysql/AdminActivityLog'),
-  TextsByIdCache = require(rootPrefix + '/lib/cacheManagement/multi/TextsByIds'),
   IncrementWeightsAndAddVideoTags = require(rootPrefix + '/lib/video/IncrementWeightsAndAddVideoTags'),
   VideoDetailsByVideoIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/VideoDetailsByVideoIds'),
   DecrementWeightsAndRemoveVideoTags = require(rootPrefix + '/lib/video/DecrementWeightsAndRemoveVideoTags'),
@@ -50,15 +49,11 @@ class UpdateVideoDescription extends ServiceBase {
     oThis.videoDetail = null;
     oThis.creatorUserId = null;
     oThis.existingTextId = null;
-    oThis.existingLinkIds = [];
 
     oThis.user = null;
     oThis.isUserCreator = null;
 
     oThis.text = null;
-    oThis.tagsIds = [];
-
-    oThis.urlIds = null;
   }
 
   /**
@@ -72,9 +67,9 @@ class UpdateVideoDescription extends ServiceBase {
 
     await oThis._fetchVideoDetails();
 
-    let promiseArray = [oThis._fetchTextDetails(), oThis._fetchCreatorUser()];
-    await Promise.all(promiseArray);
+    await oThis._fetchCreatorUser();
 
+    let promiseArray = [];
     promiseArray = [oThis._decrementVideoTagsWeightForExistingDescription(), oThis._filterTags()];
     await Promise.all(promiseArray);
 
@@ -119,31 +114,6 @@ class UpdateVideoDescription extends ServiceBase {
         })
       );
     }
-  }
-
-  /**
-   * Fetch text details.
-   *
-   * @sets oThis.existingLinkIds
-   *
-   * @returns {Promise<void>}
-   * @private
-   */
-  async _fetchTextDetails() {
-    const oThis = this;
-
-    if (!oThis.existingTextId) {
-      return;
-    }
-
-    const cacheRsp = await new TextsByIdCache({ ids: [oThis.existingTextId] }).fetch();
-    if (cacheRsp.isFailure()) {
-      return Promise.reject(cacheRsp);
-    }
-
-    const textData = cacheRsp.data[oThis.existingTextId];
-
-    oThis.existingLinkIds = textData.linkIds || [];
   }
 
   /**
@@ -227,7 +197,7 @@ class UpdateVideoDescription extends ServiceBase {
     const oThis = this;
 
     // Filter out tags from video description.
-    const filterTagsResp = await new FilterTags(oThis.videoDescription).perform(),
+    const filterTagsResp = await new FilterTags(oThis.videoDescription, oThis.existingTextId).perform(),
       videoDescriptionTagsData = filterTagsResp.data;
 
     oThis.text = videoDescriptionTagsData.text;
@@ -266,8 +236,6 @@ class UpdateVideoDescription extends ServiceBase {
       if (oThis.existingTextId) {
         const updateParams = {
           id: oThis.existingTextId,
-          tagIds: oThis.tagIds,
-          linkIds: oThis.urlIds,
           text: oThis.text
         };
 
@@ -277,13 +245,8 @@ class UpdateVideoDescription extends ServiceBase {
 
       const insertParams = {
         text: oThis.text,
-        linkIds: oThis.urlIds,
         kind: textConstants.videoDescriptionKind
       };
-
-      if (oThis.isUserCreator) {
-        insertParams.tagIds = oThis.tagIds;
-      }
 
       // Create new entry in texts table.
       const textRow = await new TextModel().insertText(insertParams);

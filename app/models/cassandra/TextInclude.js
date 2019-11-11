@@ -130,10 +130,10 @@ class TextIncludeModel extends CassandraModelBase {
     const oThis = this,
       queries = [];
 
-    const query = `INSERT INTO ${oThis.tableName}(text_id, entity_identifier, replaceable_text) VALUES(?, ?, ?) `;
+    const query = `INSERT INTO ${oThis.queryTableName}(text_id, entity_identifier, replaceable_text) VALUES(?, ?, ?) `;
 
-    for (let i = 0; i < entityIdentifiers.length; i++) {
-      const updateParam = [textId, entityIdentifiers[i], replaceableText];
+    for (let ind = 0; ind < entityIdentifiers.length; ind++) {
+      const updateParam = [textId, entityIdentifiers[ind], replaceableText];
       queries.push({ query: query, params: updateParam });
     }
 
@@ -144,11 +144,14 @@ class TextIncludeModel extends CassandraModelBase {
 
   /**
    * Flush cache.
-   *
+   * @param {object} params
+   * @param {array<number>} params.textIds
    * @returns {Promise<*>}
    */
-  static async flushCache() {
+  static async flushCache(params) {
     // Do nothing.
+    const TextIncludesByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TextIncludesByTextIds');
+    await new TextIncludesByIdsCache({ ids: params.textIds }).clear();
   }
 }
 
