@@ -1,12 +1,17 @@
 const rootPrefix = '../../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
-  GetProfile = require(rootPrefix + '/lib/user/profile/Get'),
   UserModel = require(rootPrefix + '/app/models/mysql/User'),
-  GetTokenService = require(rootPrefix + '/app/services/token/Get'),
+  UserCache = require(rootPrefix + '/lib/cacheManagement/multi/User'),
+  TagByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/Tag'),
+  UrlsByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/UrlsByIds'),
+  VideoByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/VideoByIds'),
+  ImageByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/ImageByIds'),
+  TextsByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TextsByIds'),
+  UserBlockedListCache = require(rootPrefix + '/lib/cacheManagement/single/UserBlockedList'),
+  TextIncludesByTextIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TextIncludesByTextIds'),
   ReplyDetailsByVideoIdCache = require(rootPrefix + '/lib/cacheManagement/single/ReplyDetailsByVideoIdPagination'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
-  UserBlockedListCache = require(rootPrefix + '/lib/cacheManagement/single/UserBlockedList'),
   paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination');
 
 /**
@@ -42,20 +47,34 @@ class GetReplyList extends ServiceBase {
 
     oThis.currentUserId = null;
     oThis.paginationTimestamp = null;
+
     oThis.nextPaginationTimestamp = null;
     oThis.repliesCount = 0;
-    oThis.videoDetails = [];
+    oThis.replyDetails = {};
+    oThis.videoReplies = [];
     oThis.videoIds = [];
-    oThis.tokenDetails = {};
-    oThis.profileUserObj = null;
+    oThis.userIds = [];
+    oThis.linkIds = [];
+    oThis.descriptionIds = [];
+
+    oThis.videos = {};
+    oThis.imageIds = [];
+
+    oThis.users = {};
+
+    oThis.videoDescriptions = {};
+
+    oThis.links = {};
+
+    oThis.tags = {};
+
+    oThis.images = {};
   }
 
   /**
    * Async perform.
    *
-   * @sets oThis.profileUserObj
-   *
-   * @return {Promise<void>}
+   * @returns {Promise<result>}
    * @private
    */
   async _asyncPerform() {
@@ -63,16 +82,24 @@ class GetReplyList extends ServiceBase {
 
     await oThis._validateAndSanitizeParams();
 
-    let resp = null;
+    await oThis._fetchVideoReplies();
 
-    await oThis._fetchVideoIds();
+    if (oThis.videoReplies.length === 0) {
+      return oThis._prepareResponse();
+    }
+
+    const promisesArray = [
+      oThis._fetchVideos(),
+      oThis._fetchUsers(),
+      oThis._fetchVideoDescriptions(),
+      oThis._fetchLinks(),
+      oThis._fetchTags()
+    ];
+    await Promise.all(promisesArray);
+
+    await oThis._fetchImages();
 
     oThis._addResponseMetaData();
-
-    const promisesArray = [];
-    promisesArray.push(oThis._setTokenDetails());
-    promisesArray.push(oThis._getVideos());
-    await Promise.all(promisesArray);
 
     return oThis._prepareResponse();
   }
@@ -105,27 +132,26 @@ class GetReplyList extends ServiceBase {
   /**
    * Fetch video ids.
    *
-   * @sets oThis.repliesCount, oThis.videoDetails, oThis.videoIds, oThis.nextPaginationTimestamp
+   * @sets oThis.replyDetails, oThis.repliesCount, oThis.videoIds, oThis.userIds, oThis.descriptionIds, oThis.linkIds,
+   *       oThis.nextPaginationTimestamp
    *
-   * @return {Promise<void>}
+   * @returns {Promise<*>}
    * @private
    */
-  async _fetchVideoIds() {
+  async _fetchVideoReplies() {
     const oThis = this;
 
-    //todo: do we need to check blocked user list here???
-    // If not an admin, only then perform further validations.
     if (!oThis.isAdmin) {
       // If user's profile(not self) is not approved, videos would not be shown.
-      if (oThis.currentUserId != oThis.profileUserId && !UserModel.isUserApprovedCreator(oThis.profileUserObj)) {
+      if (+oThis.currentUserId !== +oThis.profileUserId && !UserModel.isUserApprovedCreator(oThis.profileUserObj)) {
         return responseHelper.successWithData({});
       }
-      // Check for blocked user's list
-      let cacheResp = await new UserBlockedListCache({ userId: oThis.currentUserId }).fetch();
+      // Check for blocked user's list.
+      const cacheResp = await new UserBlockedListCache({ userId: oThis.currentUserId }).fetch();
       if (cacheResp.isFailure()) {
         return Promise.reject(cacheResp);
       }
-      let blockedByUserInfo = cacheResp.data[oThis.currentUserId];
+      const blockedByUserInfo = cacheResp.data[oThis.currentUserId];
       if (blockedByUserInfo.hasBlocked[oThis.profileUserId] || blockedByUserInfo.blockedBy[oThis.profileUserId]) {
         return responseHelper.successWithData({});
       }
@@ -140,18 +166,238 @@ class GetReplyList extends ServiceBase {
       return Promise.reject(cacheResponse);
     }
 
-    const replyDetails = cacheResponse.data.replyDetails;
+    oThis.replyDetails = cacheResponse.data.replyDetails;
     const replyIds = cacheResponse.data.replyIds || [];
 
-    for (let ind = 0; ind < replyIds.length; ind++) {
-      const replyId = replyIds[ind];
-      const replyDetail = replyDetails[replyId];
+    for (let index = 0; index < replyIds.length; index++) {
+      const replyId = replyIds[index];
+      const replyDetail = oThis.replyDetails[replyId];
       oThis.repliesCount++;
+
+      const videoReplyEntity = {
+        id: replyId,
+        userId: replyDetail.creatorUserId,
+        replyDetailId: replyId,
+        updatedAt: replyDetail.updatedAt
+      };
+
+      oThis.videoReplies.push(videoReplyEntity);
+
+      oThis.videoIds.push(replyDetail.entityId);
+      oThis.userIds.push(replyDetail.creatorUserId);
+
+      if (replyDetail.descriptionId) {
+        oThis.descriptionIds.push(replyDetail.descriptionId);
+      }
+      if (replyDetail.linkIds) {
+        oThis.linkIds = oThis.linkIds.concat(replyDetail.linkIds);
+      }
 
       oThis.nextPaginationTimestamp = replyDetail.createdAt;
     }
 
-    return responseHelper.successWithData({});
+    oThis.userIds = [...new Set(oThis.userIds)]; // Get unique userIds.
+  }
+
+  /**
+   * Fetch videos.
+   *
+   * @sets oThis.videos, oThis.imageIds
+   *
+   * @returns {Promise<*>}
+   * @private
+   */
+  async _fetchVideos() {
+    const oThis = this;
+
+    if (oThis.videoIds.length === 0) {
+      return;
+    }
+
+    const videosCacheResponse = await new VideoByIdsCache({ ids: oThis.videoIds }).fetch();
+    if (videosCacheResponse.isFailure()) {
+      return Promise.reject(
+        responseHelper.error({
+          internal_error_identifier: 'a_s_r_l_fv_1',
+          api_error_identifier: 'something_went_wrong',
+          debug_options: { videoIds: oThis.videoIds }
+        })
+      );
+    }
+
+    oThis.videos = videosCacheResponse.data;
+
+    for (const videoId in oThis.videos) {
+      const videoEntity = oThis.videos[videoId];
+      if (videoEntity.posterImageId) {
+        oThis.imageIds.push(videoEntity.posterImageId);
+      }
+    }
+  }
+
+  /**
+   * Fetch users.
+   *
+   * @sets oThis.users
+   *
+   * @returns {Promise<*>}
+   * @private
+   */
+  async _fetchUsers() {
+    const oThis = this;
+
+    if (oThis.userIds.length === 0) {
+      return;
+    }
+
+    const usersCacheResponse = await new UserCache({ ids: oThis.userIds }).fetch();
+    if (usersCacheResponse.isFailure()) {
+      return Promise.reject(
+        responseHelper.error({
+          internal_error_identifier: 'a_s_r_l_fu_1',
+          api_error_identifier: 'something_went_wrong',
+          debug_options: { userIds: oThis.userIds }
+        })
+      );
+    }
+
+    oThis.users = usersCacheResponse.data;
+  }
+
+  /**
+   * Fetch video descriptions.
+   *
+   * @sets oThis.videoDescriptions
+   *
+   * @returns {Promise<*>}
+   * @private
+   */
+  async _fetchVideoDescriptions() {
+    const oThis = this;
+
+    if (oThis.descriptionIds.length === 0) {
+      return;
+    }
+
+    const descriptionsCacheResponse = await new TextIncludesByTextIdsCache({ ids: oThis.descriptionIds }).fetch();
+    if (descriptionsCacheResponse.isFailure()) {
+      return Promise.reject(
+        responseHelper.error({
+          internal_error_identifier: 'a_s_r_l_fvd_1',
+          api_error_identifier: 'something_went_wrong',
+          debug_options: { descriptionIds: oThis.descriptionIds }
+        })
+      );
+    }
+
+    oThis.videoDescriptions = descriptionsCacheResponse.data;
+  }
+
+  /**
+   * Fetch links.
+   *
+   * @sets oThis.links
+   *
+   * @returns {Promise<*>}
+   * @private
+   */
+  async _fetchLinks() {
+    const oThis = this;
+
+    if (oThis.linkIds.length === 0) {
+      return;
+    }
+
+    const urlsCacheResponse = await new UrlsByIdsCache({ ids: oThis.linkIds }).fetch();
+    if (urlsCacheResponse.isFailure()) {
+      return Promise.reject(
+        responseHelper.error({
+          internal_error_identifier: 'a_s_r_l_fl_1',
+          api_error_identifier: 'something_went_wrong',
+          debug_options: { linkIds: oThis.linkIds }
+        })
+      );
+    }
+
+    oThis.links = urlsCacheResponse.data;
+  }
+
+  /**
+   * Fetch tags.
+   *
+   * @sets oThis.tags
+   *
+   * @returns {Promise<never>}
+   * @private
+   */
+  async _fetchTags() {
+    const oThis = this;
+
+    const textsCacheResponse = await new TextsByIdsCache({ ids: oThis.descriptionIds }).fetch();
+    if (textsCacheResponse.isFailure()) {
+      return Promise.reject(
+        responseHelper.error({
+          internal_error_identifier: 'a_s_r_l_ft_1',
+          api_error_identifier: 'something_went_wrong',
+          debug_options: { descriptionIds: oThis.descriptionIds }
+        })
+      );
+    }
+
+    const texts = textsCacheResponse.data;
+    let tagIds = [];
+    for (const textId in texts) {
+      const textEntity = texts[textId];
+      if (textEntity.tagIds) {
+        tagIds = tagIds.concat(textEntity.tagIds);
+      }
+    }
+
+    if (tagIds.length === 0) {
+      return;
+    }
+
+    const tagsCacheResponse = await new TagByIdsCache({ ids: tagIds }).fetch();
+    if (tagsCacheResponse.isFailure()) {
+      return Promise.reject(
+        responseHelper.error({
+          internal_error_identifier: 'a_s_r_l_ft_2',
+          api_error_identifier: 'something_went_wrong',
+          debug_options: { tagIds: oThis.tagIds }
+        })
+      );
+    }
+
+    oThis.tags = tagsCacheResponse.data;
+  }
+
+  /**
+   * Fetch images.
+   *
+   * @sets oThis.images
+   *
+   * @returns {Promise<*>}
+   * @private
+   */
+  async _fetchImages() {
+    const oThis = this;
+
+    if (oThis.imageIds.length === 0) {
+      return;
+    }
+
+    const imagesCacheResponse = await new ImageByIdsCache({ ids: oThis.imageIds }).fetch();
+    if (imagesCacheResponse.isFailure()) {
+      return Promise.reject(
+        responseHelper.error({
+          internal_error_identifier: 'a_s_r_l_fi_1',
+          api_error_identifier: 'something_went_wrong',
+          debug_options: { imageIds: oThis.imageIds }
+        })
+      );
+    }
+
+    oThis.images = imagesCacheResponse.data;
   }
 
   /**
@@ -181,55 +427,6 @@ class GetReplyList extends ServiceBase {
   }
 
   /**
-   * Fetch token details.
-   *
-   * @sets oThis.tokenDetails
-   *
-   * @return {Promise<result>}
-   * @private
-   */
-  async _setTokenDetails() {
-    const oThis = this;
-
-    const tokenResp = await new GetTokenService().perform();
-    if (tokenResp.isFailure()) {
-      return Promise.reject(tokenResp);
-    }
-
-    oThis.tokenDetails = tokenResp.data.tokenDetails;
-
-    return responseHelper.successWithData({});
-  }
-
-  /**
-   * Get videos.
-   *
-   * @sets oThis.profileResponse
-   *
-   * @return {Promise<result>}
-   * @private
-   */
-  async _getVideos() {
-    const oThis = this;
-
-    const getProfileObj = new GetProfile({
-      userIds: [oThis.profileUserId],
-      currentUserId: oThis.currentUserId,
-      videoIds: oThis.videoIds,
-      isAdmin: oThis.isAdmin
-    });
-
-    const response = await getProfileObj.perform();
-    if (response.isFailure()) {
-      return Promise.reject(response);
-    }
-
-    oThis.profileResponse = response.data;
-
-    return responseHelper.successWithData({});
-  }
-
-  /**
    * Prepare final response.
    *
    * @return {Promise<result>}
@@ -240,21 +437,6 @@ class GetReplyList extends ServiceBase {
 
     return responseHelper.successWithData({
       [entityType.userVideoList]: oThis.videoDetails,
-      usersByIdMap: oThis.profileResponse.usersByIdMap,
-      userStat: oThis.profileResponse.userStat,
-      [entityType.userProfilesMap]: oThis.profileResponse.userProfilesMap,
-      tags: oThis.profileResponse.tags,
-      linkMap: oThis.profileResponse.linkMap,
-      imageMap: oThis.profileResponse.imageMap,
-      videoMap: oThis.profileResponse.videoMap,
-      [entityType.videoDetailsMap]: oThis.profileResponse.videoDetailsMap,
-      [entityType.videoDescriptionsMap]: oThis.profileResponse.videoDescriptionMap,
-      [entityType.currentUserUserContributionsMap]: oThis.profileResponse.currentUserUserContributionsMap,
-      [entityType.currentUserVideoContributionsMap]: oThis.profileResponse.currentUserVideoContributionsMap,
-      [entityType.userProfileAllowedActions]: oThis.profileResponse.userProfileAllowedActions,
-      tokenUsersByUserIdMap: oThis.profileResponse.tokenUsersByUserIdMap,
-      [entityType.pricePointsMap]: oThis.profileResponse.pricePointsMap,
-      tokenDetails: oThis.tokenDetails,
       meta: oThis.responseMetaData
     });
   }
