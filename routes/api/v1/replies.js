@@ -9,7 +9,7 @@ const rootPrefix = '../../..',
 router.post('/validate-upload', cookieHelper.validateUserLoginRequired, function(req, res, next) {
   req.decodedParams.apiName = apiName.validateUploadReply;
 
-  Promise.resolve(routeHelper.perform(req, res, next, '/reply/Validate', 'r_a_v1_v_3', null, null));
+  Promise.resolve(routeHelper.perform(req, res, next, '/reply/Validate', 'r_a_v1_r_1', null, null));
 });
 
 module.exports = router;
