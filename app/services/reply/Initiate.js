@@ -1,27 +1,26 @@
 const rootPrefix = '../../..',
   UrlModel = require(rootPrefix + '/app/models/mysql/Url'),
-  AddReplyDescription = require(rootPrefix + '/lib/addDescription/Reply'),
   ServiceBase = require(rootPrefix + '/app/services/Base'),
-  responseHelper = require(rootPrefix + '/lib/formatter/response'),
   CommonValidator = require(rootPrefix + '/lib/validators/Common'),
-  urlConstants = require(rootPrefix + '/lib/globalConstant/url'),
+  AddReplyDescription = require(rootPrefix + '/lib/addDescription/Reply'),
+  ValidateReplyService = require(rootPrefix + '/app/services/reply/Validate'),
   videoLib = require(rootPrefix + '/lib/videoLib'),
+  urlConstants = require(rootPrefix + '/lib/globalConstant/url'),
+  responseHelper = require(rootPrefix + '/lib/formatter/response'),
   videoConstants = require(rootPrefix + '/lib/globalConstant/video'),
-  replyDetailConstants = require(rootPrefix + '/lib/globalConstant/replyDetail'),
-  ValidateReplyService = require(rootPrefix + '/app/services/reply/Validate');
+  replyDetailConstants = require(rootPrefix + '/lib/globalConstant/replyDetail');
 
 /**
- * Class to delete video by user.
+ * Class to initiate reply.
  *
- * @class ValidateUploadVideoParams
+ * @class InitiateReply
  */
-class ValidateUploadVideoParams extends ServiceBase {
+class InitiateReply extends ServiceBase {
   /**
-   * Constructor to delete video by user.
+   * Constructor to initiate reply.
    *
    * @param {object} params
    * @param {object} params.current_user
-   * @param {number} params.profile_user_id
    * @param {number} params.parent_kind: parent post kind
    * @param {number} params.parent_id: parent video id
    * @param {number} params.reply_detail_id: if reply is editing
@@ -33,10 +32,8 @@ class ValidateUploadVideoParams extends ServiceBase {
    * @param {number} params.image_width: image width
    * @param {number} params.image_height: image height
    * @param {number} params.image_size: image size
-   * @param {boolean} params.isExternalUrl: video source is other than s3 upload
    * @param {string} [params.video_description]: Video description
    * @param {string} [params.link]: Link
-   * @param {string/number} [params.per_reply_amount_in_wei]: Per reply amount in wei.
    *
    * @augments ServiceBase
    *
@@ -79,9 +76,9 @@ class ValidateUploadVideoParams extends ServiceBase {
     await oThis._validateAndSanitize();
 
     if (oThis.replyDetailId) {
-      await oThis._getReplyDetails();
-      await oThis._editDescription();
-      await oThis._editLink();
+      // await oThis._getReplyDetails();
+      // await oThis._editDescription();
+      // await oThis._editLink();
     } else {
       await oThis._addLink();
 
@@ -106,6 +103,12 @@ class ValidateUploadVideoParams extends ServiceBase {
     });
   }
 
+  /**
+   * Validate and sanitize.
+   *
+   * @returns {Promise<never>}
+   * @private
+   */
   async _validateAndSanitize() {
     const oThis = this;
 
@@ -130,6 +133,34 @@ class ValidateUploadVideoParams extends ServiceBase {
     }
   }
 
+  /**
+   * Add link in urls table.
+   *
+   * @returns {Promise<*>}
+   * @private
+   */
+  async _addLink() {
+    const oThis = this;
+
+    if (oThis.link) {
+      // If new url is added then insert in 2 tables.
+      const insertRsp = await new UrlModel({}).insertUrl({
+        url: oThis.link,
+        kind: urlConstants.socialUrlKind
+      });
+
+      oThis.linkIds = [insertRsp.insertId];
+    }
+
+    return null;
+  }
+
+  /**
+   * Validate and save reply in reply details and related tables.
+   *
+   * @returns {Promise<Result>}
+   * @private
+   */
   async _validateAndSaveReply() {
     const oThis = this;
 
@@ -161,6 +192,13 @@ class ValidateUploadVideoParams extends ServiceBase {
     return resp;
   }
 
+  /**
+   * Add reply description in text table and update text id in reply details.
+   *
+   * @param params
+   * @returns {Promise<void>}
+   * @private
+   */
   async _addReplyDescription(params) {
     const oThis = this;
 
@@ -170,28 +208,6 @@ class ValidateUploadVideoParams extends ServiceBase {
       replyDetailId: oThis.replyDetailId
     }).perform();
   }
-
-  /**
-   * Add link in urls table.
-   *
-   * @returns {Promise<*>}
-   * @private
-   */
-  async _addLink() {
-    const oThis = this;
-
-    if (oThis.link) {
-      // If new url is added then insert in 2 tables.
-      const insertRsp = await new UrlModel({}).insertUrl({
-        url: oThis.link,
-        kind: urlConstants.socialUrlKind
-      });
-
-      oThis.linkIds = [insertRsp.insertId];
-    }
-
-    return null;
-  }
 }
 
-module.exports = ValidateUploadVideoParams;
+module.exports = InitiateReply;
