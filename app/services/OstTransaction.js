@@ -1,21 +1,21 @@
 const rootPrefix = '../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
-  SecureTokenCache = require(rootPrefix + '/lib/cacheManagement/single/SecureToken'),
   TransactionModel = require(rootPrefix + '/app/models/mysql/Transaction'),
+  SecureTokenCache = require(rootPrefix + '/lib/cacheManagement/single/SecureToken'),
+  ValidatePepocornTopUp = require(rootPrefix + '/app/services/pepocornTopUp/Validate'),
   PendingTransactionModel = require(rootPrefix + '/app/models/mysql/PendingTransaction'),
   PepocornTransactionModel = require(rootPrefix + '/app/models/mysql/PepocornTransaction'),
   TokenUserByUserId = require(rootPrefix + '/lib/cacheManagement/multi/TokenUserByUserIds'),
   TransactionByOstTxIdCache = require(rootPrefix + '/lib/cacheManagement/multi/TransactionByOstTxId'),
   TokenUserByOstUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TokenUserByOstUserIds'),
   VideoDetailsByVideoIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/VideoDetailsByVideoIds'),
-  ValidatePepocornTopUp = require(rootPrefix + '/app/services/pepocornTopUp/Validate'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   createErrorLogsEntry = require(rootPrefix + '/lib/errorLogs/createEntry'),
   errorLogsConstants = require(rootPrefix + '/lib/globalConstant/errorLogs'),
-  pepocornTransactionConstants = require(rootPrefix + '/lib/globalConstant/redemption/pepocornTransaction'),
-  transactionConstants = require(rootPrefix + '/lib/globalConstant/transaction');
+  transactionConstants = require(rootPrefix + '/lib/globalConstant/transaction'),
+  pepocornTransactionConstants = require(rootPrefix + '/lib/globalConstant/redemption/pepocornTransaction');
 
 /**
  * Class to perform ost transaction.
@@ -71,7 +71,8 @@ class OstTransaction extends ServiceBase {
   /**
    * Async perform.
    *
-   * @return {Promise<void>}
+   * @returns {Promise<void>}
+   * @private
    */
   async _asyncPerform() {
     const oThis = this;
@@ -83,25 +84,22 @@ class OstTransaction extends ServiceBase {
       return Promise.reject(setStatusResponse);
     }
 
-    const promisesArray = [];
-    promisesArray.push(oThis._fetchTransaction());
-    promisesArray.push(oThis._fetchFromOstUserIdAndValidate());
-
+    const promisesArray = [oThis._fetchTransaction(), oThis._fetchFromOstUserIdAndValidate()];
     await Promise.all(promisesArray);
 
     if (oThis.transactionId) {
-      //  record was already inserted. do nothing
+      // Record was already inserted. Do nothing.
     } else {
       await oThis._insertInTransactionAndAssociatedTables();
     }
 
-    return Promise.resolve(responseHelper.successWithData());
+    return responseHelper.successWithData({});
   }
 
   /**
    * Validate and sanitize.
    *
-   * @sets
+   * @sets oThis.videoId, oThis.pepocornAmount, oThis.productId, oThis.pepoUsdPricePoint
    *
    * @private
    */
@@ -111,7 +109,7 @@ class OstTransaction extends ServiceBase {
     const parsedMetaProperty = transactionConstants._parseTransactionMetaDetails(oThis.transaction.meta_property);
 
     if (oThis._isUserTransactionKind()) {
-      //did not use the meta property as not sure of all previous builds
+      // Did not use the meta property as not sure of all previous builds.
       oThis.videoId = oThis.meta.vi;
     } else if (oThis._isRedemptionTransactionKind()) {
       oThis.pepocornAmount = parsedMetaProperty.pepocornAmount;
@@ -175,42 +173,21 @@ class OstTransaction extends ServiceBase {
 
     if (transactionConstants.notFinalizedOstTransactionStatuses.indexOf(oThis.ostTransactionStatus) > -1) {
       oThis.transactionStatus = transactionConstants.pendingStatus;
-    } else {
-      const errorObject = responseHelper.error({
-        internal_error_identifier: 'a_s_ost_4',
-        api_error_identifier: 'something_went_wrong',
-        debug_options: {
-          Error: 'Invalid ost transaction status. Only allowed ost status is CREATED ',
-          ostTransactionStatus: oThis.ostTransactionStatus
-        }
-      });
-      await createErrorLogsEntry.perform(errorObject, errorLogsConstants.highSeverity);
 
-      return errorObject;
+      return responseHelper.successWithData({});
     }
 
-    return responseHelper.successWithData({});
-  }
+    const errorObject = responseHelper.error({
+      internal_error_identifier: 'a_s_ost_4',
+      api_error_identifier: 'something_went_wrong',
+      debug_options: {
+        Error: 'Invalid ost transaction status. Only allowed ost status is CREATED ',
+        ostTransactionStatus: oThis.ostTransactionStatus
+      }
+    });
+    await createErrorLogsEntry.perform(errorObject, errorLogsConstants.highSeverity);
 
-  /**
-   * Insert text.
-   *
-   * @sets oThis.textId
-   *
-   * @returns {Promise<void>}
-   * @private
-   */
-  async _insertText() {
-    const oThis = this;
-
-    const insertData = { text: oThis.text };
-    const insertResponse = await new TextModel().insertText(insertData);
-
-    oThis.textId = insertResponse.insertId;
-    insertData.id = insertResponse.insertId;
-
-    const formattedInsertData = new TextModel().formatDbData(insertData);
-    await TextModel.flushCache({ textIds: [formattedInsertData.id] });
+    return errorObject;
   }
 
   /**
@@ -272,7 +249,6 @@ class OstTransaction extends ServiceBase {
     const userIds = [oThis.userId];
 
     const tokenUserDetailsResponse = await new TokenUserByUserId({ userIds: userIds }).fetch();
-
     if (tokenUserDetailsResponse.isFailure()) {
       return Promise.reject(tokenUserDetailsResponse);
     }
@@ -320,14 +296,13 @@ class OstTransaction extends ServiceBase {
     const oThis = this;
 
     const videoDetailsCacheResponse = await new VideoDetailsByVideoIdsCache({ videoIds: [oThis.videoId] }).fetch();
-
     if (videoDetailsCacheResponse.isFailure()) {
       return Promise.reject(videoDetailsCacheResponse);
     }
 
     const videoIdFromCache = videoDetailsCacheResponse.data[oThis.videoId].videoId;
 
-    if (videoIdFromCache != oThis.videoId) {
+    if (+videoIdFromCache !== +oThis.videoId) {
       return Promise.reject(
         responseHelper.paramValidationError({
           internal_error_identifier: 'a_s_ot_7',
@@ -342,13 +317,15 @@ class OstTransaction extends ServiceBase {
   /**
    * This function validates if the parameters are correct.
    *
+   * @sets oThis.isValidRedemption
+   *
    * @returns {Promise<void>}
    * @private
    */
   async _validateTransactionDataForRedemption() {
     const oThis = this;
 
-    const validateParam = {
+    const validateParams = {
       request_timestamp: oThis.transaction.updated_timestamp,
       product_id: oThis.productId,
       pepo_amount_in_wei: oThis.transfersData[0].amount,
@@ -356,20 +333,19 @@ class OstTransaction extends ServiceBase {
       pepo_usd_price_point: oThis.pepoUsdPricePoint
     };
 
-    oThis.isValidRedemption = await new ValidatePepocornTopUp(validateParam)
+    oThis.isValidRedemption = false;
+
+    const pepocornTopUpValidationResponse = await new ValidatePepocornTopUp(validateParams)
       .perform()
-      .then(async function(resp) {
-        if (resp.isFailure()) {
-          await createErrorLogsEntry.perform(resp, errorLogsConstants.highSeverity);
-          return false;
-        } else {
-          return true;
-        }
-      })
-      .catch(async function(resp) {
-        await createErrorLogsEntry.perform(resp, errorLogsConstants.highSeverity);
-        return false;
+      .catch(async function(err) {
+        await createErrorLogsEntry.perform(err, errorLogsConstants.highSeverity);
       });
+
+    if (pepocornTopUpValidationResponse.isFailure()) {
+      await createErrorLogsEntry.perform(pepocornTopUpValidationResponse, errorLogsConstants.highSeverity);
+    } else {
+      oThis.isValidRedemption = true;
+    }
   }
 
   /**
@@ -407,7 +383,7 @@ class OstTransaction extends ServiceBase {
   async _validateToUserIdForRedemption() {
     const oThis = this;
 
-    if (oThis.transfersData.length != 1) {
+    if (oThis.transfersData.length !== 1) {
       const errorObject = responseHelper.error({
         internal_error_identifier: 'a_s_ost_vtui_1',
         api_error_identifier: 'something_went_wrong',
@@ -420,7 +396,7 @@ class OstTransaction extends ServiceBase {
 
     await oThis.getTokenData();
 
-    if (oThis.transfersData[0].to_user_id.toLowerCase() != oThis.tokenData.ostCompanyUserId.toLowerCase()) {
+    if (oThis.transfersData[0].to_user_id.toLowerCase() !== oThis.tokenData.ostCompanyUserId.toLowerCase()) {
       const errorObject = responseHelper.error({
         internal_error_identifier: 'a_s_ost_vtui_2',
         api_error_identifier: 'something_went_wrong',
@@ -606,7 +582,7 @@ class OstTransaction extends ServiceBase {
   /**
    * Return true if it is a user-to-user transaction.
    *
-   * @returns {Boolean}
+   * @returns {boolean}
    * @private
    */
   _isUserTransactionKind() {
@@ -618,17 +594,17 @@ class OstTransaction extends ServiceBase {
   /**
    * Return true if it is a pepocorn convert for redemption transaction.
    *
-   * @returns {Boolean}
+   * @returns {boolean}
    * @private
    */
   _isRedemptionTransactionKind() {
     const oThis = this;
 
-    return oThis.transaction.meta_property.name == transactionConstants.redemptionMetaName;
+    return oThis.transaction.meta_property.name === transactionConstants.redemptionMetaName;
   }
 
   /**
-   * Return true if it is a pepocorn convert for redemption transaction.
+   * Return transaction kind.
    *
    * @returns {Boolean}
    * @private
