@@ -102,6 +102,8 @@ class PopulateIncludesFromTexts {
 
       await new TextIncludeModel().deleteTags(textId, data.entityIdentifiers);
 
+      await TextIncludeModel.flushCache({ textIds: [textId] });
+
       promiseArray.push(
         new TextIncludeModel().insertInTextIncludes(textId, data.entityIdentifiers, data.replaceableTexts)
       );
