@@ -47,6 +47,8 @@ class OstTransaction extends ServiceBase {
     oThis.userId = params.current_user.id;
     oThis.meta = params.meta || {};
 
+    console.log('==oThis.meta===11111111111111===', oThis.meta);
+
     oThis.ostTxId = oThis.transaction.id;
     oThis.ostTransactionStatus = oThis.transaction.status.toUpperCase();
     oThis.transfersData = oThis.transaction.transfers;
@@ -101,7 +103,7 @@ class OstTransaction extends ServiceBase {
   /**
    * Validate and sanitize.
    *
-   * @sets oThis.videoId, oThis.pepocornAmount, oThis.productId, oThis.pepoUsdPricePoint
+   * @sets oThis.videoId, oThis.pepocornAmount, oThis.productId, oThis.pepoUsdPricePoint, oThis.replyDetailId
    *
    * @private
    */
@@ -111,6 +113,7 @@ class OstTransaction extends ServiceBase {
     const parsedMetaProperty = transactionConstants._parseTransactionMetaDetails(oThis.transaction.meta_property);
 
     if (oThis._isUserTransactionKind()) {
+      console.log('==parsedMetaProperty======', parsedMetaProperty);
       // Did not use the meta property as not sure of all previous builds.
       oThis.videoId = oThis.meta.vi;
     } else if (oThis._isRedemptionTransactionKind()) {
@@ -161,7 +164,6 @@ class OstTransaction extends ServiceBase {
     } else if (oThis._isRedemptionTransactionKind()) {
       await oThis._insertInPepocornTransactions();
     } else if (oThis._isReplyOnVideoTransactionKind()) {
-      await oThis._insertInPendingTransactions();
       await oThis._validateAndUpdateReplyVideoDetails();
     }
   }
@@ -427,7 +429,7 @@ class OstTransaction extends ServiceBase {
       promiseArray.push(oThis._validateToUserIdForRedemption());
       promiseArray.push(oThis._validateTransactionDataForRedemption());
     } else if (oThis._isReplyOnVideoTransactionKind()) {
-      promiseArray.push(oThis._validateIfValidTransaction(), oThis._fetchToUserIdsAndAmounts());
+      promiseArray.push(oThis._validateIfValidTransaction());
     }
 
     await Promise.all(promiseArray);
@@ -546,6 +548,10 @@ class OstTransaction extends ServiceBase {
       amounts: oThis.amountsArray,
       kind: oThis._transactionKind()
     };
+
+    if (oThis._isReplyOnVideoTransactionKind()) {
+      extraData.replyDetailId = oThis.replyDetailId;
+    }
 
     const insertData = {
       ost_tx_id: oThis.ostTxId,
