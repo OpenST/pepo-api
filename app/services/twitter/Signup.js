@@ -212,7 +212,7 @@ class TwitterSignup extends ServiceBase {
         return Promise.reject(cacheResponse);
       }
 
-      if (cacheResponse.data[uniqueUserName]) {
+      if (cacheResponse.data[uniqueUserName].id) {
         uniqueUserName = basicHelper.getUniqueUserName(uniqueUserName);
         retryCount--;
       } else {
