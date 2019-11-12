@@ -57,7 +57,7 @@ class PopulateIncludesFromTexts {
       for (let ind = 0; ind < Rows.length; ind++) {
         const formattedData = new TextModel().formatDbData(Rows[ind]);
 
-        if (!formattedData.tagIds) {
+        if (!formattedData.tagIds || formattedData.tagIds.length == 0) {
           continue;
         }
 
@@ -96,7 +96,6 @@ class PopulateIncludesFromTexts {
   async _insertInTextIncludes() {
     const oThis = this;
 
-    let promiseArray = [];
     for (const textId in oThis.includesData) {
       const data = oThis.includesData[textId];
 
@@ -104,18 +103,7 @@ class PopulateIncludesFromTexts {
 
       await TextIncludeModel.flushCache({ textIds: [textId] });
 
-      promiseArray.push(
-        new TextIncludeModel().insertInTextIncludes(textId, data.entityIdentifiers, data.replaceableTexts)
-      );
-
-      if (promiseArray.length === 30) {
-        await Promise.all(promiseArray);
-        promiseArray = [];
-      }
-    }
-
-    if (promiseArray.length > 0) {
-      await Promise.all(promiseArray);
+      await new TextIncludeModel().insertInTextIncludes(textId, data.entityIdentifiers, data.replaceableTexts);
     }
   }
 }

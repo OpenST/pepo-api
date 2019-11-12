@@ -140,6 +140,8 @@ class TextIncludeModel extends CassandraModelBase {
     if (queries.length > 0) {
       await oThis.batchFire(queries);
     }
+
+    await TextIncludeModel.flushCache({ textIds: [textId] });
   }
 
   /**
@@ -154,6 +156,8 @@ class TextIncludeModel extends CassandraModelBase {
 
     const deleteParams = [textId, tagEntityIdentifiers];
     await oThis.batchFire([{ query: query, params: deleteParams }]);
+
+    await TextIncludeModel.flushCache({ textIds: [textId] });
   }
 
   /**
