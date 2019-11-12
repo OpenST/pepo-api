@@ -1,17 +1,19 @@
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
+  UserModel = require(rootPrefix + '/app/models/mysql/User'),
+  UserCache = require(rootPrefix + '/lib/cacheManagement/multi/User'),
+  UserBlockedListCache = require(rootPrefix + '/lib/cacheManagement/single/UserBlockedList'),
+  VideoDetailsByVideoIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/VideoDetailsByVideoIds'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   replyDetailConstants = require(rootPrefix + '/lib/globalConstant/replyDetail'),
-  VideoDetailsByVideoIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/VideoDetailsByVideoIds'),
-  videoDetailsConstants = require(rootPrefix + '/lib/globalConstant/videoDetail'),
-  UserBlockedListCache = require(rootPrefix + '/lib/cacheManagement/single/UserBlockedList');
+  videoDetailsConstants = require(rootPrefix + '/lib/globalConstant/videoDetail');
 
 /**
- * Class to delete video by user.
+ * Class to validate reply params.
  *
- * @class ValidateUploadVideoParams
+ * @class ValidateReplyParams
  */
-class ValidateUploadVideoParams extends ServiceBase {
+class ValidateReplyParams extends ServiceBase {
   /**
    * Constructor to delete video by user.
    *
@@ -49,9 +51,26 @@ class ValidateUploadVideoParams extends ServiceBase {
    */
   async _asyncPerform() {
     const oThis = this;
-    let videoDetails = {};
 
     oThis.parentKind = oThis.parentKind.toUpperCase();
+
+    await oThis._validateVideoStatus();
+
+    await oThis._validateApprovedCreator();
+
+    await oThis._validateIfUserIsBlocked();
+
+    return responseHelper.successWithData({});
+  }
+
+  /**
+   * Validate video status.
+   *
+   * @returns {Promise<never>}
+   * @private
+   */
+  async _validateVideoStatus() {
+    const oThis = this;
 
     if (oThis.parentKind === replyDetailConstants.videoParentKind) {
       const videoDetailsCacheRsp = await new VideoDetailsByVideoIdsCache({ videoIds: [oThis.parentId] }).fetch();
@@ -60,9 +79,9 @@ class ValidateUploadVideoParams extends ServiceBase {
         return Promise.reject(videoDetailsCacheRsp);
       }
 
-      videoDetails = videoDetailsCacheRsp.data[oThis.parentId];
+      oThis.videoDetails = videoDetailsCacheRsp.data[oThis.parentId];
 
-      if (videoDetails.status === videoDetailsConstants.deletedStatus) {
+      if (oThis.status === videoDetailsConstants.deletedStatus) {
         return Promise.reject(
           responseHelper.error({
             internal_error_identifier: 'a_s_r_v_1',
@@ -78,6 +97,42 @@ class ValidateUploadVideoParams extends ServiceBase {
         })
       );
     }
+  }
+
+  /**
+   * Validate if parent video creator is approved or not.
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _validateApprovedCreator() {
+    const oThis = this,
+      parentVideoCreatorId = oThis.videoDetails.creatorUserId;
+
+    const userCacheResp = await new UserCache({ ids: [parentVideoCreatorId] }).fetch();
+
+    if (userCacheResp.isFailure()) {
+      return Promise.reject(userCacheResp);
+    }
+
+    if (!UserModel.isUserApprovedCreator(userCacheResp.data[parentVideoCreatorId])) {
+      return Promise.reject(
+        responseHelper.error({
+          internal_error_identifier: 'a_s_r_v_4',
+          api_error_identifier: 'something_went_wrong'
+        })
+      );
+    }
+  }
+
+  /**
+   * Validate if user is blocked or not.
+   *
+   * @returns {Promise<never>}
+   * @private
+   */
+  async _validateIfUserIsBlocked() {
+    const oThis = this;
 
     let cacheResp = await new UserBlockedListCache({ userId: oThis.currentUser.id }).fetch();
     if (cacheResp.isFailure()) {
@@ -85,20 +140,18 @@ class ValidateUploadVideoParams extends ServiceBase {
     }
     let blockedByUserInfo = cacheResp.data[oThis.currentUser.id];
     if (
-      blockedByUserInfo.hasBlocked[videoDetails.creatorUserId] ||
-      blockedByUserInfo.blockedBy[videoDetails.creatorUserId]
+      blockedByUserInfo.hasBlocked[oThis.videoDetails.creatorUserId] ||
+      blockedByUserInfo.blockedBy[oThis.videoDetails.creatorUserId]
     ) {
       return Promise.reject(
         responseHelper.error({
           internal_error_identifier: 'a_s_r_v_3',
           api_error_identifier: 'unauthorized_api_request',
-          debug_options: { videoDetails: videoDetails }
+          debug_options: { videoDetails: oThis.videoDetails }
         })
       );
     }
-
-    return responseHelper.successWithData({});
   }
 }
 
-module.exports = ValidateUploadVideoParams;
+module.exports = ValidateReplyParams;
