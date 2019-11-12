@@ -148,7 +148,7 @@ class UserModel extends ModelBase {
 
     for (let index = 0; index < dbRows.length; index++) {
       const formatDbRow = oThis.formatDbData(dbRows[index]);
-      response[formatDbRow.userName] = formatDbRow.id;
+      response[formatDbRow.userName] = formatDbRow;
     }
 
     return response;

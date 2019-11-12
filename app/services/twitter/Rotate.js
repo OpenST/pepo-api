@@ -75,7 +75,7 @@ class RotateTwitterAccount extends ServiceBase {
       return Promise.reject(cacheRsp);
     }
 
-    if (!cacheRsp.data[oThis.userName]) {
+    if (!cacheRsp.data[oThis.userName].id) {
       return Promise.reject(
         responseHelper.paramValidationError({
           internal_error_identifier: 'a_s_u_rta_1',
@@ -86,7 +86,7 @@ class RotateTwitterAccount extends ServiceBase {
       );
     }
 
-    oThis.userId = cacheRsp.data[oThis.userName];
+    oThis.userId = cacheRsp.data[oThis.userName].id;
   }
 
   /**

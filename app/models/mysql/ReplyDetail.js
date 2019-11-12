@@ -194,12 +194,12 @@ class ReplyDetail extends ModelBase {
     return oThis
       .insert({
         creator_user_id: params.userId,
-        entity_kind: videoDetailsConstants.invertedEntityKinds[params.entityKind],
+        entity_kind: replyDetailConstants.invertedEntityKinds[params.entityKind],
         entity_id: params.entityId,
-        parent_kind: videoDetailsConstants.invertedParentKinds[params.parentKind],
+        parent_kind: replyDetailConstants.invertedParentKinds[params.parentKind],
         parent_id: params.parentId,
         link_ids: linkIds,
-        status: videoDetailsConstants.invertedStatuses[params.status]
+        status: replyDetailConstants.invertedStatuses[params.status]
       })
       .fire();
   }

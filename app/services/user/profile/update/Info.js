@@ -109,7 +109,7 @@ class UpdateProfileInfo extends UpdateProfileBase {
       return Promise.reject(cacheResponse);
     }
 
-    if (cacheResponse.data[oThis.username]) {
+    if (cacheResponse.data[oThis.username].id) {
       return Promise.reject(
         responseHelper.paramValidationError({
           internal_error_identifier: 'a_s_u_p_dun_1',
