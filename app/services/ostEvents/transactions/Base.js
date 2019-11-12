@@ -637,15 +637,16 @@ class TransactionOstEventBase extends ServiceBase {
   /**
    * This function validates if the parameters are correct.
    *
+   * @sets oThis.isValidRedemption
+   *
    * @returns {Promise<void>}
    * @private
    */
   async _validateTransactionDataForRedemption() {
     const oThis = this;
 
-    //Note: Use params from ost event for validation.
-
-    const validateParam = {
+    // Note: Use params from ost event for validation.
+    const validateParams = {
       request_timestamp: oThis.ostTransaction.block_timestamp,
       product_id: oThis.productId,
       pepo_amount_in_wei: oThis.ostTransaction.transfers[0].amount,
@@ -653,20 +654,19 @@ class TransactionOstEventBase extends ServiceBase {
       pepo_usd_price_point: oThis.pepoUsdPricePoint
     };
 
-    oThis.isValidRedemption = await new ValidatePepocornTopUp(validateParam)
+    oThis.isValidRedemption = false;
+
+    const pepocornTopUpValidationResponse = await new ValidatePepocornTopUp(validateParams)
       .perform()
-      .then(async function(resp) {
-        if (resp.isFailure()) {
-          await createErrorLogsEntry.perform(resp, errorLogsConstants.highSeverity);
-          return false;
-        } else {
-          return true;
-        }
-      })
-      .catch(async function(resp) {
-        await createErrorLogsEntry.perform(resp, errorLogsConstants.highSeverity);
-        return false;
+      .catch(async function(err) {
+        await createErrorLogsEntry.perform(err, errorLogsConstants.highSeverity);
       });
+
+    if (pepocornTopUpValidationResponse.isFailure()) {
+      await createErrorLogsEntry.perform(pepocornTopUpValidationResponse, errorLogsConstants.highSeverity);
+    } else {
+      oThis.isValidRedemption = true;
+    }
   }
 
   /**
@@ -680,7 +680,7 @@ class TransactionOstEventBase extends ServiceBase {
   async _validateToUserIdForRedemption() {
     const oThis = this;
 
-    if (oThis.ostTransaction.transfers.length != 1) {
+    if (oThis.ostTransaction.transfers.length !== 1) {
       const errorObject = responseHelper.error({
         internal_error_identifier: 'a_s_oe_b_vtui_1',
         api_error_identifier: 'something_went_wrong',
@@ -692,7 +692,6 @@ class TransactionOstEventBase extends ServiceBase {
     }
 
     const tokenDataRsp = await new SecureTokenCache().fetch();
-
     if (tokenDataRsp.isFailure()) {
       logger.error('Error while fetching token data.');
 
@@ -701,7 +700,7 @@ class TransactionOstEventBase extends ServiceBase {
 
     const tokenData = tokenDataRsp.data;
 
-    if (oThis.ostTransaction.transfers[0].to_user_id.toLowerCase() != tokenData.ostCompanyUserId.toLowerCase()) {
+    if (oThis.ostTransaction.transfers[0].to_user_id.toLowerCase() !== tokenData.ostCompanyUserId.toLowerCase()) {
       const errorObject = responseHelper.error({
         internal_error_identifier: 'a_s_oe_b_vtui_2',
         api_error_identifier: 'something_went_wrong',
@@ -716,13 +715,37 @@ class TransactionOstEventBase extends ServiceBase {
   /**
    * Return true if it is a pepocorn convert for redemption transaction.
    *
-   * @returns {Boolean}
+   * @returns {boolean}
    * @private
    */
   _isRedemptionTransactionKind() {
     const oThis = this;
 
-    return oThis.ostTransaction.meta_property.name == transactionConstants.redemptionMetaName;
+    return oThis.ostTransaction.meta_property.name === transactionConstants.redemptionMetaName;
+  }
+
+  /**
+   * Return true if it is reply on video transaction.
+   *
+   * @returns {boolean}
+   * @private
+   */
+  _isReplyOnVideoTransactionKind() {
+    const oThis = this;
+
+    return oThis.transaction.meta_property.name === transactionConstants.replyOnVideoMetaName;
+  }
+
+  /**
+   * Return true if it is user-to-user transaction on a reply video.
+   *
+   * @returns {boolean}
+   * @private
+   */
+  _isPepoOnReplyTransactionKind() {
+    const oThis = this;
+
+    return oThis.transaction.meta_property.name === transactionConstants.pepoOnReplyMetaName;
   }
 }
 
