@@ -233,6 +233,25 @@ class Tag extends ModelBase {
   }
 
   /**
+   * Update reply tag weights
+   *
+   * @param tagIds
+   * @param weightToAdd
+   * @returns {Promise<any>}
+   */
+  async updateReplyTagWeights(tagIds, weightToAdd) {
+    const oThis = this;
+
+    let queryObj = oThis.update(['reply_weight=reply_weight+?', weightToAdd]).where({ id: tagIds });
+
+    if (weightToAdd < 0) {
+      queryObj.where(['reply_weight > 0']);
+    }
+
+    return queryObj.fire();
+  }
+
+  /**
    * Flush cache.
    *
    * @param {object} params
