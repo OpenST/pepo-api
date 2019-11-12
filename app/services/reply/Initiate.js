@@ -82,7 +82,8 @@ class InitiateReply extends ServiceBase {
     } else {
       await oThis._addLink();
 
-      let resp = await oThis._validateAndSaveReply();
+      const resp = await oThis._validateAndSaveReply();
+
       oThis.videoId = resp.videoId;
       oThis.replyDetailId = resp.replyDetailId;
 
@@ -112,6 +113,8 @@ class InitiateReply extends ServiceBase {
   async _validateAndSanitize() {
     const oThis = this;
 
+    oThis.parentKind = oThis.parentKind.toUpperCase();
+
     let validateReplyResp = await new ValidateReplyService({
       current_user: oThis.currentUser,
       video_description: oThis.videoDescription,
@@ -136,7 +139,7 @@ class InitiateReply extends ServiceBase {
   /**
    * Add link in urls table.
    *
-   * @returns {Promise<*>}
+   * @returns {Promise<void>}
    * @private
    */
   async _addLink() {
@@ -151,8 +154,6 @@ class InitiateReply extends ServiceBase {
 
       oThis.linkIds = [insertRsp.insertId];
     }
-
-    return null;
   }
 
   /**
