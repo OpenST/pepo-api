@@ -1,5 +1,6 @@
 const rootPrefix = '../../../..',
   FilterTags = require(rootPrefix + '/lib/FilterOutTags'),
+  FilterAtMentions = require(rootPrefix + '/lib/FilterOutAtMentions'),
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   TextModel = require(rootPrefix + '/app/models/mysql/Text'),
   UserModel = require(rootPrefix + '/app/models/mysql/User'),
@@ -70,12 +71,18 @@ class UpdateVideoDescription extends ServiceBase {
     await oThis._fetchCreatorUser();
 
     let promiseArray = [];
-    promiseArray = [oThis._decrementVideoTagsWeightForExistingDescription(), oThis._filterTags()];
+    promiseArray = [
+      oThis._decrementVideoTagsWeightForExistingDescription(),
+      oThis._filterTags(),
+      oThis._filterAtMentions()
+    ];
     await Promise.all(promiseArray);
 
     await oThis._incrementWeightsAndAddVideoTags();
 
     await oThis._updateVideoDescription();
+
+    // TODO @dhananjay - publish notification and activity for at-mentioned users.
 
     await oThis._flushCache();
 
@@ -202,6 +209,23 @@ class UpdateVideoDescription extends ServiceBase {
 
     oThis.text = videoDescriptionTagsData.text;
     oThis.tagIds = videoDescriptionTagsData.tagIds;
+  }
+
+  /**
+   * Filter at mentions.
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _filterAtMentions() {
+    const oThis = this;
+
+    // Filter out at mentions from video description.
+    const filterMentionsResp = await new FilterAtMentions(oThis.videoDescription, oThis.existingTextId).perform(),
+      videoDescriptionAtMentionsData = filterMentionsResp.data;
+
+    oThis.userNamesWithPrefix = videoDescriptionAtMentionsData.userNamesWithPrefix;
+    oThis.userNamesToUserIdMap = videoDescriptionAtMentionsData.userNamesToUserIdMap;
   }
 
   /**
