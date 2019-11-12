@@ -130,6 +130,31 @@ class UserModel extends ModelBase {
   }
 
   /**
+   * Fetch user by user names.
+   *
+   * @param {Array} userNames: user names
+   *
+   * @return {object}
+   */
+  async fetchByUserNames(userNames) {
+    const oThis = this;
+
+    const dbRows = await oThis
+      .select(['id', 'user_name'])
+      .where(['user_name IN (?)', userNames])
+      .fire();
+
+    const response = {};
+
+    for (let index = 0; index < dbRows.length; index++) {
+      const formatDbRow = oThis.formatDbData(dbRows[index]);
+      response[formatDbRow.userName] = formatDbRow.id;
+    }
+
+    return response;
+  }
+
+  /**
    * Fetch secure user by id.
    *
    * @param {string} id
@@ -386,8 +411,8 @@ class UserModel extends ModelBase {
     promisesArray.push(new SecureUserCache({ id: params.id }).clear());
 
     if (params.userName) {
-      const UserByUsernameCache = require(rootPrefix + '/lib/cacheManagement/single/UserByUsername');
-      promisesArray.push(new UserByUsernameCache({ userName: params.userName }).clear());
+      const UserIdByUserNamesCache = require(rootPrefix + '/lib/cacheManagement/multi/UserIdByUserNames');
+      promisesArray.push(new UserIdByUserNamesCache({ userNames: [params.userName] }).clear());
     }
 
     if (params.email) {

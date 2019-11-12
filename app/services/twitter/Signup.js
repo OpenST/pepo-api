@@ -7,7 +7,7 @@ const rootPrefix = '../../..',
   bgJob = require(rootPrefix + '/lib/rabbitMqEnqueue/bgJob'),
   imageLib = require(rootPrefix + '/lib/imageLib'),
   TokenUserModel = require(rootPrefix + '/app/models/mysql/TokenUser'),
-  UserByUsernameCache = require(rootPrefix + '/lib/cacheManagement/single/UserByUsername'),
+  UserIdByUserNamesCache = require(rootPrefix + '/lib/cacheManagement/multi/UserIdByUserNames'),
   TwitterUserExtendedModel = require(rootPrefix + '/app/models/mysql/TwitterUserExtended'),
   TwitterUserModel = require(rootPrefix + '/app/models/mysql/TwitterUser'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
@@ -206,13 +206,13 @@ class TwitterSignup extends ServiceBase {
       retryCount = 3;
 
     while (retryCount > 0) {
-      let cacheResponse = await new UserByUsernameCache({ userName: uniqueUserName }).fetch();
+      let cacheResponse = await new UserIdByUserNamesCache({ userNames: [uniqueUserName] }).fetch();
 
       if (cacheResponse.isFailure()) {
         return Promise.reject(cacheResponse);
       }
 
-      if (cacheResponse.data.id) {
+      if (cacheResponse.data[uniqueUserName]) {
         uniqueUserName = basicHelper.getUniqueUserName(uniqueUserName);
         retryCount--;
       } else {

@@ -7,7 +7,7 @@ const rootPrefix = '../../../../..',
   TextsByIdCache = require(rootPrefix + '/lib/cacheManagement/multi/TextsByIds'),
   AddUpdateUserLinkClass = require(rootPrefix + '/lib/user/profile/AddUpdateLink'),
   UpdateProfileBase = require(rootPrefix + '/app/services/user/profile/update/Base'),
-  UserByUsernameCache = require(rootPrefix + '/lib/cacheManagement/single/UserByUsername'),
+  UserIdByUserNamesCache = require(rootPrefix + '/lib/cacheManagement/multi/UserIdByUserNames'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   userTagConstants = require(rootPrefix + '/lib/globalConstant/userTag'),
@@ -103,13 +103,13 @@ class UpdateProfileInfo extends UpdateProfileBase {
       return;
     }
 
-    let cacheResponse = await new UserByUsernameCache({ userName: oThis.username }).fetch();
+    let cacheResponse = await new UserIdByUserNamesCache({ userNames: [oThis.username] }).fetch();
 
     if (cacheResponse.isFailure()) {
       return Promise.reject(cacheResponse);
     }
 
-    if (cacheResponse.data.id) {
+    if (cacheResponse.data[oThis.username]) {
       return Promise.reject(
         responseHelper.paramValidationError({
           internal_error_identifier: 'a_s_u_p_dun_1',
