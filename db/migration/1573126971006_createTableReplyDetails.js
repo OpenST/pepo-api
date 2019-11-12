@@ -15,7 +15,7 @@ const upQuery =
         `parent_id` bigint(20) NOT NULL, \n\
         `description_id` int(11) NULL,\n\
         `link_ids` varchar(255) NULL, \n\
-        `transaction_id` int(11) NOT NULL, \n\
+        `transaction_id` int(11) NULL, \n\
         `total_contributed_by` int(11) NOT NULL DEFAULT 0, \n\
         `total_amount` decimal(30,0) NOT NULL  DEFAULT 0, \n\
         `total_transactions` int(11) NOT NULL DEFAULT 0, \n\

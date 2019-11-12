@@ -75,7 +75,7 @@ class SaveEmail extends ServiceBase {
     if (+oThis.currentUserId !== +oThis.profileUserId) {
       return Promise.reject(
         responseHelper.paramValidationError({
-          internal_error_identifier: 'a_s_u_p_u_b_1',
+          internal_error_identifier: 'a_s_u_se_1',
           api_error_identifier: 'unauthorized_api_request',
           params_error_identifiers: [],
           debug_options: {}

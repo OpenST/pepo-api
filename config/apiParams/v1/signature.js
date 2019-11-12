@@ -346,8 +346,12 @@ const v1Signature = {
         validatorMethods: ['validateNonEmptyObject']
       },
       {
-        parameter: 'parent_video_id',
+        parameter: 'parent_id',
         validatorMethods: ['validateNonZeroInteger']
+      },
+      {
+        parameter: 'parent_kind',
+        validatorMethods: ['validateString']
       },
       {
         parameter: 'video_url',

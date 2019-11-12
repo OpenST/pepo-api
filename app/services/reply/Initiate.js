@@ -190,7 +190,7 @@ class InitiateReply extends ServiceBase {
       return Promise.reject(resp);
     }
 
-    return resp;
+    return resp.data;
   }
 
   /**
@@ -203,11 +203,17 @@ class InitiateReply extends ServiceBase {
   async _addReplyDescription(params) {
     const oThis = this;
 
-    await new AddReplyDescription({
+    const replyDescriptionResp = await new AddReplyDescription({
       videoDescription: oThis.videoDescription,
       videoId: oThis.videoId,
       replyDetailId: oThis.replyDetailId
     }).perform();
+
+    if (replyDescriptionResp.isFailure()) {
+      return Promise.reject(replyDescriptionResp);
+    }
+
+    oThis.descriptionId = replyDescriptionResp.data.descriptionId;
   }
 }
 
