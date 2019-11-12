@@ -8,6 +8,7 @@ const rootPrefix = '../../..',
   urlConstants = require(rootPrefix + '/lib/globalConstant/url'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   videoConstants = require(rootPrefix + '/lib/globalConstant/video'),
+  entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
   replyDetailConstants = require(rootPrefix + '/lib/globalConstant/replyDetail');
 
 /**
@@ -91,16 +92,13 @@ class InitiateReply extends ServiceBase {
     }
 
     return responseHelper.successWithData({
-      replyDetail: {
-        id: oThis.replyDetailId,
-        creatorUserId: oThis.addVideoParams.userId,
-        entityKind: oThis.addVideoParams.entityKind,
-        entityId: oThis.videoId,
-        descriptionId: oThis.descriptionId,
-        linkIds: oThis.addVideoParams.linkIds,
-        parentId: oThis.addVideoParams.parentId,
-        parentKind: oThis.addVideoParams.parentKind
-      }
+      [entityTypeConstants.videoReplyList]: [
+        {
+          replyDetailId: oThis.replyDetailId,
+          userId: oThis.addVideoParams.userId,
+          updatedAt: Math.round(new Date() / 1000)
+        }
+      ]
     });
   }
 

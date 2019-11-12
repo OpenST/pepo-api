@@ -13,11 +13,11 @@ router.post('/', cookieHelper.validateUserLoginRequired, function(req, res, next
   req.decodedParams.apiName = apiName.initiateReply;
 
   const dataFormatterFunc = async function(serviceResponse) {
-    console.log('=serviceResponse======', serviceResponse);
+    console.log('=serviceResponse======', JSON.stringify(serviceResponse));
     const wrapperFormatterRsp = await new FormatterComposer({
-      resultType: responseEntityKey.replyDetails,
+      resultType: responseEntityKey.videoReplies,
       entityKindToResponseKeyMap: {
-        [entityType.replyDetails]: responseEntityKey.replyDetails
+        [entityType.videoReplyList]: responseEntityKey.videoReplies
       },
       serviceData: serviceResponse.data
     }).perform();

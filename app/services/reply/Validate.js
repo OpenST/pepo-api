@@ -51,7 +51,9 @@ class ValidateUploadVideoParams extends ServiceBase {
     const oThis = this;
     let videoDetails = {};
 
-    if (oThis.parentKind.toUpperCase() === replyDetailConstants.videoParentKind) {
+    oThis.parentKind = oThis.parentKind.toUpperCase();
+
+    if (oThis.parentKind === replyDetailConstants.videoParentKind) {
       const videoDetailsCacheRsp = await new VideoDetailsByVideoIdsCache({ videoIds: [oThis.parentId] }).fetch();
 
       if (videoDetailsCacheRsp.isFailure()) {

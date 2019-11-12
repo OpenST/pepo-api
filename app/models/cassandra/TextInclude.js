@@ -68,7 +68,8 @@ class TextIncludeModel extends CassandraModelBase {
   }
 
   /**
-   * Fetch includes by text id
+   * Fetch includes by text id.
+   *
    * @param textIds - ids of texts table
    * @returns {Promise<{}>}
    */
@@ -98,7 +99,7 @@ class TextIncludeModel extends CassandraModelBase {
   }
 
   /**
-   * Fetch latest last action timestamp
+   * Fetch latest last action timestamp.
    *
    * @param queryParams
    * @returns {*}
