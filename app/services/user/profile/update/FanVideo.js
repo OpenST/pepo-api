@@ -137,7 +137,8 @@ class UpdateFanVideo extends UpdateProfileBase {
     await new AddVideoDescription({
       videoDescription: oThis.videoDescription,
       videoId: oThis.videoId,
-      isUserCreator: UserModelKlass.isUserApprovedCreator(oThis.userObj)
+      isUserCreator: UserModelKlass.isUserApprovedCreator(oThis.userObj),
+      currentUserId: oThis.currentUserId
     }).perform();
   }
 

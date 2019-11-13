@@ -9,6 +9,9 @@ const rootPrefix = '../../..',
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   videoConstants = require(rootPrefix + '/lib/globalConstant/video'),
   entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
+  entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
+  ReplyDetailsByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/ReplyDetailsByIds'),
+  logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   replyDetailConstants = require(rootPrefix + '/lib/globalConstant/replyDetail');
 
 /**
@@ -45,10 +48,11 @@ class InitiateReply extends ServiceBase {
 
     const oThis = this;
 
+    oThis.replyDetailId = params.reply_detail_id || null;
+
     oThis.currentUser = params.current_user;
     oThis.parentKind = params.parent_kind;
     oThis.parentId = params.parent_id;
-    oThis.replyDetailId = params.reply_detail_id;
     oThis.videoUrl = params.video_url;
     oThis.posterImageUrl = params.poster_image_url;
     oThis.videoWidth = params.video_width;
@@ -61,7 +65,6 @@ class InitiateReply extends ServiceBase {
     oThis.link = params.link;
 
     oThis.videoId = null;
-    oThis.replyDetailId = null;
     oThis.addVideoParams = {};
   }
 
@@ -77,9 +80,13 @@ class InitiateReply extends ServiceBase {
     await oThis._validateAndSanitize();
 
     if (oThis.replyDetailId) {
-      // await oThis._getReplyDetails();
-      // await oThis._editDescription();
-      // await oThis._editLink();
+      await oThis._getReplyDetails();
+
+      if (oThis.replyDetail.status) {
+        await oThis._fetchReplyDescription();
+        await oThis._addReplyDescription();
+        // await oThis._editLink();
+      }
     } else {
       await oThis._addLink();
 
@@ -92,10 +99,11 @@ class InitiateReply extends ServiceBase {
     }
 
     return responseHelper.successWithData({
-      [entityTypeConstants.videoReplyList]: [
+      [entityType.videoReplyList]: [
         {
+          id: oThis.replyDetailId,
+          userId: oThis.currentUser.id,
           replyDetailId: oThis.replyDetailId,
-          userId: oThis.addVideoParams.userId,
           updatedAt: Math.round(new Date() / 1000)
         }
       ]
@@ -134,6 +142,21 @@ class InitiateReply extends ServiceBase {
     }
   }
 
+  async _getReplyDetails() {
+    const oThis = this;
+
+    const replyDetailCacheResp = await new ReplyDetailsByIdsCache({ ids: [oThis.replyDetailId] }).fetch();
+
+    if (replyDetailCacheResp.isFailure()) {
+      logger.error('Error while fetching reply detail data for reply_detail_id:', oThis.replyDetailId);
+
+      return Promise.reject(replyDetailCacheResp);
+    }
+
+    oThis.replyDetail = replyDetailCacheResp.data[oThis.replyDetailId];
+  }
+
+  async _fetchReplyDescription() {}
   /**
    * Add link in urls table.
    *
@@ -204,7 +227,8 @@ class InitiateReply extends ServiceBase {
     const replyDescriptionResp = await new AddReplyDescription({
       videoDescription: oThis.videoDescription,
       videoId: oThis.videoId,
-      replyDetailId: oThis.replyDetailId
+      replyDetailId: oThis.replyDetailId,
+      currentUserId: oThis.currentUser.id
     }).perform();
 
     if (replyDescriptionResp.isFailure()) {
