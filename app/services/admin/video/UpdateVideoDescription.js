@@ -15,6 +15,7 @@ const rootPrefix = '../../../..',
   textConstants = require(rootPrefix + '/lib/globalConstant/text'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   userConstants = require(rootPrefix + '/lib/globalConstant/user'),
+  videoTagConstants = require(rootPrefix + '/lib/globalConstant/videoTag'),
   videoDetailsConstants = require(rootPrefix + '/lib/globalConstant/videoDetail'),
   adminActivityLogConstants = require(rootPrefix + '/lib/globalConstant/adminActivityLogs');
 
@@ -187,7 +188,11 @@ class UpdateVideoDescription extends ServiceBase {
       return;
     }
 
-    return new DecrementWeightsAndRemoveVideoTags({ tagIds: tagIdsArray, videoId: oThis.videoId }).perform();
+    return new DecrementWeightsAndRemoveVideoTags({
+      tagIds: tagIdsArray,
+      videoId: oThis.videoId,
+      kind: videoTagConstants.postKind
+    }).perform();
   }
 
   /**
@@ -241,7 +246,11 @@ class UpdateVideoDescription extends ServiceBase {
     const oThis = this;
 
     if (oThis.isUserCreator) {
-      return new IncrementWeightsAndAddVideoTags({ tagIds: oThis.tagIds, videoId: oThis.videoId }).perform();
+      return new IncrementWeightsAndAddVideoTags({
+        tagIds: oThis.tagIds,
+        videoId: oThis.videoId,
+        kind: videoTagConstants.postKind
+      }).perform();
     }
   }
 
