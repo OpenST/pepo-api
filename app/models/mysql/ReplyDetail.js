@@ -148,29 +148,28 @@ class ReplyDetail extends ModelBase {
    * @param params
    * @returns {Promise<*>}
    */
-  async fetchReplyDetailByEntityIdAndEntityKind(params) {
+  async fetchReplyDetailByEntityIdsAndEntityKind(params) {
     const oThis = this;
 
-    const entityId = params.entityId,
+    const entityIds = params.entityIds,
       entityKind = params.entityKind;
-
-    console.log('The params are : ', params);
 
     const dbRows = await oThis
       .select('*')
       .where({
-        entity_id: entityId,
+        entity_id: entityIds,
         entity_kind: entityKind
       })
       .fire();
 
-    console.log('The dbRows are : ', dbRows);
+    let replyDetails = {};
 
-    if (dbRows.length === 0) {
-      return {};
+    for (let index = 0; index < dbRows.length; index++) {
+      const formatDbRow = oThis.formatDbData(dbRows[index]);
+      replyDetails[formatDbRow.entityId] = formatDbRow;
     }
 
-    return oThis.formatDbData(dbRows[0]);
+    return replyDetails;
   }
 
   /**
