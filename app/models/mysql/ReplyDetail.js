@@ -143,6 +143,37 @@ class ReplyDetail extends ModelBase {
   }
 
   /**
+   * Fetch reply detail by entity id and entity kind.
+   *
+   * @param params
+   * @returns {Promise<*>}
+   */
+  async fetchReplyDetailByEntityIdAndEntityKind(params) {
+    const oThis = this;
+
+    const entityId = params.entityId,
+      entityKind = params.entityKind;
+
+    console.log('The params are : ', params);
+
+    const dbRows = await oThis
+      .select('*')
+      .where({
+        entity_id: entityId,
+        entity_kind: entityKind
+      })
+      .fire();
+
+    console.log('The dbRows are : ', dbRows);
+
+    if (dbRows.length === 0) {
+      return {};
+    }
+
+    return oThis.formatDbData(dbRows[0]);
+  }
+
+  /**
    * Fetch reply details by ids.
    *
    * @param {array} videoIds
