@@ -40,6 +40,7 @@ class GetVideoList extends ServiceBase {
 
     oThis.limit = oThis._defaultPageLimit();
 
+    oThis.usersVideosMap = {};
     oThis.currentUserId = null;
     oThis.paginationTimestamp = null;
     oThis.nextPaginationTimestamp = null;
@@ -220,6 +221,9 @@ class GetVideoList extends ServiceBase {
   async _getVideos() {
     const oThis = this;
 
+    if (oThis.videoIds.length <= 0) {
+      return responseHelper.successWithData({});
+    }
     const usersVideoListObj = new GetUsersVideoList({
       currentUserId: oThis.currentUserId,
       videoIds: oThis.videoIds,
@@ -256,20 +260,20 @@ class GetVideoList extends ServiceBase {
 
     return responseHelper.successWithData({
       [entityType.userVideoList]: oThis.videoDetails,
-      usersByIdMap: oThis.usersVideosMap.usersByIdMap,
-      userStat: oThis.usersVideosMap.userStat,
-      [entityType.userProfilesMap]: oThis.usersVideosMap.userProfilesMap,
-      tags: oThis.usersVideosMap.tags,
-      linkMap: oThis.usersVideosMap.linkMap,
-      imageMap: oThis.usersVideosMap.imageMap,
-      videoMap: oThis.usersVideosMap.videoMap,
-      [entityType.videoDetailsMap]: oThis.usersVideosMap.videoDetailsMap,
-      [entityType.videoDescriptionsMap]: oThis.usersVideosMap.videoDescriptionMap,
-      [entityType.currentUserUserContributionsMap]: oThis.usersVideosMap.currentUserUserContributionsMap,
-      [entityType.currentUserVideoContributionsMap]: oThis.usersVideosMap.currentUserVideoContributionsMap,
-      [entityType.userProfileAllowedActions]: oThis.usersVideosMap.userProfileAllowedActions,
-      tokenUsersByUserIdMap: oThis.usersVideosMap.tokenUsersByUserIdMap,
-      [entityType.pricePointsMap]: oThis.usersVideosMap.pricePointsMap,
+      usersByIdMap: oThis.usersVideosMap.usersByIdMap || {},
+      userStat: oThis.usersVideosMap.userStat || {},
+      [entityType.userProfilesMap]: oThis.usersVideosMap.userProfilesMap || {},
+      tags: oThis.usersVideosMap.tags || {},
+      linkMap: oThis.usersVideosMap.linkMap || {},
+      imageMap: oThis.usersVideosMap.imageMap || {},
+      videoMap: oThis.usersVideosMap.videoMap || {},
+      [entityType.videoDetailsMap]: oThis.usersVideosMap.videoDetailsMap || {},
+      [entityType.videoDescriptionsMap]: oThis.usersVideosMap.videoDescriptionMap || {},
+      [entityType.currentUserUserContributionsMap]: oThis.usersVideosMap.currentUserUserContributionsMap || {},
+      [entityType.currentUserVideoContributionsMap]: oThis.usersVideosMap.currentUserVideoContributionsMap || {},
+      [entityType.userProfileAllowedActions]: oThis.usersVideosMap.userProfileAllowedActions || {},
+      tokenUsersByUserIdMap: oThis.usersVideosMap.tokenUsersByUserIdMap || {},
+      [entityType.pricePointsMap]: oThis.usersVideosMap.pricePointsMap || {},
       tokenDetails: oThis.tokenDetails,
       meta: oThis.responseMetaData
     });

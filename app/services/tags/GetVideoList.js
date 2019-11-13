@@ -184,6 +184,10 @@ class GetTagsVideoList extends ServiceBase {
   async _getVideos() {
     const oThis = this;
 
+    if (oThis.videoIds.length <= 0) {
+      return responseHelper.successWithData({});
+    }
+
     const userVideosObj = new GetUserVideos({
       currentUserId: oThis.currentUser.id,
       videoIds: oThis.videoIds,
@@ -232,20 +236,20 @@ class GetTagsVideoList extends ServiceBase {
 
     return responseHelper.successWithData({
       [entityType.userVideoList]: oThis.videoDetails,
-      [entityType.videoDetailsMap]: oThis.usersVideosMap.videoDetailsMap,
-      [entityType.videoDescriptionsMap]: oThis.usersVideosMap.videoDescriptionMap,
-      [entityType.userProfilesMap]: oThis.usersVideosMap.userProfilesMap,
-      [entityType.currentUserUserContributionsMap]: oThis.usersVideosMap.currentUserUserContributionsMap,
-      [entityType.currentUserVideoContributionsMap]: oThis.usersVideosMap.currentUserVideoContributionsMap,
-      [entityType.userProfileAllowedActions]: oThis.usersVideosMap.userProfileAllowedActions,
-      [entityType.pricePointsMap]: oThis.usersVideosMap.pricePointsMap,
-      usersByIdMap: oThis.usersVideosMap.usersByIdMap,
-      userStat: oThis.usersVideosMap.userStat,
-      tags: oThis.usersVideosMap.tags,
-      linkMap: oThis.usersVideosMap.linkMap,
-      imageMap: oThis.usersVideosMap.imageMap,
-      videoMap: oThis.usersVideosMap.videoMap,
-      tokenUsersByUserIdMap: oThis.usersVideosMap.tokenUsersByUserIdMap,
+      [entityType.videoDetailsMap]: oThis.usersVideosMap.videoDetailsMap || {},
+      [entityType.videoDescriptionsMap]: oThis.usersVideosMap.videoDescriptionMap || {},
+      [entityType.userProfilesMap]: oThis.usersVideosMap.userProfilesMap || {},
+      [entityType.currentUserUserContributionsMap]: oThis.usersVideosMap.currentUserUserContributionsMap || {},
+      [entityType.currentUserVideoContributionsMap]: oThis.usersVideosMap.currentUserVideoContributionsMap || {},
+      [entityType.userProfileAllowedActions]: oThis.usersVideosMap.userProfileAllowedActions || {},
+      [entityType.pricePointsMap]: oThis.usersVideosMap.pricePointsMap || {},
+      usersByIdMap: oThis.usersVideosMap.usersByIdMap || {},
+      userStat: oThis.usersVideosMap.userStat || {},
+      tags: oThis.usersVideosMap.tags || {},
+      linkMap: oThis.usersVideosMap.linkMap || {},
+      imageMap: oThis.usersVideosMap.imageMap || {},
+      videoMap: oThis.usersVideosMap.videoMap || {},
+      tokenUsersByUserIdMap: oThis.usersVideosMap.tokenUsersByUserIdMap || {},
 
       tokenDetails: oThis.tokenDetails,
       meta: oThis.responseMetaData
