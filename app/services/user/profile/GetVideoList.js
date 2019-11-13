@@ -1,6 +1,6 @@
 const rootPrefix = '../../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
-  GetProfile = require(rootPrefix + '/lib/user/profile/Get'),
+  GetUsersVideoList = require(rootPrefix + '/lib/GetUsersVideoList'),
   UserModel = require(rootPrefix + '/app/models/mysql/User'),
   GetTokenService = require(rootPrefix + '/app/services/token/Get'),
   UserBlockedListCache = require(rootPrefix + '/lib/cacheManagement/single/UserBlockedList'),
@@ -154,7 +154,6 @@ class GetVideoList extends ServiceBase {
       const videoId = videoIds[ind];
       const videoDetail = videoDetails[videoId];
       oThis.videosCount++;
-      oThis.videoDetails.push(videoDetail);
       oThis.videoIds.push(videoDetail.videoId);
 
       oThis.nextPaginationTimestamp = videoDetail.createdAt;
@@ -213,7 +212,7 @@ class GetVideoList extends ServiceBase {
   /**
    * Get videos.
    *
-   * @sets oThis.profileResponse
+   * @sets oThis.usersVideosMap
    *
    * @return {Promise<result>}
    * @private
@@ -221,19 +220,27 @@ class GetVideoList extends ServiceBase {
   async _getVideos() {
     const oThis = this;
 
-    const getProfileObj = new GetProfile({
-      userIds: [oThis.profileUserId],
+    const usersVideoListObj = new GetUsersVideoList({
       currentUserId: oThis.currentUserId,
       videoIds: oThis.videoIds,
       isAdmin: oThis.isAdmin
     });
 
-    const response = await getProfileObj.perform();
+    const response = await usersVideoListObj.perform();
     if (response.isFailure()) {
       return Promise.reject(response);
     }
 
-    oThis.profileResponse = response.data;
+    oThis.usersVideosMap = response.data;
+
+    for (let ind = 0; ind < oThis.videoIds.length; ind++) {
+      let vid = oThis.videoIds[ind],
+        vdObj = oThis.usersVideosMap.fullVideosMap[vid];
+
+      if (vdObj) {
+        oThis.videoDetails.push(vdObj);
+      }
+    }
 
     return responseHelper.successWithData({});
   }
@@ -249,20 +256,20 @@ class GetVideoList extends ServiceBase {
 
     return responseHelper.successWithData({
       [entityType.userVideoList]: oThis.videoDetails,
-      usersByIdMap: oThis.profileResponse.usersByIdMap,
-      userStat: oThis.profileResponse.userStat,
-      [entityType.userProfilesMap]: oThis.profileResponse.userProfilesMap,
-      tags: oThis.profileResponse.tags,
-      linkMap: oThis.profileResponse.linkMap,
-      imageMap: oThis.profileResponse.imageMap,
-      videoMap: oThis.profileResponse.videoMap,
-      [entityType.videoDetailsMap]: oThis.profileResponse.videoDetailsMap,
-      [entityType.videoDescriptionsMap]: oThis.profileResponse.videoDescriptionMap,
-      [entityType.currentUserUserContributionsMap]: oThis.profileResponse.currentUserUserContributionsMap,
-      [entityType.currentUserVideoContributionsMap]: oThis.profileResponse.currentUserVideoContributionsMap,
-      [entityType.userProfileAllowedActions]: oThis.profileResponse.userProfileAllowedActions,
-      tokenUsersByUserIdMap: oThis.profileResponse.tokenUsersByUserIdMap,
-      [entityType.pricePointsMap]: oThis.profileResponse.pricePointsMap,
+      usersByIdMap: oThis.usersVideosMap.usersByIdMap,
+      userStat: oThis.usersVideosMap.userStat,
+      [entityType.userProfilesMap]: oThis.usersVideosMap.userProfilesMap,
+      tags: oThis.usersVideosMap.tags,
+      linkMap: oThis.usersVideosMap.linkMap,
+      imageMap: oThis.usersVideosMap.imageMap,
+      videoMap: oThis.usersVideosMap.videoMap,
+      [entityType.videoDetailsMap]: oThis.usersVideosMap.videoDetailsMap,
+      [entityType.videoDescriptionsMap]: oThis.usersVideosMap.videoDescriptionMap,
+      [entityType.currentUserUserContributionsMap]: oThis.usersVideosMap.currentUserUserContributionsMap,
+      [entityType.currentUserVideoContributionsMap]: oThis.usersVideosMap.currentUserVideoContributionsMap,
+      [entityType.userProfileAllowedActions]: oThis.usersVideosMap.userProfileAllowedActions,
+      tokenUsersByUserIdMap: oThis.usersVideosMap.tokenUsersByUserIdMap,
+      [entityType.pricePointsMap]: oThis.usersVideosMap.pricePointsMap,
       tokenDetails: oThis.tokenDetails,
       meta: oThis.responseMetaData
     });
