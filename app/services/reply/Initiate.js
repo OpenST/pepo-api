@@ -12,6 +12,7 @@ const rootPrefix = '../../..',
   entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
   ReplyDetailsByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/ReplyDetailsByIds'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
+  EditReplyLink = require(rootPrefix + '/lib/editLink/Reply'),
   replyDetailConstants = require(rootPrefix + '/lib/globalConstant/replyDetail');
 
 /**
@@ -82,10 +83,23 @@ class InitiateReply extends ServiceBase {
     if (oThis.replyDetailId) {
       await oThis._getReplyDetails();
 
-      if (oThis.replyDetail.status) {
-        await oThis._fetchReplyDescription();
+      if (oThis.replyDetail.creatorUserId != oThis.currentUser.id) {
+        return Promise.reject(
+          responseHelper.error({
+            internal_error_identifier: 's_r_i_1',
+            api_error_identifier: 'unauthorized_api_request',
+            debug_options: { replyDetail: oThis.replyDetail, currentUserId: oThis.currentUser.id }
+          })
+        );
+      }
+
+      if (oThis.replyDetail.status != replyDetailConstants.pendingStatus) {
         await oThis._addReplyDescription();
-        // await oThis._editLink();
+
+        await new EditReplyLink({
+          replyDetailId: oThis.replyDetail.id,
+          link: oThis.link
+        }).perform();
       }
     } else {
       await oThis._addLink();
@@ -155,8 +169,6 @@ class InitiateReply extends ServiceBase {
 
     oThis.replyDetail = replyDetailCacheResp.data[oThis.replyDetailId];
   }
-
-  async _fetchReplyDescription() {}
 
   /**
    * Add link in urls table.
