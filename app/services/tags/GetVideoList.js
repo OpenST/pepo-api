@@ -1,6 +1,6 @@
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
-  GetProfile = require(rootPrefix + '/lib/user/profile/Get'),
+  GetUserVideos = require(rootPrefix + '/lib/GetUsersVideoList'),
   GetTokenService = require(rootPrefix + '/app/services/token/Get'),
   VideoDetailsByVideoIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/VideoDetailsByVideoIds'),
   VideoTagsByTagIdPaginationCache = require(rootPrefix + '/lib/cacheManagement/single/VideoTagsByTagIdPagination'),
@@ -41,7 +41,6 @@ class GetTagsVideoList extends ServiceBase {
     oThis.nextPaginationTimestamp = null;
     oThis.videosCount = 0;
     oThis.videoIds = [];
-    oThis.userIds = [];
     oThis.videoDetails = [];
     oThis.tokenDetails = {};
   }
@@ -58,8 +57,6 @@ class GetTagsVideoList extends ServiceBase {
     await oThis._validateAndSanitizeParams();
 
     await oThis._fetchVideoIds();
-
-    await oThis._fetchCreatorUserIds();
 
     oThis._addResponseMetaData();
 
@@ -121,39 +118,12 @@ class GetTagsVideoList extends ServiceBase {
 
     for (let ind = 0; ind < videoTagsDetails.length; ind++) {
       const videoTagsDetail = videoTagsDetails[ind];
-
       oThis.videosCount++;
       oThis.videoIds.push(videoTagsDetail.videoId);
       oThis.nextPaginationTimestamp = videoTagsDetail.createdAt;
     }
 
     return responseHelper.successWithData({});
-  }
-
-  /**
-   * Fetch creator user ids.
-   *
-   * @sets oThis.userIds
-   *
-   * @returns {Promise<void>}
-   * @private
-   */
-  async _fetchCreatorUserIds() {
-    const oThis = this;
-
-    const videoDetailsCacheResponse = await new VideoDetailsByVideoIdsCache({ videoIds: oThis.videoIds }).fetch();
-
-    if (videoDetailsCacheResponse.isFailure()) {
-      return Promise.reject(videoDetailsCacheResponse);
-    }
-
-    const videoDetailsCacheData = videoDetailsCacheResponse.data;
-
-    for (let videoId in videoDetailsCacheData) {
-      let videoDetails = videoDetailsCacheData[videoId];
-
-      oThis.userIds.push(videoDetails.creatorUserId);
-    }
   }
 
   /**
@@ -206,7 +176,7 @@ class GetTagsVideoList extends ServiceBase {
   /**
    * Get videos.
    *
-   * @sets oThis.profileResponse
+   * @sets oThis.usersVideosMap
    *
    * @return {Promise<result>}
    * @private
@@ -214,20 +184,19 @@ class GetTagsVideoList extends ServiceBase {
   async _getVideos() {
     const oThis = this;
 
-    const getProfileObj = new GetProfile({
-      userIds: oThis.userIds,
+    const userVideosObj = new GetUserVideos({
       currentUserId: oThis.currentUser.id,
       videoIds: oThis.videoIds,
       isAdmin: false
     });
 
-    const response = await getProfileObj.perform();
+    const response = await userVideosObj.perform();
 
     if (response.isFailure()) {
       return Promise.reject(response);
     }
 
-    oThis.profileResponse = response.data;
+    oThis.usersVideosMap = response.data;
 
     return responseHelper.successWithData({});
   }
@@ -245,8 +214,8 @@ class GetTagsVideoList extends ServiceBase {
 
     for (let i = 0; i < oThis.videoIds.length; i++) {
       let videoId = oThis.videoIds[i];
-      if (oThis.profileResponse.videoDetailsMap[videoId]) {
-        oThis.videoDetails.push(oThis.profileResponse.videoDetailsMap[videoId]);
+      if (oThis.usersVideosMap.fullVideosMap[videoId]) {
+        oThis.videoDetails.push(oThis.usersVideosMap.fullVideosMap[videoId]);
       }
     }
   }
@@ -263,20 +232,20 @@ class GetTagsVideoList extends ServiceBase {
 
     return responseHelper.successWithData({
       [entityType.userVideoList]: oThis.videoDetails,
-      [entityType.videoDetailsMap]: oThis.profileResponse.videoDetailsMap,
-      [entityType.videoDescriptionsMap]: oThis.profileResponse.videoDescriptionMap,
-      [entityType.userProfilesMap]: oThis.profileResponse.userProfilesMap,
-      [entityType.currentUserUserContributionsMap]: oThis.profileResponse.currentUserUserContributionsMap,
-      [entityType.currentUserVideoContributionsMap]: oThis.profileResponse.currentUserVideoContributionsMap,
-      [entityType.userProfileAllowedActions]: oThis.profileResponse.userProfileAllowedActions,
-      [entityType.pricePointsMap]: oThis.profileResponse.pricePointsMap,
-      usersByIdMap: oThis.profileResponse.usersByIdMap,
-      userStat: oThis.profileResponse.userStat,
-      tags: oThis.profileResponse.tags,
-      linkMap: oThis.profileResponse.linkMap,
-      imageMap: oThis.profileResponse.imageMap,
-      videoMap: oThis.profileResponse.videoMap,
-      tokenUsersByUserIdMap: oThis.profileResponse.tokenUsersByUserIdMap,
+      [entityType.videoDetailsMap]: oThis.usersVideosMap.videoDetailsMap,
+      [entityType.videoDescriptionsMap]: oThis.usersVideosMap.videoDescriptionMap,
+      [entityType.userProfilesMap]: oThis.usersVideosMap.userProfilesMap,
+      [entityType.currentUserUserContributionsMap]: oThis.usersVideosMap.currentUserUserContributionsMap,
+      [entityType.currentUserVideoContributionsMap]: oThis.usersVideosMap.currentUserVideoContributionsMap,
+      [entityType.userProfileAllowedActions]: oThis.usersVideosMap.userProfileAllowedActions,
+      [entityType.pricePointsMap]: oThis.usersVideosMap.pricePointsMap,
+      usersByIdMap: oThis.usersVideosMap.usersByIdMap,
+      userStat: oThis.usersVideosMap.userStat,
+      tags: oThis.usersVideosMap.tags,
+      linkMap: oThis.usersVideosMap.linkMap,
+      imageMap: oThis.usersVideosMap.imageMap,
+      videoMap: oThis.usersVideosMap.videoMap,
+      tokenUsersByUserIdMap: oThis.usersVideosMap.tokenUsersByUserIdMap,
 
       tokenDetails: oThis.tokenDetails,
       meta: oThis.responseMetaData
