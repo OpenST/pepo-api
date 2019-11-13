@@ -1,5 +1,6 @@
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
+  GetTokenService = require(rootPrefix + '/app/services/token/Get'),
   ReplyDetailsByVideoIdCache = require(rootPrefix + '/lib/cacheManagement/single/ReplyDetailsByVideoIdPagination'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
@@ -61,9 +62,12 @@ class GetReplyList extends ServiceBase {
 
     await oThis._fetchReplyDetailIds();
 
+    const promisesArray = [];
     if (oThis.replyDetailIds.length > 0) {
-      await oThis._getReplyVideos();
+      promisesArray.push(oThis._setTokenDetails());
+      promisesArray.push(oThis._getReplyVideos());
     }
+    await Promise.all(promisesArray);
 
     oThis._addResponseMetaData();
 
@@ -81,7 +85,7 @@ class GetReplyList extends ServiceBase {
   async _validateAndSanitizeParams() {
     const oThis = this;
 
-    oThis.currentUserId = oThis.currentUser ? Number(oThis.currentUser.id) : 0;
+    oThis.currentUserId = 1036; //oThis.currentUser ? Number(oThis.currentUser.id) : 0;
 
     if (oThis.paginationIdentifier) {
       const parsedPaginationParams = oThis._parsePaginationParams(oThis.paginationIdentifier);
@@ -170,8 +174,30 @@ class GetReplyList extends ServiceBase {
     oThis.userRepliesMap = response.data;
     for (let ind = 0; ind < oThis.replyDetailIds.length; ind++) {
       let rdId = oThis.replyDetailIds[ind];
-      oThis.videoReplies.push(oThis.userRepliesMap.fullVideosMap[rdId]);
+      let rdObj = oThis.userRepliesMap.replyDetailsMap[rdId];
+      oThis.videoReplies.push(oThis.userRepliesMap.fullVideosMap[rdObj.entityId]);
     }
+
+    return responseHelper.successWithData({});
+  }
+
+  /**
+   * Fetch token details.
+   *
+   * @sets oThis.tokenDetails
+   *
+   * @return {Promise<result>}
+   * @private
+   */
+  async _setTokenDetails() {
+    const oThis = this;
+
+    const tokenResp = await new GetTokenService().perform();
+    if (tokenResp.isFailure()) {
+      return Promise.reject(tokenResp);
+    }
+
+    oThis.tokenDetails = tokenResp.data.tokenDetails;
 
     return responseHelper.successWithData({});
   }
