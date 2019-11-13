@@ -236,6 +236,30 @@ class ReplyDetail extends ModelBase {
   }
 
   /**
+   * Delete video details
+   *
+   * @param {object} params
+   * @param {number} params.videoIds
+   *
+   * @returns {object}
+   */
+  async markVideoEntitiesDeleted(params) {
+    const oThis = this;
+
+    await oThis
+      .update({
+        status: replyDetailConstants.invertedStatuses[replyDetailConstants.deletedStatus]
+      })
+      .where({
+        entity_kind: replyDetailConstants.invertedEntityKinds[replyDetailConstants.videoEntityKind],
+        entity_id: params.videoIds
+      })
+      .fire();
+
+    return ReplyDetail.flushCache(params);
+  }
+
+  /**
    * Flush cache.
    *
    * @param {object} params
