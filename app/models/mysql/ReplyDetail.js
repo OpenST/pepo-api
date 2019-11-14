@@ -291,6 +291,8 @@ class ReplyDetail extends ModelBase {
    * @param {number} [params.videoId]
    * @param {number} [params.replyDetailId]
    * @param {array<number>} [params.replyDetailIds]
+   * @param {array<number>} [params.entityIds]
+   * @param {string} [params.entityKind]
    *
    * @returns {Promise<*>}
    */
@@ -314,6 +316,18 @@ class ReplyDetail extends ModelBase {
       const ReplyDetailsByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/ReplyDetailsByIds');
 
       promisesArray.push(new ReplyDetailsByIdsCache({ ids: params.replyDetailIds }).clear());
+    }
+
+    if (params.entityIds && params.entityKind) {
+      const ReplyDetailsByEntityIdsAndEntityKindCache = require(rootPrefix +
+        '/lib/cacheManagement/multi/ReplyDetailsByEntityIdsAndEntityKind');
+
+      promisesArray.push(
+        new ReplyDetailsByEntityIdsAndEntityKindCache({
+          entityIds: params.entityIds,
+          entityKind: params.entityKind
+        }).clear()
+      );
     }
 
     await Promise.all(promisesArray);
