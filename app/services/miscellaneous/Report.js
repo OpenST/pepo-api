@@ -4,6 +4,8 @@ const rootPrefix = '../../..',
   UserMultiCache = require(rootPrefix + '/lib/cacheManagement/multi/User'),
   VideoByIdCache = require(rootPrefix + '/lib/cacheManagement/multi/VideoByIds'),
   SendTransactionalMail = require(rootPrefix + '/lib/email/hookCreator/SendTransactionalMail'),
+  ReplyDetailsByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/ReplyDetailsByIds'),
+  replyDetailConstants = require(rootPrefix + '/lib/globalConstant/replyDetail'),
   VideoDetailsByVideoIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/VideoDetailsByVideoIds'),
   basicHelper = require(rootPrefix + '/helpers/basic'),
   userConstants = require(rootPrefix + '/lib/globalConstant/user'),
@@ -37,8 +39,8 @@ class ReportForEntity extends ServiceBase {
     const oThis = this;
 
     oThis.currentUser = params.current_user || {};
-    oThis.reportEntityKind = params.report_entity_kind;
-    oThis.reportEntityId = params.report_entity_id;
+    oThis.reportEntityKind = 'reply'; //params.report_entity_kind;
+    oThis.reportEntityId = 1; //params.report_entity_id;
 
     oThis.videoUrl = null;
     oThis.reportedUserObj = null;
@@ -80,6 +82,24 @@ class ReportForEntity extends ServiceBase {
         promiseArray.push(oThis._fetchVideoCreator());
 
         await Promise.all(promiseArray);
+
+        oThis.templateVars = {
+          report_entity_kind: oThis.reportEntityKind,
+          report_entity_id: oThis.reportEntityId,
+          reporter_user_name: oThis.currentUser.name,
+          reporter_user_id: oThis.currentUser.id,
+          reportee_user_name: oThis.reportedUserObj.name,
+          reportee_user_id: oThis.reportedUserObj.id,
+          video_url: encodeURIComponent(oThis.videoUrl),
+          user_admin_url_prefix: basicHelper.userProfilePrefixUrl()
+        };
+
+        break;
+      }
+      case reportEntityConstants.replyReportEntityKind: {
+        const promiseArray = [];
+
+        await oThis._fetchReply();
 
         oThis.templateVars = {
           report_entity_kind: oThis.reportEntityKind,
@@ -170,6 +190,64 @@ class ReportForEntity extends ServiceBase {
     const creatorUserId = videoDetails.creatorUserId;
     // Fetch user name for creator.
     oThis.reportedUserObj = await oThis._fetchUserFor(creatorUserId);
+  }
+
+  /**
+   * Fetch reply.
+   *
+   * @sets oThis.videoUrl
+   *
+   * @returns {Promise<never>}
+   * @private
+   */
+  async _fetchReply() {
+    const oThis = this;
+
+    const replyDetailCacheResp = await new ReplyDetailsByIdsCache({ ids: [oThis.reportEntityId] }).fetch();
+    if (replyDetailCacheResp.isFailure()) {
+      logger.error('Error while fetching reply detail data.');
+
+      return Promise.reject(replyDetailCacheResp);
+    }
+
+    const replyDetail = replyDetailCacheResp.data[oThis.reportEntityId];
+
+    if (
+      !CommonValidator.validateNonEmptyObject(replyDetail) ||
+      replyDetail.status === replyDetailConstants.deletedStatus
+    ) {
+      return Promise.reject(
+        responseHelper.error({
+          internal_error_identifier: 'a_s_m_rp_4',
+          api_error_identifier: 'entity_not_found',
+          debug_options: { replyDetailId: oThis.reportEntityId }
+        })
+      );
+    }
+
+    oThis.reportedUserObj = await oThis._fetchUserFor(replyDetail.creatorUserId);
+
+    let videoId = replyDetail.entityId;
+    const cacheRsp = await new VideoByIdCache({ ids: [videoId] }).fetch();
+
+    if (cacheRsp.isFailure()) {
+      return Promise.reject(cacheRsp);
+    }
+
+    if (
+      !CommonValidator.validateNonEmptyObject(cacheRsp.data[videoId]) ||
+      cacheRsp.data[videoId].status === videoConstants.deletedStatus
+    ) {
+      return Promise.reject(
+        responseHelper.error({
+          internal_error_identifier: 'a_s_m_rp_5',
+          api_error_identifier: 'entity_not_found',
+          debug_options: { videoId: videoId }
+        })
+      );
+    }
+
+    oThis.videoUrl = cacheRsp.data[videoId].resolutions.original.url;
   }
 
   /**
