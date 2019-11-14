@@ -162,6 +162,22 @@ class TextIncludeModel extends CassandraModelBase {
   }
 
   /**
+   * Delete tags
+   * @param textId
+   * @returns {Promise<void>}
+   */
+  async deleteRowsForTextId(textId, entityIdentifiersArray) {
+    const oThis = this;
+
+    const query = `DELETE FROM ${oThis.queryTableName} WHERE text_id = ? AND entity_identifier in ?`;
+
+    const deleteParams = [textId, entityIdentifiersArray];
+    await oThis.batchFire([{ query: query, params: deleteParams }]);
+
+    await TextIncludeModel.flushCache({ textIds: [textId] });
+  }
+
+  /**
    * Flush cache.
    * @param {object} params
    * @param {array<number>} params.textIds
