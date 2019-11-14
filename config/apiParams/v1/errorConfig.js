@@ -173,6 +173,12 @@ const v1ErrorConfig = {
     message: 'Invalid video id.'
   },
 
+  invalid_reply_detail_id: {
+    parameter: 'reply_detail_id',
+    code: 'invalid',
+    message: 'Invalid reply detail id.'
+  },
+
   invalid_text: {
     parameter: 'text',
     code: 'invalid',
@@ -339,6 +345,12 @@ const v1ErrorConfig = {
     parameter: 'video_id',
     code: 'invalid',
     message: 'Video has been deleted.'
+  },
+
+  reply_deleted: {
+    parameter: 'reply_id',
+    code: 'invalid',
+    message: 'Reply has been deleted.'
   },
 
   invalid_tag_id: {

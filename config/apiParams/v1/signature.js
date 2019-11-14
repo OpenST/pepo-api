@@ -47,6 +47,19 @@ const v1Signature = {
     ],
     optional: []
   },
+  [apiName.getReply]: {
+    mandatory: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      },
+      {
+        parameter: 'reply_id',
+        validatorMethods: ['validateInteger']
+      }
+    ],
+    optional: []
+  },
   [apiName.registerDevice]: {
     mandatory: [
       {

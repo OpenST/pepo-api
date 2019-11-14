@@ -47,6 +47,7 @@ class GetReplyList extends ServiceBase {
     oThis.videoReplies = [];
     oThis.replyDetailIds = [];
     oThis.userRepliesMap = {};
+    oThis.tokenDetails = null;
   }
 
   /**
