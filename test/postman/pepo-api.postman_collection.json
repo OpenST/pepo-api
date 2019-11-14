@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "3d50ee80-7e8b-422f-82a3-15725b35f198",
+		"_postman_id": "7a31759d-f871-491e-bd3c-91487accc53a",
 		"name": "pepo-api",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -2702,6 +2702,103 @@
 								"api",
 								"v1",
 								"report"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "initiate reply",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "video_url",
+									"value": "https://dbvoeb7t6hffk.cloudfront.net/d/ua/images/1000-028c57da230c81a50dc2c25c9ff105d0-original.mp4",
+									"type": "text"
+								},
+								{
+									"key": "poster_image_url",
+									"value": "https://dbvoeb7t6hffk.cloudfront.net/d/ua/images/1000-028c57da230c81a50dc2c25c9ff105d0-original.jpeg",
+									"type": "text"
+								},
+								{
+									"key": "video_size",
+									"value": "2000",
+									"type": "text"
+								},
+								{
+									"key": "video_height",
+									"value": "100",
+									"type": "text"
+								},
+								{
+									"key": "video_width",
+									"value": "100",
+									"type": "text"
+								},
+								{
+									"key": "image_size",
+									"value": "1000",
+									"type": "text"
+								},
+								{
+									"key": "image_height",
+									"value": "100",
+									"type": "text"
+								},
+								{
+									"key": "image_width",
+									"value": "100",
+									"type": "text"
+								},
+								{
+									"key": "parent_kind",
+									"value": "video",
+									"type": "text"
+								},
+								{
+									"key": "parent_id",
+									"value": "17",
+									"type": "text"
+								},
+								{
+									"key": "video_description",
+									"value": "Adding #reply #on 17th #video ",
+									"type": "text"
+								},
+								{
+									"key": "link",
+									"value": "https://xyz.com",
+									"type": "text"
+								},
+								{
+									"key": "reply_detail_id",
+									"value": "14",
+									"type": "text",
+									"disabled": true
+								}
+							]
+						},
+						"url": {
+							"raw": "{{api_server}}/api/v1/replies",
+							"host": [
+								"{{api_server}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"replies"
+							],
+							"query": [
+								{
+									"key": "image_url",
+									"value": "https://s3.amazonaws.com/uassets.stagingpepo.com/pepo-staging1000/ua/images",
+									"disabled": true
+								}
 							]
 						}
 					},
