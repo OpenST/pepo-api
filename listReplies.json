@@ -1052,9 +1052,9 @@
         "link_ids": [
           368
         ],
-        "total_contributed_by": 0,
-        "total_amount_raised_in_wei": "0",
-        "total_transactions": 0,
+        "total_contributed_by": 700,
+        "total_amount_raised_in_wei": "000000000000000000",
+        "total_transactions": 700,
         "parent_id": 12,
         "parent_kind": "VIDEO",
         "uts": 1572593737
@@ -1096,9 +1096,9 @@
         "entity_id": "3100",
         "description_id": null,
         "link_ids": null,
-        "total_contributed_by": 0,
-        "total_amount_raised_in_wei": "0",
-        "total_transactions": 0,
+        "total_contributed_by": 100,
+        "total_amount_raised_in_wei": "1000000000000000000",
+        "total_transactions": 100,
         "parent_id": 12,
         "parent_kind": "VIDEO",
         "uts": 1572594026
@@ -1112,9 +1112,9 @@
         "link_ids": [
           375
         ],
-        "total_contributed_by": 0,
-        "total_amount_raised_in_wei": "0",
-        "total_transactions": 0,
+        "total_contributed_by": 200,
+        "total_amount_raised_in_wei": "2000000000000000000",
+        "total_transactions": 200,
         "parent_id": 12,
         "parent_kind": "VIDEO",
         "uts": 1572595643
@@ -1126,9 +1126,9 @@
         "entity_id": "3106",
         "description_id": 1072,
         "link_ids": null,
-        "total_contributed_by": 0,
-        "total_amount_raised_in_wei": "0",
-        "total_transactions": 0,
+        "total_contributed_by": 300,
+        "total_amount_raised_in_wei": "3000000000000000000",
+        "total_transactions": 300,
         "parent_id": 12,
         "parent_kind": "VIDEO",
         "uts": 1572596347
@@ -1140,9 +1140,9 @@
         "entity_id": "3111",
         "description_id": 1077,
         "link_ids": null,
-        "total_contributed_by": 0,
-        "total_amount_raised_in_wei": "0",
-        "total_transactions": 0,
+        "total_contributed_by": 40,
+        "total_amount_raised_in_wei": "4000000000000000000",
+        "total_transactions": 400,
         "parent_id": 12,
         "parent_kind": "VIDEO",
         "uts": 1572596839
@@ -1154,9 +1154,9 @@
         "entity_id": "3113",
         "description_id": 1079,
         "link_ids": null,
-        "total_contributed_by": 0,
-        "total_amount_raised_in_wei": "0",
-        "total_transactions": 0,
+        "total_contributed_by": 50,
+        "total_amount_raised_in_wei": "5000000000000000000",
+        "total_transactions": 500,
         "parent_id": 12,
         "parent_kind": "VIDEO",
         "uts": 1572596985
@@ -1168,9 +1168,9 @@
         "entity_id": "3114",
         "description_id": 1080,
         "link_ids": null,
-        "total_contributed_by": 0,
-        "total_amount_raised_in_wei": "0",
-        "total_transactions": 0,
+        "total_contributed_by": 600,
+        "total_amount_raised_in_wei": "6000000000000000000",
+        "total_transactions": 600,
         "parent_id": 12,
         "parent_kind": "VIDEO",
         "uts": 1572597076
