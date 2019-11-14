@@ -85,7 +85,7 @@ class GetReplyList extends ServiceBase {
   async _validateAndSanitizeParams() {
     const oThis = this;
 
-    oThis.currentUserId = 1036; //oThis.currentUser ? Number(oThis.currentUser.id) : 0;
+    oThis.currentUserId = oThis.currentUser ? Number(oThis.currentUser.id) : 0;
 
     if (oThis.paginationIdentifier) {
       const parsedPaginationParams = oThis._parsePaginationParams(oThis.paginationIdentifier);
