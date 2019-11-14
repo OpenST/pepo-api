@@ -77,7 +77,6 @@ class UserProfile extends ServiceBase {
 
     const getProfileObj = new GetProfile({
       userIds: [oThis.profileUserId],
-      videoIds: [],
       isAdmin: true
     });
 
