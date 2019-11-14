@@ -118,10 +118,7 @@ class GetVideoById extends ServiceBase {
   async _setTokenDetails() {
     const oThis = this;
 
-    const getTokenServiceObj = new GetTokenService({});
-
-    const tokenResp = await getTokenServiceObj.perform();
-
+    const tokenResp = await new GetTokenService({}).perform();
     if (tokenResp.isFailure()) {
       return Promise.reject(tokenResp);
     }
@@ -132,7 +129,7 @@ class GetVideoById extends ServiceBase {
   /**
    * Get video details for display - fetches all the details of user, video.
    *
-   * @sets oThis.usersVideosMap, oThis.responseMetaData
+   * @sets oThis.usersVideosMap, oThis.responseMetaData, oThis.videoDetails
    *
    * @return {Promise<void>}
    * @private
@@ -175,7 +172,7 @@ class GetVideoById extends ServiceBase {
       );
     }
 
-    // If video is not received back from user profile call
+    // If video is not received back from user profile call.
     if (!oThis.usersVideosMap.videoMap[oThis.videoId]) {
       return Promise.reject(
         responseHelper.error({

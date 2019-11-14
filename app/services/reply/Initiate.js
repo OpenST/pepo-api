@@ -72,6 +72,8 @@ class InitiateReply extends ServiceBase {
   /**
    * Async perform.
    *
+   * @sets oThis.videoId, oThis.replyDetailId
+   *
    * @return {Promise<void>}
    * @private
    */
@@ -129,6 +131,8 @@ class InitiateReply extends ServiceBase {
   /**
    * Validate and sanitize.
    *
+   * @sets oThis.parentKind, oThis.link
+   *
    * @returns {Promise<never>}
    * @private
    */
@@ -137,7 +141,7 @@ class InitiateReply extends ServiceBase {
 
     oThis.parentKind = oThis.parentKind.toUpperCase();
 
-    let validateReplyResp = await new ValidateReplyService({
+    const validateReplyResp = await new ValidateReplyService({
       current_user: oThis.currentUser,
       video_description: oThis.videoDescription,
       link: oThis.link,
@@ -160,6 +164,8 @@ class InitiateReply extends ServiceBase {
 
   /**
    * Get reply details.
+   *
+   * @sets oThis.replyDetail
    *
    * @returns {Promise<never>}
    * @private
@@ -200,6 +206,8 @@ class InitiateReply extends ServiceBase {
   /**
    * Add link in urls table.
    *
+   * @sets oThis.linkIds
+   *
    * @returns {Promise<void>}
    * @private
    */
@@ -220,7 +228,9 @@ class InitiateReply extends ServiceBase {
   /**
    * Validate and save reply in reply details and related tables.
    *
-   * @returns {Promise<Result>}
+   * @sets oThis.addVideoParams
+   *
+   * @returns {Promise<result>}
    * @private
    */
   async _validateAndSaveReply() {
@@ -257,11 +267,12 @@ class InitiateReply extends ServiceBase {
   /**
    * Add reply description in text table and update text id in reply details.
    *
-   * @param params
+   * @sets oThis.descriptionId
+   *
    * @returns {Promise<void>}
    * @private
    */
-  async _addReplyDescription(params) {
+  async _addReplyDescription() {
     const oThis = this;
 
     const replyDescriptionResp = await new AddReplyDescription({
