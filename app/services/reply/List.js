@@ -207,14 +207,14 @@ class GetReplyList extends ServiceBase {
 
     return responseHelper.successWithData({
       [entityType.userVideoList]: oThis.videoReplies,
-      [entityType.replyDetailsMap]: oThis.userRepliesMap.replyDetailsMap,
+      [entityType.replyDetailsMap]: oThis.userRepliesMap.replyDetailsMap || {},
       [entityType.videoDescriptionsMap]: oThis.userRepliesMap.videoDescriptionMap,
       [entityType.userProfilesMap]: oThis.userRepliesMap.userProfilesMap,
       [entityType.currentUserUserContributionsMap]: oThis.userRepliesMap.currentUserUserContributionsMap,
       [entityType.currentUserVideoContributionsMap]: oThis.userRepliesMap.currentUserVideoContributionsMap,
       [entityType.userProfileAllowedActions]: oThis.userRepliesMap.userProfileAllowedActions,
       [entityType.pricePointsMap]: oThis.userRepliesMap.pricePointsMap,
-      usersByIdMap: oThis.userRepliesMap.usersByIdMap,
+      usersByIdMap: oThis.userRepliesMap.usersByIdMap || {},
       userStat: oThis.userRepliesMap.userStat,
       tags: oThis.userRepliesMap.tags,
       linkMap: oThis.userRepliesMap.linkMap,
