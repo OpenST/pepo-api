@@ -146,7 +146,8 @@ class TextIncludeModel extends CassandraModelBase {
   }
 
   /**
-   * Delete tags
+   * Delete tags.
+   *
    * @param textId
    * @returns {Promise<void>}
    */
