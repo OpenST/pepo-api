@@ -197,6 +197,13 @@ class CronProcessesModel extends ModelBase {
       .where({ id: params.id })
       .fire();
   }
+
+  /**
+   * Get inverted value for status
+   */
+  get invertedStatuses() {
+    return cronProcessesConstants.invertedStatuses;
+  }
 }
 
 module.exports = CronProcessesModel;
