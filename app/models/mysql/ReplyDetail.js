@@ -237,21 +237,19 @@ class ReplyDetail extends ModelBase {
    * Mark video entities deleted.
    *
    * @param {object} params
-   * @param {array<number>} params.videoIds
+   * @param {Array} params.replyDetailsIds
    *
    * @returns {object}
    */
-  async markVideoEntitiesDeleted(params) {
+  async markReplyDetailsDeleted(params) {
     const oThis = this;
 
     await oThis
       .update({
         status: replyDetailConstants.invertedStatuses[replyDetailConstants.deletedStatus]
       })
-      .where({
-        entity_kind: replyDetailConstants.invertedEntityKinds[replyDetailConstants.videoEntityKind],
-        entity_id: params.videoIds
-      })
+      .where({ id: params.replyDetailsIds })
+      .where(['status != ?', replyDetailConstants.invertedStatuses[replyDetailConstants.deletedStatus]])
       .fire();
 
     params.entityIds = params.videoIds;
