@@ -3,19 +3,19 @@ const rootPrefix = '../../..',
   responseHelper = require(rootPrefix + '/lib/formatter/response');
 
 /**
- * Class to delete video by user.
+ * Class to validate video by user.
  *
  * @class ValidateUploadVideoParams
  */
 class ValidateUploadVideoParams extends ServiceBase {
   /**
-   * Constructor to delete video by user.
+   * Constructor to validate video by user.
    *
    * @param {object} params
    * @param {object} params.current_user
    * @param {string} [params.video_description]: Video description
    * @param {string} [params.link]: Link
-   * @param {number} [params.per_reply_amount_in_wei]: amount in wei to write reply on video.
+   * @param {string/number} [params.per_reply_amount_in_wei]: amount in wei to write reply on video.
    *
    * @augments ServiceBase
    *
@@ -35,7 +35,7 @@ class ValidateUploadVideoParams extends ServiceBase {
   /**
    * Async perform.
    *
-   * @return {Promise<void>}
+   * @return {Promise<result>}
    * @private
    */
   async _asyncPerform() {

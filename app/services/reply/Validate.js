@@ -20,10 +20,10 @@ class ValidateReplyParams extends ServiceBase {
    *
    * @param {object} params
    * @param {object} params.current_user
+   * @param {string} params.parent_kind: Parent kind where reply is being written.
+   * @param {number} params.parent_id: Parent id(videos) where reply is being written.
    * @param {string} [params.video_description]: Video description
    * @param {string} [params.link]: Link
-   * @param {number} [params.parent_kind]: Parent kind where reply is being written.
-   * @param {number} [params.parent_id]: Parent id(videos) where reply is being written.
    *
    * @augments ServiceBase
    *
@@ -37,23 +37,20 @@ class ValidateReplyParams extends ServiceBase {
     oThis.currentUser = params.current_user;
     oThis.videoDescription = params.video_description;
     oThis.link = params.link;
-    oThis.parentKind = params.parent_kind;
+    oThis.parentKind = params.parent_kind.toUpperCase();
     oThis.parentId = params.parent_id;
 
     oThis.videoDetails = null;
-    oThis.creatorUserId = null;
   }
 
   /**
    * Async perform.
    *
-   * @return {Promise<void>}
+   * @returns {Promise<result>}
    * @private
    */
   async _asyncPerform() {
     const oThis = this;
-
-    oThis.parentKind = oThis.parentKind.toUpperCase();
 
     await oThis._validateVideoStatus();
 
@@ -66,6 +63,8 @@ class ValidateReplyParams extends ServiceBase {
 
   /**
    * Validate video status.
+   *
+   * @sets oThis.videoDetails
    *
    * @returns {Promise<never>}
    * @private
@@ -144,11 +143,12 @@ class ValidateReplyParams extends ServiceBase {
   async _validateIfUserIsBlocked() {
     const oThis = this;
 
-    let cacheResp = await new UserBlockedListCache({ userId: oThis.currentUser.id }).fetch();
+    const cacheResp = await new UserBlockedListCache({ userId: oThis.currentUser.id }).fetch();
     if (cacheResp.isFailure()) {
       return Promise.reject(cacheResp);
     }
-    let blockedByUserInfo = cacheResp.data[oThis.currentUser.id];
+
+    const blockedByUserInfo = cacheResp.data[oThis.currentUser.id];
     if (
       blockedByUserInfo.hasBlocked[oThis.videoDetails.creatorUserId] ||
       blockedByUserInfo.blockedBy[oThis.videoDetails.creatorUserId]

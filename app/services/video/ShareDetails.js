@@ -3,6 +3,7 @@ const uuidV4 = require('uuid/v4');
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   UserModel = require(rootPrefix + '/app/models/mysql/User'),
+  CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   UserMultiCache = require(rootPrefix + '/lib/cacheManagement/multi/User'),
   TextsByIdCache = require(rootPrefix + '/lib/cacheManagement/multi/TextsByIds'),
   VideoByIdCache = require(rootPrefix + '/lib/cacheManagement/multi/VideoByIds'),
@@ -12,7 +13,6 @@ const rootPrefix = '../../..',
   coreConstants = require(rootPrefix + '/config/coreConstants'),
   gotoConstants = require(rootPrefix + '/lib/globalConstant/goto'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
-  commonValidator = require(rootPrefix + '/lib/validators/Common'),
   userConstants = require(rootPrefix + '/lib/globalConstant/user'),
   videoConstants = require(rootPrefix + '/lib/globalConstant/video'),
   entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
@@ -81,7 +81,7 @@ class ShareDetails extends ServiceBase {
     }
 
     if (
-      !commonValidator.validateNonEmptyObject(cacheRsp.data[oThis.videoId]) ||
+      !CommonValidators.validateNonEmptyObject(cacheRsp.data[oThis.videoId]) ||
       cacheRsp.data[oThis.videoId].status === videoConstants.deletedStatus
     ) {
       return Promise.reject(
