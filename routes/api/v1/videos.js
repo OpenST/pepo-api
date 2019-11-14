@@ -118,7 +118,7 @@ router.get('/:video_id/replies', sanitizer.sanitizeDynamicUrlParams, function(re
 
 /* Video share */
 router.get('/:video_id/share', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
-  req.decodedParams.apiName = apiName.share;
+  req.decodedParams.apiName = apiName.videoShare;
   req.decodedParams.video_id = req.params.video_id;
 
   const dataFormatterFunc = async function(serviceResponse) {

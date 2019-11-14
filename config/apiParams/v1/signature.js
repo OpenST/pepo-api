@@ -862,7 +862,7 @@ const v1Signature = {
       }
     ]
   },
-  [apiName.share]: {
+  [apiName.videoShare]: {
     mandatory: [
       {
         parameter: 'video_id',

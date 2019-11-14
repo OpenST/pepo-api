@@ -2,13 +2,13 @@ const express = require('express'),
   router = express.Router();
 
 const rootPrefix = '../../..',
-  routeHelper = require(rootPrefix + '/routes/helper'),
   FormatterComposer = require(rootPrefix + '/lib/formatter/Composer'),
-  apiName = require(rootPrefix + '/lib/globalConstant/apiName'),
+  routeHelper = require(rootPrefix + '/routes/helper'),
+  sanitizer = require(rootPrefix + '/helpers/sanitizer'),
   cookieHelper = require(rootPrefix + '/lib/cookieHelper'),
-  responseEntityKey = require(rootPrefix + '/lib/globalConstant/responseEntityKey'),
+  apiName = require(rootPrefix + '/lib/globalConstant/apiName'),
   entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
-  sanitizer = require(rootPrefix + '/helpers/sanitizer');
+  responseEntityKey = require(rootPrefix + '/lib/globalConstant/responseEntityKey');
 
 router.post('/', cookieHelper.validateUserLoginRequired, function(req, res, next) {
   req.decodedParams.apiName = apiName.initiateReply;
@@ -34,7 +34,7 @@ router.post('/validate-upload', cookieHelper.validateUserLoginRequired, function
   Promise.resolve(routeHelper.perform(req, res, next, '/reply/Validate', 'r_a_v1_r_2', null, null));
 });
 
-/* Get reply by id */
+/* Get reply by id. */
 router.get('/:reply_id', sanitizer.sanitizeDynamicUrlParams, cookieHelper.validateUserLoginRequired, function(
   req,
   res,
