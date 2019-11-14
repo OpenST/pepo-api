@@ -66,6 +66,7 @@ class UpdateFanVideo extends UpdateProfileBase {
     oThis.addVideoParams = {};
     oThis.flushUserCache = false;
     oThis.flushUserProfileElementsCache = false;
+    oThis.mentionedUserIds = [];
 
     oThis.paginationTimestamp = Math.round(new Date() / 1000);
   }
@@ -134,12 +135,20 @@ class UpdateFanVideo extends UpdateProfileBase {
 
     oThis.videoId = resp.data.videoId;
 
-    await new AddVideoDescription({
+    const addVideoDescriptionRsp = await new AddVideoDescription({
       videoDescription: oThis.videoDescription,
       videoId: oThis.videoId,
       isUserCreator: UserModelKlass.isUserApprovedCreator(oThis.userObj),
       currentUserId: oThis.currentUserId
     }).perform();
+
+    if (addVideoDescriptionRsp.isFailure()) {
+      return Promise.reject(addVideoDescriptionRsp);
+    }
+
+    let addVideoDescriptionData = addVideoDescriptionRsp.data;
+
+    oThis.mentionedUserIds = addVideoDescriptionData.mentionedUserIds;
   }
 
   /**
@@ -205,7 +214,8 @@ class UpdateFanVideo extends UpdateProfileBase {
       // Notification would be published only if user is approved.
       await notificationJobEnqueue.enqueue(notificationJobConstants.videoAdd, {
         userId: oThis.profileUserId,
-        videoId: oThis.videoId
+        videoId: oThis.videoId,
+        mentionedUserIds: oThis.mentionedUserIds
       });
     }
   }
