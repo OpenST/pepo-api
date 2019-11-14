@@ -1,17 +1,18 @@
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
-  CommonValidator = require(rootPrefix + '/lib/validators/Common'),
+  CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   UserMultiCache = require(rootPrefix + '/lib/cacheManagement/multi/User'),
   VideoByIdCache = require(rootPrefix + '/lib/cacheManagement/multi/VideoByIds'),
   SendTransactionalMail = require(rootPrefix + '/lib/email/hookCreator/SendTransactionalMail'),
   ReplyDetailsByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/ReplyDetailsByIds'),
-  replyDetailConstants = require(rootPrefix + '/lib/globalConstant/replyDetail'),
   VideoDetailsByVideoIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/VideoDetailsByVideoIds'),
   basicHelper = require(rootPrefix + '/helpers/basic'),
   userConstants = require(rootPrefix + '/lib/globalConstant/user'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
+  logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   videoConstants = require(rootPrefix + '/lib/globalConstant/video'),
   emailConstants = require(rootPrefix + '/lib/globalConstant/email'),
+  replyDetailConstants = require(rootPrefix + '/lib/globalConstant/replyDetail'),
   reportEntityConstants = require(rootPrefix + '/lib/globalConstant/reportEntity'),
   emailServiceApiCallHookConstants = require(rootPrefix + '/lib/globalConstant/emailServiceApiCallHook');
 
@@ -97,8 +98,6 @@ class ReportForEntity extends ServiceBase {
         break;
       }
       case reportEntityConstants.replyReportEntityKind: {
-        const promiseArray = [];
-
         await oThis._fetchReply();
 
         oThis.templateVars = {
@@ -153,7 +152,7 @@ class ReportForEntity extends ServiceBase {
     }
 
     if (
-      !CommonValidator.validateNonEmptyObject(cacheRsp.data[oThis.reportEntityId]) ||
+      !CommonValidators.validateNonEmptyObject(cacheRsp.data[oThis.reportEntityId]) ||
       cacheRsp.data[oThis.reportEntityId].status === videoConstants.deletedStatus
     ) {
       return Promise.reject(
@@ -213,7 +212,7 @@ class ReportForEntity extends ServiceBase {
     const replyDetail = replyDetailCacheResp.data[oThis.reportEntityId];
 
     if (
-      !CommonValidator.validateNonEmptyObject(replyDetail) ||
+      !CommonValidators.validateNonEmptyObject(replyDetail) ||
       replyDetail.status === replyDetailConstants.deletedStatus
     ) {
       return Promise.reject(
@@ -227,15 +226,14 @@ class ReportForEntity extends ServiceBase {
 
     oThis.reportedUserObj = await oThis._fetchUserFor(replyDetail.creatorUserId);
 
-    let videoId = replyDetail.entityId;
+    const videoId = replyDetail.entityId;
     const cacheRsp = await new VideoByIdCache({ ids: [videoId] }).fetch();
-
     if (cacheRsp.isFailure()) {
       return Promise.reject(cacheRsp);
     }
 
     if (
-      !CommonValidator.validateNonEmptyObject(cacheRsp.data[videoId]) ||
+      !CommonValidators.validateNonEmptyObject(cacheRsp.data[videoId]) ||
       cacheRsp.data[videoId].status === videoConstants.deletedStatus
     ) {
       return Promise.reject(
@@ -267,7 +265,7 @@ class ReportForEntity extends ServiceBase {
 
     // If user is not active, no point in reporting.
     if (
-      !CommonValidator.validateNonEmptyObject(userMultiCacheRsp.data[userId]) ||
+      !CommonValidators.validateNonEmptyObject(userMultiCacheRsp.data[userId]) ||
       userMultiCacheRsp.data[userId].status === userConstants.inActiveStatus
     ) {
       return Promise.reject(
@@ -283,7 +281,7 @@ class ReportForEntity extends ServiceBase {
 
     // If current user is trying to report himself/herself, error out.
     if (
-      CommonValidator.validateNonEmptyObject(oThis.currentUser) &&
+      CommonValidators.validateNonEmptyObject(oThis.currentUser) &&
       userMultiCacheRsp.data[userId].id === oThis.currentUser.id
     ) {
       return Promise.reject(
