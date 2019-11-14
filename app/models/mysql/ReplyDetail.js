@@ -162,7 +162,7 @@ class ReplyDetail extends ModelBase {
       })
       .fire();
 
-    let replyDetails = {};
+    const replyDetails = {};
 
     for (let index = 0; index < dbRows.length; index++) {
       const formatDbRow = oThis.formatDbData(dbRows[index]);
@@ -175,16 +175,16 @@ class ReplyDetail extends ModelBase {
   /**
    * Fetch reply details by ids.
    *
-   * @param {array} videoIds
+   * @param {array} replyDetailIds
    *
    * @returns {Promise<void>}
    */
-  async fetchByIds(Ids) {
+  async fetchByIds(replyDetailIds) {
     const oThis = this;
 
     const dbRows = await oThis
       .select('*')
-      .where({ id: Ids })
+      .where({ id: replyDetailIds })
       .fire();
 
     const response = {};
@@ -209,12 +209,11 @@ class ReplyDetail extends ModelBase {
    * @param {string} [params.linkIds]
    * @param {string} params.status
    *
-   * @returns {object}
+   * @returns Promise{object}
    */
-  insertVideo(params) {
+  async insertVideo(params) {
     const oThis = this;
 
-    const perReplyAmountInWei = params.perReplyAmountInWei || 0;
     let linkIds = null;
 
     if (params.linkIds && params.linkIds.length > 0) {
