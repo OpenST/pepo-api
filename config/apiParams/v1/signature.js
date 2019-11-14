@@ -876,6 +876,20 @@ const v1Signature = {
       }
     ]
   },
+  [apiName.replyShare]: {
+    mandatory: [
+      {
+        parameter: 'reply_detail_id',
+        validatorMethods: ['validateInteger']
+      }
+    ],
+    optional: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      }
+    ]
+  },
   [apiName.refreshTwitterConnect]: {
     mandatory: [
       {

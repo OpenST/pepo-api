@@ -14,7 +14,6 @@ router.post('/', cookieHelper.validateUserLoginRequired, function(req, res, next
   req.decodedParams.apiName = apiName.initiateReply;
 
   const dataFormatterFunc = async function(serviceResponse) {
-    console.log('=serviceResponse======', JSON.stringify(serviceResponse));
     const wrapperFormatterRsp = await new FormatterComposer({
       resultType: responseEntityKey.videoReplies,
       entityKindToResponseKeyMap: {
@@ -70,6 +69,26 @@ router.get('/:reply_id', sanitizer.sanitizeDynamicUrlParams, cookieHelper.valida
   };
 
   Promise.resolve(routeHelper.perform(req, res, next, '/reply/GetById', 'r_a_v1_r_3', null, dataFormatterFunc));
+});
+
+/* Reply share. */
+router.get('/:reply_detail_id/share', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.replyShare;
+  req.decodedParams.reply_detail_id = req.params.reply_detail_id;
+
+  const dataFormatterFunc = async function(serviceResponse) {
+    const wrapperFormatterRsp = await new FormatterComposer({
+      resultType: responseEntityKey.share,
+      entityKindToResponseKeyMap: {
+        [entityType.share]: responseEntityKey.share
+      },
+      serviceData: serviceResponse.data
+    }).perform();
+
+    serviceResponse.data = wrapperFormatterRsp.data;
+  };
+
+  Promise.resolve(routeHelper.perform(req, res, next, '/reply/ShareDetails', 'r_a_v1_r_4', null, dataFormatterFunc));
 });
 
 module.exports = router;
