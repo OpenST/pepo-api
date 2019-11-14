@@ -4,6 +4,7 @@ const rootPrefix = '../../..',
   UserCache = require(rootPrefix + '/lib/cacheManagement/multi/User'),
   UserBlockedListCache = require(rootPrefix + '/lib/cacheManagement/single/UserBlockedList'),
   VideoDetailsByVideoIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/VideoDetailsByVideoIds'),
+  basicHelper = require(rootPrefix + '/helpers/basic'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   replyDetailConstants = require(rootPrefix + '/lib/globalConstant/replyDetail'),
   videoDetailsConstants = require(rootPrefix + '/lib/globalConstant/videoDetail');
@@ -81,7 +82,7 @@ class ValidateReplyParams extends ServiceBase {
 
       oThis.videoDetails = videoDetailsCacheRsp.data[oThis.parentId];
 
-      if (oThis.status === videoDetailsConstants.deletedStatus) {
+      if (basicHelper.isEmptyObject(oThis.videoDetails)) {
         return Promise.reject(
           responseHelper.error({
             internal_error_identifier: 'a_s_r_v_1',
@@ -89,10 +90,19 @@ class ValidateReplyParams extends ServiceBase {
           })
         );
       }
+
+      if (oThis.status === videoDetailsConstants.deletedStatus) {
+        return Promise.reject(
+          responseHelper.error({
+            internal_error_identifier: 'a_s_r_v_2',
+            api_error_identifier: 'entity_not_found'
+          })
+        );
+      }
     } else {
       return Promise.reject(
         responseHelper.error({
-          internal_error_identifier: 'a_s_r_v_2',
+          internal_error_identifier: 'a_s_r_v_3',
           api_error_identifier: 'something_went_wrong'
         })
       );
@@ -145,7 +155,7 @@ class ValidateReplyParams extends ServiceBase {
     ) {
       return Promise.reject(
         responseHelper.error({
-          internal_error_identifier: 'a_s_r_v_3',
+          internal_error_identifier: 'a_s_r_v_5',
           api_error_identifier: 'unauthorized_api_request',
           debug_options: { videoDetails: oThis.videoDetails }
         })

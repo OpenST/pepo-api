@@ -1,18 +1,18 @@
 const rootPrefix = '../../..',
   UrlModel = require(rootPrefix + '/app/models/mysql/Url'),
   ServiceBase = require(rootPrefix + '/app/services/Base'),
+  EditReplyLink = require(rootPrefix + '/lib/editLink/Reply'),
   CommonValidator = require(rootPrefix + '/lib/validators/Common'),
+  EditDescriptionLib = require(rootPrefix + '/lib/editDescription/Reply'),
   AddReplyDescription = require(rootPrefix + '/lib/addDescription/Reply'),
   ValidateReplyService = require(rootPrefix + '/app/services/reply/Validate'),
+  ReplyDetailsByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/ReplyDetailsByIds'),
   videoLib = require(rootPrefix + '/lib/videoLib'),
   urlConstants = require(rootPrefix + '/lib/globalConstant/url'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   videoConstants = require(rootPrefix + '/lib/globalConstant/video'),
-  entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
   entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
-  ReplyDetailsByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/ReplyDetailsByIds'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
-  EditReplyLink = require(rootPrefix + '/lib/editLink/Reply'),
   replyDetailConstants = require(rootPrefix + '/lib/globalConstant/replyDetail');
 
 /**
@@ -81,9 +81,11 @@ class InitiateReply extends ServiceBase {
     await oThis._validateAndSanitize();
 
     if (oThis.replyDetailId) {
+      console.log('oThis.replyDetailId ========', oThis.replyDetailId);
+
       await oThis._getReplyDetails();
 
-      if (oThis.replyDetail.creatorUserId != oThis.currentUser.id) {
+      if (oThis.replyDetail.creatorUserId !== oThis.currentUser.id) {
         return Promise.reject(
           responseHelper.error({
             internal_error_identifier: 's_r_i_1',
@@ -93,8 +95,8 @@ class InitiateReply extends ServiceBase {
         );
       }
 
-      if (oThis.replyDetail.status != replyDetailConstants.pendingStatus) {
-        await oThis._addReplyDescription();
+      if (oThis.replyDetail.status === replyDetailConstants.pendingStatus) {
+        await oThis._editReplyDescription();
 
         await new EditReplyLink({
           replyDetailId: oThis.replyDetail.id,
@@ -156,9 +158,14 @@ class InitiateReply extends ServiceBase {
     }
   }
 
+  /**
+   * Get reply details.
+   *
+   * @returns {Promise<never>}
+   * @private
+   */
   async _getReplyDetails() {
     const oThis = this;
-
     const replyDetailCacheResp = await new ReplyDetailsByIdsCache({ ids: [oThis.replyDetailId] }).fetch();
 
     if (replyDetailCacheResp.isFailure()) {
@@ -168,6 +175,26 @@ class InitiateReply extends ServiceBase {
     }
 
     oThis.replyDetail = replyDetailCacheResp.data[oThis.replyDetailId];
+  }
+
+  /**
+   * Edit reply description.
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _editReplyDescription() {
+    const oThis = this;
+
+    const editDescriptionResp = await new EditDescriptionLib({
+      videoId: oThis.replyDetail.entityId,
+      videoDescription: oThis.videoDescription,
+      replyDetailId: oThis.replyDetailId
+    }).perform();
+
+    if (editDescriptionResp.isFailure()) {
+      return Promise.reject(editDescriptionResp);
+    }
   }
 
   /**
