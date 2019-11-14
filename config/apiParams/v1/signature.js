@@ -862,10 +862,24 @@ const v1Signature = {
       }
     ]
   },
-  [apiName.share]: {
+  [apiName.videoShare]: {
     mandatory: [
       {
         parameter: 'video_id',
+        validatorMethods: ['validateInteger']
+      }
+    ],
+    optional: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      }
+    ]
+  },
+  [apiName.replyShare]: {
+    mandatory: [
+      {
+        parameter: 'reply_detail_id',
         validatorMethods: ['validateInteger']
       }
     ],

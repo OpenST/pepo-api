@@ -3,24 +3,22 @@ const uuidV4 = require('uuid/v4');
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   UserModel = require(rootPrefix + '/app/models/mysql/User'),
+  CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   UserMultiCache = require(rootPrefix + '/lib/cacheManagement/multi/User'),
   TextsByIdCache = require(rootPrefix + '/lib/cacheManagement/multi/TextsByIds'),
-  VideoByIdCache = require(rootPrefix + '/lib/cacheManagement/multi/VideoByIds'),
   TwitterUserByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TwitterUserByIds'),
+  ReplyDetailsByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/ReplyDetailsByIds'),
   TwitterUserByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TwitterUserByUserIds'),
-  VideoDetailsByVideoIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/VideoDetailsByVideoIds'),
   coreConstants = require(rootPrefix + '/config/coreConstants'),
   gotoConstants = require(rootPrefix + '/lib/globalConstant/goto'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
-  commonValidator = require(rootPrefix + '/lib/validators/Common'),
   userConstants = require(rootPrefix + '/lib/globalConstant/user'),
-  videoConstants = require(rootPrefix + '/lib/globalConstant/video'),
   entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
-  shareEntityConstants = require(rootPrefix + '/lib/globalConstant/shareEntity'),
-  videoDetailsConstants = require(rootPrefix + '/lib/globalConstant/videoDetail');
+  replyDetailConstants = require(rootPrefix + '/lib/globalConstant/replyDetail'),
+  shareEntityConstants = require(rootPrefix + '/lib/globalConstant/shareEntity');
 
 /**
- * Class to share video details.
+ * Class to share reply details.
  *
  * @class ShareDetails
  */
@@ -29,7 +27,7 @@ class ShareDetails extends ServiceBase {
    * Constructor to share video details.
    *
    * @param {object} params
-   * @param {number} params.video_id
+   * @param {number} params.reply_detail_id
    * @param {object} params.current_user
    *
    * @augments ServiceBase
@@ -41,7 +39,7 @@ class ShareDetails extends ServiceBase {
 
     const oThis = this;
 
-    oThis.videoId = params.video_id;
+    oThis.replyDetailId = params.reply_detail_id;
     oThis.currentUser = params.current_user;
 
     oThis.isSelfVideoShare = false;
@@ -62,13 +60,11 @@ class ShareDetails extends ServiceBase {
   async _asyncPerform() {
     const oThis = this;
 
-    await oThis._fetchVideo();
-
-    await oThis._fetchCreatorUserName();
+    await oThis._fetchReplyDetails();
 
     oThis.messageObject = shareEntityConstants.getVideoShareEntity({
       creatorName: oThis.creatorName,
-      url: oThis._generateVideoShareUrl(),
+      url: oThis._generateReplyShareUrl(),
       videoDescription: oThis.videoDescriptionText,
       handle: oThis.twitterHandle,
       isSelfVideoShare: oThis.isSelfVideoShare
@@ -78,76 +74,56 @@ class ShareDetails extends ServiceBase {
   }
 
   /**
-   * Fetch video.
+   * Fetch reply details from reply detail id.
+   *
+   * @sets oThis.videoDescriptionText, oThis.isSelfVideoShare, oThis.creatorName
    *
    * @returns {Promise<never>}
    * @private
    */
-  async _fetchVideo() {
+  async _fetchReplyDetails() {
     const oThis = this;
 
-    const cacheRsp = await new VideoByIdCache({ ids: [oThis.videoId] }).fetch();
-    if (cacheRsp.isFailure()) {
-      return Promise.reject(cacheRsp);
+    const cacheResponse = await new ReplyDetailsByIdsCache({ ids: [oThis.replyDetailId] }).fetch();
+    if (cacheResponse.isFailure()) {
+      return Promise.reject(cacheResponse);
     }
 
+    const replyDetails = cacheResponse.data[oThis.replyDetailId];
+
     if (
-      !commonValidator.validateNonEmptyObject(cacheRsp.data[oThis.videoId]) ||
-      cacheRsp.data[oThis.videoId].status === videoConstants.deletedStatus
+      !CommonValidators.validateNonEmptyObject(replyDetails) ||
+      replyDetails.status === replyDetailConstants.deletedStatus ||
+      replyDetails.creatorUserId
     ) {
       return Promise.reject(
         responseHelper.error({
-          internal_error_identifier: 'a_s_v_sd_1',
+          internal_error_identifier: 'a_s_r_sd_1',
           api_error_identifier: 'entity_not_found',
-          debug_options: { inputVideoId: oThis.videoId }
+          debug_options: {
+            inputReplyDetailId: oThis.replyDetailId,
+            status: replyDetails.status,
+            creatorUserId: replyDetails.creatorUserId
+          }
         })
       );
     }
-  }
 
-  /**
-   * Fetch video creator user name.
-   *
-   * @sets oThis.videoDescriptionText, oThis.isSelfVideoShare, oThis.creatorName
-   *
-   * @returns {Promise<*>}
-   * @private
-   */
-  async _fetchCreatorUserName() {
-    const oThis = this;
-
-    const videoDetailsCacheRsp = await new VideoDetailsByVideoIdsCache({ videoIds: [oThis.videoId] }).fetch();
-
-    if (videoDetailsCacheRsp.isFailure()) {
-      return Promise.reject(videoDetailsCacheRsp);
-    }
-
-    const videoDetails = videoDetailsCacheRsp.data[oThis.videoId];
-
-    if (videoDetails.descriptionId) {
-      const textCacheResp = await new TextsByIdCache({ ids: [videoDetails.descriptionId] }).fetch();
+    // Fetch description if available.
+    if (replyDetails.descriptionId) {
+      const textCacheResp = await new TextsByIdCache({ ids: [replyDetails.descriptionId] }).fetch();
       if (textCacheResp.isFailure()) {
         return Promise.reject(textCacheResp);
       }
 
-      const videoDescription = textCacheResp.data[videoDetails.descriptionId];
+      const videoDescription = textCacheResp.data[replyDetails.descriptionId];
 
       if (videoDescription && videoDescription.text) {
         oThis.videoDescriptionText = videoDescription.text;
       }
     }
 
-    // Already deleted.
-    if (!videoDetails.creatorUserId || videoDetails.status === videoDetailsConstants.deletedStatus) {
-      return Promise.reject(
-        responseHelper.error({
-          internal_error_identifier: 'a_s_v_sd_2',
-          api_error_identifier: 'entity_not_found'
-        })
-      );
-    }
-
-    const creatorUserId = videoDetails.creatorUserId;
+    const creatorUserId = replyDetails.creatorUserId;
 
     let userObj = {};
 
@@ -168,11 +144,9 @@ class ShareDetails extends ServiceBase {
     if (!userObj || userObj.status !== userConstants.activeStatus || !UserModel.isUserApprovedCreator(userObj)) {
       return Promise.reject(
         responseHelper.error({
-          internal_error_identifier: 'a_s_v_sd_3',
+          internal_error_identifier: 'a_s_r_sd_3',
           api_error_identifier: 'entity_not_found',
-          debug_options: {
-            creatorUserId: creatorUserId
-          }
+          debug_options: { creatorUserId: creatorUserId }
         })
       );
     }
@@ -219,7 +193,7 @@ class ShareDetails extends ServiceBase {
   /**
    * Prepare final response.
    *
-   * @returns {Promise<*|result>}
+   * @returns {Promise<*>}
    * @private
    */
   _prepareResponse() {
@@ -229,7 +203,7 @@ class ShareDetails extends ServiceBase {
       [entityType.share]: Object.assign(
         {
           id: uuidV4(),
-          kind: shareEntityConstants.videoShareKind,
+          kind: shareEntityConstants.replyShareKind,
           uts: Math.round(new Date() / 1000)
         },
         oThis.messageObject
@@ -243,10 +217,10 @@ class ShareDetails extends ServiceBase {
    * @returns {string}
    * @private
    */
-  _generateVideoShareUrl() {
+  _generateReplyShareUrl() {
     const oThis = this;
 
-    return coreConstants.PA_DOMAIN + '/' + gotoConstants.videoGotoKind + '/' + oThis.videoId;
+    return coreConstants.PA_DOMAIN + '/' + gotoConstants.replyGotoKind + '/' + oThis.replyDetailId;
   }
 }
 
