@@ -234,10 +234,10 @@ class ReplyDetail extends ModelBase {
   }
 
   /**
-   * Delete video details
+   * Mark video entities deleted.
    *
    * @param {object} params
-   * @param {number} params.videoIds
+   * @param {array<number>} params.videoIds
    *
    * @returns {object}
    */
@@ -253,6 +253,9 @@ class ReplyDetail extends ModelBase {
         entity_id: params.videoIds
       })
       .fire();
+
+    params.entityIds = params.videoIds;
+    params.entityKind = replyDetailConstants.invertedEntityKinds[replyDetailConstants.videoEntityKind];
 
     return ReplyDetail.flushCache(params);
   }
@@ -289,6 +292,7 @@ class ReplyDetail extends ModelBase {
    *
    * @param {object} params
    * @param {number} [params.videoId]
+   * @param {array<number>} [params.videoIds]
    * @param {number} [params.replyDetailId]
    * @param {array<number>} [params.replyDetailIds]
    * @param {array<number>} [params.entityIds]
@@ -304,6 +308,15 @@ class ReplyDetail extends ModelBase {
         '/lib/cacheManagement/single/ReplyDetailsByVideoIdPagination');
 
       promisesArray.push(new ReplyDetailsByVideoIdPaginationCache({ videoId: params.videoId }).clear());
+    }
+
+    if (params.videoIds) {
+      const ReplyDetailsByVideoIdPaginationCache = require(rootPrefix +
+        '/lib/cacheManagement/single/ReplyDetailsByVideoIdPagination');
+
+      for (let index = 0; index < params.videoIds.length; index++) {
+        promisesArray.push(new ReplyDetailsByVideoIdPaginationCache({ videoId: params.videoIds[index] }).clear());
+      }
     }
 
     if (params.replyDetailId) {
