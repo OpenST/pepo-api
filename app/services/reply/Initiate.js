@@ -10,9 +10,9 @@ const rootPrefix = '../../..',
   videoLib = require(rootPrefix + '/lib/videoLib'),
   urlConstants = require(rootPrefix + '/lib/globalConstant/url'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
+  logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   videoConstants = require(rootPrefix + '/lib/globalConstant/video'),
   entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
-  logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   replyDetailConstants = require(rootPrefix + '/lib/globalConstant/replyDetail');
 
 /**

@@ -1,12 +1,13 @@
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
-  GetUserVideosList = require(rootPrefix + '/lib/GetUsersVideoList'),
   GetTokenService = require(rootPrefix + '/app/services/token/Get'),
-  replyDetailConstants = require(rootPrefix + '/lib/globalConstant/replyDetail'),
+  GetUserVideosList = require(rootPrefix + '/lib/GetUsersVideoList'),
   ReplyDetailsByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/ReplyDetailsByIds'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
-  entityType = require(rootPrefix + '/lib/globalConstant/entityType');
+  logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
+  entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
+  replyDetailConstants = require(rootPrefix + '/lib/globalConstant/replyDetail');
 
 /**
  * Class to get reply by id.
@@ -20,7 +21,7 @@ class GetReplyById extends ServiceBase {
    * @param {object} params
    * @param {number} params.reply_id
    * @param {object} params.current_user
-   * @param {boolean} params.is_admin
+   * @param {boolean} [params.is_admin]
    *
    * @augments ServiceBase
    *
@@ -44,7 +45,7 @@ class GetReplyById extends ServiceBase {
   /**
    * Async perform.
    *
-   * @return {Promise<void>}
+   * @returns {Promise<void>}
    * @private
    */
   async _asyncPerform() {
@@ -77,7 +78,7 @@ class GetReplyById extends ServiceBase {
       return Promise.reject(replyDetailCacheResp);
     }
 
-    let replyDetail = replyDetailCacheResp.data[oThis.replyId];
+    const replyDetail = replyDetailCacheResp.data[oThis.replyId];
 
     if (!CommonValidators.validateNonEmptyObject(replyDetail)) {
       return Promise.reject(
@@ -109,16 +110,13 @@ class GetReplyById extends ServiceBase {
    *
    * @sets oThis.tokenDetails
    *
-   * @return {Promise<void>}
+   * @returns {Promise<void>}
    * @private
    */
   async _setTokenDetails() {
     const oThis = this;
 
-    const getTokenServiceObj = new GetTokenService({});
-
-    const tokenResp = await getTokenServiceObj.perform();
-
+    const tokenResp = await new GetTokenService({}).perform();
     if (tokenResp.isFailure()) {
       return Promise.reject(tokenResp);
     }
@@ -129,7 +127,7 @@ class GetReplyById extends ServiceBase {
   /**
    * Get videos.
    *
-   * @sets oThis.userRepliesMap
+   * @sets oThis.userRepliesMap, oThis.videoReplies
    *
    * @return {Promise<result>}
    * @private
@@ -156,7 +154,7 @@ class GetReplyById extends ServiceBase {
     }
 
     oThis.userRepliesMap = response.data;
-    let rdObj = oThis.userRepliesMap.replyDetailsMap[oThis.replyId];
+    const rdObj = oThis.userRepliesMap.replyDetailsMap[oThis.replyId];
     oThis.videoReplies.push(oThis.userRepliesMap.fullVideosMap[rdObj.entityId]);
 
     return responseHelper.successWithData({});
