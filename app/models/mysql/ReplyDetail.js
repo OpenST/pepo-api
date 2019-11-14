@@ -288,9 +288,9 @@ class ReplyDetail extends ModelBase {
    * Flush cache.
    *
    * @param {object} params
-   * @param {number} params.videoId
-   * @param {number} params.replyDetailId
-   * @param {array<number>} params.replyDetailIds
+   * @param {number} [params.videoId]
+   * @param {number} [params.replyDetailId]
+   * @param {array<number>} [params.replyDetailIds]
    *
    * @returns {Promise<*>}
    */
@@ -301,19 +301,19 @@ class ReplyDetail extends ModelBase {
       const ReplyDetailsByVideoIdPaginationCache = require(rootPrefix +
         '/lib/cacheManagement/single/ReplyDetailsByVideoIdPagination');
 
-      await new ReplyDetailsByVideoIdPaginationCache({ videoId: params.videoId }).clear();
+      promisesArray.push(new ReplyDetailsByVideoIdPaginationCache({ videoId: params.videoId }).clear());
     }
 
     if (params.replyDetailId) {
       const ReplyDetailsByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/ReplyDetailsByIds');
 
-      await new ReplyDetailsByIdsCache({ ids: [params.replyDetailId] }).clear();
+      promisesArray.push(new ReplyDetailsByIdsCache({ ids: [params.replyDetailId] }).clear());
     }
 
     if (params.replyDetailIds) {
       const ReplyDetailsByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/ReplyDetailsByIds');
 
-      await new ReplyDetailsByIdsCache({ ids: params.replyDetailIds }).clear();
+      promisesArray.push(new ReplyDetailsByIdsCache({ ids: params.replyDetailIds }).clear());
     }
 
     await Promise.all(promisesArray);
