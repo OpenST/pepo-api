@@ -150,9 +150,9 @@ class GetReplyList extends ServiceBase {
   /**
    * Get videos.
    *
-   * @sets oThis.userRepliesMap
+   * @sets oThis.userRepliesMap, oThis.videoReplies
    *
-   * @returns {Promise<result>}
+   * @returns {Promise<void>}
    * @private
    */
   async _getReplyVideos() {
@@ -175,8 +175,6 @@ class GetReplyList extends ServiceBase {
       const rdObj = oThis.userRepliesMap.replyDetailsMap[rdId];
       oThis.videoReplies.push(oThis.userRepliesMap.fullVideosMap[rdObj.entityId]);
     }
-
-    return responseHelper.successWithData({});
   }
 
   /**

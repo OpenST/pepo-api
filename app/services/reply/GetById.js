@@ -63,9 +63,9 @@ class GetReplyById extends ServiceBase {
   /**
    * Fetch creator user id.
    *
-   * @sets oThis.videoDetails, oThis.creatorUserId, oThis.currentUserId
+   * @sets oThis.currentUserId
    *
-   * @return {Promise<void>}
+   * @returns {Promise<void>}
    * @private
    */
   async _validateReplyDetailId() {
@@ -129,7 +129,7 @@ class GetReplyById extends ServiceBase {
    *
    * @sets oThis.userRepliesMap, oThis.videoReplies
    *
-   * @return {Promise<result>}
+   * @returns {Promise<void>}
    * @private
    */
   async _getReplyVideos() {
@@ -156,14 +156,12 @@ class GetReplyById extends ServiceBase {
     oThis.userRepliesMap = response.data;
     const rdObj = oThis.userRepliesMap.replyDetailsMap[oThis.replyId];
     oThis.videoReplies.push(oThis.userRepliesMap.fullVideosMap[rdObj.entityId]);
-
-    return responseHelper.successWithData({});
   }
 
   /**
    * Prepare final response.
    *
-   * @return {Promise<*|result>}
+   * @returns {Promise<*|result>}
    * @private
    */
   async _prepareResponse() {
