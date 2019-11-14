@@ -148,7 +148,8 @@ class UserModel extends ModelBase {
 
     for (let index = 0; index < dbRows.length; index++) {
       const formatDbRow = oThis.formatDbData(dbRows[index]);
-      response[formatDbRow.userName] = formatDbRow;
+      let userName = formatDbRow.userName.toLowerCase();
+      response[userName] = formatDbRow;
     }
 
     return response;
