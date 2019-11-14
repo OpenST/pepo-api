@@ -93,10 +93,6 @@ class TwitterConnect extends ServiceBase {
     const TwitterConnectOnTwitterIdResp = await new ReplayAttackCache({ twitterId: oThis.twitterId }).fetch();
 
     if (TwitterConnectOnTwitterIdResp.isFailure()) {
-      return Promise.reject(TwitterConnectOnTwitterIdResp);
-    }
-
-    if (TwitterConnectOnTwitterIdResp.data > 1) {
       return Promise.reject(
         responseHelper.error({
           internal_error_identifier: 's_t_c_vdr_1',
