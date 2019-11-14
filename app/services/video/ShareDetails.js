@@ -19,17 +19,14 @@ const rootPrefix = '../../..',
   shareEntityConstants = require(rootPrefix + '/lib/globalConstant/shareEntity'),
   videoDetailsConstants = require(rootPrefix + '/lib/globalConstant/videoDetail');
 
-// Declare variables.
-const urlDomain = coreConstants.PA_DOMAIN;
-
 /**
- * Class to share details.
+ * Class to share video details.
  *
  * @class ShareDetails
  */
 class ShareDetails extends ServiceBase {
   /**
-   * Constructor to share details.
+   * Constructor to share video details.
    *
    * @param {object} params
    * @param {number} params.video_id
@@ -247,7 +244,7 @@ class ShareDetails extends ServiceBase {
   _generateVideoShareUrl() {
     const oThis = this;
 
-    return urlDomain + '/' + gotoConstants.videoGotoKind + '/' + oThis.videoId;
+    return coreConstants.PA_DOMAIN + '/' + gotoConstants.videoGotoKind + '/' + oThis.videoId;
   }
 }
 
