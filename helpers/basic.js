@@ -619,6 +619,13 @@ class BasicHelper {
     return coreConstants.PA_DOMAIN + '/admin/user-profile';
   }
 
+  /**
+   * Get timestamp in minutes to date till seconds.
+   *
+   * @param {number} unixTimestampInMinutes
+   *
+   * @returns {string}
+   */
   timeStampInMinutesToDateTillSeconds(unixTimestampInMinutes) {
     const dateObject = new Date(unixTimestampInMinutes * 1000);
     const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -632,17 +639,59 @@ class BasicHelper {
     return date + ' ' + month + ' ' + year + ' ' + hour + ':' + min + ':' + sec;
   }
 
+  /**
+   * Get timestamp in minutes to date.
+   *
+   * @param {number} unixTimestampInMinutes
+   *
+   * @returns {string}
+   */
   timeStampInMinutesToDate(unixTimestampInMinutes) {
     const dateObject = new Date(unixTimestampInMinutes * 1000);
     const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     const year = dateObject.getFullYear();
     const month = months[dateObject.getMonth()];
     const date = dateObject.getDate();
-    const hour = dateObject.getHours();
-    const min = dateObject.getMinutes();
-    const sec = dateObject.getSeconds();
 
     return date + ' ' + month + ' ' + year;
+  }
+
+  /**
+   * subtract arr2 from arr1
+   * @param arr1
+   * @param arr2
+   * @returns {Array}
+   */
+  arrayDiff(arr1, arr2) {
+    const diffArray = [],
+      arrMap = {};
+
+    for (let i = 0; i < arr1.length; i++) {
+      arrMap[arr1[i]] = 1;
+    }
+
+    for (let i = 0; i < arr2.length; i++) {
+      delete arrMap[arr2[i]];
+    }
+
+    for (let arrEle in arrMap) {
+      diffArray.push(arrEle);
+    }
+
+    return diffArray;
+  }
+
+  /**
+   * Filter search term
+   *
+   * @param searchTerm
+   * @returns {string|*}
+   */
+  filterSearchTerm(searchTerm) {
+    if (searchTerm && (searchTerm[0] == '#' || searchTerm[0] == '@')) {
+      return searchTerm.substr(1);
+    }
+    return searchTerm;
   }
 }
 

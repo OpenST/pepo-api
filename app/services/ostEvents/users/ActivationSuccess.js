@@ -116,7 +116,7 @@ class UserActivationSuccess extends UserOstEventBase {
 
     if (
       oThis.tokenUserObj.ostStatus === tokenUserConstants.activatedOstStatus &&
-      oThis.tokenUserObj.ost_token_holder_address !== oThis.ostUserTokenHolderAddress
+      oThis.tokenUserObj.ostTokenHolderAddress !== oThis.ostUserTokenHolderAddress
     ) {
       return Promise.reject(
         responseHelper.error({
@@ -216,7 +216,7 @@ class UserActivationSuccess extends UserOstEventBase {
   async _markTokenUserAirdropStartedProperty() {
     const oThis = this;
 
-    logger.log('Marking token user airdrop done property.');
+    logger.log('Marking token user airdrop started property.');
 
     let propertyVal = oThis.tokenUserObj.properties;
     propertyVal = new TokenUserModel().setBitwise('properties', propertyVal, tokenUserConstants.airdropStartedProperty);

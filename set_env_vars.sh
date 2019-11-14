@@ -4,7 +4,10 @@ export PA_ENVIRONMENT='development'
 export PA_PORT=3000
 export PA_DEBUG_ENABLED='1';
 export PA_DOMAIN='http://pepodev.com:8080'
+export PA_STORE_DOMAIN='http://store.pepodev.com:8080';
+export PA_INVITE_DOMAIN='http://invite.pepodev.com:8080';
 export PA_WEB_DOMAIN='http://test:testpasswd@pepodev.com:8080'
+export PA_STORE_WEB_DOMAIN='http://test:testpasswd@store.pepodev.com:8080'
 export PA_COOKIE_DOMAIN='.pepodev.com'
 
 # Devops error logs framework
@@ -149,6 +152,9 @@ export PA_GOOGLE_INAPP_SERVICE_ACCOUNT_EMAIL=''
 
 # Feed related constants.
 export PA_USER_SEARCH_CURATED_USER_IDS='[1000]'
+export PA_USER_SEARCH_TOP_USER_IDS='[1000]'
+export PA_CURATED_TAG_IDS='[1]'
+export PA_TOP_TAG_IDS='[1]'
 export PA_CURATED_FEED_IDS='[1000]'
 
 # Slack related constants.
@@ -161,3 +167,7 @@ export PA_GOOGLE_CLIENT_EMAIL='pepo-245@lateral-avatar-205714.iam.gserviceaccoun
 export PA_GOOGLE_PROJECT_ID='lateral-avatar-205714'
 export PA_GOOGLE_USAGE_REPORT_SPREADSHEET_ID='1zB67I1MaWo8Ohw4A-yZNHbY0A9nrA1NifhdueTLUBMg'
 export PA_GOOGLE_USAGE_REPORT_GROUP_IDS='{"User data Lifetime": "1969769902", "User data Last 7 days": "262285918", "User data Last 24 hours": "1492159954", "Videos Stats Lifetime": "2079750882", "Videos Stats Last 7 days": "293576976", "Videos Stats Last 24 hrs": "920797104", "Tags Used": "1756942354"}'
+
+# Video pixel data file path
+export PA_VIDEO_PIXEL_DATA_S3_FILE_PATH='redshift/full_video_watched_by_devices.csv'
+export PA_VIDEO_PIXEL_DATA_APP_FILE_PATH='.'

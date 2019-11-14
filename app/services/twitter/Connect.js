@@ -18,8 +18,8 @@ const rootPrefix = '../../..',
   gotoConstants = require(rootPrefix + '/lib/globalConstant/goto'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger');
 
-const currentPepoApiDomain = coreConstants.PA_DOMAIN,
-  urlParser = require('url');
+const urlParser = require('url');
+
 /**
  * Class for Twitter Connect service.
  *
@@ -52,6 +52,7 @@ class TwitterConnect extends ServiceBase {
     oThis.handle = params.handle;
     oThis.inviteCode = params.invite_code;
 
+    oThis.failedDueToKnownReason = false;
     oThis.userTwitterEntity = null;
     oThis.twitterUserObj = null;
     oThis.serviceResp = null;
@@ -143,7 +144,7 @@ class TwitterConnect extends ServiceBase {
   /**
    * Validate user signup is allowed or not.
    *
-   * @return {Promise<Result>}
+   * @return {Promise<Result/void>}
    * @private
    */
   async _validateUserSignupAllowed() {
@@ -162,9 +163,9 @@ class TwitterConnect extends ServiceBase {
       } else {
         await oThis._validateInviteCode();
       }
-    } else {
+    } else if (oThis.inviteCode) {
       // Validate invite code for users, who don't have prelaunch access
-      let inviteValidationResp = await oThis._validateInviteCode();
+      const inviteValidationResp = await oThis._validateInviteCode();
       if (inviteValidationResp.isFailure()) {
         return Promise.reject(inviteValidationResp);
       }
@@ -273,11 +274,7 @@ class TwitterConnect extends ServiceBase {
     if (CommonValidators.validateNonEmptyUrl(oThis.inviteCode)) {
       let parsedUrl = urlParser.parse(oThis.inviteCode, true);
 
-      if (
-        !CommonValidators.validateNonEmptyObject(parsedUrl) ||
-        !['http:', 'https:'].includes(parsedUrl.protocol) ||
-        !currentPepoApiDomain.match(parsedUrl.host)
-      ) {
+      if (!CommonValidators.validateNonEmptyObject(parsedUrl) || !['http:', 'https:'].includes(parsedUrl.protocol)) {
         return responseHelper.paramValidationError({
           internal_error_identifier: 's_t_c_vic_8',
           api_error_identifier: 'invalid_api_params',
@@ -285,7 +282,25 @@ class TwitterConnect extends ServiceBase {
           debug_options: { parsedUrl: JSON.stringify(parsedUrl) }
         });
       }
-      oThis.inviteCode = parsedUrl.query.invite;
+
+      if (coreConstants.PA_DOMAIN.match(parsedUrl.host)) {
+        oThis.inviteCode = parsedUrl.query.invite;
+      } else if (coreConstants.PA_INVITE_DOMAIN.match(parsedUrl.host)) {
+        if (parsedUrl.pathname.split('/').length > 2) {
+          oThis.failedDueToKnownReason = true;
+
+          return responseHelper.successWithData({});
+        }
+
+        oThis.inviteCode = parsedUrl.pathname.split('/')[1];
+      } else {
+        return responseHelper.paramValidationError({
+          internal_error_identifier: 's_t_c_vic_9',
+          api_error_identifier: 'invalid_api_params',
+          params_error_identifiers: ['invalid_invite_code'],
+          debug_options: { parsedUrl: JSON.stringify(parsedUrl) }
+        });
+      }
     }
 
     if (!CommonValidators.validateInviteCode(oThis.inviteCode)) {
@@ -297,6 +312,7 @@ class TwitterConnect extends ServiceBase {
     }
 
     oThis.inviteCode = oThis.inviteCode.toUpperCase();
+    logger.log('The invite code is : ', oThis.inviteCode);
     return responseHelper.successWithData({});
   }
 
@@ -326,7 +342,12 @@ class TwitterConnect extends ServiceBase {
       return validateResponse;
     }
 
+    if (oThis.failedDueToKnownReason) {
+      return responseHelper.successWithData({});
+    }
+
     let inviterCodeRow = await oThis._fetchInviterCodeObject();
+    logger.log('The inviterCodeRow is : ', inviterCodeRow);
 
     // Invite code used is not present
     if (!inviterCodeRow || !inviterCodeRow.id) {

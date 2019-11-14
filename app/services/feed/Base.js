@@ -77,7 +77,7 @@ class FeedBase extends ServiceBase {
     const promisesArray = [oThis._filterInactiveUserFeeds(), oThis._setTokenDetails()];
     await Promise.all(promisesArray);
 
-    return oThis._prepareResponse();
+    return await oThis._prepareResponse();
   }
 
   /**
@@ -94,6 +94,7 @@ class FeedBase extends ServiceBase {
     for (let index = 0; index < oThis.feedIds.length; index++) {
       const feedData = oThis.feedsMap[oThis.feedIds[index]];
 
+      // order feed data using order of feed ids
       oThis.feeds.push(feedData);
       oThis.userIds.push(feedData.actor);
 
@@ -167,7 +168,7 @@ class FeedBase extends ServiceBase {
           CommonValidators.validateNonEmptyObject(videoEntityForFeed) &&
           videoEntityForFeed.status === videoConstants.deletedStatus
         ) {
-          createErrorLogsEntry.perform(errorObject, errorLogsConstants.mediumSeverity);
+          await createErrorLogsEntry.perform(errorObject, errorLogsConstants.mediumSeverity);
         }
       } else {
         tempFeeds.push(feedData);
@@ -198,6 +199,17 @@ class FeedBase extends ServiceBase {
     oThis.tokenDetails = tokenResp.data.tokenDetails;
 
     return responseHelper.successWithData({});
+  }
+
+  _validateAndSanitizeParams() {
+    return new Error('sub-class to implement');
+  }
+  _setFeedIds() {
+    return new Error('sub-class to implement');
+  }
+
+  _prepareResponse() {
+    return new Error('sub-class to implement');
   }
 }
 

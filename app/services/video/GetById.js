@@ -6,7 +6,6 @@ const rootPrefix = '../../..',
   VideoDetailsByVideoIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/VideoDetailsByVideoIds'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   userConstants = require(rootPrefix + '/lib/globalConstant/user'),
-  logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
   paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination'),
   videoDetailsConstants = require(rootPrefix + '/lib/globalConstant/videoDetail');
@@ -161,9 +160,7 @@ class GetVideoById extends ServiceBase {
 
     oThis.profileResponse = response.data;
 
-    let userResponse = oThis.profileResponse.usersByIdMap[oThis.creatorUserId];
-
-    logger.log('===== userResponse ======', userResponse);
+    const userResponse = oThis.profileResponse.usersByIdMap[oThis.creatorUserId];
 
     if (
       !CommonValidators.validateNonEmptyObject(userResponse) ||

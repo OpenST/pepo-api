@@ -138,56 +138,55 @@ class FeedModel extends ModelBase {
    *
    * @return {object}
    */
-  async getNewFeedIdsAfterTime(params) {
+  async getLatestFeedIds(params) {
     const oThis = this,
-      lastVisitedAt = params.lastVisitedAt,
       limit = params.limit;
 
-    const response = [];
+    const response = { feedIds: [], feedsMap: {} };
 
     const dbRows = await oThis
-      .select('id')
-      .where(['pagination_identifier > ?', lastVisitedAt])
+      .select('id, pagination_identifier, primary_external_entity_id, actor')
       .order_by('pagination_identifier desc')
       .limit(limit)
       .fire();
 
     for (let index = 0; index < dbRows.length; index++) {
       const formatDbRow = oThis.formatDbData(dbRows[index]);
-      response.push(formatDbRow.id);
+      response['feedIds'].push(formatDbRow.id);
+      response['feedsMap'][formatDbRow.id] = formatDbRow;
     }
 
     return response;
   }
 
   /**
-   * Fetch new feeds ids after last visit time.
+   * Fetch feeds ids after pagination Timestamp.
    *
    * @param {array} ids: Feed Ids
    *
    * @return {object}
    */
-  async getOlderFeedIds(params) {
+  async getPersonalizedFeedIdsAfterTimestamp(params) {
     const oThis = this,
-      feedIds = params.feedIds,
+      offset = params.offset,
+      paginationTimestamp = params.paginationTimestamp,
       limit = params.limit;
 
-    const response = [];
+    const response = { feedIds: [], feedsMap: {} };
 
     let queryObj = oThis
-      .select('id')
+      .select('*')
+      .where(['pagination_identifier < ?', paginationTimestamp])
       .order_by('pagination_identifier desc')
-      .limit(limit);
-
-    if (feedIds.length > 0) {
-      queryObj.where(['id not in (?)', feedIds]);
-    }
+      .limit(limit)
+      .offset(offset);
 
     const dbRows = await queryObj.fire();
 
     for (let index = 0; index < dbRows.length; index++) {
       const formatDbRow = oThis.formatDbData(dbRows[index]);
-      response.push(formatDbRow.id);
+      response['feedIds'].push(formatDbRow.id);
+      response['feedsMap'][formatDbRow.id] = formatDbRow;
     }
 
     return response;

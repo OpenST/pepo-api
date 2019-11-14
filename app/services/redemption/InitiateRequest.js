@@ -3,37 +3,40 @@ const uuidV4 = require('uuid/v4'),
 
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
-  GetBalance = require(rootPrefix + '/app/services/user/GetBalance'),
   UserModel = require(rootPrefix + '/app/models/mysql/User'),
   UserMultiCache = require(rootPrefix + '/lib/cacheManagement/multi/User'),
-  OstPricePointModel = require(rootPrefix + '/app/models/mysql/OstPricePoints'),
+  GetPepocornBalance = require(rootPrefix + '/lib/pepocorn/GetPepocornBalance'),
+  SecureTokenCache = require(rootPrefix + '/lib/cacheManagement/single/SecureToken'),
+  PepocornBalanceModel = require(rootPrefix + '/app/models/mysql/PepocornBalance'),
+  PepocornTransactionsModel = require(rootPrefix + '/app/models/mysql/PepocornTransaction'),
   TwitterUserByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TwitterUserByIds'),
   TokenUserByUserIdCache = require(rootPrefix + '/lib/cacheManagement/multi/TokenUserByUserIds'),
   RedemptionProductsCache = require(rootPrefix + '/lib/cacheManagement/single/RedemptionProducts'),
   TwitterUserByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TwitterUserByUserIds'),
   basicHelper = require(rootPrefix + '/helpers/basic'),
+  bgJob = require(rootPrefix + '/lib/rabbitMqEnqueue/bgJob'),
   coreConstants = require(rootPrefix + '/config/coreConstants'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
+  logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   emailConstants = require(rootPrefix + '/lib/globalConstant/email'),
-  bgJob = require(rootPrefix + '/lib/rabbitMqEnqueue/bgJob'),
   bgJobConstants = require(rootPrefix + '/lib/globalConstant/bgJob'),
-  ostPricePointConstants = require(rootPrefix + '/lib/globalConstant/ostPricePoints'),
+  redemptionConstants = require(rootPrefix + '/lib/globalConstant/redemption'),
+  pepocornTransactionConstants = require(rootPrefix + '/lib/globalConstant/redemption/pepocornTransaction'),
   emailServiceApiCallHookConstants = require(rootPrefix + '/lib/globalConstant/emailServiceApiCallHook');
 
 /**
  * Class to request redemption for user.
  *
- * @class RequestRedemption
+ * @class InitiateRequestRedemption
  */
-class RequestRedemption extends ServiceBase {
+class InitiateRequestRedemption extends ServiceBase {
   /**
    * Constructor to request redemption for user.
    *
    * @param {object} params
    * @param {object} params.current_user
    * @param {number} params.product_id
-   * @param {string} params.price_point
-   * @param {string} params.pepo_amount_in_wei
+   * @param {number} params.dollar_amount
    *
    * @augments ServiceBase
    *
@@ -46,20 +49,9 @@ class RequestRedemption extends ServiceBase {
 
     oThis.currentUser = params.current_user;
     oThis.productId = params.product_id;
-    oThis.pricePoint = params.price_point;
-    oThis.pepoAmountInWei = params.pepo_amount_in_wei;
+    oThis.dollarAmount = params.dollar_amount;
 
     oThis.currentUserId = oThis.currentUser.id;
-
-    oThis.productLink = null;
-    oThis.dollarValue = null;
-    oThis.productKind = null;
-    oThis.redemptionReceiverUsername = null;
-    oThis.currentUserTokenHolderAddress = null;
-    oThis.currentUserEmailAddress = null;
-    oThis.currentUserUserName = null;
-    oThis.redemptionReceiverTokenHolderAddress = null;
-    oThis.currentUserTwitterHandle = null;
   }
 
   /**
@@ -85,7 +77,11 @@ class RequestRedemption extends ServiceBase {
 
     oThis._prepareSendMailParams();
 
-    await oThis._enqueAfterRedemptionJob();
+    await oThis._debitPepocornBalance();
+
+    await oThis._insertPepocornTransactions();
+
+    await oThis._enqueueAfterRedemptionJob();
 
     return responseHelper.successWithData({
       redemption: {
@@ -114,7 +110,7 @@ class RequestRedemption extends ServiceBase {
     if (userDetailsCacheRsp.isFailure()) {
       return Promise.reject(
         responseHelper.error({
-          internal_error_identifier: 'a_s_r_r_1',
+          internal_error_identifier: 'a_s_r_ir_1',
           api_error_identifier: 'something_went_wrong_bad_request',
           debug_options: { error: userDetailsCacheRsp }
         })
@@ -123,10 +119,12 @@ class RequestRedemption extends ServiceBase {
 
     const currentUserDetails = userDetailsCacheRsp.data[oThis.currentUserId];
 
+    logger.log('currentUserDetails', currentUserDetails);
+
     if (!currentUserDetails || !UserModel.isUserApprovedCreator(currentUserDetails)) {
       return Promise.reject(
         responseHelper.error({
-          internal_error_identifier: 'a_s_r_r_2',
+          internal_error_identifier: 'a_s_r_ir_2',
           api_error_identifier: 'redemption_user_not_approved_creator',
           debug_options: {}
         })
@@ -148,91 +146,21 @@ class RequestRedemption extends ServiceBase {
    */
   async _validateAndSanitize() {
     const oThis = this;
-
-    await oThis._validateUserBalance();
-    await oThis._validatePricePoint();
-    await oThis._validateAndSetProductDetails();
-    await oThis._validateProductValue();
+    await oThis._validateProductId();
+    await oThis._validateDollarAmount();
+    oThis._getPepocornAmount();
+    await oThis._validatePepocornBalance();
   }
 
   /**
-   * Fetch and validate if pepo amount in wei is lesser than the user balance or not.
+   * Get redemption product details and validate product id.
+   *
+   * @sets oThis.productLink, oThis.productDollarValue, oThis.productKind, oThis.productMinDollarValue, oThis.productDollarStep
    *
    * @returns {Promise<boolean>}
    * @private
    */
-  async _validateUserBalance() {
-    const oThis = this;
-
-    // Validate pepo amount in wei < = balance.
-    const balanceResponse = await new GetBalance({ user_id: oThis.currentUserId }).perform();
-    if (balanceResponse.isFailure()) {
-      return Promise.reject(balanceResponse);
-    }
-
-    const pepoAmountInBn = new BigNumber(oThis.pepoAmountInWei),
-      balanceInBn = new BigNumber(balanceResponse.data.balance.total_balance);
-
-    if (pepoAmountInBn.gt(balanceInBn)) {
-      return Promise.reject(
-        responseHelper.error({
-          internal_error_identifier: 'a_s_r_r_3',
-          api_error_identifier: 'redemption_user_has_insufficient_balance',
-          debug_options: {}
-        })
-      );
-    }
-  }
-
-  /**
-   * Validate price point.
-   *
-   * @returns {Promise<boolean>}
-   * @private
-   */
-  async _validatePricePoint() {
-    const oThis = this;
-
-    const currentTimeInSeconds = Math.round(Date.now() / 1000);
-
-    const dbRows = await new OstPricePointModel()
-      .select('conversion_rate')
-      .where([
-        'created_at > (?) AND quote_currency = (?)',
-        currentTimeInSeconds - 3600,
-        ostPricePointConstants.invertedQuoteCurrencies[ostPricePointConstants.usdQuoteCurrency]
-      ])
-      .fire();
-
-    let validationResult = false;
-    for (let index = 0; index < dbRows.length; index++) {
-      const pricePointEntity = dbRows[index];
-
-      if (new BigNumber(pricePointEntity.conversion_rate).eq(new BigNumber(oThis.pricePoint))) {
-        validationResult = true;
-      }
-    }
-
-    if (!validationResult) {
-      return Promise.reject(
-        responseHelper.error({
-          internal_error_identifier: 'a_s_r_r_4',
-          api_error_identifier: 'something_went_wrong_bad_request',
-          debug_options: {}
-        })
-      );
-    }
-  }
-
-  /**
-   * Get redemption product details.
-   *
-   * @sets oThis.productLink, oThis.dollarValue
-   *
-   * @returns {Promise<boolean>}
-   * @private
-   */
-  async _validateAndSetProductDetails() {
+  async _validateProductId() {
     const oThis = this;
 
     const redemptionProductsCacheResponse = await new RedemptionProductsCache().fetch();
@@ -243,21 +171,26 @@ class RequestRedemption extends ServiceBase {
     const redemptionProducts = redemptionProductsCacheResponse.data.products;
 
     let validationResult = false;
+
     for (let index = 0; index < redemptionProducts.length; index++) {
       const redemptionProduct = redemptionProducts[index];
 
-      if (+redemptionProduct.id === +oThis.productId) {
+      if (+redemptionProduct.id === +oThis.productId && redemptionProduct.status === redemptionConstants.activeStatus) {
         validationResult = true;
+
+        logger.log('redemptionProduct ======', redemptionProduct);
         oThis.productLink = redemptionProduct.images.landscape;
-        oThis.dollarValue = redemptionProduct.dollarValue;
+        oThis.productDollarValue = redemptionProduct.dollarValue;
         oThis.productKind = redemptionProduct.kind;
+        oThis.productMinDollarValue = redemptionProduct.minDollarValue;
+        oThis.productDollarStep = redemptionProduct.dollarStep;
       }
     }
 
     if (!validationResult) {
       return Promise.reject(
         responseHelper.paramValidationError({
-          internal_error_identifier: 'a_s_r_r_5',
+          internal_error_identifier: 'a_s_r_ir_3',
           api_error_identifier: 'invalid_api_params',
           params_error_identifiers: ['invalid_product_id'],
           debug_options: {}
@@ -267,24 +200,101 @@ class RequestRedemption extends ServiceBase {
   }
 
   /**
-   * Validate if product value is correct or not.
+   * Validate dollar amount.
    *
-   * @returns {boolean}
+   * @returns {Promise<never>}
    * @private
    */
-  async _validateProductValue() {
+  async _validateDollarAmount() {
     const oThis = this;
 
-    const productValueInUsdInWei = basicHelper.getUSDAmountForPepo(oThis.pricePoint, oThis.pepoAmountInWei);
+    logger.log('oThis.dollarAmount =========', oThis.dollarAmount);
+    logger.log('oThis.productMinDollarValue ======', oThis.productMinDollarValue);
 
-    const productValueInUsd = basicHelper.toNormalPrecisionFiat(productValueInUsdInWei, 18).toString();
+    const dollarAmountBN = new BigNumber(oThis.dollarAmount),
+      productMinDollarValueBN = new BigNumber(oThis.productMinDollarValue),
+      productDollarStepBN = new BigNumber(oThis.productDollarStep);
 
-    if (productValueInUsd !== oThis.dollarValue) {
+    if (dollarAmountBN.lt(productMinDollarValueBN)) {
+      let apiErrorIdentifier = null;
+
+      switch (Number(oThis.productMinDollarValue)) {
+        case 10:
+          apiErrorIdentifier = 'min_redemption_amount_10';
+          break;
+        case 25:
+          apiErrorIdentifier = 'min_redemption_amount_25';
+          break;
+        default:
+          throw new Error('Invalid Min Dollar Amount for Product.');
+      }
+
       return Promise.reject(
         responseHelper.error({
-          internal_error_identifier: 'a_s_r_r_6',
-          api_error_identifier: 'something_went_wrong_bad_request',
-          debug_options: {}
+          internal_error_identifier: 'a_s_r_ir_4',
+          api_error_identifier: apiErrorIdentifier,
+          debug_options: {
+            dollarAmountBN: dollarAmountBN,
+            productMinDollarValueBN: productMinDollarValueBN
+          }
+        })
+      );
+    }
+
+    if (!dollarAmountBN.mod(productDollarStepBN).eq(new BigNumber(0))) {
+      return Promise.reject(
+        responseHelper.error({
+          internal_error_identifier: 'a_s_r_ir_5',
+          api_error_identifier: 'invalid_dollar_step',
+          debug_options: {
+            dollarAmountBN: dollarAmountBN,
+            productDollarStepBN: productDollarStepBN
+          }
+        })
+      );
+    }
+  }
+
+  /**
+   * Get pepocorn amount.
+   *
+   * @private
+   */
+  _getPepocornAmount() {
+    const oThis = this;
+
+    oThis.pepocornAmount = oThis.dollarAmount * redemptionConstants.pepocornPerDollar;
+
+    logger.log('oThis.pepocornAmount ====', oThis.pepocornAmount);
+  }
+
+  /**
+   * Get pepocorn balance.
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _validatePepocornBalance() {
+    const oThis = this,
+      pepoCornBalanceResponse = await new GetPepocornBalance({ userIds: [oThis.currentUserId] }).perform();
+
+    const pepocornBalance = pepoCornBalanceResponse[oThis.currentUserId].balance;
+
+    logger.log('pepocornBalance ====', pepocornBalance);
+    logger.log('oThis.pepocornAmount ====', oThis.pepocornAmount);
+
+    const pepocornAmountBN = new BigNumber(oThis.pepocornAmount),
+      pepocornBalanceBN = new BigNumber(pepocornBalance);
+
+    if (pepocornAmountBN.gt(pepocornBalanceBN)) {
+      return Promise.reject(
+        responseHelper.error({
+          internal_error_identifier: 'a_s_r_ir_6',
+          api_error_identifier: 'insufficient_pepocorn_balance',
+          debug_options: {
+            pepocornAmountBN: pepocornAmountBN.toString(10),
+            pepocornBalanceBN: pepocornBalanceBN.toString(10)
+          }
         })
       );
     }
@@ -343,6 +353,56 @@ class RequestRedemption extends ServiceBase {
   }
 
   /**
+   * Debit pepocorn balance.
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _debitPepocornBalance() {
+    const oThis = this;
+
+    const updatePepocornBalanceResp = await new PepocornBalanceModel({})
+      .update(['balance = balance - ?', oThis.pepocornAmount])
+      .where({ user_id: oThis.currentUserId })
+      .where(['balance >= ?', oThis.pepocornAmount])
+      .fire();
+
+    if (updatePepocornBalanceResp.affectedRows === 0) {
+      return Promise.reject(
+        responseHelper.error({
+          internal_error_identifier: 'a_s_r_ir_6',
+          api_error_identifier: 'insufficient_pepocorn_balance',
+          debug_options: {
+            pepocornAmount: oThis.pepocornAmount
+          }
+        })
+      );
+    } else {
+      await PepocornBalanceModel.flushCache({ userId: oThis.currentUserId });
+    }
+  }
+
+  /**
+   * Insert into pepocorn transactions.
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _insertPepocornTransactions() {
+    const oThis = this;
+
+    await new PepocornTransactionsModel({})
+      .insert({
+        user_id: oThis.currentUserId,
+        kind: pepocornTransactionConstants.invertedKinds[pepocornTransactionConstants.debitKind],
+        pepocorn_amount: oThis.pepocornAmount,
+        redemption_id: oThis.redemptionId,
+        status: pepocornTransactionConstants.invertedStatuses[pepocornTransactionConstants.processedStatus]
+      })
+      .fire();
+  }
+
+  /**
    * Prepare send mail params.
    *
    * @sets oThis.transactionalMailParams
@@ -355,7 +415,7 @@ class RequestRedemption extends ServiceBase {
     oThis.transactionalMailParams = {
       receiverEntityId: 0,
       receiverEntityKind: emailServiceApiCallHookConstants.hookParamsInternalEmailEntityKind,
-      templateName: emailServiceApiCallHookConstants.userRedemptionTemplateName,
+      templateName: emailServiceApiCallHookConstants.userRedemptionRequestTemplateName,
       templateVars: {
         // User details.
         username: oThis.currentUserUserName,
@@ -368,34 +428,36 @@ class RequestRedemption extends ServiceBase {
         product_id: oThis.productId,
         product_kind: oThis.productKind,
         product_link: oThis.productLink,
-        product_dollar_value: oThis.dollarValue,
+        product_dollar_value: oThis.productDollarValue,
         // Redemption details.
         redemption_id: oThis.redemptionId,
-        pepo_amount: basicHelper.convertWeiToNormal(oThis.pepoAmountInWei).toString(10),
+        dollar_amount: oThis.dollarAmount,
         redemption_receiver_username: oThis.redemptionReceiverUsername,
         redemption_receiver_token_holder_address: oThis.redemptionReceiverTokenHolderAddress,
         pepo_api_domain: 1,
+        pepocorn_amount: oThis.pepocornAmount,
         receiverEmail: emailConstants.redemptionRequest
       }
     };
   }
 
   /**
-   * Enque after signup job.
+   * Enqueue after sign-up job.
    *
    * @returns {Promise<void>}
    * @private
    */
-  async _enqueAfterRedemptionJob() {
+  async _enqueueAfterRedemptionJob() {
     const oThis = this;
 
     const messagePayload = {
       transactionalMailParams: oThis.transactionalMailParams,
       currentUserId: oThis.currentUserId,
-      productKind: oThis.productKind
+      productKind: oThis.productKind,
+      newRequest: 1
     };
     await bgJob.enqueue(bgJobConstants.afterRedemptionJobTopic, messagePayload);
   }
 }
 
-module.exports = RequestRedemption;
+module.exports = InitiateRequestRedemption;

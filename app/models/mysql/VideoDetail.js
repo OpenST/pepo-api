@@ -35,7 +35,7 @@ class VideoDetail extends ModelBase {
    * @param {number} dbRow.creator_user_id
    * @param {number} dbRow.video_id
    * @param {number} dbRow.description_id
-   * @param {array} dbRow.link_ids
+   * @param {string} dbRow.link_ids
    * @param {number} dbRow.total_contributed_by
    * @param {number} dbRow.total_amount
    * @param {number} dbRow.total_transactions
@@ -53,7 +53,7 @@ class VideoDetail extends ModelBase {
       creatorUserId: dbRow.creator_user_id,
       videoId: dbRow.video_id,
       descriptionId: dbRow.description_id,
-      linkIds: dbRow.link_ids,
+      linkIds: dbRow.link_ids ? JSON.parse(dbRow.link_ids) : null,
       totalContributedBy: dbRow.total_contributed_by,
       totalAmount: dbRow.total_amount,
       totalTransactions: dbRow.total_transactions,
@@ -115,6 +115,41 @@ class VideoDetail extends ModelBase {
     for (let index = 0; index < dbRows.length; index++) {
       const dbRow = dbRows[index];
       response[dbRow.creator_user_id] = { latestVideoId: dbRow.latest_video_id };
+    }
+
+    return response;
+  }
+
+  /**
+   * Fetch all videoDetail objects for user ids.
+   *
+   * @param {integer} videoId: video id
+   *
+   * @return {object}
+   */
+  async fetchVideoIds(userIds) {
+    const oThis = this;
+
+    const dbRows = await oThis
+      .select('*')
+      .where({
+        creator_user_id: userIds,
+        status: videoDetailsConstants.invertedStatuses[videoDetailsConstants.activeStatus]
+      })
+      .order_by('video_id DESC')
+      .fire();
+
+    const response = {};
+
+    for (let index = 0; index < userIds.length; index++) {
+      const userId = userIds[index];
+      response[userId] = { videoIds: [], videoDetails: {} };
+    }
+
+    for (let index = 0; index < dbRows.length; index++) {
+      const dbRow = oThis.formatDbData(dbRows[index]);
+      response[dbRow.creatorUserId].videoIds.push(dbRow.videoId);
+      response[dbRow.creatorUserId].videoDetails[dbRow.videoId] = dbRow;
     }
 
     return response;

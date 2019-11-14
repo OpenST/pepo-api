@@ -31,6 +31,7 @@ router.get('/:video_id', sanitizer.sanitizeDynamicUrlParams, cookieHelper.valida
         [entityType.linksMap]: responseEntityKey.links,
         [entityType.imagesMap]: responseEntityKey.images,
         [entityType.videosMap]: responseEntityKey.videos,
+        [entityType.videoDescriptionsMap]: responseEntityKey.videoDescriptions,
         [entityType.videoDetailsMap]: responseEntityKey.videoDetails,
         [entityType.currentUserUserContributionsMap]: responseEntityKey.currentUserUserContributions,
         [entityType.currentUserVideoContributionsMap]: responseEntityKey.currentUserVideoContributions,

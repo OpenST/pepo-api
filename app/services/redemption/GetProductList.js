@@ -2,8 +2,8 @@ const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   GetUserBalance = require(rootPrefix + '/app/services/user/GetBalance'),
   PricePointsCache = require(rootPrefix + '/lib/cacheManagement/single/PricePoints'),
-  RedemptionCache = require(rootPrefix + '/lib/cacheManagement/single/RedemptionProducts'),
-  RedemptionProduct = require(rootPrefix + '/app/models/mysql/redemption/Product'),
+  RedemptionProductsCache = require(rootPrefix + '/lib/cacheManagement/single/RedemptionProducts'),
+  GetPepocornBalance = require(rootPrefix + '/lib/pepocorn/GetPepocornBalance'),
   responseHelper = require(rootPrefix + '/lib/formatter/response');
 
 class GetRedemptionInfo extends ServiceBase {
@@ -35,7 +35,10 @@ class GetRedemptionInfo extends ServiceBase {
     //       square:"https://d3attjoi5jlede.cloudfront.net/images/web/redemption/redemption-amazon-1x1.png",
     //       landscape:"https://d3attjoi5jlede.cloudfront.net/images/web/redemption/redemption-amazon-16x9.png"
     //     },
-    //     dollar_value: 10
+    //     dollar_value: 10,
+    //     min_dollar_value: 10,
+    //     dollar_step: 1,
+    //     pepocorn_per_step: 1
     //   },
     //     { id: '2',
     //       status: 'ACTIVE',
@@ -110,12 +113,14 @@ class GetRedemptionInfo extends ServiceBase {
     //
     // return responseHelper.successWithData(r);
 
-    let redemptionProductsRsp = await new RedemptionCache().fetch();
+    let redemptionProductsRsp = await new RedemptionProductsCache().fetch();
     if (redemptionProductsRsp.isFailure()) {
       return Promise.reject(redemptionProductsRsp);
     }
 
     let getUserBalanceResponse = await new GetUserBalance({ user_id: oThis.currentUser.id }).perform();
+
+    let getPepocornBalanceRsp = await new GetPepocornBalance({ userIds: [oThis.currentUser.id] }).perform();
 
     await oThis._fetchPricePoints();
 
@@ -123,6 +128,7 @@ class GetRedemptionInfo extends ServiceBase {
       responseHelper.successWithData({
         redemption_products: redemptionProductsRsp.data['products'],
         balance: getUserBalanceResponse.data.balance,
+        pepocorn_balance: getPepocornBalanceRsp[oThis.currentUser.id].balance,
         price_points: oThis.pricePoints
       })
     );
