@@ -1,6 +1,9 @@
 const rootPrefix = '../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
-  databaseConstants = require(rootPrefix + '/lib/globalConstant/database');
+  responseHelper = require(rootPrefix + '/lib/formatter/response'),
+  databaseConstants = require(rootPrefix + '/lib/globalConstant/database'),
+  createErrorLogsEntry = require(rootPrefix + '/lib/errorLogs/createEntry'),
+  errorLogsConstants = require(rootPrefix + '/lib/globalConstant/errorLogs');
 
 // Declare variables.
 const dbName = databaseConstants.userDbName;
@@ -163,6 +166,39 @@ class UserStat extends ModelBase {
         total_amount_spent: params.totalAmountSpent
       })
       .fire();
+  }
+
+  /**
+   * Update user stat. If user does not exist, create a new user.
+   *
+   * @param {object} params
+   * @param {number} params.userId
+   * @param {number} params.totalContributedBy
+   * @param {number} params.totalContributedTo
+   * @param {number} params.totalAmountRaised
+   * @param {number} params.totalAmountSpent
+   *
+   * @returns {Promise<void>}
+   */
+  static async updateOrCreateUserStat(params) {
+    const updateResponse = await new UserStat().updateUserStat(params);
+
+    if (updateResponse.affectedRows === 0) {
+      await new UserStat().createUserStat(params).catch(async function(err) {
+        if (UserStat.isDuplicateIndexViolation(UserStat.userIdUniqueIndexName, err)) {
+          await new UserStat().updateUserStat(params);
+        } else {
+          const errorObject = responseHelper.error({
+            internal_error_identifier: 'l_us_6',
+            api_error_identifier: 'something_went_wrong',
+            debug_options: { Reason: 'User stats not updated for given user id.', userId: params.userId }
+          });
+          createErrorLogsEntry.perform(errorObject, errorLogsConstants.highSeverity);
+
+          return Promise.reject(errorObject);
+        }
+      });
+    }
   }
 
   /**

@@ -7,6 +7,10 @@ const rootPrefix = '../..',
   PendingTransactionModel = require(rootPrefix + '/app/models/mysql/PendingTransaction'),
   PepocornTransactionModel = require(rootPrefix + '/app/models/mysql/PepocornTransaction'),
   TokenUserByUserId = require(rootPrefix + '/lib/cacheManagement/multi/TokenUserByUserIds'),
+  ReplyDetailsByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/ReplyDetailsByIds'),
+  ReplyDetailsByEntityIdsAndEntityKindCache = require(rootPrefix +
+    '/lib/cacheManagement/multi/ReplyDetailsByEntityIdsAndEntityKind'),
+  replyDetailConstants = require(rootPrefix + '/lib/globalConstant/replyDetail'),
   ReplyVideoPostTransaction = require(rootPrefix + '/lib/transaction/ReplyVideoPostTransaction'),
   TransactionByOstTxIdCache = require(rootPrefix + '/lib/cacheManagement/multi/TransactionByOstTxId'),
   TokenUserByOstUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TokenUserByOstUserIds'),
@@ -123,6 +127,8 @@ class OstTransaction extends ServiceBase {
     } else if (oThis._isReplyOnVideoTransactionKind()) {
       oThis.replyDetailId = parsedMetaProperty.replyDetailId;
       oThis.videoId = parsedMetaProperty.videoId;
+    } else if (oThis._isPepoOnReplyTransactionKind()) {
+      oThis.replyDetailId = parsedMetaProperty.replyDetailId;
     } else {
       return Promise.reject(
         responseHelper.error({
@@ -165,6 +171,8 @@ class OstTransaction extends ServiceBase {
       await oThis._insertInPepocornTransactions();
     } else if (oThis._isReplyOnVideoTransactionKind()) {
       await oThis._validateAndUpdateReplyVideoDetails();
+    } else if (oThis._isPepoOnReplyTransactionKind()) {
+      await oThis._insertInPendingTransactions();
     }
   }
 
@@ -305,18 +313,70 @@ class OstTransaction extends ServiceBase {
 
     const videoDetailsCacheResponse = await new VideoDetailsByVideoIdsCache({ videoIds: [oThis.videoId] }).fetch();
     if (videoDetailsCacheResponse.isFailure()) {
+      logger.error('Error while fetching video detail data.');
       return Promise.reject(videoDetailsCacheResponse);
     }
 
-    const videoIdFromCache = videoDetailsCacheResponse.data[oThis.videoId].videoId;
+    let videoDetail = videoDetailsCacheResponse.data[oThis.videoId];
 
-    if (+videoIdFromCache !== +oThis.videoId) {
+    if (CommonValidators.validateNonEmptyObject(videoDetail)) {
+      return responseHelper.successWithData({});
+    } else {
+      const ReplyDetailsByEntityIdsAndEntityKindCacheRsp = await new ReplyDetailsByEntityIdsAndEntityKindCache({
+        entityIds: [oThis.videoId],
+        entityKind: replyDetailConstants.invertedEntityKinds[replyDetailConstants.videoEntityKind]
+      }).fetch();
+
+      if (ReplyDetailsByEntityIdsAndEntityKindCacheRsp.isFailure()) {
+        logger.error('Error while fetching reply detail data.');
+
+        return Promise.reject(ReplyDetailsByEntityIdsAndEntityKindCacheRsp);
+      }
+
+      let replyDetail = ReplyDetailsByEntityIdsAndEntityKindCacheRsp.data[oThis.videoId];
+
+      oThis.replyDetailId = replyDetail.id;
+
+      if (!CommonValidators.validateNonEmptyObject(replyDetail)) {
+        return Promise.reject(
+          responseHelper.paramValidationError({
+            internal_error_identifier: 'a_s_ot_9',
+            api_error_identifier: 'invalid_api_params',
+            params_error_identifiers: ['invalid_video_id'],
+            debug_options: { replyDetail: replyDetail, videoDetail: videoDetail, replyDetailId: oThis.replyDetailId }
+          })
+        );
+      }
+    }
+
+    return responseHelper.successWithData({});
+  }
+
+  /**
+   * Fetch reply details and validate.
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _fetchReplyDetailsAndValidate() {
+    const oThis = this;
+
+    const replyDetailCacheResp = await new ReplyDetailsByIdsCache({ ids: [oThis.replyDetailId] }).fetch();
+    if (replyDetailCacheResp.isFailure()) {
+      logger.error('Error while fetching reply detail data.');
+
+      return Promise.reject(replyDetailCacheResp);
+    }
+
+    let replyDetail = replyDetailCacheResp.data[oThis.replyDetailId];
+
+    if (!CommonValidators.validateNonEmptyObject(replyDetail)) {
       return Promise.reject(
         responseHelper.paramValidationError({
-          internal_error_identifier: 'a_s_ot_7',
+          internal_error_identifier: 'a_s_ot_9',
           api_error_identifier: 'invalid_api_params',
-          params_error_identifiers: ['invalid_video_id'],
-          debug_options: { videoIdFromCache: videoIdFromCache, videoId: oThis.videoId }
+          params_error_identifiers: ['invalid_reply_detail_id'],
+          debug_options: { replyDetail: replyDetail, replyDetailId: oThis.replyDetailId }
         })
       );
     }
@@ -430,6 +490,8 @@ class OstTransaction extends ServiceBase {
       promiseArray.push(oThis._validateTransactionDataForRedemption());
     } else if (oThis._isReplyOnVideoTransactionKind()) {
       promiseArray.push(oThis._validateIfValidTransaction());
+    } else if (oThis._isPepoOnReplyTransactionKind()) {
+      promiseArray.push(oThis._fetchReplyDetailsAndValidate(), oThis._fetchToUserIdsAndAmounts());
     }
 
     await Promise.all(promiseArray);
@@ -549,7 +611,7 @@ class OstTransaction extends ServiceBase {
       kind: oThis._transactionKind()
     };
 
-    if (oThis._isReplyOnVideoTransactionKind()) {
+    if (oThis._isReplyOnVideoTransactionKind() || oThis._isPepoOnReplyTransactionKind()) {
       extraData.replyDetailId = oThis.replyDetailId;
     }
 
@@ -659,7 +721,7 @@ class OstTransaction extends ServiceBase {
     return (
       !oThis._isRedemptionTransactionKind() &&
       !oThis._isReplyOnVideoTransactionKind() &&
-      !oThis._isReplyVideoTransactionKind()
+      !oThis._isPepoOnReplyTransactionKind()
     );
   }
 
@@ -693,7 +755,7 @@ class OstTransaction extends ServiceBase {
    * @returns {boolean}
    * @private
    */
-  _isReplyVideoTransactionKind() {
+  _isPepoOnReplyTransactionKind() {
     const oThis = this;
 
     return oThis.transaction.meta_property.name === transactionConstants.pepoOnReplyMetaName;
@@ -714,7 +776,7 @@ class OstTransaction extends ServiceBase {
       return transactionConstants.extraData.redemptionKind;
     } else if (oThis._isReplyOnVideoTransactionKind()) {
       return transactionConstants.extraData.replyOnVideoTransactionKind;
-    } else if (oThis._isReplyVideoTransactionKind()) {
+    } else if (oThis._isPepoOnReplyTransactionKind()) {
       return transactionConstants.extraData.userTransactionOnReplyKind;
     }
   }

@@ -259,6 +259,33 @@ class ReplyDetail extends ModelBase {
   }
 
   /**
+   * Update by reply detail id.
+   *
+   * @param {object} params
+   * @param {number} params.totalAmount
+   * @param {number} params.totalContributedBy
+   * @param {number} params.replyDetailId
+   *
+   * @returns {Promise<void>}
+   */
+  async updateByReplyDetailId(params) {
+    const oThis = this;
+
+    const totalTransactions = 1;
+
+    return oThis
+      .update([
+        'total_amount = total_amount + ?, total_transactions = total_transactions + ?, ' +
+          'total_contributed_by = total_contributed_by + ? ',
+        params.totalAmount,
+        totalTransactions,
+        params.totalContributedBy
+      ])
+      .where({ id: params.replyDetailId })
+      .fire();
+  }
+
+  /**
    * Flush cache.
    *
    * @param {object} params
