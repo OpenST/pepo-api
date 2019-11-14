@@ -48,7 +48,41 @@ router.get('/:video_id', sanitizer.sanitizeDynamicUrlParams, cookieHelper.valida
   Promise.resolve(routeHelper.perform(req, res, next, '/video/GetById', 'r_a_v1_v_1', null, dataFormatterFunc));
 });
 
-/* Video history */
+// /* Video history */
+// router.get('/:video_id/replies', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+//   req.decodedParams.apiName = apiName.replyList;
+//   req.decodedParams.video_id = req.params.video_id;
+//
+//   const dataFormatterFunc = async function(serviceResponse) {
+//     const wrapperFormatterRsp = await new FormatterComposer({
+//       resultType: responseEntityKey.replies,
+//       entityKindToResponseKeyMap: {
+//         [entityType.userVideoList]: responseEntityKey.videoReplies,
+//         [entityType.usersMap]: responseEntityKey.users,
+//         [entityType.userStats]: responseEntityKey.userStats,
+//         [entityType.userProfilesMap]: responseEntityKey.userProfiles,
+//         [entityType.videoDescriptionsMap]: responseEntityKey.videoDescriptions,
+//         [entityType.tagsMap]: responseEntityKey.tags,
+//         [entityType.linksMap]: responseEntityKey.links,
+//         [entityType.imagesMap]: responseEntityKey.images,
+//         [entityType.videosMap]: responseEntityKey.videos,
+//         [entityType.replyDetailsMap]: responseEntityKey.replyDetails,
+//         [entityType.currentUserUserContributionsMap]: responseEntityKey.currentUserUserContributions,
+//         [entityType.currentUserVideoContributionsMap]: responseEntityKey.currentUserVideoContributions,
+//         [entityType.pricePointsMap]: responseEntityKey.pricePoints,
+//         [entityType.token]: responseEntityKey.token,
+//         [entityType.userVideoListMeta]: responseEntityKey.meta
+//       },
+//       serviceData: serviceResponse.data
+//     }).perform();
+//
+//     serviceResponse.data = wrapperFormatterRsp.data;
+//   };
+//
+//   Promise.resolve(routeHelper.perform(req, res, next, '/reply/List', 'r_a_v1_u_13', null, dataFormatterFunc));
+// });
+
+/* Reply List */
 router.get('/:video_id/replies', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.replyList;
   req.decodedParams.video_id = req.params.video_id;
@@ -79,7 +113,7 @@ router.get('/:video_id/replies', sanitizer.sanitizeDynamicUrlParams, function(re
     serviceResponse.data = wrapperFormatterRsp.data;
   };
 
-  Promise.resolve(routeHelper.perform(req, res, next, '/reply/List', 'r_a_v1_u_13', null, dataFormatterFunc));
+  Promise.resolve(routeHelper.perform(req, res, next, '/reply/DummyList', 'r_a_v1_v_4', null));
 });
 
 /* Video share */
