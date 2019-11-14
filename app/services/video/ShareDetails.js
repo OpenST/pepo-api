@@ -45,7 +45,6 @@ class ShareDetails extends ServiceBase {
     oThis.currentUser = params.current_user;
 
     oThis.isSelfVideoShare = false;
-    oThis.messageObject = null;
     oThis.creatorName = null;
     oThis.twitterHandle = null;
     oThis.videoDescriptionText = null;
@@ -53,8 +52,6 @@ class ShareDetails extends ServiceBase {
 
   /**
    * Async perform.
-   *
-   * @sets oThis.messageObject
    *
    * @returns {Promise<void>}
    * @private
@@ -65,14 +62,6 @@ class ShareDetails extends ServiceBase {
     await oThis._fetchVideo();
 
     await oThis._fetchCreatorUserName();
-
-    oThis.messageObject = shareEntityConstants.getVideoShareEntity({
-      creatorName: oThis.creatorName,
-      url: oThis._generateVideoShareUrl(),
-      videoDescription: oThis.videoDescriptionText,
-      handle: oThis.twitterHandle,
-      isSelfVideoShare: oThis.isSelfVideoShare
-    });
 
     return responseHelper.successWithData(oThis._prepareResponse());
   }
@@ -219,11 +208,19 @@ class ShareDetails extends ServiceBase {
   /**
    * Prepare final response.
    *
-   * @returns {Promise<*|result>}
+   * @returns {{}}
    * @private
    */
   _prepareResponse() {
     const oThis = this;
+
+    const messageObject = shareEntityConstants.getVideoShareEntity({
+      creatorName: oThis.creatorName,
+      url: oThis._generateVideoShareUrl(),
+      videoDescription: oThis.videoDescriptionText,
+      handle: oThis.twitterHandle,
+      isSelfVideoShare: oThis.isSelfVideoShare
+    });
 
     return {
       [entityType.share]: Object.assign(
@@ -232,7 +229,7 @@ class ShareDetails extends ServiceBase {
           kind: shareEntityConstants.videoShareKind,
           uts: Math.round(new Date() / 1000)
         },
-        oThis.messageObject
+        messageObject
       )
     };
   }

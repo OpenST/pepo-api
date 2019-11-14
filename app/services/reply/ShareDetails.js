@@ -24,7 +24,7 @@ const rootPrefix = '../../..',
  */
 class ShareDetails extends ServiceBase {
   /**
-   * Constructor to share video details.
+   * Constructor to share reply details.
    *
    * @param {object} params
    * @param {number} params.reply_detail_id
@@ -43,7 +43,6 @@ class ShareDetails extends ServiceBase {
     oThis.currentUser = params.current_user;
 
     oThis.isSelfVideoShare = false;
-    oThis.messageObject = null;
     oThis.creatorName = null;
     oThis.twitterHandle = null;
     oThis.videoDescriptionText = null;
@@ -52,8 +51,6 @@ class ShareDetails extends ServiceBase {
   /**
    * Async perform.
    *
-   * @sets oThis.messageObject
-   *
    * @returns {Promise<void>}
    * @private
    */
@@ -61,14 +58,6 @@ class ShareDetails extends ServiceBase {
     const oThis = this;
 
     await oThis._fetchReplyDetails();
-
-    oThis.messageObject = shareEntityConstants.getVideoShareEntity({
-      creatorName: oThis.creatorName,
-      url: oThis._generateReplyShareUrl(),
-      videoDescription: oThis.videoDescriptionText,
-      handle: oThis.twitterHandle,
-      isSelfVideoShare: oThis.isSelfVideoShare
-    });
 
     return responseHelper.successWithData(oThis._prepareResponse());
   }
@@ -193,11 +182,19 @@ class ShareDetails extends ServiceBase {
   /**
    * Prepare final response.
    *
-   * @returns {Promise<*>}
+   * @returns {{}}
    * @private
    */
   _prepareResponse() {
     const oThis = this;
+
+    const messageObject = shareEntityConstants.getVideoShareEntity({
+      creatorName: oThis.creatorName,
+      url: oThis._generateReplyShareUrl(),
+      videoDescription: oThis.videoDescriptionText,
+      handle: oThis.twitterHandle,
+      isSelfVideoShare: oThis.isSelfVideoShare
+    });
 
     return {
       [entityType.share]: Object.assign(
@@ -206,7 +203,7 @@ class ShareDetails extends ServiceBase {
           kind: shareEntityConstants.replyShareKind,
           uts: Math.round(new Date() / 1000)
         },
-        oThis.messageObject
+        messageObject
       )
     };
   }
