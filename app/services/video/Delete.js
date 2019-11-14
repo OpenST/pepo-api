@@ -31,7 +31,6 @@ class DeleteVideo extends ServiceBase {
     oThis.currentUser = params.current_user;
     oThis.videoId = params.video_id;
 
-    oThis.videoDetails = null;
     oThis.creatorUserId = null;
   }
 
@@ -62,7 +61,7 @@ class DeleteVideo extends ServiceBase {
   /**
    * Fetch creator user id.
    *
-   * @sets oThis.videoDetails, oThis.creatorUserId
+   * @sets oThis.creatorUserId
    *
    * @returns {Promise<never>}
    * @private
@@ -104,8 +103,7 @@ class DeleteVideo extends ServiceBase {
       );
     }
 
-    oThis.videoDetails = videoDetailsCacheData[oThis.videoId];
-    oThis.creatorUserId = oThis.videoDetails.creatorUserId;
+    oThis.creatorUserId = videoDetailsCacheData[oThis.videoId].creatorUserId;
   }
 }
 module.exports = DeleteVideo;
