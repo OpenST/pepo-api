@@ -39,8 +39,8 @@ class ReportForEntity extends ServiceBase {
     const oThis = this;
 
     oThis.currentUser = params.current_user || {};
-    oThis.reportEntityKind = 'reply'; //params.report_entity_kind;
-    oThis.reportEntityId = 1; //params.report_entity_id;
+    oThis.reportEntityKind = params.report_entity_kind;
+    oThis.reportEntityId = params.report_entity_id;
 
     oThis.videoUrl = null;
     oThis.reportedUserObj = null;
