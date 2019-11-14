@@ -462,7 +462,8 @@ class OstTransaction extends ServiceBase {
     const replyVideoResponse = await new ReplyVideoPostTransaction({
       replyDetailId: oThis.replyDetailId,
       videoId: oThis.videoId,
-      transactionId: oThis.ostTxId
+      transactionId: oThis.ostTxId,
+      pepoAmountInWei: oThis.transfersData[0].amount
     }).perform();
     if (replyVideoResponse.isFailure()) {
       return Promise.reject(replyVideoResponse);

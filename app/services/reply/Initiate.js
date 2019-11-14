@@ -7,6 +7,8 @@ const rootPrefix = '../../..',
   AddReplyDescription = require(rootPrefix + '/lib/addDescription/Reply'),
   ValidateReplyService = require(rootPrefix + '/app/services/reply/Validate'),
   ReplyDetailsByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/ReplyDetailsByIds'),
+  ReplyVideoPostTransaction = require(rootPrefix + '/lib/transaction/ReplyVideoPostTransaction'),
+  VideoDetailsByVideoIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/VideoDetailsByVideoIds'),
   videoLib = require(rootPrefix + '/lib/videoLib'),
   urlConstants = require(rootPrefix + '/lib/globalConstant/url'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
@@ -83,7 +85,7 @@ class InitiateReply extends ServiceBase {
     await oThis._validateAndSanitize();
 
     if (oThis.replyDetailId) {
-      console.log('oThis.replyDetailId ========', oThis.replyDetailId);
+      logger.log('oThis.replyDetailId ========', oThis.replyDetailId);
 
       await oThis._getReplyDetails();
 
@@ -115,6 +117,8 @@ class InitiateReply extends ServiceBase {
 
       await oThis._addReplyDescription();
     }
+
+    await oThis._onVideoPostCompletion();
 
     return responseHelper.successWithData({
       [entityType.videoReplyList]: [
@@ -287,6 +291,43 @@ class InitiateReply extends ServiceBase {
     }
 
     oThis.descriptionId = replyDescriptionResp.data.descriptionId;
+  }
+
+  /**
+   * On video post completion.
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _onVideoPostCompletion() {
+    const oThis = this;
+
+    let parentVideoDetails = null;
+
+    if (oThis.parentKind === replyDetailConstants.videoParentKind) {
+      const videoDetailsByVideoIdsCacheResp = await new VideoDetailsByVideoIdsCache({
+        videoIds: [oThis.parentId]
+      }).fetch();
+
+      if (videoDetailsByVideoIdsCacheResp.isFailure()) {
+        return Promise.reject(videoDetailsByVideoIdsCacheResp);
+      }
+
+      parentVideoDetails = videoDetailsByVideoIdsCacheResp.data[oThis.parentId];
+    }
+
+    if (CommonValidator.validateNonEmptyObject(parentVideoDetails)) {
+      if (
+        CommonValidator.validateZeroWeiValue(parentVideoDetails.perReplyAmountInWei) ||
+        parentVideoDetails.creatorUserId === oThis.currentUser.id
+      ) {
+        await new ReplyVideoPostTransaction({
+          replyDetailId: oThis.replyDetailId,
+          videoId: oThis.parentId,
+          pepoAmountInWei: parentVideoDetails.perReplyAmountInWei
+        }).perform();
+      }
+    }
   }
 }
 
