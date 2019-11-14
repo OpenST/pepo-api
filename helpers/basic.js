@@ -693,6 +693,22 @@ class BasicHelper {
     }
     return searchTerm;
   }
+
+  /**
+   * This function converts given numbers to bignumber and adds them.
+   *
+   * @param number1
+   * @param number2
+   * @returns {string}
+   * @private
+   */
+  convertToBigNumberAndAdd(number1, number2) {
+    const oThis = this;
+    return oThis
+      .convertToBigNumber(number1)
+      .plus(oThis.convertToBigNumber(number2))
+      .toString(10);
+  }
 }
 
 module.exports = new BasicHelper();
