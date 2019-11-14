@@ -54,6 +54,8 @@ class ShareDetails extends ServiceBase {
   /**
    * Async perform.
    *
+   * @sets oThis.messageObject
+   *
    * @returns {Promise<void>}
    * @private
    */
