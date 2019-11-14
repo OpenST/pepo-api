@@ -121,6 +121,12 @@ class FetchGoto extends ServiceBase {
         oThis.gotoParams = { videoId: videoId };
         oThis.gotoKind = gotoConstants.videoGotoKind;
       }
+    } else if (pathArray[1] === gotoConstants.replyGotoKind) {
+      const replyDetailId = Number(pathArray[2]);
+      if (replyDetailId) {
+        oThis.gotoParams = { replyDetailId: replyDetailId };
+        oThis.gotoKind = gotoConstants.replyGotoKind;
+      }
     } else if (pathArray[1] === gotoConstants.tagGotoKind) {
       const tagName = pathArray[2];
 
