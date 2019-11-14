@@ -1,10 +1,10 @@
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   GetTokenService = require(rootPrefix + '/app/services/token/Get'),
+  GetUserVideosList = require(rootPrefix + '/lib/GetUsersVideoList'),
   ReplyDetailsByVideoIdCache = require(rootPrefix + '/lib/cacheManagement/single/ReplyDetailsByVideoIdPagination'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
-  GetUserVideosList = require(rootPrefix + '/lib/GetUsersVideoList'),
   paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination');
 
 /**
@@ -127,7 +127,7 @@ class GetReplyList extends ServiceBase {
    *
    * @sets oThis.responseMetaData
    *
-   * @return {Result}
+   * @returns {void}
    * @private
    */
   _addResponseMetaData() {
@@ -144,8 +144,6 @@ class GetReplyList extends ServiceBase {
     oThis.responseMetaData = {
       [paginationConstants.nextPagePayloadKey]: nextPagePayloadKey
     };
-
-    return responseHelper.successWithData({});
   }
 
   /**
@@ -153,7 +151,7 @@ class GetReplyList extends ServiceBase {
    *
    * @sets oThis.userRepliesMap
    *
-   * @return {Promise<result>}
+   * @returns {Promise<result>}
    * @private
    */
   async _getReplyVideos() {
@@ -166,15 +164,14 @@ class GetReplyList extends ServiceBase {
     });
 
     const response = await userVideosObj.perform();
-
     if (response.isFailure()) {
       return Promise.reject(response);
     }
 
     oThis.userRepliesMap = response.data;
     for (let ind = 0; ind < oThis.replyDetailIds.length; ind++) {
-      let rdId = oThis.replyDetailIds[ind];
-      let rdObj = oThis.userRepliesMap.replyDetailsMap[rdId];
+      const rdId = oThis.replyDetailIds[ind];
+      const rdObj = oThis.userRepliesMap.replyDetailsMap[rdId];
       oThis.videoReplies.push(oThis.userRepliesMap.fullVideosMap[rdObj.entityId]);
     }
 
@@ -186,7 +183,7 @@ class GetReplyList extends ServiceBase {
    *
    * @sets oThis.tokenDetails
    *
-   * @return {Promise<result>}
+   * @returns {Promise<void>}
    * @private
    */
   async _setTokenDetails() {
@@ -198,14 +195,12 @@ class GetReplyList extends ServiceBase {
     }
 
     oThis.tokenDetails = tokenResp.data.tokenDetails;
-
-    return responseHelper.successWithData({});
   }
 
   /**
    * Prepare final response.
    *
-   * @return {Promise<result>}
+   * @returns {Promise<result>}
    * @private
    */
   async _prepareResponse() {
