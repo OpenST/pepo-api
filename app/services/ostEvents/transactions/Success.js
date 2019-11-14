@@ -331,6 +331,7 @@ class SuccessTransactionOstEvent extends TransactionOstEventBase {
   async _updateReplyDetails() {
     const oThis = this;
 
+    // TODO: @Tejas call method updateByReplyDetailId
     await new ReplyDetailModel()
       .update(['total_amount=total_amount+?', oThis.ostTransaction.transfers[0].amount])
       .where({ id: oThis.replyDetailId })

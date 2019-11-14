@@ -212,6 +212,7 @@ class ReplyDetail extends ModelBase {
    * @returns Promise{object}
    */
   async insertVideo(params) {
+    // TODO: @Tejas flush cache for entity id, parent id
     const oThis = this;
 
     let linkIds = null;
@@ -254,6 +255,7 @@ class ReplyDetail extends ModelBase {
 
     params.entityIds = params.videoIds;
     params.entityKind = replyDetailConstants.invertedEntityKinds[replyDetailConstants.videoEntityKind];
+    params.parentVideoIds = params.parentVideoIds;
 
     return ReplyDetail.flushCache(params);
   }
@@ -268,6 +270,7 @@ class ReplyDetail extends ModelBase {
    *
    * @returns {Promise<void>}
    */
+  // TODO: @Tejas fetch reply details cache and after update flush all reply details cache means by entity_id, parent_id and id.
   async updateByReplyDetailId(params) {
     const oThis = this;
 
@@ -289,8 +292,7 @@ class ReplyDetail extends ModelBase {
    * Flush cache.
    *
    * @param {object} params
-   * @param {number} [params.videoId]
-   * @param {array<number>} [params.videoIds]
+   * @param {array<number>} [params.parentVideoIds]
    * @param {number} [params.replyDetailId]
    * @param {array<number>} [params.replyDetailIds]
    * @param {array<number>} [params.entityIds]
@@ -301,19 +303,14 @@ class ReplyDetail extends ModelBase {
   static async flushCache(params) {
     const promisesArray = [];
 
-    if (params.videoId) {
-      const ReplyDetailsByVideoIdPaginationCache = require(rootPrefix +
-        '/lib/cacheManagement/single/ReplyDetailsByVideoIdPagination');
+    if (params.parentVideoIds) {
+      const ReplyDetailsByParentVideoPaginationCache = require(rootPrefix +
+        '/lib/cacheManagement/single/ReplyDetailsByParentVideoPagination');
 
-      promisesArray.push(new ReplyDetailsByVideoIdPaginationCache({ videoId: params.videoId }).clear());
-    }
-
-    if (params.videoIds) {
-      const ReplyDetailsByVideoIdPaginationCache = require(rootPrefix +
-        '/lib/cacheManagement/single/ReplyDetailsByVideoIdPagination');
-
-      for (let index = 0; index < params.videoIds.length; index++) {
-        promisesArray.push(new ReplyDetailsByVideoIdPaginationCache({ videoId: params.videoIds[index] }).clear());
+      for (let index = 0; index < params.parentVideoIds.length; index++) {
+        promisesArray.push(
+          new ReplyDetailsByParentVideoPaginationCache({ videoId: params.parentVideoIds[index] }).clear()
+        );
       }
     }
 
@@ -330,6 +327,7 @@ class ReplyDetail extends ModelBase {
     }
 
     if (params.entityIds && params.entityKind) {
+      // TODO: @Tejas entity kind inverted cache issue, if entity kind is non-integer then invert and flush.
       const ReplyDetailsByEntityIdsAndEntityKindCache = require(rootPrefix +
         '/lib/cacheManagement/multi/ReplyDetailsByEntityIdsAndEntityKind');
 

@@ -2,7 +2,8 @@ const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   GetTokenService = require(rootPrefix + '/app/services/token/Get'),
   GetUserVideosList = require(rootPrefix + '/lib/GetUsersVideoList'),
-  ReplyDetailsByVideoIdCache = require(rootPrefix + '/lib/cacheManagement/single/ReplyDetailsByVideoIdPagination'),
+  ReplyDetailsByParentVideoPaginationCache = require(rootPrefix +
+    '/lib/cacheManagement/single/ReplyDetailsByParentVideoPagination'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
   paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination');
@@ -111,7 +112,7 @@ class GetReplyList extends ServiceBase {
   async _fetchReplyDetailIds() {
     const oThis = this;
 
-    const cacheResponse = await new ReplyDetailsByVideoIdCache({
+    const cacheResponse = await new ReplyDetailsByParentVideoPaginationCache({
       videoId: oThis.videoId,
       limit: oThis.limit,
       paginationTimestamp: oThis.paginationTimestamp
