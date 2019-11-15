@@ -148,7 +148,7 @@ class UserModel extends ModelBase {
 
     for (let index = 0; index < dbRows.length; index++) {
       const formatDbRow = oThis.formatDbData(dbRows[index]);
-      let userName = formatDbRow.userName.toLowerCase();
+      const userName = formatDbRow.userName.toLowerCase();
       response[userName] = formatDbRow;
     }
 
@@ -352,22 +352,28 @@ class UserModel extends ModelBase {
     }
 
     // Filter users by creator statuses
-    let approvedPropertyVal = userConstants.invertedProperties[userConstants.isApprovedCreatorProperty],
+    const approvedPropertyVal = userConstants.invertedProperties[userConstants.isApprovedCreatorProperty],
       deniedPropertyVal = userConstants.invertedProperties[userConstants.isDeniedCreatorProperty];
     switch (params.filter) {
-      case userConstants.pendingCreatorFilterValue:
+      case userConstants.pendingCreatorFilterValue: {
         queryObject.where([
           'properties != (properties | ?) AND properties != (properties | ?)',
           approvedPropertyVal,
           deniedPropertyVal
         ]);
         break;
-      case userConstants.approvedCreatorFilterValue:
+      }
+      case userConstants.approvedCreatorFilterValue: {
         queryObject.where(['properties = properties | ?', approvedPropertyVal]);
         break;
-      case userConstants.deniedCreatorFilterValue:
+      }
+      case userConstants.deniedCreatorFilterValue: {
         queryObject.where(['properties = properties | ?', deniedPropertyVal]);
         break;
+      }
+      default: {
+        throw new Error('Invalid filter value.');
+      }
     }
 
     if (paginationTimestamp) {
