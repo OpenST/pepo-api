@@ -1040,6 +1040,28 @@ const v1Signature = {
       }
     ]
   },
+  [apiName.getAllVideoListByTagId]: {
+    mandatory: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      },
+      {
+        parameter: 'tag_id',
+        validatorMethods: ['validateNonZeroInteger']
+      },
+      {
+        parameter: 'supported_entities',
+        validatorMethods: ['validateNonEmptyStringArray']
+      }
+    ],
+    optional: [
+      {
+        parameter: paginationConstants.paginationIdentifierKey,
+        validatorMethods: ['validateString', 'validatePaginationIdentifier']
+      }
+    ]
+  },
   [apiName.pepocornTopUpValidate]: {
     mandatory: [
       {

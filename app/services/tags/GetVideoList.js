@@ -3,7 +3,9 @@ const rootPrefix = '../../..',
   GetUserVideos = require(rootPrefix + '/lib/GetUsersVideoList'),
   GetTokenService = require(rootPrefix + '/app/services/token/Get'),
   VideoTagsByTagIdPaginationCache = require(rootPrefix + '/lib/cacheManagement/single/VideoTagsByTagIdPagination'),
+  tagConstants = require(rootPrefix + '/lib/globalConstant/tag'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
+  videoTagConstants = require(rootPrefix + '/lib/globalConstant/videoTag'),
   entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
   paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination');
 
@@ -20,6 +22,7 @@ class GetTagsVideoList extends ServiceBase {
    * @param {object} params.current_user
    * @param {number} params.tag_id
    * @param {string} [params.pagination_identifier]
+   * @param {array<string>} [params.supported_entities]
    *
    * @augments ServiceBase
    *
@@ -33,6 +36,7 @@ class GetTagsVideoList extends ServiceBase {
     oThis.currentUser = params.current_user;
     oThis.tagId = params.tag_id;
     oThis.paginationIdentifier = params[paginationConstants.paginationIdentifierKey] || null;
+    oThis.supportedEntities = params.supported_entities || [tagConstants.videosSupportedEntity];
 
     oThis.limit = oThis._defaultPageLimit();
 
@@ -86,6 +90,20 @@ class GetTagsVideoList extends ServiceBase {
       oThis.paginationTimestamp = null;
     }
 
+    // Validate supported entities.
+    for (let index = 0; index < oThis.supportedEntities.length; index++) {
+      if (!tagConstants.supportedEntities[oThis.supportedEntities[index]]) {
+        return Promise.reject(
+          responseHelper.paramValidationError({
+            internal_error_identifier: 'a_s_t_gvl_1',
+            api_error_identifier: 'invalid_api_params',
+            params_error_identifiers: ['invalid_supported_entities'],
+            debug_options: {}
+          })
+        );
+      }
+    }
+
     // Validate limit.
     return oThis._validatePageSize();
   }
@@ -101,10 +119,20 @@ class GetTagsVideoList extends ServiceBase {
   async _fetchVideoIds() {
     const oThis = this;
 
+    let videoTagKind = videoTagConstants.allCacheKeyKind;
+    if (oThis.supportedEntities.length === 1) {
+      if (oThis.supportedEntities.indexOf(tagConstants.repliesSupportedEntity) > -1) {
+        videoTagKind = videoTagConstants.replyCacheKeyKind;
+      } else {
+        videoTagKind = videoTagConstants.postCacheKeyKind; // Defaulting to this as only two kinds are possible.
+      }
+    }
+
     const cacheResponse = await new VideoTagsByTagIdPaginationCache({
       tagId: oThis.tagId,
       limit: oThis.limit,
-      paginationTimestamp: oThis.paginationTimestamp
+      paginationTimestamp: oThis.paginationTimestamp,
+      kind: videoTagKind
     }).fetch();
 
     if (cacheResponse.isFailure()) {

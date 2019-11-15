@@ -119,18 +119,22 @@ class VideoTag extends ModelBase {
   }
 
   /**
-   * Fetch by tag id
+   * Fetch by tag id.
    *
    * @param {integer} params.tagId: tag id
    * @param {integer} params.limit: no of rows to fetch
-   * @param {integer} params.paginationTimestamp:
-   * @return {Promise}
+   * @param {integer} params.paginationTimestamp
+   * @param {string} params.kind
+   *
+   * @returns {Promise}
    */
   async fetchByTagId(params) {
-    const oThis = this,
-      limit = params.limit,
+    const oThis = this;
+
+    const limit = params.limit,
       tagId = params.tagId,
-      paginationTimestamp = params.paginationTimestamp;
+      paginationTimestamp = params.paginationTimestamp,
+      videoCacheKeyKind = params.kind;
 
     const queryObject = oThis
       .select('*')
@@ -142,6 +146,20 @@ class VideoTag extends ModelBase {
 
     if (paginationTimestamp) {
       queryObject.where(['created_at < ?', paginationTimestamp]);
+    }
+
+    switch (videoCacheKeyKind) {
+      case videoTagConstants.postCacheKeyKind: {
+        queryObject.where(['video_kind = ?', videoTagConstants.invertedKinds[videoTagConstants.postKind]]);
+        break;
+      }
+      case videoTagConstants.replyCacheKeyKind: {
+        queryObject.where(['video_kind = ?', videoTagConstants.invertedKinds[videoTagConstants.replyKind]]);
+        break;
+      }
+      default: {
+        // Do nothing.
+      }
     }
 
     const dbRows = await queryObject.fire();
@@ -174,11 +192,16 @@ class VideoTag extends ModelBase {
   /**
    * Flush cache.
    *
+   * @param {object} params
+   * @param {number} params.tagId
+   * @param {array<number>} params.tagIds
+   *
    * @returns {Promise<*>}
    */
   static async flushCache(params) {
-    let promiseArray = [];
+    const promiseArray = [];
     let tagIds = [];
+
     if (params.tagId) {
       tagIds.push(params.tagId);
     } else if (params.tagIds) {
@@ -186,8 +209,8 @@ class VideoTag extends ModelBase {
     }
     if (tagIds.length > 0) {
       const VideoIdsByTagIdPagination = require(rootPrefix + '/lib/cacheManagement/single/VideoTagsByTagIdPagination');
-      for (let i = 0; i < tagIds.length; i++) {
-        promiseArray.push(new VideoIdsByTagIdPagination({ tagId: tagIds[i] }).clear());
+      for (let index = 0; index < tagIds.length; index++) {
+        promiseArray.push(new VideoIdsByTagIdPagination({ tagId: tagIds[index] }).clear());
       }
 
       await Promise.all(promiseArray);
