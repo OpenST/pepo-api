@@ -363,6 +363,12 @@ class UserSearch extends ServiceBase {
     }
 
     oThis.usersVideosResponse = response.data;
+    for (let ind = 0; ind < oThis.searchResults.length; ind++) {
+      const userId = oThis.searchResults[ind].userId,
+        userProfile = oThis.usersVideosResponse.userProfilesMap[userId];
+      oThis.searchResults[ind].linkId = userProfile.linkIds.length > 0 ? userProfile.linkIds[0] : null;
+      oThis.searchResults[ind].videoId = oThis.userToProfileElementMap[userId].videoId || null;
+    }
   }
 
   /**
