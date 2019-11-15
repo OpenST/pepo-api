@@ -2293,47 +2293,18 @@
 								],
 								"body": {
 									"mode": "urlencoded",
-									"urlencoded": [
-										{
-											"key": "name",
-											"value": "Pankaj Keswani",
-											"type": "text"
-										},
-										{
-											"key": "user_name",
-											"value": "pankaj",
-											"type": "text"
-										},
-										{
-											"key": "bio",
-											"value": "This is my bio, please save it with #cool",
-											"type": "text"
-										},
-										{
-											"key": "link",
-											"value": "https://www.facebook.com",
-											"type": "text"
-										}
-									]
+									"urlencoded": []
 								},
 								"url": {
-									"raw": "{{api_server}}/api/v1/users/1400/video-history?",
+									"raw": "{{api_server}}/api/v1/videos/1009",
 									"host": [
 										"{{api_server}}"
 									],
 									"path": [
 										"api",
 										"v1",
-										"users",
-										"1400",
-										"video-history"
-									],
-									"query": [
-										{
-											"key": "pagination_identifier",
-											"value": "asdfgjery56718bnmasdjk",
-											"disabled": true
-										}
+										"videos",
+										"1009"
 									]
 								}
 							},
@@ -2658,6 +2629,34 @@
 					"_postman_isSubFolder": true
 				},
 				{
+					"name": "replies",
+					"item": [
+						{
+							"name": "share",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{api_server}}/api/v1/replies/1009/share",
+									"host": [
+										"{{api_server}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"replies",
+										"1009",
+										"share"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"protocolProfileBehavior": {},
+					"_postman_isSubFolder": true
+				},
+				{
 					"name": "report-video",
 					"request": {
 						"method": "POST",
@@ -2675,6 +2674,47 @@
 								{
 									"key": "report_entity_kind",
 									"value": "video",
+									"type": "text"
+								},
+								{
+									"key": "report_entity_id",
+									"value": "2421",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{api_server}}/api/v1/report",
+							"host": [
+								"{{api_server}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"report"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "report-reply",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/x-www-form-urlencoded"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "report_entity_kind",
+									"value": "reply",
 									"type": "text"
 								},
 								{
