@@ -253,10 +253,6 @@ class ReplyDetail extends ModelBase {
       .where(['status != ?', replyDetailConstants.invertedStatuses[replyDetailConstants.deletedStatus]])
       .fire();
 
-    params.entityIds = params.videoIds;
-    params.entityKind = replyDetailConstants.invertedEntityKinds[replyDetailConstants.videoEntityKind];
-    params.parentVideoIds = params.parentVideoIds;
-
     return ReplyDetail.flushCache(params);
   }
 
