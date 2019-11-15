@@ -221,7 +221,7 @@ class ReplyDetail extends ModelBase {
       linkIds = JSON.stringify(params.linkIds);
     }
 
-    await oThis
+    const insertResponse = await oThis
       .insert({
         creator_user_id: params.userId,
         entity_kind: replyDetailConstants.invertedEntityKinds[params.entityKind],
@@ -233,13 +233,15 @@ class ReplyDetail extends ModelBase {
       })
       .fire();
 
-    let flushCacheParams = {
+    const flushCacheParams = {
       parentVideoIds: [params.parentId],
       entityIds: [params.entityId],
       entityKind: params.entityKind
     };
 
-    return ReplyDetail.flushCache(flushCacheParams);
+    await ReplyDetail.flushCache(flushCacheParams);
+
+    return insertResponse;
   }
 
   /**
