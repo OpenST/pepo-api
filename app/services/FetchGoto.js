@@ -8,7 +8,7 @@ const rootPrefix = '../..',
   coreConstants = require(rootPrefix + '/config/coreConstants'),
   gotoConstants = require(rootPrefix + '/lib/globalConstant/goto'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
-  entityType = require(rootPrefix + '/lib/globalConstant/entityType');
+  entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType');
 
 const currentPepoApiDomain = coreConstants.PA_DOMAIN;
 
@@ -164,7 +164,7 @@ class FetchGoto extends ServiceBase {
       const goto = gotoFactory.gotoFor(oThis.gotoKind, oThis.gotoParams);
 
       return responseHelper.successWithData({
-        [entityType.goto]: goto
+        [entityTypeConstants.goto]: goto
       });
     }
 
