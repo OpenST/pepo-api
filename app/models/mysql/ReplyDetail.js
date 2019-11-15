@@ -1,7 +1,8 @@
 const rootPrefix = '../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
   databaseConstants = require(rootPrefix + '/lib/globalConstant/database'),
-  replyDetailConstants = require(rootPrefix + '/lib/globalConstant/replyDetail');
+  replyDetailConstants = require(rootPrefix + '/lib/globalConstant/replyDetail'),
+  ReplyDetailsByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/ReplyDetailsByIds');
 
 // Declare variables.
 const dbName = databaseConstants.entityDbName;
@@ -158,7 +159,7 @@ class ReplyDetail extends ModelBase {
       .select('*')
       .where({
         entity_id: entityIds,
-        entity_kind: entityKind
+        entity_kind: replyDetailConstants.invertedEntityKinds[entityKind]
       })
       .fire();
 
@@ -212,7 +213,6 @@ class ReplyDetail extends ModelBase {
    * @returns Promise{object}
    */
   async insertVideo(params) {
-    // TODO: @Tejas flush cache for entity id, parent id
     const oThis = this;
 
     let linkIds = null;
@@ -221,7 +221,7 @@ class ReplyDetail extends ModelBase {
       linkIds = JSON.stringify(params.linkIds);
     }
 
-    return oThis
+    await oThis
       .insert({
         creator_user_id: params.userId,
         entity_kind: replyDetailConstants.invertedEntityKinds[params.entityKind],
@@ -232,6 +232,14 @@ class ReplyDetail extends ModelBase {
         status: replyDetailConstants.invertedStatuses[params.status]
       })
       .fire();
+
+    let flushCacheParams = {
+      parentVideoIds: [params.parentId],
+      entityIds: [params.entityId],
+      entityKind: params.entityKind
+    };
+
+    return ReplyDetail.flushCache(flushCacheParams);
   }
 
   /**
@@ -266,9 +274,17 @@ class ReplyDetail extends ModelBase {
    *
    * @returns {Promise<void>}
    */
-  // TODO: @Tejas fetch reply details cache and after update flush all reply details cache means by entity_id, parent_id and id.
   async updateByReplyDetailId(params) {
     const oThis = this;
+
+    const replyDetailCacheResp = await new ReplyDetailsByIdsCache({ ids: [params.replyDetailId] }).fetch();
+    if (replyDetailCacheResp.isFailure()) {
+      logger.error('Error while fetching reply detail data.');
+
+      return Promise.reject(replyDetailCacheResp);
+    }
+
+    let replyDetail = replyDetailCacheResp.data[params.replyDetailId];
 
     const totalTransactions = 1;
 
@@ -280,8 +296,17 @@ class ReplyDetail extends ModelBase {
         totalTransactions,
         params.totalContributedBy
       ])
-      .where({ id: params.replyDetailId })
+      .where({ id: replyDetail.id })
       .fire();
+
+    let flushCacheParams = {
+      parentVideoIds: [replyDetail.parentId],
+      replyDetailId: replyDetail.id,
+      entityIds: [replyDetail.entityId],
+      entityKind: replyDetailConstants.videoEntityKind
+    };
+
+    return ReplyDetail.flushCache(flushCacheParams);
   }
 
   /**
@@ -323,7 +348,6 @@ class ReplyDetail extends ModelBase {
     }
 
     if (params.entityIds && params.entityKind) {
-      // TODO: @Tejas entity kind inverted cache issue, if entity kind is non-integer then invert and flush.
       const ReplyDetailsByEntityIdsAndEntityKindCache = require(rootPrefix +
         '/lib/cacheManagement/multi/ReplyDetailsByEntityIdsAndEntityKind');
 

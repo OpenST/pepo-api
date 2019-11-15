@@ -324,7 +324,7 @@ class OstTransaction extends ServiceBase {
     } else {
       const ReplyDetailsByEntityIdsAndEntityKindCacheRsp = await new ReplyDetailsByEntityIdsAndEntityKindCache({
         entityIds: [oThis.videoId],
-        entityKind: replyDetailConstants.invertedEntityKinds[replyDetailConstants.videoEntityKind]
+        entityKind: replyDetailConstants.videoEntityKind
       }).fetch();
 
       if (ReplyDetailsByEntityIdsAndEntityKindCacheRsp.isFailure()) {
