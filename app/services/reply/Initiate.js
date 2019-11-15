@@ -69,6 +69,7 @@ class InitiateReply extends ServiceBase {
 
     oThis.videoId = null;
     oThis.addVideoParams = {};
+    oThis.mentionedUserIds = [];
   }
 
   /**
@@ -205,6 +206,9 @@ class InitiateReply extends ServiceBase {
     if (editDescriptionResp.isFailure()) {
       return Promise.reject(editDescriptionResp);
     }
+
+    // for these users id, we have already sent mention-notification. so, need to skip the reply-event-notification
+    oThis.mentionedUserIds = editDescriptionResp.data.mentionedUserIds;
   }
 
   /**
@@ -291,6 +295,9 @@ class InitiateReply extends ServiceBase {
     }
 
     oThis.descriptionId = replyDescriptionResp.data.descriptionId;
+
+    // for these users id, we have already sent mention-notification. so, need to skip the reply-event-notification
+    oThis.mentionedUserIds = replyDescriptionResp.data.mentionedUserIds;
   }
 
   /**
@@ -324,7 +331,8 @@ class InitiateReply extends ServiceBase {
         await new ReplyVideoPostTransaction({
           replyDetailId: oThis.replyDetailId,
           videoId: oThis.parentId,
-          pepoAmountInWei: parentVideoDetails.perReplyAmountInWei
+          pepoAmountInWei: parentVideoDetails.perReplyAmountInWei,
+          mentionedUserIds: oThis.mentionedUserIds
         }).perform();
       }
     }
