@@ -372,7 +372,7 @@ class UserModel extends ModelBase {
         break;
       }
       default: {
-        throw new Error('Invalid filter value.');
+        // Do nothing.
       }
     }
 
