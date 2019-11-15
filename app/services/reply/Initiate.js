@@ -302,7 +302,7 @@ class InitiateReply extends ServiceBase {
   async _onVideoPostCompletion() {
     const oThis = this;
 
-    let parentVideoDetails = null;
+    let parentVideoDetails = {};
 
     if (oThis.parentKind === replyDetailConstants.videoParentKind) {
       const videoDetailsByVideoIdsCacheResp = await new VideoDetailsByVideoIdsCache({
