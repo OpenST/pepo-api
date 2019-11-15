@@ -247,7 +247,6 @@ class ReplyDetail extends ModelBase {
    *
    * @param {object} params
    * @param {Array} params.replyDetailsIds
-   * @param {Array} params.parentVideoIds
    *
    * @returns {object}
    */
