@@ -65,8 +65,8 @@ class GetReplyList extends ServiceBase {
     await oThis._fetchReplyDetailIds();
 
     const promisesArray = [];
+    promisesArray.push(oThis._setTokenDetails());
     if (oThis.replyDetailIds.length > 0) {
-      promisesArray.push(oThis._setTokenDetails());
       promisesArray.push(oThis._getReplyVideos());
     }
     await Promise.all(promisesArray);
@@ -209,19 +209,19 @@ class GetReplyList extends ServiceBase {
     return responseHelper.successWithData({
       [entityType.userVideoList]: oThis.videoReplies,
       [entityType.replyDetailsMap]: oThis.userRepliesMap.replyDetailsMap || {},
-      [entityType.videoDescriptionsMap]: oThis.userRepliesMap.videoDescriptionMap,
-      [entityType.userProfilesMap]: oThis.userRepliesMap.userProfilesMap,
-      [entityType.currentUserUserContributionsMap]: oThis.userRepliesMap.currentUserUserContributionsMap,
-      [entityType.currentUserVideoContributionsMap]: oThis.userRepliesMap.currentUserVideoContributionsMap,
-      [entityType.userProfileAllowedActions]: oThis.userRepliesMap.userProfileAllowedActions,
-      [entityType.pricePointsMap]: oThis.userRepliesMap.pricePointsMap,
+      [entityType.videoDescriptionsMap]: oThis.userRepliesMap.videoDescriptionMap || {},
+      [entityType.userProfilesMap]: oThis.userRepliesMap.userProfilesMap || {},
+      [entityType.currentUserUserContributionsMap]: oThis.userRepliesMap.currentUserUserContributionsMap || {},
+      [entityType.currentUserVideoContributionsMap]: oThis.userRepliesMap.currentUserVideoContributionsMap || {},
+      [entityType.userProfileAllowedActions]: oThis.userRepliesMap.userProfileAllowedActions || {},
+      [entityType.pricePointsMap]: oThis.userRepliesMap.pricePointsMap || {},
       usersByIdMap: oThis.userRepliesMap.usersByIdMap || {},
-      userStat: oThis.userRepliesMap.userStat,
-      tags: oThis.userRepliesMap.tags,
-      linkMap: oThis.userRepliesMap.linkMap,
-      imageMap: oThis.userRepliesMap.imageMap,
-      videoMap: oThis.userRepliesMap.videoMap,
-      tokenUsersByUserIdMap: oThis.userRepliesMap.tokenUsersByUserIdMap,
+      userStat: oThis.userRepliesMap.userStat || {},
+      tags: oThis.userRepliesMap.tags || {},
+      linkMap: oThis.userRepliesMap.linkMap || {},
+      imageMap: oThis.userRepliesMap.imageMap || {},
+      videoMap: oThis.userRepliesMap.videoMap || {},
+      tokenUsersByUserIdMap: oThis.userRepliesMap.tokenUsersByUserIdMap || {},
       tokenDetails: oThis.tokenDetails,
       meta: oThis.responseMetaData
     });
