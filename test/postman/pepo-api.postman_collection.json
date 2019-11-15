@@ -2351,6 +2351,47 @@
 								}
 							},
 							"response": []
+						},
+						{
+							"name": "list-replies",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"type": "text",
+										"value": "application/x-www-form-urlencoded"
+									}
+								],
+								"body": {
+									"mode": "urlencoded",
+									"urlencoded": [
+										{
+											"key": "pagination_identifier",
+											"value": "eyJwYWdpbmF0aW9uX2lkIjoiMTAxMCJ9==",
+											"type": "text"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{api_server}}/api/v1/videos/1009/replies",
+									"host": [
+										"{{api_server}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"videos",
+										"1009",
+										"replies"
+									]
+								}
+							},
+							"response": []
 						}
 					],
 					"protocolProfileBehavior": {},
@@ -2482,16 +2523,10 @@
 								],
 								"body": {
 									"mode": "urlencoded",
-									"urlencoded": [
-										{
-											"key": "pagination_identifier",
-											"value": "eyJwYWdpbmF0aW9uX2lkIjoiMTAxMCJ9==",
-											"type": "text"
-										}
-									]
+									"urlencoded": []
 								},
 								"url": {
-									"raw": "{{api_server}}/api/v1/invites/",
+									"raw": "{{api_server}}/api/v1/invites/?pagination_identifier=eyJwYWdpbmF0aW9uX2lkIjoiMTAxMCJ9==",
 									"host": [
 										"{{api_server}}"
 									],
@@ -2500,6 +2535,12 @@
 										"v1",
 										"invites",
 										""
+									],
+									"query": [
+										{
+											"key": "pagination_identifier",
+											"value": "eyJwYWdpbmF0aW9uX2lkIjoiMTAxMCJ9=="
+										}
 									]
 								}
 							},
