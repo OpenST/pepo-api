@@ -247,13 +247,14 @@ class ReplyDetail extends ModelBase {
    *
    * @param {object} params
    * @param {Array} params.replyDetailsIds
+   * @param {Array} params.parentVideoIds
    *
    * @returns {object}
    */
   async markReplyDetailsDeleted(params) {
     const oThis = this;
 
-    await oThis
+    let updateResp = await oThis
       .update({
         status: replyDetailConstants.invertedStatuses[replyDetailConstants.deletedStatus]
       })
@@ -261,7 +262,7 @@ class ReplyDetail extends ModelBase {
       .where(['status != ?', replyDetailConstants.invertedStatuses[replyDetailConstants.deletedStatus]])
       .fire();
 
-    return ReplyDetail.flushCache(params);
+    return updateResp.affectedRows;
   }
 
   /**
