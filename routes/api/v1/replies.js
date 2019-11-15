@@ -91,4 +91,12 @@ router.get('/:reply_detail_id/share', sanitizer.sanitizeDynamicUrlParams, functi
   Promise.resolve(routeHelper.perform(req, res, next, '/reply/ShareDetails', 'r_a_v1_r_4', null, dataFormatterFunc));
 });
 
+/* Delete reply video */
+router.post('/:reply_details_id/delete', cookieHelper.validateUserLoginRequired, function(req, res, next) {
+  req.decodedParams.apiName = apiName.deleteReplyVideo;
+  req.decodedParams.reply_details_id = req.params.reply_details_id;
+
+  Promise.resolve(routeHelper.perform(req, res, next, '/reply/Delete', 'r_a_v1_r_4', null, null));
+});
+
 module.exports = router;
