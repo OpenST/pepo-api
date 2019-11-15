@@ -6,10 +6,10 @@ const rootPrefix = '../../..',
   routeHelper = require(rootPrefix + '/routes/helper'),
   sanitizer = require(rootPrefix + '/helpers/sanitizer'),
   apiName = require(rootPrefix + '/lib/globalConstant/apiName'),
-  entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
+  entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
   responseEntityKey = require(rootPrefix + '/lib/globalConstant/responseEntityKey');
 
-/* Get tags */
+/* Get tags. */
 router.get('/', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.getTags;
 
@@ -17,8 +17,8 @@ router.get('/', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
     const wrapperFormatterRsp = await new FormatterComposer({
       resultType: responseEntityKey.tags,
       entityKindToResponseKeyMap: {
-        [entityType.tagList]: responseEntityKey.tags,
-        [entityType.tagListMeta]: responseEntityKey.meta
+        [entityTypeConstants.tagList]: responseEntityKey.tags,
+        [entityTypeConstants.tagListMeta]: responseEntityKey.meta
       },
       serviceData: serviceResponse.data
     }).perform();
@@ -29,7 +29,7 @@ router.get('/', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   Promise.resolve(routeHelper.perform(req, res, next, '/search/TagSearch', 'r_a_v1_t_1', null, dataFormatterFunc));
 });
 
-/* Get tag details */
+/* Get tag details. */
 router.get('/:tag_id', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.tagDetails;
   req.decodedParams.tag_id = req.params.tag_id;
@@ -38,7 +38,7 @@ router.get('/:tag_id', sanitizer.sanitizeDynamicUrlParams, function(req, res, ne
     const wrapperFormatterRsp = await new FormatterComposer({
       resultType: responseEntityKey.tag,
       entityKindToResponseKeyMap: {
-        [entityType.tag]: responseEntityKey.tag
+        [entityTypeConstants.tag]: responseEntityKey.tag
       },
       serviceData: serviceResponse.data
     }).perform();
@@ -49,7 +49,7 @@ router.get('/:tag_id', sanitizer.sanitizeDynamicUrlParams, function(req, res, ne
   Promise.resolve(routeHelper.perform(req, res, next, '/tags/GetDetails', 'r_a_v1_t_2', null, dataFormatterFunc));
 });
 
-/* Get videos list by tag id  */
+/* Get videos list by tag id.  */
 router.get('/:tag_id/videos', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.getVideoListByTagId;
   req.decodedParams.tag_id = req.params.tag_id;
@@ -58,21 +58,21 @@ router.get('/:tag_id/videos', sanitizer.sanitizeDynamicUrlParams, function(req, 
     const wrapperFormatterRsp = await new FormatterComposer({
       resultType: responseEntityKey.tagVideoList,
       entityKindToResponseKeyMap: {
-        [entityType.tagVideoList]: responseEntityKey.tagVideoList,
-        [entityType.usersMap]: responseEntityKey.users,
-        [entityType.userStats]: responseEntityKey.userStats,
-        [entityType.userProfilesMap]: responseEntityKey.userProfiles,
-        [entityType.videoDescriptionsMap]: responseEntityKey.videoDescriptions,
-        [entityType.tagsMap]: responseEntityKey.tags,
-        [entityType.linksMap]: responseEntityKey.links,
-        [entityType.imagesMap]: responseEntityKey.images,
-        [entityType.videosMap]: responseEntityKey.videos,
-        [entityType.videoDetailsMap]: responseEntityKey.videoDetails,
-        [entityType.currentUserUserContributionsMap]: responseEntityKey.currentUserUserContributions,
-        [entityType.currentUserVideoContributionsMap]: responseEntityKey.currentUserVideoContributions,
-        [entityType.pricePointsMap]: responseEntityKey.pricePoints,
-        [entityType.token]: responseEntityKey.token,
-        [entityType.tagVideoListMeta]: responseEntityKey.meta
+        [entityTypeConstants.tagVideoList]: responseEntityKey.tagVideoList,
+        [entityTypeConstants.usersMap]: responseEntityKey.users,
+        [entityTypeConstants.userStats]: responseEntityKey.userStats,
+        [entityTypeConstants.userProfilesMap]: responseEntityKey.userProfiles,
+        [entityTypeConstants.videoDescriptionsMap]: responseEntityKey.videoDescriptions,
+        [entityTypeConstants.tagsMap]: responseEntityKey.tags,
+        [entityTypeConstants.linksMap]: responseEntityKey.links,
+        [entityTypeConstants.imagesMap]: responseEntityKey.images,
+        [entityTypeConstants.videosMap]: responseEntityKey.videos,
+        [entityTypeConstants.videoDetailsMap]: responseEntityKey.videoDetails,
+        [entityTypeConstants.currentUserUserContributionsMap]: responseEntityKey.currentUserUserContributions,
+        [entityTypeConstants.currentUserVideoContributionsMap]: responseEntityKey.currentUserVideoContributions,
+        [entityTypeConstants.pricePointsMap]: responseEntityKey.pricePoints,
+        [entityTypeConstants.token]: responseEntityKey.token,
+        [entityTypeConstants.tagVideoListMeta]: responseEntityKey.meta
       },
       serviceData: serviceResponse.data
     }).perform();
@@ -92,21 +92,21 @@ router.get('/:tag_id/allvideos', sanitizer.sanitizeDynamicUrlParams, function(re
     const wrapperFormatterRsp = await new FormatterComposer({
       resultType: responseEntityKey.tagVideoList,
       entityKindToResponseKeyMap: {
-        [entityType.tagVideoList]: responseEntityKey.tagVideoList,
-        [entityType.usersMap]: responseEntityKey.users,
-        [entityType.userStats]: responseEntityKey.userStats,
-        [entityType.userProfilesMap]: responseEntityKey.userProfiles,
-        [entityType.videoDescriptionsMap]: responseEntityKey.videoDescriptions,
-        [entityType.tagsMap]: responseEntityKey.tags,
-        [entityType.linksMap]: responseEntityKey.links,
-        [entityType.imagesMap]: responseEntityKey.images,
-        [entityType.videosMap]: responseEntityKey.videos,
-        [entityType.videoDetailsMap]: responseEntityKey.videoDetails,
-        [entityType.currentUserUserContributionsMap]: responseEntityKey.currentUserUserContributions,
-        [entityType.currentUserVideoContributionsMap]: responseEntityKey.currentUserVideoContributions,
-        [entityType.pricePointsMap]: responseEntityKey.pricePoints,
-        [entityType.token]: responseEntityKey.token,
-        [entityType.tagVideoListMeta]: responseEntityKey.meta
+        [entityTypeConstants.tagVideoList]: responseEntityKey.tagVideoList,
+        [entityTypeConstants.usersMap]: responseEntityKey.users,
+        [entityTypeConstants.userStats]: responseEntityKey.userStats,
+        [entityTypeConstants.userProfilesMap]: responseEntityKey.userProfiles,
+        [entityTypeConstants.videoDescriptionsMap]: responseEntityKey.videoDescriptions,
+        [entityTypeConstants.tagsMap]: responseEntityKey.tags,
+        [entityTypeConstants.linksMap]: responseEntityKey.links,
+        [entityTypeConstants.imagesMap]: responseEntityKey.images,
+        [entityTypeConstants.videosMap]: responseEntityKey.videos,
+        [entityTypeConstants.videoDetailsMap]: responseEntityKey.videoDetails,
+        [entityTypeConstants.currentUserUserContributionsMap]: responseEntityKey.currentUserUserContributions,
+        [entityTypeConstants.currentUserVideoContributionsMap]: responseEntityKey.currentUserVideoContributions,
+        [entityTypeConstants.pricePointsMap]: responseEntityKey.pricePoints,
+        [entityTypeConstants.token]: responseEntityKey.token,
+        [entityTypeConstants.tagVideoListMeta]: responseEntityKey.meta
       },
       serviceData: serviceResponse.data
     }).perform();
