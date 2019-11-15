@@ -363,6 +363,18 @@ const v1ErrorConfig = {
     parameter: 'pepocorn_amount',
     code: 'invalid',
     message: 'Pepocorn amount is invalid.'
+  },
+
+  invalid_limit: {
+    parameter: 'limit',
+    code: 'invalid',
+    message: 'Limit is invalid.'
+  },
+
+  invalid_supported_entities: {
+    parameter: 'supported_entities',
+    code: 'invalid',
+    message: 'Supported entities is invalid.'
   }
 };
 
