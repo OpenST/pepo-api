@@ -804,7 +804,7 @@ class TransactionOstEventBase extends ServiceBase {
   _isReplyOnVideoTransactionKind() {
     const oThis = this;
 
-    return oThis.transaction.meta_property.name === transactionConstants.replyOnVideoMetaName;
+    return oThis.ostTransaction.meta_property.name === transactionConstants.replyOnVideoMetaName;
   }
 
   /**
@@ -816,7 +816,7 @@ class TransactionOstEventBase extends ServiceBase {
   _isPepoOnReplyTransactionKind() {
     const oThis = this;
 
-    return oThis.transaction.meta_property.name === transactionConstants.pepoOnReplyMetaName;
+    return oThis.ostTransaction.meta_property.name === transactionConstants.pepoOnReplyMetaName;
   }
 }
 
