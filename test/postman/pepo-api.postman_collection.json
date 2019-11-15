@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "7a31759d-f871-491e-bd3c-91487accc53a",
+		"_postman_id": "8d757ae4-cf86-4057-a052-c99f925dfecb",
 		"name": "pepo-api",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -2057,12 +2057,12 @@
 							"response": []
 						},
 						{
-							"name": "Videos",
+							"name": "videos",
 							"request": {
 								"method": "GET",
 								"header": [],
 								"url": {
-									"raw": "{{api_server}}/api/v1/tags/66/videos?",
+									"raw": "{{api_server}}/api/v1/tags/66/videos",
 									"host": [
 										"{{api_server}}"
 									],
@@ -2078,6 +2078,38 @@
 											"key": "pagination_identifier",
 											"value": "eyJwYWdlIjoyfQ==",
 											"disabled": true
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "all-videos",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{api_server}}/api/v1/tags/66/videos?supported_entities=['videos', 'replies']",
+									"host": [
+										"{{api_server}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"tags",
+										"66",
+										"videos"
+									],
+									"query": [
+										{
+											"key": "pagination_identifier",
+											"value": "eyJwYWdlIjoyfQ==",
+											"disabled": true
+										},
+										{
+											"key": "supported_entities",
+											"value": "['videos', 'replies']"
 										}
 									]
 								}
@@ -2784,7 +2816,7 @@
 							]
 						},
 						"url": {
-							"raw": "{{api_server}}/api/v1/replies",
+							"raw": "{{api_server}}/api/v1/replies?",
 							"host": [
 								"{{api_server}}"
 							],
