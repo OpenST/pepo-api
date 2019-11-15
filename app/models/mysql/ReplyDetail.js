@@ -1,8 +1,8 @@
 const rootPrefix = '../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
+  logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   databaseConstants = require(rootPrefix + '/lib/globalConstant/database'),
-  replyDetailConstants = require(rootPrefix + '/lib/globalConstant/replyDetail'),
-  ReplyDetailsByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/ReplyDetailsByIds');
+  replyDetailConstants = require(rootPrefix + '/lib/globalConstant/replyDetail');
 
 // Declare variables.
 const dbName = databaseConstants.entityDbName;
@@ -255,7 +255,7 @@ class ReplyDetail extends ModelBase {
   async markReplyDetailsDeleted(params) {
     const oThis = this;
 
-    let updateResp = await oThis
+    const updateResp = await oThis
       .update({
         status: replyDetailConstants.invertedStatuses[replyDetailConstants.deletedStatus]
       })
@@ -279,6 +279,8 @@ class ReplyDetail extends ModelBase {
   async updateByReplyDetailId(params) {
     const oThis = this;
 
+    const ReplyDetailsByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/ReplyDetailsByIds');
+
     const replyDetailCacheResp = await new ReplyDetailsByIdsCache({ ids: [params.replyDetailId] }).fetch();
     if (replyDetailCacheResp.isFailure()) {
       logger.error('Error while fetching reply detail data.');
@@ -286,11 +288,11 @@ class ReplyDetail extends ModelBase {
       return Promise.reject(replyDetailCacheResp);
     }
 
-    let replyDetail = replyDetailCacheResp.data[params.replyDetailId];
+    const replyDetail = replyDetailCacheResp.data[params.replyDetailId];
 
     const totalTransactions = 1;
 
-    return oThis
+    const updateResponse = await oThis
       .update([
         'total_amount = total_amount + ?, total_transactions = total_transactions + ?, ' +
           'total_contributed_by = total_contributed_by + ? ',
@@ -301,14 +303,16 @@ class ReplyDetail extends ModelBase {
       .where({ id: replyDetail.id })
       .fire();
 
-    let flushCacheParams = {
+    const flushCacheParams = {
       parentVideoIds: [replyDetail.parentId],
       replyDetailId: replyDetail.id,
       entityIds: [replyDetail.entityId],
       entityKind: replyDetailConstants.videoEntityKind
     };
 
-    return ReplyDetail.flushCache(flushCacheParams);
+    await ReplyDetail.flushCache(flushCacheParams);
+
+    return updateResponse;
   }
 
   /**
