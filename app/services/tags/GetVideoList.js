@@ -43,9 +43,11 @@ class GetTagsVideoList extends ServiceBase {
     oThis.paginationTimestamp = null;
     oThis.nextPaginationTimestamp = null;
     oThis.videosCount = 0;
+    oThis.responseMetaData = {};
     oThis.videoIds = [];
     oThis.videoDetails = [];
     oThis.tokenDetails = {};
+    oThis.usersVideosMap = {};
   }
 
   /**
