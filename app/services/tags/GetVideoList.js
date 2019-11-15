@@ -2,10 +2,9 @@ const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   GetUserVideos = require(rootPrefix + '/lib/GetUsersVideoList'),
   GetTokenService = require(rootPrefix + '/app/services/token/Get'),
-  VideoDetailsByVideoIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/VideoDetailsByVideoIds'),
   VideoTagsByTagIdPaginationCache = require(rootPrefix + '/lib/cacheManagement/single/VideoTagsByTagIdPagination'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
-  entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
+  entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
   paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination');
 
 /**
@@ -48,7 +47,7 @@ class GetTagsVideoList extends ServiceBase {
   /**
    * Async perform.
    *
-   * @return {Promise<void>}
+   * @returns {Promise<void>}
    * @private
    */
   async _asyncPerform() {
@@ -60,9 +59,7 @@ class GetTagsVideoList extends ServiceBase {
 
     oThis._addResponseMetaData();
 
-    const promisesArray = [];
-    promisesArray.push(oThis._setTokenDetails());
-    promisesArray.push(oThis._getVideos());
+    const promisesArray = [oThis._setTokenDetails(), oThis._getVideos()];
     await Promise.all(promisesArray);
 
     oThis._setUserVideoList();
@@ -122,8 +119,6 @@ class GetTagsVideoList extends ServiceBase {
       oThis.videoIds.push(videoTagsDetail.videoId);
       oThis.nextPaginationTimestamp = videoTagsDetail.createdAt;
     }
-
-    return responseHelper.successWithData({});
   }
 
   /**
@@ -131,7 +126,7 @@ class GetTagsVideoList extends ServiceBase {
    *
    * @sets oThis.responseMetaData
    *
-   * @return {Result}
+   * @returns {void}
    * @private
    */
   _addResponseMetaData() {
@@ -148,8 +143,6 @@ class GetTagsVideoList extends ServiceBase {
     oThis.responseMetaData = {
       [paginationConstants.nextPagePayloadKey]: nextPagePayloadKey
     };
-
-    return responseHelper.successWithData({});
   }
 
   /**
@@ -157,7 +150,7 @@ class GetTagsVideoList extends ServiceBase {
    *
    * @sets oThis.tokenDetails
    *
-   * @return {Promise<result>}
+   * @returns {Promise<result>}
    * @private
    */
   async _setTokenDetails() {
@@ -169,8 +162,6 @@ class GetTagsVideoList extends ServiceBase {
     }
 
     oThis.tokenDetails = tokenResp.data.tokenDetails;
-
-    return responseHelper.successWithData({});
   }
 
   /**
@@ -178,7 +169,7 @@ class GetTagsVideoList extends ServiceBase {
    *
    * @sets oThis.usersVideosMap
    *
-   * @return {Promise<result>}
+   * @returns {Promise<result>}
    * @private
    */
   async _getVideos() {
@@ -201,8 +192,6 @@ class GetTagsVideoList extends ServiceBase {
     }
 
     oThis.usersVideosMap = response.data;
-
-    return responseHelper.successWithData({});
   }
 
   /**
@@ -216,8 +205,8 @@ class GetTagsVideoList extends ServiceBase {
   _setUserVideoList() {
     const oThis = this;
 
-    for (let i = 0; i < oThis.videoIds.length; i++) {
-      let videoId = oThis.videoIds[i];
+    for (let index = 0; index < oThis.videoIds.length; index++) {
+      const videoId = oThis.videoIds[index];
       if (oThis.usersVideosMap.fullVideosMap[videoId]) {
         oThis.videoDetails.push(oThis.usersVideosMap.fullVideosMap[videoId]);
       }
@@ -227,7 +216,6 @@ class GetTagsVideoList extends ServiceBase {
   /**
    * Prepare final response.
    *
-   *
    * @returns {*|result}
    * @private
    */
@@ -235,14 +223,15 @@ class GetTagsVideoList extends ServiceBase {
     const oThis = this;
 
     return responseHelper.successWithData({
-      [entityType.userVideoList]: oThis.videoDetails,
-      [entityType.videoDetailsMap]: oThis.usersVideosMap.videoDetailsMap || {},
-      [entityType.videoDescriptionsMap]: oThis.usersVideosMap.videoDescriptionMap || {},
-      [entityType.userProfilesMap]: oThis.usersVideosMap.userProfilesMap || {},
-      [entityType.currentUserUserContributionsMap]: oThis.usersVideosMap.currentUserUserContributionsMap || {},
-      [entityType.currentUserVideoContributionsMap]: oThis.usersVideosMap.currentUserVideoContributionsMap || {},
-      [entityType.userProfileAllowedActions]: oThis.usersVideosMap.userProfileAllowedActions || {},
-      [entityType.pricePointsMap]: oThis.usersVideosMap.pricePointsMap || {},
+      [entityTypeConstants.userVideoList]: oThis.videoDetails,
+      [entityTypeConstants.videoDetailsMap]: oThis.usersVideosMap.videoDetailsMap || {},
+      [entityTypeConstants.videoDescriptionsMap]: oThis.usersVideosMap.videoDescriptionMap || {},
+      [entityTypeConstants.userProfilesMap]: oThis.usersVideosMap.userProfilesMap || {},
+      [entityTypeConstants.currentUserUserContributionsMap]: oThis.usersVideosMap.currentUserUserContributionsMap || {},
+      [entityTypeConstants.currentUserVideoContributionsMap]:
+        oThis.usersVideosMap.currentUserVideoContributionsMap || {},
+      [entityTypeConstants.userProfileAllowedActions]: oThis.usersVideosMap.userProfileAllowedActions || {},
+      [entityTypeConstants.pricePointsMap]: oThis.usersVideosMap.pricePointsMap || {},
       usersByIdMap: oThis.usersVideosMap.usersByIdMap || {},
       userStat: oThis.usersVideosMap.userStat || {},
       tags: oThis.usersVideosMap.tags || {},
@@ -250,7 +239,6 @@ class GetTagsVideoList extends ServiceBase {
       imageMap: oThis.usersVideosMap.imageMap || {},
       videoMap: oThis.usersVideosMap.videoMap || {},
       tokenUsersByUserIdMap: oThis.usersVideosMap.tokenUsersByUserIdMap || {},
-
       tokenDetails: oThis.tokenDetails,
       meta: oThis.responseMetaData
     });
