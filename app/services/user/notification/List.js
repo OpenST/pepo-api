@@ -547,7 +547,11 @@ class UserNotificationList extends ServiceBase {
     const oThis = this;
 
     let actorId = userNotification.actorIds[0];
-    if (userNotification.kind === userNotificationConstants.videoAddKind) {
+    if (
+      userNotification.kind === userNotificationConstants.videoAddKind ||
+      userNotification.kind === userNotificationConstants.userMentionKind ||
+      userNotification.kind === userNotificationConstants.replyUserMentionKind
+    ) {
       if (oThis.notificationVideoMap[userNotification.uuid]) {
         for (let index = 0; index < oThis.notificationVideoMap[userNotification.uuid].length; index++) {
           const vid = oThis.notificationVideoMap[userNotification.uuid][index];
