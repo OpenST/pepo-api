@@ -546,16 +546,10 @@ class UserNotificationList extends ServiceBase {
   _isNotificationBlocked(userNotification) {
     const oThis = this;
 
-    let actorId = userNotification.actorIds[0];
-    if (
-      userNotification.kind === userNotificationConstants.videoAddKind ||
-      userNotification.kind === userNotificationConstants.userMentionKind ||
-      userNotification.kind === userNotificationConstants.replyUserMentionKind ||
-      userNotification.kind === userNotificationConstants.replySenderWithAmountKind ||
-      userNotification.kind === userNotificationConstants.replySenderWithoutAmountKind ||
-      userNotification.kind === userNotificationConstants.replyReceiverWithAmountKind ||
-      userNotification.kind === userNotificationConstants.replyReceiverWithoutAmountKind
-    ) {
+    let actorId = userNotification.actorIds[0],
+      blockedNotificationsKindsMap = oThis._getBlockedNotificationsKinds();
+
+    if (blockedNotificationsKindsMap[userNotification.kind]) {
       if (oThis.notificationVideoMap[userNotification.uuid]) {
         for (let index = 0; index < oThis.notificationVideoMap[userNotification.uuid].length; index++) {
           const vid = oThis.notificationVideoMap[userNotification.uuid][index];
@@ -701,6 +695,24 @@ class UserNotificationList extends ServiceBase {
     const oThis = this;
 
     return oThis.limit;
+  }
+
+  /**
+   * Get blocked notifications kinds.
+   *
+   * @returns {{[p: string]: number}}
+   * @private
+   */
+  _getBlockedNotificationsKinds() {
+    return {
+      [userNotificationConstants.videoAddKind]: 1,
+      [userNotificationConstants.userMentionKind]: 1,
+      [userNotificationConstants.replyUserMentionKind]: 1,
+      [userNotificationConstants.replySenderWithAmountKind]: 1,
+      [userNotificationConstants.replySenderWithoutAmountKind]: 1,
+      [userNotificationConstants.replyReceiverWithAmountKind]: 1,
+      [userNotificationConstants.replyReceiverWithoutAmountKind]: 1
+    };
   }
 }
 
