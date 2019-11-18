@@ -102,9 +102,9 @@ class ReplyDetail extends ModelBase {
   /**
    * Fetch by video id.
    *
-   * @param {integer} params.limit: no of rows to fetch
-   * @param {integer} params.videoId: video id
-   * @param {integer} params.paginationTimestamp: pagination timestamp
+   * @param {number} params.limit: no of rows to fetch
+   * @param {number} params.videoId: video id
+   * @param {number} params.paginationTimestamp: pagination timestamp
    *
    * @returns Promise{object}
    */

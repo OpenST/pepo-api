@@ -10,6 +10,7 @@ const rootPrefix = '../../..',
   entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
   responseEntityKey = require(rootPrefix + '/lib/globalConstant/responseEntityKey');
 
+// TODO - replies - please write one liner comment with purpose of the route here.
 router.post('/', cookieHelper.validateUserLoginRequired, function(req, res, next) {
   req.decodedParams.apiName = apiName.initiateReply;
 
@@ -28,13 +29,14 @@ router.post('/', cookieHelper.validateUserLoginRequired, function(req, res, next
   Promise.resolve(routeHelper.perform(req, res, next, '/reply/Initiate', 'r_a_v1_r_1', null, dataFormatterFunc));
 });
 
+// TODO - replies - please write one liner comment with purpose of the route here.
 router.post('/validate-upload', cookieHelper.validateUserLoginRequired, function(req, res, next) {
   req.decodedParams.apiName = apiName.validateUploadReply;
 
   Promise.resolve(routeHelper.perform(req, res, next, '/reply/Validate', 'r_a_v1_r_2', null, null));
 });
 
-/* Get reply by id. */
+// TODO - replies - please write one liner comment with purpose of the route here.
 router.get('/:reply_id', sanitizer.sanitizeDynamicUrlParams, cookieHelper.validateUserLoginRequired, function(
   req,
   res,
@@ -71,7 +73,7 @@ router.get('/:reply_id', sanitizer.sanitizeDynamicUrlParams, cookieHelper.valida
   Promise.resolve(routeHelper.perform(req, res, next, '/reply/GetById', 'r_a_v1_r_3', null, dataFormatterFunc));
 });
 
-/* Reply share. */
+// TODO - replies - please write one liner comment with purpose of the route here.
 router.get('/:reply_detail_id/share', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.replyShare;
   req.decodedParams.reply_detail_id = req.params.reply_detail_id;

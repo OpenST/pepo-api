@@ -83,6 +83,7 @@ router.get('/:video_id/replies', sanitizer.sanitizeDynamicUrlParams, function(re
 });
 
 // /* Reply List */
+// TODO - replies - clean this up
 // router.get('/:video_id/replies', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
 //   req.decodedParams.apiName = apiName.replyList;
 //   req.decodedParams.video_id = req.params.video_id;
