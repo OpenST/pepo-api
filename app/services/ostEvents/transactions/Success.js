@@ -331,14 +331,11 @@ class SuccessTransactionOstEvent extends TransactionOstEventBase {
   async _updateReplyDetails() {
     const oThis = this;
 
-    await new ReplyDetailModel()
-      .updateByReplyDetailId({
-        replyDetailId: oThis.replyDetailId,
-        totalAmount: oThis.ostTransaction.transfers[0].amount,
-        totalContributedBy: 0
-      })
-      .where({ id: oThis.replyDetailId })
-      .fire();
+    await new ReplyDetailModel().updateByReplyDetailId({
+      replyDetailId: oThis.replyDetailId,
+      totalAmount: oThis.ostTransaction.transfers[0].amount,
+      totalContributedBy: 0
+    });
   }
 
   /**
