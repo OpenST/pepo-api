@@ -122,11 +122,11 @@ class ReplyDetail extends ModelBase {
         entity_kind: replyDetailConstants.invertedEntityKinds[replyDetailConstants.videoEntityKind],
         status: replyDetailConstants.invertedStatuses[replyDetailConstants.activeStatus]
       })
-      .order_by('id desc')
+      .order_by('id asc')
       .limit(limit);
 
     if (paginationTimestamp) {
-      queryObject.where(['created_at < ?', paginationTimestamp]);
+      queryObject.where(['created_at > ?', paginationTimestamp]);
     }
 
     const dbRows = await queryObject.fire();

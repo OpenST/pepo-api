@@ -162,7 +162,8 @@ class GetReplyList extends ServiceBase {
     const userVideosObj = new GetUserVideosList({
       currentUserId: oThis.currentUserId,
       replyDetailIds: oThis.replyDetailIds,
-      isAdmin: oThis.isAdmin
+      isAdmin: oThis.isAdmin,
+      fetchVideoViewDetails: 1
     });
 
     const response = await userVideosObj.perform();
@@ -213,6 +214,7 @@ class GetReplyList extends ServiceBase {
       [entityType.userProfilesMap]: oThis.userRepliesMap.userProfilesMap || {},
       [entityType.currentUserUserContributionsMap]: oThis.userRepliesMap.currentUserUserContributionsMap || {},
       [entityType.currentUserVideoContributionsMap]: oThis.userRepliesMap.currentUserVideoContributionsMap || {},
+      [entityType.currentUserVideoRelationsMap]: oThis.userRepliesMap.currentUserVideoRelationsMap || {},
       [entityType.userProfileAllowedActions]: oThis.userRepliesMap.userProfileAllowedActions || {},
       [entityType.pricePointsMap]: oThis.userRepliesMap.pricePointsMap || {},
       usersByIdMap: oThis.userRepliesMap.usersByIdMap || {},
