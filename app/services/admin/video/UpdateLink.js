@@ -47,8 +47,6 @@ class UpdateLink extends ServiceBase {
       currentAdminId: oThis.currentAdminId
     }).perform();
 
-    await oThis._logAdminActivity();
-
     return responseHelper.successWithData({});
   }
 }
