@@ -1,5 +1,6 @@
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
+  CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   DeleteReplyVideoLib = require(rootPrefix + '/lib/video/delete/ReplyVideos'),
   ReplyDetailsByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/ReplyDetailsByIds'),
   VideoDetailsByVideoIds = require(rootPrefix + '/lib/cacheManagement/multi/VideoDetailsByVideoIds'),
@@ -36,7 +37,7 @@ class DeleteReplyVideo extends ServiceBase {
   /**
    * Async perform.
    *
-   * @return {Promise<void>}
+   * @returns {Promise<void>}
    * @private
    */
   async _asyncPerform() {
@@ -56,10 +57,10 @@ class DeleteReplyVideo extends ServiceBase {
       });
     }
 
-    //Only the reply video creator or the parent video creator can delete the reply video.
+    // Only the reply video creator or the parent video creator can delete the reply video.
     if (
-      oThis.currentUserId != oThis.replyDetails.creatorUserId &&
-      oThis.currentUserId != oThis.parentVideoCreatorUserId
+      +oThis.currentUserId !== +oThis.replyDetails.creatorUserId &&
+      +oThis.currentUserId !== +oThis.parentVideoCreatorUserId
     ) {
       return Promise.reject(
         responseHelper.paramValidationError({
@@ -85,11 +86,11 @@ class DeleteReplyVideo extends ServiceBase {
   }
 
   /**
-   * Fetch creator user id.
+   * Fetch reply details.
    *
    * @sets oThis.replyDetails
    *
-   * @return {Promise<void>}
+   * @returns {Promise<void>}
    * @private
    */
   async _fetchReplyDetails() {
@@ -100,11 +101,22 @@ class DeleteReplyVideo extends ServiceBase {
       return Promise.reject(replyDetailsCacheResponse);
     }
 
+    if (!CommonValidators.validateNonEmptyObject(replyDetailsCacheResponse.data[oThis.replyDetailsId])) {
+      return responseHelper.paramValidationError({
+        internal_error_identifier: 'a_s_r_d_3',
+        api_error_identifier: 'invalid_api_params',
+        params_error_identifiers: ['invalid_reply_details_id'],
+        debug_options: { replyDetailsId: oThis.replyDetailsId }
+      });
+    }
+
     oThis.replyDetails = replyDetailsCacheResponse.data[oThis.replyDetailsId];
   }
 
   /**
    * Fetch parent details.
+   *
+   * @sets oThis.parentVideoCreatorUserId
    *
    * @returns {Promise<void>}
    * @private
@@ -112,9 +124,9 @@ class DeleteReplyVideo extends ServiceBase {
   async _fetchParentDetails() {
     const oThis = this;
 
-    let parentVideoId = oThis.replyDetails.parentId,
-      cacheResponse = await new VideoDetailsByVideoIds({ videoIds: [parentVideoId] }).fetch();
+    const parentVideoId = oThis.replyDetails.parentId;
 
+    const cacheResponse = await new VideoDetailsByVideoIds({ videoIds: [parentVideoId] }).fetch();
     if (cacheResponse.isFailure()) {
       return Promise.reject(cacheResponse);
     }
