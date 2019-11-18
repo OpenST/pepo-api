@@ -550,7 +550,11 @@ class UserNotificationList extends ServiceBase {
     if (
       userNotification.kind === userNotificationConstants.videoAddKind ||
       userNotification.kind === userNotificationConstants.userMentionKind ||
-      userNotification.kind === userNotificationConstants.replyUserMentionKind
+      userNotification.kind === userNotificationConstants.replyUserMentionKind ||
+      userNotification.kind === userNotificationConstants.replySenderWithAmountKind ||
+      userNotification.kind === userNotificationConstants.replySenderWithoutAmountKind ||
+      userNotification.kind === userNotificationConstants.replyReceiverWithAmountKind ||
+      userNotification.kind === userNotificationConstants.replyReceiverWithoutAmountKind
     ) {
       if (oThis.notificationVideoMap[userNotification.uuid]) {
         for (let index = 0; index < oThis.notificationVideoMap[userNotification.uuid].length; index++) {
