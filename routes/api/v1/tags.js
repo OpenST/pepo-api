@@ -49,7 +49,7 @@ router.get('/:tag_id', sanitizer.sanitizeDynamicUrlParams, function(req, res, ne
   Promise.resolve(routeHelper.perform(req, res, next, '/tags/GetDetails', 'r_a_v1_t_2', null, dataFormatterFunc));
 });
 
-/* Get videos list by tag id.  */
+/* Get videos list (only videos) by tag id.  This route is maintained as it is used in earlier versions of app. */
 router.get('/:tag_id/videos', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.getVideoListByTagId;
   req.decodedParams.tag_id = req.params.tag_id;
@@ -83,7 +83,7 @@ router.get('/:tag_id/videos', sanitizer.sanitizeDynamicUrlParams, function(req, 
   Promise.resolve(routeHelper.perform(req, res, next, '/tags/GetVideoList', 'r_a_v1_t_3', null, dataFormatterFunc));
 });
 
-/* Get all videos list by tag id. */
+/* Get all videos list (videos + replies) by tag id. */
 router.get('/:tag_id/allvideos', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.getAllVideoListByTagId;
   req.decodedParams.tag_id = req.params.tag_id;
