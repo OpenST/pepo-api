@@ -10,7 +10,7 @@ const rootPrefix = '../../..',
   entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
   responseEntityKey = require(rootPrefix + '/lib/globalConstant/responseEntityKey');
 
-// TODO - replies - please write one liner comment with purpose of the route here.
+// Initiate reply on particular video.
 router.post('/', cookieHelper.validateUserLoginRequired, function(req, res, next) {
   req.decodedParams.apiName = apiName.initiateReply;
 
@@ -29,14 +29,14 @@ router.post('/', cookieHelper.validateUserLoginRequired, function(req, res, next
   Promise.resolve(routeHelper.perform(req, res, next, '/reply/Initiate', 'r_a_v1_r_1', null, dataFormatterFunc));
 });
 
-// TODO - replies - please write one liner comment with purpose of the route here.
+// Validate initiate reply api parameters.
 router.post('/validate-upload', cookieHelper.validateUserLoginRequired, function(req, res, next) {
   req.decodedParams.apiName = apiName.validateUploadReply;
 
   Promise.resolve(routeHelper.perform(req, res, next, '/reply/Validate', 'r_a_v1_r_2', null, null));
 });
 
-// TODO - replies - please write one liner comment with purpose of the route here.
+// Get any particular reply given its reply detail id.
 router.get('/:reply_id', sanitizer.sanitizeDynamicUrlParams, cookieHelper.validateUserLoginRequired, function(
   req,
   res,
@@ -73,7 +73,7 @@ router.get('/:reply_id', sanitizer.sanitizeDynamicUrlParams, cookieHelper.valida
   Promise.resolve(routeHelper.perform(req, res, next, '/reply/GetById', 'r_a_v1_r_3', null, dataFormatterFunc));
 });
 
-// TODO - replies - please write one liner comment with purpose of the route here.
+// Get url and message for sharing reply video given its reply detail id.
 router.get('/:reply_detail_id/share', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.replyShare;
   req.decodedParams.reply_detail_id = req.params.reply_detail_id;
@@ -93,7 +93,7 @@ router.get('/:reply_detail_id/share', sanitizer.sanitizeDynamicUrlParams, functi
   Promise.resolve(routeHelper.perform(req, res, next, '/reply/ShareDetails', 'r_a_v1_r_4', null, dataFormatterFunc));
 });
 
-/* Delete reply video */
+// Delete reply video given its reply detail id.
 router.post('/:reply_details_id/delete', cookieHelper.validateUserLoginRequired, function(req, res, next) {
   req.decodedParams.apiName = apiName.deleteReplyVideo;
   req.decodedParams.reply_details_id = req.params.reply_details_id;
