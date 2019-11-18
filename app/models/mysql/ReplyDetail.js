@@ -241,7 +241,6 @@ class ReplyDetail extends ModelBase {
 
     await ReplyDetail.flushCache(flushCacheParams);
 
-    logger.log('insertResponse  ============', insertResponse);
     return insertResponse;
   }
 
