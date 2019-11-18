@@ -162,7 +162,15 @@ class WebSocketAuth extends ServiceBase {
     if (replayAttackCacheResponse.isFailure()) {
       logger.log('Replay attack detected !!');
 
-      return Promise.reject(replayAttackCacheResponse);
+      return Promise.reject(
+        responseHelper.error({
+          internal_error_identifier: 'a_s_ws_a_cfra_1',
+          api_error_identifier: 'could_not_proceed',
+          debug_options: {
+            authKey: oThis.decryptedPayload.auth_key
+          }
+        })
+      );
     }
   }
 
