@@ -5,6 +5,7 @@ const rootPrefix = '../..',
 const dbName = databaseConstants.entityDbName;
 const dbKind = dbKindConstants.sqlDbKind;
 
+// TODO - replies - default value should be removed in another code push when everything becomes stable.
 const upQuery = 'ALTER TABLE `videos` \n\
       ADD COLUMN `kind` tinyint(4) NOT NULL DEFAULT 1 AFTER `status`;';
 

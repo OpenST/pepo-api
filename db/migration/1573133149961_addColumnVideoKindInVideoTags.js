@@ -4,7 +4,7 @@ const rootPrefix = '../..',
 
 const dbName = database.entityDbName;
 const dbKind = DbKindConstant.sqlDbKind;
-
+// TODO - replies - later on this default value of 1 should be removed.
 const upQuery =
   'ALTER TABLE `video_tags` \n\
       ADD COLUMN `video_kind` tinyint(4) NOT NULL DEFAULT 1 AFTER `video_id`;';
