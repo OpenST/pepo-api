@@ -99,27 +99,6 @@ class TextIncludeModel extends CassandraModelBase {
   }
 
   /**
-   * Fetch latest last action timestamp.
-   *
-   * @param queryParams
-   * @returns {*}
-   */
-  async fetchTextIncludes(queryParams) {
-    const oThis = this;
-
-    const query = `select * from ${oThis.queryTableName} where text_id = ? and entity_identifier = ?;`;
-    const params = [queryParams.textId, queryParams.entityIdentifier];
-
-    const queryRsp = await oThis.fire(query, params);
-
-    if (queryRsp.rows.length === 0) {
-      return {};
-    }
-
-    return oThis.formatDbData(queryRsp.rows[0]);
-  }
-
-  /**
    *
    *
    * @param textId
@@ -149,8 +128,10 @@ class TextIncludeModel extends CassandraModelBase {
    * Delete tags.
    *
    * @param textId
+   * @param tagEntityIdentifiers
    * @returns {Promise<void>}
    */
+  // TODO - replies - this looks similar to deleteRowsForTextId method.
   async deleteTags(textId, tagEntityIdentifiers) {
     const oThis = this;
 
@@ -167,6 +148,8 @@ class TextIncludeModel extends CassandraModelBase {
    * @param textId
    * @returns {Promise<void>}
    */
+  // TODO - replies - add validations here. Delete is a critical functionality.
+  // TODO - Validate that entityIdentifiersArray is a array and textId is numeric.
   async deleteRowsForTextId(textId, entityIdentifiersArray) {
     const oThis = this;
 
@@ -185,7 +168,6 @@ class TextIncludeModel extends CassandraModelBase {
    * @returns {Promise<*>}
    */
   static async flushCache(params) {
-    // Do nothing.
     const TextIncludesByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TextIncludesByTextIds');
     await new TextIncludesByIdsCache({ ids: params.textIds }).clear();
   }
