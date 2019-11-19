@@ -94,7 +94,7 @@ class CuratedEntity extends ModelBase {
    *
    * @param {string} entityKind
    *
-   * @returns {Promise<[]>}
+   * @returns {Promise<{}>}
    */
   async getForKind(entityKind) {
     const oThis = this;
@@ -117,21 +117,21 @@ class CuratedEntity extends ModelBase {
       entityIds.push(curatedEntity.entity_kind);
     }
 
-    return entityIds;
+    return { [entityKind]: entityIds };
   }
 
   /**
    * Flush cache.
    *
    * @param {object} params
-   * @param {object} params.entityKind
+   * @param {string} params.entityKind
    *
    * @returns {Promise<void>}
    */
   static async flushCache(params) {
-    const CacheKlass = require(rootPrefix + '/klass.js');
+    const CuratedEntityIdsByKindCache = require(rootPrefix + '/lib/cacheManagement/single/CuratedEntityIdsByKind');
 
-    await new CacheKlass({ entityKind: params.entityKind }).clear();
+    await new CuratedEntityIdsByKindCache({ entityKind: params.entityKind }).clear();
   }
 }
 
