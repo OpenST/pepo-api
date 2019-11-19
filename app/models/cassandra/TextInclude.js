@@ -1,9 +1,9 @@
 const rootPrefix = '../../..',
+  CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   CassandraModelBase = require(rootPrefix + '/app/models/cassandra/Base'),
-  cassandraKeyspaceConstants = require(rootPrefix + '/lib/globalConstant/cassandraKeyspace'),
-  commonValidators = require(rootPrefix + '/lib/validators/Common'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
-  textIncludeConstants = require(rootPrefix + '/lib/globalConstant/cassandra/textInclude');
+  textIncludeConstants = require(rootPrefix + '/lib/globalConstant/cassandra/textInclude'),
+  cassandraKeyspaceConstants = require(rootPrefix + '/lib/globalConstant/cassandraKeyspace');
 
 // Declare variables.
 const keyspace = cassandraKeyspaceConstants.cassandraKeyspaceName;
@@ -41,6 +41,11 @@ class TextIncludeModel extends CassandraModelBase {
     };
   }
 
+  /**
+   * Returns long to short names map.
+   *
+   * @returns {*}
+   */
   get longToShortNamesMap() {
     return textIncludeConstants.longToShortNamesMap;
   }
@@ -101,11 +106,12 @@ class TextIncludeModel extends CassandraModelBase {
   }
 
   /**
+   * Insert in text includes.
    *
+   * @param {number} textId
+   * @param {array} entityIdentifiers
+   * @param {array} replaceableTexts
    *
-   * @param textId
-   * @param entityIdentifiers
-   * @param replaceableTexts
    * @returns {Promise<void>}
    */
   async insertInTextIncludes(textId, entityIdentifiers, replaceableTexts) {
@@ -128,15 +134,18 @@ class TextIncludeModel extends CassandraModelBase {
 
   /**
    * Delete rows for given textId and entityIdentifiers.
-   * @param textId - textId
-   * @param entityIdentifiersArray - entityIdentifiersArray
+   *
+   * @param {number} textId - textId
+   * @param {array} entityIdentifiersArray - entityIdentifiersArray
+   *
    * @returns {Promise<void>}
    */
   async deleteRowsForTextId(textId, entityIdentifiersArray) {
     const oThis = this;
 
-    if (!commonValidators.validateInteger(textId) || !commonValidators.validateNonEmptyArray(entityIdentifiersArray)) {
+    if (!CommonValidators.validateInteger(textId) || !CommonValidators.validateNonEmptyArray(entityIdentifiersArray)) {
       logger.trace('Validation Failed for delete rows for text id.');
+
       return;
     }
 
@@ -150,8 +159,10 @@ class TextIncludeModel extends CassandraModelBase {
 
   /**
    * Flush cache.
+   *
    * @param {object} params
    * @param {array<number>} params.textIds
+   *
    * @returns {Promise<*>}
    */
   static async flushCache(params) {
