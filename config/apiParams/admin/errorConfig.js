@@ -164,6 +164,16 @@ const adminErrorConfig = {
     parameter: 'sort_by',
     code: 'invalid',
     message: 'Invalid sort by.'
+  },
+  invalid_entity_kind: {
+    parameter: 'entity_kind',
+    code: 'invalid',
+    message: 'Invalid entity kind.'
+  },
+  invalid_entity_ids: {
+    parameter: 'entity_id',
+    code: 'invalid',
+    message: 'Invalid entity ids.'
   }
 };
 
