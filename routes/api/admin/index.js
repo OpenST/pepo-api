@@ -181,7 +181,7 @@ router.get('/video-history/:profile_user_id', sanitizer.sanitizeDynamicUrlParams
   );
 });
 
-/* Reply history for admin - intentionally retained the same api name */
+/* Reply history for admin */
 router.get('/reply-history/:profile_user_id', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.userReplyList;
   req.decodedParams.profile_user_id = req.params.profile_user_id;
@@ -214,7 +214,7 @@ router.get('/reply-history/:profile_user_id', sanitizer.sanitizeDynamicUrlParams
   };
 
   Promise.resolve(
-    routeHelper.perform(req, res, next, '/user/profile/GetVideoList', 'r_a_v1_u_5', null, dataFormatterFunc)
+    routeHelper.perform(req, res, next, '/admin/reply/GetUserList', 'r_a_v1_u_7', null, dataFormatterFunc)
   );
 });
 
