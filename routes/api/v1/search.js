@@ -76,7 +76,6 @@ router.get('/users-mention', sanitizer.sanitizeDynamicUrlParams, function(req, r
   req.decodedParams.apiName = apiName.getTags;
 
   const dataFormatterFunc = async function(serviceResponse) {
-    console.log('serviceResponse---', serviceResponse);
     const wrapperFormatterRsp = await new FormatterComposer({
       resultType: responseEntityKey.userSearchResults,
       entityKindToResponseKeyMap: {

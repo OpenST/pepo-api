@@ -28,7 +28,6 @@ class DummyList extends ServiceBase {
     const oThis = this;
 
     oThis.videoId = +params.video_id;
-    console.log('The oThis.videoId is : ', params);
   }
 
   /**
