@@ -8,7 +8,6 @@ const rootPrefix = '../../../..',
   ReplyDetailsByUserIdPaginationCache = require(rootPrefix +
     '/lib/cacheManagement/single/ReplyDetailsByUserIdPagination'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
-  entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
   paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination'),
   adminEntityType = require(rootPrefix + '/lib/globalConstant/adminEntityType');
 
@@ -300,6 +299,7 @@ class GetUserReplyList extends ServiceBase {
       [adminEntityType.currentUserUserContributionsMap]: oThis.usersVideosMap.currentUserUserContributionsMap || {},
       [adminEntityType.currentUserVideoContributionsMap]: oThis.usersVideosMap.currentUserVideoContributionsMap || {},
       [adminEntityType.pricePointsMap]: oThis.usersVideosMap.pricePointsMap || {},
+      [adminEntityType.replyDetailsMap]: oThis.replyDetailsMap || {},
       tokenDetails: oThis.tokenDetails,
       meta: oThis.responseMetaData
     });
