@@ -14,7 +14,7 @@ const upQuery =
         `created_at` int(11) NOT NULL, \n\
         `updated_at` int(11) NOT NULL, \n\
         PRIMARY KEY (`id`), \n\
-        ADD INDEX c_idx_1 (`entity_id`, `entity_kind`),\n\
+        INDEX c_idx_1 (`entity_id`, `entity_kind`)\n\
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;';
 
 const downQuery = 'drop table if exists `curated_entities`;';
