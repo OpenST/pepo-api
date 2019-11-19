@@ -316,6 +316,52 @@ class ReplyDetail extends ModelBase {
   }
 
   /**
+   * Fetch by creator user id.
+   *
+   * @param {integer} params.limit: no of rows to fetch
+   * @param {integer} params.creatorUserId: creator user id
+   * @param {integer} params.paginationTimestamp: creator user id
+   *
+   * @returns {Promise}
+   */
+  async fetchByCreatorUserId(params) {
+    const oThis = this;
+
+    const limit = params.limit,
+      creatorUserId = params.creatorUserId,
+      paginationTimestamp = params.paginationTimestamp;
+
+    const queryObject = oThis
+      .select('*')
+      .where({
+        creator_user_id: creatorUserId,
+        status: replyDetailConstants.invertedStatuses[replyDetailConstants.activeStatus]
+      })
+      .order_by('id desc')
+      .limit(limit);
+
+    if (paginationTimestamp) {
+      queryObject.where(['created_at < ?', paginationTimestamp]);
+    }
+
+    const dbRows = await queryObject.fire();
+
+    const replyDetails = {};
+
+    const videoIds = [],
+      replyDetailIds = [];
+
+    for (let index = 0; index < dbRows.length; index++) {
+      const formatDbRow = oThis.formatDbData(dbRows[index]);
+      replyDetails[formatDbRow.entityId] = formatDbRow;
+      videoIds.push(formatDbRow.entityId);
+      replyDetailIds.push(formatDbRow.id);
+    }
+
+    return { videoIds: videoIds, replyDetails: replyDetails, replyDetailIds: replyDetailIds };
+  }
+
+  /**
    * Flush cache.
    *
    * @param {object} params

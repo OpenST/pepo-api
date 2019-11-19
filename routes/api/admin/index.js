@@ -181,6 +181,43 @@ router.get('/video-history/:profile_user_id', sanitizer.sanitizeDynamicUrlParams
   );
 });
 
+/* Reply history for admin - intentionally retained the same api name */
+router.get('/reply-history/:profile_user_id', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.userReplyList;
+  req.decodedParams.profile_user_id = req.params.profile_user_id;
+  req.decodedParams.is_admin = true;
+
+  const dataFormatterFunc = async function(serviceResponse) {
+    const wrapperFormatterRsp = await new AdminFormatterComposer({
+      resultType: adminResponseEntityKey.userVideoList,
+      entityKindToResponseKeyMap: {
+        [adminEntityType.userVideoList]: adminResponseEntityKey.userVideoList,
+        [adminEntityType.adminUsersMap]: adminResponseEntityKey.users,
+        [adminEntityType.userStats]: adminResponseEntityKey.userStats,
+        [adminEntityType.userProfilesMap]: adminResponseEntityKey.userProfiles,
+        [adminEntityType.tagsMap]: adminResponseEntityKey.tags,
+        [adminEntityType.linksMap]: adminResponseEntityKey.links,
+        [adminEntityType.imagesMap]: adminResponseEntityKey.images,
+        [adminEntityType.videosMap]: adminResponseEntityKey.videos,
+        [adminEntityType.videoDetailsMap]: adminResponseEntityKey.videoDetails,
+        [adminEntityType.videoDescriptionsMap]: adminResponseEntityKey.videoDescriptions,
+        [adminEntityType.currentUserUserContributionsMap]: adminResponseEntityKey.currentUserUserContributions,
+        [adminEntityType.currentUserVideoContributionsMap]: adminResponseEntityKey.currentUserVideoContributions,
+        [adminEntityType.pricePointsMap]: adminResponseEntityKey.pricePoints,
+        [adminEntityType.token]: adminResponseEntityKey.token,
+        [adminEntityType.userVideoListMeta]: adminResponseEntityKey.meta
+      },
+      serviceData: serviceResponse.data
+    }).perform();
+
+    serviceResponse.data = wrapperFormatterRsp.data;
+  };
+
+  Promise.resolve(
+    routeHelper.perform(req, res, next, '/user/profile/GetVideoList', 'r_a_v1_u_5', null, dataFormatterFunc)
+  );
+});
+
 /* Delete video. */
 router.post('/delete-video/:video_id', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.adminDeleteVideo;
