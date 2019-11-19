@@ -85,8 +85,6 @@ class CuratedEntity extends ModelBase {
     }
 
     await oThis.delete({ entity_kind: entityKindInt }).fire();
-
-    await CuratedEntity.flushCache({ entityKind: entityKind });
   }
 
   /**
