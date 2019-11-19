@@ -290,7 +290,7 @@ class GetUserReplyList extends ServiceBase {
       usersByIdMap: oThis.usersVideosMap.usersByIdMap || {},
       userStat: oThis.usersVideosMap.userStat || {},
       [adminEntityType.userProfilesMap]: oThis.usersVideosMap.userProfilesMap || {},
-      [adminEntityType.tagsMap]: oThis.usersVideosMap.tags || {},
+      tags: oThis.usersVideosMap.tags || {},
       linkMap: oThis.usersVideosMap.linkMap || {},
       imageMap: oThis.usersVideosMap.imageMap || {},
       videoMap: oThis.usersVideosMap.videoMap || {},
