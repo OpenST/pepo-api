@@ -2,7 +2,7 @@
 # Core ENV Details
 export PA_ENVIRONMENT='development'
 export PA_PORT=3000
-export PA_DEBUG_ENABLED='1';
+export PA_DEFAULT_LOG_LEVEL='info';
 export PA_DOMAIN='http://pepodev.com:8080'
 export PA_STORE_DOMAIN='http://store.pepodev.com:8080';
 export PA_INVITE_DOMAIN='http://invite.pepodev.com:8080';
