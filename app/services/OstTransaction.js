@@ -8,19 +8,19 @@ const rootPrefix = '../..',
   PepocornTransactionModel = require(rootPrefix + '/app/models/mysql/PepocornTransaction'),
   TokenUserByUserId = require(rootPrefix + '/lib/cacheManagement/multi/TokenUserByUserIds'),
   ReplyDetailsByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/ReplyDetailsByIds'),
-  ReplyDetailsByEntityIdsAndEntityKindCache = require(rootPrefix +
-    '/lib/cacheManagement/multi/ReplyDetailsByEntityIdsAndEntityKind'),
-  replyDetailConstants = require(rootPrefix + '/lib/globalConstant/replyDetail'),
   ReplyVideoPostTransaction = require(rootPrefix + '/lib/transaction/ReplyVideoPostTransaction'),
   TransactionByOstTxIdCache = require(rootPrefix + '/lib/cacheManagement/multi/TransactionByOstTxId'),
   TokenUserByOstUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TokenUserByOstUserIds'),
   VideoDetailsByVideoIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/VideoDetailsByVideoIds'),
+  ReplyDetailsByEntityIdsAndEntityKindCache = require(rootPrefix +
+    '/lib/cacheManagement/multi/ReplyDetailsByEntityIdsAndEntityKind'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   createErrorLogsEntry = require(rootPrefix + '/lib/errorLogs/createEntry'),
   errorLogsConstants = require(rootPrefix + '/lib/globalConstant/errorLogs'),
   ostPlatformSdkWrapper = require(rootPrefix + '/lib/ostPlatform/jsSdkWrapper'),
   transactionConstants = require(rootPrefix + '/lib/globalConstant/transaction'),
+  replyDetailConstants = require(rootPrefix + '/lib/globalConstant/replyDetail'),
   pepocornTransactionConstants = require(rootPrefix + '/lib/globalConstant/redemption/pepocornTransaction');
 
 /**
@@ -50,8 +50,6 @@ class OstTransaction extends ServiceBase {
     oThis.transaction = params.ost_transaction;
     oThis.userId = params.current_user.id;
     oThis.meta = params.meta || {};
-
-    console.log('==oThis.meta===11111111111111===', oThis.meta);
 
     oThis.ostTxId = oThis.transaction.id;
     oThis.ostTransactionStatus = oThis.transaction.status.toUpperCase();
@@ -117,7 +115,6 @@ class OstTransaction extends ServiceBase {
     const parsedMetaProperty = transactionConstants._parseTransactionMetaDetails(oThis.transaction.meta_property);
 
     if (oThis._isUserTransactionKind()) {
-      console.log('==parsedMetaProperty======', parsedMetaProperty);
       // Did not use the meta property as not sure of all previous builds.
       oThis.videoId = oThis.meta.vi;
     } else if (oThis._isRedemptionTransactionKind()) {
@@ -305,6 +302,8 @@ class OstTransaction extends ServiceBase {
   /**
    * Fetch video details and validate.
    *
+   * @sets oThis.replyDetailId
+   *
    * @returns {Promise<void>}
    * @private
    */
@@ -314,39 +313,39 @@ class OstTransaction extends ServiceBase {
     const videoDetailsCacheResponse = await new VideoDetailsByVideoIdsCache({ videoIds: [oThis.videoId] }).fetch();
     if (videoDetailsCacheResponse.isFailure()) {
       logger.error('Error while fetching video detail data.');
+
       return Promise.reject(videoDetailsCacheResponse);
     }
 
-    let videoDetail = videoDetailsCacheResponse.data[oThis.videoId];
+    const videoDetail = videoDetailsCacheResponse.data[oThis.videoId];
 
     if (CommonValidators.validateNonEmptyObject(videoDetail)) {
       return responseHelper.successWithData({});
-    } else {
-      const ReplyDetailsByEntityIdsAndEntityKindCacheRsp = await new ReplyDetailsByEntityIdsAndEntityKindCache({
-        entityIds: [oThis.videoId],
-        entityKind: replyDetailConstants.videoEntityKind
-      }).fetch();
+    }
+    const replyDetailsByEntityIdsAndEntityKindCacheRsp = await new ReplyDetailsByEntityIdsAndEntityKindCache({
+      entityIds: [oThis.videoId],
+      entityKind: replyDetailConstants.videoEntityKind
+    }).fetch();
 
-      if (ReplyDetailsByEntityIdsAndEntityKindCacheRsp.isFailure()) {
-        logger.error('Error while fetching reply detail data.');
+    if (replyDetailsByEntityIdsAndEntityKindCacheRsp.isFailure()) {
+      logger.error('Error while fetching reply detail data.');
 
-        return Promise.reject(ReplyDetailsByEntityIdsAndEntityKindCacheRsp);
-      }
+      return Promise.reject(replyDetailsByEntityIdsAndEntityKindCacheRsp);
+    }
 
-      let replyDetail = ReplyDetailsByEntityIdsAndEntityKindCacheRsp.data[oThis.videoId];
+    const replyDetail = replyDetailsByEntityIdsAndEntityKindCacheRsp.data[oThis.videoId];
 
-      oThis.replyDetailId = replyDetail.id;
+    oThis.replyDetailId = replyDetail.id;
 
-      if (!CommonValidators.validateNonEmptyObject(replyDetail)) {
-        return Promise.reject(
-          responseHelper.paramValidationError({
-            internal_error_identifier: 'a_s_ot_9',
-            api_error_identifier: 'invalid_api_params',
-            params_error_identifiers: ['invalid_video_id'],
-            debug_options: { replyDetail: replyDetail, videoDetail: videoDetail, replyDetailId: oThis.replyDetailId }
-          })
-        );
-      }
+    if (!CommonValidators.validateNonEmptyObject(replyDetail)) {
+      return Promise.reject(
+        responseHelper.paramValidationError({
+          internal_error_identifier: 'a_s_ot_9',
+          api_error_identifier: 'invalid_api_params',
+          params_error_identifiers: ['invalid_video_id'],
+          debug_options: { replyDetail: replyDetail, videoDetail: videoDetail, replyDetailId: oThis.replyDetailId }
+        })
+      );
     }
 
     return responseHelper.successWithData({});
@@ -368,7 +367,7 @@ class OstTransaction extends ServiceBase {
       return Promise.reject(replyDetailCacheResp);
     }
 
-    let replyDetail = replyDetailCacheResp.data[oThis.replyDetailId];
+    const replyDetail = replyDetailCacheResp.data[oThis.replyDetailId];
 
     if (!CommonValidators.validateNonEmptyObject(replyDetail)) {
       return Promise.reject(
