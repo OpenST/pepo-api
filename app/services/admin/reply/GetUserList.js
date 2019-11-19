@@ -4,11 +4,13 @@ const rootPrefix = '../../../..',
   UserModel = require(rootPrefix + '/app/models/mysql/User'),
   GetTokenService = require(rootPrefix + '/app/services/token/Get'),
   UserBlockedListCache = require(rootPrefix + '/lib/cacheManagement/single/UserBlockedList'),
+  ReplyDetailsByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/ReplyDetailsByIds'),
   ReplyDetailsByUserIdPaginationCache = require(rootPrefix +
     '/lib/cacheManagement/single/ReplyDetailsByUserIdPagination'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
-  paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination');
+  paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination'),
+  adminEntityType = require(rootPrefix + '/lib/globalConstant/adminEntityType');
 
 /**
  * Class for user reply list service.
@@ -81,6 +83,7 @@ class GetUserReplyList extends ServiceBase {
     oThis._addResponseMetaData();
 
     const promisesArray = [];
+    promisesArray.push(oThis._getReplyDetails());
     promisesArray.push(oThis._setTokenDetails());
     promisesArray.push(oThis._getVideos());
     await Promise.all(promisesArray);
@@ -198,6 +201,23 @@ class GetUserReplyList extends ServiceBase {
   }
 
   /**
+   * Get reply details.
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _getReplyDetails() {
+    const oThis = this,
+      replyDetailsResp = await new ReplyDetailsByIdsCache({ ids: oThis.replyDetailIds }).fetch();
+
+    if (replyDetailsResp.isFailure()) {
+      return Promise.reject(replyDetailsResp);
+    }
+
+    oThis.replyDetailsMap = replyDetailsResp.data;
+  }
+
+  /**
    * Fetch token details.
    *
    * @sets oThis.tokenDetails
@@ -267,21 +287,19 @@ class GetUserReplyList extends ServiceBase {
     const oThis = this;
 
     return responseHelper.successWithData({
-      [entityType.userVideoList]: oThis.videoDetails,
+      [adminEntityType.userVideoList]: oThis.videoDetails,
       usersByIdMap: oThis.usersVideosMap.usersByIdMap || {},
       userStat: oThis.usersVideosMap.userStat || {},
-      [entityType.userProfilesMap]: oThis.usersVideosMap.userProfilesMap || {},
-      tags: oThis.usersVideosMap.tags || {},
+      [adminEntityType.userProfilesMap]: oThis.usersVideosMap.userProfilesMap || {},
+      [adminEntityType.tagsMap]: oThis.usersVideosMap.tags || {},
       linkMap: oThis.usersVideosMap.linkMap || {},
       imageMap: oThis.usersVideosMap.imageMap || {},
       videoMap: oThis.usersVideosMap.videoMap || {},
-      [entityType.videoDetailsMap]: oThis.usersVideosMap.videoDetailsMap || {},
-      [entityType.videoDescriptionsMap]: oThis.usersVideosMap.videoDescriptionMap || {},
-      [entityType.currentUserUserContributionsMap]: oThis.usersVideosMap.currentUserUserContributionsMap || {},
-      [entityType.currentUserVideoContributionsMap]: oThis.usersVideosMap.currentUserVideoContributionsMap || {},
-      [entityType.userProfileAllowedActions]: oThis.usersVideosMap.userProfileAllowedActions || {},
-      tokenUsersByUserIdMap: oThis.usersVideosMap.tokenUsersByUserIdMap || {},
-      [entityType.pricePointsMap]: oThis.usersVideosMap.pricePointsMap || {},
+      [adminEntityType.videoDetailsMap]: oThis.usersVideosMap.videoDetailsMap || {},
+      [adminEntityType.videoDescriptionsMap]: oThis.usersVideosMap.videoDescriptionMap || {},
+      [adminEntityType.currentUserUserContributionsMap]: oThis.usersVideosMap.currentUserUserContributionsMap || {},
+      [adminEntityType.currentUserVideoContributionsMap]: oThis.usersVideosMap.currentUserVideoContributionsMap || {},
+      [adminEntityType.pricePointsMap]: oThis.usersVideosMap.pricePointsMap || {},
       tokenDetails: oThis.tokenDetails,
       meta: oThis.responseMetaData
     });

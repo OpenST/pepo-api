@@ -185,6 +185,24 @@ const adminSignature = {
       }
     ]
   },
+  [apiName.userReplyList]: {
+    mandatory: [
+      {
+        parameter: 'profile_user_id',
+        validatorMethods: ['validateNonZeroInteger']
+      },
+      {
+        parameter: 'is_admin',
+        validatorMethods: ['validateBoolean']
+      }
+    ],
+    optional: [
+      {
+        parameter: paginationConstants.paginationIdentifierKey,
+        validatorMethods: ['validateString', 'validatePaginationIdentifier']
+      }
+    ]
+  },
   [apiName.adminUserProfile]: {
     mandatory: [
       {
