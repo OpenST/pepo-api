@@ -189,6 +189,14 @@ router.post('/delete-video/:video_id', sanitizer.sanitizeDynamicUrlParams, funct
   Promise.resolve(routeHelper.perform(req, res, next, '/admin/DeleteVideo', 'r_a_v1_ad_6', null, null, null));
 });
 
+/* Delete reply video. */
+router.post('/delete-reply-video/:reply_details_id', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.adminDeleteReplyVideo;
+  req.decodedParams.reply_details_id = req.params.reply_details_id;
+
+  Promise.resolve(routeHelper.perform(req, res, next, '/admin/reply/Delete', 'r_a_v1_ad_drv_1', null, null, null));
+});
+
 /* Update video link. */
 router.post('/update-video/:video_id/link', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.adminUpdateVideoLink;

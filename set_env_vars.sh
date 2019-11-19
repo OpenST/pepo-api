@@ -140,6 +140,7 @@ export REPLICATION_FACTOR='3'
 export DEFAULT_REPLICATION_LEVEL='localOne'
 
 export PA_CDN_URL='https://dbvoeb7t6hffk.cloudfront.net'
+export PA_CDN_DISTRIBUTION_ID='E3BUFDKXA1T0E'
 export TWITTER_OAUTH_URL='https://api.twitter.com/oauth/authorize?oauth_token='
 
 # Pepo twitter handle
@@ -158,7 +159,7 @@ export PA_TOP_TAG_IDS='[1]'
 export PA_CURATED_FEED_IDS='[1000]'
 
 # Slack related constants.
-export PA_SLACK_OAUTH_TOKEN='xoxp-777224596644-779895340934-778717974948-a9c2624c28bc708be08cb2777474bcf1'
+export PA_SLACK_OAUTH_TOKEN='xoxp-246676767414-245599437185-838396824006-71fcc8c32cef66a568b2ea890fc14ae9'
 
 # Google constants
 # escape while creating the env variable and unescape while usage

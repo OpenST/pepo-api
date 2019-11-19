@@ -2,21 +2,32 @@ const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   OstEventModel = require(rootPrefix + '/app/models/mysql/OstEvent'),
-  // ProcessOstEventClass = require(rootPrefix + '/app/services/ostEvents/Process'),
   bgJob = require(rootPrefix + '/lib/rabbitMqEnqueue/bgJob'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   bgJobConstants = require(rootPrefix + '/lib/globalConstant/bgJob'),
-  ostEventConstant = require(rootPrefix + '/lib/globalConstant/ostEvent');
+  ostEventConstants = require(rootPrefix + '/lib/globalConstant/ostEvent');
 
+/**
+ * Class to create new ost event.
+ *
+ * @class OstEventCreate
+ */
 class OstEventCreate extends ServiceBase {
   /**
+   * Constructor to create new ost event.
+   *
    * @param {object} params
+   * @param {object} params.webhookParams
+   * @param {object} params.eventData
+   * @param {number} params.eventData.id
+   *
+   * @augments ServiceBase
    *
    * @constructor
    */
   constructor(params) {
-    super(params);
+    super();
 
     const oThis = this;
 
@@ -28,9 +39,9 @@ class OstEventCreate extends ServiceBase {
   }
 
   /**
-   * Perform - Validate Login Credentials.
+   * Async perform.
    *
-   * @return {Promise<void>}
+   * @returns {Promise<void>}
    * @private
    */
   async _asyncPerform() {
@@ -46,19 +57,21 @@ class OstEventCreate extends ServiceBase {
 
     await oThis._publishOstEvent();
 
-    return Promise.resolve(responseHelper.successWithData({}));
+    return responseHelper.successWithData({});
   }
 
   /**
    * Validate request.
    *
-   * @return {Promise<void>}
+   * @sets oThis.duplicateEvent
+   *
+   * @returns {Promise<void>}
    * @private
    */
   async _validateAndSanitizeParams() {
     const oThis = this;
 
-    logger.log('Validate for ost events');
+    logger.log('Validate for ost events.');
 
     if (!oThis.eventId || !CommonValidators.validateString(oThis.eventId)) {
       return Promise.reject(
@@ -69,32 +82,33 @@ class OstEventCreate extends ServiceBase {
       );
     }
 
-    let ostEventRes = await new OstEventModel().fetchByEventId(oThis.eventId);
+    const ostEventRes = await new OstEventModel().fetchByEventId(oThis.eventId);
 
     if (ostEventRes.id) {
       oThis.duplicateEvent = true;
     }
-
-    return Promise.resolve(responseHelper.successWithData({}));
   }
 
   /**
-   * Create entry in Ost Event Table.
+   * Create entry in ost event table.
    *
-   * @return {Promise<void>}
+   * @sets oThis.ostEventId
+   *
+   * @returns {Promise<void>}
    * @private
    */
   async _createEntryInOstEvent() {
     const oThis = this;
-    logger.log('Create entry in Ost Event');
 
-    let stringifiedEventData = JSON.stringify(oThis.eventData);
+    logger.log('Create entry in Ost Event.');
 
-    // Insert in database
-    let insertResponse = await new OstEventModel()
+    const stringifiedEventData = JSON.stringify(oThis.eventData);
+
+    // Insert in database.
+    const insertResponse = await new OstEventModel()
       .insert({
         event_id: oThis.eventId,
-        status: ostEventConstant.invertedStatuses[ostEventConstant.pendingStatus.toUpperCase()],
+        status: ostEventConstants.invertedStatuses[ostEventConstants.pendingStatus.toUpperCase()],
         event_data: stringifiedEventData
       })
       .fire();
@@ -106,14 +120,12 @@ class OstEventCreate extends ServiceBase {
     }
 
     oThis.ostEventId = insertResponse.insertId;
-
-    return Promise.resolve(responseHelper.successWithData({}));
   }
 
   /**
-   * Publish Ost Event ID.
+   * Publish ost event ID.
    *
-   * @return {Promise<void>}
+   * @returns {Promise<void>}
    * @private
    */
   async _publishOstEvent() {
@@ -126,10 +138,6 @@ class OstEventCreate extends ServiceBase {
     };
 
     await bgJob.enqueue(bgJobConstants.ostWebhookJobTopic, messagePayload);
-
-    //await new ProcessOstEventClass({ ostEventId: oThis.ostEventId }).perform();
-
-    return Promise.resolve(responseHelper.successWithData({}));
   }
 }
 

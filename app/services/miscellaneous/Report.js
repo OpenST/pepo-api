@@ -1,15 +1,18 @@
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
-  CommonValidator = require(rootPrefix + '/lib/validators/Common'),
+  CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   UserMultiCache = require(rootPrefix + '/lib/cacheManagement/multi/User'),
   VideoByIdCache = require(rootPrefix + '/lib/cacheManagement/multi/VideoByIds'),
   SendTransactionalMail = require(rootPrefix + '/lib/email/hookCreator/SendTransactionalMail'),
+  ReplyDetailsByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/ReplyDetailsByIds'),
   VideoDetailsByVideoIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/VideoDetailsByVideoIds'),
   basicHelper = require(rootPrefix + '/helpers/basic'),
   userConstants = require(rootPrefix + '/lib/globalConstant/user'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
+  logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   videoConstants = require(rootPrefix + '/lib/globalConstant/video'),
   emailConstants = require(rootPrefix + '/lib/globalConstant/email'),
+  replyDetailConstants = require(rootPrefix + '/lib/globalConstant/replyDetail'),
   reportEntityConstants = require(rootPrefix + '/lib/globalConstant/reportEntity'),
   emailServiceApiCallHookConstants = require(rootPrefix + '/lib/globalConstant/emailServiceApiCallHook');
 
@@ -48,7 +51,7 @@ class ReportForEntity extends ServiceBase {
   /**
    * Async perform.
    *
-   * @return {Promise<void>}
+   * @returns {Promise<void>}
    * @private
    */
   async _asyncPerform() {
@@ -74,12 +77,24 @@ class ReportForEntity extends ServiceBase {
 
     switch (oThis.reportEntityKind) {
       case reportEntityConstants.videoReportEntityKind: {
-        const promiseArray = [];
-
-        promiseArray.push(oThis._fetchVideo());
-        promiseArray.push(oThis._fetchVideoCreator());
-
+        const promiseArray = [oThis._fetchVideo(), oThis._fetchVideoCreator()];
         await Promise.all(promiseArray);
+
+        oThis.templateVars = {
+          report_entity_kind: oThis.reportEntityKind,
+          report_entity_id: oThis.reportEntityId,
+          reporter_user_name: oThis.currentUser.name,
+          reporter_user_id: oThis.currentUser.id,
+          reportee_user_name: oThis.reportedUserObj.name,
+          reportee_user_id: oThis.reportedUserObj.id,
+          video_url: encodeURIComponent(oThis.videoUrl),
+          user_admin_url_prefix: basicHelper.userProfilePrefixUrl()
+        };
+
+        break;
+      }
+      case reportEntityConstants.replyReportEntityKind: {
+        await oThis._fetchReply();
 
         oThis.templateVars = {
           report_entity_kind: oThis.reportEntityKind,
@@ -133,7 +148,7 @@ class ReportForEntity extends ServiceBase {
     }
 
     if (
-      !CommonValidator.validateNonEmptyObject(cacheRsp.data[oThis.reportEntityId]) ||
+      !CommonValidators.validateNonEmptyObject(cacheRsp.data[oThis.reportEntityId]) ||
       cacheRsp.data[oThis.reportEntityId].status === videoConstants.deletedStatus
     ) {
       return Promise.reject(
@@ -160,16 +175,80 @@ class ReportForEntity extends ServiceBase {
     const oThis = this;
 
     const videoDetailsCacheRsp = await new VideoDetailsByVideoIdsCache({ videoIds: [oThis.reportEntityId] }).fetch();
-
     if (videoDetailsCacheRsp.isFailure()) {
       return Promise.reject(videoDetailsCacheRsp);
     }
 
-    const videoDetails = videoDetailsCacheRsp.data[oThis.reportEntityId];
+    if (!CommonValidators.validateNonEmptyObject(videoDetailsCacheRsp.data[oThis.reportEntityId])) {
+      return Promise.reject(
+        responseHelper.error({
+          internal_error_identifier: 'a_s_m_rp_2',
+          api_error_identifier: 'entity_not_found',
+          debug_options: { videoId: oThis.reportEntityId }
+        })
+      );
+    }
 
-    const creatorUserId = videoDetails.creatorUserId;
+    const creatorUserId = videoDetailsCacheRsp.data[oThis.reportEntityId].creatorUserId;
     // Fetch user name for creator.
     oThis.reportedUserObj = await oThis._fetchUserFor(creatorUserId);
+  }
+
+  /**
+   * Fetch reply.
+   *
+   * @sets oThis.reportedUserObj, oThis.videoUrl
+   *
+   * @returns {Promise<never>}
+   * @private
+   */
+  async _fetchReply() {
+    const oThis = this;
+
+    const replyDetailCacheResp = await new ReplyDetailsByIdsCache({ ids: [oThis.reportEntityId] }).fetch();
+    if (replyDetailCacheResp.isFailure()) {
+      logger.error('Error while fetching reply detail data.');
+
+      return Promise.reject(replyDetailCacheResp);
+    }
+
+    const replyDetail = replyDetailCacheResp.data[oThis.reportEntityId];
+
+    if (
+      !CommonValidators.validateNonEmptyObject(replyDetail) ||
+      replyDetail.status === replyDetailConstants.deletedStatus
+    ) {
+      return Promise.reject(
+        responseHelper.error({
+          internal_error_identifier: 'a_s_m_rp_3',
+          api_error_identifier: 'entity_not_found',
+          debug_options: { replyDetailId: oThis.reportEntityId }
+        })
+      );
+    }
+
+    oThis.reportedUserObj = await oThis._fetchUserFor(replyDetail.creatorUserId);
+
+    const videoId = replyDetail.entityId;
+    const cacheRsp = await new VideoByIdCache({ ids: [videoId] }).fetch();
+    if (cacheRsp.isFailure()) {
+      return Promise.reject(cacheRsp);
+    }
+
+    if (
+      !CommonValidators.validateNonEmptyObject(cacheRsp.data[videoId]) ||
+      cacheRsp.data[videoId].status === videoConstants.deletedStatus
+    ) {
+      return Promise.reject(
+        responseHelper.error({
+          internal_error_identifier: 'a_s_m_rp_4',
+          api_error_identifier: 'entity_not_found',
+          debug_options: { videoId: videoId }
+        })
+      );
+    }
+
+    oThis.videoUrl = cacheRsp.data[videoId].resolutions.original.url;
   }
 
   /**
@@ -182,19 +261,18 @@ class ReportForEntity extends ServiceBase {
     const oThis = this;
 
     const userMultiCacheRsp = await new UserMultiCache({ ids: [userId] }).fetch();
-
     if (userMultiCacheRsp.isFailure() || !userMultiCacheRsp.data) {
       return Promise.reject(userMultiCacheRsp);
     }
 
     // If user is not active, no point in reporting.
     if (
-      !CommonValidator.validateNonEmptyObject(userMultiCacheRsp.data[userId]) ||
+      !CommonValidators.validateNonEmptyObject(userMultiCacheRsp.data[userId]) ||
       userMultiCacheRsp.data[userId].status === userConstants.inActiveStatus
     ) {
       return Promise.reject(
         responseHelper.error({
-          internal_error_identifier: 'a_s_m_rp_2',
+          internal_error_identifier: 'a_s_m_rp_5',
           api_error_identifier: 'entity_not_found',
           debug_options: {
             userId: userId
@@ -205,13 +283,13 @@ class ReportForEntity extends ServiceBase {
 
     // If current user is trying to report himself/herself, error out.
     if (
-      CommonValidator.validateNonEmptyObject(oThis.currentUser) &&
+      CommonValidators.validateNonEmptyObject(oThis.currentUser) &&
       userMultiCacheRsp.data[userId].id === oThis.currentUser.id
     ) {
       return Promise.reject(
         responseHelper.error({
-          internal_error_identifier: 'a_s_m_rp_3',
-          api_error_identifier: 'resource_not_found',
+          internal_error_identifier: 'a_s_m_rp_6',
+          api_error_identifier: 'something_went_wrong',
           debug_options: {}
         })
       );

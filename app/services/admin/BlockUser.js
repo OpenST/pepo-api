@@ -245,6 +245,12 @@ class BlockUser extends ServiceBase {
           currentAdminId: oThis.currentAdminId
         })
       );
+      promisesArray.push(
+        bgJob.enqueue(bgJobConstants.deleteUserRepliesJobTopic, {
+          userId: oThis.userIds[index],
+          currentAdminId: oThis.currentAdminId
+        })
+      );
     }
 
     await Promise.all(promisesArray);

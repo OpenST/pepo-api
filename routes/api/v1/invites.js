@@ -28,10 +28,10 @@ router.get('/', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
     serviceResponse.data = wrapperFormatterRsp.data;
   };
 
-  Promise.resolve(routeHelper.perform(req, res, next, '/invite/InvitedUsers', 'r_a_v1_u_16', null, dataFormatterFunc));
+  Promise.resolve(routeHelper.perform(req, res, next, '/invite/InvitedUsers', 'r_a_v1_i_1', null, dataFormatterFunc));
 });
 
-/* Get Invite Code*/
+/* Get invite code. */
 router.get('/code', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.getInviteCode;
 
@@ -48,7 +48,7 @@ router.get('/code', sanitizer.sanitizeDynamicUrlParams, function(req, res, next)
     serviceResponse.data = wrapperFormatterRsp.data;
   };
 
-  Promise.resolve(routeHelper.perform(req, res, next, '/invite/GetCode', 'r_a_v1_u_18', null, dataFormatterFunc));
+  Promise.resolve(routeHelper.perform(req, res, next, '/invite/GetCode', 'r_a_v1_i_2', null, dataFormatterFunc));
 });
 
 module.exports = router;

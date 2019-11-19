@@ -24,7 +24,8 @@ const rootPrefix = '../../..',
   reportIssueRoutes = require(rootPrefix + '/routes/api/v1/reportIssue'),
   reportRoutes = require(rootPrefix + '/routes/api/v1/report'),
   pepocornTopUpRoutes = require(rootPrefix + '/routes/api/v1/pepocornTopUps'),
-  ostTransactionRoutes = require(rootPrefix + '/routes/api/v1/ostTransactions');
+  ostTransactionRoutes = require(rootPrefix + '/routes/api/v1/ostTransactions'),
+  replyRoutes = require(rootPrefix + '/routes/api/v1/replies');
 
 // Node.js cookie parsing middleware.
 router.use(cookieParser(coreConstant.COOKIE_SECRET));
@@ -56,5 +57,6 @@ router.use('/notifications', notificationsRoutes);
 router.use('/top-up', topupRoutes);
 router.use('/twitter', twitterRoutes);
 router.use('/pepocorn-topups', pepocornTopUpRoutes);
+router.use('/replies', replyRoutes);
 
 module.exports = router;

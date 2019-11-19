@@ -2,28 +2,18 @@ const bigNumber = require('bignumber.js');
 
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
-  GetProfile = require(rootPrefix + '/lib/user/profile/Get'),
+  GetUsersVideos = require(rootPrefix + '/lib/GetUsersVideoList'),
   UserModel = require(rootPrefix + '/app/models/mysql/User'),
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   VideoDetailModel = require(rootPrefix + '/app/models/mysql/VideoDetail'),
-  UrlByIdCache = require(rootPrefix + '/lib/cacheManagement/multi/UrlsByIds'),
-  ImageByIdCache = require(rootPrefix + '/lib/cacheManagement/multi/ImageByIds'),
-  VideoByIdCache = require(rootPrefix + '/lib/cacheManagement/multi/VideoByIds'),
   SecureTokenCache = require(rootPrefix + '/lib/cacheManagement/single/SecureToken'),
-  PricePointsCache = require(rootPrefix + '/lib/cacheManagement/single/PricePoints'),
-  TwitterUserByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TwitterUserByIds'),
-  UserStatByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/UserStatByUserIds'),
   InviteCodeByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/InviteCodeByUserIds'),
-  TwitterUserByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TwitterUserByUserIds'),
-  TokenUserDetailByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TokenUserByUserIds'),
   LifetimePurchaseByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/LifetimePurchaseByUserIds'),
-  UserProfileElementsByUserIdCache = require(rootPrefix + '/lib/cacheManagement/multi/UserProfileElementsByUserIds'),
   basicHelper = require(rootPrefix + '/helpers/basic'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   adminEntityType = require(rootPrefix + '/lib/globalConstant/adminEntityType'),
   paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination'),
-  userConstants = require(rootPrefix + '/lib/globalConstant/user'),
-  userProfileElementConstants = require(rootPrefix + '/lib/globalConstant/userProfileElement');
+  userConstants = require(rootPrefix + '/lib/globalConstant/user');
 
 /**
  * Class for user details by search for admin.
@@ -58,26 +48,17 @@ class UserSearch extends ServiceBase {
     oThis.limit = oThis._defaultPageLimit();
 
     oThis.userIds = [];
-    oThis.imageIds = [];
     oThis.videoIds = [];
     oThis.userDetails = {};
-    oThis.imageDetails = {};
-    oThis.videos = {};
-    oThis.links = {};
-    oThis.allLinkIds = [];
     oThis.userToProfileElementMap = {};
-    oThis.tokenUsersByUserIdMap = {};
-    oThis.userStatsMap = {};
     oThis.tokenDetails = {};
     oThis.searchResults = [];
-    oThis.videoDescriptionMap = {};
-    oThis.videoDetailsMap = {};
     oThis.paginationTimestamp = null;
     oThis.nextPaginationTimestamp = null;
-    oThis.twitterUserByUserIdMap = {};
     oThis.pricePoints = {};
     oThis.userPepoCoinsMap = {};
     oThis.lifetimePurchasesMap = {};
+    oThis.usersVideosResponse = {};
   }
 
   /**
@@ -94,30 +75,23 @@ class UserSearch extends ServiceBase {
     await oThis._fetchUserIds();
 
     if (oThis.userIds.length > 0) {
-      await oThis._fetchTokenUsers();
-
       oThis._prepareSearchResults();
 
       await oThis._fetchLatestVideos();
 
-      await oThis._fetchProfileElements();
-
-      await oThis._getProfileInfo();
+      await oThis._fetchUserVideos();
 
       const promisesArray = [];
       promisesArray.push(
-        oThis._fetchVideos(),
-        oThis._fetchLink(),
-        oThis._fetchUserStats(),
-        oThis._fetchTwitterUser(),
         oThis._fetchPricePointsForStakeCurrency(),
-        oThis._fetchLifetimePurchases()
+        oThis._fetchLifetimePurchases(),
+        oThis._fetchInviterCodeDetails()
       );
       await Promise.all(promisesArray);
     }
 
     const promisesArray2 = [];
-    promisesArray2.push(oThis._prepareUserPepoStatsAndCoinsMap(), oThis._fetchImages());
+    promisesArray2.push(oThis._prepareUserPepoStatsAndCoinsMap());
     await Promise.all(promisesArray2);
 
     oThis._addResponseMetaData();
@@ -209,30 +183,6 @@ class UserSearch extends ServiceBase {
   }
 
   /**
-   * Fetch token users
-   *
-   * @sets oThis.tokenUsersByUserIdMap
-   *
-   * @return {Promise<void>}
-   * @private
-   */
-  async _fetchTokenUsers() {
-    const oThis = this;
-
-    if (oThis.userIds.length === 0) {
-      return responseHelper.successWithData({});
-    }
-
-    const tokenUserRes = await new TokenUserDetailByUserIdsCache({ userIds: oThis.userIds }).fetch();
-
-    if (tokenUserRes.isFailure()) {
-      return Promise.reject(tokenUserRes);
-    }
-
-    oThis.tokenUsersByUserIdMap = tokenUserRes.data;
-  }
-
-  /**
    * Prepare search results.
    *
    * @sets oThis.searchResults, oThis.nextPaginationTimestamp
@@ -251,10 +201,6 @@ class UserSearch extends ServiceBase {
         updatedAt: userDetail.updatedAt,
         userId: userId
       });
-
-      if (userDetail.profileImageId) {
-        oThis.imageIds.push(userDetail.profileImageId);
-      }
 
       oThis.nextPaginationTimestamp = userDetail.createdAt;
     }
@@ -292,153 +238,6 @@ class UserSearch extends ServiceBase {
   }
 
   /**
-   * Fetch profile elements.
-   *
-   * @sets oThis.userToProfileElementMap
-   *
-   * @return {Promise<void>}
-   * @private
-   */
-  async _fetchProfileElements() {
-    const oThis = this;
-
-    if (oThis.userIds.length === 0) {
-      return responseHelper.successWithData({});
-    }
-
-    const cacheRsp = await new UserProfileElementsByUserIdCache({ usersIds: oThis.userIds }).fetch();
-    if (cacheRsp.isFailure()) {
-      return Promise.reject(cacheRsp);
-    }
-    const profileElementsData = cacheRsp.data;
-
-    for (const userId in profileElementsData) {
-      const profileElements = profileElementsData[userId];
-
-      for (const kind in profileElements) {
-        oThis._fetchElementData(userId, kind, profileElements[kind].data);
-      }
-    }
-
-    for (let ind = 0; ind < oThis.searchResults.length; ind++) {
-      const userId = oThis.searchResults[ind].userId;
-      oThis.searchResults[ind].videoId = oThis.userToProfileElementMap[userId].videoId
-        ? oThis.userToProfileElementMap[userId].videoId
-        : null;
-      oThis.searchResults[ind].linkId = oThis.userToProfileElementMap[userId].linkId
-        ? oThis.userToProfileElementMap[userId].linkId
-        : null;
-    }
-  }
-
-  /**
-   * Fetch element data.
-   *
-   * @param {number} userId
-   * @param {string} kind
-   * @param {object} data
-   *
-   * @sets oThis.allLinkIds, oThis.userToProfileElementMap
-   *
-   * @private
-   */
-  _fetchElementData(userId, kind, data) {
-    const oThis = this;
-
-    switch (kind) {
-      case userProfileElementConstants.linkIdKind: {
-        oThis.allLinkIds.push(data);
-        oThis.userToProfileElementMap[userId].linkId = data;
-        break;
-      }
-
-      default: {
-        // Do nothing.
-      }
-    }
-  }
-
-  /**
-   * Fetch videos.
-   *
-   * @sets oThis.imageIds, oThis.videos
-   *
-   * @return {Promise<never>}
-   * @private
-   */
-  async _fetchVideos() {
-    const oThis = this;
-
-    if (oThis.videoIds.length === 0) {
-      return responseHelper.successWithData({});
-    }
-
-    const cacheRsp = await new VideoByIdCache({ ids: oThis.videoIds }).fetch();
-    if (cacheRsp.isFailure()) {
-      return Promise.reject(cacheRsp);
-    }
-
-    for (const videoId in cacheRsp.data) {
-      const video = cacheRsp.data[videoId],
-        posterImageId = video.posterImageId;
-
-      if (posterImageId) {
-        oThis.imageIds.push(posterImageId);
-      }
-    }
-
-    oThis.videos = cacheRsp.data;
-  }
-
-  /**
-   * Fetch link.
-   *
-   * @sets oThis.links
-   *
-   * @return {Promise<never>}
-   * @private
-   */
-  async _fetchLink() {
-    const oThis = this;
-
-    if (oThis.allLinkIds.length === 0) {
-      return responseHelper.successWithData({});
-    }
-
-    const cacheRsp = await new UrlByIdCache({ ids: oThis.allLinkIds }).fetch();
-    if (cacheRsp.isFailure()) {
-      return Promise.reject(cacheRsp);
-    }
-
-    oThis.links = cacheRsp.data;
-  }
-
-  /**
-   * Fetch user stats.
-   *
-   * @sets oThis.userStatsMap
-   *
-   * @returns {Promise<never>}
-   * @private
-   */
-  async _fetchUserStats() {
-    const oThis = this;
-
-    if (oThis.userIds.length === 0) {
-      return responseHelper.successWithData({});
-    }
-
-    const cacheRsp = await new UserStatByUserIdsCache({ userIds: oThis.userIds }).fetch();
-    if (cacheRsp.isFailure()) {
-      return Promise.reject(cacheRsp);
-    }
-
-    oThis.userStatsMap = cacheRsp.data;
-
-    await oThis._fetchInviterCodeDetails();
-  }
-
-  /**
    * Fetch referral count from invite codes
    *
    *
@@ -466,52 +265,6 @@ class UserSearch extends ServiceBase {
   }
 
   /**
-   * Fetch twitter user.
-   *
-   * @return {Promise<result>}
-   * @private
-   */
-  async _fetchTwitterUser() {
-    const oThis = this;
-
-    const twitterUserByUserIdsCacheResponse = await new TwitterUserByUserIdsCache({
-      userIds: oThis.userIds
-    }).fetch();
-
-    if (twitterUserByUserIdsCacheResponse.isFailure()) {
-      return Promise.reject(twitterUserByUserIdsCacheResponse);
-    }
-
-    const twitterUserByUserIds = twitterUserByUserIdsCacheResponse.data;
-
-    const twitterUserIds = [];
-
-    for (let index = 0; index < oThis.userIds.length; index++) {
-      const twitterUserObj = twitterUserByUserIds[oThis.userIds[index]];
-      twitterUserIds.push(twitterUserObj.id);
-    }
-
-    const twitterUserByIdsCacheResp = await new TwitterUserByIdsCache({
-      ids: twitterUserIds
-    }).fetch();
-
-    if (twitterUserByIdsCacheResp.isFailure()) {
-      return Promise.reject(twitterUserByIdsCacheResp);
-    }
-
-    const twitterUserByIds = twitterUserByIdsCacheResp.data;
-
-    for (const id in twitterUserByIds) {
-      const twitterUserObj = twitterUserByIds[id];
-      const userId = twitterUserObj.userId;
-
-      oThis.twitterUserByUserIdMap[userId] = twitterUserObj;
-    }
-
-    return responseHelper.successWithData({});
-  }
-
-  /**
    * Fetch price points for given stake currency.
    *
    * @sets oThis.tokenDetails, oThis.pricePoints
@@ -522,11 +275,7 @@ class UserSearch extends ServiceBase {
   async _fetchPricePointsForStakeCurrency() {
     const oThis = this;
 
-    const promisesArray = [];
-    promisesArray.push(new SecureTokenCache({}).fetch(), new PricePointsCache({}).fetch());
-    const promisesResponse = await Promise.all(promisesArray);
-
-    const tokenDetailsResponse = promisesResponse[0];
+    const tokenDetailsResponse = await new SecureTokenCache({}).fetch();
     if (tokenDetailsResponse.isFailure()) {
       return Promise.reject(tokenDetailsResponse);
     }
@@ -534,12 +283,7 @@ class UserSearch extends ServiceBase {
     oThis.tokenDetails = tokenDetailsResponse.data;
     const stakeCurrency = oThis.tokenDetails.stakeCurrency;
 
-    const pricePointsCacheRsp = promisesResponse[1];
-    if (pricePointsCacheRsp.isFailure()) {
-      return Promise.reject(pricePointsCacheRsp);
-    }
-
-    oThis.pricePoints = oThis.profileResponse.pricePointsMap[stakeCurrency];
+    oThis.pricePoints = oThis.usersVideosResponse.pricePointsMap[stakeCurrency];
   }
 
   /**
@@ -580,7 +324,7 @@ class UserSearch extends ServiceBase {
     for (let index = 0; index < oThis.userIds.length; index++) {
       const userId = oThis.userIds[index];
 
-      const userStat = oThis.userStatsMap[userId];
+      const userStat = oThis.usersVideosResponse.userStat[userId];
 
       const userReceivedAmountInBigNumber = basicHelper.convertWeiToNormal(userStat.totalAmountRaised || '0');
 
@@ -596,50 +340,35 @@ class UserSearch extends ServiceBase {
   }
 
   /**
-   * Fetch profile info.
+   * user videos and profile details
    *
-   * @sets oThis.profileResponse
+   * @sets oThis.usersVideosResponse
    *
    * @returns {Promise<void>}
    * @private
    */
-  async _getProfileInfo() {
+  async _fetchUserVideos() {
     const oThis = this;
 
-    const getProfileObj = new GetProfile({
-      userIds: oThis.userIds,
+    const getUserVideosObj = new GetUsersVideos({
+      creatorUserIds: oThis.userIds,
+      currentUserId: 0,
       videoIds: oThis.videoIds,
       isAdmin: true
     });
 
-    const response = await getProfileObj.perform();
+    const response = await getUserVideosObj.perform();
     if (response.isFailure()) {
       return Promise.reject(response);
     }
 
-    oThis.profileResponse = response.data;
-    oThis.videoDescriptionMap = oThis.profileResponse.videoDescriptionMap;
-    oThis.videoDetailsMap = oThis.profileResponse.videoDetailsMap;
-  }
-
-  /**
-   * Fetch images.
-   *
-   * @sets oThis.imageDetails
-   *
-   * @returns {Promise<void>}
-   * @private
-   */
-  async _fetchImages() {
-    const oThis = this;
-
-    if (oThis.imageIds.length === 0) {
-      return responseHelper.successWithData({});
+    oThis.usersVideosResponse = response.data;
+    for (let ind = 0; ind < oThis.searchResults.length; ind++) {
+      const userId = oThis.searchResults[ind].userId,
+        userProfile = oThis.usersVideosResponse.userProfilesMap[userId];
+      oThis.searchResults[ind].linkId = userProfile.linkIds.length > 0 ? userProfile.linkIds[0] : null;
+      oThis.searchResults[ind].videoId = oThis.userToProfileElementMap[userId].videoId || null;
     }
-
-    const imageData = await new ImageByIdCache({ ids: oThis.imageIds }).fetch();
-
-    oThis.imageDetails = imageData.data;
   }
 
   /**
@@ -678,15 +407,15 @@ class UserSearch extends ServiceBase {
     const response = {
       [adminEntityType.userSearchList]: oThis.searchResults,
       usersByIdMap: oThis.userDetails,
-      tokenUsersByUserIdMap: oThis.tokenUsersByUserIdMap,
-      videoMap: oThis.videos,
-      imageMap: oThis.imageDetails,
-      linkMap: oThis.links,
-      videoDescriptionsMap: oThis.videoDescriptionMap,
-      videoDetailsMap: oThis.videoDetailsMap,
-      adminTwitterUsersMap: oThis.twitterUserByUserIdMap,
+      tokenUsersByUserIdMap: oThis.usersVideosResponse.tokenUsersByUserIdMap,
+      videoMap: oThis.usersVideosResponse.videoMap,
+      imageMap: oThis.usersVideosResponse.imageMap,
+      linkMap: oThis.usersVideosResponse.linkMap,
+      videoDescriptionsMap: oThis.usersVideosResponse.videoDescriptionMap,
+      videoDetailsMap: oThis.usersVideosResponse.videoDetailsMap,
+      adminTwitterUsersMap: oThis.usersVideosResponse.twitterUsersMap,
       tokenDetails: oThis.tokenDetails,
-      userStat: oThis.userStatsMap,
+      userStat: oThis.usersVideosResponse.userStat,
       inviteCodesMap: oThis.inviteCodes,
       userPepoCoinsMap: oThis.userPepoCoinsMap,
       meta: oThis.responseMetaData

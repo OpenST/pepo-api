@@ -3,29 +3,38 @@ const uuidV4 = require('uuid/v4');
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   UserModel = require(rootPrefix + '/app/models/mysql/User'),
+  CommonValidators = require(rootPrefix + '/lib/validators/Common'),
+  UserMultiCache = require(rootPrefix + '/lib/cacheManagement/multi/User'),
   TextsByIdCache = require(rootPrefix + '/lib/cacheManagement/multi/TextsByIds'),
   VideoByIdCache = require(rootPrefix + '/lib/cacheManagement/multi/VideoByIds'),
-  UserMultiCache = require(rootPrefix + '/lib/cacheManagement/multi/User'),
-  VideoDetailsByVideoIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/VideoDetailsByVideoIds'),
-  TwitterUserByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TwitterUserByUserIds'),
   TwitterUserByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TwitterUserByIds'),
-  videoDetailsConstants = require(rootPrefix + '/lib/globalConstant/videoDetail'),
+  TwitterUserByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TwitterUserByUserIds'),
+  VideoDetailsByVideoIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/VideoDetailsByVideoIds'),
+  coreConstants = require(rootPrefix + '/config/coreConstants'),
+  gotoConstants = require(rootPrefix + '/lib/globalConstant/goto'),
+  responseHelper = require(rootPrefix + '/lib/formatter/response'),
   userConstants = require(rootPrefix + '/lib/globalConstant/user'),
   videoConstants = require(rootPrefix + '/lib/globalConstant/video'),
+  entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
   shareEntityConstants = require(rootPrefix + '/lib/globalConstant/shareEntity'),
-  gotoConstants = require(rootPrefix + '/lib/globalConstant/goto'),
-  coreConstants = require(rootPrefix + '/config/coreConstants'),
-  responseHelper = require(rootPrefix + '/lib/formatter/response'),
-  commonValidator = require(rootPrefix + '/lib/validators/Common'),
-  entityType = require(rootPrefix + '/lib/globalConstant/entityType');
+  videoDetailsConstants = require(rootPrefix + '/lib/globalConstant/videoDetail');
 
-const urlDomain = coreConstants.PA_DOMAIN;
-
+/**
+ * Class to share video details.
+ *
+ * @class ShareDetails
+ */
 class ShareDetails extends ServiceBase {
   /**
-   * @constructor
+   * Constructor to share video details.
    *
-   * @param params
+   * @param {object} params
+   * @param {number} params.video_id
+   * @param {object} params.current_user
+   *
+   * @augments ServiceBase
+   *
+   * @constructor
    */
   constructor(params) {
     super();
@@ -36,7 +45,6 @@ class ShareDetails extends ServiceBase {
     oThis.currentUser = params.current_user;
 
     oThis.isSelfVideoShare = false;
-    oThis.messageObject = null;
     oThis.creatorName = null;
     oThis.twitterHandle = null;
     oThis.videoDescriptionText = null;
@@ -45,7 +53,7 @@ class ShareDetails extends ServiceBase {
   /**
    * Async perform.
    *
-   * @return {Promise<void>}
+   * @returns {Promise<void>}
    * @private
    */
   async _asyncPerform() {
@@ -54,14 +62,6 @@ class ShareDetails extends ServiceBase {
     await oThis._fetchVideo();
 
     await oThis._fetchCreatorUserName();
-
-    oThis.messageObject = shareEntityConstants.getVideoShareEntity({
-      creatorName: oThis.creatorName,
-      url: oThis._generateVideoShareUrl(),
-      videoDescription: oThis.videoDescriptionText,
-      handle: oThis.twitterHandle,
-      isSelfVideoShare: oThis.isSelfVideoShare
-    });
 
     return responseHelper.successWithData(oThis._prepareResponse());
   }
@@ -76,13 +76,12 @@ class ShareDetails extends ServiceBase {
     const oThis = this;
 
     const cacheRsp = await new VideoByIdCache({ ids: [oThis.videoId] }).fetch();
-
     if (cacheRsp.isFailure()) {
       return Promise.reject(cacheRsp);
     }
 
     if (
-      !commonValidator.validateNonEmptyObject(cacheRsp.data[oThis.videoId]) ||
+      !CommonValidators.validateNonEmptyObject(cacheRsp.data[oThis.videoId]) ||
       cacheRsp.data[oThis.videoId].status === videoConstants.deletedStatus
     ) {
       return Promise.reject(
@@ -98,9 +97,9 @@ class ShareDetails extends ServiceBase {
   /**
    * Fetch video creator user name.
    *
-   * @returns {Promise<never>}
+   * @sets oThis.videoDescriptionText, oThis.isSelfVideoShare, oThis.creatorName
    *
-   * @sets oThis.creatorName
+   * @returns {Promise<*>}
    * @private
    */
   async _fetchCreatorUserName() {
@@ -112,16 +111,15 @@ class ShareDetails extends ServiceBase {
       return Promise.reject(videoDetailsCacheRsp);
     }
 
-    let videoDetails = videoDetailsCacheRsp.data[oThis.videoId];
+    const videoDetails = videoDetailsCacheRsp.data[oThis.videoId];
 
     if (videoDetails.descriptionId) {
       const textCacheResp = await new TextsByIdCache({ ids: [videoDetails.descriptionId] }).fetch();
-
       if (textCacheResp.isFailure()) {
         return Promise.reject(textCacheResp);
       }
 
-      let videoDescription = textCacheResp.data[videoDetails.descriptionId];
+      const videoDescription = textCacheResp.data[videoDetails.descriptionId];
 
       if (videoDescription && videoDescription.text) {
         oThis.videoDescriptionText = videoDescription.text;
@@ -138,11 +136,11 @@ class ShareDetails extends ServiceBase {
       );
     }
 
-    let creatorUserId = videoDetails.creatorUserId;
+    const creatorUserId = videoDetails.creatorUserId;
 
     let userObj = {};
 
-    // Video is of current user, so no need for query
+    // Video is of current user, so no need for query.
     if (oThis.currentUser && creatorUserId === oThis.currentUser.id) {
       userObj = oThis.currentUser;
       oThis.isSelfVideoShare = true;
@@ -175,7 +173,9 @@ class ShareDetails extends ServiceBase {
   /**
    * Fetch twitter handle.
    *
-   * @returns {Promise<never>}
+   * @sets oThis.twitterHandle
+   *
+   * @returns {Promise<*>}
    * @private
    */
   async _fetchTwitterHandle(userId) {
@@ -208,11 +208,19 @@ class ShareDetails extends ServiceBase {
   /**
    * Prepare final response.
    *
-   * @returns {Promise<*|result>}
+   * @returns {{}}
    * @private
    */
   _prepareResponse() {
     const oThis = this;
+
+    const messageObject = shareEntityConstants.getVideoShareEntity({
+      creatorName: oThis.creatorName,
+      url: oThis._generateVideoShareUrl(),
+      videoDescription: oThis.videoDescriptionText,
+      handle: oThis.twitterHandle,
+      isSelfVideoShare: oThis.isSelfVideoShare
+    });
 
     return {
       [entityType.share]: Object.assign(
@@ -221,7 +229,7 @@ class ShareDetails extends ServiceBase {
           kind: shareEntityConstants.videoShareKind,
           uts: Math.round(new Date() / 1000)
         },
-        oThis.messageObject
+        messageObject
       )
     };
   }
@@ -235,7 +243,7 @@ class ShareDetails extends ServiceBase {
   _generateVideoShareUrl() {
     const oThis = this;
 
-    return urlDomain + '/' + gotoConstants.videoGotoKind + '/' + oThis.videoId;
+    return coreConstants.PA_DOMAIN + '/' + gotoConstants.videoGotoKind + '/' + oThis.videoId;
   }
 }
 

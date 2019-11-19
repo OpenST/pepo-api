@@ -657,7 +657,7 @@ class BasicHelper {
   }
 
   /**
-   * subtract arr2 from arr1
+   * Subtract arr2 from arr1
    * @param arr1
    * @param arr2
    * @returns {Array}
@@ -666,15 +666,15 @@ class BasicHelper {
     const diffArray = [],
       arrMap = {};
 
-    for (let i = 0; i < arr1.length; i++) {
-      arrMap[arr1[i]] = 1;
+    for (let index = 0; index < arr1.length; index++) {
+      arrMap[arr1[index]] = 1;
     }
 
-    for (let i = 0; i < arr2.length; i++) {
-      delete arrMap[arr2[i]];
+    for (let index = 0; index < arr2.length; index++) {
+      delete arrMap[arr2[index]];
     }
 
-    for (let arrEle in arrMap) {
+    for (const arrEle in arrMap) {
       diffArray.push(arrEle);
     }
 
@@ -682,16 +682,36 @@ class BasicHelper {
   }
 
   /**
-   * Filter search term
+   * Filter search term.
    *
-   * @param searchTerm
+   * @param {string} searchTerm
+   *
    * @returns {string|*}
    */
   filterSearchTerm(searchTerm) {
-    if (searchTerm && (searchTerm[0] == '#' || searchTerm[0] == '@')) {
+    if (searchTerm && (searchTerm[0] === '#' || searchTerm[0] === '@')) {
       return searchTerm.substr(1);
     }
+
     return searchTerm;
+  }
+
+  /**
+   * This function converts given numbers to bignumber and adds them.
+   *
+   * @param {string/number} number1
+   * @param {string/number} number2
+   *
+   * @returns {string}
+   * @private
+   */
+  convertToBigNumberAndAdd(number1, number2) {
+    const oThis = this;
+
+    return oThis
+      .convertToBigNumber(number1)
+      .plus(oThis.convertToBigNumber(number2))
+      .toString(10);
   }
 }
 
