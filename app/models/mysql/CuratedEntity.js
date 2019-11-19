@@ -28,20 +28,6 @@ class CuratedEntity extends ModelBase {
   }
 
   /**
-   * Flush cache.
-   *
-   * @param {object} params
-   * @param {object} params.entityKind
-   *
-   * @returns {Promise<void>}
-   */
-  static async flushCache(params) {
-    const CacheKlass = require(rootPrefix + '/klass.js');
-
-    await new CacheKlass({ entityKind: params.entityKind }).clear();
-  }
-
-  /**
    * Format Db data.
    *
    * @param {object} dbRow
@@ -88,6 +74,20 @@ class CuratedEntity extends ModelBase {
     await oThis.delete({ entity_kind: entityKindInt }).fire();
 
     await CuratedEntity.flushCache({ entityKind: entityKind });
+  }
+
+  /**
+   * Flush cache.
+   *
+   * @param {object} params
+   * @param {object} params.entityKind
+   *
+   * @returns {Promise<void>}
+   */
+  static async flushCache(params) {
+    const CacheKlass = require(rootPrefix + '/klass.js');
+
+    await new CacheKlass({ entityKind: params.entityKind }).clear();
   }
 }
 
