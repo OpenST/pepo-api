@@ -264,14 +264,22 @@ class GetUserReplyList extends ServiceBase {
 
     oThis.usersVideosMap = response.data;
 
-    for (let ind = 0; ind < oThis.videoIds.length; ind++) {
-      let vid = oThis.videoIds[ind],
-        vdObj = oThis.usersVideosMap.fullVideosMap[vid];
-
-      if (vdObj) {
-        oThis.videoDetails.push(vdObj);
-      }
+    for (let ind = 0; ind < oThis.replyDetailIds.length; ind++) {
+      const rdId = oThis.replyDetailIds[ind];
+      const rdObj = oThis.usersVideosMap.replyDetailsMap[rdId];
+      oThis.videoReplies.push(oThis.usersVideosMap.fullVideosMap[rdObj.entityId]);
     }
+
+    // oThis.usersVideosMap = response.data;
+    //
+    // for (let ind = 0; ind < oThis.videoIds.length; ind++) {
+    //   let vid = oThis.videoIds[ind],
+    //     vdObj = oThis.usersVideosMap.fullVideosMap[vid];
+    //
+    //   if (vdObj) {
+    //     oThis.videoDetails.push(vdObj);
+    //   }
+    // }
 
     return responseHelper.successWithData({});
   }
@@ -286,7 +294,7 @@ class GetUserReplyList extends ServiceBase {
     const oThis = this;
 
     return responseHelper.successWithData({
-      [adminEntityType.userVideoList]: oThis.videoDetails,
+      [adminEntityType.userVideoList]: oThis.videoReplies,
       usersByIdMap: oThis.usersVideosMap.usersByIdMap || {},
       userStat: oThis.usersVideosMap.userStat || {},
       [adminEntityType.userProfilesMap]: oThis.usersVideosMap.userProfilesMap || {},
