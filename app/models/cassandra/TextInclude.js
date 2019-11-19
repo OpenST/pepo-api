@@ -1,7 +1,9 @@
 const rootPrefix = '../../..',
+  CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   CassandraModelBase = require(rootPrefix + '/app/models/cassandra/Base'),
-  cassandraKeyspaceConstants = require(rootPrefix + '/lib/globalConstant/cassandraKeyspace'),
-  textIncludeConstants = require(rootPrefix + '/lib/globalConstant/cassandra/textInclude');
+  logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
+  textIncludeConstants = require(rootPrefix + '/lib/globalConstant/cassandra/textInclude'),
+  cassandraKeyspaceConstants = require(rootPrefix + '/lib/globalConstant/cassandraKeyspace');
 
 // Declare variables.
 const keyspace = cassandraKeyspaceConstants.cassandraKeyspaceName;
@@ -39,6 +41,11 @@ class TextIncludeModel extends CassandraModelBase {
     };
   }
 
+  /**
+   * Returns long to short names map.
+   *
+   * @returns {*}
+   */
   get longToShortNamesMap() {
     return textIncludeConstants.longToShortNamesMap;
   }
@@ -99,11 +106,12 @@ class TextIncludeModel extends CassandraModelBase {
   }
 
   /**
+   * Insert in text includes.
    *
+   * @param {number} textId
+   * @param {array} entityIdentifiers
+   * @param {array} replaceableTexts
    *
-   * @param textId
-   * @param entityIdentifiers
-   * @param replaceableTexts
    * @returns {Promise<void>}
    */
   async insertInTextIncludes(textId, entityIdentifiers, replaceableTexts) {
@@ -125,33 +133,21 @@ class TextIncludeModel extends CassandraModelBase {
   }
 
   /**
-   * Delete tags.
+   * Delete rows for given textId and entityIdentifiers.
    *
-   * @param textId
-   * @param tagEntityIdentifiers
+   * @param {number} textId - textId
+   * @param {array} entityIdentifiersArray - entityIdentifiersArray
+   *
    * @returns {Promise<void>}
    */
-  // TODO - replies - this looks similar to deleteRowsForTextId method.
-  async deleteTags(textId, tagEntityIdentifiers) {
-    const oThis = this;
-
-    const query = `DELETE FROM ${oThis.queryTableName} WHERE text_id = ? AND entity_identifier in ?`;
-
-    const deleteParams = [textId, tagEntityIdentifiers];
-    await oThis.batchFire([{ query: query, params: deleteParams }]);
-
-    await TextIncludeModel.flushCache({ textIds: [textId] });
-  }
-
-  /**
-   * Delete tags
-   * @param textId
-   * @returns {Promise<void>}
-   */
-  // TODO - replies - add validations here. Delete is a critical functionality.
-  // TODO - Validate that entityIdentifiersArray is a array and textId is numeric.
   async deleteRowsForTextId(textId, entityIdentifiersArray) {
     const oThis = this;
+
+    if (!CommonValidators.validateInteger(textId) || !CommonValidators.validateNonEmptyArray(entityIdentifiersArray)) {
+      logger.trace('Validation Failed for delete rows for text id.');
+
+      return;
+    }
 
     const query = `DELETE FROM ${oThis.queryTableName} WHERE text_id = ? AND entity_identifier in ?`;
 
@@ -163,8 +159,10 @@ class TextIncludeModel extends CassandraModelBase {
 
   /**
    * Flush cache.
+   *
    * @param {object} params
    * @param {array<number>} params.textIds
+   *
    * @returns {Promise<*>}
    */
   static async flushCache(params) {

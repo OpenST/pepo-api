@@ -199,13 +199,15 @@ class UpdateProfileInfo extends UpdateProfileBase {
         })
           .perform()
           .then(async function(resp) {
-            oThis.tagIds = resp.data.tagIds;
+            if (resp.data && resp.data.tagIds) {
+              oThis.tagIds = resp.data.tagIds;
 
-            await new AssociateTagsToUser({
-              userId: oThis.profileUserId,
-              tagIds: oThis.tagIds,
-              tagAddedKind: userTagConstants.selfAddedKind
-            }).perform();
+              await new AssociateTagsToUser({
+                userId: oThis.profileUserId,
+                tagIds: oThis.tagIds,
+                tagAddedKind: userTagConstants.selfAddedKind
+              }).perform();
+            }
           })
       );
       oThis.flushUserProfileElementsCache = true;

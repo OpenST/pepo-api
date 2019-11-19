@@ -51,7 +51,7 @@ class ReportForEntity extends ServiceBase {
   /**
    * Async perform.
    *
-   * @return {Promise<void>}
+   * @returns {Promise<void>}
    * @private
    */
   async _asyncPerform() {
@@ -77,11 +77,7 @@ class ReportForEntity extends ServiceBase {
 
     switch (oThis.reportEntityKind) {
       case reportEntityConstants.videoReportEntityKind: {
-        const promiseArray = [];
-
-        promiseArray.push(oThis._fetchVideo());
-        promiseArray.push(oThis._fetchVideoCreator());
-
+        const promiseArray = [oThis._fetchVideo(), oThis._fetchVideoCreator()];
         await Promise.all(promiseArray);
 
         oThis.templateVars = {
@@ -179,14 +175,21 @@ class ReportForEntity extends ServiceBase {
     const oThis = this;
 
     const videoDetailsCacheRsp = await new VideoDetailsByVideoIdsCache({ videoIds: [oThis.reportEntityId] }).fetch();
-
     if (videoDetailsCacheRsp.isFailure()) {
       return Promise.reject(videoDetailsCacheRsp);
     }
 
-    const videoDetails = videoDetailsCacheRsp.data[oThis.reportEntityId];
+    if (!CommonValidators.validateNonEmptyObject(videoDetailsCacheRsp.data[oThis.reportEntityId])) {
+      return Promise.reject(
+        responseHelper.error({
+          internal_error_identifier: 'a_s_m_rp_2',
+          api_error_identifier: 'entity_not_found',
+          debug_options: { videoId: oThis.reportEntityId }
+        })
+      );
+    }
 
-    const creatorUserId = videoDetails.creatorUserId;
+    const creatorUserId = videoDetailsCacheRsp.data[oThis.reportEntityId].creatorUserId;
     // Fetch user name for creator.
     oThis.reportedUserObj = await oThis._fetchUserFor(creatorUserId);
   }
@@ -194,7 +197,7 @@ class ReportForEntity extends ServiceBase {
   /**
    * Fetch reply.
    *
-   * @sets oThis.videoUrl
+   * @sets oThis.reportedUserObj, oThis.videoUrl
    *
    * @returns {Promise<never>}
    * @private
@@ -217,7 +220,7 @@ class ReportForEntity extends ServiceBase {
     ) {
       return Promise.reject(
         responseHelper.error({
-          internal_error_identifier: 'a_s_m_rp_4',
+          internal_error_identifier: 'a_s_m_rp_3',
           api_error_identifier: 'entity_not_found',
           debug_options: { replyDetailId: oThis.reportEntityId }
         })
@@ -238,7 +241,7 @@ class ReportForEntity extends ServiceBase {
     ) {
       return Promise.reject(
         responseHelper.error({
-          internal_error_identifier: 'a_s_m_rp_5',
+          internal_error_identifier: 'a_s_m_rp_4',
           api_error_identifier: 'entity_not_found',
           debug_options: { videoId: videoId }
         })
@@ -258,7 +261,6 @@ class ReportForEntity extends ServiceBase {
     const oThis = this;
 
     const userMultiCacheRsp = await new UserMultiCache({ ids: [userId] }).fetch();
-
     if (userMultiCacheRsp.isFailure() || !userMultiCacheRsp.data) {
       return Promise.reject(userMultiCacheRsp);
     }
@@ -270,7 +272,7 @@ class ReportForEntity extends ServiceBase {
     ) {
       return Promise.reject(
         responseHelper.error({
-          internal_error_identifier: 'a_s_m_rp_2',
+          internal_error_identifier: 'a_s_m_rp_5',
           api_error_identifier: 'entity_not_found',
           debug_options: {
             userId: userId
@@ -286,8 +288,8 @@ class ReportForEntity extends ServiceBase {
     ) {
       return Promise.reject(
         responseHelper.error({
-          internal_error_identifier: 'a_s_m_rp_3',
-          api_error_identifier: 'resource_not_found',
+          internal_error_identifier: 'a_s_m_rp_6',
+          api_error_identifier: 'something_went_wrong',
           debug_options: {}
         })
       );

@@ -21,17 +21,21 @@ class OstEventProcess extends ServiceBase {
    * @constructor
    */
   constructor(params) {
-    super(params);
+    super();
 
     const oThis = this;
 
     oThis.ostEventObj = params.ostEventObj;
+
+    oThis.eventData = {};
+    oThis.ostEventTopic = '';
   }
 
   /**
-   * Perform - Process Ost Event.
+   * Async perform.
    *
-   * @return {Promise<void>}
+   * @returns {Promise<void>}
+   * @private
    */
   async _asyncPerform() {
     const oThis = this;
@@ -45,6 +49,8 @@ class OstEventProcess extends ServiceBase {
 
   /**
    * Extract event topic.
+   *
+   * @sets oThis.eventData, oThis.ostEventTopic
    *
    * @returns {Promise<never>}
    * @private
@@ -69,13 +75,14 @@ class OstEventProcess extends ServiceBase {
   }
 
   /**
-   * Validate param.
+   * Validate parameters.
    *
-   * @return {Promise<void>}
+   * @returns {Promise<void>}
    * @private
    */
   async _execute() {
     const oThis = this;
+
     let eventProcessResponse = null;
 
     switch (oThis.ostEventTopic) {
@@ -129,7 +136,7 @@ class OstEventProcess extends ServiceBase {
           responseHelper.error({
             internal_error_identifier: 's_oe_f_e_1',
             api_error_identifier: 'something_went_wrong',
-            debug_options: { ostEventObjId: oThis.ostEventObj.id, msg: 'Invalid Topic of ost event' }
+            debug_options: { ostEventObjId: oThis.ostEventObj.id, msg: 'Invalid topic of ost event.' }
           })
         );
       }

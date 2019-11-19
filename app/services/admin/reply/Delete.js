@@ -1,7 +1,8 @@
 const rootPrefix = '../../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
-  ReplyDetailsByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/ReplyDetailsByIds'),
+  CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   DeleteReplyVideoLib = require(rootPrefix + '/lib/video/delete/ReplyVideos'),
+  ReplyDetailsByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/ReplyDetailsByIds'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   replyDetailsConstants = require(rootPrefix + '/lib/globalConstant/replyDetail');
 
@@ -29,15 +30,15 @@ class DeleteReplyVideo extends ServiceBase {
 
     oThis.replyDetailsId = params.reply_details_id;
     oThis.currentAdmin = params.current_admin;
-
     oThis.currentAdminId = Number(oThis.currentAdmin.id);
+
     oThis.creatorUserId = null;
   }
 
   /**
    * Async perform.
    *
-   * @return {Promise<void>}
+   * @returns {Promise<void>}
    * @private
    */
   async _asyncPerform() {
@@ -66,11 +67,11 @@ class DeleteReplyVideo extends ServiceBase {
   }
 
   /**
-   * Fetch creator user id.
+   * Fetch reply details.
    *
-   * @sets oThis.videoDetails, oThis.creatorUserId
+   * @sets oThis.replyDetails
    *
-   * @return {Promise<void>}
+   * @returns {Promise<void>}
    * @private
    */
   async _fetchReplyDetails() {
@@ -79,6 +80,15 @@ class DeleteReplyVideo extends ServiceBase {
     const replyDetailsCacheResponse = await new ReplyDetailsByIdsCache({ ids: [oThis.replyDetailsId] }).fetch();
     if (replyDetailsCacheResponse.isFailure()) {
       return Promise.reject(replyDetailsCacheResponse);
+    }
+
+    if (!CommonValidators.validateNonEmptyObject(replyDetailsCacheResponse.data[oThis.replyDetailsId])) {
+      return responseHelper.paramValidationError({
+        internal_error_identifier: 'a_s_a_r_d_2',
+        api_error_identifier: 'invalid_api_params',
+        params_error_identifiers: ['invalid_reply_details_id'],
+        debug_options: { replyDetailsId: oThis.replyDetailsId }
+      });
     }
 
     oThis.replyDetails = replyDetailsCacheResponse.data[oThis.replyDetailsId];

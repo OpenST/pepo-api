@@ -12,8 +12,8 @@ class CoreConstants {
     return process.env.PA_ENVIRONMENT.substring(0, 2);
   }
 
-  get DEBUG_ENABLED() {
-    return process.env.PA_DEBUG_ENABLED;
+  get DEFAULT_LOG_LEVEL() {
+    return process.env.PA_DEFAULT_LOG_LEVEL;
   }
 
   get APP_NAME() {

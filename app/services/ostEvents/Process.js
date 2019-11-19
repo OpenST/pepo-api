@@ -2,32 +2,42 @@ const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   OstEventModel = require(rootPrefix + '/app/models/mysql/OstEvent'),
-  ostEventConstant = require(rootPrefix + '/lib/globalConstant/ostEvent'),
   OstEventProcessFactory = require(rootPrefix + '/app/services/ostEvents/Factory'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
-  logger = require(rootPrefix + '/lib/logger/customConsoleLogger');
+  logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
+  ostEventConstants = require(rootPrefix + '/lib/globalConstant/ostEvent');
 
+/**
+ * Class to process ost events.
+ *
+ * @class OstEventProcess
+ */
 class OstEventProcess extends ServiceBase {
   /**
+   * Constructor to process ost events.
+   *
    * @param {object} params
    * @param {string} params.ostEventId: OST Event Table Id
+   *
+   * @augments ServiceBase
    *
    * @constructor
    */
   constructor(params) {
-    super(params);
+    super();
 
     const oThis = this;
 
     oThis.ostEventId = params.ostEventId;
 
-    oThis.ostEventObj = null;
+    oThis.ostEventObj = {};
   }
 
   /**
-   * Perform - Process Ost Event.
+   * Async perform.
    *
-   * @return {Promise<void>}
+   * @returns {Promise<void>}
+   * @private
    */
   async _asyncPerform() {
     const oThis = this;
@@ -36,7 +46,7 @@ class OstEventProcess extends ServiceBase {
 
     await oThis._fetchOstEvent();
 
-    await oThis._updateOstEventStatus(ostEventConstant.startedStatus);
+    await oThis._updateOstEventStatus(ostEventConstants.startedStatus);
 
     await oThis._processEvent();
 
@@ -44,11 +54,9 @@ class OstEventProcess extends ServiceBase {
   }
 
   /**
-   * Validate param
+   * Validate parameters.
    *
-   *
-   * @return {Promise<void>}
-   *
+   * @returns {Promise<void>}
    * @private
    */
   async _validateAndSanitizeParams() {
@@ -64,46 +72,43 @@ class OstEventProcess extends ServiceBase {
         })
       );
     }
-
-    return Promise.resolve(responseHelper.successWithData({}));
   }
 
   /**
-   * Fetch Entry from Ost Event Table
+   * Fetch entry from ost event table.
    *
+   * @sets oThis.ostEventObj
    *
-   * @return {Promise<void>}
-   *
+   * @returns {Promise<void>}
    * @private
    */
   async _fetchOstEvent() {
     const oThis = this;
     logger.log('fetch entry for Ost Event process');
 
-    let dbRow = await new OstEventModel().fetchById(oThis.ostEventId);
+    const dbRow = await new OstEventModel().fetchById(oThis.ostEventId);
 
-    if (!dbRow || !dbRow.id || dbRow.status !== ostEventConstant.pendingStatus) {
+    if (!dbRow || !dbRow.id || dbRow.status !== ostEventConstants.pendingStatus) {
       logger.error('Error while fetching data from ost events table. dbRows=', dbRow);
 
       return Promise.reject(dbRow);
     }
 
     oThis.ostEventObj = dbRow;
-
-    return Promise.resolve(responseHelper.successWithData({}));
   }
 
   /**
    * Update status of ost event row.
    *
-   * @return {Promise<void>}
+   * @returns {Promise<void>}
    * @private
    */
   async _updateOstEventStatus(ostEventStatus) {
     const oThis = this;
+
     logger.log('Update Ost Event status-', ostEventStatus);
 
-    let ostEventstatus = ostEventConstant.invertedStatuses[ostEventStatus];
+    const ostEventstatus = ostEventConstants.invertedStatuses[ostEventStatus];
 
     if (!ostEventstatus) {
       throw new Error(`Invalid ostEventstatus for Process. ostEventStatus=${ostEventStatus}`);
@@ -113,25 +118,24 @@ class OstEventProcess extends ServiceBase {
       .update({ status: ostEventstatus })
       .where({ id: oThis.ostEventId })
       .fire();
-
-    return Promise.resolve(responseHelper.successWithData({}));
   }
 
   /**
-   * Use Factory To process Event.
+   * Use factory to process event.
    *
-   * @return {Promise<void>}
+   * @returns {Promise<void>}
    * @private
    */
   async _processEvent() {
     const oThis = this;
 
-    logger.log('Process Ost Event');
+    logger.log('Process Ost Event.');
 
     const response = await new OstEventProcessFactory({ ostEventObj: oThis.ostEventObj })
       .perform()
       .catch(async function(err) {
         logger.error(err);
+
         return responseHelper.error({
           internal_error_identifier: 's_oe_p_vas_2',
           api_error_identifier: 'something_went_wrong',
@@ -140,12 +144,10 @@ class OstEventProcess extends ServiceBase {
       });
 
     if (response.isSuccess()) {
-      await oThis._updateOstEventStatus(ostEventConstant.doneStatus);
+      await oThis._updateOstEventStatus(ostEventConstants.doneStatus);
     } else {
-      await oThis._updateOstEventStatus(ostEventConstant.failedStatus);
+      await oThis._updateOstEventStatus(ostEventConstants.failedStatus);
     }
-
-    return responseHelper.successWithData({});
   }
 }
 

@@ -99,7 +99,7 @@ class PopulateIncludesFromTexts {
     for (const textId in oThis.includesData) {
       const data = oThis.includesData[textId];
 
-      await new TextIncludeModel().deleteTags(textId, data.entityIdentifiers);
+      await new TextIncludeModel().deleteRowsForTextId(textId, data.entityIdentifiers);
 
       await TextIncludeModel.flushCache({ textIds: [textId] });
 

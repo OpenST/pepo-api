@@ -102,9 +102,9 @@ class ReplyDetail extends ModelBase {
   /**
    * Fetch by video id.
    *
-   * @param {integer} params.limit: no of rows to fetch
-   * @param {integer} params.videoId: video id
-   * @param {integer} params.paginationTimestamp: pagination timestamp
+   * @param {number} params.limit: no of rows to fetch
+   * @param {number} params.videoId: video id
+   * @param {number} params.paginationTimestamp: pagination timestamp
    *
    * @returns Promise{object}
    */
@@ -122,11 +122,11 @@ class ReplyDetail extends ModelBase {
         entity_kind: replyDetailConstants.invertedEntityKinds[replyDetailConstants.videoEntityKind],
         status: replyDetailConstants.invertedStatuses[replyDetailConstants.activeStatus]
       })
-      .order_by('id desc')
+      .order_by('id asc')
       .limit(limit);
 
     if (paginationTimestamp) {
-      queryObject.where(['created_at < ?', paginationTimestamp]);
+      queryObject.where(['created_at > ?', paginationTimestamp]);
     }
 
     const dbRows = await queryObject.fire();
@@ -241,7 +241,6 @@ class ReplyDetail extends ModelBase {
 
     await ReplyDetail.flushCache(flushCacheParams);
 
-    logger.log('insertResponse  ============', insertResponse);
     return insertResponse;
   }
 
