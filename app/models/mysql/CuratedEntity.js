@@ -56,6 +56,19 @@ class CuratedEntity extends ModelBase {
   }
 
   /**
+   * Insert entities.
+   *
+   * @param {array} insertArray
+   *
+   * @returns {Promise<*>}
+   */
+  async insertEntities(insertArray) {
+    const oThis = this;
+
+    return oThis.insertMultiple(['entity_id', 'entity_kind', 'position'], insertArray, { touch: true }).fire();
+  }
+
+  /**
    * Delete all rows of a particular entity kind.
    *
    * @param {string} entityKind
@@ -74,6 +87,37 @@ class CuratedEntity extends ModelBase {
     await oThis.delete({ entity_kind: entityKindInt }).fire();
 
     await CuratedEntity.flushCache({ entityKind: entityKind });
+  }
+
+  /**
+   * Get entity ids for particular entity kind.
+   *
+   * @param {string} entityKind
+   *
+   * @returns {Promise<[]>}
+   */
+  async getForKind(entityKind) {
+    const oThis = this;
+
+    const entityKindInt = curatedEntitiesConstants.invertedEntityKinds[entityKind];
+
+    if (!entityKindInt) {
+      return Promise.reject(new Error('Invalid entity kind.'));
+    }
+
+    const dbRows = await oThis
+      .select('entity_id')
+      .where({ entity_kind: entityKindInt })
+      .order_by('position ASC')
+      .fire();
+
+    const entityIds = [];
+    for (let index = 0; index < dbRows.length; index++) {
+      const curatedEntity = dbRows[index];
+      entityIds.push(curatedEntity.entity_kind);
+    }
+
+    return entityIds;
   }
 
   /**
