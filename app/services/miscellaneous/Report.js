@@ -77,11 +77,7 @@ class ReportForEntity extends ServiceBase {
 
     switch (oThis.reportEntityKind) {
       case reportEntityConstants.videoReportEntityKind: {
-        const promiseArray = [];
-
-        promiseArray.push(oThis._fetchVideo());
-        promiseArray.push(oThis._fetchVideoCreator());
-
+        const promiseArray = [oThis._fetchVideo(), oThis._fetchVideoCreator()];
         await Promise.all(promiseArray);
 
         oThis.templateVars = {
