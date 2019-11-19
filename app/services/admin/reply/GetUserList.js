@@ -51,6 +51,7 @@ class GetUserReplyList extends ServiceBase {
     oThis.videoIds = [];
     oThis.tokenDetails = {};
     oThis.profileUserObj = null;
+    oThis.videoReplies = [];
   }
 
   /**
