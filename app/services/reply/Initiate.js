@@ -207,7 +207,7 @@ class InitiateReply extends ServiceBase {
       return Promise.reject(editDescriptionResp);
     }
 
-    // for these users id, we have already sent mention-notification. so, need to skip the reply-event-notification
+    // For these users id, we have already sent mention-notification. So, need to skip the reply-event-notification.
     oThis.mentionedUserIds = editDescriptionResp.data.mentionedUserIds;
   }
 
@@ -296,7 +296,7 @@ class InitiateReply extends ServiceBase {
 
     oThis.descriptionId = replyDescriptionResp.data.descriptionId;
 
-    // for these users id, we have already sent mention-notification. so, need to skip the reply-event-notification
+    // For these users id, we have already sent mention-notification. So, need to skip the reply-event-notification.
     oThis.mentionedUserIds = replyDescriptionResp.data.mentionedUserIds;
   }
 
