@@ -150,7 +150,7 @@ class Insert extends ServiceBase {
     const entityIdsArray = cacheResponse.data[oThis.entityKind];
 
     // If entityId already exists in the curated entities table.
-    if (entityIdsArray.indexOf(oThis.entityId) > -1) {
+    if (entityIdsArray.indexOf(oThis.entityId.toString()) > -1) {
       return Promise.reject(
         responseHelper.paramValidationError({
           internal_error_identifier: 'a_s_a_c_i_4',
@@ -174,8 +174,9 @@ class Insert extends ServiceBase {
 
     const newElementPosition = oThis.entityIdsArrayLength + 1;
     const entityKindInt = curatedEntitiesConstants.invertedEntityKinds[oThis.entityKind];
+    const insertArray = [oThis.entityId, entityKindInt, newElementPosition];
 
-    await new CuratedEntityModel().insertEntities([oThis.entityId, entityKindInt, newElementPosition]);
+    await new CuratedEntityModel().insertEntities([insertArray]);
 
     await CuratedEntityModel.flushCache({ entityKind: oThis.entityKind });
   }
