@@ -24,6 +24,13 @@ router.post('/reorder', sanitizer.sanitizeDynamicUrlParams, function(req, res, n
   Promise.resolve(routeHelper.perform(req, res, next, '/admin/curated/Reorder', 'r_a_v1_ce_i_2', null, null, null));
 });
 
+/* delete curated entity */
+router.post('/delete', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.deleteCuratedEntity;
+
+  Promise.resolve(routeHelper.perform(req, res, next, '/admin/curated/Delete', 'r_a_v1_ce_i_5', null, null, null));
+});
+
 /* Get list for given user entity kind */
 router.get('/users', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.getUsersCuratedEntityList;
@@ -62,13 +69,6 @@ router.get('/tags', sanitizer.sanitizeDynamicUrlParams, function(req, res, next)
   };
 
   Promise.resolve(routeHelper.perform(req, res, next, '/admin/curated/List', 'r_a_v1_ce_i_4', null, dataFormatterFunc));
-});
-
-/* Reorder curated entity */
-router.post('/delete', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
-  req.decodedParams.apiName = apiName.deleteCuratedEntity;
-
-  Promise.resolve(routeHelper.perform(req, res, next, '/admin/curated/Delete', 'r_a_v1_ce_i_5', null, null, null));
 });
 
 module.exports = router;
