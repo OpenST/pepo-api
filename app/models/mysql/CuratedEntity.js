@@ -69,25 +69,6 @@ class CuratedEntity extends ModelBase {
   }
 
   /**
-   * Delete all rows of a particular entity kind.
-   *
-   * @param {string} entityKind
-   *
-   * @returns {Promise<never>}
-   */
-  async deleteAllOfKind(entityKind) {
-    const oThis = this;
-
-    const entityKindInt = curatedEntitiesConstants.invertedEntityKinds[entityKind];
-
-    if (!entityKindInt) {
-      return Promise.reject(new Error('Invalid entity kind.'));
-    }
-
-    await oThis.delete({ entity_kind: entityKindInt }).fire();
-  }
-
-  /**
    * Get entity ids for particular entity kind.
    *
    * @param {string} entityKind
@@ -116,6 +97,82 @@ class CuratedEntity extends ModelBase {
     }
 
     return { [entityKind]: entityIds };
+  }
+
+  /**
+   * Get entity ids for particular entity kind.
+   *
+   * @param {number} entityId
+   * @param {string} entityKind
+   *
+   * @returns {Promise<{}>}
+   */
+  async getForIdAndKind(entityId, entityKind) {
+    const oThis = this;
+
+    const entityKindInt = curatedEntitiesConstants.invertedEntityKinds[entityKind];
+
+    if (!entityKindInt) {
+      return Promise.reject(new Error('Invalid entity kind.'));
+    }
+
+    const dbRows = await oThis
+      .select('*')
+      .where({
+        entity_id: entityId,
+        entity_kind: entityKindInt
+      })
+      .fire();
+
+    if (dbRows.length === 0) {
+      return {};
+    }
+
+    return oThis.formatDbData(dbRows[0]);
+  }
+
+  /**
+   * Delete all rows of a particular entity kind.
+   *
+   * @param {string} entityKind
+   *
+   * @returns {Promise<never>}
+   */
+  async deleteAllOfKind(entityKind) {
+    const oThis = this;
+
+    const entityKindInt = curatedEntitiesConstants.invertedEntityKinds[entityKind];
+
+    if (!entityKindInt) {
+      return Promise.reject(new Error('Invalid entity kind.'));
+    }
+
+    await oThis.delete({ entity_kind: entityKindInt }).fire();
+  }
+
+  /**
+   * Delete row for particular id and kind.
+   *
+   * @param {number} entityId
+   * @param {string} entityKind
+   *
+   * @returns {Promise<never>}
+   */
+  async deleteForIdAndKind(entityId, entityKind) {
+    const oThis = this;
+
+    const entityKindInt = curatedEntitiesConstants.invertedEntityKinds[entityKind];
+
+    if (!entityKindInt) {
+      return Promise.reject(new Error('Invalid entity kind.'));
+    }
+
+    await oThis
+      .delete({
+        entity_id: entityId,
+        entity_kind: entityKindInt
+      })
+      .fire();
   }
 
   /**
