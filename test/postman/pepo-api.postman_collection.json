@@ -153,6 +153,67 @@
 					"response": []
 				},
 				{
+					"name": "delete-reply",
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "password",
+									"value": "Pepo-Admin-20!9*",
+									"type": "string"
+								},
+								{
+									"key": "username",
+									"value": "pepo",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"type": "text",
+								"value": "application/x-www-form-urlencoded"
+							},
+							{
+								"key": "csrf-token",
+								"type": "text",
+								"value": "{{csrf-token}}"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "email",
+									"value": "santhosh@ost.com",
+									"type": "text"
+								},
+								{
+									"key": "password",
+									"value": "5b300f84986e09ab",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{api_server}}/api/admin/delete-reply-video/803",
+							"host": [
+								"{{api_server}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"delete-reply-video",
+								"803"
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "fetch-csrf",
 					"event": [
 						{
