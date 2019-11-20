@@ -85,7 +85,7 @@ class CuratedEntity extends ModelBase {
     }
 
     const dbRows = await oThis
-      .select('entity_id')
+      .select('entity_id, position')
       .where({ entity_kind: entityKindInt })
       .order_by('position ASC')
       .fire();
