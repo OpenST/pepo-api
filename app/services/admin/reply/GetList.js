@@ -76,8 +76,6 @@ class GetUserReplyList extends ServiceBase {
     }
     oThis.profileUserObj = resp.data.userObject;
 
-    console.log('oThis.profileUserObj ======', oThis.profileUserObj);
-
     await oThis._fetchVideoIds();
 
     oThis._addResponseMetaData();
@@ -150,8 +148,6 @@ class GetUserReplyList extends ServiceBase {
       limit: oThis.limit,
       paginationTimestamp: oThis.paginationTimestamp
     }).fetch();
-
-    console.log('cacheResponse  =========', cacheResponse);
 
     if (cacheResponse.isFailure()) {
       return Promise.reject(cacheResponse);
@@ -271,17 +267,6 @@ class GetUserReplyList extends ServiceBase {
       oThis.videoReplies.push(oThis.usersVideosMap.fullVideosMap[rdObj.entityId]);
     }
 
-    // oThis.usersVideosMap = response.data;
-    //
-    // for (let ind = 0; ind < oThis.videoIds.length; ind++) {
-    //   let vid = oThis.videoIds[ind],
-    //     vdObj = oThis.usersVideosMap.fullVideosMap[vid];
-    //
-    //   if (vdObj) {
-    //     oThis.videoDetails.push(vdObj);
-    //   }
-    // }
-
     return responseHelper.successWithData({});
   }
 
@@ -303,7 +288,6 @@ class GetUserReplyList extends ServiceBase {
       linkMap: oThis.usersVideosMap.linkMap || {},
       imageMap: oThis.usersVideosMap.imageMap || {},
       videoMap: oThis.usersVideosMap.videoMap || {},
-      [adminEntityType.videoDetailsMap]: oThis.usersVideosMap.videoDetailsMap || {},
       [adminEntityType.videoDescriptionsMap]: oThis.usersVideosMap.videoDescriptionMap || {},
       [adminEntityType.currentUserUserContributionsMap]: oThis.usersVideosMap.currentUserUserContributionsMap || {},
       [adminEntityType.currentUserVideoContributionsMap]: oThis.usersVideosMap.currentUserVideoContributionsMap || {},

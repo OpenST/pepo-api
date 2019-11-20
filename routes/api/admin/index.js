@@ -199,7 +199,6 @@ router.get('/reply-history/:profile_user_id', sanitizer.sanitizeDynamicUrlParams
         [adminEntityType.linksMap]: adminResponseEntityKey.links,
         [adminEntityType.imagesMap]: adminResponseEntityKey.images,
         [adminEntityType.videosMap]: adminResponseEntityKey.videos,
-        [adminEntityType.videoDetailsMap]: adminResponseEntityKey.videoDetails,
         [adminEntityType.replyDetailsMap]: adminResponseEntityKey.replyDetails,
         [adminEntityType.videoDescriptionsMap]: adminResponseEntityKey.videoDescriptions,
         [adminEntityType.currentUserUserContributionsMap]: adminResponseEntityKey.currentUserUserContributions,
@@ -214,9 +213,7 @@ router.get('/reply-history/:profile_user_id', sanitizer.sanitizeDynamicUrlParams
     serviceResponse.data = wrapperFormatterRsp.data;
   };
 
-  Promise.resolve(
-    routeHelper.perform(req, res, next, '/admin/reply/GetUserList', 'r_a_v1_u_7', null, dataFormatterFunc)
-  );
+  Promise.resolve(routeHelper.perform(req, res, next, '/admin/reply/GetList', 'r_a_v1_u_7', null, dataFormatterFunc));
 });
 
 /* Delete video. */
