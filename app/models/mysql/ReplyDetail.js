@@ -365,6 +365,7 @@ class ReplyDetail extends ModelBase {
    * Flush cache.
    *
    * @param {object} params
+   * @param {number} [params.userId]
    * @param {array<number>} [params.parentVideoIds]
    * @param {number} [params.replyDetailId]
    * @param {array<number>} [params.replyDetailIds]
@@ -375,6 +376,12 @@ class ReplyDetail extends ModelBase {
    */
   static async flushCache(params) {
     const promisesArray = [];
+
+    if (params.userId) {
+      const ReplyDetailsByUserIdPaginationCache = require(rootPrefix +
+        '/lib/cacheManagement/single/ReplyDetailsByUserIdPagination');
+      promisesArray.push(new ReplyDetailsByUserIdPaginationCache({ userId: params.userId }).clear());
+    }
 
     if (params.parentVideoIds) {
       const ReplyDetailsByParentVideoPaginationCache = require(rootPrefix +
