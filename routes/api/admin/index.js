@@ -237,6 +237,7 @@ router.get('/users/:user_id/profile', sanitizer.sanitizeDynamicUrlParams, functi
       entityKindToResponseKeyMap: {
         [adminEntityType.userProfile]: adminResponseEntityKey.adminUserProfile,
         [adminEntityType.adminUsersMap]: adminResponseEntityKey.users,
+        [adminEntityType.globalUserMuteDetailsMap]: adminResponseEntityKey.globalUserMuteDetails,
         [adminEntityType.imagesMap]: adminResponseEntityKey.images,
         [adminEntityType.userBalance]: adminResponseEntityKey.userBalance
       },
