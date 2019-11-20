@@ -76,6 +76,19 @@ const adminSignature = {
     ],
     optional: []
   },
+  [apiName.adminDeleteReplyVideo]: {
+    mandatory: [
+      {
+        parameter: 'reply_details_id',
+        validatorMethods: ['validateNonZeroInteger']
+      },
+      {
+        parameter: 'current_admin',
+        validatorMethods: ['validateNonEmptyObject']
+      }
+    ],
+    optional: []
+  },
   [apiName.adminUpdateVideoLink]: {
     mandatory: [
       {
