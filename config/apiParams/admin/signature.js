@@ -106,6 +106,23 @@ const adminSignature = {
     ],
     optional: []
   },
+  [apiName.adminUpdateReplyLink]: {
+    mandatory: [
+      {
+        parameter: 'reply_detail_id',
+        validatorMethods: ['validateNonZeroInteger']
+      },
+      {
+        parameter: 'current_admin',
+        validatorMethods: ['validateNonEmptyObject']
+      },
+      {
+        parameter: 'link',
+        validatorMethods: ['validateString', 'validateStopWords']
+      }
+    ],
+    optional: []
+  },
   [apiName.adminUpdateVideoDescription]: {
     mandatory: [
       {

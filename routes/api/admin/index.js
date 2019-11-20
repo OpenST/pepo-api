@@ -240,6 +240,16 @@ router.post('/update-video/:video_id/link', sanitizer.sanitizeDynamicUrlParams, 
   Promise.resolve(routeHelper.perform(req, res, next, '/admin/video/UpdateLink', 'r_a_v1_ad_uvl_1', null, null, null));
 });
 
+/* Update reply video link. */
+router.post('/update-reply-video/:reply_detail_id/link', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.adminUpdateReplyLink;
+  req.decodedParams.reply_detail_id = req.params.reply_detail_id;
+
+  Promise.resolve(
+    routeHelper.perform(req, res, next, '/admin/reply/UpdateReplyLink', 'r_a_v1_ad_uvl_4', null, null, null)
+  );
+});
+
 /* Update video description. */
 router.post('/update-video/:video_id/description', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.adminUpdateVideoDescription;
