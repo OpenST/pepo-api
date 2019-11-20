@@ -55,7 +55,7 @@ class GetCuratedList extends ServiceBase {
 
     await oThis.fetchAssociatedEntitiesForEntityKind();
 
-    return responseHelper.successWithData(oThis.prepareResponse());
+    return responseHelper.successWithData(oThis._prepareResponse());
   }
 
   /**
@@ -229,21 +229,21 @@ class GetCuratedList extends ServiceBase {
    *
    * @returns {*}
    */
-  prepareResponse() {
+  _prepareResponse() {
     const oThis = this;
 
     if (oThis.entityKind === curatedEntitiesConstants.userEntityKind) {
       return {
-        [oThis.entityKind]: oThis.curatedEntityIds,
+        [adminEntityType.usersCuratedEntitiesList]: oThis.curatedEntityIds,
         usersByIdMap: oThis.userByUserIdMap,
         tokenUsersByUserIdMap: oThis.tokenUsersByUserIdMap
       };
+    } else {
+      return {
+        [adminEntityType.tagsCuratedEntitiesList]: oThis.curatedEntityIds,
+        tags: oThis.tagsMap
+      };
     }
-
-    return {
-      [oThis.entityKind]: oThis.curatedEntityIds,
-      [adminEntityType.tagsMap]: oThis.tagsMap
-    };
   }
 }
 

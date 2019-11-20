@@ -222,6 +222,75 @@ const adminSignature = {
         validatorMethods: ['validateBoolean']
       }
     ]
+  },
+  [apiName.insertCuratedEntity]: {
+    mandatory: [
+      {
+        parameter: 'entity_kind',
+        validatorMethods: ['validateString']
+      },
+      {
+        parameter: 'entity_id',
+        validatorMethods: ['validateNonZeroInteger']
+      },
+      {
+        parameter: 'current_admin',
+        validatorMethods: ['validateNonEmptyObject']
+      }
+    ],
+    optional: []
+  },
+  [apiName.deleteCuratedEntity]: {
+    mandatory: [
+      {
+        parameter: 'entity_kind',
+        validatorMethods: ['validateString']
+      },
+      {
+        parameter: 'entity_id',
+        validatorMethods: ['validateNonZeroInteger']
+      },
+      {
+        parameter: 'current_admin',
+        validatorMethods: ['validateNonEmptyObject']
+      }
+    ],
+    optional: []
+  },
+  [apiName.reorderCuratedEntity]: {
+    mandatory: [
+      {
+        parameter: 'entity_kind',
+        validatorMethods: ['validateString']
+      },
+      {
+        parameter: 'entity_ids',
+        validatorMethods: ['validateNonBlankStringArray']
+      },
+      {
+        parameter: 'current_admin',
+        validatorMethods: ['validateNonEmptyObject']
+      }
+    ],
+    optional: []
+  },
+  [apiName.getUsersCuratedEntityList]: {
+    mandatory: [
+      {
+        parameter: 'entity_kind',
+        validatorMethods: ['validateString']
+      }
+    ],
+    optional: []
+  },
+  [apiName.getTagsCuratedEntityList]: {
+    mandatory: [
+      {
+        parameter: 'entity_kind',
+        validatorMethods: ['validateString']
+      }
+    ],
+    optional: []
   }
 };
 

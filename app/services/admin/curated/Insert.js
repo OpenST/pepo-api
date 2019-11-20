@@ -36,7 +36,7 @@ class Insert extends ServiceBase {
 
     oThis.currentAdminId = params.current_admin.id;
     oThis.entityKind = params.entity_kind;
-    oThis.entityId = params.entity_id;
+    oThis.entityId = +params.entity_id;
 
     oThis.entityIdsArrayLength = 0;
   }

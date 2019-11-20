@@ -72,6 +72,10 @@ class Reorder extends ServiceBase {
   async validateAndSanitize() {
     const oThis = this;
 
+    oThis.entityIdsArray = JSON.parse(oThis.entityIdsArray);
+
+    oThis.entityIdsArray = [...new Set(oThis.entityIdsArray)];
+
     if (oThis.entityIdsArray.length === 0 || oThis.entityIdsArray.length > 20) {
       return Promise.reject(
         responseHelper.paramValidationError({
