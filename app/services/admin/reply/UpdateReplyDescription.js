@@ -2,7 +2,9 @@ const rootPrefix = '../../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   EditReplyDescriptionLib = require(rootPrefix + '/lib/editDescription/Reply'),
   ActivityLogModel = require(rootPrefix + '/app/models/mysql/AdminActivityLog'),
+  ReplyDetailsByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/ReplyDetailsByIds'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
+  replyDetailConstants = require(rootPrefix + '/lib/globalConstant/replyDetail'),
   adminActivityLogConstants = require(rootPrefix + '/lib/globalConstant/adminActivityLogs');
 
 /**
@@ -68,6 +70,20 @@ class UpdateReplyDescription extends ServiceBase {
    */
   async _editReplyDescription() {
     const oThis = this;
+
+    const replyDetailsByIdsCacheResponse = await new ReplyDetailsByIdsCache({ ids: [oThis.replyDetailsId] }).fetch();
+
+    if (replyDetailsByIdsCacheResponse.isFailure()) {
+      return Promise.reject(replyDetailsByIdsCacheResponse);
+    }
+
+    const replyDetail = replyDetailsByIdsCacheResponse.data[oThis.replyDetailsId];
+
+    if (replyDetail.entityKind === replyDetailConstants.videoEntityKind) {
+      oThis.videoId = replyDetail.entityId;
+    } else {
+      throw new Error(`Invalid entityKind-${replyDetail.entityKind}`);
+    }
 
     const editReplyDescriptionLibResp = await new EditReplyDescriptionLib({
       replyDetailId: oThis.replyDetailsId,
