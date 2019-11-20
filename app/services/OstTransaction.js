@@ -425,7 +425,7 @@ class OstTransaction extends ServiceBase {
     const oThis = this;
 
     const transactionValidationResponse = await ostPlatformSdkWrapper.getTransaction({
-      transaction_uuid: oThis.ostTxId,
+      transaction_id: oThis.ostTxId,
       user_id: oThis.fromOstUserId
     });
     if (transactionValidationResponse.isFailure()) {

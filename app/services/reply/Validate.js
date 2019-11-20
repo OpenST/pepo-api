@@ -51,6 +51,7 @@ class ValidateReplyParams extends ServiceBase {
    */
   async _asyncPerform() {
     const oThis = this;
+    // Link and description validated in signature.js
 
     await oThis._validateParent();
 
