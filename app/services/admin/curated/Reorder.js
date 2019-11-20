@@ -109,7 +109,7 @@ class Reorder extends ServiceBase {
     const insertArray = [];
 
     for (let index = 0; index < oThis.entityIdsArray.length; index++) {
-      insertArray.push([oThis.entityIdsArray[index], oThis.entityKindInt, index]);
+      insertArray.push([oThis.entityIdsArray[index], oThis.entityKindInt, index + 1]);
       // First position is entityId, second position is entityKind, third position is position of the entity.
     }
 
