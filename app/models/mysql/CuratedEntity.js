@@ -91,12 +91,14 @@ class CuratedEntity extends ModelBase {
       .fire();
 
     const entityIds = [];
+    let highestPosition = 0;
     for (let index = 0; index < dbRows.length; index++) {
       const curatedEntity = oThis.formatDbData(dbRows[index]);
       entityIds.push(curatedEntity.entityId);
+      highestPosition = curatedEntity.position;
     }
 
-    return { [entityKind]: entityIds };
+    return { entityIds: entityIds, highestPosition: highestPosition };
   }
 
   /**

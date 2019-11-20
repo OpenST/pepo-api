@@ -191,7 +191,7 @@ class Reorder extends ServiceBase {
       return Promise.reject(cacheResponse);
     }
 
-    oThis.oldCuratedOrder = cacheResponse.data[oThis.entityKind];
+    oThis.oldCuratedOrder = cacheResponse.data.entityIds;
   }
 
   /**
@@ -203,8 +203,6 @@ class Reorder extends ServiceBase {
     const oThis = this;
 
     await new CuratedEntityModel().deleteAllOfKind(oThis.entityKind);
-
-    await CuratedEntityModel.flushCache({ entityKind: oThis.entityKind });
   }
 
   /**
@@ -225,6 +223,8 @@ class Reorder extends ServiceBase {
     }
 
     await new CuratedEntityModel().insertEntities(insertArray);
+
+    await CuratedEntityModel.flushCache({ entityKind: oThis.entityKind });
   }
 
   /**

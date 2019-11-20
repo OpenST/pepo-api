@@ -102,7 +102,7 @@ class GetCuratedList extends ServiceBase {
       return Promise.reject(curatedEntityIdsByKindCacheRsp);
     }
 
-    oThis.curatedEntityIds = curatedEntityIdsByKindCacheRsp.data[oThis.entityKind];
+    oThis.curatedEntityIds = curatedEntityIdsByKindCacheRsp.data.entityIds;
 
     console.log('oThis.curatedEntityIds----', oThis.curatedEntityIds);
   }

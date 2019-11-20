@@ -38,7 +38,7 @@ class Insert extends ServiceBase {
     oThis.entityKind = params.entity_kind;
     oThis.entityId = +params.entity_id;
 
-    oThis.entityIdsArrayLength = 0;
+    oThis.entityHighestPosition = 0;
   }
 
   /**
@@ -142,7 +142,7 @@ class Insert extends ServiceBase {
   /**
    * Fetch existing entities.
    *
-   * @sets oThis.entityIdsArrayLength
+   * @sets oThis.entityHighestPosition
    *
    * @returns {Promise<never>}
    */
@@ -154,7 +154,7 @@ class Insert extends ServiceBase {
       return Promise.reject(cacheResponse);
     }
 
-    const entityIdsArray = cacheResponse.data[oThis.entityKind];
+    const entityIdsArray = cacheResponse.data.entityIds;
 
     // If entityId already exists in the curated entities table.
     if (entityIdsArray.indexOf(oThis.entityId) > -1) {
@@ -168,7 +168,7 @@ class Insert extends ServiceBase {
       );
     }
 
-    oThis.entityIdsArrayLength = entityIdsArray.length;
+    oThis.entityHighestPosition = cacheResponse.data.highestPosition;
   }
 
   /**
@@ -179,7 +179,7 @@ class Insert extends ServiceBase {
   async updateEntities() {
     const oThis = this;
 
-    const newElementPosition = oThis.entityIdsArrayLength + 1;
+    const newElementPosition = oThis.entityHighestPosition + 1;
     const entityKindInt = curatedEntitiesConstants.invertedEntityKinds[oThis.entityKind];
     const insertArray = [oThis.entityId, entityKindInt, newElementPosition];
 

@@ -100,9 +100,9 @@ class DeleteForEntityIdAndKind extends ServiceBase {
       return Promise.reject(curatedEntityIdsByKindCacheRsp);
     }
 
-    const curatedEntityIdsForKind = curatedEntityIdsByKindCacheRsp.data[oThis.entityKind];
+    const curatedEntityIds = curatedEntityIdsByKindCacheRsp.data.entityIds;
 
-    if (curatedEntityIdsForKind.indexOf(oThis.entityId) === -1) {
+    if (curatedEntityIds.indexOf(oThis.entityId) === -1) {
       return Promise.reject(
         responseHelper.error({
           internal_error_identifier: 'a_s_a_c_d_2',
