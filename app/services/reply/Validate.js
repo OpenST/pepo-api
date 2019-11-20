@@ -34,6 +34,7 @@ class ValidateReplyParams extends ServiceBase {
 
     const oThis = this;
 
+    // TODO - replies - link and description are not validated. Why?
     oThis.currentUser = params.current_user;
     oThis.videoDescription = params.video_description;
     oThis.link = params.link;
