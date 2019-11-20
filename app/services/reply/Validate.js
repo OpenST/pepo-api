@@ -52,6 +52,8 @@ class ValidateReplyParams extends ServiceBase {
   async _asyncPerform() {
     const oThis = this;
 
+    // TODO - replies - first validate oThis.parentKind. If other than video, then return error.
+
     await oThis._validateVideoStatus();
 
     await oThis._validateApprovedCreator();
@@ -69,6 +71,7 @@ class ValidateReplyParams extends ServiceBase {
    * @returns {Promise<never>}
    * @private
    */
+  // TODO - replies - rename the method to validateParent
   async _validateVideoStatus() {
     const oThis = this;
 
@@ -90,6 +93,7 @@ class ValidateReplyParams extends ServiceBase {
         );
       }
 
+      // TODO - replies - where is oThis.status set. I was not able to find it.
       if (oThis.status === videoDetailsConstants.deletedStatus) {
         return Promise.reject(
           responseHelper.error({
@@ -114,6 +118,7 @@ class ValidateReplyParams extends ServiceBase {
    * @returns {Promise<void>}
    * @private
    */
+  // TODO - replies - rename the method to validateParentCreator
   async _validateApprovedCreator() {
     const oThis = this,
       parentVideoCreatorId = oThis.videoDetails.creatorUserId;
