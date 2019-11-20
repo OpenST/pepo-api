@@ -110,10 +110,9 @@ class MuteUser extends ServiceBase {
 
     if (isUserAlreadyMuted) {
       return Promise.reject(
-        responseHelper.paramValidationError({
+        responseHelper.error({
           internal_error_identifier: 'a_s_a_mu_3',
-          api_error_identifier: 'could_not_proceed',
-          params_error_identifiers: ['user_already_muted'],
+          api_error_identifier: 'user_already_muted',
           debug_options: {}
         })
       );

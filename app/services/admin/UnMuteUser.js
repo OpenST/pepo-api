@@ -109,10 +109,9 @@ class UnMuteUser extends ServiceBase {
 
     if (isUserAlreadyUnMuted) {
       return Promise.reject(
-        responseHelper.paramValidationError({
-          internal_error_identifier: 'a_s_a_umu_3',
-          api_error_identifier: 'could_not_proceed',
-          params_error_identifiers: ['user_already_unmuted'],
+        responseHelper.error({
+          internal_error_identifier: 'a_s_a_mu_3',
+          api_error_identifier: 'user_already_unmuted',
           debug_options: {}
         })
       );
