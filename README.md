@@ -194,6 +194,24 @@ Note: Get the webhooks id from above run(subscribe webhooks). Secret has to be o
   node executables/rabbitMqSubscribers/pepoMobileEventJobProcessor.js --cronProcessId 5
 ```
 
+
+* Cron for processing the cloudfront cache invalidation after video delete
+```bash
+  # note: for topics to subscribe and prefetchcount, please see params column of the cron_processes table
+  source set_env_vars.sh
+  node executables/rabbitMqSubscribers/cdnCacheInvalidationProcessor.js --cronProcessId 6
+```
+
+* Push Notifications related crons.
+```bash
+  # Hook processor cron
+  source set_env_vars.sh
+  node executables/pushNotification/hookProcessor.js --cronProcessId 8
+  # Aggragated push notifcations cron
+  source set_env_vars.sh
+  node executables/pushNotification/aggregator.js --cronProcessId 9
+```
+
 ## Web-sockets
 * Start web-socket server.
 ```bash
