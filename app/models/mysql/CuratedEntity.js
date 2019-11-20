@@ -102,38 +102,6 @@ class CuratedEntity extends ModelBase {
   }
 
   /**
-   * Get entity ids for particular entity kind.
-   *
-   * @param {number} entityId
-   * @param {string} entityKind
-   *
-   * @returns {Promise<{}>}
-   */
-  async getForIdAndKind(entityId, entityKind) {
-    const oThis = this;
-
-    const entityKindInt = curatedEntitiesConstants.invertedEntityKinds[entityKind];
-
-    if (!entityKindInt) {
-      return Promise.reject(new Error('Invalid entity kind.'));
-    }
-
-    const dbRows = await oThis
-      .select('*')
-      .where({
-        entity_id: entityId,
-        entity_kind: entityKindInt
-      })
-      .fire();
-
-    if (dbRows.length === 0) {
-      return {};
-    }
-
-    return oThis.formatDbData(dbRows[0]);
-  }
-
-  /**
    * Delete all rows of a particular entity kind.
    *
    * @param {string} entityKind
