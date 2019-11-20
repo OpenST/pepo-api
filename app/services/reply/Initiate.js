@@ -244,6 +244,8 @@ class InitiateReply extends ServiceBase {
   async _validateAndSaveReply() {
     const oThis = this;
 
+    // TODO - replies - oThis.addVideoParams should not be part of oThis.
+
     oThis.addVideoParams = {
       userId: oThis.currentUser.id,
       videoUrl: oThis.videoUrl,
