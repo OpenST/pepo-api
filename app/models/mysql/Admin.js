@@ -235,6 +235,11 @@ class AdminModel extends ModelBase {
       promisesArray.push(new AdminByEmailsCache({ emails: [params.email] }).clear());
     }
 
+    if (params.slackId) {
+      const AdminBySlackIdCache = require(rootPrefix + '/lib/cacheManagement/single/AdminBySlackId');
+      promisesArray.push(new AdminBySlackIdCache({ slackId: params.slackId }).clear());
+    }
+
     await Promise.all(promisesArray);
   }
 }
