@@ -7,9 +7,9 @@ const rootPrefix = '../../../..',
 /**
  * Class to order curated entities.
  *
- * @class Update
+ * @class Reorder
  */
-class Update extends ServiceBase {
+class Reorder extends ServiceBase {
   /**
    * Constructor to order curated entities.
    *
@@ -26,6 +26,8 @@ class Update extends ServiceBase {
 
     oThis.entityKind = params.entity_kind;
     oThis.entityIdsArray = params.entity_ids;
+
+    oThis.entityKindInt = 0;
   }
 
   /**
@@ -43,11 +45,13 @@ class Update extends ServiceBase {
 
     await oThis.updateEntities();
 
-    return responseHelper.successWithData();
+    return responseHelper.successWithData({});
   }
 
   /**
    * Validate and sanitize input parameters.
+   *
+   * @sets oThis.entityKindInt
    *
    * @returns {Promise<never>}
    */
@@ -65,7 +69,9 @@ class Update extends ServiceBase {
       );
     }
 
-    if (!curatedEntitiesConstants.invertedEntityKinds[oThis.entityKind]) {
+    oThis.entityKindInt = curatedEntitiesConstants.invertedEntityKinds[oThis.entityKind];
+
+    if (!oThis.entityKindInt) {
       return Promise.reject(
         responseHelper.paramValidationError({
           internal_error_identifier: 'a_s_a_c_u_2',
@@ -90,11 +96,23 @@ class Update extends ServiceBase {
     await CuratedEntityModel.flushCache({ entityKind: oThis.entityKind });
   }
 
+  /**
+   * Update curated entities table.
+   *
+   * @returns {Promise<*>}
+   */
   async updateEntities() {
     const oThis = this;
-  }
 
-  async fetchUsers() {}
+    const insertArray = [];
+
+    for (let index = 0; index < oThis.entityIdsArray.length; index++) {
+      insertArray.push([oThis.entityIdsArray[index], oThis.entityKindInt, index]);
+      // First position is entityId, second position is entityKind, third position is position of the entity.
+    }
+
+    await new CuratedEntityModel().insertEntities(insertArray);
+  }
 }
 
-module.exports = Update;
+module.exports = Reorder;
