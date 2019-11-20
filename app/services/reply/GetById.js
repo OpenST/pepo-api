@@ -69,7 +69,7 @@ class GetReplyById extends ServiceBase {
    * @private
    */
   async _validateReplyDetailId() {
-    // TODO - replies - do we need to add check for blocked relation between reply creator and current user. OR between parent creator and current user. Please confirm this with Junisha.
+    // TODO - replies - we need to add check for blocked relation between reply creator and current user.
     const oThis = this;
 
     const replyDetailCacheResp = await new ReplyDetailsByIdsCache({ ids: [oThis.replyId] }).fetch();
