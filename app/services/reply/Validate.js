@@ -34,7 +34,6 @@ class ValidateReplyParams extends ServiceBase {
 
     const oThis = this;
 
-    // TODO - replies - link and description are not validated. Why?
     oThis.currentUser = params.current_user;
     oThis.videoDescription = params.video_description;
     oThis.link = params.link;
@@ -53,11 +52,9 @@ class ValidateReplyParams extends ServiceBase {
   async _asyncPerform() {
     const oThis = this;
 
-    // TODO - replies - first validate oThis.parentKind. If other than video, then return error.
+    await oThis._validateParent();
 
-    await oThis._validateVideoStatus();
-
-    await oThis._validateApprovedCreator();
+    await oThis._validateParentCreator();
 
     await oThis._validateIfUserIsBlocked();
 
@@ -72,8 +69,7 @@ class ValidateReplyParams extends ServiceBase {
    * @returns {Promise<never>}
    * @private
    */
-  // TODO - replies - rename the method to validateParent
-  async _validateVideoStatus() {
+  async _validateParent() {
     const oThis = this;
 
     if (oThis.parentKind === replyDetailConstants.videoParentKind) {
@@ -94,8 +90,7 @@ class ValidateReplyParams extends ServiceBase {
         );
       }
 
-      // TODO - replies - where is oThis.status set. I was not able to find it.
-      if (oThis.status === videoDetailsConstants.deletedStatus) {
+      if (oThis.videoDetails.status === videoDetailsConstants.deletedStatus) {
         return Promise.reject(
           responseHelper.error({
             internal_error_identifier: 'a_s_r_v_2',
@@ -119,8 +114,7 @@ class ValidateReplyParams extends ServiceBase {
    * @returns {Promise<void>}
    * @private
    */
-  // TODO - replies - rename the method to validateParentCreator
-  async _validateApprovedCreator() {
+  async _validateParentCreator() {
     const oThis = this,
       parentVideoCreatorId = oThis.videoDetails.creatorUserId;
 
