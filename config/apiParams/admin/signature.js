@@ -126,7 +126,7 @@ const adminSignature = {
   [apiName.adminUpdateReplyDescription]: {
     mandatory: [
       {
-        parameter: 'reply_details_id',
+        parameter: 'reply_detail_id',
         validatorMethods: ['validateNonZeroInteger']
       },
       {
