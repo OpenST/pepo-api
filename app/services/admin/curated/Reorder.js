@@ -1,9 +1,13 @@
 const rootPrefix = '../../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
+  CommonValidators = require(rootPrefix + '/lib/validators/Common'),
+  UserCache = require(rootPrefix + '/lib/cacheManagement/multi/User'),
+  TagMultiCache = require(rootPrefix + '/lib/cacheManagement/multi/Tag'),
   CuratedEntityModel = require(rootPrefix + '/app/models/mysql/CuratedEntity'),
   AdminActivityLogModel = require(rootPrefix + '/app/models/mysql/AdminActivityLog'),
   CuratedEntityIdsByKindCache = require(rootPrefix + '/lib/cacheManagement/single/CuratedEntityIdsByKind'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
+  userConstants = require(rootPrefix + '/lib/globalConstant/user'),
   curatedEntitiesConstants = require(rootPrefix + '/lib/globalConstant/curatedEntities'),
   adminActivityLogConstants = require(rootPrefix + '/lib/globalConstant/adminActivityLogs');
 
@@ -37,7 +41,6 @@ class Reorder extends ServiceBase {
     oThis.entityIdsArray = params.entity_ids;
 
     oThis.oldCuratedOrder = [];
-    oThis.entityKindInt = 0;
   }
 
   /**
@@ -65,39 +68,108 @@ class Reorder extends ServiceBase {
   /**
    * Validate and sanitize input parameters.
    *
-   * @sets oThis.entityKindInt
-   *
    * @returns {Promise<never>}
    */
   async validateAndSanitize() {
     const oThis = this;
 
-    oThis.entityIdsArray = JSON.parse(oThis.entityIdsArray);
+    const uniqueEntityIdsArray = [...new Set(oThis.entityIdsArray)];
 
-    oThis.entityIdsArray = [...new Set(oThis.entityIdsArray)];
-
-    if (oThis.entityIdsArray.length === 0 || oThis.entityIdsArray.length > 20) {
+    if (uniqueEntityIdsArray.length !== oThis.entityIdsArray.length) {
       return Promise.reject(
         responseHelper.paramValidationError({
-          internal_error_identifier: 'a_s_a_c_u_1',
+          internal_error_identifier: 'a_s_a_c_r_1',
           api_error_identifier: 'invalid_api_params',
           params_error_identifiers: ['invalid_entity_ids'],
-          debug_options: { entity_ids: oThis.entityIdsArray }
+          debug_options: { entityIds: oThis.entityIdsArray }
         })
       );
     }
 
-    oThis.entityKindInt = curatedEntitiesConstants.invertedEntityKinds[oThis.entityKind];
-
-    if (!oThis.entityKindInt) {
+    if (oThis.entityIdsArray.length === 0 || oThis.entityIdsArray.length > 20) {
       return Promise.reject(
         responseHelper.paramValidationError({
-          internal_error_identifier: 'a_s_a_c_u_2',
+          internal_error_identifier: 'a_s_a_c_r_2',
           api_error_identifier: 'invalid_api_params',
-          params_error_identifiers: ['invalid_entity_kind'],
-          debug_options: { entity_kind: oThis.entityKind }
+          params_error_identifiers: ['invalid_entity_ids'],
+          debug_options: { entityIds: oThis.entityIdsArray }
         })
       );
+    }
+
+    if (oThis.entityKind === curatedEntitiesConstants.userEntityKind) {
+      await oThis.fetchAndValidateUsers();
+    } else if (oThis.entityKind === curatedEntitiesConstants.tagsEntityKind) {
+      await oThis.fetchAndValidateTags();
+    } else {
+      return Promise.reject(
+        responseHelper.paramValidationError({
+          internal_error_identifier: 'a_s_a_c_r_3',
+          api_error_identifier: 'invalid_api_params',
+          params_error_identifiers: ['invalid_entity_kind'],
+          debug_options: { entityKind: oThis.entityKind }
+        })
+      );
+    }
+  }
+
+  /**
+   * Fetch and validate users.
+   *
+   * @returns {Promise<never>}
+   */
+  async fetchAndValidateUsers() {
+    const oThis = this;
+
+    const userDetailsCacheResponse = await new UserCache({ ids: oThis.entityIdsArray }).fetch();
+    if (userDetailsCacheResponse.isFailure()) {
+      return Promise.reject(userDetailsCacheResponse);
+    }
+
+    const userData = userDetailsCacheResponse.data;
+
+    for (let index = 0; index < oThis.entityIdsArray.length; index++) {
+      const userObject = userData[oThis.entityIdsArray[index]];
+      if (!CommonValidators.validateNonEmptyObject(userObject) || userObject.status !== userConstants.activeStatus) {
+        return Promise.reject(
+          responseHelper.paramValidationError({
+            internal_error_identifier: 'a_s_a_c_r_4',
+            api_error_identifier: 'invalid_api_params',
+            params_error_identifiers: ['invalid_entity_ids'],
+            debug_options: { entityId: oThis.entityIdsArray }
+          })
+        );
+      }
+    }
+  }
+
+  /**
+   * Fetch and validate tags.
+   *
+   * @returns {Promise<never>}
+   */
+  async fetchAndValidateTags() {
+    const oThis = this;
+
+    const tagsCacheResponse = await new TagMultiCache({ ids: oThis.entityIdsArray }).fetch();
+    if (tagsCacheResponse.isFailure()) {
+      return Promise.reject(tagsCacheResponse);
+    }
+
+    const tagData = tagsCacheResponse.data;
+
+    for (let index = 0; index < oThis.entityIdsArray.length; index++) {
+      const tagObject = tagData[oThis.entityIdsArray[index]];
+      if (!CommonValidators.validateNonEmptyObject(tagObject)) {
+        return Promise.reject(
+          responseHelper.paramValidationError({
+            internal_error_identifier: 'a_s_a_c_r_5',
+            api_error_identifier: 'invalid_api_params',
+            params_error_identifiers: ['invalid_entity_ids'],
+            debug_options: { entityIds: oThis.entityIdsArray }
+          })
+        );
+      }
     }
   }
 
@@ -145,8 +217,10 @@ class Reorder extends ServiceBase {
 
     const insertArray = [];
 
+    const entityKindInt = curatedEntitiesConstants.invertedEntityKinds[oThis.entityKind];
+
     for (let index = 0; index < oThis.entityIdsArray.length; index++) {
-      insertArray.push([oThis.entityIdsArray[index], oThis.entityKindInt, index + 1]);
+      insertArray.push([oThis.entityIdsArray[index], entityKindInt, index + 1]);
       // First position is entityId, second position is entityKind, third position is position of the entity.
     }
 
