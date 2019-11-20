@@ -250,6 +250,20 @@ router.post('/update-video/:video_id/description', sanitizer.sanitizeDynamicUrlP
   );
 });
 
+/* Update video reply description. */
+router.post('/update-reply-video/:reply_detail_id/description', sanitizer.sanitizeDynamicUrlParams, function(
+  req,
+  res,
+  next
+) {
+  req.decodedParams.apiName = apiName.adminUpdateReplyDescription;
+  req.decodedParams.reply_detail_id = req.params.reply_detail_id;
+
+  Promise.resolve(
+    routeHelper.perform(req, res, next, '/admin/reply/UpdateReplyDescription', 'r_a_v1_ad_uvl_3', null, null, null)
+  );
+});
+
 /* Logged in Admin */
 router.get('/current', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.loggedInAdmin;
