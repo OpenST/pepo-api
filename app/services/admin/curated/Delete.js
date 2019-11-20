@@ -140,7 +140,7 @@ class DeleteForEntityIdAndKind extends ServiceBase {
 
     await new AdminActivityLogModel().insertAction({
       adminId: oThis.currentAdminId,
-      actionOn: oThis.entityKind,
+      actionOn: oThis.entityId,
       extraData: JSON.stringify({ eids: [oThis.entityId], enk: oThis.entityKind }),
       action: adminActivityLogConstants.deleteCuratedEntity
     });

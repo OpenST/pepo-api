@@ -2,6 +2,7 @@ const rootPrefix = '../../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   CuratedEntityModel = require(rootPrefix + '/app/models/mysql/CuratedEntity'),
   AdminActivityLogModel = require(rootPrefix + '/app/models/mysql/AdminActivityLog'),
+  CuratedEntityIdsByKindCache = require(rootPrefix + '/lib/cacheManagement/single/CuratedEntityIdsByKind'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   curatedEntitiesConstants = require(rootPrefix + '/lib/globalConstant/curatedEntities'),
   adminActivityLogConstants = require(rootPrefix + '/lib/globalConstant/adminActivityLogs');
@@ -35,6 +36,7 @@ class Reorder extends ServiceBase {
     oThis.entityKind = params.entity_kind;
     oThis.entityIdsArray = params.entity_ids;
 
+    oThis.oldCuratedOrder = [];
     oThis.entityKindInt = 0;
   }
 
@@ -48,6 +50,8 @@ class Reorder extends ServiceBase {
     const oThis = this;
 
     await oThis.validateAndSanitize();
+
+    await oThis.fetchExistingEntities();
 
     await oThis.deleteExistingEntities();
 
@@ -94,6 +98,27 @@ class Reorder extends ServiceBase {
   }
 
   /**
+   * Fetch existing entities.
+   *
+   * @sets oThis.oldCuratedOrder
+   *
+   * @returns {Promise<never>}
+   */
+  async fetchExistingEntities() {
+    const oThis = this;
+
+    const cacheResponse = await new CuratedEntityIdsByKindCache({
+      entityKind: oThis.entityKind
+    }).fetch();
+
+    if (!cacheResponse || cacheResponse.isFailure()) {
+      return Promise.reject(cacheResponse);
+    }
+
+    oThis.oldCuratedOrder = cacheResponse.data[oThis.entityKind];
+  }
+
+  /**
    * Delete existing entries for the entity kind.
    *
    * @returns {Promise<void>}
@@ -135,8 +160,12 @@ class Reorder extends ServiceBase {
 
     await new AdminActivityLogModel().insertAction({
       adminId: oThis.currentAdminId,
-      actionOn: oThis.entityKind,
-      extraData: JSON.stringify({ eids: oThis.entityIdsArray, enk: oThis.entityKind }),
+      actionOn: 0,
+      extraData: JSON.stringify({
+        oldEids: oThis.oldCuratedOrder,
+        newEids: oThis.entityIdsArray,
+        enk: oThis.entityKind
+      }),
       action: adminActivityLogConstants.reorderCuratedEntity
     });
   }
