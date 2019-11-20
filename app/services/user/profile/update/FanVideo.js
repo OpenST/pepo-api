@@ -218,9 +218,8 @@ class UpdateFanVideo extends UpdateProfileBase {
         userId: oThis.profileUserId,
         videoId: oThis.videoId
       };
-      await bgJob.enqueue(bgJobConstants.slackContentMonitoringJobTopic, messagePayload);
 
-      promiseArray.push(bgJob.enqueue(bgJobConstants.slackContentMonitoringJobTopic, messagePayload));
+      promiseArray.push(bgJob.enqueue(bgJobConstants.contentMonitoringJobTopic, messagePayload));
       // Notification would be published only if user is approved.
       promiseArray.push(
         notificationJobEnqueue.enqueue(notificationJobConstants.videoAdd, {
@@ -232,7 +231,7 @@ class UpdateFanVideo extends UpdateProfileBase {
       const messagePayload = {
         userId: oThis.profileUserId
       };
-      promiseArray.push(bgJob.enqueue(bgJobConstants.slackApproveNewCreatorJobTopic, messagePayload));
+      promiseArray.push(bgJob.enqueue(bgJobConstants.approveNewCreatorJobTopic, messagePayload));
     }
 
     await Promise.all(promiseArray);
