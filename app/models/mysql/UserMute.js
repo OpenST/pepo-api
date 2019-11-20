@@ -78,10 +78,12 @@ class UserMute extends ModelBase {
       .fire();
 
     const response = {};
+    for (let index = 0; index < user2Ids.length; index++) {
+      response[user2Ids[index]] = { all: 0 };
+    }
 
     for (let index = 0; index < dbRows.length; index++) {
       const formatDbRow = oThis.formatDbData(dbRows[index]);
-      response[formatDbRow.user2Id] = response[formatDbRow.user2Id] || { all: 0 };
       if (formatDbRow.user1Id == 0) {
         response[formatDbRow.user2Id]['all'] = 1;
       }
@@ -97,6 +99,26 @@ class UserMute extends ModelBase {
    */
   static get userRelationUniqueIndexName() {
     return 'uk_1';
+  }
+
+  /**
+   * Flush cache.
+   *
+   * @param {object} params
+   * @param {number} params.user2Ids
+   *
+   * @returns {Promise<*>}
+   */
+  static async flushCache(params) {
+    const promisesArray = [];
+
+    if (params.user2Id) {
+      const UserMuteByUser2IdsForGlobalCache = require(rootPrefix +
+        '/lib/cacheManagement/multi/UserMuteByUser2IdsForGlobal');
+      promisesArray.push(new UserMuteByUser2IdsForGlobalCache({ user2Ids: [params.user2Id] }).clear());
+    }
+
+    await Promise.all(promisesArray);
   }
 }
 

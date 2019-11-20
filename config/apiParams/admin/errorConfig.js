@@ -50,6 +50,16 @@ const adminErrorConfig = {
     code: 'invalid',
     message: 'User is already approved.'
   },
+  user_already_muted: {
+    parameter: 'user_id',
+    code: 'invalid',
+    message: 'User is already muted.'
+  },
+  user_already_unmuted: {
+    parameter: 'user_id',
+    code: 'invalid',
+    message: 'User is already un muted.'
+  },
   user_already_denied_as_creator: {
     parameter: 'user_id',
     code: 'invalid',
