@@ -64,7 +64,7 @@ class Insert extends ServiceBase {
 
     if (oThis.entityKind === curatedEntitiesConstants.userEntityKind) {
       await oThis.fetchAndValidateUser();
-    } else if (oThis.entityKind === curatedEntitiesConstants.userEntityKind) {
+    } else if (oThis.entityKind === curatedEntitiesConstants.tagsEntityKind) {
       await oThis.fetchAndValidateTag();
     } else {
       return Promise.reject(
