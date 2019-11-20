@@ -64,7 +64,7 @@ class Reorder extends ServiceBase {
           internal_error_identifier: 'a_s_a_c_u_1',
           api_error_identifier: 'invalid_api_params',
           params_error_identifiers: ['invalid_entity_ids'],
-          debug_options: { entity_ids: oThis.entity_ids }
+          debug_options: { entity_ids: oThis.entityIdsArray }
         })
       );
     }
@@ -77,7 +77,7 @@ class Reorder extends ServiceBase {
           internal_error_identifier: 'a_s_a_c_u_2',
           api_error_identifier: 'invalid_api_params',
           params_error_identifiers: ['invalid_entity_kind'],
-          debug_options: { entity_kind: oThis.entity_kind }
+          debug_options: { entity_kind: oThis.entityKind }
         })
       );
     }
