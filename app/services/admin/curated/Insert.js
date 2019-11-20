@@ -4,9 +4,11 @@ const rootPrefix = '../../../..',
   UserCache = require(rootPrefix + '/lib/cacheManagement/multi/User'),
   TagMultiCache = require(rootPrefix + '/lib/cacheManagement/multi/Tag'),
   CuratedEntityModel = require(rootPrefix + '/app/models/mysql/CuratedEntity'),
+  AdminActivityLogModel = require(rootPrefix + '/app/models/mysql/AdminActivityLog'),
   CuratedEntityIdsByKindCache = require(rootPrefix + '/lib/cacheManagement/single/CuratedEntityIdsByKind'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
-  curatedEntitiesConstants = require(rootPrefix + '/lib/globalConstant/curatedEntities');
+  curatedEntitiesConstants = require(rootPrefix + '/lib/globalConstant/curatedEntities'),
+  adminActivityLogConstants = require(rootPrefix + '/lib/globalConstant/adminActivityLogs');
 
 /**
  * Class to insert new entry in curated entities.
@@ -18,6 +20,8 @@ class Insert extends ServiceBase {
    * Constructor to insert new entry in curated entities.
    *
    * @param {object} params
+   * @param {object} params.current_admin
+   * @param {number} params.current_admin.id
    * @param {string} params.entity_kind
    * @param {number} params.entity_id
    *
@@ -30,6 +34,7 @@ class Insert extends ServiceBase {
 
     const oThis = this;
 
+    oThis.currentAdminId = params.current_admin.id;
     oThis.entityKind = params.entity_kind;
     oThis.entityId = params.entity_id;
 
@@ -50,6 +55,8 @@ class Insert extends ServiceBase {
     await oThis.fetchExistingEntities();
 
     await oThis.updateEntities();
+
+    await oThis.logAdminActivity();
 
     return responseHelper.successWithData({});
   }
@@ -179,6 +186,23 @@ class Insert extends ServiceBase {
     await new CuratedEntityModel().insertEntities([insertArray]);
 
     await CuratedEntityModel.flushCache({ entityKind: oThis.entityKind });
+  }
+
+  /**
+   * Log admin activity.
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async logAdminActivity() {
+    const oThis = this;
+
+    await new AdminActivityLogModel().insertAction({
+      adminId: oThis.currentAdminId,
+      actionOn: oThis.entityKind,
+      extraData: JSON.stringify({ eids: [oThis.entityId], enk: oThis.entityKind }),
+      action: adminActivityLogConstants.insertNewCuratedEntity
+    });
   }
 }
 

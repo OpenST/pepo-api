@@ -1,9 +1,11 @@
 const rootPrefix = '../../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   CuratedEntityModel = require(rootPrefix + '/app/models/mysql/CuratedEntity'),
+  AdminActivityLogModel = require(rootPrefix + '/app/models/mysql/AdminActivityLog'),
   CuratedEntityIdsByKindCache = require(rootPrefix + '/lib/cacheManagement/single/CuratedEntityIdsByKind'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
-  curatedEntitiesConstants = require(rootPrefix + '/lib/globalConstant/curatedEntities');
+  curatedEntitiesConstants = require(rootPrefix + '/lib/globalConstant/curatedEntities'),
+  adminActivityLogConstants = require(rootPrefix + '/lib/globalConstant/adminActivityLogs');
 
 /**
  * Class to delete specific curated entity row.
@@ -15,6 +17,8 @@ class DeleteForEntityIdAndKind extends ServiceBase {
    * Constructor to delete specific curated entity row.
    *
    * @param {object} params
+   * @param {object} params.current_admin
+   * @param {number} params.current_admin.id
    * @param {string} params.entity_kind
    * @param {number} params.entity_id
    *
@@ -27,6 +31,7 @@ class DeleteForEntityIdAndKind extends ServiceBase {
 
     const oThis = this;
 
+    oThis.currentAdminId = params.current_admin.id;
     oThis.entityKind = params.entity_kind;
     oThis.entityId = params.entity_id;
 
@@ -47,6 +52,8 @@ class DeleteForEntityIdAndKind extends ServiceBase {
     await oThis.fetchAndValidateExistingEntity();
 
     await oThis.deleteEntity();
+
+    await oThis.logAdminActivity();
 
     return responseHelper.successWithData({});
   }
@@ -120,6 +127,23 @@ class DeleteForEntityIdAndKind extends ServiceBase {
     await new CuratedEntityModel().deleteForIdAndKind(oThis.entityId, oThis.entityKind);
 
     await CuratedEntityModel.flushCache({ entityKind: oThis.entityKind });
+  }
+
+  /**
+   * Log admin activity.
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async logAdminActivity() {
+    const oThis = this;
+
+    await new AdminActivityLogModel().insertAction({
+      adminId: oThis.currentAdminId,
+      actionOn: oThis.entityKind,
+      extraData: JSON.stringify({ eids: [oThis.entityId], enk: oThis.entityKind }),
+      action: adminActivityLogConstants.deleteCuratedEntity
+    });
   }
 }
 

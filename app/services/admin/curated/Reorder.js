@@ -1,8 +1,10 @@
 const rootPrefix = '../../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   CuratedEntityModel = require(rootPrefix + '/app/models/mysql/CuratedEntity'),
+  AdminActivityLogModel = require(rootPrefix + '/app/models/mysql/AdminActivityLog'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
-  curatedEntitiesConstants = require(rootPrefix + '/lib/globalConstant/curatedEntities');
+  curatedEntitiesConstants = require(rootPrefix + '/lib/globalConstant/curatedEntities'),
+  adminActivityLogConstants = require(rootPrefix + '/lib/globalConstant/adminActivityLogs');
 
 /**
  * Class to order curated entities.
@@ -14,6 +16,9 @@ class Reorder extends ServiceBase {
    * Constructor to order curated entities.
    *
    * @param {object} params
+   * @param {object} params
+   * @param {object} params.current_admin
+   * @param {number} params.current_admin.id
    * @param {string} params.entity_kind
    * @param {array<number>} params.entity_ids
    *
@@ -26,6 +31,7 @@ class Reorder extends ServiceBase {
 
     const oThis = this;
 
+    oThis.currentAdminId = params.current_admin.id;
     oThis.entityKind = params.entity_kind;
     oThis.entityIdsArray = params.entity_ids;
 
@@ -46,6 +52,8 @@ class Reorder extends ServiceBase {
     await oThis.deleteExistingEntities();
 
     await oThis.updateEntities();
+
+    await oThis.logAdminActivity();
 
     return responseHelper.successWithData({});
   }
@@ -114,6 +122,23 @@ class Reorder extends ServiceBase {
     }
 
     await new CuratedEntityModel().insertEntities(insertArray);
+  }
+
+  /**
+   * Log admin activity.
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async logAdminActivity() {
+    const oThis = this;
+
+    await new AdminActivityLogModel().insertAction({
+      adminId: oThis.currentAdminId,
+      actionOn: oThis.entityKind,
+      extraData: JSON.stringify({ eids: oThis.entityIdsArray, enk: oThis.entityKind }),
+      action: adminActivityLogConstants.reorderCuratedEntity
+    });
   }
 }
 
