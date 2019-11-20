@@ -85,7 +85,7 @@ class CuratedEntity extends ModelBase {
     }
 
     const dbRows = await oThis
-      .select('entity_id')
+      .select('id, entity_id')
       .where({ entity_kind: entityKindInt })
       .order_by('position ASC')
       .fire();
@@ -93,7 +93,7 @@ class CuratedEntity extends ModelBase {
     const entityIds = [];
     for (let index = 0; index < dbRows.length; index++) {
       const curatedEntity = dbRows[index];
-      entityIds.push(curatedEntity.entity_kind);
+      entityIds.push(curatedEntity.entity_id);
     }
 
     return { [entityKind]: entityIds };
