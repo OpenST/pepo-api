@@ -14,6 +14,8 @@ class Reorder extends ServiceBase {
    * Constructor to order curated entities.
    *
    * @param {object} params
+   * @param {string} params.entity_kind
+   * @param {array<number>} params.entity_ids
    *
    * @augments ServiceBase
    *

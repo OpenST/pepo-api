@@ -171,9 +171,14 @@ const adminErrorConfig = {
     message: 'Invalid entity kind.'
   },
   invalid_entity_ids: {
-    parameter: 'entity_id',
+    parameter: 'entity_ids',
     code: 'invalid',
     message: 'Invalid entity ids.'
+  },
+  invalid_entity_id: {
+    parameter: 'entity_id',
+    code: 'invalid',
+    message: 'Invalid entity id.'
   }
 };
 
