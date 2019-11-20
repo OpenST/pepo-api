@@ -1,0 +1,125 @@
+const rootPrefix = '../../../..',
+  ServiceBase = require(rootPrefix + '/app/services/Base'),
+  CuratedEntityModel = require(rootPrefix + '/app/models/mysql/CuratedEntity'),
+  CuratedEntityIdsByKindCache = require(rootPrefix + '/lib/cacheManagement/single/CuratedEntityIdsByKind'),
+  responseHelper = require(rootPrefix + '/lib/formatter/response'),
+  commonValidators = require(rootPrefix + '/lib/validators/Common'),
+  curatedEntitiesConstants = require(rootPrefix + '/lib/globalConstant/curatedEntities');
+
+/**
+ * Class to delete specific curated entity row.
+ *
+ * @class DeleteForEntityIdAndKind
+ */
+class DeleteForEntityIdAndKind extends ServiceBase {
+  /**
+   * Constructor to delete specific curated entity row.
+   *
+   * @param {object} params
+   *
+   * @augments ServiceBase
+   *
+   * @constructor
+   */
+  constructor(params) {
+    super();
+
+    const oThis = this;
+
+    oThis.entityKind = params.entity_kind;
+    oThis.entityId = params.entity_id;
+
+    oThis.entityKindInt = 0;
+  }
+
+  /**
+   * Async perform.
+   *
+   * @returns {Promise<result>}
+   * @private
+   */
+  async _asyncPerform() {
+    const oThis = this;
+
+    await oThis.validateAndSanitize();
+
+    await oThis.fetchAndValidateExistingEntity();
+
+    await oThis.deleteEntity();
+
+    return responseHelper.successWithData({});
+  }
+
+  /**
+   * Validate and sanitize input parameters.
+   *
+   * @sets oThis.entityKindInt
+   *
+   * @returns {Promise<never>}
+   */
+  async validateAndSanitize() {
+    const oThis = this;
+
+    oThis.entityKindInt = curatedEntitiesConstants.invertedEntityKinds[oThis.entityKind];
+
+    if (!oThis.entityKindInt) {
+      return Promise.reject(
+        responseHelper.paramValidationError({
+          internal_error_identifier: 'a_s_a_c_d_1',
+          api_error_identifier: 'invalid_api_params',
+          params_error_identifiers: ['invalid_entity_kind'],
+          debug_options: { entity_kind: oThis.entityKind }
+        })
+      );
+    }
+  }
+
+  /**
+   * Fetch existing entry for the entity kind and validate if present.
+   *
+   * @sets oThis.entityDetails
+   *
+   * @returns {Promise<void>}
+   */
+  async fetchAndValidateExistingEntity() {
+    const oThis = this;
+
+    const curatedEntityIdsByKindCacheRsp = await new CuratedEntityIdsByKindCache({
+      entityKind: oThis.entityKind
+    }).fetch();
+
+    if (!curatedEntityIdsByKindCacheRsp || curatedEntityIdsByKindCacheRsp.isFailure()) {
+      return Promise.reject(curatedEntityIdsByKindCacheRsp);
+    }
+
+    const curatedEntityIdsForKind = curatedEntityIdsByKindCacheRsp.data[oThis.entityKind];
+
+    if (curatedEntityIdsForKind.indexOf(oThis.entityId) === -1) {
+      return Promise.reject(
+        responseHelper.error({
+          internal_error_identifier: 'a_s_a_c_d_2',
+          api_error_identifier: 'entity_not_found',
+          debug_options: {
+            entity_kind: oThis.entityKind,
+            entity_id: oThis.entityId
+          }
+        })
+      );
+    }
+  }
+
+  /**
+   * Delete curated entity from table.
+   *
+   * @returns {Promise<*>}
+   */
+  async deleteEntity() {
+    const oThis = this;
+
+    await new CuratedEntityModel().deleteForIdAndKind(oThis.entityId, oThis.entityKind);
+
+    await CuratedEntityModel.flushCache({ entityKind: oThis.entityKind });
+  }
+}
+
+module.exports = DeleteForEntityIdAndKind;
