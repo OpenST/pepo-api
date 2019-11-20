@@ -143,14 +143,14 @@ class Insert extends ServiceBase {
     const oThis = this;
 
     const cacheResponse = await new CuratedEntityIdsByKindCache({ entityKind: oThis.entityKind }).fetch();
-    if (cacheResponse.isFailure()) {
+    if (!cacheResponse || cacheResponse.isFailure()) {
       return Promise.reject(cacheResponse);
     }
 
     const entityIdsArray = cacheResponse.data[oThis.entityKind];
 
     // If entityId already exists in the curated entities table.
-    if (entityIdsArray.indexOf(oThis.entityId.toString()) > -1) {
+    if (entityIdsArray.indexOf(oThis.entityId) > -1) {
       return Promise.reject(
         responseHelper.paramValidationError({
           internal_error_identifier: 'a_s_a_c_i_4',

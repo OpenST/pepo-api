@@ -3,7 +3,6 @@ const rootPrefix = '../../../..',
   CuratedEntityModel = require(rootPrefix + '/app/models/mysql/CuratedEntity'),
   CuratedEntityIdsByKindCache = require(rootPrefix + '/lib/cacheManagement/single/CuratedEntityIdsByKind'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
-  commonValidators = require(rootPrefix + '/lib/validators/Common'),
   curatedEntitiesConstants = require(rootPrefix + '/lib/globalConstant/curatedEntities');
 
 /**
@@ -16,6 +15,8 @@ class DeleteForEntityIdAndKind extends ServiceBase {
    * Constructor to delete specific curated entity row.
    *
    * @param {object} params
+   * @param {string} params.entity_kind
+   * @param {number} params.entity_id
    *
    * @augments ServiceBase
    *
@@ -68,7 +69,7 @@ class DeleteForEntityIdAndKind extends ServiceBase {
           internal_error_identifier: 'a_s_a_c_d_1',
           api_error_identifier: 'invalid_api_params',
           params_error_identifiers: ['invalid_entity_kind'],
-          debug_options: { entity_kind: oThis.entityKind }
+          debug_options: { entityKind: oThis.entityKind }
         })
       );
     }

@@ -45,9 +45,9 @@ class CuratedEntity extends ModelBase {
 
     const formattedData = {
       id: dbRow.id,
-      entityId: dbRow.entity_id,
+      entityId: Number(dbRow.entity_id),
       entityKind: curatedEntitiesConstants.entityKinds[dbRow.entity_kind],
-      position: dbRow.position,
+      position: Number(dbRow.position),
       createdAt: dbRow.created_at,
       updatedAt: dbRow.updated_at
     };
@@ -85,15 +85,15 @@ class CuratedEntity extends ModelBase {
     }
 
     const dbRows = await oThis
-      .select('id, entity_id')
+      .select('entity_id')
       .where({ entity_kind: entityKindInt })
       .order_by('position ASC')
       .fire();
 
     const entityIds = [];
     for (let index = 0; index < dbRows.length; index++) {
-      const curatedEntity = dbRows[index];
-      entityIds.push(curatedEntity.entity_id);
+      const curatedEntity = oThis.formatDbData(dbRows[index]);
+      entityIds.push(curatedEntity.entityId);
     }
 
     return { [entityKind]: entityIds };
