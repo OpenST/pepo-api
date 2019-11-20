@@ -87,6 +87,8 @@ class GetReplyList extends ServiceBase {
   async _validateAndSanitizeParams() {
     const oThis = this;
 
+    // TODO - replies - there is no validation on video_id status. Please discuss internally and remove this TODO if needed.
+
     oThis.currentUserId = oThis.currentUser ? Number(oThis.currentUser.id) : 0;
 
     if (oThis.paginationIdentifier) {
