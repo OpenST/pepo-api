@@ -147,7 +147,10 @@ class CuratedEntity extends ModelBase {
       return Promise.reject(new Error('Invalid entity kind.'));
     }
 
-    await oThis.delete({ entity_kind: entityKindInt }).fire();
+    await oThis
+      .delete()
+      .where({ entity_kind: entityKindInt })
+      .fire();
   }
 
   /**
