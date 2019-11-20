@@ -171,7 +171,8 @@ class CuratedEntity extends ModelBase {
     }
 
     await oThis
-      .delete({
+      .delete()
+      .where({
         entity_id: entityId,
         entity_kind: entityKindInt
       })
