@@ -159,21 +159,33 @@ class GetReplyList extends ServiceBase {
 
     const userVideosObj = new GetUserVideosList({
       currentUserId: oThis.currentUserId,
+      videoIds: [oThis.videoId],
       replyDetailIds: oThis.replyDetailIds,
       isAdmin: oThis.isAdmin,
       fetchVideoViewDetails: 1
     });
 
-    const response = await userVideosObj.perform();
-    if (response.isFailure()) {
-      return Promise.reject(response);
+    const cacheResponse = await userVideosObj.perform();
+    if (cacheResponse.isFailure()) {
+      return Promise.reject(cacheResponse);
     }
 
-    oThis.userRepliesMap = response.data;
+    oThis.userRepliesMap = cacheResponse.data;
+    const videoDetails = oThis.userRepliesMap.videoDetailsMap[oThis.videoId];
+    const videoCreatorId = videoDetails.creatorUserId;
+
     for (let ind = 0; ind < oThis.replyDetailIds.length; ind++) {
       const rdId = oThis.replyDetailIds[ind];
       const rdObj = oThis.userRepliesMap.replyDetailsMap[rdId];
       oThis.videoReplies.push(oThis.userRepliesMap.fullVideosMap[rdObj.entityId]);
+
+      oThis.userRepliesMap.currentUserVideoRelationsMap[rdId].canDelete = 0;
+      if (
+        +videoCreatorId === +oThis.currentUserId ||
+        +oThis.userRepliesMap.replyDetailsMap[rdId].creatorUserId === +oThis.currentUserId
+      ) {
+        oThis.userRepliesMap.currentUserVideoRelationsMap[rdId].canDelete = 1;
+      }
     }
   }
 
