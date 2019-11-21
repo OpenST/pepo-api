@@ -16,6 +16,7 @@ class SlackEventFactory extends ServiceBase {
    *
    * @param {object} params
    * @param {object} params.webhookParams: webhook params
+   * @param {object} params.current_admin: User Admin
    *
    * @augments ServiceBase
    *
@@ -27,6 +28,7 @@ class SlackEventFactory extends ServiceBase {
     const oThis = this;
 
     oThis.eventData = params.webhookParams;
+    oThis.currentAdmin = params.current_admin;
     oThis.eventType = null;
     oThis.eventParams = {};
   }
@@ -61,7 +63,7 @@ class SlackEventFactory extends ServiceBase {
 
     logger.log('Validate for salck events factory');
 
-    if (!oThis.eventData || !CommonValidators.validateString(oThis.eventData)) {
+    if (!oThis.eventData || !CommonValidators.validateNonEmptyObject(oThis.eventData)) {
       return Promise.reject(
         responseHelper.error({
           internal_error_identifier: 'a_s_se_f_1',
@@ -85,8 +87,7 @@ class SlackEventFactory extends ServiceBase {
     let action = oThis.eventData.actions[0].value,
       splittedAction = action.split('|'),
       eventType = splittedAction[0],
-      actionParams = splittedAction[1],
-      splittedActionParams = actionParams.split('|');
+      splittedActionParams = splittedAction.splice(0, 1);
 
     oThis.eventType = eventType;
 
@@ -110,6 +111,8 @@ class SlackEventFactory extends ServiceBase {
       oThis.eventParams[key] = value;
     }
 
+    console.log('The oThis.eventParams is : ', oThis.eventParams);
+
     return responseHelper.successWithData({});
   }
 
@@ -126,17 +129,26 @@ class SlackEventFactory extends ServiceBase {
     switch (oThis.eventType) {
       case slackConstants.approveUserEventType: {
         const ApproveUserClass = require(rootPrefix + '/app/services/slackEvents/ApproveUser');
-        eventResponse = await new ApproveUserClass(oThis.eventParams).perform();
+        eventResponse = await new ApproveUserClass({
+          eventParams: oThis.eventParams,
+          currentAdmin: oThis.currentAdmin
+        }).perform();
         break;
       }
       case slackConstants.blockUserEventType: {
         const BlockUserClass = require(rootPrefix + '/app/services/slackEvents/BlockUser');
-        eventResponse = await new BlockUserClass(oThis.eventParams).perform();
+        eventResponse = await new BlockUserClass({
+          eventParams: oThis.eventParams,
+          currentAdmin: oThis.currentAdmin
+        }).perform();
         break;
       }
       case slackConstants.deleteVideoEventType: {
         const DeleteVideoClass = require(rootPrefix + '/app/services/slackEvents/DeleteVideo');
-        eventResponse = await new DeleteVideoClass(oThis.eventParams).perform();
+        eventResponse = await new DeleteVideoClass({
+          eventParams: oThis.eventParams,
+          currentAdmin: oThis.currentAdmin
+        }).perform();
         break;
       }
       default: {
@@ -158,6 +170,8 @@ class SlackEventFactory extends ServiceBase {
           debug_options: { eventResponse: eventResponse, eventData: oThis.eventData }
         })
       );
+    } else {
+      return eventResponse;
     }
   }
 }

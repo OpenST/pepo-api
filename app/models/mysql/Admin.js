@@ -126,7 +126,7 @@ class AdminModel extends ModelBase {
       .select('id')
       .where({
         slack_id: slackId,
-        status: adminConstants.activeStatus
+        status: adminConstants.invertedStatuses[adminConstants.activeStatus]
       })
       .fire();
 
