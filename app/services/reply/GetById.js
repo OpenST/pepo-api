@@ -142,7 +142,8 @@ class GetReplyById extends ServiceBase {
       currentUserId: oThis.currentUserId,
       videoIds: [oThis.parentVideoId],
       replyDetailIds: [oThis.replyId],
-      isAdmin: oThis.isAdmin
+      isAdmin: oThis.isAdmin,
+      fetchVideoViewDetails: 1
     });
 
     const response = await userVideosObj.perform();
@@ -180,7 +181,7 @@ class GetReplyById extends ServiceBase {
       [entityTypeConstants.userProfilesMap]: oThis.userRepliesMap.userProfilesMap,
       [entityTypeConstants.currentUserUserContributionsMap]: oThis.userRepliesMap.currentUserUserContributionsMap,
       [entityTypeConstants.currentUserVideoContributionsMap]: oThis.userRepliesMap.currentUserVideoContributionsMap,
-      [entityTypeConstants.currentUserVideoRelationsMap]: oThis.userRepliesMap.currentUserVideoRelationsMap || {},
+      [entityTypeConstants.currentUserVideoRelationsMap]: oThis.userRepliesMap.currentUserVideoRelationsMap,
       [entityTypeConstants.userProfileAllowedActions]: oThis.userRepliesMap.userProfileAllowedActions,
       [entityTypeConstants.pricePointsMap]: oThis.userRepliesMap.pricePointsMap,
       usersByIdMap: oThis.userRepliesMap.usersByIdMap,
