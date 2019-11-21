@@ -243,6 +243,10 @@ const v1Signature = {
       {
         parameter: 'invite_code',
         validatorMethods: ['validateNonBlankString']
+      },
+      {
+        parameter: 'utm_params',
+        validatorMethods: ['validateObject']
       }
     ]
   },

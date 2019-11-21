@@ -45,6 +45,7 @@ class TwitterSignup extends ServiceBase {
    *
    * @param {string} params.inviterCodeId: invite code table id of inviter
    * @param {object} params.prelaunchInviteObj: prelaunch invite object, if user was part of pre-launch program
+   * @param {object} params.utmParams: utm params used while signup.
    *
    * @augments ServiceBase
    *
@@ -62,6 +63,7 @@ class TwitterSignup extends ServiceBase {
     oThis.inviterCodeId = params.inviterCodeId;
     oThis.twitterRespHeaders = params.twitterRespHeaders;
     oThis.prelaunchInviteObj = params.prelaunchInviteObj || {};
+    oThis.utmParams = params.utmParams || {};
 
     oThis.userId = null;
 

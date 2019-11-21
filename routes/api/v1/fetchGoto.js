@@ -7,6 +7,7 @@ const rootPrefix = '../../..',
   apiName = require(rootPrefix + '/lib/globalConstant/apiName'),
   sanitizer = require(rootPrefix + '/helpers/sanitizer'),
   entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
+  cookieHelper = require(rootPrefix + '/lib/cookieHelper'),
   responseEntityKey = require(rootPrefix + '/lib/globalConstant/responseEntityKey');
 
 /* Fetch go-to */
@@ -22,6 +23,10 @@ router.get('/', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
       serviceData: serviceResponse.data
     }).perform();
 
+    // Utm cookie would be set for user in case of signup goto only
+    if (serviceResponse.data.utmCookieValue) {
+      cookieHelper.setUserUtmCookie(res, serviceResponse.data.utmCookieValue);
+    }
     serviceResponse.data = wrapperFormatterRsp.data;
   };
 
