@@ -5,7 +5,7 @@ const rootPrefix = '../../..',
   ReplyDetailsByParentVideoPaginationCache = require(rootPrefix +
     '/lib/cacheManagement/single/ReplyDetailsByParentVideoPagination'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
-  entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
+  entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
   paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination');
 
 /**
@@ -64,8 +64,7 @@ class GetReplyList extends ServiceBase {
 
     await oThis._fetchReplyDetailIds();
 
-    const promisesArray = [];
-    promisesArray.push(oThis._setTokenDetails());
+    const promisesArray = [oThis._setTokenDetails()];
     if (oThis.replyDetailIds.length > 0) {
       promisesArray.push(oThis._getReplyVideos());
     }
@@ -129,6 +128,68 @@ class GetReplyList extends ServiceBase {
   }
 
   /**
+   * Fetch token details.
+   *
+   * @sets oThis.tokenDetails
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _setTokenDetails() {
+    const oThis = this;
+
+    const tokenResp = await new GetTokenService().perform();
+    if (tokenResp.isFailure()) {
+      return Promise.reject(tokenResp);
+    }
+
+    oThis.tokenDetails = tokenResp.data.tokenDetails;
+  }
+
+  /**
+   * Get videos.
+   *
+   * @sets oThis.userRepliesMap, oThis.videoReplies
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _getReplyVideos() {
+    const oThis = this;
+
+    const userVideosObj = new GetUserVideosList({
+      currentUserId: oThis.currentUserId,
+      videoIds: [oThis.videoId],
+      replyDetailIds: oThis.replyDetailIds,
+      isAdmin: oThis.isAdmin,
+      fetchVideoViewDetails: 1
+    });
+
+    const cacheResponse = await userVideosObj.perform();
+    if (cacheResponse.isFailure()) {
+      return Promise.reject(cacheResponse);
+    }
+
+    oThis.userRepliesMap = cacheResponse.data;
+    const videoDetails = oThis.userRepliesMap.videoDetailsMap[oThis.videoId];
+    const videoCreatorId = videoDetails.creatorUserId;
+
+    for (let ind = 0; ind < oThis.replyDetailIds.length; ind++) {
+      const rdId = oThis.replyDetailIds[ind];
+      const rdObj = oThis.userRepliesMap.replyDetailsMap[rdId];
+      oThis.videoReplies.push(oThis.userRepliesMap.fullVideosMap[rdObj.entityId]);
+
+      oThis.userRepliesMap.currentUserVideoRelationsMap[rdId].canDelete = 0;
+      if (
+        +videoCreatorId === +oThis.currentUserId ||
+        +oThis.userRepliesMap.replyDetailsMap[rdId].creatorUserId === +oThis.currentUserId
+      ) {
+        oThis.userRepliesMap.currentUserVideoRelationsMap[rdId].canDelete = 1;
+      }
+    }
+  }
+
+  /**
    * Add next page meta data.
    *
    * @sets oThis.responseMetaData
@@ -153,56 +214,6 @@ class GetReplyList extends ServiceBase {
   }
 
   /**
-   * Get videos.
-   *
-   * @sets oThis.userRepliesMap, oThis.videoReplies
-   *
-   * @returns {Promise<void>}
-   * @private
-   */
-  async _getReplyVideos() {
-    const oThis = this;
-
-    const userVideosObj = new GetUserVideosList({
-      currentUserId: oThis.currentUserId,
-      replyDetailIds: oThis.replyDetailIds,
-      isAdmin: oThis.isAdmin,
-      fetchVideoViewDetails: 1
-    });
-
-    const response = await userVideosObj.perform();
-    if (response.isFailure()) {
-      return Promise.reject(response);
-    }
-
-    oThis.userRepliesMap = response.data;
-    for (let ind = 0; ind < oThis.replyDetailIds.length; ind++) {
-      const rdId = oThis.replyDetailIds[ind];
-      const rdObj = oThis.userRepliesMap.replyDetailsMap[rdId];
-      oThis.videoReplies.push(oThis.userRepliesMap.fullVideosMap[rdObj.entityId]);
-    }
-  }
-
-  /**
-   * Fetch token details.
-   *
-   * @sets oThis.tokenDetails
-   *
-   * @returns {Promise<void>}
-   * @private
-   */
-  async _setTokenDetails() {
-    const oThis = this;
-
-    const tokenResp = await new GetTokenService().perform();
-    if (tokenResp.isFailure()) {
-      return Promise.reject(tokenResp);
-    }
-
-    oThis.tokenDetails = tokenResp.data.tokenDetails;
-  }
-
-  /**
    * Prepare final response.
    *
    * @returns {Promise<result>}
@@ -212,15 +223,16 @@ class GetReplyList extends ServiceBase {
     const oThis = this;
 
     return responseHelper.successWithData({
-      [entityType.userVideoList]: oThis.videoReplies,
-      [entityType.replyDetailsMap]: oThis.userRepliesMap.replyDetailsMap || {},
-      [entityType.videoDescriptionsMap]: oThis.userRepliesMap.videoDescriptionMap || {},
-      [entityType.userProfilesMap]: oThis.userRepliesMap.userProfilesMap || {},
-      [entityType.currentUserUserContributionsMap]: oThis.userRepliesMap.currentUserUserContributionsMap || {},
-      [entityType.currentUserVideoContributionsMap]: oThis.userRepliesMap.currentUserVideoContributionsMap || {},
-      [entityType.currentUserVideoRelationsMap]: oThis.userRepliesMap.currentUserVideoRelationsMap || {},
-      [entityType.userProfileAllowedActions]: oThis.userRepliesMap.userProfileAllowedActions || {},
-      [entityType.pricePointsMap]: oThis.userRepliesMap.pricePointsMap || {},
+      [entityTypeConstants.userVideoList]: oThis.videoReplies,
+      [entityTypeConstants.replyDetailsMap]: oThis.userRepliesMap.replyDetailsMap || {},
+      [entityTypeConstants.videoDescriptionsMap]: oThis.userRepliesMap.videoDescriptionMap || {},
+      [entityTypeConstants.userProfilesMap]: oThis.userRepliesMap.userProfilesMap || {},
+      [entityTypeConstants.currentUserUserContributionsMap]: oThis.userRepliesMap.currentUserUserContributionsMap || {},
+      [entityTypeConstants.currentUserVideoContributionsMap]:
+        oThis.userRepliesMap.currentUserVideoContributionsMap || {},
+      [entityTypeConstants.currentUserVideoRelationsMap]: oThis.userRepliesMap.currentUserVideoRelationsMap || {},
+      [entityTypeConstants.userProfileAllowedActions]: oThis.userRepliesMap.userProfileAllowedActions || {},
+      [entityTypeConstants.pricePointsMap]: oThis.userRepliesMap.pricePointsMap || {},
       usersByIdMap: oThis.userRepliesMap.usersByIdMap || {},
       userStat: oThis.userRepliesMap.userStat || {},
       tags: oThis.userRepliesMap.tags || {},
