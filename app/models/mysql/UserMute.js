@@ -84,10 +84,7 @@ class UserMute extends ModelBase {
 
     for (let index = 0; index < dbRows.length; index++) {
       const formatDbRow = oThis.formatDbData(dbRows[index]);
-      // TODO - mute - is following condition needed? Query already has proper where clause.
-      if (formatDbRow.user1Id == 0) {
-        response[formatDbRow.user2Id]['all'] = 1;
-      }
+      response[formatDbRow.user2Id]['all'] = 1;
     }
 
     return response;

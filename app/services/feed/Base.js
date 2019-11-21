@@ -118,8 +118,7 @@ class FeedBase extends ServiceBase {
         actorIds.push(actorId);
       }
 
-      // TODO - mute - if we make the following a hash instead of array, loops for indexOf can be prevented.
-      const mutedUserIds = [];
+      const mutedUserIds = {};
       const cacheResponse = await new UserMuteByUser2IdsForGlobalCache({ user2Ids: actorIds }).fetch();
       if (cacheResponse.isFailure()) {
         return Promise.reject(cacheResponse);
@@ -130,7 +129,7 @@ class FeedBase extends ServiceBase {
       for (let userId in globalUserMuteDetailsByUserIdMap) {
         let obj = globalUserMuteDetailsByUserIdMap[userId];
         if (obj.all) {
-          mutedUserIds.push(userId);
+          mutedUserIds[userId] = 1;
         }
       }
 
@@ -139,7 +138,7 @@ class FeedBase extends ServiceBase {
           feedData = oThis.feedsMap[feedId],
           actorId = feedData.actor;
 
-        if (mutedUserIds.indexOf(actorId) > -1) {
+        if (mutedUserIds[actorId]) {
           continue;
         }
 
