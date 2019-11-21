@@ -459,6 +459,7 @@ class OstTransaction extends ServiceBase {
     const oThis = this;
 
     const replyVideoResponse = await new ReplyVideoPostTransaction({
+      currentUserId: oThis.userId,
       replyDetailId: oThis.replyDetailId,
       videoId: oThis.videoId,
       transactionId: oThis.ostTxId,
