@@ -84,10 +84,10 @@ class SlackEventFactory extends ServiceBase {
   async _extractEventTopic() {
     const oThis = this;
 
-    let action = oThis.eventData.actions[0].value,
+    let action = oThis.eventData.payload.actions[0].value,
       splittedAction = action.split('|'),
-      eventType = splittedAction[0],
-      splittedActionParams = splittedAction.splice(0, 1);
+      eventType = splittedAction[0];
+    splittedAction.splice(0, 1);
 
     oThis.eventType = eventType;
 
@@ -102,16 +102,14 @@ class SlackEventFactory extends ServiceBase {
       );
     }
 
-    for (let i = 0; i < splittedActionParams.length; i++) {
-      let param = splittedActionParams[i],
+    for (let i = 0; i < splittedAction.length; i++) {
+      let param = splittedAction[i],
         splittedParam = param.split(':'),
         key = splittedParam[0],
         value = splittedParam[1];
 
       oThis.eventParams[key] = value;
     }
-
-    console.log('The oThis.eventParams is : ', oThis.eventParams);
 
     return responseHelper.successWithData({});
   }
