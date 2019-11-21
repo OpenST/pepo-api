@@ -108,7 +108,7 @@ class CdnCacheInvalidationProcessor extends RabbitMqProcessorBase {
 
     setTimeout(function() {
       rabbitMqSubscription.resumeConsumption();
-    }, 2000 * 15);
+    }, 1000 * 10);
 
     return Promise.resolve({});
   }
