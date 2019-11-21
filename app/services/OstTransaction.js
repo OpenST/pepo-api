@@ -464,6 +464,7 @@ class OstTransaction extends ServiceBase {
       transactionId: oThis.ostTxId,
       pepoAmountInWei: oThis.transfersData[0].amount
     }).perform();
+
     if (replyVideoResponse.isFailure()) {
       return Promise.reject(replyVideoResponse);
     }
