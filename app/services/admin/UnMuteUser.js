@@ -41,6 +41,8 @@ class UnMuteUser extends ServiceBase {
    * @private
    */
   async _asyncPerform() {
+    // TODO - mute - should'nt we validate the oThis.currentAdminId?
+
     const oThis = this;
 
     await oThis._fetchUser();
