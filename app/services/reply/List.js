@@ -5,7 +5,7 @@ const rootPrefix = '../../..',
   ReplyDetailsByParentVideoPaginationCache = require(rootPrefix +
     '/lib/cacheManagement/single/ReplyDetailsByParentVideoPagination'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
-  entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
+  entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
   paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination');
 
 /**
@@ -64,8 +64,7 @@ class GetReplyList extends ServiceBase {
 
     await oThis._fetchReplyDetailIds();
 
-    const promisesArray = [];
-    promisesArray.push(oThis._setTokenDetails());
+    const promisesArray = [oThis._setTokenDetails()];
     if (oThis.replyDetailIds.length > 0) {
       promisesArray.push(oThis._getReplyVideos());
     }
@@ -129,27 +128,22 @@ class GetReplyList extends ServiceBase {
   }
 
   /**
-   * Add next page meta data.
+   * Fetch token details.
    *
-   * @sets oThis.responseMetaData
+   * @sets oThis.tokenDetails
    *
-   * @returns {void}
+   * @returns {Promise<void>}
    * @private
    */
-  _addResponseMetaData() {
+  async _setTokenDetails() {
     const oThis = this;
 
-    const nextPagePayloadKey = {};
-
-    if (oThis.replyDetailIds.length >= oThis.limit) {
-      nextPagePayloadKey[paginationConstants.paginationIdentifierKey] = {
-        pagination_timestamp: oThis.nextPaginationTimestamp
-      };
+    const tokenResp = await new GetTokenService().perform();
+    if (tokenResp.isFailure()) {
+      return Promise.reject(tokenResp);
     }
 
-    oThis.responseMetaData = {
-      [paginationConstants.nextPagePayloadKey]: nextPagePayloadKey
-    };
+    oThis.tokenDetails = tokenResp.data.tokenDetails;
   }
 
   /**
@@ -184,22 +178,27 @@ class GetReplyList extends ServiceBase {
   }
 
   /**
-   * Fetch token details.
+   * Add next page meta data.
    *
-   * @sets oThis.tokenDetails
+   * @sets oThis.responseMetaData
    *
-   * @returns {Promise<void>}
+   * @returns {void}
    * @private
    */
-  async _setTokenDetails() {
+  _addResponseMetaData() {
     const oThis = this;
 
-    const tokenResp = await new GetTokenService().perform();
-    if (tokenResp.isFailure()) {
-      return Promise.reject(tokenResp);
+    const nextPagePayloadKey = {};
+
+    if (oThis.replyDetailIds.length >= oThis.limit) {
+      nextPagePayloadKey[paginationConstants.paginationIdentifierKey] = {
+        pagination_timestamp: oThis.nextPaginationTimestamp
+      };
     }
 
-    oThis.tokenDetails = tokenResp.data.tokenDetails;
+    oThis.responseMetaData = {
+      [paginationConstants.nextPagePayloadKey]: nextPagePayloadKey
+    };
   }
 
   /**
@@ -212,15 +211,16 @@ class GetReplyList extends ServiceBase {
     const oThis = this;
 
     return responseHelper.successWithData({
-      [entityType.userVideoList]: oThis.videoReplies,
-      [entityType.replyDetailsMap]: oThis.userRepliesMap.replyDetailsMap || {},
-      [entityType.videoDescriptionsMap]: oThis.userRepliesMap.videoDescriptionMap || {},
-      [entityType.userProfilesMap]: oThis.userRepliesMap.userProfilesMap || {},
-      [entityType.currentUserUserContributionsMap]: oThis.userRepliesMap.currentUserUserContributionsMap || {},
-      [entityType.currentUserVideoContributionsMap]: oThis.userRepliesMap.currentUserVideoContributionsMap || {},
-      [entityType.currentUserVideoRelationsMap]: oThis.userRepliesMap.currentUserVideoRelationsMap || {},
-      [entityType.userProfileAllowedActions]: oThis.userRepliesMap.userProfileAllowedActions || {},
-      [entityType.pricePointsMap]: oThis.userRepliesMap.pricePointsMap || {},
+      [entityTypeConstants.userVideoList]: oThis.videoReplies,
+      [entityTypeConstants.replyDetailsMap]: oThis.userRepliesMap.replyDetailsMap || {},
+      [entityTypeConstants.videoDescriptionsMap]: oThis.userRepliesMap.videoDescriptionMap || {},
+      [entityTypeConstants.userProfilesMap]: oThis.userRepliesMap.userProfilesMap || {},
+      [entityTypeConstants.currentUserUserContributionsMap]: oThis.userRepliesMap.currentUserUserContributionsMap || {},
+      [entityTypeConstants.currentUserVideoContributionsMap]:
+        oThis.userRepliesMap.currentUserVideoContributionsMap || {},
+      [entityTypeConstants.currentUserVideoRelationsMap]: oThis.userRepliesMap.currentUserVideoRelationsMap || {},
+      [entityTypeConstants.userProfileAllowedActions]: oThis.userRepliesMap.userProfileAllowedActions || {},
+      [entityTypeConstants.pricePointsMap]: oThis.userRepliesMap.pricePointsMap || {},
       usersByIdMap: oThis.userRepliesMap.usersByIdMap || {},
       userStat: oThis.userRepliesMap.userStat || {},
       tags: oThis.userRepliesMap.tags || {},
