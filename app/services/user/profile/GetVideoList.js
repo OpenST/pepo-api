@@ -258,6 +258,9 @@ class GetVideoList extends ServiceBase {
   async _prepareResponse() {
     const oThis = this;
 
+    console.log('--------------------oThis.usersVideosMap---------------\n\n\n\n\n\n');
+    console.log(JSON.stringify(oThis.usersVideosMap.videoDescriptionMap));
+    console.log('--------------------oThis.usersVideosMap---------------\n\n\n\n\n\n');
     return responseHelper.successWithData({
       [entityType.userVideoList]: oThis.videoDetails,
       usersByIdMap: oThis.usersVideosMap.usersByIdMap || {},
