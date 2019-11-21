@@ -50,7 +50,7 @@ const assignParams = function(req, res, next) {
   next();
 };
 
-router.use('/', validateSlackSignature, sanitizer.sanitizeBodyAndQuery, assignParams);
+router.use(validateSlackSignature, sanitizer.sanitizeBodyAndQuery, assignParams);
 
 /* Listen to Ost Events*/
 router.post('/', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {

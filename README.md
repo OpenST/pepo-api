@@ -217,7 +217,7 @@ Note: Get the webhooks id from above run(subscribe webhooks). Secret has to be o
 ## Create admin 
 ```bash
   R = require('./app/services/admin/ResetPassword.js')
-  r = new R({ email: 'pepo@ost.com', name: 'Pepo Api'})
+  r = new R({ email: 'pepo@ost.com', name: 'Pepo Api', slack_id: 'ABC123'})
   r.perform().then(console.log)
 ```
 

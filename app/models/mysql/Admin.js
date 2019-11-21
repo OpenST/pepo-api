@@ -69,7 +69,7 @@ class AdminModel extends ModelBase {
    * @returns {array}
    */
   safeFormattedColumnNames() {
-    return ['id', 'name', 'email', 'slackId', 'status', 'createdAt', 'updatedAt'];
+    return ['id', 'name', 'email', 'status', 'createdAt', 'updatedAt'];
   }
 
   /**
