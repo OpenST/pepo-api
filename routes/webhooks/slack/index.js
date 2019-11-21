@@ -64,38 +64,36 @@ const assignParams = function(req, res, next) {
 
 router.use(formatPayload, sanitizer.sanitizeBodyAndQuery, assignParams, validateSlackSignature);
 
-// /* Listen to Slack Events*/
-// router.post('/', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
-//   const performer = async function() {
-//     let response = responseHelper.successWithData({});
-//     // let response = responseHelper.error({
-//     //   internal_error_identifier: 'r_a_w_pl_7',
-//     //   api_error_identifier: 'resource_not_found',
-//     //   debug_options: {}
-//     // });
-//
-//     return responseHelper.renderApiResponse(response, res, errorConfig);
-//
-//     if (response.success) {
-//       return res.status(200).json({});
-//     } else {
-//       let status = response._fetchHttpCode(errorConfig.api_error_config || {});
-//       let errorResponse = response.toHash(errorConfig);
-//
-//       let formattedResponse = {
-//         response_type: 'ephermal',
-//         replace_original: false,
-//         text: 'DUMMY ERROR'
-//       };
-//
-//       return res.status(status).json(formattedResponse);
-//     }
-//
-//     // let response = await new SlackEventFactory(req.decodedParams).perform();
-//   };
-//
-//   performer();
-// });
+/* Listen to Slack Events*/
+router.post('/test', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  const performer = async function() {
+    let response = responseHelper.successWithData({});
+    // let response = responseHelper.error({
+    //   internal_error_identifier: 'r_a_w_pl_7',
+    //   api_error_identifier: 'resource_not_found',
+    //   debug_options: {}
+    // });
+
+    if (response.success) {
+      return res.status(200).json({});
+    } else {
+      let status = response._fetchHttpCode(errorConfig.api_error_config || {});
+      let errorResponse = response.toHash(errorConfig);
+
+      let formattedResponse = {
+        response_type: 'ephermal',
+        replace_original: false,
+        text: 'DUMMY ERROR'
+      };
+
+      return res.status(status).json(formattedResponse);
+    }
+
+    // let response = await new SlackEventFactory(req.decodedParams).perform();
+  };
+
+  performer();
+});
 
 /* Listen to Slack Events*/
 router.post('/', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {

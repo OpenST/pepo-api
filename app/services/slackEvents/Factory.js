@@ -128,6 +128,7 @@ class SlackEventFactory extends ServiceBase {
       case slackConstants.approveUserEventType: {
         const ApproveUserClass = require(rootPrefix + '/app/services/slackEvents/ApproveUser');
         eventResponse = await new ApproveUserClass({
+          eventDataPayload: oThis.eventData.payload,
           eventParams: oThis.eventParams,
           currentAdmin: oThis.currentAdmin
         }).perform();
@@ -136,6 +137,7 @@ class SlackEventFactory extends ServiceBase {
       case slackConstants.blockUserEventType: {
         const BlockUserClass = require(rootPrefix + '/app/services/slackEvents/BlockUser');
         eventResponse = await new BlockUserClass({
+          eventDataPayload: oThis.eventData.payload,
           eventParams: oThis.eventParams,
           currentAdmin: oThis.currentAdmin
         }).perform();
@@ -144,6 +146,7 @@ class SlackEventFactory extends ServiceBase {
       case slackConstants.deleteVideoEventType: {
         const DeleteVideoClass = require(rootPrefix + '/app/services/slackEvents/DeleteVideo');
         eventResponse = await new DeleteVideoClass({
+          eventDataPayload: oThis.eventData.payload,
           eventParams: oThis.eventParams,
           currentAdmin: oThis.currentAdmin
         }).perform();

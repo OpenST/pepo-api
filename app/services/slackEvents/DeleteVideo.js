@@ -49,7 +49,7 @@ class DeleteVideo extends SlackEventBase {
   async _callDeleteVideoService() {
     const oThis = this,
       deletevideoServiceParams = {
-        video_id: [oThis.eventParams.video_id],
+        video_id: oThis.eventParams.video_id,
         current_admin: oThis.currentAdmin
       };
 
@@ -64,7 +64,27 @@ class DeleteVideo extends SlackEventBase {
 
   async _postResponseToSlack() {
     const oThis = this;
-    return responseHelper.successWithData({});
+
+    return super._postResponseToSlack();
+  }
+
+  /**
+   * Update Payload for slack post request
+   *
+   *
+   * @return {Promise<void>}
+   *
+   * @private
+   */
+  async _updatedBlocks(actionPos, newBlocks) {
+    const oThis = this;
+    logger.log('_updateBlocks start');
+
+    delete newBlocks[actionPos]['accessory'];
+
+    newBlocks[actionPos]['text']['text'] += +oThis._textToWrite('\nDeleted');
+
+    return newBlocks;
   }
 }
 

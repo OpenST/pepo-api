@@ -35,7 +35,7 @@ class AdminResetPassword extends ServiceBase {
 
     oThis.email = params.email;
     oThis.name = params.name;
-    oThis.slackId = params.slack_id;
+    oThis.slackId = params.slack_id || null;
 
     oThis.adminObj = {};
     oThis.password = null;

@@ -12,7 +12,7 @@
 					"name": "Slack",
 					"item": [
 						{
-							"name": "activate-user-success Copy",
+							"name": "approve-user-success",
 							"request": {
 								"method": "POST",
 								"header": [
