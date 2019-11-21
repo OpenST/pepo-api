@@ -179,7 +179,7 @@ class GetReplyList extends ServiceBase {
       const rdObj = oThis.userRepliesMap.replyDetailsMap[rdId];
       oThis.videoReplies.push(oThis.userRepliesMap.fullVideosMap[rdObj.entityId]);
 
-      oThis.userRepliesMap.currentUserVideoRelationsMap[rdId].canDelete = 0;
+      oThis.userRepliesMap.currentUserVideoRelationsMap[rdObj.entityId].canDelete = 0;
       if (
         +videoCreatorId === +oThis.currentUserId ||
         +oThis.userRepliesMap.replyDetailsMap[rdId].creatorUserId === +oThis.currentUserId
