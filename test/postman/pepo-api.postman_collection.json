@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "4590eefc-1d14-479e-aa32-ca50d7635acd",
+		"_postman_id": "ba795c0d-bae4-421f-a401-76002ab4f004",
 		"name": "pepo-api",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -17,25 +17,36 @@
 								"method": "POST",
 								"header": [
 									{
+										"warning": "Value contains invalid newline characters.",
 										"key": "Content-Type",
 										"name": "Content-Type",
-										"value": "application/json",
+										"value": "application/x-www-form-urlencoded",
+										"type": "text"
+									},
+									{
+										"key": "x-slack-signature",
+										"value": "v0=b63936ef94913a87fd89119de93aa6fdf8d6de59a30090d601fb03abcafbce70",
+										"type": "text"
+									},
+									{
+										"key": "x-slack-request-timestamp",
+										"value": "1574348564",
 										"type": "text"
 									}
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{ \"id\": \"28262d90-4545-424d-8422-74d4df5cc963\",\n  \"topic\": \"users/activation_success\",\n  \"created_at\": 1560164197,\n  \"webhook_id\": \"96f9ff47-5dc8-432f-9a6c-1c79e0cf3bd0\",\n  \"version\": \"2\",\n  \"data\": \n   { \"result_type\": \"user\",\n     \"user\": \n      { \"id\": \"2e0f3041-026a-4be3-b1d2-791c98565219\",\n        \"token_id\": 1128,\n        \"token_holder_address\": \"0x55fc5e23f3ae102f5615f6c7cefaf414922322fe\",\n        \"device_manager_address\": \"0x5ac584e41ec36b16015f86ebff94dcc668a3e457\",\n        \"recovery_address\": \"0x15d3f1825d193d9b688c8dfa3c4234a05e79a092\",\n        \"recovery_owner_address\": \"0x49a74de62e7db11dcc1010780d0699b5bf83c2ac\",\n        \"type\": \"user\",\n        \"status\": \"ACTIVATED\",\n        \"updated_timestamp\": 1560164197 } } }"
+									"raw": "payload=%7B%22type%22%3A%22block_actions%22%2C%22team%22%3A%7B%22id%22%3A%22T78KWNKC6%22%2C%22domain%22%3A%22ostdotcom%22%7D%2C%22user%22%3A%7B%22id%22%3A%22U99HQ8NLT%22%2C%22username%22%3A%22aman%22%2C%22name%22%3A%22aman%22%2C%22team_id%22%3A%22T78KWNKC6%22%7D%2C%22api_app_id%22%3A%22AQC5JETDX%22%2C%22token%22%3A%22t2kaSFG00CJoVpW3Vfw2pIJ0%22%2C%22container%22%3A%7B%22type%22%3A%22message%22%2C%22message_ts%22%3A%221574331819.000100%22%2C%22channel_id%22%3A%22CQN8L1SMA%22%2C%22is_ephemeral%22%3Afalse%7D%2C%22trigger_id%22%3A%22832493891955.246676767414.d594ae4ac4f6c4410df4d64a2e02c8fb%22%2C%22channel%22%3A%7B%22id%22%3A%22CQN8L1SMA%22%2C%22name%22%3A%22test_approve_new_creators%22%7D%2C%22message%22%3A%7B%22type%22%3A%22message%22%2C%22subtype%22%3A%22bot_message%22%2C%22text%22%3A%22%2AHi%2C+We+got+a+video+from+a+new+User+at+PEPO.+Please+check+the+details+about+the+videos+and+take+actions+accordingly%2A%22%2C%22ts%22%3A%221574331819.000100%22%2C%22username%22%3A%22Pepo+Development%22%2C%22bot_id%22%3A%22BQKM9737E%22%2C%22blocks%22%3A%5B%7B%22type%22%3A%22section%22%2C%22block_id%22%3A%22d7IY%22%2C%22text%22%3A%7B%22type%22%3A%22mrkdwn%22%2C%22text%22%3A%22---------------------------------------------------------%5Cn%2AHi%2C+We+got+a+video+from+an+existing+User+at+PEPO.+Please+check+the+details+about+the+videos+and+take+actions+accordingly%2A%5Cn%2AUser%27s+Full+Name%3A%2A%3A+Ankit+Singh%5Cn%2AUsername%3A%2A%3A+sing_k0p6b1b8hb%5Cn%2AAdmin+Profile+URL%3A%2A%3A+%3Chttp%3A%5C%2F%5C%2Fpepodev.com%3A8080%5C%2Fadmin%5C%2Fuser-profile%5C%2F1021%3E%5Cn%2ATwitter+handle%3A%2A%3A+singhankit2099%5Cn%2AEmail+address%3A%2A%3A+null%5Cn%22%2C%22verbatim%22%3Afalse%7D%7D%2C%7B%22type%22%3A%22divider%22%2C%22block_id%22%3A%22e1I%22%7D%2C%7B%22type%22%3A%22section%22%2C%22block_id%22%3A%22djZ%22%2C%22text%22%3A%7B%22type%22%3A%22mrkdwn%22%2C%22text%22%3A%22%2AVideoLink%2A%3A+%3Chttps%3A%5C%2F%5C%2Fdbvoeb7t6hffk.cloudfront.net%5C%2Fd%5C%2Fua%5C%2Fvideos%5C%2Fpankaj-profile.mp4-original.mp4%3E%5Cn%2AUpdatedAt%2A%3A+18+Sep+2019+17%3A34%3A32%22%2C%22verbatim%22%3Afalse%7D%2C%22accessory%22%3A%7B%22type%22%3A%22button%22%2C%22style%22%3A%22danger%22%2C%22text%22%3A%7B%22type%22%3A%22plain_text%22%2C%22text%22%3A%22Delete+Video%22%2C%22emoji%22%3Atrue%7D%2C%22value%22%3A%22delete_video%7Cvideo_id%3A22%22%2C%22action_id%22%3A%22aOtUU%22%7D%7D%2C%7B%22type%22%3A%22divider%22%2C%22block_id%22%3A%2229LQg%22%7D%2C%7B%22type%22%3A%22actions%22%2C%22block_id%22%3A%22e87Qk%22%2C%22elements%22%3A%5B%7B%22type%22%3A%22button%22%2C%22action_id%22%3A%22F%5C%2FDZ%5C%2F%22%2C%22text%22%3A%7B%22type%22%3A%22plain_text%22%2C%22text%22%3A%22Approve+User%22%2C%22emoji%22%3Atrue%7D%2C%22style%22%3A%22primary%22%2C%22value%22%3A%22approve_user%7Cuser_id%3A1021%22%7D%2C%7B%22type%22%3A%22button%22%2C%22action_id%22%3A%22Ur6op%22%2C%22text%22%3A%7B%22type%22%3A%22plain_text%22%2C%22text%22%3A%22Block+User%22%2C%22emoji%22%3Atrue%7D%2C%22style%22%3A%22danger%22%2C%22value%22%3A%22block_user%7Cuser_id%3A1021%22%7D%5D%7D%2C%7B%22type%22%3A%22section%22%2C%22block_id%22%3A%22sOYA%22%2C%22text%22%3A%7B%22type%22%3A%22mrkdwn%22%2C%22text%22%3A%22--------------------------------------------------------------------%22%2C%22verbatim%22%3Afalse%7D%7D%5D%7D%2C%22response_url%22%3A%22https%3A%5C%2F%5C%2Fhooks.slack.com%5C%2Factions%5C%2FT78KWNKC6%5C%2F836036662689%5C%2FaYZtwMZtnU4AFCr7H572Rg8R%22%2C%22actions%22%3A%5B%7B%22action_id%22%3A%22F%5C%2FDZ%5C%2F%22%2C%22block_id%22%3A%22e87Qk%22%2C%22text%22%3A%7B%22type%22%3A%22plain_text%22%2C%22text%22%3A%22Approve+User%22%2C%22emoji%22%3Atrue%7D%2C%22value%22%3A%22approve_user%7Cuser_id%3A1021%22%2C%22style%22%3A%22primary%22%2C%22type%22%3A%22button%22%2C%22action_ts%22%3A%221574348564.116169%22%7D%5D%7D"
 								},
 								"url": {
-									"raw": "{{api_server}}/webhooks/ost/v2",
+									"raw": "{{api_server}}/webhooks/slack/",
 									"host": [
 										"{{api_server}}"
 									],
 									"path": [
 										"webhooks",
-										"ost",
-										"v2"
+										"slack",
+										""
 									]
 								}
 							},
@@ -651,7 +662,7 @@
 							}
 						],
 						"url": {
-							"raw": "{{api_server}}/api/admin/update-video/1089/link?description=Hello. Simply #testing this service. https://ost.com#testing this service. https://ost.com",
+							"raw": "{{api_server}}/api/admin/update-video/1089/link?description=Hello. Simply #testing this service. https://ost.com#testing this service. https://ost.com#testing this service. https://ost.com",
 							"host": [
 								"{{api_server}}"
 							],
@@ -668,7 +679,7 @@
 									"value": "Hello. Simply #testing this service. https://ost.com"
 								}
 							],
-							"hash": "testing this service. https://ost.com#testing this service. https://ost.com"
+							"hash": "testing this service. https://ost.com#testing this service. https://ost.com#testing this service. https://ost.com"
 						}
 					},
 					"response": []

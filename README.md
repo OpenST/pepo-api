@@ -40,6 +40,11 @@
                        proxy_cookie_domain localhost pepodev.com;
                        proxy_pass http://pepodev.com:3000/api/;
                }
+               
+               location /webhooks/ {
+                       proxy_cookie_domain localhost pepodev.com;
+                       proxy_pass http://pepodev.com:3000/webhooks/;
+               }               
    
                location /admin/ {
                        proxy_cookie_domain localhost pepodev.com;
