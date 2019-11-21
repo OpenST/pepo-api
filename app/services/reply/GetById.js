@@ -6,7 +6,7 @@ const rootPrefix = '../../..',
   ReplyDetailsByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/ReplyDetailsByIds'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
-  entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
+  entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
   replyDetailConstants = require(rootPrefix + '/lib/globalConstant/replyDetail');
 
 /**
@@ -171,14 +171,15 @@ class GetReplyById extends ServiceBase {
     const oThis = this;
 
     return responseHelper.successWithData({
-      [entityType.userVideoList]: oThis.videoReplies,
-      [entityType.replyDetailsMap]: oThis.userRepliesMap.replyDetailsMap,
-      [entityType.videoDescriptionsMap]: oThis.userRepliesMap.videoDescriptionMap,
-      [entityType.userProfilesMap]: oThis.userRepliesMap.userProfilesMap,
-      [entityType.currentUserUserContributionsMap]: oThis.userRepliesMap.currentUserUserContributionsMap,
-      [entityType.currentUserVideoContributionsMap]: oThis.userRepliesMap.currentUserVideoContributionsMap,
-      [entityType.userProfileAllowedActions]: oThis.userRepliesMap.userProfileAllowedActions,
-      [entityType.pricePointsMap]: oThis.userRepliesMap.pricePointsMap,
+      [entityTypeConstants.userVideoList]: oThis.videoReplies,
+      [entityTypeConstants.replyDetailsMap]: oThis.userRepliesMap.replyDetailsMap,
+      [entityTypeConstants.videoDescriptionsMap]: oThis.userRepliesMap.videoDescriptionMap,
+      [entityTypeConstants.userProfilesMap]: oThis.userRepliesMap.userProfilesMap,
+      [entityTypeConstants.currentUserUserContributionsMap]: oThis.userRepliesMap.currentUserUserContributionsMap,
+      [entityTypeConstants.currentUserVideoContributionsMap]: oThis.userRepliesMap.currentUserVideoContributionsMap,
+      [entityTypeConstants.currentUserVideoRelationsMap]: oThis.userRepliesMap.currentUserVideoRelationsMap || {},
+      [entityTypeConstants.userProfileAllowedActions]: oThis.userRepliesMap.userProfileAllowedActions,
+      [entityTypeConstants.pricePointsMap]: oThis.userRepliesMap.pricePointsMap,
       usersByIdMap: oThis.userRepliesMap.usersByIdMap,
       userStat: oThis.userRepliesMap.userStat,
       tags: oThis.userRepliesMap.tags,
