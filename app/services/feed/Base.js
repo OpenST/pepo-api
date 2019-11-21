@@ -118,6 +118,7 @@ class FeedBase extends ServiceBase {
         actorIds.push(actorId);
       }
 
+      // TODO - mute - if we make the following a hash instead of array, loops for indexOf can be prevented.
       const mutedUserIds = [];
       const cacheResponse = await new UserMuteByUser2IdsForGlobalCache({ user2Ids: actorIds }).fetch();
       if (cacheResponse.isFailure()) {
