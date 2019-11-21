@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "3a18427c-bee0-4a5a-8fa4-4352c91a4474",
+		"_postman_id": "4590eefc-1d14-479e-aa32-ca50d7635acd",
 		"name": "pepo-api",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -8,6 +8,43 @@
 		{
 			"name": "webhook",
 			"item": [
+				{
+					"name": "Slack",
+					"item": [
+						{
+							"name": "activate-user-success Copy",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{ \"id\": \"28262d90-4545-424d-8422-74d4df5cc963\",\n  \"topic\": \"users/activation_success\",\n  \"created_at\": 1560164197,\n  \"webhook_id\": \"96f9ff47-5dc8-432f-9a6c-1c79e0cf3bd0\",\n  \"version\": \"2\",\n  \"data\": \n   { \"result_type\": \"user\",\n     \"user\": \n      { \"id\": \"2e0f3041-026a-4be3-b1d2-791c98565219\",\n        \"token_id\": 1128,\n        \"token_holder_address\": \"0x55fc5e23f3ae102f5615f6c7cefaf414922322fe\",\n        \"device_manager_address\": \"0x5ac584e41ec36b16015f86ebff94dcc668a3e457\",\n        \"recovery_address\": \"0x15d3f1825d193d9b688c8dfa3c4234a05e79a092\",\n        \"recovery_owner_address\": \"0x49a74de62e7db11dcc1010780d0699b5bf83c2ac\",\n        \"type\": \"user\",\n        \"status\": \"ACTIVATED\",\n        \"updated_timestamp\": 1560164197 } } }"
+								},
+								"url": {
+									"raw": "{{api_server}}/webhooks/ost/v2",
+									"host": [
+										"{{api_server}}"
+									],
+									"path": [
+										"webhooks",
+										"ost",
+										"v2"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"protocolProfileBehavior": {},
+					"_postman_isSubFolder": true
+				},
 				{
 					"name": "activate-user-success",
 					"request": {
