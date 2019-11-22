@@ -326,6 +326,8 @@ class OstTransaction extends ServiceBase {
     if (CommonValidators.validateNonEmptyObject(videoDetail)) {
       return responseHelper.successWithData({});
     }
+
+    // TODO: Why is this cache hit required here?
     const replyDetailsByEntityIdsAndEntityKindCacheRsp = await new ReplyDetailsByEntityIdsAndEntityKindCache({
       entityIds: [oThis.videoId],
       entityKind: replyDetailConstants.videoEntityKind

@@ -571,6 +571,7 @@ class TransactionOstEventBase extends ServiceBase {
     if (CommonValidators.validateNonEmptyObject(videoDetail)) {
       return responseHelper.successWithData({});
     } else {
+      // TODO: can fetch reply details using cacheByReplyDetailsId, and check if video matches.
       const ReplyDetailsByEntityIdsAndEntityKindCacheRsp = await new ReplyDetailsByEntityIdsAndEntityKindCache({
         entityIds: [oThis.videoId],
         entityKind: replyDetailConstants.videoEntityKind
