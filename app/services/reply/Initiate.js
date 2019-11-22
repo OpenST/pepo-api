@@ -125,7 +125,7 @@ class InitiateReply extends ServiceBase {
       [entityType.videoReplyList]: [
         {
           id: oThis.replyDetailId,
-          userId: oThis.currentUser.id,
+          creatorUserId: oThis.currentUser.id,
           replyDetailId: oThis.replyDetailId,
           updatedAt: Math.round(new Date() / 1000)
         }
