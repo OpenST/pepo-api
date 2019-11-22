@@ -126,7 +126,6 @@ class OstTransaction extends ServiceBase {
       oThis.videoId = parsedMetaProperty.videoId;
     } else if (oThis._isPepoOnReplyTransactionKind()) {
       oThis.replyDetailId = parsedMetaProperty.replyDetailId;
-      oThis.videoId = parsedMetaProperty.videoId;
     } else {
       return Promise.reject(
         responseHelper.error({
@@ -380,6 +379,7 @@ class OstTransaction extends ServiceBase {
         })
       );
     }
+    oThis.videoId = replyDetail.entityId;
   }
 
   /**
