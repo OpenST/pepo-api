@@ -2,7 +2,7 @@ const rootPrefix = '../../../..',
   UpdateStats = require(rootPrefix + '/lib/UpdateStats'),
   UserStatModel = require(rootPrefix + '/app/models/mysql/UserStat'),
   TokenUserModel = require(rootPrefix + '/app/models/mysql/TokenUser'),
-  ReplyDetailModel = require(rootPrefix + '/app/models/mysql/ReplyDetail'),
+  ReplyDetailsModel = require(rootPrefix + '/app/models/mysql/ReplyDetail'),
   FiatPaymentModel = require(rootPrefix + '/app/models/mysql/FiatPayment'),
   PepocornBalanceModel = require(rootPrefix + '/app/models/mysql/PepocornBalance'),
   UserStatByUserIds = require(rootPrefix + '/lib/cacheManagement/multi/UserStatByUserIds'),
@@ -331,7 +331,7 @@ class SuccessTransactionOstEvent extends TransactionOstEventBase {
   async _updateReplyDetails() {
     const oThis = this;
 
-    await new ReplyDetailModel().updateByReplyDetailId({
+    await new ReplyDetailsModel().updateByReplyDetailId({
       replyDetailId: oThis.replyDetailId,
       totalAmount: oThis.ostTransaction.transfers[0].amount,
       totalContributedBy: 0

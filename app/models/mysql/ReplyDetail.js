@@ -10,9 +10,9 @@ const dbName = databaseConstants.entityDbName;
 /**
  * Class for reply detail model.
  *
- * @class ReplyDetail
+ * @class ReplyDetailsModel
  */
-class ReplyDetail extends ModelBase {
+class ReplyDetailsModel extends ModelBase {
   /**
    * Constructor for reply detail model.
    *
@@ -239,7 +239,7 @@ class ReplyDetail extends ModelBase {
       entityKind: params.entityKind
     };
 
-    await ReplyDetail.flushCache(flushCacheParams);
+    await ReplyDetailsModel.flushCache(flushCacheParams);
 
     return insertResponse;
   }
@@ -310,7 +310,7 @@ class ReplyDetail extends ModelBase {
       entityKind: replyDetailConstants.videoEntityKind
     };
 
-    await ReplyDetail.flushCache(flushCacheParams);
+    await ReplyDetailsModel.flushCache(flushCacheParams);
 
     return updateResponse;
   }
@@ -422,4 +422,4 @@ class ReplyDetail extends ModelBase {
   }
 }
 
-module.exports = ReplyDetail;
+module.exports = ReplyDetailsModel;
