@@ -385,11 +385,14 @@ class OstTransaction extends ServiceBase {
         })
       );
     }
-    oThis.videoId = replyDetail.entityId;
+
+    if (oThis._isPepoOnReplyTransactionKind()) {
+      oThis.videoId = replyDetail.entityId;
+    }
 
     console.log('\n\n\n\nreplyDetail------------', replyDetail);
 
-    if (replyDetail.descriptionId) {
+    if (oThis._isReplyOnVideoTransactionKind() && replyDetail.descriptionId) {
       oThis.descriptionId = replyDetail.descriptionId;
     }
   }
