@@ -3,7 +3,6 @@ const uuidV4 = require('uuid/v4');
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   UserModel = require(rootPrefix + '/app/models/mysql/User'),
-  CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   UserMultiCache = require(rootPrefix + '/lib/cacheManagement/multi/User'),
   ImageByIdCache = require(rootPrefix + '/lib/cacheManagement/multi/ImageByIds'),
   TextsByIdCache = require(rootPrefix + '/lib/cacheManagement/multi/TextsByIds'),
@@ -42,6 +41,8 @@ class ShareDetails extends ServiceBase {
     oThis.creatorName = null;
     oThis.twitterHandle = null;
     oThis.videoDescriptionText = null;
+    oThis.posterImageId = null;
+    oThis.posterImageUrl = null;
   }
 
   /**
@@ -98,7 +99,9 @@ class ShareDetails extends ServiceBase {
       );
     }
 
-    oThis.posterImageId = cacheRsp.data[oThis.videoId].posterImageId;
+    if (cacheRsp.data[oThis.videoId].posterImageId) {
+      oThis.posterImageId = cacheRsp.data[oThis.videoId].posterImageId;
+    }
   }
 
   /**
@@ -110,6 +113,9 @@ class ShareDetails extends ServiceBase {
   async _fetchPosterImageUrl() {
     const oThis = this;
 
+    if (!oThis.posterImageId) {
+      return;
+    }
     const cacheRsp = await new ImageByIdCache({ ids: [oThis.posterImageId] }).fetch();
 
     if (cacheRsp.isFailure()) {
