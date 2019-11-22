@@ -376,6 +376,10 @@ class CoreConstants {
     return process.env.PA_CDN_URL;
   }
 
+  get PA_CDN_DISTRIBUTION_ID() {
+    return process.env.PA_CDN_DISTRIBUTION_ID;
+  }
+
   // Cassandra related constants.
   get CASSANDRA_REPLICATION_CLASS() {
     return process.env.REPLICATION_CLASS;

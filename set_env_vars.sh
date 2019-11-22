@@ -2,7 +2,7 @@
 # Core ENV Details
 export PA_ENVIRONMENT='development'
 export PA_PORT=3000
-export PA_DEFAULT_LOG_LEVEL='info';
+export PA_DEFAULT_LOG_LEVEL='debug';
 export PA_DOMAIN='http://pepodev.com:8080'
 export PA_STORE_DOMAIN='http://store.pepodev.com:8080';
 export PA_INVITE_DOMAIN='http://invite.pepodev.com:8080';
@@ -140,6 +140,7 @@ export REPLICATION_FACTOR='3'
 export DEFAULT_REPLICATION_LEVEL='localOne'
 
 export PA_CDN_URL='https://dbvoeb7t6hffk.cloudfront.net'
+export PA_CDN_DISTRIBUTION_ID='E3BUFDKXA1T0E'
 export TWITTER_OAUTH_URL='https://api.twitter.com/oauth/authorize?oauth_token='
 
 # Pepo twitter handle

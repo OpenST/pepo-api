@@ -247,6 +247,8 @@ class PublicVideoFeed extends FeedBase {
       allVideoIds.length
     );
 
+    let allActorIds = [];
+
     if (allVideoIds.length > 0) {
       const videoIdToUserVideoViewMap = await new UserVideoViewModel().fetchVideoViewDetails({
         userId: oThis.currentUserId,
@@ -269,6 +271,7 @@ class PublicVideoFeed extends FeedBase {
           continue;
         }
 
+        allActorIds.push(actorId);
         // if seen
         if (userVideoViewObj && userVideoViewObj.lastViewAt) {
           let wasSeenRecently =
@@ -285,22 +288,26 @@ class PublicVideoFeed extends FeedBase {
       }
     }
 
-    if (newPersonalizeData['unseenFeedIds'].length > 0 && !oThis._isOlderBuildWithoutVideoPlayEvent()) {
-      let sortParams = {
-        currentUserId: oThis.currentUserId,
-        unseenFeedIds: newPersonalizeData['unseenFeedIds'].slice(),
-        feedsMap: feedQueryResp['feedsMap']
-      };
+    let sortParams = {
+      allActorIds: allActorIds,
+      sortFeeds: !oThis._isOlderBuildWithoutVideoPlayEvent(),
+      currentUserId: oThis.currentUserId,
+      unseenFeedIds: newPersonalizeData['unseenFeedIds'].slice(),
+      seenFeedIds: newPersonalizeData['seenFeedIds'].slice(),
+      shuffledSeenFeedIds: newPersonalizeData['shuffledSeenFeedIds'].slice(),
+      feedsMap: feedQueryResp['feedsMap']
+    };
 
-      // logger.log(`===================PERSONALIZED FEED:${oThis.currentUserId} sortParams === `, sortParams);
-      const sortResponse = await new SortUnseenFeedLib(sortParams).perform();
+    // logger.log(`===================PERSONALIZED FEED:${oThis.currentUserId} sortParams === `, sortParams);
+    const sortResponse = await new SortUnseenFeedLib(sortParams).perform();
 
-      if (sortResponse.isFailure()) {
-        return Promise.reject(sortResponse);
-      }
-
-      newPersonalizeData['unseenFeedIds'] = sortResponse.data['sortedFeedIds'];
+    if (sortResponse.isFailure()) {
+      return Promise.reject(sortResponse);
     }
+
+    newPersonalizeData['unseenFeedIds'] = sortResponse.data['unseenFeedIds'];
+    newPersonalizeData['seenFeedIds'] = sortResponse.data['seenFeedIds'];
+    newPersonalizeData['shuffledSeenFeedIds'] = sortResponse.data['shuffledSeenFeedIds'];
 
     // logger.log(
     //   `===================PERSONALIZED FEED:${oThis.currentUserId} newPersonalizeData before shuffle=== `,
