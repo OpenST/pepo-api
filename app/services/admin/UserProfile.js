@@ -5,6 +5,7 @@ const rootPrefix = '../../..',
   GetProfile = require(rootPrefix + '/lib/user/profile/Get'),
   GetPepocornBalance = require(rootPrefix + '/lib/pepocorn/GetPepocornBalance'),
   SecureTokenCache = require(rootPrefix + '/lib/cacheManagement/single/SecureToken'),
+  UserMuteByUser2IdsForGlobalCache = require(rootPrefix + '/lib/cacheManagement/multi/UserMuteByUser2IdsForGlobal'),
   TokenUserDetailByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TokenUserByUserIds'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
@@ -35,6 +36,7 @@ class UserProfile extends ServiceBase {
     oThis.profileUserId = params.profile_user_id;
 
     oThis.ostUserId = null;
+    oThis.globalUserMuteDetailsByUserIdMap = {};
     oThis.profileResponse = {};
     oThis.stakeCurrency = null;
     oThis.pepocornBalance = null;
@@ -55,6 +57,7 @@ class UserProfile extends ServiceBase {
       oThis._getProfileInfo(),
       oThis._fetchTokenUserData(),
       oThis._fetchTokenDetails(),
+      oThis._fetchMuteDetails(),
       oThis._fetchPepocornBalance()
     ];
     await Promise.all(promisesArray);
@@ -133,6 +136,25 @@ class UserProfile extends ServiceBase {
         })
       );
     }
+  }
+
+  /**
+   * Fetch mute user details.
+   *
+   * @sets oThis.stakeCurrency
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _fetchMuteDetails() {
+    const oThis = this;
+
+    const cacheResponse = await new UserMuteByUser2IdsForGlobalCache({ user2Ids: [oThis.profileUserId] }).fetch();
+    if (cacheResponse.isFailure()) {
+      return Promise.reject(cacheResponse);
+    }
+
+    oThis.globalUserMuteDetailsByUserIdMap = cacheResponse.data;
   }
 
   /**
@@ -219,6 +241,7 @@ class UserProfile extends ServiceBase {
 
     return responseHelper.successWithData({
       usersByIdMap: oThis.profileResponse.usersByIdMap,
+      globalUserMuteDetailsMap: oThis.globalUserMuteDetailsByUserIdMap,
       userProfile: oThis.profileResponse.userProfilesMap[oThis.profileUserId],
       imageMap: oThis.profileResponse.imageMap,
       tokenUsersByUserIdMap: oThis.profileResponse.tokenUsersByUserIdMap,
