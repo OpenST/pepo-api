@@ -57,7 +57,7 @@ router.get('/:video_id/replies', sanitizer.sanitizeDynamicUrlParams, function(re
     const wrapperFormatterRsp = await new FormatterComposer({
       resultType: responseEntityKey.videoReplies,
       entityKindToResponseKeyMap: {
-        [entityType.userVideoList]: responseEntityKey.videoReplies,
+        [entityType.videoReplyList]: responseEntityKey.videoReplies,
         [entityType.usersMap]: responseEntityKey.users,
         [entityType.userStats]: responseEntityKey.userStats,
         [entityType.userProfilesMap]: responseEntityKey.userProfiles,

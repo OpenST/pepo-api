@@ -213,7 +213,7 @@ class GetReplyList extends ServiceBase {
     const oThis = this;
 
     return responseHelper.successWithData({
-      [entityTypeConstants.userVideoList]: oThis.videoReplies,
+      [entityTypeConstants.videoReplyList]: oThis.videoReplies,
       [entityTypeConstants.replyDetailsMap]: oThis.userRepliesMap.replyDetailsMap || {},
       [entityTypeConstants.videoDescriptionsMap]: oThis.userRepliesMap.videoDescriptionMap || {},
       [entityTypeConstants.userProfilesMap]: oThis.userRepliesMap.userProfilesMap || {},
