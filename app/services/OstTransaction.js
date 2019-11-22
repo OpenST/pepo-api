@@ -354,12 +354,6 @@ class OstTransaction extends ServiceBase {
       );
     }
 
-    console.log('\n\n\n\nreplyDetail------------', replyDetail);
-
-    if (replyDetail.descriptionId) {
-      oThis.descriptionId = replyDetail.descriptionId;
-    }
-
     return responseHelper.successWithData({});
   }
 
@@ -392,6 +386,12 @@ class OstTransaction extends ServiceBase {
       );
     }
     oThis.videoId = replyDetail.entityId;
+
+    console.log('\n\n\n\nreplyDetail------------', replyDetail);
+
+    if (replyDetail.descriptionId) {
+      oThis.descriptionId = replyDetail.descriptionId;
+    }
   }
 
   /**
@@ -541,7 +541,8 @@ class OstTransaction extends ServiceBase {
       promiseArray.push(oThis._validateToUserIdForRedemption());
       promiseArray.push(oThis._validateTransactionDataForRedemption());
     } else if (oThis._isReplyOnVideoTransactionKind()) {
-      promiseArray.push(oThis._validateIfValidTransaction());
+      console.log('\n\n\n\n\n\n\n\n\n\n=========================HERE================================================');
+      promiseArray.push(oThis._fetchReplyDetailsAndValidate(), oThis._validateIfValidTransaction());
     } else if (oThis._isPepoOnReplyTransactionKind()) {
       promiseArray.push(oThis._fetchReplyDetailsAndValidate(), oThis._fetchToUserIdsAndAmounts());
     }
