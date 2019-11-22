@@ -6,6 +6,7 @@ const rootPrefix = '../..',
   gotoConstants = require(rootPrefix + '/lib/globalConstant/goto'),
   entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
   coreConstants = require(rootPrefix + '/config/coreConstants'),
+  userUtmDetailsConstants = require(rootPrefix + '/lib/globalConstant/userUtmDetail'),
   responseHelper = require(rootPrefix + '/lib/formatter/response');
 
 const currentPepoApiDomain = coreConstants.PA_DOMAIN;
@@ -31,6 +32,7 @@ class FetchGoto extends ServiceBase {
     oThis.parsedUrl = {};
     oThis.gotoKind = null;
     oThis.gotoParams = null;
+    oThis.utmCookieValue = null;
   }
 
   /**
@@ -129,6 +131,7 @@ class FetchGoto extends ServiceBase {
         oThis.gotoParams = { inviteCode: query['invite'] };
         oThis.gotoKind = gotoConstants.signUpGotoKind;
       }
+      oThis.utmCookieValue = userUtmDetailsConstants.utmCookieToSet(query);
     }
   }
 
@@ -144,7 +147,8 @@ class FetchGoto extends ServiceBase {
     if (oThis.gotoKind) {
       let goto = gotoFactory.gotoFor(oThis.gotoKind, oThis.gotoParams);
       return responseHelper.successWithData({
-        [entityType.goto]: goto
+        [entityType.goto]: goto,
+        utmCookieValue: oThis.utmCookieValue
       });
     } else {
       return responseHelper.error({
