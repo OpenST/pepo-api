@@ -11,19 +11,19 @@ const rootPrefix = '../../../..',
   adminActivityLogConstants = require(rootPrefix + '/lib/globalConstant/adminActivityLogs');
 
 /**
- * Class to insert new entry in curated entities.
+ * Class to insert or update entry in curated entities.
  *
- * @class Insert
+ * @class UpdateCuratedEntities
  */
-class Insert extends ServiceBase {
+class UpdateCuratedEntities extends ServiceBase {
   /**
-   * Constructor to insert new entry in curated entities.
+   * Constructor to insert/update entries in curated entities.
    *
    * @param {object} params
    * @param {object} params.current_admin
-   * @param {number} params.current_admin.id
    * @param {string} params.entity_kind
    * @param {number} params.entity_id
+   * @param {string} params.position
    *
    * @augments ServiceBase
    *
@@ -37,8 +37,7 @@ class Insert extends ServiceBase {
     oThis.currentAdminId = params.current_admin.id;
     oThis.entityKind = params.entity_kind;
     oThis.entityId = +params.entity_id;
-
-    oThis.entityHighestPosition = 0;
+    oThis.newPosition = params.position;
   }
 
   /**
@@ -53,8 +52,6 @@ class Insert extends ServiceBase {
     await oThis.validateAndSanitize();
 
     await oThis.fetchExistingEntities();
-
-    await oThis.updateEntities();
 
     await oThis.logAdminActivity();
 
@@ -83,6 +80,48 @@ class Insert extends ServiceBase {
         })
       );
     }
+  }
+
+  /**
+   * Fetch existing entities.
+   *
+   * @returns {Promise<never>}
+   */
+  async fetchExistingEntities() {
+    const oThis = this;
+
+    const cacheResponse = await new CuratedEntityIdsByKindCache({ entityKind: oThis.entityKind }).fetch();
+    if (!cacheResponse || cacheResponse.isFailure()) {
+      return Promise.reject(cacheResponse);
+    }
+
+    const entityIdsArray = cacheResponse.data.entityIds;
+
+    if (entityIdsArray.indexOf(oThis.entityId) === -1) {
+      // If entityId does not exists in the curated entities table, insert new entry.
+      await oThis.insertNewCuratedEntity();
+    } else {
+      // If entityId already exists in the curated entities table, update its position.
+      await oThis.updateExistingCuratedEntity();
+    }
+    await CuratedEntityModel.flushCache({ entityKind: oThis.entityKind });
+  }
+
+  /**
+   * Log admin activity.
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async logAdminActivity() {
+    const oThis = this;
+
+    await new AdminActivityLogModel().insertAction({
+      adminId: oThis.currentAdminId,
+      actionOn: oThis.entityId,
+      extraData: JSON.stringify({ eids: [oThis.entityId], enk: oThis.entityKind }),
+      action: adminActivityLogConstants.updateCuratedEntity
+    });
   }
 
   /**
@@ -140,70 +179,40 @@ class Insert extends ServiceBase {
   }
 
   /**
-   * Fetch existing entities.
-   *
-   * @sets oThis.entityHighestPosition
-   *
-   * @returns {Promise<never>}
-   */
-  async fetchExistingEntities() {
-    const oThis = this;
-
-    const cacheResponse = await new CuratedEntityIdsByKindCache({ entityKind: oThis.entityKind }).fetch();
-    if (!cacheResponse || cacheResponse.isFailure()) {
-      return Promise.reject(cacheResponse);
-    }
-
-    const entityIdsArray = cacheResponse.data.entityIds;
-
-    // If entityId already exists in the curated entities table.
-    if (entityIdsArray.indexOf(oThis.entityId) > -1) {
-      return Promise.reject(
-        responseHelper.paramValidationError({
-          internal_error_identifier: 'a_s_a_c_i_4',
-          api_error_identifier: 'invalid_api_params',
-          params_error_identifiers: ['invalid_entity_id'],
-          debug_options: { entityId: oThis.entityId }
-        })
-      );
-    }
-
-    oThis.entityHighestPosition = cacheResponse.data.highestPosition;
-  }
-
-  /**
-   * Update curated entities table.
-   *
-   * @returns {Promise<never>}
-   */
-  async updateEntities() {
-    const oThis = this;
-
-    const newElementPosition = oThis.entityHighestPosition + 1;
-    const entityKindInt = curatedEntitiesConstants.invertedEntityKinds[oThis.entityKind];
-    const insertArray = [oThis.entityId, entityKindInt, newElementPosition];
-
-    await new CuratedEntityModel().insertEntities([insertArray]);
-
-    await CuratedEntityModel.flushCache({ entityKind: oThis.entityKind });
-  }
-
-  /**
-   * Log admin activity.
+   * Insert new curated entity.
    *
    * @returns {Promise<void>}
-   * @private
    */
-  async logAdminActivity() {
+  async insertNewCuratedEntity() {
     const oThis = this;
 
-    await new AdminActivityLogModel().insertAction({
-      adminId: oThis.currentAdminId,
-      actionOn: oThis.entityId,
-      extraData: JSON.stringify({ eids: [oThis.entityId], enk: oThis.entityKind }),
-      action: adminActivityLogConstants.insertNewCuratedEntity
-    });
+    await new CuratedEntityModel()
+      .insert({
+        entity_id: oThis.entityId,
+        entity_kind: curatedEntitiesConstants.invertedEntityKinds[oThis.entityKind],
+        position: oThis.newPosition
+      })
+      .fire();
+  }
+
+  /**
+   * Update existing curated entity.
+   *
+   * @returns {Promise<void>}
+   */
+  async updateExistingCuratedEntity() {
+    const oThis = this;
+
+    await new CuratedEntityModel()
+      .update({
+        position: oThis.newPosition
+      })
+      .where({
+        entity_id: oThis.entityId,
+        entity_kind: curatedEntitiesConstants.invertedEntityKinds[oThis.entityKind]
+      })
+      .fire();
   }
 }
 
-module.exports = Insert;
+module.exports = UpdateCuratedEntities;

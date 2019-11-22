@@ -249,7 +249,7 @@ const adminSignature = {
       }
     ]
   },
-  [apiName.insertCuratedEntity]: {
+  [apiName.updateCuratedEntity]: {
     mandatory: [
       {
         parameter: 'entity_kind',
@@ -275,23 +275,6 @@ const adminSignature = {
       {
         parameter: 'entity_id',
         validatorMethods: ['validateNonZeroInteger']
-      },
-      {
-        parameter: 'current_admin',
-        validatorMethods: ['validateNonEmptyObject']
-      }
-    ],
-    optional: []
-  },
-  [apiName.reorderCuratedEntity]: {
-    mandatory: [
-      {
-        parameter: 'entity_kind',
-        validatorMethods: ['validateString']
-      },
-      {
-        parameter: 'entity_ids',
-        validatorMethods: ['validateNonBlankStringArray']
       },
       {
         parameter: 'current_admin',

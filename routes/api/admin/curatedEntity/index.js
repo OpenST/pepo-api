@@ -10,25 +10,18 @@ const rootPrefix = '../../../..',
   curatedEntitiesConstants = require(rootPrefix + '/lib/globalConstant/curatedEntities'),
   adminResponseEntityKey = require(rootPrefix + '/lib/globalConstant/adminResponseEntity');
 
-/* Insert curated entity */
-router.post('/insert', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
-  req.decodedParams.apiName = apiName.insertCuratedEntity;
+/* Insert or update curated entity */
+router.post('/update', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.updateCuratedEntity;
 
-  Promise.resolve(routeHelper.perform(req, res, next, '/admin/curated/Insert', 'r_a_v1_ce_i_1', null, null, null));
-});
-
-/* Reorder curated entity */
-router.post('/reorder', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
-  req.decodedParams.apiName = apiName.reorderCuratedEntity;
-
-  Promise.resolve(routeHelper.perform(req, res, next, '/admin/curated/Reorder', 'r_a_v1_ce_i_2', null, null, null));
+  Promise.resolve(routeHelper.perform(req, res, next, '/admin/curated/Update', 'r_a_v1_ce_i_1', null, null, null));
 });
 
 /* delete curated entity */
 router.post('/delete', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.deleteCuratedEntity;
 
-  Promise.resolve(routeHelper.perform(req, res, next, '/admin/curated/Delete', 'r_a_v1_ce_i_5', null, null, null));
+  Promise.resolve(routeHelper.perform(req, res, next, '/admin/curated/Delete', 'r_a_v1_ce_i_2', null, null, null));
 });
 
 /* Get list for given user entity kind */
