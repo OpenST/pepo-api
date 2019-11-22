@@ -25,6 +25,8 @@ class ApproveUser extends SlackEventBase {
     super(params);
 
     const oThis = this;
+
+    oThis.errMsg = null;
   }
 
   /**
@@ -38,6 +40,8 @@ class ApproveUser extends SlackEventBase {
     await oThis._validateAndSanitizeParams();
 
     await oThis._callApproveUserService();
+
+    await oThis._postResponseToSlack();
 
     return responseHelper.successWithData({});
   }
@@ -58,16 +62,8 @@ class ApproveUser extends SlackEventBase {
     let approveUserServiceResponse = await new ApproveUsersAsCreatorService(approveUserServiceParams).perform();
 
     if (approveUserServiceResponse.isFailure()) {
-      return Promise.reject(approveUserServiceResponse);
-    } else {
-      return oThis._postResponseToSlack();
+      oThis._setError(approveUserServiceResponse);
     }
-  }
-
-  async _postResponseToSlack() {
-    const oThis = this;
-
-    return super._postResponseToSlack();
   }
 
   /**
@@ -82,18 +78,28 @@ class ApproveUser extends SlackEventBase {
     const oThis = this;
     logger.log('_updateBlocks start');
 
-    const txt = await oThis._textToWrite('Approved');
-    const newElement = {
-      type: 'context',
-      elements: [
-        {
-          type: 'mrkdwn',
-          text: txt
-        }
-      ]
-    };
+    if (oThis.errMsg) {
+      const formattedMsg = '`error:`' + oThis.errMsg;
 
-    newBlocks[actionPos] = newElement;
+      let trailingArray = newBlocks.splice(actionPos + 1);
+
+      newBlocks[actionPos + 1] = slackConstants.addTextSection(formattedMsg);
+      newBlocks = newBlocks.concat(trailingArray);
+    } else {
+      const txt = await oThis._textToWrite('Approved');
+      const newElement = {
+        type: 'context',
+        elements: [
+          {
+            type: 'mrkdwn',
+            text: txt
+          }
+        ]
+      };
+
+      newBlocks[actionPos] = newElement;
+    }
+
     return newBlocks;
   }
 }

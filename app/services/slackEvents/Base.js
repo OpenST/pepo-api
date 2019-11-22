@@ -3,6 +3,9 @@ const rootPrefix = '../../..',
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   HttpLibrary = require(rootPrefix + '/lib/HttpRequest'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
+  basicHelper = require(rootPrefix + '/helpers/basic'),
+  apiVersions = require(rootPrefix + '/lib/globalConstant/apiVersions'),
+  errorConfig = basicHelper.fetchErrorConfig(apiVersions.v1),
   responseHelper = require(rootPrefix + '/lib/formatter/response');
 
 /**
@@ -31,6 +34,8 @@ class SlackEventBase extends ServiceBase {
     oThis.eventDataPayload = params.eventDataPayload;
     oThis.eventParams = params.eventParams;
     oThis.currentAdmin = params.currentAdmin;
+
+    oThis.errMsg = null;
   }
 
   /**
@@ -104,8 +109,9 @@ class SlackEventBase extends ServiceBase {
 
     let blocks = await oThis._newBlockForSlack();
 
+    const text = oThis.errMsg ? 'Unable to Process' : 'Your request was processed.';
     return {
-      text: 'Your request was processed.',
+      text: text,
       blocks: blocks
     };
   }
@@ -161,6 +167,32 @@ class SlackEventBase extends ServiceBase {
    */
   async _updatedBlocks(actionPos, currentBlocks) {
     throw new Error('Sub-class to implement.');
+  }
+
+  /**
+   * Set error message received from service
+   *
+   *
+   * @return {Promise<void>}
+   *
+   * @private
+   */
+  async _setError(serviceResponse) {
+    const oThis = this;
+    logger.error('_setError start');
+
+    let errorResponse = serviceResponse.toHash(errorConfig);
+
+    const errors = errorResponse.err.error_data;
+
+    if (errors.length == 0) {
+      oThis.errMsg = errorResponse.err.msg;
+    } else {
+      oThis.errMsg = '';
+      for (let i = 0; i < errors.length; i++) {
+        oThis.errMsg += errors[i].msg;
+      }
+    }
   }
 }
 

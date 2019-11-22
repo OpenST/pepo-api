@@ -2,7 +2,8 @@ const rootPrefix = '../../..',
   SlackEventBase = require(rootPrefix + '/app/services/slackEvents/Base'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
-  DeleteVideoService = require(rootPrefix + '/app/services/admin/DeleteVideo');
+  slackConstants = require(rootPrefix + '/lib/globalConstant/slack');
+DeleteVideoService = require(rootPrefix + '/app/services/admin/DeleteVideo');
 
 /**
  * Class to process delete video event.
@@ -24,6 +25,8 @@ class DeleteVideo extends SlackEventBase {
     super(params);
 
     const oThis = this;
+
+    oThis.errMsg = null;
   }
 
   /**
@@ -37,6 +40,8 @@ class DeleteVideo extends SlackEventBase {
     await oThis._validateAndSanitizeParams();
 
     await oThis._callDeleteVideoService();
+
+    await oThis._postResponseToSlack();
 
     return responseHelper.successWithData({});
   }
@@ -57,16 +62,8 @@ class DeleteVideo extends SlackEventBase {
     let DeleteVideoServiceResponse = await new DeleteVideoService(deletevideoServiceParams).perform();
 
     if (DeleteVideoServiceResponse.isFailure()) {
-      return Promise.reject(DeleteVideoServiceResponse);
-    } else {
-      return oThis._postResponseToSlack();
+      oThis._setError(DeleteVideoServiceResponse);
     }
-  }
-
-  async _postResponseToSlack() {
-    const oThis = this;
-
-    return super._postResponseToSlack();
   }
 
   /**
@@ -81,11 +78,16 @@ class DeleteVideo extends SlackEventBase {
     const oThis = this;
     logger.log('_updateBlocks start');
 
-    const txt = await oThis._textToWrite('Deleted');
+    if (oThis.errMsg) {
+      const txt = '\n`error:`' + oThis.errMsg;
+      newBlocks[actionPos]['text']['text'] += txt;
+    } else {
+      const txt = await oThis._textToWrite('Deleted');
 
-    delete newBlocks[actionPos]['accessory'];
+      delete newBlocks[actionPos]['accessory'];
 
-    newBlocks[actionPos]['text']['text'] += txt;
+      newBlocks[actionPos]['text']['text'] += txt;
+    }
 
     return newBlocks;
   }

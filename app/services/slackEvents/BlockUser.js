@@ -2,7 +2,8 @@ const rootPrefix = '../../..',
   SlackEventBase = require(rootPrefix + '/app/services/slackEvents/Base'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
-  BlockUserService = require(rootPrefix + '/app/services/admin/BlockUser');
+  slackConstants = require(rootPrefix + '/lib/globalConstant/slack');
+BlockUserService = require(rootPrefix + '/app/services/admin/BlockUser');
 
 /**
  * Class to process block user event.
@@ -24,6 +25,8 @@ class BlockUser extends SlackEventBase {
     super(params);
 
     const oThis = this;
+
+    oThis.errMsg = null;
   }
 
   /**
@@ -37,6 +40,8 @@ class BlockUser extends SlackEventBase {
     await oThis._validateAndSanitizeParams();
 
     await oThis._callBlockUserService();
+
+    await oThis._postResponseToSlack();
 
     return responseHelper.successWithData({});
   }
@@ -57,16 +62,8 @@ class BlockUser extends SlackEventBase {
     let BlockUserServiceResponse = await new BlockUserService(blockUserServiceResponseParams).perform();
 
     if (BlockUserServiceResponse.isFailure()) {
-      return Promise.reject(BlockUserServiceResponse);
-    } else {
-      return oThis._postResponseToSlack();
+      oThis._setError(BlockUserServiceResponse);
     }
-  }
-
-  async _postResponseToSlack() {
-    const oThis = this;
-
-    return super._postResponseToSlack();
   }
 
   /**
@@ -81,18 +78,28 @@ class BlockUser extends SlackEventBase {
     const oThis = this;
     logger.log('_updateBlocks start');
 
-    const txt = await oThis._textToWrite('User Deleted');
-    const newElement = {
-      type: 'context',
-      elements: [
-        {
-          type: 'mrkdwn',
-          text: txt
-        }
-      ]
-    };
+    if (oThis.errMsg) {
+      const formattedMsg = '`error:`' + oThis.errMsg;
 
-    newBlocks[actionPos] = newElement;
+      let trailingArray = newBlocks.splice(actionPos + 1);
+
+      newBlocks[actionPos + 1] = slackConstants.addTextSection(formattedMsg);
+      newBlocks = newBlocks.concat(trailingArray);
+    } else {
+      const txt = await oThis._textToWrite('User Deleted');
+      const newElement = {
+        type: 'context',
+        elements: [
+          {
+            type: 'mrkdwn',
+            text: txt
+          }
+        ]
+      };
+
+      newBlocks[actionPos] = newElement;
+    }
+
     return newBlocks;
   }
 }
