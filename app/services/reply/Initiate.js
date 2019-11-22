@@ -14,7 +14,7 @@ const rootPrefix = '../../..',
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   videoConstants = require(rootPrefix + '/lib/globalConstant/video'),
-  entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
+  entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
   replyDetailConstants = require(rootPrefix + '/lib/globalConstant/replyDetail');
 
 /**
@@ -121,7 +121,7 @@ class InitiateReply extends ServiceBase {
     }
 
     return responseHelper.successWithData({
-      [entityType.videoReplyList]: [
+      [entityTypeConstants.videoReplyList]: [
         {
           id: oThis.replyDetailId,
           creatorUserId: oThis.currentUser.id,
