@@ -22,6 +22,7 @@ class AdminResetPassword extends ServiceBase {
    * @param {object} params
    * @param {string} params.email: Email
    * @param {string} params.name: Name
+   * @param {string} [params.slack_id]: Slack id
    *
    * @augments ServiceBase
    *
@@ -34,6 +35,7 @@ class AdminResetPassword extends ServiceBase {
 
     oThis.email = params.email;
     oThis.name = params.name;
+    oThis.slackId = params.slack_id || null;
 
     oThis.adminObj = {};
     oThis.password = null;
@@ -129,6 +131,7 @@ class AdminResetPassword extends ServiceBase {
           name: oThis.name,
           email: oThis.email,
           password: oThis.encryptedPassword,
+          slack_id: oThis.slackId,
           encryption_salt: oThis.encryptionSalt,
           status: adminConstants.invertedStatuses[adminConstants.activeStatus]
         })
