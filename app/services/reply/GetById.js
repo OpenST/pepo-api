@@ -160,7 +160,6 @@ class GetReplyById extends ServiceBase {
 
     oThis.userRepliesMap = response.data;
 
-    console.log('==oThis.userRepliesMap======', oThis.userRepliesMap);
     const rdObj = oThis.userRepliesMap.replyDetailsMap[oThis.replyId];
     oThis.videoReplies.push(oThis.userRepliesMap.fullVideosMap[rdObj.entityId]);
   }
