@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "15502460-9fd3-439a-aec0-b3ce9569cce0",
+		"_postman_id": "556ff0b7-1196-4d52-871a-a300c68db3f8",
 		"name": "pepo-api",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -168,7 +168,7 @@
 					"name": "curated-entity",
 					"item": [
 						{
-							"name": "Insert entity",
+							"name": "Update",
 							"request": {
 								"auth": {
 									"type": "basic",
@@ -210,11 +210,16 @@
 											"key": "entity_id",
 											"value": "1027",
 											"type": "text"
+										},
+										{
+											"key": "position",
+											"value": "50130000.000000",
+											"type": "text"
 										}
 									]
 								},
 								"url": {
-									"raw": "{{api_server}}/api/admin/curated-entities/insert",
+									"raw": "{{api_server}}/api/admin/curated-entities/update",
 									"host": [
 										"{{api_server}}"
 									],
@@ -222,7 +227,7 @@
 										"api",
 										"admin",
 										"curated-entities",
-										"insert"
+										"update"
 									]
 								}
 							},
@@ -392,67 +397,6 @@
 										"admin",
 										"curated-entities",
 										"tags"
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "Reorder",
-							"request": {
-								"auth": {
-									"type": "basic",
-									"basic": [
-										{
-											"key": "username",
-											"value": "pepo",
-											"type": "string"
-										},
-										{
-											"key": "password",
-											"value": "Pepo-Admin-20!9*",
-											"type": "string"
-										}
-									]
-								},
-								"method": "POST",
-								"header": [
-									{
-										"key": "Content-Type",
-										"type": "text",
-										"value": "application/x-www-form-urlencoded"
-									},
-									{
-										"key": "csrf-token",
-										"type": "text",
-										"value": "{{csrf-token}}"
-									}
-								],
-								"body": {
-									"mode": "urlencoded",
-									"urlencoded": [
-										{
-											"key": "entity_kind",
-											"value": "tags",
-											"type": "text"
-										},
-										{
-											"key": "entity_ids",
-											"value": "[21,28,24,28]",
-											"type": "text"
-										}
-									]
-								},
-								"url": {
-									"raw": "{{api_server}}/api/admin/curated-entities/reorder",
-									"host": [
-										"{{api_server}}"
-									],
-									"path": [
-										"api",
-										"admin",
-										"curated-entities",
-										"reorder"
 									]
 								}
 							},
