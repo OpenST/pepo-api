@@ -227,7 +227,7 @@ router.get('/videos/:video_id/replies', sanitizer.sanitizeDynamicUrlParams, func
       resultType: adminResponseEntityKey.videoReplies,
       entityKindToResponseKeyMap: {
         [adminEntityType.videoReplyList]: adminResponseEntityKey.videoReplies,
-        [adminEntityType.usersMap]: adminResponseEntityKey.users,
+        [adminEntityType.adminUsersMap]: adminResponseEntityKey.users,
         [adminEntityType.userStats]: adminResponseEntityKey.userStats,
         [adminEntityType.userProfilesMap]: adminResponseEntityKey.userProfiles,
         [adminEntityType.videoDescriptionsMap]: adminResponseEntityKey.videoDescriptions,
