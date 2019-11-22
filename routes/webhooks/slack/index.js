@@ -41,7 +41,10 @@ const validateSlackSignature = async function(req, res, next) {
  * @param next
  */
 const formatPayload = function(req, res, next) {
-  req.body.payload = JSON.parse(req.body.payload);
+  let payload = JSON.parse(req.body.payload);
+
+  req.body.payload = basicHelper.preprocessSlackPayload(payload);
+
   next();
 };
 

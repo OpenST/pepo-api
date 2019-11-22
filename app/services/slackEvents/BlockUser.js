@@ -1,6 +1,7 @@
 const rootPrefix = '../../..',
   SlackEventBase = require(rootPrefix + '/app/services/slackEvents/Base'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
+  logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   BlockUserService = require(rootPrefix + '/app/services/admin/BlockUser');
 
 /**
@@ -80,12 +81,13 @@ class BlockUser extends SlackEventBase {
     const oThis = this;
     logger.log('_updateBlocks start');
 
+    const txt = await oThis._textToWrite('User Deleted');
     const newElement = {
       type: 'context',
       elements: [
         {
           type: 'mrkdwn',
-          text: oThis._textToWrite('Blocked')
+          text: txt
         }
       ]
     };

@@ -164,13 +164,7 @@ class SlackEventFactory extends ServiceBase {
     }
 
     if (eventResponse.isFailure()) {
-      return Promise.reject(
-        responseHelper.error({
-          internal_error_identifier: 'a_s_se_f_e_2',
-          api_error_identifier: 'something_went_wrong',
-          debug_options: { eventResponse: eventResponse, eventData: oThis.eventData }
-        })
-      );
+      return Promise.reject(eventResponse);
     } else {
       return eventResponse;
     }

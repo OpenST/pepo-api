@@ -1,6 +1,5 @@
 const rootPrefix = '../../..',
   SlackEventBase = require(rootPrefix + '/app/services/slackEvents/Base'),
-  CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   ApproveUsersAsCreatorService = require(rootPrefix + '/app/services/admin/ApproveUsersAsCreator'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
@@ -83,12 +82,13 @@ class ApproveUser extends SlackEventBase {
     const oThis = this;
     logger.log('_updateBlocks start');
 
+    const txt = await oThis._textToWrite('Approved');
     const newElement = {
       type: 'context',
       elements: [
         {
           type: 'mrkdwn',
-          text: oThis._textToWrite('Approve')
+          text: txt
         }
       ]
     };

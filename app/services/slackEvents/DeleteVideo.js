@@ -1,6 +1,7 @@
 const rootPrefix = '../../..',
   SlackEventBase = require(rootPrefix + '/app/services/slackEvents/Base'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
+  logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   DeleteVideoService = require(rootPrefix + '/app/services/admin/DeleteVideo');
 
 /**
@@ -80,9 +81,11 @@ class DeleteVideo extends SlackEventBase {
     const oThis = this;
     logger.log('_updateBlocks start');
 
+    const txt = await oThis._textToWrite('Deleted');
+
     delete newBlocks[actionPos]['accessory'];
 
-    newBlocks[actionPos]['text']['text'] += +oThis._textToWrite('\nDeleted');
+    newBlocks[actionPos]['text']['text'] += txt;
 
     return newBlocks;
   }

@@ -66,7 +66,7 @@ class SlackEventBase extends ServiceBase {
    *
    * @private
    */
-  async _postRequestToSlack() {
+  async _postResponseToSlack() {
     const oThis = this;
     logger.log('_postRequestToSlack start');
 
@@ -142,9 +142,13 @@ class SlackEventBase extends ServiceBase {
       currentTime = Math.round(new Date() / 1000),
       currentTimeStr = new Date().toUTCString();
 
-    return `>*${actionStr} by <@${
-      oThis.eventDataPayload.user.id
-    }>* <!date^${currentTime}^{date_pretty} at {time}|${currentTimeStr}}>`;
+    //Note: Not using date and atmention because of sanitizer error in webhook payload
+    // return `>*${actionStr} by <@${
+    //   oThis.eventDataPayload.user.id
+    //   }>* <!date^${currentTime}^{date_pretty} at {time}|${currentTimeStr}}>`;
+    //
+
+    return `\n>*${actionStr} by ${oThis.eventDataPayload.user.name}* at ${currentTimeStr}`;
   }
 
   /**
