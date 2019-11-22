@@ -70,7 +70,6 @@ class InitiateReply extends ServiceBase {
     oThis.link = params.link;
 
     oThis.videoId = null;
-    oThis.addVideoParams = {};
     oThis.mentionedUserIds = [];
   }
 
@@ -236,17 +235,13 @@ class InitiateReply extends ServiceBase {
   /**
    * Validate and save reply in reply details and related tables.
    *
-   * @sets oThis.addVideoParams
-   *
    * @returns {Promise<result>}
    * @private
    */
   async _validateAndSaveReply() {
     const oThis = this;
 
-    // TODO - replies - oThis.addVideoParams should not be part of oThis.
-
-    oThis.addVideoParams = {
+    const addVideoParams = {
       userId: oThis.currentUser.id,
       videoUrl: oThis.videoUrl,
       size: oThis.videoSize,
@@ -265,7 +260,7 @@ class InitiateReply extends ServiceBase {
       parentId: oThis.parentId
     };
 
-    const resp = await videoLib.validateAndSave(oThis.addVideoParams);
+    const resp = await videoLib.validateAndSave(addVideoParams);
 
     if (resp.isFailure()) {
       return Promise.reject(resp);
