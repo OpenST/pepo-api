@@ -148,7 +148,11 @@ class UpdateFanVideo extends UpdateProfileBase {
 
     let addVideoDescriptionData = addVideoDescriptionRsp.data;
 
+    console.log('addVideoDescriptionData--------', addVideoDescriptionData);
+
     oThis.mentionedUserIds = addVideoDescriptionData.mentionedUserIds;
+
+    console.log('oThis.mentionedUserIds---2--------', oThis.mentionedUserIds);
   }
 
   /**
@@ -207,6 +211,8 @@ class UpdateFanVideo extends UpdateProfileBase {
     // Feed needs to be added for uploaded video
     const oThis = this;
 
+    await oThis._publishAtMentionNotifications();
+
     // Feed needs to be added only if user is an approved creator.
     if (UserModelKlass.isUserApprovedCreator(oThis.userObj)) {
       await oThis._addFeed();
@@ -218,6 +224,26 @@ class UpdateFanVideo extends UpdateProfileBase {
         mentionedUserIds: oThis.mentionedUserIds
       });
     }
+  }
+
+  /**  await oThis._publishNotifications();
+   * Publish notifications
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _publishAtMentionNotifications() {
+    const oThis = this;
+
+    if (oThis.mentionedUserIds.length === 0) {
+      return;
+    }
+
+    // Notification would be published only if user is approved.
+    await notificationJobEnqueue.enqueue(notificationJobConstants.userMention, {
+      userId: oThis.currentUserId,
+      videoId: oThis.videoId,
+      mentionedUserIds: oThis.mentionedUserIds
+    });
   }
 
   /**

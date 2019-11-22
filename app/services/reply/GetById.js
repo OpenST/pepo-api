@@ -6,7 +6,7 @@ const rootPrefix = '../../..',
   ReplyDetailsByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/ReplyDetailsByIds'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
-  entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
+  entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
   replyDetailConstants = require(rootPrefix + '/lib/globalConstant/replyDetail');
 
 /**
@@ -36,6 +36,7 @@ class GetReplyById extends ServiceBase {
     oThis.currentUser = params.current_user;
     oThis.isAdmin = params.is_admin || false;
 
+    oThis.parentVideoId = null;
     oThis.videoReplies = [];
     oThis.currentUserId = null;
     oThis.userRepliesMap = {};
@@ -63,7 +64,7 @@ class GetReplyById extends ServiceBase {
   /**
    * Fetch creator user id.
    *
-   * @sets oThis.currentUserId
+   * @sets oThis.parentVideoId, oThis.currentUserId
    *
    * @returns {Promise<void>}
    * @private
@@ -103,6 +104,7 @@ class GetReplyById extends ServiceBase {
       );
     }
 
+    oThis.parentVideoId = replyDetail.parentId;
     oThis.currentUserId = oThis.currentUser ? Number(oThis.currentUser.id) : 0;
   }
 
@@ -138,8 +140,10 @@ class GetReplyById extends ServiceBase {
 
     const userVideosObj = new GetUserVideosList({
       currentUserId: oThis.currentUserId,
+      videoIds: [oThis.parentVideoId],
       replyDetailIds: [oThis.replyId],
-      isAdmin: oThis.isAdmin
+      isAdmin: oThis.isAdmin,
+      fetchVideoViewDetails: 1
     });
 
     const response = await userVideosObj.perform();
@@ -155,6 +159,8 @@ class GetReplyById extends ServiceBase {
     }
 
     oThis.userRepliesMap = response.data;
+
+    console.log('==oThis.userRepliesMap======', oThis.userRepliesMap);
     const rdObj = oThis.userRepliesMap.replyDetailsMap[oThis.replyId];
     oThis.videoReplies.push(oThis.userRepliesMap.fullVideosMap[rdObj.entityId]);
   }
@@ -169,14 +175,15 @@ class GetReplyById extends ServiceBase {
     const oThis = this;
 
     return responseHelper.successWithData({
-      [entityType.userVideoList]: oThis.videoReplies,
-      [entityType.replyDetailsMap]: oThis.userRepliesMap.replyDetailsMap,
-      [entityType.videoDescriptionsMap]: oThis.userRepliesMap.videoDescriptionMap,
-      [entityType.userProfilesMap]: oThis.userRepliesMap.userProfilesMap,
-      [entityType.currentUserUserContributionsMap]: oThis.userRepliesMap.currentUserUserContributionsMap,
-      [entityType.currentUserVideoContributionsMap]: oThis.userRepliesMap.currentUserVideoContributionsMap,
-      [entityType.userProfileAllowedActions]: oThis.userRepliesMap.userProfileAllowedActions,
-      [entityType.pricePointsMap]: oThis.userRepliesMap.pricePointsMap,
+      [entityTypeConstants.userVideoList]: oThis.videoReplies,
+      [entityTypeConstants.replyDetailsMap]: oThis.userRepliesMap.replyDetailsMap,
+      [entityTypeConstants.videoDescriptionsMap]: oThis.userRepliesMap.videoDescriptionMap,
+      [entityTypeConstants.userProfilesMap]: oThis.userRepliesMap.userProfilesMap,
+      [entityTypeConstants.currentUserUserContributionsMap]: oThis.userRepliesMap.currentUserUserContributionsMap,
+      [entityTypeConstants.currentUserVideoContributionsMap]: oThis.userRepliesMap.currentUserVideoContributionsMap,
+      [entityTypeConstants.currentUserVideoRelationsMap]: oThis.userRepliesMap.currentUserVideoRelationsMap,
+      [entityTypeConstants.userProfileAllowedActions]: oThis.userRepliesMap.userProfileAllowedActions,
+      [entityTypeConstants.pricePointsMap]: oThis.userRepliesMap.pricePointsMap,
       usersByIdMap: oThis.userRepliesMap.usersByIdMap,
       userStat: oThis.userRepliesMap.userStat,
       tags: oThis.userRepliesMap.tags,

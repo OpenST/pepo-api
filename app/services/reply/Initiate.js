@@ -28,6 +28,7 @@ class InitiateReply extends ServiceBase {
    *
    * @param {object} params
    * @param {object} params.current_user
+   * @param {number} params.admin_user_id
    * @param {number} params.parent_kind: parent post kind
    * @param {number} params.parent_id: parent video id
    * @param {number} params.reply_detail_id: if reply is editing
@@ -54,6 +55,7 @@ class InitiateReply extends ServiceBase {
     oThis.replyDetailId = params.reply_detail_id || null;
 
     oThis.currentUser = params.current_user;
+    oThis.adminUserId = params.admin_user_id;
     oThis.parentKind = params.parent_kind;
     oThis.parentId = params.parent_id;
     oThis.videoUrl = params.video_url;
@@ -90,7 +92,7 @@ class InitiateReply extends ServiceBase {
 
       await oThis._getReplyDetails();
 
-      if (oThis.replyDetail.creatorUserId !== oThis.currentUser.id) {
+      if (!oThis.adminUserId || oThis.replyDetail.creatorUserId !== oThis.currentUser.id) {
         return Promise.reject(
           responseHelper.error({
             internal_error_identifier: 's_r_i_1',
@@ -100,14 +102,12 @@ class InitiateReply extends ServiceBase {
         );
       }
 
-      if (oThis.replyDetail.status === replyDetailConstants.pendingStatus) {
-        await oThis._editReplyDescription();
+      await oThis._editReplyDescription();
 
-        await new EditReplyLink({
-          replyDetailId: oThis.replyDetail.id,
-          link: oThis.link
-        }).perform();
-      }
+      await new EditReplyLink({
+        replyDetailId: oThis.replyDetail.id,
+        link: oThis.link
+      }).perform();
     } else {
       await oThis._addLink();
 
@@ -117,9 +117,9 @@ class InitiateReply extends ServiceBase {
       oThis.replyDetailId = resp.replyDetailId;
 
       await oThis._addReplyDescription();
-    }
 
-    await oThis._onVideoPostCompletion();
+      await oThis._onVideoPostCompletion();
+    }
 
     return responseHelper.successWithData({
       [entityType.videoReplyList]: [
@@ -331,9 +331,10 @@ class InitiateReply extends ServiceBase {
         parentVideoDetails.creatorUserId === oThis.currentUser.id
       ) {
         await new ReplyVideoPostTransaction({
+          currentUserId: oThis.currentUser.id,
           replyDetailId: oThis.replyDetailId,
           videoId: oThis.parentId,
-          pepoAmountInWei: parentVideoDetails.perReplyAmountInWei,
+          pepoAmountInWei: 0,
           mentionedUserIds: oThis.mentionedUserIds
         }).perform();
       }
