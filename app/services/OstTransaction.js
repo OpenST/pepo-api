@@ -516,12 +516,10 @@ class OstTransaction extends ServiceBase {
           entity = includeRow.entityIdentifier.split('_');
 
         if (entity[0] == textIncludeConstants.userEntityKindShort) {
-          oThis.mentionedUserIds.push(+entity[1]);
+          oThis.mentionedUserIds.push(entity[1]);
         }
       }
     }
-
-    console.log('\n\n\n\noThis.mentionedUserIds------------', oThis.mentionedUserIds);
   }
 
   /**
@@ -544,7 +542,6 @@ class OstTransaction extends ServiceBase {
       promiseArray.push(oThis._validateToUserIdForRedemption());
       promiseArray.push(oThis._validateTransactionDataForRedemption());
     } else if (oThis._isReplyOnVideoTransactionKind()) {
-      console.log('\n\n\n\n\n\n\n\n\n\n=========================HERE================================================');
       promiseArray.push(oThis._fetchReplyDetailsAndValidate(), oThis._validateIfValidTransaction());
     } else if (oThis._isPepoOnReplyTransactionKind()) {
       promiseArray.push(oThis._fetchReplyDetailsAndValidate(), oThis._fetchToUserIdsAndAmounts());
