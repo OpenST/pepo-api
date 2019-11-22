@@ -220,6 +220,7 @@ router.get('/reply-history/:profile_user_id', sanitizer.sanitizeDynamicUrlParams
 router.get('/videos/:video_id/replies', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.replyList;
   req.decodedParams.video_id = req.params.video_id;
+  req.decodedParams.is_admin = true;
 
   const dataFormatterFunc = async function(serviceResponse) {
     const wrapperFormatterRsp = await new AdminFormatterComposer({

@@ -126,10 +126,6 @@ const adminSignature = {
   [apiName.replyList]: {
     mandatory: [
       {
-        parameter: 'current_user',
-        validatorMethods: ['validateNonEmptyObject']
-      },
-      {
         parameter: 'current_admin',
         validatorMethods: ['validateNonEmptyObject']
       },
