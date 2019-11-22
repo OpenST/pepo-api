@@ -642,7 +642,6 @@ class UserNotificationList extends ServiceBase {
       [paginationConstants.nextPagePayloadKey]: nextPagePayloadKey
     };
 
-    console.log('RESPONSE ===========', JSON.stringify(response));
     return response;
   }
 
