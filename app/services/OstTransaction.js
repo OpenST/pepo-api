@@ -12,6 +12,7 @@ const rootPrefix = '../..',
   TransactionByOstTxIdCache = require(rootPrefix + '/lib/cacheManagement/multi/TransactionByOstTxId'),
   TokenUserByOstUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TokenUserByOstUserIds'),
   VideoDetailsByVideoIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/VideoDetailsByVideoIds'),
+  TextIncludesByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TextIncludesByTextIds'),
   ReplyDetailsByEntityIdsAndEntityKindCache = require(rootPrefix +
     '/lib/cacheManagement/multi/ReplyDetailsByEntityIdsAndEntityKind'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
@@ -21,6 +22,7 @@ const rootPrefix = '../..',
   ostPlatformSdkWrapper = require(rootPrefix + '/lib/ostPlatform/jsSdkWrapper'),
   transactionConstants = require(rootPrefix + '/lib/globalConstant/transaction'),
   replyDetailConstants = require(rootPrefix + '/lib/globalConstant/replyDetail'),
+  textIncludeConstants = require(rootPrefix + '/lib/globalConstant/cassandra/textInclude'),
   pepocornTransactionConstants = require(rootPrefix + '/lib/globalConstant/redemption/pepocornTransaction');
 
 /**
@@ -64,6 +66,8 @@ class OstTransaction extends ServiceBase {
     oThis.transactionExternalEntityId = null;
     oThis.toUserIdsArray = [];
     oThis.amountsArray = [];
+    oThis.descriptionId = null;
+    oThis.mentionedUserIds = [];
     oThis.tokenData = null;
 
     oThis.videoId = null;
@@ -348,6 +352,12 @@ class OstTransaction extends ServiceBase {
       );
     }
 
+    console.log('\n\n\n\nreplyDetail------------', replyDetail);
+
+    if (replyDetail.descriptionId) {
+      oThis.descriptionId = replyDetail.descriptionId;
+    }
+
     return responseHelper.successWithData({});
   }
 
@@ -451,7 +461,6 @@ class OstTransaction extends ServiceBase {
   /**
    * Validate reply video details and update necessary tables if validations pass.
    *
-   * @sets oThis.replyDetail
    *
    * @returns {Promise<*|result>}
    * @private
@@ -459,17 +468,55 @@ class OstTransaction extends ServiceBase {
   async _validateAndUpdateReplyVideoDetails() {
     const oThis = this;
 
+    if (oThis.descriptionId) {
+      await oThis._fetchMentionedUsers();
+    }
+
     const replyVideoResponse = await new ReplyVideoPostTransaction({
       currentUserId: oThis.userId,
       replyDetailId: oThis.replyDetailId,
       videoId: oThis.videoId,
       transactionId: oThis.ostTxId,
-      pepoAmountInWei: oThis.transfersData[0].amount
+      pepoAmountInWei: oThis.transfersData[0].amount,
+      mentionedUserIds: oThis.mentionedUserIds
     }).perform();
 
     if (replyVideoResponse.isFailure()) {
       return Promise.reject(replyVideoResponse);
     }
+  }
+
+  /**
+   * Fetch mentioned users for given text/description.
+   *
+   * @returns {Promise<never>}
+   * @private
+   */
+  async _fetchMentionedUsers() {
+    const oThis = this;
+
+    const cacheRsp = await new TextIncludesByIdsCache({ ids: [oThis.descriptionId] }).fetch();
+
+    if (cacheRsp.isFailure()) {
+      return Promise.reject(cacheRsp);
+    }
+
+    const textIncludes = cacheRsp.data;
+
+    for (const textId in textIncludes) {
+      const includesForAllKinds = textIncludes[textId];
+
+      for (let ind = 0; ind < includesForAllKinds.length; ind++) {
+        const includeRow = includesForAllKinds[ind],
+          entity = includeRow.entityIdentifier.split('_');
+
+        if (entity[0] == textIncludeConstants.userEntityKindShort) {
+          oThis.mentionedUserIds.push(+entity[1]);
+        }
+      }
+    }
+
+    console.log('\n\n\n\noThis.mentionedUserIds------------', oThis.mentionedUserIds);
   }
 
   /**
