@@ -98,6 +98,7 @@ router.get('/:tag_id/allvideos', sanitizer.sanitizeDynamicUrlParams, function(re
         [entityTypeConstants.userProfilesMap]: responseEntityKey.userProfiles,
         [entityTypeConstants.videoDescriptionsMap]: responseEntityKey.videoDescriptions,
         [entityTypeConstants.tagsMap]: responseEntityKey.tags,
+        [entityTypeConstants.replyDetailsMap]: responseEntityKey.replyDetails,
         [entityTypeConstants.linksMap]: responseEntityKey.links,
         [entityTypeConstants.imagesMap]: responseEntityKey.images,
         [entityTypeConstants.videosMap]: responseEntityKey.videos,
