@@ -9,10 +9,10 @@ const rootPrefix = '../..',
   TokenUserByUserId = require(rootPrefix + '/lib/cacheManagement/multi/TokenUserByUserIds'),
   ReplyDetailsByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/ReplyDetailsByIds'),
   ReplyVideoPostTransaction = require(rootPrefix + '/lib/transaction/ReplyVideoPostTransaction'),
+  TextIncludesByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TextIncludesByTextIds'),
   TransactionByOstTxIdCache = require(rootPrefix + '/lib/cacheManagement/multi/TransactionByOstTxId'),
   TokenUserByOstUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TokenUserByOstUserIds'),
   VideoDetailsByVideoIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/VideoDetailsByVideoIds'),
-  TextIncludesByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TextIncludesByTextIds'),
   ReplyDetailsByEntityIdsAndEntityKindCache = require(rootPrefix +
     '/lib/cacheManagement/multi/ReplyDetailsByEntityIdsAndEntityKind'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
@@ -510,7 +510,6 @@ class OstTransaction extends ServiceBase {
     const oThis = this;
 
     const cacheRsp = await new TextIncludesByIdsCache({ ids: [oThis.descriptionId] }).fetch();
-
     if (cacheRsp.isFailure()) {
       return Promise.reject(cacheRsp);
     }
@@ -524,7 +523,7 @@ class OstTransaction extends ServiceBase {
         const includeRow = includesForAllKinds[ind],
           entity = includeRow.entityIdentifier.split('_');
 
-        if (entity[0] == textIncludeConstants.userEntityKindShort) {
+        if (entity[0] === textIncludeConstants.userEntityKindShort) {
           oThis.mentionedUserIds.push(entity[1]);
         }
       }
