@@ -157,7 +157,7 @@ class ValidateReplyParams extends ServiceBase {
       return Promise.reject(
         responseHelper.error({
           internal_error_identifier: 'a_s_r_v_5',
-          api_error_identifier: 'unauthorized_api_request',
+          api_error_identifier: 'entity_not_found',
           debug_options: { videoDetails: oThis.videoDetails }
         })
       );
