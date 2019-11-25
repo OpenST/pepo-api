@@ -389,6 +389,41 @@ router.get('/tags', sanitizer.sanitizeDynamicUrlParams, function(req, res, next)
   Promise.resolve(routeHelper.perform(req, res, next, '/search/TagSearch', 'r_a_v1_ad_9', null, dataFormatterFunc));
 });
 
+/* Get video by video id */
+router.get('/videos/:video_id', sanitizer.sanitizeDynamicUrlParams, cookieHelper.validateUserLoginRequired, function(
+  req,
+  res,
+  next
+) {
+  req.decodedParams.apiName = apiName.getVideo;
+  req.decodedParams.video_id = req.params.video_id;
+  req.decodedParams.is_admin = true;
+
+  const dataFormatterFunc = async function(serviceResponse) {
+    const wrapperFormatterRsp = await new FormatterComposer({
+      resultType: adminResponseEntityKey.userVideoList,
+      entityKindToResponseKeyMap: {
+        [adminEntityType.userVideoList]: adminResponseEntityKey.userVideoList,
+        [adminEntityType.adminUsersMap]: adminResponseEntityKey.users,
+        [adminEntityType.userStats]: adminResponseEntityKey.userStats,
+        [adminEntityType.userProfilesMap]: adminResponseEntityKey.userProfiles,
+        [adminEntityType.tagsMap]: adminResponseEntityKey.tags,
+        [adminEntityType.linksMap]: adminResponseEntityKey.links,
+        [adminEntityType.imagesMap]: adminResponseEntityKey.images,
+        [adminEntityType.videosMap]: adminResponseEntityKey.videos,
+        [adminEntityType.videoDescriptionsMap]: adminResponseEntityKey.videoDescriptions,
+        [adminEntityType.videoDetailsMap]: adminResponseEntityKey.videoDetails,
+        [adminEntityType.userVideoListMeta]: adminResponseEntityKey.meta
+      },
+      serviceData: serviceResponse.data
+    }).perform();
+
+    serviceResponse.data = wrapperFormatterRsp.data;
+  };
+
+  Promise.resolve(routeHelper.perform(req, res, next, '/video/GetById', 'r_a_v1_ad_10', null, dataFormatterFunc));
+});
+
 router.use('/pre-launch', adminPreLaunchRoutes);
 router.use('/update-usage-data', adminUpdateUsageDataRoutes);
 

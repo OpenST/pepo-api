@@ -22,6 +22,7 @@ class GetVideoById extends ServiceBase {
    * @param {object} params
    * @param {number} params.video_id
    * @param {object} params.current_user
+   * @param {object} params.is_admin
    *
    * @augments ServiceBase
    *
@@ -34,6 +35,7 @@ class GetVideoById extends ServiceBase {
 
     oThis.videoId = params.video_id;
     oThis.currentUser = params.current_user;
+    oThis.isAdmin = params.is_admin || false;
 
     oThis.videoDetails = null;
     oThis.currentUserId = null;
