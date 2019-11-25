@@ -36,10 +36,7 @@ class GetTagsVideoList extends ServiceBase {
     oThis.currentUser = params.current_user;
     oThis.tagId = params.tag_id;
     oThis.paginationIdentifier = params[paginationConstants.paginationIdentifierKey] || null;
-    oThis.supportedEntities = params.supported_entities || [
-      tagConstants.videosSupportedEntity,
-      tagConstants.repliesSupportedEntity
-    ];
+    oThis.supportedEntities = params.supported_entities || [tagConstants.videosSupportedEntity];
 
     oThis.limit = oThis._defaultPageLimit();
 
