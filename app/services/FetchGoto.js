@@ -136,6 +136,8 @@ class FetchGoto extends ServiceBase {
       if (query && query['invite']) {
         oThis.gotoParams = { inviteCode: query['invite'] };
         oThis.gotoKind = gotoConstants.signUpGotoKind;
+      } else {
+        oThis.gotoKind = gotoConstants.feedGotoKind;
       }
       oThis.utmCookieValue = userUtmDetailsConstants.utmCookieToSet(query);
     }
