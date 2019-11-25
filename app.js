@@ -141,6 +141,17 @@ app.use(
   )
 );
 
+app.use(function(req, res, next) {
+  var data = '';
+  req.on('data', function(chunk) {
+    data += chunk;
+  });
+  req.on('end', function() {
+    req.rawBody = data;
+  });
+  next();
+});
+
 // Helmet helps secure Express apps by setting various HTTP headers.
 app.use(helmet());
 
