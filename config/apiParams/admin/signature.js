@@ -326,6 +326,18 @@ const adminSignature = {
         validatorMethods: ['validateBoolean']
       }
     ]
+  },
+  [apiName.getVideo]: {
+    mandatory: [
+      {
+        parameter: 'video_id',
+        validatorMethods: ['validateNonZeroInteger']
+      },
+      {
+        parameter: 'is_admin',
+        validatorMethods: ['validateBoolean']
+      }
+    ]
   }
 };
 
