@@ -326,23 +326,6 @@ class SuccessTransactionOstEvent extends TransactionOstEventBase {
   }
 
   /**
-   * Update reply details
-   *
-   * @returns {Promise<void>}
-   * @private
-   */
-  async _updateReplyDetails() {
-    const oThis = this;
-
-    //todo-replies: totalContributedBy + 1?
-    await new ReplyDetailsModel().updateByReplyDetailId({
-      replyDetailId: oThis.replyDetailId,
-      totalAmount: oThis.ostTransaction.transfers[0].amount,
-      totalContributedBy: 0
-    });
-  }
-
-  /**
    * Send notification for successful transaction.
    *
    * @returns {Promise<void>}
