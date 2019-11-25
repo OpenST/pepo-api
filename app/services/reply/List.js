@@ -155,6 +155,16 @@ class GetReplyList extends ServiceBase {
   async _getReplyVideos() {
     const oThis = this;
 
+    if (oThis.currentUserId == 2112) {
+      console.log('Details for get user video list-----', {
+        currentUserId: oThis.currentUserId,
+        videoIds: [oThis.videoId],
+        replyDetailIds: oThis.replyDetailIds,
+        isAdmin: oThis.isAdmin,
+        fetchVideoViewDetails: 1
+      });
+    }
+
     const userVideosObj = new GetUserVideosList({
       currentUserId: oThis.currentUserId,
       videoIds: [oThis.videoId],
@@ -166,6 +176,10 @@ class GetReplyList extends ServiceBase {
     const response = await userVideosObj.perform();
     if (response.isFailure()) {
       return Promise.reject(response);
+    }
+
+    if (oThis.currentUserId == 2112) {
+      console.log('--------List replies------', JSON.stringify(response));
     }
 
     oThis.userRepliesMap = response.data;
