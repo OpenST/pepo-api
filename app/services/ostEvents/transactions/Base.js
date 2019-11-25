@@ -653,6 +653,8 @@ class TransactionOstEventBase extends ServiceBase {
         })
       );
     }
+
+    oThis.videoId = replyDetail.entityId;
   }
 
   /**
