@@ -7,9 +7,9 @@ const rootPrefix = '../..',
   gotoFactory = require(rootPrefix + '/lib/goTo/factory'),
   coreConstants = require(rootPrefix + '/config/coreConstants'),
   gotoConstants = require(rootPrefix + '/lib/globalConstant/goto'),
-  entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType');
-(userUtmDetailsConstants = require(rootPrefix + '/lib/globalConstant/userUtmDetail')),
-  (responseHelper = require(rootPrefix + '/lib/formatter/response'));
+  responseHelper = require(rootPrefix + '/lib/formatter/response'),
+  entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
+  userUtmDetailsConstants = require(rootPrefix + '/lib/globalConstant/userUtmDetail');
 
 const currentPepoApiDomain = coreConstants.PA_DOMAIN;
 
@@ -33,7 +33,9 @@ class FetchGoto extends ServiceBase {
     super();
 
     const oThis = this;
+
     oThis.url = params.url.toLowerCase().replace(/&amp;/g, '&');
+
     oThis.parsedUrl = {};
     oThis.gotoKind = null;
     oThis.gotoParams = null;
@@ -142,9 +144,9 @@ class FetchGoto extends ServiceBase {
       }
     } else if (pathArray[1] === 'account') {
       oThis.gotoKind = gotoConstants.invitedUsersGotoKind;
-    } else if (pathArray[1] == 'doptin') {
+    } else if (pathArray[1] === 'doptin') {
       // If url is doptin then send it to webview
-      if (query && query['t']) {
+      if (query && query.t) {
         oThis.gotoParams = { url: oThis.url };
         oThis.gotoKind = gotoConstants.webViewGotoKind;
       }
