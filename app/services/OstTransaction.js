@@ -340,17 +340,15 @@ class OstTransaction extends ServiceBase {
       return Promise.reject(replyDetailsByEntityIdsAndEntityKindCacheRsp);
     }
 
-    const replyDetail = replyDetailsByEntityIdsAndEntityKindCacheRsp.data[oThis.videoId];
+    oThis.replyDetailId = replyDetailsByEntityIdsAndEntityKindCacheRsp.data[oThis.videoId];
 
-    oThis.replyDetailId = replyDetail.id;
-
-    if (!CommonValidators.validateNonEmptyObject(replyDetail)) {
+    if (CommonValidators.isVarNullOrUndefined(oThis.replyDetailId)) {
       return Promise.reject(
         responseHelper.paramValidationError({
           internal_error_identifier: 'a_s_ot_9',
           api_error_identifier: 'invalid_api_params',
           params_error_identifiers: ['invalid_video_id'],
-          debug_options: { replyDetail: replyDetail, videoDetail: videoDetail, replyDetailId: oThis.replyDetailId }
+          debug_options: { videoDetail: videoDetail, replyDetailId: oThis.replyDetailId }
         })
       );
     }
