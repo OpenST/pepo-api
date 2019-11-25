@@ -377,10 +377,6 @@ const v1Signature = {
     ],
     optional: [
       {
-        parameter: 'admin_user_id',
-        validatorMethods: ['validateNonZeroInteger']
-      },
-      {
         parameter: 'reply_detail_id',
         validatorMethods: ['validateNonZeroInteger']
       },

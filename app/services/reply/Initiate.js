@@ -28,7 +28,6 @@ class InitiateReply extends ServiceBase {
    *
    * @param {object} params
    * @param {object} params.current_user
-   * @param {number} params.admin_user_id
    * @param {number} params.parent_kind: parent post kind
    * @param {number} params.parent_id: parent video id
    * @param {number} params.reply_detail_id: if reply is editing
@@ -55,7 +54,6 @@ class InitiateReply extends ServiceBase {
     oThis.replyDetailId = params.reply_detail_id || null;
 
     oThis.currentUser = params.current_user;
-    oThis.adminUserId = params.admin_user_id;
     oThis.parentKind = params.parent_kind;
     oThis.parentId = params.parent_id;
     oThis.videoUrl = params.video_url;
@@ -91,7 +89,7 @@ class InitiateReply extends ServiceBase {
 
       await oThis._getReplyDetails();
 
-      if (!oThis.adminUserId || oThis.replyDetail.creatorUserId !== oThis.currentUser.id) {
+      if (oThis.replyDetail.creatorUserId !== oThis.currentUser.id) {
         return Promise.reject(
           responseHelper.error({
             internal_error_identifier: 's_r_i_1',
