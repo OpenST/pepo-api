@@ -36,10 +36,7 @@ class GetTagsVideoList extends ServiceBase {
     oThis.currentUser = params.current_user;
     oThis.tagId = params.tag_id;
     oThis.paginationIdentifier = params[paginationConstants.paginationIdentifierKey] || null;
-    oThis.supportedEntities = params.supported_entities || [
-      tagConstants.videosSupportedEntity,
-      tagConstants.repliesSupportedEntity
-    ];
+    oThis.supportedEntities = params.supported_entities || [tagConstants.videosSupportedEntity];
 
     oThis.limit = oThis._defaultPageLimit();
 
@@ -224,8 +221,6 @@ class GetTagsVideoList extends ServiceBase {
       return Promise.reject(response);
     }
 
-    console.log('==response====', response.data);
-
     oThis.usersVideosMap = response.data;
   }
 
@@ -256,8 +251,6 @@ class GetTagsVideoList extends ServiceBase {
    */
   _prepareResponse() {
     const oThis = this;
-
-    console.log('==oThis.usersVideosMap======', oThis.usersVideosMap);
 
     return responseHelper.successWithData({
       [entityTypeConstants.userVideoList]: oThis.videoDetails,
