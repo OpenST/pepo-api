@@ -1,20 +1,23 @@
 const rootPrefix = '../../../..',
   UpdateStats = require(rootPrefix + '/lib/UpdateStats'),
+  UserStatModel = require(rootPrefix + '/app/models/mysql/UserStat'),
   TokenUserModel = require(rootPrefix + '/app/models/mysql/TokenUser'),
+  ReplyDetailsModel = require(rootPrefix + '/app/models/mysql/ReplyDetail'),
   FiatPaymentModel = require(rootPrefix + '/app/models/mysql/FiatPayment'),
   PepocornBalanceModel = require(rootPrefix + '/app/models/mysql/PepocornBalance'),
+  UserStatByUserIds = require(rootPrefix + '/lib/cacheManagement/multi/UserStatByUserIds'),
   TransactionOstEventBase = require(rootPrefix + '/app/services/ostEvents/transactions/Base'),
   basicHelper = require(rootPrefix + '/helpers/basic'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
-  tokenUserConstants = require(rootPrefix + '/lib/globalConstant/tokenUser'),
-  transactionConstants = require(rootPrefix + '/lib/globalConstant/transaction'),
-  notificationJobEnqueue = require(rootPrefix + '/lib/rabbitMqEnqueue/notification'),
   createErrorLogsEntry = require(rootPrefix + '/lib/errorLogs/createEntry'),
   errorLogsConstants = require(rootPrefix + '/lib/globalConstant/errorLogs'),
+  tokenUserConstants = require(rootPrefix + '/lib/globalConstant/tokenUser'),
+  transactionConstants = require(rootPrefix + '/lib/globalConstant/transaction'),
+  fiatPaymentConstants = require(rootPrefix + '/lib/globalConstant/fiatPayment'),
+  notificationJobEnqueue = require(rootPrefix + '/lib/rabbitMqEnqueue/notification'),
   notificationJobConstants = require(rootPrefix + '/lib/globalConstant/notificationJob'),
-  pepocornTransactionConstants = require(rootPrefix + '/lib/globalConstant/redemption/pepocornTransaction'),
-  fiatPaymentConstants = require(rootPrefix + '/lib/globalConstant/fiatPayment');
+  pepocornTransactionConstants = require(rootPrefix + '/lib/globalConstant/redemption/pepocornTransaction');
 
 /**
  * Class for success transaction ost event base service.
@@ -41,6 +44,10 @@ class SuccessTransactionOstEvent extends TransactionOstEventBase {
     if (oThis._isRedemptionTransactionKind()) {
       promiseArray.push(oThis._validateToUserIdForRedemption());
       promiseArray.push(oThis._validateTransactionDataForRedemption());
+    } else if (oThis._isReplyOnVideoTransactionKind()) {
+      // Do nothing.
+    } else if (oThis._isPepoOnReplyTransactionKind()) {
+      promiseArray.push(oThis._fetchReplyDetailsAndValidate());
     } else {
       if (oThis.isVideoIdPresent()) {
         promiseArray.push(oThis.fetchVideoAndValidate());
@@ -146,47 +153,91 @@ class SuccessTransactionOstEvent extends TransactionOstEventBase {
       return Promise.resolve(responseHelper.successWithData({}));
     }
 
-    if (oThis.transactionObj.extraData.kind === transactionConstants.extraData.userTransactionKind) {
-      await oThis._updateTransactionAndRelatedActivities();
-      await oThis._updateStats();
-    } else if (oThis.transactionObj.extraData.kind === transactionConstants.extraData.airdropKind) {
-      await oThis.validateToUserId();
-      const promiseArray = [];
-      promiseArray.push(oThis.updateTransaction());
-      promiseArray.push(oThis.processForAirdropTransaction());
-      //TODO: USE AWAIT
-      promiseArray.push(oThis._enqueueUserNotification(notificationJobConstants.airdropDone));
-      await Promise.all(promiseArray);
-    } else if (oThis.transactionObj.extraData.kind === transactionConstants.extraData.redemptionKind) {
-      await oThis.validateTransfers();
-      const promiseArray = [];
-      promiseArray.push(oThis.updateTransaction());
-      promiseArray.push(oThis.updatePepocornTransactionModel());
-      await Promise.all(promiseArray);
-      await oThis._creditPepoCornBalance();
-      await oThis._enqueueRedemptionNotification();
-    } else if (oThis.transactionObj.extraData.kind === transactionConstants.extraData.topUpKind) {
-      await oThis.validateToUserId();
-      const promiseArray = [];
-      promiseArray.push(oThis.updateTransaction());
-      promiseArray.push(oThis.processForTopUpTransaction());
-      promiseArray.push(oThis._enqueueUserNotification(notificationJobConstants.topupDone));
-      promiseArray.push(
-        FiatPaymentModel.flushCache({
-          fiatPaymentId: oThis.transactionObj.fiatPaymentId,
-          userId: oThis.toUserId
-        })
-      );
-      await Promise.all(promiseArray);
-    } else {
-      return Promise.reject(
-        responseHelper.error({
-          internal_error_identifier: 'a_s_oe_t_s_pt_1',
-          api_error_identifier: 'something_went_wrong',
-          debug_options: oThis.transactionObj.extraData
-        })
-      );
+    switch (oThis.transactionObj.extraData.kind) {
+      case transactionConstants.extraData.userTransactionKind: {
+        await oThis._updateTransactionAndRelatedActivities();
+        await oThis._updateStats();
+        break;
+      }
+      case transactionConstants.extraData.airdropKind: {
+        await oThis.validateToUserId();
+        const promiseArray = [];
+        promiseArray.push(oThis.updateTransaction());
+        promiseArray.push(oThis.processForAirdropTransaction());
+        // TODO: USE AWAIT
+        promiseArray.push(oThis._enqueueUserNotification(notificationJobConstants.airdropDone));
+        await Promise.all(promiseArray);
+        break;
+      }
+      case transactionConstants.extraData.redemptionKind: {
+        await oThis.validateTransfers();
+        const promiseArray = [];
+        promiseArray.push(oThis.updateTransaction());
+        promiseArray.push(oThis.updatePepocornTransactionModel());
+        await Promise.all(promiseArray);
+        await oThis._creditPepoCornBalance();
+        await oThis._enqueueRedemptionNotification();
+        break;
+      }
+      case transactionConstants.extraData.topUpKind: {
+        await oThis.validateToUserId();
+        const promiseArray = [];
+        promiseArray.push(oThis.updateTransaction());
+        promiseArray.push(oThis.processForTopUpTransaction());
+        promiseArray.push(oThis._enqueueUserNotification(notificationJobConstants.topupDone));
+        promiseArray.push(
+          FiatPaymentModel.flushCache({
+            fiatPaymentId: oThis.transactionObj.fiatPaymentId,
+            userId: oThis.toUserId
+          })
+        );
+        await Promise.all(promiseArray);
+        break;
+      }
+      case transactionConstants.extraData.replyOnVideoTransactionKind: {
+        await oThis.validateTransfers();
+        await oThis.updateTransaction();
+        await oThis.updateUserStats();
+        break;
+      }
+      case transactionConstants.extraData.userTransactionOnReplyKind: {
+        await oThis._updateTransactionAndRelatedActivities();
+        await oThis._updateStats();
+        await oThis._updateReplyDetails();
+        break;
+      }
+      default: {
+        return Promise.reject(
+          responseHelper.error({
+            internal_error_identifier: 'a_s_oe_t_s_pt_1',
+            api_error_identifier: 'something_went_wrong',
+            debug_options: oThis.transactionObj.extraData
+          })
+        );
+      }
     }
+  }
+
+  /**
+   * Update user stats. This method is used only for replyOnVideo transaction kind.
+   *
+   * @returns {Promise<void>}
+   */
+  async updateUserStats() {
+    const oThis = this;
+
+    const updateParams = {
+      userId: oThis.fromUserId,
+      totalContributedBy: 0,
+      totalContributedTo: 0,
+      totalAmountRaised: 0,
+      totalAmountSpent: oThis.ostTransaction.transfers[0].amount
+    };
+
+    await UserStatModel.updateOrCreateUserStat(updateParams);
+
+    // Flush cache.
+    await new UserStatByUserIds({ userIds: [oThis.fromUserId] }).clear();
   }
 
   /**
@@ -262,9 +313,29 @@ class SuccessTransactionOstEvent extends TransactionOstEventBase {
       updateStatsParams.videoId = oThis.videoId;
     }
 
+    if (oThis.isReplyDetailIdPresent()) {
+      updateStatsParams.replyDetailId = oThis.replyDetailId;
+    }
+
     const updateStatsObj = new UpdateStats(updateStatsParams);
 
     await updateStatsObj.perform();
+  }
+
+  /**
+   * Update reply details
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _updateReplyDetails() {
+    const oThis = this;
+
+    await new ReplyDetailsModel().updateByReplyDetailId({
+      replyDetailId: oThis.replyDetailId,
+      totalAmount: oThis.ostTransaction.transfers[0].amount,
+      totalContributedBy: 0
+    });
   }
 
   /**

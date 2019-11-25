@@ -37,6 +37,7 @@ class Video extends ModelBase {
    * @param {string} dbRow.resolutions
    * @param {number} dbRow.poster_image_id
    * @param {number} dbRow.status
+   * @param {number} dbRow.kind
    * @param {number} dbRow.compression_status
    * @param {string} dbRow.created_at
    * @param {string} dbRow.updated_at
@@ -53,6 +54,7 @@ class Video extends ModelBase {
       resolutions: JSON.parse(dbRow.resolutions),
       posterImageId: dbRow.poster_image_id,
       status: videoConstants.statuses[dbRow.status],
+      kind: videoConstants.kinds[dbRow.kind],
       compressionStatus: videoConstants.compressionStatuses[dbRow.compression_status],
       createdAt: dbRow.created_at,
       updatedAt: dbRow.updated_at
@@ -167,6 +169,7 @@ class Video extends ModelBase {
    * @param {object} params.resolutions
    * @param {number} params.posterImageId
    * @param {string} params.status
+   * @param {string} params.kind
    * @param {string} params.compressionStatus
    *
    * @return {Promise<object>}
@@ -181,6 +184,7 @@ class Video extends ModelBase {
         resolutions: JSON.stringify(resolutions),
         poster_image_id: params.posterImageId,
         status: videoConstants.invertedStatuses[params.status],
+        kind: videoConstants.invertedKinds[params.kind],
         compression_status: videoConstants.invertedCompressionStatuses[params.compressionStatus]
       })
       .fire();

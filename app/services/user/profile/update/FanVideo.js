@@ -3,9 +3,9 @@ const rootPrefix = '../../../../..',
   FeedModel = require(rootPrefix + '/app/models/mysql/Feed'),
   UserModelKlass = require(rootPrefix + '/app/models/mysql/User'),
   CommonValidator = require(rootPrefix + '/lib/validators/Common'),
-  AddVideoDescription = require(rootPrefix + '/lib/video/AddDescription'),
-  UpdateProfileBase = require(rootPrefix + '/app/services/user/profile/update/Base'),
+  AddVideoDescription = require(rootPrefix + '/lib/addDescription/Video'),
   VideoDetailsModel = require(rootPrefix + '/app/models/mysql/VideoDetail'),
+  UpdateProfileBase = require(rootPrefix + '/app/services/user/profile/update/Base'),
   videoLib = require(rootPrefix + '/lib/videoLib'),
   bgJobConstants = require(rootPrefix + '/lib/globalConstant/bgJob'),
   bgJob = require(rootPrefix + '/lib/rabbitMqEnqueue/bgJob'),
@@ -13,6 +13,7 @@ const rootPrefix = '../../../../..',
   userConstants = require(rootPrefix + '/lib/globalConstant/user'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   feedsConstants = require(rootPrefix + '/lib/globalConstant/feed'),
+  videoConstants = require(rootPrefix + '/lib/globalConstant/video'),
   notificationJobEnqueue = require(rootPrefix + '/lib/rabbitMqEnqueue/notification'),
   notificationJobConstants = require(rootPrefix + '/lib/globalConstant/notificationJob');
 
@@ -39,6 +40,7 @@ class UpdateFanVideo extends UpdateProfileBase {
    * @param {boolean} params.isExternalUrl: video source is other than s3 upload
    * @param {string} [params.video_description]: Video description
    * @param {string} [params.link]: Link
+   * @param {string/number} [params.per_reply_amount_in_wei]: Per reply amount in wei.
    *
    * @augments UpdateProfileBase
    *
@@ -60,11 +62,13 @@ class UpdateFanVideo extends UpdateProfileBase {
     oThis.isExternalUrl = params.isExternalUrl;
     oThis.videoDescription = params.video_description;
     oThis.link = params.link;
+    oThis.perReplyAmountInWei = params.per_reply_amount_in_wei || 0;
 
     oThis.videoId = null;
     oThis.addVideoParams = {};
     oThis.flushUserCache = false;
     oThis.flushUserProfileElementsCache = false;
+    oThis.mentionedUserIds = [];
 
     oThis.paginationTimestamp = Math.round(new Date() / 1000);
   }
@@ -97,20 +101,10 @@ class UpdateFanVideo extends UpdateProfileBase {
       posterImageSize: oThis.imageSize,
       posterImageWidth: oThis.imageWidth,
       posterImageHeight: oThis.imageHeight,
-      isExternalUrl: oThis.isExternalUrl
+      isExternalUrl: oThis.isExternalUrl,
+      videoKind: videoConstants.postVideoKind,
+      perReplyAmountInWei: oThis.perReplyAmountInWei
     };
-
-    const resp = videoLib.validateVideoObj(oThis.addVideoParams);
-    if (resp.isFailure()) {
-      return Promise.reject(
-        responseHelper.paramValidationError({
-          internal_error_identifier: 'a_s_u_p_fv_1',
-          api_error_identifier: 'invalid_params',
-          params_error_identifiers: ['invalid_video_url'],
-          debug_options: {}
-        })
-      );
-    }
   }
 
   /**
@@ -134,22 +128,29 @@ class UpdateFanVideo extends UpdateProfileBase {
   async _updateProfileElements() {
     const oThis = this;
 
-    const linkIds = await oThis._addLink();
-
-    oThis.addVideoParams.linkIds = linkIds;
+    oThis.addVideoParams.linkIds = await oThis._addLink();
     const resp = await videoLib.validateAndSave(oThis.addVideoParams);
 
     if (resp.isFailure()) {
       return Promise.reject(resp);
     }
 
-    oThis.videoId = resp.data.insertId;
+    oThis.videoId = resp.data.videoId;
 
-    await new AddVideoDescription({
+    const addVideoDescriptionRsp = await new AddVideoDescription({
       videoDescription: oThis.videoDescription,
       videoId: oThis.videoId,
-      isUserCreator: UserModelKlass.isUserApprovedCreator(oThis.userObj)
+      isUserCreator: UserModelKlass.isUserApprovedCreator(oThis.userObj),
+      currentUserId: oThis.currentUserId
     }).perform();
+
+    if (addVideoDescriptionRsp.isFailure()) {
+      return Promise.reject(addVideoDescriptionRsp);
+    }
+
+    let addVideoDescriptionData = addVideoDescriptionRsp.data;
+
+    oThis.mentionedUserIds = addVideoDescriptionData.mentionedUserIds;
   }
 
   /**
@@ -162,8 +163,8 @@ class UpdateFanVideo extends UpdateProfileBase {
     const oThis = this;
 
     if (oThis.link) {
-      // If new url is added then insert in 2 tables
-      let insertRsp = await new UrlModel({}).insertUrl({
+      // If new url is added then insert in 2 tables.
+      const insertRsp = await new UrlModel({}).insertUrl({
         url: oThis.link,
         kind: urlConstants.socialUrlKind
       });
@@ -208,6 +209,8 @@ class UpdateFanVideo extends UpdateProfileBase {
     // Feed needs to be added for uploaded video
     const oThis = this;
 
+    await oThis._publishAtMentionNotifications();
+
     let promiseArray = [];
 
     // Feed needs to be added only if user is an approved creator.
@@ -224,7 +227,8 @@ class UpdateFanVideo extends UpdateProfileBase {
       promiseArray.push(
         notificationJobEnqueue.enqueue(notificationJobConstants.videoAdd, {
           userId: oThis.profileUserId,
-          videoId: oThis.videoId
+          videoId: oThis.videoId,
+          mentionedUserIds: oThis.mentionedUserIds
         })
       );
     } else {
@@ -235,6 +239,26 @@ class UpdateFanVideo extends UpdateProfileBase {
     }
 
     await Promise.all(promiseArray);
+  }
+
+  /**  await oThis._publishNotifications();
+   * Publish notifications
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _publishAtMentionNotifications() {
+    const oThis = this;
+
+    if (oThis.mentionedUserIds.length === 0) {
+      return;
+    }
+
+    // Notification would be published only if user is approved.
+    await notificationJobEnqueue.enqueue(notificationJobConstants.userMention, {
+      userId: oThis.currentUserId,
+      videoId: oThis.videoId,
+      mentionedUserIds: oThis.mentionedUserIds
+    });
   }
 
   /**

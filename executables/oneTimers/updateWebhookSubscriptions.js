@@ -67,6 +67,7 @@ class UpdateWebhookSubscriptions {
 
     const webhookId = oThis.webhooksId,
       topics = [
+        'transactions/initiate',
         'transactions/success',
         'transactions/failure',
         'users/activation_initiate',

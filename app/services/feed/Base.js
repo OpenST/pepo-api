@@ -1,6 +1,6 @@
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
-  GetProfile = require(rootPrefix + '/lib/user/profile/Get'),
+  FetchVideosLib = require(rootPrefix + '/lib/GetUsersVideoList'),
   GetTokenService = require(rootPrefix + '/app/services/token/Get'),
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
@@ -167,13 +167,13 @@ class FeedBase extends ServiceBase {
       return responseHelper.successWithData({});
     }
 
-    const getProfileObj = new GetProfile({
+    const videosLib = new FetchVideosLib({
       userIds: oThis.userIds,
       currentUserId: oThis.currentUserId,
       videoIds: oThis.videoIds
     });
 
-    const profileResp = await getProfileObj.perform();
+    const profileResp = await videosLib.perform();
 
     if (profileResp.isFailure()) {
       return Promise.reject(profileResp);

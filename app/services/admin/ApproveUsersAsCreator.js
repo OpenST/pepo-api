@@ -38,7 +38,7 @@ class ApproveUsersAsCreator extends ServiceBase {
   /**
    * Main performer for class.
    *
-   * @returns {Promise<void>}
+   * @returns {Promise<result>}
    * @private
    */
   async _asyncPerform() {
@@ -48,8 +48,8 @@ class ApproveUsersAsCreator extends ServiceBase {
 
     await oThis._approveUsers();
 
-    for (let i = 0; i < oThis.userIds.length; i++) {
-      let userId = oThis.userIds[i];
+    for (let index = 0; index < oThis.userIds.length; index++) {
+      const userId = oThis.userIds[index];
       await UserModel.flushCache(oThis.userObjects[userId]);
       await bgJob.enqueue(bgJobConstants.postUserApprovalJob, { userId: userId, currentAdminId: oThis.currentAdminId });
     }

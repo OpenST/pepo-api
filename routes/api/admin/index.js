@@ -197,12 +197,91 @@ router.get('/video-history/:profile_user_id', sanitizer.sanitizeDynamicUrlParams
   );
 });
 
+/* Reply history for admin */
+router.get('/reply-history/:profile_user_id', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.userReplyList;
+  req.decodedParams.profile_user_id = req.params.profile_user_id;
+  req.decodedParams.is_admin = true;
+
+  const dataFormatterFunc = async function(serviceResponse) {
+    const wrapperFormatterRsp = await new AdminFormatterComposer({
+      resultType: adminResponseEntityKey.userVideoList,
+      entityKindToResponseKeyMap: {
+        [adminEntityType.userVideoList]: adminResponseEntityKey.userVideoList,
+        [adminEntityType.adminUsersMap]: adminResponseEntityKey.users,
+        [adminEntityType.userStats]: adminResponseEntityKey.userStats,
+        [adminEntityType.userProfilesMap]: adminResponseEntityKey.userProfiles,
+        [adminEntityType.tagsMap]: adminResponseEntityKey.tags,
+        [adminEntityType.linksMap]: adminResponseEntityKey.links,
+        [adminEntityType.imagesMap]: adminResponseEntityKey.images,
+        [adminEntityType.videosMap]: adminResponseEntityKey.videos,
+        [adminEntityType.replyDetailsMap]: adminResponseEntityKey.replyDetails,
+        [adminEntityType.videoDescriptionsMap]: adminResponseEntityKey.videoDescriptions,
+        [adminEntityType.currentUserUserContributionsMap]: adminResponseEntityKey.currentUserUserContributions,
+        [adminEntityType.currentUserVideoContributionsMap]: adminResponseEntityKey.currentUserVideoContributions,
+        [adminEntityType.pricePointsMap]: adminResponseEntityKey.pricePoints,
+        [adminEntityType.token]: adminResponseEntityKey.token,
+        [adminEntityType.userVideoListMeta]: adminResponseEntityKey.meta
+      },
+      serviceData: serviceResponse.data
+    }).perform();
+
+    serviceResponse.data = wrapperFormatterRsp.data;
+  };
+
+  Promise.resolve(routeHelper.perform(req, res, next, '/admin/reply/GetList', 'r_a_v1_u_7', null, dataFormatterFunc));
+});
+
+/* Get list of replies given video id. */
+router.get('/videos/:video_id/replies', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.replyList;
+  req.decodedParams.video_id = req.params.video_id;
+  req.decodedParams.is_admin = true;
+
+  const dataFormatterFunc = async function(serviceResponse) {
+    const wrapperFormatterRsp = await new AdminFormatterComposer({
+      resultType: adminResponseEntityKey.videoReplies,
+      entityKindToResponseKeyMap: {
+        [adminEntityType.videoReplyList]: adminResponseEntityKey.videoReplies,
+        [adminEntityType.adminUsersMap]: adminResponseEntityKey.users,
+        [adminEntityType.userStats]: adminResponseEntityKey.userStats,
+        [adminEntityType.userProfilesMap]: adminResponseEntityKey.userProfiles,
+        [adminEntityType.videoDescriptionsMap]: adminResponseEntityKey.videoDescriptions,
+        [adminEntityType.tagsMap]: adminResponseEntityKey.tags,
+        [adminEntityType.linksMap]: adminResponseEntityKey.links,
+        [adminEntityType.imagesMap]: adminResponseEntityKey.images,
+        [adminEntityType.videosMap]: adminResponseEntityKey.videos,
+        [adminEntityType.replyDetailsMap]: adminResponseEntityKey.replyDetails,
+        [adminEntityType.currentUserUserContributionsMap]: adminResponseEntityKey.currentUserUserContributions,
+        [adminEntityType.currentUserVideoContributionsMap]: adminResponseEntityKey.currentUserVideoContributions,
+        [adminEntityType.currentUserVideoRelationsMap]: adminResponseEntityKey.currentUserVideoRelations,
+        [adminEntityType.pricePointsMap]: adminResponseEntityKey.pricePoints,
+        [adminEntityType.token]: adminResponseEntityKey.token,
+        [adminEntityType.userVideoListMeta]: adminResponseEntityKey.meta
+      },
+      serviceData: serviceResponse.data
+    }).perform();
+
+    serviceResponse.data = wrapperFormatterRsp.data;
+  };
+
+  Promise.resolve(routeHelper.perform(req, res, next, '/reply/List', 'r_a_v1_u_14', null, dataFormatterFunc));
+});
+
 /* Delete video. */
 router.post('/delete-video/:video_id', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.adminDeleteVideo;
   req.decodedParams.video_id = req.params.video_id;
 
   Promise.resolve(routeHelper.perform(req, res, next, '/admin/DeleteVideo', 'r_a_v1_ad_6', null, null, null));
+});
+
+/* Delete reply video. */
+router.post('/delete-reply-video/:reply_details_id', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.adminDeleteReplyVideo;
+  req.decodedParams.reply_details_id = req.params.reply_details_id;
+
+  Promise.resolve(routeHelper.perform(req, res, next, '/admin/reply/Delete', 'r_a_v1_ad_drv_1', null, null, null));
 });
 
 /* Update video link. */
@@ -213,6 +292,16 @@ router.post('/update-video/:video_id/link', sanitizer.sanitizeDynamicUrlParams, 
   Promise.resolve(routeHelper.perform(req, res, next, '/admin/video/UpdateLink', 'r_a_v1_ad_uvl_1', null, null, null));
 });
 
+/* Update reply video link. */
+router.post('/update-reply-video/:reply_detail_id/link', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.adminUpdateReplyLink;
+  req.decodedParams.reply_detail_id = req.params.reply_detail_id;
+
+  Promise.resolve(
+    routeHelper.perform(req, res, next, '/admin/reply/UpdateReplyLink', 'r_a_v1_ad_uvl_4', null, null, null)
+  );
+});
+
 /* Update video description. */
 router.post('/update-video/:video_id/description', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.adminUpdateVideoDescription;
@@ -220,6 +309,20 @@ router.post('/update-video/:video_id/description', sanitizer.sanitizeDynamicUrlP
 
   Promise.resolve(
     routeHelper.perform(req, res, next, '/admin/video/UpdateVideoDescription', 'r_a_v1_ad_uvl_2', null, null, null)
+  );
+});
+
+/* Update video reply description. */
+router.post('/update-reply-video/:reply_detail_id/description', sanitizer.sanitizeDynamicUrlParams, function(
+  req,
+  res,
+  next
+) {
+  req.decodedParams.apiName = apiName.adminUpdateReplyDescription;
+  req.decodedParams.reply_detail_id = req.params.reply_detail_id;
+
+  Promise.resolve(
+    routeHelper.perform(req, res, next, '/admin/reply/UpdateReplyDescription', 'r_a_v1_ad_uvl_3', null, null, null)
   );
 });
 

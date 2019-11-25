@@ -29,6 +29,26 @@ router.get('/tags', sanitizer.sanitizeDynamicUrlParams, function(req, res, next)
   Promise.resolve(routeHelper.perform(req, res, next, '/search/TagSearch', 'r_a_v1_s_1', null, dataFormatterFunc));
 });
 
+/* Search tags mention */
+router.get('/tags-mention', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.getTags;
+
+  const dataFormatterFunc = async function(serviceResponse) {
+    const wrapperFormatterRsp = await new FormatterComposer({
+      resultType: responseEntityKey.tagSearchResults,
+      entityKindToResponseKeyMap: {
+        [entityType.tagList]: responseEntityKey.tagSearchResults,
+        [entityType.tagListMeta]: responseEntityKey.meta
+      },
+      serviceData: serviceResponse.data
+    }).perform();
+
+    serviceResponse.data = wrapperFormatterRsp.data;
+  };
+
+  Promise.resolve(routeHelper.perform(req, res, next, '/search/TagSearch', 'r_a_v1_s_1', null, dataFormatterFunc));
+});
+
 /* Search users */
 router.get('/users', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.userSearch;
@@ -51,12 +71,35 @@ router.get('/users', sanitizer.sanitizeDynamicUrlParams, function(req, res, next
   Promise.resolve(routeHelper.perform(req, res, next, '/search/UserSearch', 'r_a_v1_s_2', null, dataFormatterFunc));
 });
 
+/* Search user mention */
+router.get('/users-mention', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.getTags;
+
+  const dataFormatterFunc = async function(serviceResponse) {
+    const wrapperFormatterRsp = await new FormatterComposer({
+      resultType: responseEntityKey.userSearchResults,
+      entityKindToResponseKeyMap: {
+        [entityType.users]: responseEntityKey.userSearchResults,
+        //[entityType.usersMap]: responseEntityKey.users,
+        [entityType.imagesMap]: responseEntityKey.images,
+        [entityType.userListMeta]: responseEntityKey.meta
+      },
+      serviceData: serviceResponse.data
+    }).perform();
+
+    serviceResponse.data = wrapperFormatterRsp.data;
+  };
+
+  Promise.resolve(
+    routeHelper.perform(req, res, next, '/search/AtMentionSearch', 'r_a_v1_s_3', null, dataFormatterFunc)
+  );
+});
+
 /* Search users */
 router.get('/top', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.mixedTopSearch;
 
   const dataFormatterFunc = async function(serviceResponse) {
-    console.log('Service Response: ', serviceResponse.data[entityType.searchCategoriesList]);
     const wrapperFormatterRsp = await new FormatterComposer({
       resultType: responseEntityKey.searchCategoriesResults,
       entityKindToResponseKeyMap: {
@@ -73,7 +116,7 @@ router.get('/top', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) 
     serviceResponse.data = wrapperFormatterRsp.data;
   };
 
-  Promise.resolve(routeHelper.perform(req, res, next, '/search/TopMixed', 'r_a_v1_s_3', null, dataFormatterFunc));
+  Promise.resolve(routeHelper.perform(req, res, next, '/search/TopMixed', 'r_a_v1_s_4', null, dataFormatterFunc));
 });
 
 module.exports = router;

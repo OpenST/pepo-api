@@ -1,7 +1,7 @@
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   CommonValidator = require(rootPrefix + '/lib/validators/Common'),
-  DeleteUserVideosLib = require(rootPrefix + '/lib/video/DeleteUserVideos'),
+  DeleteUserVideosLib = require(rootPrefix + '/lib/video/delete/UserVideos'),
   VideoDetailsByVideoIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/VideoDetailsByVideoIds'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   videoDetailsConstants = require(rootPrefix + '/lib/globalConstant/videoDetail');
@@ -37,7 +37,7 @@ class DeleteVideo extends ServiceBase {
   /**
    * Async perform.
    *
-   * @return {Promise<void>}
+   * @returns {Promise<void>}
    * @private
    */
   async _asyncPerform() {

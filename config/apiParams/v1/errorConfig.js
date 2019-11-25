@@ -173,6 +173,12 @@ const v1ErrorConfig = {
     message: 'Invalid video id.'
   },
 
+  invalid_reply_detail_id: {
+    parameter: 'reply_detail_id',
+    code: 'invalid',
+    message: 'Invalid reply detail id.'
+  },
+
   invalid_text: {
     parameter: 'text',
     code: 'invalid',
@@ -341,6 +347,12 @@ const v1ErrorConfig = {
     message: 'Video has been deleted.'
   },
 
+  reply_deleted: {
+    parameter: 'reply_id',
+    code: 'invalid',
+    message: 'Reply has been deleted.'
+  },
+
   invalid_tag_id: {
     parameter: 'tag_id',
     code: 'invalid',
@@ -351,6 +363,18 @@ const v1ErrorConfig = {
     parameter: 'pepocorn_amount',
     code: 'invalid',
     message: 'Pepocorn amount is invalid.'
+  },
+
+  invalid_limit: {
+    parameter: 'limit',
+    code: 'invalid',
+    message: 'Limit is invalid.'
+  },
+
+  invalid_supported_entities: {
+    parameter: 'supported_entities',
+    code: 'invalid',
+    message: 'Supported entities is invalid.'
   }
 };
 

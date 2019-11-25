@@ -10,14 +10,12 @@ const program = require('commander');
 
 const rootPrefix = '..',
   CronBase = require(rootPrefix + '/executables/CronBase'),
-  ErrorLogsConstants = require(rootPrefix + '/lib/globalConstant/errorLogs'),
   UserSocketConnectionDetailsModel = require(rootPrefix + '/app/models/mysql/UserSocketConnectionDetails'),
-  socketConnectionConstants = require(rootPrefix + '/lib/globalConstant/socketConnection'),
-  cronProcessesConstants = require(rootPrefix + '/lib/globalConstant/cronProcesses'),
-  createErrorLogsEntry = require(rootPrefix + '/lib/errorLogs/createEntry'),
   basicHelper = require(rootPrefix + '/helpers/basic'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
-  logger = require(rootPrefix + '/lib/logger/customConsoleLogger');
+  logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
+  cronProcessesConstants = require(rootPrefix + '/lib/globalConstant/cronProcesses'),
+  socketConnectionConstants = require(rootPrefix + '/lib/globalConstant/socketConnection');
 
 program.option('--cronProcessId <cronProcessId>', 'Cron table process ID').parse(process.argv);
 
@@ -67,6 +65,8 @@ class CronProcessesMonitorExecutable extends CronBase {
   /**
    * Start the executable.
    *
+   * @sets oThis.canExit
+   *
    * @returns {Promise<any>}
    * @private
    */
@@ -83,19 +83,17 @@ class CronProcessesMonitorExecutable extends CronBase {
   }
 
   /**
-   *
+   * Archive web socket connection details tabe.
    *
    * @returns {Promise<void>}
    * @private
    */
   async _archiveWebSocketConnDetailsTable() {
-    const oThis = this;
-
-    let moreDataPresent = true,
-      userIds = [];
+    const userIds = [];
+    let moreDataPresent = true;
 
     while (moreDataPresent) {
-      let idsToBeDeleted = [],
+      const idsToBeDeleted = [],
         selectQueryRsp = await new UserSocketConnectionDetailsModel()
           .select('id, user_id')
           .where(['created_at < ?', basicHelper.getCurrentTimestampInSeconds() - oneDayInSeconds])
@@ -108,9 +106,9 @@ class CronProcessesMonitorExecutable extends CronBase {
           .limit(limit)
           .fire();
 
-      for (let i = 0; i < selectQueryRsp.length; i++) {
-        idsToBeDeleted.push(selectQueryRsp[i].id);
-        userIds.push(selectQueryRsp[i].user_id);
+      for (let index = 0; index < selectQueryRsp.length; index++) {
+        idsToBeDeleted.push(selectQueryRsp[index].id);
+        userIds.push(selectQueryRsp[index].user_id);
       }
 
       logger.log('idsToBeDeleted: ', idsToBeDeleted);
@@ -118,7 +116,7 @@ class CronProcessesMonitorExecutable extends CronBase {
       if (selectQueryRsp.length === 0) {
         moreDataPresent = false;
       } else {
-        let deleteQueryRsp = await new UserSocketConnectionDetailsModel()
+        await new UserSocketConnectionDetailsModel()
           .delete()
           .where(['id IN (?)', idsToBeDeleted])
           .fire();
@@ -146,13 +144,14 @@ class CronProcessesMonitorExecutable extends CronBase {
    * @return {Promise<void>}
    * @private
    */
-  async _validateAndSanitize() {}
+  async _validateAndSanitize() {
+    // Do nothing.
+  }
 
   /**
    * Get cron kind.
    *
    * @returns {string}
-   *
    * @private
    */
   get _cronKind() {

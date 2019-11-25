@@ -1,31 +1,36 @@
+const urlParser = require('url');
+
 const rootPrefix = '../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
+  CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   TagIdByNamesCache = require(rootPrefix + '/lib/cacheManagement/multi/TagIdByNames'),
-  commonValidators = require(rootPrefix + '/lib/validators/Common'),
   gotoFactory = require(rootPrefix + '/lib/goTo/factory'),
-  gotoConstants = require(rootPrefix + '/lib/globalConstant/goto'),
-  entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
   coreConstants = require(rootPrefix + '/config/coreConstants'),
-  userUtmDetailsConstants = require(rootPrefix + '/lib/globalConstant/userUtmDetail'),
-  responseHelper = require(rootPrefix + '/lib/formatter/response');
+  gotoConstants = require(rootPrefix + '/lib/globalConstant/goto'),
+  entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType');
+(userUtmDetailsConstants = require(rootPrefix + '/lib/globalConstant/userUtmDetail')),
+  (responseHelper = require(rootPrefix + '/lib/formatter/response'));
 
 const currentPepoApiDomain = coreConstants.PA_DOMAIN;
 
-const urlParser = require('url');
-
+/**
+ * Class to fetch goto.
+ *
+ * @class FetchGoto
+ */
 class FetchGoto extends ServiceBase {
   /**
-   * Constructor for FetchGoto service.
+   * Constructor to fetch goto.
    *
    * @param {object} params
-   * @param {object} [params.url]
+   * @param {object} params.url
    *
    * @augments ServiceBase
    *
    * @constructor
    */
   constructor(params) {
-    super(params);
+    super();
 
     const oThis = this;
     oThis.url = params.url.toLowerCase().replace(/&amp;/g, '&');
@@ -36,7 +41,9 @@ class FetchGoto extends ServiceBase {
   }
 
   /**
-   * Main performer
+   * Async perform.
+   *
+   * @sets oThis.parsedUrl
    *
    * @returns {Promise<*>}
    * @private
@@ -45,7 +52,8 @@ class FetchGoto extends ServiceBase {
     const oThis = this;
 
     oThis.parsedUrl = urlParser.parse(oThis.url, true);
-    if (!commonValidators.validateNonEmptyObject(oThis.parsedUrl)) {
+
+    if (!CommonValidators.validateNonEmptyObject(oThis.parsedUrl)) {
       return Promise.reject(
         responseHelper.paramValidationError({
           internal_error_identifier: 'a_s_fgt_1',
@@ -66,7 +74,7 @@ class FetchGoto extends ServiceBase {
   }
 
   /**
-   * Validate url
+   * Validate url.
    *
    * @returns {Promise<never>}
    * @private
@@ -76,7 +84,7 @@ class FetchGoto extends ServiceBase {
 
     // Protocol and host are unknown
     if (
-      !commonValidators.validateNonEmptyObject(oThis.parsedUrl) ||
+      !CommonValidators.validateNonEmptyObject(oThis.parsedUrl) ||
       !['http:', 'https:'].includes(oThis.parsedUrl.protocol) ||
       !currentPepoApiDomain.match(oThis.parsedUrl.host)
     ) {
@@ -93,42 +101,51 @@ class FetchGoto extends ServiceBase {
   }
 
   /**
-   * Fetch Goto kind and params from url
+   * Fetch goto kind and params from url.
    *
+   * @sets oThis.gotoKind, oThis.gotoParams
+   *
+   * @returns {Promise<void>}
    * @private
    */
   async _fetchGotoKindAndParams() {
     const oThis = this;
 
-    let pathName = oThis.parsedUrl.pathname,
+    const pathName = oThis.parsedUrl.pathname,
       pathArray = pathName.split('/'),
       query = oThis.parsedUrl.query;
 
-    if (pathArray[1] == gotoConstants.videoGotoKind) {
-      let videoId = Number(pathArray[2]);
+    if (pathArray[1] === gotoConstants.videoGotoKind) {
+      const videoId = Number(pathArray[2]);
       if (videoId) {
         oThis.gotoParams = { videoId: videoId };
         oThis.gotoKind = gotoConstants.videoGotoKind;
       }
-    } else if (pathArray[1] == gotoConstants.tagGotoKind) {
-      let tagName = pathArray[2];
+    } else if (pathArray[1] === gotoConstants.replyGotoKind) {
+      const replyDetailId = Number(pathArray[2]);
+      if (replyDetailId) {
+        oThis.gotoParams = { replyDetailId: replyDetailId };
+        oThis.gotoKind = gotoConstants.replyGotoKind;
+      }
+    } else if (pathArray[1] === gotoConstants.tagGotoKind) {
+      const tagName = pathArray[2];
 
       if (tagName) {
         const tagByTagNamesCacheRsp = await new TagIdByNamesCache({ names: [tagName] }).fetch(),
           tagByTagNamesCacheData = tagByTagNamesCacheRsp.data;
 
-        if (commonValidators.validateInteger(tagByTagNamesCacheData[tagName])) {
-          let tagId = tagByTagNamesCacheData[tagName];
+        if (CommonValidators.validateInteger(tagByTagNamesCacheData[tagName])) {
+          const tagId = tagByTagNamesCacheData[tagName];
           oThis.gotoKind = gotoConstants.tagGotoKind;
           oThis.gotoParams = { tagId: tagId };
         }
       }
-    } else if (pathArray[1] == 'account') {
+    } else if (pathArray[1] === 'account') {
       oThis.gotoKind = gotoConstants.invitedUsersGotoKind;
     } else if (!pathArray[1]) {
       // If url is just 'pepo.com/' then look for invite code if any
-      if (query && query['invite']) {
-        oThis.gotoParams = { inviteCode: query['invite'] };
+      if (query && query.invite) {
+        oThis.gotoParams = { inviteCode: query.invite };
         oThis.gotoKind = gotoConstants.signUpGotoKind;
       }
       oThis.utmCookieValue = userUtmDetailsConstants.utmCookieToSet(query);
@@ -136,7 +153,7 @@ class FetchGoto extends ServiceBase {
   }
 
   /**
-   * Prepare Response.
+   * Prepare response.
    *
    * @returns {{}}
    * @private
@@ -145,20 +162,21 @@ class FetchGoto extends ServiceBase {
     const oThis = this;
 
     if (oThis.gotoKind) {
-      let goto = gotoFactory.gotoFor(oThis.gotoKind, oThis.gotoParams);
+      const goto = gotoFactory.gotoFor(oThis.gotoKind, oThis.gotoParams);
+
       return responseHelper.successWithData({
-        [entityType.goto]: goto,
+        [entityTypeConstants.goto]: goto,
         utmCookieValue: oThis.utmCookieValue
       });
-    } else {
-      return responseHelper.error({
-        internal_error_identifier: 'a_s_fgt_4',
-        api_error_identifier: 'entity_not_found',
-        debug_options: {
-          url: oThis.url
-        }
-      });
     }
+
+    return responseHelper.error({
+      internal_error_identifier: 'a_s_fgt_4',
+      api_error_identifier: 'entity_not_found',
+      debug_options: {
+        url: oThis.url
+      }
+    });
   }
 }
 
