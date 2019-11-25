@@ -15,7 +15,7 @@ const rootPrefix = '../../..',
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   userConstants = require(rootPrefix + '/lib/globalConstant/user'),
   videoConstants = require(rootPrefix + '/lib/globalConstant/video'),
-  entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
+  entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
   shareEntityConstants = require(rootPrefix + '/lib/globalConstant/shareEntity'),
   videoDetailsConstants = require(rootPrefix + '/lib/globalConstant/videoDetail');
 
@@ -53,7 +53,7 @@ class ShareDetails extends ServiceBase {
   /**
    * Async perform.
    *
-   * @returns {Promise<void>}
+   * @returns {Promise<result>}
    * @private
    */
   async _asyncPerform() {
@@ -223,7 +223,7 @@ class ShareDetails extends ServiceBase {
     });
 
     return {
-      [entityType.share]: Object.assign(
+      [entityTypeConstants.share]: Object.assign(
         {
           id: uuidV4(),
           kind: shareEntityConstants.videoShareKind,

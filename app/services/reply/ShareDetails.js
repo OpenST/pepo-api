@@ -15,7 +15,7 @@ const rootPrefix = '../../..',
   gotoConstants = require(rootPrefix + '/lib/globalConstant/goto'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   userConstants = require(rootPrefix + '/lib/globalConstant/user'),
-  entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
+  entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
   replyDetailConstants = require(rootPrefix + '/lib/globalConstant/replyDetail'),
   shareEntityConstants = require(rootPrefix + '/lib/globalConstant/shareEntity');
 
@@ -55,7 +55,7 @@ class ShareDetails extends ServiceBase {
   /**
    * Async perform.
    *
-   * @returns {Promise<void>}
+   * @returns {Promise<result>}
    * @private
    */
   async _asyncPerform() {
@@ -151,9 +151,7 @@ class ShareDetails extends ServiceBase {
 
     oThis.creatorName = userObj.name;
 
-    let promiseArray = [];
-    promiseArray.push(oThis._fetchTwitterHandle(userObj.id));
-    promiseArray.push(oThis._fetchPosterImageUrl(videoId));
+    const promiseArray = [oThis._fetchTwitterHandle(userObj.id), oThis._fetchPosterImageUrl(videoId)];
     await Promise.all(promiseArray);
   }
 
@@ -195,6 +193,8 @@ class ShareDetails extends ServiceBase {
   /**
    * Fetch poster image url.
    *
+   * @sets oThis.posterImageUrl
+   *
    * @returns {Promise<never>}
    * @private
    */
@@ -222,7 +222,10 @@ class ShareDetails extends ServiceBase {
   /**
    * Fetch poster image id.
    *
-   * @param videoId
+   * @param {number} videoId
+   *
+   * @sets oThis.posterImageId
+   *
    * @returns {Promise<never>}
    * @private
    */
@@ -257,7 +260,7 @@ class ShareDetails extends ServiceBase {
     });
 
     return {
-      [entityType.share]: Object.assign(
+      [entityTypeConstants.share]: Object.assign(
         {
           id: uuidV4(),
           kind: shareEntityConstants.replyShareKind,
