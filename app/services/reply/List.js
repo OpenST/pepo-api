@@ -155,7 +155,7 @@ class GetReplyList extends ServiceBase {
   async _getReplyVideos() {
     const oThis = this;
 
-    if (oThis.currentUserId == 2112) {
+    if (oThis.currentUserId == 1445) {
       console.log('Details for get user video list-----', {
         currentUserId: oThis.currentUserId,
         videoIds: [oThis.videoId],
@@ -178,7 +178,7 @@ class GetReplyList extends ServiceBase {
       return Promise.reject(response);
     }
 
-    if (oThis.currentUserId == 2112) {
+    if (oThis.currentUserId == 1445) {
       console.log('--------List replies------', JSON.stringify(response));
     }
 

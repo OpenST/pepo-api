@@ -119,7 +119,7 @@ class OstTransaction extends ServiceBase {
 
     const parsedMetaProperty = transactionConstants._parseTransactionMetaDetails(oThis.transaction.meta_property);
 
-    if (oThis.userId == 2112) {
+    if (oThis.userId == 1445) {
       console.log('\n\n--_validateAndSanitizeParams ostTransactions--oThis.meta--------------------', oThis.meta);
       console.log(
         '\n\n--_validateAndSanitizeParams ostTransactions--oThis.transaction--------------------',
@@ -739,7 +739,7 @@ class OstTransaction extends ServiceBase {
     insertData.id = insertResponse.insertId;
 
     const formattedInsertData = new PendingTransactionModel().formatDbData(insertData);
-    if (oThis.userId == 2112) {
+    if (oThis.userId == 1445) {
       console.log('--formattedInsertData For pending tx table---', formattedInsertData);
     }
     await PendingTransactionModel.flushCache(formattedInsertData);
