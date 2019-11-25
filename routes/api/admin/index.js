@@ -396,7 +396,7 @@ router.get('/videos/:video_id', sanitizer.sanitizeDynamicUrlParams, function(req
   req.decodedParams.is_admin = true;
 
   const dataFormatterFunc = async function(serviceResponse) {
-    const wrapperFormatterRsp = await new FormatterComposer({
+    const wrapperFormatterRsp = await new AdminFormatterComposer({
       resultType: adminResponseEntityKey.userVideoList,
       entityKindToResponseKeyMap: {
         [adminEntityType.userVideoList]: adminResponseEntityKey.userVideoList,
