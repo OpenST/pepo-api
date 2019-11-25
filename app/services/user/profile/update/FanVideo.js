@@ -148,11 +148,7 @@ class UpdateFanVideo extends UpdateProfileBase {
 
     let addVideoDescriptionData = addVideoDescriptionRsp.data;
 
-    console.log('addVideoDescriptionData--------', addVideoDescriptionData);
-
     oThis.mentionedUserIds = addVideoDescriptionData.mentionedUserIds;
-
-    console.log('oThis.mentionedUserIds---2--------', oThis.mentionedUserIds);
   }
 
   /**

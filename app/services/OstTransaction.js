@@ -390,8 +390,6 @@ class OstTransaction extends ServiceBase {
       oThis.videoId = replyDetail.entityId;
     }
 
-    console.log('\n\n\n\nreplyDetail------------', replyDetail);
-
     if (oThis._isReplyOnVideoTransactionKind() && replyDetail.descriptionId) {
       oThis.descriptionId = replyDetail.descriptionId;
     }
