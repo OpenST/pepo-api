@@ -102,12 +102,14 @@ class DeleteReplyVideo extends ServiceBase {
     }
 
     if (!CommonValidators.validateNonEmptyObject(replyDetailsCacheResponse.data[oThis.replyDetailsId])) {
-      return responseHelper.paramValidationError({
-        internal_error_identifier: 'a_s_r_d_3',
-        api_error_identifier: 'invalid_api_params',
-        params_error_identifiers: ['invalid_reply_details_id'],
-        debug_options: { replyDetailsId: oThis.replyDetailsId }
-      });
+      return Promise.reject(
+        responseHelper.paramValidationError({
+          internal_error_identifier: 'a_s_r_d_3',
+          api_error_identifier: 'invalid_api_params',
+          params_error_identifiers: ['invalid_reply_details_id'],
+          debug_options: { replyDetailsId: oThis.replyDetailsId }
+        })
+      );
     }
 
     oThis.replyDetails = replyDetailsCacheResponse.data[oThis.replyDetailsId];
