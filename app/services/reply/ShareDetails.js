@@ -139,7 +139,7 @@ class ShareDetails extends ServiceBase {
       userObj = userMultiCacheRsp.data[creatorUserId];
     }
 
-    if (!userObj || userObj.status !== userConstants.activeStatus || !UserModel.isUserApprovedCreator(userObj)) {
+    if (!userObj || userObj.status !== userConstants.activeStatus) {
       return Promise.reject(
         responseHelper.error({
           internal_error_identifier: 'a_s_r_sd_3',
