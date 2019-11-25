@@ -36,7 +36,10 @@ class GetTagsVideoList extends ServiceBase {
     oThis.currentUser = params.current_user;
     oThis.tagId = params.tag_id;
     oThis.paginationIdentifier = params[paginationConstants.paginationIdentifierKey] || null;
-    oThis.supportedEntities = params.supported_entities || [tagConstants.videosSupportedEntity];
+    oThis.supportedEntities = params.supported_entities || [
+      tagConstants.videosSupportedEntity,
+      tagConstants.repliesSupportedEntity
+    ];
 
     oThis.limit = oThis._defaultPageLimit();
 
@@ -262,6 +265,7 @@ class GetTagsVideoList extends ServiceBase {
         oThis.usersVideosMap.currentUserVideoContributionsMap || {},
       [entityTypeConstants.userProfileAllowedActions]: oThis.usersVideosMap.userProfileAllowedActions || {},
       [entityTypeConstants.pricePointsMap]: oThis.usersVideosMap.pricePointsMap || {},
+      [entityTypeConstants.replyDetailsMap]: oThis.usersVideosMap.replyDetailsMap || {},
       usersByIdMap: oThis.usersVideosMap.usersByIdMap || {},
       userStat: oThis.usersVideosMap.userStat || {},
       tags: oThis.usersVideosMap.tags || {},
