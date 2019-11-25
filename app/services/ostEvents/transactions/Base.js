@@ -589,6 +589,7 @@ class TransactionOstEventBase extends ServiceBase {
         logger.error('Error while fetching video detail data.');
         return Promise.reject(videoDetailsCacheResponse);
       }
+      //todo-replies: use different method to validate reply video
 
       let videoDetail = videoDetailsCacheResponse.data[oThis.videoId];
 
@@ -607,15 +608,15 @@ class TransactionOstEventBase extends ServiceBase {
           return Promise.reject(replyDetailsByEntityIdsAndEntityKindCacheRsp);
         }
 
-        const replyDetail = replyDetailsByEntityIdsAndEntityKindCacheRsp.data[oThis.videoId];
+        const replyDetailId = replyDetailsByEntityIdsAndEntityKindCacheRsp.data[oThis.videoId];
 
-        if (!CommonValidators.validateNonEmptyObject(replyDetail)) {
+        if (CommonValidators.isVarNullOrUndefined(replyDetailId)) {
           return Promise.reject(
             responseHelper.paramValidationError({
               internal_error_identifier: 'a_s_oe_t_b_2',
               api_error_identifier: 'invalid_api_params',
               params_error_identifiers: ['invalid_video_id'],
-              debug_options: { replyDetail: replyDetail, videoDetail: videoDetail, replyDetailId: oThis.replyDetailId }
+              debug_options: { videoDetail: videoDetail, replyDetailId: replyDetailId }
             })
           );
         }

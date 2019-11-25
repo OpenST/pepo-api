@@ -167,7 +167,7 @@ class ReplyDetailsModel extends ModelBase {
 
     for (let index = 0; index < dbRows.length; index++) {
       const formatDbRow = oThis.formatDbData(dbRows[index]);
-      replyDetails[formatDbRow.entityId] = formatDbRow;
+      replyDetails[formatDbRow.entityId] = formatDbRow.id;
     }
 
     return replyDetails;
@@ -234,9 +234,7 @@ class ReplyDetailsModel extends ModelBase {
       .fire();
 
     const flushCacheParams = {
-      parentVideoIds: [params.parentId],
-      entityIds: [params.entityId],
-      entityKind: replyDetailConstants.entityKinds[params.entityKind]
+      parentVideoIds: [params.parentId]
     };
 
     await ReplyDetailsModel.flushCache(flushCacheParams);
@@ -305,9 +303,7 @@ class ReplyDetailsModel extends ModelBase {
 
     const flushCacheParams = {
       parentVideoIds: [replyDetail.parentId],
-      replyDetailId: replyDetail.id,
-      entityIds: [replyDetail.entityId],
-      entityKind: replyDetailConstants.videoEntityKind
+      replyDetailId: replyDetail.id
     };
 
     await ReplyDetailsModel.flushCache(flushCacheParams);

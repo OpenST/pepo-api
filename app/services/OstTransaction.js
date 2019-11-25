@@ -25,6 +25,7 @@ const rootPrefix = '../..',
   textIncludeConstants = require(rootPrefix + '/lib/globalConstant/cassandra/textInclude'),
   pepocornTransactionConstants = require(rootPrefix + '/lib/globalConstant/redemption/pepocornTransaction');
 
+//todo-replies:: review tx logic
 /**
  * Class to perform ost transaction.
  *
@@ -350,17 +351,15 @@ class OstTransaction extends ServiceBase {
       return Promise.reject(replyDetailsByEntityIdsAndEntityKindCacheRsp);
     }
 
-    const replyDetail = replyDetailsByEntityIdsAndEntityKindCacheRsp.data[oThis.videoId];
+    oThis.replyDetailId = replyDetailsByEntityIdsAndEntityKindCacheRsp.data[oThis.videoId];
 
-    oThis.replyDetailId = replyDetail.id;
-
-    if (!CommonValidators.validateNonEmptyObject(replyDetail)) {
+    if (CommonValidators.isVarNullOrUndefined(oThis.replyDetailId)) {
       return Promise.reject(
         responseHelper.paramValidationError({
           internal_error_identifier: 'a_s_ot_9',
           api_error_identifier: 'invalid_api_params',
           params_error_identifiers: ['invalid_video_id'],
-          debug_options: { replyDetail: replyDetail, videoDetail: videoDetail, replyDetailId: oThis.replyDetailId }
+          debug_options: { videoDetail: videoDetail, replyDetailId: oThis.replyDetailId }
         })
       );
     }
@@ -449,6 +448,7 @@ class OstTransaction extends ServiceBase {
   async _validateIfValidTransaction() {
     const oThis = this;
 
+    //todo-replies: validate amount?
     const transactionValidationResponse = await ostPlatformSdkWrapper.getTransaction({
       transaction_id: oThis.ostTxId,
       user_id: oThis.fromOstUserId
@@ -550,6 +550,7 @@ class OstTransaction extends ServiceBase {
       promiseArray.push(oThis._validateToUserIdForRedemption());
       promiseArray.push(oThis._validateTransactionDataForRedemption());
     } else if (oThis._isReplyOnVideoTransactionKind()) {
+      //todo-replies: check if toUserId is valid
       promiseArray.push(oThis._fetchReplyDetailsAndValidate(), oThis._validateIfValidTransaction());
     } else if (oThis._isPepoOnReplyTransactionKind()) {
       promiseArray.push(oThis._fetchReplyDetailsAndValidate(), oThis._fetchToUserIdsAndAmounts());
