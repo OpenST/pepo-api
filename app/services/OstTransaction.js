@@ -120,7 +120,7 @@ class OstTransaction extends ServiceBase {
 
     if (oThis._isUserTransactionKind()) {
       // Did not use the meta property as not sure of all previous builds.
-      oThis.videoId = oThis.meta.vi;
+      oThis.videoId = parsedMetaProperty.videoId;
     } else if (oThis._isRedemptionTransactionKind()) {
       oThis.pepocornAmount = parsedMetaProperty.pepocornAmount;
       oThis.productId = parsedMetaProperty.productId;
