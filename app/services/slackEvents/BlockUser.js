@@ -1,9 +1,9 @@
 const rootPrefix = '../../..',
   SlackEventBase = require(rootPrefix + '/app/services/slackEvents/Base'),
+  BlockUserService = require(rootPrefix + '/app/services/admin/BlockUser'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   slackConstants = require(rootPrefix + '/lib/globalConstant/slack');
-BlockUserService = require(rootPrefix + '/app/services/admin/BlockUser');
 
 /**
  * Class to process block user event.
