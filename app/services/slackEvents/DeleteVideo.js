@@ -1,9 +1,8 @@
 const rootPrefix = '../../..',
   SlackEventBase = require(rootPrefix + '/app/services/slackEvents/Base'),
+  DeleteVideoService = require(rootPrefix + '/app/services/admin/DeleteVideo'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
-  logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
-  slackConstants = require(rootPrefix + '/lib/globalConstant/slack');
-DeleteVideoService = require(rootPrefix + '/app/services/admin/DeleteVideo');
+  logger = require(rootPrefix + '/lib/logger/customConsoleLogger');
 
 /**
  * Class to process delete video event.
