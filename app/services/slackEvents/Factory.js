@@ -23,20 +23,22 @@ class SlackEventFactory extends ServiceBase {
    * @constructor
    */
   constructor(params) {
-    super(params);
+    super();
 
     const oThis = this;
 
     oThis.eventData = params.webhookParams;
     oThis.currentAdmin = params.current_admin;
+
     oThis.eventType = null;
     oThis.eventParams = {};
   }
 
   /**
-   * Perform - Process Ost Event.
+   * Async perform.
    *
-   * @return {Promise<void>}
+   * @returns {Promise<void>}
+   * @private
    */
   async _asyncPerform() {
     const oThis = this;
@@ -51,11 +53,9 @@ class SlackEventFactory extends ServiceBase {
   }
 
   /**
-   * Validate param
+   * Validate and sanitize parameters.
    *
-   *
-   * @return {Promise<void>}
-   *
+   * @returns {Promise<void>}
    * @private
    */
   async _validateAndSanitizeParams() {
@@ -71,12 +71,12 @@ class SlackEventFactory extends ServiceBase {
         })
       );
     }
-
-    return Promise.resolve(responseHelper.successWithData({}));
   }
 
   /**
    * Extract event topic.
+   *
+   * @sets oThis.eventType, oThis.eventParams
    *
    * @returns {Promise<never>}
    * @private
@@ -84,15 +84,16 @@ class SlackEventFactory extends ServiceBase {
   async _extractEventTopic() {
     const oThis = this;
 
-    let action = oThis.eventData.payload.actions[0].value,
+    const action = oThis.eventData.payload.actions[0].value,
       splittedAction = action.split('|'),
       eventType = splittedAction[0];
+
     splittedAction.splice(0, 1);
 
     oThis.eventType = eventType;
 
-    // add validation for allowed event topics
-    if (slackConstants.allowedEventTypes.indexOf(oThis.eventType) == -1) {
+    // Add validation for allowed event topics.
+    if (slackConstants.allowedEventTypes.indexOf(oThis.eventType) === -1) {
       return Promise.reject(
         responseHelper.error({
           internal_error_identifier: 'a_s_se_f_eet_1',
@@ -102,26 +103,25 @@ class SlackEventFactory extends ServiceBase {
       );
     }
 
-    for (let i = 0; i < splittedAction.length; i++) {
-      let param = splittedAction[i],
+    for (let ind = 0; ind < splittedAction.length; ind++) {
+      const param = splittedAction[ind],
         splittedParam = param.split(':'),
         key = splittedParam[0],
         value = splittedParam[1];
 
       oThis.eventParams[key] = value;
     }
-
-    return responseHelper.successWithData({});
   }
 
   /**
-   * Validate param.
+   * Validate params.
    *
    * @return {Promise<void>}
    * @private
    */
   async _execute() {
     const oThis = this;
+
     let eventResponse = null;
 
     switch (oThis.eventType) {
@@ -165,9 +165,9 @@ class SlackEventFactory extends ServiceBase {
 
     if (eventResponse.isFailure()) {
       return Promise.reject(eventResponse);
-    } else {
-      return eventResponse;
     }
+
+    return eventResponse;
   }
 }
 
