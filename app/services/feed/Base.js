@@ -6,6 +6,7 @@ const rootPrefix = '../../..',
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   feedConstants = require(rootPrefix + '/lib/globalConstant/feed'),
   videoConstants = require(rootPrefix + '/lib/globalConstant/video'),
+  UserMuteByUser2IdsForGlobalCache = require(rootPrefix + '/lib/cacheManagement/multi/UserMuteByUser2IdsForGlobal'),
   createErrorLogsEntry = require(rootPrefix + '/lib/errorLogs/createEntry'),
   errorLogsConstants = require(rootPrefix + '/lib/globalConstant/errorLogs');
 
@@ -70,7 +71,7 @@ class FeedBase extends ServiceBase {
 
     await oThis._setFeedIds();
 
-    await oThis._getFeeds();
+    await oThis._filterMutedFeeds();
 
     await oThis._fetchProfileDetails();
 
@@ -81,25 +82,72 @@ class FeedBase extends ServiceBase {
   }
 
   /**
-   * Get feed details.
+   * Filter muted feeds.
    *
    * @sets oThis.feeds, oThis.userIds, oThis.videoIds
    *
-   * @returns {Promise<never>}
+   * @return {Promise<void>}
    * @private
    */
-  async _getFeeds() {
+  async _filterMutedFeeds() {
     const oThis = this;
 
-    for (let index = 0; index < oThis.feedIds.length; index++) {
-      const feedData = oThis.feedsMap[oThis.feedIds[index]];
+    if (oThis.feedIds.length < 1) {
+      return;
+    }
 
-      // order feed data using order of feed ids
-      oThis.feeds.push(feedData);
-      oThis.userIds.push(feedData.actor);
+    if (oThis.currentUserId) {
+      for (let index = 0; index < oThis.feedIds.length; index++) {
+        const feedData = oThis.feedsMap[oThis.feedIds[index]];
 
-      if (feedData.kind === feedConstants.fanUpdateKind) {
-        oThis.videoIds.push(feedData.primaryExternalEntityId);
+        // order feed data using order of feed ids
+        oThis.feeds.push(feedData);
+        oThis.userIds.push(feedData.actor);
+
+        if (feedData.kind === feedConstants.fanUpdateKind) {
+          oThis.videoIds.push(feedData.primaryExternalEntityId);
+        }
+      }
+    } else {
+      const actorIds = [];
+      for (let index = 0; index < oThis.feedIds.length; index++) {
+        const feedId = oThis.feedIds[index],
+          feedData = oThis.feedsMap[feedId],
+          actorId = feedData.actor;
+
+        actorIds.push(actorId);
+      }
+
+      const mutedUserIds = {};
+      const cacheResponse = await new UserMuteByUser2IdsForGlobalCache({ user2Ids: actorIds }).fetch();
+      if (cacheResponse.isFailure()) {
+        return Promise.reject(cacheResponse);
+      }
+
+      const globalUserMuteDetailsByUserIdMap = cacheResponse.data;
+
+      for (let userId in globalUserMuteDetailsByUserIdMap) {
+        let obj = globalUserMuteDetailsByUserIdMap[userId];
+        if (obj.all) {
+          mutedUserIds[userId] = 1;
+        }
+      }
+
+      for (let index = 0; index < oThis.feedIds.length; index++) {
+        const feedId = oThis.feedIds[index],
+          feedData = oThis.feedsMap[feedId],
+          actorId = feedData.actor;
+
+        if (mutedUserIds[actorId]) {
+          continue;
+        }
+
+        oThis.feeds.push(feedData);
+        oThis.userIds.push(actorId);
+
+        if (feedData.kind === feedConstants.fanUpdateKind) {
+          oThis.videoIds.push(feedData.primaryExternalEntityId);
+        }
       }
     }
   }
@@ -204,6 +252,7 @@ class FeedBase extends ServiceBase {
   _validateAndSanitizeParams() {
     return new Error('sub-class to implement');
   }
+
   _setFeedIds() {
     return new Error('sub-class to implement');
   }

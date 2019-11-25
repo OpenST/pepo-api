@@ -713,6 +713,37 @@ class BasicHelper {
       .plus(oThis.convertToBigNumber(number2))
       .toString(10);
   }
+
+  /**
+   * Parse and regex replace processed links and user mention in slack payload
+   *
+   * @param payload
+   * @returns {Object}
+   */
+  preprocessSlackPayload(params) {
+    const oThis = this;
+
+    if (typeof params === 'string') {
+      params = params.replace(/<(http)([^>\s]*)>/gi, '$1$2');
+    } else if (typeof params === 'boolean' || typeof params === 'number' || params === null) {
+      // Do nothing and return param as is.
+    } else if (params instanceof Array) {
+      for (const index in params) {
+        params[index] = oThis.preprocessSlackPayload(params[index]);
+      }
+    } else if (params instanceof Object) {
+      Object.keys(params).forEach(function(key) {
+        params[key] = oThis.preprocessSlackPayload(params[key]);
+      });
+    } else if (!params) {
+      // Do nothing and return param as is.
+    } else {
+      console.error('Invalid params type in payload: ', typeof params);
+      params = '';
+    }
+
+    return params;
+  }
 }
 
 module.exports = new BasicHelper();

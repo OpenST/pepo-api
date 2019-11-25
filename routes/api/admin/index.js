@@ -128,6 +128,22 @@ router.post('/users/:user_id/approve', sanitizer.sanitizeDynamicUrlParams, funct
   Promise.resolve(routeHelper.perform(req, res, next, '/admin/ApproveUsersAsCreator', 'r_a_v1_ad_3', null, null, null));
 });
 
+/* Mute User. */
+router.post('/users/:user_id/mute', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.muteUser;
+  req.decodedParams.user_id = req.params.user_id;
+
+  Promise.resolve(routeHelper.perform(req, res, next, '/admin/MuteUser', 'r_a_v1_ad_10', null, null));
+});
+
+/* UnMute User. */
+router.post('/users/:user_id/unmute', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.unMuteUser;
+  req.decodedParams.user_id = req.params.user_id;
+
+  Promise.resolve(routeHelper.perform(req, res, next, '/admin/UnMuteUser', 'r_a_v1_ad_11', null, null));
+});
+
 /* Deny user as creator */
 router.post('/users/:user_id/deny', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.adminUserDeny;
@@ -340,6 +356,7 @@ router.get('/users/:user_id/profile', sanitizer.sanitizeDynamicUrlParams, functi
       entityKindToResponseKeyMap: {
         [adminEntityType.userProfile]: adminResponseEntityKey.adminUserProfile,
         [adminEntityType.adminUsersMap]: adminResponseEntityKey.users,
+        [adminEntityType.globalUserMuteDetailsMap]: adminResponseEntityKey.globalUserMuteDetails,
         [adminEntityType.imagesMap]: adminResponseEntityKey.images,
         [adminEntityType.userBalance]: adminResponseEntityKey.userBalance
       },

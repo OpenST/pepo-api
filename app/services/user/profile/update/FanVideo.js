@@ -7,6 +7,8 @@ const rootPrefix = '../../../../..',
   VideoDetailsModel = require(rootPrefix + '/app/models/mysql/VideoDetail'),
   UpdateProfileBase = require(rootPrefix + '/app/services/user/profile/update/Base'),
   videoLib = require(rootPrefix + '/lib/videoLib'),
+  bgJobConstants = require(rootPrefix + '/lib/globalConstant/bgJob'),
+  bgJob = require(rootPrefix + '/lib/rabbitMqEnqueue/bgJob'),
   urlConstants = require(rootPrefix + '/lib/globalConstant/url'),
   userConstants = require(rootPrefix + '/lib/globalConstant/user'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
@@ -209,17 +211,34 @@ class UpdateFanVideo extends UpdateProfileBase {
 
     await oThis._publishAtMentionNotifications();
 
+    let promiseArray = [];
+
     // Feed needs to be added only if user is an approved creator.
     if (UserModelKlass.isUserApprovedCreator(oThis.userObj)) {
       await oThis._addFeed();
 
-      // Notification would be published only if user is approved.
-      await notificationJobEnqueue.enqueue(notificationJobConstants.videoAdd, {
+      const messagePayload = {
         userId: oThis.profileUserId,
         videoId: oThis.videoId,
         mentionedUserIds: oThis.mentionedUserIds
-      });
+      };
+
+      promiseArray.push(bgJob.enqueue(bgJobConstants.contentMonitoringJobTopic, messagePayload));
+      // Notification would be published only if user is approved.
+      promiseArray.push(
+        notificationJobEnqueue.enqueue(notificationJobConstants.videoAdd, {
+          userId: oThis.profileUserId,
+          videoId: oThis.videoId
+        })
+      );
+    } else {
+      const messagePayload = {
+        userId: oThis.profileUserId
+      };
+      promiseArray.push(bgJob.enqueue(bgJobConstants.approveNewCreatorJobTopic, messagePayload));
     }
+
+    await Promise.all(promiseArray);
   }
 
   /**  await oThis._publishNotifications();

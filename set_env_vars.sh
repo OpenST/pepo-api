@@ -2,7 +2,7 @@
 # Core ENV Details
 export PA_ENVIRONMENT='development'
 export PA_PORT=3000
-export PA_DEFAULT_LOG_LEVEL='info';
+export PA_DEFAULT_LOG_LEVEL='debug';
 export PA_DOMAIN='http://pepodev.com:8080'
 export PA_STORE_DOMAIN='http://store.pepodev.com:8080';
 export PA_INVITE_DOMAIN='http://invite.pepodev.com:8080';
@@ -160,6 +160,8 @@ export PA_CURATED_FEED_IDS='[1000]'
 
 # Slack related constants.
 export PA_SLACK_OAUTH_TOKEN='xoxp-246676767414-245599437185-838396824006-71fcc8c32cef66a568b2ea890fc14ae9'
+export PA_SLACK_API_APP_ID='AQC5JETDX'
+export PA_SLACK_SIGNING_SECRET='099e2ac373da461dfd4c50ccc6522b8b'
 
 # Google constants
 # escape while creating the env variable and unescape while usage
