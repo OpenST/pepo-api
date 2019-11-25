@@ -409,6 +409,14 @@ class CoreConstants {
     return process.env.PA_SLACK_OAUTH_TOKEN;
   }
 
+  get PEPO_SLACK_API_APP_ID() {
+    return process.env.PA_SLACK_API_APP_ID;
+  }
+
+  get PEPO_SLACK_SIGNING_SECRET() {
+    return process.env.PA_SLACK_SIGNING_SECRET;
+  }
+
   get PEPO_CURATED_FEED_IDS() {
     return process.env.PA_CURATED_FEED_IDS;
   }

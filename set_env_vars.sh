@@ -155,7 +155,9 @@ export PA_GOOGLE_INAPP_SERVICE_ACCOUNT_EMAIL=''
 export PA_CURATED_FEED_IDS='[1000]'
 
 # Slack related constants.
-export PA_SLACK_OAUTH_TOKEN='xoxp-777224596644-779895340934-778717974948-a9c2624c28bc708be08cb2777474bcf1'
+export PA_SLACK_OAUTH_TOKEN='xoxp-246676767414-245599437185-838396824006-71fcc8c32cef66a568b2ea890fc14ae9'
+export PA_SLACK_API_APP_ID='AQC5JETDX'
+export PA_SLACK_SIGNING_SECRET='099e2ac373da461dfd4c50ccc6522b8b'
 
 # Google constants
 # escape while creating the env variable and unescape while usage
