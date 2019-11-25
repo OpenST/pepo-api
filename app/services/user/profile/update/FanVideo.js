@@ -208,6 +208,7 @@ class UpdateFanVideo extends UpdateProfileBase {
   async _extraUpdates() {
     // Feed needs to be added for uploaded video
     const oThis = this;
+    //todo-replies: do not add for unapproved users
 
     let promiseArray = [];
 
