@@ -224,6 +224,8 @@ class GetTagsVideoList extends ServiceBase {
       return Promise.reject(response);
     }
 
+    console.log('==response====', response.data);
+
     oThis.usersVideosMap = response.data;
   }
 
@@ -254,6 +256,8 @@ class GetTagsVideoList extends ServiceBase {
    */
   _prepareResponse() {
     const oThis = this;
+
+    console.log('==oThis.usersVideosMap======', oThis.usersVideosMap);
 
     return responseHelper.successWithData({
       [entityTypeConstants.userVideoList]: oThis.videoDetails,
