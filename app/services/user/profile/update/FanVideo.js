@@ -219,8 +219,7 @@ class UpdateFanVideo extends UpdateProfileBase {
 
       const messagePayload = {
         userId: oThis.profileUserId,
-        videoId: oThis.videoId,
-        mentionedUserIds: oThis.mentionedUserIds
+        videoId: oThis.videoId
       };
 
       promiseArray.push(bgJob.enqueue(bgJobConstants.contentMonitoringJobTopic, messagePayload));
@@ -228,7 +227,8 @@ class UpdateFanVideo extends UpdateProfileBase {
       promiseArray.push(
         notificationJobEnqueue.enqueue(notificationJobConstants.videoAdd, {
           userId: oThis.profileUserId,
-          videoId: oThis.videoId
+          videoId: oThis.videoId,
+          mentionedUserIds: oThis.mentionedUserIds
         })
       );
     } else {
