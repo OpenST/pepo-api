@@ -363,6 +363,9 @@ class TransactionOstEventBase extends ServiceBase {
       toUserId: oThis.transactionObj.extraData.toUserIds[0]
     };
 
+    if (oThis.fromUserId == 2112) {
+      console.log('-----------------pendingTransactionObj-----------', JSON.stringify(pendingTransactionObj));
+    }
     await PendingTransactionModel.flushCache(pendingTransactionObj);
 
     logger.log('End:: Remove entry from pending transaction');
