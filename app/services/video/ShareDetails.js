@@ -3,9 +3,10 @@ const uuidV4 = require('uuid/v4');
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   UserModel = require(rootPrefix + '/app/models/mysql/User'),
+  UserMultiCache = require(rootPrefix + '/lib/cacheManagement/multi/User'),
+  ImageByIdCache = require(rootPrefix + '/lib/cacheManagement/multi/ImageByIds'),
   TextsByIdCache = require(rootPrefix + '/lib/cacheManagement/multi/TextsByIds'),
   VideoByIdCache = require(rootPrefix + '/lib/cacheManagement/multi/VideoByIds'),
-  UserMultiCache = require(rootPrefix + '/lib/cacheManagement/multi/User'),
   VideoDetailsByVideoIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/VideoDetailsByVideoIds'),
   TwitterUserByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TwitterUserByUserIds'),
   TwitterUserByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TwitterUserByIds'),
@@ -40,6 +41,8 @@ class ShareDetails extends ServiceBase {
     oThis.creatorName = null;
     oThis.twitterHandle = null;
     oThis.videoDescriptionText = null;
+    oThis.posterImageId = null;
+    oThis.posterImageUrl = null;
   }
 
   /**
@@ -52,6 +55,8 @@ class ShareDetails extends ServiceBase {
     const oThis = this;
 
     await oThis._fetchVideo();
+
+    await oThis._fetchPosterImageUrl();
 
     await oThis._fetchCreatorUserName();
 
@@ -93,6 +98,31 @@ class ShareDetails extends ServiceBase {
         })
       );
     }
+
+    if (cacheRsp.data[oThis.videoId].posterImageId) {
+      oThis.posterImageId = cacheRsp.data[oThis.videoId].posterImageId;
+    }
+  }
+
+  /**
+   * Fetch poster image url.
+   *
+   * @returns {Promise<never>}
+   * @private
+   */
+  async _fetchPosterImageUrl() {
+    const oThis = this;
+
+    if (!oThis.posterImageId) {
+      return;
+    }
+    const cacheRsp = await new ImageByIdCache({ ids: [oThis.posterImageId] }).fetch();
+
+    if (cacheRsp.isFailure()) {
+      return Promise.reject(cacheRsp);
+    }
+
+    oThis.posterImageUrl = cacheRsp.data[oThis.posterImageId].resolutions.original.url;
   }
 
   /**
@@ -219,6 +249,7 @@ class ShareDetails extends ServiceBase {
         {
           id: uuidV4(),
           kind: shareEntityConstants.videoShareKind,
+          posterImageUrl: oThis.posterImageUrl,
           uts: Math.round(new Date() / 1000)
         },
         oThis.messageObject
