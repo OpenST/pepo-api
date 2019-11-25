@@ -10,6 +10,8 @@ const rootPrefix = '../../..',
   entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
   responseEntityKey = require(rootPrefix + '/lib/globalConstant/responseEntityKey');
 
+//todo-replies: use at top cookieHelper.validateUserLoginRequired
+
 // Initiate reply on particular video.
 router.post('/', cookieHelper.validateUserLoginRequired, function(req, res, next) {
   req.decodedParams.apiName = apiName.initiateReply;
@@ -36,6 +38,7 @@ router.post('/validate-upload', cookieHelper.validateUserLoginRequired, function
   Promise.resolve(routeHelper.perform(req, res, next, '/reply/Validate', 'r_a_v1_r_2', null, null));
 });
 
+//todo-replies: is reply_id -> reply_detail_id
 // Get any particular reply given its reply detail id.
 router.get('/:reply_id', sanitizer.sanitizeDynamicUrlParams, cookieHelper.validateUserLoginRequired, function(
   req,

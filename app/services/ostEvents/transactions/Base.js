@@ -589,6 +589,7 @@ class TransactionOstEventBase extends ServiceBase {
         logger.error('Error while fetching video detail data.');
         return Promise.reject(videoDetailsCacheResponse);
       }
+      //todo-replies: use different method to validate reply video
 
       let videoDetail = videoDetailsCacheResponse.data[oThis.videoId];
 

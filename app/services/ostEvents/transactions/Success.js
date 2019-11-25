@@ -34,6 +34,7 @@ class SuccessTransactionOstEvent extends TransactionOstEventBase {
   async _asyncPerform() {
     const oThis = this;
 
+    //todo-replies: on success post reply initiate should be called.
     await oThis._validateAndSanitizeParams();
 
     const promiseArray = [];
@@ -45,9 +46,10 @@ class SuccessTransactionOstEvent extends TransactionOstEventBase {
       promiseArray.push(oThis._validateToUserIdForRedemption());
       promiseArray.push(oThis._validateTransactionDataForRedemption());
     } else if (oThis._isReplyOnVideoTransactionKind()) {
-      // Do nothing.
+      //todo-replies: validate amount and video as reply kind
     } else if (oThis._isPepoOnReplyTransactionKind()) {
       promiseArray.push(oThis._fetchReplyDetailsAndValidate());
+      //todo-replies: validate amount and video as reply kind
     } else {
       if (oThis.isVideoIdPresent()) {
         promiseArray.push(oThis.fetchVideoAndValidate());
@@ -67,12 +69,14 @@ class SuccessTransactionOstEvent extends TransactionOstEventBase {
         await oThis.fetchTransaction();
         await oThis._processTransaction();
       } else {
+        //todo-replies: if pepo Reply post kind handle
         if (oThis._isRedemptionTransactionKind()) {
           await oThis._insertInPepocornTransactions();
           await oThis._creditPepoCornBalance();
           await oThis._enqueueRedemptionNotification();
         } else {
           const promiseArray2 = [];
+          //todo-replies: handle for reply kinds.(updateReplyDetails)
           promiseArray2.push(oThis._sendUserTransactionNotification());
           promiseArray2.push(oThis._updateStats());
           await Promise.all(promiseArray2);
@@ -331,6 +335,7 @@ class SuccessTransactionOstEvent extends TransactionOstEventBase {
   async _updateReplyDetails() {
     const oThis = this;
 
+    //todo-replies: totalContributedBy + 1?
     await new ReplyDetailsModel().updateByReplyDetailId({
       replyDetailId: oThis.replyDetailId,
       totalAmount: oThis.ostTransaction.transfers[0].amount,
