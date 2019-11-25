@@ -207,7 +207,6 @@ class SuccessTransactionOstEvent extends TransactionOstEventBase {
       case transactionConstants.extraData.userTransactionOnReplyKind: {
         await oThis._updateTransactionAndRelatedActivities();
         await oThis._updateStats();
-        await oThis._updateReplyDetails();
         break;
       }
       default: {
