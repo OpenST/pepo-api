@@ -156,7 +156,7 @@ class ReplyDetailsModel extends ModelBase {
       entityKind = params.entityKind;
 
     const dbRows = await oThis
-      .select('*')
+      .select('id, entity_id')
       .where({
         entity_id: entityIds,
         entity_kind: replyDetailConstants.invertedEntityKinds[entityKind]
@@ -236,7 +236,7 @@ class ReplyDetailsModel extends ModelBase {
     const flushCacheParams = {
       parentVideoIds: [params.parentId],
       entityIds: [params.entityId],
-      entityKind: params.entityKind
+      entityKind: replyDetailConstants.entityKinds[params.entityKind]
     };
 
     await ReplyDetailsModel.flushCache(flushCacheParams);
