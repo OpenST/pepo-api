@@ -136,6 +136,7 @@ class PendingTransaction extends ModelBase {
       );
     }
 
+    console.log('params while pending transaction cache------------------', params);
     if (params.fromUserId && params.videoId) {
       const PendingTransactionsVideoIdsAndFromUserId = require(rootPrefix +
         '/lib/cacheManagement/multi/PendingTransactionsByVideoIdsAndFromUserId.js');

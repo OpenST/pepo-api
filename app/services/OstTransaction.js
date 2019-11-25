@@ -118,6 +118,17 @@ class OstTransaction extends ServiceBase {
 
     const parsedMetaProperty = transactionConstants._parseTransactionMetaDetails(oThis.transaction.meta_property);
 
+    if (oThis.userId == 2112) {
+      console.log('\n\n--_validateAndSanitizeParams ostTransactions--oThis.meta--------------------', oThis.meta);
+      console.log(
+        '\n\n--_validateAndSanitizeParams ostTransactions--oThis.transaction--------------------',
+        JSON.stringify(oThis.transaction)
+      );
+      console.log(
+        '\n\n--_validateAndSanitizeParams ostTransactions--parsedMetaProperty--------------------',
+        parsedMetaProperty
+      );
+    }
     if (oThis._isUserTransactionKind()) {
       // Did not use the meta property as not sure of all previous builds.
       oThis.videoId = oThis.meta.vi;
@@ -728,6 +739,9 @@ class OstTransaction extends ServiceBase {
     insertData.id = insertResponse.insertId;
 
     const formattedInsertData = new PendingTransactionModel().formatDbData(insertData);
+    if (oThis.userId == 2112) {
+      console.log('--formattedInsertData For pending tx table---', formattedInsertData);
+    }
     await PendingTransactionModel.flushCache(formattedInsertData);
   }
 
