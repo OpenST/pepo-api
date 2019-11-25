@@ -1,5 +1,6 @@
 const rootPrefix = '../../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
+  CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   EditReplyDescriptionLib = require(rootPrefix + '/lib/editDescription/Reply'),
   ActivityLogModel = require(rootPrefix + '/app/models/mysql/AdminActivityLog'),
   ReplyDetailsByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/ReplyDetailsByIds'),
@@ -78,6 +79,16 @@ class UpdateReplyDescription extends ServiceBase {
     }
 
     const replyDetail = replyDetailsByIdsCacheResponse.data[oThis.replyDetailsId];
+
+    if (!CommonValidators.validateNonEmptyObject(replyDetail)) {
+      return Promise.reject(
+        responseHelper.error({
+          internal_error_identifier: 'a_s_a_r_urd_1',
+          api_error_identifier: 'entity_not_found',
+          debug_options: `replyDetailId: ${oThis.replyDetailId}`
+        })
+      );
+    }
 
     if (replyDetail.entityKind === replyDetailConstants.videoEntityKind) {
       oThis.videoId = replyDetail.entityId;
