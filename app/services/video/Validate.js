@@ -2,6 +2,7 @@ const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   basicHelper = require(rootPrefix + '/helpers/basic'),
+  logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   responseHelper = require(rootPrefix + '/lib/formatter/response');
 
 /**
@@ -57,7 +58,7 @@ class ValidateUploadVideoParams extends ServiceBase {
     const oThis = this;
 
     const perReplyAmount = basicHelper.convertWeiToNormal(oThis.perReplyAmountInWei);
-
+    logger.log('Per reply amount ========', perReplyAmount.toString(10));
     if (!CommonValidators.validateInteger(perReplyAmount.toString(10))) {
       return Promise.reject(
         responseHelper.paramValidationError({
