@@ -125,6 +125,12 @@ class FetchGoto extends ServiceBase {
       }
     } else if (pathArray[1] == 'account') {
       oThis.gotoKind = gotoConstants.invitedUsersGotoKind;
+    } else if (pathArray[1] == 'doptin') {
+      // If url is doptin then send it to webview
+      if (query && query['t']) {
+        oThis.gotoParams = { url: oThis.url };
+        oThis.gotoKind = gotoConstants.webViewGotoKind;
+      }
     } else if (!pathArray[1]) {
       // If url is just 'pepo.com/' then look for invite code if any
       if (query && query['invite']) {
