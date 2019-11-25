@@ -28,7 +28,7 @@ class FetchGoto extends ServiceBase {
     super(params);
 
     const oThis = this;
-    oThis.url = params.url.toLowerCase();
+    oThis.url = params.url.toLowerCase().replace(/&amp;/g, '&');
     oThis.parsedUrl = {};
     oThis.gotoKind = null;
     oThis.gotoParams = null;
