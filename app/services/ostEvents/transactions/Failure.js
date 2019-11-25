@@ -13,8 +13,8 @@ const rootPrefix = '../../../..',
   transactionConstants = require(rootPrefix + '/lib/globalConstant/transaction'),
   notificationJobEnqueue = require(rootPrefix + '/lib/rabbitMqEnqueue/notification'),
   notificationJobConstants = require(rootPrefix + '/lib/globalConstant/notificationJob'),
-  fiatPaymentConstants = require(rootPrefix + '/lib/globalConstant/fiatPayment'),
-  pepocornTransactionConstants = require(rootPrefix + '/lib/globalConstant/redemption/pepocornTransaction');
+  pepocornTransactionConstants = require(rootPrefix + '/lib/globalConstant/redemption/pepocornTransaction'),
+  fiatPaymentConstants = require(rootPrefix + '/lib/globalConstant/fiatPayment');
 
 /**
  * Class for failure transaction ost event base service.
