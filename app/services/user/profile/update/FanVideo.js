@@ -209,12 +209,12 @@ class UpdateFanVideo extends UpdateProfileBase {
     // Feed needs to be added for uploaded video
     const oThis = this;
 
-    await oThis._publishAtMentionNotifications();
-
     let promiseArray = [];
 
     // Feed needs to be added only if user is an approved creator.
     if (UserModelKlass.isUserApprovedCreator(oThis.userObj)) {
+      await oThis._publishAtMentionNotifications();
+
       await oThis._addFeed();
 
       const messagePayload = {
