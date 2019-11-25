@@ -1113,6 +1113,19 @@ const v1Signature = {
       }
     ],
     optional: []
+  },
+  [apiName.deleteReplyVideo]: {
+    mandatory: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      },
+      {
+        parameter: 'reply_details_id',
+        validatorMethods: ['validateNonZeroInteger']
+      }
+    ],
+    optional: []
   }
 };
 
