@@ -54,7 +54,7 @@ class GetRedemptionInfo extends ServiceBase {
     const token = await oThis._getEncryptedCookieValue(),
       urlToken = base64Helper.encode(token);
 
-    let params = {
+    const params = {
       url: webPageConstants.redemptionProductLink,
       urlToken: urlToken,
       options: {
