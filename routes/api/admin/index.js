@@ -390,11 +390,7 @@ router.get('/tags', sanitizer.sanitizeDynamicUrlParams, function(req, res, next)
 });
 
 /* Get video by video id */
-router.get('/videos/:video_id', sanitizer.sanitizeDynamicUrlParams, cookieHelper.validateUserLoginRequired, function(
-  req,
-  res,
-  next
-) {
+router.get('/videos/:video_id', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.getVideo;
   req.decodedParams.video_id = req.params.video_id;
   req.decodedParams.is_admin = true;
