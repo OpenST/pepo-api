@@ -563,40 +563,62 @@ class TransactionOstEventBase extends ServiceBase {
   async fetchVideoAndValidate() {
     const oThis = this;
 
-    const videoDetailsCacheResponse = await new VideoDetailsByVideoIdsCache({ videoIds: [oThis.videoId] }).fetch();
-    if (videoDetailsCacheResponse.isFailure()) {
-      logger.error('Error while fetching video detail data.');
-      return Promise.reject(videoDetailsCacheResponse);
-    }
-
-    let videoDetail = videoDetailsCacheResponse.data[oThis.videoId];
-
-    if (CommonValidators.validateNonEmptyObject(videoDetail)) {
-      return responseHelper.successWithData({});
-    } else {
-      // TODO: can fetch reply details using cacheByReplyDetailsId, and check if video matches.
-      const ReplyDetailsByEntityIdsAndEntityKindCacheRsp = await new ReplyDetailsByEntityIdsAndEntityKindCache({
-        entityIds: [oThis.videoId],
-        entityKind: replyDetailConstants.videoEntityKind
-      }).fetch();
-
-      if (ReplyDetailsByEntityIdsAndEntityKindCacheRsp.isFailure()) {
+    if (oThis.replyDetailId) {
+      const replyDetailCacheResp = await new ReplyDetailsByIdsCache({ ids: [oThis.replyDetailId] }).fetch();
+      if (replyDetailCacheResp.isFailure()) {
         logger.error('Error while fetching reply detail data.');
 
-        return Promise.reject(ReplyDetailsByEntityIdsAndEntityKindCacheRsp);
+        return Promise.reject(replyDetailCacheResp);
       }
 
-      let replyDetail = ReplyDetailsByEntityIdsAndEntityKindCacheRsp.data[oThis.videoId];
+      const replyDetail = replyDetailCacheResp.data[oThis.replyDetailId];
 
       if (!CommonValidators.validateNonEmptyObject(replyDetail)) {
         return Promise.reject(
           responseHelper.paramValidationError({
-            internal_error_identifier: 'a_s_oe_t_b_2',
+            internal_error_identifier: 'a_s_oe_t_b_6',
             api_error_identifier: 'invalid_api_params',
-            params_error_identifiers: ['invalid_video_id'],
-            debug_options: { replyDetail: replyDetail, videoDetail: videoDetail, replyDetailId: oThis.replyDetailId }
+            params_error_identifiers: ['invalid_reply_detail_id'],
+            debug_options: { replyDetail: replyDetail, replyDetailId: oThis.replyDetailId }
           })
         );
+      }
+    } else {
+      const videoDetailsCacheResponse = await new VideoDetailsByVideoIdsCache({ videoIds: [oThis.videoId] }).fetch();
+      if (videoDetailsCacheResponse.isFailure()) {
+        logger.error('Error while fetching video detail data.');
+        return Promise.reject(videoDetailsCacheResponse);
+      }
+
+      let videoDetail = videoDetailsCacheResponse.data[oThis.videoId];
+
+      // Note: For older build if we receive pepo_on_reply for this this condition is added.
+      if (CommonValidators.validateNonEmptyObject(videoDetail)) {
+        return responseHelper.successWithData({});
+      } else {
+        const replyDetailsByEntityIdsAndEntityKindCacheRsp = await new ReplyDetailsByEntityIdsAndEntityKindCache({
+          entityIds: [oThis.videoId],
+          entityKind: replyDetailConstants.videoEntityKind
+        }).fetch();
+
+        if (replyDetailsByEntityIdsAndEntityKindCacheRsp.isFailure()) {
+          logger.error('Error while fetching reply detail data.');
+
+          return Promise.reject(replyDetailsByEntityIdsAndEntityKindCacheRsp);
+        }
+
+        const replyDetail = replyDetailsByEntityIdsAndEntityKindCacheRsp.data[oThis.videoId];
+
+        if (!CommonValidators.validateNonEmptyObject(replyDetail)) {
+          return Promise.reject(
+            responseHelper.paramValidationError({
+              internal_error_identifier: 'a_s_oe_t_b_2',
+              api_error_identifier: 'invalid_api_params',
+              params_error_identifiers: ['invalid_video_id'],
+              debug_options: { replyDetail: replyDetail, videoDetail: videoDetail, replyDetailId: oThis.replyDetailId }
+            })
+          );
+        }
       }
     }
 
