@@ -2,7 +2,6 @@ const uuidV4 = require('uuid/v4');
 
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
-  UserModel = require(rootPrefix + '/app/models/mysql/User'),
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   UserMultiCache = require(rootPrefix + '/lib/cacheManagement/multi/User'),
   ImageByIdCache = require(rootPrefix + '/lib/cacheManagement/multi/ImageByIds'),
@@ -131,7 +130,6 @@ class ShareDetails extends ServiceBase {
       oThis.isSelfVideoShare = true;
     } else {
       const userMultiCacheRsp = await new UserMultiCache({ ids: [creatorUserId] }).fetch();
-
       if (userMultiCacheRsp.isFailure()) {
         return Promise.reject(userMultiCacheRsp);
       }
