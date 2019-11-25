@@ -593,18 +593,18 @@ class TransactionOstEventBase extends ServiceBase {
       if (CommonValidators.validateNonEmptyObject(videoDetail)) {
         return responseHelper.successWithData({});
       } else {
-        const ReplyDetailsByEntityIdsAndEntityKindCacheRsp = await new ReplyDetailsByEntityIdsAndEntityKindCache({
+        const replyDetailsByEntityIdsAndEntityKindCacheRsp = await new ReplyDetailsByEntityIdsAndEntityKindCache({
           entityIds: [oThis.videoId],
           entityKind: replyDetailConstants.videoEntityKind
         }).fetch();
 
-        if (ReplyDetailsByEntityIdsAndEntityKindCacheRsp.isFailure()) {
+        if (replyDetailsByEntityIdsAndEntityKindCacheRsp.isFailure()) {
           logger.error('Error while fetching reply detail data.');
 
-          return Promise.reject(ReplyDetailsByEntityIdsAndEntityKindCacheRsp);
+          return Promise.reject(replyDetailsByEntityIdsAndEntityKindCacheRsp);
         }
 
-        let replyDetail = ReplyDetailsByEntityIdsAndEntityKindCacheRsp.data[oThis.videoId];
+        const replyDetail = replyDetailsByEntityIdsAndEntityKindCacheRsp.data[oThis.videoId];
 
         if (!CommonValidators.validateNonEmptyObject(replyDetail)) {
           return Promise.reject(
@@ -650,6 +650,8 @@ class TransactionOstEventBase extends ServiceBase {
         })
       );
     }
+
+    oThis.videoId = replyDetail.entityId;
   }
 
   /**
