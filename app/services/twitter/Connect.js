@@ -36,6 +36,7 @@ class TwitterConnect extends ServiceBase {
    * @param {string} params.handle: Handle
    *
    * @param {string} [params.invite_code]: invite_code
+   * @param {object} [params.utm_params]: utm_params
    *
    * @augments ServiceBase
    *
@@ -51,6 +52,7 @@ class TwitterConnect extends ServiceBase {
     oThis.twitterId = params.twitter_id;
     oThis.handle = params.handle;
     oThis.inviteCode = params.invite_code;
+    oThis.utmParams = params.utm_params;
 
     oThis.failedDueToKnownReason = false;
     oThis.userTwitterEntity = null;
@@ -451,6 +453,7 @@ class TwitterConnect extends ServiceBase {
         requestParams.inviterCodeId = oThis.inviterCodeObj.id;
       }
       requestParams.prelaunchInviteObj = oThis.prelaunchInviteObj;
+      requestParams.utmParams = oThis.utmParams;
       oThis.serviceResp = await new SignupTwitterClass(requestParams).perform();
     } else {
       logger.log('Twitter::Connect login');
