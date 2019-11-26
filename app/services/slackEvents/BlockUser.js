@@ -12,27 +12,10 @@ const rootPrefix = '../../..',
  */
 class BlockUser extends SlackEventBase {
   /**
-   * Constructor to process block user event.
+   * Async perform.
    *
-   * @param {object} params
-   * @param {object} params.eventParams: event params
-   *
-   * @augments ServiceBase
-   *
-   * @constructor
-   */
-  constructor(params) {
-    super(params);
-
-    const oThis = this;
-
-    oThis.errMsg = null;
-  }
-
-  /**
-   * Perform - Process Slack Event.
-   *
-   * @return {Promise<void>}
+   * @returns {Promise<result>}
+   * @private
    */
   async _asyncPerform() {
     const oThis = this;
@@ -47,41 +30,44 @@ class BlockUser extends SlackEventBase {
   }
 
   /**
-   * Call block user service
+   * Call block user service.
    *
    * @returns {Promise<*>}
    * @private
    */
   async _callBlockUserService() {
-    const oThis = this,
-      blockUserServiceResponseParams = {
-        user_ids: [oThis.eventParams.user_id],
-        current_admin: oThis.currentAdmin
-      };
+    const oThis = this;
 
-    let BlockUserServiceResponse = await new BlockUserService(blockUserServiceResponseParams).perform();
+    const blockUserServiceResponseParams = {
+      user_ids: [oThis.eventParams.user_id],
+      current_admin: oThis.currentAdmin
+    };
 
-    if (BlockUserServiceResponse.isFailure()) {
-      oThis._setError(BlockUserServiceResponse);
+    const blockUserServiceResponse = await new BlockUserService(blockUserServiceResponseParams).perform();
+
+    if (blockUserServiceResponse.isFailure()) {
+      oThis._setError(blockUserServiceResponse);
     }
   }
 
   /**
-   * Update Payload for slack post request
+   * Update payload for slack post request.
    *
+   * @param {number} actionPos
+   * @param {array} newBlocks
    *
-   * @return {Promise<void>}
-   *
+   * @returns {Promise<array>}
    * @private
    */
   async _updatedBlocks(actionPos, newBlocks) {
     const oThis = this;
+
     logger.log('_updateBlocks start');
 
     if (oThis.errMsg) {
       const formattedMsg = '`error:`' + oThis.errMsg;
 
-      let trailingArray = newBlocks.splice(actionPos + 1);
+      const trailingArray = newBlocks.splice(actionPos + 1);
 
       newBlocks[actionPos + 1] = slackConstants.addTextSection(formattedMsg);
       newBlocks = newBlocks.concat(trailingArray);
