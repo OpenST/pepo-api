@@ -303,6 +303,7 @@ class GetTagsVideoList extends ServiceBase {
       imageMap: oThis.usersVideosMap.imageMap || {},
       videoMap: oThis.usersVideosMap.videoMap || {},
       tokenUsersByUserIdMap: oThis.usersVideosMap.tokenUsersByUserIdMap || {},
+      [entityTypeConstants.currentUserVideoRelationsMap]: oThis.usersVideosMap.currentUserVideoRelationsMap || {},
       tokenDetails: oThis.tokenDetails,
       meta: oThis.responseMetaData
     });
