@@ -10,7 +10,7 @@ const rootPrefix = '../../..',
   entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
   responseEntityKey = require(rootPrefix + '/lib/globalConstant/responseEntityKey');
 
-//todo-replies: use at top cookieHelper.validateUserLoginRequired
+//todo-replies: use at top cookieHelper.validateUserLoginRequired, sanitizer.sanitizeDynamicUrlParams
 
 // Initiate reply on particular video.
 router.post('/', cookieHelper.validateUserLoginRequired, function(req, res, next) {
