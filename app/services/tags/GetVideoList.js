@@ -263,7 +263,7 @@ class GetTagsVideoList extends ServiceBase {
       blockedByUserData = cacheResp.data[oThis.currentUser.id];
     }
 
-    if (oThis.usersVideosMap.hasOwnProperty('replyDetailsMap')) {
+    if (Object.prototype.hasOwnProperty.call(oThis.usersVideosMap, 'replyDetailsMap')) {
       for (const replyDetailId in oThis.usersVideosMap.replyDetailsMap) {
         const replyDetail = oThis.usersVideosMap.replyDetailsMap[replyDetailId],
           replyCreatorUserId = replyDetail.creatorUserId;
