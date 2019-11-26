@@ -38,7 +38,7 @@ class ValidateUploadVideoParams extends ServiceBase {
   /**
    * Async perform.
    *
-   * @return {Promise<result>}
+   * @returns {Promise<result>}
    * @private
    */
   async _asyncPerform() {
