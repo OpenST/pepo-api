@@ -3,8 +3,8 @@ const rootPrefix = '../../..',
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   GetTokenService = require(rootPrefix + '/app/services/token/Get'),
   GetUserVideosList = require(rootPrefix + '/lib/GetUsersVideoList'),
-  ReplyDetailsByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/ReplyDetailsByIds'),
   UserBlockedListCache = require(rootPrefix + '/lib/cacheManagement/single/UserBlockedList'),
+  ReplyDetailsByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/ReplyDetailsByIds'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
@@ -172,8 +172,11 @@ class GetReplyById extends ServiceBase {
   }
 
   /**
-   * Filter replies if user is blocked or been blocked by
-   * @returns {Promise<void>}
+   * Filter replies if user is blocked or been blocked by.
+   *
+   * @sets oThis.blockedReplyDetailIdMap
+   *
+   * * @returns {Promise<void>}
    * @private
    */
   async _filterRepliesByBlockedUser() {
@@ -185,7 +188,7 @@ class GetReplyById extends ServiceBase {
       blockedByUserData = cacheResp.data[oThis.currentUser.id];
     }
 
-    if (oThis.userRepliesMap.hasOwnProperty('replyDetailsMap')) {
+    if (Object.prototype.hasOwnProperty.call(oThis.userRepliesMap, 'replyDetailsMap')) {
       for (const replyDetailId in oThis.userRepliesMap.replyDetailsMap) {
         const replyDetail = oThis.userRepliesMap.replyDetailsMap[replyDetailId],
           replyCreatorUserId = replyDetail.creatorUserId;
