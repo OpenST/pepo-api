@@ -152,7 +152,7 @@ class SlackEventBase extends ServiceBase {
   /**
    * Update payload for slack post request.
    *
-   * @returns {Promise<void>}
+   * @returns {Promise<array>}
    * @private
    */
   async _updatedBlocks() {
