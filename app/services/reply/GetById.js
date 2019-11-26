@@ -54,6 +54,8 @@ class GetReplyById extends ServiceBase {
   async _asyncPerform() {
     const oThis = this;
 
+    //todo-replies: block condition check
+
     await oThis._validateReplyDetailId();
 
     await oThis._setTokenDetails();
