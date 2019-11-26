@@ -3,8 +3,8 @@ const rootPrefix = '../../..',
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   GetTokenService = require(rootPrefix + '/app/services/token/Get'),
   GetUserVideosList = require(rootPrefix + '/lib/GetUsersVideoList'),
-  UserBlockedListCache = require(rootPrefix + '/lib/cacheManagement/single/UserBlockedList'),
   ReplyDetailsByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/ReplyDetailsByIds'),
+  UserBlockedListCache = require(rootPrefix + '/lib/cacheManagement/single/UserBlockedList'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
@@ -39,7 +39,7 @@ class GetReplyById extends ServiceBase {
 
     oThis.parentVideoId = null;
     oThis.videoReplies = [];
-    oThis.blockedReplyDetailIdMap = {};
+    oThis.blockReply = false;
     oThis.currentUserId = null;
     oThis.userRepliesMap = {};
     oThis.tokenDetails = null;
@@ -58,7 +58,7 @@ class GetReplyById extends ServiceBase {
 
     await oThis._setTokenDetails();
 
-    await oThis._filterRepliesByBlockedUser();
+    await oThis._fetchBlockRelations();
 
     await oThis._getReplyVideos();
 
@@ -74,7 +74,6 @@ class GetReplyById extends ServiceBase {
    * @private
    */
   async _validateReplyDetailId() {
-    // TODO - replies - we need to add check for blocked relation between reply creator and current user.
     const oThis = this;
 
     const replyDetailCacheResp = await new ReplyDetailsByIdsCache({ ids: [oThis.replyId] }).fetch();
@@ -109,6 +108,7 @@ class GetReplyById extends ServiceBase {
     }
 
     oThis.parentVideoId = replyDetail.parentId;
+    oThis.replyCreatorUserId = replyDetail.creatorUserId;
     oThis.currentUserId = oThis.currentUser ? Number(oThis.currentUser.id) : 0;
   }
 
@@ -132,6 +132,28 @@ class GetReplyById extends ServiceBase {
   }
 
   /**
+   * Fetch block relation
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _fetchBlockRelations() {
+    const oThis = this;
+
+    let blockedByUserData = {};
+    const cacheResp = await new UserBlockedListCache({ userId: oThis.currentUser.id }).fetch();
+    if (cacheResp.isSuccess()) {
+      blockedByUserData = cacheResp.data[oThis.currentUser.id];
+    }
+
+    if (
+      blockedByUserData.hasBlocked[oThis.replyCreatorUserId] ||
+      blockedByUserData.blockedBy[oThis.replyCreatorUserId]
+    ) {
+      oThis.blockReply = true;
+    }
+  }
+
+  /**
    * Get videos.
    *
    * @sets oThis.userRepliesMap, oThis.videoReplies
@@ -141,6 +163,10 @@ class GetReplyById extends ServiceBase {
    */
   async _getReplyVideos() {
     const oThis = this;
+
+    if (oThis.blockReply) {
+      return;
+    }
 
     const userVideosObj = new GetUserVideosList({
       currentUserId: oThis.currentUserId,
@@ -166,39 +192,7 @@ class GetReplyById extends ServiceBase {
 
     const rdObj = oThis.userRepliesMap.replyDetailsMap[oThis.replyId];
 
-    if (!oThis.blockedReplyDetailIdMap[rdObj.id]) {
-      oThis.videoReplies.push(oThis.userRepliesMap.fullVideosMap[rdObj.entityId]);
-    }
-  }
-
-  /**
-   * Filter replies if user is blocked or been blocked by.
-   *
-   * @sets oThis.blockedReplyDetailIdMap
-   *
-   * * @returns {Promise<void>}
-   * @private
-   */
-  async _filterRepliesByBlockedUser() {
-    const oThis = this;
-
-    let blockedByUserData = {};
-    const cacheResp = await new UserBlockedListCache({ userId: oThis.currentUser.id }).fetch();
-    if (cacheResp.isSuccess()) {
-      blockedByUserData = cacheResp.data[oThis.currentUser.id];
-    }
-
-    if (Object.prototype.hasOwnProperty.call(oThis.userRepliesMap, 'replyDetailsMap')) {
-      for (const replyDetailId in oThis.userRepliesMap.replyDetailsMap) {
-        const replyDetail = oThis.userRepliesMap.replyDetailsMap[replyDetailId],
-          replyCreatorUserId = replyDetail.creatorUserId;
-
-        if (blockedByUserData.hasBlocked[replyCreatorUserId] || blockedByUserData.blockedBy[replyCreatorUserId]) {
-          oThis.blockedReplyDetailIdMap[replyDetailId] = true;
-          delete oThis.userRepliesMap.replyDetailsMap[replyDetailId];
-        }
-      }
-    }
+    oThis.videoReplies.push(oThis.userRepliesMap.fullVideosMap[rdObj.entityId]);
   }
 
   /**
