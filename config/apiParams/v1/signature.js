@@ -37,15 +37,16 @@ const v1Signature = {
   [apiName.replyList]: {
     mandatory: [
       {
-        parameter: 'current_user',
-        validatorMethods: ['validateNonEmptyObject']
-      },
-      {
         parameter: 'video_id',
         validatorMethods: ['validateInteger']
       }
     ],
-    optional: []
+    optional: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      }
+    ]
   },
   [apiName.getReply]: {
     mandatory: [
