@@ -244,6 +244,7 @@ class Tag extends ModelBase {
 
     let queryObj = oThis.update(['reply_weight=reply_weight+?', weightToAdd]).where({ id: tagIds });
 
+    //todo-replies: queryObj.where(['reply_weight >= weightToAdd']);
     if (weightToAdd < 0) {
       queryObj.where(['reply_weight > 0']);
     }

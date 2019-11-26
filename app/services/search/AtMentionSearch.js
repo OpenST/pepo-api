@@ -57,6 +57,8 @@ class UserAtMentionSearch extends ServiceBase {
   async _asyncPerform() {
     const oThis = this;
 
+    //todo-replies: remove blocked users.?
+
     await oThis._validateAndSanitizeParams();
 
     await oThis._fetchUserIds();
