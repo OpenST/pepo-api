@@ -45,6 +45,7 @@ class ValidateUploadVideoParams extends ServiceBase {
     const oThis = this;
 
     await oThis._validate();
+
     return responseHelper.successWithData({});
   }
 
