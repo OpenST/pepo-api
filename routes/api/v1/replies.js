@@ -50,9 +50,9 @@ router.get('/:reply_id', sanitizer.sanitizeDynamicUrlParams, cookieHelper.valida
 
   const dataFormatterFunc = async function(serviceResponse) {
     const wrapperFormatterRsp = await new FormatterComposer({
-      resultType: responseEntityKey.replies,
+      resultType: responseEntityKey.videoReplies,
       entityKindToResponseKeyMap: {
-        [entityType.userVideoList]: responseEntityKey.videoReplies,
+        [entityType.videoReplyList]: responseEntityKey.videoReplies,
         [entityType.usersMap]: responseEntityKey.users,
         [entityType.userStats]: responseEntityKey.userStats,
         [entityType.userProfilesMap]: responseEntityKey.userProfiles,

@@ -340,7 +340,7 @@ const v1Signature = {
       },
       {
         parameter: 'per_reply_amount_in_wei',
-        validatorMethods: ['validateWeiValue']
+        validatorMethods: ['validateIntegerWeiValue']
       },
       {
         parameter: 'image_size',
@@ -436,7 +436,7 @@ const v1Signature = {
       },
       {
         parameter: 'per_reply_amount_in_wei',
-        validatorMethods: ['validateWeiValue']
+        validatorMethods: ['validateIntegerWeiValue']
       }
     ]
   },
