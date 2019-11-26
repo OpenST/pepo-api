@@ -277,6 +277,8 @@ class ReplyDetailsModel extends ModelBase {
   async updateByReplyDetailId(params) {
     const oThis = this;
 
+    //todo-replies: Note- Do not set cache with object for non primary keys but instead set ids only.
+    // Here We have to make a get call everytime due to this
     const ReplyDetailsByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/ReplyDetailsByIds');
 
     const replyDetailCacheResp = await new ReplyDetailsByIdsCache({ ids: [params.replyDetailId] }).fetch();
@@ -336,6 +338,7 @@ class ReplyDetailsModel extends ModelBase {
       .order_by('id desc')
       .limit(limit);
 
+    //todo-replies: Note- Use Id for Pagination instead of Pagination timestamp.
     if (paginationTimestamp) {
       queryObject.where(['created_at < ?', paginationTimestamp]);
     }
