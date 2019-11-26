@@ -486,6 +486,8 @@ class OstTransaction extends ServiceBase {
       await oThis._fetchMentionedUsers();
     }
 
+    console.log('------oThis.ostTxId-----', oThis.ostTxId);
+
     const replyVideoResponse = await new ReplyVideoPostTransaction({
       currentUserId: oThis.userId,
       replyDetailId: oThis.replyDetailId,
