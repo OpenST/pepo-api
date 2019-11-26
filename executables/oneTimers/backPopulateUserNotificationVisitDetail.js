@@ -25,7 +25,7 @@ class BackPopulateUserNotificationVisitDetail {
 
     while (true) {
       i++;
-      console.log('populate======Iteration====oThis.pageState====', i, oThis.pageState);
+      logger.log('populate======Iteration====oThis.pageState====', i, oThis.pageState);
 
       if (!oThis.pageState && i > 1) {
         return;

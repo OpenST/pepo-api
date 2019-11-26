@@ -9,6 +9,7 @@ const rootPrefix = '../..',
   UserModel = require(rootPrefix + '/app/models/mysql/User'),
   TwitterUserModel = require(rootPrefix + '/app/models/mysql/TwitterUser'),
   UsersTwitterRequestClass = require(rootPrefix + '/lib/twitter/oAuth1.0/Users'),
+  logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   responseHelper = require(rootPrefix + '/lib/formatter/response');
 
 const BATCH_SIZE = 20;
@@ -63,7 +64,7 @@ class FetchUserLocation {
 
     oThis.result = oThis.result.replace(/, /g, ' ');
 
-    console.log(oThis.result);
+    logger.log(oThis.result);
 
     return responseHelper.successWithData({});
   }
@@ -131,7 +132,7 @@ class FetchUserLocation {
         let location = lookupData[twitterid].location;
         oThis.result += oThis.twitterIdToUsernameMap[twitterid] + ',' + location + '\n';
       } else {
-        console.log(`====Missing twitter id ${twitterid} in lookup response`);
+        logger.log(`====Missing twitter id ${twitterid} in lookup response`);
       }
     }
   }
@@ -140,8 +141,8 @@ class FetchUserLocation {
 new FetchUserLocation()
   .perform()
   .then(function(resp) {
-    console.log('===Run success');
+    logger.log('===Run success');
   })
   .catch(function(err) {
-    console.error(err);
+    logger.error(err);
   });

@@ -8,6 +8,7 @@ const rootPrefix = '..',
   v1ParamErrorConfig = require(rootPrefix + '/config/apiParams/v1/errorConfig'),
   adminParamErrorConfig = require(rootPrefix + '/config/apiParams/admin/errorConfig'),
   webParamErrorConfig = require(rootPrefix + '/config/apiParams/web/errorConfig'),
+  logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   internalParamErrorConfig = require(rootPrefix + '/config/apiParams/internal/errorConfig');
 
 /**
@@ -489,7 +490,7 @@ class BasicHelper {
    */
   sleep(ms) {
     // eslint-disable-next-line no-console
-    console.log(`Sleeping for ${ms} ms.`);
+    logger.log(`Sleeping for ${ms} ms.`);
 
     return new Promise(function(resolve) {
       setTimeout(resolve, ms);

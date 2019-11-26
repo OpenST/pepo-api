@@ -39,7 +39,7 @@ class BackPopulateUserVideoView {
       oThis.feedToVideoMap[dbRow.id] = dbRow.primary_external_entity_id;
     }
 
-    console.log('Total videos from feed =====', dbRows.length);
+    logger.log('Total videos from feed =====', dbRows.length);
   }
 
   async populateForUsers() {
@@ -48,7 +48,7 @@ class BackPopulateUserVideoView {
     const dbRows = await new UserModel().select('id').fire();
     let promises = [];
 
-    console.log('Total Users=====', dbRows.length);
+    logger.log('Total Users=====', dbRows.length);
 
     for (let index = 0; index < dbRows.length; index++) {
       const userId = dbRows[index].id;
@@ -67,13 +67,13 @@ class BackPopulateUserVideoView {
   async populateVideoViewForUserId(userId) {
     const oThis = this;
 
-    console.log('Populate For User Id=====', userId);
+    logger.log('Populate For User Id=====', userId);
 
     let seenVideoIds = [];
 
     const lastSeenPaginationIdentifier = await oThis.getLastVisitTime(userId);
 
-    console.log('lastSeenPaginationIdentifier For User Id=====', userId, lastSeenPaginationIdentifier);
+    logger.log('lastSeenPaginationIdentifier For User Id=====', userId, lastSeenPaginationIdentifier);
 
     for (let paginationIdentifier in oThis.videoPublishData) {
       const videoIds = oThis.videoPublishData[paginationIdentifier];
@@ -82,7 +82,7 @@ class BackPopulateUserVideoView {
       }
     }
 
-    console.log('TOTAL seenVideoIds as per last visit time For User Id=====', userId, seenVideoIds.length);
+    logger.log('TOTAL seenVideoIds as per last visit time For User Id=====', userId, seenVideoIds.length);
 
     if (seenVideoIds.length === 0) {
       return;
@@ -90,7 +90,7 @@ class BackPopulateUserVideoView {
 
     const unseenFeedIds = await oThis.fetchFeedIdsForUserFromCache(userId);
 
-    console.log('TOTAL unseenFeedIds from cache For User Id=====', userId, unseenFeedIds.length);
+    logger.log('TOTAL unseenFeedIds from cache For User Id=====', userId, unseenFeedIds.length);
 
     for (let i = 0; i < unseenFeedIds.length; i++) {
       let videoId = oThis.feedToVideoMap[unseenFeedIds[i]];
