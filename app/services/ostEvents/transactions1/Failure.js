@@ -5,11 +5,11 @@ const rootPrefix = '../../../..',
   transactionConstants = require(rootPrefix + '/lib/globalConstant/transaction');
 
 /**
- * Class for success transaction ost event base service.
+ * Class for failure transaction ost event base service.
  *
- * @class SuccessTransactionOstEvent
+ * @class FailureTransactionOstEvent
  */
-class SuccessTransactionOstEvent extends TransactionOstEventBase {
+class FailureTransactionOstEvent extends TransactionOstEventBase {
   /**
    * Async perform.
    *
@@ -59,8 +59,8 @@ class SuccessTransactionOstEvent extends TransactionOstEventBase {
    * @private
    */
   _validTransactionStatus() {
-    return transactionConstants.successOstTransactionStatus;
+    return transactionConstants.failedOstTransactionStatus;
   }
 }
 
-module.exports = SuccessTransactionOstEvent;
+module.exports = FailureTransactionOstEvent;
