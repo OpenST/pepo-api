@@ -78,6 +78,8 @@ class GetReplyById extends ServiceBase {
   async _validateReplyDetailId() {
     const oThis = this;
 
+    //todo-replies: entity not found error
+
     const replyDetailCacheResp = await new ReplyDetailsByIdsCache({ ids: [oThis.replyId] }).fetch();
     if (replyDetailCacheResp.isFailure()) {
       logger.error('Error while fetching reply detail data.');
@@ -168,6 +170,7 @@ class GetReplyById extends ServiceBase {
 
     if (oThis.blockReply) {
       return;
+      //todo-replies: entity not found error
     }
 
     const userVideosObj = new GetUserVideosList({

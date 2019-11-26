@@ -62,6 +62,7 @@ class GetVideoList extends ServiceBase {
   async _asyncPerform() {
     const oThis = this;
 
+    //todo-replies: should we include parent video Id for can delete
     await oThis._validateAndSanitizeParams();
 
     let resp = null;
