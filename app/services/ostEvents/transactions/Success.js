@@ -1,4 +1,11 @@
 const rootPrefix = '../../../..',
+  AirdropSuccessClass = require(rootPrefix + '/app/services/ostEvents/transactions/kind/AirdropSuccess'),
+  PepoOnReplySuccessClass = require(rootPrefix + '/app/services/ostEvents/transactions/kind/PepoOnReplySuccess'),
+  RedemptionSuccessClass = require(rootPrefix + '/app/services/ostEvents/transactions/kind/RedemptionSuccess'),
+  ReplyOnVideoSuccessClass = require(rootPrefix + '/app/services/ostEvents/transactions/kind/ReplyOnVideoSuccess'),
+  TopUpSuccessClass = require(rootPrefix + '/app/services/ostEvents/transactions/kind/TopUpSuccess'),
+  UserTransactionSuccessClass = require(rootPrefix +
+    '/app/services/ostEvents/transactions/kind/UserTransactionSuccess'),
   TransactionOstEventBase = require(rootPrefix + '/app/services/ostEvents/transactions/Base'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
@@ -35,12 +42,31 @@ class SuccessTransactionOstEvent extends TransactionOstEventBase {
   async _processTransaction() {
     const oThis = this;
 
+    let transactionEventResponse = null;
     if (oThis._isRedemptionTransactionKind()) {
+      transactionEventResponse = new RedemptionSuccessClass({
+        params: oThis.webhookData
+      }).perform();
     } else if (oThis._isReplyOnVideoTransactionKind()) {
+      transactionEventResponse = new ReplyOnVideoSuccessClass({
+        params: oThis.webhookData
+      }).perform();
     } else if (oThis._isPepoOnReplyTransactionKind()) {
+      transactionEventResponse = new PepoOnReplySuccessClass({
+        params: oThis.webhookData
+      }).perform();
     } else if (oThis._isUserActivateAirdropTransactionKind()) {
+      transactionEventResponse = new AirdropSuccessClass({
+        params: oThis.webhookData
+      }).perform();
     } else if (oThis._isTopUpTransactionKind()) {
+      transactionEventResponse = new TopUpSuccessClass({
+        params: oThis.webhookData
+      }).perform();
     } else if (oThis._isUserTransactionKind()) {
+      transactionEventResponse = new UserTransactionSuccessClass({
+        params: oThis.webhookData
+      }).perform();
     } else {
       return Promise.reject(
         responseHelper.error({
@@ -50,6 +76,8 @@ class SuccessTransactionOstEvent extends TransactionOstEventBase {
         })
       );
     }
+
+    await transactionEventResponse;
   }
 
   /**
