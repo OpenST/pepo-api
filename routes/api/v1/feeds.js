@@ -33,6 +33,7 @@ router.get('/:feed_id', cookieHelper.validateUserLoginRequired, sanitizer.saniti
         [entityType.imagesMap]: responseEntityKey.images,
         [entityType.videosMap]: responseEntityKey.videos,
         [entityType.videoDetailsMap]: responseEntityKey.videoDetails,
+        [entityType.currentUserVideoRelationsMap]: responseEntityKey.currentUserVideoRelations,
         [entityType.currentUserUserContributionsMap]: responseEntityKey.currentUserUserContributions,
         [entityType.currentUserVideoContributionsMap]: responseEntityKey.currentUserVideoContributions
       },
@@ -66,6 +67,7 @@ router.get('/', sanitizer.sanitizeDynamicUrlParams, sanitizer.sanitizeHeaderPara
         [entityType.videoDetailsMap]: responseEntityKey.videoDetails,
         [entityType.currentUserUserContributionsMap]: responseEntityKey.currentUserUserContributions,
         [entityType.currentUserVideoContributionsMap]: responseEntityKey.currentUserVideoContributions,
+        [entityType.currentUserVideoRelationsMap]: responseEntityKey.currentUserVideoRelations,
         [entityType.feedListMeta]: responseEntityKey.meta,
         [entityType.pricePointsMap]: responseEntityKey.pricePoints,
         [entityType.token]: responseEntityKey.token
