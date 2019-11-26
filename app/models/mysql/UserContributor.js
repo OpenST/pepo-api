@@ -120,7 +120,7 @@ class UserContributor extends ModelBase {
       offset = (page - 1) * limit;
 
     const dbRows = await oThis
-      .select(['contributed_by_user_id', 'total_amount', 'updated_at'])
+      .select(['id', 'contributed_by_user_id', 'total_amount', 'updated_at'])
       .where({ user_id: params.userId })
       .limit(limit)
       .offset(offset)
