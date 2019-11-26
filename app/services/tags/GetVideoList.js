@@ -38,6 +38,8 @@ class GetTagsVideoList extends ServiceBase {
     oThis.tagId = params.tag_id;
     oThis.paginationIdentifier = params[paginationConstants.paginationIdentifierKey] || null;
     oThis.supportedEntities = params.supported_entities || [tagConstants.videosSupportedEntity];
+    // NOTE: Do not assume that oThis.supportedEntities is a string. It comes as a string only from POSTMAN.
+    // So, no need to parse this parameter.
 
     oThis.limit = oThis._defaultPageLimit();
 
