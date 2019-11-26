@@ -375,6 +375,12 @@ const v1ErrorConfig = {
     parameter: 'supported_entities',
     code: 'invalid',
     message: 'Supported entities is invalid.'
+  },
+
+  invalid_per_reply_amount_in_wei: {
+    parameter: 'per_reply_amount_in_wei',
+    code: 'invalid',
+    message: 'Invalid per reply amount. Please add valid amount.'
   }
 };
 

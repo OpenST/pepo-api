@@ -48,6 +48,7 @@ class GetTagsVideoList extends ServiceBase {
     oThis.videoIds = [];
     oThis.videoDetails = [];
     oThis.tokenDetails = {};
+    oThis.blockedReplyEntityIdMap = {};
     oThis.usersVideosMap = {};
   }
 
@@ -69,9 +70,9 @@ class GetTagsVideoList extends ServiceBase {
     const promisesArray = [oThis._setTokenDetails(), oThis._getVideos()];
     await Promise.all(promisesArray);
 
-    oThis._setUserVideoList();
-
     await oThis._filterRepliesByBlockedUser();
+
+    oThis._setUserVideoList();
 
     return oThis._prepareResponse();
   }
@@ -95,6 +96,7 @@ class GetTagsVideoList extends ServiceBase {
       oThis.paginationTimestamp = null;
     }
 
+    oThis.supportedEntities = JSON.parse(oThis.supportedEntities); // String from api
     // Validate supported entities.
     for (let index = 0; index < oThis.supportedEntities.length; index++) {
       if (!tagConstants.supportedEntities[oThis.supportedEntities[index]]) {
@@ -240,7 +242,7 @@ class GetTagsVideoList extends ServiceBase {
 
     for (let index = 0; index < oThis.videoIds.length; index++) {
       const videoId = oThis.videoIds[index];
-      if (oThis.usersVideosMap.fullVideosMap[videoId]) {
+      if (oThis.usersVideosMap.fullVideosMap[videoId] && !oThis.blockedReplyEntityIdMap[videoId]) {
         oThis.videoDetails.push(oThis.usersVideosMap.fullVideosMap[videoId]);
       }
     }
@@ -267,6 +269,7 @@ class GetTagsVideoList extends ServiceBase {
 
         if (blockedByUserData.hasBlocked[replyCreatorUserId] || blockedByUserData.blockedBy[replyCreatorUserId]) {
           delete oThis.usersVideosMap.replyDetailsMap[replyDetailId];
+          oThis.blockedReplyEntityIdMap[replyDetail.entityId] = true;
         }
       }
     }

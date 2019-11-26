@@ -39,6 +39,7 @@ class GetReplyById extends ServiceBase {
 
     oThis.parentVideoId = null;
     oThis.videoReplies = [];
+    oThis.blockedReplyDetailIdMap = {};
     oThis.currentUserId = null;
     oThis.userRepliesMap = {};
     oThis.tokenDetails = null;
@@ -57,9 +58,9 @@ class GetReplyById extends ServiceBase {
 
     await oThis._setTokenDetails();
 
-    await oThis._getReplyVideos();
-
     await oThis._filterRepliesByBlockedUser();
+
+    await oThis._getReplyVideos();
 
     return oThis._prepareResponse();
   }
@@ -164,7 +165,10 @@ class GetReplyById extends ServiceBase {
     oThis.userRepliesMap = response.data;
 
     const rdObj = oThis.userRepliesMap.replyDetailsMap[oThis.replyId];
-    oThis.videoReplies.push(oThis.userRepliesMap.fullVideosMap[rdObj.entityId]);
+
+    if (!oThis.blockedReplyDetailIdMap[rdObj.id]) {
+      oThis.videoReplies.push(oThis.userRepliesMap.fullVideosMap[rdObj.entityId]);
+    }
   }
 
   /**
@@ -187,6 +191,7 @@ class GetReplyById extends ServiceBase {
           replyCreatorUserId = replyDetail.creatorUserId;
 
         if (blockedByUserData.hasBlocked[replyCreatorUserId] || blockedByUserData.blockedBy[replyCreatorUserId]) {
+          oThis.blockedReplyDetailIdMap[replyDetailId] = true;
           delete oThis.userRepliesMap.replyDetailsMap[replyDetailId];
         }
       }
