@@ -139,11 +139,14 @@ class ModelBase {
   }
 
   /**
-   * Key object defined in Cassandra table
+   * Key object defined in cassandra table.
    *
+   * @returns {{}}
    */
   keyObject() {
-    throw "Model has to define key object for itself. eg: {partition: ['user_id'], sort: ['updated_timestamp']}";
+    throw new Error(
+      "Model has to define key object for itself. eg: {partition: ['user_id'], sort: ['updated_timestamp']}"
+    );
   }
 }
 

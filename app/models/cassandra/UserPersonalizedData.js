@@ -107,7 +107,7 @@ class UserPersonalizedDataModel extends CassandraModelBase {
   async fetchJsonDataForKind(queryParams) {
     const oThis = this;
 
-    let kindInt = userPersonalizedDataConstants.invertedKinds[queryParams.kind];
+    const kindInt = userPersonalizedDataConstants.invertedKinds[queryParams.kind];
 
     const query = `select json_data, kind from ${
       oThis.queryTableName

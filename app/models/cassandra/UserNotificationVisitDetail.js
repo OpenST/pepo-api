@@ -56,7 +56,7 @@ class UserNotificationVisitDetailModel extends CassandraModelBase {
   formatDbData(dbRow) {
     const oThis = this;
 
-    //Note:-last_visited_at is for activity_last_visited_by.
+    // Note:-last_visited_at is for activity_last_visited_by.
 
     /* eslint-disable */
     const formattedData = {
