@@ -64,7 +64,7 @@ router.get('/:reply_id', sanitizer.sanitizeDynamicUrlParams, cookieHelper.valida
         [entityType.replyDetailsMap]: responseEntityKey.replyDetails,
         [entityType.currentUserUserContributionsMap]: responseEntityKey.currentUserUserContributions,
         [entityType.currentUserVideoContributionsMap]: responseEntityKey.currentUserVideoContributions,
-        [entityType.currentUserReplyDetailsRelationsMap]: responseEntityKey.currentUserVideoRelations,
+        [entityType.currentUserReplyDetailsRelationsMap]: responseEntityKey.currentUserReplyDetailsRelations,
         [entityType.pricePointsMap]: responseEntityKey.pricePoints,
         [entityType.token]: responseEntityKey.token
       },

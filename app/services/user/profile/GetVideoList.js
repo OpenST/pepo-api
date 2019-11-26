@@ -273,7 +273,7 @@ class GetVideoList extends ServiceBase {
       [entityType.currentUserVideoContributionsMap]: oThis.usersVideosMap.currentUserVideoContributionsMap || {},
       [entityType.userProfileAllowedActions]: oThis.usersVideosMap.userProfileAllowedActions || {},
       tokenUsersByUserIdMap: oThis.usersVideosMap.tokenUsersByUserIdMap || {},
-      [entityType.pricePointsMap]: oThis.usersVideosMap.pricePointsMap || {},
+      [entityType.pricePointsMap]: oThis.usersVideosMap.pricePointsMap,
       tokenDetails: oThis.tokenDetails,
       meta: oThis.responseMetaData
     });

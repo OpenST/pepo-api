@@ -199,6 +199,33 @@ class ReplyDetailsModel extends ModelBase {
   }
 
   /**
+   * Fetch distinct reply creators of parent
+   *
+   * @param {array} replyDetailIds
+   *
+   * @returns {Promise<void>}
+   */
+  async fetchDistinctReplyCreatorsByParent(videoIds) {
+    const oThis = this;
+
+    const dbRows = await oThis
+      .select('*')
+      .where({ parent_id: videoIds })
+      .fire();
+
+    const response = {};
+
+    for (let index = 0; index < dbRows.length; index++) {
+      const formatDbRow = oThis.formatDbData(dbRows[index]);
+      response[formatDbRow.parentId] = response[formatDbRow.parentId] || [];
+      response[formatDbRow.parentId].push(formatDbRow.creatorUserId);
+      response[formatDbRow.parentId] = [...new Set(response[formatDbRow.parentId])];
+    }
+
+    return response;
+  }
+
+  /**
    * Insert new video.
    *
    * @param {object} params
