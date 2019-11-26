@@ -96,7 +96,6 @@ class GetTagsVideoList extends ServiceBase {
       oThis.paginationTimestamp = null;
     }
 
-    oThis.supportedEntities = JSON.parse(oThis.supportedEntities); // String from api
     // Validate supported entities.
     for (let index = 0; index < oThis.supportedEntities.length; index++) {
       if (!tagConstants.supportedEntities[oThis.supportedEntities[index]]) {
