@@ -10,8 +10,6 @@ const rootPrefix = '../../..',
   entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
   responseEntityKey = require(rootPrefix + '/lib/globalConstant/responseEntityKey');
 
-//todo-replies: use at top cookieHelper.validateUserLoginRequired, sanitizer.sanitizeDynamicUrlParams
-
 // Get url and message for sharing reply video given its reply detail id.
 router.get('/:reply_detail_id/share', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.replyShare;
