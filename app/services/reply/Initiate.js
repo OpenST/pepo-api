@@ -15,6 +15,7 @@ const rootPrefix = '../../..',
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   videoConstants = require(rootPrefix + '/lib/globalConstant/video'),
   entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
+  VideoDistinctReplyCreatorsCache = require(rootPrefix + '/lib/cacheManagement/multi/VideoDistinctReplyCreators'),
   replyDetailConstants = require(rootPrefix + '/lib/globalConstant/replyDetail');
 
 /**
@@ -320,10 +321,29 @@ class InitiateReply extends ServiceBase {
     }
 
     if (CommonValidator.validateNonEmptyObject(parentVideoDetails)) {
+      let isReplyFree = 0;
       if (
         CommonValidator.validateZeroWeiValue(parentVideoDetails.perReplyAmountInWei) ||
         parentVideoDetails.creatorUserId === oThis.currentUser.id
       ) {
+        isReplyFree = 1;
+      } else {
+        // Look if creator has already replied on this post
+        const cacheResp = await new VideoDistinctReplyCreatorsCache({ videoIds: [parentVideoDetails.videoId] }).fetch();
+
+        if (cacheResp.isFailure()) {
+          return Promise.reject(cacheResp);
+        }
+
+        const videoCreatorsMap = cacheResp.data;
+        // If map is not empty then look for reply creator in that list
+        if (!CommonValidators.validateNonEmptyObject(videoCreatorsMap[parentVideoDetails.videoId])) {
+          const replyCreators = videoCreatorsMap[parentVideoDetails.videoId];
+          // If reply creators is present and creator is already in it, then user can reply free
+          isReplyFree = replyCreators.length > 0 && replyCreators.includes(oThis.currentUser.id);
+        }
+      }
+      if (isReplyFree) {
         await new ReplyVideoPostTransaction({
           currentUserId: oThis.currentUser.id,
           replyDetailId: oThis.replyDetailId,
