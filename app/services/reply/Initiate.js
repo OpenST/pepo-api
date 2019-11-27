@@ -51,7 +51,6 @@ class InitiateReply extends ServiceBase {
     super();
 
     const oThis = this;
-    //todo-replies: video of reply_detail_id can be updated?
 
     oThis.replyDetailId = params.reply_detail_id || null;
 
@@ -319,38 +318,36 @@ class InitiateReply extends ServiceBase {
       parentVideoDetails = videoDetailsByVideoIdsCacheResp.data[oThis.parentId];
     }
 
-    if (CommonValidators.validateNonEmptyObject(parentVideoDetails)) {
-      let isReplyFree = 0;
-      if (
-        CommonValidators.validateZeroWeiValue(parentVideoDetails.perReplyAmountInWei) ||
-        parentVideoDetails.creatorUserId === oThis.currentUser.id
-      ) {
-        isReplyFree = 1;
-      } else {
-        // Look if creator has already replied on this post
-        const cacheResp = await new VideoDistinctReplyCreatorsCache({ videoIds: [parentVideoDetails.videoId] }).fetch();
+    let isReplyFree = 0;
+    if (
+      CommonValidators.validateZeroWeiValue(parentVideoDetails.perReplyAmountInWei) ||
+      parentVideoDetails.creatorUserId === oThis.currentUser.id
+    ) {
+      isReplyFree = 1;
+    } else {
+      // Look if creator has already replied on this post
+      const cacheResp = await new VideoDistinctReplyCreatorsCache({ videoIds: [parentVideoDetails.videoId] }).fetch();
 
-        if (cacheResp.isFailure()) {
-          return Promise.reject(cacheResp);
-        }
+      if (cacheResp.isFailure()) {
+        return Promise.reject(cacheResp);
+      }
 
-        const videoCreatorsMap = cacheResp.data;
-        // If map is not empty then look for reply creator in that list
-        const replyCreators = videoCreatorsMap[parentVideoDetails.videoId];
-        if (CommonValidators.validateNonEmptyObject(replyCreators)) {
-          // If reply creators is present and creator is already in it, then user can reply free
-          isReplyFree = replyCreators[oThis.currentUser.id] || 0;
-        }
+      const videoCreatorsMap = cacheResp.data;
+      // If map is not empty then look for reply creator in that list
+      const replyCreators = videoCreatorsMap[parentVideoDetails.videoId];
+      if (CommonValidators.validateNonEmptyObject(replyCreators)) {
+        // If reply creators is present and creator is already in it, then user can reply free
+        isReplyFree = replyCreators[oThis.currentUser.id] || 0;
       }
-      if (isReplyFree) {
-        await new ReplyVideoPostTransaction({
-          currentUserId: oThis.currentUser.id,
-          replyDetailId: oThis.replyDetailId,
-          videoId: oThis.parentId,
-          pepoAmountInWei: 0,
-          mentionedUserIds: oThis.mentionedUserIds
-        }).perform();
-      }
+    }
+    if (isReplyFree) {
+      await new ReplyVideoPostTransaction({
+        currentUserId: oThis.currentUser.id,
+        replyDetailId: oThis.replyDetailId,
+        videoId: oThis.parentId,
+        pepoAmountInWei: 0,
+        mentionedUserIds: oThis.mentionedUserIds
+      }).perform();
     }
   }
 }
