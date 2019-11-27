@@ -20,7 +20,7 @@ class GetReplyById extends ServiceBase {
    * Constructor to get reply by id.
    *
    * @param {object} params
-   * @param {number} params.reply_id
+   * @param {number} params.reply_detail_id
    * @param {object} params.current_user
    * @param {boolean} [params.is_admin]
    *
@@ -33,7 +33,7 @@ class GetReplyById extends ServiceBase {
 
     const oThis = this;
 
-    oThis.replyId = params.reply_id;
+    oThis.replyDetailId = params.reply_detail_id;
     oThis.currentUser = params.current_user;
     oThis.isAdmin = params.is_admin || false;
 
@@ -80,14 +80,14 @@ class GetReplyById extends ServiceBase {
 
     //todo-replies: entity not found error
 
-    const replyDetailCacheResp = await new ReplyDetailsByIdsCache({ ids: [oThis.replyId] }).fetch();
+    const replyDetailCacheResp = await new ReplyDetailsByIdsCache({ ids: [oThis.replyDetailId] }).fetch();
     if (replyDetailCacheResp.isFailure()) {
       logger.error('Error while fetching reply detail data.');
 
       return Promise.reject(replyDetailCacheResp);
     }
 
-    const replyDetail = replyDetailCacheResp.data[oThis.replyId];
+    const replyDetail = replyDetailCacheResp.data[oThis.replyDetailId];
 
     if (!CommonValidators.validateNonEmptyObject(replyDetail)) {
       return Promise.reject(
@@ -95,7 +95,7 @@ class GetReplyById extends ServiceBase {
           internal_error_identifier: 'a_s_r_gbi_1',
           api_error_identifier: 'invalid_api_params',
           params_error_identifiers: ['invalid_reply_detail_id'],
-          debug_options: { replyDetail: replyDetail, replyId: oThis.replyId }
+          debug_options: { replyDetail: replyDetail, replyDetailId: oThis.replyDetailId }
         })
       );
     }
@@ -106,7 +106,7 @@ class GetReplyById extends ServiceBase {
           internal_error_identifier: 'a_s_r_gbi_2',
           api_error_identifier: 'resource_not_found',
           params_error_identifiers: ['reply_deleted'],
-          debug_options: { replyId: oThis.replyId }
+          debug_options: { replyDetailId: oThis.replyDetailId }
         })
       );
     }
@@ -181,7 +181,7 @@ class GetReplyById extends ServiceBase {
     const userVideosObj = new GetUserVideosList({
       currentUserId: oThis.currentUserId,
       videoIds: [oThis.parentVideoId],
-      replyDetailIds: [oThis.replyId],
+      replyDetailIds: [oThis.replyDetailId],
       isAdmin: oThis.isAdmin,
       fetchVideoViewDetails: 1
     });
@@ -200,7 +200,7 @@ class GetReplyById extends ServiceBase {
 
     oThis.userRepliesMap = response.data;
 
-    const rdObj = oThis.userRepliesMap.replyDetailsMap[oThis.replyId];
+    const rdObj = oThis.userRepliesMap.replyDetailsMap[oThis.replyDetailId];
 
     oThis.videoReplies.push(oThis.userRepliesMap.fullVideosMap[rdObj.entityId]);
   }

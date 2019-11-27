@@ -104,7 +104,7 @@ class ReportForEntity extends ServiceBase {
           reporter_user_id: oThis.currentUser.id,
           reportee_user_name: oThis.reportedUserObj.name, // reply creator's name
           reportee_user_id: oThis.reportedUserObj.id, // reply creator's user id
-          parent_video_url: oThis.parentVideoUrl, // parent video url for this reply
+          parent_video_url: encodeURIComponent(oThis.parentVideoUrl), // parent video url for this reply
           video_url: encodeURIComponent(oThis.videoUrl),
           user_admin_url_prefix: basicHelper.userProfilePrefixUrl()
         };

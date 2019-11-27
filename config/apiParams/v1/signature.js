@@ -55,7 +55,7 @@ const v1Signature = {
         validatorMethods: ['validateNonEmptyObject']
       },
       {
-        parameter: 'reply_id',
+        parameter: 'reply_detail_id',
         validatorMethods: ['validateInteger']
       }
     ],
