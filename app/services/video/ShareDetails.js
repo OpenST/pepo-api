@@ -74,6 +74,8 @@ class ShareDetails extends ServiceBase {
   /**
    * Fetch video.
    *
+   * @sets oThis.posterImageId
+   *
    * @returns {Promise<never>}
    * @private
    */
@@ -117,6 +119,7 @@ class ShareDetails extends ServiceBase {
     if (!oThis.posterImageId) {
       return;
     }
+
     const cacheRsp = await new ImageByIdCache({ ids: [oThis.posterImageId] }).fetch();
     if (cacheRsp.isFailure()) {
       return Promise.reject(cacheRsp);

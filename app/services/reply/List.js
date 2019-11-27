@@ -58,21 +58,16 @@ class GetReplyList extends ServiceBase {
    * @private
    */
   async _asyncPerform() {
-    const oThis = this,
-      promisesArray = [];
+    const oThis = this;
 
     await oThis._validateAndSanitizeParams();
 
     await oThis._fetchReplyDetailIds();
 
-    promisesArray.push(oThis._setTokenDetails());
-    promisesArray.push(oThis._getReplyVideos());
-
+    const promisesArray = [oThis._setTokenDetails(), oThis._getReplyVideos()];
     await Promise.all(promisesArray);
 
     oThis._addResponseMetaData();
-
-    // TODO - replies - show will block relation affect the response. Please discuss this with Junisha.
 
     return oThis._prepareResponse();
   }
@@ -167,7 +162,6 @@ class GetReplyList extends ServiceBase {
 
     const userVideosObj = new GetUserVideosList({
       currentUserId: oThis.currentUserId,
-      videoIds: [oThis.videoId],
       replyDetailIds: oThis.replyDetailIds,
       isAdmin: oThis.isAdmin,
       fetchVideoViewDetails: 1

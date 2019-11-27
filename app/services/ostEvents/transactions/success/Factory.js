@@ -6,6 +6,7 @@ const rootPrefix = '../../../../..',
   TopUpSuccessWebhook = require(rootPrefix + '/app/services/ostEvents/transactions/success/Topup'),
   UserTransactionSuccessWebhook = require(rootPrefix + '/app/services/ostEvents/transactions/success/UserTransaction'),
   TransactionWebhookFactoryBase = require(rootPrefix + '/app/services/ostEvents/transactions/FactoryBase'),
+  logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   transactionConstants = require(rootPrefix + '/lib/globalConstant/transaction');
 
@@ -39,6 +40,8 @@ class TransactionWebhookSuccessFactory extends TransactionWebhookFactoryBase {
    */
   async _processTransaction() {
     const oThis = this;
+
+    logger.log('====oThis.webhookData is : ', oThis.webhookData);
 
     let transactionEventResponse = null;
     if (oThis._isRedemptionTransactionKind()) {

@@ -48,7 +48,7 @@ class GetVideoById extends ServiceBase {
   /**
    * Async perform.
    *
-   * @return {Promise<void>}
+   * @returns {Promise<result>}
    * @private
    */
   async _asyncPerform() {
@@ -68,7 +68,7 @@ class GetVideoById extends ServiceBase {
    *
    * @sets oThis.videoDetails, oThis.creatorUserId, oThis.currentUserId
    *
-   * @return {Promise<void>}
+   * @returns {Promise<void>}
    * @private
    */
   async _fetchCreatorUserId() {
@@ -105,7 +105,6 @@ class GetVideoById extends ServiceBase {
     }
 
     oThis.creatorUserId = oThis.videoDetails[0].creatorUserId;
-
     oThis.currentUserId = oThis.currentUser ? Number(oThis.currentUser.id) : 0;
   }
 
@@ -114,7 +113,7 @@ class GetVideoById extends ServiceBase {
    *
    * @sets oThis.tokenDetails
    *
-   * @return {Promise<void>}
+   * @returns {Promise<void>}
    * @private
    */
   async _setTokenDetails() {
@@ -133,7 +132,7 @@ class GetVideoById extends ServiceBase {
    *
    * @sets oThis.usersVideosMap, oThis.responseMetaData, oThis.videoDetails
    *
-   * @return {Promise<void>}
+   * @returns {Promise<void>}
    * @private
    */
   async _getVideoDetailsForDisplay() {
@@ -191,8 +190,6 @@ class GetVideoById extends ServiceBase {
     };
 
     oThis.videoDetails = [oThis.usersVideosMap.fullVideosMap[oThis.videoId]];
-
-    return responseHelper.successWithData({});
   }
 
   /**
