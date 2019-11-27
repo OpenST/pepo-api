@@ -210,7 +210,10 @@ class ReplyDetailsModel extends ModelBase {
 
     const dbRows = await oThis
       .select('*')
-      .where({ parent_id: videoIds })
+      .where({
+        parent_id: videoIds,
+        status: replyDetailConstants.invertedStatuses[replyDetailConstants.activeStatus]
+      })
       .fire();
 
     const response = {};
