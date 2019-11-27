@@ -3,9 +3,9 @@ const rootPrefix = '../../..',
   UserModel = require(rootPrefix + '/app/models/mysql/User'),
   ImageByIdCache = require(rootPrefix + '/lib/cacheManagement/multi/ImageByIds'),
   TokenUserDetailByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TokenUserByUserIds'),
+  UserBlockedListCache = require(rootPrefix + '/lib/cacheManagement/single/UserBlockedList'),
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
-  entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
   basicHelper = require(rootPrefix + '/helpers/basic'),
   paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination');
 
@@ -20,6 +20,7 @@ class UserAtMentionSearch extends ServiceBase {
    *
    * @param {object} params
    * @param {string} [params.q]
+   * @param {object} params.current_user
    * @param {Boolean} [params.getTopResults]
    *
    * @augments ServiceBase
@@ -34,6 +35,7 @@ class UserAtMentionSearch extends ServiceBase {
     oThis.query = params.q || null;
     oThis.paginationIdentifier = params[paginationConstants.paginationIdentifierKey] || null;
     oThis.isOnlyNameSearch = true;
+    oThis.currentUserId = +params.current_user.id;
 
     oThis.limit = oThis._defaultPageLimit();
 
@@ -57,11 +59,11 @@ class UserAtMentionSearch extends ServiceBase {
   async _asyncPerform() {
     const oThis = this;
 
-    //todo-replies: remove blocked users.?
-
     await oThis._validateAndSanitizeParams();
 
     await oThis._fetchUserIds();
+
+    await oThis._filterBlockedUsers();
 
     await oThis._fetchTokenUsers();
 
@@ -138,6 +140,32 @@ class UserAtMentionSearch extends ServiceBase {
 
     oThis.userIds = userData.userIds;
     oThis.userDetails = userData.userDetails;
+  }
+
+  /**
+   * Filter blocked users
+   * @returns {Promise<never>}
+   * @private
+   */
+  async _filterBlockedUsers() {
+    const oThis = this;
+
+    const cacheResp = await new UserBlockedListCache({ userId: oThis.currentUserId }).fetch();
+    if (cacheResp.isFailure()) {
+      return Promise.reject(cacheResp);
+    }
+
+    const blockedByUserInfo = cacheResp.data[oThis.currentUserId];
+
+    const activeUserIds = [];
+    for (let ind = 0; ind < oThis.userIds.length; ind++) {
+      if (blockedByUserInfo.hasBlocked[oThis.userIds[ind]] || blockedByUserInfo.blockedBy[oThis.userIds[ind]]) {
+        delete oThis.userDetails[oThis.userIds[ind]];
+      } else {
+        activeUserIds.push(oThis.userIds[ind]);
+      }
+    }
+    oThis.userIds = activeUserIds;
   }
 
   /**
