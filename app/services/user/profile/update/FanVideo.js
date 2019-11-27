@@ -152,8 +152,7 @@ class UpdateFanVideo extends UpdateProfileBase {
     const addVideoDescriptionRsp = await new AddVideoDescription({
       videoDescription: oThis.videoDescription,
       videoId: oThis.videoId,
-      isUserCreator: UserModelKlass.isUserApprovedCreator(oThis.userObj),
-      currentUserId: oThis.currentUserId
+      isUserCreator: UserModelKlass.isUserApprovedCreator(oThis.userObj)
     }).perform();
 
     if (addVideoDescriptionRsp.isFailure()) {

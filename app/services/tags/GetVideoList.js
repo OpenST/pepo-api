@@ -2,7 +2,6 @@ const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   GetUserVideos = require(rootPrefix + '/lib/GetUsersVideoList'),
   GetTokenService = require(rootPrefix + '/app/services/token/Get'),
-  UserBlockedListCache = require(rootPrefix + '/lib/cacheManagement/single/UserBlockedList'),
   VideoTagsByTagIdPaginationCache = require(rootPrefix + '/lib/cacheManagement/single/VideoTagsByTagIdPagination'),
   tagConstants = require(rootPrefix + '/lib/globalConstant/tag'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
@@ -50,7 +49,6 @@ class GetTagsVideoList extends ServiceBase {
     oThis.videoIds = [];
     oThis.videoDetails = [];
     oThis.tokenDetails = {};
-    oThis.blockedReplyEntityIdMap = {};
     oThis.usersVideosMap = {};
   }
 
@@ -71,8 +69,6 @@ class GetTagsVideoList extends ServiceBase {
 
     const promisesArray = [oThis._setTokenDetails(), oThis._getVideos()];
     await Promise.all(promisesArray);
-
-    await oThis._filterRepliesByBlockedUser();
 
     oThis._setUserVideoList();
 
@@ -214,7 +210,8 @@ class GetTagsVideoList extends ServiceBase {
     const userVideosObj = new GetUserVideos({
       currentUserId: oThis.currentUser.id,
       videoIds: oThis.videoIds,
-      isAdmin: false
+      isAdmin: false,
+      filterUserBlockedReplies: 1
     });
 
     const response = await userVideosObj.perform();
@@ -239,35 +236,8 @@ class GetTagsVideoList extends ServiceBase {
 
     for (let index = 0; index < oThis.videoIds.length; index++) {
       const videoId = oThis.videoIds[index];
-      if (oThis.usersVideosMap.fullVideosMap[videoId] && !oThis.blockedReplyEntityIdMap[videoId]) {
+      if (oThis.usersVideosMap.fullVideosMap[videoId]) {
         oThis.videoDetails.push(oThis.usersVideosMap.fullVideosMap[videoId]);
-      }
-    }
-  }
-
-  /**
-   * Filter replies if user is blocked or been blocked by
-   * @returns {Promise<void>}
-   * @private
-   */
-  async _filterRepliesByBlockedUser() {
-    const oThis = this;
-
-    let blockedByUserData = {};
-    const cacheResp = await new UserBlockedListCache({ userId: oThis.currentUser.id }).fetch();
-    if (cacheResp.isSuccess()) {
-      blockedByUserData = cacheResp.data[oThis.currentUser.id];
-    }
-
-    if (Object.prototype.hasOwnProperty.call(oThis.usersVideosMap, 'replyDetailsMap')) {
-      for (const replyDetailId in oThis.usersVideosMap.replyDetailsMap) {
-        const replyDetail = oThis.usersVideosMap.replyDetailsMap[replyDetailId],
-          replyCreatorUserId = replyDetail.creatorUserId;
-
-        if (blockedByUserData.hasBlocked[replyCreatorUserId] || blockedByUserData.blockedBy[replyCreatorUserId]) {
-          delete oThis.usersVideosMap.replyDetailsMap[replyDetailId];
-          oThis.blockedReplyEntityIdMap[replyDetail.entityId] = true;
-        }
       }
     }
   }

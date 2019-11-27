@@ -283,8 +283,7 @@ class InitiateReply extends ServiceBase {
     const replyDescriptionResp = await new AddReplyDescription({
       videoDescription: oThis.videoDescription,
       videoId: oThis.videoId,
-      replyDetailId: oThis.replyDetailId,
-      currentUserId: oThis.currentUser.id
+      replyDetailId: oThis.replyDetailId
     }).perform();
 
     if (replyDescriptionResp.isFailure()) {
