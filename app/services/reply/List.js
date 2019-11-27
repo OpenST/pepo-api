@@ -93,6 +93,8 @@ class GetReplyList extends ServiceBase {
       oThis.paginationTimestamp = null;
     }
 
+    console.log('----oThis.paginationTimestamp----', oThis.paginationTimestamp);
+
     // Validate limit.
     return oThis._validatePageSize();
   }
@@ -168,7 +170,12 @@ class GetReplyList extends ServiceBase {
       const rdId = oThis.replyDetailIds[ind];
       const rdObj = oThis.userRepliesMap.replyDetailsMap[rdId];
       oThis.videoReplies.push(oThis.userRepliesMap.fullVideosMap[rdObj.entityId]);
+      if (ind === oThis.replyDetailIds.length - 1) {
+        oThis.nextPaginationTimestamp = rdObj.createdAt;
+      }
     }
+
+    console.log('----oThis.nextPaginationTimestamp---', oThis.nextPaginationTimestamp);
   }
 
   /**
@@ -193,6 +200,8 @@ class GetReplyList extends ServiceBase {
     oThis.responseMetaData = {
       [paginationConstants.nextPagePayloadKey]: nextPagePayloadKey
     };
+
+    console.log('----oThis.responseMetaData ----', oThis.responseMetaData);
   }
 
   /**
