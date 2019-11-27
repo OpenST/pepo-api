@@ -1,6 +1,5 @@
 const rootPrefix = '../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
-  logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   databaseConstants = require(rootPrefix + '/lib/globalConstant/database'),
   replyDetailConstants = require(rootPrefix + '/lib/globalConstant/replyDetail');
 
