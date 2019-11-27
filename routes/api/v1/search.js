@@ -73,7 +73,7 @@ router.get('/users', sanitizer.sanitizeDynamicUrlParams, function(req, res, next
 
 /* Search user mention */
 router.get('/users-mention', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
-  req.decodedParams.apiName = apiName.getTags;
+  req.decodedParams.apiName = apiName.atMentionSearch;
 
   const dataFormatterFunc = async function(serviceResponse) {
     const wrapperFormatterRsp = await new FormatterComposer({
