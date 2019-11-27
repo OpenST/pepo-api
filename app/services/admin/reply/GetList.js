@@ -291,7 +291,7 @@ class GetUserReplyList extends ServiceBase {
       [adminEntityType.videoDescriptionsMap]: oThis.usersVideosMap.videoDescriptionMap || {},
       [adminEntityType.currentUserUserContributionsMap]: oThis.usersVideosMap.currentUserUserContributionsMap || {},
       [adminEntityType.currentUserVideoContributionsMap]: oThis.usersVideosMap.currentUserVideoContributionsMap || {},
-      [adminEntityType.pricePointsMap]: oThis.usersVideosMap.pricePointsMap || {},
+      [adminEntityType.pricePointsMap]: oThis.usersVideosMap.pricePointsMap,
       [adminEntityType.replyDetailsMap]: oThis.replyDetailsMap || {},
       tokenUsersByUserIdMap: oThis.usersVideosMap.tokenUsersByUserIdMap || {},
       tokenDetails: oThis.tokenDetails,
