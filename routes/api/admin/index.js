@@ -180,8 +180,6 @@ router.get('/video-history/:profile_user_id', sanitizer.sanitizeDynamicUrlParams
         [adminEntityType.videosMap]: adminResponseEntityKey.videos,
         [adminEntityType.videoDetailsMap]: adminResponseEntityKey.videoDetails,
         [adminEntityType.videoDescriptionsMap]: adminResponseEntityKey.videoDescriptions,
-        [adminEntityType.currentUserUserContributionsMap]: adminResponseEntityKey.currentUserUserContributions,
-        [adminEntityType.currentUserVideoContributionsMap]: adminResponseEntityKey.currentUserVideoContributions,
         [adminEntityType.pricePointsMap]: adminResponseEntityKey.pricePoints,
         [adminEntityType.token]: adminResponseEntityKey.token,
         [adminEntityType.userVideoListMeta]: adminResponseEntityKey.meta
@@ -217,8 +215,6 @@ router.get('/reply-history/:profile_user_id', sanitizer.sanitizeDynamicUrlParams
         [adminEntityType.videosMap]: adminResponseEntityKey.videos,
         [adminEntityType.replyDetailsMap]: adminResponseEntityKey.replyDetails,
         [adminEntityType.videoDescriptionsMap]: adminResponseEntityKey.videoDescriptions,
-        [adminEntityType.currentUserUserContributionsMap]: adminResponseEntityKey.currentUserUserContributions,
-        [adminEntityType.currentUserVideoContributionsMap]: adminResponseEntityKey.currentUserVideoContributions,
         [adminEntityType.pricePointsMap]: adminResponseEntityKey.pricePoints,
         [adminEntityType.token]: adminResponseEntityKey.token,
         [adminEntityType.userVideoListMeta]: adminResponseEntityKey.meta
@@ -252,9 +248,6 @@ router.get('/videos/:video_id/replies', sanitizer.sanitizeDynamicUrlParams, func
         [adminEntityType.imagesMap]: adminResponseEntityKey.images,
         [adminEntityType.videosMap]: adminResponseEntityKey.videos,
         [adminEntityType.replyDetailsMap]: adminResponseEntityKey.replyDetails,
-        [adminEntityType.currentUserUserContributionsMap]: adminResponseEntityKey.currentUserUserContributions,
-        [adminEntityType.currentUserVideoContributionsMap]: adminResponseEntityKey.currentUserVideoContributions,
-        [adminEntityType.currentUserVideoRelationsMap]: adminResponseEntityKey.currentUserVideoRelations,
         [adminEntityType.pricePointsMap]: adminResponseEntityKey.pricePoints,
         [adminEntityType.token]: adminResponseEntityKey.token,
         [adminEntityType.userVideoListMeta]: adminResponseEntityKey.meta
