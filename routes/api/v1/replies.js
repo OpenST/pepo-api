@@ -38,15 +38,14 @@ router.post('/validate-upload', cookieHelper.validateUserLoginRequired, function
   Promise.resolve(routeHelper.perform(req, res, next, '/reply/Validate', 'r_a_v1_r_2', null, null));
 });
 
-//todo-replies: is reply_id -> reply_detail_id
 // Get any particular reply given its reply detail id.
-router.get('/:reply_id', sanitizer.sanitizeDynamicUrlParams, cookieHelper.validateUserLoginRequired, function(
+router.get('/:reply_detail_id', sanitizer.sanitizeDynamicUrlParams, cookieHelper.validateUserLoginRequired, function(
   req,
   res,
   next
 ) {
   req.decodedParams.apiName = apiName.getReply;
-  req.decodedParams.reply_id = req.params.reply_id;
+  req.decodedParams.reply_detail_id = req.params.reply_detail_id;
 
   const dataFormatterFunc = async function(serviceResponse) {
     const wrapperFormatterRsp = await new FormatterComposer({
