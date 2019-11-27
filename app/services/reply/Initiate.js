@@ -2,7 +2,7 @@ const rootPrefix = '../../..',
   UrlModel = require(rootPrefix + '/app/models/mysql/Url'),
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   EditReplyLink = require(rootPrefix + '/lib/editLink/Reply'),
-  CommonValidator = require(rootPrefix + '/lib/validators/Common'),
+  CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   EditDescriptionLib = require(rootPrefix + '/lib/editDescription/Reply'),
   AddReplyDescription = require(rootPrefix + '/lib/addDescription/Reply'),
   ValidateReplyService = require(rootPrefix + '/app/services/reply/Validate'),
@@ -157,7 +157,7 @@ class InitiateReply extends ServiceBase {
       return Promise.reject(validateReplyResp);
     }
 
-    if (!CommonValidator.validateGenericUrl(oThis.link)) {
+    if (!CommonValidators.validateGenericUrl(oThis.link)) {
       oThis.link = null;
     }
 
@@ -320,10 +320,10 @@ class InitiateReply extends ServiceBase {
       parentVideoDetails = videoDetailsByVideoIdsCacheResp.data[oThis.parentId];
     }
 
-    if (CommonValidator.validateNonEmptyObject(parentVideoDetails)) {
+    if (CommonValidators.validateNonEmptyObject(parentVideoDetails)) {
       let isReplyFree = 0;
       if (
-        CommonValidator.validateZeroWeiValue(parentVideoDetails.perReplyAmountInWei) ||
+        CommonValidators.validateZeroWeiValue(parentVideoDetails.perReplyAmountInWei) ||
         parentVideoDetails.creatorUserId === oThis.currentUser.id
       ) {
         isReplyFree = 1;
