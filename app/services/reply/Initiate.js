@@ -337,8 +337,8 @@ class InitiateReply extends ServiceBase {
 
         const videoCreatorsMap = cacheResp.data;
         // If map is not empty then look for reply creator in that list
-        if (!CommonValidators.validateNonEmptyObject(videoCreatorsMap[parentVideoDetails.videoId])) {
-          const replyCreators = videoCreatorsMap[parentVideoDetails.videoId];
+        const replyCreators = videoCreatorsMap[parentVideoDetails.videoId];
+        if (CommonValidators.validateNonEmptyObject(replyCreators)) {
           // If reply creators is present and creator is already in it, then user can reply free
           isReplyFree = replyCreators[oThis.currentUser.id] || 0;
         }
