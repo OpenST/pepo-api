@@ -69,8 +69,6 @@ class GetReplyList extends ServiceBase {
 
     oThis._addResponseMetaData();
 
-    // TODO - replies - show will block relation affect the response. Please discuss this with Junisha.
-
     return oThis._prepareResponse();
   }
 
