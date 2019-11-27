@@ -52,6 +52,8 @@ class TransactionWebhookBase extends ServiceBase {
 
     oThis.ostTransaction = params.transaction;
 
+    console.log('====oThis.ostTransaction is : ', params);
+
     oThis.ostTxId = oThis.ostTransaction.id;
     oThis.ostTransactionStatus = oThis.ostTransaction.status;
     oThis.ostTransactionMinedTimestamp = oThis.ostTransaction.block_timestamp || null;
