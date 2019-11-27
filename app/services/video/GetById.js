@@ -217,6 +217,7 @@ class GetVideoById extends ServiceBase {
       [entityType.videoDescriptionsMap]: oThis.usersVideosMap.videoDescriptionMap,
       [entityType.currentUserUserContributionsMap]: oThis.usersVideosMap.currentUserUserContributionsMap,
       [entityType.currentUserVideoContributionsMap]: oThis.usersVideosMap.currentUserVideoContributionsMap,
+      [entityType.currentUserVideoRelationsMap]: oThis.usersVideosMap.currentUserVideoRelationsMap || {},
       [entityType.userProfileAllowedActions]: oThis.usersVideosMap.userProfileAllowedActions,
       tokenUsersByUserIdMap: oThis.usersVideosMap.tokenUsersByUserIdMap,
       [entityType.pricePointsMap]: oThis.usersVideosMap.pricePointsMap,

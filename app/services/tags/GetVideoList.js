@@ -3,7 +3,6 @@ const rootPrefix = '../../..',
   GetUserVideos = require(rootPrefix + '/lib/GetUsersVideoList'),
   GetTokenService = require(rootPrefix + '/app/services/token/Get'),
   VideoTagsByTagIdPaginationCache = require(rootPrefix + '/lib/cacheManagement/single/VideoTagsByTagIdPagination'),
-  UserBlockedListCache = require(rootPrefix + '/lib/cacheManagement/single/UserBlockedList'),
   tagConstants = require(rootPrefix + '/lib/globalConstant/tag'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   videoTagConstants = require(rootPrefix + '/lib/globalConstant/videoTag'),
@@ -38,6 +37,8 @@ class GetTagsVideoList extends ServiceBase {
     oThis.tagId = params.tag_id;
     oThis.paginationIdentifier = params[paginationConstants.paginationIdentifierKey] || null;
     oThis.supportedEntities = params.supported_entities || [tagConstants.videosSupportedEntity];
+    // NOTE: Do not assume that oThis.supportedEntities is a string. It comes as a string only from POSTMAN.
+    // So, no need to parse this parameter.
 
     oThis.limit = oThis._defaultPageLimit();
 
@@ -70,8 +71,6 @@ class GetTagsVideoList extends ServiceBase {
     await Promise.all(promisesArray);
 
     oThis._setUserVideoList();
-
-    await oThis._filterRepliesByBlockedUser();
 
     return oThis._prepareResponse();
   }
@@ -208,14 +207,11 @@ class GetTagsVideoList extends ServiceBase {
   async _getVideos() {
     const oThis = this;
 
-    if (oThis.videoIds.length <= 0) {
-      return responseHelper.successWithData({});
-    }
-
     const userVideosObj = new GetUserVideos({
       currentUserId: oThis.currentUser.id,
       videoIds: oThis.videoIds,
-      isAdmin: false
+      isAdmin: false,
+      filterUserBlockedReplies: 1
     });
 
     const response = await userVideosObj.perform();
@@ -247,32 +243,6 @@ class GetTagsVideoList extends ServiceBase {
   }
 
   /**
-   * Filter replies if user is blocked or been blocked by
-   * @returns {Promise<void>}
-   * @private
-   */
-  async _filterRepliesByBlockedUser() {
-    const oThis = this;
-
-    let blockedByUserData = {};
-    const cacheResp = await new UserBlockedListCache({ userId: oThis.currentUser.id }).fetch();
-    if (cacheResp.isSuccess()) {
-      blockedByUserData = cacheResp.data[oThis.currentUser.id];
-    }
-
-    if (oThis.usersVideosMap.hasOwnProperty('replyDetailsMap')) {
-      for (const replyDetailId in oThis.usersVideosMap.replyDetailsMap) {
-        const replyDetail = oThis.usersVideosMap.replyDetailsMap[replyDetailId],
-          replyCreatorUserId = replyDetail.creatorUserId;
-
-        if (blockedByUserData.hasBlocked[replyCreatorUserId] || blockedByUserData.blockedBy[replyCreatorUserId]) {
-          delete oThis.usersVideosMap.replyDetailsMap[replyDetailId];
-        }
-      }
-    }
-  }
-
-  /**
    * Prepare final response.
    *
    * @returns {*|result}
@@ -290,7 +260,7 @@ class GetTagsVideoList extends ServiceBase {
       [entityTypeConstants.currentUserVideoContributionsMap]:
         oThis.usersVideosMap.currentUserVideoContributionsMap || {},
       [entityTypeConstants.userProfileAllowedActions]: oThis.usersVideosMap.userProfileAllowedActions || {},
-      [entityTypeConstants.pricePointsMap]: oThis.usersVideosMap.pricePointsMap || {},
+      [entityTypeConstants.pricePointsMap]: oThis.usersVideosMap.pricePointsMap,
       [entityTypeConstants.replyDetailsMap]: oThis.usersVideosMap.replyDetailsMap || {},
       usersByIdMap: oThis.usersVideosMap.usersByIdMap || {},
       userStat: oThis.usersVideosMap.userStat || {},
@@ -299,6 +269,7 @@ class GetTagsVideoList extends ServiceBase {
       imageMap: oThis.usersVideosMap.imageMap || {},
       videoMap: oThis.usersVideosMap.videoMap || {},
       tokenUsersByUserIdMap: oThis.usersVideosMap.tokenUsersByUserIdMap || {},
+      [entityTypeConstants.currentUserVideoRelationsMap]: oThis.usersVideosMap.currentUserVideoRelationsMap || {},
       tokenDetails: oThis.tokenDetails,
       meta: oThis.responseMetaData
     });

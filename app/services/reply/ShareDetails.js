@@ -149,8 +149,12 @@ class ShareDetails extends ServiceBase {
 
     oThis.creatorName = userObj.name;
 
-    const promiseArray = [oThis._fetchTwitterHandle(userObj.id), oThis._fetchPosterImageUrl(videoId)];
-    await Promise.all(promiseArray);
+    const promisesArray = [oThis._fetchTwitterHandle(userObj.id)];
+
+    if (replyDetails.entityKind === replyDetailConstants.videoEntityKind) {
+      promisesArray.push(oThis._fetchPosterImageUrl(videoId));
+    }
+    await Promise.all(promisesArray);
   }
 
   /**
@@ -167,7 +171,6 @@ class ShareDetails extends ServiceBase {
     const twitterUserByUserIdsCacheResponse = await new TwitterUserByUserIdsCache({
       userIds: [userId]
     }).fetch();
-
     if (twitterUserByUserIdsCacheResponse.isFailure()) {
       return Promise.reject(twitterUserByUserIdsCacheResponse);
     }
@@ -193,20 +196,20 @@ class ShareDetails extends ServiceBase {
    *
    * @sets oThis.posterImageUrl
    *
-   * @returns {Promise<never>}
+   * @returns {Promise<*>}
    * @private
    */
   async _fetchPosterImageUrl(videoId) {
     const oThis = this;
 
     if (!videoId) {
-      return Promise.resolve();
+      return;
     }
 
     await oThis._fetchPosterImageId(videoId);
 
     if (!oThis.posterImageId) {
-      return Promise.resolve();
+      return;
     }
     const cacheRsp = await new ImageByIdCache({ ids: [oThis.posterImageId] }).fetch();
 

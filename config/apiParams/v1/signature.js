@@ -37,15 +37,16 @@ const v1Signature = {
   [apiName.replyList]: {
     mandatory: [
       {
-        parameter: 'current_user',
-        validatorMethods: ['validateNonEmptyObject']
-      },
-      {
         parameter: 'video_id',
         validatorMethods: ['validateInteger']
       }
     ],
-    optional: []
+    optional: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      }
+    ]
   },
   [apiName.getReply]: {
     mandatory: [
@@ -54,7 +55,7 @@ const v1Signature = {
         validatorMethods: ['validateNonEmptyObject']
       },
       {
-        parameter: 'reply_id',
+        parameter: 'reply_detail_id',
         validatorMethods: ['validateInteger']
       }
     ],
@@ -340,7 +341,7 @@ const v1Signature = {
       },
       {
         parameter: 'per_reply_amount_in_wei',
-        validatorMethods: ['validateWeiValue']
+        validatorMethods: ['validateIntegerWeiValue']
       },
       {
         parameter: 'image_size',
@@ -436,7 +437,7 @@ const v1Signature = {
       },
       {
         parameter: 'per_reply_amount_in_wei',
-        validatorMethods: ['validateWeiValue']
+        validatorMethods: ['validateIntegerWeiValue']
       }
     ]
   },
@@ -743,7 +744,12 @@ const v1Signature = {
     ]
   },
   [apiName.atMentionSearch]: {
-    mandatory: [],
+    mandatory: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      }
+    ],
     optional: [
       {
         parameter: 'q',

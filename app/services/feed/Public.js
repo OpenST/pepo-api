@@ -159,6 +159,7 @@ class PublicVideoFeed extends FeedBase {
       videoDescriptionsMap: oThis.profileResponse.videoDescriptionMap,
       currentUserUserContributionsMap: oThis.profileResponse.currentUserUserContributionsMap,
       currentUserVideoContributionsMap: oThis.profileResponse.currentUserVideoContributionsMap,
+      currentUserVideoRelationsMap: oThis.profileResponse.currentUserVideoRelationsMap,
       pricePointsMap: oThis.profileResponse.pricePointsMap,
       tokenDetails: oThis.tokenDetails,
       meta: responseMetaData

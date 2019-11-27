@@ -35,6 +35,7 @@ router.get('/:video_id', sanitizer.sanitizeDynamicUrlParams, cookieHelper.valida
         [entityType.videoDetailsMap]: responseEntityKey.videoDetails,
         [entityType.currentUserUserContributionsMap]: responseEntityKey.currentUserUserContributions,
         [entityType.currentUserVideoContributionsMap]: responseEntityKey.currentUserVideoContributions,
+        [entityType.currentUserVideoRelationsMap]: responseEntityKey.currentUserVideoRelations,
         [entityType.pricePointsMap]: responseEntityKey.pricePoints,
         [entityType.token]: responseEntityKey.token,
         [entityType.userVideoListMeta]: responseEntityKey.meta
@@ -69,7 +70,7 @@ router.get('/:video_id/replies', sanitizer.sanitizeDynamicUrlParams, function(re
         [entityType.replyDetailsMap]: responseEntityKey.replyDetails,
         [entityType.currentUserUserContributionsMap]: responseEntityKey.currentUserUserContributions,
         [entityType.currentUserVideoContributionsMap]: responseEntityKey.currentUserVideoContributions,
-        [entityType.currentUserVideoRelationsMap]: responseEntityKey.currentUserVideoRelations,
+        [entityType.currentUserReplyDetailsRelationsMap]: responseEntityKey.currentUserReplyDetailsRelations,
         [entityType.pricePointsMap]: responseEntityKey.pricePoints,
         [entityType.token]: responseEntityKey.token,
         [entityType.userVideoListMeta]: responseEntityKey.meta

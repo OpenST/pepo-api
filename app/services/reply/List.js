@@ -58,16 +58,16 @@ class GetReplyList extends ServiceBase {
    * @private
    */
   async _asyncPerform() {
-    const oThis = this;
+    const oThis = this,
+      promisesArray = [];
 
     await oThis._validateAndSanitizeParams();
 
     await oThis._fetchReplyDetailIds();
 
-    const promisesArray = [oThis._setTokenDetails()];
-    if (oThis.replyDetailIds.length > 0) {
-      promisesArray.push(oThis._getReplyVideos());
-    }
+    promisesArray.push(oThis._setTokenDetails());
+    promisesArray.push(oThis._getReplyVideos());
+
     await Promise.all(promisesArray);
 
     oThis._addResponseMetaData();
@@ -218,9 +218,10 @@ class GetReplyList extends ServiceBase {
       [entityTypeConstants.currentUserUserContributionsMap]: oThis.userRepliesMap.currentUserUserContributionsMap || {},
       [entityTypeConstants.currentUserVideoContributionsMap]:
         oThis.userRepliesMap.currentUserVideoContributionsMap || {},
-      [entityTypeConstants.currentUserVideoRelationsMap]: oThis.userRepliesMap.currentUserVideoRelationsMap || {},
+      [entityTypeConstants.currentUserReplyDetailsRelationsMap]:
+        oThis.userRepliesMap.currentUserReplyDetailsRelationsMap || {},
       [entityTypeConstants.userProfileAllowedActions]: oThis.userRepliesMap.userProfileAllowedActions || {},
-      [entityTypeConstants.pricePointsMap]: oThis.userRepliesMap.pricePointsMap || {},
+      [entityTypeConstants.pricePointsMap]: oThis.userRepliesMap.pricePointsMap,
       usersByIdMap: oThis.userRepliesMap.usersByIdMap || {},
       userStat: oThis.userRepliesMap.userStat || {},
       tags: oThis.userRepliesMap.tags || {},

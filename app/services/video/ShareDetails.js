@@ -106,7 +106,9 @@ class ShareDetails extends ServiceBase {
   /**
    * Fetch poster image url.
    *
-   * @returns {Promise<never>}
+   * @sets oThis.posterImageUrl
+   *
+   * @returns {Promise<*>}
    * @private
    */
   async _fetchPosterImageUrl() {
@@ -116,7 +118,6 @@ class ShareDetails extends ServiceBase {
       return;
     }
     const cacheRsp = await new ImageByIdCache({ ids: [oThis.posterImageId] }).fetch();
-
     if (cacheRsp.isFailure()) {
       return Promise.reject(cacheRsp);
     }

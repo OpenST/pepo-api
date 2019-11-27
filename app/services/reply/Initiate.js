@@ -2,7 +2,7 @@ const rootPrefix = '../../..',
   UrlModel = require(rootPrefix + '/app/models/mysql/Url'),
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   EditReplyLink = require(rootPrefix + '/lib/editLink/Reply'),
-  CommonValidator = require(rootPrefix + '/lib/validators/Common'),
+  CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   EditDescriptionLib = require(rootPrefix + '/lib/editDescription/Reply'),
   AddReplyDescription = require(rootPrefix + '/lib/addDescription/Reply'),
   ValidateReplyService = require(rootPrefix + '/app/services/reply/Validate'),
@@ -15,6 +15,7 @@ const rootPrefix = '../../..',
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   videoConstants = require(rootPrefix + '/lib/globalConstant/video'),
   entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
+  VideoDistinctReplyCreatorsCache = require(rootPrefix + '/lib/cacheManagement/multi/VideoDistinctReplyCreators'),
   replyDetailConstants = require(rootPrefix + '/lib/globalConstant/replyDetail');
 
 /**
@@ -50,7 +51,6 @@ class InitiateReply extends ServiceBase {
     super();
 
     const oThis = this;
-    //todo-replies: video of reply_detail_id can be updated?
 
     oThis.replyDetailId = params.reply_detail_id || null;
 
@@ -156,7 +156,7 @@ class InitiateReply extends ServiceBase {
       return Promise.reject(validateReplyResp);
     }
 
-    if (!CommonValidator.validateGenericUrl(oThis.link)) {
+    if (!CommonValidators.validateGenericUrl(oThis.link)) {
       oThis.link = null;
     }
 
@@ -282,8 +282,7 @@ class InitiateReply extends ServiceBase {
     const replyDescriptionResp = await new AddReplyDescription({
       videoDescription: oThis.videoDescription,
       videoId: oThis.videoId,
-      replyDetailId: oThis.replyDetailId,
-      currentUserId: oThis.currentUser.id
+      replyDetailId: oThis.replyDetailId
     }).perform();
 
     if (replyDescriptionResp.isFailure()) {
@@ -319,19 +318,36 @@ class InitiateReply extends ServiceBase {
       parentVideoDetails = videoDetailsByVideoIdsCacheResp.data[oThis.parentId];
     }
 
-    if (CommonValidator.validateNonEmptyObject(parentVideoDetails)) {
-      if (
-        CommonValidator.validateZeroWeiValue(parentVideoDetails.perReplyAmountInWei) ||
-        parentVideoDetails.creatorUserId === oThis.currentUser.id
-      ) {
-        await new ReplyVideoPostTransaction({
-          currentUserId: oThis.currentUser.id,
-          replyDetailId: oThis.replyDetailId,
-          videoId: oThis.parentId,
-          pepoAmountInWei: 0,
-          mentionedUserIds: oThis.mentionedUserIds
-        }).perform();
+    let isReplyFree = 0;
+    if (
+      CommonValidators.validateZeroWeiValue(parentVideoDetails.perReplyAmountInWei) ||
+      parentVideoDetails.creatorUserId === oThis.currentUser.id
+    ) {
+      isReplyFree = 1;
+    } else {
+      // Look if creator has already replied on this post
+      const cacheResp = await new VideoDistinctReplyCreatorsCache({ videoIds: [parentVideoDetails.videoId] }).fetch();
+
+      if (cacheResp.isFailure()) {
+        return Promise.reject(cacheResp);
       }
+
+      const videoCreatorsMap = cacheResp.data;
+      // If map is not empty then look for reply creator in that list
+      const replyCreators = videoCreatorsMap[parentVideoDetails.videoId];
+      if (CommonValidators.validateNonEmptyObject(replyCreators)) {
+        // If reply creators is present and creator is already in it, then user can reply free
+        isReplyFree = replyCreators[oThis.currentUser.id] || 0;
+      }
+    }
+    if (isReplyFree) {
+      await new ReplyVideoPostTransaction({
+        currentUserId: oThis.currentUser.id,
+        replyDetailId: oThis.replyDetailId,
+        videoId: oThis.parentId,
+        pepoAmountInWei: 0,
+        mentionedUserIds: oThis.mentionedUserIds
+      }).perform();
     }
   }
 }

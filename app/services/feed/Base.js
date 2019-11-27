@@ -163,10 +163,6 @@ class FeedBase extends ServiceBase {
   async _fetchProfileDetails() {
     const oThis = this;
 
-    if (oThis.userIds.length === 0) {
-      return responseHelper.successWithData({});
-    }
-
     const videosLib = new FetchVideosLib({
       userIds: oThis.userIds,
       currentUserId: oThis.currentUserId,

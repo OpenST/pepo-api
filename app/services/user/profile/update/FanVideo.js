@@ -14,6 +14,7 @@ const rootPrefix = '../../../../..',
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   feedsConstants = require(rootPrefix + '/lib/globalConstant/feed'),
   videoConstants = require(rootPrefix + '/lib/globalConstant/video'),
+  ValidateVideoService = require(rootPrefix + '/app/services/video/Validate'),
   notificationJobEnqueue = require(rootPrefix + '/lib/rabbitMqEnqueue/notification'),
   notificationJobConstants = require(rootPrefix + '/lib/globalConstant/notificationJob');
 
@@ -82,6 +83,17 @@ class UpdateFanVideo extends UpdateProfileBase {
   async _validateParams() {
     const oThis = this;
 
+    const validateVideoResp = await new ValidateVideoService({
+      currentUser: oThis.current_user,
+      videoDescription: oThis.video_description,
+      perReplyAmountInWei: oThis.per_reply_amount_in_wei || 0,
+      link: oThis.link
+    }).perform();
+
+    if (validateVideoResp.isFailure()) {
+      return Promise.reject(validateVideoResp);
+    }
+
     // If url is not valid, consider link as null.
     if (!CommonValidator.validateGenericUrl(oThis.link)) {
       oThis.link = null;
@@ -140,8 +152,7 @@ class UpdateFanVideo extends UpdateProfileBase {
     const addVideoDescriptionRsp = await new AddVideoDescription({
       videoDescription: oThis.videoDescription,
       videoId: oThis.videoId,
-      isUserCreator: UserModelKlass.isUserApprovedCreator(oThis.userObj),
-      currentUserId: oThis.currentUserId
+      isUserCreator: UserModelKlass.isUserApprovedCreator(oThis.userObj)
     }).perform();
 
     if (addVideoDescriptionRsp.isFailure()) {

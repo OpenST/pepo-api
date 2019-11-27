@@ -1,6 +1,5 @@
 const rootPrefix = '../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
-  logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   databaseConstants = require(rootPrefix + '/lib/globalConstant/database'),
   replyDetailConstants = require(rootPrefix + '/lib/globalConstant/replyDetail');
 
@@ -106,7 +105,7 @@ class ReplyDetailsModel extends ModelBase {
    * @param {number} params.videoId: video id
    * @param {number} params.paginationTimestamp: pagination timestamp
    *
-   * @returns Promise{object}
+   * @returns Promise{<array>}
    */
   async fetchByVideoId(params) {
     const oThis = this;
@@ -116,7 +115,7 @@ class ReplyDetailsModel extends ModelBase {
       paginationTimestamp = params.paginationTimestamp;
 
     const queryObject = oThis
-      .select('*')
+      .select('id')
       .where({
         parent_id: videoId,
         entity_kind: replyDetailConstants.invertedEntityKinds[replyDetailConstants.videoEntityKind],
@@ -131,16 +130,13 @@ class ReplyDetailsModel extends ModelBase {
 
     const dbRows = await queryObject.fire();
 
-    const replyDetails = {};
     const replyIds = [];
 
     for (let index = 0; index < dbRows.length; index++) {
-      const formatDbRow = oThis.formatDbData(dbRows[index]);
-      replyDetails[formatDbRow.id] = formatDbRow;
-      replyIds.push(formatDbRow.id);
+      replyIds.push(dbRows[index].id);
     }
 
-    return { replyDetails: replyDetails, replyIds: replyIds };
+    return replyIds;
   }
 
   /**
@@ -193,6 +189,35 @@ class ReplyDetailsModel extends ModelBase {
     for (let index = 0; index < dbRows.length; index++) {
       const formatDbRow = oThis.formatDbData(dbRows[index]);
       response[formatDbRow.id] = formatDbRow;
+    }
+
+    return response;
+  }
+
+  /**
+   * Fetch distinct reply creators of parent
+   *
+   * @param {array} replyDetailIds
+   *
+   * @returns {Promise<void>}
+   */
+  async fetchDistinctReplyCreatorsByParent(videoIds) {
+    const oThis = this;
+
+    const dbRows = await oThis
+      .select('*')
+      .where({
+        parent_id: videoIds,
+        status: replyDetailConstants.invertedStatuses[replyDetailConstants.activeStatus]
+      })
+      .fire();
+
+    const response = {};
+
+    for (let index = 0; index < dbRows.length; index++) {
+      const formatDbRow = oThis.formatDbData(dbRows[index]);
+      response[formatDbRow.parentId] = response[formatDbRow.parentId] || {};
+      response[formatDbRow.parentId][formatDbRow.creatorUserId] = 1;
     }
 
     return response;
@@ -277,19 +302,6 @@ class ReplyDetailsModel extends ModelBase {
   async updateByReplyDetailId(params) {
     const oThis = this;
 
-    //todo-replies: Note- Do not set cache with object for non primary keys but instead set ids only.
-    // Here We have to make a get call everytime due to this
-    const ReplyDetailsByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/ReplyDetailsByIds');
-
-    const replyDetailCacheResp = await new ReplyDetailsByIdsCache({ ids: [params.replyDetailId] }).fetch();
-    if (replyDetailCacheResp.isFailure()) {
-      logger.error('Error while fetching reply detail data.');
-
-      return Promise.reject(replyDetailCacheResp);
-    }
-
-    const replyDetail = replyDetailCacheResp.data[params.replyDetailId];
-
     const totalTransactions = 1;
 
     const updateResponse = await oThis
@@ -300,12 +312,11 @@ class ReplyDetailsModel extends ModelBase {
         totalTransactions,
         params.totalContributedBy
       ])
-      .where({ id: replyDetail.id })
+      .where({ id: params.replyDetailId })
       .fire();
 
     const flushCacheParams = {
-      parentVideoIds: [replyDetail.parentId],
-      replyDetailId: replyDetail.id
+      replyDetailId: params.replyDetailId
     };
 
     await ReplyDetailsModel.flushCache(flushCacheParams);
@@ -364,7 +375,6 @@ class ReplyDetailsModel extends ModelBase {
    * Flush cache.
    *
    * @param {object} params
-   * @param {number} [params.userId]
    * @param {array<number>} [params.parentVideoIds]
    * @param {number} [params.replyDetailId]
    * @param {array<number>} [params.replyDetailIds]
@@ -375,12 +385,6 @@ class ReplyDetailsModel extends ModelBase {
    */
   static async flushCache(params) {
     const promisesArray = [];
-
-    if (params.userId) {
-      const ReplyDetailsByUserIdPaginationCache = require(rootPrefix +
-        '/lib/cacheManagement/single/ReplyDetailsByUserIdPagination');
-      promisesArray.push(new ReplyDetailsByUserIdPaginationCache({ userId: params.userId }).clear());
-    }
 
     if (params.parentVideoIds) {
       const ReplyDetailsByParentVideoPaginationCache = require(rootPrefix +

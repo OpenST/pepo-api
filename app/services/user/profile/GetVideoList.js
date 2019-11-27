@@ -60,7 +60,8 @@ class GetVideoList extends ServiceBase {
    * @private
    */
   async _asyncPerform() {
-    const oThis = this;
+    const oThis = this,
+      promisesArray = [];
 
     await oThis._validateAndSanitizeParams();
 
@@ -77,7 +78,6 @@ class GetVideoList extends ServiceBase {
 
     oThis._addResponseMetaData();
 
-    const promisesArray = [];
     promisesArray.push(oThis._setTokenDetails());
     promisesArray.push(oThis._getVideos());
     await Promise.all(promisesArray);
@@ -121,7 +121,6 @@ class GetVideoList extends ServiceBase {
   async _fetchVideoIds() {
     const oThis = this;
 
-    // Todo: do we need to check blocked user list here???
     // If not an admin, only then perform further validations.
     if (!oThis.isAdmin) {
       // If user's profile(not self) is not approved, videos would not be shown.
@@ -221,9 +220,6 @@ class GetVideoList extends ServiceBase {
   async _getVideos() {
     const oThis = this;
 
-    if (oThis.videoIds.length <= 0) {
-      return responseHelper.successWithData({});
-    }
     const usersVideoListObj = new GetUsersVideoList({
       currentUserId: oThis.currentUserId,
       videoIds: oThis.videoIds,
@@ -272,8 +268,9 @@ class GetVideoList extends ServiceBase {
       [entityType.currentUserUserContributionsMap]: oThis.usersVideosMap.currentUserUserContributionsMap || {},
       [entityType.currentUserVideoContributionsMap]: oThis.usersVideosMap.currentUserVideoContributionsMap || {},
       [entityType.userProfileAllowedActions]: oThis.usersVideosMap.userProfileAllowedActions || {},
+      [entityType.currentUserVideoRelationsMap]: oThis.usersVideosMap.currentUserVideoRelationsMap || {},
       tokenUsersByUserIdMap: oThis.usersVideosMap.tokenUsersByUserIdMap || {},
-      [entityType.pricePointsMap]: oThis.usersVideosMap.pricePointsMap || {},
+      [entityType.pricePointsMap]: oThis.usersVideosMap.pricePointsMap,
       tokenDetails: oThis.tokenDetails,
       meta: oThis.responseMetaData
     });
