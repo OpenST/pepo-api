@@ -25,7 +25,6 @@ class TopUpSuccessTransactionKind extends TransactionKindBase {
   async _asyncPerform() {
     const oThis = this;
 
-    //todo-replies: on success post reply initiate should be called.
     await oThis._validateAndSanitizeParams();
 
     const promiseArray = [];
@@ -33,29 +32,19 @@ class TopUpSuccessTransactionKind extends TransactionKindBase {
     promiseArray.push(oThis.fetchTransaction());
     promiseArray.push(oThis.setFromAndToUserId());
 
-    if (oThis.isVideoIdPresent()) {
-      promiseArray.push(oThis.fetchVideoAndValidate());
-    }
-
     await Promise.all(promiseArray);
 
     if (oThis.transactionObj) {
       // Transaction is found in db. All updates happen in this block.
       await oThis._processTransaction();
     } else {
-      // When transaction is not found in db. Thus all insertions will happen in this block.
-      const insertResponse = await oThis.insertInTransaction();
-      if (insertResponse.isDuplicateIndexViolation) {
-        await basicHelper.sleep(500);
-        await oThis.fetchTransaction();
-        await oThis._processTransaction();
-      } else {
-        const promiseArray2 = [];
-        //todo-replies: handle for reply kinds.(updateReplyDetails)
-        promiseArray2.push(oThis._sendUserTransactionNotification());
-        promiseArray2.push(oThis._updateStats());
-        await Promise.all(promiseArray2);
-      }
+      return Promise.reject(
+        responseHelper.error({
+          internal_error_identifier: 'a_s_oe_t_k_tus_p_1',
+          api_error_identifier: 'invalid_api_params',
+          debug_options: oThis.ostTransaction
+        })
+      );
     }
 
     logger.log('Transaction Obj after receiving webhook: ', oThis.transactionObj);
@@ -103,84 +92,6 @@ class TopUpSuccessTransactionKind extends TransactionKindBase {
     const oThis = this;
     // Notification would be published only if user is approved.
     await notificationJobEnqueue.enqueue(topic, { transaction: oThis.transactionObj });
-  }
-
-  /**
-   * Update stats after transaction.
-   *
-   * @returns {Promise<void>}
-   * @private
-   */
-  async _updateStats() {
-    const oThis = this;
-
-    const updateStatsParams = {
-      fromUserId: oThis.fromUserId,
-      toUserId: oThis.toUserId,
-      totalAmount: oThis.ostTransaction.transfers[0].amount
-    };
-
-    if (oThis.isVideoIdPresent()) {
-      updateStatsParams.videoId = oThis.videoId;
-    }
-
-    if (oThis.isReplyDetailIdPresent()) {
-      updateStatsParams.replyDetailId = oThis.replyDetailId;
-    }
-
-    const updateStatsObj = new UpdateStats(updateStatsParams);
-
-    await updateStatsObj.perform();
-  }
-
-  /**
-   * Send notification for successful transaction.
-   *
-   * @returns {Promise<void>}
-   * @private
-   */
-  async _sendUserTransactionNotification() {
-    const oThis = this;
-
-    const promisesArray = [];
-
-    if (oThis.videoId) {
-      promisesArray.push(
-        notificationJobEnqueue.enqueue(notificationJobConstants.videoTxSendSuccess, {
-          transaction: oThis.transactionObj,
-          videoId: oThis.videoId
-        })
-      );
-
-      promisesArray.push(
-        notificationJobEnqueue.enqueue(notificationJobConstants.videoTxReceiveSuccess, {
-          transaction: oThis.transactionObj,
-          videoId: oThis.videoId
-        })
-      );
-    } else {
-      promisesArray.push(
-        notificationJobEnqueue.enqueue(notificationJobConstants.profileTxSendSuccess, {
-          transaction: oThis.transactionObj
-        })
-      );
-
-      promisesArray.push(
-        notificationJobEnqueue.enqueue(notificationJobConstants.profileTxReceiveSuccess, {
-          transaction: oThis.transactionObj
-        })
-      );
-    }
-
-    if (oThis.isPaperPlane) {
-      promisesArray.push(
-        notificationJobEnqueue.enqueue(notificationJobConstants.paperPlaneTransaction, {
-          transaction: oThis.transactionObj
-        })
-      );
-    }
-
-    await Promise.all(promisesArray);
   }
 
   /**

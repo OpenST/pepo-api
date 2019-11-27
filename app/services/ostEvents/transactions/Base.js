@@ -59,7 +59,7 @@ class TransactionOstEventBase extends ServiceBase {
 
     if (
       oThis._isUserTransactionKind() &&
-      (oThis.ostTransaction.meta_property.name !== 'profile' || oThis.ostTransaction.meta_property.name !== 'video')
+      (oThis.ostTransaction.meta_property.name !== 'profile' && oThis.ostTransaction.meta_property.name !== 'video')
     ) {
       const errorObject = responseHelper.error({
         internal_error_identifier: 'a_s_oe_t_b_istk_1',

@@ -121,10 +121,6 @@ class UserTransactionSuccessTransactionKind extends TransactionKindBase {
       updateStatsParams.videoId = oThis.videoId;
     }
 
-    if (oThis.isReplyDetailIdPresent()) {
-      updateStatsParams.replyDetailId = oThis.replyDetailId;
-    }
-
     const updateStatsObj = new UpdateStats(updateStatsParams);
 
     await updateStatsObj.perform();
