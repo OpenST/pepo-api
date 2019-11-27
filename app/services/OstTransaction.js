@@ -122,6 +122,7 @@ class OstTransaction extends ServiceBase {
     if (oThis._isUserTransactionKind()) {
       // Did not use the meta property as not sure of all previous builds.
       oThis.videoId = parsedMetaProperty.videoId;
+      oThis.replyDetailId = parsedMetaProperty.replyDetailId;
     } else if (oThis._isRedemptionTransactionKind()) {
       oThis.pepocornAmount = parsedMetaProperty.pepocornAmount;
       oThis.productId = parsedMetaProperty.productId;
@@ -328,7 +329,6 @@ class OstTransaction extends ServiceBase {
       return responseHelper.successWithData({});
     }
 
-    // TODO: Why is this cache hit required here?
     const replyDetailsByEntityIdsAndEntityKindCacheRsp = await new ReplyDetailsByEntityIdsAndEntityKindCache({
       entityIds: [oThis.videoId],
       entityKind: replyDetailConstants.videoEntityKind
@@ -340,15 +340,15 @@ class OstTransaction extends ServiceBase {
       return Promise.reject(replyDetailsByEntityIdsAndEntityKindCacheRsp);
     }
 
-    oThis.replyDetailId = replyDetailsByEntityIdsAndEntityKindCacheRsp.data[oThis.videoId];
+    const replyDetailId = replyDetailsByEntityIdsAndEntityKindCacheRsp.data[oThis.videoId];
 
-    if (CommonValidators.isVarNullOrUndefined(oThis.replyDetailId)) {
+    if (CommonValidators.isVarNullOrUndefined(oThis.replyDetailId) || replyDetailId != oThis.replyDetailId) {
       return Promise.reject(
         responseHelper.paramValidationError({
           internal_error_identifier: 'a_s_ot_9',
           api_error_identifier: 'invalid_api_params',
           params_error_identifiers: ['invalid_video_id'],
-          debug_options: { videoDetail: videoDetail, replyDetailId: oThis.replyDetailId }
+          debug_options: { videoDetail: videoDetail, replyDetailId: replyDetailId }
         })
       );
     }
