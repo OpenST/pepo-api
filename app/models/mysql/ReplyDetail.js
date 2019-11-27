@@ -303,19 +303,6 @@ class ReplyDetailsModel extends ModelBase {
   async updateByReplyDetailId(params) {
     const oThis = this;
 
-    //todo-replies: Note- Do not set cache with object for non primary keys but instead set ids only.
-    // Here We have to make a get call everytime due to this
-    const ReplyDetailsByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/ReplyDetailsByIds');
-
-    const replyDetailCacheResp = await new ReplyDetailsByIdsCache({ ids: [params.replyDetailId] }).fetch();
-    if (replyDetailCacheResp.isFailure()) {
-      logger.error('Error while fetching reply detail data.');
-
-      return Promise.reject(replyDetailCacheResp);
-    }
-
-    const replyDetail = replyDetailCacheResp.data[params.replyDetailId];
-
     const totalTransactions = 1;
 
     const updateResponse = await oThis
@@ -326,12 +313,11 @@ class ReplyDetailsModel extends ModelBase {
         totalTransactions,
         params.totalContributedBy
       ])
-      .where({ id: replyDetail.id })
+      .where({ id: params.replyDetailId })
       .fire();
 
     const flushCacheParams = {
-      parentVideoIds: [replyDetail.parentId],
-      replyDetailId: replyDetail.id
+      replyDetailId: params.replyDetailId
     };
 
     await ReplyDetailsModel.flushCache(flushCacheParams);
