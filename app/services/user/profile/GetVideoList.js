@@ -63,7 +63,6 @@ class GetVideoList extends ServiceBase {
     const oThis = this,
       promisesArray = [];
 
-    //todo-replies: should we include parent video Id for can delete
     await oThis._validateAndSanitizeParams();
 
     let resp = null;
@@ -122,7 +121,6 @@ class GetVideoList extends ServiceBase {
   async _fetchVideoIds() {
     const oThis = this;
 
-    // Todo: do we need to check blocked user list here???
     // If not an admin, only then perform further validations.
     if (!oThis.isAdmin) {
       // If user's profile(not self) is not approved, videos would not be shown.
