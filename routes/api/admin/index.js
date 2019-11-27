@@ -195,39 +195,6 @@ router.get('/video-history/:profile_user_id', sanitizer.sanitizeDynamicUrlParams
   );
 });
 
-/* Reply history for admin */
-router.get('/reply-history/:profile_user_id', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
-  req.decodedParams.apiName = apiName.userReplyList;
-  req.decodedParams.profile_user_id = req.params.profile_user_id;
-  req.decodedParams.is_admin = true;
-
-  const dataFormatterFunc = async function(serviceResponse) {
-    const wrapperFormatterRsp = await new AdminFormatterComposer({
-      resultType: adminResponseEntityKey.userVideoList,
-      entityKindToResponseKeyMap: {
-        [adminEntityType.userVideoList]: adminResponseEntityKey.userVideoList,
-        [adminEntityType.adminUsersMap]: adminResponseEntityKey.users,
-        [adminEntityType.userStats]: adminResponseEntityKey.userStats,
-        [adminEntityType.userProfilesMap]: adminResponseEntityKey.userProfiles,
-        [adminEntityType.tagsMap]: adminResponseEntityKey.tags,
-        [adminEntityType.linksMap]: adminResponseEntityKey.links,
-        [adminEntityType.imagesMap]: adminResponseEntityKey.images,
-        [adminEntityType.videosMap]: adminResponseEntityKey.videos,
-        [adminEntityType.replyDetailsMap]: adminResponseEntityKey.replyDetails,
-        [adminEntityType.videoDescriptionsMap]: adminResponseEntityKey.videoDescriptions,
-        [adminEntityType.pricePointsMap]: adminResponseEntityKey.pricePoints,
-        [adminEntityType.token]: adminResponseEntityKey.token,
-        [adminEntityType.userVideoListMeta]: adminResponseEntityKey.meta
-      },
-      serviceData: serviceResponse.data
-    }).perform();
-
-    serviceResponse.data = wrapperFormatterRsp.data;
-  };
-
-  Promise.resolve(routeHelper.perform(req, res, next, '/admin/reply/GetList', 'r_a_v1_u_7', null, dataFormatterFunc));
-});
-
 /* Get list of replies given video id. */
 router.get('/videos/:video_id/replies', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.replyList;
