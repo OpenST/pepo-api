@@ -1,3 +1,5 @@
+const BigNumber = require('bignumber.js');
+
 const rootPrefix = '../../..',
   OstTransactionBase = require(rootPrefix + '/app/services/ostTransaction/Base'),
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
@@ -67,7 +69,7 @@ class ReplyOnVideoTransaction extends OstTransactionBase {
       await oThis._fetchTransaction();
       if (!oThis.transactionId) {
         const errorObject = responseHelper.error({
-          internal_error_identifier: 'a_s_ost_2',
+          internal_error_identifier: 'a_s_ost_1',
           api_error_identifier: 'something_went_wrong',
           debug_options: { ostTxId: oThis.ostTxId }
         });
@@ -117,7 +119,7 @@ class ReplyOnVideoTransaction extends OstTransactionBase {
     if (!CommonValidators.validateNonEmptyObject(replyDetail)) {
       return Promise.reject(
         responseHelper.paramValidationError({
-          internal_error_identifier: 'a_s_ot_9',
+          internal_error_identifier: 'a_s_ot_2',
           api_error_identifier: 'invalid_api_params',
           params_error_identifiers: ['invalid_reply_detail_id'],
           debug_options: { replyDetail: replyDetail, replyDetailId: oThis.replyDetailId }
@@ -128,7 +130,7 @@ class ReplyOnVideoTransaction extends OstTransactionBase {
     if (replyDetail.status !== replyDetailConstants.pendingStatus) {
       return Promise.reject(
         responseHelper.paramValidationError({
-          internal_error_identifier: 'a_s_ot_10',
+          internal_error_identifier: 'a_s_ot_3',
           api_error_identifier: 'invalid_api_params',
           params_error_identifiers: ['invalid_reply_detail_id'],
           debug_options: { replyDetail: replyDetail, replyDetailId: oThis.replyDetailId }
@@ -152,7 +154,25 @@ class ReplyOnVideoTransaction extends OstTransactionBase {
         }
 
         const videoDetail = videoDetailsCacheResponse.data[parentVideoId],
-          parentVideoCreatorUserId = videoDetail.creatorUserId;
+          parentVideoCreatorUserId = videoDetail.creatorUserId,
+          parentVideoPerReplyAmountInWei = videoDetail.perReplyAmountInWei;
+
+        const parentVideoPerReplyAmountInWeiBN = new BigNumber(parentVideoPerReplyAmountInWei),
+          transferAmountBN = new BigNumber(oThis.transfersData[0].amount);
+
+        if (!parentVideoPerReplyAmountInWeiBN.eq(transferAmountBN)) {
+          return Promise.reject(
+            responseHelper.paramValidationError({
+              internal_error_identifier: 'a_s_ot_4',
+              api_error_identifier: 'invalid_api_params',
+              params_error_identifiers: ['invalid_amount_in_transaction'],
+              debug_options: {
+                parentVideoPerReplyAmountInWei: parentVideoPerReplyAmountInWei,
+                transferAmount: oThis.transfersData[0].amount
+              }
+            })
+          );
+        }
 
         const tokenUserDetailsResponse = await new TokenUserByUserId({ userIds: [parentVideoCreatorUserId] }).fetch();
         if (tokenUserDetailsResponse.isFailure()) {
@@ -165,7 +185,7 @@ class ReplyOnVideoTransaction extends OstTransactionBase {
         if (parentUserOstUserId !== oThis.toOstUserId) {
           return Promise.reject(
             responseHelper.paramValidationError({
-              internal_error_identifier: 'a_s_ot_7',
+              internal_error_identifier: 'a_s_ot_5',
               api_error_identifier: 'invalid_api_params',
               params_error_identifiers: ['invalid_to_user_id'],
               debug_options: { transfers: oThis.transfersData }
@@ -219,12 +239,6 @@ class ReplyOnVideoTransaction extends OstTransactionBase {
         })
       );
     }
-
-    //todo-replies: validate amount?
-
-    // const resultType = transactionObject.result_type,
-    //   ostTransaction = transactionObject[resultType],
-    //   transferAmount = ostTransaction.transfers[0].amount;
   }
 
   /**
