@@ -58,16 +58,13 @@ class GetReplyList extends ServiceBase {
    * @private
    */
   async _asyncPerform() {
-    const oThis = this,
-      promisesArray = [];
+    const oThis = this;
 
     await oThis._validateAndSanitizeParams();
 
     await oThis._fetchReplyDetailIds();
 
-    promisesArray.push(oThis._setTokenDetails());
-    promisesArray.push(oThis._getReplyVideos());
-
+    const promisesArray = [oThis._setTokenDetails(), oThis._getReplyVideos()];
     await Promise.all(promisesArray);
 
     oThis._addResponseMetaData();
