@@ -78,8 +78,6 @@ class GetReplyById extends ServiceBase {
   async _validateReplyDetailId() {
     const oThis = this;
 
-    //todo-replies: entity not found error
-
     const replyDetailCacheResp = await new ReplyDetailsByIdsCache({ ids: [oThis.replyDetailId] }).fetch();
     if (replyDetailCacheResp.isFailure()) {
       logger.error('Error while fetching reply detail data.');
@@ -93,7 +91,7 @@ class GetReplyById extends ServiceBase {
       return Promise.reject(
         responseHelper.paramValidationError({
           internal_error_identifier: 'a_s_r_gbi_1',
-          api_error_identifier: 'invalid_api_params',
+          api_error_identifier: 'entity_not_found',
           params_error_identifiers: ['invalid_reply_detail_id'],
           debug_options: { replyDetail: replyDetail, replyDetailId: oThis.replyDetailId }
         })
@@ -104,7 +102,7 @@ class GetReplyById extends ServiceBase {
       return Promise.reject(
         responseHelper.paramValidationError({
           internal_error_identifier: 'a_s_r_gbi_2',
-          api_error_identifier: 'resource_not_found',
+          api_error_identifier: 'entity_not_found',
           params_error_identifiers: ['reply_deleted'],
           debug_options: { replyDetailId: oThis.replyDetailId }
         })
@@ -171,7 +169,7 @@ class GetReplyById extends ServiceBase {
     if (oThis.blockReply) {
       return Promise.reject(
         responseHelper.error({
-          internal_error_identifier: 'a_s_r_gbi_4',
+          internal_error_identifier: 'a_s_r_gbi_3',
           api_error_identifier: 'entity_not_found',
           debug_options: {}
         })
@@ -191,7 +189,7 @@ class GetReplyById extends ServiceBase {
     if (response.isFailure() || !CommonValidators.validateNonEmptyObject(response.data.userProfilesMap)) {
       return Promise.reject(
         responseHelper.error({
-          internal_error_identifier: 'a_s_r_gbi_3',
+          internal_error_identifier: 'a_s_r_gbi_4',
           api_error_identifier: 'entity_not_found',
           debug_options: {}
         })
