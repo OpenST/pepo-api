@@ -139,7 +139,6 @@ class UserModel extends ModelBase {
   async fetchByUserNames(userNames) {
     const oThis = this;
 
-    //todo-replies: On block do we flush this cache
     const dbRows = await oThis
       .select(['id', 'user_name', 'status'])
       .where(['user_name IN (?)', userNames])
