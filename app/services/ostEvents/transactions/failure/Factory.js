@@ -42,17 +42,17 @@ class TransactionWebhookFailureFactory extends TransactionWebhookFactoryBase {
 
     let transactionEventResponse = null;
     if (oThis._isRedemptionTransactionKind()) {
-      transactionEventResponse = new RedemptionFailureWebhook(oThis.webhookData).perform();
+      transactionEventResponse = await new RedemptionFailureWebhook(oThis.webhookData).perform();
     } else if (oThis._isReplyOnVideoTransactionKind()) {
-      transactionEventResponse = new ReplyOnVideoFailureWebhook(oThis.webhookData).perform();
+      transactionEventResponse = await new ReplyOnVideoFailureWebhook(oThis.webhookData).perform();
     } else if (oThis._isPepoOnReplyTransactionKind()) {
-      transactionEventResponse = new PepoOnReplyFailureWebhook(oThis.webhookData).perform();
+      transactionEventResponse = await new PepoOnReplyFailureWebhook(oThis.webhookData).perform();
     } else if (oThis._isUserActivateAirdropTransactionKind()) {
-      transactionEventResponse = new AirdropFailureWebhook(oThis.webhookData).perform();
+      transactionEventResponse = await new AirdropFailureWebhook(oThis.webhookData).perform();
     } else if (oThis.TopUpFailureClass()) {
-      transactionEventResponse = new TopupFailureWebhook(oThis.webhookData).perform();
+      transactionEventResponse = await new TopupFailureWebhook(oThis.webhookData).perform();
     } else if (oThis._isUserTransactionKind()) {
-      transactionEventResponse = new UserTransactionFailureWebhook(oThis.webhookData).perform();
+      transactionEventResponse = await new UserTransactionFailureWebhook(oThis.webhookData).perform();
     } else {
       return Promise.reject(
         responseHelper.error({
@@ -63,11 +63,11 @@ class TransactionWebhookFailureFactory extends TransactionWebhookFactoryBase {
       );
     }
 
-    if (transactionEventResponse.isSuccess()) {
-      await transactionEventResponse;
-    } else {
+    if (transactionEventResponse && transactionEventResponse.isFailure()) {
       return Promise.reject(transactionEventResponse);
     }
+
+    responseHelper.successWithData({});
   }
 
   /**
