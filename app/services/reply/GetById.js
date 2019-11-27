@@ -36,7 +36,6 @@ class GetReplyById extends ServiceBase {
     oThis.currentUser = params.current_user;
     oThis.isAdmin = params.is_admin || false;
 
-    oThis.parentVideoId = null;
     oThis.videoReplies = [];
     oThis.currentUserId = null;
     oThis.userRepliesMap = {};
@@ -64,7 +63,7 @@ class GetReplyById extends ServiceBase {
   /**
    * Fetch creator user id.
    *
-   * @sets oThis.parentVideoId, oThis.currentUserId
+   * @sets oThis.currentUserId
    *
    * @returns {Promise<void>}
    * @private
@@ -103,7 +102,6 @@ class GetReplyById extends ServiceBase {
       );
     }
 
-    oThis.parentVideoId = replyDetail.parentId;
     oThis.replyCreatorUserId = replyDetail.creatorUserId;
     oThis.currentUserId = oThis.currentUser ? Number(oThis.currentUser.id) : 0;
   }
@@ -140,7 +138,6 @@ class GetReplyById extends ServiceBase {
 
     const userVideosObj = new GetUserVideosList({
       currentUserId: oThis.currentUserId,
-      videoIds: [oThis.parentVideoId],
       replyDetailIds: [oThis.replyDetailId],
       isAdmin: oThis.isAdmin,
       fetchVideoViewDetails: 1,

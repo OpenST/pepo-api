@@ -154,7 +154,6 @@ class GetReplyList extends ServiceBase {
 
     const userVideosObj = new GetUserVideosList({
       currentUserId: oThis.currentUserId,
-      videoIds: [oThis.videoId],
       replyDetailIds: oThis.replyDetailIds,
       isAdmin: oThis.isAdmin,
       fetchVideoViewDetails: 1
