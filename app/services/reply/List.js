@@ -93,8 +93,6 @@ class GetReplyList extends ServiceBase {
       oThis.paginationTimestamp = null;
     }
 
-    console.log('----oThis.paginationTimestamp----', oThis.paginationTimestamp);
-
     // Validate limit.
     return oThis._validatePageSize();
   }
@@ -174,8 +172,6 @@ class GetReplyList extends ServiceBase {
         oThis.nextPaginationTimestamp = rdObj.createdAt;
       }
     }
-
-    console.log('----oThis.nextPaginationTimestamp---', oThis.nextPaginationTimestamp);
   }
 
   /**
@@ -200,8 +196,6 @@ class GetReplyList extends ServiceBase {
     oThis.responseMetaData = {
       [paginationConstants.nextPagePayloadKey]: nextPagePayloadKey
     };
-
-    console.log('----oThis.responseMetaData ----', oThis.responseMetaData);
   }
 
   /**
