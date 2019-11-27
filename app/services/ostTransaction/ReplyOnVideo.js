@@ -140,64 +140,64 @@ class ReplyOnVideoTransaction extends OstTransactionBase {
 
     if (replyDetail.descriptionId) {
       oThis.descriptionId = replyDetail.descriptionId;
+    }
 
-      // Validate to user id.
-      if (replyDetail.parentKind === replyDetailConstants.videoParentKind) {
-        const parentVideoId = replyDetail.parentId;
+    // Validate to user id.
+    if (replyDetail.parentKind === replyDetailConstants.videoParentKind) {
+      const parentVideoId = replyDetail.parentId;
 
-        const videoDetailsCacheResponse = await new VideoDetailsByVideoIdsCache({ videoIds: [parentVideoId] }).fetch();
+      const videoDetailsCacheResponse = await new VideoDetailsByVideoIdsCache({ videoIds: [parentVideoId] }).fetch();
 
-        if (videoDetailsCacheResponse.isFailure()) {
-          logger.error('Error while fetching video detail data.');
+      if (videoDetailsCacheResponse.isFailure()) {
+        logger.error('Error while fetching video detail data.');
 
-          return Promise.reject(videoDetailsCacheResponse);
-        }
-
-        const videoDetail = videoDetailsCacheResponse.data[parentVideoId],
-          parentVideoCreatorUserId = videoDetail.creatorUserId,
-          parentVideoPerReplyAmountInWei = videoDetail.perReplyAmountInWei;
-
-        const parentVideoPerReplyAmountInWeiBN = new BigNumber(parentVideoPerReplyAmountInWei),
-          transferAmountBN = new BigNumber(oThis.transfersData[0].amount);
-
-        if (!parentVideoPerReplyAmountInWeiBN.eq(transferAmountBN)) {
-          return Promise.reject(
-            responseHelper.paramValidationError({
-              internal_error_identifier: 'a_s_ot_4',
-              api_error_identifier: 'invalid_api_params',
-              params_error_identifiers: ['invalid_amount_in_transaction'],
-              debug_options: {
-                parentVideoPerReplyAmountInWei: parentVideoPerReplyAmountInWei,
-                transferAmount: oThis.transfersData[0].amount
-              }
-            })
-          );
-        }
-
-        const tokenUserDetailsResponse = await new TokenUserByUserId({ userIds: [parentVideoCreatorUserId] }).fetch();
-        if (tokenUserDetailsResponse.isFailure()) {
-          return Promise.reject(tokenUserDetailsResponse);
-        }
-
-        const tokenUserDetail = tokenUserDetailsResponse.data[parentVideoCreatorUserId],
-          parentUserOstUserId = tokenUserDetail.ostUserId;
-
-        if (parentUserOstUserId !== oThis.toOstUserId) {
-          return Promise.reject(
-            responseHelper.paramValidationError({
-              internal_error_identifier: 'a_s_ot_5',
-              api_error_identifier: 'invalid_api_params',
-              params_error_identifiers: ['invalid_to_user_id'],
-              debug_options: { transfers: oThis.transfersData }
-            })
-          );
-        }
-
-        oThis.toUserIdsArray.push(parentVideoCreatorUserId);
-        oThis.amountsArray.push(oThis.transfersData[0].amount);
-      } else {
-        throw new Error('Invalid parentKind: ' + replyDetail.parentKind);
+        return Promise.reject(videoDetailsCacheResponse);
       }
+
+      const videoDetail = videoDetailsCacheResponse.data[parentVideoId],
+        parentVideoCreatorUserId = videoDetail.creatorUserId,
+        parentVideoPerReplyAmountInWei = videoDetail.perReplyAmountInWei;
+
+      const parentVideoPerReplyAmountInWeiBN = new BigNumber(parentVideoPerReplyAmountInWei),
+        transferAmountBN = new BigNumber(oThis.transfersData[0].amount);
+
+      if (!parentVideoPerReplyAmountInWeiBN.eq(transferAmountBN)) {
+        return Promise.reject(
+          responseHelper.paramValidationError({
+            internal_error_identifier: 'a_s_ot_4',
+            api_error_identifier: 'invalid_api_params',
+            params_error_identifiers: ['invalid_amount_in_transaction'],
+            debug_options: {
+              parentVideoPerReplyAmountInWei: parentVideoPerReplyAmountInWei,
+              transferAmount: oThis.transfersData[0].amount
+            }
+          })
+        );
+      }
+
+      const tokenUserDetailsResponse = await new TokenUserByUserId({ userIds: [parentVideoCreatorUserId] }).fetch();
+      if (tokenUserDetailsResponse.isFailure()) {
+        return Promise.reject(tokenUserDetailsResponse);
+      }
+
+      const tokenUserDetail = tokenUserDetailsResponse.data[parentVideoCreatorUserId],
+        parentUserOstUserId = tokenUserDetail.ostUserId;
+
+      if (parentUserOstUserId !== oThis.toOstUserId) {
+        return Promise.reject(
+          responseHelper.paramValidationError({
+            internal_error_identifier: 'a_s_ot_5',
+            api_error_identifier: 'invalid_api_params',
+            params_error_identifiers: ['invalid_to_user_id'],
+            debug_options: { transfers: oThis.transfersData }
+          })
+        );
+      }
+
+      oThis.toUserIdsArray.push(parentVideoCreatorUserId);
+      oThis.amountsArray.push(oThis.transfersData[0].amount);
+    } else {
+      throw new Error('Invalid parentKind: ' + replyDetail.parentKind);
     }
   }
 
