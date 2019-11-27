@@ -340,7 +340,7 @@ class InitiateReply extends ServiceBase {
         if (!CommonValidators.validateNonEmptyObject(videoCreatorsMap[parentVideoDetails.videoId])) {
           const replyCreators = videoCreatorsMap[parentVideoDetails.videoId];
           // If reply creators is present and creator is already in it, then user can reply free
-          isReplyFree = replyCreators.length > 0 && replyCreators.includes(oThis.currentUser.id);
+          isReplyFree = replyCreators[oThis.currentUser.id] || 0;
         }
       }
       if (isReplyFree) {

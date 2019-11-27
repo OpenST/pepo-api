@@ -217,9 +217,8 @@ class ReplyDetailsModel extends ModelBase {
 
     for (let index = 0; index < dbRows.length; index++) {
       const formatDbRow = oThis.formatDbData(dbRows[index]);
-      response[formatDbRow.parentId] = response[formatDbRow.parentId] || [];
-      response[formatDbRow.parentId].push(formatDbRow.creatorUserId);
-      response[formatDbRow.parentId] = [...new Set(response[formatDbRow.parentId])];
+      response[formatDbRow.parentId] = response[formatDbRow.parentId] || {};
+      response[formatDbRow.parentId][formatDbRow.creatorUserId] = 1;
     }
 
     return response;
