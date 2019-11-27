@@ -1,6 +1,6 @@
-const rootPrefix = '../../../..',
+const rootPrefix = '../../../../..',
   PepocornBalanceModel = require(rootPrefix + '/app/models/mysql/PepocornBalance'),
-  TransactionKindBase = require(rootPrefix + '/app/services/ostEvents/transactions/kind/Base'),
+  TransactionWebhookBase = require(rootPrefix + '/app/services/ostEvents/transactions/Base'),
   basicHelper = require(rootPrefix + '/helpers/basic'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
@@ -14,9 +14,9 @@ const rootPrefix = '../../../..',
 /**
  * Class for redemption success transaction service.
  *
- * @class RedemptionSuccessTransactionKind
+ * @class RedemptionSuccessWebhook
  */
-class RedemptionSuccessTransactionKind extends TransactionKindBase {
+class RedemptionSuccessWebhook extends TransactionWebhookBase {
   /**
    * Async perform.
    *
@@ -185,4 +185,4 @@ class RedemptionSuccessTransactionKind extends TransactionKindBase {
   }
 }
 
-module.exports = RedemptionSuccessTransactionKind;
+module.exports = RedemptionSuccessWebhook;

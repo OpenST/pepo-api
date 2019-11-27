@@ -1,5 +1,5 @@
-const rootPrefix = '../../../..',
-  TransactionKindBase = require(rootPrefix + '/app/services/ostEvents/transactions/kind/Base'),
+const rootPrefix = '../../../../..',
+  TransactionWebhookBase = require(rootPrefix + '/app/services/ostEvents/transactions/Base'),
   basicHelper = require(rootPrefix + '/helpers/basic'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   transactionConstants = require(rootPrefix + '/lib/globalConstant/transaction'),
@@ -9,9 +9,9 @@ const rootPrefix = '../../../..',
 /**
  * Class for pepo on reply failure transaction service.
  *
- * @class PepoOnReplyFailureTransactionKind
+ * @class PepoOnReplyFailureWebhook
  */
-class PepoOnReplyFailureTransactionKind extends TransactionKindBase {
+class PepoOnReplyFailureWebhook extends TransactionWebhookBase {
   /**
    * Async perform.
    *
@@ -27,9 +27,7 @@ class PepoOnReplyFailureTransactionKind extends TransactionKindBase {
     promiseArray.push(oThis.fetchTransaction());
     promiseArray.push(oThis.setFromAndToUserId());
 
-    if (oThis.isVideoIdPresent()) {
-      promiseArray.push(oThis.fetchVideoAndValidate());
-    }
+    promiseArray.push(oThis._fetchReplyDetailsAndValidate());
 
     await Promise.all(promiseArray);
 
@@ -65,7 +63,27 @@ class PepoOnReplyFailureTransactionKind extends TransactionKindBase {
       return responseHelper.successWithData({});
     }
 
-    // Note: There is no implementation for failure case of pepo on reply
+    await oThis._updateTransactionAndRelatedActivities();
+  }
+
+  /**
+   * Update transaction and related activites.
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _updateTransactionAndRelatedActivities() {
+    const oThis = this;
+
+    await oThis.validateTransfers();
+
+    const promiseArray1 = [];
+    promiseArray1.push(oThis.updateTransaction());
+    promiseArray1.push(oThis.removeEntryFromPendingTransactions());
+
+    await Promise.all(promiseArray1);
+
+    await oThis._sendUserTransactionNotification();
   }
 
   /**
@@ -84,12 +102,6 @@ class PepoOnReplyFailureTransactionKind extends TransactionKindBase {
         notificationJobEnqueue.enqueue(notificationJobConstants.videoTxSendFailure, {
           transaction: oThis.transactionObj,
           videoId: oThis.videoId
-        })
-      );
-    } else {
-      promisesArray.push(
-        notificationJobEnqueue.enqueue(notificationJobConstants.profileTxSendFailure, {
-          transaction: oThis.transactionObj
         })
       );
     }
@@ -118,4 +130,4 @@ class PepoOnReplyFailureTransactionKind extends TransactionKindBase {
   }
 }
 
-module.exports = PepoOnReplyFailureTransactionKind;
+module.exports = PepoOnReplyFailureWebhook;

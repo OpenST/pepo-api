@@ -1,26 +1,24 @@
-const rootPrefix = '../../../..',
+const rootPrefix = '../../../../..',
   FiatPaymentModel = require(rootPrefix + '/app/models/mysql/FiatPayment'),
-  TransactionKindBase = require(rootPrefix + '/app/services/ostEvents/transactions/kind/Base'),
-  basicHelper = require(rootPrefix + '/helpers/basic'),
-  createErrorLogsEntry = require(rootPrefix + '/lib/errorLogs/createEntry'),
-  errorLogsConstants = require(rootPrefix + '/lib/globalConstant/errorLogs'),
+  TransactionWebhookBase = require(rootPrefix + '/app/services/ostEvents/transactions/Base'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   transactionConstants = require(rootPrefix + '/lib/globalConstant/transaction'),
+  fiatPaymentConstants = require(rootPrefix + '/lib/globalConstant/fiatPayment'),
   notificationJobEnqueue = require(rootPrefix + '/lib/rabbitMqEnqueue/notification'),
-  notificationJobConstants = require(rootPrefix + '/lib/globalConstant/notificationJob'),
-  fiatPaymentConstants = require(rootPrefix + '/lib/globalConstant/fiatPayment');
+  notificationJobConstants = require(rootPrefix + '/lib/globalConstant/notificationJob');
 
 /**
- * Class for topup failure transaction service.
+ * Class for topup success transaction service.
  *
- * @class TopUpFailureFailureKind
+ * @class TopUpSuccessWebhook
  */
-class TopUpFailureFailureKind extends TransactionKindBase {
+class TopUpSuccessWebhook extends TransactionWebhookBase {
   /**
    * Async perform.
    *
-   * @return {Promise<void>}
+   * @returns {Promise<void>}
+   * @private
    */
   async _asyncPerform() {
     const oThis = this;
@@ -35,22 +33,25 @@ class TopUpFailureFailureKind extends TransactionKindBase {
     await Promise.all(promiseArray);
 
     if (oThis.transactionObj) {
+      // Transaction is found in db. All updates happen in this block.
       await oThis._processTransaction();
     } else {
       return Promise.reject(
         responseHelper.error({
-          internal_error_identifier: 'a_s_oe_t_k_tuf_p_1',
+          internal_error_identifier: 'a_s_oe_t_f_ap_1',
           api_error_identifier: 'invalid_api_params',
           debug_options: oThis.ostTransaction
         })
       );
     }
 
-    return responseHelper.successWithData({});
+    logger.log('Transaction Obj after receiving webhook: ', oThis.transactionObj);
+
+    return Promise.resolve(responseHelper.successWithData({}));
   }
 
   /**
-   * Process transaction when transaction is found in database.
+   * Process transaction when transaction is found in the database.
    *
    * @returns {Promise<any>}
    * @private
@@ -62,33 +63,33 @@ class TopUpFailureFailureKind extends TransactionKindBase {
 
     if (response.isFailure()) {
       // Transaction status need not be changed.
-      return responseHelper.successWithData({});
+      return Promise.resolve(responseHelper.successWithData({}));
     }
 
     await oThis.validateToUserId();
     const promiseArray = [];
     promiseArray.push(oThis.updateTransaction());
     promiseArray.push(oThis.processForTopUpTransaction());
+    promiseArray.push(oThis._enqueueUserNotification(notificationJobConstants.topupDone));
     promiseArray.push(
       FiatPaymentModel.flushCache({
         fiatPaymentId: oThis.transactionObj.fiatPaymentId,
         userId: oThis.toUserId
       })
     );
-    promiseArray.push(oThis._enqueueUserNotification(notificationJobConstants.topupFailed));
-
-    const errorObject = responseHelper.error({
-      internal_error_identifier: 'a_s_oe_t_1',
-      api_error_identifier: 'could_not_proceed',
-      debug_options: {
-        message: 'URGENT :: Topup of pepo could not be started after successful payment.',
-        transactionObj: JSON.stringify(oThis.transactionObj)
-      }
-    });
-    logger.error('Topup of pepo could not be started after successful payment.', errorObject);
-    await createErrorLogsEntry.perform(errorObject, errorLogsConstants.highSeverity);
-
     await Promise.all(promiseArray);
+  }
+
+  /**
+   * Enqueue user notification.
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _enqueueUserNotification(topic) {
+    const oThis = this;
+    // Notification would be published only if user is approved.
+    await notificationJobEnqueue.enqueue(topic, { transaction: oThis.transactionObj });
   }
 
   /**
@@ -98,7 +99,7 @@ class TopUpFailureFailureKind extends TransactionKindBase {
    * @private
    */
   _validTransactionStatus() {
-    return transactionConstants.failedOstTransactionStatus;
+    return transactionConstants.successOstTransactionStatus;
   }
 
   /**
@@ -108,12 +109,12 @@ class TopUpFailureFailureKind extends TransactionKindBase {
    * @private
    */
   _transactionStatus() {
-    return transactionConstants.failedStatus;
+    return transactionConstants.doneStatus;
   }
 
   _getPaymentStatus() {
-    return fiatPaymentConstants.invertedStatuses[fiatPaymentConstants.pepoTransferFailedStatus];
+    return fiatPaymentConstants.invertedStatuses[fiatPaymentConstants.pepoTransferSuccessStatus];
   }
 }
 
-module.exports = TopUpFailureFailureKind;
+module.exports = TopUpSuccessWebhook;

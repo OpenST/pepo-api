@@ -1,22 +1,20 @@
-const rootPrefix = '../../../..',
-  TransactionOstEventBase = require(rootPrefix + '/app/services/ostEvents/transactions/Base'),
+const rootPrefix = '../../../../..',
+  TopupFailureWebhook = require(rootPrefix + '/app/services/ostEvents/transactions/failure/Topup'),
+  AirdropFailureWebhook = require(rootPrefix + '/app/services/ostEvents/transactions/failure/Airdrop'),
+  TransactionWebhookFactoryBase = require(rootPrefix + '/app/services/ostEvents/transactions/FactoryBase'),
+  RedemptionFailureWebhook = require(rootPrefix + '/app/services/ostEvents/transactions/failure/Redemption'),
+  PepoOnReplyFailureWebhook = require(rootPrefix + '/app/services/ostEvents/transactions/failure/PepoOnReply'),
+  ReplyOnVideoFailureWebhook = require(rootPrefix + '/app/services/ostEvents/transactions/failure/ReplyOnVideo'),
+  UserTransactionFailureWebhook = require(rootPrefix + '/app/services/ostEvents/transactions/failure/UserTransaction'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
-  logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
-  AirdropFailureClass = require(rootPrefix + '/app/services/ostEvents/transactions/kind/AirdropFailure'),
-  PepoOnReplyFailureClass = require(rootPrefix + '/app/services/ostEvents/transactions/kind/PepoOnReplyFailure'),
-  RedemptionFailureClass = require(rootPrefix + '/app/services/ostEvents/transactions/kind/RedemptionFailure'),
-  ReplyOnVideoFailureClass = require(rootPrefix + '/app/services/ostEvents/transactions/kind/ReplyOnVideoFailure'),
-  TopUpFailureClass = require(rootPrefix + '/app/services/ostEvents/transactions/kind/TopUpFailure'),
-  UserTransactionFailureClass = require(rootPrefix +
-    '/app/services/ostEvents/transactions/kind/UserTransactionFailure'),
-  transactionConstants = require(rootPrefix + '/lib/globalConstant/transaction');
+  transactionConstant = require(rootPrefix + '/lib/globalConstant/transaction');
 
 /**
  * Class for failure transaction ost event base service.
  *
- * @class FailureTransactionOstEvent
+ * @class TransactionWebhookFailureFactory
  */
-class FailureTransactionOstEvent extends TransactionOstEventBase {
+class TransactionWebhookFailureFactory extends TransactionWebhookFactoryBase {
   /**
    * Async perform.
    *
@@ -44,27 +42,27 @@ class FailureTransactionOstEvent extends TransactionOstEventBase {
 
     let transactionEventResponse = null;
     if (oThis._isRedemptionTransactionKind()) {
-      transactionEventResponse = new RedemptionFailureClass({
+      transactionEventResponse = new RedemptionFailureWebhook({
         params: oThis.webhookData
       }).perform();
     } else if (oThis._isReplyOnVideoTransactionKind()) {
-      transactionEventResponse = new ReplyOnVideoFailureClass({
+      transactionEventResponse = new ReplyOnVideoFailureWebhook({
         params: oThis.webhookData
       }).perform();
     } else if (oThis._isPepoOnReplyTransactionKind()) {
-      transactionEventResponse = new PepoOnReplyFailureClass({
+      transactionEventResponse = new PepoOnReplyFailureWebhook({
         params: oThis.webhookData
       }).perform();
     } else if (oThis._isUserActivateAirdropTransactionKind()) {
-      transactionEventResponse = new AirdropFailureClass({
+      transactionEventResponse = new AirdropFailureWebhook({
         params: oThis.webhookData
       }).perform();
     } else if (oThis.TopUpFailureClass()) {
-      transactionEventResponse = new TopUpFailureClass({
+      transactionEventResponse = new TopupFailureWebhook({
         params: oThis.webhookData
       }).perform();
     } else if (oThis._isUserTransactionKind()) {
-      transactionEventResponse = new UserTransactionFailureClass({
+      transactionEventResponse = new UserTransactionFailureWebhook({
         params: oThis.webhookData
       }).perform();
     } else {
@@ -87,8 +85,8 @@ class FailureTransactionOstEvent extends TransactionOstEventBase {
    * @private
    */
   _validTransactionStatus() {
-    return transactionConstants.failedOstTransactionStatus;
+    return transactionConstant.failedOstTransactionStatus;
   }
 }
 
-module.exports = FailureTransactionOstEvent;
+module.exports = TransactionWebhookFailureFactory;

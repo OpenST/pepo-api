@@ -1,5 +1,5 @@
-const rootPrefix = '../../../..',
-  TransactionKindBase = require(rootPrefix + '/app/services/ostEvents/transactions/kind/Base'),
+const rootPrefix = '../../../../..',
+  TransactionWebhookBase = require(rootPrefix + '/app/services/ostEvents/transactions/Base'),
   basicHelper = require(rootPrefix + '/helpers/basic'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   transactionConstants = require(rootPrefix + '/lib/globalConstant/transaction'),
@@ -9,9 +9,9 @@ const rootPrefix = '../../../..',
 /**
  * Class for failure transaction ost event base service.
  *
- * @class UserTransactionFailureTransactionKind
+ * @class UserTransactionFailureWebhook
  */
-class UserTransactionFailureTransactionKind extends TransactionKindBase {
+class UserTransactionFailureWebhook extends TransactionWebhookBase {
   /**
    * Async perform.
    *
@@ -138,4 +138,4 @@ class UserTransactionFailureTransactionKind extends TransactionKindBase {
   }
 }
 
-module.exports = UserTransactionFailureTransactionKind;
+module.exports = UserTransactionFailureWebhook;

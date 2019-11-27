@@ -1,17 +1,18 @@
-const rootPrefix = '../../../..',
-  TransactionKindBase = require(rootPrefix + '/app/services/ostEvents/transactions/kind/Base'),
+const rootPrefix = '../../../../..',
+  TransactionWebhookBase = require(rootPrefix + '/app/services/ostEvents/transactions/Base'),
   basicHelper = require(rootPrefix + '/helpers/basic'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   transactionConstants = require(rootPrefix + '/lib/globalConstant/transaction'),
   notificationJobEnqueue = require(rootPrefix + '/lib/rabbitMqEnqueue/notification'),
-  notificationJobConstants = require(rootPrefix + '/lib/globalConstant/notificationJob');
+  notificationJobConstants = require(rootPrefix + '/lib/globalConstant/notificationJob'),
+  pepocornTransactionConstants = require(rootPrefix + '/lib/globalConstant/redemption/pepocornTransaction');
 
 /**
- * Class for reply on video failure transaction service.
+ * Class for redemption failure transaction service.
  *
- * @class ReplyOnVideoFailureTransactionKind
+ * @class RedemptionFailureWebhook
  */
-class ReplyOnVideoFailureTransactionKind extends TransactionKindBase {
+class RedemptionFailureWebhook extends TransactionWebhookBase {
   /**
    * Async perform.
    *
@@ -27,9 +28,8 @@ class ReplyOnVideoFailureTransactionKind extends TransactionKindBase {
     promiseArray.push(oThis.fetchTransaction());
     promiseArray.push(oThis.setFromAndToUserId());
 
-    if (oThis.isVideoIdPresent()) {
-      promiseArray.push(oThis.fetchVideoAndValidate());
-    }
+    promiseArray.push(oThis._validateToUserIdForRedemption());
+    promiseArray.push(oThis._validateTransactionDataForRedemption());
 
     await Promise.all(promiseArray);
 
@@ -42,7 +42,8 @@ class ReplyOnVideoFailureTransactionKind extends TransactionKindBase {
         await oThis.fetchTransaction();
         await oThis._processTransaction();
       } else {
-        await oThis._sendUserTransactionNotification();
+        await oThis._insertInPepocornTransactions();
+        await oThis._enqueueRedemptionNotification();
       }
     }
 
@@ -65,36 +66,28 @@ class ReplyOnVideoFailureTransactionKind extends TransactionKindBase {
       return responseHelper.successWithData({});
     }
 
-    // Note: There is no implementation for failure case of pepo on reply
+    await oThis.validateTransfers();
+
+    const promiseArray = [];
+    promiseArray.push(oThis.updateTransaction());
+    promiseArray.push(oThis.updatePepocornTransactionModel());
+    await Promise.all(promiseArray);
+    await oThis._enqueueRedemptionNotification();
   }
 
   /**
-   * Send notification for successful transaction.
+   * Enqueue Redemption notification.
    *
    * @returns {Promise<void>}
    * @private
    */
-  async _sendUserTransactionNotification() {
+  async _enqueueRedemptionNotification(topic) {
     const oThis = this;
 
-    const promisesArray = [];
-
-    if (oThis.videoId) {
-      promisesArray.push(
-        notificationJobEnqueue.enqueue(notificationJobConstants.videoTxSendFailure, {
-          transaction: oThis.transactionObj,
-          videoId: oThis.videoId
-        })
-      );
-    } else {
-      promisesArray.push(
-        notificationJobEnqueue.enqueue(notificationJobConstants.profileTxSendFailure, {
-          transaction: oThis.transactionObj
-        })
-      );
-    }
-
-    await Promise.all(promisesArray);
+    return notificationJobEnqueue.enqueue(notificationJobConstants.creditPepocornFailure, {
+      pepocornAmount: oThis.pepocornAmount,
+      transaction: oThis.transactionObj
+    });
   }
 
   /**
@@ -116,6 +109,13 @@ class ReplyOnVideoFailureTransactionKind extends TransactionKindBase {
   _transactionStatus() {
     return transactionConstants.failedStatus;
   }
+
+  _getPepocornTransactionStatus() {
+    const oThis = this;
+
+    //whatever be the case it will be completetly failed
+    return pepocornTransactionConstants.completelyFailedStatus;
+  }
 }
 
-module.exports = ReplyOnVideoFailureTransactionKind;
+module.exports = RedemptionFailureWebhook;

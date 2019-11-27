@@ -1,8 +1,6 @@
-const rootPrefix = '../../../..',
+const rootPrefix = '../../../../..',
   UpdateStats = require(rootPrefix + '/lib/UpdateStats'),
-  UserStatModel = require(rootPrefix + '/app/models/mysql/UserStat'),
-  UserStatByUserIds = require(rootPrefix + '/lib/cacheManagement/multi/UserStatByUserIds'),
-  TransactionKindBase = require(rootPrefix + '/app/services/ostEvents/transactions/kind/Base'),
+  TransactionWebhookBase = require(rootPrefix + '/app/services/ostEvents/transactions/Base'),
   basicHelper = require(rootPrefix + '/helpers/basic'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
@@ -11,11 +9,11 @@ const rootPrefix = '../../../..',
   notificationJobConstants = require(rootPrefix + '/lib/globalConstant/notificationJob');
 
 /**
- * Class for reply on video success transaction service.
+ * Class for user transaction success transaction kind ost service.
  *
- * @class ReplyOnVideoSuccessTransactionKind
+ * @class UserTransactionSuccessWebhook
  */
-class ReplyOnVideoSuccessTransactionKind extends TransactionKindBase {
+class UserTransactionSuccessWebhook extends TransactionWebhookBase {
   /**
    * Async perform.
    *
@@ -32,7 +30,9 @@ class ReplyOnVideoSuccessTransactionKind extends TransactionKindBase {
     promiseArray.push(oThis.fetchTransaction());
     promiseArray.push(oThis.setFromAndToUserId());
 
-    //todo-replies: validate amount and video as reply kind
+    if (oThis.isVideoIdPresent()) {
+      promiseArray.push(oThis.fetchVideoAndValidate());
+    }
 
     await Promise.all(promiseArray);
 
@@ -47,9 +47,7 @@ class ReplyOnVideoSuccessTransactionKind extends TransactionKindBase {
         await oThis.fetchTransaction();
         await oThis._processTransaction();
       } else {
-        //todo-replies: if pepo Reply post kind handle
         const promiseArray2 = [];
-        //todo-replies: handle for reply kinds.(updateReplyDetails)
         promiseArray2.push(oThis._sendUserTransactionNotification());
         promiseArray2.push(oThis._updateStats());
         await Promise.all(promiseArray2);
@@ -77,31 +75,31 @@ class ReplyOnVideoSuccessTransactionKind extends TransactionKindBase {
       return Promise.resolve(responseHelper.successWithData({}));
     }
 
-    await oThis.validateTransfers();
-    await oThis.updateTransaction();
-    await oThis.updateUserStats();
+    await oThis._updateTransactionAndRelatedActivities();
+    await oThis._updateStats();
   }
 
   /**
-   * Update user stats. This method is used only for replyOnVideo transaction kind.
+   * This function is called when transaction exists in table. This function updates transaction and related activities.
    *
    * @returns {Promise<void>}
+   * @private
    */
-  async updateUserStats() {
+  async _updateTransactionAndRelatedActivities() {
     const oThis = this;
 
-    const updateParams = {
-      userId: oThis.fromUserId,
-      totalContributedBy: 0,
-      totalContributedTo: 0,
-      totalAmountRaised: 0,
-      totalAmountSpent: oThis.ostTransaction.transfers[0].amount
-    };
+    await oThis.validateTransfers();
+    const promiseArray1 = [],
+      promiseArray2 = [];
 
-    await UserStatModel.updateOrCreateUserStat(updateParams);
+    promiseArray1.push(oThis.updateTransaction());
+    promiseArray1.push(oThis.removeEntryFromPendingTransactions());
 
-    // Flush cache.
-    await new UserStatByUserIds({ userIds: [oThis.fromUserId] }).clear();
+    await Promise.all(promiseArray1);
+
+    promiseArray2.push(oThis._sendUserTransactionNotification());
+
+    await Promise.all(promiseArray2);
   }
 
   /**
@@ -121,10 +119,6 @@ class ReplyOnVideoSuccessTransactionKind extends TransactionKindBase {
 
     if (oThis.isVideoIdPresent()) {
       updateStatsParams.videoId = oThis.videoId;
-    }
-
-    if (oThis.isReplyDetailIdPresent()) {
-      updateStatsParams.replyDetailId = oThis.replyDetailId;
     }
 
     const updateStatsObj = new UpdateStats(updateStatsParams);
@@ -203,4 +197,4 @@ class ReplyOnVideoSuccessTransactionKind extends TransactionKindBase {
   }
 }
 
-module.exports = ReplyOnVideoSuccessTransactionKind;
+module.exports = UserTransactionSuccessWebhook;

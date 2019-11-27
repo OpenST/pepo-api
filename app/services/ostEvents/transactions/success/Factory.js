@@ -1,22 +1,20 @@
-const rootPrefix = '../../../..',
-  AirdropSuccessClass = require(rootPrefix + '/app/services/ostEvents/transactions/kind/AirdropSuccess'),
-  PepoOnReplySuccessClass = require(rootPrefix + '/app/services/ostEvents/transactions/kind/PepoOnReplySuccess'),
-  RedemptionSuccessClass = require(rootPrefix + '/app/services/ostEvents/transactions/kind/RedemptionSuccess'),
-  ReplyOnVideoSuccessClass = require(rootPrefix + '/app/services/ostEvents/transactions/kind/ReplyOnVideoSuccess'),
-  TopUpSuccessClass = require(rootPrefix + '/app/services/ostEvents/transactions/kind/TopUpSuccess'),
-  UserTransactionSuccessClass = require(rootPrefix +
-    '/app/services/ostEvents/transactions/kind/UserTransactionSuccess'),
-  TransactionOstEventBase = require(rootPrefix + '/app/services/ostEvents/transactions/Base'),
+const rootPrefix = '../../../../..',
+  AirdropSuccessWebhook = require(rootPrefix + '/app/services/ostEvents/transactions/success/Airdrop'),
+  PepoOnReplySuccessWebhook = require(rootPrefix + '/app/services/ostEvents/transactions/success/PepoOnReply'),
+  RedemptionSuccessWebhook = require(rootPrefix + '/app/services/ostEvents/transactions/success/Redemption'),
+  ReplyOnVideoSuccessWebhook = require(rootPrefix + '/app/services/ostEvents/transactions/success/ReplyOnVideo'),
+  TopUpSuccessWebhook = require(rootPrefix + '/app/services/ostEvents/transactions/success/Topup'),
+  UserTransactionSuccessWebhook = require(rootPrefix + '/app/services/ostEvents/transactions/success/UserTransaction'),
+  TransactionWebhookFactoryBase = require(rootPrefix + '/app/services/ostEvents/transactions/FactoryBase'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
-  logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   transactionConstants = require(rootPrefix + '/lib/globalConstant/transaction');
 
 /**
  * Class for success transaction ost event base service.
  *
- * @class SuccessTransactionOstEvent
+ * @class TransactionWebhookSuccessFactory
  */
-class SuccessTransactionOstEvent extends TransactionOstEventBase {
+class TransactionWebhookSuccessFactory extends TransactionWebhookFactoryBase {
   /**
    * Async perform.
    *
@@ -44,27 +42,27 @@ class SuccessTransactionOstEvent extends TransactionOstEventBase {
 
     let transactionEventResponse = null;
     if (oThis._isRedemptionTransactionKind()) {
-      transactionEventResponse = new RedemptionSuccessClass({
+      transactionEventResponse = new RedemptionSuccessWebhook({
         params: oThis.webhookData
       }).perform();
     } else if (oThis._isReplyOnVideoTransactionKind()) {
-      transactionEventResponse = new ReplyOnVideoSuccessClass({
+      transactionEventResponse = new ReplyOnVideoSuccessWebhook({
         params: oThis.webhookData
       }).perform();
     } else if (oThis._isPepoOnReplyTransactionKind()) {
-      transactionEventResponse = new PepoOnReplySuccessClass({
+      transactionEventResponse = new PepoOnReplySuccessWebhook({
         params: oThis.webhookData
       }).perform();
     } else if (oThis._isUserActivateAirdropTransactionKind()) {
-      transactionEventResponse = new AirdropSuccessClass({
+      transactionEventResponse = new AirdropSuccessWebhook({
         params: oThis.webhookData
       }).perform();
     } else if (oThis._isTopUpTransactionKind()) {
-      transactionEventResponse = new TopUpSuccessClass({
+      transactionEventResponse = new TopUpSuccessWebhook({
         params: oThis.webhookData
       }).perform();
     } else if (oThis._isUserTransactionKind()) {
-      transactionEventResponse = new UserTransactionSuccessClass({
+      transactionEventResponse = new UserTransactionSuccessWebhook({
         params: oThis.webhookData
       }).perform();
     } else {
@@ -91,4 +89,4 @@ class SuccessTransactionOstEvent extends TransactionOstEventBase {
   }
 }
 
-module.exports = SuccessTransactionOstEvent;
+module.exports = TransactionWebhookSuccessFactory;

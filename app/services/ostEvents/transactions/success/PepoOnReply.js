@@ -1,6 +1,6 @@
-const rootPrefix = '../../../..',
+const rootPrefix = '../../../../..',
   UpdateStats = require(rootPrefix + '/lib/UpdateStats'),
-  TransactionKindBase = require(rootPrefix + '/app/services/ostEvents/transactions/kind/Base'),
+  TransactionWebhookBase = require(rootPrefix + '/app/services/ostEvents/transactions/Base'),
   basicHelper = require(rootPrefix + '/helpers/basic'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
@@ -11,9 +11,9 @@ const rootPrefix = '../../../..',
 /**
  * Class for pepo on reply success transaction service.
  *
- * @class PepoOnReplySuccessTransaction
+ * @class PepoOnReplySuccessWebhook
  */
-class PepoOnReplySuccessTransaction extends TransactionKindBase {
+class PepoOnReplySuccessWebhook extends TransactionWebhookBase {
   /**
    * Async perform.
    *
@@ -23,7 +23,6 @@ class PepoOnReplySuccessTransaction extends TransactionKindBase {
   async _asyncPerform() {
     const oThis = this;
 
-    //todo-replies: on success post reply initiate should be called.
     await oThis._validateAndSanitizeParams();
 
     const promiseArray = [];
@@ -46,9 +45,7 @@ class PepoOnReplySuccessTransaction extends TransactionKindBase {
         await oThis.fetchTransaction();
         await oThis._processTransaction();
       } else {
-        //todo-replies: if pepo Reply post kind handle
         const promiseArray2 = [];
-        //todo-replies: handle for reply kinds.(updateReplyDetails)
         promiseArray2.push(oThis._sendUserTransactionNotification());
         promiseArray2.push(oThis._updateStats());
         await Promise.all(promiseArray2);
@@ -104,6 +101,32 @@ class PepoOnReplySuccessTransaction extends TransactionKindBase {
   }
 
   /**
+   * Update stats after transaction.
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _updateStats() {
+    const oThis = this;
+
+    const updateStatsParams = {
+      fromUserId: oThis.fromUserId,
+      toUserId: oThis.toUserId,
+      totalAmount: oThis.ostTransaction.transfers[0].amount
+    };
+
+    updateStatsParams.videoId = oThis.videoId;
+
+    if (oThis.isReplyDetailIdPresent()) {
+      updateStatsParams.replyDetailId = oThis.replyDetailId;
+    }
+
+    const updateStatsObj = new UpdateStats(updateStatsParams);
+
+    await updateStatsObj.perform();
+  }
+
+  /**
    * Send notification for successful transaction.
    *
    * @returns {Promise<void>}
@@ -126,26 +149,6 @@ class PepoOnReplySuccessTransaction extends TransactionKindBase {
         notificationJobEnqueue.enqueue(notificationJobConstants.videoTxReceiveSuccess, {
           transaction: oThis.transactionObj,
           videoId: oThis.videoId
-        })
-      );
-    } else {
-      promisesArray.push(
-        notificationJobEnqueue.enqueue(notificationJobConstants.profileTxSendSuccess, {
-          transaction: oThis.transactionObj
-        })
-      );
-
-      promisesArray.push(
-        notificationJobEnqueue.enqueue(notificationJobConstants.profileTxReceiveSuccess, {
-          transaction: oThis.transactionObj
-        })
-      );
-    }
-
-    if (oThis.isPaperPlane) {
-      promisesArray.push(
-        notificationJobEnqueue.enqueue(notificationJobConstants.paperPlaneTransaction, {
-          transaction: oThis.transactionObj
         })
       );
     }
@@ -174,4 +177,4 @@ class PepoOnReplySuccessTransaction extends TransactionKindBase {
   }
 }
 
-module.exports = PepoOnReplySuccessTransaction;
+module.exports = PepoOnReplySuccessWebhook;

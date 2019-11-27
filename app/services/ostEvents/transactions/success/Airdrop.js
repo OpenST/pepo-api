@@ -1,6 +1,6 @@
-const rootPrefix = '../../../..',
+const rootPrefix = '../../../../..',
   TokenUserModel = require(rootPrefix + '/app/models/mysql/TokenUser'),
-  TransactionKindBase = require(rootPrefix + '/app/services/ostEvents/transactions/kind/Base'),
+  TransactionWebhookBase = require(rootPrefix + '/app/services/ostEvents/transactions/Base'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   tokenUserConstants = require(rootPrefix + '/lib/globalConstant/tokenUser'),
@@ -11,9 +11,9 @@ const rootPrefix = '../../../..',
 /**
  * Class for airdrop success transaction service.
  *
- * @class AirdropSuccessTransactionKind
+ * @class AirdropSuccessWebhook
  */
-class AirdropSuccessTransactionKind extends TransactionKindBase {
+class AirdropSuccessWebhook extends TransactionWebhookBase {
   /**
    * Async perform.
    *
@@ -38,7 +38,7 @@ class AirdropSuccessTransactionKind extends TransactionKindBase {
     } else {
       return Promise.reject(
         responseHelper.error({
-          internal_error_identifier: 'a_s_oe_t_k_as_p_1',
+          internal_error_identifier: 'a_s_oe_t_f_ap_1',
           api_error_identifier: 'invalid_api_params',
           debug_options: oThis.ostTransaction
         })
@@ -123,4 +123,4 @@ class AirdropSuccessTransactionKind extends TransactionKindBase {
   }
 }
 
-module.exports = AirdropSuccessTransactionKind;
+module.exports = AirdropSuccessWebhook;
