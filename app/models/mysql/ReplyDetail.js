@@ -106,7 +106,7 @@ class ReplyDetailsModel extends ModelBase {
    * @param {number} params.videoId: video id
    * @param {number} params.paginationTimestamp: pagination timestamp
    *
-   * @returns Promise{object}
+   * @returns Promise{<array>}
    */
   async fetchByVideoId(params) {
     const oThis = this;
@@ -137,7 +137,7 @@ class ReplyDetailsModel extends ModelBase {
       replyIds.push(dbRows[index].id);
     }
 
-    return { replyIds: replyIds };
+    return replyIds;
   }
 
   /**
