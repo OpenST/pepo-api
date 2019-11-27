@@ -41,7 +41,7 @@ class TransactionWebhookSuccessFactory extends TransactionWebhookFactoryBase {
   async _processTransaction() {
     const oThis = this;
 
-    logger.log('====oThis.webhookData is : ', oThis.webhookData);
+    logger.log('====oThis.webhookData 11111111111 is : ', oThis.webhookData);
 
     let transactionEventResponse = null;
     if (oThis._isRedemptionTransactionKind()) {

@@ -33,6 +33,11 @@ class TransactionWebhookFactoryBase extends ServiceBase {
 
     oThis.webhookData = params.data;
     oThis.ostTransaction = params.data.transaction;
+    oThis.ostTxId = oThis.ostTransaction.id;
+    oThis.ostTransactionStatus = oThis.ostTransaction.status;
+
+    console.log('\n\n\nThe oThis.webhookData is =============', oThis.webhookData);
+    console.log('\n\n\nThe oThis.ostTransaction is =============', oThis.ostTransaction);
   }
 
   /**
