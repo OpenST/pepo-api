@@ -101,7 +101,7 @@ class RedemptionSuccessWebhook extends TransactionWebhookBase {
                 pepocornAmount: oThis.pepocornAmount
               }
             });
-            createErrorLogsEntry.perform(errorObject, errorLogsConstants.highSeverity);
+            await createErrorLogsEntry.perform(errorObject, errorLogsConstants.highSeverity);
             return Promise.reject(errorObject);
           }
         });
