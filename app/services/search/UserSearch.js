@@ -66,8 +66,8 @@ class UserSearch extends ServiceBase {
 
     await oThis._fetchTokenUsers();
 
-    // TODO: This thing would not be required in ideal case,
-    // TODO: pepo user was created but platform was down and user was not created
+    // This thing would not be required in ideal case,
+    // pepo user was created but platform was down and user was not created.
     await oThis._filterNonActiveUsers();
 
     await oThis._prepareSearchResults();
