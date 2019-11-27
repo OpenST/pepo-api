@@ -127,7 +127,7 @@ const adminSignature = {
       },
       {
         parameter: 'link',
-        validatorMethods: ['validateString', 'validateStopWords']
+        validatorMethods: ['validateGenericUrl', 'validateStopWords']
       }
     ],
     optional: []
@@ -144,7 +144,7 @@ const adminSignature = {
       },
       {
         parameter: 'link',
-        validatorMethods: ['validateString', 'validateStopWords']
+        validatorMethods: ['validateGenericUrl', 'validateStopWords']
       }
     ],
     optional: []
