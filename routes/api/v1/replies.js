@@ -31,6 +31,8 @@ router.get('/:reply_detail_id/share', sanitizer.sanitizeDynamicUrlParams, functi
 
   Promise.resolve(routeHelper.perform(req, res, next, '/reply/ShareDetails', 'r_a_v1_r_4', null, dataFormatterFunc));
 });
+
+// User should be logged in to access all the further routes.
 router.use(cookieHelper.validateUserLoginRequired);
 
 // Initiate reply on particular video.
