@@ -1,5 +1,6 @@
 const rootPrefix = '../../..',
   OstTransactionBase = require(rootPrefix + '/app/services/ostTransaction/Base'),
+  SecureTokenCache = require(rootPrefix + '/lib/cacheManagement/single/SecureToken'),
   ValidatePepocornTopUp = require(rootPrefix + '/app/services/pepocornTopUp/Validate'),
   PepocornTransactionModel = require(rootPrefix + '/app/models/mysql/PepocornTransaction'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
