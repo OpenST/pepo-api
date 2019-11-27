@@ -211,10 +211,6 @@ class GetTagsVideoList extends ServiceBase {
   async _getVideos() {
     const oThis = this;
 
-    if (oThis.videoIds.length <= 0) {
-      return responseHelper.successWithData({});
-    }
-
     const userVideosObj = new GetUserVideos({
       currentUserId: oThis.currentUser.id,
       videoIds: oThis.videoIds,
@@ -294,7 +290,7 @@ class GetTagsVideoList extends ServiceBase {
       [entityTypeConstants.currentUserVideoContributionsMap]:
         oThis.usersVideosMap.currentUserVideoContributionsMap || {},
       [entityTypeConstants.userProfileAllowedActions]: oThis.usersVideosMap.userProfileAllowedActions || {},
-      [entityTypeConstants.pricePointsMap]: oThis.usersVideosMap.pricePointsMap || {},
+      [entityTypeConstants.pricePointsMap]: oThis.usersVideosMap.pricePointsMap,
       [entityTypeConstants.replyDetailsMap]: oThis.usersVideosMap.replyDetailsMap || {},
       usersByIdMap: oThis.usersVideosMap.usersByIdMap || {},
       userStat: oThis.usersVideosMap.userStat || {},

@@ -60,7 +60,8 @@ class GetVideoList extends ServiceBase {
    * @private
    */
   async _asyncPerform() {
-    const oThis = this;
+    const oThis = this,
+      promisesArray = [];
 
     //todo-replies: should we include parent video Id for can delete
     await oThis._validateAndSanitizeParams();
@@ -78,7 +79,6 @@ class GetVideoList extends ServiceBase {
 
     oThis._addResponseMetaData();
 
-    const promisesArray = [];
     promisesArray.push(oThis._setTokenDetails());
     promisesArray.push(oThis._getVideos());
     await Promise.all(promisesArray);
@@ -222,9 +222,6 @@ class GetVideoList extends ServiceBase {
   async _getVideos() {
     const oThis = this;
 
-    if (oThis.videoIds.length <= 0) {
-      return responseHelper.successWithData({});
-    }
     const usersVideoListObj = new GetUsersVideoList({
       currentUserId: oThis.currentUserId,
       videoIds: oThis.videoIds,

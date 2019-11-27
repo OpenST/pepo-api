@@ -169,8 +169,13 @@ class GetReplyById extends ServiceBase {
     const oThis = this;
 
     if (oThis.blockReply) {
-      return;
-      //todo-replies: entity not found error
+      return Promise.reject(
+        responseHelper.error({
+          internal_error_identifier: 'a_s_r_gbi_4',
+          api_error_identifier: 'entity_not_found',
+          debug_options: {}
+        })
+      );
     }
 
     const userVideosObj = new GetUserVideosList({
