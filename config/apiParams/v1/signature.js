@@ -744,7 +744,12 @@ const v1Signature = {
     ]
   },
   [apiName.atMentionSearch]: {
-    mandatory: [],
+    mandatory: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      }
+    ],
     optional: [
       {
         parameter: 'q',
