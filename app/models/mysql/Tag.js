@@ -204,10 +204,10 @@ class Tag extends ModelBase {
       return true;
     }
 
-    const queryObj = oThis.update(['weight=weight+?', weightToAdd]).where({ id: tagIds });
+    const queryObj = oThis.update(['weight = weight + ?', weightToAdd]).where({ id: tagIds });
 
     if (weightToAdd < 0) {
-      queryObj.where(['weight > 0']);
+      queryObj.where(['weight + ? >= 0', weightToAdd]);
     }
 
     return queryObj.fire();
@@ -224,10 +224,10 @@ class Tag extends ModelBase {
   async updateVideoTagWeights(tagIds, weightToAdd) {
     const oThis = this;
 
-    const queryObj = oThis.update(['video_weight=video_weight+?', weightToAdd]).where({ id: tagIds });
+    const queryObj = oThis.update(['video_weight = video_weight + ?', weightToAdd]).where({ id: tagIds });
 
     if (weightToAdd < 0) {
-      queryObj.where(['video_weight > 0']);
+      queryObj.where(['video_weight + ? >= 0', weightToAdd]);
     }
 
     return queryObj.fire();
@@ -244,11 +244,10 @@ class Tag extends ModelBase {
   async updateReplyTagWeights(tagIds, weightToAdd) {
     const oThis = this;
 
-    const queryObj = oThis.update(['reply_weight=reply_weight+?', weightToAdd]).where({ id: tagIds });
+    const queryObj = oThis.update(['reply_weight = reply_weight + ?', weightToAdd]).where({ id: tagIds });
 
-    //todo-replies: queryObj.where(['reply_weight >= weightToAdd']);
     if (weightToAdd < 0) {
-      queryObj.where(['reply_weight > 0']);
+      queryObj.where(['reply_weight + ? >= 0', weightToAdd]);
     }
 
     return queryObj.fire();
