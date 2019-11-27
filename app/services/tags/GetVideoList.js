@@ -3,10 +3,13 @@ const rootPrefix = '../../..',
   GetUserVideos = require(rootPrefix + '/lib/GetUsersVideoList'),
   GetTokenService = require(rootPrefix + '/app/services/token/Get'),
   VideoTagsByTagIdPaginationCache = require(rootPrefix + '/lib/cacheManagement/single/VideoTagsByTagIdPagination'),
+  ReplyDetailsByEntityIdsAndEntityKindCache = require(rootPrefix +
+    '/lib/cacheManagement/multi/ReplyDetailsByEntityIdsAndEntityKind'),
   tagConstants = require(rootPrefix + '/lib/globalConstant/tag'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   videoTagConstants = require(rootPrefix + '/lib/globalConstant/videoTag'),
   entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
+  replyDetailConstants = require(rootPrefix + '/lib/globalConstant/replyDetail'),
   paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination');
 
 /**
@@ -50,6 +53,8 @@ class GetTagsVideoList extends ServiceBase {
     oThis.videoDetails = [];
     oThis.tokenDetails = {};
     oThis.usersVideosMap = {};
+    oThis.replyDetailIds = [];
+    oThis.replyVideoIds = [];
   }
 
   /**
@@ -149,7 +154,15 @@ class GetTagsVideoList extends ServiceBase {
       const videoTagsDetail = videoTagsDetails[ind];
       oThis.videosCount++;
       oThis.videoIds.push(videoTagsDetail.videoId);
+      if (videoTagsDetail.videoKind == videoTagConstants.replyKind) {
+        oThis.replyVideoIds.push(videoTagsDetail.videoId);
+      }
       oThis.nextPaginationTimestamp = videoTagsDetail.createdAt;
+    }
+
+    // If there are replies in the videos selected from video tags then fetch reply detail ids
+    if (oThis.replyVideoIds.length > 0) {
+      await oThis._fetchReplyDetailIds();
     }
   }
 
@@ -210,6 +223,7 @@ class GetTagsVideoList extends ServiceBase {
     const userVideosObj = new GetUserVideos({
       currentUserId: oThis.currentUser.id,
       videoIds: oThis.videoIds,
+      replyDetailIds: oThis.replyDetailIds,
       isAdmin: false,
       filterUserBlockedReplies: 1
     });
@@ -273,6 +287,34 @@ class GetTagsVideoList extends ServiceBase {
       tokenDetails: oThis.tokenDetails,
       meta: oThis.responseMetaData
     });
+  }
+
+  /**
+   * Fetch reply detail ids
+   *
+   * @returns {Promise<never>}
+   * @private
+   */
+  async _fetchReplyDetailIds() {
+    const oThis = this;
+
+    const replyDetailsByEntityIdsAndEntityKindCacheRsp = await new ReplyDetailsByEntityIdsAndEntityKindCache({
+      entityIds: oThis.replyVideoIds,
+      entityKind: replyDetailConstants.videoEntityKind
+    }).fetch();
+
+    if (replyDetailsByEntityIdsAndEntityKindCacheRsp.isFailure()) {
+      logger.error('Error while fetching reply detail data.');
+
+      return Promise.reject(replyDetailsByEntityIdsAndEntityKindCacheRsp);
+    }
+
+    for (let vid in replyDetailsByEntityIdsAndEntityKindCacheRsp.data) {
+      const rdId = replyDetailsByEntityIdsAndEntityKindCacheRsp.data[vid];
+      if (Number(rdId) > 0) {
+        oThis.replyDetailIds.push(rdId);
+      }
+    }
   }
 
   /**
