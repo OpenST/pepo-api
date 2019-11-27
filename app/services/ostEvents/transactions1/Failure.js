@@ -1,7 +1,7 @@
 const rootPrefix = '../../../..',
   TokenUserModel = require(rootPrefix + '/app/models/mysql/TokenUser'),
   FiatPaymentModel = require(rootPrefix + '/app/models/mysql/FiatPayment'),
-  TransactionOstEventBase = require(rootPrefix + '/app/services/ostEvents/transactions/Base'),
+  TransactionOstEventBase = require(rootPrefix + '/app/services/ostEvents/transactions/FactoryBase'),
   basicHelper = require(rootPrefix + '/helpers/basic'),
   bgJob = require(rootPrefix + '/lib/rabbitMqEnqueue/bgJob'),
   bgJobConstants = require(rootPrefix + '/lib/globalConstant/bgJob'),

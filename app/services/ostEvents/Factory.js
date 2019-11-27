@@ -102,13 +102,15 @@ class OstEventProcess extends ServiceBase {
         break;
       }
       case ostEventConstants.transactionsFailureOstWebhookTopic: {
-        const TransactionFailureClass = require(rootPrefix + '/app/services/ostEvents/transactions/Failure');
-        eventProcessResponse = await new TransactionFailureClass(oThis.eventData).perform();
+        const TransactionWebhookFailureFactory = require(rootPrefix +
+          '/app/services/ostEvents/transactions/failure/Factory');
+        eventProcessResponse = await new TransactionWebhookFailureFactory(oThis.eventData).perform();
         break;
       }
       case ostEventConstants.transactionsSuccessOstWebhookTopic: {
-        const TransactionSuccessClass = require(rootPrefix + '/app/services/ostEvents/transactions/Success');
-        eventProcessResponse = await new TransactionSuccessClass(oThis.eventData).perform();
+        const TransactionWebhookSuccessFactory = require(rootPrefix +
+          '/app/services/ostEvents/transactions/success/Factory');
+        eventProcessResponse = await new TransactionWebhookSuccessFactory(oThis.eventData).perform();
         break;
       }
       case ostEventConstants.usdPricePointUpdatedOstWebhookTopic: {

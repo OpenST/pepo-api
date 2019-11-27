@@ -26,13 +26,13 @@ const rootPrefix = '../../../..',
   transactionConstants = require(rootPrefix + '/lib/globalConstant/transaction');
 
 /**
- * Class for transaction kind base.
+ * Class for transaction event ost base.
  *
  * @class TransactionOstEventBase
  */
-class TransactionWebhookBase extends ServiceBase {
+class TransactionOstEventBase extends ServiceBase {
   /**
-   * Constructor for transaction kind base.
+   * Constructor for transaction event ost base.
    *
    * @param {object} params
    * @param {string} params.data: contains the webhook event data
@@ -50,7 +50,7 @@ class TransactionWebhookBase extends ServiceBase {
 
     const oThis = this;
 
-    oThis.ostTransaction = params.transaction;
+    oThis.ostTransaction = params.data.transaction;
 
     oThis.ostTxId = oThis.ostTransaction.id;
     oThis.ostTransactionStatus = oThis.ostTransaction.status;
@@ -102,10 +102,10 @@ class TransactionWebhookBase extends ServiceBase {
       oThis.productId = parsedHash.productId;
       oThis.pepoUsdPricePoint = parsedHash.pepoUsdPricePoint;
     } else if (oThis._isPepoOnReplyTransactionKind()) {
-      oThis.replyDetailId = parsedHash.replyDetailId;
-    } else if (oThis._isReplyOnVideoTransactionKind()) {
-      oThis.replyDetailId = parsedHash.replyDetailId;
-      oThis.videoId = parsedHash.videoId;
+      if (parsedHash.replyDetailId) {
+        oThis.replyDetailId = parsedHash.replyDetailId;
+        oThis.videoId = parsedHash.videoId;
+      }
     } else {
       if (parsedHash.videoId) {
         oThis.videoId = parsedHash.videoId;
@@ -127,7 +127,7 @@ class TransactionWebhookBase extends ServiceBase {
 
     if (!oThis.transactionObj) {
       const errorObject = responseHelper.error({
-        internal_error_identifier: 'a_s_oe_t_b_1',
+        internal_error_identifier: 'a_s_oe_t_f_1',
         api_error_identifier: 'something_went_wrong',
         debug_options: { reason: 'Transaction obj was empty' }
       });
@@ -138,7 +138,7 @@ class TransactionWebhookBase extends ServiceBase {
 
     if (oThis.transactionObj.status !== transactionConstants.pendingStatus) {
       const errorObject1 = responseHelper.error({
-        internal_error_identifier: 'a_s_oe_t_b_2',
+        internal_error_identifier: 'a_s_oe_t_f_2',
         api_error_identifier: 'something_went_wrong',
         debug_options: { reason: 'Transaction status is not pending.' }
       });
@@ -307,7 +307,7 @@ class TransactionWebhookBase extends ServiceBase {
     if (paramErrors.length > 0) {
       return Promise.reject(
         responseHelper.paramValidationError({
-          internal_error_identifier: 'a_s_oe_t_b_10',
+          internal_error_identifier: 'a_s_oe_t_b_1',
           api_error_identifier: 'invalid_api_params',
           params_error_identifiers: paramErrors,
           debug_options: { transaction: oThis.transactionObj }
@@ -363,9 +363,6 @@ class TransactionWebhookBase extends ServiceBase {
       toUserId: oThis.transactionObj.extraData.toUserIds[0]
     };
 
-    if (oThis.fromUserId == 1445) {
-      console.log('-----------------pendingTransactionObj-----------', JSON.stringify(pendingTransactionObj));
-    }
     await PendingTransactionModel.flushCache(pendingTransactionObj);
 
     logger.log('End:: Remove entry from pending transaction');
@@ -613,7 +610,7 @@ class TransactionWebhookBase extends ServiceBase {
         if (CommonValidators.isVarNullOrUndefined(replyDetailId)) {
           return Promise.reject(
             responseHelper.paramValidationError({
-              internal_error_identifier: 'a_s_oe_t_b_11',
+              internal_error_identifier: 'a_s_oe_t_b_2',
               api_error_identifier: 'invalid_api_params',
               params_error_identifiers: ['invalid_video_id'],
               debug_options: { videoDetail: videoDetail, replyDetailId: replyDetailId }
@@ -655,9 +652,7 @@ class TransactionWebhookBase extends ServiceBase {
       );
     }
 
-    if (oThis._isPepoOnReplyTransactionKind()) {
-      oThis.videoId = replyDetail.entityId;
-    }
+    oThis.videoId = replyDetail.entityId;
   }
 
   /**
@@ -702,6 +697,38 @@ class TransactionWebhookBase extends ServiceBase {
    */
   _publishedTimestamp() {
     return Math.round(new Date() / 1000);
+  }
+
+  /**
+   * Valid transaction status.
+   *
+   * @return {String}
+   * @private
+   */
+  _validTransactionStatus() {
+    throw new Error('Unimplemented method validTransactionStatus for TransactionOstEvent.');
+  }
+
+  /**
+   * Transaction status
+   *
+   * @private
+   */
+  _transactionStatus() {
+    throw new Error('Unimplemented method _transactionStatus for TransactionOstEvent.');
+  }
+
+  /**
+   * Get new property value for token user.
+   *
+   * @private
+   */
+  _getPropertyValForTokenUser() {
+    throw new Error('Unimplemented method getPropertyValForTokenUser for TransactionOstEvent.');
+  }
+
+  _getPepocornTransactionStatus() {
+    throw new Error('Unimplemented method _getPepocornTransactionStatus for TransactionOstEvent.');
   }
 
   /**
@@ -788,30 +815,6 @@ class TransactionWebhookBase extends ServiceBase {
    * @returns {boolean}
    * @private
    */
-  _isUserActivateAirdropTransactionKind() {
-    const oThis = this;
-
-    return oThis.ostTransaction.meta_property.name === transactionConstants.userActivateAirdropMetaName;
-  }
-
-  /**
-   * Return true if it is a pepocorn convert for redemption transaction.
-   *
-   * @returns {boolean}
-   * @private
-   */
-  _isTopUpTransactionKind() {
-    const oThis = this;
-
-    return oThis.ostTransaction.meta_property.name === transactionConstants.topUpMetaName;
-  }
-
-  /**
-   * Return true if it is a pepocorn convert for redemption transaction.
-   *
-   * @returns {boolean}
-   * @private
-   */
   _isRedemptionTransactionKind() {
     const oThis = this;
 
@@ -841,61 +844,6 @@ class TransactionWebhookBase extends ServiceBase {
 
     return oThis.ostTransaction.meta_property.name === transactionConstants.pepoOnReplyMetaName;
   }
-
-  /**
-   * Return true if it is a pepocorn convert for redemption transaction.
-   *
-   * @returns {boolean}
-   * @private
-   */
-  _isUserTransactionKind() {
-    const oThis = this;
-
-    return (
-      !oThis._isUserActivateAirdropTransactionKind() &&
-      !oThis._isTopUpTransactionKind() &&
-      !oThis._isRedemptionTransactionKind() &&
-      !oThis._isReplyOnVideoTransactionKind() &&
-      !oThis._isPepoOnReplyTransactionKind()
-    );
-  }
-
-  /**
-   * Valid transaction status.
-   *
-   * @return {String}
-   * @private
-   */
-  _validTransactionStatus() {
-    throw new Error('Unimplemented method validTransactionStatus for TransactionOstEvent.');
-  }
-
-  /**
-   * Transaction status
-   *
-   * @private
-   */
-  _transactionStatus() {
-    throw new Error('Unimplemented method _transactionStatus for TransactionOstEvent.');
-  }
-
-  /**
-   * Get new property value for token user.
-   *
-   * @private
-   */
-  _getPropertyValForTokenUser() {
-    throw new Error('Unimplemented method getPropertyValForTokenUser for TransactionOstEvent.');
-  }
-
-  /**
-   * Get pepocorn transaction status.
-   *
-   * @private
-   */
-  _getPepocornTransactionStatus() {
-    throw new Error('Unimplemented method _getPepocornTransactionStatus for TransactionOstEvent.');
-  }
 }
 
-module.exports = TransactionWebhookBase;
+module.exports = TransactionOstEventBase;
