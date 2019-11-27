@@ -63,6 +63,10 @@ class TransactionWebhookFailureFactory extends TransactionWebhookFactoryBase {
       );
     }
 
+    if (transactionEventResponse.isFailure()) {
+      return Promise.reject(transactionEventResponse);
+    }
+
     await transactionEventResponse;
   }
 
