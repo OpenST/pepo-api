@@ -116,7 +116,7 @@ class ReplyDetailsModel extends ModelBase {
       paginationTimestamp = params.paginationTimestamp;
 
     const queryObject = oThis
-      .select('*')
+      .select('id')
       .where({
         parent_id: videoId,
         entity_kind: replyDetailConstants.invertedEntityKinds[replyDetailConstants.videoEntityKind],
@@ -131,16 +131,13 @@ class ReplyDetailsModel extends ModelBase {
 
     const dbRows = await queryObject.fire();
 
-    const replyDetails = {};
     const replyIds = [];
 
     for (let index = 0; index < dbRows.length; index++) {
-      const formatDbRow = oThis.formatDbData(dbRows[index]);
-      replyDetails[formatDbRow.id] = formatDbRow;
-      replyIds.push(formatDbRow.id);
+      replyIds.push(dbRows[index].id);
     }
 
-    return { replyDetails: replyDetails, replyIds: replyIds };
+    return { replyIds: replyIds };
   }
 
   /**

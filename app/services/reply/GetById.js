@@ -4,7 +4,6 @@ const rootPrefix = '../../..',
   GetTokenService = require(rootPrefix + '/app/services/token/Get'),
   GetUserVideosList = require(rootPrefix + '/lib/GetUsersVideoList'),
   ReplyDetailsByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/ReplyDetailsByIds'),
-  UserBlockedListCache = require(rootPrefix + '/lib/cacheManagement/single/UserBlockedList'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
@@ -39,7 +38,6 @@ class GetReplyById extends ServiceBase {
 
     oThis.parentVideoId = null;
     oThis.videoReplies = [];
-    oThis.blockReply = false;
     oThis.currentUserId = null;
     oThis.userRepliesMap = {};
     oThis.tokenDetails = null;
@@ -57,8 +55,6 @@ class GetReplyById extends ServiceBase {
     await oThis._validateReplyDetailId();
 
     await oThis._setTokenDetails();
-
-    await oThis._fetchBlockRelations();
 
     await oThis._getReplyVideos();
 
@@ -132,28 +128,6 @@ class GetReplyById extends ServiceBase {
   }
 
   /**
-   * Fetch block relation
-   * @returns {Promise<void>}
-   * @private
-   */
-  async _fetchBlockRelations() {
-    const oThis = this;
-
-    let blockedByUserData = {};
-    const cacheResp = await new UserBlockedListCache({ userId: oThis.currentUser.id }).fetch();
-    if (cacheResp.isSuccess()) {
-      blockedByUserData = cacheResp.data[oThis.currentUser.id];
-    }
-
-    if (
-      blockedByUserData.hasBlocked[oThis.replyCreatorUserId] ||
-      blockedByUserData.blockedBy[oThis.replyCreatorUserId]
-    ) {
-      oThis.blockReply = true;
-    }
-  }
-
-  /**
    * Get videos.
    *
    * @sets oThis.userRepliesMap, oThis.videoReplies
@@ -164,7 +138,18 @@ class GetReplyById extends ServiceBase {
   async _getReplyVideos() {
     const oThis = this;
 
-    if (oThis.blockReply) {
+    const userVideosObj = new GetUserVideosList({
+      currentUserId: oThis.currentUserId,
+      videoIds: [oThis.parentVideoId],
+      replyDetailIds: [oThis.replyDetailId],
+      isAdmin: oThis.isAdmin,
+      fetchVideoViewDetails: 1,
+      filterUserBlockedReplies: 1
+    });
+
+    const response = await userVideosObj.perform();
+
+    if (response.isFailure() || !CommonValidators.validateNonEmptyObject(response.data.userProfilesMap)) {
       return Promise.reject(
         responseHelper.error({
           internal_error_identifier: 'a_s_r_gbi_3',
@@ -174,17 +159,11 @@ class GetReplyById extends ServiceBase {
       );
     }
 
-    const userVideosObj = new GetUserVideosList({
-      currentUserId: oThis.currentUserId,
-      videoIds: [oThis.parentVideoId],
-      replyDetailIds: [oThis.replyDetailId],
-      isAdmin: oThis.isAdmin,
-      fetchVideoViewDetails: 1
-    });
+    oThis.userRepliesMap = response.data;
 
-    const response = await userVideosObj.perform();
-
-    if (response.isFailure() || !CommonValidators.validateNonEmptyObject(response.data.userProfilesMap)) {
+    const rdObj = oThis.userRepliesMap.replyDetailsMap[oThis.replyDetailId];
+    // If reply is not received from get videos call
+    if (!CommonValidators.validateNonEmptyObject(rdObj)) {
       return Promise.reject(
         responseHelper.error({
           internal_error_identifier: 'a_s_r_gbi_4',
@@ -193,10 +172,6 @@ class GetReplyById extends ServiceBase {
         })
       );
     }
-
-    oThis.userRepliesMap = response.data;
-
-    const rdObj = oThis.userRepliesMap.replyDetailsMap[oThis.replyDetailId];
 
     oThis.videoReplies.push(oThis.userRepliesMap.fullVideosMap[rdObj.entityId]);
   }

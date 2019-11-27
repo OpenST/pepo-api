@@ -12,8 +12,29 @@ const rootPrefix = '../../..',
 
 //todo-replies: use at top cookieHelper.validateUserLoginRequired, sanitizer.sanitizeDynamicUrlParams
 
+// Get url and message for sharing reply video given its reply detail id.
+router.get('/:reply_detail_id/share', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.replyShare;
+  req.decodedParams.reply_detail_id = req.params.reply_detail_id;
+
+  const dataFormatterFunc = async function(serviceResponse) {
+    const wrapperFormatterRsp = await new FormatterComposer({
+      resultType: responseEntityKey.share,
+      entityKindToResponseKeyMap: {
+        [entityType.share]: responseEntityKey.share
+      },
+      serviceData: serviceResponse.data
+    }).perform();
+
+    serviceResponse.data = wrapperFormatterRsp.data;
+  };
+
+  Promise.resolve(routeHelper.perform(req, res, next, '/reply/ShareDetails', 'r_a_v1_r_4', null, dataFormatterFunc));
+});
+router.use(cookieHelper.validateUserLoginRequired);
+
 // Initiate reply on particular video.
-router.post('/', cookieHelper.validateUserLoginRequired, function(req, res, next) {
+router.post('/', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.initiateReply;
 
   const dataFormatterFunc = async function(serviceResponse) {
@@ -32,18 +53,14 @@ router.post('/', cookieHelper.validateUserLoginRequired, function(req, res, next
 });
 
 // Validate initiate reply api parameters.
-router.post('/validate-upload', cookieHelper.validateUserLoginRequired, function(req, res, next) {
+router.post('/validate-upload', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.validateUploadReply;
 
   Promise.resolve(routeHelper.perform(req, res, next, '/reply/Validate', 'r_a_v1_r_2', null, null));
 });
 
 // Get any particular reply given its reply detail id.
-router.get('/:reply_detail_id', sanitizer.sanitizeDynamicUrlParams, cookieHelper.validateUserLoginRequired, function(
-  req,
-  res,
-  next
-) {
+router.get('/:reply_detail_id', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.getReply;
   req.decodedParams.reply_detail_id = req.params.reply_detail_id;
 
@@ -76,28 +93,8 @@ router.get('/:reply_detail_id', sanitizer.sanitizeDynamicUrlParams, cookieHelper
   Promise.resolve(routeHelper.perform(req, res, next, '/reply/GetById', 'r_a_v1_r_3', null, dataFormatterFunc));
 });
 
-// Get url and message for sharing reply video given its reply detail id.
-router.get('/:reply_detail_id/share', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
-  req.decodedParams.apiName = apiName.replyShare;
-  req.decodedParams.reply_detail_id = req.params.reply_detail_id;
-
-  const dataFormatterFunc = async function(serviceResponse) {
-    const wrapperFormatterRsp = await new FormatterComposer({
-      resultType: responseEntityKey.share,
-      entityKindToResponseKeyMap: {
-        [entityType.share]: responseEntityKey.share
-      },
-      serviceData: serviceResponse.data
-    }).perform();
-
-    serviceResponse.data = wrapperFormatterRsp.data;
-  };
-
-  Promise.resolve(routeHelper.perform(req, res, next, '/reply/ShareDetails', 'r_a_v1_r_4', null, dataFormatterFunc));
-});
-
 // Delete reply video given its reply detail id.
-router.post('/:reply_details_id/delete', cookieHelper.validateUserLoginRequired, function(req, res, next) {
+router.post('/:reply_details_id/delete', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.deleteReplyVideo;
   req.decodedParams.reply_details_id = req.params.reply_details_id;
 
