@@ -45,29 +45,17 @@ class TransactionWebhookSuccessFactory extends TransactionWebhookFactoryBase {
 
     let transactionEventResponse = null;
     if (oThis._isRedemptionTransactionKind()) {
-      transactionEventResponse = new RedemptionSuccessWebhook({
-        params: oThis.webhookData
-      }).perform();
+      transactionEventResponse = new RedemptionSuccessWebhook(oThis.webhookData).perform();
     } else if (oThis._isReplyOnVideoTransactionKind()) {
-      transactionEventResponse = new ReplyOnVideoSuccessWebhook({
-        params: oThis.webhookData
-      }).perform();
+      transactionEventResponse = new ReplyOnVideoSuccessWebhook(oThis.webhookData).perform();
     } else if (oThis._isPepoOnReplyTransactionKind()) {
-      transactionEventResponse = new PepoOnReplySuccessWebhook({
-        params: oThis.webhookData
-      }).perform();
+      transactionEventResponse = new PepoOnReplySuccessWebhook(oThis.webhookData).perform();
     } else if (oThis._isUserActivateAirdropTransactionKind()) {
-      transactionEventResponse = new AirdropSuccessWebhook({
-        params: oThis.webhookData
-      }).perform();
+      transactionEventResponse = new AirdropSuccessWebhook(oThis.webhookData).perform();
     } else if (oThis._isTopUpTransactionKind()) {
-      transactionEventResponse = new TopUpSuccessWebhook({
-        params: oThis.webhookData
-      }).perform();
+      transactionEventResponse = new TopUpSuccessWebhook(oThis.webhookData).perform();
     } else if (oThis._isUserTransactionKind()) {
-      transactionEventResponse = new UserTransactionSuccessWebhook({
-        params: oThis.webhookData
-      }).perform();
+      transactionEventResponse = new UserTransactionSuccessWebhook(oThis.webhookData).perform();
     } else {
       return Promise.reject(
         responseHelper.error({
