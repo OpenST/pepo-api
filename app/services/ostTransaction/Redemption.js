@@ -4,6 +4,7 @@ const rootPrefix = '../../..',
   ValidatePepocornTopUp = require(rootPrefix + '/app/services/pepocornTopUp/Validate'),
   PepocornTransactionModel = require(rootPrefix + '/app/models/mysql/PepocornTransaction'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
+  logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   createErrorLogsEntry = require(rootPrefix + '/lib/errorLogs/createEntry'),
   errorLogsConstants = require(rootPrefix + '/lib/globalConstant/errorLogs'),
   transactionConstants = require(rootPrefix + '/lib/globalConstant/transaction'),
@@ -15,23 +16,6 @@ const rootPrefix = '../../..',
  * @class RedemptionTransaction
  */
 class RedemptionTransaction extends OstTransactionBase {
-  /**
-   * Constructor to perform ost transaction.
-   *
-   * @param {object} params
-   * @param {object} params.ost_transaction
-   * @param {object} params.current_user
-   * @param {object} [params.is_paper_plane]
-   * @param {object} [params.meta]
-   *
-   * @augments ServiceBase
-   *
-   * @constructor
-   */
-  constructor(params) {
-    super(params);
-  }
-
   /**
    * Validate and sanitize.
    *
@@ -89,9 +73,7 @@ class RedemptionTransaction extends OstTransactionBase {
   async _validateTransactionData() {
     const oThis = this;
 
-    const promiseArray = [];
-    promiseArray.push(oThis._validateToUserIdForRedemption());
-    promiseArray.push(oThis._validateTransactionDataForRedemption());
+    const promiseArray = [oThis._validateToUserIdForRedemption(), oThis._validateTransactionDataForRedemption()];
     await Promise.all(promiseArray);
   }
 
@@ -130,7 +112,7 @@ class RedemptionTransaction extends OstTransactionBase {
       return Promise.reject(errorObject);
     }
 
-    oThis.toUserIdsArray.push(0); //Because company user id is considered 0 in the pepo system.
+    oThis.toUserIdsArray.push(0); // Because company user id is considered 0 in the pepo system.
     oThis.amountsArray.push(oThis.transfersData[0].amount);
   }
 
@@ -177,7 +159,7 @@ class RedemptionTransaction extends OstTransactionBase {
 
     const pepocornTopUpValidationResponse = await new ValidatePepocornTopUp(validateParams).perform();
 
-    console.log('pepocornTopUpValidationResponse ======', pepocornTopUpValidationResponse);
+    logger.log('pepocornTopUpValidationResponse ======', pepocornTopUpValidationResponse);
     if (pepocornTopUpValidationResponse.isFailure()) {
       await createErrorLogsEntry.perform(pepocornTopUpValidationResponse, errorLogsConstants.highSeverity);
     } else {

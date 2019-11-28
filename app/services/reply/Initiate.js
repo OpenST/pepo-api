@@ -9,13 +9,13 @@ const rootPrefix = '../../..',
   ReplyDetailsByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/ReplyDetailsByIds'),
   ReplyVideoPostTransaction = require(rootPrefix + '/lib/transaction/ReplyVideoPostTransaction'),
   VideoDetailsByVideoIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/VideoDetailsByVideoIds'),
+  VideoDistinctReplyCreatorsCache = require(rootPrefix + '/lib/cacheManagement/multi/VideoDistinctReplyCreators'),
   videoLib = require(rootPrefix + '/lib/videoLib'),
   urlConstants = require(rootPrefix + '/lib/globalConstant/url'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   videoConstants = require(rootPrefix + '/lib/globalConstant/video'),
   entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
-  VideoDistinctReplyCreatorsCache = require(rootPrefix + '/lib/cacheManagement/multi/VideoDistinctReplyCreators'),
   replyDetailConstants = require(rootPrefix + '/lib/globalConstant/replyDetail');
 
 /**
@@ -53,7 +53,6 @@ class InitiateReply extends ServiceBase {
     const oThis = this;
 
     oThis.replyDetailId = params.reply_detail_id || null;
-
     oThis.currentUser = params.current_user;
     oThis.parentKind = params.parent_kind;
     oThis.parentId = params.parent_id;
@@ -77,7 +76,7 @@ class InitiateReply extends ServiceBase {
    *
    * @sets oThis.videoId, oThis.replyDetailId
    *
-   * @return {Promise<void>}
+   * @returns {Promise<void>}
    * @private
    */
   async _asyncPerform() {
@@ -86,8 +85,6 @@ class InitiateReply extends ServiceBase {
     await oThis._validateAndSanitize();
 
     if (oThis.replyDetailId) {
-      logger.log('oThis.replyDetailId ========', oThis.replyDetailId);
-
       await oThis._getReplyDetails();
 
       if (oThis.replyDetail.creatorUserId !== oThis.currentUser.id) {
@@ -175,19 +172,22 @@ class InitiateReply extends ServiceBase {
    */
   async _getReplyDetails() {
     const oThis = this;
-    const replyDetailCacheResp = await new ReplyDetailsByIdsCache({ ids: [oThis.replyDetailId] }).fetch();
 
-    if (replyDetailCacheResp.isFailure()) {
+    const replyDetailsCacheResp = await new ReplyDetailsByIdsCache({ ids: [oThis.replyDetailId] }).fetch();
+
+    if (replyDetailsCacheResp.isFailure()) {
       logger.error('Error while fetching reply detail data for reply_detail_id:', oThis.replyDetailId);
 
-      return Promise.reject(replyDetailCacheResp);
+      return Promise.reject(replyDetailsCacheResp);
     }
 
-    oThis.replyDetail = replyDetailCacheResp.data[oThis.replyDetailId];
+    oThis.replyDetail = replyDetailsCacheResp.data[oThis.replyDetailId];
   }
 
   /**
    * Edit reply description.
+   *
+   * @sets oThis.mentionedUserIds
    *
    * @returns {Promise<void>}
    * @private
