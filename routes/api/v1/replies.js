@@ -80,6 +80,7 @@ router.get('/:reply_detail_id', sanitizer.sanitizeDynamicUrlParams, function(req
         [entityType.replyDetailsMap]: responseEntityKey.replyDetails,
         [entityType.currentUserUserContributionsMap]: responseEntityKey.currentUserUserContributions,
         [entityType.currentUserVideoContributionsMap]: responseEntityKey.currentUserVideoContributions,
+        [entityType.currentUserReplyDetailContributionsMap]: responseEntityKey.currentUserReplyDetailContributionsMap,
         [entityType.currentUserReplyDetailsRelationsMap]: responseEntityKey.currentUserReplyDetailsRelations,
         [entityType.pricePointsMap]: responseEntityKey.pricePoints,
         [entityType.token]: responseEntityKey.token

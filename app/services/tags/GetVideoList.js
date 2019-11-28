@@ -6,6 +6,7 @@ const rootPrefix = '../../..',
   ReplyDetailsByEntityIdsAndEntityKindCache = require(rootPrefix +
     '/lib/cacheManagement/multi/ReplyDetailsByEntityIdsAndEntityKind'),
   tagConstants = require(rootPrefix + '/lib/globalConstant/tag'),
+  logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   videoTagConstants = require(rootPrefix + '/lib/globalConstant/videoTag'),
   entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
@@ -267,23 +268,24 @@ class GetTagsVideoList extends ServiceBase {
 
     return responseHelper.successWithData({
       [entityTypeConstants.userVideoList]: oThis.videoDetails,
-      [entityTypeConstants.videoDetailsMap]: oThis.usersVideosMap.videoDetailsMap || {},
-      [entityTypeConstants.videoDescriptionsMap]: oThis.usersVideosMap.videoDescriptionMap || {},
-      [entityTypeConstants.userProfilesMap]: oThis.usersVideosMap.userProfilesMap || {},
-      [entityTypeConstants.currentUserUserContributionsMap]: oThis.usersVideosMap.currentUserUserContributionsMap || {},
+      [entityTypeConstants.videoDetailsMap]: oThis.usersVideosMap.videoDetailsMap,
+      [entityTypeConstants.videoDescriptionsMap]: oThis.usersVideosMap.videoDescriptionMap,
+      [entityTypeConstants.userProfilesMap]: oThis.usersVideosMap.userProfilesMap,
+      [entityTypeConstants.currentUserUserContributionsMap]: oThis.usersVideosMap.currentUserUserContributionsMap,
       [entityTypeConstants.currentUserVideoContributionsMap]:
-        oThis.usersVideosMap.currentUserVideoContributionsMap || {},
-      [entityTypeConstants.userProfileAllowedActions]: oThis.usersVideosMap.userProfileAllowedActions || {},
+        oThis.usersVideosMap.currentUserVideoContributionsMap,
+      [entityTypeConstants.currentUserReplyDetailContributionsMap]: oThis.usersVideosMap.currentUserReplyDetailContributionsMap,
+      [entityTypeConstants.userProfileAllowedActions]: oThis.usersVideosMap.userProfileAllowedActions,
       [entityTypeConstants.pricePointsMap]: oThis.usersVideosMap.pricePointsMap,
-      [entityTypeConstants.replyDetailsMap]: oThis.usersVideosMap.replyDetailsMap || {},
-      usersByIdMap: oThis.usersVideosMap.usersByIdMap || {},
-      userStat: oThis.usersVideosMap.userStat || {},
-      tags: oThis.usersVideosMap.tags || {},
-      linkMap: oThis.usersVideosMap.linkMap || {},
-      imageMap: oThis.usersVideosMap.imageMap || {},
-      videoMap: oThis.usersVideosMap.videoMap || {},
-      tokenUsersByUserIdMap: oThis.usersVideosMap.tokenUsersByUserIdMap || {},
-      [entityTypeConstants.currentUserVideoRelationsMap]: oThis.usersVideosMap.currentUserVideoRelationsMap || {},
+      [entityTypeConstants.replyDetailsMap]: oThis.usersVideosMap.replyDetailsMap,
+      usersByIdMap: oThis.usersVideosMap.usersByIdMap,
+      userStat: oThis.usersVideosMap.userStat,
+      tags: oThis.usersVideosMap.tags,
+      linkMap: oThis.usersVideosMap.linkMap,
+      imageMap: oThis.usersVideosMap.imageMap,
+      videoMap: oThis.usersVideosMap.videoMap,
+      tokenUsersByUserIdMap: oThis.usersVideosMap.tokenUsersByUserIdMap,
+      [entityTypeConstants.currentUserVideoRelationsMap]: oThis.usersVideosMap.currentUserVideoRelationsMap,
       tokenDetails: oThis.tokenDetails,
       meta: oThis.responseMetaData
     });
@@ -309,7 +311,7 @@ class GetTagsVideoList extends ServiceBase {
       return Promise.reject(replyDetailsByEntityIdsAndEntityKindCacheRsp);
     }
 
-    for (let vid in replyDetailsByEntityIdsAndEntityKindCacheRsp.data) {
+    for (const vid in replyDetailsByEntityIdsAndEntityKindCacheRsp.data) {
       const rdId = replyDetailsByEntityIdsAndEntityKindCacheRsp.data[vid];
       if (Number(rdId) > 0) {
         oThis.replyDetailIds.push(rdId);

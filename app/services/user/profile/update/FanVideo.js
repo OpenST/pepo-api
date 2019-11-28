@@ -84,14 +84,19 @@ class UpdateFanVideo extends UpdateProfileBase {
     const oThis = this;
 
     const validateVideoResp = await new ValidateVideoService({
-      currentUser: oThis.current_user,
-      videoDescription: oThis.video_description,
-      perReplyAmountInWei: oThis.per_reply_amount_in_wei || 0,
+      current_user: oThis.currentUser,
+      video_description: oThis.videoDescription,
+      per_reply_amount_in_wei: oThis.perReplyAmountInWei,
       link: oThis.link
     }).perform();
 
     if (validateVideoResp.isFailure()) {
       return Promise.reject(validateVideoResp);
+    }
+
+    // If url is not valid, consider link as null.
+    if (!CommonValidator.validateVideoDescription(oThis.videoDescription)) {
+      oThis.videoDescription = null;
     }
 
     // If url is not valid, consider link as null.

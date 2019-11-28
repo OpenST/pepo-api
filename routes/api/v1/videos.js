@@ -70,6 +70,7 @@ router.get('/:video_id/replies', sanitizer.sanitizeDynamicUrlParams, function(re
         [entityType.replyDetailsMap]: responseEntityKey.replyDetails,
         [entityType.currentUserUserContributionsMap]: responseEntityKey.currentUserUserContributions,
         [entityType.currentUserVideoContributionsMap]: responseEntityKey.currentUserVideoContributions,
+        [entityType.currentUserReplyDetailContributionsMap]: responseEntityKey.currentUserReplyDetailContributionsMap,
         [entityType.currentUserReplyDetailsRelationsMap]: responseEntityKey.currentUserReplyDetailsRelations,
         [entityType.pricePointsMap]: responseEntityKey.pricePoints,
         [entityType.token]: responseEntityKey.token,

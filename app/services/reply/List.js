@@ -168,6 +168,9 @@ class GetReplyList extends ServiceBase {
       const rdId = oThis.replyDetailIds[ind];
       const rdObj = oThis.userRepliesMap.replyDetailsMap[rdId];
       oThis.videoReplies.push(oThis.userRepliesMap.fullVideosMap[rdObj.entityId]);
+      if (ind === oThis.replyDetailIds.length - 1) {
+        oThis.nextPaginationTimestamp = rdObj.createdAt;
+      }
     }
   }
 
@@ -206,23 +209,24 @@ class GetReplyList extends ServiceBase {
 
     return responseHelper.successWithData({
       [entityTypeConstants.videoReplyList]: oThis.videoReplies,
-      [entityTypeConstants.replyDetailsMap]: oThis.userRepliesMap.replyDetailsMap || {},
-      [entityTypeConstants.videoDescriptionsMap]: oThis.userRepliesMap.videoDescriptionMap || {},
-      [entityTypeConstants.userProfilesMap]: oThis.userRepliesMap.userProfilesMap || {},
-      [entityTypeConstants.currentUserUserContributionsMap]: oThis.userRepliesMap.currentUserUserContributionsMap || {},
+      [entityTypeConstants.replyDetailsMap]: oThis.userRepliesMap.replyDetailsMap,
+      [entityTypeConstants.videoDescriptionsMap]: oThis.userRepliesMap.videoDescriptionMap,
+      [entityTypeConstants.userProfilesMap]: oThis.userRepliesMap.userProfilesMap,
+      [entityTypeConstants.currentUserUserContributionsMap]: oThis.userRepliesMap.currentUserUserContributionsMap,
       [entityTypeConstants.currentUserVideoContributionsMap]:
-        oThis.userRepliesMap.currentUserVideoContributionsMap || {},
+        oThis.userRepliesMap.currentUserVideoContributionsMap,
+      [entityTypeConstants.currentUserReplyDetailContributionsMap]: oThis.userRepliesMap.currentUserReplyDetailContributionsMap,
       [entityTypeConstants.currentUserReplyDetailsRelationsMap]:
-        oThis.userRepliesMap.currentUserReplyDetailsRelationsMap || {},
-      [entityTypeConstants.userProfileAllowedActions]: oThis.userRepliesMap.userProfileAllowedActions || {},
+        oThis.userRepliesMap.currentUserReplyDetailsRelationsMap,
+      [entityTypeConstants.userProfileAllowedActions]: oThis.userRepliesMap.userProfileAllowedActions,
       [entityTypeConstants.pricePointsMap]: oThis.userRepliesMap.pricePointsMap,
-      usersByIdMap: oThis.userRepliesMap.usersByIdMap || {},
-      userStat: oThis.userRepliesMap.userStat || {},
-      tags: oThis.userRepliesMap.tags || {},
-      linkMap: oThis.userRepliesMap.linkMap || {},
-      imageMap: oThis.userRepliesMap.imageMap || {},
-      videoMap: oThis.userRepliesMap.videoMap || {},
-      tokenUsersByUserIdMap: oThis.userRepliesMap.tokenUsersByUserIdMap || {},
+      usersByIdMap: oThis.userRepliesMap.usersByIdMap,
+      userStat: oThis.userRepliesMap.userStat,
+      tags: oThis.userRepliesMap.tags,
+      linkMap: oThis.userRepliesMap.linkMap,
+      imageMap: oThis.userRepliesMap.imageMap,
+      videoMap: oThis.userRepliesMap.videoMap,
+      tokenUsersByUserIdMap: oThis.userRepliesMap.tokenUsersByUserIdMap,
       tokenDetails: oThis.tokenDetails,
       meta: oThis.responseMetaData
     });

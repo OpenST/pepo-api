@@ -86,7 +86,7 @@ class ValidateReplyParams extends ServiceBase {
         return Promise.reject(
           responseHelper.error({
             internal_error_identifier: 'a_s_r_v_1',
-            api_error_identifier: 'precondition_failed'
+            api_error_identifier: 'precondition_failed_in_reply'
           })
         );
       }
@@ -95,7 +95,7 @@ class ValidateReplyParams extends ServiceBase {
         return Promise.reject(
           responseHelper.error({
             internal_error_identifier: 'a_s_r_v_2',
-            api_error_identifier: 'precondition_failed'
+            api_error_identifier: 'precondition_failed_in_reply'
           })
         );
       }
@@ -157,7 +157,7 @@ class ValidateReplyParams extends ServiceBase {
       return Promise.reject(
         responseHelper.error({
           internal_error_identifier: 'a_s_r_v_5',
-          api_error_identifier: 'precondition_failed',
+          api_error_identifier: 'precondition_failed_in_reply',
           debug_options: { videoDetails: oThis.videoDetails }
         })
       );

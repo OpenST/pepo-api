@@ -4,10 +4,10 @@
     "code": "NOT_FOUND",
     "message": "Resource not found."
   },
-  "precondition_failed": {
+  "precondition_failed_in_reply": {
     "http_code": "200",
     "code": "PRECONDITION_FAILED",
-    "message": "Precondition failed."
+    "message": "Unable to post the reply because video has been deleted."
   },
   "invalid_api_params": {
     "http_code": "200",

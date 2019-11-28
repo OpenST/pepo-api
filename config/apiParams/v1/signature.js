@@ -43,6 +43,10 @@ const v1Signature = {
     ],
     optional: [
       {
+        parameter: paginationConstants.paginationIdentifierKey,
+        validatorMethods: ['validateString', 'validatePaginationIdentifier']
+      },
+      {
         parameter: 'current_user',
         validatorMethods: ['validateNonEmptyObject']
       }
@@ -341,7 +345,7 @@ const v1Signature = {
       },
       {
         parameter: 'per_reply_amount_in_wei',
-        validatorMethods: ['validateIntegerWeiValue']
+        validatorMethods: ['validateInteger']
       },
       {
         parameter: 'image_size',
@@ -349,7 +353,7 @@ const v1Signature = {
       },
       {
         parameter: 'video_description',
-        validatorMethods: ['validateVideoDescription', 'validateStopWords']
+        validatorMethods: ['validateString', 'validateStopWords']
       },
       {
         parameter: 'link',
@@ -411,7 +415,7 @@ const v1Signature = {
       },
       {
         parameter: 'video_description',
-        validatorMethods: ['validateVideoDescription', 'validateStopWords']
+        validatorMethods: ['validateString', 'validateStopWords']
       },
       {
         parameter: 'link',

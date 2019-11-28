@@ -162,17 +162,18 @@ class ReplyOnVideoTransaction extends OstTransactionBase {
         transferAmountBN = new BigNumber(oThis.transfersData[0].amount);
 
       if (!parentVideoPerReplyAmountInWeiBN.eq(transferAmountBN)) {
-        return Promise.reject(
-          responseHelper.paramValidationError({
-            internal_error_identifier: 'a_s_ot_4',
-            api_error_identifier: 'invalid_api_params',
-            params_error_identifiers: ['invalid_amount_in_transaction'],
-            debug_options: {
-              parentVideoPerReplyAmountInWei: parentVideoPerReplyAmountInWei,
-              transferAmount: oThis.transfersData[0].amount
-            }
-          })
-        );
+        let errorObject = responseHelper.error({
+          internal_error_identifier: 'a_s_ot_4',
+          api_error_identifier: 'something_went_wrong',
+          debug_options: {
+            parentVideoPerReplyAmountInWei: parentVideoPerReplyAmountInWei,
+            transferAmount: oThis.transfersData[0].amount
+          }
+        });
+
+        // Intentionally not rejecting here. This amount validation has to be handled in web-hook success.
+        logger.error('Amounts mismatch in transaction object and per reply video amount.');
+        await createErrorLogsEntry.perform(errorObject, errorLogsConstants.mediumSeverity);
       }
 
       const tokenUserDetailsResponse = await new TokenUserByUserId({ userIds: [parentVideoCreatorUserId] }).fetch();

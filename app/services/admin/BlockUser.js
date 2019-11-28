@@ -168,6 +168,8 @@ class BlockUser extends ServiceBase {
 
     const promiseArray = [];
 
+    //todo: do not add entry if no email
+
     const removeContactParams = {
       receiverEntityKind: emailServiceApiCallHookConstants.userEmailEntityKind,
       customDescription: 'Remove contact after block user.'
