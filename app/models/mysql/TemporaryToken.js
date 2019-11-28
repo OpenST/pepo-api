@@ -88,7 +88,7 @@ class TemporaryToken extends ModelBase {
    *
    * @param {array} ids
    *
-   * @return {object}
+   * @returns Promise{<object>}
    */
   async fetchByIds(ids) {
     const oThis = this;

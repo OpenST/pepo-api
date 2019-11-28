@@ -142,7 +142,10 @@ class ReplyDetailsModel extends ModelBase {
   /**
    * Fetch reply detail by entity id and entity kind.
    *
-   * @param params
+   * @param {object} params
+   * @param {array} params.entityIds
+   * @param {string} params.entityKind
+   *
    * @returns {Promise<*>}
    */
   async fetchReplyDetailByEntityIdsAndEntityKind(params) {
@@ -271,7 +274,7 @@ class ReplyDetailsModel extends ModelBase {
    * Mark video entities deleted.
    *
    * @param {object} params
-   * @param {Array} params.replyDetailsIds
+   * @param {array} params.replyDetailsIds
    *
    * @returns {object}
    */
@@ -327,9 +330,9 @@ class ReplyDetailsModel extends ModelBase {
   /**
    * Fetch by creator user id.
    *
-   * @param {integer} params.limit: no of rows to fetch
-   * @param {integer} params.creatorUserId: creator user id
-   * @param {integer} params.paginationTimestamp: creator user id
+   * @param {number} params.limit: no of rows to fetch
+   * @param {number} params.creatorUserId: creator user id
+   * @param {number} params.paginationTimestamp: creator user id
    *
    * @returns {Promise}
    */

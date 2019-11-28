@@ -63,7 +63,7 @@ class Text extends ModelBase {
    *
    * @param {number} id
    *
-   * @returns {object}
+   * @returns Promise{<object>}
    */
   async fetchById(id) {
     const oThis = this;
@@ -78,7 +78,7 @@ class Text extends ModelBase {
    *
    * @param {array} ids: text ids
    *
-   * @returns {object}
+   * @returns Promise{<object>}
    */
   async fetchByIds(ids) {
     const oThis = this;
@@ -178,9 +178,7 @@ class Text extends ModelBase {
 
     await oThis
       .delete()
-      .where({
-        id: params.id
-      })
+      .where({ id: params.id })
       .fire();
   }
 
@@ -188,7 +186,7 @@ class Text extends ModelBase {
    * Flush cache.
    *
    * @param {object} params
-   * @param {array<number>} params.textIds
+   * @param {array<number>} params.ids
    *
    * @returns {Promise<*>}
    */
