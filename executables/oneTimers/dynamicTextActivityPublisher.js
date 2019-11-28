@@ -130,6 +130,7 @@ class DynamicTextActivityPublisher {
     }
 
     await Promise.all(promiseArray);
+    await basicHelper.sleep(5000);
   }
 }
 
