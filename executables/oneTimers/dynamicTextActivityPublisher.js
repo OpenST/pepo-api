@@ -15,6 +15,7 @@ const rootPrefix = '../..',
   basicHelper = require(rootPrefix + '/helpers/basic'),
   notificationJobEnqueue = require(rootPrefix + '/lib/rabbitMqEnqueue/notification'),
   notificationJobConstants = require(rootPrefix + '/lib/globalConstant/notificationJob'),
+  gotoConstants = require(rootPrefix + '/lib/globalConstant/goto'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger');
 
 program
@@ -116,8 +117,11 @@ class DynamicTextActivityPublisher {
           userId: oThis.userIds[ind],
           systemNotificationParams: {
             payload: {
-              url: oThis.url,
               dynamicText: oThis.text
+            },
+            gotoParams: {
+              kind: gotoConstants.webViewGotoKind,
+              url: oThis.url
             }
           }
         })
@@ -129,6 +133,7 @@ class DynamicTextActivityPublisher {
       }
     }
 
+    await basicHelper.sleep(5000);
     await Promise.all(promiseArray);
   }
 }
