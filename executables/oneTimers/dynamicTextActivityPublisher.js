@@ -112,10 +112,14 @@ class DynamicTextActivityPublisher {
 
     for (let ind = 0; ind < oThis.userIds.length; ind++) {
       promiseArray.push(
-        notificationJobEnqueue.enqueue(notificationJobConstants.dynamicText, {
+        notificationJobEnqueue.enqueue(notificationJobConstants.systemNotification, {
           userId: oThis.userIds[ind],
-          url: oThis.url,
-          dynamicText: oThis.text
+          systemNotificationParams: {
+            payload: {
+              url: oThis.url,
+              dynamicText: oThis.text
+            }
+          }
         })
       );
 
