@@ -52,8 +52,6 @@ class TransactionWebhookBase extends ServiceBase {
 
     oThis.ostTransaction = params.transaction;
 
-    logger.log('====oThis.ostTransaction is : ', params);
-
     oThis.ostTxId = oThis.ostTransaction.id;
     oThis.ostTransactionStatus = oThis.ostTransaction.status;
     oThis.ostTransactionMinedTimestamp = oThis.ostTransaction.block_timestamp || null;
@@ -412,6 +410,11 @@ class TransactionWebhookBase extends ServiceBase {
     logger.log('End:: Update token user to mark airdrops status');
   }
 
+  /**
+   * Process for topup transaction
+   *
+   * @returns {Promise<*|result>}
+   */
   async processForTopUpTransaction() {
     const oThis = this;
 
@@ -425,6 +428,11 @@ class TransactionWebhookBase extends ServiceBase {
     return responseHelper.successWithData({});
   }
 
+  /**
+   * Update pepocorn transaction model
+   *
+   * @returns {Promise<*|result>}
+   */
   async updatePepocornTransactionModel() {
     const oThis = this;
 
