@@ -33,11 +33,12 @@ class Tag extends ModelBase {
    * @param {object} dbRow
    * @param {number} dbRow.id
    * @param {string} dbRow.name
-   * @param {string} dbRow.weight
-   * @param {string} dbRow.video_weight
-   * @param {string} dbRow.status
-   * @param {string} dbRow.created_at
-   * @param {string} dbRow.updated_at
+   * @param {number} dbRow.weight
+   * @param {number} dbRow.video_weight
+   * @param {number} dbRow.reply_weight
+   * @param {number} dbRow.status
+   * @param {number} dbRow.created_at
+   * @param {number} dbRow.updated_at
    *
    * @returns {object}
    * @private
@@ -50,6 +51,7 @@ class Tag extends ModelBase {
       name: dbRow.name,
       weight: dbRow.weight,
       videoWeight: dbRow.video_weight,
+      replyWeight: dbRow.reply_weight,
       status: tagConstants.statuses[dbRow.status],
       createdAt: dbRow.created_at,
       updatedAt: dbRow.updated_at
@@ -152,7 +154,7 @@ class Tag extends ModelBase {
       .where({ status: tagConstants.invertedStatuses[tagConstants.activeStatus] })
       .limit(limit)
       .offset(offset)
-      .order_by('(weight + video_weight) DESC')
+      .order_by('(weight + video_weight + reply_weight) DESC')
       .fire();
 
     const response = [];
