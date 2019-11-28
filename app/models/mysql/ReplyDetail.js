@@ -209,10 +209,7 @@ class ReplyDetailsModel extends ModelBase {
 
     const dbRows = await oThis
       .select('*')
-      .where({
-        parent_id: videoIds,
-        status: replyDetailConstants.invertedStatuses[replyDetailConstants.activeStatus]
-      })
+      .where(['parent_id IN (?) AND transaction_id IS NOT NULL', videoIds])
       .fire();
 
     const response = {};
