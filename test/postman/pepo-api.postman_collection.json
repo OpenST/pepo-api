@@ -76,7 +76,7 @@
 							"urlencoded": []
 						},
 						"url": {
-							"raw": "{{api_server}}/api/admin/users/1410/block",
+							"raw": "{{api_server}}/api/admin/users/1410/delete",
 							"host": [
 								"{{api_server}}"
 							],
@@ -85,7 +85,7 @@
 								"admin",
 								"users",
 								"1410",
-								"block"
+								"delete"
 							]
 						}
 					},

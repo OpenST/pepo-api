@@ -16,16 +16,16 @@ const rootPrefix = '../../..',
   emailServiceApiCallHookConstants = require(rootPrefix + '/lib/globalConstant/emailServiceApiCallHook');
 
 /**
- * Class to block users by admin.
+ * Class to delete users by admin.
  *
- * @class BlockUser
+ * @class DeleteUser
  */
-class BlockUser extends ServiceBase {
+class DeleteUser extends ServiceBase {
   /**
-   * Constructor to block users by admin.
+   * Constructor to delete users by admin.
    *
    * @param {object} params
-   * @param {array} params.user_ids: User ids to be blocked by admin.
+   * @param {array} params.user_ids: User ids to be deleteed by admin.
    * @param {object} params.current_admin: current admin.
    *
    * @augments ServiceBase
@@ -64,7 +64,7 @@ class BlockUser extends ServiceBase {
 
     await oThis._fetchUsers();
 
-    await oThis._blockUsers();
+    await oThis._deleteUsers();
 
     const promisesArray = [
       oThis._decreseUserTagWeight(),
@@ -120,12 +120,12 @@ class BlockUser extends ServiceBase {
   }
 
   /**
-   * Block users.
+   * Delete users.
    *
    * @returns {Promise<void>}
    * @private
    */
-  async _blockUsers() {
+  async _deleteUsers() {
     const oThis = this;
 
     await new UserModel()
@@ -172,7 +172,7 @@ class BlockUser extends ServiceBase {
 
     const removeContactParams = {
       receiverEntityKind: emailServiceApiCallHookConstants.userEmailEntityKind,
-      customDescription: 'Remove contact after block user.'
+      customDescription: 'Remove contact after delete user.'
     };
 
     for (let ind = 0; ind < oThis.userIds.length; ind++) {
@@ -274,7 +274,7 @@ class BlockUser extends ServiceBase {
         new AdminActivityLogModel().insertAction({
           adminId: oThis.currentAdminId,
           actionOn: oThis.userIds[index],
-          action: adminActivityLogConstants.blockUser
+          action: adminActivityLogConstants.deleteUser
         })
       );
     }
@@ -283,4 +283,4 @@ class BlockUser extends ServiceBase {
   }
 }
 
-module.exports = BlockUser;
+module.exports = DeleteUser;

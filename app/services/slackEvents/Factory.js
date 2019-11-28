@@ -134,9 +134,9 @@ class SlackEventFactory extends ServiceBase {
         }).perform();
         break;
       }
-      case slackConstants.blockUserEventType: {
-        const BlockUserClass = require(rootPrefix + '/app/services/slackEvents/BlockUser');
-        eventResponse = await new BlockUserClass({
+      case slackConstants.deleteUserEventType: {
+        const DeleteUserClass = require(rootPrefix + '/app/services/slackEvents/DeleteUser');
+        eventResponse = await new DeleteUserClass({
           eventDataPayload: oThis.eventData.payload,
           eventParams: oThis.eventParams,
           currentAdmin: oThis.currentAdmin

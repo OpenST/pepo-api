@@ -76,7 +76,7 @@ const adminSignature = {
     ],
     optional: []
   },
-  [apiName.adminUserBlock]: {
+  [apiName.adminUserDelete]: {
     mandatory: [
       {
         parameter: 'user_ids',

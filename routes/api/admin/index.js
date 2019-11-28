@@ -152,12 +152,12 @@ router.post('/users/:user_id/deny', sanitizer.sanitizeDynamicUrlParams, function
   Promise.resolve(routeHelper.perform(req, res, next, '/admin/DenyUsersAsCreator', 'r_a_v1_ad_6', null, null, null));
 });
 
-/* Block user */
-router.post('/users/:user_id/block', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
-  req.decodedParams.apiName = apiName.adminUserBlock;
+/* Delete user */
+router.post('/users/:user_id/delete', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.adminUserDelete;
   req.decodedParams.user_ids = [req.params.user_id];
 
-  Promise.resolve(routeHelper.perform(req, res, next, '/admin/BlockUser', 'r_a_v1_ad_7', null, null, null));
+  Promise.resolve(routeHelper.perform(req, res, next, '/admin/DeleteUser', 'r_a_v1_ad_7', null, null, null));
 });
 
 /* Video history for admin - intentionally retained the same api name */

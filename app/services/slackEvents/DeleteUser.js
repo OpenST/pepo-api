@@ -1,16 +1,16 @@
 const rootPrefix = '../../..',
   SlackEventBase = require(rootPrefix + '/app/services/slackEvents/Base'),
-  BlockUserService = require(rootPrefix + '/app/services/admin/BlockUser'),
+  DeleteUserService = require(rootPrefix + '/app/services/admin/DeleteUser'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   slackConstants = require(rootPrefix + '/lib/globalConstant/slack');
 
 /**
- * Class to process block user event.
+ * Class to process delete user event.
  *
- * @class BlockUser
+ * @class DeleteUser
  */
-class BlockUser extends SlackEventBase {
+class DeleteUser extends SlackEventBase {
   /**
    * Async perform.
    *
@@ -22,7 +22,7 @@ class BlockUser extends SlackEventBase {
 
     await oThis._validateAndSanitizeParams();
 
-    await oThis._callBlockUserService();
+    await oThis._callDeleteUserService();
 
     await oThis._postResponseToSlack();
 
@@ -30,23 +30,23 @@ class BlockUser extends SlackEventBase {
   }
 
   /**
-   * Call block user service.
+   * Call delete user service.
    *
    * @returns {Promise<*>}
    * @private
    */
-  async _callBlockUserService() {
+  async _callDeleteUserService() {
     const oThis = this;
 
-    const blockUserServiceResponseParams = {
+    const DeleteUserServiceResponseParams = {
       user_ids: [oThis.eventParams.user_id],
       current_admin: oThis.currentAdmin
     };
 
-    const blockUserServiceResponse = await new BlockUserService(blockUserServiceResponseParams).perform();
+    const DeleteUserServiceResponse = await new DeleteUserService(DeleteUserServiceResponseParams).perform();
 
-    if (blockUserServiceResponse.isFailure()) {
-      oThis._setError(blockUserServiceResponse);
+    if (DeleteUserServiceResponse.isFailure()) {
+      oThis._setError(DeleteUserServiceResponse);
     }
   }
 
@@ -90,4 +90,4 @@ class BlockUser extends SlackEventBase {
   }
 }
 
-module.exports = BlockUser;
+module.exports = DeleteUser;

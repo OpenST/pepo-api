@@ -205,7 +205,7 @@ class FeedBase extends ServiceBase {
         const errorObject = responseHelper.error({
           internal_error_identifier: 'a_s_f_fiuf_1',
           api_error_identifier: 'something_went_wrong',
-          debug_options: { feedData: feedData, msg: 'FOUND DELETED VIDEO OR BLOCKED USERS VIDEO IN FEED' }
+          debug_options: { feedData: feedData, msg: 'FOUND DELETED VIDEO OR DELETED USERS VIDEO IN FEED' }
         });
 
         if (
