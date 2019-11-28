@@ -6,6 +6,7 @@ const rootPrefix = '../../..',
   ReplyDetailsByEntityIdsAndEntityKindCache = require(rootPrefix +
     '/lib/cacheManagement/multi/ReplyDetailsByEntityIdsAndEntityKind'),
   tagConstants = require(rootPrefix + '/lib/globalConstant/tag'),
+  logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   videoTagConstants = require(rootPrefix + '/lib/globalConstant/videoTag'),
   entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
@@ -309,7 +310,7 @@ class GetTagsVideoList extends ServiceBase {
       return Promise.reject(replyDetailsByEntityIdsAndEntityKindCacheRsp);
     }
 
-    for (let vid in replyDetailsByEntityIdsAndEntityKindCacheRsp.data) {
+    for (const vid in replyDetailsByEntityIdsAndEntityKindCacheRsp.data) {
       const rdId = replyDetailsByEntityIdsAndEntityKindCacheRsp.data[vid];
       if (Number(rdId) > 0) {
         oThis.replyDetailIds.push(rdId);
