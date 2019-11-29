@@ -19,22 +19,39 @@ const rootPrefix = '../..',
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger');
 
 program
-  .option('--url <url>', 'Goto url')
+  .option('--gotoParams <gotoParams>', 'Goto params')
   .option('--text <text>', 'Activity text')
+  .option('--publishNotification <publishNotification>', 'Is push notification required.')
+  .option('--publishActivity <publishActivity>', 'Is activity required.')
   .parse(process.argv);
+
+// gotoParams = {
+//   kind: 'webview',
+//   url: "https://stagingpepo.com?utm_type=1&utm_source=organic"
+// };
+//
+// gotoParams = {
+//   kind: 'notificationCentre'
+// };
+//
+// JSON.stringify(gotoParams);
+
+// notificationCentreGotoKind
+// node executables/oneTimers/dynamicTextActivityPublisher.js --gotoParams '{"kind":"webview","url":"https://stagingpepo.com?utm_type=1&utm_source=organic"}' --publishNotification 0 --publishActivity 1 --text "New Test System Notification. Goto is webview."
+// node executables/oneTimers/dynamicTextActivityPublisher.js --gotoParams '{"kind":"notificationCentre"}' --publishNotification 1 --publishActivity 0 --text "New Test System Notification. Goto is notification centre."
 
 program.on('--help', function() {
   logger.log('');
   logger.log('  Example:');
   logger.log('');
   logger.log(
-    'node executables/oneTimers/dynamicTextActivityPublisher.js --url "https://stagingpepo.com?utm_type=1&utm_source=organic" --text "New Test System Notification. Goto is webview."'
+    'node executables/oneTimers/dynamicTextActivityPublisher.js --gotoParams \'{"kind":"webview","url":"https://stagingpepo.com?utm_type=1&utm_source=organic"}\' --publishNotification 0 --publishActivity 1 --text "New Test System Notification. Goto is webview."'
   );
   logger.log('');
   logger.log('');
 });
 
-if (!program.url || !program.text) {
+if (!program.gotoParams || !program.text) {
   program.help();
   process.exit(1);
 }
@@ -47,8 +64,10 @@ class DynamicTextActivityPublisher {
   constructor(params) {
     const oThis = this;
 
-    oThis.url = params.url;
+    oThis.gotoParams = JSON.parse(params.gotoParams);
     oThis.text = params.text;
+    oThis.publishNotification = params.publishNotification || 0;
+    oThis.publishActivity = params.publishActivity || 0;
 
     oThis.userIds = [];
   }
@@ -108,6 +127,13 @@ class DynamicTextActivityPublisher {
 
     let promiseArray = [];
 
+    console.log(
+      'oThis.publishNotification---oThis.publishActivity---oThis.gotoParams-----',
+      oThis.publishNotification,
+      oThis.publishActivity,
+      oThis.gotoParams
+    );
+
     for (let ind = 0; ind < oThis.userIds.length; ind++) {
       promiseArray.push(
         notificationJobEnqueue.enqueue(notificationJobConstants.systemNotification, {
@@ -116,11 +142,10 @@ class DynamicTextActivityPublisher {
             payload: {
               dynamicText: oThis.text
             },
-            gotoParams: {
-              kind: gotoConstants.webViewGotoKind,
-              url: oThis.url
-            }
-          }
+            gotoParams: oThis.gotoParams
+          },
+          publishActivity: oThis.publishActivity,
+          publishNotification: oThis.publishNotification
         })
       );
 
@@ -136,8 +161,10 @@ class DynamicTextActivityPublisher {
 }
 
 new DynamicTextActivityPublisher({
-  url: program.url,
-  text: program.text
+  gotoParams: program.gotoParams,
+  text: program.text,
+  publishNotification: program.publishNotification,
+  publishActivity: program.publishActivity
 })
   .perform()
   .then(function() {
