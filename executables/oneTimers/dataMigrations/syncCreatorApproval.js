@@ -67,7 +67,7 @@ class SyncCreatorApproval {
       offset = offset + limit;
     }
 
-    console.log('The oThis.errorLogs are : ', oThis.errorLogs);
+    logger.log('The oThis.errorLogs are : ', oThis.errorLogs);
   }
 
   /**
@@ -117,7 +117,7 @@ class SyncCreatorApproval {
     // this cache give only id, twitter_id for every object
     preLaunchInviteByTwitterIds = preLaunchInviteByTwitterIdsCacheResp.data;
 
-    console.log('The preLaunchInviteByTwitterIds is : ', preLaunchInviteByTwitterIds);
+    logger.log('The preLaunchInviteByTwitterIds is : ', preLaunchInviteByTwitterIds);
 
     for (let userId in usersByIdMap) {
       let userObj = usersByIdMap[userId],
@@ -199,7 +199,7 @@ class SyncCreatorApproval {
   async _approvePreLaunchUser(preLaunchInviteId) {
     const oThis = this;
 
-    console.log('The preLaunchInviteId for _approvePreLaunchUser is : ', preLaunchInviteId);
+    logger.log('The preLaunchInviteId for _approvePreLaunchUser is : ', preLaunchInviteId);
 
     let rsp = await new ApprovePreLaunchUserService({ invite_id: preLaunchInviteId }).perform();
 
@@ -222,7 +222,7 @@ class SyncCreatorApproval {
    */
   async _approveUser(userId) {
     const oThis = this;
-    console.log('The userId for _approveUser is : ', userId);
+    logger.log('The userId for _approveUser is : ', userId);
     let rsp = await new ApproveUserService({
       user_ids: [userId],
       current_admin: oThis.currentAdminObj

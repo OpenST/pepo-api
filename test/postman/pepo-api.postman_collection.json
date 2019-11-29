@@ -1,217 +1,218 @@
 {
 	"info": {
-		"_postman_id": "ba795c0d-bae4-421f-a401-76002ab4f004",
+		"_postman_id": "240eba68-c190-4401-9ae8-163708f6dc78",
 		"name": "pepo-api",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [
 		{
-			"name": "webhook",
+			"name": "admin",
 			"item": [
 				{
-					"name": "Slack",
-					"item": [
-						{
-							"name": "approve-user-success",
-							"request": {
-								"method": "POST",
-								"header": [
-									{
-										"warning": "Value contains invalid newline characters.",
-										"key": "Content-Type",
-										"name": "Content-Type",
-										"value": "application/x-www-form-urlencoded",
-										"type": "text"
-									},
-									{
-										"key": "x-slack-signature",
-										"value": "v0=b63936ef94913a87fd89119de93aa6fdf8d6de59a30090d601fb03abcafbce70",
-										"type": "text"
-									},
-									{
-										"key": "x-slack-request-timestamp",
-										"value": "1574348564",
-										"type": "text"
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "payload=%7B%22type%22%3A%22block_actions%22%2C%22team%22%3A%7B%22id%22%3A%22T78KWNKC6%22%2C%22domain%22%3A%22ostdotcom%22%7D%2C%22user%22%3A%7B%22id%22%3A%22U99HQ8NLT%22%2C%22username%22%3A%22aman%22%2C%22name%22%3A%22aman%22%2C%22team_id%22%3A%22T78KWNKC6%22%7D%2C%22api_app_id%22%3A%22AQC5JETDX%22%2C%22token%22%3A%22t2kaSFG00CJoVpW3Vfw2pIJ0%22%2C%22container%22%3A%7B%22type%22%3A%22message%22%2C%22message_ts%22%3A%221574331819.000100%22%2C%22channel_id%22%3A%22CQN8L1SMA%22%2C%22is_ephemeral%22%3Afalse%7D%2C%22trigger_id%22%3A%22832493891955.246676767414.d594ae4ac4f6c4410df4d64a2e02c8fb%22%2C%22channel%22%3A%7B%22id%22%3A%22CQN8L1SMA%22%2C%22name%22%3A%22test_approve_new_creators%22%7D%2C%22message%22%3A%7B%22type%22%3A%22message%22%2C%22subtype%22%3A%22bot_message%22%2C%22text%22%3A%22%2AHi%2C+We+got+a+video+from+a+new+User+at+PEPO.+Please+check+the+details+about+the+videos+and+take+actions+accordingly%2A%22%2C%22ts%22%3A%221574331819.000100%22%2C%22username%22%3A%22Pepo+Development%22%2C%22bot_id%22%3A%22BQKM9737E%22%2C%22blocks%22%3A%5B%7B%22type%22%3A%22section%22%2C%22block_id%22%3A%22d7IY%22%2C%22text%22%3A%7B%22type%22%3A%22mrkdwn%22%2C%22text%22%3A%22---------------------------------------------------------%5Cn%2AHi%2C+We+got+a+video+from+an+existing+User+at+PEPO.+Please+check+the+details+about+the+videos+and+take+actions+accordingly%2A%5Cn%2AUser%27s+Full+Name%3A%2A%3A+Ankit+Singh%5Cn%2AUsername%3A%2A%3A+sing_k0p6b1b8hb%5Cn%2AAdmin+Profile+URL%3A%2A%3A+%3Chttp%3A%5C%2F%5C%2Fpepodev.com%3A8080%5C%2Fadmin%5C%2Fuser-profile%5C%2F1021%3E%5Cn%2ATwitter+handle%3A%2A%3A+singhankit2099%5Cn%2AEmail+address%3A%2A%3A+null%5Cn%22%2C%22verbatim%22%3Afalse%7D%7D%2C%7B%22type%22%3A%22divider%22%2C%22block_id%22%3A%22e1I%22%7D%2C%7B%22type%22%3A%22section%22%2C%22block_id%22%3A%22djZ%22%2C%22text%22%3A%7B%22type%22%3A%22mrkdwn%22%2C%22text%22%3A%22%2AVideoLink%2A%3A+%3Chttps%3A%5C%2F%5C%2Fdbvoeb7t6hffk.cloudfront.net%5C%2Fd%5C%2Fua%5C%2Fvideos%5C%2Fpankaj-profile.mp4-original.mp4%3E%5Cn%2AUpdatedAt%2A%3A+18+Sep+2019+17%3A34%3A32%22%2C%22verbatim%22%3Afalse%7D%2C%22accessory%22%3A%7B%22type%22%3A%22button%22%2C%22style%22%3A%22danger%22%2C%22text%22%3A%7B%22type%22%3A%22plain_text%22%2C%22text%22%3A%22Delete+Video%22%2C%22emoji%22%3Atrue%7D%2C%22value%22%3A%22delete_video%7Cvideo_id%3A22%22%2C%22action_id%22%3A%22aOtUU%22%7D%7D%2C%7B%22type%22%3A%22divider%22%2C%22block_id%22%3A%2229LQg%22%7D%2C%7B%22type%22%3A%22actions%22%2C%22block_id%22%3A%22e87Qk%22%2C%22elements%22%3A%5B%7B%22type%22%3A%22button%22%2C%22action_id%22%3A%22F%5C%2FDZ%5C%2F%22%2C%22text%22%3A%7B%22type%22%3A%22plain_text%22%2C%22text%22%3A%22Approve+User%22%2C%22emoji%22%3Atrue%7D%2C%22style%22%3A%22primary%22%2C%22value%22%3A%22approve_user%7Cuser_id%3A1021%22%7D%2C%7B%22type%22%3A%22button%22%2C%22action_id%22%3A%22Ur6op%22%2C%22text%22%3A%7B%22type%22%3A%22plain_text%22%2C%22text%22%3A%22Block+User%22%2C%22emoji%22%3Atrue%7D%2C%22style%22%3A%22danger%22%2C%22value%22%3A%22block_user%7Cuser_id%3A1021%22%7D%5D%7D%2C%7B%22type%22%3A%22section%22%2C%22block_id%22%3A%22sOYA%22%2C%22text%22%3A%7B%22type%22%3A%22mrkdwn%22%2C%22text%22%3A%22--------------------------------------------------------------------%22%2C%22verbatim%22%3Afalse%7D%7D%5D%7D%2C%22response_url%22%3A%22https%3A%5C%2F%5C%2Fhooks.slack.com%5C%2Factions%5C%2FT78KWNKC6%5C%2F836036662689%5C%2FaYZtwMZtnU4AFCr7H572Rg8R%22%2C%22actions%22%3A%5B%7B%22action_id%22%3A%22F%5C%2FDZ%5C%2F%22%2C%22block_id%22%3A%22e87Qk%22%2C%22text%22%3A%7B%22type%22%3A%22plain_text%22%2C%22text%22%3A%22Approve+User%22%2C%22emoji%22%3Atrue%7D%2C%22value%22%3A%22approve_user%7Cuser_id%3A1021%22%2C%22style%22%3A%22primary%22%2C%22type%22%3A%22button%22%2C%22action_ts%22%3A%221574348564.116169%22%7D%5D%7D"
+					"name": "approve-user",
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "username",
+									"value": "pepo",
+									"type": "string"
 								},
-								"url": {
-									"raw": "{{api_server}}/webhooks/slack/",
-									"host": [
-										"{{api_server}}"
-									],
-									"path": [
-										"webhooks",
-										"slack",
-										""
-									]
+								{
+									"key": "password",
+									"value": "Pepo-Admin-20!9*",
+									"type": "string"
 								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/x-www-form-urlencoded",
+								"type": "text"
 							},
-							"response": []
+							{
+								"key": "csrf-token",
+								"value": "{{csrf-token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{api_server}}/api/admin/users/1414/approve",
+							"host": [
+								"{{api_server}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"users",
+								"1414",
+								"approve"
+							]
 						}
-					],
-					"protocolProfileBehavior": {},
-					"_postman_isSubFolder": true
+					},
+					"response": []
 				},
 				{
-					"name": "activate-user-success",
+					"name": "deactivate-user",
 					"request": {
 						"method": "POST",
 						"header": [
 							{
 								"key": "Content-Type",
-								"name": "Content-Type",
-								"value": "application/json",
+								"value": "application/x-www-form-urlencoded",
+								"type": "text"
+							},
+							{
+								"key": "csrf-token",
+								"value": "{{csrf-token}}",
 								"type": "text"
 							}
 						],
 						"body": {
-							"mode": "raw",
-							"raw": "{ \"id\": \"28262d90-4545-424d-8422-74d4df5cc963\",\n  \"topic\": \"users/activation_success\",\n  \"created_at\": 1560164197,\n  \"webhook_id\": \"96f9ff47-5dc8-432f-9a6c-1c79e0cf3bd0\",\n  \"version\": \"2\",\n  \"data\": \n   { \"result_type\": \"user\",\n     \"user\": \n      { \"id\": \"2e0f3041-026a-4be3-b1d2-791c98565219\",\n        \"token_id\": 1128,\n        \"token_holder_address\": \"0x55fc5e23f3ae102f5615f6c7cefaf414922322fe\",\n        \"device_manager_address\": \"0x5ac584e41ec36b16015f86ebff94dcc668a3e457\",\n        \"recovery_address\": \"0x15d3f1825d193d9b688c8dfa3c4234a05e79a092\",\n        \"recovery_owner_address\": \"0x49a74de62e7db11dcc1010780d0699b5bf83c2ac\",\n        \"type\": \"user\",\n        \"status\": \"ACTIVATED\",\n        \"updated_timestamp\": 1560164197 } } }"
+							"mode": "urlencoded",
+							"urlencoded": []
 						},
 						"url": {
-							"raw": "{{api_server}}/webhooks/ost/v2",
+							"raw": "{{api_server}}/api/admin/users/1410/delete",
 							"host": [
 								"{{api_server}}"
 							],
 							"path": [
-								"webhooks",
-								"ost",
-								"v2"
+								"api",
+								"admin",
+								"users",
+								"1410",
+								"delete"
 							]
 						}
 					},
 					"response": []
 				},
 				{
-					"name": "airdrop-success",
+					"name": "delete-video",
 					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "password",
+									"value": "Pepo-Admin-20!9*",
+									"type": "string"
+								},
+								{
+									"key": "username",
+									"value": "pepo",
+									"type": "string"
+								}
+							]
+						},
 						"method": "POST",
 						"header": [
 							{
 								"key": "Content-Type",
-								"name": "Content-Type",
-								"type": "text",
-								"value": "application/json"
+								"value": "application/x-www-form-urlencoded",
+								"type": "text"
+							},
+							{
+								"key": "csrf-token",
+								"value": "{{csrf-token}}",
+								"type": "text"
 							}
 						],
 						"body": {
-							"mode": "raw",
-							"raw": "\n{\n    \"id\": \"29262d00-4545-424d-8422-74d4df5cc963\",\n    \"topic\": \"transactions/success\",\n    \"webhook_id\": \"ncse-42jkrbw-32bekjq3-23jheb423q\",\n    \"created_at\": 1552536269,\n    \"version\": \"2\",\n    \"data\": {\n        \"result_type\": \"transaction\",\n        \"transaction\": {\n            \"id\":\"e2c6cba9-ef2a-4da2-8a23-f6b3421a938c\",\n            \"transaction_hash\":\"0xa9632350057c2226c5a10418b1c3bc9acdf7e2ee\",\n            \"from\":\"0x55fc5e23f3ae102f5615f6c7cefaf414922322fe\",\n            \"to\":\"0xa9632350057c2226c5a10418b1c3bc9acdf7e2ee\",\n            \"nonce\":1,\n            \"value\":1000000000,\n            \"gas_price\":\"1000000000\",\n            \"gas_used\":1,\n            \"transaction_fee\":1,\n            \"block_confirmation\":12,\n            \"status\":\"CREATED\",\n            \"updated_timestamp\":1552536269,\n            \"block_timestamp\":1552536269,\n            \"block_number\":1552536269,\n            \"rule_name\":\"\",\n            \"meta_property\":{\n              \"name\":\"UserActivateAirdrop\",\n              \"type\":\"company_to_user\",\n              \"details\":\"Welcome\"\n            },\n            \"transfers\":[\n                {\n                \"from\":\"0xa9632350057c2226c5a10418b1c3bc9acdf7e2ee\",\n                \"from_user_id\":\"724ed66c-8a0a-477e-b303-b0486e2a3797\",\n                \"to\":\"0xc3b9b4a5c1997d73cd8d9d0fb95aa945e68e0496\",\n                \"to_user_id\":\"9e847ac4-1bd8-498f-b601-51a56bbca076\",\n                \"kind\":\"transfer\"\n                }\n            ]\n        }\n    }\n}   "
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "email",
+									"value": "santhosh@ost.com",
+									"type": "text"
+								},
+								{
+									"key": "password",
+									"value": "5b300f84986e09ab",
+									"type": "text"
+								}
+							]
 						},
 						"url": {
-							"raw": "{{api_server}}/webhooks/ost/v2",
+							"raw": "{{api_server}}/api/admin/delete-video/1089",
 							"host": [
 								"{{api_server}}"
 							],
 							"path": [
-								"webhooks",
-								"ost",
-								"v2"
+								"api",
+								"admin",
+								"delete-video",
+								"1089"
 							]
 						}
 					},
 					"response": []
 				},
 				{
-					"name": "user-Transaction-success",
+					"name": "delete-reply",
 					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "password",
+									"value": "Pepo-Admin-20!9*",
+									"type": "string"
+								},
+								{
+									"key": "username",
+									"value": "pepo",
+									"type": "string"
+								}
+							]
+						},
 						"method": "POST",
 						"header": [
 							{
 								"key": "Content-Type",
-								"name": "Content-Type",
 								"type": "text",
-								"value": "application/json"
+								"value": "application/x-www-form-urlencoded"
+							},
+							{
+								"key": "csrf-token",
+								"type": "text",
+								"value": "{{csrf-token}}"
 							}
 						],
 						"body": {
-							"mode": "raw",
-							"raw": "\n{\n    \"id\": \"29262d00-4545-424d-8422-74d4df5cc967\",\n    \"topic\": \"transactions/success\",\n    \"webhook_id\": \"ncse-42jkrbw-32bekjq3-23jheb423q\",\n    \"created_at\": 1552536269,\n    \"version\": \"2\",\n    \"data\": {\n        \"result_type\": \"transaction\",\n        \"transaction\": {\n            \"id\":\"8a15c59c-674c-449f-8f0e-dec613d4c6a1\",\n            \"transaction_hash\":\"0xa9632350057c2226c5a10418b1c3bc9acdf7e2ee\",\n            \"from\":\"0x55fc5e23f3ae102f5615f6c7cefaf414922322fe\",\n            \"to\":\"0xa9632350057c2226c5a10418b1c3bc9acdf7e2ee\",\n            \"nonce\":1,\n            \"value\":1000000000,\n            \"gas_price\":\"1000000000\",\n            \"gas_used\":1,\n            \"transaction_fee\":1,\n            \"block_confirmation\":12,\n            \"status\":\"SUCCESS\",\n            \"updated_timestamp\":1552536269,\n            \"block_timestamp\":1552536269,\n            \"block_number\":1552536269,\n            \"rule_name\":\"\",\n            \"meta_property\": {\n            \t\"name\":\"userTransaction\",\n        \t\t\"type\":\"user_to_user\",\n        \t\t\"details\":\"vi_1\"\n            },\n            \"transfers\":[\n                {\n                \"from\":\"0xa9632350057c2226c5a10418b1c3bc9acdf7e2ee\",\n                \"from_user_id\":\"e65b4c76-07c3-4e6d-86a8-d67d48017ab8\",\n                \"to\":\"0xc3b9b4a5c1997d73cd8d9d0fb95aa945e68e0496\",\n                \"to_user_id\":\"f9fbcb3d-165a-4b3e-a613-879c1bf7c36b\",\n                \"kind\":\"transfer\",\n                \"amount\": \"5\"\n                }\n            ]\n        }\n    }\n}   "
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "email",
+									"value": "santhosh@ost.com",
+									"type": "text"
+								},
+								{
+									"key": "password",
+									"value": "5b300f84986e09ab",
+									"type": "text"
+								}
+							]
 						},
 						"url": {
-							"raw": "{{api_server}}/webhooks/ost/v2",
+							"raw": "{{api_server}}/api/admin/delete-reply-video/803",
 							"host": [
 								"{{api_server}}"
 							],
 							"path": [
-								"webhooks",
-								"ost",
-								"v2"
+								"api",
+								"admin",
+								"delete-reply-video",
+								"803"
 							]
 						}
 					},
 					"response": []
 				},
-				{
-					"name": "airdrop-failed",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"name": "Content-Type",
-								"type": "text",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"id\": \"29262d00-4545-424d-8422-74d4df5cc965\",\n    \"topic\": \"transactions/failure\",\n    \"webhook_id\": \"ncse-42jkrbw-32bekjq3-23jheb423q\",\n    \"created_at\": 1552536269,\n    \"version\": \"2\",\n    \"data\": {\n        \"result_type\": \"transaction\",\n        \"transaction\": {\n            \"id\":\"e2c6cba9-ef2a-4da2-8a23-f6b3421a938c\",\n            \"transaction_hash\":\"0xa9632350057c2226c5a10418b1c3bc9acdf7e2ee\",\n            \"from\":\"0x81b7e08f65bdf5648606c89998a9cc8164397647\",\n            \"to\":\"0x81b7e08f65bdf5648606c89998a9cc8164397647\",\n            \"nonce\":1,\n            \"value\":1000000000,\n            \"gas_price\":\"1000000000\",\n            \"gas_used\":1,\n            \"transaction_fee\":1,\n            \"block_confirmation\":12,\n            \"status\":\"FAILED\",\n            \"updated_timestamp\":1552536269,\n            \"block_timestamp\":1552536269,\n            \"block_number\":1552536269,\n            \"rule_name\":\"\",\n            \"meta_property\":{\n              \"name\":\"UserActivateAirdrop\",\n              \"type\":\"company_to_user\",\n              \"details\":\"Welcome\"\n            },\n            \"transfers\":[]\n        }\n    }\n}  "
-						},
-						"url": {
-							"raw": "{{api_server}}/webhooks/ost/v2",
-							"host": [
-								"{{api_server}}"
-							],
-							"path": [
-								"webhooks",
-								"ost",
-								"v2"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "user-transaction-failed",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"name": "Content-Type",
-								"type": "text",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"id\": \"29262d00-4545-424d-8422-74d4df5cc976\",\n    \"topic\": \"transactions/failure\",\n    \"webhook_id\": \"ncse-42jkrbw-32bekjq3-23jheb423q\",\n    \"created_at\": 1552536269,\n    \"version\": \"2\",\n    \"data\": {\n        \"result_type\": \"transaction\",\n        \"transaction\": {\n            \"id\":\"8a15c59c-674c-449f-8f0e-dec613d4c6a2\",\n            \"transaction_hash\":\"0xa9632350057c2226c5a10418b1c3bc9acdf7e2ee\",\n            \"from\":\"0x55fc5e23f3ae102f5615f6c7cefaf414922322fe\",\n            \"to\":\"0xa9632350057c2226c5a10418b1c3bc9acdf7e2ee\",\n            \"nonce\":1,\n            \"value\":1000000000,\n            \"gas_price\":\"1000000000\",\n            \"gas_used\":1,\n            \"transaction_fee\":1,\n            \"block_confirmation\":12,\n            \"status\":\"FAILED\",\n            \"updated_timestamp\":1552536269,\n            \"block_timestamp\":1552536269,\n            \"block_number\":1552536269,\n            \"rule_name\":\"\",\n            \"meta_property\": {\n            \t\"name\":\"userTransaction\",\n        \t\t\"type\":\"user_to_user\",\n        \t\t\"details\":\"vi_1\"\n            },\n            \"transfers\":[\n                {\n                \"from\":\"0xa9632350057c2226c5a10418b1c3bc9acdf7e2ee\",\n                \"from_user_id\":\"e65b4c76-07c3-4e6d-86a8-d67d48017ab8\",\n                \"to\":\"0xc3b9b4a5c1997d73cd8d9d0fb95aa945e68e0496\",\n                \"to_user_id\":\"f9fbcb3d-165a-4b3e-a613-879c1bf7c36b\",\n                \"kind\":\"transfer\",\n                \"amount\": \"5\"\n                }\n            ]\n        }\n    }\n}  "
-						},
-						"url": {
-							"raw": "{{api_server}}/webhooks/ost/v2",
-							"host": [
-								"{{api_server}}"
-							],
-							"path": [
-								"webhooks",
-								"ost",
-								"v2"
-							]
-						}
-					},
-					"response": []
-				}
-			],
-			"protocolProfileBehavior": {}
-		},
-		{
-			"name": "admin",
-			"item": [
 				{
 					"name": "fetch-csrf",
 					"event": [
@@ -285,6 +286,32 @@
 					"response": []
 				},
 				{
+					"name": "logged-in-admin",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/x-www-form-urlencoded",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{api_server}}/api/admin/current",
+							"host": [
+								"{{api_server}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"current"
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "login",
 					"request": {
 						"auth": {
@@ -340,130 +367,6 @@
 								"api",
 								"admin",
 								"login"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "delete-video",
-					"request": {
-						"auth": {
-							"type": "basic",
-							"basic": [
-								{
-									"key": "password",
-									"value": "Pepo-Admin-20!9*",
-									"type": "string"
-								},
-								{
-									"key": "username",
-									"value": "pepo",
-									"type": "string"
-								}
-							]
-						},
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/x-www-form-urlencoded",
-								"type": "text"
-							},
-							{
-								"key": "csrf-token",
-								"value": "{{csrf-token}}",
-								"type": "text"
-							}
-						],
-						"body": {
-							"mode": "urlencoded",
-							"urlencoded": [
-								{
-									"key": "email",
-									"value": "santhosh@ost.com",
-									"type": "text"
-								},
-								{
-									"key": "password",
-									"value": "5b300f84986e09ab",
-									"type": "text"
-								}
-							]
-						},
-						"url": {
-							"raw": "{{api_server}}/api/admin/delete-video/1089",
-							"host": [
-								"{{api_server}}"
-							],
-							"path": [
-								"api",
-								"admin",
-								"delete-video",
-								"1089"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "users",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Content-Type",
-								"name": "Content-Type",
-								"type": "text",
-								"value": "application/x-www-form-urlencoded"
-							}
-						],
-						"url": {
-							"raw": "{{api_server}}/api/admin/users?q=test",
-							"host": [
-								"{{api_server}}"
-							],
-							"path": [
-								"api",
-								"admin",
-								"users"
-							],
-							"query": [
-								{
-									"key": "q",
-									"value": "test"
-								},
-								{
-									"key": "pagination_identifier",
-									"value": "eyJwYWdpbmF0aW9uX3RpbWVzdGFtcCI6MTU2ODg5MzMzM30=",
-									"disabled": true
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "logged-in-admin",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Content-Type",
-								"name": "Content-Type",
-								"value": "application/x-www-form-urlencoded",
-								"type": "text"
-							}
-						],
-						"url": {
-							"raw": "{{api_server}}/api/admin/current",
-							"host": [
-								"{{api_server}}"
-							],
-							"path": [
-								"api",
-								"admin",
-								"current"
 							]
 						}
 					},
@@ -531,47 +434,84 @@
 					"response": []
 				},
 				{
-					"name": "Approve user",
+					"name": "tags-search",
 					"request": {
-						"auth": {
-							"type": "basic",
-							"basic": [
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{api_server}}/api/v1/tags?q=pepo",
+							"host": [
+								"{{api_server}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"tags"
+							],
+							"query": [
 								{
-									"key": "username",
-									"value": "pepo",
-									"type": "string"
+									"key": "q",
+									"value": "pepo"
 								},
 								{
-									"key": "password",
-									"value": "Pepo-Admin-20!9*",
-									"type": "string"
+									"key": "pagination_identifier",
+									"value": "eyJwYWdlIjoyfQ==",
+									"disabled": true
 								}
 							]
-						},
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/x-www-form-urlencoded",
-								"type": "text"
-							},
-							{
-								"key": "csrf-token",
-								"value": "{{csrf-token}}",
-								"type": "text"
-							}
-						],
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "video-history",
+					"request": {
+						"method": "GET",
+						"header": [],
 						"url": {
-							"raw": "{{api_server}}/api/admin/users/1414/approve",
+							"raw": "{{api_server}}/api/admin/video-history/2068?",
 							"host": [
 								"{{api_server}}"
 							],
 							"path": [
 								"api",
 								"admin",
-								"users",
-								"1414",
-								"approve"
+								"video-history",
+								"2068"
+							],
+							"query": [
+								{
+									"key": "pagination_identifier",
+									"value": "eyJwYWdlIjoyfQ==",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "reply-history",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{api_server}}/api/admin/reply-history/1301?",
+							"host": [
+								"{{api_server}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"reply-history",
+								"1301"
+							],
+							"query": [
+								{
+									"key": "pagination_identifier",
+									"value": "eyJwYWdlIjoyfQ==",
+									"disabled": true
+								}
 							]
 						}
 					},
@@ -652,8 +592,9 @@
 						"header": [
 							{
 								"key": "Content-Type",
-								"type": "text",
-								"value": "application/x-www-form-urlencoded"
+								"name": "Content-Type",
+								"value": "application/x-www-form-urlencoded",
+								"type": "text"
 							},
 							{
 								"key": "csrf-token",
@@ -661,8 +602,18 @@
 								"value": "{{csrf-token}}"
 							}
 						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "description",
+									"value": "Hi, this is my description #desc #tagtest @betashop .",
+									"type": "text"
+								}
+							]
+						},
 						"url": {
-							"raw": "{{api_server}}/api/admin/update-video/1089/link?description=Hello. Simply #testing this service. https://ost.com#testing this service. https://ost.com#testing this service. https://ost.com",
+							"raw": "{{api_server}}/api/admin/update-video/1089/description?",
 							"host": [
 								"{{api_server}}"
 							],
@@ -671,42 +622,12 @@
 								"admin",
 								"update-video",
 								"1089",
-								"link"
+								"description"
 							],
 							"query": [
 								{
 									"key": "description",
-									"value": "Hello. Simply #testing this service. https://ost.com"
-								}
-							],
-							"hash": "testing this service. https://ost.com#testing this service. https://ost.com#testing this service. https://ost.com"
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "tags-search",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{api_server}}/api/v1/tags?q=pepo",
-							"host": [
-								"{{api_server}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"tags"
-							],
-							"query": [
-								{
-									"key": "q",
-									"value": "pepo"
-								},
-								{
-									"key": "pagination_identifier",
-									"value": "eyJwYWdlIjoyfQ==",
+									"value": "Hello. Simply ",
 									"disabled": true
 								}
 							]
@@ -715,7 +636,44 @@
 					"response": []
 				},
 				{
-					"name": "Whitelist user",
+					"name": "users",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/x-www-form-urlencoded"
+							}
+						],
+						"url": {
+							"raw": "{{api_server}}/api/admin/users?q=test",
+							"host": [
+								"{{api_server}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"users"
+							],
+							"query": [
+								{
+									"key": "q",
+									"value": "test"
+								},
+								{
+									"key": "pagination_identifier",
+									"value": "eyJwYWdpbmF0aW9uX3RpbWVzdGFtcCI6MTU2ODg5MzMzM30=",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "whitelist-user",
 					"request": {
 						"method": "POST",
 						"header": [
@@ -749,148 +707,6 @@
 						}
 					},
 					"response": []
-				},
-				{
-					"name": "Deactivate user",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/x-www-form-urlencoded",
-								"type": "text"
-							},
-							{
-								"key": "csrf-token",
-								"value": "{{csrf-token}}",
-								"type": "text"
-							}
-						],
-						"body": {
-							"mode": "urlencoded",
-							"urlencoded": []
-						},
-						"url": {
-							"raw": "{{api_server}}/api/admin/users/1410/block",
-							"host": [
-								"{{api_server}}"
-							],
-							"path": [
-								"api",
-								"admin",
-								"users",
-								"1410",
-								"block"
-							]
-						}
-					},
-					"response": []
-				}
-			],
-			"protocolProfileBehavior": {}
-		},
-		{
-			"name": "web",
-			"item": [
-				{
-					"name": "redemptions",
-					"item": [
-						{
-							"name": "request-redemption",
-							"request": {
-								"method": "POST",
-								"header": [
-									{
-										"key": "Content-Type",
-										"name": "Content-Type",
-										"value": "application/x-www-form-urlencoded",
-										"type": "text"
-									}
-								],
-								"body": {
-									"mode": "urlencoded",
-									"urlencoded": [
-										{
-											"key": "product_id",
-											"value": "1",
-											"type": "text"
-										},
-										{
-											"key": "price_point",
-											"value": "0.0136729039",
-											"type": "text"
-										},
-										{
-											"key": "pepo_amount_in_wei",
-											"value": "1000000000000000000",
-											"type": "text"
-										}
-									]
-								},
-								"url": {
-									"raw": "{{api_server}}/api/web/redemptions/",
-									"host": [
-										"{{api_server}}"
-									],
-									"path": [
-										"api",
-										"web",
-										"redemptions",
-										""
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "get-redemption-products",
-							"request": {
-								"method": "GET",
-								"header": [],
-								"url": {
-									"raw": "{{api_server}}/api/web/redemptions/products?rt=MTQ0NToxNTY4OTkwMDk3Ljg3MjpkYTFhMjg4NzY4ZTEwM2M1MGVjZmRjMGJhNDgxODljZjVmYzAyODFmODBiYzkwNjFjMTkwMmNiNDAxYjE2N2Zj",
-									"host": [
-										"{{api_server}}"
-									],
-									"path": [
-										"api",
-										"web",
-										"redemptions",
-										"products"
-									],
-									"query": [
-										{
-											"key": "rt",
-											"value": "MTQ0NToxNTY4OTkwMDk3Ljg3MjpkYTFhMjg4NzY4ZTEwM2M1MGVjZmRjMGJhNDgxODljZjVmYzAyODFmODBiYzkwNjFjMTkwMmNiNDAxYjE2N2Zj"
-										}
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "pepocorn-balance",
-							"request": {
-								"method": "GET",
-								"header": [],
-								"url": {
-									"raw": "{{api_server}}/api/web/redemptions/pepocorn-balance",
-									"host": [
-										"{{api_server}}"
-									],
-									"path": [
-										"api",
-										"web",
-										"redemptions",
-										"pepocorn-balance"
-									]
-								}
-							},
-							"response": []
-						}
-					],
-					"protocolProfileBehavior": {},
-					"_postman_isSubFolder": true
 				}
 			],
 			"protocolProfileBehavior": {}
@@ -1494,6 +1310,12 @@
 											"key": "image_width",
 											"value": "100",
 											"type": "text"
+										},
+										{
+											"key": "per_reply_amount_in_wei",
+											"value": "1000",
+											"type": "text",
+											"disabled": true
 										}
 									]
 								},
@@ -2088,7 +1910,7 @@
 							"response": []
 						},
 						{
-							"name": "Videos",
+							"name": "videos",
 							"request": {
 								"method": "GET",
 								"header": [],
@@ -2109,6 +1931,38 @@
 											"key": "pagination_identifier",
 											"value": "eyJwYWdlIjoyfQ==",
 											"disabled": true
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "all-videos",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{api_server}}/api/v1/tags/66/videos?supported_entities=['videos', 'replies']",
+									"host": [
+										"{{api_server}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"tags",
+										"66",
+										"videos"
+									],
+									"query": [
+										{
+											"key": "pagination_identifier",
+											"value": "eyJwYWdlIjoyfQ==",
+											"disabled": true
+										},
+										{
+											"key": "supported_entities",
+											"value": "['videos', 'replies']"
 										}
 									]
 								}
@@ -2292,47 +2146,18 @@
 								],
 								"body": {
 									"mode": "urlencoded",
-									"urlencoded": [
-										{
-											"key": "name",
-											"value": "Pankaj Keswani",
-											"type": "text"
-										},
-										{
-											"key": "user_name",
-											"value": "pankaj",
-											"type": "text"
-										},
-										{
-											"key": "bio",
-											"value": "This is my bio, please save it with #cool",
-											"type": "text"
-										},
-										{
-											"key": "link",
-											"value": "https://www.facebook.com",
-											"type": "text"
-										}
-									]
+									"urlencoded": []
 								},
 								"url": {
-									"raw": "{{api_server}}/api/v1/users/1400/video-history?",
+									"raw": "{{api_server}}/api/v1/videos/1009",
 									"host": [
 										"{{api_server}}"
 									],
 									"path": [
 										"api",
 										"v1",
-										"users",
-										"1400",
-										"video-history"
-									],
-									"query": [
-										{
-											"key": "pagination_identifier",
-											"value": "asdfgjery56718bnmasdjk",
-											"disabled": true
-										}
+										"videos",
+										"1009"
 									]
 								}
 							},
@@ -2375,6 +2200,47 @@
 										"videos",
 										"1009",
 										"delete"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "list-replies",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"type": "text",
+										"value": "application/x-www-form-urlencoded"
+									}
+								],
+								"body": {
+									"mode": "urlencoded",
+									"urlencoded": [
+										{
+											"key": "pagination_identifier",
+											"value": "eyJwYWdpbmF0aW9uX2lkIjoiMTAxMCJ9==",
+											"type": "text"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{api_server}}/api/v1/videos/1009/replies",
+									"host": [
+										"{{api_server}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"videos",
+										"1009",
+										"replies"
 									]
 								}
 							},
@@ -2510,16 +2376,10 @@
 								],
 								"body": {
 									"mode": "urlencoded",
-									"urlencoded": [
-										{
-											"key": "pagination_identifier",
-											"value": "eyJwYWdpbmF0aW9uX2lkIjoiMTAxMCJ9==",
-											"type": "text"
-										}
-									]
+									"urlencoded": []
 								},
 								"url": {
-									"raw": "{{api_server}}/api/v1/invites/",
+									"raw": "{{api_server}}/api/v1/invites/?pagination_identifier=eyJwYWdpbmF0aW9uX2lkIjoiMTAxMCJ9==",
 									"host": [
 										"{{api_server}}"
 									],
@@ -2528,6 +2388,12 @@
 										"v1",
 										"invites",
 										""
+									],
+									"query": [
+										{
+											"key": "pagination_identifier",
+											"value": "eyJwYWdpbmF0aW9uX2lkIjoiMTAxMCJ9=="
+										}
 									]
 								}
 							},
@@ -2657,6 +2523,89 @@
 					"_postman_isSubFolder": true
 				},
 				{
+					"name": "replies",
+					"item": [
+						{
+							"name": "share",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{api_server}}/api/v1/replies/1009/share",
+									"host": [
+										"{{api_server}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"replies",
+										"1009",
+										"share"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "get-reply",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"type": "text",
+										"value": "application/x-www-form-urlencoded"
+									}
+								],
+								"body": {
+									"mode": "urlencoded",
+									"urlencoded": []
+								},
+								"url": {
+									"raw": "{{api_server}}/api/v1/replies/1009",
+									"host": [
+										"{{api_server}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"replies",
+										"1009"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "delete",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"url": {
+									"raw": "{{api_server}}/api/v1/replies/1009/delete",
+									"host": [
+										"{{api_server}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"replies",
+										"1009",
+										"delete"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"protocolProfileBehavior": {},
+					"_postman_isSubFolder": true
+				},
+				{
 					"name": "report-video",
 					"request": {
 						"method": "POST",
@@ -2674,6 +2623,47 @@
 								{
 									"key": "report_entity_kind",
 									"value": "video",
+									"type": "text"
+								},
+								{
+									"key": "report_entity_id",
+									"value": "2421",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{api_server}}/api/v1/report",
+							"host": [
+								"{{api_server}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"report"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "report-reply",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/x-www-form-urlencoded"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "report_entity_kind",
+									"value": "reply",
 									"type": "text"
 								},
 								{
@@ -2733,6 +2723,413 @@
 								"api",
 								"v1",
 								"report"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "initiate reply",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "video_url",
+									"value": "https://dbvoeb7t6hffk.cloudfront.net/d/ua/images/1000-028c57da230c81a50dc2c25c9ff105d0-original.mp4",
+									"type": "text"
+								},
+								{
+									"key": "poster_image_url",
+									"value": "https://dbvoeb7t6hffk.cloudfront.net/d/ua/images/1000-028c57da230c81a50dc2c25c9ff105d0-original.jpeg",
+									"type": "text"
+								},
+								{
+									"key": "video_size",
+									"value": "2000",
+									"type": "text"
+								},
+								{
+									"key": "video_height",
+									"value": "100",
+									"type": "text"
+								},
+								{
+									"key": "video_width",
+									"value": "100",
+									"type": "text"
+								},
+								{
+									"key": "image_size",
+									"value": "1000",
+									"type": "text"
+								},
+								{
+									"key": "image_height",
+									"value": "100",
+									"type": "text"
+								},
+								{
+									"key": "image_width",
+									"value": "100",
+									"type": "text"
+								},
+								{
+									"key": "parent_kind",
+									"value": "video",
+									"type": "text"
+								},
+								{
+									"key": "parent_id",
+									"value": "17",
+									"type": "text"
+								},
+								{
+									"key": "video_description",
+									"value": "Adding #reply #on 17th #video ",
+									"type": "text"
+								},
+								{
+									"key": "link",
+									"value": "https://xyz.com",
+									"type": "text"
+								},
+								{
+									"key": "reply_detail_id",
+									"value": "14",
+									"type": "text",
+									"disabled": true
+								}
+							]
+						},
+						"url": {
+							"raw": "{{api_server}}/api/v1/replies?",
+							"host": [
+								"{{api_server}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"replies"
+							],
+							"query": [
+								{
+									"key": "image_url",
+									"value": "https://s3.amazonaws.com/uassets.stagingpepo.com/pepo-staging1000/ua/images",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "web",
+			"item": [
+				{
+					"name": "redemptions",
+					"item": [
+						{
+							"name": "get-redemption-products",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{api_server}}/api/web/redemptions/products?rt=MTQ0NToxNTY4OTkwMDk3Ljg3MjpkYTFhMjg4NzY4ZTEwM2M1MGVjZmRjMGJhNDgxODljZjVmYzAyODFmODBiYzkwNjFjMTkwMmNiNDAxYjE2N2Zj",
+									"host": [
+										"{{api_server}}"
+									],
+									"path": [
+										"api",
+										"web",
+										"redemptions",
+										"products"
+									],
+									"query": [
+										{
+											"key": "rt",
+											"value": "MTQ0NToxNTY4OTkwMDk3Ljg3MjpkYTFhMjg4NzY4ZTEwM2M1MGVjZmRjMGJhNDgxODljZjVmYzAyODFmODBiYzkwNjFjMTkwMmNiNDAxYjE2N2Zj"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "pepocorn-balance",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{api_server}}/api/web/redemptions/pepocorn-balance",
+									"host": [
+										"{{api_server}}"
+									],
+									"path": [
+										"api",
+										"web",
+										"redemptions",
+										"pepocorn-balance"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "request-redemption",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"value": "application/x-www-form-urlencoded",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "urlencoded",
+									"urlencoded": [
+										{
+											"key": "product_id",
+											"value": "1",
+											"type": "text"
+										},
+										{
+											"key": "price_point",
+											"value": "0.0136729039",
+											"type": "text"
+										},
+										{
+											"key": "pepo_amount_in_wei",
+											"value": "1000000000000000000",
+											"type": "text"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{api_server}}/api/web/redemptions/",
+									"host": [
+										"{{api_server}}"
+									],
+									"path": [
+										"api",
+										"web",
+										"redemptions",
+										""
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"protocolProfileBehavior": {},
+					"_postman_isSubFolder": true
+				}
+			],
+			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "webhook",
+			"item": [
+				{
+					"name": "slack",
+					"item": [
+						{
+							"name": "approve-user",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"warning": "Value contains invalid newline characters.",
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"value": "application/x-www-form-urlencoded",
+										"type": "text"
+									},
+									{
+										"key": "x-slack-signature",
+										"value": "v0=b63936ef94913a87fd89119de93aa6fdf8d6de59a30090d601fb03abcafbce70",
+										"type": "text"
+									},
+									{
+										"key": "x-slack-request-timestamp",
+										"value": "1574348564",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "payload=%7B%22type%22%3A%22block_actions%22%2C%22team%22%3A%7B%22id%22%3A%22T78KWNKC6%22%2C%22domain%22%3A%22ostdotcom%22%7D%2C%22user%22%3A%7B%22id%22%3A%22U99HQ8NLT%22%2C%22username%22%3A%22aman%22%2C%22name%22%3A%22aman%22%2C%22team_id%22%3A%22T78KWNKC6%22%7D%2C%22api_app_id%22%3A%22AQC5JETDX%22%2C%22token%22%3A%22t2kaSFG00CJoVpW3Vfw2pIJ0%22%2C%22container%22%3A%7B%22type%22%3A%22message%22%2C%22message_ts%22%3A%221574331819.000100%22%2C%22channel_id%22%3A%22CQN8L1SMA%22%2C%22is_ephemeral%22%3Afalse%7D%2C%22trigger_id%22%3A%22832493891955.246676767414.d594ae4ac4f6c4410df4d64a2e02c8fb%22%2C%22channel%22%3A%7B%22id%22%3A%22CQN8L1SMA%22%2C%22name%22%3A%22test_approve_new_creators%22%7D%2C%22message%22%3A%7B%22type%22%3A%22message%22%2C%22subtype%22%3A%22bot_message%22%2C%22text%22%3A%22%2AHi%2C+We+got+a+video+from+a+new+User+at+PEPO.+Please+check+the+details+about+the+videos+and+take+actions+accordingly%2A%22%2C%22ts%22%3A%221574331819.000100%22%2C%22username%22%3A%22Pepo+Development%22%2C%22bot_id%22%3A%22BQKM9737E%22%2C%22blocks%22%3A%5B%7B%22type%22%3A%22section%22%2C%22block_id%22%3A%22d7IY%22%2C%22text%22%3A%7B%22type%22%3A%22mrkdwn%22%2C%22text%22%3A%22---------------------------------------------------------%5Cn%2AHi%2C+We+got+a+video+from+an+existing+User+at+PEPO.+Please+check+the+details+about+the+videos+and+take+actions+accordingly%2A%5Cn%2AUser%27s+Full+Name%3A%2A%3A+Ankit+Singh%5Cn%2AUsername%3A%2A%3A+sing_k0p6b1b8hb%5Cn%2AAdmin+Profile+URL%3A%2A%3A+%3Chttp%3A%5C%2F%5C%2Fpepodev.com%3A8080%5C%2Fadmin%5C%2Fuser-profile%5C%2F1021%3E%5Cn%2ATwitter+handle%3A%2A%3A+singhankit2099%5Cn%2AEmail+address%3A%2A%3A+null%5Cn%22%2C%22verbatim%22%3Afalse%7D%7D%2C%7B%22type%22%3A%22divider%22%2C%22block_id%22%3A%22e1I%22%7D%2C%7B%22type%22%3A%22section%22%2C%22block_id%22%3A%22djZ%22%2C%22text%22%3A%7B%22type%22%3A%22mrkdwn%22%2C%22text%22%3A%22%2AVideoLink%2A%3A+%3Chttps%3A%5C%2F%5C%2Fdbvoeb7t6hffk.cloudfront.net%5C%2Fd%5C%2Fua%5C%2Fvideos%5C%2Fpankaj-profile.mp4-original.mp4%3E%5Cn%2AUpdatedAt%2A%3A+18+Sep+2019+17%3A34%3A32%22%2C%22verbatim%22%3Afalse%7D%2C%22accessory%22%3A%7B%22type%22%3A%22button%22%2C%22style%22%3A%22danger%22%2C%22text%22%3A%7B%22type%22%3A%22plain_text%22%2C%22text%22%3A%22Delete+Video%22%2C%22emoji%22%3Atrue%7D%2C%22value%22%3A%22delete_video%7Cvideo_id%3A22%22%2C%22action_id%22%3A%22aOtUU%22%7D%7D%2C%7B%22type%22%3A%22divider%22%2C%22block_id%22%3A%2229LQg%22%7D%2C%7B%22type%22%3A%22actions%22%2C%22block_id%22%3A%22e87Qk%22%2C%22elements%22%3A%5B%7B%22type%22%3A%22button%22%2C%22action_id%22%3A%22F%5C%2FDZ%5C%2F%22%2C%22text%22%3A%7B%22type%22%3A%22plain_text%22%2C%22text%22%3A%22Approve+User%22%2C%22emoji%22%3Atrue%7D%2C%22style%22%3A%22primary%22%2C%22value%22%3A%22approve_user%7Cuser_id%3A1021%22%7D%2C%7B%22type%22%3A%22button%22%2C%22action_id%22%3A%22Ur6op%22%2C%22text%22%3A%7B%22type%22%3A%22plain_text%22%2C%22text%22%3A%22Block+User%22%2C%22emoji%22%3Atrue%7D%2C%22style%22%3A%22danger%22%2C%22value%22%3A%22block_user%7Cuser_id%3A1021%22%7D%5D%7D%2C%7B%22type%22%3A%22section%22%2C%22block_id%22%3A%22sOYA%22%2C%22text%22%3A%7B%22type%22%3A%22mrkdwn%22%2C%22text%22%3A%22--------------------------------------------------------------------%22%2C%22verbatim%22%3Afalse%7D%7D%5D%7D%2C%22response_url%22%3A%22https%3A%5C%2F%5C%2Fhooks.slack.com%5C%2Factions%5C%2FT78KWNKC6%5C%2F836036662689%5C%2FaYZtwMZtnU4AFCr7H572Rg8R%22%2C%22actions%22%3A%5B%7B%22action_id%22%3A%22F%5C%2FDZ%5C%2F%22%2C%22block_id%22%3A%22e87Qk%22%2C%22text%22%3A%7B%22type%22%3A%22plain_text%22%2C%22text%22%3A%22Approve+User%22%2C%22emoji%22%3Atrue%7D%2C%22value%22%3A%22approve_user%7Cuser_id%3A1021%22%2C%22style%22%3A%22primary%22%2C%22type%22%3A%22button%22%2C%22action_ts%22%3A%221574348564.116169%22%7D%5D%7D"
+								},
+								"url": {
+									"raw": "{{api_server}}/webhooks/slack/",
+									"host": [
+										"{{api_server}}"
+									],
+									"path": [
+										"webhooks",
+										"slack",
+										""
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"protocolProfileBehavior": {},
+					"_postman_isSubFolder": true
+				},
+				{
+					"name": "activate-user-success",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{ \"id\": \"28262d90-4545-424d-8422-74d4df5cc963\",\n  \"topic\": \"users/activation_success\",\n  \"created_at\": 1560164197,\n  \"webhook_id\": \"96f9ff47-5dc8-432f-9a6c-1c79e0cf3bd0\",\n  \"version\": \"2\",\n  \"data\": \n   { \"result_type\": \"user\",\n     \"user\": \n      { \"id\": \"2e0f3041-026a-4be3-b1d2-791c98565219\",\n        \"token_id\": 1128,\n        \"token_holder_address\": \"0x55fc5e23f3ae102f5615f6c7cefaf414922322fe\",\n        \"device_manager_address\": \"0x5ac584e41ec36b16015f86ebff94dcc668a3e457\",\n        \"recovery_address\": \"0x15d3f1825d193d9b688c8dfa3c4234a05e79a092\",\n        \"recovery_owner_address\": \"0x49a74de62e7db11dcc1010780d0699b5bf83c2ac\",\n        \"type\": \"user\",\n        \"status\": \"ACTIVATED\",\n        \"updated_timestamp\": 1560164197 } } }"
+						},
+						"url": {
+							"raw": "{{api_server}}/webhooks/ost/v2",
+							"host": [
+								"{{api_server}}"
+							],
+							"path": [
+								"webhooks",
+								"ost",
+								"v2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "airdrop-failed",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"id\": \"29262d00-4545-424d-8422-74d4df5cc965\",\n    \"topic\": \"transactions/failure\",\n    \"webhook_id\": \"ncse-42jkrbw-32bekjq3-23jheb423q\",\n    \"created_at\": 1552536269,\n    \"version\": \"2\",\n    \"data\": {\n        \"result_type\": \"transaction\",\n        \"transaction\": {\n            \"id\":\"e2c6cba9-ef2a-4da2-8a23-f6b3421a938c\",\n            \"transaction_hash\":\"0xa9632350057c2226c5a10418b1c3bc9acdf7e2ee\",\n            \"from\":\"0x81b7e08f65bdf5648606c89998a9cc8164397647\",\n            \"to\":\"0x81b7e08f65bdf5648606c89998a9cc8164397647\",\n            \"nonce\":1,\n            \"value\":1000000000,\n            \"gas_price\":\"1000000000\",\n            \"gas_used\":1,\n            \"transaction_fee\":1,\n            \"block_confirmation\":12,\n            \"status\":\"FAILED\",\n            \"updated_timestamp\":1552536269,\n            \"block_timestamp\":1552536269,\n            \"block_number\":1552536269,\n            \"rule_name\":\"\",\n            \"meta_property\":{\n              \"name\":\"UserActivateAirdrop\",\n              \"type\":\"company_to_user\",\n              \"details\":\"Welcome\"\n            },\n            \"transfers\":[]\n        }\n    }\n}  "
+						},
+						"url": {
+							"raw": "{{api_server}}/webhooks/ost/v2",
+							"host": [
+								"{{api_server}}"
+							],
+							"path": [
+								"webhooks",
+								"ost",
+								"v2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "airdrop-success",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "\n{\n    \"id\": \"29262d00-4545-424d-8422-74d4df5cc963\",\n    \"topic\": \"transactions/success\",\n    \"webhook_id\": \"ncse-42jkrbw-32bekjq3-23jheb423q\",\n    \"created_at\": 1552536269,\n    \"version\": \"2\",\n    \"data\": {\n        \"result_type\": \"transaction\",\n        \"transaction\": {\n            \"id\":\"e2c6cba9-ef2a-4da2-8a23-f6b3421a938c\",\n            \"transaction_hash\":\"0xa9632350057c2226c5a10418b1c3bc9acdf7e2ee\",\n            \"from\":\"0x55fc5e23f3ae102f5615f6c7cefaf414922322fe\",\n            \"to\":\"0xa9632350057c2226c5a10418b1c3bc9acdf7e2ee\",\n            \"nonce\":1,\n            \"value\":1000000000,\n            \"gas_price\":\"1000000000\",\n            \"gas_used\":1,\n            \"transaction_fee\":1,\n            \"block_confirmation\":12,\n            \"status\":\"CREATED\",\n            \"updated_timestamp\":1552536269,\n            \"block_timestamp\":1552536269,\n            \"block_number\":1552536269,\n            \"rule_name\":\"\",\n            \"meta_property\":{\n              \"name\":\"UserActivateAirdrop\",\n              \"type\":\"company_to_user\",\n              \"details\":\"Welcome\"\n            },\n            \"transfers\":[\n                {\n                \"from\":\"0xa9632350057c2226c5a10418b1c3bc9acdf7e2ee\",\n                \"from_user_id\":\"724ed66c-8a0a-477e-b303-b0486e2a3797\",\n                \"to\":\"0xc3b9b4a5c1997d73cd8d9d0fb95aa945e68e0496\",\n                \"to_user_id\":\"9e847ac4-1bd8-498f-b601-51a56bbca076\",\n                \"kind\":\"transfer\"\n                }\n            ]\n        }\n    }\n}   "
+						},
+						"url": {
+							"raw": "{{api_server}}/webhooks/ost/v2",
+							"host": [
+								"{{api_server}}"
+							],
+							"path": [
+								"webhooks",
+								"ost",
+								"v2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "user-transaction-failed",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"id\": \"29262d00-4545-424d-8422-74d4df5cc976\",\n    \"topic\": \"transactions/failure\",\n    \"webhook_id\": \"ncse-42jkrbw-32bekjq3-23jheb423q\",\n    \"created_at\": 1552536269,\n    \"version\": \"2\",\n    \"data\": {\n        \"result_type\": \"transaction\",\n        \"transaction\": {\n            \"id\":\"8a15c59c-674c-449f-8f0e-dec613d4c6a2\",\n            \"transaction_hash\":\"0xa9632350057c2226c5a10418b1c3bc9acdf7e2ee\",\n            \"from\":\"0x55fc5e23f3ae102f5615f6c7cefaf414922322fe\",\n            \"to\":\"0xa9632350057c2226c5a10418b1c3bc9acdf7e2ee\",\n            \"nonce\":1,\n            \"value\":1000000000,\n            \"gas_price\":\"1000000000\",\n            \"gas_used\":1,\n            \"transaction_fee\":1,\n            \"block_confirmation\":12,\n            \"status\":\"FAILED\",\n            \"updated_timestamp\":1552536269,\n            \"block_timestamp\":1552536269,\n            \"block_number\":1552536269,\n            \"rule_name\":\"\",\n            \"meta_property\": {\n            \t\"name\":\"userTransaction\",\n        \t\t\"type\":\"user_to_user\",\n        \t\t\"details\":\"vi_1\"\n            },\n            \"transfers\":[\n                {\n                \"from\":\"0xa9632350057c2226c5a10418b1c3bc9acdf7e2ee\",\n                \"from_user_id\":\"e65b4c76-07c3-4e6d-86a8-d67d48017ab8\",\n                \"to\":\"0xc3b9b4a5c1997d73cd8d9d0fb95aa945e68e0496\",\n                \"to_user_id\":\"f9fbcb3d-165a-4b3e-a613-879c1bf7c36b\",\n                \"kind\":\"transfer\",\n                \"amount\": \"5\"\n                }\n            ]\n        }\n    }\n}  "
+						},
+						"url": {
+							"raw": "{{api_server}}/webhooks/ost/v2",
+							"host": [
+								"{{api_server}}"
+							],
+							"path": [
+								"webhooks",
+								"ost",
+								"v2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "user-transaction-success",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "\n{\n    \"id\": \"29262d00-4545-424d-8422-74d4df5cc967\",\n    \"topic\": \"transactions/success\",\n    \"webhook_id\": \"ncse-42jkrbw-32bekjq3-23jheb423q\",\n    \"created_at\": 1552536269,\n    \"version\": \"2\",\n    \"data\": {\n        \"result_type\": \"transaction\",\n        \"transaction\": {\n            \"id\":\"8a15c59c-674c-449f-8f0e-dec613d4c6a1\",\n            \"transaction_hash\":\"0xa9632350057c2226c5a10418b1c3bc9acdf7e2ee\",\n            \"from\":\"0x55fc5e23f3ae102f5615f6c7cefaf414922322fe\",\n            \"to\":\"0xa9632350057c2226c5a10418b1c3bc9acdf7e2ee\",\n            \"nonce\":1,\n            \"value\":1000000000,\n            \"gas_price\":\"1000000000\",\n            \"gas_used\":1,\n            \"transaction_fee\":1,\n            \"block_confirmation\":12,\n            \"status\":\"SUCCESS\",\n            \"updated_timestamp\":1552536269,\n            \"block_timestamp\":1552536269,\n            \"block_number\":1552536269,\n            \"rule_name\":\"\",\n            \"meta_property\": {\n            \t\"name\":\"userTransaction\",\n        \t\t\"type\":\"user_to_user\",\n        \t\t\"details\":\"vi_1\"\n            },\n            \"transfers\":[\n                {\n                \"from\":\"0xa9632350057c2226c5a10418b1c3bc9acdf7e2ee\",\n                \"from_user_id\":\"e65b4c76-07c3-4e6d-86a8-d67d48017ab8\",\n                \"to\":\"0xc3b9b4a5c1997d73cd8d9d0fb95aa945e68e0496\",\n                \"to_user_id\":\"f9fbcb3d-165a-4b3e-a613-879c1bf7c36b\",\n                \"kind\":\"transfer\",\n                \"amount\": \"5\"\n                }\n            ]\n        }\n    }\n}   "
+						},
+						"url": {
+							"raw": "{{api_server}}/webhooks/ost/v2",
+							"host": [
+								"{{api_server}}"
+							],
+							"path": [
+								"webhooks",
+								"ost",
+								"v2"
 							]
 						}
 					},

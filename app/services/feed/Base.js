@@ -1,12 +1,12 @@
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
-  GetProfile = require(rootPrefix + '/lib/user/profile/Get'),
+  FetchVideosLib = require(rootPrefix + '/lib/GetUsersVideoList'),
   GetTokenService = require(rootPrefix + '/app/services/token/Get'),
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
+  UserMuteByUser2IdsForGlobalCache = require(rootPrefix + '/lib/cacheManagement/multi/UserMuteByUser2IdsForGlobal'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   feedConstants = require(rootPrefix + '/lib/globalConstant/feed'),
   videoConstants = require(rootPrefix + '/lib/globalConstant/video'),
-  UserMuteByUser2IdsForGlobalCache = require(rootPrefix + '/lib/cacheManagement/multi/UserMuteByUser2IdsForGlobal'),
   createErrorLogsEntry = require(rootPrefix + '/lib/errorLogs/createEntry'),
   errorLogsConstants = require(rootPrefix + '/lib/globalConstant/errorLogs');
 
@@ -78,7 +78,7 @@ class FeedBase extends ServiceBase {
     const promisesArray = [oThis._filterInactiveUserFeeds(), oThis._setTokenDetails()];
     await Promise.all(promisesArray);
 
-    return await oThis._prepareResponse();
+    return oThis._prepareResponse();
   }
 
   /**
@@ -100,7 +100,7 @@ class FeedBase extends ServiceBase {
       for (let index = 0; index < oThis.feedIds.length; index++) {
         const feedData = oThis.feedsMap[oThis.feedIds[index]];
 
-        // order feed data using order of feed ids
+        // Order feed data using order of feed ids.
         oThis.feeds.push(feedData);
         oThis.userIds.push(feedData.actor);
 
@@ -126,8 +126,8 @@ class FeedBase extends ServiceBase {
 
       const globalUserMuteDetailsByUserIdMap = cacheResponse.data;
 
-      for (let userId in globalUserMuteDetailsByUserIdMap) {
-        let obj = globalUserMuteDetailsByUserIdMap[userId];
+      for (const userId in globalUserMuteDetailsByUserIdMap) {
+        const obj = globalUserMuteDetailsByUserIdMap[userId];
         if (obj.all) {
           mutedUserIds[userId] = 1;
         }
@@ -163,17 +163,13 @@ class FeedBase extends ServiceBase {
   async _fetchProfileDetails() {
     const oThis = this;
 
-    if (oThis.userIds.length === 0) {
-      return responseHelper.successWithData({});
-    }
-
-    const getProfileObj = new GetProfile({
+    const videosLib = new FetchVideosLib({
       userIds: oThis.userIds,
       currentUserId: oThis.currentUserId,
       videoIds: oThis.videoIds
     });
 
-    const profileResp = await getProfileObj.perform();
+    const profileResp = await videosLib.perform();
 
     if (profileResp.isFailure()) {
       return Promise.reject(profileResp);
@@ -193,7 +189,7 @@ class FeedBase extends ServiceBase {
   async _filterInactiveUserFeeds() {
     const oThis = this;
 
-    let tempFeeds = [];
+    const tempFeeds = [];
     for (let index = 0; index < oThis.feeds.length; index++) {
       const feedData = oThis.feeds[index];
 
@@ -209,7 +205,7 @@ class FeedBase extends ServiceBase {
         const errorObject = responseHelper.error({
           internal_error_identifier: 'a_s_f_fiuf_1',
           api_error_identifier: 'something_went_wrong',
-          debug_options: { feedData: feedData, msg: "FOUND DELETED VIDEO OR BLOCKED USER'S VIDEO IN FEED" }
+          debug_options: { feedData: feedData, msg: 'FOUND DELETED VIDEO OR DELETED USERS VIDEO IN FEED' }
         });
 
         if (
@@ -245,20 +241,18 @@ class FeedBase extends ServiceBase {
     }
 
     oThis.tokenDetails = tokenResp.data.tokenDetails;
-
-    return responseHelper.successWithData({});
   }
 
   _validateAndSanitizeParams() {
-    return new Error('sub-class to implement');
+    return new Error('Sub-class to implement.');
   }
 
   _setFeedIds() {
-    return new Error('sub-class to implement');
+    return new Error('Sub-class to implement.');
   }
 
   _prepareResponse() {
-    return new Error('sub-class to implement');
+    return new Error('Sub-class to implement.');
   }
 }
 

@@ -13,11 +13,11 @@ const program = require('commander');
 const rootPrefix = '..',
   CronBase = require(rootPrefix + '/executables/CronBase'),
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
-  ErrorLogsConstants = require(rootPrefix + '/lib/globalConstant/errorLogs'),
   CronProcessModel = require(rootPrefix + '/app/models/mysql/CronProcesses'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   createErrorLogsEntry = require(rootPrefix + '/lib/errorLogs/createEntry'),
+  errorLogsConstants = require(rootPrefix + '/lib/globalConstant/errorLogs'),
   cronProcessesConstants = require(rootPrefix + '/lib/globalConstant/cronProcesses');
 
 program.option('--cronProcessId <cronProcessId>', 'Cron table process ID').parse(process.argv);
@@ -221,7 +221,7 @@ class CronProcessesMonitorExecutable extends CronBase {
       api_error_identifier: 'cron_stuck',
       debug_options: debugOptions
     });
-    await createErrorLogsEntry.perform(errorObject, ErrorLogsConstants.highSeverity);
+    await createErrorLogsEntry.perform(errorObject, errorLogsConstants.highSeverity);
   }
 
   /**
@@ -239,7 +239,7 @@ class CronProcessesMonitorExecutable extends CronBase {
       api_error_identifier: 'cron_stopped',
       debug_options: debugOptions
     });
-    await createErrorLogsEntry.perform(errorObject, ErrorLogsConstants.highSeverity);
+    await createErrorLogsEntry.perform(errorObject, errorLogsConstants.highSeverity);
   }
 
   /**

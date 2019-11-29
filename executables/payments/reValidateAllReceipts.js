@@ -23,7 +23,7 @@ program.on('--help', function() {
   logger.log('');
   logger.log('  Example:');
   logger.log('');
-  logger.log('    node executables/payments/reValidateAllReceipts.js --cronProcessId 39');
+  logger.log('    node executables/payments/reValidateAllReceipts.js --cronProcessId 40');
   logger.log('');
   logger.log('');
 });

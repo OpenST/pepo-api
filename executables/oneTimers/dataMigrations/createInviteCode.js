@@ -190,6 +190,6 @@ new CreateInviteCode({})
     process.exit(0);
   })
   .catch(function(err) {
-    console.log(err);
+    logger.log(err);
     process.exit(1);
   });

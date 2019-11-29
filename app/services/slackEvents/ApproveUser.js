@@ -1,7 +1,7 @@
 const rootPrefix = '../../..',
   SlackEventBase = require(rootPrefix + '/app/services/slackEvents/Base'),
-  responseHelper = require(rootPrefix + '/lib/formatter/response'),
   ApproveUsersAsCreatorService = require(rootPrefix + '/app/services/admin/ApproveUsersAsCreator'),
+  responseHelper = require(rootPrefix + '/lib/formatter/response'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   slackConstants = require(rootPrefix + '/lib/globalConstant/slack');
 
@@ -12,27 +12,10 @@ const rootPrefix = '../../..',
  */
 class ApproveUser extends SlackEventBase {
   /**
-   * Constructor to process approve user event.
+   * Async perform.
    *
-   * @param {object} params
-   * @param {object} params.eventParams: event params
-   *
-   * @augments ServiceBase
-   *
-   * @constructor
-   */
-  constructor(params) {
-    super(params);
-
-    const oThis = this;
-
-    oThis.errMsg = null;
-  }
-
-  /**
-   * Perform - Process Slack Event.
-   *
-   * @return {Promise<void>}
+   * @returns {Promise<result>}
+   * @private
    */
   async _asyncPerform() {
     const oThis = this;
@@ -47,19 +30,20 @@ class ApproveUser extends SlackEventBase {
   }
 
   /**
-   * Call approve user service
+   * Call approve user service.
    *
    * @returns {Promise<*>}
    * @private
    */
   async _callApproveUserService() {
-    const oThis = this,
-      approveUserServiceParams = {
-        user_ids: [oThis.eventParams.user_id],
-        current_admin: oThis.currentAdmin
-      };
+    const oThis = this;
 
-    let approveUserServiceResponse = await new ApproveUsersAsCreatorService(approveUserServiceParams).perform();
+    const approveUserServiceParams = {
+      user_ids: [oThis.eventParams.user_id],
+      current_admin: oThis.currentAdmin
+    };
+
+    const approveUserServiceResponse = await new ApproveUsersAsCreatorService(approveUserServiceParams).perform();
 
     if (approveUserServiceResponse.isFailure()) {
       oThis._setError(approveUserServiceResponse);
@@ -67,21 +51,23 @@ class ApproveUser extends SlackEventBase {
   }
 
   /**
-   * Update Payload for slack post request
+   * Update payload for slack post request.
    *
+   * @param {number} actionPos
+   * @param {array} newBlocks
    *
-   * @return {Promise<void>}
-   *
+   * @returns {Promise<array>}
    * @private
    */
   async _updatedBlocks(actionPos, newBlocks) {
     const oThis = this;
+
     logger.log('_updateBlocks start');
 
     if (oThis.errMsg) {
       const formattedMsg = '`error:`' + oThis.errMsg;
 
-      let trailingArray = newBlocks.splice(actionPos + 1);
+      const trailingArray = newBlocks.splice(actionPos + 1);
 
       newBlocks[actionPos + 1] = slackConstants.addTextSection(formattedMsg);
       newBlocks = newBlocks.concat(trailingArray);

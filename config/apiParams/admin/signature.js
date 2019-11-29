@@ -76,7 +76,7 @@ const adminSignature = {
     ],
     optional: []
   },
-  [apiName.adminUserBlock]: {
+  [apiName.adminUserDelete]: {
     mandatory: [
       {
         parameter: 'user_ids',
@@ -102,6 +102,19 @@ const adminSignature = {
     ],
     optional: []
   },
+  [apiName.adminDeleteReplyVideo]: {
+    mandatory: [
+      {
+        parameter: 'reply_details_id',
+        validatorMethods: ['validateNonZeroInteger']
+      },
+      {
+        parameter: 'current_admin',
+        validatorMethods: ['validateNonEmptyObject']
+      }
+    ],
+    optional: []
+  },
   [apiName.adminUpdateVideoLink]: {
     mandatory: [
       {
@@ -114,7 +127,37 @@ const adminSignature = {
       },
       {
         parameter: 'link',
-        validatorMethods: ['validateString', 'validateStopWords']
+        validatorMethods: ['validateGenericUrl', 'validateStopWords']
+      }
+    ],
+    optional: []
+  },
+  [apiName.adminUpdateReplyLink]: {
+    mandatory: [
+      {
+        parameter: 'reply_detail_id',
+        validatorMethods: ['validateNonZeroInteger']
+      },
+      {
+        parameter: 'current_admin',
+        validatorMethods: ['validateNonEmptyObject']
+      },
+      {
+        parameter: 'link',
+        validatorMethods: ['validateGenericUrl', 'validateStopWords']
+      }
+    ],
+    optional: []
+  },
+  [apiName.replyList]: {
+    mandatory: [
+      {
+        parameter: 'current_admin',
+        validatorMethods: ['validateNonEmptyObject']
+      },
+      {
+        parameter: 'video_id',
+        validatorMethods: ['validateInteger']
       }
     ],
     optional: []
@@ -123,6 +166,23 @@ const adminSignature = {
     mandatory: [
       {
         parameter: 'video_id',
+        validatorMethods: ['validateNonZeroInteger']
+      },
+      {
+        parameter: 'current_admin',
+        validatorMethods: ['validateNonEmptyObject']
+      },
+      {
+        parameter: 'video_description',
+        validatorMethods: ['validateVideoDescription', 'validateStopWords']
+      }
+    ],
+    optional: []
+  },
+  [apiName.adminUpdateReplyDescription]: {
+    mandatory: [
+      {
+        parameter: 'reply_detail_id',
         validatorMethods: ['validateNonZeroInteger']
       },
       {
@@ -245,6 +305,18 @@ const adminSignature = {
       },
       {
         parameter: 'getTopResults',
+        validatorMethods: ['validateBoolean']
+      }
+    ]
+  },
+  [apiName.getVideo]: {
+    mandatory: [
+      {
+        parameter: 'video_id',
+        validatorMethods: ['validateNonZeroInteger']
+      },
+      {
+        parameter: 'is_admin',
         validatorMethods: ['validateBoolean']
       }
     ]

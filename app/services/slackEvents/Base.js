@@ -1,12 +1,13 @@
 const rootPrefix = '../../..',
+  HttpLibrary = require(rootPrefix + '/lib/HttpRequest'),
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
-  HttpLibrary = require(rootPrefix + '/lib/HttpRequest'),
-  logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   basicHelper = require(rootPrefix + '/helpers/basic'),
-  apiVersions = require(rootPrefix + '/lib/globalConstant/apiVersions'),
-  errorConfig = basicHelper.fetchErrorConfig(apiVersions.v1),
-  responseHelper = require(rootPrefix + '/lib/formatter/response');
+  responseHelper = require(rootPrefix + '/lib/formatter/response'),
+  logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
+  apiVersions = require(rootPrefix + '/lib/globalConstant/apiVersions');
+
+const errorConfig = basicHelper.fetchErrorConfig(apiVersions.v1);
 
 /**
  * Class for slack related webhooks events base.
@@ -19,6 +20,9 @@ class SlackEventBase extends ServiceBase {
    *
    * @param {object} params
    * @param {object} params.eventDataPayload: event payload from slack
+   * @param {string} params.eventDataPayload.response_url
+   * @param {object} params.eventDataPayload.message
+   * @param {array<object>} params.eventDataPayload.actions
    * @param {object} params.eventParams: event params
    * @param {object} params.currentAdmin: current admin params
    *
@@ -27,7 +31,7 @@ class SlackEventBase extends ServiceBase {
    * @constructor
    */
   constructor(params) {
-    super(params);
+    super();
 
     const oThis = this;
 
@@ -39,17 +43,15 @@ class SlackEventBase extends ServiceBase {
   }
 
   /**
-   * Validate param
+   * Validate parameters.
    *
-   *
-   * @return {Promise<void>}
-   *
+   * @returns {Promise<void>}
    * @private
    */
   async _validateAndSanitizeParams() {
     const oThis = this;
 
-    logger.log('Validate for salck events factory');
+    logger.log('Validate for slack events factory.');
 
     if (!oThis.eventParams || !CommonValidators.validateNonEmptyObject(oThis.eventParams)) {
       return Promise.reject(
@@ -59,82 +61,71 @@ class SlackEventBase extends ServiceBase {
         })
       );
     }
-
-    return Promise.resolve(responseHelper.successWithData({}));
   }
 
   /**
-   * Post request to slack
+   * Post request to slack.
    *
-   *
-   * @return {Promise<void>}
-   *
+   * @returns {Promise<void>}
    * @private
    */
   async _postResponseToSlack() {
     const oThis = this;
+
     logger.log('_postRequestToSlack start');
 
-    const header = {
-      'Content-Type': 'application/json'
-    };
+    const header = { 'Content-Type': 'application/json' };
 
-    let HttpLibObj = new HttpLibrary({
+    const httpLibObj = new HttpLibrary({
       resource: oThis.eventDataPayload.response_url,
       header: header,
       noFormattingRequired: true
     });
 
     const requestPayload = await oThis._getPayloadForSlackPost();
-    const resp = await HttpLibObj.post(JSON.stringify(requestPayload));
+    const resp = await httpLibObj.post(JSON.stringify(requestPayload));
 
     if (resp.isFailure()) {
       return Promise.reject(resp);
     }
-
-    return Promise.resolve(responseHelper.successWithData({}));
   }
 
   /**
-   * Get Payload for slack post request
+   * Get payload for slack post request.
    *
-   *
-   * @return {Promise<void>}
-   *
+   * @returns {Promise<void>}
    * @private
    */
   async _getPayloadForSlackPost() {
     const oThis = this;
+
     logger.log('_getPayloadForSlackPost start');
 
-    let blocks = await oThis._newBlockForSlack();
-
+    const blocks = await oThis._newBlockForSlack();
     const text = oThis.errMsg ? 'Unable to Process' : 'Your request was processed.';
-    return {
-      text: text,
-      blocks: blocks
-    };
+
+    return { text: text, blocks: blocks };
   }
 
   /**
-   * Constri Payload for slack post request
+   * Construct payload for slack post request.
    *
-   *
-   * @return {Promise<void>}
-   *
+   * @returns {Promise<void>}
    * @private
    */
   async _newBlockForSlack() {
     const oThis = this;
+
     logger.log('_newBlockForSlack start');
+
     let actionPos = 0;
 
     const currentBlocks = oThis.eventDataPayload.message.blocks,
       actionBlockId = oThis.eventDataPayload.actions[0].block_id;
 
-    for (let i = 0; i < currentBlocks.length; i++) {
-      if (currentBlocks[i].block_id == actionBlockId) {
-        actionPos = i;
+    for (let index = 0; index < currentBlocks.length; index++) {
+      if (currentBlocks[index].block_id == actionBlockId) {
+        actionPos = index;
       }
     }
 
@@ -144,53 +135,53 @@ class SlackEventBase extends ServiceBase {
   }
 
   async _textToWrite(actionStr) {
-    const oThis = this,
-      currentTime = Math.round(new Date() / 1000),
-      currentTimeStr = new Date().toUTCString();
+    const oThis = this;
 
-    //Note: Not using date and atmention because of sanitizer error in webhook payload
-    // return `>*${actionStr} by <@${
-    //   oThis.eventDataPayload.user.id
-    //   }>* <!date^${currentTime}^{date_pretty} at {time}|${currentTimeStr}}>`;
-    //
+    const currentTimeStr = new Date().toUTCString();
+    /*
+    Note: Not using date and atmention because of sanitizer error in webhook payload.
+    const currentTime = Math.round(new Date() / 1000);
+    return `>*${actionStr} by <@${
+      oThis.eventDataPayload.user.id
+      }>* <!date^${currentTime}^{date_pretty} at {time}|${currentTimeStr}}>`;
+     */
 
     return `\n>*${actionStr} by ${oThis.eventDataPayload.user.name}* at ${currentTimeStr}`;
   }
 
   /**
-   * Update Payload for slack post request
+   * Update payload for slack post request.
    *
-   *
-   * @return {Promise<void>}
-   *
+   * @returns {Promise<array>}
    * @private
    */
-  async _updatedBlocks(actionPos, currentBlocks) {
+  async _updatedBlocks() {
     throw new Error('Sub-class to implement.');
   }
 
   /**
-   * Set error message received from service
+   * Set error message received from service.
    *
+   * @sets oThis.errMsg
    *
-   * @return {Promise<void>}
-   *
+   * @returns {Promise<void>}
    * @private
    */
   async _setError(serviceResponse) {
     const oThis = this;
+
     logger.error('_setError start');
 
-    let errorResponse = serviceResponse.toHash(errorConfig);
+    const errorResponse = serviceResponse.toHash(errorConfig);
 
     const errors = errorResponse.err.error_data;
 
-    if (errors.length == 0) {
+    if (errors.length === 0) {
       oThis.errMsg = errorResponse.err.msg;
     } else {
       oThis.errMsg = '';
-      for (let i = 0; i < errors.length; i++) {
-        oThis.errMsg += errors[i].msg;
+      for (let index = 0; index < errors.length; index++) {
+        oThis.errMsg += errors[index].msg;
       }
     }
   }

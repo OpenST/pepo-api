@@ -207,7 +207,7 @@ class WebSocketAuth extends ServiceBase {
   }
 
   /**
-   * Verify auth key validity
+   * Verify auth key validity.
    *
    * @returns {Promise<never>}
    * @private

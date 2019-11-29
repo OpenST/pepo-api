@@ -6,7 +6,6 @@ const rootPrefix = '../../..',
   routeHelper = require(rootPrefix + '/routes/helper'),
   sanitizer = require(rootPrefix + '/helpers/sanitizer'),
   apiName = require(rootPrefix + '/lib/globalConstant/apiName'),
-  pepocornProductConstants = require(rootPrefix + '/lib/globalConstant/pepocornProduct'),
   entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
   responseEntityKey = require(rootPrefix + '/lib/globalConstant/responseEntityKey');
 

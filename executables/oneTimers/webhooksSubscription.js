@@ -40,6 +40,7 @@ class WebhooksSubscription {
     let webhookUrl = webhookConstants.webhookUrl;
     let params = {
       topics: [
+        'transactions/initiate',
         'transactions/success',
         'transactions/failure',
         'users/activation_initiate',

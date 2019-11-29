@@ -2,25 +2,32 @@ const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   FiatPaymentModel = require(rootPrefix + '/app/models/mysql/FiatPayment'),
   PaymentProcessingFactory = require(rootPrefix + '/lib/payment/process/Factory'),
-  fiatPaymentConstants = require(rootPrefix + '/lib/globalConstant/fiatPayment'),
-  productConstant = require(rootPrefix + '/lib/globalConstant/inAppProduct'),
-  bgJobConstants = require(rootPrefix + '/lib/globalConstant/bgJob'),
   basicHelper = require(rootPrefix + '/helpers/basic'),
   bgJob = require(rootPrefix + '/lib/rabbitMqEnqueue/bgJob'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
+  bgJobConstants = require(rootPrefix + '/lib/globalConstant/bgJob'),
   entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
   createErrorLogsEntry = require(rootPrefix + '/lib/errorLogs/createEntry'),
   errorLogsConstants = require(rootPrefix + '/lib/globalConstant/errorLogs'),
+  fiatPaymentConstants = require(rootPrefix + '/lib/globalConstant/fiatPayment'),
+  inAppProductConstants = require(rootPrefix + '/lib/globalConstant/inAppProduct'),
   ostPricePointConstants = require(rootPrefix + '/lib/globalConstant/ostPricePoints'),
   mysqlErrorConstants = require(rootPrefix + '/lib/globalConstant/mysqlErrorConstants');
 
+/**
+ * Class to create a top-up request.
+ *
+ * @class CreateTopup
+ */
 class CreateTopup extends ServiceBase {
   /**
-   * Constructor for feed base.
+   * Constructor to create a top-up request.
    *
    * @param {object} params
    * @param {object} params.current_user
    * @param {object} params.response
+   * @param {string} params.os
+   * @param {string} params.user_id
    *
    * @augments ServiceBase
    *
@@ -43,7 +50,7 @@ class CreateTopup extends ServiceBase {
   }
 
   /**
-   * AsyncPerform
+   * Async perform.
    *
    * @returns {Promise<*|result>}
    * @private
@@ -59,7 +66,7 @@ class CreateTopup extends ServiceBase {
       return oThis._apiResponse();
     }
 
-    let processResp = await oThis._serviceSpecificTasks();
+    const processResp = await oThis._serviceSpecificTasks();
 
     await oThis._fetchFiatPayment();
 
@@ -77,7 +84,7 @@ class CreateTopup extends ServiceBase {
   }
 
   /**
-   * Validate and sanitize
+   * Validate and sanitize.
    *
    * @returns {*|result}
    * @private
@@ -85,11 +92,11 @@ class CreateTopup extends ServiceBase {
   async _validateAndSanitize() {
     const oThis = this;
 
-    // checking if the logged in user is same as the userId coming in params
+    // Checking if the logged in user is same as the userId coming in params.
     if (oThis.userId != oThis.currentUser.id) {
       return Promise.reject(
         responseHelper.paramValidationError({
-          internal_error_identifier: 'a_s_p_pv_2',
+          internal_error_identifier: 'a_s_tu_c_1',
           api_error_identifier: 'invalid_api_params',
           params_error_identifiers: ['invalid_user_id'],
           debug_options: {
@@ -100,9 +107,9 @@ class CreateTopup extends ServiceBase {
       );
     }
 
-    if (oThis.os !== productConstant.ios && oThis.os !== productConstant.android) {
-      let errorObject = responseHelper.error({
-        internal_error_identifier: 'invalid_os:a_s_p_pv_3',
+    if (oThis.os !== inAppProductConstants.ios && oThis.os !== inAppProductConstants.android) {
+      const errorObject = responseHelper.error({
+        internal_error_identifier: 'invalid_os:a_s_tu_c_2',
         api_error_identifier: 'invalid_api_params',
         debug_options: { os: oThis.os }
       });
@@ -110,7 +117,7 @@ class CreateTopup extends ServiceBase {
 
       return Promise.reject(
         responseHelper.paramValidationError({
-          internal_error_identifier: 'a_s_p_pv_3',
+          internal_error_identifier: 'a_s_tu_c_3',
           api_error_identifier: 'invalid_api_params',
           params_error_identifiers: ['invalid_os'],
           debug_options: { os: oThis.os }
@@ -118,24 +125,28 @@ class CreateTopup extends ServiceBase {
       );
     }
 
-    // we are not validating the keys inside paymentReceipt in _validateAndSanitize
-    // because Apple and Google will keep changing it.
-
+    /*
+    We are not validating the keys inside paymentReceipt in _validateAndSanitize
+    because Apple and Google will keep changing it.
+     */
     return responseHelper.successWithData({});
   }
 
   /**
-   * Insert in fiat payments
+   * Insert in fiat payments.
    *
-   * @returns {Promise<*|result>}
+   * @sets oThis.paymentDetail, oThis.fiatPaymentId, oThis.retryCount
+   *
+   * @returns {Promise<void>}
    * @private
    */
   async _recordTopup() {
-    const oThis = this,
-      serviceReceiptId = oThis.paymentReceipt.transactionId,
+    const oThis = this;
+
+    const serviceReceiptId = oThis.paymentReceipt.transactionId,
       serviceKind = oThis._getServiceKind();
 
-    let createParams = {
+    const createParams = {
       receipt_id: serviceReceiptId,
       raw_receipt: JSON.stringify(oThis.paymentReceipt),
       from_user_id: oThis.currentUser.id,
@@ -145,11 +156,12 @@ class CreateTopup extends ServiceBase {
       status: fiatPaymentConstants.invertedStatuses[fiatPaymentConstants.receiptValidationPendingStatus],
       retry_after: basicHelper.getCurrentTimestampInSeconds()
     };
-    let fiatPaymentCreateResp = await new FiatPaymentModel()
+
+    const fiatPaymentCreateResp = await new FiatPaymentModel()
       .insert(createParams)
       .fire()
       .catch(async function(mysqlErrorObject) {
-        // duplicate is handled here.
+        // Duplicate is handled here.
         if (mysqlErrorObject.code === mysqlErrorConstants.duplicateError) {
           oThis.paymentDetail = await new FiatPaymentModel().fetchByReceiptIdAndServiceKind(
             serviceReceiptId,
@@ -161,7 +173,7 @@ class CreateTopup extends ServiceBase {
           oThis.fiatPaymentId = oThis.paymentDetail.id;
           oThis.retryCount = oThis.paymentDetail.retryCount;
         } else {
-          let errorResp = responseHelper.error({
+          const errorResp = responseHelper.error({
             internal_error_identifier: 'a_s_p_pv_1',
             api_error_identifier: 'something_went_wrong',
             debug_options: {
@@ -171,6 +183,7 @@ class CreateTopup extends ServiceBase {
             }
           });
           await createErrorLogsEntry.perform(errorResp, errorLogsConstants.highSeverity);
+
           return Promise.reject(errorResp);
         }
       });
@@ -179,8 +192,6 @@ class CreateTopup extends ServiceBase {
       oThis.fiatPaymentId = fiatPaymentCreateResp.insertId;
       oThis.retryCount = 0;
     }
-
-    return responseHelper.successWithData({});
   }
 
   /**
@@ -192,17 +203,19 @@ class CreateTopup extends ServiceBase {
   _needReValidation() {
     const oThis = this;
 
-    if (oThis.os === productConstant.android) {
-      if (oThis.paymentDetail.status == fiatPaymentConstants.receiptValidationPendingStatus) {
+    if (oThis.os === inAppProductConstants.android) {
+      if (oThis.paymentDetail.status === fiatPaymentConstants.receiptValidationPendingStatus) {
         return true;
       }
     }
+
     return false;
   }
 
   /**
-   * Api response
+   * Api response.
    *
+   * @returns {result}
    * @private
    */
   _apiResponse() {
@@ -212,42 +225,45 @@ class CreateTopup extends ServiceBase {
   }
 
   /**
-   * Service specific tasks
+   * Service specific tasks.
    *
    * @returns {Promise<void>}
    * @private
    */
   async _serviceSpecificTasks() {
-    const oThis = this,
-      params = {
-        fiatPaymentId: oThis.fiatPaymentId,
-        paymentReceipt: oThis.paymentReceipt,
-        userId: oThis.userId,
-        retryCount: oThis.retryCount
-      };
+    const oThis = this;
 
-    let paymentProcessor = PaymentProcessingFactory.getInstance(oThis.os, params);
+    const params = {
+      fiatPaymentId: oThis.fiatPaymentId,
+      paymentReceipt: oThis.paymentReceipt,
+      userId: oThis.userId,
+      retryCount: oThis.retryCount
+    };
+
+    const paymentProcessor = PaymentProcessingFactory.getInstance(oThis.os, params);
 
     return paymentProcessor.perform();
   }
 
   /**
-   * Get service kind
+   * Get service kind.
    *
    * @returns {string}
    */
   _getServiceKind() {
     const oThis = this;
 
-    if (oThis.os === productConstant.ios) {
+    if (oThis.os === inAppProductConstants.ios) {
       return fiatPaymentConstants.applePayKind;
-    } else if (oThis.os === productConstant.android) {
+    } else if (oThis.os === inAppProductConstants.android) {
       return fiatPaymentConstants.googlePayKind;
     }
   }
 
   /**
-   * Fetch fiat payment receipt
+   * Fetch fiat payment receipt.
+   *
+   * @sets oThis.paymentDetail
    *
    * @return {Promise<void>}
    * @private
@@ -255,7 +271,7 @@ class CreateTopup extends ServiceBase {
   async _fetchFiatPayment() {
     const oThis = this;
 
-    let paymentObj = await new FiatPaymentModel().fetchByIds([oThis.fiatPaymentId]);
+    const paymentObj = await new FiatPaymentModel().fetchByIds([oThis.fiatPaymentId]);
 
     oThis.paymentDetail = paymentObj[oThis.fiatPaymentId];
   }
