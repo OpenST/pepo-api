@@ -74,19 +74,17 @@ class DynamicTextActivityPublisher {
   async _fetchUserIds() {
     const oThis = this;
 
-    let offset = 0,
-      pageNo = 1;
+    let minUserId = -1;
 
     const limit = 30;
 
     while (true) {
-      offset = (pageNo - 1) * limit;
-
       const rows = await new UserModel()
         .select('id')
         .where({ status: userConstants.invertedStatuses[userConstants.activeStatus] })
-        .offset(offset)
+        .where('id > ?', minUserId)
         .limit(limit)
+        .order('id asc')
         .fire();
 
       if (rows.length == 0) {
@@ -94,10 +92,9 @@ class DynamicTextActivityPublisher {
       } else {
         for (let ind = 0; ind < rows.length; ind++) {
           oThis.userIds.push(rows[ind].id);
+          minUserId = rows[ind].id;
         }
       }
-
-      pageNo += 1;
     }
   }
 
