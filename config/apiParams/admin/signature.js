@@ -158,13 +158,14 @@ const adminSignature = {
       {
         parameter: 'video_id',
         validatorMethods: ['validateInteger']
-      },
+      }
+    ],
+    optional: [
       {
         parameter: paginationConstants.paginationIdentifierKey,
         validatorMethods: ['validateString', 'validatePaginationIdentifier']
       }
-    ],
-    optional: []
+    ]
   },
   [apiName.adminUpdateVideoDescription]: {
     mandatory: [
