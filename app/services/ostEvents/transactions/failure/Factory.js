@@ -49,7 +49,7 @@ class TransactionWebhookFailureFactory extends TransactionWebhookFactoryBase {
       transactionEventResponse = await new PepoOnReplyFailureWebhook(oThis.webhookData).perform();
     } else if (oThis._isUserActivateAirdropTransactionKind()) {
       transactionEventResponse = await new AirdropFailureWebhook(oThis.webhookData).perform();
-    } else if (oThis.TopUpFailureClass()) {
+    } else if (oThis._isTopUpTransactionKind()) {
       transactionEventResponse = await new TopupFailureWebhook(oThis.webhookData).perform();
     } else if (oThis._isUserTransactionKind()) {
       transactionEventResponse = await new UserTransactionFailureWebhook(oThis.webhookData).perform();
