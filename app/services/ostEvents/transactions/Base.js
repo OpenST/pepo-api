@@ -26,13 +26,13 @@ const rootPrefix = '../../../..',
   transactionConstants = require(rootPrefix + '/lib/globalConstant/transaction');
 
 /**
- * Class for transaction event ost base.
+ * Class for transaction kind base.
  *
  * @class TransactionOstEventBase
  */
-class TransactionOstEventBase extends ServiceBase {
+class TransactionWebhookBase extends ServiceBase {
   /**
-   * Constructor for transaction event ost base.
+   * Constructor for transaction kind base.
    *
    * @param {object} params
    * @param {string} params.data: contains the webhook event data
@@ -50,7 +50,7 @@ class TransactionOstEventBase extends ServiceBase {
 
     const oThis = this;
 
-    oThis.ostTransaction = params.data.transaction;
+    oThis.ostTransaction = params.transaction;
 
     oThis.ostTxId = oThis.ostTransaction.id;
     oThis.ostTransactionStatus = oThis.ostTransaction.status;
@@ -102,10 +102,10 @@ class TransactionOstEventBase extends ServiceBase {
       oThis.productId = parsedHash.productId;
       oThis.pepoUsdPricePoint = parsedHash.pepoUsdPricePoint;
     } else if (oThis._isPepoOnReplyTransactionKind()) {
-      if (parsedHash.replyDetailId) {
-        oThis.replyDetailId = parsedHash.replyDetailId;
-        oThis.videoId = parsedHash.videoId;
-      }
+      oThis.replyDetailId = parsedHash.replyDetailId;
+    } else if (oThis._isReplyOnVideoTransactionKind()) {
+      oThis.replyDetailId = parsedHash.replyDetailId;
+      oThis.videoId = parsedHash.videoId;
     } else {
       if (parsedHash.videoId) {
         oThis.videoId = parsedHash.videoId;
@@ -127,7 +127,7 @@ class TransactionOstEventBase extends ServiceBase {
 
     if (!oThis.transactionObj) {
       const errorObject = responseHelper.error({
-        internal_error_identifier: 'a_s_oe_t_f_1',
+        internal_error_identifier: 'a_s_oe_t_b_1',
         api_error_identifier: 'something_went_wrong',
         debug_options: { reason: 'Transaction obj was empty' }
       });
@@ -138,7 +138,7 @@ class TransactionOstEventBase extends ServiceBase {
 
     if (oThis.transactionObj.status !== transactionConstants.pendingStatus) {
       const errorObject1 = responseHelper.error({
-        internal_error_identifier: 'a_s_oe_t_f_2',
+        internal_error_identifier: 'a_s_oe_t_b_2',
         api_error_identifier: 'something_went_wrong',
         debug_options: { reason: 'Transaction status is not pending.' }
       });
@@ -307,7 +307,7 @@ class TransactionOstEventBase extends ServiceBase {
     if (paramErrors.length > 0) {
       return Promise.reject(
         responseHelper.paramValidationError({
-          internal_error_identifier: 'a_s_oe_t_b_1',
+          internal_error_identifier: 'a_s_oe_t_b_10',
           api_error_identifier: 'invalid_api_params',
           params_error_identifiers: paramErrors,
           debug_options: { transaction: oThis.transactionObj }
@@ -410,6 +410,11 @@ class TransactionOstEventBase extends ServiceBase {
     logger.log('End:: Update token user to mark airdrops status');
   }
 
+  /**
+   * Process for topup transaction
+   *
+   * @returns {Promise<*|result>}
+   */
   async processForTopUpTransaction() {
     const oThis = this;
 
@@ -423,6 +428,11 @@ class TransactionOstEventBase extends ServiceBase {
     return responseHelper.successWithData({});
   }
 
+  /**
+   * Update pepocorn transaction model
+   *
+   * @returns {Promise<*|result>}
+   */
   async updatePepocornTransactionModel() {
     const oThis = this;
 
@@ -560,39 +570,63 @@ class TransactionOstEventBase extends ServiceBase {
   async fetchVideoAndValidate() {
     const oThis = this;
 
-    const videoDetailsCacheResponse = await new VideoDetailsByVideoIdsCache({ videoIds: [oThis.videoId] }).fetch();
-    if (videoDetailsCacheResponse.isFailure()) {
-      logger.error('Error while fetching video detail data.');
-      return Promise.reject(videoDetailsCacheResponse);
-    }
-
-    let videoDetail = videoDetailsCacheResponse.data[oThis.videoId];
-
-    if (CommonValidators.validateNonEmptyObject(videoDetail)) {
-      return responseHelper.successWithData({});
-    } else {
-      const ReplyDetailsByEntityIdsAndEntityKindCacheRsp = await new ReplyDetailsByEntityIdsAndEntityKindCache({
-        entityIds: [oThis.videoId],
-        entityKind: replyDetailConstants.videoEntityKind
-      }).fetch();
-
-      if (ReplyDetailsByEntityIdsAndEntityKindCacheRsp.isFailure()) {
+    if (oThis.replyDetailId) {
+      const replyDetailCacheResp = await new ReplyDetailsByIdsCache({ ids: [oThis.replyDetailId] }).fetch();
+      if (replyDetailCacheResp.isFailure()) {
         logger.error('Error while fetching reply detail data.');
 
-        return Promise.reject(ReplyDetailsByEntityIdsAndEntityKindCacheRsp);
+        return Promise.reject(replyDetailCacheResp);
       }
 
-      let replyDetail = ReplyDetailsByEntityIdsAndEntityKindCacheRsp.data[oThis.videoId];
+      const replyDetail = replyDetailCacheResp.data[oThis.replyDetailId];
 
       if (!CommonValidators.validateNonEmptyObject(replyDetail)) {
         return Promise.reject(
           responseHelper.paramValidationError({
-            internal_error_identifier: 'a_s_oe_t_b_2',
+            internal_error_identifier: 'a_s_oe_t_b_6',
             api_error_identifier: 'invalid_api_params',
-            params_error_identifiers: ['invalid_video_id'],
-            debug_options: { replyDetail: replyDetail, videoDetail: videoDetail, replyDetailId: oThis.replyDetailId }
+            params_error_identifiers: ['invalid_reply_detail_id'],
+            debug_options: { replyDetail: replyDetail, replyDetailId: oThis.replyDetailId }
           })
         );
+      }
+    } else {
+      const videoDetailsCacheResponse = await new VideoDetailsByVideoIdsCache({ videoIds: [oThis.videoId] }).fetch();
+      if (videoDetailsCacheResponse.isFailure()) {
+        logger.error('Error while fetching video detail data.');
+        return Promise.reject(videoDetailsCacheResponse);
+      }
+      //todo-replies: use different method to validate reply video
+
+      let videoDetail = videoDetailsCacheResponse.data[oThis.videoId];
+
+      // Note: For older build if we receive pepo_on_reply for this this condition is added.
+      if (CommonValidators.validateNonEmptyObject(videoDetail)) {
+        return responseHelper.successWithData({});
+      } else {
+        const replyDetailsByEntityIdsAndEntityKindCacheRsp = await new ReplyDetailsByEntityIdsAndEntityKindCache({
+          entityIds: [oThis.videoId],
+          entityKind: replyDetailConstants.videoEntityKind
+        }).fetch();
+
+        if (replyDetailsByEntityIdsAndEntityKindCacheRsp.isFailure()) {
+          logger.error('Error while fetching reply detail data.');
+
+          return Promise.reject(replyDetailsByEntityIdsAndEntityKindCacheRsp);
+        }
+
+        const replyDetailId = replyDetailsByEntityIdsAndEntityKindCacheRsp.data[oThis.videoId];
+
+        if (CommonValidators.isVarNullOrUndefined(replyDetailId)) {
+          return Promise.reject(
+            responseHelper.paramValidationError({
+              internal_error_identifier: 'a_s_oe_t_b_11',
+              api_error_identifier: 'invalid_api_params',
+              params_error_identifiers: ['invalid_video_id'],
+              debug_options: { videoDetail: videoDetail, replyDetailId: replyDetailId }
+            })
+          );
+        }
       }
     }
 
@@ -626,6 +660,10 @@ class TransactionOstEventBase extends ServiceBase {
           debug_options: { replyDetail: replyDetail, replyDetailId: oThis.replyDetailId }
         })
       );
+    }
+
+    if (oThis._isPepoOnReplyTransactionKind()) {
+      oThis.videoId = replyDetail.entityId;
     }
   }
 
@@ -671,38 +709,6 @@ class TransactionOstEventBase extends ServiceBase {
    */
   _publishedTimestamp() {
     return Math.round(new Date() / 1000);
-  }
-
-  /**
-   * Valid transaction status.
-   *
-   * @return {String}
-   * @private
-   */
-  _validTransactionStatus() {
-    throw new Error('Unimplemented method validTransactionStatus for TransactionOstEvent.');
-  }
-
-  /**
-   * Transaction status
-   *
-   * @private
-   */
-  _transactionStatus() {
-    throw new Error('Unimplemented method _transactionStatus for TransactionOstEvent.');
-  }
-
-  /**
-   * Get new property value for token user.
-   *
-   * @private
-   */
-  _getPropertyValForTokenUser() {
-    throw new Error('Unimplemented method getPropertyValForTokenUser for TransactionOstEvent.');
-  }
-
-  _getPepocornTransactionStatus() {
-    throw new Error('Unimplemented method _getPepocornTransactionStatus for TransactionOstEvent.');
   }
 
   /**
@@ -789,6 +795,30 @@ class TransactionOstEventBase extends ServiceBase {
    * @returns {boolean}
    * @private
    */
+  _isUserActivateAirdropTransactionKind() {
+    const oThis = this;
+
+    return oThis.ostTransaction.meta_property.name === transactionConstants.userActivateAirdropMetaName;
+  }
+
+  /**
+   * Return true if it is a pepocorn convert for redemption transaction.
+   *
+   * @returns {boolean}
+   * @private
+   */
+  _isTopUpTransactionKind() {
+    const oThis = this;
+
+    return oThis.ostTransaction.meta_property.name === transactionConstants.topUpMetaName;
+  }
+
+  /**
+   * Return true if it is a pepocorn convert for redemption transaction.
+   *
+   * @returns {boolean}
+   * @private
+   */
   _isRedemptionTransactionKind() {
     const oThis = this;
 
@@ -818,6 +848,61 @@ class TransactionOstEventBase extends ServiceBase {
 
     return oThis.ostTransaction.meta_property.name === transactionConstants.pepoOnReplyMetaName;
   }
+
+  /**
+   * Return true if it is a pepocorn convert for redemption transaction.
+   *
+   * @returns {boolean}
+   * @private
+   */
+  _isUserTransactionKind() {
+    const oThis = this;
+
+    return (
+      !oThis._isUserActivateAirdropTransactionKind() &&
+      !oThis._isTopUpTransactionKind() &&
+      !oThis._isRedemptionTransactionKind() &&
+      !oThis._isReplyOnVideoTransactionKind() &&
+      !oThis._isPepoOnReplyTransactionKind()
+    );
+  }
+
+  /**
+   * Valid transaction status.
+   *
+   * @return {String}
+   * @private
+   */
+  _validTransactionStatus() {
+    throw new Error('Unimplemented method validTransactionStatus for TransactionOstEvent.');
+  }
+
+  /**
+   * Transaction status
+   *
+   * @private
+   */
+  _transactionStatus() {
+    throw new Error('Unimplemented method _transactionStatus for TransactionOstEvent.');
+  }
+
+  /**
+   * Get new property value for token user.
+   *
+   * @private
+   */
+  _getPropertyValForTokenUser() {
+    throw new Error('Unimplemented method getPropertyValForTokenUser for TransactionOstEvent.');
+  }
+
+  /**
+   * Get pepocorn transaction status.
+   *
+   * @private
+   */
+  _getPepocornTransactionStatus() {
+    throw new Error('Unimplemented method _getPepocornTransactionStatus for TransactionOstEvent.');
+  }
 }
 
-module.exports = TransactionOstEventBase;
+module.exports = TransactionWebhookBase;

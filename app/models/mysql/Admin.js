@@ -37,6 +37,7 @@ class AdminModel extends ModelBase {
    * @param {string} dbRow.name
    * @param {string} dbRow.email
    * @param {string} dbRow.password
+   * @param {string} dbRow.slack_id
    * @param {string} dbRow.encryption_salt
    * @param {number} dbRow.status
    * @param {number} dbRow.created_at
@@ -52,6 +53,7 @@ class AdminModel extends ModelBase {
       name: dbRow.name,
       email: dbRow.email,
       password: dbRow.password,
+      slackId: dbRow.slack_id,
       encryptionSalt: dbRow.encryption_salt,
       status: adminConstants.statuses[dbRow.status],
       createdAt: dbRow.created_at,
@@ -108,6 +110,31 @@ class AdminModel extends ModelBase {
     }
 
     return response;
+  }
+
+  /**
+   * Fetch secure user by ids.
+   *
+   * @param {string} slackId
+   *
+   * @return {object}
+   */
+  async fetchBySlackId(slackId) {
+    const oThis = this;
+
+    const dbRows = await oThis
+      .select('id')
+      .where({
+        slack_id: slackId,
+        status: adminConstants.invertedStatuses[adminConstants.activeStatus]
+      })
+      .fire();
+
+    if (dbRows.length === 0) {
+      return {};
+    }
+
+    return oThis.formatDbData(dbRows[0]);
   }
 
   /**
@@ -206,6 +233,11 @@ class AdminModel extends ModelBase {
     if (params.email) {
       const AdminByEmailsCache = require(rootPrefix + '/lib/cacheManagement/multi/AdminByEmails');
       promisesArray.push(new AdminByEmailsCache({ emails: [params.email] }).clear());
+    }
+
+    if (params.slackId) {
+      const AdminBySlackIdCache = require(rootPrefix + '/lib/cacheManagement/single/AdminBySlackId');
+      promisesArray.push(new AdminBySlackIdCache({ slackId: params.slackId }).clear());
     }
 
     await Promise.all(promisesArray);

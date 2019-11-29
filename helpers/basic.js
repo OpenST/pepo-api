@@ -8,6 +8,7 @@ const rootPrefix = '..',
   v1ParamErrorConfig = require(rootPrefix + '/config/apiParams/v1/errorConfig'),
   adminParamErrorConfig = require(rootPrefix + '/config/apiParams/admin/errorConfig'),
   webParamErrorConfig = require(rootPrefix + '/config/apiParams/web/errorConfig'),
+  logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   internalParamErrorConfig = require(rootPrefix + '/config/apiParams/internal/errorConfig');
 
 /**
@@ -489,7 +490,7 @@ class BasicHelper {
    */
   sleep(ms) {
     // eslint-disable-next-line no-console
-    console.log(`Sleeping for ${ms} ms.`);
+    logger.log(`Sleeping for ${ms} ms.`);
 
     return new Promise(function(resolve) {
       setTimeout(resolve, ms);
@@ -712,6 +713,37 @@ class BasicHelper {
       .convertToBigNumber(number1)
       .plus(oThis.convertToBigNumber(number2))
       .toString(10);
+  }
+
+  /**
+   * Parse and regex replace processed links and user mention in slack payload
+   *
+   * @param payload
+   * @returns {Object}
+   */
+  preprocessSlackPayload(params) {
+    const oThis = this;
+
+    if (typeof params === 'string') {
+      params = params.replace(/<(http)([^>\s]*)>/gi, '$1$2');
+    } else if (typeof params === 'boolean' || typeof params === 'number' || params === null) {
+      // Do nothing and return param as is.
+    } else if (params instanceof Array) {
+      for (const index in params) {
+        params[index] = oThis.preprocessSlackPayload(params[index]);
+      }
+    } else if (params instanceof Object) {
+      Object.keys(params).forEach(function(key) {
+        params[key] = oThis.preprocessSlackPayload(params[key]);
+      });
+    } else if (!params) {
+      // Do nothing and return param as is.
+    } else {
+      console.error('Invalid params type in payload: ', typeof params);
+      params = '';
+    }
+
+    return params;
   }
 }
 

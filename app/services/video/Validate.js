@@ -1,5 +1,8 @@
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
+  CommonValidators = require(rootPrefix + '/lib/validators/Common'),
+  basicHelper = require(rootPrefix + '/helpers/basic'),
+  logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   responseHelper = require(rootPrefix + '/lib/formatter/response');
 
 /**
@@ -28,17 +31,19 @@ class ValidateUploadVideoParams extends ServiceBase {
 
     oThis.currentUser = params.current_user;
     oThis.videoDescription = params.video_description;
-    oThis.perReplyAmountInWei = params.per_reply_amount_in_wei;
+    oThis.perReplyAmountInWei = params.per_reply_amount_in_wei || 0;
     oThis.link = params.link;
   }
 
   /**
    * Async perform.
    *
-   * @return {Promise<result>}
+   * @returns {Promise<result>}
    * @private
    */
   async _asyncPerform() {
+    const oThis = this;
+
     return responseHelper.successWithData({});
   }
 }

@@ -2,9 +2,10 @@ const uuidV4 = require('uuid/v4');
 
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
-  UserModel = require(rootPrefix + '/app/models/mysql/User'),
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   UserMultiCache = require(rootPrefix + '/lib/cacheManagement/multi/User'),
+  ImageByIdCache = require(rootPrefix + '/lib/cacheManagement/multi/ImageByIds'),
+  VideoByIdCache = require(rootPrefix + '/lib/cacheManagement/multi/VideoByIds'),
   TextsByIdCache = require(rootPrefix + '/lib/cacheManagement/multi/TextsByIds'),
   TwitterUserByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TwitterUserByIds'),
   ReplyDetailsByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/ReplyDetailsByIds'),
@@ -13,7 +14,7 @@ const rootPrefix = '../../..',
   gotoConstants = require(rootPrefix + '/lib/globalConstant/goto'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   userConstants = require(rootPrefix + '/lib/globalConstant/user'),
-  entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
+  entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
   replyDetailConstants = require(rootPrefix + '/lib/globalConstant/replyDetail'),
   shareEntityConstants = require(rootPrefix + '/lib/globalConstant/shareEntity');
 
@@ -46,12 +47,14 @@ class ShareDetails extends ServiceBase {
     oThis.creatorName = null;
     oThis.twitterHandle = null;
     oThis.videoDescriptionText = null;
+    oThis.posterImageId = null;
+    oThis.posterImageUrl = null;
   }
 
   /**
    * Async perform.
    *
-   * @returns {Promise<void>}
+   * @returns {Promise<result>}
    * @private
    */
   async _asyncPerform() {
@@ -98,6 +101,11 @@ class ShareDetails extends ServiceBase {
       );
     }
 
+    let videoId = null;
+    if (replyDetails.entityKind === replyDetailConstants.videoEntityKind) {
+      videoId = replyDetails.entityId;
+    }
+
     // Fetch description if available.
     if (replyDetails.descriptionId) {
       const textCacheResp = await new TextsByIdCache({ ids: [replyDetails.descriptionId] }).fetch();
@@ -122,7 +130,6 @@ class ShareDetails extends ServiceBase {
       oThis.isSelfVideoShare = true;
     } else {
       const userMultiCacheRsp = await new UserMultiCache({ ids: [creatorUserId] }).fetch();
-
       if (userMultiCacheRsp.isFailure()) {
         return Promise.reject(userMultiCacheRsp);
       }
@@ -130,7 +137,7 @@ class ShareDetails extends ServiceBase {
       userObj = userMultiCacheRsp.data[creatorUserId];
     }
 
-    if (!userObj || userObj.status !== userConstants.activeStatus || !UserModel.isUserApprovedCreator(userObj)) {
+    if (!userObj || userObj.status !== userConstants.activeStatus) {
       return Promise.reject(
         responseHelper.error({
           internal_error_identifier: 'a_s_r_sd_3',
@@ -141,7 +148,13 @@ class ShareDetails extends ServiceBase {
     }
 
     oThis.creatorName = userObj.name;
-    await oThis._fetchTwitterHandle(userObj.id);
+
+    const promisesArray = [oThis._fetchTwitterHandle(userObj.id)];
+
+    if (replyDetails.entityKind === replyDetailConstants.videoEntityKind) {
+      promisesArray.push(oThis._fetchPosterImageUrl(videoId));
+    }
+    await Promise.all(promisesArray);
   }
 
   /**
@@ -158,7 +171,6 @@ class ShareDetails extends ServiceBase {
     const twitterUserByUserIdsCacheResponse = await new TwitterUserByUserIdsCache({
       userIds: [userId]
     }).fetch();
-
     if (twitterUserByUserIdsCacheResponse.isFailure()) {
       return Promise.reject(twitterUserByUserIdsCacheResponse);
     }
@@ -180,6 +192,58 @@ class ShareDetails extends ServiceBase {
   }
 
   /**
+   * Fetch poster image url.
+   *
+   * @sets oThis.posterImageUrl
+   *
+   * @returns {Promise<*>}
+   * @private
+   */
+  async _fetchPosterImageUrl(videoId) {
+    const oThis = this;
+
+    if (!videoId) {
+      return;
+    }
+
+    await oThis._fetchPosterImageId(videoId);
+
+    if (!oThis.posterImageId) {
+      return;
+    }
+    const cacheRsp = await new ImageByIdCache({ ids: [oThis.posterImageId] }).fetch();
+
+    if (cacheRsp.isFailure()) {
+      return Promise.reject(cacheRsp);
+    }
+
+    oThis.posterImageUrl = cacheRsp.data[oThis.posterImageId].resolutions.original.url;
+  }
+
+  /**
+   * Fetch poster image id.
+   *
+   * @param {number} videoId
+   *
+   * @sets oThis.posterImageId
+   *
+   * @returns {Promise<never>}
+   * @private
+   */
+  async _fetchPosterImageId(videoId) {
+    const oThis = this;
+
+    const cacheRsp = await new VideoByIdCache({ ids: [videoId] }).fetch();
+    if (cacheRsp.isFailure()) {
+      return Promise.reject(cacheRsp);
+    }
+
+    if (cacheRsp.data[videoId].posterImageId) {
+      oThis.posterImageId = cacheRsp.data[videoId].posterImageId;
+    }
+  }
+
+  /**
    * Prepare final response.
    *
    * @returns {{}}
@@ -197,10 +261,11 @@ class ShareDetails extends ServiceBase {
     });
 
     return {
-      [entityType.share]: Object.assign(
+      [entityTypeConstants.share]: Object.assign(
         {
           id: uuidV4(),
           kind: shareEntityConstants.replyShareKind,
+          posterImageUrl: oThis.posterImageUrl,
           uts: Math.round(new Date() / 1000)
         },
         messageObject

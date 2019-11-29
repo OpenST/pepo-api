@@ -1,6 +1,5 @@
 const rootPrefix = '../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
-  logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   databaseConstants = require(rootPrefix + '/lib/globalConstant/database'),
   replyDetailConstants = require(rootPrefix + '/lib/globalConstant/replyDetail');
 
@@ -10,9 +9,9 @@ const dbName = databaseConstants.entityDbName;
 /**
  * Class for reply detail model.
  *
- * @class ReplyDetail
+ * @class ReplyDetailsModel
  */
-class ReplyDetail extends ModelBase {
+class ReplyDetailsModel extends ModelBase {
   /**
    * Constructor for reply detail model.
    *
@@ -106,7 +105,7 @@ class ReplyDetail extends ModelBase {
    * @param {number} params.videoId: video id
    * @param {number} params.paginationTimestamp: pagination timestamp
    *
-   * @returns Promise{object}
+   * @returns Promise{<array>}
    */
   async fetchByVideoId(params) {
     const oThis = this;
@@ -116,7 +115,7 @@ class ReplyDetail extends ModelBase {
       paginationTimestamp = params.paginationTimestamp;
 
     const queryObject = oThis
-      .select('*')
+      .select('id')
       .where({
         parent_id: videoId,
         entity_kind: replyDetailConstants.invertedEntityKinds[replyDetailConstants.videoEntityKind],
@@ -131,22 +130,22 @@ class ReplyDetail extends ModelBase {
 
     const dbRows = await queryObject.fire();
 
-    const replyDetails = {};
     const replyIds = [];
 
     for (let index = 0; index < dbRows.length; index++) {
-      const formatDbRow = oThis.formatDbData(dbRows[index]);
-      replyDetails[formatDbRow.id] = formatDbRow;
-      replyIds.push(formatDbRow.id);
+      replyIds.push(dbRows[index].id);
     }
 
-    return { replyDetails: replyDetails, replyIds: replyIds };
+    return replyIds;
   }
 
   /**
    * Fetch reply detail by entity id and entity kind.
    *
-   * @param params
+   * @param {object} params
+   * @param {array} params.entityIds
+   * @param {string} params.entityKind
+   *
    * @returns {Promise<*>}
    */
   async fetchReplyDetailByEntityIdsAndEntityKind(params) {
@@ -156,7 +155,7 @@ class ReplyDetail extends ModelBase {
       entityKind = params.entityKind;
 
     const dbRows = await oThis
-      .select('*')
+      .select('id, entity_id')
       .where({
         entity_id: entityIds,
         entity_kind: replyDetailConstants.invertedEntityKinds[entityKind]
@@ -167,7 +166,7 @@ class ReplyDetail extends ModelBase {
 
     for (let index = 0; index < dbRows.length; index++) {
       const formatDbRow = oThis.formatDbData(dbRows[index]);
-      replyDetails[formatDbRow.entityId] = formatDbRow;
+      replyDetails[formatDbRow.entityId] = formatDbRow.id;
     }
 
     return replyDetails;
@@ -193,6 +192,32 @@ class ReplyDetail extends ModelBase {
     for (let index = 0; index < dbRows.length; index++) {
       const formatDbRow = oThis.formatDbData(dbRows[index]);
       response[formatDbRow.id] = formatDbRow;
+    }
+
+    return response;
+  }
+
+  /**
+   * Fetch distinct reply creators of parent
+   *
+   * @param {array} replyDetailIds
+   *
+   * @returns {Promise<void>}
+   */
+  async fetchDistinctReplyCreatorsByParent(videoIds) {
+    const oThis = this;
+
+    const dbRows = await oThis
+      .select('*')
+      .where(['parent_id IN (?) AND transaction_id IS NOT NULL', videoIds])
+      .fire();
+
+    const response = {};
+
+    for (let index = 0; index < dbRows.length; index++) {
+      const formatDbRow = oThis.formatDbData(dbRows[index]);
+      response[formatDbRow.parentId] = response[formatDbRow.parentId] || {};
+      response[formatDbRow.parentId][formatDbRow.creatorUserId] = 1;
     }
 
     return response;
@@ -234,12 +259,10 @@ class ReplyDetail extends ModelBase {
       .fire();
 
     const flushCacheParams = {
-      parentVideoIds: [params.parentId],
-      entityIds: [params.entityId],
-      entityKind: params.entityKind
+      parentVideoIds: [params.parentId]
     };
 
-    await ReplyDetail.flushCache(flushCacheParams);
+    await ReplyDetailsModel.flushCache(flushCacheParams);
 
     return insertResponse;
   }
@@ -248,7 +271,7 @@ class ReplyDetail extends ModelBase {
    * Mark video entities deleted.
    *
    * @param {object} params
-   * @param {Array} params.replyDetailsIds
+   * @param {array} params.replyDetailsIds
    *
    * @returns {object}
    */
@@ -279,17 +302,6 @@ class ReplyDetail extends ModelBase {
   async updateByReplyDetailId(params) {
     const oThis = this;
 
-    const ReplyDetailsByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/ReplyDetailsByIds');
-
-    const replyDetailCacheResp = await new ReplyDetailsByIdsCache({ ids: [params.replyDetailId] }).fetch();
-    if (replyDetailCacheResp.isFailure()) {
-      logger.error('Error while fetching reply detail data.');
-
-      return Promise.reject(replyDetailCacheResp);
-    }
-
-    const replyDetail = replyDetailCacheResp.data[params.replyDetailId];
-
     const totalTransactions = 1;
 
     const updateResponse = await oThis
@@ -300,19 +312,63 @@ class ReplyDetail extends ModelBase {
         totalTransactions,
         params.totalContributedBy
       ])
-      .where({ id: replyDetail.id })
+      .where({ id: params.replyDetailId })
       .fire();
 
     const flushCacheParams = {
-      parentVideoIds: [replyDetail.parentId],
-      replyDetailId: replyDetail.id,
-      entityIds: [replyDetail.entityId],
-      entityKind: replyDetailConstants.videoEntityKind
+      replyDetailId: params.replyDetailId
     };
 
-    await ReplyDetail.flushCache(flushCacheParams);
+    await ReplyDetailsModel.flushCache(flushCacheParams);
 
     return updateResponse;
+  }
+
+  /**
+   * Fetch by creator user id.
+   *
+   * @param {number} params.limit: no of rows to fetch
+   * @param {number} params.creatorUserId: creator user id
+   * @param {number} params.paginationTimestamp: creator user id
+   *
+   * @returns {Promise}
+   */
+  async fetchByCreatorUserId(params) {
+    const oThis = this;
+
+    const limit = params.limit,
+      creatorUserId = params.creatorUserId,
+      paginationTimestamp = params.paginationTimestamp;
+
+    const queryObject = oThis
+      .select('*')
+      .where({
+        creator_user_id: creatorUserId,
+        status: replyDetailConstants.invertedStatuses[replyDetailConstants.activeStatus]
+      })
+      .order_by('id desc')
+      .limit(limit);
+
+    //todo-replies: Note- Use Id for Pagination instead of Pagination timestamp.
+    if (paginationTimestamp) {
+      queryObject.where(['created_at < ?', paginationTimestamp]);
+    }
+
+    const dbRows = await queryObject.fire();
+
+    const replyDetails = {};
+
+    const videoIds = [],
+      replyDetailIds = [];
+
+    for (let index = 0; index < dbRows.length; index++) {
+      const formatDbRow = oThis.formatDbData(dbRows[index]);
+      replyDetails[formatDbRow.entityId] = formatDbRow;
+      videoIds.push(formatDbRow.entityId);
+      replyDetailIds.push(formatDbRow.id);
+    }
+
+    return { videoIds: videoIds, replyDetails: replyDetails, replyDetailIds: replyDetailIds };
   }
 
   /**
@@ -369,4 +425,4 @@ class ReplyDetail extends ModelBase {
   }
 }
 
-module.exports = ReplyDetail;
+module.exports = ReplyDetailsModel;

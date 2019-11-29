@@ -4,6 +4,11 @@
     "code": "NOT_FOUND",
     "message": "Resource not found."
   },
+  "precondition_failed_in_reply": {
+    "http_code": "200",
+    "code": "PRECONDITION_FAILED",
+    "message": "Unable to post the reply because video has been deleted."
+  },
   "invalid_api_params": {
     "http_code": "200",
     "code": "BAD_REQUEST",
@@ -128,6 +133,16 @@
     "http_code": "200",
     "code": "BAD_REQUEST",
     "message": "Invalid twitter account selected."
+  },
+  "user_already_muted": {
+    "http_code": "422",
+    "code": "UNPROCESSABLE_ENTITY",
+    "message": "User is already muted."
+  },
+  "user_already_unmuted": {
+    "http_code": "422",
+    "code": "UNPROCESSABLE_ENTITY",
+    "message": "User is already un muted."
   },
   "invalid_receiver_user_id": {
     "http_code": "200",

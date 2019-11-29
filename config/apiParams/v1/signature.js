@@ -37,15 +37,20 @@ const v1Signature = {
   [apiName.replyList]: {
     mandatory: [
       {
-        parameter: 'current_user',
-        validatorMethods: ['validateNonEmptyObject']
-      },
-      {
         parameter: 'video_id',
         validatorMethods: ['validateInteger']
       }
     ],
-    optional: []
+    optional: [
+      {
+        parameter: paginationConstants.paginationIdentifierKey,
+        validatorMethods: ['validateString', 'validatePaginationIdentifier']
+      },
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      }
+    ]
   },
   [apiName.getReply]: {
     mandatory: [
@@ -54,7 +59,7 @@ const v1Signature = {
         validatorMethods: ['validateNonEmptyObject']
       },
       {
-        parameter: 'reply_id',
+        parameter: 'reply_detail_id',
         validatorMethods: ['validateInteger']
       }
     ],
@@ -269,6 +274,10 @@ const v1Signature = {
       {
         parameter: 'invite_code',
         validatorMethods: ['validateNonBlankString']
+      },
+      {
+        parameter: 'utm_params',
+        validatorMethods: ['validateObject']
       }
     ]
   },
@@ -336,7 +345,7 @@ const v1Signature = {
       },
       {
         parameter: 'per_reply_amount_in_wei',
-        validatorMethods: ['validateWeiValue']
+        validatorMethods: ['validateInteger']
       },
       {
         parameter: 'image_size',
@@ -344,7 +353,7 @@ const v1Signature = {
       },
       {
         parameter: 'video_description',
-        validatorMethods: ['validateVideoDescription', 'validateStopWords']
+        validatorMethods: ['validateString', 'validateStopWords']
       },
       {
         parameter: 'link',
@@ -406,7 +415,7 @@ const v1Signature = {
       },
       {
         parameter: 'video_description',
-        validatorMethods: ['validateVideoDescription', 'validateStopWords']
+        validatorMethods: ['validateString', 'validateStopWords']
       },
       {
         parameter: 'link',
@@ -432,7 +441,7 @@ const v1Signature = {
       },
       {
         parameter: 'per_reply_amount_in_wei',
-        validatorMethods: ['validateWeiValue']
+        validatorMethods: ['validateIntegerWeiValue']
       }
     ]
   },
@@ -739,7 +748,12 @@ const v1Signature = {
     ]
   },
   [apiName.atMentionSearch]: {
-    mandatory: [],
+    mandatory: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      }
+    ],
     optional: [
       {
         parameter: 'q',
@@ -1106,6 +1120,19 @@ const v1Signature = {
       {
         parameter: 'current_user',
         validatorMethods: ['validateNonEmptyObject']
+      }
+    ],
+    optional: []
+  },
+  [apiName.deleteReplyVideo]: {
+    mandatory: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      },
+      {
+        parameter: 'reply_details_id',
+        validatorMethods: ['validateNonZeroInteger']
       }
     ],
     optional: []

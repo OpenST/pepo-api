@@ -41,6 +41,7 @@ router.use('/fetch-goto', fetchGotoRoutes);
 router.use('/feeds', cookieHelper.validateUserLoginCookieIfPresent, feedsRoutes);
 router.use('/videos', cookieHelper.validateUserLoginCookieIfPresent, videoRoutes);
 router.use('/report', cookieHelper.validateUserLoginCookieIfPresent, reportRoutes);
+router.use('/replies', cookieHelper.validateUserLoginCookieIfPresent, replyRoutes);
 
 router.use(cookieHelper.validateUserLoginCookieIfPresent, cookieHelper.validateUserLoginRequired);
 
@@ -57,6 +58,5 @@ router.use('/notifications', notificationsRoutes);
 router.use('/top-up', topupRoutes);
 router.use('/twitter', twitterRoutes);
 router.use('/pepocorn-topups', pepocornTopUpRoutes);
-router.use('/replies', replyRoutes);
 
 module.exports = router;

@@ -1,8 +1,8 @@
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
+  CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   TagMultiCache = require(rootPrefix + '/lib/cacheManagement/multi/Tag'),
   entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
-  commonValidators = require(rootPrefix + '/lib/validators/Common'),
   responseHelper = require(rootPrefix + '/lib/formatter/response');
 
 /**
@@ -65,7 +65,7 @@ class GetTagDetails extends ServiceBase {
     if (
       !tagsResponse ||
       !tagsResponse.data ||
-      !commonValidators.validateNonEmptyObject(tagsResponse.data[oThis.tagId])
+      !CommonValidators.validateNonEmptyObject(tagsResponse.data[oThis.tagId])
     ) {
       return Promise.reject(
         responseHelper.paramValidationError({

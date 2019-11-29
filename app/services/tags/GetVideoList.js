@@ -3,10 +3,14 @@ const rootPrefix = '../../..',
   GetUserVideos = require(rootPrefix + '/lib/GetUsersVideoList'),
   GetTokenService = require(rootPrefix + '/app/services/token/Get'),
   VideoTagsByTagIdPaginationCache = require(rootPrefix + '/lib/cacheManagement/single/VideoTagsByTagIdPagination'),
+  ReplyDetailsByEntityIdsAndEntityKindCache = require(rootPrefix +
+    '/lib/cacheManagement/multi/ReplyDetailsByEntityIdsAndEntityKind'),
   tagConstants = require(rootPrefix + '/lib/globalConstant/tag'),
+  logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   videoTagConstants = require(rootPrefix + '/lib/globalConstant/videoTag'),
   entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
+  replyDetailConstants = require(rootPrefix + '/lib/globalConstant/replyDetail'),
   paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination');
 
 /**
@@ -37,6 +41,8 @@ class GetTagsVideoList extends ServiceBase {
     oThis.tagId = params.tag_id;
     oThis.paginationIdentifier = params[paginationConstants.paginationIdentifierKey] || null;
     oThis.supportedEntities = params.supported_entities || [tagConstants.videosSupportedEntity];
+    // NOTE: Do not assume that oThis.supportedEntities is a string. It comes as a string only from POSTMAN.
+    // So, no need to parse this parameter.
 
     oThis.limit = oThis._defaultPageLimit();
 
@@ -48,6 +54,8 @@ class GetTagsVideoList extends ServiceBase {
     oThis.videoDetails = [];
     oThis.tokenDetails = {};
     oThis.usersVideosMap = {};
+    oThis.replyDetailIds = [];
+    oThis.replyVideoIds = [];
   }
 
   /**
@@ -147,7 +155,15 @@ class GetTagsVideoList extends ServiceBase {
       const videoTagsDetail = videoTagsDetails[ind];
       oThis.videosCount++;
       oThis.videoIds.push(videoTagsDetail.videoId);
+      if (videoTagsDetail.videoKind == videoTagConstants.replyKind) {
+        oThis.replyVideoIds.push(videoTagsDetail.videoId);
+      }
       oThis.nextPaginationTimestamp = videoTagsDetail.createdAt;
+    }
+
+    // If there are replies in the videos selected from video tags then fetch reply detail ids
+    if (oThis.replyVideoIds.length > 0) {
+      await oThis._fetchReplyDetailIds();
     }
   }
 
@@ -205,14 +221,12 @@ class GetTagsVideoList extends ServiceBase {
   async _getVideos() {
     const oThis = this;
 
-    if (oThis.videoIds.length <= 0) {
-      return responseHelper.successWithData({});
-    }
-
     const userVideosObj = new GetUserVideos({
       currentUserId: oThis.currentUser.id,
       videoIds: oThis.videoIds,
-      isAdmin: false
+      replyDetailIds: oThis.replyDetailIds,
+      isAdmin: false,
+      filterUserBlockedReplies: 1
     });
 
     const response = await userVideosObj.perform();
@@ -254,24 +268,55 @@ class GetTagsVideoList extends ServiceBase {
 
     return responseHelper.successWithData({
       [entityTypeConstants.userVideoList]: oThis.videoDetails,
-      [entityTypeConstants.videoDetailsMap]: oThis.usersVideosMap.videoDetailsMap || {},
-      [entityTypeConstants.videoDescriptionsMap]: oThis.usersVideosMap.videoDescriptionMap || {},
-      [entityTypeConstants.userProfilesMap]: oThis.usersVideosMap.userProfilesMap || {},
-      [entityTypeConstants.currentUserUserContributionsMap]: oThis.usersVideosMap.currentUserUserContributionsMap || {},
+      [entityTypeConstants.videoDetailsMap]: oThis.usersVideosMap.videoDetailsMap,
+      [entityTypeConstants.videoDescriptionsMap]: oThis.usersVideosMap.videoDescriptionMap,
+      [entityTypeConstants.userProfilesMap]: oThis.usersVideosMap.userProfilesMap,
+      [entityTypeConstants.currentUserUserContributionsMap]: oThis.usersVideosMap.currentUserUserContributionsMap,
       [entityTypeConstants.currentUserVideoContributionsMap]:
-        oThis.usersVideosMap.currentUserVideoContributionsMap || {},
-      [entityTypeConstants.userProfileAllowedActions]: oThis.usersVideosMap.userProfileAllowedActions || {},
-      [entityTypeConstants.pricePointsMap]: oThis.usersVideosMap.pricePointsMap || {},
-      usersByIdMap: oThis.usersVideosMap.usersByIdMap || {},
-      userStat: oThis.usersVideosMap.userStat || {},
-      tags: oThis.usersVideosMap.tags || {},
-      linkMap: oThis.usersVideosMap.linkMap || {},
-      imageMap: oThis.usersVideosMap.imageMap || {},
-      videoMap: oThis.usersVideosMap.videoMap || {},
-      tokenUsersByUserIdMap: oThis.usersVideosMap.tokenUsersByUserIdMap || {},
+        oThis.usersVideosMap.currentUserVideoContributionsMap,
+      [entityTypeConstants.currentUserReplyDetailContributionsMap]: oThis.usersVideosMap.currentUserReplyDetailContributionsMap,
+      [entityTypeConstants.userProfileAllowedActions]: oThis.usersVideosMap.userProfileAllowedActions,
+      [entityTypeConstants.pricePointsMap]: oThis.usersVideosMap.pricePointsMap,
+      [entityTypeConstants.replyDetailsMap]: oThis.usersVideosMap.replyDetailsMap,
+      usersByIdMap: oThis.usersVideosMap.usersByIdMap,
+      userStat: oThis.usersVideosMap.userStat,
+      tags: oThis.usersVideosMap.tags,
+      linkMap: oThis.usersVideosMap.linkMap,
+      imageMap: oThis.usersVideosMap.imageMap,
+      videoMap: oThis.usersVideosMap.videoMap,
+      tokenUsersByUserIdMap: oThis.usersVideosMap.tokenUsersByUserIdMap,
+      [entityTypeConstants.currentUserVideoRelationsMap]: oThis.usersVideosMap.currentUserVideoRelationsMap,
       tokenDetails: oThis.tokenDetails,
       meta: oThis.responseMetaData
     });
+  }
+
+  /**
+   * Fetch reply detail ids
+   *
+   * @returns {Promise<never>}
+   * @private
+   */
+  async _fetchReplyDetailIds() {
+    const oThis = this;
+
+    const replyDetailsByEntityIdsAndEntityKindCacheRsp = await new ReplyDetailsByEntityIdsAndEntityKindCache({
+      entityIds: oThis.replyVideoIds,
+      entityKind: replyDetailConstants.videoEntityKind
+    }).fetch();
+
+    if (replyDetailsByEntityIdsAndEntityKindCacheRsp.isFailure()) {
+      logger.error('Error while fetching reply detail data.');
+
+      return Promise.reject(replyDetailsByEntityIdsAndEntityKindCacheRsp);
+    }
+
+    for (const vid in replyDetailsByEntityIdsAndEntityKindCacheRsp.data) {
+      const rdId = replyDetailsByEntityIdsAndEntityKindCacheRsp.data[vid];
+      if (Number(rdId) > 0) {
+        oThis.replyDetailIds.push(rdId);
+      }
+    }
   }
 
   /**

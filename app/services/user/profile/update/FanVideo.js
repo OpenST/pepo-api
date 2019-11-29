@@ -7,11 +7,14 @@ const rootPrefix = '../../../../..',
   VideoDetailsModel = require(rootPrefix + '/app/models/mysql/VideoDetail'),
   UpdateProfileBase = require(rootPrefix + '/app/services/user/profile/update/Base'),
   videoLib = require(rootPrefix + '/lib/videoLib'),
+  bgJobConstants = require(rootPrefix + '/lib/globalConstant/bgJob'),
+  bgJob = require(rootPrefix + '/lib/rabbitMqEnqueue/bgJob'),
   urlConstants = require(rootPrefix + '/lib/globalConstant/url'),
   userConstants = require(rootPrefix + '/lib/globalConstant/user'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   feedsConstants = require(rootPrefix + '/lib/globalConstant/feed'),
   videoConstants = require(rootPrefix + '/lib/globalConstant/video'),
+  ValidateVideoService = require(rootPrefix + '/app/services/video/Validate'),
   notificationJobEnqueue = require(rootPrefix + '/lib/rabbitMqEnqueue/notification'),
   notificationJobConstants = require(rootPrefix + '/lib/globalConstant/notificationJob');
 
@@ -80,6 +83,22 @@ class UpdateFanVideo extends UpdateProfileBase {
   async _validateParams() {
     const oThis = this;
 
+    const validateVideoResp = await new ValidateVideoService({
+      current_user: oThis.currentUser,
+      video_description: oThis.videoDescription,
+      per_reply_amount_in_wei: oThis.perReplyAmountInWei,
+      link: oThis.link
+    }).perform();
+
+    if (validateVideoResp.isFailure()) {
+      return Promise.reject(validateVideoResp);
+    }
+
+    // If url is not valid, consider link as null.
+    if (!CommonValidator.validateVideoDescription(oThis.videoDescription)) {
+      oThis.videoDescription = null;
+    }
+
     // If url is not valid, consider link as null.
     if (!CommonValidator.validateGenericUrl(oThis.link)) {
       oThis.link = null;
@@ -138,8 +157,7 @@ class UpdateFanVideo extends UpdateProfileBase {
     const addVideoDescriptionRsp = await new AddVideoDescription({
       videoDescription: oThis.videoDescription,
       videoId: oThis.videoId,
-      isUserCreator: UserModelKlass.isUserApprovedCreator(oThis.userObj),
-      currentUserId: oThis.currentUserId
+      isUserCreator: UserModelKlass.isUserApprovedCreator(oThis.userObj)
     }).perform();
 
     if (addVideoDescriptionRsp.isFailure()) {
@@ -207,17 +225,56 @@ class UpdateFanVideo extends UpdateProfileBase {
     // Feed needs to be added for uploaded video
     const oThis = this;
 
+    let promiseArray = [];
+
     // Feed needs to be added only if user is an approved creator.
     if (UserModelKlass.isUserApprovedCreator(oThis.userObj)) {
+      await oThis._publishAtMentionNotifications();
+
       await oThis._addFeed();
 
-      // Notification would be published only if user is approved.
-      await notificationJobEnqueue.enqueue(notificationJobConstants.videoAdd, {
+      const messagePayload = {
         userId: oThis.profileUserId,
-        videoId: oThis.videoId,
-        mentionedUserIds: oThis.mentionedUserIds
-      });
+        videoId: oThis.videoId
+      };
+
+      promiseArray.push(bgJob.enqueue(bgJobConstants.contentMonitoringJobTopic, messagePayload));
+      // Notification would be published only if user is approved.
+      promiseArray.push(
+        notificationJobEnqueue.enqueue(notificationJobConstants.videoAdd, {
+          userId: oThis.profileUserId,
+          videoId: oThis.videoId,
+          mentionedUserIds: oThis.mentionedUserIds
+        })
+      );
+    } else {
+      const messagePayload = {
+        userId: oThis.profileUserId
+      };
+      promiseArray.push(bgJob.enqueue(bgJobConstants.approveNewCreatorJobTopic, messagePayload));
     }
+
+    await Promise.all(promiseArray);
+  }
+
+  /**  await oThis._publishNotifications();
+   * Publish notifications
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _publishAtMentionNotifications() {
+    const oThis = this;
+
+    if (oThis.mentionedUserIds.length === 0) {
+      return;
+    }
+
+    // Notification would be published only if user is approved.
+    await notificationJobEnqueue.enqueue(notificationJobConstants.userMention, {
+      userId: oThis.currentUserId,
+      videoId: oThis.videoId,
+      mentionedUserIds: oThis.mentionedUserIds
+    });
   }
 
   /**

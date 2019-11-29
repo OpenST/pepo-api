@@ -11,6 +11,7 @@ const rootPrefix = '../../..',
   PreLaunchInviteModel = require(rootPrefix + '/app/models/mysql/PreLaunchInvite'),
   emailServiceApiCallHookConstants = require(rootPrefix + '/lib/globalConstant/emailServiceApiCallHook'),
   UpdateContactInPepoCampaign = require(rootPrefix + '/lib/email/hookCreator/UpdateContact'),
+  logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   preLaunchInviteConstant = require(rootPrefix + '/lib/globalConstant/preLaunchInvite');
 
 command
@@ -124,6 +125,6 @@ new addCustomAttributeForPreLaunchInviteUser({})
     process.exit(0);
   })
   .catch(function(err) {
-    console.log(err);
+    logger.log(err);
     process.exit(1);
   });

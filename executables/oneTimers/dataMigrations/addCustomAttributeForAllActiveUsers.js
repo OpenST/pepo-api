@@ -11,6 +11,7 @@ const rootPrefix = '../../..',
   UserModel = require(rootPrefix + '/app/models/mysql/User'),
   emailServiceApiCallHookConstants = require(rootPrefix + '/lib/globalConstant/emailServiceApiCallHook'),
   AddContactInPepoCampaign = require(rootPrefix + '/lib/email/hookCreator/AddContact'),
+  logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   userConstants = require(rootPrefix + '/lib/globalConstant/user');
 
 command
@@ -90,7 +91,7 @@ class addCustomAttributeForAllActiveUsers {
 
     for (let index = 0; index < usersData.length; index++) {
       const userObj = new UserModel().formatDbData(usersData[index]);
-      console.log('The userObj.email is : ', userObj.email);
+      logger.log('The userObj.email is : ', userObj.email);
       if (userObj.email) {
         await oThis._addContactInPepoCampaign(userObj.id);
       }
@@ -127,6 +128,6 @@ new addCustomAttributeForAllActiveUsers({})
     process.exit(0);
   })
   .catch(function(err) {
-    console.log(err);
+    logger.log(err);
     process.exit(1);
   });

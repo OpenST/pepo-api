@@ -2,19 +2,20 @@ const rootPrefix = '../../..',
   UrlModel = require(rootPrefix + '/app/models/mysql/Url'),
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   EditReplyLink = require(rootPrefix + '/lib/editLink/Reply'),
-  CommonValidator = require(rootPrefix + '/lib/validators/Common'),
+  CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   EditDescriptionLib = require(rootPrefix + '/lib/editDescription/Reply'),
   AddReplyDescription = require(rootPrefix + '/lib/addDescription/Reply'),
   ValidateReplyService = require(rootPrefix + '/app/services/reply/Validate'),
   ReplyDetailsByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/ReplyDetailsByIds'),
   ReplyVideoPostTransaction = require(rootPrefix + '/lib/transaction/ReplyVideoPostTransaction'),
   VideoDetailsByVideoIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/VideoDetailsByVideoIds'),
+  VideoDistinctReplyCreatorsCache = require(rootPrefix + '/lib/cacheManagement/multi/VideoDistinctReplyCreators'),
   videoLib = require(rootPrefix + '/lib/videoLib'),
   urlConstants = require(rootPrefix + '/lib/globalConstant/url'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   videoConstants = require(rootPrefix + '/lib/globalConstant/video'),
-  entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
+  entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
   replyDetailConstants = require(rootPrefix + '/lib/globalConstant/replyDetail');
 
 /**
@@ -52,7 +53,6 @@ class InitiateReply extends ServiceBase {
     const oThis = this;
 
     oThis.replyDetailId = params.reply_detail_id || null;
-
     oThis.currentUser = params.current_user;
     oThis.parentKind = params.parent_kind;
     oThis.parentId = params.parent_id;
@@ -68,7 +68,6 @@ class InitiateReply extends ServiceBase {
     oThis.link = params.link;
 
     oThis.videoId = null;
-    oThis.addVideoParams = {};
     oThis.mentionedUserIds = [];
   }
 
@@ -77,7 +76,7 @@ class InitiateReply extends ServiceBase {
    *
    * @sets oThis.videoId, oThis.replyDetailId
    *
-   * @return {Promise<void>}
+   * @returns {Promise<void>}
    * @private
    */
   async _asyncPerform() {
@@ -86,8 +85,6 @@ class InitiateReply extends ServiceBase {
     await oThis._validateAndSanitize();
 
     if (oThis.replyDetailId) {
-      logger.log('oThis.replyDetailId ========', oThis.replyDetailId);
-
       await oThis._getReplyDetails();
 
       if (oThis.replyDetail.creatorUserId !== oThis.currentUser.id) {
@@ -100,14 +97,12 @@ class InitiateReply extends ServiceBase {
         );
       }
 
-      if (oThis.replyDetail.status === replyDetailConstants.pendingStatus) {
-        await oThis._editReplyDescription();
+      await oThis._editReplyDescription();
 
-        await new EditReplyLink({
-          replyDetailId: oThis.replyDetail.id,
-          link: oThis.link
-        }).perform();
-      }
+      await new EditReplyLink({
+        replyDetailId: oThis.replyDetail.id,
+        link: oThis.link
+      }).perform();
     } else {
       await oThis._addLink();
 
@@ -117,15 +112,15 @@ class InitiateReply extends ServiceBase {
       oThis.replyDetailId = resp.replyDetailId;
 
       await oThis._addReplyDescription();
+
+      await oThis._onVideoPostCompletion();
     }
 
-    await oThis._onVideoPostCompletion();
-
     return responseHelper.successWithData({
-      [entityType.videoReplyList]: [
+      [entityTypeConstants.videoReplyList]: [
         {
           id: oThis.replyDetailId,
-          userId: oThis.currentUser.id,
+          creatorUserId: oThis.currentUser.id,
           replyDetailId: oThis.replyDetailId,
           updatedAt: Math.round(new Date() / 1000)
         }
@@ -158,7 +153,7 @@ class InitiateReply extends ServiceBase {
       return Promise.reject(validateReplyResp);
     }
 
-    if (!CommonValidator.validateGenericUrl(oThis.link)) {
+    if (!CommonValidators.validateGenericUrl(oThis.link)) {
       oThis.link = null;
     }
 
@@ -177,19 +172,22 @@ class InitiateReply extends ServiceBase {
    */
   async _getReplyDetails() {
     const oThis = this;
-    const replyDetailCacheResp = await new ReplyDetailsByIdsCache({ ids: [oThis.replyDetailId] }).fetch();
 
-    if (replyDetailCacheResp.isFailure()) {
+    const replyDetailsCacheResp = await new ReplyDetailsByIdsCache({ ids: [oThis.replyDetailId] }).fetch();
+
+    if (replyDetailsCacheResp.isFailure()) {
       logger.error('Error while fetching reply detail data for reply_detail_id:', oThis.replyDetailId);
 
-      return Promise.reject(replyDetailCacheResp);
+      return Promise.reject(replyDetailsCacheResp);
     }
 
-    oThis.replyDetail = replyDetailCacheResp.data[oThis.replyDetailId];
+    oThis.replyDetail = replyDetailsCacheResp.data[oThis.replyDetailId];
   }
 
   /**
    * Edit reply description.
+   *
+   * @sets oThis.mentionedUserIds
    *
    * @returns {Promise<void>}
    * @private
@@ -207,7 +205,7 @@ class InitiateReply extends ServiceBase {
       return Promise.reject(editDescriptionResp);
     }
 
-    // for these users id, we have already sent mention-notification. so, need to skip the reply-event-notification
+    // For these users id, we have already sent mention-notification. So, need to skip the reply-event-notification.
     oThis.mentionedUserIds = editDescriptionResp.data.mentionedUserIds;
   }
 
@@ -236,15 +234,13 @@ class InitiateReply extends ServiceBase {
   /**
    * Validate and save reply in reply details and related tables.
    *
-   * @sets oThis.addVideoParams
-   *
    * @returns {Promise<result>}
    * @private
    */
   async _validateAndSaveReply() {
     const oThis = this;
 
-    oThis.addVideoParams = {
+    const addVideoParams = {
       userId: oThis.currentUser.id,
       videoUrl: oThis.videoUrl,
       size: oThis.videoSize,
@@ -263,7 +259,7 @@ class InitiateReply extends ServiceBase {
       parentId: oThis.parentId
     };
 
-    const resp = await videoLib.validateAndSave(oThis.addVideoParams);
+    const resp = await videoLib.validateAndSave(addVideoParams);
 
     if (resp.isFailure()) {
       return Promise.reject(resp);
@@ -286,8 +282,7 @@ class InitiateReply extends ServiceBase {
     const replyDescriptionResp = await new AddReplyDescription({
       videoDescription: oThis.videoDescription,
       videoId: oThis.videoId,
-      replyDetailId: oThis.replyDetailId,
-      currentUserId: oThis.currentUser.id
+      replyDetailId: oThis.replyDetailId
     }).perform();
 
     if (replyDescriptionResp.isFailure()) {
@@ -296,7 +291,7 @@ class InitiateReply extends ServiceBase {
 
     oThis.descriptionId = replyDescriptionResp.data.descriptionId;
 
-    // for these users id, we have already sent mention-notification. so, need to skip the reply-event-notification
+    // For these users id, we have already sent mention-notification. So, need to skip the reply-event-notification.
     oThis.mentionedUserIds = replyDescriptionResp.data.mentionedUserIds;
   }
 
@@ -323,18 +318,36 @@ class InitiateReply extends ServiceBase {
       parentVideoDetails = videoDetailsByVideoIdsCacheResp.data[oThis.parentId];
     }
 
-    if (CommonValidator.validateNonEmptyObject(parentVideoDetails)) {
-      if (
-        CommonValidator.validateZeroWeiValue(parentVideoDetails.perReplyAmountInWei) ||
-        parentVideoDetails.creatorUserId === oThis.currentUser.id
-      ) {
-        await new ReplyVideoPostTransaction({
-          replyDetailId: oThis.replyDetailId,
-          videoId: oThis.parentId,
-          pepoAmountInWei: parentVideoDetails.perReplyAmountInWei,
-          mentionedUserIds: oThis.mentionedUserIds
-        }).perform();
+    let isReplyFree = 0;
+    if (
+      CommonValidators.validateZeroWeiValue(parentVideoDetails.perReplyAmountInWei) ||
+      parentVideoDetails.creatorUserId === oThis.currentUser.id
+    ) {
+      isReplyFree = 1;
+    } else {
+      // Look if creator has already replied on this post
+      const cacheResp = await new VideoDistinctReplyCreatorsCache({ videoIds: [parentVideoDetails.videoId] }).fetch();
+
+      if (cacheResp.isFailure()) {
+        return Promise.reject(cacheResp);
       }
+
+      const videoCreatorsMap = cacheResp.data;
+      // If map is not empty then look for reply creator in that list
+      const replyCreators = videoCreatorsMap[parentVideoDetails.videoId];
+      if (CommonValidators.validateNonEmptyObject(replyCreators)) {
+        // If reply creators is present and creator is already in it, then user can reply free
+        isReplyFree = replyCreators[oThis.currentUser.id] || 0;
+      }
+    }
+    if (isReplyFree) {
+      await new ReplyVideoPostTransaction({
+        currentUserId: oThis.currentUser.id,
+        replyDetailId: oThis.replyDetailId,
+        videoId: oThis.parentId,
+        pepoAmountInWei: 0,
+        mentionedUserIds: oThis.mentionedUserIds
+      }).perform();
     }
   }
 }

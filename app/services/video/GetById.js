@@ -22,6 +22,7 @@ class GetVideoById extends ServiceBase {
    * @param {object} params
    * @param {number} params.video_id
    * @param {object} params.current_user
+   * @param {object} params.is_admin
    *
    * @augments ServiceBase
    *
@@ -34,6 +35,7 @@ class GetVideoById extends ServiceBase {
 
     oThis.videoId = params.video_id;
     oThis.currentUser = params.current_user;
+    oThis.isAdmin = params.is_admin || false;
 
     oThis.videoDetails = null;
     oThis.currentUserId = null;
@@ -46,7 +48,7 @@ class GetVideoById extends ServiceBase {
   /**
    * Async perform.
    *
-   * @return {Promise<void>}
+   * @returns {Promise<result>}
    * @private
    */
   async _asyncPerform() {
@@ -66,7 +68,7 @@ class GetVideoById extends ServiceBase {
    *
    * @sets oThis.videoDetails, oThis.creatorUserId, oThis.currentUserId
    *
-   * @return {Promise<void>}
+   * @returns {Promise<void>}
    * @private
    */
   async _fetchCreatorUserId() {
@@ -103,7 +105,6 @@ class GetVideoById extends ServiceBase {
     }
 
     oThis.creatorUserId = oThis.videoDetails[0].creatorUserId;
-
     oThis.currentUserId = oThis.currentUser ? Number(oThis.currentUser.id) : 0;
   }
 
@@ -112,7 +113,7 @@ class GetVideoById extends ServiceBase {
    *
    * @sets oThis.tokenDetails
    *
-   * @return {Promise<void>}
+   * @returns {Promise<void>}
    * @private
    */
   async _setTokenDetails() {
@@ -131,7 +132,7 @@ class GetVideoById extends ServiceBase {
    *
    * @sets oThis.usersVideosMap, oThis.responseMetaData, oThis.videoDetails
    *
-   * @return {Promise<void>}
+   * @returns {Promise<void>}
    * @private
    */
   async _getVideoDetailsForDisplay() {
@@ -189,8 +190,6 @@ class GetVideoById extends ServiceBase {
     };
 
     oThis.videoDetails = [oThis.usersVideosMap.fullVideosMap[oThis.videoId]];
-
-    return responseHelper.successWithData({});
   }
 
   /**
@@ -215,6 +214,7 @@ class GetVideoById extends ServiceBase {
       [entityType.videoDescriptionsMap]: oThis.usersVideosMap.videoDescriptionMap,
       [entityType.currentUserUserContributionsMap]: oThis.usersVideosMap.currentUserUserContributionsMap,
       [entityType.currentUserVideoContributionsMap]: oThis.usersVideosMap.currentUserVideoContributionsMap,
+      [entityType.currentUserVideoRelationsMap]: oThis.usersVideosMap.currentUserVideoRelationsMap || {},
       [entityType.userProfileAllowedActions]: oThis.usersVideosMap.userProfileAllowedActions,
       tokenUsersByUserIdMap: oThis.usersVideosMap.tokenUsersByUserIdMap,
       [entityType.pricePointsMap]: oThis.usersVideosMap.pricePointsMap,

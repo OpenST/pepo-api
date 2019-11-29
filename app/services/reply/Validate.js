@@ -51,10 +51,11 @@ class ValidateReplyParams extends ServiceBase {
    */
   async _asyncPerform() {
     const oThis = this;
+    // Link and description validated in signature.js
 
-    await oThis._validateVideoStatus();
+    await oThis._validateParent();
 
-    await oThis._validateApprovedCreator();
+    await oThis._validateParentCreator();
 
     await oThis._validateIfUserIsBlocked();
 
@@ -69,7 +70,7 @@ class ValidateReplyParams extends ServiceBase {
    * @returns {Promise<never>}
    * @private
    */
-  async _validateVideoStatus() {
+  async _validateParent() {
     const oThis = this;
 
     if (oThis.parentKind === replyDetailConstants.videoParentKind) {
@@ -85,16 +86,16 @@ class ValidateReplyParams extends ServiceBase {
         return Promise.reject(
           responseHelper.error({
             internal_error_identifier: 'a_s_r_v_1',
-            api_error_identifier: 'entity_not_found'
+            api_error_identifier: 'precondition_failed_in_reply'
           })
         );
       }
 
-      if (oThis.status === videoDetailsConstants.deletedStatus) {
+      if (oThis.videoDetails.status === videoDetailsConstants.deletedStatus) {
         return Promise.reject(
           responseHelper.error({
             internal_error_identifier: 'a_s_r_v_2',
-            api_error_identifier: 'entity_not_found'
+            api_error_identifier: 'precondition_failed_in_reply'
           })
         );
       }
@@ -114,7 +115,7 @@ class ValidateReplyParams extends ServiceBase {
    * @returns {Promise<void>}
    * @private
    */
-  async _validateApprovedCreator() {
+  async _validateParentCreator() {
     const oThis = this,
       parentVideoCreatorId = oThis.videoDetails.creatorUserId;
 
@@ -156,7 +157,7 @@ class ValidateReplyParams extends ServiceBase {
       return Promise.reject(
         responseHelper.error({
           internal_error_identifier: 'a_s_r_v_5',
-          api_error_identifier: 'unauthorized_api_request',
+          api_error_identifier: 'precondition_failed_in_reply',
           debug_options: { videoDetails: oThis.videoDetails }
         })
       );

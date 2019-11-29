@@ -10,70 +10,6 @@ const rootPrefix = '../../..',
   entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
   responseEntityKey = require(rootPrefix + '/lib/globalConstant/responseEntityKey');
 
-// Initiate reply on particular video.
-router.post('/', cookieHelper.validateUserLoginRequired, function(req, res, next) {
-  req.decodedParams.apiName = apiName.initiateReply;
-
-  const dataFormatterFunc = async function(serviceResponse) {
-    const wrapperFormatterRsp = await new FormatterComposer({
-      resultType: responseEntityKey.videoReplies,
-      entityKindToResponseKeyMap: {
-        [entityType.videoReplyList]: responseEntityKey.videoReplies
-      },
-      serviceData: serviceResponse.data
-    }).perform();
-
-    serviceResponse.data = wrapperFormatterRsp.data;
-  };
-
-  Promise.resolve(routeHelper.perform(req, res, next, '/reply/Initiate', 'r_a_v1_r_1', null, dataFormatterFunc));
-});
-
-// Validate initiate reply api parameters.
-router.post('/validate-upload', cookieHelper.validateUserLoginRequired, function(req, res, next) {
-  req.decodedParams.apiName = apiName.validateUploadReply;
-
-  Promise.resolve(routeHelper.perform(req, res, next, '/reply/Validate', 'r_a_v1_r_2', null, null));
-});
-
-// Get any particular reply given its reply detail id.
-router.get('/:reply_id', sanitizer.sanitizeDynamicUrlParams, cookieHelper.validateUserLoginRequired, function(
-  req,
-  res,
-  next
-) {
-  req.decodedParams.apiName = apiName.getReply;
-  req.decodedParams.reply_id = req.params.reply_id;
-
-  const dataFormatterFunc = async function(serviceResponse) {
-    const wrapperFormatterRsp = await new FormatterComposer({
-      resultType: responseEntityKey.replies,
-      entityKindToResponseKeyMap: {
-        [entityType.userVideoList]: responseEntityKey.videoReplies,
-        [entityType.usersMap]: responseEntityKey.users,
-        [entityType.userStats]: responseEntityKey.userStats,
-        [entityType.userProfilesMap]: responseEntityKey.userProfiles,
-        [entityType.videoDescriptionsMap]: responseEntityKey.videoDescriptions,
-        [entityType.tagsMap]: responseEntityKey.tags,
-        [entityType.linksMap]: responseEntityKey.links,
-        [entityType.imagesMap]: responseEntityKey.images,
-        [entityType.videosMap]: responseEntityKey.videos,
-        [entityType.replyDetailsMap]: responseEntityKey.replyDetails,
-        [entityType.currentUserUserContributionsMap]: responseEntityKey.currentUserUserContributions,
-        [entityType.currentUserVideoContributionsMap]: responseEntityKey.currentUserVideoContributions,
-        [entityType.currentUserVideoRelationsMap]: responseEntityKey.currentUserVideoRelations,
-        [entityType.pricePointsMap]: responseEntityKey.pricePoints,
-        [entityType.token]: responseEntityKey.token
-      },
-      serviceData: serviceResponse.data
-    }).perform();
-
-    serviceResponse.data = wrapperFormatterRsp.data;
-  };
-
-  Promise.resolve(routeHelper.perform(req, res, next, '/reply/GetById', 'r_a_v1_r_3', null, dataFormatterFunc));
-});
-
 // Get url and message for sharing reply video given its reply detail id.
 router.get('/:reply_detail_id/share', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.replyShare;
@@ -94,8 +30,72 @@ router.get('/:reply_detail_id/share', sanitizer.sanitizeDynamicUrlParams, functi
   Promise.resolve(routeHelper.perform(req, res, next, '/reply/ShareDetails', 'r_a_v1_r_4', null, dataFormatterFunc));
 });
 
+// User should be logged in to access all the further routes.
+router.use(cookieHelper.validateUserLoginRequired);
+
+// Initiate reply on particular video.
+router.post('/', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.initiateReply;
+
+  const dataFormatterFunc = async function(serviceResponse) {
+    const wrapperFormatterRsp = await new FormatterComposer({
+      resultType: responseEntityKey.videoReplies,
+      entityKindToResponseKeyMap: {
+        [entityType.videoReplyList]: responseEntityKey.videoReplies
+      },
+      serviceData: serviceResponse.data
+    }).perform();
+
+    serviceResponse.data = wrapperFormatterRsp.data;
+  };
+
+  Promise.resolve(routeHelper.perform(req, res, next, '/reply/Initiate', 'r_a_v1_r_1', null, dataFormatterFunc));
+});
+
+// Validate initiate reply api parameters.
+router.post('/validate-upload', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.validateUploadReply;
+
+  Promise.resolve(routeHelper.perform(req, res, next, '/reply/Validate', 'r_a_v1_r_2', null, null));
+});
+
+// Get any particular reply given its reply detail id.
+router.get('/:reply_detail_id', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.getReply;
+  req.decodedParams.reply_detail_id = req.params.reply_detail_id;
+
+  const dataFormatterFunc = async function(serviceResponse) {
+    const wrapperFormatterRsp = await new FormatterComposer({
+      resultType: responseEntityKey.videoReplies,
+      entityKindToResponseKeyMap: {
+        [entityType.videoReplyList]: responseEntityKey.videoReplies,
+        [entityType.usersMap]: responseEntityKey.users,
+        [entityType.userStats]: responseEntityKey.userStats,
+        [entityType.userProfilesMap]: responseEntityKey.userProfiles,
+        [entityType.videoDescriptionsMap]: responseEntityKey.videoDescriptions,
+        [entityType.tagsMap]: responseEntityKey.tags,
+        [entityType.linksMap]: responseEntityKey.links,
+        [entityType.imagesMap]: responseEntityKey.images,
+        [entityType.videosMap]: responseEntityKey.videos,
+        [entityType.replyDetailsMap]: responseEntityKey.replyDetails,
+        [entityType.currentUserUserContributionsMap]: responseEntityKey.currentUserUserContributions,
+        [entityType.currentUserVideoContributionsMap]: responseEntityKey.currentUserVideoContributions,
+        [entityType.currentUserReplyDetailContributionsMap]: responseEntityKey.currentUserReplyDetailContributions,
+        [entityType.currentUserReplyDetailsRelationsMap]: responseEntityKey.currentUserReplyDetailsRelations,
+        [entityType.pricePointsMap]: responseEntityKey.pricePoints,
+        [entityType.token]: responseEntityKey.token
+      },
+      serviceData: serviceResponse.data
+    }).perform();
+
+    serviceResponse.data = wrapperFormatterRsp.data;
+  };
+
+  Promise.resolve(routeHelper.perform(req, res, next, '/reply/GetById', 'r_a_v1_r_3', null, dataFormatterFunc));
+});
+
 // Delete reply video given its reply detail id.
-router.post('/:reply_details_id/delete', cookieHelper.validateUserLoginRequired, function(req, res, next) {
+router.post('/:reply_details_id/delete', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.deleteReplyVideo;
   req.decodedParams.reply_details_id = req.params.reply_details_id;
 

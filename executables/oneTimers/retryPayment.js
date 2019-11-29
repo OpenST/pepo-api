@@ -54,7 +54,7 @@ class RetryPayment {
       }).perform();
     }
 
-    console.log('--processResp---', processResp);
+    logger.log('--processResp---', processResp);
 
     if (processResp.isSuccess() && processResp.data.productionEnvSandboxReceipt === 0) {
       logger.step('Enquing job to transfer pepo.');

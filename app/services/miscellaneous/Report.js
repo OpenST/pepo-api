@@ -44,6 +44,7 @@ class ReportForEntity extends ServiceBase {
     oThis.reportEntityId = params.report_entity_id;
 
     oThis.videoUrl = null;
+    oThis.parentVideoUrl = null;
     oThis.reportedUserObj = null;
     oThis.templateVars = {};
   }
@@ -101,8 +102,9 @@ class ReportForEntity extends ServiceBase {
           report_entity_id: oThis.reportEntityId,
           reporter_user_name: oThis.currentUser.name,
           reporter_user_id: oThis.currentUser.id,
-          reportee_user_name: oThis.reportedUserObj.name,
-          reportee_user_id: oThis.reportedUserObj.id,
+          reportee_user_name: oThis.reportedUserObj.name, // reply creator's name
+          reportee_user_id: oThis.reportedUserObj.id, // reply creator's user id
+          parent_video_url: encodeURIComponent(oThis.parentVideoUrl), // parent video url for this reply
           video_url: encodeURIComponent(oThis.videoUrl),
           user_admin_url_prefix: basicHelper.userProfilePrefixUrl()
         };
@@ -197,7 +199,7 @@ class ReportForEntity extends ServiceBase {
   /**
    * Fetch reply.
    *
-   * @sets oThis.reportedUserObj, oThis.videoUrl
+   * @sets oThis.reportedUserObj, oThis.videoUrl, oThis.parentVideoUrl
    *
    * @returns {Promise<never>}
    * @private
@@ -229,26 +231,31 @@ class ReportForEntity extends ServiceBase {
 
     oThis.reportedUserObj = await oThis._fetchUserFor(replyDetail.creatorUserId);
 
-    const videoId = replyDetail.entityId;
-    const cacheRsp = await new VideoByIdCache({ ids: [videoId] }).fetch();
+    const videoId = replyDetail.entityId,
+      parentVideoId = replyDetail.parentId;
+
+    const cacheRsp = await new VideoByIdCache({ ids: [videoId, parentVideoId] }).fetch();
     if (cacheRsp.isFailure()) {
       return Promise.reject(cacheRsp);
     }
 
     if (
       !CommonValidators.validateNonEmptyObject(cacheRsp.data[videoId]) ||
-      cacheRsp.data[videoId].status === videoConstants.deletedStatus
+      cacheRsp.data[videoId].status === videoConstants.deletedStatus ||
+      !CommonValidators.validateNonEmptyObject(cacheRsp.data[parentVideoId]) ||
+      cacheRsp.data[parentVideoId].status === videoConstants.deletedStatus
     ) {
       return Promise.reject(
         responseHelper.error({
           internal_error_identifier: 'a_s_m_rp_4',
           api_error_identifier: 'entity_not_found',
-          debug_options: { videoId: videoId }
+          debug_options: { videoId: videoId, parentVideoId: parentVideoId }
         })
       );
     }
 
     oThis.videoUrl = cacheRsp.data[videoId].resolutions.original.url;
+    oThis.parentVideoUrl = cacheRsp.data[parentVideoId].resolutions.original.url;
   }
 
   /**

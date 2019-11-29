@@ -350,13 +350,7 @@ const v1ErrorConfig = {
   reply_deleted: {
     parameter: 'reply_id',
     code: 'invalid',
-    message: 'Reply has been deleted.'
-  },
-
-  invalid_tag_id: {
-    parameter: 'tag_id',
-    code: 'invalid',
-    message: 'Invalid tag id.'
+    message: 'Unable to fetch the reply because it has been deleted.'
   },
 
   invalid_pepocorn_amount: {
@@ -365,16 +359,82 @@ const v1ErrorConfig = {
     message: 'Pepocorn amount is invalid.'
   },
 
-  invalid_limit: {
-    parameter: 'limit',
-    code: 'invalid',
-    message: 'Limit is invalid.'
-  },
-
   invalid_supported_entities: {
     parameter: 'supported_entities',
     code: 'invalid',
     message: 'Supported entities is invalid.'
+  },
+
+  invalid_per_reply_amount_in_wei: {
+    parameter: 'per_reply_amount_in_wei',
+    code: 'invalid',
+    message: 'Please make sure the price entered is valid integer.'
+  },
+
+  invalid_video_description: {
+    parameter: 'video_description',
+    code: 'invalid',
+    message: 'Please make sure the length of the description is 200 characters or less.'
+  },
+
+  invalid_link: {
+    parameter: 'link',
+    code: 'invalid',
+    message: 'Please make sure the link entered is valid.'
+  },
+
+  invalid_limit: {
+    parameter: 'limit',
+    code: 'invalid',
+    message: 'Oops! Something went wrong.'
+  },
+
+  invalid_poster_image_url: {
+    parameter: 'poster_image_url',
+    code: 'invalid',
+    message: 'Oops! Something went wrong.'
+  },
+
+  invalid_reply_detail_id: {
+    parameter: 'reply_detail_id',
+    code: 'invalid',
+    message: 'Oops! Something went wrong.'
+  },
+
+  invalid_tag_id: {
+    parameter: 'tag_id',
+    code: 'invalid',
+    message: 'Oops! Something went wrong.'
+  },
+
+  missing_reply_detail_id: {
+    parameter: 'reply_detail_id',
+    code: 'missing',
+    message: 'Oops! Something went wrong.'
+  },
+
+  missing_video_id: {
+    parameter: 'video_id',
+    code: 'missing',
+    message: 'Oops! Something went wrong.'
+  },
+
+  missing_parent_id: {
+    parameter: 'parent_id',
+    code: 'missing',
+    message: 'Oops! Something went wrong.'
+  },
+
+  missing_parent_kind: {
+    parameter: 'parent_kind',
+    code: 'missing',
+    message: 'Oops! Something went wrong.'
+  },
+
+  missing_video_url: {
+    parameter: 'video_url',
+    code: 'missing',
+    message: 'Oops! Something went wrong.'
   }
 };
 

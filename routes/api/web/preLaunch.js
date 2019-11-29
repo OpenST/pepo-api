@@ -104,17 +104,18 @@ router.post('/creator', validatePreLaunchInviteCookie, sanitizer.sanitizeDynamic
   Promise.resolve(routeHelper.perform(req, res, next, '/preLaunchInvite/Creator', 'r_a_w_pl_6', null));
 });
 
-/* Rotate Twitter Account*/
+/* Rotate twitter account. */
 router.get('/rotate-twitter-account', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.preLaunchInviteRotateTwitterAccount;
 
   if (coreConstants.environment === 'production' || coreConstants.environment === 'sandbox') {
-    errorObject = responseHelper.error({
+    const errorObject = responseHelper.error({
       internal_error_identifier: 'r_a_w_pl_7',
       api_error_identifier: 'resource_not_found',
       debug_options: {}
     });
-    // 404 error
+    // 404 error.
+
     return responseHelper.renderApiResponse(errorObject, res, errorConfig);
   }
 

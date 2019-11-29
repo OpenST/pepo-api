@@ -55,7 +55,7 @@ class VideoTagsSanitize {
           userVideoIds.push(userVideosDbResp[ut].video_id);
           userTextIds.push(userVideosDbResp[ut].description_id);
         }
-        console.log(
+        logger.log(
           'user video ids:',
           userVideoIds,
           user.properties & userConstants.invertedProperties[userConstants.isApprovedCreatorProperty]

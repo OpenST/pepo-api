@@ -8,7 +8,8 @@ const rootPrefix = '../..',
   coreConstants = require(rootPrefix + '/config/coreConstants'),
   gotoConstants = require(rootPrefix + '/lib/globalConstant/goto'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
-  entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType');
+  entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
+  userUtmDetailsConstants = require(rootPrefix + '/lib/globalConstant/userUtmDetail');
 
 const currentPepoApiDomain = coreConstants.PA_DOMAIN;
 
@@ -33,11 +34,12 @@ class FetchGoto extends ServiceBase {
 
     const oThis = this;
 
-    oThis.url = params.url.toLowerCase();
+    oThis.url = params.url.toLowerCase().replace(/&amp;/g, '&');
 
     oThis.parsedUrl = {};
     oThis.gotoKind = null;
     oThis.gotoParams = null;
+    oThis.utmCookieValue = null;
   }
 
   /**
@@ -142,12 +144,21 @@ class FetchGoto extends ServiceBase {
       }
     } else if (pathArray[1] === 'account') {
       oThis.gotoKind = gotoConstants.invitedUsersGotoKind;
+    } else if (pathArray[1] === 'doptin') {
+      // If url is doptin then send it to webview
+      if (query && query.t) {
+        oThis.gotoParams = { url: oThis.url };
+        oThis.gotoKind = gotoConstants.webViewGotoKind;
+      }
     } else if (!pathArray[1]) {
       // If url is just 'pepo.com/' then look for invite code if any
       if (query && query.invite) {
         oThis.gotoParams = { inviteCode: query.invite };
         oThis.gotoKind = gotoConstants.signUpGotoKind;
+      } else {
+        oThis.gotoKind = gotoConstants.feedGotoKind;
       }
+      oThis.utmCookieValue = userUtmDetailsConstants.utmCookieToSet(query);
     }
   }
 
@@ -164,7 +175,8 @@ class FetchGoto extends ServiceBase {
       const goto = gotoFactory.gotoFor(oThis.gotoKind, oThis.gotoParams);
 
       return responseHelper.successWithData({
-        [entityTypeConstants.goto]: goto
+        [entityTypeConstants.goto]: goto,
+        utmCookieValue: oThis.utmCookieValue
       });
     }
 
