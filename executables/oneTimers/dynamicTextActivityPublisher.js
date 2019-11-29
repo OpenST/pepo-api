@@ -28,7 +28,7 @@ program.on('--help', function() {
   logger.log('  Example:');
   logger.log('');
   logger.log(
-    '    node executables/oneTimers/dynamicTextActivityPublisher.js --url "http://pepodev.com:8080" --text "Jason Goldberg replied to your video. Update the app to use this new feature."'
+    'node executables/oneTimers/dynamicTextActivityPublisher.js --url "https://stagingpepo.com?utm_type=1&utm_source=organic" --text "New Test System Notification. Goto is webview."'
   );
   logger.log('');
   logger.log('');
@@ -82,9 +82,9 @@ class DynamicTextActivityPublisher {
       const rows = await new UserModel()
         .select('id')
         .where({ status: userConstants.invertedStatuses[userConstants.activeStatus] })
-        .where('id > ?', minUserId)
+        .where(['id > ?', minUserId])
         .limit(limit)
-        .order('id asc')
+        .order_by('id asc')
         .fire();
 
       if (rows.length == 0) {
