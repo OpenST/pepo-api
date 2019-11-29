@@ -63,7 +63,7 @@ class UpdateFanVideo extends UpdateProfileBase {
     oThis.isExternalUrl = params.isExternalUrl;
     oThis.videoDescription = params.video_description;
     oThis.link = params.link;
-    oThis.perReplyAmountInWei = params.per_reply_amount_in_wei || 0;
+    oThis.perReplyAmountInWei = params.per_reply_amount_in_wei;
 
     oThis.videoId = null;
     oThis.addVideoParams = {};
@@ -82,6 +82,10 @@ class UpdateFanVideo extends UpdateProfileBase {
    */
   async _validateParams() {
     const oThis = this;
+
+    if(CommonValidator.isVarNullOrUndefined(oThis.perReplyAmountInWei)) {
+      oThis.perReplyAmountInWei = '10000000000000000000'
+    }
 
     const validateVideoResp = await new ValidateVideoService({
       current_user: oThis.currentUser,
