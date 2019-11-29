@@ -32,7 +32,7 @@ class PendingTransaction extends ModelBase {
    *
    * @param {object} dbRow
    *
-   * @return {object}
+   * @returns {object}
    */
   formatDbData(dbRow) {
     const oThis = this;
@@ -58,7 +58,7 @@ class PendingTransaction extends ModelBase {
    * @param {array} toUserIds: to user ids
    * @param {number} fromUserId: from user id
    *
-   * @return {object}
+   * @returns {object}
    */
   async fetchPendingTransactionByFromUserIdAndToUserIds(toUserIds, fromUserId) {
     const oThis = this;
@@ -88,7 +88,7 @@ class PendingTransaction extends ModelBase {
    * @param {number} videoIds: video ids
    * @param {number} fromUserId: from user id
    *
-   * @return {object}
+   * @returns {object}
    */
   async fetchPendingTransactionByFromUserIdAndVideoIds(videoIds, fromUserId) {
     const oThis = this;

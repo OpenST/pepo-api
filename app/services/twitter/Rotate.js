@@ -3,7 +3,7 @@ const rootPrefix = '../../..',
   UserModel = require(rootPrefix + '/app/models/mysql/User'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   TwitterUserModel = require(rootPrefix + '/app/models/mysql/TwitterUser'),
-  UserByUserNameCache = require(rootPrefix + '/lib/cacheManagement/single/UserByUsername'),
+  UserIdByUserNamesCache = require(rootPrefix + '/lib/cacheManagement/multi/UserIdByUserNames'),
   TwitterUserByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TwitterUserByIds'),
   TwitterUserByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TwitterUserByUserIds'),
   TwitterUserByTwitterIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TwitterUserByTwitterIds'),
@@ -70,12 +70,12 @@ class RotateTwitterAccount extends ServiceBase {
   async _fetchUser() {
     const oThis = this;
 
-    const cacheRsp = await new UserByUserNameCache({ userName: oThis.userName }).fetch();
+    const cacheRsp = await new UserIdByUserNamesCache({ userNames: [oThis.userName] }).fetch();
     if (cacheRsp.isFailure()) {
       return Promise.reject(cacheRsp);
     }
 
-    if (!cacheRsp.data.id) {
+    if (!cacheRsp.data[oThis.userName].id) {
       return Promise.reject(
         responseHelper.paramValidationError({
           internal_error_identifier: 'a_s_u_rta_1',
@@ -86,7 +86,7 @@ class RotateTwitterAccount extends ServiceBase {
       );
     }
 
-    oThis.userId = cacheRsp.data.id;
+    oThis.userId = cacheRsp.data[oThis.userName].id;
   }
 
   /**

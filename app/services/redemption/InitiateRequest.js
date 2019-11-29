@@ -6,7 +6,6 @@ const rootPrefix = '../../..',
   UserModel = require(rootPrefix + '/app/models/mysql/User'),
   UserMultiCache = require(rootPrefix + '/lib/cacheManagement/multi/User'),
   GetPepocornBalance = require(rootPrefix + '/lib/pepocorn/GetPepocornBalance'),
-  SecureTokenCache = require(rootPrefix + '/lib/cacheManagement/single/SecureToken'),
   PepocornBalanceModel = require(rootPrefix + '/app/models/mysql/PepocornBalance'),
   PepocornTransactionsModel = require(rootPrefix + '/app/models/mysql/PepocornTransaction'),
   TwitterUserByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TwitterUserByIds'),
@@ -377,9 +376,8 @@ class InitiateRequestRedemption extends ServiceBase {
           }
         })
       );
-    } else {
-      await PepocornBalanceModel.flushCache({ userId: oThis.currentUserId });
     }
+    await PepocornBalanceModel.flushCache({ userId: oThis.currentUserId });
   }
 
   /**

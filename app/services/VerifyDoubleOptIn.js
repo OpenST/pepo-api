@@ -87,6 +87,8 @@ class VerifyDoubleOptIn extends ServiceBase {
   /**
    * Fetch double opt in token.
    *
+   * @sets oThis.temporaryTokenObj
+   *
    * @returns {Promise<never>}
    * @private
    */

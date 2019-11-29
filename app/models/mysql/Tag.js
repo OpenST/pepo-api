@@ -33,11 +33,12 @@ class Tag extends ModelBase {
    * @param {object} dbRow
    * @param {number} dbRow.id
    * @param {string} dbRow.name
-   * @param {string} dbRow.weight
-   * @param {string} dbRow.video_weight
-   * @param {string} dbRow.status
-   * @param {string} dbRow.created_at
-   * @param {string} dbRow.updated_at
+   * @param {number} dbRow.weight
+   * @param {number} dbRow.video_weight
+   * @param {number} dbRow.reply_weight
+   * @param {number} dbRow.status
+   * @param {number} dbRow.created_at
+   * @param {number} dbRow.updated_at
    *
    * @returns {object}
    * @private
@@ -50,6 +51,7 @@ class Tag extends ModelBase {
       name: dbRow.name,
       weight: dbRow.weight,
       videoWeight: dbRow.video_weight,
+      replyWeight: dbRow.reply_weight,
       status: tagConstants.statuses[dbRow.status],
       createdAt: dbRow.created_at,
       updatedAt: dbRow.updated_at
@@ -137,7 +139,7 @@ class Tag extends ModelBase {
    * @param {number} params.limit
    * @param {string} params.tagPrefix
    *
-   * @returns {Promise<>}
+   * @returns {Promise<{}>}
    */
   async getTagsByPrefix(params) {
     const oThis = this;
@@ -152,7 +154,7 @@ class Tag extends ModelBase {
       .where({ status: tagConstants.invertedStatuses[tagConstants.activeStatus] })
       .limit(limit)
       .offset(offset)
-      .order_by('(weight+video_weight) DESC')
+      .order_by('(weight + video_weight + reply_weight) DESC')
       .fire();
 
     const response = [];
@@ -169,7 +171,7 @@ class Tag extends ModelBase {
    *
    * @param {array} ids
    *
-   * @return {object}
+   * @returns {Promise<{}>}
    */
   async fetchByIds(ids) {
     const oThis = this;
@@ -190,43 +192,64 @@ class Tag extends ModelBase {
   }
 
   /**
-   * Update tag weights by weightToAdd
+   * Update tag weights by weightToAdd.
    *
    * @param {array} tagIds
    * @param {number} weightToAdd
    *
-   * @returns {Promise<any>}
+   * @returns {Promise<*>}
    */
   async updateTagWeights(tagIds, weightToAdd) {
     const oThis = this;
 
-    if (tagIds.length == 0) {
+    if (tagIds.length === 0) {
       return true;
     }
 
-    let queryObj = oThis.update(['weight=weight+?', weightToAdd]).where({ id: tagIds });
+    const queryObj = oThis.update(['weight = weight + ?', weightToAdd]).where({ id: tagIds });
 
     if (weightToAdd < 0) {
-      queryObj.where(['weight > 0']);
+      queryObj.where(['weight + ? >= 0', weightToAdd]);
     }
 
     return queryObj.fire();
   }
 
   /**
-   * Update video tag weights by weightToAdd
+   * Update video tag weights by weightToAdd.
    *
-   * @param tagIds
-   * @param weightToAdd
-   * @returns {Promise<any>}
+   * @param {array} tagIds
+   * @param {number} weightToAdd
+   *
+   * @returns {Promise<*>}
    */
   async updateVideoTagWeights(tagIds, weightToAdd) {
     const oThis = this;
 
-    let queryObj = oThis.update(['video_weight=video_weight+?', weightToAdd]).where({ id: tagIds });
+    const queryObj = oThis.update(['video_weight = video_weight + ?', weightToAdd]).where({ id: tagIds });
 
     if (weightToAdd < 0) {
-      queryObj.where(['video_weight > 0']);
+      queryObj.where(['video_weight + ? >= 0', weightToAdd]);
+    }
+
+    return queryObj.fire();
+  }
+
+  /**
+   * Update reply tag weights by weightToAdd.
+   *
+   * @param {array} tagIds
+   * @param {number} weightToAdd
+   *
+   * @returns {Promise<*>}
+   */
+  async updateReplyTagWeights(tagIds, weightToAdd) {
+    const oThis = this;
+
+    const queryObj = oThis.update(['reply_weight = reply_weight + ?', weightToAdd]).where({ id: tagIds });
+
+    if (weightToAdd < 0) {
+      queryObj.where(['reply_weight + ? >= 0', weightToAdd]);
     }
 
     return queryObj.fire();
@@ -238,7 +261,7 @@ class Tag extends ModelBase {
    * @param {object} params
    * @param {string} params.tagPrefix
    * @param {array} params.ids
-   * @param {String} params.name
+   * @param {string} params.name
    *
    * @returns {Promise<*>}
    */

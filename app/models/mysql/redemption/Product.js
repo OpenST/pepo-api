@@ -54,7 +54,7 @@ class RedemptionProductModel extends ModelBase {
       dollarValue: dbRow.dollar_value,
       minDollarValue: dbRow.min_dollar_value,
       dollarStep: dbRow.dollar_step,
-      pepocornPerDollar: redemptionConstants.pepocornPerDollar, // Need to be sent for all products but not a column
+      pepocornPerDollar: redemptionConstants.pepocornPerDollar, // Need to be sent for all products but not a column.
       createdAt: dbRow.created_at,
       updatedAt: dbRow.updated_at
     };
@@ -65,7 +65,7 @@ class RedemptionProductModel extends ModelBase {
   /**
    * Get all products.
    *
-   * @return {Promise<[]>}
+   * @returns {Promise<[]>}
    */
   async getAll() {
     const oThis = this;

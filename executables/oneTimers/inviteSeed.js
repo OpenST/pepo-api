@@ -12,6 +12,7 @@ const rootPrefix = '../..',
   PreLaunchInviteModel = require(rootPrefix + '/app/models/mysql/PreLaunchInvite'),
   InviteCodeModel = require(rootPrefix + '/app/models/mysql/InviteCode'),
   inviteCodeConstants = require(rootPrefix + '/lib/globalConstant/inviteCode'),
+  logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   preLaunchInviteConstant = require(rootPrefix + '/lib/globalConstant/preLaunchInvite');
 
 command
@@ -224,6 +225,6 @@ new InviteSeed({})
     process.exit(0);
   })
   .catch(function(err) {
-    console.log(err);
+    logger.log(err);
     process.exit(1);
   });

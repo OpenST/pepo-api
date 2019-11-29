@@ -14,7 +14,7 @@
     "aws-sdk": "2.484.0",
     "bignumber.js": "4.1.0",
     "body-parser": "1.18.3",
-    "cassandra-driver": "4.1.0",
+    "cassandra-driver": "4.3.1",
     "commander": "2.19.0",
     "continuation-local-storage": "3.2.1",
     "cookie-parser": "1.4.4",

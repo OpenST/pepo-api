@@ -1,15 +1,21 @@
 const rootPrefix = '../../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
-  UserDeviceIdsByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/UserDeviceIdsByUserIds'),
+  CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   TokenUserByOstUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TokenUserByOstUserIds'),
+  UserDeviceIdsByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/UserDeviceIdsByUserIds'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   notificationJobEnqueue = require(rootPrefix + '/lib/rabbitMqEnqueue/notification'),
   notificationJobConstants = require(rootPrefix + '/lib/globalConstant/notificationJob');
 
+/**
+ * Class for recovery initiate ost event.
+ *
+ * @class RecoveryInitiateOstEvent
+ */
 class RecoveryInitiateOstEvent extends ServiceBase {
   /**
-   * Constructor for recovery initiate ost event base.
+   * Constructor for recovery initiate ost event.
    *
    * @param {object} params
    * @param {string} params.data: contains the webhook event data
@@ -21,17 +27,18 @@ class RecoveryInitiateOstEvent extends ServiceBase {
    * @constructor
    */
   constructor(params) {
-    super(params);
+    super();
 
     const oThis = this;
+
     oThis.recoveryEntity = params.data.device;
     oThis.ostUserId = oThis.recoveryEntity.user_id;
   }
 
   /**
-   * Async performer.
+   * Async perform.
    *
-   * @return {Promise<void>}
+   * @returns {Promise<result>}
    * @private
    */
   async _asyncPerform() {
@@ -49,12 +56,10 @@ class RecoveryInitiateOstEvent extends ServiceBase {
   /**
    * Validate request.
    *
-   * @return {Promise<void>}
+   * @returns {Promise<void>}
    * @private
    */
   async _validateAndSanitizeParams() {
-    const oThis = this;
-
     logger.log('Start:: Validate for Recovery initiate');
 
     logger.log('End:: Validate for Recovery initiate');
@@ -63,6 +68,8 @@ class RecoveryInitiateOstEvent extends ServiceBase {
   /**
    * This function gives user id for the given ost user id(uuid).
    *
+   * @sets oThis.userId
+   *
    * @returns {Promise<void>}
    * @private
    */
@@ -70,9 +77,18 @@ class RecoveryInitiateOstEvent extends ServiceBase {
     const oThis = this;
 
     const tokenUserRsp = await new TokenUserByOstUserIdsCache({ ostUserIds: [oThis.ostUserId] }).fetch();
-
     if (tokenUserRsp.isFailure()) {
       return Promise.reject(tokenUserRsp);
+    }
+
+    if (!CommonValidators.validateNonEmptyObject(tokenUserRsp.data[oThis.ostUserId])) {
+      return Promise.reject(
+        responseHelper.error({
+          internal_error_identifier: 'a_s_oe_r_i_1',
+          api_error_identifier: 'entity_not_found',
+          debug_options: { ostUserId: oThis.ostUserId }
+        })
+      );
     }
 
     oThis.userId = tokenUserRsp.data[oThis.ostUserId].userId;
@@ -88,7 +104,6 @@ class RecoveryInitiateOstEvent extends ServiceBase {
     const oThis = this;
 
     const userDeviceCacheRsp = await new UserDeviceIdsByUserIdsCache({ userIds: [oThis.userId] }).fetch();
-
     if (userDeviceCacheRsp.isFailure()) {
       return Promise.reject(userDeviceCacheRsp);
     }

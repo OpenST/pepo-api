@@ -57,7 +57,7 @@ class UserVideoViewModel extends CassandraModelBase {
   formatDbData(dbRow) {
     const oThis = this;
 
-    //Note:-last_visited_at is for activity_last_visited_by.
+    // Note:-last_visited_at is for activity_last_visited_by.
 
     /* eslint-disable */
     const formattedData = {
@@ -86,8 +86,8 @@ class UserVideoViewModel extends CassandraModelBase {
     const query = 'update ' + oThis.queryTableName + ' set last_view_at = ? where user_id = ? and video_id = ?;';
     const queries = [];
 
-    for (let i = 0; i < queryParams.videoIds.length; i++) {
-      const updateParam = [queryParams.lastViewAt, queryParams.userId, queryParams.videoIds[i]];
+    for (let index = 0; index < queryParams.videoIds.length; index++) {
+      const updateParam = [queryParams.lastViewAt, queryParams.userId, queryParams.videoIds[index]];
       queries.push({ query: query, params: updateParam });
     }
 

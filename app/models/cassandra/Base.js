@@ -90,16 +90,16 @@ class ModelBase {
   /**
    * Batch fire the query.
    *
-   * @param {string} query
+   * @param {array} queries
    * @param {array} [params]
    * @param {object} [options]
    *
    * @returns {Promise<any>}
    */
-  async batchFire(query, params = [], options = {}) {
+  async batchFire(queries, params = [], options = {}) {
     const oThis = this;
 
-    return oThis.onWriteConnection().batch(query, params, oThis.getDefaultOptions(options));
+    return oThis.onWriteConnection().batch(queries, params, oThis.getDefaultOptions(options));
   }
 
   /**
@@ -139,11 +139,14 @@ class ModelBase {
   }
 
   /**
-   * Key object defined in Cassandra table
+   * Key object defined in cassandra table.
    *
+   * @returns {{}}
    */
   keyObject() {
-    throw "Model has to define key object for itself. eg: {partition: ['user_id'], sort: ['updated_timestamp']}";
+    throw new Error(
+      "Model has to define key object for itself. eg: {partition: ['user_id'], sort: ['updated_timestamp']}"
+    );
   }
 }
 

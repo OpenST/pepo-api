@@ -34,6 +34,37 @@ const v1Signature = {
     ],
     optional: []
   },
+  [apiName.replyList]: {
+    mandatory: [
+      {
+        parameter: 'video_id',
+        validatorMethods: ['validateInteger']
+      }
+    ],
+    optional: [
+      {
+        parameter: paginationConstants.paginationIdentifierKey,
+        validatorMethods: ['validateString', 'validatePaginationIdentifier']
+      },
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      }
+    ]
+  },
+  [apiName.getReply]: {
+    mandatory: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      },
+      {
+        parameter: 'reply_detail_id',
+        validatorMethods: ['validateInteger']
+      }
+    ],
+    optional: []
+  },
   [apiName.registerDevice]: {
     mandatory: [
       {
@@ -243,6 +274,10 @@ const v1Signature = {
       {
         parameter: 'invite_code',
         validatorMethods: ['validateNonBlankString']
+      },
+      {
+        parameter: 'utm_params',
+        validatorMethods: ['validateObject']
       }
     ]
   },
@@ -309,17 +344,131 @@ const v1Signature = {
         validatorMethods: ['validateInteger']
       },
       {
+        parameter: 'per_reply_amount_in_wei',
+        validatorMethods: ['validateInteger']
+      },
+      {
         parameter: 'image_size',
         validatorMethods: ['validateInteger']
       },
+      {
+        parameter: 'video_description',
+        validatorMethods: ['validateString', 'validateStopWords']
+      },
+      {
+        parameter: 'link',
+        validatorMethods: ['validateString', 'validateStopWords']
+      } // If link is invalid, consider empty string.
+    ]
+  },
+  [apiName.initiateReply]: {
+    mandatory: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      },
+      {
+        parameter: 'parent_id',
+        validatorMethods: ['validateNonZeroInteger']
+      },
+      {
+        parameter: 'parent_kind',
+        validatorMethods: ['validateString']
+      },
+      {
+        parameter: 'video_url',
+        validatorMethods: ['validateHttpBasedUrl']
+      }
+    ],
+    optional: [
+      {
+        parameter: 'reply_detail_id',
+        validatorMethods: ['validateNonZeroInteger']
+      },
+      {
+        parameter: 'poster_image_url',
+        validatorMethods: ['validateHttpBasedUrl']
+      },
+      {
+        parameter: 'video_width',
+        validatorMethods: ['validateInteger']
+      },
+      {
+        parameter: 'video_height',
+        validatorMethods: ['validateInteger']
+      },
+      {
+        parameter: 'video_size',
+        validatorMethods: ['validateInteger']
+      },
+      {
+        parameter: 'image_width',
+        validatorMethods: ['validateInteger']
+      },
+      {
+        parameter: 'image_height',
+        validatorMethods: ['validateInteger']
+      },
+      {
+        parameter: 'image_size',
+        validatorMethods: ['validateInteger']
+      },
+      {
+        parameter: 'video_description',
+        validatorMethods: ['validateString', 'validateStopWords']
+      },
+      {
+        parameter: 'link',
+        validatorMethods: ['validateString', 'validateStopWords']
+      } // If link is invalid, consider empty string.
+    ]
+  },
+  [apiName.validateUploadVideo]: {
+    mandatory: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      }
+    ],
+    optional: [
       {
         parameter: 'video_description',
         validatorMethods: ['validateVideoDescription', 'validateStopWords']
       },
       {
         parameter: 'link',
-        validatorMethods: ['validateString', 'validateStopWords']
-      } // If link is invalid, consider empty string.
+        validatorMethods: ['validateGenericUrl', 'validateStopWords']
+      },
+      {
+        parameter: 'per_reply_amount_in_wei',
+        validatorMethods: ['validateIntegerWeiValue']
+      }
+    ]
+  },
+  [apiName.validateUploadReply]: {
+    mandatory: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      },
+      {
+        parameter: 'parent_kind',
+        validatorMethods: ['validateString']
+      },
+      {
+        parameter: 'parent_id',
+        validatorMethods: ['validateNonZeroInteger']
+      }
+    ],
+    optional: [
+      {
+        parameter: 'video_description',
+        validatorMethods: ['validateVideoDescription', 'validateStopWords']
+      },
+      {
+        parameter: 'link',
+        validatorMethods: ['validateGenericUrl', 'validateStopWords']
+      }
     ]
   },
   [apiName.saveProfileImage]: {
@@ -598,6 +747,24 @@ const v1Signature = {
       }
     ]
   },
+  [apiName.atMentionSearch]: {
+    mandatory: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      }
+    ],
+    optional: [
+      {
+        parameter: 'q',
+        validatorMethods: ['validateString']
+      },
+      {
+        parameter: paginationConstants.paginationIdentifierKey,
+        validatorMethods: ['validateString', 'validatePaginationIdentifier']
+      }
+    ]
+  },
   [apiName.getEmail]: {
     mandatory: [
       {
@@ -709,10 +876,24 @@ const v1Signature = {
       }
     ]
   },
-  [apiName.share]: {
+  [apiName.videoShare]: {
     mandatory: [
       {
         parameter: 'video_id',
+        validatorMethods: ['validateInteger']
+      }
+    ],
+    optional: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      }
+    ]
+  },
+  [apiName.replyShare]: {
+    mandatory: [
+      {
+        parameter: 'reply_detail_id',
         validatorMethods: ['validateInteger']
       }
     ],
@@ -873,6 +1054,28 @@ const v1Signature = {
       }
     ]
   },
+  [apiName.getAllVideoListByTagId]: {
+    mandatory: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      },
+      {
+        parameter: 'tag_id',
+        validatorMethods: ['validateNonZeroInteger']
+      },
+      {
+        parameter: 'supported_entities',
+        validatorMethods: ['validateNonEmptyStringArray']
+      }
+    ],
+    optional: [
+      {
+        parameter: paginationConstants.paginationIdentifierKey,
+        validatorMethods: ['validateString', 'validatePaginationIdentifier']
+      }
+    ]
+  },
   [apiName.pepocornTopUpValidate]: {
     mandatory: [
       {
@@ -917,6 +1120,19 @@ const v1Signature = {
       {
         parameter: 'current_user',
         validatorMethods: ['validateNonEmptyObject']
+      }
+    ],
+    optional: []
+  },
+  [apiName.deleteReplyVideo]: {
+    mandatory: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      },
+      {
+        parameter: 'reply_details_id',
+        validatorMethods: ['validateNonZeroInteger']
       }
     ],
     optional: []

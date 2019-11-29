@@ -76,7 +76,7 @@ class SocketJobProcessor extends RabbitMqProcessorBase {
    *
    * @private
    */
-  _processMessage(messageParams) {
+  async _processMessage(messageParams) {
     const messageDetails = messageParams.message.payload,
       userIds = messageDetails.userIds,
       messagePayload = messageDetails.messagePayload;

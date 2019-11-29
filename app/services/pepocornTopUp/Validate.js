@@ -3,9 +3,9 @@ const BigNumber = require('bignumber.js');
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   OstPricePointModel = require(rootPrefix + '/app/models/mysql/OstPricePoints'),
+  PricePointsCache = require(rootPrefix + '/lib/cacheManagement/single/PricePoints'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   ostPricePointConstants = require(rootPrefix + '/lib/globalConstant/ostPricePoints'),
-  PricePointsCache = require(rootPrefix + '/lib/cacheManagement/single/PricePoints'),
   pepocornProductConstants = require(rootPrefix + '/lib/globalConstant/pepocornProduct');
 
 /**
@@ -88,7 +88,7 @@ class ValidatePepocornTopup extends ServiceBase {
   }
 
   /**
-   * Validate price points
+   * Validate price points.
    *
    * @returns {Promise<*|result>}
    * @private
@@ -108,7 +108,7 @@ class ValidatePepocornTopup extends ServiceBase {
       return responseHelper.successWithData({});
     }
 
-    // If price point doesn't match with the cache, will query db for last records and match
+    // If price point doesn't match with the cache, will query db for last records and match.
     const dbRows = await new OstPricePointModel()
       .select('conversion_rate')
       .where([

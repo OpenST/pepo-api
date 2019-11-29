@@ -168,7 +168,10 @@ class TagSearch extends ServiceBase {
     }
 
     return {
-      [paginationConstants.nextPagePayloadKey]: nextPagePayloadKey
+      [paginationConstants.nextPagePayloadKey]: nextPagePayloadKey,
+      // temp hardcoding, move to constants.
+      search_term: oThis.tagPrefix,
+      search_kind: 'tags'
     };
   }
 

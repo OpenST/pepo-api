@@ -241,22 +241,38 @@ class ProcessorBase extends CronBase {
         onResolve();
       })
       .catch(async function(err) {
-        let errorObject = err;
-        logger.error('e_rms_b_2', 'Error in process message from rmq.', 'Error: ', err, 'Params: ', messageParams);
-        if (!responseHelper.isCustomResult(err)) {
-          errorObject = responseHelper.error({
-            internal_error_identifier: 'unhandled_catch_response:e_rms_b_2',
-            api_error_identifier: 'unhandled_catch_response',
-            debug_options: { error: err.toString(), stack: err.stack }
-          });
-        }
-        logger.error(' In catch block of services/Base.js', err);
-
-        await createErrorLogsEntry.perform(errorObject, ErrorLogsConstants.highSeverity);
-
-        process.emit('SIGINT');
-        onResolve();
+        return oThis._handleError(onResolve, onReject, messageParams, err);
       });
+  }
+
+  /**
+   * This method processes the error
+   *
+   * @param {function} onResolve
+   * @param {function} onReject
+   * @param {object} messageParams
+   * @param {object} err
+   *
+   * @returns {*}
+   *
+   * @private
+   */
+  async _handleError(onResolve, onReject, messageParams, err) {
+    const oThis = this;
+
+    let errorObject = err;
+    logger.error('e_rms_b_2', 'Error in process message from rmq.', 'Error: ', err, 'Params: ', messageParams);
+    if (!responseHelper.isCustomResult(err)) {
+      errorObject = responseHelper.error({
+        internal_error_identifier: 'unhandled_catch_response:e_rms_b_2',
+        api_error_identifier: 'unhandled_catch_response',
+        debug_options: { error: err.toString(), stack: err.stack }
+      });
+    }
+    logger.error(' In catch block of services/Base.js', err);
+    await createErrorLogsEntry.perform(errorObject, ErrorLogsConstants.highSeverity);
+    process.emit('SIGINT');
+    onResolve();
   }
 
   /**
@@ -388,7 +404,7 @@ class ProcessorBase extends CronBase {
    *
    * @private
    */
-  _processMessage(messageParams) {
+  async _processMessage(messageParams) {
     const oThis = this;
 
     logger.log('Message params =====', messageParams);

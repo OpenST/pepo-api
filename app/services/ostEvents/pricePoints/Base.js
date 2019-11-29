@@ -89,6 +89,7 @@ class PricePointsUpdateBase extends ServiceBase {
         debug_options: oThis.ostPricePoints
       });
       await createErrorLogsEntry.perform(errorObject, errorLogsConstants.mediumSeverity);
+
       return errorObject;
     }
 
