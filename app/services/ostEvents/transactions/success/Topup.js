@@ -67,17 +67,17 @@ class TopUpSuccessWebhook extends TransactionWebhookBase {
     }
 
     await oThis.validateToUserId();
-    const promiseArray = [];
-    promiseArray.push(oThis.updateTransaction());
-    promiseArray.push(oThis.processForTopUpTransaction());
-    promiseArray.push(oThis._enqueueUserNotification(notificationJobConstants.topupDone));
-    promiseArray.push(
-      FiatPaymentModel.flushCache({
-        fiatPaymentId: oThis.transactionObj.fiatPaymentId,
-        userId: oThis.toUserId
-      })
-    );
+    const promiseArray = [
+      oThis.updateTransaction(),
+      oThis.processForTopUpTransaction(),
+      oThis._enqueueUserNotification(notificationJobConstants.topupDone)
+    ];
     await Promise.all(promiseArray);
+
+    await FiatPaymentModel.flushCache({
+      fiatPaymentId: oThis.transactionObj.fiatPaymentId,
+      userId: oThis.toUserId
+    });
   }
 
   /**
