@@ -99,10 +99,14 @@ class UpdateCuratedEntities extends ServiceBase {
 
     if (entityIdsArray.indexOf(oThis.entityId) === -1) {
       // If entityId does not exists in the curated entities table, insert new entry.
-      await oThis.insertNewCuratedEntity();
+      await new CuratedEntityModel().insertIntoCuratedEntity(oThis.entityId, oThis.entityKind, oThis.newPosition);
     } else {
       // If entityId already exists in the curated entities table, update its position.
-      await oThis.updateExistingCuratedEntity();
+      await new CuratedEntityModel().updatePositionForCuratedEntity(
+        oThis.entityId,
+        oThis.entityKind,
+        oThis.newPosition
+      );
     }
     await CuratedEntityModel.flushCache({ entityKind: oThis.entityKind });
   }
@@ -176,42 +180,6 @@ class UpdateCuratedEntities extends ServiceBase {
         })
       );
     }
-  }
-
-  /**
-   * Insert new curated entity.
-   *
-   * @returns {Promise<void>}
-   */
-  async insertNewCuratedEntity() {
-    const oThis = this;
-
-    await new CuratedEntityModel()
-      .insert({
-        entity_id: oThis.entityId,
-        entity_kind: curatedEntitiesConstants.invertedEntityKinds[oThis.entityKind],
-        position: oThis.newPosition
-      })
-      .fire();
-  }
-
-  /**
-   * Update existing curated entity.
-   *
-   * @returns {Promise<void>}
-   */
-  async updateExistingCuratedEntity() {
-    const oThis = this;
-
-    await new CuratedEntityModel()
-      .update({
-        position: oThis.newPosition
-      })
-      .where({
-        entity_id: oThis.entityId,
-        entity_kind: curatedEntitiesConstants.invertedEntityKinds[oThis.entityKind]
-      })
-      .fire();
   }
 }
 

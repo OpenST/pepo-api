@@ -56,19 +56,6 @@ class CuratedEntity extends ModelBase {
   }
 
   /**
-   * Insert entities.
-   *
-   * @param {array} insertArray
-   *
-   * @returns {Promise<*>}
-   */
-  async insertEntities(insertArray) {
-    const oThis = this;
-
-    return oThis.insertMultiple(['entity_id', 'entity_kind', 'position'], insertArray, { touch: true }).fire();
-  }
-
-  /**
    * Get entity ids for particular entity kind.
    *
    * @param {string} entityKind
@@ -103,6 +90,63 @@ class CuratedEntity extends ModelBase {
   }
 
   /**
+   * Insert into curated entities.
+   *
+   * @param {number} entityId
+   * @param {string} entityKind
+   * @param {string} newPosition
+   *
+   * @returns {Promise<{}>}
+   */
+  async insertIntoCuratedEntity(entityId, entityKind, newPosition) {
+    const oThis = this;
+
+    const entityKindInt = curatedEntitiesConstants.invertedEntityKinds[entityKind];
+
+    if (!entityKindInt) {
+      return Promise.reject(new Error('Invalid entity kind.'));
+    }
+
+    await new oThis.insert({
+      entity_id: entityId,
+      entity_kind: entityKindInt,
+      position: newPosition
+    }).fire();
+
+    await oThis.flushCache({ entityKind: entityKind });
+  }
+
+  /**
+   * Update position for curated entity.
+   *
+   * @param {number} entityId
+   * @param {string} entityKind
+   * @param {string} newPosition
+   *
+   * @returns {Promise<{}>}
+   */
+  async updatePositionForCuratedEntity(entityId, entityKind, newPosition) {
+    const oThis = this;
+
+    const entityKindInt = curatedEntitiesConstants.invertedEntityKinds[entityKind];
+
+    if (!entityKindInt) {
+      return Promise.reject(new Error('Invalid entity kind.'));
+    }
+
+    await new oThis.update({
+      position: newPosition
+    })
+      .where({
+        entity_id: entityId,
+        entity_kind: entityKindInt
+      })
+      .fire();
+
+    await oThis.flushCache({ entityKind: entityKind });
+  }
+
+  /**
    * Delete row for particular entity id and kind.
    *
    * @param {number} entityId
@@ -126,7 +170,8 @@ class CuratedEntity extends ModelBase {
         entity_kind: entityKindInt
       })
       .fire();
-    // TODO - curated - flush cache from here.
+
+    await oThis.flushCache({ entityKind: entityKind });
   }
 
   /**
