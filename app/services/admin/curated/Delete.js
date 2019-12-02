@@ -124,7 +124,7 @@ class DeleteForEntityIdAndKind extends ServiceBase {
   async deleteEntity() {
     const oThis = this;
 
-    await new CuratedEntityModel().deleteForIdAndKind(oThis.entityId, oThis.entityKind);
+    await new CuratedEntityModel().deleteForEntityIdAndKind(oThis.entityId, oThis.entityKind);
 
     await CuratedEntityModel.flushCache({ entityKind: oThis.entityKind });
   }
