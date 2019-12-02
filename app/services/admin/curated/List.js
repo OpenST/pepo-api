@@ -237,7 +237,7 @@ class GetCuratedList extends ServiceBase {
     const oThis = this;
 
     for (let index = 0; index < oThis.curatedEntityIds.length; index++) {
-      let curatedEntityId = oThis.curatedEntityIds;
+      let curatedEntityId = oThis.curatedEntityIds[index];
       oThis.curatedEntityList.push(oThis.curatedEntityDetails[curatedEntityId]);
     }
 
