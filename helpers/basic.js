@@ -621,6 +621,15 @@ class BasicHelper {
   }
 
   /**
+   * Get reply conversation thread url prefix for admin dashboard.
+   *
+   * @returns {string}
+   */
+  replyConversationThreadUrlPrefix() {
+    return coreConstants.PA_DOMAIN + '/admin/video-replies';
+  }
+
+  /**
    * Get timestamp in minutes to date till seconds.
    *
    * @param {number} unixTimestampInMinutes
