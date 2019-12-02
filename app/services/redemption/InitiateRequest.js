@@ -68,8 +68,7 @@ class InitiateRequestRedemption extends ServiceBase {
 
     await oThis._validateAndSanitize();
 
-    const promisesArray = [];
-    promisesArray.push(oThis._getTokenUserDetails(), oThis._getCurrentUserTwitterHandle());
+    const promisesArray = [oThis._getTokenUserDetails(), oThis._getCurrentUserTwitterHandle()];
     await Promise.all(promisesArray);
 
     oThis.redemptionId = uuidV4();
