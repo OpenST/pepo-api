@@ -160,7 +160,12 @@ const adminSignature = {
         validatorMethods: ['validateInteger']
       }
     ],
-    optional: []
+    optional: [
+      {
+        parameter: paginationConstants.paginationIdentifierKey,
+        validatorMethods: ['validateString', 'validatePaginationIdentifier']
+      }
+    ]
   },
   [apiName.adminUpdateVideoDescription]: {
     mandatory: [
