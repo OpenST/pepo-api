@@ -34,6 +34,8 @@ class GetCuratedList extends ServiceBase {
 
     oThis.entityKindInt = 0;
     oThis.curatedEntityIds = [];
+    oThis.curatedEntityList = [];
+    oThis.curatedEntityDetails = {};
 
     oThis.userByUserIdMap = {};
     oThis.tokenUsersByUserIdMap = {};
@@ -103,8 +105,10 @@ class GetCuratedList extends ServiceBase {
     }
 
     oThis.curatedEntityIds = curatedEntityIdsByKindCacheRsp.data.entityIds;
+    oThis.curatedEntityDetails = curatedEntityIdsByKindCacheRsp.data.entityDetails;
 
     console.log('oThis.curatedEntityIds----', oThis.curatedEntityIds);
+    console.log('oThis.curatedEntityDetails----', oThis.curatedEntityDetails);
   }
 
   /**
@@ -232,15 +236,20 @@ class GetCuratedList extends ServiceBase {
   _prepareResponse() {
     const oThis = this;
 
+    for (let index = 0; index < oThis.curatedEntityIds.length; index++) {
+      let curatedEntityId = oThis.curatedEntityIds;
+      oThis.curatedEntityList.push(oThis.curatedEntityDetails[curatedEntityId]);
+    }
+
     if (oThis.entityKind === curatedEntitiesConstants.userEntityKind) {
       return {
-        [adminEntityType.usersCuratedEntitiesList]: oThis.curatedEntityIds,
+        [adminEntityType.usersCuratedEntitiesList]: oThis.curatedEntityList,
         usersByIdMap: oThis.userByUserIdMap,
         tokenUsersByUserIdMap: oThis.tokenUsersByUserIdMap
       };
     } else {
       return {
-        [adminEntityType.tagsCuratedEntitiesList]: oThis.curatedEntityIds,
+        [adminEntityType.tagsCuratedEntitiesList]: oThis.curatedEntityList,
         tags: oThis.tagsMap
       };
     }

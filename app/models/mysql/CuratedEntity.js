@@ -85,20 +85,21 @@ class CuratedEntity extends ModelBase {
     }
 
     const dbRows = await oThis
-      .select('entity_id, position')
+      .select('*')
       .where({ entity_kind: entityKindInt })
       .order_by('position ASC')
       .fire();
 
-    const entityIds = [];
-    let highestPosition = 0;
+    const entityIds = [],
+      entityDetails = {};
+
     for (let index = 0; index < dbRows.length; index++) {
       const curatedEntity = oThis.formatDbData(dbRows[index]);
       entityIds.push(curatedEntity.entityId);
-      highestPosition = curatedEntity.position;
+      entityDetails[curatedEntity.entityId] = curatedEntity;
     }
 
-    return { entityIds: entityIds, highestPosition: highestPosition };
+    return { entityIds: entityIds, entityDetails: entityDetails };
   }
 
   /**
