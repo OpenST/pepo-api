@@ -115,7 +115,7 @@ class CuratedEntity extends ModelBase {
       })
       .fire();
 
-    await oThis.flushCache({ entityKind: entityKind });
+    await CuratedEntity.flushCache({ entityKind: entityKind });
   }
 
   /**
@@ -146,7 +146,7 @@ class CuratedEntity extends ModelBase {
       })
       .fire();
 
-    await oThis.flushCache({ entityKind: entityKind });
+    await CuratedEntity.flushCache({ entityKind: entityKind });
   }
 
   /**
@@ -174,7 +174,7 @@ class CuratedEntity extends ModelBase {
       })
       .fire();
 
-    await oThis.flushCache({ entityKind: entityKind });
+    await CuratedEntity.flushCache({ entityKind: entityKind });
   }
 
   /**
