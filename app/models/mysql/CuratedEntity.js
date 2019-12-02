@@ -107,11 +107,13 @@ class CuratedEntity extends ModelBase {
       return Promise.reject(new Error('Invalid entity kind.'));
     }
 
-    await new oThis.insert({
-      entity_id: entityId,
-      entity_kind: entityKindInt,
-      position: newPosition
-    }).fire();
+    await oThis
+      .insert({
+        entity_id: entityId,
+        entity_kind: entityKindInt,
+        position: newPosition
+      })
+      .fire();
 
     await oThis.flushCache({ entityKind: entityKind });
   }
@@ -134,9 +136,10 @@ class CuratedEntity extends ModelBase {
       return Promise.reject(new Error('Invalid entity kind.'));
     }
 
-    await new oThis.update({
-      position: newPosition
-    })
+    await oThis
+      .update({
+        position: newPosition
+      })
       .where({
         entity_id: entityId,
         entity_kind: entityKindInt
