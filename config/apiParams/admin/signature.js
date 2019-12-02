@@ -337,6 +337,10 @@ const adminSignature = {
         validatorMethods: ['validateNonZeroInteger']
       },
       {
+        parameter: 'position',
+        validatorMethods: ['validateString']
+      },
+      {
         parameter: 'current_admin',
         validatorMethods: ['validateNonEmptyObject']
       }
