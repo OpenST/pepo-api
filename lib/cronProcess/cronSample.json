@@ -18,6 +18,11 @@
     "queues": ["example"],
     "prefetchCount": 1
   },
+  "pixelsJobProcessor": {
+    "topics": ["pix.#"],
+    "queues": ["example"],
+    "prefetchCount": 1
+  },
   "pushNotificationHookProcessor": {
     "sequenceNumber": 1
   },
