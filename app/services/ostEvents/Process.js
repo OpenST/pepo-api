@@ -5,6 +5,8 @@ const rootPrefix = '../../..',
   OstEventProcessFactory = require(rootPrefix + '/app/services/ostEvents/Factory'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
+  createErrorLogsEntry = require(rootPrefix + '/lib/errorLogs/createEntry'),
+  errorLogsConstants = require(rootPrefix + '/lib/globalConstant/errorLogs'),
   ostEventConstants = require(rootPrefix + '/lib/globalConstant/ostEvent');
 
 /**
@@ -146,7 +148,7 @@ class OstEventProcess extends ServiceBase {
     if (response.isSuccess()) {
       await oThis._updateOstEventStatus(ostEventConstants.doneStatus);
     } else {
-      //todo: create error log
+      await createErrorLogsEntry.perform(response, errorLogsConstants.mediumSeverity);
       await oThis._updateOstEventStatus(ostEventConstants.failedStatus);
     }
   }
