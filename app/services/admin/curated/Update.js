@@ -108,7 +108,6 @@ class UpdateCuratedEntities extends ServiceBase {
         oThis.newPosition
       );
     }
-    await CuratedEntityModel.flushCache({ entityKind: oThis.entityKind });
   }
 
   /**

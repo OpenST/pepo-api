@@ -1,6 +1,10 @@
 const rootPrefix = '../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
   databaseConstants = require(rootPrefix + '/lib/globalConstant/database'),
+  responseHelper = require(rootPrefix + '/lib/formatter/response'),
+  logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
+  createErrorLogsEntry = require(rootPrefix + '/lib/errorLogs/createEntry'),
+  errorLogsConstants = require(rootPrefix + '/lib/globalConstant/errorLogs'),
   curatedEntitiesConstants = require(rootPrefix + '/lib/globalConstant/curatedEntities');
 
 // Declare variables.
@@ -113,9 +117,27 @@ class CuratedEntity extends ModelBase {
         entity_kind: entityKindInt,
         position: newPosition
       })
-      .fire();
+      .fire()
+      .then(async function(insertRsp) {
+        await CuratedEntity.flushCache({ entityKind: entityKind });
+      })
+      .catch(async function(err) {
+        if (CuratedEntity.isDuplicateIndexViolation(CuratedEntity.curatedEntityIdAndEntityKindUniqueIndexName, err)) {
+          logger.error(`Duplicate entry for entityId: ${entityId} and entityKind: ${entityKind}`);
+          logger.log('Insert curated entity: DuplicateIndexViolation::err ->', err);
+        } else {
+          // Insert failed due to some other reason.
+          // Send error email from here.
+          const errorObject = responseHelper.error({
+            internal_error_identifier: 'a_m_m_ce_1',
+            api_error_identifier: 'something_went_wrong',
+            debug_options: { Reason: 'Curated entity not updated for:', entityId: entityId }
+          });
+          createErrorLogsEntry.perform(errorObject, errorLogsConstants.lowSeverity);
 
-    await CuratedEntity.flushCache({ entityKind: entityKind });
+          return Promise.reject(errorObject);
+        }
+      });
   }
 
   /**
@@ -144,9 +166,28 @@ class CuratedEntity extends ModelBase {
         entity_id: entityId,
         entity_kind: entityKindInt
       })
-      .fire();
+      .fire()
+      .then(async function(updateRsp) {
+        await CuratedEntity.flushCache({ entityKind: entityKind });
+      })
+      .catch(async function(err) {
+        if (CuratedEntity.isDuplicateIndexViolation(CuratedEntity.curatedEntityKindAndPositionUniqueIndexName, err)) {
+          // Do nothing.
+          logger.error(`Duplicate entry for entityId: ${entityId} and entityKind: ${entityKind}`);
+          logger.log('Update curated entity: DuplicateIndexViolation::err ->', err);
+        } else {
+          // Insert failed due to some other reason.
+          // Send error email from here.
+          const errorObject = responseHelper.error({
+            internal_error_identifier: 'a_m_m_ce_2',
+            api_error_identifier: 'something_went_wrong',
+            debug_options: { Reason: 'Curated entity not updated for:', entityId: entityId }
+          });
+          createErrorLogsEntry.perform(errorObject, errorLogsConstants.lowSeverity);
 
-    await CuratedEntity.flushCache({ entityKind: entityKind });
+          return Promise.reject(errorObject);
+        }
+      });
   }
 
   /**
@@ -175,6 +216,24 @@ class CuratedEntity extends ModelBase {
       .fire();
 
     await CuratedEntity.flushCache({ entityKind: entityKind });
+  }
+
+  /**
+   * Index name
+   *
+   * @returns {string}
+   */
+  static get curatedEntityIdAndEntityKindUniqueIndexName() {
+    return 'c_u_idx_1';
+  }
+
+  /**
+   * Index name
+   *
+   * @returns {string}
+   */
+  static get curatedEntityKindAndPositionUniqueIndexName() {
+    return 'c_u_idx_2';
   }
 
   /**
