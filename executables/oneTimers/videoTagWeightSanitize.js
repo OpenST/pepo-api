@@ -31,7 +31,7 @@ class VideoTagWeightSanitize {
    */
   async _fetchVideoTagCount() {
     const oThis = this,
-      limit = 1;
+      limit = 50;
 
     let rows = [],
       pageNo = 1;
