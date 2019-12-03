@@ -102,6 +102,7 @@ class SlackEventBase extends ServiceBase {
     logger.log('_getPayloadForSlackPost start');
 
     const blocks = await oThis._newBlockForSlack();
+    console.log('The blocks 22222 is ========================: ', blocks);
     const text = oThis.errMsg ? 'Unable to Process' : 'Your request was processed.';
 
     return { text: text, blocks: blocks };
@@ -122,6 +123,9 @@ class SlackEventBase extends ServiceBase {
 
     const currentBlocks = oThis.eventDataPayload.message.blocks,
       actionBlockId = oThis.eventDataPayload.actions[0].block_id;
+
+    console.log('The currentBlocks is ========================: ', currentBlocks);
+    console.log('The actionBlockId is ========================: ', actionBlockId);
 
     for (let index = 0; index < currentBlocks.length; index++) {
       if (currentBlocks[index].block_id == actionBlockId) {
