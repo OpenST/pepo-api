@@ -203,6 +203,7 @@ class ConfigStrategyTemplate {
       [configStrategyConstants.notificationRabbitmq]: 'rabbitmqEntity',
       [configStrategyConstants.pepoMobileEventRabbitmq]: 'rabbitmqEntity',
       [configStrategyConstants.socketRabbitmq]: 'rabbitmqListEntity',
+      [configStrategyConstants.pixelsRabbitmq]: 'rabbitmqListEntity',
       [configStrategyConstants.websocket]: 'websocketEntity',
       [configStrategyConstants.cassandra]: 'cassandraEntity',
       [configStrategyConstants.firebase]: 'firebaseEntity'
