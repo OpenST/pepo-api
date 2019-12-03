@@ -1,8 +1,13 @@
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   UserModel = require(rootPrefix + '/app/models/mysql/User'),
+  UserCache = require(rootPrefix + '/lib/cacheManagement/multi/User'),
   ImageByIdCache = require(rootPrefix + '/lib/cacheManagement/multi/ImageByIds'),
   TokenUserDetailByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TokenUserByUserIds'),
+  VideoDetailsByVideoIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/VideoDetailsByVideoIds'),
+  ReplyDetailsByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/ReplyDetailsByIds'),
+  ReplyDetailsByParentVideoPaginationCache = require(rootPrefix +
+    '/lib/cacheManagement/single/ReplyDetailsByParentVideoPagination'),
   UserBlockedListCache = require(rootPrefix + '/lib/cacheManagement/single/UserBlockedList'),
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
@@ -20,6 +25,8 @@ class UserAtMentionSearch extends ServiceBase {
    *
    * @param {object} params
    * @param {string} [params.q]
+   * @param {string} [params.intent]
+   * @param {string} [params.parent_id]
    * @param {object} params.current_user
    * @param {Boolean} [params.getTopResults]
    *
@@ -33,6 +40,8 @@ class UserAtMentionSearch extends ServiceBase {
     const oThis = this;
 
     oThis.query = params.q || null;
+    oThis.intent = params.intent;
+    oThis.parentId = params.parent_id;
     oThis.paginationIdentifier = params[paginationConstants.paginationIdentifierKey] || null;
     oThis.isOnlyNameSearch = true;
     oThis.currentUserId = +params.current_user.id;
@@ -61,7 +70,18 @@ class UserAtMentionSearch extends ServiceBase {
 
     await oThis._validateAndSanitizeParams();
 
-    await oThis._fetchUserIds();
+    // Fetch creator users for reply intent when search term is null.
+    if (!oThis.query && oThis.intent === oThis._getReplyIntentType() && oThis.parentId) {
+      let promiseArray = [];
+
+      promiseArray.push(oThis._fetchVideoDetails);
+      promiseArray.push(oThis._fetchReplyDetailsByParentVideo);
+
+      await Promise.all(promiseArray);
+      await oThis._fetchUserDetailsForCreatorUserId();
+    } else {
+      await oThis._fetchUserIds();
+    }
 
     await oThis._filterBlockedUsers();
 
@@ -110,8 +130,80 @@ class UserAtMentionSearch extends ServiceBase {
       oThis.paginationTimestamp = null;
     }
 
+    if (!oThis.query && !oThis.intent && !oThis.parentId) {
+      return responseHelper.successWithData(oThis._prepareResponse());
+    }
+
     // Validate limit.
     return oThis._validatePageSize();
+  }
+
+  /**
+   * Fetch video details.
+   *
+   * @returns {Promise<never>}
+   * @private
+   */
+  async _fetchVideoDetails() {
+    const oThis = this;
+
+    const videoDetailsByVideoIdsCacheResp = await new VideoDetailsByVideoIdsCache({
+      videoIds: [oThis.parentId]
+    }).fetch();
+
+    if (videoDetailsByVideoIdsCacheResp.isFailure()) {
+      return Promise.reject(videoDetailsByVideoIdsCacheResp);
+    }
+
+    if (videoDetailsByVideoIdsCacheResp.data && videoDetailsByVideoIdsCacheResp.data[oThis.parentId]) {
+      let parentVideoCreatorUserId = videoDetailsByVideoIdsCacheResp.data[oThis.parentId].creatorUserId;
+      oThis.userIds.push(parentVideoCreatorUserId);
+    }
+  }
+
+  async _fetchReplyDetailsByParentVideo() {
+    const oThis = this;
+
+    const replyDetailsByParentVideoCacheResponse = await new ReplyDetailsByParentVideoPaginationCache({
+      videoId: oThis.parentId,
+      limit: oThis.limit,
+      paginationTimestamp: oThis.paginationTimestamp
+    }).fetch();
+
+    if (replyDetailsByParentVideoCacheResponse.isFailure()) {
+      return Promise.reject(replyDetailsByParentVideoCacheResponse);
+    }
+
+    const replyDetailIds = replyDetailsByParentVideoCacheResponse.data.replyDetailIds;
+
+    const replyDetailCacheResp = await new ReplyDetailsByIdsCache({ ids: [replyDetailIds] }).fetch();
+    if (replyDetailCacheResp.isFailure()) {
+      return Promise.reject(replyDetailCacheResp);
+    }
+
+    const replyDetails = replyDetailCacheResp.data;
+
+    for (let replyDetailsId in replyDetails) {
+      oThis.userIds.push(replyDetails[replyDetailsId].creatorUserId);
+    }
+  }
+
+  /**
+   * fetch user details for creator user ids.
+   *
+   * @sets ooThis.userDetails
+   *
+   * @returns {Promise<void>}
+   */
+  async _fetchUserDetailsForCreatorUserId() {
+    const oThis = this;
+
+    const userDetailsResponse = await new UserCache({ ids: oThis.userIds }).fetch();
+    if (userDetailsResponse.isFailure()) {
+      return Promise.reject(userDetailsResponse);
+    }
+
+    oThis.userDetails = userDetailsResponse.data;
   }
 
   /**
@@ -353,6 +445,26 @@ class UserAtMentionSearch extends ServiceBase {
     const oThis = this;
 
     return oThis.limit;
+  }
+
+  /**
+   * Get reply type intent.
+   *
+   * @returns {string}
+   * @private
+   */
+  _getReplyIntentType() {
+    return 'reply';
+  }
+
+  /**
+   * Get video type intent.
+   *
+   * @returns {string}
+   * @private
+   */
+  _getVideoIntentType() {
+    return 'video';
   }
 }
 

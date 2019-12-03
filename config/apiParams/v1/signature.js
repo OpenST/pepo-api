@@ -762,6 +762,14 @@ const v1Signature = {
       {
         parameter: paginationConstants.paginationIdentifierKey,
         validatorMethods: ['validateString', 'validatePaginationIdentifier']
+      },
+      {
+        parameter: 'intent',
+        validatorMethods: ['validateString']
+      },
+      {
+        parameter: 'parent_id',
+        validatorMethods: ['validateNonZeroInteger']
       }
     ]
   },
