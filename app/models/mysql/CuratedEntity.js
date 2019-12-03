@@ -131,7 +131,7 @@ class CuratedEntity extends ModelBase {
           const errorObject = responseHelper.error({
             internal_error_identifier: 'a_m_m_ce_1',
             api_error_identifier: 'something_went_wrong',
-            debug_options: { Reason: 'Curated entity not updated for:', entityId: entityId }
+            debug_options: { Reason: 'Curated entity not updated for:', entityId: entityId, error: err }
           });
           createErrorLogsEntry.perform(errorObject, errorLogsConstants.lowSeverity);
 
@@ -181,7 +181,7 @@ class CuratedEntity extends ModelBase {
           const errorObject = responseHelper.error({
             internal_error_identifier: 'a_m_m_ce_2',
             api_error_identifier: 'something_went_wrong',
-            debug_options: { Reason: 'Curated entity not updated for:', entityId: entityId }
+            debug_options: { Reason: 'Curated entity not updated for:', entityId: entityId, error: err }
           });
           createErrorLogsEntry.perform(errorObject, errorLogsConstants.lowSeverity);
 
