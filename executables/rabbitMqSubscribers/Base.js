@@ -258,8 +258,6 @@ class ProcessorBase extends CronBase {
    * @private
    */
   async _handleError(onResolve, onReject, messageParams, err) {
-    const oThis = this;
-
     let errorObject = err;
     logger.error('e_rms_b_2', 'Error in process message from rmq.', 'Error: ', err, 'Params: ', messageParams);
     if (!responseHelper.isCustomResult(err)) {
@@ -315,7 +313,7 @@ class ProcessorBase extends CronBase {
   }
 
   /**
-   * Stops consumption upon invocation
+   * Stops consumption upon invocation.
    */
   _stopPickingUpNewTasks() {
     const oThis = this;
@@ -351,7 +349,7 @@ class ProcessorBase extends CronBase {
    *
    * @param {object} messageParams
    *
-   * @return {Promise<void>}
+   * @returns {Promise<void>}
    * @private
    */
 
@@ -415,7 +413,7 @@ class ProcessorBase extends CronBase {
   /**
    * Get cron kind.
    *
-   * @return {string}
+   * @returns {string}
    * @private
    */
   get _cronKind() {
