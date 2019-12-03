@@ -146,7 +146,7 @@ class ConfigStrategyModel extends ModelBase {
       strategyKindName === configStrategyConstants.notificationRabbitmq ||
       strategyKindName === configStrategyConstants.pepoMobileEventRabbitmq ||
       strategyKindName === configStrategyConstants.socketRabbitmq ||
-      strategyKindName === configStrategyConstants.pixelsRabbitmq
+      strategyKindName === configStrategyConstants.pixelRabbitmq
     ) {
       const rmqPassword = hashNotToEncrypt[strategyKindName].password;
 
@@ -215,7 +215,7 @@ class ConfigStrategyModel extends ModelBase {
       case configStrategyConstants.notificationRabbitmq:
       case configStrategyConstants.pepoMobileEventRabbitmq:
       case configStrategyConstants.socketRabbitmq:
-      case configStrategyConstants.pixelsRabbitmq: {
+      case configStrategyConstants.pixelRabbitmq: {
         configStrategyHash[configStrategyKinds[strategyKind]].password = decryptedJsonObj.rmqPassword;
         break;
       }

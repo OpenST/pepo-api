@@ -36,7 +36,7 @@ class PixelsJobProcessor extends RabbitMqProcessorBase {
    * @returns {string}
    */
   getRmqProvider() {
-    return rabbitMqProvider.getInstance(configStrategyConstants.pixelsRabbitmq, machineKindConstant.cronKind);
+    return rabbitMqProvider.getInstance(configStrategyConstants.pixelRabbitmq, machineKindConstant.cronKind);
   }
 
   /**
