@@ -202,8 +202,8 @@ class ConfigStrategyTemplate {
       [configStrategyConstants.bgJobRabbitmq]: 'rabbitmqEntity',
       [configStrategyConstants.notificationRabbitmq]: 'rabbitmqEntity',
       [configStrategyConstants.pepoMobileEventRabbitmq]: 'rabbitmqEntity',
+      [configStrategyConstants.pixelsRabbitmq]: 'rabbitmqEntity',
       [configStrategyConstants.socketRabbitmq]: 'rabbitmqListEntity',
-      [configStrategyConstants.pixelsRabbitmq]: 'rabbitmqListEntity',
       [configStrategyConstants.websocket]: 'websocketEntity',
       [configStrategyConstants.cassandra]: 'cassandraEntity',
       [configStrategyConstants.firebase]: 'firebaseEntity'
