@@ -146,6 +146,7 @@ class OstEventProcess extends ServiceBase {
     if (response.isSuccess()) {
       await oThis._updateOstEventStatus(ostEventConstants.doneStatus);
     } else {
+      //todo: create error log
       await oThis._updateOstEventStatus(ostEventConstants.failedStatus);
     }
   }
