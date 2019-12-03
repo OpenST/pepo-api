@@ -395,12 +395,6 @@ const v1ErrorConfig = {
     message: 'Oops! Something went wrong.'
   },
 
-  invalid_reply_detail_id: {
-    parameter: 'reply_detail_id',
-    code: 'invalid',
-    message: 'Oops! Something went wrong.'
-  },
-
   invalid_tag_id: {
     parameter: 'tag_id',
     code: 'invalid',

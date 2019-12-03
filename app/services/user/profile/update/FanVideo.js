@@ -83,8 +83,8 @@ class UpdateFanVideo extends UpdateProfileBase {
   async _validateParams() {
     const oThis = this;
 
-    if(CommonValidator.isVarNullOrUndefined(oThis.perReplyAmountInWei)) {
-      oThis.perReplyAmountInWei = '10000000000000000000'
+    if (CommonValidator.isVarNullOrUndefined(oThis.perReplyAmountInWei)) {
+      oThis.perReplyAmountInWei = '10000000000000000000';
     }
 
     const validateVideoResp = await new ValidateVideoService({
@@ -242,7 +242,7 @@ class UpdateFanVideo extends UpdateProfileBase {
         videoId: oThis.videoId
       };
 
-      promiseArray.push(bgJob.enqueue(bgJobConstants.contentMonitoringJobTopic, messagePayload));
+      promiseArray.push(bgJob.enqueue(bgJobConstants.slackContentVideoMonitoringJobTopic, messagePayload));
       // Notification would be published only if user is approved.
       promiseArray.push(
         notificationJobEnqueue.enqueue(notificationJobConstants.videoAdd, {

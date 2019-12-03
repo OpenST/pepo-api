@@ -152,6 +152,15 @@ class SlackEventFactory extends ServiceBase {
         }).perform();
         break;
       }
+      case slackConstants.deleteReplyEventType: {
+        const DeleteReplyClass = require(rootPrefix + '/app/services/slackEvents/DeleteReply');
+        eventResponse = await new DeleteReplyClass({
+          eventDataPayload: oThis.eventData.payload,
+          eventParams: oThis.eventParams,
+          currentAdmin: oThis.currentAdmin
+        }).perform();
+        break;
+      }
       default: {
         return Promise.reject(
           responseHelper.error({
