@@ -14,7 +14,7 @@ program.on('--help', function() {
   logger.log('');
   logger.log('  Example:');
   logger.log('');
-  logger.log('    node executables/rabbitMqSubscribers/pixelsJobProcessor.js --cronProcessId 5');
+  logger.log('    node executables/rabbitMqSubscribers/pixelJobProcessor.js --cronProcessId 5');
   logger.log('');
   logger.log('');
 });
@@ -27,9 +27,9 @@ if (!program.cronProcessId) {
 /**
  * Class for pixels job processor.
  *
- * @class PixelsJobProcessor
+ * @class PixelJobProcessor
  */
-class PixelsJobProcessor extends RabbitMqProcessorBase {
+class PixelJobProcessor extends RabbitMqProcessorBase {
   /**
    * Get rabbitMq provider.
    *
@@ -65,11 +65,11 @@ class PixelsJobProcessor extends RabbitMqProcessorBase {
    * @returns {any}
    */
   get jobProcessorFactory() {
-    return require(rootPrefix + '/lib/jobs/pixels/factory');
+    return require(rootPrefix + '/lib/jobs/pixel/fire');
   }
 }
 
-new PixelsJobProcessor({ cronProcessId: +program.cronProcessId }).perform();
+new PixelJobProcessor({ cronProcessId: +program.cronProcessId }).perform();
 
 setInterval(function() {
   logger.info('Ending the process. Sending SIGINT.');

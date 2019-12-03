@@ -203,7 +203,7 @@ Note: Get the webhooks id from above run(subscribe webhooks). Secret has to be o
 ```bash
   # note: for topics to subscribe and prefetchcount, please see params column of the cron_processes table
   source set_env_vars.sh
-  node executables/rabbitMqSubscribers/pixelsJobProcessor.js --cronProcessId 6
+  node executables/rabbitMqSubscribers/pixelJobProcessor.js --cronProcessId 6
 ```
 
 
