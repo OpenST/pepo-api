@@ -21,9 +21,11 @@ router.post('/logout', cookieHelper.parseUserCookieForLogout, sanitizer.sanitize
   Promise.resolve(routeHelper.perform(req, res, next, '/Logout', 'r_a_v1_a_2', null));
 });
 
-/* Twitter Connect*/
+/* Twitter connect. */
 router.post('/twitter-login', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.twitterLogin;
+  req.decodedParams.sanitized_headers = req.sanitizedHeaders;
+
   cookieHelper.fetchUserUtmCookie(req);
 
   const onServiceSuccess = async function(serviceResponse) {

@@ -268,6 +268,10 @@ const v1Signature = {
       {
         parameter: 'handle',
         validatorMethods: ['validateNonBlankString']
+      },
+      {
+        parameter: 'sanitized_headers',
+        validatorMethods: ['validateNonEmptyObject']
       }
     ],
     optional: [

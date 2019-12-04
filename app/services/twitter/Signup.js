@@ -46,7 +46,7 @@ class TwitterSignup extends ServiceBase {
    * @param {string} params.inviterCodeId: invite code table id of inviter
    * @param {object} params.prelaunchInviteObj: prelaunch invite object, if user was part of pre-launch program
    * @param {object} params.utmParams: utm params used while signup.
-   * @param {object} params.sanitized_headers: sanitized headers.
+   * @param {object} params.sanitizedHeaders: sanitized headers.
    *
    * @augments ServiceBase
    *
@@ -65,6 +65,7 @@ class TwitterSignup extends ServiceBase {
     oThis.twitterRespHeaders = params.twitterRespHeaders;
     oThis.prelaunchInviteObj = params.prelaunchInviteObj || {};
     oThis.utmParams = params.utmParams || {};
+    oThis.sanitizedHeaders = params.sanitizedHeaders;
 
     oThis.userId = null;
 
@@ -534,7 +535,8 @@ class TwitterSignup extends ServiceBase {
       inviterCodeId: oThis.inviterCodeId,
       userInviteCodeId: oThis.prelaunchInviteObj.inviteCodeId,
       isCreator: UserModel.isUserApprovedCreator(oThis.userObj),
-      utmParams: oThis.utmParams
+      utmParams: oThis.utmParams,
+      sanitizedHeaders: oThis.sanitizedHeaders
     };
     await bgJob.enqueue(bgJobConstants.afterSignUpJobTopic, messagePayload);
   }
