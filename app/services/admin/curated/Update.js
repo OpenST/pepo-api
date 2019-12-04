@@ -6,6 +6,7 @@ const rootPrefix = '../../../..',
   CuratedEntityModel = require(rootPrefix + '/app/models/mysql/CuratedEntity'),
   AdminActivityLogModel = require(rootPrefix + '/app/models/mysql/AdminActivityLog'),
   CuratedEntityIdsByKindCache = require(rootPrefix + '/lib/cacheManagement/single/CuratedEntityIdsByKind'),
+  userConstants = require(rootPrefix + '/lib/globalConstant/user'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   curatedEntitiesConstants = require(rootPrefix + '/lib/globalConstant/curatedEntities'),
   adminActivityLogConstants = require(rootPrefix + '/lib/globalConstant/adminActivityLogs');
@@ -140,15 +141,26 @@ class UpdateCuratedEntities extends ServiceBase {
       return Promise.reject(userDetailsCacheResponse);
     }
 
-    const userData = userDetailsCacheResponse.data[oThis.entityId];
+    const userObj = userDetailsCacheResponse.data[oThis.entityId];
 
-    if (!CommonValidators.validateNonEmptyObject(userData)) {
+    if (!CommonValidators.validateNonEmptyObject(userObj)) {
       return Promise.reject(
         responseHelper.paramValidationError({
           internal_error_identifier: 'a_s_a_c_i_2',
           api_error_identifier: 'invalid_api_params',
           params_error_identifiers: ['invalid_entity_id'],
           debug_options: { entityId: oThis.entityId }
+        })
+      );
+    }
+
+    if (userObj.status !== userConstants.activeStatus) {
+      return Promise.reject(
+        responseHelper.paramValidationError({
+          internal_error_identifier: 'a_s_a_c_i_4',
+          api_error_identifier: 'invalid_api_params',
+          params_error_identifiers: ['user_not_active'],
+          debug_options: {}
         })
       );
     }
