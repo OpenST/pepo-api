@@ -161,6 +161,16 @@ class SlackEventFactory extends ServiceBase {
         }).perform();
         break;
       }
+      case slackConstants.sendEmailEventType: {
+        const SendEmailForResubmissionClass = require(rootPrefix +
+          '/app/services/slackEvents/SendEmailForResubmission');
+        eventResponse = await new SendEmailForResubmissionClass({
+          eventDataPayload: oThis.eventData.payload,
+          eventParams: oThis.eventParams,
+          currentAdmin: oThis.currentAdmin
+        }).perform();
+        break;
+      }
       default: {
         return Promise.reject(
           responseHelper.error({
