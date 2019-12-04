@@ -122,18 +122,16 @@ class UserMute extends ServiceBase {
       return Promise.reject(cacheResponse);
     }
 
-    let cachedData = cacheResponse.data[oThis.userId];
+    let cachedData = cacheResponse.data[oThis.currentUserId];
 
-    for (let muteUserId in cachedData) {
-      if (muteUserId === oThis.otherUserId) {
-        return Promise.reject(
-          responseHelper.error({
-            internal_error_identifier: 'a_s_a_mu_3',
-            api_error_identifier: 'user_already_muted',
-            debug_options: {}
-          })
-        );
-      }
+    if (cachedData[oThis.otherUserId]) {
+      return Promise.reject(
+        responseHelper.error({
+          internal_error_identifier: 'a_s_a_mu_3',
+          api_error_identifier: 'user_already_muted',
+          debug_options: {}
+        })
+      );
     }
   }
 

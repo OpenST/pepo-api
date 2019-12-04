@@ -95,18 +95,9 @@ class UserUnMute extends ServiceBase {
       return Promise.reject(cacheResponse);
     }
 
-    let cachedData = cacheResponse.data[oThis.currentUserId],
-      isOtherUserMuted = false;
+    let cachedData = cacheResponse.data[oThis.currentUserId];
 
-    console.log('cachedData ==========', cachedData);
-
-    for (let muteUserId in cachedData) {
-      if (muteUserId === oThis.otherUserId) {
-        isOtherUserMuted = true;
-      }
-    }
-
-    if (!isOtherUserMuted) {
+    if (!cachedData[oThis.otherUserId]) {
       return Promise.reject(
         responseHelper.error({
           internal_error_identifier: 'a_s_u_um_2',
