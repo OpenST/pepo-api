@@ -49,6 +49,10 @@ const v1Signature = {
       {
         parameter: 'current_user',
         validatorMethods: ['validateNonEmptyObject']
+      },
+      {
+        parameter: 'reply_detail_id',
+        validatorMethods: ['validateInteger']
       }
     ]
   },

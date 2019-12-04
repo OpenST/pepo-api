@@ -2,11 +2,13 @@ const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   GetTokenService = require(rootPrefix + '/app/services/token/Get'),
   GetUserVideosList = require(rootPrefix + '/lib/GetUsersVideoList'),
+  ReplyDetailsByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/ReplyDetailsByIds'),
   ReplyDetailsByParentVideoPaginationCache = require(rootPrefix +
     '/lib/cacheManagement/single/ReplyDetailsByParentVideoPagination'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
-  paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination');
+  paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination'),
+  replyDetailConstants = require(rootPrefix + '/lib/globalConstant/replyDetail');
 
 /**
  * Class for video reply details service.
@@ -36,6 +38,8 @@ class GetReplyList extends ServiceBase {
     oThis.currentUser = params.current_user;
     oThis.isAdmin = params.is_admin || false;
     oThis.paginationIdentifier = params[paginationConstants.paginationIdentifierKey] || null;
+    oThis.externalReplyDetailId = params.reply_detail_id || null;
+    //This is the reply detail id whose presence is to be checked. In case this reply id is deleted then empty response should be sent.
 
     oThis.limit = oThis._defaultPageLimit();
 
@@ -61,6 +65,19 @@ class GetReplyList extends ServiceBase {
     const oThis = this;
 
     await oThis._validateAndSanitizeParams();
+
+    if (oThis.externalReplyDetailId) {
+      let replyVideoPresenceResponse = await oThis._checkExternalReplyDetailIdPresence();
+      if (!replyVideoPresenceResponse) {
+        return Promise.reject(
+          responseHelper.error({
+            internal_error_identifier: 'a_s_r_l_1',
+            api_error_identifier: 'entity_not_found',
+            debug_options: `externalReplyDetailId: ${oThis.externalReplyDetailId}`
+          })
+        );
+      }
+    }
 
     await oThis._fetchReplyDetailIds();
 
@@ -95,6 +112,23 @@ class GetReplyList extends ServiceBase {
 
     // Validate limit.
     return oThis._validatePageSize();
+  }
+
+  /**
+   * Check external reply details presence.
+   *
+   * @returns {Promise<boolean>}
+   * @private
+   */
+  async _checkExternalReplyDetailIdPresence() {
+    const oThis = this;
+
+    let replyDetailsResponse = await new ReplyDetailsByIdsCache({ ids: [oThis.externalReplyDetailId] }).fetch();
+    if (replyDetailsResponse.isFailure()) {
+      return Promise.reject(replyDetailsResponse);
+    }
+
+    return replyDetailsResponse.data[oThis.externalReplyDetailId].status == replyDetailConstants.activeStatus;
   }
 
   /**
@@ -213,9 +247,9 @@ class GetReplyList extends ServiceBase {
       [entityTypeConstants.videoDescriptionsMap]: oThis.userRepliesMap.videoDescriptionMap,
       [entityTypeConstants.userProfilesMap]: oThis.userRepliesMap.userProfilesMap,
       [entityTypeConstants.currentUserUserContributionsMap]: oThis.userRepliesMap.currentUserUserContributionsMap,
-      [entityTypeConstants.currentUserVideoContributionsMap]:
-        oThis.userRepliesMap.currentUserVideoContributionsMap,
-      [entityTypeConstants.currentUserReplyDetailContributionsMap]: oThis.userRepliesMap.currentUserReplyDetailContributionsMap,
+      [entityTypeConstants.currentUserVideoContributionsMap]: oThis.userRepliesMap.currentUserVideoContributionsMap,
+      [entityTypeConstants.currentUserReplyDetailContributionsMap]:
+        oThis.userRepliesMap.currentUserReplyDetailContributionsMap,
       [entityTypeConstants.currentUserReplyDetailsRelationsMap]:
         oThis.userRepliesMap.currentUserReplyDetailsRelationsMap,
       [entityTypeConstants.userProfileAllowedActions]: oThis.userRepliesMap.userProfileAllowedActions,
