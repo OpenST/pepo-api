@@ -282,7 +282,14 @@ class ShareDetails extends ServiceBase {
   _generateReplyShareUrl() {
     const oThis = this;
 
-    return coreConstants.PA_DOMAIN + '/' + gotoConstants.replyGotoKind + '/' + oThis.replyDetailId;
+    return (
+      coreConstants.PA_DOMAIN +
+      '/' +
+      gotoConstants.replyGotoKind +
+      '/' +
+      oThis.replyDetailId +
+      `?utm_source=share&utm_medium=reply&utm_campaign=${oThis.replyDetailId}`
+    );
   }
 }
 

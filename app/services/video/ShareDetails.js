@@ -278,7 +278,14 @@ class ShareDetails extends ServiceBase {
   _generateVideoShareUrl() {
     const oThis = this;
 
-    return coreConstants.PA_DOMAIN + '/' + gotoConstants.videoGotoKind + '/' + oThis.videoId;
+    return (
+      coreConstants.PA_DOMAIN +
+      '/' +
+      gotoConstants.videoGotoKind +
+      '/' +
+      oThis.videoId +
+      `?utm_source=share&utm_medium=video&utm_campaign=${oThis.videoId}`
+    );
   }
 }
 
