@@ -74,8 +74,8 @@ class UserAtMentionSearch extends ServiceBase {
     if (!oThis.query && oThis.intent === oThis._getReplyIntentType() && oThis.parentId) {
       let promiseArray = [];
 
-      promiseArray.push(oThis._fetchVideoDetails);
-      promiseArray.push(oThis._fetchReplyDetailsByParentVideo);
+      promiseArray.push(oThis._fetchVideoDetails());
+      promiseArray.push(oThis._fetchReplyDetailsByParentVideo());
 
       await Promise.all(promiseArray);
       await oThis._fetchUserDetailsForCreatorUserId();
@@ -141,6 +141,8 @@ class UserAtMentionSearch extends ServiceBase {
   /**
    * Fetch video details.
    *
+   * @sets oThis.userIds
+   *
    * @returns {Promise<never>}
    * @private
    */
@@ -155,12 +157,21 @@ class UserAtMentionSearch extends ServiceBase {
       return Promise.reject(videoDetailsByVideoIdsCacheResp);
     }
 
+    // Add parent video crerator user id to userIds array.
     if (videoDetailsByVideoIdsCacheResp.data && videoDetailsByVideoIdsCacheResp.data[oThis.parentId]) {
       let parentVideoCreatorUserId = videoDetailsByVideoIdsCacheResp.data[oThis.parentId].creatorUserId;
       oThis.userIds.push(parentVideoCreatorUserId);
     }
   }
 
+  /**
+   * Fetch reply details by parent video.
+   *
+   * @sets oThis.userIds
+   *
+   * @returns {Promise<never>}
+   * @private
+   */
   async _fetchReplyDetailsByParentVideo() {
     const oThis = this;
 
@@ -176,13 +187,14 @@ class UserAtMentionSearch extends ServiceBase {
 
     const replyDetailIds = replyDetailsByParentVideoCacheResponse.data.replyDetailIds;
 
-    const replyDetailCacheResp = await new ReplyDetailsByIdsCache({ ids: [replyDetailIds] }).fetch();
+    const replyDetailCacheResp = await new ReplyDetailsByIdsCache({ ids: replyDetailIds }).fetch();
     if (replyDetailCacheResp.isFailure()) {
       return Promise.reject(replyDetailCacheResp);
     }
 
     const replyDetails = replyDetailCacheResp.data;
 
+    // Add reply video creators to userIds array.
     for (let replyDetailsId in replyDetails) {
       oThis.userIds.push(replyDetails[replyDetailsId].creatorUserId);
     }
@@ -197,6 +209,9 @@ class UserAtMentionSearch extends ServiceBase {
    */
   async _fetchUserDetailsForCreatorUserId() {
     const oThis = this;
+
+    oThis.userIds = [...new Set(oThis.userIds)];
+    // oThis.userIds = oThis.userIds.reverse();
 
     const userDetailsResponse = await new UserCache({ ids: oThis.userIds }).fetch();
     if (userDetailsResponse.isFailure()) {
