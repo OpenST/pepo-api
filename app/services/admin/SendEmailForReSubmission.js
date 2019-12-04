@@ -134,16 +134,12 @@ class SendEmailForReSubmission extends ServiceBase {
     const oThis = this;
 
     const transactionalMailParams = {
-      receiverEntityId: 0,
-      receiverEntityKind: emailServiceApiCallHookConstants.hookParamsInternalEmailEntityKind,
-      templateName: emailServiceApiCallHookConstants.reportIssueTemplateName,
-      templateVars: Object.assign(
-        {
-          pepo_api_domain: 1,
-          receiverEmail: emailConstants.reportIssue
-        },
-        oThis.templateVars
-      )
+      receiverEntityId: oThis.userId,
+      receiverEntityKind: emailServiceApiCallHookConstants.userEmailEntityKind,
+      templateName: emailServiceApiCallHookConstants.supportSubmissionTemplateName,
+      templateVars: {
+        pepo_api_domain: 1
+      }
     };
 
     return new SendTransactionalMail(transactionalMailParams).perform();
