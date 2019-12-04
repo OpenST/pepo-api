@@ -21,7 +21,7 @@
   "pixelJobProcessor": {
     "topics": ["pix.#"],
     "queues": ["example"],
-    "prefetchCount": 1
+    "prefetchCount": 25
   },
   "pushNotificationHookProcessor": {
     "sequenceNumber": 1
