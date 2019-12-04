@@ -11,6 +11,8 @@ const rootPrefix = '../../..',
   VideoDetailsByVideoIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/VideoDetailsByVideoIds'),
   VideoDistinctReplyCreatorsCache = require(rootPrefix + '/lib/cacheManagement/multi/VideoDistinctReplyCreators'),
   videoLib = require(rootPrefix + '/lib/videoLib'),
+  bgJob = require(rootPrefix + '/lib/rabbitMqEnqueue/bgJob'),
+  bgJobConstants = require(rootPrefix + '/lib/globalConstant/bgJob'),
   urlConstants = require(rootPrefix + '/lib/globalConstant/url'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
@@ -115,6 +117,14 @@ class InitiateReply extends ServiceBase {
 
       await oThis._onVideoPostCompletion();
     }
+
+    const messagePayload = {
+      userId: oThis.currentUser.id,
+      parentVideoId: oThis.parentId,
+      replyDetailId: oThis.replyDetailId
+    };
+
+    await bgJob.enqueue(bgJobConstants.slackContentReplyMonitoringJobTopic, messagePayload);
 
     return responseHelper.successWithData({
       [entityTypeConstants.videoReplyList]: [

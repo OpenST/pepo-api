@@ -51,7 +51,7 @@ class DeleteReplyVideo extends ServiceBase {
       return responseHelper.paramValidationError({
         internal_error_identifier: 'a_s_a_r_d_1',
         api_error_identifier: 'invalid_api_params',
-        params_error_identifiers: ['invalid_reply_details_id'],
+        params_error_identifiers: ['invalid_reply_detail_id'],
         debug_options: { replyDetailsId: oThis.replyDetailsId }
       });
     }
@@ -86,7 +86,7 @@ class DeleteReplyVideo extends ServiceBase {
       return responseHelper.paramValidationError({
         internal_error_identifier: 'a_s_a_r_d_2',
         api_error_identifier: 'invalid_api_params',
-        params_error_identifiers: ['invalid_reply_details_id'],
+        params_error_identifiers: ['invalid_reply_detail_id'],
         debug_options: { replyDetailsId: oThis.replyDetailsId }
       });
     }
