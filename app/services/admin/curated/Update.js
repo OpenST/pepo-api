@@ -7,6 +7,8 @@ const rootPrefix = '../../../..',
   AdminActivityLogModel = require(rootPrefix + '/app/models/mysql/AdminActivityLog'),
   CuratedEntityIdsByKindCache = require(rootPrefix + '/lib/cacheManagement/single/CuratedEntityIdsByKind'),
   userConstants = require(rootPrefix + '/lib/globalConstant/user'),
+  paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination'),
+  tagConstants = require(rootPrefix + '/lib/globalConstant/tag'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   curatedEntitiesConstants = require(rootPrefix + '/lib/globalConstant/curatedEntities'),
   adminActivityLogConstants = require(rootPrefix + '/lib/globalConstant/adminActivityLogs');
@@ -98,6 +100,17 @@ class UpdateCuratedEntities extends ServiceBase {
 
     const entityIdsArray = cacheResponse.data.entityIds;
 
+    if (entityIdsArray.length >= paginationConstants.defaultUserSearchPageSize) {
+      return Promise.reject(
+        responseHelper.paramValidationError({
+          internal_error_identifier: 'a_s_a_c_i_5',
+          api_error_identifier: 'invalid_api_params',
+          params_error_identifiers: ['invalid_entity_kind'],
+          debug_options: { entityKind: oThis.entityKind, entityIdsArray: entityIdsArray }
+        })
+      );
+    }
+
     if (entityIdsArray.indexOf(oThis.entityId) === -1) {
       // If entityId does not exists in the curated entities table, insert new entry.
       await new CuratedEntityModel().insertIntoCuratedEntity(oThis.entityId, oThis.entityKind, oThis.newPosition);
@@ -181,7 +194,7 @@ class UpdateCuratedEntities extends ServiceBase {
 
     const tagData = tagsCacheResponse.data[oThis.entityId];
 
-    if (!CommonValidators.validateNonEmptyObject(tagData)) {
+    if (!CommonValidators.validateNonEmptyObject(tagData) || tagData.status !== tagConstants.activeStatus) {
       return Promise.reject(
         responseHelper.paramValidationError({
           internal_error_identifier: 'a_s_a_c_i_3',
