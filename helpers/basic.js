@@ -621,6 +621,15 @@ class BasicHelper {
   }
 
   /**
+   * Get reply conversation thread url prefix for admin dashboard.
+   *
+   * @returns {string}
+   */
+  replyConversationThreadUrlPrefix() {
+    return coreConstants.PA_DOMAIN + '/admin/video-replies';
+  }
+
+  /**
    * Get timestamp in minutes to date till seconds.
    *
    * @param {number} unixTimestampInMinutes
@@ -726,6 +735,7 @@ class BasicHelper {
 
     if (typeof params === 'string') {
       params = params.replace(/<(http)([^>\s]*)>/gi, '$1$2');
+      params = params.replace(/<mailto:([^>\|\s]*)\|+([^><\s]*)>/gi, '$1');
     } else if (typeof params === 'boolean' || typeof params === 'number' || params === null) {
       // Do nothing and return param as is.
     } else if (params instanceof Array) {

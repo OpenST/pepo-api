@@ -65,17 +65,11 @@ class TopupFailureWebhook extends TransactionWebhookBase {
     }
 
     await oThis.validateToUserId();
-    const promiseArray = [];
-    promiseArray.push(oThis.updateTransaction());
-    promiseArray.push(oThis.processForTopUpTransaction());
-    promiseArray.push(
-      FiatPaymentModel.flushCache({
-        fiatPaymentId: oThis.transactionObj.fiatPaymentId,
-        userId: oThis.toUserId
-      })
-    );
-    promiseArray.push(oThis._enqueueUserNotification(notificationJobConstants.topupFailed));
-
+    const promiseArray = [
+      oThis.updateTransaction(),
+      oThis.processForTopUpTransaction(),
+      oThis._enqueueUserNotification(notificationJobConstants.topupFailed)
+    ];
     const errorObject = responseHelper.error({
       internal_error_identifier: 'a_s_oe_t_1',
       api_error_identifier: 'could_not_proceed',
@@ -85,9 +79,14 @@ class TopupFailureWebhook extends TransactionWebhookBase {
       }
     });
     logger.error('Topup of pepo could not be started after successful payment.', errorObject);
-    await createErrorLogsEntry.perform(errorObject, errorLogsConstants.highSeverity);
+    promiseArray.push(createErrorLogsEntry.perform(errorObject, errorLogsConstants.highSeverity));
 
     await Promise.all(promiseArray);
+
+    await FiatPaymentModel.flushCache({
+      fiatPaymentId: oThis.transactionObj.fiatPaymentId,
+      userId: oThis.toUserId
+    });
   }
 
   /**
