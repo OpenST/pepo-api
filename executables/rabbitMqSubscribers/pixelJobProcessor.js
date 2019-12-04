@@ -67,6 +67,26 @@ class PixelJobProcessor extends RabbitMqProcessorBase {
   get jobProcessorFactory() {
     return require(rootPrefix + '/lib/jobs/pixel/fire');
   }
+
+  /**
+   * Process message.
+   *
+   * @param {object} messageParams
+   * @param {object} messageParams.message
+   * @param {string} messageParams.message.kind
+   * @param {object} messageParams.message.payload
+   *
+   * @returns {Promise<>}
+   *
+   * @private
+   */
+  async _processMessage(messageParams) {
+    const oThis = this;
+
+    logger.log('Message params =====', messageParams);
+
+    return oThis.jobProcessorFactory.perform(messageParams.message.payload);
+  }
 }
 
 new PixelJobProcessor({ cronProcessId: +program.cronProcessId }).perform();
