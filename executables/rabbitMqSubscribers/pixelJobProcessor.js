@@ -46,7 +46,7 @@ class PixelJobProcessor extends RabbitMqProcessorBase {
    * @private
    */
   get _cronKind() {
-    return cronProcessesConstants.pixelsJobProcessor;
+    return cronProcessesConstants.pixelJobProcessor;
   }
 
   /**

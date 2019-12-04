@@ -18,7 +18,7 @@
     "queues": ["example"],
     "prefetchCount": 1
   },
-  "pixelsJobProcessor": {
+  "pixelJobProcessor": {
     "topics": ["pix.#"],
     "queues": ["example"],
     "prefetchCount": 1
