@@ -242,6 +242,9 @@ class PublicVideoFeed extends FeedBase {
       const feedObj = feedQueryResp.feedsMap[feedId];
       const actorId = feedObj.actor;
 
+      logger.log('actorId =======', actorId, '=====feedid', feedId);
+      logger.log('!mutedUsersRspData[actorId]', !mutedUsersRspData[actorId]);
+
       lastPaginationTimestamp = feedObj.paginationIdentifier;
       if (
         !blockedByUserInfo.hasBlocked[actorId] &&
