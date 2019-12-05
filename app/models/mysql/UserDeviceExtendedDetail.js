@@ -72,14 +72,14 @@ class UserDeviceExtendedDetailModel extends ModelBase {
    *
    * @returns {Promise<never>}
    */
-  async insert(params) {
+  async createNewEntry(params) {
     const oThis = this;
 
     const deviceId = params.deviceId;
     const userId = params.userId;
 
     if (!deviceId || !userId) {
-      return Promise.reject(new Error('Missing mandatory parameters.'));
+      return Promise.reject(new Error(`Missing mandatory parameters. Input params: ${params}`));
     }
 
     const insertParams = {
@@ -124,7 +124,7 @@ class UserDeviceExtendedDetailModel extends ModelBase {
     const userId = params.userId;
 
     if (!deviceId || !userId) {
-      return Promise.reject(new Error('Missing mandatory parameters.'));
+      return Promise.reject(new Error(`Missing mandatory parameters. Input params: ${params}`));
     }
 
     const updateParams = {};
@@ -166,7 +166,7 @@ class UserDeviceExtendedDetailModel extends ModelBase {
     const oThis = this;
 
     if (!params.deviceIds) {
-      return Promise.reject(new Error('Missing mandatory parameter.'));
+      return Promise.reject(new Error(`Missing mandatory parameter. Input params: ${params}`));
     }
 
     const dbRows = await oThis
