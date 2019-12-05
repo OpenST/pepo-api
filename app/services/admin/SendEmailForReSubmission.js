@@ -7,6 +7,7 @@ const rootPrefix = '../../..',
   SendTransactionalMail = require(rootPrefix + '/lib/email/hookCreator/SendTransactionalMail'),
   ReplayAttackCache = require(rootPrefix + '/lib/cacheManagement/single/ReplayAttackOnSlackSendEmailForResubmission'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
+  logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   ActivityLogModel = require(rootPrefix + '/app/models/mysql/AdminActivityLog'),
   adminActivityLogConstants = require(rootPrefix + '/lib/globalConstant/adminActivityLogs'),
   emailServiceApiCallHookConstants = require(rootPrefix + '/lib/globalConstant/emailServiceApiCallHook');
