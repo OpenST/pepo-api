@@ -155,30 +155,31 @@ class UserDeviceExtendedDetailModel extends ModelBase {
   }
 
   /**
-   * Get device detail by device id and user id.
+   * Get device detail by device ids.
    *
    * @param {object} params
-   * @param {string} params.deviceId
+   * @param {array<string>} params.deviceIds
    *
    * @returns {Promise<{}>}
    */
-  async getByDeviceId(params) {
+  async getByDeviceIds(params) {
     const oThis = this;
 
-    if (!params.deviceId) {
+    if (!params.deviceIds) {
       return Promise.reject(new Error('Missing mandatory parameter.'));
     }
 
     const dbRows = await oThis
       .select('*')
-      .where({ device_id: params.deviceId })
+      .where({ device_id: params.deviceIds })
       .fire();
 
-    const finalResponse = { [params.deviceId]: {} };
+    const finalResponse = {};
 
     for (let index = 0; index < dbRows.length; index++) {
       const formattedRow = oThis.formatDbData(dbRows[index]);
-      finalResponse[params.deviceId][formattedRow.userId] = formattedRow;
+      finalResponse[formattedRow.deviceId] = finalResponse[formattedRow.deviceId] || {};
+      finalResponse[formattedRow.deviceId][formattedRow.userId] = formattedRow;
     }
 
     return finalResponse;
