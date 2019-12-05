@@ -8,6 +8,9 @@ const rootPrefix = '../../..',
   LoggedOutFeedCache = require(rootPrefix + '/lib/cacheManagement/single/LoggedOutFeed'),
   UserBlockedListCache = require(rootPrefix + '/lib/cacheManagement/single/UserBlockedList'),
   UserPersonalizedDataModel = require(rootPrefix + '/app/models/cassandra/UserPersonalizedData'),
+  UserDeviceExtendedDetailModel = require(rootPrefix + '/app/models/mysql/UserDeviceExtendedDetail'),
+  UserDeviceExtendedDetailsByDeviceIdsCache = require(rootPrefix +
+    '/lib/cacheManagement/multi/UserDeviceExtendedDetailsByDeviceIds'),
   basicHelper = require(rootPrefix + '/helpers/basic'),
   coreConstants = require(rootPrefix + '/config/coreConstants'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
@@ -509,6 +512,44 @@ class PublicVideoFeed extends FeedBase {
     }
 
     oThis.feedIds = activeFeedIds;
+  }
+
+  async _markUserDeviceDetails() {
+    const oThis = this;
+    if (oThis.headers && oThis.currentUserId) {
+      let deviceId = oThis.headers['x-pepo-device-id'],
+        buildNo = oThis.headers['x-pepo-build-number'],
+        appVersion = oThis.headers['x-pepo-build-number'],
+        deviceOs = oThis.headers['x-pepo-device-os'];
+
+      if (!deviceId) {
+        return responseHelper.successWithData({});
+      }
+
+      let userDeviceExtCacheResp = await new UserDeviceExtendedDetailsByDeviceIdsCache({
+        deviceIds: [deviceId]
+      }).fetch();
+      let userDeviceExt = userDeviceExtCacheResp.data[deviceId];
+
+      const insertUpdateParams = {
+        deviceId: deviceId,
+        userId: oThis.currentUserId,
+        buildNumber: buildNo,
+        appVersion: appVersion,
+        deviceOs: deviceOs
+      };
+
+      if (userDeviceExt[oThis.currentUserId]) {
+        const currentBuildNo = userDeviceExt[oThis.currentUserId].buildNumber;
+
+        if (currentBuildNo && +buildNo > +currentBuildNo) {
+          await new UserDeviceExtendedDetailModel().updateByDeviceIdAndUserId(insertUpdateParams);
+        }
+      } else {
+        await new UserDeviceExtendedDetailModel().createNewEntry(insertUpdateParams);
+      }
+    }
+    return responseHelper.successWithData({});
   }
 
   /**

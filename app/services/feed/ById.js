@@ -131,6 +131,10 @@ class FeedById extends FeedBase {
       tokenDetails: oThis.tokenDetails
     });
   }
+
+  async _markUserDeviceDetails() {
+    //Do nothing
+  }
 }
 
 module.exports = FeedById;
