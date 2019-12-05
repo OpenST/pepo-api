@@ -515,7 +515,7 @@ class PublicVideoFeed extends FeedBase {
   }
 
   /**
-   * Mark user device details.
+   * Mark user device details. This method will work only for a logged in user.
    *
    * @returns {Promise<*|result>}
    * @private
@@ -552,6 +552,7 @@ class PublicVideoFeed extends FeedBase {
     if (userDeviceExt[oThis.currentUserId]) {
       const existingBuildNumber = userDeviceExt[oThis.currentUserId].buildNumber;
 
+      // Update existing entry if existingBuildNumber is null, or if currentBuildNumber > existingBuildNumber.
       if (!existingBuildNumber || +currentBuildNumber > +existingBuildNumber) {
         await new UserDeviceExtendedDetailModel().updateByDeviceIdAndUserId(insertUpdateParams);
       }
