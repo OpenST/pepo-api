@@ -8,6 +8,7 @@ const rootPrefix = '../../..',
   LoggedOutFeedCache = require(rootPrefix + '/lib/cacheManagement/single/LoggedOutFeed'),
   UserBlockedListCache = require(rootPrefix + '/lib/cacheManagement/single/UserBlockedList'),
   UserPersonalizedDataModel = require(rootPrefix + '/app/models/cassandra/UserPersonalizedData'),
+  UserMuteByUser1IdsCache = require(rootPrefix + '/lib/cacheManagement/multi/UserMuteByUser1Ids'),
   basicHelper = require(rootPrefix + '/helpers/basic'),
   coreConstants = require(rootPrefix + '/config/coreConstants'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
@@ -218,6 +219,16 @@ class PublicVideoFeed extends FeedBase {
       limit: feedConstants.personalizedFeedMaxIdsCount
     };
 
+    const mutedUsersCacheRsp = await new UserMuteByUser1IdsCache({ user1Ids: [oThis.currentUserId] }).fetch();
+
+    if (mutedUsersCacheRsp.isFailure()) {
+      return Promise.reject(mutedUsersCacheRsp);
+    }
+
+    const mutedUsersRspData = mutedUsersCacheRsp.data[oThis.currentUserId];
+
+    logger.log('mutedUsersRspData ========', mutedUsersRspData);
+
     // Fetch latest feeds.
     const feedQueryResp = await new FeedModel().getLatestFeedIds(queryParams);
 
@@ -232,7 +243,11 @@ class PublicVideoFeed extends FeedBase {
       const actorId = feedObj.actor;
 
       lastPaginationTimestamp = feedObj.paginationIdentifier;
-      if (!blockedByUserInfo.hasBlocked[actorId] && !blockedByUserInfo.blockedBy[actorId]) {
+      if (
+        !blockedByUserInfo.hasBlocked[actorId] &&
+        !blockedByUserInfo.blockedBy[actorId] &&
+        !mutedUsersRspData[actorId]
+      ) {
         allVideoIds.push(Number(feedObj.primaryExternalEntityId));
       }
     }
