@@ -242,9 +242,6 @@ class PublicVideoFeed extends FeedBase {
       const feedObj = feedQueryResp.feedsMap[feedId];
       const actorId = feedObj.actor;
 
-      logger.log('actorId =======', actorId, '=====feedid', feedId);
-      logger.log('!mutedUsersRspData[actorId]', !mutedUsersRspData[actorId]);
-
       lastPaginationTimestamp = feedObj.paginationIdentifier;
       if (
         !blockedByUserInfo.hasBlocked[actorId] &&
@@ -274,6 +271,8 @@ class PublicVideoFeed extends FeedBase {
         const paginationIdentifier = feedObj.paginationIdentifier;
         const userVideoViewObj = videoIdToUserVideoViewMap[Number(feedObj.primaryExternalEntityId)];
         const actorId = feedObj.actor;
+
+        logger.log('======= Muted video === ', mutedUsersRspData[actorId]);
 
         // Skip the feeds due to videos from blocked users.
         if (
