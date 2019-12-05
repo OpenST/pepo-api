@@ -126,8 +126,8 @@ class SlackEventFactory extends ServiceBase {
 
     switch (oThis.eventType) {
       case slackConstants.approveUserEventType: {
-        const ApproveUserClass = require(rootPrefix + '/app/services/slackEvents/ApproveUser');
-        eventResponse = await new ApproveUserClass({
+        const ApproveUserEvent = require(rootPrefix + '/app/services/slackEvents/ApproveUser');
+        eventResponse = await new ApproveUserEvent({
           eventDataPayload: oThis.eventData.payload,
           eventParams: oThis.eventParams,
           currentAdmin: oThis.currentAdmin
@@ -135,8 +135,8 @@ class SlackEventFactory extends ServiceBase {
         break;
       }
       case slackConstants.deleteUserEventType: {
-        const DeleteUserClass = require(rootPrefix + '/app/services/slackEvents/DeleteUser');
-        eventResponse = await new DeleteUserClass({
+        const DeleteUserEvent = require(rootPrefix + '/app/services/slackEvents/DeleteUser');
+        eventResponse = await new DeleteUserEvent({
           eventDataPayload: oThis.eventData.payload,
           eventParams: oThis.eventParams,
           currentAdmin: oThis.currentAdmin
@@ -144,8 +144,8 @@ class SlackEventFactory extends ServiceBase {
         break;
       }
       case slackConstants.deleteVideoEventType: {
-        const DeleteVideoClass = require(rootPrefix + '/app/services/slackEvents/DeleteVideo');
-        eventResponse = await new DeleteVideoClass({
+        const DeleteVideoEvent = require(rootPrefix + '/app/services/slackEvents/DeleteVideo');
+        eventResponse = await new DeleteVideoEvent({
           eventDataPayload: oThis.eventData.payload,
           eventParams: oThis.eventParams,
           currentAdmin: oThis.currentAdmin
@@ -153,8 +153,8 @@ class SlackEventFactory extends ServiceBase {
         break;
       }
       case slackConstants.deleteReplyEventType: {
-        const DeleteReplyClass = require(rootPrefix + '/app/services/slackEvents/DeleteReply');
-        eventResponse = await new DeleteReplyClass({
+        const DeleteReplyEvent = require(rootPrefix + '/app/services/slackEvents/DeleteReply');
+        eventResponse = await new DeleteReplyEvent({
           eventDataPayload: oThis.eventData.payload,
           eventParams: oThis.eventParams,
           currentAdmin: oThis.currentAdmin
@@ -162,9 +162,9 @@ class SlackEventFactory extends ServiceBase {
         break;
       }
       case slackConstants.sendEmailEventType: {
-        const SendEmailForResubmissionClass = require(rootPrefix +
+        const SendEmailForResubmissionEvent = require(rootPrefix +
           '/app/services/slackEvents/SendEmailForResubmission');
-        eventResponse = await new SendEmailForResubmissionClass({
+        eventResponse = await new SendEmailForResubmissionEvent({
           eventDataPayload: oThis.eventData.payload,
           eventParams: oThis.eventParams,
           currentAdmin: oThis.currentAdmin
