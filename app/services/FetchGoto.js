@@ -158,8 +158,10 @@ class FetchGoto extends ServiceBase {
       } else {
         oThis.gotoKind = gotoConstants.feedGotoKind;
       }
-      oThis.utmCookieValue = userUtmDetailsConstants.utmCookieToSet(query);
     }
+
+    // set UTM cookie if utm params are present in the query params.
+    oThis.utmCookieValue = userUtmDetailsConstants.utmCookieToSet(query);
   }
 
   /**
