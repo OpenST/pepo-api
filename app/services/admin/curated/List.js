@@ -94,8 +94,6 @@ class GetCuratedList extends ServiceBase {
   async fetchEntityIdsForEntityKind() {
     const oThis = this;
 
-    console.log('oThis.entityKind----', oThis.entityKind);
-
     const curatedEntityIdsByKindCacheRsp = await new CuratedEntityIdsByKindCache({
       entityKind: oThis.entityKind
     }).fetch();
@@ -106,9 +104,6 @@ class GetCuratedList extends ServiceBase {
 
     oThis.curatedEntityIds = curatedEntityIdsByKindCacheRsp.data.entityIds;
     oThis.curatedEntityDetails = curatedEntityIdsByKindCacheRsp.data.entityDetails;
-
-    console.log('oThis.curatedEntityIds----', oThis.curatedEntityIds);
-    console.log('oThis.curatedEntityDetails----', oThis.curatedEntityDetails);
   }
 
   /**
