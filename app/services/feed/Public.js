@@ -529,7 +529,7 @@ class PublicVideoFeed extends FeedBase {
 
     const deviceId = oThis.headers['x-pepo-device-id'],
       currentBuildNumber = oThis.headers['x-pepo-build-number'],
-      appVersion = oThis.headers['x-pepo-build-number'],
+      appVersion = oThis.headers['x-pepo-app-version'],
       deviceOs = oThis.headers['x-pepo-device-os'];
 
     if (!deviceId) {
