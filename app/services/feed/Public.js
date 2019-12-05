@@ -197,6 +197,7 @@ class PublicVideoFeed extends FeedBase {
    * @returns {Promise<*>}
    * @private
    */
+  // eslint-disable-next-line max-lines-per-function
   async fetchFeedIdsForFirstPage() {
     const oThis = this;
 

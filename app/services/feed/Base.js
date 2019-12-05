@@ -243,6 +243,12 @@ class FeedBase extends ServiceBase {
     oThis.tokenDetails = tokenResp.data.tokenDetails;
   }
 
+  /**
+   * Mark user device details.
+   *
+   * @returns {Promise<*>}
+   * @private
+   */
   async _markUserDeviceDetails() {
     return new Error('Sub-class to implement.');
   }

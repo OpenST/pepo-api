@@ -132,6 +132,12 @@ class FeedById extends FeedBase {
     });
   }
 
+  /**
+   * Mark user device details.
+   *
+   * @returns {Promise<*>}
+   * @private
+   */
   async _markUserDeviceDetails() {
     // Do nothing.
   }
