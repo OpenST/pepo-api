@@ -80,8 +80,6 @@ class SendEmailForReSubmission extends ServiceBase {
     }
 
     logger.log('End::_validateDuplicateRequest');
-
-    return responseHelper.successWithData({});
   }
 
   /**
