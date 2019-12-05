@@ -16,7 +16,7 @@ class UserUnMute extends ServiceBase {
    * Constructor to un mute user.
    *
    * @param {object} params
-   * @param {object} params.current_user: User id to be mute by admin.
+   * @param {object} params.current_user: Current user object.
    * @param {object} params.user_id: User id to be unMuted.
    *
    * @augments ServiceBase
@@ -81,7 +81,7 @@ class UserUnMute extends ServiceBase {
   }
 
   /**
-   * Fetch current mute state
+   * Fetch current mute state.
    *
    * @returns {Promise<never>}
    * @private

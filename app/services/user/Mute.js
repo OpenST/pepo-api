@@ -1,9 +1,9 @@
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
-  logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   UserMuteModel = require(rootPrefix + '/app/models/mysql/UserMute'),
   UsersCache = require(rootPrefix + '/lib/cacheManagement/multi/User'),
   UserMuteByUser1IdsCache = require(rootPrefix + '/lib/cacheManagement/multi/UserMuteByUser1Ids'),
+  logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   userConstants = require(rootPrefix + '/lib/globalConstant/user');
 
