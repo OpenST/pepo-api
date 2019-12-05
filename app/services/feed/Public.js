@@ -276,7 +276,11 @@ class PublicVideoFeed extends FeedBase {
         const actorId = feedObj.actor;
 
         // Skip the feeds due to videos from blocked users.
-        if (blockedByUserInfo.hasBlocked[actorId] || blockedByUserInfo.blockedBy[actorId]) {
+        if (
+          blockedByUserInfo.hasBlocked[actorId] ||
+          blockedByUserInfo.blockedBy[actorId] ||
+          mutedUsersRspData[actorId]
+        ) {
           logger.log(
             `====PERSONALIZED FEED:${oThis.currentUserId} blocked video === `,
             feedObj.primaryExternalEntityId
