@@ -9,7 +9,7 @@ const rootPrefix = '../../..',
   curatedEntitiesConstants = require(rootPrefix + '/lib/globalConstant/curatedEntities');
 
 // Declare variables.
-const topTagsResultsLimit = 6;
+const topTagsResultsLimit = 5;
 
 /**
  * Class to search tags.
