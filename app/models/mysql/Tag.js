@@ -33,7 +33,7 @@ class Tag extends ModelBase {
    * @param {object} dbRow
    * @param {number} dbRow.id
    * @param {string} dbRow.name
-   * @param {number} dbRow.weight
+   * @param {number} dbRow.user_bio_weight
    * @param {number} dbRow.video_weight
    * @param {number} dbRow.reply_weight
    * @param {number} dbRow.status
@@ -49,7 +49,7 @@ class Tag extends ModelBase {
     const formattedData = {
       id: dbRow.id,
       name: dbRow.name,
-      weight: dbRow.weight,
+      user_bio_weight: dbRow.user_bio_weight,
       videoWeight: dbRow.video_weight,
       replyWeight: dbRow.reply_weight,
       status: tagConstants.statuses[dbRow.status],
@@ -111,24 +111,7 @@ class Tag extends ModelBase {
   async insertTags(insertArray) {
     const oThis = this;
 
-    return oThis.insertMultiple(['name', 'weight', 'status'], insertArray, { touch: true }).fire();
-  }
-
-  /**
-   * Update tag weight.
-   *
-   * @param {string} caseStatement
-   * @param {string} tags
-   *
-   * @returns {Promise<*>}
-   */
-  async updateTags(caseStatement, tags) {
-    const oThis = this;
-
-    return oThis
-      .update(caseStatement)
-      .where({ name: tags })
-      .fire();
+    return oThis.insertMultiple(['name', 'user_bio_weight', 'status'], insertArray, { touch: true }).fire();
   }
 
   /**
@@ -154,7 +137,7 @@ class Tag extends ModelBase {
       .where({ status: tagConstants.invertedStatuses[tagConstants.activeStatus] })
       .limit(limit)
       .offset(offset)
-      .order_by('(weight + video_weight + reply_weight) DESC')
+      .order_by('(user_bio_weight + video_weight + reply_weight) DESC')
       .fire();
 
     const response = [];
@@ -206,10 +189,10 @@ class Tag extends ModelBase {
       return true;
     }
 
-    const queryObj = oThis.update(['weight = weight + ?', weightToAdd]).where({ id: tagIds });
+    const queryObj = oThis.update(['user_bio_weight = user_bio_weight + ?', weightToAdd]).where({ id: tagIds });
 
     if (weightToAdd < 0) {
-      queryObj.where(['weight + ? >= 0', weightToAdd]);
+      queryObj.where(['user_bio_weight + ? >= 0', weightToAdd]);
     }
 
     return queryObj.fire();
