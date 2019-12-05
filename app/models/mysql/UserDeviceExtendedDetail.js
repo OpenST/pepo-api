@@ -150,7 +150,7 @@ class UserDeviceExtendedDetailModel extends ModelBase {
         .where({ device_id: deviceId, user_id: userId })
         .fire();
 
-      await UserDeviceExtendedDetailModel.flushCache(params);
+      await UserDeviceExtendedDetailModel.flushCache({ deviceIds: [deviceId] });
     }
   }
 
@@ -189,16 +189,16 @@ class UserDeviceExtendedDetailModel extends ModelBase {
    * Flush cache.
    *
    * @param {object} params
-   * @param {string} params.deviceId
-   * @param {number} params.userId
+   * @param {array<string>} params.deviceIds
    *
    * @returns {Promise<void>}
    */
   static async flushCache(params) {
     // Do nothing.
-    const CacheKlass = require(rootPrefix + '/');
+    const UserDeviceExtendedDetailsByDeviceIdsCache = require(rootPrefix +
+      '/lib/cacheManagement/multi/UserDeviceExtendedDetailsByDeviceIds');
 
-    await new CacheKlass(params).clear();
+    await new UserDeviceExtendedDetailsByDeviceIdsCache({ deviceIds: params.deviceIds }).clear();
   }
 }
 
