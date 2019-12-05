@@ -13,7 +13,7 @@ const rootPrefix = '../../..',
   curatedEntitiesConstants = require(rootPrefix + '/lib/globalConstant/curatedEntities');
 
 // Declare variables.
-const topUsersResultsLimit = 7;
+const topUsersResultsLimit = 6;
 
 /**
  * Class for user search.
