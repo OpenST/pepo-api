@@ -514,45 +514,50 @@ class PublicVideoFeed extends FeedBase {
     oThis.feedIds = activeFeedIds;
   }
 
+  /**
+   * Mark user device details.
+   *
+   * @returns {Promise<*|result>}
+   * @private
+   */
   async _markUserDeviceDetails() {
     const oThis = this;
+
     if (!oThis.currentUserId) {
-      return responseHelper.successWithData({});
+      return;
     }
 
-    let deviceId = oThis.headers['x-pepo-device-id'],
-      buildNo = oThis.headers['x-pepo-build-number'],
+    const deviceId = oThis.headers['x-pepo-device-id'],
+      currentBuildNumber = oThis.headers['x-pepo-build-number'],
       appVersion = oThis.headers['x-pepo-build-number'],
       deviceOs = oThis.headers['x-pepo-device-os'];
 
     if (!deviceId) {
-      return responseHelper.successWithData({});
+      return;
     }
 
-    let userDeviceExtCacheResp = await new UserDeviceExtendedDetailsByDeviceIdsCache({
+    const userDeviceExtCacheResp = await new UserDeviceExtendedDetailsByDeviceIdsCache({
       deviceIds: [deviceId]
     }).fetch();
-    let userDeviceExt = userDeviceExtCacheResp.data[deviceId];
+    const userDeviceExt = userDeviceExtCacheResp.data[deviceId];
 
     const insertUpdateParams = {
       deviceId: deviceId,
       userId: oThis.currentUserId,
-      buildNumber: buildNo,
+      buildNumber: currentBuildNumber,
       appVersion: appVersion,
       deviceOs: deviceOs
     };
 
     if (userDeviceExt[oThis.currentUserId]) {
-      const currentBuildNo = userDeviceExt[oThis.currentUserId].buildNumber;
+      const existingBuildNumber = userDeviceExt[oThis.currentUserId].buildNumber;
 
-      if (currentBuildNo && +buildNo > +currentBuildNo) {
+      if (!existingBuildNumber || +currentBuildNumber > +existingBuildNumber) {
         await new UserDeviceExtendedDetailModel().updateByDeviceIdAndUserId(insertUpdateParams);
       }
     } else {
       await new UserDeviceExtendedDetailModel().createNewEntry(insertUpdateParams);
     }
-
-    return responseHelper.successWithData({});
   }
 
   /**

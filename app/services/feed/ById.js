@@ -133,7 +133,7 @@ class FeedById extends FeedBase {
   }
 
   async _markUserDeviceDetails() {
-    //Do nothing
+    // Do nothing.
   }
 }
 
