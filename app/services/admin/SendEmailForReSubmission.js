@@ -1,11 +1,12 @@
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   UserModel = require(rootPrefix + '/app/models/mysql/User'),
+  userConstants = require(rootPrefix + '/lib/globalConstant/user'),
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   UsersCache = require(rootPrefix + '/lib/cacheManagement/multi/User'),
   SendTransactionalMail = require(rootPrefix + '/lib/email/hookCreator/SendTransactionalMail'),
+  ReplayAttackCache = require(rootPrefix + '/lib/cacheManagement/single/ReplayAttackOnSlackSendEmailForResubmission'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
-  userConstants = require(rootPrefix + '/lib/globalConstant/user'),
   ActivityLogModel = require(rootPrefix + '/app/models/mysql/AdminActivityLog'),
   adminActivityLogConstants = require(rootPrefix + '/lib/globalConstant/adminActivityLogs'),
   emailServiceApiCallHookConstants = require(rootPrefix + '/lib/globalConstant/emailServiceApiCallHook');
@@ -45,11 +46,39 @@ class SendEmailForReSubmission extends ServiceBase {
   async _asyncPerform() {
     const oThis = this;
 
+    await oThis._validateDuplicateRequest();
+
     await oThis._fetchAndValidateUser();
 
     await oThis._sendResubmissionEmail();
 
     await oThis._logAdminActivity();
+
+    return responseHelper.successWithData({});
+  }
+
+  /**
+   * Allow the api only if not recently used within 1 sec
+   *
+   * @return {Promise<Result>}
+   * @private
+   */
+  async _validateDuplicateRequest() {
+    const oThis = this;
+    logger.log('Start::_validateDuplicateRequest');
+
+    const SendEmailForResubmissionOnUserIdResp = await new ReplayAttackCache({ userId: oThis.userId }).fetch();
+
+    if (SendEmailForResubmissionOnUserIdResp.isFailure()) {
+      return Promise.reject(
+        responseHelper.error({
+          internal_error_identifier: 'a_s_a_sefrs_1',
+          api_error_identifier: 'could_not_proceed'
+        })
+      );
+    }
+
+    logger.log('End::_validateDuplicateRequest');
 
     return responseHelper.successWithData({});
   }
@@ -68,7 +97,7 @@ class SendEmailForReSubmission extends ServiceBase {
     if (cacheRsp.isFailure()) {
       return Promise.reject(
         responseHelper.paramValidationError({
-          internal_error_identifier: 'a_s_a_sefrs_1',
+          internal_error_identifier: 'a_s_a_sefrs_2',
           api_error_identifier: 'invalid_params',
           params_error_identifiers: ['invalid_user_id'],
           debug_options: {}
@@ -81,7 +110,7 @@ class SendEmailForReSubmission extends ServiceBase {
     if (userObj.status !== userConstants.activeStatus) {
       return Promise.reject(
         responseHelper.paramValidationError({
-          internal_error_identifier: 'a_s_a_sefrs_2',
+          internal_error_identifier: 'a_s_a_sefrs_3',
           api_error_identifier: 'could_not_proceed',
           params_error_identifiers: ['user_inactive'],
           debug_options: {}
@@ -92,7 +121,7 @@ class SendEmailForReSubmission extends ServiceBase {
     if (CommonValidators.isVarNullOrUndefined(userObj.email)) {
       return Promise.reject(
         responseHelper.paramValidationError({
-          internal_error_identifier: 'a_s_a_sefrs_3',
+          internal_error_identifier: 'a_s_a_sefrs_4',
           api_error_identifier: 'could_not_proceed',
           params_error_identifiers: ['email_not_double_optin'],
           debug_options: {}
@@ -103,7 +132,7 @@ class SendEmailForReSubmission extends ServiceBase {
     if (UserModel.isUserApprovedCreator(userObj)) {
       return Promise.reject(
         responseHelper.paramValidationError({
-          internal_error_identifier: 'a_s_a_sefrs_4',
+          internal_error_identifier: 'a_s_a_sefrs_5',
           api_error_identifier: 'could_not_proceed',
           params_error_identifiers: ['user_already_approved'],
           debug_options: {}
@@ -114,7 +143,7 @@ class SendEmailForReSubmission extends ServiceBase {
     if (UserModel.isUserDeniedCreator(userObj)) {
       return Promise.reject(
         responseHelper.paramValidationError({
-          internal_error_identifier: 'a_s_a_sefrs_5',
+          internal_error_identifier: 'a_s_a_sefrs_6',
           api_error_identifier: 'could_not_proceed',
           params_error_identifiers: ['user_already_denied_as_creator'],
           debug_options: {}
