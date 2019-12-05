@@ -215,10 +215,6 @@ class PublicVideoFeed extends FeedBase {
 
     logger.log(`===================PERSONALIZED FEED:${oThis.currentUserId} blockedByUserInfo === `, blockedByUserInfo);
 
-    const queryParams = {
-      limit: feedConstants.personalizedFeedMaxIdsCount
-    };
-
     const mutedUsersCacheRsp = await new UserMuteByUser1IdsCache({ user1Ids: [oThis.currentUserId] }).fetch();
 
     if (mutedUsersCacheRsp.isFailure()) {
@@ -228,6 +224,10 @@ class PublicVideoFeed extends FeedBase {
     const mutedUsersRspData = mutedUsersCacheRsp.data[oThis.currentUserId];
 
     logger.log('mutedUsersRspData ========', mutedUsersRspData);
+
+    const queryParams = {
+      limit: feedConstants.personalizedFeedMaxIdsCount
+    };
 
     // Fetch latest feeds.
     const feedQueryResp = await new FeedModel().getLatestFeedIds(queryParams);

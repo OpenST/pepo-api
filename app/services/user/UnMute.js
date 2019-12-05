@@ -41,6 +41,8 @@ class UserUnMute extends ServiceBase {
   async _asyncPerform() {
     const oThis = this;
 
+    await oThis._validate();
+
     await oThis._fetchUser();
 
     await oThis._fetchCurrentMuteState();
@@ -48,6 +50,30 @@ class UserUnMute extends ServiceBase {
     await oThis._unMuteUser();
 
     return responseHelper.successWithData({});
+  }
+
+  /**
+   * Validate params.
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _validate() {
+    const oThis = this;
+
+    if (oThis.currentUserId === oThis.otherUserId) {
+      return Promise.reject(
+        responseHelper.paramValidationError({
+          internal_error_identifier: 'a_s_u_um_v_1',
+          api_error_identifier: 'invalid_api_params',
+          params_error_identifiers: ['unmute_not_possible'],
+          debug_options: {
+            currentUserId: oThis.currentUserId,
+            otherUserId: oThis.otherUserId
+          }
+        })
+      );
+    }
   }
 
   /**
@@ -59,16 +85,15 @@ class UserUnMute extends ServiceBase {
   async _fetchUser() {
     const oThis = this;
 
-    const cacheRsp = await new UsersCache({ ids: [oThis.currentUserId, oThis.otherUserId] }).fetch();
+    const cacheRsp = await new UsersCache({ ids: [oThis.otherUserId] }).fetch();
 
     if (cacheRsp.isFailure()) {
       return Promise.reject(cacheRsp);
     }
 
-    const currentUserObj = cacheRsp.data[oThis.currentUserId],
-      otherUserObj = cacheRsp.data[oThis.otherUserId];
+    const otherUserObj = cacheRsp.data[oThis.otherUserId];
 
-    if (currentUserObj.status !== userConstants.activeStatus || otherUserObj.status !== userConstants.activeStatus) {
+    if (otherUserObj.status !== userConstants.activeStatus) {
       return Promise.reject(
         responseHelper.paramValidationError({
           internal_error_identifier: 'a_s_u_um_1',

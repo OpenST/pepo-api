@@ -86,16 +86,15 @@ class UserMute extends ServiceBase {
   async _fetchUser() {
     const oThis = this;
 
-    const cacheRsp = await new UsersCache({ ids: [oThis.currentUserId, oThis.otherUserId] }).fetch();
+    const cacheRsp = await new UsersCache({ ids: [oThis.otherUserId] }).fetch();
 
     if (cacheRsp.isFailure()) {
       return Promise.reject(cacheRsp);
     }
 
-    const currentUserObj = cacheRsp.data[oThis.currentUserId],
-      otherUserObj = cacheRsp.data[oThis.otherUserId];
+    const otherUserObj = cacheRsp.data[oThis.otherUserId];
 
-    if (currentUserObj.status !== userConstants.activeStatus || otherUserObj.status !== userConstants.activeStatus) {
+    if (otherUserObj.status !== userConstants.activeStatus) {
       return Promise.reject(
         responseHelper.paramValidationError({
           internal_error_identifier: 'a_s_a_m_2',
