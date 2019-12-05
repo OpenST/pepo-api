@@ -103,6 +103,8 @@ class UserDeviceExtendedDetailModel extends ModelBase {
     }
 
     await oThis.insert(insertParams).fire();
+
+    await UserDeviceExtendedDetailModel.flushCache({ deviceIds: [deviceId] });
   }
 
   /**
@@ -157,21 +159,20 @@ class UserDeviceExtendedDetailModel extends ModelBase {
   /**
    * Get device detail by device ids.
    *
-   * @param {object} params
-   * @param {array<string>} params.deviceIds
+   * @param {array<string>} deviceIds
    *
    * @returns {Promise<{}>}
    */
-  async getByDeviceIds(params) {
+  async getByDeviceIds(deviceIds) {
     const oThis = this;
 
-    if (!params.deviceIds) {
-      return Promise.reject(new Error(`Missing mandatory parameter. Input params: ${params}`));
+    if (!deviceIds) {
+      return Promise.reject(new Error(`Missing mandatory parameter. Input deviceIds: ${deviceIds}`));
     }
 
     const dbRows = await oThis
       .select('*')
-      .where({ device_id: params.deviceIds })
+      .where({ device_id: deviceIds })
       .fire();
 
     const finalResponse = {};
