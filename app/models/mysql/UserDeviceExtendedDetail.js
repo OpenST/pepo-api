@@ -1,6 +1,7 @@
 const rootPrefix = '../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
+  logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   databaseConstants = require(rootPrefix + '/lib/globalConstant/database'),
   userDeviceExtendedDetailConstants = require(rootPrefix + '/lib/globalConstant/userDeviceExtendedDetail');
 
@@ -70,7 +71,7 @@ class UserDeviceExtendedDetailModel extends ModelBase {
    * @param {string} params.appVersion
    * @param {string} params.deviceOs
    *
-   * @returns {Promise<never>}
+   * @returns {Promise<*>}
    */
   async createNewEntry(params) {
     const oThis = this;
@@ -79,7 +80,9 @@ class UserDeviceExtendedDetailModel extends ModelBase {
     const userId = params.userId;
 
     if (!deviceId || !userId) {
-      return Promise.reject(new Error(`Missing mandatory parameters. Input params: ${params}`));
+      logger.error(`Missing mandatory parameters. Input params: ${params}`);
+
+      return;
     }
 
     const insertParams = {
@@ -126,7 +129,9 @@ class UserDeviceExtendedDetailModel extends ModelBase {
     const userId = params.userId;
 
     if (!deviceId || !userId) {
-      return Promise.reject(new Error(`Missing mandatory parameters. Input params: ${params}`));
+      logger.error(`Missing mandatory parameters. Input params: ${params}`);
+
+      return;
     }
 
     const updateParams = {};
@@ -161,13 +166,15 @@ class UserDeviceExtendedDetailModel extends ModelBase {
    *
    * @param {array<string>} deviceIds
    *
-   * @returns {Promise<{}>}
+   * @returns {Promise<*>}
    */
   async getByDeviceIds(deviceIds) {
     const oThis = this;
 
     if (!deviceIds) {
-      return Promise.reject(new Error(`Missing mandatory parameter. Input deviceIds: ${deviceIds}`));
+      logger.error(`Missing mandatory parameter. Input deviceIds: ${deviceIds}`);
+
+      return;
     }
 
     const dbRows = await oThis
