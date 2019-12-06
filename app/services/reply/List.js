@@ -21,6 +21,7 @@ class GetReplyList extends ServiceBase {
    *
    * @param {object} params
    * @param {string/number} params.video_id
+   * @param {string/number} [params.check_reply_detail_id]
    * @param {object} [params.current_user]
    * @param {boolean} [params.is_admin]
    * @param {string} [params.pagination_identifier]
@@ -38,8 +39,8 @@ class GetReplyList extends ServiceBase {
     oThis.currentUser = params.current_user;
     oThis.isAdmin = params.is_admin || false;
     oThis.paginationIdentifier = params[paginationConstants.paginationIdentifierKey] || null;
-    oThis.externalReplyDetailId = params.reply_detail_id || null;
-    //This is the reply detail id whose presence is to be checked. In case this reply id is deleted then empty response should be sent.
+    oThis.checkReplyDetailId = params.check_reply_detail_id || null;
+    //This is the reply detail id whose presence is to be checked. In case this reply id is deleted then NOT FOUND error is sent.
 
     oThis.limit = oThis._defaultPageLimit();
 
@@ -66,14 +67,14 @@ class GetReplyList extends ServiceBase {
 
     await oThis._validateAndSanitizeParams();
 
-    if (oThis.externalReplyDetailId) {
-      let replyVideoPresenceResponse = await oThis._checkExternalReplyDetailIdPresence();
+    if (oThis.checkReplyDetailId) {
+      let replyVideoPresenceResponse = await oThis._checkReplyDetailIdPresence();
       if (!replyVideoPresenceResponse) {
         return Promise.reject(
           responseHelper.error({
             internal_error_identifier: 'a_s_r_l_1',
             api_error_identifier: 'entity_not_found',
-            debug_options: `externalReplyDetailId: ${oThis.externalReplyDetailId}`
+            debug_options: `checkReplyDetailId: ${oThis.checkReplyDetailId}`
           })
         );
       }
@@ -115,20 +116,20 @@ class GetReplyList extends ServiceBase {
   }
 
   /**
-   * Check external reply details presence.
+   * Check reply details presence.
    *
    * @returns {Promise<boolean>}
    * @private
    */
-  async _checkExternalReplyDetailIdPresence() {
+  async _checkReplyDetailIdPresence() {
     const oThis = this;
 
-    let replyDetailsResponse = await new ReplyDetailsByIdsCache({ ids: [oThis.externalReplyDetailId] }).fetch();
+    let replyDetailsResponse = await new ReplyDetailsByIdsCache({ ids: [oThis.checkReplyDetailId] }).fetch();
     if (replyDetailsResponse.isFailure()) {
       return Promise.reject(replyDetailsResponse);
     }
 
-    return replyDetailsResponse.data[oThis.externalReplyDetailId].status == replyDetailConstants.activeStatus;
+    return replyDetailsResponse.data[oThis.checkReplyDetailId].status == replyDetailConstants.activeStatus;
   }
 
   /**
