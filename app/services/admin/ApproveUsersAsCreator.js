@@ -2,10 +2,11 @@ const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   UserModel = require(rootPrefix + '/app/models/mysql/User'),
   UsersCache = require(rootPrefix + '/lib/cacheManagement/multi/User'),
-  responseHelper = require(rootPrefix + '/lib/formatter/response'),
   bgJob = require(rootPrefix + '/lib/rabbitMqEnqueue/bgJob'),
+  responseHelper = require(rootPrefix + '/lib/formatter/response'),
+  userConstants = require(rootPrefix + '/lib/globalConstant/user'),
   bgJobConstants = require(rootPrefix + '/lib/globalConstant/bgJob'),
-  userConstants = require(rootPrefix + '/lib/globalConstant/user');
+  pixelConstants = require(rootPrefix + '/lib/globalConstant/pixel');
 
 /**
  * Class to approve users by admin.
@@ -19,6 +20,7 @@ class ApproveUsersAsCreator extends ServiceBase {
    * @param {object} params
    * @param {array} params.user_ids: User ids to be approved by admin.
    * @param {object} params.current_admin: current admin.
+   * @param {string} [params.approved_via_medium]: indicates the platform from where the user is approved (slack/pepo-admin)
    *
    * @augments ServiceBase
    *
@@ -31,6 +33,7 @@ class ApproveUsersAsCreator extends ServiceBase {
 
     oThis.userIds = params.user_ids;
     oThis.currentAdminId = params.current_admin.id;
+    oThis.approvedViaMedium = params.approved_via_medium || pixelConstants.userApprovedViaAdminUserProfileMedium;
 
     oThis.userObjects = {};
   }
