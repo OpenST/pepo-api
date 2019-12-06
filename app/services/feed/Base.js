@@ -75,7 +75,7 @@ class FeedBase extends ServiceBase {
 
     await oThis._fetchProfileDetails();
 
-    const promisesArray = [oThis._filterInactiveUserFeeds(), oThis._setTokenDetails()];
+    const promisesArray = [oThis._filterInactiveUserFeeds(), oThis._setTokenDetails(), oThis._markUserDeviceDetails()];
     await Promise.all(promisesArray);
 
     return oThis._prepareResponse();
@@ -241,6 +241,16 @@ class FeedBase extends ServiceBase {
     }
 
     oThis.tokenDetails = tokenResp.data.tokenDetails;
+  }
+
+  /**
+   * Mark user device details.
+   *
+   * @returns {Promise<*>}
+   * @private
+   */
+  async _markUserDeviceDetails() {
+    return new Error('Sub-class to implement.');
   }
 
   _validateAndSanitizeParams() {
