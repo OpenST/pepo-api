@@ -2,13 +2,11 @@ const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   GetTokenService = require(rootPrefix + '/app/services/token/Get'),
   GetUserVideosList = require(rootPrefix + '/lib/GetUsersVideoList'),
-  ReplyDetailsByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/ReplyDetailsByIds'),
   ReplyDetailsByParentVideoPaginationCache = require(rootPrefix +
     '/lib/cacheManagement/single/ReplyDetailsByParentVideoPagination'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
-  paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination'),
-  replyDetailConstants = require(rootPrefix + '/lib/globalConstant/replyDetail');
+  paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination');
 
 /**
  * Class for video reply details service.
@@ -67,19 +65,6 @@ class GetReplyList extends ServiceBase {
 
     await oThis._validateAndSanitizeParams();
 
-    if (oThis.checkReplyDetailId) {
-      let replyVideoPresenceResponse = await oThis._checkReplyDetailIdPresence();
-      if (!replyVideoPresenceResponse) {
-        return Promise.reject(
-          responseHelper.error({
-            internal_error_identifier: 'a_s_r_l_1',
-            api_error_identifier: 'entity_not_found',
-            debug_options: `checkReplyDetailId: ${oThis.checkReplyDetailId}`
-          })
-        );
-      }
-    }
-
     await oThis._fetchReplyDetailIds();
 
     const promisesArray = [oThis._setTokenDetails(), oThis._getReplyVideos()];
@@ -113,28 +98,6 @@ class GetReplyList extends ServiceBase {
 
     // Validate limit.
     return oThis._validatePageSize();
-  }
-
-  /**
-   * Check reply details presence.
-   *
-   * @returns {Promise<boolean>}
-   * @private
-   */
-  async _checkReplyDetailIdPresence() {
-    const oThis = this;
-
-    let replyDetailsResponse = await new ReplyDetailsByIdsCache({ ids: [oThis.checkReplyDetailId] }).fetch();
-    if (replyDetailsResponse.isFailure()) {
-      return Promise.reject(replyDetailsResponse);
-    }
-
-    //check reply id should be a reply of the given (parent)video id.
-    if (replyDetailsResponse.data[oThis.checkReplyDetailId].parentId != oThis.videoId) {
-      return false;
-    }
-
-    return replyDetailsResponse.data[oThis.checkReplyDetailId].status == replyDetailConstants.activeStatus;
   }
 
   /**
@@ -190,9 +153,14 @@ class GetReplyList extends ServiceBase {
   async _getReplyVideos() {
     const oThis = this;
 
+    let toFetchDetailsForReplyDetailsIds = oThis.replyDetailIds;
+    if (oThis.checkReplyDetailId) {
+      toFetchDetailsForReplyDetailsIds = toFetchDetailsForReplyDetailsIds.concat([oThis.checkReplyDetailId]);
+    }
+
     const userVideosObj = new GetUserVideosList({
       currentUserId: oThis.currentUserId,
-      replyDetailIds: oThis.replyDetailIds,
+      replyDetailIds: toFetchDetailsForReplyDetailsIds,
       isAdmin: oThis.isAdmin,
       fetchVideoViewDetails: 1
     });
@@ -203,6 +171,28 @@ class GetReplyList extends ServiceBase {
     }
 
     oThis.userRepliesMap = response.data;
+
+    if (oThis.checkReplyDetailId) {
+      if (!oThis.userRepliesMap.replyDetailsMap[oThis.checkReplyDetailId]) {
+        return Promise.reject(
+          responseHelper.error({
+            internal_error_identifier: 'a_s_r_l_1',
+            api_error_identifier: 'entity_not_found',
+            debug_options: `checkReplyDetailId: ${oThis.checkReplyDetailId}`
+          })
+        );
+      }
+
+      if (oThis.userRepliesMap.replyDetailsMap[oThis.checkReplyDetailId].parentId != oThis.videoId) {
+        return Promise.reject(
+          responseHelper.error({
+            internal_error_identifier: 'a_s_r_l_2',
+            api_error_identifier: 'entity_not_found',
+            debug_options: `checkReplyDetailId: ${oThis.checkReplyDetailId}`
+          })
+        );
+      }
+    }
 
     for (let ind = 0; ind < oThis.replyDetailIds.length; ind++) {
       const rdId = oThis.replyDetailIds[ind];
