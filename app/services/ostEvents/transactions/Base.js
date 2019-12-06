@@ -61,6 +61,7 @@ class TransactionWebhookBase extends ServiceBase {
     oThis.transactionObj = null;
 
     oThis.videoId = null;
+    oThis.parentVideoId = null;
     oThis.replyDetailId = null;
 
     oThis.pepocornAmount = null;
@@ -661,6 +662,8 @@ class TransactionWebhookBase extends ServiceBase {
         })
       );
     }
+
+    oThis.parentVideoId = replyDetail.parentId;
 
     if (oThis._isPepoOnReplyTransactionKind()) {
       oThis.videoId = replyDetail.entityId;
