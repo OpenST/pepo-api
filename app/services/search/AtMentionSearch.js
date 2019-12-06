@@ -8,6 +8,7 @@ const rootPrefix = '../../..',
   ReplyDetailsByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/ReplyDetailsByIds'),
   ReplyDetailsByParentVideoPaginationCache = require(rootPrefix +
     '/lib/cacheManagement/single/ReplyDetailsByParentVideoPagination'),
+  AllRepliesByParentVideoIdCache = require(rootPrefix + '/lib/cacheManagement/single/AllRepliesByParentVideoId'),
   UserBlockedListCache = require(rootPrefix + '/lib/cacheManagement/single/UserBlockedList'),
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
@@ -74,8 +75,8 @@ class UserAtMentionSearch extends ServiceBase {
     if (!oThis.query && oThis.intent === oThis._getReplyIntentType() && oThis.parentId) {
       let promiseArray = [];
 
-      promiseArray.push(oThis._fetchParentVideoDetails());
-      promiseArray.push(oThis._fetchReplyDetailsByParentVideo());
+      promiseArray.push(oThis._fetchParentVideoCreator());
+      promiseArray.push(oThis._fetchReplyCreatorsForParentVideo());
 
       await Promise.all(promiseArray);
       await oThis._fetchUserDetailsForCreatorUserId();
@@ -146,7 +147,7 @@ class UserAtMentionSearch extends ServiceBase {
    * @returns {Promise<never>}
    * @private
    */
-  async _fetchParentVideoDetails() {
+  async _fetchParentVideoCreator() {
     const oThis = this;
 
     const videoDetailsByVideoIdsCacheResp = await new VideoDetailsByVideoIdsCache({
@@ -172,31 +173,29 @@ class UserAtMentionSearch extends ServiceBase {
    * @returns {Promise<never>}
    * @private
    */
-  async _fetchReplyDetailsByParentVideo() {
+  async _fetchReplyCreatorsForParentVideo() {
     const oThis = this;
 
-    const replyDetailsByParentVideoCacheResponse = await new ReplyDetailsByParentVideoPaginationCache({
-      videoId: oThis.parentId,
-      limit: oThis.limit,
-      paginationTimestamp: oThis.paginationTimestamp
+    const allRepliesByParentVideoIdCacheResponse = await new AllRepliesByParentVideoIdCache({
+      parentVideoId: oThis.parentId
     }).fetch();
 
-    if (replyDetailsByParentVideoCacheResponse.isFailure()) {
-      return Promise.reject(replyDetailsByParentVideoCacheResponse);
+    if (allRepliesByParentVideoIdCacheResponse.isFailure()) {
+      return Promise.reject(allRepliesByParentVideoIdCacheResponse);
     }
 
-    const replyDetailIds = replyDetailsByParentVideoCacheResponse.data.replyDetailIds;
+    const allRepliesForParentVideoId = allRepliesByParentVideoIdCacheResponse.data.allReplies;
 
-    const replyDetailCacheResp = await new ReplyDetailsByIdsCache({ ids: replyDetailIds }).fetch();
-    if (replyDetailCacheResp.isFailure()) {
-      return Promise.reject(replyDetailCacheResp);
+    if (!allRepliesForParentVideoId || allRepliesForParentVideoId.length === 0) {
+      return;
     }
 
-    const replyDetails = replyDetailCacheResp.data;
+    console.log(allRepliesByParentVideoIdCacheResponse);
 
     // Add reply video creators to userIds array.
-    for (let replyDetailsId in replyDetails) {
-      oThis.userIds.push(replyDetails[replyDetailsId].creatorUserId);
+    for (let ind = 0; ind < allRepliesForParentVideoId.length; ind++) {
+      let replyDetail = allRepliesForParentVideoId[ind];
+      oThis.userIds.push(replyDetail.creatorId);
     }
   }
 
