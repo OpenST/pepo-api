@@ -74,7 +74,7 @@ class UserAtMentionSearch extends ServiceBase {
     if (!oThis.query && oThis.intent === oThis._getReplyIntentType() && oThis.parentId) {
       let promiseArray = [];
 
-      promiseArray.push(oThis._fetchVideoDetails());
+      promiseArray.push(oThis._fetchParentVideoDetails());
       promiseArray.push(oThis._fetchReplyDetailsByParentVideo());
 
       await Promise.all(promiseArray);
@@ -139,14 +139,14 @@ class UserAtMentionSearch extends ServiceBase {
   }
 
   /**
-   * Fetch video details.
+   * Fetch parent video details.
    *
    * @sets oThis.userIds
    *
    * @returns {Promise<never>}
    * @private
    */
-  async _fetchVideoDetails() {
+  async _fetchParentVideoDetails() {
     const oThis = this;
 
     const videoDetailsByVideoIdsCacheResp = await new VideoDetailsByVideoIdsCache({
@@ -157,7 +157,7 @@ class UserAtMentionSearch extends ServiceBase {
       return Promise.reject(videoDetailsByVideoIdsCacheResp);
     }
 
-    // Add parent video crerator user id to userIds array.
+    // Add parent video creator user id to userIds array.
     if (videoDetailsByVideoIdsCacheResp.data && videoDetailsByVideoIdsCacheResp.data[oThis.parentId]) {
       let parentVideoCreatorUserId = videoDetailsByVideoIdsCacheResp.data[oThis.parentId].creatorUserId;
       oThis.userIds.push(parentVideoCreatorUserId);
