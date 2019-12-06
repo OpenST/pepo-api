@@ -147,6 +147,10 @@ class ApproveUsersAsCreator extends ServiceBase {
     const oThis = this;
 
     return {
+      pixel_identifier: pixelConstants.getPixelIdentifierKey(
+        pixelConstants.userEntityType,
+        pixelConstants.creatorApprovedEntityAction
+      ),
       entity_type: pixelConstants.userEntityType,
       entity_action: pixelConstants.creatorApprovedEntityAction,
       page_type: oThis.approvedViaMedium,
