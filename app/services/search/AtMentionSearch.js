@@ -158,9 +158,10 @@ class UserAtMentionSearch extends ServiceBase {
       return Promise.reject(videoDetailsByVideoIdsCacheResp);
     }
 
+    let parentVideoCreatorUserId = videoDetailsByVideoIdsCacheResp.data[oThis.parentId].creatorUserId;
+
     // Add parent video creator user id to userIds array.
-    if (videoDetailsByVideoIdsCacheResp.data && videoDetailsByVideoIdsCacheResp.data[oThis.parentId]) {
-      let parentVideoCreatorUserId = videoDetailsByVideoIdsCacheResp.data[oThis.parentId].creatorUserId;
+    if (parentVideoCreatorUserId) {
       oThis.userIds.push(parentVideoCreatorUserId);
     }
   }
@@ -210,7 +211,10 @@ class UserAtMentionSearch extends ServiceBase {
     const oThis = this;
 
     oThis.userIds = [...new Set(oThis.userIds)];
-    // oThis.userIds = oThis.userIds.reverse();
+
+    if (!oThis.userIds || oThis.userIds.length === 0) {
+      return;
+    }
 
     const userDetailsResponse = await new UserCache({ ids: oThis.userIds }).fetch();
     if (userDetailsResponse.isFailure()) {
