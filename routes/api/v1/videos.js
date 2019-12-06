@@ -247,7 +247,7 @@ router.get('/:video_id/unseen-replies', sanitizer.sanitizeDynamicUrlParams, func
     };
   };
 
-  Promise.resolve(routeHelper.perform(req, res, next, '/reply/List', 'r_a_v1_u_13', null, dataFormatterFunc));
+  Promise.resolve(routeHelper.perform(req, res, next, '/reply/Unseen', 'r_a_v1_u_13', null, dataFormatterFunc));
 });
 
 /* Video share */

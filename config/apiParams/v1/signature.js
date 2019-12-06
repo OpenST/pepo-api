@@ -57,6 +57,10 @@ const v1Signature = {
       {
         parameter: 'video_id',
         validatorMethods: ['validateInteger']
+      },
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
       }
     ],
     optional: []

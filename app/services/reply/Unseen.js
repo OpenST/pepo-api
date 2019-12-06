@@ -2,6 +2,7 @@ const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   GetTokenService = require(rootPrefix + '/app/services/token/Get'),
   GetUserVideosList = require(rootPrefix + '/lib/GetUsersVideoList'),
+  FetchAssociatedEntities = require(rootPrefix + '/lib/FetchAssociatedEntities'),
   UserVideoViewModel = require(rootPrefix + '/app/models/cassandra/UserVideoView'),
   AllRepliesByParentVideoId = require(rootPrefix + '/lib/cacheManagement/single/AllRepliesByParentVideoId'),
   ReplyDetailsByParentVideoPaginationCache = require(rootPrefix +
@@ -37,9 +38,12 @@ class Unseen extends ServiceBase {
     oThis.videoId = +params.video_id;
     oThis.currentUser = params.current_user;
 
+    console.log('-oThis.currentUser---', oThis.currentUser);
     oThis.currentUserId = oThis.currentUser.id;
 
     oThis.allRepliesArray = [];
+    oThis.seenVideos = {};
+    oThis.unseenRepliesArray = [];
 
     oThis.videoReplies = [];
     oThis.replyDetailIds = [];
@@ -62,16 +66,15 @@ class Unseen extends ServiceBase {
 
     await oThis._fetchAllSeenVideoOfCurrentUserId();
 
+    oThis._filterUnSeenVideos();
+
+    await oThis._fetchUserAndRelatedEntities();
+
     //fetch all replies of given parent video.
 
     //Filter out all seen videos.
 
     // Fetch user ids and relted data.
-
-    await oThis._fetchReplyDetailIds();
-
-    const promisesArray = [oThis._setTokenDetails(), oThis._getReplyVideos()];
-    await Promise.all(promisesArray);
 
     return oThis._prepareResponse();
   }
@@ -125,63 +128,48 @@ class Unseen extends ServiceBase {
       userId: oThis.currentUserId,
       videoIds: replyVideoIds
     });
+
+    //loop through the all replies array. And remove all the videos which are seen.
+
+    console.log('---seenVideosData---', seenVideosData);
+    for (let videoId in seenVideosData) {
+      if (seenVideosData[videoId].lastViewAt) {
+        oThis.seenVideos[videoId] = seenVideosData[videoId];
+      }
+    }
   }
+
   /**
-   * Fetch video reply details.
+   * Filter seen videos.
    *
-   * @sets oThis.replyDetails
-   *
-   * @returns {Promise<*>}
    * @private
    */
-  async _fetchReplyDetailIds() {
+  _filterUnSeenVideos() {
     const oThis = this;
 
-    const cacheResponse = await new ReplyDetailsByParentVideoPaginationCache({
-      videoId: oThis.videoId,
-      limit: oThis.limit,
-      paginationTimestamp: oThis.paginationTimestamp
-    }).fetch();
-    if (cacheResponse.isFailure()) {
-      return Promise.reject(cacheResponse);
+    for (let i = 0; i < oThis.allRepliesArray.length; i++) {
+      if (!oThis.seenVideos[oThis.allRepliesArray[i].replyVideoId]) {
+        oThis.unseenRepliesArray.push(oThis.allRepliesArray[i]);
+      }
     }
-
-    oThis.replyDetailIds = cacheResponse.data.replyDetailIds;
   }
 
   /**
-   * Get videos.
-   *
-   * @sets oThis.userRepliesMap, oThis.videoReplies
+   * Fetch user and related entities.
    *
    * @returns {Promise<void>}
    * @private
    */
-  async _getReplyVideos() {
+  async _fetchUserAndRelatedEntities() {
     const oThis = this;
 
-    const userVideosObj = new GetUserVideosList({
-      currentUserId: oThis.currentUserId,
-      replyDetailIds: oThis.replyDetailIds,
-      isAdmin: oThis.isAdmin,
-      fetchVideoViewDetails: 1
-    });
-
-    const response = await userVideosObj.perform();
-    if (response.isFailure()) {
-      return Promise.reject(response);
+    let userIdsArray = [];
+    for (let i = 0; i < oThis.unseenRepliesArray.length; i++) {
+      userIdsArray.push(oThis.unseenRepliesArray[i].creatorId);
     }
 
-    oThis.userRepliesMap = response.data;
-
-    for (let ind = 0; ind < oThis.replyDetailIds.length; ind++) {
-      const rdId = oThis.replyDetailIds[ind];
-      const rdObj = oThis.userRepliesMap.replyDetailsMap[rdId];
-      oThis.videoReplies.push(oThis.userRepliesMap.fullVideosMap[rdObj.entityId]);
-      if (ind === oThis.replyDetailIds.length - 1) {
-        oThis.nextPaginationTimestamp = rdObj.createdAt;
-      }
-    }
+    oThis.userEntities = await new FetchAssociatedEntities({ userIds: userIdsArray }).perform();
+    console.log('--userEntitiesData---', userEntitiesData);
   }
 
   /**
@@ -216,48 +204,6 @@ class Unseen extends ServiceBase {
       tokenDetails: oThis.tokenDetails,
       meta: oThis.responseMetaData
     });
-  }
-
-  /**
-   * Returns default page limit.
-   *
-   * @returns {number}
-   * @private
-   */
-  _defaultPageLimit() {
-    return paginationConstants.defaultVideoListPageSize;
-  }
-
-  /**
-   * Returns minimum page limit.
-   *
-   * @returns {number}
-   * @private
-   */
-  _minPageLimit() {
-    return paginationConstants.minVideoListPageSize;
-  }
-
-  /**
-   * Returns maximum page limit.
-   *
-   * @returns {number}
-   * @private
-   */
-  _maxPageLimit() {
-    return paginationConstants.maxVideoListPageSize;
-  }
-
-  /**
-   * Returns current page limit.
-   *
-   * @returns {number}
-   * @private
-   */
-  _currentPageLimit() {
-    const oThis = this;
-
-    return oThis.limit;
   }
 }
 
