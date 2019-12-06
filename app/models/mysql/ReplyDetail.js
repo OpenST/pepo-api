@@ -372,6 +372,32 @@ class ReplyDetailsModel extends ModelBase {
   }
 
   /**
+   * Get all replies
+   *
+   * @returns {Promise<void>}
+   */
+  async getAllReplies(parentVideoId) {
+    const oThis = this;
+
+    const dbRows = await oThis
+      .select(['id', 'creator_user_id', 'entity_id'])
+      .where([
+        'parent_kind = ? AND parent_id = ? AND status = ?',
+        replyDetailConstants.invertedParentKinds[replyDetailConstants.videoParentKind],
+        parentVideoId,
+        replyDetailConstants.invertedStatuses[replyDetailConstants.activeStatus]
+      ])
+      .fire();
+
+    let allRepliesArray = [];
+    for (let index = 0; index < dbRows.length; index++) {
+      allRepliesArray.push(oThis.formatDbData(dbRows[index]));
+    }
+
+    return allRepliesArray;
+  }
+
+  /**
    * Flush cache.
    *
    * @param {object} params
