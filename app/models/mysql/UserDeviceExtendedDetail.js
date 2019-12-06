@@ -165,6 +165,16 @@ class UserDeviceExtendedDetailModel extends ModelBase {
     return finalResponse;
   }
 
+  /**
+   * Validate optional parameters.
+   *
+   * @param {object} params
+   * @param {number} [params.buildNumber]
+   * @param {string} [params.appVersion]
+   * @param {string} [params.deviceOs]
+   *
+   * @returns {{}}
+   */
   validateOptionalParameters(params) {
     const oThis = this;
 
@@ -197,7 +207,7 @@ class UserDeviceExtendedDetailModel extends ModelBase {
    */
   validateBuildNumber(buildNumber) {
     buildNumber = Number(buildNumber);
-    if (typeof buildNumber === 'number' && buildNumber > 0) {
+    if (buildNumber > 0) {
       return buildNumber;
     }
 
