@@ -90,20 +90,7 @@ class UserDeviceExtendedDetailModel extends ModelBase {
       user_id: userId
     };
 
-    if (params.buildNumber) {
-      insertParams.build_number = params.buildNumber;
-    }
-
-    if (params.appVersion) {
-      insertParams.app_version = params.appVersion;
-    }
-
-    if (params.deviceOs) {
-      const deviceOsInt = userDeviceExtendedDetailConstants.invertedDeviceOs[params.deviceOs];
-      if (deviceOsInt) {
-        insertParams.device_os = deviceOsInt;
-      }
-    }
+    Object.assign(insertParams, oThis.validateOptionalParameters(params));
 
     await oThis.insert(insertParams).fire();
 
@@ -134,22 +121,7 @@ class UserDeviceExtendedDetailModel extends ModelBase {
       return;
     }
 
-    const updateParams = {};
-
-    if (params.buildNumber) {
-      updateParams.build_number = params.buildNumber;
-    }
-
-    if (params.appVersion) {
-      updateParams.app_version = params.appVersion;
-    }
-
-    if (params.deviceOs) {
-      const deviceOsInt = userDeviceExtendedDetailConstants.invertedDeviceOs[params.deviceOs];
-      if (deviceOsInt) {
-        updateParams.device_os = deviceOsInt;
-      }
-    }
+    const updateParams = oThis.validateOptionalParameters(params);
 
     if (CommonValidators.validateNonEmptyObject(updateParams)) {
       await oThis
@@ -191,6 +163,60 @@ class UserDeviceExtendedDetailModel extends ModelBase {
     }
 
     return finalResponse;
+  }
+
+  validateOptionalParameters(params) {
+    const oThis = this;
+
+    const responseParameters = {};
+
+    if (params.buildNumber) {
+      responseParameters.build_number = oThis.validateBuildNumber(params.buildNumber);
+    }
+
+    if (params.appVersion) {
+      responseParameters.app_version = oThis.validateAppVersion(params.appVersion);
+    }
+
+    if (params.deviceOs) {
+      const deviceOsInt = userDeviceExtendedDetailConstants.invertedDeviceOs[params.deviceOs];
+      if (deviceOsInt) {
+        responseParameters.device_os = deviceOsInt;
+      }
+    }
+
+    return responseParameters;
+  }
+
+  /**
+   * Validate build number.
+   *
+   * @param {number} buildNumber
+   *
+   * @returns {null|number}
+   */
+  validateBuildNumber(buildNumber) {
+    buildNumber = Number(buildNumber);
+    if (typeof buildNumber === 'number' && buildNumber > 0) {
+      return buildNumber;
+    }
+
+    return null;
+  }
+
+  /**
+   * Validate app version.
+   *
+   * @param {string} appVersion
+   *
+   * @returns {null|*}
+   */
+  validateAppVersion(appVersion) {
+    if (appVersion.split('.').length === 3) {
+      return appVersion;
+    }
+
+    return null;
   }
 
   /**
