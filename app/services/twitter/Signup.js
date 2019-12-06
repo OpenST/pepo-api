@@ -571,7 +571,8 @@ class TwitterSignup extends ServiceBase {
       tokenUser: safeFormattedTokenUserData,
       userLoginCookieValue: userLoginCookieValue,
       openEmailAddFlow: oThis.userOptedInEmail ? 0 : 1,
-      twitterUserExtended: safeFormattedTwitterUserExtendedData
+      twitterUserExtended: safeFormattedTwitterUserExtendedData,
+      utmParams: oThis.utmParams
     });
   }
 
