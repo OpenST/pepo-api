@@ -52,6 +52,15 @@ const v1Signature = {
       }
     ]
   },
+  [apiName.unseenReplies]: {
+    mandatory: [
+      {
+        parameter: 'video_id',
+        validatorMethods: ['validateInteger']
+      }
+    ],
+    optional: []
+  },
   [apiName.getReply]: {
     mandatory: [
       {
