@@ -129,6 +129,11 @@ class GetReplyList extends ServiceBase {
       return Promise.reject(replyDetailsResponse);
     }
 
+    //check reply id should be a reply of the given (parent)video id.
+    if (replyDetailsResponse.data[oThis.checkReplyDetailId].parentId != oThis.videoId) {
+      return false;
+    }
+
     return replyDetailsResponse.data[oThis.checkReplyDetailId].status == replyDetailConstants.activeStatus;
   }
 
