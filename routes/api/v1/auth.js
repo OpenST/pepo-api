@@ -24,7 +24,6 @@ router.post('/logout', cookieHelper.parseUserCookieForLogout, sanitizer.sanitize
 /* Twitter connect. */
 router.post('/twitter-login', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.twitterLogin;
-  req.decodedParams.sanitized_headers = req.sanitizedHeaders;
 
   cookieHelper.fetchUserUtmCookie(req);
 
