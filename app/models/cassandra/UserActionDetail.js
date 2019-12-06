@@ -115,7 +115,7 @@ class UserActionDetailModel extends CassandraModelBase {
     let isFirstParameter = true;
 
     for (const key in queryParams.updateParams) {
-      const val = queryParams.updateParams.key;
+      const val = queryParams.updateParams[key];
 
       if (!isFirstParameter) {
         queryString += ', ';

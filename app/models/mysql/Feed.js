@@ -43,6 +43,8 @@ class FeedModel extends ModelBase {
       kind: feedsConstants.kinds[dbRow.kind],
       paginationIdentifier: dbRow.pagination_identifier,
       actor: dbRow.actor,
+      isPopular: dbRow.is_popular,
+      lastReplyTimestamp: dbRow.last_reply_timestamp,
       extraData: dbRow.hasOwnProperty('extra_data') ? JSON.parse(dbRow.extra_data) : undefined,
       createdAt: dbRow.created_at,
       updatedAt: dbRow.updated_at
