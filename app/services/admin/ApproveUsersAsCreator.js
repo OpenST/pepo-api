@@ -3,10 +3,12 @@ const rootPrefix = '../../..',
   UserModel = require(rootPrefix + '/app/models/mysql/User'),
   UsersCache = require(rootPrefix + '/lib/cacheManagement/multi/User'),
   bgJob = require(rootPrefix + '/lib/rabbitMqEnqueue/bgJob'),
+  pixelJob = require(rootPrefix + '/lib/rabbitMqEnqueue/pixel'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   userConstants = require(rootPrefix + '/lib/globalConstant/user'),
   bgJobConstants = require(rootPrefix + '/lib/globalConstant/bgJob'),
-  pixelConstants = require(rootPrefix + '/lib/globalConstant/pixel');
+  pixelConstants = require(rootPrefix + '/lib/globalConstant/pixel'),
+  pixelJobConstants = require(rootPrefix + '/lib/globalConstant/pixelJob');
 
 /**
  * Class to approve users by admin.
@@ -39,7 +41,7 @@ class ApproveUsersAsCreator extends ServiceBase {
   }
 
   /**
-   * Main performer for class.
+   * Async perform.
    *
    * @returns {Promise<result>}
    * @private
@@ -54,7 +56,11 @@ class ApproveUsersAsCreator extends ServiceBase {
     for (let index = 0; index < oThis.userIds.length; index++) {
       const userId = oThis.userIds[index];
       await UserModel.flushCache(oThis.userObjects[userId]);
-      await bgJob.enqueue(bgJobConstants.postUserApprovalJob, { userId: userId, currentAdminId: oThis.currentAdminId });
+      const promisesArray = [
+        bgJob.enqueue(bgJobConstants.postUserApprovalJob, { userId: userId, currentAdminId: oThis.currentAdminId }),
+        pixelJob.enqueue(pixelJobConstants.approveUserAsCreatorJob, oThis.getPixelParameters(userId))
+      ];
+      await Promise.all(promisesArray);
     }
 
     return responseHelper.successWithData({});
@@ -128,6 +134,26 @@ class ApproveUsersAsCreator extends ServiceBase {
       .update(['properties = properties | ?', propertyVal])
       .where({ id: oThis.userIds })
       .fire();
+  }
+
+  /**
+   * Get pixel parameters.
+   *
+   * @param {number} userId
+   *
+   * @returns {{}}
+   */
+  getPixelParameters(userId) {
+    const oThis = this;
+
+    return {
+      entity_type: pixelConstants.userEntityType,
+      entity_action: pixelConstants.creatorApprovedEntityAction,
+      page_type: oThis.approvedViaMedium,
+      page_name: oThis.approvedViaMedium === pixelConstants.userApprovedViaAdminUserProfileMedium ? userId : '',
+      current_admin_id: oThis.currentAdminId,
+      user_id: userId
+    };
   }
 }
 
