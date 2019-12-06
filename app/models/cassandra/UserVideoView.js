@@ -51,6 +51,8 @@ class UserVideoViewModel extends CassandraModelBase {
    * @param {number} dbRow.user_id
    * @param {number} dbRow.video_id
    * @param {number} dbRow.last_view_at
+   * @param {number} dbRow.last_reply_view_at
+   * @param {number} dbRow.republished_at
    *
    * @returns {object}
    */
@@ -63,11 +65,39 @@ class UserVideoViewModel extends CassandraModelBase {
     const formattedData = {
       userId: dbRow.user_id ? Number(dbRow.user_id) : undefined,
       videoId: dbRow.video_id ? Number(dbRow.video_id) : undefined,
-      lastViewAt: dbRow.last_view_at ? basicHelper.dateToMilliSecondsTimestamp(dbRow.last_view_at) : undefined
+      lastViewAt: dbRow.last_view_at ? basicHelper.dateToMilliSecondsTimestamp(dbRow.last_view_at) : undefined,
+      lastReplyViewAt: dbRow.last_reply_view_at
+        ? basicHelper.dateToMilliSecondsTimestamp(dbRow.last_reply_view_at)
+        : undefined,
+      republishedAt: dbRow.republished_at ? basicHelper.dateToMilliSecondsTimestamp(dbRow.republished_at) : undefined
     };
     /* eslint-enable */
 
     return oThis.sanitizeFormattedData(formattedData);
+  }
+
+  /**
+   * Update user video view time.
+   *
+   * @param {object} queryParams
+   * @param {number} queryParams.userId
+   * @param {number} queryParams.parentVideoIds
+   * @param {number} queryParams.lastReplyViewAt
+   *
+   * @returns {Promise<any>}
+   */
+  async updateLastReplyViewAtForParentVideos(queryParams) {
+    const oThis = this;
+
+    const query = 'update ' + oThis.queryTableName + ' set last_reply_view_at = ? where user_id = ? and video_id = ?;';
+    const queries = [];
+
+    for (let index = 0; index < queryParams.parentVideoIds.length; index++) {
+      const updateParam = [queryParams.lastReplyViewAt, queryParams.userId, queryParams.parentVideoIds[index]];
+      queries.push({ query: query, params: updateParam });
+    }
+
+    return oThis.batchFire(queries);
   }
 
   /**
