@@ -147,7 +147,7 @@ class FeedModel extends ModelBase {
     const response = { feedIds: [], feedsMap: {} };
 
     const dbRows = await oThis
-      .select('id, pagination_identifier, primary_external_entity_id, actor')
+      .select('id, pagination_identifier, primary_external_entity_id, actor, is_popular, last_reply_timestamp')
       .order_by('pagination_identifier desc')
       .limit(limit)
       .fire();

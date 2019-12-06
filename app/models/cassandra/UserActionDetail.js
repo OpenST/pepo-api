@@ -1,6 +1,5 @@
 const rootPrefix = '../../..',
   CassandraModelBase = require(rootPrefix + '/app/models/cassandra/Base'),
-  ParametersFormatter = require(rootPrefix + '/lib/notification/formatter/ParametersFormatter'),
   basicHelper = require(rootPrefix + '/helpers/basic'),
   cassandraKeyspaceConstants = require(rootPrefix + '/lib/globalConstant/cassandraKeyspace'),
   userActionDetailConstants = require(rootPrefix + '/lib/globalConstant/cassandra/userActionDetail');
@@ -84,6 +83,12 @@ class UserActionDetailModel extends CassandraModelBase {
         ? basicHelper.dateToMilliSecondsTimestamp(formattedDbRow.userContributionTimestamp)
         : undefined
     };
+
+    if (formattedData.entityIdentifier) {
+      let data = formattedData.entityIdentifier.split('_');
+      formattedData.entityKind = userActionDetailConstants.shortToLongNamesMapForEntityKind[data[0]];
+      formattedData.entityId = data[1];
+    }
     /* eslint-enable */
 
     return oThis.sanitizeFormattedData(formattedData);
@@ -130,6 +135,36 @@ class UserActionDetailModel extends CassandraModelBase {
     valuesArray.push(entityIdentifier);
 
     return oThis.fire(queryString, valuesArray);
+  }
+
+  /**
+   * Fetch user notifications
+   *
+   * @param {object} queryParams: queryParams
+   *
+   * @return {object}
+   */
+  async fetchUserActionDetails(userId, entityIdentifiers) {
+    const oThis = this;
+
+    const longToShortnamesMap = userActionDetailConstants.longToShortNamesMap,
+      userIdKey = longToShortnamesMap['userId'],
+      entityIdentifierKey = longToShortnamesMap['entityIdentifier'];
+
+    const query = `select * from ${oThis.queryTableName} where ${userIdKey} = ? and ${entityIdentifierKey} in ?;`;
+
+    const params = [userId, entityIdentifiers];
+
+    const queryRsp = await oThis.fire(query, params);
+
+    const response = {};
+
+    for (let index = 0; index < queryRsp.rows.length; index++) {
+      const formattedData = oThis.formatDbData(queryRsp.rows[index]);
+      response[formattedData.entityIdentifier] = formattedData;
+    }
+
+    return response;
   }
 
   /**
