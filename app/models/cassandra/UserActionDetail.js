@@ -38,13 +38,9 @@ class UserActionDetailModel extends CassandraModelBase {
     const namesMap = userActionDetailConstants.shortToLongNamesMap;
 
     return {
-      partition: [namesMap.user_id],
-      sort: [namesMap.entity_identifier]
+      partition: [namesMap.u_id],
+      sort: [namesMap.e_i]
     };
-  }
-
-  get longToShortNamesMap() {
-    return userActionDetailConstants.longToShortNamesMap;
   }
 
   /**
@@ -91,6 +87,49 @@ class UserActionDetailModel extends CassandraModelBase {
     /* eslint-enable */
 
     return oThis.sanitizeFormattedData(formattedData);
+  }
+
+  /**
+   * Update user notification visit details.
+   *
+   * @param {object} queryParams
+   * @param {string} queryParams.entityKind
+   * @param {number} queryParams.entityId
+   * @param {string/number} queryParams.userId
+   * @param {object} queryParams.updateParams
+   *
+   * @returns {Promise<any>}
+   */
+  async updateRow(queryParams) {
+    const oThis = this;
+    const longToShortnamesMap = userActionDetailConstants.longToShortNamesMap;
+
+    const entityIdentifier = userActionDetailConstants.createEntityIdentifier(
+      queryParams.entityKind,
+      queryParams.entityId
+    );
+
+    let queryString = 'update ' + oThis.queryTableName + ' set ';
+
+    const valuesArray = [];
+    let isFirstParameter = true;
+
+    for (const key in queryParams.updateParams) {
+      const val = queryParams.updateParams.key;
+
+      if (!isFirstParameter) {
+        queryString += ', ';
+      }
+
+      queryString += `${longToShortnamesMap[key]}=? `;
+      valuesArray.push(val);
+    }
+
+    queryString += `where ${longToShortnamesMap['userId']} = ? and ${longToShortnamesMap['entityIdentifier']} = ?;`;
+    valuesArray.push(queryParams.userId);
+    valuesArray.push(entityIdentifier);
+
+    return oThis.fire(queryString, valuesArray);
   }
 
   /**

@@ -119,6 +119,7 @@ class PepoOnReplySuccessWebhook extends TransactionWebhookBase {
 
     if (oThis.isReplyDetailIdPresent()) {
       updateStatsParams.replyDetailId = oThis.replyDetailId;
+      updateStatsParams.parentVideoId = oThis.parentVideoId;
     }
 
     const updateStatsObj = new UpdateStats(updateStatsParams);
