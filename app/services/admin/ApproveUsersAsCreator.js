@@ -155,8 +155,9 @@ class ApproveUsersAsCreator extends ServiceBase {
       entity_action: pixelConstants.creatorApprovedEntityAction,
       page_type: oThis.approvedViaMedium,
       page_name: oThis.approvedViaMedium === pixelConstants.userApprovedViaAdminUserProfileMedium ? userId : '',
+      // Page name is null if approve request comes from slack.
       current_admin_id: oThis.currentAdminId,
-      user_id: userId
+      approved_user_id: userId
     };
   }
 }
