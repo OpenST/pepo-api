@@ -65,6 +65,11 @@ const adminErrorConfig = {
     code: 'invalid',
     message: 'User is inactive.'
   },
+  email_not_double_optin: {
+    parameter: 'email',
+    code: 'invalid',
+    message: 'This email address is not double opt in.'
+  },
   duplicate_user_name: {
     parameter: 'user_name',
     code: 'invalid',
