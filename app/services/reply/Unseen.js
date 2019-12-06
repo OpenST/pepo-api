@@ -106,12 +106,25 @@ class Unseen extends ServiceBase {
     oThis.allRepliesArray = allRepliesCacheRsp.data.allReplies;
   }
 
+  /**
+   * Fetch all seen video of current user id.
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
   async _fetchAllSeenVideoOfCurrentUserId() {
     const oThis = this;
 
     let replyVideoIds = [];
 
-    for (let i = 0; i < oThis.allRepliesArray.length; i++) {}
+    for (let i = 0; i < oThis.allRepliesArray.length; i++) {
+      replyVideoIds.push(oThis.allRepliesArray[i].replyVideoId);
+    }
+
+    let seenVideosData = await new UserVideoViewModel().fetchVideoViewDetails({
+      userId: oThis.currentUserId,
+      videoIds: replyVideoIds
+    });
   }
   /**
    * Fetch video reply details.
@@ -134,25 +147,6 @@ class Unseen extends ServiceBase {
     }
 
     oThis.replyDetailIds = cacheResponse.data.replyDetailIds;
-  }
-
-  /**
-   * Fetch token details.
-   *
-   * @sets oThis.tokenDetails
-   *
-   * @returns {Promise<void>}
-   * @private
-   */
-  async _setTokenDetails() {
-    const oThis = this;
-
-    const tokenResp = await new GetTokenService().perform();
-    if (tokenResp.isFailure()) {
-      return Promise.reject(tokenResp);
-    }
-
-    oThis.tokenDetails = tokenResp.data.tokenDetails;
   }
 
   /**
