@@ -2,6 +2,8 @@ const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   GetTokenService = require(rootPrefix + '/app/services/token/Get'),
   GetUserVideosList = require(rootPrefix + '/lib/GetUsersVideoList'),
+  UserVideoViewModel = require(rootPrefix + '/app/models/cassandra/UserVideoView'),
+  AllRepliesByParentVideoId = require(rootPrefix + '/lib/cacheManagement/single/AllRepliesByParentVideoId'),
   ReplyDetailsByParentVideoPaginationCache = require(rootPrefix +
     '/lib/cacheManagement/single/ReplyDetailsByParentVideoPagination'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
@@ -15,7 +17,7 @@ const rootPrefix = '../../..',
  */
 class Unseen extends ServiceBase {
   /**
-   * Constructor for video reply details service.
+   * Constructor for unseen reply videos.
    *
    * @param {object} params
    * @param {string/number} params.video_id
@@ -34,16 +36,10 @@ class Unseen extends ServiceBase {
 
     oThis.videoId = +params.video_id;
     oThis.currentUser = params.current_user;
-    oThis.isAdmin = params.is_admin || false;
-    oThis.paginationIdentifier = params[paginationConstants.paginationIdentifierKey] || null;
 
-    oThis.limit = oThis._defaultPageLimit();
+    oThis.currentUserId = oThis.currentUser.id;
 
-    oThis.currentUserId = null;
-    oThis.paginationTimestamp = null;
-    oThis.responseMetaData = {};
-
-    oThis.nextPaginationTimestamp = null;
+    oThis.allRepliesArray = [];
 
     oThis.videoReplies = [];
     oThis.replyDetailIds = [];
@@ -62,12 +58,20 @@ class Unseen extends ServiceBase {
 
     await oThis._validateAndSanitizeParams();
 
+    await oThis._fetchAllRepliesOfGivenParentVideoId();
+
+    await oThis._fetchAllSeenVideoOfCurrentUserId();
+
+    //fetch all replies of given parent video.
+
+    //Filter out all seen videos.
+
+    // Fetch user ids and relted data.
+
     await oThis._fetchReplyDetailIds();
 
     const promisesArray = [oThis._setTokenDetails(), oThis._getReplyVideos()];
     await Promise.all(promisesArray);
-
-    oThis._addResponseMetaData();
 
     return oThis._prepareResponse();
   }
@@ -75,28 +79,40 @@ class Unseen extends ServiceBase {
   /**
    * Validate and sanitize.
    *
-   * @sets oThis.currentUserId, oThis.paginationTimestamp
-   *
    * @returns {Promise<*|result>}
    * @private
    */
   async _validateAndSanitizeParams() {
     const oThis = this;
-
-    oThis.currentUserId = oThis.currentUser ? Number(oThis.currentUser.id) : 0;
-
-    if (oThis.paginationIdentifier) {
-      const parsedPaginationParams = oThis._parsePaginationParams(oThis.paginationIdentifier);
-
-      oThis.paginationTimestamp = parsedPaginationParams.pagination_timestamp; // Override paginationTimestamp number.
-    } else {
-      oThis.paginationTimestamp = null;
-    }
-
-    // Validate limit.
-    return oThis._validatePageSize();
   }
 
+  /**
+   * Fetch All Replies Of Given Parent VideoId
+   *
+   * @sets oThis.allRepliesArray
+   *
+   * @returns {Promise<never>}
+   * @private
+   */
+  async _fetchAllRepliesOfGivenParentVideoId() {
+    const oThis = this;
+
+    let allRepliesCacheRsp = await new AllRepliesByParentVideoId({ parentVideoId: oThis.videoId }).fetch();
+
+    if (allRepliesCacheRsp.isFailure()) {
+      return Promise.reject(allRepliesCacheRsp);
+    }
+
+    oThis.allRepliesArray = allRepliesCacheRsp.data.allReplies;
+  }
+
+  async _fetchAllSeenVideoOfCurrentUserId() {
+    const oThis = this;
+
+    let replyVideoIds = [];
+
+    for (let i = 0; i < oThis.allRepliesArray.length; i++) {}
+  }
   /**
    * Fetch video reply details.
    *
@@ -172,30 +188,6 @@ class Unseen extends ServiceBase {
         oThis.nextPaginationTimestamp = rdObj.createdAt;
       }
     }
-  }
-
-  /**
-   * Add next page meta data.
-   *
-   * @sets oThis.responseMetaData
-   *
-   * @returns {void}
-   * @private
-   */
-  _addResponseMetaData() {
-    const oThis = this;
-
-    const nextPagePayloadKey = {};
-
-    if (oThis.replyDetailIds.length >= oThis.limit) {
-      nextPagePayloadKey[paginationConstants.paginationIdentifierKey] = {
-        pagination_timestamp: oThis.nextPaginationTimestamp
-      };
-    }
-
-    oThis.responseMetaData = {
-      [paginationConstants.nextPagePayloadKey]: nextPagePayloadKey
-    };
   }
 
   /**
