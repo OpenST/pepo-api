@@ -618,7 +618,7 @@ class TransactionWebhookBase extends ServiceBase {
 
         const replyDetailId = replyDetailsByEntityIdsAndEntityKindCacheRsp.data[oThis.videoId];
 
-        if (CommonValidators.isVarNullOrUndefined(replyDetailId)) {
+        if (!(Number(replyDetailId) > 0)) {
           return Promise.reject(
             responseHelper.paramValidationError({
               internal_error_identifier: 'a_s_oe_t_b_11',
