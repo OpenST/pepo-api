@@ -142,10 +142,6 @@ class UserVideoViewModel extends CassandraModelBase {
 
     const queryRsp = await oThis.fire(query, params);
 
-    if (queryRsp.rows.length === 0) {
-      return {};
-    }
-
     for (let index = 0; index < queryRsp.rows.length; index++) {
       const formattedData = oThis.formatDbData(queryRsp.rows[index]);
       response[formattedData.videoId] = formattedData;
