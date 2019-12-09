@@ -36,18 +36,13 @@ class Unseen extends ServiceBase {
     const oThis = this;
 
     oThis.videoId = +params.video_id;
-    oThis.currentUser = params.current_user;
+    oThis.currentUser = params.current_user || null;
 
-    oThis.currentUserId = oThis.currentUser.id;
+    oThis.currentUserId = null;
 
     oThis.allRepliesArray = [];
     oThis.seenVideos = {};
     oThis.unseenRepliesArray = [];
-
-    oThis.videoReplies = [];
-    oThis.replyDetailIds = [];
-    oThis.userRepliesMap = {};
-    oThis.tokenDetails = null;
   }
 
   /**
@@ -59,27 +54,18 @@ class Unseen extends ServiceBase {
   async _asyncPerform() {
     const oThis = this;
 
-    await oThis._validateAndSanitizeParams();
-
     await oThis._fetchAllRepliesOfGivenParentVideoId();
 
-    await oThis._fetchAllSeenVideoOfCurrentUserId();
+    if (oThis.currentUser) {
+      oThis.currentUserId = oThis.currentUser.id;
+      await oThis._fetchAllSeenVideoOfCurrentUserId();
+    }
 
     oThis._filterUnSeenVideos();
 
     await oThis._fetchUserAndRelatedEntities();
 
     return oThis._prepareResponse();
-  }
-
-  /**
-   * Validate and sanitize.
-   *
-   * @returns {Promise<*|result>}
-   * @private
-   */
-  async _validateAndSanitizeParams() {
-    const oThis = this;
   }
 
   /**
