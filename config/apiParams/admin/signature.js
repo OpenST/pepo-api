@@ -63,6 +63,19 @@ const adminSignature = {
     ],
     optional: []
   },
+  [apiName.adminSendEmailForResubmission]: {
+    mandatory: [
+      {
+        parameter: 'user_id',
+        validatorMethods: ['validateInteger']
+      },
+      {
+        parameter: 'current_admin',
+        validatorMethods: ['validateNonEmptyObject']
+      }
+    ],
+    optional: []
+  },
   [apiName.adminUserDeny]: {
     mandatory: [
       {
