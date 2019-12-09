@@ -2,20 +2,15 @@ const rootPrefix = '../../..',
   FeedBase = require(rootPrefix + '/app/services/feed/Base'),
   FeedModel = require(rootPrefix + '/app/models/mysql/Feed'),
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
-  SortUnseenFeedLib = require(rootPrefix + '/lib/feed/SortUnseen'),
+  GetListFeedLib = require(rootPrefix + '/lib/feed/GetList'),
   FeedByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/FeedByIds'),
-  UserVideoViewModel = require(rootPrefix + '/app/models/cassandra/UserVideoView'),
   LoggedOutFeedCache = require(rootPrefix + '/lib/cacheManagement/single/LoggedOutFeed'),
-  UserBlockedListCache = require(rootPrefix + '/lib/cacheManagement/single/UserBlockedList'),
   UserPersonalizedDataModel = require(rootPrefix + '/app/models/cassandra/UserPersonalizedData'),
-  UserMuteByUser1IdsCache = require(rootPrefix + '/lib/cacheManagement/multi/UserMuteByUser1Ids'),
   UserDeviceExtendedDetailModel = require(rootPrefix + '/app/models/mysql/UserDeviceExtendedDetail'),
   UserDeviceExtendedDetailsByDeviceIdsCache = require(rootPrefix +
     '/lib/cacheManagement/multi/UserDeviceExtendedDetailsByDeviceIds'),
-  basicHelper = require(rootPrefix + '/helpers/basic'),
   coreConstants = require(rootPrefix + '/config/coreConstants'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
-  feedConstants = require(rootPrefix + '/lib/globalConstant/feed'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination'),
   userPersonalizedDataConstants = require(rootPrefix + '/lib/globalConstant/cassandra/userPersonalizedData');
@@ -202,141 +197,18 @@ class PublicVideoFeed extends FeedBase {
   async fetchFeedIdsForFirstPage() {
     const oThis = this;
 
-    let lastPaginationTimestamp = 0;
-
-    const newPersonalizeData = {
-      unseenFeedIds: [],
-      shuffledSeenFeedIds: [],
-      seenFeedIds: []
-    };
-
-    const cacheResp = await new UserBlockedListCache({ userId: oThis.currentUserId }).fetch();
-    if (cacheResp.isFailure()) {
-      return Promise.reject(cacheResp);
-    }
-
-    const blockedByUserInfo = cacheResp.data[oThis.currentUserId];
-
-    logger.log(`===================PERSONALIZED FEED:${oThis.currentUserId} blockedByUserInfo === `, blockedByUserInfo);
-
-    const mutedUsersCacheRsp = await new UserMuteByUser1IdsCache({ user1Ids: [oThis.currentUserId] }).fetch();
-
-    if (mutedUsersCacheRsp.isFailure()) {
-      return Promise.reject(mutedUsersCacheRsp);
-    }
-
-    const mutedUsersRspData = mutedUsersCacheRsp.data[oThis.currentUserId];
-
-    logger.log('mutedUsersRspData ========', mutedUsersRspData);
-
-    const queryParams = {
-      limit: feedConstants.personalizedFeedMaxIdsCount
-    };
-
-    // Fetch latest feeds.
-    const feedQueryResp = await new FeedModel().getLatestFeedIds(queryParams);
-
-    const allVideoIds = [];
-
-    const totalFeeds = feedQueryResp.feedIds.length;
-
-    // Collect non blocked video ids.
-    for (let index = 0; index < totalFeeds; index++) {
-      const feedId = feedQueryResp.feedIds[index];
-      const feedObj = feedQueryResp.feedsMap[feedId];
-      const actorId = feedObj.actor;
-
-      lastPaginationTimestamp = feedObj.paginationIdentifier;
-      if (
-        !blockedByUserInfo.hasBlocked[actorId] &&
-        !blockedByUserInfo.blockedBy[actorId] &&
-        !mutedUsersRspData[actorId]
-      ) {
-        allVideoIds.push(Number(feedObj.primaryExternalEntityId));
-      }
-    }
-
-    logger.log(
-      `===================PERSONALIZED FEED:${oThis.currentUserId} all valid videoIds === `,
-      allVideoIds.length
-    );
-
-    const allActorIds = [];
-
-    if (allVideoIds.length > 0) {
-      const videoIdToUserVideoViewMap = await new UserVideoViewModel().fetchVideoViewDetails({
-        userId: oThis.currentUserId,
-        videoIds: allVideoIds
-      });
-
-      for (let index = 0; index < feedQueryResp.feedIds.length; index++) {
-        const feedId = feedQueryResp.feedIds[index];
-        const feedObj = feedQueryResp.feedsMap[feedId];
-        const paginationIdentifier = feedObj.paginationIdentifier;
-        const userVideoViewObj = videoIdToUserVideoViewMap[Number(feedObj.primaryExternalEntityId)];
-        const actorId = feedObj.actor;
-
-        logger.log('======= Muted video === ', mutedUsersRspData[actorId]);
-
-        // Skip the feeds due to videos from blocked users.
-        if (
-          blockedByUserInfo.hasBlocked[actorId] ||
-          blockedByUserInfo.blockedBy[actorId] ||
-          mutedUsersRspData[actorId]
-        ) {
-          logger.log(
-            `====PERSONALIZED FEED:${oThis.currentUserId} blocked video === `,
-            feedObj.primaryExternalEntityId
-          );
-          continue;
-        }
-
-        allActorIds.push(actorId);
-        // If seen.
-        if (userVideoViewObj && userVideoViewObj.lastViewAt) {
-          const wasSeenRecently =
-            paginationIdentifier >= Date.now() / 1000 - feedConstants.personalizedFeedSeenVideosAgeInSeconds;
-
-          if (wasSeenRecently) {
-            newPersonalizeData.shuffledSeenFeedIds.push(feedId);
-          } else {
-            newPersonalizeData.seenFeedIds.push(feedId);
-          }
-        } else {
-          newPersonalizeData.unseenFeedIds.push(feedId);
-        }
-      }
-    }
-
-    const sortParams = {
-      allActorIds: allActorIds,
+    const getListParams = {
       sortFeeds: !oThis._isOlderBuildWithoutVideoPlayEvent(),
-      currentUserId: oThis.currentUserId,
-      unseenFeedIds: newPersonalizeData.unseenFeedIds.slice(),
-      seenFeedIds: newPersonalizeData.seenFeedIds.slice(),
-      shuffledSeenFeedIds: newPersonalizeData.shuffledSeenFeedIds.slice(),
-      feedsMap: feedQueryResp.feedsMap
+      currentUserId: oThis.currentUserId
     };
 
-    const sortResponse = await new SortUnseenFeedLib(sortParams).perform();
+    const getListResponse = await new GetListFeedLib(getListParams).perform();
 
-    if (sortResponse.isFailure()) {
-      return Promise.reject(sortResponse);
+    if (getListResponse.isFailure()) {
+      return Promise.reject(getListResponse);
     }
 
-    newPersonalizeData.unseenFeedIds = sortResponse.data.unseenFeedIds;
-    newPersonalizeData.seenFeedIds = sortResponse.data.seenFeedIds;
-    newPersonalizeData.shuffledSeenFeedIds = sortResponse.data.shuffledSeenFeedIds;
-
-    newPersonalizeData.shuffledSeenFeedIds = basicHelper.shuffleArray(newPersonalizeData.shuffledSeenFeedIds);
-
-    let allSortedFeedIds = newPersonalizeData.unseenFeedIds.concat(newPersonalizeData.shuffledSeenFeedIds);
-    allSortedFeedIds = allSortedFeedIds.concat(newPersonalizeData.seenFeedIds);
-
-    oThis.userPersonalizedfeedData = {
-      allSortedFeedIds: allSortedFeedIds,
-      lastPaginationTimestamp: lastPaginationTimestamp
-    };
+    oThis.userPersonalizedfeedData = getListResponse.data;
 
     await new UserPersonalizedDataModel().updateJsonDataForUsers({
       userId: oThis.currentUserId,
