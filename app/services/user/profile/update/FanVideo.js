@@ -108,10 +108,6 @@ class UpdateFanVideo extends UpdateProfileBase {
       oThis.link = null;
     }
 
-    if (oThis.link) {
-      oThis.link = oThis.link.toLowerCase();
-    }
-
     oThis.addVideoParams = {
       userId: oThis.profileUserId,
       videoUrl: oThis.videoUrl,
