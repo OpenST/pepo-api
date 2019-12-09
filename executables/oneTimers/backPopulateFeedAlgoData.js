@@ -43,7 +43,7 @@ class BackPopulateFeedAlgoData {
 
     while (true) {
       const dbRows = await new VideoContributorModel()
-        .select('video_id, contributed_by_user_id, max(created_at) as created_at')
+        .select('video_id, contributed_by_user_id, max(updated_at) as updated_at')
         .order_by('video_id, contributed_by_user_id desc')
         .group_by('video_id, contributed_by_user_id')
         .limit(limit)
@@ -121,11 +121,11 @@ class BackPopulateFeedAlgoData {
         if (parentVideoId) {
           replyQueryData[parentVideoId] = replyQueryData[parentVideoId] || {};
           replyQueryData[parentVideoId][userId] = replyQueryData[parentVideoId][userId] || {
-            max_created_at: 0
+            max_updated_at: 0
           };
 
-          if (replyQueryData[parentVideoId][userId]['max_created_at'] < dbRow.created_at) {
-            replyQueryData[parentVideoId][userId]['max_created_at'] = dbRow.created_at;
+          if (replyQueryData[parentVideoId][userId]['max_updated_at'] < dbRow.updated_at) {
+            replyQueryData[parentVideoId][userId]['max_updated_at'] = dbRow.updated_at;
           }
         } else {
           if (videoIds.indexOf(dbRow.video_id) === -1) {
@@ -137,7 +137,7 @@ class BackPopulateFeedAlgoData {
             dbRow.video_id
           );
 
-          const updateParam = [dbRow.created_at * 1000, userId, entityIdentifier];
+          const updateParam = [dbRow.updated_at * 1000, userId, entityIdentifier];
           queries.push({ query: videoQuery, params: updateParam });
         }
       }
@@ -151,7 +151,7 @@ class BackPopulateFeedAlgoData {
           parentId
         );
 
-        const updateParam = [dbRow.max_created_at * 1000, userId, entityIdentifier];
+        const updateParam = [dbRow.max_updated_at * 1000, userId, entityIdentifier];
         queries.push({ query: replyQuery, params: updateParam });
       }
     }
