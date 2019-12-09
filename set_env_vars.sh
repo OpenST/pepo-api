@@ -152,10 +152,6 @@ export PA_GOOGLE_INAPP_SERVICE_ACCOUNT_KEY=''
 export PA_GOOGLE_INAPP_SERVICE_ACCOUNT_EMAIL=''
 
 # Feed related constants.
-export PA_USER_SEARCH_CURATED_USER_IDS='[1000]'
-export PA_USER_SEARCH_TOP_USER_IDS='[1000]'
-export PA_CURATED_TAG_IDS='[1]'
-export PA_TOP_TAG_IDS='[1]'
 export PA_CURATED_FEED_IDS='[1000]'
 
 # Slack related constants.

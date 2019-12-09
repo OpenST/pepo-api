@@ -18,6 +18,7 @@ const rootPrefix = '../../..',
   apiVersions = require(rootPrefix + '/lib/globalConstant/apiVersions'),
   adminPreLaunchRoutes = require(rootPrefix + '/routes/api/admin/preLaunch/index'),
   adminUpdateUsageDataRoutes = require(rootPrefix + '/routes/api/admin/updateUsageData/index'),
+  curatedEntitiesDataRoutes = require(rootPrefix + '/routes/api/admin/curatedEntity/index'),
   adminResponseEntityKey = require(rootPrefix + '/lib/globalConstant/adminResponseEntity');
 
 // Declare variables.
@@ -392,5 +393,6 @@ router.post('/users/:user_id/send-resubmission-email', sanitizer.sanitizeDynamic
 
 router.use('/pre-launch', adminPreLaunchRoutes);
 router.use('/update-usage-data', adminUpdateUsageDataRoutes);
+router.use('/curated-entities', curatedEntitiesDataRoutes);
 
 module.exports = router;
