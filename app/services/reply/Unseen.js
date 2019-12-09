@@ -86,7 +86,6 @@ class Unseen extends ServiceBase {
     }
 
     oThis.allRepliesArray = allRepliesCacheRsp.data.allReplies;
-    oThis.allRepliesArray.splice(4); //Need to send only 4 reply's data.
   }
 
   /**
@@ -124,10 +123,13 @@ class Unseen extends ServiceBase {
   _filterUnSeenVideos() {
     const oThis = this;
 
-    //loop through the all replies array. And remove all the videos which are seen.
+    //loop through the all replies array. And remove all the videos which are seen. Break the loop once 4 unseen replies are fetched.
     for (let i = 0; i < oThis.allRepliesArray.length; i++) {
       if (!oThis.seenVideos[oThis.allRepliesArray[i].replyVideoId]) {
         oThis.unseenRepliesArray.push(oThis.allRepliesArray[i]);
+        if (oThis.unseenRepliesArray.length === 4) {
+          break;
+        }
       }
     }
   }
