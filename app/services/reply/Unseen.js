@@ -38,7 +38,6 @@ class Unseen extends ServiceBase {
     oThis.videoId = +params.video_id;
     oThis.currentUser = params.current_user;
 
-    console.log('-oThis.currentUser---', oThis.currentUser);
     oThis.currentUserId = oThis.currentUser.id;
 
     oThis.allRepliesArray = [];
@@ -69,12 +68,6 @@ class Unseen extends ServiceBase {
     oThis._filterUnSeenVideos();
 
     await oThis._fetchUserAndRelatedEntities();
-
-    //fetch all replies of given parent video.
-
-    //Filter out all seen videos.
-
-    // Fetch user ids and relted data.
 
     return oThis._prepareResponse();
   }
@@ -129,9 +122,6 @@ class Unseen extends ServiceBase {
       videoIds: replyVideoIds
     });
 
-    //loop through the all replies array. And remove all the videos which are seen.
-
-    console.log('---seenVideosData---', seenVideosData);
     for (let videoId in seenVideosData) {
       if (seenVideosData[videoId].lastViewAt) {
         oThis.seenVideos[videoId] = seenVideosData[videoId];
@@ -147,6 +137,7 @@ class Unseen extends ServiceBase {
   _filterUnSeenVideos() {
     const oThis = this;
 
+    //loop through the all replies array. And remove all the videos which are seen.
     for (let i = 0; i < oThis.allRepliesArray.length; i++) {
       if (!oThis.seenVideos[oThis.allRepliesArray[i].replyVideoId]) {
         oThis.unseenRepliesArray.push(oThis.allRepliesArray[i]);
@@ -168,8 +159,12 @@ class Unseen extends ServiceBase {
       userIdsArray.push(oThis.unseenRepliesArray[i].creatorId);
     }
 
-    oThis.userEntities = await new FetchAssociatedEntities({ userIds: userIdsArray }).perform();
-    console.log('--userEntitiesData---', userEntitiesData);
+    let associatedEntitiesRsp = await new FetchAssociatedEntities({ userIds: userIdsArray }).perform();
+
+    if (associatedEntitiesRsp.isFailure()) {
+      return Promise.reject(associatedEntitiesRsp);
+    }
+    oThis.userEntities = associatedEntitiesRsp.data;
   }
 
   /**
@@ -181,28 +176,16 @@ class Unseen extends ServiceBase {
   async _prepareResponse() {
     const oThis = this;
 
+    let unseenRepliesEntity = {};
+    unseenRepliesEntity[oThis.videoId] = {
+      unseen: oThis.unseenRepliesArray
+    };
+
     return responseHelper.successWithData({
-      [entityTypeConstants.videoReplyList]: oThis.videoReplies,
-      [entityTypeConstants.replyDetailsMap]: oThis.userRepliesMap.replyDetailsMap,
-      [entityTypeConstants.videoDescriptionsMap]: oThis.userRepliesMap.videoDescriptionMap,
-      [entityTypeConstants.userProfilesMap]: oThis.userRepliesMap.userProfilesMap,
-      [entityTypeConstants.currentUserUserContributionsMap]: oThis.userRepliesMap.currentUserUserContributionsMap,
-      [entityTypeConstants.currentUserVideoContributionsMap]: oThis.userRepliesMap.currentUserVideoContributionsMap,
-      [entityTypeConstants.currentUserReplyDetailContributionsMap]:
-        oThis.userRepliesMap.currentUserReplyDetailContributionsMap,
-      [entityTypeConstants.currentUserReplyDetailsRelationsMap]:
-        oThis.userRepliesMap.currentUserReplyDetailsRelationsMap,
-      [entityTypeConstants.userProfileAllowedActions]: oThis.userRepliesMap.userProfileAllowedActions,
-      [entityTypeConstants.pricePointsMap]: oThis.userRepliesMap.pricePointsMap,
-      usersByIdMap: oThis.userRepliesMap.usersByIdMap,
-      userStat: oThis.userRepliesMap.userStat,
-      tags: oThis.userRepliesMap.tags,
-      linkMap: oThis.userRepliesMap.linkMap,
-      imageMap: oThis.userRepliesMap.imageMap,
-      videoMap: oThis.userRepliesMap.videoMap,
-      tokenUsersByUserIdMap: oThis.userRepliesMap.tokenUsersByUserIdMap,
-      tokenDetails: oThis.tokenDetails,
-      meta: oThis.responseMetaData
+      [entityTypeConstants.unseenReplies]: unseenRepliesEntity,
+      usersByIdMap: oThis.userEntities.usersMap,
+      imageMap: oThis.userEntities.imagesMap,
+      tokenUsersByUserIdMap: oThis.userEntities.tokenUsersByUserIdMap
     });
   }
 }

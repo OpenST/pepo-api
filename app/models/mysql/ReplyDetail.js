@@ -387,6 +387,7 @@ class ReplyDetailsModel extends ModelBase {
         parentVideoId,
         replyDetailConstants.invertedStatuses[replyDetailConstants.activeStatus]
       ])
+      .order_by('created_at DESC')
       .fire();
 
     let allRepliesArray = [];
