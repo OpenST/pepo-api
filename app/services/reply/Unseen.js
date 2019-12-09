@@ -56,7 +56,7 @@ class Unseen extends ServiceBase {
 
     await oThis._fetchAllRepliesOfGivenParentVideoId();
 
-    if (oThis.currentUser) {
+    if (oThis.currentUser && oThis.allRepliesArray.length > 0) {
       oThis.currentUserId = oThis.currentUser.id;
       await oThis._fetchAllSeenVideoOfCurrentUserId();
     }
@@ -86,6 +86,7 @@ class Unseen extends ServiceBase {
     }
 
     oThis.allRepliesArray = allRepliesCacheRsp.data.allReplies;
+    oThis.allRepliesArray.splice(4); //Need to send only 4 reply's data.
   }
 
   /**
