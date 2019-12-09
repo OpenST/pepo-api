@@ -189,7 +189,8 @@ class GetReplyById extends ServiceBase {
       [entityTypeConstants.userProfilesMap]: oThis.userRepliesMap.userProfilesMap,
       [entityTypeConstants.currentUserUserContributionsMap]: oThis.userRepliesMap.currentUserUserContributionsMap,
       [entityTypeConstants.currentUserVideoContributionsMap]: oThis.userRepliesMap.currentUserVideoContributionsMap,
-      [entityTypeConstants.currentUserReplyDetailContributionsMap]: oThis.userRepliesMap.currentUserReplyDetailContributionsMap,
+      [entityTypeConstants.currentUserReplyDetailContributionsMap]:
+        oThis.userRepliesMap.currentUserReplyDetailContributionsMap,
       [entityTypeConstants.currentUserReplyDetailsRelationsMap]:
         oThis.userRepliesMap.currentUserReplyDetailsRelationsMap,
       [entityTypeConstants.userProfileAllowedActions]: oThis.userRepliesMap.userProfileAllowedActions,

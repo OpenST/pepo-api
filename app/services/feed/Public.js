@@ -9,6 +9,9 @@ const rootPrefix = '../../..',
   UserBlockedListCache = require(rootPrefix + '/lib/cacheManagement/single/UserBlockedList'),
   UserPersonalizedDataModel = require(rootPrefix + '/app/models/cassandra/UserPersonalizedData'),
   UserMuteByUser1IdsCache = require(rootPrefix + '/lib/cacheManagement/multi/UserMuteByUser1Ids'),
+  UserDeviceExtendedDetailModel = require(rootPrefix + '/app/models/mysql/UserDeviceExtendedDetail'),
+  UserDeviceExtendedDetailsByDeviceIdsCache = require(rootPrefix +
+    '/lib/cacheManagement/multi/UserDeviceExtendedDetailsByDeviceIds'),
   basicHelper = require(rootPrefix + '/helpers/basic'),
   coreConstants = require(rootPrefix + '/config/coreConstants'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
@@ -195,6 +198,7 @@ class PublicVideoFeed extends FeedBase {
    * @returns {Promise<*>}
    * @private
    */
+  // eslint-disable-next-line max-lines-per-function
   async fetchFeedIdsForFirstPage() {
     const oThis = this;
 
@@ -530,6 +534,53 @@ class PublicVideoFeed extends FeedBase {
     }
 
     oThis.feedIds = activeFeedIds;
+  }
+
+  /**
+   * Mark user device details. This method will work only for a logged in user.
+   *
+   * @returns {Promise<*|result>}
+   * @private
+   */
+  async _markUserDeviceDetails() {
+    const oThis = this;
+
+    if (!oThis.currentUserId) {
+      return;
+    }
+
+    const deviceId = oThis.headers['x-pepo-device-id'],
+      currentBuildNumber = oThis.headers['x-pepo-build-number'],
+      appVersion = oThis.headers['x-pepo-app-version'],
+      deviceOs = oThis.headers['x-pepo-device-os'];
+
+    if (!deviceId) {
+      return;
+    }
+
+    const userDeviceExtCacheResp = await new UserDeviceExtendedDetailsByDeviceIdsCache({
+      deviceIds: [deviceId]
+    }).fetch();
+    const userDeviceExt = userDeviceExtCacheResp.data[deviceId];
+
+    const insertUpdateParams = {
+      deviceId: deviceId,
+      userId: oThis.currentUserId,
+      buildNumber: currentBuildNumber,
+      appVersion: appVersion,
+      deviceOs: deviceOs
+    };
+
+    if (userDeviceExt[oThis.currentUserId]) {
+      const existingBuildNumber = userDeviceExt[oThis.currentUserId].buildNumber;
+
+      // Update existing entry if existingBuildNumber is null, or if currentBuildNumber > existingBuildNumber.
+      if (!existingBuildNumber || +currentBuildNumber > +existingBuildNumber) {
+        await new UserDeviceExtendedDetailModel().updateByDeviceIdAndUserId(insertUpdateParams);
+      }
+    } else {
+      await new UserDeviceExtendedDetailModel().createNewEntry(insertUpdateParams);
+    }
   }
 
   /**
