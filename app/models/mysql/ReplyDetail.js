@@ -403,7 +403,6 @@ class ReplyDetailsModel extends ModelBase {
    *
    * @param {object} params
    * @param {array<number>} [params.parentVideoIds]
-   * @param {number} [params.parentVideoId]
    * @param {number} [params.replyDetailId]
    * @param {array<number>} [params.replyDetailIds]
    * @param {array<number>} [params.entityIds]
@@ -423,7 +422,7 @@ class ReplyDetailsModel extends ModelBase {
         promisesArray.push(
           new ReplyDetailsByParentVideoPaginationCache({ videoId: params.parentVideoIds[index] }).clear()
         );
-        promisesArray.push(new AllRepliesByParentVideoId({ parentVideoId: params.parentVideoIds[index] })).clear();
+        promisesArray.push(new AllRepliesByParentVideoId({ parentVideoId: params.parentVideoIds[index] }).clear());
       }
     }
 
