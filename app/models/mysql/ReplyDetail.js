@@ -403,6 +403,7 @@ class ReplyDetailsModel extends ModelBase {
    *
    * @param {object} params
    * @param {array<number>} [params.parentVideoIds]
+   * @param {number} [params.parentVideoId]
    * @param {number} [params.replyDetailId]
    * @param {array<number>} [params.replyDetailIds]
    * @param {array<number>} [params.entityIds]
@@ -415,12 +416,14 @@ class ReplyDetailsModel extends ModelBase {
 
     if (params.parentVideoIds) {
       const ReplyDetailsByParentVideoPaginationCache = require(rootPrefix +
-        '/lib/cacheManagement/single/ReplyDetailsByParentVideoPagination');
+          '/lib/cacheManagement/single/ReplyDetailsByParentVideoPagination'),
+        AllRepliesByParentVideoId = require(rootPrefix + '/lib/cacheManagement/single/AllRepliesByParentVideoId');
 
       for (let index = 0; index < params.parentVideoIds.length; index++) {
         promisesArray.push(
           new ReplyDetailsByParentVideoPaginationCache({ videoId: params.parentVideoIds[index] }).clear()
         );
+        promisesArray.push(new AllRepliesByParentVideoId({ parentVideoId: params.parentVideoIds[index] })).clear();
       }
     }
 
