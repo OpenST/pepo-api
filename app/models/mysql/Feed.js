@@ -136,7 +136,8 @@ class FeedModel extends ModelBase {
   /**
    * Fetch new feeds ids after last visit time.
    *
-   * @param {array} ids: Feed Ids
+   * @param {Object} params
+   * @param {array} params.limit: limit
    *
    * @return {object}
    */
