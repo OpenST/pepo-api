@@ -52,7 +52,6 @@ class UserVideoViewModel extends CassandraModelBase {
    * @param {number} dbRow.video_id
    * @param {number} dbRow.last_view_at
    * @param {number} dbRow.last_reply_view_at
-   * @param {number} dbRow.republished_at
    *
    * @returns {object}
    */
@@ -68,8 +67,7 @@ class UserVideoViewModel extends CassandraModelBase {
       lastViewAt: dbRow.last_view_at ? basicHelper.dateToMilliSecondsTimestamp(dbRow.last_view_at) : undefined,
       lastReplyViewAt: dbRow.last_reply_view_at
         ? basicHelper.dateToMilliSecondsTimestamp(dbRow.last_reply_view_at)
-        : undefined,
-      republishedAt: dbRow.republished_at ? basicHelper.dateToMilliSecondsTimestamp(dbRow.republished_at) : undefined
+        : undefined
     };
     /* eslint-enable */
 
