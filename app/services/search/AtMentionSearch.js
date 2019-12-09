@@ -73,12 +73,9 @@ class UserAtMentionSearch extends ServiceBase {
 
     // Fetch creator users for reply intent when search term is null.
     if (!oThis.query && oThis.intent === oThis._getReplyIntentType() && oThis.parentId) {
-      let promiseArray = [];
+      await oThis._fetchParentVideoCreator();
+      await oThis._fetchReplyCreatorsForParentVideo();
 
-      promiseArray.push(oThis._fetchParentVideoCreator());
-      promiseArray.push(oThis._fetchReplyCreatorsForParentVideo());
-
-      await Promise.all(promiseArray);
       await oThis._fetchUserDetailsForCreatorUserId();
     } else {
       await oThis._fetchUserIds();
