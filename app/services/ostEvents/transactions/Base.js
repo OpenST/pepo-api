@@ -616,9 +616,9 @@ class TransactionWebhookBase extends ServiceBase {
           return Promise.reject(replyDetailsByEntityIdsAndEntityKindCacheRsp);
         }
 
-        const replyDetailId = replyDetailsByEntityIdsAndEntityKindCacheRsp.data[oThis.videoId];
+        const replyDetailId = replyDetailsByEntityIdsAndEntityKindCacheRsp.data[oThis.videoId].id;
 
-        if (!(Number(replyDetailId) > 0)) {
+        if (replyDetailId) {
           return Promise.reject(
             responseHelper.paramValidationError({
               internal_error_identifier: 'a_s_oe_t_b_11',

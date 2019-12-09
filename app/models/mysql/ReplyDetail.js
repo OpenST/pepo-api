@@ -164,13 +164,9 @@ class ReplyDetailsModel extends ModelBase {
 
     const replyDetails = {};
 
-    for (let index = 0; index < entityIds.length; index++) {
-      replyDetails[entityIds[index]] = 0;
-    }
-
     for (let index = 0; index < dbRows.length; index++) {
       const formatDbRow = oThis.formatDbData(dbRows[index]);
-      replyDetails[formatDbRow.entityId] = formatDbRow.id;
+      replyDetails[formatDbRow.entityId] = { id: formatDbRow.id };
     }
 
     return replyDetails;

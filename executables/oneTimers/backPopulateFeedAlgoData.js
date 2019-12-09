@@ -96,7 +96,7 @@ class BackPopulateFeedAlgoData {
         const replyDetailIds = [];
 
         for (let videoId in replyDetailsByEntityIdsAndEntityKindCacheRsp.data) {
-          replyDetailIds.push(replyDetailsByEntityIdsAndEntityKindCacheRsp.data[videoId]);
+          replyDetailIds.push(replyDetailsByEntityIdsAndEntityKindCacheRsp.data[videoId].id);
         }
 
         const replyDetailCacheResp = await new ReplyDetailsByIdsCache({ ids: replyDetailIds }).fetch();
