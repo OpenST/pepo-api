@@ -128,7 +128,7 @@ class PopulateParentVideoIdInUserNotificationsPayload {
         userIds: batchedUserIds
       });
 
-      console.log('userIdToUserNotificationsMap-----', userIdToUserNotificationsMap);
+      // console.log('userIdToUserNotificationsMap-----', userIdToUserNotificationsMap);
 
       if (!userIdToUserNotificationsMap || !commonValidators.validateNonEmptyObject(userIdToUserNotificationsMap)) {
         continue;
@@ -138,18 +138,17 @@ class PopulateParentVideoIdInUserNotificationsPayload {
         let userId = batchedUserIds[ind],
           userNotifications = userIdToUserNotificationsMap[userId];
 
-        console.log('userNotifications---', userNotifications);
+        // console.log('userNotifications---', userNotifications);
 
         if (userNotifications) {
-          const query = `UPDATE ${userNotificationModelObj.queryTableName} SET payload = ? WHERE user_id = ?`;
+          const query = `UPDATE ${
+            userNotificationModelObj.queryTableName
+          } SET payload = ? WHERE user_id = ? AND last_action_timestamp = ? AND uuid = ?`;
 
           for (let newInd = 0; newInd < userNotifications.length; newInd++) {
             let userNotification = userNotifications[newInd],
               payload = userNotification.payload,
               replyDetailId = payload.replyDetailId;
-
-            console.log('kindsArray----', kindsArray);
-            console.log('userNotification.kind-----', userNotification.kind);
 
             if (kindsArray.indexOf(userNotification.kind) > -1) {
               if (!oThis.replyDetailsIdToParentIdMap[replyDetailId]) {
@@ -159,7 +158,12 @@ class PopulateParentVideoIdInUserNotificationsPayload {
                 payload['pvid'] = oThis.replyDetailsIdToParentIdMap[replyDetailId];
 
                 const stringifiedPayload = JSON.stringify(payload),
-                  updateParam = [stringifiedPayload, userId];
+                  updateParam = [
+                    stringifiedPayload,
+                    userId,
+                    userNotification.lastActionTimestamp,
+                    userNotification.uuid
+                  ];
 
                 queries.push({ query: query, params: updateParam });
               }
