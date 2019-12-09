@@ -118,6 +118,7 @@ class PopulateParentVideoIdInUserNotificationsPayload {
 
     while (oThis.userIds.length > 0) {
       const queries = [],
+        cacheFlushPromises = [],
         userNotificationModelObj = new UserNotificationModel();
 
       const batchedUserIds = oThis.userIds.splice(0, BATCH_SIZE);
@@ -127,8 +128,6 @@ class PopulateParentVideoIdInUserNotificationsPayload {
       const userIdToUserNotificationsMap = await oThis._fetchUserNotificationByUserIds({
         userIds: batchedUserIds
       });
-
-      // console.log('userIdToUserNotificationsMap-----', userIdToUserNotificationsMap);
 
       if (!userIdToUserNotificationsMap || !commonValidators.validateNonEmptyObject(userIdToUserNotificationsMap)) {
         continue;
@@ -166,14 +165,16 @@ class PopulateParentVideoIdInUserNotificationsPayload {
                   ];
 
                 queries.push({ query: query, params: updateParam });
+                cacheFlushPromises.push(UserNotificationModel.flushCache({ userId: userId }));
               }
             }
           }
         }
       }
       if (queries.length > 0) {
-        console.log('========batchFire(queries)=====', queries);
-        // await userNotificationModelObj.batchFire(queries);
+        console.log('========batchFire(queries)=====\n', queries);
+        await userNotificationModelObj.batchFire(queries);
+        await Promise.all(cacheFlushPromises);
       }
     }
   }
