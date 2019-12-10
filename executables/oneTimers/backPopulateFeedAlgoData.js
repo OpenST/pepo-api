@@ -172,23 +172,32 @@ class BackPopulateFeedAlgoData {
       limit = 100,
       offset = 0;
 
-    const dbRows = await new ReplyDetailsModel()
-      .select('parent_id, creator_user_id, max(created_at) as reply_time')
-      .group_by('parent_id, creator_user_id')
-      .fire();
+    while (true) {
+      const dbRows = await new ReplyDetailsModel()
+        .select('parent_id, creator_user_id, max(created_at) as reply_time')
+        .group_by('parent_id, creator_user_id')
+        .offset(offset)
+        .limit(limit)
+        .order_by('parent_id, creator_user_id desc')
+        .fire();
 
-    offset = offset + limit;
+      offset = offset + limit;
 
-    for (let i = 0; i < dbRows.length; i++) {
-      const dbRow = dbRows[i];
+      if (dbRows.length === 0) {
+        break;
+      }
 
-      let entityIdentifier = userActionDetailConstants.createEntityIdentifier(
-        userActionDetailConstants.videoEntityKind,
-        dbRow.parent_id
-      );
+      for (let i = 0; i < dbRows.length; i++) {
+        const dbRow = dbRows[i];
 
-      const updateParam = [dbRow.reply_time * 1000, dbRow.creator_user_id, entityIdentifier];
-      queries.push({ query: query, params: updateParam });
+        let entityIdentifier = userActionDetailConstants.createEntityIdentifier(
+          userActionDetailConstants.videoEntityKind,
+          dbRow.parent_id
+        );
+
+        const updateParam = [dbRow.reply_time * 1000, dbRow.creator_user_id, entityIdentifier];
+        queries.push({ query: query, params: updateParam });
+      }
     }
 
     while (queries.length > 0) {
@@ -209,7 +218,7 @@ class BackPopulateFeedAlgoData {
 
     while (true) {
       const dbRows = await new UserContributorModel()
-        .select('user_id, contributed_by_user_id, created_at')
+        .select('id, user_id, contributed_by_user_id, created_at')
         .order_by('id asc')
         .limit(limit)
         .offset(offset)
@@ -249,7 +258,7 @@ class BackPopulateFeedAlgoData {
       .where('status != 1')
       .fire();
 
-    //Todo:  populate feed - is popular.???
+    //Todo:  populate feed - is popular ???
 
     let promises = [];
     for (let i = 0; i < dbRows.length; i++) {
