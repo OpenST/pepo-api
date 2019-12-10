@@ -1,15 +1,12 @@
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
-  GetTokenService = require(rootPrefix + '/app/services/token/Get'),
-  GetUserVideosList = require(rootPrefix + '/lib/GetUsersVideoList'),
   FetchAssociatedEntities = require(rootPrefix + '/lib/FetchAssociatedEntities'),
   UserVideoViewModel = require(rootPrefix + '/app/models/cassandra/UserVideoView'),
+  VideoDetailsByVideoIds = require(rootPrefix + '/lib/cacheManagement/multi/VideoDetailsByVideoIds'),
   AllRepliesByParentVideoId = require(rootPrefix + '/lib/cacheManagement/single/AllRepliesByParentVideoId'),
-  ReplyDetailsByParentVideoPaginationCache = require(rootPrefix +
-    '/lib/cacheManagement/single/ReplyDetailsByParentVideoPagination'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
-  paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination');
+  videoDetailsConstants = require(rootPrefix + '/lib/globalConstant/videoDetail');
 
 /**
  * Class for unseen replies for a parent video id.
@@ -38,8 +35,6 @@ class Unseen extends ServiceBase {
     oThis.videoId = +params.video_id;
     oThis.currentUser = params.current_user || null;
 
-    oThis.currentUserId = null;
-
     oThis.allRepliesArray = [];
     oThis.seenVideos = {};
     oThis.unseenRepliesArray = [];
@@ -54,22 +49,44 @@ class Unseen extends ServiceBase {
   async _asyncPerform() {
     const oThis = this;
 
-    // TODO bubble - add validation for video id for deleted and block relation
+    await oThis._validateVideoId();
 
     await oThis._fetchAllRepliesOfGivenParentVideoId();
 
-    // TODO bubble - move the checks to the function
-    if (oThis.currentUser && oThis.allRepliesArray.length > 0) {
-      oThis.currentUserId = oThis.currentUser.id;
-      await oThis._fetchAllSeenVideoOfCurrentUserId();
-    }
+    await oThis._fetchAllSeenVideoOfCurrentUserId();
 
-    // TODO bubble - name change
-    oThis._filterUnSeenVideos();
+    oThis._filterVideosToDisplay();
 
     await oThis._fetchUserAndRelatedEntities();
 
     return oThis._prepareResponse();
+  }
+
+  /**
+   * Validate video id
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _validateVideoId() {
+    const oThis = this;
+
+    let videoDetailsRsp = await new VideoDetailsByVideoIds({ videoIds: [oThis.videoId] }).fetch();
+    if (videoDetailsRsp.isFailure()) {
+      return Promise.reject(videoDetailsRsp);
+    }
+
+    let videoStatus = videoDetailsRsp.data[oThis.videoId].status;
+    if (videoStatus && videoStatus !== videoDetailsConstants.activeStatus) {
+      return Promise.reject(
+        responseHelper.paramValidationError({
+          internal_error_identifier: 'a_s_r_p_us_1',
+          api_error_identifier: 'invalid_api_params',
+          params_error_identifiers: ['invalid_video_id'],
+          debug_options: { videoId: oThis.videoId, videoDetails: videoDetailsRsp.data[oThis.videoId] }
+        })
+      );
+    }
   }
 
   /**
@@ -100,6 +117,9 @@ class Unseen extends ServiceBase {
    */
   async _fetchAllSeenVideoOfCurrentUserId() {
     const oThis = this;
+    if (!oThis.currentUser || oThis.allRepliesArray.length === 0) {
+      return;
+    }
 
     let replyVideoIds = [];
 
@@ -108,7 +128,7 @@ class Unseen extends ServiceBase {
     }
 
     let seenVideosData = await new UserVideoViewModel().fetchVideoViewDetails({
-      userId: oThis.currentUserId,
+      userId: oThis.currentUser.id,
       videoIds: replyVideoIds
     });
 
@@ -124,11 +144,11 @@ class Unseen extends ServiceBase {
    *
    * @private
    */
-  _filterUnSeenVideos() {
+  _filterVideosToDisplay() {
     const oThis = this;
 
     //loop through the all replies array. And remove all the videos which are seen. Break the loop once 4 unseen replies are fetched.
-    for (let i = 0; i < oThis.allRepliesArray.length; i++) {
+    for (let i = oThis.allRepliesArray.length - 1; i >= 0; i--) {
       if (!oThis.seenVideos[oThis.allRepliesArray[i].replyVideoId]) {
         oThis.unseenRepliesArray.push(oThis.allRepliesArray[i]);
         if (oThis.unseenRepliesArray.length === 4) {

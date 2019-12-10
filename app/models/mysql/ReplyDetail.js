@@ -379,10 +379,8 @@ class ReplyDetailsModel extends ModelBase {
   async getAllReplies(parentVideoId) {
     const oThis = this;
 
-    // TODO bubble - select entity kind too
-    // TODO bubble - change the usage to consider ASC order
     const dbRows = await oThis
-      .select(['id', 'creator_user_id', 'entity_id'])
+      .select(['id', 'creator_user_id', 'entity_id', 'entity_kind'])
       .where([
         'parent_kind = ? AND parent_id = ? AND status = ?',
         replyDetailConstants.invertedParentKinds[replyDetailConstants.videoParentKind],
@@ -423,9 +421,7 @@ class ReplyDetailsModel extends ModelBase {
       for (let index = 0; index < params.parentVideoIds.length; index++) {
         let currParentVideoId = params.parentVideoIds[index];
 
-        promisesArray.push(
-          new ReplyDetailsByParentVideoPaginationCache({ videoId: currParentVideoId }).clear()
-        );
+        promisesArray.push(new ReplyDetailsByParentVideoPaginationCache({ videoId: currParentVideoId }).clear());
         promisesArray.push(new AllRepliesByParentVideoId({ parentVideoId: currParentVideoId }).clear());
       }
     }
