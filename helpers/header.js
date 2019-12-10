@@ -44,18 +44,19 @@ class HeaderHelper {
   /**
    * Is reply build.
    *
-   * @param {Object} params
-   * @param {String} params.deviceOs
-   * @param {Number} params.buildNumber
+   * @param {Object} headers
    *
    * @returns {Boolean}
    */
-  isReplyBuild(params) {
+  isReplyBuild(headers) {
     const oThis = this;
 
-    if (params.deviceOs === oThis.iosDeviceOs && params.buildNumber >= oThis.iosReplyBuildNumber) {
+    const deviceOs = oThis.pepoDeviceOs(headers),
+      buildNumber = oThis.pepoBuildNumber(headers);
+
+    if (deviceOs === oThis.iosDeviceOs && buildNumber >= oThis.iosReplyBuildNumber) {
       return true;
-    } else if (params.deviceOs === oThis.androidDeviceOs && params.buildNumber >= oThis.androidReplyBuildNumber) {
+    } else if (deviceOs === oThis.androidDeviceOs && buildNumber >= oThis.androidReplyBuildNumber) {
       return true;
     }
 
@@ -65,21 +66,19 @@ class HeaderHelper {
   /**
    * Is video play event build.
    *
-   * @param {Object} params
-   * @param {String} params.deviceOs
-   * @param {Number} params.buildNumber
+   * @param {Object} headers
    *
    * @returns {Boolean}
    */
-  isVideoPlayEventBuild(params) {
+  isVideoPlayEventBuild(headers) {
     const oThis = this;
 
-    if (params.deviceOs === oThis.iosDeviceOs && params.buildNumber >= oThis.iosVideoPlayEventBuildNumber) {
+    const deviceOs = oThis.pepoDeviceOs(headers),
+      buildNumber = oThis.pepoBuildNumber(headers);
+
+    if (deviceOs === oThis.iosDeviceOs && buildNumber >= oThis.iosVideoPlayEventBuildNumber) {
       return true;
-    } else if (
-      params.deviceOs === oThis.androidDeviceOs &&
-      params.buildNumber >= oThis.androidVideoPlayEventBuildNumber
-    ) {
+    } else if (deviceOs === oThis.androidDeviceOs && buildNumber >= oThis.androidVideoPlayEventBuildNumber) {
       return true;
     }
 
