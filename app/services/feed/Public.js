@@ -6,11 +6,10 @@ const rootPrefix = '../../..',
   FeedByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/FeedByIds'),
   LoggedOutFeedCache = require(rootPrefix + '/lib/cacheManagement/single/LoggedOutFeed'),
   UserPersonalizedDataModel = require(rootPrefix + '/app/models/cassandra/UserPersonalizedData'),
-  UserMuteByUser1IdsCache = require(rootPrefix + '/lib/cacheManagement/multi/UserMuteByUser1Ids'),
   UserDeviceExtendedDetailModel = require(rootPrefix + '/app/models/mysql/UserDeviceExtendedDetail'),
   UserDeviceExtendedDetailsByDeviceIdsCache = require(rootPrefix +
     '/lib/cacheManagement/multi/UserDeviceExtendedDetailsByDeviceIds'),
-  basicHelper = require(rootPrefix + '/helpers/basic'),
+  headerHelper = require(rootPrefix + '/helpers/header'),
   coreConstants = require(rootPrefix + '/config/coreConstants'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
@@ -181,7 +180,7 @@ class PublicVideoFeed extends FeedBase {
     const dbRow = await new UserPersonalizedDataModel().fetchJsonDataForKind({
       userId: oThis.currentUserId,
       kind: userPersonalizedDataConstants.feedDataKind,
-      uniqueId: oThis._pepodeviceId()
+      uniqueId: headerHelper.pepoDeviceId(oThis.headers)
     });
 
     if (CommonValidators.validateNonEmptyObject(dbRow.jsonData)) {
@@ -200,8 +199,8 @@ class PublicVideoFeed extends FeedBase {
     const oThis = this;
 
     const getListParams = {
-      sortFeeds: !oThis._isOlderBuildWithoutVideoPlayEvent(),
-      currentUserId: oThis.currentUserId
+      currentUserId: oThis.currentUserId,
+      headers: oThis.headers
     };
 
     const getListResponse = await new GetListFeedLib(getListParams).perform();
@@ -215,47 +214,9 @@ class PublicVideoFeed extends FeedBase {
     await new UserPersonalizedDataModel().updateJsonDataForUsers({
       userId: oThis.currentUserId,
       kind: userPersonalizedDataConstants.feedDataKind,
-      uniqueId: oThis._pepodeviceId(),
+      uniqueId: headerHelper.pepoDeviceId(oThis.headers),
       jsonData: oThis.userPersonalizedfeedData
     });
-  }
-
-  /**
-   * Returns unique identifier of device for current request.
-   *
-   * @returns {string}
-   * @private
-   */
-  _pepodeviceId() {
-    const oThis = this;
-    logger.log(
-      `===================PERSONALIZED FEED${oThis.currentUserId} x-pepo-device-id:`,
-      oThis.headers['x-pepo-device-id']
-    );
-
-    return oThis.headers['x-pepo-device-id'] || '';
-  }
-
-  /**
-   * Returns true if older pepo builds which does not have video play event.
-   *
-   * @returns {boolean}
-   * @private
-   */
-  _isOlderBuildWithoutVideoPlayEvent() {
-    const oThis = this;
-
-    const appVersion = oThis.headers['x-pepo-app-version'] || '';
-
-    let res = false;
-
-    if (['0.9.0', '0.9.1'].indexOf(appVersion) > -1) {
-      res = true;
-    }
-
-    logger.log(`===================PERSONALIZED FEED${oThis.currentUserId}=======x-pepo-app-version==`, appVersion);
-
-    return res;
   }
 
   /**
@@ -423,10 +384,10 @@ class PublicVideoFeed extends FeedBase {
       return;
     }
 
-    const deviceId = oThis.headers['x-pepo-device-id'],
-      currentBuildNumber = oThis.headers['x-pepo-build-number'],
-      appVersion = oThis.headers['x-pepo-app-version'],
-      deviceOs = oThis.headers['x-pepo-device-os'];
+    const deviceId = headerHelper.pepoDeviceId(oThis.headers),
+      currentBuildNumber = headerHelper.pepoBuildNumber(oThis.headers),
+      appVersion = headerHelper.pepoAppVersion(oThis.headers),
+      deviceOs = headerHelper.pepoDeviceOs(oThis.headers);
 
     if (!deviceId) {
       return;
