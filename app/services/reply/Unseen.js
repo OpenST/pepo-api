@@ -6,6 +6,7 @@ const rootPrefix = '../../..',
   AllRepliesByParentVideoId = require(rootPrefix + '/lib/cacheManagement/single/AllRepliesByParentVideoId'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
+  replyDetailConstants = require(rootPrefix + '/lib/globalConstant/replyDetail'),
   videoDetailsConstants = require(rootPrefix + '/lib/globalConstant/videoDetail');
 
 /**
@@ -124,7 +125,7 @@ class Unseen extends ServiceBase {
     let replyVideoIds = [];
 
     for (let i = 0; i < oThis.allRepliesArray.length; i++) {
-      replyVideoIds.push(oThis.allRepliesArray[i].replyVideoId);
+      replyVideoIds.push(oThis.allRepliesArray[i][replyDetailConstants.longToShortNamesMapForCache['replyVideoId']]);
     }
 
     let seenVideosData = await new UserVideoViewModel().fetchVideoViewDetails({
@@ -149,7 +150,9 @@ class Unseen extends ServiceBase {
 
     //loop through the all replies array. And remove all the videos which are seen. Break the loop once 4 unseen replies are fetched.
     for (let i = oThis.allRepliesArray.length - 1; i >= 0; i--) {
-      if (!oThis.seenVideos[oThis.allRepliesArray[i].replyVideoId]) {
+      if (
+        !oThis.seenVideos[oThis.allRepliesArray[i][replyDetailConstants.longToShortNamesMapForCache['replyVideoId']]]
+      ) {
         oThis.unseenRepliesArray.push(oThis.allRepliesArray[i]);
         if (oThis.unseenRepliesArray.length === 4) {
           break;
@@ -169,7 +172,7 @@ class Unseen extends ServiceBase {
 
     let userIdsArray = [];
     for (let i = 0; i < oThis.unseenRepliesArray.length; i++) {
-      userIdsArray.push(oThis.unseenRepliesArray[i].creatorId);
+      userIdsArray.push(oThis.unseenRepliesArray[i][replyDetailConstants.longToShortNamesMapForCache['creatorUserId']]);
     }
 
     let associatedEntitiesRsp = await new FetchAssociatedEntities({ userIds: userIdsArray }).perform();
