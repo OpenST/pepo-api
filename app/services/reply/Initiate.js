@@ -166,10 +166,6 @@ class InitiateReply extends ServiceBase {
     if (!CommonValidators.validateGenericUrl(oThis.link)) {
       oThis.link = null;
     }
-
-    if (oThis.link) {
-      oThis.link = oThis.link.toLowerCase();
-    }
   }
 
   /**
