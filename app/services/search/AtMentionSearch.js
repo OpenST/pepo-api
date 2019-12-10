@@ -188,14 +188,14 @@ class UserAtMentionSearch extends ServiceBase {
       return;
     }
 
-    let userIdsArray = [];
+    let userIdsArray = oThis.userIds;
     // Add reply video creators to userIds array.
     for (let ind = 0; ind < allRepliesForParentVideoId.length; ind++) {
       let replyDetail = allRepliesForParentVideoId[ind];
       userIdsArray.push(replyDetail.creatorId);
     }
 
-    oThis.userId = basicHelper.uniquate(userIdsArray, oThis.limit);
+    oThis.userIds = basicHelper.uniquate(userIdsArray, oThis.limit);
   }
 
   /**
