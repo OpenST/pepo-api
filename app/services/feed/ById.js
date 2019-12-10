@@ -131,6 +131,16 @@ class FeedById extends FeedBase {
       tokenDetails: oThis.tokenDetails
     });
   }
+
+  /**
+   * Mark user device details.
+   *
+   * @returns {Promise<*>}
+   * @private
+   */
+  async _markUserDeviceDetails() {
+    // Do nothing.
+  }
 }
 
 module.exports = FeedById;

@@ -1,15 +1,19 @@
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   UserModel = require(rootPrefix + '/app/models/mysql/User'),
+  CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   UserCache = require(rootPrefix + '/lib/cacheManagement/multi/User'),
   ImageByIdCache = require(rootPrefix + '/lib/cacheManagement/multi/ImageByIds'),
   TokenUserDetailByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TokenUserByUserIds'),
-  CommonValidators = require(rootPrefix + '/lib/validators/Common'),
-  coreConstants = require(rootPrefix + '/config/coreConstants'),
+  CuratedEntityIdsByKindCache = require(rootPrefix + '/lib/cacheManagement/single/CuratedEntityIdsByKind'),
+  basicHelper = require(rootPrefix + '/helpers/basic'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
-  basicHelper = require(rootPrefix + '/helpers/basic'),
-  paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination');
+  paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination'),
+  curatedEntitiesConstants = require(rootPrefix + '/lib/globalConstant/curatedEntities');
+
+// Declare variables.
+const topUsersResultsLimit = 5;
 
 /**
  * Class for user search.
@@ -139,27 +143,28 @@ class UserSearch extends ServiceBase {
       oThis.hasNextPage = userData.userIds.length >= oThis.limit;
     } else {
       // Display curated users in search.
-      const curatedUserIdsString = oThis.getTopResults
-        ? coreConstants.PEPO_USER_SEARCH_TOP_USER_IDS
-        : coreConstants.PEPO_USER_SEARCH_CURATED_USER_IDS;
-      if (curatedUserIdsString.length === 0) {
-        // Empty string.
+      const cacheResponse = await new CuratedEntityIdsByKindCache({
+        entityKind: curatedEntitiesConstants.userEntityKind
+      }).fetch();
+      if (cacheResponse.isFailure()) {
+        return Promise.reject(cacheResponse);
+      }
+
+      let curatedUserIds = cacheResponse.data.entityIds;
+
+      curatedUserIds = oThis.getTopResults ? curatedUserIds.slice(0, topUsersResultsLimit + 1) : curatedUserIds;
+
+      if (curatedUserIds.length === 0) {
+        // Empty curated userIds array.
         userData = { userIds: [], userDetails: {} };
       } else {
-        const curatedUserIds = JSON.parse(curatedUserIdsString);
-
-        if (curatedUserIds.length === 0) {
-          // Empty curated userIds array.
-          userData = { userIds: [], userDetails: {} };
-        } else {
-          // Fetch curated users information.
-          const userDetailsCacheResponse = await new UserCache({ ids: curatedUserIds }).fetch();
-          if (userDetailsCacheResponse.isFailure()) {
-            return Promise.reject(userDetailsCacheResponse);
-          }
-
-          userData = { userIds: curatedUserIds, userDetails: userDetailsCacheResponse.data };
+        // Fetch curated users information.
+        const userDetailsCacheResponse = await new UserCache({ ids: curatedUserIds }).fetch();
+        if (userDetailsCacheResponse.isFailure()) {
+          return Promise.reject(userDetailsCacheResponse);
         }
+
+        userData = { userIds: curatedUserIds, userDetails: userDetailsCacheResponse.data };
       }
     }
 
@@ -202,7 +207,7 @@ class UserSearch extends ServiceBase {
 
     for (let ind = 0; ind < oThis.userIds.length; ) {
       const userId = oThis.userIds[ind];
-      if (oThis.tokenUsersByUserIdMap[userId].hasOwnProperty('userId')) {
+      if (Object.prototype.hasOwnProperty.call(oThis.tokenUsersByUserIdMap[userId], 'userId')) {
         ind++; // Increment only if not deleted
       } else {
         oThis.userIds.splice(ind, 1);

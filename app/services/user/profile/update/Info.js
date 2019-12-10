@@ -83,10 +83,6 @@ class UpdateProfileInfo extends UpdateProfileBase {
       oThis.bio = CommonValidators.sanitizeText(oThis.bio);
     }
 
-    if (oThis.link) {
-      oThis.link = oThis.link.toLowerCase();
-    }
-
     await oThis._validateUserName();
   }
 
