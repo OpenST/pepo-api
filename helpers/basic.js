@@ -23,7 +23,7 @@ class BasicHelper {
       uniqueOrderedArray = [];
     for (let i = 0; i < inputArray.length; i++) {
       let arrayElement = inputArray[i];
-      if (!arrayElement) {
+      if (!uniqueMap[arrayElement]) {
         counter++;
         uniqueMap[arrayElement] = 1;
         uniqueOrderedArray.push(arrayElement);
