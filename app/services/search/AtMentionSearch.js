@@ -188,8 +188,6 @@ class UserAtMentionSearch extends ServiceBase {
       return;
     }
 
-    console.log(allRepliesByParentVideoIdCacheResponse);
-
     // Add reply video creators to userIds array.
     for (let ind = 0; ind < allRepliesForParentVideoId.length; ind++) {
       let replyDetail = allRepliesForParentVideoId[ind];
@@ -208,7 +206,7 @@ class UserAtMentionSearch extends ServiceBase {
     const oThis = this;
 
     oThis.userIds = [...new Set(oThis.userIds)];
-    oThis.userIds.splice(20);
+    oThis.userIds.splice(oThis.limit);
 
     if (!oThis.userIds || oThis.userIds.length === 0) {
       return;
