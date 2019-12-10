@@ -18,6 +18,7 @@ const rootPrefix = '../../..',
   apiVersions = require(rootPrefix + '/lib/globalConstant/apiVersions'),
   adminPreLaunchRoutes = require(rootPrefix + '/routes/api/admin/preLaunch/index'),
   adminUpdateUsageDataRoutes = require(rootPrefix + '/routes/api/admin/updateUsageData/index'),
+  curatedEntitiesDataRoutes = require(rootPrefix + '/routes/api/admin/curatedEntity/index'),
   adminResponseEntityKey = require(rootPrefix + '/lib/globalConstant/adminResponseEntity');
 
 // Declare variables.
@@ -380,7 +381,18 @@ router.get('/videos/:video_id', sanitizer.sanitizeDynamicUrlParams, function(req
   Promise.resolve(routeHelper.perform(req, res, next, '/video/GetById', 'r_a_v1_ad_19', null, dataFormatterFunc));
 });
 
+/* Send resubmission email */
+router.post('/users/:user_id/send-resubmission-email', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.adminSendEmailForResubmission;
+  req.decodedParams.user_id = req.params.user_id;
+
+  Promise.resolve(
+    routeHelper.perform(req, res, next, '/admin/SendEmailForReSubmission', 'r_a_v1_ad_20', null, null, null)
+  );
+});
+
 router.use('/pre-launch', adminPreLaunchRoutes);
 router.use('/update-usage-data', adminUpdateUsageDataRoutes);
+router.use('/curated-entities', curatedEntitiesDataRoutes);
 
 module.exports = router;

@@ -63,6 +63,19 @@ const adminSignature = {
     ],
     optional: []
   },
+  [apiName.adminSendEmailForResubmission]: {
+    mandatory: [
+      {
+        parameter: 'user_id',
+        validatorMethods: ['validateInteger']
+      },
+      {
+        parameter: 'current_admin',
+        validatorMethods: ['validateNonEmptyObject']
+      }
+    ],
+    optional: []
+  },
   [apiName.adminUserDeny]: {
     mandatory: [
       {
@@ -325,6 +338,62 @@ const adminSignature = {
         validatorMethods: ['validateBoolean']
       }
     ]
+  },
+  [apiName.updateCuratedEntity]: {
+    mandatory: [
+      {
+        parameter: 'entity_kind',
+        validatorMethods: ['validateString']
+      },
+      {
+        parameter: 'entity_id',
+        validatorMethods: ['validateNonZeroInteger']
+      },
+      {
+        parameter: 'position',
+        validatorMethods: ['validateString']
+      },
+      {
+        parameter: 'current_admin',
+        validatorMethods: ['validateNonEmptyObject']
+      }
+    ],
+    optional: []
+  },
+  [apiName.deleteCuratedEntity]: {
+    mandatory: [
+      {
+        parameter: 'entity_kind',
+        validatorMethods: ['validateString']
+      },
+      {
+        parameter: 'entity_id',
+        validatorMethods: ['validateNonZeroInteger']
+      },
+      {
+        parameter: 'current_admin',
+        validatorMethods: ['validateNonEmptyObject']
+      }
+    ],
+    optional: []
+  },
+  [apiName.getUsersCuratedEntityList]: {
+    mandatory: [
+      {
+        parameter: 'entity_kind',
+        validatorMethods: ['validateString']
+      }
+    ],
+    optional: []
+  },
+  [apiName.getTagsCuratedEntityList]: {
+    mandatory: [
+      {
+        parameter: 'entity_kind',
+        validatorMethods: ['validateString']
+      }
+    ],
+    optional: []
   }
 };
 
