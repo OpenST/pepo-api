@@ -54,13 +54,17 @@ class Unseen extends ServiceBase {
   async _asyncPerform() {
     const oThis = this;
 
+    // TODO bubble - add validation for video id for deleted and block relation
+
     await oThis._fetchAllRepliesOfGivenParentVideoId();
 
+    // TODO bubble - move the checks to the function
     if (oThis.currentUser && oThis.allRepliesArray.length > 0) {
       oThis.currentUserId = oThis.currentUser.id;
       await oThis._fetchAllSeenVideoOfCurrentUserId();
     }
 
+    // TODO bubble - name change
     oThis._filterUnSeenVideos();
 
     await oThis._fetchUserAndRelatedEntities();
