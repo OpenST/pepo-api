@@ -618,7 +618,7 @@ class TransactionWebhookBase extends ServiceBase {
 
         const replyDetailId = replyDetailsByEntityIdsAndEntityKindCacheRsp.data[oThis.videoId].id;
 
-        if (replyDetailId) {
+        if (!replyDetailId) {
           return Promise.reject(
             responseHelper.paramValidationError({
               internal_error_identifier: 'a_s_oe_t_b_11',
@@ -663,9 +663,10 @@ class TransactionWebhookBase extends ServiceBase {
       );
     }
 
+    oThis.parentVideoId = replyDetail.parentId;
+
     if (oThis._isPepoOnReplyTransactionKind()) {
       oThis.videoId = replyDetail.entityId;
-      oThis.parentVideoId = replyDetail.parentId;
     }
   }
 
