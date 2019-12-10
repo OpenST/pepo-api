@@ -3,15 +3,12 @@
  *
  * Usage - node executables/oneTimers/populateParentVideoIdInUserNotificationsPayload.js
  */
-
+// TODO - check if parent video id is present in the table. If not update.
 const rootPrefix = '../..',
   UserModel = require(rootPrefix + '/app/models/mysql/User'),
   ReplyDetailsModel = require(rootPrefix + '/app/models/mysql/ReplyDetail'),
   UserNotificationModel = require(rootPrefix + '/app/models/cassandra/UserNotification'),
-  basicHelper = require(rootPrefix + '/helpers/basic'),
   commonValidators = require(rootPrefix + '/lib/validators/Common'),
-  userConstants = require(rootPrefix + '/lib/globalConstant/user'),
-  replyDetailConstants = require(rootPrefix + '/lib/globalConstant/replyDetail'),
   userNotificationConstants = require(rootPrefix + '/lib/globalConstant/cassandra/userNotification'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger');
 
@@ -46,13 +43,12 @@ class PopulateParentVideoIdInUserNotificationsPayload {
   async _fetchUserIds() {
     const oThis = this;
 
-    let minUserId = -1;
+    let iterationLastId = -1;
 
     while (true) {
       const rows = await new UserModel()
         .select('id')
-        .where({ status: userConstants.invertedStatuses[userConstants.activeStatus] })
-        .where(['id > ?', minUserId])
+        .where(['id > ?', iterationLastId])
         .limit(limit)
         .order_by('id asc')
         .fire();
@@ -64,38 +60,11 @@ class PopulateParentVideoIdInUserNotificationsPayload {
         for (let ind = 0; ind < rows.length; ind++) {
           oThis.userIds.push(rows[ind].id);
           batchedUserIds.push(rows[ind].id);
-          minUserId = rows[ind].id;
+          iterationLastId = rows[ind].id;
         }
+
         await oThis._fetchParentIdForReplyCreators(batchedUserIds);
       }
-    }
-  }
-
-  /**
-   * Fetch parent id for reply creators.
-   *
-   * @returns {Promise<void>}
-   * @private
-   */
-  async _fetchParentIdForReplyCreators(userIds) {
-    const oThis = this;
-
-    const dbRows = await new ReplyDetailsModel()
-      .select('*')
-      .where({
-        status: replyDetailConstants.invertedStatuses[replyDetailConstants.activeStatus],
-        creator_user_id: userIds
-      })
-      .fire();
-
-    if (dbRows.length === 0) {
-      return;
-    }
-
-    for (let ind = 0; ind < dbRows.length; ind++) {
-      let dbRow = dbRows[ind];
-
-      oThis.replyDetailsIdToParentIdMap[dbRow.id] = dbRow.parent_id;
     }
   }
 
@@ -108,18 +77,17 @@ class PopulateParentVideoIdInUserNotificationsPayload {
   async _populate() {
     const oThis = this;
 
-    const kindsArray = [
-      userNotificationConstants.replySenderWithAmountKind,
-      userNotificationConstants.replySenderWithoutAmountKind,
-      userNotificationConstants.replyReceiverWithAmountKind,
-      userNotificationConstants.replyReceiverWithoutAmountKind,
-      userNotificationConstants.replyUserMentionKind
-    ];
+    const kindsMap = {
+      [userNotificationConstants.replySenderWithAmountKind]: 1,
+      [userNotificationConstants.replySenderWithoutAmountKind]: 1,
+      [userNotificationConstants.replyReceiverWithAmountKind]: 1,
+      [userNotificationConstants.replyReceiverWithoutAmountKind]: 1,
+      [userNotificationConstants.replyUserMentionKind]: 1
+    };
 
     while (oThis.userIds.length > 0) {
       const queries = [],
-        cacheFlushPromises = [],
-        userNotificationModelObj = new UserNotificationModel();
+        cacheFlushPromises = [];
 
       const batchedUserIds = oThis.userIds.splice(0, BATCH_SIZE);
 
@@ -141,7 +109,7 @@ class PopulateParentVideoIdInUserNotificationsPayload {
 
         if (userNotifications) {
           const query = `UPDATE ${
-            userNotificationModelObj.queryTableName
+            new UserNotificationModel().queryTableName
           } SET payload = ? WHERE user_id = ? AND last_action_timestamp = ? AND uuid = ?`;
 
           for (let newInd = 0; newInd < userNotifications.length; newInd++) {
@@ -149,11 +117,12 @@ class PopulateParentVideoIdInUserNotificationsPayload {
               payload = userNotification.payload,
               replyDetailId = payload.replyDetailId;
 
-            if (kindsArray.indexOf(userNotification.kind) > -1) {
+            if (kindsMap[userNotification.kind]) {
               if (!oThis.replyDetailsIdToParentIdMap[replyDetailId]) {
                 // continue with to next userNotifications
-                console.log('Data not found for replyDetailId----> ', replyDetailId);
+                console.log('Data not found for replyDetailId----> Need to investigate: ', replyDetailId);
               } else {
+                // TODO - update only if needed
                 payload['pvid'] = oThis.replyDetailsIdToParentIdMap[replyDetailId];
 
                 const stringifiedPayload = JSON.stringify(payload),
@@ -173,9 +142,38 @@ class PopulateParentVideoIdInUserNotificationsPayload {
       }
       if (queries.length > 0) {
         console.log('========batchFire(queries)=====\n', queries);
-        await userNotificationModelObj.batchFire(queries);
+        // TODO - batching
+        await new UserNotificationModel().batchFire(queries);
+        // TODO - remove clear cache from here. flush global cache at the end
         await Promise.all(cacheFlushPromises);
       }
+    }
+  }
+
+  /**
+   * Fetch parent id for reply creators.
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _fetchParentIdForReplyCreators(userIds) {
+    const oThis = this;
+
+    const dbRows = await new ReplyDetailsModel()
+      .select('*')
+      .where({
+        creator_user_id: userIds
+      })
+      .fire();
+
+    if (dbRows.length === 0) {
+      return;
+    }
+
+    for (let ind = 0; ind < dbRows.length; ind++) {
+      let dbRow = dbRows[ind];
+
+      oThis.replyDetailsIdToParentIdMap[dbRow.id] = dbRow.parent_id;
     }
   }
 
@@ -192,7 +190,8 @@ class PopulateParentVideoIdInUserNotificationsPayload {
     const response = {},
       userNotificationModelObj = new UserNotificationModel();
 
-    const queryString = `select * from ${userNotificationModelObj.queryTableName} where user_id IN ? ALLOW FILTERING`;
+    // TODO - batching
+    const queryString = `select * from ${userNotificationModelObj.queryTableName} where user_id IN ?`;
 
     const queryRsp = await userNotificationModelObj.fire(queryString, [params.userIds]);
 
