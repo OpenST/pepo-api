@@ -32,8 +32,8 @@ class BackPopulateFeedAlgoData {
     const oThis = this;
 
     const tableName = new UserActionDetailModel().queryTableName,
-      videoQuery = `UPDATE ${tableName} set l_v_c_t = ? where u_id=? and e_i = ? `,
-      replyQuery = `UPDATE ${tableName} set l_r_c_t = ? where u_id=? and e_i = ? `;
+      videoQuery = `UPDATE ${tableName} set l_v_c_t = ? where u_id = ? and e_i = ? `,
+      replyQuery = `UPDATE ${tableName} set l_r_c_t = ? where u_id = ? and e_i = ? `;
 
     let queries = [],
       limit = 100,
@@ -129,7 +129,7 @@ class BackPopulateFeedAlgoData {
           }
         } else {
           if (videoIds.indexOf(dbRow.video_id) === -1) {
-            Promise.reject(`INVALID Video ID-`, dbRow.video_id);
+            return Promise.reject(`INVALID Video ID-`, dbRow.video_id);
           }
 
           let entityIdentifier = userActionDetailConstants.createEntityIdentifier(
@@ -166,7 +166,7 @@ class BackPopulateFeedAlgoData {
     const oThis = this;
 
     const tableName = new UserActionDetailModel().queryTableName,
-      query = `UPDATE ${tableName} set l_r_t = ? where u_id=? and e_i = ? `;
+      query = `UPDATE ${tableName} set l_r_t = ? where u_id = ? and e_i = ? `;
 
     let queries = [],
       limit = 100,
@@ -210,7 +210,7 @@ class BackPopulateFeedAlgoData {
     const oThis = this;
 
     const tableName = new UserActionDetailModel().queryTableName,
-      query = `UPDATE ${tableName} set u_c_t = ? where u_id=? and e_i = ? `;
+      query = `UPDATE ${tableName} set u_c_t = ? where u_id = ? and e_i = ? `;
 
     let queries = [],
       limit = 100,
