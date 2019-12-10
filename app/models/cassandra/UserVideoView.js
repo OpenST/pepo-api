@@ -135,7 +135,9 @@ class UserVideoViewModel extends CassandraModelBase {
     const oThis = this;
     const response = {};
 
-    const query = `select last_view_at, video_id from ${oThis.queryTableName} where user_id = ? and video_id in ?;`;
+    const query = `select last_view_at, last_reply_view_at, video_id from ${
+      oThis.queryTableName
+    } where user_id = ? and video_id in ?;`;
     const params = [queryParams.userId, queryParams.videoIds];
 
     const queryRsp = await oThis.fire(query, params);
