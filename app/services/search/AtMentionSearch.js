@@ -208,6 +208,7 @@ class UserAtMentionSearch extends ServiceBase {
     const oThis = this;
 
     oThis.userIds = [...new Set(oThis.userIds)];
+    oThis.userIds.splice(20);
 
     if (!oThis.userIds || oThis.userIds.length === 0) {
       return;
@@ -245,8 +246,8 @@ class UserAtMentionSearch extends ServiceBase {
       oThis.hasNextPage = userData.userIds.length >= oThis.limit;
     }
 
-    oThis.userIds = userData.userIds;
-    oThis.userDetails = userData.userDetails;
+    oThis.userIds = userData.userIds || [];
+    oThis.userDetails = userData.userDetails || {};
   }
 
   /**
