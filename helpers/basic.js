@@ -17,6 +17,24 @@ const rootPrefix = '..',
  * @class BasicHelper
  */
 class BasicHelper {
+  uniquate(inputArray, limit) {
+    let uniqueMap = {},
+      counter = 0,
+      uniqueOrderedArray = [];
+    for (let i = 0; i < inputArray.length; i++) {
+      let arrayElement = inputArray[i];
+      if (!arrayElement) {
+        counter++;
+        uniqueMap[arrayElement] = 1;
+        uniqueOrderedArray.push(arrayElement);
+        if (counter === limit) {
+          return uniqueOrderedArray;
+        }
+      }
+    }
+    return uniqueOrderedArray;
+  }
+
   /**
    * Convert wei value to un wei (normal).
    *

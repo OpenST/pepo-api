@@ -188,11 +188,14 @@ class UserAtMentionSearch extends ServiceBase {
       return;
     }
 
+    let userIdsArray = [];
     // Add reply video creators to userIds array.
     for (let ind = 0; ind < allRepliesForParentVideoId.length; ind++) {
       let replyDetail = allRepliesForParentVideoId[ind];
-      oThis.userIds.push(replyDetail.creatorId);
+      userIdsArray.push(replyDetail.creatorId);
     }
+
+    oThis.userId = basicHelper.uniquate(userIdsArray, oThis.limit);
   }
 
   /**
@@ -204,9 +207,6 @@ class UserAtMentionSearch extends ServiceBase {
    */
   async _fetchUserDetailsForCreatorUserId() {
     const oThis = this;
-
-    oThis.userIds = [...new Set(oThis.userIds)];
-    oThis.userIds.splice(oThis.limit);
 
     if (!oThis.userIds || oThis.userIds.length === 0) {
       return;
