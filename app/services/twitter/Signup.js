@@ -47,6 +47,7 @@ class TwitterSignup extends ServiceBase {
    * @param {object} params.prelaunchInviteObj: prelaunch invite object, if user was part of pre-launch program
    * @param {object} params.utmParams: utm params used while signup.
    * @param {object} params.sanitizedHeaders: sanitized headers.
+   * @param {string} [params.inviteCode:] invite code.
    *
    * @augments ServiceBase
    *
@@ -66,6 +67,7 @@ class TwitterSignup extends ServiceBase {
     oThis.prelaunchInviteObj = params.prelaunchInviteObj || {};
     oThis.utmParams = params.utmParams || {};
     oThis.sanitizedHeaders = params.sanitizedHeaders;
+    oThis.inviteCode = params.inviteCode || '';
 
     oThis.userId = null;
 
@@ -572,7 +574,8 @@ class TwitterSignup extends ServiceBase {
       userLoginCookieValue: userLoginCookieValue,
       openEmailAddFlow: oThis.userOptedInEmail ? 0 : 1,
       twitterUserExtended: safeFormattedTwitterUserExtendedData,
-      utmParams: oThis.utmParams
+      utmParams: oThis.utmParams,
+      meta: { isRegistration: 1, inviteCode: oThis.inviteCode }
     });
   }
 

@@ -36,6 +36,7 @@ router.post('/twitter-login', sanitizer.sanitizeDynamicUrlParams, function(req, 
         [entityType.loggedInUser]: responseEntityKey.loggedInUser,
         [entityType.usersMap]: responseEntityKey.users,
         [entityType.utmParams]: responseEntityKey.utmParams,
+        [entityType.twitterConnectMeta]: responseEntityKey.meta,
         [entityType.goto]: responseEntityKey.goto
       },
       serviceData: serviceResponse.data
