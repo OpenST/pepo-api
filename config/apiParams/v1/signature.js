@@ -1144,7 +1144,7 @@ const v1Signature = {
         validatorMethods: ['validateNonEmptyObject']
       },
       {
-        parameter: 'user_id',
+        parameter: 'other_user_id',
         validatorMethods: ['validateNonZeroInteger']
       }
     ],
@@ -1157,7 +1157,7 @@ const v1Signature = {
         validatorMethods: ['validateNonEmptyObject']
       },
       {
-        parameter: 'user_id',
+        parameter: 'other_user_id',
         validatorMethods: ['validateNonZeroInteger']
       }
     ],

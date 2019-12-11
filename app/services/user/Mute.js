@@ -18,7 +18,7 @@ class UserMute extends ServiceBase {
    *
    * @param {object} params
    * @param {object} params.current_user: User id to be mute by admin.
-   * @param {object} params.user_id: User id to be muted.
+   * @param {object} params.other_user_id: User id to be muted.
    *
    * @augments ServiceBase
    *
@@ -30,7 +30,7 @@ class UserMute extends ServiceBase {
     const oThis = this;
 
     oThis.currentUserId = params.current_user.id;
-    oThis.otherUserId = params.user_id;
+    oThis.otherUserId = params.other_user_id;
   }
 
   /**

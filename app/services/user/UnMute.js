@@ -17,7 +17,7 @@ class UserUnMute extends ServiceBase {
    *
    * @param {object} params
    * @param {object} params.current_user: Current user object.
-   * @param {object} params.user_id: User id to be unMuted.
+   * @param {object} params.other_user_id: User id to be unMuted.
    *
    * @augments ServiceBase
    *
@@ -29,7 +29,7 @@ class UserUnMute extends ServiceBase {
     const oThis = this;
 
     oThis.currentUserId = params.current_user.id;
-    oThis.otherUserId = params.user_id;
+    oThis.otherUserId = params.other_user_id;
   }
 
   /**

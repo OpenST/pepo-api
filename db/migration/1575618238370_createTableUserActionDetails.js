@@ -17,6 +17,13 @@ const upQuery = `CREATE TABLE ${keySpace}.user_action_details \n\
   PRIMARY KEY ((u_id), e_i)\n\
 );`;
 
+//   u_id: 'userId',
+//   e_i: 'entityIdentifier',
+//   l_r_t: 'lastReplyTimestamp',
+//   l_r_c_t: 'lastReplyContributionTimestamp',
+//   l_v_c_t: 'lastVideoContributionTimestamp',
+//   u_c_t: 'userContributionTimestamp'
+
 const downQuery = `drop table if exists ${keySpace}.user_action_details;`;
 
 const CreateTableUserActionDetails = {

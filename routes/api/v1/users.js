@@ -364,20 +364,21 @@ router.post('/:profile_user_id/unblock', sanitizer.sanitizeDynamicUrlParams, fun
   Promise.resolve(routeHelper.perform(req, res, next, '/user/profile/UnBlockOtherUserForUser', 'r_a_v1_u_17', null));
 });
 
+// TODO feed done - change user_id to other_user_id
 /* Mute User. */
-router.post('/:user_id/mute', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+router.post('/:other_user_id/mute', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.muteUser;
-  // TODO feed - change user_id to other_user_id
-  req.decodedParams.user_id = req.params.user_id;
+  req.decodedParams.other_user_id = req.params.other_user_id;
 
   Promise.resolve(routeHelper.perform(req, res, next, '/user/Mute', 'r_a_v1_u_18', null));
 });
 
+// TODO feed done - change user_id to other_user_id
+
 /* UnMute User. */
-// TODO feed - change user_id to other_user_id
-router.post('/:user_id/unmute', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+router.post('/:other_user_id/unmute', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.unMuteUser;
-  req.decodedParams.user_id = req.params.user_id;
+  req.decodedParams.other_user_id = req.params.other_user_id;
 
   Promise.resolve(routeHelper.perform(req, res, next, '/user/UnMute', 'r_a_v1_u_19', null));
 });

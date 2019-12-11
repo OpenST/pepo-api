@@ -137,7 +137,14 @@ class UserActionDetailModel extends CassandraModelBase {
     valuesArray.push(queryParams.userId);
     valuesArray.push(entityIdentifier);
 
-    return oThis.fire(queryString, valuesArray);
+    await oThis.fire(queryString, valuesArray);
+
+    const flushCacheParams = {
+      userId: queryParams.userId,
+      entityIdentifiers: [entityIdentifier]
+    };
+
+    return UserActionDetailModel.flushCache(flushCacheParams);
   }
 
   /**
@@ -175,9 +182,17 @@ class UserActionDetailModel extends CassandraModelBase {
    *
    * @returns {Promise<*>}
    */
-  static async flushCache() {
-    // TODO feed - ?
-    // Do nothing.
+  static async flushCache(params) {
+    // TODO feed done- ?
+    if (params.userId && params.entityIdentifiers) {
+      const UserActionDetailsByUserIdsCache = require(rootPrefix +
+        '/lib/cacheManagement/multi/UserActionDetailsByUserIds');
+
+      await new UserActionDetailsByUserIdsCache({
+        userId: params.userId,
+        entityIdentifiers: params.entityIdentifiers
+      }).clear();
+    }
   }
 }
 
