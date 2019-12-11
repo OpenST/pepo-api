@@ -113,7 +113,6 @@ class populateRegisterUserPixel {
         await oThis.appendLoglineToFile(logline, user.id);
         userIdsBeforeThis = user.id;
       }
-      break;
     }
   }
 

@@ -9,7 +9,8 @@ const rootPrefix = '../..',
   userConstants = require(rootPrefix + '/lib/globalConstant/user'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger');
 
-let userIdsBeforeThis = process.argv[2] || 0;
+let activityLogIdBeforeThis = process.argv[2] || 0;
+
 const logPixelTemplate = `{{timestamp}} :: 114.143.238.58 :: GET /devp101_pixel.png?v=2&tid=back_populate&did={{device_id}}&sesid=back_populate&serid=1&dt=back_populate&ua=${
   pixelConstants.pixelUserAgent
 }&ee=user&ea=creator_approved&pt=back_populate&uid={{current_admin_user_id}}&approved_user_id={{current_user_id}}&mobile_app_version={{mobile_app_version}} HTTP/1.1 :: - :: ${
@@ -36,70 +37,56 @@ class backPopulateBecomeCreatorPixel {
         userToApproverAdminDetailsMap = {},
         userToDeviceDataMap = {};
 
-      const userDbRows = await new UserModel()
-        .select('*')
-        .where(['id < ?', userIdsBeforeThis])
-        .limit(10)
-        .order_by('id Desc')
-        .fire();
-
-      if (userDbRows.length == 0) {
-        break;
-      }
-      for (let i = 0; i < userDbRows.length; i++) {
-        let user = userDbRows[i];
-        userIds.push(user.id);
-      }
-
       const activityLogsResp = await new ActivityLogModel()
         .select('*')
-        .where({ action_on: userIds })
+        .where(['id < ?', activityLogIdBeforeThis])
         .where(['action=?', adminActivityLogConstants.invertedActions[adminActivityLogConstants.approvedAsCreator]])
+        .order_by('id Desc')
+        .limit(10)
         .fire();
 
+      if (activityLogsResp.length == 0) {
+        break;
+      }
       for (let i = 0; i < activityLogsResp.length; i++) {
-        userToApproverAdminDetailsMap[activityLogsResp[i].action_on] = activityLogsResp[i];
+        let activityLog = activityLogsResp[i];
+        userIds.push(activityLog.action_on);
+        userToApproverAdminDetailsMap[activityLog.action_on] = activityLog;
       }
 
       const userDeviceExtResp = await new UserDeviceExtendedDetailModel()
         .select('*')
         .where({ user_id: userIds })
-        .order_by('id Desc')
         .fire();
 
       for (let i = 0; i < userDeviceExtResp.length; i++) {
         userToDeviceDataMap[userDeviceExtResp[i].user_id] = userDeviceExtResp[i];
       }
 
-      for (let i = 0; i < userDbRows.length; i++) {
-        let user = userDbRows[i],
-          timestamp = user.created_at,
-          current_user_id = user.id,
-          userApprovedBit = userConstants.invertedProperties[userConstants.isApprovedCreatorProperty];
+      for (let i = 0; i < activityLogsResp.length; i++) {
+        let activityLog = activityLogsResp[i],
+          current_user_id = activityLog.action_on,
+          actionTimestamp = userToApproverAdminDetailsMap[current_user_id].created_at,
+          current_admin_user_id = userToApproverAdminDetailsMap[current_user_id].admin_id,
+          mobile_app_version = '',
+          deviceId = '';
 
-        if ((user.properties & userApprovedBit) != userApprovedBit) {
-          continue;
+        activityLogIdBeforeThis = userToApproverAdminDetailsMap[current_user_id].id;
+
+        if (userToDeviceDataMap[current_user_id]) {
+          mobile_app_version = userToDeviceDataMap[current_user_id].app_version;
+          deviceId = userToDeviceDataMap[current_user_id].device_id;
         }
 
-        let mobile_app_version = userToDeviceDataMap[current_user_id]
-            ? userToDeviceDataMap[current_user_id].app_version
-            : '',
-          deviceId = userToDeviceDataMap[current_user_id] ? userToDeviceDataMap[current_user_id].device_id : '',
-          current_admin_user_id = userToApproverAdminDetailsMap[current_user_id]
-            ? userToApproverAdminDetailsMap[current_user_id].admin_id
-            : '';
-
         let logline = logPixelTemplate
-          .replace('{{timestamp}}', timestamp)
+          .replace('{{timestamp}}', actionTimestamp)
           .replace('{{current_user_id}}', current_user_id)
           .replace('{{mobile_app_version}}', mobile_app_version)
           .replace('{{current_admin_user_id}}', current_admin_user_id)
           .replace('{{device_id}}', deviceId);
 
-        await oThis.appendLoglineToFile(logline, user.id);
-        userIdsBeforeThis = user.id;
+        await oThis.appendLoglineToFile(logline, current_user_id);
       }
-      break;
     }
   }
 
