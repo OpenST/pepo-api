@@ -54,7 +54,6 @@ class PopulateParentVideoIdInUserNotificationsPayload {
       const rows = await new UserModel()
         .select('id')
         .where(['id > ?', iterationLastId])
-        .where(['id = 2221'])
         .limit(limit)
         .order_by('id asc')
         .fire();
@@ -119,15 +118,15 @@ class PopulateParentVideoIdInUserNotificationsPayload {
 
           for (let newInd = 0; newInd < userNotifications.length; newInd++) {
             let userNotification = userNotifications[newInd],
-              payload = userNotification.payload,
-              replyDetailId = payload.rdid || payload.replyDetailId;
+              payload = JSON.parse(userNotification.payload),
+              replyDetailId = payload.rdid;
 
-            if (kindsMap[userNotification.kind]) {
+            if (kindsMap[userNotificationConstants.kinds[userNotification.kind]]) {
               if (!oThis.replyDetailsIdToParentIdMap[+replyDetailId]) {
                 // continue with to next userNotifications
                 console.log('Data not found for replyDetailId----> Need to investigate: ', replyDetailId);
               } else if (payload.hasOwnProperty('pvid')) {
-                console.log('Parent video id already present in payload: ', replyDetailId, payload['pvid']);
+                console.log('Parent video id already present in payload for replyDetailId: ', replyDetailId);
               } else {
                 payload['pvid'] = oThis.replyDetailsIdToParentIdMap[replyDetailId];
 
@@ -135,7 +134,7 @@ class PopulateParentVideoIdInUserNotificationsPayload {
                   updateParam = [
                     stringifiedPayload,
                     userId,
-                    userNotification.lastActionTimestamp,
+                    userNotification.last_action_timestamp,
                     userNotification.uuid
                   ];
 
@@ -208,6 +207,7 @@ class PopulateParentVideoIdInUserNotificationsPayload {
       i++;
       logger.log('SELECT QUERY======Iteration====pageState====', i, pageState);
 
+      // Break if we reach to last page (for last page -> pageState = null)
       if (!pageState && i > 1) {
         return response;
       }
@@ -229,9 +229,8 @@ class PopulateParentVideoIdInUserNotificationsPayload {
 
       for (let index = 0; index < queryRsp.rows.length; index++) {
         const row = queryRsp.rows[index];
-        const formattedData = new UserNotificationModel().formatDbData(row);
-        response[formattedData.userId] = response[formattedData.userId] || [];
-        response[formattedData.userId].push(formattedData);
+        response[row.user_id] = response[row.user_id] || [];
+        response[row.user_id].push(row);
       }
     }
   }
@@ -247,12 +246,7 @@ class PopulateParentVideoIdInUserNotificationsPayload {
 
     let cacheObject = await cacheProvider.getInstance();
 
-    cacheObject.cacheInstance
-      .delAll()
-      .then(function() {
-        console.log('--------Flushed memcached--------');
-      })
-      .catch(console.log);
+    return cacheObject.cacheInstance.delAll();
   }
 }
 
