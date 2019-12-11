@@ -3,17 +3,18 @@
  *
  * Usage - node executables/oneTimers/populateParentVideoIdInUserNotificationsPayload.js
  */
-// TODO - check if parent video id is present in the table. If not update.
 const rootPrefix = '../..',
   UserModel = require(rootPrefix + '/app/models/mysql/User'),
   ReplyDetailsModel = require(rootPrefix + '/app/models/mysql/ReplyDetail'),
   UserNotificationModel = require(rootPrefix + '/app/models/cassandra/UserNotification'),
   commonValidators = require(rootPrefix + '/lib/validators/Common'),
+  cacheProvider = require(rootPrefix + '/lib/providers/memcached'),
   userNotificationConstants = require(rootPrefix + '/lib/globalConstant/cassandra/userNotification'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger');
 
 const limit = 30,
-  BATCH_SIZE = 30;
+  BATCH_SIZE = 30,
+  selectQueryLimit = 30;
 
 class PopulateParentVideoIdInUserNotificationsPayload {
   constructor() {
@@ -21,6 +22,8 @@ class PopulateParentVideoIdInUserNotificationsPayload {
 
     oThis.userIds = [];
     oThis.replyDetailsIdToParentIdMap = {};
+
+    oThis.pageState = null;
   }
 
   /**
@@ -33,6 +36,8 @@ class PopulateParentVideoIdInUserNotificationsPayload {
     await oThis._fetchUserIds();
 
     await oThis._populate();
+
+    await oThis._flushCache();
   }
 
   /**
@@ -49,6 +54,7 @@ class PopulateParentVideoIdInUserNotificationsPayload {
       const rows = await new UserModel()
         .select('id')
         .where(['id > ?', iterationLastId])
+        .where(['id = 2221'])
         .limit(limit)
         .order_by('id asc')
         .fire();
@@ -86,8 +92,7 @@ class PopulateParentVideoIdInUserNotificationsPayload {
     };
 
     while (oThis.userIds.length > 0) {
-      const queries = [],
-        cacheFlushPromises = [];
+      const queries = [];
 
       const batchedUserIds = oThis.userIds.splice(0, BATCH_SIZE);
 
@@ -115,14 +120,15 @@ class PopulateParentVideoIdInUserNotificationsPayload {
           for (let newInd = 0; newInd < userNotifications.length; newInd++) {
             let userNotification = userNotifications[newInd],
               payload = userNotification.payload,
-              replyDetailId = payload.replyDetailId;
+              replyDetailId = payload.rdid || payload.replyDetailId;
 
             if (kindsMap[userNotification.kind]) {
-              if (!oThis.replyDetailsIdToParentIdMap[replyDetailId]) {
+              if (!oThis.replyDetailsIdToParentIdMap[+replyDetailId]) {
                 // continue with to next userNotifications
                 console.log('Data not found for replyDetailId----> Need to investigate: ', replyDetailId);
+              } else if (payload.hasOwnProperty('pvid')) {
+                console.log('Parent video id already present in payload: ', replyDetailId, payload['pvid']);
               } else {
-                // TODO - update only if needed
                 payload['pvid'] = oThis.replyDetailsIdToParentIdMap[replyDetailId];
 
                 const stringifiedPayload = JSON.stringify(payload),
@@ -134,7 +140,6 @@ class PopulateParentVideoIdInUserNotificationsPayload {
                   ];
 
                 queries.push({ query: query, params: updateParam });
-                cacheFlushPromises.push(UserNotificationModel.flushCache({ userId: userId }));
               }
             }
           }
@@ -142,10 +147,16 @@ class PopulateParentVideoIdInUserNotificationsPayload {
       }
       if (queries.length > 0) {
         console.log('========batchFire(queries)=====\n', queries);
-        // TODO - batching
-        await new UserNotificationModel().batchFire(queries);
-        // TODO - remove clear cache from here. flush global cache at the end
-        await Promise.all(cacheFlushPromises);
+
+        while (true) {
+          let batchedQueries = queries.splice(0, BATCH_SIZE);
+
+          if (batchedQueries.length == 0) {
+            break;
+          }
+
+          await new UserNotificationModel().batchFire(batchedQueries);
+        }
       }
     }
   }
@@ -173,7 +184,7 @@ class PopulateParentVideoIdInUserNotificationsPayload {
     for (let ind = 0; ind < dbRows.length; ind++) {
       let dbRow = dbRows[ind];
 
-      oThis.replyDetailsIdToParentIdMap[dbRow.id] = dbRow.parent_id;
+      oThis.replyDetailsIdToParentIdMap[+dbRow.id] = +dbRow.parent_id;
     }
   }
 
@@ -187,25 +198,61 @@ class PopulateParentVideoIdInUserNotificationsPayload {
   async _fetchUserNotificationByUserIds(params) {
     const oThis = this;
 
-    const response = {},
-      userNotificationModelObj = new UserNotificationModel();
+    let i = 0,
+      response = {},
+      pageState = null;
 
-    // TODO - batching
-    const queryString = `select * from ${userNotificationModelObj.queryTableName} where user_id IN ?`;
+    const queryString = `select * from ${new UserNotificationModel().queryTableName} where user_id IN ?`;
 
-    const queryRsp = await userNotificationModelObj.fire(queryString, [params.userIds]);
+    while (true) {
+      i++;
+      logger.log('SELECT QUERY======Iteration====pageState====', i, pageState);
 
-    if (queryRsp.rows.length === 0) {
-      return response; // returns {}
+      if (!pageState && i > 1) {
+        return response;
+      }
+
+      const queryParams = [params.userIds],
+        options = {
+          prepare: true,
+          fetchSize: selectQueryLimit,
+          pageState: pageState
+        };
+
+      const queryRsp = await new UserNotificationModel().eachRow(queryString, queryParams, options, null, null);
+
+      if (queryRsp.rows.length == 0) {
+        return response;
+      }
+
+      pageState = queryRsp.pageState;
+
+      for (let index = 0; index < queryRsp.rows.length; index++) {
+        const row = queryRsp.rows[index];
+        const formattedData = new UserNotificationModel().formatDbData(row);
+        response[formattedData.userId] = response[formattedData.userId] || [];
+        response[formattedData.userId].push(formattedData);
+      }
     }
+  }
 
-    for (let index = 0; index < queryRsp.rows.length; index++) {
-      const formattedData = userNotificationModelObj.formatDbData(queryRsp.rows[index]);
-      response[formattedData.userId] = response[formattedData.userId] || [];
-      response[formattedData.userId].push(formattedData);
-    }
+  /**
+   * Flush cache.
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _flushCache() {
+    const oThis = this;
 
-    return response;
+    let cacheObject = await cacheProvider.getInstance();
+
+    cacheObject.cacheInstance
+      .delAll()
+      .then(function() {
+        console.log('--------Flushed memcached--------');
+      })
+      .catch(console.log);
   }
 }
 
