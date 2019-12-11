@@ -200,9 +200,8 @@ class ReplyDetailsModel extends ModelBase {
   /**
    * Fetch distinct reply creators of parent
    *
-   * @param {array} replyDetailIds
-   *
-   * @returns {Promise<void>}
+   * @param videoIds
+   * @return {Promise<void>}
    */
   async fetchDistinctReplyCreatorsByParent(videoIds) {
     const oThis = this;

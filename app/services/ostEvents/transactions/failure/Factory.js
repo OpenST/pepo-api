@@ -46,7 +46,7 @@ class TransactionWebhookFailureFactory extends TransactionWebhookFactoryBase {
       internal_error_identifier: 'a_s_oe_t_f_f_pt_1',
       api_error_identifier: 'something_went_wrong',
       debug_options: {
-        Reason: 'Transaction failure for reply on video.',
+        Reason: 'Transaction failure.',
         ostTransaction: oThis.ostTransaction
       }
     });

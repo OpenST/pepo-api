@@ -430,6 +430,7 @@ const v1ErrorConfig = {
     code: 'missing',
     message: 'Oops! Something went wrong.'
   },
+  // TODO feed - confirm languages.
   mute_not_possible: {
     parameter: 'user_id',
     code: 'invalid',

@@ -122,8 +122,11 @@ class UserActionDetailModel extends CassandraModelBase {
     for (const key in queryParams.updateParams) {
       const val = queryParams.updateParams[key];
 
+      // to avoid extra loop, join was not used here.
       if (!isFirstParameter) {
         queryString += ', ';
+      } else {
+        isFirstParameter = false;
       }
 
       queryString += `${longToShortnamesMap[key]}=? `;
@@ -173,6 +176,7 @@ class UserActionDetailModel extends CassandraModelBase {
    * @returns {Promise<*>}
    */
   static async flushCache() {
+    // TODO feed - ?
     // Do nothing.
   }
 }

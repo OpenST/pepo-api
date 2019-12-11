@@ -146,7 +146,7 @@ class UserUnMute extends ServiceBase {
 
     await new UserMuteModel()
       .delete()
-      .where({ user2_id: oThis.otherUserId, user1_id: oThis.currentUserId })
+      .where({ user1_id: oThis.currentUserId, user2_id: oThis.otherUserId })
       .fire();
 
     return UserMuteModel.flushCache({ user1Id: oThis.currentUserId });

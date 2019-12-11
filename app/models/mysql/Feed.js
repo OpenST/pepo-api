@@ -165,9 +165,8 @@ class FeedModel extends ModelBase {
   /**
    * Fetch feeds ids after pagination Timestamp.
    *
-   * @param {array} ids: Feed Ids
-   *
-   * @return {object}
+   * @param params
+   * @return {Promise<{feedIds: Array, feedsMap: {}}>}
    */
   async getPersonalizedFeedIdsAfterTimestamp(params) {
     const oThis = this,
