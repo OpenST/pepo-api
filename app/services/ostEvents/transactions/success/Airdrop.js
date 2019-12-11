@@ -71,7 +71,10 @@ class AirdropSuccessWebhook extends TransactionWebhookBase {
     promiseArray.push(oThis.updateTransaction());
     promiseArray.push(oThis.processForAirdropTransaction());
     await Promise.all(promiseArray);
-    await oThis._enqueueUserNotification(notificationJobConstants.airdropDone);
+    // IF its manual airdrop then don't send notification
+    if (oThis.transactionObj && !oThis.transactionObj.extraData.isManualAirdrop) {
+      await oThis._enqueueUserNotification(notificationJobConstants.airdropDone);
+    }
   }
 
   /**
