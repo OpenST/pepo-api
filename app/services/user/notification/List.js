@@ -19,6 +19,7 @@ const rootPrefix = '../../../..',
   userConstants = require(rootPrefix + '/lib/globalConstant/user'),
   videoConstants = require(rootPrefix + '/lib/globalConstant/video'),
   bgJobConstants = require(rootPrefix + '/lib/globalConstant/bgJob'),
+  replyDetailConstants = require(rootPrefix + '/lib/globalConstant/replyDetail'),
   paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination'),
   responseEntityKey = require(rootPrefix + '/lib/globalConstant/responseEntityKey'),
   UserBlockedListCache = require(rootPrefix + '/lib/cacheManagement/single/UserBlockedList'),
@@ -316,6 +317,14 @@ class UserNotificationList extends ServiceBase {
     }
 
     oThis.replyDetailsMap = cacheRsp.data;
+
+    for (const replyDetailId in oThis.replyDetailsMap) {
+      const replyDetail = oThis.replyDetailsMap[replyDetailId];
+      if (replyDetail.status === replyDetailConstants.deletedStatus) {
+        delete oThis.replyDetailsMap[replyDetailId];
+        continue;
+      }
+    }
   }
 
   /**
