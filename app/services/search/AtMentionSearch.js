@@ -5,15 +5,13 @@ const rootPrefix = '../../..',
   ImageByIdCache = require(rootPrefix + '/lib/cacheManagement/multi/ImageByIds'),
   TokenUserDetailByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TokenUserByUserIds'),
   VideoDetailsByVideoIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/VideoDetailsByVideoIds'),
-  ReplyDetailsByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/ReplyDetailsByIds'),
-  ReplyDetailsByParentVideoPaginationCache = require(rootPrefix +
-    '/lib/cacheManagement/single/ReplyDetailsByParentVideoPagination'),
   AllRepliesByParentVideoIdCache = require(rootPrefix + '/lib/cacheManagement/single/AllRepliesByParentVideoId'),
   UserBlockedListCache = require(rootPrefix + '/lib/cacheManagement/single/UserBlockedList'),
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   basicHelper = require(rootPrefix + '/helpers/basic'),
-  paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination');
+  paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination'),
+  replyDetailConstants = require(rootPrefix + '/lib/globalConstant/replyDetail');
 
 /**
  * Class for user at mention search.
@@ -192,7 +190,7 @@ class UserAtMentionSearch extends ServiceBase {
     // Add reply video creators to userIds array.
     for (let ind = 0; ind < allRepliesForParentVideoId.length; ind++) {
       let replyDetail = allRepliesForParentVideoId[ind];
-      userIdsArray.push(replyDetail.creatorId);
+      userIdsArray.push(replyDetail[replyDetailConstants.longToShortNamesMapForCache['creatorUserId']]);
     }
 
     oThis.userIds = basicHelper.uniquate(userIdsArray, oThis.limit);
