@@ -73,7 +73,6 @@ class PublicVideoFeed extends FeedBase {
 
       oThis.paginationTimestamp = parsedPaginationParams.pagination_timestamp; // Override paginationTimestamp number.
       oThis.pageNumber = Number(parsedPaginationParams.page_no) || 1; // Override paginationTimestamp number.
-      logger.log(`===================PERSONALIZED FEED${oThis.currentUserId} Page Number:`, oThis.pageNumber);
     } else {
       oThis.paginationTimestamp = null;
       oThis.pageNumber = 1;
@@ -226,6 +225,7 @@ class PublicVideoFeed extends FeedBase {
    * @private
    */
   _showShuffledFeeds() {
+    // shuffle feeds only in logged in mode.
     const oThis = this;
 
     return oThis.currentUserId;
@@ -355,6 +355,7 @@ class PublicVideoFeed extends FeedBase {
   async _filterFeedData() {
     const oThis = this;
 
+    // TODO feed - use the method written by Ankit
     oThis.feedIds = [...new Set(oThis.feedIds)];
 
     const activeFeedIds = [];
