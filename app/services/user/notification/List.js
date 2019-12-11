@@ -628,7 +628,10 @@ class UserNotificationList extends ServiceBase {
       if (oThis.notificationVideoMap[userNotification.uuid]) {
         for (let index = 0; index < oThis.notificationVideoMap[userNotification.uuid].length; index++) {
           const vid = oThis.notificationVideoMap[userNotification.uuid][index];
-          if (oThis.videoMap[vid].status === videoConstants.deletedStatus) {
+          if (
+            CommonValidators.validateNonEmptyObject(oThis.videoMap[vid]) &&
+            oThis.videoMap[vid].status === videoConstants.deletedStatus
+          ) {
             oThis.notificationsToDelete.push(userNotification);
 
             return true;
