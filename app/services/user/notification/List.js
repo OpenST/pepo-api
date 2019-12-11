@@ -397,8 +397,13 @@ class UserNotificationList extends ServiceBase {
     oThis.videoMap = cacheRsp.data;
 
     for (const videoId in oThis.videoMap) {
-      const video = oThis.videoMap[videoId],
-        posterImageId = video.posterImageId;
+      const video = oThis.videoMap[videoId];
+      if (video.status === videoConstants.deletedStatus) {
+        delete oThis.videoMap[videoId];
+        continue;
+      }
+
+      const posterImageId = video.posterImageId;
       if (posterImageId) {
         oThis.imageIds.push(posterImageId);
       }
