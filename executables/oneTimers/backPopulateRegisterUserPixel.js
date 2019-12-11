@@ -27,6 +27,7 @@ class populateRegisterUserPixel {
    * @returns {Promise<void>}
    */
   async perform() {
+    const oThis = this;
     const userUtmParams = {};
 
     const utmDbRows = await new UserUtmDetailModel().select('*').fire();
@@ -61,18 +62,23 @@ class populateRegisterUserPixel {
         .select('*')
         .where({ user_id: userIds })
         .fire();
+
       for (let i = 0; i < inviteCodeDbRows.length; i++) {
         let inviteCodeRow = inviteCodeDbRows[i];
-        userToInviterUser[inviteCodeRow.user_id] = inviteCodeRow.inviter_code_id;
-        inviterCodeIds.push(inviteCodeRow.inviter_code_id);
+        if (inviteCodeRow.inviter_code_id) {
+          userToInviterUser[inviteCodeRow.user_id] = inviteCodeRow.inviter_code_id;
+          inviterCodeIds.push(inviteCodeRow.inviter_code_id);
+        }
       }
-      const inviterCodeDbRows = await new InviteCodeModel()
-        .select('*')
-        .where({ id: inviterCodeIds })
-        .fire();
-      for (let i = 0; i < inviterCodeDbRows.length; i++) {
-        let inviterCodeRow = inviterCodeDbRows[i];
-        inviterUserToCode[inviterCodeRow.id] = inviterCodeRow.code;
+      if (inviterCodeIds.length > 0) {
+        const inviterCodeDbRows = await new InviteCodeModel()
+          .select('*')
+          .where({ id: inviterCodeIds })
+          .fire();
+        for (let i = 0; i < inviterCodeDbRows.length; i++) {
+          let inviterCodeRow = inviterCodeDbRows[i];
+          inviterUserToCode[inviterCodeRow.id] = inviterCodeRow.code;
+        }
       }
 
       for (let i = 0; i < userDbRows.length; i++) {
@@ -104,18 +110,26 @@ class populateRegisterUserPixel {
           .replace('{{utm_medium}}', utm_medium)
           .replace('{{utm_campaign}}', utm_campaign);
 
-        console.log('filePath----------', filePath);
-        fs.appendFile(filePath, logline, function(err) {
-          if (err) {
-            logger.error(err);
-          } else {
-            userIdsBeforeThis = user.id;
-            logger.log('The log inserted for userId:' + userIdsBeforeThis);
-          }
-        });
+        await oThis.appendLoglineToFile(logline, user.id);
+        userIdsBeforeThis = user.id;
       }
       break;
     }
+  }
+
+  async appendLoglineToFile(logline, userId) {
+    return new Promise(function(onResolve, onReject) {
+      console.log('logline------------------', logline);
+      console.log('filePath---------------', filePath);
+      fs.appendFile(filePath, logline, function(err) {
+        if (err) {
+          logger.error(err);
+        } else {
+          logger.log('The log inserted for userId:' + userId);
+        }
+        onResolve();
+      });
+    });
   }
 }
 
