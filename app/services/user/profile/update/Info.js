@@ -285,6 +285,18 @@ class UpdateProfileInfo extends UpdateProfileBase {
   async _extraUpdates() {
     const oThis = this;
   }
+
+  /**
+   * Prepares Response
+   *
+   * @returns {*|result}
+   * @private
+   */
+  _prepareResponse() {
+    const oThis = this;
+
+    return responseHelper.successWithData({});
+  }
 }
 
 module.exports = UpdateProfileInfo;

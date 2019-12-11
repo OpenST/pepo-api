@@ -65,7 +65,7 @@ class UpdateProfileBase extends ServiceBase {
 
     await oThis._flushCaches();
 
-    return responseHelper.successWithData({});
+    return oThis._prepareResponse();
   }
 
   /**
@@ -216,6 +216,15 @@ class UpdateProfileBase extends ServiceBase {
    * @private
    */
   async _extraUpdates() {
+    throw new Error('sub-class to implement');
+  }
+
+  /**
+   * Prepare response
+   *
+   * @private
+   */
+  _prepareResponse() {
     throw new Error('sub-class to implement');
   }
 }
