@@ -99,6 +99,7 @@ class backPopulateBecomeCreatorPixel {
         await oThis.appendLoglineToFile(logline, user.id);
         userIdsBeforeThis = user.id;
       }
+      break;
     }
   }
 

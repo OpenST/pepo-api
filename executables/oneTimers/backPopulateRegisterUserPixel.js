@@ -41,7 +41,7 @@ class populateRegisterUserPixel {
       const userDbRows = await new UserModel()
         .select('*')
         .where(['id < ?', userIdsBeforeThis])
-        .limit(100)
+        .limit(10)
         .order_by('id Desc')
         .fire();
 
@@ -114,6 +114,7 @@ class populateRegisterUserPixel {
           }
         });
       }
+      break;
     }
   }
 }
