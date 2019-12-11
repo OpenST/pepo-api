@@ -313,7 +313,6 @@ class GetTagsVideoList extends ServiceBase {
 
     for (const vid in replyDetailsByEntityIdsAndEntityKindCacheRsp.data) {
       const rdId = replyDetailsByEntityIdsAndEntityKindCacheRsp.data[vid].id;
-      // TODO feed done - remove Number check
       if (rdId) {
         oThis.replyDetailIds.push(rdId);
       }

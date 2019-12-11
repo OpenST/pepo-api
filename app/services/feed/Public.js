@@ -9,6 +9,7 @@ const rootPrefix = '../../..',
   UserDeviceExtendedDetailModel = require(rootPrefix + '/app/models/mysql/UserDeviceExtendedDetail'),
   UserDeviceExtendedDetailsByDeviceIdsCache = require(rootPrefix +
     '/lib/cacheManagement/multi/UserDeviceExtendedDetailsByDeviceIds'),
+  basicHelper = require(rootPrefix + '/helpers/basic'),
   headerHelper = require(rootPrefix + '/helpers/header'),
   coreConstants = require(rootPrefix + '/config/coreConstants'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
@@ -355,8 +356,7 @@ class PublicVideoFeed extends FeedBase {
   async _filterFeedData() {
     const oThis = this;
 
-    // TODO feed - use the method written by Ankit
-    oThis.feedIds = [...new Set(oThis.feedIds)];
+    oThis.feedIds = basicHelper.uniquate(oThis.feedIds);
 
     const activeFeedIds = [];
 

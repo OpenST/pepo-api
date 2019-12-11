@@ -255,6 +255,9 @@ class FeedModel extends ModelBase {
     const LoggedOutFeedCache = require(rootPrefix + '/lib/cacheManagement/single/LoggedOutFeed');
     promisesArray.push(new LoggedOutFeedCache({}).clear());
 
+    const LatestFeedCache = require(rootPrefix + '/lib/cacheManagement/single/LatestFeed');
+    promisesArray.push(new LatestFeedCache({}).clear());
+
     if (params.id) {
       const FeedByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/FeedByIds');
       promisesArray.push(new FeedByIdsCache({ ids: [params.id] }).clear());

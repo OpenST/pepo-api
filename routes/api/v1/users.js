@@ -364,7 +364,6 @@ router.post('/:profile_user_id/unblock', sanitizer.sanitizeDynamicUrlParams, fun
   Promise.resolve(routeHelper.perform(req, res, next, '/user/profile/UnBlockOtherUserForUser', 'r_a_v1_u_17', null));
 });
 
-// TODO feed done - change user_id to other_user_id
 /* Mute User. */
 router.post('/:other_user_id/mute', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.muteUser;
@@ -372,8 +371,6 @@ router.post('/:other_user_id/mute', sanitizer.sanitizeDynamicUrlParams, function
 
   Promise.resolve(routeHelper.perform(req, res, next, '/user/Mute', 'r_a_v1_u_18', null));
 });
-
-// TODO feed done - change user_id to other_user_id
 
 /* UnMute User. */
 router.post('/:other_user_id/unmute', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {

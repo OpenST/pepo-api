@@ -183,7 +183,6 @@ class UserActionDetailModel extends CassandraModelBase {
    * @returns {Promise<*>}
    */
   static async flushCache(params) {
-    // TODO feed done- ?
     if (params.userId && params.entityIdentifiers) {
       const UserActionDetailsByUserIdsCache = require(rootPrefix +
         '/lib/cacheManagement/multi/UserActionDetailsByUserIds');
