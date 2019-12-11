@@ -3,6 +3,7 @@ const rootPrefix = '../../..',
   UserModel = require(rootPrefix + '/app/models/mysql/User'),
   TagModel = require(rootPrefix + '/app/models/mysql/Tag'),
   UsersCache = require(rootPrefix + '/lib/cacheManagement/multi/User'),
+  CuratedEntityDeleteService = require(rootPrefix + '/app/services/admin/curated/Delete'),
   TwitterDisconnect = require(rootPrefix + '/app/services/twitter/Disconnect'),
   AdminActivityLogModel = require(rootPrefix + '/app/models/mysql/AdminActivityLog'),
   UserTagsCacheKlass = require(rootPrefix + '/lib/cacheManagement/multi/UserTagsByUserIds'),
@@ -12,6 +13,7 @@ const rootPrefix = '../../..',
   userConstants = require(rootPrefix + '/lib/globalConstant/user'),
   bgJobConstants = require(rootPrefix + '/lib/globalConstant/bgJob'),
   userTagConstants = require(rootPrefix + '/lib/globalConstant/userTag'),
+  curatedEntitiesConstants = require(rootPrefix + '/lib/globalConstant/curatedEntities'),
   adminActivityLogConstants = require(rootPrefix + '/lib/globalConstant/adminActivityLogs'),
   emailServiceApiCallHookConstants = require(rootPrefix + '/lib/globalConstant/emailServiceApiCallHook');
 
@@ -38,6 +40,7 @@ class DeleteUser extends ServiceBase {
     const oThis = this;
 
     oThis.userIds = params.user_ids;
+    oThis.currentAdmin = params.current_admin;
     oThis.currentAdminId = params.current_admin.id;
 
     oThis.userIdsLength = oThis.userIds.length;
@@ -67,6 +70,7 @@ class DeleteUser extends ServiceBase {
     await oThis._deleteUsers();
 
     const promisesArray = [
+      oThis._deleteUserFromCuratedEntities(),
       oThis._decreseUserTagWeight(),
       oThis._removeContactsInCampaigns(),
       oThis._disconnectTwitter(),
@@ -134,6 +138,24 @@ class DeleteUser extends ServiceBase {
       .fire();
 
     return oThis._flushCache();
+  }
+
+  /**
+   * Delete given users from curated entities.
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _deleteUserFromCuratedEntities() {
+    const oThis = this;
+
+    for (let ind = 0; ind < oThis.userIds.length; ind++) {
+      await new CuratedEntityDeleteService({
+        current_admin: oThis.currentAdmin,
+        entity_kind: curatedEntitiesConstants.userEntityKind,
+        entity_id: oThis.userIds[ind]
+      }).perform();
+    }
   }
 
   /**
