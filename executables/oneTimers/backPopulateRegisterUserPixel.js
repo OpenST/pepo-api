@@ -7,6 +7,9 @@ const rootPrefix = '../..',
   pixelConstants = require(rootPrefix + '/lib/globalConstant/pixel'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger');
 
+//select u_id from devp101_tracker.pixels where e_entity='user' AND e_action='registration' order by id DESC;
+const registeredUserIds = [1000, 1001, 1002, 1003, 1004, 1005, 1006, 1007, 1008, 1009];
+
 let userIdsBeforeThis = process.argv[2] || 0;
 const logPixelTemplate = `{{timestamp}} :: 114.143.238.58 :: GET /devp101_pixel.png?v=2&tid=back_populate&serid=1&sesid=back_populate&dt=back_populate&ua=${
   pixelConstants.pixelUserAgent
@@ -84,8 +87,13 @@ class populateRegisterUserPixel {
       for (let i = 0; i < userDbRows.length; i++) {
         let user = userDbRows[i],
           timestamp = user.created_at,
-          current_user_id = user.id,
+          current_user_id = +user.id,
           registration_at = timestamp;
+
+        userIdsBeforeThis = current_user_id;
+        if (registeredUserIds.includes(current_user_id)) {
+          continue;
+        }
 
         let inviterCodeId = userToInviterUser[current_user_id];
         let invite_code = inviterCodeId ? inviterUserToCode[inviterCodeId] : null;
@@ -110,8 +118,7 @@ class populateRegisterUserPixel {
           .replace('{{utm_medium}}', utm_medium)
           .replace('{{utm_campaign}}', utm_campaign);
 
-        await oThis.appendLoglineToFile(logline, user.id);
-        userIdsBeforeThis = user.id;
+        await oThis.appendLoglineToFile(logline, current_user_id);
       }
     }
   }
