@@ -3,20 +3,18 @@
  *
  * Usage - node executables/oneTimers/populateParentVideoIdInUserNotificationsPayload.js
  */
-
 const rootPrefix = '../..',
   UserModel = require(rootPrefix + '/app/models/mysql/User'),
   ReplyDetailsModel = require(rootPrefix + '/app/models/mysql/ReplyDetail'),
   UserNotificationModel = require(rootPrefix + '/app/models/cassandra/UserNotification'),
-  basicHelper = require(rootPrefix + '/helpers/basic'),
   commonValidators = require(rootPrefix + '/lib/validators/Common'),
-  userConstants = require(rootPrefix + '/lib/globalConstant/user'),
-  replyDetailConstants = require(rootPrefix + '/lib/globalConstant/replyDetail'),
+  cacheProvider = require(rootPrefix + '/lib/providers/memcached'),
   userNotificationConstants = require(rootPrefix + '/lib/globalConstant/cassandra/userNotification'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger');
 
 const limit = 30,
-  BATCH_SIZE = 30;
+  BATCH_SIZE = 30,
+  selectQueryLimit = 30;
 
 class PopulateParentVideoIdInUserNotificationsPayload {
   constructor() {
@@ -24,6 +22,8 @@ class PopulateParentVideoIdInUserNotificationsPayload {
 
     oThis.userIds = [];
     oThis.replyDetailsIdToParentIdMap = {};
+
+    oThis.pageState = null;
   }
 
   /**
@@ -36,6 +36,8 @@ class PopulateParentVideoIdInUserNotificationsPayload {
     await oThis._fetchUserIds();
 
     await oThis._populate();
+
+    await oThis._flushCache();
   }
 
   /**
@@ -46,13 +48,12 @@ class PopulateParentVideoIdInUserNotificationsPayload {
   async _fetchUserIds() {
     const oThis = this;
 
-    let minUserId = -1;
+    let iterationLastId = -1;
 
     while (true) {
       const rows = await new UserModel()
         .select('id')
-        .where({ status: userConstants.invertedStatuses[userConstants.activeStatus] })
-        .where(['id > ?', minUserId])
+        .where(['id > ?', iterationLastId])
         .limit(limit)
         .order_by('id asc')
         .fire();
@@ -64,38 +65,11 @@ class PopulateParentVideoIdInUserNotificationsPayload {
         for (let ind = 0; ind < rows.length; ind++) {
           oThis.userIds.push(rows[ind].id);
           batchedUserIds.push(rows[ind].id);
-          minUserId = rows[ind].id;
+          iterationLastId = rows[ind].id;
         }
+
         await oThis._fetchParentIdForReplyCreators(batchedUserIds);
       }
-    }
-  }
-
-  /**
-   * Fetch parent id for reply creators.
-   *
-   * @returns {Promise<void>}
-   * @private
-   */
-  async _fetchParentIdForReplyCreators(userIds) {
-    const oThis = this;
-
-    const dbRows = await new ReplyDetailsModel()
-      .select('*')
-      .where({
-        status: replyDetailConstants.invertedStatuses[replyDetailConstants.activeStatus],
-        creator_user_id: userIds
-      })
-      .fire();
-
-    if (dbRows.length === 0) {
-      return;
-    }
-
-    for (let ind = 0; ind < dbRows.length; ind++) {
-      let dbRow = dbRows[ind];
-
-      oThis.replyDetailsIdToParentIdMap[dbRow.id] = dbRow.parent_id;
     }
   }
 
@@ -108,18 +82,16 @@ class PopulateParentVideoIdInUserNotificationsPayload {
   async _populate() {
     const oThis = this;
 
-    const kindsArray = [
-      userNotificationConstants.replySenderWithAmountKind,
-      userNotificationConstants.replySenderWithoutAmountKind,
-      userNotificationConstants.replyReceiverWithAmountKind,
-      userNotificationConstants.replyReceiverWithoutAmountKind,
-      userNotificationConstants.replyUserMentionKind
-    ];
+    const kindsMap = {
+      [userNotificationConstants.replySenderWithAmountKind]: 1,
+      [userNotificationConstants.replySenderWithoutAmountKind]: 1,
+      [userNotificationConstants.replyReceiverWithAmountKind]: 1,
+      [userNotificationConstants.replyReceiverWithoutAmountKind]: 1,
+      [userNotificationConstants.replyUserMentionKind]: 1
+    };
 
     while (oThis.userIds.length > 0) {
-      const queries = [],
-        cacheFlushPromises = [],
-        userNotificationModelObj = new UserNotificationModel();
+      const queries = [];
 
       const batchedUserIds = oThis.userIds.splice(0, BATCH_SIZE);
 
@@ -141,18 +113,20 @@ class PopulateParentVideoIdInUserNotificationsPayload {
 
         if (userNotifications) {
           const query = `UPDATE ${
-            userNotificationModelObj.queryTableName
+            new UserNotificationModel().queryTableName
           } SET payload = ? WHERE user_id = ? AND last_action_timestamp = ? AND uuid = ?`;
 
           for (let newInd = 0; newInd < userNotifications.length; newInd++) {
             let userNotification = userNotifications[newInd],
-              payload = userNotification.payload,
-              replyDetailId = payload.replyDetailId;
+              payload = JSON.parse(userNotification.payload),
+              replyDetailId = payload.rdid;
 
-            if (kindsArray.indexOf(userNotification.kind) > -1) {
-              if (!oThis.replyDetailsIdToParentIdMap[replyDetailId]) {
+            if (kindsMap[userNotificationConstants.kinds[userNotification.kind]]) {
+              if (!oThis.replyDetailsIdToParentIdMap[+replyDetailId]) {
                 // continue with to next userNotifications
-                console.log('Data not found for replyDetailId----> ', replyDetailId);
+                console.log('Data not found for replyDetailId----> Need to investigate: ', replyDetailId);
+              } else if (payload.hasOwnProperty('pvid')) {
+                console.log('Parent video id already present in payload for replyDetailId: ', replyDetailId);
               } else {
                 payload['pvid'] = oThis.replyDetailsIdToParentIdMap[replyDetailId];
 
@@ -160,12 +134,11 @@ class PopulateParentVideoIdInUserNotificationsPayload {
                   updateParam = [
                     stringifiedPayload,
                     userId,
-                    userNotification.lastActionTimestamp,
+                    userNotification.last_action_timestamp,
                     userNotification.uuid
                   ];
 
                 queries.push({ query: query, params: updateParam });
-                cacheFlushPromises.push(UserNotificationModel.flushCache({ userId: userId }));
               }
             }
           }
@@ -173,9 +146,44 @@ class PopulateParentVideoIdInUserNotificationsPayload {
       }
       if (queries.length > 0) {
         console.log('========batchFire(queries)=====\n', queries);
-        await userNotificationModelObj.batchFire(queries);
-        await Promise.all(cacheFlushPromises);
+
+        while (true) {
+          let batchedQueries = queries.splice(0, BATCH_SIZE);
+
+          if (batchedQueries.length == 0) {
+            break;
+          }
+
+          await new UserNotificationModel().batchFire(batchedQueries);
+        }
       }
+    }
+  }
+
+  /**
+   * Fetch parent id for reply creators.
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _fetchParentIdForReplyCreators(userIds) {
+    const oThis = this;
+
+    const dbRows = await new ReplyDetailsModel()
+      .select('*')
+      .where({
+        creator_user_id: userIds
+      })
+      .fire();
+
+    if (dbRows.length === 0) {
+      return;
+    }
+
+    for (let ind = 0; ind < dbRows.length; ind++) {
+      let dbRow = dbRows[ind];
+
+      oThis.replyDetailsIdToParentIdMap[+dbRow.id] = +dbRow.parent_id;
     }
   }
 
@@ -189,24 +197,56 @@ class PopulateParentVideoIdInUserNotificationsPayload {
   async _fetchUserNotificationByUserIds(params) {
     const oThis = this;
 
-    const response = {},
-      userNotificationModelObj = new UserNotificationModel();
+    let i = 0,
+      response = {},
+      pageState = null;
 
-    const queryString = `select * from ${userNotificationModelObj.queryTableName} where user_id IN ? ALLOW FILTERING`;
+    const queryString = `select * from ${new UserNotificationModel().queryTableName} where user_id IN ?`;
 
-    const queryRsp = await userNotificationModelObj.fire(queryString, [params.userIds]);
+    while (true) {
+      i++;
+      logger.log('SELECT QUERY======Iteration====pageState====', i, pageState);
 
-    if (queryRsp.rows.length === 0) {
-      return response; // returns {}
+      // Break if we reach to last page (for last page -> pageState = null)
+      if (!pageState && i > 1) {
+        return response;
+      }
+
+      const queryParams = [params.userIds],
+        options = {
+          prepare: true,
+          fetchSize: selectQueryLimit,
+          pageState: pageState
+        };
+
+      const queryRsp = await new UserNotificationModel().eachRow(queryString, queryParams, options, null, null);
+
+      if (queryRsp.rows.length == 0) {
+        return response;
+      }
+
+      pageState = queryRsp.pageState;
+
+      for (let index = 0; index < queryRsp.rows.length; index++) {
+        const row = queryRsp.rows[index];
+        response[row.user_id] = response[row.user_id] || [];
+        response[row.user_id].push(row);
+      }
     }
+  }
 
-    for (let index = 0; index < queryRsp.rows.length; index++) {
-      const formattedData = userNotificationModelObj.formatDbData(queryRsp.rows[index]);
-      response[formattedData.userId] = response[formattedData.userId] || [];
-      response[formattedData.userId].push(formattedData);
-    }
+  /**
+   * Flush cache.
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _flushCache() {
+    const oThis = this;
 
-    return response;
+    let cacheObject = await cacheProvider.getInstance();
+
+    return cacheObject.cacheInstance.delAll();
   }
 }
 
