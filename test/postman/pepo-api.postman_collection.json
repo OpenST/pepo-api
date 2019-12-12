@@ -2310,6 +2310,41 @@
 								}
 							},
 							"response": []
+						},
+						{
+							"name": "users-mention",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{api_server}}/api/v1/search/users-mention?intent=reply&parent_id=2647",
+									"host": [
+										"{{api_server}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"search",
+										"users-mention"
+									],
+									"query": [
+										{
+											"key": "q",
+											"value": null,
+											"disabled": true
+										},
+										{
+											"key": "intent",
+											"value": "reply"
+										},
+										{
+											"key": "parent_id",
+											"value": "2647"
+										}
+									]
+								}
+							},
+							"response": []
 						}
 					],
 					"protocolProfileBehavior": {},
