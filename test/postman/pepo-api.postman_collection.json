@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "240eba68-c190-4401-9ae8-163708f6dc78",
+		"_postman_id": "7f5ea763-50e0-4448-b7bc-6ef5a37175a4",
 		"name": "pepo-api",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -2305,6 +2305,41 @@
 										{
 											"key": "q",
 											"value": "pe"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "users-mention",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{api_server}}/api/v1/search/users-mention?intent=reply&parent_id=2647",
+									"host": [
+										"{{api_server}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"search",
+										"users-mention"
+									],
+									"query": [
+										{
+											"key": "q",
+											"value": null,
+											"disabled": true
+										},
+										{
+											"key": "intent",
+											"value": "reply"
+										},
+										{
+											"key": "parent_id",
+											"value": "2647"
 										}
 									]
 								}
