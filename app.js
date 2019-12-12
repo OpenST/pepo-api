@@ -82,6 +82,8 @@ const assignParams = function(req, res, next) {
   // Also override any request params, related to signatures
   // And finally assign it to req.decodedParams
   req.decodedParams = Object.assign(getRequestParams(req), req.decodedParams);
+  delete req.decodedParams.current_user;
+  //current_user object should never be respected when it comes from front end.
 
   next();
 };
