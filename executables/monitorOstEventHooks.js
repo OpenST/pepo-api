@@ -40,8 +40,6 @@ class MonitorOstEventHooks extends CronBase {
 
     oThis.currentTimeStamp = null;
     oThis.canExit = true;
-    oThis.ostEventRecordsLength = null;
-    oThis.transactionRecordsLength = null;
     oThis.ostEventIds = [];
     oThis.transactionIds = [];
   }
@@ -108,9 +106,9 @@ class MonitorOstEventHooks extends CronBase {
 
     let offset = 0;
     while (true) {
-      await oThis._fetchOstEvents(BATCH_SIZE, offset);
+      let batchOstEventRecordsLength = await oThis._fetchOstEventsForBatch(BATCH_SIZE, offset);
       // No more ost events records present to process
-      if (oThis.ostEventRecordsLength < BATCH_SIZE) {
+      if (batchOstEventRecordsLength < BATCH_SIZE) {
         break;
       }
 
@@ -119,9 +117,9 @@ class MonitorOstEventHooks extends CronBase {
 
     offset = 0;
     while (true) {
-      await oThis._fetchTransactions(BATCH_SIZE, offset);
+      let batchTxRecordsLength = await oThis._fetchTransactionsForBatch(BATCH_SIZE, offset);
       // No more transactions records present to process
-      if (oThis.transactionRecordsLength < BATCH_SIZE) {
+      if (batchTxRecordsLength < BATCH_SIZE) {
         break;
       }
 
@@ -141,7 +139,7 @@ class MonitorOstEventHooks extends CronBase {
    * @returns {Promise<void>}
    * @private
    */
-  async _fetchOstEvents(limit, offset) {
+  async _fetchOstEventsForBatch(limit, offset) {
     const oThis = this;
 
     let notAllowedStatus = [
@@ -160,12 +158,14 @@ class MonitorOstEventHooks extends CronBase {
       .offset(offset)
       .fire();
 
-    oThis.ostEventRecordsLength = ostEventRecords.length;
+    let batchOstEventRecordsLength = ostEventRecords.length;
 
-    for (let index = 0; index < oThis.ostEventRecordsLength; index++) {
+    for (let index = 0; index < batchOstEventRecordsLength; index++) {
       let ostEventRow = ostEventRecords[index];
       oThis.ostEventIds.push(ostEventRow.id);
     }
+
+    return batchOstEventRecordsLength;
   }
 
   /**
@@ -176,7 +176,7 @@ class MonitorOstEventHooks extends CronBase {
    * @returns {Promise<void>}
    * @private
    */
-  async _fetchTransactions(limit, offset) {
+  async _fetchTransactionsForBatch(limit, offset) {
     const oThis = this;
 
     let notAllowedStatus = [
@@ -195,12 +195,14 @@ class MonitorOstEventHooks extends CronBase {
       .offset(offset)
       .fire();
 
-    oThis.transactionRecordsLength = transactionRecords.length;
+    let batchTxRecordsLength = transactionRecords.length;
 
-    for (let index = 0; index < oThis.transactionRecordsLength; index++) {
+    for (let index = 0; index < batchTxRecordsLength; index++) {
       let transactionRow = transactionRecords[index];
       oThis.transactionIds.push(transactionRow.id);
     }
+
+    return batchTxRecordsLength;
   }
 
   /**
