@@ -225,7 +225,21 @@ router.post('/:profile_user_id/fan-video', sanitizer.sanitizeDynamicUrlParams, f
   req.decodedParams.apiName = apiName.saveFanVideo;
   req.decodedParams.profile_user_id = req.params.profile_user_id;
 
-  Promise.resolve(routeHelper.perform(req, res, next, '/user/profile/update/FanVideo', 'r_a_v1_u_9', null));
+  const dataFormatterFunc = async function(serviceResponse) {
+    const wrapperFormatterRsp = await new FormatterComposer({
+      resultType: responseEntityKey.userVideoList,
+      entityKindToResponseKeyMap: {
+        [entityType.userVideoList]: responseEntityKey.userVideoList
+      },
+      serviceData: serviceResponse.data
+    }).perform();
+
+    serviceResponse.data = wrapperFormatterRsp.data;
+  };
+
+  Promise.resolve(
+    routeHelper.perform(req, res, next, '/user/profile/update/FanVideo', 'r_a_v1_u_9', null, dataFormatterFunc)
+  );
 });
 
 /* Profile image save */
