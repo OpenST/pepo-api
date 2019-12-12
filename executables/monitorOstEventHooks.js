@@ -101,6 +101,12 @@ class MonitorOstEventHooks extends CronBase {
     oThis.currentTimeStamp = basicHelper.getCurrentTimestampInSeconds();
   }
 
+  /**
+   * Perform Batch
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
   async _performBatch() {
     const oThis = this;
 
