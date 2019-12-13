@@ -143,6 +143,7 @@ class ApproveUsersAsCreator extends ServiceBase {
    *
    * @returns {{}}
    */
+  // TODO pixel - send only kind and params
   getPixelParameters(userId) {
     const oThis = this;
 

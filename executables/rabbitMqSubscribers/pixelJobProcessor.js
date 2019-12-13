@@ -85,6 +85,8 @@ class PixelJobProcessor extends RabbitMqProcessorBase {
 
     logger.log('Message params =====', messageParams);
 
+    // TODO pixel - factory.getInstance
+
     return oThis.jobProcessorFactory.perform(messageParams.message.payload);
   }
 }

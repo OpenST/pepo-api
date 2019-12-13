@@ -408,7 +408,7 @@ class ConfigStrategyModel extends ModelBase {
    * @param {string} errCode
    * @param {string} errMsg
    *
-   * @returns {Promise<never>}
+   * @return {Promise<never>}
    * @private
    */
   _customError(errCode, errMsg) {

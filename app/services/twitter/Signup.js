@@ -537,8 +537,7 @@ class TwitterSignup extends ServiceBase {
       inviterCodeId: oThis.inviterCodeId,
       userInviteCodeId: oThis.prelaunchInviteObj.inviteCodeId,
       isCreator: UserModel.isUserApprovedCreator(oThis.userObj),
-      utmParams: oThis.utmParams,
-      sanitizedHeaders: oThis.sanitizedHeaders
+      utmParams: oThis.utmParams
     };
     await bgJob.enqueue(bgJobConstants.afterSignUpJobTopic, messagePayload);
   }
