@@ -143,22 +143,15 @@ class ApproveUsersAsCreator extends ServiceBase {
    *
    * @returns {{}}
    */
-  // TODO pixel - send only kind and params
   getPixelParameters(userId) {
     const oThis = this;
 
     return {
-      pixel_identifier: pixelConstants.getPixelIdentifierKey(
-        pixelConstants.userEntityType,
-        pixelConstants.creatorApprovedEntityAction
-      ),
-      entity_type: pixelConstants.userEntityType,
-      entity_action: pixelConstants.creatorApprovedEntityAction,
-      page_type: oThis.approvedViaMedium,
-      page_name: oThis.approvedViaMedium === pixelConstants.userApprovedViaAdminUserProfileMedium ? userId : '',
-      // Page name is null if approve request comes from slack.
-      current_admin_id: oThis.currentAdminId,
-      approved_user_id: userId
+      entityType: pixelConstants.userEntityType,
+      entityAction: pixelConstants.creatorApprovedEntityAction,
+      approvedViaMedium: oThis.approvedViaMedium,
+      adminId: oThis.currentAdminId,
+      approvedUserId: userId
     };
   }
 }
