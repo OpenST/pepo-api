@@ -38,7 +38,7 @@ const v1Signature = {
     mandatory: [
       {
         parameter: 'video_id',
-        validatorMethods: ['validateInteger']
+        validatorMethods: ['validateNonZeroInteger']
       }
     ],
     optional: [
@@ -53,6 +53,20 @@ const v1Signature = {
       {
         parameter: 'check_reply_detail_id',
         validatorMethods: ['validateInteger']
+      }
+    ]
+  },
+  [apiName.unseenReplies]: {
+    mandatory: [
+      {
+        parameter: 'video_id',
+        validatorMethods: ['validateInteger']
+      }
+    ],
+    optional: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
       }
     ]
   },
