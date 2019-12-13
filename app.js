@@ -83,7 +83,10 @@ const assignParams = function(req, res, next) {
   // And finally assign it to req.decodedParams
   req.decodedParams = Object.assign(getRequestParams(req), req.decodedParams);
   delete req.decodedParams.current_user;
-  //current_user object should never be respected when it comes from front end.
+  delete req.decodedParams.user_login_cookie_value;
+  delete req.decodedParams.current_admin;
+  delete req.decodedParams.admin_login_cookie_value;
+  //IMPORTANT: Above keys are removed from decoded params as they are being set internally. Thus any such key coming from front end should not be respected.
 
   next();
 };
