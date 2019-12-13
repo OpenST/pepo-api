@@ -325,8 +325,7 @@ class UpdateFanVideo extends UpdateProfileBase {
   _prepareResponse() {
     const oThis = this;
 
-    // FE fires the video creation pixel and foloowing response is necessary.
-
+    // FE fires the video creation pixel and following response is necessary.
     return responseHelper.successWithData({
       [entityType.userVideoList]: [
         {
