@@ -380,13 +380,14 @@ class ReplyDetailsModel extends ModelBase {
     const oThis = this;
 
     const dbRows = await oThis
-      .select(['id', 'creator_user_id', 'entity_id'])
+      .select(['id', 'creator_user_id', 'entity_id', 'entity_kind'])
       .where([
         'parent_kind = ? AND parent_id = ? AND status = ?',
         replyDetailConstants.invertedParentKinds[replyDetailConstants.videoParentKind],
         parentVideoId,
         replyDetailConstants.invertedStatuses[replyDetailConstants.activeStatus]
       ])
+      .order_by('created_at DESC')
       .fire();
 
     let allRepliesArray = [];
@@ -414,12 +415,14 @@ class ReplyDetailsModel extends ModelBase {
 
     if (params.parentVideoIds) {
       const ReplyDetailsByParentVideoPaginationCache = require(rootPrefix +
-        '/lib/cacheManagement/single/ReplyDetailsByParentVideoPagination');
+          '/lib/cacheManagement/single/ReplyDetailsByParentVideoPagination'),
+        AllRepliesByParentVideoId = require(rootPrefix + '/lib/cacheManagement/single/AllRepliesByParentVideoId');
 
       for (let index = 0; index < params.parentVideoIds.length; index++) {
-        promisesArray.push(
-          new ReplyDetailsByParentVideoPaginationCache({ videoId: params.parentVideoIds[index] }).clear()
-        );
+        let currParentVideoId = params.parentVideoIds[index];
+
+        promisesArray.push(new ReplyDetailsByParentVideoPaginationCache({ videoId: currParentVideoId }).clear());
+        promisesArray.push(new AllRepliesByParentVideoId({ parentVideoId: currParentVideoId }).clear());
       }
     }
 
