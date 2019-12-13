@@ -208,10 +208,10 @@ class UserNotificationList extends ServiceBase {
   _getUserIdsForNotifications(userNotification, supportingEntitiesConfig) {
     let uIds = [];
 
-    const keysForUserId = supportingEntitiesConfig.userIds;
+    const keysForUserId = supportingEntitiesConfig.userIds; // [['actorIds']]
 
     for (let index = 0; index < keysForUserId.length; index++) {
-      const dataKeys = keysForUserId[index];
+      const dataKeys = keysForUserId[index]; // ['actorIds']
 
       const val = NotificationResponseHelper.getKeyDataFromNotification(userNotification, dataKeys);
 
