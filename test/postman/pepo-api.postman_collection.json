@@ -1,6 +1,7 @@
 {
 	"info": {
-		"_postman_id": "240eba68-c190-4401-9ae8-163708f6dc78",
+		"_postman_id": "5d0819c2-84ba-4978-bbb2-c28857cefa5d",
+		"_postman_id": "e8015a78-8aca-4318-9da5-1aa132f4c976",
 		"name": "pepo-api",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -8,6 +9,248 @@
 		{
 			"name": "admin",
 			"item": [
+				{
+					"name": "curated-entity",
+					"item": [
+						{
+							"name": "Update",
+							"request": {
+								"auth": {
+									"type": "basic",
+									"basic": [
+										{
+											"key": "username",
+											"value": "pepo",
+											"type": "string"
+										},
+										{
+											"key": "password",
+											"value": "Pepo-Admin-20!9*",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"type": "text",
+										"value": "application/x-www-form-urlencoded"
+									},
+									{
+										"key": "csrf-token",
+										"type": "text",
+										"value": "{{csrf-token}}"
+									}
+								],
+								"body": {
+									"mode": "urlencoded",
+									"urlencoded": [
+										{
+											"key": "entity_kind",
+											"value": "users",
+											"type": "text"
+										},
+										{
+											"key": "entity_id",
+											"value": "1027",
+											"type": "text"
+										},
+										{
+											"key": "position",
+											"value": "50130000.000000",
+											"type": "text"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{api_server}}/api/admin/curated-entities/update",
+									"host": [
+										"{{api_server}}"
+									],
+									"path": [
+										"api",
+										"admin",
+										"curated-entities",
+										"update"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Delete",
+							"request": {
+								"auth": {
+									"type": "basic",
+									"basic": [
+										{
+											"key": "username",
+											"value": "pepo",
+											"type": "string"
+										},
+										{
+											"key": "password",
+											"value": "Pepo-Admin-20!9*",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/x-www-form-urlencoded",
+										"type": "text"
+									},
+									{
+										"key": "csrf-token",
+										"value": "{{csrf-token}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "urlencoded",
+									"urlencoded": [
+										{
+											"key": "entity_kind",
+											"value": "tags",
+											"type": "text"
+										},
+										{
+											"key": "entity_id",
+											"value": "42",
+											"type": "text"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{api_server}}/api/admin/curated-entities/delete",
+									"host": [
+										"{{api_server}}"
+									],
+									"path": [
+										"api",
+										"admin",
+										"curated-entities",
+										"delete"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "user list",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"auth": {
+									"type": "basic",
+									"basic": [
+										{
+											"key": "username",
+											"value": "pepo",
+											"type": "string"
+										},
+										{
+											"key": "password",
+											"value": "Pepo-Admin-20!9*",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"value": "application/x-www-form-urlencoded",
+										"type": "text"
+									},
+									{
+										"key": "csrf-token",
+										"type": "text",
+										"value": "{{csrf-token}}"
+									}
+								],
+								"body": {
+									"mode": "urlencoded",
+									"urlencoded": []
+								},
+								"url": {
+									"raw": "{{api_server}}/api/admin/curated-entities/users",
+									"host": [
+										"{{api_server}}"
+									],
+									"path": [
+										"api",
+										"admin",
+										"curated-entities",
+										"users"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "tag list",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"auth": {
+									"type": "basic",
+									"basic": [
+										{
+											"key": "username",
+											"value": "pepo",
+											"type": "string"
+										},
+										{
+											"key": "password",
+											"value": "Pepo-Admin-20!9*",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"value": "application/x-www-form-urlencoded",
+										"type": "text"
+									},
+									{
+										"key": "csrf-token",
+										"type": "text",
+										"value": "{{csrf-token}}"
+									}
+								],
+								"body": {
+									"mode": "urlencoded",
+									"urlencoded": []
+								},
+								"url": {
+									"raw": "{{api_server}}/api/admin/curated-entities/tags",
+									"host": [
+										"{{api_server}}"
+									],
+									"path": [
+										"api",
+										"admin",
+										"curated-entities",
+										"tags"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"protocolProfileBehavior": {},
+					"_postman_isSubFolder": true
+				},
 				{
 					"name": "approve-user",
 					"request": {
@@ -875,6 +1118,48 @@
 										"v1",
 										"users",
 										"recovery-info"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Mute-User",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"url": {
+									"raw": "{{api_server}}/api/v1/users/1000/mute",
+									"host": [
+										"{{api_server}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"users",
+										"1000",
+										"mute"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "UnMute-User",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"url": {
+									"raw": "{{api_server}}/api/v1/users/1000/unmute",
+									"host": [
+										"{{api_server}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"users",
+										"1000",
+										"unmute"
 									]
 								}
 							},
@@ -2068,6 +2353,41 @@
 								}
 							},
 							"response": []
+						},
+						{
+							"name": "users-mention",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{api_server}}/api/v1/search/users-mention?intent=reply&parent_id=2647",
+									"host": [
+										"{{api_server}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"search",
+										"users-mention"
+									],
+									"query": [
+										{
+											"key": "q",
+											"value": null,
+											"disabled": true
+										},
+										{
+											"key": "intent",
+											"value": "reply"
+										},
+										{
+											"key": "parent_id",
+											"value": "2647"
+										}
+									]
+								}
+							},
+							"response": []
 						}
 					],
 					"protocolProfileBehavior": {},
@@ -2241,6 +2561,40 @@
 										"videos",
 										"1009",
 										"replies"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "unseen-replies",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{api_server}}/api/v1/search/users-mention?q=&intent=reply&parent_id=4728",
+									"host": [
+										"{{api_server}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"search",
+										"users-mention"
+									],
+									"query": [
+										{
+											"key": "q",
+											"value": ""
+										},
+										{
+											"key": "intent",
+											"value": "reply"
+										},
+										{
+											"key": "parent_id",
+											"value": "4728"
+										}
 									]
 								}
 							},

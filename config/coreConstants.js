@@ -405,22 +405,6 @@ class CoreConstants {
     return process.env.PA_PEPO_REDEMPTION_USER_ID;
   }
 
-  get PEPO_USER_SEARCH_CURATED_USER_IDS() {
-    return process.env.PA_USER_SEARCH_CURATED_USER_IDS;
-  }
-
-  get PEPO_USER_SEARCH_TOP_USER_IDS() {
-    return process.env.PA_USER_SEARCH_TOP_USER_IDS;
-  }
-
-  get PEPO_TAG_SEARCH_CURATED_TAG_IDS() {
-    return process.env.PA_CURATED_TAG_IDS;
-  }
-
-  get PEPO_TAG_SEARCH_TOP_TAG_IDS() {
-    return process.env.PA_TOP_TAG_IDS;
-  }
-
   get PEPO_SLACK_OAUTH_TOKEN() {
     return process.env.PA_SLACK_OAUTH_TOKEN;
   }
@@ -461,8 +445,16 @@ class CoreConstants {
     return process.env.PA_VIDEO_PIXEL_DATA_S3_FILE_PATH;
   }
 
+  get PA_REPLY_PIXEL_DATA_S3_FILE_PATH() {
+    return process.env.PA_REPLY_PIXEL_DATA_S3_FILE_PATH;
+  }
+
   get PA_VIDEO_PIXEL_DATA_APP_FILE_PATH() {
     return process.env.PA_VIDEO_PIXEL_DATA_APP_FILE_PATH;
+  }
+
+  get PA_REPLY_PIXEL_DATA_APP_FILE_PATH() {
+    return process.env.PA_REPLY_PIXEL_DATA_APP_FILE_PATH;
   }
 }
 

@@ -82,6 +82,11 @@ const assignParams = function(req, res, next) {
   // Also override any request params, related to signatures
   // And finally assign it to req.decodedParams
   req.decodedParams = Object.assign(getRequestParams(req), req.decodedParams);
+  delete req.decodedParams.current_user;
+  delete req.decodedParams.user_login_cookie_value;
+  delete req.decodedParams.current_admin;
+  delete req.decodedParams.admin_login_cookie_value;
+  //IMPORTANT: Above keys are removed from decoded params as they are being set internally. Thus any such key coming from front end should not be respected.
 
   next();
 };

@@ -2,11 +2,14 @@ const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   TagMultiCache = require(rootPrefix + '/lib/cacheManagement/multi/Tag'),
   TagPaginationCache = require(rootPrefix + '/lib/cacheManagement/single/TagPagination'),
-  responseHelper = require(rootPrefix + '/lib/formatter/response'),
-  coreConstants = require(rootPrefix + '/config/coreConstants'),
+  CuratedEntityIdsByKindCache = require(rootPrefix + '/lib/cacheManagement/single/CuratedEntityIdsByKind'),
   basicHelper = require(rootPrefix + '/helpers/basic'),
-  commonValidator = require(rootPrefix + '/lib/validators/Common'),
-  paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination');
+  responseHelper = require(rootPrefix + '/lib/formatter/response'),
+  paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination'),
+  curatedEntitiesConstants = require(rootPrefix + '/lib/globalConstant/curatedEntities');
+
+// Declare variables.
+const topTagsResultsLimit = 5;
 
 /**
  * Class to search tags.
@@ -110,11 +113,19 @@ class TagSearch extends ServiceBase {
       oThis.tagIds = tagPaginationRsp.data;
     } else {
       // Display curated tags in search.
-      const curatedTagIdsString = oThis.getTopResults
-        ? coreConstants.PEPO_TAG_SEARCH_TOP_TAG_IDS
-        : coreConstants.PEPO_TAG_SEARCH_CURATED_TAG_IDS;
-      if (curatedTagIdsString.length > 0) {
-        oThis.tagIds = JSON.parse(curatedTagIdsString);
+      const cacheResponse = await new CuratedEntityIdsByKindCache({
+        entityKind: curatedEntitiesConstants.tagsEntityKind
+      }).fetch();
+      if (cacheResponse.isFailure()) {
+        return Promise.reject(cacheResponse);
+      }
+
+      let tagIds = cacheResponse.data.entityIds;
+
+      tagIds = oThis.getTopResults ? tagIds.slice(0, topTagsResultsLimit + 1) : tagIds;
+
+      if (tagIds.length > 0) {
+        oThis.tagIds = tagIds;
       }
     }
   }
@@ -130,7 +141,7 @@ class TagSearch extends ServiceBase {
   async _getTags() {
     const oThis = this;
 
-    if (oThis.tagIds.length == 0) {
+    if (oThis.tagIds.length === 0) {
       return;
     }
 
@@ -150,7 +161,7 @@ class TagSearch extends ServiceBase {
 
     const nextPagePayloadKey = {};
 
-    if (oThis.tagIds.length >= oThis.limit) {
+    if (oThis.tagIds.length >= oThis.limit && oThis.tagPrefix) {
       nextPagePayloadKey[paginationConstants.paginationIdentifierKey] = {
         page: oThis.page + 1
       };

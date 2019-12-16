@@ -152,10 +152,6 @@ export PA_GOOGLE_INAPP_SERVICE_ACCOUNT_KEY=''
 export PA_GOOGLE_INAPP_SERVICE_ACCOUNT_EMAIL=''
 
 # Feed related constants.
-export PA_USER_SEARCH_CURATED_USER_IDS='[1000]'
-export PA_USER_SEARCH_TOP_USER_IDS='[1000]'
-export PA_CURATED_TAG_IDS='[1]'
-export PA_TOP_TAG_IDS='[1]'
 export PA_CURATED_FEED_IDS='[1000]'
 
 # Slack related constants.
@@ -173,4 +169,6 @@ export PA_GOOGLE_USAGE_REPORT_GROUP_IDS='{"User data Lifetime": "1969769902", "U
 
 # Video pixel data file path
 export PA_VIDEO_PIXEL_DATA_S3_FILE_PATH='redshift/full_video_watched_by_devices.csv'
+export PA_REPLY_PIXEL_DATA_S3_FILE_PATH='redshift/full_reply_watched_by_devices.csv'
 export PA_VIDEO_PIXEL_DATA_APP_FILE_PATH='.'
+export PA_REPLY_PIXEL_DATA_APP_FILE_PATH='.'

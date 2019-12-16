@@ -6,6 +6,8 @@ const rootPrefix = '../../../../..',
   PepoOnReplyFailureWebhook = require(rootPrefix + '/app/services/ostEvents/transactions/failure/PepoOnReply'),
   ReplyOnVideoFailureWebhook = require(rootPrefix + '/app/services/ostEvents/transactions/failure/ReplyOnVideo'),
   UserTransactionFailureWebhook = require(rootPrefix + '/app/services/ostEvents/transactions/failure/UserTransaction'),
+  createErrorLogsEntry = require(rootPrefix + '/lib/errorLogs/createEntry'),
+  errorLogsConstants = require(rootPrefix + '/lib/globalConstant/errorLogs'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   transactionConstant = require(rootPrefix + '/lib/globalConstant/transaction');
 
@@ -39,6 +41,16 @@ class TransactionWebhookFailureFactory extends TransactionWebhookFactoryBase {
    */
   async _processTransaction() {
     const oThis = this;
+
+    const errorObject = responseHelper.error({
+      internal_error_identifier: 'a_s_oe_t_f_f_pt_1',
+      api_error_identifier: 'something_went_wrong',
+      debug_options: {
+        Reason: 'Transaction failure.',
+        ostTransaction: oThis.ostTransaction
+      }
+    });
+    await createErrorLogsEntry.perform(errorObject, errorLogsConstants.mediumSeverity);
 
     let transactionEventResponse = null;
     if (oThis._isRedemptionTransactionKind()) {

@@ -33,8 +33,6 @@ class Text extends ModelBase {
    * @param {object} dbRow
    * @param {number} dbRow.id
    * @param {string} dbRow.text
-   * @param {string} dbRow.tag_ids
-   * @param {string} dbRow.link_ids
    * @param {number} dbRow.kind
    * @param {string} dbRow.created_at
    * @param {string} dbRow.updated_at
@@ -48,8 +46,6 @@ class Text extends ModelBase {
     const formattedData = {
       id: dbRow.id,
       text: dbRow.text,
-      tagIds: dbRow.tag_ids ? JSON.parse(dbRow.tag_ids) : null,
-      linkIds: dbRow.link_ids ? JSON.parse(dbRow.link_ids) : null,
       kind: textConstants.kinds[dbRow.kind],
       createdAt: dbRow.created_at,
       updatedAt: dbRow.updated_at
@@ -103,8 +99,6 @@ class Text extends ModelBase {
    *
    * @param {object} params
    * @param {string} params.text
-   * @param {array} params.tagIds
-   * @param {array} params.linkIds
    * @param {string} params.kind
    *
    * @returns {object}
@@ -117,14 +111,6 @@ class Text extends ModelBase {
       kind: textConstants.invertedKinds[params.kind]
     };
 
-    if (params.tagIds) {
-      insertParams.tag_ids = JSON.stringify(params.tagIds);
-    }
-
-    if (params.linkIds) {
-      insertParams.link_ids = JSON.stringify(params.linkIds);
-    }
-
     return oThis.insert(insertParams).fire();
   }
 
@@ -134,30 +120,15 @@ class Text extends ModelBase {
    * @param {object} params
    * @param {number} params.text
    * @param {string} params.id
-   * @param {array} [params.tagIds]
-   * @param {array} [params.linkIds]
    *
    * @returns {Promise<void>}
    */
   async updateById(params) {
     const oThis = this;
 
-    let linkIds = null,
-      tagIds = null;
-
-    if (params.linkIds && params.linkIds.length > 0) {
-      linkIds = JSON.stringify(params.linkIds);
-    }
-
-    if (params.tagIds && params.tagIds.length > 0) {
-      tagIds = JSON.stringify(params.tagIds);
-    }
-
     return oThis
       .update({
-        text: params.text,
-        tag_ids: tagIds,
-        link_ids: linkIds
+        text: params.text
       })
       .where({
         id: params.id

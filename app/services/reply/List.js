@@ -6,7 +6,8 @@ const rootPrefix = '../../..',
     '/lib/cacheManagement/single/ReplyDetailsByParentVideoPagination'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
-  paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination');
+  paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination'),
+  replyDetailConstants = require(rootPrefix + '/lib/globalConstant/replyDetail');
 
 /**
  * Class for video reply details service.
@@ -19,6 +20,7 @@ class GetReplyList extends ServiceBase {
    *
    * @param {object} params
    * @param {string/number} params.video_id
+   * @param {string/number} [params.check_reply_detail_id]
    * @param {object} [params.current_user]
    * @param {boolean} [params.is_admin]
    * @param {string} [params.pagination_identifier]
@@ -36,6 +38,8 @@ class GetReplyList extends ServiceBase {
     oThis.currentUser = params.current_user;
     oThis.isAdmin = params.is_admin || false;
     oThis.paginationIdentifier = params[paginationConstants.paginationIdentifierKey] || null;
+    oThis.checkReplyDetailId = params.check_reply_detail_id || null;
+    //This is the reply detail id whose presence is to be checked. In case this reply id is deleted then NOT FOUND error is sent.
 
     oThis.limit = oThis._defaultPageLimit();
 
@@ -150,9 +154,14 @@ class GetReplyList extends ServiceBase {
   async _getReplyVideos() {
     const oThis = this;
 
+    let toFetchDetailsForReplyDetailsIds = oThis.replyDetailIds;
+    if (oThis.checkReplyDetailId) {
+      toFetchDetailsForReplyDetailsIds = toFetchDetailsForReplyDetailsIds.concat([oThis.checkReplyDetailId]);
+    }
+
     const userVideosObj = new GetUserVideosList({
       currentUserId: oThis.currentUserId,
-      replyDetailIds: oThis.replyDetailIds,
+      replyDetailIds: toFetchDetailsForReplyDetailsIds,
       isAdmin: oThis.isAdmin,
       fetchVideoViewDetails: 1
     });
@@ -163,6 +172,31 @@ class GetReplyList extends ServiceBase {
     }
 
     oThis.userRepliesMap = response.data;
+
+    if (oThis.checkReplyDetailId) {
+      if (
+        !oThis.userRepliesMap.replyDetailsMap[oThis.checkReplyDetailId] ||
+        oThis.userRepliesMap.replyDetailsMap[oThis.checkReplyDetailId].status != replyDetailConstants.activeStatus
+      ) {
+        return Promise.reject(
+          responseHelper.error({
+            internal_error_identifier: 'a_s_r_l_1',
+            api_error_identifier: 'entity_not_found',
+            debug_options: `checkReplyDetailId: ${oThis.checkReplyDetailId}`
+          })
+        );
+      }
+
+      if (oThis.userRepliesMap.replyDetailsMap[oThis.checkReplyDetailId].parentId != oThis.videoId) {
+        return Promise.reject(
+          responseHelper.error({
+            internal_error_identifier: 'a_s_r_l_2',
+            api_error_identifier: 'entity_not_found',
+            debug_options: `checkReplyDetailId: ${oThis.checkReplyDetailId}`
+          })
+        );
+      }
+    }
 
     for (let ind = 0; ind < oThis.replyDetailIds.length; ind++) {
       const rdId = oThis.replyDetailIds[ind];
@@ -213,9 +247,9 @@ class GetReplyList extends ServiceBase {
       [entityTypeConstants.videoDescriptionsMap]: oThis.userRepliesMap.videoDescriptionMap,
       [entityTypeConstants.userProfilesMap]: oThis.userRepliesMap.userProfilesMap,
       [entityTypeConstants.currentUserUserContributionsMap]: oThis.userRepliesMap.currentUserUserContributionsMap,
-      [entityTypeConstants.currentUserVideoContributionsMap]:
-        oThis.userRepliesMap.currentUserVideoContributionsMap,
-      [entityTypeConstants.currentUserReplyDetailContributionsMap]: oThis.userRepliesMap.currentUserReplyDetailContributionsMap,
+      [entityTypeConstants.currentUserVideoContributionsMap]: oThis.userRepliesMap.currentUserVideoContributionsMap,
+      [entityTypeConstants.currentUserReplyDetailContributionsMap]:
+        oThis.userRepliesMap.currentUserReplyDetailContributionsMap,
       [entityTypeConstants.currentUserReplyDetailsRelationsMap]:
         oThis.userRepliesMap.currentUserReplyDetailsRelationsMap,
       [entityTypeConstants.userProfileAllowedActions]: oThis.userRepliesMap.userProfileAllowedActions,

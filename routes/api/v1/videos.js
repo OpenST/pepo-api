@@ -85,6 +85,28 @@ router.get('/:video_id/replies', sanitizer.sanitizeDynamicUrlParams, function(re
   Promise.resolve(routeHelper.perform(req, res, next, '/reply/List', 'r_a_v1_u_13', null, dataFormatterFunc));
 });
 
+/* Get list of replies given video id. */
+router.get('/:video_id/unseen-replies', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.unseenReplies;
+  req.decodedParams.video_id = req.params.video_id;
+
+  const dataFormatterFunc = async function(serviceResponse) {
+    const wrapperFormatterRsp = await new FormatterComposer({
+      resultType: responseEntityKey.unseenReplies,
+      entityKindToResponseKeyMap: {
+        [entityType.unseenReplies]: responseEntityKey.unseenReplies,
+        [entityType.usersMap]: responseEntityKey.users,
+        [entityType.imagesMap]: responseEntityKey.images
+      },
+      serviceData: serviceResponse.data
+    }).perform();
+
+    serviceResponse.data = wrapperFormatterRsp.data;
+  };
+
+  Promise.resolve(routeHelper.perform(req, res, next, '/reply/Unseen', 'r_a_v1_u_13', null, dataFormatterFunc));
+});
+
 /* Video share */
 router.get('/:video_id/share', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.videoShare;

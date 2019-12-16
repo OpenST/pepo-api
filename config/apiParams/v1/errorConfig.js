@@ -429,6 +429,17 @@ const v1ErrorConfig = {
     parameter: 'video_url',
     code: 'missing',
     message: 'Oops! Something went wrong.'
+  },
+  // TODO feed - confirm languages - Added in sheet.
+  mute_not_possible: {
+    parameter: 'user_id',
+    code: 'invalid',
+    message: 'Please make sure you are not muting yourself.'
+  },
+  unmute_not_possible: {
+    parameter: 'user_id',
+    code: 'invalid',
+    message: 'Please make sure you are not unmuting yourself.'
   }
 };
 

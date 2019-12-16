@@ -91,6 +91,30 @@ class UserMute extends ModelBase {
   }
 
   /**
+   * Fetch muted user2 ids by user1 id.
+   *
+   * @returns {Promise<void>}
+   */
+  async fetchMutedUsersByUser1Ids(user1Ids) {
+    const oThis = this;
+
+    const dbRows = await oThis
+      .select('*')
+      .where({ user1_id: user1Ids })
+      .fire();
+
+    const response = {};
+
+    for (let index = 0; index < dbRows.length; index++) {
+      const formatDbRow = oThis.formatDbData(dbRows[index]);
+      response[formatDbRow.user1Id] = response[formatDbRow.user1Id] || {};
+      response[formatDbRow.user1Id][formatDbRow.user2Id] = 1;
+    }
+
+    return response;
+  }
+
+  /**
    * Index name
    *
    * @returns {string}
@@ -104,6 +128,8 @@ class UserMute extends ModelBase {
    *
    * @param {object} params
    * @param {number} params.user2Ids
+   * @param {number} params.user1Ids
+   * @param {number} params.user1Id
    *
    * @returns {Promise<*>}
    */
@@ -114,6 +140,16 @@ class UserMute extends ModelBase {
       const UserMuteByUser2IdsForGlobalCache = require(rootPrefix +
         '/lib/cacheManagement/multi/UserMuteByUser2IdsForGlobal');
       promisesArray.push(new UserMuteByUser2IdsForGlobalCache({ user2Ids: [params.user2Id] }).clear());
+    }
+
+    if (params.user1Id) {
+      const UserMuteByUser1IdsCache = require(rootPrefix + '/lib/cacheManagement/multi/UserMuteByUser1Ids');
+      promisesArray.push(new UserMuteByUser1IdsCache({ user1Ids: [params.user1Id] }).clear());
+    }
+
+    if (params.user1Ids) {
+      const UserMuteByUser1IdsCache = require(rootPrefix + '/lib/cacheManagement/multi/UserMuteByUser1Ids');
+      promisesArray.push(new UserMuteByUser1IdsCache({ user1Ids: params.user1Ids }).clear());
     }
 
     await Promise.all(promisesArray);

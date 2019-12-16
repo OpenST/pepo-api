@@ -272,9 +272,9 @@ class GetTagsVideoList extends ServiceBase {
       [entityTypeConstants.videoDescriptionsMap]: oThis.usersVideosMap.videoDescriptionMap,
       [entityTypeConstants.userProfilesMap]: oThis.usersVideosMap.userProfilesMap,
       [entityTypeConstants.currentUserUserContributionsMap]: oThis.usersVideosMap.currentUserUserContributionsMap,
-      [entityTypeConstants.currentUserVideoContributionsMap]:
-        oThis.usersVideosMap.currentUserVideoContributionsMap,
-      [entityTypeConstants.currentUserReplyDetailContributionsMap]: oThis.usersVideosMap.currentUserReplyDetailContributionsMap,
+      [entityTypeConstants.currentUserVideoContributionsMap]: oThis.usersVideosMap.currentUserVideoContributionsMap,
+      [entityTypeConstants.currentUserReplyDetailContributionsMap]:
+        oThis.usersVideosMap.currentUserReplyDetailContributionsMap,
       [entityTypeConstants.userProfileAllowedActions]: oThis.usersVideosMap.userProfileAllowedActions,
       [entityTypeConstants.pricePointsMap]: oThis.usersVideosMap.pricePointsMap,
       [entityTypeConstants.replyDetailsMap]: oThis.usersVideosMap.replyDetailsMap,
@@ -312,8 +312,8 @@ class GetTagsVideoList extends ServiceBase {
     }
 
     for (const vid in replyDetailsByEntityIdsAndEntityKindCacheRsp.data) {
-      const rdId = replyDetailsByEntityIdsAndEntityKindCacheRsp.data[vid];
-      if (Number(rdId) > 0) {
+      const rdId = replyDetailsByEntityIdsAndEntityKindCacheRsp.data[vid].id;
+      if (rdId) {
         oThis.replyDetailIds.push(rdId);
       }
     }

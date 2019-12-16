@@ -4,6 +4,7 @@ const rootPrefix = '../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   TagIdByNamesCache = require(rootPrefix + '/lib/cacheManagement/multi/TagIdByNames'),
+  ReplyDetailsByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/ReplyDetailsByIds'),
   gotoFactory = require(rootPrefix + '/lib/goTo/factory'),
   coreConstants = require(rootPrefix + '/config/coreConstants'),
   gotoConstants = require(rootPrefix + '/lib/globalConstant/goto'),
@@ -125,8 +126,16 @@ class FetchGoto extends ServiceBase {
       }
     } else if (pathArray[1] === gotoConstants.replyGotoKind) {
       const replyDetailId = Number(pathArray[2]);
+
       if (replyDetailId) {
-        oThis.gotoParams = { replyDetailId: replyDetailId };
+        const replyDetailCacheResp = await new ReplyDetailsByIdsCache({ ids: [replyDetailId] }).fetch();
+        if (replyDetailCacheResp.isFailure()) {
+          return Promise.reject(replyDetailCacheResp);
+        }
+
+        const parentVideoId = replyDetailCacheResp.data[replyDetailId].parentId;
+
+        oThis.gotoParams = { replyDetailId: replyDetailId, parentVideoId: parentVideoId };
         oThis.gotoKind = gotoConstants.replyGotoKind;
       }
     } else if (pathArray[1] === gotoConstants.tagGotoKind) {
@@ -158,8 +167,10 @@ class FetchGoto extends ServiceBase {
       } else {
         oThis.gotoKind = gotoConstants.feedGotoKind;
       }
-      oThis.utmCookieValue = userUtmDetailsConstants.utmCookieToSet(query);
     }
+
+    // set UTM cookie if utm params are present in the query params.
+    oThis.utmCookieValue = userUtmDetailsConstants.utmCookieToSet(query);
   }
 
   /**
