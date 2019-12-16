@@ -166,7 +166,7 @@ class ReplyDetailsModel extends ModelBase {
 
     for (let index = 0; index < dbRows.length; index++) {
       const formatDbRow = oThis.formatDbData(dbRows[index]);
-      replyDetails[formatDbRow.entityId] = formatDbRow.id;
+      replyDetails[formatDbRow.entityId] = { id: formatDbRow.id };
     }
 
     return replyDetails;
@@ -200,9 +200,8 @@ class ReplyDetailsModel extends ModelBase {
   /**
    * Fetch distinct reply creators of parent
    *
-   * @param {array} replyDetailIds
-   *
-   * @returns {Promise<void>}
+   * @param videoIds
+   * @return {Promise<void>}
    */
   async fetchDistinctReplyCreatorsByParent(videoIds) {
     const oThis = this;
