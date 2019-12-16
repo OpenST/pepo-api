@@ -96,6 +96,12 @@ class PublicVideoFeed extends FeedBase {
    */
   async _setFeedIds() {
     const oThis = this;
+    
+    if(oThis.currentUser && (oThis.currentUser.id == 1566 || oThis.currentUser.id == 6)) {
+      oThis.feedIds = [];
+      oThis.feedsMap = {};
+      return;
+}
 
     // If logged in feed, then show shuffled feeds
     if (oThis._showShuffledFeeds()) {
