@@ -11,7 +11,6 @@ const rootPrefix = '../../..',
     '/lib/cacheManagement/multi/UserDeviceExtendedDetailsByDeviceIds'),
   basicHelper = require(rootPrefix + '/helpers/basic'),
   headerHelper = require(rootPrefix + '/helpers/header'),
-  coreConstants = require(rootPrefix + '/config/coreConstants'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination'),
@@ -44,8 +43,6 @@ class PublicVideoFeed extends FeedBase {
     oThis.headers = params.sanitized_headers;
 
     oThis.limit = oThis._defaultPageLimit();
-    oThis.paginationTimestamp = null;
-    oThis.nextPaginationTimestamp = null;
     oThis.pageNumber = null;
     oThis.nextPageNumber = null;
 
@@ -55,7 +52,7 @@ class PublicVideoFeed extends FeedBase {
   /**
    * Validate and sanitize.
    *
-   * @sets oThis.currentUserId, oThis.paginationTimestamp
+   * @sets oThis.currentUserId
    *
    * @returns {Promise<*|result>}
    * @private
@@ -72,10 +69,8 @@ class PublicVideoFeed extends FeedBase {
     if (oThis.paginationIdentifier) {
       const parsedPaginationParams = oThis._parsePaginationParams(oThis.paginationIdentifier);
 
-      oThis.paginationTimestamp = parsedPaginationParams.pagination_timestamp; // Override paginationTimestamp number.
-      oThis.pageNumber = Number(parsedPaginationParams.page_no) || 1; // Override paginationTimestamp number.
+      oThis.pageNumber = Number(parsedPaginationParams.page_no) || 1; // Override page number.
     } else {
-      oThis.paginationTimestamp = null;
       oThis.pageNumber = 1;
     }
 
@@ -101,7 +96,7 @@ class PublicVideoFeed extends FeedBase {
     }
 
     // If logged in feed, then show shuffled feeds
-    if (oThis._showShuffledFeeds()) {
+    if (oThis._showLoggedInFeed()) {
       if (oThis.pageNumber > 1) {
         await oThis.fetchPersonalizedFeedDataforUser();
 
@@ -112,11 +107,11 @@ class PublicVideoFeed extends FeedBase {
       } else {
         await oThis.fetchFeedIdsForFirstPage();
       }
-
-      await oThis._setFeedDataForLoggedInUser();
     } else {
-      await oThis._setFeedDataForLoggedOutUser();
+      await oThis._fetchFeedDataForLoggedOutUser();
     }
+
+    await oThis._setFeedData();
 
     await oThis._filterFeedData();
   }
@@ -134,15 +129,9 @@ class PublicVideoFeed extends FeedBase {
 
     const nextPagePayloadKey = {};
 
-    if (oThis._showShuffledFeeds()) {
-      if (oThis.nextPageNumber) {
-        nextPagePayloadKey[paginationConstants.paginationIdentifierKey] = {
-          page_no: oThis.nextPageNumber
-        };
-      }
-    } else if (oThis.nextPaginationTimestamp) {
+    if (oThis.nextPageNumber) {
       nextPagePayloadKey[paginationConstants.paginationIdentifierKey] = {
-        pagination_timestamp: oThis.nextPaginationTimestamp
+        page_no: oThis.nextPageNumber
       };
     }
 
@@ -186,7 +175,7 @@ class PublicVideoFeed extends FeedBase {
     const dbRow = await new UserPersonalizedDataModel().fetchJsonDataForKind({
       userId: oThis.currentUserId,
       kind: userPersonalizedDataConstants.feedDataKind,
-      uniqueId: headerHelper.pepoDeviceId(oThis.headers)
+      uniqueId: oThis._uniqueId()
     });
 
     if (CommonValidators.validateNonEmptyObject(dbRow.jsonData)) {
@@ -220,7 +209,7 @@ class PublicVideoFeed extends FeedBase {
     await new UserPersonalizedDataModel().updateJsonDataForUsers({
       userId: oThis.currentUserId,
       kind: userPersonalizedDataConstants.feedDataKind,
-      uniqueId: headerHelper.pepoDeviceId(oThis.headers),
+      uniqueId: oThis._uniqueId(),
       jsonData: oThis.userPersonalizedfeedData
     });
   }
@@ -231,7 +220,7 @@ class PublicVideoFeed extends FeedBase {
    * @returns {boolean}
    * @private
    */
-  _showShuffledFeeds() {
+  _showLoggedInFeed() {
     // shuffle feeds only in logged in mode.
     const oThis = this;
 
@@ -246,7 +235,7 @@ class PublicVideoFeed extends FeedBase {
    * @returns {Promise<void>}
    * @private
    */
-  async _setFeedDataForLoggedInUser() {
+  async _setFeedData() {
     const oThis = this;
 
     const allSortedFeedIds = oThis.userPersonalizedfeedData.allSortedFeedIds;
@@ -290,65 +279,21 @@ class PublicVideoFeed extends FeedBase {
   /**
    * Set feed ids.
    *
-   * @sets oThis.feedIds, oThis.feedsMap, oThis.nextPaginationTimestamp
+   * @sets oThis.feedIds, oThis.feedsMap
    *
    * @returns {Promise<void>}
    * @private
    */
-  async _setFeedDataForLoggedOutUser() {
+  async _fetchFeedDataForLoggedOutUser() {
     const oThis = this;
 
-    const loggedOutFeedCacheResp = await new LoggedOutFeedCache({
-      limit: oThis.limit,
-      paginationTimestamp: oThis.paginationTimestamp
-    }).fetch();
+    const loggedOutFeedCacheResp = await new LoggedOutFeedCache({}).fetch();
 
-    oThis.feedIds = loggedOutFeedCacheResp.data.feedIds;
-    oThis.feedsMap = loggedOutFeedCacheResp.data.feedDetails;
-
-    if (oThis.feedIds.length >= oThis.limit) {
-      const lastFeedId = oThis.feedIds[oThis.feedIds.length - 1];
-      oThis.nextPaginationTimestamp = oThis.feedsMap[lastFeedId].paginationIdentifier;
+    if (loggedOutFeedCacheResp.isFailure()) {
+      return Promise.reject(loggedOutFeedCacheResp);
     }
 
-    if (!oThis.currentUserId) {
-      await oThis._handleCuratedFeeds();
-    }
-  }
-
-  /**
-   * Update feed ids.
-   *
-   * @sets oThis.feedIds, oThis.feedsMap
-   *
-   * @returns {Promise<*>}
-   * @private
-   */
-  async _handleCuratedFeeds() {
-    const oThis = this;
-
-    let curatedFeedMap = {};
-    const curatedFeedIdsString = coreConstants.PEPO_CURATED_FEED_IDS,
-      curatedFeedIds = JSON.parse(curatedFeedIdsString);
-
-    if (oThis.paginationTimestamp == null) {
-      // Logged out mode and FIRST page.
-      curatedFeedMap = await new FeedModel().fetchByIds(curatedFeedIds);
-
-      oThis.feedsMap = Object.assign(oThis.feedsMap, curatedFeedMap);
-      oThis.feedIds = curatedFeedIds.concat(oThis.feedIds);
-    } else {
-      // Logged out mode and NOT FIRST page.
-      for (let index = 0; index < curatedFeedIds.length; index++) {
-        const curatedFeedId = curatedFeedIds[index],
-          arrayIndex = oThis.feedIds.indexOf(curatedFeedId);
-
-        if (arrayIndex >= 0) {
-          oThis.feedIds.splice(arrayIndex, 1);
-          delete oThis.feedsMap[curatedFeedId];
-        }
-      }
-    }
+    oThis.userPersonalizedfeedData = loggedOutFeedCacheResp.data;
   }
 
   /**
@@ -463,6 +408,22 @@ class PublicVideoFeed extends FeedBase {
    */
   _maxPageLimit() {
     return paginationConstants.maxFeedsListPageSize;
+  }
+
+  /**
+   * Returns maximum page limit.
+   *
+   * @returns {number}
+   * @private
+   */
+  _uniqueId() {
+    const oThis = this;
+
+    if (oThis._showLoggedInFeed) {
+      return headerHelper.pepoDeviceId(oThis.headers);
+    } else {
+      return null;
+    }
   }
 }
 

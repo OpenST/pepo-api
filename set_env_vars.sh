@@ -151,9 +151,6 @@ export PA_GOOGLE_INAPP_SERVICE_ACCOUNT_KEY=''
 # Value for PA_GOOGLE_INAPP_SERVICE_ACCOUNT_KEY should be escaped first with escape() function. This is done so as to avoid /n being escaped automatically.
 export PA_GOOGLE_INAPP_SERVICE_ACCOUNT_EMAIL=''
 
-# Feed related constants.
-export PA_CURATED_FEED_IDS='[1000]'
-
 # Slack related constants.
 export PA_SLACK_OAUTH_TOKEN='xoxp-246676767414-245599437185-838396824006-71fcc8c32cef66a568b2ea890fc14ae9'
 export PA_SLACK_API_APP_ID='AQC5JETDX'

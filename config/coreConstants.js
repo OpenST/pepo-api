@@ -417,10 +417,6 @@ class CoreConstants {
     return process.env.PA_SLACK_SIGNING_SECRET;
   }
 
-  get PEPO_CURATED_FEED_IDS() {
-    return process.env.PA_CURATED_FEED_IDS;
-  }
-
   get PA_GOOGLE_CLIENT_EMAIL() {
     return process.env.PA_GOOGLE_CLIENT_EMAIL;
   }
