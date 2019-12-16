@@ -38,5 +38,7 @@
     "prefetchCount": 1
   },
   "reValidateAllReceipts": {
+  },
+  "monitorOstEventHooks": {
   }
 }

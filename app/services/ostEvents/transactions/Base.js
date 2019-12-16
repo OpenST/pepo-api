@@ -62,6 +62,7 @@ class TransactionWebhookBase extends ServiceBase {
 
     oThis.videoId = null;
     oThis.replyDetailId = null;
+    oThis.parentVideoId = null;
 
     oThis.pepocornAmount = null;
     oThis.productId = null;
@@ -615,9 +616,9 @@ class TransactionWebhookBase extends ServiceBase {
           return Promise.reject(replyDetailsByEntityIdsAndEntityKindCacheRsp);
         }
 
-        const replyDetailId = replyDetailsByEntityIdsAndEntityKindCacheRsp.data[oThis.videoId];
+        const replyDetailId = replyDetailsByEntityIdsAndEntityKindCacheRsp.data[oThis.videoId].id;
 
-        if (CommonValidators.isVarNullOrUndefined(replyDetailId)) {
+        if (!replyDetailId) {
           return Promise.reject(
             responseHelper.paramValidationError({
               internal_error_identifier: 'a_s_oe_t_b_11',
@@ -661,6 +662,8 @@ class TransactionWebhookBase extends ServiceBase {
         })
       );
     }
+
+    oThis.parentVideoId = replyDetail.parentId;
 
     if (oThis._isPepoOnReplyTransactionKind()) {
       oThis.videoId = replyDetail.entityId;
