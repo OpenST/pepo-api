@@ -434,6 +434,20 @@ class UserNotificationList extends ServiceBase {
       };
       formattedUserNotification.heading = await oThis._getHeading(userNotification, formattedUserNotification.payload);
 
+      // TEMP CODE - for QA testing
+      const kindsMap = {
+        [userNotificationConstants.replySenderWithAmountKind]: 1,
+        [userNotificationConstants.replySenderWithoutAmountKind]: 1,
+        [userNotificationConstants.replyReceiverWithAmountKind]: 1,
+        [userNotificationConstants.replyReceiverWithoutAmountKind]: 1,
+        [userNotificationConstants.replyUserMentionKind]: 1
+      };
+
+      if (kindsMap[userNotification.kind]) {
+        console.log('\n\n\nformattedUserNotification-GOTO-------------->', formattedUserNotification.goto);
+      }
+      // TEMP CODE - for QA testing
+
       oThis.formattedUserNotifications.push(formattedUserNotification);
     }
 
