@@ -296,7 +296,7 @@ class UpdateFanVideo extends UpdateProfileBase {
       })
       .fire();
 
-    oThis.feedId = feedInsertResp.id;
+    oThis.feedId = feedInsertResp.insertId;
   }
 
   /**
