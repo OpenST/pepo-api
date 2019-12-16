@@ -94,7 +94,7 @@ class PublicVideoFeed extends FeedBase {
   async _setFeedIds() {
     const oThis = this;
 
-    if (oThis.currentUser && (oThis.currentUser.id == 1566 || oThis.currentUser.id == 6)) {
+    if (oThis.currentUser && oThis.currentUser.id == 1566) {
       oThis.feedIds = [];
       oThis.feedsMap = {};
       return;
