@@ -51,6 +51,7 @@ class UserVideoViewModel extends CassandraModelBase {
    * @param {number} dbRow.user_id
    * @param {number} dbRow.video_id
    * @param {number} dbRow.last_view_at
+   * @param {number} dbRow.last_reply_view_at
    *
    * @returns {object}
    */
@@ -63,11 +64,38 @@ class UserVideoViewModel extends CassandraModelBase {
     const formattedData = {
       userId: dbRow.user_id ? Number(dbRow.user_id) : undefined,
       videoId: dbRow.video_id ? Number(dbRow.video_id) : undefined,
-      lastViewAt: dbRow.last_view_at ? basicHelper.dateToMilliSecondsTimestamp(dbRow.last_view_at) : undefined
+      lastViewAt: dbRow.last_view_at ? basicHelper.dateToMilliSecondsTimestamp(dbRow.last_view_at) : undefined,
+      lastReplyViewAt: dbRow.last_reply_view_at
+        ? basicHelper.dateToMilliSecondsTimestamp(dbRow.last_reply_view_at)
+        : undefined
     };
     /* eslint-enable */
 
     return oThis.sanitizeFormattedData(formattedData);
+  }
+
+  /**
+   * Update user video view time.
+   *
+   * @param {object} queryParams
+   * @param {number} queryParams.userId
+   * @param {number} queryParams.parentVideoIds
+   * @param {number} queryParams.lastReplyViewAt
+   *
+   * @returns {Promise<any>}
+   */
+  async updateLastReplyViewAtForParentVideos(queryParams) {
+    const oThis = this;
+
+    const query = 'update ' + oThis.queryTableName + ' set last_reply_view_at = ? where user_id = ? and video_id = ?;';
+    const queries = [];
+
+    for (let index = 0; index < queryParams.parentVideoIds.length; index++) {
+      const updateParam = [queryParams.lastReplyViewAt, queryParams.userId, queryParams.parentVideoIds[index]];
+      queries.push({ query: query, params: updateParam });
+    }
+
+    return oThis.batchFire(queries);
   }
 
   /**
@@ -107,14 +135,12 @@ class UserVideoViewModel extends CassandraModelBase {
     const oThis = this;
     const response = {};
 
-    const query = `select last_view_at, video_id from ${oThis.queryTableName} where user_id = ? and video_id in ?;`;
+    const query = `select last_view_at, last_reply_view_at, video_id from ${
+      oThis.queryTableName
+    } where user_id = ? and video_id in ?;`;
     const params = [queryParams.userId, queryParams.videoIds];
 
     const queryRsp = await oThis.fire(query, params);
-
-    if (queryRsp.rows.length === 0) {
-      return {};
-    }
 
     for (let index = 0; index < queryRsp.rows.length; index++) {
       const formattedData = oThis.formatDbData(queryRsp.rows[index]);

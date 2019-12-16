@@ -43,6 +43,8 @@ class FeedModel extends ModelBase {
       kind: feedsConstants.kinds[dbRow.kind],
       paginationIdentifier: dbRow.pagination_identifier,
       actor: dbRow.actor,
+      isPopular: dbRow.is_popular,
+      lastReplyTimestamp: dbRow.last_reply_timestamp,
       extraData: dbRow.hasOwnProperty('extra_data') ? JSON.parse(dbRow.extra_data) : undefined,
       createdAt: dbRow.created_at,
       updatedAt: dbRow.updated_at
@@ -134,7 +136,8 @@ class FeedModel extends ModelBase {
   /**
    * Fetch new feeds ids after last visit time.
    *
-   * @param {array} ids: Feed Ids
+   * @param {Object} params
+   * @param {array} params.limit: limit
    *
    * @return {object}
    */
@@ -145,7 +148,7 @@ class FeedModel extends ModelBase {
     const response = { feedIds: [], feedsMap: {} };
 
     const dbRows = await oThis
-      .select('id, pagination_identifier, primary_external_entity_id, actor')
+      .select('id, pagination_identifier, primary_external_entity_id, actor, is_popular, last_reply_timestamp')
       .order_by('pagination_identifier desc')
       .limit(limit)
       .fire();
@@ -162,9 +165,8 @@ class FeedModel extends ModelBase {
   /**
    * Fetch feeds ids after pagination Timestamp.
    *
-   * @param {array} ids: Feed Ids
-   *
-   * @return {object}
+   * @param params
+   * @return {Promise<{feedIds: Array, feedsMap: {}}>}
    */
   async getPersonalizedFeedIdsAfterTimestamp(params) {
     const oThis = this,
@@ -252,6 +254,9 @@ class FeedModel extends ModelBase {
 
     const LoggedOutFeedCache = require(rootPrefix + '/lib/cacheManagement/single/LoggedOutFeed');
     promisesArray.push(new LoggedOutFeedCache({}).clear());
+
+    const LatestFeedCache = require(rootPrefix + '/lib/cacheManagement/single/LatestFeed');
+    promisesArray.push(new LatestFeedCache({}).clear());
 
     if (params.id) {
       const FeedByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/FeedByIds');

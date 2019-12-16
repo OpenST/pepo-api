@@ -70,6 +70,7 @@ class UpdateFanVideo extends UpdateProfileBase {
     oThis.flushUserCache = false;
     oThis.flushUserProfileElementsCache = false;
     oThis.mentionedUserIds = [];
+    oThis.feedId = null;
 
     oThis.paginationTimestamp = Math.round(new Date() / 1000);
   }
@@ -286,7 +287,7 @@ class UpdateFanVideo extends UpdateProfileBase {
   async _addFeed() {
     const oThis = this;
 
-    return new FeedModel()
+    const feedInsertResp = await new FeedModel()
       .insert({
         primary_external_entity_id: oThis.videoId,
         kind: feedsConstants.invertedKinds[feedsConstants.fanUpdateKind],
@@ -294,6 +295,8 @@ class UpdateFanVideo extends UpdateProfileBase {
         pagination_identifier: oThis.paginationTimestamp
       })
       .fire();
+
+    oThis.feedId = feedInsertResp.insertId;
   }
 
   /**
@@ -308,7 +311,9 @@ class UpdateFanVideo extends UpdateProfileBase {
     const promisesArray = [];
 
     promisesArray.push(super._flushCaches());
-    promisesArray.push(FeedModel.flushCache({ paginationTimestamp: oThis.paginationTimestamp }));
+    if (oThis.feedId) {
+      promisesArray.push(FeedModel.flushCache({ id: oThis.feedId }));
+    }
     promisesArray.push(VideoDetailsModel.flushCache({ userId: oThis.profileUserId }));
 
     await Promise.all(promisesArray);

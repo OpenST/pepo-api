@@ -2,8 +2,6 @@ const rootPrefix = '../../../../..',
   TransactionWebhookBase = require(rootPrefix + '/app/services/ostEvents/transactions/Base'),
   basicHelper = require(rootPrefix + '/helpers/basic'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
-  createErrorLogsEntry = require(rootPrefix + '/lib/errorLogs/createEntry'),
-  errorLogsConstants = require(rootPrefix + '/lib/globalConstant/errorLogs'),
   transactionConstants = require(rootPrefix + '/lib/globalConstant/transaction');
 
 /**
@@ -21,16 +19,6 @@ class ReplyOnVideoFailureWebhook extends TransactionWebhookBase {
     const oThis = this;
 
     await oThis._validateAndSanitizeParams();
-
-    const errorObject = responseHelper.error({
-      internal_error_identifier: 'a_s_oe_t_f_rov_1',
-      api_error_identifier: 'something_went_wrong',
-      debug_options: {
-        Reason: 'Transaction failure for reply on video.',
-        ostTxId: oThis.ostTxId
-      }
-    });
-    await createErrorLogsEntry.perform(errorObject, errorLogsConstants.highSeverity);
 
     const promiseArray = [];
 

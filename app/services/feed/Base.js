@@ -253,14 +253,32 @@ class FeedBase extends ServiceBase {
     return new Error('Sub-class to implement.');
   }
 
+  /**
+   * Validate and sanitize
+   *
+   * @return {Error}
+   * @private
+   */
   _validateAndSanitizeParams() {
     return new Error('Sub-class to implement.');
   }
 
+  /**
+   * Set feed ids
+   *
+   * @return {Error}
+   * @private
+   */
   _setFeedIds() {
     return new Error('Sub-class to implement.');
   }
 
+  /**
+   * Prepare response
+   *
+   * @return {Error}
+   * @private
+   */
   _prepareResponse() {
     return new Error('Sub-class to implement.');
   }
