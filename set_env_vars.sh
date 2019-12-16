@@ -169,4 +169,6 @@ export PA_GOOGLE_USAGE_REPORT_GROUP_IDS='{"User data Lifetime": "1969769902", "U
 
 # Video pixel data file path
 export PA_VIDEO_PIXEL_DATA_S3_FILE_PATH='redshift/full_video_watched_by_devices.csv'
+export PA_REPLY_PIXEL_DATA_S3_FILE_PATH='redshift/full_reply_watched_by_devices.csv'
 export PA_VIDEO_PIXEL_DATA_APP_FILE_PATH='.'
+export PA_REPLY_PIXEL_DATA_APP_FILE_PATH='.'
