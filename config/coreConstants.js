@@ -445,8 +445,16 @@ class CoreConstants {
     return process.env.PA_VIDEO_PIXEL_DATA_S3_FILE_PATH;
   }
 
+  get PA_REPLY_PIXEL_DATA_S3_FILE_PATH() {
+    return process.env.PA_REPLY_PIXEL_DATA_S3_FILE_PATH;
+  }
+
   get PA_VIDEO_PIXEL_DATA_APP_FILE_PATH() {
     return process.env.PA_VIDEO_PIXEL_DATA_APP_FILE_PATH;
+  }
+
+  get PA_REPLY_PIXEL_DATA_APP_FILE_PATH() {
+    return process.env.PA_REPLY_PIXEL_DATA_APP_FILE_PATH;
   }
 
   get PA_TRACKER_ENDPOINT() {
