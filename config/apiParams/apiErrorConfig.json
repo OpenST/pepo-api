@@ -194,6 +194,11 @@
     "code": "BAD_REQUEST",
     "message": "Minimum $25 required for redeeming."
   },
+  "pending_transaction_found": {
+    "http_code": "200",
+    "code": "BAD_REQUEST",
+    "message": "Pending Transaction Found In OstEvents and Transaction Table."
+  },
   "invalid_dollar_step": {
     "http_code": "200",
     "code": "BAD_REQUEST",
