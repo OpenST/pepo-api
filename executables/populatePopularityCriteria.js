@@ -252,7 +252,7 @@ class PopulatePopularityCriteria extends CronBase {
 
     const promises = [];
 
-    if (oThis.markAsPopularFeedIds) {
+    if (oThis.markAsPopularFeedIds.length) {
       const promise1 = new FeedModel()
         .update({ is_popular: 1 })
         .where({ id: oThis.markAsPopularFeedIds })
@@ -260,7 +260,7 @@ class PopulatePopularityCriteria extends CronBase {
       promises.push(promise1);
     }
 
-    if (oThis.markAsUnpopularFeedIds) {
+    if (oThis.markAsUnpopularFeedIds.length) {
       const promise2 = new FeedModel()
         .update({ is_popular: 0 })
         .where({ id: oThis.markAsUnpopularFeedIds })
