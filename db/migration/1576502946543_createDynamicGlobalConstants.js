@@ -5,6 +5,7 @@ const rootPrefix = '../..',
 const dbName = database.entityDbName;
 const dbKind = DbKindConstant.sqlDbKind;
 
+//todo feed:  kind type
 const upQuery =
   'CREATE TABLE `dynamic_global_constants` (\
   `id` bigint(20) NOT NULL AUTO_INCREMENT,\
