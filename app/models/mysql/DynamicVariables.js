@@ -103,7 +103,7 @@ class DynamicVariables extends ModelBase {
 
     let responseData = {};
     for (let index = 0; index < dbRows.length; index++) {
-      responseData[dynamicVariablesConstants.kinds[dbRows[index].kind]] = dbRows[index].value;
+      responseData[dynamicVariablesConstants.kinds[dbRows[index].kind]] = dbRows[index];
     }
 
     return responseData;
