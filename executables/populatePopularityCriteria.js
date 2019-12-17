@@ -4,12 +4,13 @@ const program = require('commander'),
 const rootPrefix = '..',
   CronBase = require(rootPrefix + '/executables/CronBase'),
   FeedModel = require(rootPrefix + '/app/models/mysql/Feed'),
-  VideoDetailModel = require(rootPrefix + '/app/models/mysql/VideoDetail'),
   LatestFeedCache = require(rootPrefix + '/lib/cacheManagement/single/LatestFeed'),
   DynamicVariablesModel = require(rootPrefix + '/app/models/mysql/DynamicVariables'),
   VideoDetailsByVideoIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/VideoDetailsByVideoIds'),
+  basicHelper = require(rootPrefix + '/helpers/basic'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
+  videoDetailsConstants = require(rootPrefix + '/lib/globalConstant/videoDetail'),
   cronProcessesConstants = require(rootPrefix + '/lib/globalConstant/cronProcesses'),
   dynamicVariablesConstants = require(rootPrefix + '/lib/globalConstant/dynamicVariables');
 
@@ -31,7 +32,7 @@ if (!cronProcessId) {
   process.exit(1);
 }
 
-const ninetiethPercentile = 0.1;
+const ninetiethPercentile = 0.9;
 
 class PopulatePopularityCriteria extends CronBase {
   constructor(params) {
@@ -39,12 +40,12 @@ class PopulatePopularityCriteria extends CronBase {
     const oThis = this;
     oThis.canExit = true;
 
-    oThis.videoIds = [];
-    oThis.videoIdToFeedMap = {};
+    oThis.videoDetailsMapByVideoId = {};
+    oThis.feedsMap = {};
     oThis.pepoValuePopularityThreshold = null;
     oThis.totalRepliesPopularityThreshold = null;
-    oThis.popularFeedIds = [];
-    oThis.unpopularFeedIds = [];
+    oThis.markAsPopularFeedIds = [];
+    oThis.markAsUnpopularFeedIds = [];
   }
 
   /**
@@ -67,24 +68,13 @@ class PopulatePopularityCriteria extends CronBase {
 
     oThis.canExit = false;
 
-    // Fetch latest feed and Collect video ids.
-    await oThis._fetchLatestFeed();
+    await oThis._fetchLatestFeedAndVideoDetails();
 
-    const promiseArray = [];
-    promiseArray.push(oThis._setPepoValuePopularityThreshold());
+    await oThis._setPopularityThreshold();
 
-    // select video details where video_id IN videoIds order by total_replies
-    // Get some_count * 0.1(90th percentile) row
-    promiseArray.push(oThis._setTotalRepliesPopularityThreshold());
-
-    await Promise.all(promiseArray);
-
-    // Loop over collected feeds, collect markPopular and markUnpopular feed ids array.
     await oThis._getPopularAndUnpopularFeedIds();
 
     await oThis._markPopularUnpopular();
-
-    await oThis._flushCache();
 
     oThis.canExit = true;
 
@@ -99,9 +89,10 @@ class PopulatePopularityCriteria extends CronBase {
    * @returns {Promise<void>}
    * @private
    */
-  async _fetchLatestFeed() {
+  async _fetchLatestFeedAndVideoDetails() {
     const oThis = this;
 
+    const videoIds = [];
     const latestFeedCacheResp = await new LatestFeedCache().fetch();
 
     if (latestFeedCacheResp.isFailure()) {
@@ -110,15 +101,23 @@ class PopulatePopularityCriteria extends CronBase {
 
     const latestFeedCacheRespData = latestFeedCacheResp.data;
 
-    const feedsMap = latestFeedCacheRespData.feedsMap;
+    oThis.feedsMap = latestFeedCacheRespData.feedsMap;
 
-    for (let feedId in feedsMap) {
-      const videoId = feedsMap[feedId].primaryExternalEntityId;
-      oThis.videoIds.push(videoId);
-      oThis.videoIdToFeedMap[videoId] = feedId;
+    for (let feedId in oThis.feedsMap) {
+      const videoId = oThis.feedsMap[feedId].primaryExternalEntityId;
+      videoIds.push(videoId);
     }
 
-    // Return if videoIds length === 0;
+    if (videoIds.length === 0) {
+      return;
+    }
+
+    const videoDetailsCacheResponse = await new VideoDetailsByVideoIdsCache({ videoIds: videoIds }).fetch();
+    if (videoDetailsCacheResponse.isFailure()) {
+      return Promise.reject(videoDetailsCacheResponse);
+    }
+
+    oThis.videoDetailsMapByVideoId = videoDetailsCacheResponse.data;
   }
 
   /**
@@ -129,75 +128,85 @@ class PopulatePopularityCriteria extends CronBase {
    * @returns {Promise<void>}
    * @private
    */
-  async _setPepoValuePopularityThreshold() {
+  async _setPopularityThreshold() {
     const oThis = this;
 
-    const dbRows = await new VideoDetailModel()
-      .select('*')
-      .where({ video_id: oThis.videoIds })
-      .order_by('total_amount desc')
-      .fire();
+    let totalContributionsArr = [],
+      totalRepliesArr = [];
 
-    logger.debug('oThis._ninetiethPercentileIndex   =======', oThis._ninetiethPercentileIndex(dbRows.length));
+    for (let vid in oThis.videoDetailsMapByVideoId) {
+      const videoDetail = oThis.videoDetailsMapByVideoId[vid];
+      totalContributionsArr.push(videoDetail.totalAmount);
+      totalRepliesArr.push(videoDetail.totalReplies);
+    }
 
-    const dbRow = dbRows[oThis._ninetiethPercentileIndex(dbRows.length)];
-    oThis.pepoValuePopularityThreshold = dbRow.total_amount;
+    totalContributionsArr = basicHelper.sortNumbers(totalContributionsArr);
+    totalRepliesArr = basicHelper.sortNumbers(totalRepliesArr);
 
-    logger.debug('oThis.pepoValuePopularityThreshold   =======', oThis.pepoValuePopularityThreshold);
+    const popularityIndex = oThis._ninetiethPercentileIndex(totalContributionsArr.length);
+    logger.debug('oThis._ninetiethPercentileIndex   =======', popularityIndex);
 
-    const updateResp = await new DynamicVariablesModel()
+    if (
+      new BigNumber(totalContributionsArr[popularityIndex]).gte(
+        new BigNumber(videoDetailsConstants.minPepoAmountForPopularVideo)
+      )
+    ) {
+      oThis.pepoValuePopularityThreshold = totalContributionsArr[popularityIndex];
+    } else {
+      oThis.pepoValuePopularityThreshold = videoDetailsConstants.minPepoAmountForPopularVideo;
+    }
+
+    if (totalContributionsArr[popularityIndex] > videoDetailsConstants.minNoOfRepliesForPopularVideo) {
+      oThis.totalRepliesPopularityThreshold = totalRepliesArr[popularityIndex];
+    } else {
+      oThis.totalRepliesPopularityThreshold = videoDetailsConstants.minNoOfRepliesForPopularVideo;
+    }
+
+    const promises = [];
+
+    let promise1 = new DynamicVariablesModel()
       .update({ value: oThis.pepoValuePopularityThreshold })
       .where({ kind: dynamicVariablesConstants.invertedKinds[dynamicVariablesConstants.pepoValuePopularityThreshold] })
-      .fire();
+      .fire()
+      .then(async function(updateResp) {
+        if (updateResp.affectedRows === 0) {
+          await new DynamicVariablesModel()
+            .insert({
+              value: oThis.pepoValuePopularityThreshold,
+              kind: dynamicVariablesConstants.invertedKinds[dynamicVariablesConstants.pepoValuePopularityThreshold]
+            })
+            .fire();
+        }
+      });
 
-    if (updateResp.affectedRows === 0) {
-      await new DynamicVariablesModel()
-        .insert({
-          value: oThis.pepoValuePopularityThreshold,
-          kind: dynamicVariablesConstants.invertedKinds[dynamicVariablesConstants.pepoValuePopularityThreshold]
-        })
-        .fire();
-    }
-  }
-
-  /**
-   * Get total replies popularity threshold.
-   *
-   * @sets oThis.totalRepliesPopularityThreshold
-   *
-   * @returns {Promise<void>}
-   * @private
-   */
-  async _setTotalRepliesPopularityThreshold() {
-    const oThis = this;
-
-    const dbRows = await new VideoDetailModel()
-      .select('*')
-      .where({ video_id: oThis.videoIds })
-      .order_by('total_replies desc')
-      .fire();
-
-    const dbRow = dbRows[oThis._ninetiethPercentileIndex(dbRows.length)];
-
-    oThis.totalRepliesPopularityThreshold = dbRow.total_replies;
-
-    logger.debug('oThis.totalRepliesPopularityThreshold   =======', oThis.totalRepliesPopularityThreshold);
-
-    const updateResp = await new DynamicVariablesModel()
+    let promise2 = new DynamicVariablesModel()
       .update({ value: oThis.totalRepliesPopularityThreshold })
       .where({
         kind: dynamicVariablesConstants.invertedKinds[dynamicVariablesConstants.numberOfRepliesPopularityThreshold]
       })
-      .fire();
+      .fire()
+      .then(async function(updateResp) {
+        if (updateResp.affectedRows === 0) {
+          await new DynamicVariablesModel()
+            .insert({
+              value: oThis.totalRepliesPopularityThreshold,
+              kind:
+                dynamicVariablesConstants.invertedKinds[dynamicVariablesConstants.numberOfRepliesPopularityThreshold]
+            })
+            .fire();
+        }
+      });
 
-    if (updateResp.affectedRows === 0) {
-      await new DynamicVariablesModel()
-        .insert({
-          value: oThis.totalRepliesPopularityThreshold,
-          kind: dynamicVariablesConstants.invertedKinds[dynamicVariablesConstants.numberOfRepliesPopularityThreshold]
-        })
-        .fire();
-    }
+    promises.push(promise1);
+    promises.push(promise2);
+
+    await Promise.all(promises);
+    await DynamicVariablesModel.flushCache({
+      kinds: [
+        dynamicVariablesConstants.numberOfRepliesPopularityThreshold,
+        dynamicVariablesConstants.pepoValuePopularityThreshold
+      ]
+    });
   }
 
   /**
@@ -211,25 +220,23 @@ class PopulatePopularityCriteria extends CronBase {
   async _getPopularAndUnpopularFeedIds() {
     const oThis = this;
 
-    const videoDetailsCacheResponse = await new VideoDetailsByVideoIdsCache({ videoIds: oThis.videoIds }).fetch();
-    if (videoDetailsCacheResponse.isFailure()) {
-      return Promise.reject(videoDetailsCacheResponse);
-    }
+    for (let feedId in oThis.feedsMap) {
+      const feedObj = oThis.feedsMap[feedId],
+        videoId = feedObj.primaryExternalEntityId,
+        videoDetail = oThis.videoDetailsMapByVideoId[videoId];
 
-    const videoDetailsCacheResponseData = videoDetailsCacheResponse.data;
-
-    for (let index = 0; index < oThis.videoIds.length; index++) {
-      const videoId = oThis.videoIds[index],
-        videoDetail = videoDetailsCacheResponseData[videoId],
-        feedId = oThis.videoIdToFeedMap[videoId];
-
-      if (
+      const isPopular =
         new BigNumber(videoDetail.totalAmount).gte(new BigNumber(oThis.pepoValuePopularityThreshold)) ||
-        videoDetail.totalReplies >= oThis.totalRepliesPopularityThreshold
-      ) {
-        oThis.popularFeedIds.push(feedId);
+        videoDetail.totalReplies >= oThis.totalRepliesPopularityThreshold;
+
+      if (isPopular) {
+        if (!feedObj.isPopular) {
+          oThis.markAsPopularFeedIds.push(feedId);
+        }
       } else {
-        oThis.unpopularFeedIds.push(feedId);
+        if (feedObj.isPopular) {
+          oThis.markAsUnpopularFeedIds.push(feedId);
+        }
       }
     }
   }
@@ -243,40 +250,30 @@ class PopulatePopularityCriteria extends CronBase {
   async _markPopularUnpopular() {
     const oThis = this;
 
-    await new FeedModel()
-      .update({ is_popular: 1 })
-      .where({ id: oThis.popularFeedIds })
-      .fire();
+    const promises = [];
 
-    await new FeedModel()
-      .update({ is_popular: 0 })
-      .where({ id: oThis.unpopularFeedIds })
-      .fire();
-  }
+    if (oThis.markAsPopularFeedIds) {
+      const promise1 = new FeedModel()
+        .update({ is_popular: 1 })
+        .where({ id: oThis.markAsPopularFeedIds })
+        .fire();
+      promises.push(promise1);
+    }
 
-  /**
-   * Flush cache.
-   *
-   * @returns {Promise<void>}
-   * @private
-   */
-  async _flushCache() {
-    const oThis = this,
-      promiseArray = [];
+    if (oThis.markAsUnpopularFeedIds) {
+      const promise2 = new FeedModel()
+        .update({ is_popular: 0 })
+        .where({ id: oThis.markAsUnpopularFeedIds })
+        .fire();
+      promises.push(promise2);
+    }
 
-    const feedIds = oThis.popularFeedIds.concat(oThis.unpopularFeedIds);
+    await Promise.all(promises);
 
-    promiseArray.push(FeedModel.flushCache({ ids: feedIds }));
-    promiseArray.push(
-      DynamicVariablesModel.flushCache({
-        kinds: [
-          dynamicVariablesConstants.numberOfRepliesPopularityThreshold,
-          dynamicVariablesConstants.pepoValuePopularityThreshold
-        ]
-      })
-    );
+    const feedIds = oThis.markAsPopularFeedIds.concat(oThis.markAsUnpopularFeedIds);
 
-    await Promise.all(promiseArray);
+    //flush only updated feeds and not all ids
+    await FeedModel.flushCache({ ids: feedIds });
   }
 
   /**
