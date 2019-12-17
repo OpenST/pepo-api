@@ -5,9 +5,8 @@ const rootPrefix = '../..',
 const dbName = database.entityDbName;
 const dbKind = DbKindConstant.sqlDbKind;
 
-//todo feed:  kind type
 const upQuery =
-  'CREATE TABLE `dynamic_global_constants` (\
+  'CREATE TABLE `dynamic_variables` (\
   `id` bigint(20) NOT NULL AUTO_INCREMENT,\
   `kind` tinyint(4) NOT NULL,\
   `value` varchar(50) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,\
@@ -17,13 +16,13 @@ const upQuery =
   UNIQUE uidx_1 (`kind`)\
   ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;';
 
-const downQuery = 'drop table if exists `dynamic_global_constants`;';
+const downQuery = 'drop table if exists `dynamic_variables`;';
 
-const createDynamicGlobalConstants = {
+const createDynamicVariables = {
   dbName: dbName,
   up: [upQuery],
   down: [downQuery],
   dbKind: dbKind
 };
 
-module.exports = createDynamicGlobalConstants;
+module.exports = createDynamicVariables;

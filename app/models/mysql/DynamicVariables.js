@@ -3,7 +3,7 @@ const rootPrefix = '../../..',
   databaseConstants = require(rootPrefix + '/lib/globalConstant/database'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
-  dynamicGlobalConstantsConsts = require(rootPrefix + '/lib/globalConstant/dynamicGlobalConstants');
+  dynamicVariablesConstants = require(rootPrefix + '/lib/globalConstant/dynamicVariables');
 
 // Declare variables.
 const dbName = databaseConstants.entityDbName;
@@ -11,9 +11,9 @@ const dbName = databaseConstants.entityDbName;
 /**
  * Class for dynamic global constants model.
  *
- * @class DynamicGlobalConstants
+ * @class DynamicVariables
  */
-class DynamicGlobalConstants extends ModelBase {
+class DynamicVariables extends ModelBase {
   /**
    * Constructor for curated entity model.
    *
@@ -26,7 +26,7 @@ class DynamicGlobalConstants extends ModelBase {
 
     const oThis = this;
 
-    oThis.tableName = 'dynamic_global_constants';
+    oThis.tableName = 'dynamic_variables';
   }
 
   /**
@@ -46,7 +46,7 @@ class DynamicGlobalConstants extends ModelBase {
 
     const formattedData = {
       id: dbRow.id,
-      kind: dynamicGlobalConstantsConsts.kinds(dbRow.kind),
+      kind: dynamicVariablesConstants.kinds(dbRow.kind),
       value: dbRow.value,
       createdAt: dbRow.created_at,
       updatedAt: dbRow.updated_at
@@ -65,7 +65,7 @@ class DynamicGlobalConstants extends ModelBase {
   async getForKind(kind) {
     const oThis = this;
 
-    const constantKindInt = dynamicGlobalConstantsConsts.invertedKinds[kind];
+    const constantKindInt = dynamicVariablesConstants.invertedKinds[kind];
 
     if (!constantKindInt) {
       return Promise.reject(new Error('Invalid constant kind.'));
@@ -95,7 +95,7 @@ class DynamicGlobalConstants extends ModelBase {
 
     let constantKindIntArray = [];
     for (let i = 0; i < kinds.length; i++) {
-      constantKindIntArray.push(dynamicGlobalConstantsConsts.invertedKinds[kinds[i]]);
+      constantKindIntArray.push(dynamicVariablesConstants.invertedKinds[kinds[i]]);
     }
 
     const dbRows = await oThis
@@ -105,7 +105,7 @@ class DynamicGlobalConstants extends ModelBase {
 
     let responseData = {};
     for (let index = 0; index < dbRows.length; index++) {
-      responseData[dynamicGlobalConstantsConsts.kinds[dbRows[index].kind]] = dbRows[index].value;
+      responseData[dynamicVariablesConstants.kinds[dbRows[index].kind]] = dbRows[index].value;
     }
 
     return responseData;
@@ -122,4 +122,4 @@ class DynamicGlobalConstants extends ModelBase {
   static async flushCache(params) {}
 }
 
-module.exports = DynamicGlobalConstants;
+module.exports = DynamicVariables;
