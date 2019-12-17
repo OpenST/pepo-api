@@ -144,7 +144,9 @@ class PopulatePopularityCriteria extends CronBase {
     totalRepliesArr = basicHelper.sortNumbers(totalRepliesArr);
 
     const popularityIndex = oThis._ninetiethPercentileIndex(totalContributionsArr.length);
-    logger.debug('oThis._ninetiethPercentileIndex   =======', popularityIndex);
+    logger.debug('oThis._ninetiethPercentileIndex === ', popularityIndex);
+    logger.debug('totalContributionsArr[popularityIndex] === ', totalContributionsArr[popularityIndex]);
+    logger.debug('totalRepliesArr[popularityIndex] === ', totalRepliesArr[popularityIndex]);
 
     if (
       new BigNumber(totalContributionsArr[popularityIndex]).gte(
