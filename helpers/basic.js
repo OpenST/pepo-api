@@ -798,6 +798,17 @@ class BasicHelper {
 
     return params;
   }
+
+  /**
+   * Sort numbers array.
+   *
+   * @param numbers
+   */
+  sortNumbers(numbers) {
+    return numbers.sort(function(a, b) {
+      return a - b;
+    });
+  }
 }
 
 module.exports = new BasicHelper();
