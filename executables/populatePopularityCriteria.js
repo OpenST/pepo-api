@@ -275,6 +275,8 @@ class PopulatePopularityCriteria extends CronBase {
         ]
       })
     );
+
+    await Promise.all(promiseArray);
   }
 
   /**
