@@ -147,8 +147,6 @@ class ApproveUsersAsCreator extends ServiceBase {
     const oThis = this;
 
     return {
-      entityType: pixelConstants.userEntityType, // Mandatory parameter.
-      entityAction: pixelConstants.creatorApprovedEntityAction, // Mandatory parameter.
       approvedViaMedium: oThis.approvedViaMedium, // Mandatory parameter.
       adminId: oThis.currentAdminId, // Mandatory parameter.
       approvedUserId: userId // Mandatory parameter.
