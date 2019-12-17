@@ -1,8 +1,6 @@
 const rootPrefix = '../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
   databaseConstants = require(rootPrefix + '/lib/globalConstant/database'),
-  responseHelper = require(rootPrefix + '/lib/formatter/response'),
-  logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   dynamicVariablesConstants = require(rootPrefix + '/lib/globalConstant/dynamicVariables');
 
 // Declare variables.
@@ -112,14 +110,34 @@ class DynamicVariables extends ModelBase {
   }
 
   /**
+   * Get dynamic global constant kind unique index name.
+   *
+   * @returns {string}
+   */
+  static get uniqueKindIndexName() {
+    return 'uidx_1';
+  }
+
+  /**
    * Flush cache.
    *
    * @param {object} params
    * @param {string} params.kind
+   * @param {string} params.kinds
    *
    * @returns {Promise<void>}
    */
-  static async flushCache(params) {}
+  static async flushCache(params) {
+    if (params.kind) {
+      const DynamicVariablesByKindCache = require(rootPrefix + '/lib/cacheManagement/multi/DynamicVariablesByKind');
+      await new DynamicVariablesByKindCache({ kinds: [params.kind] }).clear();
+    }
+
+    if (params.kinds) {
+      const DynamicVariablesByKindCache = require(rootPrefix + '/lib/cacheManagement/multi/DynamicVariablesByKind');
+      await new DynamicVariablesByKindCache({ kinds: params.kinds }).clear();
+    }
+  }
 }
 
 module.exports = DynamicVariables;
