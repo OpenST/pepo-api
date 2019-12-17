@@ -46,7 +46,7 @@ class DynamicGlobalConstants extends ModelBase {
 
     const formattedData = {
       id: dbRow.id,
-      kind: dynamicGlobalConstantsConsts.constantKinds(dbRow.kind),
+      kind: dynamicGlobalConstantsConsts.kinds(dbRow.kind),
       value: dbRow.value,
       createdAt: dbRow.created_at,
       updatedAt: dbRow.updated_at
@@ -58,14 +58,14 @@ class DynamicGlobalConstants extends ModelBase {
   /**
    * Get value for given constant kind.
    *
-   * @param {string} constantKind
+   * @param {string} kind
    *
    * @returns {Promise<{}>}
    */
-  async getForKind(constantKind) {
+  async getForKind(kind) {
     const oThis = this;
 
-    const constantKindInt = dynamicGlobalConstantsConsts.invertedConstantKinds[constantKind];
+    const constantKindInt = dynamicGlobalConstantsConsts.invertedKinds[kind];
 
     if (!constantKindInt) {
       return Promise.reject(new Error('Invalid constant kind.'));
@@ -86,16 +86,16 @@ class DynamicGlobalConstants extends ModelBase {
   /**
    * Get value for given constant kind.
    *
-   * @param {string} constantKind
+   * @param {Array} Kinds
    *
    * @returns {Promise<{}>}
    */
-  async getForKinds(constantKinds) {
+  async getForKinds(kinds) {
     const oThis = this;
 
     let constantKindIntArray = [];
-    for (let i = 0; i < constantKinds.length; i++) {
-      constantKindIntArray.push(dynamicGlobalConstantsConsts.invertedConstantKinds[constantKinds[i]]);
+    for (let i = 0; i < kinds.length; i++) {
+      constantKindIntArray.push(dynamicGlobalConstantsConsts.invertedKinds[kinds[i]]);
     }
 
     const dbRows = await oThis
@@ -105,7 +105,7 @@ class DynamicGlobalConstants extends ModelBase {
 
     let responseData = {};
     for (let index = 0; index < dbRows.length; index++) {
-      responseData[dynamicGlobalConstantsConsts.constantKinds[dbRows[index].kind]] = dbRows[index].value;
+      responseData[dynamicGlobalConstantsConsts.kinds[dbRows[index].kind]] = dbRows[index].value;
     }
 
     return responseData;
@@ -115,7 +115,7 @@ class DynamicGlobalConstants extends ModelBase {
    * Flush cache.
    *
    * @param {object} params
-   * @param {string} params.constantKind
+   * @param {string} params.kind
    *
    * @returns {Promise<void>}
    */
