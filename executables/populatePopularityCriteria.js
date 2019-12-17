@@ -20,7 +20,7 @@ program.on('--help', function() {
   logger.log('');
   logger.log('  Example:');
   logger.log('');
-  logger.log('    node executables/PopulatePopularityCriteria.js --cronProcessId 13');
+  logger.log('    node executables/populatePopularityCriteria --cronProcessId 13');
   logger.log('');
   logger.log('');
 });
