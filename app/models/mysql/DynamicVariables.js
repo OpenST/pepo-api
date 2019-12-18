@@ -44,7 +44,7 @@ class DynamicVariables extends ModelBase {
 
     const formattedData = {
       id: dbRow.id,
-      kind: dynamicVariablesConstants.kinds(dbRow.kind),
+      kind: dynamicVariablesConstants.kinds[dbRow.kind],
       value: dbRow.value,
       createdAt: dbRow.created_at,
       updatedAt: dbRow.updated_at
