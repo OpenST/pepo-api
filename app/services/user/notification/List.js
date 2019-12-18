@@ -436,10 +436,10 @@ class UserNotificationList extends ServiceBase {
 
       // TEMP CODE - for QA testing
       const kindsMap = {
-        [userNotificationConstants.replySenderWithAmountKind]: 1,
-        [userNotificationConstants.replySenderWithoutAmountKind]: 1,
-        [userNotificationConstants.replyReceiverWithAmountKind]: 1,
-        [userNotificationConstants.replyReceiverWithoutAmountKind]: 1,
+        [userNotificationConstants.youRepliedWithAmountKind]: 1,
+        [userNotificationConstants.youRepliedWithoutAmountKind]: 1,
+        [userNotificationConstants.replyOnYourVideoWithAmountKind]: 1,
+        [userNotificationConstants.replyOnYourVideoWithoutAmountKind]: 1,
         [userNotificationConstants.replyUserMentionKind]: 1
       };
 
@@ -722,10 +722,10 @@ class UserNotificationList extends ServiceBase {
       [userNotificationConstants.videoAddKind]: 1,
       [userNotificationConstants.userMentionKind]: 1,
       [userNotificationConstants.replyUserMentionKind]: 1,
-      [userNotificationConstants.replySenderWithAmountKind]: 1,
-      [userNotificationConstants.replySenderWithoutAmountKind]: 1,
-      [userNotificationConstants.replyReceiverWithAmountKind]: 1,
-      [userNotificationConstants.replyReceiverWithoutAmountKind]: 1
+      [userNotificationConstants.youRepliedWithAmountKind]: 1,
+      [userNotificationConstants.youRepliedWithoutAmountKind]: 1,
+      [userNotificationConstants.replyOnYourVideoWithAmountKind]: 1,
+      [userNotificationConstants.replyOnYourVideoWithoutAmountKind]: 1
     };
   }
 }
