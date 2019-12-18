@@ -193,7 +193,8 @@ class TwitterUserConnection extends ModelBase {
   }
 
   /**
-   * Fetch twitter user connections by twitter user1 id and twitter user2 ids
+   * Fetch twitter user connections by twitter user1 id and twitter user2 ids.
+   *
    * @param twitterUser2Ids
    * @param twitterUser1Id
    * @returns {Promise<void>}

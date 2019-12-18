@@ -6,7 +6,8 @@ const rootPrefix = '../../..',
     '/lib/cacheManagement/single/ReplyDetailsByParentVideoPagination'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
-  paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination');
+  paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination'),
+  replyDetailConstants = require(rootPrefix + '/lib/globalConstant/replyDetail');
 
 /**
  * Class for video reply details service.
@@ -173,7 +174,10 @@ class GetReplyList extends ServiceBase {
     oThis.userRepliesMap = response.data;
 
     if (oThis.checkReplyDetailId) {
-      if (!oThis.userRepliesMap.replyDetailsMap[oThis.checkReplyDetailId]) {
+      if (
+        !oThis.userRepliesMap.replyDetailsMap[oThis.checkReplyDetailId] ||
+        oThis.userRepliesMap.replyDetailsMap[oThis.checkReplyDetailId].status != replyDetailConstants.activeStatus
+      ) {
         return Promise.reject(
           responseHelper.error({
             internal_error_identifier: 'a_s_r_l_1',

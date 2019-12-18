@@ -312,8 +312,8 @@ class GetTagsVideoList extends ServiceBase {
     }
 
     for (const vid in replyDetailsByEntityIdsAndEntityKindCacheRsp.data) {
-      const rdId = replyDetailsByEntityIdsAndEntityKindCacheRsp.data[vid];
-      if (Number(rdId) > 0) {
+      const rdId = replyDetailsByEntityIdsAndEntityKindCacheRsp.data[vid].id;
+      if (rdId) {
         oThis.replyDetailIds.push(rdId);
       }
     }
