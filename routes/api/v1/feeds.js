@@ -65,6 +65,7 @@ router.get('/', sanitizer.sanitizeDynamicUrlParams, sanitizer.sanitizeHeaderPara
         [entityType.imagesMap]: responseEntityKey.images,
         [entityType.videosMap]: responseEntityKey.videos,
         [entityType.videoDetailsMap]: responseEntityKey.videoDetails,
+        [entityType.userProfileAllowedActions]: responseEntityKey.userProfileAllowedActions,
         [entityType.currentUserUserContributionsMap]: responseEntityKey.currentUserUserContributions,
         [entityType.currentUserVideoContributionsMap]: responseEntityKey.currentUserVideoContributions,
         [entityType.currentUserVideoRelationsMap]: responseEntityKey.currentUserVideoRelations,
