@@ -725,7 +725,8 @@ class UserNotificationList extends ServiceBase {
       [userNotificationConstants.youRepliedWithAmountKind]: 1,
       [userNotificationConstants.youRepliedWithoutAmountKind]: 1,
       [userNotificationConstants.replyOnYourVideoWithAmountKind]: 1,
-      [userNotificationConstants.replyOnYourVideoWithoutAmountKind]: 1
+      [userNotificationConstants.replyOnYourVideoWithoutAmountKind]: 1,
+      [userNotificationConstants.replyThreadNotificationKind]: 1
     };
   }
 }
