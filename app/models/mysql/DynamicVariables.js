@@ -4,7 +4,7 @@ const rootPrefix = '../../..',
   dynamicVariablesConstants = require(rootPrefix + '/lib/globalConstant/dynamicVariables');
 
 // Declare variables.
-const dbName = databaseConstants.entityDbName;
+const dbName = databaseConstants.bigDbName;
 
 /**
  * Class for dynamic global constants model.
@@ -75,10 +75,8 @@ class DynamicVariables extends ModelBase {
 
     let responseData = {};
     for (let index = 0; index < dbRows.length; index++) {
-      let currRow = dbRows[index];
-
-      // TODO feed - format row
-      responseData[dynamicVariablesConstants.kinds[currRow.kind]] = currRow;
+      let formattedRow = oThis.formatDbData(dbRows[index]);
+      responseData[dynamicVariablesConstants.kinds[formattedRow.kind]] = formattedRow;
     }
 
     return responseData;

@@ -2,8 +2,7 @@ const rootPrefix = '../..',
   database = require(rootPrefix + '/lib/globalConstant/database'),
   DbKindConstant = require(rootPrefix + '/lib/globalConstant/dbKind');
 
-// TODO feed - move to big db
-const dbName = database.entityDbName;
+const dbName = database.bigDbName;
 const dbKind = DbKindConstant.sqlDbKind;
 
 const upQuery =
