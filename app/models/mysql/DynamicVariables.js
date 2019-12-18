@@ -56,34 +56,6 @@ class DynamicVariables extends ModelBase {
   /**
    * Get value for given constant kind.
    *
-   * @param {string} kind
-   *
-   * @returns {Promise<{}>}
-   */
-  async getForKind(kind) {
-    const oThis = this;
-
-    const constantKindInt = dynamicVariablesConstants.invertedKinds[kind];
-
-    if (!constantKindInt) {
-      return Promise.reject(new Error('Invalid constant kind.'));
-    }
-
-    const dbRows = await oThis
-      .select('*')
-      .where({ kind: constantKindInt })
-      .fire();
-
-    if (dbRows.length === 0) {
-      return {};
-    }
-
-    return oThis.formatDbData(dbRows[0]);
-  }
-
-  /**
-   * Get value for given constant kind.
-   *
    * @param {Array} Kinds
    *
    * @returns {Promise<{}>}
@@ -103,19 +75,13 @@ class DynamicVariables extends ModelBase {
 
     let responseData = {};
     for (let index = 0; index < dbRows.length; index++) {
-      responseData[dynamicVariablesConstants.kinds[dbRows[index].kind]] = dbRows[index];
+      let currRow = dbRows[index];
+
+      // TODO feed - format row
+      responseData[dynamicVariablesConstants.kinds[currRow.kind]] = currRow;
     }
 
     return responseData;
-  }
-
-  /**
-   * Get dynamic global constant kind unique index name.
-   *
-   * @returns {string}
-   */
-  static get uniqueKindIndexName() {
-    return 'uidx_1';
   }
 
   /**
