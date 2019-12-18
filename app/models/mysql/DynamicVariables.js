@@ -76,7 +76,7 @@ class DynamicVariables extends ModelBase {
     let responseData = {};
     for (let index = 0; index < dbRows.length; index++) {
       let formattedRow = oThis.formatDbData(dbRows[index]);
-      responseData[dynamicVariablesConstants.kinds[formattedRow.kind]] = formattedRow;
+      responseData[formattedRow.kind] = formattedRow;
     }
 
     return responseData;
