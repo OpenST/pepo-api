@@ -158,7 +158,7 @@ class PopulatePopularityCriteria extends CronBase {
       oThis.pepoValuePopularityThreshold = videoDetailsConstants.minPepoAmountForPopularVideo;
     }
 
-    if (totalContributionsArr[popularityIndex] > videoDetailsConstants.minNoOfRepliesForPopularVideo) {
+    if (totalRepliesArr[popularityIndex] > videoDetailsConstants.minNoOfRepliesForPopularVideo) {
       oThis.totalRepliesPopularityThreshold = totalRepliesArr[popularityIndex];
     } else {
       oThis.totalRepliesPopularityThreshold = videoDetailsConstants.minNoOfRepliesForPopularVideo;
