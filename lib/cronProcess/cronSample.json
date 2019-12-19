@@ -40,5 +40,7 @@
   "reValidateAllReceipts": {
   },
   "monitorOstEventHooks": {
+  },
+  "populatePopularityCriteria": {
   }
 }

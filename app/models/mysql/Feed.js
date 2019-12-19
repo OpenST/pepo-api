@@ -54,49 +54,6 @@ class FeedModel extends ModelBase {
   }
 
   /**
-   * Fetch public and published feed ids.
-   *
-   * @param {object} params
-   * @param {number/string} params.limit
-   * @param {number/string} params.paginationTimestamp
-   *
-   *  @returns {Promise<object>}
-   */
-  async getLoggedOutFeedIds(params) {
-    const oThis = this;
-
-    const feedIds = [],
-      feedDetails = {};
-
-    const paginationTimestamp = params.paginationTimestamp,
-      limit = params.limit;
-
-    const queryObject = oThis
-      .select('*')
-      .order_by('pagination_identifier desc')
-      .limit(limit);
-
-    if (paginationTimestamp) {
-      queryObject.where(['pagination_identifier < ?', paginationTimestamp]);
-    }
-
-    const dbRows = await queryObject.fire();
-
-    if (dbRows.length === 0) {
-      return { feedIds: feedIds, feedDetails: feedDetails };
-    }
-
-    for (let index = 0; index < dbRows.length; index++) {
-      const formatDbRow = oThis.formatDbData(dbRows[index]);
-
-      feedIds.push(formatDbRow.id);
-      feedDetails[formatDbRow.id] = formatDbRow;
-    }
-
-    return { feedIds: feedIds, feedDetails: feedDetails };
-  }
-
-  /**
    * Fetch feed by externalEntityId.
    *
    * @param {number} externalEntityId
