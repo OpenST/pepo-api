@@ -3,7 +3,8 @@ const rootPrefix = '../../..',
   ApproveUsersAsCreatorService = require(rootPrefix + '/app/services/admin/ApproveUsersAsCreator'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
-  slackConstants = require(rootPrefix + '/lib/globalConstant/slack');
+  slackConstants = require(rootPrefix + '/lib/globalConstant/slack'),
+  pixelConstants = require(rootPrefix + '/lib/globalConstant/pixel');
 
 /**
  * Class to process approve user event.
@@ -40,7 +41,8 @@ class ApproveUser extends SlackEventBase {
 
     const approveUserServiceParams = {
       user_ids: [oThis.eventParams.user_id],
-      current_admin: oThis.currentAdmin
+      current_admin: oThis.currentAdmin,
+      approved_via_medium: pixelConstants.userApprovedViaSlackChannelMedium
     };
 
     const approveUserServiceResponse = await new ApproveUsersAsCreatorService(approveUserServiceParams).perform();

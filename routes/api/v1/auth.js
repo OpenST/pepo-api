@@ -21,9 +21,10 @@ router.post('/logout', cookieHelper.parseUserCookieForLogout, sanitizer.sanitize
   Promise.resolve(routeHelper.perform(req, res, next, '/Logout', 'r_a_v1_a_2', null));
 });
 
-/* Twitter Connect*/
+/* Twitter connect. */
 router.post('/twitter-login', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.twitterLogin;
+
   cookieHelper.fetchUserUtmCookie(req);
 
   const onServiceSuccess = async function(serviceResponse) {
@@ -34,6 +35,8 @@ router.post('/twitter-login', sanitizer.sanitizeDynamicUrlParams, function(req, 
       entityKindToResponseKeyMap: {
         [entityType.loggedInUser]: responseEntityKey.loggedInUser,
         [entityType.usersMap]: responseEntityKey.users,
+        [entityType.utmParams]: responseEntityKey.utmParams,
+        [entityType.twitterConnectMeta]: responseEntityKey.meta,
         [entityType.goto]: responseEntityKey.goto
       },
       serviceData: serviceResponse.data

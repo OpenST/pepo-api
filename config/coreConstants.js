@@ -452,6 +452,10 @@ class CoreConstants {
   get PA_REPLY_PIXEL_DATA_APP_FILE_PATH() {
     return process.env.PA_REPLY_PIXEL_DATA_APP_FILE_PATH;
   }
+
+  get PA_TRACKER_ENDPOINT() {
+    return process.env.PA_TRACKER_ENDPOINT;
+  }
 }
 
 module.exports = new CoreConstants();

@@ -18,7 +18,7 @@ command
 
 const handleError = function() {
   command.outputHelp();
-  throw 'Required parameters are missing!';
+  throw new Error('Required parameters are missing!');
 };
 
 const Main = async function() {
@@ -27,16 +27,16 @@ const Main = async function() {
   if (command.create) {
     performerObj = new InsertCronKlass(command.inFile, command.outFile);
   } else if (command.stopStuckCron) {
-    let ids = command.identifiers.split(' ');
+    const ids = command.identifiers.split(' ');
     if (ids.length < 1) {
-      throw 'ids cannot be empty';
+      throw new Error('ids cannot be empty.');
     }
     performerObj = new StopCronKlass(ids);
   } else {
     handleError();
   }
 
-  let resp = performerObj ? await performerObj.perform() : handleError();
+  const resp = performerObj ? await performerObj.perform() : handleError();
   if (resp.isFailure()) {
     throw resp;
   }

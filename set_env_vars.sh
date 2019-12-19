@@ -156,7 +156,7 @@ export PA_SLACK_OAUTH_TOKEN='xoxp-246676767414-245599437185-838396824006-71fcc8c
 export PA_SLACK_API_APP_ID='AQC5JETDX'
 export PA_SLACK_SIGNING_SECRET='099e2ac373da461dfd4c50ccc6522b8b'
 
-# Google constants
+# Google constants.
 # escape while creating the env variable and unescape while usage
 export PA_GOOGLE_PRIVATE_KEY='-----BEGIN%20PRIVATE%20KEY-----%0AMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQDMxsHlpqlL8eTj%0A16lkEsGlDPCgzz5ll8mrmpblv8jVJb45OPX5Nko2vcsDN3Z3fpNqJO5gB7kJG22o%0AasosP/A+uvzRIv2R6EJ6SJACm/voh4qMqGyfAdg4jyFfG0ziMu80SNU62Oyxhl0E%0ADbSP/33B69zz/czBZDPQEVYJR0qyQ3bfguNKpTpljVsUVySqP9AL4SWlowSAXuju%0AniR5vDEzKeDn1mgi/I3VJK7ngRb6a0o4syttKjxjaexh835phhVpGNvsWstmGP1u%0A+ec1Xo3cSKEh1/l+j1DxbBV6Wodxk2ny+nB8TVVkB7KJgduI/Kh+6rgjybPJNIdG%0ABEmZqiGbAgMBAAECggEADTuOzhNN/11bSCnohVH893h1mD6sLo53dsJfm+sfxD5T%0AI4l9w6PxecYb91I/MouYZRSL3uLA30jJdkeoVuGu2a7lpXIYZrRWj2Ze//wqdCVG%0AG77Kfh/1Y/pD0syF1FwsPvmx5cKc0P/4xMlJ8MA21TAzsASnlZuvCXQFVkYoGorJ%0Ayg2TvFkgEazxhOUx9PZuIQH7qzh2dkPmSs3aRqhSjHKgrt/NyJm6OPbbdEBwDoxO%0AddS9yOCQfIJ+DeSn8fuQI7M7w/qLPPzpZSSR1Qes3BfK7ESPrTOmXLVgo5KxW9hX%0A5nhvJJGXILq50TtZeiILgHLR8ATSc4/vZDZoVFv3CQKBgQD8KPdUQlVvXUg4+Hwu%0A9GfAeaSG5BiXtnqsf5QhOM5Qb9ey2FIkFRS4d2TTn71Qn5iqfqihaQ48ZD1K/Cd8%0AOulYM5aIAHQTtLKvH6rNHCeVFMWButEHTCcUokauENrreySMi75hrYZq28z0j1UF%0A8Ob79y/Td2h04olfGIXcfO6TrwKBgQDP5RGGkv1BZxz7y0tnOSzs2OT9OZVyH+Nb%0AKNl3tRNIgbk8qKoBqEKyzueLyKXVhzsEquq0t0IPhxBtY3T45RNz7epU77DYPh1x%0AL3RmeCYdAIlJl4nCo12u9WVG9ES8gw37J75Jn8OcHGXej8aDLGTiPTzlGzJenQTO%0AGa3JAh4P1QKBgQCnIMvU9+ZCWpRc1i0QvgLqKnWmxhWasGKcZC6c2la8L3TKX+AJ%0AdEN4hAG61bwXbMA1+J7x5HyAAHwzb+8HwtAYGpEh8RL+YJyxv45oRcniYJMLifOz%0AH4Ejhu7LvfYrb0HpOVHk0asutiIg0cMrneCqjcoQIauFFQSxl8JZQiCqlwKBgQCl%0A/Lk/f4DhhVio2ao8onPyL0K1xBJEap12nWj0oQjibWDew7PpWtTWO0i4XN27XRuM%0AIIMBAwilqSs+i5hLWWtstlrQsge6v+11/3OqlOepZFI5BdsiIpmcJaZVPpbbBLBX%0ABWZzFjJyJGJZjuXqublawZYrPsm6rRe3Dt2ojh4+eQKBgFRJmDjERpCONzQcLqEV%0AyfsustMhryfxXJ3xYSvugmKrHuR6FOcz3JviaCSpgdF4alSRcAKrmyRR9CHqqM6I%0AN+Szqjwk0/nd0VEnRzCbKIxNBbpcCEgFEJXJjavUhZsNycTFLFluDs4AbMKjf3SJ%0A4GpJY3ZaQrdZ69H1jxjutgwe%0A-----END%20PRIVATE%20KEY-----%0A'
 export PA_GOOGLE_CLIENT_EMAIL='pepo-245@lateral-avatar-205714.iam.gserviceaccount.com'
@@ -164,8 +164,11 @@ export PA_GOOGLE_PROJECT_ID='lateral-avatar-205714'
 export PA_GOOGLE_USAGE_REPORT_SPREADSHEET_ID='1zB67I1MaWo8Ohw4A-yZNHbY0A9nrA1NifhdueTLUBMg'
 export PA_GOOGLE_USAGE_REPORT_GROUP_IDS='{"User data Lifetime": "1969769902", "User data Last 7 days": "262285918", "User data Last 24 hours": "1492159954", "Videos Stats Lifetime": "2079750882", "Videos Stats Last 7 days": "293576976", "Videos Stats Last 24 hrs": "920797104", "Tags Used": "1756942354"}'
 
-# Video pixel data file path
+# Video pixel data file path.
 export PA_VIDEO_PIXEL_DATA_S3_FILE_PATH='redshift/full_video_watched_by_devices.csv'
 export PA_REPLY_PIXEL_DATA_S3_FILE_PATH='redshift/full_reply_watched_by_devices.csv'
 export PA_VIDEO_PIXEL_DATA_APP_FILE_PATH='.'
 export PA_REPLY_PIXEL_DATA_APP_FILE_PATH='.'
+
+# Tracker related constants.
+export PA_TRACKER_ENDPOINT='https://px.pepo.com/devp101_pixel.png'

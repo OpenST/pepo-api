@@ -42,6 +42,17 @@
       ]
     },
 
+    "pixelRabbitmq": {
+      "username": "guest",
+      "password": "guest",
+      "host": "127.0.0.1",
+      "port": "5672",
+      "heartbeats": "30",
+      "clusterNodes": [
+        "127.0.0.1"
+      ]
+    },
+
     "socketRabbitmq": {
       "username": "guest",
       "password": "guest",
@@ -65,18 +76,21 @@
         }
       ]
     },
+
     "websocket": {
       "wsAuthSalt": "asdfghjklqwertyuiop",
       "endpoint": "127.0.0.1",
       "port": "4000",
       "protocol": "https"
     },
+
     "cassandra": {
       "username": "cassandra",
       "password": "cassandra",
       "contactPoints": ["127.0.0.1:9042"],
       "localDataCenter": "datacenter1"
     },
+
     "firebase": {
       "type": "service_account",
       "projectId": "pepo-staging-60d8e",
