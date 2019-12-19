@@ -138,21 +138,23 @@ class PepoOnReplySuccessWebhook extends TransactionWebhookBase {
 
     const promisesArray = [];
 
-    if (oThis.videoId) {
-      promisesArray.push(
-        notificationJobEnqueue.enqueue(notificationJobConstants.videoTxSendSuccess, {
-          transaction: oThis.transactionObj,
-          videoId: oThis.videoId
-        })
-      );
+    promisesArray.push(
+      notificationJobEnqueue.enqueue(notificationJobConstants.replyTxSendSuccess, {
+        transaction: oThis.transactionObj,
+        videoId: oThis.videoId,
+        parentVideoId: oThis.parentVideoId,
+        replyDetailId: oThis.replyDetailId
+      })
+    );
 
-      promisesArray.push(
-        notificationJobEnqueue.enqueue(notificationJobConstants.videoTxReceiveSuccess, {
-          transaction: oThis.transactionObj,
-          videoId: oThis.videoId
-        })
-      );
-    }
+    promisesArray.push(
+      notificationJobEnqueue.enqueue(notificationJobConstants.replyTxReceiveSuccess, {
+        transaction: oThis.transactionObj,
+        videoId: oThis.videoId,
+        parentVideoId: oThis.parentVideoId,
+        replyDetailId: oThis.replyDetailId
+      })
+    );
 
     await Promise.all(promisesArray);
   }

@@ -83,10 +83,10 @@ class PopulateParentVideoIdInUserNotificationsPayload {
     const oThis = this;
 
     const kindsMap = {
-      [userNotificationConstants.replySenderWithAmountKind]: 1,
-      [userNotificationConstants.replySenderWithoutAmountKind]: 1,
-      [userNotificationConstants.replyReceiverWithAmountKind]: 1,
-      [userNotificationConstants.replyReceiverWithoutAmountKind]: 1,
+      [userNotificationConstants.youRepliedWithAmountKind]: 1,
+      [userNotificationConstants.youRepliedWithoutAmountKind]: 1,
+      [userNotificationConstants.replyOnYourVideoWithAmountKind]: 1,
+      [userNotificationConstants.replyOnYourVideoWithoutAmountKind]: 1,
       [userNotificationConstants.replyUserMentionKind]: 1
     };
 

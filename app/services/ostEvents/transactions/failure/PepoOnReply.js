@@ -97,14 +97,14 @@ class PepoOnReplyFailureWebhook extends TransactionWebhookBase {
 
     const promisesArray = [];
 
-    if (oThis.videoId) {
-      promisesArray.push(
-        notificationJobEnqueue.enqueue(notificationJobConstants.videoTxSendFailure, {
-          transaction: oThis.transactionObj,
-          videoId: oThis.videoId
-        })
-      );
-    }
+    promisesArray.push(
+      notificationJobEnqueue.enqueue(notificationJobConstants.replyTxSendFailure, {
+        transaction: oThis.transactionObj,
+        videoId: oThis.videoId,
+        parentVideoId: oThis.parentVideoId,
+        replyDetailId: oThis.replyDetailId
+      })
+    );
 
     await Promise.all(promisesArray);
   }
