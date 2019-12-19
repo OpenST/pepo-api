@@ -2,10 +2,13 @@ const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   UserModel = require(rootPrefix + '/app/models/mysql/User'),
   UsersCache = require(rootPrefix + '/lib/cacheManagement/multi/User'),
-  responseHelper = require(rootPrefix + '/lib/formatter/response'),
   bgJob = require(rootPrefix + '/lib/rabbitMqEnqueue/bgJob'),
+  pixelJob = require(rootPrefix + '/lib/rabbitMqEnqueue/pixel'),
+  responseHelper = require(rootPrefix + '/lib/formatter/response'),
+  userConstants = require(rootPrefix + '/lib/globalConstant/user'),
   bgJobConstants = require(rootPrefix + '/lib/globalConstant/bgJob'),
-  userConstants = require(rootPrefix + '/lib/globalConstant/user');
+  pixelConstants = require(rootPrefix + '/lib/globalConstant/pixel'),
+  pixelJobConstants = require(rootPrefix + '/lib/globalConstant/pixelJob');
 
 /**
  * Class to approve users by admin.
@@ -19,6 +22,7 @@ class ApproveUsersAsCreator extends ServiceBase {
    * @param {object} params
    * @param {array} params.user_ids: User ids to be approved by admin.
    * @param {object} params.current_admin: current admin.
+   * @param {string} [params.approved_via_medium]: indicates the platform from where the user is approved (slack/pepo-admin)
    *
    * @augments ServiceBase
    *
@@ -31,12 +35,13 @@ class ApproveUsersAsCreator extends ServiceBase {
 
     oThis.userIds = params.user_ids;
     oThis.currentAdminId = params.current_admin.id;
+    oThis.approvedViaMedium = params.approved_via_medium || pixelConstants.userApprovedViaAdminUserProfileMedium;
 
     oThis.userObjects = {};
   }
 
   /**
-   * Main performer for class.
+   * Async perform.
    *
    * @returns {Promise<result>}
    * @private
@@ -51,7 +56,11 @@ class ApproveUsersAsCreator extends ServiceBase {
     for (let index = 0; index < oThis.userIds.length; index++) {
       const userId = oThis.userIds[index];
       await UserModel.flushCache(oThis.userObjects[userId]);
-      await bgJob.enqueue(bgJobConstants.postUserApprovalJob, { userId: userId, currentAdminId: oThis.currentAdminId });
+      const promisesArray = [
+        bgJob.enqueue(bgJobConstants.postUserApprovalJob, { userId: userId, currentAdminId: oThis.currentAdminId }),
+        pixelJob.enqueue(pixelJobConstants.approveUserAsCreatorJob, oThis.getPixelParameters(userId))
+      ];
+      await Promise.all(promisesArray);
     }
 
     return responseHelper.successWithData({});
@@ -125,6 +134,23 @@ class ApproveUsersAsCreator extends ServiceBase {
       .update(['properties = properties | ?', propertyVal])
       .where({ id: oThis.userIds })
       .fire();
+  }
+
+  /**
+   * Get pixel parameters.
+   *
+   * @param {number} userId
+   *
+   * @returns {{}}
+   */
+  getPixelParameters(userId) {
+    const oThis = this;
+
+    return {
+      approvedViaMedium: oThis.approvedViaMedium, // Mandatory parameter.
+      adminId: oThis.currentAdminId, // Mandatory parameter.
+      approvedUserId: userId // Mandatory parameter.
+    };
   }
 }
 

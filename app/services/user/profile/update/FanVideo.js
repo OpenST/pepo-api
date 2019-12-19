@@ -14,6 +14,7 @@ const rootPrefix = '../../../../..',
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   feedsConstants = require(rootPrefix + '/lib/globalConstant/feed'),
   videoConstants = require(rootPrefix + '/lib/globalConstant/video'),
+  entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
   ValidateVideoService = require(rootPrefix + '/app/services/video/Validate'),
   notificationJobEnqueue = require(rootPrefix + '/lib/rabbitMqEnqueue/notification'),
   notificationJobConstants = require(rootPrefix + '/lib/globalConstant/notificationJob');
@@ -154,6 +155,7 @@ class UpdateFanVideo extends UpdateProfileBase {
     }
 
     oThis.videoId = resp.data.videoId;
+    oThis.videoDetailId = resp.data.videoDetailId;
 
     const addVideoDescriptionRsp = await new AddVideoDescription({
       videoDescription: oThis.videoDescription,
@@ -317,6 +319,28 @@ class UpdateFanVideo extends UpdateProfileBase {
     promisesArray.push(VideoDetailsModel.flushCache({ userId: oThis.profileUserId }));
 
     await Promise.all(promisesArray);
+  }
+
+  /**
+   * Prepares Response
+   *
+   * @returns {*|result}
+   * @private
+   */
+  _prepareResponse() {
+    const oThis = this;
+
+    // FE fires the video creation pixel and following response is necessary.
+    return responseHelper.successWithData({
+      [entityType.userVideoList]: [
+        {
+          creatorUserId: oThis.profileUserId.toString(),
+          updatedAt: Math.round(new Date() / 1000),
+          videoId: oThis.videoId.toString(),
+          videoDetailId: oThis.videoDetailId.toString()
+        }
+      ]
+    });
   }
 }
 

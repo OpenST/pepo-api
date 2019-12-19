@@ -71,12 +71,12 @@ module.exports = {
     'no-useless-rename': 'error',
     // "prefer-destructuring": "error",
     // "prefer-template": "error",
-    'capitalized-comments': ['error'],
+    // 'capitalized-comments': ['error'],
     'consistent-this': ['error', 'oThis'],
     'eol-last': ['error', 'always'],
     'id-length': ['error', { min: 2 }],
     'key-spacing': ['error', { beforeColon: false, afterColon: true }],
-    'lines-around-comment': ['error', { beforeBlockComment: false, beforeLineComment: false }],
+    // 'lines-around-comment': ['error', { beforeBlockComment: false, beforeLineComment: false }],
     'lines-between-class-members': ['error', 'always'],
     'no-array-constructor': 'error',
     'max-depth': ['error', 4],
@@ -88,7 +88,7 @@ module.exports = {
     'no-trailing-spaces': 'error',
     'no-unneeded-ternary': 'error',
     'operator-assignment': ['error', 'always'],
-    'padding-line-between-statements': ['error', { blankLine: 'always', prev: '*', next: 'return' }],
-    'spaced-comment': ['error', 'always', { exceptions: ['-', '+'] }]
+    'padding-line-between-statements': ['error', { blankLine: 'always', prev: '*', next: 'return' }]
+    // 'spaced-comment': ['error', 'always', { exceptions: ['-', '+'] }]
   }
 };

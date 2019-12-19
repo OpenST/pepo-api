@@ -28,13 +28,13 @@ const rootPrefix = '../../..',
   prelaunchInviteConstants = require(rootPrefix + '/lib/globalConstant/preLaunchInvite');
 
 /**
- * Class for Twitter Signup service.
+ * Class for twitter signup service.
  *
  * @class TwitterConnect
  */
 class TwitterSignup extends ServiceBase {
   /**
-   * Constructor for signup service.
+   * Constructor for twitter signup service.
    *
    * @param {object} params
    * @param {string} params.twitterUserObj: Twitter User Table Obj
@@ -46,13 +46,15 @@ class TwitterSignup extends ServiceBase {
    * @param {string} params.inviterCodeId: invite code table id of inviter
    * @param {object} params.prelaunchInviteObj: prelaunch invite object, if user was part of pre-launch program
    * @param {object} params.utmParams: utm params used while signup.
+   * @param {object} params.sanitizedHeaders: sanitized headers.
+   * @param {string} [params.inviteCode:] invite code.
    *
    * @augments ServiceBase
    *
    * @constructor
    */
   constructor(params) {
-    super(params);
+    super();
 
     const oThis = this;
 
@@ -64,6 +66,8 @@ class TwitterSignup extends ServiceBase {
     oThis.twitterRespHeaders = params.twitterRespHeaders;
     oThis.prelaunchInviteObj = params.prelaunchInviteObj || {};
     oThis.utmParams = params.utmParams || {};
+    oThis.sanitizedHeaders = params.sanitizedHeaders;
+    oThis.inviteCode = params.inviteCode || '';
 
     oThis.userId = null;
 
@@ -86,38 +90,39 @@ class TwitterSignup extends ServiceBase {
   }
 
   /**
-   * Perform: Perform user creation.
+   * Async perform.
    *
-   * @return {Promise<void>}
+   * @returns {Promise<void>}
+   * @private
    */
   async _asyncPerform() {
     const oThis = this;
 
     await oThis._performSignup();
 
-    return Promise.resolve(oThis._serviceResponse());
+    return oThis._serviceResponse();
   }
 
   /**
-   *  Perform For Signup Via Twitter.
+   * Perform signup via twitter.
    *
-   * @return {Promise<void>}
+   * @returns {Promise<void>}
    * @private
    */
   async _performSignup() {
     const oThis = this;
+
     logger.log('Start::Perform Twitter Signup');
 
-    const promisesArray1 = [];
+    // Starting the create user in ost in parallel.
+    const createOstUserPromise = oThis._createUserInOst();
 
-    // starting the create user in ost in parallel.
-    let createOstUserPromise = oThis._createUserInOst();
-
-    promisesArray1.push(oThis._saveProfileImage());
-    promisesArray1.push(oThis._setUserName());
-    promisesArray1.push(oThis._emailToSet());
-    promisesArray1.push(oThis._setKMSEncryptionSalt());
-
+    const promisesArray1 = [
+      oThis._saveProfileImage(),
+      oThis._setUserName(),
+      oThis._emailToSet(),
+      oThis._setKMSEncryptionSalt()
+    ];
     await Promise.all(promisesArray1).catch(function(err) {
       logger.error('Error in _performSignup: ', err);
 
@@ -132,15 +137,12 @@ class TwitterSignup extends ServiceBase {
 
     await oThis._createUser();
 
-    let promiseArray2 = [];
-    promiseArray2.push(oThis._twitterSpecificFunction());
-
-    promiseArray2.push(
-      createOstUserPromise.then(function(a) {
+    const promiseArray2 = [
+      oThis._twitterSpecificFunction(),
+      createOstUserPromise.then(function() {
         return oThis._createTokenUser();
       })
-    );
-
+    ];
     await Promise.all(promiseArray2);
 
     await oThis._enqueAfterSignupJob();
@@ -151,9 +153,9 @@ class TwitterSignup extends ServiceBase {
   }
 
   /**
-   * create or update twitter user
+   * Create or update twitter user.
    *
-   * @return {Promise<void>}
+   * @returns {Promise<void>}
    * @private
    */
   async _twitterSpecificFunction() {
@@ -570,7 +572,9 @@ class TwitterSignup extends ServiceBase {
       tokenUser: safeFormattedTokenUserData,
       userLoginCookieValue: userLoginCookieValue,
       openEmailAddFlow: oThis.userOptedInEmail ? 0 : 1,
-      twitterUserExtended: safeFormattedTwitterUserExtendedData
+      twitterUserExtended: safeFormattedTwitterUserExtendedData,
+      utmParams: oThis.utmParams,
+      meta: { isRegistration: 1, inviteCode: oThis.inviteCode }
     });
   }
 

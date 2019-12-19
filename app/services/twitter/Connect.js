@@ -454,6 +454,7 @@ class TwitterConnect extends ServiceBase {
       }
       requestParams.prelaunchInviteObj = oThis.prelaunchInviteObj;
       requestParams.utmParams = oThis.utmParams;
+      requestParams.inviteCode = oThis.inviteCode || '';
       oThis.serviceResp = await new SignupTwitterClass(requestParams).perform();
     } else {
       logger.log('Twitter::Connect login');
