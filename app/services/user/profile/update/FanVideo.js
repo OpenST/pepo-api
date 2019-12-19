@@ -83,6 +83,8 @@ class UpdateFanVideo extends UpdateProfileBase {
    */
   async _validateParams() {
     const oThis = this;
+    
+    return Promise.reject({note: 'temporary stopping the API.'});
 
     if (CommonValidator.isVarNullOrUndefined(oThis.perReplyAmountInWei)) {
       oThis.perReplyAmountInWei = '10000000000000000000';
