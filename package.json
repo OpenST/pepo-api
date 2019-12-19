@@ -8,7 +8,7 @@
   },
   "dependencies": {
     "@ostdotcom/base": "^2.0.0",
-    "@ostdotcom/cache": "1.0.8-beta.2",
+    "@ostdotcom/cache": "1.0.8-beta.3",
     "@ostdotcom/notification": "1.0.8-beta.1",
     "@ostdotcom/ost-sdk-js": "2.2.0",
     "aws-sdk": "2.484.0",
