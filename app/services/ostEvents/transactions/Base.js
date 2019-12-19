@@ -61,6 +61,7 @@ class TransactionWebhookBase extends ServiceBase {
     oThis.transactionObj = null;
 
     oThis.videoId = null;
+    oThis.parentVideoId = null;
     oThis.replyDetailId = null;
     oThis.parentVideoId = null;
 

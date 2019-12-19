@@ -6,6 +6,7 @@ const rootPrefix = '../../../..',
   UserMultiCache = require(rootPrefix + '/lib/cacheManagement/multi/User'),
   ImageByIdCache = require(rootPrefix + '/lib/cacheManagement/multi/ImageByIds'),
   VideoByIdCache = require(rootPrefix + '/lib/cacheManagement/multi/VideoByIds'),
+  ReplyDetailsByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/ReplyDetailsByIds'),
   UserNotificationModel = require(rootPrefix + '/app/models/cassandra/UserNotification'),
   NotificationResponseHelper = require(rootPrefix + '/lib/notification/response/Helper'),
   TokenUserByUserIdsMultiCache = require(rootPrefix + '/lib/cacheManagement/multi/TokenUserByUserIds'),
@@ -18,6 +19,7 @@ const rootPrefix = '../../../..',
   userConstants = require(rootPrefix + '/lib/globalConstant/user'),
   videoConstants = require(rootPrefix + '/lib/globalConstant/video'),
   bgJobConstants = require(rootPrefix + '/lib/globalConstant/bgJob'),
+  replyDetailConstants = require(rootPrefix + '/lib/globalConstant/replyDetail'),
   paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination'),
   responseEntityKey = require(rootPrefix + '/lib/globalConstant/responseEntityKey'),
   UserBlockedListCache = require(rootPrefix + '/lib/cacheManagement/single/UserBlockedList'),
@@ -56,12 +58,14 @@ class UserNotificationList extends ServiceBase {
     oThis.userNotifications = [];
     oThis.userIds = [];
     oThis.videoIds = [];
+    oThis.replyDetailIds = [];
     oThis.imageIds = [];
     oThis.blockedByUserInfo = {};
 
     oThis.usersByIdMap = {};
     oThis.tokenUsersByUserIdMap = {};
     oThis.videoMap = {};
+    oThis.replyDetailsMap = {};
     oThis.imageMap = {};
 
     oThis.formattedUserNotifications = [];
@@ -82,7 +86,9 @@ class UserNotificationList extends ServiceBase {
 
     await oThis._setUserNotifications();
 
-    await oThis._setUserAndVideoIds();
+    await oThis._setUserIdsVideoIdsAndReplyDetailIds();
+
+    await oThis._fetchReplyDetails();
 
     const promisesArray = [
       oThis._fetchUsers(),
@@ -168,14 +174,14 @@ class UserNotificationList extends ServiceBase {
   }
 
   /**
-   * Find user ids in the notifications.
+   * Find user ids, video ids and reply detail ids in the notifications.
    *
-   * @sets oThis.userIds, oThis.videoIds
+   * @sets oThis.userIds, oThis.videoIds, oThis.replyDetailIds
    *
    * @returns {Promise<void>}
    * @private
    */
-  async _setUserAndVideoIds() {
+  async _setUserIdsVideoIdsAndReplyDetailIds() {
     const oThis = this;
 
     for (let index = 0; index < oThis.userNotifications.length; index++) {
@@ -193,10 +199,15 @@ class UserNotificationList extends ServiceBase {
       oThis.videoIds = oThis.videoIds.concat(
         oThis._getVideoIdsForNotifications(userNotification, supportingEntitiesConfig)
       );
+
+      oThis.replyDetailIds = oThis.replyDetailIds.concat(
+        oThis._getReplyDetailIdsForNotifications(userNotification, supportingEntitiesConfig)
+      );
     }
 
     oThis.userIds = [...new Set(oThis.userIds)];
     oThis.videoIds = [...new Set(oThis.videoIds)];
+    oThis.replyDetailIds = [...new Set(oThis.replyDetailIds)];
   }
 
   /**
@@ -255,6 +266,65 @@ class UserNotificationList extends ServiceBase {
     }
 
     return vIds;
+  }
+
+  /**
+   * Get video ids of supporting entity for a notifications.
+   *
+   * @returns {Promise<array>}
+   * @private
+   */
+  _getReplyDetailIdsForNotifications(userNotification, supportingEntitiesConfig) {
+    const oThis = this;
+
+    let rdIds = [];
+
+    const keysForReplyDetailId = supportingEntitiesConfig.replyDetailIds;
+
+    for (let index = 0; index < keysForReplyDetailId.length; index++) {
+      const dataKeys = keysForReplyDetailId[index];
+
+      const val = NotificationResponseHelper.getKeyDataFromNotification(userNotification, dataKeys);
+
+      if (Array.isArray(val)) {
+        rdIds = rdIds.concat(val);
+      } else {
+        rdIds.push(Number(val));
+      }
+    }
+
+    return rdIds;
+  }
+
+  /**
+   * Fetch reply details
+   *
+   * @sets oThis.replyDetailsMap, oThis.videoIds
+   *
+   * @returns {Promise<never>}
+   * @private
+   */
+  async _fetchReplyDetails() {
+    const oThis = this;
+
+    const replyDetailsByIdsCacheObj = new ReplyDetailsByIdsCache({
+        ids: oThis.replyDetailIds
+      }),
+      cacheRsp = await replyDetailsByIdsCacheObj.fetch();
+
+    if (cacheRsp.isFailure()) {
+      return Promise.reject(cacheRsp);
+    }
+
+    oThis.replyDetailsMap = cacheRsp.data;
+
+    for (const replyDetailId in oThis.replyDetailsMap) {
+      const replyDetail = oThis.replyDetailsMap[replyDetailId];
+      if (replyDetail.status === replyDetailConstants.deletedStatus) {
+        delete oThis.replyDetailsMap[replyDetailId];
+        continue;
+      }
+    }
   }
 
   /**
@@ -336,8 +406,13 @@ class UserNotificationList extends ServiceBase {
     oThis.videoMap = cacheRsp.data;
 
     for (const videoId in oThis.videoMap) {
-      const video = oThis.videoMap[videoId],
-        posterImageId = video.posterImageId;
+      const video = oThis.videoMap[videoId];
+      if (video.status === videoConstants.deletedStatus) {
+        delete oThis.videoMap[videoId];
+        continue;
+      }
+
+      const posterImageId = video.posterImageId;
       if (posterImageId) {
         oThis.imageIds.push(posterImageId);
       }
@@ -567,7 +642,8 @@ class UserNotificationList extends ServiceBase {
       if (oThis.notificationVideoMap[userNotification.uuid]) {
         for (let index = 0; index < oThis.notificationVideoMap[userNotification.uuid].length; index++) {
           const vid = oThis.notificationVideoMap[userNotification.uuid][index];
-          if (oThis.videoMap[vid].status === videoConstants.deletedStatus) {
+          if (!CommonValidators.validateNonEmptyObject(oThis.videoMap[vid])) {
+            // As video is not present in map, means its deleted so needs to clear activity.
             oThis.notificationsToDelete.push(userNotification);
 
             return true;
@@ -640,6 +716,7 @@ class UserNotificationList extends ServiceBase {
       tokenUsersByUserIdMap: tokenUserHash,
       imageMap: oThis.imageMap,
       videoMap: oThis.videoMap,
+      replyDetailsMap: oThis.replyDetailsMap,
       userNotificationList: oThis.formattedUserNotifications
     };
 
