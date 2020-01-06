@@ -77,10 +77,23 @@ class CronProcessesMonitorExecutable extends CronBase {
 
     oThis.cronKindToRestartTimeMap = {
       [cronProcessesConstants.continuousCronsType]: {
-        [cronProcessesConstants.emailServiceApiCallHookProcessor]: cronProcessesConstants.continuousCronRestartInterval
+        [cronProcessesConstants.emailServiceApiCallHookProcessor]: cronProcessesConstants.continuousCronRestartInterval,
+        [cronProcessesConstants.pushNotificationHookProcessor]: cronProcessesConstants.continuousCronRestartInterval,
+        [cronProcessesConstants.bgJobProcessor]: cronProcessesConstants.continuousCronRestartInterval,
+        [cronProcessesConstants.notificationJobProcessor]: cronProcessesConstants.continuousCronRestartInterval,
+        [cronProcessesConstants.pixelJobProcessor]: cronProcessesConstants.continuousCronRestartInterval,
+        [cronProcessesConstants.pepoMobileEventJobProcessor]: cronProcessesConstants.continuousCronRestartInterval,
+        [cronProcessesConstants.cdnCacheInvalidationProcessor]: cronProcessesConstants.continuousCronRestartInterval
       },
       // Restart interval time for periodic crons should match with devops-cron config file.
-      [cronProcessesConstants.periodicCronsType]: {}
+      [cronProcessesConstants.periodicCronsType]: {
+        [cronProcessesConstants.pushNotificationAggregator]: 30 * 60 * 1000, // 30 mins
+        [cronProcessesConstants.userSocketConnArchival]: 6 * 60 * 60 * 1000, // 6 hours
+        [cronProcessesConstants.retryPendingReceiptValidation]: 10 * 60 * 1000, // 10 mins
+        [cronProcessesConstants.reValidateAllReceipts]: 24 * 60 * 60 * 1000, // 24 hours
+        [cronProcessesConstants.monitorOstEventHooks]: 2 * 60 * 60 * 1000, // 2 hours
+        [cronProcessesConstants.populatePopularityCriteria]: 60 * 60 * 1000 // 1 hour
+      }
     };
 
     await oThis._monitor();
