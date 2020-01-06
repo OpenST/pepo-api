@@ -74,11 +74,6 @@ class ResetBadge extends ServiceBase {
   async _resetUnreadNotificationsCount() {
     const oThis = this;
 
-    // TEMP code fix for 128 cassandra driver issue
-    if (oThis.currentUserId == 128) {
-      return responseHelper.successWithData({});
-    }
-
     //NOTE: Optimization- Try delete row for resetting the data
     let queryRsp = await new UserNotificationCountModel().fetchUnreadNotificationCount({
       userIds: [oThis.currentUserId]
