@@ -2,7 +2,6 @@ const rootPrefix = '../../../..',
   jsSdkWrapper = require(rootPrefix + '/lib/ostPlatform/jsSdkWrapper'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   ServiceBase = require(rootPrefix + '/app/services/Base'),
-  CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   createErrorLogsEntry = require(rootPrefix + '/lib/errorLogs/createEntry'),
   errorLogsConstants = require(rootPrefix + '/lib/globalConstant/errorLogs'),
   ReplayAttackCache = require(rootPrefix + '/lib/cacheManagement/single/ReplayAttackOnRegisterDevice'),
@@ -50,6 +49,8 @@ class RegisterDevice extends ServiceBase {
     }
 
     return oThis._requestPlatformToRegisterDevice();
+
+    // TODO Tejas - add one more method - _prepareResponse. In the above 2 methods, just set the device entity in oThis.
   }
 
   /**
@@ -75,15 +76,11 @@ class RegisterDevice extends ServiceBase {
    */
   async _validateDuplicateRequest() {
     const oThis = this;
-    logger.log('Start::_validateDuplicateRequest');
-
     const ReplayAttackOnRegisterDeviceCacheResp = await new ReplayAttackCache({ userId: oThis.userId }).fetch();
 
     if (ReplayAttackOnRegisterDeviceCacheResp.isFailure()) {
       oThis.isDuplicateRequest = true;
     }
-
-    logger.log('End::_validateDuplicateRequest');
   }
 
   /**
