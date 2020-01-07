@@ -9,9 +9,12 @@ const command = require('commander');
 
 const rootPrefix = '../..',
   cacheProvider = require(rootPrefix + '/lib/providers/memcached'),
+  CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   TransactionModel = require(rootPrefix + '/app/models/mysql/Transaction'),
   transactionConstants = require(rootPrefix + '/lib/globalConstant/transaction'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger');
+
+const BATCH_SIZE = 25;
 
 command
   .version('0.1.0')
@@ -61,7 +64,7 @@ class PopulateTransactionsData {
 
     oThis.transactionId = command.transactionId ? command.transactionId : 0;
 
-    let limit = 2,
+    let limit = BATCH_SIZE,
       offset = 0;
     while (true) {
       await oThis._fetchTransaction(limit, offset);
@@ -74,7 +77,7 @@ class PopulateTransactionsData {
 
       oThis.transactionsById = {};
 
-      offset = offset + 2;
+      offset = offset + BATCH_SIZE;
     }
   }
 
@@ -122,8 +125,13 @@ class PopulateTransactionsData {
         fiatPaymentId = transaction.fiatPaymentId,
         videoId = transaction.videoId;
 
-      extraData.fiatPaymentId = fiatPaymentId;
-      extraData.videoId = videoId;
+      if (!CommonValidators.isVarNullOrUndefined(fiatPaymentId)) {
+        extraData.fiatPaymentId = fiatPaymentId;
+      }
+
+      if (!CommonValidators.isVarNullOrUndefined(videoId)) {
+        extraData.videoId = videoId;
+      }
 
       let updateData = {
         to_user_id: toUserId[0],
