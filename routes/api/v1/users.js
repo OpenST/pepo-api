@@ -324,7 +324,7 @@ router.get('/:profile_user_id/reply-history', sanitizer.sanitizeDynamicUrlParams
         [entityType.replyDetailsMap]: responseEntityKey.replyDetails,
         [entityType.pricePointsMap]: responseEntityKey.pricePoints,
         [entityType.token]: responseEntityKey.token,
-        [entityType.userReplyListMeta]: responseEntityKey.meta
+        [entityType.userVideoListMeta]: responseEntityKey.meta
       },
       serviceData: serviceResponse.data
     }).perform();

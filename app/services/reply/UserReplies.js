@@ -113,7 +113,7 @@ class GetUserReplyList extends ServiceBase {
     const oThis = this;
 
     const cacheResponse = await new ReplyDetailsIdsByUserIdCache({
-      userId: oThis.userId,
+      userId: oThis.profileUserId,
       limit: oThis.limit,
       paginationTimestamp: oThis.paginationTimestamp
     }).fetch();
