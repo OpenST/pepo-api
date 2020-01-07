@@ -5,8 +5,7 @@ const rootPrefix = '../../..',
   ReplyDetailsIdsByUserIdCache = require(rootPrefix + '/lib/cacheManagement/single/ReplyDetailIdsByUserId'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
-  paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination'),
-  replyDetailConstants = require(rootPrefix + '/lib/globalConstant/replyDetail');
+  paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination');
 
 /**
  * Class for user reply details service.
@@ -19,7 +18,6 @@ class GetUserReplyList extends ServiceBase {
    *
    * @param {object} params
    * @param {string/number} params.profile_user_id
-   * @param {string/number} [params.check_reply_detail_id]
    * @param {object} [params.current_user]
    * @param {boolean} [params.is_admin]
    * @param {string} [params.pagination_identifier]
@@ -37,9 +35,6 @@ class GetUserReplyList extends ServiceBase {
     oThis.currentUser = params.current_user;
     oThis.isAdmin = params.is_admin || false;
     oThis.paginationIdentifier = params[paginationConstants.paginationIdentifierKey] || null;
-
-    oThis.checkReplyDetailId = params.check_reply_detail_id || null;
-    // This is the reply detail id whose presence is to be checked. In case this reply id is deleted then NOT FOUND error is sent.
 
     oThis.limit = oThis._defaultPageLimit();
 
@@ -155,16 +150,12 @@ class GetUserReplyList extends ServiceBase {
   async _getReplyVideos() {
     const oThis = this;
 
-    let toFetchDetailsForReplyDetailsIds = oThis.replyDetailIds;
-    if (oThis.checkReplyDetailId) {
-      toFetchDetailsForReplyDetailsIds = toFetchDetailsForReplyDetailsIds.concat([oThis.checkReplyDetailId]);
-    }
-
     const userVideosObj = new GetUserVideosList({
       currentUserId: oThis.currentUserId,
-      replyDetailIds: toFetchDetailsForReplyDetailsIds,
+      replyDetailIds: oThis.replyDetailIds,
       isAdmin: oThis.isAdmin,
-      fetchVideoViewDetails: 0
+      fetchVideoViewDetails: 0,
+      filterUserBlockedReplies: 1
     });
 
     const response = await userVideosObj.perform();
@@ -174,22 +165,6 @@ class GetUserReplyList extends ServiceBase {
     }
 
     oThis.userRepliesMap = response.data;
-
-    // We may not need this is in this api. Remove after checking
-    if (oThis.checkReplyDetailId) {
-      if (
-        !oThis.userRepliesMap.replyDetailsMap[oThis.checkReplyDetailId] ||
-        oThis.userRepliesMap.replyDetailsMap[oThis.checkReplyDetailId].status != replyDetailConstants.activeStatus
-      ) {
-        return Promise.reject(
-          responseHelper.error({
-            internal_error_identifier: 'a_s_r_ur_1',
-            api_error_identifier: 'entity_not_found',
-            debug_options: `checkReplyDetailId: ${oThis.checkReplyDetailId}`
-          })
-        );
-      }
-    }
 
     for (let ind = 0; ind < oThis.replyDetailIds.length; ind++) {
       const rdId = oThis.replyDetailIds[ind];
