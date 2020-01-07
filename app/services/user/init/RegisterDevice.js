@@ -27,6 +27,7 @@ class RegisterDevice extends ServiceBase {
     oThis.apiSignerAddress = params.api_signer_address;
 
     oThis.isDuplicateRequest = false;
+    oThis.device = null;
   }
 
   /**
@@ -45,12 +46,12 @@ class RegisterDevice extends ServiceBase {
     await oThis._validateDuplicateRequest();
 
     if (oThis.isDuplicateRequest) {
-      return oThis._requestPlatformToGetUserDeviceDetail();
+      await oThis._requestPlatformToGetUserDeviceDetail();
+    } else {
+      await oThis._requestPlatformToRegisterDevice();
     }
 
-    return oThis._requestPlatformToRegisterDevice();
-
-    // TODO Tejas - add one more method - _prepareResponse. In the above 2 methods, just set the device entity in oThis.
+    return oThis._prepareResponse();
   }
 
   /**
@@ -66,21 +67,6 @@ class RegisterDevice extends ServiceBase {
     oThis.apiSignerAddress = oThis.apiSignerAddress.toLowerCase();
 
     oThis.ostUserId = null;
-  }
-
-  /**
-   * Validate duplicate request
-   *
-   * @return {Promise<Result>}
-   * @private
-   */
-  async _validateDuplicateRequest() {
-    const oThis = this;
-    const ReplayAttackOnRegisterDeviceCacheResp = await new ReplayAttackCache({ userId: oThis.userId }).fetch();
-
-    if (ReplayAttackOnRegisterDeviceCacheResp.isFailure()) {
-      oThis.isDuplicateRequest = true;
-    }
   }
 
   /**
@@ -109,7 +95,53 @@ class RegisterDevice extends ServiceBase {
   }
 
   /**
+   * Validate duplicate request
+   *
+   * @return {Promise<Result>}
+   * @private
+   */
+  async _validateDuplicateRequest() {
+    const oThis = this;
+    const ReplayAttackOnRegisterDeviceCacheResp = await new ReplayAttackCache({ userId: oThis.userId }).fetch();
+
+    if (ReplayAttackOnRegisterDeviceCacheResp.isFailure()) {
+      oThis.isDuplicateRequest = true;
+    }
+  }
+
+  /**
+   * Request platform to get user device details using platform's sdk
+   *
+   * Sets oThis.device
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _requestPlatformToGetUserDeviceDetail() {
+    const oThis = this;
+
+    let paramsForPlatform = {
+      user_id: oThis.ostUserId,
+      device_address: oThis.deviceAddress
+    };
+
+    let platformResponse = await jsSdkWrapper.getDeviceDetails(paramsForPlatform);
+
+    if (platformResponse.isFailure()) {
+      logger.error('Get device details API to platform failed.');
+      await createErrorLogsEntry.perform(platformResponse, errorLogsConstants.highSeverity);
+      return Promise.reject(platformResponse);
+    }
+
+    let resultType = platformResponse.data['result_type'];
+
+    oThis.device = platformResponse.data[resultType];
+  }
+
+  /**
    * Request platform to register device using platform's sdk
+   *
+   * Sets oThis.device
    *
    * @returns {Promise<void>}
    * @private
@@ -138,40 +170,23 @@ class RegisterDevice extends ServiceBase {
       return Promise.reject(platformResponse);
     }
 
-    let resultType = platformResponse.data['result_type'],
-      returnData = {
-        device: platformResponse.data[resultType]
-      };
+    let resultType = platformResponse.data['result_type'];
 
-    return responseHelper.successWithData(returnData);
+    oThis.device = platformResponse.data[resultType];
   }
 
   /**
-   * Request platform to get user device details using platform's sdk
+   * Prepare response
    *
-   * @returns {Promise<void>}
+   * @returns {*|result}
    * @private
    */
-  async _requestPlatformToGetUserDeviceDetail() {
+  _prepareResponse() {
     const oThis = this;
 
-    let paramsForPlatform = {
-      user_id: oThis.ostUserId,
-      device_address: oThis.deviceAddress
+    let returnData = {
+      device: oThis.device
     };
-
-    let platformResponse = await jsSdkWrapper.getDeviceDetails(paramsForPlatform);
-
-    if (platformResponse.isFailure()) {
-      logger.error('Get device details API to platform failed.');
-      await createErrorLogsEntry.perform(platformResponse, errorLogsConstants.highSeverity);
-      return Promise.reject(platformResponse);
-    }
-
-    let resultType = platformResponse.data['result_type'],
-      returnData = {
-        device: platformResponse.data[resultType]
-      };
 
     return responseHelper.successWithData(returnData);
   }
