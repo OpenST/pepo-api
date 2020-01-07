@@ -322,6 +322,7 @@ router.get('/:profile_user_id/reply-history', sanitizer.sanitizeDynamicUrlParams
         [entityType.imagesMap]: responseEntityKey.images,
         [entityType.videosMap]: responseEntityKey.videos,
         [entityType.replyDetailsMap]: responseEntityKey.replyDetails,
+        [entityType.videoDetailsMap]: responseEntityKey.videoDetails,
         [entityType.pricePointsMap]: responseEntityKey.pricePoints,
         [entityType.token]: responseEntityKey.token,
         [entityType.userVideoListMeta]: responseEntityKey.meta

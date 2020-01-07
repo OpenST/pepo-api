@@ -164,7 +164,7 @@ class GetUserReplyList extends ServiceBase {
       currentUserId: oThis.currentUserId,
       replyDetailIds: toFetchDetailsForReplyDetailsIds,
       isAdmin: oThis.isAdmin,
-      fetchVideoViewDetails: 1
+      fetchVideoViewDetails: 0
     });
 
     const response = await userVideosObj.perform();
@@ -237,6 +237,7 @@ class GetUserReplyList extends ServiceBase {
     return responseHelper.successWithData({
       [entityTypeConstants.userReplyList]: oThis.userReplies,
       [entityTypeConstants.replyDetailsMap]: oThis.userRepliesMap.replyDetailsMap,
+      [entityTypeConstants.videoDetailsMap]: oThis.userRepliesMap.videoDetailsMap,
       [entityTypeConstants.videoDescriptionsMap]: oThis.userRepliesMap.videoDescriptionMap,
       [entityTypeConstants.userProfilesMap]: oThis.userRepliesMap.userProfilesMap,
       [entityTypeConstants.currentUserUserContributionsMap]: oThis.userRepliesMap.currentUserUserContributionsMap,
