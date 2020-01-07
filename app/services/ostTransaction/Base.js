@@ -283,6 +283,9 @@ class OstTransactionBase extends ServiceBase {
     const insertData = {
       ost_tx_id: oThis.ostTxId,
       from_user_id: oThis.userId,
+      kind: transactionConstants.invertedKinds[oThis._transactionKind()],
+      to_user_id: oThis.toUserIdsArray[0],
+      amount: oThis.amountsArray[0],
       video_id: oThis.videoId,
       extra_data: JSON.stringify(oThis._getExtraData()),
       status: transactionConstants.invertedStatuses[oThis.transactionStatus]
@@ -355,6 +358,16 @@ class OstTransactionBase extends ServiceBase {
     const oThis = this;
 
     return !CommonValidators.isVarNullOrUndefined(oThis.videoId);
+  }
+
+  /**
+   * Get Transaction Kind
+   *
+   * @returns {Object}
+   * @private
+   */
+  _transactionKind() {
+    throw new Error('Unimplemented method _transactionKind for OstTransaction.');
   }
 }
 
