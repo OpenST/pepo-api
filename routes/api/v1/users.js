@@ -303,6 +303,38 @@ router.get('/:profile_user_id/video-history', sanitizer.sanitizeDynamicUrlParams
   );
 });
 
+/* Reply history */
+router.get('/:profile_user_id/reply-history', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.userReplyList;
+  req.decodedParams.profile_user_id = req.params.profile_user_id;
+
+  const dataFormatterFunc = async function(serviceResponse) {
+    const wrapperFormatterRsp = await new FormatterComposer({
+      resultType: responseEntityKey.userReplies,
+      entityKindToResponseKeyMap: {
+        [entityType.userReplyList]: responseEntityKey.userReplies,
+        [entityType.usersMap]: responseEntityKey.users,
+        [entityType.userStats]: responseEntityKey.userStats,
+        [entityType.userProfilesMap]: responseEntityKey.userProfiles,
+        [entityType.videoDescriptionsMap]: responseEntityKey.videoDescriptions,
+        [entityType.tagsMap]: responseEntityKey.tags,
+        [entityType.linksMap]: responseEntityKey.links,
+        [entityType.imagesMap]: responseEntityKey.images,
+        [entityType.videosMap]: responseEntityKey.videos,
+        [entityType.replyDetailsMap]: responseEntityKey.replyDetails,
+        [entityType.pricePointsMap]: responseEntityKey.pricePoints,
+        [entityType.token]: responseEntityKey.token,
+        [entityType.userReplyListMeta]: responseEntityKey.meta
+      },
+      serviceData: serviceResponse.data
+    }).perform();
+
+    serviceResponse.data = wrapperFormatterRsp.data;
+  };
+
+  Promise.resolve(routeHelper.perform(req, res, next, '/reply/UserReplies', 'r_a_v1_u_20', null, dataFormatterFunc));
+});
+
 /* User websocket details*/
 router.get('/:user_id/websocket-details', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.websocketDetails;

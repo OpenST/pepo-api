@@ -340,7 +340,7 @@ class ReplyDetailsModel extends ModelBase {
       paginationTimestamp = params.paginationTimestamp;
 
     const queryObject = oThis
-      .select('*')
+      .select('id, entity_id')
       .where({
         creator_user_id: creatorUserId,
         status: replyDetailConstants.invertedStatuses[replyDetailConstants.activeStatus]
@@ -355,19 +355,16 @@ class ReplyDetailsModel extends ModelBase {
 
     const dbRows = await queryObject.fire();
 
-    const replyDetails = {};
-
     const videoIds = [],
       replyDetailIds = [];
 
     for (let index = 0; index < dbRows.length; index++) {
       const formatDbRow = oThis.formatDbData(dbRows[index]);
-      replyDetails[formatDbRow.entityId] = formatDbRow;
       videoIds.push(formatDbRow.entityId);
       replyDetailIds.push(formatDbRow.id);
     }
 
-    return { videoIds: videoIds, replyDetails: replyDetails, replyDetailIds: replyDetailIds };
+    return { videoIds: videoIds, replyDetailIds: replyDetailIds };
   }
 
   /**
