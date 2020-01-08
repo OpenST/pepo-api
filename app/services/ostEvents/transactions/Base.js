@@ -508,28 +508,45 @@ class TransactionWebhookBase extends ServiceBase {
       );
     }
 
+    const extraData = {
+      toUserIds: [oThis.toUserId],
+      amounts: [oThis.ostTransaction.transfers[0].amount]
+    };
+
     let isDuplicateIndexViolation = false;
 
     let txKind = null;
 
+    //video_id is parent video id for reply on video.
+    //no video id in pepo on reply so we fetch the entity id using reply detail id.
+
     if (oThis._isRedemptionTransactionKind()) {
       txKind = transactionConstants.extraData.redemptionKind;
+    } else if (oThis._isPepoOnReplyTransactionKind()) {
+      txKind = transactionConstants.extraData.userTransactionOnReplyKind;
+      extraData['replyDetailId'] = oThis.replyDetailId;
+      extraData['videoId'] = oThis.videoId;
+    } else if (oThis._isReplyOnVideoTransactionKind()) {
+      txKind = transactionConstants.extraData.replyOnVideoTransactionKind;
+      extraData['replyDetailId'] = oThis.replyDetailId;
+      extraData['videoId'] = oThis.videoId;
     } else {
       txKind = transactionConstants.extraData.userTransactionKind;
+      if (oThis.isVideoIdPresent()) {
+        extraData['videoId'] = oThis.videoId;
+      }
     }
 
-    const extraData = {
-      toUserIds: [oThis.toUserId],
-      amounts: [oThis.ostTransaction.transfers[0].amount],
-      kind: txKind
-    };
+    extraData['kind'] = txKind;
 
     const insertData = {
       ost_tx_id: oThis.ostTxId,
       from_user_id: oThis.fromUserId,
+      kind: transactionConstants.invertedKinds[txKind],
+      to_user_id: oThis.toUserId,
+      amount: oThis.ostTransaction.transfers[0].amount,
       video_id: oThis.videoId,
       extra_data: JSON.stringify(extraData),
-      text_id: null,
       status: transactionConstants.invertedStatuses[oThis._transactionStatus()]
     };
 

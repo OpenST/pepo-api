@@ -255,6 +255,9 @@ class UserActivationSuccess extends UserOstEventBase {
     const insertData = {
       ost_tx_id: oThis.airdropTxResp.transaction.id,
       from_user_id: 0,
+      kind: transactionConstants.invertedKinds[transactionConstants.airdropKind],
+      to_user_id: oThis.tokenUserObj.userId,
+      amount: tokenConstants.airdropAmount,
       extra_data: JSON.stringify(extraData),
       status: transactionConstants.invertedStatuses[transactionConstants.pendingStatus]
     };

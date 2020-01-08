@@ -320,8 +320,21 @@ class ReplyOnVideoTransaction extends OstTransactionBase {
       toUserIds: oThis.toUserIdsArray,
       amounts: oThis.amountsArray,
       kind: transactionConstants.extraData.replyOnVideoTransactionKind,
-      replyDetailId: oThis.replyDetailId
+      replyDetailId: oThis.replyDetailId,
+      videoId: oThis.videoId
     };
+  }
+
+  /**
+   * Get Transaction Kind
+   *
+   * @returns {Object}
+   * @private
+   */
+  _transactionKind() {
+    const oThis = this;
+
+    return transactionConstants.replyOnVideoTransactionKind;
   }
 }
 
