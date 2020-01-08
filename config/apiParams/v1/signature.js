@@ -502,6 +502,19 @@ const v1Signature = {
     ],
     optional: []
   },
+  [apiName.videoMergeJobStatus]: {
+    mandatory: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      },
+      {
+        parameter: 'video_merge_job_id',
+        validatorMethods: ['validateInteger']
+      }
+    ],
+    optional: []
+  },
   [apiName.saveProfileImage]: {
     mandatory: [
       {
