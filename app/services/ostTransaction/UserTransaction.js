@@ -133,11 +133,29 @@ class UserTransaction extends OstTransactionBase {
   _getExtraData() {
     const oThis = this;
 
-    return {
+    const ed = {
       toUserIds: oThis.toUserIdsArray,
       amounts: oThis.amountsArray,
       kind: transactionConstants.extraData.userTransactionKind
     };
+
+    if (oThis._isVideoIdPresent()) {
+      ed['videoId'] = oThis.videoId;
+    }
+
+    return ed;
+  }
+
+  /**
+   * Get Transaction Kind
+   *
+   * @returns {Object}
+   * @private
+   */
+  _transactionKind() {
+    const oThis = this;
+
+    return transactionConstants.userTransactionKind;
   }
 }
 
