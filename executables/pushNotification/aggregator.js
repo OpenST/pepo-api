@@ -82,10 +82,6 @@ class NotificationAggregator extends CronBase {
       await oThis._fetchAggregatedDetails();
 
       for (let userId in oThis.userIdToAggregatedDetailsMap) {
-        // TEMP code fix for 128 cassandra driver issue
-        if (userId == 128) {
-          continue;
-        }
         oThis.recipientUserIds.push(userId);
       }
 
