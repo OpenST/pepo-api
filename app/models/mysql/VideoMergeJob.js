@@ -1,6 +1,7 @@
 const rootPrefix = '../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
-  databaseConstants = require(rootPrefix + '/lib/globalConstant/database');
+  databaseConstants = require(rootPrefix + '/lib/globalConstant/database'),
+  videoMergeJobConstants = require(rootPrefix + '/lib/globalConstant/videoMergeJob');
 
 // Declare variables.
 const dbName = databaseConstants.bigDbName;
@@ -46,7 +47,7 @@ class VideoMergeJob extends ModelBase {
       id: dbRow.id,
       userId: dbRow.user_id,
       mergedUrl: dbRow.merged_url,
-      status: dbRow.status,
+      status: videoMergeJobConstants.statuses[dbRow.status],
       createdAt: dbRow.created_at,
       updatedAt: dbRow.updated_at
     };
@@ -70,6 +71,7 @@ class VideoMergeJob extends ModelBase {
       .fire();
 
     const response = {};
+
     for (let index = 0; index < dbRows.length; index++) {
       const formatDbRow = oThis.formatDbData(dbRows[index]);
       response[formatDbRow.id] = formatDbRow;
