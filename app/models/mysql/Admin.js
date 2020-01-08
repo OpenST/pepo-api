@@ -166,7 +166,10 @@ class AdminModel extends ModelBase {
    * Get cookie value.
    *
    * @param {object} adminObj
+   * @param {number} adminObj.id
+   * @param {string} adminObj.password
    * @param {object} options
+   * @param {number} options.timestamp
    *
    * @returns {string}
    */
@@ -180,7 +183,10 @@ class AdminModel extends ModelBase {
    * Get cookie token.
    *
    * @param {object} adminObj
+   * @param {number} adminObj.id
+   * @param {string} adminObj.password
    * @param {object} options
+   * @param {number} options.timestamp
    *
    * @returns {string}
    */
@@ -204,9 +210,12 @@ class AdminModel extends ModelBase {
   }
 
   /**
-   * Cookie token for admin
+   * Cookie token for admin.
    *
-   * @param adminObj
+   * @param {object} adminObj
+   * @param {number} adminObj.id
+   * @param {string} adminObj.password
+   *
    * @returns {*}
    */
   cookieToken(adminObj) {
@@ -217,8 +226,9 @@ class AdminModel extends ModelBase {
    * Flush cache.
    *
    * @param {object} params
-   * @param {number} params.id
-   * @param {string} params.email
+   * @param {number} [params.id]
+   * @param {string} [params.email]
+   * @param {number} [params.slackId]
    *
    * @returns {Promise<*>}
    */
