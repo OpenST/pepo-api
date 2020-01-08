@@ -91,13 +91,13 @@ class VideoMergeJob extends ModelBase {
     const promisesArray = [];
 
     if (params.id) {
-      const CacheKlass = require('./');
-      promisesArray.push(new CacheKlass({ ids: [params.id] }).clear());
+      const VideoMergeJobByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/VideoMergeJobByIds');
+      promisesArray.push(new VideoMergeJobByIdsCache({ ids: [params.id] }).clear());
     }
 
     if (params.ids) {
-      const CacheKlass = require('./');
-      promisesArray.push(new CacheKlass({ ids: params.ids }).clear());
+      const VideoMergeJobByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/VideoMergeJobByIds');
+      promisesArray.push(new VideoMergeJobByIdsCache({ ids: params.ids }).clear());
     }
 
     await Promise.all(promisesArray);
