@@ -1,5 +1,4 @@
 const rootPrefix = '../../../../..',
-  UpdateStats = require(rootPrefix + '/lib/UpdateStats'),
   UserStatModel = require(rootPrefix + '/app/models/mysql/UserStat'),
   UserStatByUserIds = require(rootPrefix + '/lib/cacheManagement/multi/UserStatByUserIds'),
   TransactionWebhookBase = require(rootPrefix + '/app/services/ostEvents/transactions/Base'),
@@ -7,9 +6,7 @@ const rootPrefix = '../../../../..',
   basicHelper = require(rootPrefix + '/helpers/basic'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
-  transactionConstants = require(rootPrefix + '/lib/globalConstant/transaction'),
-  notificationJobEnqueue = require(rootPrefix + '/lib/rabbitMqEnqueue/notification'),
-  notificationJobConstants = require(rootPrefix + '/lib/globalConstant/notificationJob');
+  transactionConstants = require(rootPrefix + '/lib/globalConstant/transaction');
 
 /**
  * Class for reply on video success transaction service.
@@ -114,6 +111,7 @@ class ReplyOnVideoSuccessWebhook extends TransactionWebhookBase {
 
     const replyVideoResponse = await new ReplyVideoPostTransaction({
       currentUserId: oThis.fromUserId,
+      replyCreatorUserId: oThis.replyCreatorUserId,
       replyDetailId: oThis.replyDetailId,
       videoId: oThis.videoId,
       transactionId: oThis.ostTxId,

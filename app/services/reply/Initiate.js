@@ -349,6 +349,7 @@ class InitiateReply extends ServiceBase {
     if (isReplyFree) {
       await new ReplyVideoPostTransaction({
         currentUserId: oThis.currentUser.id,
+        replyCreatorUserId: oThis.currentUser.id,
         replyDetailId: oThis.replyDetailId,
         videoId: oThis.parentId,
         pepoAmountInWei: 0,

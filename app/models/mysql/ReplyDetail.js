@@ -257,6 +257,7 @@ class ReplyDetailsModel extends ModelBase {
       })
       .fire();
 
+    // UserId cache flush not required here since the status is pending
     const flushCacheParams = {
       parentVideoIds: [params.parentId]
     };
@@ -399,6 +400,7 @@ class ReplyDetailsModel extends ModelBase {
    *
    * @param {object} params
    * @param {array<number>} [params.parentVideoIds]
+   * @param {number} [params.userId]
    * @param {number} [params.replyDetailId]
    * @param {array<number>} [params.replyDetailIds]
    * @param {array<number>} [params.entityIds]
@@ -408,6 +410,11 @@ class ReplyDetailsModel extends ModelBase {
    */
   static async flushCache(params) {
     const promisesArray = [];
+
+    if (params.userId) {
+      const ReplyDetailsIdsByUserIdCache = require(rootPrefix + '/lib/cacheManagement/single/ReplyDetailIdsByUserId');
+      promisesArray.push(new ReplyDetailsIdsByUserIdCache({ userId: params.userId }).clear());
+    }
 
     if (params.parentVideoIds) {
       const ReplyDetailsByParentVideoPaginationCache = require(rootPrefix +
