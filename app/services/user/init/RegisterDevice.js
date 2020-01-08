@@ -4,6 +4,7 @@ const rootPrefix = '../../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   createErrorLogsEntry = require(rootPrefix + '/lib/errorLogs/createEntry'),
   errorLogsConstants = require(rootPrefix + '/lib/globalConstant/errorLogs'),
+  ReplayAttackCache = require(rootPrefix + '/lib/cacheManagement/single/ReplayAttackOnRegisterDevice'),
   TokenUserDetailByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TokenUserByUserIds'),
   responseHelper = require(rootPrefix + '/lib/formatter/response');
 
@@ -24,6 +25,9 @@ class RegisterDevice extends ServiceBase {
     oThis.userId = params.current_user.id;
     oThis.deviceAddress = params.device_address;
     oThis.apiSignerAddress = params.api_signer_address;
+
+    oThis.isDuplicateRequest = false;
+    oThis.device = null;
   }
 
   /**
@@ -39,7 +43,15 @@ class RegisterDevice extends ServiceBase {
 
     await oThis._fetchTokenUserData();
 
-    return oThis._requestPlatformToRegisterDevice();
+    await oThis._validateDuplicateRequest();
+
+    if (oThis.isDuplicateRequest) {
+      await oThis._requestPlatformToGetUserDeviceDetail();
+    } else {
+      await oThis._requestPlatformToRegisterDevice();
+    }
+
+    return oThis._prepareResponse();
   }
 
   /**
@@ -83,7 +95,53 @@ class RegisterDevice extends ServiceBase {
   }
 
   /**
+   * Validate duplicate request
+   *
+   * @return {Promise<Result>}
+   * @private
+   */
+  async _validateDuplicateRequest() {
+    const oThis = this;
+    const ReplayAttackOnRegisterDeviceCacheResp = await new ReplayAttackCache({ userId: oThis.userId }).fetch();
+
+    if (ReplayAttackOnRegisterDeviceCacheResp.isFailure()) {
+      oThis.isDuplicateRequest = true;
+    }
+  }
+
+  /**
+   * Request platform to get user device details using platform's sdk
+   *
+   * Sets oThis.device
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _requestPlatformToGetUserDeviceDetail() {
+    const oThis = this;
+
+    let paramsForPlatform = {
+      user_id: oThis.ostUserId,
+      device_address: oThis.deviceAddress
+    };
+
+    let platformResponse = await jsSdkWrapper.getDeviceDetails(paramsForPlatform);
+
+    if (platformResponse.isFailure()) {
+      logger.error('Get device details API to platform failed.');
+      await createErrorLogsEntry.perform(platformResponse, errorLogsConstants.highSeverity);
+      return Promise.reject(platformResponse);
+    }
+
+    let resultType = platformResponse.data['result_type'];
+
+    oThis.device = platformResponse.data[resultType];
+  }
+
+  /**
    * Request platform to register device using platform's sdk
+   *
+   * Sets oThis.device
    *
    * @returns {Promise<void>}
    * @private
@@ -112,10 +170,23 @@ class RegisterDevice extends ServiceBase {
       return Promise.reject(platformResponse);
     }
 
-    let resultType = platformResponse.data['result_type'],
-      returnData = {
-        device: platformResponse.data[resultType]
-      };
+    let resultType = platformResponse.data['result_type'];
+
+    oThis.device = platformResponse.data[resultType];
+  }
+
+  /**
+   * Prepare response
+   *
+   * @returns {*|result}
+   * @private
+   */
+  _prepareResponse() {
+    const oThis = this;
+
+    let returnData = {
+      device: oThis.device
+    };
 
     return responseHelper.successWithData(returnData);
   }
