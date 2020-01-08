@@ -181,7 +181,7 @@ router.get('/merge-jobs/:video_merge_job_id', sanitizer.sanitizeDynamicUrlParams
   };
 
   Promise.resolve(
-    routeHelper.perform(req, res, next, '/video/VideoMergeStatus', 'r_a_v1_v_7', null, dataFormatterFunc)
+    routeHelper.perform(req, res, next, '/video/VideoMergeJobStatus', 'r_a_v1_v_7', null, dataFormatterFunc)
   );
 });
 
