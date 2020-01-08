@@ -73,11 +73,6 @@ class HasUnreadNotifications extends ServiceBase {
   async _checkIfVisited() {
     const oThis = this;
 
-    // TEMP code fix for 128 cassandra driver issue
-    if (oThis.userId == 128) {
-      return { notificationUnread: { flag: 0 } };
-    }
-
     const queryParams = {
       userId: oThis.userId
     };
