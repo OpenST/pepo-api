@@ -34,9 +34,9 @@ class VideoMergeJobStatus extends ServiceBase {
   async _asyncPerform() {
     const oThis = this;
 
-    await oThis.fetchVideoMergeJob();
+    await oThis._fetchVideoMergeJob();
 
-    await oThis.validateAndSanitize();
+    await oThis._validateAndSanitize();
 
     return responseHelper.successWithData(oThis._prepareResponse());
   }
@@ -47,8 +47,9 @@ class VideoMergeJobStatus extends ServiceBase {
    * @sets oThis.jobDetails
    *
    * @returns {Promise<never>}
+   * @private
    */
-  async fetchVideoMergeJob() {
+  async _fetchVideoMergeJob() {
     const oThis = this;
 
     const cacheResponse = await new VideoMergeJobByIdsCache({ ids: [oThis.jobId] }).fetch();
@@ -63,8 +64,9 @@ class VideoMergeJobStatus extends ServiceBase {
    * Validate and sanitize.
    *
    * @returns {Promise<never>}
+   * @private
    */
-  async validateAndSanitize() {
+  async _validateAndSanitize() {
     const oThis = this;
 
     if (!CommonValidators.validateNonEmptyObject(oThis.jobDetails)) {
