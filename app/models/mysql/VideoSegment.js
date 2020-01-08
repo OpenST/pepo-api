@@ -33,7 +33,7 @@ class VideoSegment extends ModelBase {
    * @param {number} dbRow.id
    * @param {number} dbRow.video_merge_job_id
    * @param {string} dbRow.segment_url
-   * @param {number} dbRow.sequence_number
+   * @param {number} dbRow.sequence_index
    * @param {string} dbRow.created_at
    * @param {string} dbRow.updated_at
    *
@@ -46,7 +46,7 @@ class VideoSegment extends ModelBase {
       id: dbRow.id,
       videoMergeJobId: dbRow.video_merge_job_id,
       segmentUrl: dbRow.segment_url,
-      sequenceNumber: dbRow.sequence_number,
+      sequenceIndex: dbRow.sequence_index,
       createdAt: dbRow.created_at,
       updatedAt: dbRow.updated_at
     };

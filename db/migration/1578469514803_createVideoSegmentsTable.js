@@ -10,7 +10,7 @@ const upQuery =
   `id` bigint(20) NOT NULL AUTO_INCREMENT,\
   `video_merge_job_id` bigint(20) NOT NULL,\
   `segment_url` varchar(255) NOT NULL,\
-  `sequence_number` tinyint(4) NOT NULL,\
+  `sequence_index` int(11) NOT NULL,\
   `created_at` int(11) NOT NULL,\
   `updated_at` int(11) NOT NULL,\
   PRIMARY KEY (`id`),\
