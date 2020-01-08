@@ -188,7 +188,7 @@ class UserActivationSuccess extends UserOstEventBase {
       transferToAddress: oThis.tokenUserObj.ostTokenHolderAddress,
       transferToUserId: oThis.tokenUserObj.userId,
       amountInWei: tokenConstants.airdropAmount,
-      transactionKind: transactionConstants.extraData.airdropKind,
+      transactionKind: transactionConstants.airdropKind,
       transactionMetaProperties: {
         name: 'UserActivateAirdrop',
         type: transactionTypesConstants.companyToUserTransactionType,
