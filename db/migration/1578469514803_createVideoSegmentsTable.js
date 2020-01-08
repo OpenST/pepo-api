@@ -13,7 +13,8 @@ const upQuery =
   `sequence_number` tinyint(4) NOT NULL,\
   `created_at` int(11) NOT NULL,\
   `updated_at` int(11) NOT NULL,\
-  PRIMARY KEY (`id`)\
+  PRIMARY KEY (`id`),\
+  INDEX (`video_merge_job_id`) \
   ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;';
 
 const downQuery = 'drop table if exists `video_segments`;';
