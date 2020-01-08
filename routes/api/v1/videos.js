@@ -144,4 +144,23 @@ router.post('/validate-upload', cookieHelper.validateUserLoginRequired, function
   Promise.resolve(routeHelper.perform(req, res, next, '/video/Validate', 'r_a_v1_v_5', null, null));
 });
 
+/* Video share */
+router.get('/merge-segments', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.mergeVideoSegments;
+
+  const dataFormatterFunc = async function(serviceResponse) {
+    const wrapperFormatterRsp = await new FormatterComposer({
+      resultType: responseEntityKey.videoMergeJob,
+      entityKindToResponseKeyMap: {
+        [entityType.videoMergeJob]: responseEntityKey.videoMergeJob
+      },
+      serviceData: serviceResponse.data
+    }).perform();
+
+    serviceResponse.data = wrapperFormatterRsp.data;
+  };
+
+  Promise.resolve(routeHelper.perform(req, res, next, '/video/MergeSegments', 'r_a_v1_v_5', null, dataFormatterFunc));
+});
+
 module.exports = router;

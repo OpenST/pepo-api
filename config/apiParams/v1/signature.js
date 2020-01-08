@@ -489,6 +489,28 @@ const v1Signature = {
       }
     ]
   },
+  [apiName.mergeVideoSegments]: {
+    mandatory: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      }
+    ],
+    optional: [
+      {
+        parameter: 'video_description',
+        validatorMethods: ['validateVideoDescription', 'validateStopWords']
+      },
+      {
+        parameter: 'link',
+        validatorMethods: ['validateGenericUrl', 'validateStopWords']
+      },
+      {
+        parameter: 'per_reply_amount_in_wei',
+        validatorMethods: ['validateIntegerWeiValue']
+      }
+    ]
+  },
   [apiName.saveProfileImage]: {
     mandatory: [
       {
