@@ -507,10 +507,7 @@ class TransactionWebhookBase extends ServiceBase {
       );
     }
 
-    const extraData = {
-      toUserIds: [oThis.toUserId],
-      amounts: [oThis.ostTransaction.transfers[0].amount]
-    };
+    const extraData = {};
 
     let isDuplicateIndexViolation = false;
 
@@ -524,19 +521,12 @@ class TransactionWebhookBase extends ServiceBase {
     } else if (oThis._isPepoOnReplyTransactionKind()) {
       txKind = transactionConstants.extraData.userTransactionOnReplyKind;
       extraData['replyDetailId'] = oThis.replyDetailId;
-      extraData['videoId'] = oThis.videoId;
     } else if (oThis._isReplyOnVideoTransactionKind()) {
       txKind = transactionConstants.extraData.replyOnVideoTransactionKind;
       extraData['replyDetailId'] = oThis.replyDetailId;
-      extraData['videoId'] = oThis.videoId;
     } else {
       txKind = transactionConstants.extraData.userTransactionKind;
-      if (oThis.isVideoIdPresent()) {
-        extraData['videoId'] = oThis.videoId;
-      }
     }
-
-    extraData['kind'] = txKind;
 
     const insertData = {
       ost_tx_id: oThis.ostTxId,
