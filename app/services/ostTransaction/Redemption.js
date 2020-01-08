@@ -211,6 +211,18 @@ class RedemptionTransaction extends OstTransactionBase {
       kind: transactionConstants.extraData.redemptionKind
     };
   }
+
+  /**
+   * Get Transaction Kind
+   *
+   * @returns {Object}
+   * @private
+   */
+  _transactionKind() {
+    const oThis = this;
+
+    return transactionConstants.redemptionKind;
+  }
 }
 
 module.exports = RedemptionTransaction;
