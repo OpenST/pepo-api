@@ -144,29 +144,8 @@ router.post('/validate-upload', cookieHelper.validateUserLoginRequired, function
   Promise.resolve(routeHelper.perform(req, res, next, '/video/Validate', 'r_a_v1_v_5', null, null));
 });
 
-/* Video merge status. */
-router.get('/merge-status', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
-  req.decodedParams.apiName = apiName.videoMergeStatus;
-
-  const dataFormatterFunc = async function(serviceResponse) {
-    const wrapperFormatterRsp = await new FormatterComposer({
-      resultType: responseEntityKey.videoMergeJob,
-      entityKindToResponseKeyMap: {
-        [entityType.videoMergeJob]: responseEntityKey.videoMergeJob
-      },
-      serviceData: serviceResponse.data
-    }).perform();
-
-    serviceResponse.data = wrapperFormatterRsp.data;
-  };
-
-  Promise.resolve(
-    routeHelper.perform(req, res, next, '/video/VideoMergeStatus', 'r_a_v1_v_6', null, dataFormatterFunc)
-  );
-});
-
 /* Merge video segments. */
-router.post('/merge-segments', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+router.post('/merge-jobs', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.mergeVideoSegments;
 
   const dataFormatterFunc = async function(serviceResponse) {
@@ -181,7 +160,29 @@ router.post('/merge-segments', sanitizer.sanitizeDynamicUrlParams, function(req,
     serviceResponse.data = wrapperFormatterRsp.data;
   };
 
-  Promise.resolve(routeHelper.perform(req, res, next, '/video/MergeSegments', 'r_a_v1_v_7', null, dataFormatterFunc));
+  Promise.resolve(routeHelper.perform(req, res, next, '/video/MergeSegments', 'r_a_v1_v_6', null, dataFormatterFunc));
+});
+
+/* Video merge status. */
+router.get('/merge-jobs/:video_merge_job_id', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.videoMergeJobStatus;
+  req.decodedParams.video_merge_job_id = req.params.video_merge_job_id;
+
+  const dataFormatterFunc = async function(serviceResponse) {
+    const wrapperFormatterRsp = await new FormatterComposer({
+      resultType: responseEntityKey.videoMergeJob,
+      entityKindToResponseKeyMap: {
+        [entityType.videoMergeJob]: responseEntityKey.videoMergeJob
+      },
+      serviceData: serviceResponse.data
+    }).perform();
+
+    serviceResponse.data = wrapperFormatterRsp.data;
+  };
+
+  Promise.resolve(
+    routeHelper.perform(req, res, next, '/video/VideoMergeStatus', 'r_a_v1_v_7', null, dataFormatterFunc)
+  );
 });
 
 module.exports = router;
