@@ -4,7 +4,6 @@ const rootPrefix = '../../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   createErrorLogsEntry = require(rootPrefix + '/lib/errorLogs/createEntry'),
   errorLogsConstants = require(rootPrefix + '/lib/globalConstant/errorLogs'),
-  ReplayAttackCache = require(rootPrefix + '/lib/cacheManagement/single/ReplayAttackOnRegisterDevice'),
   TokenUserDetailByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TokenUserByUserIds'),
   responseHelper = require(rootPrefix + '/lib/formatter/response');
 
@@ -25,9 +24,6 @@ class RegisterDevice extends ServiceBase {
     oThis.userId = params.current_user.id;
     oThis.deviceAddress = params.device_address;
     oThis.apiSignerAddress = params.api_signer_address;
-
-    oThis.isDuplicateRequest = false;
-    oThis.device = null;
   }
 
   /**
@@ -43,15 +39,7 @@ class RegisterDevice extends ServiceBase {
 
     await oThis._fetchTokenUserData();
 
-    await oThis._validateDuplicateRequest();
-
-    if (oThis.isDuplicateRequest) {
-      await oThis._requestPlatformToGetUserDeviceDetail();
-    } else {
-      await oThis._requestPlatformToRegisterDevice();
-    }
-
-    return oThis._prepareResponse();
+    return oThis._requestPlatformToRegisterDevice();
   }
 
   /**
@@ -95,24 +83,7 @@ class RegisterDevice extends ServiceBase {
   }
 
   /**
-   * Validate duplicate request
-   *
-   * @return {Promise<Result>}
-   * @private
-   */
-  async _validateDuplicateRequest() {
-    const oThis = this;
-    const ReplayAttackOnRegisterDeviceCacheResp = await new ReplayAttackCache({ userId: oThis.userId }).fetch();
-
-    if (ReplayAttackOnRegisterDeviceCacheResp.isFailure()) {
-      oThis.isDuplicateRequest = true;
-    }
-  }
-
-  /**
    * Request platform to get user device details using platform's sdk
-   *
-   * Sets oThis.device
    *
    * @returns {Promise<void>}
    * @private
@@ -133,15 +104,11 @@ class RegisterDevice extends ServiceBase {
       return Promise.reject(platformResponse);
     }
 
-    let resultType = platformResponse.data['result_type'];
-
-    oThis.device = platformResponse.data[resultType];
+    return platformResponse;
   }
 
   /**
    * Request platform to register device using platform's sdk
-   *
-   * Sets oThis.device
    *
    * @returns {Promise<void>}
    * @private
@@ -155,37 +122,22 @@ class RegisterDevice extends ServiceBase {
       api_signer_address: oThis.apiSignerAddress
     };
 
-    let platformResponse = await jsSdkWrapper.registerDevice(paramsForPlatform);
+    let platformResponse = await jsSdkWrapper.registerDevice(paramsForPlatform).catch(async function(platformError) {
+      let errorResponse = JSON.parse(platformError.debugOptions.error);
 
-    if (platformResponse.isFailure()) {
-      if (platformResponse.debugOptions.err.code === 'ALREADY_EXISTS') {
-        return responseHelper.error({
-          internal_error_identifier: 'a_s_u_rd_2',
-          api_error_identifier: 'duplicate_entry',
-          debug_options: { err: platformResponse.debugOptions.err }
-        });
+      if (errorResponse.err.code === 'ALREADY_EXISTS') {
+        return oThis._requestPlatformToGetUserDeviceDetail();
       }
+
       logger.error('Register device API to platform failed.');
-      await createErrorLogsEntry.perform(platformResponse, errorLogsConstants.highSeverity);
-      return Promise.reject(platformResponse);
-    }
+      await createErrorLogsEntry.perform(platformError, errorLogsConstants.highSeverity);
+      return Promise.reject(platformError);
+    });
 
     let resultType = platformResponse.data['result_type'];
 
-    oThis.device = platformResponse.data[resultType];
-  }
-
-  /**
-   * Prepare response
-   *
-   * @returns {*|result}
-   * @private
-   */
-  _prepareResponse() {
-    const oThis = this;
-
     let returnData = {
-      device: oThis.device
+      device: platformResponse.data[resultType]
     };
 
     return responseHelper.successWithData(returnData);
