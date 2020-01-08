@@ -494,22 +494,13 @@ const v1Signature = {
       {
         parameter: 'current_user',
         validatorMethods: ['validateNonEmptyObject']
+      },
+      {
+        parameter: 'video_urls',
+        validatorMethods: ['validateHashArray']
       }
     ],
-    optional: [
-      {
-        parameter: 'video_description',
-        validatorMethods: ['validateVideoDescription', 'validateStopWords']
-      },
-      {
-        parameter: 'link',
-        validatorMethods: ['validateGenericUrl', 'validateStopWords']
-      },
-      {
-        parameter: 'per_reply_amount_in_wei',
-        validatorMethods: ['validateIntegerWeiValue']
-      }
-    ]
+    optional: []
   },
   [apiName.saveProfileImage]: {
     mandatory: [
