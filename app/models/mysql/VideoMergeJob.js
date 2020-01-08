@@ -55,25 +55,27 @@ class VideoMergeJob extends ModelBase {
   }
 
   /**
-   * Fetch video merge job by id.
+   * Fetch video merge jobs by ids.
    *
-   * @param {number} jobId
+   * @param {number} jobIds
    *
    * @returns {Promise<{}>}
    */
-  async fetchVideoMergeJobById(jobId) {
+  async fetchVideoMergeJobByIds(jobIds) {
     const oThis = this;
 
     const dbRows = await oThis
       .select('*')
-      .where({ id: jobId })
+      .where({ id: jobIds })
       .fire();
 
-    if (dbRows.length === 0) {
-      return {};
+    const response = {};
+    for (let index = 0; index < dbRows.length; index++) {
+      const formatDbRow = oThis.formatDbData(dbRows[index]);
+      response[formatDbRow.id] = formatDbRow;
     }
 
-    return oThis.formatDbData(dbRows[0]);
+    return response;
   }
 
   /**
