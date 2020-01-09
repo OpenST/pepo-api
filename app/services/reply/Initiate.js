@@ -259,7 +259,6 @@ class InitiateReply extends ServiceBase {
       isExternalUrl: false,
       videoKind: videoConstants.replyVideoKind,
       linkIds: oThis.linkIds,
-      status: replyDetailConstants.pendingStatus,
       entityKind: replyDetailConstants.videoEntityKind,
       parentKind: oThis.parentKind,
       parentId: oThis.parentId

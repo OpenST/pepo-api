@@ -254,8 +254,7 @@ class ReplyDetailsModel extends ModelBase {
         parent_kind: replyDetailConstants.invertedParentKinds[params.parentKind],
         parent_id: params.parentId,
         link_ids: linkIds,
-        // TODO santhosh - check if all usages have status pending. if yes, then don't status from params
-        status: replyDetailConstants.invertedStatuses[params.status]
+        status: replyDetailConstants.invertedStatuses[replyDetailConstants.pendingStatus]
       })
       .fire();
 
@@ -403,7 +402,7 @@ class ReplyDetailsModel extends ModelBase {
    *
    * @param {object} params
    * @param {array<number>} [params.parentVideoIds]
-   * @param {number} [params.userId]
+   * @param {number} [params.userIds]
    * @param {number} [params.replyDetailId]
    * @param {array<number>} [params.replyDetailIds]
    * @param {array<number>} [params.entityIds]
@@ -414,9 +413,11 @@ class ReplyDetailsModel extends ModelBase {
   static async flushCache(params) {
     const promisesArray = [];
 
-    if (params.userId) {
+    if (params.userIds) {
       const ReplyDetailsIdsByUserIdCache = require(rootPrefix + '/lib/cacheManagement/single/ReplyDetailIdsByUserId');
-      promisesArray.push(new ReplyDetailsIdsByUserIdCache({ userId: params.userId }).clear());
+      for (let ind = 0; ind < params.userIds.length; ind++) {
+        promisesArray.push(new ReplyDetailsIdsByUserIdCache({ userId: params.userIds[ind] }).clear());
+      }
     }
 
     if (params.parentVideoIds) {
