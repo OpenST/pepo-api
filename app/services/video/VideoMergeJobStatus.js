@@ -91,7 +91,7 @@ class VideoMergeJobStatus extends ServiceBase {
       return Promise.reject(
         responseHelper.error({
           internal_error_identifier: 'a_s_v_vms_2',
-          api_error_identifier: 'entity_not_found',
+          api_error_identifier: 'invalid_api_params',
           debug_options: {
             jobId: oThis.jobId,
             jobDetailUserId: oThis.jobDetails.userId,
