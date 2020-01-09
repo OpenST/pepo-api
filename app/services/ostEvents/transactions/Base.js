@@ -534,7 +534,6 @@ class TransactionWebhookBase extends ServiceBase {
       kind: transactionConstants.invertedKinds[txKind],
       to_user_id: oThis.toUserId,
       amount: oThis.ostTransaction.transfers[0].amount,
-      video_id: oThis.videoId,
       extra_data: JSON.stringify(extraData),
       status: transactionConstants.invertedStatuses[oThis._transactionStatus()]
     };
