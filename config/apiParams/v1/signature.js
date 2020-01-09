@@ -497,7 +497,7 @@ const v1Signature = {
       },
       {
         parameter: 'video_urls',
-        validatorMethods: ['validateNonEmptyString']
+        validatorMethods: ['validateStringifiedVideoUrls']
       }
     ],
     optional: []
