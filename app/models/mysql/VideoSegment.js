@@ -55,26 +55,6 @@ class VideoSegment extends ModelBase {
   }
 
   /**
-   * Insert segment.
-   *
-   * @param {object} params
-   * @param {number} params.jobId
-   * @param {string} params.segmentUrl
-   *
-   * @returns {Promise<void>}
-   */
-  async insertSegment(params) {
-    const oThis = this;
-
-    return oThis
-      .insert({
-        video_merge_job_id: params.jobId,
-        segment_url: params.segmentUrl
-      })
-      .fire();
-  }
-
-  /**
    * Fetch video segments by job id.
    *
    * @param {number} jobId

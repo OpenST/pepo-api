@@ -1,28 +1,28 @@
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
-  VideoMergeJobModel = require(rootPrefix + '/app/models/mysql/VideoMergeJob'),
-  VideoSegmentModel = require(rootPrefix + '/app/models/mysql/VideoSegment'),
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
-  videoMergeJobConstants = require(rootPrefix + '/lib/globalConstant/videoMergeJob'),
-  videoConstants = require(rootPrefix + '/lib/globalConstant/video'),
-  shortToLongUrl = require(rootPrefix + '/lib/shortToLongUrl'),
-  s3Constants = require(rootPrefix + '/lib/globalConstant/s3'),
+  VideoSegmentModel = require(rootPrefix + '/app/models/mysql/VideoSegment'),
+  VideoMergeJobModel = require(rootPrefix + '/app/models/mysql/VideoMergeJob'),
   util = require(rootPrefix + '/lib/util'),
   bgJob = require(rootPrefix + '/lib/rabbitMqEnqueue/bgJob'),
+  shortToLongUrl = require(rootPrefix + '/lib/shortToLongUrl'),
+  s3Constants = require(rootPrefix + '/lib/globalConstant/s3'),
+  responseHelper = require(rootPrefix + '/lib/formatter/response'),
+  videoConstants = require(rootPrefix + '/lib/globalConstant/video'),
   bgJobConstants = require(rootPrefix + '/lib/globalConstant/bgJob'),
-  responseHelper = require(rootPrefix + '/lib/formatter/response');
+  videoMergeJobConstants = require(rootPrefix + '/lib/globalConstant/videoMergeJob');
 
 /**
- * Class to merge video segments
+ * Class to merge video segments.
  *
  * @class MergeSegments
  */
 class MergeSegments extends ServiceBase {
   /**
-   * Constructor to share video details.
+   * Constructor to merge video segments.
    *
    * @param {object} params
-   * @param {String} params.video_urls
+   * @param {string} params.video_urls
    * @param {object} params.current_user
    *
    * @augments ServiceBase
@@ -34,9 +34,11 @@ class MergeSegments extends ServiceBase {
 
     const oThis = this;
 
-    oThis.currentUserId = oThis.current_user.id;
-    oThis.videoUrls = JSON.parse(params.video_urls);
+    oThis.stringifiedVideoUrls = params.video_urls;
+    oThis.currentUserId = params.current_user.id;
 
+    oThis.videoUrls = [];
+    oThis.mergedVideoS3Url = '';
     oThis.jobId = null;
   }
 
@@ -49,9 +51,11 @@ class MergeSegments extends ServiceBase {
   async _asyncPerform() {
     const oThis = this;
 
-    await oThis._insertInVideoSegments();
+    await oThis._validateAndSanitize();
 
     await oThis._insertInVideoMergeJob();
+
+    await oThis._insertInVideoSegments();
 
     await oThis._enqueueMergeJob();
 
@@ -59,7 +63,53 @@ class MergeSegments extends ServiceBase {
   }
 
   /**
-   * Insert in video merge job
+   * Validate and sanitize.
+   *
+   * @sets oThis.videoUrls
+   *
+   * @returns {Promise<never>}
+   * @private
+   */
+  async _validateAndSanitize() {
+    const oThis = this;
+
+    try {
+      oThis.videoUrls = JSON.parse(oThis.stringifiedVideoUrls);
+    } catch (err) {
+      return Promise.reject(
+        responseHelper.error({
+          internal_error_identifier: 'a_s_v_ms_1',
+          api_error_identifier: 'invalid_api_params',
+          debug_options: {
+            stringifiedVideoUrls: oThis.stringifiedVideoUrls
+          }
+        })
+      );
+    }
+
+    for (let ind = 0; ind < oThis.videoUrls.length; ind++) {
+      const url = oThis.videoUrls[ind].video_url;
+
+      if (!CommonValidators.validateNonEmptyUrl(url)) {
+        return Promise.reject(
+          responseHelper.error({
+            internal_error_identifier: 'a_s_v_ms_2',
+            api_error_identifier: 'invalid_api_params',
+            params_error_identifiers: ['invalid_url'],
+            debug_options: {
+              url: url
+            }
+          })
+        );
+      }
+    }
+  }
+
+  /**
+   * Insert in video merge job.
+   *
+   * @sets oThis.mergedVideoS3Url, oThis.jobId
+   *
    * @returns {Promise<void>}
    * @private
    */
@@ -82,33 +132,33 @@ class MergeSegments extends ServiceBase {
   }
 
   /**
-   * Insert in video segments
+   * Insert in video segments.
+   *
    * @returns {Promise<void>}
    * @private
    */
   async _insertInVideoSegments() {
     const oThis = this;
 
-    const promiseArray = [];
+    const bulkInsertArray = [];
 
     for (let ind = 0; ind < oThis.videoUrls.length; ind++) {
       const segmentUrl = await oThis._shortenS3Url(oThis.videoUrls[ind].video_url);
 
-      promiseArray.push(
-        new VideoSegmentModel().insertSegment({
-          jobId: oThis.jobId,
-          segmentUrl: segmentUrl
-        })
-      );
+      bulkInsertArray.push([oThis.jobId, segmentUrl, ind]);
     }
 
-    await Promise.all(promiseArray);
+    await new VideoSegmentModel()
+      .insertMultiple(['video_merge_job_id', 'segment_url', 'sequence_index'], bulkInsertArray)
+      .fire();
   }
 
   /**
-   * Shorten s3 url
+   * Shorten S3 url.
    *
-   * @returns {Promise<void>}
+   * @param {string} url
+   *
+   * @returns {Promise<string>}
    * @private
    */
   async _shortenS3Url(url) {
@@ -126,9 +176,9 @@ class MergeSegments extends ServiceBase {
     ) {
       return Promise.reject(
         responseHelper.error({
-          internal_error_identifier: 'a_s_v_ms_1',
-          api_error_identifier: 'invalid_url',
-          debug_options: {}
+          internal_error_identifier: 'a_s_v_ms_3',
+          api_error_identifier: 'something_went_wrong',
+          debug_options: { url: url }
         })
       );
     }
@@ -137,7 +187,8 @@ class MergeSegments extends ServiceBase {
   }
 
   /**
-   * Enqueue merge background job
+   * Enqueue merge background job.
+   *
    * @returns {Promise<void>}
    * @private
    */
@@ -152,7 +203,7 @@ class MergeSegments extends ServiceBase {
   }
 
   /**
-   * Prepare final response
+   * Prepare final response.
    *
    * @returns {Promise<void>}
    * @private
