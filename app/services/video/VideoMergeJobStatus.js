@@ -31,6 +31,12 @@ class VideoMergeJobStatus extends ServiceBase {
     oThis.jobDetails = {};
   }
 
+  /**
+   * Async perform.
+   *
+   * @returns {Promise<result>}
+   * @private
+   */
   async _asyncPerform() {
     const oThis = this;
 
@@ -38,7 +44,7 @@ class VideoMergeJobStatus extends ServiceBase {
 
     await oThis._validateAndSanitize();
 
-    return responseHelper.successWithData(oThis._prepareResponse());
+    return oThis._prepareResponse();
   }
 
   /**
@@ -99,15 +105,15 @@ class VideoMergeJobStatus extends ServiceBase {
   /**
    * Prepare response.
    *
-   * @returns {{}}
+   * @returns {result}
    * @private
    */
   _prepareResponse() {
     const oThis = this;
 
-    return {
+    return responseHelper.successWithData({
       [entityTypeConstants.videoMergeJob]: oThis.jobDetails
-    };
+    });
   }
 }
 
