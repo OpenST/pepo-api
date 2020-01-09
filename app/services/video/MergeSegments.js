@@ -1,23 +1,23 @@
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
-  VideoMergeJobModel = require(rootPrefix + '/app/models/mysql/VideoMergeJob'),
   VideoSegmentModel = require(rootPrefix + '/app/models/mysql/VideoSegment'),
+  VideoMergeJobModel = require(rootPrefix + '/app/models/mysql/VideoMergeJob'),
   videoMergeJobConstants = require(rootPrefix + '/lib/globalConstant/videoMergeJob'),
   bgJob = require(rootPrefix + '/lib/rabbitMqEnqueue/bgJob'),
-  bgJobConstants = require(rootPrefix + '/lib/globalConstant/bgJob'),
-  responseHelper = require(rootPrefix + '/lib/formatter/response');
+  responseHelper = require(rootPrefix + '/lib/formatter/response'),
+  bgJobConstants = require(rootPrefix + '/lib/globalConstant/bgJob');
 
 /**
- * Class to merge video segments
+ * Class to merge video segments.
  *
  * @class MergeSegments
  */
 class MergeSegments extends ServiceBase {
   /**
-   * Constructor to share video details.
+   * Constructor to merge video segments.
    *
    * @param {object} params
-   * @param {String} params.video_urls
+   * @param {string} params.video_urls
    * @param {object} params.current_user
    *
    * @augments ServiceBase
@@ -29,8 +29,8 @@ class MergeSegments extends ServiceBase {
 
     const oThis = this;
 
-    oThis.currentUserId = oThis.current_user.id;
     oThis.videoUrls = JSON.parse(params.video_urls);
+    oThis.currentUserId = params.current_user.id;
 
     oThis.jobId = null;
   }
@@ -38,7 +38,7 @@ class MergeSegments extends ServiceBase {
   /**
    * Async perform.
    *
-   * @returns {Promise}
+   * @returns {Promise<result>}
    * @private
    */
   async _asyncPerform() {
@@ -54,7 +54,10 @@ class MergeSegments extends ServiceBase {
   }
 
   /**
-   * Insert in video merge job
+   * Insert in video merge job.
+   *
+   * @sets oThis.jobId
+   *
    * @returns {Promise<void>}
    * @private
    */
@@ -112,7 +115,7 @@ class MergeSegments extends ServiceBase {
   /**
    * Prepare final response
    *
-   * @returns {Promise<void>}
+   * @returns {Promise<result>}
    * @private
    */
   async _prepareResponse() {
