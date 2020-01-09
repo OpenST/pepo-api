@@ -84,18 +84,12 @@ class VideoMergeJob extends ModelBase {
    * Flush cache.
    *
    * @param {object} params
-   * @param {number} [params.id]
    * @param {array<number>} [params.ids]
    *
    * @returns {Promise<void>}
    */
   static async flushCache(params) {
     const promisesArray = [];
-
-    if (params.id) {
-      const VideoMergeJobByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/VideoMergeJobByIds');
-      promisesArray.push(new VideoMergeJobByIdsCache({ ids: [params.id] }).clear());
-    }
 
     if (params.ids) {
       const VideoMergeJobByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/VideoMergeJobByIds');
