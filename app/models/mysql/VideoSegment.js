@@ -76,14 +76,16 @@ class VideoSegment extends ModelBase {
   }
 
   /**
-   * Fetch video segments by job id
-   * @param jobId
+   * Fetch video segments by job id.
+   *
+   * @param {number} jobId
+   *
    * @returns {Promise}
    */
   async fetchSegmentsByJobId(jobId) {
     const oThis = this;
 
-    const Rows = await oThis
+    const dbRows = await oThis
       .select('segment_url, sequence_index')
       .where({
         video_merge_job_id: jobId
@@ -93,8 +95,8 @@ class VideoSegment extends ModelBase {
 
     const response = [];
 
-    for (let ind = 0; ind < Rows.length; ind++) {
-      const formattedRow = oThis.formatDbData(Rows[ind]);
+    for (let ind = 0; ind < dbRows.length; ind++) {
+      const formattedRow = oThis.formatDbData(dbRows[ind]);
       response.push(formattedRow);
     }
 
