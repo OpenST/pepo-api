@@ -100,7 +100,6 @@ class RegisterDevice extends ServiceBase {
 
     if (platformResponse.isFailure()) {
       logger.error('Get device details API to platform failed.');
-      await createErrorLogsEntry.perform(platformResponse, errorLogsConstants.highSeverity);
       return Promise.reject(platformResponse);
     }
 
