@@ -1,5 +1,7 @@
 const rootPrefix = '../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
+  shortToLongUrl = require(rootPrefix + '/lib/shortToLongUrl'),
+  videoConstants = require(rootPrefix + '/lib/globalConstant/video'),
   databaseConstants = require(rootPrefix + '/lib/globalConstant/database');
 
 // Declare variables.
@@ -45,7 +47,7 @@ class VideoSegment extends ModelBase {
     const formattedData = {
       id: dbRow.id,
       videoMergeJobId: dbRow.video_merge_job_id,
-      segmentUrl: dbRow.segment_url,
+      segmentUrl: shortToLongUrl.getFullUrl(dbRow.segment_url, videoConstants.originalResolution),
       sequenceIndex: dbRow.sequence_index,
       createdAt: dbRow.created_at,
       updatedAt: dbRow.updated_at

@@ -368,6 +368,10 @@ class CoreConstants {
     return process.env.PR_LAMBDA_VIDEO_COMPRESS_FUNCTION;
   }
 
+  get PR_VIDEO_MERGE_FUNCTION() {
+    return process.env.PR_LAMBDA_VIDEO_MERGE_FUNCTION;
+  }
+
   get PA_EMAIL_TOKENS_DECRIPTOR_KEY() {
     return process.env.PA_EMAIL_TOKENS_DECRIPTOR_KEY;
   }

@@ -1,6 +1,8 @@
 const rootPrefix = '../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
   databaseConstants = require(rootPrefix + '/lib/globalConstant/database'),
+  shortToLongUrl = require(rootPrefix + '/lib/shortToLongUrl'),
+  videoConstants = require(rootPrefix + '/lib/globalConstant/video'),
   videoMergeJobConstants = require(rootPrefix + '/lib/globalConstant/videoMergeJob');
 
 // Declare variables.
@@ -46,7 +48,7 @@ class VideoMergeJob extends ModelBase {
     const formattedData = {
       id: dbRow.id,
       userId: dbRow.user_id,
-      mergedUrl: dbRow.merged_url,
+      mergedUrl: shortToLongUrl.getFullUrl(dbRow.merged_url, videoConstants.originalResolution),
       status: videoMergeJobConstants.statuses[dbRow.status],
       createdAt: dbRow.created_at,
       updatedAt: dbRow.updated_at
