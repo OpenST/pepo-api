@@ -260,7 +260,7 @@ class TransactionWebhookBase extends ServiceBase {
   /**
    * Validate to user id.
    *
-   * @returns {Promise<never>}
+   * @return {Promise<never>}
    */
   async validateToUserId() {
     const oThis = this;

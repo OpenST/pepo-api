@@ -245,6 +245,7 @@ class ReplyDetailsModel extends ModelBase {
       linkIds = JSON.stringify(params.linkIds);
     }
 
+    // NOTE - userId was not passed to the flush cache as we don't want to flush the user replies cache as status is pending.
     const insertResponse = await oThis
       .insert({
         creator_user_id: params.userId,
@@ -253,6 +254,7 @@ class ReplyDetailsModel extends ModelBase {
         parent_kind: replyDetailConstants.invertedParentKinds[params.parentKind],
         parent_id: params.parentId,
         link_ids: linkIds,
+        // TODO santhosh - check if all usages have status pending. if yes, then don't status from params
         status: replyDetailConstants.invertedStatuses[params.status]
       })
       .fire();
@@ -315,6 +317,7 @@ class ReplyDetailsModel extends ModelBase {
       .where({ id: params.replyDetailId })
       .fire();
 
+    // NOTE - userId was not passed to the flush cache as we don't want to flush the user replies cache.
     const flushCacheParams = {
       replyDetailId: params.replyDetailId
     };

@@ -61,7 +61,7 @@ class ReplyOnVideoSuccessWebhook extends TransactionWebhookBase {
   /**
    * Process transaction when transaction is found in the database.
    *
-   * @returns {Promise<any>}
+   * @return {Promise<any>}
    * @private
    */
   async _processTransaction() {
@@ -104,7 +104,7 @@ class ReplyOnVideoSuccessWebhook extends TransactionWebhookBase {
   /**
    * Call reply on video post transaction lib
    *
-   * @returns {Promise<never>}
+   * @return {Promise<never>}
    */
   async callReplyOnVideoPostTransactionLib() {
     const oThis = this;
