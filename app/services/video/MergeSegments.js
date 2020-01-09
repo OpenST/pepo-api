@@ -3,6 +3,10 @@ const rootPrefix = '../../..',
   VideoMergeJobModel = require(rootPrefix + '/app/models/mysql/VideoMergeJob'),
   VideoSegmentModel = require(rootPrefix + '/app/models/mysql/VideoSegment'),
   videoMergeJobConstants = require(rootPrefix + '/lib/globalConstant/videoMergeJob'),
+  videoConstants = require(rootPrefix + '/lib/globalConstant/video'),
+  shortToLongUrl = require(rootPrefix + '/lib/shortToLongUrl'),
+  s3Constants = require(rootPrefix + '/lib/globalConstant/s3'),
+  util = require(rootPrefix + '/lib/util'),
   bgJob = require(rootPrefix + '/lib/rabbitMqEnqueue/bgJob'),
   bgJobConstants = require(rootPrefix + '/lib/globalConstant/bgJob'),
   responseHelper = require(rootPrefix + '/lib/formatter/response');
@@ -61,10 +65,16 @@ class MergeSegments extends ServiceBase {
   async _insertInVideoMergeJob() {
     const oThis = this;
 
-    // TODO: Take care of merged url
+    oThis.mergedVideoS3Url =
+      s3Constants.videoShortUrlPrefix +
+      '/' +
+      util.getS3FileTemplatePrefix(oThis.currentUserId) +
+      s3Constants.fileNameShortSizeSuffix +
+      '.mp4';
+
     const response = await new VideoMergeJobModel().insertJob({
       userId: oThis.currentUserId,
-      mergedUrl: ''
+      mergedUrl: oThis.mergedVideoS3Url
     });
 
     oThis.jobId = response.insertId;
@@ -123,7 +133,7 @@ class MergeSegments extends ServiceBase {
     const response = {
       id: oThis.jobId,
       status: videoMergeJobConstants.notStartedStatus,
-      merged_url: null,
+      merged_url: shortToLongUrl.getFullUrl(oThis.mergedVideoS3Url, videoConstants.originalResolution),
       uts: currentTime
     };
 
