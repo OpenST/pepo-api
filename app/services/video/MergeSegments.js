@@ -2,6 +2,7 @@ const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   VideoMergeJobModel = require(rootPrefix + '/app/models/mysql/VideoMergeJob'),
   VideoSegmentModel = require(rootPrefix + '/app/models/mysql/VideoSegment'),
+  CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   videoMergeJobConstants = require(rootPrefix + '/lib/globalConstant/videoMergeJob'),
   videoConstants = require(rootPrefix + '/lib/globalConstant/video'),
   shortToLongUrl = require(rootPrefix + '/lib/shortToLongUrl'),
@@ -48,9 +49,9 @@ class MergeSegments extends ServiceBase {
   async _asyncPerform() {
     const oThis = this;
 
-    await oThis._insertInVideoMergeJob();
-
     await oThis._insertInVideoSegments();
+
+    await oThis._insertInVideoMergeJob();
 
     await oThis._enqueueMergeJob();
 
@@ -91,7 +92,7 @@ class MergeSegments extends ServiceBase {
     const promiseArray = [];
 
     for (let ind = 0; ind < oThis.videoUrls.length; ind++) {
-      const segmentUrl = oThis.videoUrls[ind].video_url; // TODO: Create a short url
+      const segmentUrl = await oThis._shortenS3Url(oThis.videoUrls[ind].video_url);
 
       promiseArray.push(
         new VideoSegmentModel().insertSegment({
@@ -102,6 +103,37 @@ class MergeSegments extends ServiceBase {
     }
 
     await Promise.all(promiseArray);
+  }
+
+  /**
+   * Shorten s3 url
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _shortenS3Url(url) {
+    const oThis = this;
+
+    const splitUrlArray = url.split('/'),
+      fileName = splitUrlArray.pop(),
+      baseUrl = splitUrlArray.join('/'),
+      shortEntity = s3Constants.LongUrlToShortUrlMap[baseUrl];
+
+    if (
+      CommonValidators.isVarNullOrUndefined(fileName) ||
+      CommonValidators.isVarNullOrUndefined(shortEntity) ||
+      !fileName.match(oThis.currentUserId + '-')
+    ) {
+      return Promise.reject(
+        responseHelper.error({
+          internal_error_identifier: 'a_s_v_ms_1',
+          api_error_identifier: 'invalid_url',
+          debug_options: {}
+        })
+      );
+    }
+
+    return shortEntity + '/' + fileName;
   }
 
   /**
