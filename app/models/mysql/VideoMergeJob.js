@@ -81,22 +81,22 @@ class VideoMergeJob extends ModelBase {
   }
 
   /**
-   * Insert video merge job
-   * @param params
+   * Insert video merge job.
+   *
+   * @param {object} params
+   * @param {number} params.userId
+   * @param {string} params.mergedUrl
+   *
    * @returns {Promise<void>}
    */
   async insertJob(params) {
     const oThis = this;
 
-    const currentTime = Math.floor(Date.now() / 1000);
-
     return oThis
       .insert({
         user_id: params.userId,
         merged_url: params.mergedUrl,
-        status: videoMergeJobConstants.invertedStatuses[videoMergeJobConstants.notStartedStatus],
-        created_at: currentTime,
-        updated_at: currentTime
+        status: videoMergeJobConstants.invertedStatuses[videoMergeJobConstants.notStartedStatus]
       })
       .fire();
   }
