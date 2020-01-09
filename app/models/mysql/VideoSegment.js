@@ -53,6 +53,53 @@ class VideoSegment extends ModelBase {
 
     return oThis.sanitizeFormattedData(formattedData);
   }
+
+  /**
+   * Insert segment
+   *
+   * @param params
+   * @returns {Promise<void>}
+   */
+  async insertSegment(params) {
+    const oThis = this;
+
+    const currentTime = Math.floor(Date.now() / 1000);
+
+    return oThis
+      .insert({
+        video_merge_job_id: params.jobId,
+        segment_url: params.segmentUrl,
+        created_at: currentTime,
+        updated_at: currentTime
+      })
+      .fire();
+  }
+
+  /**
+   * Fetch video segments by job id
+   * @param jobId
+   * @returns {Promise}
+   */
+  async fetchSegmentsByJobId(jobId) {
+    const oThis = this;
+
+    const Rows = await oThis
+      .select('segment_url, sequence_index')
+      .where({
+        video_merge_job_id: jobId
+      })
+      .order_by('sequence_index asc')
+      .fire();
+
+    const response = [];
+
+    for (let ind = 0; ind < Rows.length; ind++) {
+      const formattedRow = oThis.formatDbData(Rows[ind]);
+      response.push(formattedRow);
+    }
+
+    return response;
+  }
 }
 
 module.exports = VideoSegment;
