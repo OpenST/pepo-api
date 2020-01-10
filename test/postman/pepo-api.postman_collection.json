@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "61b9ac42-c6c0-440d-8b48-3c0a1c3a98cd",
+		"_postman_id": "057ace53-5abe-422e-b935-f5ccba5ee0ce",
 		"name": "pepo-api",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -2554,6 +2554,36 @@
 										"videos",
 										"1009",
 										"delete"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "merge-segments",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "video_urls",
+											"value": "'[\"https://s3.amazonaws.com/uassets.stagingpepo.com/pepo-staging1000/ua/videos/2239-6f6278fcfc2da06bd3dc6ffe976e4e28-original.mp4\", \"https://s3.amazonaws.com/uassets.stagingpepo.com/pepo-staging1000/ua/videos/2239-7f34ca8bd69c664e6dfd5908d9a7856f-original.mp4\"]'",
+											"type": "text"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{api_server}}/api/v1/videos/merge-jobs",
+									"host": [
+										"{{api_server}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"videos",
+										"merge-jobs"
 									]
 								}
 							},
