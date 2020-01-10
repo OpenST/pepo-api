@@ -10,6 +10,7 @@ const rootPrefix = '../../..',
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   videoConstants = require(rootPrefix + '/lib/globalConstant/video'),
   bgJobConstants = require(rootPrefix + '/lib/globalConstant/bgJob'),
+  entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
   videoMergeJobConstants = require(rootPrefix + '/lib/globalConstant/videoMergeJob');
 
 /**
@@ -216,11 +217,11 @@ class MergeSegments extends ServiceBase {
     const response = {
       id: oThis.jobId,
       status: videoMergeJobConstants.notStartedStatus,
-      merged_url: shortToLongUrl.getFullUrl(oThis.mergedVideoS3Url, videoConstants.originalResolution),
-      uts: currentTime
+      mergedUrl: shortToLongUrl.getFullUrl(oThis.mergedVideoS3Url, videoConstants.originalResolution),
+      updatedAt: currentTime
     };
 
-    return responseHelper.successWithData(response);
+    return responseHelper.successWithData({ [entityTypeConstants.videoMergeJob]: response });
   }
 }
 
