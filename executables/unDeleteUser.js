@@ -178,8 +178,7 @@ class UnDeleteUser {
       addContactParams = {
         receiverEntityId: oThis.userId,
         receiverEntityKind: emailServiceApiCallHookConstants.userEmailEntityKind,
-        // TODO - have the same description as signup.
-        customDescription: 'Contact add',
+        customDescription: 'Contact add for already double opt in email.',
         customAttributes: {
           [emailServiceApiCallHookConstants.appSignupAttribute]: 1
         }
