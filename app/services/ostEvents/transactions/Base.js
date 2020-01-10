@@ -301,7 +301,7 @@ class TransactionWebhookBase extends ServiceBase {
     }
 
     //Note UserId is 0 for comapny token holder address
-    if ((oThis.toUserId || 0) !== oThis.transactionObj.toUserId) {
+    if ((oThis.toUserId || '0') !== oThis.transactionObj.toUserId) {
       logger.error('Mismatch in to user id in table and in webhook data.');
       paramErrors.push('invalid_to_user_id');
     }
