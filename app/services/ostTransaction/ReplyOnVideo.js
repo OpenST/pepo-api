@@ -309,7 +309,10 @@ class ReplyOnVideoTransaction extends OstTransactionBase {
   _getExtraData() {
     const oThis = this;
 
-    return { replyDetailId: oThis.replyDetailId };
+    return {
+      replyDetailId: oThis.replyDetailId,
+      videoId: oThis.videoId
+    };
   }
 
   /**
