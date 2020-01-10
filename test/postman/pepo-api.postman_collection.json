@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "057ace53-5abe-422e-b935-f5ccba5ee0ce",
+		"_postman_id": "218f603d-4b50-4aa5-903c-d312e31ca36e",
 		"name": "pepo-api",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -2563,13 +2563,20 @@
 							"name": "merge-segments",
 							"request": {
 								"method": "POST",
-								"header": [],
+								"header": [
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"value": "application/x-www-form-urlencoded",
+										"type": "text"
+									}
+								],
 								"body": {
-									"mode": "formdata",
-									"formdata": [
+									"mode": "urlencoded",
+									"urlencoded": [
 										{
 											"key": "video_urls",
-											"value": "'[\"https://s3.amazonaws.com/uassets.stagingpepo.com/pepo-staging1000/ua/videos/2239-6f6278fcfc2da06bd3dc6ffe976e4e28-original.mp4\", \"https://s3.amazonaws.com/uassets.stagingpepo.com/pepo-staging1000/ua/videos/2239-7f34ca8bd69c664e6dfd5908d9a7856f-original.mp4\"]'",
+											"value": "[{\"video_url\":\"https://s3.amazonaws.com/uassets.stagingpepo.com/pepo-staging1000/ua/videos/2239-6f6278fcfc2da06bd3dc6ffe976e4e28-original.mp4\"},{\"video_url\":\"https://s3.amazonaws.com/uassets.stagingpepo.com/pepo-staging1000/ua/videos/2239-7f34ca8bd69c664e6dfd5908d9a7856f-original.mp4\"},{\"video_url\":\"https://s3.amazonaws.com/uassets.stagingpepo.com/pepo-staging1000/ua/videos/2239-4cf5b1cafcfc32e7ed70adbc1426ce01-original.mp4\"}]",
 											"type": "text"
 										}
 									]
