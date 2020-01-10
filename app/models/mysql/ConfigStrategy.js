@@ -165,6 +165,12 @@ class ConfigStrategyModel extends ModelBase {
       hashNotToEncrypt[strategyKindName].password = '{{cassandraPassword}}';
       hashToEncrypt.cassandraPassword = cassandraPassword;
       encryptedKeysFound = true;
+    } else if (strategyKindName === configStrategyConstants.arango) {
+      const arangoPassword = hashNotToEncrypt[strategyKindName].password;
+
+      hashNotToEncrypt[strategyKindName].password = '{{arangoPassword}}';
+      hashToEncrypt.arangoPassword = arangoPassword;
+      encryptedKeysFound = true;
     } else if (strategyKindName === configStrategyConstants.firebase) {
       const privateKey = hashNotToEncrypt[strategyKindName].privateKey;
 
@@ -225,6 +231,10 @@ class ConfigStrategyModel extends ModelBase {
       }
       case configStrategyConstants.cassandra: {
         configStrategyHash[configStrategyKinds[strategyKind]].password = decryptedJsonObj.cassandraPassword;
+        break;
+      }
+      case configStrategyConstants.arango: {
+        configStrategyHash[configStrategyKinds[strategyKind]].password = decryptedJsonObj.arangoPassword;
         break;
       }
       case configStrategyConstants.firebase: {

@@ -94,6 +94,14 @@ class ConfigStrategyTemplate {
           databaseURL: 'databaseURLEntity'
         }
       },
+      arangoEntity: {
+        entityType: 'object',
+        entitiesPresent: {
+          username: 'usernameEntity',
+          password: 'passwordEntity',
+          url: 'hostEntity'
+        }
+      },
       typeEntity: {
         entityType: 'string'
       },
@@ -206,7 +214,8 @@ class ConfigStrategyTemplate {
       [configStrategyConstants.socketRabbitmq]: 'rabbitmqListEntity',
       [configStrategyConstants.websocket]: 'websocketEntity',
       [configStrategyConstants.cassandra]: 'cassandraEntity',
-      [configStrategyConstants.firebase]: 'firebaseEntity'
+      [configStrategyConstants.firebase]: 'firebaseEntity',
+      [configStrategyConstants.arango]: 'arangoEntity'
     };
   }
 }

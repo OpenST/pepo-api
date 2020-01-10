@@ -91,6 +91,12 @@
       "localDataCenter": "datacenter1"
     },
 
+    "arango": {
+      "username": "root",
+      "password": "",
+      "url": "http://localhost:8529"
+    },
+
     "firebase": {
       "type": "service_account",
       "projectId": "pepo-staging-60d8e",
