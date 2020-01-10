@@ -85,7 +85,7 @@ class printTransactionMisMatchData {
           .where({
             ost_tx_id: transactionId
           })
-          .fire({ touch: true });
+          .fire();
       } else {
         failedTransactionIds.push(transactionId);
       }
