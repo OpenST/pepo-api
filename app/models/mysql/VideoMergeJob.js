@@ -48,7 +48,7 @@ class VideoMergeJob extends ModelBase {
     const formattedData = {
       id: dbRow.id,
       userId: dbRow.user_id,
-      mergedUrl: shortToLongUrl.getFullUrl(dbRow.merged_url, videoConstants.originalResolution),
+      mergedUrl: shortToLongUrl.getFullUrlInternal(dbRow.merged_url, videoConstants.originalResolution),
       status: videoMergeJobConstants.statuses[dbRow.status],
       createdAt: dbRow.created_at,
       updatedAt: dbRow.updated_at

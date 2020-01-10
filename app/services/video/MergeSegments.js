@@ -217,7 +217,7 @@ class MergeSegments extends ServiceBase {
     const response = {
       id: oThis.jobId,
       status: videoMergeJobConstants.notStartedStatus,
-      mergedUrl: shortToLongUrl.getFullUrl(oThis.mergedVideoS3Url, videoConstants.originalResolution),
+      mergedUrl: shortToLongUrl.getFullUrlInternal(oThis.mergedVideoS3Url, videoConstants.originalResolution),
       updatedAt: currentTime
     };
 

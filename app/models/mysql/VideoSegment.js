@@ -47,7 +47,7 @@ class VideoSegment extends ModelBase {
     const formattedData = {
       id: dbRow.id,
       videoMergeJobId: dbRow.video_merge_job_id,
-      segmentUrl: shortToLongUrl.getFullUrl(dbRow.segment_url, videoConstants.originalResolution),
+      segmentUrl: shortToLongUrl.getFullUrlInternal(dbRow.segment_url, videoConstants.originalResolution),
       sequenceIndex: dbRow.sequence_index,
       createdAt: dbRow.created_at,
       updatedAt: dbRow.updated_at
