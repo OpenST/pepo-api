@@ -127,9 +127,6 @@ class PepoOnReplyTransaction extends OstTransactionBase {
     const oThis = this;
 
     return {
-      toUserIds: oThis.toUserIdsArray,
-      amounts: oThis.amountsArray,
-      kind: transactionConstants.extraData.userTransactionOnReplyKind,
       replyDetailId: oThis.replyDetailId,
       videoId: oThis.videoId
     };
