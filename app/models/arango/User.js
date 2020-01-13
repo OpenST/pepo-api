@@ -1,6 +1,6 @@
 const rootPrefix = '../../..',
   ModelBase = require(rootPrefix + '/app/models/arango/Base'),
-  userConstants = require(rootPrefix + '/lib/globalConstant/arango/user');
+  userArangoConstants = require(rootPrefix + '/lib/globalConstant/arango/user');
 
 /**
  * Class for user model.
@@ -40,7 +40,7 @@ class UserModel extends ModelBase {
     const vars = {
       collectionName: oThis.collectionName,
       id: insertParams.id,
-      status: userConstants.invertedStatuses[userConstants.activeStatus],
+      status: userArangoConstants.invertedStatuses[userArangoConstants.activeStatus],
       createdAt: insertParams.createdAt
     };
 
@@ -76,7 +76,7 @@ class UserModel extends ModelBase {
 
     const formattedData = {
       id: dbRow.id,
-      status: userConstants.statuses[dbRow.status],
+      status: userArangoConstants.statuses[dbRow.status],
       createdAt: dbRow.created_at
     };
 

@@ -17,6 +17,7 @@ class UnBlockOtherUserForUser extends ServiceBase {
     const oThis = this;
     oThis.currentUserId = params.current_user.id;
     oThis.profileUserId = params.profile_user_id;
+    oThis.isBlockedByBoth = false;
   }
 
   /**
@@ -94,6 +95,13 @@ class UnBlockOtherUserForUser extends ServiceBase {
       );
     }
 
+    if (
+      userRelationsRows[0].relations.indexOf(userRelationConstants.blockedByUser1Relation) > -1 &&
+      userRelationsRows[0].relations.indexOf(userRelationConstants.blockedByUser2Relation) > -1
+    ) {
+      oThis.isBlockedByBoth = true;
+    }
+
     for (let index = 0; index < userRelationsRows.length; index++) {
       let row = userRelationsRows[index];
       if (row.user1_id == oThis.currentUserId) {
@@ -125,14 +133,32 @@ class UnBlockOtherUserForUser extends ServiceBase {
    */
   async _updateGraphDb() {
     const oThis = this;
-    const params = {
+
+    if (oThis.isBlockedByBoth) {
+      return;
+    }
+
+    const params1 = {
       updateKey: 'isBlocked',
       updateVal: false,
       fromUserId: oThis.currentUserId,
       toUserId: oThis.profileUserId
     };
 
-    await new FollowArangoModel().addUpdateFollower(params);
+    //block both ways
+    const params2 = {
+      updateKey: 'isBlocked',
+      updateVal: false,
+      toUserId: oThis.currentUserId,
+      fromUserId: oThis.profileUserId
+    };
+
+    const promiseArray = [
+      new FollowArangoModel().addUpdateFollower(params1),
+      new FollowArangoModel().addUpdateFollower(params2)
+    ];
+
+    await Promise.all(promiseArray);
   }
 
   /**

@@ -1,7 +1,7 @@
 const rootPrefix = '../../..',
   ModelBase = require(rootPrefix + '/app/models/arango/Base'),
   UserArangoModel = require(rootPrefix + '/app/models/arango/User'),
-  followConstants = require(rootPrefix + '/lib/globalConstant/arango/follow');
+  followArangoConstants = require(rootPrefix + '/lib/globalConstant/arango/follow');
 
 /**
  * Class for follow model.
@@ -113,7 +113,7 @@ class FollowModel extends ModelBase {
     const formattedData = {
       id: dbRow.id,
       fromUserId: dbRow._from ? dbRow._from.split('/')[1] : undefined,
-      toUserId: dbRow._from ? dbRow._to.split('/')[1] : undefined,
+      toUserId: dbRow._to ? dbRow._to.split('/')[1] : undefined,
       isContributor: dbRow.is_contributor,
       isTwitterFollower: dbRow.is_twitter_follower,
       isMuted: dbRow.is_muted,

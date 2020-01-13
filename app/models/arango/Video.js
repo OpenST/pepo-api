@@ -1,6 +1,6 @@
 const rootPrefix = '../../..',
   ModelBase = require(rootPrefix + '/app/models/arango/Base'),
-  videoConstants = require(rootPrefix + '/lib/globalConstant/arango/video');
+  videoArangoConstants = require(rootPrefix + '/lib/globalConstant/arango/video');
 
 /**
  * Class for video model.
@@ -40,7 +40,7 @@ class VideoModel extends ModelBase {
     const vars = {
       collectionName: oThis.collectionName,
       id: insertParams.id,
-      status: videoConstants.invertedStatuses[videoConstants.activeStatus],
+      status: videoArangoConstants.invertedStatuses[videoArangoConstants.activeStatus],
       createdAt: insertParams.createdAt
     };
 
@@ -76,7 +76,7 @@ class VideoModel extends ModelBase {
 
     const formattedData = {
       id: dbRow.id,
-      status: videoConstants.statuses[dbRow.status],
+      status: videoArangoConstants.statuses[dbRow.status],
       createdAt: dbRow.created_at
     };
 

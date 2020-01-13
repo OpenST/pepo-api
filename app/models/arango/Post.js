@@ -2,7 +2,7 @@ const rootPrefix = '../../..',
   ModelBase = require(rootPrefix + '/app/models/arango/Base'),
   UserArangoModel = require(rootPrefix + '/app/models/arango/User'),
   VideoArangoModel = require(rootPrefix + '/app/models/arango/Video'),
-  postConstants = require(rootPrefix + '/lib/globalConstant/arango/post');
+  postArangoConstants = require(rootPrefix + '/lib/globalConstant/arango/post');
 
 /**
  * Class for post model.

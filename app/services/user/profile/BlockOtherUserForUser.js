@@ -134,14 +134,27 @@ class BlockOtherUserForUser extends ServiceBase {
    */
   async _updateGraphDb() {
     const oThis = this;
-    const params = {
+    const params1 = {
       updateKey: 'isBlocked',
       updateVal: true,
       fromUserId: oThis.currentUserId,
       toUserId: oThis.profileUserId
     };
 
-    await new FollowArangoModel().addUpdateFollower(params);
+    //block both ways
+    const params2 = {
+      updateKey: 'isBlocked',
+      updateVal: true,
+      toUserId: oThis.currentUserId,
+      fromUserId: oThis.profileUserId
+    };
+
+    const promiseArray = [
+      new FollowArangoModel().addUpdateFollower(params1),
+      new FollowArangoModel().addUpdateFollower(params2)
+    ];
+
+    await Promise.all(promiseArray);
   }
 
   /**
