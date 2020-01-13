@@ -264,7 +264,7 @@ class TransactionWebhookBase extends ServiceBase {
   async validateToUserId() {
     const oThis = this;
 
-    if (oThis.toUserId !== oThis.transactionObj.extraData.toUserIds[0]) {
+    if (oThis.toUserId !== oThis.transactionObj.toUserId) {
       logger.error('Mismatch in to user id in table and in webhook data.');
 
       return Promise.reject(
@@ -301,7 +301,7 @@ class TransactionWebhookBase extends ServiceBase {
     }
 
     //Note UserId is 0 for comapny token holder address
-    if ((oThis.toUserId || 0) !== oThis.transactionObj.extraData.toUserIds[0]) {
+    if ((oThis.toUserId || '0') !== oThis.transactionObj.toUserId) {
       logger.error('Mismatch in to user id in table and in webhook data.');
       paramErrors.push('invalid_to_user_id');
     }
@@ -362,7 +362,7 @@ class TransactionWebhookBase extends ServiceBase {
       ostTxid: oThis.ostTxId,
       fromUserId: oThis.fromUserId,
       videoId: oThis.videoId,
-      toUserId: oThis.transactionObj.extraData.toUserIds[0]
+      toUserId: oThis.transactionObj.toUserId
     };
 
     await PendingTransactionModel.flushCache(pendingTransactionObj);
@@ -424,7 +424,7 @@ class TransactionWebhookBase extends ServiceBase {
       .update({
         status: oThis._getPaymentStatus()
       })
-      .where({ id: oThis.transactionObj.fiatPaymentId })
+      .where({ id: oThis.transactionObj.extraData.fiatPaymentId })
       .fire();
 
     return responseHelper.successWithData({});
@@ -507,10 +507,7 @@ class TransactionWebhookBase extends ServiceBase {
       );
     }
 
-    const extraData = {
-      toUserIds: [oThis.toUserId],
-      amounts: [oThis.ostTransaction.transfers[0].amount]
-    };
+    const extraData = {};
 
     let isDuplicateIndexViolation = false;
 
@@ -520,23 +517,16 @@ class TransactionWebhookBase extends ServiceBase {
     //no video id in pepo on reply so we fetch the entity id using reply detail id.
 
     if (oThis._isRedemptionTransactionKind()) {
-      txKind = transactionConstants.extraData.redemptionKind;
+      txKind = transactionConstants.redemptionKind;
     } else if (oThis._isPepoOnReplyTransactionKind()) {
-      txKind = transactionConstants.extraData.userTransactionOnReplyKind;
+      txKind = transactionConstants.userTransactionOnReplyKind;
       extraData['replyDetailId'] = oThis.replyDetailId;
-      extraData['videoId'] = oThis.videoId;
     } else if (oThis._isReplyOnVideoTransactionKind()) {
-      txKind = transactionConstants.extraData.replyOnVideoTransactionKind;
+      txKind = transactionConstants.replyOnVideoTransactionKind;
       extraData['replyDetailId'] = oThis.replyDetailId;
-      extraData['videoId'] = oThis.videoId;
     } else {
-      txKind = transactionConstants.extraData.userTransactionKind;
-      if (oThis.isVideoIdPresent()) {
-        extraData['videoId'] = oThis.videoId;
-      }
+      txKind = transactionConstants.userTransactionKind;
     }
-
-    extraData['kind'] = txKind;
 
     const insertData = {
       ost_tx_id: oThis.ostTxId,
@@ -544,7 +534,6 @@ class TransactionWebhookBase extends ServiceBase {
       kind: transactionConstants.invertedKinds[txKind],
       to_user_id: oThis.toUserId,
       amount: oThis.ostTransaction.transfers[0].amount,
-      video_id: oThis.videoId,
       extra_data: JSON.stringify(extraData),
       status: transactionConstants.invertedStatuses[oThis._transactionStatus()]
     };

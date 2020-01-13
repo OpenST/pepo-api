@@ -188,7 +188,7 @@ class UserActivationSuccess extends UserOstEventBase {
       transferToAddress: oThis.tokenUserObj.ostTokenHolderAddress,
       transferToUserId: oThis.tokenUserObj.userId,
       amountInWei: tokenConstants.airdropAmount,
-      transactionKind: transactionConstants.extraData.airdropKind,
+      transactionKind: transactionConstants.airdropKind,
       transactionMetaProperties: {
         name: 'UserActivateAirdrop',
         type: transactionTypesConstants.companyToUserTransactionType,
@@ -246,11 +246,7 @@ class UserActivationSuccess extends UserOstEventBase {
 
     logger.log('Creating entry in transactions table.');
 
-    const extraData = {
-      toUserIds: [oThis.tokenUserObj.userId],
-      amounts: [tokenConstants.airdropAmount],
-      kind: transactionConstants.extraData.airdropKind
-    };
+    const extraData = {};
 
     const insertData = {
       ost_tx_id: oThis.airdropTxResp.transaction.id,
