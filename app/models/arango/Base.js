@@ -1,7 +1,7 @@
 const rootPrefix = '../../..',
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
-  util = require(rootPrefix + '/lib/util'),
   arangoClient = require(rootPrefix + '/lib/arangoWrapper'),
+  arangoConstants = require(rootPrefix + '/lib/globalConstant/arango'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger');
 
 /**
@@ -28,6 +28,31 @@ class ModelBase {
    */
   onWriteConnection() {
     return arangoClient;
+  }
+
+  /**
+   * Connection pool to use for vertex collection query.
+   *
+   * @return {*}
+   */
+  onVertexConnection() {
+    const oThis = this;
+
+    const graph = oThis.onSocialGraphConnection();
+    return graph.vertexCollection(oThis.collectionName);
+  }
+
+  /**
+   * Connection pool to use for graph query.
+   *
+   * @return {*}
+   */
+  onSocialGraphConnection() {
+    const oThis = this;
+
+    const db = oThis.onWriteConnection();
+
+    return db.graph(arangoConstants.socialGraphName);
   }
 
   /**

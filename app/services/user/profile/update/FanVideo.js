@@ -1,4 +1,5 @@
 const rootPrefix = '../../../../..',
+  AddToGraphLib = require(rootPrefix + '/lib/video/AddToGraph'),
   UrlModel = require(rootPrefix + '/app/models/mysql/Url'),
   FeedModel = require(rootPrefix + '/app/models/mysql/Feed'),
   UserModelKlass = require(rootPrefix + '/app/models/mysql/User'),
@@ -236,6 +237,8 @@ class UpdateFanVideo extends UpdateProfileBase {
 
       await oThis._addFeed();
 
+      await oThis._addToGraph();
+
       const messagePayload = {
         userId: oThis.profileUserId,
         videoId: oThis.videoId
@@ -258,6 +261,24 @@ class UpdateFanVideo extends UpdateProfileBase {
     }
 
     await Promise.all(promiseArray);
+  }
+
+  /**
+   * Add post in Social Graph.
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _addToGraph() {
+    const oThis = this;
+
+    const params = {
+      creatorUserId: oThis.profileUserId,
+      videoId: oThis.videoId,
+      createdAt: Math.round(new Date() / 1000)
+    };
+
+    await new AddToGraphLib(params).perform();
   }
 
   /**  await oThis._publishNotifications();

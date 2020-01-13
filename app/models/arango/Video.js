@@ -1,15 +1,15 @@
 const rootPrefix = '../../..',
   ModelBase = require(rootPrefix + '/app/models/arango/Base'),
-  userConstants = require(rootPrefix + '/lib/globalConstant/arango/user');
+  videoConstants = require(rootPrefix + '/lib/globalConstant/arango/video');
 
 /**
- * Class for user model.
+ * Class for video model.
  *
- * @class UserModel
+ * @class VideoModel
  */
-class UserModel extends ModelBase {
+class VideoModel extends ModelBase {
   /**
-   * Constructor for user model.
+   * Constructor for video model.
    *
    * @augments ModelBase
    *
@@ -20,11 +20,11 @@ class UserModel extends ModelBase {
 
     const oThis = this;
 
-    oThis.collectionName = 'users';
+    oThis.collectionName = 'videos';
   }
 
   /**
-   * Add a vertice In users collection in arango db
+   * Add a vertice In videos collection in arango db
    *
    * @param {object} insertParams
    * @param {string} insertParams.id
@@ -40,7 +40,7 @@ class UserModel extends ModelBase {
     const vars = {
       collectionName: oThis.collectionName,
       id: insertParams.id,
-      status: userConstants.invertedStatuses[userConstants.activeStatus],
+      status: videoConstants.invertedStatuses[videoConstants.activeStatus],
       createdAt: insertParams.createdAt
     };
 
@@ -48,17 +48,17 @@ class UserModel extends ModelBase {
   }
 
   /**
-   * delete a vertice In users collection in arango db alongwith its edges
+   * delete a vertice In videos collection in arango db alongwith its edges
    *
    * @param {object} params
-   * @param {string} params.userId
+   * @param {string} params.videoId
    *
    * @returns {Promise<*>}
    */
   async deleteEntryWithEdges(params) {
     const oThis = this;
 
-    return oThis.onVertexConnection().remove(params.userId);
+    return oThis.onVertexConnection().remove(params.videoId);
   }
 
   /**
@@ -76,7 +76,7 @@ class UserModel extends ModelBase {
 
     const formattedData = {
       id: dbRow.id,
-      status: userConstants.statuses[dbRow.status],
+      status: videoConstants.statuses[dbRow.status],
       createdAt: dbRow.created_at
     };
 
@@ -84,4 +84,4 @@ class UserModel extends ModelBase {
   }
 }
 
-module.exports = UserModel;
+module.exports = VideoModel;

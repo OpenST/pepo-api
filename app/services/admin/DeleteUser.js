@@ -1,6 +1,7 @@
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   UserModel = require(rootPrefix + '/app/models/mysql/User'),
+  UserArangoModel = require(rootPrefix + '/app/models/arango/User'),
   TagModel = require(rootPrefix + '/app/models/mysql/Tag'),
   UsersCache = require(rootPrefix + '/lib/cacheManagement/multi/User'),
   CuratedEntityDeleteService = require(rootPrefix + '/app/services/admin/curated/Delete'),
@@ -70,6 +71,7 @@ class DeleteUser extends ServiceBase {
     await oThis._deleteUsers();
 
     const promisesArray = [
+      oThis._deleteUsersFromSocialGraph(),
       oThis._deleteUserFromCuratedEntities(),
       oThis._decreseUserTagWeight(),
       oThis._removeContactsInCampaigns(),
@@ -121,6 +123,24 @@ class DeleteUser extends ServiceBase {
 
       oThis.userObjects[userId] = userObj;
     }
+  }
+
+  /**
+   * Delete all users from Social Graph .
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _deleteUsersFromSocialGraph() {
+    const oThis = this,
+      promises = [];
+
+    for (let i = 0; i < oThis.userIds.length; i++) {
+      const promise = new UserArangoModel().deleteEntryWithEdges({ userId: oThis.userIds[i] });
+      promises.push(promise);
+    }
+
+    await Promise.all(promises);
   }
 
   /**
