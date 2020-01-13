@@ -28,7 +28,7 @@ class PostModel extends ModelBase {
   }
 
   /**
-   * Add a vertice In posts collection in arango db
+   * Add a edge In posts collection in arango db
    *
    * @param {object} insertParams
    * @param {string} insertParams.creatorUserId
@@ -49,20 +49,6 @@ class PostModel extends ModelBase {
     };
 
     return oThis.query(query, vars);
-  }
-
-  /**
-   * delete a vertice In posts collection in arango db alongwith its edges
-   *
-   * @param {object} params
-   * @param {string} params.postId
-   *
-   * @returns {Promise<*>}
-   */
-  async deleteEntryWithEdges(params) {
-    const oThis = this;
-
-    return oThis.onVertexConnection().remove(params.postId);
   }
 
   /**
