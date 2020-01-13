@@ -78,7 +78,7 @@ class printTransactionMisMatchData {
             [
               'extra_data=?,kind=?',
               JSON.stringify(extraData),
-              transactionConstants.invertedKinds[transactionConstants.replyOnVideoTransactionKind]
+              transactionConstants.invertedKinds[kind]
             ],
             { touch: false }
           )
