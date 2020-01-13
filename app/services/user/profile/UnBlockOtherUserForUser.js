@@ -1,5 +1,6 @@
 const rootPrefix = '../../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
+  FollowArangoModel = require(rootPrefix + '/app/models/arango/Follow'),
   UserRelationModel = require(rootPrefix + '/app/models/mysql/UserRelation'),
   userRelationConstants = require(rootPrefix + '/lib/globalConstant/userRelation'),
   UserBlockedListCache = require(rootPrefix + '/lib/cacheManagement/single/UserBlockedList'),
@@ -30,6 +31,8 @@ class UnBlockOtherUserForUser extends ServiceBase {
     await oThis._validateParams();
 
     await oThis._updateUserRelations();
+
+    await oThis._updateGraphDb();
 
     await oThis._flushCache();
 
@@ -112,6 +115,24 @@ class UnBlockOtherUserForUser extends ServiceBase {
           .fire();
       }
     }
+  }
+
+  /**
+   * Update Follow Edge on graph db.
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _updateGraphDb() {
+    const oThis = this;
+    const params = {
+      updateKey: 'isBlocked',
+      updateVal: false,
+      fromUserId: oThis.currentUserId,
+      toUserId: oThis.profileUserId
+    };
+
+    await new FollowArangoModel().addUpdateFollower(params);
   }
 
   /**

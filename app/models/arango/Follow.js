@@ -30,79 +30,63 @@ class FollowModel extends ModelBase {
    * Add a edge In follows collection in arango db for isContributor or Is TwitterFollower
    *
    * @param {object} params
-   * @param {Boolean} params.isContributor
-   * @param {Boolean} params.isTwitterFollower
+   * @param {Boolean} params.updateKey
+   * @param {Boolean} params.updateVal
    * @param {string} params.fromUserId
    * @param {number} params.toUserId
    *
    * @returns {Promise<*>}
    */
-  async addUpdateIsFeedFollower(params) {
+  async addUpdateFollower(params) {
     const oThis = this;
 
-    let updateKey = null;
-    if (params.isTwitterFollower) {
+    let updateKey = null,
+      updateVal = params.updateVal ? true : false;
+
+    let isFeedFollowerLogicForUpdate = null,
+      isFeedFollowerLogicForInsert = null;
+
+    if (params.updateKey == 'isTwitterFollower') {
       updateKey = 'is_twitter_follower';
-    } else if (params.isContributor) {
+      isFeedFollowerLogicForInsert = updateVal ? true : false;
+      isFeedFollowerLogicForUpdate = updateVal
+        ? '((!u.is_muted && !u.is_blocked) || true)'
+        : '((u.is_contributor && !u.is_muted && !u.is_blocked) || false)';
+    } else if (params.updateKey == 'isContributor') {
       updateKey = 'is_contributor';
-    } else {
-      throw `INVALID Arguments Passed-${JSON.stringify(params)}`;
-    }
-
-    // || false is added for update in is_feed_follower to convert null to false.
-    const query =
-      'FOR u in @@collectionName ' +
-      'FILTER u._from == @from and u._to == @to ' +
-      'UPSERT  {_from: @from, _to:@to} ' +
-      `INSERT {_from:@from, _to:@to, @updateKey: true, is_feed_follower: true} ` +
-      `UPDATE {@updateKey: true, is_feed_follower: !(u.is_muted || u.is_blocked || false)} INTO @@collectionName`;
-
-    const vars = {
-      collectionName: oThis.collectionName,
-      from: `${oThis.fromCollectionName}/${params.fromUserId}`,
-      to: `${oThis.toCollectionName}/${params.toUserId}`,
-      updateKey: updateKey
-    };
-
-    return oThis.query(query, vars);
-  }
-
-  /**
-   * Add a edge In follows collection in arango db for isContributor or Is TwitterFollower
-   *
-   * @param {object} params
-   * @param {Boolean} params.isMuted
-   * @param {Boolean} params.isBlocked
-   * @param {string} params.fromUserId
-   * @param {number} params.toUserId
-   *
-   * @returns {Promise<*>}
-   */
-  async addUpdateIsNotFeedFollower(params) {
-    const oThis = this;
-
-    let updateKey = null;
-    if (params.isMuted) {
+      isFeedFollowerLogicForInsert = updateVal ? true : false;
+      isFeedFollowerLogicForUpdate = updateVal
+        ? '((!u.is_muted && !u.is_blocked) || true)'
+        : '((u.is_twitter_follower && !u.is_muted && !u.is_blocked) || false)';
+    } else if (params.updateKey == 'isMuted') {
       updateKey = 'is_muted';
-    } else if (params.isBlocked) {
+      isFeedFollowerLogicForInsert = false;
+      isFeedFollowerLogicForUpdate = updateVal
+        ? 'false'
+        : '(((u.is_twitter_follower || u.is_contributor) && !u.is_blocked) || false)';
+    } else if (params.updateKey == 'isBlocked') {
       updateKey = 'is_blocked';
+      isFeedFollowerLogicForInsert = false;
+      isFeedFollowerLogicForUpdate = updateVal
+        ? 'false'
+        : '(((u.is_twitter_follower || u.is_contributor) && !u.is_muted) || false)';
     } else {
       throw `INVALID Arguments Passed-${JSON.stringify(params)}`;
     }
 
-    // || false is added for update in is_feed_follower to convert null to false.
     const query =
       'FOR u in @@collectionName ' +
       'FILTER u._from == @from and u._to == @to ' +
       'UPSERT  {_from: @from, _to:@to} ' +
-      `INSERT {_from:@from, _to:@to, @updateKey: true, is_feed_follower: false} ` +
-      `UPDATE {@updateKey: true, is_feed_follower: (u.is_twitter_follower || u.is_contributor || false)} INTO @@collectionName`;
+      `INSERT {_from:@from, _to:@to, @updateKey: @updateVal, is_feed_follower: ${isFeedFollowerLogicForInsert}} ` +
+      `UPDATE {@updateKey: @updateVal, is_feed_follower: ${isFeedFollowerLogicForUpdate} INTO @@collectionName`;
 
     const vars = {
       collectionName: oThis.collectionName,
       from: `${oThis.fromCollectionName}/${params.fromUserId}`,
       to: `${oThis.toCollectionName}/${params.toUserId}`,
-      updateKey: updateKey
+      updateKey: updateKey,
+      updateVal: updateVal
     };
 
     return oThis.query(query, vars);

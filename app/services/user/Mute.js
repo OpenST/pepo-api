@@ -1,5 +1,6 @@
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
+  FollowArangoModel = require(rootPrefix + '/app/models/arango/Follow'),
   UserMuteModel = require(rootPrefix + '/app/models/mysql/UserMute'),
   UsersCache = require(rootPrefix + '/lib/cacheManagement/multi/User'),
   UserMuteByUser1IdsCache = require(rootPrefix + '/lib/cacheManagement/multi/UserMuteByUser1Ids'),
@@ -49,6 +50,8 @@ class UserMute extends ServiceBase {
     await oThis._fetchCurrentMuteState();
 
     await oThis._muteUser();
+
+    await oThis._updateGraphDb();
 
     return responseHelper.successWithData({});
   }
@@ -156,6 +159,24 @@ class UserMute extends ServiceBase {
     }
 
     return UserMuteModel.flushCache({ user1Id: oThis.currentUserId });
+  }
+
+  /**
+   * Update Follow Edge on graph db.
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _updateGraphDb() {
+    const oThis = this;
+    const insertParams = {
+      updateKey: 'isMuted',
+      updateVal: true,
+      fromUserId: oThis.currentUserId,
+      toUserId: oThis.otherUserId
+    };
+
+    await new FollowArangoModel().addUpdateFollower(insertParams);
   }
 }
 
