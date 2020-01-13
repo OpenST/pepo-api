@@ -205,11 +205,7 @@ class RedemptionTransaction extends OstTransactionBase {
   _getExtraData() {
     const oThis = this;
 
-    return {
-      toUserIds: oThis.toUserIdsArray,
-      amounts: oThis.amountsArray,
-      kind: transactionConstants.extraData.redemptionKind
-    };
+    return {};
   }
 
   /**

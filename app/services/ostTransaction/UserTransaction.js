@@ -133,11 +133,7 @@ class UserTransaction extends OstTransactionBase {
   _getExtraData() {
     const oThis = this;
 
-    const ed = {
-      toUserIds: oThis.toUserIdsArray,
-      amounts: oThis.amountsArray,
-      kind: transactionConstants.extraData.userTransactionKind
-    };
+    const ed = {};
 
     if (oThis._isVideoIdPresent()) {
       ed['videoId'] = oThis.videoId;

@@ -44,8 +44,6 @@ class Transaction extends ModelBase {
       toUserId: dbRow.to_user_id,
       amount: dbRow.amount,
       kind: transactionConstants.kinds[dbRow.kind],
-      fiatPaymentId: dbRow.fiat_payment_id,
-      videoId: dbRow.video_id,
       extraData: JSON.parse(dbRow.extra_data),
       textId: dbRow.text_id,
       status: transactionConstants.statuses[dbRow.status],

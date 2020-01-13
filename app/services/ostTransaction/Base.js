@@ -286,7 +286,6 @@ class OstTransactionBase extends ServiceBase {
       kind: transactionConstants.invertedKinds[oThis._transactionKind()],
       to_user_id: oThis.toUserIdsArray[0],
       amount: oThis.amountsArray[0],
-      video_id: oThis.videoId,
       extra_data: JSON.stringify(oThis._getExtraData()),
       status: transactionConstants.invertedStatuses[oThis.transactionStatus]
     };

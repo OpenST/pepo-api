@@ -84,7 +84,7 @@ class TopupFailureWebhook extends TransactionWebhookBase {
     await Promise.all(promiseArray);
 
     await FiatPaymentModel.flushCache({
-      fiatPaymentId: oThis.transactionObj.fiatPaymentId,
+      fiatPaymentId: oThis.transactionObj.extraData.fiatPaymentId,
       userId: oThis.toUserId
     });
   }
