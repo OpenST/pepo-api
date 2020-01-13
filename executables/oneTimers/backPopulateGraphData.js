@@ -1,3 +1,5 @@
+const fs = require('fs');
+
 const rootPrefix = '../..',
   UserModel = require(rootPrefix + '/app/models/mysql/User'),
   VideoDetailModel = require(rootPrefix + '/app/models/mysql/VideoDetail'),
@@ -7,6 +9,7 @@ const rootPrefix = '../..',
   UserMuteModel = require(rootPrefix + '/app/models/mysql/UserMute'),
   UserRelationModel = require(rootPrefix + '/app/models/mysql/UserRelation'),
   PostArangoModel = require(rootPrefix + '/app/models/arango/Post'),
+  FollowArangoModel = require(rootPrefix + '/app/models/arango/Follow'),
   userConstants = require(rootPrefix + '/lib/globalConstant/user'),
   videoDetailConstants = require(rootPrefix + '/lib/globalConstant/videoDetail'),
   userArangoConstants = require(rootPrefix + '/lib/globalConstant/arango/user'),
@@ -14,6 +17,7 @@ const rootPrefix = '../..',
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger');
 
 const BATCHSIZE = 200;
+const FILEPATH = '/Users/amanbarbaria/Desktop/test';
 
 class BackPopulateGraphData {
   /**
@@ -58,8 +62,6 @@ class BackPopulateGraphData {
       let offset = 0;
 
       while (true) {
-        offset = offset + BATCHSIZE;
-
         const dbRows = await new UserContributorModel()
           .select('user_id, contributed_by_user_id')
           .order_by('id ASC')
@@ -76,9 +78,10 @@ class BackPopulateGraphData {
               userFollowData[userContributorObj.contributedByUserId] || {};
             userFollowData[userContributorObj.contributedByUserId][userContributorObj.userId] =
               userFollowData[userContributorObj.contributedByUserId][userContributorObj.userId] || {};
-            userFollowData[userContributorObj.contributedByUserId][userContributorObj.userId]['isContributor'] = 1;
+            userFollowData[userContributorObj.contributedByUserId][userContributorObj.userId]['isContributor'] = true;
           }
         }
+        offset = offset + BATCHSIZE;
       }
     }
 
@@ -86,8 +89,6 @@ class BackPopulateGraphData {
       let offset = 0;
 
       while (true) {
-        offset = offset + BATCHSIZE;
-
         const dbRows = await new UserMuteModel()
           .select('user1_id, user2_id')
           .where('user1_id > 0')
@@ -104,9 +105,10 @@ class BackPopulateGraphData {
             userFollowData[userMuteObj.user1Id] = userFollowData[userMuteObj.user1Id] || {};
             userFollowData[userMuteObj.user1Id][userMuteObj.user2Id] =
               userFollowData[userMuteObj.user1Id][userMuteObj.user2Id] || {};
-            userFollowData[userMuteObj.user1Id][userMuteObj.user2Id]['isMuted'] = 1;
+            userFollowData[userMuteObj.user1Id][userMuteObj.user2Id]['isMuted'] = true;
           }
         }
+        offset = offset + BATCHSIZE;
       }
     }
 
@@ -114,8 +116,6 @@ class BackPopulateGraphData {
       let offset = 0;
 
       while (true) {
-        offset = offset + BATCHSIZE;
-
         const dbRows = await new UserRelationModel()
           .select('user1_id, user2_id')
           .where('relations = 1')
@@ -132,14 +132,16 @@ class BackPopulateGraphData {
             userFollowData[userRelationObj.user1Id] = userFollowData[userRelationObj.user1Id] || {};
             userFollowData[userRelationObj.user1Id][userRelationObj.user2Id] =
               userFollowData[userRelationObj.user1Id][userRelationObj.user2Id] || {};
-            userFollowData[userRelationObj.user1Id][userRelationObj.user2Id]['isBlocked'] = 1;
+            userFollowData[userRelationObj.user1Id][userRelationObj.user2Id]['isBlocked'] = true;
 
             userFollowData[userRelationObj.user2Id] = userFollowData[userRelationObj.user2Id] || {};
             userFollowData[userRelationObj.user2Id][userRelationObj.user1Id] =
               userFollowData[userRelationObj.user2Id][userRelationObj.user1Id] || {};
-            userFollowData[userRelationObj.user2Id][userRelationObj.user1Id]['isBlocked'] = 1;
+            userFollowData[userRelationObj.user2Id][userRelationObj.user1Id]['isBlocked'] = true;
           }
         }
+
+        offset = offset + BATCHSIZE;
       }
     }
 
@@ -148,8 +150,6 @@ class BackPopulateGraphData {
       let offset = 0;
 
       while (true) {
-        offset = offset + BATCHSIZE;
-
         const dbRows = await new TwitterUserModel()
           .select('user_id, id')
           .where('user_id >0')
@@ -166,6 +166,8 @@ class BackPopulateGraphData {
             twitterIdToUserIdMap[tuObj.id] = tuObj.userId;
           }
         }
+
+        offset = offset + BATCHSIZE;
       }
     }
 
@@ -173,8 +175,6 @@ class BackPopulateGraphData {
       let offset = 0;
 
       while (true) {
-        offset = offset + BATCHSIZE;
-
         const dbRows = await new TwitterUserConnectionModel()
           .select('twitter_user1_id, twitter_user2_id')
           .where('properties >0')
@@ -193,18 +193,23 @@ class BackPopulateGraphData {
 
             userFollowData[user1Id] = userFollowData[user1Id] || {};
             userFollowData[user1Id][user2Id] = userFollowData[user1Id][user2Id] || {};
-            userFollowData[user1Id][user2Id]['isTwitterFollower'] = 1;
+            userFollowData[user1Id][user2Id]['isTwitterFollower'] = true;
           }
         }
+
+        offset = offset + BATCHSIZE;
       }
     }
+
+    const followFromCollectionName = new FollowArangoModel().fromCollectionName;
+    const followToCollectionName = new FollowArangoModel().toCollectionName;
 
     for (let user1Id in userFollowData) {
       for (let user2Id in userFollowData[user1Id]) {
         let data = userFollowData[user1Id][user2Id];
         followRowsForArango.push([
-          user1Id,
-          user2Id,
+          `${followFromCollectionName}/${user1Id}`,
+          `${followFromCollectionName}/${user2Id}`,
           data['isContributor'] || false,
           data['isTwitterFollower'] || false,
           data['isMuted'] || false,
@@ -214,6 +219,8 @@ class BackPopulateGraphData {
         ]);
       }
     }
+
+    await oThis._writeToCsv(followRowsForArango, 'follows');
   }
 
   /**
@@ -230,8 +237,6 @@ class BackPopulateGraphData {
     let offset = 0;
 
     while (true) {
-      offset = offset + BATCHSIZE;
-
       const dbRows = await new UserModel()
         .select('*')
         .where({ status: userConstants.invertedStatuses[userConstants.activeStatus] })
@@ -241,7 +246,7 @@ class BackPopulateGraphData {
         .fire();
 
       if (dbRows.length === 0) {
-        return;
+        break;
       } else {
         for (let i = 0; i < dbRows.length; i++) {
           const userObj = new UserModel().formatDbData(dbRows[i]);
@@ -252,7 +257,10 @@ class BackPopulateGraphData {
           ]);
         }
       }
+      offset = offset + BATCHSIZE;
     }
+
+    await oThis._writeToCsv(userRowsForArango, 'users');
   }
 
   /**
@@ -273,8 +281,6 @@ class BackPopulateGraphData {
     let offset = 0;
 
     while (true) {
-      offset = offset + BATCHSIZE;
-
       const dbRows = await new VideoDetailModel()
         .select('*')
         .where({ status: videoDetailConstants.invertedStatuses[videoDetailConstants.activeStatus] })
@@ -284,7 +290,7 @@ class BackPopulateGraphData {
         .fire();
 
       if (dbRows.length === 0) {
-        return;
+        break;
       } else {
         for (let i = 0; i < dbRows.length; i++) {
           const videoDetailObj = new VideoDetailModel().formatDbData(dbRows[i]);
@@ -302,7 +308,31 @@ class BackPopulateGraphData {
           ]);
         }
       }
+
+      offset = offset + BATCHSIZE;
     }
+
+    await oThis._writeToCsv(postRowsForArango, 'posts');
+    await oThis._writeToCsv(videoRowsForArango, 'videos');
+  }
+
+  async _writeToCsv(data, fileName) {
+    const oThis = this;
+
+    logger.log('Writing to csv for ', fileName, ' Started');
+
+    let filePath = `${FILEPATH}/${fileName}.csv`;
+
+    let text = '';
+    for (let i = 0; i < data.length; i++) {
+      const row = data[i];
+      if (i > 0) {
+        text = text + '\n';
+      }
+      text = text + row.join(',');
+    }
+
+    fs.writeFileSync(filePath, text);
   }
 }
 
