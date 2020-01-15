@@ -29,19 +29,19 @@ class VideoModel extends ModelBase {
    * @param {object} insertParams
    * @param {string} insertParams.id
    * @param {number} insertParams.status
-   * @param {number} insertParams.createdAt
+   * @param {number} insertParams.updatedAt
    *
    * @returns {Promise<*>}
    */
   async createEntry(insertParams) {
     const oThis = this;
 
-    const query = 'INSERT {_key: @id, status: @status, created_at: @createdAt} INTO @@collectionName';
+    const query = 'INSERT {_key: @id, status: @status, updated_at: @updatedAt} INTO @@collectionName';
     const vars = {
       collectionName: oThis.collectionName,
       id: insertParams.id,
       status: videoArangoConstants.invertedStatuses[videoArangoConstants.activeStatus],
-      createdAt: insertParams.createdAt
+      updatedAt: insertParams.updatedAt
     };
 
     return oThis.query(query, vars);
@@ -67,7 +67,7 @@ class VideoModel extends ModelBase {
    * @param {object} dbRow
    * @param {string} dbRow.id
    * @param {number} dbRow.status
-   * @param {number} dbRow.created_at
+   * @param {number} dbRow.updated_at
    *
    * @return {object}
    */
@@ -77,7 +77,7 @@ class VideoModel extends ModelBase {
     const formattedData = {
       id: dbRow.id,
       status: videoArangoConstants.statuses[dbRow.status],
-      createdAt: dbRow.created_at
+      updatedAt: dbRow.updated_at
     };
 
     return oThis.sanitizeFormattedData(formattedData);
