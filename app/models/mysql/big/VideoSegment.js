@@ -1,4 +1,4 @@
-const rootPrefix = '../../..',
+const rootPrefix = '../../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
   shortToLongUrl = require(rootPrefix + '/lib/shortToLongUrl'),
   videoConstants = require(rootPrefix + '/lib/globalConstant/video'),
