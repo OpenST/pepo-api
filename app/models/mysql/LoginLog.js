@@ -26,7 +26,33 @@ class LoginLog extends ModelBase {
     oThis.tableName = 'login_logs';
   }
 
-  formatDbData(dbRow) {}
+  /**
+   * Format db data.
+   *
+   * @param {object} dbRow
+   * @param {number} dbRow.id
+   * @param {number} dbRow.user_id
+   * @param {string} dbRow.service_kind
+   * @param {number} dbRow.timestamp
+   * @param {number} dbRow.created_at
+   * @param {number} dbRow.updated_at
+   *
+   * @return {object}
+   */
+  formatDbData(dbRow) {
+    const oThis = this;
+
+    const formattedData = {
+      id: dbRow.id,
+      userId: dbRow.user_id,
+      serviceKind: dbRow.service_kind, // dhananjay - convert to enum
+      timestamp: dbRow.timestamp,
+      createdAt: dbRow.created_at,
+      updatedAt: dbRow.updated_at
+    };
+
+    return oThis.sanitizeFormattedData(formattedData);
+  }
 }
 
 module.exports = LoginLog;
