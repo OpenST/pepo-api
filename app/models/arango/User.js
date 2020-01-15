@@ -24,6 +24,48 @@ class UserModel extends ModelBase {
   }
 
   /**
+   * Fetch posts for a user
+   *
+   * @param {object} queryParams
+   * @param {string} queryParams.userId
+   * @param {number} queryParams.pageNumber
+   * @param {number} queryParams.limit
+   *
+   * @returns {Promise<*>}
+   */
+  async getPosts(queryParams) {
+    const oThis = this;
+
+    const offset = queryParams.limit * (queryParams.pageNumber - 1);
+
+    const query = `WITH users
+     FOR v, e, p IN 1..2 OUTBOUND @startVertex followers, posts
+     PRUNE  IS_SAME_COLLECTION('posts',p.edges[0])
+     OPTIONS {uniqueVertices: 'global', bfs: true}
+     FILTER IS_SAME_COLLECTION('videos',v)
+     SORT v.created_at ASC
+     LIMIT @offset, @limit
+     RETURN v`;
+
+    const vars = {
+      startVertex: `${oThis.collectionName}/${queryParams.userId}`,
+      limit: queryParams.limit,
+      offset: offset
+    };
+
+    const result = await oThis.query(query, vars);
+    const dbRows = result._result;
+
+    const response = [];
+
+    for (let index = 0; index < dbRows.length; index++) {
+      response.push(dbRows[index]._key);
+    }
+
+    return { videoIds: response };
+  }
+
+  /**
    * Add a vertice In users collection in arango db
    *
    * @param {object} insertParams
