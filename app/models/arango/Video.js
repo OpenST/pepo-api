@@ -28,7 +28,6 @@ class VideoModel extends ModelBase {
    *
    * @param {object} insertParams
    * @param {string} insertParams.id
-   * @param {number} insertParams.status
    * @param {number} insertParams.updatedAt
    *
    * @returns {Promise<*>}
@@ -41,6 +40,28 @@ class VideoModel extends ModelBase {
       collectionName: oThis.collectionName,
       id: insertParams.id,
       status: videoArangoConstants.invertedStatuses[videoArangoConstants.activeStatus],
+      updatedAt: insertParams.updatedAt
+    };
+
+    return oThis.query(query, vars);
+  }
+
+  /**
+   * Add a vertice In videos collection in arango db
+   *
+   * @param {object} insertParams
+   * @param {string} insertParams.id
+   * @param {number} insertParams.updatedAt
+   *
+   * @returns {Promise<*>}
+   */
+  async updateTimestampForEntry(insertParams) {
+    const oThis = this;
+
+    const query = 'Update {_key: @id, updated_at: @updatedAt} INTO @@collectionName';
+    const vars = {
+      collectionName: oThis.collectionName,
+      id: insertParams.id,
       updatedAt: insertParams.updatedAt
     };
 

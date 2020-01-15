@@ -39,11 +39,11 @@ class UserModel extends ModelBase {
     const offset = queryParams.limit * (queryParams.pageNumber - 1);
 
     const query = `WITH users
-     FOR v, e, p IN 1..2 OUTBOUND @startVertex followers, posts
-     PRUNE  IS_SAME_COLLECTION('posts',p.edges[0])
+     FOR v, e, p IN 1..2 OUTBOUND @startVertex followers, posts, replies
+     PRUNE  IS_SAME_COLLECTION('posts',p.edges[0]) OR IS_SAME_COLLECTION('replies',p.edges[0])
      OPTIONS {uniqueVertices: 'global', bfs: true}
      FILTER IS_SAME_COLLECTION('videos',v)
-     SORT v.created_at ASC
+     SORT v.updated_at ASC
      LIMIT @offset, @limit
      RETURN v`;
 

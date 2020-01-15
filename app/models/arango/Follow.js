@@ -79,7 +79,7 @@ class FollowModel extends ModelBase {
       'FILTER u._from == @from and u._to == @to ' +
       'UPSERT  {_from: @from, _to:@to} ' +
       `INSERT {_from:@from, _to:@to, @updateKey: @updateVal, is_feed_follower: ${isFeedFollowerLogicForInsert}} ` +
-      `UPDATE {@updateKey: @updateVal, is_feed_follower: ${isFeedFollowerLogicForUpdate} INTO @@collectionName`;
+      `UPDATE {@updateKey: @updateVal, is_feed_follower: ${isFeedFollowerLogicForUpdate}} INTO @@collectionName`;
 
     const vars = {
       collectionName: oThis.collectionName,
