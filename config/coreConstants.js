@@ -197,6 +197,20 @@ class CoreConstants {
     return process.env.PA_FIAT_DB_MYSQL_PASSWORD;
   }
 
+  // User social connect db.
+
+  get SOCIAL_CONNECT_DB_MYSQL_HOST() {
+    return process.env.PA_SOCIAL_CONNECT_DB_MYSQL_HOST;
+  }
+
+  get SOCIAL_CONNECT_DB_MYSQL_USER() {
+    return process.env.PA_SOCIAL_CONNECT_DB_MYSQL_USER;
+  }
+
+  get SOCIAL_CONNECT_DB_MYSQL_PASSWORD() {
+    return process.env.PA_SOCIAL_CONNECT_DB_MYSQL_PASSWORD;
+  }
+
   // Admin db
   get ADMIN_DB_MYSQL_HOST() {
     return process.env.PA_ADMIN_DB_MYSQL_HOST;

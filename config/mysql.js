@@ -108,6 +108,13 @@ const mysqlConfig = {
         user: coreConstants.REDEMPTION_DB_MYSQL_USER,
         password: coreConstants.REDEMPTION_DB_MYSQL_PASSWORD
       }
+    },
+    socialConnectDbCluster: {
+      master: {
+        host: coreConstants.SOCIAL_CONNECT_DB_MYSQL_HOST,
+        user: coreConstants.SOCIAL_CONNECT_DB_MYSQL_USER,
+        password: coreConstants.SOCIAL_CONNECT_DB_MYSQL_PASSWORD
+      }
     }
   },
   databases: {}
@@ -142,6 +149,9 @@ mysqlConfig.databases[database.adminDbName] = ['adminDbCluster'];
 
 // Redemption db
 mysqlConfig.databases[database.redemptionDbName] = ['redemptionDbCluster'];
+
+// Social connect db
+mysqlConfig.databases[database.socialConnectDbName] = ['socialConnectDbCluster'];
 
 // Socket db
 mysqlConfig.databases[database.socketDbName] = ['socketDbCluster'];
