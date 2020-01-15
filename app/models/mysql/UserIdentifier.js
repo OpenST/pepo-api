@@ -34,6 +34,7 @@ class UserIdentifier extends ModelBase {
    * @param {number} dbRow.user_id
    * @param {string} dbRow.e_value
    * @param {string} dbRow.e_kind
+   * @param {string} dbRow.service_kind
    * @param {number} dbRow.created_at
    * @param {number} dbRow.updated_at
    *
@@ -47,6 +48,7 @@ class UserIdentifier extends ModelBase {
       userId: dbRow.user_id,
       eValue: dbRow.e_value,
       eKind: dbRow.e_kind, // dhananjay - convert to enum
+      serviceKind: dbRow.service_kind, // dhananjay - convert to enum
       createdAt: dbRow.created_at,
       updatedAt: dbRow.updated_at
     };
