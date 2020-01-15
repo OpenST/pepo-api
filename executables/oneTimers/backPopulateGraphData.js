@@ -3,18 +3,34 @@ const fs = require('fs');
 const rootPrefix = '../..',
   UserModel = require(rootPrefix + '/app/models/mysql/User'),
   VideoDetailModel = require(rootPrefix + '/app/models/mysql/VideoDetail'),
+  ReplyDetailModel = require(rootPrefix + '/app/models/mysql/ReplyDetail'),
   UserContributorModel = require(rootPrefix + '/app/models/mysql/UserContributor'),
   TwitterUserConnectionModel = require(rootPrefix + '/app/models/mysql/TwitterUserConnection'),
   TwitterUserModel = require(rootPrefix + '/app/models/mysql/TwitterUser'),
   UserMuteModel = require(rootPrefix + '/app/models/mysql/UserMute'),
   UserRelationModel = require(rootPrefix + '/app/models/mysql/UserRelation'),
   PostArangoModel = require(rootPrefix + '/app/models/arango/Post'),
+  ReplyArangoModel = require(rootPrefix + '/app/models/arango/Reply'),
   FollowArangoModel = require(rootPrefix + '/app/models/arango/Follow'),
   userConstants = require(rootPrefix + '/lib/globalConstant/user'),
   videoDetailConstants = require(rootPrefix + '/lib/globalConstant/videoDetail'),
+  replyDetailConstants = require(rootPrefix + '/lib/globalConstant/replyDetail'),
   userArangoConstants = require(rootPrefix + '/lib/globalConstant/arango/user'),
   videoArangoConstants = require(rootPrefix + '/lib/globalConstant/arango/video'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger');
+
+// /Applications/ArangoDB3-CLI.app/Contents/Resources/arangoimport --file ~/Desktop/test/users.csv  --server.database pepo_api_development --collection users --create-collection true --type csv
+//
+//
+// /Applications/ArangoDB3-CLI.app/Contents/Resources/arangoimport --file ~/Desktop/test/videos.csv  --server.database pepo_api_development --collection videos --create-collection true --type csv
+//
+//
+// /Applications/ArangoDB3-CLI.app/Contents/Resources/arangoimport --file ~/Desktop/test/follows.csv --server.database pepo_api_development --collection follows --create-collection true --type csv --create-collection-type edge
+//
+//
+// /Applications/ArangoDB3-CLI.app/Contents/Resources/arangoimport --file ~/Desktop/test/posts.csv --server.database pepo_api_development --collection posts --create-collection true --type csv --create-collection-type edge
+//
+// /Applications/ArangoDB3-CLI.app/Contents/Resources/arangoimport --file ~/Desktop/test/replies.csv --server.database pepo_api_development --collection replies --create-collection true --type csv --create-collection-type edge
 
 const BATCHSIZE = 200;
 const FILEPATH = '/Users/amanbarbaria/Desktop/test';
@@ -30,6 +46,7 @@ class BackPopulateGraphData {
 
     await oThis._getUsers();
     await oThis._getVideos();
+    await oThis._getReplies();
     await oThis._getFollowData();
   }
 
@@ -314,6 +331,51 @@ class BackPopulateGraphData {
 
     await oThis._writeToCsv(postRowsForArango, 'posts');
     await oThis._writeToCsv(videoRowsForArango, 'videos');
+  }
+
+  /**
+   * Get users.
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _getReplies() {
+    const oThis = this;
+
+    const replyRowsForArango = [['_from', '_to', 'posted_at']];
+
+    const replyFromCollectionName = new ReplyArangoModel().fromCollectionName;
+    const replyToCollectionName = new ReplyArangoModel().toCollectionName;
+
+    let offset = 0;
+
+    while (true) {
+      const dbRows = await new ReplyDetailModel()
+        .select('*')
+        .where({ status: replyDetailConstants.invertedStatuses[replyDetailConstants.activeStatus] })
+        .order_by('id ASC')
+        .limit(BATCHSIZE)
+        .offset(offset)
+        .fire();
+
+      if (dbRows.length === 0) {
+        break;
+      } else {
+        for (let i = 0; i < dbRows.length; i++) {
+          const replyDetailObj = new ReplyDetailModel().formatDbData(dbRows[i]);
+
+          replyRowsForArango.push([
+            `${replyFromCollectionName}/${replyDetailObj.creatorUserId}`,
+            `${replyToCollectionName}/${replyDetailObj.parentId}`,
+            replyDetailObj.createdAt
+          ]);
+        }
+      }
+
+      offset = offset + BATCHSIZE;
+    }
+
+    await oThis._writeToCsv(replyRowsForArango, 'replies');
   }
 
   async _writeToCsv(data, fileName) {
