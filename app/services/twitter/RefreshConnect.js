@@ -1,6 +1,6 @@
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
-  AccountTwitterRequestClass = require(rootPrefix + '/lib/twitter/oAuth1.0/Account'),
+  AccountTwitterRequestClass = require(rootPrefix + '/lib/socialConnect/twitter/oAuth1.0/Account'),
   TwitterUserByTwitterIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TwitterUserByTwitterIds'),
   TwitterUserExtendedModel = require(rootPrefix + '/app/models/mysql/TwitterUserExtended'),
   SecureUserCache = require(rootPrefix + '/lib/cacheManagement/single/SecureUser'),

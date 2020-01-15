@@ -8,7 +8,7 @@ const command = require('commander');
 const rootPrefix = '../..',
   UserModel = require(rootPrefix + '/app/models/mysql/User'),
   TwitterUserModel = require(rootPrefix + '/app/models/mysql/TwitterUser'),
-  UsersTwitterRequestClass = require(rootPrefix + '/lib/twitter/oAuth1.0/Users'),
+  UsersTwitterRequestClass = require(rootPrefix + '/lib/socialConnect/twitter/oAuth1.0/Users'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   responseHelper = require(rootPrefix + '/lib/formatter/response');
 
