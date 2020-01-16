@@ -10,7 +10,7 @@ const upQuery =
       `id` bigint(20) NOT NULL AUTO_INCREMENT, \n\
       `github_id` varchar(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL, \n\
       `user_id` bigint(20) NOT NULL, \n\
-      `github_login` varchar(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL, \n\
+      `user_name` varchar(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL, \n\
       `name` varchar(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci, \n\
       `email` varchar(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci, \n\
       `profile_image_url` varchar(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci, \n\
