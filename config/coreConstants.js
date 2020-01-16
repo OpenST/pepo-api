@@ -478,6 +478,26 @@ class CoreConstants {
   get PA_TRACKER_ENDPOINT() {
     return process.env.PA_TRACKER_ENDPOINT;
   }
+
+  get PA_APPLE_CLIENT_ID() {
+    return process.env.PA_APPLE_CLIENT_ID;
+  }
+
+  get PA_APPLE_REDIRECT_URI() {
+    return process.env.PA_APPLE_REDIRECT_URI;
+  }
+
+  get PA_APPLE_TEAM_ID() {
+    return process.env.PA_APPLE_TEAM_ID;
+  }
+
+  get PA_APPLE_KEY_IDENTIFIER() {
+    return process.env.PA_APPLE_KEY_IDENTIFIER;
+  }
+
+  get PA_PRIVATE_KEY_PATH() {
+    return process.env.PA_PRIVATE_KEY_PATH;
+  }
 }
 
 module.exports = new CoreConstants();

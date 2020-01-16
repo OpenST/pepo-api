@@ -179,3 +179,10 @@ export PA_REPLY_PIXEL_DATA_APP_FILE_PATH='.'
 
 # Tracker related constants.
 export PA_TRACKER_ENDPOINT='https://px.pepo.com/devp101_pixel.png'
+
+#Apple constants
+export PA_APPLE_CLIENT_ID='com.pepo.staging'
+export PA_APPLE_REDIRECT_URI='https://stagingpepo.com'
+export PA_APPLE_TEAM_ID='N83K86W6P4'
+export PA_APPLE_KEY_IDENTIFIER='2P3PRWRQGT'
+export PA_PRIVATE_KEY_PATH='/Users/ankitsingh/Downloads/SignInWithApple/PepoStaging/AuthKey_2P3PRWRQGT.p8'
