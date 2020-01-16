@@ -374,6 +374,14 @@ class CoreConstants {
     return process.env.PA_TWITTER_AUTH_CALLBACK_ROUTE;
   }
 
+  get GOOGLE_CLIENT_ID() {
+    return process.env.PA_GOOGLE_CLIENT_ID;
+  }
+
+  get GOOGLE_CLIENT_SECRET() {
+    return process.env.PA_GOOGLE_CLIENT_SECRET;
+  }
+
   get PR_IMAGE_RESIZE_FUNCTION() {
     return process.env.PR_LAMBDA_IMAGE_RESIZE_FUNCTION;
   }
