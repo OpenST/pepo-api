@@ -221,6 +221,12 @@ const v1ErrorConfig = {
     message: 'Invalid to user id in transfers.'
   },
 
+  invalid_transaction_type: {
+    parameter: 'meta_property',
+    code: 'invalid',
+    message: 'Invalid transaction type.'
+  },
+
   invalid_twitter_user: {
     parameter: 'twitter_user',
     code: 'invalid',

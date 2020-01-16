@@ -6,9 +6,11 @@ const rootPrefix = '../../../../..',
   PepoOnReplyFailureWebhook = require(rootPrefix + '/app/services/ostEvents/transactions/failure/PepoOnReply'),
   ReplyOnVideoFailureWebhook = require(rootPrefix + '/app/services/ostEvents/transactions/failure/ReplyOnVideo'),
   UserTransactionFailureWebhook = require(rootPrefix + '/app/services/ostEvents/transactions/failure/UserTransaction'),
+  ManualCompanyToUserFailureWebhook = require(rootPrefix +
+    '/app/services/ostEvents/transactions/failure/ManualCompanyToUser'),
+  responseHelper = require(rootPrefix + '/lib/formatter/response'),
   createErrorLogsEntry = require(rootPrefix + '/lib/errorLogs/createEntry'),
   errorLogsConstants = require(rootPrefix + '/lib/globalConstant/errorLogs'),
-  responseHelper = require(rootPrefix + '/lib/formatter/response'),
   transactionConstant = require(rootPrefix + '/lib/globalConstant/transaction');
 
 /**
@@ -63,6 +65,8 @@ class TransactionWebhookFailureFactory extends TransactionWebhookFactoryBase {
       transactionEventResponse = await new AirdropFailureWebhook(oThis.webhookData).perform();
     } else if (oThis._isTopUpTransactionKind()) {
       transactionEventResponse = await new TopupFailureWebhook(oThis.webhookData).perform();
+    } else if (oThis._isManualCompanyToUserTransaction()) {
+      transactionEventResponse = await new ManualCompanyToUserFailureWebhook(oThis.webhookData).perform();
     } else if (oThis._isUserTransactionKind()) {
       transactionEventResponse = await new UserTransactionFailureWebhook(oThis.webhookData).perform();
     } else {
