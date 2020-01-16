@@ -45,7 +45,7 @@ class UserModel extends ModelBase {
      FILTER IS_SAME_COLLECTION('videos',v)
      SORT v.updated_at ASC
      LIMIT @offset, @limit
-     RETURN v`;
+     RETURN DISTINCT v`;
 
     const vars = {
       startVertex: `${oThis.collectionName}/${queryParams.userId}`,
