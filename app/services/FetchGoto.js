@@ -134,13 +134,9 @@ class FetchGoto extends ServiceBase {
         }
 
         const replyDetail = replyDetailCacheResp.data[replyDetailId];
-        const parentVideoId = replyDetail.parentId;
 
-        if (
-          CommonValidators.validateNonEmptyObject(replyDetail) &&
-          !CommonValidators.isVarNullOrUndefined(parentVideoId)
-        ) {
-          oThis.gotoParams = { replyDetailId: replyDetailId, parentVideoId: parentVideoId };
+        if (CommonValidators.validateNonEmptyObject(replyDetail)) {
+          oThis.gotoParams = { replyDetailId: replyDetailId, parentVideoId: replyDetail.parentId };
           oThis.gotoKind = gotoConstants.replyGotoKind;
         }
       }
