@@ -491,7 +491,8 @@ class TransactionWebhookBase extends ServiceBase {
 
     if (
       (oThis._isRedemptionTransactionKind() && !oThis.fromUserId) ||
-      (!oThis._isRedemptionTransactionKind() && (!oThis.toUserId || !oThis.fromUserId))
+      (!oThis._isRedemptionTransactionKind() && (!oThis.toUserId || !oThis.fromUserId)) ||
+      (oThis._isReferralBonusTransactionKind() && !oThis.toUserId)
     ) {
       return Promise.reject(
         responseHelper.error({
@@ -520,10 +521,12 @@ class TransactionWebhookBase extends ServiceBase {
       txKind = transactionConstants.redemptionKind;
     } else if (oThis._isPepoOnReplyTransactionKind()) {
       txKind = transactionConstants.userTransactionOnReplyKind;
-      extraData['replyDetailId'] = oThis.replyDetailId;
+      extraData.replyDetailId = oThis.replyDetailId;
     } else if (oThis._isReplyOnVideoTransactionKind()) {
       txKind = transactionConstants.replyOnVideoTransactionKind;
-      extraData['replyDetailId'] = oThis.replyDetailId;
+      extraData.replyDetailId = oThis.replyDetailId;
+    } else if (oThis._isReferralBonusTransactionKind()) {
+      txKind = transactionConstants.bonusTransactionKind;
     } else {
       txKind = transactionConstants.userTransactionKind;
     }
@@ -657,7 +660,7 @@ class TransactionWebhookBase extends ServiceBase {
       return Promise.reject(replyDetailCacheResp);
     }
 
-    let replyDetail = replyDetailCacheResp.data[oThis.replyDetailId];
+    const replyDetail = replyDetailCacheResp.data[oThis.replyDetailId];
 
     if (!CommonValidators.validateNonEmptyObject(replyDetail)) {
       return Promise.reject(
@@ -833,6 +836,18 @@ class TransactionWebhookBase extends ServiceBase {
     const oThis = this;
 
     return oThis.ostTransaction.meta_property.name === transactionConstants.redemptionMetaName;
+  }
+
+  /**
+   * Return true if it is a referral bonus transaction.
+   *
+   * @returns {boolean}
+   * @private
+   */
+  _isReferralBonusTransactionKind() {
+    const oThis = this;
+
+    return oThis.ostTransaction.meta_property.name === transactionConstants.referralBonusMetaName;
   }
 
   /**
