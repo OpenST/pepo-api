@@ -7,7 +7,8 @@ const rootPrefix = '../../..',
   SignupTwitterClass = require(rootPrefix + '/app/services/twitter/Signup'),
   LoginTwitterClass = require(rootPrefix + '/app/services/twitter/Login'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
-  logger = require(rootPrefix + '/lib/logger/customConsoleLogger');
+  logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
+  CommonValidators = require(rootPrefix + '/lib/validators/Common');
 
 /**
  * Class for Twitter Connect service.
@@ -187,6 +188,22 @@ class TwitterConnect extends ConnectBase {
     oThis.serviceResp = await new LoginTwitterClass(requestParams).perform();
 
     logger.log('End::Connect._performLogin');
+  }
+
+  /**
+   * Get unique property from social platform info, like email or phone number
+   *
+   * @returns {{}|{kind: string, value: *}}
+   * @private
+   */
+  _getSocialUserUniqueProperties() {
+    const oThis = this;
+
+    if (!oThis.userTwitterEntity.email || !CommonValidators.isValidEmail(oThis.userTwitterEntity.email)) {
+      return {};
+    }
+
+    return { kind: 'email', value: oThis.userTwitterEntity.email };
   }
 }
 

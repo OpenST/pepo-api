@@ -7,6 +7,7 @@ const rootPrefix = '../../..',
   gotoFactory = require(rootPrefix + '/lib/goTo/factory'),
   entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
   gotoConstants = require(rootPrefix + '/lib/globalConstant/goto'),
+  UserUniqueIdentifierModel = require(rootPrefix + '/app/models/mysql/UserIdentifier'),
   CommonValidators = require(rootPrefix + '/lib/validators/Common');
 
 const urlParser = require('url');
@@ -31,10 +32,7 @@ class SocialConnectBase extends ServiceBase {
     super(params);
 
     const oThis = this;
-    oThis.userUniqueIdentifierKind = null;
-    oThis.userUniqueIdentifierValue = null;
     oThis.socialUserObj = null;
-    oThis.userIdentifierObj = null;
     oThis.newSocialConnect = false;
     oThis.userId = null;
     oThis.isUserSignUp = true;
@@ -75,7 +73,6 @@ class SocialConnectBase extends ServiceBase {
   /**
    * Method to validate access tokens and fetching data from Social platforms.
    *
-   * @Sets oThis.userUniqueIdentifierKind, oThis.userUniqueIdentifierValue
    * @returns {Promise<void>}
    * @private
    */
@@ -135,20 +132,25 @@ class SocialConnectBase extends ServiceBase {
       oThis.newSocialConnect = true;
 
       // Look for user email or phone number already exists.
-      // Means user is already part of system using same or different social connect,
-      if (oThis.userUniqueIdentifierKind && oThis.userUniqueIdentifierValue) {
-        // TODO: Query user identifiers table
+      // Means user is already part of system using same or different social connect.
+      let userIdentifierObj = {},
+        userUniqueElements = oThis._getSocialUserUniqueProperties();
+      if (CommonValidators.validateNonEmptyObject(userUniqueElements)) {
+        userIdentifierObj = await new UserUniqueIdentifierModel().fetchByKindAndValue(
+          userUniqueElements.kind,
+          userUniqueElements.val
+        );
       }
 
-      if (oThis.userIdentifierObj) {
+      if (CommonValidators.validateNonEmptyObject(userIdentifierObj)) {
         // This means user email or phone number is already exists in system via another or same social platform.
-        const userCacheResp = await new UserCache({ ids: [oThis.userIdentifierObj.userId] }).fetch();
+        const userCacheResp = await new UserCache({ ids: [userIdentifierObj.userId] }).fetch();
 
         if (userCacheResp.isFailure()) {
           return Promise.reject(userCacheResp);
         }
 
-        const userObj = userCacheResp.data[oThis.userIdentifierObj.userId];
+        const userObj = userCacheResp.data[userIdentifierObj.userId];
 
         // If user has already connected this social platform.
         // Means in case of twitter connect request, same email user has already connected twitter before then its signup
@@ -161,6 +163,15 @@ class SocialConnectBase extends ServiceBase {
         }
       }
     }
+  }
+
+  /**
+   * Get unique property from social platform info, like email or phone number
+   *
+   * @private
+   */
+  _getSocialUserUniqueProperties() {
+    throw 'Sub-class to implement';
   }
 
   /**

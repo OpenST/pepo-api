@@ -55,6 +55,29 @@ class UserIdentifier extends ModelBase {
 
     return oThis.sanitizeFormattedData(formattedData);
   }
+
+  /**
+   * Fetch by entity kind and value.
+   *
+   * @param {string} eKind: entity kind
+   * @param {string} eValue: entity value
+   *
+   * @return {object}
+   */
+  async fetchByKindAndValue(eKind, eValue) {
+    const oThis = this;
+
+    const dbRows = await oThis
+      .select('*')
+      .where(['e_kind = ? AND e_value = ?', eKind, eValue])
+      .fire();
+
+    if (dbRows.length === 0) {
+      return {};
+    }
+
+    return oThis.formatDbData(dbRows[0]);
+  }
 }
 
 module.exports = UserIdentifier;
