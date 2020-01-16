@@ -4,6 +4,9 @@ const rootPrefix = '../../..',
   coreConstants = require(rootPrefix + '/config/coreConstants'),
   InviteCodeCache = require(rootPrefix + '/lib/cacheManagement/single/InviteCodeByCode'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
+  gotoFactory = require(rootPrefix + '/lib/goTo/factory'),
+  entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
+  gotoConstants = require(rootPrefix + '/lib/globalConstant/goto'),
   CommonValidators = require(rootPrefix + '/lib/validators/Common');
 
 const urlParser = require('url');
@@ -32,7 +35,7 @@ class SocialConnectBase extends ServiceBase {
     oThis.userUniqueIdentifierValue = null;
     oThis.socialUserObj = null;
     oThis.userIdentifierObj = null;
-    oThis.newSocialAccount = false;
+    oThis.newSocialConnect = false;
     oThis.userId = null;
     oThis.isUserSignUp = true;
     oThis.serviceResp = null;
@@ -58,7 +61,7 @@ class SocialConnectBase extends ServiceBase {
 
     await oThis._performConnect();
 
-    // return oThis._sendFlowCompleteGoto(oThis.serviceResp);
+    return oThis._sendFlowCompleteGoto(oThis.serviceResp);
   }
 
   /**
@@ -129,7 +132,7 @@ class SocialConnectBase extends ServiceBase {
       oThis.userId = oThis.socialUserObj.userId;
     } else {
       // If social account is not in our system, then look for unique identifier
-      oThis.newSocialAccount = true;
+      oThis.newSocialConnect = true;
 
       // Look for user email or phone number already exists.
       // Means user is already part of system using same or different social connect,
@@ -288,6 +291,25 @@ class SocialConnectBase extends ServiceBase {
     }
 
     return cacheResp.data[oThis.inviteCode];
+  }
+
+  /**
+   * Send Goto after the flow completes, either in error or success
+   *
+   * @param response
+   * @private
+   */
+  async _sendFlowCompleteGoto(response) {
+    const oThis = this;
+
+    if (response.isSuccess()) {
+      response.data[entityType.goto] = { pn: null, v: null };
+      if (response.data.openEmailAddFlow) {
+        response.data[entityType.goto] = gotoFactory.gotoFor(gotoConstants.addEmailScreenGotoKind);
+      }
+    }
+
+    return response;
   }
 }
 

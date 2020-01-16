@@ -180,7 +180,8 @@ class TwitterConnect extends ConnectBase {
       userTwitterEntity: oThis.userTwitterEntity,
       twitterRespHeaders: oThis.twitterRespHeaders,
       token: oThis.token,
-      secret: oThis.secret
+      secret: oThis.secret,
+      newSocialConnect: oThis.newSocialConnect
     };
 
     oThis.serviceResp = await new LoginTwitterClass(requestParams).perform();
