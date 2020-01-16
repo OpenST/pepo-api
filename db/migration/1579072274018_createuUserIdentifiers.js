@@ -11,7 +11,6 @@ const upQuery =
   `user_id` bigint(20) NOT NULL,\
   `e_value` varchar(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NULL,\
   `e_kind` tinyint(4) NOT NULL,\n\
-  `service_kind` tinyint(4) NOT NULL, \n\
   `created_at` int(11) NOT NULL,\
   `updated_at` int(11) NOT NULL,\
   PRIMARY KEY (`id`)\

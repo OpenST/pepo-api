@@ -8,6 +8,7 @@ const rootPrefix = '../../..',
   LoginTwitterClass = require(rootPrefix + '/lib/connect/login/ByTwitter'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
+  userIdentifierConstants = require(rootPrefix + '/lib/globalConstant/userIdentifier'),
   CommonValidators = require(rootPrefix + '/lib/validators/Common');
 
 /**
@@ -182,7 +183,7 @@ class TwitterConnect extends ConnectBase {
       twitterRespHeaders: oThis.twitterRespHeaders,
       token: oThis.token,
       secret: oThis.secret,
-      newSocialConnect: oThis.newSocialConnect
+      isNewSocialConnect: oThis.newSocialConnect
     };
 
     oThis.serviceResp = await new LoginTwitterClass(requestParams).perform();
@@ -203,7 +204,7 @@ class TwitterConnect extends ConnectBase {
       return {};
     }
 
-    return { kind: 'email', value: oThis.userTwitterEntity.email };
+    return { kind: userIdentifierConstants.emailKind, value: oThis.userTwitterEntity.email };
   }
 }
 

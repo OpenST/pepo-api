@@ -1,5 +1,6 @@
 const rootPrefix = '../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
+  userIdentifierConstants = require(rootPrefix + '/lib/globalConstant/userIdentifier'),
   databaseConstants = require(rootPrefix + '/lib/globalConstant/database');
 
 // Declare variables.
@@ -77,6 +78,25 @@ class UserIdentifier extends ModelBase {
     }
 
     return oThis.formatDbData(dbRows[0]);
+  }
+
+  /**
+   * Insert Email of user as unique identifier
+   *
+   * @param userId
+   * @param email
+   * @returns {Promise<void>}
+   */
+  async insertUserEmail(userId, email) {
+    const oThis = this;
+
+    await oThis
+      .insert({
+        user_id: userId,
+        e_kind: userIdentifierConstants.invertedKinds[userIdentifierConstants.emailKind],
+        e_value: email
+      })
+      .fire();
   }
 }
 
