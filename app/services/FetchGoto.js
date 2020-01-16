@@ -133,10 +133,16 @@ class FetchGoto extends ServiceBase {
           return Promise.reject(replyDetailCacheResp);
         }
 
-        const parentVideoId = replyDetailCacheResp.data[replyDetailId].parentId;
+        const replyDetail = replyDetailCacheResp.data[replyDetailId];
+        const parentVideoId = replyDetail.parentId;
 
-        oThis.gotoParams = { replyDetailId: replyDetailId, parentVideoId: parentVideoId };
-        oThis.gotoKind = gotoConstants.replyGotoKind;
+        if (
+          CommonValidators.validateNonEmptyObject(replyDetail) &&
+          !CommonValidators.isVarNullOrUndefined(parentVideoId)
+        ) {
+          oThis.gotoParams = { replyDetailId: replyDetailId, parentVideoId: parentVideoId };
+          oThis.gotoKind = gotoConstants.replyGotoKind;
+        }
       }
     } else if (pathArray[1] === gotoConstants.tagGotoKind) {
       const tagName = pathArray[2];
