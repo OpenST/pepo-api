@@ -1,6 +1,12 @@
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
-  UserCache = require(rootPrefix + '/lib/cacheManagement/multi/User');
+  UserCache = require(rootPrefix + '/lib/cacheManagement/multi/User'),
+  coreConstants = require(rootPrefix + '/config/coreConstants'),
+  InviteCodeCache = require(rootPrefix + '/lib/cacheManagement/single/InviteCodeByCode'),
+  responseHelper = require(rootPrefix + '/lib/formatter/response'),
+  CommonValidators = require(rootPrefix + '/lib/validators/Common');
+
+const urlParser = require('url');
 
 /**
  * Base class for all social platform connects
@@ -181,7 +187,26 @@ class SocialConnectBase extends ServiceBase {
     const oThis = this;
 
     // If user has used some invite code, then associate if its valid
-    if (oThis.inviteCode) {
+    if (oThis.inviteCode && oThis._validateAndSanitizeInviteCode()) {
+      let inviterCodeRow = await oThis._fetchInviterCodeObject();
+      // Invite code used is not present
+      if (!inviterCodeRow || !inviterCodeRow.id) {
+        return responseHelper.paramValidationError({
+          internal_error_identifier: 's_c_b_1',
+          api_error_identifier: 'invalid_api_params',
+          params_error_identifiers: ['invalid_invite_code']
+        });
+      }
+
+      // If there is number of invites limit on invite code, and it has been reached
+      if (inviterCodeRow.inviteLimit >= 0 && inviterCodeRow.inviteLimit <= inviterCodeRow.invitedUserCount) {
+        return responseHelper.paramValidationError({
+          internal_error_identifier: 's_c_b_2',
+          api_error_identifier: 'invalid_api_params',
+          params_error_identifiers: ['expired_invite_code']
+        });
+      }
+      oThis.inviterCodeObj = inviterCodeRow;
     }
   }
 
@@ -203,6 +228,66 @@ class SocialConnectBase extends ServiceBase {
    */
   async _performLogin() {
     throw 'Sub-class to implement';
+  }
+
+  /**
+   * validate and sanitize invite code. Invite code can be a url or just an invite code.
+   *
+   * @returns {boolean}
+   * @private
+   */
+  _validateAndSanitizeInviteCode() {
+    const oThis = this;
+
+    if (CommonValidators.validateNonEmptyUrl(oThis.inviteCode)) {
+      let parsedUrl = urlParser.parse(oThis.inviteCode, true);
+
+      if (!CommonValidators.validateNonEmptyObject(parsedUrl) || !['http:', 'https:'].includes(parsedUrl.protocol)) {
+        return false;
+      }
+
+      if (coreConstants.PA_DOMAIN.match(parsedUrl.host)) {
+        oThis.inviteCode = parsedUrl.query.invite;
+      } else if (coreConstants.PA_INVITE_DOMAIN.match(parsedUrl.host)) {
+        if (parsedUrl.pathname.split('/').length > 2) {
+          return false;
+        }
+
+        oThis.inviteCode = parsedUrl.pathname.split('/')[1];
+      } else {
+        return false;
+      }
+    }
+
+    if (!CommonValidators.validateInviteCode(oThis.inviteCode)) {
+      return false;
+    }
+
+    oThis.inviteCode = oThis.inviteCode.toUpperCase();
+    return true;
+  }
+
+  /**
+   * Fetch inviter code row from cache
+   *
+   * @returns {Promise<never>}
+   * @private
+   */
+  async _fetchInviterCodeObject() {
+    const oThis = this;
+
+    let cacheResp = await new InviteCodeCache({ inviteCode: oThis.inviteCode }).fetch();
+    // Invite code used is not present
+    if (cacheResp.isFailure()) {
+      return responseHelper.paramValidationError({
+        internal_error_identifier: 's_t_c_vic_2',
+        api_error_identifier: 'could_not_proceed',
+        params_error_identifiers: ['something_went_wrong'],
+        debug_options: {}
+      });
+    }
+
+    return cacheResp.data[oThis.inviteCode];
   }
 }
 
