@@ -14,7 +14,6 @@ const upQuery =
       `name` varchar(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci, \n\
       `email` varchar(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci, \n\
       `profile_image_url` varchar(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci, \n\
-      `bio` blob, \n\
       `created_at` int(11) NOT NULL, \n\
       `updated_at` int(11) NOT NULL, \n\
       PRIMARY KEY (`id`), \n\
