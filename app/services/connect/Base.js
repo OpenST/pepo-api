@@ -138,7 +138,7 @@ class SocialConnectBase extends ServiceBase {
       if (CommonValidators.validateNonEmptyObject(userUniqueElements)) {
         userIdentifierObj = await new UserUniqueIdentifierModel().fetchByKindAndValue(
           userUniqueElements.kind,
-          userUniqueElements.val
+          userUniqueElements.value
         );
       }
 

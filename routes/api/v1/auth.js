@@ -50,7 +50,7 @@ router.post('/twitter-login', sanitizer.sanitizeDynamicUrlParams, function(req, 
   };
 
   Promise.resolve(
-    routeHelper.perform(req, res, next, '/twitter/Connect', 'r_a_v1_a_3', null, onServiceSuccess, onServiceFailure)
+    routeHelper.perform(req, res, next, '/connect/Twitter', 'r_a_v1_a_3', null, onServiceSuccess, onServiceFailure)
   );
 });
 
