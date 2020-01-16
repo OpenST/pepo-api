@@ -1,11 +1,13 @@
 const rootPrefix = '../../../../..',
-  AirdropSuccessWebhook = require(rootPrefix + '/app/services/ostEvents/transactions/success/Airdrop'),
-  PepoOnReplySuccessWebhook = require(rootPrefix + '/app/services/ostEvents/transactions/success/PepoOnReply'),
-  RedemptionSuccessWebhook = require(rootPrefix + '/app/services/ostEvents/transactions/success/Redemption'),
-  ReplyOnVideoSuccessWebhook = require(rootPrefix + '/app/services/ostEvents/transactions/success/ReplyOnVideo'),
   TopUpSuccessWebhook = require(rootPrefix + '/app/services/ostEvents/transactions/success/Topup'),
-  UserTransactionSuccessWebhook = require(rootPrefix + '/app/services/ostEvents/transactions/success/UserTransaction'),
+  AirdropSuccessWebhook = require(rootPrefix + '/app/services/ostEvents/transactions/success/Airdrop'),
   TransactionWebhookFactoryBase = require(rootPrefix + '/app/services/ostEvents/transactions/FactoryBase'),
+  RedemptionSuccessWebhook = require(rootPrefix + '/app/services/ostEvents/transactions/success/Redemption'),
+  PepoOnReplySuccessWebhook = require(rootPrefix + '/app/services/ostEvents/transactions/success/PepoOnReply'),
+  ReplyOnVideoSuccessWebhook = require(rootPrefix + '/app/services/ostEvents/transactions/success/ReplyOnVideo'),
+  UserTransactionSuccessWebhook = require(rootPrefix + '/app/services/ostEvents/transactions/success/UserTransaction'),
+  ManualCompanyToUserSuccessWebhook = require(rootPrefix +
+    '/app/services/ostEvents/transactions/success/ManualCompanyToUser'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   transactionConstants = require(rootPrefix + '/lib/globalConstant/transaction');
@@ -54,12 +56,14 @@ class TransactionWebhookSuccessFactory extends TransactionWebhookFactoryBase {
       transactionEventResponse = await new AirdropSuccessWebhook(oThis.webhookData).perform();
     } else if (oThis._isTopUpTransactionKind()) {
       transactionEventResponse = await new TopUpSuccessWebhook(oThis.webhookData).perform();
+    } else if (oThis._isManualCompanyToUserTransaction()) {
+      transactionEventResponse = await new ManualCompanyToUserSuccessWebhook(oThis.webhookData).perform();
     } else if (oThis._isUserTransactionKind()) {
       transactionEventResponse = await new UserTransactionSuccessWebhook(oThis.webhookData).perform();
     } else {
       return Promise.reject(
         responseHelper.error({
-          internal_error_identifier: 'a_s_oe_t_s_pt_1',
+          internal_error_identifier: 'a_s_oe_t_s_f_pt_1',
           api_error_identifier: 'something_went_wrong',
           debug_options: oThis.transactionObj
         })
