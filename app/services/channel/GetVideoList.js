@@ -100,6 +100,7 @@ class GetChannelVideoList extends ServiceBase {
       oThis.paginationTimestamp = null;
     }
 
+    // Validate whether channel exists or not.
     await oThis._validateChannel();
 
     // Validate limit.
