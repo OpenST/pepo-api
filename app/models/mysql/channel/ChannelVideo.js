@@ -104,10 +104,17 @@ class ChannelVideoModel extends ModelBase {
   /**
    * Flush cache.
    *
+   * @param {object} params
+   * @param {number} [params.channelId]
+   *
    * @returns {Promise<*>}
    */
-  static async flushCache() {
-    // Do nothing.
+  static async flushCache(params) {
+    if (params.channelId) {
+      const VideoIdsByChannelIdPaginationCache = require(rootPrefix +
+        '/lib/cacheManagement/single/VideoIdsByChannelIdPagination');
+      await new VideoIdsByChannelIdPaginationCache({ channelId: params.channelId }).clear();
+    }
   }
 }
 

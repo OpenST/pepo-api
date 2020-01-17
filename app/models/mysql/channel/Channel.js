@@ -67,12 +67,12 @@ class ChannelModel extends ModelBase {
   async fetchByIds(ids) {
     const oThis = this;
 
-    const response = {};
-
     const dbRows = await oThis
       .select('*')
       .where(['id IN (?)', ids])
       .fire();
+
+    const response = {};
 
     for (let index = 0; index < dbRows.length; index++) {
       const formatDbRow = oThis._formatDbData(dbRows[index]);
