@@ -1,17 +1,17 @@
 const rootPrefix = '../../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
   databaseConstants = require(rootPrefix + '/lib/globalConstant/database'),
-  channelConstants = require(rootPrefix + '/lib/globalConstant/channel/channels');
+  channelUsersConstants = require(rootPrefix + '/lib/globalConstant/channel/channelUsers');
 
 // Declare variables names.
 const dbName = databaseConstants.channelDbName;
 
 /**
- * Class for channels model.
+ * Class for channel users model.
  *
- * @class ChannelModel
+ * @class ChannelUserModel
  */
-class ChannelModel extends ModelBase {
+class ChannelUserModel extends ModelBase {
   /**
    * Constructor for channels model.
    *
@@ -24,7 +24,7 @@ class ChannelModel extends ModelBase {
 
     const oThis = this;
 
-    oThis.tableName = 'channels';
+    oThis.tableName = 'channel_users';
   }
 
   /**
@@ -32,10 +32,9 @@ class ChannelModel extends ModelBase {
    *
    * @param {object} dbRow
    * @param {number} dbRow.id
-   * @param {number} dbRow.name
+   * @param {number} dbRow.channel_id
+   * @param {number} dbRow.user_id
    * @param {number} dbRow.status
-   * @param {number} dbRow.description_id
-   * @param {number} dbRow.image_id
    * @param {number} dbRow.created_at
    * @param {number} dbRow.updated_at
    *
@@ -46,10 +45,9 @@ class ChannelModel extends ModelBase {
 
     const formattedData = {
       id: dbRow.id,
-      name: dbRow.name,
-      status: channelConstants.invertedStatuses[dbRow.status],
-      descriptionId: dbRow.description_id,
-      imageId: dbRow.image_id,
+      channelId: dbRow.channel_id,
+      userId: dbRow.user_id,
+      status: channelUsersConstants.invertedStatuses[dbRow.status],
       createdAt: dbRow.created_at,
       updatedAt: dbRow.updated_at
     };
@@ -67,4 +65,4 @@ class ChannelModel extends ModelBase {
   }
 }
 
-module.exports = ChannelModel;
+module.exports = ChannelUserModel;
