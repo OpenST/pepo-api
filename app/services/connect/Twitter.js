@@ -89,7 +89,6 @@ class TwitterConnect extends ConnectBase {
   /**
    * Method to validate Credentials and get profile data from twitter.
    *
-   * @Sets oThis.userUniqueIdentifierKind, oThis.userUniqueIdentifierValue
    * @returns {Promise<void>}
    * @private
    */

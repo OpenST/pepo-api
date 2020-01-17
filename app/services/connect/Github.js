@@ -7,10 +7,9 @@ const rootPrefix = '../../..',
   GithubGetUser = require(rootPrefix + '/lib/connect/wrappers/github/GetUser'),
   GithubUserEmail = require(rootPrefix + '/lib/connect/wrappers/github/GetUserEmails'),
   GithubUserFormatter = require(rootPrefix + '/lib/connect/wrappers/github/UserEntityFormatter'),
-  coreConstants = require(rootPrefix + '/config/coreConstants'),
   userConstants = require(rootPrefix + '/lib/globalConstant/user'),
-  responseHelper = require(rootPrefix + '/lib/formatter/response'),
-  userIdentifierConstants = require(rootPrefix + '/lib/globalConstant/userIdentifier');
+  userIdentifierConstants = require(rootPrefix + '/lib/globalConstant/userIdentifier'),
+  CommonValidators = require(rootPrefix + '/lib/validators/Common');
 
 /**
  * Github Connect
@@ -19,7 +18,7 @@ const rootPrefix = '../../..',
  */
 class GithubConnect extends ConnectBase {
   /**
-   * Constructor for social platform connects base.
+   * Constructor for github connect.
    *
    * @param {object} params
    * @param {string} params.access_code
@@ -41,7 +40,6 @@ class GithubConnect extends ConnectBase {
   /**
    * Method to validate access tokens and fetching data from Social platforms.
    *
-   * @Sets oThis.userUniqueIdentifierKind, oThis.userUniqueIdentifierValue
    * @returns {Promise<void>}
    * @private
    */
@@ -70,9 +68,6 @@ class GithubConnect extends ConnectBase {
         }
       }
     }
-
-    oThis.userUniqueIdentifierValue = oThis.formattedGithubUser.email;
-    oThis.userUniqueIdentifierKind = userIdentifierConstants.emailKind;
   }
 
   /**
@@ -134,7 +129,8 @@ class GithubConnect extends ConnectBase {
       accessToken: oThis.accessToken,
       userGithubEntity: oThis.formattedGithubUser
     };
-    let signUpResponse = await new GithubSignup(signUpParams).perform();
+
+    oThis.serviceResp = await new GithubSignup(signUpParams).perform();
   }
 
   /**
@@ -152,7 +148,23 @@ class GithubConnect extends ConnectBase {
       githubUserObj: oThis.socialUserObj
     };
 
-    let loginResponse = await new GithubLogin(loginParams).perform();
+    oThis.serviceResp = await new GithubLogin(loginParams).perform();
+  }
+
+  /**
+   * Get unique property from github info, like email
+   *
+   * @returns {{}|{kind: string, value: *}}
+   * @private
+   */
+  _getSocialUserUniqueProperties() {
+    const oThis = this;
+
+    if (!oThis.formattedGithubUser.email || !CommonValidators.isValidEmail(oThis.formattedGithubUser.email)) {
+      return {};
+    }
+
+    return { kind: userIdentifierConstants.emailKind, value: oThis.formattedGithubUser.email };
   }
 }
 

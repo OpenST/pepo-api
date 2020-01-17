@@ -9,7 +9,9 @@ const rootPrefix = '../../..',
   coreConstants = require(rootPrefix + '/config/coreConstants'),
   userConstants = require(rootPrefix + '/lib/globalConstant/user'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
-  appleHelper = require(rootPrefix + '/lib/connect/wrappers/apple/helper');
+  appleHelper = require(rootPrefix + '/lib/connect/wrappers/apple/helper'),
+  userIdentifierConstants = require(rootPrefix + '/lib/globalConstant/userIdentifier'),
+  CommonValidators = require(rootPrefix + '/lib/validators/Common');
 
 /**
  * Apple Connect
@@ -18,7 +20,7 @@ const rootPrefix = '../../..',
  */
 class AppleConnect extends ConnectBase {
   /**
-   * Constructor for social platform connects base.
+   * Constructor for apple connect.
    *
    * @param {object} params
    * @param {string} params.authorization_code
@@ -40,12 +42,12 @@ class AppleConnect extends ConnectBase {
     oThis.name = params.full_name;
 
     oThis.appleOAuthDetails = null;
+    oThis.decryptedAppleEmail = null;
   }
 
   /**
    * Method to validate access tokens and fetching data from Social platforms.
    *
-   * @Sets oThis.userUniqueIdentifierKind, oThis.userUniqueIdentifierValue
    * @returns {Promise<void>}
    * @private
    */
@@ -110,8 +112,7 @@ class AppleConnect extends ConnectBase {
       );
     }
 
-    oThis.userUniqueIdentifierKind = 'email';
-    oThis.userUniqueIdentifierValue = decryptedIdentityToken.email;
+    oThis.decryptedAppleEmail = decryptedIdentityToken.email;
   }
 
   /**
@@ -194,7 +195,7 @@ class AppleConnect extends ConnectBase {
       fullName: oThis.fullName
     };
 
-    let signUpResponse = await new AppleSignup(params).perform();
+    oThis.serviceResp = await new AppleSignup(params).perform();
   }
 
   /**
@@ -212,7 +213,23 @@ class AppleConnect extends ConnectBase {
       fullName: oThis.fullName
     };
 
-    let loginResponse = await new AppleLogin(params).perform();
+    oThis.serviceResp = await new AppleLogin(params).perform();
+  }
+
+  /**
+   * Get unique property from github info, like email
+   *
+   * @returns {{}|{kind: string, value: *}}
+   * @private
+   */
+  _getSocialUserUniqueProperties() {
+    const oThis = this;
+
+    if (!oThis.decryptedAppleEmail || !CommonValidators.isValidEmail(oThis.decryptedAppleEmail)) {
+      return {};
+    }
+
+    return { kind: userIdentifierConstants.emailKind, value: oThis.decryptedAppleEmail };
   }
 }
 
