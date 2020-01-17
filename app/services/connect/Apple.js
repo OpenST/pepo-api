@@ -3,16 +3,17 @@ const rootPrefix = '../../..',
   AppleLogin = require(rootPrefix + '/lib/connect/login/ByApple'),
   ConnectBase = require(rootPrefix + '/app/services/connect/Base'),
   AppleSignup = require(rootPrefix + '/lib/connect/signup/ByApple'),
-  AppleUserModel = require(rootPrefix + '/app/models/mysql/appleUser'),
+  CommonValidators = require(rootPrefix + '/lib/validators/Common'),
+  AppleUserModel = require(rootPrefix + '/app/models/mysql/AppleUser'),
   GetAccessToken = require(rootPrefix + '/lib/connect/wrappers/apple/GetAccessToken'),
   GetApplePublicKey = require(rootPrefix + '/lib/connect/wrappers/apple/GetPublicKey'),
   coreConstants = require(rootPrefix + '/config/coreConstants'),
   userConstants = require(rootPrefix + '/lib/globalConstant/user'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   appleHelper = require(rootPrefix + '/lib/connect/wrappers/apple/helper'),
-  userIdentifierConstants = require(rootPrefix + '/lib/globalConstant/userIdentifier'),
-  CommonValidators = require(rootPrefix + '/lib/validators/Common');
+  userIdentifierConstants = require(rootPrefix + '/lib/globalConstant/userIdentifier');
 
+const APPLE_API_URL = 'https://appleid.apple.com';
 /**
  * Apple Connect
  *
@@ -72,8 +73,6 @@ class AppleConnect extends ConnectBase {
     let publicKey = await new GetApplePublicKey().perform(),
       decryptedIdentityToken = await appleHelper.getDecryptedIdentityToken(oThis.identityToken, publicKey);
 
-    console.log('--decryptedIdentityToken--', decryptedIdentityToken);
-
     if (decryptedIdentityToken.iss !== APPLE_API_URL) {
       return Promise.reject(
         responseHelper.error({
@@ -130,7 +129,6 @@ class AppleConnect extends ConnectBase {
       }).perform();
 
     oThis.appleOAuthDetails = oAuthDetails;
-    console.log('--oThis.appleOAuthDetails--', oThis.appleOAuthDetails);
   }
 
   /**

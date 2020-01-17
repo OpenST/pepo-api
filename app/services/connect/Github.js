@@ -2,6 +2,7 @@ const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   ConnectBase = require(rootPrefix + '/app/services/connect/Base'),
   GithubLogin = require(rootPrefix + '/lib/connect/login/ByGithub'),
+  CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   GithubSignup = require(rootPrefix + '/lib/connect/signup/ByGithub'),
   GithubUserModel = require(rootPrefix + '/app/models/mysql/GithubUser'),
   GithubGetUser = require(rootPrefix + '/lib/connect/wrappers/github/GetUser'),
@@ -21,7 +22,7 @@ class GithubConnect extends ConnectBase {
    * Constructor for github connect.
    *
    * @param {object} params
-   * @param {string} params.access_code
+   * @param {string} params.access_token
    * @param {string} params.identity_token
    *
    * @augments ServiceBase
@@ -165,6 +166,22 @@ class GithubConnect extends ConnectBase {
     }
 
     return { kind: userIdentifierConstants.emailKind, value: oThis.formattedGithubUser.email };
+  }
+
+  /**
+   * Get social user unique properties
+   *
+   * @returns {{}|{kind: *, value: *}}
+   * @private
+   */
+  _getSocialUserUniqueProperties() {
+    const oThis = this;
+
+    if (!oThis.userUniqueIdentifierValue || !CommonValidators.isValidEmail(oThis.userUniqueIdentifierValue)) {
+      return {};
+    }
+
+    return { kind: userIdentifierConstants.emailKind, value: oThis.userUniqueIdentifierValue };
   }
 }
 
