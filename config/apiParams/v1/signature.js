@@ -1098,6 +1098,26 @@ const v1Signature = {
       }
     ]
   },
+
+  [apiName.channelUsers]: {
+    mandatory: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      },
+      {
+        parameter: 'channel_id',
+        validatorMethods: ['validateNonZeroInteger']
+      }
+    ],
+    optional: [
+      {
+        parameter: paginationConstants.paginationIdentifierKey,
+        validatorMethods: ['validateString', 'validatePaginationIdentifier']
+      }
+    ]
+  },
+
   [apiName.getAllVideoListByTagId]: {
     mandatory: [
       {

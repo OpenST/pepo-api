@@ -47,7 +47,7 @@ class ChannelModel extends ModelBase {
     const formattedData = {
       id: dbRow.id,
       name: dbRow.name,
-      status: channelConstants.invertedStatuses[dbRow.status],
+      status: channelConstants.statuses[dbRow.status],
       descriptionId: dbRow.description_id,
       imageId: dbRow.image_id,
       createdAt: dbRow.created_at,
@@ -75,7 +75,7 @@ class ChannelModel extends ModelBase {
     const response = {};
 
     for (let index = 0; index < dbRows.length; index++) {
-      const formatDbRow = oThis._formatDbData(dbRows[index]);
+      const formatDbRow = oThis.formatDbData(dbRows[index]);
       response[formatDbRow.id] = formatDbRow;
     }
 

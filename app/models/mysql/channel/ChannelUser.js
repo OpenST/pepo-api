@@ -56,6 +56,50 @@ class ChannelUserModel extends ModelBase {
   }
 
   /**
+   * Fetch by channel id.
+   *
+   * @param {integer} params.limit: no of rows to fetch
+   * @param {integer} params.channelId: channel id
+   * @param {integer} params.paginationTimestamp: pagination timestamp
+   *
+   * @returns {Promise}
+   */
+  async fetchByChannelId(params) {
+    const oThis = this;
+
+    const limit = params.limit,
+      channelId = params.channelId,
+      paginationTimestamp = params.paginationTimestamp;
+
+    const queryObject = oThis
+      .select('user_id, created_at')
+      .where({
+        channel_id: channelId,
+        status: channelUsersConstants.invertedStatuses[channelUsersConstants.activeStatus]
+      })
+      .order_by('created_at desc')
+      .limit(limit);
+
+    if (paginationTimestamp) {
+      queryObject.where(['created_at < ?', paginationTimestamp]);
+    }
+
+    const dbRows = await queryObject.fire();
+
+    let nextPaginationTimestamp = null;
+
+    const userIds = [];
+
+    for (let index = 0; index < dbRows.length; index++) {
+      const formatDbRow = oThis.formatDbData(dbRows[index]);
+      nextPaginationTimestamp = formatDbRow.createdAt;
+      userIds.push(formatDbRow.userId);
+    }
+
+    return { userIds: userIds, nextPaginationTimestamp: nextPaginationTimestamp };
+  }
+
+  /**
    * Fetch channel user for given user id and channel ids.
    *
    * @param {array} ids: channel ids
@@ -86,12 +130,24 @@ class ChannelUserModel extends ModelBase {
    * @returns {Promise<*>}
    */
   static async flushCache(params) {
+    const promisesArray = [];
+
+    const ChannelUsersByChannelIdPaginationCache = require(rootPrefix +
+      '/lib/cacheManagement/single/UserIdsByChannelIdPagination.js');
+    if (params.channelId) {
+      promisesArray.push(new ChannelUsersByChannelIdPaginationCache({ channelId: params.channelId }).clear());
+    }
+
     const cacheByUserIdAndChannelIds = require(rootPrefix +
       '/lib/cacheManagement/multi/ChannelUserByUserIdAndChannelIds');
 
     if (params.userId && params.channelId) {
-      await new cacheByUserIdAndChannelIds({ userId: params.userId, channelIds: [params.channelId] }).clear();
+      promisesArray.push(
+        new cacheByUserIdAndChannelIds({ userId: params.userId, channelIds: [params.channelId] }).clear()
+      );
     }
+
+    await Promise.all(promisesArray);
   }
 }
 

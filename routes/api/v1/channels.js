@@ -83,4 +83,26 @@ router.get('/:channel_id/videos', sanitizer.sanitizeDynamicUrlParams, function(r
   Promise.resolve(routeHelper.perform(req, res, next, '/channel/GetVideoList', 'r_a_v1_c_4', null, dataFormatterFunc));
 });
 
+/* Fetch videos of a channel. */
+router.get('/:channel_id/users', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.channelUsers;
+  req.decodedParams.channel_id = req.params.channel_id;
+
+  const dataFormatterFunc = async function(serviceResponse) {
+    const wrapperFormatterRsp = await new FormatterComposer({
+      resultType: responseEntityKey.channelUserList,
+      entityKindToResponseKeyMap: {
+        [entityTypeConstants.usersMap]: responseEntityKey.channelUserList,
+        [entityTypeConstants.imagesMap]: responseEntityKey.images,
+        [entityTypeConstants.userListMeta]: responseEntityKey.meta
+      },
+      serviceData: serviceResponse.data
+    }).perform();
+
+    serviceResponse.data = wrapperFormatterRsp.data;
+  };
+
+  Promise.resolve(routeHelper.perform(req, res, next, '/channel/user/List', 'r_a_v1_c_5', null, dataFormatterFunc));
+});
+
 module.exports = router;
