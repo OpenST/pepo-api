@@ -7,6 +7,7 @@ const rootPrefix = '../../../..',
 // Declare variables.
 const dbName = databaseConstants.bigDbName;
 
+// TODO - santhosh - add method for insert
 /**
  * Class for video segment model.
  *

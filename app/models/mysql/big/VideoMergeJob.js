@@ -57,6 +57,8 @@ class VideoMergeJob extends ModelBase {
     return oThis.sanitizeFormattedData(formattedData);
   }
 
+  // TODO - santhosh - add method for update status
+
   /**
    * Fetch video merge jobs by ids.
    *
@@ -91,6 +93,7 @@ class VideoMergeJob extends ModelBase {
    *
    * @returns {Promise<void>}
    */
+  // TODO - santhosh - flush cache from here.
   async insertJob(params) {
     const oThis = this;
 

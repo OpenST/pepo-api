@@ -368,6 +368,7 @@ class CoreConstants {
     return process.env.PR_LAMBDA_VIDEO_COMPRESS_FUNCTION;
   }
 
+  // TODO - santhosh - why not PA_PR?
   get PR_VIDEO_MERGE_FUNCTION() {
     return process.env.PR_LAMBDA_VIDEO_MERGE_FUNCTION;
   }
