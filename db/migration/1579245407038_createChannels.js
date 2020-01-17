@@ -10,8 +10,8 @@ const upQuery =
   `id` bigint(20) NOT NULL AUTO_INCREMENT,\
   `name` varchar(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL, \n\
   `status` tinyint(4) NOT NULL,\
-  `description_id` bigint(20) NOT NULL,\n\
-  `image_id` bigint(20) NOT NULL,\n\
+  `description_id` bigint(20) DEFAULT NULL,\n\
+  `image_id` bigint(20) DEFAULT NULL,\n\
   `created_at` int(11) NOT NULL,\
   `updated_at` int(11) NOT NULL,\
   PRIMARY KEY (`id`),\
