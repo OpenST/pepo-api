@@ -1,15 +1,15 @@
 const rootPrefix = '../../..',
-  ConnectBase = require(rootPrefix + '/app/services/connect/Base'),
   ServiceBase = require(rootPrefix + '/app/services/Base'),
-  AppleUserModel = require(rootPrefix + '/app/models/mysql/appleUser'),
-  AppleSignup = require(rootPrefix + '/lib/connect/signup/ByApple'),
   AppleLogin = require(rootPrefix + '/lib/connect/login/ByApple'),
-  GetApplePublicKey = require(rootPrefix + '/lib/connect/wrappers/apple/GetPublicKey'),
+  ConnectBase = require(rootPrefix + '/app/services/connect/Base'),
+  AppleSignup = require(rootPrefix + '/lib/connect/signup/ByApple'),
+  AppleUserModel = require(rootPrefix + '/app/models/mysql/appleUser'),
   GetAccessToken = require(rootPrefix + '/lib/connect/wrappers/apple/GetAccessToken'),
-  appleHelper = require(rootPrefix + '/lib/connect/wrappers/apple/helper'),
+  GetApplePublicKey = require(rootPrefix + '/lib/connect/wrappers/apple/GetPublicKey'),
   coreConstants = require(rootPrefix + '/config/coreConstants'),
   userConstants = require(rootPrefix + '/lib/globalConstant/user'),
-  responseHelper = require(rootPrefix + '/lib/formatter/response');
+  responseHelper = require(rootPrefix + '/lib/formatter/response'),
+  appleHelper = require(rootPrefix + '/lib/connect/wrappers/apple/helper');
 
 /**
  * Apple Connect
