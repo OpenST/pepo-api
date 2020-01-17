@@ -153,18 +153,6 @@ class AppleConnect extends ConnectBase {
   }
 
   /**
-   * Method to check whether social account exists or not.
-   *
-   * @returns {boolean}
-   * @private
-   */
-  _socialAccountExists() {
-    const oThis = this;
-
-    return oThis.socialUserObj && oThis.socialUserObj.userId;
-  }
-
-  /**
    * Method to check whether same social platform is connected before.
    *
    * @param userObj

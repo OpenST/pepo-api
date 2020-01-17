@@ -1197,6 +1197,32 @@ const v1Signature = {
       }
     ],
     optional: []
+  },
+  [apiName.googleConnect]: {
+    mandatory: [
+      {
+        parameter: 'access_token',
+        validatorMethods: ['validateString']
+      },
+      {
+        parameter: 'refresh_token',
+        validatorMethods: ['validateString']
+      }
+    ],
+    optional: [
+      {
+        parameter: 'expires_in',
+        validatorMethods: ['validateString']
+      },
+      {
+        parameter: 'token_type',
+        validatorMethods: ['validateString']
+      },
+      {
+        parameter: 'id_token',
+        validatorMethods: ['validateString']
+      }
+    ]
   }
 };
 

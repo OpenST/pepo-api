@@ -1,12 +1,12 @@
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   ConnectBase = require(rootPrefix + '/app/services/connect/Base'),
-  GithubLogin = require(rootPrefix + '/lib/connect/login/ByGithub'),
-  GithubSignup = require(rootPrefix + '/lib/connect/signup/ByGithub'),
-  GithubUserModel = require(rootPrefix + '/app/models/mysql/GithubUser'),
-  GithubGetUser = require(rootPrefix + '/lib/connect/wrappers/github/GetUser'),
-  GithubUserEmail = require(rootPrefix + '/lib/connect/wrappers/github/GetUserEmails'),
-  GithubUserFormatter = require(rootPrefix + '/lib/connect/wrappers/github/UserEntityFormatter'),
+  GoogleLogin = require(rootPrefix + '/lib/connect/login/ByGoogle'),
+  GoogleSignup = require(rootPrefix + '/lib/connect/signup/ByGoogle'),
+  GoogleUserModel = require(rootPrefix + '/app/models/mysql/GoogleUser'),
+  GoogleUserInfoLib = require(rootPrefix + '/lib/connect/wrappers/google/UserInfo'),
+  GoogleUserFormatter = require(rootPrefix + '/lib/connect/wrappers/google/UserEntityFormatter'),
+  UserModel = require(rootPrefix + '/app/models/mysql/User'),
   userConstants = require(rootPrefix + '/lib/globalConstant/user'),
   userIdentifierConstants = require(rootPrefix + '/lib/globalConstant/userIdentifier'),
   CommonValidators = require(rootPrefix + '/lib/validators/Common');
@@ -16,12 +16,16 @@ const rootPrefix = '../../..',
  *
  * @class GithubConnect
  */
-class GithubConnect extends ConnectBase {
+class GoogleConnect extends ConnectBase {
   /**
    * Constructor for Google connect.
    *
    * @param {object} params
    * @param {string} params.access_token
+   * @param {string} params.expires_in
+   * @param {string} params.refresh_token
+   * @param {string} params.token_type
+   * @param {string} params.id_token
    *
    * @augments ServiceBase
    *
@@ -32,8 +36,12 @@ class GithubConnect extends ConnectBase {
 
     const oThis = this;
     oThis.accessToken = params.access_token;
+    oThis.tokenExpiry = params.expires_in;
+    oThis.refreshToken = params.refresh_token;
+    oThis.tokenType = params.token_type;
+    oThis.idToken = params.id_token;
 
-    oThis.gitHubUserDetails = null;
+    oThis.formattedGoogleUser = null;
   }
 
   /**
@@ -45,32 +53,17 @@ class GithubConnect extends ConnectBase {
   async _validateAndFetchSocialInfo() {
     const oThis = this;
 
-    let githubUserRsp = await new GithubGetUser({ oAuthToken: oThis.accessToken }).getUser();
+    let googleUserRsp = await new GoogleUserInfoLib({ accessToken: oThis.accessToken }).perform();
 
-    if (githubUserRsp.isFailure()) {
-      return Promise.reject(githubUserRsp);
+    if (googleUserRsp.isFailure()) {
+      return Promise.reject(googleUserRsp);
     }
 
-    oThis.formattedGithubUser = new GithubUserFormatter(githubUserRsp.data);
-
-    if (!oThis.formattedGithubUser.email) {
-      let githubUserEmailRsp = await new GithubUserEmail({ oAuthToken: oThis.accessToken }).getUserEmails();
-      if (githubUserEmailRsp.isFailure()) {
-        return Promise.reject(githubUserRsp);
-      }
-
-      for (let i = 0; i < githubUserEmailRsp.data; i++) {
-        let emailObject = githubUserEmailRsp.data[i];
-        if (emailObject.primary == 'true') {
-          oThis.formattedGithubUser.email = emailObject.email;
-          break;
-        }
-      }
-    }
+    oThis.formattedGoogleUser = new GoogleUserFormatter(googleUserRsp.data);
   }
 
   /**
-   * Method to fetch data from respective social_users tables
+   * Method to fetch data from google_users tables
    *
    * @Sets oThis.socialUserObj
    * @returns {Promise<void>}
@@ -79,27 +72,15 @@ class GithubConnect extends ConnectBase {
   async _fetchSocialUser() {
     const oThis = this;
 
-    //fetch social user on the basis of apple id
-    let queryResponse = await new GithubUserModel()
+    //fetch social user on the basis of google user id
+    let queryResponse = await new GoogleUserModel()
       .select('*')
-      .where(['github_id = ?', oThis.formattedGithubUser.id])
+      .where(['google_id = ?', oThis.formattedGoogleUser.id])
       .fire();
 
     if (queryResponse.length > 0) {
       oThis.socialUserObj = queryResponse[0];
     }
-  }
-
-  /**
-   * Method to check whether social account exists or not.
-   *
-   * @returns {boolean}
-   * @private
-   */
-  _socialAccountExists() {
-    const oThis = this;
-
-    return oThis.socialUserObj && oThis.socialUserObj.userId;
   }
 
   /**
@@ -112,7 +93,7 @@ class GithubConnect extends ConnectBase {
     // Look for property set in user object.
     const propertiesArray = new UserModel().getBitwiseArray('properties', userObj.properties);
 
-    return propertiesArray.indexOf(userConstants.hasGithubLoginProperty) > -1;
+    return propertiesArray.indexOf(userConstants.hasGoogleLoginProperty) > -1;
   }
 
   /**
@@ -126,10 +107,13 @@ class GithubConnect extends ConnectBase {
 
     let signUpParams = {
       accessToken: oThis.accessToken,
-      userGithubEntity: oThis.formattedGithubUser
+      refreshToken: oThis.refreshToken,
+      userGoogleEntity: oThis.formattedGoogleUser
     };
 
-    oThis.serviceResp = await new GithubSignup(signUpParams).perform();
+    console.log('signUpParams: ', signUpParams);
+
+    oThis.serviceResp = await new GoogleSignup(signUpParams).perform();
   }
 
   /**
@@ -143,11 +127,12 @@ class GithubConnect extends ConnectBase {
 
     let loginParams = {
       accessToken: oThis.accessToken,
-      userGithubEntity: oThis.formattedGithubUser,
-      githubUserObj: oThis.socialUserObj
+      refreshToken: oThis.refreshToken,
+      userGoogleEntity: oThis.formattedGoogleUser,
+      googleUserObj: oThis.socialUserObj
     };
 
-    oThis.serviceResp = await new GithubLogin(loginParams).perform();
+    // oThis.serviceResp = await new GoogleLogin(loginParams).perform();
   }
 
   /**
@@ -159,12 +144,12 @@ class GithubConnect extends ConnectBase {
   _getSocialUserUniqueProperties() {
     const oThis = this;
 
-    if (!oThis.formattedGithubUser.email || !CommonValidators.isValidEmail(oThis.formattedGithubUser.email)) {
+    if (!oThis.formattedGoogleUser.email || !CommonValidators.isValidEmail(oThis.formattedGoogleUser.email)) {
       return {};
     }
 
-    return { kind: userIdentifierConstants.emailKind, value: oThis.formattedGithubUser.email };
+    return { kind: userIdentifierConstants.emailKind, value: oThis.formattedGoogleUser.email };
   }
 }
 
-module.exports = GithubConnect;
+module.exports = GoogleConnect;
