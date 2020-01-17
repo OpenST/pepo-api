@@ -55,7 +55,7 @@ class GithubConnect extends ConnectBase {
     oThis.formattedGithubUser = new GithubUserFormatter(githubUserRsp.data);
 
     if (!oThis.formattedGithubUser.email) {
-      let githubUserEmailRsp = await new GithubUserEmail({ oAuthToken: oThis.accessToken }).getUserEmails();
+      let githubUserEmailRsp = await new GithubUserEmail().getUserEmails({ oAuthToken: oThis.accessToken });
       if (githubUserEmailRsp.isFailure()) {
         return Promise.reject(githubUserRsp);
       }
