@@ -13,11 +13,11 @@ const rootPrefix = '../../../',
 /**
  * Class to add user to a channel.
  *
- * @class SaveEmail
+ * @class JoinChannel
  */
 class JoinChannel extends ServiceBase {
   /**
-   * Constructor to save email id of user.
+   * Constructor to add user to a channel.
    *
    * @param {object} params
    * @param {number} params.channel_id

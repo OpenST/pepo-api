@@ -144,6 +144,11 @@
     "code": "UNPROCESSABLE_ENTITY",
     "message": "User is already in the channel."
   },
+  "user_inactive_in_channel": {
+    "http_code": "422",
+    "code": "UNPROCESSABLE_ENTITY",
+    "message": "User is not in the channel."
+  },
   "user_already_unmuted": {
     "http_code": "422",
     "code": "UNPROCESSABLE_ENTITY",
