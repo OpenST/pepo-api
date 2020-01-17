@@ -64,6 +64,7 @@ class VideoMergeJobStatus extends ServiceBase {
     }
 
     oThis.jobDetails = cacheResponse.data[oThis.jobId];
+    // TODO - santhosh - validation missing.
   }
 
   /**
