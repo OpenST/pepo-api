@@ -1,6 +1,7 @@
 const rootPrefix = '../../../',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   ChannelUserModel = require(rootPrefix + '/app/models/mysql/channel/ChannelUser'),
+  ChannelStatModel = require(rootPrefix + '/app/models/mysql/channel/ChannelStat'),
   ChannelByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/ChannelByIds'),
   ChannelUserByUserIdAndChannelIdsCache = require(rootPrefix +
     '/lib/cacheManagement/multi/ChannelUserByUserIdAndChannelIds'),
@@ -52,6 +53,8 @@ class JoinChannel extends ServiceBase {
     await oThis._fetchChannelUser();
 
     await oThis._addUpdateChannelUser();
+
+    await oThis._updateChannelStat();
 
     return responseHelper.successWithData({});
   }
@@ -171,6 +174,23 @@ class JoinChannel extends ServiceBase {
     }
 
     await ChannelUserModel.flushCache(oThis.channelUserObj);
+  }
+
+  /**
+   * Update channel stat.
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _updateChannelStat() {
+    const oThis = this;
+
+    await new ChannelStatModel()
+      .update('total_users = total_users + 1')
+      .where({ channel_id: oThis.channelId })
+      .fire();
+
+    await ChannelStatModel.flushCache({ channelId: oThis.channelId });
   }
 }
 
