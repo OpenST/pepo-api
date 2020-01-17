@@ -53,6 +53,27 @@ class GoogleUserExtended extends ModelBase {
 
     return oThis.sanitizeFormattedData(formattedData);
   }
+
+  /**
+   * Fetch by google user id.
+   *
+   * @param googleUserId
+   * @returns {Promise<void>}
+   */
+  async fetchByGoogleUserId(googleUserId) {
+    const oThis = this;
+
+    const dbRow = await oThis
+      .select('*')
+      .where({ google_user_id: googleUserId })
+      .fire();
+
+    if (dbRow.length == 0) {
+      return null;
+    }
+
+    return oThis.formatDbData(dbRow[0]);
+  }
 }
 
 module.exports = GoogleUserExtended;

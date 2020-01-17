@@ -133,7 +133,9 @@ class GithubConnect extends ConnectBase {
     let loginParams = {
       accessToken: oThis.accessToken,
       userGithubEntity: oThis.formattedGithubUser,
-      githubUserObj: oThis.socialUserObj
+      githubUserObj: oThis.socialUserObj,
+      userId: oThis.userId,
+      isNewSocialConnect: oThis.newSocialConnect
     };
 
     oThis.serviceResp = await new GithubLogin(loginParams).perform();

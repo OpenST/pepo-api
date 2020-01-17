@@ -79,7 +79,7 @@ class GoogleConnect extends ConnectBase {
       .fire();
 
     if (queryResponse.length > 0) {
-      oThis.socialUserObj = queryResponse[0];
+      oThis.socialUserObj = new GoogleUserModel().formatDbData(queryResponse[0]);
     }
   }
 
@@ -129,10 +129,12 @@ class GoogleConnect extends ConnectBase {
       accessToken: oThis.accessToken,
       refreshToken: oThis.refreshToken,
       userGoogleEntity: oThis.formattedGoogleUser,
-      googleUserObj: oThis.socialUserObj
+      googleUserObj: oThis.socialUserObj,
+      userId: oThis.userId,
+      isNewSocialConnect: oThis.newSocialConnect
     };
 
-    // oThis.serviceResp = await new GoogleLogin(loginParams).perform();
+    oThis.serviceResp = await new GoogleLogin(loginParams).perform();
   }
 
   /**

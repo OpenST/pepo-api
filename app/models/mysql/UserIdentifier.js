@@ -49,7 +49,6 @@ class UserIdentifier extends ModelBase {
       userId: dbRow.user_id,
       eValue: dbRow.e_value,
       eKind: dbRow.e_kind, // dhananjay - convert to enum
-      serviceKind: dbRow.service_kind, // dhananjay - convert to enum
       createdAt: dbRow.created_at,
       updatedAt: dbRow.updated_at
     };
@@ -70,7 +69,7 @@ class UserIdentifier extends ModelBase {
 
     const dbRows = await oThis
       .select('*')
-      .where(['e_kind = ? AND e_value = ?', eKind, eValue])
+      .where(['e_kind = ? AND e_value = ?', userIdentifierConstants.invertedKinds[eKind], eValue])
       .fire();
 
     if (dbRows.length === 0) {

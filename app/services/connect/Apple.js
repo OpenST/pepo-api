@@ -213,14 +213,18 @@ class AppleConnect extends ConnectBase {
   async _performLogin() {
     const oThis = this;
 
-    oThis.socialUserObj.appleId = oThis.appleId;
-    oThis.socialUserObj.email = oThis.decryptedAppleEmail;
-    oThis.socialUserObj.name = oThis.fullName;
-
+    let appleUserEntity = {
+      id: oThis.appleId,
+      email: oThis.decryptedAppleEmail,
+      fullName: oThis.fullName || oThis.decryptedAppleEmail
+    };
     let params = {
       appleUserObj: oThis.socialUserObj,
+      appleUserEntity: appleUserEntity,
       accessToken: oThis.appleOAuthDetails.access_token,
-      refreshToken: oThis.appleOAuthDetails.refresh_token
+      refreshToken: oThis.appleOAuthDetails.refresh_token,
+      isNewSocialConnect: oThis.newSocialConnect,
+      userId: oThis.userId
     };
 
     oThis.serviceResp = await new AppleLogin(params).perform();

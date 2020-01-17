@@ -160,6 +160,7 @@ class SocialConnectBase extends ServiceBase {
         } else {
           // We have received same email from twitter and gmail, means its login for user
           oThis.isUserSignUp = false;
+          oThis.userId = userIdentifierObj.userId;
         }
       }
     }
