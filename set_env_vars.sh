@@ -168,8 +168,8 @@ export PA_GOOGLE_CLIENT_EMAIL='pepo-245@lateral-avatar-205714.iam.gserviceaccoun
 export PA_GOOGLE_PROJECT_ID='lateral-avatar-205714'
 export PA_GOOGLE_USAGE_REPORT_SPREADSHEET_ID='1zB67I1MaWo8Ohw4A-yZNHbY0A9nrA1NifhdueTLUBMg'
 export PA_GOOGLE_USAGE_REPORT_GROUP_IDS='{"User data Lifetime": "1969769902", "User data Last 7 days": "262285918", "User data Last 24 hours": "1492159954", "Videos Stats Lifetime": "2079750882", "Videos Stats Last 7 days": "293576976", "Videos Stats Last 24 hrs": "920797104", "Tags Used": "1756942354"}'
-export PA_GOOGLE_CLIENT_SECRET='d-_DoiL3sUgLxjn274weNyu3'
-export PA_GOOGLE_CLIENT_ID='385345557398-spnefi4eaqv3b0j8i7lncur35mivj7ir.apps.googleusercontent.com'
+export PA_GOOGLE_CLIENT_SECRET='PrH4JMqKzPo2ZJZL9c8TWFhf'
+export PA_GOOGLE_CLIENT_ID='82182934708-tt5qs2hbrndc1r5k7ja4cd2vvo44uuf0.apps.googleusercontent.com'
 
 # Video pixel data file path.
 export PA_VIDEO_PIXEL_DATA_S3_FILE_PATH='redshift/full_video_watched_by_devices.csv'
@@ -182,7 +182,7 @@ export PA_TRACKER_ENDPOINT='https://px.pepo.com/devp101_pixel.png'
 
 #Apple constants
 export PA_APPLE_CLIENT_ID='com.pepo.staging'
-export PA_APPLE_REDIRECT_URI='https://stagingpepo.com'
+export PA_APPLE_REDIRECT_URI='https://stagingpepo.com/webview/apple/oauth'
 export PA_APPLE_TEAM_ID='N83K86W6P4'
 export PA_APPLE_KEY_IDENTIFIER='2P3PRWRQGT'
-export PA_PRIVATE_KEY_PATH='/Users/ankitsingh/Downloads/SignInWithApple/PepoStaging/AuthKey_2P3PRWRQGT.p8'
+export PA_APPLE_PRIVATE_KEY='-----BEGIN%20PRIVATE%20KEY-----%0AMIGTAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBHkwdwIBAQQg16k4h4bCtLDUDEIq%0A8Y/2KEWbueEjZqcdDko24dssmjmgCgYIKoZIzj0DAQehRANCAAQXtk9pu4XbH43k%0Apv51c2iuqqEt2d7NwNmMwgstzXIcAmh5sDgQ0apTUJQCgUmNA1KZOiNa2iNvfGD1%0AqPlhU891%0A-----END%20PRIVATE%20KEY-----'

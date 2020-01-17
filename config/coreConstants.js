@@ -495,8 +495,8 @@ class CoreConstants {
     return process.env.PA_APPLE_KEY_IDENTIFIER;
   }
 
-  get PA_PRIVATE_KEY_PATH() {
-    return process.env.PA_PRIVATE_KEY_PATH;
+  get PA_APPLE_PRIVATE_KEY() {
+    return process.env.PA_APPLE_PRIVATE_KEY;
   }
 }
 
