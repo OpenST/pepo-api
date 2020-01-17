@@ -108,6 +108,13 @@ const mysqlConfig = {
         user: coreConstants.REDEMPTION_DB_MYSQL_USER,
         password: coreConstants.REDEMPTION_DB_MYSQL_PASSWORD
       }
+    },
+    channelDbCluster: {
+      master: {
+        host: coreConstants.CHANNEL_DB_MYSQL_HOST,
+        user: coreConstants.CHANNEL_DB_MYSQL_USER,
+        password: coreConstants.CHANNEL_DB_MYSQL_PASSWORD
+      }
     }
   },
   databases: {}
@@ -151,5 +158,8 @@ mysqlConfig.databases[database.fiatDbName] = ['fiatDbCluster'];
 
 // Infra db
 mysqlConfig.databases[database.infraDbName] = ['infraDbCluster'];
+
+// Channel db
+mysqlConfig.databases[database.channelDbName] = ['channelDbCluster'];
 
 module.exports = mysqlConfig;

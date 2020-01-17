@@ -184,7 +184,6 @@ class CoreConstants {
   }
 
   // Fiat db.
-
   get FIAT_DB_MYSQL_HOST() {
     return process.env.PA_FIAT_DB_MYSQL_HOST;
   }
@@ -221,6 +220,19 @@ class CoreConstants {
 
   get REDEMPTION_DB_MYSQL_PASSWORD() {
     return process.env.PA_REDEMPTION_DB_MYSQL_PASSWORD;
+  }
+
+  // Channel db.
+  get CHANNEL_DB_MYSQL_HOST() {
+    return process.env.PA_CHANNEL_DB_MYSQL_HOST;
+  }
+
+  get CHANNEL_DB_MYSQL_USER() {
+    return process.env.PA_CHANNEL_DB_MYSQL_USER;
+  }
+
+  get CHANNEL_DB_MYSQL_PASSWORD() {
+    return process.env.PA_CHANNEL_DB_MYSQL_PASSWORD;
   }
 
   // KMS related constants.
