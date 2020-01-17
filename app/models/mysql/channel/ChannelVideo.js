@@ -34,6 +34,7 @@ class ChannelVideoModel extends ModelBase {
    * @param {number} dbRow.id
    * @param {number} dbRow.channel_id
    * @param {number} dbRow.video_id
+   * @param {number} dbRow.video_kind
    * @param {number} dbRow.status
    * @param {number} dbRow.created_at
    * @param {number} dbRow.updated_at
@@ -47,6 +48,7 @@ class ChannelVideoModel extends ModelBase {
       id: dbRow.id,
       channelId: dbRow.channel_id,
       videoId: dbRow.video_id,
+      videoKind: channelVideosConstants.kinds[dbRow.video_kind],
       status: channelVideosConstants.invertedStatuses[dbRow.status],
       createdAt: dbRow.created_at,
       updatedAt: dbRow.updated_at
@@ -63,7 +65,7 @@ class ChannelVideoModel extends ModelBase {
    * @param {number} params.channelId
    * @param {number} [params.paginationTimestamp]
    *
-   * @returns {Promise<[]>}
+   * @returns {Promise<{}>}
    */
   async fetchVideoIdsByChannelId(params) {
     const oThis = this;
@@ -73,7 +75,7 @@ class ChannelVideoModel extends ModelBase {
       paginationTimestamp = params.paginationTimestamp;
 
     const queryObject = oThis
-      .select('video_id')
+      .select('*')
       .where({
         channel_id: channelId,
         status: channelVideosConstants.invertedStatuses[channelVideosConstants.activeStatus]
@@ -88,11 +90,13 @@ class ChannelVideoModel extends ModelBase {
     const dbRows = await queryObject.fire();
 
     const videoIds = [];
+    let nextPaginationTimestamp = null;
     for (let index = 0; index < dbRows.length; index++) {
       videoIds.push(dbRows[index].video_id);
+      nextPaginationTimestamp = dbRows[index].created_at;
     }
 
-    return videoIds;
+    return { videoIds: videoIds, nextPaginationTimestamp: nextPaginationTimestamp };
   }
 
   /**
