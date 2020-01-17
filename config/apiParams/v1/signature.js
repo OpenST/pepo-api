@@ -1080,7 +1080,7 @@ const v1Signature = {
       }
     ]
   },
-  [apiName.channelVideos]: {
+  [apiName.getChannelVideos]: {
     mandatory: [
       {
         parameter: 'current_user',

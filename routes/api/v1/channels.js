@@ -47,7 +47,7 @@ router.get('/:channel_id/leave', sanitizer.sanitizeDynamicUrlParams, function(re
 
 /* Fetch videos of a channel. */
 router.get('/:channel_id/videos', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
-  req.decodedParams.apiName = apiName.channelVideos;
+  req.decodedParams.apiName = apiName.getChannelVideos;
   req.decodedParams.channel_id = req.params.channel_id;
 
   const dataFormatterFunc = async function(serviceResponse) {
