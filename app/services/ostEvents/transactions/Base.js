@@ -25,6 +25,7 @@ const rootPrefix = '../../../..',
   pepocornTransactionConstants = require(rootPrefix + '/lib/globalConstant/redemption/pepocornTransaction'),
   transactionConstants = require(rootPrefix + '/lib/globalConstant/transaction');
 
+//todo: Refactor Code
 /**
  * Class for transaction kind base.
  *
