@@ -24,7 +24,7 @@ class ChannelTagModel extends ModelBase {
 
     const oThis = this;
 
-    oThis.tableName = 'channel_stats';
+    oThis.tableName = 'channel_tags';
   }
 
   /**
