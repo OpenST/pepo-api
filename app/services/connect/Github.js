@@ -1,15 +1,16 @@
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
+  UserModel = require(rootPrefix + '/app/models/mysql/User'),
   ConnectBase = require(rootPrefix + '/app/services/connect/Base'),
   GithubLogin = require(rootPrefix + '/lib/connect/login/ByGithub'),
+  CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   GithubSignup = require(rootPrefix + '/lib/connect/signup/ByGithub'),
   GithubUserModel = require(rootPrefix + '/app/models/mysql/GithubUser'),
   GithubGetUser = require(rootPrefix + '/lib/connect/wrappers/github/GetUser'),
   GithubUserEmail = require(rootPrefix + '/lib/connect/wrappers/github/GetUserEmails'),
   GithubUserFormatter = require(rootPrefix + '/lib/connect/wrappers/github/UserEntityFormatter'),
   userConstants = require(rootPrefix + '/lib/globalConstant/user'),
-  userIdentifierConstants = require(rootPrefix + '/lib/globalConstant/userIdentifier'),
-  CommonValidators = require(rootPrefix + '/lib/validators/Common');
+  userIdentifierConstants = require(rootPrefix + '/lib/globalConstant/userIdentifier');
 
 /**
  * Github Connect
@@ -45,7 +46,7 @@ class GithubConnect extends ConnectBase {
   async _validateAndFetchSocialInfo() {
     const oThis = this;
 
-    let githubUserRsp = await new GithubGetUser({ oAuthToken: oThis.accessToken }).getUser();
+    let githubUserRsp = await new GithubGetUser().getUser({ oAuthToken: oThis.accessToken });
 
     if (githubUserRsp.isFailure()) {
       return Promise.reject(githubUserRsp);
@@ -86,7 +87,7 @@ class GithubConnect extends ConnectBase {
       .fire();
 
     if (queryResponse.length > 0) {
-      oThis.socialUserObj = queryResponse[0];
+      oThis.socialUserObj = new GithubUserModel().formatDbData(queryResponse[0]);
     }
   }
 
