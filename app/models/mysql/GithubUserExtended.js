@@ -51,6 +51,15 @@ class GithubUserExtendedModel extends ModelBase {
 
     return oThis.sanitizeFormattedData(formattedData);
   }
+
+  /**
+   * Flush cache.
+   *
+   * @param {object} params
+   *
+   * @returns {Promise<*>}
+   */
+  static async flushCache(params) {}
 }
 
 module.exports = GithubUserExtendedModel;
