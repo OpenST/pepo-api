@@ -15,6 +15,7 @@ const rootPrefix = '../../..',
   supportRoutes = require(rootPrefix + '/routes/api/v1/support'),
   cookieHelper = require(rootPrefix + '/lib/cookieHelper'),
   tagRoutes = require(rootPrefix + '/routes/api/v1/tags'),
+  channelRoutes = require(rootPrefix + '/routes/api/v1/channels'),
   searchRoutes = require(rootPrefix + '/routes/api/v1/search'),
   notificationsRoutes = require(rootPrefix + '/routes/api/v1/notifications'),
   fetchGotoRoutes = require(rootPrefix + '/routes/api/v1/fetchGoto'),
@@ -53,6 +54,7 @@ router.use('/redemptions', redemptionsRoutes);
 router.use('/support', supportRoutes);
 router.use('/upload-params', uploadParamsRoutes);
 router.use('/tags', tagRoutes);
+router.use('/channels', channelRoutes);
 router.use('/search', searchRoutes);
 router.use('/notifications', notificationsRoutes);
 router.use('/top-up', topupRoutes);
