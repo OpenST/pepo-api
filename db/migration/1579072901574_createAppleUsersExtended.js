@@ -11,7 +11,6 @@ const upQuery =
       `apple_user_id` bigint(20) NOT NULL, \n\
       `access_token` varchar(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL, \n\
       `refresh_token` varchar(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL, \n\
-      `status` tinyint(4) NOT NULL, \n\
       `created_at` int(11) NOT NULL, \n\
       `updated_at` int(11) NOT NULL, \n\
       PRIMARY KEY (`id`) \n\
