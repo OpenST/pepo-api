@@ -34,19 +34,7 @@ router.get('/:channel_id/join', sanitizer.sanitizeDynamicUrlParams, function(req
   req.decodedParams.apiName = apiName.joinChannel;
   req.decodedParams.channel_id = req.params.channel_id;
 
-  // const dataFormatterFunc = async function(serviceResponse) {
-  //   const wrapperFormatterRsp = await new FormatterComposer({
-  //     resultType: responseEntityKey.tag,
-  //     entityKindToResponseKeyMap: {
-  //       [entityTypeConstants.tag]: responseEntityKey.tag
-  //     },
-  //     serviceData: serviceResponse.data
-  //   }).perform();
-  //
-  //   serviceResponse.data = wrapperFormatterRsp.data;
-  // };
-
-  Promise.resolve(routeHelper.perform(req, res, next, '/channel/user/Join', 'r_a_v1_c_2', null, dataFormatterFunc));
+  Promise.resolve(routeHelper.perform(req, res, next, '/channel/user/Join', 'r_a_v1_c_2', null, null));
 });
 
 /* Leave channel by User. */
@@ -54,19 +42,7 @@ router.get('/:channel_id/leave', sanitizer.sanitizeDynamicUrlParams, function(re
   req.decodedParams.apiName = apiName.leaveChannel;
   req.decodedParams.channel_id = req.params.channel_id;
 
-  // const dataFormatterFunc = async function(serviceResponse) {
-  //   const wrapperFormatterRsp = await new FormatterComposer({
-  //     resultType: responseEntityKey.tag,
-  //     entityKindToResponseKeyMap: {
-  //       [entityTypeConstants.tag]: responseEntityKey.tag
-  //     },
-  //     serviceData: serviceResponse.data
-  //   }).perform();
-  //
-  //   serviceResponse.data = wrapperFormatterRsp.data;
-  // };
-
-  Promise.resolve(routeHelper.perform(req, res, next, '/channel/user/Leave', 'r_a_v1_c_3', null, dataFormatterFunc));
+  Promise.resolve(routeHelper.perform(req, res, next, '/channel/user/Leave', 'r_a_v1_c_3', null, null));
 });
 
 module.exports = router;

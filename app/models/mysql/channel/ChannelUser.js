@@ -56,12 +56,42 @@ class ChannelUserModel extends ModelBase {
   }
 
   /**
+   * Fetch channel user for given user id and channel ids.
+   *
+   * @param {array} ids: channel ids
+   *
+   * @return {object}
+   */
+  async fetchByUserIdAndChannelIds(userId, channelIds) {
+    const oThis = this;
+
+    const response = {};
+
+    const dbRows = await oThis
+      .select('*')
+      .where({ user_id: userId, channel_id: channelIds })
+      .fire();
+
+    for (let index = 0; index < dbRows.length; index++) {
+      const formatDbRow = oThis._formatDbData(dbRows[index]);
+      response[formatDbRow.channelId] = formatDbRow;
+    }
+
+    return response;
+  }
+
+  /**
    * Flush cache.
    *
    * @returns {Promise<*>}
    */
-  static async flushCache() {
-    // Do nothing.
+  static async flushCache(params) {
+    const cacheByUserIdAndChannelIds = require(rootPrefix +
+      '/lib/cacheManagement/multi/ChannelUserByUserIdAndChannelIds');
+
+    if (params.userId && params.channelId) {
+      await new cacheByUserIdAndChannelIds({ userId: params.userId, channelIds: [params.channelId] }).clear();
+    }
   }
 }
 
