@@ -90,13 +90,15 @@ class ChannelVideoModel extends ModelBase {
     const dbRows = await queryObject.fire();
 
     const videoIds = [];
-    let nextPaginationTimestamp = null;
+    const channelVideoDetails = {};
+
     for (let index = 0; index < dbRows.length; index++) {
-      videoIds.push(dbRows[index].video_id);
-      nextPaginationTimestamp = dbRows[index].created_at;
+      const formatDbRow = oThis.formatDbData(dbRows[index]);
+      channelVideoDetails[formatDbRow.videoId] = formatDbRow;
+      videoIds.push(formatDbRow.videoId);
     }
 
-    return { videoIds: videoIds, nextPaginationTimestamp: nextPaginationTimestamp };
+    return { videoIds: videoIds, channelVideoDetails: channelVideoDetails };
   }
 
   /**
