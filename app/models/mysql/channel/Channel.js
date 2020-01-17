@@ -58,12 +58,41 @@ class ChannelModel extends ModelBase {
   }
 
   /**
+   * Fetch channel for given ids.
+   *
+   * @param {array} ids: channel ids
+   *
+   * @return {object}
+   */
+  async fetchByIds(ids) {
+    const oThis = this;
+
+    const response = {};
+
+    const dbRows = await oThis
+      .select('*')
+      .where(['id IN (?)', ids])
+      .fire();
+
+    for (let index = 0; index < dbRows.length; index++) {
+      const formatDbRow = oThis._formatDbData(dbRows[index]);
+      response[formatDbRow.id] = formatDbRow;
+    }
+
+    return response;
+  }
+
+  /**
    * Flush cache.
    *
    * @returns {Promise<*>}
    */
-  static async flushCache() {
-    // Do nothing.
+  static async flushCache(params) {
+    const ChannelByIds = require(rootPrefix + '/lib/cacheManagement/multi/ChannelByIds');
+
+    if (params.id) {
+      await new ChannelByIds({ ids: [params.id] }).clear();
+    }
   }
 }
 
