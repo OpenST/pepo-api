@@ -120,6 +120,39 @@ router.post('/google-login', sanitizer.sanitizeDynamicUrlParams, function(req, r
   );
 });
 
+/* Apple connect. */
+router.post('/apple-login', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.appleConnect;
+
+  cookieHelper.fetchUserUtmCookie(req);
+
+  const onServiceSuccess = async function(serviceResponse) {
+    cookieHelper.setLoginCookie(res, serviceResponse.data.userLoginCookieValue);
+    cookieHelper.deleteUserUtmCookie(res);
+    const wrapperFormatterRsp = await new FormatterComposer({
+      resultType: responseEntityKey.loggedInUser,
+      entityKindToResponseKeyMap: {
+        [entityType.loggedInUser]: responseEntityKey.loggedInUser,
+        [entityType.usersMap]: responseEntityKey.users,
+        [entityType.utmParams]: responseEntityKey.utmParams,
+        [entityType.twitterConnectMeta]: responseEntityKey.meta,
+        [entityType.goto]: responseEntityKey.goto
+      },
+      serviceData: serviceResponse.data
+    }).perform();
+
+    serviceResponse.data = wrapperFormatterRsp.data;
+  };
+
+  const onServiceFailure = async function() {
+    cookieHelper.deleteLoginCookie(res);
+  };
+
+  Promise.resolve(
+    routeHelper.perform(req, res, next, '/connect/Apple', 'r_a_v1_a_7', null, onServiceSuccess, onServiceFailure)
+  );
+});
+
 /* Twitter Disconnect */
 router.post('/twitter-disconnect', cookieHelper.parseUserCookieForLogout, sanitizer.sanitizeDynamicUrlParams, function(
   req,

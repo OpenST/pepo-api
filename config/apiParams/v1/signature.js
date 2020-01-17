@@ -1223,6 +1223,47 @@ const v1Signature = {
         validatorMethods: ['validateString']
       }
     ]
+  },
+  [apiName.appleConnect]: {
+    mandatory: [
+      {
+        parameter: 'authorization_code',
+        validatorMethods: ['validateString']
+      },
+      {
+        parameter: 'authorized_scopes',
+        validatorMethods: ['validateString']
+      },
+      {
+        parameter: 'email',
+        validatorMethods: ['validateString']
+      },
+      {
+        parameter: 'full_name',
+        validatorMethods: ['validateString']
+      },
+      {
+        parameter: 'nonce',
+        validatorMethods: ['validateString']
+      },
+      {
+        parameter: 'identity_token',
+        validatorMethods: ['validateString']
+      },
+      {
+        parameter: 'real_user_status',
+        validatorMethods: ['validateInteger']
+      },
+      {
+        parameter: 'state',
+        validatorMethods: ['validateString']
+      },
+      {
+        parameter: 'user',
+        validatorMethods: ['validateString']
+      }
+    ],
+    optional: []
   }
 };
 

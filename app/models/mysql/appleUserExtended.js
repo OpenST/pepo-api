@@ -34,7 +34,6 @@ class AppleUserExtendedModel extends ModelBase {
    * @param {number} dbRow.apple_user_id
    * @param {string} dbRow.access_token
    * @param {string} dbRow.refresh_token
-   * @param {number} dbRow.status
    * @param {number} dbRow.created_at
    * @param {number} dbRow.updated_at
    *
@@ -48,12 +47,37 @@ class AppleUserExtendedModel extends ModelBase {
       appleUserId: dbRow.apple_user_id,
       accessToken: dbRow.access_token,
       refreshToken: dbRow.refresh_token,
-      status: dbRow.status,
       createdAt: dbRow.created_at,
       updatedAt: dbRow.updated_at
     };
 
     return oThis.sanitizeFormattedData(formattedData);
+  }
+
+  /**
+   * List of formatted column names that can be exposed by service.
+   *
+   * @returns {array}
+   */
+  safeFormattedColumnNames() {
+    return ['id', 'appleUserId', 'createdAt', 'updatedAt'];
+  }
+
+  /**
+   * Fetch apple user extended obj by apple user id.
+   *
+   * @param appleUserId
+   * @returns {Promise<void>}
+   */
+  async fetchByAppleUserId(appleUserId) {
+    const oThis = this;
+
+    const dbRow = await oThis
+      .select('*')
+      .where({ apple_user_id: appleUserId })
+      .fire();
+
+    return oThis.formatDbData(dbRow[0]);
   }
 }
 
