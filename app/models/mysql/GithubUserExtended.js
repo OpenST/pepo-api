@@ -3,7 +3,7 @@ const rootPrefix = '../../..',
   databaseConstants = require(rootPrefix + '/lib/globalConstant/database');
 
 // Declare variables names.
-const dbName = databaseConstants.userDbName;
+const dbName = databaseConstants.socialConnectDbName;
 
 /**
  * Class for github user extended.
