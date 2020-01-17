@@ -33,11 +33,10 @@ class GithubUserModel extends ModelBase {
    * @param {number} dbRow.id
    * @param {string} dbRow.github_id
    * @param {number} dbRow.user_id
-   * @param {string} dbRow.github_login
+   * @param {string} dbRow.user_name
    * @param {string} dbRow.name
    * @param {string} dbRow.email
    * @param {string} dbRow.profile_image_url
-   * @param {string} dbRow.bio
    * @param {number} dbRow.created_at
    * @param {number} dbRow.updated_at
    *
@@ -50,16 +49,32 @@ class GithubUserModel extends ModelBase {
       id: dbRow.id,
       githubId: dbRow.github_id,
       userId: dbRow.user_id,
-      githubLogin: dbRow.github_login,
+      userName: dbRow.user_name,
       name: dbRow.name,
       email: dbRow.email,
       profileImageUrl: dbRow.profile_image_url,
-      bio: dbRow.bio,
       createdAt: dbRow.created_at,
       updatedAt: dbRow.updated_at
     };
 
     return oThis.sanitizeFormattedData(formattedData);
+  }
+
+  /**
+   * Fetch github user by user id.
+   *
+   * @param userId
+   * @returns {Promise<void>}
+   */
+  async fetchByUserId(userId) {
+    const oThis = this;
+
+    const dbRow = await oThis
+      .select('*')
+      .where({ user_id: userId })
+      .fire();
+
+    return oThis.formatDbData(dbRow[0]);
   }
 
   /**

@@ -53,6 +53,32 @@ class GithubUserExtendedModel extends ModelBase {
   }
 
   /**
+   * List of formatted column names that can be exposed by service.
+   *
+   * @returns {array}
+   */
+  safeFormattedColumnNames() {
+    return ['id', 'githubUserId', 'createdAt', 'updatedAt'];
+  }
+
+  /**
+   * Fetch github user extended obj by github user id.
+   *
+   * @param githubUserId
+   * @returns {Promise<void>}
+   */
+  async fetchByGithubUserId(githubUserId) {
+    const oThis = this;
+
+    const dbRow = await oThis
+      .select('*')
+      .where({ github_user_id: githubUserId })
+      .fire();
+
+    return oThis.formatDbData(dbRow[0]);
+  }
+
+  /**
    * Flush cache.
    *
    * @param {object} params
