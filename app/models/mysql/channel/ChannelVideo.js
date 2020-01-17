@@ -56,6 +56,46 @@ class ChannelVideoModel extends ModelBase {
   }
 
   /**
+   * Fetch video ids by channel id.
+   *
+   * @param {object} params
+   * @param {number} params.limit
+   * @param {number} params.channelId
+   * @param {number} [params.paginationTimestamp]
+   *
+   * @returns {Promise<[]>}
+   */
+  async fetchVideoIdsByChannelId(params) {
+    const oThis = this;
+
+    const limit = params.limit,
+      channelId = params.channelId,
+      paginationTimestamp = params.paginationTimestamp;
+
+    const queryObject = oThis
+      .select('video_id')
+      .where({
+        channel_id: channelId,
+        status: channelVideosConstants.invertedStatuses[channelVideosConstants.activeStatus]
+      })
+      .order_by('created_at desc')
+      .limit(limit);
+
+    if (paginationTimestamp) {
+      queryObject.where(['created_at < ?', paginationTimestamp]);
+    }
+
+    const dbRows = await queryObject.fire();
+
+    const videoIds = [];
+    for (let index = 0; index < dbRows.length; index++) {
+      videoIds.push(dbRows[index].video_id);
+    }
+
+    return videoIds;
+  }
+
+  /**
    * Flush cache.
    *
    * @returns {Promise<*>}
