@@ -35,7 +35,6 @@ class LeaveChannel extends ServiceBase {
     oThis.currentUser = params.current_user;
     oThis.channelId = params.channel_id;
 
-    oThis.channelObj = null;
     oThis.channelUserObj = null;
   }
 
@@ -60,8 +59,6 @@ class LeaveChannel extends ServiceBase {
   /**
    * Fetch and validate channel.
    *
-   * @sets oThis.channelObj
-   *
    * @returns {Promise<void>}
    * @private
    */
@@ -73,12 +70,9 @@ class LeaveChannel extends ServiceBase {
       return Promise.reject(channelByIdsCacheResponse);
     }
 
-    oThis.channelObj = channelByIdsCacheResponse.data[oThis.channelId];
+    const channelObj = channelByIdsCacheResponse.data[oThis.channelId];
 
-    if (
-      !CommonValidators.validateNonEmptyObject(oThis.channelObj) ||
-      oThis.channelObj.status !== channelsConstants.activeStatus
-    ) {
+    if (!CommonValidators.validateNonEmptyObject(channelObj) || channelObj.status !== channelsConstants.activeStatus) {
       return Promise.reject(
         responseHelper.error({
           internal_error_identifier: 'a_s_c_u_l_fc_1',
