@@ -1235,10 +1235,6 @@ const v1Signature = {
         validatorMethods: ['validateArray']
       },
       {
-        parameter: 'email',
-        validatorMethods: ['validateAppleEmail']
-      },
-      {
         parameter: 'full_name',
         validatorMethods: ['validateObject']
       },
@@ -1255,15 +1251,20 @@ const v1Signature = {
         validatorMethods: ['validateInteger']
       },
       {
-        parameter: 'state',
-        validatorMethods: ['validateAppleEmail']
-      },
-      {
         parameter: 'user',
         validatorMethods: ['validateString']
       }
     ],
-    optional: []
+    optional: [
+      {
+        parameter: 'email',
+        validatorMethods: ['validateAppleEmail']
+      },
+      {
+        parameter: 'state',
+        validatorMethods: ['validateAppleEmail']
+      }
+    ]
   }
 };
 
