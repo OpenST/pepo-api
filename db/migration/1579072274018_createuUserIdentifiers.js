@@ -13,8 +13,9 @@ const upQuery =
   `e_kind` tinyint(4) NOT NULL,\n\
   `created_at` int(11) NOT NULL,\
   `updated_at` int(11) NOT NULL,\
-  PRIMARY KEY (`id`)\
-  ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;';
+  PRIMARY KEY (`id`),\
+  UNIQUE KEY `uidx_1` (`user_id`,`e_value`)\n\
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;';
 
 const downQuery = 'drop table if exists `user_identifiers`;';
 
