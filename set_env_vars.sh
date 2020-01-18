@@ -74,6 +74,11 @@ export PA_REDEMPTION_DB_MYSQL_HOST='127.0.0.1'
 export PA_REDEMPTION_DB_MYSQL_USER='root'
 export PA_REDEMPTION_DB_MYSQL_PASSWORD='root'
 
+# webhook redemption db
+export PA_WEBHOOK_DB_MYSQL_HOST='127.0.0.1'
+export PA_WEBHOOK_DB_MYSQL_USER='root'
+export PA_WEBHOOK_DB_MYSQL_PASSWORD='root'
+
 #mysql transaction db
 export PA_FIAT_DB_MYSQL_HOST='127.0.0.1'
 export PA_FIAT_DB_MYSQL_USER='root'
