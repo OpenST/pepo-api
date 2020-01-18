@@ -62,7 +62,7 @@ class GithubConnect extends ConnectBase {
 
       for (let i = 0; i < githubUserEmailRsp.data; i++) {
         let emailObject = githubUserEmailRsp.data[i];
-        if (emailObject.primary == 'true') {
+        if (emailObject.primary == true) {
           oThis.formattedGithubUser.email = emailObject.email;
           break;
         }
