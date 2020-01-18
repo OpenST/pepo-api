@@ -1,5 +1,6 @@
 const rootPrefix = '../../../..',
   UpdateUsageDataBase = require(rootPrefix + '/app/services/admin/updateUsageData/Base'),
+  basicHelper = require(rootPrefix + '/helpers/basic'),
   bgJobConstants = require(rootPrefix + '/lib/globalConstant/bgJob');
 
 /**
@@ -26,6 +27,21 @@ class VideosPerformance extends UpdateUsageDataBase {
     const oThis = this;
 
     await oThis.enqueueMultipleJobs();
+
+    const queryEndTimeStampInSeconds = Math.floor(Date.now() / 1000);
+
+    // For 7 days.
+    const queryStartTimeStampInSecondsForSevenDays = queryEndTimeStampInSeconds - 7 * 24 * 60 * 60;
+
+    const sheetGid = basicHelper.isProduction() ? 829142765 : 1851904912;
+
+    await oThis._enqueueJob({
+      queryStartTimeStampInSeconds: queryStartTimeStampInSecondsForSevenDays,
+      queryEndTimeStampInSeconds: queryEndTimeStampInSeconds,
+      sheetName: 'Interval Video Stats Last 7 days',
+      sheetGid: sheetGid,
+      allVideosButOnlyTimeIntervalData: true
+    });
   }
 }
 
