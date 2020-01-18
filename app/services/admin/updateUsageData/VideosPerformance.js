@@ -28,7 +28,7 @@ class VideosPerformance extends UpdateUsageDataBase {
 
     await oThis.enqueueMultipleJobs();
 
-    const queryEndTimeStampInSeconds = Math.floor(Date.now() / 1000);
+    const queryEndTimeStampInSeconds = 1579277944; // TODO - change this in next best of week
 
     // For 7 days.
     const queryStartTimeStampInSecondsForSevenDays = queryEndTimeStampInSeconds - 7 * 24 * 60 * 60;
