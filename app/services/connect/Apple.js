@@ -1,5 +1,6 @@
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
+  UserModel = require(rootPrefix + '/app/models/mysql/User'),
   AppleLogin = require(rootPrefix + '/lib/connect/login/ByApple'),
   ConnectBase = require(rootPrefix + '/app/services/connect/Base'),
   AppleSignup = require(rootPrefix + '/lib/connect/signup/ByApple'),
@@ -93,7 +94,8 @@ class AppleConnect extends ConnectBase {
           internal_error_identifier: 'l_c_l_ba_2',
           api_error_identifier: 'something_went_wrong',
           debug_options: {
-            Error: `aud parameter does not include this client - is: ${jwtClaims.aud} | expected: ${clientID}`
+            // TODO - ankit - what to do here?
+            // Error: `aud parameter does not include this client - is: ${jwtClaims.aud} | expected: ${clientID}`
           }
         })
       );
@@ -128,14 +130,14 @@ class AppleConnect extends ConnectBase {
         authorizationCode: oThis.authorizationCode
       }).perform();
 
-    oAuthDetails = {
-      access_token: 'a591f44180f07407b83585446d4452718.0.nvt.0bXZTXBEJEQ55EJjMzddeA',
-      token_type: 'Bearer',
-      expires_in: 3600,
-      refresh_token: 'refdc0be07e2d4dfdba2c3d1b9ef658f6.0.nvt.g_nz14NPB6wIJvQEn1Lc7A',
-      id_token:
-        'eyJraWQiOiJBSURPUEsxIiwiYWxnIjoiUlMyNTYifQ.eyJpc3MiOiJodHRwczovL2FwcGxlaWQuYXBwbGUuY29tIiwiYXVkIjoiY29tLnBlcG8uc3RhZ2luZyIsImV4cCI6MTU3OTI3NDc1MywiaWF0IjoxNTc5Mjc0MTUzLCJzdWIiOiIwMDAwNTMuZjA4N2E2OTJlZDc2NDQzZjgyNjk2MjY0YzM4M2E3NGIuMTM0OSIsIm5vbmNlIjoiMDUyYjgyZTExOTNlNTdmZWZkYzAzYTI2YjJmZDAyM2YzOGI1NGVlMDE1NWFjZDFjMzY4YzE4ZjVjZmQwNWZiOSIsImF0X2hhc2giOiJ6aHlMZWVSb2FjWk91NTk0RFJMZDZBIiwiZW1haWwiOiJyYWNoaW5Ab3N0LmNvbSIsImVtYWlsX3ZlcmlmaWVkIjoidHJ1ZSIsImF1dGhfdGltZSI6MTU3OTI3Mzk5MH0.ltRvDAm85bELnoada4HWgW_2G19vAsHo9fPIp65xhEzW0sTOZbRlKTW4oKa8LwQ_O-LrtDQXGhjSwg7LWN193yf8ojz2l1-MQLt3bGCjs2hQRHiY3Ztfc8N2K-1zUQYMN2HokNR1N4t9_vgqj5hSx9Ngmy6IMG-rde8ypGJX9QEjZQ4xXDKTe6-Dm9VG24xXheyyXCakVr19zlDaRjSVIgX_Ass16avhTjBgVe2gb-_xcJnjc9loKKR_Bq8dYreZucPefAD2EhX6foTsRTp4EX-UG49nxLG0o02aQbYeTU-tMdtxrJalT8WTjsCnKlFEzpD5QW8ch_wtP8v-SzAF8g'
-    };
+    // oAuthDetails = {
+    //   access_token: 'a591f44180f07407b83585446d4452718.0.nvt.0bXZTXBEJEQ55EJjMzddeA',
+    //   token_type: 'Bearer',
+    //   expires_in: 3600,
+    //   refresh_token: 'refdc0be07e2d4dfdba2c3d1b9ef658f6.0.nvt.g_nz14NPB6wIJvQEn1Lc7A',
+    //   id_token:
+    //     'eyJraWQiOiJBSURPUEsxIiwiYWxnIjoiUlMyNTYifQ.eyJpc3MiOiJodHRwczovL2FwcGxlaWQuYXBwbGUuY29tIiwiYXVkIjoiY29tLnBlcG8uc3RhZ2luZyIsImV4cCI6MTU3OTI3NDc1MywiaWF0IjoxNTc5Mjc0MTUzLCJzdWIiOiIwMDAwNTMuZjA4N2E2OTJlZDc2NDQzZjgyNjk2MjY0YzM4M2E3NGIuMTM0OSIsIm5vbmNlIjoiMDUyYjgyZTExOTNlNTdmZWZkYzAzYTI2YjJmZDAyM2YzOGI1NGVlMDE1NWFjZDFjMzY4YzE4ZjVjZmQwNWZiOSIsImF0X2hhc2giOiJ6aHlMZWVSb2FjWk91NTk0RFJMZDZBIiwiZW1haWwiOiJyYWNoaW5Ab3N0LmNvbSIsImVtYWlsX3ZlcmlmaWVkIjoidHJ1ZSIsImF1dGhfdGltZSI6MTU3OTI3Mzk5MH0.ltRvDAm85bELnoada4HWgW_2G19vAsHo9fPIp65xhEzW0sTOZbRlKTW4oKa8LwQ_O-LrtDQXGhjSwg7LWN193yf8ojz2l1-MQLt3bGCjs2hQRHiY3Ztfc8N2K-1zUQYMN2HokNR1N4t9_vgqj5hSx9Ngmy6IMG-rde8ypGJX9QEjZQ4xXDKTe6-Dm9VG24xXheyyXCakVr19zlDaRjSVIgX_Ass16avhTjBgVe2gb-_xcJnjc9loKKR_Bq8dYreZucPefAD2EhX6foTsRTp4EX-UG49nxLG0o02aQbYeTU-tMdtxrJalT8WTjsCnKlFEzpD5QW8ch_wtP8v-SzAF8g'
+    // };
     console.log('--oAuthDetails--', oAuthDetails);
     if (oAuthDetails.error) {
       return Promise.reject(
