@@ -75,6 +75,10 @@ class GithubUserExtendedModel extends ModelBase {
       .where({ github_user_id: githubUserId })
       .fire();
 
+    if (dbRow.length == 0) {
+      return null;
+    }
+
     return oThis.formatDbData(dbRow[0]);
   }
 
