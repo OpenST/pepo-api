@@ -224,6 +224,13 @@ Note: Get the webhooks id from above run(subscribe webhooks). Secret has to be o
   node executables/pushNotification/aggregator.js --cronProcessId 9
 ```
 
+* Factory process for processing webhook pre process jobs.
+```bash
+  # note: for topics to subscribe and prefetchcount, please see params column of the cron_processes table
+  source set_env_vars.sh
+  node executables/rabbitMqSubscribers/webhookJobPreProcessor.js --cronProcessId 10
+```
+
 ## Web-sockets
 * Start web-socket server.
 ```bash

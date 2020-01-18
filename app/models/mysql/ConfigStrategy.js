@@ -144,6 +144,7 @@ class ConfigStrategyModel extends ModelBase {
     if (
       strategyKindName === configStrategyConstants.bgJobRabbitmq ||
       strategyKindName === configStrategyConstants.notificationRabbitmq ||
+      strategyKindName === configStrategyConstants.webhookPreProcessorRabbitmq ||
       strategyKindName === configStrategyConstants.pepoMobileEventRabbitmq ||
       strategyKindName === configStrategyConstants.socketRabbitmq ||
       strategyKindName === configStrategyConstants.pixelRabbitmq
@@ -213,6 +214,7 @@ class ConfigStrategyModel extends ModelBase {
     switch (configStrategyKinds[strategyKind]) {
       case configStrategyConstants.bgJobRabbitmq:
       case configStrategyConstants.notificationRabbitmq:
+      case configStrategyConstants.webhookPreProcessorRabbitmq:
       case configStrategyConstants.pepoMobileEventRabbitmq:
       case configStrategyConstants.socketRabbitmq:
       case configStrategyConstants.pixelRabbitmq: {

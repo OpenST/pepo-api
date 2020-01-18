@@ -75,15 +75,19 @@ class VideoTag extends ModelBase {
     const oThis = this;
 
     const dbRows = await oThis
-      .select('*')
+      .select('tag_id')
       .where({ video_id: videoIds })
       .fire();
 
     const response = {};
 
+    for (let index = 0; index < videoIds.length; index++) {
+      response[videoIds[index]] = [];
+    }
+
     for (let index = 0; index < dbRows.length; index++) {
       const formatDbRow = oThis.formatDbData(dbRows[index]);
-      response[formatDbRow.videoId] = formatDbRow;
+      response[formatDbRow.videoId] = formatDbRow.tagId;
     }
 
     return response;

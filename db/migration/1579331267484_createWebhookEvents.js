@@ -16,8 +16,8 @@ const upQuery =
   `status` tinyint(4) NOT NULL, \
   `execute_at` int(11) NOT NULL,\
   `retry_count` tinyint(4) NOT NULL DEFAULT 0,\
-  `lock_id` varchar(50) NOT NULL, \
-  `error_response` text COLLATE utf8_unicode_ci, \
+  `lock_id` varchar(50) NULL, \
+  `error_response` text COLLATE utf8_unicode_ci NULL, \
   `created_at` int(11) NOT NULL,\
   `updated_at` int(11) NOT NULL,\
   PRIMARY KEY (`id`),\

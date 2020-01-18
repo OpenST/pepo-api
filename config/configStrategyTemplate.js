@@ -201,6 +201,7 @@ class ConfigStrategyTemplate {
       [configStrategyConstants.memcached]: 'memcachedEntity',
       [configStrategyConstants.bgJobRabbitmq]: 'rabbitmqEntity',
       [configStrategyConstants.notificationRabbitmq]: 'rabbitmqEntity',
+      [configStrategyConstants.webhookPreProcessorRabbitmq]: 'rabbitmqEntity',
       [configStrategyConstants.pepoMobileEventRabbitmq]: 'rabbitmqEntity',
       [configStrategyConstants.pixelRabbitmq]: 'rabbitmqEntity',
       [configStrategyConstants.socketRabbitmq]: 'rabbitmqListEntity',
