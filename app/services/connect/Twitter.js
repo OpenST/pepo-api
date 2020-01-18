@@ -182,6 +182,7 @@ class TwitterConnect extends ConnectBase {
       twitterRespHeaders: oThis.twitterRespHeaders,
       token: oThis.token,
       secret: oThis.secret,
+      userId: oThis.userId,
       isNewSocialConnect: oThis.newSocialConnect
     };
 
