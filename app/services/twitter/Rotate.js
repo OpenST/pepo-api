@@ -3,6 +3,7 @@ const rootPrefix = '../../..',
   UserModel = require(rootPrefix + '/app/models/mysql/User'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   TwitterUserModel = require(rootPrefix + '/app/models/mysql/TwitterUser'),
+  TwitterUserExtendedModel = require(rootPrefix + '/app/models/mysql/TwitterUserExtended'),
   UserIdByUserNamesCache = require(rootPrefix + '/lib/cacheManagement/multi/UserIdByUserNames'),
   TwitterUserByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TwitterUserByIds'),
   TwitterUserByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TwitterUserByUserIds'),
@@ -53,6 +54,8 @@ class RotateTwitterAccount extends ServiceBase {
     await oThis._rotateTwitterAccount();
 
     await oThis._clearTwitterUserCache();
+
+    await oThis._deleteTwitterUserExtended();
 
     await oThis._markUserEmailAsNull();
 
@@ -173,6 +176,23 @@ class RotateTwitterAccount extends ServiceBase {
       .update({ twitter_id: negatedTwitterId })
       .where({ id: oThis.twitterUserId })
       .fire();
+  }
+
+  /**
+   * Delete twitter user extended obj for twitter user id.
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _deleteTwitterUserExtended() {
+    const oThis = this;
+
+    await new TwitterUserExtendedModel()
+      .delete()
+      .where({ twitter_user_id: oThis.twitterUserId })
+      .fire();
+
+    await TwitterUserExtendedModel.flushCache({ twitterUserId: oThis.twitterUserId });
   }
 
   /**
