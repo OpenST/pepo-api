@@ -1232,15 +1232,15 @@ const v1Signature = {
       },
       {
         parameter: 'authorized_scopes',
-        validatorMethods: ['validateString']
+        validatorMethods: ['validateArray']
       },
       {
         parameter: 'email',
-        validatorMethods: ['validateString']
+        validatorMethods: ['validateAppleEmail']
       },
       {
         parameter: 'full_name',
-        validatorMethods: ['validateString']
+        validatorMethods: ['validateObject']
       },
       {
         parameter: 'nonce',
@@ -1256,7 +1256,7 @@ const v1Signature = {
       },
       {
         parameter: 'state',
-        validatorMethods: ['validateString']
+        validatorMethods: ['validateAppleEmail']
       },
       {
         parameter: 'user',
