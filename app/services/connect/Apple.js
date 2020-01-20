@@ -168,7 +168,7 @@ class AppleConnect extends ConnectBase {
       .fire();
 
     if (queryResponse.length > 0) {
-      oThis.socialUserObj = queryResponse[0];
+      oThis.socialUserObj = new AppleUserModel().formatDbData(queryResponse[0]);
     }
   }
 
