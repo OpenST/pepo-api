@@ -14,6 +14,7 @@ const rootPrefix = '../../..',
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   twitterUserExtendedConstants = require(rootPrefix + '/lib/globalConstant/twitterUserExtended');
 
+// TODO: To be deprecated. This service is not used now.
 /**
  * Class for tweet info.
  *
