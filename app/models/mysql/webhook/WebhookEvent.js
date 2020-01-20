@@ -1,7 +1,7 @@
 const rootPrefix = '../../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
-  webhookEventConstants = require(rootPrefix + '/lib/globalConstant/webhook/webhookEvent'),
-  databaseConstants = require(rootPrefix + '/lib/globalConstant/database');
+  databaseConstants = require(rootPrefix + '/lib/globalConstant/database'),
+  webhookEventConstants = require(rootPrefix + '/lib/globalConstant/webhook/webhookEvent');
 
 // Declare variables names.
 const dbName = databaseConstants.webhookDbName;
@@ -70,8 +70,7 @@ class WebhookEventModel extends ModelBase {
   }
 
   /**
-   * List Of formatted column names that can be exposed by service.
-   *
+   * List of formatted column names that can be exposed by service.
    *
    * @returns {array}
    */
@@ -127,7 +126,9 @@ class WebhookEventModel extends ModelBase {
    *
    * @returns {Promise<*>}
    */
-  static async flushCache(params) {}
+  static async flushCache() {
+    // Do nothing.
+  }
 }
 
 module.exports = WebhookEventModel;
