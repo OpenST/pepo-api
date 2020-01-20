@@ -321,6 +321,33 @@ const v1Signature = {
     ],
     optional: []
   },
+  [apiName.rotateGoogleAccount]: {
+    mandatory: [
+      {
+        parameter: 'user_name',
+        validatorMethods: ['validateString', 'validateUserName']
+      }
+    ],
+    optional: []
+  },
+  [apiName.rotateAppleAccount]: {
+    mandatory: [
+      {
+        parameter: 'user_name',
+        validatorMethods: ['validateString', 'validateUserName']
+      }
+    ],
+    optional: []
+  },
+  [apiName.rotateGithubAccount]: {
+    mandatory: [
+      {
+        parameter: 'user_name',
+        validatorMethods: ['validateString', 'validateUserName']
+      }
+    ],
+    optional: []
+  },
   [apiName.saveFanVideo]: {
     mandatory: [
       {

@@ -66,7 +66,7 @@ class AppleUserModel extends ModelBase {
     const oThis = this;
 
     const Rows = await oThis
-      .select('id, user_id')
+      .select('id, user_id, apple_id')
       .where({ user_id: userIds })
       .fire();
 
