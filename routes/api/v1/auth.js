@@ -21,7 +21,7 @@ router.post('/logout', cookieHelper.parseUserCookieForLogout, sanitizer.sanitize
 
   const resp = responseHelper.successWithData({});
 
-  return res.status(status).json(resp); // Deliberately returning success response
+  return res.status(200).json(resp); // Deliberately returning success response
 
   Promise.resolve(routeHelper.perform(req, res, next, '/Logout', 'r_a_v1_a_1', null));
 });
