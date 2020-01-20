@@ -126,7 +126,7 @@ router.get('/:profile_user_id/contribution-suggestion', sanitizer.sanitizeDynami
   );
 });
 
-/* User Activation Initiated Api call*/
+/* User Activation Initiated Api call */
 router.post('/activation-initiate', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.activationInitiate;
 
@@ -150,7 +150,7 @@ router.post('/activation-initiate', sanitizer.sanitizeDynamicUrlParams, function
   );
 });
 
-/* Logged In User*/
+/* Logged In User */
 router.get('/current', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.loggedInUser;
 

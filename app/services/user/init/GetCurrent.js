@@ -5,12 +5,8 @@ const rootPrefix = '../../../..',
   PricePointsCache = require(rootPrefix + '/lib/cacheManagement/single/PricePoints'),
   GetTokenService = require(rootPrefix + '/app/services/token/Get'),
   TokenUserDetailByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TokenUserByUserIds'),
-  SecureTwitterUserExtendedByTwitterUserIdCache = require(rootPrefix +
-    '/lib/cacheManagement/single/SecureTwitterUserExtendedByTwitterUserId'),
-  TwitterUserByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TwitterUserByUserIds'),
   UserModel = require(rootPrefix + '/app/models/mysql/User'),
   TokenUserModel = require(rootPrefix + '/app/models/mysql/TokenUser'),
-  TwitterUserExtendedModel = require(rootPrefix + '/app/models/mysql/TwitterUserExtended'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger');
 
 class GetCurrentUser extends ServiceBase {
@@ -28,9 +24,6 @@ class GetCurrentUser extends ServiceBase {
     oThis.userId = params.current_user.id;
     oThis.pricePoints = {};
     oThis.tokenDetails = {};
-
-    oThis.twitterUserObj = null;
-    oThis.twitterUserExtended = null;
   }
 
   /**
@@ -48,10 +41,6 @@ class GetCurrentUser extends ServiceBase {
     await oThis._fetchPricePoints();
 
     await oThis._setTokenDetails();
-
-    await oThis._fetchTwitterUser();
-
-    await oThis.fetchTwitterUserExtended();
 
     return Promise.resolve(oThis._serviceResponse());
   }
@@ -142,55 +131,6 @@ class GetCurrentUser extends ServiceBase {
   }
 
   /**
-   * Fetch Twitter User Obj if present.
-   *
-   * @sets oThis.twitterUserObj
-   *
-   * @return {Promise<Result>}
-   * @private
-   */
-  async _fetchTwitterUser() {
-    const oThis = this;
-
-    logger.log('Start::Fetch Twitter User');
-
-    const twitterUserCacheRsp = await new TwitterUserByUserIdsCache({
-      userIds: [oThis.userId]
-    }).fetch();
-
-    if (twitterUserCacheRsp.isFailure()) {
-      return Promise.reject(twitterUserCacheRsp);
-    }
-
-    oThis.twitterUserObj = twitterUserCacheRsp.data[oThis.userId];
-
-    logger.log('End::Fetch Twitter User');
-    return responseHelper.successWithData({});
-  }
-
-  /**
-   * Fetch Twitter user Extended
-   *
-   * @sets oThis.twitterUserExtended
-   *
-   * @return {Promise<Result>}
-   * @private
-   */
-  async fetchTwitterUserExtended() {
-    const oThis = this;
-
-    const secureTwitterUserExtendedRes = await new SecureTwitterUserExtendedByTwitterUserIdCache({
-      twitterUserId: oThis.twitterUserObj.id
-    }).fetch();
-
-    if (secureTwitterUserExtendedRes.isFailure()) {
-      return Promise.reject(secureTwitterUserExtendedRes);
-    }
-
-    oThis.twitterUserExtended = secureTwitterUserExtendedRes.data;
-  }
-
-  /**
    * Response for service
    *
    *
@@ -203,9 +143,6 @@ class GetCurrentUser extends ServiceBase {
 
     const safeFormattedUserData = new UserModel().safeFormattedData(oThis.user);
     const safeFormattedTokenUserData = new TokenUserModel().safeFormattedData(oThis.tokenUser);
-    const safeFormattedTwitterUserExtendedData = new TwitterUserExtendedModel().safeFormattedData(
-      oThis.twitterUserExtended
-    );
 
     return responseHelper.successWithData({
       usersByIdMap: { [safeFormattedUserData.id]: safeFormattedUserData },
@@ -213,8 +150,7 @@ class GetCurrentUser extends ServiceBase {
       user: safeFormattedUserData,
       tokenUser: safeFormattedTokenUserData,
       pricePointsMap: oThis.pricePoints,
-      tokenDetails: oThis.tokenDetails,
-      twitterUserExtended: safeFormattedTwitterUserExtendedData
+      tokenDetails: oThis.tokenDetails
     });
   }
 }
