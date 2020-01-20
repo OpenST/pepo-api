@@ -220,7 +220,7 @@ class WebhookProcessorExecutable extends CronBase {
 
     const webhookEndpoint = oThis.webhookEnpointMapByUuid[webhookEvent.webhookEndpointUuid];
 
-    if (webhookEndpoint.status !== webhookEndpointConstants.invertedStatuses[webhookEndpointConstants.activeStatus]) {
+    if (webhookEndpoint.status !== webhookEndpointConstants.activeStatus) {
       oThis.deletedWebhookEventIds.push(webhookEvent.id);
       return;
     }
