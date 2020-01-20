@@ -3,6 +3,8 @@ const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   UserModel = require(rootPrefix + '/app/models/mysql/User'),
   SecureUserCache = require(rootPrefix + '/lib/cacheManagement/single/SecureUser'),
+  UserDeviceIdsByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/UserDeviceIdsByUserIds'),
+  UserDeviceByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/UserDeviceByIds'),
   coreConstants = require(rootPrefix + '/config/coreConstants'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   localCipher = require(rootPrefix + '/lib/encryptors/localCipher');
@@ -13,7 +15,6 @@ class DisconnectBase extends ServiceBase {
    *
    * @param {object} params
    * @param {object} params.current_user
-   * @param {object} params.device_id
    *
    * @augments ServiceBase
    *
@@ -25,7 +26,8 @@ class DisconnectBase extends ServiceBase {
     const oThis = this;
     oThis.currentUserId = params.current_user ? params.current_user.id : null;
 
-    oThis.deviceId = params.device_id;
+    oThis.userDeviceIds = [];
+    oThis.deviceIds = [];
   }
 
   /**
@@ -47,6 +49,10 @@ class DisconnectBase extends ServiceBase {
     await oThis._markTokenNull();
 
     await oThis._rotateCookieToken();
+
+    await oThis._fetchDeviceIds();
+
+    await oThis._fetchDevices();
 
     await oThis._logoutUserDevices();
 
@@ -86,6 +92,46 @@ class DisconnectBase extends ServiceBase {
   }
 
   /**
+   * Fetch device ids
+   *
+   * @returns {Promise<never>}
+   * @private
+   */
+  async _fetchDeviceIds() {
+    const oThis = this;
+
+    const userDeviceCacheRsp = await new UserDeviceIdsByUserIdsCache({ userIds: [oThis.currentUserId] }).fetch();
+
+    if (userDeviceCacheRsp.isFailure()) {
+      return Promise.reject(userDeviceCacheRsp);
+    }
+
+    oThis.userDeviceIds = userDeviceCacheRsp.data[oThis.currentUserId];
+  }
+
+  /**
+   * Fetch device
+   *
+   * @returns {Promise<*|result|Result|Response>}
+   * @private
+   */
+  async _fetchDevices() {
+    const oThis = this;
+
+    let userDeviceByIdsCache = new UserDeviceByIdsCache({ ids: oThis.userDeviceIds });
+
+    let cacheRsp = await userDeviceByIdsCache.fetch();
+
+    if (cacheRsp.isFailure()) {
+      return Promise.reject(cacheRsp);
+    }
+
+    for (const id in cacheRsp.data) {
+      oThis.deviceIds.push(cacheRsp.data[id].deviceId);
+    }
+  }
+
+  /**
    * Logout user devices.
    *
    * @returns {Promise<void>}
@@ -96,7 +142,7 @@ class DisconnectBase extends ServiceBase {
 
     await new Logout({
       current_user: { id: oThis.currentUserId },
-      deviceIds: [oThis.deviceId]
+      deviceIds: oThis.deviceIds
     }).perform();
   }
 }

@@ -7,6 +7,7 @@ const rootPrefix = '../../..',
   apiName = require(rootPrefix + '/lib/globalConstant/apiName'),
   sanitizer = require(rootPrefix + '/helpers/sanitizer'),
   entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
+  responseHelper = require(rootPrefix + '/lib/formatter/response'),
   responseEntityKey = require(rootPrefix + '/lib/globalConstant/responseEntityKey'),
   cookieHelper = require(rootPrefix + '/lib/cookieHelper');
 
@@ -17,6 +18,10 @@ router.post('/logout', cookieHelper.parseUserCookieForLogout, sanitizer.sanitize
   next
 ) {
   req.decodedParams.apiName = apiName.logout;
+
+  const resp = responseHelper.successWithData({});
+
+  return res.status(status).json(resp); // Deliberately returning success response
 
   Promise.resolve(routeHelper.perform(req, res, next, '/Logout', 'r_a_v1_a_1', null));
 });
