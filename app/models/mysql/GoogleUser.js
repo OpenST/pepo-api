@@ -57,6 +57,29 @@ class GoogleUser extends ModelBase {
 
     return oThis.sanitizeFormattedData(formattedData);
   }
+
+  /**
+   * Fetch by user ids
+   * @param {Array} userIds
+   *
+   * @returns {Promise<void>}
+   */
+  async fetchByUserIds(userIds) {
+    const oThis = this;
+
+    const Rows = await oThis
+      .select('id, user_id')
+      .where({ user_id: userIds })
+      .fire();
+
+    const response = {};
+    for (let ind = 0; ind < Rows.length; ind++) {
+      const formattedData = oThis.formatDbData(Rows[ind]);
+      response[formattedData.userId] = formattedData;
+    }
+
+    return response;
+  }
 }
 
 module.exports = GoogleUser;

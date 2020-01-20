@@ -163,7 +163,7 @@ router.post('/twitter-disconnect', cookieHelper.parseUserCookieForLogout, saniti
 
   cookieHelper.deleteLoginCookie(res);
 
-  Promise.resolve(routeHelper.perform(req, res, next, '/twitter/Disconnect', 'r_a_v1_a_6', null));
+  Promise.resolve(routeHelper.perform(req, res, next, '/disconnect/Twitter', 'r_a_v1_a_6', null));
 });
 
 /* Apple Disconnect */

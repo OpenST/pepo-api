@@ -3,7 +3,7 @@ const rootPrefix = '../../..',
   GoogleUserModel = require(rootPrefix + '/app/models/mysql/GoogleUser'),
   GoogleUserExtendedModel = require(rootPrefix + '/app/models/mysql/GoogleUserExtended');
 
-class GithubDisconnect extends DisconnectBase {
+class GoogleDisconnect extends DisconnectBase {
   /**
    * @constructor
    */
@@ -23,9 +23,9 @@ class GithubDisconnect extends DisconnectBase {
   async _getSocialId() {
     const oThis = this;
 
-    const response = await new GoogleUserModel().fetchByUserId(oThis.currentUserId);
+    const response = await new GoogleUserModel().fetchByUserIds([oThis.currentUserId]);
 
-    oThis.githubUserId = response.id;
+    oThis.googleUserId = response[oThis.currentUserId].id;
   }
 
   /**
@@ -42,9 +42,9 @@ class GithubDisconnect extends DisconnectBase {
         access_token: null,
         refresh_token: null
       })
-      .where({ github_user_id: oThis.githubUserId })
+      .where({ google_user_id: oThis.googleUserId })
       .fire();
   }
 }
 
-module.exports = GithubDisconnect;
+module.exports = GoogleDisconnect;

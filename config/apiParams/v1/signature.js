@@ -740,7 +740,12 @@ const v1Signature = {
     ]
   },
   [apiName.twitterDisconnect]: {
-    mandatory: [],
+    mandatory: [
+      {
+        parameter: 'device_id',
+        validatorMethods: ['validateNonBlankString']
+      }
+    ],
     optional: [
       {
         parameter: 'current_user',
@@ -749,7 +754,12 @@ const v1Signature = {
     ]
   },
   [apiName.appleDisconnect]: {
-    mandatory: [],
+    mandatory: [
+      {
+        parameter: 'device_id',
+        validatorMethods: ['validateNonBlankString']
+      }
+    ],
     optional: [
       {
         parameter: 'current_user',
@@ -758,7 +768,12 @@ const v1Signature = {
     ]
   },
   [apiName.googleDisconnect]: {
-    mandatory: [],
+    mandatory: [
+      {
+        parameter: 'device_id',
+        validatorMethods: ['validateNonBlankString']
+      }
+    ],
     optional: [
       {
         parameter: 'current_user',
@@ -767,7 +782,12 @@ const v1Signature = {
     ]
   },
   [apiName.githubDisconnect]: {
-    mandatory: [],
+    mandatory: [
+      {
+        parameter: 'device_id',
+        validatorMethods: ['validateNonBlankString']
+      }
+    ],
     optional: [
       {
         parameter: 'current_user',

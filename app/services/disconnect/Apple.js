@@ -25,7 +25,7 @@ class AppleDisconnect extends DisconnectBase {
 
     const response = await new AppleUserModel().fetchByUserIds([oThis.currentUserId]);
 
-    oThis.appleUserId = response.data[oThis.currentUserId].id;
+    oThis.appleUserId = response[oThis.currentUserId].id;
   }
 
   /**
