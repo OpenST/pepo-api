@@ -492,7 +492,7 @@ class TransactionWebhookBase extends ServiceBase {
     if (
       (oThis._isRedemptionTransactionKind() && !oThis.fromUserId) ||
       (!oThis._isRedemptionTransactionKind() && (!oThis.toUserId || !oThis.fromUserId)) ||
-      (oThis._isReferralBonusTransactionKind() && !oThis.toUserId)
+      ((oThis._isReferralBonusTransactionKind() || oThis._isManualTransactionKind()) && !oThis.toUserId)
     ) {
       return Promise.reject(
         responseHelper.error({
@@ -527,6 +527,8 @@ class TransactionWebhookBase extends ServiceBase {
       extraData.replyDetailId = oThis.replyDetailId;
     } else if (oThis._isReferralBonusTransactionKind()) {
       txKind = transactionConstants.bonusTransactionKind;
+    } else if (oThis._isManualTransactionKind()) {
+      txKind = transactionConstants.manualTransactionKind;
     } else {
       txKind = transactionConstants.userTransactionKind;
     }
@@ -848,6 +850,18 @@ class TransactionWebhookBase extends ServiceBase {
     const oThis = this;
 
     return oThis.ostTransaction.meta_property.name === transactionConstants.referralBonusMetaName;
+  }
+
+  /**
+   * Return true if it is a referral bonus transaction.
+   *
+   * @returns {boolean}
+   * @private
+   */
+  _isManualTransactionKind() {
+    const oThis = this;
+
+    return oThis.ostTransaction.meta_property.name === transactionConstants.manualMetaName;
   }
 
   /**
