@@ -79,6 +79,15 @@ class AppleUserExtendedModel extends ModelBase {
 
     return oThis.formatDbData(dbRow[0]);
   }
+
+  /**
+   * Flush cache.
+   *
+   * @param {object} params
+   *
+   * @returns {Promise<*>}
+   */
+  static async flushCache(params) {}
 }
 
 module.exports = AppleUserExtendedModel;
