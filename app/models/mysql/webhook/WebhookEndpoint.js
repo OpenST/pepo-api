@@ -108,7 +108,16 @@ class WebhookEndpointModel extends ModelBase {
    *
    * @returns {Promise<*>}
    */
-  static async flushCache(params) {}
+  static async flushCache(params) {
+    const promisesArray = [];
+
+    if (params.uuid) {
+      const WebhookEndpointByUuidsCache = require(rootPrefix + '/lib/cacheManagement/multi/WebhookEndpointByUuids');
+      promisesArray.push(new WebhookEndpointByUuidsCache({ uuids: [params.uuid] }).clear());
+    }
+
+    await Promise.all(promisesArray);
+  }
 }
 
 module.exports = WebhookEndpointModel;

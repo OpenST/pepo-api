@@ -33,6 +33,8 @@
   },
   "pushNotificationAggregator": {
   },
+  "webhookProcessor": {
+  },
   "userSocketConnArchival": {
   },
   "retryPendingReceiptValidation": {
