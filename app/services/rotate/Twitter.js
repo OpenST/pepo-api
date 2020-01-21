@@ -4,13 +4,23 @@ const rootPrefix = '../../..',
   TwitterUserModel = require(rootPrefix + '/app/models/mysql/TwitterUser'),
   TwitterUserByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TwitterUserByIds'),
   TwitterUserByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TwitterUserByUserIds'),
-  TwitterUserByTwitterIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TwitterUserByTwitterIds'),
   basicHelper = require(rootPrefix + '/helpers/basic');
 
+/**
+ * Class to rotate account.
+ *
+ * @class RotateTwitterAccount
+ */
 class RotateTwitterAccount extends RotateAccountBase {
   /**
+   * Constructor to rotate twitter account.
+   *
+   * @param {object} params
+   * @param {string} params.user_name: user name
+   *
+   * @augments ServiceBase
+   *
    * @constructor
-   * @param params
    */
   constructor(params) {
     super(params);
@@ -100,18 +110,18 @@ class RotateTwitterAccount extends RotateAccountBase {
       );
     }
 
-    const negatedTwitterId = '-' + oThis.twitterUserId.toString();
+    const negatedTwitterUserId = '-' + oThis.twitterUserId.toString();
 
     await new TwitterUserModel()
-      .update({ twitter_id: negatedTwitterId })
+      .update({ twitter_id: negatedTwitterUserId })
       .where({ id: oThis.twitterUserId })
       .fire();
 
-    await new TwitterUserByTwitterIdsCache({
-      twitterIds: [oThis.twitterUserTwitterId]
-    }).clear();
-
-    await TwitterUserModel.flushCache(oThis.twitterUserObj);
+    await TwitterUserModel.flushCache({
+      id: oThis.twitterUserObj.id,
+      userId: oThis.twitterUserObj.userId,
+      twitterId: oThis.twitterUserTwitterId
+    });
   }
 
   /**

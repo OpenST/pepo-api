@@ -3,10 +3,21 @@ const rootPrefix = '../../..',
   AppleUserModel = require(rootPrefix + '/app/models/mysql/AppleUser'),
   AppleUserExtendedModel = require(rootPrefix + '/app/models/mysql/AppleUserExtended');
 
+/**
+ * Class to rotate apple account.
+ *
+ * @class RotateAppleAccount
+ */
 class RotateAppleAccount extends RotateAccountBase {
   /**
+   * Constructor to rotate apple account.
+   *
+   * @param {object} params
+   * @param {string} params.user_name: user name
+   *
+   * @augments ServiceBase
+   *
    * @constructor
-   * @param params
    */
   constructor(params) {
     super(params);
@@ -18,7 +29,8 @@ class RotateAppleAccount extends RotateAccountBase {
   }
 
   /**
-   * Fetch social user
+   * Fetch social user.
+   *
    * @returns {Promise<never>}
    * @private
    */
@@ -32,23 +44,24 @@ class RotateAppleAccount extends RotateAccountBase {
   }
 
   /**
-   * Rotate social account
+   * Rotate social account.
+   *
    * @returns {Promise<void>}
    * @private
    */
   async _rotateAccount() {
     const oThis = this;
 
-    const negatedAppleId = '-' + oThis.appleId.toString();
+    const negatedAppleUserId = '-' + oThis.appleUserId.toString();
 
     await new AppleUserModel()
-      .update({ apple_id: negatedAppleId })
+      .update({ apple_id: negatedAppleUserId })
       .where({ id: oThis.appleUserId })
       .fire();
   }
 
   /**
-   * Delete extended data
+   * Delete extended data.
    *
    * @returns {Promise<void>}
    * @private

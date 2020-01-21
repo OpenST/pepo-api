@@ -85,7 +85,34 @@ class RotateAccountBase extends ServiceBase {
   }
 
   /**
-   * Mark user email as null
+   * Fetch social user.
+   *
+   * @private
+   */
+  async _fetchSocialUser() {
+    throw new Error('Sub-class to implement.');
+  }
+
+  /**
+   * Rotate account.
+   *
+   * @private
+   */
+  async _rotateAccount() {
+    throw new Error('Sub-class to implement.');
+  }
+
+  /**
+   * Delete social user extended.
+   *
+   * @private
+   */
+  async _deleteSocialUserExtended() {
+    throw new Error('Sub-class to implement.');
+  }
+
+  /**
+   * Mark user email as null.
    *
    * @returns {Promise<void>}
    * @private
@@ -102,7 +129,7 @@ class RotateAccountBase extends ServiceBase {
   }
 
   /**
-   * Delte user identifier.
+   * Delete user identifier.
    *
    * @returns {Promise<void>}
    * @private

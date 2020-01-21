@@ -3,10 +3,21 @@ const rootPrefix = '../../..',
   GithubUserModel = require(rootPrefix + '/app/models/mysql/GithubUser'),
   GithubUserExtendedModel = require(rootPrefix + '/app/models/mysql/GithubUserExtended');
 
+/**
+ * Class to rotate account.
+ *
+ * @class RotateGithubAccount
+ */
 class RotateGithubAccount extends RotateAccountBase {
   /**
+   * Constructor to rotate github account.
+   *
+   * @param {object} params
+   * @param {string} params.user_name: user name
+   *
+   * @augments ServiceBase
+   *
    * @constructor
-   * @param params
    */
   constructor(params) {
     super(params);
@@ -39,10 +50,10 @@ class RotateGithubAccount extends RotateAccountBase {
   async _rotateAccount() {
     const oThis = this;
 
-    const negatedGithubId = '-' + oThis.githubId.toString();
+    const negatedGithubUserId = '-' + oThis.githubUserId.toString();
 
     await new GithubUserModel()
-      .update({ github_id: negatedGithubId })
+      .update({ github_id: negatedGithubUserId })
       .where({ id: oThis.githubUserId })
       .fire();
   }

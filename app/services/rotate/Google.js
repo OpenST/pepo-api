@@ -3,10 +3,21 @@ const rootPrefix = '../../..',
   GoogleUserModel = require(rootPrefix + '/app/models/mysql/GoogleUser'),
   GoogleUserExtendedModel = require(rootPrefix + '/app/models/mysql/GoogleUserExtended');
 
+/**
+ * Class to rotate account.
+ *
+ * @class RotateGoogleAccount
+ */
 class RotateGoogleAccount extends RotateAccountBase {
   /**
+   * Constructor to rotate google account.
+   *
+   * @param {object} params
+   * @param {string} params.user_name: user name
+   *
+   * @augments ServiceBase
+   *
    * @constructor
-   * @param params
    */
   constructor(params) {
     super(params);
@@ -39,10 +50,10 @@ class RotateGoogleAccount extends RotateAccountBase {
   async _rotateAccount() {
     const oThis = this;
 
-    const negatedGoogleId = '-' + oThis.googleId.toString();
+    const negatedGoogleUserId = '-' + oThis.googleUserId.toString();
 
     await new GoogleUserModel()
-      .update({ google_id: negatedGoogleId })
+      .update({ google_id: negatedGoogleUserId })
       .where({ id: oThis.googleUserId })
       .fire();
   }
