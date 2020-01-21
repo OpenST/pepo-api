@@ -40,7 +40,7 @@ class AppleConnect extends ConnectBase {
     const oThis = this;
     oThis.authorizationCode = params.authorization_code;
     oThis.identityToken = params.identity_token;
-    oThis.appleId = params.user;
+    oThis.appleId = params.user; // TODO - login - change param name
     oThis.name = params.full_name;
 
     oThis.appleOAuthDetails = null;
