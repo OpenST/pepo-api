@@ -256,16 +256,10 @@ class EnqueueVideosDataForWatermarkPurpose {
     const oThis = this;
 
     console.log('\n\n\nThe oThis.compressData is : ', oThis.compressData);
-    if (basicHelper.isEmptyObject(oThis.compressData.compression_data)) {
-      await oThis._updateEntity(videoConstants.compressionDoneStatus);
-
-      return responseHelper.successWithData({});
-    }
 
     const resp = await mediaResizer.compressVideo(oThis.compressData);
     if (resp.isFailure()) {
       await oThis._updateEntity(videoConstants.compressionFailedStatus);
-
       return responseHelper.successWithData({});
     }
 
