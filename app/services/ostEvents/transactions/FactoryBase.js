@@ -189,7 +189,8 @@ class TransactionWebhookFactoryBase extends ServiceBase {
     const oThis = this;
 
     const validManualCompanyToUserTransactionKinds = {
-      [transactionConstants.referralBonusMetaName]: 1
+      [transactionConstants.referralBonusMetaName]: 1,
+      [transactionConstants.manualMetaName]: 1
     };
 
     return validManualCompanyToUserTransactionKinds[oThis.ostTransaction.meta_property.name];
