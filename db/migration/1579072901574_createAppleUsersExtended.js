@@ -9,8 +9,8 @@ const upQuery =
   'CREATE TABLE `apple_users_extended` ( \n\
       `id` bigint(20) NOT NULL AUTO_INCREMENT, \n\
       `apple_user_id` bigint(20) NOT NULL, \n\
-      `access_token` varchar(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL, \n\
-      `refresh_token` varchar(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL, \n\
+      `access_token` varchar(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci, \n\
+      `refresh_token` varchar(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci, \n\
       `created_at` int(11) NOT NULL, \n\
       `updated_at` int(11) NOT NULL, \n\
       PRIMARY KEY (`id`) \n\
