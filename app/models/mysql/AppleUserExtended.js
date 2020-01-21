@@ -77,6 +77,10 @@ class AppleUserExtendedModel extends ModelBase {
       .where({ apple_user_id: appleUserId })
       .fire();
 
+    if (dbRow.length === 0) {
+      return {};
+    }
+
     return oThis.formatDbData(dbRow[0]);
   }
 
