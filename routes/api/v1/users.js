@@ -164,6 +164,7 @@ router.get('/current', sanitizer.sanitizeDynamicUrlParams, function(req, res, ne
         [entityType.twitterConnectMeta]: responseEntityKey.meta,
         [entityType.pricePointsMap]: responseEntityKey.pricePoints,
         [entityType.usersMap]: responseEntityKey.users,
+        [entityType.imagesMap]: responseEntityKey.images,
         [entityType.token]: responseEntityKey.token
       },
       serviceData: serviceResponse.data
