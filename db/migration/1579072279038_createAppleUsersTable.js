@@ -11,7 +11,7 @@ const upQuery =
       `apple_id` varchar(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL, \n\
       `user_id` bigint(20), \n\
       `name` varchar(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL, \n\
-      `email` varchar(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL, \n\
+      `email` varchar(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci, \n\
       `created_at` int(11) NOT NULL, \n\
       `updated_at` int(11) NOT NULL, \n\
       PRIMARY KEY (`id`), \n\
