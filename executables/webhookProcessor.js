@@ -342,16 +342,14 @@ class WebhookProcessorExecutable extends CronBase {
   async _markWebhookEventAsInternalFailed() {
     const oThis = this;
 
-    const currentTime = Math.ceil(Date.now() / 1000),
-      nextExecutionTime =
-        currentTime + webhookEventConstants.nextExecutionTimeFactor ** (webhookEvent.internalErrorCount + 1) * 60;
+    const currentTime = Math.ceil(Date.now() / 1000);
 
     //Note: Do not increment retry count as it is an internal error
     if (oThis.internalErrorWebhookEventIds.length > 0) {
       await new WebhookEventModel()
         .update({
           status: webhookEventConstants.invertedStatuses[webhookEventConstants.failedStatus],
-          execute_at: nextExecutionTime,
+          execute_at: `${currentTime} + (300 * internal_error_count)`,
           lock_id: null
         })
         .update('internal_error_count = internal_error_count + 1')

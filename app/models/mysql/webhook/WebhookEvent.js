@@ -109,7 +109,7 @@ class WebhookEventModel extends ModelBase {
     const dbRows = await oThis
       .select('*')
       .where({
-        lockId: params.lockId,
+        lock_id: params.lockId,
         status: webhookEventConstants.invertedStatuses[webhookEventConstants.inProgressStatus]
       })
       .fire();
