@@ -329,7 +329,7 @@ const v1Signature = {
     mandatory: [
       {
         parameter: 'user_name',
-        validatorMethods: ['validateString', 'validateUserName']
+        validatorMethods: ['validateString']
       }
     ],
     optional: []
@@ -338,7 +338,7 @@ const v1Signature = {
     mandatory: [
       {
         parameter: 'user_name',
-        validatorMethods: ['validateString', 'validateUserName']
+        validatorMethods: ['validateString']
       }
     ],
     optional: []
@@ -347,7 +347,7 @@ const v1Signature = {
     mandatory: [
       {
         parameter: 'user_name',
-        validatorMethods: ['validateString', 'validateUserName']
+        validatorMethods: ['validateString']
       }
     ],
     optional: []
