@@ -4,12 +4,9 @@ const express = require('express'),
 
 const rootPrefix = '../../..',
   routeHelper = require(rootPrefix + '/routes/helper'),
-  commonValidator = require(rootPrefix + '/lib/validators/Common'),
   apiName = require(rootPrefix + '/lib/globalConstant/apiName'),
-  LoginCookieAuth = require(rootPrefix + '/lib/authentication/LoginCookie'),
   sanitizer = require(rootPrefix + '/helpers/sanitizer'),
   coreConstants = require(rootPrefix + '/config/coreConstants'),
-  base64Helper = require(rootPrefix + '/lib/base64Helper'),
   cookieHelper = require(rootPrefix + '/lib/cookieHelper');
 
 // Node.js cookie parsing middleware.

@@ -80,7 +80,7 @@ class GithubConnect extends ConnectBase {
   async _fetchSocialUser() {
     const oThis = this;
 
-    //fetch social user on the basis of apple id
+    // Fetch social user on the basis of github id.
     let queryResponse = await new GithubUserModel()
       .select('*')
       .where(['github_id = ?', oThis.formattedGithubUser.id])

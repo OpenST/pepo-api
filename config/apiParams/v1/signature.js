@@ -163,6 +163,10 @@ const v1Signature = {
       {
         parameter: 'current_user',
         validatorMethods: ['validateNonEmptyObject']
+      },
+      {
+        parameter: 'login_service_type',
+        validatorMethods: ['validateNonBlankString']
       }
     ],
     optional: []
