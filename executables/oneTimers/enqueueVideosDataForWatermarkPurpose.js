@@ -133,6 +133,10 @@ class EnqueueVideosDataForWatermarkPurpose {
       }
     }
 
+    if (videoIds.length === 0) {
+      return;
+    }
+
     let videoDetailsData = await new VideoDetailModel()
       .select('creator_user_id, video_id')
       .where(['video_id IN (?)', videoIds])
@@ -210,8 +214,12 @@ class EnqueueVideosDataForWatermarkPurpose {
   async _prepareResizerRequestData() {
     const oThis = this;
 
-    //todo: source url logic fix
-    let sourceUrl = shortToLongUrl.getFullUrl(oThis.video.urlTemplate, videoConstants.originalResolution);
+    let sourceUrl = null;
+
+    const urlToUse =
+      oThis.video.resolutions.o && oThis.video.resolutions.o.u ? oThis.video.resolutions.o.u : oThis.video.urlTemplate;
+
+    sourceUrl = shortToLongUrl.getFullUrl(urlToUse, videoConstants.originalResolution);
 
     oThis.compressData = {
       source_url: sourceUrl,
