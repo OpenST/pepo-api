@@ -13,7 +13,7 @@ const upQuery =
   `api_version` tinyint(4) NOT NULL DEFAULT '1',\
   `endpoint` varchar(250) NOT NULL, \
   `secret` text COLLATE utf8_unicode_ci NOT NULL, \
-  `grace_secret` varchar(100), \
+  `grace_secret` text COLLATE utf8_unicode_ci, \
   `secret_salt` blob NOT NULL, \
   `grace_expiry_at` int(11) NOT NULL DEFAULT 0,\
   `status` tinyint(4) NOT NULL, \
