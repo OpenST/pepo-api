@@ -284,7 +284,9 @@ class CoreConstants {
   }
 
   get S3_LOGS_FOLDER() {
-    return '/logs';
+    const oThis = this;
+
+    return oThis.S3_AWS_MASTER_FOLDER + '/logs';
   }
 
   get IMAGES_S3_FOLDER() {
