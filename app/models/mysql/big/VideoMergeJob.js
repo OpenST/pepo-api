@@ -66,7 +66,8 @@ class VideoMergeJob extends ModelBase {
   async updateStatus(status, jobId) {
     const oThis = this;
 
-    await new oThis.update(['status = ?', videoMergeJobConstants.invertedStatuses[status]])
+    await oThis
+      .update(['status = ?', videoMergeJobConstants.invertedStatuses[status]])
       .where(['id = ?', jobId])
       .fire();
 
