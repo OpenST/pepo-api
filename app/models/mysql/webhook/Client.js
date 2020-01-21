@@ -80,8 +80,8 @@ class ClientModel extends ModelBase {
    *
    * @returns {Promise<*>}
    */
-  static async flushCache(params) {
-    // flush cache here
+  static async flushCache() {
+    // Do nothing.
   }
 }
 
