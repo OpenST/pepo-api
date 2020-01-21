@@ -1,10 +1,10 @@
 const rootPrefix = '../../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
-  UserMultiCache = require(rootPrefix + '/lib/cacheManagement/multi/User'),
   SecureUserCache = require(rootPrefix + '/lib/cacheManagement/single/SecureUser'),
   PricePointsCache = require(rootPrefix + '/lib/cacheManagement/single/PricePoints'),
   GetTokenService = require(rootPrefix + '/app/services/token/Get'),
+  ImageByIdCache = require(rootPrefix + '/lib/cacheManagement/multi/ImageByIds'),
   TokenUserDetailByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TokenUserByUserIds'),
   UserModel = require(rootPrefix + '/app/models/mysql/User'),
   TokenUserModel = require(rootPrefix + '/app/models/mysql/TokenUser'),
@@ -29,6 +29,7 @@ class GetCurrentUser extends ServiceBase {
     oThis.loginServiceType = params.login_service_type;
     oThis.pricePoints = {};
     oThis.tokenDetails = {};
+    oThis.imageMap = {};
   }
 
   /**
@@ -46,6 +47,8 @@ class GetCurrentUser extends ServiceBase {
     await oThis._fetchPricePoints();
 
     await oThis._setTokenDetails();
+
+    await oThis._fetchImages();
 
     return Promise.resolve(oThis._serviceResponse());
   }
@@ -134,6 +137,32 @@ class GetCurrentUser extends ServiceBase {
   }
 
   /**
+   * Fetch images.
+   *
+   * @sets oThis.imageMap
+   *
+   * @return {Promise<*>}
+   * @private
+   */
+  async _fetchImages() {
+    const oThis = this;
+
+    if (!oThis.secureUser.profileImageId) {
+      return;
+    }
+
+    let imageId = oThis.secureUser.profileImageId;
+
+    const cacheRsp = await new ImageByIdCache({ ids: [imageId] }).fetch();
+
+    if (cacheRsp.isFailure()) {
+      return Promise.reject(cacheRsp);
+    }
+
+    oThis.imageMap = cacheRsp.data;
+  }
+
+  /**
    * Response for service
    *
    *
@@ -159,6 +188,7 @@ class GetCurrentUser extends ServiceBase {
       usersByIdMap: { [safeFormattedUserData.id]: safeFormattedUserData },
       tokenUsersByUserIdMap: { [safeFormattedTokenUserData.userId]: safeFormattedTokenUserData },
       user: safeFormattedUserData,
+      imageMap: oThis.imageMap,
       tokenUser: safeFormattedTokenUserData,
       userLoginCookieValue: userLoginCookieValue,
       meta: { isRegistration: 1, serviceType: oThis.loginServiceType },

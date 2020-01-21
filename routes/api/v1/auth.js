@@ -40,6 +40,7 @@ router.post('/twitter-login', sanitizer.sanitizeDynamicUrlParams, function(req, 
       entityKindToResponseKeyMap: {
         [entityType.loggedInUser]: responseEntityKey.loggedInUser,
         [entityType.usersMap]: responseEntityKey.users,
+        [entityType.imagesMap]: responseEntityKey.images,
         [entityType.utmParams]: responseEntityKey.utmParams,
         [entityType.twitterConnectMeta]: responseEntityKey.meta,
         [entityType.goto]: responseEntityKey.goto
@@ -73,6 +74,7 @@ router.post('/github-login', sanitizer.sanitizeDynamicUrlParams, function(req, r
       entityKindToResponseKeyMap: {
         [entityType.loggedInUser]: responseEntityKey.loggedInUser,
         [entityType.usersMap]: responseEntityKey.users,
+        [entityType.imagesMap]: responseEntityKey.images,
         [entityType.utmParams]: responseEntityKey.utmParams,
         [entityType.twitterConnectMeta]: responseEntityKey.meta,
         [entityType.goto]: responseEntityKey.goto
@@ -106,6 +108,7 @@ router.post('/google-login', sanitizer.sanitizeDynamicUrlParams, function(req, r
       entityKindToResponseKeyMap: {
         [entityType.loggedInUser]: responseEntityKey.loggedInUser,
         [entityType.usersMap]: responseEntityKey.users,
+        [entityType.imagesMap]: responseEntityKey.images,
         [entityType.utmParams]: responseEntityKey.utmParams,
         [entityType.twitterConnectMeta]: responseEntityKey.meta,
         [entityType.goto]: responseEntityKey.goto
@@ -139,6 +142,7 @@ router.post('/apple-login', sanitizer.sanitizeDynamicUrlParams, function(req, re
       entityKindToResponseKeyMap: {
         [entityType.loggedInUser]: responseEntityKey.loggedInUser,
         [entityType.usersMap]: responseEntityKey.users,
+        [entityType.imagesMap]: responseEntityKey.images,
         [entityType.utmParams]: responseEntityKey.utmParams,
         [entityType.twitterConnectMeta]: responseEntityKey.meta,
         [entityType.goto]: responseEntityKey.goto
