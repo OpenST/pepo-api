@@ -174,8 +174,26 @@ class TransactionWebhookFactoryBase extends ServiceBase {
       !oThis._isTopUpTransactionKind() &&
       !oThis._isRedemptionTransactionKind() &&
       !oThis._isReplyOnVideoTransactionKind() &&
-      !oThis._isPepoOnReplyTransactionKind()
+      !oThis._isPepoOnReplyTransactionKind() &&
+      !oThis._isManualCompanyToUserTransaction()
     );
+  }
+
+  /**
+   * Return true if it is a valid company-to-user transaction.
+   *
+   * @returns {boolean}
+   * @private
+   */
+  _isManualCompanyToUserTransaction() {
+    const oThis = this;
+
+    const validManualCompanyToUserTransactionKinds = {
+      [transactionConstants.referralBonusMetaName]: 1,
+      [transactionConstants.manualMetaName]: 1
+    };
+
+    return validManualCompanyToUserTransactionKinds[oThis.ostTransaction.meta_property.name];
   }
 }
 

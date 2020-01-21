@@ -21,8 +21,8 @@ class BasicHelper {
     let uniqueMap = {},
       counter = 0,
       uniqueOrderedArray = [];
-    for (let i = 0; i < inputArray.length; i++) {
-      let arrayElement = inputArray[i];
+    for (let index = 0; index < inputArray.length; index++) {
+      let arrayElement = inputArray[index];
       if (!uniqueMap[arrayElement]) {
         counter++;
         uniqueMap[arrayElement] = 1;
@@ -38,8 +38,9 @@ class BasicHelper {
   /**
    * Get unique array.
    *
-   * @param {Array} inputArray
-   * @param {Number} [limit]
+   * @param {array} inputArray
+   * @param {number} [limit]
+   *
    * @returns {[]}
    */
   uniquate(inputArray, limit) {
@@ -57,6 +58,7 @@ class BasicHelper {
         }
       }
     }
+
     return uniqueOrderedArray;
   }
 
