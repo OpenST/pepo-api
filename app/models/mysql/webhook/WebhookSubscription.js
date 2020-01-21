@@ -28,24 +28,13 @@ class WebhookSubscriptionModel extends ModelBase {
   }
 
   /**
-   * Bitwise config.
-   *
-   * @return {object}
-   */
-  get bitwiseConfig() {
-    return {
-      topicKinds: webhookSubscriptionConstants.topicKinds
-    };
-  }
-
-  /**
    * Format Db data.
    *
    * @param {object} dbRow
    * @param {number} dbRow.id
    * @param {number} dbRow.client_id
    * @param {string} dbRow.w_e_uuid
-   * @param {number} dbRow.topic_kinds
+   * @param {number} dbRow.topic_kind
    * @param {number} dbRow.content_entity_id
    * @param {number} dbRow.status
    * @param {number} dbRow.created_at
@@ -60,7 +49,7 @@ class WebhookSubscriptionModel extends ModelBase {
       id: dbRow.id,
       clientId: dbRow.client_id,
       webhookEndpointUuid: dbRow.w_e_uuid,
-      topicKinds: dbRow.topic_kinds,
+      topicKind: webhookSubscriptionConstants.topicKinds[dbRow.topic_kind],
       contentEntityId: dbRow.content_entity_id,
       status: webhookSubscriptionConstants.statuses[dbRow.status],
       createdAt: dbRow.created_at,
@@ -81,41 +70,12 @@ class WebhookSubscriptionModel extends ModelBase {
       'id',
       'clientId',
       'webhookEndpointUuid',
-      'topicKinds',
+      'topicKind',
       'contentEntityId',
       'status',
       'createdAt',
       'updatedAt'
     ];
-  }
-
-  /**
-   * Get rows by topicKind and contentEntityIds.
-   *
-   * @param {object} params
-   * @param {Integer} params.contentEntityIds
-   * @param {Array} params.topicKind
-   *
-   * @returns {Promise<*>}
-   */
-  async getByKindAndContentEntityIds(params) {
-    const oThis = this;
-    const topicKindVal = webhookSubscriptionConstants.invertedTopicKinds[params.topicKind];
-
-    const dbRows = await oThis
-      .select('*')
-      .where({ content_entity_id: params.contentEntityIds })
-      .where(['topic_kinds = topic_kinds | ?', topicKindVal])
-      .fire();
-
-    const response = {};
-
-    for (let index = 0; index < dbRows.length; index++) {
-      const formatDbRow = oThis.formatDbData(dbRows[index]);
-      response[formatDbRow.contentEntityId] = formatDbRow;
-    }
-
-    return response;
   }
 
   /**
