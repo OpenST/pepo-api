@@ -97,6 +97,15 @@ class UserIdentifier extends ModelBase {
       })
       .fire();
   }
+
+  /**
+   * Index name
+   *
+   * @returns {string}
+   */
+  static get userIdEmailUniqueIndexName() {
+    return 'uidx_1';
+  }
 }
 
 module.exports = UserIdentifier;

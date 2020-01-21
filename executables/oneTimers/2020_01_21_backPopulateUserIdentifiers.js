@@ -140,11 +140,23 @@ class BackPopulateUserUniqueIdentifier {
 
       for (let i = 0; i < userDataObjectsArray.length; i++) {
         let userData = userDataObjectsArray[i];
-        await new UserUniqueIdentifierModel().insert({
-          user_id: userData.userId,
-          e_value: userData.emailId,
-          e_kind: userIdentifierConstants.invertedKinds[userIdentifierConstants.emailKind]
-        });
+        await new UserUniqueIdentifierModel()
+          .insert({
+            user_id: userData.userId,
+            e_value: userData.emailId,
+            e_kind: userIdentifierConstants.invertedKinds[userIdentifierConstants.emailKind]
+          })
+          .fire()
+          .catch(function(err) {
+            if (
+              !UserUniqueIdentifierModel.isDuplicateIndexViolation(
+                UserUniqueIdentifierModel.userIdEmailUniqueIndexName,
+                err
+              )
+            ) {
+              console.log('\nError', err);
+            }
+          });
       }
     }
   }
