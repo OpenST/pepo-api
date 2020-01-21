@@ -191,7 +191,6 @@ class Image extends ModelBase {
    * Insert into images.
    *
    * @param {object} params
-   * @param {boolean} [params.shortenTwitterUrl]
    * @param {string} params.urlTemplate
    * @param {string} params.resolutions
    * @param {string} params.resizeStatus
@@ -204,11 +203,7 @@ class Image extends ModelBase {
     const oThis = this;
 
     // If twitter url needs to be shorten.
-    if (
-      params.shortenTwitterUrl &&
-      params.resolutions.original &&
-      params.resolutions.original.url.match(imageConstants.twitterImageUrlPrefix[0])
-    ) {
+    if (params.resolutions.original && imageConstants.isFromExternalSource(params.resolutions.original.url)) {
       const imageLib = require(rootPrefix + '/lib/imageLib');
       const shortenedUrl = imageLib.shortenUrl({
         imageUrl: params.resolutions.original.url,
@@ -270,7 +265,7 @@ class Image extends ModelBase {
     const responseResolutionHash = {};
     for (const resolution in resolutions) {
       if (resolution === imageConstants.originalResolution) {
-        if (resolutions[resolution].url.match(imageConstants.twitterImageUrlPrefix[1])) {
+        if (imageConstants.isFromExternalSource(resolutions[resolution].url)) {
           // If the url is twitter url then url is to be stored in resolutions hash.
           responseResolutionHash.o = oThis._formatResolutionToInsert(resolutions[resolution]);
           responseResolutionHash.o.u = resolutions[resolution].url;
