@@ -1,5 +1,6 @@
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
+  UserModel = require(rootPrefix + '/app/models/mysql/User'),
   CommonValidator = require(rootPrefix + '/lib/validators/Common'),
   DeleteUserVideosLib = require(rootPrefix + '/lib/video/delete/UserVideos'),
   VideoDetailsByVideoIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/VideoDetailsByVideoIds'),
@@ -48,7 +49,8 @@ class DeleteVideo extends ServiceBase {
     const deleteUserVideosRsp = await new DeleteUserVideosLib({
       userId: oThis.creatorUserId,
       videoIds: [oThis.videoId],
-      isUserAction: true
+      isUserAction: true,
+      isUserCreator: UserModel.isUserApprovedCreator(oThis.currentUser)
     }).perform();
 
     if (deleteUserVideosRsp && deleteUserVideosRsp.isSuccess()) {
