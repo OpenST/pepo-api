@@ -64,7 +64,16 @@ class VideoMergeJobStatus extends ServiceBase {
     }
 
     oThis.jobDetails = cacheResponse.data[oThis.jobId];
-    // TODO - santhosh - validation missing.
+
+    if (CommonValidators.isEmptyObject(oThis.jobDetails)) {
+      return Promise.reject(
+        responseHelper.error({
+          internal_error_identifier: 'a_s_v_vms_1',
+          api_error_identifier: 'entity_not_found',
+          debug_options: { jobId: oThis.jobId }
+        })
+      );
+    }
   }
 
   /**
@@ -79,7 +88,7 @@ class VideoMergeJobStatus extends ServiceBase {
     if (!CommonValidators.validateNonEmptyObject(oThis.jobDetails)) {
       return Promise.reject(
         responseHelper.error({
-          internal_error_identifier: 'a_s_v_vms_1',
+          internal_error_identifier: 'a_s_v_vms_2',
           api_error_identifier: 'entity_not_found',
           debug_options: {
             jobId: oThis.jobId
@@ -91,7 +100,7 @@ class VideoMergeJobStatus extends ServiceBase {
     if (+oThis.jobDetails.userId !== +oThis.currentUser.id) {
       return Promise.reject(
         responseHelper.error({
-          internal_error_identifier: 'a_s_v_vms_2',
+          internal_error_identifier: 'a_s_v_vms_3',
           api_error_identifier: 'invalid_api_params',
           debug_options: {
             jobId: oThis.jobId,

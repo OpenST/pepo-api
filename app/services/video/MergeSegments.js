@@ -89,9 +89,11 @@ class MergeSegments extends ServiceBase {
     }
 
     for (let ind = 0; ind < oThis.videoUrls.length; ind++) {
-      const url = oThis.videoUrls[ind].video_url;
+      const url = oThis.videoUrls[ind].video_url,
+        splitUrlArray = url.split('/'),
+        fileName = splitUrlArray.pop();
 
-      if (!CommonValidators.validateNonEmptyUrl(url)) {
+      if (!CommonValidators.validateNonEmptyUrl(url) || !fileName.match(oThis.currentUserId + '-')) {
         return Promise.reject(
           responseHelper.error({
             internal_error_identifier: 'a_s_v_ms_2',
@@ -103,6 +105,8 @@ class MergeSegments extends ServiceBase {
           })
         );
       }
+
+      oThis.videoUrls[ind] = url;
     }
   }
 
@@ -141,50 +145,7 @@ class MergeSegments extends ServiceBase {
   async _insertInVideoSegments() {
     const oThis = this;
 
-    const bulkInsertArray = [];
-
-    for (let ind = 0; ind < oThis.videoUrls.length; ind++) {
-      const segmentUrl = await oThis._shortenS3Url(oThis.videoUrls[ind].video_url);
-
-      bulkInsertArray.push([oThis.jobId, segmentUrl, ind]);
-    }
-
-    await new VideoSegmentModel()
-      .insertMultiple(['video_merge_job_id', 'segment_url', 'sequence_index'], bulkInsertArray)
-      .fire();
-  }
-
-  /**
-   * Shorten S3 url.
-   *
-   * @param {string} url
-   *
-   * @returns {Promise<string>}
-   * @private
-   */
-  async _shortenS3Url(url) {
-    const oThis = this;
-
-    const splitUrlArray = url.split('/'),
-      fileName = splitUrlArray.pop(),
-      baseUrl = splitUrlArray.join('/'),
-      shortEntity = s3Constants.LongUrlToShortUrlMap[baseUrl];
-
-    if (
-      CommonValidators.isVarNullOrUndefined(fileName) ||
-      CommonValidators.isVarNullOrUndefined(shortEntity) ||
-      !fileName.match(oThis.currentUserId + '-')
-    ) {
-      return Promise.reject(
-        responseHelper.error({
-          internal_error_identifier: 'a_s_v_ms_3',
-          api_error_identifier: 'something_went_wrong',
-          debug_options: { url: url }
-        })
-      );
-    }
-
-    return shortEntity + '/' + fileName;
+    return new VideoSegmentModel().insertSegments(oThis.jobId, oThis.videoUrls);
   }
 
   /**

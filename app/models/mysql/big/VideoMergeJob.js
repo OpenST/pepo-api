@@ -57,7 +57,21 @@ class VideoMergeJob extends ModelBase {
     return oThis.sanitizeFormattedData(formattedData);
   }
 
-  // TODO - santhosh - add method for update status
+  /**
+   * Update job status
+   * @param status
+   * @param jobId
+   * @returns {Promise<void>}
+   */
+  async updateStatus(status, jobId) {
+    const oThis = this;
+
+    await new oThis.update(['status = ?', videoMergeJobConstants.invertedStatuses[status]])
+      .where(['id = ?', jobId])
+      .fire();
+
+    await VideoMergeJob.flushCache({ ids: [jobId] });
+  }
 
   /**
    * Fetch video merge jobs by ids.
@@ -93,17 +107,20 @@ class VideoMergeJob extends ModelBase {
    *
    * @returns {Promise<void>}
    */
-  // TODO - santhosh - flush cache from here.
   async insertJob(params) {
     const oThis = this;
 
-    return oThis
+    const resp = await oThis
       .insert({
         user_id: params.userId,
         merged_url: params.mergedUrl,
         status: videoMergeJobConstants.invertedStatuses[videoMergeJobConstants.notStartedStatus]
       })
       .fire();
+
+    await VideoMergeJob.flushCache({ ids: [resp.insertId] });
+
+    return resp;
   }
 
   /**

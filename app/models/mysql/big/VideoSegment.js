@@ -1,13 +1,15 @@
 const rootPrefix = '../../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
+  CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   shortToLongUrl = require(rootPrefix + '/lib/shortToLongUrl'),
   videoConstants = require(rootPrefix + '/lib/globalConstant/video'),
+  s3Constants = require(rootPrefix + '/lib/globalConstant/s3'),
+  responseHelper = require(rootPrefix + '/lib/formatter/response'),
   databaseConstants = require(rootPrefix + '/lib/globalConstant/database');
 
 // Declare variables.
 const dbName = databaseConstants.bigDbName;
 
-// TODO - santhosh - add method for insert
 /**
  * Class for video segment model.
  *
@@ -58,6 +60,26 @@ class VideoSegment extends ModelBase {
   }
 
   /**
+   * Insert multiple segments
+   * @param {Number} jobId
+   * @param {Array} videoUrls
+   * @returns {Promise<void>}
+   */
+  async insertSegments(jobId, videoUrls) {
+    const oThis = this;
+
+    const bulkInsertArray = [];
+
+    for (let ind = 0; ind < videoUrls.length; ind++) {
+      const segmentUrl = await oThis._shortenS3Url(videoUrls[ind]);
+
+      bulkInsertArray.push([jobId, segmentUrl, ind]);
+    }
+
+    await oThis.insertMultiple(['video_merge_job_id', 'segment_url', 'sequence_index'], bulkInsertArray).fire();
+  }
+
+  /**
    * Fetch video segments by job id.
    *
    * @param {number} jobId
@@ -83,6 +105,35 @@ class VideoSegment extends ModelBase {
     }
 
     return response;
+  }
+
+  /**
+   * Shorten S3 url.
+   *
+   * @param {string} url
+   *
+   * @returns {Promise<string>}
+   * @private
+   */
+  async _shortenS3Url(url) {
+    const oThis = this;
+
+    const splitUrlArray = url.split('/'),
+      fileName = splitUrlArray.pop(),
+      baseUrl = splitUrlArray.join('/'),
+      shortEntity = s3Constants.LongUrlToShortUrlMap[baseUrl];
+
+    if (CommonValidators.isVarNullOrUndefined(fileName) || CommonValidators.isVarNullOrUndefined(shortEntity)) {
+      return Promise.reject(
+        responseHelper.error({
+          internal_error_identifier: 'a_m_m_b_vs_1',
+          api_error_identifier: 'something_went_wrong',
+          debug_options: { url: url }
+        })
+      );
+    }
+
+    return shortEntity + '/' + fileName;
   }
 }
 
