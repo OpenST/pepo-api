@@ -3,11 +3,7 @@ const rootPrefix = '../..',
   TwitterUserModel = require(rootPrefix + '/app/models/mysql/TwitterUser'),
   userIdentifierConstants = require(rootPrefix + '/lib/globalConstant/userIdentifier'),
   UserUniqueIdentifierModel = require(rootPrefix + '/app/models/mysql/UserIdentifier'),
-  ImageModel = require(rootPrefix + '/app/models/mysql/Image'),
-  util = require(rootPrefix + '/lib/util'),
   basicHelper = require(rootPrefix + '/helpers/basic'),
-  s3Constants = require(rootPrefix + '/lib/globalConstant/s3'),
-  imageConstants = require(rootPrefix + '/lib/globalConstant/image'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger');
 
 const BATCH_SIZE = 100;
@@ -19,6 +15,7 @@ class BackPopulateUserUniqueIdentifier {
     oThis.rotatedUserIds = [];
     oThis.existingUserDataObjects = [];
   }
+
   /**
    * Perform.
    *
@@ -100,7 +97,11 @@ class BackPopulateUserUniqueIdentifier {
       .where(['user_id = ?', userId])
       .fire();
 
-    return queryResponse[0].twitter_id < 0;
+    if (!queryResponse[0] || queryResponse[0].twitter_id < 0) {
+      return true;
+    }
+
+    return false;
   }
 
   /**
@@ -112,15 +113,15 @@ class BackPopulateUserUniqueIdentifier {
   async _performOperationOnRotatedUserIds() {
     const oThis = this;
 
-    console.log('--oThis.rotatedUserIds---', oThis.rotatedUserIds);
+    console.log('RotatedUserIds: ', oThis.rotatedUserIds);
 
-    // while(oThis.rotatedUserIds.length > 0){
-    //   let userIds = oThis.rotatedUserIds.splice(0, BATCH_SIZE);
-    //     await new UserModel()
-    //       .update({email: null})
-    //       .where({ id: userIds })
-    //       .fire();
-    // }
+    while (oThis.rotatedUserIds.length > 0) {
+      let userIds = oThis.rotatedUserIds.splice(0, BATCH_SIZE);
+      await new UserModel()
+        .update({ email: null })
+        .where({ id: userIds })
+        .fire();
+    }
   }
 
   /**
@@ -132,20 +133,20 @@ class BackPopulateUserUniqueIdentifier {
   async _performOperationOnNonRotatedUserIds() {
     const oThis = this;
 
-    console.log('--oThis.existingUserDataObjects--', oThis.existingUserDataObjects);
+    console.log('ExistingUserDataObjects: ', oThis.existingUserDataObjects);
 
-    // while(oThis.existingUserDataObjects.length > 0){
-    //   let userDataObjectsArray = oThis.existingUserDataObjects.splice(0, BATCH_SIZE);
-    //
-    //   for(let i = 0 ; i < userDataObjectsArray.length ; i++){
-    //     let userData = userDataObjectsArray[i];
-    //     await new UserUniqueIdentifierModel().insert({
-    //       user_id: userData.userId,
-    //       e_value: userData.emailId,
-    //       e_kind: userIdentifierConstants.invertedKinds[userIdentifierConstants.emailKind]
-    //     })
-    //   }
-    // }
+    while (oThis.existingUserDataObjects.length > 0) {
+      let userDataObjectsArray = oThis.existingUserDataObjects.splice(0, BATCH_SIZE);
+
+      for (let i = 0; i < userDataObjectsArray.length; i++) {
+        let userData = userDataObjectsArray[i];
+        await new UserUniqueIdentifierModel().insert({
+          user_id: userData.userId,
+          e_value: userData.emailId,
+          e_kind: userIdentifierConstants.invertedKinds[userIdentifierConstants.emailKind]
+        });
+      }
+    }
   }
 }
 
