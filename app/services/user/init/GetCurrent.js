@@ -2,17 +2,21 @@ const rootPrefix = '../../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   UserMultiCache = require(rootPrefix + '/lib/cacheManagement/multi/User'),
+  SecureUserCache = require(rootPrefix + '/lib/cacheManagement/single/SecureUser'),
   PricePointsCache = require(rootPrefix + '/lib/cacheManagement/single/PricePoints'),
   GetTokenService = require(rootPrefix + '/app/services/token/Get'),
   TokenUserDetailByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TokenUserByUserIds'),
   UserModel = require(rootPrefix + '/app/models/mysql/User'),
   TokenUserModel = require(rootPrefix + '/app/models/mysql/TokenUser'),
+  localCipher = require(rootPrefix + '/lib/encryptors/localCipher'),
+  coreConstants = require(rootPrefix + '/config/coreConstants'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger');
 
 class GetCurrentUser extends ServiceBase {
   /**
    * @param {Object} params
    * @param {String} params.current_user: User Name
+   * @param {String} params.login_service_type: login service type
    *
    * @constructor
    */
@@ -22,6 +26,7 @@ class GetCurrentUser extends ServiceBase {
     const oThis = this;
 
     oThis.userId = params.current_user.id;
+    oThis.loginServiceType = params.login_service_type;
     oThis.pricePoints = {};
     oThis.tokenDetails = {};
   }
@@ -57,14 +62,12 @@ class GetCurrentUser extends ServiceBase {
     const oThis = this;
     logger.log('fetch User');
 
-    let usersByIdHashRes = await new UserMultiCache({ ids: [oThis.userId] }).fetch();
-
-    if (usersByIdHashRes.isFailure()) {
-      return Promise.reject(usersByIdHashRes);
+    const cacheResp = await new SecureUserCache({ id: oThis.userId }).fetch();
+    if (cacheResp.isFailure() || !cacheResp.data.id) {
+      return Promise.reject(cacheResp);
     }
 
-    let usersByIdMap = usersByIdHashRes.data;
-    oThis.user = usersByIdMap[oThis.userId];
+    oThis.secureUser = cacheResp.data;
 
     return Promise.resolve(responseHelper.successWithData({}));
   }
@@ -141,7 +144,15 @@ class GetCurrentUser extends ServiceBase {
   async _serviceResponse() {
     const oThis = this;
 
-    const safeFormattedUserData = new UserModel().safeFormattedData(oThis.user);
+    const decryptedEncryptionSalt = localCipher.decrypt(coreConstants.CACHE_SHA_KEY, oThis.secureUser.encryptionSaltLc);
+
+    // NOTE - this cookie versioning has been introduced on 22/01/2020.
+    const userLoginCookieValue = new UserModel().getCookieValueFor(oThis.secureUser, decryptedEncryptionSalt, {
+      timestamp: Date.now() / 1000,
+      loginServiceType: oThis.loginServiceType
+    });
+
+    const safeFormattedUserData = new UserModel().safeFormattedData(oThis.secureUser);
     const safeFormattedTokenUserData = new TokenUserModel().safeFormattedData(oThis.tokenUser);
 
     return responseHelper.successWithData({
@@ -149,6 +160,8 @@ class GetCurrentUser extends ServiceBase {
       tokenUsersByUserIdMap: { [safeFormattedTokenUserData.userId]: safeFormattedTokenUserData },
       user: safeFormattedUserData,
       tokenUser: safeFormattedTokenUserData,
+      userLoginCookieValue: userLoginCookieValue,
+      meta: { isRegistration: 1, serviceType: oThis.loginServiceType },
       pricePointsMap: oThis.pricePoints,
       tokenDetails: oThis.tokenDetails
     });

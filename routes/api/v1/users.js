@@ -8,6 +8,7 @@ const rootPrefix = '../../..',
   apiName = require(rootPrefix + '/lib/globalConstant/apiName'),
   entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
+  cookieHelper = require(rootPrefix + '/lib/cookieHelper'),
   responseEntityKey = require(rootPrefix + '/lib/globalConstant/responseEntityKey');
 
 /* Register Device*/
@@ -155,10 +156,12 @@ router.get('/current', sanitizer.sanitizeDynamicUrlParams, function(req, res, ne
   req.decodedParams.apiName = apiName.loggedInUser;
 
   const dataFormatterFunc = async function(serviceResponse) {
+    cookieHelper.setLoginCookie(res, serviceResponse.data.userLoginCookieValue);
     const wrapperFormatterRsp = await new FormatterComposer({
       resultType: responseEntityKey.loggedInUser,
       entityKindToResponseKeyMap: {
         [entityType.loggedInUser]: responseEntityKey.loggedInUser,
+        [entityType.twitterConnectMeta]: responseEntityKey.meta,
         [entityType.pricePointsMap]: responseEntityKey.pricePoints,
         [entityType.usersMap]: responseEntityKey.users,
         [entityType.token]: responseEntityKey.token
