@@ -226,7 +226,9 @@ class WebhookProcessorExecutable extends CronBase {
 
       const formattedDataResp = await webhookProcessorfactory.perform(processParams);
 
-      if (formattedDataResp.isFailure) {
+      logger.debug(`formattedDataResp success: ${!formattedDataResp.isFailure()}  data: `, formattedDataResp.data);
+
+      if (formattedDataResp.isFailure()) {
         if (webhookEvent.internalErrorCount >= webhookEventConstants.maxInternalErrorCount - 1) {
           oThis.internalErrorMaxLimitWebhookEventIds.push(webhookEvent.id);
         } else {
@@ -239,19 +241,20 @@ class WebhookProcessorExecutable extends CronBase {
 
       const postEventResp = '';
 
-      if (postEventResp.isFailure) {
+      if (postEventResp.isFailure()) {
         await oThis._markWebhookEventAsFailed(webhookEvent, postEventResp);
       } else {
         oThis.successWebhookEventIds.push(webhookEvent.id);
       }
-    } catch (e) {
+    } catch (err) {
       const errorObject = responseHelper.error({
         internal_error_identifier: 'e_wp_se_1',
         api_error_identifier: 'something_went_wrong',
-        debug_options: { error: JSON.stringify(e) }
+        debug_options: { error: err.toString(), stack: err.stack }
       });
 
-      logger.error('Error: ', errorObject.getDebugData());
+      logger.error('Error: ', JSON.stringify(errorObject));
+
       await createErrorLogsEntry.perform(errorObject, errorLogsConstants.mediumSeverity);
 
       if (webhookEvent.internalErrorCount >= webhookEventConstants.maxInternalErrorCount - 1) {
@@ -349,10 +352,12 @@ class WebhookProcessorExecutable extends CronBase {
       await new WebhookEventModel()
         .update({
           status: webhookEventConstants.invertedStatuses[webhookEventConstants.failedStatus],
-          execute_at: `${currentTime} + (300 * internal_error_count)`,
           lock_id: null
         })
-        .update('internal_error_count = internal_error_count + 1')
+        .update(
+          `internal_error_count = internal_error_count + 1,  
+                  execute_at= ${currentTime} + (300 * internal_error_count)`
+        )
         .where({ id: oThis.internalErrorWebhookEventIds })
         .fire();
     }
