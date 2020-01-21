@@ -446,6 +446,11 @@ const v1ErrorConfig = {
     parameter: 'user_id',
     code: 'invalid',
     message: 'Please make sure you are not unmuting yourself.'
+  },
+  invalid_uuid: {
+    parameter: 'uuid',
+    code: 'invalid',
+    message: 'Uuid is invalid.'
   }
 };
 
