@@ -9,6 +9,7 @@ const program = require('commander');
 const rootPrefix = '..',
   CronBase = require(rootPrefix + '/executables/CronBase'),
   WebhookEventModel = require(rootPrefix + '/app/models/mysql/webhook/WebhookEvent'),
+  PublishWebhookLib = require(rootPrefix + '/lib/webhook/PublishWebhook'),
   cronProcessesConstants = require(rootPrefix + '/lib/globalConstant/cronProcesses'),
   WebhookEndpointByUuidsCache = require(rootPrefix + '/lib/cacheManagement/multi/WebhookEndpointByUuids'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
@@ -239,7 +240,12 @@ class WebhookProcessorExecutable extends CronBase {
 
       const formattedEventData = formattedDataResp.data;
 
-      const postEventResp = '';
+      const postParams = {
+        formattedParams: formattedEventData,
+        webhookEndpoint: webhookEndpoint
+      };
+
+      const postEventResp = new PublishWebhookLib(postParams).perform();
 
       if (postEventResp.isFailure()) {
         await oThis._markWebhookEventAsFailed(webhookEvent, postEventResp);
