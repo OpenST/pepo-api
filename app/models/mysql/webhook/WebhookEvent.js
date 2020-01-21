@@ -40,6 +40,7 @@ class WebhookEventModel extends ModelBase {
    * @param {number} dbRow.status
    * @param {number} dbRow.execute_at
    * @param {number} dbRow.retry_count
+   * @param {string} dbRow.internal_error_count
    * @param {string} dbRow.lock_id
    * @param {string} dbRow.error_response
    * @param {number} dbRow.created_at
@@ -60,6 +61,7 @@ class WebhookEventModel extends ModelBase {
       status: webhookEventConstants.statuses[dbRow.status],
       executeAt: dbRow.execute_at,
       retryCount: dbRow.retry_count,
+      internalErrorCount: dbRow.internal_error_count,
       lockId: dbRow.lock_id,
       errorResponse: dbRow.error_response,
       createdAt: dbRow.created_at,
@@ -85,6 +87,7 @@ class WebhookEventModel extends ModelBase {
       'status',
       'executeAt',
       'retryCount',
+      'internalErrorCount',
       'lockId',
       'errorResponse',
       'createdAt',

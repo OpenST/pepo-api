@@ -16,6 +16,7 @@ const rootPrefix = '..',
   basicHelper = require(rootPrefix + '/helpers/basic'),
   webhookEventConstants = require(rootPrefix + '/lib/globalConstant/webhook/webhookEvent'),
   webhookEndpointConstants = require(rootPrefix + '/lib/globalConstant/webhook/webhookEndpoint'),
+  webhookProcessorfactory = require(rootPrefix + '/lib/webhook/processor/factory'),
   createErrorLogsEntry = require(rootPrefix + '/lib/errorLogs/createEntry'),
   errorLogsConstants = require(rootPrefix + '/lib/globalConstant/errorLogs');
 logger = require(rootPrefix + '/lib/logger/customConsoleLogger');
@@ -104,6 +105,7 @@ class WebhookProcessorExecutable extends CronBase {
 
     oThis.successWebhookEventIds = [];
     oThis.internalErrorWebhookEventIds = [];
+    oThis.internalErrorMaxLimitWebhookEventIds = [];
     oThis.deletedWebhookEventIds = [];
   }
 
@@ -140,18 +142,7 @@ class WebhookProcessorExecutable extends CronBase {
       return;
     }
 
-    const dbRows = await new WebhookEventModel()
-      .select('*')
-      .where({
-        status: webhookEventConstants.invertedStatuses[webhookEventConstants.inProgressStatus],
-        lock_id: lockId
-      })
-      .fire();
-
-    for (let i = 0; i < dbRows.length; i++) {
-      const formattedRow = new WebhookEventModel().formatDbData(dbRows[i]);
-      oThis.lockedWebhookEvents.push(formattedRow);
-    }
+    oThis.lockedWebhookEvents = await new WebhookEventModel().getLockedRows({ lockId: lockId });
   }
 
   /**
@@ -176,6 +167,7 @@ class WebhookProcessorExecutable extends CronBase {
     const promises2 = [
       oThis._markWebhookEventAsSuccess(),
       oThis._markWebhookEventAsInternalFailed(),
+      oThis._markWebhookEventAsInternalCompletelyFailed(),
       oThis._markWebhookEventAsDeleted()
     ];
     await Promise.all(promises2);
@@ -212,7 +204,8 @@ class WebhookProcessorExecutable extends CronBase {
    *
    * @returns {Promise<void>}
    *
-   * @sets oThis.deletedWebhookEventIds, oThis.internalErrorWebhookEventIds, oThis.successWebhookEventIds
+   * @sets oThis.deletedWebhookEventIds, oThis.internalErrorWebhookEventIds, oThis.internalErrorMaxLimitWebhookEventIds
+   * @sets oThis.successWebhookEventIds
    *
    */
   async _sendEvent(webhookEvent) {
@@ -226,12 +219,23 @@ class WebhookProcessorExecutable extends CronBase {
     }
 
     try {
-      const formattedDataResp = '';
+      const processParams = {
+        webhookEvent: webhookEvent,
+        webhookEndpoint: webhookEndpoint
+      };
+
+      const formattedDataResp = await webhookProcessorfactory.perform(processParams);
 
       if (formattedDataResp.isFailure) {
-        oThis.internalErrorWebhookEventIds.push(webhookEvent.id);
+        if (webhookEvent.internalErrorCount >= webhookEventConstants.maxInternalErrorCount - 1) {
+          oThis.internalErrorMaxLimitWebhookEventIds.push(webhookEvent.id);
+        } else {
+          oThis.internalErrorWebhookEventIds.push(webhookEvent.id);
+        }
         return;
       }
+
+      const formattedEventData = formattedDataResp.data;
 
       const postEventResp = '';
 
@@ -249,7 +253,12 @@ class WebhookProcessorExecutable extends CronBase {
 
       logger.error('Error: ', errorObject.getDebugData());
       await createErrorLogsEntry.perform(errorObject, errorLogsConstants.mediumSeverity);
-      oThis.internalErrorWebhookEventIds.push(webhookEvent.id);
+
+      if (webhookEvent.internalErrorCount >= webhookEventConstants.maxInternalErrorCount - 1) {
+        oThis.internalErrorMaxLimitWebhookEventIds.push(webhookEvent.id);
+      } else {
+        oThis.internalErrorWebhookEventIds.push(webhookEvent.id);
+      }
     }
   }
 
@@ -298,12 +307,44 @@ class WebhookProcessorExecutable extends CronBase {
    *
    * @private
    */
+  async _markWebhookEventAsInternalCompletelyFailed() {
+    const oThis = this;
+
+    //  if internal_error_count > limit .. then mark as completely failed
+    if (oThis.internalErrorMaxLimitWebhookEventIds.length > 0) {
+      const errorObject = responseHelper.error({
+        internal_error_identifier: 'e_wp_mweaicf_1',
+        api_error_identifier: 'something_went_wrong',
+        debug_options: {
+          reason: 'IMPORTANT: Webhooks has reached its max internal limit.',
+          webhook_event_ids: oThis.internalErrorMaxLimitWebhookEventIds
+        }
+      });
+
+      logger.error('Error: ', errorObject.getDebugData());
+      await createErrorLogsEntry.perform(errorObject, errorLogsConstants.highSeverity);
+
+      await new WebhookEventModel()
+        .update({
+          status: webhookEventConstants.invertedStatuses[webhookEventConstants.completelyFailedStatus]
+        })
+        .update('internal_error_count = internal_error_count + 1')
+        .where({ id: oThis.internalErrorMaxLimitWebhookEventIds })
+        .fire();
+    }
+  }
+
+  /**
+   * Mark event failure due to error in post api call to endpoint
+   *
+   * @private
+   */
   async _markWebhookEventAsInternalFailed() {
     const oThis = this;
 
-    //resend after 5 minutes
     const currentTime = Math.ceil(Date.now() / 1000),
-      nextExecutionTime = currentTime + 5 * 60;
+      nextExecutionTime =
+        currentTime + webhookEventConstants.nextExecutionTimeFactor ** (webhookEvent.internalErrorCount + 1) * 60;
 
     //Note: Do not increment retry count as it is an internal error
     if (oThis.internalErrorWebhookEventIds.length > 0) {
@@ -313,6 +354,7 @@ class WebhookProcessorExecutable extends CronBase {
           execute_at: nextExecutionTime,
           lock_id: null
         })
+        .update('internal_error_count = internal_error_count + 1')
         .where({ id: oThis.internalErrorWebhookEventIds })
         .fire();
     }
@@ -326,25 +368,29 @@ class WebhookProcessorExecutable extends CronBase {
   async _markWebhookEventAsFailed(webhookEvent, postEventResp) {
     const oThis = this;
 
-    const currentTime = Math.ceil(Date.now() / 1000),
-      nextExecutionTime = currentTime + webhookEventConstants.nextExecutionTimeFactor ** (webhookEvent.retryCount + 1);
-
-    if (webhookEvent.retryCount >= webhookEventConstants.retryCount - 1) {
+    //mark internal_error_count as 0 since it was tried once.
+    if (webhookEvent.retryCount >= webhookEventConstants.maxRetryCount - 1) {
       //Note: Do not remove lock id. index data with null lock ids will be less.
       // Discuss with aman.
       await new WebhookEventModel()
         .update({
           status: webhookEventConstants.invertedStatuses[webhookEventConstants.completelyFailedStatus],
           retry_count: webhookEvent.retryCount + 1,
+          internal_error_count: 0,
           error_response: JSON.stringify(postEventResp.getDebugData())
         })
         .where({ id: webhookEvent.id })
         .fire();
     } else {
+      const currentTime = Math.ceil(Date.now() / 1000),
+        nextExecutionTime =
+          currentTime + webhookEventConstants.nextExecutionTimeFactor ** (webhookEvent.retryCount + 1) * 60;
+
       await new WebhookEventModel()
         .update({
           status: webhookEventConstants.invertedStatuses[webhookEventConstants.failedStatus],
           retry_count: webhookEvent.retryCount + 1,
+          internal_error_count: 0,
           error_response: JSON.stringify(postEventResp.getDebugData()),
           lock_id: null,
           execute_at: nextExecutionTime
