@@ -6,13 +6,13 @@ const dbName = databaseConstants.webhookDbName;
 const dbKind = dbKindConstants.sqlDbKind;
 
 const upQuery =
-  'CREATE TABLE `webhook_endpoints` (\
+  "CREATE TABLE `webhook_endpoints` (\
   `id` bigint(20) NOT NULL AUTO_INCREMENT,\
   `uuid` varchar(50) NOT NULL,\
   `client_id` int(11) NOT NULL,\
-  `api_version` tinyint(4) NOT NULL,\
+  `api_version` tinyint(4) NOT NULL DEFAULT '1',\
   `endpoint` varchar(250) NOT NULL, \
-  `secret` varchar(100) NOT NULL, \
+  `secret` text COLLATE utf8_unicode_ci NOT NULL, \
   `grace_secret` varchar(100), \
   `secret_salt` blob NOT NULL, \
   `grace_expiry_at` int(11) NOT NULL DEFAULT 0,\
@@ -20,8 +20,9 @@ const upQuery =
   `created_at` int(11) NOT NULL,\
   `updated_at` int(11) NOT NULL,\
   PRIMARY KEY (`id`),\
-  UNIQUE uidx_1 (`uuid`)\
-  ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;';
+  UNIQUE uidx_1 (`uuid`),\
+  KEY `client_id` (`client_id`,`endpoint`)\
+  ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
 
 const downQuery = 'drop table if exists `webhook_endpoints`;';
 
