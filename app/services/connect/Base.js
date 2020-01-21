@@ -7,6 +7,7 @@ const rootPrefix = '../../..',
   gotoFactory = require(rootPrefix + '/lib/goTo/factory'),
   entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
   gotoConstants = require(rootPrefix + '/lib/globalConstant/goto'),
+  userIdentifierConstants = require(rootPrefix + '/lib/globalConstant/userIdentifier'),
   UserUniqueIdentifierModel = require(rootPrefix + '/app/models/mysql/UserIdentifier'),
   CommonValidators = require(rootPrefix + '/lib/validators/Common');
 
@@ -124,23 +125,36 @@ class SocialConnectBase extends ServiceBase {
   async _verifyUserPresence() {
     const oThis = this;
 
+    let userIdentifierObj = {};
+
     // Check social user existence
     if (oThis._socialAccountExists()) {
       oThis.isUserSignUp = false;
       oThis.userId = oThis.socialUserObj.userId;
+
+      let currentSocialEmail = oThis._getCurrentSocialEmail();
+
+      // if param email is present and different from table email
+      if (CommonValidators.isValidEmail(currentSocialEmail) && currentSocialEmail != oThis.socialUserObj.email) {
+        // then query user idt with param email
+        userIdentifierObj = await oThis._fetchUserIdentifier(userIdentifierConstants.emailKind, currentSocialEmail);
+        if (CommonValidators.validateNonEmptyObject(userIdentifierObj)) {
+          // if record found do nothing.
+        } else {
+          // else update social table with param email and insert into user idt
+          await oThis._updateEmailInSocialUsers();
+          await new UserUniqueIdentifierModel().insertUserEmail(oThis.userId, currentSocialEmail);
+        }
+      }
     } else {
       // If social account is not in our system, then look for unique identifier
       oThis.newSocialConnect = true;
 
       // Look for user email or phone number already exists.
       // Means user is already part of system using same or different social connect.
-      let userIdentifierObj = {},
-        userUniqueElements = oThis._getSocialUserUniqueProperties();
+      let userUniqueElements = oThis._getSocialUserUniqueProperties();
       if (CommonValidators.validateNonEmptyObject(userUniqueElements)) {
-        userIdentifierObj = await new UserUniqueIdentifierModel().fetchByKindAndValue(
-          userUniqueElements.kind,
-          userUniqueElements.value
-        );
+        userIdentifierObj = await oThis._fetchUserIdentifier(userUniqueElements.kind, userUniqueElements.value);
       }
 
       if (CommonValidators.validateNonEmptyObject(userIdentifierObj)) {
@@ -247,6 +261,25 @@ class SocialConnectBase extends ServiceBase {
   }
 
   /**
+   * Get current social email from parameters.
+   *
+   * @private
+   */
+  _getCurrentSocialEmail() {
+    throw 'Sub-class to implement';
+  }
+
+  /**
+   * Update social users.
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _updateEmailInSocialUsers() {
+    throw 'Sub-class to implement';
+  }
+
+  /**
    * validate and sanitize invite code. Invite code can be a url or just an invite code.
    *
    * @returns {boolean}
@@ -323,6 +356,26 @@ class SocialConnectBase extends ServiceBase {
     }
 
     return response;
+  }
+
+  /**
+   *
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _fetchUserIdentifier(kind, value) {
+    const oThis = this;
+
+    // Look for user email or phone number already exists.
+    // Means user is already part of system using same or different social connect.
+    let userIdentifierObj = {},
+      userUniqueElements = oThis._getSocialUserUniqueProperties();
+    if (CommonValidators.validateNonEmptyObject(userUniqueElements)) {
+      userIdentifierObj = await new UserUniqueIdentifierModel().fetchByKindAndValue(kind, value);
+    }
+
+    return userIdentifierObj;
   }
 }
 

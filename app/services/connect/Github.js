@@ -156,6 +156,35 @@ class GithubConnect extends ConnectBase {
 
     return { kind: userIdentifierConstants.emailKind, value: oThis.formattedGithubUser.email };
   }
+
+  /**
+   * Get current social email from parameters.
+   *
+   * @returns {null}
+   * @private
+   */
+  _getCurrentSocialEmail() {
+    const oThis = this;
+
+    return oThis.formattedGithubUser.email;
+  }
+
+  /**
+   * Update email in social users.
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _updateEmailInSocialUsers() {
+    const oThis = this;
+
+    let email = oThis._getCurrentSocialEmail();
+
+    await new GithubUserModel()
+      .update({ email: email })
+      .where({ id: oThis.socialUserObj.id })
+      .fire();
+  }
 }
 
 module.exports = GithubConnect;

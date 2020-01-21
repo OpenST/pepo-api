@@ -2,6 +2,7 @@ const rootPrefix = '../../..',
   ConnectBase = require(rootPrefix + '/app/services/connect/Base'),
   userConstants = require(rootPrefix + '/lib/globalConstant/user'),
   UserModel = require(rootPrefix + '/app/models/mysql/User'),
+  TwitterUserModel = require(rootPrefix + '/app/models/mysql/TwitterUser'),
   TwitterUserByTwitterIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TwitterUserByTwitterIds'),
   AccountTwitterRequestClass = require(rootPrefix + '/lib/connect/wrappers/twitter/oAuth1.0/Account'),
   SignupTwitterClass = require(rootPrefix + '/lib/connect/signup/ByTwitter'),
@@ -205,6 +206,36 @@ class TwitterConnect extends ConnectBase {
     }
 
     return { kind: userIdentifierConstants.emailKind, value: oThis.userTwitterEntity.email };
+  }
+
+  /**
+   * Get current social email from parameters.
+   *
+   * @returns {null}
+   * @private
+   */
+  _getCurrentSocialEmail() {
+    const oThis = this;
+
+    return oThis.userTwitterEntity.email;
+  }
+
+  /**
+   * Update email in social users.
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _updateEmailInSocialUsers() {
+    const oThis = this;
+
+    let email = oThis._getCurrentSocialEmail();
+
+    await new TwitterUserModel()
+      .update({ email: email })
+      .where({ id: oThis.socialUserObj.id })
+      .fire();
+    await TwitterUserModel.flushCache(oThis.socialUserObj);
   }
 }
 

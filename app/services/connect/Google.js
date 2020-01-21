@@ -152,6 +152,35 @@ class GoogleConnect extends ConnectBase {
 
     return { kind: userIdentifierConstants.emailKind, value: oThis.formattedGoogleUser.email };
   }
+
+  /**
+   * Get current social email from parameters.
+   *
+   * @returns {null}
+   * @private
+   */
+  _getCurrentSocialEmail() {
+    const oThis = this;
+
+    return oThis.formattedGoogleUser.email;
+  }
+
+  /**
+   * Update email in social users.
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _updateEmailInSocialUsers() {
+    const oThis = this;
+
+    let email = oThis._getCurrentSocialEmail();
+
+    await new GoogleUserModel()
+      .update({ email: email })
+      .where({ id: oThis.socialUserObj.id })
+      .fire();
+  }
 }
 
 module.exports = GoogleConnect;

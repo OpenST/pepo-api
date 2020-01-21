@@ -253,6 +253,35 @@ class AppleConnect extends ConnectBase {
 
     return { kind: userIdentifierConstants.emailKind, value: oThis.decryptedAppleEmail };
   }
+
+  /**
+   * Get current social email from parameters.
+   *
+   * @returns {null}
+   * @private
+   */
+  _getCurrentSocialEmail() {
+    const oThis = this;
+
+    return oThis.decryptedAppleEmail;
+  }
+
+  /**
+   * Update email in social users.
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _updateEmailInSocialUsers() {
+    const oThis = this;
+
+    let email = oThis._getCurrentSocialEmail();
+
+    await new AppleUserModel()
+      .update({ email: email })
+      .where({ id: oThis.socialUserObj.id })
+      .fire();
+  }
 }
 
 module.exports = AppleConnect;
