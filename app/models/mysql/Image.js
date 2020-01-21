@@ -97,25 +97,14 @@ class Image extends ModelBase {
 
     const responseResolutionHash = {};
     for (const resolution in resolutions) {
-      let responseResolution = resolution;
-      if (resolution === 'o') {
-        responseResolution = imageConstants.originalResolution;
-        responseResolutionHash[responseResolution] = oThis._formatResolution(resolutions[resolution]);
-        /*
-        If url is already present in original resolution hash. Then the same url is set in original resolutions hash
-        else we make the original url from url template.
-         */
-        if (responseResolutionHash[responseResolution].url) {
-          responseResolutionHash[responseResolution].url = shortToLongUrl.getFullUrl(
-            responseResolutionHash[responseResolution].url
-          );
-        } else {
-          responseResolutionHash[responseResolution].url = shortToLongUrl.getFullUrl(urlTemplate, responseResolution);
-        }
-      } else {
-        responseResolutionHash[responseResolution] = oThis._formatResolution(resolutions[resolution]);
-        responseResolutionHash[responseResolution].url = shortToLongUrl.getFullUrl(urlTemplate, responseResolution);
-      }
+      const longResolutionKey = imageConstants.invertedResolutionKeyToShortMap[resolution];
+
+      responseResolutionHash[longResolutionKey] = oThis._formatResolution(resolutions[resolution]);
+
+      const url = responseResolutionHash[longResolutionKey].url
+        ? responseResolutionHash[longResolutionKey].url
+        : urlTemplate;
+      responseResolutionHash[longResolutionKey].url = shortToLongUrl.getFullUrl(url, longResolutionKey);
     }
 
     return responseResolutionHash;
@@ -246,12 +235,13 @@ class Image extends ModelBase {
 
     const responseResolutionHash = {};
     for (const resolution in resolutions) {
+      const shortResolutionKey = imageConstants.resolutionKeyToShortMap[resolution];
+
+      responseResolutionHash[shortResolutionKey] = oThis._formatResolutionToInsert(resolutions[resolution]);
+
       // While inserting original url has to be present in original resolutions hash only.
       if (resolution === imageConstants.originalResolution) {
-        responseResolutionHash.o = oThis._formatResolutionToInsert(resolutions[resolution]);
-        responseResolutionHash.o.u = resolutions[resolution].url;
-      } else {
-        responseResolutionHash[resolution] = oThis._formatResolutionToInsert(resolutions[resolution]);
+        responseResolutionHash[shortResolutionKey].u = resolutions[resolution].url;
       }
     }
 
@@ -269,17 +259,11 @@ class Image extends ModelBase {
 
     const responseResolutionHash = {};
     for (const resolution in resolutions) {
-      if (resolution === imageConstants.originalResolution) {
-        if (resolutions[resolution].url.match(imageConstants.twitterImageUrlPrefix[1])) {
-          // If the url is twitter url then url is to be stored in resolutions hash.
-          responseResolutionHash.o = oThis._formatResolutionToInsert(resolutions[resolution]);
-          responseResolutionHash.o.u = resolutions[resolution].url;
-        } else {
-          responseResolutionHash.o = oThis._formatResolutionToInsert(resolutions[resolution]);
-        }
-      } else {
-        responseResolutionHash[resolution] = oThis._formatResolutionToInsert(resolutions[resolution]);
+      const shortResolutionKey = imageConstants.resolutionKeyToShortMap[resolution];
+      if (resolutions[resolution].url && resolutions[resolution].url.match(imageConstants.twitterImageUrlPrefix[1])) {
+        responseResolutionHash[shortResolutionKey].u = resolutions[resolution].url;
       }
+      responseResolutionHash[shortResolutionKey] = oThis._formatResolutionToInsert(resolutions[resolution]);
     }
 
     return responseResolutionHash;
