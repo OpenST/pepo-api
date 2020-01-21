@@ -8,6 +8,7 @@ const rootPrefix = '../../..',
   AppleUserModel = require(rootPrefix + '/app/models/mysql/AppleUser'),
   GetAccessToken = require(rootPrefix + '/lib/connect/wrappers/apple/GetAccessToken'),
   GetApplePublicKey = require(rootPrefix + '/lib/connect/wrappers/apple/GetPublicKey'),
+  AppleNameFormatter = require(rootPrefix + 'lib/connect/wrappers/apple/AppleNameFormatter'),
   coreConstants = require(rootPrefix + '/config/coreConstants'),
   userConstants = require(rootPrefix + '/lib/globalConstant/user'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
@@ -41,7 +42,7 @@ class AppleConnect extends ConnectBase {
     oThis.authorizationCode = params.authorization_code;
     oThis.identityToken = params.identity_token;
     oThis.appleId = params.user; // TODO - login - change param name
-    oThis.name = params.full_name;
+    oThis.fullName = params.full_name;
 
     oThis.appleOAuthDetails = null;
     oThis.decryptedAppleEmail = null;
@@ -194,12 +195,15 @@ class AppleConnect extends ConnectBase {
   async _performSignUp() {
     const oThis = this;
 
+    let formattedAppleName = new AppleNameFormatter({ fullName: oThis.fullName, email: oThis.decryptedAppleEmail });
+
     let params = {
       appleOAuthDetails: oThis.appleOAuthDetails,
       appleUserEntity: {
         id: oThis.appleId,
         email: oThis.decryptedAppleEmail,
-        fullName: oThis.fullName || oThis.decryptedAppleEmail
+        fullName: formattedAppleName.formattedName,
+        socialUserName: formattedAppleName.socialUserName
       }
     };
 
@@ -215,10 +219,12 @@ class AppleConnect extends ConnectBase {
   async _performLogin() {
     const oThis = this;
 
+    let formattedAppleName = new AppleNameFormatter({ fullName: oThis.fullName, email: oThis.decryptedAppleEmail });
     let appleUserEntity = {
       id: oThis.appleId,
       email: oThis.decryptedAppleEmail,
-      fullName: oThis.fullName || oThis.decryptedAppleEmail
+      fullName: formattedAppleName.formattedName,
+      socialUserName: formattedAppleName.socialUserName
     };
     let params = {
       appleUserObj: oThis.socialUserObj,
