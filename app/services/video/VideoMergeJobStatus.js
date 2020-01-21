@@ -64,16 +64,6 @@ class VideoMergeJobStatus extends ServiceBase {
     }
 
     oThis.jobDetails = cacheResponse.data[oThis.jobId];
-
-    if (CommonValidators.isEmptyObject(oThis.jobDetails)) {
-      return Promise.reject(
-        responseHelper.error({
-          internal_error_identifier: 'a_s_v_vms_1',
-          api_error_identifier: 'entity_not_found',
-          debug_options: { jobId: oThis.jobId }
-        })
-      );
-    }
   }
 
   /**
