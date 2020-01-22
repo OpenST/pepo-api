@@ -261,6 +261,7 @@ class Video extends ModelBase {
 
       // While inserting original url has to be present in original resolutions hash only.
       if (resolution === videoConstants.originalResolution) {
+        responseResolutionHash[shortResolutionKey] = responseResolutionHash[shortResolutionKey] || {};
         responseResolutionHash[shortResolutionKey].u = resolutions[resolution].url;
       }
     }
