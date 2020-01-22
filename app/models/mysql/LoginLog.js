@@ -45,7 +45,7 @@ class LoginLog extends ModelBase {
     const formattedData = {
       id: dbRow.id,
       userId: dbRow.user_id,
-      serviceKind: dbRow.service_kind, // dhananjay - convert to enum
+      serviceKind: dbRow.service_kind,
       timestamp: dbRow.timestamp,
       createdAt: dbRow.created_at,
       updatedAt: dbRow.updated_at
