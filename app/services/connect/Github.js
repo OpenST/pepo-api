@@ -34,7 +34,7 @@ class GithubConnect extends ConnectBase {
     const oThis = this;
     oThis.accessToken = params.access_token;
 
-    oThis.gitHubUserDetails = null;
+    oThis.formattedGithubUser = null;
   }
 
   /**
@@ -51,6 +51,8 @@ class GithubConnect extends ConnectBase {
     if (githubUserRsp.isFailure()) {
       return Promise.reject(githubUserRsp);
     }
+
+    // TODO - login - move formatting logic inside wrapper
 
     oThis.formattedGithubUser = new GithubUserFormatter(githubUserRsp.data);
 
