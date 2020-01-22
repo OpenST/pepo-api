@@ -52,8 +52,6 @@ class GithubConnect extends ConnectBase {
       return Promise.reject(githubUserRsp);
     }
 
-    // TODO - login - move formatting logic inside wrapper
-
     oThis.formattedGithubUser = githubUserRsp.data;
 
     if (!oThis.formattedGithubUser.email) {
