@@ -24,7 +24,8 @@ class SocialConnectBase extends ServiceBase {
    * Constructor for social platform connects base.
    *
    * @param {object} params
-   * @param {object} params.current_user
+   * @param {string} [params.invite_code]: invite_code
+   * @param {object} [params.utm_params]: utm_params
    *
    * @augments ServiceBase
    *
@@ -33,10 +34,9 @@ class SocialConnectBase extends ServiceBase {
   constructor(params) {
     super(params);
 
-    // TODO - login - respect invite code
-    // TODO - login - utm params - respect
-
     const oThis = this;
+    oThis.inviteCode = params.invite_code;
+    oThis.utmParams = params.utm_params;
     oThis.socialUserObj = null;
     oThis.newSocialConnect = false;
     oThis.userId = null;
@@ -302,6 +302,23 @@ class SocialConnectBase extends ServiceBase {
       }
       oThis.inviterCodeObj = inviterCodeRow;
     }
+  }
+
+  /**
+   * Append invite params and utm for signup job.
+   *
+   * @private
+   */
+  _appendInviteParams() {
+    const oThis = this;
+
+    let rp = {};
+    if (oThis.inviterCodeObj) {
+      rp.inviterCodeId = oThis.inviterCodeObj.id;
+    }
+    rp.utmParams = oThis.utmParams;
+    rp.inviteCode = oThis.inviteCode || '';
+    return rp;
   }
 
   /**

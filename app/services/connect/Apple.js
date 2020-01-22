@@ -207,6 +207,8 @@ class AppleConnect extends ConnectBase {
       }
     };
 
+    Object.assign(params, oThis._appendInviteParams());
+
     oThis.serviceResp = await new AppleSignup(params).perform();
   }
 

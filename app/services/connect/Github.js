@@ -118,6 +118,7 @@ class GithubConnect extends ConnectBase {
       userGithubEntity: oThis.formattedGithubUser
     };
 
+    Object.assign(signUpParams, oThis._appendInviteParams());
     oThis.serviceResp = await new GithubSignup(signUpParams).perform();
   }
 

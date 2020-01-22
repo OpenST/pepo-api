@@ -27,9 +27,6 @@ class TwitterConnect extends ConnectBase {
    * @param {string} params.twitter_id: Twitter_id
    * @param {string} params.handle: Handle
    *
-   * @param {string} [params.invite_code]: invite_code
-   * @param {object} [params.utm_params]: utm_params
-   *
    * @augments ServiceBase
    *
    * @constructor
@@ -43,8 +40,6 @@ class TwitterConnect extends ConnectBase {
     oThis.secret = params.secret;
     oThis.twitterId = params.twitter_id;
     oThis.handle = params.handle;
-    oThis.inviteCode = params.invite_code;
-    oThis.utmParams = params.utm_params;
     oThis.userTwitterEntity = null;
     oThis.twitterRespHeaders = null;
   }
@@ -155,11 +150,7 @@ class TwitterConnect extends ConnectBase {
       secret: oThis.secret
     };
 
-    if (oThis.inviterCodeObj) {
-      requestParams.inviterCodeId = oThis.inviterCodeObj.id;
-    }
-    requestParams.utmParams = oThis.utmParams;
-    requestParams.inviteCode = oThis.inviteCode || '';
+    Object.assign(requestParams, oThis._appendInviteParams());
     oThis.serviceResp = await new SignupTwitterClass(requestParams).perform();
 
     logger.log('End::Connect._performSignUp');
