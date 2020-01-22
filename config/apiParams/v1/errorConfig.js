@@ -431,6 +431,18 @@ const v1ErrorConfig = {
     message: 'Oops! Something went wrong.'
   },
 
+  invalid_topics: {
+    parameter: 'topic_kind',
+    code: 'invalid',
+    message: 'Topic kind is invalid.'
+  },
+
+  invalid_endpoint_uuid: {
+    parameter: 'endpoint_uuid',
+    code: 'invalid',
+    message: 'Endpoint uuid is invalid.'
+  },
+
   missing_video_url: {
     parameter: 'video_url',
     code: 'missing',
