@@ -7,7 +7,7 @@ const rootPrefix = '../../..',
   gotoFactory = require(rootPrefix + '/lib/goTo/factory'),
   entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
   gotoConstants = require(rootPrefix + '/lib/globalConstant/goto'),
-  UserUniqueIdentifierModel = require(rootPrefix + '/app/models/mysql/UserIdentifier'),
+  UserIdentifiersByEmailsCache = require(rootPrefix + '/lib/cacheManagement/multi/UserIdentifiersByEmails'),
   UserModel = require(rootPrefix + '/app/models/mysql/User'),
   UserStatsByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/UserStatByUserIds'),
   CommonValidators = require(rootPrefix + '/lib/validators/Common');
@@ -141,38 +141,47 @@ class SocialConnectBase extends ServiceBase {
       // Means user is already part of system using same or different social connect.
       let userIdentifiers = [],
         userUniqueElements = oThis._getSocialUserUniqueProperties();
-      // TODO - login - use cache hit.
+
       if (CommonValidators.validateNonEmptyObject(userUniqueElements)) {
-        userIdentifiers = await new UserUniqueIdentifierModel().fetchByKindAndValues(
-          userUniqueElements.kind,
-          userUniqueElements.values
+        const userIdentifiersByEmailsCacheRsp = await new UserIdentifiersByEmailsCache({
+          emails: userUniqueElements.values
+        }).fetch();
+
+        if (!userIdentifiersByEmailsCacheRsp || userIdentifiersByEmailsCacheRsp.isFailure()) {
+          return Promise.reject(userIdentifiersByEmailsCacheRsp);
+        }
+
+        const userIdentifiersByEmailsMap = userIdentifiersByEmailsCacheRsp.data;
+
+        for (let eValue in userIdentifiersByEmailsMap) {
+          if (CommonValidators.validateNonEmptyObject(userIdentifiersByEmailsMap[eValue])) {
+            userIdentifiers.push(userIdentifiersByEmailsMap[eValue]);
+          }
+        }
+      }
+
+      // This means user email or phone number is already exists in system via another or same social platform.
+      let userObj = await oThis._decideUserToAssociateNewAccount(userIdentifiers);
+      if (!CommonValidators.validateNonEmptyObject(userObj)) {
+        // If no user account is found and user identifiers are present
+        return Promise.reject(
+          responseHelper.error({
+            internal_error_identifier: 'a_s_c_b_1',
+            api_error_identifier: 'something_went_wrong',
+            debug_options: { userIdentifiers: userIdentifiers, currentData: oThis }
+          })
         );
       }
 
-      if (CommonValidators.validateNonEmptyObject(userIdentifiers)) {
-        // This means user email or phone number is already exists in system via another or same social platform.
-        let userObj = await oThis._decideUserToAssociateNewAccount(userIdentifiers);
-        if (!CommonValidators.validateNonEmptyObject(userObj)) {
-          // If no user account is found and user identifiers are present
-          return Promise.reject(
-            responseHelper.error({
-              internal_error_identifier: 'a_s_c_b_1',
-              api_error_identifier: 'something_went_wrong',
-              debug_options: { userIdentifiers: userIdentifiers, currentData: oThis }
-            })
-          );
-        }
-
-        // If user has already connected this social platform.
-        // Means in case of twitter connect request, same email user has already connected twitter before then its signup
-        if (oThis._sameSocialConnectUsed(userObj)) {
-          // We have received same email from 2 different twitter accounts, then we would make 2 Pepo users
-          oThis.isUserSignUp = true;
-        } else {
-          // We have received same email from twitter and gmail, means its login for user
-          oThis.isUserSignUp = false;
-          oThis.userId = userObj.id;
-        }
+      // If user has already connected this social platform.
+      // Means in case of twitter connect request, same email user has already connected twitter before then its signup
+      if (oThis._sameSocialConnectUsed(userObj)) {
+        // We have received same email from 2 different twitter accounts, then we would make 2 Pepo users
+        oThis.isUserSignUp = true;
+      } else {
+        // We have received same email from twitter and gmail, means its login for user
+        oThis.isUserSignUp = false;
+        oThis.userId = userObj.id;
       }
     }
   }
