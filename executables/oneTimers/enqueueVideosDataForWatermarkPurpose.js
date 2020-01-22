@@ -10,6 +10,7 @@ const command = require('commander');
 const rootPrefix = '../..',
   util = require(rootPrefix + '/lib/util'),
   basicHelper = require(rootPrefix + '/helpers/basic'),
+  s3Wrapper = require(rootPrefix + '/lib/aws/S3Wrapper'),
   bgJob = require(rootPrefix + '/lib/rabbitMqEnqueue/bgJob'),
   shortToLongUrl = require(rootPrefix + '/lib/shortToLongUrl'),
   s3Constants = require(rootPrefix + '/lib/globalConstant/s3'),
@@ -89,7 +90,7 @@ class EnqueueVideosDataForWatermarkPurpose {
       offset = offset + BATCH_SIZE;
     }
 
-    console.log('The oThis.notProcessedVideoIds are : ', oThis.notProcessedVideoIds);
+    logger.log('The oThis.notProcessedVideoIds are : ', oThis.notProcessedVideoIds);
   }
 
   /**
@@ -110,8 +111,6 @@ class EnqueueVideosDataForWatermarkPurpose {
       .limit(limit)
       .offset(offset)
       .fire();
-
-    //todo: fetch all videos. if not to be processed - add array
 
     oThis.totalRowsFound = videosData.length;
 
@@ -165,7 +164,6 @@ class EnqueueVideosDataForWatermarkPurpose {
         );
       }
 
-      //todo:remove use of _fetchEntity
       await oThis._prepareResizerRequestData();
       await oThis._sendResizerRequest();
     }
@@ -219,7 +217,10 @@ class EnqueueVideosDataForWatermarkPurpose {
     const urlToUse =
       oThis.video.resolutions.o && oThis.video.resolutions.o.u ? oThis.video.resolutions.o.u : oThis.video.urlTemplate;
 
-    sourceUrl = shortToLongUrl.getFullUrl(urlToUse, videoConstants.originalResolution);
+    const fileName = shortToLongUrl.getCompleteFileName(urlToUse, videoConstants.originalResolution);
+
+    let urlExpiry = 60 * 60;
+    sourceUrl = await s3Wrapper.getSignedUrl(fileName, s3Constants.videoFileType, urlExpiry);
 
     oThis.compressData = {
       source_url: sourceUrl,
@@ -233,8 +234,7 @@ class EnqueueVideosDataForWatermarkPurpose {
 
     const videoKind = oThis.video.kind;
     const sizesToGenerate = videoConstants.compressionSizes[videoKind];
-    const extension = util.getFileExtension(sourceUrl);
-    const contentType = util.getVideoContentTypeForExtension(extension);
+    const contentType = 'video/mp4';
 
     for (const sizeName in sizesToGenerate) {
       if (sizeName === videoConstants.externalResolution) {
@@ -263,7 +263,7 @@ class EnqueueVideosDataForWatermarkPurpose {
   async _sendResizerRequest() {
     const oThis = this;
 
-    console.log('\n\n\nThe oThis.compressData is : ', oThis.compressData);
+    logger.log('\n\n\nThe oThis.compressData is : ', oThis.compressData);
 
     const resp = await mediaResizer.compressVideo(oThis.compressData);
     if (resp.isFailure()) {
