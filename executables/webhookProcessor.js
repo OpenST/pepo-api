@@ -245,7 +245,7 @@ class WebhookProcessorExecutable extends CronBase {
         webhookEndpoint: webhookEndpoint
       };
 
-      const postEventResp = new PublishWebhookLib(postParams).perform();
+      const postEventResp = await new PublishWebhookLib(postParams).perform();
 
       if (postEventResp.isFailure()) {
         await oThis._markWebhookEventAsFailed(webhookEvent, postEventResp);
