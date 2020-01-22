@@ -48,7 +48,7 @@ class UserIdentifier extends ModelBase {
       id: dbRow.id,
       userId: dbRow.user_id,
       eValue: dbRow.e_value,
-      eKind: dbRow.e_kind, // dhananjay - convert to enum
+      eKind: userIdentifierConstants.invertedKinds[dbRow.e_kind],
       createdAt: dbRow.created_at,
       updatedAt: dbRow.updated_at
     };
@@ -102,12 +102,56 @@ class UserIdentifier extends ModelBase {
   }
 
   /**
+   * Fetch user identifiers by email ids.
+   *
+   * @param {array<string>} emails
+   *
+   * @returns {Promise<{}>}
+   */
+  async fetchUserIdsByEmails(emails) {
+    const oThis = this;
+
+    const dbRows = await oThis
+      .select('*')
+      .where({
+        e_value: emails,
+        e_kind: userIdentifierConstants.invertedKinds[userIdentifierConstants.emailKind]
+      })
+      .fire();
+
+    const response = {};
+
+    for (let index = 0; index < dbRows.length; index++) {
+      const formatDbRow = oThis.formatDbData(dbRows[index]);
+      response[formatDbRow.eValue] = formatDbRow;
+    }
+
+    return response;
+  }
+
+  /**
    * Index name
    *
    * @returns {string}
    */
   static get userIdEmailUniqueIndexName() {
     return 'uidx_1';
+  }
+
+  /**
+   * Flush cache.
+   *
+   * @param {object} params
+   *
+   * @returns {Promise<*>}
+   */
+  static async flushCache(params) {
+    const promisesArray = [];
+
+    if (params.emails) {
+      const UserIdentifiersByEmailsCache = require(rootPrefix + '/lib/cacheManagement/multi/UserIdentifiersByEmails');
+      promisesArray.push(new UserIdentifiersByEmailsCache({ emails: params.emails }).clear());
+    }
   }
 }
 
