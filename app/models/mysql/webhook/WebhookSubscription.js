@@ -60,8 +60,7 @@ class WebhookSubscriptionModel extends ModelBase {
   }
 
   /**
-   * List Of formatted column names that can be exposed by service.
-   *
+   * List of formatted column names that can be exposed by service.
    *
    * @returns {array}
    */

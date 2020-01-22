@@ -8,19 +8,19 @@ const program = require('commander');
 
 const rootPrefix = '..',
   CronBase = require(rootPrefix + '/executables/CronBase'),
-  WebhookEventModel = require(rootPrefix + '/app/models/mysql/webhook/WebhookEvent'),
   PublishWebhookLib = require(rootPrefix + '/lib/webhook/PublishWebhook'),
+  WebhookEventModel = require(rootPrefix + '/app/models/mysql/webhook/WebhookEvent'),
   cronProcessesConstants = require(rootPrefix + '/lib/globalConstant/cronProcesses'),
   WebhookEndpointByUuidsCache = require(rootPrefix + '/lib/cacheManagement/multi/WebhookEndpointByUuids'),
-  responseHelper = require(rootPrefix + '/lib/formatter/response'),
-  sigIntConstant = require(rootPrefix + '/lib/globalConstant/sigInt'),
   basicHelper = require(rootPrefix + '/helpers/basic'),
-  webhookEventConstants = require(rootPrefix + '/lib/globalConstant/webhook/webhookEvent'),
-  webhookEndpointConstants = require(rootPrefix + '/lib/globalConstant/webhook/webhookEndpoint'),
-  webhookProcessorfactory = require(rootPrefix + '/lib/webhook/processor/factory'),
+  responseHelper = require(rootPrefix + '/lib/formatter/response'),
+  logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
+  sigIntConstants = require(rootPrefix + '/lib/globalConstant/sigInt'),
   createErrorLogsEntry = require(rootPrefix + '/lib/errorLogs/createEntry'),
   errorLogsConstants = require(rootPrefix + '/lib/globalConstant/errorLogs'),
-  logger = require(rootPrefix + '/lib/logger/customConsoleLogger');
+  webhookProcessorfactory = require(rootPrefix + '/lib/webhook/processor/factory'),
+  webhookEventConstants = require(rootPrefix + '/lib/globalConstant/webhook/webhookEvent'),
+  webhookEndpointConstants = require(rootPrefix + '/lib/globalConstant/webhook/webhookEndpoint');
 
 program.option('--cronProcessId <cronProcessId>', 'Cron table process ID').parse(process.argv);
 
@@ -68,6 +68,8 @@ class WebhookProcessorExecutable extends CronBase {
   /**
    * Start the executable.
    *
+   * @sets oThis.canExit
+   *
    * @returns {Promise<any>}
    * @private
    */
@@ -76,7 +78,7 @@ class WebhookProcessorExecutable extends CronBase {
 
     oThis.canExit = false;
 
-    while (sigIntConstant.getSigIntStatus != 1) {
+    while (sigIntConstants.getSigIntStatus != 1) {
       oThis._initParams();
 
       await oThis._getLockedRows();
@@ -94,7 +96,10 @@ class WebhookProcessorExecutable extends CronBase {
   }
 
   /**
-   * Init params for current iteration
+   * Init params for current iteration.
+   *
+   * @sets oThis.lockedWebhookEvents, oThis.webhookEnpointMapByUuid, oThis.successWebhookEventIds
+   * @sets oThis.internalErrorWebhookEventIds, oThis.internalErrorMaxLimitWebhookEventIds, oThis.deletedWebhookEventIds
    *
    * @private
    */
@@ -111,12 +116,11 @@ class WebhookProcessorExecutable extends CronBase {
   }
 
   /**
-   * Get Lock on Webhook Event Rows to be processed and fetch them.
-   *
-   * @returns {Promise<void>}
+   * Get lock on webhook event rows to be processed and fetch them.
    *
    * @sets oThis.lockedWebhookEvents
    *
+   * @returns {Promise<void>}
    */
   async _getLockedRows() {
     const oThis = this;
@@ -158,8 +162,8 @@ class WebhookProcessorExecutable extends CronBase {
 
     const promises1 = [];
 
-    for (let i = 0; i < oThis.lockedWebhookEvents.length; i++) {
-      const webhookEvent = oThis.lockedWebhookEvents[i];
+    for (let index = 0; index < oThis.lockedWebhookEvents.length; index++) {
+      const webhookEvent = oThis.lockedWebhookEvents[index];
       promises1.push(oThis._sendEvent(webhookEvent));
     }
 
@@ -175,24 +179,22 @@ class WebhookProcessorExecutable extends CronBase {
   }
 
   /**
-   * Fetch Webhook Endpoints
-   *
-   * @returns {Promise<void>}
+   * Fetch webhook endpoints.
    *
    * @sets oThis.webhookEnpointMapByUuid
    *
+   * @returns {Promise<void>}
    */
   async _fetchWebhookEndpoints() {
     const oThis = this;
 
     const webhookEndpointsUuids = [];
 
-    for (let i = 0; i < oThis.lockedWebhookEvents.length; i++) {
-      webhookEndpointsUuids.push(oThis.lockedWebhookEvents[i].webhookEndpointUuid);
+    for (let index = 0; index < oThis.lockedWebhookEvents.length; index++) {
+      webhookEndpointsUuids.push(oThis.lockedWebhookEvents[index].webhookEndpointUuid);
     }
 
     const cacheResp = await new WebhookEndpointByUuidsCache({ uuids: webhookEndpointsUuids }).fetch();
-
     if (cacheResp.isFailure()) {
       return Promise.reject(cacheResp);
     }
@@ -201,13 +203,12 @@ class WebhookProcessorExecutable extends CronBase {
   }
 
   /**
-   * Send event
-   *
-   * @returns {Promise<void>}
+   * Send event.
    *
    * @sets oThis.deletedWebhookEventIds, oThis.internalErrorWebhookEventIds, oThis.internalErrorMaxLimitWebhookEventIds
    * @sets oThis.successWebhookEventIds
    *
+   * @returns {Promise<void>}
    */
   async _sendEvent(webhookEvent) {
     const oThis = this;
@@ -216,6 +217,7 @@ class WebhookProcessorExecutable extends CronBase {
 
     if (webhookEndpoint.status !== webhookEndpointConstants.activeStatus) {
       oThis.deletedWebhookEventIds.push(webhookEvent.id);
+
       return;
     }
 
@@ -235,6 +237,7 @@ class WebhookProcessorExecutable extends CronBase {
         } else {
           oThis.internalErrorWebhookEventIds.push(webhookEvent.id);
         }
+
         return;
       }
 
@@ -272,14 +275,15 @@ class WebhookProcessorExecutable extends CronBase {
   }
 
   /**
-   * Mark event failure due to error in post api call to endpoint
+   * Mark event failure due to error in post api call to endpoint.
    *
+   * @returns {Promise<void>}
    * @private
    */
   async _markWebhookEventAsDeleted() {
     const oThis = this;
 
-    //Note: Do not remove lock id. index data with null lock ids will be less.
+    // Note: Do not remove lock id. Index data with null lock ids will be less.
     // Discuss with aman.
     if (oThis.deletedWebhookEventIds.length > 0) {
       await new WebhookEventModel()
@@ -292,8 +296,9 @@ class WebhookProcessorExecutable extends CronBase {
   }
 
   /**
-   * Mark event failure due to error in post api call to endpoint
+   * Mark event failure due to error in post api call to endpoint.
    *
+   * @returns {Promise<void>}
    * @private
    */
   async _markWebhookEventAsSuccess() {
@@ -312,8 +317,9 @@ class WebhookProcessorExecutable extends CronBase {
   }
 
   /**
-   * Mark event failure due to error in post api call to endpoint
+   * Mark event failure due to error in post api call to endpoint.
    *
+   * @returns {Promise<void>}
    * @private
    */
   async _markWebhookEventAsInternalCompletelyFailed() {
@@ -344,8 +350,9 @@ class WebhookProcessorExecutable extends CronBase {
   }
 
   /**
-   * Mark event failure due to error in post api call to endpoint
+   * Mark event failure due to error in post api call to endpoint.
    *
+   * @returns {Promise<void>}
    * @private
    */
   async _markWebhookEventAsInternalFailed() {
@@ -370,16 +377,15 @@ class WebhookProcessorExecutable extends CronBase {
   }
 
   /**
-   * Mark event failure due to error in post api call to endpoint
+   * Mark event failure due to error in post api call to endpoint.
    *
+   * @returns {Promise<void>}
    * @private
    */
   async _markWebhookEventAsFailed(webhookEvent, postEventResp) {
-    const oThis = this;
-
-    //mark internal_error_count as 0 since it was tried once.
+    // Mark internal_error_count as 0 since it was tried once.
     if (webhookEvent.retryCount >= webhookEventConstants.maxRetryCount - 1) {
-      //Note: Do not remove lock id. index data with null lock ids will be less.
+      // Note: Do not remove lock id. Index data with null lock ids will be less.
       // Discuss with aman.
       await new WebhookEventModel()
         .update({
