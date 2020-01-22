@@ -8,7 +8,6 @@ const rootPrefix = '../../..',
   GithubUserModel = require(rootPrefix + '/app/models/mysql/GithubUser'),
   GithubGetUser = require(rootPrefix + '/lib/connect/wrappers/github/GetUser'),
   GithubUserEmail = require(rootPrefix + '/lib/connect/wrappers/github/GetUserEmails'),
-  GithubUserFormatter = require(rootPrefix + '/lib/connect/wrappers/github/UserEntityFormatter'),
   userConstants = require(rootPrefix + '/lib/globalConstant/user'),
   userIdentifierConstants = require(rootPrefix + '/lib/globalConstant/userIdentifier');
 
@@ -55,7 +54,7 @@ class GithubConnect extends ConnectBase {
 
     // TODO - login - move formatting logic inside wrapper
 
-    oThis.formattedGithubUser = new GithubUserFormatter(githubUserRsp.data);
+    oThis.formattedGithubUser = githubUserRsp.data;
 
     if (!oThis.formattedGithubUser.email) {
       let githubUserEmailRsp = await new GithubUserEmail().getUserEmails({ oAuthToken: oThis.accessToken });
@@ -66,7 +65,7 @@ class GithubConnect extends ConnectBase {
       for (let i = 0; i < githubUserEmailRsp.data.length; i++) {
         let emailObject = githubUserEmailRsp.data[i];
         if (emailObject.primary == true) {
-          oThis.formattedGithubUser.userData.email = emailObject.email;
+          oThis.formattedGithubUser.email = emailObject.email;
           break;
         }
       }

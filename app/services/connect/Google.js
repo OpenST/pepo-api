@@ -60,7 +60,7 @@ class GoogleConnect extends ConnectBase {
       return Promise.reject(googleUserRsp);
     }
 
-    oThis.formattedGoogleUser = new GoogleUserFormatter(googleUserRsp.data);
+    oThis.formattedGoogleUser = googleUserRsp.data;
   }
 
   /**
