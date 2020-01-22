@@ -226,22 +226,21 @@ class SocialConnectBase extends ServiceBase {
         return approvedCreatorUsers[0];
       } else {
         // If there are more than one approved user
-        let userObjs = approvedCreatorUsers.length > 0 ? approvedCreatorUsers : users;
+        let userObjs = approvedCreatorUsers.length > 1 ? approvedCreatorUsers : users;
         // Fetch user stats of all user ids
-        let cacheResp = await new UserStatsByUserIdsCache({ userIds: userIds }).fetch();
+        let statsCacheResp = await new UserStatsByUserIdsCache({ userIds: userIds }).fetch();
         // User which has max contributed by count and contributed to count will be considered
         let maxCounts = { by: 0, to: 0, uid: 0 };
         for (let index in userObjs) {
           let uId = userObjs[index].id,
-            usObj = cacheResp.data[uId];
+            usObj = statsCacheResp.data[uId];
           if (CommonValidators.validateNonEmptyObject(usObj) && usObj.totalContributedBy >= maxCounts.by) {
-            maxCounts.by = usObj.totalContributedBy;
-            if (maxCounts.uid == 0) {
-              maxCounts.to = usObj.totalContributedTo;
-              maxCounts.uid = uId;
-            }
             // If total contributed by is same then look for total contributed to
             if (usObj.totalContributedBy == maxCounts.by && usObj.totalContributedTo > maxCounts.to) {
+              maxCounts.to = usObj.totalContributedTo;
+              maxCounts.uid = uId;
+            } else {
+              maxCounts.by = usObj.totalContributedBy;
               maxCounts.to = usObj.totalContributedTo;
               maxCounts.uid = uId;
             }
