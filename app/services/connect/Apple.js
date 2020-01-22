@@ -42,6 +42,7 @@ class AppleConnect extends ConnectBase {
     oThis.authorizationCode = params.authorization_code;
     oThis.identityToken = params.identity_token;
     oThis.appleId = params.user; // TODO - login - change param name
+    oThis.duplicateRequestIdentifier = oThis.appleId;
     oThis.fullName = params.full_name;
 
     oThis.appleOAuthDetails = null;

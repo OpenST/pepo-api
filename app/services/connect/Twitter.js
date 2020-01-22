@@ -39,6 +39,7 @@ class TwitterConnect extends ConnectBase {
     oThis.token = params.token;
     oThis.secret = params.secret;
     oThis.twitterId = params.twitter_id;
+    oThis.duplicateRequestIdentifier = oThis.twitterId;
     oThis.handle = params.handle;
     oThis.userTwitterEntity = null;
     oThis.twitterRespHeaders = null;

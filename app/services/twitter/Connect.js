@@ -5,7 +5,7 @@ const rootPrefix = '../../..',
   AccountTwitterRequestClass = require(rootPrefix + '/lib/connect/wrappers/twitter/oAuth1.0/Account'),
   PreLaunchInviteByTwitterIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/PreLaunchInviteByTwitterIds'),
   PreLaunchInviteByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/PreLaunchInviteByIds'),
-  ReplayAttackCache = require(rootPrefix + '/lib/cacheManagement/single/ReplayAttackOnTwitterConnect'),
+  ReplayAttackOnSocialConnectCache = require(rootPrefix + '/lib/cacheManagement/single/ReplayAttackOnSocialConnect'),
   SignupTwitterClass = require(rootPrefix + '/app/services/twitter/Signup'),
   LoginTwitterClass = require(rootPrefix + '/app/services/twitter/Login'),
   gotoFactory = require(rootPrefix + '/lib/goTo/factory'),
@@ -92,7 +92,9 @@ class TwitterConnect extends ServiceBase {
     const oThis = this;
     logger.log('Start::_validateDuplicateRequest');
 
-    const TwitterConnectOnTwitterIdResp = await new ReplayAttackCache({ twitterId: oThis.twitterId }).fetch();
+    const TwitterConnectOnTwitterIdResp = await new ReplayAttackOnSocialConnectCache({
+      socialId: oThis.twitterId
+    }).fetch();
 
     if (TwitterConnectOnTwitterIdResp.isFailure()) {
       return Promise.reject(

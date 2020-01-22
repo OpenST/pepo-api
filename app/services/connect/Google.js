@@ -40,6 +40,7 @@ class GoogleConnect extends ConnectBase {
     oThis.refreshToken = params.refresh_token;
     oThis.tokenType = params.token_type;
     oThis.idToken = params.id_token;
+    oThis.duplicateRequestIdentifier = oThis.accessToken;
 
     oThis.formattedGoogleUser = null;
   }

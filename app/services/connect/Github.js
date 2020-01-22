@@ -33,6 +33,7 @@ class GithubConnect extends ConnectBase {
 
     const oThis = this;
     oThis.accessToken = params.access_token;
+    oThis.duplicateRequestIdentifier = oThis.accessToken;
 
     oThis.formattedGithubUser = null;
   }

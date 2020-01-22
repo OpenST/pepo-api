@@ -10,6 +10,7 @@ const rootPrefix = '../../..',
   UserIdentifiersByEmailsCache = require(rootPrefix + '/lib/cacheManagement/multi/UserIdentifiersByEmails'),
   UserModel = require(rootPrefix + '/app/models/mysql/User'),
   UserStatsByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/UserStatByUserIds'),
+  ReplayAttackOnSocialConnectCache = require(rootPrefix + '/lib/cacheManagement/single/ReplayAttackOnSocialConnect'),
   CommonValidators = require(rootPrefix + '/lib/validators/Common');
 
 const urlParser = require('url');
@@ -73,8 +74,22 @@ class SocialConnectBase extends ServiceBase {
    * @returns {Promise<void>}
    * @private
    */
-  // TODO - login - missing implementation.
-  async _validateDuplicateRequest() {}
+  async _validateDuplicateRequest() {
+    const oThis = this;
+
+    const resp = await new ReplayAttackOnSocialConnectCache({ socialId: oThis.duplicateRequestIdentifier }).fetch();
+
+    if (resp.isFailure()) {
+      return Promise.reject(
+        responseHelper.error({
+          internal_error_identifier: 's_c_b_1',
+          api_error_identifier: 'could_not_proceed'
+        })
+      );
+    }
+
+    return responseHelper.successWithData({});
+  }
 
   /**
    * Method to validate access tokens and fetching data from Social platforms.
