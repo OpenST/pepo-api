@@ -96,8 +96,9 @@ class AppleConnect extends ConnectBase {
           internal_error_identifier: 'l_c_l_ba_2',
           api_error_identifier: 'something_went_wrong',
           debug_options: {
-            // TODO - ankit - what to do here?
-            // Error: `aud parameter does not include this client - is: ${jwtClaims.aud} | expected: ${clientID}`
+            Error: `aud parameter does not include this client - is: ${decryptedIdentityToken.aud} | expected: ${
+              coreConstants.PA_APPLE_CLIENT_ID
+            }`
           }
         })
       );
