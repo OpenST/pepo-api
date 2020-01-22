@@ -1305,7 +1305,7 @@ const v1Signature = {
         validatorMethods: ['validateInteger']
       },
       {
-        parameter: 'user',
+        parameter: 'apple_user_id',
         validatorMethods: ['validateString']
       }
     ],
