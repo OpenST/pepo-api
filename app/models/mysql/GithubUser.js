@@ -63,18 +63,24 @@ class GithubUserModel extends ModelBase {
   /**
    * Fetch github user by user id.
    *
-   * @param userId
+   * @param userIds
    * @returns {Promise<void>}
    */
-  async fetchByUserId(userId) {
+  async fetchByUserIds(userIds) {
     const oThis = this;
 
-    const dbRow = await oThis
+    const dbRows = await oThis
       .select('*')
-      .where({ user_id: userId })
+      .where({ user_id: userIds })
       .fire();
 
-    return oThis.formatDbData(dbRow[0]);
+    const response = {};
+    for (let ind = 0; ind < dbRows.length; ind++) {
+      const formattedData = oThis.formatDbData(dbRows[ind]);
+      response[formattedData.userId] = formattedData;
+    }
+
+    return response;
   }
 
   /**

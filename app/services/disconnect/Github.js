@@ -23,9 +23,9 @@ class GithubDisconnect extends DisconnectBase {
   async _getSocialId() {
     const oThis = this;
 
-    const response = await new GithubUserModel().fetchByUserId(oThis.currentUserId);
+    const response = await new GithubUserModel().fetchByUserIds([oThis.currentUserId]);
 
-    oThis.githubUserId = response.id;
+    oThis.githubUserId = response[oThis.currentUserId].id;
   }
 
   /**

@@ -36,10 +36,10 @@ class RotateGithubAccount extends RotateAccountBase {
   async _fetchSocialUser() {
     const oThis = this;
 
-    const userRsp = await new GithubUserModel().fetchByUserId(oThis.userId);
+    const userRsp = await new GithubUserModel().fetchByUserIds([oThis.userId]);
 
-    oThis.githubUserId = userRsp.id;
-    oThis.githubId = userRsp.githubId;
+    oThis.githubUserId = userRsp[oThis.userId].id;
+    oThis.githubId = userRsp[oThis.userId].githubId;
   }
 
   /**
