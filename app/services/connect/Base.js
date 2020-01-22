@@ -34,6 +34,7 @@ class SocialConnectBase extends ServiceBase {
     super(params);
 
     // TODO - login - respect invite code
+    // TODO - login - utm params - respect
 
     const oThis = this;
     oThis.socialUserObj = null;
