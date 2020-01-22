@@ -43,13 +43,13 @@ if (!cronProcessId) {
 const BATCH_SIZE = 1;
 
 /**
- * Class for webhook Processor.
+ * Class for webhook processor.
  *
  * @class WebhookProcessorExecutable
  */
 class WebhookProcessorExecutable extends CronBase {
   /**
-   * Constructor for webhook Processor.
+   * Constructor for webhook processor.
    *
    * @augments CronBase
    *
