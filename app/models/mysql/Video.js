@@ -99,23 +99,15 @@ class Video extends ModelBase {
     const responseResolutionHash = {};
 
     for (const resolution in resolutions) {
-      let responseResolution = resolution;
-      if (resolution === 'o') {
-        // If url is present then use that one or else make the url using template.
-        responseResolution = videoConstants.originalResolution;
-        responseResolutionHash[responseResolution] = oThis._formatResolution(resolutions[resolution]);
-        if (responseResolutionHash[responseResolution].url) {
-          responseResolutionHash[responseResolution].url = shortToLongUrl.getFullUrl(
-            responseResolutionHash[responseResolution].url,
-            responseResolution
-          );
-        } else {
-          responseResolutionHash[responseResolution].url = shortToLongUrl.getFullUrl(urlTemplate, responseResolution);
-        }
-      } else {
-        responseResolutionHash[responseResolution] = oThis._formatResolution(resolutions[resolution]);
-        responseResolutionHash[responseResolution].url = shortToLongUrl.getFullUrl(urlTemplate, responseResolution);
-      }
+      const longResolutionKey = videoConstants.invertedResolutionKeyToShortMap[resolution];
+
+      responseResolutionHash[longResolutionKey] = oThis._formatResolution(resolutions[resolution]);
+
+      const url = responseResolutionHash[longResolutionKey].url
+        ? responseResolutionHash[longResolutionKey].url
+        : urlTemplate;
+
+      responseResolutionHash[longResolutionKey].url = shortToLongUrl.getFullUrl(url, longResolutionKey);
     }
 
     return responseResolutionHash;
@@ -263,12 +255,14 @@ class Video extends ModelBase {
     const responseResolutionHash = {};
 
     for (const resolution in resolutions) {
+      const shortResolutionKey = videoConstants.resolutionKeyToShortMap[resolution];
+
+      responseResolutionHash[shortResolutionKey] = oThis._formatResolutionToInsert(resolutions[resolution]);
+
       // While inserting original url has to be present in original resolutions hash only.
       if (resolution === videoConstants.originalResolution) {
-        responseResolutionHash.o = oThis._formatResolutionToInsert(resolutions[resolution]);
-        responseResolutionHash.o.u = resolutions[resolution].url;
-      } else {
-        responseResolutionHash[resolution] = oThis._formatResolutionToInsert(resolutions[resolution]);
+        responseResolutionHash[shortResolutionKey] = responseResolutionHash[shortResolutionKey] || {};
+        responseResolutionHash[shortResolutionKey].u = resolutions[resolution].url;
       }
     }
 
@@ -286,11 +280,8 @@ class Video extends ModelBase {
 
     const responseResolutionHash = {};
     for (const resolution in resolutions) {
-      if (resolution === videoConstants.originalResolution) {
-        responseResolutionHash.o = oThis._formatResolutionToInsert(resolutions[resolution]);
-      } else {
-        responseResolutionHash[resolution] = oThis._formatResolutionToInsert(resolutions[resolution]);
-      }
+      const shortResolutionKey = videoConstants.resolutionKeyToShortMap[resolution];
+      responseResolutionHash[shortResolutionKey] = oThis._formatResolutionToInsert(resolutions[resolution]);
     }
 
     return responseResolutionHash;
