@@ -10,6 +10,7 @@ const command = require('commander');
 const rootPrefix = '../..',
   util = require(rootPrefix + '/lib/util'),
   basicHelper = require(rootPrefix + '/helpers/basic'),
+  s3Wrapper = require(rootPrefix + '/lib/aws/S3Wrapper'),
   bgJob = require(rootPrefix + '/lib/rabbitMqEnqueue/bgJob'),
   shortToLongUrl = require(rootPrefix + '/lib/shortToLongUrl'),
   s3Constants = require(rootPrefix + '/lib/globalConstant/s3'),
@@ -89,7 +90,7 @@ class EnqueueVideosDataForWatermarkPurpose {
       offset = offset + BATCH_SIZE;
     }
 
-    console.log('The oThis.notProcessedVideoIds are : ', oThis.notProcessedVideoIds);
+    logger.log('The oThis.notProcessedVideoIds are : ', oThis.notProcessedVideoIds);
   }
 
   /**
@@ -111,8 +112,6 @@ class EnqueueVideosDataForWatermarkPurpose {
       .offset(offset)
       .fire();
 
-    //todo: fetch all videos. if not to be processed - add array
-
     oThis.totalRowsFound = videosData.length;
 
     if (oThis.totalRowsFound == 0) {
@@ -123,47 +122,34 @@ class EnqueueVideosDataForWatermarkPurpose {
 
     let videoIds = [];
     for (let index = 0; index < videosData.length; index++) {
-      let formatDbRow = new VideoModel()._formatDbData(videosData[index]),
-        videoId = formatDbRow.id;
-      if (formatDbRow.compressionStatus === videoConstants.compressionDoneStatus) {
-        videoIds.push(videoId);
-        videoIdToVideoMap[videoId] = formatDbRow;
+      let formatDbRow = new VideoModel()._formatDbData(videosData[index]);
+      oThis.videoId = formatDbRow.id;
+
+      if (true || formatDbRow.compressionStatus === videoConstants.compressionDoneStatus) {
+        oThis.video = formatDbRow;
+
+        if (!oThis.videoId) {
+          return Promise.reject(
+            responseHelper.error({
+              internal_error_identifier: 'e_ot_evdfwp_1',
+              api_error_identifier: 'something_went_wrong',
+              debug_options: { videoId: oThis.videoId }
+            })
+          );
+        }
+
+        let resolutions = oThis.video.resolutions,
+          externalResolution = resolutions['e'];
+
+        if (CommonValidators.validateNonEmptyObject(externalResolution)) {
+          continue;
+        }
+
+        await oThis._prepareResizerRequestData();
+        await oThis._sendResizerRequest();
       } else {
         oThis.notProcessedVideoIds.push(videoId);
       }
-    }
-
-    let videoDetailsData = await new VideoDetailModel()
-      .select('creator_user_id, video_id')
-      .where(['video_id IN (?)', videoIds])
-      .fire();
-
-    for (let index = 0; index < videoDetailsData.length; index++) {
-      oThis.userId = videoDetailsData[index].creator_user_id;
-      oThis.videoId = videoDetailsData[index].video_id;
-
-      oThis.video = videoIdToVideoMap[oThis.videoId];
-
-      let resolutions = oThis.video.resolutions,
-        externalResolution = resolutions['e'];
-
-      if (CommonValidators.validateNonEmptyObject(externalResolution)) {
-        continue;
-      }
-
-      if (!oThis.videoId) {
-        return Promise.reject(
-          responseHelper.error({
-            internal_error_identifier: 'e_ot_evdfwp_1',
-            api_error_identifier: 'something_went_wrong',
-            debug_options: { videoId: oThis.videoId }
-          })
-        );
-      }
-
-      //todo:remove use of _fetchEntity
-      await oThis._prepareResizerRequestData();
-      await oThis._sendResizerRequest();
     }
   }
 
@@ -210,8 +196,21 @@ class EnqueueVideosDataForWatermarkPurpose {
   async _prepareResizerRequestData() {
     const oThis = this;
 
-    //todo: source url logic fix
-    let sourceUrl = shortToLongUrl.getFullUrl(oThis.video.urlTemplate, videoConstants.originalResolution);
+    let sourceUrl = null;
+
+    const urlToUse =
+      oThis.video.resolutions.o && oThis.video.resolutions.o.u ? oThis.video.resolutions.o.u : oThis.video.urlTemplate;
+
+    oThis.userId = urlToUse.split('/')[1].split('-')[0];
+
+    if (!oThis.userId) {
+      throw new Error(`invalid user id - ${oThis.userId}`);
+    }
+
+    const fileName = shortToLongUrl.getCompleteFileName(urlToUse, videoConstants.originalResolution);
+
+    let urlExpiry = 60 * 60;
+    sourceUrl = await s3Wrapper.getSignedUrl(fileName, s3Constants.videoFileType, urlExpiry);
 
     oThis.compressData = {
       source_url: sourceUrl,
@@ -225,8 +224,7 @@ class EnqueueVideosDataForWatermarkPurpose {
 
     const videoKind = oThis.video.kind;
     const sizesToGenerate = videoConstants.compressionSizes[videoKind];
-    const extension = util.getFileExtension(sourceUrl);
-    const contentType = util.getVideoContentTypeForExtension(extension);
+    const contentType = 'video/mp4';
 
     for (const sizeName in sizesToGenerate) {
       if (sizeName === videoConstants.externalResolution) {
@@ -255,17 +253,11 @@ class EnqueueVideosDataForWatermarkPurpose {
   async _sendResizerRequest() {
     const oThis = this;
 
-    console.log('\n\n\nThe oThis.compressData is : ', oThis.compressData);
-    if (basicHelper.isEmptyObject(oThis.compressData.compression_data)) {
-      await oThis._updateEntity(videoConstants.compressionDoneStatus);
-
-      return responseHelper.successWithData({});
-    }
+    logger.log('\n\n\nThe oThis.compressData is : ', oThis.compressData);
 
     const resp = await mediaResizer.compressVideo(oThis.compressData);
     if (resp.isFailure()) {
       await oThis._updateEntity(videoConstants.compressionFailedStatus);
-
       return responseHelper.successWithData({});
     }
 
