@@ -68,8 +68,7 @@ class WebhookEndpointModel extends ModelBase {
   }
 
   /**
-   * List Of formatted column names that can be exposed by service.
-   *
+   * List of formatted column names that can be exposed by service.
    *
    * @returns {array}
    */
@@ -81,7 +80,7 @@ class WebhookEndpointModel extends ModelBase {
    * Get rows by uuid.
    *
    * @param {object} params
-   * @param {Array} params.uuids
+   * @param {array<number>} params.uuids
    *
    * @returns {Promise<*>}
    */
