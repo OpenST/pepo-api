@@ -122,50 +122,34 @@ class EnqueueVideosDataForWatermarkPurpose {
 
     let videoIds = [];
     for (let index = 0; index < videosData.length; index++) {
-      let formatDbRow = new VideoModel()._formatDbData(videosData[index]),
-        videoId = formatDbRow.id;
-      if (formatDbRow.compressionStatus === videoConstants.compressionDoneStatus) {
-        videoIds.push(videoId);
-        videoIdToVideoMap[videoId] = formatDbRow;
+      let formatDbRow = new VideoModel()._formatDbData(videosData[index]);
+      oThis.videoId = formatDbRow.id;
+
+      if (true || formatDbRow.compressionStatus === videoConstants.compressionDoneStatus) {
+        oThis.video = formatDbRow;
+
+        if (!oThis.videoId) {
+          return Promise.reject(
+            responseHelper.error({
+              internal_error_identifier: 'e_ot_evdfwp_1',
+              api_error_identifier: 'something_went_wrong',
+              debug_options: { videoId: oThis.videoId }
+            })
+          );
+        }
+
+        let resolutions = oThis.video.resolutions,
+          externalResolution = resolutions['e'];
+
+        if (CommonValidators.validateNonEmptyObject(externalResolution)) {
+          continue;
+        }
+
+        await oThis._prepareResizerRequestData();
+        await oThis._sendResizerRequest();
       } else {
         oThis.notProcessedVideoIds.push(videoId);
       }
-    }
-
-    if (videoIds.length === 0) {
-      return;
-    }
-
-    let videoDetailsData = await new VideoDetailModel()
-      .select('creator_user_id, video_id')
-      .where(['video_id IN (?)', videoIds])
-      .fire();
-
-    for (let index = 0; index < videoDetailsData.length; index++) {
-      oThis.userId = videoDetailsData[index].creator_user_id;
-      oThis.videoId = videoDetailsData[index].video_id;
-
-      oThis.video = videoIdToVideoMap[oThis.videoId];
-
-      let resolutions = oThis.video.resolutions,
-        externalResolution = resolutions['e'];
-
-      if (CommonValidators.validateNonEmptyObject(externalResolution)) {
-        continue;
-      }
-
-      if (!oThis.videoId) {
-        return Promise.reject(
-          responseHelper.error({
-            internal_error_identifier: 'e_ot_evdfwp_1',
-            api_error_identifier: 'something_went_wrong',
-            debug_options: { videoId: oThis.videoId }
-          })
-        );
-      }
-
-      await oThis._prepareResizerRequestData();
-      await oThis._sendResizerRequest();
     }
   }
 
@@ -216,6 +200,12 @@ class EnqueueVideosDataForWatermarkPurpose {
 
     const urlToUse =
       oThis.video.resolutions.o && oThis.video.resolutions.o.u ? oThis.video.resolutions.o.u : oThis.video.urlTemplate;
+
+    oThis.userId = urlToUse.split('/')[1].split('-')[0];
+
+    if (!oThis.userId) {
+      throw new Error(`invalid user id - ${oThis.userId}`);
+    }
 
     const fileName = shortToLongUrl.getCompleteFileName(urlToUse, videoConstants.originalResolution);
 
