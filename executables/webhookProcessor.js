@@ -19,8 +19,8 @@ const rootPrefix = '..',
   webhookEndpointConstants = require(rootPrefix + '/lib/globalConstant/webhook/webhookEndpoint'),
   webhookProcessorfactory = require(rootPrefix + '/lib/webhook/processor/factory'),
   createErrorLogsEntry = require(rootPrefix + '/lib/errorLogs/createEntry'),
-  errorLogsConstants = require(rootPrefix + '/lib/globalConstant/errorLogs');
-logger = require(rootPrefix + '/lib/logger/customConsoleLogger');
+  errorLogsConstants = require(rootPrefix + '/lib/globalConstant/errorLogs'),
+  logger = require(rootPrefix + '/lib/logger/customConsoleLogger');
 
 program.option('--cronProcessId <cronProcessId>', 'Cron table process ID').parse(process.argv);
 
@@ -245,7 +245,7 @@ class WebhookProcessorExecutable extends CronBase {
         webhookEndpoint: webhookEndpoint
       };
 
-      const postEventResp = new PublishWebhookLib(postParams).perform();
+      const postEventResp = await new PublishWebhookLib(postParams).perform();
 
       if (postEventResp.isFailure()) {
         await oThis._markWebhookEventAsFailed(webhookEvent, postEventResp);
