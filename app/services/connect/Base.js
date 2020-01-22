@@ -160,28 +160,32 @@ class SocialConnectBase extends ServiceBase {
         }
       }
 
-      // This means user email or phone number is already exists in system via another or same social platform.
-      let userObj = await oThis._decideUserToAssociateNewAccount(userIdentifiers);
-      if (!CommonValidators.validateNonEmptyObject(userObj)) {
-        // If no user account is found and user identifiers are present
-        return Promise.reject(
-          responseHelper.error({
-            internal_error_identifier: 'a_s_c_b_1',
-            api_error_identifier: 'something_went_wrong',
-            debug_options: { userIdentifiers: userIdentifiers, currentData: oThis }
-          })
-        );
-      }
+      if (userIdentifiers.length > 0) {
+        // This means user email or phone number already exists in system via another or same social platform.
+        let userObj = await oThis._decideUserToAssociateNewAccount(userIdentifiers);
+        if (!CommonValidators.validateNonEmptyObject(userObj)) {
+          // If no user account is found and user identifiers are present
+          return Promise.reject(
+            responseHelper.error({
+              internal_error_identifier: 'a_s_c_b_1',
+              api_error_identifier: 'something_went_wrong',
+              debug_options: { userIdentifiers: userIdentifiers, currentData: oThis }
+            })
+          );
+        }
 
-      // If user has already connected this social platform.
-      // Means in case of twitter connect request, same email user has already connected twitter before then its signup
-      if (oThis._sameSocialConnectUsed(userObj)) {
-        // We have received same email from 2 different twitter accounts, then we would make 2 Pepo users
-        oThis.isUserSignUp = true;
+        // If user has already connected this social platform.
+        // Means in case of twitter connect request, same email user has already connected twitter before then its signup
+        if (oThis._sameSocialConnectUsed(userObj)) {
+          // We have received same email from 2 different twitter accounts, then we would make 2 Pepo users
+          oThis.isUserSignUp = true;
+        } else {
+          // We have received same email from twitter and gmail, means its login for user
+          oThis.isUserSignUp = false;
+          oThis.userId = userObj.id;
+        }
       } else {
-        // We have received same email from twitter and gmail, means its login for user
-        oThis.isUserSignUp = false;
-        oThis.userId = userObj.id;
+        oThis.isUserSignUp = true;
       }
     }
   }
