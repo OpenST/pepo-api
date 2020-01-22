@@ -260,11 +260,14 @@ class Image extends ModelBase {
     const responseResolutionHash = {};
     for (const resolution in resolutions) {
       const shortResolutionKey = imageConstants.resolutionKeyToShortMap[resolution];
+      responseResolutionHash[shortResolutionKey] = responseResolutionHash[shortResolutionKey] || {};
       if (resolutions[resolution].url && resolutions[resolution].url.match(imageConstants.twitterImageUrlPrefix[1])) {
-        responseResolutionHash[shortResolutionKey] = responseResolutionHash[shortResolutionKey] || {};
         responseResolutionHash[shortResolutionKey].u = resolutions[resolution].url;
       }
-      responseResolutionHash[shortResolutionKey] = oThis._formatResolutionToInsert(resolutions[resolution]);
+      Object.assign(
+        responseResolutionHash[shortResolutionKey],
+        oThis._formatResolutionToInsert(resolutions[resolution])
+      );
     }
 
     return responseResolutionHash;
