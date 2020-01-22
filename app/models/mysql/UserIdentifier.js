@@ -150,7 +150,8 @@ class UserIdentifier extends ModelBase {
 
     for (let index = 0; index < dbRows.length; index++) {
       const formatDbRow = oThis.formatDbData(dbRows[index]);
-      response[formatDbRow.userId] = formatDbRow;
+      response[formatDbRow.userId] = response[formatDbRow.userId] || [];
+      response[formatDbRow.userId].push(formatDbRow);
     }
 
     return response;

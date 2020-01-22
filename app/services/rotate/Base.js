@@ -139,14 +139,21 @@ class RotateAccountBase extends ServiceBase {
 
     //NOTE - we need email('eValue') for cache flush param
     const fetchByUserIdsRsp = await new UserUniqueIdentifierModel().fetchByUserIds([oThis.userId]),
-      userIdentifiers = fetchByUserIdsRsp[oThis.userId];
+      userIdentifiers = fetchByUserIdsRsp[oThis.userId],
+      emails = [];
+
+    for (let index = 0; index < userIdentifiers.length; index++) {
+      emails.push(userIdentifiers[index].eValue);
+    }
 
     await new UserUniqueIdentifierModel()
       .delete()
       .where({ user_id: oThis.userId })
       .fire();
 
-    await UserUniqueIdentifierModel.flushCache({ emails: userIdentifiers.eValue });
+    if (emails.length > 0) {
+      await UserUniqueIdentifierModel.flushCache({ emails: emails });
+    }
   }
 }
 
