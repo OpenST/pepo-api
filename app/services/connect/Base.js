@@ -141,6 +141,7 @@ class SocialConnectBase extends ServiceBase {
       // Means user is already part of system using same or different social connect.
       let userIdentifiers = [],
         userUniqueElements = oThis._getSocialUserUniqueProperties();
+      // TODO - login - use cache hit.
       if (CommonValidators.validateNonEmptyObject(userUniqueElements)) {
         userIdentifiers = await new UserUniqueIdentifierModel().fetchByKindAndValues(
           userUniqueElements.kind,
