@@ -130,6 +130,33 @@ class UserIdentifier extends ModelBase {
   }
 
   /**
+   * Fetch by user ids.
+   *
+   * @param {array<string>} userIds - user ids.
+   *
+   * @returns {Promise<{}>}
+   */
+  async fetchByUserIds(userIds) {
+    const oThis = this;
+
+    const dbRows = await oThis
+      .select('*')
+      .where({
+        user_id: userIds
+      })
+      .fire();
+
+    const response = {};
+
+    for (let index = 0; index < dbRows.length; index++) {
+      const formatDbRow = oThis.formatDbData(dbRows[index]);
+      response[formatDbRow.userId] = formatDbRow;
+    }
+
+    return response;
+  }
+
+  /**
    * Index name
    *
    * @returns {string}
