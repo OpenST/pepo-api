@@ -7,8 +7,9 @@ const rootPrefix = '../../..',
   gotoFactory = require(rootPrefix + '/lib/goTo/factory'),
   entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
   gotoConstants = require(rootPrefix + '/lib/globalConstant/goto'),
-  userIdentifierConstants = require(rootPrefix + '/lib/globalConstant/userIdentifier'),
   UserUniqueIdentifierModel = require(rootPrefix + '/app/models/mysql/UserIdentifier'),
+  UserModel = require(rootPrefix + '/app/models/mysql/User'),
+  UserStatsByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/UserStatByUserIds'),
   CommonValidators = require(rootPrefix + '/lib/validators/Common');
 
 const urlParser = require('url');
@@ -125,47 +126,38 @@ class SocialConnectBase extends ServiceBase {
   async _verifyUserPresence() {
     const oThis = this;
 
-    let userIdentifierObj = {};
-
     // Check social user existence
     if (oThis._socialAccountExists()) {
       oThis.isUserSignUp = false;
       oThis.userId = oThis.socialUserObj.userId;
-
-      let currentSocialEmail = oThis._getCurrentSocialEmail();
-
-      // if param email is present and different from table email
-      if (CommonValidators.isValidEmail(currentSocialEmail) && currentSocialEmail != oThis.socialUserObj.email) {
-        // then query user idt with param email
-        userIdentifierObj = await oThis._fetchUserIdentifier(userIdentifierConstants.emailKind, currentSocialEmail);
-        if (CommonValidators.validateNonEmptyObject(userIdentifierObj)) {
-          // if record found do nothing.
-        } else {
-          // else update social table with param email and insert into user idt
-          await oThis._updateEmailInSocialUsers();
-          await new UserUniqueIdentifierModel().insertUserEmail(oThis.userId, currentSocialEmail);
-        }
-      }
     } else {
       // If social account is not in our system, then look for unique identifier
       oThis.newSocialConnect = true;
 
       // Look for user email or phone number already exists.
       // Means user is already part of system using same or different social connect.
-      let userUniqueElements = oThis._getSocialUserUniqueProperties();
+      let userIdentifiers = [],
+        userUniqueElements = oThis._getSocialUserUniqueProperties();
       if (CommonValidators.validateNonEmptyObject(userUniqueElements)) {
-        userIdentifierObj = await oThis._fetchUserIdentifier(userUniqueElements.kind, userUniqueElements.value);
+        userIdentifiers = await new UserUniqueIdentifierModel().fetchByKindAndValues(
+          userUniqueElements.kind,
+          userUniqueElements.values
+        );
       }
 
-      if (CommonValidators.validateNonEmptyObject(userIdentifierObj)) {
+      if (CommonValidators.validateNonEmptyObject(userIdentifiers)) {
         // This means user email or phone number is already exists in system via another or same social platform.
-        const userCacheResp = await new UserCache({ ids: [userIdentifierObj.userId] }).fetch();
-
-        if (userCacheResp.isFailure()) {
-          return Promise.reject(userCacheResp);
+        let userObj = await oThis._decideUserToAssociateNewAccount(userIdentifiers);
+        if (!CommonValidators.validateNonEmptyObject(userObj)) {
+          // If no user account is found and user identifiers are present
+          return Promise.reject(
+            responseHelper.error({
+              internal_error_identifier: 'a_s_c_b_1',
+              api_error_identifier: 'something_went_wrong',
+              debug_options: { userIdentifiers: userIdentifiers, currentData: oThis }
+            })
+          );
         }
-
-        const userObj = userCacheResp.data[userIdentifierObj.userId];
 
         // If user has already connected this social platform.
         // Means in case of twitter connect request, same email user has already connected twitter before then its signup
@@ -175,9 +167,77 @@ class SocialConnectBase extends ServiceBase {
         } else {
           // We have received same email from twitter and gmail, means its login for user
           oThis.isUserSignUp = false;
-          oThis.userId = userIdentifierObj.userId;
+          oThis.userId = userObj.id;
         }
       }
+    }
+  }
+
+  /**
+   * From user identifiers, decide which user can be associated with new social connect account.
+   *
+   * @param userIdentifiers
+   * @returns {Promise<*|{}>}
+   * @private
+   */
+  async _decideUserToAssociateNewAccount(userIdentifiers) {
+    const oThis = this;
+
+    let userIds = [];
+    for (let i = 0; i < userIdentifiers.length; i++) {
+      userIds.push(userIdentifiers[i].userId);
+    }
+
+    const userCacheResp = await new UserCache({ ids: userIds }).fetch();
+
+    if (userCacheResp.isFailure()) {
+      return Promise.reject(userCacheResp);
+    }
+
+    const users = [];
+    for (let userId in userCacheResp.data) {
+      users.push(userCacheResp.data[userId]);
+    }
+
+    // If there are more than 1 user with unique data, then we would make some decision
+    if (users.length > 1) {
+      let approvedCreatorUsers = [];
+      // First preference is given to approved creator users.
+      for (let i = 0; i < users.length; i++) {
+        if (UserModel.isUserApprovedCreator(users[i])) {
+          approvedCreatorUsers.push(users[i]);
+        }
+      }
+      // If there is only one approved creator, then that user would be considered
+      if (approvedCreatorUsers.length == 1) {
+        return approvedCreatorUsers[0];
+      } else {
+        // If there are more than one approved user
+        let userObjs = approvedCreatorUsers.length > 0 ? approvedCreatorUsers : users;
+        // Fetch user stats of all user ids
+        let cacheResp = await new UserStatsByUserIdsCache({ userIds: userIds }).fetch();
+        // User which has max contributed by count and contributed to count will be considered
+        let maxCounts = { by: 0, to: 0, uid: 0 };
+        for (let index in userObjs) {
+          let uId = userObjs[index].id,
+            usObj = cacheResp.data[uId];
+          if (CommonValidators.validateNonEmptyObject(usObj) && usObj.totalContributedBy >= maxCounts.by) {
+            maxCounts.by = usObj.totalContributedBy;
+            if (maxCounts.uid == 0) {
+              maxCounts.to = usObj.totalContributedTo;
+              maxCounts.uid = uId;
+            }
+            // If total contributed by is same then look for total contributed to
+            if (usObj.totalContributedBy == maxCounts.by && usObj.totalContributedTo > maxCounts.to) {
+              maxCounts.to = usObj.totalContributedTo;
+              maxCounts.uid = uId;
+            }
+          }
+        }
+        return maxCounts.uid > 0 ? userCacheResp.data[maxCounts.uid] : userObjs[0];
+      }
+    } else {
+      return users[0] || {};
     }
   }
 
@@ -261,25 +321,6 @@ class SocialConnectBase extends ServiceBase {
   }
 
   /**
-   * Get current social email from parameters.
-   *
-   * @private
-   */
-  _getCurrentSocialEmail() {
-    throw 'Sub-class to implement';
-  }
-
-  /**
-   * Update social users.
-   *
-   * @returns {Promise<void>}
-   * @private
-   */
-  async _updateEmailInSocialUsers() {
-    throw 'Sub-class to implement';
-  }
-
-  /**
    * validate and sanitize invite code. Invite code can be a url or just an invite code.
    *
    * @returns {boolean}
@@ -356,26 +397,6 @@ class SocialConnectBase extends ServiceBase {
     }
 
     return response;
-  }
-
-  /**
-   *
-   *
-   * @returns {Promise<void>}
-   * @private
-   */
-  async _fetchUserIdentifier(kind, value) {
-    const oThis = this;
-
-    // Look for user email or phone number already exists.
-    // Means user is already part of system using same or different social connect.
-    let userIdentifierObj = {},
-      userUniqueElements = oThis._getSocialUserUniqueProperties();
-    if (CommonValidators.validateNonEmptyObject(userUniqueElements)) {
-      userIdentifierObj = await new UserUniqueIdentifierModel().fetchByKindAndValue(kind, value);
-    }
-
-    return userIdentifierObj;
   }
 }
 

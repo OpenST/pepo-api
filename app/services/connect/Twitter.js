@@ -205,7 +205,7 @@ class TwitterConnect extends ConnectBase {
       return {};
     }
 
-    return { kind: userIdentifierConstants.emailKind, value: oThis.userTwitterEntity.email };
+    return { kind: userIdentifierConstants.emailKind, values: [oThis.userTwitterEntity.email] };
   }
 
   /**

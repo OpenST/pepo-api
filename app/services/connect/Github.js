@@ -154,7 +154,8 @@ class GithubConnect extends ConnectBase {
       return {};
     }
 
-    return { kind: userIdentifierConstants.emailKind, value: oThis.formattedGithubUser.email };
+    // TODO: Consider all verified emails.
+    return { kind: userIdentifierConstants.emailKind, values: [oThis.formattedGithubUser.email] };
   }
 
   /**

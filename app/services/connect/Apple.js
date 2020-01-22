@@ -251,7 +251,7 @@ class AppleConnect extends ConnectBase {
       return {};
     }
 
-    return { kind: userIdentifierConstants.emailKind, value: oThis.decryptedAppleEmail };
+    return { kind: userIdentifierConstants.emailKind, values: [oThis.decryptedAppleEmail] };
   }
 
   /**

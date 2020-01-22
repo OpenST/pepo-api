@@ -150,7 +150,7 @@ class GoogleConnect extends ConnectBase {
       return {};
     }
 
-    return { kind: userIdentifierConstants.emailKind, value: oThis.formattedGoogleUser.email };
+    return { kind: userIdentifierConstants.emailKind, values: [oThis.formattedGoogleUser.email] };
   }
 
   /**

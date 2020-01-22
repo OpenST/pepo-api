@@ -60,23 +60,26 @@ class UserIdentifier extends ModelBase {
    * Fetch by entity kind and value.
    *
    * @param {string} eKind: entity kind
-   * @param {string} eValue: entity value
+   * @param {string} eValues: entity value
    *
    * @return {object}
    */
-  async fetchByKindAndValue(eKind, eValue) {
-    const oThis = this;
+  async fetchByKindAndValues(eKind, eValues) {
+    const oThis = this,
+      formattedDbRows = [];
 
     const dbRows = await oThis
       .select('*')
-      .where(['e_kind = ? AND e_value = ?', userIdentifierConstants.invertedKinds[eKind], eValue])
+      .where(['e_kind = ? AND e_value IN (?)', userIdentifierConstants.invertedKinds[eKind], eValues])
       .fire();
 
-    if (dbRows.length === 0) {
-      return {};
+    if (dbRows.length > 0) {
+      for (let i = 0; i < dbRows.length; i++) {
+        formattedDbRows.push(oThis.formatDbData(dbRows[i]));
+      }
     }
 
-    return oThis.formatDbData(dbRows[0]);
+    return formattedDbRows;
   }
 
   /**
