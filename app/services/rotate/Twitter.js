@@ -4,6 +4,7 @@ const rootPrefix = '../../..',
   TwitterUserModel = require(rootPrefix + '/app/models/mysql/TwitterUser'),
   TwitterUserByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TwitterUserByIds'),
   TwitterUserByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TwitterUserByUserIds'),
+  responseHelper = require(rootPrefix + '/lib/formatter/response'),
   basicHelper = require(rootPrefix + '/helpers/basic');
 
 /**
