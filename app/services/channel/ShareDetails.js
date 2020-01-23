@@ -130,7 +130,7 @@ class ShareDetails extends ServiceBase {
   _prepareResponse() {
     const oThis = this;
 
-    const messageObject = shareEntityConstants.getVideoShareEntity({
+    const messageObject = shareEntityConstants.getChannelShareEntity({
       channelName: oThis.channelName,
       url: oThis._generateChannelShareUrl(),
       channelTagline: oThis.channelTagline
