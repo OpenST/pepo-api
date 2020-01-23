@@ -182,7 +182,7 @@ export PA_TRACKER_ENDPOINT='https://px.pepo.com/devp101_pixel.png'
 
 #Apple constants
 export PA_APPLE_CLIENT_ID='com.pepo.staging'
-export PA_APPLE_REDIRECT_URI='https://stagingpepo.com/webview/apple/oauth'
+export PA_APPLE_REDIRECT_URI='https://stagingpepo.com/apple/oauth'
 export PA_APPLE_TEAM_ID='N83K86W6P4'
 export PA_APPLE_KEY_IDENTIFIER='2P3PRWRQGT'
 export PA_APPLE_PRIVATE_KEY='-----BEGIN%20PRIVATE%20KEY-----%0AMIGTAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBHkwdwIBAQQg16k4h4bCtLDUDEIq%0A8Y/2KEWbueEjZqcdDko24dssmjmgCgYIKoZIzj0DAQehRANCAAQXtk9pu4XbH43k%0Apv51c2iuqqEt2d7NwNmMwgstzXIcAmh5sDgQ0apTUJQCgUmNA1KZOiNa2iNvfGD1%0AqPlhU891%0A-----END%20PRIVATE%20KEY-----'
