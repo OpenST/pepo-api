@@ -49,7 +49,7 @@ class UsageDataBase extends ServiceBase {
 
     // For lifetime data.
     const promisesArray = [
-      bgJob.enqueue(oThis.kind, { queryStartTimeStampInSeconds: null, queryEndTimeStampInSeconds: null })
+      oThis._enqueueJob({ queryStartTimeStampInSeconds: null, queryEndTimeStampInSeconds: null })
     ];
 
     const queryEndTimeStampInSeconds = Math.floor(Date.now() / 1000);
@@ -60,20 +60,32 @@ class UsageDataBase extends ServiceBase {
     const queryStartTimeStampInSecondsForTwentyFourHours = queryEndTimeStampInSeconds - 24 * 60 * 60;
 
     promisesArray.push(
-      bgJob.enqueue(oThis.kind, {
+      oThis._enqueueJob({
         queryStartTimeStampInSeconds: queryStartTimeStampInSecondsForSevenDays,
         queryEndTimeStampInSeconds: queryEndTimeStampInSeconds
       })
     );
 
     promisesArray.push(
-      bgJob.enqueue(oThis.kind, {
+      oThis._enqueueJob({
         queryStartTimeStampInSeconds: queryStartTimeStampInSecondsForTwentyFourHours,
         queryEndTimeStampInSeconds: queryEndTimeStampInSeconds
       })
     );
 
     await Promise.all(promisesArray);
+  }
+
+  /**
+   * Enqueue job
+   *
+   * @param params
+   * @private
+   */
+  _enqueueJob(params) {
+    const oThis = this;
+
+    return bgJob.enqueue(oThis.kind, params)
   }
 }
 
