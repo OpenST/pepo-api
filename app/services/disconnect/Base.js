@@ -44,6 +44,8 @@ class DisconnectBase extends ServiceBase {
       return responseHelper.successWithData({});
     }
 
+    // TODO - login - add methods here and throw - subclass to implement.
+
     await oThis._getSocialId();
 
     await oThis._markTokenNull();
