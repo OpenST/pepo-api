@@ -316,34 +316,7 @@ const v1Signature = {
     ],
     optional: []
   },
-  [apiName.rotateTwitterAccount]: {
-    mandatory: [
-      {
-        parameter: 'user_name',
-        validatorMethods: ['validateString', 'validateUserName']
-      }
-    ],
-    optional: []
-  },
-  [apiName.rotateGoogleAccount]: {
-    mandatory: [
-      {
-        parameter: 'user_name',
-        validatorMethods: ['validateString']
-      }
-    ],
-    optional: []
-  },
-  [apiName.rotateAppleAccount]: {
-    mandatory: [
-      {
-        parameter: 'user_name',
-        validatorMethods: ['validateString']
-      }
-    ],
-    optional: []
-  },
-  [apiName.rotateGithubAccount]: {
+  [apiName.rotateAccount]: {
     mandatory: [
       {
         parameter: 'user_name',

@@ -1,16 +1,21 @@
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   UserModel = require(rootPrefix + '/app/models/mysql/User'),
+  RotateAppleAccount = require(rootPrefix + '/app/services/rotate/Apple'),
+  RotateGithubAccount = require(rootPrefix + '/app/services/rotate/Github'),
+  RotateGoogleAccount = require(rootPrefix + '/app/services/rotate/Google'),
+  RotateTwitterAccount = require(rootPrefix + '/app/services/rotate/Twitter'),
   UserUniqueIdentifierModel = require(rootPrefix + '/app/models/mysql/UserIdentifier'),
   UserIdByUserNamesCache = require(rootPrefix + '/lib/cacheManagement/multi/UserIdByUserNames'),
+  userConstants = require(rootPrefix + '/lib/globalConstant/user'),
   responseHelper = require(rootPrefix + '/lib/formatter/response');
 
 /**
  * Class to rotate account.
  *
- * @class RotateAccountBase
+ * @class RotateAccountBas
  */
-class RotateAccountBase extends ServiceBase {
+class RotateAccountFactory extends ServiceBase {
   /**
    * Constructor to rotate account.
    *
@@ -29,6 +34,7 @@ class RotateAccountBase extends ServiceBase {
     oThis.userName = params.user_name;
 
     oThis.userId = null;
+    oThis.propertiesArray = [];
   }
 
   /**
@@ -41,11 +47,18 @@ class RotateAccountBase extends ServiceBase {
 
     await oThis._fetchUser();
 
-    await oThis._fetchSocialUser();
-
-    await oThis._rotateAccount();
-
-    await oThis._deleteSocialUserExtended();
+    if (oThis.propertiesArray.includes(userConstants.hasAppleLoginProperty)) {
+      await new RotateAppleAccount({ userId: oThis.userId }).perform();
+    }
+    if (oThis.propertiesArray.includes(userConstants.hasGithubLoginProperty)) {
+      await new RotateGithubAccount({ userId: oThis.userId }).perform();
+    }
+    if (oThis.propertiesArray.includes(userConstants.hasGoogleLoginProperty)) {
+      await new RotateGoogleAccount({ userId: oThis.userId }).perform();
+    }
+    if (oThis.propertiesArray.includes(userConstants.hasTwitterLoginProperty)) {
+      await new RotateTwitterAccount({ userId: oThis.userId }).perform();
+    }
 
     await oThis._markUserEmailAsNull();
 
@@ -81,34 +94,10 @@ class RotateAccountBase extends ServiceBase {
       );
     }
 
-    oThis.userId = cacheRsp.data[oThis.userName].id;
-  }
+    const userObj = cacheRsp.data[oThis.userName];
+    oThis.userId = userObj.id;
 
-  /**
-   * Fetch social user.
-   *
-   * @private
-   */
-  async _fetchSocialUser() {
-    throw new Error('Sub-class to implement.');
-  }
-
-  /**
-   * Rotate account.
-   *
-   * @private
-   */
-  async _rotateAccount() {
-    throw new Error('Sub-class to implement.');
-  }
-
-  /**
-   * Delete social user extended.
-   *
-   * @private
-   */
-  async _deleteSocialUserExtended() {
-    throw new Error('Sub-class to implement.');
+    oThis.propertiesArray = new UserModel().getBitwiseArray('properties', userObj.properties);
   }
 
   /**
@@ -160,4 +149,4 @@ class RotateAccountBase extends ServiceBase {
   }
 }
 
-module.exports = RotateAccountBase;
+module.exports = RotateAccountFactory;

@@ -12,9 +12,9 @@ const rootPrefix = '../../..',
 
 const errorConfig = basicHelper.fetchErrorConfig(apiVersions.v1);
 
-/* Rotate twitter account. */
-router.get('/twitter', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
-  req.decodedParams.apiName = apiName.rotateTwitterAccount;
+/* Rotate account. */
+router.get('/', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.rotateAccount;
 
   if (coreConstants.environment === 'production' || coreConstants.environment === 'sandbox') {
     // 404 error.
@@ -27,61 +27,7 @@ router.get('/twitter', sanitizer.sanitizeDynamicUrlParams, function(req, res, ne
     return responseHelper.renderApiResponse(errorObject, res, errorConfig);
   }
 
-  Promise.resolve(routeHelper.perform(req, res, next, '/rotate/Twitter', 'r_a_v1_ra_2', null));
-});
-
-/* Rotate google account. */
-router.get('/google', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
-  req.decodedParams.apiName = apiName.rotateGoogleAccount;
-
-  if (coreConstants.environment === 'production' || coreConstants.environment === 'sandbox') {
-    // 404 error.
-    const errorObject = responseHelper.error({
-      internal_error_identifier: 'r_a_v1_ra_3',
-      api_error_identifier: 'resource_not_found',
-      debug_options: {}
-    });
-
-    return responseHelper.renderApiResponse(errorObject, res, errorConfig);
-  }
-
-  Promise.resolve(routeHelper.perform(req, res, next, '/rotate/Google', 'r_a_v1_ra_4', null));
-});
-
-/* Rotate apple account. */
-router.get('/apple', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
-  req.decodedParams.apiName = apiName.rotateAppleAccount;
-
-  if (coreConstants.environment === 'production' || coreConstants.environment === 'sandbox') {
-    // 404 error.
-    const errorObject = responseHelper.error({
-      internal_error_identifier: 'r_a_v1_ra_5',
-      api_error_identifier: 'resource_not_found',
-      debug_options: {}
-    });
-
-    return responseHelper.renderApiResponse(errorObject, res, errorConfig);
-  }
-
-  Promise.resolve(routeHelper.perform(req, res, next, '/rotate/Apple', 'r_a_v1_ra_6', null));
-});
-
-/* Rotate github account. */
-router.get('/github', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
-  req.decodedParams.apiName = apiName.rotateGithubAccount;
-
-  if (coreConstants.environment === 'production' || coreConstants.environment === 'sandbox') {
-    // 404 error.
-    const errorObject = responseHelper.error({
-      internal_error_identifier: 'r_a_v1_ra_7',
-      api_error_identifier: 'resource_not_found',
-      debug_options: {}
-    });
-
-    return responseHelper.renderApiResponse(errorObject, res, errorConfig);
-  }
-
-  Promise.resolve(routeHelper.perform(req, res, next, '/rotate/Github', 'r_a_v1_ra_8', null));
+  Promise.resolve(routeHelper.perform(req, res, next, '/rotate/Factory', 'r_a_v1_ra_1', null));
 });
 
 module.exports = router;

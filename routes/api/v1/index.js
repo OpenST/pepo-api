@@ -30,8 +30,9 @@ const rootPrefix = '../../..',
 // Node.js cookie parsing middleware.
 router.use(cookieParser(coreConstant.COOKIE_SECRET));
 
-// TEMP route - only for QA - TODO - remove later after talking with SOMA
+// TEMP route START- only for QA
 router.use('/rotate-account', rotateAccountRoutes);
+// TEMP route END - only for QA
 
 router.use('/report-issue', reportIssueRoutes);
 router.use('/auth', authRoutes);
