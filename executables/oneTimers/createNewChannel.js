@@ -151,13 +151,18 @@ class CreateNewChannel {
 
     // Update channel table.
     await new ChannelModel()
-      .update({ description_id: oThis.textInsertId })
+      .update({ description_id: textInsertId })
       .where({ id: oThis.channelId })
       .fire();
 
     await ChannelModel.flushCache({ ids: [oThis.channelId] });
   }
 
+  /**
+   * Perform channel image url related tasks.
+   *
+   * @returns {Promise<void>}
+   */
   async performImageUrlRelatedTasks() {
     const oThis = this;
 
