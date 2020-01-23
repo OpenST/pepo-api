@@ -12,6 +12,7 @@ const rootPrefix = '../../..',
   coreConstants = require(rootPrefix + '/config/coreConstants'),
   userConstants = require(rootPrefix + '/lib/globalConstant/user'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
+  logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   appleHelper = require(rootPrefix + '/lib/connect/wrappers/apple/helper'),
   userIdentifierConstants = require(rootPrefix + '/lib/globalConstant/userIdentifier');
 
@@ -58,6 +59,8 @@ class AppleConnect extends ConnectBase {
   async _validateAndFetchSocialInfo() {
     const oThis = this;
 
+    logger.log('FullName: ', oThis.fullName);
+
     let promiseArray = [];
     promiseArray.push(oThis.verifyIdentityToken());
     promiseArray.push(oThis.getAccessTokenFromApple());
@@ -75,6 +78,8 @@ class AppleConnect extends ConnectBase {
 
     let publicKey = await new GetApplePublicKey().perform(),
       decryptedIdentityToken = await appleHelper.getDecryptedIdentityToken(oThis.identityToken, publicKey);
+
+    logger.log('Decrypted Identity Token: ', decryptedIdentityToken);
 
     if (decryptedIdentityToken.iss !== APPLE_API_URL) {
       return Promise.reject(
