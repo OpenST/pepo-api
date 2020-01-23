@@ -83,6 +83,44 @@ class ChannelModel extends ModelBase {
   }
 
   /**
+   * Get channels that starts with channel prefix.
+   *
+   * @param {object} params
+   * @param {number} params.page
+   * @param {number} params.limit
+   * @param {string} params.channelPrefix
+   *
+   * @returns {Promise<{}>}
+   */
+  async getChannelsByPrefix(params) {
+    const oThis = this;
+
+    const page = params.page || 1,
+      limit = params.limit || 10,
+      offset = (page - 1) * limit;
+
+    const dbRows = await oThis
+      .select('*')
+      .where('name LIKE "' + params.channelPrefix + '%"')
+      .where({ status: channelConstants.invertedStatuses[channelConstants.activeStatus] })
+      .limit(limit)
+      .offset(offset)
+      .order_by('id DESC')
+      .fire();
+
+    const channelIds = [],
+      channelDetails = {};
+
+    for (let index = 0; index < dbRows.length; index++) {
+      let channelId = dbRows[index].id;
+      channelDetails[channelId] = oThis.formatDbData(dbRows[index]);
+      channelIds.push(channelId);
+    }
+
+    return { channelIds: channelIds, channelDetails: channelDetails };
+  }
+
+  /**
    * Flush cache.
    *
    * @param {object} params

@@ -639,6 +639,19 @@ const v1Signature = {
       }
     ]
   },
+  [apiName.getChannels]: {
+    mandatory: [],
+    optional: [
+      {
+        parameter: 'q',
+        validatorMethods: ['validateString']
+      },
+      {
+        parameter: paginationConstants.paginationIdentifierKey,
+        validatorMethods: ['validateString', 'validatePaginationIdentifier']
+      }
+    ]
+  },
   [apiName.mixedTopSearch]: {
     mandatory: [],
     optional: [
