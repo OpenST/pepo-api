@@ -118,51 +118,73 @@ class FetchGoto extends ServiceBase {
       pathArray = pathName.split('/'),
       query = oThis.parsedUrl.query;
 
-    if (pathArray[1] === gotoConstants.videoGotoKind) {
-      const videoId = Number(pathArray[2]);
-      if (videoId) {
-        oThis.gotoParams = { videoId: videoId };
-        oThis.gotoKind = gotoConstants.videoGotoKind;
-      }
-    } else if (pathArray[1] === gotoConstants.replyGotoKind) {
-      const replyDetailId = Number(pathArray[2]);
-
-      if (replyDetailId) {
-        const replyDetailCacheResp = await new ReplyDetailsByIdsCache({ ids: [replyDetailId] }).fetch();
-        if (replyDetailCacheResp.isFailure()) {
-          return Promise.reject(replyDetailCacheResp);
+    switch (pathArray[1]) {
+      case gotoConstants.videoGotoKind: {
+        const videoId = Number(pathArray[2]);
+        if (videoId) {
+          oThis.gotoParams = { videoId: videoId };
+          oThis.gotoKind = gotoConstants.videoGotoKind;
         }
 
-        const replyDetail = replyDetailCacheResp.data[replyDetailId];
+        break;
+      }
+      case gotoConstants.replyGotoKind: {
+        const replyDetailId = Number(pathArray[2]);
 
-        if (CommonValidators.validateNonEmptyObject(replyDetail)) {
-          oThis.gotoParams = { replyDetailId: replyDetailId, parentVideoId: replyDetail.parentId };
-          oThis.gotoKind = gotoConstants.replyGotoKind;
+        if (replyDetailId) {
+          const replyDetailCacheResp = await new ReplyDetailsByIdsCache({ ids: [replyDetailId] }).fetch();
+          if (replyDetailCacheResp.isFailure()) {
+            return Promise.reject(replyDetailCacheResp);
+          }
+
+          const replyDetail = replyDetailCacheResp.data[replyDetailId];
+
+          if (CommonValidators.validateNonEmptyObject(replyDetail)) {
+            oThis.gotoParams = { replyDetailId: replyDetailId, parentVideoId: replyDetail.parentId };
+            oThis.gotoKind = gotoConstants.replyGotoKind;
+          }
         }
+
+        break;
       }
-    } else if (pathArray[1] === gotoConstants.tagGotoKind) {
-      const tagName = pathArray[2];
+      case gotoConstants.tagGotoKind: {
+        const tagName = pathArray[2];
 
-      if (tagName) {
-        const tagByTagNamesCacheRsp = await new TagIdByNamesCache({ names: [tagName] }).fetch(),
-          tagByTagNamesCacheData = tagByTagNamesCacheRsp.data;
+        if (tagName) {
+          const tagByTagNamesCacheRsp = await new TagIdByNamesCache({ names: [tagName] }).fetch(),
+            tagByTagNamesCacheData = tagByTagNamesCacheRsp.data;
 
-        if (CommonValidators.validateInteger(tagByTagNamesCacheData[tagName])) {
-          const tagId = tagByTagNamesCacheData[tagName];
-          oThis.gotoKind = gotoConstants.tagGotoKind;
-          oThis.gotoParams = { tagId: tagId };
+          if (CommonValidators.validateInteger(tagByTagNamesCacheData[tagName])) {
+            const tagId = tagByTagNamesCacheData[tagName];
+            oThis.gotoKind = gotoConstants.tagGotoKind;
+            oThis.gotoParams = { tagId: tagId };
+          }
         }
+
+        break;
       }
-    } else if (pathArray[1] === 'account') {
-      oThis.gotoKind = gotoConstants.invitedUsersGotoKind;
-    } else if (pathArray[1] === 'doptin') {
-      // If url is doptin then send it to webview
-      if (query && query.t) {
-        oThis.gotoParams = { url: oThis.url };
-        oThis.gotoKind = gotoConstants.webViewGotoKind;
+      case 'account': {
+        oThis.gotoKind = gotoConstants.invitedUsersGotoKind;
+
+        break;
       }
-    } else if (!pathArray[1]) {
-      // If url is just 'pepo.com/' then look for invite code if any
+      case 'doptin': {
+        // If url is doptin then send it to webview
+        if (query && query.t) {
+          oThis.gotoParams = { url: oThis.url };
+          oThis.gotoKind = gotoConstants.webViewGotoKind;
+        }
+
+        break;
+      }
+      default: {
+        // Do nothing.
+        break;
+      }
+    }
+
+    if (!pathArray[1]) {
+      // If url is just 'pepo.com/' then look for invite code if any.
       if (query && query.invite) {
         oThis.gotoParams = { inviteCode: query.invite };
         oThis.gotoKind = gotoConstants.signUpGotoKind;
