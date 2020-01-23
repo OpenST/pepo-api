@@ -1,5 +1,4 @@
 const rootPrefix = '../../..',
-  RotateAccountBase = require(rootPrefix + '/app/services/rotate/Base'),
   AppleUserModel = require(rootPrefix + '/app/models/mysql/AppleUser'),
   AppleUserExtendedModel = require(rootPrefix + '/app/models/mysql/AppleUserExtended');
 
@@ -10,24 +9,31 @@ const rootPrefix = '../../..',
  */
 
 // TODO - login - give a single rotate for all associated account and not service specific. Talk to Soma.
-class RotateAppleAccount extends RotateAccountBase {
+class RotateAppleAccount {
   /**
    * Constructor to rotate apple account.
    *
    * @param {object} params
-   * @param {string} params.user_name: user name
+   * @param {string} params.userId: user id
    *
    * @augments ServiceBase
    *
    * @constructor
    */
   constructor(params) {
-    super(params);
-
     const oThis = this;
 
+    oThis.userId = params.userId;
     oThis.appleUserId = null;
     oThis.appleId = null;
+  }
+
+  async perform() {
+    const oThis = this;
+
+    await oThis._fetchSocialUser();
+    await oThis._rotateAccount();
+    await oThis._deleteSocialUserExtended();
   }
 
   /**
