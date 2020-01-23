@@ -6,7 +6,6 @@ const rootPrefix = '../..',
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   ChannelModel = require(rootPrefix + '/app/models/mysql/channel/Channel'),
   imageLib = require(rootPrefix + '/lib/imageLib'),
-  responseHelper = require(rootPrefix + '/lib/formatter/response'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   textConstants = require(rootPrefix + '/lib/globalConstant/text'),
   imageConstants = require(rootPrefix + '/lib/globalConstant/image'),
@@ -120,8 +119,6 @@ class CreateNewChannel {
   /**
    * Perform channel description related tasks.
    *
-   * @sets oThis.textInsertId
-   *
    * @returns {Promise<void>}
    */
   async performChannelDescriptionRelatedTasks() {
@@ -156,6 +153,8 @@ class CreateNewChannel {
       .fire();
 
     await ChannelModel.flushCache({ ids: [oThis.channelId] });
+
+    logger.info('Added channel description.');
   }
 
   /**
@@ -166,16 +165,33 @@ class CreateNewChannel {
   async performImageUrlRelatedTasks() {
     const oThis = this;
 
+    if (!oThis.imageUrl) {
+      return;
+    }
+
     const imageParams = {
       imageUrl: oThis.imageUrl,
       kind: imageConstants.channelImageKind,
       channelId: oThis.channelId,
-      userId: oThis.profileUserId,
       isExternalUrl: false,
       enqueueResizer: true
     };
 
+    // Validate and save image.
     const resp = imageLib.validateAndSave(imageParams);
+    if (resp.isFailure()) {
+      return Promise.reject(resp);
+    }
+
+    // Update channel table.
+    await new ChannelModel()
+      .update({ image_id: resp.insertId })
+      .where({ id: oThis.channelId })
+      .fire();
+
+    await ChannelModel.flushCache({ ids: [oThis.channelId] });
+
+    logger.info('Added channel image.');
   }
 }
 
