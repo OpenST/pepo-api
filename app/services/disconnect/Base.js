@@ -44,8 +44,6 @@ class DisconnectBase extends ServiceBase {
       return responseHelper.successWithData({});
     }
 
-    // TODO - login - add methods here and throw - subclass to implement.
-
     await oThis._getSocialId();
 
     await oThis._markTokenNull();
@@ -59,6 +57,24 @@ class DisconnectBase extends ServiceBase {
     await oThis._logoutUserDevices();
 
     return responseHelper.successWithData({});
+  }
+
+  /**
+   * Get social Id.
+   *
+   * @private
+   */
+  _getSocialId() {
+    throw new Error('Sub-class to implement.');
+  }
+
+  /**
+   * Mark token null.
+   *
+   * @private
+   */
+  _markTokenNull() {
+    throw new Error('Sub-class to implement.');
   }
 
   /**
