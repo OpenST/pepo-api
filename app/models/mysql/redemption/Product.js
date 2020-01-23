@@ -1,7 +1,7 @@
 const rootPrefix = '../../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
-  redemptionConstants = require(rootPrefix + '/lib/globalConstant/redemption'),
-  databaseConstants = require(rootPrefix + '/lib/globalConstant/database');
+  databaseConstants = require(rootPrefix + '/lib/globalConstant/database'),
+  redemptionConstants = require(rootPrefix + '/lib/globalConstant/redemption');
 
 // Declare variables names.
 const dbName = databaseConstants.redemptionDbName;
