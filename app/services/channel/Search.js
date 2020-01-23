@@ -1,7 +1,7 @@
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   ChannelMultiCache = require(rootPrefix + '/lib/cacheManagement/multi/ChannelByIds'),
-  ChannelPaginationCache = require(rootPrefix + '/lib/cacheManagement/single/ChannelPagination'),
+  ChannelNamePaginationCache = require(rootPrefix + '/lib/cacheManagement/single/ChannelNamePagination'),
   basicHelper = require(rootPrefix + '/helpers/basic'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination');
@@ -97,7 +97,7 @@ class ChannelSearch extends ServiceBase {
     const oThis = this;
 
     if (oThis.channelPrefix) {
-      const channelPaginationRsp = await new ChannelPaginationCache({
+      const channelPaginationRsp = await new ChannelNamePaginationCache({
         limit: oThis.limit,
         page: oThis.page,
         channelPrefix: oThis.channelPrefix
