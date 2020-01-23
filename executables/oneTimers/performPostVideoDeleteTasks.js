@@ -7,6 +7,7 @@ const rootPrefix = '../..',
   VideoModel = require(rootPrefix + '/app/models/mysql/Video'),
   ImageModel = require(rootPrefix + '/app/models/mysql/Image'),
   s3Wrapper = require(rootPrefix + '/lib/aws/S3Wrapper'),
+  imageConstants = require(rootPrefix + '/lib/globalConstant/image'),
   videoConstants = require(rootPrefix + '/lib/globalConstant/video'),
   coreConstants = require(rootPrefix + '/config/coreConstants'),
   s3Constants = require(rootPrefix + '/lib/globalConstant/s3'),
@@ -120,12 +121,15 @@ class PerformPostVideoDeleteTasks {
       return;
     }
 
-    let pathPrefix = null;
+    let pathPrefix = null,
+      sizeMap = null;
 
     if (entityKind == 'images') {
       pathPrefix = coreConstants.S3_USER_IMAGES_FOLDER;
+      sizeMap = imageConstants.invertedResolutionKeyToShortMap;
     } else {
       pathPrefix = coreConstants.S3_USER_VIDEOS_FOLDER;
+      sizeMap = videoConstants.invertedResolutionKeyToShortMap;
     }
 
     const resolutions = entity.resolutions,
@@ -137,7 +141,7 @@ class PerformPostVideoDeleteTasks {
     oThis.entityKeys.push(entityKeyPattern);
 
     for (const size in resolutions) {
-      let sizeParsed = size == 'o' ? 'original' : size;
+      const sizeParsed = sizeMap[size];
 
       const bucket = coreConstants.S3_USER_ASSETS_BUCKET,
         entityKey = pathPrefix + shortToLongUrl.replaceSizeInUrlTemplate(urlTemplate, sizeParsed);

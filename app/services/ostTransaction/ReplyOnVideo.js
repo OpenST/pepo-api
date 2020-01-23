@@ -34,6 +34,10 @@ class ReplyOnVideoTransaction extends OstTransactionBase {
    */
   constructor(params) {
     super(params);
+
+    const oThis = this;
+
+    oThis.replyCreatorUserId = null;
   }
 
   /**
@@ -141,6 +145,8 @@ class ReplyOnVideoTransaction extends OstTransactionBase {
     if (replyDetail.descriptionId) {
       oThis.descriptionId = replyDetail.descriptionId;
     }
+
+    oThis.replyCreatorUserId = replyDetail.creatorUserId;
 
     // Validate to user id.
     if (replyDetail.parentKind === replyDetailConstants.videoParentKind) {
@@ -258,6 +264,7 @@ class ReplyOnVideoTransaction extends OstTransactionBase {
 
     const replyVideoResponse = await new ReplyVideoPostTransaction({
       currentUserId: oThis.userId,
+      replyCreatorUserId: oThis.replyCreatorUserId,
       replyDetailId: oThis.replyDetailId,
       videoId: oThis.videoId,
       transactionId: oThis.transactionId,

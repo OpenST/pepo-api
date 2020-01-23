@@ -258,7 +258,8 @@ class UserModel extends ModelBase {
   }
 
   /**
-   * Get cookie value.
+   * Get cookie value for version v2.
+   * // NOTE - this cookie versioning has been introduced on 22/01/2020.
    *
    * @param {object} userObj
    * @param {string} decryptedEncryptionSalt
@@ -270,7 +271,15 @@ class UserModel extends ModelBase {
     const oThis = this;
 
     return (
-      userObj.id + ':' + options.timestamp + ':' + oThis.getCookieTokenFor(userObj, decryptedEncryptionSalt, options)
+      'v2' +
+      ':' +
+      userObj.id +
+      ':' +
+      options.loginServiceType +
+      ':' +
+      options.timestamp +
+      ':' +
+      oThis.getCookieTokenForVersionV2(userObj, decryptedEncryptionSalt, options)
     );
   }
 
@@ -296,6 +305,46 @@ class UserModel extends ModelBase {
       uniqueStr.substring(0, 16);
     const salt =
       userObj.id + ':' + uniqueStr.slice(-16) + ':' + coreConstants.PA_COOKIE_TOKEN_SECRET + ':' + options.timestamp;
+
+    return util.createSha256Digest(salt, stringToSign);
+  }
+
+  /**
+   * Get cookie token for version v2.
+   *
+   * @param {object} userObj
+   * @param {string} decryptedEncryptionSalt
+   * @param {object} options
+   *
+   * @returns {string}
+   */
+  getCookieTokenForVersionV2(userObj, decryptedEncryptionSalt, options) {
+    const uniqueStr = localCipher.decrypt(decryptedEncryptionSalt, userObj.cookieToken);
+
+    const stringToSign =
+      'v2' +
+      ':' +
+      userObj.id +
+      ':' +
+      options.loginServiceType +
+      ':' +
+      options.timestamp +
+      ':' +
+      coreConstants.PA_COOKIE_TOKEN_SECRET +
+      ':' +
+      uniqueStr.substring(0, 16);
+    const salt =
+      'v2' +
+      ':' +
+      userObj.id +
+      ':' +
+      uniqueStr.slice(-16) +
+      ':' +
+      coreConstants.PA_COOKIE_TOKEN_SECRET +
+      ':' +
+      options.timestamp +
+      ':' +
+      options.loginServiceType;
 
     return util.createSha256Digest(salt, stringToSign);
   }

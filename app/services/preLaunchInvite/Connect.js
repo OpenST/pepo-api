@@ -2,8 +2,8 @@ const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   LoginTwitterClass = require(rootPrefix + '/app/services/preLaunchInvite/Login'),
   SignupTwitterClass = require(rootPrefix + '/app/services/preLaunchInvite/Signup'),
-  AccountTwitterRequestClass = require(rootPrefix + '/lib/twitter/oAuth1.0/Account'),
-  ReplayAttackCache = require(rootPrefix + '/lib/cacheManagement/single/ReplayAttackOnTwitterConnect'),
+  AccountTwitterRequestClass = require(rootPrefix + '/lib/connect/wrappers/twitter/oAuth1.0/Account'),
+  ReplayAttackOnSocialConnectCache = require(rootPrefix + '/lib/cacheManagement/single/ReplayAttackOnSocialConnect'),
   TwitterUserByTwitterIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TwitterUserByTwitterIds'),
   PreLaunchInviteByTwitterIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/PreLaunchInviteByTwitterIds'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
@@ -74,7 +74,9 @@ class PreLaunchTwitterConnect extends ServiceBase {
     logger.log('Start::_validateDuplicateRequest');
 
     // Note: Reusing the same cache as in User Login.
-    const TwitterConnectOnTwitterIdResp = await new ReplayAttackCache({ twitterId: oThis.twitterId }).fetch();
+    const TwitterConnectOnTwitterIdResp = await new ReplayAttackOnSocialConnectCache({
+      socialId: oThis.twitterId
+    }).fetch();
 
     if (TwitterConnectOnTwitterIdResp.isFailure()) {
       return Promise.reject(TwitterConnectOnTwitterIdResp);

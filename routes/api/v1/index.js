@@ -21,7 +21,7 @@ const rootPrefix = '../../..',
   fetchGotoRoutes = require(rootPrefix + '/routes/api/v1/fetchGoto'),
   twitterRoutes = require(rootPrefix + '/routes/api/v1/twitter'),
   uploadParamsRoutes = require(rootPrefix + '/routes/api/v1/uploadParams'),
-  rotateTwitterAccountRoutes = require(rootPrefix + '/routes/api/v1/rotateTwitterAccount'),
+  rotateAccountRoutes = require(rootPrefix + '/routes/api/v1/rotateAccount'),
   reportIssueRoutes = require(rootPrefix + '/routes/api/v1/reportIssue'),
   reportRoutes = require(rootPrefix + '/routes/api/v1/report'),
   pepocornTopUpRoutes = require(rootPrefix + '/routes/api/v1/pepocornTopUps'),
@@ -31,8 +31,9 @@ const rootPrefix = '../../..',
 // Node.js cookie parsing middleware.
 router.use(cookieParser(coreConstant.COOKIE_SECRET));
 
-// TEMP route - only for QA - TODO - remove later after talking with SOMA
-router.use('/rotate-twitter-account', rotateTwitterAccountRoutes);
+// TEMP route START- only for QA
+router.use('/rotate-account', rotateAccountRoutes);
+// TEMP route END - only for QA
 
 router.use('/report-issue', reportIssueRoutes);
 router.use('/auth', authRoutes);
