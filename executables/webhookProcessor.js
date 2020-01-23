@@ -449,16 +449,9 @@ class WebhookProcessorExecutable extends CronBase {
   }
 }
 
-const webhookProcessor = new WebhookProcessorExecutable({ cronProcessId: +cronProcessId });
+new WebhookProcessorExecutable({ cronProcessId: +cronProcessId }).perform();
 
-webhookProcessor
-  .perform()
-  .then(function() {
-    logger.step('** Exiting process');
-    logger.info('Cron last run at: ', Date.now());
-    process.emit('SIGINT');
-  })
-  .catch(function(err) {
-    logger.error('** Exiting process due to Error: ', err);
-    process.emit('SIGINT');
-  });
+setInterval(function() {
+  logger.info('Ending the process. Sending SIGINT.');
+  process.emit('SIGINT');
+}, cronProcessesConstants.continuousCronRestartInterval);
