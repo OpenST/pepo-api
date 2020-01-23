@@ -114,7 +114,7 @@ class GoogleConnect extends ConnectBase {
 
     console.log('signUpParams: ', signUpParams);
 
-    Object.assign(signUpParams, oThis._appendInviteParams());
+    Object.assign(signUpParams, oThis._appendCommonSignupParams());
     oThis.serviceResp = await new GoogleSignup(signUpParams).perform();
   }
 
