@@ -14,6 +14,7 @@ const rootPrefix = '../..',
 
 program
   .option('--channelName <channelName>', 'Channel Name')
+  .option('--channelTagline <channelTagline>', 'Channel Tagline')
   .option('--channelDescription <channelDescription>', 'Channel Description')
   .option('--imageUrl <imageUrl>', 'Image Url')
   .parse(process.argv);
@@ -23,7 +24,7 @@ program.on('--help', function() {
   logger.log('  Example:');
   logger.log('');
   logger.log(
-    '    node executables/oneTimers/createNewChannel.js --channelName "PEPO" --channelDescription "This is a video description. Link: https://pepo.com. Tags: #test1 #test2" --imageUrl "https://s3.amazonaws.com/uassets.stagingpepo.com/d/ua/images/1-6f6278fcfc2da06bd3dc6ffe976e4e28-original.jpg"'
+    '    node executables/oneTimers/createNewChannel.js --channelName "PEPO" --channelTagline "This is some tagline. #new #tagline" --channelDescription "This is a video description. Link: https://pepo.com. Tags: #test1 #test2" --imageUrl "https://s3.amazonaws.com/uassets.stagingpepo.com/d/ua/images/1-6f6278fcfc2da06bd3dc6ffe976e4e28-original.jpg"'
   );
   logger.log('');
   logger.log('');
@@ -45,6 +46,7 @@ class CreateNewChannel {
    *
    * @param {object} params
    * @param {string} params.channelName
+   * @param {string} [params.channelTagline]
    * @param {string} [params.channelDescription]
    * @param {string} [params.imageUrl]
    *
@@ -54,6 +56,7 @@ class CreateNewChannel {
     const oThis = this;
 
     oThis.channelName = params.channelName;
+    oThis.channelTagline = params.channelTagline || null;
     oThis.channelDescription = params.channelDescription || null;
     oThis.imageUrl = params.imageUrl || null;
 
@@ -64,9 +67,10 @@ class CreateNewChannel {
   async perform() {
     const oThis = this;
 
-    console.log('=====', oThis.channelName);
-    console.log('=====', oThis.channelDescription);
-    console.log('=====', oThis.imageUrl);
+    console.log('Channel Name: ', oThis.channelName);
+    console.log('Channel Tagline: ', oThis.channelTagline);
+    console.log('Channel Description: ', oThis.channelDescription);
+    console.log('Image URL: ', oThis.imageUrl);
 
     // Validate whether channel exists or not.
     await oThis.validateChannel();
@@ -74,6 +78,7 @@ class CreateNewChannel {
     await oThis.createNewChannel();
 
     const promisesArray = [
+      oThis.performChannelTaglineRelatedTasks(),
       oThis.performChannelDescriptionRelatedTasks(),
       oThis.performImageUrlRelatedTasks(),
       oThis.createChannelStat()
@@ -119,6 +124,47 @@ class CreateNewChannel {
     oThis.channelId = insertResponse.insertId;
 
     logger.info(`Channel creation done. Channel ID: ${oThis.channelId}`);
+  }
+
+  /**
+   * Perform channel tagline related tasks.
+   *
+   * @returns {Promise<void>}
+   */
+  async performChannelTaglineRelatedTasks() {
+    const oThis = this;
+
+    // If channel tagline is not valid, consider it as null.
+    if (!CommonValidators.validateChannelTagline(oThis.channelTagline)) {
+      oThis.channelTagline = null;
+    }
+
+    if (!oThis.channelTagline) {
+      return;
+    }
+
+    // Create new entry in texts table.
+    const textRow = await new TextModel().insertText({
+      text: oThis.channelTagline,
+      kind: textConstants.channelTaglineKind
+    });
+
+    const textInsertId = textRow.insertId;
+
+    // Filter out tags from channel tagline.
+    await new FilterTags(oThis.channelTagline, textInsertId).perform();
+
+    await TextModel.flushCache({ ids: [textInsertId] });
+
+    // Update channel table.
+    await new ChannelModel()
+      .update({ tagline_id: textInsertId })
+      .where({ id: oThis.channelId })
+      .fire();
+
+    await ChannelModel.flushCache({ ids: [oThis.channelId] });
+
+    logger.info('Added channel tagline.');
   }
 
   /**
@@ -215,6 +261,7 @@ class CreateNewChannel {
 
 new CreateNewChannel({
   channelName: program.channelName,
+  channelTagline: program.channelTagline,
   channelDescription: program.channelDescription,
   imageUrl: program.imageUrl
 })
