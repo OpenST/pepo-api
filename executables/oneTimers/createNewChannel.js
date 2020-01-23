@@ -183,9 +183,11 @@ class CreateNewChannel {
       return Promise.reject(resp);
     }
 
+    const imageData = resp.data;
+
     // Update channel table.
     await new ChannelModel()
-      .update({ image_id: resp.insertId })
+      .update({ image_id: imageData.insertId })
       .where({ id: oThis.channelId })
       .fire();
 
