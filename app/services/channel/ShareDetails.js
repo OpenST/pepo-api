@@ -24,7 +24,6 @@ class ShareDetails extends ServiceBase {
    *
    * @param {object} params
    * @param {number} params.channel_id
-   * @param {object} params.current_user
    *
    * @augments ServiceBase
    *
@@ -36,7 +35,6 @@ class ShareDetails extends ServiceBase {
     const oThis = this;
 
     oThis.channelId = params.channel_id;
-    oThis.currentUser = params.current_user;
 
     oThis.channelName = null;
     oThis.channelTagline = null;
