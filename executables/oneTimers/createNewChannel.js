@@ -54,8 +54,8 @@ class CreateNewChannel {
     const oThis = this;
 
     oThis.channelName = params.channelName;
-    oThis.channelDescription = params.channelDescription;
-    oThis.imageUrl = params.imageUrl;
+    oThis.channelDescription = params.channelDescription || null;
+    oThis.imageUrl = params.imageUrl || null;
 
     oThis.channelId = null;
     oThis.textInsertId = null;
@@ -73,16 +73,7 @@ class CreateNewChannel {
 
     await oThis.createNewChannel();
 
-    const promisesArray = [];
-
-    if (oThis.channelDescription) {
-      promisesArray.push(oThis.performChannelDescriptionRelatedTasks());
-    }
-
-    if (oThis.imageUrl) {
-      promisesArray.push(oThis.performImageUrlRelatedTasks());
-    }
-
+    const promisesArray = [oThis.performChannelDescriptionRelatedTasks(), oThis.performImageUrlRelatedTasks()];
     await Promise.all(promisesArray);
   }
 
@@ -136,22 +127,35 @@ class CreateNewChannel {
   async performChannelDescriptionRelatedTasks() {
     const oThis = this;
 
-    // If url is not valid, consider link as null.
+    // If channel description is not valid, consider it as null.
     if (!CommonValidators.validateChannelDescription(oThis.channelDescription)) {
       oThis.channelDescription = null;
     }
 
+    if (!oThis.channelDescription) {
+      return;
+    }
+
+    // Create new entry in texts table.
     const textRow = await new TextModel().insertText({
-      text: oThis.bio,
+      text: oThis.channelDescription,
       kind: textConstants.channelDescriptionKind
     });
 
-    oThis.textInsertId = textRow.insertId;
+    const textInsertId = textRow.insertId;
 
     // Filter out tags from channel description.
-    await new FilterTags(oThis.channelDescription, oThis.textInsertId).perform();
+    await new FilterTags(oThis.channelDescription, textInsertId).perform();
 
-    await TextModel.flushCache({ ids: [oThis.textInsertId] });
+    await TextModel.flushCache({ ids: [textInsertId] });
+
+    // Update channel table.
+    await new ChannelModel()
+      .update({ description_id: oThis.textInsertId })
+      .where({ id: oThis.channelId })
+      .fire();
+
+    await ChannelModel.flushCache({ ids: [oThis.channelId] });
   }
 
   async performImageUrlRelatedTasks() {
