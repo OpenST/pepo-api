@@ -10,6 +10,7 @@ const upQuery =
   `id` bigint(20) NOT NULL AUTO_INCREMENT,\
   `name` varchar(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL, \n\
   `status` tinyint(4) NOT NULL,\
+  `tagline_id` bigint(20) DEFAULT NULL,\n\
   `description_id` bigint(20) DEFAULT NULL,\n\
   `image_id` bigint(20) DEFAULT NULL,\n\
   `created_at` int(11) NOT NULL,\
