@@ -1,5 +1,4 @@
 const rootPrefix = '../../..',
-  RotateAccountBase = require(rootPrefix + '/app/services/rotate/Base'),
   TwitterUserExtendedModel = require(rootPrefix + '/app/models/mysql/TwitterUserExtended'),
   TwitterUserModel = require(rootPrefix + '/app/models/mysql/TwitterUser'),
   TwitterUserByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TwitterUserByIds'),
@@ -12,25 +11,32 @@ const rootPrefix = '../../..',
  *
  * @class RotateTwitterAccount
  */
-class RotateTwitterAccount extends RotateAccountBase {
+class RotateTwitterAccount {
   /**
    * Constructor to rotate twitter account.
    *
    * @param {object} params
-   * @param {string} params.user_name: user name
+   * @param {string} params.userId: user id
    *
    * @augments ServiceBase
    *
    * @constructor
    */
   constructor(params) {
-    super(params);
-
     const oThis = this;
 
+    oThis.userId = params.userId;
     oThis.twitterUserId = null;
     oThis.twitterUserObj = null;
     oThis.twitterUserTwitterId = null;
+  }
+
+  async perform() {
+    const oThis = this;
+
+    await oThis._fetchSocialUser();
+    await oThis._rotateAccount();
+    await oThis._deleteSocialUserExtended();
   }
 
   /**

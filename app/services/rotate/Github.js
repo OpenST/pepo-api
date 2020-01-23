@@ -1,5 +1,4 @@
 const rootPrefix = '../../..',
-  RotateAccountBase = require(rootPrefix + '/app/services/rotate/Base'),
   GithubUserModel = require(rootPrefix + '/app/models/mysql/GithubUser'),
   GithubUserExtendedModel = require(rootPrefix + '/app/models/mysql/GithubUserExtended');
 
@@ -8,24 +7,31 @@ const rootPrefix = '../../..',
  *
  * @class RotateGithubAccount
  */
-class RotateGithubAccount extends RotateAccountBase {
+class RotateGithubAccount {
   /**
    * Constructor to rotate github account.
    *
    * @param {object} params
-   * @param {string} params.user_name: user name
+   * @param {string} params.userId: user id
    *
    * @augments ServiceBase
    *
    * @constructor
    */
   constructor(params) {
-    super(params);
-
     const oThis = this;
 
+    oThis.userId = params.userId;
     oThis.githubUserId = null;
     oThis.githubId = null;
+  }
+
+  async perform() {
+    const oThis = this;
+
+    await oThis._fetchSocialUser();
+    await oThis._rotateAccount();
+    await oThis._deleteSocialUserExtended();
   }
 
   /**

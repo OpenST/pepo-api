@@ -1,5 +1,4 @@
 const rootPrefix = '../../..',
-  RotateAccountBase = require(rootPrefix + '/app/services/rotate/Base'),
   GoogleUserModel = require(rootPrefix + '/app/models/mysql/GoogleUser'),
   GoogleUserExtendedModel = require(rootPrefix + '/app/models/mysql/GoogleUserExtended');
 
@@ -8,24 +7,31 @@ const rootPrefix = '../../..',
  *
  * @class RotateGoogleAccount
  */
-class RotateGoogleAccount extends RotateAccountBase {
+class RotateGoogleAccount {
   /**
    * Constructor to rotate google account.
    *
    * @param {object} params
-   * @param {string} params.user_name: user name
+   * @param {string} params.userId: user id
    *
    * @augments ServiceBase
    *
    * @constructor
    */
   constructor(params) {
-    super(params);
-
     const oThis = this;
 
+    oThis.userId = params.userId;
     oThis.googleUserId = null;
     oThis.googleId = null;
+  }
+
+  async perform() {
+    const oThis = this;
+
+    await oThis._fetchSocialUser();
+    await oThis._rotateAccount();
+    await oThis._deleteSocialUserExtended();
   }
 
   /**
