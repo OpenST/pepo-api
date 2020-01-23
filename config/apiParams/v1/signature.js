@@ -1193,6 +1193,20 @@ const v1Signature = {
     ]
   },
 
+  [apiName.channelShare]: {
+    mandatory: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      },
+      {
+        parameter: 'channel_id',
+        validatorMethods: ['validateNonZeroInteger']
+      }
+    ],
+    optional: []
+  },
+
   [apiName.getAllVideoListByTagId]: {
     mandatory: [
       {

@@ -105,4 +105,24 @@ router.get('/:channel_id/users', sanitizer.sanitizeDynamicUrlParams, function(re
   Promise.resolve(routeHelper.perform(req, res, next, '/channel/user/List', 'r_a_v1_c_5', null, dataFormatterFunc));
 });
 
+// Get url and message for sharing channel given its channel id.
+router.get('/:channel_id/share', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.channelShare;
+  req.decodedParams.channel_id = req.params.channel_id;
+
+  const dataFormatterFunc = async function(serviceResponse) {
+    const wrapperFormatterRsp = await new FormatterComposer({
+      resultType: responseEntityKey.share,
+      entityKindToResponseKeyMap: {
+        [entityTypeConstants.share]: responseEntityKey.share
+      },
+      serviceData: serviceResponse.data
+    }).perform();
+
+    serviceResponse.data = wrapperFormatterRsp.data;
+  };
+
+  Promise.resolve(routeHelper.perform(req, res, next, '/channel/ShareDetails', 'r_a_v1_c_6', null, dataFormatterFunc));
+});
+
 module.exports = router;
