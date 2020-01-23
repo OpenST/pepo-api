@@ -6,6 +6,7 @@ const rootPrefix = '../../..',
   RotateGoogleAccount = require(rootPrefix + '/app/services/rotate/Google'),
   RotateTwitterAccount = require(rootPrefix + '/app/services/rotate/Twitter'),
   UserUniqueIdentifierModel = require(rootPrefix + '/app/models/mysql/UserIdentifier'),
+  UserMultiCache = require(rootPrefix + '/lib/cacheManagement/multi/User'),
   UserIdByUserNamesCache = require(rootPrefix + '/lib/cacheManagement/multi/UserIdByUserNames'),
   userConstants = require(rootPrefix + '/lib/globalConstant/user'),
   responseHelper = require(rootPrefix + '/lib/formatter/response');
@@ -94,8 +95,15 @@ class RotateAccountFactory extends ServiceBase {
       );
     }
 
-    const userObj = cacheRsp.data[oThis.userName];
-    oThis.userId = userObj.id;
+    oThis.userId = cacheRsp.data[oThis.userName].id;
+
+    const userMultiCacheRsp = await new UserMultiCache({ ids: [oThis.userId] }).fetch();
+
+    if (userMultiCacheRsp.isFailure()) {
+      return Promise.reject(userMultiCacheRsp);
+    }
+
+    const userObj = userMultiCacheRsp.data[oThis.userId];
 
     oThis.propertiesArray = new UserModel().getBitwiseArray('properties', userObj.properties);
   }
