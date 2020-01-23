@@ -8,6 +8,8 @@ const rootPrefix = '../../..',
  *
  * @class RotateAppleAccount
  */
+
+// TODO - login - give a single rotate for all associated account and not service specific. Talk to Soma.
 class RotateAppleAccount extends RotateAccountBase {
   /**
    * Constructor to rotate apple account.
