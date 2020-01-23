@@ -1,15 +1,14 @@
 const rootPrefix = '../../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
+  CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   ChannelUserModel = require(rootPrefix + '/app/models/mysql/channel/ChannelUser'),
   ChannelStatModel = require(rootPrefix + '/app/models/mysql/channel/ChannelStat'),
   ChannelByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/ChannelByIds'),
   ChannelUserByUserIdAndChannelIdsCache = require(rootPrefix +
     '/lib/cacheManagement/multi/ChannelUserByUserIdAndChannelIds'),
-  CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
-  channelsConstants = require(rootPrefix + '/lib/globalConstant/channel/channels'),
-  channelUsersConstants = require(rootPrefix + '/lib/globalConstant/channel/channelUsers'),
-  logger = require(rootPrefix + '/lib/logger/customConsoleLogger');
+  channelConstants = require(rootPrefix + '/lib/globalConstant/channel/channels'),
+  channelUsersConstants = require(rootPrefix + '/lib/globalConstant/channel/channelUsers');
 
 /**
  * Class to remove user from a channel.
@@ -75,7 +74,7 @@ class LeaveChannel extends ServiceBase {
 
     const channelObj = channelByIdsCacheResponse.data[oThis.channelId];
 
-    if (!CommonValidators.validateNonEmptyObject(channelObj) || channelObj.status !== channelsConstants.activeStatus) {
+    if (!CommonValidators.validateNonEmptyObject(channelObj) || channelObj.status !== channelConstants.activeStatus) {
       return Promise.reject(
         responseHelper.error({
           internal_error_identifier: 'a_s_c_u_l_fc_1',

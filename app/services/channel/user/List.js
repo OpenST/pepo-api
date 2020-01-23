@@ -1,17 +1,14 @@
 const rootPrefix = '../../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
-  ChannelUserModel = require(rootPrefix + '/app/models/mysql/channel/ChannelUser'),
-  UserMultiCache = require(rootPrefix + '/lib/cacheManagement/multi/User'),
-  ChannelByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/ChannelByIds'),
-  ImageByIdCache = require(rootPrefix + '/lib/cacheManagement/multi/ImageByIds'),
-  UserIdsByChannelIdPaginationCache = require(rootPrefix + '/lib/cacheManagement/single/UserIdsByChannelIdPagination'),
-  TokenUserByUserIdsMultiCache = require(rootPrefix + '/lib/cacheManagement/multi/TokenUserByUserIds'),
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
+  UserMultiCache = require(rootPrefix + '/lib/cacheManagement/multi/User'),
+  ImageByIdCache = require(rootPrefix + '/lib/cacheManagement/multi/ImageByIds'),
+  ChannelByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/ChannelByIds'),
+  TokenUserByUserIdsMultiCache = require(rootPrefix + '/lib/cacheManagement/multi/TokenUserByUserIds'),
+  UserIdsByChannelIdPaginationCache = require(rootPrefix + '/lib/cacheManagement/single/UserIdsByChannelIdPagination'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination'),
-  entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
-  channelsConstants = require(rootPrefix + '/lib/globalConstant/channel/channels'),
-  responseEntityKey = require(rootPrefix + '/lib/globalConstant/responseEntityKey');
+  channelsConstants = require(rootPrefix + '/lib/globalConstant/channel/channels');
 
 /**
  * Class to list the channel users.
@@ -218,8 +215,6 @@ class ListChannelUser extends ServiceBase {
     }
 
     oThis.tokenUsersByUserIdMap = tokenUsersByIdHashRes.data;
-
-    return responseHelper.successWithData({});
   }
 
   /**
@@ -238,7 +233,6 @@ class ListChannelUser extends ServiceBase {
     }
 
     const cacheRsp = await new ImageByIdCache({ ids: oThis.imageIds }).fetch();
-
     if (cacheRsp.isFailure()) {
       return Promise.reject(cacheRsp);
     }
