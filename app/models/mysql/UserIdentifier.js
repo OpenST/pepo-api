@@ -167,6 +167,15 @@ class UserIdentifier extends ModelBase {
   }
 
   /**
+   * Index name
+   *
+   * @returns {string}
+   */
+  static get eValueUniqueIndexName() {
+    return 'uidx_2';
+  }
+
+  /**
    * Flush cache.
    *
    * @param {object} params
