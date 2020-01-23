@@ -245,6 +245,7 @@ class ReplyDetailsModel extends ModelBase {
       linkIds = JSON.stringify(params.linkIds);
     }
 
+    // NOTE - userId was not passed to the flush cache as we don't want to flush the user replies cache as status is pending.
     const insertResponse = await oThis
       .insert({
         creator_user_id: params.userId,
@@ -253,10 +254,11 @@ class ReplyDetailsModel extends ModelBase {
         parent_kind: replyDetailConstants.invertedParentKinds[params.parentKind],
         parent_id: params.parentId,
         link_ids: linkIds,
-        status: replyDetailConstants.invertedStatuses[params.status]
+        status: replyDetailConstants.invertedStatuses[replyDetailConstants.pendingStatus]
       })
       .fire();
 
+    // UserId cache flush not required here since the status is pending
     const flushCacheParams = {
       parentVideoIds: [params.parentId]
     };
@@ -314,6 +316,7 @@ class ReplyDetailsModel extends ModelBase {
       .where({ id: params.replyDetailId })
       .fire();
 
+    // NOTE - userId was not passed to the flush cache as we don't want to flush the user replies cache.
     const flushCacheParams = {
       replyDetailId: params.replyDetailId
     };
@@ -340,7 +343,7 @@ class ReplyDetailsModel extends ModelBase {
       paginationTimestamp = params.paginationTimestamp;
 
     const queryObject = oThis
-      .select('*')
+      .select('id, entity_id')
       .where({
         creator_user_id: creatorUserId,
         status: replyDetailConstants.invertedStatuses[replyDetailConstants.activeStatus]
@@ -355,19 +358,16 @@ class ReplyDetailsModel extends ModelBase {
 
     const dbRows = await queryObject.fire();
 
-    const replyDetails = {};
-
     const videoIds = [],
       replyDetailIds = [];
 
     for (let index = 0; index < dbRows.length; index++) {
       const formatDbRow = oThis.formatDbData(dbRows[index]);
-      replyDetails[formatDbRow.entityId] = formatDbRow;
       videoIds.push(formatDbRow.entityId);
       replyDetailIds.push(formatDbRow.id);
     }
 
-    return { videoIds: videoIds, replyDetails: replyDetails, replyDetailIds: replyDetailIds };
+    return { videoIds: videoIds, replyDetailIds: replyDetailIds };
   }
 
   /**
@@ -402,6 +402,7 @@ class ReplyDetailsModel extends ModelBase {
    *
    * @param {object} params
    * @param {array<number>} [params.parentVideoIds]
+   * @param {number} [params.userIds]
    * @param {number} [params.replyDetailId]
    * @param {array<number>} [params.replyDetailIds]
    * @param {array<number>} [params.entityIds]
@@ -411,6 +412,13 @@ class ReplyDetailsModel extends ModelBase {
    */
   static async flushCache(params) {
     const promisesArray = [];
+
+    if (params.userIds) {
+      const ReplyDetailsIdsByUserIdCache = require(rootPrefix + '/lib/cacheManagement/single/ReplyDetailIdsByUserId');
+      for (let ind = 0; ind < params.userIds.length; ind++) {
+        promisesArray.push(new ReplyDetailsIdsByUserIdCache({ userId: params.userIds[ind] }).clear());
+      }
+    }
 
     if (params.parentVideoIds) {
       const ReplyDetailsByParentVideoPaginationCache = require(rootPrefix +

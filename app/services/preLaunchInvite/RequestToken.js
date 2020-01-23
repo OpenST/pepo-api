@@ -1,7 +1,7 @@
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   TwitterAuthTokenModel = require(rootPrefix + '/app/models/mysql/TwitterAuthToken'),
-  AuthorizationTwitterRequestClass = require(rootPrefix + '/lib/twitter/oAuth1.0/Authorization'),
+  AuthorizationTwitterRequestClass = require(rootPrefix + '/lib/connect/wrappers/twitter/oAuth1.0/Authorization'),
   twitterAuthTokenConstants = require(rootPrefix + '/lib/globalConstant/twitterAuthToken'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   coreConstants = require(rootPrefix + '/config/coreConstants'),

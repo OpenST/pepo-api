@@ -1,22 +1,22 @@
 const rootPrefix = '../../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
-  UserMultiCache = require(rootPrefix + '/lib/cacheManagement/multi/User'),
+  SecureUserCache = require(rootPrefix + '/lib/cacheManagement/single/SecureUser'),
   PricePointsCache = require(rootPrefix + '/lib/cacheManagement/single/PricePoints'),
   GetTokenService = require(rootPrefix + '/app/services/token/Get'),
+  ImageByIdCache = require(rootPrefix + '/lib/cacheManagement/multi/ImageByIds'),
   TokenUserDetailByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TokenUserByUserIds'),
-  SecureTwitterUserExtendedByTwitterUserIdCache = require(rootPrefix +
-    '/lib/cacheManagement/single/SecureTwitterUserExtendedByTwitterUserId'),
-  TwitterUserByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TwitterUserByUserIds'),
   UserModel = require(rootPrefix + '/app/models/mysql/User'),
   TokenUserModel = require(rootPrefix + '/app/models/mysql/TokenUser'),
-  TwitterUserExtendedModel = require(rootPrefix + '/app/models/mysql/TwitterUserExtended'),
+  localCipher = require(rootPrefix + '/lib/encryptors/localCipher'),
+  coreConstants = require(rootPrefix + '/config/coreConstants'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger');
 
 class GetCurrentUser extends ServiceBase {
   /**
    * @param {Object} params
    * @param {String} params.current_user: User Name
+   * @param {String} params.login_service_type: login service type
    *
    * @constructor
    */
@@ -26,11 +26,10 @@ class GetCurrentUser extends ServiceBase {
     const oThis = this;
 
     oThis.userId = params.current_user.id;
+    oThis.loginServiceType = params.login_service_type;
     oThis.pricePoints = {};
     oThis.tokenDetails = {};
-
-    oThis.twitterUserObj = null;
-    oThis.twitterUserExtended = null;
+    oThis.imageMap = {};
   }
 
   /**
@@ -49,9 +48,7 @@ class GetCurrentUser extends ServiceBase {
 
     await oThis._setTokenDetails();
 
-    await oThis._fetchTwitterUser();
-
-    await oThis.fetchTwitterUserExtended();
+    await oThis._fetchImages();
 
     return Promise.resolve(oThis._serviceResponse());
   }
@@ -68,14 +65,12 @@ class GetCurrentUser extends ServiceBase {
     const oThis = this;
     logger.log('fetch User');
 
-    let usersByIdHashRes = await new UserMultiCache({ ids: [oThis.userId] }).fetch();
-
-    if (usersByIdHashRes.isFailure()) {
-      return Promise.reject(usersByIdHashRes);
+    const cacheResp = await new SecureUserCache({ id: oThis.userId }).fetch();
+    if (cacheResp.isFailure() || !cacheResp.data.id) {
+      return Promise.reject(cacheResp);
     }
 
-    let usersByIdMap = usersByIdHashRes.data;
-    oThis.user = usersByIdMap[oThis.userId];
+    oThis.secureUser = cacheResp.data;
 
     return Promise.resolve(responseHelper.successWithData({}));
   }
@@ -142,52 +137,29 @@ class GetCurrentUser extends ServiceBase {
   }
 
   /**
-   * Fetch Twitter User Obj if present.
+   * Fetch images.
    *
-   * @sets oThis.twitterUserObj
+   * @sets oThis.imageMap
    *
-   * @return {Promise<Result>}
+   * @return {Promise<*>}
    * @private
    */
-  async _fetchTwitterUser() {
+  async _fetchImages() {
     const oThis = this;
 
-    logger.log('Start::Fetch Twitter User');
-
-    const twitterUserCacheRsp = await new TwitterUserByUserIdsCache({
-      userIds: [oThis.userId]
-    }).fetch();
-
-    if (twitterUserCacheRsp.isFailure()) {
-      return Promise.reject(twitterUserCacheRsp);
+    if (!oThis.secureUser.profileImageId) {
+      return;
     }
 
-    oThis.twitterUserObj = twitterUserCacheRsp.data[oThis.userId];
+    let imageId = oThis.secureUser.profileImageId;
 
-    logger.log('End::Fetch Twitter User');
-    return responseHelper.successWithData({});
-  }
+    const cacheRsp = await new ImageByIdCache({ ids: [imageId] }).fetch();
 
-  /**
-   * Fetch Twitter user Extended
-   *
-   * @sets oThis.twitterUserExtended
-   *
-   * @return {Promise<Result>}
-   * @private
-   */
-  async fetchTwitterUserExtended() {
-    const oThis = this;
-
-    const secureTwitterUserExtendedRes = await new SecureTwitterUserExtendedByTwitterUserIdCache({
-      twitterUserId: oThis.twitterUserObj.id
-    }).fetch();
-
-    if (secureTwitterUserExtendedRes.isFailure()) {
-      return Promise.reject(secureTwitterUserExtendedRes);
+    if (cacheRsp.isFailure()) {
+      return Promise.reject(cacheRsp);
     }
 
-    oThis.twitterUserExtended = secureTwitterUserExtendedRes.data;
+    oThis.imageMap = cacheRsp.data;
   }
 
   /**
@@ -201,20 +173,27 @@ class GetCurrentUser extends ServiceBase {
   async _serviceResponse() {
     const oThis = this;
 
-    const safeFormattedUserData = new UserModel().safeFormattedData(oThis.user);
+    const decryptedEncryptionSalt = localCipher.decrypt(coreConstants.CACHE_SHA_KEY, oThis.secureUser.encryptionSaltLc);
+
+    // NOTE - this cookie versioning has been introduced on 22/01/2020.
+    const userLoginCookieValue = new UserModel().getCookieValueFor(oThis.secureUser, decryptedEncryptionSalt, {
+      timestamp: Date.now() / 1000,
+      loginServiceType: oThis.loginServiceType
+    });
+
+    const safeFormattedUserData = new UserModel().safeFormattedData(oThis.secureUser);
     const safeFormattedTokenUserData = new TokenUserModel().safeFormattedData(oThis.tokenUser);
-    const safeFormattedTwitterUserExtendedData = new TwitterUserExtendedModel().safeFormattedData(
-      oThis.twitterUserExtended
-    );
 
     return responseHelper.successWithData({
       usersByIdMap: { [safeFormattedUserData.id]: safeFormattedUserData },
       tokenUsersByUserIdMap: { [safeFormattedTokenUserData.userId]: safeFormattedTokenUserData },
       user: safeFormattedUserData,
+      imageMap: oThis.imageMap,
       tokenUser: safeFormattedTokenUserData,
+      userLoginCookieValue: userLoginCookieValue,
+      meta: { isRegistration: 1, serviceType: oThis.loginServiceType },
       pricePointsMap: oThis.pricePoints,
-      tokenDetails: oThis.tokenDetails,
-      twitterUserExtended: safeFormattedTwitterUserExtendedData
+      tokenDetails: oThis.tokenDetails
     });
   }
 }

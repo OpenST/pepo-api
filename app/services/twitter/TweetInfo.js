@@ -1,6 +1,6 @@
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
-  AccountTwitterRequestClass = require(rootPrefix + '/lib/twitter/oAuth1.0/Account'),
+  AccountTwitterRequestClass = require(rootPrefix + '/lib/connect/wrappers/twitter/oAuth1.0/Account'),
   TwitterUserByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TwitterUserByUserIds'),
   TwitterUserExtendedModel = require(rootPrefix + '/app/models/mysql/TwitterUserExtended'),
   TwitterUserByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TwitterUserByIds'),
@@ -14,6 +14,7 @@ const rootPrefix = '../../..',
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   twitterUserExtendedConstants = require(rootPrefix + '/lib/globalConstant/twitterUserExtended');
 
+// TODO: To be deprecated. This service is not used now.
 /**
  * Class for tweet info.
  *

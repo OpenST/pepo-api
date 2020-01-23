@@ -163,6 +163,10 @@ const v1Signature = {
       {
         parameter: 'current_user',
         validatorMethods: ['validateNonEmptyObject']
+      },
+      {
+        parameter: 'login_service_type',
+        validatorMethods: ['validateNonBlankString']
       }
     ],
     optional: []
@@ -312,11 +316,11 @@ const v1Signature = {
     ],
     optional: []
   },
-  [apiName.rotateTwitterAccount]: {
+  [apiName.rotateAccount]: {
     mandatory: [
       {
         parameter: 'user_name',
-        validatorMethods: ['validateString', 'validateUserName']
+        validatorMethods: ['validateString']
       }
     ],
     optional: []
@@ -688,6 +692,24 @@ const v1Signature = {
       }
     ]
   },
+  [apiName.userReplyList]: {
+    mandatory: [
+      {
+        parameter: 'profile_user_id',
+        validatorMethods: ['validateNonZeroInteger']
+      },
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      }
+    ],
+    optional: [
+      {
+        parameter: paginationConstants.paginationIdentifierKey,
+        validatorMethods: ['validateString', 'validatePaginationIdentifier']
+      }
+    ]
+  },
   [apiName.getVideo]: {
     mandatory: [
       {
@@ -766,6 +788,33 @@ const v1Signature = {
     ]
   },
   [apiName.twitterDisconnect]: {
+    mandatory: [],
+    optional: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      }
+    ]
+  },
+  [apiName.appleDisconnect]: {
+    mandatory: [],
+    optional: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      }
+    ]
+  },
+  [apiName.googleDisconnect]: {
+    mandatory: [],
+    optional: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      }
+    ]
+  },
+  [apiName.githubDisconnect]: {
     mandatory: [],
     optional: [
       {
@@ -1214,6 +1263,108 @@ const v1Signature = {
       }
     ],
     optional: []
+  },
+  [apiName.githubConnect]: {
+    mandatory: [
+      {
+        parameter: 'access_token',
+        validatorMethods: ['validateString']
+      }
+    ],
+    optional: [
+      {
+        parameter: 'invite_code',
+        validatorMethods: ['validateNonBlankString']
+      },
+      {
+        parameter: 'utm_params',
+        validatorMethods: ['validateObject']
+      }
+    ]
+  },
+  [apiName.googleConnect]: {
+    mandatory: [
+      {
+        parameter: 'access_token',
+        validatorMethods: ['validateString']
+      },
+      {
+        parameter: 'refresh_token',
+        validatorMethods: ['validateString']
+      }
+    ],
+    optional: [
+      {
+        parameter: 'expires_in',
+        validatorMethods: ['validateString']
+      },
+      {
+        parameter: 'token_type',
+        validatorMethods: ['validateString']
+      },
+      {
+        parameter: 'id_token',
+        validatorMethods: ['validateString']
+      },
+      {
+        parameter: 'invite_code',
+        validatorMethods: ['validateNonBlankString']
+      },
+      {
+        parameter: 'utm_params',
+        validatorMethods: ['validateObject']
+      }
+    ]
+  },
+  [apiName.appleConnect]: {
+    mandatory: [
+      {
+        parameter: 'authorization_code',
+        validatorMethods: ['validateString']
+      },
+      {
+        parameter: 'authorized_scopes',
+        validatorMethods: ['validateArray']
+      },
+      {
+        parameter: 'nonce',
+        validatorMethods: ['validateString']
+      },
+      {
+        parameter: 'identity_token',
+        validatorMethods: ['validateString']
+      },
+      {
+        parameter: 'real_user_status',
+        validatorMethods: ['validateInteger']
+      },
+      {
+        parameter: 'apple_user_id',
+        validatorMethods: ['validateString']
+      }
+    ],
+    optional: [
+      {
+        parameter: 'email',
+        validatorMethods: ['validateNullString']
+      },
+      {
+        parameter: 'state',
+        validatorMethods: ['validateNullString']
+      },
+      {
+        parameter: 'full_name',
+        validatorMethods: ['validateObject']
+      },
+      {
+        parameter: 'invite_code',
+        validatorMethods: ['validateNonBlankString']
+      },
+      {
+        parameter: 'utm_params',
+        validatorMethods: ['validateObject']
+      }
+    ]
   }
 };
 

@@ -3,6 +3,8 @@ const rootPrefix = '../../..',
   UserModel = require(rootPrefix + '/app/models/mysql/User'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   TwitterUserModel = require(rootPrefix + '/app/models/mysql/TwitterUser'),
+  UserUniqueIdentifierModel = require(rootPrefix + '/app/models/mysql/UserIdentifier'),
+  TwitterUserExtendedModel = require(rootPrefix + '/app/models/mysql/TwitterUserExtended'),
   UserIdByUserNamesCache = require(rootPrefix + '/lib/cacheManagement/multi/UserIdByUserNames'),
   TwitterUserByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TwitterUserByIds'),
   TwitterUserByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TwitterUserByUserIds'),
@@ -54,7 +56,11 @@ class RotateTwitterAccount extends ServiceBase {
 
     await oThis._clearTwitterUserCache();
 
+    await oThis._deleteTwitterUserExtended();
+
     await oThis._markUserEmailAsNull();
+
+    await oThis._deleteUniqueUserIdentifier();
 
     return responseHelper.successWithData({});
   }
@@ -176,6 +182,23 @@ class RotateTwitterAccount extends ServiceBase {
   }
 
   /**
+   * Delete twitter user extended obj for twitter user id.
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _deleteTwitterUserExtended() {
+    const oThis = this;
+
+    await new TwitterUserExtendedModel()
+      .delete()
+      .where({ twitter_user_id: oThis.twitterUserId })
+      .fire();
+
+    await TwitterUserExtendedModel.flushCache({ twitterUserId: oThis.twitterUserId });
+  }
+
+  /**
    * Clear twitter user cache.
    *
    * @returns {Promise<void>}
@@ -206,6 +229,21 @@ class RotateTwitterAccount extends ServiceBase {
       .fire();
 
     await UserModel.flushCache({ id: oThis.userId });
+  }
+
+  /**
+   * Delte user identifier.
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _deleteUniqueUserIdentifier() {
+    const oThis = this;
+
+    await new UserUniqueIdentifierModel()
+      .delete()
+      .where({ user_id: oThis.userId })
+      .fire();
   }
 }
 

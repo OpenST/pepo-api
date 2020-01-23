@@ -31,7 +31,8 @@
     "mysql": "2.16.0",
     "sanitize-html": "1.19.3",
     "slack": "11.0.2",
-    "socket.io": "2.2.0"
+    "socket.io": "2.2.0",
+    "node-rsa": "1.0.7"
   },
   "devDependencies": {
     "eslint": "6.5.1",

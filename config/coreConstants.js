@@ -197,6 +197,20 @@ class CoreConstants {
     return process.env.PA_FIAT_DB_MYSQL_PASSWORD;
   }
 
+  // User social connect db.
+
+  get SOCIAL_CONNECT_DB_MYSQL_HOST() {
+    return process.env.PA_SOCIAL_CONNECT_DB_MYSQL_HOST;
+  }
+
+  get SOCIAL_CONNECT_DB_MYSQL_USER() {
+    return process.env.PA_SOCIAL_CONNECT_DB_MYSQL_USER;
+  }
+
+  get SOCIAL_CONNECT_DB_MYSQL_PASSWORD() {
+    return process.env.PA_SOCIAL_CONNECT_DB_MYSQL_PASSWORD;
+  }
+
   // Admin db
   get ADMIN_DB_MYSQL_HOST() {
     return process.env.PA_ADMIN_DB_MYSQL_HOST;
@@ -374,6 +388,14 @@ class CoreConstants {
     return process.env.PA_PR_LAMBDA_VIDEO_COMPRESS_FUNCTION;
   }
 
+  get GOOGLE_CLIENT_ID() {
+    return process.env.PA_GOOGLE_CLIENT_ID;
+  }
+
+  get GOOGLE_CLIENT_SECRET() {
+    return process.env.PA_GOOGLE_CLIENT_SECRET;
+  }
+
   get PA_PR_VIDEO_MERGE_FUNCTION() {
     return process.env.PA_PR_LAMBDA_VIDEO_MERGE_FUNCTION;
   }
@@ -465,6 +487,26 @@ class CoreConstants {
 
   get PA_TRACKER_ENDPOINT() {
     return process.env.PA_TRACKER_ENDPOINT;
+  }
+
+  get PA_APPLE_CLIENT_ID() {
+    return process.env.PA_APPLE_CLIENT_ID;
+  }
+
+  get PA_APPLE_REDIRECT_URI() {
+    return process.env.PA_APPLE_REDIRECT_URI;
+  }
+
+  get PA_APPLE_TEAM_ID() {
+    return process.env.PA_APPLE_TEAM_ID;
+  }
+
+  get PA_APPLE_KEY_IDENTIFIER() {
+    return process.env.PA_APPLE_KEY_IDENTIFIER;
+  }
+
+  get PA_APPLE_PRIVATE_KEY() {
+    return process.env.PA_APPLE_PRIVATE_KEY;
   }
 }
 
