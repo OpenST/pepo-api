@@ -146,17 +146,7 @@ class BackPopulateUserUniqueIdentifier {
             e_value: userData.emailId,
             e_kind: userIdentifierConstants.invertedKinds[userIdentifierConstants.emailKind]
           })
-          .fire()
-          .catch(function(err) {
-            if (
-              !UserUniqueIdentifierModel.isDuplicateIndexViolation(
-                UserUniqueIdentifierModel.userIdEmailUniqueIndexName,
-                err
-              )
-            ) {
-              console.log('\nError', err);
-            }
-          });
+          .fire();
       }
     }
   }
