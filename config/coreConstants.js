@@ -297,6 +297,12 @@ class CoreConstants {
     return oThis.S3_USER_ASSETS_FOLDER + oThis.VIDEOS_S3_FOLDER;
   }
 
+  get S3_LOGS_FOLDER() {
+    const oThis = this;
+
+    return oThis.S3_AWS_MASTER_FOLDER + '/logs';
+  }
+
   get IMAGES_S3_FOLDER() {
     return '/images';
   }
@@ -374,6 +380,14 @@ class CoreConstants {
     return process.env.PA_TWITTER_AUTH_CALLBACK_ROUTE;
   }
 
+  get PA_PR_IMAGE_RESIZE_FUNCTION() {
+    return process.env.PA_PR_LAMBDA_IMAGE_RESIZE_FUNCTION;
+  }
+
+  get PA_PR_VIDEO_COMPRESS_FUNCTION() {
+    return process.env.PA_PR_LAMBDA_VIDEO_COMPRESS_FUNCTION;
+  }
+
   get GOOGLE_CLIENT_ID() {
     return process.env.PA_GOOGLE_CLIENT_ID;
   }
@@ -382,12 +396,8 @@ class CoreConstants {
     return process.env.PA_GOOGLE_CLIENT_SECRET;
   }
 
-  get PR_IMAGE_RESIZE_FUNCTION() {
-    return process.env.PR_LAMBDA_IMAGE_RESIZE_FUNCTION;
-  }
-
-  get PR_VIDEO_COMPRESS_FUNCTION() {
-    return process.env.PR_LAMBDA_VIDEO_COMPRESS_FUNCTION;
+  get PA_PR_VIDEO_MERGE_FUNCTION() {
+    return process.env.PA_PR_LAMBDA_VIDEO_MERGE_FUNCTION;
   }
 
   get PA_EMAIL_TOKENS_DECRIPTOR_KEY() {

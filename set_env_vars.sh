@@ -132,8 +132,9 @@ export PA_TWITTER_CONSUMER_SECRET='iM5UMt4px8rwoqEoRV9gJGrJGtEoMUxOYkaWXSges7t4b
 export PA_TWITTER_AUTH_CALLBACK_ROUTE='http://pepodev.com:8080/twitter/oauth'
 
 # image resizer variables
-export PR_LAMBDA_IMAGE_RESIZE_FUNCTION='arn:aws:lambda:us-east-1:274208178423:function:pepoImageResizer'
-export PR_LAMBDA_VIDEO_COMPRESS_FUNCTION='arn:aws:lambda:us-east-1:274208178423:function:pepoVideoCompressor'
+export PA_PR_LAMBDA_IMAGE_RESIZE_FUNCTION='arn:aws:lambda:us-east-1:274208178423:function:pepoImageResizer'
+export PA_PR_LAMBDA_VIDEO_COMPRESS_FUNCTION='arn:aws:lambda:us-east-1:274208178423:function:pepoVideoCompressor'
+export PA_PR_LAMBDA_VIDEO_MERGE_FUNCTION='arn:aws:lambda:us-east-1:274208178423:function:pepoVideoMerger'
 
 export PA_EMAIL_TOKENS_DECRIPTOR_KEY='3d3w6fs0983ab6b1e37d1c1fs64hm8g9'
 
