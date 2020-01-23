@@ -1245,7 +1245,16 @@ const v1Signature = {
         validatorMethods: ['validateString']
       }
     ],
-    optional: []
+    optional: [
+      {
+        parameter: 'invite_code',
+        validatorMethods: ['validateNonBlankString']
+      },
+      {
+        parameter: 'utm_params',
+        validatorMethods: ['validateObject']
+      }
+    ]
   },
   [apiName.googleConnect]: {
     mandatory: [
@@ -1270,6 +1279,14 @@ const v1Signature = {
       {
         parameter: 'id_token',
         validatorMethods: ['validateString']
+      },
+      {
+        parameter: 'invite_code',
+        validatorMethods: ['validateNonBlankString']
+      },
+      {
+        parameter: 'utm_params',
+        validatorMethods: ['validateObject']
       }
     ]
   },
@@ -1311,6 +1328,14 @@ const v1Signature = {
       },
       {
         parameter: 'full_name',
+        validatorMethods: ['validateObject']
+      },
+      {
+        parameter: 'invite_code',
+        validatorMethods: ['validateNonBlankString']
+      },
+      {
+        parameter: 'utm_params',
         validatorMethods: ['validateObject']
       }
     ]
