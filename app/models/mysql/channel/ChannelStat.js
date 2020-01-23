@@ -75,7 +75,7 @@ class ChannelStatModel extends ModelBase {
    *
    * @returns {Promise<*>}
    */
-  static async flushCache(params) {
+  static async flushCache() {
     // Do nothing.
   }
 }

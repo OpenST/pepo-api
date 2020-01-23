@@ -5,6 +5,7 @@ const rootPrefix = '../..',
   TextModel = require(rootPrefix + '/app/models/mysql/Text'),
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   ChannelModel = require(rootPrefix + '/app/models/mysql/channel/Channel'),
+  ChannelStatModel = require(rootPrefix + '/app/models/mysql/channel/ChannelStat'),
   imageLib = require(rootPrefix + '/lib/imageLib'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   textConstants = require(rootPrefix + '/lib/globalConstant/text'),
@@ -72,7 +73,11 @@ class CreateNewChannel {
 
     await oThis.createNewChannel();
 
-    const promisesArray = [oThis.performChannelDescriptionRelatedTasks(), oThis.performImageUrlRelatedTasks()];
+    const promisesArray = [
+      oThis.performChannelDescriptionRelatedTasks(),
+      oThis.performImageUrlRelatedTasks(),
+      oThis.createChannelStat()
+    ];
     await Promise.all(promisesArray);
   }
 
@@ -194,6 +199,17 @@ class CreateNewChannel {
     await ChannelModel.flushCache({ ids: [oThis.channelId] });
 
     logger.info('Added channel image.');
+  }
+
+  /**
+   * Create new entry in channel stat table.
+   *
+   * @returns {Promise<void>}
+   */
+  async createChannelStat() {
+    const oThis = this;
+
+    await new ChannelStatModel().insert({ channel_id: oThis.channelId, total_videos: 0, total_users: 0 }).fire();
   }
 }
 

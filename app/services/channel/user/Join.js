@@ -1,15 +1,15 @@
 const rootPrefix = '../../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
+  CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   ChannelUserModel = require(rootPrefix + '/app/models/mysql/channel/ChannelUser'),
   ChannelStatModel = require(rootPrefix + '/app/models/mysql/channel/ChannelStat'),
   ChannelByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/ChannelByIds'),
   ChannelUserByUserIdAndChannelIdsCache = require(rootPrefix +
     '/lib/cacheManagement/multi/ChannelUserByUserIdAndChannelIds'),
-  CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
-  channelsConstants = require(rootPrefix + '/lib/globalConstant/channel/channels'),
-  channelUsersConstants = require(rootPrefix + '/lib/globalConstant/channel/channelUsers'),
-  logger = require(rootPrefix + '/lib/logger/customConsoleLogger');
+  logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
+  channelConstants = require(rootPrefix + '/lib/globalConstant/channel/channels'),
+  channelUsersConstants = require(rootPrefix + '/lib/globalConstant/channel/channelUsers');
 
 /**
  * Class to add user to a channel.
@@ -75,7 +75,7 @@ class JoinChannel extends ServiceBase {
 
     const channelObj = channelByIdsCacheResponse.data[oThis.channelId];
 
-    if (!CommonValidators.validateNonEmptyObject(channelObj) || channelObj.status !== channelsConstants.activeStatus) {
+    if (!CommonValidators.validateNonEmptyObject(channelObj) || channelObj.status !== channelConstants.activeStatus) {
       return Promise.reject(
         responseHelper.error({
           internal_error_identifier: 'a_s_c_u_j_fc_1',
@@ -153,7 +153,7 @@ class JoinChannel extends ServiceBase {
       const formattedUpdatedParams = new ChannelUserModel().formatDbData(updateParams);
       Object.assign(oThis.channelUserObj, formattedUpdatedParams);
     } else {
-      let insertData = {
+      const insertData = {
         channel_id: oThis.channelId,
         user_id: oThis.currentUser.id,
         status: channelUsersConstants.invertedStatuses[channelUsersConstants.activeStatus]
@@ -164,6 +164,7 @@ class JoinChannel extends ServiceBase {
 
       if (!insertResponse) {
         logger.error('Error while inserting data in channel_user table.');
+
         return Promise.reject(new Error('Error while inserting data in channel_user table.'));
       }
 
