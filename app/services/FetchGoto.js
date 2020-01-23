@@ -3,6 +3,7 @@ const urlParser = require('url');
 const rootPrefix = '../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
+  ChannelByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/ChannelByIds'),
   TagIdByNamesCache = require(rootPrefix + '/lib/cacheManagement/multi/TagIdByNames'),
   ReplyDetailsByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/ReplyDetailsByIds'),
   gotoFactory = require(rootPrefix + '/lib/goTo/factory'),
@@ -156,8 +157,27 @@ class FetchGoto extends ServiceBase {
 
           if (CommonValidators.validateInteger(tagByTagNamesCacheData[tagName])) {
             const tagId = tagByTagNamesCacheData[tagName];
-            oThis.gotoKind = gotoConstants.tagGotoKind;
             oThis.gotoParams = { tagId: tagId };
+            oThis.gotoKind = gotoConstants.tagGotoKind;
+          }
+        }
+
+        break;
+      }
+      case gotoConstants.channelGotoKind: {
+        const channelId = Number(pathArray[2]);
+
+        if (channelId) {
+          const cacheResponse = await new ChannelByIdsCache({ ids: [channelId] }).fetch();
+          if (cacheResponse.isFailure()) {
+            return Promise.reject(cacheResponse);
+          }
+
+          const channelDetails = cacheResponse.data[channelId];
+
+          if (CommonValidators.validateNonEmptyObject(channelDetails)) {
+            oThis.gotoParams = { channelId: channelId };
+            oThis.gotoKind = gotoConstants.channelGotoKind;
           }
         }
 
@@ -169,7 +189,7 @@ class FetchGoto extends ServiceBase {
         break;
       }
       case 'doptin': {
-        // If url is doptin then send it to webview
+        // If url is doptin then send it to webview.
         if (query && query.t) {
           oThis.gotoParams = { url: oThis.url };
           oThis.gotoKind = gotoConstants.webViewGotoKind;
