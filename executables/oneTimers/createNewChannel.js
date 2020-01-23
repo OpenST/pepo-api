@@ -22,7 +22,7 @@ program.on('--help', function() {
   logger.log('  Example:');
   logger.log('');
   logger.log(
-    '    node executables/oneTimers/createNewChannel.js --channelName "PEPO" --channelDescription "This is a video description. Link: https://pepo.com. Tags: #test1 #test2" --imageUrl "https://something.com/image.jpg"'
+    '    node executables/oneTimers/createNewChannel.js --channelName "PEPO" --channelDescription "This is a video description. Link: https://pepo.com. Tags: #test1 #test2" --imageUrl "https://s3.amazonaws.com/uassets.stagingpepo.com/d/ua/images/1-6f6278fcfc2da06bd3dc6ffe976e4e28-original.jpg"'
   );
   logger.log('');
   logger.log('');
@@ -178,7 +178,7 @@ class CreateNewChannel {
     };
 
     // Validate and save image.
-    const resp = imageLib.validateAndSave(imageParams);
+    const resp = await imageLib.validateAndSave(imageParams);
     if (resp.isFailure()) {
       return Promise.reject(resp);
     }
