@@ -315,7 +315,7 @@ class UpdateFanVideo extends UpdateProfileBase {
 
     promisesArray.push(super._flushCaches());
     if (oThis.feedId) {
-      promisesArray.push(FeedModel.flushCache({ id: oThis.feedId }));
+      promisesArray.push(FeedModel.flushCache({ ids: [oThis.feedId] }));
     }
     promisesArray.push(VideoDetailsModel.flushCache({ userId: oThis.profileUserId }));
 
