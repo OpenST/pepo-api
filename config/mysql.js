@@ -115,6 +115,13 @@ const mysqlConfig = {
         user: coreConstants.SOCIAL_CONNECT_DB_MYSQL_USER,
         password: coreConstants.SOCIAL_CONNECT_DB_MYSQL_PASSWORD
       }
+    },
+    webhookDbCluster: {
+      master: {
+        host: coreConstants.WEBHOOK_DB_MYSQL_HOST,
+        user: coreConstants.WEBHOOK_DB_MYSQL_USER,
+        password: coreConstants.WEBHOOK_DB_MYSQL_PASSWORD
+      }
     }
   },
   databases: {}
@@ -161,5 +168,8 @@ mysqlConfig.databases[database.fiatDbName] = ['fiatDbCluster'];
 
 // Infra db
 mysqlConfig.databases[database.infraDbName] = ['infraDbCluster'];
+
+//webhook db
+mysqlConfig.databases[database.webhookDbName] = ['webhookDbCluster'];
 
 module.exports = mysqlConfig;

@@ -13,6 +13,11 @@
     "queues": ["example"],
     "prefetchCount": 1
   },
+  "webhookJobPreProcessor": {
+    "topics": ["wepp.#"],
+    "queues": ["example"],
+    "prefetchCount": 1
+  },
   "pepoMobileEventJobProcessor": {
     "topics": ["pme.#"],
     "queues": ["example"],
@@ -27,6 +32,8 @@
     "sequenceNumber": 1
   },
   "pushNotificationAggregator": {
+  },
+  "webhookProcessor": {
   },
   "userSocketConnArchival": {
   },

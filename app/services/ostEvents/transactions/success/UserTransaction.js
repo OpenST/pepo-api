@@ -5,6 +5,8 @@ const rootPrefix = '../../../../..',
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   transactionConstants = require(rootPrefix + '/lib/globalConstant/transaction'),
+  webhookPreProcessorJobEnqueue = require(rootPrefix + '/lib/rabbitMqEnqueue/webhookPreProcessor'),
+  webhookPreProcessorJobConstants = require(rootPrefix + '/lib/globalConstant/webhookPreProcessorJob'),
   notificationJobEnqueue = require(rootPrefix + '/lib/rabbitMqEnqueue/notification'),
   notificationJobConstants = require(rootPrefix + '/lib/globalConstant/notificationJob');
 
@@ -77,6 +79,7 @@ class UserTransactionSuccessWebhook extends TransactionWebhookBase {
 
     await oThis._updateTransactionAndRelatedActivities();
     await oThis._updateStats();
+    await oThis._enqueueWebhookPreprocessor();
   }
 
   /**
@@ -124,6 +127,23 @@ class UserTransactionSuccessWebhook extends TransactionWebhookBase {
     const updateStatsObj = new UpdateStats(updateStatsParams);
 
     await updateStatsObj.perform();
+  }
+
+  /**
+   * Enqueue for Webhook Preprocessor.
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _enqueueWebhookPreprocessor() {
+    const oThis = this;
+
+    if (oThis.isVideoIdPresent()) {
+      await webhookPreProcessorJobEnqueue.enqueue(webhookPreProcessorJobConstants.videoContributionTopic, {
+        transaction: oThis.transactionObj,
+        videoId: oThis.videoId
+      });
+    }
   }
 
   /**
