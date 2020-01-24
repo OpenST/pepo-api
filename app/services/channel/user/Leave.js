@@ -5,7 +5,7 @@ const rootPrefix = '../../../..',
   ChannelStatModel = require(rootPrefix + '/app/models/mysql/channel/ChannelStat'),
   ChannelByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelByIds'),
   ChannelUserByUserIdAndChannelIdsCache = require(rootPrefix +
-    '/lib/cacheManagement/multi/ChannelUserByUserIdAndChannelIds'),
+    '/lib/cacheManagement/multi/channel/ChannelUserByUserIdAndChannelIds'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   channelConstants = require(rootPrefix + '/lib/globalConstant/channel/channels'),
   channelUsersConstants = require(rootPrefix + '/lib/globalConstant/channel/channelUsers');

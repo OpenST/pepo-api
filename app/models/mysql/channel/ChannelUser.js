@@ -75,7 +75,7 @@ class ChannelUserModel extends ModelBase {
       .select('user_id, created_at')
       .where({
         channel_id: channelId,
-        status: channelUsersConstants.invertedStatuses[channelUsersConstants.activeStatus]
+        status: channelUsersConstants.invertedStatuses[channelUsersConstants.activeStatus] // TODO:channels - No index on status.
       })
       .order_by('created_at desc')
       .limit(limit);
@@ -102,9 +102,10 @@ class ChannelUserModel extends ModelBase {
   /**
    * Fetch channel user for given user id and channel ids.
    *
-   * @param {array} ids: channel ids
+   * @param {number} userId: user id.
+   * @param {array<number>} channelIds: channel ids
    *
-   * @return {object}
+   * @returns {Promise<object>}
    */
   async fetchByUserIdAndChannelIds(userId, channelIds) {
     const oThis = this;
@@ -139,7 +140,7 @@ class ChannelUserModel extends ModelBase {
     }
 
     const cacheByUserIdAndChannelIds = require(rootPrefix +
-      '/lib/cacheManagement/multi/ChannelUserByUserIdAndChannelIds');
+      '/lib/cacheManagement/multi/channel/ChannelUserByUserIdAndChannelIds');
 
     if (params.userId && params.channelId) {
       promisesArray.push(
