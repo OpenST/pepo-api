@@ -45,8 +45,8 @@ class ChannelStatModel extends ModelBase {
     const formattedData = {
       id: dbRow.id,
       channelId: dbRow.channel_id,
-      totalVideos: dbRow.total_videos,
-      totalUsers: dbRow.total_users,
+      totalVideos: dbRow.total_videos ? dbRow.total_videos : 0,
+      totalUsers: dbRow.total_users ? dbRow.total_users : 0,
       createdAt: dbRow.created_at,
       updatedAt: dbRow.updated_at
     };
