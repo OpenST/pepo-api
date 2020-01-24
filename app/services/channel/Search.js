@@ -35,9 +35,11 @@ class ChannelSearch extends ServiceBase {
     oThis.limit = null;
     oThis.page = null;
     oThis.channelIds = [];
+    oThis.channels = {};
+
     oThis.imageIds = [];
     oThis.descriptionIds = [];
-    oThis.channels = {};
+
     oThis.imageMap = {};
   }
 
@@ -117,7 +119,7 @@ class ChannelSearch extends ServiceBase {
   /**
    * Get channels.
    *
-   * @sets oThis.channels
+   * @sets oThis.channels, oThis.imageIds, oThis.descriptionIds
    *
    * @returns {Promise<void>}
    * @private
@@ -133,10 +135,15 @@ class ChannelSearch extends ServiceBase {
 
     oThis.channels = channelsResponse.data;
 
-    for (let channelId in oThis.channels) {
-      let channel = oThis.channels[channelId];
-      oThis.imageIds.push(channel.imageId);
-      oThis.descriptionIds.push(channel.descriptionId);
+    for (const channelId in oThis.channels) {
+      const channel = oThis.channels[channelId];
+      if (channel.imageId) {
+        oThis.imageIds.push(channel.imageId);
+      }
+
+      if (channel.descriptionId) {
+        oThis.descriptionIds.push(channel.descriptionId);
+      }
     }
   }
 
@@ -156,7 +163,6 @@ class ChannelSearch extends ServiceBase {
     }
 
     const cacheRsp = await new ImageByIdCache({ ids: oThis.imageIds }).fetch();
-
     if (cacheRsp.isFailure()) {
       return Promise.reject(cacheRsp);
     }
