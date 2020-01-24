@@ -522,6 +522,32 @@ class UserModel extends ModelBase {
 
     return propertiesArray.indexOf(userConstants.isDeniedCreatorProperty) > -1;
   }
+
+  /**
+   * Is user logged in from twitter.
+   *
+   * @param {object} userObj
+   *
+   * @returns {boolean}
+   */
+  static isUserTwitterLogin(userObj) {
+    const propertiesArray = new UserModel().getBitwiseArray('properties', userObj.properties);
+
+    return propertiesArray.indexOf(userConstants.hasTwitterLoginProperty) > -1;
+  }
+
+  /**
+   * Is user logged in from github.
+   *
+   * @param {object} userObj
+   *
+   * @returns {boolean}
+   */
+  static isUserGithubLogin(userObj) {
+    const propertiesArray = new UserModel().getBitwiseArray('properties', userObj.properties);
+
+    return propertiesArray.indexOf(userConstants.hasGithubLoginProperty) > -1;
+  }
 }
 
 module.exports = UserModel;
