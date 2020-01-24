@@ -153,8 +153,19 @@ class UploadParams extends ServiceBase {
       for (let index = 0; index < fileArray.length; index++) {
         const feFileName = fileArray[index],
           fileExtension = util.getFileExtension(feFileName),
-          contentType = oThis._getContent(intent, fileExtension),
-          fileName = oThis._getRandomEncodedFileNames(fileExtension);
+          contentType = oThis._getContent(intent, fileExtension);
+
+        if (!contentType) {
+          return Promise.reject(
+            responseHelper.paramValidationError({
+              internal_error_identifier: 'a_s_up_3',
+              api_error_identifier: 'invalid_api_params',
+              params_error_identifiers: ['invalid_images'],
+              debug_options: {}
+            })
+          );
+        }
+        const fileName = oThis._getRandomEncodedFileNames(fileExtension);
 
         const preSignedPostParams = await AwsS3wrapper.createPresignedPostFor(
           intent,
