@@ -1,4 +1,4 @@
-const rootPrefix = '../../..',
+const rootPrefix = '../../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
   databaseConstants = require(rootPrefix + '/lib/globalConstant/database'),
   dynamicVariablesConstants = require(rootPrefix + '/lib/globalConstant/dynamicVariables');
@@ -9,9 +9,9 @@ const dbName = databaseConstants.bigDbName;
 /**
  * Class for dynamic global constants model.
  *
- * @class DynamicVariables
+ * @class DynamicVariable
  */
-class DynamicVariables extends ModelBase {
+class DynamicVariable extends ModelBase {
   /**
    * Constructor for curated entity model.
    *
@@ -94,11 +94,6 @@ class DynamicVariables extends ModelBase {
   static async flushCache(params) {
     const promisesArray = [];
 
-    if (params.kind) {
-      const DynamicVariablesByKindCache = require(rootPrefix + '/lib/cacheManagement/multi/DynamicVariablesByKind');
-      promisesArray.push(new DynamicVariablesByKindCache({ kinds: [params.kind] }).clear());
-    }
-
     if (params.kinds) {
       const DynamicVariablesByKindCache = require(rootPrefix + '/lib/cacheManagement/multi/DynamicVariablesByKind');
       promisesArray.push(new DynamicVariablesByKindCache({ kinds: params.kinds }).clear());
@@ -108,4 +103,4 @@ class DynamicVariables extends ModelBase {
   }
 }
 
-module.exports = DynamicVariables;
+module.exports = DynamicVariable;
