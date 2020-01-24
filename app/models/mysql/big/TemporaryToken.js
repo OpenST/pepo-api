@@ -1,9 +1,9 @@
-const rootPrefix = '../../..',
+const rootPrefix = '../../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
   coreConstants = require(rootPrefix + '/config/coreConstants'),
   localCipher = require(rootPrefix + '/lib/encryptors/localCipher'),
   databaseConstants = require(rootPrefix + '/lib/globalConstant/database'),
-  temporaryTokenConstants = require(rootPrefix + '/lib/globalConstant/temporaryToken');
+  temporaryTokenConstants = require(rootPrefix + '/lib/globalConstant/big/temporaryToken');
 
 // Declare variables.
 const dbName = databaseConstants.bigDbName;

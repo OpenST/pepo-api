@@ -2,7 +2,7 @@ const rootPrefix = '../../../',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   UserCache = require(rootPrefix + '/lib/cacheManagement/multi/User'),
   UserEmailLogsModel = require(rootPrefix + '/app/models/mysql/UserEmailLogs'),
-  TemporaryTokenModel = require(rootPrefix + '/app/models/mysql/TemporaryToken'),
+  TemporaryTokenModel = require(rootPrefix + '/app/models/mysql/big/TemporaryToken'),
   UserByEmailsCache = require(rootPrefix + '/lib/cacheManagement/multi/UserByEmails'),
   SendTransactionalMail = require(rootPrefix + '/lib/email/hookCreator/SendTransactionalMail'),
   UserEmailLogsByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/UserEmailLogsByUserIds'),
@@ -10,7 +10,7 @@ const rootPrefix = '../../../',
   util = require(rootPrefix + '/lib/util'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   webPageConstants = require(rootPrefix + '/lib/globalConstant/webPage'),
-  temporaryTokenConstants = require(rootPrefix + '/lib/globalConstant/temporaryToken'),
+  temporaryTokenConstants = require(rootPrefix + '/lib/globalConstant/big/temporaryToken'),
   emailServiceApiCallHookConstants = require(rootPrefix + '/lib/globalConstant/emailServiceApiCallHook');
 
 /**
@@ -115,12 +115,12 @@ class SaveEmail extends ServiceBase {
       );
     }
 
-    let promiseArray = [];
+    const promiseArray = [
+      new UserByEmailsCache({ emails: [oThis.email] }).fetch(),
+      new UserIdentifiersByEmailsCache({ emails: [oThis.email] }).fetch()
+    ];
 
-    promiseArray.push(new UserByEmailsCache({ emails: [oThis.email] }).fetch());
-    promiseArray.push(new UserIdentifiersByEmailsCache({ emails: [oThis.email] }).fetch());
-
-    let responseArray = await Promise.all(promiseArray),
+    const responseArray = await Promise.all(promiseArray),
       userDetailsResponse = responseArray[0],
       userIdentifiersResponse = responseArray[1];
 

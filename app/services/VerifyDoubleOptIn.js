@@ -1,7 +1,7 @@
 const rootPrefix = '../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
-  TemporaryTokenModel = require(rootPrefix + '/app/models/mysql/TemporaryToken'),
   UserIdentifierModel = require(rootPrefix + '/app/models/mysql/UserIdentifier'),
+  TemporaryTokenModel = require(rootPrefix + '/app/models/mysql/big/TemporaryToken'),
   UserByEmailsCache = require(rootPrefix + '/lib/cacheManagement/multi/UserByEmails'),
   AddContactInPepoCampaign = require(rootPrefix + '/lib/email/hookCreator/AddContact'),
   UserIdentifiersByEmailsCache = require(rootPrefix + '/lib/cacheManagement/multi/UserIdentifiersByEmails'),
@@ -9,8 +9,8 @@ const rootPrefix = '../..',
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   localCipher = require(rootPrefix + '/lib/encryptors/localCipher'),
-  temporaryTokenConstants = require(rootPrefix + '/lib/globalConstant/temporaryToken'),
   preLaunchInviteConstants = require(rootPrefix + '/lib/globalConstant/preLaunchInvite'),
+  temporaryTokenConstants = require(rootPrefix + '/lib/globalConstant/big/temporaryToken'),
   emailServiceApiCallHookConstants = require(rootPrefix + '/lib/globalConstant/emailServiceApiCallHook');
 
 /**
@@ -318,12 +318,12 @@ class VerifyDoubleOptIn extends ServiceBase {
    * @private
    */
   async _checkIfEmailExist(email) {
-    let promiseArray = [];
+    const promiseArray = [
+      new UserByEmailsCache({ emails: [email] }).fetch(),
+      new UserIdentifiersByEmailsCache({ emails: [email] }).fetch()
+    ];
 
-    promiseArray.push(new UserByEmailsCache({ emails: [email] }).fetch());
-    promiseArray.push(new UserIdentifiersByEmailsCache({ emails: [email] }).fetch());
-
-    let responseArray = await Promise.all(promiseArray),
+    const responseArray = await Promise.all(promiseArray),
       userDetailsResponse = responseArray[0],
       userIdentifiersResponse = responseArray[1];
 
