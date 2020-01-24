@@ -2,6 +2,7 @@ const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   ChannelByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelByIds'),
+  ChannelStatByChannelIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelStatByChannelIds'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   channelConstants = require(rootPrefix + '/lib/globalConstant/channel/channels');
 
@@ -29,6 +30,9 @@ class GetChannel extends ServiceBase {
 
     oThis.channelId = params.channel_id;
     oThis.currentUser = params.current_user;
+
+    oThis.channelDetails = {};
+    oThis.channelStats = {};
   }
 
   async _asyncPerform() {
@@ -76,8 +80,23 @@ class GetChannel extends ServiceBase {
     }
   }
 
+  /**
+   * Fetch channel stats.
+   *
+   * @sets oThis.channelStats
+   *
+   * @returns {Promise<never>}
+   * @private
+   */
   async _fetchChannelStats() {
     const oThis = this;
+
+    const cacheResponse = await new ChannelStatByChannelIdsCache({ channelIds: [oThis.channelId] }).fetch();
+    if (cacheResponse.isFailure()) {
+      return Promise.reject(cacheResponse);
+    }
+
+    oThis.channelStats = cacheResponse.data[oThis.channelId];
   }
 }
 
