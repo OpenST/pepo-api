@@ -1,7 +1,7 @@
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   ImageByIdCache = require(rootPrefix + '/lib/cacheManagement/multi/ImageByIds'),
-  ChannelMultiCache = require(rootPrefix + '/lib/cacheManagement/multi/ChannelByIds'),
+  ChannelByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/ChannelByIds'),
   ChannelNamePaginationCache = require(rootPrefix + '/lib/cacheManagement/single/ChannelNamePagination'),
   basicHelper = require(rootPrefix + '/helpers/basic'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
@@ -131,7 +131,7 @@ class ChannelSearch extends ServiceBase {
       return;
     }
 
-    const channelsResponse = await new ChannelMultiCache({ ids: oThis.channelIds }).fetch();
+    const channelsResponse = await new ChannelByIdsCache({ ids: oThis.channelIds }).fetch();
 
     oThis.channels = channelsResponse.data;
 
