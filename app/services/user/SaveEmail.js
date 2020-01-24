@@ -6,6 +6,7 @@ const rootPrefix = '../../../',
   UserByEmailsCache = require(rootPrefix + '/lib/cacheManagement/multi/UserByEmails'),
   SendTransactionalMail = require(rootPrefix + '/lib/email/hookCreator/SendTransactionalMail'),
   UserEmailLogsByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/UserEmailLogsByUserIds'),
+  UserIdentifiersByEmailsCache = require(rootPrefix + '/lib/cacheManagement/multi/UserIdentifiersByEmails'),
   util = require(rootPrefix + '/lib/util'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   webPageConstants = require(rootPrefix + '/lib/globalConstant/webPage'),
@@ -114,16 +115,29 @@ class SaveEmail extends ServiceBase {
       );
     }
 
+    let promiseArray = [];
+
+    promiseArray.push(new UserByEmailsCache({ emails: [oThis.email] }).fetch());
+    promiseArray.push(new UserIdentifiersByEmailsCache({ emails: [oThis.email] }).fetch());
+
+    let responseArray = await Promise.all(promiseArray),
+      userDetailsResponse = responseArray[0],
+      userIdentifiersResponse = responseArray[1];
+
     // Check if email is not already associated with some different user.
-    const userDetailsResponse = await new UserByEmailsCache({ emails: [oThis.email] }).fetch();
     if (userDetailsResponse.isFailure()) {
       return Promise.reject(userDetailsResponse);
     }
 
-    const userId = userDetailsResponse.data[oThis.email].id;
+    if (userIdentifiersResponse.isFailure()) {
+      return Promise.reject(userIdentifiersResponse);
+    }
+
+    const userId = userDetailsResponse.data[oThis.email].id,
+      userIdentifiersUserId = userIdentifiersResponse.data[oThis.email].id;
 
     // If userId already exists, email is already associated with some different user.
-    if (userId) {
+    if (userId || userIdentifiersUserId) {
       return Promise.reject(
         responseHelper.paramValidationError({
           internal_error_identifier: 'a_s_u_p_u_e_4',

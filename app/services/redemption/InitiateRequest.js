@@ -51,6 +51,7 @@ class InitiateRequestRedemption extends ServiceBase {
     oThis.dollarAmount = params.dollar_amount;
 
     oThis.currentUserId = oThis.currentUser.id;
+    oThis.currentUserTwitterHandle = '';
   }
 
   /**
@@ -342,12 +343,15 @@ class InitiateRequestRedemption extends ServiceBase {
 
     const currentUserTwitterId = twitterUserByUserIdsCacheResponse.data[oThis.currentUserId].id;
 
-    const twitterUserByUserIdCacheResponse = await new TwitterUserByIdsCache({ ids: [currentUserTwitterId] }).fetch();
-    if (twitterUserByUserIdCacheResponse.isFailure()) {
-      return Promise.reject(twitterUserByUserIdCacheResponse);
-    }
+    if (currentUserTwitterId) {
+      const twitterUserByUserIdCacheResponse = await new TwitterUserByIdsCache({ ids: [currentUserTwitterId] }).fetch();
 
-    oThis.currentUserTwitterHandle = twitterUserByUserIdCacheResponse.data[currentUserTwitterId].handle || '';
+      if (twitterUserByUserIdCacheResponse.isFailure()) {
+        return Promise.reject(twitterUserByUserIdCacheResponse);
+      }
+
+      oThis.currentUserTwitterHandle = twitterUserByUserIdCacheResponse.data[currentUserTwitterId].handle || '';
+    }
   }
 
   /**

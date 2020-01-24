@@ -1,7 +1,10 @@
 const rootPrefix = '../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   TemporaryTokenModel = require(rootPrefix + '/app/models/mysql/TemporaryToken'),
+  UserIdentifierModel = require(rootPrefix + '/app/models/mysql/UserIdentifier'),
+  UserByEmailsCache = require(rootPrefix + '/lib/cacheManagement/multi/UserByEmails'),
   AddContactInPepoCampaign = require(rootPrefix + '/lib/email/hookCreator/AddContact'),
+  UserIdentifiersByEmailsCache = require(rootPrefix + '/lib/cacheManagement/multi/UserIdentifiersByEmails'),
   coreConstants = require(rootPrefix + '/config/coreConstants'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
@@ -226,8 +229,24 @@ class VerifyDoubleOptIn extends ServiceBase {
     }
 
     const userId = userEmailLogsDetails[0].user_id,
-      email = userEmailLogsDetails[0].email;
+      email = userEmailLogsDetails[0].email,
+      promiseArray = [];
 
+    await oThis._checkIfEmailExist(email);
+
+    promiseArray.push(oThis._updateEmailInUsers(email, userId));
+    promiseArray.push(oThis._insertUserIdentifiers(email, userId));
+
+    await Promise.all(promiseArray);
+  }
+
+  /**
+   * Update email in users table.
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _updateEmailInUsers(email, userId) {
     const UserModel = require(rootPrefix + '/app/models/mysql/User');
 
     // Update email for user.
@@ -246,7 +265,7 @@ class VerifyDoubleOptIn extends ServiceBase {
 
           return Promise.reject(
             responseHelper.paramValidationError({
-              internal_error_identifier: 'a_s_pli_doi_aefu_1',
+              internal_error_identifier: 'a_s_vdoi_1',
               api_error_identifier: 'invalid_params',
               params_error_identifiers: ['already_associated_email'],
               debug_options: {}
@@ -256,6 +275,81 @@ class VerifyDoubleOptIn extends ServiceBase {
 
         return Promise.reject(err);
       });
+  }
+
+  /**
+   * Insert into user identifiers.
+   *
+   * @param email
+   * @param userId
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _insertUserIdentifiers(email, userId) {
+    await new UserIdentifierModel()
+      .insertUserEmail(userId, email)
+      .then(async function() {
+        await UserIdentifierModel.flushCache({ emails: [email] });
+      })
+      .catch(function(err) {
+        logger.error(`Error while inserting email in user identifiers table. : ${err}`);
+
+        if (UserIdentifierModel.isDuplicateIndexViolation(UserIdentifierModel.eValueUniqueIndexName, err)) {
+          logger.log('Email conflict.');
+
+          return Promise.reject(
+            responseHelper.paramValidationError({
+              internal_error_identifier: 'a_s_vdoi_2',
+              api_error_identifier: 'invalid_params',
+              params_error_identifiers: ['already_associated_email'],
+              debug_options: {}
+            })
+          );
+        }
+
+        return Promise.reject(err);
+      });
+  }
+
+  /**
+   * Checks if email exist in the system.
+   *
+   * @returns {Promise<never>}
+   * @private
+   */
+  async _checkIfEmailExist(email) {
+    let promiseArray = [];
+
+    promiseArray.push(new UserByEmailsCache({ emails: [email] }).fetch());
+    promiseArray.push(new UserIdentifiersByEmailsCache({ emails: [email] }).fetch());
+
+    let responseArray = await Promise.all(promiseArray),
+      userDetailsResponse = responseArray[0],
+      userIdentifiersResponse = responseArray[1];
+
+    // Check if email is not already associated with some different user.
+    if (userDetailsResponse.isFailure()) {
+      return Promise.reject(userDetailsResponse);
+    }
+
+    if (userIdentifiersResponse.isFailure()) {
+      return Promise.reject(userIdentifiersResponse);
+    }
+
+    const userId = userDetailsResponse.data[email].id,
+      userIdFromUserIdentifiersTable = userIdentifiersResponse.data[email].id;
+
+    // If userId already exists, email is already associated with some different user.
+    if (userId || userIdFromUserIdentifiersTable) {
+      return Promise.reject(
+        responseHelper.paramValidationError({
+          internal_error_identifier: 'a_s_vdoi_2',
+          api_error_identifier: 'invalid_params',
+          params_error_identifiers: ['already_associated_email'],
+          debug_options: {}
+        })
+      );
+    }
   }
 
   /**

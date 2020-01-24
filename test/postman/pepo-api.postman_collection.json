@@ -1,7 +1,6 @@
 {
 	"info": {
-		"_postman_id": "5d0819c2-84ba-4978-bbb2-c28857cefa5d",
-		"_postman_id": "e8015a78-8aca-4318-9da5-1aa132f4c976",
+		"_postman_id": "b4c71d50-4b83-499f-9c1a-687aee7f9de7",
 		"name": "pepo-api",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -1449,6 +1448,48 @@
 							"response": []
 						},
 						{
+							"name": "reply-history",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"type": "text",
+										"value": "application/x-www-form-urlencoded"
+									}
+								],
+								"body": {
+									"mode": "urlencoded",
+									"urlencoded": [
+										{
+											"key": "pagination_identifier",
+											"value": "eyJwYWdpbmF0aW9uX2lkIjoiMTAxMCJ9==",
+											"type": "text",
+											"disabled": true
+										}
+									]
+								},
+								"url": {
+									"raw": "{{api_server}}/api/v1/users/1445/reply-history",
+									"host": [
+										"{{api_server}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"users",
+										"1445",
+										"reply-history"
+									]
+								}
+							},
+							"response": []
+						},
+						{
 							"name": "email",
 							"protocolProfileBehavior": {
 								"disableBodyPruning": true
@@ -2484,6 +2525,41 @@
 							"response": []
 						},
 						{
+							"name": "video-merge-job-status",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"type": "text",
+										"value": "application/x-www-form-urlencoded"
+									}
+								],
+								"body": {
+									"mode": "urlencoded",
+									"urlencoded": []
+								},
+								"url": {
+									"raw": "{{api_server}}/api/v1/videos/merge-jobs/1",
+									"host": [
+										"{{api_server}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"videos",
+										"merge-jobs",
+										"1"
+									]
+								}
+							},
+							"response": []
+						},
+						{
 							"name": "share",
 							"request": {
 								"method": "GET",
@@ -2520,6 +2596,43 @@
 										"videos",
 										"1009",
 										"delete"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "merge-segments",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"value": "application/x-www-form-urlencoded",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "urlencoded",
+									"urlencoded": [
+										{
+											"key": "video_urls",
+											"value": "[{\"video_url\":\"https://s3.amazonaws.com/uassets.stagingpepo.com/pepo-staging1000/ua/videos/2239-6f6278fcfc2da06bd3dc6ffe976e4e28-original.mp4\"},{\"video_url\":\"https://s3.amazonaws.com/uassets.stagingpepo.com/pepo-staging1000/ua/videos/2239-7f34ca8bd69c664e6dfd5908d9a7856f-original.mp4\"},{\"video_url\":\"https://s3.amazonaws.com/uassets.stagingpepo.com/pepo-staging1000/ua/videos/2239-4cf5b1cafcfc32e7ed70adbc1426ce01-original.mp4\"}]",
+											"type": "text"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{api_server}}/api/v1/videos/merge-jobs",
+									"host": [
+										"{{api_server}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"videos",
+										"merge-jobs"
 									]
 								}
 							},

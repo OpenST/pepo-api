@@ -120,7 +120,7 @@ class UserUnMute extends ServiceBase {
       return Promise.reject(cacheResponse);
     }
 
-    let cachedData = cacheResponse.data[oThis.currentUserId];
+    const cachedData = cacheResponse.data[oThis.currentUserId];
 
     if (!cachedData[oThis.otherUserId]) {
       return Promise.reject(

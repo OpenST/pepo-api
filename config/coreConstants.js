@@ -197,6 +197,20 @@ class CoreConstants {
     return process.env.PA_FIAT_DB_MYSQL_PASSWORD;
   }
 
+  // User social connect db.
+
+  get SOCIAL_CONNECT_DB_MYSQL_HOST() {
+    return process.env.PA_SOCIAL_CONNECT_DB_MYSQL_HOST;
+  }
+
+  get SOCIAL_CONNECT_DB_MYSQL_USER() {
+    return process.env.PA_SOCIAL_CONNECT_DB_MYSQL_USER;
+  }
+
+  get SOCIAL_CONNECT_DB_MYSQL_PASSWORD() {
+    return process.env.PA_SOCIAL_CONNECT_DB_MYSQL_PASSWORD;
+  }
+
   // Admin db
   get ADMIN_DB_MYSQL_HOST() {
     return process.env.PA_ADMIN_DB_MYSQL_HOST;
@@ -296,6 +310,12 @@ class CoreConstants {
     return oThis.S3_USER_ASSETS_FOLDER + oThis.VIDEOS_S3_FOLDER;
   }
 
+  get S3_LOGS_FOLDER() {
+    const oThis = this;
+
+    return oThis.S3_AWS_MASTER_FOLDER + '/logs';
+  }
+
   get IMAGES_S3_FOLDER() {
     return '/images';
   }
@@ -373,12 +393,24 @@ class CoreConstants {
     return process.env.PA_TWITTER_AUTH_CALLBACK_ROUTE;
   }
 
-  get PR_IMAGE_RESIZE_FUNCTION() {
-    return process.env.PR_LAMBDA_IMAGE_RESIZE_FUNCTION;
+  get PA_PR_IMAGE_RESIZE_FUNCTION() {
+    return process.env.PA_PR_LAMBDA_IMAGE_RESIZE_FUNCTION;
   }
 
-  get PR_VIDEO_COMPRESS_FUNCTION() {
-    return process.env.PR_LAMBDA_VIDEO_COMPRESS_FUNCTION;
+  get PA_PR_VIDEO_COMPRESS_FUNCTION() {
+    return process.env.PA_PR_LAMBDA_VIDEO_COMPRESS_FUNCTION;
+  }
+
+  get GOOGLE_CLIENT_ID() {
+    return process.env.PA_GOOGLE_CLIENT_ID;
+  }
+
+  get GOOGLE_CLIENT_SECRET() {
+    return process.env.PA_GOOGLE_CLIENT_SECRET;
+  }
+
+  get PA_PR_VIDEO_MERGE_FUNCTION() {
+    return process.env.PA_PR_LAMBDA_VIDEO_MERGE_FUNCTION;
   }
 
   get PA_EMAIL_TOKENS_DECRIPTOR_KEY() {
@@ -468,6 +500,26 @@ class CoreConstants {
 
   get PA_TRACKER_ENDPOINT() {
     return process.env.PA_TRACKER_ENDPOINT;
+  }
+
+  get PA_APPLE_CLIENT_ID() {
+    return process.env.PA_APPLE_CLIENT_ID;
+  }
+
+  get PA_APPLE_REDIRECT_URI() {
+    return process.env.PA_APPLE_REDIRECT_URI;
+  }
+
+  get PA_APPLE_TEAM_ID() {
+    return process.env.PA_APPLE_TEAM_ID;
+  }
+
+  get PA_APPLE_KEY_IDENTIFIER() {
+    return process.env.PA_APPLE_KEY_IDENTIFIER;
+  }
+
+  get PA_APPLE_PRIVATE_KEY() {
+    return process.env.PA_APPLE_PRIVATE_KEY;
   }
 }
 

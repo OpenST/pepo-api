@@ -6,6 +6,7 @@ const rootPrefix = '../../../..',
     '/lib/cacheManagement/single/TwitterUserConnectionByUser1Pagination'),
   responseHelper = require(rootPrefix + '/lib/formatter/response');
 
+// TODO: To be deprecated. This service is not used now.
 /**
  * Class for user suggestion (A list of users who should be suggested to the current user).
  *

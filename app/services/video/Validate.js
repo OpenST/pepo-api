@@ -1,8 +1,5 @@
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
-  CommonValidators = require(rootPrefix + '/lib/validators/Common'),
-  basicHelper = require(rootPrefix + '/helpers/basic'),
-  logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   responseHelper = require(rootPrefix + '/lib/formatter/response');
 
 /**
@@ -42,8 +39,6 @@ class ValidateUploadVideoParams extends ServiceBase {
    * @private
    */
   async _asyncPerform() {
-    const oThis = this;
-
     return responseHelper.successWithData({});
   }
 }
