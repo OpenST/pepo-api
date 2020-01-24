@@ -85,7 +85,7 @@ class ShareDetails extends ServiceBase {
           debug_options: {
             inputChannelId: oThis.channelId,
             status: channelDetails.status,
-            creatorUserId: channelDetails.channelName
+            channelName: channelDetails.channelName
           }
         })
       );
@@ -93,29 +93,40 @@ class ShareDetails extends ServiceBase {
 
     oThis.channelName = channelDetails.channelName;
 
+    const promisesArray = [];
+
     // Fetch tagline if available.
     if (channelDetails.taglineId) {
-      const textCacheResp = await new TextsByIdCache({ ids: [channelDetails.taglineId] }).fetch();
-      if (textCacheResp.isFailure()) {
-        return Promise.reject(textCacheResp);
-      }
-
-      const videoDescription = textCacheResp.data[channelDetails.taglineId];
-
-      if (videoDescription && videoDescription.text) {
-        oThis.channelTagline = videoDescription.text;
-      }
+      promisesArray.push(new TextsByIdCache({ ids: [channelDetails.taglineId] }).fetch());
     }
 
     // Fetch channel image if available.
     if (channelDetails.imageId) {
-      const imageId = channelDetails.imageId;
-      const cacheRsp = await new ImageByIdCache({ ids: [imageId] }).fetch();
-      if (cacheRsp.isFailure()) {
-        return Promise.reject(cacheRsp);
-      }
+      promisesArray.push(new ImageByIdCache({ ids: [channelDetails.imageId] }).fetch());
+    }
 
-      oThis.channelImageUrl = cacheRsp.data[imageId].resolutions.original.url;
+    const promisesResponse = await Promise.all(promisesArray);
+
+    // Fetch tagline.
+    const textCacheResponse = promisesResponse[0];
+    if (textCacheResponse.isFailure()) {
+      return Promise.reject(textCacheResponse);
+    }
+
+    const channelTaglineObject = textCacheResponse.data[channelDetails.taglineId];
+    if (channelTaglineObject && channelTaglineObject.text) {
+      oThis.channelTagline = channelTaglineObject.text;
+    }
+
+    // Fetch channel image.
+    const imageCacheResponse = promisesResponse[1];
+    if (imageCacheResponse.isFailure()) {
+      return Promise.reject(imageCacheResponse);
+    }
+
+    const channelImageObject = imageCacheResponse.data[channelDetails.imageId];
+    if (CommonValidators.validateNonEmptyObject(channelImageObject)) {
+      oThis.channelImageUrl = channelImageObject.resolutions.original.url;
     }
   }
 

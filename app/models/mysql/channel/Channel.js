@@ -34,6 +34,7 @@ class ChannelModel extends ModelBase {
    * @param {number} dbRow.id
    * @param {number} dbRow.name
    * @param {number} dbRow.status
+   * @param {number} dbRow.tagline_id
    * @param {number} dbRow.description_id
    * @param {number} dbRow.image_id
    * @param {number} dbRow.created_at
@@ -49,6 +50,7 @@ class ChannelModel extends ModelBase {
       name: dbRow.name,
       status: channelConstants.statuses[dbRow.status],
       descriptionId: dbRow.description_id,
+      taglineId: dbRow.tagline_id,
       imageId: dbRow.image_id,
       createdAt: dbRow.created_at,
       updatedAt: dbRow.updated_at
@@ -112,7 +114,7 @@ class ChannelModel extends ModelBase {
       channelDetails = {};
 
     for (let index = 0; index < dbRows.length; index++) {
-      let channelId = dbRows[index].id;
+      const channelId = dbRows[index].id;
       channelDetails[channelId] = oThis.formatDbData(dbRows[index]);
       channelIds.push(channelId);
     }
