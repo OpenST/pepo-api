@@ -16,7 +16,11 @@ const v1ErrorConfig = {
     code: 'invalid',
     message: 'User Name can contain alphanumeric and underscore and should be min 1 characters and max 15 characters.'
   },
-
+  invalid_clientId: {
+    parameter: 'client_id',
+    code: 'invalid',
+    message: 'Invalid parameter client_id.'
+  },
   invalid_password: {
     parameter: 'password',
     code: 'invalid',

@@ -65,35 +65,6 @@ class VideoTag extends ModelBase {
   }
 
   /**
-   * Fetch video tags by video ids.
-   *
-   * @param {array} videoIds
-   *
-   * @returns {Promise<void>}
-   */
-  async fetchByVideoIds(videoIds) {
-    const oThis = this;
-
-    const dbRows = await oThis
-      .select('tag_id')
-      .where({ video_id: videoIds })
-      .fire();
-
-    const response = {};
-
-    for (let index = 0; index < videoIds.length; index++) {
-      response[videoIds[index]] = [];
-    }
-
-    for (let index = 0; index < dbRows.length; index++) {
-      const formatDbRow = oThis.formatDbData(dbRows[index]);
-      response[formatDbRow.videoId] = formatDbRow.tagId;
-    }
-
-    return response;
-  }
-
-  /**
    * Fetch video ids by tag ids.
    *
    * @param {array} tagIds

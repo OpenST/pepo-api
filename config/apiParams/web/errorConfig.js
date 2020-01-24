@@ -70,11 +70,6 @@ const webErrorConfig = {
     code: 'invalid',
     message: 'Invalid parameter status.'
   },
-  invalid_clientId: {
-    parameter: 'client_id',
-    code: 'invalid',
-    message: 'Invalid parameter client_id.'
-  },
   invalid_email: {
     parameter: 'email',
     code: 'invalid',
