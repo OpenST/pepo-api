@@ -134,8 +134,8 @@ class ChannelModel extends ModelBase {
     const promisesArray = [];
 
     if (params.ids) {
-      const ChannelByIds = require(rootPrefix + '/lib/cacheManagement/multi/ChannelByIds');
-      promisesArray.push(new ChannelByIds({ ids: params.ids }).clear());
+      const ChannelByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelByIds');
+      promisesArray.push(new ChannelByIdsCache({ ids: params.ids }).clear());
     }
 
     await Promise.all(promisesArray);

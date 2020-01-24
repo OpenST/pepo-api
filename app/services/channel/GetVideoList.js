@@ -3,7 +3,7 @@ const rootPrefix = '../../..',
   GetUserVideos = require(rootPrefix + '/lib/GetUsersVideoList'),
   GetTokenService = require(rootPrefix + '/app/services/token/Get'),
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
-  ChannelByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/ChannelByIds'),
+  ChannelByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelByIds'),
   VideoIdsByChannelIdPaginationCache = require(rootPrefix +
     '/lib/cacheManagement/single/VideoIdsByChannelIdPagination'),
   ReplyDetailsByEntityIdsAndEntityKindCache = require(rootPrefix +

@@ -64,10 +64,19 @@ class ChannelStatModel extends ModelBase {
   async getByChannelId(channelId) {
     const oThis = this;
 
-    return oThis
+    const dbRows = await oThis
       .select('*')
       .where({ channel_id: channelId })
       .fire();
+
+    const response = {};
+
+    for (let index = 0; index < dbRows.length; index++) {
+      const formatDbRow = oThis.formatDbData(dbRows[index]);
+      response[formatDbRow.channelId] = formatDbRow;
+    }
+
+    return response;
   }
 
   /**

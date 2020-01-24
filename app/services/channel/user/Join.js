@@ -3,7 +3,7 @@ const rootPrefix = '../../../..',
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   ChannelUserModel = require(rootPrefix + '/app/models/mysql/channel/ChannelUser'),
   ChannelStatModel = require(rootPrefix + '/app/models/mysql/channel/ChannelStat'),
-  ChannelByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/ChannelByIds'),
+  ChannelByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelByIds'),
   ChannelUserByUserIdAndChannelIdsCache = require(rootPrefix +
     '/lib/cacheManagement/multi/ChannelUserByUserIdAndChannelIds'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
