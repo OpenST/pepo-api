@@ -47,7 +47,7 @@ class ChannelUserModel extends ModelBase {
       id: dbRow.id,
       channelId: dbRow.channel_id,
       userId: dbRow.user_id,
-      status: channelUsersConstants.invertedStatuses[dbRow.status],
+      status: channelUsersConstants.statuses[dbRow.status],
       createdAt: dbRow.created_at,
       updatedAt: dbRow.updated_at
     };
@@ -110,15 +110,15 @@ class ChannelUserModel extends ModelBase {
   async fetchByUserIdAndChannelIds(userId, channelIds) {
     const oThis = this;
 
-    const response = {};
-
     const dbRows = await oThis
       .select('*')
       .where({ user_id: userId, channel_id: channelIds })
       .fire();
 
+    const response = {};
+
     for (let index = 0; index < dbRows.length; index++) {
-      const formatDbRow = oThis._formatDbData(dbRows[index]);
+      const formatDbRow = oThis.formatDbData(dbRows[index]);
       response[formatDbRow.channelId] = formatDbRow;
     }
 
