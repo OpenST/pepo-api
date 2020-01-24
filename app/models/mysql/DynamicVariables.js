@@ -56,16 +56,16 @@ class DynamicVariables extends ModelBase {
   /**
    * Get value for given constant kind.
    *
-   * @param {Array} Kinds
+   * @param {array} kinds
    *
    * @returns {Promise<{}>}
    */
   async getForKinds(kinds) {
     const oThis = this;
 
-    let constantKindIntArray = [];
-    for (let i = 0; i < kinds.length; i++) {
-      constantKindIntArray.push(dynamicVariablesConstants.invertedKinds[kinds[i]]);
+    const constantKindIntArray = [];
+    for (let index = 0; index < kinds.length; index++) {
+      constantKindIntArray.push(dynamicVariablesConstants.invertedKinds[kinds[index]]);
     }
 
     const dbRows = await oThis
@@ -73,9 +73,9 @@ class DynamicVariables extends ModelBase {
       .where({ kind: constantKindIntArray })
       .fire();
 
-    let responseData = {};
+    const responseData = {};
     for (let index = 0; index < dbRows.length; index++) {
-      let formattedRow = oThis.formatDbData(dbRows[index]);
+      const formattedRow = oThis.formatDbData(dbRows[index]);
       responseData[formattedRow.kind] = formattedRow;
     }
 
@@ -92,15 +92,19 @@ class DynamicVariables extends ModelBase {
    * @returns {Promise<void>}
    */
   static async flushCache(params) {
+    const promisesArray = [];
+
     if (params.kind) {
       const DynamicVariablesByKindCache = require(rootPrefix + '/lib/cacheManagement/multi/DynamicVariablesByKind');
-      await new DynamicVariablesByKindCache({ kinds: [params.kind] }).clear();
+      promisesArray.push(new DynamicVariablesByKindCache({ kinds: [params.kind] }).clear());
     }
 
     if (params.kinds) {
       const DynamicVariablesByKindCache = require(rootPrefix + '/lib/cacheManagement/multi/DynamicVariablesByKind');
-      await new DynamicVariablesByKindCache({ kinds: params.kinds }).clear();
+      promisesArray.push(new DynamicVariablesByKindCache({ kinds: params.kinds }).clear());
     }
+
+    await Promise.all(promisesArray);
   }
 }
 
