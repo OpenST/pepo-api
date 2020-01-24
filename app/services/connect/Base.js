@@ -158,9 +158,10 @@ class SocialConnectBase extends ServiceBase {
       let userIdentifiers = [],
         userUniqueElements = oThis._getSocialUserUniqueProperties();
 
-      // Email which can be set for user.
-      oThis.userEmailToSet = userUniqueElements.values[0];
       if (CommonValidators.validateNonEmptyObject(userUniqueElements)) {
+        // Email which can be set for user.
+        oThis.userEmailToSet = userUniqueElements.values[0];
+        
         const userIdentifiersByEmailsCacheRsp = await new UserIdentifiersByEmailsCache({
           emails: userUniqueElements.values
         }).fetch();
