@@ -44,6 +44,7 @@ class SocialConnectBase extends ServiceBase {
     oThis.isUserSignUp = true;
     oThis.serviceResp = null;
     oThis.inviterCodeObj = null;
+    oThis.userEmailToSet = null;
   }
 
   /**
@@ -157,6 +158,8 @@ class SocialConnectBase extends ServiceBase {
       let userIdentifiers = [],
         userUniqueElements = oThis._getSocialUserUniqueProperties();
 
+      // Email which can be set for user.
+      oThis.userEmailToSet = userUniqueElements.values[0];
       if (CommonValidators.validateNonEmptyObject(userUniqueElements)) {
         const userIdentifiersByEmailsCacheRsp = await new UserIdentifiersByEmailsCache({
           emails: userUniqueElements.values
@@ -194,6 +197,7 @@ class SocialConnectBase extends ServiceBase {
         if (oThis._sameSocialConnectUsed(userObj)) {
           // We have received same email from 2 different twitter accounts, then we would make 2 Pepo users
           oThis.isUserSignUp = true;
+          oThis.userEmailToSet = null;
         } else {
           // We have received same email from twitter and gmail, means its login for user
           oThis.isUserSignUp = false;
@@ -336,7 +340,7 @@ class SocialConnectBase extends ServiceBase {
    *
    * @private
    */
-  _appendInviteParams() {
+  _appendCommonSignupParams() {
     const oThis = this;
 
     let rp = {};
@@ -345,6 +349,7 @@ class SocialConnectBase extends ServiceBase {
     }
     rp.utmParams = oThis.utmParams;
     rp.inviteCode = oThis.inviteCode || '';
+    rp.userEmail = oThis.userEmailToSet;
     return rp;
   }
 

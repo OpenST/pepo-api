@@ -151,7 +151,7 @@ class TwitterConnect extends ConnectBase {
       secret: oThis.secret
     };
 
-    Object.assign(requestParams, oThis._appendInviteParams());
+    Object.assign(requestParams, oThis._appendCommonSignupParams());
     oThis.serviceResp = await new SignupTwitterClass(requestParams).perform();
 
     logger.log('End::Connect._performSignUp');
