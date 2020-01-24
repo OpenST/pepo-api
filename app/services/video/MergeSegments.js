@@ -11,7 +11,7 @@ const rootPrefix = '../../..',
   videoConstants = require(rootPrefix + '/lib/globalConstant/video'),
   bgJobConstants = require(rootPrefix + '/lib/globalConstant/bgJob'),
   entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
-  videoMergeJobConstants = require(rootPrefix + '/lib/globalConstant/videoMergeJob');
+  videoMergeJobConstants = require(rootPrefix + '/lib/globalConstant/big/videoMergeJob');
 
 /**
  * Class to merge video segments.

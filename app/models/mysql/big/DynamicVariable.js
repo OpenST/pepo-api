@@ -1,7 +1,7 @@
 const rootPrefix = '../../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
   databaseConstants = require(rootPrefix + '/lib/globalConstant/database'),
-  dynamicVariablesConstants = require(rootPrefix + '/lib/globalConstant/dynamicVariables');
+  dynamicVariablesConstants = require(rootPrefix + '/lib/globalConstant/big/dynamicVariables');
 
 // Declare variables.
 const dbName = databaseConstants.bigDbName;

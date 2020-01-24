@@ -12,7 +12,7 @@ const rootPrefix = '..',
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   videoDetailsConstants = require(rootPrefix + '/lib/globalConstant/videoDetail'),
   cronProcessesConstants = require(rootPrefix + '/lib/globalConstant/cronProcesses'),
-  dynamicVariablesConstants = require(rootPrefix + '/lib/globalConstant/dynamicVariables');
+  dynamicVariablesConstants = require(rootPrefix + '/lib/globalConstant/big/dynamicVariables');
 
 program.option('--cronProcessId <cronProcessId>', 'Cron table process ID').parse(process.argv);
 

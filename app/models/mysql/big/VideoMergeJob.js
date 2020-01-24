@@ -3,7 +3,7 @@ const rootPrefix = '../../../..',
   databaseConstants = require(rootPrefix + '/lib/globalConstant/database'),
   shortToLongUrl = require(rootPrefix + '/lib/shortToLongUrl'),
   videoConstants = require(rootPrefix + '/lib/globalConstant/video'),
-  videoMergeJobConstants = require(rootPrefix + '/lib/globalConstant/videoMergeJob');
+  videoMergeJobConstants = require(rootPrefix + '/lib/globalConstant/big/videoMergeJob');
 
 // Declare variables.
 const dbName = databaseConstants.bigDbName;
