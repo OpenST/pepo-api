@@ -233,7 +233,7 @@ class EnqueueVideosDataForWatermarkPurpose {
           sizeName,
           sizeDetails,
           contentType,
-          oThis.video.urlTemplate,
+          urlToUse,
           coreConstants.S3_USER_VIDEOS_FOLDER
         );
 
