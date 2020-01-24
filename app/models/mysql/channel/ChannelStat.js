@@ -55,18 +55,18 @@ class ChannelStatModel extends ModelBase {
   }
 
   /**
-   * Get channel stats by channel id.
+   * Get channel stats by channel ids.
    *
-   * @param {number} channelId
+   * @param {array<number>} channelIds
    *
    * @returns {Promise<any>}
    */
-  async getByChannelId(channelId) {
+  async getByChannelIds(channelIds) {
     const oThis = this;
 
     const dbRows = await oThis
       .select('*')
-      .where({ channel_id: channelId })
+      .where({ channel_id: channelIds })
       .fire();
 
     const response = {};
@@ -84,8 +84,16 @@ class ChannelStatModel extends ModelBase {
    *
    * @returns {Promise<*>}
    */
-  static async flushCache() {
-    // Do nothing.
+  static async flushCache(params) {
+    const promisesArray = [];
+
+    if (params.channelIds) {
+      const ChannelStatByChannelIdsCache = require(rootPrefix +
+        '/lib/cacheManagement/multi/channel/ChannelStatByChannelIds');
+      promisesArray.push(new ChannelStatByChannelIdsCache({ channelIds: params.channelIds }).clear());
+    }
+
+    await Promise.all(promisesArray);
   }
 }
 
