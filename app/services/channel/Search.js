@@ -1,5 +1,6 @@
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
+  ImageByIdCache = require(rootPrefix + '/lib/cacheManagement/multi/ImageByIds'),
   ChannelMultiCache = require(rootPrefix + '/lib/cacheManagement/multi/ChannelByIds'),
   ChannelNamePaginationCache = require(rootPrefix + '/lib/cacheManagement/single/ChannelNamePagination'),
   basicHelper = require(rootPrefix + '/helpers/basic'),
@@ -34,7 +35,10 @@ class ChannelSearch extends ServiceBase {
     oThis.limit = null;
     oThis.page = null;
     oThis.channelIds = [];
+    oThis.imageIds = [];
+    oThis.descriptionIds = [];
     oThis.channels = {};
+    oThis.imageMap = {};
   }
 
   /**
@@ -52,11 +56,14 @@ class ChannelSearch extends ServiceBase {
 
     await oThis._getChannels();
 
+    await oThis._fetchImages();
+
     const responseMetaData = oThis._finalResponse();
 
     return responseHelper.successWithData({
       channelIds: oThis.channelIds,
       channelsMap: oThis.channels,
+      imageMap: oThis.imageMap,
       meta: responseMetaData
     });
   }
@@ -125,6 +132,36 @@ class ChannelSearch extends ServiceBase {
     const channelsResponse = await new ChannelMultiCache({ ids: oThis.channelIds }).fetch();
 
     oThis.channels = channelsResponse.data;
+
+    for (let channelId in oThis.channels) {
+      let channel = oThis.channels[channelId];
+      oThis.imageIds.push(channel.imageId);
+      oThis.descriptionIds.push(channel.descriptionId);
+    }
+  }
+
+  /**
+   * Fetch images.
+   *
+   * @sets oThis.imageMap
+   *
+   * @return {Promise<*>}
+   * @private
+   */
+  async _fetchImages() {
+    const oThis = this;
+
+    if (oThis.imageIds.length < 1) {
+      return;
+    }
+
+    const cacheRsp = await new ImageByIdCache({ ids: oThis.imageIds }).fetch();
+
+    if (cacheRsp.isFailure()) {
+      return Promise.reject(cacheRsp);
+    }
+
+    oThis.imageMap = cacheRsp.data;
   }
 
   /**
