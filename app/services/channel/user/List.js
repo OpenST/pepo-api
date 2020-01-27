@@ -158,7 +158,7 @@ class ListChannelUser extends ServiceBase {
 
     oThis.userIds = cacheResponse.data.userIds || [];
     oThis.nextPaginationTimestamp = cacheResponse.data.nextPaginationTimestamp;
-    oThis.usersCount += oThis.userIds.length;
+    oThis.usersCount += oThis.userIds.length; //TODO:channels - Why += here?
   }
 
   /**
@@ -172,16 +172,16 @@ class ListChannelUser extends ServiceBase {
   async _fetchUsers() {
     const oThis = this;
 
-    if (oThis.userIds.length < 1) {
+    if (oThis.userIds.length === 0) {
       return;
     }
 
-    const usersByIdHashRes = await new UserMultiCache({ ids: oThis.userIds }).fetch();
-    if (usersByIdHashRes.isFailure()) {
-      return Promise.reject(usersByIdHashRes);
+    const cacheResponse = await new UserMultiCache({ ids: oThis.userIds }).fetch();
+    if (cacheResponse.isFailure()) {
+      return Promise.reject(cacheResponse);
     }
 
-    oThis.usersByIdMap = usersByIdHashRes.data;
+    oThis.usersByIdMap = cacheResponse.data;
 
     for (const id in oThis.usersByIdMap) {
       const userObj = oThis.usersByIdMap[id];
@@ -202,19 +202,18 @@ class ListChannelUser extends ServiceBase {
   async _fetchTokenUsers() {
     const oThis = this;
 
-    if (oThis.userIds.length < 1) {
-      return responseHelper.successWithData({});
+    if (oThis.userIds.length === 0) {
+      return;
     }
 
-    const tokenUsersByIdHashRes = await new TokenUserByUserIdsMultiCache({
+    const cacheResponse = await new TokenUserByUserIdsMultiCache({
       userIds: oThis.userIds
     }).fetch();
-
-    if (tokenUsersByIdHashRes.isFailure()) {
-      return Promise.reject(tokenUsersByIdHashRes);
+    if (cacheResponse.isFailure()) {
+      return Promise.reject(cacheResponse);
     }
 
-    oThis.tokenUsersByUserIdMap = tokenUsersByIdHashRes.data;
+    oThis.tokenUsersByUserIdMap = cacheResponse.data;
   }
 
   /**
@@ -228,16 +227,16 @@ class ListChannelUser extends ServiceBase {
   async _fetchImages() {
     const oThis = this;
 
-    if (oThis.imageIds.length < 1) {
+    if (oThis.imageIds.length === 0) {
       return;
     }
 
-    const cacheRsp = await new ImageByIdCache({ ids: oThis.imageIds }).fetch();
-    if (cacheRsp.isFailure()) {
-      return Promise.reject(cacheRsp);
+    const cacheResponse = await new ImageByIdCache({ ids: oThis.imageIds }).fetch();
+    if (cacheResponse.isFailure()) {
+      return Promise.reject(cacheResponse);
     }
 
-    oThis.imageMap = cacheRsp.data;
+    oThis.imageMap = cacheResponse.data;
   }
 
   /**
