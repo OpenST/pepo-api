@@ -67,12 +67,12 @@ class LeaveChannel extends ServiceBase {
   async _fetchChannel() {
     const oThis = this;
 
-    const channelByIdsCacheResponse = await new ChannelByIdsCache({ ids: [oThis.channelId] }).fetch();
-    if (channelByIdsCacheResponse.isFailure()) {
-      return Promise.reject(channelByIdsCacheResponse);
+    const cacheResponse = await new ChannelByIdsCache({ ids: [oThis.channelId] }).fetch();
+    if (cacheResponse.isFailure()) {
+      return Promise.reject(cacheResponse);
     }
 
-    const channelObj = channelByIdsCacheResponse.data[oThis.channelId];
+    const channelObj = cacheResponse.data[oThis.channelId];
 
     if (!CommonValidators.validateNonEmptyObject(channelObj) || channelObj.status !== channelConstants.activeStatus) {
       return Promise.reject(
@@ -98,16 +98,15 @@ class LeaveChannel extends ServiceBase {
   async _fetchChannelUser() {
     const oThis = this;
 
-    const channelUserCacheResponse = await new ChannelUserByUserIdAndChannelIdsCache({
+    const cacheResponse = await new ChannelUserByUserIdAndChannelIdsCache({
       userId: oThis.currentUser.id,
       channelIds: [oThis.channelId]
     }).fetch();
-
-    if (channelUserCacheResponse.isFailure()) {
-      return Promise.reject(channelUserCacheResponse);
+    if (cacheResponse.isFailure()) {
+      return Promise.reject(cacheResponse);
     }
 
-    oThis.channelUserObj = channelUserCacheResponse.data[oThis.channelId];
+    oThis.channelUserObj = cacheResponse.data[oThis.channelId];
 
     if (
       !CommonValidators.validateNonEmptyObject(oThis.channelUserObj) ||

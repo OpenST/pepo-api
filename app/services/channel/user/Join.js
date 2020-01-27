@@ -99,16 +99,16 @@ class JoinChannel extends ServiceBase {
   async _fetchChannelUser() {
     const oThis = this;
 
-    const channelUserCacheResponse = await new ChannelUserByUserIdAndChannelIdsCache({
+    const cacheResponse = await new ChannelUserByUserIdAndChannelIdsCache({
       userId: oThis.currentUser.id,
       channelIds: [oThis.channelId]
     }).fetch();
 
-    if (channelUserCacheResponse.isFailure()) {
-      return Promise.reject(channelUserCacheResponse);
+    if (cacheResponse.isFailure()) {
+      return Promise.reject(cacheResponse);
     }
 
-    oThis.channelUserObj = channelUserCacheResponse.data[oThis.channelId];
+    oThis.channelUserObj = cacheResponse.data[oThis.channelId];
 
     if (
       CommonValidators.validateNonEmptyObject(oThis.channelUserObj) &&
@@ -176,7 +176,7 @@ class JoinChannel extends ServiceBase {
         status: channelUsersConstants.invertedStatuses[channelUsersConstants.activeStatus]
       };
 
-      let insertResponse = await new ChannelUserModel()._insert(insertData);
+      let insertResponse = await new ChannelUserModel()._insert(insertData); // TODO:channels - _insert method does not exist.
       insertResponse = insertResponse.data;
 
       if (!insertResponse) {
