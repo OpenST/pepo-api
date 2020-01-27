@@ -39,7 +39,7 @@ class GetChannel extends ServiceBase {
     oThis.currentUser = params.current_user;
 
     oThis.channel = {};
-    oThis.channelStats = {};
+    oThis.channelStatsMap = {};
     oThis.currentUserChannelRelations = { [oThis.channelId]: {} };
 
     oThis.textIds = [];
@@ -149,7 +149,7 @@ class GetChannel extends ServiceBase {
   /**
    * Fetch channel stats.
    *
-   * @sets oThis.channelStats
+   * @sets oThis.channelStatsMap
    *
    * @returns {Promise<never>}
    * @private
@@ -162,16 +162,16 @@ class GetChannel extends ServiceBase {
       return Promise.reject(cacheResponse);
     }
 
-    oThis.channelStats = cacheResponse.data[oThis.channelId];
+    oThis.channelStatsMap = cacheResponse.data;
 
-    if (!CommonValidators.validateNonEmptyObject(oThis.channelStats)) {
+    if (!CommonValidators.validateNonEmptyObject(oThis.channelStatsMap[oThis.channelId])) {
       return Promise.reject(
         responseHelper.error({
           internal_error_identifier: 'a_s_c_g_2',
           api_error_identifier: 'entity_not_found',
           debug_options: {
             channelId: oThis.channelId,
-            channelStats: oThis.channelStats
+            channelStats: oThis.channelStatsMap[oThis.channelId]
           }
         })
       );
@@ -253,9 +253,9 @@ class GetChannel extends ServiceBase {
     );
 
     return {
-      [entityTypeConstants.channels]: channelObject,
+      [entityTypeConstants.channel]: channelObject,
       [entityTypeConstants.channelDetails]: channelDetailsObject,
-      [entityTypeConstants.channelStats]: oThis.channelStats,
+      [entityTypeConstants.channelStats]: oThis.channelStatsMap,
       [entityTypeConstants.currentUserChannelRelations]: oThis.currentUserChannelRelations,
       texts: oThis.texts,
       images: oThis.images,

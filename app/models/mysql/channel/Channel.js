@@ -146,7 +146,7 @@ class ChannelModel extends ModelBase {
       updatedAt: formattedChannelObject.updatedAt
     };
 
-    return { channelObject: channelObject, channelDetailsObject: channelDetailsObject };
+    return { channelObject: channelObject, channelDetailsObject: { [channelObject.id]: channelDetailsObject } };
   }
 
   /**
