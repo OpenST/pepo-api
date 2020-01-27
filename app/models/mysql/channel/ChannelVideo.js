@@ -34,7 +34,6 @@ class ChannelVideoModel extends ModelBase {
    * @param {number} dbRow.id
    * @param {number} dbRow.channel_id
    * @param {number} dbRow.video_id
-   * @param {number} dbRow.video_kind
    * @param {number} dbRow.status
    * @param {number} dbRow.created_at
    * @param {number} dbRow.updated_at
@@ -48,7 +47,6 @@ class ChannelVideoModel extends ModelBase {
       id: dbRow.id,
       channelId: dbRow.channel_id,
       videoId: dbRow.video_id,
-      videoKind: channelVideosConstants.kinds[dbRow.video_kind],
       status: channelVideosConstants.invertedStatuses[dbRow.status],
       createdAt: dbRow.created_at,
       updatedAt: dbRow.updated_at

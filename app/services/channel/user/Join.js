@@ -125,6 +125,22 @@ class JoinChannel extends ServiceBase {
         })
       );
     }
+
+    if (
+      CommonValidators.validateNonEmptyObject(oThis.channelUserObj) &&
+      oThis.channelUserObj.status === channelUsersConstants.blockedStatus
+    ) {
+      return Promise.reject(
+        responseHelper.error({
+          internal_error_identifier: 'a_s_c_u_j_fcu_2',
+          api_error_identifier: 'user_blocked_in_channel',
+          debug_options: {
+            channelId: oThis.channelId,
+            userId: oThis.currentUser.id
+          }
+        })
+      );
+    }
   }
 
   /**
