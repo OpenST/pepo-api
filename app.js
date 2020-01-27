@@ -180,6 +180,18 @@ app.use('/api/v1/search/top', sanitizer.sanitizeDynamicUrlParams, function(req, 
   return res.status(200).json(require(rootPrefix + '/dummy/searchTop.json'));
 });
 
+app.use('/api/v1/channels/1/videos', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  return res.status(200).json(require(rootPrefix + '/dummy/getChannelVideos.json'));
+});
+
+app.use('/api/v1/channels/1/share', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  return res.status(200).json(require(rootPrefix + '/dummy/getChannelShare.json'));
+});
+
+app.use('/api/v1/channels/1', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  return res.status(200).json(require(rootPrefix + '/dummy/getChannel.json'));
+});
+
 // Start Request logging. Placed below static and health check to reduce logs
 app.use(appendRequestDebugInfo, startRequestLogLine);
 

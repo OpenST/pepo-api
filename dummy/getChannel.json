@@ -1,0 +1,99 @@
+{
+  "success": true,
+  "data": {
+    "result_type": "channel",
+    "channel": {
+      "id": 1,
+      "name": "Channel One",
+      "status": "ACTIVE",
+      "uts": 1580135514
+    },
+    "channel_stats": {
+      "1": {
+        "id": 100000000,
+        "total_users": 2,
+        "total_videos": 10,
+        "uts": 1580135514
+      }
+    },
+    "channel_details": {
+      "1": {
+        "id": 1,
+        "description_id": 1,
+        "tagline_id": 2,
+        "tag_ids": [
+          10736
+        ],
+        "cover_image_id": 7694,
+        "uts": 1580135514
+      }
+    },
+    "images": {
+      "7694": {
+        "id": 7694,
+        "resolutions": {
+          "288w": {
+            "size": 22765,
+            "height": "512",
+            "width": "288",
+            "url": "https://dbvoeb7t6hffk.cloudfront.net/pepo-staging1000/ua/images/2217-d14dc1a782b7a735bcdd74e77e09582c-288w.jpg"
+          },
+          "original": {
+            "size": 39490,
+            "height": 1280,
+            "width": 720,
+            "url": "https://dbvoeb7t6hffk.cloudfront.net/pepo-staging1000/ua/images/2217-d14dc1a782b7a735bcdd74e77e09582c-original.jpg"
+          }
+        },
+        "status": "ACTIVE",
+        "uts": 1580135518
+      }
+    },
+    "texts": {
+      "1": {
+        "text": "Dummy description 1 - #testchannel #v1",
+        "includes": {
+          "#testchannel": {
+            "kind": "tags",
+            "id": 10736
+          },
+          "#v1": {
+            "kind": "tags",
+            "id": 10737
+          }
+        }
+      },
+      "2": {
+        "text": "Dummy tagline 1",
+        "includes": {}
+      }
+    },
+    "tags": {
+      "10736": {
+        "id": 10736,
+        "text": "testchannel",
+        "weight": "0",
+        "video_weight": "10",
+        "status": "ACTIVE",
+        "uts": 1580135776
+      },
+      "10737": {
+        "id": 10737,
+        "text": "v1",
+        "weight": "0",
+        "video_weight": "1",
+        "status": "ACTIVE",
+        "uts": 1580135462
+      }
+    },
+    "current_user_channel_relations": {
+      "1": {
+        "id": 1,
+        "is_admin": 1,
+        "is_member": 1,
+        "notification_status": 0,
+        "uts": 1580135462
+      }
+    }
+  }
+}
