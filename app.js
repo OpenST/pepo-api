@@ -192,6 +192,18 @@ app.use('/api/v1/channels/1', sanitizer.sanitizeDynamicUrlParams, function(req, 
   return res.status(200).json(require(rootPrefix + '/dummy/getChannel.json'));
 });
 
+app.use('/api/v1/channels/2/videos', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  return res.status(404).json(require(rootPrefix + '/dummy/getDeletedChannel.json'));
+});
+
+app.use('/api/v1/channels/2/share', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  return res.status(404).json(require(rootPrefix + '/dummy/getDeletedChannel.json'));
+});
+
+app.use('/api/v1/channels/2', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  return res.status(404).json(require(rootPrefix + '/dummy/getDeletedChannel.json'));
+});
+
 // Start Request logging. Placed below static and health check to reduce logs
 app.use(appendRequestDebugInfo, startRequestLogLine);
 
