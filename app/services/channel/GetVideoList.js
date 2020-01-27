@@ -168,10 +168,6 @@ class GetChannelVideoList extends ServiceBase {
       oThis.videosCount++;
       oThis.videoIds.push(videoDetail.videoId);
 
-      if (videoDetail.videoKind === channelVideosConstants.replyKind) {
-        oThis.replyVideoIds.push(videoDetail.videoId);
-      }
-
       oThis.nextPaginationTimestamp = videoDetail.createdAt;
     }
 
