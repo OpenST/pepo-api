@@ -46,6 +46,12 @@ class GetChannel extends ServiceBase {
     oThis.images = {};
   }
 
+  /**
+   * Async perform.
+   *
+   * @returns {Promise<*|result>}
+   * @private
+   */
   async _asyncPerform() {
     const oThis = this;
 
@@ -78,11 +84,11 @@ class GetChannel extends ServiceBase {
       return Promise.reject(cacheResponse);
     }
 
-    const channelDetails = cacheResponse.data[oThis.channelId];
+    oThis.channelDetails = cacheResponse.data[oThis.channelId];
 
     if (
-      !CommonValidators.validateNonEmptyObject(channelDetails) ||
-      channelDetails.status !== channelConstants.activeStatus
+      !CommonValidators.validateNonEmptyObject(oThis.channelDetails) ||
+      oThis.channelDetails.status !== channelConstants.activeStatus
     ) {
       return Promise.reject(
         responseHelper.error({
@@ -90,13 +96,11 @@ class GetChannel extends ServiceBase {
           api_error_identifier: 'entity_not_found',
           debug_options: {
             channelId: oThis.channelId,
-            channelDetails: channelDetails
+            channelDetails: oThis.channelDetails
           }
         })
       );
     }
-
-    oThis.channelDetails = channelDetails;
 
     if (oThis.channelDetails.taglineId) {
       oThis.textIds.push(oThis.channelDetails.taglineId);
@@ -127,22 +131,20 @@ class GetChannel extends ServiceBase {
       return Promise.reject(cacheResponse);
     }
 
-    const channelStats = cacheResponse.data[oThis.channelId];
+    oThis.channelStats = cacheResponse.data[oThis.channelId];
 
-    if (!CommonValidators.validateNonEmptyObject(channelStats)) {
+    if (!CommonValidators.validateNonEmptyObject(oThis.channelStats)) {
       return Promise.reject(
         responseHelper.error({
           internal_error_identifier: 'a_s_c_g_2',
           api_error_identifier: 'entity_not_found',
           debug_options: {
             channelId: oThis.channelId,
-            channelStats: channelStats
+            channelStats: oThis.channelStats
           }
         })
       );
     }
-
-    oThis.channelStats = channelStats;
   }
 
   /**
