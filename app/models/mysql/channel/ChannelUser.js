@@ -35,6 +35,7 @@ class ChannelUserModel extends ModelBase {
    * @param {number} dbRow.channel_id
    * @param {number} dbRow.user_id
    * @param {number} dbRow.role
+   * @param {number} dbRow.notification_status
    * @param {number} dbRow.status
    * @param {number} dbRow.created_at
    * @param {number} dbRow.updated_at
@@ -49,6 +50,7 @@ class ChannelUserModel extends ModelBase {
       channelId: dbRow.channel_id,
       userId: dbRow.user_id,
       role: channelUsersConstants.roles[dbRow.role],
+      notificationStatus: channelUsersConstants.notificationStatuses[dbRow.notification_status],
       status: channelUsersConstants.statuses[dbRow.status],
       createdAt: dbRow.created_at,
       updatedAt: dbRow.updated_at

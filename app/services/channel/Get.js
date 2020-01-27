@@ -213,9 +213,11 @@ class GetChannel extends ServiceBase {
     ) {
       oThis.currentUserChannelRelations[oThis.channelId] = {
         id: oThis.currentUser.id,
-        isAdmin: channelUserRelation.role === channelUsersConstants.adminRole,
+        isAdmin: Number(channelUserRelation.role === channelUsersConstants.adminRole),
         isMember: 1,
-        notificationStatus: 0,
+        notificationStatus: Number(
+          channelUserRelation.notificationStatus === channelUsersConstants.activeNotificationStatus
+        ),
         updatedAt: channelUserRelation.updatedAt
       };
     }
