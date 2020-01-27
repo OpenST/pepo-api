@@ -10,6 +10,7 @@ const upQuery =
   `id` bigint(20) NOT NULL AUTO_INCREMENT,\n\
   `channel_id` bigint(20) NOT NULL,\n\
   `user_id` bigint(20) NOT NULL,\n\
+  `role` tinyint(4) NOT NULL,\n\
   `status` tinyint(4) NOT NULL,\n\
   `created_at` int(11) NOT NULL,\n\
   `updated_at` int(11) NOT NULL,\n\

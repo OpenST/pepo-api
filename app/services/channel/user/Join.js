@@ -156,6 +156,7 @@ class JoinChannel extends ServiceBase {
       const insertData = {
         channel_id: oThis.channelId,
         user_id: oThis.currentUser.id,
+        role: channelUsersConstants.invertedRoles[channelUsersConstants.normalRole],
         status: channelUsersConstants.invertedStatuses[channelUsersConstants.activeStatus]
       };
 
