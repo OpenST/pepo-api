@@ -9,27 +9,6 @@ const rootPrefix = '../../..',
   entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
   responseEntityKey = require(rootPrefix + '/lib/globalConstant/responseEntityKey');
 
-/* Search channels */
-router.get('/search', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
-  req.decodedParams.apiName = apiName.getChannels;
-
-  const dataFormatterFunc = async function(serviceResponse) {
-    const wrapperFormatterRsp = await new FormatterComposer({
-      resultType: responseEntityKey.channelSearchResults,
-      entityKindToResponseKeyMap: {
-        [entityTypeConstants.channelList]: responseEntityKey.channelSearchResults,
-        [entityTypeConstants.imagesMap]: responseEntityKey.images,
-        [entityTypeConstants.channelListMeta]: responseEntityKey.meta
-      },
-      serviceData: serviceResponse.data
-    }).perform();
-
-    serviceResponse.data = wrapperFormatterRsp.data;
-  };
-
-  Promise.resolve(routeHelper.perform(req, res, next, '/channel/Search', 'r_a_v1_c_6', null, dataFormatterFunc));
-});
-
 /* Get channel details. */
 router.get('/:channel_id', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.channelDetail;
@@ -47,7 +26,7 @@ router.get('/:channel_id', sanitizer.sanitizeDynamicUrlParams, function(req, res
   //   serviceResponse.data = wrapperFormatterRsp.data;
   // };
 
-  // Promise.resolve(routeHelper.perform(req, res, next, '/channel/GetDetail', 'r_a_v1_c_1', null, dataFormatterFunc));
+  Promise.resolve(routeHelper.perform(req, res, next, '/channel/Get', 'r_a_v1_c_1', null, null));
 });
 
 /* Join channel by user. */
@@ -101,7 +80,7 @@ router.get('/:channel_id/videos', sanitizer.sanitizeDynamicUrlParams, function(r
   Promise.resolve(routeHelper.perform(req, res, next, '/channel/GetVideoList', 'r_a_v1_c_4', null, dataFormatterFunc));
 });
 
-/* Fetch videos of a channel. */
+/* Fetch users of a channel. */
 router.get('/:channel_id/users', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.channelUsers;
   req.decodedParams.channel_id = req.params.channel_id;
