@@ -56,6 +56,36 @@ class ChannelTagModel extends ModelBase {
   }
 
   /**
+   * Fetch active tag ids by channel ids.
+   *
+   * @param {array<number>} channelIds
+   *
+   * @returns {Promise<void>}
+   */
+  async fetchActiveChannelsTagsByChannelIds(channelIds) {
+    const oThis = this;
+
+    const dbRows = await oThis
+      .select('channel_id, tag_id') // TODO:channels - verify select query input.
+      .where({
+        channel_id: channelIds,
+        status: channelTagsConstants.invertedStatuses[channelTagsConstants.activeStatus] // TODO:channels - verify index.
+      })
+      .order_by('created_at asc')
+      .fire();
+
+    const response = {};
+
+    for (let index = 0; index < dbRows.length; index++) {
+      const formattedDbRow = oThis.formatDbData(dbRows[index]);
+      response[formattedDbRow.channelId] = response[formattedDbRow.channelId] || [];
+      response[formattedDbRow.channelId].push(formattedDbRow);
+    }
+
+    return response;
+  }
+
+  /**
    * Flush cache.
    *
    * @returns {Promise<*>}
