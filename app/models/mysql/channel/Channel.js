@@ -122,7 +122,15 @@ class ChannelModel extends ModelBase {
     return { channelIds: channelIds, channelDetails: channelDetails };
   }
 
-  getChannelAndChannelDetailsObject(formattedChannelObject) {
+  /**
+   * Get channel and channel details object.
+   *
+   * @param {object} formattedChannelObject
+   * @param {array<number>} [channelTagIds]
+   *
+   * @returns {{channelDetailsObject: *, channelObject: *}}
+   */
+  getChannelAndChannelDetailsObject(formattedChannelObject, channelTagIds) {
     const channelObject = {
       id: formattedChannelObject.id,
       name: formattedChannelObject.name,
@@ -131,14 +139,14 @@ class ChannelModel extends ModelBase {
     };
 
     const channelDetailsObject = {
-      taglineId: formattedChannelObject.taglineId ? formattedChannelObject.taglineId : null
+      taglineId: formattedChannelObject.taglineId ? formattedChannelObject.taglineId : null,
+      descriptionId: formattedChannelObject.descriptionId ? formattedChannelObject.descriptionId : null,
+      coverImageId: formattedChannelObject.coverImageId ? formattedChannelObject.coverImageId : null,
+      tagIds: channelTagIds ? channelTagIds : [],
+      updatedAt: formattedChannelObject.updatedAt
     };
 
-    if (formattedChannelObject.taglineId) {
-      channelDetailsObject.taglineId = formattedChannelObject.taglineId;
-    }
-
-    return { channelObject, channelDetailsObject };
+    return { channelObject: channelObject, channelDetailsObject: channelDetailsObject };
   }
 
   /**

@@ -1,12 +1,15 @@
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
+  ChannelModel = require(rootPrefix + '/app/models/mysql/channel/Channel'),
   FetchAssociatedEntities = require(rootPrefix + '/lib/FetchAssociatedEntities'),
   ChannelByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelByIds'),
+  ChannelTagByChannelIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelTagByChannelIds'),
   ChannelStatByChannelIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelStatByChannelIds'),
   ChannelUserByUserIdAndChannelIdsCache = require(rootPrefix +
     '/lib/cacheManagement/multi/channel/ChannelUserByUserIdAndChannelIds'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
+  entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
   channelConstants = require(rootPrefix + '/lib/globalConstant/channel/channels'),
   channelUsersConstants = require(rootPrefix + '/lib/globalConstant/channel/channelUsers');
 
@@ -35,15 +38,18 @@ class GetChannel extends ServiceBase {
     oThis.channelId = params.channel_id;
     oThis.currentUser = params.current_user;
 
-    oThis.channelDetails = {};
+    oThis.channel = {};
     oThis.channelStats = {};
-    oThis.currentUserChannelRelations = {};
+    oThis.currentUserChannelRelations = { [oThis.channelId]: {} };
 
     oThis.textIds = [];
     oThis.texts = {};
 
     oThis.imageIds = [];
     oThis.images = {};
+
+    oThis.tagIds = [];
+    oThis.tags = {};
   }
 
   /**
@@ -56,6 +62,8 @@ class GetChannel extends ServiceBase {
     const oThis = this;
 
     await oThis._fetchAndValidateChannel();
+
+    await oThis._fetchChannelTagIds();
 
     const promisesArray = [
       oThis._fetchChannelStats(),
@@ -71,7 +79,7 @@ class GetChannel extends ServiceBase {
   /**
    * Fetch and validate channel.
    *
-   * @sets oThis.channelDetails, oThis.textIds, oThis.imageIds
+   * @sets oThis.channel, oThis.textIds, oThis.imageIds
    *
    * @returns {Promise<never>}
    * @private
@@ -84,11 +92,11 @@ class GetChannel extends ServiceBase {
       return Promise.reject(cacheResponse);
     }
 
-    oThis.channelDetails = cacheResponse.data[oThis.channelId];
+    oThis.channel = cacheResponse.data[oThis.channelId];
 
     if (
-      !CommonValidators.validateNonEmptyObject(oThis.channelDetails) ||
-      oThis.channelDetails.status !== channelConstants.activeStatus
+      !CommonValidators.validateNonEmptyObject(oThis.channel) ||
+      oThis.channel.status !== channelConstants.activeStatus
     ) {
       return Promise.reject(
         responseHelper.error({
@@ -96,22 +104,45 @@ class GetChannel extends ServiceBase {
           api_error_identifier: 'entity_not_found',
           debug_options: {
             channelId: oThis.channelId,
-            channelDetails: oThis.channelDetails
+            channelDetails: oThis.channel
           }
         })
       );
     }
 
-    if (oThis.channelDetails.taglineId) {
-      oThis.textIds.push(oThis.channelDetails.taglineId);
+    if (oThis.channel.taglineId) {
+      oThis.textIds.push(oThis.channel.taglineId);
     }
 
-    if (oThis.channelDetails.descriptionId) {
-      oThis.textIds.push(oThis.channelDetails.descriptionId);
+    if (oThis.channel.descriptionId) {
+      oThis.textIds.push(oThis.channel.descriptionId);
     }
 
-    if (oThis.channelDetails.imageId) {
-      oThis.imageIds.push(oThis.channelDetails.imageId);
+    if (oThis.channel.coverImageId) {
+      oThis.imageIds.push(oThis.channel.coverImageId);
+    }
+  }
+
+  /**
+   * Fetch channel tag ids.
+   *
+   * @sets oThis.tagIds
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _fetchChannelTagIds() {
+    const oThis = this;
+
+    const cacheResponse = await new ChannelTagByChannelIdsCache({ channelIds: [oThis.channelId] }).fetch();
+    if (cacheResponse.isFailure()) {
+      return Promise.reject(cacheResponse);
+    }
+
+    const channelTagsArray = cacheResponse.data[oThis.channelId];
+    for (let index = 0; index < channelTagsArray.length; index++) {
+      const channelTag = channelTagsArray[index];
+      oThis.tagIds.push(channelTag.tagId);
     }
   }
 
@@ -158,8 +189,6 @@ class GetChannel extends ServiceBase {
   async _fetchUserChannelRelations() {
     const oThis = this;
 
-    oThis.currentUserChannelRelations = { [oThis.channelId]: { is_member: 0, has_muted: 0, has_blocked: 0 } };
-
     const userId = oThis.currentUser.id;
     const cacheResponse = await new ChannelUserByUserIdAndChannelIdsCache({
       userId: userId,
@@ -174,7 +203,13 @@ class GetChannel extends ServiceBase {
       CommonValidators.validateNonEmptyObject(channelUserRelation) &&
       channelUserRelation.status === channelUsersConstants.activeStatus
     ) {
-      oThis.currentUserChannelRelations[oThis.channelId].is_member = 1;
+      oThis.currentUserChannelRelations[oThis.channelId] = {
+        id: oThis.currentUser.id,
+        is_admin: channelUserRelation.role === channelUsersConstants.adminRole,
+        is_member: 1,
+        notification_status: 0,
+        updatedAt: channelUserRelation.updatedAt
+      };
     }
   }
 
@@ -191,7 +226,8 @@ class GetChannel extends ServiceBase {
 
     const associatedEntitiesResponse = await new FetchAssociatedEntities({
       textIds: oThis.textIds,
-      imageIds: oThis.imageIds
+      imageIds: oThis.imageIds,
+      tagIds: oThis.tagIds
     }).perform();
     if (associatedEntitiesResponse.isFailure()) {
       return Promise.reject(associatedEntitiesResponse);
@@ -199,6 +235,7 @@ class GetChannel extends ServiceBase {
 
     oThis.images = associatedEntitiesResponse.data.imagesMap;
     oThis.texts = associatedEntitiesResponse.data.textMap;
+    oThis.tags = associatedEntitiesResponse.data.tags;
   }
 
   /**
@@ -210,11 +247,19 @@ class GetChannel extends ServiceBase {
   _prepareResponse() {
     const oThis = this;
 
+    const { channelObject, channelDetailsObject } = new ChannelModel().getChannelAndChannelDetailsObject(
+      oThis.channel,
+      oThis.tagIds
+    );
+
     return {
-      channel: oThis.channelDetails,
-      channelStats: oThis.channelStats,
+      [entityTypeConstants.channels]: channelObject,
+      [entityTypeConstants.channelDetails]: channelDetailsObject,
+      [entityTypeConstants.channelStats]: oThis.channelStats,
+      [entityTypeConstants.currentUserChannelRelations]: oThis.currentUserChannelRelations,
       texts: oThis.texts,
-      images: oThis.images
+      images: oThis.images,
+      tags: oThis.tags
     };
   }
 }
