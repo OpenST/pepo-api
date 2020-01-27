@@ -262,12 +262,12 @@ class GetChannel extends ServiceBase {
 
     return {
       [entityTypeConstants.channel]: channelObject,
-      [entityTypeConstants.channelDetails]: channelDetailsObject,
-      [entityTypeConstants.channelStats]: oThis.channelStatsMap,
-      [entityTypeConstants.currentUserChannelRelations]: oThis.currentUserChannelRelations,
+      [entityTypeConstants.channelDetailsMap]: channelDetailsObject,
+      [entityTypeConstants.channelStatsMap]: oThis.channelStatsMap,
+      [entityTypeConstants.currentUserChannelRelationsMap]: oThis.currentUserChannelRelations,
       texts: oThis.texts,
-      images: oThis.images,
-      tags: oThis.tags
+      [entityTypeConstants.imagesMap]: oThis.images,
+      [entityTypeConstants.tagsMap]: oThis.tags
     };
   }
 }
