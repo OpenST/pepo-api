@@ -14,19 +14,24 @@ router.get('/:channel_id', sanitizer.sanitizeDynamicUrlParams, function(req, res
   req.decodedParams.apiName = apiName.getChannelDetails;
   req.decodedParams.channel_id = req.params.channel_id;
 
-  // const dataFormatterFunc = async function(serviceResponse) {
-  //   const wrapperFormatterRsp = await new FormatterComposer({
-  //     resultType: responseEntityKey.tag,
-  //     entityKindToResponseKeyMap: {
-  //       [entityTypeConstants.tag]: responseEntityKey.tag
-  //     },
-  //     serviceData: serviceResponse.data
-  //   }).perform();
-  //
-  //   serviceResponse.data = wrapperFormatterRsp.data;
-  // };
+  const dataFormatterFunc = async function(serviceResponse) {
+    const wrapperFormatterRsp = await new FormatterComposer({
+      resultType: responseEntityKey.channel,
+      entityKindToResponseKeyMap: {
+        [entityTypeConstants.channel]: responseEntityKey.channel,
+        [entityTypeConstants.channelDetailsMap]: responseEntityKey.channelDetails,
+        [entityTypeConstants.channelStatsMap]: responseEntityKey.channelStats,
+        [entityTypeConstants.currentUserChannelRelationsMap]: responseEntityKey.currentUserChannelRelations,
+        [entityTypeConstants.tagsMap]: responseEntityKey.tags,
+        [entityTypeConstants.imagesMap]: responseEntityKey.images // TODO:channels - add texts entity.
+      },
+      serviceData: serviceResponse.data
+    }).perform();
 
-  Promise.resolve(routeHelper.perform(req, res, next, '/channel/Get', 'r_a_v1_c_1', null, null));
+    serviceResponse.data = wrapperFormatterRsp.data;
+  };
+
+  Promise.resolve(routeHelper.perform(req, res, next, '/channel/Get', 'r_a_v1_c_1', null, dataFormatterFunc));
 });
 
 /* Join channel by user. */
