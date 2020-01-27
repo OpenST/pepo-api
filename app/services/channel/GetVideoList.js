@@ -6,15 +6,10 @@ const rootPrefix = '../../..',
   ChannelByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelByIds'),
   VideoIdsByChannelIdPaginationCache = require(rootPrefix +
     '/lib/cacheManagement/single/VideoIdsByChannelIdPagination'),
-  ReplyDetailsByEntityIdsAndEntityKindCache = require(rootPrefix +
-    '/lib/cacheManagement/multi/ReplyDetailsByEntityIdsAndEntityKind'),
-  logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination'),
   entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
-  replyDetailConstants = require(rootPrefix + '/lib/globalConstant/replyDetail'),
-  channelsConstants = require(rootPrefix + '/lib/globalConstant/channel/channels'),
-  channelVideosConstants = require(rootPrefix + '/lib/globalConstant/channel/channelVideos');
+  channelsConstants = require(rootPrefix + '/lib/globalConstant/channel/channels');
 
 /**
  * Class for user video details service.
@@ -54,8 +49,6 @@ class GetChannelVideoList extends ServiceBase {
     oThis.videoDetails = [];
     oThis.tokenDetails = {};
     oThis.usersVideosMap = {};
-    oThis.replyDetailIds = [];
-    oThis.replyVideoIds = [];
   }
 
   /**
@@ -170,40 +163,6 @@ class GetChannelVideoList extends ServiceBase {
 
       oThis.nextPaginationTimestamp = videoDetail.createdAt;
     }
-
-    // If there are replies in the videos selected from video tags then fetch reply detail ids
-    if (oThis.replyVideoIds.length > 0) {
-      await oThis._fetchReplyDetailIds();
-    }
-  }
-
-  /**
-   * Fetch reply detail ids.
-   *
-   * @sets oThis.replyDetailIds
-   *
-   * @returns {Promise<never>}
-   * @private
-   */
-  async _fetchReplyDetailIds() {
-    const oThis = this;
-
-    const cacheResponse = await new ReplyDetailsByEntityIdsAndEntityKindCache({
-      entityIds: oThis.replyVideoIds,
-      entityKind: replyDetailConstants.videoEntityKind
-    }).fetch();
-    if (cacheResponse.isFailure()) {
-      logger.error('Error while fetching reply detail data.');
-
-      return Promise.reject(cacheResponse);
-    }
-
-    for (const vid in cacheResponse.data) {
-      const rdId = cacheResponse.data[vid].id;
-      if (rdId) {
-        oThis.replyDetailIds.push(rdId);
-      }
-    }
   }
 
   /**
@@ -263,7 +222,6 @@ class GetChannelVideoList extends ServiceBase {
     const userVideosObj = new GetUserVideos({
       currentUserId: oThis.currentUser.id,
       videoIds: oThis.videoIds,
-      replyDetailIds: oThis.replyDetailIds,
       isAdmin: false,
       filterUserBlockedReplies: 1
     });
@@ -312,11 +270,8 @@ class GetChannelVideoList extends ServiceBase {
       [entityTypeConstants.userProfilesMap]: oThis.usersVideosMap.userProfilesMap,
       [entityTypeConstants.currentUserUserContributionsMap]: oThis.usersVideosMap.currentUserUserContributionsMap,
       [entityTypeConstants.currentUserVideoContributionsMap]: oThis.usersVideosMap.currentUserVideoContributionsMap,
-      [entityTypeConstants.currentUserReplyDetailContributionsMap]:
-        oThis.usersVideosMap.currentUserReplyDetailContributionsMap,
       [entityTypeConstants.userProfileAllowedActions]: oThis.usersVideosMap.userProfileAllowedActions,
       [entityTypeConstants.pricePointsMap]: oThis.usersVideosMap.pricePointsMap,
-      [entityTypeConstants.replyDetailsMap]: oThis.usersVideosMap.replyDetailsMap,
       usersByIdMap: oThis.usersVideosMap.usersByIdMap,
       userStat: oThis.usersVideosMap.userStat,
       tags: oThis.usersVideosMap.tags,
