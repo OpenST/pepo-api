@@ -1,6 +1,8 @@
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
+  TextsByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TextsByIds'),
+  ImageByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/ImageByIds'),
   ChannelByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelByIds'),
   ChannelStatByChannelIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelStatByChannelIds'),
   ChannelUserByUserIdAndChannelIdsCache = require(rootPrefix +
@@ -37,6 +39,12 @@ class GetChannel extends ServiceBase {
     oThis.channelDetails = {};
     oThis.channelStats = {};
     oThis.currentUserChannelRelations = {};
+
+    oThis.textIds = [];
+    oThis.texts = {};
+
+    oThis.imageIds = [];
+    oThis.images = {};
   }
 
   async _asyncPerform() {
@@ -44,15 +52,22 @@ class GetChannel extends ServiceBase {
 
     await oThis._fetchAndValidateChannel();
 
-    const promisesArray = [oThis._fetchChannelStats(), oThis._fetchUserChannelRelations()];
+    const promisesArray = [
+      oThis._fetchChannelStats(),
+      oThis._fetchUserChannelRelations(),
+      oThis._fetchTexts(),
+      oThis._fetchImages()
+    ];
 
     await Promise.all(promisesArray);
+
+    return responseHelper.successWithData(oThis._prepareResponse());
   }
 
   /**
    * Fetch and validate channel.
    *
-   * @sets oThis.channelDetails
+   * @sets oThis.channelDetails, oThis.textIds, oThis.imageIds
    *
    * @returns {Promise<never>}
    * @private
@@ -84,6 +99,18 @@ class GetChannel extends ServiceBase {
     }
 
     oThis.channelDetails = channelDetails;
+
+    if (oThis.channelDetails.taglineId) {
+      oThis.textIds.push(oThis.channelDetails.taglineId);
+    }
+
+    if (oThis.channelDetails.descriptionId) {
+      oThis.textIds.push(oThis.channelDetails.descriptionId);
+    }
+
+    if (oThis.channelDetails.imageId) {
+      oThis.imageIds.push(oThis.channelDetails.imageId);
+    }
   }
 
   /**
@@ -153,6 +180,69 @@ class GetChannel extends ServiceBase {
     ) {
       oThis.currentUserChannelRelations[oThis.channelId].is_member = 1;
     }
+  }
+
+  /**
+   * Fetch texts.
+   *
+   * @sets oThis.texts
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _fetchTexts() {
+    const oThis = this;
+
+    if (oThis.textIds.length === 0) {
+      return;
+    }
+
+    const cacheResponse = await new TextsByIdsCache({ ids: [oThis.textIds] }).fetch();
+    if (cacheResponse.isFailure()) {
+      return Promise.reject(cacheResponse);
+    }
+
+    oThis.texts = cacheResponse.data;
+  }
+
+  /**
+   * Fetch images.
+   *
+   * @sets oThis.images
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _fetchImages() {
+    const oThis = this;
+
+    if (oThis.imageIds.length === 0) {
+      return;
+    }
+
+    const cacheResponse = await new ImageByIdsCache({ ids: oThis.imageIds }).fetch();
+    if (cacheResponse.isFailure()) {
+      return Promise.reject(cacheResponse);
+    }
+
+    oThis.images = cacheResponse.data;
+  }
+
+  /**
+   * Prepare response.
+   *
+   * @returns {{images: *, texts: *, channel: *, channelStats: *}}
+   * @private
+   */
+  _prepareResponse() {
+    const oThis = this;
+
+    return {
+      channel: oThis.channelDetails,
+      channelStats: oThis.channelStats,
+      texts: oThis.texts,
+      images: oThis.images
+    };
   }
 }
 
