@@ -172,6 +172,11 @@ app.use(express.static(path.join(__dirname, 'public')));
 // Health checker
 app.use('/health-checker', elbHealthCheckerRoute);
 
+/* Dummy routes */
+app.use('/api/v1/search/channels', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  return res.status(200).json(require(rootPrefix + '/dummy/searchChannel.json'));
+});
+
 // Start Request logging. Placed below static and health check to reduce logs
 app.use(appendRequestDebugInfo, startRequestLogLine);
 
