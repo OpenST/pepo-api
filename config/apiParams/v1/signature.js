@@ -622,6 +622,19 @@ const v1Signature = {
     ],
     optional: []
   },
+  [apiName.getChannelDetails]: {
+    mandatory: [
+      {
+        parameter: 'channel_id',
+        validatorMethods: ['validateNonZeroInteger']
+      },
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      }
+    ],
+    optional: []
+  },
   [apiName.getTags]: {
     mandatory: [],
     optional: [

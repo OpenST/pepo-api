@@ -11,7 +11,7 @@ const rootPrefix = '../../..',
 
 /* Get channel details. */
 router.get('/:channel_id', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
-  req.decodedParams.apiName = apiName.channelDetail;
+  req.decodedParams.apiName = apiName.getChannelDetails;
   req.decodedParams.channel_id = req.params.channel_id;
 
   // const dataFormatterFunc = async function(serviceResponse) {

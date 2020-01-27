@@ -33,7 +33,7 @@ class GetChannel extends ServiceBase {
     const oThis = this;
 
     oThis.channelId = params.channel_id;
-    oThis.currentUser = params.current_user || {};
+    oThis.currentUser = params.current_user;
 
     oThis.channelDetails = {};
     oThis.channelStats = {};
@@ -155,10 +155,6 @@ class GetChannel extends ServiceBase {
    */
   async _fetchUserChannelRelations() {
     const oThis = this;
-
-    if (!oThis.currentUser.id) {
-      return;
-    }
 
     oThis.currentUserChannelRelations = { [oThis.channelId]: { is_member: 0, has_muted: 0, has_blocked: 0 } };
 
