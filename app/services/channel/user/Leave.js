@@ -138,6 +138,7 @@ class LeaveChannel extends ServiceBase {
     const oThis = this;
 
     const updateParams = {
+      role: channelUsersConstants.invertedRoles[channelUsersConstants.normalRole],
       status: channelUsersConstants.invertedStatuses[channelUsersConstants.inactiveStatus]
     };
 
