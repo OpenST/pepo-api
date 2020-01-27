@@ -40,7 +40,13 @@ class GetChannel extends ServiceBase {
 
     oThis.channel = {};
     oThis.channelStatsMap = {};
-    oThis.currentUserChannelRelations = { [oThis.channelId]: {} };
+    oThis.currentUserChannelRelations[oThis.channelId] = {
+      id: oThis.currentUser.id,
+      isAdmin: 0,
+      isMember: 0,
+      notificationStatus: 0,
+      updatedAt: 0
+    };
 
     oThis.textIds = [];
     oThis.texts = {};
@@ -205,9 +211,9 @@ class GetChannel extends ServiceBase {
     ) {
       oThis.currentUserChannelRelations[oThis.channelId] = {
         id: oThis.currentUser.id,
-        is_admin: channelUserRelation.role === channelUsersConstants.adminRole,
-        is_member: 1,
-        notification_status: 0,
+        isAdmin: channelUserRelation.role === channelUsersConstants.adminRole,
+        isMember: 1,
+        notificationStatus: 0,
         updatedAt: channelUserRelation.updatedAt
       };
     }
