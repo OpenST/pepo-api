@@ -82,6 +82,9 @@ class ChannelStatModel extends ModelBase {
   /**
    * Flush cache.
    *
+   * @param {object} params
+   * @param {array<number>} [params.channelIds]
+   *
    * @returns {Promise<*>}
    */
   static async flushCache(params) {

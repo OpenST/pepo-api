@@ -130,23 +130,26 @@ class ChannelUserModel extends ModelBase {
   /**
    * Flush cache.
    *
+   * @param {object} params
+   * @param {number} [params.channelId]
+   * @param {number} [params.userId]
+   *
    * @returns {Promise<*>}
    */
   static async flushCache(params) {
     const promisesArray = [];
 
-    const ChannelUsersByChannelIdPaginationCache = require(rootPrefix +
-      '/lib/cacheManagement/single/UserIdsByChannelIdPagination.js');
     if (params.channelId) {
+      const ChannelUsersByChannelIdPaginationCache = require(rootPrefix +
+        '/lib/cacheManagement/single/UserIdsByChannelIdPagination.js');
       promisesArray.push(new ChannelUsersByChannelIdPaginationCache({ channelId: params.channelId }).clear());
     }
 
-    const cacheByUserIdAndChannelIds = require(rootPrefix +
-      '/lib/cacheManagement/multi/channel/ChannelUserByUserIdAndChannelIds');
-
     if (params.userId && params.channelId) {
+      const ChannelUserByUserIdAndChannelIdsCache = require(rootPrefix +
+        '/lib/cacheManagement/multi/channel/ChannelUserByUserIdAndChannelIds');
       promisesArray.push(
-        new cacheByUserIdAndChannelIds({ userId: params.userId, channelIds: [params.channelId] }).clear()
+        new ChannelUserByUserIdAndChannelIdsCache({ userId: params.userId, channelIds: [params.channelId] }).clear()
       );
     }
 
