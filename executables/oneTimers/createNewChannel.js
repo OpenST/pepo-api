@@ -238,7 +238,7 @@ class CreateNewChannel {
 
     // Update channel table.
     await new ChannelModel()
-      .update({ image_id: imageData.insertId })
+      .update({ cover_image_id: imageData.insertId })
       .where({ id: oThis.channelId })
       .fire();
 

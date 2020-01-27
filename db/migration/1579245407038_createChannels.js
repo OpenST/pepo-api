@@ -12,7 +12,7 @@ const upQuery =
   `status` tinyint(4) NOT NULL,\
   `tagline_id` bigint(20) DEFAULT NULL,\n\
   `description_id` bigint(20) DEFAULT NULL,\n\
-  `image_id` bigint(20) DEFAULT NULL,\n\
+  `cover_image_id` bigint(20) DEFAULT NULL,\n\
   `created_at` int(11) NOT NULL,\
   `updated_at` int(11) NOT NULL,\
   PRIMARY KEY (`id`),\

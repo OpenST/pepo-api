@@ -36,7 +36,7 @@ class ChannelModel extends ModelBase {
    * @param {number} dbRow.status
    * @param {number} dbRow.tagline_id
    * @param {number} dbRow.description_id
-   * @param {number} dbRow.image_id
+   * @param {number} dbRow.cover_image_id
    * @param {number} dbRow.created_at
    * @param {number} dbRow.updated_at
    *
@@ -51,7 +51,7 @@ class ChannelModel extends ModelBase {
       status: channelConstants.statuses[dbRow.status],
       descriptionId: dbRow.description_id,
       taglineId: dbRow.tagline_id,
-      imageId: dbRow.image_id,
+      coverImageId: dbRow.cover_image_id,
       createdAt: dbRow.created_at,
       updatedAt: dbRow.updated_at
     };
@@ -120,6 +120,25 @@ class ChannelModel extends ModelBase {
     }
 
     return { channelIds: channelIds, channelDetails: channelDetails };
+  }
+
+  getChannelAndChannelDetailsObject(formattedChannelObject) {
+    const channelObject = {
+      id: formattedChannelObject.id,
+      name: formattedChannelObject.name,
+      status: formattedChannelObject.status,
+      updatedAt: formattedChannelObject.updatedAt
+    };
+
+    const channelDetailsObject = {
+      taglineId: formattedChannelObject.taglineId ? formattedChannelObject.taglineId : null
+    };
+
+    if (formattedChannelObject.taglineId) {
+      channelDetailsObject.taglineId = formattedChannelObject.taglineId;
+    }
+
+    return { channelObject, channelDetailsObject };
   }
 
   /**

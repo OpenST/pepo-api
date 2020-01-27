@@ -144,7 +144,7 @@ class JoinChannel extends ServiceBase {
   }
 
   /**
-   * Add or Update channel user as active.
+   * Add or update channel user as active.
    *
    * @sets oThis.channelUserObj
    *

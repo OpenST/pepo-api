@@ -138,7 +138,7 @@ class ChannelSearch extends ServiceBase {
     for (const channelId in oThis.channels) {
       const channel = oThis.channels[channelId];
       if (channel.imageId) {
-        oThis.imageIds.push(channel.imageId);
+        oThis.imageIds.push(channel.coverImageId);
       }
 
       if (channel.descriptionId) {

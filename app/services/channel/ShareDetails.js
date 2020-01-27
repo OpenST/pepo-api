@@ -102,7 +102,7 @@ class ShareDetails extends ServiceBase {
 
     // Fetch channel image if available.
     if (channelDetails.imageId) {
-      promisesArray.push(new ImageByIdCache({ ids: [channelDetails.imageId] }).fetch());
+      promisesArray.push(new ImageByIdCache({ ids: [channelDetails.coverImageId] }).fetch());
     }
 
     const promisesResponse = await Promise.all(promisesArray);
