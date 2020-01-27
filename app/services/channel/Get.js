@@ -40,12 +40,14 @@ class GetChannel extends ServiceBase {
 
     oThis.channel = {};
     oThis.channelStatsMap = {};
-    oThis.currentUserChannelRelations[oThis.channelId] = {
-      id: oThis.currentUser.id,
-      isAdmin: 0,
-      isMember: 0,
-      notificationStatus: 0,
-      updatedAt: 0
+    oThis.currentUserChannelRelations = {
+      [oThis.channelId]: {
+        id: oThis.currentUser.id,
+        isAdmin: 0,
+        isMember: 0,
+        notificationStatus: 0,
+        updatedAt: 0
+      }
     };
 
     oThis.textIds = [];
