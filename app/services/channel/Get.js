@@ -1,8 +1,7 @@
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
-  TextsByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TextsByIds'),
-  ImageByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/ImageByIds'),
+  FetchAssociatedEntities = require(rootPrefix + '/lib/FetchAssociatedEntities'),
   ChannelByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelByIds'),
   ChannelStatByChannelIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelStatByChannelIds'),
   ChannelUserByUserIdAndChannelIdsCache = require(rootPrefix +
@@ -55,8 +54,7 @@ class GetChannel extends ServiceBase {
     const promisesArray = [
       oThis._fetchChannelStats(),
       oThis._fetchUserChannelRelations(),
-      oThis._fetchTexts(),
-      oThis._fetchImages()
+      oThis._fetchAssociatedEntities()
     ];
 
     await Promise.all(promisesArray);
@@ -183,49 +181,26 @@ class GetChannel extends ServiceBase {
   }
 
   /**
-   * Fetch texts.
+   * Fetch associated entities.
    *
-   * @sets oThis.texts
+   * @sets oThis.images, oThis.texts
    *
-   * @returns {Promise<void>}
+   * @returns {Promise<never>}
    * @private
    */
-  async _fetchTexts() {
+  async _fetchAssociatedEntities() {
     const oThis = this;
 
-    if (oThis.textIds.length === 0) {
-      return;
+    const associatedEntitiesResponse = await new FetchAssociatedEntities({
+      textIds: oThis.textIds,
+      imageIds: oThis.imageIds
+    }).perform();
+    if (associatedEntitiesResponse.isFailure()) {
+      return Promise.reject(associatedEntitiesResponse);
     }
 
-    const cacheResponse = await new TextsByIdsCache({ ids: [oThis.textIds] }).fetch();
-    if (cacheResponse.isFailure()) {
-      return Promise.reject(cacheResponse);
-    }
-
-    oThis.texts = cacheResponse.data;
-  }
-
-  /**
-   * Fetch images.
-   *
-   * @sets oThis.images
-   *
-   * @returns {Promise<void>}
-   * @private
-   */
-  async _fetchImages() {
-    const oThis = this;
-
-    if (oThis.imageIds.length === 0) {
-      return;
-    }
-
-    const cacheResponse = await new ImageByIdsCache({ ids: oThis.imageIds }).fetch();
-    if (cacheResponse.isFailure()) {
-      return Promise.reject(cacheResponse);
-    }
-
-    oThis.images = cacheResponse.data;
+    oThis.images = associatedEntitiesResponse.data.imagesMap;
+    oThis.texts = associatedEntitiesResponse.data.textMap;
   }
 
   /**
