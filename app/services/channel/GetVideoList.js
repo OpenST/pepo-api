@@ -24,7 +24,6 @@ class GetChannelVideoList extends ServiceBase {
    * @param {object} params.current_user
    * @param {number} params.channel_id
    * @param {string} [params.pagination_identifier]
-   * @param {array<string>} [params.supported_entities]
    *
    * @augments ServiceBase
    *
