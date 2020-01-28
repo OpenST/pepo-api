@@ -185,7 +185,7 @@ class PinVideoInChannel {
       })
       .fire();
 
-    //todo:channel  if needed..!! get tags of a video and use it in query
+    //todo:channels  if needed..!! get tags of a video and use it in query
     await ChannelTagVideoModel.flushCache({ channelId: oThis.channelId, videoId: oThis.videoId });
   }
 }

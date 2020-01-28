@@ -44,7 +44,6 @@ class ListChannelUser extends ServiceBase {
 
     oThis.paginationTimestamp = null;
     oThis.nextPaginationTimestamp = null;
-    oThis.usersCount = 0;
     oThis.responseMetaData = {};
     oThis.userIds = [];
     oThis.imageIds = [];
@@ -138,7 +137,7 @@ class ListChannelUser extends ServiceBase {
   /**
    * Fetch user ids.
    *
-   * @sets oThis.usersCount, oThis.userIds, oThis.nextPaginationTimestamp
+   * @sets oThis.userIds, oThis.nextPaginationTimestamp
    *
    * @return {Promise<void>}
    * @private
@@ -158,7 +157,6 @@ class ListChannelUser extends ServiceBase {
 
     oThis.userIds = cacheResponse.data.userIds || [];
     oThis.nextPaginationTimestamp = cacheResponse.data.nextPaginationTimestamp;
-    oThis.usersCount += oThis.userIds.length; // TODO:channels - Why += here?
   }
 
   /**
@@ -252,7 +250,7 @@ class ListChannelUser extends ServiceBase {
 
     const nextPagePayloadKey = {};
 
-    if (oThis.usersCount >= oThis.limit) {
+    if (oThis.userIds.length >= oThis.limit) {
       nextPagePayloadKey[paginationConstants.paginationIdentifierKey] = {
         pagination_timestamp: oThis.nextPaginationTimestamp
       };

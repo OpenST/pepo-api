@@ -66,7 +66,7 @@ class ChannelTagModel extends ModelBase {
     const oThis = this;
 
     const dbRows = await oThis
-      .select('channel_id, tag_id') // TODO:channels - verify select query input.
+      .select('channel_id, tag_id')
       .where({
         channel_id: channelIds,
         status: channelTagsConstants.invertedStatuses[channelTagsConstants.activeStatus] // TODO:channels - verify index.
@@ -92,6 +92,7 @@ class ChannelTagModel extends ModelBase {
    */
   static async flushCache() {
     // Do nothing.
+    // TODO:channels - Check usage.
   }
 }
 
