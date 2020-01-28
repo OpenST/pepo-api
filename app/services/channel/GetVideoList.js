@@ -120,11 +120,13 @@ class GetChannelVideoList extends ServiceBase {
       channelObject.status !== channelsConstants.activeStatus
     ) {
       return Promise.reject(
-        responseHelper.error({
+        responseHelper.paramValidationError({
           internal_error_identifier: 'a_s_c_gvl_1',
-          api_error_identifier: 'entity_not_found',
+          api_error_identifier: 'resource_not_found',
+          params_error_identifiers: ['invalid_channel_id'],
           debug_options: {
-            channelId: oThis.channelId
+            channelId: oThis.channelId,
+            channelDetails: oThis.channel
           }
         })
       );
@@ -156,11 +158,11 @@ class GetChannelVideoList extends ServiceBase {
 
     for (let index = 0; index < videoIds.length; index++) {
       const videoId = videoIds[index];
-      const videoDetail = channelVideoDetails[videoId];
+      const channelVideoDetail = channelVideoDetails[videoId];
       oThis.videosCount++;
-      oThis.videoIds.push(videoDetail.videoId);
+      oThis.videoIds.push(channelVideoDetail.videoId);
 
-      oThis.nextPaginationTimestamp = videoDetail.createdAt;
+      oThis.nextPaginationTimestamp = channelVideoDetail.createdAt;
     }
   }
 
@@ -232,6 +234,8 @@ class GetChannelVideoList extends ServiceBase {
     }
 
     oThis.usersVideosMap = response.data;
+
+    console.log('oThis.usersVideosMap===', oThis.usersVideosMap);
   }
 
   /**
@@ -269,16 +273,14 @@ class GetChannelVideoList extends ServiceBase {
       [entityTypeConstants.userProfilesMap]: oThis.usersVideosMap.userProfilesMap,
       [entityTypeConstants.currentUserUserContributionsMap]: oThis.usersVideosMap.currentUserUserContributionsMap,
       [entityTypeConstants.currentUserVideoContributionsMap]: oThis.usersVideosMap.currentUserVideoContributionsMap,
-      [entityTypeConstants.userProfileAllowedActions]: oThis.usersVideosMap.userProfileAllowedActions,
+      [entityTypeConstants.currentUserVideoRelationsMap]: oThis.usersVideosMap.currentUserVideoRelationsMap,
       [entityTypeConstants.pricePointsMap]: oThis.usersVideosMap.pricePointsMap,
       usersByIdMap: oThis.usersVideosMap.usersByIdMap,
-      userStat: oThis.usersVideosMap.userStat,
       tags: oThis.usersVideosMap.tags,
       linkMap: oThis.usersVideosMap.linkMap,
       imageMap: oThis.usersVideosMap.imageMap,
       videoMap: oThis.usersVideosMap.videoMap,
       tokenUsersByUserIdMap: oThis.usersVideosMap.tokenUsersByUserIdMap,
-      [entityTypeConstants.currentUserVideoRelationsMap]: oThis.usersVideosMap.currentUserVideoRelationsMap,
       tokenDetails: oThis.tokenDetails,
       meta: oThis.responseMetaData
     });
