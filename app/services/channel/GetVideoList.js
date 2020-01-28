@@ -41,10 +41,13 @@ class GetChannelVideoList extends ServiceBase {
     oThis.limit = oThis._defaultPageLimit();
 
     oThis.paginationTimestamp = null;
-    oThis.nextPaginationTimestamp = null;
-    oThis.videosCount = 0;
-    oThis.responseMetaData = {};
+
     oThis.videoIds = [];
+    oThis.channelVideoDetails = {};
+    oThis.videosCount = 0;
+    oThis.nextPaginationTimestamp = null;
+
+    oThis.responseMetaData = {};
     oThis.videoDetails = [];
     oThis.tokenDetails = {};
     oThis.usersVideosMap = {};
@@ -136,7 +139,7 @@ class GetChannelVideoList extends ServiceBase {
   /**
    * Fetch video ids.
    *
-   * @sets oThis.videosCount, oThis.videoIds, oThis.nextPaginationTimestamp
+   * @sets oThis.videoIds, oThis.channelVideoDetails, oThis.videosCount, oThis.nextPaginationTimestamp
    *
    * @return {Promise<void>}
    * @private
@@ -153,15 +156,14 @@ class GetChannelVideoList extends ServiceBase {
       return Promise.reject(cacheResponse);
     }
 
-    const channelVideoDetails = cacheResponse.data.channelVideoDetails;
-    const videoIds = cacheResponse.data.videoIds || [];
+    oThis.videoIds = cacheResponse.data.videoIds || [];
+    oThis.channelVideoDetails = cacheResponse.data.channelVideoDetails;
 
-    for (let index = 0; index < videoIds.length; index++) {
-      const videoId = videoIds[index];
-      const channelVideoDetail = channelVideoDetails[videoId];
+    for (let index = 0; index < oThis.videoIds.length; index++) {
+      const videoId = oThis.videoIds[index];
+      const channelVideoDetail = oThis.channelVideoDetails[videoId];
+
       oThis.videosCount++;
-      oThis.videoIds.push(channelVideoDetail.videoId);
-
       oThis.nextPaginationTimestamp = channelVideoDetail.createdAt;
     }
   }
@@ -234,8 +236,6 @@ class GetChannelVideoList extends ServiceBase {
     }
 
     oThis.usersVideosMap = response.data;
-
-    console.log('oThis.usersVideosMap===', oThis.usersVideosMap);
   }
 
   /**
@@ -251,8 +251,10 @@ class GetChannelVideoList extends ServiceBase {
 
     for (let index = 0; index < oThis.videoIds.length; index++) {
       const videoId = oThis.videoIds[index];
-      if (oThis.usersVideosMap.fullVideosMap[videoId]) {
-        oThis.videoDetails.push(oThis.usersVideosMap.fullVideosMap[videoId]);
+      if (CommonValidators.validateNonEmptyObject(oThis.usersVideosMap.fullVideosMap[videoId])) {
+        const channelVideoDetail = oThis.usersVideosMap.fullVideosMap[videoId];
+        channelVideoDetail.isPinned = oThis.channelVideoDetails[videoId].pinnedAt ? 1 : 0;
+        oThis.videoDetails.push(channelVideoDetail);
       }
     }
   }
