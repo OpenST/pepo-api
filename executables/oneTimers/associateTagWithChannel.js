@@ -124,10 +124,10 @@ class AssociateTagWithChannel {
       const activeVideoIds = await oThis.filterOutDeletedVideos(videoIds);
       const resp = await oThis.fetchChannelVideoForVideoId(activeVideoIds);
 
-      //todo: insert in channelTagVideos with ignore error..
       await oThis.insertInChannelVideo(resp.toInsertVideoIds, videoTagMapByVideoId);
       await oThis.markChannelVideoActive(resp.inactiveChannelVideoIds, videoTagMapByVideoId);
       await oThis._updateChannelStat();
+      //todo: insert in channelTagVideos with ignore error and is_pinned flag..
     }
 
     logger.info(`ChannelTag backPopulateChannelVideos ended`);
@@ -171,7 +171,8 @@ class AssociateTagWithChannel {
     const updateRes = await new ChannelVideoModel()
       .update(
         {
-          status: channelVideosConstants.invertedStatuses[channelVideosConstants.activeStatus]
+          status: channelVideosConstants.invertedStatuses[channelVideosConstants.activeStatus],
+          pinned_at: null
         },
         { touch: false }
       )
@@ -220,7 +221,8 @@ class AssociateTagWithChannel {
       const updateRes = await new ChannelVideoModel()
         .update(
           {
-            status: channelVideosConstants.invertedStatuses[channelVideosConstants.activeStatus]
+            status: channelVideosConstants.invertedStatuses[channelVideosConstants.activeStatus],
+            pinned_at: null
           },
           { touch: false }
         )
