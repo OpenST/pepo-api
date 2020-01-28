@@ -34,7 +34,7 @@ class ChannelSearch extends ServiceBase {
    * Constructor to search channels.
    *
    * @param {object} params
-   * @param {object} current_user
+   * @param {object} params.current_user
    * @param {string} params.q
    * @param {string} params.pagination_identifier
    * @param {Boolean} [params.getTopResults]
@@ -408,6 +408,29 @@ class ChannelSearch extends ServiceBase {
   }
 
   /**
+   * Fetch images.
+   *
+   * @sets oThis.imageMap
+   *
+   * @return {Promise<*>}
+   * @private
+   */
+  async _fetchImages() {
+    const oThis = this;
+
+    if (oThis.imageIds.length < 1) {
+      return;
+    }
+
+    const cacheRsp = await new ImageByIdCache({ ids: oThis.imageIds }).fetch();
+    if (cacheRsp.isFailure()) {
+      return Promise.reject(cacheRsp);
+    }
+
+    oThis.imageMap = cacheRsp.data;
+  }
+
+  /**
    * Format response to be returned.
    *
    * @returns {*|result}
@@ -521,29 +544,6 @@ class ChannelSearch extends ServiceBase {
     }
 
     return null;
-  }
-
-  /**
-   * Fetch images.
-   *
-   * @sets oThis.imageMap
-   *
-   * @return {Promise<*>}
-   * @private
-   */
-  async _fetchImages() {
-    const oThis = this;
-
-    if (oThis.imageIds.length < 1) {
-      return;
-    }
-
-    const cacheRsp = await new ImageByIdCache({ ids: oThis.imageIds }).fetch();
-    if (cacheRsp.isFailure()) {
-      return Promise.reject(cacheRsp);
-    }
-
-    oThis.imageMap = cacheRsp.data;
   }
 
   /**

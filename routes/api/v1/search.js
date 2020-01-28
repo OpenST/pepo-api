@@ -95,7 +95,7 @@ router.get('/channels', sanitizer.sanitizeDynamicUrlParams, function(req, res, n
     serviceResponse.data = wrapperFormatterRsp.data;
   };
 
-  Promise.resolve(routeHelper.perform(req, res, next, '/channel/Search', 'r_a_v1_c_7', null, dataFormatterFunc));
+  Promise.resolve(routeHelper.perform(req, res, next, '/search/ChannelSearch', 'r_a_v1_c_7', null, dataFormatterFunc));
 });
 
 /* Search user mention */
