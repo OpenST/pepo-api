@@ -703,6 +703,10 @@ const v1Signature = {
     mandatory: [],
     optional: [
       {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      },
+      {
         parameter: 'q',
         validatorMethods: ['validateString']
       },

@@ -135,6 +135,13 @@ router.get('/top', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) 
         [entityType.userSearchList]: responseEntityKey.userSearchResults,
         [entityType.usersMap]: responseEntityKey.users,
         [entityType.imagesMap]: responseEntityKey.images,
+        [entityType.channelList]: responseEntityKey.channelSearchResults,
+        [entityType.channelsMap]: responseEntityKey.channels,
+        [entityType.channelDetailsMap]: responseEntityKey.channelDetails,
+        [entityType.channelStatsMap]: responseEntityKey.channelStats,
+        [entityType.currentUserChannelRelationsMap]: responseEntityKey.currentUserChannelRelations,
+        [entityType.tagsMap]: responseEntityKey.tags,
+        [entityType.textsMap]: responseEntityKey.texts,
         [entityType.userSearchMeta]: responseEntityKey.meta
       },
       serviceData: serviceResponse.data
