@@ -1222,6 +1222,10 @@ const v1Signature = {
       {
         parameter: paginationConstants.paginationIdentifierKey,
         validatorMethods: ['validateString', 'validatePaginationIdentifier']
+      },
+      {
+        parameter: paginationConstants.filterByTagIdKey,
+        validatorMethods: ['validateNonZeroInteger']
       }
     ]
   },
