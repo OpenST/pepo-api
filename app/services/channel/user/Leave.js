@@ -138,7 +138,9 @@ class LeaveChannel extends ServiceBase {
 
     const updateParams = {
       role: channelUsersConstants.invertedRoles[channelUsersConstants.normalRole],
-      status: channelUsersConstants.invertedStatuses[channelUsersConstants.inactiveStatus]
+      status: channelUsersConstants.invertedStatuses[channelUsersConstants.inactiveStatus],
+      notification_status:
+        channelUsersConstants.invertedNotificationStatuses[channelUsersConstants.inactiveNotificationStatus]
     };
 
     const updateResponse = await new ChannelUserModel()

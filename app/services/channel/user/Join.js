@@ -54,7 +54,7 @@ class JoinChannel extends ServiceBase {
 
     await oThis._addUpdateChannelUser();
 
-    await oThis._updateChannelStat();
+    await oThis._updateChannelStats();
 
     return responseHelper.successWithData({});
   }
@@ -158,7 +158,10 @@ class JoinChannel extends ServiceBase {
 
     if (CommonValidators.validateNonEmptyObject(oThis.channelUserObj)) {
       const updateParams = {
-        status: channelUsersConstants.invertedStatuses[channelUsersConstants.activeStatus]
+        role: channelUsersConstants.invertedRoles[channelUsersConstants.normalRole],
+        status: channelUsersConstants.invertedStatuses[channelUsersConstants.activeStatus],
+        notification_status:
+          channelUsersConstants.invertedNotificationStatuses[channelUsersConstants.activeNotificationStatus]
       };
 
       const updateResponse = await new ChannelUserModel()
@@ -175,7 +178,9 @@ class JoinChannel extends ServiceBase {
         channel_id: oThis.channelId,
         user_id: oThis.currentUser.id,
         role: channelUsersConstants.invertedRoles[channelUsersConstants.normalRole],
-        status: channelUsersConstants.invertedStatuses[channelUsersConstants.activeStatus]
+        status: channelUsersConstants.invertedStatuses[channelUsersConstants.activeStatus],
+        notification_status:
+          channelUsersConstants.invertedNotificationStatuses[channelUsersConstants.activeNotificationStatus]
       };
 
       let insertResponse = await new ChannelUserModel().insert(insertData);
@@ -197,12 +202,12 @@ class JoinChannel extends ServiceBase {
   }
 
   /**
-   * Update channel stat.
+   * Update channel stats.
    *
    * @returns {Promise<void>}
    * @private
    */
-  async _updateChannelStat() {
+  async _updateChannelStats() {
     const oThis = this;
 
     await new ChannelStatModel()
