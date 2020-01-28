@@ -2,34 +2,25 @@ const program = require('commander');
 
 const rootPrefix = '../..',
   CommonValidator = require(rootPrefix + '/lib/validators/Common'),
-  ChannelTagModel = require(rootPrefix + '/app/models/mysql/channel/ChannelTag'),
   ChannelByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelByIds'),
-  VideoTagModel = require(rootPrefix + '/app/models/mysql/VideoTag'),
-  ChannelStatModel = require(rootPrefix + '/app/models/mysql/channel/ChannelStat'),
-  ChannelUserModel = require(rootPrefix + '/app/models/mysql/channel/ChannelUser'),
   ChannelVideoModel = require(rootPrefix + '/app/models/mysql/channel/ChannelVideo'),
   ChannelTagVideoModel = require(rootPrefix + '/app/models/mysql/channel/ChannelTagVideo'),
-  VideoDetailsByVideoIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/VideoDetailsByVideoIds'),
-  UserMuteByUser2IdsForGlobalCache = require(rootPrefix + '/lib/cacheManagement/multi/UserMuteByUser2IdsForGlobal'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
-  videoDetailsConstants = require(rootPrefix + '/lib/globalConstant/videoDetail'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
-  channelTagConstants = require(rootPrefix + '/lib/globalConstant/channel/channelTags'),
   channelVideosConstants = require(rootPrefix + '/lib/globalConstant/channel/channelVideos'),
-  channelUsersConstants = require(rootPrefix + '/lib/globalConstant/channel/channelUsers'),
-  videoTagConstants = require(rootPrefix + '/lib/globalConstant/videoTag'),
   channelConstants = require(rootPrefix + '/lib/globalConstant/channel/channels');
 
 program
   .option('--channelId <channelId>', 'Channel Id')
   .option('--videoId <videoId>', 'Video Id')
+  .option('--unpin <videoId>', 'Unpin Video')
   .parse(process.argv);
 
 program.on('--help', function() {
   logger.log('');
   logger.log('  Example:');
   logger.log('');
-  logger.log('node executables/oneTimers/pinVideoInChannel --channelId 1 --videoId 1018');
+  logger.log('node executables/oneTimers/pinVideoInChannel --channelId 1 --videoId 1018 --unpin 0');
   logger.log('');
   logger.log('');
 });
@@ -38,8 +29,6 @@ if (!program.channelId || !program.videoId) {
   program.help();
   process.exit(1);
 }
-
-const currentTime = Math.floor(Date.now() / 1000);
 
 /**
  * Class to pin a video for a channel.
@@ -53,6 +42,7 @@ class PinVideoInChannel {
    * @param {object} params
    * @param {number} params.channelId
    * @param {number} params.videoId
+   * @param {Boolean} params.unpin
    *
    * @constructor
    */
@@ -61,6 +51,9 @@ class PinVideoInChannel {
 
     oThis.channelId = parseInt(params.channelId);
     oThis.videoId = parseInt(params.videoId);
+    oThis.unpin = parseInt(params.unpin) || 0;
+
+    oThis.pinnedAtVal = oThis.unpin ? null : Math.floor(Date.now() / 1000);
 
     oThis.channel = null;
   }
@@ -167,7 +160,7 @@ class PinVideoInChannel {
     //  update channel videos
 
     const updateRes = await new ChannelVideoModel()
-      .update({ pinned_at: currentTime })
+      .update({ pinned_at: oThis.pinnedAtVal })
       .where({ id: oThis.channelVideo.id })
       .fire();
 
@@ -185,7 +178,7 @@ class PinVideoInChannel {
     //  update channel tag videos
 
     await new ChannelTagVideoModel()
-      .update({ pinned_at: currentTime })
+      .update({ pinned_at: oThis.pinnedAtVal })
       .where({
         channel_id: oThis.channelId,
         video_id: oThis.videoId
@@ -199,7 +192,8 @@ class PinVideoInChannel {
 
 new PinVideoInChannel({
   channelId: program.channelId,
-  videoId: program.videoId
+  videoId: program.videoId,
+  unpin: program.unpin
 })
   .perform()
   .then(function() {
