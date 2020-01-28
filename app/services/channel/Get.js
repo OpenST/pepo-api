@@ -257,12 +257,10 @@ class GetChannel extends ServiceBase {
   _prepareResponse() {
     const oThis = this;
 
-    const channelIdToTagIdsMap = { [oThis.channelId]: oThis.tagIds };
-
     return {
       [entityTypeConstants.channel]: oThis.channel,
       [entityTypeConstants.channelDetailsMap]: { [oThis.channel.id]: oThis.channel },
-      [entityTypeConstants.channelIdToTagIdsMap]: channelIdToTagIdsMap,
+      [entityTypeConstants.channelIdToTagIdsMap]: { [oThis.channel.id]: oThis.tagIds },
       [entityTypeConstants.channelStatsMap]: oThis.channelStatsMap,
       [entityTypeConstants.currentUserChannelRelationsMap]: oThis.currentUserChannelRelations,
       [entityTypeConstants.textsMap]: oThis.texts,
