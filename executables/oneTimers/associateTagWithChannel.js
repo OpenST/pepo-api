@@ -159,10 +159,15 @@ class AssociateTagWithChannel {
       const videoId = videoIds[i],
         videoTag = videoTagMapByVideoId[videoId],
         channelVideo = oThis.channelVideoMap[videoId],
-        pinnedAt = channelVideo && channelVideo.id && channelVideo.pinnedAt ? channelVideo.pinnedAt : null,
-        insertValue = [oThis.channelId, oThis.tagId, videoId, pinnedAt, videoTag.createdAt, videoTag.createdAt];
+        pinnedAt =
+          channelVideo &&
+          channelVideo.id &&
+          channelVideo.pinnedAt &&
+          channelVideo.status === channelVideosConstants.activeStatus
+            ? channelVideo.pinnedAt
+            : null;
 
-      insertValues.push(insertValue);
+      insertValues.push([oThis.channelId, oThis.tagId, videoId, pinnedAt, videoTag.createdAt, videoTag.createdAt]);
     }
 
     const res = await new ChannelTagVideoModel()

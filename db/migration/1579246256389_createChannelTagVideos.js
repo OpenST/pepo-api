@@ -16,7 +16,7 @@ const upQuery =
   `updated_at` int(11) NOT NULL,\
   PRIMARY KEY (`id`),\
   UNIQUE uidx_1 (`channel_id`, `tag_id`, `video_id`), \n\
-  INDEX `idx_2` (`video_id`) \n\
+  INDEX `idx_2` (`video_id`,`channel_id`) \n\
   ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;';
 
 const downQuery = 'drop table if exists `channel_tag_videos`;';
