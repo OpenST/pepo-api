@@ -44,7 +44,6 @@ class DisassociateTagWithChannel {
    * @param {object} params
    * @param {number} params.channelId
    * @param {number} params.tagId
-   * @param {Boolean} [params.backPopulateVideos]
    *
    * @constructor
    */
