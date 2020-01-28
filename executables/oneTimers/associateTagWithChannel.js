@@ -6,6 +6,7 @@ const rootPrefix = '../..',
   ChannelByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelByIds'),
   VideoTagModel = require(rootPrefix + '/app/models/mysql/VideoTag'),
   ChannelStatModel = require(rootPrefix + '/app/models/mysql/channel/ChannelStat'),
+  ChannelUserModel = require(rootPrefix + '/app/models/mysql/channel/ChannelUser'),
   ChannelVideoModel = require(rootPrefix + '/app/models/mysql/channel/ChannelVideo'),
   ChannelTagVideoModel = require(rootPrefix + '/app/models/mysql/channel/ChannelTagVideo'),
   VideoDetailsByVideoIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/VideoDetailsByVideoIds'),
@@ -15,6 +16,7 @@ const rootPrefix = '../..',
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   channelTagConstants = require(rootPrefix + '/lib/globalConstant/channel/channelTags'),
   channelVideosConstants = require(rootPrefix + '/lib/globalConstant/channel/channelVideos'),
+  channelUsersConstants = require(rootPrefix + '/lib/globalConstant/channel/channelUsers'),
   videoTagConstants = require(rootPrefix + '/lib/globalConstant/videoTag'),
   channelConstants = require(rootPrefix + '/lib/globalConstant/channel/channels');
 
@@ -125,7 +127,7 @@ class AssociateTagWithChannel {
         videoTagMapByVideoId[videoId] = videoTag;
       }
 
-      const activeVideoIds = await oThis.filterOutDeletedVideos(videoIds);
+      const activeVideoIds = await oThis.filterOutVideos(videoIds);
       const resp = await oThis.fetchChannelVideoForVideoId(activeVideoIds);
 
       await oThis.insertInChannelVideo(resp.toInsertVideoIds, videoTagMapByVideoId);
@@ -297,6 +299,10 @@ class AssociateTagWithChannel {
     const toInsertVideoIds = [],
       inactiveChannelVideoIds = [];
 
+    if (videoIds.length === 0) {
+      return { inactiveChannelVideoIds: inactiveChannelVideoIds, toInsertVideoIds: toInsertVideoIds };
+    }
+
     const response = await new ChannelVideoModel()
       .select('*')
       .where({
@@ -327,12 +333,12 @@ class AssociateTagWithChannel {
   }
 
   /**
-   * Filter out inactive and unapproved videos.
+   * Filter out inactive videos and unapproved/blockedInChannel users video.
    *
    * @returns {Promise<never>}
    * @private
    */
-  async filterOutDeletedVideos(videoIds) {
+  async filterOutVideos(videoIds) {
     const oThis = this;
 
     const activeVideoIds = [],
@@ -354,7 +360,7 @@ class AssociateTagWithChannel {
       }
     }
 
-    const mutedUserIds = {};
+    const mutedUserIdMap = {};
     const cacheResponse = await new UserMuteByUser2IdsForGlobalCache({ user2Ids: actorIds }).fetch();
     if (cacheResponse.isFailure()) {
       return Promise.reject(cacheResponse);
@@ -365,8 +371,23 @@ class AssociateTagWithChannel {
     for (const userId in globalUserMuteDetailsByUserIdMap) {
       const obj = globalUserMuteDetailsByUserIdMap[userId];
       if (obj.all) {
-        mutedUserIds[userId] = 1;
+        mutedUserIdMap[userId] = 1;
       }
+    }
+
+    const blockedUserIdMap = {};
+    const blockedUserIds = await new ChannelUserModel()
+      .select('user_id')
+      .where({
+        user_id: actorIds,
+        channel_id: oThis.channelId,
+        status: channelUsersConstants.invertedStatuses[channelUsersConstants.blockedStatus]
+      })
+      .fire();
+
+    for (let i = 0; i < blockedUserIds.length; i++) {
+      const blockedUserId = blockedUserIds[i].user_id;
+      blockedUserIdMap[blockedUserId] = 1;
     }
 
     for (let videoId in videoDetailsCacheData) {
@@ -375,9 +396,11 @@ class AssociateTagWithChannel {
       if (
         CommonValidator.validateNonEmptyObject(videoDetail) &&
         videoDetail.status === videoDetailsConstants.activeStatus &&
-        !mutedUserIds[videoDetail.creatorUserId]
+        !mutedUserIdMap[videoDetail.creatorUserId]
       ) {
-        activeVideoIds.push(videoId);
+        if (blockedUserIdMap[videoDetail.creatorUserId] != 1) {
+          activeVideoIds.push(videoId);
+        }
       } else {
         logger.error(`Invalid Video id found in VideoTag. videoId:${videoId}  tagId:${oThis.tagId}`);
       }

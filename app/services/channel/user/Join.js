@@ -176,7 +176,7 @@ class JoinChannel extends ServiceBase {
         status: channelUsersConstants.invertedStatuses[channelUsersConstants.activeStatus]
       };
 
-      let insertResponse = await new ChannelUserModel()._insert(insertData); // TODO:channels - _insert method does not exist.
+      let insertResponse = await new ChannelUserModel().insert(insertData); // TODO:channels - _insert method does not exist.
       insertResponse = insertResponse.data;
 
       if (!insertResponse) {
