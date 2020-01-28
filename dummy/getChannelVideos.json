@@ -1078,6 +1078,7 @@
         "kind": "CHANNEL_VIDEOS",
         "uts": 1580135514,
         "payload": {
+          "is_pinned": 0,
           "video_detail_id": "6805"
         }
       },
@@ -1086,6 +1087,7 @@
         "kind": "CHANNEL_VIDEOS",
         "uts": 1580135563,
         "payload": {
+          "is_pinned": 0,
           "video_detail_id": "6806"
         }
       },
@@ -1094,6 +1096,7 @@
         "kind": "CHANNEL_VIDEOS",
         "uts": 1580135608,
         "payload": {
+          "is_pinned": 0,
           "video_detail_id": "6808"
         }
       },
@@ -1102,6 +1105,7 @@
         "kind": "CHANNEL_VIDEOS",
         "uts": 1580135646,
         "payload": {
+          "is_pinned": 0,
           "video_detail_id": "6810"
         }
       },
@@ -1110,6 +1114,7 @@
         "kind": "CHANNEL_VIDEOS",
         "uts": 1580135624,
         "payload": {
+          "is_pinned": 0,
           "video_detail_id": "6809"
         }
       },
@@ -1118,6 +1123,7 @@
         "kind": "CHANNEL_VIDEOS",
         "uts": 1580135571,
         "payload": {
+          "is_pinned": 0,
           "video_detail_id": "6807"
         }
       },
@@ -1126,6 +1132,7 @@
         "kind": "CHANNEL_VIDEOS",
         "uts": 1580135508,
         "payload": {
+          "is_pinned": 0,
           "video_detail_id": "6804"
         }
       },
@@ -1134,6 +1141,7 @@
         "kind": "CHANNEL_VIDEOS",
         "uts": 1580135462,
         "payload": {
+          "is_pinned": 0,
           "video_detail_id": "6802"
         }
       }
