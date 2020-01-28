@@ -18,6 +18,7 @@ class MixedTopSearch extends ServiceBase {
    * Constructor to get mixed top search results
    *
    * @param {object} params
+   * @param {object} params.current_user
    * @param {string} params.q
    * @param {string} params.pagination_identifier
    * @param {Array} params.supported_entities
@@ -30,6 +31,7 @@ class MixedTopSearch extends ServiceBase {
     super(params);
 
     const oThis = this;
+    oThis.currentUser = params.current_user;
     oThis.q = params.q || null;
     oThis.paginationIdentifier = params[paginationConstants.paginationIdentifierKey] || null;
     oThis.supportedEntities = params.supported_entities || ['user', 'tag', 'channel'];
@@ -128,7 +130,7 @@ class MixedTopSearch extends ServiceBase {
   async _getTopChannelResults() {
     const oThis = this;
 
-    let resp = await new ChannelSearch({ q: oThis.q, getTopResults: true }).perform();
+    let resp = await new ChannelSearch({ q: oThis.q, getTopResults: true, current_user: oThis.currentUser }).perform();
 
     oThis.channelResponses = resp.data;
   }
@@ -175,10 +177,18 @@ class MixedTopSearch extends ServiceBase {
         kind: 'channel',
         title: oThis.q ? 'Channel' : null
       });
-      response[entityType.userSearchList] = oThis.userResponses[entityType.userSearchList];
-      response.usersByIdMap = oThis.userResponses.usersByIdMap;
-      response.tokenUsersByUserIdMap = oThis.userResponses.tokenUsersByUserIdMap;
-      response.imageMap = oThis.userResponses.imageMap;
+
+      response.channelIds = oThis.channelResponses.channelIds;
+      response[entityType.channelsMap] = oThis.channelResponses[entityType.channelsMap];
+      response[entityType.channelDetailsMap] = oThis.channelResponses[entityType.channelDetailsMap];
+      response[entityType.channelStatsMap] = oThis.channelResponses[entityType.channelStatsMap];
+      response[entityType.currentUserChannelRelationsMap] =
+        oThis.channelResponses[entityType.currentUserChannelRelationsMap];
+      response[entityType.channelIdToTagIdsMap] = oThis.channelResponses[entityType.channelIdToTagIdsMap];
+      response.tags = oThis.channelResponses.tags;
+      response.links = oThis.channelResponses.links;
+      response.textsMap = oThis.channelResponses.textsMap;
+      Object.assign(response.imageMap, oThis.channelResponses.imageMap);
     }
 
     return responseHelper.successWithData(response);
