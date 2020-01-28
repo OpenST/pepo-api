@@ -6,6 +6,8 @@ const rootPrefix = '../../..',
   ChannelByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelByIds'),
   ChannelVideoIdsByChannelIdPaginationCache = require(rootPrefix +
     '/lib/cacheManagement/single/ChannelVideoIdsByChannelIdPagination'),
+  ChannelTagVideoIdsByTagIdAndChannelIdPaginationCache = require(rootPrefix +
+    '/lib/cacheManagement/single/ChannelTagVideoIdsByTagIdAndChannelIdPagination'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination'),
   entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
@@ -24,6 +26,7 @@ class GetChannelVideoList extends ServiceBase {
    * @param {object} params.current_user
    * @param {number} params.channel_id
    * @param {string} [params.pagination_identifier]
+   * @param {number} [params.filter_by_tag_id]
    *
    * @augments ServiceBase
    *
@@ -37,16 +40,13 @@ class GetChannelVideoList extends ServiceBase {
     oThis.currentUser = params.current_user;
     oThis.channelId = params.channel_id;
     oThis.paginationIdentifier = params[paginationConstants.paginationIdentifierKey] || null;
+    oThis.filterByTagId = params[paginationConstants.filterByTagIdKey] || null;
 
     oThis.limit = oThis._defaultPageLimit();
-
-    oThis.paginationTimestamp = null;
-    oThis.filterByTagId = null;
+    oThis.page = 1;
 
     oThis.videoIds = [];
     oThis.channelVideoDetails = {};
-    oThis.videosCount = 0;
-    oThis.nextPaginationTimestamp = null;
 
     oThis.responseMetaData = {};
     oThis.videoDetails = [];
@@ -80,7 +80,7 @@ class GetChannelVideoList extends ServiceBase {
   /**
    * Validate and sanitize.
    *
-   * @sets oThis.paginationTimestamp, oThis.filterByTagId
+   * @sets oThis.page
    *
    * @returns {Promise<*|result>}
    * @private
@@ -91,11 +91,7 @@ class GetChannelVideoList extends ServiceBase {
     if (oThis.paginationIdentifier) {
       const parsedPaginationParams = oThis._parsePaginationParams(oThis.paginationIdentifier);
 
-      oThis.paginationTimestamp = parsedPaginationParams.pagination_timestamp; // Override paginationTimestamp number.
-      oThis.filterByTagId = parsedPaginationParams.filter_by_tag_id;
-    } else {
-      oThis.paginationTimestamp = null;
-      oThis.filterByTagId = null;
+      oThis.page = parsedPaginationParams.page; // Override paginationTimestamp number.
     }
 
     // Validate whether channel exists or not.
@@ -142,18 +138,35 @@ class GetChannelVideoList extends ServiceBase {
   /**
    * Fetch video ids.
    *
-   * @sets oThis.videoIds, oThis.channelVideoDetails, oThis.videosCount, oThis.nextPaginationTimestamp
-   *
    * @return {Promise<void>}
    * @private
    */
   async _fetchVideoIds() {
     const oThis = this;
 
-    const cacheResponse = await new ChannelVideoIdsByChannelIdPaginationCache({
+    if (oThis.filterByTagId) {
+      await oThis._fetchVideosFromChannelTagVideos();
+    } else {
+      await oThis._fetchVideosFromChannelVideos();
+    }
+  }
+
+  /**
+   * Fetch videos from channel tag videos.
+   *
+   * @sets oThis.videoIds, oThis.channelVideoDetails
+   *
+   * @returns {Promise<never>}
+   * @private
+   */
+  async _fetchVideosFromChannelTagVideos() {
+    const oThis = this;
+
+    const cacheResponse = await new ChannelTagVideoIdsByTagIdAndChannelIdPaginationCache({
+      tagId: oThis.filterByTagId,
       channelId: oThis.channelId,
       limit: oThis.limit,
-      paginationTimestamp: oThis.paginationTimestamp
+      page: oThis.page
     }).fetch();
     if (cacheResponse.isFailure()) {
       return Promise.reject(cacheResponse);
@@ -161,14 +174,30 @@ class GetChannelVideoList extends ServiceBase {
 
     oThis.videoIds = cacheResponse.data.videoIds || [];
     oThis.channelVideoDetails = cacheResponse.data.channelVideoDetails;
+  }
 
-    for (let index = 0; index < oThis.videoIds.length; index++) {
-      const videoId = oThis.videoIds[index];
-      const channelVideoDetail = oThis.channelVideoDetails[videoId];
+  /**
+   * Fetch video ids from channel videos.
+   *
+   * @sets oThis.videoIds, oThis.channelVideoDetails
+   *
+   * @returns {Promise<never>}
+   * @private
+   */
+  async _fetchVideosFromChannelVideos() {
+    const oThis = this;
 
-      oThis.videosCount++;
-      oThis.nextPaginationTimestamp = channelVideoDetail.createdAt;
+    const cacheResponse = await new ChannelVideoIdsByChannelIdPaginationCache({
+      channelId: oThis.channelId,
+      limit: oThis.limit,
+      page: oThis.page
+    }).fetch();
+    if (cacheResponse.isFailure()) {
+      return Promise.reject(cacheResponse);
     }
+
+    oThis.videoIds = cacheResponse.data.videoIds || [];
+    oThis.channelVideoDetails = cacheResponse.data.channelVideoDetails;
   }
 
   /**
@@ -184,15 +213,15 @@ class GetChannelVideoList extends ServiceBase {
 
     const nextPagePayloadKey = {};
 
-    if (oThis.videosCount >= oThis.limit) {
+    if (oThis.videoIds.length >= oThis.limit) {
       nextPagePayloadKey[paginationConstants.paginationIdentifierKey] = {
-        pagination_timestamp: oThis.nextPaginationTimestamp,
-        filter_by_tag_id: oThis.filterByTagId
+        page: oThis.page + 1
       };
     }
 
     oThis.responseMetaData = {
-      [paginationConstants.nextPagePayloadKey]: nextPagePayloadKey
+      [paginationConstants.nextPagePayloadKey]: nextPagePayloadKey,
+      [paginationConstants.filterByTagIdKey]: oThis.filterByTagId
     };
   }
 
