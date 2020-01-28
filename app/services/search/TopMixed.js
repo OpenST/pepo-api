@@ -2,6 +2,7 @@ const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   UserSearch = require(rootPrefix + '/app/services/search/UserSearch'),
   TagSearch = require(rootPrefix + '/app/services/search/TagSearch'),
+  ChannelSearch = require(rootPrefix + '/app/services/search/ChannelSearch'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
   basicHelper = require(rootPrefix + '/helpers/basic'),
@@ -31,11 +32,12 @@ class MixedTopSearch extends ServiceBase {
     const oThis = this;
     oThis.q = params.q || null;
     oThis.paginationIdentifier = params[paginationConstants.paginationIdentifierKey] || null;
-    oThis.supportedEntities = params.supported_entities || ['user', 'tag'];
+    oThis.supportedEntities = params.supported_entities || ['user', 'tag', 'channel'];
 
     oThis.searchEntities = [];
     oThis.tagResponses = null;
     oThis.userResponses = null;
+    oThis.channelResponses = null;
   }
 
   /**
@@ -55,6 +57,9 @@ class MixedTopSearch extends ServiceBase {
     }
     if (oThis.supportedEntities.includes('tag')) {
       promises.push(oThis._getTopTagResults());
+    }
+    if (oThis.supportedEntities.includes('channel')) {
+      promises.push(oThis._getTopChannelResults());
     }
     await Promise.all(promises);
 
@@ -114,6 +119,20 @@ class MixedTopSearch extends ServiceBase {
     oThis.tagResponses = resp.data;
   }
 
+  /**
+   * Get top channel results
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _getTopChannelResults() {
+    const oThis = this;
+
+    let resp = await new ChannelSearch({ q: oThis.q, getTopResults: true }).perform();
+
+    oThis.channelResponses = resp.data;
+  }
+
   _prepareResponse() {
     const oThis = this;
 
@@ -142,6 +161,19 @@ class MixedTopSearch extends ServiceBase {
         updatedAt: Math.round(new Date() / 1000),
         kind: 'user',
         title: oThis.q ? 'People' : null
+      });
+      response[entityType.userSearchList] = oThis.userResponses[entityType.userSearchList];
+      response.usersByIdMap = oThis.userResponses.usersByIdMap;
+      response.tokenUsersByUserIdMap = oThis.userResponses.tokenUsersByUserIdMap;
+      response.imageMap = oThis.userResponses.imageMap;
+    }
+
+    if (oThis.channelResponses) {
+      response[entityType.searchCategoriesList].push({
+        id: 'sc_cr',
+        updatedAt: Math.round(new Date() / 1000),
+        kind: 'channel',
+        title: oThis.q ? 'Channel' : null
       });
       response[entityType.userSearchList] = oThis.userResponses[entityType.userSearchList];
       response.usersByIdMap = oThis.userResponses.usersByIdMap;

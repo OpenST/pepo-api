@@ -71,6 +71,33 @@ router.get('/users', sanitizer.sanitizeDynamicUrlParams, function(req, res, next
   Promise.resolve(routeHelper.perform(req, res, next, '/search/UserSearch', 'r_a_v1_s_2', null, dataFormatterFunc));
 });
 
+/* Search channels. */
+router.get('/channels', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.getChannels;
+
+  const dataFormatterFunc = async function(serviceResponse) {
+    const wrapperFormatterRsp = await new FormatterComposer({
+      resultType: responseEntityKey.channelSearchResults,
+      entityKindToResponseKeyMap: {
+        [entityType.channelList]: responseEntityKey.channelSearchResults,
+        [entityType.channelsMap]: responseEntityKey.channels,
+        [entityType.channelDetailsMap]: responseEntityKey.channelDetails,
+        [entityType.channelStatsMap]: responseEntityKey.channelStats,
+        [entityType.currentUserChannelRelationsMap]: responseEntityKey.currentUserChannelRelations,
+        [entityType.tagsMap]: responseEntityKey.tags,
+        [entityType.imagesMap]: responseEntityKey.images,
+        [entityType.textsMap]: responseEntityKey.texts,
+        [entityType.channelListMeta]: responseEntityKey.meta
+      },
+      serviceData: serviceResponse.data
+    }).perform();
+
+    serviceResponse.data = wrapperFormatterRsp.data;
+  };
+
+  Promise.resolve(routeHelper.perform(req, res, next, '/search/ChannelSearch', 'r_a_v1_c_7', null, dataFormatterFunc));
+});
+
 /* Search user mention */
 router.get('/users-mention', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.atMentionSearch;
