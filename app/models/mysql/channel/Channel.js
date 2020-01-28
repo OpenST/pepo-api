@@ -139,10 +139,10 @@ class ChannelModel extends ModelBase {
     };
 
     const channelDetailsObject = {
-      taglineId: formattedChannelObject.taglineId ? formattedChannelObject.taglineId : null,
-      descriptionId: formattedChannelObject.descriptionId ? formattedChannelObject.descriptionId : null,
-      coverImageId: formattedChannelObject.coverImageId ? formattedChannelObject.coverImageId : null,
-      tagIds: channelTagIds ? channelTagIds : [],
+      taglineId: formattedChannelObject.taglineId || null,
+      descriptionId: formattedChannelObject.descriptionId || null,
+      coverImageId: formattedChannelObject.coverImageId || null,
+      tagIds: channelTagIds || [],
       updatedAt: formattedChannelObject.updatedAt
     };
 
