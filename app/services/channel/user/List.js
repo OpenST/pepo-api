@@ -158,7 +158,7 @@ class ListChannelUser extends ServiceBase {
 
     oThis.userIds = cacheResponse.data.userIds || [];
     oThis.nextPaginationTimestamp = cacheResponse.data.nextPaginationTimestamp;
-    oThis.usersCount += oThis.userIds.length; //TODO:channels - Why += here?
+    oThis.usersCount += oThis.userIds.length; // TODO:channels - Why += here?
   }
 
   /**
