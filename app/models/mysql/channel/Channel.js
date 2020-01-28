@@ -123,33 +123,6 @@ class ChannelModel extends ModelBase {
   }
 
   /**
-   * Get channel and channel details object.
-   *
-   * @param {object} formattedChannelObject
-   * @param {array<number>} [channelTagIds]
-   *
-   * @returns {{channelDetailsObject: *, channelObject: *}}
-   */
-  getChannelAndChannelDetailsObject(formattedChannelObject, channelTagIds) {
-    const channelObject = {
-      id: formattedChannelObject.id,
-      name: formattedChannelObject.name,
-      status: formattedChannelObject.status,
-      updatedAt: formattedChannelObject.updatedAt
-    };
-
-    const channelDetailsObject = {
-      taglineId: formattedChannelObject.taglineId || null,
-      descriptionId: formattedChannelObject.descriptionId || null,
-      coverImageId: formattedChannelObject.coverImageId || null,
-      tagIds: channelTagIds || [],
-      updatedAt: formattedChannelObject.updatedAt
-    };
-
-    return { channelObject: channelObject, channelDetailsObject: { [channelObject.id]: channelDetailsObject } };
-  }
-
-  /**
    * Flush cache.
    *
    * @param {object} params
