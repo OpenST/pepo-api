@@ -27,47 +27,6 @@
         "profile_image_id": "7573"
       }
     },
-    "user_stats": {
-      "2217": {
-        "id": "651",
-        "user_id": "2217",
-        "total_contributed_by": 0,
-        "total_contributed_to": 5,
-        "total_amount_raised_in_wei": "0",
-        "total_amount_spent_in_wei": "107000000000000000000",
-        "uts": 1579802498
-      },
-      "2529": {
-        "id": 0,
-        "user_id": 0,
-        "total_contributed_by": 0,
-        "total_contributed_to": 0,
-        "total_amount_raised_in_wei": 0,
-        "total_amount_spent_in_wei": 0,
-        "uts": 0
-      }
-    },
-    "user_profiles": {
-      "2217": {
-        "id": 2217,
-        "user_id": 2217,
-        "bio": null,
-        "link_ids": [
-          "1007"
-        ],
-        "uts": 1575897647
-      },
-      "2529": {
-        "id": 2529,
-        "user_id": 2529,
-        "bio": {
-          "text": "2nd update",
-          "includes": {}
-        },
-        "link_ids": [],
-        "uts": 1579852603
-      }
-    },
     "video_descriptions": {
       "2932": {
         "text": "#testchannel #v1",
