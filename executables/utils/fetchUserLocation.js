@@ -32,6 +32,7 @@ class FetchUserLocation {
     oThis.twitterIds = [];
     oThis.userIdToUsernameMap = {};
     oThis.twitterIdToUsernameMap = {};
+    oThis.twitterIdToUserIdMap = {};
     oThis.nextPaginationTimestamp = null;
     oThis.locationData = {};
     oThis.result = '';
@@ -108,6 +109,7 @@ class FetchUserLocation {
       if (twitterId > 0) {
         oThis.twitterIds.push(twitterId);
         oThis.twitterIdToUsernameMap[twitterId] = oThis.userIdToUsernameMap[userId];
+        oThis.twitterIdToUserIdMap[twitterId] = userId;
       }
     }
   }
@@ -130,7 +132,8 @@ class FetchUserLocation {
       if (lookupData.hasOwnProperty(twitterid)) {
         oThis.locationData[oThis.twitterIdToUsernameMap[twitterid]] = lookupData[twitterid].location;
         let location = lookupData[twitterid].location;
-        oThis.result += oThis.twitterIdToUsernameMap[twitterid] + ',' + location + '\n';
+        oThis.result +=
+          oThis.twitterIdToUserIdMap[twitterid] + ',' + oThis.twitterIdToUsernameMap[twitterid] + ',' + location + '\n';
       } else {
         logger.log(`====Missing twitter id ${twitterid} in lookup response`);
       }
@@ -142,7 +145,9 @@ new FetchUserLocation()
   .perform()
   .then(function(resp) {
     logger.log('===Run success');
+    process.exit(0);
   })
   .catch(function(err) {
     logger.error(err);
+    process.exit(1);
   });
