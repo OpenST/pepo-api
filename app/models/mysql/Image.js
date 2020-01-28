@@ -192,7 +192,11 @@ class Image extends ModelBase {
     const oThis = this;
 
     // If twitter url needs to be shorten.
-    if (params.resolutions.original && imageConstants.isFromExternalSource(params.resolutions.original.url)) {
+    if (
+      params.resolutions.original &&
+      params.resolutions.original.url &&
+      imageConstants.isFromExternalSource(params.resolutions.original.url)
+    ) {
       const imageLib = require(rootPrefix + '/lib/imageLib');
       const shortenedUrl = imageLib.shortenUrl({
         imageUrl: params.resolutions.original.url,
