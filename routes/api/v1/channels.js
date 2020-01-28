@@ -23,7 +23,8 @@ router.get('/:channel_id', sanitizer.sanitizeDynamicUrlParams, function(req, res
         [entityTypeConstants.channelStatsMap]: responseEntityKey.channelStats,
         [entityTypeConstants.currentUserChannelRelationsMap]: responseEntityKey.currentUserChannelRelations,
         [entityTypeConstants.tagsMap]: responseEntityKey.tags,
-        [entityTypeConstants.imagesMap]: responseEntityKey.images // TODO:channels - add texts entity.
+        [entityTypeConstants.imagesMap]: responseEntityKey.images,
+        [entityTypeConstants.textsMap]: responseEntityKey.texts
       },
       serviceData: serviceResponse.data
     }).perform();

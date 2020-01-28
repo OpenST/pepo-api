@@ -107,9 +107,10 @@ class GetChannel extends ServiceBase {
       oThis.channel.status !== channelConstants.activeStatus
     ) {
       return Promise.reject(
-        responseHelper.error({
+        responseHelper.paramValidationError({
           internal_error_identifier: 'a_s_c_g_1',
-          api_error_identifier: 'entity_not_found',
+          api_error_identifier: 'resource_not_found',
+          params_error_identifiers: ['invalid_channel_id'],
           debug_options: {
             channelId: oThis.channelId,
             channelDetails: oThis.channel
@@ -267,7 +268,7 @@ class GetChannel extends ServiceBase {
       [entityTypeConstants.channelDetailsMap]: channelDetailsObject,
       [entityTypeConstants.channelStatsMap]: oThis.channelStatsMap,
       [entityTypeConstants.currentUserChannelRelationsMap]: oThis.currentUserChannelRelations,
-      texts: oThis.texts,
+      [entityTypeConstants.textsMap]: oThis.texts,
       imageMap: oThis.images,
       tags: oThis.tags
     };
