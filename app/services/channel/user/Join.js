@@ -77,11 +77,13 @@ class JoinChannel extends ServiceBase {
 
     if (!CommonValidators.validateNonEmptyObject(channelObj) || channelObj.status !== channelConstants.activeStatus) {
       return Promise.reject(
-        responseHelper.error({
+        responseHelper.paramValidationError({
           internal_error_identifier: 'a_s_c_u_j_fc_1',
-          api_error_identifier: 'entity_not_found',
+          api_error_identifier: 'resource_not_found',
+          params_error_identifiers: ['invalid_channel_id'],
           debug_options: {
-            channelId: oThis.channelId
+            channelId: oThis.channelId,
+            channelDetails: oThis.channel
           }
         })
       );
@@ -176,7 +178,7 @@ class JoinChannel extends ServiceBase {
         status: channelUsersConstants.invertedStatuses[channelUsersConstants.activeStatus]
       };
 
-      let insertResponse = await new ChannelUserModel().insert(insertData); // TODO:channels - _insert method does not exist.
+      let insertResponse = await new ChannelUserModel().insert(insertData);
       insertResponse = insertResponse.data;
 
       if (!insertResponse) {
