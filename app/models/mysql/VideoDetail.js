@@ -205,10 +205,10 @@ class VideoDetail extends ModelBase {
     const videoToPopularChannelIdsMap = await new ChannelVideoModel().fetchPopularChannelIdsByVideoIds({
       videoIds: videoIds
     });
-    for (let vId in videoDetails) {
-      let videoPopularChannelIds = videoToPopularChannelIdsMap[vId];
+    for (const videoId in videoDetails) {
+      const videoPopularChannelIds = videoToPopularChannelIdsMap[videoId];
       if (videoPopularChannelIds) {
-        videoDetails[vId]['channelIds'] = videoPopularChannelIds;
+        videoDetails[videoId].channelIds = videoPopularChannelIds;
       }
     }
 
@@ -242,7 +242,7 @@ class VideoDetail extends ModelBase {
 
       response[formatDbRow.videoId] = formatDbRow;
       if (videoPopularChannelIds) {
-        response[formatDbRow.videoId]['channelIds'] = videoPopularChannelIds;
+        response[formatDbRow.videoId].channelIds = videoPopularChannelIds;
       }
     }
 
