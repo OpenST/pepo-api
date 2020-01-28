@@ -88,8 +88,8 @@ class ChannelModel extends ModelBase {
    * Get channels that starts with channel prefix.
    *
    * @param {object} params
-   * @param {number} params.page
-   * @param {number} params.limit
+   * @param {number} [params.page]
+   * @param {number} [params.limit]
    * @param {string} params.channelPrefix
    *
    * @returns {Promise<{}>}

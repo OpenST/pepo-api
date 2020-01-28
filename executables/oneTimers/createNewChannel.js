@@ -117,6 +117,10 @@ class CreateNewChannel {
   async createNewChannel() {
     const oThis = this;
 
+    if (!CommonValidators.validateChannelTitle(oThis.channelName)) {
+      return Promise.reject(new Error('Invalid channel name.'));
+    }
+
     const insertResponse = await new ChannelModel()
       .insert({ name: oThis.channelName, status: channelsConstants.invertedStatuses[channelsConstants.activeStatus] })
       .fire();
