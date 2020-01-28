@@ -63,32 +63,27 @@ class ChannelTagVideoModel extends ModelBase {
    * @param {number} params.limit
    * @param {number} params.tagId
    * @param {number} params.channelId
-   * @param {number} [params.paginationTimestamp]
+   * @param {number} [params.page]
    *
    * @returns {Promise<{channelTagVideoDetails: *, videoIds: *}>}
    */
   async fetchVideoIdsByChannelIdAndTagId(params) {
     const oThis = this;
 
-    const limit = params.limit,
-      tagId = params.tagId,
-      channelId = params.channelId,
-      paginationTimestamp = params.paginationTimestamp;
+    const page = params.page,
+      limit = params.limit,
+      offset = (page - 1) * limit;
 
-    const queryObject = oThis
+    const dbRows = await oThis
       .select('*')
       .where({
-        channel_id: channelId,
-        tag_id: tagId
+        channel_id: params.channelId,
+        tag_id: params.tagId
       })
       .order_by('pinned_at desc, created_at desc')
-      .limit(limit);
-
-    if (paginationTimestamp) {
-      queryObject.where(['created_at < ?', paginationTimestamp]);
-    }
-
-    const dbRows = await queryObject.fire();
+      .limit(limit)
+      .offset(offset)
+      .fire();
 
     const videoIds = [];
     const channelVideoDetails = {};

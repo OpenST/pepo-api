@@ -64,31 +64,27 @@ class ChannelVideoModel extends ModelBase {
    * @param {object} params
    * @param {number} params.limit
    * @param {number} params.channelId
-   * @param {number} [params.paginationTimestamp]
+   * @param {number} [params.page]
    *
    * @returns {Promise<{}>}
    */
   async fetchVideoIdsByChannelId(params) {
     const oThis = this;
 
-    const limit = params.limit,
-      channelId = params.channelId,
-      paginationTimestamp = params.paginationTimestamp;
+    const page = params.page,
+      limit = params.limit,
+      offset = (page - 1) * limit;
 
-    const queryObject = oThis
+    const dbRows = await oThis
       .select('*')
       .where({
-        channel_id: channelId,
+        channel_id: params.channelId,
         status: channelVideosConstants.invertedStatuses[channelVideosConstants.activeStatus]
       })
       .order_by('pinned_at desc, created_at desc')
-      .limit(limit);
-
-    if (paginationTimestamp) {
-      queryObject.where(['created_at < ?', paginationTimestamp]);
-    }
-
-    const dbRows = await queryObject.fire();
+      .limit(limit)
+      .offset(offset)
+      .fire();
 
     const videoIds = [];
     const channelVideoDetails = {};
