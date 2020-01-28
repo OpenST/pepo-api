@@ -1,6 +1,7 @@
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   TagByIdCache = require(rootPrefix + '/lib/cacheManagement/multi/Tag'),
+  UrlByIdCache = require(rootPrefix + '/lib/cacheManagement/multi/UrlsByIds'),
   ImageByIdCache = require(rootPrefix + '/lib/cacheManagement/multi/ImageByIds'),
   TextsByIdCache = require(rootPrefix + '/lib/cacheManagement/multi/TextsByIds'),
   ChannelByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelByIds'),
@@ -37,7 +38,7 @@ class ChannelSearch extends ServiceBase {
    * @param {object} params.current_user
    * @param {string} params.q
    * @param {string} params.pagination_identifier
-   * @param {Boolean} [params.getTopResults]
+   * @param {boolean} [params.getTopResults]
    *
    * @augments ServiceBase
    *
@@ -108,7 +109,7 @@ class ChannelSearch extends ServiceBase {
   /**
    * Validate and sanitize specific params.
    *
-   * @sets oThis.page, oThis.limit
+   * @sets oThis.channelPrefix, oThis.page, oThis.limit
    *
    * @returns {Promise<never>}
    * @private
@@ -182,9 +183,12 @@ class ChannelSearch extends ServiceBase {
       return;
     }
 
-    const channelsResponse = await new ChannelByIdsCache({ ids: oThis.channelIds }).fetch();
+    const cacheResponse = await new ChannelByIdsCache({ ids: oThis.channelIds }).fetch();
+    if (cacheResponse.isFailure()) {
+      return Promise.reject(cacheResponse);
+    }
 
-    oThis.channels = channelsResponse.data;
+    oThis.channels = cacheResponse.data;
 
     for (const channelId in oThis.channels) {
       const channel = oThis.channels[channelId];
@@ -218,38 +222,41 @@ class ChannelSearch extends ServiceBase {
       return Promise.reject(cacheResponse);
     }
 
-    const channelTagByChannelIdsCacheCacheData = cacheResponse.data;
+    const cacheData = cacheResponse.data;
 
-    for (let channelId in channelTagByChannelIdsCacheCacheData) {
-      const channelTags = channelTagByChannelIdsCacheCacheData[channelId];
-      oThis.channelIdToTagIdsMap[channelId] = channelTags;
+    for (const channelId in cacheData) {
+      oThis.channelIdToTagIdsMap[channelId] = cacheData[channelId];
     }
   }
 
   /**
-   * Fetch tag and links from texts
+   * Fetch tag and links from texts.
    *
-   * @returns {Promise<never>}
+   * @sets oThis.textData, oThis.includesData, oThis.linkIds, oThis.tagIds
+   *
+   * @returns {Promise<void>}
    * @private
    */
   async _fetchTagAndLinksFromText() {
     const oThis = this;
 
-    if (oThis.textIds.length > 0) {
-      const cacheRsp = await new TextsByIdCache({ ids: oThis.textIds }).fetch();
-      if (cacheRsp.isFailure()) {
-        return Promise.reject(cacheRsp);
-      }
-
-      oThis.textData = cacheRsp.data;
-
-      const includesCacheRsp = await new TextIncludesByIdsCache({ ids: oThis.textIds }).fetch();
-      if (includesCacheRsp.isFailure()) {
-        return Promise.reject(includesCacheRsp);
-      }
-
-      oThis.includesData = includesCacheRsp.data;
+    if (oThis.textIds.length === 0) {
+      return;
     }
+
+    const cacheResponse = await new TextsByIdCache({ ids: oThis.textIds }).fetch();
+    if (cacheResponse.isFailure()) {
+      return Promise.reject(cacheResponse);
+    }
+
+    oThis.textData = cacheResponse.data;
+
+    const includesCacheResponse = await new TextIncludesByIdsCache({ ids: oThis.textIds }).fetch();
+    if (includesCacheResponse.isFailure()) {
+      return Promise.reject(includesCacheResponse);
+    }
+
+    oThis.includesData = includesCacheResponse.data;
 
     const allTagIds = [],
       allLinkIds = [];
@@ -260,14 +267,14 @@ class ChannelSearch extends ServiceBase {
         const include = textIncludes[ind],
           entity = include.entityIdentifier.split('_');
 
-        if (entity[0] == textIncludeConstants.tagEntityKindShort) {
+        if (entity[0] === textIncludeConstants.tagEntityKindShort) {
           allTagIds.push(+entity[1]);
         } else if (
-          entity[0] == textIncludeConstants.linkEntityKindShort &&
+          entity[0] === textIncludeConstants.linkEntityKindShort &&
           (oThis.textData[textId].kind === textConstants.channelTaglineKind ||
             oThis.textData[textId].kind === textConstants.channelDescriptionKind)
         ) {
-          allLinkIds.push(+entity[1]); // Inserting only channel tagline and channel description links, bio links are ignored
+          allLinkIds.push(+entity[1]); // Inserting only channel tagline and channel description links, bio links are ignored.
         }
       }
     }
@@ -281,23 +288,22 @@ class ChannelSearch extends ServiceBase {
    *
    * @sets oThis.tags
    *
-   * @returns {Promise<never>}
+   * @returns {Promise<void>}
    * @private
    */
   async _fetchTags() {
     const oThis = this;
 
     if (oThis.tagIds.length <= 0) {
-      return responseHelper.successWithData({});
+      return;
     }
 
-    const cacheRsp = await new TagByIdCache({ ids: oThis.tagIds }).fetch();
-
-    if (cacheRsp.isFailure()) {
-      return Promise.reject(cacheRsp);
+    const cacheResponse = await new TagByIdCache({ ids: oThis.tagIds }).fetch();
+    if (cacheResponse.isFailure()) {
+      return Promise.reject(cacheResponse);
     }
 
-    oThis.tags = cacheRsp.data;
+    oThis.tags = cacheResponse.data;
   }
 
   /**
@@ -305,23 +311,22 @@ class ChannelSearch extends ServiceBase {
    *
    * @sets oThis.links
    *
-   * @returns {Promise<never>}
+   * @returns {Promise<void>}
    * @private
    */
   async _fetchLinks() {
     const oThis = this;
 
     if (oThis.linkIds.length <= 0) {
-      return responseHelper.successWithData({});
+      return;
     }
 
-    const cacheRsp = await new UrlByIdCache({ ids: oThis.linkIds }).fetch();
-
-    if (cacheRsp.isFailure()) {
-      return Promise.reject(cacheRsp);
+    const cacheResponse = await new UrlByIdCache({ ids: oThis.linkIds }).fetch();
+    if (cacheResponse.isFailure()) {
+      return Promise.reject(cacheResponse);
     }
 
-    oThis.links = cacheRsp.data;
+    oThis.links = cacheResponse.data;
   }
 
   /**
@@ -342,8 +347,8 @@ class ChannelSearch extends ServiceBase {
 
     oThis.channelStatsMap = cacheResponse.data;
 
-    for (let channelId in oThis.channelStatsMap) {
-      let channelStat = oThis.channelStatsMap[channelId];
+    for (const channelId in oThis.channelStatsMap) {
+      const channelStat = oThis.channelStatsMap[channelId];
       if (!CommonValidators.validateNonEmptyObject(channelStat)) {
         return Promise.reject(
           responseHelper.error({
@@ -381,7 +386,7 @@ class ChannelSearch extends ServiceBase {
 
     const channelUserRelations = cacheResponse.data;
 
-    for (let channelId in channelUserRelations) {
+    for (const channelId in channelUserRelations) {
       oThis.currentUserChannelRelations[channelId] = {
         id: oThis.currentUser.id,
         isAdmin: 0,
@@ -390,7 +395,7 @@ class ChannelSearch extends ServiceBase {
         updatedAt: 0
       };
 
-      let channelUserRelation = channelUserRelations[channelId];
+      const channelUserRelation = channelUserRelations[channelId];
       if (
         CommonValidators.validateNonEmptyObject(channelUserRelation) &&
         channelUserRelation.status === channelUsersConstants.activeStatus
@@ -419,16 +424,16 @@ class ChannelSearch extends ServiceBase {
   async _fetchImages() {
     const oThis = this;
 
-    if (oThis.imageIds.length < 1) {
+    if (oThis.imageIds.length === 1) {
       return;
     }
 
-    const cacheRsp = await new ImageByIdCache({ ids: oThis.imageIds }).fetch();
-    if (cacheRsp.isFailure()) {
-      return Promise.reject(cacheRsp);
+    const cacheResponse = await new ImageByIdCache({ ids: oThis.imageIds }).fetch();
+    if (cacheResponse.isFailure()) {
+      return Promise.reject(cacheResponse);
     }
 
-    oThis.imageMap = cacheRsp.data;
+    oThis.imageMap = cacheResponse.data;
   }
 
   /**
@@ -457,8 +462,6 @@ class ChannelSearch extends ServiceBase {
       meta: responseMetaData
     };
 
-    console.log('The response is : ', response);
-
     return responseHelper.successWithData(response);
   }
 
@@ -476,7 +479,7 @@ class ChannelSearch extends ServiceBase {
         linkIds = [],
         tagIdsToReplaceableTagNameMap = {};
 
-      // Fetch link id and tag ids
+      // Fetch link id and tag ids.
       for (let ind = 0; ind < textIncludes.length; ind++) {
         const includeRow = textIncludes[ind],
           entity = includeRow.entityIdentifier.split('_');
@@ -503,7 +506,7 @@ class ChannelSearch extends ServiceBase {
   }
 
   /**
-   *  Format tags, links and at mentions present in text.
+   * Format tags, links and at mentions present in text.
    *
    * @returns {{includes: {}, text: *}}
    * @private
