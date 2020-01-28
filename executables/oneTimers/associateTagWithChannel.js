@@ -7,6 +7,7 @@ const rootPrefix = '../..',
   VideoTagModel = require(rootPrefix + '/app/models/mysql/VideoTag'),
   ChannelStatModel = require(rootPrefix + '/app/models/mysql/channel/ChannelStat'),
   ChannelVideoModel = require(rootPrefix + '/app/models/mysql/channel/ChannelVideo'),
+  ChannelTagVideoModel = require(rootPrefix + '/app/models/mysql/channel/ChannelTagVideo'),
   VideoDetailsByVideoIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/VideoDetailsByVideoIds'),
   UserMuteByUser2IdsForGlobalCache = require(rootPrefix + '/lib/cacheManagement/multi/UserMuteByUser2IdsForGlobal'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
@@ -63,6 +64,7 @@ class AssociateTagWithChannel {
     oThis.channel = null;
     oThis.channelTag = null;
     oThis.channelVideoCount = 0;
+    oThis.channelVideoMap = {};
   }
 
   async perform() {
@@ -97,6 +99,8 @@ class AssociateTagWithChannel {
 
     while (true) {
       oThis.channelVideoCount = 0;
+      oThis.channelVideoMap = {};
+
       const videoIds = [];
       const videoTagMapByVideoId = {};
 
@@ -127,10 +131,47 @@ class AssociateTagWithChannel {
       await oThis.insertInChannelVideo(resp.toInsertVideoIds, videoTagMapByVideoId);
       await oThis.markChannelVideoActive(resp.inactiveChannelVideoIds, videoTagMapByVideoId);
       await oThis._updateChannelStat();
-      //todo: insert in channelTagVideos with ignore error and is_pinned flag..
+      await oThis.insertInChannelTagVideo(activeVideoIds, videoTagMapByVideoId);
     }
 
     logger.info(`ChannelTag backPopulateChannelVideos ended`);
+  }
+
+  /**
+   * Multi insert in  Channel Tag Video.
+   *
+   * @returns {Promise<never>}
+   * @private
+   */
+  async insertInChannelTagVideo(videoIds, videoTagMapByVideoId) {
+    const oThis = this;
+
+    const insertColumns = ['channel_id', 'tag_id', 'video_id', 'pinned_at', 'created_at', 'updated_at'],
+      insertValues = [];
+
+    if (videoIds.length === 0) {
+      return;
+    }
+
+    for (let i = 0; i < videoIds.length; i++) {
+      //Note: use tag creation time for backpopulate
+
+      const videoId = videoIds[i],
+        videoTag = videoTagMapByVideoId[videoId],
+        channelVideo = oThis.channelVideoMap[videoId],
+        pinnedAt = channelVideo && channelVideo.id && channelVideo.pinnedAt ? channelVideo.pinnedAt : null,
+        insertValue = [oThis.channelId, oThis.tagId, videoId, pinnedAt, videoTag.createdAt, videoTag.createdAt];
+
+      insertValues.push(insertValue);
+    }
+
+    const res = await new ChannelTagVideoModel()
+      .insertMultiple(insertColumns, insertValues, { touch: false, withIgnore: true })
+      .fire();
+
+    oThis.channelVideoCount += videoIds.length;
+
+    await ChannelTagVideoModel.flushCache({ channelId: oThis.channelId, tagId: oThis.tagId });
   }
 
   /**
@@ -249,8 +290,7 @@ class AssociateTagWithChannel {
     const oThis = this;
 
     const toInsertVideoIds = [],
-      inactiveChannelVideoIds = [],
-      channelVideoMap = {};
+      inactiveChannelVideoIds = [];
 
     const response = await new ChannelVideoModel()
       .select('*')
@@ -262,12 +302,12 @@ class AssociateTagWithChannel {
 
     for (let i = 0; i < response.length; i++) {
       const channelVideo = new ChannelVideoModel().formatDbData(response[i]);
-      channelVideoMap[channelVideo.videoId] = channelVideo;
+      oThis.channelVideoMap[channelVideo.videoId] = channelVideo;
     }
 
     for (let i = 0; i < videoIds.length; i++) {
       const videoId = videoIds[i];
-      const channelVideo = channelVideoMap[videoId];
+      const channelVideo = oThis.channelVideoMap[videoId];
 
       if (!CommonValidator.validateNonEmptyObject(channelVideo)) {
         toInsertVideoIds.push(videoId);
