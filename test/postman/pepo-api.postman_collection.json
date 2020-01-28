@@ -3108,6 +3108,53 @@
 								}
 							},
 							"response": []
+						},
+						{
+							"name": "get-channel-videos",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"type": "text",
+										"value": "application/x-www-form-urlencoded"
+									}
+								],
+								"body": {
+									"mode": "urlencoded",
+									"urlencoded": []
+								},
+								"url": {
+									"raw": "{{api_server}}/api/v1/channels/1/videos?",
+									"host": [
+										"{{api_server}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"channels",
+										"1",
+										"videos"
+									],
+									"query": [
+										{
+											"key": "pagination_identifier",
+											"value": "eyJwYWdlIjozfQ==",
+											"disabled": true
+										},
+										{
+											"key": "filter_by_tag_id",
+											"value": "1",
+											"disabled": true
+										}
+									]
+								}
+							},
+							"response": []
 						}
 					],
 					"protocolProfileBehavior": {},
