@@ -49,7 +49,7 @@ class ChannelVideoModel extends ModelBase {
       channelId: dbRow.channel_id,
       videoId: dbRow.video_id,
       status: channelVideosConstants.invertedStatuses[dbRow.status],
-      pinnedAt: dbRow.status.pinned_at,
+      pinnedAt: dbRow.pinned_at,
       createdAt: dbRow.created_at,
       updatedAt: dbRow.updated_at
     };
@@ -80,7 +80,7 @@ class ChannelVideoModel extends ModelBase {
         channel_id: channelId,
         status: channelVideosConstants.invertedStatuses[channelVideosConstants.activeStatus]
       })
-      .order_by('created_at desc')
+      .order_by('pinned_at desc, created_at desc')
       .limit(limit);
 
     if (paginationTimestamp) {
