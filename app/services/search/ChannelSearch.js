@@ -95,7 +95,7 @@ class ChannelSearch extends ServiceBase {
     await oThis._fetchTagAndLinksFromText();
 
     const promisesArray1 = [
-      oThis._fetchTags(),
+      oThis._fetchTags(), // TODO:channels - use fetchAssociatedEntities
       oThis._fetchLinks(),
       oThis._fetchChannelStats(),
       oThis._fetchUserChannelRelations(),
@@ -317,7 +317,7 @@ class ChannelSearch extends ServiceBase {
   async _fetchLinks() {
     const oThis = this;
 
-    if (oThis.linkIds.length <= 0) {
+    if (oThis.linkIds.length === 0) {
       return;
     }
 
