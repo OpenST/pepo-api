@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "b4c71d50-4b83-499f-9c1a-687aee7f9de7",
+		"_postman_id": "6aae450a-5c70-4f9e-81c4-896f4be80462",
 		"name": "pepo-api",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -3063,6 +3063,47 @@
 										"replies",
 										"1009",
 										"delete"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"protocolProfileBehavior": {},
+					"_postman_isSubFolder": true
+				},
+				{
+					"name": "channels",
+					"item": [
+						{
+							"name": "get-channel",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"type": "text",
+										"value": "application/x-www-form-urlencoded"
+									}
+								],
+								"body": {
+									"mode": "urlencoded",
+									"urlencoded": []
+								},
+								"url": {
+									"raw": "{{api_server}}/api/v1/channels/1",
+									"host": [
+										"{{api_server}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"channels",
+										"1"
 									]
 								}
 							},
