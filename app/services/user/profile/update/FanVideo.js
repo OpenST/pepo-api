@@ -4,7 +4,7 @@ const rootPrefix = '../../../../..',
   UserModelKlass = require(rootPrefix + '/app/models/mysql/User'),
   CommonValidator = require(rootPrefix + '/lib/validators/Common'),
   AddVideoDescription = require(rootPrefix + '/lib/addDescription/Video'),
-  VideoDetailsModel = require(rootPrefix + '/app/models/mysql/VideoDetail'),
+  VideoDetailModel = require(rootPrefix + '/app/models/mysql/VideoDetail'),
   UpdateProfileBase = require(rootPrefix + '/app/services/user/profile/update/Base'),
   videoLib = require(rootPrefix + '/lib/videoLib'),
   bgJobConstants = require(rootPrefix + '/lib/globalConstant/bgJob'),
@@ -317,7 +317,7 @@ class UpdateFanVideo extends UpdateProfileBase {
     if (oThis.feedId) {
       promisesArray.push(FeedModel.flushCache({ ids: [oThis.feedId] }));
     }
-    promisesArray.push(VideoDetailsModel.flushCache({ userId: oThis.profileUserId }));
+    promisesArray.push(VideoDetailModel.flushCache({ userId: oThis.profileUserId }));
 
     await Promise.all(promisesArray);
   }

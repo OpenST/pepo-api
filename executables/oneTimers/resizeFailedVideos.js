@@ -1,6 +1,6 @@
 const rootPrefix = '../..',
   VideoModel = require(rootPrefix + '/app/models/mysql/Video'),
-  VideoDetailsModels = require(rootPrefix + '/app/models/mysql/VideoDetail'),
+  VideoDetailModel = require(rootPrefix + '/app/models/mysql/VideoDetail'),
   basicHelper = require(rootPrefix + '/helpers/basic'),
   bgJob = require(rootPrefix + '/lib/rabbitMqEnqueue/bgJob'),
   bgJobConstants = require(rootPrefix + '/lib/globalConstant/bgJob'),
@@ -68,7 +68,7 @@ class ResizeVideos {
   async _getVideoDetails(idsArray) {
     const oThis = this;
 
-    const videoDetailsDbRow = await new VideoDetailsModels()
+    const videoDetailsDbRow = await new VideoDetailModel()
       .select('*')
       .where(['video_id in (?)', idsArray])
       .fire();

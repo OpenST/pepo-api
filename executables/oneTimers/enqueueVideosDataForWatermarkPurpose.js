@@ -8,7 +8,6 @@
 const command = require('commander');
 
 const rootPrefix = '../..',
-  util = require(rootPrefix + '/lib/util'),
   basicHelper = require(rootPrefix + '/helpers/basic'),
   s3Wrapper = require(rootPrefix + '/lib/aws/S3Wrapper'),
   bgJob = require(rootPrefix + '/lib/rabbitMqEnqueue/bgJob'),
@@ -20,10 +19,7 @@ const rootPrefix = '../..',
   videoConstants = require(rootPrefix + '/lib/globalConstant/video'),
   mediaResizer = require(rootPrefix + '/lib/providers/mediaResizer'),
   bgJobConstants = require(rootPrefix + '/lib/globalConstant/bgJob'),
-  createErrorLogsEntry = require(rootPrefix + '/lib/errorLogs/createEntry'),
-  errorLogsConstants = require(rootPrefix + '/lib/globalConstant/errorLogs'),
   VideoModel = require(rootPrefix + '/app/models/mysql/Video'),
-  VideoDetailModel = require(rootPrefix + '/app/models/mysql/VideoDetail'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger');
 
 const BATCH_SIZE = 25;
