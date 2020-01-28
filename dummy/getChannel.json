@@ -51,7 +51,7 @@
     },
     "texts": {
       "1": {
-        "text": "Dummy description 1 - #testchannel #v1",
+        "text": "Dummy description 1 - #testchannel #v1 https://www.flipkart.com/",
         "includes": {
           "#testchannel": {
             "kind": "tags",
@@ -60,12 +60,24 @@
           "#v1": {
             "kind": "tags",
             "id": 10737
+          },
+          "https://www.flipkart.com/": {
+            "kind": "links",
+            "id": 1
           }
         }
       },
       "2": {
         "text": "Dummy tagline 1",
         "includes": {}
+      }
+    },
+    "links": {
+      "1": {
+        "id": 1,
+        "url": "https://www.flipkart.com/",
+        "kind": "DESCRIPTION_INCLUDE",
+        "uts": 1580135776
       }
     },
     "tags": {
