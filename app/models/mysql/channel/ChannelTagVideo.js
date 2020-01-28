@@ -91,15 +91,15 @@ class ChannelTagVideoModel extends ModelBase {
     const dbRows = await queryObject.fire();
 
     const videoIds = [];
-    const channelTagVideoDetails = {};
+    const channelVideoDetails = {};
 
     for (let index = 0; index < dbRows.length; index++) {
       const formatDbRow = oThis.formatDbData(dbRows[index]);
-      channelTagVideoDetails[formatDbRow.videoId] = formatDbRow;
+      channelVideoDetails[formatDbRow.videoId] = formatDbRow;
       videoIds.push(formatDbRow.videoId);
     }
 
-    return { videoIds: videoIds, channelTagVideoDetails: channelTagVideoDetails };
+    return { videoIds: videoIds, channelVideoDetails: channelVideoDetails };
   }
 
   /**
@@ -109,7 +109,23 @@ class ChannelTagVideoModel extends ModelBase {
    *
    * @returns {Promise<*>}
    */
-  static async flushCache(params) {}
+  static async flushCache(params) {
+    // TODO:channels - Check usage.
+    const promisesArray = [];
+
+    if (params.channelId && params.tagId) {
+      const ChannelTagVideoIdsByTagIdAndChannelIdPaginationCache = require(rootPrefix +
+        '/lib/cacheManagement/single/ChannelTagVideoIdsByTagIdAndChannelIdPagination');
+      promisesArray.push(
+        new ChannelTagVideoIdsByTagIdAndChannelIdPaginationCache({
+          channelId: params.channelId,
+          tagId: params.tagId
+        }).clear()
+      );
+    }
+
+    await Promise.all(promisesArray);
+  }
 }
 
 module.exports = ChannelTagVideoModel;
