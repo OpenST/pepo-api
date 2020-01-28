@@ -1,6 +1,7 @@
 const rootPrefix = '../../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
   databaseConstants = require(rootPrefix + '/lib/globalConstant/database'),
+  ChannelStatModel = require(rootPrefix + '/app/models/mysql/channel/ChannelStat'),
   channelVideosConstants = require(rootPrefix + '/lib/globalConstant/channel/channelVideos');
 
 // Declare variables names.
@@ -99,6 +100,49 @@ class ChannelVideoModel extends ModelBase {
     }
 
     return { videoIds: videoIds, channelVideoDetails: channelVideoDetails };
+  }
+
+  async fetchPopularChannelIdsByVideoIds(params) {
+    const oThis = this,
+      videoIds = params.videoIds,
+      videoIdChannelIdsMap = {},
+      allChannelIds = [];
+
+    if (videoIds.length == 0) {
+      return {};
+    }
+    const videoChannelResult = await oThis
+      .select('*')
+      .where({
+        videoIds: videoIds,
+        status: channelVideosConstants.invertedStatuses[channelVideosConstants.activeStatus]
+      })
+      .fire();
+
+    for (let i = 0; i < videoChannelResult.length; i++) {
+      let videoChannel = videoChannelResult[i];
+      videoIdChannelIdsMap[videoChannel.video_id] = videoIdChannelIdsMap[videoChannel.video_id] || {};
+      videoIdChannelIdsMap[videoChannel.video_id][videoChannel.channel_id] = 1;
+      allChannelIds.push(videoChannel.channel_id);
+    }
+
+    let orderedAllChannelIds = await new ChannelStatModel().orderByPopularChannelIds(allChannelIds);
+
+    for (let vId in videoIdChannelIdsMap) {
+      let unorderedVChannelIds = videoIdChannelIdsMap[vId],
+        orderedVChannelIds = [];
+
+      for (let i = 0; i < orderedAllChannelIds.length; i++) {
+        let vcId = orderedAllChannelIds[i];
+        if (unorderedVChannelIds[vcId]) {
+          orderedVChannelIds.push(vcId);
+        }
+      }
+
+      videoIdChannelIdsMap[vId] = orderedVChannelIds;
+    }
+
+    return videoIdChannelIdsMap;
   }
 
   /**

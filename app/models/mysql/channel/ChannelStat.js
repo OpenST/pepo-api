@@ -80,6 +80,30 @@ class ChannelStatModel extends ModelBase {
   }
 
   /**
+   * Get channel stats by channel ids.
+   *
+   * @param {array<number>} channelIds
+   *
+   * @returns {Promise<any>}
+   */
+  async orderByPopularChannelIds(channelIds) {
+    const oThis = this,
+      orderedChannelIds = [];
+
+    const dbRows = await oThis
+      .select('channel_id, total_users')
+      .where({ channel_id: channelIds })
+      .order('total_users DESC')
+      .fire();
+
+    for (let index = 0; index < dbRows.length; index++) {
+      orderedChannelIds.push(dbRows[index].channel_id);
+    }
+
+    return orderedChannelIds;
+  }
+
+  /**
    * Flush cache.
    *
    * @param {object} params
