@@ -263,6 +263,8 @@ class DeleteUser extends ServiceBase {
     const promisesArray = [];
 
     for (let index = 0; index < oThis.userIdsLength; index++) {
+      const userId = oThis.userIds[index];
+
       promisesArray.push(
         bgJob.enqueue(bgJobConstants.deleteUserJobTopic, {
           userId: oThis.userIds[index],
@@ -271,8 +273,9 @@ class DeleteUser extends ServiceBase {
       );
       promisesArray.push(
         bgJob.enqueue(bgJobConstants.deleteUserVideosJobTopic, {
-          userId: oThis.userIds[index],
-          currentAdminId: oThis.currentAdminId
+          userId: userId,
+          currentAdminId: oThis.currentAdminId,
+          isUserCreator: UserModel.isUserApprovedCreator(oThis.userObjects[userId])
         })
       );
       promisesArray.push(

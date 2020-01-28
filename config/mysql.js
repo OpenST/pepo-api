@@ -116,6 +116,13 @@ const mysqlConfig = {
         password: coreConstants.SOCIAL_CONNECT_DB_MYSQL_PASSWORD
       }
     },
+    webhookDbCluster: {
+      master: {
+        host: coreConstants.WEBHOOK_DB_MYSQL_HOST,
+        user: coreConstants.WEBHOOK_DB_MYSQL_USER,
+        password: coreConstants.WEBHOOK_DB_MYSQL_PASSWORD
+      }
+    },
     channelDbCluster: {
       master: {
         host: coreConstants.CHANNEL_DB_MYSQL_HOST,
@@ -168,6 +175,9 @@ mysqlConfig.databases[database.fiatDbName] = ['fiatDbCluster'];
 
 // Infra db
 mysqlConfig.databases[database.infraDbName] = ['infraDbCluster'];
+
+//webhook db
+mysqlConfig.databases[database.webhookDbName] = ['webhookDbCluster'];
 
 // Channel db
 mysqlConfig.databases[database.channelDbName] = ['channelDbCluster'];

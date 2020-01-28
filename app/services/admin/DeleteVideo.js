@@ -1,4 +1,6 @@
 const rootPrefix = '../../..',
+  UserModel = require(rootPrefix + '/app/models/mysql/User'),
+  UsersCache = require(rootPrefix + '/lib/cacheManagement/multi/User'),
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   VideoDetailsByVideoIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/VideoDetailsByVideoIds'),
   bgJob = require(rootPrefix + '/lib/rabbitMqEnqueue/bgJob'),
@@ -33,6 +35,7 @@ class DeleteVideo extends ServiceBase {
 
     oThis.currentAdminId = Number(oThis.currentAdmin.id);
     oThis.creatorUserId = null;
+    oThis.user = null;
   }
 
   /**
@@ -59,7 +62,8 @@ class DeleteVideo extends ServiceBase {
     await bgJob.enqueue(bgJobConstants.deleteUserVideosJobTopic, {
       userId: oThis.creatorUserId,
       currentAdminId: oThis.currentAdminId,
-      videoIds: [oThis.videoId]
+      videoIds: [oThis.videoId],
+      isUserCreator: UserModel.isUserApprovedCreator(oThis.user)
     });
 
     return responseHelper.successWithData({});
@@ -83,6 +87,20 @@ class DeleteVideo extends ServiceBase {
 
     oThis.videoDetails = [videoDetailsCacheResponse.data[oThis.videoId]];
     oThis.creatorUserId = oThis.videoDetails[0].creatorUserId;
+
+    const cacheRsp = await new UsersCache({ ids: [oThis.creatorUserId] }).fetch();
+    if (cacheRsp.isFailure()) {
+      return Promise.reject(
+        responseHelper.paramValidationError({
+          internal_error_identifier: 'a_s_a_dv_fcui_1',
+          api_error_identifier: 'invalid_params',
+          params_error_identifiers: ['invalid_user_id'],
+          debug_options: {}
+        })
+      );
+    }
+
+    oThis.user = cacheRsp.data[oThis.creatorUserId];
   }
 }
 

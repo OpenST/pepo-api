@@ -81,9 +81,11 @@ class CronProcessesMonitorExecutable extends CronBase {
         [cronProcessesConstants.pushNotificationHookProcessor]: cronProcessesConstants.continuousCronRestartInterval,
         [cronProcessesConstants.bgJobProcessor]: cronProcessesConstants.continuousCronRestartInterval,
         [cronProcessesConstants.notificationJobProcessor]: cronProcessesConstants.continuousCronRestartInterval,
+        [cronProcessesConstants.webhookJobPreProcessor]: cronProcessesConstants.continuousCronRestartInterval,
         [cronProcessesConstants.pixelJobProcessor]: cronProcessesConstants.continuousCronRestartInterval,
         [cronProcessesConstants.pepoMobileEventJobProcessor]: cronProcessesConstants.continuousCronRestartInterval,
-        [cronProcessesConstants.cdnCacheInvalidationProcessor]: cronProcessesConstants.continuousCronRestartInterval
+        [cronProcessesConstants.cdnCacheInvalidationProcessor]: cronProcessesConstants.continuousCronRestartInterval,
+        [cronProcessesConstants.webhookProcessor]: cronProcessesConstants.continuousCronRestartInterval
       },
       // Restart interval time for periodic crons should match with devops-cron config file.
       [cronProcessesConstants.periodicCronsType]: {

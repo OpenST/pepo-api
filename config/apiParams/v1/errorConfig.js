@@ -16,7 +16,11 @@ const v1ErrorConfig = {
     code: 'invalid',
     message: 'User Name can contain alphanumeric and underscore and should be min 1 characters and max 15 characters.'
   },
-
+  invalid_clientId: {
+    parameter: 'client_id',
+    code: 'invalid',
+    message: 'Invalid parameter client_id.'
+  },
   invalid_password: {
     parameter: 'password',
     code: 'invalid',
@@ -431,6 +435,18 @@ const v1ErrorConfig = {
     message: 'Oops! Something went wrong.'
   },
 
+  invalid_topics: {
+    parameter: 'topic_kind',
+    code: 'invalid',
+    message: 'Topic kind is invalid.'
+  },
+
+  invalid_endpoint_uuid: {
+    parameter: 'endpoint_uuid',
+    code: 'invalid',
+    message: 'Endpoint uuid is invalid.'
+  },
+
   missing_video_url: {
     parameter: 'video_url',
     code: 'missing',
@@ -446,6 +462,11 @@ const v1ErrorConfig = {
     parameter: 'user_id',
     code: 'invalid',
     message: 'Please make sure you are not unmuting yourself.'
+  },
+  invalid_uuid: {
+    parameter: 'uuid',
+    code: 'invalid',
+    message: 'Uuid is invalid.'
   }
 };
 

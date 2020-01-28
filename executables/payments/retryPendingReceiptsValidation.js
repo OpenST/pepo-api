@@ -186,7 +186,7 @@ class RetryPendingReceiptValidation extends CronBase {
       postRetryFiatPaymentDetailRsp.data.status === fiatPaymentConstants.receiptValidationSuccessStatus
     ) {
       await bgJob.enqueue(bgJobConstants.validatePaymentReceiptJobTopic, {
-        fiatPaymentId: oThis.fiatPaymentId
+        fiatPaymentId: fiatPayment.id
       });
     }
 
