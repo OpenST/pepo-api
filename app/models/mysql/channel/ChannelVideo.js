@@ -102,44 +102,53 @@ class ChannelVideoModel extends ModelBase {
     return { videoIds: videoIds, channelVideoDetails: channelVideoDetails };
   }
 
+  /**
+   * Fetch popular channel ids by video ids.
+   *
+   * @param {object} params
+   * @param {array<number>} params.videoIds
+   *
+   * @returns {Promise<{}>}
+   */
   async fetchPopularChannelIdsByVideoIds(params) {
-    const oThis = this,
-      videoIds = params.videoIds,
+    const oThis = this;
+
+    const videoIds = params.videoIds,
       videoIdChannelIdsMap = {},
       allChannelIds = [];
 
-    if (videoIds.length == 0) {
+    if (videoIds.length === 0) {
       return {};
     }
     const videoChannelResult = await oThis
       .select('*')
       .where({
-        videoIds: videoIds,
+        video_id: videoIds,
         status: channelVideosConstants.invertedStatuses[channelVideosConstants.activeStatus]
       })
       .fire();
 
-    for (let i = 0; i < videoChannelResult.length; i++) {
-      let videoChannel = videoChannelResult[i];
+    for (let index = 0; index < videoChannelResult.length; index++) {
+      const videoChannel = videoChannelResult[index];
       videoIdChannelIdsMap[videoChannel.video_id] = videoIdChannelIdsMap[videoChannel.video_id] || {};
       videoIdChannelIdsMap[videoChannel.video_id][videoChannel.channel_id] = 1;
       allChannelIds.push(videoChannel.channel_id);
     }
 
-    let orderedAllChannelIds = await new ChannelStatModel().orderByPopularChannelIds(allChannelIds);
+    const orderedAllChannelIds = await new ChannelStatModel().orderByPopularChannelIds(allChannelIds);
 
-    for (let vId in videoIdChannelIdsMap) {
-      let unorderedVChannelIds = videoIdChannelIdsMap[vId],
+    for (const videoId in videoIdChannelIdsMap) {
+      const unorderedVChannelIds = videoIdChannelIdsMap[videoId],
         orderedVChannelIds = [];
 
-      for (let i = 0; i < orderedAllChannelIds.length; i++) {
-        let vcId = orderedAllChannelIds[i];
+      for (let index = 0; index < orderedAllChannelIds.length; index++) {
+        const vcId = orderedAllChannelIds[index];
         if (unorderedVChannelIds[vcId]) {
           orderedVChannelIds.push(vcId);
         }
       }
 
-      videoIdChannelIdsMap[vId] = orderedVChannelIds;
+      videoIdChannelIdsMap[videoId] = orderedVChannelIds;
     }
 
     return videoIdChannelIdsMap;
