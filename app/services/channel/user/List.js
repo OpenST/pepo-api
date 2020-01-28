@@ -6,9 +6,13 @@ const rootPrefix = '../../../..',
   ChannelByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelByIds'),
   TokenUserByUserIdsMultiCache = require(rootPrefix + '/lib/cacheManagement/multi/TokenUserByUserIds'),
   UserIdsByChannelIdPaginationCache = require(rootPrefix + '/lib/cacheManagement/single/UserIdsByChannelIdPagination'),
+  ChannelUserByUserIdAndChannelIdsCache = require(rootPrefix +
+    '/lib/cacheManagement/multi/channel/ChannelUserByUserIdAndChannelIds'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination'),
-  channelsConstants = require(rootPrefix + '/lib/globalConstant/channel/channels');
+  entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
+  channelsConstants = require(rootPrefix + '/lib/globalConstant/channel/channels'),
+  channelUsersConstants = require(rootPrefix + '/lib/globalConstant/channel/channelUsers');
 
 /**
  * Class to list the channel users.
@@ -41,6 +45,15 @@ class ListChannelUser extends ServiceBase {
 
     oThis.channelObj = null;
     oThis.channelUserObj = null;
+    oThis.currentUserChannelRelations = {
+      [oThis.channelId]: {
+        id: oThis.currentUser.id,
+        isAdmin: 0,
+        isMember: 0,
+        notificationStatus: 0,
+        updatedAt: 0
+      }
+    };
 
     oThis.paginationTimestamp = null;
     oThis.nextPaginationTimestamp = null;
@@ -67,7 +80,7 @@ class ListChannelUser extends ServiceBase {
 
     await oThis._fetchUserIds();
 
-    const promisesArray = [oThis._fetchUsers(), oThis._fetchTokenUsers()];
+    const promisesArray = [oThis._fetchUsers(), oThis._fetchTokenUsers(), oThis._fetchUserChannelRelations()];
     await Promise.all(promisesArray);
 
     await oThis._fetchImages();
@@ -215,6 +228,44 @@ class ListChannelUser extends ServiceBase {
   }
 
   /**
+   * Fetch current user channel relations.
+   *
+   * @sets oThis.currentUserChannelRelations
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _fetchUserChannelRelations() {
+    const oThis = this;
+
+    const userId = oThis.currentUser.id;
+    const cacheResponse = await new ChannelUserByUserIdAndChannelIdsCache({
+      userId: userId,
+      channelIds: [oThis.channelId]
+    }).fetch();
+
+    if (cacheResponse.isFailure()) {
+      return Promise.reject(cacheResponse);
+    }
+
+    const channelUserRelation = cacheResponse.data[oThis.channelId];
+    if (
+      CommonValidators.validateNonEmptyObject(channelUserRelation) &&
+      channelUserRelation.status === channelUsersConstants.activeStatus
+    ) {
+      oThis.currentUserChannelRelations[oThis.channelId] = {
+        id: oThis.currentUser.id,
+        isAdmin: Number(channelUserRelation.role === channelUsersConstants.adminRole),
+        isMember: 1,
+        notificationStatus: Number(
+          channelUserRelation.notificationStatus === channelUsersConstants.activeNotificationStatus
+        ),
+        updatedAt: channelUserRelation.updatedAt
+      };
+    }
+  }
+
+  /**
    * Fetch images.
    *
    * @sets oThis.imageMap
@@ -274,6 +325,7 @@ class ListChannelUser extends ServiceBase {
       usersByIdMap: oThis.usersByIdMap,
       tokenUsersByUserIdMap: oThis.tokenUsersByUserIdMap,
       userIds: oThis.userIds,
+      [entityTypeConstants.currentUserChannelRelationsMap]: oThis.currentUserChannelRelations,
       imageMap: oThis.imageMap,
       meta: oThis.responseMetaData
     });
