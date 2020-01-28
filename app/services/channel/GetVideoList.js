@@ -4,21 +4,21 @@ const rootPrefix = '../../..',
   GetTokenService = require(rootPrefix + '/app/services/token/Get'),
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   ChannelByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelByIds'),
-  VideoIdsByChannelIdPaginationCache = require(rootPrefix +
-    '/lib/cacheManagement/single/VideoIdsByChannelIdPagination'),
+  ChannelVideoIdsByChannelIdPaginationCache = require(rootPrefix +
+    '/lib/cacheManagement/single/ChannelVideoIdsByChannelIdPagination'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination'),
   entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
   channelsConstants = require(rootPrefix + '/lib/globalConstant/channel/channels');
 
 /**
- * Class for user video details service.
+ * Class for channel video details service.
  *
  * @class GetChannelVideoList
  */
 class GetChannelVideoList extends ServiceBase {
   /**
-   * Constructor for user video details service.
+   * Constructor for channel video details service.
    *
    * @param {object} params
    * @param {object} params.current_user
@@ -41,6 +41,7 @@ class GetChannelVideoList extends ServiceBase {
     oThis.limit = oThis._defaultPageLimit();
 
     oThis.paginationTimestamp = null;
+    oThis.filterByTagId = null;
 
     oThis.videoIds = [];
     oThis.channelVideoDetails = {};
@@ -79,7 +80,7 @@ class GetChannelVideoList extends ServiceBase {
   /**
    * Validate and sanitize.
    *
-   * @sets oThis.paginationTimestamp
+   * @sets oThis.paginationTimestamp, oThis.filterByTagId
    *
    * @returns {Promise<*|result>}
    * @private
@@ -91,8 +92,10 @@ class GetChannelVideoList extends ServiceBase {
       const parsedPaginationParams = oThis._parsePaginationParams(oThis.paginationIdentifier);
 
       oThis.paginationTimestamp = parsedPaginationParams.pagination_timestamp; // Override paginationTimestamp number.
+      oThis.filterByTagId = parsedPaginationParams.filter_by_tag_id;
     } else {
       oThis.paginationTimestamp = null;
+      oThis.filterByTagId = null;
     }
 
     // Validate whether channel exists or not.
@@ -147,7 +150,7 @@ class GetChannelVideoList extends ServiceBase {
   async _fetchVideoIds() {
     const oThis = this;
 
-    const cacheResponse = await new VideoIdsByChannelIdPaginationCache({
+    const cacheResponse = await new ChannelVideoIdsByChannelIdPaginationCache({
       channelId: oThis.channelId,
       limit: oThis.limit,
       paginationTimestamp: oThis.paginationTimestamp
@@ -183,7 +186,8 @@ class GetChannelVideoList extends ServiceBase {
 
     if (oThis.videosCount >= oThis.limit) {
       nextPagePayloadKey[paginationConstants.paginationIdentifierKey] = {
-        pagination_timestamp: oThis.nextPaginationTimestamp
+        pagination_timestamp: oThis.nextPaginationTimestamp,
+        filter_by_tag_id: oThis.filterByTagId
       };
     }
 
