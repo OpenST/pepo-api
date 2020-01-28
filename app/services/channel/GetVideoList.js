@@ -272,7 +272,6 @@ class GetChannelVideoList extends ServiceBase {
       [entityTypeConstants.channelVideoList]: oThis.videoDetails,
       [entityTypeConstants.videoDetailsMap]: oThis.usersVideosMap.videoDetailsMap,
       [entityTypeConstants.videoDescriptionsMap]: oThis.usersVideosMap.videoDescriptionMap,
-      [entityTypeConstants.userProfilesMap]: oThis.usersVideosMap.userProfilesMap,
       [entityTypeConstants.currentUserUserContributionsMap]: oThis.usersVideosMap.currentUserUserContributionsMap,
       [entityTypeConstants.currentUserVideoContributionsMap]: oThis.usersVideosMap.currentUserVideoContributionsMap,
       [entityTypeConstants.currentUserVideoRelationsMap]: oThis.usersVideosMap.currentUserVideoRelationsMap,

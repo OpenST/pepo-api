@@ -62,8 +62,6 @@ router.get('/:channel_id/videos', sanitizer.sanitizeDynamicUrlParams, function(r
       entityKindToResponseKeyMap: {
         [entityTypeConstants.channelVideoList]: responseEntityKey.channelVideoList,
         [entityTypeConstants.usersMap]: responseEntityKey.users,
-        [entityTypeConstants.userStats]: responseEntityKey.userStats,
-        [entityTypeConstants.userProfilesMap]: responseEntityKey.userProfiles,
         [entityTypeConstants.videoDescriptionsMap]: responseEntityKey.videoDescriptions,
         [entityTypeConstants.tagsMap]: responseEntityKey.tags,
         [entityTypeConstants.linksMap]: responseEntityKey.links,
@@ -75,7 +73,7 @@ router.get('/:channel_id/videos', sanitizer.sanitizeDynamicUrlParams, function(r
         [entityTypeConstants.currentUserVideoRelationsMap]: responseEntityKey.currentUserVideoRelations,
         [entityTypeConstants.pricePointsMap]: responseEntityKey.pricePoints,
         [entityTypeConstants.token]: responseEntityKey.token,
-        [entityTypeConstants.tagVideoListMeta]: responseEntityKey.meta
+        [entityTypeConstants.channelVideosListMeta]: responseEntityKey.meta
       },
       serviceData: serviceResponse.data
     }).perform();
