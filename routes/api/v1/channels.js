@@ -93,10 +93,10 @@ router.get('/:channel_id/users', sanitizer.sanitizeDynamicUrlParams, function(re
     const wrapperFormatterRsp = await new FormatterComposer({
       resultType: responseEntityKey.channelUserList,
       entityKindToResponseKeyMap: {
-        [entityTypeConstants.usersMap]: responseEntityKey.channelUserList,
+        [entityTypeConstants.users]: responseEntityKey.channelUserList,
         [entityTypeConstants.currentUserChannelRelationsMap]: responseEntityKey.currentUserChannelRelations,
         [entityTypeConstants.imagesMap]: responseEntityKey.images,
-        [entityTypeConstants.userListMeta]: responseEntityKey.meta
+        [entityTypeConstants.channelListMeta]: responseEntityKey.meta
       },
       serviceData: serviceResponse.data
     }).perform();

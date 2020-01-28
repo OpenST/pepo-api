@@ -87,19 +87,20 @@ class ChannelSearch extends ServiceBase {
 
     await oThis._getChannelIds();
 
-    await oThis._getChannels();
-    await oThis._fetchChannelTagIds();
+    const promisesArray = [oThis._getChannels(), oThis._fetchChannelTagIds()];
+
+    await Promise.all(promisesArray);
 
     await oThis._fetchTagAndLinksFromText();
 
-    const promisesArray = [
+    const promisesArray1 = [
       oThis._fetchTags(),
       oThis._fetchLinks(),
       oThis._fetchChannelStats(),
       oThis._fetchUserChannelRelations(),
       oThis._fetchImages()
     ];
-    await Promise.all(promisesArray);
+    await Promise.all(promisesArray1);
 
     return oThis._formatResponse();
   }
