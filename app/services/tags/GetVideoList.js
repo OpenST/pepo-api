@@ -2,6 +2,7 @@ const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   GetUserVideos = require(rootPrefix + '/lib/GetUsersVideoList'),
   GetTokenService = require(rootPrefix + '/app/services/token/Get'),
+  CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   VideoTagsByTagIdPaginationCache = require(rootPrefix + '/lib/cacheManagement/single/VideoTagsByTagIdPagination'),
   ReplyDetailsByEntityIdsAndEntityKindCache = require(rootPrefix +
     '/lib/cacheManagement/multi/ReplyDetailsByEntityIdsAndEntityKind'),
@@ -251,7 +252,7 @@ class GetTagsVideoList extends ServiceBase {
 
     for (let index = 0; index < oThis.videoIds.length; index++) {
       const videoId = oThis.videoIds[index];
-      if (oThis.usersVideosMap.fullVideosMap[videoId]) {
+      if (CommonValidators.validateNonEmptyObject(oThis.usersVideosMap.fullVideosMap[videoId])) {
         oThis.videoDetails.push(oThis.usersVideosMap.fullVideosMap[videoId]);
       }
     }
