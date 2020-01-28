@@ -48,7 +48,7 @@ class ChannelVideoModel extends ModelBase {
       id: dbRow.id,
       channelId: dbRow.channel_id,
       videoId: dbRow.video_id,
-      status: channelVideosConstants.invertedStatuses[dbRow.status],
+      status: channelVideosConstants.statuses[dbRow.status],
       pinnedAt: dbRow.pinned_at,
       createdAt: dbRow.created_at,
       updatedAt: dbRow.updated_at
