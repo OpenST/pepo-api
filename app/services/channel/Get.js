@@ -1,7 +1,6 @@
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
-  ChannelModel = require(rootPrefix + '/app/models/mysql/channel/Channel'),
   FetchAssociatedEntities = require(rootPrefix + '/lib/FetchAssociatedEntities'),
   ChannelByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelByIds'),
   ChannelTagByChannelIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelTagByChannelIds'),
@@ -258,14 +257,12 @@ class GetChannel extends ServiceBase {
   _prepareResponse() {
     const oThis = this;
 
-    const { channelObject, channelDetailsObject } = new ChannelModel().getChannelAndChannelDetailsObject(
-      oThis.channel,
-      oThis.tagIds
-    );
+    const channelIdToTagIdsMap = { [oThis.channelId]: oThis.tagIds };
 
     return {
-      [entityTypeConstants.channel]: channelObject,
-      [entityTypeConstants.channelDetailsMap]: channelDetailsObject,
+      [entityTypeConstants.channel]: oThis.channel,
+      [entityTypeConstants.channelDetailsMap]: { [oThis.channel.id]: oThis.channel },
+      [entityTypeConstants.channelIdToTagIdsMap]: channelIdToTagIdsMap,
       [entityTypeConstants.channelStatsMap]: oThis.channelStatsMap,
       [entityTypeConstants.currentUserChannelRelationsMap]: oThis.currentUserChannelRelations,
       [entityTypeConstants.textsMap]: oThis.texts,
