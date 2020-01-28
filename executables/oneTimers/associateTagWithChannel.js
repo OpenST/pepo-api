@@ -176,8 +176,6 @@ class AssociateTagWithChannel {
       .insertMultiple(insertColumns, insertValues, { touch: false, withIgnore: true })
       .fire();
 
-    oThis.channelVideoCount += videoIds.length;
-
     await ChannelTagVideoModel.flushCache({ channelId: oThis.channelId, tagId: oThis.tagId });
   }
 
@@ -281,7 +279,7 @@ class AssociateTagWithChannel {
         .where(['status != ?', channelVideosConstants.invertedStatuses[channelVideosConstants.activeStatus]])
         .fire();
 
-      oThis.channelVideoCount = oThis.channelVideoCount - (res.Duplicates + updateRes.affectedRows);
+      oThis.channelVideoCount = oThis.channelVideoCount - (res.Duplicates - updateRes.affectedRows);
     }
 
     await ChannelVideoModel.flushCache({ channelId: oThis.channelId });
