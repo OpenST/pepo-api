@@ -79,7 +79,7 @@ class ChannelTagModel extends ModelBase {
     for (let index = 0; index < dbRows.length; index++) {
       const formattedDbRow = oThis.formatDbData(dbRows[index]);
       response[formattedDbRow.channelId] = response[formattedDbRow.channelId] || [];
-      response[formattedDbRow.channelId].push(formattedDbRow);
+      response[formattedDbRow.channelId].push(formattedDbRow.tagId);
     }
 
     return response;

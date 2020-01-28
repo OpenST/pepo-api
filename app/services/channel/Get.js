@@ -147,11 +147,7 @@ class GetChannel extends ServiceBase {
       return Promise.reject(cacheResponse);
     }
 
-    const channelTagsArray = cacheResponse.data[oThis.channelId];
-    for (let index = 0; index < channelTagsArray.length; index++) {
-      const channelTag = channelTagsArray[index];
-      oThis.tagIds.push(channelTag.tagId);
-    }
+    oThis.tagIds = cacheResponse.data[oThis.channelId];
   }
 
   /**

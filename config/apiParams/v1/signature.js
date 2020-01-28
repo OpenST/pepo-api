@@ -682,12 +682,20 @@ const v1Signature = {
     mandatory: [],
     optional: [
       {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      },
+      {
         parameter: 'q',
         validatorMethods: ['validateString']
       },
       {
         parameter: paginationConstants.paginationIdentifierKey,
         validatorMethods: ['validateString', 'validatePaginationIdentifier']
+      },
+      {
+        parameter: 'getTopResults',
+        validatorMethods: ['validateBoolean']
       }
     ]
   },

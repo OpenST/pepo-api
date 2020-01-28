@@ -173,9 +173,9 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/health-checker', elbHealthCheckerRoute);
 
 /* Dummy routes */
-app.use('/api/v1/search/channels', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
-  return res.status(200).json(require(rootPrefix + '/dummy/searchChannel.json'));
-});
+// app.use('/api/v1/search/channels', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+//   return res.status(200).json(require(rootPrefix + '/dummy/searchChannel.json'));
+// });
 app.use('/api/v1/search/top', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   return res.status(200).json(require(rootPrefix + '/dummy/searchTop.json'));
 });

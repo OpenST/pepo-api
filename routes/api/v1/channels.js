@@ -126,24 +126,4 @@ router.get('/:channel_id/share', sanitizer.sanitizeDynamicUrlParams, function(re
   Promise.resolve(routeHelper.perform(req, res, next, '/channel/ShareDetails', 'r_a_v1_c_6', null, dataFormatterFunc));
 });
 
-/* Search channels. */
-router.get('/search', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
-  req.decodedParams.apiName = apiName.getChannels;
-
-  const dataFormatterFunc = async function(serviceResponse) {
-    const wrapperFormatterRsp = await new FormatterComposer({
-      resultType: responseEntityKey.channelSearchResults,
-      entityKindToResponseKeyMap: {
-        [entityTypeConstants.channelList]: responseEntityKey.channelSearchResults,
-        [entityTypeConstants.channelListMeta]: responseEntityKey.meta
-      },
-      serviceData: serviceResponse.data
-    }).perform();
-
-    serviceResponse.data = wrapperFormatterRsp.data;
-  };
-
-  Promise.resolve(routeHelper.perform(req, res, next, '/channel/Search', 'r_a_v1_c_7', null, dataFormatterFunc));
-});
-
 module.exports = router;
