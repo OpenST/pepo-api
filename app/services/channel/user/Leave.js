@@ -195,11 +195,14 @@ class LeaveChannel extends ServiceBase {
       channelIds: [oThis.channelId]
     };
 
-    let getCurrentUserChannelRelationsLib = await new GetCurrentUserChannelRelationsLib(
+    const currentUserChannelRelationsResponse = await new GetCurrentUserChannelRelationsLib(
       currentUserChannelRelationLibParams
     ).perform();
+    if (currentUserChannelRelationsResponse.isFailure()) {
+      return Promise.reject(currentUserChannelRelationsResponse);
+    }
 
-    oThis.currentUserChannelRelations = getCurrentUserChannelRelationsLib.data.currentUserChannelRelations;
+    oThis.currentUserChannelRelations = currentUserChannelRelationsResponse.data.currentUserChannelRelations;
   }
 }
 

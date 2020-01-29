@@ -74,12 +74,12 @@ class JoinChannel extends ServiceBase {
   async _fetchChannel() {
     const oThis = this;
 
-    const channelByIdsCacheResponse = await new ChannelByIdsCache({ ids: [oThis.channelId] }).fetch();
-    if (channelByIdsCacheResponse.isFailure()) {
-      return Promise.reject(channelByIdsCacheResponse);
+    const cacheResponse = await new ChannelByIdsCache({ ids: [oThis.channelId] }).fetch();
+    if (cacheResponse.isFailure()) {
+      return Promise.reject(cacheResponse);
     }
 
-    const channelObj = channelByIdsCacheResponse.data[oThis.channelId];
+    const channelObj = cacheResponse.data[oThis.channelId];
 
     if (!CommonValidators.validateNonEmptyObject(channelObj) || channelObj.status !== channelConstants.activeStatus) {
       return Promise.reject(
@@ -240,11 +240,14 @@ class JoinChannel extends ServiceBase {
       channelIds: [oThis.channelId]
     };
 
-    let getCurrentUserChannelRelationsLib = await new GetCurrentUserChannelRelationsLib(
+    const currentUserChannelRelationsResponse = await new GetCurrentUserChannelRelationsLib(
       currentUserChannelRelationLibParams
     ).perform();
+    if (currentUserChannelRelationsResponse.isFailure()) {
+      return Promise.reject(currentUserChannelRelationsResponse);
+    }
 
-    oThis.currentUserChannelRelations = getCurrentUserChannelRelationsLib.data.currentUserChannelRelations;
+    oThis.currentUserChannelRelations = currentUserChannelRelationsResponse.data.currentUserChannelRelations;
   }
 }
 
