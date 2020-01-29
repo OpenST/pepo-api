@@ -270,6 +270,7 @@ class GetTagsVideoList extends ServiceBase {
     return responseHelper.successWithData({
       [entityTypeConstants.tagVideoList]: oThis.videoDetails,
       [entityTypeConstants.videoDetailsMap]: oThis.usersVideosMap.videoDetailsMap,
+      [entityTypeConstants.channelsMap]: oThis.usersVideosMap.channelsMap,
       [entityTypeConstants.videoDescriptionsMap]: oThis.usersVideosMap.videoDescriptionMap,
       [entityTypeConstants.userProfilesMap]: oThis.usersVideosMap.userProfilesMap,
       [entityTypeConstants.currentUserUserContributionsMap]: oThis.usersVideosMap.currentUserUserContributionsMap,

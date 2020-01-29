@@ -304,6 +304,7 @@ class GetChannelVideoList extends ServiceBase {
     return responseHelper.successWithData({
       [entityTypeConstants.channelVideoList]: oThis.videoDetails,
       [entityTypeConstants.videoDetailsMap]: oThis.usersVideosMap.videoDetailsMap,
+      [entityTypeConstants.channelsMap]: oThis.usersVideosMap.channelsMap,
       [entityTypeConstants.videoDescriptionsMap]: oThis.usersVideosMap.videoDescriptionMap,
       [entityTypeConstants.currentUserUserContributionsMap]: oThis.usersVideosMap.currentUserUserContributionsMap,
       [entityTypeConstants.currentUserVideoContributionsMap]: oThis.usersVideosMap.currentUserVideoContributionsMap,

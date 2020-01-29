@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "6aae450a-5c70-4f9e-81c4-896f4be80462",
+		"_postman_id": "184e6e4a-3b92-490d-996e-ff115b4b3991",
 		"name": "pepo-api",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -194,6 +194,60 @@
 						},
 						{
 							"name": "tag list",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"auth": {
+									"type": "basic",
+									"basic": [
+										{
+											"key": "username",
+											"value": "pepo",
+											"type": "string"
+										},
+										{
+											"key": "password",
+											"value": "Pepo-Admin-20!9*",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"value": "application/x-www-form-urlencoded",
+										"type": "text"
+									},
+									{
+										"key": "csrf-token",
+										"type": "text",
+										"value": "{{csrf-token}}"
+									}
+								],
+								"body": {
+									"mode": "urlencoded",
+									"urlencoded": []
+								},
+								"url": {
+									"raw": "{{api_server}}/api/admin/curated-entities/tags",
+									"host": [
+										"{{api_server}}"
+									],
+									"path": [
+										"api",
+										"admin",
+										"curated-entities",
+										"tags"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "channel list",
 							"protocolProfileBehavior": {
 								"disableBodyPruning": true
 							},
@@ -2366,6 +2420,37 @@
 						},
 						{
 							"name": "tags",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{api_server}}/api/v1/search/tags?q=pe",
+									"host": [
+										"{{api_server}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"search",
+										"tags"
+									],
+									"query": [
+										{
+											"key": "pagination_identifier",
+											"value": "eyJwYWdlIjoyfQ==",
+											"disabled": true
+										},
+										{
+											"key": "q",
+											"value": "pe"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "channels",
 							"request": {
 								"method": "GET",
 								"header": [],
