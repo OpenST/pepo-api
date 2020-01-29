@@ -38,7 +38,7 @@ class JoinChannel extends ServiceBase {
     oThis.channelId = params.channel_id;
 
     oThis.channelUserObj = null;
-    oThis.currentUserChannelRelations = {};
+    oThis.currentUserChannelRelationsMap = {};
   }
 
   /**
@@ -61,7 +61,7 @@ class JoinChannel extends ServiceBase {
     await oThis._fetchCurrentUserChannelRelations();
 
     return responseHelper.successWithData({
-      currentUserChannelRelations: oThis.currentUserChannelRelations
+      currentUserChannelRelationsMap: oThis.currentUserChannelRelationsMap
     });
   }
 
@@ -226,7 +226,7 @@ class JoinChannel extends ServiceBase {
   /**
    * Fetch current user channel relations
    *
-   * @sets oThis.currentUserChannelRelations
+   * @sets oThis.currentUserChannelRelationsMap
    *
    * @returns {Promise<void>}
    * @private
@@ -246,7 +246,7 @@ class JoinChannel extends ServiceBase {
       return Promise.reject(currentUserChannelRelationsResponse);
     }
 
-    oThis.currentUserChannelRelations = currentUserChannelRelationsResponse.data.currentUserChannelRelations;
+    oThis.currentUserChannelRelationsMap = currentUserChannelRelationsResponse.data.currentUserChannelRelations;
   }
 }
 

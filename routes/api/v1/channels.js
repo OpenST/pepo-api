@@ -40,7 +40,19 @@ router.post('/:channel_id/join', sanitizer.sanitizeDynamicUrlParams, function(re
   req.decodedParams.apiName = apiName.joinChannel;
   req.decodedParams.channel_id = req.params.channel_id;
 
-  Promise.resolve(routeHelper.perform(req, res, next, '/channel/user/Join', 'r_a_v1_c_2', null, null));
+  const dataFormatterFunc = async function(serviceResponse) {
+    const wrapperFormatterRsp = await new FormatterComposer({
+      resultType: responseEntityKey.currentUserChannelRelations,
+      entityKindToResponseKeyMap: {
+        [entityTypeConstants.currentUserChannelRelationsMap]: responseEntityKey.currentUserChannelRelations
+      },
+      serviceData: serviceResponse.data
+    }).perform();
+
+    serviceResponse.data = wrapperFormatterRsp.data;
+  };
+
+  Promise.resolve(routeHelper.perform(req, res, next, '/channel/user/Join', 'r_a_v1_c_2', null, dataFormatterFunc));
 });
 
 /* Leave channel by user. */
@@ -48,7 +60,19 @@ router.post('/:channel_id/leave', sanitizer.sanitizeDynamicUrlParams, function(r
   req.decodedParams.apiName = apiName.leaveChannel;
   req.decodedParams.channel_id = req.params.channel_id;
 
-  Promise.resolve(routeHelper.perform(req, res, next, '/channel/user/Leave', 'r_a_v1_c_3', null, null));
+  const dataFormatterFunc = async function(serviceResponse) {
+    const wrapperFormatterRsp = await new FormatterComposer({
+      resultType: responseEntityKey.currentUserChannelRelations,
+      entityKindToResponseKeyMap: {
+        [entityTypeConstants.currentUserChannelRelationsMap]: responseEntityKey.currentUserChannelRelations
+      },
+      serviceData: serviceResponse.data
+    }).perform();
+
+    serviceResponse.data = wrapperFormatterRsp.data;
+  };
+
+  Promise.resolve(routeHelper.perform(req, res, next, '/channel/user/Leave', 'r_a_v1_c_3', null, dataFormatterFunc));
 });
 
 /* Mute notification for channel user. */
@@ -56,7 +80,21 @@ router.post('/:channel_id/turn-off-notifications', sanitizer.sanitizeDynamicUrlP
   req.decodedParams.apiName = apiName.turnOffChannelNotifications;
   req.decodedParams.channel_id = req.params.channel_id;
 
-  Promise.resolve(routeHelper.perform(req, res, next, '/channel/user/TurnOffNotifications', 'r_a_v1_c_7', null, null));
+  const dataFormatterFunc = async function(serviceResponse) {
+    const wrapperFormatterRsp = await new FormatterComposer({
+      resultType: responseEntityKey.currentUserChannelRelations,
+      entityKindToResponseKeyMap: {
+        [entityTypeConstants.currentUserChannelRelationsMap]: responseEntityKey.currentUserChannelRelations
+      },
+      serviceData: serviceResponse.data
+    }).perform();
+
+    serviceResponse.data = wrapperFormatterRsp.data;
+  };
+
+  Promise.resolve(
+    routeHelper.perform(req, res, next, '/channel/user/TurnOffNotifications', 'r_a_v1_c_7', null, dataFormatterFunc)
+  );
 });
 
 /* Mute notification for channel user. */
@@ -64,7 +102,21 @@ router.post('/:channel_id/turn-on-notifications', sanitizer.sanitizeDynamicUrlPa
   req.decodedParams.apiName = apiName.turnOffChannelNotifications;
   req.decodedParams.channel_id = req.params.channel_id;
 
-  Promise.resolve(routeHelper.perform(req, res, next, '/channel/user/TurnOnNotifications', 'r_a_v1_c_8', null, null));
+  const dataFormatterFunc = async function(serviceResponse) {
+    const wrapperFormatterRsp = await new FormatterComposer({
+      resultType: responseEntityKey.currentUserChannelRelations,
+      entityKindToResponseKeyMap: {
+        [entityTypeConstants.currentUserChannelRelationsMap]: responseEntityKey.currentUserChannelRelations
+      },
+      serviceData: serviceResponse.data
+    }).perform();
+
+    serviceResponse.data = wrapperFormatterRsp.data;
+  };
+
+  Promise.resolve(
+    routeHelper.perform(req, res, next, '/channel/user/TurnOnNotifications', 'r_a_v1_c_8', null, dataFormatterFunc)
+  );
 });
 
 /* Fetch videos of a channel. */

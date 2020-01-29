@@ -36,7 +36,7 @@ class TurnOffChannelNotifications extends ServiceBase {
     oThis.channelId = params.channel_id;
 
     oThis.channelUserObj = null;
-    oThis.currentUserChannelRelations = {};
+    oThis.currentUserChannelRelationsMap = {};
   }
 
   /**
@@ -57,7 +57,7 @@ class TurnOffChannelNotifications extends ServiceBase {
     await oThis._fetchCurrentUserChannelRelations();
 
     return responseHelper.successWithData({
-      currentUserChannelRelations: oThis.currentUserChannelRelations
+      currentUserChannelRelationsMap: oThis.currentUserChannelRelationsMap
     });
   }
 
@@ -198,7 +198,7 @@ class TurnOffChannelNotifications extends ServiceBase {
   /**
    * Fetch current user channel relations
    *
-   * @sets oThis.currentUserChannelRelations
+   * @sets oThis.currentUserChannelRelationsMap
    *
    * @returns {Promise<void>}
    * @private
@@ -218,7 +218,7 @@ class TurnOffChannelNotifications extends ServiceBase {
       return Promise.reject(currentUserChannelRelationsResponse);
     }
 
-    oThis.currentUserChannelRelations = currentUserChannelRelationsResponse.data.currentUserChannelRelations;
+    oThis.currentUserChannelRelationsMap = currentUserChannelRelationsResponse.data.currentUserChannelRelations;
   }
 }
 
