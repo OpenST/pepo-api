@@ -3,14 +3,12 @@ const rootPrefix = '../../..',
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   FetchAssociatedEntities = require(rootPrefix + '/lib/FetchAssociatedEntities'),
   ChannelByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelByIds'),
+  GetCurrentUserChannelRelationsLib = require(rootPrefix + '/lib/channel/getCurrentUserChannelRelations'),
   ChannelTagByChannelIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelTagByChannelIds'),
   ChannelStatByChannelIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelStatByChannelIds'),
-  ChannelUserByUserIdAndChannelIdsCache = require(rootPrefix +
-    '/lib/cacheManagement/multi/channel/ChannelUserByUserIdAndChannelIds'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
-  channelConstants = require(rootPrefix + '/lib/globalConstant/channel/channels'),
-  channelUsersConstants = require(rootPrefix + '/lib/globalConstant/channel/channelUsers');
+  channelConstants = require(rootPrefix + '/lib/globalConstant/channel/channels');
 
 /**
  * Class to get channel details.
@@ -39,15 +37,7 @@ class GetChannel extends ServiceBase {
 
     oThis.channel = {};
     oThis.channelStatsMap = {};
-    oThis.currentUserChannelRelations = {
-      [oThis.channelId]: {
-        id: oThis.currentUser.id,
-        isAdmin: 0,
-        isMember: 0,
-        notificationStatus: 0,
-        updatedAt: 0
-      }
-    };
+    oThis.currentUserChannelRelations = {};
 
     oThis.textIds = [];
     oThis.texts = {};
@@ -74,7 +64,7 @@ class GetChannel extends ServiceBase {
 
     const promisesArray = [
       oThis._fetchChannelStats(),
-      oThis._fetchUserChannelRelations(),
+      oThis._fetchCurrentUserChannelRelations(),
       oThis._fetchAssociatedEntities()
     ];
 
@@ -190,33 +180,22 @@ class GetChannel extends ServiceBase {
    * @returns {Promise<void>}
    * @private
    */
-  async _fetchUserChannelRelations() {
+  async _fetchCurrentUserChannelRelations() {
     const oThis = this;
 
-    const userId = oThis.currentUser.id;
-    const cacheResponse = await new ChannelUserByUserIdAndChannelIdsCache({
-      userId: userId,
+    const currentUserChannelRelationLibParams = {
+      currentUserId: oThis.currentUser.id,
       channelIds: [oThis.channelId]
-    }).fetch();
-    if (cacheResponse.isFailure()) {
-      return Promise.reject(cacheResponse);
+    };
+
+    const currentUserChannelRelationsResponse = await new GetCurrentUserChannelRelationsLib(
+      currentUserChannelRelationLibParams
+    ).perform();
+    if (currentUserChannelRelationsResponse.isFailure()) {
+      return Promise.reject(currentUserChannelRelationsResponse);
     }
 
-    const channelUserRelation = cacheResponse.data[oThis.channelId];
-    if (
-      CommonValidators.validateNonEmptyObject(channelUserRelation) &&
-      channelUserRelation.status === channelUsersConstants.activeStatus
-    ) {
-      oThis.currentUserChannelRelations[oThis.channelId] = {
-        id: oThis.currentUser.id,
-        isAdmin: Number(channelUserRelation.role === channelUsersConstants.adminRole),
-        isMember: 1,
-        notificationStatus: Number(
-          channelUserRelation.notificationStatus === channelUsersConstants.activeNotificationStatus
-        ),
-        updatedAt: channelUserRelation.updatedAt
-      };
-    }
+    oThis.currentUserChannelRelations = currentUserChannelRelationsResponse.data.currentUserChannelRelations;
   }
 
   /**
