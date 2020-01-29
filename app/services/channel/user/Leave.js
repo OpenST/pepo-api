@@ -191,7 +191,7 @@ class LeaveChannel extends ServiceBase {
     const oThis = this;
 
     const currentUserChannelRelationLibParams = {
-      currentUser: oThis.currentUser,
+      currentUserId: oThis.currentUser.id,
       channelIds: [oThis.channelId]
     };
 
