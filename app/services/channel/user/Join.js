@@ -4,6 +4,7 @@ const rootPrefix = '../../../..',
   ChannelUserModel = require(rootPrefix + '/app/models/mysql/channel/ChannelUser'),
   ChannelStatModel = require(rootPrefix + '/app/models/mysql/channel/ChannelStat'),
   ChannelByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelByIds'),
+  GetCurrentUserChannelRelationsLib = require(rootPrefix + '/lib/channel/getCurrentUserChannelRelations'),
   ChannelUserByUserIdAndChannelIdsCache = require(rootPrefix +
     '/lib/cacheManagement/multi/channel/ChannelUserByUserIdAndChannelIds'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
@@ -37,6 +38,7 @@ class JoinChannel extends ServiceBase {
     oThis.channelId = params.channel_id;
 
     oThis.channelUserObj = null;
+    oThis.currentUserChannelRelations = {};
   }
 
   /**
@@ -56,7 +58,11 @@ class JoinChannel extends ServiceBase {
 
     await oThis._updateChannelStats();
 
-    return responseHelper.successWithData({});
+    await oThis._fetchCurrentUserChannelRelations();
+
+    return responseHelper.successWithData({
+      currentUserChannelRelations: oThis.currentUserChannelRelations
+    });
   }
 
   /**
@@ -183,8 +189,8 @@ class JoinChannel extends ServiceBase {
           channelUsersConstants.invertedNotificationStatuses[channelUsersConstants.activeNotificationStatus]
       };
 
-      let insertResponse = await new ChannelUserModel().insert(insertData);
-      insertResponse = insertResponse.data;
+      let insertResponse = await new ChannelUserModel().insert(insertData).fire();
+      insertData.id = insertResponse.insertId;
 
       if (!insertResponse) {
         logger.error('Error while inserting data in channel_user table.');
@@ -216,6 +222,29 @@ class JoinChannel extends ServiceBase {
       .fire();
 
     await ChannelStatModel.flushCache({ channelId: oThis.channelId });
+  }
+
+  /**
+   * Fetch current user channel relations
+   *
+   * @sets oThis.currentUserChannelRelations
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _fetchCurrentUserChannelRelations() {
+    const oThis = this;
+
+    const currentUserChannelRelationLibParams = {
+      currentUser: oThis.currentUser,
+      channelIds: [oThis.channelId]
+    };
+
+    let getCurrentUserChannelRelationsLib = await new GetCurrentUserChannelRelationsLib(
+      currentUserChannelRelationLibParams
+    ).perform();
+
+    oThis.currentUserChannelRelations = getCurrentUserChannelRelationsLib.data.currentUserChannelRelations;
   }
 }
 

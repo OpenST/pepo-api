@@ -4,6 +4,7 @@ const rootPrefix = '../../../..',
   ChannelUserModel = require(rootPrefix + '/app/models/mysql/channel/ChannelUser'),
   ChannelStatModel = require(rootPrefix + '/app/models/mysql/channel/ChannelStat'),
   ChannelByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelByIds'),
+  GetCurrentUserChannelRelationsLib = require(rootPrefix + '/lib/channel/getCurrentUserChannelRelations'),
   ChannelUserByUserIdAndChannelIdsCache = require(rootPrefix +
     '/lib/cacheManagement/multi/channel/ChannelUserByUserIdAndChannelIds'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
@@ -36,6 +37,7 @@ class LeaveChannel extends ServiceBase {
     oThis.channelId = params.channel_id;
 
     oThis.channelUserObj = null;
+    oThis.currentUserChannelRelations = {};
   }
 
   /**
@@ -55,7 +57,11 @@ class LeaveChannel extends ServiceBase {
 
     await oThis._updateChannelStat();
 
-    return responseHelper.successWithData({});
+    await oThis._fetchCurrentUserChannelRelations();
+
+    return responseHelper.successWithData({
+      currentUserChannelRelations: oThis.currentUserChannelRelations
+    });
   }
 
   /**
@@ -171,6 +177,29 @@ class LeaveChannel extends ServiceBase {
       .fire();
 
     await ChannelStatModel.flushCache({ channelId: oThis.channelId });
+  }
+
+  /**
+   * Fetch current user channel relations
+   *
+   * @sets oThis.currentUserChannelRelations
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _fetchCurrentUserChannelRelations() {
+    const oThis = this;
+
+    const currentUserChannelRelationLibParams = {
+      currentUser: oThis.currentUser,
+      channelIds: [oThis.channelId]
+    };
+
+    let getCurrentUserChannelRelationsLib = await new GetCurrentUserChannelRelationsLib(
+      currentUserChannelRelationLibParams
+    ).perform();
+
+    oThis.currentUserChannelRelations = getCurrentUserChannelRelationsLib.data.currentUserChannelRelations;
   }
 }
 

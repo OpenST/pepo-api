@@ -36,7 +36,7 @@ router.get('/:channel_id', sanitizer.sanitizeDynamicUrlParams, function(req, res
 });
 
 /* Join channel by user. */
-router.get('/:channel_id/join', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+router.post('/:channel_id/join', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.joinChannel;
   req.decodedParams.channel_id = req.params.channel_id;
 
@@ -44,7 +44,7 @@ router.get('/:channel_id/join', sanitizer.sanitizeDynamicUrlParams, function(req
 });
 
 /* Leave channel by user. */
-router.get('/:channel_id/leave', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+router.post('/:channel_id/leave', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.leaveChannel;
   req.decodedParams.channel_id = req.params.channel_id;
 
