@@ -64,4 +64,25 @@ router.get('/tags', sanitizer.sanitizeDynamicUrlParams, function(req, res, next)
   Promise.resolve(routeHelper.perform(req, res, next, '/admin/curated/List', 'r_a_v1_ce_i_4', null, dataFormatterFunc));
 });
 
+/* Get list for given tag entity kind */
+router.get('/channels', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.getChannelsCuratedEntityList;
+  req.decodedParams.entity_kind = curatedEntitiesConstants.channelsEntityKind;
+
+  const dataFormatterFunc = async function(serviceResponse) {
+    const wrapperFormatterRsp = await new AdminFormatterComposer({
+      resultType: adminResponseEntityKey.channelsCuratedList,
+      entityKindToResponseKeyMap: {
+        [adminEntityType.channelsCuratedEntitiesList]: adminResponseEntityKey.channelsCuratedList,
+        [adminEntityType.channelsMap]: adminResponseEntityKey.channels,
+        [adminEntityType.channelDetailsMap]: adminResponseEntityKey.channels
+      },
+      serviceData: serviceResponse.data
+    }).perform();
+    serviceResponse.data = wrapperFormatterRsp.data;
+  };
+
+  Promise.resolve(routeHelper.perform(req, res, next, '/admin/curated/List', 'r_a_v1_ce_i_4', null, dataFormatterFunc));
+});
+
 module.exports = router;

@@ -394,6 +394,15 @@ const adminSignature = {
       }
     ],
     optional: []
+  },
+  [apiName.getChannelsCuratedEntityList]: {
+    mandatory: [
+      {
+        parameter: 'entity_kind',
+        validatorMethods: ['validateString']
+      }
+    ],
+    optional: []
   }
 };
 
