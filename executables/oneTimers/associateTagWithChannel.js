@@ -483,7 +483,7 @@ class AssociateTagWithChannel {
       );
     }
 
-    logger.info(`Channel Tag validation done`);
+    logger.info('Channel Tag validation done.');
   }
 
   /**
@@ -497,7 +497,7 @@ class AssociateTagWithChannel {
   async addUpdateChannelTag() {
     const oThis = this;
 
-    logger.info(`ChannelTag addUpdateChannelTag started`);
+    logger.info('ChannelTag addUpdateChannelTag started.');
 
     if (oThis.channelTag && oThis.channelTag.id) {
       await new ChannelTagModel()
@@ -509,7 +509,7 @@ class AssociateTagWithChannel {
 
       oThis.channelTag.status = channelTagConstants.activeStatus;
     } else {
-      let insertData = {
+      const insertData = {
         channel_id: oThis.channelId,
         tag_id: oThis.tagId,
         status: channelTagConstants.invertedStatuses[channelTagConstants.activeStatus]
@@ -524,9 +524,9 @@ class AssociateTagWithChannel {
       oThis.channelTag = new ChannelTagModel().formatDbData(insertData);
     }
 
-    await ChannelTagModel.flushCache(oThis.channelTag);
+    await ChannelTagModel.flushCache({ channelIds: [oThis.channelTag.channelId] });
 
-    logger.info(`ChannelTag addUpdateChannelTag done`);
+    logger.info('ChannelTag addUpdateChannelTag done.');
   }
 }
 

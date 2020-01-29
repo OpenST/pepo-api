@@ -161,7 +161,7 @@ class DisassociateTagWithChannel {
   async markChannelTagInactive() {
     const oThis = this;
 
-    logger.info(`ChannelTag markChannelTagInactive started`);
+    logger.info('ChannelTag markChannelTagInactive started');
 
     await new ChannelTagModel()
       .update({ status: channelTagConstants.invertedStatuses[channelTagConstants.inactiveStatus] })
@@ -172,9 +172,9 @@ class DisassociateTagWithChannel {
 
     oThis.channelTag.status = channelTagConstants.inactiveStatus;
 
-    await ChannelTagModel.flushCache(oThis.channelTag);
+    await ChannelTagModel.flushCache({ channelIds: [oThis.channelTag.channelId] });
 
-    logger.info(`ChannelTag markChannelTagInactive done`);
+    logger.info('ChannelTag markChannelTagInactive done');
   }
 
   /**
@@ -186,7 +186,7 @@ class DisassociateTagWithChannel {
   async removeChannelVideos() {
     const oThis = this;
 
-    logger.info(`ChannelTag removeChannelVideos started`);
+    logger.info('ChannelTag removeChannelVideos started');
 
     const limit = 100;
     let lastVideoId = null;
@@ -256,7 +256,7 @@ class DisassociateTagWithChannel {
   async deleteFromChannelVideos(videoIds, videoIdMap) {
     const oThis = this;
 
-    let dbQuery = await new ChannelTagVideoModel()
+    const dbQuery = await new ChannelTagVideoModel()
       .select('video_id')
       .where({
         channel_id: oThis.channelId,
@@ -272,7 +272,7 @@ class DisassociateTagWithChannel {
 
     const videoIdsToBeDeletedInChannelVideo = [];
 
-    for (let videoId in videoIdMap) {
+    for (const videoId in videoIdMap) {
       if (videoIdMap[videoId]) {
         videoIdsToBeDeletedInChannelVideo.push(videoId);
       }

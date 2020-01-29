@@ -88,11 +88,21 @@ class ChannelTagModel extends ModelBase {
   /**
    * Flush cache.
    *
+   * @param {object} params
+   * @param {array<number>} params.channelIds
+   *
    * @returns {Promise<*>}
    */
-  static async flushCache() {
-    // Do nothing.
-    // TODO:channels - Check usage.
+  static async flushCache(params) {
+    const promisesArray = [];
+
+    if (params.channelIds) {
+      const ChannelTagByChannelIdsCache = require(rootPrefix +
+        '/lib/cacheManagement/multi/channel/ChannelTagByChannelIds');
+      promisesArray.push(new ChannelTagByChannelIdsCache({ channelIds: params.channelIds }).clear());
+    }
+
+    await Promise.all(promisesArray);
   }
 }
 
