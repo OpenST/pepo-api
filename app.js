@@ -173,6 +173,10 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/health-checker', elbHealthCheckerRoute);
 
 /* Dummy routes */
+app.use('/api/v1/dummy/feeds', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  return res.status(200).json(require(rootPrefix + '/dummy/getFeed.json'));
+});
+
 app.use('/api/v1/dummy/search/channels', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   return res.status(200).json(require(rootPrefix + '/dummy/searchChannel.json'));
 });
@@ -202,10 +206,6 @@ app.use('/api/v1/dummy/channels/2/share', sanitizer.sanitizeDynamicUrlParams, fu
 
 app.use('/api/v1/dummy/channels/2', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   return res.status(404).json(require(rootPrefix + '/dummy/getDeletedChannel.json'));
-});
-
-app.use('/api/v1/dummy/feeds', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
-  return res.status(404).json(require(rootPrefix + '/dummy/getFeed.json'));
 });
 
 // Start Request logging. Placed below static and health check to reduce logs
