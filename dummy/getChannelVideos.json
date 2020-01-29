@@ -1053,87 +1053,115 @@
     "meta": {
       "next_page_payload": null
     },
-    "result_type": "channel_videos",
+    "result_type": "FAN_UPDATE",
     "channel_videos": [
       {
         "id": "v_6803",
-        "kind": "CHANNEL_VIDEOS",
+        "kind": "FAN_UPDATE",
         "uts": 1580135470,
         "payload": {
+          "user_id": 2529,
+          "video_id": 6803,
           "is_pinned": 1,
           "video_detail_id": "6803"
         }
       },
       {
         "id": "v_6811",
-        "kind": "CHANNEL_VIDEOS",
+        "kind": "FAN_UPDATE",
         "uts": 1580135768,
         "payload": {
+          "user_id": 2217,
+          "video_id": 6811,
           "is_pinned": 1,
           "video_detail_id": "6811"
         }
       },
       {
         "id": "v_6805",
-        "kind": "CHANNEL_VIDEOS",
+        "kind": "FAN_UPDATE",
         "uts": 1580135514,
         "payload": {
+          "user_id": 2529,
+          "video_id": 6805,
+          "is_pinned": 0,
           "video_detail_id": "6805"
         }
       },
       {
         "id": "v_6806",
-        "kind": "CHANNEL_VIDEOS",
+        "kind": "FAN_UPDATE",
         "uts": 1580135563,
         "payload": {
+          "user_id": 2529,
+          "video_id": 6806,
+          "is_pinned": 0,
           "video_detail_id": "6806"
         }
       },
       {
         "id": "v_6808",
-        "kind": "CHANNEL_VIDEOS",
+        "kind": "FAN_UPDATE",
         "uts": 1580135608,
         "payload": {
+          "user_id": 2529,
+          "video_id": 6808,
+          "is_pinned": 0,
           "video_detail_id": "6808"
         }
       },
       {
         "id": "v_6810",
-        "kind": "CHANNEL_VIDEOS",
+        "kind": "FAN_UPDATE",
         "uts": 1580135646,
         "payload": {
+          "user_id": 2529,
+          "video_id": 6810,
+          "is_pinned": 0,
           "video_detail_id": "6810"
         }
       },
       {
         "id": "v_6809",
-        "kind": "CHANNEL_VIDEOS",
+        "kind": "FAN_UPDATE",
         "uts": 1580135624,
         "payload": {
+          "user_id": 2217,
+          "video_id": 6809,
+          "is_pinned": 0,
           "video_detail_id": "6809"
         }
       },
       {
         "id": "v_6807",
-        "kind": "CHANNEL_VIDEOS",
+        "kind": "FAN_UPDATE",
         "uts": 1580135571,
         "payload": {
+          "user_id": 2217,
+          "video_id": 6807,
+          "is_pinned": 0,
           "video_detail_id": "6807"
         }
       },
       {
         "id": "v_6804",
-        "kind": "CHANNEL_VIDEOS",
+        "kind": "FAN_UPDATE",
         "uts": 1580135508,
         "payload": {
+          "user_id": 2217,
+          "video_id": 6804,
+          "is_pinned": 0,
           "video_detail_id": "6804"
         }
       },
       {
         "id": "v_6802",
-        "kind": "CHANNEL_VIDEOS",
+        "kind": "FAN_UPDATE",
         "uts": 1580135462,
         "payload": {
+          "user_id": 2217,
+          "video_id": 6802,
+          "is_pinned": 0,
           "video_detail_id": "6802"
         }
       }
