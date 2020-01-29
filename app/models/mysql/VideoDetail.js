@@ -207,9 +207,7 @@ class VideoDetail extends ModelBase {
     });
     for (const videoId in videoDetails) {
       const videoPopularChannelIds = videoToPopularChannelIdsMap[videoId];
-      if (videoPopularChannelIds) {
-        videoDetails[videoId].channelIds = videoPopularChannelIds;
-      }
+      videoDetails[videoId].channelIds = videoPopularChannelIds || [];
     }
 
     return { videoIds: videoIds, videoDetails: videoDetails };
