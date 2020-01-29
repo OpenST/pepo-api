@@ -241,9 +241,7 @@ class VideoDetail extends ModelBase {
         videoPopularChannelIds = videoToPopularChannelIdsMap[formatDbRow.videoId];
 
       response[formatDbRow.videoId] = formatDbRow;
-      if (videoPopularChannelIds) {
-        response[formatDbRow.videoId].channelIds = videoPopularChannelIds;
-      }
+      response[formatDbRow.videoId].channelIds = videoPopularChannelIds || [];
     }
 
     return response;

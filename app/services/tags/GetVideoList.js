@@ -231,7 +231,6 @@ class GetTagsVideoList extends ServiceBase {
     });
 
     const response = await userVideosObj.perform();
-
     if (response.isFailure()) {
       return Promise.reject(response);
     }
