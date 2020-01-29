@@ -2,13 +2,11 @@ const rootPrefix = '../../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   ChannelUserModel = require(rootPrefix + '/app/models/mysql/channel/ChannelUser'),
-  ChannelStatModel = require(rootPrefix + '/app/models/mysql/channel/ChannelStat'),
   ChannelByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelByIds'),
   GetCurrentUserChannelRelationsLib = require(rootPrefix + '/lib/channel/getCurrentUserChannelRelations'),
   ChannelUserByUserIdAndChannelIdsCache = require(rootPrefix +
     '/lib/cacheManagement/multi/channel/ChannelUserByUserIdAndChannelIds'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
-  logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   channelConstants = require(rootPrefix + '/lib/globalConstant/channel/channels'),
   channelUsersConstants = require(rootPrefix + '/lib/globalConstant/channel/channelUsers');
 
@@ -54,7 +52,7 @@ class TurnOnChannelNotifications extends ServiceBase {
 
     await oThis._fetchChannelUser();
 
-    await oThis._UpdateChannelUser();
+    await oThis._updateChannelUser();
 
     await oThis._fetchCurrentUserChannelRelations();
 
@@ -109,20 +107,29 @@ class TurnOnChannelNotifications extends ServiceBase {
       userId: oThis.currentUser.id,
       channelIds: [oThis.channelId]
     }).fetch();
-
     if (cacheResponse.isFailure()) {
       return Promise.reject(cacheResponse);
     }
 
     oThis.channelUserObj = cacheResponse.data[oThis.channelId];
 
-    if (
-      CommonValidators.validateNonEmptyObject(oThis.channelUserObj) &&
-      oThis.channelUserObj.status !== channelUsersConstants.activeStatus
-    ) {
+    if (!CommonValidators.validateNonEmptyObject(oThis.channelUserObj)) {
       return Promise.reject(
         responseHelper.error({
           internal_error_identifier: 'a_s_c_u_tonn_fcu_1',
+          api_error_identifier: 'entity_not_found',
+          debug_options: {
+            channelId: oThis.channelId,
+            userId: oThis.currentUser.id
+          }
+        })
+      );
+    }
+
+    if (oThis.channelUserObj.status === channelUsersConstants.inactiveStatus) {
+      return Promise.reject(
+        responseHelper.error({
+          internal_error_identifier: 'a_s_c_u_tonn_fcu_2',
           api_error_identifier: 'user_active_in_channel',
           debug_options: {
             channelId: oThis.channelId,
@@ -132,13 +139,10 @@ class TurnOnChannelNotifications extends ServiceBase {
       );
     }
 
-    if (
-      CommonValidators.validateNonEmptyObject(oThis.channelUserObj) &&
-      oThis.channelUserObj.status === channelUsersConstants.blockedStatus
-    ) {
+    if (oThis.channelUserObj.status === channelUsersConstants.blockedStatus) {
       return Promise.reject(
         responseHelper.error({
-          internal_error_identifier: 'a_s_c_u_tonn_fcu_2',
+          internal_error_identifier: 'a_s_c_u_tonn_fcu_3',
           api_error_identifier: 'user_blocked_in_channel',
           debug_options: {
             channelId: oThis.channelId,
@@ -148,13 +152,10 @@ class TurnOnChannelNotifications extends ServiceBase {
       );
     }
 
-    if (
-      CommonValidators.validateNonEmptyObject(oThis.channelUserObj) &&
-      oThis.channelUserObj.notificationStatus === channelUsersConstants.activeNotificationStatus
-    ) {
+    if (oThis.channelUserObj.notificationStatus === channelUsersConstants.activeNotificationStatus) {
       return Promise.reject(
         responseHelper.error({
-          internal_error_identifier: 'a_s_c_u_tonn_fcu_3',
+          internal_error_identifier: 'a_s_c_u_tonn_fcu_4',
           api_error_identifier: 'notification_already_turned_on_for_user_in_channel',
           debug_options: {
             channelId: oThis.channelId,
@@ -173,25 +174,23 @@ class TurnOnChannelNotifications extends ServiceBase {
    * @returns {Promise<void>}
    * @private
    */
-  async _UpdateChannelUser() {
+  async _updateChannelUser() {
     const oThis = this;
 
-    if (CommonValidators.validateNonEmptyObject(oThis.channelUserObj)) {
-      const updateParams = {
-        notification_status:
-          channelUsersConstants.invertedNotificationStatuses[channelUsersConstants.activeNotificationStatus]
-      };
+    const updateParams = {
+      notification_status:
+        channelUsersConstants.invertedNotificationStatuses[channelUsersConstants.activeNotificationStatus]
+    };
 
-      const updateResponse = await new ChannelUserModel()
-        .update(updateParams)
-        .where({ id: oThis.channelUserObj.id })
-        .fire();
+    const updateResponse = await new ChannelUserModel()
+      .update(updateParams)
+      .where({ id: oThis.channelUserObj.id })
+      .fire();
 
-      Object.assign(updateParams, updateResponse.defaultUpdatedAttributes);
+    Object.assign(updateParams, updateResponse.defaultUpdatedAttributes);
 
-      const formattedUpdatedParams = new ChannelUserModel().formatDbData(updateParams);
-      Object.assign(oThis.channelUserObj, formattedUpdatedParams);
-    }
+    const formattedUpdatedParams = new ChannelUserModel().formatDbData(updateParams);
+    Object.assign(oThis.channelUserObj, formattedUpdatedParams);
 
     await ChannelUserModel.flushCache(oThis.channelUserObj);
   }
