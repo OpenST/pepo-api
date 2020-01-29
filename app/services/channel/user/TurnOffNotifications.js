@@ -7,6 +7,7 @@ const rootPrefix = '../../../..',
   ChannelUserByUserIdAndChannelIdsCache = require(rootPrefix +
     '/lib/cacheManagement/multi/channel/ChannelUserByUserIdAndChannelIds'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
+  entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
   channelConstants = require(rootPrefix + '/lib/globalConstant/channel/channels'),
   channelUsersConstants = require(rootPrefix + '/lib/globalConstant/channel/channelUsers');
 
@@ -57,7 +58,7 @@ class TurnOffChannelNotifications extends ServiceBase {
     await oThis._fetchCurrentUserChannelRelations();
 
     return responseHelper.successWithData({
-      currentUserChannelRelationsMap: oThis.currentUserChannelRelationsMap
+      [entityTypeConstants.currentUserChannelRelationsMap]: oThis.currentUserChannelRelationsMap
     });
   }
 

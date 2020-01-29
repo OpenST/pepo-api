@@ -9,6 +9,7 @@ const rootPrefix = '../../../..',
     '/lib/cacheManagement/multi/channel/ChannelUserByUserIdAndChannelIds'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
+  entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
   channelConstants = require(rootPrefix + '/lib/globalConstant/channel/channels'),
   channelUsersConstants = require(rootPrefix + '/lib/globalConstant/channel/channelUsers');
 
@@ -61,7 +62,7 @@ class JoinChannel extends ServiceBase {
     await oThis._fetchCurrentUserChannelRelations();
 
     return responseHelper.successWithData({
-      currentUserChannelRelationsMap: oThis.currentUserChannelRelationsMap
+      [entityTypeConstants.currentUserChannelRelationsMap]: oThis.currentUserChannelRelationsMap
     });
   }
 
