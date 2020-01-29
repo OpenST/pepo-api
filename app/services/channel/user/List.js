@@ -140,7 +140,8 @@ class ListChannelUser extends ServiceBase {
           internal_error_identifier: 'a_s_c_u_j_fc_1',
           api_error_identifier: 'entity_not_found',
           debug_options: {
-            channelId: oThis.channelId
+            channelId: oThis.channelId,
+            channelObject: oThis.channelObj
           }
         })
       );
@@ -238,9 +239,8 @@ class ListChannelUser extends ServiceBase {
   async _fetchUserChannelRelations() {
     const oThis = this;
 
-    const userId = oThis.currentUser.id;
     const cacheResponse = await new ChannelUserByUserIdAndChannelIdsCache({
-      userId: userId,
+      userId: oThis.currentUser.id,
       channelIds: [oThis.channelId]
     }).fetch();
 
