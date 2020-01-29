@@ -233,8 +233,6 @@ class UpdateFanVideo extends UpdateProfileBase {
 
     // Feed needs to be added only if user is an approved creator.
     if (UserModelKlass.isUserApprovedCreator(oThis.userObj)) {
-      await oThis._publishAtMentionNotifications();
-
       await oThis._addFeed();
 
       const messagePayload = {
@@ -245,7 +243,7 @@ class UpdateFanVideo extends UpdateProfileBase {
       promiseArray.push(bgJob.enqueue(bgJobConstants.slackContentVideoMonitoringJobTopic, messagePayload));
       // Notification would be published only if user is approved.
       promiseArray.push(
-        notificationJobEnqueue.enqueue(notificationJobConstants.videoAdd, {
+        notificationJobEnqueue.enqueue(notificationJobConstants.videoNotificationsKind, {
           userId: oThis.profileUserId,
           videoId: oThis.videoId,
           mentionedUserIds: oThis.mentionedUserIds
@@ -259,26 +257,6 @@ class UpdateFanVideo extends UpdateProfileBase {
     }
 
     await Promise.all(promiseArray);
-  }
-
-  /**  await oThis._publishNotifications();
-   * Publish notifications
-   * @returns {Promise<void>}
-   * @private
-   */
-  async _publishAtMentionNotifications() {
-    const oThis = this;
-
-    if (oThis.mentionedUserIds.length === 0) {
-      return;
-    }
-
-    // Notification would be published only if user is approved.
-    await notificationJobEnqueue.enqueue(notificationJobConstants.userMention, {
-      userId: oThis.currentUserId,
-      videoId: oThis.videoId,
-      mentionedUserIds: oThis.mentionedUserIds
-    });
   }
 
   /**
