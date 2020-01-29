@@ -189,8 +189,7 @@ class JoinChannel extends ServiceBase {
           channelUsersConstants.invertedNotificationStatuses[channelUsersConstants.activeNotificationStatus]
       };
 
-      let insertResponse = await new ChannelUserModel().insert(insertData).fire();
-      insertData.id = insertResponse.insertId;
+      const insertResponse = await new ChannelUserModel().insert(insertData).fire();
 
       if (!insertResponse) {
         logger.error('Error while inserting data in channel_user table.');
