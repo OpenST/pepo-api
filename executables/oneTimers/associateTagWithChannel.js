@@ -2,23 +2,23 @@ const program = require('commander');
 
 const rootPrefix = '../..',
   CommonValidator = require(rootPrefix + '/lib/validators/Common'),
-  ChannelTagModel = require(rootPrefix + '/app/models/mysql/channel/ChannelTag'),
-  ChannelByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelByIds'),
   VideoTagModel = require(rootPrefix + '/app/models/mysql/VideoTag'),
+  ChannelTagModel = require(rootPrefix + '/app/models/mysql/channel/ChannelTag'),
   ChannelStatModel = require(rootPrefix + '/app/models/mysql/channel/ChannelStat'),
   ChannelUserModel = require(rootPrefix + '/app/models/mysql/channel/ChannelUser'),
   ChannelVideoModel = require(rootPrefix + '/app/models/mysql/channel/ChannelVideo'),
   ChannelTagVideoModel = require(rootPrefix + '/app/models/mysql/channel/ChannelTagVideo'),
+  ChannelByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelByIds'),
   VideoDetailsByVideoIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/VideoDetailsByVideoIds'),
   UserMuteByUser2IdsForGlobalCache = require(rootPrefix + '/lib/cacheManagement/multi/UserMuteByUser2IdsForGlobal'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
-  videoDetailsConstants = require(rootPrefix + '/lib/globalConstant/videoDetail'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
-  channelTagConstants = require(rootPrefix + '/lib/globalConstant/channel/channelTags'),
-  channelVideosConstants = require(rootPrefix + '/lib/globalConstant/channel/channelVideos'),
-  channelUsersConstants = require(rootPrefix + '/lib/globalConstant/channel/channelUsers'),
   videoTagConstants = require(rootPrefix + '/lib/globalConstant/videoTag'),
-  channelConstants = require(rootPrefix + '/lib/globalConstant/channel/channels');
+  channelConstants = require(rootPrefix + '/lib/globalConstant/channel/channels'),
+  videoDetailsConstants = require(rootPrefix + '/lib/globalConstant/videoDetail'),
+  channelTagConstants = require(rootPrefix + '/lib/globalConstant/channel/channelTags'),
+  channelUsersConstants = require(rootPrefix + '/lib/globalConstant/channel/channelUsers'),
+  channelVideosConstants = require(rootPrefix + '/lib/globalConstant/channel/channelVideos');
 
 program
   .option('--channelId <channelId>', 'Channel Id')
@@ -52,7 +52,7 @@ class AssociateTagWithChannel {
    * @param {object} params
    * @param {number} params.channelId
    * @param {number} params.tagId
-   * @param {Boolean} [params.backPopulateVideos]
+   * @param {boolean} [params.backPopulateVideos]
    *
    * @constructor
    */
@@ -69,6 +69,11 @@ class AssociateTagWithChannel {
     oThis.channelVideoMap = {};
   }
 
+  /**
+   * Main performer for class.
+   *
+   * @returns {Promise<void>}
+   */
   async perform() {
     const oThis = this;
 
@@ -88,13 +93,13 @@ class AssociateTagWithChannel {
    *
    * @sets oThis.channelTag
    *
-   * @returns {Promise<never>}
+   * @returns {Promise<void>}
    * @private
    */
   async backPopulateChannelVideos() {
     const oThis = this;
 
-    logger.info(`ChannelTag backPopulateChannelVideos started`);
+    logger.info('ChannelTag backPopulateChannelVideos started');
 
     const limit = 100;
     let paginationTimestamp = null;
@@ -114,12 +119,13 @@ class AssociateTagWithChannel {
       });
 
       if (videoTagArr.length === 0) {
-        logger.log(`backPopulateChannelVideos complete`);
+        logger.info('ChannelTag backPopulateChannelVideos ended');
+
         return;
       }
 
-      for (let i = 0; i < videoTagArr.length; i++) {
-        const videoTag = videoTagArr[i],
+      for (let index = 0; index < videoTagArr.length; index++) {
+        const videoTag = videoTagArr[index],
           videoId = videoTag.videoId;
 
         videoIds.push(videoId);
@@ -135,14 +141,12 @@ class AssociateTagWithChannel {
       await oThis._updateChannelStat();
       await oThis.insertInChannelTagVideo(activeVideoIds, videoTagMapByVideoId);
     }
-
-    logger.info(`ChannelTag backPopulateChannelVideos ended`);
   }
 
   /**
-   * Multi insert in  Channel Tag Video.
+   * Multi insert in  channel tag video.
    *
-   * @returns {Promise<never>}
+   * @returns {Promise<void>}
    * @private
    */
   async insertInChannelTagVideo(videoIds, videoTagMapByVideoId) {
@@ -155,10 +159,10 @@ class AssociateTagWithChannel {
       return;
     }
 
-    for (let i = 0; i < videoIds.length; i++) {
-      //Note: use tag creation time for backpopulate
+    for (let index = 0; index < videoIds.length; index++) {
+      // Note: use tag creation time for backpopulate.
 
-      const videoId = videoIds[i],
+      const videoId = videoIds[index],
         videoTag = videoTagMapByVideoId[videoId],
         channelVideo = oThis.channelVideoMap[videoId],
         pinnedAt =
@@ -172,7 +176,7 @@ class AssociateTagWithChannel {
       insertValues.push([oThis.channelId, oThis.tagId, videoId, pinnedAt, videoTag.createdAt, videoTag.createdAt]);
     }
 
-    const res = await new ChannelTagVideoModel()
+    await new ChannelTagVideoModel()
       .insertMultiple(insertColumns, insertValues, { touch: false, withIgnore: true })
       .fire();
 
@@ -201,14 +205,14 @@ class AssociateTagWithChannel {
   }
 
   /**
-   * Mark Channel Video Active.
+   * Mark channel video active.
    *
-   * @returns {Promise<never>}
+   * @returns {Promise<void>}
    * @private
    */
   async markChannelVideoActive(channelVideoIds) {
     const oThis = this;
-    //  update channel videos if inactive status
+    //  Update channel videos if inactive status.
 
     if (channelVideoIds.length === 0) {
       return;
@@ -232,9 +236,9 @@ class AssociateTagWithChannel {
   }
 
   /**
-   * Multi insert in  Channel Video.
+   * Multi insert in  channel video.
    *
-   * @returns {Promise<never>}
+   * @returns {Promise<void>}
    * @private
    */
   async insertInChannelVideo(videoIds, videoTagMapByVideoId) {
@@ -248,10 +252,10 @@ class AssociateTagWithChannel {
       return;
     }
 
-    for (let i = 0; i < videoIds.length; i++) {
-      const videoId = videoIds[i],
+    for (let index = 0; index < videoIds.length; index++) {
+      const videoId = videoIds[index],
         videoTag = videoTagMapByVideoId[videoId],
-        //use tag creation time for backpopulate
+        // Use tag creation time for backpopulate.
         insertValue = [oThis.channelId, videoId, status, videoTag.createdAt, videoTag.createdAt];
 
       insertValues.push(insertValue);
@@ -279,14 +283,14 @@ class AssociateTagWithChannel {
         .where(['status != ?', channelVideosConstants.invertedStatuses[channelVideosConstants.activeStatus]])
         .fire();
 
-      oThis.channelVideoCount = oThis.channelVideoCount - (res.Duplicates - updateRes.affectedRows);
+      oThis.channelVideoCount -= res.Duplicates - updateRes.affectedRows;
     }
 
     await ChannelVideoModel.flushCache({ channelId: oThis.channelId });
   }
 
   /**
-   * Fetch Channel Video objects For VideoId in a channel.
+   * Fetch channel video objects for video id in a channel.
    *
    * @returns {Promise<never>}
    * @private
@@ -309,13 +313,13 @@ class AssociateTagWithChannel {
       })
       .fire();
 
-    for (let i = 0; i < response.length; i++) {
-      const channelVideo = new ChannelVideoModel().formatDbData(response[i]);
+    for (let index = 0; index < response.length; index++) {
+      const channelVideo = new ChannelVideoModel().formatDbData(response[index]);
       oThis.channelVideoMap[channelVideo.videoId] = channelVideo;
     }
 
-    for (let i = 0; i < videoIds.length; i++) {
-      const videoId = videoIds[i];
+    for (let index = 0; index < videoIds.length; index++) {
+      const videoId = videoIds[index];
       const channelVideo = oThis.channelVideoMap[videoId];
 
       if (!CommonValidator.validateNonEmptyObject(channelVideo)) {
@@ -323,7 +327,7 @@ class AssociateTagWithChannel {
       } else if (channelVideo.status !== channelVideosConstants.activeStatus) {
         inactiveChannelVideoIds.push(channelVideo.id);
       } else {
-        //    Do Nothing....
+        // Do nothing.
       }
     }
 
@@ -342,7 +346,7 @@ class AssociateTagWithChannel {
     const activeVideoIds = [],
       actorIds = [];
 
-    //Note: Filter out inactive and unapproved and muted users
+    // Note: Filter out inactive and unapproved and muted users
 
     const videoDetailsCacheResponse = await new VideoDetailsByVideoIdsCache({ videoIds: videoIds }).fetch();
     if (videoDetailsCacheResponse.isFailure()) {
@@ -350,7 +354,7 @@ class AssociateTagWithChannel {
     }
     const videoDetailsCacheData = videoDetailsCacheResponse.data;
 
-    for (let videoId in videoDetailsCacheData) {
+    for (const videoId in videoDetailsCacheData) {
       const videoDetail = videoDetailsCacheData[videoId];
 
       if (CommonValidator.validateNonEmptyObject(videoDetail)) {
@@ -383,12 +387,12 @@ class AssociateTagWithChannel {
       })
       .fire();
 
-    for (let i = 0; i < blockedUserIds.length; i++) {
-      const blockedUserId = blockedUserIds[i].user_id;
+    for (let index = 0; index < blockedUserIds.length; index++) {
+      const blockedUserId = blockedUserIds[index].user_id;
       blockedUserIdMap[blockedUserId] = 1;
     }
 
-    for (let videoId in videoDetailsCacheData) {
+    for (const videoId in videoDetailsCacheData) {
       const videoDetail = videoDetailsCacheData[videoId];
 
       if (
@@ -446,7 +450,7 @@ class AssociateTagWithChannel {
   }
 
   /**
-   * Fetch and Validate channel Tag.
+   * Fetch and validate channel tag.
    *
    * @sets oThis.channelId
    *

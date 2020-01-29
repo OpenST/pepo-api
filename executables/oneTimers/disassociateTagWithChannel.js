@@ -1,17 +1,17 @@
 const program = require('commander');
 
 const rootPrefix = '../..',
-  CommonValidator = require(rootPrefix + '/lib/validators/Common'),
+  CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   ChannelTagModel = require(rootPrefix + '/app/models/mysql/channel/ChannelTag'),
-  ChannelByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelByIds'),
   ChannelStatModel = require(rootPrefix + '/app/models/mysql/channel/ChannelStat'),
   ChannelVideoModel = require(rootPrefix + '/app/models/mysql/channel/ChannelVideo'),
   ChannelTagVideoModel = require(rootPrefix + '/app/models/mysql/channel/ChannelTagVideo'),
+  ChannelByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelByIds'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
+  channelConstants = require(rootPrefix + '/lib/globalConstant/channel/channels'),
   channelTagConstants = require(rootPrefix + '/lib/globalConstant/channel/channelTags'),
-  channelVideosConstants = require(rootPrefix + '/lib/globalConstant/channel/channelVideos'),
-  channelConstants = require(rootPrefix + '/lib/globalConstant/channel/channels');
+  channelVideosConstants = require(rootPrefix + '/lib/globalConstant/channel/channelVideos');
 
 program
   .option('--channelId <channelId>', 'Channel Id')
@@ -59,6 +59,11 @@ class DisassociateTagWithChannel {
     oThis.channelVideoMap = {};
   }
 
+  /**
+   * Main performer for class.
+   *
+   * @returns {Promise<void>}
+   */
   async perform() {
     const oThis = this;
 
@@ -92,7 +97,7 @@ class DisassociateTagWithChannel {
     oThis.channel = cacheResponse.data[oThis.channelId];
 
     if (
-      !CommonValidator.validateNonEmptyObject(oThis.channel) ||
+      !CommonValidators.validateNonEmptyObject(oThis.channel) ||
       oThis.channel.status !== channelConstants.activeStatus
     ) {
       return Promise.reject(
@@ -110,7 +115,7 @@ class DisassociateTagWithChannel {
   }
 
   /**
-   * Fetch and Validate channel Tag.
+   * Fetch and validate channel tag.
    *
    * @sets oThis.channelTag
    *
@@ -132,7 +137,7 @@ class DisassociateTagWithChannel {
     }
 
     if (
-      !CommonValidator.validateNonEmptyObject(oThis.channelTag) ||
+      !CommonValidators.validateNonEmptyObject(oThis.channelTag) ||
       oThis.channelTag.status !== channelTagConstants.activeStatus
     ) {
       return Promise.reject(
@@ -147,7 +152,7 @@ class DisassociateTagWithChannel {
       );
     }
 
-    logger.info(`Channel Tag validation done`);
+    logger.info('Channel Tag validation done.');
   }
 
   /**
@@ -161,7 +166,7 @@ class DisassociateTagWithChannel {
   async markChannelTagInactive() {
     const oThis = this;
 
-    logger.info('ChannelTag markChannelTagInactive started');
+    logger.info('ChannelTag markChannelTagInactive started.');
 
     await new ChannelTagModel()
       .update({ status: channelTagConstants.invertedStatuses[channelTagConstants.inactiveStatus] })
@@ -174,13 +179,13 @@ class DisassociateTagWithChannel {
 
     await ChannelTagModel.flushCache({ channelIds: [oThis.channelTag.channelId] });
 
-    logger.info('ChannelTag markChannelTagInactive done');
+    logger.info('ChannelTag markChannelTagInactive done.');
   }
 
   /**
-   * remove videos for a channel with tag id.
+   * Remove videos for a channel with tag id.
    *
-   * @returns {Promise<never>}
+   * @returns {Promise<void>}
    * @private
    */
   async removeChannelVideos() {
@@ -189,7 +194,7 @@ class DisassociateTagWithChannel {
     logger.info('ChannelTag removeChannelVideos started');
 
     const limit = 100;
-    let lastVideoId = null;
+    const lastVideoId = null;
 
     while (true) {
       const videoIds = [],
@@ -212,26 +217,25 @@ class DisassociateTagWithChannel {
       const res = await dbQuery.fire();
 
       if (res.length === 0) {
-        logger.log(`removeChannelVideos complete`);
+        logger.info('ChannelTag removeChannelVideos ended');
+
         return;
       }
 
-      for (let i = 0; i < res.length; i++) {
-        const videoId = res[i].video_id;
+      for (let index = 0; index < res.length; index++) {
+        const videoId = res[index].video_id;
         videoIds.push(videoId);
-        channelTagVideoIds.push(res[i].id);
+        channelTagVideoIds.push(res[index].id);
         videoIdMap[videoId] = 1;
       }
 
       await oThis.deleteChannelTagVideoForIds(channelTagVideoIds);
       await oThis.deleteFromChannelVideos(videoIds, videoIdMap);
     }
-
-    logger.info(`ChannelTag removeChannelVideos ended`);
   }
 
   /**
-   * delete from channelTagVideos model.
+   * Delete from channelTagVideos model.
    *
    * @returns {Promise<never>}
    * @private
@@ -248,7 +252,7 @@ class DisassociateTagWithChannel {
   }
 
   /**
-   * delete videos without other tags in the channel.
+   * Delete videos without other tags in the channel.
    *
    * @returns {Promise<never>}
    * @private
@@ -265,8 +269,8 @@ class DisassociateTagWithChannel {
       .where(['tag_id != ?', oThis.tagId])
       .fire();
 
-    for (let i = 0; i < dbQuery.length; i++) {
-      const videoId = dbQuery[i].video_id;
+    for (let index = 0; index < dbQuery.length; index++) {
+      const videoId = dbQuery[index].video_id;
       videoIdMap[videoId] = 0;
     }
 
@@ -283,9 +287,9 @@ class DisassociateTagWithChannel {
   }
 
   /**
-   * Mark Channel Video Inactive.
+   * Mark channel video inactive.
    *
-   * @returns {Promise<never>}
+   * @returns {Promise<void>}
    * @private
    */
   async markChannelVideoInactive(videoIdsToBeDeletedInChannelVideo) {
@@ -296,7 +300,7 @@ class DisassociateTagWithChannel {
       return;
     }
 
-    const updateRes = await new ChannelVideoModel()
+    await new ChannelVideoModel()
       .update(
         {
           status: channelVideosConstants.invertedStatuses[channelVideosConstants.inactiveStatus],
