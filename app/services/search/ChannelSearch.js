@@ -1,11 +1,7 @@
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
-  TagByIdCache = require(rootPrefix + '/lib/cacheManagement/multi/Tag'),
-  UrlByIdCache = require(rootPrefix + '/lib/cacheManagement/multi/UrlsByIds'),
-  ImageByIdCache = require(rootPrefix + '/lib/cacheManagement/multi/ImageByIds'),
-  TextsByIdCache = require(rootPrefix + '/lib/cacheManagement/multi/TextsByIds'),
+  FetchAssociatedEntities = require(rootPrefix + '/lib/FetchAssociatedEntities'),
   ChannelByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelByIds'),
-  TextIncludesByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TextIncludesByTextIds'),
   ChannelNamePaginationCache = require(rootPrefix + '/lib/cacheManagement/single/ChannelNamePagination'),
   CuratedEntityIdsByKindCache = require(rootPrefix + '/lib/cacheManagement/single/CuratedEntityIdsByKind'),
   ChannelTagByChannelIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelTagByChannelIds'),
@@ -14,13 +10,11 @@ const rootPrefix = '../../..',
     '/lib/cacheManagement/multi/channel/ChannelUserByUserIdAndChannelIds'),
   basicHelper = require(rootPrefix + '/helpers/basic'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
-  textConstants = require(rootPrefix + '/lib/globalConstant/text'),
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination'),
   entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
   curatedEntitiesConstants = require(rootPrefix + '/lib/globalConstant/curatedEntities'),
-  channelUsersConstants = require(rootPrefix + '/lib/globalConstant/channel/channelUsers'),
-  textIncludeConstants = require(rootPrefix + '/lib/globalConstant/cassandra/textInclude');
+  channelUsersConstants = require(rootPrefix + '/lib/globalConstant/channel/channelUsers');
 
 // Declare variables.
 const topChannelsResultsLimit = 5;
@@ -61,8 +55,6 @@ class ChannelSearch extends ServiceBase {
 
     oThis.imageIds = [];
     oThis.textIds = [];
-    oThis.linkIds = [];
-    oThis.tagIds = [];
 
     oThis.channelIdToTagIdsMap = {};
     oThis.channelStatsMap = {};
@@ -92,15 +84,9 @@ class ChannelSearch extends ServiceBase {
 
     await Promise.all(promisesArray);
 
-    await oThis._fetchTagAndLinksFromText();
+    await oThis._fetchAssociatedEntities();
 
-    const promisesArray1 = [
-      oThis._fetchTags(), // TODO:channels - use fetchAssociatedEntities
-      oThis._fetchLinks(),
-      oThis._fetchChannelStats(),
-      oThis._fetchUserChannelRelations(),
-      oThis._fetchImages()
-    ];
+    const promisesArray1 = [oThis._fetchChannelStats(), oThis._fetchUserChannelRelations()];
     await Promise.all(promisesArray1);
 
     return oThis._formatResponse();
@@ -230,103 +216,23 @@ class ChannelSearch extends ServiceBase {
   }
 
   /**
-   * Fetch tag and links from texts.
-   *
-   * @sets oThis.textData, oThis.includesData, oThis.linkIds, oThis.tagIds
+   * Fetch all associated entities
    *
    * @returns {Promise<void>}
    * @private
    */
-  async _fetchTagAndLinksFromText() {
+  async _fetchAssociatedEntities() {
     const oThis = this;
 
-    if (oThis.textIds.length === 0) {
-      return;
-    }
+    const associatedEntitiesResp = await new FetchAssociatedEntities({
+      textIds: oThis.textIds,
+      imageIds: oThis.imageIds
+    }).perform();
 
-    const cacheResponse = await new TextsByIdCache({ ids: oThis.textIds }).fetch();
-    if (cacheResponse.isFailure()) {
-      return Promise.reject(cacheResponse);
-    }
-
-    oThis.textData = cacheResponse.data;
-
-    const includesCacheResponse = await new TextIncludesByIdsCache({ ids: oThis.textIds }).fetch();
-    if (includesCacheResponse.isFailure()) {
-      return Promise.reject(includesCacheResponse);
-    }
-
-    oThis.includesData = includesCacheResponse.data;
-
-    const allTagIds = [],
-      allLinkIds = [];
-    for (const textId in oThis.includesData) {
-      const textIncludes = oThis.includesData[textId];
-
-      for (let ind = 0; ind < textIncludes.length; ind++) {
-        const include = textIncludes[ind],
-          entity = include.entityIdentifier.split('_');
-
-        if (entity[0] === textIncludeConstants.tagEntityKindShort) {
-          allTagIds.push(+entity[1]);
-        } else if (
-          entity[0] === textIncludeConstants.linkEntityKindShort &&
-          (oThis.textData[textId].kind === textConstants.channelTaglineKind ||
-            oThis.textData[textId].kind === textConstants.channelDescriptionKind)
-        ) {
-          allLinkIds.push(+entity[1]); // Inserting only channel tagline and channel description links, bio links are ignored.
-        }
-      }
-    }
-
-    oThis.linkIds = [...new Set(oThis.linkIds.concat(allLinkIds))];
-    oThis.tagIds = [...new Set(oThis.tagIds.concat(allTagIds))];
-  }
-
-  /**
-   * Fetch tags if present.
-   *
-   * @sets oThis.tags
-   *
-   * @returns {Promise<void>}
-   * @private
-   */
-  async _fetchTags() {
-    const oThis = this;
-
-    if (oThis.tagIds.length <= 0) {
-      return;
-    }
-
-    const cacheResponse = await new TagByIdCache({ ids: oThis.tagIds }).fetch();
-    if (cacheResponse.isFailure()) {
-      return Promise.reject(cacheResponse);
-    }
-
-    oThis.tags = cacheResponse.data;
-  }
-
-  /**
-   * Fetch links if present.
-   *
-   * @sets oThis.links
-   *
-   * @returns {Promise<void>}
-   * @private
-   */
-  async _fetchLinks() {
-    const oThis = this;
-
-    if (oThis.linkIds.length === 0) {
-      return;
-    }
-
-    const cacheResponse = await new UrlByIdCache({ ids: oThis.linkIds }).fetch();
-    if (cacheResponse.isFailure()) {
-      return Promise.reject(cacheResponse);
-    }
-
-    oThis.links = cacheResponse.data;
+    oThis.links = associatedEntitiesResp.data.links;
+    oThis.tags = associatedEntitiesResp.data.tags;
+    oThis.imageMap = associatedEntitiesResp.data.imagesMap;
+    oThis.textsMap = associatedEntitiesResp.data.textMap;
   }
 
   /**
@@ -414,29 +320,6 @@ class ChannelSearch extends ServiceBase {
   }
 
   /**
-   * Fetch images.
-   *
-   * @sets oThis.imageMap
-   *
-   * @return {Promise<*>}
-   * @private
-   */
-  async _fetchImages() {
-    const oThis = this;
-
-    if (oThis.imageIds.length === 1) {
-      return;
-    }
-
-    const cacheResponse = await new ImageByIdCache({ ids: oThis.imageIds }).fetch();
-    if (cacheResponse.isFailure()) {
-      return Promise.reject(cacheResponse);
-    }
-
-    oThis.imageMap = cacheResponse.data;
-  }
-
-  /**
    * Format response to be returned.
    *
    * @returns {*|result}
@@ -445,7 +328,6 @@ class ChannelSearch extends ServiceBase {
   _formatResponse() {
     const oThis = this;
 
-    oThis._formatTextResponse();
     const responseMetaData = oThis._finalResponse();
 
     const response = {
@@ -463,91 +345,6 @@ class ChannelSearch extends ServiceBase {
     };
 
     return responseHelper.successWithData(response);
-  }
-
-  /**
-   * Format text response to be sent.
-   *
-   * @private
-   */
-  _formatTextResponse() {
-    const oThis = this;
-
-    for (const textId in oThis.textData) {
-      const textIncludes = oThis.includesData[textId],
-        tagIds = [],
-        linkIds = [],
-        tagIdsToReplaceableTagNameMap = {};
-
-      // Fetch link id and tag ids.
-      for (let ind = 0; ind < textIncludes.length; ind++) {
-        const includeRow = textIncludes[ind],
-          entity = includeRow.entityIdentifier.split('_');
-
-        if (entity[0] === textIncludeConstants.tagEntityKindShort) {
-          tagIds.push(+entity[1]);
-          tagIdsToReplaceableTagNameMap[+entity[1]] = includeRow.replaceableText;
-        } else if (entity[0] === textIncludeConstants.linkEntityKindShort) {
-          linkIds.push(+entity[1]);
-        }
-      }
-
-      const formatTextParams = {
-        textId: textId,
-        tagIds: tagIds,
-        linkIds: linkIds,
-        tagIdToTagNameMap: tagIdsToReplaceableTagNameMap
-      };
-      const textIncludesData = oThis._formatIncludesDataInText(formatTextParams);
-      if (textIncludesData) {
-        oThis.textsMap[textId] = textIncludesData;
-      }
-    }
-  }
-
-  /**
-   * Format tags, links and at mentions present in text.
-   *
-   * @returns {{includes: {}, text: *}}
-   * @private
-   */
-  _formatIncludesDataInText(params) {
-    const oThis = this;
-
-    if (oThis.textData[params.textId] && oThis.textData[params.textId].text) {
-      const textData = {
-        text: oThis.textData[params.textId].text,
-        includes: {}
-      };
-
-      if (params.tagIds) {
-        for (let ind = 0; ind < params.tagIds.length; ind++) {
-          const tagId = params.tagIds[ind],
-            tagDetail = oThis.tags[tagId],
-            tagName = params.tagIdToTagNameMap[tagId];
-
-          textData.includes[tagName] = {
-            kind: 'tags',
-            id: tagDetail.id
-          };
-        }
-      }
-
-      if (params.linkIds) {
-        for (let ind = 0; ind < params.linkIds.length; ind++) {
-          const linkId = params.linkIds[ind];
-
-          textData.includes[oThis.links[linkId].url] = {
-            kind: 'links',
-            id: linkId
-          };
-        }
-      }
-
-      return textData;
-    }
-
-    return null;
   }
 
   /**
