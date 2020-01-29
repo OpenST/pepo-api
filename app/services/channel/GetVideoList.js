@@ -128,7 +128,7 @@ class GetChannelVideoList extends ServiceBase {
           params_error_identifiers: ['invalid_channel_id'],
           debug_options: {
             channelId: oThis.channelId,
-            channelDetails: oThis.channel
+            channelDetails: channelObject
           }
         })
       );
