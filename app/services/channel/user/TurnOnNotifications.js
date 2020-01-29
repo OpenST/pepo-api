@@ -2,7 +2,6 @@ const rootPrefix = '../../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   ChannelUserModel = require(rootPrefix + '/app/models/mysql/channel/ChannelUser'),
-  ChannelStatModel = require(rootPrefix + '/app/models/mysql/channel/ChannelStat'),
   ChannelByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelByIds'),
   GetCurrentUserChannelRelationsLib = require(rootPrefix + '/lib/channel/getCurrentUserChannelRelations'),
   ChannelUserByUserIdAndChannelIdsCache = require(rootPrefix +
@@ -38,7 +37,7 @@ class TurnOnChannelNotifications extends ServiceBase {
     oThis.channelId = params.channel_id;
 
     oThis.channelUserObj = null;
-    oThis.currentUserChannelRelations = {};
+    oThis.currentUserChannelRelationsMap = {};
   }
 
   /**
@@ -59,7 +58,7 @@ class TurnOnChannelNotifications extends ServiceBase {
     await oThis._fetchCurrentUserChannelRelations();
 
     return responseHelper.successWithData({
-      currentUserChannelRelations: oThis.currentUserChannelRelations
+      currentUserChannelRelationsMap: oThis.currentUserChannelRelationsMap
     });
   }
 
@@ -199,7 +198,7 @@ class TurnOnChannelNotifications extends ServiceBase {
   /**
    * Fetch current user channel relations
    *
-   * @sets oThis.currentUserChannelRelations
+   * @sets oThis.currentUserChannelRelationsMap
    *
    * @returns {Promise<void>}
    * @private
@@ -219,7 +218,7 @@ class TurnOnChannelNotifications extends ServiceBase {
       return Promise.reject(currentUserChannelRelationsResponse);
     }
 
-    oThis.currentUserChannelRelations = currentUserChannelRelationsResponse.data.currentUserChannelRelations;
+    oThis.currentUserChannelRelationsMap = currentUserChannelRelationsResponse.data.currentUserChannelRelations;
   }
 }
 
