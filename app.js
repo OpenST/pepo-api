@@ -204,6 +204,10 @@ app.use('/api/v1/dummy/channels/2', sanitizer.sanitizeDynamicUrlParams, function
   return res.status(404).json(require(rootPrefix + '/dummy/getDeletedChannel.json'));
 });
 
+app.use('/api/v1/dummy/feeds', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  return res.status(404).json(require(rootPrefix + '/dummy/getFeed.json'));
+});
+
 // Start Request logging. Placed below static and health check to reduce logs
 app.use(appendRequestDebugInfo, startRequestLogLine);
 
