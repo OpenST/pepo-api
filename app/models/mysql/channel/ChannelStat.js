@@ -84,12 +84,16 @@ class ChannelStatModel extends ModelBase {
    *
    * @param {array<number>} channelIds
    *
-   * @returns {Promise<any>}
+   * @returns {Promise<*>}
    */
   async orderByPopularChannelIds(channelIds) {
     const oThis = this;
 
     const orderedChannelIds = [];
+
+    if (channelIds.length === 0) {
+      return orderedChannelIds;
+    }
 
     const dbRows = await oThis
       .select('channel_id, total_users')
