@@ -1053,7 +1053,7 @@
     "meta": {
       "next_page_payload": null
     },
-    "result_type": "FAN_UPDATE",
+    "result_type": "channel_videos",
     "channel_videos": [
       {
         "id": "v_6803",
