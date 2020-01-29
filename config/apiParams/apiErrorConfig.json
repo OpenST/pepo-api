@@ -144,6 +144,16 @@
     "code": "UNPROCESSABLE_ENTITY",
     "message": "User is blocked in the channel."
   },
+  "notification_already_turned_off_for_user_in_channel": {
+    "http_code": "422",
+    "code": "UNPROCESSABLE_ENTITY",
+    "message": "Notification is already turned off for user in the channel."
+  },
+  "notification_already_turned_on_for_user_in_channel": {
+    "http_code": "422",
+    "code": "UNPROCESSABLE_ENTITY",
+    "message": "Notification is already turned on for user in the channel."
+  },
   "user_active_in_channel": {
     "http_code": "422",
     "code": "UNPROCESSABLE_ENTITY",

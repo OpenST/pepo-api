@@ -51,6 +51,22 @@ router.post('/:channel_id/leave', sanitizer.sanitizeDynamicUrlParams, function(r
   Promise.resolve(routeHelper.perform(req, res, next, '/channel/user/Leave', 'r_a_v1_c_3', null, null));
 });
 
+/* Mute notification for channel user. */
+router.post('/:channel_id/turn-off-notifications', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.turnOffChannelNotifications;
+  req.decodedParams.channel_id = req.params.channel_id;
+
+  Promise.resolve(routeHelper.perform(req, res, next, '/channel/user/TurnOffNotifications', 'r_a_v1_c_7', null, null));
+});
+
+/* Mute notification for channel user. */
+router.post('/:channel_id/turn-on-notifications', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.turnOffChannelNotifications;
+  req.decodedParams.channel_id = req.params.channel_id;
+
+  Promise.resolve(routeHelper.perform(req, res, next, '/channel/user/TurnOnNotifications', 'r_a_v1_c_8', null, null));
+});
+
 /* Fetch videos of a channel. */
 router.get('/:channel_id/videos', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.getChannelVideos;
