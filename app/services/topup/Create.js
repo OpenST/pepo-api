@@ -6,7 +6,7 @@ const rootPrefix = '../../..',
   bgJob = require(rootPrefix + '/lib/rabbitMqEnqueue/bgJob'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   bgJobConstants = require(rootPrefix + '/lib/globalConstant/bgJob'),
-  entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
+  entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
   createErrorLogsEntry = require(rootPrefix + '/lib/errorLogs/createEntry'),
   errorLogsConstants = require(rootPrefix + '/lib/globalConstant/errorLogs'),
   fiatPaymentConstants = require(rootPrefix + '/lib/globalConstant/fiatPayment'),
@@ -221,7 +221,7 @@ class CreateTopup extends ServiceBase {
   _apiResponse() {
     const oThis = this;
 
-    return responseHelper.successWithData({ [entityType.topup]: oThis.paymentDetail });
+    return responseHelper.successWithData({ [entityTypeConstants.topup]: oThis.paymentDetail });
   }
 
   /**

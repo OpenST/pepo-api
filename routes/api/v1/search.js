@@ -6,7 +6,7 @@ const rootPrefix = '../../..',
   routeHelper = require(rootPrefix + '/routes/helper'),
   sanitizer = require(rootPrefix + '/helpers/sanitizer'),
   apiName = require(rootPrefix + '/lib/globalConstant/apiName'),
-  entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
+  entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
   responseEntityKey = require(rootPrefix + '/lib/globalConstant/responseEntityKey');
 
 /* Search tags */
@@ -17,8 +17,8 @@ router.get('/tags', sanitizer.sanitizeDynamicUrlParams, function(req, res, next)
     const wrapperFormatterRsp = await new FormatterComposer({
       resultType: responseEntityKey.tagSearchResults,
       entityKindToResponseKeyMap: {
-        [entityType.tagList]: responseEntityKey.tagSearchResults,
-        [entityType.tagListMeta]: responseEntityKey.meta
+        [entityTypeConstants.tagList]: responseEntityKey.tagSearchResults,
+        [entityTypeConstants.tagListMeta]: responseEntityKey.meta
       },
       serviceData: serviceResponse.data
     }).perform();
@@ -37,8 +37,8 @@ router.get('/tags-mention', sanitizer.sanitizeDynamicUrlParams, function(req, re
     const wrapperFormatterRsp = await new FormatterComposer({
       resultType: responseEntityKey.tagSearchResults,
       entityKindToResponseKeyMap: {
-        [entityType.tagList]: responseEntityKey.tagSearchResults,
-        [entityType.tagListMeta]: responseEntityKey.meta
+        [entityTypeConstants.tagList]: responseEntityKey.tagSearchResults,
+        [entityTypeConstants.tagListMeta]: responseEntityKey.meta
       },
       serviceData: serviceResponse.data
     }).perform();
@@ -57,10 +57,10 @@ router.get('/users', sanitizer.sanitizeDynamicUrlParams, function(req, res, next
     const wrapperFormatterRsp = await new FormatterComposer({
       resultType: responseEntityKey.userSearchResults,
       entityKindToResponseKeyMap: {
-        [entityType.userSearchList]: responseEntityKey.userSearchResults,
-        [entityType.usersMap]: responseEntityKey.users,
-        [entityType.imagesMap]: responseEntityKey.images,
-        [entityType.userSearchMeta]: responseEntityKey.meta
+        [entityTypeConstants.userSearchList]: responseEntityKey.userSearchResults,
+        [entityTypeConstants.usersMap]: responseEntityKey.users,
+        [entityTypeConstants.imagesMap]: responseEntityKey.images,
+        [entityTypeConstants.userSearchMeta]: responseEntityKey.meta
       },
       serviceData: serviceResponse.data
     }).perform();
@@ -79,15 +79,15 @@ router.get('/channels', sanitizer.sanitizeDynamicUrlParams, function(req, res, n
     const wrapperFormatterRsp = await new FormatterComposer({
       resultType: responseEntityKey.channelSearchResults,
       entityKindToResponseKeyMap: {
-        [entityType.channelList]: responseEntityKey.channelSearchResults,
-        [entityType.channelsMap]: responseEntityKey.channels,
-        [entityType.channelDetailsMap]: responseEntityKey.channelDetails,
-        [entityType.channelStatsMap]: responseEntityKey.channelStats,
-        [entityType.currentUserChannelRelationsMap]: responseEntityKey.currentUserChannelRelations,
-        [entityType.tagsMap]: responseEntityKey.tags,
-        [entityType.imagesMap]: responseEntityKey.images,
-        [entityType.textsMap]: responseEntityKey.texts,
-        [entityType.channelListMeta]: responseEntityKey.meta
+        [entityTypeConstants.channelList]: responseEntityKey.channelSearchResults,
+        [entityTypeConstants.channelsMap]: responseEntityKey.channels,
+        [entityTypeConstants.channelDetailsMap]: responseEntityKey.channelDetails,
+        [entityTypeConstants.channelStatsMap]: responseEntityKey.channelStats,
+        [entityTypeConstants.currentUserChannelRelationsMap]: responseEntityKey.currentUserChannelRelations,
+        [entityTypeConstants.tagsMap]: responseEntityKey.tags,
+        [entityTypeConstants.imagesMap]: responseEntityKey.images,
+        [entityTypeConstants.textsMap]: responseEntityKey.texts,
+        [entityTypeConstants.channelListMeta]: responseEntityKey.meta
       },
       serviceData: serviceResponse.data
     }).perform();
@@ -106,10 +106,10 @@ router.get('/users-mention', sanitizer.sanitizeDynamicUrlParams, function(req, r
     const wrapperFormatterRsp = await new FormatterComposer({
       resultType: responseEntityKey.userSearchResults,
       entityKindToResponseKeyMap: {
-        [entityType.users]: responseEntityKey.userSearchResults,
-        //[entityType.usersMap]: responseEntityKey.users,
-        [entityType.imagesMap]: responseEntityKey.images,
-        [entityType.userListMeta]: responseEntityKey.meta
+        [entityTypeConstants.users]: responseEntityKey.userSearchResults,
+        //[entityTypeConstants.usersMap]: responseEntityKey.users,
+        [entityTypeConstants.imagesMap]: responseEntityKey.images,
+        [entityTypeConstants.userListMeta]: responseEntityKey.meta
       },
       serviceData: serviceResponse.data
     }).perform();
@@ -130,19 +130,19 @@ router.get('/top', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) 
     const wrapperFormatterRsp = await new FormatterComposer({
       resultType: responseEntityKey.searchCategoriesResults,
       entityKindToResponseKeyMap: {
-        [entityType.searchCategoriesList]: responseEntityKey.searchCategoriesResults,
-        [entityType.tagList]: responseEntityKey.tagSearchResults,
-        [entityType.userSearchList]: responseEntityKey.userSearchResults,
-        [entityType.usersMap]: responseEntityKey.users,
-        [entityType.imagesMap]: responseEntityKey.images,
-        [entityType.channelList]: responseEntityKey.channelSearchResults,
-        [entityType.channelsMap]: responseEntityKey.channels,
-        [entityType.channelDetailsMap]: responseEntityKey.channelDetails,
-        [entityType.channelStatsMap]: responseEntityKey.channelStats,
-        [entityType.currentUserChannelRelationsMap]: responseEntityKey.currentUserChannelRelations,
-        [entityType.tagsMap]: responseEntityKey.tags,
-        [entityType.textsMap]: responseEntityKey.texts,
-        [entityType.userSearchMeta]: responseEntityKey.meta
+        [entityTypeConstants.searchCategoriesList]: responseEntityKey.searchCategoriesResults,
+        [entityTypeConstants.tagList]: responseEntityKey.tagSearchResults,
+        [entityTypeConstants.userSearchList]: responseEntityKey.userSearchResults,
+        [entityTypeConstants.usersMap]: responseEntityKey.users,
+        [entityTypeConstants.imagesMap]: responseEntityKey.images,
+        [entityTypeConstants.channelList]: responseEntityKey.channelSearchResults,
+        [entityTypeConstants.channelsMap]: responseEntityKey.channels,
+        [entityTypeConstants.channelDetailsMap]: responseEntityKey.channelDetails,
+        [entityTypeConstants.channelStatsMap]: responseEntityKey.channelStats,
+        [entityTypeConstants.currentUserChannelRelationsMap]: responseEntityKey.currentUserChannelRelations,
+        [entityTypeConstants.tagsMap]: responseEntityKey.tags,
+        [entityTypeConstants.textsMap]: responseEntityKey.texts,
+        [entityTypeConstants.userSearchMeta]: responseEntityKey.meta
       },
       serviceData: serviceResponse.data
     }).perform();

@@ -4,7 +4,7 @@ const rootPrefix = '../../..',
   TagSearch = require(rootPrefix + '/app/services/search/TagSearch'),
   ChannelSearch = require(rootPrefix + '/app/services/search/ChannelSearch'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
-  entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
+  entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
   basicHelper = require(rootPrefix + '/helpers/basic'),
   paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination');
 
@@ -139,14 +139,14 @@ class MixedTopSearch extends ServiceBase {
     const oThis = this;
 
     let response = {
-      [entityType.searchCategoriesList]: [],
+      [entityTypeConstants.searchCategoriesList]: [],
       meta: {
         [paginationConstants.nextPagePayloadKey]: {}
       }
     };
     // If tag responses present then add in this result set
     if (oThis.tagResponses) {
-      response[entityType.searchCategoriesList].push({
+      response[entityTypeConstants.searchCategoriesList].push({
         id: 'sc_tr',
         updatedAt: Math.round(new Date() / 1000),
         kind: 'tag',
@@ -158,20 +158,20 @@ class MixedTopSearch extends ServiceBase {
 
     // If user responses present then append those
     if (oThis.userResponses) {
-      response[entityType.searchCategoriesList].push({
+      response[entityTypeConstants.searchCategoriesList].push({
         id: 'sc_ur',
         updatedAt: Math.round(new Date() / 1000),
         kind: 'user',
         title: oThis.q ? 'People' : null
       });
-      response[entityType.userSearchList] = oThis.userResponses[entityType.userSearchList];
+      response[entityTypeConstants.userSearchList] = oThis.userResponses[entityTypeConstants.userSearchList];
       response.usersByIdMap = oThis.userResponses.usersByIdMap;
       response.tokenUsersByUserIdMap = oThis.userResponses.tokenUsersByUserIdMap;
       response.imageMap = oThis.userResponses.imageMap;
     }
 
     if (oThis.channelResponses) {
-      response[entityType.searchCategoriesList].push({
+      response[entityTypeConstants.searchCategoriesList].push({
         id: 'sc_cr',
         updatedAt: Math.round(new Date() / 1000),
         kind: 'channel',
@@ -179,12 +179,13 @@ class MixedTopSearch extends ServiceBase {
       });
 
       response.channelIds = oThis.channelResponses.channelIds;
-      response[entityType.channelsMap] = oThis.channelResponses[entityType.channelsMap];
-      response[entityType.channelDetailsMap] = oThis.channelResponses[entityType.channelDetailsMap];
-      response[entityType.channelStatsMap] = oThis.channelResponses[entityType.channelStatsMap];
-      response[entityType.currentUserChannelRelationsMap] =
-        oThis.channelResponses[entityType.currentUserChannelRelationsMap];
-      response[entityType.channelIdToTagIdsMap] = oThis.channelResponses[entityType.channelIdToTagIdsMap];
+      response[entityTypeConstants.channelsMap] = oThis.channelResponses[entityTypeConstants.channelsMap];
+      response[entityTypeConstants.channelDetailsMap] = oThis.channelResponses[entityTypeConstants.channelDetailsMap];
+      response[entityTypeConstants.channelStatsMap] = oThis.channelResponses[entityTypeConstants.channelStatsMap];
+      response[entityTypeConstants.currentUserChannelRelationsMap] =
+        oThis.channelResponses[entityTypeConstants.currentUserChannelRelationsMap];
+      response[entityTypeConstants.channelIdToTagIdsMap] =
+        oThis.channelResponses[entityTypeConstants.channelIdToTagIdsMap];
       response.tags = oThis.channelResponses.tags;
       response.links = oThis.channelResponses.links;
       response.textsMap = oThis.channelResponses.textsMap;

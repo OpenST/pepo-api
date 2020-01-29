@@ -6,7 +6,7 @@ const rootPrefix = '../../..',
   routeHelper = require(rootPrefix + '/routes/helper'),
   sanitizer = require(rootPrefix + '/helpers/sanitizer'),
   apiName = require(rootPrefix + '/lib/globalConstant/apiName'),
-  entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
+  entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
   cookieHelper = require(rootPrefix + '/lib/cookieHelper'),
   responseEntityKey = require(rootPrefix + '/lib/globalConstant/responseEntityKey');
 
@@ -23,22 +23,23 @@ router.get('/:video_id', sanitizer.sanitizeDynamicUrlParams, cookieHelper.valida
     const wrapperFormatterRsp = await new FormatterComposer({
       resultType: responseEntityKey.userVideoList,
       entityKindToResponseKeyMap: {
-        [entityType.userVideoList]: responseEntityKey.userVideoList,
-        [entityType.usersMap]: responseEntityKey.users,
-        [entityType.userStats]: responseEntityKey.userStats,
-        [entityType.userProfilesMap]: responseEntityKey.userProfiles,
-        [entityType.tagsMap]: responseEntityKey.tags,
-        [entityType.linksMap]: responseEntityKey.links,
-        [entityType.imagesMap]: responseEntityKey.images,
-        [entityType.videosMap]: responseEntityKey.videos,
-        [entityType.videoDescriptionsMap]: responseEntityKey.videoDescriptions,
-        [entityType.videoDetailsMap]: responseEntityKey.videoDetails,
-        [entityType.currentUserUserContributionsMap]: responseEntityKey.currentUserUserContributions,
-        [entityType.currentUserVideoContributionsMap]: responseEntityKey.currentUserVideoContributions,
-        [entityType.currentUserVideoRelationsMap]: responseEntityKey.currentUserVideoRelations,
-        [entityType.pricePointsMap]: responseEntityKey.pricePoints,
-        [entityType.token]: responseEntityKey.token,
-        [entityType.userVideoListMeta]: responseEntityKey.meta
+        [entityTypeConstants.userVideoList]: responseEntityKey.userVideoList,
+        [entityTypeConstants.usersMap]: responseEntityKey.users,
+        [entityTypeConstants.userStats]: responseEntityKey.userStats,
+        [entityTypeConstants.userProfilesMap]: responseEntityKey.userProfiles,
+        [entityTypeConstants.tagsMap]: responseEntityKey.tags,
+        [entityTypeConstants.linksMap]: responseEntityKey.links,
+        [entityTypeConstants.imagesMap]: responseEntityKey.images,
+        [entityTypeConstants.videosMap]: responseEntityKey.videos,
+        [entityTypeConstants.videoDescriptionsMap]: responseEntityKey.videoDescriptions,
+        [entityTypeConstants.videoDetailsMap]: responseEntityKey.videoDetails,
+        [entityTypeConstants.channelsMap]: responseEntityKey.channels,
+        [entityTypeConstants.currentUserUserContributionsMap]: responseEntityKey.currentUserUserContributions,
+        [entityTypeConstants.currentUserVideoContributionsMap]: responseEntityKey.currentUserVideoContributions,
+        [entityTypeConstants.currentUserVideoRelationsMap]: responseEntityKey.currentUserVideoRelations,
+        [entityTypeConstants.pricePointsMap]: responseEntityKey.pricePoints,
+        [entityTypeConstants.token]: responseEntityKey.token,
+        [entityTypeConstants.userVideoListMeta]: responseEntityKey.meta
       },
       serviceData: serviceResponse.data
     }).perform();
@@ -58,23 +59,24 @@ router.get('/:video_id/replies', sanitizer.sanitizeDynamicUrlParams, function(re
     const wrapperFormatterRsp = await new FormatterComposer({
       resultType: responseEntityKey.videoReplies,
       entityKindToResponseKeyMap: {
-        [entityType.videoReplyList]: responseEntityKey.videoReplies,
-        [entityType.usersMap]: responseEntityKey.users,
-        [entityType.userStats]: responseEntityKey.userStats,
-        [entityType.userProfilesMap]: responseEntityKey.userProfiles,
-        [entityType.videoDescriptionsMap]: responseEntityKey.videoDescriptions,
-        [entityType.tagsMap]: responseEntityKey.tags,
-        [entityType.linksMap]: responseEntityKey.links,
-        [entityType.imagesMap]: responseEntityKey.images,
-        [entityType.videosMap]: responseEntityKey.videos,
-        [entityType.replyDetailsMap]: responseEntityKey.replyDetails,
-        [entityType.currentUserUserContributionsMap]: responseEntityKey.currentUserUserContributions,
-        [entityType.currentUserVideoContributionsMap]: responseEntityKey.currentUserVideoContributions,
-        [entityType.currentUserReplyDetailContributionsMap]: responseEntityKey.currentUserReplyDetailContributions,
-        [entityType.currentUserReplyDetailsRelationsMap]: responseEntityKey.currentUserReplyDetailsRelations,
-        [entityType.pricePointsMap]: responseEntityKey.pricePoints,
-        [entityType.token]: responseEntityKey.token,
-        [entityType.userVideoListMeta]: responseEntityKey.meta
+        [entityTypeConstants.videoReplyList]: responseEntityKey.videoReplies,
+        [entityTypeConstants.usersMap]: responseEntityKey.users,
+        [entityTypeConstants.userStats]: responseEntityKey.userStats,
+        [entityTypeConstants.userProfilesMap]: responseEntityKey.userProfiles,
+        [entityTypeConstants.videoDescriptionsMap]: responseEntityKey.videoDescriptions,
+        [entityTypeConstants.tagsMap]: responseEntityKey.tags,
+        [entityTypeConstants.linksMap]: responseEntityKey.links,
+        [entityTypeConstants.imagesMap]: responseEntityKey.images,
+        [entityTypeConstants.videosMap]: responseEntityKey.videos,
+        [entityTypeConstants.replyDetailsMap]: responseEntityKey.replyDetails,
+        [entityTypeConstants.currentUserUserContributionsMap]: responseEntityKey.currentUserUserContributions,
+        [entityTypeConstants.currentUserVideoContributionsMap]: responseEntityKey.currentUserVideoContributions,
+        [entityTypeConstants.currentUserReplyDetailContributionsMap]:
+          responseEntityKey.currentUserReplyDetailContributions,
+        [entityTypeConstants.currentUserReplyDetailsRelationsMap]: responseEntityKey.currentUserReplyDetailsRelations,
+        [entityTypeConstants.pricePointsMap]: responseEntityKey.pricePoints,
+        [entityTypeConstants.token]: responseEntityKey.token,
+        [entityTypeConstants.userVideoListMeta]: responseEntityKey.meta
       },
       serviceData: serviceResponse.data
     }).perform();
@@ -94,9 +96,9 @@ router.get('/:video_id/unseen-replies', sanitizer.sanitizeDynamicUrlParams, func
     const wrapperFormatterRsp = await new FormatterComposer({
       resultType: responseEntityKey.unseenReplies,
       entityKindToResponseKeyMap: {
-        [entityType.unseenReplies]: responseEntityKey.unseenReplies,
-        [entityType.usersMap]: responseEntityKey.users,
-        [entityType.imagesMap]: responseEntityKey.images
+        [entityTypeConstants.unseenReplies]: responseEntityKey.unseenReplies,
+        [entityTypeConstants.usersMap]: responseEntityKey.users,
+        [entityTypeConstants.imagesMap]: responseEntityKey.images
       },
       serviceData: serviceResponse.data
     }).perform();
@@ -116,7 +118,7 @@ router.get('/:video_id/share', sanitizer.sanitizeDynamicUrlParams, function(req,
     const wrapperFormatterRsp = await new FormatterComposer({
       resultType: responseEntityKey.share,
       entityKindToResponseKeyMap: {
-        [entityType.share]: responseEntityKey.share
+        [entityTypeConstants.share]: responseEntityKey.share
       },
       serviceData: serviceResponse.data
     }).perform();
@@ -152,7 +154,7 @@ router.post('/merge-jobs', sanitizer.sanitizeDynamicUrlParams, function(req, res
     const wrapperFormatterRsp = await new FormatterComposer({
       resultType: responseEntityKey.videoMergeJob,
       entityKindToResponseKeyMap: {
-        [entityType.videoMergeJob]: responseEntityKey.videoMergeJob
+        [entityTypeConstants.videoMergeJob]: responseEntityKey.videoMergeJob
       },
       serviceData: serviceResponse.data
     }).perform();
@@ -172,7 +174,7 @@ router.get('/merge-jobs/:video_merge_job_id', sanitizer.sanitizeDynamicUrlParams
     const wrapperFormatterRsp = await new FormatterComposer({
       resultType: responseEntityKey.videoMergeJob,
       entityKindToResponseKeyMap: {
-        [entityType.videoMergeJob]: responseEntityKey.videoMergeJob
+        [entityTypeConstants.videoMergeJob]: responseEntityKey.videoMergeJob
       },
       serviceData: serviceResponse.data
     }).perform();

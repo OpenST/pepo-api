@@ -6,7 +6,7 @@ const rootPrefix = '../../..',
   routeHelper = require(rootPrefix + '/routes/helper'),
   sanitizer = require(rootPrefix + '/helpers/sanitizer'),
   apiName = require(rootPrefix + '/lib/globalConstant/apiName'),
-  entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
+  entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
   responseEntityKey = require(rootPrefix + '/lib/globalConstant/responseEntityKey');
 
 router.get('/info', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
@@ -16,7 +16,7 @@ router.get('/info', sanitizer.sanitizeDynamicUrlParams, function(req, res, next)
     const wrapperFormatterRsp = await new FormatterComposer({
       resultType: responseEntityKey.supportInfo,
       entityKindToResponseKeyMap: {
-        [entityType.supportInfo]: responseEntityKey.supportInfo
+        [entityTypeConstants.supportInfo]: responseEntityKey.supportInfo
       },
       serviceData: serviceResponse.data
     }).perform();

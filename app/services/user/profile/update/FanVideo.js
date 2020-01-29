@@ -15,7 +15,7 @@ const rootPrefix = '../../../../..',
   feedsConstants = require(rootPrefix + '/lib/globalConstant/feed'),
   videoDetailsConstants = require(rootPrefix + '/lib/globalConstant/videoDetail'),
   videoConstants = require(rootPrefix + '/lib/globalConstant/video'),
-  entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
+  entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
   ValidateVideoService = require(rootPrefix + '/app/services/video/Validate'),
   notificationJobEnqueue = require(rootPrefix + '/lib/rabbitMqEnqueue/notification'),
   notificationJobConstants = require(rootPrefix + '/lib/globalConstant/notificationJob');
@@ -333,7 +333,7 @@ class UpdateFanVideo extends UpdateProfileBase {
 
     // FE fires the video creation pixel and following response is necessary.
     return responseHelper.successWithData({
-      [entityType.userVideoList]: [
+      [entityTypeConstants.userVideoList]: [
         {
           creatorUserId: oThis.profileUserId.toString(),
           updatedAt: Math.round(new Date() / 1000),

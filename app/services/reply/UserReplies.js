@@ -217,6 +217,7 @@ class GetUserReplyList extends ServiceBase {
       [entityTypeConstants.userReplyList]: oThis.userReplies,
       [entityTypeConstants.replyDetailsMap]: oThis.userRepliesMap.replyDetailsMap,
       [entityTypeConstants.videoDetailsMap]: oThis.userRepliesMap.videoDetailsMap,
+      [entityTypeConstants.channelsMap]: oThis.userRepliesMap.channelsMap,
       [entityTypeConstants.videoDescriptionsMap]: oThis.userRepliesMap.videoDescriptionMap,
       [entityTypeConstants.userProfilesMap]: oThis.userRepliesMap.userProfilesMap,
       [entityTypeConstants.currentUserUserContributionsMap]: oThis.userRepliesMap.currentUserUserContributionsMap,

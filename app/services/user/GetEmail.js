@@ -3,7 +3,7 @@ const rootPrefix = '../../..',
   UserCache = require(rootPrefix + '/lib/cacheManagement/multi/User'),
   UserEmailLogsByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/UserEmailLogsByUserIds'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
-  entityType = require(rootPrefix + '/lib/globalConstant/entityType');
+  entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType');
 
 /**
  * Class to get email of current user.
@@ -45,7 +45,7 @@ class GetEmail extends ServiceBase {
 
     await oThis.getEmail();
 
-    return responseHelper.successWithData({ [entityType.email]: oThis.email });
+    return responseHelper.successWithData({ [entityTypeConstants.email]: oThis.email });
   }
 
   /**

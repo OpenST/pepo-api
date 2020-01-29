@@ -2,7 +2,7 @@ const rootPrefix = '../../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   PreLaunchInviteModel = require(rootPrefix + '/app/models/mysql/PreLaunchInvite'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
-  entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
+  entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
   paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination'),
   preLaunchInviteConstants = require(rootPrefix + '/lib/globalConstant/preLaunchInvite');
 
@@ -186,8 +186,8 @@ class InviteUserSearch extends ServiceBase {
     const oThis = this;
 
     const response = {
-      [entityType.inviteUserSearchList]: oThis.searchResults,
-      [entityType.inviteMap]: oThis.inviteDetails,
+      [entityTypeConstants.inviteUserSearchList]: oThis.searchResults,
+      [entityTypeConstants.inviteMap]: oThis.inviteDetails,
       meta: oThis.responseMetaData
     };
 

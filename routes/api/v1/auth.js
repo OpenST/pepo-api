@@ -6,7 +6,7 @@ const rootPrefix = '../../..',
   routeHelper = require(rootPrefix + '/routes/helper'),
   apiName = require(rootPrefix + '/lib/globalConstant/apiName'),
   sanitizer = require(rootPrefix + '/helpers/sanitizer'),
-  entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
+  entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   responseEntityKey = require(rootPrefix + '/lib/globalConstant/responseEntityKey'),
   cookieHelper = require(rootPrefix + '/lib/cookieHelper');
@@ -38,12 +38,12 @@ router.post('/twitter-login', sanitizer.sanitizeDynamicUrlParams, function(req, 
     const wrapperFormatterRsp = await new FormatterComposer({
       resultType: responseEntityKey.loggedInUser,
       entityKindToResponseKeyMap: {
-        [entityType.loggedInUser]: responseEntityKey.loggedInUser,
-        [entityType.usersMap]: responseEntityKey.users,
-        [entityType.imagesMap]: responseEntityKey.images,
-        [entityType.utmParams]: responseEntityKey.utmParams,
-        [entityType.twitterConnectMeta]: responseEntityKey.meta,
-        [entityType.goto]: responseEntityKey.goto
+        [entityTypeConstants.loggedInUser]: responseEntityKey.loggedInUser,
+        [entityTypeConstants.usersMap]: responseEntityKey.users,
+        [entityTypeConstants.imagesMap]: responseEntityKey.images,
+        [entityTypeConstants.utmParams]: responseEntityKey.utmParams,
+        [entityTypeConstants.twitterConnectMeta]: responseEntityKey.meta,
+        [entityTypeConstants.goto]: responseEntityKey.goto
       },
       serviceData: serviceResponse.data
     }).perform();
@@ -72,12 +72,12 @@ router.post('/github-login', sanitizer.sanitizeDynamicUrlParams, function(req, r
     const wrapperFormatterRsp = await new FormatterComposer({
       resultType: responseEntityKey.loggedInUser,
       entityKindToResponseKeyMap: {
-        [entityType.loggedInUser]: responseEntityKey.loggedInUser,
-        [entityType.usersMap]: responseEntityKey.users,
-        [entityType.imagesMap]: responseEntityKey.images,
-        [entityType.utmParams]: responseEntityKey.utmParams,
-        [entityType.twitterConnectMeta]: responseEntityKey.meta,
-        [entityType.goto]: responseEntityKey.goto
+        [entityTypeConstants.loggedInUser]: responseEntityKey.loggedInUser,
+        [entityTypeConstants.usersMap]: responseEntityKey.users,
+        [entityTypeConstants.imagesMap]: responseEntityKey.images,
+        [entityTypeConstants.utmParams]: responseEntityKey.utmParams,
+        [entityTypeConstants.twitterConnectMeta]: responseEntityKey.meta,
+        [entityTypeConstants.goto]: responseEntityKey.goto
       },
       serviceData: serviceResponse.data
     }).perform();
@@ -106,12 +106,12 @@ router.post('/google-login', sanitizer.sanitizeDynamicUrlParams, function(req, r
     const wrapperFormatterRsp = await new FormatterComposer({
       resultType: responseEntityKey.loggedInUser,
       entityKindToResponseKeyMap: {
-        [entityType.loggedInUser]: responseEntityKey.loggedInUser,
-        [entityType.usersMap]: responseEntityKey.users,
-        [entityType.imagesMap]: responseEntityKey.images,
-        [entityType.utmParams]: responseEntityKey.utmParams,
-        [entityType.twitterConnectMeta]: responseEntityKey.meta,
-        [entityType.goto]: responseEntityKey.goto
+        [entityTypeConstants.loggedInUser]: responseEntityKey.loggedInUser,
+        [entityTypeConstants.usersMap]: responseEntityKey.users,
+        [entityTypeConstants.imagesMap]: responseEntityKey.images,
+        [entityTypeConstants.utmParams]: responseEntityKey.utmParams,
+        [entityTypeConstants.twitterConnectMeta]: responseEntityKey.meta,
+        [entityTypeConstants.goto]: responseEntityKey.goto
       },
       serviceData: serviceResponse.data
     }).perform();
@@ -140,12 +140,12 @@ router.post('/apple-login', sanitizer.sanitizeDynamicUrlParams, function(req, re
     const wrapperFormatterRsp = await new FormatterComposer({
       resultType: responseEntityKey.loggedInUser,
       entityKindToResponseKeyMap: {
-        [entityType.loggedInUser]: responseEntityKey.loggedInUser,
-        [entityType.usersMap]: responseEntityKey.users,
-        [entityType.imagesMap]: responseEntityKey.images,
-        [entityType.utmParams]: responseEntityKey.utmParams,
-        [entityType.twitterConnectMeta]: responseEntityKey.meta,
-        [entityType.goto]: responseEntityKey.goto
+        [entityTypeConstants.loggedInUser]: responseEntityKey.loggedInUser,
+        [entityTypeConstants.usersMap]: responseEntityKey.users,
+        [entityTypeConstants.imagesMap]: responseEntityKey.images,
+        [entityTypeConstants.utmParams]: responseEntityKey.utmParams,
+        [entityTypeConstants.twitterConnectMeta]: responseEntityKey.meta,
+        [entityTypeConstants.goto]: responseEntityKey.goto
       },
       serviceData: serviceResponse.data
     }).perform();

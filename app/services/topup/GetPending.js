@@ -3,7 +3,7 @@ const rootPrefix = '../../..',
   TransactionCache = require(rootPrefix + '/lib/cacheManagement/multi/TransactionByIds'),
   UserPendingTopupCache = require(rootPrefix + '/lib/cacheManagement/single/UserPendingTopups'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
-  entityType = require(rootPrefix + '/lib/globalConstant/entityType');
+  entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType');
 
 class GetPendingTopup extends ServiceBase {
   /**
@@ -105,7 +105,7 @@ class GetPendingTopup extends ServiceBase {
     }
 
     return responseHelper.successWithData({
-      [entityType.topupList]: response
+      [entityTypeConstants.topupList]: response
     });
   }
 }
