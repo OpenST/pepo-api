@@ -20,7 +20,7 @@ program.on('--help', function() {
   logger.log('');
   logger.log('  Example:');
   logger.log('');
-  logger.log('node executables/oneTimers/pinVideoInChannel --channelId 1 --videoId 1018 --unpin 0');
+  logger.log('node executables/oneTimers/2020_01_30_pinVideoInChannel.js --channelId 1 --videoId 1018 --unpin 0');
   logger.log('');
   logger.log('');
 });
