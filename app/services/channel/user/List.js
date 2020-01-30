@@ -5,9 +5,8 @@ const rootPrefix = '../../../..',
   ImageByIdCache = require(rootPrefix + '/lib/cacheManagement/multi/ImageByIds'),
   ChannelByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelByIds'),
   TokenUserByUserIdsMultiCache = require(rootPrefix + '/lib/cacheManagement/multi/TokenUserByUserIds'),
-  UserIdsByChannelIdPaginationCache = require(rootPrefix + '/lib/cacheManagement/single/UserIdsByChannelIdPagination'),
-  ChannelUserByUserIdAndChannelIdsCache = require(rootPrefix +
-    '/lib/cacheManagement/multi/channel/ChannelUserByUserIdAndChannelIds'),
+  ChannelUsersByChannelIdPaginationCache = require(rootPrefix +
+    '/lib/cacheManagement/single/ChannelUsersByChannelIdPagination'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination'),
   entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
@@ -38,22 +37,15 @@ class ListChannelUser extends ServiceBase {
     const oThis = this;
 
     oThis.currentUser = params.current_user;
+    oThis.currentUserId = oThis.currentUser.id;
     oThis.channelId = params.channel_id;
     oThis.paginationIdentifier = params[paginationConstants.paginationIdentifierKey] || null;
 
     oThis.limit = oThis._defaultPageLimit();
 
     oThis.channelObj = null;
-    oThis.channelUserObj = null;
-    oThis.currentUserChannelRelations = {
-      [oThis.channelId]: {
-        id: oThis.currentUser.id,
-        isAdmin: 0,
-        isMember: 0,
-        notificationStatus: 0,
-        updatedAt: 0
-      }
-    };
+    oThis.channelUsers = null;
+    oThis.channelUserRelationMap = {};
 
     oThis.paginationTimestamp = null;
     oThis.nextPaginationTimestamp = null;
@@ -78,9 +70,9 @@ class ListChannelUser extends ServiceBase {
 
     await oThis._fetchAndValidateChannel();
 
-    await oThis._fetchUserIds();
+    await oThis._fetchChannelUsers();
 
-    const promisesArray = [oThis._fetchUsers(), oThis._fetchTokenUsers(), oThis._fetchUserChannelRelations()];
+    const promisesArray = [oThis._fetchUsers(), oThis._fetchTokenUsers(), oThis._setChannelUserRelations()];
     await Promise.all(promisesArray);
 
     await oThis._fetchImages();
@@ -149,17 +141,17 @@ class ListChannelUser extends ServiceBase {
   }
 
   /**
-   * Fetch user ids.
+   * Fetch channel users.
    *
    * @sets oThis.userIds, oThis.nextPaginationTimestamp
    *
    * @return {Promise<void>}
    * @private
    */
-  async _fetchUserIds() {
+  async _fetchChannelUsers() {
     const oThis = this;
 
-    const cacheResponse = await new UserIdsByChannelIdPaginationCache({
+    const cacheResponse = await new ChannelUsersByChannelIdPaginationCache({
       channelId: oThis.channelId,
       limit: oThis.limit,
       paginationTimestamp: oThis.paginationTimestamp
@@ -170,6 +162,7 @@ class ListChannelUser extends ServiceBase {
     }
 
     oThis.userIds = cacheResponse.data.userIds || [];
+    oThis.channelUsers = cacheResponse.data.channelUserDetails;
     oThis.nextPaginationTimestamp = cacheResponse.data.nextPaginationTimestamp;
   }
 
@@ -229,39 +222,39 @@ class ListChannelUser extends ServiceBase {
   }
 
   /**
-   * Fetch current user channel relations.
+   * Fetch channel user relations.
    *
-   * @sets oThis.currentUserChannelRelations
+   * @sets oThis.channelUserRelationMap
    *
    * @returns {Promise<void>}
    * @private
    */
-  async _fetchUserChannelRelations() {
+  async _setChannelUserRelations() {
     const oThis = this;
+    oThis.channelUserRelationMap[oThis.channelId] = {};
 
-    const cacheResponse = await new ChannelUserByUserIdAndChannelIdsCache({
-      userId: oThis.currentUser.id,
-      channelIds: [oThis.channelId]
-    }).fetch();
+    for (let index = 0; index < oThis.userIds.length; index++) {
+      let userId = oThis.userIds[index];
+      const channelUserRelation = oThis.channelUsers[userId];
 
-    if (cacheResponse.isFailure()) {
-      return Promise.reject(cacheResponse);
-    }
-
-    const channelUserRelation = cacheResponse.data[oThis.channelId];
-    if (
-      CommonValidators.validateNonEmptyObject(channelUserRelation) &&
-      channelUserRelation.status === channelUsersConstants.activeStatus
-    ) {
-      oThis.currentUserChannelRelations[oThis.channelId] = {
-        id: oThis.currentUser.id,
-        isAdmin: Number(channelUserRelation.role === channelUsersConstants.adminRole),
-        isMember: 1,
-        notificationStatus: Number(
-          channelUserRelation.notificationStatus === channelUsersConstants.activeNotificationStatus
-        ),
-        updatedAt: channelUserRelation.updatedAt
+      oThis.channelUserRelationMap[oThis.channelId][userId] = {
+        id: userId,
+        isAdmin: 0,
+        isMember: 0,
+        updatedAt: 0
       };
+
+      if (
+        CommonValidators.validateNonEmptyObject(channelUserRelation) &&
+        channelUserRelation.status === channelUsersConstants.activeStatus
+      ) {
+        oThis.channelUserRelationMap[oThis.channelId][userId] = {
+          id: userId,
+          isAdmin: Number(channelUserRelation.role === channelUsersConstants.adminRole),
+          isMember: 1,
+          updatedAt: channelUserRelation.updatedAt
+        };
+      }
     }
   }
 
@@ -325,7 +318,7 @@ class ListChannelUser extends ServiceBase {
       usersByIdMap: oThis.usersByIdMap,
       tokenUsersByUserIdMap: oThis.tokenUsersByUserIdMap,
       userIds: oThis.userIds,
-      [entityTypeConstants.currentUserChannelRelationsMap]: oThis.currentUserChannelRelations,
+      [entityTypeConstants.channelUserRelationMap]: oThis.channelUserRelationMap,
       imageMap: oThis.imageMap,
       meta: oThis.responseMetaData
     });

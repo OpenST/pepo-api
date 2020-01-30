@@ -76,12 +76,12 @@ class ChannelUserModel extends ModelBase {
       paginationTimestamp = params.paginationTimestamp;
 
     const queryObject = oThis
-      .select('user_id, created_at')
+      .select('*')
       .where({
         channel_id: channelId,
         status: channelUsersConstants.invertedStatuses[channelUsersConstants.activeStatus] // TODO:channels - No index on status.
       })
-      .order_by('created_at desc')
+      .order_by('role asc, created_at desc')
       .limit(limit);
 
     if (paginationTimestamp) {
@@ -92,15 +92,21 @@ class ChannelUserModel extends ModelBase {
 
     let nextPaginationTimestamp = null;
 
-    const userIds = [];
+    const userIds = [],
+      channelUserDetails = {};
 
     for (let index = 0; index < dbRows.length; index++) {
       const formatDbRow = oThis.formatDbData(dbRows[index]);
+      channelUserDetails[formatDbRow.userId] = formatDbRow;
       nextPaginationTimestamp = formatDbRow.createdAt;
       userIds.push(formatDbRow.userId);
     }
 
-    return { userIds: userIds, nextPaginationTimestamp: nextPaginationTimestamp };
+    return {
+      userIds: userIds,
+      channelUserDetails: channelUserDetails,
+      nextPaginationTimestamp: nextPaginationTimestamp
+    };
   }
 
   /**

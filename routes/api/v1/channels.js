@@ -189,7 +189,7 @@ router.get('/:channel_id/users', sanitizer.sanitizeDynamicUrlParams, function(re
       resultType: responseEntityKey.channelUserList,
       entityKindToResponseKeyMap: {
         [entityTypeConstants.users]: responseEntityKey.channelUserList,
-        [entityTypeConstants.currentUserChannelRelationsMap]: responseEntityKey.currentUserChannelRelations,
+        [entityTypeConstants.channelUserRelationMap]: responseEntityKey.channelUserRelations,
         [entityTypeConstants.imagesMap]: responseEntityKey.images,
         [entityTypeConstants.channelListMeta]: responseEntityKey.meta
       },
