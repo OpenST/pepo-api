@@ -149,7 +149,7 @@ class ChannelUserModel extends ModelBase {
 
     if (params.channelId) {
       const ChannelUsersByChannelIdPaginationCache = require(rootPrefix +
-        '/lib/cacheManagement/single/UserIdsByChannelIdPagination.js');
+        '/lib/cacheManagement/single/ChannelUsersByChannelIdPagination');
       promisesArray.push(new ChannelUsersByChannelIdPaginationCache({ channelId: params.channelId }).clear());
     }
 
