@@ -4,7 +4,7 @@ const rootPrefix = '../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   TagIdByNamesCache = require(rootPrefix + '/lib/cacheManagement/multi/TagIdByNames'),
-  ChannelByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelByIds'),
+  ChannelByPermalinksCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelByPermalinks'),
   ReplyDetailsByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/ReplyDetailsByIds'),
   gotoFactory = require(rootPrefix + '/lib/goTo/factory'),
   coreConstants = require(rootPrefix + '/config/coreConstants'),
@@ -165,17 +165,17 @@ class FetchGoto extends ServiceBase {
         break;
       }
       case gotoConstants.channelGotoKind: {
-        const channelId = Number(pathArray[2]);
+        const channelPermalink = pathArray[2];
 
-        if (channelId) {
-          const cacheResponse = await new ChannelByIdsCache({ ids: [channelId] }).fetch();
+        if (channelPermalink) {
+          const cacheResponse = await new ChannelByPermalinksCache({ permalinks: [channelPermalink] }).fetch();
           if (cacheResponse.isFailure()) {
             return Promise.reject(cacheResponse);
           }
 
-          const channelDetails = cacheResponse.data[channelId];
+          const channelId = cacheResponse.data[channelPermalink];
 
-          if (CommonValidators.validateNonEmptyObject(channelDetails)) {
+          if (Number(channelId)) {
             oThis.gotoParams = { channelId: channelId };
             oThis.gotoKind = gotoConstants.channelGotoKind;
           }
