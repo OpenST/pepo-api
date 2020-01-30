@@ -127,24 +127,30 @@ router.get('/users-mention', sanitizer.sanitizeDynamicUrlParams, function(req, r
 router.get('/top', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.mixedTopSearch;
 
+  // Note: Here the if condition is needed because channel search is not supported for old builds.
   const dataFormatterFunc = async function(serviceResponse) {
-    const wrapperFormatterRsp = await new FormatterComposer({
-      resultType: responseEntityKey.searchCategoriesResults,
-      entityKindToResponseKeyMap: {
-        [entityTypeConstants.searchCategoriesList]: responseEntityKey.searchCategoriesResults,
-        [entityTypeConstants.tagList]: responseEntityKey.tagSearchResults,
-        [entityTypeConstants.userSearchList]: responseEntityKey.userSearchResults,
-        [entityTypeConstants.usersMap]: responseEntityKey.users,
-        [entityTypeConstants.imagesMap]: responseEntityKey.images,
+    let entityResponseMap = {
+      [entityTypeConstants.searchCategoriesList]: responseEntityKey.searchCategoriesResults,
+      [entityTypeConstants.tagList]: responseEntityKey.tagSearchResults,
+      [entityTypeConstants.userSearchList]: responseEntityKey.userSearchResults,
+      [entityTypeConstants.usersMap]: responseEntityKey.users,
+      [entityTypeConstants.imagesMap]: responseEntityKey.images,
+      [entityTypeConstants.userSearchMeta]: responseEntityKey.meta
+    };
+    if (serviceResponse.data.meta.supportedEntities.indexOf('channel') > -1) {
+      Object.assign(entityResponseMap, {
         [entityTypeConstants.channelList]: responseEntityKey.channelSearchResults,
         [entityTypeConstants.channelsMap]: responseEntityKey.channels,
         [entityTypeConstants.channelDetailsMap]: responseEntityKey.channelDetails,
         [entityTypeConstants.channelStatsMap]: responseEntityKey.channelStats,
         [entityTypeConstants.currentUserChannelRelationsMap]: responseEntityKey.currentUserChannelRelations,
         [entityTypeConstants.tagsMap]: responseEntityKey.tags,
-        [entityTypeConstants.textsMap]: responseEntityKey.texts,
-        [entityTypeConstants.userSearchMeta]: responseEntityKey.meta
-      },
+        [entityTypeConstants.textsMap]: responseEntityKey.texts
+      });
+    }
+    const wrapperFormatterRsp = await new FormatterComposer({
+      resultType: responseEntityKey.searchCategoriesResults,
+      entityKindToResponseKeyMap: entityResponseMap,
       serviceData: serviceResponse.data
     }).perform();
 

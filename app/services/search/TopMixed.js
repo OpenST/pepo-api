@@ -141,7 +141,8 @@ class MixedTopSearch extends ServiceBase {
     let response = {
       [entityTypeConstants.searchCategoriesList]: [],
       meta: {
-        [paginationConstants.nextPagePayloadKey]: {}
+        [paginationConstants.nextPagePayloadKey]: {},
+        supportedEntities: oThis.supportedEntities
       }
     };
     // If tag responses present then add in this result set
@@ -170,6 +171,7 @@ class MixedTopSearch extends ServiceBase {
       response.imageMap = oThis.userResponses.imageMap;
     }
 
+    // If channel responses present then append those
     if (oThis.channelResponses) {
       response[entityTypeConstants.searchCategoriesList].push({
         id: 'sc_cr',
