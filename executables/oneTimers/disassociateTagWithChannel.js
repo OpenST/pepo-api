@@ -335,7 +335,7 @@ class DisassociateTagWithChannel {
       .where({ channel_id: oThis.channelId })
       .fire();
 
-    await ChannelStatModel.flushCache({ channelId: oThis.channelId });
+    await ChannelStatModel.flushCache({ channelIds: [oThis.channelId] });
   }
 }
 
