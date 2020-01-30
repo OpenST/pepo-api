@@ -125,12 +125,6 @@ class ChannelStatModel extends ModelBase {
       promisesArray.push(new ChannelStatByChannelIdsCache({ channelIds: params.channelIds }).clear());
     }
 
-    if (params.channelId) {
-      const ChannelStatByChannelIdsCache = require(rootPrefix +
-        '/lib/cacheManagement/multi/channel/ChannelStatByChannelIds');
-      promisesArray.push(new ChannelStatByChannelIdsCache({ channelIds: [params.channelId] }).clear());
-    }
-
     await Promise.all(promisesArray);
   }
 }
