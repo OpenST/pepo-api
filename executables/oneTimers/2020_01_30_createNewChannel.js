@@ -183,6 +183,7 @@ class CreateNewChannel {
     // If channel description is not valid, consider it as null.
     if (!CommonValidators.validateChannelDescription(oThis.channelDescription)) {
       oThis.channelDescription = null;
+      throw 'Invalid tagline.';
     }
 
     if (!oThis.channelDescription) {
