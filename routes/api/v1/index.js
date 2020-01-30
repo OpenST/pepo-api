@@ -44,6 +44,7 @@ router.use('/feeds', cookieHelper.validateUserLoginCookieIfPresent, feedsRoutes)
 router.use('/videos', cookieHelper.validateUserLoginCookieIfPresent, videoRoutes);
 router.use('/report', cookieHelper.validateUserLoginCookieIfPresent, reportRoutes);
 router.use('/replies', cookieHelper.validateUserLoginCookieIfPresent, replyRoutes);
+router.use('/channels', channelRoutes);
 
 router.use(cookieHelper.validateUserLoginCookieIfPresent, cookieHelper.validateUserLoginRequired);
 
@@ -55,7 +56,6 @@ router.use('/redemptions', redemptionsRoutes);
 router.use('/support', supportRoutes);
 router.use('/upload-params', uploadParamsRoutes);
 router.use('/tags', tagRoutes);
-router.use('/channels', channelRoutes);
 router.use('/search', searchRoutes);
 router.use('/notifications', notificationsRoutes);
 router.use('/top-up', topupRoutes);

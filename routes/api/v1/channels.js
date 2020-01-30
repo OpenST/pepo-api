@@ -7,7 +7,31 @@ const rootPrefix = '../../..',
   sanitizer = require(rootPrefix + '/helpers/sanitizer'),
   apiName = require(rootPrefix + '/lib/globalConstant/apiName'),
   entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
+  cookieHelper = require(rootPrefix + '/lib/cookieHelper'),
   responseEntityKey = require(rootPrefix + '/lib/globalConstant/responseEntityKey');
+
+/* Get url and message for sharing channel given its permalink. */
+router.get('/:channel_permalink/share', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.channelShare;
+  req.decodedParams.channel_permalink = req.params.channel_permalink;
+
+  const dataFormatterFunc = async function(serviceResponse) {
+    const wrapperFormatterRsp = await new FormatterComposer({
+      resultType: responseEntityKey.share,
+      entityKindToResponseKeyMap: {
+        [entityTypeConstants.share]: responseEntityKey.share
+      },
+      serviceData: serviceResponse.data
+    }).perform();
+
+    serviceResponse.data = wrapperFormatterRsp.data;
+  };
+
+  Promise.resolve(routeHelper.perform(req, res, next, '/channel/ShareDetails', 'r_a_v1_c_6', null, dataFormatterFunc));
+});
+
+// User should be logged in to access all the further routes.
+router.use(cookieHelper.validateUserLoginRequired);
 
 /* Get channel details. */
 router.get('/:channel_id', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
@@ -176,26 +200,6 @@ router.get('/:channel_id/users', sanitizer.sanitizeDynamicUrlParams, function(re
   };
 
   Promise.resolve(routeHelper.perform(req, res, next, '/channel/user/List', 'r_a_v1_c_5', null, dataFormatterFunc));
-});
-
-/* Get url and message for sharing channel given its channel id. */
-router.get('/:channel_permalink/share', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
-  req.decodedParams.apiName = apiName.channelShare;
-  req.decodedParams.channel_permalink = req.params.channel_permalink;
-
-  const dataFormatterFunc = async function(serviceResponse) {
-    const wrapperFormatterRsp = await new FormatterComposer({
-      resultType: responseEntityKey.share,
-      entityKindToResponseKeyMap: {
-        [entityTypeConstants.share]: responseEntityKey.share
-      },
-      serviceData: serviceResponse.data
-    }).perform();
-
-    serviceResponse.data = wrapperFormatterRsp.data;
-  };
-
-  Promise.resolve(routeHelper.perform(req, res, next, '/channel/ShareDetails', 'r_a_v1_c_6', null, dataFormatterFunc));
 });
 
 module.exports = router;
