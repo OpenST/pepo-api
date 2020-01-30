@@ -338,7 +338,7 @@ class ChannelSearch extends ServiceBase {
       [entityTypeConstants.currentUserChannelRelationsMap]: oThis.currentUserChannelRelations,
       [entityTypeConstants.channelIdToTagIdsMap]: oThis.channelIdToTagIdsMap,
       tags: oThis.tags,
-      links: oThis.links,
+      linkMap: oThis.links,
       textsMap: oThis.textsMap,
       imageMap: oThis.imageMap,
       meta: responseMetaData

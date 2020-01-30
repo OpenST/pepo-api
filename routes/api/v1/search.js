@@ -145,6 +145,7 @@ router.get('/top', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) 
         [entityTypeConstants.channelStatsMap]: responseEntityKey.channelStats,
         [entityTypeConstants.currentUserChannelRelationsMap]: responseEntityKey.currentUserChannelRelations,
         [entityTypeConstants.tagsMap]: responseEntityKey.tags,
+        [entityTypeConstants.linksMap]: responseEntityKey.links,
         [entityTypeConstants.textsMap]: responseEntityKey.texts
       });
     }

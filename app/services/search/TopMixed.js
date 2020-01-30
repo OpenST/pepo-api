@@ -189,7 +189,7 @@ class MixedTopSearch extends ServiceBase {
       response[entityTypeConstants.channelIdToTagIdsMap] =
         oThis.channelResponses[entityTypeConstants.channelIdToTagIdsMap];
       response.tags = oThis.channelResponses.tags;
-      response.links = oThis.channelResponses.links;
+      response.linkMap = oThis.channelResponses.linkMap;
       response.textsMap = oThis.channelResponses.textsMap;
       Object.assign(response.imageMap, oThis.channelResponses.imageMap);
     }
