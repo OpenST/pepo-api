@@ -86,6 +86,7 @@ router.get('/channels', sanitizer.sanitizeDynamicUrlParams, function(req, res, n
         [entityTypeConstants.currentUserChannelRelationsMap]: responseEntityKey.currentUserChannelRelations,
         [entityTypeConstants.tagsMap]: responseEntityKey.tags,
         [entityTypeConstants.imagesMap]: responseEntityKey.images,
+        [entityTypeConstants.linksMap]: responseEntityKey.links,
         [entityTypeConstants.textsMap]: responseEntityKey.texts,
         [entityTypeConstants.channelListMeta]: responseEntityKey.meta
       },

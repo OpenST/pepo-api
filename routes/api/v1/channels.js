@@ -24,6 +24,7 @@ router.get('/:channel_id', sanitizer.sanitizeDynamicUrlParams, function(req, res
         [entityTypeConstants.currentUserChannelRelationsMap]: responseEntityKey.currentUserChannelRelations,
         [entityTypeConstants.tagsMap]: responseEntityKey.tags,
         [entityTypeConstants.imagesMap]: responseEntityKey.images,
+        [entityTypeConstants.linksMap]: responseEntityKey.links,
         [entityTypeConstants.textsMap]: responseEntityKey.texts
       },
       serviceData: serviceResponse.data

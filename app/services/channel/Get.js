@@ -47,6 +47,7 @@ class GetChannel extends ServiceBase {
 
     oThis.tagIds = [];
     oThis.tags = {};
+    oThis.links = {};
   }
 
   /**
@@ -221,6 +222,7 @@ class GetChannel extends ServiceBase {
     oThis.images = associatedEntitiesResponse.data.imagesMap;
     oThis.texts = associatedEntitiesResponse.data.textMap;
     oThis.tags = associatedEntitiesResponse.data.tags;
+    oThis.links = associatedEntitiesResponse.data.links;
   }
 
   /**
@@ -239,6 +241,7 @@ class GetChannel extends ServiceBase {
       [entityTypeConstants.channelStatsMap]: oThis.channelStatsMap,
       [entityTypeConstants.currentUserChannelRelationsMap]: oThis.currentUserChannelRelations,
       [entityTypeConstants.textsMap]: oThis.texts,
+      [entityTypeConstants.linksMap]: oThis.links,
       imageMap: oThis.images,
       tags: oThis.tags
     };

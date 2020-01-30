@@ -2,6 +2,7 @@ const program = require('commander');
 
 const rootPrefix = '../..',
   FilterTags = require(rootPrefix + '/lib/FilterOutTags'),
+  FilterOutLinks = require(rootPrefix + '/lib/FilterOutLinks'),
   TextModel = require(rootPrefix + '/app/models/mysql/Text'),
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   ChannelModel = require(rootPrefix + '/app/models/mysql/channel/Channel'),
@@ -198,6 +199,9 @@ class CreateNewChannel {
 
     // Filter out tags from channel description.
     await new FilterTags(oThis.channelDescription, textInsertId).perform();
+
+    // Filter out links from channel description.
+    await new FilterOutLinks(oThis.channelDescription, textInsertId).perform();
 
     await TextModel.flushCache({ ids: [textInsertId] });
 
