@@ -145,6 +145,30 @@ class MixedTopSearch extends ServiceBase {
         supportedEntities: oThis.supportedEntities
       }
     };
+
+    // If channel responses present then append those
+    if (oThis.channelResponses) {
+      response[entityTypeConstants.searchCategoriesList].push({
+        id: 'sc_cr',
+        updatedAt: Math.round(new Date() / 1000),
+        kind: 'channel',
+        title: oThis.q ? 'Channel' : null
+      });
+
+      response.channelIds = oThis.channelResponses.channelIds;
+      response[entityTypeConstants.channelsMap] = oThis.channelResponses[entityTypeConstants.channelsMap];
+      response[entityTypeConstants.channelDetailsMap] = oThis.channelResponses[entityTypeConstants.channelDetailsMap];
+      response[entityTypeConstants.channelStatsMap] = oThis.channelResponses[entityTypeConstants.channelStatsMap];
+      response[entityTypeConstants.currentUserChannelRelationsMap] =
+        oThis.channelResponses[entityTypeConstants.currentUserChannelRelationsMap];
+      response[entityTypeConstants.channelIdToTagIdsMap] =
+        oThis.channelResponses[entityTypeConstants.channelIdToTagIdsMap];
+      response.tags = oThis.channelResponses.tags;
+      response.linkMap = oThis.channelResponses.linkMap;
+      response.textsMap = oThis.channelResponses.textsMap;
+      response.imageMap = oThis.channelResponses.imageMap;
+    }
+
     // If tag responses present then add in this result set
     if (oThis.tagResponses) {
       response[entityTypeConstants.searchCategoriesList].push({
@@ -168,30 +192,7 @@ class MixedTopSearch extends ServiceBase {
       response[entityTypeConstants.userSearchList] = oThis.userResponses[entityTypeConstants.userSearchList];
       response.usersByIdMap = oThis.userResponses.usersByIdMap;
       response.tokenUsersByUserIdMap = oThis.userResponses.tokenUsersByUserIdMap;
-      response.imageMap = oThis.userResponses.imageMap;
-    }
-
-    // If channel responses present then append those
-    if (oThis.channelResponses) {
-      response[entityTypeConstants.searchCategoriesList].push({
-        id: 'sc_cr',
-        updatedAt: Math.round(new Date() / 1000),
-        kind: 'channel',
-        title: oThis.q ? 'Channel' : null
-      });
-
-      response.channelIds = oThis.channelResponses.channelIds;
-      response[entityTypeConstants.channelsMap] = oThis.channelResponses[entityTypeConstants.channelsMap];
-      response[entityTypeConstants.channelDetailsMap] = oThis.channelResponses[entityTypeConstants.channelDetailsMap];
-      response[entityTypeConstants.channelStatsMap] = oThis.channelResponses[entityTypeConstants.channelStatsMap];
-      response[entityTypeConstants.currentUserChannelRelationsMap] =
-        oThis.channelResponses[entityTypeConstants.currentUserChannelRelationsMap];
-      response[entityTypeConstants.channelIdToTagIdsMap] =
-        oThis.channelResponses[entityTypeConstants.channelIdToTagIdsMap];
-      response.tags = oThis.channelResponses.tags;
-      response.linkMap = oThis.channelResponses.linkMap;
-      response.textsMap = oThis.channelResponses.textsMap;
-      Object.assign(response.imageMap, oThis.channelResponses.imageMap);
+      Object.assign(response.imageMap, oThis.userResponses.imageMap);
     }
 
     return responseHelper.successWithData(response);
