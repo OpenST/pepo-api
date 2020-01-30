@@ -315,6 +315,7 @@ class GetChannelVideoList extends ServiceBase {
       linkMap: oThis.usersVideosMap.linkMap,
       imageMap: oThis.usersVideosMap.imageMap,
       videoMap: oThis.usersVideosMap.videoMap,
+      [entityTypeConstants.userProfileAllowedActions]: oThis.usersVideosMap.userProfileAllowedActions,
       tokenUsersByUserIdMap: oThis.usersVideosMap.tokenUsersByUserIdMap,
       tokenDetails: oThis.tokenDetails,
       meta: oThis.responseMetaData

@@ -141,6 +141,7 @@ router.get('/:channel_id/videos', sanitizer.sanitizeDynamicUrlParams, function(r
         [entityTypeConstants.currentUserUserContributionsMap]: responseEntityKey.currentUserUserContributions,
         [entityTypeConstants.currentUserVideoContributionsMap]: responseEntityKey.currentUserVideoContributions,
         [entityTypeConstants.currentUserVideoRelationsMap]: responseEntityKey.currentUserVideoRelations,
+        [entityTypeConstants.userProfileAllowedActions]: responseEntityKey.userProfileAllowedActions,
         [entityTypeConstants.pricePointsMap]: responseEntityKey.pricePoints,
         [entityTypeConstants.token]: responseEntityKey.token,
         [entityTypeConstants.channelVideosListMeta]: responseEntityKey.meta
