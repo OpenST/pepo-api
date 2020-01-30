@@ -241,7 +241,7 @@ class ListChannelUser extends ServiceBase {
         id: userId,
         isAdmin: 0,
         isMember: 0,
-        updatedAt: 0
+        updatedAt: Math.round(new Date() / 1000)
       };
 
       if (
