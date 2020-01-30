@@ -666,6 +666,15 @@ class BasicHelper {
   }
 
   /**
+   * Get channel url prefix.
+   *
+   * @returns {string}
+   */
+  channelPrefixUrl() {
+    return coreConstants.PA_DOMAIN + '/channels';
+  }
+
+  /**
    * Get reply conversation thread url prefix for admin dashboard.
    *
    * @returns {string}

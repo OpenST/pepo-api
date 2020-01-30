@@ -131,6 +131,7 @@ class ReportForEntity extends ServiceBase {
       }
       case reportEntityConstants.channelReportEntityKind: {
         await oThis._fetchChannel();
+        let channelUrl = basicHelper.channelPrefixUrl() + '/' + oThis.channel.permalink;
 
         oThis.templateVars = {
           report_entity_kind: oThis.reportEntityKind,
@@ -138,7 +139,7 @@ class ReportForEntity extends ServiceBase {
           reporter_user_name: oThis.currentUser.name,
           reporter_user_id: oThis.currentUser.id,
           reported_channel_name: oThis.channel.name,
-          channel_url: 'https://google.com',
+          channel_url: channelUrl,
           user_admin_url_prefix: basicHelper.userProfilePrefixUrl()
         };
 
