@@ -116,6 +116,7 @@ export PA_S3_AWS_SECRET_KEY='iQsumDc+3yu2+AunoU5k8Y5HLXz1B0GoI70wgaNW'
 export PA_S3_AWS_REGION='us-east-1'
 export PA_S3_AWS_MASTER_FOLDER='d'
 export PA_S3_USER_ASSETS_BUCKET='uassets.stagingpepo.com'
+export PA_S3_CHANNEL_ASSETS_BUCKET='uassets.stagingpepo.com'
 
 # ost-platform API credentials
 export PA_SA_API_END_POINT='https://api.stagingost.com/testnet/v2/'

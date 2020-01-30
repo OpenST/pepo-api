@@ -25,7 +25,7 @@ program.on('--help', function() {
   logger.log('  Example:');
   logger.log('');
   logger.log(
-    '    node executables/oneTimers/createNewChannel.js --channelName "PEPO" --channelTagline "This is some tagline. #new #tagline" --channelDescription "This is a video description. Link: https://pepo.com. Tags: #test1 #test2" --imageUrl "https://s3.amazonaws.com/uassets.stagingpepo.com/d/ua/images/1-6f6278fcfc2da06bd3dc6ffe976e4e28-original.jpg"'
+    '    node executables/oneTimers/createNewChannel.js --channelName "PEPO" --channelTagline "This is some tagline. #new #tagline" --channelDescription "This is a video description. Link: https://pepo.com. Tags: #test1 #test2" --imageUrl "https://s3.amazonaws.com/uassets.stagingpepo.com/d/ca/images/4a13513801c01f00868daa02f71f2551-original.png"'
   );
   logger.log('');
   logger.log('');

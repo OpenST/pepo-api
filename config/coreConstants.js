@@ -304,16 +304,32 @@ class CoreConstants {
     return process.env.PA_S3_USER_ASSETS_BUCKET;
   }
 
+  get S3_CHANNEL_ASSETS_BUCKET() {
+    return process.env.PA_S3_CHANNEL_ASSETS_BUCKET;
+  }
+
   get S3_USER_ASSETS_FOLDER() {
     const oThis = this;
 
     return oThis.S3_AWS_MASTER_FOLDER + '/' + 'ua';
   }
 
+  get S3_CHANNEL_ASSETS_FOLDER() {
+    const oThis = this;
+
+    return oThis.S3_AWS_MASTER_FOLDER + '/' + 'ca';
+  }
+
   get S3_USER_IMAGES_FOLDER() {
     const oThis = this;
 
     return oThis.S3_USER_ASSETS_FOLDER + oThis.IMAGES_S3_FOLDER;
+  }
+
+  get S3_CHANNEL_IMAGES_FOLDER() {
+    const oThis = this;
+
+    return oThis.S3_CHANNEL_ASSETS_FOLDER + oThis.IMAGES_S3_FOLDER;
   }
 
   get S3_USER_VIDEOS_FOLDER() {
