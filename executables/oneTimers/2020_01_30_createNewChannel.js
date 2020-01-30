@@ -18,6 +18,7 @@ program
   .option('--channelTagline <channelTagline>', 'Channel Tagline')
   .option('--channelDescription <channelDescription>', 'Channel Description')
   .option('--imageUrl <imageUrl>', 'Image Url')
+  .option('--channelPermalink <channelPermalink>', 'Channel Permalink')
   .parse(process.argv);
 
 program.on('--help', function() {
@@ -25,7 +26,7 @@ program.on('--help', function() {
   logger.log('  Example:');
   logger.log('');
   logger.log(
-    '    node executables/oneTimers/2020_01_30_createNewChannel.js --channelName "PEPO" --channelTagline "This is some tagline. #new #tagline" --channelDescription "This is a video description. Link: https://pepo.com. Tags: #test1 #test2" --imageUrl "https://s3.amazonaws.com/uassets.stagingpepo.com/d/ca/images/4a13513801c01f00868daa02f71f2551-original.png"'
+    '    node executables/oneTimers/2020_01_30_createNewChannel.js --channelName "PEPO" --channelTagline "This is some tagline. #new #tagline" --channelDescription "This is a video description. Link: https://pepo.com. Tags: #test1 #test2" --imageUrl "https://s3.amazonaws.com/uassets.stagingpepo.com/d/ca/images/4a13513801c01f00868daa02f71f2551-original.png" --channelPermalink "test"'
   );
   logger.log('');
   logger.log('');
@@ -49,6 +50,7 @@ class CreateNewChannel {
    * @param {string} params.channelName
    * @param {string} [params.channelTagline]
    * @param {string} [params.channelDescription]
+   * @param {string} [params.channelPermalink]
    * @param {string} [params.imageUrl]
    *
    * @constructor
@@ -60,6 +62,7 @@ class CreateNewChannel {
     oThis.channelTagline = params.channelTagline || null;
     oThis.channelDescription = params.channelDescription || null;
     oThis.imageUrl = params.imageUrl || null;
+    oThis.channelPermalink = params.channelPermalink;
 
     oThis.channelId = null;
     oThis.textInsertId = null;
@@ -72,6 +75,7 @@ class CreateNewChannel {
     console.log('Channel Tagline: ', oThis.channelTagline);
     console.log('Channel Description: ', oThis.channelDescription);
     console.log('Image URL: ', oThis.imageUrl);
+    console.log('Channel Permalink: ', oThis.channelPermalink);
 
     // Validate whether channel exists or not.
     await oThis.validateChannel();
@@ -96,6 +100,9 @@ class CreateNewChannel {
   async validateChannel() {
     const oThis = this;
 
+    if (!oThis.channelName || !oThis.channelPermalink) {
+      return Promise.reject(new Error('Channel name and Permalink are mandatory.'));
+    }
     const dbRows = await new ChannelModel()
       .select('*')
       .where({ name: oThis.channelName })
@@ -103,6 +110,14 @@ class CreateNewChannel {
 
     if (dbRows.length !== 0) {
       return Promise.reject(new Error('Channel name already exists'));
+    }
+
+    const channelPermalinksResp = await new ChannelModel().fetchIdsByPermalinks([oThis.channelPermalink]);
+    if (
+      CommonValidators.validateNonEmptyObject(channelPermalinksResp) &&
+      channelPermalinksResp[oThis.channelPermalink]
+    ) {
+      return Promise.reject(new Error('Same Permalink already exists'));
     }
 
     logger.info('Channel validation done.');
@@ -123,7 +138,11 @@ class CreateNewChannel {
     }
 
     const insertResponse = await new ChannelModel()
-      .insert({ name: oThis.channelName, status: channelsConstants.invertedStatuses[channelsConstants.activeStatus] })
+      .insert({
+        name: oThis.channelName,
+        status: channelsConstants.invertedStatuses[channelsConstants.activeStatus],
+        permalink: oThis.channelPermalink
+      })
       .fire();
 
     oThis.channelId = insertResponse.insertId;
@@ -212,7 +231,7 @@ class CreateNewChannel {
       .where({ id: oThis.channelId })
       .fire();
 
-    await ChannelModel.flushCache({ ids: [oThis.channelId] });
+    await ChannelModel.flushCache({ ids: [oThis.channelId], permalinks: [oThis.channelPermalink] });
 
     logger.info('Added channel description.');
   }
@@ -272,7 +291,8 @@ new CreateNewChannel({
   channelName: program.channelName,
   channelTagline: program.channelTagline,
   channelDescription: program.channelDescription,
-  imageUrl: program.imageUrl
+  imageUrl: program.imageUrl,
+  channelPermalink: program.channelPermalink
 })
   .perform()
   .then(function() {

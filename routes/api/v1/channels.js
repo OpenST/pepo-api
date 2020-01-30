@@ -178,9 +178,9 @@ router.get('/:channel_id/users', sanitizer.sanitizeDynamicUrlParams, function(re
 });
 
 /* Get url and message for sharing channel given its channel id. */
-router.get('/:channel_id/share', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+router.get('/:channel_permalink/share', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.channelShare;
-  req.decodedParams.channel_id = req.params.channel_id;
+  req.decodedParams.channel_permalink = req.params.channel_permalink;
 
   const dataFormatterFunc = async function(serviceResponse) {
     const wrapperFormatterRsp = await new FormatterComposer({

@@ -32,12 +32,12 @@ class ChannelModel extends ModelBase {
    *
    * @param {object} dbRow
    * @param {number} dbRow.id
-   * @param {number} dbRow.name
+   * @param {String} dbRow.name
    * @param {number} dbRow.status
    * @param {number} dbRow.tagline_id
    * @param {number} dbRow.description_id
    * @param {number} dbRow.cover_image_id
-   * @param {string} dbRow.permalink
+   * @param {String} dbRow.permalink
    * @param {number} dbRow.created_at
    * @param {number} dbRow.updated_at
    *
@@ -81,6 +81,30 @@ class ChannelModel extends ModelBase {
     for (let index = 0; index < dbRows.length; index++) {
       const formatDbRow = oThis.formatDbData(dbRows[index]);
       response[formatDbRow.id] = formatDbRow;
+    }
+
+    return response;
+  }
+
+  /**
+   * Fetch Channel ids from permalinks
+   *
+   * @param permalinks
+   * @returns {Promise<void>}
+   */
+  async fetchIdsByPermalinks(permalinks) {
+    const oThis = this;
+
+    const dbRows = await oThis
+      .select('id, permalink')
+      .where(['permalink IN (?)', permalinks])
+      .fire();
+
+    const response = {};
+
+    for (let index = 0; index < dbRows.length; index++) {
+      const dbRow = dbRows[index];
+      response[dbRow.permalink] = dbRow.id;
     }
 
     return response;
@@ -138,6 +162,11 @@ class ChannelModel extends ModelBase {
     if (params.ids) {
       const ChannelByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelByIds');
       promisesArray.push(new ChannelByIdsCache({ ids: params.ids }).clear());
+    }
+
+    if (params.permalinks) {
+      const ChannelByPermalinksCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelByPermalinks');
+      promisesArray.push(new ChannelByPermalinksCache({ permalinks: params.permalinks }).clear());
     }
 
     await Promise.all(promisesArray);
