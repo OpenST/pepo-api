@@ -146,6 +146,8 @@ class MixedTopSearch extends ServiceBase {
       }
     };
 
+    response.imageMap = {};
+
     // If channel responses present then append those
     if (oThis.channelResponses) {
       response[entityTypeConstants.searchCategoriesList].push({
