@@ -18,6 +18,9 @@ program
   .option('--channelTagline <channelTagline>', 'Channel Tagline')
   .option('--channelDescription <channelDescription>', 'Channel Description')
   .option('--imageUrl <imageUrl>', 'Image Url')
+  .option('--size <size>', 'Image Size')
+  .option('--width <width>', 'Image Width')
+  .option('--height <height>', 'Image Height')
   .option('--channelPermalink <channelPermalink>', 'Channel Permalink')
   .parse(process.argv);
 
@@ -26,13 +29,18 @@ program.on('--help', function() {
   logger.log('  Example:');
   logger.log('');
   logger.log(
-    '    node executables/oneTimers/2020_01_30_createNewChannel.js --channelName "PEPO" --channelTagline "This is some tagline. #new #tagline" --channelDescription "This is a video description. Link: https://pepo.com. Tags: #test1 #test2" --imageUrl "https://s3.amazonaws.com/uassets.stagingpepo.com/d/ca/images/4a13513801c01f00868daa02f71f2551-original.png" --channelPermalink "test"'
+    '    node executables/oneTimers/2020_01_30_createNewChannel.js --channelName "PEPO" --channelTagline "This is some tagline. #new #tagline" --channelDescription "This is a video description. Link: https://pepo.com. Tags: #test1 #test2" --imageUrl "https://s3.amazonaws.com/uassets.stagingpepo.com/d/ca/images/4a13513801c01f00868daa02f71f2551-original.png" --size 123 --width 123 --height 123 --channelPermalink "test"'
   );
   logger.log('');
   logger.log('');
 });
 
 if (!program.channelName) {
+  program.help();
+  process.exit(1);
+}
+
+if (program.imageUrl && (!program.size || !program.width || !program.height)) {
   program.help();
   process.exit(1);
 }
@@ -52,6 +60,9 @@ class CreateNewChannel {
    * @param {string} [params.channelDescription]
    * @param {string} [params.channelPermalink]
    * @param {string} [params.imageUrl]
+   * @param {string} [params.size]
+   * @param {string} [params.width]
+   * @param {string} [params.height]
    *
    * @constructor
    */
@@ -62,6 +73,9 @@ class CreateNewChannel {
     oThis.channelTagline = params.channelTagline || null;
     oThis.channelDescription = params.channelDescription || null;
     oThis.imageUrl = params.imageUrl || null;
+    oThis.size = params.size || null;
+    oThis.width = params.width || null;
+    oThis.height = params.height || null;
     oThis.channelPermalink = params.channelPermalink;
 
     oThis.channelId = null;
@@ -75,6 +89,7 @@ class CreateNewChannel {
     console.log('Channel Tagline: ', oThis.channelTagline);
     console.log('Channel Description: ', oThis.channelDescription);
     console.log('Image URL: ', oThis.imageUrl);
+    console.log('Image dimensions: [size, width, height]', oThis.size, oThis.width, oThis.height);
     console.log('Channel Permalink: ', oThis.channelPermalink);
 
     // Validate whether channel exists or not.
@@ -250,6 +265,9 @@ class CreateNewChannel {
 
     const imageParams = {
       imageUrl: oThis.imageUrl,
+      size: oThis.size,
+      width: oThis.width,
+      height: oThis.height,
       kind: imageConstants.channelImageKind,
       channelId: oThis.channelId,
       isExternalUrl: false,
@@ -292,6 +310,9 @@ new CreateNewChannel({
   channelTagline: program.channelTagline,
   channelDescription: program.channelDescription,
   imageUrl: program.imageUrl,
+  size: program.size,
+  width: program.width,
+  height: program.height,
   channelPermalink: program.channelPermalink
 })
   .perform()
