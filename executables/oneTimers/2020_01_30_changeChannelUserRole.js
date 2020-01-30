@@ -2,39 +2,46 @@ const program = require('commander');
 
 const rootPrefix = '../..',
   ChannelUserModel = require(rootPrefix + '/app/models/mysql/channel/ChannelUser'),
+  ChannelByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelByIds'),
   CommonValidator = require(rootPrefix + '/lib/validators/Common'),
   UserModel = require(rootPrefix + '/app/models/mysql/User'),
+  ChannelStatModel = require(rootPrefix + '/app/models/mysql/channel/ChannelStat'),
   ChannelUserByUserIdAndChannelIdsCache = require(rootPrefix +
     '/lib/cacheManagement/multi/channel/ChannelUserByUserIdAndChannelIds'),
   channelUsersConstants = require(rootPrefix + '/lib/globalConstant/channel/channelUsers'),
+  channelConstants = require(rootPrefix + '/lib/globalConstant/channel/channels'),
   userConstants = require(rootPrefix + '/lib/globalConstant/user'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger');
 
 program
   .option('--userId <userId>', 'User id')
   .option('--channelId <channelId>', 'Channel id')
+  .option('--role <role>', 'valid values - ADMIN/NORMAL')
   .parse(process.argv);
 
 program.on('--help', function() {
   logger.log('');
   logger.log('  Example:');
   logger.log('');
-  logger.log('    node executables/oneTimers/2020_01_30_makeChannelUserAdmin.js --userId 1234 --channelId 1');
+  logger.log(
+    '    node executables/oneTimers/2020_01_30_changeChannelUserRole.js --userId 1234 --channelId 1 --role "ADMIN"'
+  );
   logger.log('');
   logger.log('');
 });
 
-if (!program.userId || !program.channelId) {
+if (!program.userId || !program.channelId || !program.role) {
   program.help();
   process.exit(1);
 }
 
-class MakeChannelUserAdmin {
+class ChangeChannelUserRole {
   constructor(params) {
     const oThis = this;
 
     oThis.userId = params.userId;
     oThis.channelId = params.channelId;
+    oThis.role = params.role;
 
     oThis.channelUser = false;
   }
@@ -42,34 +49,44 @@ class MakeChannelUserAdmin {
   async perform() {
     const oThis = this;
 
-    const valid = await oThis._checkValidUser();
-
-    if (!valid) {
-      return;
-    }
+    await oThis._validate();
 
     await oThis._checkIfChannelUser();
 
-    await oThis._upgradeRole();
+    await oThis._changeRole();
   }
 
   /**
-   * Check valid user
-   * @returns {Promise}
+   * Validate input
+   *
+   * @returns {Promise<never>}
    * @private
    */
-  async _checkValidUser() {
+  async _validate() {
     const oThis = this;
+
+    // Validate channel id
+    const cacheResponse = await new ChannelByIdsCache({ ids: [oThis.channelId] }).fetch();
+    if (cacheResponse.isFailure()) {
+      return Promise.reject(cacheResponse);
+    }
+
+    const channelObj = cacheResponse.data[oThis.channelId];
+
+    if (!CommonValidator.validateNonEmptyObject(channelObj) || channelObj.status !== channelConstants.activeStatus) {
+      return Promise.reject(new Error('===== Invalid channel id ======='));
+    }
 
     const response = await new UserModel().fetchById(oThis.userId);
 
     if (!CommonValidator.validateNonEmptyObject(response) || response.status != userConstants.activeStatus) {
-      console.error('=== Not a valid user ===');
-
-      return false;
+      return Promise.reject(new Error('=== Not a valid user ==='));
     }
 
-    return true;
+    // Check for valid role
+    if (!channelUsersConstants.invertedRoles[oThis.role]) {
+      return Promise.reject(new Error('===== Invalid role ====='));
+    }
   }
 
   /**
@@ -91,17 +108,17 @@ class MakeChannelUserAdmin {
   }
 
   /**
-   * Upgrade role
+   * Change role
    * @returns {Promise<void>}
    * @private
    */
-  async _upgradeRole() {
+  async _changeRole() {
     const oThis = this;
 
     if (oThis.channelUser) {
       await new ChannelUserModel()
         .update({
-          role: channelUsersConstants.invertedRoles[channelUsersConstants.adminRole]
+          role: channelUsersConstants.invertedRoles[oThis.role]
         })
         .where({
           user_id: oThis.userId,
@@ -116,24 +133,43 @@ class MakeChannelUserAdmin {
           notification_status:
             channelUsersConstants.invertedNotificationStatuses[channelUsersConstants.activeNotificationStatus],
           status: channelUsersConstants.invertedStatuses[channelUsersConstants.activeStatus],
-          role: channelUsersConstants.invertedRoles[channelUsersConstants.adminRole]
+          role: channelUsersConstants.invertedRoles[oThis.role]
         })
         .fire();
+
+      await oThis._updateChannelStats();
     }
 
     await ChannelUserModel.flushCache({ userId: oThis.userId, channelId: oThis.channelId });
   }
+
+  /**
+   * Update channel stats
+   * @returns {Promise}
+   * @private
+   */
+  async _updateChannelStats() {
+    const oThis = this;
+
+    await new ChannelStatModel()
+      .update('total_users = total_users + 1')
+      .where({ channel_id: oThis.channelId })
+      .fire();
+
+    await ChannelStatModel.flushCache({ channelIds: [oThis.channelId] });
+  }
 }
 
-new MakeChannelUserAdmin({
+new ChangeChannelUserRole({
   userId: program.userId,
-  channelId: program.channelId
+  channelId: program.channelId,
+  role: program.role
 })
   .perform()
   .then(function() {
     process.exit(0);
   })
   .catch(function(err) {
-    logger.log(err);
+    logger.error(err);
     process.exit(1);
   });
