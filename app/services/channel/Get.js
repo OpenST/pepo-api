@@ -241,7 +241,7 @@ class GetChannel extends ServiceBase {
       [entityTypeConstants.channelStatsMap]: oThis.channelStatsMap,
       [entityTypeConstants.currentUserChannelRelationsMap]: oThis.currentUserChannelRelations,
       [entityTypeConstants.textsMap]: oThis.texts,
-      [entityTypeConstants.linksMap]: oThis.links,
+      linkMap: oThis.links,
       imageMap: oThis.images,
       tags: oThis.tags
     };
