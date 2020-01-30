@@ -139,14 +139,27 @@ class MixedTopSearch extends ServiceBase {
     const oThis = this;
 
     let response = {
+      channelIds: [],
+      [entityTypeConstants.channelsMap]: {},
+      [entityTypeConstants.channelDetailsMap]: {},
+      [entityTypeConstants.channelStatsMap]: {},
+      [entityTypeConstants.currentUserChannelRelationsMap]: {},
+      [entityTypeConstants.channelIdToTagIdsMap]: {},
+      tags: {},
+      linkMap: {},
+      textsMap: {},
+      imageMap: {},
+      tagIds: [],
+      tagsMap: {},
+      [entityTypeConstants.userSearchList]: [],
+      usersByIdMap: {},
+      tokenUsersByUserIdMap: {},
       [entityTypeConstants.searchCategoriesList]: [],
       meta: {
         [paginationConstants.nextPagePayloadKey]: {},
         supportedEntities: oThis.supportedEntities
       }
     };
-
-    response.imageMap = {};
 
     // If channel responses present then append those
     if (oThis.channelResponses) {
