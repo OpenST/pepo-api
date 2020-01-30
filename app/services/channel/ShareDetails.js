@@ -206,9 +206,7 @@ class ShareDetails extends ServiceBase {
 
     return (
       coreConstants.PA_DOMAIN +
-      '/' +
-      gotoConstants.channelGotoKind +
-      '/' +
+      '/channels/' +
       oThis.channelPermalink +
       `?utm_source=share&utm_medium=channel&utm_campaign=${oThis.channelId}`
     );
