@@ -71,7 +71,7 @@ class FetchGoto extends ServiceBase {
       );
     }
 
-    // await oThis._validateUrl();
+    await oThis._validateUrl();
 
     await oThis._fetchGotoKindAndParams();
 
