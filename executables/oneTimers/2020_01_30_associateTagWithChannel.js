@@ -30,7 +30,9 @@ program.on('--help', function() {
   logger.log('');
   logger.log('  Example:');
   logger.log('');
-  logger.log('node executables/oneTimers/associateTagWithChannel --channelId 1 --tagId 10001 --backPopulateVideos 0');
+  logger.log(
+    'node executables/oneTimers/2020_01_30_associateTagWithChannel.js --channelId 1 --tagId 10736 --backPopulateVideos 1'
+  );
   logger.log('');
   logger.log('');
 });
