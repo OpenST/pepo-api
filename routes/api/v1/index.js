@@ -44,7 +44,7 @@ router.use('/feeds', cookieHelper.validateUserLoginCookieIfPresent, feedsRoutes)
 router.use('/videos', cookieHelper.validateUserLoginCookieIfPresent, videoRoutes);
 router.use('/report', cookieHelper.validateUserLoginCookieIfPresent, reportRoutes);
 router.use('/replies', cookieHelper.validateUserLoginCookieIfPresent, replyRoutes);
-router.use('/channels', channelRoutes);
+router.use('/channels', cookieHelper.validateUserLoginCookieIfPresent, channelRoutes);
 
 router.use(cookieHelper.validateUserLoginCookieIfPresent, cookieHelper.validateUserLoginRequired);
 
