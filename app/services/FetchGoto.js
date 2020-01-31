@@ -11,6 +11,7 @@ const rootPrefix = '../..',
   gotoConstants = require(rootPrefix + '/lib/globalConstant/goto'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
+  UserByUsernameCache = require(rootPrefix + '/lib/cacheManagement/multi/UserIdByUserNames'),
   userUtmDetailsConstants = require(rootPrefix + '/lib/globalConstant/userUtmDetail');
 
 const currentPepoApiDomain = coreConstants.PA_DOMAIN;
@@ -198,7 +199,25 @@ class FetchGoto extends ServiceBase {
         break;
       }
       default: {
-        // Do nothing.
+        // Look if url includes username
+        if (!pathArray[2] && CommonValidators.validateUserName(pathArray[1])) {
+          // If anything is passed after first element, that means url is pepo.com/xyz/abc, then its not a profile url
+          // If its a valid username, then look for existence in db
+          const cacheResponse = await new UserByUsernameCache({ userNames: [pathArray[1]] }).fetch();
+          if (cacheResponse.isFailure()) {
+            return Promise.reject(cacheResponse);
+          }
+          const userObj = cacheResponse.data[pathArray[1]];
+
+          if (CommonValidators.validateNonEmptyObject(userObj)) {
+            oThis.gotoKind = gotoConstants.profileGotoKind;
+            oThis.gotoParams = { userId: userObj.id };
+            // If pay parameter is passed for profile page then pass that in params too.
+            if (query && query.at && query.at == 'pay') {
+              oThis.gotoParams.at = query.at;
+            }
+          }
+        }
         break;
       }
     }

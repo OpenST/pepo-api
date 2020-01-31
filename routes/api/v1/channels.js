@@ -10,10 +10,10 @@ const rootPrefix = '../../..',
   cookieHelper = require(rootPrefix + '/lib/cookieHelper'),
   responseEntityKey = require(rootPrefix + '/lib/globalConstant/responseEntityKey');
 
-/* Get url and message for sharing channel given its permalink. */
-router.get('/:channel_permalink/share', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+/* Get url and message for sharing channel given its id. */
+router.get('/:channel_id/share', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.channelShare;
-  req.decodedParams.channel_permalink = req.params.channel_permalink;
+  req.decodedParams.channel_id = Number(req.params.channel_id);
 
   const dataFormatterFunc = async function(serviceResponse) {
     const wrapperFormatterRsp = await new FormatterComposer({

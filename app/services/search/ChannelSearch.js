@@ -298,7 +298,7 @@ class ChannelSearch extends ServiceBase {
         isAdmin: 0,
         isMember: 0,
         notificationStatus: 0,
-        updatedAt: 0
+        updatedAt: Math.round(new Date() / 1000)
       };
 
       const channelUserRelation = channelUserRelations[channelId];

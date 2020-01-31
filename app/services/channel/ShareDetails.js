@@ -25,6 +25,7 @@ class ShareDetails extends ServiceBase {
    *
    * @param {object} params
    * @param {string} params.channel_permalink
+   * @param {number} params.channel_id
    *
    * @augments ServiceBase
    *
@@ -35,9 +36,9 @@ class ShareDetails extends ServiceBase {
 
     const oThis = this;
 
-    oThis.channelPermalink = params.channel_permalink;
+    oThis.channelPermalink = params.channel_permalink || '';
+    oThis.channelId = params.channel_id || null;
 
-    oThis.channelId = null;
     oThis.channelName = null;
     oThis.channelTagline = null;
     oThis.channelImageUrl = null;
@@ -68,25 +69,29 @@ class ShareDetails extends ServiceBase {
   async _fetchChannelDetails() {
     const oThis = this;
 
-    const cacheResponse = await new ChannelByPermalinksCache({ permalinks: [oThis.channelPermalink] }).fetch();
-    if (cacheResponse.isFailure()) {
-      return Promise.reject(cacheResponse);
+    // If channel Id is not passed and permalink is passed.
+    if (!oThis.channelId) {
+      const cacheResponse = await new ChannelByPermalinksCache({ permalinks: [oThis.channelPermalink] }).fetch();
+      if (cacheResponse.isFailure()) {
+        return Promise.reject(cacheResponse);
+      }
+
+      const permalinkIdsMap = cacheResponse.data;
+      if (!permalinkIdsMap[oThis.channelPermalink]) {
+        return Promise.reject(
+          responseHelper.error({
+            internal_error_identifier: 'a_s_c_sd_1',
+            api_error_identifier: 'entity_not_found',
+            debug_options: {
+              channelPermalink: oThis.channelPermalink
+            }
+          })
+        );
+      }
+
+      oThis.channelId = permalinkIdsMap[oThis.channelPermalink];
     }
 
-    const permalinkIdsMap = cacheResponse.data;
-    if (!permalinkIdsMap[oThis.channelPermalink]) {
-      return Promise.reject(
-        responseHelper.error({
-          internal_error_identifier: 'a_s_c_sd_1',
-          api_error_identifier: 'entity_not_found',
-          debug_options: {
-            channelPermalink: oThis.channelPermalink
-          }
-        })
-      );
-    }
-
-    oThis.channelId = permalinkIdsMap[oThis.channelPermalink];
     const channelCacheResponse = await new ChannelByIdsCache({ ids: [oThis.channelId] }).fetch(),
       channelDetails = channelCacheResponse.data[oThis.channelId];
 

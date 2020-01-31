@@ -1290,8 +1290,8 @@ const v1Signature = {
   [apiName.channelShare]: {
     mandatory: [
       {
-        parameter: 'channel_permalink',
-        validatorMethods: ['validateName']
+        parameter: 'channel_id',
+        validatorMethods: ['validateNonZeroInteger']
       }
     ],
     optional: []
