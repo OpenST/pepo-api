@@ -213,7 +213,7 @@ class FetchGoto extends ServiceBase {
             oThis.gotoKind = gotoConstants.profileGotoKind;
             oThis.gotoParams = { userId: userObj.id };
             // If pay parameter is passed for profile page then pass that in params too.
-            if (query && query.at && query.at == 'pay') {
+            if (query && query.at == 'pay') {
               oThis.gotoParams.at = query.at;
             }
           }
