@@ -64,16 +64,17 @@ class ChannelUserModel extends ModelBase {
    *
    * @param {integer} params.limit: no of rows to fetch
    * @param {integer} params.channelId: channel id
-   * @param {integer} params.paginationTimestamp: pagination timestamp
+   * @param {integer} params.page: page
    *
    * @returns {Promise}
    */
   async fetchByChannelId(params) {
     const oThis = this;
 
-    const limit = params.limit,
-      channelId = params.channelId,
-      paginationTimestamp = params.paginationTimestamp;
+    const channelId = params.channelId,
+      page = params.page,
+      limit = params.limit,
+      offset = (page - 1) * limit;
 
     const queryObject = oThis
       .select('*')
@@ -82,15 +83,10 @@ class ChannelUserModel extends ModelBase {
         status: channelUsersConstants.invertedStatuses[channelUsersConstants.activeStatus] // TODO:channels - No index on status.
       })
       .order_by('role asc, created_at desc')
-      .limit(limit);
-
-    if (paginationTimestamp) {
-      queryObject.where(['created_at < ?', paginationTimestamp]);
-    }
+      .limit(limit)
+      .offset(offset);
 
     const dbRows = await queryObject.fire();
-
-    let nextPaginationTimestamp = null;
 
     const userIds = [],
       channelUserDetails = {};
@@ -98,14 +94,12 @@ class ChannelUserModel extends ModelBase {
     for (let index = 0; index < dbRows.length; index++) {
       const formatDbRow = oThis.formatDbData(dbRows[index]);
       channelUserDetails[formatDbRow.userId] = formatDbRow;
-      nextPaginationTimestamp = formatDbRow.createdAt;
       userIds.push(formatDbRow.userId);
     }
 
     return {
       userIds: userIds,
-      channelUserDetails: channelUserDetails,
-      nextPaginationTimestamp: nextPaginationTimestamp
+      channelUserDetails: channelUserDetails
     };
   }
 

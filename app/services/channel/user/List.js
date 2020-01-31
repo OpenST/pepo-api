@@ -47,8 +47,7 @@ class ListChannelUser extends ServiceBase {
     oThis.channelUsers = null;
     oThis.channelUserRelationMap = {};
 
-    oThis.paginationTimestamp = null;
-    oThis.nextPaginationTimestamp = null;
+    oThis.page = 1;
     oThis.responseMetaData = {};
     oThis.userIds = [];
     oThis.imageIds = [];
@@ -85,7 +84,7 @@ class ListChannelUser extends ServiceBase {
   /**
    * Validate and sanitize.
    *
-   * @sets oThis.paginationTimestamp
+   * @sets oThis.page
    *
    * @returns {Promise<*|result>}
    * @private
@@ -96,9 +95,7 @@ class ListChannelUser extends ServiceBase {
     if (oThis.paginationIdentifier) {
       const parsedPaginationParams = oThis._parsePaginationParams(oThis.paginationIdentifier);
 
-      oThis.paginationTimestamp = parsedPaginationParams.pagination_timestamp; // Override paginationTimestamp number.
-    } else {
-      oThis.paginationTimestamp = null;
+      oThis.page = parsedPaginationParams.page; // Override page number.
     }
 
     // Validate limit.
@@ -143,7 +140,7 @@ class ListChannelUser extends ServiceBase {
   /**
    * Fetch channel users.
    *
-   * @sets oThis.userIds, oThis.nextPaginationTimestamp
+   * @sets oThis.userIds, oThis.channelUsers
    *
    * @return {Promise<void>}
    * @private
@@ -154,7 +151,7 @@ class ListChannelUser extends ServiceBase {
     const cacheResponse = await new ChannelUsersByChannelIdPaginationCache({
       channelId: oThis.channelId,
       limit: oThis.limit,
-      paginationTimestamp: oThis.paginationTimestamp
+      page: oThis.page
     }).fetch();
 
     if (cacheResponse.isFailure()) {
@@ -163,7 +160,6 @@ class ListChannelUser extends ServiceBase {
 
     oThis.userIds = cacheResponse.data.userIds || [];
     oThis.channelUsers = cacheResponse.data.channelUserDetails;
-    oThis.nextPaginationTimestamp = cacheResponse.data.nextPaginationTimestamp;
   }
 
   /**
@@ -296,7 +292,7 @@ class ListChannelUser extends ServiceBase {
 
     if (oThis.userIds.length >= oThis.limit) {
       nextPagePayloadKey[paginationConstants.paginationIdentifierKey] = {
-        pagination_timestamp: oThis.nextPaginationTimestamp
+        page: oThis.page + 1
       };
     }
 
