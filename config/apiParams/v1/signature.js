@@ -1297,6 +1297,16 @@ const v1Signature = {
     optional: []
   },
 
+  [apiName.profileShare]: {
+    mandatory: [
+      {
+        parameter: 'user_id',
+        validatorMethods: ['validateNonZeroInteger']
+      }
+    ],
+    optional: []
+  },
+
   [apiName.getAllVideoListByTagId]: {
     mandatory: [
       {
