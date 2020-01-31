@@ -53,6 +53,14 @@ class TurnOffChannelNotifications extends ServiceBase {
 
     await oThis._fetchChannelUser();
 
+    if (oThis.channelUserObj.notificationStatus === channelUsersConstants.inactiveNotificationStatus) {
+      await oThis._fetchCurrentUserChannelRelations();
+
+      return responseHelper.successWithData({
+        [entityTypeConstants.currentUserChannelRelationsMap]: oThis.currentUserChannelRelationsMap
+      });
+    }
+
     await oThis._updateChannelUser();
 
     await oThis._fetchCurrentUserChannelRelations();
@@ -145,19 +153,6 @@ class TurnOffChannelNotifications extends ServiceBase {
         responseHelper.error({
           internal_error_identifier: 'a_s_c_u_tfn_fcu_3',
           api_error_identifier: 'user_blocked_in_channel',
-          debug_options: {
-            channelId: oThis.channelId,
-            userId: oThis.currentUser.id
-          }
-        })
-      );
-    }
-
-    if (oThis.channelUserObj.notificationStatus === channelUsersConstants.inactiveNotificationStatus) {
-      return Promise.reject(
-        responseHelper.error({
-          internal_error_identifier: 'a_s_c_u_tfn_fcu_4',
-          api_error_identifier: 'notification_already_turned_off_for_user_in_channel',
           debug_options: {
             channelId: oThis.channelId,
             userId: oThis.currentUser.id
