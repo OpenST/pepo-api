@@ -68,7 +68,7 @@ class BlockUserInChannel extends ServiceBase {
     if (cacheRsp.isFailure()) {
       return Promise.reject(
         responseHelper.paramValidationError({
-          internal_error_identifier: 'a_s_a_mu_1',
+          internal_error_identifier: 'a_s_a_buic_1',
           api_error_identifier: 'invalid_params',
           params_error_identifiers: ['invalid_user_id'],
           debug_options: { userId: oThis.userId }
@@ -81,7 +81,7 @@ class BlockUserInChannel extends ServiceBase {
     if (userObj.status !== userConstants.activeStatus) {
       return Promise.reject(
         responseHelper.paramValidationError({
-          internal_error_identifier: 'a_s_a_mu_2',
+          internal_error_identifier: 'a_s_a_buic_2',
           api_error_identifier: 'could_not_proceed',
           params_error_identifiers: ['user_inactive'],
           debug_options: {}
