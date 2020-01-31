@@ -433,4 +433,26 @@ router.post('/:other_user_id/unmute', sanitizer.sanitizeDynamicUrlParams, functi
   Promise.resolve(routeHelper.perform(req, res, next, '/user/UnMute', 'r_a_v1_u_19', null));
 });
 
+/* Get url and message for share profile given userid. */
+router.get('/:user_id/share', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.profileShare;
+  req.decodedParams.user_id = req.params.user_id;
+
+  const dataFormatterFunc = async function(serviceResponse) {
+    const wrapperFormatterRsp = await new FormatterComposer({
+      resultType: responseEntityKey.share,
+      entityKindToResponseKeyMap: {
+        [entityTypeConstants.share]: responseEntityKey.share
+      },
+      serviceData: serviceResponse.data
+    }).perform();
+
+    serviceResponse.data = wrapperFormatterRsp.data;
+  };
+
+  Promise.resolve(
+    routeHelper.perform(req, res, next, '/user/profile/ShareDetails', 'r_a_v1_u_20', null, dataFormatterFunc)
+  );
+});
+
 module.exports = router;

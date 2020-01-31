@@ -159,6 +159,15 @@ const v1Signature = {
       }
     ],
     optional: []
+  },
+  [apiName.profileShare]: {
+    mandatory: [
+      {
+        parameter: 'username',
+        validatorMethods: ['validateName']
+      }
+    ],
+    optional: []
   }
 };
 

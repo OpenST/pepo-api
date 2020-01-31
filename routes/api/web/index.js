@@ -43,4 +43,26 @@ router.get('/channels/:channel_permalink/share', sanitizer.sanitizeDynamicUrlPar
   Promise.resolve(routeHelper.perform(req, res, next, '/channel/ShareDetails', 'r_a_w_1', null, dataFormatterFunc));
 });
 
+/* Get url and message for profile given username. */
+router.get('/users/:username/share', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.profileShare;
+  req.decodedParams.username = req.params.username;
+
+  const dataFormatterFunc = async function(serviceResponse) {
+    const wrapperFormatterRsp = await new FormatterComposer({
+      resultType: responseEntityKey.share,
+      entityKindToResponseKeyMap: {
+        [entityTypeConstants.share]: responseEntityKey.share
+      },
+      serviceData: serviceResponse.data
+    }).perform();
+
+    serviceResponse.data = wrapperFormatterRsp.data;
+  };
+
+  Promise.resolve(
+    routeHelper.perform(req, res, next, '/user/profile/ShareDetails', 'r_a_w_2', null, dataFormatterFunc)
+  );
+});
+
 module.exports = router;
