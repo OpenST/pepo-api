@@ -57,6 +57,19 @@ class JoinChannel extends ServiceBase {
 
     await oThis._fetchChannelUser();
 
+    if (
+      CommonValidators.validateNonEmptyObject(oThis.channelUserObj) &&
+      oThis.channelUserObj.status === channelUsersConstants.activeStatus
+    ) {
+      await oThis._fetchCurrentUserChannelRelations();
+      await oThis._fetchChannelStats();
+
+      return responseHelper.successWithData({
+        [entityTypeConstants.currentUserChannelRelationsMap]: oThis.currentUserChannelRelationsMap,
+        [entityTypeConstants.channelStatsMap]: oThis.channelStatsMap
+      });
+    }
+
     await oThis._addUpdateChannelUser();
 
     await oThis._updateChannelStats();
@@ -121,22 +134,6 @@ class JoinChannel extends ServiceBase {
     }
 
     oThis.channelUserObj = cacheResponse.data[oThis.channelId];
-
-    if (
-      CommonValidators.validateNonEmptyObject(oThis.channelUserObj) &&
-      oThis.channelUserObj.status === channelUsersConstants.activeStatus
-    ) {
-      return Promise.reject(
-        responseHelper.error({
-          internal_error_identifier: 'a_s_c_u_j_fcu_1',
-          api_error_identifier: 'user_active_in_channel',
-          debug_options: {
-            channelId: oThis.channelId,
-            userId: oThis.currentUser.id
-          }
-        })
-      );
-    }
 
     if (
       CommonValidators.validateNonEmptyObject(oThis.channelUserObj) &&
