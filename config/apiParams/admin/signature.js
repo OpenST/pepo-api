@@ -76,6 +76,23 @@ const adminSignature = {
     ],
     optional: []
   },
+  [apiName.adminUserBlockInChannel]: {
+    mandatory: [
+      {
+        parameter: 'user_id',
+        validatorMethods: ['validateNonZeroInteger']
+      },
+      {
+        parameter: 'current_admin',
+        validatorMethods: ['validateNonEmptyObject']
+      },
+      {
+        parameter: 'channel_id',
+        validatorMethods: ['validateNonZeroInteger']
+      }
+    ],
+    optional: []
+  },
   [apiName.adminUserDeny]: {
     mandatory: [
       {
