@@ -1,10 +1,10 @@
 const rootPrefix = '../..',
-  database = require(rootPrefix + '/lib/globalConstant/database'),
-  DbKindConstant = require(rootPrefix + '/lib/globalConstant/dbKind');
+  dbKindConstants = require(rootPrefix + '/lib/globalConstant/dbKind'),
+  databaseConstants = require(rootPrefix + '/lib/globalConstant/database');
 
-const dbName = database.entityDbName;
+const dbName = databaseConstants.entityDbName;
 
-const dbKind = DbKindConstant.sqlDbKind;
+const dbKind = dbKindConstants.sqlDbKind;
 
 const upQuery =
   "ALTER TABLE `texts` \n\
@@ -14,11 +14,11 @@ const downQuery =
   "ALTER TABLE `texts` \n\
       MODIFY `text` VARCHAR(255) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '';";
 
-const alterColumnBalancesInPepocornBalances = {
+const alterColumnTextInTextsTable = {
   dbName: dbName,
   up: [upQuery],
   down: [downQuery],
   dbKind: dbKind
 };
 
-module.exports = alterColumnBalancesInPepocornBalances;
+module.exports = alterColumnTextInTextsTable;
