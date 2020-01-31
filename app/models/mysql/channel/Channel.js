@@ -121,6 +121,8 @@ class ChannelModel extends ModelBase {
    * @returns {Promise<{}>}
    */
   async getChannelsByPrefix(params) {
+    // TODO: Channels, only send channel ids as response
+    // TODO: Channels, change query to order by created_at
     const oThis = this;
 
     const page = params.page || 1,

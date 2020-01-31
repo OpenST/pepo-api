@@ -84,10 +84,11 @@ class ChannelSearch extends ServiceBase {
 
     await Promise.all(promisesArray);
 
-    await oThis._fetchAssociatedEntities();
-
-    const promisesArray1 = [oThis._fetchChannelStats(), oThis._fetchUserChannelRelations()];
-    await Promise.all(promisesArray1);
+    await Promise.all([
+      oThis._fetchAssociatedEntities(),
+      oThis._fetchChannelStats(),
+      oThis._fetchUserChannelRelations()
+    ]);
 
     return oThis._formatResponse();
   }
@@ -127,6 +128,7 @@ class ChannelSearch extends ServiceBase {
   async _getChannelIds() {
     const oThis = this;
 
+    // TODO: channels, set only active channels in oThis.channelIds and oThis.channels
     if (oThis.channelPrefix) {
       const channelPaginationRsp = await new ChannelNamePaginationCache({
         limit: oThis.limit,
@@ -176,6 +178,7 @@ class ChannelSearch extends ServiceBase {
 
     oThis.channels = cacheResponse.data;
 
+    // TODO: Channels, only active channels needs to be sent outside.
     for (const channelId in oThis.channels) {
       const channel = oThis.channels[channelId];
       if (channel.coverImageId) {
@@ -281,6 +284,7 @@ class ChannelSearch extends ServiceBase {
   async _fetchUserChannelRelations() {
     const oThis = this;
 
+    // TODO: Channels, use current user relations lib
     const userId = oThis.currentUser.id;
     const cacheResponse = await new ChannelUserByUserIdAndChannelIdsCache({
       userId: userId,
@@ -330,6 +334,7 @@ class ChannelSearch extends ServiceBase {
 
     const responseMetaData = oThis._finalResponse();
 
+    //TODO: Channels, send channels list instead of seperate channel ids and map
     const response = {
       channelIds: oThis.channelIds,
       [entityTypeConstants.channelsMap]: oThis.channels,
