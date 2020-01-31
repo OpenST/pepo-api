@@ -60,9 +60,7 @@ class LeaveChannel extends ServiceBase {
 
     await oThis._updateChannelStat();
 
-    await oThis._fetchCurrentUserChannelRelations();
-
-    await oThis._fetchChannelStats();
+    await Promise.all([oThis._fetchCurrentUserChannelRelations(), oThis._fetchChannelStats()]);
 
     return responseHelper.successWithData({
       [entityTypeConstants.currentUserChannelRelationsMap]: oThis.currentUserChannelRelationsMap,
@@ -232,7 +230,7 @@ class LeaveChannel extends ServiceBase {
     if (!CommonValidators.validateNonEmptyObject(oThis.channelStatsMap[oThis.channelId])) {
       return Promise.reject(
         responseHelper.error({
-          internal_error_identifier: 'a_s_c_u_l_fcu_2',
+          internal_error_identifier: 'a_s_c_u_l_fcs_1',
           api_error_identifier: 'entity_not_found',
           debug_options: {
             channelId: oThis.channelId,

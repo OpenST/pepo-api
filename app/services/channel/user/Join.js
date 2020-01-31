@@ -61,9 +61,7 @@ class JoinChannel extends ServiceBase {
 
     await oThis._updateChannelStats();
 
-    await oThis._fetchCurrentUserChannelRelations();
-
-    await oThis._fetchChannelStats();
+    await Promise.all([oThis._fetchCurrentUserChannelRelations(), oThis._fetchChannelStats()]);
 
     return responseHelper.successWithData({
       [entityTypeConstants.currentUserChannelRelationsMap]: oThis.currentUserChannelRelationsMap,
@@ -276,7 +274,7 @@ class JoinChannel extends ServiceBase {
     if (!CommonValidators.validateNonEmptyObject(oThis.channelStatsMap[oThis.channelId])) {
       return Promise.reject(
         responseHelper.error({
-          internal_error_identifier: 'a_s_c_u_j_fcu_3',
+          internal_error_identifier: 'a_s_c_u_j_fcs_1',
           api_error_identifier: 'entity_not_found',
           debug_options: {
             channelId: oThis.channelId,
