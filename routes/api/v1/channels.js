@@ -69,7 +69,8 @@ router.post('/:channel_id/join', sanitizer.sanitizeDynamicUrlParams, function(re
     const wrapperFormatterRsp = await new FormatterComposer({
       resultType: responseEntityKey.currentUserChannelRelations,
       entityKindToResponseKeyMap: {
-        [entityTypeConstants.currentUserChannelRelationsMap]: responseEntityKey.currentUserChannelRelations
+        [entityTypeConstants.currentUserChannelRelationsMap]: responseEntityKey.currentUserChannelRelations,
+        [entityTypeConstants.channelStatsMap]: responseEntityKey.channelStats
       },
       serviceData: serviceResponse.data
     }).perform();
@@ -89,7 +90,8 @@ router.post('/:channel_id/leave', sanitizer.sanitizeDynamicUrlParams, function(r
     const wrapperFormatterRsp = await new FormatterComposer({
       resultType: responseEntityKey.currentUserChannelRelations,
       entityKindToResponseKeyMap: {
-        [entityTypeConstants.currentUserChannelRelationsMap]: responseEntityKey.currentUserChannelRelations
+        [entityTypeConstants.currentUserChannelRelationsMap]: responseEntityKey.currentUserChannelRelations,
+        [entityTypeConstants.channelStatsMap]: responseEntityKey.channelStats
       },
       serviceData: serviceResponse.data
     }).perform();

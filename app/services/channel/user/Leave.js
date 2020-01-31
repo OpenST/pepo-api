@@ -5,6 +5,7 @@ const rootPrefix = '../../../..',
   ChannelStatModel = require(rootPrefix + '/app/models/mysql/channel/ChannelStat'),
   ChannelByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelByIds'),
   GetCurrentUserChannelRelationsLib = require(rootPrefix + '/lib/channel/getCurrentUserChannelRelations'),
+  ChannelStatByChannelIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelStatByChannelIds'),
   ChannelUserByUserIdAndChannelIdsCache = require(rootPrefix +
     '/lib/cacheManagement/multi/channel/ChannelUserByUserIdAndChannelIds'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
@@ -39,6 +40,7 @@ class LeaveChannel extends ServiceBase {
 
     oThis.channelUserObj = null;
     oThis.currentUserChannelRelationsMap = {};
+    oThis.channelStatsMap = {};
   }
 
   /**
@@ -60,8 +62,11 @@ class LeaveChannel extends ServiceBase {
 
     await oThis._fetchCurrentUserChannelRelations();
 
+    await oThis._fetchChannelStats();
+
     return responseHelper.successWithData({
-      [entityTypeConstants.currentUserChannelRelationsMap]: oThis.currentUserChannelRelationsMap
+      [entityTypeConstants.currentUserChannelRelationsMap]: oThis.currentUserChannelRelationsMap,
+      [entityTypeConstants.channelStatsMap]: oThis.channelStatsMap
     });
   }
 
@@ -204,6 +209,38 @@ class LeaveChannel extends ServiceBase {
     }
 
     oThis.currentUserChannelRelationsMap = currentUserChannelRelationsResponse.data.currentUserChannelRelations;
+  }
+
+  /**
+   * Fetch channel stats.
+   *
+   * @sets oThis.channelStatsMap
+   *
+   * @returns {Promise<never>}
+   * @private
+   */
+  async _fetchChannelStats() {
+    const oThis = this;
+
+    const cacheResponse = await new ChannelStatByChannelIdsCache({ channelIds: [oThis.channelId] }).fetch();
+    if (cacheResponse.isFailure()) {
+      return Promise.reject(cacheResponse);
+    }
+
+    oThis.channelStatsMap = cacheResponse.data;
+
+    if (!CommonValidators.validateNonEmptyObject(oThis.channelStatsMap[oThis.channelId])) {
+      return Promise.reject(
+        responseHelper.error({
+          internal_error_identifier: 'a_s_c_u_l_fcu_2',
+          api_error_identifier: 'entity_not_found',
+          debug_options: {
+            channelId: oThis.channelId,
+            channelStats: oThis.channelStatsMap[oThis.channelId]
+          }
+        })
+      );
+    }
   }
 }
 
