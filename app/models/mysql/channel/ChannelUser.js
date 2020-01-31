@@ -155,6 +155,40 @@ class ChannelUserModel extends ModelBase {
   }
 
   /**
+   * Fetch users with active status and notification status on.
+   *
+   * @param channelIds
+   * @returns {Promise<{allUserIds: *, channelIdToUserIdsMap: *}>}
+   */
+  async fetchActiveUserIdsWithNotificationStatusOn(channelIds) {
+    const oThis = this;
+
+    const dbRows = await oThis
+      .select('*')
+      .where({
+        channel_id: channelIds,
+        notification_status: channelUsersConstants.invertedStatuses[channelUsersConstants.activeNotificationStatus],
+        status: channelUsersConstants.invertedStatuses[channelUsersConstants.activeStatus]
+      })
+      .fire();
+
+    const channelIdToUserIdsMap = {},
+      allUserIds = [];
+
+    for (let index = 0; index < dbRows.length; index++) {
+      const formatDbRow = oThis.formatDbData(dbRows[index]);
+      channelIdToUserIdsMap[formatDbRow.channelId] = channelIdToUserIdsMap[formatDbRow.channelId] || [];
+      channelIdToUserIdsMap[formatDbRow.channelId].push(formatDbRow.userId);
+      allUserIds.push(formatDbRow.userId);
+    }
+
+    return {
+      channelIdToUserIdsMap: channelIdToUserIdsMap,
+      allUserIds: allUserIds
+    };
+  }
+
+  /**
    * Flush cache.
    *
    * @param {object} params
