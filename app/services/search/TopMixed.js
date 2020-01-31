@@ -1,27 +1,27 @@
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
-  UserSearch = require(rootPrefix + '/app/services/search/UserSearch'),
   TagSearch = require(rootPrefix + '/app/services/search/TagSearch'),
+  UserSearch = require(rootPrefix + '/app/services/search/UserSearch'),
   ChannelSearch = require(rootPrefix + '/app/services/search/ChannelSearch'),
+  basicHelper = require(rootPrefix + '/helpers/basic'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
-  basicHelper = require(rootPrefix + '/helpers/basic'),
   paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination');
 
 /**
- * Class to get mixed top search results
+ * Class to get mixed top search results.
  *
  * @class MixedTopSearch
  */
 class MixedTopSearch extends ServiceBase {
   /**
-   * Constructor to get mixed top search results
+   * Constructor to get mixed top search results.
    *
    * @param {object} params
    * @param {object} params.current_user
    * @param {string} params.q
    * @param {string} params.pagination_identifier
-   * @param {Array} params.supported_entities
+   * @param {array<string>} params.supported_entities
    *
    * @augments ServiceBase
    *
@@ -53,7 +53,7 @@ class MixedTopSearch extends ServiceBase {
 
     await oThis._validateAndSanitizeParams();
 
-    let promises = [];
+    const promises = [];
     if (oThis.supportedEntities.includes('user')) {
       promises.push(oThis._getTopUserResults());
     }
@@ -102,7 +102,7 @@ class MixedTopSearch extends ServiceBase {
   async _getTopUserResults() {
     const oThis = this;
 
-    let resp = await new UserSearch({ q: oThis.q, getTopResults: true }).perform();
+    const resp = await new UserSearch({ q: oThis.q, getTopResults: true }).perform();
 
     oThis.userResponses = resp.data;
   }
@@ -116,7 +116,7 @@ class MixedTopSearch extends ServiceBase {
   async _getTopTagResults() {
     const oThis = this;
 
-    let resp = await new TagSearch({ q: oThis.q, getTopResults: true }).perform();
+    const resp = await new TagSearch({ q: oThis.q, getTopResults: true }).perform();
 
     oThis.tagResponses = resp.data;
   }
@@ -130,7 +130,11 @@ class MixedTopSearch extends ServiceBase {
   async _getTopChannelResults() {
     const oThis = this;
 
-    let resp = await new ChannelSearch({ q: oThis.q, getTopResults: true, current_user: oThis.currentUser }).perform();
+    const resp = await new ChannelSearch({
+      q: oThis.q,
+      getTopResults: true,
+      current_user: oThis.currentUser
+    }).perform();
 
     oThis.channelResponses = resp.data;
   }
@@ -138,7 +142,7 @@ class MixedTopSearch extends ServiceBase {
   _prepareResponse() {
     const oThis = this;
 
-    let response = {
+    const response = {
       channelIds: [],
       [entityTypeConstants.channelsMap]: {},
       [entityTypeConstants.channelDetailsMap]: {},

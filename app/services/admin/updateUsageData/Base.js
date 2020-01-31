@@ -48,9 +48,7 @@ class UsageDataBase extends ServiceBase {
     const oThis = this;
 
     // For lifetime data.
-    const promisesArray = [
-      oThis._enqueueJob({ queryStartTimeStampInSeconds: null, queryEndTimeStampInSeconds: null })
-    ];
+    const promisesArray = [oThis._enqueueJob({ queryStartTimeStampInSeconds: null, queryEndTimeStampInSeconds: null })];
 
     const queryEndTimeStampInSeconds = Math.floor(Date.now() / 1000);
 
@@ -85,7 +83,7 @@ class UsageDataBase extends ServiceBase {
   _enqueueJob(params) {
     const oThis = this;
 
-    return bgJob.enqueue(oThis.kind, params)
+    return bgJob.enqueue(oThis.kind, params);
   }
 }
 
