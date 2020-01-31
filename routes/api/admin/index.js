@@ -391,6 +391,14 @@ router.post('/users/:user_id/send-resubmission-email', sanitizer.sanitizeDynamic
   );
 });
 
+/* Block user from channel. */
+router.post('/channels/:channel_id/block-user', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.adminUserBlockInChannel;
+  req.decodedParams.channel_id = req.params.channel_id;
+
+  Promise.resolve(routeHelper.perform(req, res, next, '/admin/BlockUserInChannel', 'r_a_v1_ad_21', null, null, null));
+});
+
 router.use('/pre-launch', adminPreLaunchRoutes);
 router.use('/update-usage-data', adminUpdateUsageDataRoutes);
 router.use('/curated-entities', curatedEntitiesDataRoutes);

@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "184e6e4a-3b92-490d-996e-ff115b4b3991",
+		"_postman_id": "6eabfadd-2caf-4c84-84c2-af92a52e0bcf",
 		"name": "pepo-api",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -504,6 +504,63 @@
 								"admin",
 								"delete-reply-video",
 								"803"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "block-user-in-channel",
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "password",
+									"value": "Pepo-Admin-20!9*",
+									"type": "string"
+								},
+								{
+									"key": "username",
+									"value": "pepo",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"type": "text",
+								"value": "application/x-www-form-urlencoded"
+							},
+							{
+								"key": "csrf-token",
+								"type": "text",
+								"value": "{{csrf-token}}"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "user_id",
+									"value": "1001",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{api_server}}/api/admin/channels/1/block-user",
+							"host": [
+								"{{api_server}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"channels",
+								"1",
+								"block-user"
 							]
 						}
 					},
