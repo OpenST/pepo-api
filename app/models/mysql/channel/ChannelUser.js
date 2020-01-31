@@ -136,6 +136,31 @@ class ChannelUserModel extends ModelBase {
   }
 
   /**
+   * Fetch by user id and status.
+   *
+   * @param userId
+   * @param status
+   * @returns {Promise<void>}
+   */
+  async fetchByUserIdAndStatus(userId, status) {
+    const oThis = this;
+
+    const dbRows = await oThis
+      .select('*')
+      .where(['status = ? AND user_id = ?', status, userId])
+      .fire();
+
+    const response = {};
+
+    for (let index = 0; index < dbRows.length; index++) {
+      const formatDbRow = oThis.formatDbData(dbRows[index]);
+      response[formatDbRow.channelId] = formatDbRow;
+    }
+
+    return response;
+  }
+
+  /**
    * Flush cache.
    *
    * @param {object} params
