@@ -114,6 +114,7 @@ class ShareDetails extends ServiceBase {
     }
 
     oThis.channelName = channelDetails.name;
+    oThis.channelPermalink = oThis.channelPermalink || channelDetails.permalink;
 
     await Promise.all([
       oThis._fetchTagLine(channelDetails.taglineId),
