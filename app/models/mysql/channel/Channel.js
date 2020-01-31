@@ -127,9 +127,12 @@ class ChannelModel extends ModelBase {
       limit = params.limit || 10,
       offset = (page - 1) * limit;
 
+    const queryWithWildCards = params.channelPrefix + '%',
+      queryWithWildCardsSpaceIncluded = '% ' + params.channelPrefix + '%';
+
     const dbRows = await oThis
       .select('*')
-      .where('name LIKE "' + params.channelPrefix + '%"')
+      .where(['name LIKE ? OR name LIKE ?', queryWithWildCards, queryWithWildCardsSpaceIncluded])
       .where({ status: channelConstants.invertedStatuses[channelConstants.activeStatus] })
       .limit(limit)
       .offset(offset)
