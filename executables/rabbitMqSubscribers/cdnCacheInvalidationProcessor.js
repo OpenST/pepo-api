@@ -3,13 +3,11 @@ const program = require('commander');
 const rootPrefix = '../..',
   RabbitMqProcessorBase = require(rootPrefix + '/executables/rabbitMqSubscribers/Base'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
-  machineKindConstants = require(rootPrefix + '/lib/globalConstant/machineKind'),
   rabbitMqProvider = require(rootPrefix + '/lib/providers/rabbitMq'),
-  basicHelper = require(rootPrefix + '/helpers/basic'),
   cloudfrontWrapper = require(rootPrefix + '/lib/aws/CloudfrontWrapper'),
-  cronProcessesConstants = require(rootPrefix + '/lib/globalConstant/cronProcesses'),
-  bgJobConstants = require(rootPrefix + '/lib/globalConstant/bgJob'),
-  configStrategyConstants = require(rootPrefix + '/lib/globalConstant/configStrategy');
+  machineKindConstants = require(rootPrefix + '/lib/globalConstant/machineKind'),
+  configStrategyConstants = require(rootPrefix + '/lib/globalConstant/configStrategy'),
+  cronProcessesConstants = require(rootPrefix + '/lib/globalConstant/big/cronProcesses');
 
 program.option('--cronProcessId <cronProcessId>', 'Cron table process ID').parse(process.argv);
 
@@ -28,7 +26,7 @@ if (!program.cronProcessId) {
 }
 
 /**
- * Class for cdn cache invalidation processor
+ * Class for cdn cache invalidation processor.
  *
  * @class CdnCacheInvalidationProcessor
  */
@@ -65,10 +63,11 @@ class CdnCacheInvalidationProcessor extends RabbitMqProcessorBase {
   /**
    * This function checks if there are any pending tasks left or not.
    *
-   * @returns {Boolean}
+   * @returns {boolean}
    */
   _pendingTasksDone() {
     const oThis = this;
+
     const rmqTaskDone = super._pendingTasksDone();
 
     return !!(rmqTaskDone && !oThis.cacheInvalidationInProgress);

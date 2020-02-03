@@ -13,12 +13,12 @@ const program = require('commander');
 const rootPrefix = '..',
   CronBase = require(rootPrefix + '/executables/CronBase'),
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
-  CronProcessModel = require(rootPrefix + '/app/models/mysql/CronProcesses'),
+  CronProcessesModel = require(rootPrefix + '/app/models/mysql/big/CronProcesses'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   createErrorLogsEntry = require(rootPrefix + '/lib/errorLogs/createEntry'),
   errorLogsConstants = require(rootPrefix + '/lib/globalConstant/errorLogs'),
-  cronProcessesConstants = require(rootPrefix + '/lib/globalConstant/cronProcesses');
+  cronProcessesConstants = require(rootPrefix + '/lib/globalConstant/big/cronProcesses');
 
 program.option('--cronProcessId <cronProcessId>', 'Cron table process ID').parse(process.argv);
 
@@ -114,7 +114,7 @@ class CronProcessesMonitorExecutable extends CronBase {
   async _monitor() {
     const oThis = this;
 
-    const existingCrons = await new CronProcessModel()
+    const existingCrons = await new CronProcessesModel()
         .select('*')
         .where(['status NOT IN (?)', cronProcessesConstants.invertedStatuses[cronProcessesConstants.inactiveStatus]])
         .fire(),

@@ -116,8 +116,6 @@ class VideoSegment extends ModelBase {
    * @private
    */
   async _shortenS3Url(url) {
-    const oThis = this;
-
     const splitUrlArray = url.split('/'),
       fileName = splitUrlArray.pop(),
       baseUrl = splitUrlArray.join('/'),

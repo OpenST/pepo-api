@@ -11,7 +11,7 @@ const rootPrefix = '..',
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   videoDetailsConstants = require(rootPrefix + '/lib/globalConstant/videoDetail'),
-  cronProcessesConstants = require(rootPrefix + '/lib/globalConstant/cronProcesses'),
+  cronProcessesConstants = require(rootPrefix + '/lib/globalConstant/big/cronProcesses'),
   dynamicVariablesConstants = require(rootPrefix + '/lib/globalConstant/big/dynamicVariables');
 
 program.option('--cronProcessId <cronProcessId>', 'Cron table process ID').parse(process.argv);
@@ -274,7 +274,7 @@ class PopulatePopularityCriteria extends CronBase {
 
     const feedIds = oThis.markAsPopularFeedIds.concat(oThis.markAsUnpopularFeedIds);
 
-    //flush only updated feeds and not all ids
+    // Flush only updated feeds and not all ids.
     await FeedModel.flushCache({ ids: feedIds });
   }
 

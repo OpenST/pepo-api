@@ -14,7 +14,7 @@ const rootPrefix = '..',
   basicHelper = require(rootPrefix + '/helpers/basic'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
-  cronProcessesConstants = require(rootPrefix + '/lib/globalConstant/cronProcesses'),
+  cronProcessesConstants = require(rootPrefix + '/lib/globalConstant/big/cronProcesses'),
   socketConnectionConstants = require(rootPrefix + '/lib/globalConstant/socketConnection');
 
 program.option('--cronProcessId <cronProcessId>', 'Cron table process ID').parse(process.argv);

@@ -2,11 +2,11 @@ const program = require('commander');
 
 const rootPrefix = '../..',
   RabbitMqProcessorBase = require(rootPrefix + '/executables/rabbitMqSubscribers/Base'),
-  rabbitMqProvider = require(rootPrefix + '/lib/providers/rabbitMq'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
-  cronProcessesConstants = require(rootPrefix + '/lib/globalConstant/cronProcesses'),
+  rabbitMqProvider = require(rootPrefix + '/lib/providers/rabbitMq'),
+  machineKindConstants = require(rootPrefix + '/lib/globalConstant/machineKind'),
   configStrategyConstants = require(rootPrefix + '/lib/globalConstant/configStrategy'),
-  machineKindConstant = require(rootPrefix + '/lib/globalConstant/machineKind');
+  cronProcessesConstants = require(rootPrefix + '/lib/globalConstant/big/cronProcesses');
 
 program.option('--cronProcessId <cronProcessId>', 'Cron table process ID').parse(process.argv);
 
@@ -38,7 +38,7 @@ class WebhookJobPreProcessor extends RabbitMqProcessorBase {
   getRmqProvider() {
     return rabbitMqProvider.getInstance(
       configStrategyConstants.webhookPreProcessorRabbitmq,
-      machineKindConstant.cronKind
+      machineKindConstants.cronKind
     );
   }
 

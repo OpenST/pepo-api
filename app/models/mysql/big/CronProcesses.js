@@ -1,11 +1,13 @@
-const rootPrefix = '../../..',
+const rootPrefix = '../../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
   coreConstants = require(rootPrefix + '/config/coreConstants'),
   databaseConstants = require(rootPrefix + '/lib/globalConstant/database'),
-  cronProcessesConstants = require(rootPrefix + '/lib/globalConstant/cronProcesses');
+  cronProcessesConstants = require(rootPrefix + '/lib/globalConstant/big/cronProcesses');
 
 // Declare variables.
 const dbName = databaseConstants.bigDbName;
+
+const has = Object.prototype.hasOwnProperty; // Cache the lookup once, in module scope.
 
 /**
  * Class for cron process model.
@@ -64,10 +66,12 @@ class CronProcessesModel extends ModelBase {
    */
   async getById(id) {
     const oThis = this;
-    let response = await oThis
+
+    const response = await oThis
       .select(['id', 'kind', 'kind_name', 'ip_address', 'params', 'status', 'last_started_at', 'last_ended_at'])
       .where({ id: id })
       .fire();
+
     return response;
   }
 
@@ -115,10 +119,10 @@ class CronProcessesModel extends ModelBase {
 
     // Perform validations.
     if (
-      !params.hasOwnProperty('kind') ||
-      !params.hasOwnProperty('ip_address') ||
-      !params.hasOwnProperty('status') ||
-      !params.hasOwnProperty('chain_id')
+      !has.call(params, 'kind') ||
+      !has.call(params, 'ip_address') ||
+      !has.call(params, 'status') ||
+      !has.call(params, 'chain_id')
     ) {
       throw new Error('Mandatory parameters are missing.');
     }
@@ -148,10 +152,10 @@ class CronProcessesModel extends ModelBase {
 
     // Perform validations.
     if (
-      !params.hasOwnProperty('id') ||
-      !params.hasOwnProperty('newLastStartTime') ||
-      !params.hasOwnProperty('newStatus') ||
-      !params.hasOwnProperty('kind')
+      !has.call(params, 'id') ||
+      !has.call(params, 'newLastStartTime') ||
+      !has.call(params, 'newStatus') ||
+      !has.call(params, 'kind')
     ) {
       throw new Error(
         'Mandatory parameters are missing. Expected an object with the following keys: {id, kind, newLastStartTime, newStatus}'

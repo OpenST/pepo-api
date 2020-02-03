@@ -13,7 +13,7 @@ const rootPrefix = '../..',
   errorLogsConstants = require(rootPrefix + '/lib/globalConstant/errorLogs'),
   fiatPaymentConstants = require(rootPrefix + '/lib/globalConstant/fiatPayment'),
   inAppProductsConstants = require(rootPrefix + '/lib/globalConstant/inAppProduct'),
-  cronProcessesConstants = require(rootPrefix + '/lib/globalConstant/cronProcesses');
+  cronProcessesConstants = require(rootPrefix + '/lib/globalConstant/big/cronProcesses');
 
 const BATCH_SIZE = 5;
 
