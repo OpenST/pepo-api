@@ -173,11 +173,27 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/health-checker', elbHealthCheckerRoute);
 
 /* Dummy routes */
+app.use('/api/v1/dummy/feeds', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  return res.status(200).json(require(rootPrefix + '/dummy/getFeed.json'));
+});
+
 app.use('/api/v1/dummy/search/channels', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   return res.status(200).json(require(rootPrefix + '/dummy/searchChannel.json'));
 });
 app.use('/api/v1/dummy/search/top', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   return res.status(200).json(require(rootPrefix + '/dummy/searchTop.json'));
+});
+
+app.use('/api/v1/dummy/channels/2/videos', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  return res.status(404).json(require(rootPrefix + '/dummy/getDeletedChannel.json'));
+});
+
+app.use('/api/v1/dummy/channels/2/share', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  return res.status(404).json(require(rootPrefix + '/dummy/getDeletedChannel.json'));
+});
+
+app.use('/api/v1/dummy/channels/2', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  return res.status(404).json(require(rootPrefix + '/dummy/getDeletedChannel.json'));
 });
 
 app.use('/api/v1/dummy/channels/1/videos', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
@@ -192,16 +208,8 @@ app.use('/api/v1/dummy/channels/1', sanitizer.sanitizeDynamicUrlParams, function
   return res.status(200).json(require(rootPrefix + '/dummy/getChannel.json'));
 });
 
-app.use('/api/v1/dummy/channels/2/videos', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
-  return res.status(404).json(require(rootPrefix + '/dummy/getDeletedChannel.json'));
-});
-
-app.use('/api/v1/dummy/channels/2/share', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
-  return res.status(404).json(require(rootPrefix + '/dummy/getDeletedChannel.json'));
-});
-
-app.use('/api/v1/dummy/channels/2', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
-  return res.status(404).json(require(rootPrefix + '/dummy/getDeletedChannel.json'));
+app.use('/api/v1/dummy/users/:user_id/share', function(req, res, next) {
+  return res.status(200).json(require(rootPrefix + '/dummy/getProfileShare.json'));
 });
 
 // Start Request logging. Placed below static and health check to reduce logs
