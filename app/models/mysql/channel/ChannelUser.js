@@ -159,8 +159,9 @@ class ChannelUserModel extends ModelBase {
   /**
    * Fetch by user id and status.
    *
-   * @param userId
-   * @param status
+   * @param {number} userId
+   * @param {number} status
+   *
    * @returns {Promise<void>}
    */
   async fetchByUserIdAndStatus(userId, status) {
@@ -184,7 +185,8 @@ class ChannelUserModel extends ModelBase {
   /**
    * Fetch users with active status and notification status on.
    *
-   * @param channelIds
+   * @param {array<number>} channelIds
+   *
    * @returns {Promise<{allUserIds: *, channelIdToUserIdsMap: *}>}
    */
   async fetchActiveUserIdsWithNotificationStatusOn(channelIds) {
@@ -218,13 +220,14 @@ class ChannelUserModel extends ModelBase {
   /**
    * Fetch blocked users by channel ids.
    *
-   * @param channelIds
+   * @param {array<number>} channelIds
+   *
    * @returns {Promise<void>}
    */
   async fetchBlockedUsersByChannelIds(channelIds) {
     const oThis = this;
 
-    let dbRows = await oThis
+    const dbRows = await oThis
       .select('*')
       .where([
         'channel_id IN (?) AND status = ?',
@@ -233,9 +236,9 @@ class ChannelUserModel extends ModelBase {
       ])
       .fire();
 
-    let finalResponse = {};
-    for (let i = 0; i < channelIds.length; i++) {
-      finalResponse[channelIds[i]] = [];
+    const finalResponse = {};
+    for (let index = 0; index < channelIds.length; index++) {
+      finalResponse[channelIds[index]] = [];
     }
 
     for (let index = 0; index < dbRows.length; index++) {
