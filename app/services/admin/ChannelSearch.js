@@ -164,8 +164,10 @@ class ChannelSearch extends ServiceBase {
 
     oThis.channels = cacheResponse.data;
 
-    for (const channelId in oThis.channels) {
-      const channel = oThis.channels[channelId];
+    for (let index = 0; index < channelIds.length; index++) {
+      const channelId = channelIds[index],
+        channel = oThis.channels[channelId];
+
       oThis.channelIds.push(channelId);
       if (channel.coverImageId) {
         oThis.imageIds.push(channel.coverImageId);
