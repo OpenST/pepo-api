@@ -24,6 +24,23 @@ const adminSignature = {
       }
     ]
   },
+  [apiName.adminChannelSearch]: {
+    mandatory: [],
+    optional: [
+      {
+        parameter: 'q',
+        validatorMethods: ['validateString']
+      },
+      {
+        parameter: paginationConstants.paginationIdentifierKey,
+        validatorMethods: ['validateString', 'validatePaginationIdentifier']
+      },
+      {
+        parameter: 'current_admin',
+        validatorMethods: ['validateNonEmptyObject']
+      }
+    ]
+  },
   [apiName.adminUserApprove]: {
     mandatory: [
       {

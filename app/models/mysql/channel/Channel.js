@@ -116,6 +116,7 @@ class ChannelModel extends ModelBase {
    * @param {object} params
    * @param {number} [params.paginationTimestamp]
    * @param {number} [params.limit]
+   * @param {boolean} params.isAdminSearch
    * @param {string} params.channelPrefix
    *
    * @returns {Promise<{}>}
@@ -125,6 +126,7 @@ class ChannelModel extends ModelBase {
 
     const query = params.channelPrefix,
       limit = params.limit || 10,
+      isAdminSearch = params.isAdminSearch,
       paginationTimestamp = params.paginationTimestamp;
 
     const queryWithWildCards = query + '%',
@@ -133,9 +135,12 @@ class ChannelModel extends ModelBase {
     const queryObject = await oThis
       .select('*')
       .where(['name LIKE ? OR name LIKE ?', queryWithWildCards, queryWithWildCardsSpaceIncluded])
-      .where({ status: channelConstants.invertedStatuses[channelConstants.activeStatus] })
       .order_by('created_at DESC')
       .limit(limit);
+
+    if (!isAdminSearch) {
+      queryObject.where({ status: channelConstants.invertedStatuses[channelConstants.activeStatus] });
+    }
 
     if (paginationTimestamp) {
       queryObject.where(['created_at < ?', paginationTimestamp]);

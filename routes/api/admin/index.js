@@ -121,6 +121,27 @@ router.get('/users', sanitizer.sanitizeDynamicUrlParams, function(req, res, next
   Promise.resolve(routeHelper.perform(req, res, next, '/admin/UserSearch', 'r_a_v1_ad_2', null, dataFormatterFunc));
 });
 
+/* Search channels. */
+router.get('/channels', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.adminChannelSearch;
+
+  const dataFormatterFunc = async function(serviceResponse) {
+    const wrapperFormatterRsp = await new AdminFormatterComposer({
+      resultType: adminResponseEntityKey.channelSearchResults,
+      entityKindToResponseKeyMap: {
+        [adminEntityType.channelSearchList]: adminResponseEntityKey.channelSearchResults,
+        [adminEntityType.channelsMap]: adminResponseEntityKey.channels,
+        [adminEntityType.channelListMeta]: adminResponseEntityKey.meta
+      },
+      serviceData: serviceResponse.data
+    }).perform();
+
+    serviceResponse.data = wrapperFormatterRsp.data;
+  };
+
+  Promise.resolve(routeHelper.perform(req, res, next, '/admin/ChannelSearch', 'r_a_v1_ad_22', null, dataFormatterFunc));
+});
+
 /* Approve user as creator */
 router.post('/users/:user_id/approve', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.adminUserApprove;
