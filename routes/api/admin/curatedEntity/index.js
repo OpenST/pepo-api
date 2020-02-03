@@ -74,8 +74,7 @@ router.get('/channels', sanitizer.sanitizeDynamicUrlParams, function(req, res, n
       resultType: adminResponseEntityKey.channelsCuratedList,
       entityKindToResponseKeyMap: {
         [adminEntityType.channelsCuratedEntitiesList]: adminResponseEntityKey.channelsCuratedList,
-        [adminEntityType.channelsMap]: adminResponseEntityKey.channels,
-        [adminEntityType.channelDetailsMap]: adminResponseEntityKey.channels
+        [adminEntityType.channelsMap]: adminResponseEntityKey.channels
       },
       serviceData: serviceResponse.data
     }).perform();
