@@ -22,7 +22,8 @@ router.get('/', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
         [entityTypeConstants.imagesMap]: responseEntityKey.images,
         [entityTypeConstants.videosMap]: responseEntityKey.videos,
         [entityTypeConstants.replyDetailsMap]: responseEntityKey.replyDetails,
-        [entityTypeConstants.userNotificationListMeta]: responseEntityKey.meta
+        [entityTypeConstants.userNotificationListMeta]: responseEntityKey.meta,
+        [entityTypeConstants.channelsMap]: responseEntityKey.channels
       },
       serviceData: serviceResponse.data
     }).perform();

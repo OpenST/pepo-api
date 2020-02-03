@@ -6,6 +6,7 @@ const rootPrefix = '../../../..',
   UserMultiCache = require(rootPrefix + '/lib/cacheManagement/multi/User'),
   ImageByIdCache = require(rootPrefix + '/lib/cacheManagement/multi/ImageByIds'),
   VideoByIdCache = require(rootPrefix + '/lib/cacheManagement/multi/VideoByIds'),
+  ChannelByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelByIds'),
   ReplyDetailsByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/ReplyDetailsByIds'),
   UserNotificationModel = require(rootPrefix + '/app/models/cassandra/UserNotification'),
   NotificationResponseHelper = require(rootPrefix + '/lib/notification/response/Helper'),
@@ -59,10 +60,12 @@ class UserNotificationList extends ServiceBase {
     oThis.userIds = [];
     oThis.videoIds = [];
     oThis.replyDetailIds = [];
+    oThis.channelIds = [];
     oThis.imageIds = [];
     oThis.blockedByUserInfo = {};
 
     oThis.usersByIdMap = {};
+    oThis.channelsByIdMap = {};
     oThis.tokenUsersByUserIdMap = {};
     oThis.videoMap = {};
     oThis.replyDetailsMap = {};
@@ -94,7 +97,8 @@ class UserNotificationList extends ServiceBase {
       oThis._fetchUsers(),
       oThis._fetchTokenUsers(),
       oThis._fetchVideos(),
-      oThis._fetchBlockedByUserInfo()
+      oThis._fetchBlockedByUserInfo(),
+      oThis._fetchChannels()
     ];
     // Images are fetched later because video covers also needs to be fetched.
 
@@ -198,11 +202,16 @@ class UserNotificationList extends ServiceBase {
       oThis.replyDetailIds = oThis.replyDetailIds.concat(
         oThis._getReplyDetailIdsForNotifications(userNotification, supportingEntitiesConfig)
       );
+
+      oThis.channelIds = oThis.channelIds.concat(
+        oThis._getChannelIdsForNotifications(userNotification, supportingEntitiesConfig)
+      );
     }
 
     oThis.userIds = [...new Set(oThis.userIds)];
     oThis.videoIds = [...new Set(oThis.videoIds)];
     oThis.replyDetailIds = [...new Set(oThis.replyDetailIds)];
+    oThis.channelIds = [...new Set(oThis.channelIds)];
   }
 
   /**
@@ -270,8 +279,6 @@ class UserNotificationList extends ServiceBase {
    * @private
    */
   _getReplyDetailIdsForNotifications(userNotification, supportingEntitiesConfig) {
-    const oThis = this;
-
     let rdIds = [];
 
     const keysForReplyDetailId = supportingEntitiesConfig.replyDetailIds;
@@ -289,6 +296,32 @@ class UserNotificationList extends ServiceBase {
     }
 
     return rdIds;
+  }
+
+  /**
+   * Get channel ids of supporting entity for a notifications.
+   *
+   * @returns {Promise<array>}
+   * @private
+   */
+  _getChannelIdsForNotifications(userNotification, supportingEntitiesConfig) {
+    let chIds = [];
+
+    if (supportingEntitiesConfig.channelIds) {
+      const keysForChannelId = supportingEntitiesConfig.channelIds;
+
+      for (let index = 0; index < keysForChannelId.length; index++) {
+        const dataKeys = keysForChannelId[index];
+
+        const val = NotificationResponseHelper.getKeyDataFromNotification(userNotification, dataKeys);
+
+        if (val) {
+          chIds.push(val);
+        }
+      }
+    }
+
+    return chIds;
   }
 
   /**
@@ -350,6 +383,30 @@ class UserNotificationList extends ServiceBase {
         oThis.imageIds.push(userObj.profileImageId);
       }
     }
+  }
+
+  /**
+   * Fetch channels from cache.
+   *
+   * @sets oThis.channelsByIdMap
+   *
+   * @returns {Promise<*>}
+   * @private
+   */
+  async _fetchChannels() {
+    const oThis = this;
+
+    if (oThis.channelIds.length < 0) {
+      return;
+    }
+    console.log('oThis.channelIds =====', oThis.channelIds);
+    const channelByIdsCacheResp = await new ChannelByIdsCache({ ids: oThis.channelIds }).fetch();
+
+    if (channelByIdsCacheResp.isFailure()) {
+      return Promise.reject(channelByIdsCacheResp);
+    }
+
+    oThis.channelsByIdMap = channelByIdsCacheResp.data;
   }
 
   /**
@@ -581,7 +638,8 @@ class UserNotificationList extends ServiceBase {
 
     const params = {
       supportingEntities: {
-        [responseEntityKey.users]: oThis.usersByIdMap
+        [responseEntityKey.users]: oThis.usersByIdMap,
+        [responseEntityKey.channels]: oThis.channelsByIdMap
       },
       payload: payload,
       userNotification: userNotification,
@@ -712,7 +770,8 @@ class UserNotificationList extends ServiceBase {
       imageMap: oThis.imageMap,
       videoMap: oThis.videoMap,
       replyDetailsMap: oThis.replyDetailsMap,
-      userNotificationList: oThis.formattedUserNotifications
+      userNotificationList: oThis.formattedUserNotifications,
+      channelsMap: oThis.channelsByIdMap
     };
 
     const nextPagePayloadKey = {};
