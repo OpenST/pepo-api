@@ -71,7 +71,6 @@ class RotateWebhookSecret extends ServiceBase {
     }
 
     if (!cacheRsp.data[oThis.uuid].id) {
-      //todo:
       return Promise.reject(
         responseHelper.paramValidationError({
           internal_error_identifier: 'a_s_w_rs_1',
