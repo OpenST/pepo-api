@@ -5,10 +5,9 @@ const rootPrefix = '../../..',
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   ImageByIdCache = require(rootPrefix + '/lib/cacheManagement/multi/ImageByIds'),
   TextsByIdCache = require(rootPrefix + '/lib/cacheManagement/multi/TextsByIds'),
-  ChannelByPermalinksCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelByPermalinks'),
   ChannelByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelByIds'),
+  ChannelByPermalinksCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelByPermalinks'),
   coreConstants = require(rootPrefix + '/config/coreConstants'),
-  gotoConstants = require(rootPrefix + '/lib/globalConstant/goto'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
   shareEntityConstants = require(rootPrefix + '/lib/globalConstant/shareEntity'),
@@ -24,8 +23,8 @@ class ShareDetails extends ServiceBase {
    * Constructor to share channel details.
    *
    * @param {object} params
-   * @param {string} params.channel_permalink
-   * @param {number} params.channel_id
+   * @param {string} [params.channel_permalink]
+   * @param {number} [params.channel_id]
    *
    * @augments ServiceBase
    *
@@ -61,7 +60,7 @@ class ShareDetails extends ServiceBase {
   /**
    * Fetch channel details by channel id.
    *
-   * @sets oThis.channelName, oThis.channelTagline, oThis.channelImageUrl
+   * @sets oThis.channelId, oThis.channelName, oThis.channelPermalink
    *
    * @returns {Promise<never>}
    * @private
@@ -69,7 +68,7 @@ class ShareDetails extends ServiceBase {
   async _fetchChannelDetails() {
     const oThis = this;
 
-    // If channel Id is not passed and permalink is passed.
+    // If channel id is not passed and permalink is passed.
     if (!oThis.channelId) {
       const cacheResponse = await new ChannelByPermalinksCache({ permalinks: [oThis.channelPermalink] }).fetch();
       if (cacheResponse.isFailure()) {
@@ -125,8 +124,11 @@ class ShareDetails extends ServiceBase {
   /**
    * Fetch tag line of channel.
    *
-   * @param tagLineId
-   * @returns {Promise<never>}
+   * @param {number} tagLineId
+   *
+   * @sets oThis.channelTagline
+   *
+   * @returns {Promise<void>}
    * @private
    */
   async _fetchTagLine(tagLineId) {
@@ -137,7 +139,6 @@ class ShareDetails extends ServiceBase {
     }
 
     const textCacheResponse = await new TextsByIdCache({ ids: [tagLineId] }).fetch();
-
     if (textCacheResponse.isFailure()) {
       return Promise.reject(textCacheResponse);
     }
@@ -149,10 +150,13 @@ class ShareDetails extends ServiceBase {
   }
 
   /**
-   * Fetch Cover image oif channel
+   * Fetch cover image of channel.
    *
-   * @param imageId
-   * @returns {Promise<never>}
+   * @param {number} imageId
+   *
+   * @sets oThis.channelImageUrl
+   *
+   * @returns {Promise<void>}
    * @private
    */
   async _fetchCoverImage(imageId) {

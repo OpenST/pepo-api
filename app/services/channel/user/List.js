@@ -227,10 +227,11 @@ class ListChannelUser extends ServiceBase {
    */
   async _setChannelUserRelations() {
     const oThis = this;
+
     oThis.channelUserRelationMap[oThis.channelId] = {};
 
     for (let index = 0; index < oThis.userIds.length; index++) {
-      let userId = oThis.userIds[index];
+      const userId = oThis.userIds[index];
       const channelUserRelation = oThis.channelUsers[userId];
 
       oThis.channelUserRelationMap[oThis.channelId][userId] = {

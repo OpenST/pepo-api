@@ -86,7 +86,7 @@ const assignParams = function(req, res, next) {
   delete req.decodedParams.user_login_cookie_value;
   delete req.decodedParams.current_admin;
   delete req.decodedParams.admin_login_cookie_value;
-  //IMPORTANT: Above keys are removed from decoded params as they are being set internally. Thus any such key coming from front end should not be respected.
+  // IMPORTANT: Above keys are removed from decoded params as they are being set internally. Thus any such key coming from front end should not be respected.
 
   next();
 };
@@ -98,7 +98,7 @@ const assignParams = function(req, res, next) {
  * @return {*}
  */
 const getRequestParams = function(req) {
-  // IMPORTANT NOTE: Don't assign parameters before sanitization
+  // IMPORTANT NOTE: Don't assign parameters before sanitization.
   if (req.method === 'POST') {
     return req.body;
   } else if (req.method === 'GET') {
@@ -126,15 +126,15 @@ const setResponseHeader = async function(req, res, next) {
   next();
 };
 
-// If the process is not a master
+// If the process is not a master.
 
-// Set worker process title
+// Set worker process title.
 process.title = 'Pepo API node worker';
 
-// Create express application instance
+// Create express application instance.
 const app = express();
 
-// Add id and startTime to request
+// Add id and startTime to request.
 app.use(customMiddleware());
 
 // Load Morgan
@@ -163,23 +163,23 @@ app.use(helmet());
 // Node.js body parsing middleware.
 app.use(bodyParser.json());
 
-// Parsing the URL-encoded data with the qs library (extended: true)
+// Parsing the URL-encoded data with the qs library (extended: true).
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// Static file location
+// Static file location.
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Health checker
+// Health checker.
 app.use('/health-checker', elbHealthCheckerRoute);
 
-// Start Request logging. Placed below static and health check to reduce logs
+// Start Request logging. Placed below static and health check to reduce logs.
 app.use(appendRequestDebugInfo, startRequestLogLine);
 
-// set response Headers
+// Set response headers.
 app.use(setResponseHeader);
 
 /**
- * NOTE: API routes where first sanitize and then assign params
+ * NOTE: API routes where first sanitize and then assign params.
  */
 app.use('/api', sanitizer.sanitizeBodyAndQuery, assignParams, function(request, response, next) {
   if (request.hostname === pepoApiHostName) {
@@ -197,7 +197,7 @@ app.use('/api', sanitizer.sanitizeBodyAndQuery, assignParams, function(request, 
 
 app.use('/webhooks', webhookRoutes);
 
-// Catch 404 and forward to error handler
+// Catch 404 and forward to error handler.
 app.use(function(req, res, next) {
   return responseHelper.renderApiResponse(
     responseHelper.error({
@@ -210,7 +210,7 @@ app.use(function(req, res, next) {
   );
 });
 
-// Error handler
+// Error handler.
 app.use(async function(err, req, res, next) {
   let errorObject = null;
 
