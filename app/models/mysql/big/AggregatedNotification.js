@@ -1,7 +1,7 @@
-const rootPrefix = '../../..',
+const rootPrefix = '../../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
   databaseConstants = require(rootPrefix + '/lib/globalConstant/database'),
-  aggregatedNotificationsConstants = require(rootPrefix + '/lib/globalConstant/aggregatedNotifications');
+  aggregatedNotificationsConstants = require(rootPrefix + '/lib/globalConstant/big/aggregatedNotifications');
 
 // Declare variables.
 const dbName = databaseConstants.bigDbName;
