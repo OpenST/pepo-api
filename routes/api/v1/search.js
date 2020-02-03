@@ -79,7 +79,7 @@ router.get('/channels', sanitizer.sanitizeDynamicUrlParams, function(req, res, n
     const wrapperFormatterRsp = await new FormatterComposer({
       resultType: responseEntityKey.channelSearchResults,
       entityKindToResponseKeyMap: {
-        [entityTypeConstants.channelList]: responseEntityKey.channelSearchResults,
+        [entityTypeConstants.channelSearchList]: responseEntityKey.channelSearchResults,
         [entityTypeConstants.channelsMap]: responseEntityKey.channels,
         [entityTypeConstants.channelDetailsMap]: responseEntityKey.channelDetails,
         [entityTypeConstants.channelStatsMap]: responseEntityKey.channelStats,
@@ -139,7 +139,7 @@ router.get('/top', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) 
     };
     if (serviceResponse.data.meta.supportedEntities.indexOf('channel') > -1) {
       Object.assign(entityResponseMap, {
-        [entityTypeConstants.channelList]: responseEntityKey.channelSearchResults,
+        [entityTypeConstants.channelSearchList]: responseEntityKey.channelSearchResults,
         [entityTypeConstants.channelsMap]: responseEntityKey.channels,
         [entityTypeConstants.channelDetailsMap]: responseEntityKey.channelDetails,
         [entityTypeConstants.channelStatsMap]: responseEntityKey.channelStats,

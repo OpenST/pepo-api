@@ -3,16 +3,16 @@ const rootPrefix = '../../..',
   FetchAssociatedEntities = require(rootPrefix + '/lib/FetchAssociatedEntities'),
   ChannelByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelByIds'),
   ChannelNamePaginationCache = require(rootPrefix + '/lib/cacheManagement/single/ChannelNamePagination'),
+  GetCurrentUserChannelRelationsLib = require(rootPrefix + '/lib/channel/GetCurrentUserChannelRelations'),
   CuratedEntityIdsByKindCache = require(rootPrefix + '/lib/cacheManagement/single/CuratedEntityIdsByKind'),
   ChannelTagByChannelIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelTagByChannelIds'),
   ChannelStatByChannelIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelStatByChannelIds'),
-  ChannelUserByUserIdAndChannelIdsCache = require(rootPrefix +
-    '/lib/cacheManagement/multi/channel/ChannelUserByUserIdAndChannelIds'),
   basicHelper = require(rootPrefix + '/helpers/basic'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination'),
   entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
+  channelConstants = require(rootPrefix + '/lib/globalConstant/channel/channels'),
   curatedEntitiesConstants = require(rootPrefix + '/lib/globalConstant/curatedEntities'),
   channelUsersConstants = require(rootPrefix + '/lib/globalConstant/channel/channelUsers');
 
@@ -49,8 +49,10 @@ class ChannelSearch extends ServiceBase {
     oThis.getTopResults = params.getTopResults || false;
 
     oThis.limit = null;
-    oThis.page = null;
+    oThis.paginationTimestamp = null;
+    oThis.nextPaginationTimestamp = null;
     oThis.channelIds = [];
+    oThis.searchResults = [];
     oThis.channels = {};
 
     oThis.imageIds = [];
@@ -78,16 +80,16 @@ class ChannelSearch extends ServiceBase {
 
     await oThis._validateAndSanitizeParams();
 
-    await oThis._getChannelIds();
+    let channelIds = await oThis._getChannelIds();
 
-    const promisesArray = [oThis._getChannels(), oThis._fetchChannelTagIds()];
+    await oThis._getChannels(channelIds);
 
-    await Promise.all(promisesArray);
+    await oThis._fetchChannelTagIds();
 
     await Promise.all([
       oThis._fetchAssociatedEntities(),
       oThis._fetchChannelStats(),
-      oThis._fetchUserChannelRelations()
+      oThis._fetchCurrentUserChannelRelations()
     ]);
 
     return oThis._formatResponse();
@@ -96,7 +98,7 @@ class ChannelSearch extends ServiceBase {
   /**
    * Validate and sanitize specific params.
    *
-   * @sets oThis.channelPrefix, oThis.page, oThis.limit
+   * @sets oThis.channelPrefix, oThis.paginationTimestamp, oThis.limit
    *
    * @returns {Promise<never>}
    * @private
@@ -108,9 +110,9 @@ class ChannelSearch extends ServiceBase {
 
     if (oThis.paginationIdentifier) {
       const parsedPaginationParams = oThis._parsePaginationParams(oThis.paginationIdentifier);
-      oThis.page = parsedPaginationParams.page; // Override page
+      oThis.paginationTimestamp = parsedPaginationParams.paginationTimestamp; // Override paginationTimestamp
     } else {
-      oThis.page = 1;
+      oThis.paginationTimestamp = null;
     }
     oThis.limit = paginationConstants.defaultChannelListPageSize;
 
@@ -120,23 +122,23 @@ class ChannelSearch extends ServiceBase {
   /**
    * Get channel ids.
    *
-   * @sets oThis.channelIds
-   *
-   * @returns {Promise<void>}
+   * @returns {Promise<*>}
    * @private
    */
   async _getChannelIds() {
     const oThis = this;
 
+    let channelIds = [];
+
     // TODO: channels, set only active channels in oThis.channelIds and oThis.channels
     if (oThis.channelPrefix) {
       const channelPaginationRsp = await new ChannelNamePaginationCache({
         limit: oThis.limit,
-        page: oThis.page,
+        paginationTimestamp: oThis.paginationTimestamp,
         channelPrefix: oThis.channelPrefix
       }).fetch();
 
-      oThis.channelIds = channelPaginationRsp.data.channelIds;
+      channelIds = channelPaginationRsp.data.channelIds;
     } else {
       // Display curated channels in search.
       const cacheResponse = await new CuratedEntityIdsByKindCache({
@@ -146,32 +148,35 @@ class ChannelSearch extends ServiceBase {
         return Promise.reject(cacheResponse);
       }
 
-      let channelIds = cacheResponse.data.entityIds;
+      channelIds = cacheResponse.data.entityIds;
 
       channelIds = oThis.getTopResults ? channelIds.slice(0, topChannelsResultsLimit + 1) : channelIds;
 
       if (channelIds.length > 0) {
-        oThis.channelIds = channelIds;
+        channelIds = channelIds;
       }
     }
+
+    return channelIds;
   }
 
   /**
    * Get channels.
    *
-   * @sets oThis.channels, oThis.imageIds, oThis.textIds
+   * @sets oThis.channels, oThis.channelIds, oThis.imageIds, oThis.textIds, oThis.searchResults, oThis.nextPaginationTimestamp
    *
-   * @returns {Promise<void>}
+   * @param channelIds
+   * @returns {Promise<never>}
    * @private
    */
-  async _getChannels() {
+  async _getChannels(channelIds) {
     const oThis = this;
 
-    if (oThis.channelIds.length === 0) {
+    if (channelIds.length === 0) {
       return;
     }
 
-    const cacheResponse = await new ChannelByIdsCache({ ids: oThis.channelIds }).fetch();
+    const cacheResponse = await new ChannelByIdsCache({ ids: channelIds }).fetch();
     if (cacheResponse.isFailure()) {
       return Promise.reject(cacheResponse);
     }
@@ -181,16 +186,30 @@ class ChannelSearch extends ServiceBase {
     // TODO: Channels, only active channels needs to be sent outside.
     for (const channelId in oThis.channels) {
       const channel = oThis.channels[channelId];
-      if (channel.coverImageId) {
-        oThis.imageIds.push(channel.coverImageId);
-      }
+      if (channel.status === channelConstants.activeStatus) {
+        oThis.channelIds.push(channelId);
+        if (channel.coverImageId) {
+          oThis.imageIds.push(channel.coverImageId);
+        }
 
-      if (channel.descriptionId) {
-        oThis.textIds.push(channel.descriptionId);
-      }
+        if (channel.descriptionId) {
+          oThis.textIds.push(channel.descriptionId);
+        }
 
-      if (channel.taglineId) {
-        oThis.textIds.push(channel.taglineId);
+        if (channel.taglineId) {
+          oThis.textIds.push(channel.taglineId);
+        }
+
+        oThis.searchResults.push({
+          id: channelId,
+          name: channel.name,
+          status: channel.status,
+          updatedAt: channel.updatedAt
+        });
+
+        oThis.nextPaginationTimestamp = channel.createdAt;
+      } else {
+        delete oThis.channels[channelId];
       }
     }
   }
@@ -281,46 +300,22 @@ class ChannelSearch extends ServiceBase {
    * @returns {Promise<void>}
    * @private
    */
-  async _fetchUserChannelRelations() {
+  async _fetchCurrentUserChannelRelations() {
     const oThis = this;
 
-    // TODO: Channels, use current user relations lib
-    const userId = oThis.currentUser.id;
-    const cacheResponse = await new ChannelUserByUserIdAndChannelIdsCache({
-      userId: userId,
+    const currentUserChannelRelationLibParams = {
+      currentUserId: oThis.currentUser.id,
       channelIds: oThis.channelIds
-    }).fetch();
-    if (cacheResponse.isFailure()) {
-      return Promise.reject(cacheResponse);
+    };
+
+    const currentUserChannelRelationsResponse = await new GetCurrentUserChannelRelationsLib(
+      currentUserChannelRelationLibParams
+    ).perform();
+    if (currentUserChannelRelationsResponse.isFailure()) {
+      return Promise.reject(currentUserChannelRelationsResponse);
     }
 
-    const channelUserRelations = cacheResponse.data;
-
-    for (const channelId in channelUserRelations) {
-      oThis.currentUserChannelRelations[channelId] = {
-        id: oThis.currentUser.id,
-        isAdmin: 0,
-        isMember: 0,
-        notificationStatus: 0,
-        updatedAt: Math.round(new Date() / 1000)
-      };
-
-      const channelUserRelation = channelUserRelations[channelId];
-      if (
-        CommonValidators.validateNonEmptyObject(channelUserRelation) &&
-        channelUserRelation.status === channelUsersConstants.activeStatus
-      ) {
-        oThis.currentUserChannelRelations[channelId] = {
-          id: oThis.currentUser.id,
-          isAdmin: Number(channelUserRelation.role === channelUsersConstants.adminRole),
-          isMember: 1,
-          notificationStatus: Number(
-            channelUserRelation.notificationStatus === channelUsersConstants.activeNotificationStatus
-          ),
-          updatedAt: channelUserRelation.updatedAt
-        };
-      }
-    }
+    oThis.currentUserChannelRelations = currentUserChannelRelationsResponse.data.currentUserChannelRelations;
   }
 
   /**
@@ -336,7 +331,7 @@ class ChannelSearch extends ServiceBase {
 
     //TODO: Channels, send channels list instead of seperate channel ids and map
     const response = {
-      channelIds: oThis.channelIds,
+      [entityTypeConstants.channelSearchList]: oThis.searchResults,
       [entityTypeConstants.channelsMap]: oThis.channels,
       [entityTypeConstants.channelDetailsMap]: oThis.channels,
       [entityTypeConstants.channelStatsMap]: oThis.channelStatsMap,
@@ -365,7 +360,7 @@ class ChannelSearch extends ServiceBase {
 
     if (oThis.channelIds.length >= oThis.limit && oThis.channelPrefix) {
       nextPagePayloadKey[paginationConstants.paginationIdentifierKey] = {
-        page: oThis.page + 1
+        pagination_timestamp: oThis.nextPaginationTimestamp
       };
     }
 

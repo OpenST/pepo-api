@@ -114,7 +114,7 @@ class ChannelModel extends ModelBase {
    * Get channels that starts with channel prefix.
    *
    * @param {object} params
-   * @param {number} [params.page]
+   * @param {number} [params.paginationTimestamp]
    * @param {number} [params.limit]
    * @param {string} params.channelPrefix
    *
@@ -125,32 +125,34 @@ class ChannelModel extends ModelBase {
     // TODO: Channels, change query to order by created_at
     const oThis = this;
 
-    const page = params.page || 1,
+    const query = params.channelPrefix,
       limit = params.limit || 10,
-      offset = (page - 1) * limit;
+      paginationTimestamp = params.paginationTimestamp;
 
-    const queryWithWildCards = params.channelPrefix + '%',
-      queryWithWildCardsSpaceIncluded = '% ' + params.channelPrefix + '%';
+    const queryWithWildCards = query + '%',
+      queryWithWildCardsSpaceIncluded = '% ' + query + '%';
 
-    const dbRows = await oThis
+    const queryObject = await oThis
       .select('*')
       .where(['name LIKE ? OR name LIKE ?', queryWithWildCards, queryWithWildCardsSpaceIncluded])
       .where({ status: channelConstants.invertedStatuses[channelConstants.activeStatus] })
-      .limit(limit)
-      .offset(offset)
-      .order_by('id DESC')
-      .fire();
+      .order_by('created_at DESC')
+      .limit(limit);
 
-    const channelIds = [],
-      channelDetails = {};
+    if (paginationTimestamp) {
+      queryObject.where(['created_at < ?', paginationTimestamp]);
+    }
+
+    const dbRows = await queryObject.fire();
+
+    const channelIds = [];
 
     for (let index = 0; index < dbRows.length; index++) {
       const channelId = dbRows[index].id;
-      channelDetails[channelId] = oThis.formatDbData(dbRows[index]);
       channelIds.push(channelId);
     }
 
-    return { channelIds: channelIds, channelDetails: channelDetails };
+    return { channelIds: channelIds };
   }
 
   /**

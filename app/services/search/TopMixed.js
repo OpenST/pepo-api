@@ -143,7 +143,6 @@ class MixedTopSearch extends ServiceBase {
     const oThis = this;
 
     const response = {
-      channelIds: [],
       [entityTypeConstants.channelsMap]: {},
       [entityTypeConstants.channelDetailsMap]: {},
       [entityTypeConstants.channelStatsMap]: {},
@@ -174,7 +173,7 @@ class MixedTopSearch extends ServiceBase {
         title: oThis.q ? 'Channel' : null
       });
 
-      response.channelIds = oThis.channelResponses.channelIds;
+      response[entityTypeConstants.channelSearchList] = oThis.channelResponses[entityTypeConstants.channelSearchList];
       response[entityTypeConstants.channelsMap] = oThis.channelResponses[entityTypeConstants.channelsMap];
       response[entityTypeConstants.channelDetailsMap] = oThis.channelResponses[entityTypeConstants.channelDetailsMap];
       response[entityTypeConstants.channelStatsMap] = oThis.channelResponses[entityTypeConstants.channelStatsMap];
