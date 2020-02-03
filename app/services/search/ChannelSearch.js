@@ -129,7 +129,6 @@ class ChannelSearch extends ServiceBase {
 
     let channelIds = [];
 
-    // TODO: channels, set only active channels in oThis.channelIds and oThis.channels
     if (oThis.channelPrefix) {
       const channelPaginationRsp = await new ChannelNamePaginationCache({
         limit: oThis.limit,
@@ -179,7 +178,6 @@ class ChannelSearch extends ServiceBase {
 
     oThis.channels = cacheResponse.data;
 
-    // TODO: Channels, only active channels needs to be sent outside.
     for (const channelId in oThis.channels) {
       const channel = oThis.channels[channelId];
       if (channel.status === channelConstants.activeStatus) {
@@ -325,7 +323,6 @@ class ChannelSearch extends ServiceBase {
 
     const responseMetaData = oThis._finalResponse();
 
-    // TODO: Channels, send channels list instead of seperate channel ids and map
     const response = {
       [entityTypeConstants.channelSearchList]: oThis.searchResults,
       [entityTypeConstants.channelsMap]: oThis.channels,
