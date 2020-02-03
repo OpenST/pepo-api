@@ -303,8 +303,7 @@ class DisassociateTagWithChannel {
     await new ChannelVideoModel()
       .update(
         {
-          status: channelVideosConstants.invertedStatuses[channelVideosConstants.inactiveStatus],
-          pinned_at: null
+          status: channelVideosConstants.invertedStatuses[channelVideosConstants.inactiveStatus]
         },
         { touch: false }
       )

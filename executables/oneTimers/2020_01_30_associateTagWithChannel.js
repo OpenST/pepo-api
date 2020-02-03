@@ -223,8 +223,7 @@ class AssociateTagWithChannel {
     const updateRes = await new ChannelVideoModel()
       .update(
         {
-          status: channelVideosConstants.invertedStatuses[channelVideosConstants.activeStatus],
-          pinned_at: null
+          status: channelVideosConstants.invertedStatuses[channelVideosConstants.activeStatus]
         },
         { touch: false }
       )
@@ -273,8 +272,7 @@ class AssociateTagWithChannel {
       const updateRes = await new ChannelVideoModel()
         .update(
           {
-            status: channelVideosConstants.invertedStatuses[channelVideosConstants.activeStatus],
-            pinned_at: null
+            status: channelVideosConstants.invertedStatuses[channelVideosConstants.activeStatus]
           },
           { touch: false }
         )
