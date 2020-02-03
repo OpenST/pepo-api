@@ -216,6 +216,37 @@ class ChannelUserModel extends ModelBase {
   }
 
   /**
+   * Fetch blocked users by channel ids.
+   *
+   * @param channelIds
+   * @returns {Promise<void>}
+   */
+  async fetchBlockedUsersByChannelIds(channelIds) {
+    const oThis = this;
+
+    let dbRows = await oThis
+      .select('*')
+      .where([
+        'channel_id IN (?) AND status = ?',
+        channelIds,
+        channelUsersConstants.invertedStatuses[channelUsersConstants.blockedStatus]
+      ])
+      .fire();
+
+    let finalResponse = {};
+    for (let i = 0; i < channelIds.length; i++) {
+      finalResponse[channelIds[i]] = [];
+    }
+
+    for (let index = 0; index < dbRows.length; index++) {
+      const formatDbRow = oThis.formatDbData(dbRows[index]);
+      finalResponse[formatDbRow.channelId].push(formatDbRow.userId);
+    }
+
+    return finalResponse;
+  }
+
+  /**
    * Flush cache.
    *
    * @param {object} params
@@ -231,6 +262,10 @@ class ChannelUserModel extends ModelBase {
       const ChannelUsersByChannelIdPaginationCache = require(rootPrefix +
         '/lib/cacheManagement/single/ChannelUsersByChannelIdPagination');
       promisesArray.push(new ChannelUsersByChannelIdPaginationCache({ channelId: params.channelId }).clear());
+
+      const ChannelBlockedUsersByChannelIds = require(rootPrefix +
+        '/lib/cacheManagement/multi/channel/ChannelBlockedUserByChannelIds');
+      promisesArray.push(new ChannelBlockedUsersByChannelIds({ channelIds: [params.channelId] }).clear());
     }
 
     if (params.userId && params.channelId) {
