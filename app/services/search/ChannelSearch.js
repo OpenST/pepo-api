@@ -13,8 +13,7 @@ const rootPrefix = '../../..',
   paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination'),
   entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
   channelConstants = require(rootPrefix + '/lib/globalConstant/channel/channels'),
-  curatedEntitiesConstants = require(rootPrefix + '/lib/globalConstant/curatedEntities'),
-  channelUsersConstants = require(rootPrefix + '/lib/globalConstant/channel/channelUsers');
+  curatedEntitiesConstants = require(rootPrefix + '/lib/globalConstant/curatedEntities');
 
 // Declare variables.
 const topChannelsResultsLimit = 5;
@@ -80,7 +79,7 @@ class ChannelSearch extends ServiceBase {
 
     await oThis._validateAndSanitizeParams();
 
-    let channelIds = await oThis._getChannelIds();
+    const channelIds = await oThis._getChannelIds();
 
     await oThis._getChannels(channelIds);
 
@@ -151,10 +150,6 @@ class ChannelSearch extends ServiceBase {
       channelIds = cacheResponse.data.entityIds;
 
       channelIds = oThis.getTopResults ? channelIds.slice(0, topChannelsResultsLimit + 1) : channelIds;
-
-      if (channelIds.length > 0) {
-        channelIds = channelIds;
-      }
     }
 
     return channelIds;
@@ -165,8 +160,9 @@ class ChannelSearch extends ServiceBase {
    *
    * @sets oThis.channels, oThis.channelIds, oThis.imageIds, oThis.textIds, oThis.searchResults, oThis.nextPaginationTimestamp
    *
-   * @param channelIds
-   * @returns {Promise<never>}
+   * @param {array<number>} channelIds
+   *
+   * @returns {Promise<void>}
    * @private
    */
   async _getChannels(channelIds) {
@@ -329,7 +325,7 @@ class ChannelSearch extends ServiceBase {
 
     const responseMetaData = oThis._finalResponse();
 
-    //TODO: Channels, send channels list instead of seperate channel ids and map
+    // TODO: Channels, send channels list instead of seperate channel ids and map
     const response = {
       [entityTypeConstants.channelSearchList]: oThis.searchResults,
       [entityTypeConstants.channelsMap]: oThis.channels,
@@ -366,7 +362,7 @@ class ChannelSearch extends ServiceBase {
 
     return {
       [paginationConstants.nextPagePayloadKey]: nextPagePayloadKey,
-      // temp hardcoding, move to constants.
+      // Temp hardcoding, move to constants.
       search_term: oThis.channelPrefix,
       search_kind: 'channels'
     };

@@ -160,6 +160,7 @@ class ChannelModel extends ModelBase {
    *
    * @param {object} params
    * @param {array<number>} [params.ids]
+   * @param {array<string>} [params.permalinks]
    *
    * @returns {Promise<*>}
    */
