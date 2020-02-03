@@ -7,7 +7,7 @@ const rootPrefix = '../../..',
   localCipher = require(rootPrefix + '/lib/encryptors/localCipher'),
   apiVersions = require(rootPrefix + '/lib/globalConstant/apiVersions'),
   databaseConstants = require(rootPrefix + '/lib/globalConstant/database'),
-  globalSaltConstants = require(rootPrefix + '/lib/globalConstant/globalSalt'),
+  globalSaltConstants = require(rootPrefix + '/lib/globalConstant/big/globalSalt'),
   configStrategyValidator = require(rootPrefix + '/helpers/configStrategyValidator'),
   configStrategyConstants = require(rootPrefix + '/lib/globalConstant/configStrategy');
 

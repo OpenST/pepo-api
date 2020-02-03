@@ -21,7 +21,7 @@ const rootPrefix = '..',
   userConstants = require(rootPrefix + '/lib/globalConstant/user'),
   userTagConstants = require(rootPrefix + '/lib/globalConstant/userTag'),
   adminActivityLogConstants = require(rootPrefix + '/lib/globalConstant/adminActivityLogs'),
-  emailServiceApiCallHookConstants = require(rootPrefix + '/lib/globalConstant/emailServiceApiCallHook');
+  emailServiceApiCallHookConstants = require(rootPrefix + '/lib/globalConstant/big/emailServiceApiCallHook');
 
 program
   .option('--adminId <adminId>', 'Admin Id')

@@ -11,10 +11,10 @@ const rootPrefix = '../..',
   RemoveContact = require(rootPrefix + '/lib/email/hookProcessor/RemoveContact'),
   UpdateContact = require(rootPrefix + '/lib/email/hookProcessor/UpdateContact'),
   SendTransactionalMail = require(rootPrefix + '/lib/email/hookProcessor/SendTransactionalMail'),
-  EmailServiceAPICallHookModel = require(rootPrefix + '/app/models/mysql/EmailServiceAPICallHook'),
+  EmailServiceAPICallHookModel = require(rootPrefix + '/app/models/mysql/big/EmailServiceAPICallHook'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   cronProcessesConstants = require(rootPrefix + '/lib/globalConstant/big/cronProcesses'),
-  emailServiceApiCallHookConstants = require(rootPrefix + '/lib/globalConstant/emailServiceApiCallHook');
+  emailServiceApiCallHookConstants = require(rootPrefix + '/lib/globalConstant/big/emailServiceApiCallHook');
 
 let ModelKlass;
 

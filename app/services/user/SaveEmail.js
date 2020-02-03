@@ -11,7 +11,7 @@ const rootPrefix = '../../../',
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   webPageConstants = require(rootPrefix + '/lib/globalConstant/webPage'),
   temporaryTokenConstants = require(rootPrefix + '/lib/globalConstant/big/temporaryToken'),
-  emailServiceApiCallHookConstants = require(rootPrefix + '/lib/globalConstant/emailServiceApiCallHook');
+  emailServiceApiCallHookConstants = require(rootPrefix + '/lib/globalConstant/big/emailServiceApiCallHook');
 
 /**
  * Class to save email id of user.

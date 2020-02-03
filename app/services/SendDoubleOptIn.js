@@ -7,7 +7,7 @@ const rootPrefix = '../..',
   webPageConstants = require(rootPrefix + '/lib/globalConstant/webPage'),
   preLaunchInviteConstants = require(rootPrefix + '/lib/globalConstant/preLaunchInvite'),
   temporaryTokenConstants = require(rootPrefix + '/lib/globalConstant/big/temporaryToken'),
-  emailServiceApiCallHookConstants = require(rootPrefix + '/lib/globalConstant/emailServiceApiCallHook');
+  emailServiceApiCallHookConstants = require(rootPrefix + '/lib/globalConstant/big/emailServiceApiCallHook');
 
 /**
  * Class to send double opt in email.

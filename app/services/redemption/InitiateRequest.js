@@ -21,7 +21,7 @@ const rootPrefix = '../../..',
   bgJobConstants = require(rootPrefix + '/lib/globalConstant/bgJob'),
   redemptionConstants = require(rootPrefix + '/lib/globalConstant/redemption'),
   pepocornTransactionConstants = require(rootPrefix + '/lib/globalConstant/redemption/pepocornTransaction'),
-  emailServiceApiCallHookConstants = require(rootPrefix + '/lib/globalConstant/emailServiceApiCallHook');
+  emailServiceApiCallHookConstants = require(rootPrefix + '/lib/globalConstant/big/emailServiceApiCallHook');
 
 /**
  * Class to request redemption for user.

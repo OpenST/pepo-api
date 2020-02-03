@@ -1,9 +1,9 @@
-const rootPrefix = '../../..',
+const rootPrefix = '../../../..',
   KmsWrapper = require(rootPrefix + '/lib/aws/KmsWrapper'),
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   databaseConstants = require(rootPrefix + '/lib/globalConstant/database'),
-  globalSaltConstants = require(rootPrefix + '/lib/globalConstant/globalSalt');
+  globalSaltConstants = require(rootPrefix + '/lib/globalConstant/big/globalSalt');
 
 // Declare variables.
 const dbName = databaseConstants.bigDbName;

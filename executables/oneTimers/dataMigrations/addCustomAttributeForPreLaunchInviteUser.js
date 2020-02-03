@@ -9,7 +9,7 @@ const command = require('commander');
 
 const rootPrefix = '../../..',
   PreLaunchInviteModel = require(rootPrefix + '/app/models/mysql/PreLaunchInvite'),
-  emailServiceApiCallHookConstants = require(rootPrefix + '/lib/globalConstant/emailServiceApiCallHook'),
+  emailServiceApiCallHookConstants = require(rootPrefix + '/lib/globalConstant/big/emailServiceApiCallHook'),
   UpdateContactInPepoCampaign = require(rootPrefix + '/lib/email/hookCreator/UpdateContact'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   preLaunchInviteConstant = require(rootPrefix + '/lib/globalConstant/preLaunchInvite');

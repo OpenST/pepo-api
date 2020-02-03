@@ -11,7 +11,7 @@ const rootPrefix = '../..',
   localCipher = require(rootPrefix + '/lib/encryptors/localCipher'),
   preLaunchInviteConstants = require(rootPrefix + '/lib/globalConstant/preLaunchInvite'),
   temporaryTokenConstants = require(rootPrefix + '/lib/globalConstant/big/temporaryToken'),
-  emailServiceApiCallHookConstants = require(rootPrefix + '/lib/globalConstant/emailServiceApiCallHook');
+  emailServiceApiCallHookConstants = require(rootPrefix + '/lib/globalConstant/big/emailServiceApiCallHook');
 
 /**
  * Class to verify double opt in token.

@@ -9,7 +9,7 @@ const command = require('commander');
 
 const rootPrefix = '../../..',
   UserModel = require(rootPrefix + '/app/models/mysql/User'),
-  emailServiceApiCallHookConstants = require(rootPrefix + '/lib/globalConstant/emailServiceApiCallHook'),
+  emailServiceApiCallHookConstants = require(rootPrefix + '/lib/globalConstant/big/emailServiceApiCallHook'),
   AddContactInPepoCampaign = require(rootPrefix + '/lib/email/hookCreator/AddContact'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   userConstants = require(rootPrefix + '/lib/globalConstant/user');

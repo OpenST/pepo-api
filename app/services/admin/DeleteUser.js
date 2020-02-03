@@ -15,7 +15,7 @@ const rootPrefix = '../../..',
   userTagConstants = require(rootPrefix + '/lib/globalConstant/userTag'),
   curatedEntitiesConstants = require(rootPrefix + '/lib/globalConstant/curatedEntities'),
   adminActivityLogConstants = require(rootPrefix + '/lib/globalConstant/adminActivityLogs'),
-  emailServiceApiCallHookConstants = require(rootPrefix + '/lib/globalConstant/emailServiceApiCallHook');
+  emailServiceApiCallHookConstants = require(rootPrefix + '/lib/globalConstant/big/emailServiceApiCallHook');
 
 /**
  * Class to delete users by admin.

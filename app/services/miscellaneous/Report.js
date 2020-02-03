@@ -16,7 +16,7 @@ const rootPrefix = '../../..',
   replyDetailConstants = require(rootPrefix + '/lib/globalConstant/replyDetail'),
   channelConstants = require(rootPrefix + '/lib/globalConstant/channel/channels'),
   reportEntityConstants = require(rootPrefix + '/lib/globalConstant/reportEntity'),
-  emailServiceApiCallHookConstants = require(rootPrefix + '/lib/globalConstant/emailServiceApiCallHook');
+  emailServiceApiCallHookConstants = require(rootPrefix + '/lib/globalConstant/big/emailServiceApiCallHook');
 
 /**
  * Class to report for an entity.
