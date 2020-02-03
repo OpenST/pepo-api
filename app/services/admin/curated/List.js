@@ -267,7 +267,7 @@ class GetCuratedList extends ServiceBase {
 
     const channelTagByChannelIdsCacheCacheData = cacheResponse.data;
 
-    for (let channelId in channelTagByChannelIdsCacheCacheData) {
+    for (const channelId in channelTagByChannelIdsCacheCacheData) {
       const channelTags = channelTagByChannelIdsCacheCacheData[channelId];
       oThis.channelIdToTagIdsMap[channelId] = channelTags;
     }
@@ -282,7 +282,7 @@ class GetCuratedList extends ServiceBase {
     const oThis = this;
 
     for (let index = 0; index < oThis.curatedEntityIds.length; index++) {
-      let curatedEntityId = oThis.curatedEntityIds[index];
+      const curatedEntityId = oThis.curatedEntityIds[index];
       oThis.curatedEntityList.push(oThis.curatedEntityDetails[curatedEntityId]);
     }
 
@@ -297,14 +297,14 @@ class GetCuratedList extends ServiceBase {
         [adminEntityType.tagsCuratedEntitiesList]: oThis.curatedEntityList,
         tags: oThis.tagsMap
       };
-    } else {
-      return {
-        [adminEntityType.channelsCuratedEntitiesList]: oThis.curatedEntityList,
-        [adminEntityType.channelsMap]: oThis.channels,
-        [adminEntityType.channelDetailsMap]: oThis.channels,
-        [adminEntityType.channelIdToTagIdsMap]: oThis.channelIdToTagIdsMap
-      };
     }
+
+    return {
+      [adminEntityType.channelsCuratedEntitiesList]: oThis.curatedEntityList,
+      [adminEntityType.channelsMap]: oThis.channels,
+      [adminEntityType.channelDetailsMap]: oThis.channels,
+      [adminEntityType.channelIdToTagIdsMap]: oThis.channelIdToTagIdsMap
+    };
   }
 }
 

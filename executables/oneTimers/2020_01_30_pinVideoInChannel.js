@@ -2,13 +2,14 @@ const program = require('commander');
 
 const rootPrefix = '../..',
   CommonValidator = require(rootPrefix + '/lib/validators/Common'),
-  ChannelByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelByIds'),
   ChannelVideoModel = require(rootPrefix + '/app/models/mysql/channel/ChannelVideo'),
   ChannelTagVideoModel = require(rootPrefix + '/app/models/mysql/channel/ChannelTagVideo'),
+  ChannelByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelByIds'),
+  ChannelTagByChannelIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelTagByChannelIds'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
-  channelVideosConstants = require(rootPrefix + '/lib/globalConstant/channel/channelVideos'),
-  channelConstants = require(rootPrefix + '/lib/globalConstant/channel/channels');
+  channelConstants = require(rootPrefix + '/lib/globalConstant/channel/channels'),
+  channelVideosConstants = require(rootPrefix + '/lib/globalConstant/channel/channelVideos');
 
 program
   .option('--channelId <channelId>', 'Channel Id')
@@ -37,12 +38,12 @@ if (!program.channelId || !program.videoId) {
  */
 class PinVideoInChannel {
   /**
-   * Constructor to associate a new tag with channel.
+   * Constructor to pin a video for a channel.
    *
    * @param {object} params
-   * @param {number} params.channelId
-   * @param {number} params.videoId
-   * @param {Boolean} params.unpin
+   * @param {number/string} params.channelId
+   * @param {number/string} params.videoId
+   * @param {boolean} params.unpin
    *
    * @constructor
    */
@@ -56,8 +57,14 @@ class PinVideoInChannel {
     oThis.pinnedAtVal = oThis.unpin ? null : Math.floor(Date.now() / 1000);
 
     oThis.channel = null;
+    oThis.channelTagIds = null;
   }
 
+  /**
+   * Main performer for class.
+   *
+   * @returns {Promise<void>}
+   */
   async perform() {
     const oThis = this;
 
@@ -66,6 +73,8 @@ class PinVideoInChannel {
     await oThis.validateChannelVideo();
 
     await oThis.pinChannelVideo();
+
+    await oThis.fetchChannelTagIds();
 
     await oThis.pinChannelTagVideo();
   }
@@ -109,9 +118,9 @@ class PinVideoInChannel {
   }
 
   /**
-   * Fetch and Validate channel Tag.
+   * Fetch and validate channel tag.
    *
-   * @sets oThis.channelId
+   * @sets oThis.channelVideo
    *
    * @returns {Promise<void>}
    */
@@ -146,36 +155,54 @@ class PinVideoInChannel {
       );
     }
 
-    logger.info(`Channel Video validation done`);
+    logger.info('Channel video validation done.');
   }
 
   /**
-   * Pin Channel Video.
+   * Pin channel video.
    *
    * @returns {Promise<never>}
    * @private
    */
   async pinChannelVideo() {
     const oThis = this;
-    //  update channel videos
+    //  Update channel videos.
 
-    const updateRes = await new ChannelVideoModel()
+    await new ChannelVideoModel()
       .update({ pinned_at: oThis.pinnedAtVal })
       .where({ id: oThis.channelVideo.id })
       .fire();
 
-    await ChannelVideoModel.flushCache({ channelId: oThis.channelId, videoId: oThis.videoId });
+    await ChannelVideoModel.flushCache({ channelId: oThis.channelId });
   }
 
   /**
-   * Pin Channel Tag Video.
+   * Fetch channel tag ids.
+   *
+   * @sets oThis.channelTagIds
+   *
+   * @returns {Promise<void>}
+   */
+  async fetchChannelTagIds() {
+    const oThis = this;
+
+    const cacheResponse = await new ChannelTagByChannelIdsCache({ channelIds: [oThis.channelId] }).fetch();
+    if (cacheResponse.isFailure()) {
+      return Promise.reject(cacheResponse);
+    }
+
+    oThis.channelTagIds = cacheResponse.data[oThis.channelId];
+  }
+
+  /**
+   * Pin channel tag video.
    *
    * @returns {Promise<never>}
    * @private
    */
   async pinChannelTagVideo() {
     const oThis = this;
-    //  update channel tag videos
+    // Update channel tag videos.
 
     await new ChannelTagVideoModel()
       .update({ pinned_at: oThis.pinnedAtVal })
@@ -185,8 +212,14 @@ class PinVideoInChannel {
       })
       .fire();
 
-    //todo:channels  if needed..!! get tags of a video and use it in query
-    await ChannelTagVideoModel.flushCache({ channelId: oThis.channelId, videoId: oThis.videoId });
+    const promisesArray = [];
+    for (let index = 0; index < oThis.channelTagIds.length; index++) {
+      promisesArray.push(
+        ChannelTagVideoModel.flushCache({ channelId: oThis.channelId, tagId: oThis.channelTagIds[index] })
+      );
+    }
+
+    await Promise.all(promisesArray);
   }
 }
 
