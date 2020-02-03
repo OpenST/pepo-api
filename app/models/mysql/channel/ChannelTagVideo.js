@@ -105,7 +105,6 @@ class ChannelTagVideoModel extends ModelBase {
    * @returns {Promise<*>}
    */
   static async flushCache(params) {
-    // TODO:channels - Check usage.
     const promisesArray = [];
 
     if (params.channelId && params.tagId) {
