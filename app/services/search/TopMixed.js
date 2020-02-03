@@ -81,20 +81,25 @@ class MixedTopSearch extends ServiceBase {
 
     oThis.q = basicHelper.filterSearchTerm(oThis.q);
 
-    // This request cannot be paginated because it has mixed results
-    // if (oThis.paginationIdentifier) {
-    //   const parsedPaginationParams = oThis._parsePaginationParams(oThis.paginationIdentifier);
-    //   oThis.page = parsedPaginationParams.page; // Override page
-    // } else {
-    //   oThis.page = 1;
-    // }
-    // oThis.limit = paginationConstants.defaultTagListPageSize;
-    //
-    // return oThis._validatePageSize();
+    /*
+    This request cannot be paginated because it has mixed results.
+
+    if (oThis.paginationIdentifier) {
+      const parsedPaginationParams = oThis._parsePaginationParams(oThis.paginationIdentifier);
+      oThis.page = parsedPaginationParams.page; // Override page
+    } else {
+      oThis.page = 1;
+    }
+    oThis.limit = paginationConstants.defaultTagListPageSize;
+
+    return oThis._validatePageSize();
+     */
   }
 
   /**
-   * Get top user results
+   * Get top user results.
+   *
+   * @sets oThis.userResponses
    *
    * @returns {Promise<void>}
    * @private
@@ -108,7 +113,9 @@ class MixedTopSearch extends ServiceBase {
   }
 
   /**
-   * Get top tag results
+   * Get top tag results.
+   *
+   * @sets oThis.tagResponses
    *
    * @returns {Promise<void>}
    * @private
@@ -122,7 +129,9 @@ class MixedTopSearch extends ServiceBase {
   }
 
   /**
-   * Get top channel results
+   * Get top channel results.
+   *
+   * @sets oThis.channelResponses
    *
    * @returns {Promise<void>}
    * @private
@@ -139,6 +148,12 @@ class MixedTopSearch extends ServiceBase {
     oThis.channelResponses = resp.data;
   }
 
+  /**
+   * Prepare service response.
+   *
+   * @returns {*|result}
+   * @private
+   */
   _prepareResponse() {
     const oThis = this;
 
@@ -164,7 +179,7 @@ class MixedTopSearch extends ServiceBase {
       }
     };
 
-    // If channel responses present then append those
+    // If channel responses present then append those.
     if (oThis.channelResponses) {
       response[entityTypeConstants.searchCategoriesList].push({
         id: 'sc_cr',
@@ -187,7 +202,7 @@ class MixedTopSearch extends ServiceBase {
       response.imageMap = oThis.channelResponses.imageMap;
     }
 
-    // If tag responses present then add in this result set
+    // If tag responses present then add in this result set.
     if (oThis.tagResponses) {
       response[entityTypeConstants.searchCategoriesList].push({
         id: 'sc_tr',
@@ -199,7 +214,7 @@ class MixedTopSearch extends ServiceBase {
       response.tagsMap = oThis.tagResponses.tagsMap;
     }
 
-    // If user responses present then append those
+    // If user responses present then append those.
     if (oThis.userResponses) {
       response[entityTypeConstants.searchCategoriesList].push({
         id: 'sc_ur',
