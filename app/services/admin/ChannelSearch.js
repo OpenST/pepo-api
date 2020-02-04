@@ -133,8 +133,6 @@ class ChannelSearch extends ServiceBase {
       };
     const channelSearchQueryRsp = await new ChannelModel({}).getChannelsByPrefix(searchQueryParams);
 
-    console.log('the channelSearchQueryRsp is : ', channelSearchQueryRsp);
-
     channelIds = channelSearchQueryRsp.channelIds;
 
     return channelIds;
@@ -320,8 +318,6 @@ class ChannelSearch extends ServiceBase {
       imageMap: oThis.imageMap,
       meta: responseMetaData
     };
-
-    console.log('The response is : ', response);
 
     return responseHelper.successWithData(response);
   }
