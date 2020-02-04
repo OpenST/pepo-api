@@ -107,3 +107,21 @@ function onListening() {
     : 'port ' + addr.port;
   logger.log('Listening on ' + bind);
 }
+
+process.on('SIGTERM', () => {
+  console.info('SIGTERM signal received.');
+  console.log('Closing http server.');
+  server.close(() => {
+    console.log('Http server closed.');
+    process.exit(0);
+  });
+});
+
+process.on('SIGINT', () => {
+  console.info('SIGINT signal received.');
+  console.log('Closing http server.');
+  server.close(() => {
+    console.log('Http server closed.');
+    process.exit(0);
+  });
+});
