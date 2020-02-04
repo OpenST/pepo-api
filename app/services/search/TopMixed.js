@@ -202,18 +202,6 @@ class MixedTopSearch extends ServiceBase {
       response.imageMap = oThis.channelResponses.imageMap;
     }
 
-    // If tag responses present then add in this result set.
-    if (oThis.tagResponses) {
-      response[entityTypeConstants.searchCategoriesList].push({
-        id: 'sc_tr',
-        updatedAt: Math.round(new Date() / 1000),
-        kind: 'tag',
-        title: oThis.q ? 'Tags' : null
-      });
-      response.tagIds = oThis.tagResponses.tagIds;
-      response.tagsMap = oThis.tagResponses.tagsMap;
-    }
-
     // If user responses present then append those.
     if (oThis.userResponses) {
       response[entityTypeConstants.searchCategoriesList].push({
@@ -226,6 +214,18 @@ class MixedTopSearch extends ServiceBase {
       response.usersByIdMap = oThis.userResponses.usersByIdMap;
       response.tokenUsersByUserIdMap = oThis.userResponses.tokenUsersByUserIdMap;
       Object.assign(response.imageMap, oThis.userResponses.imageMap);
+    }
+
+    // If tag responses present then add in this result set.
+    if (oThis.tagResponses) {
+      response[entityTypeConstants.searchCategoriesList].push({
+        id: 'sc_tr',
+        updatedAt: Math.round(new Date() / 1000),
+        kind: 'tag',
+        title: oThis.q ? 'Tags' : null
+      });
+      response.tagIds = oThis.tagResponses.tagIds;
+      response.tagsMap = oThis.tagResponses.tagsMap;
     }
 
     return responseHelper.successWithData(response);
