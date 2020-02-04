@@ -1,7 +1,7 @@
-const rootPrefix = '../../..',
+const rootPrefix = '../../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
   databaseConstants = require(rootPrefix + '/lib/globalConstant/database'),
-  socketConnectionConstants = require(rootPrefix + '/lib/globalConstant/socketConnection');
+  socketConnectionConstants = require(rootPrefix + '/lib/globalConstant/socket/socketConnection');
 
 // Declare variables.
 const dbName = databaseConstants.socketDbName;

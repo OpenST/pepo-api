@@ -17,8 +17,8 @@ const rootPrefix = '.',
   processIdSelector = require(rootPrefix + '/lib/webSocket/processIdSelector'),
   configStrategyProvider = require(rootPrefix + '/lib/providers/configStrategy'),
   websocketAutoDisconnect = require(rootPrefix + '/lib/webSocket/autoDisconnect'),
-  socketConnectionConstants = require(rootPrefix + '/lib/globalConstant/socketConnection'),
   configStrategyConstants = require(rootPrefix + '/lib/globalConstant/config/configStrategy'),
+  socketConnectionConstants = require(rootPrefix + '/lib/globalConstant/socket/socketConnection'),
   socketJobProcessor = require(rootPrefix + '/executables/rabbitMqSubscribers/socketJobProcessor');
 
 const apiVersions = require(rootPrefix + '/lib/globalConstant/apiVersions'),

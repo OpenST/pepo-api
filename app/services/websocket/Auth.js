@@ -1,7 +1,7 @@
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   ReplayAttack = require(rootPrefix + '/lib/cacheManagement/single/ReplayAttack'),
-  UserSocketConnectionDetailsModel = require(rootPrefix + '/app/models/mysql/UserSocketConnectionDetails'),
+  UserSocketConnectionDetailsModel = require(rootPrefix + '/app/models/mysql/socket/UserSocketConnectionDetails'),
   UserSocketConDetailsByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/UserSocketConDetailsByUserIds'),
   basicHelper = require(rootPrefix + '/helpers/basic'),
   base64Helper = require(rootPrefix + '/lib/base64Helper'),
@@ -9,8 +9,8 @@ const rootPrefix = '../../..',
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   localCipher = require(rootPrefix + '/lib/encryptors/localCipher'),
   configStrategy = require(rootPrefix + '/lib/providers/configStrategy'),
-  socketConnectionConstants = require(rootPrefix + '/lib/globalConstant/socketConnection'),
-  configStrategyConstants = require(rootPrefix + '/lib/globalConstant/config/configStrategy');
+  configStrategyConstants = require(rootPrefix + '/lib/globalConstant/config/configStrategy'),
+  socketConnectionConstants = require(rootPrefix + '/lib/globalConstant/socket/socketConnection');
 
 /**
  * Class for websocket auth.
