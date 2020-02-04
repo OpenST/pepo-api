@@ -108,20 +108,25 @@ function onListening() {
   logger.log('Listening on ' + bind);
 }
 
-process.on('SIGTERM', () => {
-  console.info('SIGTERM signal received.');
-  console.log('Closing http server.');
-  server.close(() => {
-    console.log('Http server closed.');
-    process.exit(0);
-  });
+process.on('SIGTERM', function(){
+  onSigint();
 });
 
-process.on('SIGINT', () => {
-  console.info('SIGINT signal received.');
-  console.log('Closing http server.');
+process.on('SIGINT', function(){
+  onSigint();
+});
+
+function onSigint() {
+  logger.info('SIGINT signal received.');
+  logger.log('Closing http server.');
   server.close(() => {
-    console.log('Http server closed.');
+    logger.log('Current concurrent connections:', server.connections);
+    logger.log('Http server closing. Bye.');
     process.exit(0);
   });
-});
+
+  setTimeout(function() {
+      logger.log('Timeout occurred for server.close(). Current concurrent connections:', server.connections);
+      process.exit(1);
+  }, 60000);
+}
