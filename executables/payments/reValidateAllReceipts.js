@@ -2,14 +2,14 @@ const program = require('commander');
 
 const rootPrefix = '../..',
   CronBase = require(rootPrefix + '/executables/CronBase'),
-  FiatPaymentModel = require(rootPrefix + '/app/models/mysql/FiatPayment'),
+  FiatPaymentModel = require(rootPrefix + '/app/models/mysql/fiat/FiatPayment'),
   basicHelper = require(rootPrefix + '/helpers/basic'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   paymentValidationFactory = require(rootPrefix + '/lib/payment/Validation/Factory'),
   createErrorLogsEntry = require(rootPrefix + '/lib/errorLogs/createEntry'),
   errorLogsConstants = require(rootPrefix + '/lib/globalConstant/errorLogs'),
-  fiatPaymentConstants = require(rootPrefix + '/lib/globalConstant/fiatPayment'),
+  fiatPaymentConstants = require(rootPrefix + '/lib/globalConstant/fiat/fiatPayment'),
   inAppProductsConstants = require(rootPrefix + '/lib/globalConstant/inAppProduct'),
   cronProcessesConstants = require(rootPrefix + '/lib/globalConstant/big/cronProcesses');
 

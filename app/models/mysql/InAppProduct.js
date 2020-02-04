@@ -9,9 +9,9 @@ const dbName = databaseConstants.fiatDbName;
 /**
  * Class for in app products model.
  *
- * @class InAppProduct
+ * @class InAppProductModel
  */
-class InAppProduct extends ModelBase {
+class InAppProductModel extends ModelBase {
   /**
    * Constructor for in app products model.
    *
@@ -106,4 +106,4 @@ class InAppProduct extends ModelBase {
   }
 }
 
-module.exports = InAppProduct;
+module.exports = InAppProductModel;

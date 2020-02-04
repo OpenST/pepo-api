@@ -6,12 +6,12 @@
  */
 
 const rootPrefix = '../..',
-  FiatPaymentModel = require(rootPrefix + '/app/models/mysql/FiatPayment'),
+  FiatPaymentModel = require(rootPrefix + '/app/models/mysql/fiat/FiatPayment'),
   ApplePay = require(rootPrefix + '/lib/payment/process/ApplePay'),
   GooglePay = require(rootPrefix + '/lib/payment/process/GooglePay'),
   bgJobConstants = require(rootPrefix + '/lib/globalConstant/bgJob'),
   bgJob = require(rootPrefix + '/lib/rabbitMqEnqueue/bgJob'),
-  fiatPaymentConstants = require(rootPrefix + '/lib/globalConstant/fiatPayment'),
+  fiatPaymentConstants = require(rootPrefix + '/lib/globalConstant/fiat/fiatPayment'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger');
 
 const fiatPaymentId = process.argv[2];

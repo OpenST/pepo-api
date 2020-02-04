@@ -1,7 +1,7 @@
-const rootPrefix = '../../..',
+const rootPrefix = '../../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
   databaseConstants = require(rootPrefix + '/lib/globalConstant/database'),
-  fiatPaymentConstants = require(rootPrefix + '/lib/globalConstant/fiatPayment'),
+  fiatPaymentConstants = require(rootPrefix + '/lib/globalConstant/fiat/fiatPayment'),
   ostPricePointConstants = require(rootPrefix + '/lib/globalConstant/ostPricePoints');
 
 // Declare variables.
@@ -10,9 +10,9 @@ const dbName = databaseConstants.fiatDbName;
 /**
  * Class for fiat payment model.
  *
- * @class FiatPayment
+ * @class FiatPaymentModel
  */
-class FiatPayment extends ModelBase {
+class FiatPaymentModel extends ModelBase {
   /**
    * Constructor for fiat payment model.
    *
@@ -53,7 +53,7 @@ class FiatPayment extends ModelBase {
    * @param {number} dbRow.created_at
    * @param {number} dbRow.updated_at
    *
-   * @return {object}
+   * @returns {object}
    */
   formatDbData(dbRow) {
     const oThis = this;
@@ -87,7 +87,7 @@ class FiatPayment extends ModelBase {
    *
    * @param {array} ids
    *
-   * @return {Promise<void>}
+   * @returns {Promise<void>}
    */
   async fetchByIds(ids) {
     const oThis = this;
@@ -113,7 +113,7 @@ class FiatPayment extends ModelBase {
    * @param {string} receiptId: receipt id
    * @param {number} serviceKind: service kind
    *
-   * @return {Promise<*>}
+   * @returns {Promise<*>}
    */
   async fetchByReceiptIdAndServiceKind(receiptId, serviceKind) {
     const oThis = this;
@@ -170,7 +170,7 @@ class FiatPayment extends ModelBase {
    * @param {number} userId: user id for which the fiat payment is to be fetched
    * @param {array} statuses: array of statuses used for filtering
    *
-   * @return {Promise<void>}
+   * @returns {Promise<void>}
    */
   async fetchByUserIdAndStatus(userId, statuses) {
     const oThis = this;
@@ -227,4 +227,4 @@ class FiatPayment extends ModelBase {
   }
 }
 
-module.exports = FiatPayment;
+module.exports = FiatPaymentModel;

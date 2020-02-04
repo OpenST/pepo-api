@@ -3,27 +3,27 @@ const rootPrefix = '../../../..',
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   TokenUserModel = require(rootPrefix + '/app/models/mysql/TokenUser'),
   TransactionModel = require(rootPrefix + '/app/models/mysql/Transaction'),
-  PendingTransactionModel = require(rootPrefix + '/app/models/mysql/PendingTransaction'),
+  FiatPaymentModel = require(rootPrefix + '/app/models/mysql/fiat/FiatPayment'),
   SecureTokenCache = require(rootPrefix + '/lib/cacheManagement/single/SecureToken'),
-  PepocornTransactionModel = require(rootPrefix + '/app/models/mysql/redemption/PepocornTransaction'),
+  ValidatePepocornTopUp = require(rootPrefix + '/app/services/pepocornTopUp/Validate'),
+  PendingTransactionModel = require(rootPrefix + '/app/models/mysql/PendingTransaction'),
   ReplyDetailsByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/ReplyDetailsByIds'),
-  ReplyDetailsByEntityIdsAndEntityKindCache = require(rootPrefix +
-    '/lib/cacheManagement/multi/ReplyDetailsByEntityIdsAndEntityKind'),
-  replyDetailConstants = require(rootPrefix + '/lib/globalConstant/replyDetail'),
+  PepocornTransactionModel = require(rootPrefix + '/app/models/mysql/redemption/PepocornTransaction'),
   TokenUserByUserIdCache = require(rootPrefix + '/lib/cacheManagement/multi/TokenUserByUserIds'),
   TransactionByOstTxIdCache = require(rootPrefix + '/lib/cacheManagement/multi/TransactionByOstTxId'),
   TokenUserByOstUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TokenUserByOstUserIds'),
   VideoDetailsByVideoIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/VideoDetailsByVideoIds'),
-  ValidatePepocornTopUp = require(rootPrefix + '/app/services/pepocornTopUp/Validate'),
-  notificationJobEnqueue = require(rootPrefix + '/lib/rabbitMqEnqueue/notification'),
-  FiatPaymentModel = require(rootPrefix + '/app/models/mysql/FiatPayment'),
+  ReplyDetailsByEntityIdsAndEntityKindCache = require(rootPrefix +
+    '/lib/cacheManagement/multi/ReplyDetailsByEntityIdsAndEntityKind'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   commonValidator = require(rootPrefix + '/lib/validators/Common'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   createErrorLogsEntry = require(rootPrefix + '/lib/errorLogs/createEntry'),
   errorLogsConstants = require(rootPrefix + '/lib/globalConstant/errorLogs'),
-  pepocornTransactionConstants = require(rootPrefix + '/lib/globalConstant/redemption/pepocornTransaction'),
-  transactionConstants = require(rootPrefix + '/lib/globalConstant/transaction');
+  replyDetailConstants = require(rootPrefix + '/lib/globalConstant/replyDetail'),
+  transactionConstants = require(rootPrefix + '/lib/globalConstant/transaction'),
+  notificationJobEnqueue = require(rootPrefix + '/lib/rabbitMqEnqueue/notification'),
+  pepocornTransactionConstants = require(rootPrefix + '/lib/globalConstant/redemption/pepocornTransaction');
 
 /**
  * Class for transaction kind base.
@@ -301,7 +301,7 @@ class TransactionWebhookBase extends ServiceBase {
       paramErrors.push('invalid_from_user_id');
     }
 
-    //Note UserId is 0 for comapny token holder address
+    // Note: UserId is 0 for comapny token holder address
     if ((oThis.toUserId || '0') !== oThis.transactionObj.toUserId) {
       logger.error('Mismatch in to user id in table and in webhook data.');
       paramErrors.push('invalid_to_user_id');
@@ -515,8 +515,8 @@ class TransactionWebhookBase extends ServiceBase {
 
     let txKind = null;
 
-    //video_id is parent video id for reply on video.
-    //no video id in pepo on reply so we fetch the entity id using reply detail id.
+    // Video_id is parent video id for reply on video.
+    // No video id in pepo on reply so we fetch the entity id using reply detail id.
 
     if (oThis._isRedemptionTransactionKind()) {
       txKind = transactionConstants.redemptionKind;
@@ -608,39 +608,39 @@ class TransactionWebhookBase extends ServiceBase {
       const videoDetailsCacheResponse = await new VideoDetailsByVideoIdsCache({ videoIds: [oThis.videoId] }).fetch();
       if (videoDetailsCacheResponse.isFailure()) {
         logger.error('Error while fetching video detail data.');
+
         return Promise.reject(videoDetailsCacheResponse);
       }
-      //todo-replies: use different method to validate reply video
+      // Todo-replies: use different method to validate reply video
 
-      let videoDetail = videoDetailsCacheResponse.data[oThis.videoId];
+      const videoDetail = videoDetailsCacheResponse.data[oThis.videoId];
 
       // Note: For older build if we receive pepo_on_reply for this this condition is added.
       if (CommonValidators.validateNonEmptyObject(videoDetail)) {
         return responseHelper.successWithData({});
-      } else {
-        const replyDetailsByEntityIdsAndEntityKindCacheRsp = await new ReplyDetailsByEntityIdsAndEntityKindCache({
-          entityIds: [oThis.videoId],
-          entityKind: replyDetailConstants.videoEntityKind
-        }).fetch();
+      }
+      const replyDetailsByEntityIdsAndEntityKindCacheRsp = await new ReplyDetailsByEntityIdsAndEntityKindCache({
+        entityIds: [oThis.videoId],
+        entityKind: replyDetailConstants.videoEntityKind
+      }).fetch();
 
-        if (replyDetailsByEntityIdsAndEntityKindCacheRsp.isFailure()) {
-          logger.error('Error while fetching reply detail data.');
+      if (replyDetailsByEntityIdsAndEntityKindCacheRsp.isFailure()) {
+        logger.error('Error while fetching reply detail data.');
 
-          return Promise.reject(replyDetailsByEntityIdsAndEntityKindCacheRsp);
-        }
+        return Promise.reject(replyDetailsByEntityIdsAndEntityKindCacheRsp);
+      }
 
-        const replyDetailId = replyDetailsByEntityIdsAndEntityKindCacheRsp.data[oThis.videoId].id;
+      const replyDetailId = replyDetailsByEntityIdsAndEntityKindCacheRsp.data[oThis.videoId].id;
 
-        if (!replyDetailId) {
-          return Promise.reject(
-            responseHelper.paramValidationError({
-              internal_error_identifier: 'a_s_oe_t_b_11',
-              api_error_identifier: 'invalid_api_params',
-              params_error_identifiers: ['invalid_video_id'],
-              debug_options: { videoDetail: videoDetail, replyDetailId: replyDetailId }
-            })
-          );
-        }
+      if (!replyDetailId) {
+        return Promise.reject(
+          responseHelper.paramValidationError({
+            internal_error_identifier: 'a_s_oe_t_b_11',
+            api_error_identifier: 'invalid_api_params',
+            params_error_identifiers: ['invalid_video_id'],
+            debug_options: { videoDetail: videoDetail, replyDetailId: replyDetailId }
+          })
+        );
       }
     }
 

@@ -1,5 +1,5 @@
 const rootPrefix = '../../../../..',
-  FiatPaymentModel = require(rootPrefix + '/app/models/mysql/FiatPayment'),
+  FiatPaymentModel = require(rootPrefix + '/app/models/mysql/fiat/FiatPayment'),
   TransactionWebhookBase = require(rootPrefix + '/app/services/ostEvents/transactions/Base'),
   createErrorLogsEntry = require(rootPrefix + '/lib/errorLogs/createEntry'),
   errorLogsConstants = require(rootPrefix + '/lib/globalConstant/errorLogs'),
@@ -8,7 +8,7 @@ const rootPrefix = '../../../../..',
   transactionConstants = require(rootPrefix + '/lib/globalConstant/transaction'),
   notificationJobEnqueue = require(rootPrefix + '/lib/rabbitMqEnqueue/notification'),
   notificationJobConstants = require(rootPrefix + '/lib/globalConstant/notificationJob'),
-  fiatPaymentConstants = require(rootPrefix + '/lib/globalConstant/fiatPayment');
+  fiatPaymentConstants = require(rootPrefix + '/lib/globalConstant/fiat/fiatPayment');
 
 /**
  * Class for topup failure transaction service.
