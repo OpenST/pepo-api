@@ -1,6 +1,7 @@
 const rootPrefix = '../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   UserIdentifierModel = require(rootPrefix + '/app/models/mysql/UserIdentifier'),
+  UserEmailLogsModel = require(rootPrefix + '/app/models/mysql/big/UserEmailLogs'),
   TemporaryTokenModel = require(rootPrefix + '/app/models/mysql/big/TemporaryToken'),
   UserByEmailsCache = require(rootPrefix + '/lib/cacheManagement/multi/UserByEmails'),
   AddContactInPepoCampaign = require(rootPrefix + '/lib/email/hookCreator/AddContact'),
@@ -215,8 +216,6 @@ class VerifyDoubleOptIn extends ServiceBase {
    */
   async _addEmailForUser() {
     const oThis = this;
-
-    const UserEmailLogsModel = require(rootPrefix + '/app/models/mysql/UserEmailLogs');
 
     // Fetch details from user email logs table.
     const userEmailLogsDetails = await new UserEmailLogsModel()

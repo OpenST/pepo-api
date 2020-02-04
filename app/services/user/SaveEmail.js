@@ -1,7 +1,7 @@
 const rootPrefix = '../../../',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   UserCache = require(rootPrefix + '/lib/cacheManagement/multi/User'),
-  UserEmailLogsModel = require(rootPrefix + '/app/models/mysql/UserEmailLogs'),
+  UserEmailLogsModel = require(rootPrefix + '/app/models/mysql/big/UserEmailLogs'),
   TemporaryTokenModel = require(rootPrefix + '/app/models/mysql/big/TemporaryToken'),
   UserByEmailsCache = require(rootPrefix + '/lib/cacheManagement/multi/UserByEmails'),
   SendTransactionalMail = require(rootPrefix + '/lib/email/hookCreator/SendTransactionalMail'),
