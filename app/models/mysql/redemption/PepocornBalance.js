@@ -1,4 +1,4 @@
-const rootPrefix = '../../..',
+const rootPrefix = '../../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
   databaseConstants = require(rootPrefix + '/lib/globalConstant/database');
 
@@ -127,19 +127,13 @@ class PepocornBalancesModel extends ModelBase {
    * Flush cache.
    *
    * @param {object} params
-   * @param {number} params.userId
-   * @param {array<number>} params.userIds
+   * @param {array<number>} [params.userIds]
    *
    * @returns {Promise<void>}
    */
   static async flushCache(params) {
-    const PepocornBalanceByUserIds = require(rootPrefix + '/lib/cacheManagement/multi/PepocornBalanceByUserIds');
-
-    if (params.userId) {
-      await new PepocornBalanceByUserIds({ userIds: [params.userId] }).clear();
-    }
-
     if (params.userIds) {
+      const PepocornBalanceByUserIds = require(rootPrefix + '/lib/cacheManagement/multi/PepocornBalanceByUserIds');
       await new PepocornBalanceByUserIds({ userIds: params.userIds }).clear();
     }
   }

@@ -5,7 +5,7 @@ const rootPrefix = '../../../..',
   TransactionModel = require(rootPrefix + '/app/models/mysql/Transaction'),
   PendingTransactionModel = require(rootPrefix + '/app/models/mysql/PendingTransaction'),
   SecureTokenCache = require(rootPrefix + '/lib/cacheManagement/single/SecureToken'),
-  PepocornTransactionModel = require(rootPrefix + '/app/models/mysql/PepocornTransaction'),
+  PepocornTransactionModel = require(rootPrefix + '/app/models/mysql/redemption/PepocornTransaction'),
   ReplyDetailsByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/ReplyDetailsByIds'),
   ReplyDetailsByEntityIdsAndEntityKindCache = require(rootPrefix +
     '/lib/cacheManagement/multi/ReplyDetailsByEntityIdsAndEntityKind'),

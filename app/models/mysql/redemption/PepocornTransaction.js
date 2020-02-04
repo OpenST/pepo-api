@@ -1,7 +1,7 @@
-const rootPrefix = '../../..',
+const rootPrefix = '../../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
-  pepocornTransactionConstants = require(rootPrefix + '/lib/globalConstant/redemption/pepocornTransaction'),
-  databaseConstants = require(rootPrefix + '/lib/globalConstant/database');
+  databaseConstants = require(rootPrefix + '/lib/globalConstant/database'),
+  pepocornTransactionConstants = require(rootPrefix + '/lib/globalConstant/redemption/pepocornTransaction');
 
 // Declare variables.
 const dbName = databaseConstants.redemptionDbName;
@@ -64,11 +64,11 @@ class PepocornTransactionModel extends ModelBase {
   /**
    * Flush cache.
    *
-   * @param {object} params
-   *
    * @returns {Promise<void>}
    */
-  static async flushCache(params) {}
+  static async flushCache() {
+    // Do nothing.
+  }
 }
 
 module.exports = PepocornTransactionModel;
