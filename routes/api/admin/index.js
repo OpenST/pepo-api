@@ -131,6 +131,13 @@ router.get('/channels', sanitizer.sanitizeDynamicUrlParams, function(req, res, n
       entityKindToResponseKeyMap: {
         [adminEntityType.channelSearchList]: adminResponseEntityKey.channelSearchResults,
         [adminEntityType.channelsMap]: adminResponseEntityKey.channels,
+        [adminEntityType.channelDetailsMap]: adminResponseEntityKey.channelDetails,
+        [adminEntityType.channelStatsMap]: adminResponseEntityKey.channelStats,
+        [adminEntityType.currentUserChannelRelationsMap]: adminResponseEntityKey.currentUserChannelRelations,
+        [adminEntityType.tagsMap]: adminResponseEntityKey.tags,
+        [adminEntityType.imagesMap]: adminResponseEntityKey.images,
+        [adminEntityType.linksMap]: adminResponseEntityKey.links,
+        [adminEntityType.textsMap]: adminResponseEntityKey.texts,
         [adminEntityType.channelListMeta]: adminResponseEntityKey.meta
       },
       serviceData: serviceResponse.data
