@@ -1,7 +1,7 @@
-const rootPrefix = '../../..',
+const rootPrefix = '../../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
   databaseConstants = require(rootPrefix + '/lib/globalConstant/database'),
-  notificationHookConstants = require(rootPrefix + '/lib/globalConstant/notificationHook');
+  notificationHookConstants = require(rootPrefix + '/lib/globalConstant/big/notificationHook');
 
 const dbName = databaseConstants.bigDbName;
 
