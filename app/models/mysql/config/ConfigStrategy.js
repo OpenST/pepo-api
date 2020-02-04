@@ -1,4 +1,4 @@
-const rootPrefix = '../../..',
+const rootPrefix = '../../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
   SecureGlobalSaltCache = require(rootPrefix + '/lib/cacheManagement/single/SecureGlobalSalt'),
   basicHelper = require(rootPrefix + '/helpers/basic'),
@@ -9,7 +9,7 @@ const rootPrefix = '../../..',
   databaseConstants = require(rootPrefix + '/lib/globalConstant/database'),
   globalSaltConstants = require(rootPrefix + '/lib/globalConstant/big/globalSalt'),
   configStrategyValidator = require(rootPrefix + '/helpers/configStrategyValidator'),
-  configStrategyConstants = require(rootPrefix + '/lib/globalConstant/configStrategy');
+  configStrategyConstants = require(rootPrefix + '/lib/globalConstant/config/configStrategy');
 
 // Declare variables.
 const dbName = databaseConstants.configDbName,

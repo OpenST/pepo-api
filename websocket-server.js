@@ -1,8 +1,8 @@
 const app = require('express')();
 const http = require('http').Server(app);
 const io = require('socket.io')(http, {
-  pingInterval: 30000, // how many ms before sending a new ping packet [30 seconds]
-  pingTimeout: 60000 // how many ms without a pong packet to consider the connection closed [60 seconds]
+  pingInterval: 30000, // How many ms before sending a new ping packet [30 seconds]
+  pingTimeout: 60000 // How many ms without a pong packet to consider the connection closed [60 seconds]
 });
 
 const rootPrefix = '.',
@@ -11,7 +11,7 @@ const rootPrefix = '.',
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   configStrategyProvider = require(rootPrefix + '/lib/providers/configStrategy'),
-  configStrategyConstants = require(rootPrefix + '/lib/globalConstant/configStrategy'),
+  configStrategyConstants = require(rootPrefix + '/lib/globalConstant/config/configStrategy'),
   processIdSelector = require(rootPrefix + '/lib/webSocket/processIdSelector'),
   createErrorLogsEntry = require(rootPrefix + '/lib/errorLogs/createEntry'),
   errorLogsConstants = require(rootPrefix + '/lib/globalConstant/errorLogs'),
@@ -33,10 +33,10 @@ async function run() {
     return websocketConfigResponse;
   }
 
-  let websocketPort = websocketConfigResponse.data[configStrategyConstants.websocket].port;
+  const websocketPort = websocketConfigResponse.data[configStrategyConstants.websocket].port;
 
   logger.step('# Fetching cron process id.');
-  let cronProcessId = await processIdSelector.perform();
+  const cronProcessId = await processIdSelector.perform();
 
   logger.step('# Start subscribtion job for cron process id:', cronProcessId);
   await subscribeToRmq(cronProcessId);
@@ -44,9 +44,9 @@ async function run() {
   logger.step('# Attaching handlers');
   attachHandlers();
 
-  //** Uncomment the following lines to test websockets on local. **/
-  // app.get('/', function(req, res) {
-  //   res.sendFile(__dirname + '/index.html');
+  //* * Uncomment the following lines to test websockets on local. **/
+  // App.get('/', function(req, res) {
+  //   Res.sendFile(__dirname + '/index.html');
   // });
 
   http.listen(websocketPort, function() {
@@ -55,19 +55,20 @@ async function run() {
 }
 
 /**
- * Start subscription job for cron process id
+ * Start subscription job for cron process id.
  *
- * @param cronProcessId
- * @return {Promise<void>}
+ * @param {number} cronProcessId
+ *
+ * @returns {Promise<void>}
  */
 async function subscribeToRmq(cronProcessId) {
-  let socketJobProcessorObj = new socketJobProcessor({ cronProcessId: +cronProcessId });
+  const socketJobProcessorObj = new socketJobProcessor({ cronProcessId: +cronProcessId });
   await socketJobProcessorObj.perform();
   socketIdentifier = socketConnectionConstants.getSocketIdentifierFromTopic(socketJobProcessorObj.topics[0]);
 }
 
 /**
- * Attach handlers
+ * Attach handlers.
  */
 function attachHandlers() {
   io.on('connection', async function(socket) {
@@ -82,13 +83,14 @@ function attachHandlers() {
       });
       socket.emit('pepo-stream', JSON.stringify(err));
       socket.disconnect();
+
       return true;
     }
 
-    let params = socket.handshake.query;
+    const params = socket.handshake.query;
     params.socketIdentifier = socketIdentifier;
 
-    let websocketAuthRsp = await new WebsocketAuth(params).perform().catch(function(err) {
+    const websocketAuthRsp = await new WebsocketAuth(params).perform().catch(function(err) {
       return responseHelper.error({
         internal_error_identifier: 'ws_s_1',
         api_error_identifier: 'something_went_wrong',
@@ -106,6 +108,7 @@ function attachHandlers() {
       });
       socket.emit('pepo-stream', JSON.stringify(err));
       socket.disconnect();
+
       return true;
     }
 
@@ -126,7 +129,7 @@ async function autoDisconnect() {
 run().catch(async function(err) {
   logger.error('Could not start websocket-server: ', err);
 
-  let errorObject = responseHelper.error({
+  const errorObject = responseHelper.error({
     internal_error_identifier: 'Could not start websocket-server',
     api_error_identifier: 'something_went_wrong',
     debug_options: { error: err.toString(), stack: err.stack },

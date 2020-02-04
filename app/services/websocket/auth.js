@@ -9,8 +9,8 @@ const rootPrefix = '../../..',
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   localCipher = require(rootPrefix + '/lib/encryptors/localCipher'),
   configStrategy = require(rootPrefix + '/lib/providers/configStrategy'),
-  configStrategyConstants = require(rootPrefix + '/lib/globalConstant/configStrategy'),
-  socketConnectionConstants = require(rootPrefix + '/lib/globalConstant/socketConnection');
+  socketConnectionConstants = require(rootPrefix + '/lib/globalConstant/socketConnection'),
+  configStrategyConstants = require(rootPrefix + '/lib/globalConstant/config/configStrategy');
 
 /**
  * Class for websocket auth.

@@ -6,8 +6,8 @@ const rootPrefix = '../..',
   rabbitMqProvider = require(rootPrefix + '/lib/providers/rabbitMq'),
   cloudfrontWrapper = require(rootPrefix + '/lib/aws/CloudfrontWrapper'),
   machineKindConstants = require(rootPrefix + '/lib/globalConstant/machineKind'),
-  configStrategyConstants = require(rootPrefix + '/lib/globalConstant/configStrategy'),
-  cronProcessesConstants = require(rootPrefix + '/lib/globalConstant/big/cronProcesses');
+  cronProcessesConstants = require(rootPrefix + '/lib/globalConstant/big/cronProcesses'),
+  configStrategyConstants = require(rootPrefix + '/lib/globalConstant/config/configStrategy');
 
 program.option('--cronProcessId <cronProcessId>', 'Cron table process ID').parse(process.argv);
 

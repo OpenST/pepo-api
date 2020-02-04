@@ -5,8 +5,8 @@ const rootPrefix = '../..',
   webSocketCustomCache = require(rootPrefix + '/lib/webSocket/customCache'),
   machineKindConstants = require(rootPrefix + '/lib/globalConstant/machineKind'),
   socketRabbitMqProvider = require(rootPrefix + '/lib/providers/socketRabbitMq'),
-  configStrategyConstants = require(rootPrefix + '/lib/globalConstant/configStrategy'),
-  cronProcessesConstants = require(rootPrefix + '/lib/globalConstant/big/cronProcesses');
+  cronProcessesConstants = require(rootPrefix + '/lib/globalConstant/big/cronProcesses'),
+  configStrategyConstants = require(rootPrefix + '/lib/globalConstant/config/configStrategy');
 
 /**
  * Class for socket job processor.

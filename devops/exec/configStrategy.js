@@ -1,11 +1,11 @@
 const rootPrefix = '../..',
   GlobalSaltModel = require(rootPrefix + '/app/models/mysql/big/GlobalSalt'),
-  ConfigStrategyModel = require(rootPrefix + '/app/models/mysql/ConfigStrategy'),
+  ConfigStrategyModel = require(rootPrefix + '/app/models/mysql/config/ConfigStrategy'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   kmsPurposeConstants = require(rootPrefix + '/lib/globalConstant/kms'),
   globalSaltConstants = require(rootPrefix + '/lib/globalConstant/big/globalSalt'),
-  configStrategyConstants = require(rootPrefix + '/lib/globalConstant/configStrategy');
+  configStrategyConstants = require(rootPrefix + '/lib/globalConstant/config/configStrategy');
 
 const command = require('commander'),
   path = require('path'),

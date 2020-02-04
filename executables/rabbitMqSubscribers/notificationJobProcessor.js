@@ -5,7 +5,7 @@ const rootPrefix = '../..',
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   rabbitMqProvider = require(rootPrefix + '/lib/providers/rabbitMq'),
   machineKindConstants = require(rootPrefix + '/lib/globalConstant/machineKind'),
-  configStrategyConstants = require(rootPrefix + '/lib/globalConstant/configStrategy'),
+  configStrategyConstants = require(rootPrefix + '/lib/globalConstant/config/configStrategy'),
   cronProcessesConstants = require(rootPrefix + '/lib/globalConstant/big/cronProcesses');
 
 program.option('--cronProcessId <cronProcessId>', 'Cron table process ID').parse(process.argv);
