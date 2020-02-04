@@ -6,20 +6,20 @@ const io = require('socket.io')(http, {
 });
 
 const rootPrefix = '.',
+  WebsocketAuth = require(rootPrefix + '/app/services/websocket/Auth'),
   basicHelper = require(rootPrefix + '/helpers/basic'),
-  webSocketServerHelper = require(rootPrefix + '/lib/webSocket/helper'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
-  configStrategyProvider = require(rootPrefix + '/lib/providers/configStrategy'),
-  configStrategyConstants = require(rootPrefix + '/lib/globalConstant/config/configStrategy'),
-  processIdSelector = require(rootPrefix + '/lib/webSocket/processIdSelector'),
+  webSocketServerHelper = require(rootPrefix + '/lib/webSocket/helper'),
+  webSocketCustomCache = require(rootPrefix + '/lib/webSocket/customCache'),
   createErrorLogsEntry = require(rootPrefix + '/lib/errorLogs/createEntry'),
   errorLogsConstants = require(rootPrefix + '/lib/globalConstant/errorLogs'),
+  processIdSelector = require(rootPrefix + '/lib/webSocket/processIdSelector'),
+  configStrategyProvider = require(rootPrefix + '/lib/providers/configStrategy'),
+  websocketAutoDisconnect = require(rootPrefix + '/lib/webSocket/autoDisconnect'),
   socketConnectionConstants = require(rootPrefix + '/lib/globalConstant/socketConnection'),
-  socketJobProcessor = require(rootPrefix + '/executables/rabbitMqSubscribers/socketJobProcessor'),
-  WebsocketAuth = require(rootPrefix + '/app/services/websocket/auth'),
-  webSocketCustomCache = require(rootPrefix + '/lib/webSocket/customCache'),
-  websocketAutoDisconnect = require(rootPrefix + '/lib/webSocket/autoDisconnect');
+  configStrategyConstants = require(rootPrefix + '/lib/globalConstant/config/configStrategy'),
+  socketJobProcessor = require(rootPrefix + '/executables/rabbitMqSubscribers/socketJobProcessor');
 
 const apiVersions = require(rootPrefix + '/lib/globalConstant/apiVersions'),
   errorConfig = basicHelper.fetchErrorConfig(apiVersions.v1);
@@ -90,11 +90,11 @@ function attachHandlers() {
     const params = socket.handshake.query;
     params.socketIdentifier = socketIdentifier;
 
-    const websocketAuthRsp = await new WebsocketAuth(params).perform().catch(function(err) {
+    const websocketAuthRsp = await new WebsocketAuth(params).perform().catch(function(error) {
       return responseHelper.error({
         internal_error_identifier: 'ws_s_1',
         api_error_identifier: 'something_went_wrong',
-        debug_options: { error: err }
+        debug_options: { error: error }
       });
     });
 
