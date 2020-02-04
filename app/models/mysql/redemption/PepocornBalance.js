@@ -8,9 +8,9 @@ const dbName = databaseConstants.redemptionDbName;
 /**
  * Class for pepocorn balances model.
  *
- * @class PepocornBalancesModel
+ * @class PepocornBalanceModel
  */
-class PepocornBalancesModel extends ModelBase {
+class PepocornBalanceModel extends ModelBase {
   /**
    * Constructor for pepocorn balances model.
    *
@@ -36,7 +36,7 @@ class PepocornBalancesModel extends ModelBase {
    * @param {number} dbRow.created_at
    * @param {number} dbRow.updated_at
    *
-   * @return {object}
+   * @returns {object}
    */
   formatDbData(dbRow) {
     const oThis = this;
@@ -94,7 +94,7 @@ class PepocornBalancesModel extends ModelBase {
    *
    * @param {array} userIds: user ids
    *
-   * @return {object}
+   * @returns {object}
    */
   async fetchBalanceByUserIds(userIds) {
     const oThis = this;
@@ -115,7 +115,7 @@ class PepocornBalancesModel extends ModelBase {
   }
 
   /**
-   * Index name
+   * Index name.
    *
    * @returns {string}
    */
@@ -139,4 +139,4 @@ class PepocornBalancesModel extends ModelBase {
   }
 }
 
-module.exports = PepocornBalancesModel;
+module.exports = PepocornBalanceModel;
