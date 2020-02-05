@@ -243,7 +243,7 @@ class UpdateFanVideo extends UpdateProfileBase {
       // Notification would be published only if user is approved.
       promiseArray.push(
         notificationJobEnqueue.enqueue(notificationJobConstants.videoNotificationsKind, {
-          userId: oThis.profileUserId,
+          creatorUserId: oThis.profileUserId,
           videoId: oThis.videoId,
           mentionedUserIds: oThis.mentionedUserIds
         })
