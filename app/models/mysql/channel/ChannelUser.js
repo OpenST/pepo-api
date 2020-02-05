@@ -142,7 +142,12 @@ class ChannelUserModel extends ModelBase {
 
     const dbRows = await oThis
       .select('*')
-      .where({ user_id: userIds, channel_id: channelIds })
+      .where({
+        user_id: userIds,
+        channel_id: channelIds,
+        notification_status: channelUsersConstants.invertedStatuses[channelUsersConstants.activeNotificationStatus],
+        status: channelUsersConstants.invertedStatuses[channelUsersConstants.activeStatus]
+      })
       .fire();
 
     const response = {};
