@@ -72,7 +72,7 @@ class GetChannelVideoList extends ServiceBase {
     const promisesArray = [oThis._setTokenDetails(), oThis._getVideos()];
     await Promise.all(promisesArray);
 
-    oThis._setUserVideoList();
+    oThis._setChannelVideoList();
 
     return oThis._prepareResponse();
   }
@@ -258,8 +258,7 @@ class GetChannelVideoList extends ServiceBase {
     const userVideosObj = new GetUserVideos({
       currentUserId: oThis.currentUser.id,
       videoIds: oThis.videoIds,
-      isAdmin: false,
-      filterUserBlockedReplies: 1
+      isAdmin: false
     });
 
     const response = await userVideosObj.perform();
@@ -272,14 +271,14 @@ class GetChannelVideoList extends ServiceBase {
   }
 
   /**
-   * Set user video list.
+   * Set channel video list.
    *
    * @set oThis.videoDetails
    *
    * @returns {*|result}
    * @private
    */
-  _setUserVideoList() {
+  _setChannelVideoList() {
     const oThis = this;
 
     for (let index = 0; index < oThis.videoIds.length; index++) {
