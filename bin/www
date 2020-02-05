@@ -109,14 +109,14 @@ function onListening() {
 }
 
 process.on('SIGTERM', function(){
-  onSigint();
+  onTerminationSignal();
 });
 
 process.on('SIGINT', function(){
-  onSigint();
+  onTerminationSignal();
 });
 
-function onSigint() {
+function onTerminationSignal() {
   logger.info('SIGINT signal received.');
   logger.log('Closing http server.');
   server.close(() => {
