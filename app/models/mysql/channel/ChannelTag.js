@@ -71,7 +71,7 @@ class ChannelTagModel extends ModelBase {
         channel_id: channelIds,
         status: channelTagsConstants.invertedStatuses[channelTagsConstants.activeStatus] // TODO:channels - verify index.
       })
-      .order_by('created_at asc')
+      .order_by('created_at desc')
       .fire();
 
     const response = {};
