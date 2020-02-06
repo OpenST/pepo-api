@@ -3,11 +3,11 @@ const rootPrefix = '../../..',
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   UserMuteModel = require(rootPrefix + '/app/models/mysql/UserMute'),
   UsersCache = require(rootPrefix + '/lib/cacheManagement/multi/User'),
-  AdminActivityLogModel = require(rootPrefix + '/app/models/mysql/AdminActivityLog'),
+  AdminActivityLogModel = require(rootPrefix + '/app/models/mysql/admin/AdminActivityLog'),
   UserMuteByUser2IdsForGlobalCache = require(rootPrefix + '/lib/cacheManagement/multi/UserMuteByUser2IdsForGlobal'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   userConstants = require(rootPrefix + '/lib/globalConstant/user'),
-  adminActivityLogConstants = require(rootPrefix + '/lib/globalConstant/adminActivityLogs');
+  adminActivityLogConstants = require(rootPrefix + '/lib/globalConstant/admin/adminActivityLogs');
 
 /**
  * Class to mute user by admin.

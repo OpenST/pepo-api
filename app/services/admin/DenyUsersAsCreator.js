@@ -2,10 +2,10 @@ const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   UserModel = require(rootPrefix + '/app/models/mysql/User'),
   UsersCache = require(rootPrefix + '/lib/cacheManagement/multi/User'),
-  ActivityLogModel = require(rootPrefix + '/app/models/mysql/AdminActivityLog'),
+  AdminActivityLogModel = require(rootPrefix + '/app/models/mysql/admin/AdminActivityLog'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   userConstants = require(rootPrefix + '/lib/globalConstant/user'),
-  adminActivityLogConstants = require(rootPrefix + '/lib/globalConstant/adminActivityLogs');
+  adminActivityLogConstants = require(rootPrefix + '/lib/globalConstant/admin/adminActivityLogs');
 
 /**
  * Class to deny users as creator by admin.
@@ -162,7 +162,7 @@ class DenyUsersAsCreator extends ServiceBase {
     const oThis = this;
 
     for (const userId in oThis.userObjects) {
-      await new ActivityLogModel({}).insertAction({
+      await new AdminActivityLogModel({}).insertAction({
         adminId: oThis.currentAdminId,
         actionOn: userId,
         action: adminActivityLogConstants.denyAsCreator

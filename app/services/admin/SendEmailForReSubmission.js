@@ -4,12 +4,12 @@ const rootPrefix = '../../..',
   userConstants = require(rootPrefix + '/lib/globalConstant/user'),
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   UsersCache = require(rootPrefix + '/lib/cacheManagement/multi/User'),
+  AdminActivityLogModel = require(rootPrefix + '/app/models/mysql/admin/AdminActivityLog'),
   SendTransactionalMail = require(rootPrefix + '/lib/email/hookCreator/SendTransactionalMail'),
   ReplayAttackCache = require(rootPrefix + '/lib/cacheManagement/single/ReplayAttackOnSlackSendEmailForResubmission'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
-  ActivityLogModel = require(rootPrefix + '/app/models/mysql/AdminActivityLog'),
-  adminActivityLogConstants = require(rootPrefix + '/lib/globalConstant/adminActivityLogs'),
+  adminActivityLogConstants = require(rootPrefix + '/lib/globalConstant/admin/adminActivityLogs'),
   emailServiceApiCallHookConstants = require(rootPrefix + '/lib/globalConstant/big/emailServiceApiCallHook');
 
 /**
@@ -181,7 +181,7 @@ class SendEmailForReSubmission extends ServiceBase {
   async _logAdminActivity() {
     const oThis = this;
 
-    await new ActivityLogModel({}).insertAction({
+    await new AdminActivityLogModel({}).insertAction({
       adminId: oThis.currentAdminId,
       actionOn: oThis.userId,
       action: adminActivityLogConstants.emailSentForResubmission

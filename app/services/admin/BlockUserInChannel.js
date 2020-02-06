@@ -2,10 +2,10 @@ const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   UsersCache = require(rootPrefix + '/lib/cacheManagement/multi/User'),
   BlockUserFromChannel = require(rootPrefix + '/lib/channel/BlockUserInChannel'),
-  AdminActivityLogModel = require(rootPrefix + '/app/models/mysql/AdminActivityLog'),
+  AdminActivityLogModel = require(rootPrefix + '/app/models/mysql/admin/AdminActivityLog'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   userConstants = require(rootPrefix + '/lib/globalConstant/user'),
-  adminActivityLogConstants = require(rootPrefix + '/lib/globalConstant/adminActivityLogs');
+  adminActivityLogConstants = require(rootPrefix + '/lib/globalConstant/admin/adminActivityLogs');
 
 /**
  * Class to block user in a channel.

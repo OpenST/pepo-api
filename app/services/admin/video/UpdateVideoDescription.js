@@ -1,9 +1,9 @@
 const rootPrefix = '../../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   EditVideoDescriptionLib = require(rootPrefix + '/lib/editDescription/Video'),
-  ActivityLogModel = require(rootPrefix + '/app/models/mysql/AdminActivityLog'),
+  AdminActivityLogModel = require(rootPrefix + '/app/models/mysql/admin/AdminActivityLog'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
-  adminActivityLogConstants = require(rootPrefix + '/lib/globalConstant/adminActivityLogs');
+  adminActivityLogConstants = require(rootPrefix + '/lib/globalConstant/admin/adminActivityLogs');
 
 /**
  * Class to update video description.
@@ -90,7 +90,7 @@ class UpdateVideoDescription extends ServiceBase {
   async _logAdminActivity() {
     const oThis = this;
 
-    await new ActivityLogModel().insertAction({
+    await new AdminActivityLogModel().insertAction({
       adminId: oThis.currentAdminId,
       actionOn: oThis.creatorUserId,
       action: adminActivityLogConstants.updateUserVideoDescription,

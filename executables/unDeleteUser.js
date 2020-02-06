@@ -10,17 +10,16 @@ const program = require('commander');
 
 const rootPrefix = '..',
   TagModel = require(rootPrefix + '/app/models/mysql/Tag'),
-  CronBase = require(rootPrefix + '/executables/CronBase'),
   UserModel = require(rootPrefix + '/app/models/mysql/User'),
   UsersCache = require(rootPrefix + '/lib/cacheManagement/multi/User'),
-  AdminActivityLogModel = require(rootPrefix + '/app/models/mysql/AdminActivityLog'),
+  AdminActivityLogModel = require(rootPrefix + '/app/models/mysql/admin/AdminActivityLog'),
   AddContactInPepoCampaign = require(rootPrefix + '/lib/email/hookCreator/AddContact'),
   UserTagsCacheKlass = require(rootPrefix + '/lib/cacheManagement/multi/UserTagsByUserIds'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   userConstants = require(rootPrefix + '/lib/globalConstant/user'),
   userTagConstants = require(rootPrefix + '/lib/globalConstant/userTag'),
-  adminActivityLogConstants = require(rootPrefix + '/lib/globalConstant/adminActivityLogs'),
+  adminActivityLogConstants = require(rootPrefix + '/lib/globalConstant/admin/adminActivityLogs'),
   emailServiceApiCallHookConstants = require(rootPrefix + '/lib/globalConstant/big/emailServiceApiCallHook');
 
 program
@@ -54,8 +53,6 @@ class UnDeleteUser {
   /**
    * Constructor for undelete user.
    *
-   * @augments CronBase
-   *
    * @constructor
    */
   constructor(params) {
@@ -77,15 +74,7 @@ class UnDeleteUser {
 
     await oThis._fetchUsers();
 
-    let promiseArray = [];
-
-    promiseArray.push(oThis._markUserActive());
-
-    promiseArray.push(oThis._increaseUserTagWeight());
-
-    promiseArray.push(oThis._addContactInCampaigns());
-
-    await Promise.all(promiseArray);
+    await Promise.all([oThis._markUserActive(), oThis._increaseUserTagWeight(), oThis._addContactInCampaigns()]);
 
     await oThis._logAdminActivity();
   }
