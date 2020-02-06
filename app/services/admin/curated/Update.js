@@ -4,7 +4,7 @@ const rootPrefix = '../../../..',
   UserCache = require(rootPrefix + '/lib/cacheManagement/multi/User'),
   TagMultiCache = require(rootPrefix + '/lib/cacheManagement/multi/Tag'),
   CuratedEntityModel = require(rootPrefix + '/app/models/mysql/CuratedEntity'),
-  AdminActivityLogModel = require(rootPrefix + '/app/models/mysql/AdminActivityLog'),
+  AdminActivityLogModel = require(rootPrefix + '/app/models/mysql/admin/AdminActivityLog'),
   ChannelByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelByIds'),
   CuratedEntityIdsByKindCache = require(rootPrefix + '/lib/cacheManagement/single/CuratedEntityIdsByKind'),
   userConstants = require(rootPrefix + '/lib/globalConstant/user'),
@@ -12,7 +12,7 @@ const rootPrefix = '../../../..',
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   channelsConstants = require(rootPrefix + '/lib/globalConstant/channel/channels'),
   curatedEntitiesConstants = require(rootPrefix + '/lib/globalConstant/curatedEntities'),
-  adminActivityLogConstants = require(rootPrefix + '/lib/globalConstant/adminActivityLogs');
+  adminActivityLogConstants = require(rootPrefix + '/lib/globalConstant/admin/adminActivityLogs');
 
 /**
  * Class to insert or update entry in curated entities.

@@ -13,13 +13,13 @@ const rootPrefix = '../../..',
   apiName = require(rootPrefix + '/lib/globalConstant/apiName'),
   coreConstants = require(rootPrefix + '/config/coreConstants'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
-  adminConstants = require(rootPrefix + '/lib/globalConstant/admin'),
-  adminEntityType = require(rootPrefix + '/lib/globalConstant/adminEntityType'),
   apiVersions = require(rootPrefix + '/lib/globalConstant/apiVersions'),
+  adminConstants = require(rootPrefix + '/lib/globalConstant/admin/admin'),
+  adminEntityType = require(rootPrefix + '/lib/globalConstant/adminEntityType'),
   adminPreLaunchRoutes = require(rootPrefix + '/routes/api/admin/preLaunch/index'),
-  adminUpdateUsageDataRoutes = require(rootPrefix + '/routes/api/admin/updateUsageData/index'),
+  adminResponseEntityKey = require(rootPrefix + '/lib/globalConstant/adminResponseEntity'),
   curatedEntitiesDataRoutes = require(rootPrefix + '/routes/api/admin/curatedEntity/index'),
-  adminResponseEntityKey = require(rootPrefix + '/lib/globalConstant/adminResponseEntity');
+  adminUpdateUsageDataRoutes = require(rootPrefix + '/routes/api/admin/updateUsageData/index');
 
 // Declare variables.
 const errorConfig = basicHelper.fetchErrorConfig(apiVersions.admin);

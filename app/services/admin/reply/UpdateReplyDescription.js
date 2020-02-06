@@ -2,11 +2,11 @@ const rootPrefix = '../../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   EditReplyDescriptionLib = require(rootPrefix + '/lib/editDescription/Reply'),
-  ActivityLogModel = require(rootPrefix + '/app/models/mysql/AdminActivityLog'),
+  AdminActivityLogModel = require(rootPrefix + '/app/models/mysql/admin/AdminActivityLog'),
   ReplyDetailsByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/ReplyDetailsByIds'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   replyDetailConstants = require(rootPrefix + '/lib/globalConstant/replyDetail'),
-  adminActivityLogConstants = require(rootPrefix + '/lib/globalConstant/adminActivityLogs');
+  adminActivityLogConstants = require(rootPrefix + '/lib/globalConstant/admin/adminActivityLogs');
 
 /**
  * Class to update reply description.
@@ -118,7 +118,7 @@ class UpdateReplyDescription extends ServiceBase {
   async _logAdminActivity() {
     const oThis = this;
 
-    await new ActivityLogModel().insertAction({
+    await new AdminActivityLogModel().insertAction({
       adminId: oThis.currentAdminId,
       actionOn: oThis.creatorUserId,
       action: adminActivityLogConstants.updateUserReplyDescription,

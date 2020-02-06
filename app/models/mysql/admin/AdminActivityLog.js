@@ -1,7 +1,7 @@
-const rootPrefix = '../../..',
+const rootPrefix = '../../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
   databaseConstants = require(rootPrefix + '/lib/globalConstant/database'),
-  adminActivityLogConstants = require(rootPrefix + '/lib/globalConstant/adminActivityLogs');
+  adminActivityLogConstants = require(rootPrefix + '/lib/globalConstant/admin/adminActivityLogs');
 
 // Declare variables.
 const dbName = databaseConstants.adminDbName;
@@ -39,7 +39,7 @@ class AdminActivityLogModel extends ModelBase {
    * @param {number} dbRow.created_at
    * @param {number} dbRow.updated_at
    *
-   * @return {object}
+   * @returns {object}
    */
   formatDbData(dbRow) {
     const oThis = this;

@@ -9,9 +9,9 @@ const command = require('commander');
 
 const rootPrefix = '../../..',
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
-  AdminModel = require(rootPrefix + '/app/models/mysql/Admin'),
+  AdminModel = require(rootPrefix + '/app/models/mysql/admin/Admin'),
   userConstants = require(rootPrefix + '/lib/globalConstant/user'),
-  adminConstants = require(rootPrefix + '/lib/globalConstant/admin'),
+  adminConstants = require(rootPrefix + '/lib/globalConstant/admin/admin'),
   ApproveUserService = require(rootPrefix + '/app/services/admin/ApproveUsersAsCreator'),
   ApprovePreLaunchUserService = require(rootPrefix + '/app/services/admin/preLaunch/ApproveUser'),
   TwitterUserByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TwitterUserByIds'),

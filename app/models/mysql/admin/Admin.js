@@ -1,8 +1,8 @@
-const rootPrefix = '../../..',
+const rootPrefix = '../../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
   util = require(rootPrefix + '/lib/util'),
   coreConstants = require(rootPrefix + '/config/coreConstants'),
-  adminConstants = require(rootPrefix + '/lib/globalConstant/admin'),
+  adminConstants = require(rootPrefix + '/lib/globalConstant/admin/admin'),
   databaseConstants = require(rootPrefix + '/lib/globalConstant/database');
 
 // Declare variables names.
@@ -43,7 +43,7 @@ class AdminModel extends ModelBase {
    * @param {number} dbRow.created_at
    * @param {number} dbRow.updated_at
    *
-   * @return {object}
+   * @returns {object}
    */
   formatDbData(dbRow) {
     const oThis = this;
@@ -75,9 +75,9 @@ class AdminModel extends ModelBase {
   /**
    * Fetch secure user by id.
    *
-   * @param {string} id
+   * @param {string/number} id
    *
-   * @return {object}
+   * @returns {Promise<object>}
    */
   async fetchById(id) {
     const oThis = this;
@@ -92,7 +92,7 @@ class AdminModel extends ModelBase {
    *
    * @param {array} ids
    *
-   * @return {object}
+   * @returns {Promise<object>}
    */
   async fetchByIds(ids) {
     const oThis = this;
@@ -117,7 +117,7 @@ class AdminModel extends ModelBase {
    *
    * @param {string} slackId
    *
-   * @return {object}
+   * @returns {Promise<object>}
    */
   async fetchBySlackId(slackId) {
     const oThis = this;
@@ -230,7 +230,7 @@ class AdminModel extends ModelBase {
    * @param {string} [params.email]
    * @param {number} [params.slackId]
    *
-   * @returns {Promise<*>}
+   * @returns {Promise<void>}
    */
   static async flushCache(params) {
     const promisesArray = [];

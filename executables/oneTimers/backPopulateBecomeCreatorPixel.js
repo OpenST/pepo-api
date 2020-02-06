@@ -1,9 +1,9 @@
 const fs = require('fs');
 
 const rootPrefix = '../..',
-  ActivityLogModel = require(rootPrefix + '/app/models/mysql/AdminActivityLog'),
+  AdminActivityLogModel = require(rootPrefix + '/app/models/mysql/admin/AdminActivityLog'),
   UserDeviceExtendedDetailModel = require(rootPrefix + '/app/models/mysql/UserDeviceExtendedDetail'),
-  adminActivityLogConstants = require(rootPrefix + '/lib/globalConstant/adminActivityLogs'),
+  adminActivityLogConstants = require(rootPrefix + '/lib/globalConstant/admin/adminActivityLogs'),
   pixelConstants = require(rootPrefix + '/lib/globalConstant/pixel'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger');
 
@@ -54,7 +54,7 @@ class backPopulateBecomeCreatorPixel {
         userToApproverAdminDetailsMap = {},
         userToDeviceDataMap = {};
 
-      const activityLogsResp = await new ActivityLogModel()
+      const activityLogsResp = await new AdminActivityLogModel()
         .select('*')
         .where(['id < ?', activityLogIdBeforeThis])
         .where(['action=?', adminActivityLogConstants.invertedActions[adminActivityLogConstants.approvedAsCreator]])
