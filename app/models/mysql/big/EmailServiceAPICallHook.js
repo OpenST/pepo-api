@@ -8,9 +8,9 @@ const dbName = databaseConstants.bigDbName;
 /**
  * Class for email service api call hook model.
  *
- * @class EmailServiceAPICallHook
+ * @class EmailServiceAPICallHookModel
  */
-class EmailServiceAPICallHook extends ModelBase {
+class EmailServiceAPICallHookModel extends ModelBase {
   /**
    * Constructor for email service api call hook model.
    *
@@ -203,4 +203,4 @@ class EmailServiceAPICallHook extends ModelBase {
   }
 }
 
-module.exports = EmailServiceAPICallHook;
+module.exports = EmailServiceAPICallHookModel;

@@ -9,9 +9,9 @@ const dbName = databaseConstants.bigDbName;
 /**
  * Class for aggregated notification model.
  *
- * @class AggregatedNotification
+ * @class AggregatedNotificationModel
  */
-class AggregatedNotification extends ModelBase {
+class AggregatedNotificationModel extends ModelBase {
   /**
    * Constructor for aggregated notification model.
    *
@@ -125,4 +125,4 @@ class AggregatedNotification extends ModelBase {
   }
 }
 
-module.exports = AggregatedNotification;
+module.exports = AggregatedNotificationModel;

@@ -9,9 +9,9 @@ const dbName = databaseConstants.socketDbName;
 /**
  * Class for user socket connection details model.
  *
- * @class UserSocketConnectionDetails
+ * @class UserSocketConnectionDetailsModel
  */
-class UserSocketConnectionDetails extends ModelBase {
+class UserSocketConnectionDetailsModel extends ModelBase {
   /**
    * Constructor for user socket connection details model.
    *
@@ -158,7 +158,7 @@ class UserSocketConnectionDetails extends ModelBase {
       })
       .fire();
 
-    await UserSocketConnectionDetails.flushCache({ userIds: userIds });
+    await UserSocketConnectionDetailsModel.flushCache({ userIds: userIds });
   }
 
   /**
@@ -177,4 +177,4 @@ class UserSocketConnectionDetails extends ModelBase {
   }
 }
 
-module.exports = UserSocketConnectionDetails;
+module.exports = UserSocketConnectionDetailsModel;

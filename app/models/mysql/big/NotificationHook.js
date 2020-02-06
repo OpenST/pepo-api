@@ -8,9 +8,9 @@ const dbName = databaseConstants.bigDbName;
 /**
  * Class for notification hook model.
  *
- * @class NotificationHook
+ * @class NotificationHookModel
  */
-class NotificationHook extends ModelBase {
+class NotificationHookModel extends ModelBase {
   /**
    * Constructor for notification hook model.
    *
@@ -165,4 +165,4 @@ class NotificationHook extends ModelBase {
   }
 }
 
-module.exports = NotificationHook;
+module.exports = NotificationHookModel;

@@ -9,9 +9,9 @@ const dbName = databaseConstants.bigDbName;
 /**
  * Class for dynamic global constants model.
  *
- * @class DynamicVariable
+ * @class DynamicVariableModel
  */
-class DynamicVariable extends ModelBase {
+class DynamicVariableModel extends ModelBase {
   /**
    * Constructor for curated entity model.
    *
@@ -103,4 +103,4 @@ class DynamicVariable extends ModelBase {
   }
 }
 
-module.exports = DynamicVariable;
+module.exports = DynamicVariableModel;

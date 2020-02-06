@@ -11,9 +11,9 @@ const dbName = databaseConstants.bigDbName;
 /**
  * Class for temporary token model.
  *
- * @class TemporaryToken
+ * @class TemporaryTokenModel
  */
-class TemporaryToken extends ModelBase {
+class TemporaryTokenModel extends ModelBase {
   /**
    * Constructor for temporary token model.
    *
@@ -144,4 +144,4 @@ class TemporaryToken extends ModelBase {
   }
 }
 
-module.exports = TemporaryToken;
+module.exports = TemporaryTokenModel;

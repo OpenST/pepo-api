@@ -8,9 +8,9 @@ const dbName = databaseConstants.bigDbName;
 /**
  * Class for user email logs model.
  *
- * @class UserEmailLogs
+ * @class UserEmailLogsModel
  */
-class UserEmailLogs extends ModelBase {
+class UserEmailLogsModel extends ModelBase {
   /**
    * Constructor for user email logs model.
    *
@@ -155,4 +155,4 @@ class UserEmailLogs extends ModelBase {
   }
 }
 
-module.exports = UserEmailLogs;
+module.exports = UserEmailLogsModel;

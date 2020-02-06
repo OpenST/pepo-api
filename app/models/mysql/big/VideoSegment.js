@@ -13,9 +13,9 @@ const dbName = databaseConstants.bigDbName;
 /**
  * Class for video segment model.
  *
- * @class VideoSegment
+ * @class VideoSegmentModel
  */
-class VideoSegment extends ModelBase {
+class VideoSegmentModel extends ModelBase {
   /**
    * Constructor for video segment model.
    *
@@ -135,4 +135,4 @@ class VideoSegment extends ModelBase {
   }
 }
 
-module.exports = VideoSegment;
+module.exports = VideoSegmentModel;
