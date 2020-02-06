@@ -155,15 +155,25 @@ class ChannelVideoModel extends ModelBase {
    *
    * @param {object} params
    * @param {number} [params.channelId]
+   * @param {number} [params.videoId]
    *
    * @returns {Promise<*>}
    */
   static async flushCache(params) {
+    const promisesArray = [];
+
     if (params.channelId) {
       const ChannelVideoIdsByChannelIdPaginationCache = require(rootPrefix +
         '/lib/cacheManagement/single/ChannelVideoIdsByChannelIdPagination');
-      await new ChannelVideoIdsByChannelIdPaginationCache({ channelId: params.channelId }).clear();
+      promisesArray.push(new ChannelVideoIdsByChannelIdPaginationCache({ channelId: params.channelId }).clear());
     }
+
+    if (params.videoId) {
+      const VideoDetailsByVideoIds = require(rootPrefix + '/lib/cacheManagement/multi/VideoDetailsByVideoIds');
+      promisesArray.push(new VideoDetailsByVideoIds({ videoIds: [params.videoId] }).clear());
+    }
+
+    await Promise.all(promisesArray);
   }
 }
 
