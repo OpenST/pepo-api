@@ -4,16 +4,17 @@ const rootPrefix = '../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   TagIdByNamesCache = require(rootPrefix + '/lib/cacheManagement/multi/TagIdByNames'),
-  ChannelByPermalinksCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelByPermalinks'),
+  UserByUsernameCache = require(rootPrefix + '/lib/cacheManagement/multi/UserIdByUserNames'),
   ReplyDetailsByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/ReplyDetailsByIds'),
+  ChannelByPermalinksCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelByPermalinks'),
   gotoFactory = require(rootPrefix + '/lib/goTo/factory'),
   coreConstants = require(rootPrefix + '/config/coreConstants'),
   gotoConstants = require(rootPrefix + '/lib/globalConstant/goto'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
-  UserByUsernameCache = require(rootPrefix + '/lib/cacheManagement/multi/UserIdByUserNames'),
   userUtmDetailsConstants = require(rootPrefix + '/lib/globalConstant/userUtmDetail');
 
+// Declare variables.
 const currentPepoApiDomain = coreConstants.PA_DOMAIN;
 
 /**
@@ -165,7 +166,7 @@ class FetchGoto extends ServiceBase {
 
         break;
       }
-      case gotoConstants.channelGotoKind: {
+      case gotoConstants.communitiesUrlKind: {
         const channelPermalink = pathArray[2];
 
         if (channelPermalink) {
@@ -178,7 +179,7 @@ class FetchGoto extends ServiceBase {
 
           if (Number(channelId)) {
             oThis.gotoParams = { channelId: channelId };
-            oThis.gotoKind = gotoConstants.channelGotoKind;
+            oThis.gotoKind = gotoConstants.channelsGotoKind;
           }
         }
 
@@ -232,7 +233,7 @@ class FetchGoto extends ServiceBase {
       }
     }
 
-    // set UTM cookie if utm params are present in the query params.
+    // Set UTM cookie if utm params are present in the query params.
     oThis.utmCookieValue = userUtmDetailsConstants.utmCookieToSet(query);
   }
 
