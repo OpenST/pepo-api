@@ -6,11 +6,11 @@ const rootPrefix = '../..',
   basicHelper = require(rootPrefix + '/helpers/basic'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
-  paymentValidationFactory = require(rootPrefix + '/lib/payment/Validation/Factory'),
   createErrorLogsEntry = require(rootPrefix + '/lib/errorLogs/createEntry'),
   errorLogsConstants = require(rootPrefix + '/lib/globalConstant/errorLogs'),
+  paymentValidationFactory = require(rootPrefix + '/lib/payment/Validation/factory'),
   fiatPaymentConstants = require(rootPrefix + '/lib/globalConstant/fiat/fiatPayment'),
-  inAppProductsConstants = require(rootPrefix + '/lib/globalConstant/inAppProduct'),
+  inAppProductConstants = require(rootPrefix + '/lib/globalConstant/fiat/inAppProduct'),
   cronProcessesConstants = require(rootPrefix + '/lib/globalConstant/big/cronProcesses');
 
 const BATCH_SIZE = 10;
@@ -162,9 +162,9 @@ class ReValidateAllReceipts extends CronBase {
 
     let os = null;
     if (fiatPayment.serviceKind === fiatPaymentConstants.applePayKind) {
-      os = inAppProductsConstants.ios;
+      os = inAppProductConstants.ios;
     } else if (fiatPayment.serviceKind === fiatPaymentConstants.googlePayKind) {
-      os = inAppProductsConstants.android;
+      os = inAppProductConstants.android;
     } else {
       return Promise.reject(
         responseHelper.error({

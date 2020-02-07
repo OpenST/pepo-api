@@ -1,7 +1,7 @@
-const rootPrefix = '../../..',
+const rootPrefix = '../../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
   databaseConstants = require(rootPrefix + '/lib/globalConstant/database'),
-  inAppProductsConstants = require(rootPrefix + '/lib/globalConstant/inAppProduct');
+  inAppProductConstants = require(rootPrefix + '/lib/globalConstant/fiat/inAppProduct');
 
 // Declare variables.
 const dbName = databaseConstants.fiatDbName;
@@ -52,7 +52,7 @@ class InAppProductModel extends ModelBase {
       id: dbRow.id,
       appleProductId: dbRow.apple_product_id,
       googleProductId: dbRow.google_product_id,
-      status: inAppProductsConstants.statuses[dbRow.status],
+      status: inAppProductConstants.statuses[dbRow.status],
       lowerLimit: dbRow.lower_limit,
       upperLimit: dbRow.upper_limit,
       pepoAmountInWei: dbRow.pepo_amount_in_wei,
@@ -80,7 +80,7 @@ class InAppProductModel extends ModelBase {
         'lower_limit <= ? AND upper_limit > ? AND status = ?',
         pricePoint,
         pricePoint,
-        inAppProductsConstants.invertedStatuses[inAppProductsConstants.active]
+        inAppProductConstants.invertedStatuses[inAppProductConstants.active]
       ])
       .order_by('amount_in_usd asc')
       .fire();
