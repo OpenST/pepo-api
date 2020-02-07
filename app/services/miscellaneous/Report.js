@@ -105,9 +105,9 @@ class ReportForEntity extends ServiceBase {
           report_entity_id: oThis.reportEntityId,
           reporter_user_name: oThis.currentUser.name,
           reporter_user_id: oThis.currentUser.id,
-          reportee_user_name: oThis.reportedUserObj.name, // reply creator's name
-          reportee_user_id: oThis.reportedUserObj.id, // reply creator's user id
-          parent_video_url: encodeURIComponent(oThis.parentVideoUrl), // parent video url for this reply
+          reportee_user_name: oThis.reportedUserObj.name, // Reply creator's name.
+          reportee_user_id: oThis.reportedUserObj.id, // Reply creator's user id.
+          parent_video_url: encodeURIComponent(oThis.parentVideoUrl), // Parent video url for this reply.
           video_url: encodeURIComponent(oThis.videoUrl),
           user_admin_url_prefix: basicHelper.userProfilePrefixUrl()
         };
@@ -131,7 +131,7 @@ class ReportForEntity extends ServiceBase {
       }
       case reportEntityConstants.channelReportEntityKind: {
         await oThis._fetchChannel();
-        let channelUrl = basicHelper.channelPrefixUrl() + '/' + oThis.channel.permalink;
+        const channelUrl = basicHelper.channelPrefixUrl() + '/' + oThis.channel.permalink;
 
         oThis.templateVars = {
           report_entity_kind: oThis.reportEntityKind,

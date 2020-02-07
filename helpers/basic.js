@@ -654,7 +654,7 @@ class BasicHelper {
    * @returns {string}
    */
   channelPrefixUrl() {
-    return coreConstants.PA_DOMAIN + '/channels';
+    return coreConstants.PA_DOMAIN + '/communities';
   }
 
   /**
