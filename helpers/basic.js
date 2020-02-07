@@ -649,11 +649,11 @@ class BasicHelper {
   }
 
   /**
-   * Get channel url prefix.
+   * Get communities url prefix.
    *
    * @returns {string}
    */
-  channelPrefixUrl() {
+  communitiesPrefixUrl() {
     return coreConstants.PA_DOMAIN + '/communities';
   }
 

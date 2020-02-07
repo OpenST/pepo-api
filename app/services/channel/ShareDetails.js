@@ -215,7 +215,7 @@ class ShareDetails extends ServiceBase {
     const oThis = this;
 
     return (
-      basicHelper.channelPrefixUrl() +
+      basicHelper.communitiesPrefixUrl() +
       '/' +
       oThis.channelPermalink +
       `?utm_source=share&utm_medium=channel&utm_campaign=${oThis.channelId}`

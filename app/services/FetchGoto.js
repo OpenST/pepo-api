@@ -165,7 +165,7 @@ class FetchGoto extends ServiceBase {
 
         break;
       }
-      case gotoConstants.channelGotoKind: {
+      case gotoConstants.communitiesGotoKind: {
         const channelPermalink = pathArray[2];
 
         if (channelPermalink) {
@@ -178,7 +178,7 @@ class FetchGoto extends ServiceBase {
 
           if (Number(channelId)) {
             oThis.gotoParams = { channelId: channelId };
-            oThis.gotoKind = gotoConstants.channelGotoKind;
+            oThis.gotoKind = gotoConstants.communitiesGotoKind;
           }
         }
 
