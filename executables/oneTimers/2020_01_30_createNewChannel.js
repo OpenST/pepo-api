@@ -14,6 +14,7 @@ const rootPrefix = '../..',
   channelsConstants = require(rootPrefix + '/lib/globalConstant/channel/channels');
 
 program
+  .option('--channelId <channelId>', 'Channel Id only if need to update channel.')
   .option('--channelName <channelName>', 'Channel Name')
   .option('--channelTagline <channelTagline>', 'Channel Tagline')
   .option('--channelDescription <channelDescription>', 'Channel Description')
@@ -29,20 +30,22 @@ program.on('--help', function() {
   logger.log('  Example:');
   logger.log('');
   logger.log(
-    '    node executables/oneTimers/2020_01_30_createNewChannel.js --channelName "PEPO" --channelTagline "This is some tagline. #new #tagline" --channelDescription "This is a video description. Link: https://pepo.com. Tags: #test1 #test2" --imageUrl "https://s3.amazonaws.com/uassets.stagingpepo.com/d/ca/images/4a13513801c01f00868daa02f71f2551-original.png" --size 123 --width 123 --height 123 --channelPermalink "test"'
+    '    node executables/oneTimers/2020_01_30_createNewChannel.js --channelId 0 --channelName "PEPO" --channelTagline "This is some tagline. #new #tagline" --channelDescription "This is a video description. Link: https://pepo.com. Tags: #test1 #test2" --imageUrl "https://s3.amazonaws.com/uassets.stagingpepo.com/d/ca/images/4a13513801c01f00868daa02f71f2551-original.png" --size 123 --width 123 --height 123 --channelPermalink "test"'
   );
   logger.log('');
   logger.log('');
 });
 
-if (!program.channelName) {
-  program.help();
-  process.exit(1);
-}
+if (!program.channelId) {
+  if (!program.channelName) {
+    program.help();
+    process.exit(1);
+  }
 
-if (program.imageUrl && (!program.size || !program.width || !program.height)) {
-  program.help();
-  process.exit(1);
+  if (program.imageUrl && (!program.size || !program.width || !program.height)) {
+    program.help();
+    process.exit(1);
+  }
 }
 
 /**
@@ -63,6 +66,7 @@ class CreateNewChannel {
    * @param {string} [params.size]
    * @param {string} [params.width]
    * @param {string} [params.height]
+   * @param {string} [params.channelId]
    *
    * @constructor
    */
@@ -78,7 +82,7 @@ class CreateNewChannel {
     oThis.height = params.height || null;
     oThis.channelPermalink = params.channelPermalink;
 
-    oThis.channelId = null;
+    oThis.channelId = params.channelId || null;
     oThis.textInsertId = null;
   }
 
@@ -93,9 +97,12 @@ class CreateNewChannel {
     console.log('Channel Permalink: ', oThis.channelPermalink);
 
     // Validate whether channel exists or not.
-    await oThis.validateChannel();
 
-    await oThis.createNewChannel();
+    if (!oThis.channelId) {
+      await oThis.validateChannel();
+
+      await oThis.createNewChannel();
+    }
 
     const promisesArray = [
       oThis.performChannelTaglineRelatedTasks(),
@@ -217,7 +224,6 @@ class CreateNewChannel {
     // If channel description is not valid, consider it as null.
     if (!CommonValidators.validateChannelDescription(oThis.channelDescription)) {
       oThis.channelDescription = null;
-      throw 'Invalid tagline.';
     }
 
     if (!oThis.channelDescription) {
@@ -301,11 +307,17 @@ class CreateNewChannel {
   async createChannelStat() {
     const oThis = this;
 
-    await new ChannelStatModel().insert({ channel_id: oThis.channelId, total_videos: 0, total_users: 0 }).fire();
+    await new ChannelStatModel()
+      .insert({ channel_id: oThis.channelId, total_videos: 0, total_users: 0 })
+      .fire()
+      .catch(function(error) {
+        logger.info('Avoid this error while updating channel. Error while creating channel stats: ', error);
+      });
   }
 }
 
 new CreateNewChannel({
+  channelId: program.channelId,
   channelName: program.channelName,
   channelTagline: program.channelTagline,
   channelDescription: program.channelDescription,
