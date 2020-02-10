@@ -104,7 +104,7 @@ class ChannelModel extends ModelBase {
 
     for (let index = 0; index < dbRows.length; index++) {
       const dbRow = dbRows[index];
-      response[dbRow.permalink] = dbRow.id;
+      response[dbRow.permalink.toLowerCase()] = dbRow.id;
     }
 
     return response;
