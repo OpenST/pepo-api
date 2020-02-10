@@ -6,7 +6,7 @@ const rootPrefix = '../../..',
   routeHelper = require(rootPrefix + '/routes/helper'),
   sanitizer = require(rootPrefix + '/helpers/sanitizer'),
   apiName = require(rootPrefix + '/lib/globalConstant/apiName'),
-  entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
+  entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
   responseEntityKey = require(rootPrefix + '/lib/globalConstant/responseEntityKey');
 
 /* Get notifications. */
@@ -17,12 +17,13 @@ router.get('/', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
     const wrapperFormatterRsp = await new FormatterComposer({
       resultType: responseEntityKey.userNotificationList,
       entityKindToResponseKeyMap: {
-        [entityType.userNotificationList]: responseEntityKey.userNotificationList,
-        [entityType.usersMap]: responseEntityKey.users,
-        [entityType.imagesMap]: responseEntityKey.images,
-        [entityType.videosMap]: responseEntityKey.videos,
-        [entityType.replyDetailsMap]: responseEntityKey.replyDetails,
-        [entityType.userNotificationListMeta]: responseEntityKey.meta
+        [entityTypeConstants.userNotificationList]: responseEntityKey.userNotificationList,
+        [entityTypeConstants.usersMap]: responseEntityKey.users,
+        [entityTypeConstants.imagesMap]: responseEntityKey.images,
+        [entityTypeConstants.videosMap]: responseEntityKey.videos,
+        [entityTypeConstants.replyDetailsMap]: responseEntityKey.replyDetails,
+        [entityTypeConstants.userNotificationListMeta]: responseEntityKey.meta,
+        [entityTypeConstants.channelsMap]: responseEntityKey.channels
       },
       serviceData: serviceResponse.data
     }).perform();

@@ -2,11 +2,11 @@ const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   ProductsCache = require(rootPrefix + '/lib/cacheManagement/single/Products'),
-  InAppProductConstants = require(rootPrefix + '/lib/globalConstant/inAppProduct'),
+  inAppProductConstants = require(rootPrefix + '/lib/globalConstant/fiat/inAppProduct'),
   LifetimePurchaseByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/LifetimePurchaseByUserIds'),
   UserProfileElementsByUserId = require(rootPrefix + '/lib/cacheManagement/multi/UserProfileElementsByUserIds'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
-  entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
+  entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
   userProfileElementConst = require(rootPrefix + '/lib/globalConstant/userProfileElement');
 
 /**
@@ -72,8 +72,8 @@ class GetTopupProduct extends ServiceBase {
       oThis.limitsData.limit_reached = 1;
     }
 
-    responseData[entityType.topupProducts] = availableProductsArray;
-    responseData[entityType.topupLimitsData] = oThis.limitsData;
+    responseData[entityTypeConstants.topupProducts] = availableProductsArray;
+    responseData[entityTypeConstants.topupLimitsData] = oThis.limitsData;
 
     return responseHelper.successWithData(responseData);
   }
@@ -87,7 +87,7 @@ class GetTopupProduct extends ServiceBase {
   async _validateAndSanitize() {
     const oThis = this;
 
-    if (oThis.os !== InAppProductConstants.ios && oThis.os !== InAppProductConstants.android) {
+    if (oThis.os !== inAppProductConstants.ios && oThis.os !== inAppProductConstants.android) {
       return Promise.reject(
         responseHelper.paramValidationError({
           internal_error_identifier: 'a_s_t_gp_1',
@@ -172,9 +172,9 @@ class GetTopupProduct extends ServiceBase {
   _calculateRemainingLimit(amountSpent) {
     const oThis = this;
 
-    let remainingLimit = InAppProductConstants.lifetimeLimit - amountSpent;
+    let remainingLimit = inAppProductConstants.lifetimeLimit - amountSpent;
 
-    oThis.limitsData.limit = InAppProductConstants.lifetimeLimit;
+    oThis.limitsData.limit = inAppProductConstants.lifetimeLimit;
     if (!CommonValidators.isVarNullOrUndefined(oThis.customPurchaseLimitOfUser)) {
       remainingLimit = oThis.customPurchaseLimitOfUser - amountSpent;
       oThis.limitsData.limit = oThis.customPurchaseLimitOfUser;
@@ -200,13 +200,13 @@ class GetTopupProduct extends ServiceBase {
     for (let index = 0; index < productsArray.length; index++) {
       // Check if products price is less than remaining limit.
       if (productsArray[index].amountInUsd <= remainingLimit) {
-        if (oThis.os === InAppProductConstants.ios) {
+        if (oThis.os === inAppProductConstants.ios) {
           // If the os is ios, products with apple product id are only filtered.
           if (productsArray[index].appleProductId) {
             productsArray[index].id = productsArray[index].appleProductId;
             availableProductsArray.push(productsArray[index]);
           }
-        } else if (oThis.os === InAppProductConstants.android) {
+        } else if (oThis.os === inAppProductConstants.android) {
           // If the os is android, products with google product id are only filtered.
           if (productsArray[index].googleProductId) {
             productsArray[index].id = productsArray[index].googleProductId;

@@ -7,7 +7,7 @@ const rootPrefix = '../../..',
   apiName = require(rootPrefix + '/lib/globalConstant/apiName'),
   sanitizer = require(rootPrefix + '/helpers/sanitizer'),
   responseEntityKey = require(rootPrefix + '/lib/globalConstant/responseEntityKey'),
-  entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
+  entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
   cookieHelper = require(rootPrefix + '/lib/cookieHelper');
 
 /* Redemption products list.*/
@@ -34,7 +34,7 @@ router.post('/request', sanitizer.sanitizeDynamicUrlParams, function(req, res, n
     const wrapperFormatterRsp = await new FormatterComposer({
       resultType: responseEntityKey.redemption,
       entityKindToResponseKeyMap: {
-        [entityType.redemption]: responseEntityKey.redemption
+        [entityTypeConstants.redemption]: responseEntityKey.redemption
       },
       serviceData: serviceResponse.data
     }).perform();
@@ -55,7 +55,7 @@ router.get('/pepocorn-balance', sanitizer.sanitizeDynamicUrlParams, function(req
     const wrapperFormatterRsp = await new FormatterComposer({
       resultType: responseEntityKey.pepocornBalance,
       entityKindToResponseKeyMap: {
-        [entityType.pepocornBalance]: responseEntityKey.pepocornBalance
+        [entityTypeConstants.pepocornBalance]: responseEntityKey.pepocornBalance
       },
       serviceData: serviceResponse.data
     }).perform();

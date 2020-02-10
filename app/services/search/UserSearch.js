@@ -8,7 +8,7 @@ const rootPrefix = '../../..',
   CuratedEntityIdsByKindCache = require(rootPrefix + '/lib/cacheManagement/single/CuratedEntityIdsByKind'),
   basicHelper = require(rootPrefix + '/helpers/basic'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
-  entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
+  entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
   paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination'),
   curatedEntitiesConstants = require(rootPrefix + '/lib/globalConstant/curatedEntities');
 
@@ -302,7 +302,7 @@ class UserSearch extends ServiceBase {
     const oThis = this;
 
     const response = {
-      [entityType.userSearchList]: oThis.searchResults,
+      [entityTypeConstants.userSearchList]: oThis.searchResults,
       usersByIdMap: oThis.userDetails,
       tokenUsersByUserIdMap: oThis.tokenUsersByUserIdMap,
       imageMap: oThis.imageDetails,

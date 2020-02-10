@@ -2,7 +2,7 @@ const rootPrefix = '..',
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   configTemplate = require(rootPrefix + '/config/configStrategyTemplate'),
-  configStrategyConstants = require(rootPrefix + '/lib/globalConstant/configStrategy');
+  configStrategyConstants = require(rootPrefix + '/lib/globalConstant/config/configStrategy');
 
 /**
  * Class to validate config strategy.

@@ -2,11 +2,11 @@ const program = require('commander');
 
 const rootPrefix = '../..',
   RabbitMqProcessorBase = require(rootPrefix + '/executables/rabbitMqSubscribers/Base'),
-  rabbitMqProvider = require(rootPrefix + '/lib/providers/rabbitMq'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
-  cronProcessesConstants = require(rootPrefix + '/lib/globalConstant/cronProcesses'),
-  configStrategyConstants = require(rootPrefix + '/lib/globalConstant/configStrategy'),
-  machineKindConstant = require(rootPrefix + '/lib/globalConstant/machineKind');
+  rabbitMqProvider = require(rootPrefix + '/lib/providers/rabbitMq'),
+  machineKindConstants = require(rootPrefix + '/lib/globalConstant/machineKind'),
+  cronProcessesConstants = require(rootPrefix + '/lib/globalConstant/big/cronProcesses'),
+  configStrategyConstants = require(rootPrefix + '/lib/globalConstant/config/configStrategy');
 
 program.option('--cronProcessId <cronProcessId>', 'Cron table process ID').parse(process.argv);
 
@@ -25,7 +25,7 @@ if (!program.cronProcessId) {
 }
 
 /**
- * Class for pepoMobileEvent job processor.
+ * Class for pepo mobile event job processor.
  *
  * @class PepoMobileEventJobProcessor
  */
@@ -36,7 +36,7 @@ class PepoMobileEventJobProcessor extends RabbitMqProcessorBase {
    * @returns {string}
    */
   getRmqProvider() {
-    return rabbitMqProvider.getInstance(configStrategyConstants.pepoMobileEventRabbitmq, machineKindConstant.cronKind);
+    return rabbitMqProvider.getInstance(configStrategyConstants.pepoMobileEventRabbitmq, machineKindConstants.cronKind);
   }
 
   /**

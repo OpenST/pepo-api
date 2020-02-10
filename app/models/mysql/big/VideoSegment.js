@@ -2,9 +2,9 @@ const rootPrefix = '../../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   shortToLongUrl = require(rootPrefix + '/lib/shortToLongUrl'),
-  videoConstants = require(rootPrefix + '/lib/globalConstant/video'),
   s3Constants = require(rootPrefix + '/lib/globalConstant/s3'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
+  videoConstants = require(rootPrefix + '/lib/globalConstant/video'),
   databaseConstants = require(rootPrefix + '/lib/globalConstant/database');
 
 // Declare variables.
@@ -13,9 +13,9 @@ const dbName = databaseConstants.bigDbName;
 /**
  * Class for video segment model.
  *
- * @class VideoSegment
+ * @class VideoSegmentModel
  */
-class VideoSegment extends ModelBase {
+class VideoSegmentModel extends ModelBase {
   /**
    * Constructor for video segment model.
    *
@@ -116,8 +116,6 @@ class VideoSegment extends ModelBase {
    * @private
    */
   async _shortenS3Url(url) {
-    const oThis = this;
-
     const splitUrlArray = url.split('/'),
       fileName = splitUrlArray.pop(),
       baseUrl = splitUrlArray.join('/'),
@@ -137,4 +135,4 @@ class VideoSegment extends ModelBase {
   }
 }
 
-module.exports = VideoSegment;
+module.exports = VideoSegmentModel;

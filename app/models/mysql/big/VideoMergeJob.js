@@ -3,7 +3,7 @@ const rootPrefix = '../../../..',
   databaseConstants = require(rootPrefix + '/lib/globalConstant/database'),
   shortToLongUrl = require(rootPrefix + '/lib/shortToLongUrl'),
   videoConstants = require(rootPrefix + '/lib/globalConstant/video'),
-  videoMergeJobConstants = require(rootPrefix + '/lib/globalConstant/videoMergeJob');
+  videoMergeJobConstants = require(rootPrefix + '/lib/globalConstant/big/videoMergeJob');
 
 // Declare variables.
 const dbName = databaseConstants.bigDbName;
@@ -11,9 +11,9 @@ const dbName = databaseConstants.bigDbName;
 /**
  * Class for video merge job model.
  *
- * @class VideoMergeJob
+ * @class VideoMergeJobModel
  */
-class VideoMergeJob extends ModelBase {
+class VideoMergeJobModel extends ModelBase {
   /**
    * Constructor for video merge job model.
    *
@@ -71,7 +71,7 @@ class VideoMergeJob extends ModelBase {
       .where(['id = ?', jobId])
       .fire();
 
-    await VideoMergeJob.flushCache({ ids: [jobId] });
+    await VideoMergeJobModel.flushCache({ ids: [jobId] });
   }
 
   /**
@@ -119,7 +119,7 @@ class VideoMergeJob extends ModelBase {
       })
       .fire();
 
-    await VideoMergeJob.flushCache({ ids: [resp.insertId] });
+    await VideoMergeJobModel.flushCache({ ids: [resp.insertId] });
 
     return resp;
   }
@@ -144,4 +144,4 @@ class VideoMergeJob extends ModelBase {
   }
 }
 
-module.exports = VideoMergeJob;
+module.exports = VideoMergeJobModel;

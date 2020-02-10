@@ -1,5 +1,5 @@
 const rootPrefix = '..',
-  configStrategyConstants = require(rootPrefix + '/lib/globalConstant/configStrategy');
+  configStrategyConstants = require(rootPrefix + '/lib/globalConstant/config/configStrategy');
 
 /**
  * Class for config strategy template.

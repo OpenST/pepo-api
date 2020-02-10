@@ -447,6 +447,12 @@ const v1ErrorConfig = {
     message: 'Endpoint uuid is invalid.'
   },
 
+  invalid_channel_id: {
+    parameter: 'channel_id',
+    code: 'invalid',
+    message: 'Channel does not exist.'
+  },
+
   missing_video_url: {
     parameter: 'video_url',
     code: 'missing',

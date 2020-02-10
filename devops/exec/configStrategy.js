@@ -1,11 +1,11 @@
 const rootPrefix = '../..',
+  GlobalSaltModel = require(rootPrefix + '/app/models/mysql/big/GlobalSalt'),
+  ConfigStrategyModel = require(rootPrefix + '/app/models/mysql/config/ConfigStrategy'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   kmsPurposeConstants = require(rootPrefix + '/lib/globalConstant/kms'),
-  globalSaltModel = require(rootPrefix + '/app/models/mysql/GlobalSalt'),
-  globalSaltConstant = require(rootPrefix + '/lib/globalConstant/globalSalt'),
-  ConfigStrategyModel = require(rootPrefix + '/app/models/mysql/ConfigStrategy'),
-  configStrategyConstant = require(rootPrefix + '/lib/globalConstant/configStrategy');
+  globalSaltConstants = require(rootPrefix + '/lib/globalConstant/big/globalSalt'),
+  configStrategyConstants = require(rootPrefix + '/lib/globalConstant/config/configStrategy');
 
 const command = require('commander'),
   path = require('path'),
@@ -38,9 +38,9 @@ const Main = async function() {
 
   if (command.addConfigs) {
     if (!command.kind) {
-      await new globalSaltModel().createEncryptionSalt(
+      await new GlobalSaltModel().createEncryptionSalt(
         kmsPurposeConstants.configStrategyEncryptionPurpose,
-        globalSaltConstant.configStrategyKind
+        globalSaltConstants.configStrategyKind
       );
     }
     await _addConfig(oThis.config);
@@ -137,7 +137,7 @@ const _activate = async function(kind) {
  * @private
  */
 const _validateKind = async function(kind) {
-  if (configStrategyConstant.mandatoryKinds[kind] !== 1) {
+  if (configStrategyConstants.mandatoryKinds[kind] !== 1) {
     return Promise.reject(
       responseHelper.error({
         internal_error_identifier: 'd_e_cs_1',

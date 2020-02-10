@@ -5,7 +5,7 @@ const rootPrefix = '../../..',
   InviteCodeCache = require(rootPrefix + '/lib/cacheManagement/single/InviteCodeByCode'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   gotoFactory = require(rootPrefix + '/lib/goTo/factory'),
-  entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
+  entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
   gotoConstants = require(rootPrefix + '/lib/globalConstant/goto'),
   UserIdentifiersByEmailsCache = require(rootPrefix + '/lib/cacheManagement/multi/UserIdentifiersByEmails'),
   UserModel = require(rootPrefix + '/app/models/mysql/User'),
@@ -161,7 +161,7 @@ class SocialConnectBase extends ServiceBase {
       if (CommonValidators.validateNonEmptyObject(userUniqueElements)) {
         // Email which can be set for user.
         oThis.userEmailToSet = userUniqueElements.values[0];
-        
+
         const userIdentifiersByEmailsCacheRsp = await new UserIdentifiersByEmailsCache({
           emails: userUniqueElements.values
         }).fetch();
@@ -444,9 +444,9 @@ class SocialConnectBase extends ServiceBase {
     const oThis = this;
 
     if (response.isSuccess()) {
-      response.data[entityType.goto] = { pn: null, v: null };
+      response.data[entityTypeConstants.goto] = { pn: null, v: null };
       if (response.data.openEmailAddFlow) {
-        response.data[entityType.goto] = gotoFactory.gotoFor(gotoConstants.addEmailScreenGotoKind);
+        response.data[entityTypeConstants.goto] = gotoFactory.gotoFor(gotoConstants.addEmailScreenGotoKind);
       }
     }
 

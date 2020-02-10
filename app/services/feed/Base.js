@@ -49,6 +49,7 @@ class FeedBase extends ServiceBase {
       tags: {},
       userStat: {},
       videoDetailsMap: {},
+      channelsMap: {},
       videoDescriptionMap: {},
       currentUserUserContributionsMap: {},
       currentUserVideoContributionsMap: {},

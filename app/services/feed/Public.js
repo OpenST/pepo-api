@@ -145,6 +145,7 @@ class PublicVideoFeed extends FeedBase {
       tags: oThis.profileResponse.tags,
       userStat: oThis.profileResponse.userStat,
       videoDetailsMap: oThis.profileResponse.videoDetailsMap,
+      channelsMap: oThis.profileResponse.channelsMap,
       videoDescriptionsMap: oThis.profileResponse.videoDescriptionMap,
       currentUserUserContributionsMap: oThis.profileResponse.currentUserUserContributionsMap,
       currentUserVideoContributionsMap: oThis.profileResponse.currentUserVideoContributionsMap,

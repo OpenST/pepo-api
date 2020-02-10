@@ -6,7 +6,7 @@ const rootPrefix = '../../..',
   routeHelper = require(rootPrefix + '/routes/helper'),
   sanitizer = require(rootPrefix + '/helpers/sanitizer'),
   apiName = require(rootPrefix + '/lib/globalConstant/apiName'),
-  entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
+  entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
   responseEntityKey = require(rootPrefix + '/lib/globalConstant/responseEntityKey');
 
 /* Invited users list. */
@@ -17,10 +17,10 @@ router.get('/', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
     const wrapperFormatterRsp = await new FormatterComposer({
       resultType: responseEntityKey.invitedUsers,
       entityKindToResponseKeyMap: {
-        [entityType.userSearchList]: responseEntityKey.invitedUsers,
-        [entityType.imagesMap]: responseEntityKey.images,
-        [entityType.usersMap]: responseEntityKey.users,
-        [entityType.invitedUsersListMeta]: responseEntityKey.meta
+        [entityTypeConstants.userSearchList]: responseEntityKey.invitedUsers,
+        [entityTypeConstants.imagesMap]: responseEntityKey.images,
+        [entityTypeConstants.usersMap]: responseEntityKey.users,
+        [entityTypeConstants.invitedUsersListMeta]: responseEntityKey.meta
       },
       serviceData: serviceResponse.data
     }).perform();
@@ -39,8 +39,8 @@ router.get('/code', sanitizer.sanitizeDynamicUrlParams, function(req, res, next)
     const wrapperFormatterRsp = await new FormatterComposer({
       resultType: responseEntityKey.inviteDetails,
       entityKindToResponseKeyMap: {
-        [entityType.inviteCode]: responseEntityKey.inviteDetails,
-        [entityType.share]: responseEntityKey.share
+        [entityTypeConstants.inviteCode]: responseEntityKey.inviteDetails,
+        [entityTypeConstants.share]: responseEntityKey.share
       },
       serviceData: serviceResponse.data
     }).perform();

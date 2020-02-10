@@ -122,6 +122,13 @@ const mysqlConfig = {
         user: coreConstants.WEBHOOK_DB_MYSQL_USER,
         password: coreConstants.WEBHOOK_DB_MYSQL_PASSWORD
       }
+    },
+    channelDbCluster: {
+      master: {
+        host: coreConstants.CHANNEL_DB_MYSQL_HOST,
+        user: coreConstants.CHANNEL_DB_MYSQL_USER,
+        password: coreConstants.CHANNEL_DB_MYSQL_PASSWORD
+      }
     }
   },
   databases: {}
@@ -171,5 +178,8 @@ mysqlConfig.databases[database.infraDbName] = ['infraDbCluster'];
 
 //webhook db
 mysqlConfig.databases[database.webhookDbName] = ['webhookDbCluster'];
+
+// Channel db
+mysqlConfig.databases[database.channelDbName] = ['channelDbCluster'];
 
 module.exports = mysqlConfig;

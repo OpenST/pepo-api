@@ -2,8 +2,10 @@ const rootPrefix = '../../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   UserCache = require(rootPrefix + '/lib/cacheManagement/multi/User'),
   TagByIdCache = require(rootPrefix + '/lib/cacheManagement/multi/Tag'),
+  ChannelByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelByIds'),
   TokenUserDetailByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TokenUserByUserIds'),
   CuratedEntityIdsByKindCache = require(rootPrefix + '/lib/cacheManagement/single/CuratedEntityIdsByKind'),
+  ChannelTagByChannelIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelTagByChannelIds'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   userConstants = require(rootPrefix + '/lib/globalConstant/user'),
   adminEntityType = require(rootPrefix + '/lib/globalConstant/adminEntityType'),
@@ -40,6 +42,8 @@ class GetCuratedList extends ServiceBase {
     oThis.userByUserIdMap = {};
     oThis.tokenUsersByUserIdMap = {};
     oThis.tagsMap = {};
+    oThis.channels = {};
+    oThis.channelIdToTagIdsMap = {};
   }
 
   /**
@@ -118,8 +122,11 @@ class GetCuratedList extends ServiceBase {
       const promisesArray = [oThis._fetchUsers(), oThis._fetchTokenUsers()];
       await Promise.all(promisesArray);
       oThis._filterNonActiveUsers();
-    } else {
+    } else if (oThis.entityKind === curatedEntitiesConstants.tagsEntityKind) {
       await oThis._fetchTags();
+    } else {
+      const promisesArray1 = [oThis._fetchChannels(), oThis._fetchChannelTagIds()];
+      await Promise.all(promisesArray1);
     }
   }
 
@@ -224,6 +231,49 @@ class GetCuratedList extends ServiceBase {
   }
 
   /**
+   * Fetch Channels details.
+   *
+   * @sets oThis.channels
+   *
+   * @returns {Promise<never>}
+   * @private
+   */
+  async _fetchChannels() {
+    const oThis = this;
+
+    const cacheRsp = await new ChannelByIdsCache({ ids: oThis.curatedEntityIds }).fetch();
+    if (!cacheRsp || cacheRsp.isFailure()) {
+      return Promise.reject(cacheRsp);
+    }
+
+    oThis.channels = cacheRsp.data;
+  }
+
+  /**
+   * Fetch channel tag ids.
+   *
+   * @sets oThis.channelIdToTagIdsMap
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _fetchChannelTagIds() {
+    const oThis = this;
+
+    const cacheResponse = await new ChannelTagByChannelIdsCache({ channelIds: oThis.curatedEntityIds }).fetch();
+    if (cacheResponse.isFailure()) {
+      return Promise.reject(cacheResponse);
+    }
+
+    const channelTagByChannelIdsCacheCacheData = cacheResponse.data;
+
+    for (const channelId in channelTagByChannelIdsCacheCacheData) {
+      const channelTags = channelTagByChannelIdsCacheCacheData[channelId];
+      oThis.channelIdToTagIdsMap[channelId] = channelTags;
+    }
+  }
+
+  /**
    * Prepare final response.
    *
    * @returns {*}
@@ -232,7 +282,7 @@ class GetCuratedList extends ServiceBase {
     const oThis = this;
 
     for (let index = 0; index < oThis.curatedEntityIds.length; index++) {
-      let curatedEntityId = oThis.curatedEntityIds[index];
+      const curatedEntityId = oThis.curatedEntityIds[index];
       oThis.curatedEntityList.push(oThis.curatedEntityDetails[curatedEntityId]);
     }
 
@@ -242,12 +292,19 @@ class GetCuratedList extends ServiceBase {
         usersByIdMap: oThis.userByUserIdMap,
         tokenUsersByUserIdMap: oThis.tokenUsersByUserIdMap
       };
-    } else {
+    } else if (oThis.entityKind === curatedEntitiesConstants.tagsEntityKind) {
       return {
         [adminEntityType.tagsCuratedEntitiesList]: oThis.curatedEntityList,
         tags: oThis.tagsMap
       };
     }
+
+    return {
+      [adminEntityType.channelsCuratedEntitiesList]: oThis.curatedEntityList,
+      [adminEntityType.channelsMap]: oThis.channels,
+      [adminEntityType.channelDetailsMap]: oThis.channels,
+      [adminEntityType.channelIdToTagIdsMap]: oThis.channelIdToTagIdsMap
+    };
   }
 }
 

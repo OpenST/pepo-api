@@ -13,13 +13,13 @@ const rootPrefix = '../../..',
   apiName = require(rootPrefix + '/lib/globalConstant/apiName'),
   coreConstants = require(rootPrefix + '/config/coreConstants'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
-  adminConstants = require(rootPrefix + '/lib/globalConstant/admin'),
-  adminEntityType = require(rootPrefix + '/lib/globalConstant/adminEntityType'),
   apiVersions = require(rootPrefix + '/lib/globalConstant/apiVersions'),
+  adminConstants = require(rootPrefix + '/lib/globalConstant/admin/admin'),
+  adminEntityType = require(rootPrefix + '/lib/globalConstant/adminEntityType'),
   adminPreLaunchRoutes = require(rootPrefix + '/routes/api/admin/preLaunch/index'),
-  adminUpdateUsageDataRoutes = require(rootPrefix + '/routes/api/admin/updateUsageData/index'),
+  adminResponseEntityKey = require(rootPrefix + '/lib/globalConstant/adminResponseEntity'),
   curatedEntitiesDataRoutes = require(rootPrefix + '/routes/api/admin/curatedEntity/index'),
-  adminResponseEntityKey = require(rootPrefix + '/lib/globalConstant/adminResponseEntity');
+  adminUpdateUsageDataRoutes = require(rootPrefix + '/routes/api/admin/updateUsageData/index');
 
 // Declare variables.
 const errorConfig = basicHelper.fetchErrorConfig(apiVersions.admin);
@@ -119,6 +119,34 @@ router.get('/users', sanitizer.sanitizeDynamicUrlParams, function(req, res, next
   };
 
   Promise.resolve(routeHelper.perform(req, res, next, '/admin/UserSearch', 'r_a_v1_ad_2', null, dataFormatterFunc));
+});
+
+/* Search channels. */
+router.get('/channels', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.adminChannelSearch;
+
+  const dataFormatterFunc = async function(serviceResponse) {
+    const wrapperFormatterRsp = await new AdminFormatterComposer({
+      resultType: adminResponseEntityKey.channelSearchResults,
+      entityKindToResponseKeyMap: {
+        [adminEntityType.channelSearchList]: adminResponseEntityKey.channelSearchResults,
+        [adminEntityType.channelsMap]: adminResponseEntityKey.channels,
+        [adminEntityType.channelDetailsMap]: adminResponseEntityKey.channelDetails,
+        [adminEntityType.channelStatsMap]: adminResponseEntityKey.channelStats,
+        [adminEntityType.currentUserChannelRelationsMap]: adminResponseEntityKey.currentUserChannelRelations,
+        [adminEntityType.tagsMap]: adminResponseEntityKey.tags,
+        [adminEntityType.imagesMap]: adminResponseEntityKey.images,
+        [adminEntityType.linksMap]: adminResponseEntityKey.links,
+        [adminEntityType.textsMap]: adminResponseEntityKey.texts,
+        [adminEntityType.channelListMeta]: adminResponseEntityKey.meta
+      },
+      serviceData: serviceResponse.data
+    }).perform();
+
+    serviceResponse.data = wrapperFormatterRsp.data;
+  };
+
+  Promise.resolve(routeHelper.perform(req, res, next, '/admin/ChannelSearch', 'r_a_v1_ad_22', null, dataFormatterFunc));
 });
 
 /* Approve user as creator */
@@ -389,6 +417,14 @@ router.post('/users/:user_id/send-resubmission-email', sanitizer.sanitizeDynamic
   Promise.resolve(
     routeHelper.perform(req, res, next, '/admin/SendEmailForReSubmission', 'r_a_v1_ad_20', null, null, null)
   );
+});
+
+/* Block user from channel. */
+router.post('/channels/:channel_id/block-user', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.adminUserBlockInChannel;
+  req.decodedParams.channel_id = req.params.channel_id;
+
+  Promise.resolve(routeHelper.perform(req, res, next, '/admin/BlockUserInChannel', 'r_a_v1_ad_21', null, null, null));
 });
 
 router.use('/pre-launch', adminPreLaunchRoutes);

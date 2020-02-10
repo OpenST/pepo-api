@@ -3,6 +3,7 @@ const rootPrefix = '../../..',
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   UserMultiCache = require(rootPrefix + '/lib/cacheManagement/multi/User'),
   VideoByIdCache = require(rootPrefix + '/lib/cacheManagement/multi/VideoByIds'),
+  ChannelByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelByIds'),
   SendTransactionalMail = require(rootPrefix + '/lib/email/hookCreator/SendTransactionalMail'),
   ReplyDetailsByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/ReplyDetailsByIds'),
   VideoDetailsByVideoIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/VideoDetailsByVideoIds'),
@@ -13,8 +14,9 @@ const rootPrefix = '../../..',
   videoConstants = require(rootPrefix + '/lib/globalConstant/video'),
   emailConstants = require(rootPrefix + '/lib/globalConstant/email'),
   replyDetailConstants = require(rootPrefix + '/lib/globalConstant/replyDetail'),
+  channelConstants = require(rootPrefix + '/lib/globalConstant/channel/channels'),
   reportEntityConstants = require(rootPrefix + '/lib/globalConstant/reportEntity'),
-  emailServiceApiCallHookConstants = require(rootPrefix + '/lib/globalConstant/emailServiceApiCallHook');
+  emailServiceApiCallHookConstants = require(rootPrefix + '/lib/globalConstant/big/emailServiceApiCallHook');
 
 /**
  * Class to report for an entity.
@@ -46,6 +48,7 @@ class ReportForEntity extends ServiceBase {
     oThis.videoUrl = null;
     oThis.parentVideoUrl = null;
     oThis.reportedUserObj = null;
+    oThis.channel = null;
     oThis.templateVars = {};
   }
 
@@ -102,9 +105,9 @@ class ReportForEntity extends ServiceBase {
           report_entity_id: oThis.reportEntityId,
           reporter_user_name: oThis.currentUser.name,
           reporter_user_id: oThis.currentUser.id,
-          reportee_user_name: oThis.reportedUserObj.name, // reply creator's name
-          reportee_user_id: oThis.reportedUserObj.id, // reply creator's user id
-          parent_video_url: encodeURIComponent(oThis.parentVideoUrl), // parent video url for this reply
+          reportee_user_name: oThis.reportedUserObj.name, // Reply creator's name.
+          reportee_user_id: oThis.reportedUserObj.id, // Reply creator's user id.
+          parent_video_url: encodeURIComponent(oThis.parentVideoUrl), // Parent video url for this reply.
           video_url: encodeURIComponent(oThis.videoUrl),
           user_admin_url_prefix: basicHelper.userProfilePrefixUrl()
         };
@@ -121,6 +124,22 @@ class ReportForEntity extends ServiceBase {
           reporter_user_id: oThis.currentUser.id,
           reportee_user_name: oThis.reportedUserObj.name,
           reportee_user_id: oThis.reportedUserObj.id,
+          user_admin_url_prefix: basicHelper.userProfilePrefixUrl()
+        };
+
+        break;
+      }
+      case reportEntityConstants.channelReportEntityKind: {
+        await oThis._fetchChannel();
+        const channelUrl = basicHelper.communitiesPrefixUrl() + '/' + oThis.channel.permalink;
+
+        oThis.templateVars = {
+          report_entity_kind: oThis.reportEntityKind,
+          report_entity_id: oThis.reportEntityId,
+          reporter_user_name: oThis.currentUser.name,
+          reporter_user_id: oThis.currentUser.id,
+          reported_channel_name: oThis.channel.name,
+          channel_url: channelUrl,
           user_admin_url_prefix: basicHelper.userProfilePrefixUrl()
         };
 
@@ -303,6 +322,40 @@ class ReportForEntity extends ServiceBase {
     }
 
     return userMultiCacheRsp.data[userId];
+  }
+
+  /**
+   * Fetch and validate channel.
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _fetchChannel() {
+    const oThis = this;
+
+    const cacheResponse = await new ChannelByIdsCache({ ids: [oThis.reportEntityId] }).fetch();
+    if (cacheResponse.isFailure()) {
+      return Promise.reject(cacheResponse);
+    }
+
+    oThis.channel = cacheResponse.data[oThis.reportEntityId];
+
+    if (
+      !CommonValidators.validateNonEmptyObject(oThis.channel) ||
+      oThis.channel.status !== channelConstants.activeStatus
+    ) {
+      return Promise.reject(
+        responseHelper.paramValidationError({
+          internal_error_identifier: 'a_s_c_u_j_fc_1',
+          api_error_identifier: 'resource_not_found',
+          params_error_identifiers: ['invalid_channel_id'],
+          debug_options: {
+            channelId: oThis.reportEntityId,
+            channelDetails: oThis.channel
+          }
+        })
+      );
+    }
   }
 
   /**

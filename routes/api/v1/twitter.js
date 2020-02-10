@@ -6,7 +6,7 @@ const rootPrefix = '../../..',
   routeHelper = require(rootPrefix + '/routes/helper'),
   sanitizer = require(rootPrefix + '/helpers/sanitizer'),
   apiName = require(rootPrefix + '/lib/globalConstant/apiName'),
-  entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
+  entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
   cookieHelper = require(rootPrefix + '/lib/cookieHelper'),
   responseEntityKey = require(rootPrefix + '/lib/globalConstant/responseEntityKey');
 
@@ -30,11 +30,11 @@ router.get('/tweet-info', sanitizer.sanitizeDynamicUrlParams, function(req, res,
     const wrapperFormatterRsp = await new FormatterComposer({
       resultType: responseEntityKey.loggedInUser,
       entityKindToResponseKeyMap: {
-        [entityType.loggedInUser]: responseEntityKey.loggedInUser,
-        [entityType.pricePointsMap]: responseEntityKey.pricePoints,
-        [entityType.usersMap]: responseEntityKey.users,
-        [entityType.token]: responseEntityKey.token,
-        [entityType.twitterUsersMap]: responseEntityKey.twitterUsers
+        [entityTypeConstants.loggedInUser]: responseEntityKey.loggedInUser,
+        [entityTypeConstants.pricePointsMap]: responseEntityKey.pricePoints,
+        [entityTypeConstants.usersMap]: responseEntityKey.users,
+        [entityTypeConstants.token]: responseEntityKey.token,
+        [entityTypeConstants.twitterUsersMap]: responseEntityKey.twitterUsers
       },
       serviceData: serviceResponse.data
     }).perform();

@@ -1,8 +1,8 @@
 const rootPrefix = '../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
-  databaseConstants = require(rootPrefix + '/lib/globalConstant/database'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
+  databaseConstants = require(rootPrefix + '/lib/globalConstant/database'),
   createErrorLogsEntry = require(rootPrefix + '/lib/errorLogs/createEntry'),
   errorLogsConstants = require(rootPrefix + '/lib/globalConstant/errorLogs'),
   curatedEntitiesConstants = require(rootPrefix + '/lib/globalConstant/curatedEntities');
@@ -118,7 +118,7 @@ class CuratedEntity extends ModelBase {
         position: newPosition
       })
       .fire()
-      .then(async function(insertRsp) {
+      .then(async function() {
         await CuratedEntity.flushCache({ entityKind: entityKind });
       })
       .catch(async function(err) {
@@ -167,7 +167,7 @@ class CuratedEntity extends ModelBase {
         entity_kind: entityKindInt
       })
       .fire()
-      .then(async function(updateRsp) {
+      .then(async function() {
         await CuratedEntity.flushCache({ entityKind: entityKind });
       })
       .catch(async function(err) {

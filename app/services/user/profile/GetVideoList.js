@@ -6,7 +6,7 @@ const rootPrefix = '../../../..',
   UserBlockedListCache = require(rootPrefix + '/lib/cacheManagement/single/UserBlockedList'),
   VideoDetailsByUserIdCache = require(rootPrefix + '/lib/cacheManagement/single/VideoDetailsByUserIdPagination'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
-  entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
+  entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
   paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination');
 
 /**
@@ -255,22 +255,23 @@ class GetVideoList extends ServiceBase {
     const oThis = this;
 
     return responseHelper.successWithData({
-      [entityType.userVideoList]: oThis.videoDetails,
+      [entityTypeConstants.userVideoList]: oThis.videoDetails,
       usersByIdMap: oThis.usersVideosMap.usersByIdMap,
       userStat: oThis.usersVideosMap.userStat,
-      [entityType.userProfilesMap]: oThis.usersVideosMap.userProfilesMap,
+      [entityTypeConstants.userProfilesMap]: oThis.usersVideosMap.userProfilesMap,
       tags: oThis.usersVideosMap.tags,
       linkMap: oThis.usersVideosMap.linkMap,
       imageMap: oThis.usersVideosMap.imageMap,
       videoMap: oThis.usersVideosMap.videoMap,
-      [entityType.videoDetailsMap]: oThis.usersVideosMap.videoDetailsMap,
-      [entityType.videoDescriptionsMap]: oThis.usersVideosMap.videoDescriptionMap,
-      [entityType.currentUserUserContributionsMap]: oThis.usersVideosMap.currentUserUserContributionsMap,
-      [entityType.currentUserVideoContributionsMap]: oThis.usersVideosMap.currentUserVideoContributionsMap,
-      [entityType.userProfileAllowedActions]: oThis.usersVideosMap.userProfileAllowedActions,
-      [entityType.currentUserVideoRelationsMap]: oThis.usersVideosMap.currentUserVideoRelationsMap,
+      [entityTypeConstants.videoDetailsMap]: oThis.usersVideosMap.videoDetailsMap,
+      [entityTypeConstants.channelsMap]: oThis.usersVideosMap.channelsMap,
+      [entityTypeConstants.videoDescriptionsMap]: oThis.usersVideosMap.videoDescriptionMap,
+      [entityTypeConstants.currentUserUserContributionsMap]: oThis.usersVideosMap.currentUserUserContributionsMap,
+      [entityTypeConstants.currentUserVideoContributionsMap]: oThis.usersVideosMap.currentUserVideoContributionsMap,
+      [entityTypeConstants.userProfileAllowedActions]: oThis.usersVideosMap.userProfileAllowedActions,
+      [entityTypeConstants.currentUserVideoRelationsMap]: oThis.usersVideosMap.currentUserVideoRelationsMap,
       tokenUsersByUserIdMap: oThis.usersVideosMap.tokenUsersByUserIdMap,
-      [entityType.pricePointsMap]: oThis.usersVideosMap.pricePointsMap,
+      [entityTypeConstants.pricePointsMap]: oThis.usersVideosMap.pricePointsMap,
       tokenDetails: oThis.tokenDetails,
       meta: oThis.responseMetaData
     });

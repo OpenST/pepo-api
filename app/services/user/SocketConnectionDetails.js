@@ -1,7 +1,7 @@
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   SecureUserCache = require(rootPrefix + '/lib/cacheManagement/single/SecureUser'),
-  UserSocketConnectionDetailsModel = require(rootPrefix + '/app/models/mysql/UserSocketConnectionDetails'),
+  UserSocketConnectionDetailsModel = require(rootPrefix + '/app/models/mysql/socket/UserSocketConnectionDetails'),
   UserSocketConnectionDetailsCache = require(rootPrefix + '/lib/cacheManagement/multi/UserSocketConDetailsByUserIds'),
   util = require(rootPrefix + '/lib/util'),
   basicHelper = require(rootPrefix + '/helpers/basic'),
@@ -9,8 +9,8 @@ const rootPrefix = '../../..',
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   localCipher = require(rootPrefix + '/lib/encryptors/localCipher'),
   configStrategyProvider = require(rootPrefix + '/lib/providers/configStrategy'),
-  configStrategyConstants = require(rootPrefix + '/lib/globalConstant/configStrategy'),
-  socketConnectionConstants = require(rootPrefix + '/lib/globalConstant/socketConnection');
+  configStrategyConstants = require(rootPrefix + '/lib/globalConstant/config/configStrategy'),
+  socketConnectionConstants = require(rootPrefix + '/lib/globalConstant/socket/socketConnection');
 
 /**
  * Class to get socket connection details.

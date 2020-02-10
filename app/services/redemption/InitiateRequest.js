@@ -6,8 +6,8 @@ const rootPrefix = '../../..',
   UserModel = require(rootPrefix + '/app/models/mysql/User'),
   UserMultiCache = require(rootPrefix + '/lib/cacheManagement/multi/User'),
   GetPepocornBalance = require(rootPrefix + '/lib/pepocorn/GetPepocornBalance'),
-  PepocornBalanceModel = require(rootPrefix + '/app/models/mysql/PepocornBalance'),
-  PepocornTransactionsModel = require(rootPrefix + '/app/models/mysql/PepocornTransaction'),
+  PepocornBalanceModel = require(rootPrefix + '/app/models/mysql/redemption/PepocornBalance'),
+  PepocornTransactionModel = require(rootPrefix + '/app/models/mysql/redemption/PepocornTransaction'),
   TwitterUserByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TwitterUserByIds'),
   TokenUserByUserIdCache = require(rootPrefix + '/lib/cacheManagement/multi/TokenUserByUserIds'),
   RedemptionProductsCache = require(rootPrefix + '/lib/cacheManagement/single/RedemptionProducts'),
@@ -19,9 +19,9 @@ const rootPrefix = '../../..',
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   emailConstants = require(rootPrefix + '/lib/globalConstant/email'),
   bgJobConstants = require(rootPrefix + '/lib/globalConstant/bgJob'),
-  redemptionConstants = require(rootPrefix + '/lib/globalConstant/redemption'),
+  redemptionConstants = require(rootPrefix + '/lib/globalConstant/redemption/redemption'),
   pepocornTransactionConstants = require(rootPrefix + '/lib/globalConstant/redemption/pepocornTransaction'),
-  emailServiceApiCallHookConstants = require(rootPrefix + '/lib/globalConstant/emailServiceApiCallHook');
+  emailServiceApiCallHookConstants = require(rootPrefix + '/lib/globalConstant/big/emailServiceApiCallHook');
 
 /**
  * Class to request redemption for user.
@@ -380,7 +380,7 @@ class InitiateRequestRedemption extends ServiceBase {
         })
       );
     }
-    await PepocornBalanceModel.flushCache({ userId: oThis.currentUserId });
+    await PepocornBalanceModel.flushCache({ userIds: [oThis.currentUserId] });
   }
 
   /**
@@ -392,7 +392,7 @@ class InitiateRequestRedemption extends ServiceBase {
   async _insertPepocornTransactions() {
     const oThis = this;
 
-    await new PepocornTransactionsModel({})
+    await new PepocornTransactionModel({})
       .insert({
         user_id: oThis.currentUserId,
         kind: pepocornTransactionConstants.invertedKinds[pepocornTransactionConstants.debitKind],

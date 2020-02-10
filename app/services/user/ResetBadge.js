@@ -68,14 +68,14 @@ class ResetBadge extends ServiceBase {
   /**
    * Resets unread notifications counts to zero.
    *
-   * @returns {Promise<void>}
+   * @returns {Promise<*>}
    * @private
    */
   async _resetUnreadNotificationsCount() {
     const oThis = this;
 
-    //NOTE: Optimization- Try delete row for resetting the data
-    let queryRsp = await new UserNotificationCountModel().fetchUnreadNotificationCount({
+    // NOTE: Optimization- Try delete row for resetting the data.
+    const queryRsp = await new UserNotificationCountModel().fetchUnreadNotificationCount({
       userIds: [oThis.currentUserId]
     });
 
@@ -86,6 +86,7 @@ class ResetBadge extends ServiceBase {
 
     if (!queryRsp[oThis.currentUserId]) {
       logger.win('NO USER NOTIFICATION ROW FOUND FOR =>', oThis.currentUserId);
+
       return responseHelper.successWithData({});
     }
 

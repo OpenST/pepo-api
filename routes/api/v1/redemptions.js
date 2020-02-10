@@ -6,7 +6,7 @@ const rootPrefix = '../../..',
   routeHelper = require(rootPrefix + '/routes/helper'),
   sanitizer = require(rootPrefix + '/helpers/sanitizer'),
   apiName = require(rootPrefix + '/lib/globalConstant/apiName'),
-  entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
+  entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
   responseEntityKey = require(rootPrefix + '/lib/globalConstant/responseEntityKey');
 
 // Get the products url.
@@ -22,7 +22,7 @@ router.get('/info', sanitizer.sanitizeDynamicUrlParams, function(req, res, next)
     const wrapperFormatterRsp = await new FormatterComposer({
       resultType: responseEntityKey.redemptionInfo,
       entityKindToResponseKeyMap: {
-        [entityType.redemptionInfo]: responseEntityKey.redemptionInfo
+        [entityTypeConstants.redemptionInfo]: responseEntityKey.redemptionInfo
       },
       serviceData: serviceResponse.data
     }).perform();
@@ -47,7 +47,7 @@ router.get('/webview-url', sanitizer.sanitizeDynamicUrlParams, function(req, res
     const wrapperFormatterRsp = await new FormatterComposer({
       resultType: responseEntityKey.redemptionInfo,
       entityKindToResponseKeyMap: {
-        [entityType.redemptionInfo]: responseEntityKey.redemptionInfo
+        [entityTypeConstants.redemptionInfo]: responseEntityKey.redemptionInfo
       },
       serviceData: serviceResponse.data
     }).perform();

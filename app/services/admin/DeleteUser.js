@@ -3,9 +3,9 @@ const rootPrefix = '../../..',
   UserModel = require(rootPrefix + '/app/models/mysql/User'),
   TagModel = require(rootPrefix + '/app/models/mysql/Tag'),
   UsersCache = require(rootPrefix + '/lib/cacheManagement/multi/User'),
-  CuratedEntityDeleteService = require(rootPrefix + '/app/services/admin/curated/Delete'),
   TwitterDisconnect = require(rootPrefix + '/app/services/disconnect/Twitter'),
-  AdminActivityLogModel = require(rootPrefix + '/app/models/mysql/AdminActivityLog'),
+  CuratedEntityDeleteService = require(rootPrefix + '/app/services/admin/curated/Delete'),
+  AdminActivityLogModel = require(rootPrefix + '/app/models/mysql/admin/AdminActivityLog'),
   UserTagsCacheKlass = require(rootPrefix + '/lib/cacheManagement/multi/UserTagsByUserIds'),
   RemoveContactInPepoCampaign = require(rootPrefix + '/lib/email/hookCreator/RemoveContact'),
   bgJob = require(rootPrefix + '/lib/rabbitMqEnqueue/bgJob'),
@@ -14,8 +14,8 @@ const rootPrefix = '../../..',
   bgJobConstants = require(rootPrefix + '/lib/globalConstant/bgJob'),
   userTagConstants = require(rootPrefix + '/lib/globalConstant/userTag'),
   curatedEntitiesConstants = require(rootPrefix + '/lib/globalConstant/curatedEntities'),
-  adminActivityLogConstants = require(rootPrefix + '/lib/globalConstant/adminActivityLogs'),
-  emailServiceApiCallHookConstants = require(rootPrefix + '/lib/globalConstant/emailServiceApiCallHook');
+  adminActivityLogConstants = require(rootPrefix + '/lib/globalConstant/admin/adminActivityLogs'),
+  emailServiceApiCallHookConstants = require(rootPrefix + '/lib/globalConstant/big/emailServiceApiCallHook');
 
 /**
  * Class to delete users by admin.
@@ -265,6 +265,12 @@ class DeleteUser extends ServiceBase {
     for (let index = 0; index < oThis.userIdsLength; index++) {
       const userId = oThis.userIds[index];
 
+      promisesArray.push(
+        bgJob.enqueue(bgJobConstants.deleteUserJobTopic, {
+          userId: oThis.userIds[index],
+          currentAdminId: oThis.currentAdminId
+        })
+      );
       promisesArray.push(
         bgJob.enqueue(bgJobConstants.deleteUserVideosJobTopic, {
           userId: userId,

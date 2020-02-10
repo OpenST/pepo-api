@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "b4c71d50-4b83-499f-9c1a-687aee7f9de7",
+		"_postman_id": "620a853c-4a22-4531-bb48-45ac5e4a2a46",
 		"name": "pepo-api",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -245,10 +245,351 @@
 								}
 							},
 							"response": []
+						},
+						{
+							"name": "channel list",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"auth": {
+									"type": "basic",
+									"basic": [
+										{
+											"key": "username",
+											"value": "pepo",
+											"type": "string"
+										},
+										{
+											"key": "password",
+											"value": "Pepo-Admin-20!9*",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"value": "application/x-www-form-urlencoded",
+										"type": "text"
+									},
+									{
+										"key": "csrf-token",
+										"type": "text",
+										"value": "{{csrf-token}}"
+									}
+								],
+								"body": {
+									"mode": "urlencoded",
+									"urlencoded": []
+								},
+								"url": {
+									"raw": "{{api_server}}/api/admin/curated-entities/tags",
+									"host": [
+										"{{api_server}}"
+									],
+									"path": [
+										"api",
+										"admin",
+										"curated-entities",
+										"tags"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "fetch-csrf",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "99fee1eb-c1f9-46c7-9f67-2f8e85469d56",
+										"exec": [
+											"const $ = cheerio.load(pm.response.text())",
+											"",
+											"pm.environment.set('csrf-token', $('meta[name=csrf-token]').attr('content'));"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"auth": {
+									"type": "basic",
+									"basic": [
+										{
+											"key": "username",
+											"value": "pepo",
+											"type": "string"
+										},
+										{
+											"key": "password",
+											"value": "Pepo-Admin-20!9*",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"type": "text",
+										"value": "application/x-www-form-urlencoded"
+									}
+								],
+								"body": {
+									"mode": "urlencoded",
+									"urlencoded": [
+										{
+											"key": "email",
+											"value": "santhosh@ost.com",
+											"type": "text"
+										},
+										{
+											"key": "password",
+											"value": "5b300f84986e09ab",
+											"type": "text"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{api_server}}/admin/login",
+									"host": [
+										"{{api_server}}"
+									],
+									"path": [
+										"admin",
+										"login"
+									]
+								}
+							},
+							"response": []
 						}
 					],
 					"protocolProfileBehavior": {},
 					"_postman_isSubFolder": true
+				},
+				{
+					"name": "logged-in-admin",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/x-www-form-urlencoded",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{api_server}}/api/admin/current",
+							"host": [
+								"{{api_server}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"current"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "login",
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "username",
+									"value": "pepo",
+									"type": "string"
+								},
+								{
+									"key": "password",
+									"value": "Pepo-Admin-20!9*",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/x-www-form-urlencoded"
+							},
+							{
+								"key": "csrf-token",
+								"value": "{{csrf-token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "email",
+									"value": "santhosh@ost.com",
+									"type": "text"
+								},
+								{
+									"key": "password",
+									"value": "4e9d759c9349bcef",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{api_server}}/api/admin/login",
+							"host": [
+								"{{api_server}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "logout",
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "username",
+									"value": "pepo",
+									"type": "string"
+								},
+								{
+									"key": "password",
+									"value": "Pepo-Admin-20!9*",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/x-www-form-urlencoded",
+								"type": "text"
+							},
+							{
+								"key": "csrf-token",
+								"value": "{{csrf-token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "user_name",
+									"value": "ankit123",
+									"type": "text"
+								},
+								{
+									"key": "password",
+									"value": "12345678",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{api_server}}/api/admin/logout",
+							"host": [
+								"{{api_server}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"logout"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "users",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/x-www-form-urlencoded"
+							}
+						],
+						"url": {
+							"raw": "{{api_server}}/api/admin/users?q=test",
+							"host": [
+								"{{api_server}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"users"
+							],
+							"query": [
+								{
+									"key": "q",
+									"value": "test"
+								},
+								{
+									"key": "pagination_identifier",
+									"value": "eyJwYWdpbmF0aW9uX3RpbWVzdGFtcCI6MTU2ODg5MzMzM30=",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "tags-search",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{api_server}}/api/v1/tags?q=pepo",
+							"host": [
+								"{{api_server}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"tags"
+							],
+							"query": [
+								{
+									"key": "q",
+									"value": "pepo"
+								},
+								{
+									"key": "pagination_identifier",
+									"value": "eyJwYWdlIjoyfQ==",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
 				},
 				{
 					"name": "approve-user",
@@ -456,117 +797,19 @@
 					"response": []
 				},
 				{
-					"name": "fetch-csrf",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"id": "99fee1eb-c1f9-46c7-9f67-2f8e85469d56",
-								"exec": [
-									"const $ = cheerio.load(pm.response.text())",
-									"",
-									"pm.environment.set('csrf-token', $('meta[name=csrf-token]').attr('content'));"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"protocolProfileBehavior": {
-						"disableBodyPruning": true
-					},
+					"name": "block-user-in-channel",
 					"request": {
 						"auth": {
 							"type": "basic",
 							"basic": [
 								{
-									"key": "username",
-									"value": "pepo",
-									"type": "string"
-								},
-								{
 									"key": "password",
 									"value": "Pepo-Admin-20!9*",
 									"type": "string"
-								}
-							]
-						},
-						"method": "GET",
-						"header": [
-							{
-								"key": "Content-Type",
-								"name": "Content-Type",
-								"type": "text",
-								"value": "application/x-www-form-urlencoded"
-							}
-						],
-						"body": {
-							"mode": "urlencoded",
-							"urlencoded": [
-								{
-									"key": "email",
-									"value": "santhosh@ost.com",
-									"type": "text"
 								},
-								{
-									"key": "password",
-									"value": "5b300f84986e09ab",
-									"type": "text"
-								}
-							]
-						},
-						"url": {
-							"raw": "{{api_server}}/admin/login",
-							"host": [
-								"{{api_server}}"
-							],
-							"path": [
-								"admin",
-								"login"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "logged-in-admin",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Content-Type",
-								"name": "Content-Type",
-								"value": "application/x-www-form-urlencoded",
-								"type": "text"
-							}
-						],
-						"url": {
-							"raw": "{{api_server}}/api/admin/current",
-							"host": [
-								"{{api_server}}"
-							],
-							"path": [
-								"api",
-								"admin",
-								"current"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "login",
-					"request": {
-						"auth": {
-							"type": "basic",
-							"basic": [
 								{
 									"key": "username",
 									"value": "pepo",
-									"type": "string"
-								},
-								{
-									"key": "password",
-									"value": "Pepo-Admin-20!9*",
 									"type": "string"
 								}
 							]
@@ -575,131 +818,36 @@
 						"header": [
 							{
 								"key": "Content-Type",
-								"name": "Content-Type",
 								"type": "text",
 								"value": "application/x-www-form-urlencoded"
 							},
 							{
 								"key": "csrf-token",
-								"value": "{{csrf-token}}",
-								"type": "text"
+								"type": "text",
+								"value": "{{csrf-token}}"
 							}
 						],
 						"body": {
 							"mode": "urlencoded",
 							"urlencoded": [
 								{
-									"key": "email",
-									"value": "santhosh@ost.com",
-									"type": "text"
-								},
-								{
-									"key": "password",
-									"value": "4e9d759c9349bcef",
+									"key": "user_id",
+									"value": "1001",
 									"type": "text"
 								}
 							]
 						},
 						"url": {
-							"raw": "{{api_server}}/api/admin/login",
+							"raw": "{{api_server}}/api/admin/channels/1/block-user",
 							"host": [
 								"{{api_server}}"
 							],
 							"path": [
 								"api",
 								"admin",
-								"login"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "logout",
-					"request": {
-						"auth": {
-							"type": "basic",
-							"basic": [
-								{
-									"key": "username",
-									"value": "pepo",
-									"type": "string"
-								},
-								{
-									"key": "password",
-									"value": "Pepo-Admin-20!9*",
-									"type": "string"
-								}
-							]
-						},
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"name": "Content-Type",
-								"value": "application/x-www-form-urlencoded",
-								"type": "text"
-							},
-							{
-								"key": "csrf-token",
-								"value": "{{csrf-token}}",
-								"type": "text"
-							}
-						],
-						"body": {
-							"mode": "urlencoded",
-							"urlencoded": [
-								{
-									"key": "user_name",
-									"value": "ankit123",
-									"type": "text"
-								},
-								{
-									"key": "password",
-									"value": "12345678",
-									"type": "text"
-								}
-							]
-						},
-						"url": {
-							"raw": "{{api_server}}/api/admin/logout",
-							"host": [
-								"{{api_server}}"
-							],
-							"path": [
-								"api",
-								"admin",
-								"logout"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "tags-search",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{api_server}}/api/v1/tags?q=pepo",
-							"host": [
-								"{{api_server}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"tags"
-							],
-							"query": [
-								{
-									"key": "q",
-									"value": "pepo"
-								},
-								{
-									"key": "pagination_identifier",
-									"value": "eyJwYWdlIjoyfQ==",
-									"disabled": true
-								}
+								"channels",
+								"1",
+								"block-user"
 							]
 						}
 					},
@@ -878,43 +1026,6 @@
 					"response": []
 				},
 				{
-					"name": "users",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Content-Type",
-								"name": "Content-Type",
-								"type": "text",
-								"value": "application/x-www-form-urlencoded"
-							}
-						],
-						"url": {
-							"raw": "{{api_server}}/api/admin/users?q=test",
-							"host": [
-								"{{api_server}}"
-							],
-							"path": [
-								"api",
-								"admin",
-								"users"
-							],
-							"query": [
-								{
-									"key": "q",
-									"value": "test"
-								},
-								{
-									"key": "pagination_identifier",
-									"value": "eyJwYWdpbmF0aW9uX3RpbWVzdGFtcCI6MTU2ODg5MzMzM30=",
-									"disabled": true
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
 					"name": "whitelist-user",
 					"request": {
 						"method": "POST",
@@ -1012,6 +1123,165 @@
 										"v1",
 										"auth",
 										"twitter-login"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "github-login",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"type": "text",
+										"value": "text/plain"
+									}
+								],
+								"body": {
+									"mode": "urlencoded",
+									"urlencoded": [
+										{
+											"key": "access_token",
+											"value": "1152149157206847488-ocfNpLMSQMykW21zUqT8COi4oEL0NP",
+											"type": "text"
+										},
+										{
+											"key": "invite_code",
+											"value": "QUK9IZ",
+											"type": "text",
+											"disabled": true
+										}
+									]
+								},
+								"url": {
+									"raw": "{{api_server}}/api/v1/auth/github-login",
+									"host": [
+										"{{api_server}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"auth",
+										"github-login"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "google-login",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"type": "text",
+										"value": "text/plain"
+									}
+								],
+								"body": {
+									"mode": "urlencoded",
+									"urlencoded": [
+										{
+											"key": "access_token",
+											"value": "1152149157206847488-ocfNpLMSQMykW21zUqT8COi4oEL0NP",
+											"type": "text"
+										},
+										{
+											"key": "refresh_token",
+											"value": "1152149157206847488-ocfNpLMSQMykW21zUqT8COi4oEL0NP",
+											"type": "text"
+										},
+										{
+											"key": "invite_code",
+											"value": "QUK9IZ",
+											"type": "text",
+											"disabled": true
+										}
+									]
+								},
+								"url": {
+									"raw": "{{api_server}}/api/v1/auth/google-login",
+									"host": [
+										"{{api_server}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"auth",
+										"google-login"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "apple-login",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"type": "text",
+										"value": "text/plain"
+									}
+								],
+								"body": {
+									"mode": "urlencoded",
+									"urlencoded": [
+										{
+											"key": "authorization_code",
+											"value": "c71066db151ad4a5ab6b35e1f53655e37.0.nruzq.M5OXHoQ1rs_Vm7RxWB_ofA",
+											"type": "text"
+										},
+										{
+											"key": "authorized_scopes",
+											"value": "[]",
+											"type": "text"
+										},
+										{
+											"key": "nonce",
+											"value": "cZMahArIu4BD2s5bRLmHPO_pzG67Pwnq",
+											"type": "text"
+										},
+										{
+											"key": "identity_token",
+											"value": "eyJraWQiOiJBSURPUEsxIiwiYWxnIjoiUlMyNTYifQ.eyJpc3MiOiJodHRwczovL2FwcGxlaWQuYXBwbGUuY29tIiwiYXVkIjoiY29tLnBlcG8uc3RhZ2luZyIsImV4cCI6MTU3OTMzMjI2OCwiaWF0IjoxNTc5MzMxNjY4LCJzdWIiOiIwMDE0OTAuNjU5NmFjYWI0OTI1NGU3M2IxYTcyYmEzYjFkYTM0ZWYuMTIzNiIsIm5vbmNlIjoiMmM0ZDY5ODEwMWUyMjQ1YzM1MmE3ZTFkMjY5ODA5Y2E1YjcwZjkwN2ViMzdmNzMzZGU1MWE2YzBjZGU3YzhmMSIsImNfaGFzaCI6IldhRDltZ1ZJZXR1ZmQ5eEtvRnVUdmciLCJlbWFpbCI6InByZXNoaXRhQG9zdC5jb20iLCJlbWFpbF92ZXJpZmllZCI6InRydWUiLCJhdXRoX3RpbWUiOjE1NzkzMzE2Njh9.GUv5QRTVEBVGxaXZjpaXW1GbKcB_JHT38sVnZWmoQTiwah6Q5r0HMf96J3vQ1YmWk2E1Fwf7JvCE_FI4vJ9kvzlHw7YTdDJ1xRYnQPd2fTauce6F5V2ERqjm-cmDL6w9Gj23i71HKNuqAaew0aTJiUZUb0oro1QIFTZQU2hhvF_qeJ9xEE-e3R6kqddoi_jwstBwO-HnNkomxj6_FipYcZDWgyt1IAscL1HncJWTylfL5bZfMAGbxE6A1LBDGLIGhtCZuBpOAP7LPQcEDydfX8zJSoUdgvf-lta9AhQkGNKkv6KAkmBllFM6qS6g22mXtZ7AmuRo8jP5BgVaMGpIGQ",
+											"type": "text"
+										},
+										{
+											"key": "real_user_status",
+											"value": "1",
+											"type": "text"
+										},
+										{
+											"key": "apple_user_id",
+											"value": "001490.6596acab49254e73b1a72ba3b1da34ef.1236",
+											"type": "text"
+										},
+										{
+											"key": "invite_code",
+											"value": "QUK9IZ",
+											"type": "text",
+											"disabled": true
+										}
+									]
+								},
+								"url": {
+									"raw": "{{api_server}}/api/v1/auth/apple-login",
+									"host": [
+										"{{api_server}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"auth",
+										"apple-login"
 									]
 								}
 							},
@@ -1792,7 +2062,7 @@
 							"response": []
 						},
 						{
-							"name": "rotate-twitter-account",
+							"name": "rotate-account",
 							"request": {
 								"method": "GET",
 								"header": [],
@@ -2366,6 +2636,37 @@
 						},
 						{
 							"name": "tags",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{api_server}}/api/v1/search/tags?q=pe",
+									"host": [
+										"{{api_server}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"search",
+										"tags"
+									],
+									"query": [
+										{
+											"key": "pagination_identifier",
+											"value": "eyJwYWdlIjoyfQ==",
+											"disabled": true
+										},
+										{
+											"key": "q",
+											"value": "pe"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "channels",
 							"request": {
 								"method": "GET",
 								"header": [],
@@ -3048,6 +3349,103 @@
 							"response": []
 						},
 						{
+							"name": "initiate reply",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "urlencoded",
+									"urlencoded": [
+										{
+											"key": "video_url",
+											"value": "https://dbvoeb7t6hffk.cloudfront.net/d/ua/images/1000-028c57da230c81a50dc2c25c9ff105d0-original.mp4",
+											"type": "text"
+										},
+										{
+											"key": "poster_image_url",
+											"value": "https://dbvoeb7t6hffk.cloudfront.net/d/ua/images/1000-028c57da230c81a50dc2c25c9ff105d0-original.jpeg",
+											"type": "text"
+										},
+										{
+											"key": "video_size",
+											"value": "2000",
+											"type": "text"
+										},
+										{
+											"key": "video_height",
+											"value": "100",
+											"type": "text"
+										},
+										{
+											"key": "video_width",
+											"value": "100",
+											"type": "text"
+										},
+										{
+											"key": "image_size",
+											"value": "1000",
+											"type": "text"
+										},
+										{
+											"key": "image_height",
+											"value": "100",
+											"type": "text"
+										},
+										{
+											"key": "image_width",
+											"value": "100",
+											"type": "text"
+										},
+										{
+											"key": "parent_kind",
+											"value": "video",
+											"type": "text"
+										},
+										{
+											"key": "parent_id",
+											"value": "17",
+											"type": "text"
+										},
+										{
+											"key": "video_description",
+											"value": "Adding #reply #on 17th #video ",
+											"type": "text"
+										},
+										{
+											"key": "link",
+											"value": "https://xyz.com",
+											"type": "text"
+										},
+										{
+											"key": "reply_detail_id",
+											"value": "14",
+											"type": "text",
+											"disabled": true
+										}
+									]
+								},
+								"url": {
+									"raw": "{{api_server}}/api/v1/replies?",
+									"host": [
+										"{{api_server}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"replies"
+									],
+									"query": [
+										{
+											"key": "image_url",
+											"value": "https://s3.amazonaws.com/uassets.stagingpepo.com/pepo-staging1000/ua/images",
+											"disabled": true
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
 							"name": "delete",
 							"request": {
 								"method": "POST",
@@ -3073,224 +3471,222 @@
 					"_postman_isSubFolder": true
 				},
 				{
-					"name": "report-video",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"name": "Content-Type",
-								"value": "application/x-www-form-urlencoded",
-								"type": "text"
-							}
-						],
-						"body": {
-							"mode": "urlencoded",
-							"urlencoded": [
-								{
-									"key": "report_entity_kind",
-									"value": "video",
-									"type": "text"
+					"name": "channels",
+					"item": [
+						{
+							"name": "get-channel",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"type": "text",
+										"value": "application/x-www-form-urlencoded"
+									}
+								],
+								"body": {
+									"mode": "urlencoded",
+									"urlencoded": []
 								},
-								{
-									"key": "report_entity_id",
-									"value": "2421",
-									"type": "text"
+								"url": {
+									"raw": "{{api_server}}/api/v1/channels/1",
+									"host": [
+										"{{api_server}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"channels",
+										"1"
+									]
 								}
-							]
+							},
+							"response": []
 						},
-						"url": {
-							"raw": "{{api_server}}/api/v1/report",
-							"host": [
-								"{{api_server}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"report"
-							]
+						{
+							"name": "get-channel-videos",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"type": "text",
+										"value": "application/x-www-form-urlencoded"
+									}
+								],
+								"body": {
+									"mode": "urlencoded",
+									"urlencoded": []
+								},
+								"url": {
+									"raw": "{{api_server}}/api/v1/channels/1/videos?",
+									"host": [
+										"{{api_server}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"channels",
+										"1",
+										"videos"
+									],
+									"query": [
+										{
+											"key": "pagination_identifier",
+											"value": "eyJwYWdlIjozfQ==",
+											"disabled": true
+										},
+										{
+											"key": "filter_by_tag_id",
+											"value": "1",
+											"disabled": true
+										}
+									]
+								}
+							},
+							"response": []
 						}
-					},
-					"response": []
+					],
+					"protocolProfileBehavior": {},
+					"_postman_isSubFolder": true
 				},
 				{
-					"name": "report-reply",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"name": "Content-Type",
-								"type": "text",
-								"value": "application/x-www-form-urlencoded"
-							}
-						],
-						"body": {
-							"mode": "urlencoded",
-							"urlencoded": [
-								{
-									"key": "report_entity_kind",
-									"value": "reply",
-									"type": "text"
+					"name": "report",
+					"item": [
+						{
+							"name": "report-video",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"value": "application/x-www-form-urlencoded",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "urlencoded",
+									"urlencoded": [
+										{
+											"key": "report_entity_kind",
+											"value": "video",
+											"type": "text"
+										},
+										{
+											"key": "report_entity_id",
+											"value": "2421",
+											"type": "text"
+										}
+									]
 								},
-								{
-									"key": "report_entity_id",
-									"value": "2421",
-									"type": "text"
+								"url": {
+									"raw": "{{api_server}}/api/v1/report",
+									"host": [
+										"{{api_server}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"report"
+									]
 								}
-							]
+							},
+							"response": []
 						},
-						"url": {
-							"raw": "{{api_server}}/api/v1/report",
-							"host": [
-								"{{api_server}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"report"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "report-user",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"name": "Content-Type",
-								"value": "application/x-www-form-urlencoded",
-								"type": "text"
-							}
-						],
-						"body": {
-							"mode": "urlencoded",
-							"urlencoded": [
-								{
-									"key": "report_entity_kind",
-									"value": "user",
-									"type": "text"
+						{
+							"name": "report-reply",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"type": "text",
+										"value": "application/x-www-form-urlencoded"
+									}
+								],
+								"body": {
+									"mode": "urlencoded",
+									"urlencoded": [
+										{
+											"key": "report_entity_kind",
+											"value": "reply",
+											"type": "text"
+										},
+										{
+											"key": "report_entity_id",
+											"value": "2421",
+											"type": "text"
+										}
+									]
 								},
-								{
-									"key": "report_entity_id",
-									"value": "1398",
-									"type": "text"
+								"url": {
+									"raw": "{{api_server}}/api/v1/report",
+									"host": [
+										"{{api_server}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"report"
+									]
 								}
-							]
+							},
+							"response": []
 						},
-						"url": {
-							"raw": "{{api_server}}/api/v1/report",
-							"host": [
-								"{{api_server}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"report"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "initiate reply",
-					"request": {
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "urlencoded",
-							"urlencoded": [
-								{
-									"key": "video_url",
-									"value": "https://dbvoeb7t6hffk.cloudfront.net/d/ua/images/1000-028c57da230c81a50dc2c25c9ff105d0-original.mp4",
-									"type": "text"
+						{
+							"name": "report-user",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"value": "application/x-www-form-urlencoded",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "urlencoded",
+									"urlencoded": [
+										{
+											"key": "report_entity_kind",
+											"value": "user",
+											"type": "text"
+										},
+										{
+											"key": "report_entity_id",
+											"value": "1398",
+											"type": "text"
+										}
+									]
 								},
-								{
-									"key": "poster_image_url",
-									"value": "https://dbvoeb7t6hffk.cloudfront.net/d/ua/images/1000-028c57da230c81a50dc2c25c9ff105d0-original.jpeg",
-									"type": "text"
-								},
-								{
-									"key": "video_size",
-									"value": "2000",
-									"type": "text"
-								},
-								{
-									"key": "video_height",
-									"value": "100",
-									"type": "text"
-								},
-								{
-									"key": "video_width",
-									"value": "100",
-									"type": "text"
-								},
-								{
-									"key": "image_size",
-									"value": "1000",
-									"type": "text"
-								},
-								{
-									"key": "image_height",
-									"value": "100",
-									"type": "text"
-								},
-								{
-									"key": "image_width",
-									"value": "100",
-									"type": "text"
-								},
-								{
-									"key": "parent_kind",
-									"value": "video",
-									"type": "text"
-								},
-								{
-									"key": "parent_id",
-									"value": "17",
-									"type": "text"
-								},
-								{
-									"key": "video_description",
-									"value": "Adding #reply #on 17th #video ",
-									"type": "text"
-								},
-								{
-									"key": "link",
-									"value": "https://xyz.com",
-									"type": "text"
-								},
-								{
-									"key": "reply_detail_id",
-									"value": "14",
-									"type": "text",
-									"disabled": true
+								"url": {
+									"raw": "{{api_server}}/api/v1/report",
+									"host": [
+										"{{api_server}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"report"
+									]
 								}
-							]
-						},
-						"url": {
-							"raw": "{{api_server}}/api/v1/replies?",
-							"host": [
-								"{{api_server}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"replies"
-							],
-							"query": [
-								{
-									"key": "image_url",
-									"value": "https://s3.amazonaws.com/uassets.stagingpepo.com/pepo-staging1000/ua/images",
-									"disabled": true
-								}
-							]
+							},
+							"response": []
 						}
-					},
-					"response": []
+					],
+					"protocolProfileBehavior": {},
+					"_postman_isSubFolder": true
 				}
 			],
 			"protocolProfileBehavior": {}

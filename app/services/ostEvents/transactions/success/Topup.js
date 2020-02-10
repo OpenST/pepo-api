@@ -1,10 +1,10 @@
 const rootPrefix = '../../../../..',
-  FiatPaymentModel = require(rootPrefix + '/app/models/mysql/FiatPayment'),
+  FiatPaymentModel = require(rootPrefix + '/app/models/mysql/fiat/FiatPayment'),
   TransactionWebhookBase = require(rootPrefix + '/app/services/ostEvents/transactions/Base'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   transactionConstants = require(rootPrefix + '/lib/globalConstant/transaction'),
-  fiatPaymentConstants = require(rootPrefix + '/lib/globalConstant/fiatPayment'),
+  fiatPaymentConstants = require(rootPrefix + '/lib/globalConstant/fiat/fiatPayment'),
   notificationJobEnqueue = require(rootPrefix + '/lib/rabbitMqEnqueue/notification'),
   notificationJobConstants = require(rootPrefix + '/lib/globalConstant/notificationJob');
 

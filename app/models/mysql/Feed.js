@@ -112,8 +112,8 @@ class FeedModel extends ModelBase {
 
     for (let index = 0; index < dbRows.length; index++) {
       const formatDbRow = oThis.formatDbData(dbRows[index]);
-      response['feedIds'].push(formatDbRow.id);
-      response['feedsMap'][formatDbRow.id] = formatDbRow;
+      response.feedIds.push(formatDbRow.id);
+      response.feedsMap[formatDbRow.id] = formatDbRow;
     }
 
     return response;
@@ -133,7 +133,7 @@ class FeedModel extends ModelBase {
 
     const response = { feedIds: [], feedsMap: {} };
 
-    let queryObj = oThis
+    const queryObj = oThis
       .select('*')
       .where(['pagination_identifier < ?', paginationTimestamp])
       .order_by('pagination_identifier desc')
@@ -144,8 +144,8 @@ class FeedModel extends ModelBase {
 
     for (let index = 0; index < dbRows.length; index++) {
       const formatDbRow = oThis.formatDbData(dbRows[index]);
-      response['feedIds'].push(formatDbRow.id);
-      response['feedsMap'][formatDbRow.id] = formatDbRow;
+      response.feedIds.push(formatDbRow.id);
+      response.feedsMap[formatDbRow.id] = formatDbRow;
     }
 
     return response;
@@ -182,7 +182,7 @@ class FeedModel extends ModelBase {
    * @param {object} params
    * @param {number} params.actor
    *
-   * @return {object}
+   * @returns {Promise<object>}
    */
   async deleteByActor(params) {
     const oThis = this;
@@ -201,7 +201,6 @@ class FeedModel extends ModelBase {
    * Flush cache.
    *
    * @param {object} params
-   * @param {number} [params.id]
    * @param {array<number>} [params.ids]
    *
    * @returns {Promise<*>}
@@ -214,11 +213,6 @@ class FeedModel extends ModelBase {
 
     const LatestFeedCache = require(rootPrefix + '/lib/cacheManagement/single/LatestFeed');
     promisesArray.push(new LatestFeedCache({}).clear());
-
-    if (params.id) {
-      const FeedByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/FeedByIds');
-      promisesArray.push(new FeedByIdsCache({ ids: [params.id] }).clear());
-    }
 
     if (params.ids) {
       const FeedByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/FeedByIds');

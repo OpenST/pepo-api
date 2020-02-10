@@ -2,7 +2,7 @@ const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   GetPepocornBalance = require(rootPrefix + '/lib/pepocorn/GetPepocornBalance'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
-  entityType = require(rootPrefix + '/lib/globalConstant/entityType');
+  entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType');
 
 /**
  * Class to get pepocorn balance of current user.
@@ -40,7 +40,7 @@ class PepocornBalance extends ServiceBase {
 
     const pepoCornBalanceObject = await new GetPepocornBalance({ userIds: [oThis.currentUserId] }).perform();
 
-    const serviceResponse = { [entityType.pepocornBalance]: pepoCornBalanceObject[oThis.currentUserId] };
+    const serviceResponse = { [entityTypeConstants.pepocornBalance]: pepoCornBalanceObject[oThis.currentUserId] };
 
     return responseHelper.successWithData(serviceResponse);
   }

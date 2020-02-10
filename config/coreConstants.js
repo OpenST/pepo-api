@@ -184,7 +184,6 @@ class CoreConstants {
   }
 
   // Fiat db.
-
   get FIAT_DB_MYSQL_HOST() {
     return process.env.PA_FIAT_DB_MYSQL_HOST;
   }
@@ -250,6 +249,19 @@ class CoreConstants {
     return process.env.PA_WEBHOOK_DB_MYSQL_PASSWORD;
   }
 
+  // Channel db.
+  get CHANNEL_DB_MYSQL_HOST() {
+    return process.env.PA_CHANNEL_DB_MYSQL_HOST;
+  }
+
+  get CHANNEL_DB_MYSQL_USER() {
+    return process.env.PA_CHANNEL_DB_MYSQL_USER;
+  }
+
+  get CHANNEL_DB_MYSQL_PASSWORD() {
+    return process.env.PA_CHANNEL_DB_MYSQL_PASSWORD;
+  }
+
   // KMS related constants.
   get KMS_AWS_ACCESS_KEY() {
     return process.env.PA_KMS_AWS_ACCESS_KEY;
@@ -292,16 +304,32 @@ class CoreConstants {
     return process.env.PA_S3_USER_ASSETS_BUCKET;
   }
 
+  get S3_CHANNEL_ASSETS_BUCKET() {
+    return process.env.PA_S3_CHANNEL_ASSETS_BUCKET;
+  }
+
   get S3_USER_ASSETS_FOLDER() {
     const oThis = this;
 
     return oThis.S3_AWS_MASTER_FOLDER + '/' + 'ua';
   }
 
+  get S3_CHANNEL_ASSETS_FOLDER() {
+    const oThis = this;
+
+    return oThis.S3_AWS_MASTER_FOLDER + '/' + 'ca';
+  }
+
   get S3_USER_IMAGES_FOLDER() {
     const oThis = this;
 
     return oThis.S3_USER_ASSETS_FOLDER + oThis.IMAGES_S3_FOLDER;
+  }
+
+  get S3_CHANNEL_IMAGES_FOLDER() {
+    const oThis = this;
+
+    return oThis.S3_CHANNEL_ASSETS_FOLDER + oThis.IMAGES_S3_FOLDER;
   }
 
   get S3_USER_VIDEOS_FOLDER() {

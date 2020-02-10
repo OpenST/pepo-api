@@ -4,7 +4,9 @@ const rootPrefix = '../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   TagIdByNamesCache = require(rootPrefix + '/lib/cacheManagement/multi/TagIdByNames'),
+  UserByUsernameCache = require(rootPrefix + '/lib/cacheManagement/multi/UserIdByUserNames'),
   ReplyDetailsByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/ReplyDetailsByIds'),
+  ChannelByPermalinksCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelByPermalinks'),
   gotoFactory = require(rootPrefix + '/lib/goTo/factory'),
   coreConstants = require(rootPrefix + '/config/coreConstants'),
   gotoConstants = require(rootPrefix + '/lib/globalConstant/goto'),
@@ -12,6 +14,7 @@ const rootPrefix = '../..',
   entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
   userUtmDetailsConstants = require(rootPrefix + '/lib/globalConstant/userUtmDetail');
 
+// Declare variables.
 const currentPepoApiDomain = coreConstants.PA_DOMAIN;
 
 /**
@@ -118,51 +121,110 @@ class FetchGoto extends ServiceBase {
       pathArray = pathName.split('/'),
       query = oThis.parsedUrl.query;
 
-    if (pathArray[1] === gotoConstants.videoGotoKind) {
-      const videoId = Number(pathArray[2]);
-      if (videoId) {
-        oThis.gotoParams = { videoId: videoId };
-        oThis.gotoKind = gotoConstants.videoGotoKind;
-      }
-    } else if (pathArray[1] === gotoConstants.replyGotoKind) {
-      const replyDetailId = Number(pathArray[2]);
-
-      if (replyDetailId) {
-        const replyDetailCacheResp = await new ReplyDetailsByIdsCache({ ids: [replyDetailId] }).fetch();
-        if (replyDetailCacheResp.isFailure()) {
-          return Promise.reject(replyDetailCacheResp);
+    switch (pathArray[1]) {
+      case gotoConstants.videoGotoKind: {
+        const videoId = Number(pathArray[2]);
+        if (videoId) {
+          oThis.gotoParams = { videoId: videoId };
+          oThis.gotoKind = gotoConstants.videoGotoKind;
         }
 
-        const replyDetail = replyDetailCacheResp.data[replyDetailId];
+        break;
+      }
+      case gotoConstants.replyGotoKind: {
+        const replyDetailId = Number(pathArray[2]);
 
-        if (CommonValidators.validateNonEmptyObject(replyDetail)) {
-          oThis.gotoParams = { replyDetailId: replyDetailId, parentVideoId: replyDetail.parentId };
-          oThis.gotoKind = gotoConstants.replyGotoKind;
+        if (replyDetailId) {
+          const replyDetailCacheResp = await new ReplyDetailsByIdsCache({ ids: [replyDetailId] }).fetch();
+          if (replyDetailCacheResp.isFailure()) {
+            return Promise.reject(replyDetailCacheResp);
+          }
+
+          const replyDetail = replyDetailCacheResp.data[replyDetailId];
+
+          if (CommonValidators.validateNonEmptyObject(replyDetail)) {
+            oThis.gotoParams = { replyDetailId: replyDetailId, parentVideoId: replyDetail.parentId };
+            oThis.gotoKind = gotoConstants.replyGotoKind;
+          }
         }
+
+        break;
       }
-    } else if (pathArray[1] === gotoConstants.tagGotoKind) {
-      const tagName = pathArray[2];
+      case gotoConstants.tagGotoKind: {
+        const tagName = pathArray[2];
 
-      if (tagName) {
-        const tagByTagNamesCacheRsp = await new TagIdByNamesCache({ names: [tagName] }).fetch(),
-          tagByTagNamesCacheData = tagByTagNamesCacheRsp.data;
+        if (tagName) {
+          const tagByTagNamesCacheRsp = await new TagIdByNamesCache({ names: [tagName] }).fetch(),
+            tagByTagNamesCacheData = tagByTagNamesCacheRsp.data;
 
-        if (CommonValidators.validateInteger(tagByTagNamesCacheData[tagName])) {
-          const tagId = tagByTagNamesCacheData[tagName];
-          oThis.gotoKind = gotoConstants.tagGotoKind;
-          oThis.gotoParams = { tagId: tagId };
+          if (CommonValidators.validateInteger(tagByTagNamesCacheData[tagName])) {
+            const tagId = tagByTagNamesCacheData[tagName];
+            oThis.gotoParams = { tagId: tagId };
+            oThis.gotoKind = gotoConstants.tagGotoKind;
+          }
         }
+
+        break;
       }
-    } else if (pathArray[1] === 'account') {
-      oThis.gotoKind = gotoConstants.invitedUsersGotoKind;
-    } else if (pathArray[1] === 'doptin') {
-      // If url is doptin then send it to webview
-      if (query && query.t) {
-        oThis.gotoParams = { url: oThis.url };
-        oThis.gotoKind = gotoConstants.webViewGotoKind;
+      case gotoConstants.communitiesUrlKind: {
+        const channelPermalink = pathArray[2];
+
+        if (channelPermalink) {
+          const cacheResponse = await new ChannelByPermalinksCache({ permalinks: [channelPermalink] }).fetch();
+          if (cacheResponse.isFailure()) {
+            return Promise.reject(cacheResponse);
+          }
+
+          const channelId = cacheResponse.data[channelPermalink];
+
+          if (Number(channelId)) {
+            oThis.gotoParams = { channelId: channelId };
+            oThis.gotoKind = gotoConstants.channelsGotoKind;
+          }
+        }
+
+        break;
       }
-    } else if (!pathArray[1]) {
-      // If url is just 'pepo.com/' then look for invite code if any
+      case 'account': {
+        oThis.gotoKind = gotoConstants.invitedUsersGotoKind;
+
+        break;
+      }
+      case 'doptin': {
+        // If url is doptin then send it to webview.
+        if (query && query.t) {
+          oThis.gotoParams = { url: oThis.url };
+          oThis.gotoKind = gotoConstants.webViewGotoKind;
+        }
+
+        break;
+      }
+      default: {
+        // Look if url includes username
+        if (!pathArray[2] && CommonValidators.validateUserName(pathArray[1])) {
+          // If anything is passed after first element, that means url is pepo.com/xyz/abc, then its not a profile url
+          // If its a valid username, then look for existence in db
+          const cacheResponse = await new UserByUsernameCache({ userNames: [pathArray[1]] }).fetch();
+          if (cacheResponse.isFailure()) {
+            return Promise.reject(cacheResponse);
+          }
+          const userObj = cacheResponse.data[pathArray[1]];
+
+          if (CommonValidators.validateNonEmptyObject(userObj)) {
+            oThis.gotoKind = gotoConstants.profileGotoKind;
+            oThis.gotoParams = { userId: userObj.id };
+            // If pay parameter is passed for profile page then pass that in params too.
+            if (query && query.at == 'pay') {
+              oThis.gotoParams.at = query.at;
+            }
+          }
+        }
+        break;
+      }
+    }
+
+    if (!pathArray[1]) {
+      // If url is just 'pepo.com/' then look for invite code if any.
       if (query && query.invite) {
         oThis.gotoParams = { inviteCode: query.invite };
         oThis.gotoKind = gotoConstants.signUpGotoKind;
@@ -171,7 +233,7 @@ class FetchGoto extends ServiceBase {
       }
     }
 
-    // set UTM cookie if utm params are present in the query params.
+    // Set UTM cookie if utm params are present in the query params.
     oThis.utmCookieValue = userUtmDetailsConstants.utmCookieToSet(query);
   }
 

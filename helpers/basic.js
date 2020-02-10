@@ -17,24 +17,6 @@ const rootPrefix = '..',
  * @class BasicHelper
  */
 class BasicHelper {
-  uniquate(inputArray, limit) {
-    let uniqueMap = {},
-      counter = 0,
-      uniqueOrderedArray = [];
-    for (let index = 0; index < inputArray.length; index++) {
-      let arrayElement = inputArray[index];
-      if (!uniqueMap[arrayElement]) {
-        counter++;
-        uniqueMap[arrayElement] = 1;
-        uniqueOrderedArray.push(arrayElement);
-        if (counter === limit) {
-          return uniqueOrderedArray;
-        }
-      }
-    }
-    return uniqueOrderedArray;
-  }
-
   /**
    * Get unique array.
    *
@@ -44,11 +26,12 @@ class BasicHelper {
    * @returns {[]}
    */
   uniquate(inputArray, limit) {
-    let uniqueMap = {},
-      counter = 0,
+    const uniqueMap = {},
       uniqueOrderedArray = [];
-    for (let i = 0; i < inputArray.length; i++) {
-      let arrayElement = inputArray[i];
+    let counter = 0;
+
+    for (let index = 0; index < inputArray.length; index++) {
+      const arrayElement = inputArray[index];
       if (!uniqueMap[arrayElement]) {
         counter++;
         uniqueMap[arrayElement] = 1;
@@ -663,6 +646,15 @@ class BasicHelper {
    */
   userProfilePrefixUrl() {
     return coreConstants.PA_DOMAIN + '/admin/user-profile';
+  }
+
+  /**
+   * Get communities url prefix.
+   *
+   * @returns {string}
+   */
+  communitiesPrefixUrl() {
+    return coreConstants.PA_DOMAIN + '/communities';
   }
 
   /**
