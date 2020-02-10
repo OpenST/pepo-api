@@ -79,7 +79,7 @@ class Tag extends ModelBase {
 
     for (let index = 0; index < dbRows.length; index++) {
       const formatDbRow = oThis._formatDbData(dbRows[index]);
-      response[formatDbRow.name] = formatDbRow.id;
+      response[formatDbRow.name.toLowerCase()] = formatDbRow.id;
     }
 
     return response;

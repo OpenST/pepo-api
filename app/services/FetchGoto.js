@@ -151,9 +151,9 @@ class FetchGoto extends ServiceBase {
         break;
       }
       case gotoConstants.tagGotoKind: {
-        const tagName = pathArray[2];
-
+        let tagName = pathArray[2];
         if (tagName) {
+          tagName = tagName.toLowerCase();
           const tagByTagNamesCacheRsp = await new TagIdByNamesCache({ names: [tagName] }).fetch(),
             tagByTagNamesCacheData = tagByTagNamesCacheRsp.data;
 
