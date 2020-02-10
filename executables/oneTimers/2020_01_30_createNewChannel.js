@@ -311,7 +311,7 @@ class CreateNewChannel {
       .insert({ channel_id: oThis.channelId, total_videos: 0, total_users: 0 })
       .fire()
       .catch(function(error) {
-        logger.info('Avoid this error while updating channel. Error while creating channel stats: ', error);
+        logger.log('Avoid this error while updating channel. Error while creating channel stats: ', error);
       });
   }
 }
