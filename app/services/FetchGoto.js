@@ -167,9 +167,10 @@ class FetchGoto extends ServiceBase {
         break;
       }
       case gotoConstants.communitiesUrlKind: {
-        const channelPermalink = pathArray[2];
+        let channelPermalink = pathArray[2];
 
         if (channelPermalink) {
+          channelPermalink = channelPermalink.toLowerCase();
           const cacheResponse = await new ChannelByPermalinksCache({ permalinks: [channelPermalink] }).fetch();
           if (cacheResponse.isFailure()) {
             return Promise.reject(cacheResponse);

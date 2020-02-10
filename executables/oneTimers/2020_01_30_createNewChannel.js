@@ -134,10 +134,10 @@ class CreateNewChannel {
       return Promise.reject(new Error('Channel name already exists'));
     }
 
-    const channelPermalinksResp = await new ChannelModel().fetchIdsByPermalinks([oThis.channelPermalink]);
+    const channelPermalinksResp = await new ChannelModel().fetchIdsByPermalinks([oThis.channelPermalink.toLowerCase()]);
     if (
       CommonValidators.validateNonEmptyObject(channelPermalinksResp) &&
-      channelPermalinksResp[oThis.channelPermalink]
+      channelPermalinksResp[oThis.channelPermalink.toLowerCase()]
     ) {
       return Promise.reject(new Error('Same Permalink already exists'));
     }
