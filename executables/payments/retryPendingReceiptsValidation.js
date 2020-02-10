@@ -12,7 +12,7 @@ const rootPrefix = '../..',
   createErrorLogsEntry = require(rootPrefix + '/lib/errorLogs/createEntry'),
   errorLogsConstants = require(rootPrefix + '/lib/globalConstant/errorLogs'),
   fiatPaymentConstants = require(rootPrefix + '/lib/globalConstant/fiat/fiatPayment'),
-  inAppProductsConstants = require(rootPrefix + '/lib/globalConstant/inAppProduct'),
+  inAppProductConstants = require(rootPrefix + '/lib/globalConstant/fiat/inAppProduct'),
   cronProcessesConstants = require(rootPrefix + '/lib/globalConstant/big/cronProcesses');
 
 const BATCH_SIZE = 5;
@@ -162,9 +162,9 @@ class RetryPendingReceiptValidation extends CronBase {
       },
       os = null;
     if (fiatPayment.serviceKind === fiatPaymentConstants.applePayKind) {
-      os = inAppProductsConstants.ios;
+      os = inAppProductConstants.ios;
     } else if (fiatPayment.serviceKind === fiatPaymentConstants.googlePayKind) {
-      os = inAppProductsConstants.android;
+      os = inAppProductConstants.android;
     } else {
       return Promise.reject(
         responseHelper.error({

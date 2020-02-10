@@ -7,7 +7,7 @@ const rootPrefix = '../../..',
   TextsByIdCache = require(rootPrefix + '/lib/cacheManagement/multi/TextsByIds'),
   ChannelByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelByIds'),
   ChannelByPermalinksCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelByPermalinks'),
-  coreConstants = require(rootPrefix + '/config/coreConstants'),
+  basicHelper = require(rootPrefix + '/helpers/basic'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
   shareEntityConstants = require(rootPrefix + '/lib/globalConstant/shareEntity'),
@@ -215,8 +215,8 @@ class ShareDetails extends ServiceBase {
     const oThis = this;
 
     return (
-      coreConstants.PA_DOMAIN +
-      '/channels/' +
+      basicHelper.communitiesPrefixUrl() +
+      '/' +
       oThis.channelPermalink +
       `?utm_source=share&utm_medium=channel&utm_campaign=${oThis.channelId}`
     );

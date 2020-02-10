@@ -399,7 +399,7 @@ class UserNotificationList extends ServiceBase {
     if (oThis.channelIds.length < 0) {
       return;
     }
-    console.log('oThis.channelIds =====', oThis.channelIds);
+
     const channelByIdsCacheResp = await new ChannelByIdsCache({ ids: oThis.channelIds }).fetch();
 
     if (channelByIdsCacheResp.isFailure()) {
@@ -843,7 +843,10 @@ class UserNotificationList extends ServiceBase {
       [userNotificationConstants.youRepliedWithoutAmountKind]: 1,
       [userNotificationConstants.replyOnYourVideoWithAmountKind]: 1,
       [userNotificationConstants.replyOnYourVideoWithoutAmountKind]: 1,
-      [userNotificationConstants.replyThreadNotificationKind]: 1
+      [userNotificationConstants.replyThreadNotificationKind]: 1,
+      [userNotificationConstants.videoAddInChannelKind]: 1,
+      [userNotificationConstants.userMentionInChannelKind]: 1,
+      [userNotificationConstants.videoAddSupportersAndChannelMembersKind]: 1
     };
   }
 }

@@ -24,7 +24,7 @@ router.use('/prelaunch', preLaunchRoutes);
 router.use('/support', supportRoutes);
 
 /* Get url and message for sharing channel given its permalink. */
-router.get('/channels/:channel_permalink/share', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+router.get('/communities/:channel_permalink/share', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.channelShare;
   req.decodedParams.channel_permalink = req.params.channel_permalink;
 
