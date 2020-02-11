@@ -119,7 +119,7 @@ class ShareDetails extends ServiceBase {
 
     await Promise.all([
       oThis._fetchTagLine(channelDetails.taglineId),
-      oThis._fetchCoverImage(channelDetails.coverImageId)
+      oThis._fetchShareImage(channelDetails.shareImageId)
     ]);
   }
 
@@ -161,7 +161,7 @@ class ShareDetails extends ServiceBase {
    * @returns {Promise<void>}
    * @private
    */
-  async _fetchCoverImage(imageId) {
+  async _fetchShareImage(imageId) {
     const oThis = this;
 
     if (!imageId) {
