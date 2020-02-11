@@ -459,6 +459,12 @@ const v1ErrorConfig = {
     message: 'Channel does not exist.'
   },
 
+  channel_not_active: {
+    parameter: 'channel_id',
+    code: 'invalid',
+    message: 'The channel has been disabled.'
+  },
+
   missing_video_url: {
     parameter: 'video_url',
     code: 'missing',
