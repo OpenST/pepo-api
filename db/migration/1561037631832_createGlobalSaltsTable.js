@@ -7,7 +7,6 @@ const dbKind = DbKindConstant.sqlDbKind;
 
 const migrationName = {
   dbName: dbName,
-  // TODO \n\
   up: [
     'CREATE TABLE `global_salts` ( \n\
   `id` bigint(20) NOT NULL AUTO_INCREMENT, \n\

@@ -1,9 +1,9 @@
 const rootPrefix = '../../..',
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
-  CronProcessModel = require(rootPrefix + '/app/models/mysql/CronProcesses'),
+  CronProcessesModel = require(rootPrefix + '/app/models/mysql/big/CronProcesses'),
   CronProcessesHandler = require(rootPrefix + '/lib/CronProcessesHandler'),
-  cronProcessesConstants = require(rootPrefix + '/lib/globalConstant/cronProcesses');
+  cronProcessesConstants = require(rootPrefix + '/lib/globalConstant/big/cronProcesses');
 /**
  * Class for updating status in cron table
  *
@@ -23,11 +23,9 @@ class StopCron {
   }
 
   /**
+   * Main performer for class.
    *
-   * Perform
-   *
-   * @return {Promise<result>}
-   *
+   * @returns {Promise<result>}
    */
   perform() {
     const oThis = this;
@@ -37,6 +35,7 @@ class StopCron {
         return error;
       }
       logger.error('devops/utils/StopCron.js::perform::catch', error);
+
       return oThis._getRespError('do_u_cs_uc_p1');
     });
   }
@@ -47,33 +46,34 @@ class StopCron {
    */
   async _asyncPerform() {
     const oThis = this;
-    let CronProcessModelObj = new CronProcessModel();
-    let rowData = await CronProcessModelObj.getById(oThis.ids);
+    const CronProcessModelObj = new CronProcessesModel();
+    const rowData = await CronProcessModelObj.getById(oThis.ids);
     if (rowData.length < 1) {
       return oThis._getRespError('do_u_cs_uc_ap1');
     }
-    let idsToBeUpdated = [];
-    for (let i = 0; i < rowData.length; i++) {
-      if (rowData[i]['status'] != new CronProcessModel().invertedStatuses[oThis.status]) {
-        idsToBeUpdated.push(rowData[i]['id']);
+    const idsToBeUpdated = [];
+    for (let index = 0; index < rowData.length; index++) {
+      if (rowData[index].status != new CronProcessesModel().invertedStatuses[oThis.status]) {
+        idsToBeUpdated.push(rowData[index].id);
       }
     }
-    let CronProcessesHandlerObj = new CronProcessesHandler();
-    for (let i = 0; i < idsToBeUpdated.length; i++) {
-      let updateCronProcessModelObj = new CronProcessModel();
+    const CronProcessesHandlerObj = new CronProcessesHandler();
+    for (let index = 0; index < idsToBeUpdated.length; index++) {
+      const updateCronProcessModelObj = new CronProcessesModel();
       await updateCronProcessModelObj.updateLastEndTimeAndStatus({
         newLastEndTime: CronProcessesHandlerObj._convertFromEpochToLocalTime(Date.now()),
-        id: idsToBeUpdated[i],
+        id: idsToBeUpdated[index],
         newStatus: oThis.status
       });
     }
+
     return Promise.resolve(responseHelper.successWithData({}));
   }
 
   /**
-   * Generate Error response
+   * Generate error response.
    *
-   * @param code {String} - Error internal identifier
+   * @param {string} code: Error internal identifier
    *
    * @returns {Promise<void>}
    * @private

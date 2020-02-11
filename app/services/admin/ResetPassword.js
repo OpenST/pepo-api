@@ -1,14 +1,14 @@
 const rootPrefix = '../../..',
   KmsWrapper = require(rootPrefix + '/lib/aws/KmsWrapper'),
   ServiceBase = require(rootPrefix + '/app/services/Base'),
-  AdminModel = require(rootPrefix + '/app/models/mysql/Admin'),
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
+  AdminModel = require(rootPrefix + '/app/models/mysql/admin/Admin'),
   AdminByIdCache = require(rootPrefix + '/lib/cacheManagement/single/AdminById'),
   AdminByEmailsCache = require(rootPrefix + '/lib/cacheManagement/multi/AdminByEmails'),
   util = require(rootPrefix + '/lib/util'),
   kmsConstants = require(rootPrefix + '/lib/globalConstant/kms'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
-  adminConstants = require(rootPrefix + '/lib/globalConstant/admin');
+  adminConstants = require(rootPrefix + '/lib/globalConstant/admin/admin');
 
 /**
  * Class to reset admin password.

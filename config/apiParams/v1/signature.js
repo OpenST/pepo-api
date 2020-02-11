@@ -622,6 +622,71 @@ const v1Signature = {
     ],
     optional: []
   },
+  [apiName.getChannelDetails]: {
+    mandatory: [
+      {
+        parameter: 'channel_id',
+        validatorMethods: ['validateNonZeroInteger']
+      },
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      }
+    ],
+    optional: []
+  },
+  [apiName.joinChannel]: {
+    mandatory: [
+      {
+        parameter: 'channel_id',
+        validatorMethods: ['validateNonZeroInteger']
+      },
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      }
+    ],
+    optional: []
+  },
+  [apiName.leaveChannel]: {
+    mandatory: [
+      {
+        parameter: 'channel_id',
+        validatorMethods: ['validateNonZeroInteger']
+      },
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      }
+    ],
+    optional: []
+  },
+  [apiName.turnOffChannelNotifications]: {
+    mandatory: [
+      {
+        parameter: 'channel_id',
+        validatorMethods: ['validateNonZeroInteger']
+      },
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      }
+    ],
+    optional: []
+  },
+  [apiName.turnOnChannelNotifications]: {
+    mandatory: [
+      {
+        parameter: 'channel_id',
+        validatorMethods: ['validateNonZeroInteger']
+      },
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      }
+    ],
+    optional: []
+  },
   [apiName.getTags]: {
     mandatory: [],
     optional: [
@@ -639,9 +704,34 @@ const v1Signature = {
       }
     ]
   },
+  [apiName.getChannels]: {
+    mandatory: [],
+    optional: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      },
+      {
+        parameter: 'q',
+        validatorMethods: ['validateString']
+      },
+      {
+        parameter: paginationConstants.paginationIdentifierKey,
+        validatorMethods: ['validateString', 'validatePaginationIdentifier']
+      },
+      {
+        parameter: 'getTopResults',
+        validatorMethods: ['validateBoolean']
+      }
+    ]
+  },
   [apiName.mixedTopSearch]: {
     mandatory: [],
     optional: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      },
       {
         parameter: 'q',
         validatorMethods: ['validateString']
@@ -1155,6 +1245,68 @@ const v1Signature = {
       }
     ]
   },
+  [apiName.getChannelVideos]: {
+    mandatory: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      },
+      {
+        parameter: 'channel_id',
+        validatorMethods: ['validateNonZeroInteger']
+      }
+    ],
+    optional: [
+      {
+        parameter: paginationConstants.paginationIdentifierKey,
+        validatorMethods: ['validateString', 'validatePaginationIdentifier']
+      },
+      {
+        parameter: paginationConstants.filterByTagIdKey,
+        validatorMethods: ['validateNonZeroInteger']
+      }
+    ]
+  },
+
+  [apiName.channelUsers]: {
+    mandatory: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      },
+      {
+        parameter: 'channel_id',
+        validatorMethods: ['validateNonZeroInteger']
+      }
+    ],
+    optional: [
+      {
+        parameter: paginationConstants.paginationIdentifierKey,
+        validatorMethods: ['validateString', 'validatePaginationIdentifier']
+      }
+    ]
+  },
+
+  [apiName.channelShare]: {
+    mandatory: [
+      {
+        parameter: 'channel_id',
+        validatorMethods: ['validateNonZeroInteger']
+      }
+    ],
+    optional: []
+  },
+
+  [apiName.profileShare]: {
+    mandatory: [
+      {
+        parameter: 'user_id',
+        validatorMethods: ['validateNonZeroInteger']
+      }
+    ],
+    optional: []
+  },
+
   [apiName.getAllVideoListByTagId]: {
     mandatory: [
       {

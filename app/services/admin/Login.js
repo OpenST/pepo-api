@@ -1,14 +1,14 @@
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
-  AdminModel = require(rootPrefix + '/app/models/mysql/Admin'),
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
+  AdminModel = require(rootPrefix + '/app/models/mysql/admin/Admin'),
   AdminByIdCache = require(rootPrefix + '/lib/cacheManagement/single/AdminById'),
   AdminByEmailsCache = require(rootPrefix + '/lib/cacheManagement/multi/AdminByEmails'),
   util = require(rootPrefix + '/lib/util'),
   coreConstants = require(rootPrefix + '/config/coreConstants'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   localCipher = require(rootPrefix + '/lib/encryptors/localCipher'),
-  adminConstants = require(rootPrefix + '/lib/globalConstant/admin');
+  adminConstants = require(rootPrefix + '/lib/globalConstant/admin/admin');
 
 /**
  * Class to authenticate admin login.

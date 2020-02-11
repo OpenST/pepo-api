@@ -150,6 +150,24 @@ const v1Signature = {
       }
     ],
     optional: []
+  },
+  [apiName.channelShare]: {
+    mandatory: [
+      {
+        parameter: 'channel_permalink',
+        validatorMethods: ['validateName']
+      }
+    ],
+    optional: []
+  },
+  [apiName.profileShare]: {
+    mandatory: [
+      {
+        parameter: 'username',
+        validatorMethods: ['validateName']
+      }
+    ],
+    optional: []
   }
 };
 

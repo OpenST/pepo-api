@@ -2,7 +2,7 @@ const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   TagMultiCache = require(rootPrefix + '/lib/cacheManagement/multi/Tag'),
-  entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
+  entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
   responseHelper = require(rootPrefix + '/lib/formatter/response');
 
 /**
@@ -45,7 +45,7 @@ class GetTagDetails extends ServiceBase {
     await oThis._getTagsDetails();
 
     return responseHelper.successWithData({
-      [entityType.tag]: oThis.tagDetails
+      [entityTypeConstants.tag]: oThis.tagDetails
     });
   }
 

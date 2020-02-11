@@ -24,6 +24,23 @@ const adminSignature = {
       }
     ]
   },
+  [apiName.adminChannelSearch]: {
+    mandatory: [],
+    optional: [
+      {
+        parameter: 'q',
+        validatorMethods: ['validateString']
+      },
+      {
+        parameter: paginationConstants.paginationIdentifierKey,
+        validatorMethods: ['validateString', 'validatePaginationIdentifier']
+      },
+      {
+        parameter: 'current_admin',
+        validatorMethods: ['validateNonEmptyObject']
+      }
+    ]
+  },
   [apiName.adminUserApprove]: {
     mandatory: [
       {
@@ -72,6 +89,23 @@ const adminSignature = {
       {
         parameter: 'current_admin',
         validatorMethods: ['validateNonEmptyObject']
+      }
+    ],
+    optional: []
+  },
+  [apiName.adminUserBlockInChannel]: {
+    mandatory: [
+      {
+        parameter: 'user_id',
+        validatorMethods: ['validateNonZeroInteger']
+      },
+      {
+        parameter: 'current_admin',
+        validatorMethods: ['validateNonEmptyObject']
+      },
+      {
+        parameter: 'channel_id',
+        validatorMethods: ['validateNonZeroInteger']
       }
     ],
     optional: []
@@ -387,6 +421,15 @@ const adminSignature = {
     optional: []
   },
   [apiName.getTagsCuratedEntityList]: {
+    mandatory: [
+      {
+        parameter: 'entity_kind',
+        validatorMethods: ['validateString']
+      }
+    ],
+    optional: []
+  },
+  [apiName.getChannelsCuratedEntityList]: {
     mandatory: [
       {
         parameter: 'entity_kind',

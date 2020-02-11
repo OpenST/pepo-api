@@ -5,14 +5,14 @@ const rootPrefix = '..',
   CronBase = require(rootPrefix + '/executables/CronBase'),
   FeedModel = require(rootPrefix + '/app/models/mysql/Feed'),
   LatestFeedCache = require(rootPrefix + '/lib/cacheManagement/single/LatestFeed'),
-  DynamicVariablesModel = require(rootPrefix + '/app/models/mysql/DynamicVariables'),
+  DynamicVariableModel = require(rootPrefix + '/app/models/mysql/big/DynamicVariable'),
   VideoDetailsByVideoIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/VideoDetailsByVideoIds'),
   basicHelper = require(rootPrefix + '/helpers/basic'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   videoDetailsConstants = require(rootPrefix + '/lib/globalConstant/videoDetail'),
-  cronProcessesConstants = require(rootPrefix + '/lib/globalConstant/cronProcesses'),
-  dynamicVariablesConstants = require(rootPrefix + '/lib/globalConstant/dynamicVariables');
+  cronProcessesConstants = require(rootPrefix + '/lib/globalConstant/big/cronProcesses'),
+  dynamicVariablesConstants = require(rootPrefix + '/lib/globalConstant/big/dynamicVariables');
 
 program.option('--cronProcessId <cronProcessId>', 'Cron table process ID').parse(process.argv);
 
@@ -103,7 +103,7 @@ class PopulatePopularityCriteria extends CronBase {
 
     oThis.feedsMap = latestFeedCacheRespData.feedsMap;
 
-    for (let feedId in oThis.feedsMap) {
+    for (const feedId in oThis.feedsMap) {
       const videoId = oThis.feedsMap[feedId].primaryExternalEntityId;
       videoIds.push(videoId);
     }
@@ -134,7 +134,7 @@ class PopulatePopularityCriteria extends CronBase {
     let totalContributionsArr = [],
       totalRepliesArr = [];
 
-    for (let vid in oThis.videoDetailsMapByVideoId) {
+    for (const vid in oThis.videoDetailsMapByVideoId) {
       const videoDetail = oThis.videoDetailsMapByVideoId[vid];
       totalContributionsArr.push(videoDetail.totalAmount);
       totalRepliesArr.push(videoDetail.totalReplies);
@@ -166,13 +166,13 @@ class PopulatePopularityCriteria extends CronBase {
 
     const promises = [];
 
-    let promise1 = new DynamicVariablesModel()
+    const promise1 = new DynamicVariableModel()
       .update({ value: oThis.pepoValuePopularityThreshold })
       .where({ kind: dynamicVariablesConstants.invertedKinds[dynamicVariablesConstants.pepoValuePopularityThreshold] })
       .fire()
       .then(async function(updateResp) {
         if (updateResp.affectedRows === 0) {
-          await new DynamicVariablesModel()
+          await new DynamicVariableModel()
             .insert({
               value: oThis.pepoValuePopularityThreshold,
               kind: dynamicVariablesConstants.invertedKinds[dynamicVariablesConstants.pepoValuePopularityThreshold]
@@ -181,7 +181,7 @@ class PopulatePopularityCriteria extends CronBase {
         }
       });
 
-    let promise2 = new DynamicVariablesModel()
+    const promise2 = new DynamicVariableModel()
       .update({ value: oThis.totalRepliesPopularityThreshold })
       .where({
         kind: dynamicVariablesConstants.invertedKinds[dynamicVariablesConstants.numberOfRepliesPopularityThreshold]
@@ -189,7 +189,7 @@ class PopulatePopularityCriteria extends CronBase {
       .fire()
       .then(async function(updateResp) {
         if (updateResp.affectedRows === 0) {
-          await new DynamicVariablesModel()
+          await new DynamicVariableModel()
             .insert({
               value: oThis.totalRepliesPopularityThreshold,
               kind:
@@ -203,7 +203,7 @@ class PopulatePopularityCriteria extends CronBase {
     promises.push(promise2);
 
     await Promise.all(promises);
-    await DynamicVariablesModel.flushCache({
+    await DynamicVariableModel.flushCache({
       kinds: [
         dynamicVariablesConstants.numberOfRepliesPopularityThreshold,
         dynamicVariablesConstants.pepoValuePopularityThreshold
@@ -222,7 +222,7 @@ class PopulatePopularityCriteria extends CronBase {
   async _getPopularAndUnpopularFeedIds() {
     const oThis = this;
 
-    for (let feedId in oThis.feedsMap) {
+    for (const feedId in oThis.feedsMap) {
       const feedObj = oThis.feedsMap[feedId],
         videoId = feedObj.primaryExternalEntityId,
         videoDetail = oThis.videoDetailsMapByVideoId[videoId];
@@ -274,7 +274,7 @@ class PopulatePopularityCriteria extends CronBase {
 
     const feedIds = oThis.markAsPopularFeedIds.concat(oThis.markAsUnpopularFeedIds);
 
-    //flush only updated feeds and not all ids
+    // Flush only updated feeds and not all ids.
     await FeedModel.flushCache({ ids: feedIds });
   }
 

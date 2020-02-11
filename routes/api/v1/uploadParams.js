@@ -6,7 +6,7 @@ const rootPrefix = '../../..',
   apiName = require(rootPrefix + '/lib/globalConstant/apiName'),
   sanitizer = require(rootPrefix + '/helpers/sanitizer'),
   FormatterComposer = require(rootPrefix + '/lib/formatter/Composer'),
-  entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
+  entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
   responseEntityKey = require(rootPrefix + '/lib/globalConstant/responseEntityKey');
 
 /* Upload params */
@@ -17,7 +17,7 @@ router.get('/', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
     const wrapperFormatterRsp = await new FormatterComposer({
       resultType: responseEntityKey.uploadParams,
       entityKindToResponseKeyMap: {
-        [entityType.uploadParams]: responseEntityKey.uploadParams
+        [entityTypeConstants.uploadParams]: responseEntityKey.uploadParams
       },
       serviceData: serviceResponse.data
     }).perform();

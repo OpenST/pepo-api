@@ -79,7 +79,7 @@ class Tag extends ModelBase {
 
     for (let index = 0; index < dbRows.length; index++) {
       const formatDbRow = oThis._formatDbData(dbRows[index]);
-      response[formatDbRow.name] = formatDbRow.id;
+      response[formatDbRow.name.toLowerCase()] = formatDbRow.id;
     }
 
     return response;
@@ -131,9 +131,11 @@ class Tag extends ModelBase {
       limit = params.limit || 10,
       offset = (page - 1) * limit;
 
+    const tagPrefix = params.tagPrefix + "%";
+    
     const dbRows = await oThis
       .select('*')
-      .where('name LIKE "' + params.tagPrefix + '%"')
+      .where(['name LIKE ?', tagPrefix])
       .where({ status: tagConstants.invertedStatuses[tagConstants.activeStatus] })
       .limit(limit)
       .offset(offset)

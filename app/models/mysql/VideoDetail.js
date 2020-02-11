@@ -1,6 +1,7 @@
 const rootPrefix = '../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
   databaseConstants = require(rootPrefix + '/lib/globalConstant/database'),
+  ChannelVideoModel = require(rootPrefix + '/app/models/mysql/channel/ChannelVideo'),
   videoDetailsConstants = require(rootPrefix + '/lib/globalConstant/videoDetail');
 
 // Declare variables.
@@ -162,28 +163,6 @@ class VideoDetail extends ModelBase {
   }
 
   /**
-   * Fetch videoDetail object for video id.
-   *
-   * @param {integer} videoId: video id
-   *
-   * @returns {object}
-   */
-  async fetchByVideoId(videoId) {
-    const oThis = this;
-
-    const dbRows = await oThis
-      .select('*')
-      .where({ video_id: videoId })
-      .fire();
-
-    if (dbRows.length === 0) {
-      return {};
-    }
-
-    return oThis.formatDbData(dbRows[0]);
-  }
-
-  /**
    * Fetch by creator user id.
    *
    * @param {integer} params.limit: no of rows to fetch
@@ -223,34 +202,15 @@ class VideoDetail extends ModelBase {
       videoDetails[formatDbRow.videoId] = formatDbRow;
       videoIds.push(formatDbRow.videoId);
     }
-
-    return { videoIds: videoIds, videoDetails: videoDetails };
-  }
-
-  /**
-   * Fetch by video ids and user id.
-   *
-   * @param {array} videoIds: Array of video id
-   * @param {integer} userId: id of user who clicked the video
-   *
-   * @returns {object}
-   */
-  async fetchByVideoIdsAndUserId(videoIds, userId) {
-    const oThis = this;
-
-    const dbRows = await oThis
-      .select('*')
-      .where({ video_id: videoIds, creator_user_id: userId })
-      .fire();
-
-    const response = {};
-
-    for (let index = 0; index < dbRows.length; index++) {
-      const formatDbRow = oThis.formatDbData(dbRows[index]);
-      response[formatDbRow.videoId] = formatDbRow;
+    const videoToPopularChannelIdsMap = await new ChannelVideoModel().fetchPopularChannelIdsByVideoIds({
+      videoIds: videoIds
+    });
+    for (const videoId in videoDetails) {
+      const videoPopularChannelIds = videoToPopularChannelIdsMap[videoId];
+      videoDetails[videoId].channelIds = videoPopularChannelIds || [];
     }
 
-    return response;
+    return { videoIds: videoIds, videoDetails: videoDetails };
   }
 
   /**
@@ -270,9 +230,16 @@ class VideoDetail extends ModelBase {
 
     const response = {};
 
+    const videoToPopularChannelIdsMap = await new ChannelVideoModel().fetchPopularChannelIdsByVideoIds({
+      videoIds: videoIds
+    });
+
     for (let index = 0; index < dbRows.length; index++) {
-      const formatDbRow = oThis.formatDbData(dbRows[index]);
+      const formatDbRow = oThis.formatDbData(dbRows[index]),
+        videoPopularChannelIds = videoToPopularChannelIdsMap[formatDbRow.videoId];
+
       response[formatDbRow.videoId] = formatDbRow;
+      response[formatDbRow.videoId].channelIds = videoPopularChannelIds || [];
     }
 
     return response;

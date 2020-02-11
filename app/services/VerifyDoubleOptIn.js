@@ -1,7 +1,8 @@
 const rootPrefix = '../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
-  TemporaryTokenModel = require(rootPrefix + '/app/models/mysql/TemporaryToken'),
   UserIdentifierModel = require(rootPrefix + '/app/models/mysql/UserIdentifier'),
+  UserEmailLogsModel = require(rootPrefix + '/app/models/mysql/big/UserEmailLogs'),
+  TemporaryTokenModel = require(rootPrefix + '/app/models/mysql/big/TemporaryToken'),
   UserByEmailsCache = require(rootPrefix + '/lib/cacheManagement/multi/UserByEmails'),
   AddContactInPepoCampaign = require(rootPrefix + '/lib/email/hookCreator/AddContact'),
   UserIdentifiersByEmailsCache = require(rootPrefix + '/lib/cacheManagement/multi/UserIdentifiersByEmails'),
@@ -9,9 +10,9 @@ const rootPrefix = '../..',
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   localCipher = require(rootPrefix + '/lib/encryptors/localCipher'),
-  temporaryTokenConstants = require(rootPrefix + '/lib/globalConstant/temporaryToken'),
   preLaunchInviteConstants = require(rootPrefix + '/lib/globalConstant/preLaunchInvite'),
-  emailServiceApiCallHookConstants = require(rootPrefix + '/lib/globalConstant/emailServiceApiCallHook');
+  temporaryTokenConstants = require(rootPrefix + '/lib/globalConstant/big/temporaryToken'),
+  emailServiceApiCallHookConstants = require(rootPrefix + '/lib/globalConstant/big/emailServiceApiCallHook');
 
 /**
  * Class to verify double opt in token.
@@ -216,8 +217,6 @@ class VerifyDoubleOptIn extends ServiceBase {
   async _addEmailForUser() {
     const oThis = this;
 
-    const UserEmailLogsModel = require(rootPrefix + '/app/models/mysql/UserEmailLogs');
-
     // Fetch details from user email logs table.
     const userEmailLogsDetails = await new UserEmailLogsModel()
       .select('user_id, email')
@@ -318,12 +317,12 @@ class VerifyDoubleOptIn extends ServiceBase {
    * @private
    */
   async _checkIfEmailExist(email) {
-    let promiseArray = [];
+    const promiseArray = [
+      new UserByEmailsCache({ emails: [email] }).fetch(),
+      new UserIdentifiersByEmailsCache({ emails: [email] }).fetch()
+    ];
 
-    promiseArray.push(new UserByEmailsCache({ emails: [email] }).fetch());
-    promiseArray.push(new UserIdentifiersByEmailsCache({ emails: [email] }).fetch());
-
-    let responseArray = await Promise.all(promiseArray),
+    const responseArray = await Promise.all(promiseArray),
       userDetailsResponse = responseArray[0],
       userIdentifiersResponse = responseArray[1];
 

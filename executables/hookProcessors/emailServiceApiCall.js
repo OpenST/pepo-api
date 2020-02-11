@@ -6,15 +6,15 @@
 const program = require('commander');
 
 const rootPrefix = '../..',
-  HookProcessorsBase = require(rootPrefix + '/executables/hookProcessors/Base'),
   AddContact = require(rootPrefix + '/lib/email/hookProcessor/AddContact'),
+  HookProcessorsBase = require(rootPrefix + '/executables/hookProcessors/Base'),
   RemoveContact = require(rootPrefix + '/lib/email/hookProcessor/RemoveContact'),
   UpdateContact = require(rootPrefix + '/lib/email/hookProcessor/UpdateContact'),
   SendTransactionalMail = require(rootPrefix + '/lib/email/hookProcessor/SendTransactionalMail'),
-  EmailServiceAPICallHookModel = require(rootPrefix + '/app/models/mysql/EmailServiceAPICallHook'),
-  emailServiceApiCallHookConstants = require(rootPrefix + '/lib/globalConstant/emailServiceApiCallHook'),
+  EmailServiceAPICallHookModel = require(rootPrefix + '/app/models/mysql/big/EmailServiceAPICallHook'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
-  cronProcessesConstants = require(rootPrefix + '/lib/globalConstant/cronProcesses');
+  cronProcessesConstants = require(rootPrefix + '/lib/globalConstant/big/cronProcesses'),
+  emailServiceApiCallHookConstants = require(rootPrefix + '/lib/globalConstant/big/emailServiceApiCallHook');
 
 let ModelKlass;
 
@@ -37,30 +37,25 @@ if (!cronProcessId) {
 }
 
 /**
- * Class for EmailServiceApicall
+ * Class for to process hooks specifically related to pepo campaigns.
  *
- * @class
+ * @class EmailServiceApiCall
  */
 class EmailServiceApiCall extends HookProcessorsBase {
-  /**
-   * Constructor
-   *
-   * @constructor
-   */
-  constructor(params) {
-    super(params);
-  }
-
   /**
    * Run validations on input parameters.
    *
    * @return {Promise<void>}
    * @private
    */
-  async _validateAndSanitize() {}
+  async _validateAndSanitize() {
+    // Do nothing.
+  }
 
   /**
    * Function which will process the hook.
+   *
+   * @sets oThis.failedHookToBeIgnored
    *
    * @returns {Promise<void>}
    * @private
@@ -68,7 +63,7 @@ class EmailServiceApiCall extends HookProcessorsBase {
   async _processHook() {
     const oThis = this;
 
-    let HookProcessorKlass = oThis.getHookProcessorClass(),
+    const HookProcessorKlass = oThis.getHookProcessorClass(),
       response = await new HookProcessorKlass({ hook: oThis.hook }).perform();
 
     if (response.isSuccess()) {
@@ -77,17 +72,15 @@ class EmailServiceApiCall extends HookProcessorsBase {
       } else {
         oThis.successResponse[oThis.hook.id] = response.data;
       }
+    } else if (
+      response.data.error == 'VALIDATION_ERROR' &&
+      response.data.error_message &&
+      typeof response.data.error_message === 'object' &&
+      response.data.error_message.subscription_status
+    ) {
+      oThis.failedHookToBeIgnored[oThis.hook.id] = response.data;
     } else {
-      if (
-        response.data['error'] == 'VALIDATION_ERROR' &&
-        response.data['error_message'] &&
-        typeof response.data['error_message'] === 'object' &&
-        response.data['error_message']['subscription_status']
-      ) {
-        oThis.failedHookToBeIgnored[oThis.hook.id] = response.data;
-      } else {
-        oThis.failedHookToBeRetried[oThis.hook.id] = response.data;
-      }
+      oThis.failedHookToBeRetried[oThis.hook.id] = response.data;
     }
   }
 
@@ -127,7 +120,7 @@ class EmailServiceApiCall extends HookProcessorsBase {
   async _updateStatusToProcessed() {
     const oThis = this;
 
-    for (let hookId in oThis.hooksToBeProcessed) {
+    for (const hookId in oThis.hooksToBeProcessed) {
       if (oThis.successResponse[hookId]) {
         await new EmailServiceAPICallHookModel().markStatusAsProcessed(hookId, oThis.successResponse[hookId]);
       }
@@ -166,8 +159,10 @@ class EmailServiceApiCall extends HookProcessorsBase {
   get hookModelKlass() {
     if (!ModelKlass) {
       ModelKlass = EmailServiceAPICallHookModel;
+
       return ModelKlass;
     }
+
     return ModelKlass;
   }
 }

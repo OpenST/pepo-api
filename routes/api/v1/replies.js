@@ -7,7 +7,7 @@ const rootPrefix = '../../..',
   sanitizer = require(rootPrefix + '/helpers/sanitizer'),
   cookieHelper = require(rootPrefix + '/lib/cookieHelper'),
   apiName = require(rootPrefix + '/lib/globalConstant/apiName'),
-  entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
+  entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
   responseEntityKey = require(rootPrefix + '/lib/globalConstant/responseEntityKey');
 
 // Get url and message for sharing reply video given its reply detail id.
@@ -19,7 +19,7 @@ router.get('/:reply_detail_id/share', sanitizer.sanitizeDynamicUrlParams, functi
     const wrapperFormatterRsp = await new FormatterComposer({
       resultType: responseEntityKey.share,
       entityKindToResponseKeyMap: {
-        [entityType.share]: responseEntityKey.share
+        [entityTypeConstants.share]: responseEntityKey.share
       },
       serviceData: serviceResponse.data
     }).perform();
@@ -41,7 +41,7 @@ router.post('/', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
     const wrapperFormatterRsp = await new FormatterComposer({
       resultType: responseEntityKey.videoReplies,
       entityKindToResponseKeyMap: {
-        [entityType.videoReplyList]: responseEntityKey.videoReplies
+        [entityTypeConstants.videoReplyList]: responseEntityKey.videoReplies
       },
       serviceData: serviceResponse.data
     }).perform();
@@ -68,22 +68,23 @@ router.get('/:reply_detail_id', sanitizer.sanitizeDynamicUrlParams, function(req
     const wrapperFormatterRsp = await new FormatterComposer({
       resultType: responseEntityKey.videoReplies,
       entityKindToResponseKeyMap: {
-        [entityType.videoReplyList]: responseEntityKey.videoReplies,
-        [entityType.usersMap]: responseEntityKey.users,
-        [entityType.userStats]: responseEntityKey.userStats,
-        [entityType.userProfilesMap]: responseEntityKey.userProfiles,
-        [entityType.videoDescriptionsMap]: responseEntityKey.videoDescriptions,
-        [entityType.tagsMap]: responseEntityKey.tags,
-        [entityType.linksMap]: responseEntityKey.links,
-        [entityType.imagesMap]: responseEntityKey.images,
-        [entityType.videosMap]: responseEntityKey.videos,
-        [entityType.replyDetailsMap]: responseEntityKey.replyDetails,
-        [entityType.currentUserUserContributionsMap]: responseEntityKey.currentUserUserContributions,
-        [entityType.currentUserVideoContributionsMap]: responseEntityKey.currentUserVideoContributions,
-        [entityType.currentUserReplyDetailContributionsMap]: responseEntityKey.currentUserReplyDetailContributions,
-        [entityType.currentUserReplyDetailsRelationsMap]: responseEntityKey.currentUserReplyDetailsRelations,
-        [entityType.pricePointsMap]: responseEntityKey.pricePoints,
-        [entityType.token]: responseEntityKey.token
+        [entityTypeConstants.videoReplyList]: responseEntityKey.videoReplies,
+        [entityTypeConstants.usersMap]: responseEntityKey.users,
+        [entityTypeConstants.userStats]: responseEntityKey.userStats,
+        [entityTypeConstants.userProfilesMap]: responseEntityKey.userProfiles,
+        [entityTypeConstants.videoDescriptionsMap]: responseEntityKey.videoDescriptions,
+        [entityTypeConstants.tagsMap]: responseEntityKey.tags,
+        [entityTypeConstants.linksMap]: responseEntityKey.links,
+        [entityTypeConstants.imagesMap]: responseEntityKey.images,
+        [entityTypeConstants.videosMap]: responseEntityKey.videos,
+        [entityTypeConstants.replyDetailsMap]: responseEntityKey.replyDetails,
+        [entityTypeConstants.currentUserUserContributionsMap]: responseEntityKey.currentUserUserContributions,
+        [entityTypeConstants.currentUserVideoContributionsMap]: responseEntityKey.currentUserVideoContributions,
+        [entityTypeConstants.currentUserReplyDetailContributionsMap]:
+          responseEntityKey.currentUserReplyDetailContributions,
+        [entityTypeConstants.currentUserReplyDetailsRelationsMap]: responseEntityKey.currentUserReplyDetailsRelations,
+        [entityTypeConstants.pricePointsMap]: responseEntityKey.pricePoints,
+        [entityTypeConstants.token]: responseEntityKey.token
       },
       serviceData: serviceResponse.data
     }).perform();

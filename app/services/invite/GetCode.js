@@ -4,7 +4,7 @@ const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   InviteCodeByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/InviteCodeByUserIds'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
-  entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
+  entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
   shareEntityConstants = require(rootPrefix + '/lib/globalConstant/shareEntity');
 
 /**
@@ -85,7 +85,7 @@ class GetCode extends ServiceBase {
     const inviteUrl = shareEntityConstants.inviteShareUrl + oThis.inviteCodeDetails.code;
 
     const response = {
-      [entityType.share]: Object.assign(
+      [entityTypeConstants.share]: Object.assign(
         {
           id: oThis.shareId,
           kind: shareEntityConstants.inviteShareKind,
@@ -94,7 +94,7 @@ class GetCode extends ServiceBase {
         },
         shareEntityConstants.getInviteShareEntity(inviteUrl)
       ),
-      [entityType.inviteCode]: oThis.inviteCodeDetails
+      [entityTypeConstants.inviteCode]: oThis.inviteCodeDetails
     };
 
     return responseHelper.successWithData(response);

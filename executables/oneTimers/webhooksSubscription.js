@@ -17,7 +17,7 @@ const rootPrefix = '../..',
  */
 class WebhooksSubscription {
   /**
-   * Perform.
+   * Main performer for class.
    *
    * @returns {Promise<void>}
    */
@@ -37,8 +37,8 @@ class WebhooksSubscription {
   async subscribeToOstPlatformEvents() {
     const oThis = this;
 
-    let webhookUrl = webhookConstants.webhookUrl;
-    let params = {
+    const webhookUrl = webhookConstants.webhookUrl;
+    const params = {
       topics: [
         'transactions/initiate',
         'transactions/success',
@@ -56,7 +56,7 @@ class WebhooksSubscription {
 
     logger.log('Created webhook for: ', params);
 
-    let webhooksCreationResponse = await jsSdkWrapper.createWebhooks(params);
+    const webhooksCreationResponse = await jsSdkWrapper.createWebhooks(params);
 
     if (webhooksCreationResponse.isFailure()) {
       logger.error(webhooksCreationResponse);
@@ -81,8 +81,8 @@ class WebhooksSubscription {
 
     const currentTime = Math.floor(Date.now() / 1000);
 
-    // Insert user in database
-    let insertResponse = await new WebhooksModel()
+    // Insert in webhooks table.
+    const insertResponse = await new WebhooksModel()
       .insert({
         ost_id: oThis.webhooksData.id,
         status: webhookConstants.invertedStatuses[oThis.webhooksData.status],

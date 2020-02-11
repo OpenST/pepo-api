@@ -1,13 +1,13 @@
 const rootPrefix = '../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
-  TemporaryTokenModel = require(rootPrefix + '/app/models/mysql/TemporaryToken'),
+  TemporaryTokenModel = require(rootPrefix + '/app/models/mysql/big/TemporaryToken'),
   SendTransactionalMail = require(rootPrefix + '/lib/email/hookCreator/SendTransactionalMail'),
   util = require(rootPrefix + '/lib/util'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   webPageConstants = require(rootPrefix + '/lib/globalConstant/webPage'),
-  temporaryTokenConstants = require(rootPrefix + '/lib/globalConstant/temporaryToken'),
   preLaunchInviteConstants = require(rootPrefix + '/lib/globalConstant/preLaunchInvite'),
-  emailServiceApiCallHookConstants = require(rootPrefix + '/lib/globalConstant/emailServiceApiCallHook');
+  temporaryTokenConstants = require(rootPrefix + '/lib/globalConstant/big/temporaryToken'),
+  emailServiceApiCallHookConstants = require(rootPrefix + '/lib/globalConstant/big/emailServiceApiCallHook');
 
 /**
  * Class to send double opt in email.

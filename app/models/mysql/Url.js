@@ -113,6 +113,8 @@ class Url extends ModelBase {
       })
       .fire();
 
+    await Url.flushCache({ ids: [response.insertId] });
+
     return response;
   }
 
@@ -128,7 +130,7 @@ class Url extends ModelBase {
   async updateById(params) {
     const oThis = this;
 
-    return oThis
+    const response = await oThis
       .update({
         url: params.url
       })
@@ -136,6 +138,10 @@ class Url extends ModelBase {
         id: params.id
       })
       .fire();
+
+    await Url.flushCache({ ids: [params.id] });
+
+    return response;
   }
 
   /**
@@ -157,41 +163,53 @@ class Url extends ModelBase {
         kind: urlConstants.invertedKinds[params.kind]
       })
       .fire();
+
+    await Url.flushCache({ ids: [params.id] });
   }
 
   /**
    * Delete by id.
    *
    * @param {object} params
-   * @param {number} params.id
+   * @param {array} params.ids
    *
    * @return {Promise<void>}
    */
-  async deleteById(params) {
+  async deleteByIds(params) {
     const oThis = this;
 
     await oThis
       .delete()
       .where({
-        id: params.id
+        id: params.ids
       })
       .fire();
+
+    await Url.flushCache({ ids: params.ids });
   }
 
   /**
    * Get url details.
    *
-   * @param {array} url
+   * @param {array} urls
    *
    * @returns {Promise<void>}
    */
-  async getUrls(url) {
+  async getUrls(urls) {
     const oThis = this;
 
-    return oThis
+    const Rows = await oThis
       .select('*')
-      .where({ url: url })
+      .where({ url: urls })
       .fire();
+
+    const response = {};
+    for (let ind = 0; ind < Rows.length; ind++) {
+      const formattedRow = oThis._formatDbData(Rows[ind]);
+      response[formattedRow.id] = formattedRow;
+    }
+
+    return response;
   }
 
   /**

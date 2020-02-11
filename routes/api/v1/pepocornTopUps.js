@@ -6,7 +6,7 @@ const rootPrefix = '../../..',
   routeHelper = require(rootPrefix + '/routes/helper'),
   sanitizer = require(rootPrefix + '/helpers/sanitizer'),
   apiName = require(rootPrefix + '/lib/globalConstant/apiName'),
-  entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
+  entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
   responseEntityKey = require(rootPrefix + '/lib/globalConstant/responseEntityKey');
 
 /* Get pepocorn info. */
@@ -17,8 +17,8 @@ router.get('/info', sanitizer.sanitizeDynamicUrlParams, function(req, res, next)
     const wrapperFormatterRsp = await new FormatterComposer({
       resultType: responseEntityKey.pepocornTopupInfo,
       entityKindToResponseKeyMap: {
-        [entityType.pepocornTopupInfo]: responseEntityKey.pepocornTopupInfo,
-        [entityType.pricePointsMap]: responseEntityKey.pricePoints
+        [entityTypeConstants.pepocornTopupInfo]: responseEntityKey.pepocornTopupInfo,
+        [entityTypeConstants.pricePointsMap]: responseEntityKey.pricePoints
       },
       serviceData: serviceResponse.data
     }).perform();
@@ -47,7 +47,7 @@ router.get('/balance', sanitizer.sanitizeDynamicUrlParams, function(req, res, ne
     const wrapperFormatterRsp = await new FormatterComposer({
       resultType: responseEntityKey.pepocornBalance,
       entityKindToResponseKeyMap: {
-        [entityType.pepocornBalance]: responseEntityKey.pepocornBalance
+        [entityTypeConstants.pepocornBalance]: responseEntityKey.pepocornBalance
       },
       serviceData: serviceResponse.data
     }).perform();

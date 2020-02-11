@@ -4,7 +4,7 @@ const rootPrefix = '../../../../..',
   UserModelKlass = require(rootPrefix + '/app/models/mysql/User'),
   CommonValidator = require(rootPrefix + '/lib/validators/Common'),
   AddVideoDescription = require(rootPrefix + '/lib/addDescription/Video'),
-  VideoDetailsModel = require(rootPrefix + '/app/models/mysql/VideoDetail'),
+  VideoDetailModel = require(rootPrefix + '/app/models/mysql/VideoDetail'),
   UpdateProfileBase = require(rootPrefix + '/app/services/user/profile/update/Base'),
   videoLib = require(rootPrefix + '/lib/videoLib'),
   bgJobConstants = require(rootPrefix + '/lib/globalConstant/bgJob'),
@@ -13,9 +13,8 @@ const rootPrefix = '../../../../..',
   userConstants = require(rootPrefix + '/lib/globalConstant/user'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   feedsConstants = require(rootPrefix + '/lib/globalConstant/feed'),
-  videoDetailsConstants = require(rootPrefix + '/lib/globalConstant/videoDetail'),
   videoConstants = require(rootPrefix + '/lib/globalConstant/video'),
-  entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
+  entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
   ValidateVideoService = require(rootPrefix + '/app/services/video/Validate'),
   notificationJobEnqueue = require(rootPrefix + '/lib/rabbitMqEnqueue/notification'),
   notificationJobConstants = require(rootPrefix + '/lib/globalConstant/notificationJob');
@@ -233,8 +232,6 @@ class UpdateFanVideo extends UpdateProfileBase {
 
     // Feed needs to be added only if user is an approved creator.
     if (UserModelKlass.isUserApprovedCreator(oThis.userObj)) {
-      await oThis._publishAtMentionNotifications();
-
       await oThis._addFeed();
 
       const messagePayload = {
@@ -245,8 +242,8 @@ class UpdateFanVideo extends UpdateProfileBase {
       promiseArray.push(bgJob.enqueue(bgJobConstants.slackContentVideoMonitoringJobTopic, messagePayload));
       // Notification would be published only if user is approved.
       promiseArray.push(
-        notificationJobEnqueue.enqueue(notificationJobConstants.videoAdd, {
-          userId: oThis.profileUserId,
+        notificationJobEnqueue.enqueue(notificationJobConstants.videoNotificationsKind, {
+          creatorUserId: oThis.profileUserId,
           videoId: oThis.videoId,
           mentionedUserIds: oThis.mentionedUserIds
         })
@@ -259,26 +256,6 @@ class UpdateFanVideo extends UpdateProfileBase {
     }
 
     await Promise.all(promiseArray);
-  }
-
-  /**  await oThis._publishNotifications();
-   * Publish notifications
-   * @returns {Promise<void>}
-   * @private
-   */
-  async _publishAtMentionNotifications() {
-    const oThis = this;
-
-    if (oThis.mentionedUserIds.length === 0) {
-      return;
-    }
-
-    // Notification would be published only if user is approved.
-    await notificationJobEnqueue.enqueue(notificationJobConstants.userMention, {
-      userId: oThis.currentUserId,
-      videoId: oThis.videoId,
-      mentionedUserIds: oThis.mentionedUserIds
-    });
   }
 
   /**
@@ -315,9 +292,9 @@ class UpdateFanVideo extends UpdateProfileBase {
 
     promisesArray.push(super._flushCaches());
     if (oThis.feedId) {
-      promisesArray.push(FeedModel.flushCache({ id: oThis.feedId }));
+      promisesArray.push(FeedModel.flushCache({ ids: [oThis.feedId] }));
     }
-    promisesArray.push(VideoDetailsModel.flushCache({ userId: oThis.profileUserId }));
+    promisesArray.push(VideoDetailModel.flushCache({ userId: oThis.profileUserId }));
 
     await Promise.all(promisesArray);
   }
@@ -333,7 +310,7 @@ class UpdateFanVideo extends UpdateProfileBase {
 
     // FE fires the video creation pixel and following response is necessary.
     return responseHelper.successWithData({
-      [entityType.userVideoList]: [
+      [entityTypeConstants.userVideoList]: [
         {
           creatorUserId: oThis.profileUserId.toString(),
           updatedAt: Math.round(new Date() / 1000),

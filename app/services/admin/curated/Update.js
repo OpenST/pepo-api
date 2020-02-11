@@ -4,13 +4,15 @@ const rootPrefix = '../../../..',
   UserCache = require(rootPrefix + '/lib/cacheManagement/multi/User'),
   TagMultiCache = require(rootPrefix + '/lib/cacheManagement/multi/Tag'),
   CuratedEntityModel = require(rootPrefix + '/app/models/mysql/CuratedEntity'),
-  AdminActivityLogModel = require(rootPrefix + '/app/models/mysql/AdminActivityLog'),
+  AdminActivityLogModel = require(rootPrefix + '/app/models/mysql/admin/AdminActivityLog'),
+  ChannelByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelByIds'),
   CuratedEntityIdsByKindCache = require(rootPrefix + '/lib/cacheManagement/single/CuratedEntityIdsByKind'),
   userConstants = require(rootPrefix + '/lib/globalConstant/user'),
   tagConstants = require(rootPrefix + '/lib/globalConstant/tag'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
+  channelsConstants = require(rootPrefix + '/lib/globalConstant/channel/channels'),
   curatedEntitiesConstants = require(rootPrefix + '/lib/globalConstant/curatedEntities'),
-  adminActivityLogConstants = require(rootPrefix + '/lib/globalConstant/adminActivityLogs');
+  adminActivityLogConstants = require(rootPrefix + '/lib/globalConstant/admin/adminActivityLogs');
 
 /**
  * Class to insert or update entry in curated entities.
@@ -68,19 +70,29 @@ class UpdateCuratedEntities extends ServiceBase {
   async validateAndSanitize() {
     const oThis = this;
 
-    if (oThis.entityKind === curatedEntitiesConstants.userEntityKind) {
-      await oThis.fetchAndValidateUser();
-    } else if (oThis.entityKind === curatedEntitiesConstants.tagsEntityKind) {
-      await oThis.fetchAndValidateTag();
-    } else {
-      return Promise.reject(
-        responseHelper.paramValidationError({
-          internal_error_identifier: 'a_s_a_c_i_1',
-          api_error_identifier: 'invalid_api_params',
-          params_error_identifiers: ['invalid_entity_kind'],
-          debug_options: { entityKind: oThis.entityKind }
-        })
-      );
+    switch (oThis.entityKind) {
+      case curatedEntitiesConstants.userEntityKind: {
+        await oThis.fetchAndValidateUser();
+        break;
+      }
+      case curatedEntitiesConstants.tagsEntityKind: {
+        await oThis.fetchAndValidateTag();
+        break;
+      }
+      case curatedEntitiesConstants.channelsEntityKind: {
+        await oThis.fetchAndValidateChannel();
+        break;
+      }
+      default: {
+        return Promise.reject(
+          responseHelper.paramValidationError({
+            internal_error_identifier: 'a_s_a_c_i_1',
+            api_error_identifier: 'invalid_api_params',
+            params_error_identifiers: ['invalid_entity_kind'],
+            debug_options: { entityKind: oThis.entityKind }
+          })
+        );
+      }
     }
   }
 
@@ -189,6 +201,34 @@ class UpdateCuratedEntities extends ServiceBase {
           api_error_identifier: 'invalid_api_params',
           params_error_identifiers: ['invalid_entity_id'],
           debug_options: { entityId: oThis.entityId }
+        })
+      );
+    }
+  }
+
+  /**
+   * Fetch and validate channel.
+   *
+   * @returns {Promise<never>}
+   */
+  async fetchAndValidateChannel() {
+    const oThis = this;
+
+    const channelByIdsCacheResponse = await new ChannelByIdsCache({ ids: [oThis.entityId] }).fetch();
+    if (channelByIdsCacheResponse.isFailure()) {
+      return Promise.reject(channelByIdsCacheResponse);
+    }
+
+    const channelObj = channelByIdsCacheResponse.data[oThis.entityId];
+
+    if (!CommonValidators.validateNonEmptyObject(channelObj) || channelObj.status !== channelsConstants.activeStatus) {
+      return Promise.reject(
+        responseHelper.error({
+          internal_error_identifier: 'a_s_c_u_j_fc_1',
+          api_error_identifier: 'entity_not_found',
+          debug_options: {
+            channelId: oThis.channelId
+          }
         })
       );
     }

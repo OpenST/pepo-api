@@ -1,17 +1,17 @@
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
-  FiatPaymentModel = require(rootPrefix + '/app/models/mysql/FiatPayment'),
-  PaymentProcessingFactory = require(rootPrefix + '/lib/payment/process/Factory'),
+  FiatPaymentModel = require(rootPrefix + '/app/models/mysql/fiat/FiatPayment'),
   basicHelper = require(rootPrefix + '/helpers/basic'),
   bgJob = require(rootPrefix + '/lib/rabbitMqEnqueue/bgJob'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   bgJobConstants = require(rootPrefix + '/lib/globalConstant/bgJob'),
-  entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
   createErrorLogsEntry = require(rootPrefix + '/lib/errorLogs/createEntry'),
   errorLogsConstants = require(rootPrefix + '/lib/globalConstant/errorLogs'),
-  fiatPaymentConstants = require(rootPrefix + '/lib/globalConstant/fiatPayment'),
-  inAppProductConstants = require(rootPrefix + '/lib/globalConstant/inAppProduct'),
+  entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
+  paymentProcessingFactory = require(rootPrefix + '/lib/payment/process/Factory'),
+  fiatPaymentConstants = require(rootPrefix + '/lib/globalConstant/fiat/fiatPayment'),
   ostPricePointConstants = require(rootPrefix + '/lib/globalConstant/ostPricePoints'),
+  inAppProductConstants = require(rootPrefix + '/lib/globalConstant/fiat/inAppProduct'),
   mysqlErrorConstants = require(rootPrefix + '/lib/globalConstant/mysqlErrorConstants');
 
 /**
@@ -221,7 +221,7 @@ class CreateTopup extends ServiceBase {
   _apiResponse() {
     const oThis = this;
 
-    return responseHelper.successWithData({ [entityType.topup]: oThis.paymentDetail });
+    return responseHelper.successWithData({ [entityTypeConstants.topup]: oThis.paymentDetail });
   }
 
   /**
@@ -240,7 +240,7 @@ class CreateTopup extends ServiceBase {
       retryCount: oThis.retryCount
     };
 
-    const paymentProcessor = PaymentProcessingFactory.getInstance(oThis.os, params);
+    const paymentProcessor = paymentProcessingFactory.getInstance(oThis.os, params);
 
     return paymentProcessor.perform();
   }

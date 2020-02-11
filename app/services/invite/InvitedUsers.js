@@ -6,7 +6,7 @@ const rootPrefix = '../../..',
   InviteCodeByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/InviteCodeByUserIds'),
   TokenUserDetailByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TokenUserByUserIds'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
-  entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
+  entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
   paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination');
 
 /**
@@ -269,7 +269,7 @@ class InvitedUsers extends ServiceBase {
     const oThis = this;
 
     const response = {
-      [entityType.userSearchList]: oThis.searchResults,
+      [entityTypeConstants.userSearchList]: oThis.searchResults,
       usersByIdMap: oThis.userDetails,
       tokenUsersByUserIdMap: oThis.tokenUsersByUserIdMap,
       imageMap: oThis.imageDetails,

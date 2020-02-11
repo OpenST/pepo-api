@@ -86,13 +86,12 @@ class UserMute extends ServiceBase {
   async _fetchUser() {
     const oThis = this;
 
-    const cacheRsp = await new UsersCache({ ids: [oThis.otherUserId] }).fetch();
-
-    if (cacheRsp.isFailure()) {
-      return Promise.reject(cacheRsp);
+    const cacheResponse = await new UsersCache({ ids: [oThis.otherUserId] }).fetch();
+    if (cacheResponse.isFailure()) {
+      return Promise.reject(cacheResponse);
     }
 
-    const otherUserObj = cacheRsp.data[oThis.otherUserId];
+    const otherUserObj = cacheResponse.data[oThis.otherUserId];
 
     if (otherUserObj.status !== userConstants.activeStatus) {
       return Promise.reject(
@@ -116,12 +115,11 @@ class UserMute extends ServiceBase {
     const oThis = this;
 
     const cacheResponse = await new UserMuteByUser1IdsCache({ user1Ids: [oThis.currentUserId] }).fetch();
-
     if (cacheResponse.isFailure()) {
       return Promise.reject(cacheResponse);
     }
 
-    let cachedData = cacheResponse.data[oThis.currentUserId];
+    const cachedData = cacheResponse.data[oThis.currentUserId];
 
     if (cachedData[oThis.otherUserId]) {
       return Promise.reject(
@@ -143,15 +141,16 @@ class UserMute extends ServiceBase {
   async _muteUser() {
     const oThis = this;
 
-    let insertData = {
+    const insertData = {
       user1_id: oThis.currentUserId,
       user2_id: oThis.otherUserId
     };
 
-    let insertResponse = await new UserMuteModel().insert(insertData).fire();
+    const insertResponse = await new UserMuteModel().insert(insertData).fire();
 
     if (!insertResponse) {
       logger.error('Error while inserting data in userMute table.');
+
       return Promise.reject(new Error('Error while inserting data in userMute table.'));
     }
 

@@ -4,7 +4,7 @@ const rootPrefix = '../../..',
   SecureTokenCache = require(rootPrefix + '/lib/cacheManagement/single/SecureToken'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
-  entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
+  entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
   pricePointConstants = require(rootPrefix + '/lib/globalConstant/ostPricePoints'),
   pepocornProductConstants = require(rootPrefix + '/lib/globalConstant/pepocornProduct');
 
@@ -53,8 +53,8 @@ class GetPepocornTopUpInfo extends ServiceBase {
     oThis._fetchProductInfo();
 
     return responseHelper.successWithData({
-      [entityType.pepocornTopupInfo]: oThis.productInfo,
-      [entityType.pricePointsMap]: oThis.pricePoints
+      [entityTypeConstants.pepocornTopupInfo]: oThis.productInfo,
+      [entityTypeConstants.pricePointsMap]: oThis.pricePoints
     });
   }
 

@@ -2,11 +2,11 @@ const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   UserMuteModel = require(rootPrefix + '/app/models/mysql/UserMute'),
   UsersCache = require(rootPrefix + '/lib/cacheManagement/multi/User'),
-  AdminActivityLogModel = require(rootPrefix + '/app/models/mysql/AdminActivityLog'),
+  AdminActivityLogModel = require(rootPrefix + '/app/models/mysql/admin/AdminActivityLog'),
   UserMuteByUser2IdsForGlobalCache = require(rootPrefix + '/lib/cacheManagement/multi/UserMuteByUser2IdsForGlobal'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   userConstants = require(rootPrefix + '/lib/globalConstant/user'),
-  adminActivityLogConstants = require(rootPrefix + '/lib/globalConstant/adminActivityLogs');
+  adminActivityLogConstants = require(rootPrefix + '/lib/globalConstant/admin/adminActivityLogs');
 
 /**
  * Class to un mute user by admin.
@@ -105,7 +105,7 @@ class UnMuteUser extends ServiceBase {
       return Promise.reject(cacheResponse);
     }
 
-    let isUserAlreadyUnMuted = cacheResponse.data[oThis.userId]['all'] == 0 ? true : false;
+    const isUserAlreadyUnMuted = cacheResponse.data[oThis.userId].all == 0;
 
     if (isUserAlreadyUnMuted) {
       return Promise.reject(

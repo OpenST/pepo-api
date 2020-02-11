@@ -6,7 +6,7 @@ const rootPrefix = '../../..',
   routeHelper = require(rootPrefix + '/routes/helper'),
   sanitizer = require(rootPrefix + '/helpers/sanitizer'),
   apiName = require(rootPrefix + '/lib/globalConstant/apiName'),
-  entityType = require(rootPrefix + '/lib/globalConstant/entityType'),
+  entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   cookieHelper = require(rootPrefix + '/lib/cookieHelper'),
   responseEntityKey = require(rootPrefix + '/lib/globalConstant/responseEntityKey');
@@ -19,7 +19,7 @@ router.post('/register-device', sanitizer.sanitizeDynamicUrlParams, function(req
     const wrapperFormatterRsp = await new FormatterComposer({
       resultType: responseEntityKey.device,
       entityKindToResponseKeyMap: {
-        [entityType.device]: responseEntityKey.device
+        [entityTypeConstants.device]: responseEntityKey.device
       },
       serviceData: serviceResponse.data
     }).perform();
@@ -40,7 +40,7 @@ router.get('/recovery-info', sanitizer.sanitizeDynamicUrlParams, function(req, r
     const wrapperFormatterRsp = await new FormatterComposer({
       resultType: responseEntityKey.recoveryInfo,
       entityKindToResponseKeyMap: {
-        [entityType.recoveryInfo]: responseEntityKey.recoveryInfo
+        [entityTypeConstants.recoveryInfo]: responseEntityKey.recoveryInfo
       },
       serviceData: serviceResponse.data
     }).perform();
@@ -62,10 +62,10 @@ router.get('/:profile_user_id/contribution-to', sanitizer.sanitizeDynamicUrlPara
     const wrapperFormatterRsp = await new FormatterComposer({
       resultType: responseEntityKey.contributionToUsers,
       entityKindToResponseKeyMap: {
-        [entityType.users]: responseEntityKey.contributionToUsers,
-        [entityType.imagesMap]: responseEntityKey.images,
-        [entityType.userListMeta]: responseEntityKey.meta,
-        [entityType.userContributionToStatsMap]: responseEntityKey.userContributionToStats
+        [entityTypeConstants.users]: responseEntityKey.contributionToUsers,
+        [entityTypeConstants.imagesMap]: responseEntityKey.images,
+        [entityTypeConstants.userListMeta]: responseEntityKey.meta,
+        [entityTypeConstants.userContributionToStatsMap]: responseEntityKey.userContributionToStats
       },
       serviceData: serviceResponse.data
     }).perform();
@@ -87,10 +87,10 @@ router.get('/:profile_user_id/contribution-by', sanitizer.sanitizeDynamicUrlPara
     const wrapperFormatterRsp = await new FormatterComposer({
       resultType: responseEntityKey.contributionByUsers,
       entityKindToResponseKeyMap: {
-        [entityType.users]: responseEntityKey.contributionByUsers,
-        [entityType.imagesMap]: responseEntityKey.images,
-        [entityType.userListMeta]: responseEntityKey.meta,
-        [entityType.userContributionByStatsMap]: responseEntityKey.userContributionByStats
+        [entityTypeConstants.users]: responseEntityKey.contributionByUsers,
+        [entityTypeConstants.imagesMap]: responseEntityKey.images,
+        [entityTypeConstants.userListMeta]: responseEntityKey.meta,
+        [entityTypeConstants.userContributionByStatsMap]: responseEntityKey.userContributionByStats
       },
       serviceData: serviceResponse.data
     }).perform();
@@ -112,9 +112,9 @@ router.get('/:profile_user_id/contribution-suggestion', sanitizer.sanitizeDynami
     const wrapperFormatterRsp = await new FormatterComposer({
       resultType: responseEntityKey.contributionSuggestions,
       entityKindToResponseKeyMap: {
-        [entityType.users]: responseEntityKey.contributionSuggestions,
-        [entityType.imagesMap]: responseEntityKey.images,
-        [entityType.userListMeta]: responseEntityKey.meta
+        [entityTypeConstants.users]: responseEntityKey.contributionSuggestions,
+        [entityTypeConstants.imagesMap]: responseEntityKey.images,
+        [entityTypeConstants.userListMeta]: responseEntityKey.meta
       },
       serviceData: serviceResponse.data
     }).perform();
@@ -135,10 +135,10 @@ router.post('/activation-initiate', sanitizer.sanitizeDynamicUrlParams, function
     const wrapperFormatterRsp = await new FormatterComposer({
       resultType: responseEntityKey.activationInitiate,
       entityKindToResponseKeyMap: {
-        [entityType.loggedInUser]: responseEntityKey.loggedInUser,
-        [entityType.pricePointsMap]: responseEntityKey.pricePoints,
-        [entityType.usersMap]: responseEntityKey.users,
-        [entityType.token]: responseEntityKey.token
+        [entityTypeConstants.loggedInUser]: responseEntityKey.loggedInUser,
+        [entityTypeConstants.pricePointsMap]: responseEntityKey.pricePoints,
+        [entityTypeConstants.usersMap]: responseEntityKey.users,
+        [entityTypeConstants.token]: responseEntityKey.token
       },
       serviceData: serviceResponse.data
     }).perform();
@@ -160,12 +160,12 @@ router.get('/current', sanitizer.sanitizeDynamicUrlParams, function(req, res, ne
     const wrapperFormatterRsp = await new FormatterComposer({
       resultType: responseEntityKey.loggedInUser,
       entityKindToResponseKeyMap: {
-        [entityType.loggedInUser]: responseEntityKey.loggedInUser,
-        [entityType.twitterConnectMeta]: responseEntityKey.meta,
-        [entityType.pricePointsMap]: responseEntityKey.pricePoints,
-        [entityType.usersMap]: responseEntityKey.users,
-        [entityType.imagesMap]: responseEntityKey.images,
-        [entityType.token]: responseEntityKey.token
+        [entityTypeConstants.loggedInUser]: responseEntityKey.loggedInUser,
+        [entityTypeConstants.twitterConnectMeta]: responseEntityKey.meta,
+        [entityTypeConstants.pricePointsMap]: responseEntityKey.pricePoints,
+        [entityTypeConstants.usersMap]: responseEntityKey.users,
+        [entityTypeConstants.imagesMap]: responseEntityKey.images,
+        [entityTypeConstants.token]: responseEntityKey.token
       },
       serviceData: serviceResponse.data
     }).perform();
@@ -185,16 +185,16 @@ router.get('/:profile_user_id/profile', sanitizer.sanitizeDynamicUrlParams, func
     const wrapperFormatterRsp = await new FormatterComposer({
       resultType: responseEntityKey.userProfile,
       entityKindToResponseKeyMap: {
-        [entityType.userProfile]: responseEntityKey.userProfile,
-        [entityType.usersMap]: responseEntityKey.users,
-        [entityType.linksMap]: responseEntityKey.links,
-        [entityType.imagesMap]: responseEntityKey.images,
-        [entityType.tagsMap]: responseEntityKey.tags,
-        [entityType.userProfileAllowedActions]: responseEntityKey.userProfileAllowedActions,
-        [entityType.userStats]: responseEntityKey.userStats,
-        [entityType.currentUserUserContributionsMap]: responseEntityKey.currentUserUserContributions,
-        [entityType.pricePointsMap]: responseEntityKey.pricePoints,
-        [entityType.twitterUsersMap]: responseEntityKey.twitterUsers
+        [entityTypeConstants.userProfile]: responseEntityKey.userProfile,
+        [entityTypeConstants.usersMap]: responseEntityKey.users,
+        [entityTypeConstants.linksMap]: responseEntityKey.links,
+        [entityTypeConstants.imagesMap]: responseEntityKey.images,
+        [entityTypeConstants.tagsMap]: responseEntityKey.tags,
+        [entityTypeConstants.userProfileAllowedActions]: responseEntityKey.userProfileAllowedActions,
+        [entityTypeConstants.userStats]: responseEntityKey.userStats,
+        [entityTypeConstants.currentUserUserContributionsMap]: responseEntityKey.currentUserUserContributions,
+        [entityTypeConstants.pricePointsMap]: responseEntityKey.pricePoints,
+        [entityTypeConstants.twitterUsersMap]: responseEntityKey.twitterUsers
       },
       serviceData: serviceResponse.data
     }).perform();
@@ -213,7 +213,7 @@ router.get('/email', sanitizer.sanitizeDynamicUrlParams, function(req, res, next
     const wrapperFormatterRsp = await new FormatterComposer({
       resultType: responseEntityKey.email,
       entityKindToResponseKeyMap: {
-        [entityType.email]: responseEntityKey.email
+        [entityTypeConstants.email]: responseEntityKey.email
       },
       serviceData: serviceResponse.data
     }).perform();
@@ -233,7 +233,7 @@ router.post('/:profile_user_id/fan-video', sanitizer.sanitizeDynamicUrlParams, f
     const wrapperFormatterRsp = await new FormatterComposer({
       resultType: responseEntityKey.userVideoList,
       entityKindToResponseKeyMap: {
-        [entityType.userVideoList]: responseEntityKey.userVideoList
+        [entityTypeConstants.userVideoList]: responseEntityKey.userVideoList
       },
       serviceData: serviceResponse.data
     }).perform();
@@ -279,22 +279,23 @@ router.get('/:profile_user_id/video-history', sanitizer.sanitizeDynamicUrlParams
     const wrapperFormatterRsp = await new FormatterComposer({
       resultType: responseEntityKey.userVideoList,
       entityKindToResponseKeyMap: {
-        [entityType.userVideoList]: responseEntityKey.userVideoList,
-        [entityType.usersMap]: responseEntityKey.users,
-        [entityType.userStats]: responseEntityKey.userStats,
-        [entityType.userProfilesMap]: responseEntityKey.userProfiles,
-        [entityType.videoDescriptionsMap]: responseEntityKey.videoDescriptions,
-        [entityType.tagsMap]: responseEntityKey.tags,
-        [entityType.linksMap]: responseEntityKey.links,
-        [entityType.imagesMap]: responseEntityKey.images,
-        [entityType.videosMap]: responseEntityKey.videos,
-        [entityType.videoDetailsMap]: responseEntityKey.videoDetails,
-        [entityType.currentUserUserContributionsMap]: responseEntityKey.currentUserUserContributions,
-        [entityType.currentUserVideoContributionsMap]: responseEntityKey.currentUserVideoContributions,
-        [entityType.currentUserVideoRelationsMap]: responseEntityKey.currentUserVideoRelations,
-        [entityType.pricePointsMap]: responseEntityKey.pricePoints,
-        [entityType.token]: responseEntityKey.token,
-        [entityType.userVideoListMeta]: responseEntityKey.meta
+        [entityTypeConstants.userVideoList]: responseEntityKey.userVideoList,
+        [entityTypeConstants.usersMap]: responseEntityKey.users,
+        [entityTypeConstants.userStats]: responseEntityKey.userStats,
+        [entityTypeConstants.userProfilesMap]: responseEntityKey.userProfiles,
+        [entityTypeConstants.videoDescriptionsMap]: responseEntityKey.videoDescriptions,
+        [entityTypeConstants.tagsMap]: responseEntityKey.tags,
+        [entityTypeConstants.linksMap]: responseEntityKey.links,
+        [entityTypeConstants.imagesMap]: responseEntityKey.images,
+        [entityTypeConstants.videosMap]: responseEntityKey.videos,
+        [entityTypeConstants.videoDetailsMap]: responseEntityKey.videoDetails,
+        [entityTypeConstants.channelsMap]: responseEntityKey.channels,
+        [entityTypeConstants.currentUserUserContributionsMap]: responseEntityKey.currentUserUserContributions,
+        [entityTypeConstants.currentUserVideoContributionsMap]: responseEntityKey.currentUserVideoContributions,
+        [entityTypeConstants.currentUserVideoRelationsMap]: responseEntityKey.currentUserVideoRelations,
+        [entityTypeConstants.pricePointsMap]: responseEntityKey.pricePoints,
+        [entityTypeConstants.token]: responseEntityKey.token,
+        [entityTypeConstants.userVideoListMeta]: responseEntityKey.meta
       },
       serviceData: serviceResponse.data
     }).perform();
@@ -316,20 +317,21 @@ router.get('/:profile_user_id/reply-history', sanitizer.sanitizeDynamicUrlParams
     const wrapperFormatterRsp = await new FormatterComposer({
       resultType: responseEntityKey.userReplies,
       entityKindToResponseKeyMap: {
-        [entityType.userReplyList]: responseEntityKey.userReplies,
-        [entityType.usersMap]: responseEntityKey.users,
-        [entityType.userStats]: responseEntityKey.userStats,
-        [entityType.userProfilesMap]: responseEntityKey.userProfiles,
-        [entityType.videoDescriptionsMap]: responseEntityKey.videoDescriptions,
-        [entityType.tagsMap]: responseEntityKey.tags,
-        [entityType.linksMap]: responseEntityKey.links,
-        [entityType.imagesMap]: responseEntityKey.images,
-        [entityType.videosMap]: responseEntityKey.videos,
-        [entityType.replyDetailsMap]: responseEntityKey.replyDetails,
-        [entityType.videoDetailsMap]: responseEntityKey.videoDetails,
-        [entityType.pricePointsMap]: responseEntityKey.pricePoints,
-        [entityType.token]: responseEntityKey.token,
-        [entityType.userVideoListMeta]: responseEntityKey.meta
+        [entityTypeConstants.userReplyList]: responseEntityKey.userReplies,
+        [entityTypeConstants.usersMap]: responseEntityKey.users,
+        [entityTypeConstants.userStats]: responseEntityKey.userStats,
+        [entityTypeConstants.userProfilesMap]: responseEntityKey.userProfiles,
+        [entityTypeConstants.videoDescriptionsMap]: responseEntityKey.videoDescriptions,
+        [entityTypeConstants.tagsMap]: responseEntityKey.tags,
+        [entityTypeConstants.linksMap]: responseEntityKey.links,
+        [entityTypeConstants.imagesMap]: responseEntityKey.images,
+        [entityTypeConstants.videosMap]: responseEntityKey.videos,
+        [entityTypeConstants.replyDetailsMap]: responseEntityKey.replyDetails,
+        [entityTypeConstants.videoDetailsMap]: responseEntityKey.videoDetails,
+        [entityTypeConstants.channelsMap]: responseEntityKey.channels,
+        [entityTypeConstants.pricePointsMap]: responseEntityKey.pricePoints,
+        [entityTypeConstants.token]: responseEntityKey.token,
+        [entityTypeConstants.userVideoListMeta]: responseEntityKey.meta
       },
       serviceData: serviceResponse.data
     }).perform();
@@ -349,7 +351,7 @@ router.get('/:user_id/websocket-details', sanitizer.sanitizeDynamicUrlParams, fu
     const wrapperFormatterRsp = await new FormatterComposer({
       resultType: responseEntityKey.websocketConnectionPayload,
       entityKindToResponseKeyMap: {
-        [entityType.websocketConnectionPayload]: responseEntityKey.websocketConnectionPayload
+        [entityTypeConstants.websocketConnectionPayload]: responseEntityKey.websocketConnectionPayload
       },
       serviceData: serviceResponse.data
     }).perform();
@@ -385,10 +387,10 @@ router.get('/search', sanitizer.sanitizeDynamicUrlParams, function(req, res, nex
     const wrapperFormatterRsp = await new FormatterComposer({
       resultType: responseEntityKey.userSearchResults,
       entityKindToResponseKeyMap: {
-        [entityType.userSearchList]: responseEntityKey.userSearchResults,
-        [entityType.usersMap]: responseEntityKey.users,
-        [entityType.imagesMap]: responseEntityKey.images,
-        [entityType.userSearchMeta]: responseEntityKey.meta
+        [entityTypeConstants.userSearchList]: responseEntityKey.userSearchResults,
+        [entityTypeConstants.usersMap]: responseEntityKey.users,
+        [entityTypeConstants.imagesMap]: responseEntityKey.images,
+        [entityTypeConstants.userSearchMeta]: responseEntityKey.meta
       },
       serviceData: serviceResponse.data
     }).perform();
@@ -429,6 +431,28 @@ router.post('/:other_user_id/unmute', sanitizer.sanitizeDynamicUrlParams, functi
   req.decodedParams.other_user_id = req.params.other_user_id;
 
   Promise.resolve(routeHelper.perform(req, res, next, '/user/UnMute', 'r_a_v1_u_19', null));
+});
+
+/* Get url and message for share profile given userid. */
+router.get('/:user_id/share', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.profileShare;
+  req.decodedParams.user_id = req.params.user_id;
+
+  const dataFormatterFunc = async function(serviceResponse) {
+    const wrapperFormatterRsp = await new FormatterComposer({
+      resultType: responseEntityKey.share,
+      entityKindToResponseKeyMap: {
+        [entityTypeConstants.share]: responseEntityKey.share
+      },
+      serviceData: serviceResponse.data
+    }).perform();
+
+    serviceResponse.data = wrapperFormatterRsp.data;
+  };
+
+  Promise.resolve(
+    routeHelper.perform(req, res, next, '/user/profile/ShareDetails', 'r_a_v1_u_20', null, dataFormatterFunc)
+  );
 });
 
 module.exports = router;

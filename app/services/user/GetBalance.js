@@ -46,6 +46,8 @@ class GetBalance extends ServiceBase {
   /**
    * Fetch token user data.
    *
+   * @sets oThis.tokenUserData
+   *
    * @returns {Promise<void>}
    * @private
    */

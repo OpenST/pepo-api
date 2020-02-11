@@ -71,7 +71,7 @@ module.exports = {
     'no-useless-rename': 'error',
     // "prefer-destructuring": "error",
     // "prefer-template": "error",
-    // 'capitalized-comments': ['error'],
+    'capitalized-comments': ['error'],
     'consistent-this': ['error', 'oThis'],
     'eol-last': ['error', 'always'],
     'id-length': ['error', { min: 2 }],
@@ -88,7 +88,7 @@ module.exports = {
     'no-trailing-spaces': 'error',
     'no-unneeded-ternary': 'error',
     'operator-assignment': ['error', 'always'],
-    'padding-line-between-statements': ['error', { blankLine: 'always', prev: '*', next: 'return' }]
-    // 'spaced-comment': ['error', 'always', { exceptions: ['-', '+'] }]
+    'padding-line-between-statements': ['error', { blankLine: 'always', prev: '*', next: 'return' }],
+    'spaced-comment': ['error', 'always', { exceptions: ['-', '+'] }]
   }
 };

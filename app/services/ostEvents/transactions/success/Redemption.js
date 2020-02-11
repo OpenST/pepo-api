@@ -1,6 +1,6 @@
 const rootPrefix = '../../../../..',
-  PepocornBalanceModel = require(rootPrefix + '/app/models/mysql/PepocornBalance'),
   TransactionWebhookBase = require(rootPrefix + '/app/services/ostEvents/transactions/Base'),
+  PepocornBalanceModel = require(rootPrefix + '/app/models/mysql/redemption/PepocornBalance'),
   basicHelper = require(rootPrefix + '/helpers/basic'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
@@ -92,7 +92,7 @@ class RedemptionSuccessWebhook extends TransactionWebhookBase {
               .where({ user_id: oThis.fromUserId })
               .fire();
           } else {
-            let errorObject = responseHelper.error({
+            const errorObject = responseHelper.error({
               internal_error_identifier: 'a_s_oe_t_s_cpcb_1',
               api_error_identifier: 'something_went_wrong',
               debug_options: {
@@ -102,13 +102,14 @@ class RedemptionSuccessWebhook extends TransactionWebhookBase {
               }
             });
             await createErrorLogsEntry.perform(errorObject, errorLogsConstants.highSeverity);
+
             return Promise.reject(errorObject);
           }
         });
     }
 
     await PepocornBalanceModel.flushCache({
-      userId: oThis.fromUserId
+      userIds: [oThis.fromUserId]
     });
   }
 
@@ -129,10 +130,7 @@ class RedemptionSuccessWebhook extends TransactionWebhookBase {
     }
 
     await oThis.validateTransfers();
-    const promiseArray = [];
-    promiseArray.push(oThis.updateTransaction());
-    promiseArray.push(oThis.updatePepocornTransactionModel());
-    await Promise.all(promiseArray);
+    await Promise.all([oThis.updateTransaction(), oThis.updatePepocornTransactionModel()]);
     await oThis._creditPepoCornBalance();
     await oThis._enqueueRedemptionNotification();
   }

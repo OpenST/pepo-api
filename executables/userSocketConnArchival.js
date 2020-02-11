@@ -10,12 +10,12 @@ const program = require('commander');
 
 const rootPrefix = '..',
   CronBase = require(rootPrefix + '/executables/CronBase'),
-  UserSocketConnectionDetailsModel = require(rootPrefix + '/app/models/mysql/UserSocketConnectionDetails'),
+  UserSocketConnectionDetailsModel = require(rootPrefix + '/app/models/mysql/socket/UserSocketConnectionDetails'),
   basicHelper = require(rootPrefix + '/helpers/basic'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
-  cronProcessesConstants = require(rootPrefix + '/lib/globalConstant/cronProcesses'),
-  socketConnectionConstants = require(rootPrefix + '/lib/globalConstant/socketConnection');
+  cronProcessesConstants = require(rootPrefix + '/lib/globalConstant/big/cronProcesses'),
+  socketConnectionConstants = require(rootPrefix + '/lib/globalConstant/socket/socketConnection');
 
 program.option('--cronProcessId <cronProcessId>', 'Cron table process ID').parse(process.argv);
 
