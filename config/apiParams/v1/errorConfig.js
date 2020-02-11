@@ -11,6 +11,12 @@ const v1ErrorConfig = {
     message: 'App Name is Invalid'
   },
 
+  invalid_name: {
+    parameter: 'name',
+    code: 'invalid',
+    message: 'Name can contain min 2 characters and max 30 characters.'
+  },
+
   invalid_user_name: {
     parameter: 'user_name',
     code: 'invalid',
