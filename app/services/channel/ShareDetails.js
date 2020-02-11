@@ -78,7 +78,7 @@ class ShareDetails extends ServiceBase {
       }
 
       const permalinkIdsMap = cacheResponse.data;
-      if (!permalinkIdsMap[oThis.channelPermalink].toLowerCase()) {
+      if (!permalinkIdsMap[oThis.channelPermalink.toLowerCase()]) {
         return Promise.reject(
           responseHelper.error({
             internal_error_identifier: 'a_s_c_sd_1',
