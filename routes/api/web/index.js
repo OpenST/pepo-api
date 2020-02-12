@@ -65,8 +65,15 @@ router.get('/users/:username/share', sanitizer.sanitizeDynamicUrlParams, functio
   );
 });
 
-/* Video history */
-router.get('/video/:video_id', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+//Report
+router.post('/report', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.reportIssue;
+
+  Promise.resolve(routeHelper.perform(req, res, next, '/miscellaneous/Report', 'r_a_w_r_1', null, null));
+});
+
+/* Video By Id */
+router.get('/videos/:video_id', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.getVideo;
   req.decodedParams.video_id = req.params.video_id;
 
@@ -98,7 +105,7 @@ router.get('/video/:video_id', sanitizer.sanitizeDynamicUrlParams, function(req,
     serviceResponse.data = wrapperFormatterRsp.data;
   };
 
-  Promise.resolve(routeHelper.perform(req, res, next, '/video/GetById', 'r_a_w_3', null, dataFormatterFunc));
+  Promise.resolve(routeHelper.perform(req, res, next, '/video/GetById', 'r_a_w_v_1', null, dataFormatterFunc));
 });
 
 module.exports = router;
