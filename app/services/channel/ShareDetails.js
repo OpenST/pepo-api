@@ -121,6 +121,10 @@ class ShareDetails extends ServiceBase {
       oThis._fetchTagLine(channelDetails.taglineId),
       oThis._fetchShareImage(channelDetails.shareImageId)
     ]);
+
+    if (!oThis.channelImageUrl) {
+      await oThis._fetchShareImage(channelDetails.coverImageId);
+    }
   }
 
   /**
