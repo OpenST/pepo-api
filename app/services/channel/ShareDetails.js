@@ -224,7 +224,7 @@ class ShareDetails extends ServiceBase {
       basicHelper.communitiesPrefixUrl() +
       '/' +
       oThis.channelPermalink +
-      `?utm_source=share&utm_medium=channel&utm_campaign=${oThis.channelId}`
+      `?utm_source=share&utm_medium=community&utm_campaign=${oThis.channelId}`
     );
   }
 }
