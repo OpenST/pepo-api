@@ -180,6 +180,12 @@ const adminErrorConfig = {
     code: 'invalid',
     message: 'Invalid entity kind.'
   },
+  channel_not_active: {
+    parameter: 'channel_id',
+    code: 'invalid',
+    message: 'The Channel has been disabled.'
+  },
+
   invalid_entity_ids: {
     parameter: 'entity_ids',
     code: 'invalid',

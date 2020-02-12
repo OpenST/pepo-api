@@ -68,10 +68,21 @@ class UpdateProfileInfo extends UpdateProfileBase {
   async _validateParams() {
     const oThis = this;
 
-    if (!oThis.name || !oThis.username) {
+    if (!oThis.name) {
       return Promise.reject(
         responseHelper.paramValidationError({
           internal_error_identifier: 'a_s_u_p_up_1',
+          api_error_identifier: 'invalid_params',
+          params_error_identifiers: ['invalid_name'],
+          debug_options: {}
+        })
+      );
+    }
+
+    if (!oThis.username) {
+      return Promise.reject(
+        responseHelper.paramValidationError({
+          internal_error_identifier: 'a_s_u_p_up_2',
           api_error_identifier: 'invalid_params',
           params_error_identifiers: ['invalid_user_name'],
           debug_options: {}
@@ -108,7 +119,7 @@ class UpdateProfileInfo extends UpdateProfileBase {
     if (cacheResponse.data[oThis.username].id) {
       return Promise.reject(
         responseHelper.paramValidationError({
-          internal_error_identifier: 'a_s_u_p_dun_1',
+          internal_error_identifier: 'a_s_u_p_up_3',
           api_error_identifier: 'invalid_api_params',
           params_error_identifiers: ['duplicate_user_name'],
           debug_options: { user_name: oThis.username }
@@ -252,7 +263,7 @@ class UpdateProfileInfo extends UpdateProfileBase {
           if (UserModelClass.isDuplicateIndexViolation(UserModelClass.usernameUniqueIndexName, err)) {
             return Promise.reject(
               responseHelper.paramValidationError({
-                internal_error_identifier: 'a_s_u_p_up_2',
+                internal_error_identifier: 'a_s_u_p_up_4',
                 api_error_identifier: 'invalid_api_params',
                 params_error_identifiers: ['duplicate_user_name'],
                 debug_options: { user_name: oThis.username }
@@ -262,7 +273,7 @@ class UpdateProfileInfo extends UpdateProfileBase {
           // Insert failed due to some other reason.
           // Send error email from here.
           const errorObject = responseHelper.error({
-            internal_error_identifier: 'a_s_u_p_up_3',
+            internal_error_identifier: 'a_s_u_p_up_5',
             api_error_identifier: 'something_went_wrong',
             debug_options: { Error: err }
           });

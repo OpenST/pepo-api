@@ -11,6 +11,12 @@ const v1ErrorConfig = {
     message: 'App Name is Invalid'
   },
 
+  invalid_name: {
+    parameter: 'name',
+    code: 'invalid',
+    message: 'Name can contain min 2 characters and max 30 characters.'
+  },
+
   invalid_user_name: {
     parameter: 'user_name',
     code: 'invalid',
@@ -451,6 +457,12 @@ const v1ErrorConfig = {
     parameter: 'channel_id',
     code: 'invalid',
     message: 'Channel does not exist.'
+  },
+
+  channel_not_active: {
+    parameter: 'channel_id',
+    code: 'invalid',
+    message: 'The channel has been disabled.'
   },
 
   missing_video_url: {
