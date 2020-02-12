@@ -22,6 +22,10 @@ program
   .option('--size <size>', 'Image Size')
   .option('--width <width>', 'Image Width')
   .option('--height <height>', 'Image Height')
+  .option('--shareImageUrl <shareImageUrl>', 'Share Image Url')
+  .option('--shareImageSize <shareImageSize>', 'Share Image Size')
+  .option('--shareImageWidth <shareImageWidth>', 'Share Image Width')
+  .option('--shareImageHeight <shareImageHeight>', 'Share Image Height')
   .option('--channelPermalink <channelPermalink>', 'Channel Permalink')
   .parse(process.argv);
 
@@ -30,7 +34,7 @@ program.on('--help', function() {
   logger.log('  Example:');
   logger.log('');
   logger.log(
-    '    node executables/oneTimers/2020_01_30_createNewChannel.js --channelId 0 --channelName "PEPO" --channelTagline "This is some tagline. #new #tagline" --channelDescription "This is a video description. Link: https://pepo.com. Tags: #test1 #test2" --imageUrl "https://s3.amazonaws.com/uassets.stagingpepo.com/d/ca/images/4a13513801c01f00868daa02f71f2551-original.png" --size 123 --width 123 --height 123 --channelPermalink "test"'
+    '    node executables/oneTimers/2020_01_30_createNewChannel.js --channelId 0 --channelName "PEPO" --channelTagline "This is some tagline. #new #tagline" --channelDescription "This is a video description. Link: https://pepo.com. Tags: #test1 #test2" --imageUrl "https://s3.amazonaws.com/uassets.stagingpepo.com/d/ca/images/4a13513801c01f00868daa02f71f2551-original.png" --size 123 --width 123 --height 123 --shareImageUrl "https://s3.amazonaws.com/uassets.stagingpepo.com/d/ca/images/4a13513801c01f00868daa02f71f2551-original.png" --shareImageSize 123 --shareImageWidth 123 --shareImageHeight 123 --channelPermalink "test"'
   );
   logger.log('');
   logger.log('');
@@ -43,6 +47,11 @@ if (!program.channelId) {
   }
 
   if (program.imageUrl && (!program.size || !program.width || !program.height)) {
+    program.help();
+    process.exit(1);
+  }
+
+  if (program.shareImageUrl && (!program.shareImageSize || !program.shareImageWidth || !program.shareImageHeight)) {
     program.help();
     process.exit(1);
   }
@@ -66,6 +75,10 @@ class CreateNewChannel {
    * @param {string} [params.size]
    * @param {string} [params.width]
    * @param {string} [params.height]
+   * @param {string} [params.shareImageUrl]
+   * @param {string} [params.shareImageSize]
+   * @param {string} [params.shareImageWidth]
+   * @param {string} [params.shareImageHeight]
    * @param {string} [params.channelId]
    *
    * @constructor
@@ -80,6 +93,10 @@ class CreateNewChannel {
     oThis.size = params.size || null;
     oThis.width = params.width || null;
     oThis.height = params.height || null;
+    oThis.shareImageUrl = params.shareImageUrl || null;
+    oThis.shareImageSize = params.shareImageSize || null;
+    oThis.shareImageWidth = params.shareImageWidth || null;
+    oThis.shareImageHeight = params.shareImageHeight || null;
     oThis.channelPermalink = params.channelPermalink;
 
     oThis.channelId = params.channelId || null;
@@ -94,6 +111,13 @@ class CreateNewChannel {
     console.log('Channel Description: ', oThis.channelDescription);
     console.log('Image URL: ', oThis.imageUrl);
     console.log('Image dimensions: [size, width, height]', oThis.size, oThis.width, oThis.height);
+    console.log('Share Image URL: ', oThis.shareImageUrl);
+    console.log(
+      'Share Image dimensions: [size, width, height]',
+      oThis.shareImageSize,
+      oThis.shareImageWidth,
+      oThis.shareImageHeight
+    );
     console.log('Channel Permalink: ', oThis.channelPermalink);
 
     // Validate whether channel exists or not.
@@ -111,6 +135,8 @@ class CreateNewChannel {
       oThis.createChannelStat()
     ];
     await Promise.all(promisesArray);
+
+    await oThis.performShareImageUrlRelatedTasks();
   }
 
   /**
@@ -300,6 +326,48 @@ class CreateNewChannel {
   }
 
   /**
+   * Perform channel share image url related tasks.
+   *
+   * @returns {Promise<void>}
+   */
+  async performShareImageUrlRelatedTasks() {
+    const oThis = this;
+
+    if (!oThis.shareImageUrl) {
+      return;
+    }
+
+    const imageParams = {
+      imageUrl: oThis.shareImageUrl,
+      size: oThis.shareImageSize,
+      width: oThis.shareImageWidth,
+      height: oThis.shareImageHeight,
+      kind: imageConstants.channelShareImageKind,
+      channelId: oThis.channelId,
+      isExternalUrl: false,
+      enqueueResizer: true
+    };
+
+    // Validate and save image.
+    const resp = await imageLib.validateAndSave(imageParams);
+    if (resp.isFailure()) {
+      return Promise.reject(resp);
+    }
+
+    const imageData = resp.data;
+
+    // Update channel table.
+    await new ChannelModel()
+      .update({ share_image_id: imageData.insertId })
+      .where({ id: oThis.channelId })
+      .fire();
+
+    await ChannelModel.flushCache({ ids: [oThis.channelId] });
+
+    logger.info('Added channel share image.');
+  }
+
+  /**
    * Create new entry in channel stat table.
    *
    * @returns {Promise<void>}
@@ -325,6 +393,10 @@ new CreateNewChannel({
   size: program.size,
   width: program.width,
   height: program.height,
+  shareImageUrl: program.shareImageUrl,
+  shareImageSize: program.shareImageSize,
+  shareImageWidth: program.shareImageWidth,
+  shareImageHeight: program.shareImageHeight,
   channelPermalink: program.channelPermalink
 })
   .perform()

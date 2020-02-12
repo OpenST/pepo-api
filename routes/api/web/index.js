@@ -16,7 +16,7 @@ const rootPrefix = '../../..',
 // Node.js cookie parsing middleware.
 router.use(cookieParser(coreConstants.WEB_COOKIE_SECRET));
 
-//NOTE: CSRF COOKIE SHOULD NOT BE SET HERE. IT SHOULD ONLY BE SET AT WEB. DO NOT UNCOMMENT-AMAN
+// NOTE: CSRF COOKIE SHOULD NOT BE SET HERE. IT SHOULD ONLY BE SET AT WEB. DO NOT UNCOMMENT-AMAN
 // router.use(cookieHelper.setWebCsrf());
 
 router.use('/prelaunch', preLaunchRoutes);

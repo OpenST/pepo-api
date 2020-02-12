@@ -78,7 +78,7 @@ class ShareDetails extends ServiceBase {
       }
 
       const permalinkIdsMap = cacheResponse.data;
-      if (!permalinkIdsMap[oThis.channelPermalink].toLowerCase()) {
+      if (!permalinkIdsMap[oThis.channelPermalink.toLowerCase()]) {
         return Promise.reject(
           responseHelper.error({
             internal_error_identifier: 'a_s_c_sd_1',
@@ -119,8 +119,12 @@ class ShareDetails extends ServiceBase {
 
     await Promise.all([
       oThis._fetchTagLine(channelDetails.taglineId),
-      oThis._fetchCoverImage(channelDetails.coverImageId)
+      oThis._fetchShareImage(channelDetails.shareImageId)
     ]);
+
+    if (!oThis.channelImageUrl) {
+      await oThis._fetchShareImage(channelDetails.coverImageId);
+    }
   }
 
   /**
@@ -161,7 +165,7 @@ class ShareDetails extends ServiceBase {
    * @returns {Promise<void>}
    * @private
    */
-  async _fetchCoverImage(imageId) {
+  async _fetchShareImage(imageId) {
     const oThis = this;
 
     if (!imageId) {
