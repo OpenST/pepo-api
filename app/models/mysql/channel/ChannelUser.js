@@ -130,6 +130,36 @@ class ChannelUserModel extends ModelBase {
   }
 
   /**
+   * Fetch active channel ids for given user ids.
+   *
+   * @param {number} userIds: user ids.
+   *
+   * @returns {Promise<object>}
+   */
+  async fetchActiveChannelIdsForUsers(userIds) {
+    const oThis = this;
+
+    const dbRows = await oThis
+      .select('*')
+      .where({ user_id: userIds, status: channelUsersConstants.invertedStatuses[channelUsersConstants.activeStatus] })
+      .fire();
+
+    const response = {};
+
+    for (let index = 0; index < userIds.length; index++) {
+      const userId = userIds[index];
+      response[userId] = [];
+    }
+
+    for (let index = 0; index < dbRows.length; index++) {
+      const formatDbRow = oThis.formatDbData(dbRows[index]);
+      response[formatDbRow.userId].push(formatDbRow.channelId);
+    }
+
+    return response;
+  }
+
+  /**
    * Fetch channel user for given user id and channel ids.
    *
    * @param {number} userIds: user id.
@@ -274,6 +304,11 @@ class ChannelUserModel extends ModelBase {
       const ChannelBlockedUsersByChannelIds = require(rootPrefix +
         '/lib/cacheManagement/multi/channel/ChannelBlockedUserByChannelIds');
       promisesArray.push(new ChannelBlockedUsersByChannelIds({ channelIds: [params.channelId] }).clear());
+    }
+
+    if (params.userId) {
+      const ChannelUserByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelUserByUserIds');
+      promisesArray.push(new ChannelUserByUserIdsCache({ userIds: [params.userId] }).clear());
     }
 
     if (params.userId && params.channelId) {
