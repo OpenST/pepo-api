@@ -204,6 +204,11 @@
     "code": "BAD_REQUEST",
     "message": "Minimum $10 required for redeeming."
   },
+  "min_redemption_amount_15": {
+    "http_code": "200",
+    "code": "BAD_REQUEST",
+    "message": "Minimum $15 required for redeeming."
+  },
   "min_redemption_amount_25": {
     "http_code": "200",
     "code": "BAD_REQUEST",
