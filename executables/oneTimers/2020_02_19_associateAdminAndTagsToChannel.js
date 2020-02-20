@@ -183,15 +183,17 @@ class AssociateAdminAndTagsToChannel {
 
     // Creates new tags.
     if (newTagsToCreateArray.length > 0) {
-      console.log('Some tags are not present in tags db.');
+      console.log('Some tags are not present in tags db.\nCreating these tags: ');
       await new TagModel().insertTags(newTagsToCreateArray);
-    }
 
-    // Fetch new inserted tags.
-    const newTags = await new TagModel().getTags(newTagsToInsert);
+      console.log('newTagsToInsert------> ', newTagsToInsert);
 
-    for (let ind = 0; ind < newTags.length; ind++) {
-      oThis.tagIds.push(newTags[ind].id);
+      // Fetch new inserted tags.
+      const newTags = await new TagModel().getTags(newTagsToInsert);
+
+      for (let ind = 0; ind < newTags.length; ind++) {
+        oThis.tagIds.push(newTags[ind].id);
+      }
     }
 
     if (oThis.tagNames.length !== oThis.tagIds.length) {
@@ -222,11 +224,11 @@ class AssociateAdminAndTagsToChannel {
 
     let promiseArray = [];
 
-    for (let ind = 0; ind < oThis.tags.length; ind++) {
+    for (let ind = 0; ind < oThis.tagIds.length; ind++) {
       promiseArray.push(
         new AddInChannelLib({
           channelId: oThis.channelId,
-          tagId: oThis.tags[ind]
+          tagId: oThis.tagIds[ind]
         }).perform()
       );
     }
