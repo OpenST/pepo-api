@@ -178,6 +178,15 @@ const v1Signature = {
     ],
     optional: []
   },
+  [apiName.videoShare]: {
+    mandatory: [
+      {
+        parameter: 'video_id',
+        validatorMethods: ['validateInteger']
+      }
+    ],
+    optional: []
+  },
   [apiName.reportIssue]: {
     mandatory: [
       {
