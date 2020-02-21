@@ -1,7 +1,7 @@
 /**
  * Associate Admins and tags to a channel.
  *
- * Usage:- node executables/oneTimers/2020_02_19_associateAdminAndTagsToChannel.js --channelId 1 --admins '["dhananjay","patil"]' --tags '["apple","bat"]'
+ * Usage:- node executables/oneTimers/2020_02_19_associateAdminAndTagsToChannel.js --channelId 2 --admins '["dhananjay","patil"]' --tags '["apple","bat"]'
  *
  * NOTE:- Please pass tag names without '#'.
  *
@@ -67,15 +67,23 @@ class AssociateAdminAndTagsToChannel {
     console.log(' Input adminUserNames ====>', oThis.adminUserNames);
     console.log(' Input tagNames ====>', oThis.tagNames);
 
+    if (oThis.tagNames.length === 0 && oThis.adminUserNames.length === 0) {
+      return;
+    }
+
     await oThis._validateChannel();
 
     await oThis._validateAndSetAdminUserIds();
 
     await oThis._fetchOrCreateTags();
 
-    await oThis._associateTagsToChannel();
+    if (oThis.adminUserIds && oThis.adminUserIds.length > 0) {
+      await oThis._associateTagsToChannel();
+    }
 
-    await oThis._associateAdminsToChannel();
+    if (oThis.tagIds && oThis.tagIds.length > 0) {
+      await oThis._associateAdminsToChannel();
+    }
   }
 
   /**
@@ -125,10 +133,14 @@ class AssociateAdminAndTagsToChannel {
   async _validateAndSetAdminUserIds() {
     const oThis = this;
 
+    if (oThis.adminUserNames.length === 0) {
+      return;
+    }
+
     const userNamesToUserMap = await new UserModel().fetchByUserNames(oThis.adminUserNames);
 
     if (Object.keys(userNamesToUserMap).length !== oThis.adminUserNames.length) {
-      console.log('Some admins are not present in admin db.');
+      console.log('Some admins are not present in user db.');
       return Promise.reject(
         responseHelper.error({
           internal_error_identifier: 'e_o_atc_vc_2',
@@ -156,6 +168,10 @@ class AssociateAdminAndTagsToChannel {
   async _fetchOrCreateTags() {
     const oThis = this;
 
+    if (oThis.tagNames.length === 0) {
+      return;
+    }
+
     let tagNameToTagIdMap = {},
       newTagsToInsert = [],
       newTagsToCreateArray = [];
@@ -164,8 +180,6 @@ class AssociateAdminAndTagsToChannel {
       .select(['id', 'name'])
       .where({ name: oThis.tagNames })
       .fire();
-
-    console.log('dbRows=====', dbRows);
 
     for (let index = 0; index < dbRows.length; index++) {
       const formatDbRow = new TagModel()._formatDbData(dbRows[index]);
@@ -183,7 +197,7 @@ class AssociateAdminAndTagsToChannel {
 
     // Creates new tags.
     if (newTagsToCreateArray.length > 0) {
-      console.log('Some tags are not present in tags db.\nCreating these tags: ');
+      console.log('Some tags are not present in tags db.\nCreating these tags: ', newTagsToCreateArray);
       await new TagModel().insertTags(newTagsToCreateArray);
 
       console.log('newTagsToInsert------> ', newTagsToInsert);
@@ -222,6 +236,8 @@ class AssociateAdminAndTagsToChannel {
   async _associateTagsToChannel() {
     const oThis = this;
 
+    logger.info('Associate tags to channel started.');
+
     let promiseArray = [];
 
     for (let ind = 0; ind < oThis.tagIds.length; ind++) {
@@ -233,7 +249,9 @@ class AssociateAdminAndTagsToChannel {
       );
     }
 
-    return Promise.all(promiseArray);
+    await Promise.all(promiseArray);
+
+    logger.info('Associate tags to channel done.');
   }
 
   /**
@@ -244,6 +262,8 @@ class AssociateAdminAndTagsToChannel {
    */
   async _associateAdminsToChannel() {
     const oThis = this;
+
+    logger.info('Associate admins to channel started.');
 
     let promiseArray = [];
 
@@ -257,7 +277,9 @@ class AssociateAdminAndTagsToChannel {
       );
     }
 
-    return Promise.all(promiseArray);
+    await Promise.all(promiseArray);
+
+    logger.info('Associate admins to channel done.');
   }
 }
 
