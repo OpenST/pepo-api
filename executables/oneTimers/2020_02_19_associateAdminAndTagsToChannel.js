@@ -183,13 +183,13 @@ class AssociateAdminAndTagsToChannel {
 
     for (let index = 0; index < dbRows.length; index++) {
       const formatDbRow = new TagModel()._formatDbData(dbRows[index]);
-      tagNameToTagIdMap[formatDbRow.name] = formatDbRow;
+      tagNameToTagIdMap[formatDbRow.name.toLowerCase()] = formatDbRow;
       oThis.tagIds.push(formatDbRow.id);
     }
 
     for (let ind = 0; ind < oThis.tagNames.length; ind++) {
       let inputTagName = oThis.tagNames[ind];
-      if (!tagNameToTagIdMap[inputTagName]) {
+      if (!tagNameToTagIdMap[inputTagName.toLowerCase()]) {
         newTagsToInsert.push(inputTagName);
         newTagsToCreateArray.push([inputTagName, 0, tagConstants.invertedStatuses[tagConstants.activeStatus]]);
       }
