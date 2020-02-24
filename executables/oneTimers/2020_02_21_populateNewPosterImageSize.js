@@ -1,6 +1,7 @@
 const rootPrefix = '../..',
   ImageModel = require(rootPrefix + '/app/models/mysql/Image'),
   bgJob = require(rootPrefix + '/lib/rabbitMqEnqueue/bgJob'),
+  basicHelper = require(rootPrefix + '/helpers/basic'),
   imageConstants = require(rootPrefix + '/lib/globalConstant/image'),
   bgJobConstants = require(rootPrefix + '/lib/globalConstant/bgJob'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger');
