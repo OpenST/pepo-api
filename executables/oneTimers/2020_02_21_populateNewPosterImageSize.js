@@ -1,7 +1,7 @@
 const rootPrefix = '../..',
-  VideoModel = require(rootPrefix + '/app/models/mysql/Video'),
-  VideoDetailsByVideoIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/VideoDetailsByVideoIds'),
+  ImageModel = require(rootPrefix + '/app/models/mysql/Image'),
   bgJob = require(rootPrefix + '/lib/rabbitMqEnqueue/bgJob'),
+  imageConstants = require(rootPrefix + '/lib/globalConstant/image'),
   bgJobConstants = require(rootPrefix + '/lib/globalConstant/bgJob'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger');
 
@@ -9,8 +9,6 @@ class PopulateNewPosterImageSize {
   constructor() {}
 
   async perform() {
-    const oThis = this;
-
     const limit = 25;
 
     let page = 1,
@@ -20,8 +18,13 @@ class PopulateNewPosterImageSize {
     while (moreDataPresent) {
       offset = (page - 1) * limit;
 
-      const dbRows = await new VideoModel()
+      const dbRows = await new ImageModel()
         .select('*')
+        .where({
+          kind: imageConstants.invertedKinds[imageConstants.posterImageKind],
+          status: imageConstants.invertedStatuses[imageConstants.activeStatus]
+        })
+        .order_by('id desc')
         .limit(limit)
         .offset(offset)
         .fire();
@@ -29,55 +32,21 @@ class PopulateNewPosterImageSize {
       if (dbRows.length === 0) {
         moreDataPresent = false;
       } else {
-        await oThis._populateDataForGivenRows(dbRows);
+        const promiseArray = [];
+
+        for (let imageIndex = 0; imageIndex < dbRows.length; imageIndex++) {
+          const dbRow = dbRows[imageIndex];
+
+          logger.log('dbRow.id ====', dbRow.id);
+          promiseArray.push(bgJob.enqueue(bgJobConstants.imageResizer, { imageId: dbRow.id }));
+        }
+
+        await Promise.all(promiseArray);
+        await basicHelper.sleep(2000);
       }
+
       page++;
     }
-  }
-
-  /**
-   * Get video details.
-   *
-   * @returns {Promise<void>}
-   * @private
-   */
-  async _populateDataForGivenRows(dbRows) {
-    const videoIds = [],
-      videoIdToPosterImageDetailsMap = {},
-      promiseArray = [];
-
-    for (let videoIndex = 0; videoIndex < dbRows.length; videoIndex++) {
-      const dbRow = dbRows[videoIndex];
-
-      videoIdToPosterImageDetailsMap[dbRow.id] = {
-        posterImageId: dbRow.poster_image_id
-      };
-      videoIds.push(dbRow.id);
-    }
-
-    const videoDetailsCacheResp = await new VideoDetailsByVideoIdsCache({ videoIds: videoIds }).fetch();
-
-    if (videoDetailsCacheResp.isFailure()) {
-      return Promise.reject(videoDetailsCacheResp);
-    }
-
-    const videoDetailsCacheRespData = videoDetailsCacheResp.data;
-
-    for (let videoId in videoDetailsCacheRespData) {
-      const creatorUserId = videoDetailsCacheRespData[videoId].creatorUserId,
-        posterImageId = videoIdToPosterImageDetailsMap[videoId].posterImageId;
-
-      videoIdToPosterImageDetailsMap[videoId].creatorUserId = creatorUserId;
-
-      if (creatorUserId && posterImageId) {
-        logger.log('====', { userId: creatorUserId, imageId: posterImageId });
-
-        promiseArray.push(
-          bgJob.enqueue(bgJobConstants.imageResizer, { userId: creatorUserId, imageId: posterImageId })
-        );
-      }
-    }
-    await Promise.all(promiseArray);
   }
 }
 
