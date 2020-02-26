@@ -223,9 +223,10 @@ class UpdateCuratedEntities extends ServiceBase {
 
     if (!CommonValidators.validateNonEmptyObject(channelObj) || channelObj.status !== channelsConstants.activeStatus) {
       return Promise.reject(
-        responseHelper.error({
+        responseHelper.paramValidationError({
           internal_error_identifier: 'a_s_c_u_j_fc_1',
-          api_error_identifier: 'entity_not_found',
+          api_error_identifier: 'invalid_api_params',
+          params_error_identifiers: ['channel_not_active'],
           debug_options: {
             channelId: oThis.channelId
           }
