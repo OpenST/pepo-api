@@ -168,6 +168,37 @@ const v1Signature = {
       }
     ],
     optional: []
+  },
+  [apiName.getVideo]: {
+    mandatory: [
+      {
+        parameter: 'video_id',
+        validatorMethods: ['validateNonZeroInteger']
+      }
+    ],
+    optional: []
+  },
+  [apiName.videoShare]: {
+    mandatory: [
+      {
+        parameter: 'video_id',
+        validatorMethods: ['validateInteger']
+      }
+    ],
+    optional: []
+  },
+  [apiName.reportIssue]: {
+    mandatory: [
+      {
+        parameter: 'report_entity_id',
+        validatorMethods: ['validateNonZeroInteger']
+      },
+      {
+        parameter: 'report_entity_kind',
+        validatorMethods: ['validateNonBlankString']
+      }
+    ],
+    optional: []
   }
 };
 
