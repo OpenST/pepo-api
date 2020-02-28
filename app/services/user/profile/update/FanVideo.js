@@ -5,6 +5,7 @@ const rootPrefix = '../../../../..',
   CommonValidator = require(rootPrefix + '/lib/validators/Common'),
   AddVideoDescription = require(rootPrefix + '/lib/addDescription/Video'),
   VideoDetailModel = require(rootPrefix + '/app/models/mysql/VideoDetail'),
+  ValidateVideoService = require(rootPrefix + '/app/services/video/Validate'),
   UpdateProfileBase = require(rootPrefix + '/app/services/user/profile/update/Base'),
   videoLib = require(rootPrefix + '/lib/videoLib'),
   bgJobConstants = require(rootPrefix + '/lib/globalConstant/bgJob'),
@@ -15,7 +16,6 @@ const rootPrefix = '../../../../..',
   feedsConstants = require(rootPrefix + '/lib/globalConstant/feed'),
   videoConstants = require(rootPrefix + '/lib/globalConstant/video'),
   entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
-  ValidateVideoService = require(rootPrefix + '/app/services/video/Validate'),
   notificationJobEnqueue = require(rootPrefix + '/lib/rabbitMqEnqueue/notification'),
   notificationJobConstants = require(rootPrefix + '/lib/globalConstant/notificationJob');
 
@@ -167,7 +167,7 @@ class UpdateFanVideo extends UpdateProfileBase {
       return Promise.reject(addVideoDescriptionRsp);
     }
 
-    let addVideoDescriptionData = addVideoDescriptionRsp.data;
+    const addVideoDescriptionData = addVideoDescriptionRsp.data;
 
     oThis.mentionedUserIds = addVideoDescriptionData.mentionedUserIds;
   }
@@ -225,10 +225,10 @@ class UpdateFanVideo extends UpdateProfileBase {
    * @private
    */
   async _extraUpdates() {
-    // Feed needs to be added for uploaded video
+    // Feed needs to be added for uploaded video.
     const oThis = this;
 
-    let promiseArray = [];
+    const promiseArray = [];
 
     // Feed needs to be added only if user is an approved creator.
     if (UserModelKlass.isUserApprovedCreator(oThis.userObj)) {
@@ -300,7 +300,7 @@ class UpdateFanVideo extends UpdateProfileBase {
   }
 
   /**
-   * Prepares Response
+   * Prepare service response.
    *
    * @returns {*|result}
    * @private
