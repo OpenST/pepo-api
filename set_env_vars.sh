@@ -183,6 +183,9 @@ export PA_GOOGLE_USAGE_REPORT_GROUP_IDS='{"User data Lifetime": "1969769902", "U
 export PA_GOOGLE_CLIENT_SECRET='PrH4JMqKzPo2ZJZL9c8TWFhf'
 export PA_GOOGLE_CLIENT_ID='82182934708-tt5qs2hbrndc1r5k7ja4cd2vvo44uuf0.apps.googleusercontent.com'
 
+export PA_USER_DATA_LOCAL_FILE_PATH='./userData.csv';
+export PA_USER_DATA_S3_FILE_PATH='testFolder/userData.csv';
+
 # Video pixel data file path.
 export PA_VIDEO_PIXEL_DATA_S3_FILE_PATH='redshift/full_video_watched_by_devices.csv'
 export PA_REPLY_PIXEL_DATA_S3_FILE_PATH='redshift/full_reply_watched_by_devices.csv'

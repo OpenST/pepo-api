@@ -549,6 +549,14 @@ class CoreConstants {
   get PA_APPLE_PRIVATE_KEY() {
     return process.env.PA_APPLE_PRIVATE_KEY;
   }
+
+  get USER_DATA_LOCAL_FILE_PATH() {
+    return process.env.PA_USER_DATA_LOCAL_FILE_PATH;
+  }
+
+  get USER_DATA_S3_FILE_PATH() {
+    return process.env.PA_USER_DATA_S3_FILE_PATH;
+  }
 }
 
 module.exports = new CoreConstants();
