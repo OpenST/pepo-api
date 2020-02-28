@@ -10,7 +10,7 @@ const rootPrefix = '../../..',
  *
  * @class UnmuteUser
  */
-class UnmuteUser extends SlackEventBase {
+class UnmuteUserEvent extends SlackEventBase {
   /**
    * Async perform.
    *
@@ -90,4 +90,4 @@ class UnmuteUser extends SlackEventBase {
   }
 }
 
-module.exports = UnmuteUser;
+module.exports = UnmuteUserEvent;
