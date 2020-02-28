@@ -7,14 +7,15 @@ const rootPrefix = '../../../../..',
   VideoDetailModel = require(rootPrefix + '/app/models/mysql/VideoDetail'),
   ValidateVideoService = require(rootPrefix + '/app/services/video/Validate'),
   UpdateProfileBase = require(rootPrefix + '/app/services/user/profile/update/Base'),
+  UserMuteByUser2IdsForGlobalCache = require(rootPrefix + '/lib/cacheManagement/multi/UserMuteByUser2IdsForGlobal'),
   videoLib = require(rootPrefix + '/lib/videoLib'),
-  bgJobConstants = require(rootPrefix + '/lib/globalConstant/bgJob'),
   bgJob = require(rootPrefix + '/lib/rabbitMqEnqueue/bgJob'),
   urlConstants = require(rootPrefix + '/lib/globalConstant/url'),
   userConstants = require(rootPrefix + '/lib/globalConstant/user'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   feedsConstants = require(rootPrefix + '/lib/globalConstant/feed'),
   videoConstants = require(rootPrefix + '/lib/globalConstant/video'),
+  bgJobConstants = require(rootPrefix + '/lib/globalConstant/bgJob'),
   entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
   notificationJobEnqueue = require(rootPrefix + '/lib/rabbitMqEnqueue/notification'),
   notificationJobConstants = require(rootPrefix + '/lib/globalConstant/notificationJob');
@@ -228,10 +229,17 @@ class UpdateFanVideo extends UpdateProfileBase {
     // Feed needs to be added for uploaded video.
     const oThis = this;
 
+    const cacheResponse = await new UserMuteByUser2IdsForGlobalCache({ user2Ids: [oThis.profileUserId] }).fetch();
+    if (cacheResponse.isFailure()) {
+      return Promise.reject(cacheResponse);
+    }
+
+    const isUserUnMuted = cacheResponse.data[oThis.userId].all === 0;
+
     const promiseArray = [];
 
-    // Feed needs to be added only if user is an approved creator.
-    if (UserModelKlass.isUserApprovedCreator(oThis.userObj)) {
+    // Feed needs to be added only if user is an approved creator and globally unmuted.
+    if (UserModelKlass.isUserApprovedCreator(oThis.userObj) && isUserUnMuted) {
       await oThis._addFeed();
 
       const messagePayload = {
