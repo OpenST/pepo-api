@@ -234,7 +234,7 @@ class UpdateFanVideo extends UpdateProfileBase {
       return Promise.reject(cacheResponse);
     }
 
-    const isUserUnMuted = cacheResponse.data[oThis.userId].all === 0;
+    const isUserUnMuted = cacheResponse.data[oThis.profileUserId].all == 0;
 
     const promiseArray = [];
 
