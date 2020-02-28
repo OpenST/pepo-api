@@ -35,6 +35,7 @@ class RedemptionProductModel extends ModelBase {
    * @param {number} dbRow.status
    * @param {string} dbRow.kind
    * @param {string} dbRow.images
+   * @param {string} dbRow.description
    * @param {decimal} dbRow.dollar_value
    * @param {decimal} dbRow.min_dollar_value
    * @param {decimal} dbRow.dollar_step
@@ -51,6 +52,7 @@ class RedemptionProductModel extends ModelBase {
       status: redemptionConstants.statuses[dbRow.status],
       kind: dbRow.kind,
       images: JSON.parse(dbRow.images),
+      description: dbRow.description,
       dollarValue: dbRow.dollar_value,
       minDollarValue: dbRow.min_dollar_value,
       dollarStep: dbRow.dollar_step,
