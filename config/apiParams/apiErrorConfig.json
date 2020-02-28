@@ -189,6 +189,16 @@
     "code": "BAD_REQUEST",
     "message": "Atleast 1 approved video is required before your account is eligible for redemptions."
   },
+  "redemption_user_muted_by_admin": {
+    "http_code": "200",
+    "code": "BAD_REQUEST",
+    "message": "Atleast 1 approved video is required before your account is eligible for redemptions."
+  },
+  "redemption_user_without_video": {
+    "http_code": "200",
+    "code": "BAD_REQUEST",
+    "message": "Atleast 1 approved video is required before your account is eligible for redemptions."
+  },
   "insufficient_pepocorn_balance": {
     "http_code": "200",
     "code": "BAD_REQUEST",
