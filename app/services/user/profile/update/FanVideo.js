@@ -252,8 +252,9 @@ class UpdateFanVideo extends UpdateProfileBase {
       );
     }
 
-    // If user is approved and globally muted, publish content monitoring msg
-    // else send request to admins to approve new creator.
+    /* If user is approved and globally muted, publish content monitoring msg
+     else send request to admins to approve new creator.
+     */
     if (UserModelKlass.isUserApprovedCreator(oThis.userObj) && !isUserMuted) {
       const messagePayload = {
         userId: oThis.profileUserId,
@@ -301,9 +302,8 @@ class UpdateFanVideo extends UpdateProfileBase {
   async _flushCaches() {
     const oThis = this;
 
-    const promisesArray = [];
+    const promisesArray = [super._flushCaches()];
 
-    promisesArray.push(super._flushCaches());
     if (oThis.feedId) {
       promisesArray.push(FeedModel.flushCache({ ids: [oThis.feedId] }));
     }
@@ -321,7 +321,7 @@ class UpdateFanVideo extends UpdateProfileBase {
   _prepareResponse() {
     const oThis = this;
 
-    // FE fires the video creation pixel and following response is necessary.
+    // NOTE: Front-end fires the video creation pixel and following response is necessary.
     return responseHelper.successWithData({
       [entityTypeConstants.userVideoList]: [
         {
