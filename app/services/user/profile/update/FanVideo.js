@@ -242,29 +242,25 @@ class UpdateFanVideo extends UpdateProfileBase {
       // Feed needs to be added only if user is an approved creator.
       await oThis._addFeed();
 
-      // If user is globally muted, send request to admins to approve new creator.
-      if (isUserMuted) {
-        const messagePayloadForApproveCreator = {
-          userId: oThis.profileUserId
-        };
-        promisesArray.push(bgJob.enqueue(bgJobConstants.approveNewCreatorJobTopic, messagePayloadForApproveCreator));
-      } else {
-        // Video notifications would be published only if user is approved and unmuted globally.
-        promisesArray.push(
-          notificationJobEnqueue.enqueue(notificationJobConstants.videoNotificationsKind, {
-            creatorUserId: oThis.profileUserId,
-            videoId: oThis.videoId,
-            mentionedUserIds: oThis.mentionedUserIds
-          })
-        );
+      // Video notifications would be published only if user is approved.
+      promisesArray.push(
+        notificationJobEnqueue.enqueue(notificationJobConstants.videoNotificationsKind, {
+          creatorUserId: oThis.profileUserId,
+          videoId: oThis.videoId,
+          mentionedUserIds: oThis.mentionedUserIds
+        })
+      );
+    }
 
-        const messagePayload = {
-          userId: oThis.profileUserId,
-          videoId: oThis.videoId
-        };
+    // If user is approved and globally muted, publish content monitoring msg
+    // else send request to admins to approve new creator.
+    if (UserModelKlass.isUserApprovedCreator(oThis.userObj) && !isUserMuted) {
+      const messagePayload = {
+        userId: oThis.profileUserId,
+        videoId: oThis.videoId
+      };
 
-        promisesArray.push(bgJob.enqueue(bgJobConstants.slackContentVideoMonitoringJobTopic, messagePayload));
-      }
+      promisesArray.push(bgJob.enqueue(bgJobConstants.slackContentVideoMonitoringJobTopic, messagePayload));
     } else {
       const messagePayloadForApproveCreator = {
         userId: oThis.profileUserId
