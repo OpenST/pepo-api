@@ -1,8 +1,7 @@
 const rootPrefix = '../../..',
-  apiName = require(rootPrefix + '/lib/globalConstant/apiName'),
-  paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination');
+  apiName = require(rootPrefix + '/lib/globalConstant/apiName');
 
-const v1Signature = {
+const webSignature = {
   [apiName.preLaunchLogout]: {
     mandatory: [],
     optional: []
@@ -25,7 +24,6 @@ const v1Signature = {
       }
     ]
   },
-
   [apiName.getRedemptionProducts]: {
     mandatory: [
       {
@@ -35,7 +33,6 @@ const v1Signature = {
     ],
     optional: []
   },
-
   [apiName.validateSupportUrl]: {
     mandatory: [
       {
@@ -45,7 +42,6 @@ const v1Signature = {
     ],
     optional: []
   },
-
   [apiName.preLaunchInviteVerify]: {
     mandatory: [
       {
@@ -200,7 +196,6 @@ const v1Signature = {
     ],
     optional: []
   },
-
   [apiName.githubConnect]: {
     mandatory: [
       {
@@ -219,7 +214,6 @@ const v1Signature = {
       }
     ]
   },
-
   [apiName.githubDisconnect]: {
     mandatory: [],
     optional: [
@@ -231,4 +225,4 @@ const v1Signature = {
   }
 };
 
-module.exports = v1Signature;
+module.exports = webSignature;
