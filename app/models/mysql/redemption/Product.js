@@ -52,7 +52,7 @@ class RedemptionProductModel extends ModelBase {
       status: redemptionConstants.statuses[dbRow.status],
       kind: dbRow.kind,
       images: JSON.parse(dbRow.images),
-      description: dbRow.description,
+      description: dbRow.description ? escape(dbRow.description) : null,
       dollarValue: dbRow.dollar_value,
       minDollarValue: dbRow.min_dollar_value,
       dollarStep: dbRow.dollar_step,
