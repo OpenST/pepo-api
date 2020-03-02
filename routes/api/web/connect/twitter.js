@@ -1,7 +1,7 @@
 const express = require('express'),
   router = express.Router();
 
-const rootPrefix = '../../..',
+const rootPrefix = '../../../..',
   FormatterComposer = require(rootPrefix + '/lib/formatter/Composer'),
   routeHelper = require(rootPrefix + '/routes/helper'),
   sanitizer = require(rootPrefix + '/helpers/sanitizer'),
@@ -10,9 +10,9 @@ const rootPrefix = '../../..',
   entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
   responseEntityKey = require(rootPrefix + '/lib/globalConstant/responseEntityKey');
 
-/* Github connect. */
+/* Twitter connect. */
 router.post('/login', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
-  req.decodedParams.apiName = apiName.githubConnect;
+  req.decodedParams.apiName = apiName.twitterLogin;
 
   cookieHelper.fetchUserUtmCookie(req);
 
@@ -40,21 +40,36 @@ router.post('/login', sanitizer.sanitizeDynamicUrlParams, function(req, res, nex
   };
 
   Promise.resolve(
-    routeHelper.perform(req, res, next, '/connect/Github', 'r_a_w_g_1', null, onServiceSuccess, onServiceFailure)
+    routeHelper.perform(req, res, next, '/connect/Twitter', 'r_a_w_g_1', null, onServiceSuccess, onServiceFailure)
   );
 });
 
-/* Github disconnect. */
+/* Twitter disconnect. */
 router.post('/disconnect', cookieHelper.parseUserCookieForLogout, sanitizer.sanitizeDynamicUrlParams, function(
   req,
   res,
   next
 ) {
-  req.decodedParams.apiName = apiName.githubDisconnect;
+  req.decodedParams.apiName = apiName.twitterDisconnect;
 
   cookieHelper.deleteLoginCookie(res);
 
-  Promise.resolve(routeHelper.perform(req, res, next, '/disconnect/Github', 'r_a_w_g_2', null));
+  Promise.resolve(routeHelper.perform(req, res, next, '/disconnect/Twitter', 'r_a_w_g_2', null));
+});
+
+/* Request Token for twitter */
+router.get('/request_token', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.twitterRequestToken;
+
+  const onServiceSuccess = async function(serviceResponse) {
+    // if (serviceResponse.data.dataCookieValue) {
+    //   cookieHelper.setPreLaunchDataCookie(res, serviceResponse.data.dataCookieValue);
+    // }
+  };
+
+  Promise.resolve(
+    routeHelper.perform(req, res, next, '/connect/GetTwitterRequestToken', 'r_a_w_pl_2', null, onServiceSuccess)
+  );
 });
 
 module.exports = router;

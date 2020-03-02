@@ -6,11 +6,15 @@ const rootPrefix = '../../..',
   cookieHelper = require(rootPrefix + '/lib/cookieHelper'),
   apiName = require(rootPrefix + '/lib/globalConstant/apiName'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
-  githubAuthRoutes = require(rootPrefix + '/routes/api/web/github'),
-  twitterAuthRoutes = require(rootPrefix + '/routes/api/web/twitter');
+  appleAuthRoutes = require(rootPrefix + '/routes/api/web/connect/apple'),
+  githubAuthRoutes = require(rootPrefix + '/routes/api/web/connect/github'),
+  googleAuthRoutes = require(rootPrefix + '/routes/api/web/connect/google'),
+  twitterAuthRoutes = require(rootPrefix + '/routes/api/web/connect/twitter');
 
 router.use('/github', githubAuthRoutes);
 router.use('/twitter', twitterAuthRoutes);
+router.use('/apple', appleAuthRoutes);
+router.use('/google', googleAuthRoutes);
 
 /* Logout user. */
 router.post('/logout', cookieHelper.parseUserCookieForLogout, sanitizer.sanitizeDynamicUrlParams, function(req, res) {
