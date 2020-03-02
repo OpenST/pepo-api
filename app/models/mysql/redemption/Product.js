@@ -38,6 +38,7 @@ class RedemptionProductModel extends ModelBase {
    * @param {string} dbRow.description
    * @param {decimal} dbRow.dollar_value
    * @param {decimal} dbRow.min_dollar_value
+   * @param {decimal} dbRow.max_dollar_value
    * @param {decimal} dbRow.dollar_step
    * @param {number} dbRow.created_at
    * @param {number} dbRow.updated_at
@@ -55,6 +56,7 @@ class RedemptionProductModel extends ModelBase {
       description: dbRow.description ? escape(dbRow.description) : null,
       dollarValue: dbRow.dollar_value,
       minDollarValue: dbRow.min_dollar_value,
+      maxDollarValue: dbRow.max_dollar_value,
       dollarStep: dbRow.dollar_step,
       pepocornPerDollar: redemptionConstants.pepocornPerDollar, // Need to be sent for all products but not a column.
       createdAt: dbRow.created_at,
