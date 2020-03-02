@@ -3,8 +3,7 @@ const rootPrefix = '../../..',
   ApproveUsersAsCreatorService = require(rootPrefix + '/app/services/admin/ApproveUsersAsCreator'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
-  slackConstants = require(rootPrefix + '/lib/globalConstant/slack'),
-  pixelConstants = require(rootPrefix + '/lib/globalConstant/pixel');
+  slackConstants = require(rootPrefix + '/lib/globalConstant/slack');
 
 /**
  * Class to process approve user event.
