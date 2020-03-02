@@ -214,6 +214,11 @@
     "code": "BAD_REQUEST",
     "message": "Minimum $25 required for redeeming."
   },
+  "max_redemption_amount_crossed": {
+    "http_code": "200",
+    "code": "BAD_REQUEST",
+    "message": "Maximum redemption amount for redemption crossed."
+  },
   "pending_transaction_found": {
     "http_code": "200",
     "code": "BAD_REQUEST",

@@ -7,7 +7,7 @@ const dbKind = DbKindConstant.sqlDbKind;
 
 const upQuery =
   'ALTER TABLE `products` \n\
-      ADD COLUMN `max_dollar_value` decimal(21,2) NOT NULL DEFAULT 100000.00 AFTER `min_dollar_value`';
+      ADD COLUMN `max_dollar_value` decimal(21,2) NULL AFTER `min_dollar_value`';
 
 const downQuery = 'ALTER TABLE `products` DROP `max_dollar_value`;';
 
