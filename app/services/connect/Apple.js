@@ -79,8 +79,6 @@ class AppleConnect extends ConnectBase {
     let publicKey = await new GetApplePublicKey().perform(),
       decryptedIdentityToken = await appleHelper.getDecryptedIdentityToken(oThis.identityToken, publicKey);
 
-    logger.log('Decrypted Identity Token: ', decryptedIdentityToken);
-
     if (decryptedIdentityToken.iss !== APPLE_API_URL) {
       return Promise.reject(
         responseHelper.error({
