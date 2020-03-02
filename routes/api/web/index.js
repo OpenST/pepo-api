@@ -10,7 +10,6 @@ const rootPrefix = '../../..',
   coreConstants = require(rootPrefix + '/config/coreConstants'),
   apiName = require(rootPrefix + '/lib/globalConstant/apiName'),
   supportRoutes = require(rootPrefix + '/routes/api/web/support'),
-  preLaunchRoutes = require(rootPrefix + '/routes/api/web/preLaunch'),
   entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
   responseEntityKey = require(rootPrefix + '/lib/globalConstant/responseEntityKey');
 
@@ -19,10 +18,6 @@ router.use(cookieParser(coreConstants.WEB_COOKIE_SECRET));
 
 // NOTE: CSRF COOKIE SHOULD NOT BE SET HERE. IT SHOULD ONLY BE SET AT WEB. DO NOT UNCOMMENT-AMAN
 // router.use(cookieHelper.setWebCsrf());
-
-router.use('/prelaunch', preLaunchRoutes);
-
-router.use('/support', supportRoutes);
 
 router.use('/support', supportRoutes);
 
