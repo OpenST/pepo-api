@@ -58,7 +58,7 @@ router.post('/disconnect', cookieHelper.parseUserCookieForLogout, sanitizer.sani
 });
 
 /* Request Token for twitter */
-router.get('/twitter/request_token', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+router.get('/request_token', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.twitterRequestToken;
 
   const onServiceSuccess = async function(serviceResponse) {
