@@ -6,9 +6,11 @@ const rootPrefix = '../../..',
   cookieHelper = require(rootPrefix + '/lib/cookieHelper'),
   apiName = require(rootPrefix + '/lib/globalConstant/apiName'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
-  githubAuthRoutes = require(rootPrefix + '/routes/api/web/github');
+  githubAuthRoutes = require(rootPrefix + '/routes/api/web/github'),
+  twitterAuthRoutes = require(rootPrefix + '/routes/api/web/twitter');
 
 router.use('/github', githubAuthRoutes);
+router.use('/twitter', twitterAuthRoutes);
 
 /* Logout user. */
 router.post('/logout', cookieHelper.parseUserCookieForLogout, sanitizer.sanitizeDynamicUrlParams, function(req, res) {
