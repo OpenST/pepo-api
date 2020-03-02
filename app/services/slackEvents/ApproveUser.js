@@ -41,8 +41,7 @@ class ApproveUser extends SlackEventBase {
 
     const approveUserServiceParams = {
       user_ids: [oThis.eventParams.user_id],
-      current_admin: oThis.currentAdmin,
-      approved_via_medium: pixelConstants.userApprovedViaSlackChannelMedium
+      current_admin: oThis.currentAdmin
     };
 
     const approveUserServiceResponse = await new ApproveUsersAsCreatorService(approveUserServiceParams).perform();
