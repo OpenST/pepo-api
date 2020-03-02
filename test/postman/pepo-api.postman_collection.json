@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "620a853c-4a22-4531-bb48-45ac5e4a2a46",
+		"_postman_id": "88063399-2266-4e9c-a335-e3e7219dd4c9",
 		"name": "pepo-api",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -1145,7 +1145,7 @@
 									"urlencoded": [
 										{
 											"key": "access_token",
-											"value": "1152149157206847488-ocfNpLMSQMykW21zUqT8COi4oEL0NP",
+											"value": "1626ef4aa98944afd2aa639d624092180c93780b",
 											"type": "text"
 										},
 										{
@@ -1333,6 +1333,37 @@
 										"v1",
 										"auth",
 										"twitter-disconnect"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "github-disconnect",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"type": "text",
+										"value": "text/plain"
+									}
+								],
+								"body": {
+									"mode": "urlencoded",
+									"urlencoded": []
+								},
+								"url": {
+									"raw": "{{api_server}}/api/v1/auth/github-disconnect",
+									"host": [
+										"{{api_server}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"auth",
+										"github-disconnect"
 									]
 								}
 							},
@@ -3785,6 +3816,118 @@
 										"web",
 										"redemptions",
 										""
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"protocolProfileBehavior": {},
+					"_postman_isSubFolder": true
+				},
+				{
+					"name": "auth",
+					"item": [
+						{
+							"name": "github-login",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"type": "text",
+										"value": "text/plain"
+									}
+								],
+								"body": {
+									"mode": "urlencoded",
+									"urlencoded": [
+										{
+											"key": "access_token",
+											"value": "1626ef4aa98944afd2aa639d624092180c93780b",
+											"type": "text"
+										},
+										{
+											"key": "invite_code",
+											"value": "QUK9IZ",
+											"type": "text",
+											"disabled": true
+										}
+									]
+								},
+								"url": {
+									"raw": "{{api_server}}/api/web/auth/github-login",
+									"host": [
+										"{{api_server}}"
+									],
+									"path": [
+										"api",
+										"web",
+										"auth",
+										"github-login"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "github-disconnect",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"type": "text",
+										"value": "text/plain"
+									}
+								],
+								"body": {
+									"mode": "urlencoded",
+									"urlencoded": []
+								},
+								"url": {
+									"raw": "{{api_server}}/api/web/auth/github-disconnect",
+									"host": [
+										"{{api_server}}"
+									],
+									"path": [
+										"api",
+										"web",
+										"auth",
+										"github-disconnect"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "logout",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"type": "text",
+										"value": "application/x-www-form-urlencoded"
+									}
+								],
+								"body": {
+									"mode": "urlencoded",
+									"urlencoded": []
+								},
+								"url": {
+									"raw": "{{api_server}}/api/v1/auth/logout",
+									"host": [
+										"{{api_server}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"auth",
+										"logout"
 									]
 								}
 							},
