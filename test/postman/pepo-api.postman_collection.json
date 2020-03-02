@@ -3857,7 +3857,7 @@
 									]
 								},
 								"url": {
-									"raw": "{{api_server}}/api/web/auth/github-login",
+									"raw": "{{api_server}}/api/web/auth/github/login",
 									"host": [
 										"{{api_server}}"
 									],
@@ -3865,7 +3865,8 @@
 										"api",
 										"web",
 										"auth",
-										"github-login"
+										"github",
+										"login"
 									]
 								}
 							},
@@ -3888,7 +3889,7 @@
 									"urlencoded": []
 								},
 								"url": {
-									"raw": "{{api_server}}/api/web/auth/github-disconnect",
+									"raw": "{{api_server}}/api/web/auth/github/disconnect",
 									"host": [
 										"{{api_server}}"
 									],
@@ -3896,7 +3897,8 @@
 										"api",
 										"web",
 										"auth",
-										"github-disconnect"
+										"github",
+										"disconnect"
 									]
 								}
 							},
