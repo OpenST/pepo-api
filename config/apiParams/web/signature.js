@@ -199,6 +199,35 @@ const v1Signature = {
       }
     ],
     optional: []
+  },
+
+  [apiName.githubConnect]: {
+    mandatory: [
+      {
+        parameter: 'access_token',
+        validatorMethods: ['validateString']
+      }
+    ],
+    optional: [
+      {
+        parameter: 'invite_code',
+        validatorMethods: ['validateNonBlankString']
+      },
+      {
+        parameter: 'utm_params',
+        validatorMethods: ['validateObject']
+      }
+    ]
+  },
+
+  [apiName.githubDisconnect]: {
+    mandatory: [],
+    optional: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      }
+    ]
   }
 };
 

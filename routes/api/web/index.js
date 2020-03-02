@@ -3,15 +3,16 @@ const express = require('express'),
   router = express.Router();
 
 const rootPrefix = '../../..',
-  preLaunchRoutes = require(rootPrefix + '/routes/api/web/preLaunch'),
+  FormatterComposer = require(rootPrefix + '/lib/formatter/Composer'),
+  routeHelper = require(rootPrefix + '/routes/helper'),
+  sanitizer = require(rootPrefix + '/helpers/sanitizer'),
+  authRoutes = require(rootPrefix + '/routes/api/web/auth'),
   coreConstants = require(rootPrefix + '/config/coreConstants'),
   apiName = require(rootPrefix + '/lib/globalConstant/apiName'),
-  sanitizer = require(rootPrefix + '/helpers/sanitizer'),
-  routeHelper = require(rootPrefix + '/routes/helper'),
-  FormatterComposer = require(rootPrefix + '/lib/formatter/Composer'),
+  supportRoutes = require(rootPrefix + '/routes/api/web/support'),
+  preLaunchRoutes = require(rootPrefix + '/routes/api/web/preLaunch'),
   entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
-  responseEntityKey = require(rootPrefix + '/lib/globalConstant/responseEntityKey'),
-  supportRoutes = require(rootPrefix + '/routes/api/web/support');
+  responseEntityKey = require(rootPrefix + '/lib/globalConstant/responseEntityKey');
 
 // Node.js cookie parsing middleware.
 router.use(cookieParser(coreConstants.WEB_COOKIE_SECRET));
@@ -22,6 +23,10 @@ router.use(cookieParser(coreConstants.WEB_COOKIE_SECRET));
 router.use('/prelaunch', preLaunchRoutes);
 
 router.use('/support', supportRoutes);
+
+router.use('/support', supportRoutes);
+
+router.use('/auth', authRoutes);
 
 /* Get url and message for sharing channel given its permalink. */
 router.get('/communities/:channel_permalink/share', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
@@ -65,7 +70,7 @@ router.get('/users/:username/share', sanitizer.sanitizeDynamicUrlParams, functio
   );
 });
 
-//Report
+// Report.
 router.post('/report', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.reportIssue;
 
@@ -108,7 +113,7 @@ router.get('/videos/:video_id', sanitizer.sanitizeDynamicUrlParams, function(req
   Promise.resolve(routeHelper.perform(req, res, next, '/video/GetById', 'r_a_w_v_1', null, dataFormatterFunc));
 });
 
-/* Video share */
+/* Video share. */
 router.get('/videos/:video_id/share', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.videoShare;
   req.decodedParams.video_id = req.params.video_id;
