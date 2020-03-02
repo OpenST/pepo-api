@@ -164,17 +164,17 @@ class InitiateRequestRedemption extends ServiceBase {
       );
     }
 
-    const cacheResponse = await new VideoDetailsByUserIdCache({
+    const videoDetailCacheResponse = await new VideoDetailsByUserIdCache({
       userId: oThis.currentUserId,
       limit: paginationConstants.defaultVideoListPageSize,
       paginationTimestamp: null
     }).fetch();
 
-    if (cacheResponse.isFailure()) {
-      return Promise.reject(cacheResponse);
+    if (videoDetailCacheResponse.isFailure()) {
+      return Promise.reject(videoDetailCacheResponse);
     }
 
-    if (cacheResponse.data.videoIds.length == 0) {
+    if (videoDetailCacheResponse.data.videoIds.length == 0) {
       return Promise.reject(
         responseHelper.error({
           internal_error_identifier: 'a_s_r_ir_vue_2',
