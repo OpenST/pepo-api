@@ -94,8 +94,7 @@ class CronProcessesMonitorExecutable extends CronBase {
         [cronProcessesConstants.retryPendingReceiptValidation]: 10 * 60 * 1000, // 10 mins
         [cronProcessesConstants.reValidateAllReceipts]: 24 * 60 * 60 * 1000, // 24 hours
         [cronProcessesConstants.monitorOstEventHooks]: 2 * 60 * 60 * 1000, // 2 hours
-        [cronProcessesConstants.populatePopularityCriteria]: 60 * 60 * 1000, // 1 hour
-        [cronProcessesConstants.populateUserData]: 5 * 60 * 1000 // 5 min
+        [cronProcessesConstants.populatePopularityCriteria]: 60 * 60 * 1000 // 1 hour
       }
     };
 
