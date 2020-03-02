@@ -5,17 +5,18 @@ const rootPrefix = '../../../../..',
   CommonValidator = require(rootPrefix + '/lib/validators/Common'),
   AddVideoDescription = require(rootPrefix + '/lib/addDescription/Video'),
   VideoDetailModel = require(rootPrefix + '/app/models/mysql/VideoDetail'),
+  ValidateVideoService = require(rootPrefix + '/app/services/video/Validate'),
   UpdateProfileBase = require(rootPrefix + '/app/services/user/profile/update/Base'),
+  UserMuteByUser2IdsForGlobalCache = require(rootPrefix + '/lib/cacheManagement/multi/UserMuteByUser2IdsForGlobal'),
   videoLib = require(rootPrefix + '/lib/videoLib'),
-  bgJobConstants = require(rootPrefix + '/lib/globalConstant/bgJob'),
   bgJob = require(rootPrefix + '/lib/rabbitMqEnqueue/bgJob'),
   urlConstants = require(rootPrefix + '/lib/globalConstant/url'),
   userConstants = require(rootPrefix + '/lib/globalConstant/user'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   feedsConstants = require(rootPrefix + '/lib/globalConstant/feed'),
   videoConstants = require(rootPrefix + '/lib/globalConstant/video'),
+  bgJobConstants = require(rootPrefix + '/lib/globalConstant/bgJob'),
   entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
-  ValidateVideoService = require(rootPrefix + '/app/services/video/Validate'),
   notificationJobEnqueue = require(rootPrefix + '/lib/rabbitMqEnqueue/notification'),
   notificationJobConstants = require(rootPrefix + '/lib/globalConstant/notificationJob');
 
@@ -167,7 +168,7 @@ class UpdateFanVideo extends UpdateProfileBase {
       return Promise.reject(addVideoDescriptionRsp);
     }
 
-    let addVideoDescriptionData = addVideoDescriptionRsp.data;
+    const addVideoDescriptionData = addVideoDescriptionRsp.data;
 
     oThis.mentionedUserIds = addVideoDescriptionData.mentionedUserIds;
   }
@@ -225,37 +226,50 @@ class UpdateFanVideo extends UpdateProfileBase {
    * @private
    */
   async _extraUpdates() {
-    // Feed needs to be added for uploaded video
+    // Feed needs to be added for uploaded video.
     const oThis = this;
 
-    let promiseArray = [];
+    const cacheResponse = await new UserMuteByUser2IdsForGlobalCache({ user2Ids: [oThis.profileUserId] }).fetch();
+    if (cacheResponse.isFailure()) {
+      return Promise.reject(cacheResponse);
+    }
 
-    // Feed needs to be added only if user is an approved creator.
+    const isUserMuted = cacheResponse.data[oThis.profileUserId].all == 1;
+
+    const promisesArray = [];
+
     if (UserModelKlass.isUserApprovedCreator(oThis.userObj)) {
+      // Feed needs to be added only if user is an approved creator.
       await oThis._addFeed();
 
-      const messagePayload = {
-        userId: oThis.profileUserId,
-        videoId: oThis.videoId
-      };
-
-      promiseArray.push(bgJob.enqueue(bgJobConstants.slackContentVideoMonitoringJobTopic, messagePayload));
-      // Notification would be published only if user is approved.
-      promiseArray.push(
+      // Video notifications would be published only if user is approved.
+      promisesArray.push(
         notificationJobEnqueue.enqueue(notificationJobConstants.videoNotificationsKind, {
           creatorUserId: oThis.profileUserId,
           videoId: oThis.videoId,
           mentionedUserIds: oThis.mentionedUserIds
         })
       );
-    } else {
-      const messagePayload = {
-        userId: oThis.profileUserId
-      };
-      promiseArray.push(bgJob.enqueue(bgJobConstants.approveNewCreatorJobTopic, messagePayload));
     }
 
-    await Promise.all(promiseArray);
+    /* If user is approved and globally muted, publish content monitoring msg
+     else send request to admins to approve new creator.
+     */
+    if (UserModelKlass.isUserApprovedCreator(oThis.userObj) && !isUserMuted) {
+      const messagePayload = {
+        userId: oThis.profileUserId,
+        videoId: oThis.videoId
+      };
+
+      promisesArray.push(bgJob.enqueue(bgJobConstants.slackContentVideoMonitoringJobTopic, messagePayload));
+    } else {
+      const messagePayloadForApproveCreator = {
+        userId: oThis.profileUserId
+      };
+      promisesArray.push(bgJob.enqueue(bgJobConstants.approveNewCreatorJobTopic, messagePayloadForApproveCreator));
+    }
+
+    await Promise.all(promisesArray);
   }
 
   /**
@@ -288,9 +302,8 @@ class UpdateFanVideo extends UpdateProfileBase {
   async _flushCaches() {
     const oThis = this;
 
-    const promisesArray = [];
+    const promisesArray = [super._flushCaches()];
 
-    promisesArray.push(super._flushCaches());
     if (oThis.feedId) {
       promisesArray.push(FeedModel.flushCache({ ids: [oThis.feedId] }));
     }
@@ -300,7 +313,7 @@ class UpdateFanVideo extends UpdateProfileBase {
   }
 
   /**
-   * Prepares Response
+   * Prepare service response.
    *
    * @returns {*|result}
    * @private
@@ -308,7 +321,7 @@ class UpdateFanVideo extends UpdateProfileBase {
   _prepareResponse() {
     const oThis = this;
 
-    // FE fires the video creation pixel and following response is necessary.
+    // NOTE: Front-end fires the video creation pixel and following response is necessary.
     return responseHelper.successWithData({
       [entityTypeConstants.userVideoList]: [
         {
