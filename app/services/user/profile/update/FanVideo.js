@@ -234,36 +234,45 @@ class UpdateFanVideo extends UpdateProfileBase {
       return Promise.reject(cacheResponse);
     }
 
-    const isUserUnMuted = cacheResponse.data[oThis.profileUserId].all == 0;
+    const isUserMuted = cacheResponse.data[oThis.profileUserId].all == 1;
 
-    const promiseArray = [];
+    const promisesArray = [];
 
-    // Feed needs to be added only if user is an approved creator and globally unmuted.
-    if (UserModelKlass.isUserApprovedCreator(oThis.userObj) && isUserUnMuted) {
+    if (UserModelKlass.isUserApprovedCreator(oThis.userObj)) {
+      // Feed needs to be added only if user is an approved creator.
       await oThis._addFeed();
 
-      const messagePayload = {
-        userId: oThis.profileUserId,
-        videoId: oThis.videoId
-      };
+      // If user is globally muted, send request to admins to approve new creator.
+      if (isUserMuted) {
+        const messagePayloadForApproveCreator = {
+          userId: oThis.profileUserId
+        };
+        promisesArray.push(bgJob.enqueue(bgJobConstants.approveNewCreatorJobTopic, messagePayloadForApproveCreator));
+      } else {
+        // Video notifications would be published only if user is approved and unmuted globally.
+        promisesArray.push(
+          notificationJobEnqueue.enqueue(notificationJobConstants.videoNotificationsKind, {
+            creatorUserId: oThis.profileUserId,
+            videoId: oThis.videoId,
+            mentionedUserIds: oThis.mentionedUserIds
+          })
+        );
 
-      promiseArray.push(bgJob.enqueue(bgJobConstants.slackContentVideoMonitoringJobTopic, messagePayload));
-      // Notification would be published only if user is approved.
-      promiseArray.push(
-        notificationJobEnqueue.enqueue(notificationJobConstants.videoNotificationsKind, {
-          creatorUserId: oThis.profileUserId,
-          videoId: oThis.videoId,
-          mentionedUserIds: oThis.mentionedUserIds
-        })
-      );
+        const messagePayload = {
+          userId: oThis.profileUserId,
+          videoId: oThis.videoId
+        };
+
+        promisesArray.push(bgJob.enqueue(bgJobConstants.slackContentVideoMonitoringJobTopic, messagePayload));
+      }
     } else {
-      const messagePayload = {
+      const messagePayloadForApproveCreator = {
         userId: oThis.profileUserId
       };
-      promiseArray.push(bgJob.enqueue(bgJobConstants.approveNewCreatorJobTopic, messagePayload));
+      promisesArray.push(bgJob.enqueue(bgJobConstants.approveNewCreatorJobTopic, messagePayloadForApproveCreator));
     }
 
-    await Promise.all(promiseArray);
+    await Promise.all(promisesArray);
   }
 
   /**
