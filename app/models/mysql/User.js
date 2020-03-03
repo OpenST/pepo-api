@@ -215,7 +215,7 @@ class UserModel extends ModelBase {
       const userId = dbRows[index].id;
       const formatDbRow = oThis.formatDbData(dbRows[index]);
       response[formatDbRow.id] = formatDbRow;
-      response[formatDbRow.isUserGlobalMuted] = globalMuteUsersCacheResponse.data[userId].all == 1;
+      response[formatDbRow.id].isUserGlobalMuted = globalMuteUsersCacheResponse.data[userId].all == 1;
     }
 
     return response;
