@@ -12,6 +12,7 @@ const rootPrefix = '../../..',
   tokensRoutes = require(rootPrefix + '/routes/api/v1/tokens'),
   feedsRoutes = require(rootPrefix + '/routes/api/v1/feeds'),
   redemptionsRoutes = require(rootPrefix + '/routes/api/v1/redemptions'),
+  sessionAuthsRoutes = require(rootPrefix + '/routes/api/v1/sessionAuths'),
   supportRoutes = require(rootPrefix + '/routes/api/v1/support'),
   cookieHelper = require(rootPrefix + '/lib/cookieHelper'),
   tagRoutes = require(rootPrefix + '/routes/api/v1/tags'),
@@ -53,6 +54,7 @@ router.use('/invites', invitesRoutes);
 router.use('/tokens', tokensRoutes);
 router.use('/ost-transactions', ostTransactionRoutes);
 router.use('/redemptions', redemptionsRoutes);
+router.use('/session-auth', sessionAuthsRoutes);
 router.use('/support', supportRoutes);
 router.use('/upload-params', uploadParamsRoutes);
 router.use('/tags', tagRoutes);
