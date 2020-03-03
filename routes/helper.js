@@ -99,7 +99,7 @@ class RoutesHelper {
       if (response.isSuccess() && onServiceSuccess) {
         // If required, this function could reformat data as per API version requirements.
         // NOTE: This method should modify response.data
-        response.data.sanitizedRequestHeaders = req.headers;
+        response.data.sanitizedRequestHeaders = req.headers; // TODO:@Shlok change this to sanitizedHeaders
         await onServiceSuccess(response);
       }
 
