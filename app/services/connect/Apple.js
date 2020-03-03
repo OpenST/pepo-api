@@ -94,20 +94,6 @@ class AppleConnect extends ConnectBase {
       );
     }
 
-    if (decryptedIdentityToken.aud !== coreConstants.PA_APPLE_CLIENT_ID) {
-      return Promise.reject(
-        responseHelper.error({
-          internal_error_identifier: 'l_c_l_ba_2',
-          api_error_identifier: 'something_went_wrong',
-          debug_options: {
-            Error: `aud parameter does not include this client - is: ${decryptedIdentityToken.aud} | expected: ${
-              coreConstants.PA_APPLE_CLIENT_ID
-            }`
-          }
-        })
-      );
-    }
-
     if (decryptedIdentityToken.exp < Date.now() / 1000) {
       return Promise.reject(
         responseHelper.error({
@@ -122,9 +108,26 @@ class AppleConnect extends ConnectBase {
 
     oThis.decryptedAppleEmail = decryptedIdentityToken.email;
 
+    let appleClientId = coreConstants.PA_APPLE_CLIENT_ID;
     // In case of web request, we are not getting apple id in request
     if (apiRefererConstants.isWebRequest(oThis.apiReferer)) {
       oThis.appleId = decryptedIdentityToken.sub;
+      // For Web request client id is appended .signin by default by apple.
+      appleClientId = appleClientId + '.signin';
+    }
+
+    if (decryptedIdentityToken.aud !== appleClientId) {
+      return Promise.reject(
+        responseHelper.error({
+          internal_error_identifier: 'l_c_l_ba_2',
+          api_error_identifier: 'something_went_wrong',
+          debug_options: {
+            Error: `aud parameter does not include this client - is: ${
+              decryptedIdentityToken.aud
+            } | expected: ${appleClientId}`
+          }
+        })
+      );
     }
   }
 
