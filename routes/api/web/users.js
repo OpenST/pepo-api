@@ -42,8 +42,6 @@ router.get('/current', sanitizer.sanitizeDynamicUrlParams, function(req, res, ne
   req.decodedParams.apiName = apiName.loggedInUser;
 
   const dataFormatterFunc = async function(serviceResponse) {
-    // cookieHelper.setLoginCookie(res, serviceResponse.data.userLoginCookieValue); TODO: Set web cookie.
-
     const wrapperFormatterRsp = await new FormatterComposer({
       resultType: responseEntityKey.loggedInUser,
       entityKindToResponseKeyMap: {

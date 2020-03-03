@@ -6,6 +6,7 @@ const rootPrefix = '../../..',
   FormatterComposer = require(rootPrefix + '/lib/formatter/Composer'),
   routeHelper = require(rootPrefix + '/routes/helper'),
   sanitizer = require(rootPrefix + '/helpers/sanitizer'),
+  cookieHelper = require(rootPrefix + '/lib/cookieHelper'),
   authRoutes = require(rootPrefix + '/routes/api/web/auth'),
   userRoutes = require(rootPrefix + '/routes/api/web/users'),
   feedsRoutes = require(rootPrefix + '/routes/api/web/feeds'),
@@ -24,15 +25,12 @@ router.use(cookieParser(coreConstants.WEB_COOKIE_SECRET));
 // router.use(cookieHelper.setWebCsrf());
 
 router.use('/support', supportRoutes);
-
 router.use('/auth', authRoutes);
-
 router.use('/report', reportRoutes);
-
 router.use('/videos', videoRoutes);
-
 router.use('/feeds', feedsRoutes);
 
+router.use(cookieHelper.validateUserWebLoginCookieIfPresent, cookieHelper.validateUserLoginRequired);
 router.use('/users', userRoutes);
 
 /* Get url and message for sharing channel given its permalink. */
