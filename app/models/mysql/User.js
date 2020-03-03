@@ -182,7 +182,7 @@ class UserModel extends ModelBase {
     const oThis = this;
 
     const promisesArray = [
-      new UserMuteByUser2IdsForGlobalCache({ user2Ids: [ids] }).fetch(),
+      new UserMuteByUser2IdsForGlobalCache({ user2Ids: ids }).fetch(),
       oThis
         .select([
           'id',
