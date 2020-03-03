@@ -44,6 +44,14 @@ class HeaderHelper {
     return 14;
   }
 
+  get iosParisRelease2020BuildNumber() {
+    return 29;
+  }
+
+  get androidParisRelease2020BuildNumber() {
+    return 31;
+  }
+
   /**
    * Is reply build?
    *
@@ -82,6 +90,28 @@ class HeaderHelper {
     if (deviceOs === oThis.iosDeviceOs && buildNumber >= oThis.iosVideoPlayEventBuildNumber) {
       return true;
     } else if (deviceOs === oThis.androidDeviceOs && buildNumber >= oThis.androidVideoPlayEventBuildNumber) {
+      return true;
+    }
+
+    return false;
+  }
+
+  /**
+   * Is paris release 2020 build?
+   *
+   * @param {object} headers
+   *
+   * @returns {boolean}
+   */
+  isBuildAfterParisRelease2020(headers) {
+    const oThis = this;
+
+    const deviceOs = oThis.pepoDeviceOs(headers),
+      buildNumber = oThis.pepoBuildNumber(headers);
+
+    if (deviceOs === oThis.iosDeviceOs && buildNumber > oThis.iosParisRelease2020BuildNumber) {
+      return true;
+    } else if (deviceOs === oThis.androidDeviceOs && buildNumber > oThis.androidParisRelease2020BuildNumber) {
       return true;
     }
 
