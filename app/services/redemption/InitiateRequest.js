@@ -236,6 +236,7 @@ class InitiateRequestRedemption extends ServiceBase {
         oThis.productDollarValue = redemptionProduct.dollarValue;
         oThis.productKind = redemptionProduct.kind;
         oThis.productMinDollarValue = redemptionProduct.minDollarValue;
+        oThis.productMaxDollarValue = redemptionProduct.maxDollarValue;
         oThis.productDollarStep = redemptionProduct.dollarStep;
       }
     }
@@ -268,10 +269,19 @@ class InitiateRequestRedemption extends ServiceBase {
       productMinDollarValueBN = new BigNumber(oThis.productMinDollarValue),
       productDollarStepBN = new BigNumber(oThis.productDollarStep);
 
+    let productMaxDollarValueBN;
+
+    if (oThis.productMaxDollarValue) {
+      productMaxDollarValueBN = new BigNumber(oThis.productMaxDollarValue);
+    }
+
     if (dollarAmountBN.lt(productMinDollarValueBN)) {
       let apiErrorIdentifier = null;
 
       switch (Number(oThis.productMinDollarValue)) {
+        case 5:
+          apiErrorIdentifier = 'min_redemption_amount_5';
+          break;
         case 10:
           apiErrorIdentifier = 'min_redemption_amount_10';
           break;
@@ -292,6 +302,19 @@ class InitiateRequestRedemption extends ServiceBase {
           debug_options: {
             dollarAmountBN: dollarAmountBN,
             productMinDollarValueBN: productMinDollarValueBN
+          }
+        })
+      );
+    }
+
+    if (productMaxDollarValueBN && dollarAmountBN.gt(productMaxDollarValueBN)) {
+      return Promise.reject(
+        responseHelper.error({
+          internal_error_identifier: 'a_s_r_ir_7',
+          api_error_identifier: 'max_redemption_amount_crossed',
+          debug_options: {
+            dollarAmountBN: dollarAmountBN,
+            productMaxDollarValueBN: productMaxDollarValueBN
           }
         })
       );
