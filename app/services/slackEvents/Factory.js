@@ -125,6 +125,15 @@ class SlackEventFactory extends ServiceBase {
     let eventResponse = null;
 
     switch (oThis.eventType) {
+      case slackConstants.unmuteUserEventType: {
+        const UnmuteUserEvent = require(rootPrefix + '/app/services/slackEvents/UnmuteUser');
+        eventResponse = await new UnmuteUserEvent({
+          eventDataPayload: oThis.eventData.payload,
+          eventParams: oThis.eventParams,
+          currentAdmin: oThis.currentAdmin
+        }).perform();
+        break;
+      }
       case slackConstants.approveUserEventType: {
         const ApproveUserEvent = require(rootPrefix + '/app/services/slackEvents/ApproveUser');
         eventResponse = await new ApproveUserEvent({

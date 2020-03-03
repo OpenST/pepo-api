@@ -1,16 +1,16 @@
 const rootPrefix = '../../..',
   SlackEventBase = require(rootPrefix + '/app/services/slackEvents/Base'),
-  ApproveUsersAsCreatorService = require(rootPrefix + '/app/services/admin/ApproveUsersAsCreator'),
+  UnmuteUser = require(rootPrefix + '/app/services/admin/UnMuteUser'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   slackConstants = require(rootPrefix + '/lib/globalConstant/slack');
 
 /**
- * Class to process approve user event.
+ * Class to process unmute user event.
  *
- * @class ApproveUser
+ * @class UnmuteUser
  */
-class ApproveUser extends SlackEventBase {
+class UnmuteUserEvent extends SlackEventBase {
   /**
    * Async perform.
    *
@@ -22,7 +22,7 @@ class ApproveUser extends SlackEventBase {
 
     await oThis._validateAndSanitizeParams();
 
-    await oThis._callApproveUserService();
+    await oThis._callUnmuteUserService();
 
     await oThis._postResponseToSlack();
 
@@ -30,23 +30,23 @@ class ApproveUser extends SlackEventBase {
   }
 
   /**
-   * Call approve user service.
+   * Call unmute user service.
    *
    * @returns {Promise<*>}
    * @private
    */
-  async _callApproveUserService() {
+  async _callUnmuteUserService() {
     const oThis = this;
 
-    const approveUserServiceParams = {
-      user_ids: [oThis.eventParams.user_id],
+    const unmuteUserServiceParams = {
+      user_id: oThis.eventParams.user_id,
       current_admin: oThis.currentAdmin
     };
 
-    const approveUserServiceResponse = await new ApproveUsersAsCreatorService(approveUserServiceParams).perform();
+    const unmuteUserServiceResponse = await new UnmuteUser(unmuteUserServiceParams).perform();
 
-    if (approveUserServiceResponse.isFailure()) {
-      oThis._setError(approveUserServiceResponse);
+    if (unmuteUserServiceResponse.isFailure()) {
+      oThis._setError(unmuteUserServiceResponse);
     }
   }
 
@@ -72,7 +72,7 @@ class ApproveUser extends SlackEventBase {
       newBlocks[actionPos + 1] = slackConstants.addTextSection(formattedMsg);
       newBlocks = newBlocks.concat(trailingArray);
     } else {
-      const txt = await oThis._textToWrite('Approved');
+      const txt = await oThis._textToWrite('Unmuted');
       const newElement = {
         type: 'context',
         elements: [
@@ -90,4 +90,4 @@ class ApproveUser extends SlackEventBase {
   }
 }
 
-module.exports = ApproveUser;
+module.exports = UnmuteUserEvent;

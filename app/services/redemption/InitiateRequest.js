@@ -7,6 +7,8 @@ const rootPrefix = '../../..',
   UserMultiCache = require(rootPrefix + '/lib/cacheManagement/multi/User'),
   GetPepocornBalance = require(rootPrefix + '/lib/pepocorn/GetPepocornBalance'),
   PepocornBalanceModel = require(rootPrefix + '/app/models/mysql/redemption/PepocornBalance'),
+  UserMuteByUser2IdsForGlobalCache = require(rootPrefix + '/lib/cacheManagement/multi/UserMuteByUser2IdsForGlobal'),
+  VideoDetailsByUserIdCache = require(rootPrefix + '/lib/cacheManagement/single/VideoDetailsByUserIdPagination'),
   PepocornTransactionModel = require(rootPrefix + '/app/models/mysql/redemption/PepocornTransaction'),
   TwitterUserByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TwitterUserByIds'),
   TokenUserByUserIdCache = require(rootPrefix + '/lib/cacheManagement/multi/TokenUserByUserIds'),
@@ -21,6 +23,7 @@ const rootPrefix = '../../..',
   bgJobConstants = require(rootPrefix + '/lib/globalConstant/bgJob'),
   redemptionConstants = require(rootPrefix + '/lib/globalConstant/redemption/redemption'),
   pepocornTransactionConstants = require(rootPrefix + '/lib/globalConstant/redemption/pepocornTransaction'),
+  paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination'),
   emailServiceApiCallHookConstants = require(rootPrefix + '/lib/globalConstant/big/emailServiceApiCallHook');
 
 /**
@@ -138,6 +141,51 @@ class InitiateRequestRedemption extends ServiceBase {
   }
 
   /**
+   * Validate if user is unmuted and has a video.
+   *
+   * @returns {Promise<boolean>}
+   * @private
+   */
+  async _validateUserEligibility() {
+    const oThis = this;
+
+    const cacheResponse = await new UserMuteByUser2IdsForGlobalCache({ user2Ids: [oThis.currentUserId] }).fetch();
+    if (cacheResponse.isFailure()) {
+      return Promise.reject(cacheResponse);
+    }
+
+    if (cacheResponse.data[oThis.currentUserId].all == 1) {
+      return Promise.reject(
+        responseHelper.error({
+          internal_error_identifier: 'a_s_r_ir_vue_1',
+          api_error_identifier: 'redemption_user_muted_by_admin',
+          debug_options: {}
+        })
+      );
+    }
+
+    const videoDetailCacheResponse = await new VideoDetailsByUserIdCache({
+      userId: oThis.currentUserId,
+      limit: paginationConstants.defaultVideoListPageSize,
+      paginationTimestamp: null
+    }).fetch();
+
+    if (videoDetailCacheResponse.isFailure()) {
+      return Promise.reject(videoDetailCacheResponse);
+    }
+
+    if (videoDetailCacheResponse.data.videoIds.length == 0) {
+      return Promise.reject(
+        responseHelper.error({
+          internal_error_identifier: 'a_s_r_ir_vue_2',
+          api_error_identifier: 'redemption_user_without_video',
+          debug_options: {}
+        })
+      );
+    }
+  }
+
+  /**
    * Validate and sanitize params.
    *
    * @returns {Promise<never>}
@@ -145,9 +193,15 @@ class InitiateRequestRedemption extends ServiceBase {
    */
   async _validateAndSanitize() {
     const oThis = this;
+
+    await oThis._validateUserEligibility();
+
     await oThis._validateProductId();
+
     await oThis._validateDollarAmount();
+
     oThis._getPepocornAmount();
+
     await oThis._validatePepocornBalance();
   }
 
@@ -182,6 +236,7 @@ class InitiateRequestRedemption extends ServiceBase {
         oThis.productDollarValue = redemptionProduct.dollarValue;
         oThis.productKind = redemptionProduct.kind;
         oThis.productMinDollarValue = redemptionProduct.minDollarValue;
+        oThis.productMaxDollarValue = redemptionProduct.maxDollarValue;
         oThis.productDollarStep = redemptionProduct.dollarStep;
       }
     }
@@ -214,10 +269,19 @@ class InitiateRequestRedemption extends ServiceBase {
       productMinDollarValueBN = new BigNumber(oThis.productMinDollarValue),
       productDollarStepBN = new BigNumber(oThis.productDollarStep);
 
+    let productMaxDollarValueBN;
+
+    if (oThis.productMaxDollarValue) {
+      productMaxDollarValueBN = new BigNumber(oThis.productMaxDollarValue);
+    }
+
     if (dollarAmountBN.lt(productMinDollarValueBN)) {
       let apiErrorIdentifier = null;
 
       switch (Number(oThis.productMinDollarValue)) {
+        case 5:
+          apiErrorIdentifier = 'min_redemption_amount_5';
+          break;
         case 10:
           apiErrorIdentifier = 'min_redemption_amount_10';
           break;
@@ -238,6 +302,19 @@ class InitiateRequestRedemption extends ServiceBase {
           debug_options: {
             dollarAmountBN: dollarAmountBN,
             productMinDollarValueBN: productMinDollarValueBN
+          }
+        })
+      );
+    }
+
+    if (productMaxDollarValueBN && dollarAmountBN.gt(productMaxDollarValueBN)) {
+      return Promise.reject(
+        responseHelper.error({
+          internal_error_identifier: 'a_s_r_ir_7',
+          api_error_identifier: 'max_redemption_amount_crossed',
+          debug_options: {
+            dollarAmountBN: dollarAmountBN,
+            productMaxDollarValueBN: productMaxDollarValueBN
           }
         })
       );
