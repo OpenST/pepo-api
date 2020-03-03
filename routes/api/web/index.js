@@ -27,8 +27,6 @@ router.use(cookieParser(coreConstants.WEB_COOKIE_SECRET));
 router.use('/support', supportRoutes);
 router.use('/auth', authRoutes);
 router.use('/report', reportRoutes);
-router.use('/videos', videoRoutes);
-router.use('/feeds', feedsRoutes);
 
 /* Get url and message for sharing channel given its permalink. */
 router.get('/communities/:channel_permalink/share', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
@@ -50,6 +48,11 @@ router.get('/communities/:channel_permalink/share', sanitizer.sanitizeDynamicUrl
   Promise.resolve(routeHelper.perform(req, res, next, '/channel/ShareDetails', 'r_a_w_1', null, dataFormatterFunc));
 });
 
+// Login not mandatory for following.
+router.use('/videos', cookieHelper.validateUserWebLoginCookieIfPresent, videoRoutes);
+router.use('/feeds', cookieHelper.validateUserWebLoginCookieIfPresent, feedsRoutes);
+
+// Login is mandatory for following routes.
 router.use(cookieHelper.validateUserWebLoginCookieIfPresent, cookieHelper.validateUserLoginRequired);
 router.use('/users', userRoutes);
 
