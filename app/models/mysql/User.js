@@ -380,7 +380,7 @@ class UserModel extends ModelBase {
       ':' +
       uniqueStr.slice(-16) +
       ':' +
-      coreConstants.WEB_COOKIE_SECRET +
+      coreConstants.PA_COOKIE_TOKEN_SECRET +
       ':' +
       options.timestamp +
       ':' +

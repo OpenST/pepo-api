@@ -20,13 +20,14 @@ const rootPrefix = '../../..',
   entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
   responseEntityKey = require(rootPrefix + '/lib/globalConstant/responseEntityKey');
 
+router.use('/support', supportRoutes);
+
 // Node.js cookie parsing middleware.
 router.use(cookieParser(coreConstants.WEB_COOKIE_SECRET));
 
 // NOTE: CSRF COOKIE SHOULD NOT BE SET HERE. IT SHOULD ONLY BE SET AT WEB. DO NOT UNCOMMENT-AMAN
 // router.use(cookieHelper.setWebCsrf());
 
-router.use('/support', supportRoutes);
 router.use('/auth', authRoutes);
 router.use('/report', reportRoutes);
 

@@ -12,9 +12,6 @@ const rootPrefix = '../../..',
   entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
   responseEntityKey = require(rootPrefix + '/lib/globalConstant/responseEntityKey');
 
-// Node.js cookie parsing middleware.
-router.use(cookieParser(coreConstants.COOKIE_SECRET));
-
 /* Get url and message for profile given username. */
 router.get('/:username/share', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.profileShare;

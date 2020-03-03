@@ -8,9 +8,6 @@ const rootPrefix = '../../..',
   sanitizer = require(rootPrefix + '/helpers/sanitizer'),
   coreConstants = require(rootPrefix + '/config/coreConstants');
 
-// Node.js cookie parsing middleware.
-router.use(cookieParser(coreConstants.COOKIE_SECRET));
-
 // Report.
 router.post('/', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.reportIssue;

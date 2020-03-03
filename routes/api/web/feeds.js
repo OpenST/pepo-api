@@ -12,7 +12,6 @@ const rootPrefix = '../../..',
   responseEntityKey = require(rootPrefix + '/lib/globalConstant/responseEntityKey');
 
 // Node.js cookie parsing middleware.
-router.use(cookieParser(coreConstants.COOKIE_SECRET));
 
 /* Public Feeds*/
 router.get('/', sanitizer.sanitizeDynamicUrlParams, sanitizer.sanitizeHeaderParams, function(req, res, next) {

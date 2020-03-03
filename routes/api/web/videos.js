@@ -11,9 +11,6 @@ const rootPrefix = '../../..',
   entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
   responseEntityKey = require(rootPrefix + '/lib/globalConstant/responseEntityKey');
 
-// Node.js cookie parsing middleware.
-router.use(cookieParser(coreConstants.COOKIE_SECRET));
-
 /* Video By Id */
 router.get('/:video_id', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.getVideo;
