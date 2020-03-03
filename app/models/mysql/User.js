@@ -4,7 +4,8 @@ const rootPrefix = '../../..',
   coreConstants = require(rootPrefix + '/config/coreConstants'),
   userConstants = require(rootPrefix + '/lib/globalConstant/user'),
   localCipher = require(rootPrefix + '/lib/encryptors/localCipher'),
-  databaseConstants = require(rootPrefix + '/lib/globalConstant/database');
+  databaseConstants = require(rootPrefix + '/lib/globalConstant/database'),
+  apiRefererConstants = require(rootPrefix + '/lib/globalConstant/apiReferers');
 
 // Declare variables names.
 const dbName = databaseConstants.userDbName;
@@ -270,17 +271,16 @@ class UserModel extends ModelBase {
   getCookieValueFor(userObj, decryptedEncryptionSalt, options) {
     const oThis = this;
 
-    return (
-      'v2' +
-      ':' +
-      userObj.id +
-      ':' +
-      options.loginServiceType +
-      ':' +
-      options.timestamp +
-      ':' +
-      oThis.getCookieTokenForVersionV2(userObj, decryptedEncryptionSalt, options)
-    );
+    let cookieToken = null,
+      version = 'v2';
+    if (apiRefererConstants.isWebRequest(options.apiReferer)) {
+      cookieToken = oThis.getCookieTokenForWeb(userObj, decryptedEncryptionSalt, options);
+      version = apiRefererConstants.webReferer;
+    } else {
+      cookieToken = oThis.getCookieTokenForVersionV2(userObj, decryptedEncryptionSalt, options);
+    }
+
+    return version + ':' + userObj.id + ':' + options.loginServiceType + ':' + options.timestamp + ':' + cookieToken;
   }
 
   /**
@@ -341,6 +341,46 @@ class UserModel extends ModelBase {
       uniqueStr.slice(-16) +
       ':' +
       coreConstants.PA_COOKIE_TOKEN_SECRET +
+      ':' +
+      options.timestamp +
+      ':' +
+      options.loginServiceType;
+
+    return util.createSha256Digest(salt, stringToSign);
+  }
+
+  /**
+   * Get cookie token for web.
+   *
+   * @param {object} userObj
+   * @param {string} decryptedEncryptionSalt
+   * @param {object} options
+   *
+   * @returns {string}
+   */
+  getCookieTokenForWeb(userObj, decryptedEncryptionSalt, options) {
+    const uniqueStr = localCipher.decrypt(decryptedEncryptionSalt, userObj.cookieToken);
+
+    const stringToSign =
+      apiRefererConstants.webReferer +
+      ':' +
+      userObj.id +
+      ':' +
+      options.loginServiceType +
+      ':' +
+      options.timestamp +
+      ':' +
+      coreConstants.WEB_COOKIE_SECRET +
+      ':' +
+      uniqueStr.substring(0, 16);
+    const salt =
+      apiRefererConstants.webReferer +
+      ':' +
+      userObj.id +
+      ':' +
+      uniqueStr.slice(-16) +
+      ':' +
+      coreConstants.WEB_COOKIE_SECRET +
       ':' +
       options.timestamp +
       ':' +

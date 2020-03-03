@@ -26,6 +26,7 @@ class SocialConnectBase extends ServiceBase {
    *
    * @param {object} params
    * @param {string} [params.invite_code]: invite_code
+   * @param {string} [params.api_referer]: api_referer
    * @param {object} [params.utm_params]: utm_params
    *
    * @augments ServiceBase
@@ -38,6 +39,7 @@ class SocialConnectBase extends ServiceBase {
     const oThis = this;
     oThis.inviteCode = params.invite_code;
     oThis.utmParams = params.utm_params;
+    oThis.apiReferer = params.api_referer;
     oThis.socialUserObj = null;
     oThis.newSocialConnect = false;
     oThis.userId = null;
@@ -351,6 +353,7 @@ class SocialConnectBase extends ServiceBase {
     rp.utmParams = oThis.utmParams;
     rp.inviteCode = oThis.inviteCode || '';
     rp.userEmail = oThis.userEmailToSet;
+    rp.apiReferer = oThis.apiReferer;
     return rp;
   }
 

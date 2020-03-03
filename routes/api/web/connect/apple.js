@@ -7,17 +7,19 @@ const rootPrefix = '../../../..',
   sanitizer = require(rootPrefix + '/helpers/sanitizer'),
   cookieHelper = require(rootPrefix + '/lib/cookieHelper'),
   apiName = require(rootPrefix + '/lib/globalConstant/apiName'),
+  apiRefererConstants = require(rootPrefix + '/lib/globalConstant/apiReferers'),
   entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
   responseEntityKey = require(rootPrefix + '/lib/globalConstant/responseEntityKey');
 
 /* Apple connect. */
 router.post('/login', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.appleConnect;
+  req.decodedParams.api_referer = apiRefererConstants.webReferer;
 
   cookieHelper.fetchUserUtmCookie(req);
 
   const onServiceSuccess = async function(serviceResponse) {
-    cookieHelper.setLoginCookie(res, serviceResponse.data.userLoginCookieValue);
+    cookieHelper.setWebLoginCookie(res, serviceResponse.data.userLoginCookieValue);
     cookieHelper.deleteUserUtmCookie(res);
     const wrapperFormatterRsp = await new FormatterComposer({
       resultType: responseEntityKey.loggedInUser,
@@ -36,7 +38,7 @@ router.post('/login', sanitizer.sanitizeDynamicUrlParams, function(req, res, nex
   };
 
   const onServiceFailure = async function() {
-    cookieHelper.deleteLoginCookie(res);
+    cookieHelper.deleteWebLoginCookie(res);
   };
 
   Promise.resolve(
@@ -51,8 +53,9 @@ router.post('/disconnect', cookieHelper.parseUserCookieForLogout, sanitizer.sani
   next
 ) {
   req.decodedParams.apiName = apiName.appleDisconnect;
+  req.decodedParams.api_referer = apiRefererConstants.webReferer;
 
-  cookieHelper.deleteLoginCookie(res);
+  cookieHelper.deleteWebLoginCookie(res);
 
   Promise.resolve(routeHelper.perform(req, res, next, '/disconnect/Apple', 'r_a_w_a_2', null));
 });

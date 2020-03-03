@@ -8,16 +8,18 @@ const rootPrefix = '../../../..',
   cookieHelper = require(rootPrefix + '/lib/cookieHelper'),
   apiName = require(rootPrefix + '/lib/globalConstant/apiName'),
   entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
+  apiRefererConstants = require(rootPrefix + '/lib/globalConstant/apiReferers'),
   responseEntityKey = require(rootPrefix + '/lib/globalConstant/responseEntityKey');
 
 /* Twitter connect. */
 router.post('/login', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.twitterLogin;
+  req.decodedParams.api_referer = apiRefererConstants.webReferer;
 
   cookieHelper.fetchUserUtmCookie(req);
 
   const onServiceSuccess = async function(serviceResponse) {
-    cookieHelper.setLoginCookie(res, serviceResponse.data.userLoginCookieValue);
+    cookieHelper.setWebLoginCookie(res, serviceResponse.data.userLoginCookieValue);
     cookieHelper.deleteUserUtmCookie(res);
     const wrapperFormatterRsp = await new FormatterComposer({
       resultType: responseEntityKey.loggedInUser,
@@ -36,7 +38,7 @@ router.post('/login', sanitizer.sanitizeDynamicUrlParams, function(req, res, nex
   };
 
   const onServiceFailure = async function() {
-    cookieHelper.deleteLoginCookie(res);
+    cookieHelper.deleteWebLoginCookie(res);
   };
 
   Promise.resolve(
@@ -51,8 +53,9 @@ router.post('/disconnect', cookieHelper.parseUserCookieForLogout, sanitizer.sani
   next
 ) {
   req.decodedParams.apiName = apiName.twitterDisconnect;
+  req.decodedParams.api_referer = apiRefererConstants.webReferer;
 
-  cookieHelper.deleteLoginCookie(res);
+  cookieHelper.deleteWebLoginCookie(res);
 
   Promise.resolve(routeHelper.perform(req, res, next, '/disconnect/Twitter', 'r_a_w_g_2', null));
 });
@@ -60,6 +63,7 @@ router.post('/disconnect', cookieHelper.parseUserCookieForLogout, sanitizer.sani
 /* Request Token for twitter */
 router.get('/request_token', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.twitterRequestToken;
+  req.decodedParams.api_referer = apiRefererConstants.webReferer;
 
   const onServiceSuccess = async function(serviceResponse) {
     // if (serviceResponse.data.dataCookieValue) {

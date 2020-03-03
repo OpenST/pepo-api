@@ -146,7 +146,8 @@ class GithubConnect extends ConnectBase {
       userGithubEntity: oThis.formattedGithubUser,
       githubUserObj: oThis.socialUserObj,
       userId: oThis.userId,
-      isNewSocialConnect: oThis.newSocialConnect
+      isNewSocialConnect: oThis.newSocialConnect,
+      apiReferer: oThis.apiReferer
     };
 
     oThis.serviceResp = await new GithubLogin(loginParams).perform();
