@@ -22,7 +22,6 @@ class ApproveUsersAsCreator extends ServiceBase {
    * @param {object} params
    * @param {array} params.user_ids: User ids to be approved by admin.
    * @param {object} params.current_admin: current admin.
-   * @param {string} [params.approved_via_medium]: indicates the platform from where the user is approved (slack/pepo-admin)
    *
    * @augments ServiceBase
    *
@@ -35,7 +34,6 @@ class ApproveUsersAsCreator extends ServiceBase {
 
     oThis.userIds = params.user_ids;
     oThis.currentAdminId = params.current_admin.id;
-    oThis.approvedViaMedium = params.approved_via_medium || pixelConstants.userApprovedViaAdminUserProfileMedium;
 
     oThis.userObjects = {};
   }
@@ -57,8 +55,7 @@ class ApproveUsersAsCreator extends ServiceBase {
       const userId = oThis.userIds[index];
       await UserModel.flushCache(oThis.userObjects[userId]);
       const promisesArray = [
-        bgJob.enqueue(bgJobConstants.postUserApprovalJob, { userId: userId, currentAdminId: oThis.currentAdminId }),
-        pixelJob.enqueue(pixelJobConstants.approveUserAsCreatorJob, oThis.getPixelParameters(userId))
+        bgJob.enqueue(bgJobConstants.postUserApprovalJob, { userId: userId, currentAdminId: oThis.currentAdminId })
       ];
       await Promise.all(promisesArray);
     }
@@ -134,23 +131,6 @@ class ApproveUsersAsCreator extends ServiceBase {
       .update(['properties = properties | ?', propertyVal])
       .where({ id: oThis.userIds })
       .fire();
-  }
-
-  /**
-   * Get pixel parameters.
-   *
-   * @param {number} userId
-   *
-   * @returns {{}}
-   */
-  getPixelParameters(userId) {
-    const oThis = this;
-
-    return {
-      approvedViaMedium: oThis.approvedViaMedium, // Mandatory parameter.
-      adminId: oThis.currentAdminId, // Mandatory parameter.
-      approvedUserId: userId // Mandatory parameter.
-    };
   }
 }
 

@@ -140,7 +140,7 @@ export PA_CAMPAIGN_MASTER_LIST="64194"
 #Twitter API Key
 export PA_TWITTER_CONSUMER_KEY='NEo4gEXzdQZaoTsqzpZvepfKb'
 export PA_TWITTER_CONSUMER_SECRET='iM5UMt4px8rwoqEoRV9gJGrJGtEoMUxOYkaWXSges7t4bk564t'
-export PA_TWITTER_AUTH_CALLBACK_ROUTE='http://pepodev.com:8080/twitter/oauth'
+export PA_TWITTER_AUTH_CALLBACK_ROUTE='http://pepodev.com/connect/twitter/oauth'
 
 # image resizer variables
 export PA_PR_LAMBDA_IMAGE_RESIZE_FUNCTION='arn:aws:lambda:us-east-1:274208178423:function:pepoImageResizer'
@@ -169,7 +169,7 @@ export PA_GOOGLE_INAPP_SERVICE_ACCOUNT_KEY=''
 export PA_GOOGLE_INAPP_SERVICE_ACCOUNT_EMAIL=''
 
 # Slack related constants.
-export PA_SLACK_OAUTH_TOKEN='xoxp-246676767414-245599437185-838396824006-71fcc8c32cef66a568b2ea890fc14ae9'
+export PA_SLACK_OAUTH_TOKEN='xoxb-246676767414-838041942631-fFwvshTcfhyWp9awQaJj3aAo'
 export PA_SLACK_API_APP_ID='AQC5JETDX'
 export PA_SLACK_SIGNING_SECRET='099e2ac373da461dfd4c50ccc6522b8b'
 

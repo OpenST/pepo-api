@@ -4,6 +4,7 @@ const rootPrefix = '../../..',
   userConstants = require(rootPrefix + '/lib/globalConstant/user'),
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   UsersCache = require(rootPrefix + '/lib/cacheManagement/multi/User'),
+  UserMuteByUser2IdsForGlobalCache = require(rootPrefix + '/lib/cacheManagement/multi/UserMuteByUser2IdsForGlobal'),
   AdminActivityLogModel = require(rootPrefix + '/app/models/mysql/admin/AdminActivityLog'),
   SendTransactionalMail = require(rootPrefix + '/lib/email/hookCreator/SendTransactionalMail'),
   ReplayAttackCache = require(rootPrefix + '/lib/cacheManagement/single/ReplayAttackOnSlackSendEmailForResubmission'),
@@ -129,14 +130,18 @@ class SendEmailForReSubmission extends ServiceBase {
     }
 
     if (UserModel.isUserApprovedCreator(userObj)) {
-      return Promise.reject(
-        responseHelper.paramValidationError({
-          internal_error_identifier: 'a_s_a_sefrs_5',
-          api_error_identifier: 'could_not_proceed',
-          params_error_identifiers: ['user_already_approved'],
-          debug_options: {}
-        })
-      );
+      const isMuted = await oThis._isGloballyMutedByAdmin();
+
+      if (!isMuted) {
+        return Promise.reject(
+          responseHelper.paramValidationError({
+            internal_error_identifier: 'a_s_a_sefrs_5',
+            api_error_identifier: 'could_not_proceed',
+            params_error_identifiers: ['user_already_approved'],
+            debug_options: {}
+          })
+        );
+      }
     }
 
     if (UserModel.isUserDeniedCreator(userObj)) {
@@ -149,6 +154,23 @@ class SendEmailForReSubmission extends ServiceBase {
         })
       );
     }
+  }
+
+  /**
+   * Send true if Globally Muted By Admin.
+   *
+   * @returns {Promise<Boolean>}
+   * @private
+   */
+  async _isGloballyMutedByAdmin() {
+    const oThis = this;
+
+    const cacheResponse = await new UserMuteByUser2IdsForGlobalCache({ user2Ids: [oThis.userId] }).fetch();
+    if (cacheResponse.isFailure()) {
+      return Promise.reject(cacheResponse);
+    }
+
+    return cacheResponse.data[oThis.userId].all == 1;
   }
 
   /**

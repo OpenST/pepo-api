@@ -1517,6 +1517,19 @@ const v1Signature = {
         validatorMethods: ['validateObject']
       }
     ]
+  },
+  [apiName.getSessionAuth]: {
+    mandatory: [
+      {
+        parameter: 'session_auth_payload_id',
+        validatorMethods: ['validateNonZeroInteger']
+      },
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      }
+    ],
+    optional: []
   }
 };
 
