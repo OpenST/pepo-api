@@ -104,7 +104,8 @@ class UserModel extends ModelBase {
       'approvedCreator',
       'status',
       'createdAt',
-      'updatedAt'
+      'updatedAt',
+      'isUserGlobalMuted'
     ];
   }
 
