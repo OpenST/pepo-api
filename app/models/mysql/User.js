@@ -455,7 +455,17 @@ class UserModel extends ModelBase {
     for (let ind = 0; ind < dbRows.length; ind++) {
       const formattedRow = oThis.formatDbData(dbRows[ind]);
       userIds.push(formattedRow.id);
-      userDetails[dbRows[ind].id] = formattedRow;
+      userDetails[formattedRow.id] = formattedRow;
+    }
+
+    const globalMuteUsersCacheResponse = await new UserMuteByUser2IdsForGlobalCache({ user2Ids: [userIds] }).fetch();
+    if (globalMuteUsersCacheResponse.isFailure()) {
+      return Promise.reject(globalMuteUsersCacheResponse);
+    }
+
+    for (let index = 0; index < userIds.length; index++) {
+      const userId = userIds[index];
+      userDetails[userId].isUserGlobalMuted = globalMuteUsersCacheResponse.data[userId].all == 1;
     }
 
     return { userIds: userIds, userDetails: userDetails };
