@@ -30,9 +30,6 @@ router.use('/report', reportRoutes);
 router.use('/videos', videoRoutes);
 router.use('/feeds', feedsRoutes);
 
-router.use(cookieHelper.validateUserWebLoginCookieIfPresent, cookieHelper.validateUserLoginRequired);
-router.use('/users', userRoutes);
-
 /* Get url and message for sharing channel given its permalink. */
 router.get('/communities/:channel_permalink/share', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.channelShare;
@@ -52,5 +49,8 @@ router.get('/communities/:channel_permalink/share', sanitizer.sanitizeDynamicUrl
 
   Promise.resolve(routeHelper.perform(req, res, next, '/channel/ShareDetails', 'r_a_w_1', null, dataFormatterFunc));
 });
+
+router.use(cookieHelper.validateUserWebLoginCookieIfPresent, cookieHelper.validateUserLoginRequired);
+router.use('/users', userRoutes);
 
 module.exports = router;
