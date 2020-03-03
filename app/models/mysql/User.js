@@ -230,16 +230,29 @@ class UserModel extends ModelBase {
   async fetchSecureById(id) {
     const oThis = this;
 
-    const dbRows = await oThis
-      .select('*')
-      .where(['id = ?', id])
-      .fire();
+    const promisesArray = [
+      oThis
+        .select('*')
+        .where(['id = ?', id])
+        .fire(),
+      new UserMuteByUser2IdsForGlobalCache({ user2Ids: [id] }).fetch()
+    ];
 
+    const promisesResponse = await Promise.all(promisesArray);
+
+    const dbRows = promisesResponse[0];
     if (dbRows.length === 0) {
       return {};
     }
+    const response = oThis.formatDbData(dbRows[0]);
 
-    return oThis.formatDbData(dbRows[0]);
+    const globalMuteUsersCacheResponse = promisesResponse[1];
+    if (globalMuteUsersCacheResponse.isFailure()) {
+      return Promise.reject(globalMuteUsersCacheResponse);
+    }
+    response.isUserGlobalMuted = globalMuteUsersCacheResponse.data[id].all == 1;
+
+    return response;
   }
 
   /**
@@ -458,7 +471,7 @@ class UserModel extends ModelBase {
       userDetails[formattedRow.id] = formattedRow;
     }
 
-    const globalMuteUsersCacheResponse = await new UserMuteByUser2IdsForGlobalCache({ user2Ids: [userIds] }).fetch();
+    const globalMuteUsersCacheResponse = await new UserMuteByUser2IdsForGlobalCache({ user2Ids: userIds }).fetch();
     if (globalMuteUsersCacheResponse.isFailure()) {
       return Promise.reject(globalMuteUsersCacheResponse);
     }
