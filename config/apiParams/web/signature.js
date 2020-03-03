@@ -325,6 +325,19 @@ const webSignature = {
       }
     ],
     optional: []
+  },
+  [apiName.postSessionAuth]: {
+    mandatory: [
+      {
+        parameter: 'payload',
+        validatorMethods: ['validateNonBlankString']
+      },
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      }
+    ],
+    optional: []
   }
 };
 

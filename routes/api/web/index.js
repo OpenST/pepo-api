@@ -8,6 +8,7 @@ const rootPrefix = '../../..',
   sanitizer = require(rootPrefix + '/helpers/sanitizer'),
   cookieHelper = require(rootPrefix + '/lib/cookieHelper'),
   authRoutes = require(rootPrefix + '/routes/api/web/auth'),
+  sessionAuthRoutes = require(rootPrefix + '/routes/api/web/sessionAuth'),
   userRoutes = require(rootPrefix + '/routes/api/web/users'),
   feedsRoutes = require(rootPrefix + '/routes/api/web/feeds'),
   videoRoutes = require(rootPrefix + '/routes/api/web/videos'),
@@ -15,6 +16,7 @@ const rootPrefix = '../../..',
   apiName = require(rootPrefix + '/lib/globalConstant/apiName'),
   reportRoutes = require(rootPrefix + '/routes/api/web/report'),
   supportRoutes = require(rootPrefix + '/routes/api/web/support'),
+  webPageConstants = require(rootPrefix + '/lib/globalConstant/webPage'),
   entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
   responseEntityKey = require(rootPrefix + '/lib/globalConstant/responseEntityKey');
 
@@ -55,5 +57,6 @@ router.use('/feeds', cookieHelper.validateUserWebLoginCookieIfPresent, feedsRout
 // Login is mandatory for following routes.
 router.use(cookieHelper.validateUserWebLoginCookieIfPresent, cookieHelper.validateUserLoginRequired);
 router.use('/users', userRoutes);
+router.use(webPageConstants.sessionAuthPagePath, sessionAuthRoutes);
 
 module.exports = router;
