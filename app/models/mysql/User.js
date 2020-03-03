@@ -1,5 +1,6 @@
 const rootPrefix = '../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
+  UserMuteByUser2IdsForGlobalCache = require(rootPrefix + '/lib/cacheManagement/multi/UserMuteByUser2IdsForGlobal'),
   util = require(rootPrefix + '/lib/util'),
   coreConstants = require(rootPrefix + '/config/coreConstants'),
   userConstants = require(rootPrefix + '/lib/globalConstant/user'),
@@ -180,27 +181,40 @@ class UserModel extends ModelBase {
   async fetchByIds(ids) {
     const oThis = this;
 
-    const dbRows = await oThis
-      .select([
-        'id',
-        'user_name',
-        'name',
-        'profile_image_id',
-        'mark_inactive_trigger_count',
-        'properties',
-        'email',
-        'status',
-        'created_at',
-        'updated_at'
-      ])
-      .where({ id: ids })
-      .fire();
+    const promisesArray = [
+      new UserMuteByUser2IdsForGlobalCache({ user2Ids: [ids] }).fetch(),
+      oThis
+        .select([
+          'id',
+          'user_name',
+          'name',
+          'profile_image_id',
+          'mark_inactive_trigger_count',
+          'properties',
+          'email',
+          'status',
+          'created_at',
+          'updated_at'
+        ])
+        .where({ id: ids })
+        .fire()
+    ];
+
+    const promisesResponse = await Promise.all(promisesArray);
+
+    const globalMuteUsersCacheResponse = promisesResponse[0];
+    if (globalMuteUsersCacheResponse.isFailure()) {
+      return Promise.reject(globalMuteUsersCacheResponse);
+    }
+    const dbRows = promisesResponse[1];
 
     const response = {};
 
     for (let index = 0; index < dbRows.length; index++) {
+      const userId = dbRows[index].id;
       const formatDbRow = oThis.formatDbData(dbRows[index]);
       response[formatDbRow.id] = formatDbRow;
+      response[formatDbRow.isUserGlobalMuted] = globalMuteUsersCacheResponse.data[userId].all == 1;
     }
 
     return response;
