@@ -264,23 +264,7 @@ const webSignature = {
         validatorMethods: ['validateString']
       },
       {
-        parameter: 'authorized_scopes',
-        validatorMethods: ['validateArray']
-      },
-      {
-        parameter: 'nonce',
-        validatorMethods: ['validateString']
-      },
-      {
         parameter: 'identity_token',
-        validatorMethods: ['validateString']
-      },
-      {
-        parameter: 'real_user_status',
-        validatorMethods: ['validateInteger']
-      },
-      {
-        parameter: 'apple_user_id',
         validatorMethods: ['validateString']
       },
       {
