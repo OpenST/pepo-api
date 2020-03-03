@@ -7,6 +7,7 @@ const rootPrefix = '../../..',
   routeHelper = require(rootPrefix + '/routes/helper'),
   sanitizer = require(rootPrefix + '/helpers/sanitizer'),
   authRoutes = require(rootPrefix + '/routes/api/web/auth'),
+  feedsRoutes = require(rootPrefix + '/routes/api/web/feeds'),
   videoRoutes = require(rootPrefix + '/routes/api/web/videos'),
   coreConstants = require(rootPrefix + '/config/coreConstants'),
   apiName = require(rootPrefix + '/lib/globalConstant/apiName'),
@@ -28,6 +29,8 @@ router.use('/auth', authRoutes);
 router.use('/report', reportRoutes);
 
 router.use('/videos', videoRoutes);
+
+router.use('/feeds', feedsRoutes);
 
 /* Get url and message for sharing channel given its permalink. */
 router.get('/communities/:channel_permalink/share', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
