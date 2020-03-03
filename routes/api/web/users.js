@@ -62,3 +62,5 @@ router.get('/current', sanitizer.sanitizeDynamicUrlParams, function(req, res, ne
 
   Promise.resolve(routeHelper.perform(req, res, next, '/user/init/GetCurrent', 'r_a_w_u_2', null, dataFormatterFunc));
 });
+
+module.exports = router;
