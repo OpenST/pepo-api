@@ -230,7 +230,8 @@ class AppleConnect extends ConnectBase {
       accessToken: oThis.appleOAuthDetails.access_token,
       refreshToken: oThis.appleOAuthDetails.refresh_token,
       isNewSocialConnect: oThis.newSocialConnect,
-      userId: oThis.userId
+      userId: oThis.userId,
+      apiReferer: oThis.apiReferer
     };
 
     oThis.serviceResp = await new AppleLogin(params).perform();

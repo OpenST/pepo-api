@@ -176,7 +176,8 @@ class TwitterConnect extends ConnectBase {
       token: oThis.token,
       secret: oThis.secret,
       userId: oThis.userId,
-      isNewSocialConnect: oThis.newSocialConnect
+      isNewSocialConnect: oThis.newSocialConnect,
+      apiReferer: oThis.apiReferer
     };
 
     oThis.serviceResp = await new LoginTwitterClass(requestParams).perform();
