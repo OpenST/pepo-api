@@ -225,6 +225,9 @@ class InitiateRequestRedemption extends ServiceBase {
       let apiErrorIdentifier = null;
 
       switch (Number(oThis.productMinDollarValue)) {
+        case 5:
+          apiErrorIdentifier = 'min_redemption_amount_5';
+          break;
         case 10:
           apiErrorIdentifier = 'min_redemption_amount_10';
           break;
