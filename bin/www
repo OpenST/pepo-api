@@ -106,7 +106,6 @@ function onListening() {
     ? 'pipe ' + addr
     : 'port ' + addr.port;
   logger.log('Listening on ' + bind);
-  process.send('ready');
 }
 
 process.on('SIGTERM', function(){
