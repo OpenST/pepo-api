@@ -328,6 +328,19 @@ const webSignature = {
         validatorMethods: ['validateNonEmptyObject']
       }
     ]
+  },
+  [apiName.loggedInUser]: {
+    mandatory: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      },
+      {
+        parameter: 'login_service_type',
+        validatorMethods: ['validateNonBlankString']
+      }
+    ],
+    optional: []
   }
 };
 
