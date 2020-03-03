@@ -119,7 +119,7 @@ class GetRedemptionInfo extends ServiceBase {
       return Promise.reject(redemptionProductsRsp);
     }
 
-    // Remove deleted products
+    // Filter out inactive products
     const allRedemptionProducts = redemptionProductsRsp.data['products'],
       activeRedemptionProducts = [];
     for(let index=0; index < allRedemptionProducts.length; index++) {
