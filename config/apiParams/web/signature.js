@@ -1,5 +1,6 @@
 const rootPrefix = '../../..',
-  apiName = require(rootPrefix + '/lib/globalConstant/apiName');
+  apiName = require(rootPrefix + '/lib/globalConstant/apiName'),
+  paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination');
 
 const webSignature = {
   [apiName.preLaunchLogout]: {
@@ -217,6 +218,24 @@ const webSignature = {
   [apiName.githubDisconnect]: {
     mandatory: [],
     optional: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      }
+    ]
+  },
+  [apiName.feedsList]: {
+    mandatory: [
+      {
+        parameter: 'sanitized_headers',
+        validatorMethods: ['validateNonEmptyObject']
+      }
+    ],
+    optional: [
+      {
+        parameter: paginationConstants.paginationIdentifierKey,
+        validatorMethods: ['validateString', 'validatePaginationIdentifier']
+      },
       {
         parameter: 'current_user',
         validatorMethods: ['validateNonEmptyObject']
