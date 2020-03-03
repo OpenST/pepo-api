@@ -1,6 +1,9 @@
+/**
+ * Class for header helpers.
+ *
+ * @class HeaderHelper
+ */
 class HeaderHelper {
-  constructor() {}
-
   pepoDeviceId(headers) {
     return headers['x-pepo-device-id'] || '';
   }
@@ -14,7 +17,7 @@ class HeaderHelper {
   }
 
   pepoDeviceOs(headers) {
-    return headers['x-pepo-device-os'];
+    return headers['x-pepo-device-os'] || 'postman';
   }
 
   get androidDeviceOs() {
@@ -41,12 +44,20 @@ class HeaderHelper {
     return 14;
   }
 
+  get iosParisRelease2020BuildNumber() {
+    return 29;
+  }
+
+  get androidParisRelease2020BuildNumber() {
+    return 31;
+  }
+
   /**
-   * Is reply build.
+   * Is reply build?
    *
-   * @param {Object} headers
+   * @param {object} headers
    *
-   * @returns {Boolean}
+   * @returns {boolean}
    */
   isReplyBuild(headers) {
     const oThis = this;
@@ -64,11 +75,11 @@ class HeaderHelper {
   }
 
   /**
-   * Is video play event build.
+   * Is video play event build?
    *
-   * @param {Object} headers
+   * @param {object} headers
    *
-   * @returns {Boolean}
+   * @returns {boolean}
    */
   isVideoPlayEventBuild(headers) {
     const oThis = this;
@@ -79,6 +90,28 @@ class HeaderHelper {
     if (deviceOs === oThis.iosDeviceOs && buildNumber >= oThis.iosVideoPlayEventBuildNumber) {
       return true;
     } else if (deviceOs === oThis.androidDeviceOs && buildNumber >= oThis.androidVideoPlayEventBuildNumber) {
+      return true;
+    }
+
+    return false;
+  }
+
+  /**
+   * Is paris release 2020 build?
+   *
+   * @param {object} headers
+   *
+   * @returns {boolean}
+   */
+  isBuildAfterParisRelease2020(headers) {
+    const oThis = this;
+
+    const deviceOs = oThis.pepoDeviceOs(headers),
+      buildNumber = oThis.pepoBuildNumber(headers);
+
+    if (deviceOs === oThis.iosDeviceOs && buildNumber > oThis.iosParisRelease2020BuildNumber) {
+      return true;
+    } else if (deviceOs === oThis.androidDeviceOs && buildNumber > oThis.androidParisRelease2020BuildNumber) {
       return true;
     }
 
