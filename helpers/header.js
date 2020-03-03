@@ -45,11 +45,11 @@ class HeaderHelper {
   }
 
   get iosParisRelease2020BuildNumber() {
-    return 20;
+    return 29;
   }
 
   get androidParisRelease2020BuildNumber() {
-    return 10;
+    return 31;
   }
 
   /**
