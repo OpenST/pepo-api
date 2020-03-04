@@ -51,12 +51,17 @@ router.get('/communities/:channel_permalink/share', sanitizer.sanitizeDynamicUrl
   Promise.resolve(routeHelper.perform(req, res, next, '/channel/ShareDetails', 'r_a_w_1', null, dataFormatterFunc));
 });
 
-// Login not mandatory for following.
-router.use('/videos', cookieHelper.validateUserWebLoginCookieIfPresent, videoRoutes);
-router.use('/feeds', cookieHelper.validateUserWebLoginCookieIfPresent, feedsRoutes);
+// Login not mandatory for following
 
-// Login is mandatory for following routes.
-router.use(cookieHelper.validateUserWebLoginCookieIfPresent, cookieHelper.validateUserLoginRequired);
+router.use(cookieHelper.validateUserWebLoginCookieIfPresent);
+
+router.use('/videos', videoRoutes);
+router.use('/feeds', feedsRoutes);
+
+// Login mandatory for following
+
+router.use(cookieHelper.validateUserLoginRequired);
+
 router.use('/users', userRoutes);
 router.use(webPageConstants.sessionAuthPagePath, sessionAuthRoutes);
 

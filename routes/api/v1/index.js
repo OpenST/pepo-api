@@ -41,13 +41,18 @@ router.use('/auth', authRoutes);
 router.use('/fetch-goto', fetchGotoRoutes);
 
 // Login not mandatory for following
-router.use('/feeds', cookieHelper.validateUserLoginCookieIfPresent, feedsRoutes);
-router.use('/videos', cookieHelper.validateUserLoginCookieIfPresent, videoRoutes);
-router.use('/report', cookieHelper.validateUserLoginCookieIfPresent, reportRoutes);
-router.use('/replies', cookieHelper.validateUserLoginCookieIfPresent, replyRoutes);
-router.use('/channels', cookieHelper.validateUserLoginCookieIfPresent, channelRoutes);
 
-router.use(cookieHelper.validateUserLoginCookieIfPresent, cookieHelper.validateUserLoginRequired);
+router.use(cookieHelper.validateUserLoginCookieIfPresent);
+
+router.use('/feeds', feedsRoutes);
+router.use('/videos', videoRoutes);
+router.use('/report', reportRoutes);
+router.use('/replies', replyRoutes);
+router.use('/channels', channelRoutes);
+
+// Login mandatory for following
+
+router.use(cookieHelper.validateUserLoginRequired);
 
 router.use('/users', usersRoutes);
 router.use('/invites', invitesRoutes);
