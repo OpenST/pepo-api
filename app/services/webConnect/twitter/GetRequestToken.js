@@ -5,6 +5,7 @@ const rootPrefix = '../../../..',
   twitterAuthTokenConstants = require(rootPrefix + '/lib/globalConstant/twitterAuthToken'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   coreConstants = require(rootPrefix + '/config/coreConstants'),
+  responseEntity = require(rootPrefix + '/lib/globalConstant/responseEntityKey'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger');
 
 /**
@@ -56,7 +57,7 @@ class GetRequestToken extends ServiceBase {
 
     return Promise.resolve(
       responseHelper.successWithData({
-        twitterRedirectUrl: twitterRedirectUrl,
+        [responseEntity.redirectUrl]: twitterRedirectUrl,
         dataCookieValue: dataCookieValue
       })
     );

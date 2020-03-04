@@ -3,6 +3,7 @@ const rootPrefix = '../../../..',
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   coreConstants = require(rootPrefix + '/config/coreConstants'),
   basicHelper = require(rootPrefix + '/helpers/basic'),
+  responseEntity = require(rootPrefix + '/lib/globalConstant/responseEntityKey'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger');
 
 /**
@@ -55,7 +56,7 @@ class GetGoogleRedirectUrl extends ServiceBase {
 
     return Promise.resolve(
       responseHelper.successWithData({
-        googleRedirectUrl: googleRedirectUrl,
+        [responseEntity.redirectUrl]: googleRedirectUrl,
         dataCookieValue: dataCookieValue
       })
     );
