@@ -25,7 +25,7 @@ class CommunityData extends UpdateUsageDataBase {
   async enqueue() {
     const oThis = this;
 
-    await oThis._enqueueJob();
+    await oThis._enqueueJob({});
   }
 }
 
