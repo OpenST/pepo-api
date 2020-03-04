@@ -336,6 +336,10 @@ const adminSignature = {
     mandatory: [],
     optional: []
   },
+  [apiName.adminUpdateCommunityDataUsage]: {
+    mandatory: [],
+    optional: []
+  },
   [apiName.adminUpdateVideosPerformanceUsage]: {
     mandatory: [],
     optional: []
