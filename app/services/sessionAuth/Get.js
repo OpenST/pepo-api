@@ -1,5 +1,6 @@
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
+  CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   SessionAuthPayloadCache = require(rootPrefix + '/lib/cacheManagement/multi/SessionAuthPayload'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
@@ -24,7 +25,7 @@ class GetSessionAuth extends ServiceBase {
    * @constructor
    */
   constructor(params) {
-    super(params);
+    super();
 
     const oThis = this;
 
@@ -37,7 +38,8 @@ class GetSessionAuth extends ServiceBase {
   /**
    * Main performer for class.
    *
-   * @return {Promise<void>}
+   * @returns {Promise<void>}
+   * @private
    */
   async _asyncPerform() {
     const oThis = this;
@@ -50,7 +52,9 @@ class GetSessionAuth extends ServiceBase {
   }
 
   /**
-   * Fetch session Auth payload.
+   * Fetch session auth payload.
+   *
+   * @sets oThis.sessionAuthPayloadObj
    *
    * @return {Promise<void>}
    * @private
@@ -59,12 +63,21 @@ class GetSessionAuth extends ServiceBase {
     const oThis = this;
 
     const cacheRsp = await new SessionAuthPayloadCache({ ids: [oThis.sessionAuthPayloadId] }).fetch();
-
     if (cacheRsp.isFailure()) {
       return Promise.reject(cacheRsp);
     }
 
     oThis.sessionAuthPayloadObj = cacheRsp.data[oThis.sessionAuthPayloadId];
+
+    if (!CommonValidators.validateNonEmptyObject(oThis.sessionAuthPayloadObj)) {
+      return Promise.reject(
+        responseHelper.error({
+          internal_error_identifier: 'a_s_sa_g_fsap_1',
+          api_error_identifier: 'entity_not_found',
+          debug_options: { sessionAuthPayloadId: oThis.sessionAuthPayloadId }
+        })
+      );
+    }
 
     if (
       !oThis.sessionAuthPayloadObj.id ||
@@ -73,9 +86,9 @@ class GetSessionAuth extends ServiceBase {
     ) {
       return Promise.reject(
         responseHelper.error({
-          internal_error_identifier: 'a_s_sa_g_fsap_1',
+          internal_error_identifier: 'a_s_sa_g_fsap_2',
           api_error_identifier: 'entity_not_found',
-          debug_options: {}
+          debug_options: { sessionAuthPayloadObj: oThis.sessionAuthPayloadObj }
         })
       );
     }
