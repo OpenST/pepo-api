@@ -1,6 +1,7 @@
 const rootPrefix = '..',
   ApiParamsValidator = require(rootPrefix + '/lib/validators/ApiParams'),
   basicHelper = require(rootPrefix + '/helpers/basic'),
+  sanitizer = require(rootPrefix + '/helpers/sanitizer'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   responseHelper = require(rootPrefix + '/lib/formatter/response');
 
@@ -99,6 +100,7 @@ class RoutesHelper {
       if (response.isSuccess() && onServiceSuccess) {
         // If required, this function could reformat data as per API version requirements.
         // NOTE: This method should modify response.data
+        response.data.sanitizedRequestHeaders = sanitizer.sanitizeParams(req.headers);
         await onServiceSuccess(response);
       }
 

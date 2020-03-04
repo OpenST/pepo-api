@@ -115,7 +115,7 @@ class UserMute extends ModelBase {
   }
 
   /**
-   * Index name
+   * Index name.
    *
    * @returns {string}
    */
@@ -127,8 +127,8 @@ class UserMute extends ModelBase {
    * Flush cache.
    *
    * @param {object} params
-   * @param {number} params.user2Ids
-   * @param {number} params.user1Ids
+   * @param {number} params.user2Id
+   * @param {array<number>} params.user1Ids
    * @param {number} params.user1Id
    *
    * @returns {Promise<*>}
@@ -140,6 +140,9 @@ class UserMute extends ModelBase {
       const UserMuteByUser2IdsForGlobalCache = require(rootPrefix +
         '/lib/cacheManagement/multi/UserMuteByUser2IdsForGlobal');
       promisesArray.push(new UserMuteByUser2IdsForGlobalCache({ user2Ids: [params.user2Id] }).clear());
+
+      const UserCache = require(rootPrefix + '/lib/cacheManagement/multi/User');
+      promisesArray.push(new UserCache({ ids: [params.user2Id] }).clear());
     }
 
     if (params.user1Id) {
