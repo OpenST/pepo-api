@@ -42,7 +42,16 @@ router.post('/login', sanitizer.sanitizeDynamicUrlParams, function(req, res, nex
   };
 
   Promise.resolve(
-    routeHelper.perform(req, res, next, '/connect/Twitter', 'r_a_w_g_1', null, onServiceSuccess, onServiceFailure)
+    routeHelper.perform(
+      req,
+      res,
+      next,
+      '/connect/twitter/Verify',
+      'r_a_w_c_t_1',
+      null,
+      onServiceSuccess,
+      onServiceFailure
+    )
   );
 });
 

@@ -10,13 +10,14 @@ const rootPrefix = '../../..',
 /**
  * Class for getting request token from twitter.
  *
- * @class GetTwitterRequestToken
+ * @class GetRequestToken
  */
-class GetTwitterRequestToken extends ServiceBase {
+class GetRequestToken extends ServiceBase {
   /**
    * Constructor for getting request token from twitter.
    *
    * @param {object} params
+   * @param {string} params.invite
    *
    * @augments ServiceBase
    *
@@ -122,4 +123,4 @@ class GetTwitterRequestToken extends ServiceBase {
   }
 }
 
-module.exports = GetTwitterRequestToken;
+module.exports = GetRequestToken;
