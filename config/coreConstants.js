@@ -569,6 +569,10 @@ class CoreConstants {
   get GOOGLE_OAUTH_URL() {
     return 'https://accounts.google.com/o/oauth2/v2/auth';
   }
+
+  get APPLE_OAUTH_URL() {
+    return 'https://appleid.apple.com/auth/authorize';
+  }
 }
 
 module.exports = new CoreConstants();

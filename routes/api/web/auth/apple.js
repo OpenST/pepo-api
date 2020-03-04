@@ -11,6 +11,21 @@ const rootPrefix = '../../../..',
   entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
   responseEntityKey = require(rootPrefix + '/lib/globalConstant/responseEntityKey');
 
+/* Request Token for google */
+router.get('/request-token', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.appleRequestToken;
+
+  const onServiceSuccess = async function(serviceResponse) {
+    // if (serviceResponse.data.dataCookieValue) {
+    //   cookieHelper.setPreLaunchDataCookie(res, serviceResponse.data.dataCookieValue);
+    // }
+  };
+
+  Promise.resolve(
+    routeHelper.perform(req, res, next, '/webConnect/apple/GetRedirectUrl', 'r_a_w_a_1', null, onServiceSuccess)
+  );
+});
+
 /* Apple connect. */
 router.post('/login', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.appleConnect;
@@ -42,7 +57,7 @@ router.post('/login', sanitizer.sanitizeDynamicUrlParams, function(req, res, nex
   };
 
   Promise.resolve(
-    routeHelper.perform(req, res, next, '/connect/Apple', 'r_a_w_a_1', null, onServiceSuccess, onServiceFailure)
+    routeHelper.perform(req, res, next, '/connect/Apple', 'r_a_w_a_2', null, onServiceSuccess, onServiceFailure)
   );
 });
 
@@ -57,7 +72,7 @@ router.post('/disconnect', cookieHelper.parseUserCookieForLogout, sanitizer.sani
 
   cookieHelper.deleteWebLoginCookie(res);
 
-  Promise.resolve(routeHelper.perform(req, res, next, '/disconnect/Apple', 'r_a_w_a_2', null));
+  Promise.resolve(routeHelper.perform(req, res, next, '/disconnect/Apple', 'r_a_w_a_3', null));
 });
 
 module.exports = router;

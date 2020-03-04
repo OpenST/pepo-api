@@ -34,6 +34,15 @@ const webSignature = {
       }
     ]
   },
+  [apiName.appleRequestToken]: {
+    mandatory: [],
+    optional: [
+      {
+        parameter: 'invite',
+        validatorMethods: ['validateString']
+      }
+    ]
+  },
   [apiName.getRedemptionProducts]: {
     mandatory: [
       {
