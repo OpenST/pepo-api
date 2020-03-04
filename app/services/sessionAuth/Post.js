@@ -3,8 +3,8 @@ const rootPrefix = '../../..',
   SessionAuthPayloadModel = require(rootPrefix + '/app/models/mysql/big/SessionAuthPayload'),
   SessionAuthNotificationPublisher = require(rootPrefix + '/lib/userNotificationPublisher/SessionAuth'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
-  entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
   webPageConstants = require(rootPrefix + '/lib/globalConstant/webPage'),
+  entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
   sessionAuthPayloadConstants = require(rootPrefix + '/lib/globalConstant/big/sessionAuthPayload');
 
 /**
@@ -26,7 +26,7 @@ class PostSessionAuth extends ServiceBase {
    * @constructor
    */
   constructor(params) {
-    super(params);
+    super();
 
     const oThis = this;
 
@@ -40,7 +40,8 @@ class PostSessionAuth extends ServiceBase {
   /**
    * Main performer for class.
    *
-   * @return {Promise<void>}
+   * @returns {Promise<result>}
+   * @private
    */
   async _asyncPerform() {
     const oThis = this;
@@ -53,31 +54,35 @@ class PostSessionAuth extends ServiceBase {
   }
 
   /**
-   * Add session Auth payload.
+   * Add session auth payload.
    *
-   * @return {Promise<void>}
+   * @sets oThis.sessionAuthPayloadObj
+   *
+   * @returns {Promise<void>}
    * @private
    */
   async _insertSessionAuthPayload() {
     const oThis = this;
 
-    let insertData = {
+    const insertData = {
       user_id: oThis.currentUserId,
       payload: oThis.payload,
       status: sessionAuthPayloadConstants.invertedStatuses[sessionAuthPayloadConstants.activeStatus]
     };
 
-    let insertResponse = await new SessionAuthPayloadModel().insert(insertData).fire();
+    const insertResponse = await new SessionAuthPayloadModel().insert(insertData).fire();
 
     insertData.id = insertResponse.insertId;
     Object.assign(insertData, insertResponse.defaultUpdatedAttributes);
 
     oThis.sessionAuthPayloadObj = new SessionAuthPayloadModel().formatDbData(insertData);
-    await SessionAuthPayloadModel.flushCache(oThis.sessionAuthPayloadObj);
+    await SessionAuthPayloadModel.flushCache({ ids: [oThis.sessionAuthPayloadObj.id] });
   }
 
   /**
    * Create entry in notification hook table for push notification.
+   *
+   * @sets oThis.pushNotificationEnabled
    *
    * @return {Promise<void>}
    * @private
@@ -90,7 +95,7 @@ class PostSessionAuth extends ServiceBase {
       sessionAuthPayloadId: oThis.sessionAuthPayloadObj.id
     };
 
-    let resp = await new SessionAuthNotificationPublisher(publishParams).perform();
+    const resp = await new SessionAuthNotificationPublisher(publishParams).perform();
 
     oThis.pushNotificationEnabled = resp.isSuccess() && resp.data.push_notification_created ? 1 : 0;
   }

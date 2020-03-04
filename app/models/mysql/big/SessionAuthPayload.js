@@ -58,7 +58,7 @@ class SessionAuthPayloadModel extends ModelBase {
   /**
    * Get rows for given ids.
    *
-   * @param {array} ids
+   * @param {array<number>} ids
    *
    * @returns {Promise<{}>}
    */
@@ -83,16 +83,16 @@ class SessionAuthPayloadModel extends ModelBase {
    * Flush cache.
    *
    * @param {object} params
-   * @param {string} params.id
+   * @param {array<number>} params.ids
    *
    * @returns {Promise<void>}
    */
   static async flushCache(params) {
     const promisesArray = [];
 
-    if (params.id) {
+    if (params.ids) {
       const sessionAuthPayloadCache = require(rootPrefix + '/lib/cacheManagement/multi/SessionAuthPayload');
-      promisesArray.push(new sessionAuthPayloadCache({ ids: [params.id] }).clear());
+      promisesArray.push(new sessionAuthPayloadCache({ ids: params.ids }).clear());
     }
 
     await Promise.all(promisesArray);
