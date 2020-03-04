@@ -7,13 +7,13 @@ const rootPrefix = '../../../..',
 const dbName = databaseConstants.bigDbName;
 
 /**
- * Class for Session Auth Payload model.
+ * Class for session auth payload model.
  *
  * @class SessionAuthPayloadModel
  */
 class SessionAuthPayloadModel extends ModelBase {
   /**
-   * Constructor for Session Auth Payload model.
+   * Constructor for session auth payload model.
    *
    * @augments ModelBase
    *
