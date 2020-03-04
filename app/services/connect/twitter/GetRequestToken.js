@@ -1,4 +1,4 @@
-const rootPrefix = '../../..',
+const rootPrefix = '../../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   TwitterAuthTokenModel = require(rootPrefix + '/app/models/mysql/TwitterAuthToken'),
   AuthorizationTwitterRequestClass = require(rootPrefix + '/lib/connect/wrappers/twitter/oAuth1.0/Authorization'),
