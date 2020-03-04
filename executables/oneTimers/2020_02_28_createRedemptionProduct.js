@@ -23,26 +23,11 @@ program.on('--help', function() {
   logger.log('  Example:');
   logger.log('');
   logger.log(
-  '    node executables/oneTimers/2020_02_28_createRedemptionProduct --productKind "UNSTOPPABLE DOMAINS" --images \'{"square":"https://d3attjoi5jlede.cloudfront.net/images/web/redemption/redemption-uber-1x1.png","landscape":"https://d3attjoi5jlede.cloudfront.net/images/web/redemption/redemption-uber-16x9.png"}\' --prodDescription \'Blockchain domains replace crypto addresses with human readable names and can be used to build censorship resistant websites. Get your code to purchase <a href="https://unstoppabledomains.com/pepo-preview/" rel="noopener noreferrer nofollow" title="Unstoppable domains"> Unstoppable domains </a>\' --dollarValue 5.00 --minDollarValue 5.00 --maxDollarValue 0 --dollarStep 1.00 --displayOrder 1.12'
+    '    node executables/oneTimers/2020_02_28_createRedemptionProduct --productKind "UNSTOPPABLE DOMAINS" --images \'{"square":"https://d3attjoi5jlede.cloudfront.net/images/web/redemption/redemption-uber-1x1.png","landscape":"https://d3attjoi5jlede.cloudfront.net/images/web/redemption/redemption-uber-16x9.png"}\' --prodDescription \'Blockchain domains replace crypto addresses with human readable names and can be used to build censorship resistant websites. Get your code to purchase <a href="https://unstoppabledomains.com/pepo-preview/" rel="noopener noreferrer nofollow" title="Unstoppable domains"> Unstoppable domains </a>\' --dollarValue 5.00 --minDollarValue 5.00 --maxDollarValue 0 --dollarStep 1.00 --displayOrder 1.12'
   );
   logger.log('');
   logger.log('');
 });
-
-if (!program.productKind) {
-  if (
-    !program.description &&
-    !program.images &&
-    !program.dollarValue &&
-    !program.minDollarValue &&
-    !program.maxDollarValue &&
-    !program.dollarStep &&
-    !program.displayOrder
-  ) {
-    program.help();
-    process.exit(1);
-  }
-}
 
 class CreateProducts {
   constructor(params) {
