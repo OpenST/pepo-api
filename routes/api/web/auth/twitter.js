@@ -46,7 +46,7 @@ router.post('/login', sanitizer.sanitizeDynamicUrlParams, function(req, res, nex
       req,
       res,
       next,
-      '/connect/twitter/Verify',
+      '/webConnect/twitter/Verify',
       'r_a_w_c_t_1',
       null,
       onServiceSuccess,
@@ -81,7 +81,7 @@ router.get('/request-token', sanitizer.sanitizeDynamicUrlParams, function(req, r
   };
 
   Promise.resolve(
-    routeHelper.perform(req, res, next, '/connect/twitter/GetRequestToken', 'r_a_w_pl_2', null, onServiceSuccess)
+    routeHelper.perform(req, res, next, '/webConnect/twitter/GetRequestToken', 'r_a_w_pl_2', null, onServiceSuccess)
   );
 });
 
