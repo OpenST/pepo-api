@@ -565,6 +565,10 @@ class CoreConstants {
   get USER_DATA_S3_FILE_PATH() {
     return process.env.PA_USER_DATA_S3_FILE_PATH;
   }
+
+  get GOOGLE_OAUTH_URL() {
+    return 'https://accounts.google.com/o/oauth2/v2/auth';
+  }
 }
 
 module.exports = new CoreConstants();

@@ -803,6 +803,27 @@ class BasicHelper {
       return a - b;
     });
   }
+
+  /**
+   * Generate Url
+   *
+   * @param url
+   * @param urlParams
+   * @returns {*}
+   */
+  generateUrl(url, urlParams) {
+    const urlParser = require('url');
+
+    let generatedUrl = new urlParser.URL(url);
+    const searchParams = new urlParser.URLSearchParams(generatedUrl.searchParams);
+    for (let key in urlParams) {
+      let val = urlParams[key];
+      searchParams.append(key, val);
+    }
+    generatedUrl.search = searchParams;
+
+    return generatedUrl.href;
+  }
 }
 
 module.exports = new BasicHelper();
