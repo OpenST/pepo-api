@@ -557,6 +557,14 @@ class CoreConstants {
   get USER_DATA_S3_FILE_PATH() {
     return process.env.PA_USER_DATA_S3_FILE_PATH;
   }
+
+  get CHANNEL_DATA_LOCAL_FILE_PATH() {
+    return process.env.PA_CHANNEL_DATA_LOCAL_FILE_PATH;
+  }
+
+  get CHANNEL_DATA_S3_FILE_PATH() {
+    return process.env.PA_CHANNEL_DATA_S3_FILE_PATH;
+  }
 }
 
 module.exports = new CoreConstants();
