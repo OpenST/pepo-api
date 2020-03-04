@@ -295,6 +295,24 @@ const webSignature = {
       }
     ]
   },
+  [apiName.twitterLogin]: {
+    mandatory: [
+      {
+        parameter: 'oauth_token',
+        validatorMethods: ['validateNonBlankString']
+      },
+      {
+        parameter: 'oauth_verifier',
+        validatorMethods: ['validateNonBlankString']
+      }
+    ],
+    optional: [
+      {
+        parameter: 'i',
+        validatorMethods: ['validateString']
+      }
+    ]
+  },
   [apiName.feedsList]: {
     mandatory: [
       {
