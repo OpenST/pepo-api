@@ -81,7 +81,7 @@ router.get('/request_token', sanitizer.sanitizeDynamicUrlParams, function(req, r
   };
 
   Promise.resolve(
-    routeHelper.perform(req, res, next, '/connect/GetTwitterRequestToken', 'r_a_w_pl_2', null, onServiceSuccess)
+    routeHelper.perform(req, res, next, '/connect/twitter/GetRequestToken', 'r_a_w_pl_2', null, onServiceSuccess)
   );
 });
 
