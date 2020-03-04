@@ -3,18 +3,18 @@ const rootPrefix = '../../../..',
   bgJobConstants = require(rootPrefix + '/lib/globalConstant/bgJob');
 
 /**
- * Class to update community data in Google Sheets.
+ * Class to update channel data in Google Sheets.
  *
- * @class CommunityData
+ * @class ChannelData
  */
-class CommunityData extends UpdateUsageDataBase {
+class ChannelData extends UpdateUsageDataBase {
   /**
    * Returns background job kind.
    *
    * @returns {string}
    */
   get kind() {
-    return bgJobConstants.updateCommunityDataUsageTopic;
+    return bgJobConstants.updateChannelDataUsageTopic;
   }
 
   /**
@@ -29,4 +29,4 @@ class CommunityData extends UpdateUsageDataBase {
   }
 }
 
-module.exports = CommunityData;
+module.exports = ChannelData;

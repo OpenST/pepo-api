@@ -336,7 +336,7 @@ const adminSignature = {
     mandatory: [],
     optional: []
   },
-  [apiName.adminUpdateCommunityDataUsage]: {
+  [apiName.adminUpdateChannelDataUsage]: {
     mandatory: [],
     optional: []
   },
