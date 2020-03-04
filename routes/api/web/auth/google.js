@@ -11,9 +11,9 @@ const rootPrefix = '../../../..',
   apiRefererConstants = require(rootPrefix + '/lib/globalConstant/apiReferers'),
   responseEntityKey = require(rootPrefix + '/lib/globalConstant/responseEntityKey');
 
-/* Twitter connect. */
+/* Apple connect. */
 router.post('/login', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
-  req.decodedParams.apiName = apiName.twitterLogin;
+  req.decodedParams.apiName = apiName.googleConnect;
   req.decodedParams.api_referer = apiRefererConstants.webReferer;
 
   cookieHelper.fetchUserUtmCookie(req);
@@ -42,37 +42,13 @@ router.post('/login', sanitizer.sanitizeDynamicUrlParams, function(req, res, nex
   };
 
   Promise.resolve(
-    routeHelper.perform(
-      req,
-      res,
-      next,
-      '/connect/twitter/Verify',
-      'r_a_w_c_t_1',
-      null,
-      onServiceSuccess,
-      onServiceFailure
-    )
+    routeHelper.perform(req, res, next, '/connect/Google', 'r_a_w_go_1', null, onServiceSuccess, onServiceFailure)
   );
 });
 
-/* Twitter disconnect. */
-router.post('/disconnect', cookieHelper.parseUserCookieForLogout, sanitizer.sanitizeDynamicUrlParams, function(
-  req,
-  res,
-  next
-) {
-  req.decodedParams.apiName = apiName.twitterDisconnect;
-  req.decodedParams.api_referer = apiRefererConstants.webReferer;
-
-  cookieHelper.deleteWebLoginCookie(res);
-
-  Promise.resolve(routeHelper.perform(req, res, next, '/disconnect/Twitter', 'r_a_w_g_2', null));
-});
-
-/* Request Token for twitter */
-router.get('/request_token', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
-  req.decodedParams.apiName = apiName.twitterRequestToken;
-  req.decodedParams.api_referer = apiRefererConstants.webReferer;
+/* Request Token for google */
+router.get('/request-token', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.googleRequestToken;
 
   const onServiceSuccess = async function(serviceResponse) {
     // if (serviceResponse.data.dataCookieValue) {
@@ -81,8 +57,22 @@ router.get('/request_token', sanitizer.sanitizeDynamicUrlParams, function(req, r
   };
 
   Promise.resolve(
-    routeHelper.perform(req, res, next, '/connect/twitter/GetRequestToken', 'r_a_w_pl_2', null, onServiceSuccess)
+    routeHelper.perform(req, res, next, '/webConnect/google/GetRedirectUrl', 'r_a_w_go_2', null, onServiceSuccess)
   );
+});
+
+/* Github disconnect. */
+router.post('/disconnect', cookieHelper.parseUserCookieForLogout, sanitizer.sanitizeDynamicUrlParams, function(
+  req,
+  res,
+  next
+) {
+  req.decodedParams.apiName = apiName.googleDisconnect;
+  req.decodedParams.api_referer = apiRefererConstants.webReferer;
+
+  cookieHelper.deleteWebLoginCookie(res);
+
+  Promise.resolve(routeHelper.perform(req, res, next, '/disconnect/Google', 'r_a_w_go_3', null));
 });
 
 module.exports = router;

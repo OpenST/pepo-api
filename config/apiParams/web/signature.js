@@ -25,6 +25,15 @@ const webSignature = {
       }
     ]
   },
+  [apiName.googleRequestToken]: {
+    mandatory: [],
+    optional: [
+      {
+        parameter: 'invite',
+        validatorMethods: ['validateString']
+      }
+    ]
+  },
   [apiName.getRedemptionProducts]: {
     mandatory: [
       {
