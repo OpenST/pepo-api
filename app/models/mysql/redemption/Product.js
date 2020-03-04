@@ -40,6 +40,7 @@ class RedemptionProductModel extends ModelBase {
    * @param {decimal} dbRow.min_dollar_value
    * @param {decimal} dbRow.max_dollar_value
    * @param {decimal} dbRow.dollar_step
+   * @param {decimal} dbRow.display_order
    * @param {number} dbRow.created_at
    * @param {number} dbRow.updated_at
    *
@@ -59,6 +60,7 @@ class RedemptionProductModel extends ModelBase {
       maxDollarValue: dbRow.max_dollar_value,
       dollarStep: dbRow.dollar_step,
       pepocornPerDollar: redemptionConstants.pepocornPerDollar, // Need to be sent for all products but not a column.
+      displayOrder: dbRow.display_order,
       createdAt: dbRow.created_at,
       updatedAt: dbRow.updated_at
     };
@@ -74,7 +76,7 @@ class RedemptionProductModel extends ModelBase {
   async getAll() {
     const oThis = this;
 
-    const dbRows = await oThis.select('*').fire();
+    const dbRows = await oThis.select('*').order_by('display_order ASC').fire();
 
     const response = [];
 

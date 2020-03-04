@@ -4,6 +4,7 @@ const rootPrefix = '../../..',
   PricePointsCache = require(rootPrefix + '/lib/cacheManagement/single/PricePoints'),
   RedemptionProductsCache = require(rootPrefix + '/lib/cacheManagement/single/RedemptionProducts'),
   GetPepocornBalance = require(rootPrefix + '/lib/pepocorn/GetPepocornBalance'),
+  redemptionConstants = require(rootPrefix + '/lib/globalConstant/redemption/redemption'),
   responseHelper = require(rootPrefix + '/lib/formatter/response');
 
 class GetRedemptionInfo extends ServiceBase {
@@ -118,6 +119,15 @@ class GetRedemptionInfo extends ServiceBase {
       return Promise.reject(redemptionProductsRsp);
     }
 
+    // Filter out inactive products
+    const allRedemptionProducts = redemptionProductsRsp.data['products'],
+      activeRedemptionProducts = [];
+    for(let index=0; index < allRedemptionProducts.length; index++) {
+      if (allRedemptionProducts[index].status === redemptionConstants.activeStatus) {
+        activeRedemptionProducts.push(allRedemptionProducts[index]);
+      }
+    }
+
     let getUserBalanceResponse = await new GetUserBalance({ user_id: oThis.currentUser.id }).perform();
 
     let getPepocornBalanceRsp = await new GetPepocornBalance({ userIds: [oThis.currentUser.id] }).perform();
@@ -126,7 +136,7 @@ class GetRedemptionInfo extends ServiceBase {
 
     return Promise.resolve(
       responseHelper.successWithData({
-        redemption_products: redemptionProductsRsp.data['products'],
+        redemption_products: activeRedemptionProducts,
         balance: getUserBalanceResponse.data.balance,
         pepocorn_balance: getPepocornBalanceRsp[oThis.currentUser.id].balance,
         price_points: oThis.pricePoints
