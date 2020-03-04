@@ -538,6 +538,14 @@ class CoreConstants {
     return process.env.PA_APPLE_REDIRECT_URI;
   }
 
+  get PA_APPLE_WEB_SERVICE_ID() {
+    return process.env.PA_APPLE_WEB_SERVICE_ID;
+  }
+
+  get PA_APPLE_WEB_REDIRECT_URI() {
+    return process.env.PA_APPLE_WEB_REDIRECT_URI;
+  }
+
   get PA_APPLE_TEAM_ID() {
     return process.env.PA_APPLE_TEAM_ID;
   }

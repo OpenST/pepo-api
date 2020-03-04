@@ -49,6 +49,8 @@ class AppleConnect extends ConnectBase {
 
     oThis.appleOAuthDetails = null;
     oThis.decryptedAppleEmail = null;
+    oThis.appleClientId = null;
+    oThis.appleRedirectUri = null;
   }
 
   /**
@@ -61,6 +63,15 @@ class AppleConnect extends ConnectBase {
     const oThis = this;
 
     logger.log('FullName: ', oThis.fullName);
+
+    // Different client id and uri has to be used for app and web requests.
+    if (apiRefererConstants.isWebRequest(oThis.apiReferer)) {
+      oThis.appleClientId = coreConstants.PA_APPLE_WEB_SERVICE_ID;
+      oThis.appleRedirectUri = coreConstants.PA_APPLE_WEB_REDIRECT_URI;
+    } else {
+      oThis.appleClientId = coreConstants.PA_APPLE_CLIENT_ID;
+      oThis.appleRedirectUri = coreConstants.PA_APPLE_REDIRECT_URI;
+    }
 
     let promiseArray = [];
     promiseArray.push(oThis.verifyIdentityToken());
@@ -108,23 +119,20 @@ class AppleConnect extends ConnectBase {
 
     oThis.decryptedAppleEmail = decryptedIdentityToken.email;
 
-    let appleClientId = coreConstants.PA_APPLE_CLIENT_ID;
-    // In case of web request, we are not getting apple id in request
+    // In case of web request, we are not getting apple id in response
     if (apiRefererConstants.isWebRequest(oThis.apiReferer)) {
       oThis.appleId = decryptedIdentityToken.sub;
-      // For Web request client id is appended .signin by default by apple.
-      appleClientId = appleClientId + '.signin';
     }
 
-    if (decryptedIdentityToken.aud !== appleClientId) {
+    if (decryptedIdentityToken.aud !== oThis.appleClientId) {
       return Promise.reject(
         responseHelper.error({
           internal_error_identifier: 'l_c_l_ba_2',
           api_error_identifier: 'something_went_wrong',
           debug_options: {
-            Error: `aud parameter does not include this client - is: ${
-              decryptedIdentityToken.aud
-            } | expected: ${appleClientId}`
+            Error: `aud parameter does not include this client - is: ${decryptedIdentityToken.aud} | expected: ${
+              oThis.appleClientId
+            }`
           }
         })
       );
@@ -139,10 +147,12 @@ class AppleConnect extends ConnectBase {
   async getAccessTokenFromApple() {
     const oThis = this;
 
-    let clientSecret = appleHelper.createClientSecret(),
+    let clientSecret = appleHelper.createClientSecret(oThis.appleClientId),
       oAuthDetails = await new GetAccessToken({
         clientSecret: clientSecret,
-        authorizationCode: oThis.authorizationCode
+        authorizationCode: oThis.authorizationCode,
+        appleClientId: oThis.appleClientId,
+        appleRedirectUri: oThis.appleRedirectUri
       }).perform();
 
     if (oAuthDetails.error) {
