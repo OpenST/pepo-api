@@ -26,34 +26,6 @@ const apiVersions = require(rootPrefix + '/lib/globalConstant/apiVersions'),
 
 let socketIdentifier = null;
 
-async function run() {
-  const websocketConfigResponse = await configStrategyProvider.getConfigForKind(configStrategyConstants.websocket);
-
-  if (websocketConfigResponse.isFailure()) {
-    return websocketConfigResponse;
-  }
-
-  const websocketPort = websocketConfigResponse.data[configStrategyConstants.websocket].port;
-
-  logger.step('# Fetching cron process id.');
-  const cronProcessId = await processIdSelector.perform();
-
-  logger.step('# Start subscribtion job for cron process id:', cronProcessId);
-  await subscribeToRmq(cronProcessId);
-
-  logger.step('# Attaching handlers');
-  attachHandlers();
-
-  //* * Uncomment the following lines to test websockets on local. **/
-  // App.get('/', function(req, res) {
-  //   Res.sendFile(__dirname + '/index.html');
-  // });
-
-  http.listen(websocketPort, function() {
-    logger.step('# Listening on port ' + websocketPort);
-  });
-}
-
 /**
  * Start subscription job for cron process id.
  *
@@ -120,6 +92,44 @@ function attachHandlers() {
   });
 }
 
+/**
+ * Function to run socket server.
+ *
+ * @returns {Promise<void>}
+ */
+async function run() {
+  const websocketConfigResponse = await configStrategyProvider.getConfigForKind(configStrategyConstants.websocket);
+
+  if (websocketConfigResponse.isFailure()) {
+    return websocketConfigResponse;
+  }
+
+  const websocketPort = websocketConfigResponse.data[configStrategyConstants.websocket].port;
+
+  logger.step('# Fetching cron process id.');
+  const cronProcessId = await processIdSelector.perform();
+
+  logger.step('# Start subscribtion job for cron process id:', cronProcessId);
+  await subscribeToRmq(cronProcessId);
+
+  logger.step('# Attaching handlers');
+  attachHandlers();
+
+  //* * Uncomment the following lines to test websockets on local. **/
+  // App.get('/', function(req, res) {
+  //   Res.sendFile(__dirname + '/index.html');
+  // });
+
+  http.listen(websocketPort, function() {
+    logger.step('# Listening on port ' + websocketPort);
+  });
+}
+
+/**
+ * Function to disconnect.
+ *
+ * @returns {Promise<void>}
+ */
 async function autoDisconnect() {
   logger.log('\n#AutoDisconnect called at: ', basicHelper.getCurrentTimestampInMinutes());
   websocketAutoDisconnect.perform();
@@ -140,4 +150,5 @@ run().catch(async function(err) {
 
   process.exit(1);
 });
+
 autoDisconnect();
