@@ -32,10 +32,10 @@ router.use(cookieHelper.setWebCsrf());
 //
 router.use(cookieHelper.validateUserWebLoginCookieIfPresent);
 
+router.use('/auth', authRoutes);
 router.use('/videos', videoRoutes);
 router.use('/feeds', feedsRoutes);
 router.use('/report', reportRoutes);
-router.use('/auth', authRoutes);
 router.use('/communities', communityRoutes);
 
 //

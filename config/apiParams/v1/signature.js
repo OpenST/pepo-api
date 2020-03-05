@@ -244,6 +244,10 @@ const v1Signature = {
         validatorMethods: ['validateNonEmptyObject']
       },
       {
+        parameter: 'login_service_type',
+        validatorMethods: ['validateNonBlankString']
+      },
+      {
         parameter: 'pepo_device_os',
         validatorMethods: ['validateNonBlankString']
       },
