@@ -48,7 +48,7 @@ class GetGoogleRedirectUrl extends ServiceBase {
       scope: 'https://www.googleapis.com/auth/plus.login https://www.googleapis.com/auth/plus.profile.emails.read',
       access_type: 'offline',
       response_type: 'code',
-      redirect_uri: coreConstants.PA_DOMAIN + '/webview/google/oauth',
+      redirect_uri: coreConstants.GOOGLE_REDIRECT_URI,
       client_id: coreConstants.GOOGLE_CLIENT_ID
     };
 

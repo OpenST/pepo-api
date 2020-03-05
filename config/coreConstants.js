@@ -573,6 +573,10 @@ class CoreConstants {
   get APPLE_OAUTH_URL() {
     return 'https://appleid.apple.com/auth/authorize';
   }
+
+  get GOOGLE_REDIRECT_URI() {
+    return this.PA_DOMAIN + '/webview/google/oauth';
+  }
 }
 
 module.exports = new CoreConstants();

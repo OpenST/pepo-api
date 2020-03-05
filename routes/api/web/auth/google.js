@@ -42,7 +42,16 @@ router.post('/login', sanitizer.sanitizeDynamicUrlParams, function(req, res, nex
   };
 
   Promise.resolve(
-    routeHelper.perform(req, res, next, '/connect/Google', 'r_a_w_go_1', null, onServiceSuccess, onServiceFailure)
+    routeHelper.perform(
+      req,
+      res,
+      next,
+      '/webConnect/google/Verify',
+      'r_a_w_go_1',
+      null,
+      onServiceSuccess,
+      onServiceFailure
+    )
   );
 });
 
