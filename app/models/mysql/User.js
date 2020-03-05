@@ -301,7 +301,7 @@ class UserModel extends ModelBase {
 
     let cookieToken = null,
       version = 'v2';
-    if (apiSourceConstants.isWebRequest(options.apiReferer)) {
+    if (apiSourceConstants.isWebRequest(options.apiSource)) {
       cookieToken = oThis.getCookieTokenForWeb(userObj, decryptedEncryptionSalt, options);
       version = apiSourceConstants.web;
     } else {

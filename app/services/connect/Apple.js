@@ -65,7 +65,7 @@ class AppleConnect extends ConnectBase {
     logger.log('FullName: ', oThis.fullName);
 
     // Different client id and uri has to be used for app and web requests.
-    if (apiSourceConstants.isWebRequest(oThis.apiReferer)) {
+    if (apiSourceConstants.isWebRequest(oThis.apiSource)) {
       oThis.appleClientId = coreConstants.PA_APPLE_WEB_SERVICE_ID;
       oThis.appleRedirectUri = coreConstants.PA_APPLE_WEB_REDIRECT_URI;
     } else {
@@ -120,7 +120,7 @@ class AppleConnect extends ConnectBase {
     oThis.decryptedAppleEmail = decryptedIdentityToken.email;
 
     // In case of web request, we are not getting apple id in response
-    if (apiSourceConstants.isWebRequest(oThis.apiReferer)) {
+    if (apiSourceConstants.isWebRequest(oThis.apiSource)) {
       oThis.appleId = decryptedIdentityToken.sub;
     }
 
@@ -250,7 +250,7 @@ class AppleConnect extends ConnectBase {
       refreshToken: oThis.appleOAuthDetails.refresh_token,
       isNewSocialConnect: oThis.newSocialConnect,
       userId: oThis.userId,
-      apiReferer: oThis.apiReferer
+      apiSource: oThis.apiSource
     };
 
     oThis.serviceResp = await new AppleLogin(params).perform();

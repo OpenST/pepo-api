@@ -27,7 +27,7 @@ router.get('/request-token', sanitizer.sanitizeDynamicUrlParams, function(req, r
 /* Github connect. */
 router.post('/login', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.githubConnect;
-  req.decodedParams.api_referer = apiSourceConstants.web;
+  req.decodedParams.api_source = apiSourceConstants.web;
 
   cookieHelper.fetchUserUtmCookie(req);
 
@@ -75,7 +75,7 @@ router.post('/disconnect', cookieHelper.parseUserCookieForLogout, sanitizer.sani
   next
 ) {
   req.decodedParams.apiName = apiName.githubDisconnect;
-  req.decodedParams.api_referer = apiSourceConstants.web;
+  req.decodedParams.api_source = apiSourceConstants.web;
 
   cookieHelper.deleteWebLoginCookie(res);
 

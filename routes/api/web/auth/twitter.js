@@ -14,7 +14,7 @@ const rootPrefix = '../../../..',
 /* Request Token for twitter */
 router.get('/request-token', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.twitterRequestToken;
-  req.decodedParams.api_referer = apiSourceConstants.web;
+  req.decodedParams.api_source = apiSourceConstants.web;
 
   const onServiceSuccess = async function(serviceResponse) {
     cookieHelper.setLoginRefererCookie(req, res);
@@ -28,7 +28,7 @@ router.get('/request-token', sanitizer.sanitizeDynamicUrlParams, function(req, r
 /* Twitter connect. */
 router.post('/login', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.twitterLogin;
-  req.decodedParams.api_referer = apiSourceConstants.web;
+  req.decodedParams.api_source = apiSourceConstants.web;
 
   cookieHelper.fetchUserUtmCookie(req);
 
@@ -76,7 +76,7 @@ router.post('/disconnect', cookieHelper.parseUserCookieForLogout, sanitizer.sani
   next
 ) {
   req.decodedParams.apiName = apiName.twitterDisconnect;
-  req.decodedParams.api_referer = apiSourceConstants.web;
+  req.decodedParams.api_source = apiSourceConstants.web;
 
   cookieHelper.deleteWebLoginCookie(res);
 

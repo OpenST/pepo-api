@@ -231,7 +231,7 @@ const webSignature = {
         validatorMethods: ['validateString']
       },
       {
-        parameter: 'api_referer',
+        parameter: 'api_source',
         validatorMethods: ['validateString']
       }
     ],
@@ -253,7 +253,7 @@ const webSignature = {
         validatorMethods: ['validateString']
       },
       {
-        parameter: 'api_referer',
+        parameter: 'api_source',
         validatorMethods: ['validateString']
       }
     ],
@@ -279,7 +279,7 @@ const webSignature = {
         validatorMethods: ['validateString']
       },
       {
-        parameter: 'api_referer',
+        parameter: 'api_source',
         validatorMethods: ['validateString']
       }
     ],

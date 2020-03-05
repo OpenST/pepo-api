@@ -138,7 +138,7 @@ class GoogleConnect extends ConnectBase {
       googleUserObj: oThis.socialUserObj,
       userId: oThis.userId,
       isNewSocialConnect: oThis.newSocialConnect,
-      apiReferer: oThis.apiReferer
+      apiSource: oThis.apiSource
     };
 
     oThis.serviceResp = await new GoogleLogin(loginParams).perform();

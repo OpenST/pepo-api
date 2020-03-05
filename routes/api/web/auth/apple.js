@@ -27,7 +27,7 @@ router.get('/request-token', sanitizer.sanitizeDynamicUrlParams, function(req, r
 /* Apple connect. */
 router.post('/login', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.appleConnect;
-  req.decodedParams.api_referer = apiSourceConstants.web;
+  req.decodedParams.api_source = apiSourceConstants.web;
 
   cookieHelper.fetchUserUtmCookie(req);
 
@@ -66,7 +66,7 @@ router.post('/disconnect', cookieHelper.parseUserCookieForLogout, sanitizer.sani
   next
 ) {
   req.decodedParams.apiName = apiName.appleDisconnect;
-  req.decodedParams.api_referer = apiSourceConstants.web;
+  req.decodedParams.api_source = apiSourceConstants.web;
 
   cookieHelper.deleteWebLoginCookie(res);
 
