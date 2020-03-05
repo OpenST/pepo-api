@@ -574,6 +574,14 @@ class CoreConstants {
     return 'https://appleid.apple.com/auth/authorize';
   }
 
+  get GITHUB_OAUTH_URL() {
+    return 'https://github.com/login/oauth';
+  }
+
+  get PA_GITHUB_CLIENT_ID() {
+    return process.env.PA_GITHUB_CLIENT_ID;
+  }
+
   get GOOGLE_REDIRECT_URI() {
     return this.PA_DOMAIN + '/webview/google/oauth';
   }

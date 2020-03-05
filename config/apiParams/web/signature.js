@@ -34,6 +34,15 @@ const webSignature = {
       }
     ]
   },
+  [apiName.githubRequestToken]: {
+    mandatory: [],
+    optional: [
+      {
+        parameter: 'invite',
+        validatorMethods: ['validateString']
+      }
+    ]
+  },
   [apiName.appleRequestToken]: {
     mandatory: [],
     optional: [

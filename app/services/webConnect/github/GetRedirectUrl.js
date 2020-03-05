@@ -6,13 +6,13 @@ const rootPrefix = '../../../..',
   responseEntity = require(rootPrefix + '/lib/globalConstant/responseEntityKey');
 
 /**
- * Class for getting Apple redirect Url
+ * Class for getting Github redirect Url
  *
- * @class GetAppleRedirectUrl
+ * @class GetGithubRedirectUrl
  */
-class GetAppleRedirectUrl extends ServiceBase {
+class GetGithubRedirectUrl extends ServiceBase {
   /**
-   * Constructor for getting Apple redirect Url
+   * Constructor for getting Github redirect Url
    *
    * @param {object} params
    * @param {string} params.invite
@@ -44,22 +44,21 @@ class GetAppleRedirectUrl extends ServiceBase {
       : null;
 
     const urlParams = {
-      client_id: coreConstants.PA_APPLE_WEB_SERVICE_ID,
-      redirect_uri: coreConstants.PA_DOMAIN + '/webview/apple/oauth',
-      response_type: 'code id_token',
-      scope: 'email name',
-      response_mode: 'form_post'
+      client_id: coreConstants.PA_GITHUB_CLIENT_ID,
+      redirect_uri: coreConstants.PA_DOMAIN + '/webview/github/oauth',
+      response_type: 'code',
+      scope: 'read:user user:email'
     };
 
-    let appleRedirectUrl = basicHelper.generateUrl(coreConstants.APPLE_OAUTH_URL, urlParams);
+    let githubRedirectUrl = basicHelper.generateUrl(coreConstants.GITHUB_OAUTH_URL, urlParams);
 
     return Promise.resolve(
       responseHelper.successWithData({
-        [responseEntity.redirectUrl]: appleRedirectUrl,
+        [responseEntity.redirectUrl]: githubRedirectUrl,
         dataCookieValue: dataCookieValue
       })
     );
   }
 }
 
-module.exports = GetAppleRedirectUrl;
+module.exports = GetGithubRedirectUrl;
