@@ -841,14 +841,13 @@ class BasicHelper {
    * Check if request from pepo dev env
    * and pepo dev env is supported or not
    *
-   * @param requestHost
+   * @param req
    * @returns {boolean}
    */
-  isRequestFromPepoDevEnvAndSupported(requestHost) {
-    const oThis = this,
-      pepoDevEnvHost = coreConstants.PEPO_DEV_ENV_DOMAIN.split('/')[2];
+  isRequestFromPepoDevEnvAndSupported(req) {
+    const oThis = this;
 
-    return !oThis.isProduction() && pepoDevEnvHost == requestHost;
+    return !oThis.isProduction() && req.headers['x-dev-env'];
   }
 
   /**

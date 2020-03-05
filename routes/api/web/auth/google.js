@@ -15,7 +15,7 @@ const rootPrefix = '../../../..',
 /* Request Token for google */
 router.get('/request-token', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.googleRequestToken;
-  req.decodedParams.dev_login = basicHelper.isRequestFromPepoDevEnvAndSupported(req.headers['host']);
+  req.decodedParams.dev_login = basicHelper.isRequestFromPepoDevEnvAndSupported(req);
 
   const onServiceSuccess = async function(serviceResponse) {
     cookieHelper.setLoginRefererCookie(req, res);
@@ -30,7 +30,7 @@ router.get('/request-token', sanitizer.sanitizeDynamicUrlParams, function(req, r
 router.post('/login', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.googleConnect;
   req.decodedParams.api_source = apiSourceConstants.web;
-  req.decodedParams.dev_login = basicHelper.isRequestFromPepoDevEnvAndSupported(req.headers['host']);
+  req.decodedParams.dev_login = basicHelper.isRequestFromPepoDevEnvAndSupported(req);
 
   cookieHelper.fetchUserUtmCookie(req);
 
@@ -79,7 +79,7 @@ router.post('/disconnect', cookieHelper.parseUserCookieForLogout, sanitizer.sani
 ) {
   req.decodedParams.apiName = apiName.googleDisconnect;
   req.decodedParams.api_source = apiSourceConstants.web;
-  req.decodedParams.dev_login = basicHelper.isRequestFromPepoDevEnvAndSupported(req.headers['host']);
+  req.decodedParams.dev_login = basicHelper.isRequestFromPepoDevEnvAndSupported(req);
 
   cookieHelper.deleteWebLoginCookie(res);
 
