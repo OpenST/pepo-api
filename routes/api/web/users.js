@@ -34,7 +34,7 @@ router.get('/:username/share', sanitizer.sanitizeDynamicUrlParams, function(req,
   );
 });
 
-/* Logged In User */
+/* Logged-In user. */
 router.get('/current', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.loggedInUser;
 
@@ -56,6 +56,28 @@ router.get('/current', sanitizer.sanitizeDynamicUrlParams, function(req, res, ne
   };
 
   Promise.resolve(routeHelper.perform(req, res, next, '/user/init/GetCurrent', 'r_a_w_u_2', null, dataFormatterFunc));
+});
+
+/* User websocket details. */
+router.get('/:user_id/websocket-details', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.websocketDetails;
+  req.decodedParams.user_id = req.params.user_id;
+
+  const dataFormatterFunc = async function(serviceResponse) {
+    const wrapperFormatterRsp = await new FormatterComposer({
+      resultType: responseEntityKey.websocketConnectionPayload,
+      entityKindToResponseKeyMap: {
+        [entityTypeConstants.websocketConnectionPayload]: responseEntityKey.websocketConnectionPayload
+      },
+      serviceData: serviceResponse.data
+    }).perform();
+
+    serviceResponse.data = wrapperFormatterRsp.data;
+  };
+
+  Promise.resolve(
+    routeHelper.perform(req, res, next, '/user/SocketConnectionDetails', 'r_a_w_u_3', null, dataFormatterFunc)
+  );
 });
 
 module.exports = router;
