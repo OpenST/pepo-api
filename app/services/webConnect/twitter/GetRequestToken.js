@@ -19,6 +19,7 @@ class GetRequestToken extends ServiceBase {
    *
    * @param {object} params
    * @param {string} params.invite
+   * @param {boolean} params.dev_login
    *
    * @augments ServiceBase
    *
@@ -30,6 +31,7 @@ class GetRequestToken extends ServiceBase {
     const oThis = this;
 
     oThis.inviteCode = params.invite;
+    oThis.isDevLogin = params.dev_login;
 
     oThis.twitterAuthTokenObj = {};
     oThis.twitterRespData = null;
@@ -77,7 +79,7 @@ class GetRequestToken extends ServiceBase {
 
     logger.log('Start::_fetchRequestToken');
 
-    const twitterResp = await new AuthorizationTwitterRequestClass().requestToken();
+    const twitterResp = await new AuthorizationTwitterRequestClass({ isDevLogin: oThis.isDevLogin }).requestToken();
 
     if (twitterResp.isFailure()) {
       return Promise.reject(

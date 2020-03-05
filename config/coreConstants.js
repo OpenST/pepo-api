@@ -417,10 +417,6 @@ class CoreConstants {
     return process.env.PA_TWITTER_CONSUMER_SECRET;
   }
 
-  get TWITTER_AUTH_CALLBACK_ROUTE() {
-    return process.env.PA_TWITTER_AUTH_CALLBACK_ROUTE;
-  }
-
   get PA_PR_IMAGE_RESIZE_FUNCTION() {
     return process.env.PA_PR_LAMBDA_IMAGE_RESIZE_FUNCTION;
   }
@@ -542,10 +538,6 @@ class CoreConstants {
     return process.env.PA_APPLE_WEB_SERVICE_ID;
   }
 
-  get PA_APPLE_WEB_REDIRECT_URI() {
-    return process.env.PA_APPLE_WEB_REDIRECT_URI;
-  }
-
   get PA_APPLE_TEAM_ID() {
     return process.env.PA_APPLE_TEAM_ID;
   }
@@ -592,14 +584,6 @@ class CoreConstants {
 
   get PA_GITHUB_CLIENT_SECRET() {
     return process.env.PA_GITHUB_CLIENT_SECRET;
-  }
-
-  get GOOGLE_REDIRECT_URI() {
-    return this.PA_DOMAIN + '/webview/google/oauth';
-  }
-
-  get GITHUB_REDIRECT_URI() {
-    return this.PA_DOMAIN + '/webview/github/oauth';
   }
 
   get PEPO_DEV_ENV_DOMAIN() {

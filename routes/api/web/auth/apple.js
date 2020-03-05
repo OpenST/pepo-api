@@ -7,6 +7,7 @@ const rootPrefix = '../../../..',
   sanitizer = require(rootPrefix + '/helpers/sanitizer'),
   cookieHelper = require(rootPrefix + '/lib/cookieHelper'),
   apiName = require(rootPrefix + '/lib/globalConstant/apiName'),
+  basicHelper = require(rootPrefix + '/helpers/basic'),
   apiSourceConstants = require(rootPrefix + '/lib/globalConstant/apiSource'),
   entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
   responseEntityKey = require(rootPrefix + '/lib/globalConstant/responseEntityKey');
@@ -14,6 +15,7 @@ const rootPrefix = '../../../..',
 /* Request Token for google */
 router.get('/request-token', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.appleRequestToken;
+  req.decodedParams.dev_login = basicHelper.isRequestFromPepoDevEnvAndSupported(req.headers['host']);
 
   const onServiceSuccess = async function(serviceResponse) {
     cookieHelper.setLoginRefererCookie(req, res);
@@ -28,6 +30,7 @@ router.get('/request-token', sanitizer.sanitizeDynamicUrlParams, function(req, r
 router.post('/login', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.appleConnect;
   req.decodedParams.api_source = apiSourceConstants.web;
+  req.decodedParams.dev_login = basicHelper.isRequestFromPepoDevEnvAndSupported(req.headers['host']);
 
   cookieHelper.fetchUserUtmCookie(req);
 
@@ -67,6 +70,7 @@ router.post('/disconnect', cookieHelper.parseUserCookieForLogout, sanitizer.sani
 ) {
   req.decodedParams.apiName = apiName.appleDisconnect;
   req.decodedParams.api_source = apiSourceConstants.web;
+  req.decodedParams.dev_login = basicHelper.isRequestFromPepoDevEnvAndSupported(req.headers['host']);
 
   cookieHelper.deleteWebLoginCookie(res);
 

@@ -1519,6 +1519,10 @@ const v1Signature = {
       {
         parameter: 'utm_params',
         validatorMethods: ['validateObject']
+      },
+      {
+        parameter: 'dev_login',
+        validatorMethods: ['validateBoolean']
       }
     ]
   },

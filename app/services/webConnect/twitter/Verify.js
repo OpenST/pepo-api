@@ -22,6 +22,7 @@ class TwitterVerify extends ServiceBase {
    * @param {string} params.oauth_verifier
    * @param {string} params.api_source
    * @param {object} params.utm_params
+   * @param {boolean} params.dev_login
    *
    * @augments ServiceBase
    *
@@ -37,6 +38,7 @@ class TwitterVerify extends ServiceBase {
     oThis.inviteCode = params.invite_code;
     oThis.utmParams = params.utm_params;
     oThis.apiSource = params.api_source;
+    oThis.isDevLogin = params.dev_login;
 
     oThis.oAuthTokenSecret = null;
     oThis.twitterAuthTokenObj = null;
@@ -110,7 +112,9 @@ class TwitterVerify extends ServiceBase {
       oAuthVerifier: oThis.oauthVerifier
     };
 
-    const twitterResp = await new AuthorizationTwitterRequestClass().accessToken(reqParams);
+    const twitterResp = await new AuthorizationTwitterRequestClass({ isDevLogin: oThis.isDevLogin }).accessToken(
+      reqParams
+    );
 
     if (twitterResp.isFailure()) {
       return Promise.reject(

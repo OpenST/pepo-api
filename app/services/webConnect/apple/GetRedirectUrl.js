@@ -3,7 +3,8 @@ const rootPrefix = '../../../..',
   basicHelper = require(rootPrefix + '/helpers/basic'),
   coreConstants = require(rootPrefix + '/config/coreConstants'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
-  responseEntity = require(rootPrefix + '/lib/globalConstant/responseEntityKey');
+  responseEntity = require(rootPrefix + '/lib/globalConstant/responseEntityKey'),
+  socialConnectServiceTypeConstants = require(rootPrefix + '/lib/globalConstant/socialConnectServiceType');
 
 /**
  * Class for getting Apple redirect Url
@@ -16,6 +17,7 @@ class GetAppleRedirectUrl extends ServiceBase {
    *
    * @param {object} params
    * @param {string} params.invite
+   * @param {boolean} params.dev_login
    *
    * @augments ServiceBase
    *
@@ -26,6 +28,7 @@ class GetAppleRedirectUrl extends ServiceBase {
 
     const oThis = this;
     oThis.inviteCode = params.invite;
+    oThis.isDevLogin = params.dev_login;
   }
 
   /**
@@ -45,7 +48,10 @@ class GetAppleRedirectUrl extends ServiceBase {
 
     const urlParams = {
       client_id: coreConstants.PA_APPLE_WEB_SERVICE_ID,
-      redirect_uri: coreConstants.PA_DOMAIN + '/webview/apple/oauth',
+      redirect_uri: basicHelper.getLoginRedirectUrl(
+        oThis.isDevLogin,
+        socialConnectServiceTypeConstants.appleSocialConnect
+      ),
       response_type: 'code id_token',
       scope: 'email name',
       response_mode: 'form_post'

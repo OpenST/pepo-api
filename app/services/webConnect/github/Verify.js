@@ -19,6 +19,7 @@ class GithubConnectVerify extends ServiceBase {
    * @param {string} params.invite_code
    * @param {string} params.api_source
    * @param {object} params.utm_params
+   * @param {boolean} params.dev_login
    *
    * @augments ServiceBase
    *
@@ -32,6 +33,7 @@ class GithubConnectVerify extends ServiceBase {
     oThis.inviteCode = params.invite_code;
     oThis.utmParams = params.utm_params;
     oThis.apiSource = params.api_source;
+    oThis.isDevLogin = params.dev_login;
 
     oThis.githubRespData = null;
     oThis.serviceResponse = null;
@@ -66,7 +68,10 @@ class GithubConnectVerify extends ServiceBase {
 
     logger.log('Start::_fetchAccessToken');
 
-    const githubResp = await new GetAccessToken({ code: oThis.authorizationCode }).perform();
+    const githubResp = await new GetAccessToken({
+      code: oThis.authorizationCode,
+      isDevLogin: oThis.isDevLogin
+    }).perform();
 
     if (githubResp.isFailure()) {
       return Promise.reject(

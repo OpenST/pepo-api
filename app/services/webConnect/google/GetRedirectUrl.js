@@ -4,7 +4,8 @@ const rootPrefix = '../../../..',
   coreConstants = require(rootPrefix + '/config/coreConstants'),
   basicHelper = require(rootPrefix + '/helpers/basic'),
   responseEntity = require(rootPrefix + '/lib/globalConstant/responseEntityKey'),
-  logger = require(rootPrefix + '/lib/logger/customConsoleLogger');
+  logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
+  socialConnectServiceTypeConstants = require(rootPrefix + '/lib/globalConstant/socialConnectServiceType');
 
 /**
  * Class for getting Google redirect Url
@@ -17,6 +18,7 @@ class GetGoogleRedirectUrl extends ServiceBase {
    *
    * @param {object} params
    * @param {string} params.invite
+   * @param {boolean} params.dev_login
    *
    * @augments ServiceBase
    *
@@ -27,6 +29,7 @@ class GetGoogleRedirectUrl extends ServiceBase {
 
     const oThis = this;
     oThis.inviteCode = params.invite;
+    oThis.isDevLogin = params.dev_login;
   }
 
   /**
@@ -48,7 +51,10 @@ class GetGoogleRedirectUrl extends ServiceBase {
       scope: 'https://www.googleapis.com/auth/plus.login https://www.googleapis.com/auth/plus.profile.emails.read',
       access_type: 'offline',
       response_type: 'code',
-      redirect_uri: coreConstants.GOOGLE_REDIRECT_URI,
+      redirect_uri: basicHelper.getLoginRedirectUrl(
+        oThis.isDevLogin,
+        socialConnectServiceTypeConstants.googleSocialConnect
+      ),
       client_id: coreConstants.GOOGLE_CLIENT_ID
     };
 

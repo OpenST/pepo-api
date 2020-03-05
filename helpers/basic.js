@@ -850,6 +850,20 @@ class BasicHelper {
 
     return !oThis.isProduction() && pepoDevEnvHost == requestHost;
   }
+
+  /**
+   * Get login redirect url
+   *
+   * @param isDevEnvLogin
+   * @param loginService
+   * @returns {string}
+   */
+  getLoginRedirectUrl(isDevEnvLogin, loginService) {
+    const oThis = this,
+      redirectDomain = oThis.afterWebLoginRedirectDomain(isDevEnvLogin);
+
+    return redirectDomain + '/webview/' + loginService + '/oauth';
+  }
 }
 
 module.exports = new BasicHelper();

@@ -13,8 +13,10 @@ const rootPrefix = '../../..',
   userConstants = require(rootPrefix + '/lib/globalConstant/user'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
+  basicHelper = require(rootPrefix + '/helpers/basic'),
   appleHelper = require(rootPrefix + '/lib/connect/wrappers/apple/helper'),
   apiSourceConstants = require(rootPrefix + '/lib/globalConstant/apiSource'),
+  socialConnectServiceTypeConstants = require(rootPrefix + '/lib/globalConstant/socialConnectServiceType'),
   userIdentifierConstants = require(rootPrefix + '/lib/globalConstant/userIdentifier');
 
 const APPLE_API_URL = 'https://appleid.apple.com';
@@ -32,6 +34,7 @@ class AppleConnect extends ConnectBase {
    * @param {string} params.identity_token
    * @param {string} params.apple_user_id
    * @param {string} params.full_name
+   * @param {Boolean} params.dev_login
    *
    * @augments ServiceBase
    *
@@ -46,6 +49,7 @@ class AppleConnect extends ConnectBase {
     oThis.appleId = params.apple_user_id;
     oThis.duplicateRequestIdentifier = oThis.appleId;
     oThis.fullName = params.full_name;
+    oThis.isDevLogin = params.dev_login;
 
     oThis.appleOAuthDetails = null;
     oThis.decryptedAppleEmail = null;
@@ -67,7 +71,10 @@ class AppleConnect extends ConnectBase {
     // Different client id and uri has to be used for app and web requests.
     if (apiSourceConstants.isWebRequest(oThis.apiSource)) {
       oThis.appleClientId = coreConstants.PA_APPLE_WEB_SERVICE_ID;
-      oThis.appleRedirectUri = coreConstants.PA_APPLE_WEB_REDIRECT_URI;
+      oThis.appleRedirectUri = basicHelper.getLoginRedirectUrl(
+        oThis.isDevLogin,
+        socialConnectServiceTypeConstants.appleSocialConnect
+      );
     } else {
       oThis.appleClientId = coreConstants.PA_APPLE_CLIENT_ID;
       oThis.appleRedirectUri = coreConstants.PA_APPLE_REDIRECT_URI;

@@ -19,6 +19,7 @@ class GoogleConnectVerify extends ServiceBase {
    * @param {string} params.invite_code
    * @param {string} params.api_source
    * @param {object} params.utm_params
+   * @param {boolean} params.dev_login
    *
    * @augments ServiceBase
    *
@@ -32,6 +33,7 @@ class GoogleConnectVerify extends ServiceBase {
     oThis.inviteCode = params.invite_code;
     oThis.utmParams = params.utm_params;
     oThis.apiSource = params.api_source;
+    oThis.isDevLogin = params.dev_login;
 
     oThis.googleRespData = null;
     oThis.serviceResponse = null;
@@ -66,7 +68,10 @@ class GoogleConnectVerify extends ServiceBase {
 
     logger.log('Start::_fetchAccessToken');
 
-    const googleResp = await new GetAccessToken({ code: oThis.authorizationCode }).perform();
+    const googleResp = await new GetAccessToken({
+      code: oThis.authorizationCode,
+      isDevLogin: oThis.isDevLogin
+    }).perform();
 
     if (googleResp.isFailure()) {
       return Promise.reject(

@@ -26,7 +26,12 @@ const webSignature = {
     ]
   },
   [apiName.googleRequestToken]: {
-    mandatory: [],
+    mandatory: [
+      {
+        parameter: 'dev_login',
+        validatorMethods: ['validateBoolean']
+      }
+    ],
     optional: [
       {
         parameter: 'invite',
@@ -35,7 +40,12 @@ const webSignature = {
     ]
   },
   [apiName.githubRequestToken]: {
-    mandatory: [],
+    mandatory: [
+      {
+        parameter: 'dev_login',
+        validatorMethods: ['validateBoolean']
+      }
+    ],
     optional: [
       {
         parameter: 'invite',
@@ -44,7 +54,12 @@ const webSignature = {
     ]
   },
   [apiName.appleRequestToken]: {
-    mandatory: [],
+    mandatory: [
+      {
+        parameter: 'dev_login',
+        validatorMethods: ['validateBoolean']
+      }
+    ],
     optional: [
       {
         parameter: 'invite',
@@ -233,6 +248,10 @@ const webSignature = {
       {
         parameter: 'api_source',
         validatorMethods: ['validateString']
+      },
+      {
+        parameter: 'dev_login',
+        validatorMethods: ['validateBoolean']
       }
     ],
     optional: [
@@ -255,6 +274,10 @@ const webSignature = {
       {
         parameter: 'api_source',
         validatorMethods: ['validateString']
+      },
+      {
+        parameter: 'dev_login',
+        validatorMethods: ['validateBoolean']
       }
     ],
     optional: [
@@ -281,6 +304,10 @@ const webSignature = {
       {
         parameter: 'api_source',
         validatorMethods: ['validateString']
+      },
+      {
+        parameter: 'dev_login',
+        validatorMethods: ['validateBoolean']
       }
     ],
     optional: [
