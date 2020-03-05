@@ -6,7 +6,7 @@ const rootPrefix = '../../..',
   userConstants = require(rootPrefix + '/lib/globalConstant/user'),
   localCipher = require(rootPrefix + '/lib/encryptors/localCipher'),
   databaseConstants = require(rootPrefix + '/lib/globalConstant/database'),
-  apiRefererConstants = require(rootPrefix + '/lib/globalConstant/apiReferers');
+  apiSourceConstants = require(rootPrefix + '/lib/globalConstant/apiSource');
 
 // Declare variables names.
 const dbName = databaseConstants.userDbName;
@@ -301,9 +301,9 @@ class UserModel extends ModelBase {
 
     let cookieToken = null,
       version = 'v2';
-    if (apiRefererConstants.isWebRequest(options.apiReferer)) {
+    if (apiSourceConstants.isWebRequest(options.apiSource)) {
       cookieToken = oThis.getCookieTokenForWeb(userObj, decryptedEncryptionSalt, options);
-      version = apiRefererConstants.webReferer;
+      version = apiSourceConstants.web;
     } else {
       cookieToken = oThis.getCookieTokenForVersionV2(userObj, decryptedEncryptionSalt, options);
     }
@@ -390,7 +390,7 @@ class UserModel extends ModelBase {
     const uniqueStr = localCipher.decrypt(decryptedEncryptionSalt, userObj.cookieToken);
 
     const stringToSign =
-      apiRefererConstants.webReferer +
+      apiSourceConstants.web +
       ':' +
       userObj.id +
       ':' +
@@ -402,7 +402,7 @@ class UserModel extends ModelBase {
       ':' +
       uniqueStr.substring(0, 16);
     const salt =
-      apiRefererConstants.webReferer +
+      apiSourceConstants.web +
       ':' +
       userObj.id +
       ':' +

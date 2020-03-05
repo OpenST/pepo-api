@@ -7,7 +7,7 @@ const rootPrefix = '../../../..',
   sanitizer = require(rootPrefix + '/helpers/sanitizer'),
   cookieHelper = require(rootPrefix + '/lib/cookieHelper'),
   apiName = require(rootPrefix + '/lib/globalConstant/apiName'),
-  apiRefererConstants = require(rootPrefix + '/lib/globalConstant/apiReferers'),
+  apiSourceConstants = require(rootPrefix + '/lib/globalConstant/apiSource'),
   entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
   responseEntityKey = require(rootPrefix + '/lib/globalConstant/responseEntityKey');
 
@@ -27,7 +27,7 @@ router.get('/request-token', sanitizer.sanitizeDynamicUrlParams, function(req, r
 /* Github connect. */
 router.post('/login', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.githubConnect;
-  req.decodedParams.api_referer = apiRefererConstants.webReferer;
+  req.decodedParams.api_source = apiSourceConstants.web;
 
   cookieHelper.fetchUserUtmCookie(req);
 
@@ -59,7 +59,7 @@ router.post('/login', sanitizer.sanitizeDynamicUrlParams, function(req, res, nex
       req,
       res,
       next,
-      '/webConnect/google/Verify',
+      '/webConnect/github/Verify',
       'r_a_w_a_gh_2',
       null,
       onServiceSuccess,
@@ -75,7 +75,7 @@ router.post('/disconnect', cookieHelper.parseUserCookieForLogout, sanitizer.sani
   next
 ) {
   req.decodedParams.apiName = apiName.githubDisconnect;
-  req.decodedParams.api_referer = apiRefererConstants.webReferer;
+  req.decodedParams.api_source = apiSourceConstants.web;
 
   cookieHelper.deleteWebLoginCookie(res);
 

@@ -17,7 +17,7 @@ class GithubConnectVerify extends ServiceBase {
    * @param {object} params
    * @param {string} params.authorization_code
    * @param {string} params.invite_code
-   * @param {string} params.api_referer
+   * @param {string} params.api_source
    * @param {object} params.utm_params
    *
    * @augments ServiceBase
@@ -31,7 +31,7 @@ class GithubConnectVerify extends ServiceBase {
     oThis.authorizationCode = params.authorization_code;
     oThis.inviteCode = params.invite_code;
     oThis.utmParams = params.utm_params;
-    oThis.apiReferer = params.api_referer;
+    oThis.apiSource = params.api_source;
 
     oThis.githubRespData = null;
     oThis.serviceResponse = null;
@@ -100,7 +100,7 @@ class GithubConnectVerify extends ServiceBase {
       access_token: oThis.githubRespData.response.access_token,
       invite_code: oThis.inviteCode,
       utm_params: oThis.utmParams,
-      api_referer: oThis.apiReferer
+      api_source: oThis.apiSource
     }).perform();
 
     if (oThis.serviceResponse.isFailure()) {
