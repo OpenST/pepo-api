@@ -575,7 +575,7 @@ class CoreConstants {
   }
 
   get GITHUB_OAUTH_URL() {
-    return 'https://github.com/login/oauth';
+    return 'https://github.com/login/oauth/authorize';
   }
 
   get PA_GITHUB_CLIENT_ID() {
