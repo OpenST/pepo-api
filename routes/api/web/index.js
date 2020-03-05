@@ -3,6 +3,7 @@ const express = require('express'),
   router = express.Router();
 
 const rootPrefix = '../../..',
+  preLaunchRoutes = require(rootPrefix + '/routes/api/web/preLaunch'),
   cookieHelper = require(rootPrefix + '/lib/cookieHelper'),
   authRoutes = require(rootPrefix + '/routes/api/web/auth/index'),
   sessionAuthRoutes = require(rootPrefix + '/routes/api/web/sessionAuth'),
@@ -23,6 +24,8 @@ router.use('/support', supportRoutes);
 
 // Node.js cookie parsing middleware.
 router.use(cookieParser(coreConstants.WEB_COOKIE_SECRET));
+
+router.use('/prelaunch', preLaunchRoutes);
 
 // CSRF check
 router.use(cookieHelper.setWebCsrf());
