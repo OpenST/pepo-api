@@ -387,6 +387,28 @@ const webSignature = {
       }
     ],
     optional: []
+  },
+  [apiName.ostTransaction]: {
+    mandatory: [
+      {
+        parameter: 'ost_transaction',
+        validatorMethods: ['validateNonEmptyObject', 'validateOstTransactionObject']
+      },
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      }
+    ],
+    optional: [
+      {
+        parameter: 'meta',
+        validatorMethods: ['validateNonEmptyObject', 'validateOstTransactionMeta']
+      },
+      {
+        parameter: 'is_paper_plane',
+        validatorMethods: ['validateBoolean']
+      }
+    ]
   }
 };
 
