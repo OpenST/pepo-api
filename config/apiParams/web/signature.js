@@ -227,7 +227,7 @@ const webSignature = {
   [apiName.githubConnect]: {
     mandatory: [
       {
-        parameter: 'access_token',
+        parameter: 'authorization_code',
         validatorMethods: ['validateString']
       },
       {

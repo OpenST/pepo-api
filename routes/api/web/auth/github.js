@@ -58,7 +58,16 @@ router.post('/login', sanitizer.sanitizeDynamicUrlParams, function(req, res, nex
   };
 
   Promise.resolve(
-    routeHelper.perform(req, res, next, '/connect/Github', 'r_a_w_a_gh_2', null, onServiceSuccess, onServiceFailure)
+    routeHelper.perform(
+      req,
+      res,
+      next,
+      '/webConnect/google/Verify',
+      'r_a_w_a_gh_2',
+      null,
+      onServiceSuccess,
+      onServiceFailure
+    )
   );
 });
 
