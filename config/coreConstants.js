@@ -566,6 +566,14 @@ class CoreConstants {
     return process.env.PA_USER_DATA_S3_FILE_PATH;
   }
 
+  get CHANNEL_DATA_LOCAL_FILE_PATH() {
+    return process.env.PA_CHANNEL_DATA_LOCAL_FILE_PATH;
+  }
+
+  get CHANNEL_DATA_S3_FILE_PATH() {
+    return process.env.PA_CHANNEL_DATA_S3_FILE_PATH;
+  }
+
   get GOOGLE_OAUTH_URL() {
     return 'https://accounts.google.com/o/oauth2/v2/auth';
   }

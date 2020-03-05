@@ -3,18 +3,18 @@ const rootPrefix = '../../../..',
   bgJobConstants = require(rootPrefix + '/lib/globalConstant/bgJob');
 
 /**
- * Class to update videos performance data in Google Sheets.
+ * Class to update channel data in Google Sheets.
  *
- * @class VideosPerformance
+ * @class ChannelData
  */
-class VideosPerformance extends UpdateUsageDataBase {
+class ChannelData extends UpdateUsageDataBase {
   /**
    * Returns background job kind.
    *
    * @returns {string}
    */
   get kind() {
-    return bgJobConstants.updateVideosPerformanceUsageTopic;
+    return bgJobConstants.updateChannelDataUsageTopic;
   }
 
   /**
@@ -25,8 +25,8 @@ class VideosPerformance extends UpdateUsageDataBase {
   async enqueue() {
     const oThis = this;
 
-    await oThis.enqueueMultipleJobs();
+    await oThis._enqueueJob({});
   }
 }
 
-module.exports = VideosPerformance;
+module.exports = ChannelData;

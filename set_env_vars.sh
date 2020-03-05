@@ -179,12 +179,15 @@ export PA_GOOGLE_PRIVATE_KEY='-----BEGIN%20PRIVATE%20KEY-----%0AMIIEvgIBADANBgkq
 export PA_GOOGLE_CLIENT_EMAIL='pepo-245@lateral-avatar-205714.iam.gserviceaccount.com'
 export PA_GOOGLE_PROJECT_ID='lateral-avatar-205714'
 export PA_GOOGLE_USAGE_REPORT_SPREADSHEET_ID='1zB67I1MaWo8Ohw4A-yZNHbY0A9nrA1NifhdueTLUBMg'
-export PA_GOOGLE_USAGE_REPORT_GROUP_IDS='{"User data Lifetime": "1969769902", "User data Last 7 days": "262285918", "User data Last 24 hours": "1492159954", "Videos Stats Lifetime": "2079750882", "Videos Stats Last 7 days": "293576976", "Videos Stats Last 24 hrs": "920797104", "Tags Used": "1756942354"}'
+export PA_GOOGLE_USAGE_REPORT_GROUP_IDS='{"User data Lifetime": "1969769902", "User data Last 7 days": "262285918", "User data Last 24 hours": "1492159954", "Videos Stats Lifetime": "2079750882", "Videos Stats Last 7 days": "293576976", "Videos Stats Last 24 hrs": "920797104", "Tags Used": "1756942354", "Community data": "1732462944"}'
 export PA_GOOGLE_CLIENT_SECRET='PrH4JMqKzPo2ZJZL9c8TWFhf'
 export PA_GOOGLE_CLIENT_ID='82182934708-tt5qs2hbrndc1r5k7ja4cd2vvo44uuf0.apps.googleusercontent.com'
 
 export PA_USER_DATA_LOCAL_FILE_PATH='./userData.csv';
 export PA_USER_DATA_S3_FILE_PATH='testFolder/userData.csv';
+
+export PA_CHANNEL_DATA_LOCAL_FILE_PATH='./channelData.csv';
+export PA_CHANNEL_DATA_S3_FILE_PATH='testFolder/channelData.csv';
 
 # Video pixel data file path.
 export PA_VIDEO_PIXEL_DATA_S3_FILE_PATH='redshift/full_video_watched_by_devices.csv'
