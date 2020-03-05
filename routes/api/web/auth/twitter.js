@@ -73,6 +73,7 @@ router.post('/disconnect', cookieHelper.parseUserCookieForLogout, sanitizer.sani
 router.get('/request-token', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.twitterRequestToken;
   req.decodedParams.api_referer = apiRefererConstants.webReferer;
+  cookieHelper.setApiRefererCookie(req, res);
 
   const onServiceSuccess = async function(serviceResponse) {
     // if (serviceResponse.data.dataCookieValue) {

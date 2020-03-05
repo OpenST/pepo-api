@@ -58,6 +58,7 @@ router.post('/login', sanitizer.sanitizeDynamicUrlParams, function(req, res, nex
 /* Request Token for google */
 router.get('/request-token', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.googleRequestToken;
+  cookieHelper.setApiRefererCookie(req, res);
 
   const onServiceSuccess = async function(serviceResponse) {
     // if (serviceResponse.data.dataCookieValue) {

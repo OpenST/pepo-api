@@ -14,6 +14,7 @@ const rootPrefix = '../../../..',
 /* Request Token for github */
 router.get('/request-token', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.githubRequestToken;
+  cookieHelper.setApiRefererCookie(req, res);
 
   const onServiceSuccess = async function(serviceResponse) {
     // if (serviceResponse.data.dataCookieValue) {
