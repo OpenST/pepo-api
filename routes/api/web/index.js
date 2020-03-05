@@ -9,6 +9,7 @@ const rootPrefix = '../../..',
   cookieHelper = require(rootPrefix + '/lib/cookieHelper'),
   authRoutes = require(rootPrefix + '/routes/api/web/auth/index'),
   sessionAuthRoutes = require(rootPrefix + '/routes/api/web/sessionAuth'),
+  ostTransactionRoutes = require(rootPrefix + '/routes/api/web/ostTransactions'),
   userRoutes = require(rootPrefix + '/routes/api/web/users'),
   feedsRoutes = require(rootPrefix + '/routes/api/web/feeds'),
   videoRoutes = require(rootPrefix + '/routes/api/web/videos'),
@@ -64,5 +65,6 @@ router.use(cookieHelper.validateUserLoginRequired);
 
 router.use('/users', userRoutes);
 router.use(webPageConstants.sessionAuthPagePath, sessionAuthRoutes);
+router.use(webPageConstants.ostTransactionsPagePath, ostTransactionRoutes);
 
 module.exports = router;

@@ -11,6 +11,21 @@ const rootPrefix = '../../../..',
   entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
   responseEntityKey = require(rootPrefix + '/lib/globalConstant/responseEntityKey');
 
+/* Request Token for github */
+router.get('/request-token', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.githubRequestToken;
+
+  const onServiceSuccess = async function(serviceResponse) {
+    // if (serviceResponse.data.dataCookieValue) {
+    //   cookieHelper.setPreLaunchDataCookie(res, serviceResponse.data.dataCookieValue);
+    // }
+  };
+
+  Promise.resolve(
+    routeHelper.perform(req, res, next, '/webConnect/github/GetRedirectUrl', 'r_a_w_a_gh_1', null, onServiceSuccess)
+  );
+});
+
 /* Github connect. */
 router.post('/login', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.githubConnect;
@@ -42,7 +57,7 @@ router.post('/login', sanitizer.sanitizeDynamicUrlParams, function(req, res, nex
   };
 
   Promise.resolve(
-    routeHelper.perform(req, res, next, '/connect/Github', 'r_a_w_gh_1', null, onServiceSuccess, onServiceFailure)
+    routeHelper.perform(req, res, next, '/connect/Github', 'r_a_w_a_gh_2', null, onServiceSuccess, onServiceFailure)
   );
 });
 
@@ -57,7 +72,7 @@ router.post('/disconnect', cookieHelper.parseUserCookieForLogout, sanitizer.sani
 
   cookieHelper.deleteWebLoginCookie(res);
 
-  Promise.resolve(routeHelper.perform(req, res, next, '/disconnect/Github', 'r_a_w_gh_2', null));
+  Promise.resolve(routeHelper.perform(req, res, next, '/disconnect/Github', 'r_a_w_a_gh_3', null));
 });
 
 module.exports = router;
