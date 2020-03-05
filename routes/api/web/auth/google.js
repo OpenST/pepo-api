@@ -11,6 +11,19 @@ const rootPrefix = '../../../..',
   apiRefererConstants = require(rootPrefix + '/lib/globalConstant/apiReferers'),
   responseEntityKey = require(rootPrefix + '/lib/globalConstant/responseEntityKey');
 
+/* Request Token for google */
+router.get('/request-token', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.googleRequestToken;
+
+  const onServiceSuccess = async function(serviceResponse) {
+    cookieHelper.setLoginRefererCookie(req, res);
+  };
+
+  Promise.resolve(
+    routeHelper.perform(req, res, next, '/webConnect/google/GetRedirectUrl', 'r_a_w_go_2', null, onServiceSuccess)
+  );
+});
+
 /* Apple connect. */
 router.post('/login', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.googleConnect;
@@ -52,22 +65,6 @@ router.post('/login', sanitizer.sanitizeDynamicUrlParams, function(req, res, nex
       onServiceSuccess,
       onServiceFailure
     )
-  );
-});
-
-/* Request Token for google */
-router.get('/request-token', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
-  req.decodedParams.apiName = apiName.googleRequestToken;
-  cookieHelper.setApiRefererCookie(req, res);
-
-  const onServiceSuccess = async function(serviceResponse) {
-    // if (serviceResponse.data.dataCookieValue) {
-    //   cookieHelper.setPreLaunchDataCookie(res, serviceResponse.data.dataCookieValue);
-    // }
-  };
-
-  Promise.resolve(
-    routeHelper.perform(req, res, next, '/webConnect/google/GetRedirectUrl', 'r_a_w_go_2', null, onServiceSuccess)
   );
 });
 

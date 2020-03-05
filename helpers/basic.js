@@ -809,7 +809,7 @@ class BasicHelper {
    *
    * @param url
    * @param urlParams
-   * @returns {*}
+   * @returns {string}
    */
   generateUrl(url, urlParams) {
     const urlParser = require('url');
@@ -823,6 +823,32 @@ class BasicHelper {
     generatedUrl.search = searchParams;
 
     return generatedUrl.href;
+  }
+
+  /**
+   * Return after login redirect domain
+   *
+   * @param isDevEnvLogin
+   * @returns {string}
+   */
+  afterWebLoginRedirectDomain(isDevEnvLogin) {
+    const oThis = this;
+
+    return !oThis.isProduction() && isDevEnvLogin ? coreConstants.PEPO_DEV_ENV_DOMAIN : coreConstants.PA_DOMAIN;
+  }
+
+  /**
+   * Check if request from pepo dev env
+   * and pepo dev env is supported or not
+   *
+   * @param requestHost
+   * @returns {boolean}
+   */
+  isRequestFromPepoDevEnvAndSupported(requestHost) {
+    const oThis = this,
+      pepoDevEnvHost = coreConstants.PEPO_DEV_ENV_DOMAIN.split('/')[2];
+
+    return !oThis.isProduction() && pepoDevEnvHost == requestHost;
   }
 }
 

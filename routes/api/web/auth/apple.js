@@ -14,12 +14,9 @@ const rootPrefix = '../../../..',
 /* Request Token for google */
 router.get('/request-token', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.appleRequestToken;
-  cookieHelper.setApiRefererCookie(req, res);
 
   const onServiceSuccess = async function(serviceResponse) {
-    // if (serviceResponse.data.dataCookieValue) {
-    //   cookieHelper.setPreLaunchDataCookie(res, serviceResponse.data.dataCookieValue);
-    // }
+    cookieHelper.setLoginRefererCookie(req, res);
   };
 
   Promise.resolve(

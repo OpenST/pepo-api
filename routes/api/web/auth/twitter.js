@@ -11,6 +11,20 @@ const rootPrefix = '../../../..',
   apiRefererConstants = require(rootPrefix + '/lib/globalConstant/apiReferers'),
   responseEntityKey = require(rootPrefix + '/lib/globalConstant/responseEntityKey');
 
+/* Request Token for twitter */
+router.get('/request-token', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.twitterRequestToken;
+  req.decodedParams.api_referer = apiRefererConstants.webReferer;
+
+  const onServiceSuccess = async function(serviceResponse) {
+    cookieHelper.setLoginRefererCookie(req, res);
+  };
+
+  Promise.resolve(
+    routeHelper.perform(req, res, next, '/webConnect/twitter/GetRequestToken', 'r_a_w_pl_2', null, onServiceSuccess)
+  );
+});
+
 /* Twitter connect. */
 router.post('/login', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.twitterLogin;
@@ -67,23 +81,6 @@ router.post('/disconnect', cookieHelper.parseUserCookieForLogout, sanitizer.sani
   cookieHelper.deleteWebLoginCookie(res);
 
   Promise.resolve(routeHelper.perform(req, res, next, '/disconnect/Twitter', 'r_a_w_g_2', null));
-});
-
-/* Request Token for twitter */
-router.get('/request-token', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
-  req.decodedParams.apiName = apiName.twitterRequestToken;
-  req.decodedParams.api_referer = apiRefererConstants.webReferer;
-  cookieHelper.setApiRefererCookie(req, res);
-
-  const onServiceSuccess = async function(serviceResponse) {
-    // if (serviceResponse.data.dataCookieValue) {
-    //   cookieHelper.setPreLaunchDataCookie(res, serviceResponse.data.dataCookieValue);
-    // }
-  };
-
-  Promise.resolve(
-    routeHelper.perform(req, res, next, '/webConnect/twitter/GetRequestToken', 'r_a_w_pl_2', null, onServiceSuccess)
-  );
 });
 
 module.exports = router;

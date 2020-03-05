@@ -601,6 +601,10 @@ class CoreConstants {
   get GITHUB_REDIRECT_URI() {
     return this.PA_DOMAIN + '/webview/github/oauth';
   }
+
+  get PEPO_DEV_ENV_DOMAIN() {
+    return 'http://pepodev.com';
+  }
 }
 
 module.exports = new CoreConstants();
