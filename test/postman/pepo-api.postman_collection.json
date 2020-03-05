@@ -2123,7 +2123,7 @@
 								"method": "GET",
 								"header": [],
 								"url": {
-									"raw": "{{api_server}}/api/v1/users/1445/websocket-details",
+									"raw": "{{api_server}}/api/v1/users/1022/websocket-details",
 									"host": [
 										"{{api_server}}"
 									],
@@ -2131,7 +2131,7 @@
 										"api",
 										"v1",
 										"users",
-										"1445",
+										"1022",
 										"websocket-details"
 									]
 								},
@@ -3930,6 +3930,55 @@
 										"v1",
 										"auth",
 										"logout"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"protocolProfileBehavior": {},
+					"_postman_isSubFolder": true
+				},
+				{
+					"name": "users",
+					"item": [
+						{
+							"name": "websocket-details",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{api_server}}/api/web/users/1022/websocket-details",
+									"host": [
+										"{{api_server}}"
+									],
+									"path": [
+										"api",
+										"web",
+										"users",
+										"1022",
+										"websocket-details"
+									]
+								},
+								"description": "GET websocket details"
+							},
+							"response": []
+						},
+						{
+							"name": "logged-in-user",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{api_server}}/api/web/users/current",
+									"host": [
+										"{{api_server}}"
+									],
+									"path": [
+										"api",
+										"web",
+										"users",
+										"current"
 									]
 								}
 							},
