@@ -14,7 +14,7 @@ const rootPrefix = '../../..',
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   appleHelper = require(rootPrefix + '/lib/connect/wrappers/apple/helper'),
-  apiRefererConstants = require(rootPrefix + '/lib/globalConstant/apiReferers'),
+  apiSourceConstants = require(rootPrefix + '/lib/globalConstant/apiSource'),
   userIdentifierConstants = require(rootPrefix + '/lib/globalConstant/userIdentifier');
 
 const APPLE_API_URL = 'https://appleid.apple.com';
@@ -65,7 +65,7 @@ class AppleConnect extends ConnectBase {
     logger.log('FullName: ', oThis.fullName);
 
     // Different client id and uri has to be used for app and web requests.
-    if (apiRefererConstants.isWebRequest(oThis.apiReferer)) {
+    if (apiSourceConstants.isWebRequest(oThis.apiReferer)) {
       oThis.appleClientId = coreConstants.PA_APPLE_WEB_SERVICE_ID;
       oThis.appleRedirectUri = coreConstants.PA_APPLE_WEB_REDIRECT_URI;
     } else {
@@ -120,7 +120,7 @@ class AppleConnect extends ConnectBase {
     oThis.decryptedAppleEmail = decryptedIdentityToken.email;
 
     // In case of web request, we are not getting apple id in response
-    if (apiRefererConstants.isWebRequest(oThis.apiReferer)) {
+    if (apiSourceConstants.isWebRequest(oThis.apiReferer)) {
       oThis.appleId = decryptedIdentityToken.sub;
     }
 

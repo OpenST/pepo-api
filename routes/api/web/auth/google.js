@@ -8,7 +8,7 @@ const rootPrefix = '../../../..',
   cookieHelper = require(rootPrefix + '/lib/cookieHelper'),
   apiName = require(rootPrefix + '/lib/globalConstant/apiName'),
   entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
-  apiRefererConstants = require(rootPrefix + '/lib/globalConstant/apiReferers'),
+  apiSourceConstants = require(rootPrefix + '/lib/globalConstant/apiSource'),
   responseEntityKey = require(rootPrefix + '/lib/globalConstant/responseEntityKey');
 
 /* Request Token for google */
@@ -27,7 +27,7 @@ router.get('/request-token', sanitizer.sanitizeDynamicUrlParams, function(req, r
 /* Apple connect. */
 router.post('/login', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.googleConnect;
-  req.decodedParams.api_referer = apiRefererConstants.webReferer;
+  req.decodedParams.api_referer = apiSourceConstants.web;
 
   cookieHelper.fetchUserUtmCookie(req);
 
@@ -75,7 +75,7 @@ router.post('/disconnect', cookieHelper.parseUserCookieForLogout, sanitizer.sani
   next
 ) {
   req.decodedParams.apiName = apiName.googleDisconnect;
-  req.decodedParams.api_referer = apiRefererConstants.webReferer;
+  req.decodedParams.api_referer = apiSourceConstants.web;
 
   cookieHelper.deleteWebLoginCookie(res);
 
