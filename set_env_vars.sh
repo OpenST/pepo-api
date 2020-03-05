@@ -206,3 +206,4 @@ export PA_APPLE_WEB_REDIRECT_URI='https://stagingpepo.com/webview/apple/oauth'
 
 # Github constants.
 export PA_GITHUB_CLIENT_ID='10ca594072962f391504'
+export PA_GITHUB_CLIENT_SECRET='acf9f7c951f034566dcdc1b403ecf1c55429caf1'

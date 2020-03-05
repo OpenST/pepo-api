@@ -582,8 +582,16 @@ class CoreConstants {
     return process.env.PA_GITHUB_CLIENT_ID;
   }
 
+  get PA_GITHUB_CLIENT_SECRET() {
+    return process.env.PA_GITHUB_CLIENT_SECRET;
+  }
+
   get GOOGLE_REDIRECT_URI() {
     return this.PA_DOMAIN + '/webview/google/oauth';
+  }
+
+  get GITHUB_REDIRECT_URI() {
+    return this.PA_DOMAIN + '/webview/github/oauth';
   }
 }
 
