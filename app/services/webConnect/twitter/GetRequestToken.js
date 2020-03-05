@@ -25,9 +25,10 @@ class GetRequestToken extends ServiceBase {
    * @constructor
    */
   constructor(params) {
-    super(params);
+    super();
 
     const oThis = this;
+
     oThis.inviteCode = params.invite;
 
     oThis.twitterAuthTokenObj = {};
@@ -47,13 +48,13 @@ class GetRequestToken extends ServiceBase {
 
     await oThis._insertTwitterTokens();
 
-    let dataCookieValue = oThis.inviteCode
+    const dataCookieValue = oThis.inviteCode
       ? JSON.stringify({
           i: oThis.inviteCode
         })
       : null;
 
-    let twitterRedirectUrl = coreConstants.TWITTER_OAUTH_URL + oThis.twitterAuthTokenObj.token;
+    const twitterRedirectUrl = coreConstants.TWITTER_OAUTH_URL + oThis.twitterAuthTokenObj.token;
 
     return Promise.resolve(
       responseHelper.successWithData({
@@ -64,18 +65,19 @@ class GetRequestToken extends ServiceBase {
   }
 
   /**
-   * Fetch request token from twitter
+   * Fetch request token from twitter.
+   *
+   * @sets oThis.twitterRespData
    *
    * @returns {Promise<*|result>}
    * @private
    */
   async _fetchRequestToken() {
     const oThis = this;
+
     logger.log('Start::_fetchRequestToken');
 
-    let twitterResp = null;
-
-    twitterResp = await new AuthorizationTwitterRequestClass().requestToken();
+    const twitterResp = await new AuthorizationTwitterRequestClass().requestToken();
 
     if (twitterResp.isFailure()) {
       return Promise.reject(
@@ -95,7 +97,9 @@ class GetRequestToken extends ServiceBase {
   }
 
   /**
-   * Insert in twitter auth tokens model
+   * Insert in twitter auth tokens model.
+   *
+   * @sets oThis.twitterAuthTokenObj
    *
    * @returns {Promise<never>}
    * @private
@@ -103,7 +107,7 @@ class GetRequestToken extends ServiceBase {
   async _insertTwitterTokens() {
     const oThis = this;
 
-    let insertData = {
+    const insertData = {
       token: oThis.twitterRespData.oAuthToken,
       secret: oThis.twitterRespData.oAuthTokenSecret,
       status: twitterAuthTokenConstants.invertedStatuses[twitterAuthTokenConstants.activeStatus]
@@ -113,6 +117,7 @@ class GetRequestToken extends ServiceBase {
 
     if (!insertResponse) {
       logger.error('Error while inserting data in TwitterAuthToken table.');
+
       return Promise.reject(new Error('Error while inserting data in TwitterAuthToken table.'));
     }
 

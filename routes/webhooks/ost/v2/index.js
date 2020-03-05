@@ -9,10 +9,11 @@ const rootPrefix = '../../../..',
   errorConfig = basicHelper.fetchErrorConfig(apiVersions.v1),
   sanitizer = require(rootPrefix + '/helpers/sanitizer');
 
-/* Listen to Ost Events*/
+/* Listen to ost events. */
 router.post('/', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   const performer = async function() {
-    let response = await new OstEventCreateService(req.decodedParams).perform();
+    const response = await new OstEventCreateService(req.decodedParams).perform();
+
     return responseHelper.renderApiResponse(response, res, errorConfig);
   };
 

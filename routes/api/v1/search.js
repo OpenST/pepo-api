@@ -129,7 +129,7 @@ router.get('/top', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) 
 
   // Note: Here the if condition is needed because channel search is not supported for old builds.
   const dataFormatterFunc = async function(serviceResponse) {
-    let entityResponseMap = {
+    const entityResponseMap = {
       [entityTypeConstants.searchCategoriesList]: responseEntityKey.searchCategoriesResults,
       [entityTypeConstants.tagList]: responseEntityKey.tagSearchResults,
       [entityTypeConstants.userSearchList]: responseEntityKey.userSearchResults,

@@ -13,7 +13,7 @@ const rootPrefix = '../../..',
 router.get('/products', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.getTopupProducts;
 
-  const onServiceSuccess = async function(serviceResponse) {
+  const dataFormatterFunc = async function(serviceResponse) {
     const wrapperFormatterRsp = await new FormatterComposer({
       resultType: responseEntityKey.topupProducts,
       entityKindToResponseKeyMap: {
@@ -26,14 +26,14 @@ router.get('/products', sanitizer.sanitizeDynamicUrlParams, function(req, res, n
     serviceResponse.data = wrapperFormatterRsp.data;
   };
 
-  Promise.resolve(routeHelper.perform(req, res, next, '/topup/GetProduct', 'r_a_v1_tu_1', null, onServiceSuccess));
+  Promise.resolve(routeHelper.perform(req, res, next, '/topup/GetProduct', 'r_a_v1_tu_1', null, dataFormatterFunc));
 });
 
 /* Create a topup using the payment receipt. */
 router.post('/', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.createTopup;
 
-  const onServiceSuccess = async function(serviceResponse) {
+  const dataFormatterFunc = async function(serviceResponse) {
     const wrapperFormatterRsp = await new FormatterComposer({
       resultType: responseEntityKey.topup,
       entityKindToResponseKeyMap: {
@@ -45,7 +45,7 @@ router.post('/', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
     serviceResponse.data = wrapperFormatterRsp.data;
   };
 
-  Promise.resolve(routeHelper.perform(req, res, next, '/topup/Create', 'r_a_v1_tu_2', null, onServiceSuccess));
+  Promise.resolve(routeHelper.perform(req, res, next, '/topup/Create', 'r_a_v1_tu_2', null, dataFormatterFunc));
 });
 
 /* Get pending topups for the user. */

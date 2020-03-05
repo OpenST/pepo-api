@@ -1,17 +1,15 @@
 const express = require('express'),
-  router = express.Router(),
-  cookieParser = require('cookie-parser');
+  router = express.Router();
 
 const rootPrefix = '../../..',
   FormatterComposer = require(rootPrefix + '/lib/formatter/Composer'),
   routeHelper = require(rootPrefix + '/routes/helper'),
   sanitizer = require(rootPrefix + '/helpers/sanitizer'),
-  coreConstants = require(rootPrefix + '/config/coreConstants'),
   apiName = require(rootPrefix + '/lib/globalConstant/apiName'),
   entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
   responseEntityKey = require(rootPrefix + '/lib/globalConstant/responseEntityKey');
 
-/* Post session Auth Payload */
+/* Post session auth payload. */
 router.post('/', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.postSessionAuth;
 

@@ -162,7 +162,7 @@ router.post('/apple-login', sanitizer.sanitizeDynamicUrlParams, function(req, re
   );
 });
 
-/* Twitter Disconnect */
+/* Twitter disconnect. */
 router.post('/twitter-disconnect', cookieHelper.parseUserCookieForLogout, sanitizer.sanitizeDynamicUrlParams, function(
   req,
   res,
@@ -175,7 +175,7 @@ router.post('/twitter-disconnect', cookieHelper.parseUserCookieForLogout, saniti
   Promise.resolve(routeHelper.perform(req, res, next, '/disconnect/Twitter', 'r_a_v1_a_6', null));
 });
 
-/* Apple Disconnect */
+/* Apple disconnect. */
 router.post('/apple-disconnect', cookieHelper.parseUserCookieForLogout, sanitizer.sanitizeDynamicUrlParams, function(
   req,
   res,
@@ -188,7 +188,7 @@ router.post('/apple-disconnect', cookieHelper.parseUserCookieForLogout, sanitize
   Promise.resolve(routeHelper.perform(req, res, next, '/disconnect/Apple', 'r_a_v1_a_7', null));
 });
 
-/* Google Disconnect */
+/* Google disconnect. */
 router.post('/google-disconnect', cookieHelper.parseUserCookieForLogout, sanitizer.sanitizeDynamicUrlParams, function(
   req,
   res,
@@ -201,7 +201,7 @@ router.post('/google-disconnect', cookieHelper.parseUserCookieForLogout, sanitiz
   Promise.resolve(routeHelper.perform(req, res, next, '/disconnect/Google', 'r_a_v1_a_8', null));
 });
 
-/* Github Disconnect */
+/* Github disconnect. */
 router.post('/github-disconnect', cookieHelper.parseUserCookieForLogout, sanitizer.sanitizeDynamicUrlParams, function(
   req,
   res,

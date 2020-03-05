@@ -16,12 +16,12 @@ router.get('/request-token', sanitizer.sanitizeDynamicUrlParams, function(req, r
   req.decodedParams.apiName = apiName.twitterRequestToken;
   req.decodedParams.api_source = apiSourceConstants.web;
 
-  const onServiceSuccess = async function(serviceResponse) {
+  const dataFormatterFunc = async function(serviceResponse) {
     cookieHelper.setLoginRefererCookie(req, res);
   };
 
   Promise.resolve(
-    routeHelper.perform(req, res, next, '/webConnect/twitter/GetRequestToken', 'r_a_w_pl_2', null, onServiceSuccess)
+    routeHelper.perform(req, res, next, '/webConnect/twitter/GetRequestToken', 'r_a_w_pl_2', null, dataFormatterFunc)
   );
 });
 
@@ -32,7 +32,7 @@ router.post('/login', sanitizer.sanitizeDynamicUrlParams, function(req, res, nex
 
   cookieHelper.fetchUserUtmCookie(req);
 
-  const onServiceSuccess = async function(serviceResponse) {
+  const dataFormatterFunc = async function(serviceResponse) {
     cookieHelper.setWebLoginCookie(res, serviceResponse.data.userLoginCookieValue);
     cookieHelper.deleteUserUtmCookie(res);
     const wrapperFormatterRsp = await new FormatterComposer({
@@ -63,7 +63,7 @@ router.post('/login', sanitizer.sanitizeDynamicUrlParams, function(req, res, nex
       '/webConnect/twitter/Verify',
       'r_a_w_c_t_1',
       null,
-      onServiceSuccess,
+      dataFormatterFunc,
       onServiceFailure
     )
   );

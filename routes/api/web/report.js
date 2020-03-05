@@ -1,12 +1,10 @@
 const express = require('express'),
-  router = express.Router(),
-  cookieParser = require('cookie-parser');
+  router = express.Router();
 
 const rootPrefix = '../../..',
   routeHelper = require(rootPrefix + '/routes/helper'),
-  apiName = require(rootPrefix + '/lib/globalConstant/apiName'),
   sanitizer = require(rootPrefix + '/helpers/sanitizer'),
-  coreConstants = require(rootPrefix + '/config/coreConstants');
+  apiName = require(rootPrefix + '/lib/globalConstant/apiName');
 
 // Report.
 router.post('/', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
