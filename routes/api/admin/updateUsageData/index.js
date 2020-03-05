@@ -33,4 +33,13 @@ router.post('/tags-used', sanitizer.sanitizeDynamicUrlParams, function(req, res,
   );
 });
 
+/* Update community data. */
+router.post('/community-data', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.adminUpdateChannelDataUsage;
+
+  Promise.resolve(
+    routeHelper.perform(req, res, next, '/admin/updateUsageData/ChannelData', 'r_a_ad_uud_4', null, null, null)
+  );
+});
+
 module.exports = router;
