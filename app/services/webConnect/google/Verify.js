@@ -97,7 +97,7 @@ class GoogleConnectVerify extends ServiceBase {
     logger.log('Start::GoogleConnectVerify');
 
     oThis.serviceResponse = await new GoogleConnectService({
-      token: oThis.googleRespData.access_token,
+      access_token: oThis.googleRespData.access_token,
       invite_code: oThis.inviteCode,
       utm_params: oThis.utmParams,
       api_referer: oThis.apiReferer
