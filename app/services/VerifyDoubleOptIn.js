@@ -10,7 +10,6 @@ const rootPrefix = '../..',
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   localCipher = require(rootPrefix + '/lib/encryptors/localCipher'),
-  preLaunchInviteConstants = require(rootPrefix + '/lib/globalConstant/preLaunchInvite'),
   temporaryTokenConstants = require(rootPrefix + '/lib/globalConstant/big/temporaryToken'),
   emailServiceApiCallHookConstants = require(rootPrefix + '/lib/globalConstant/big/emailServiceApiCallHook');
 
@@ -133,11 +132,6 @@ class VerifyDoubleOptIn extends ServiceBase {
     const promisesArray = [];
 
     switch (oThis.temporaryTokenObj.kind) {
-      case temporaryTokenConstants.preLaunchInviteKind: {
-        promisesArray.push(oThis._markPreLaunchInviteAsDoubleOptIn());
-        promisesArray.push(oThis._addContactInPepoCampaign(emailServiceApiCallHookConstants.preLaunchInviteEntityKind));
-        break;
-      }
       case temporaryTokenConstants.emailDoubleOptInKind: {
         promisesArray.push(oThis._addEmailForUser());
         promisesArray.push(
@@ -152,25 +146,6 @@ class VerifyDoubleOptIn extends ServiceBase {
 
     promisesArray.push(oThis._markTokenAsUsed());
     await Promise.all(promisesArray);
-  }
-
-  /**
-   * Mark pre launch invite as double opt in.
-   *
-   * @returns {Promise<void>}
-   * @private
-   */
-  async _markPreLaunchInviteAsDoubleOptIn() {
-    const oThis = this;
-
-    const PreLaunchInviteModel = require(rootPrefix + '/app/models/mysql/PreLaunchInvite');
-
-    await new PreLaunchInviteModel()
-      .update({ status: preLaunchInviteConstants.invertedStatuses[preLaunchInviteConstants.doptinStatus] })
-      .where({ id: oThis.temporaryTokenObj.entityId })
-      .fire();
-
-    await PreLaunchInviteModel.flushCache({ id: oThis.temporaryTokenObj.entityId });
   }
 
   /**

@@ -1,16 +1,17 @@
 const rootPrefix = '../../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
-  responseHelper = require(rootPrefix + '/lib/formatter/response'),
+  UserModel = require(rootPrefix + '/app/models/mysql/User'),
+  GetTokenService = require(rootPrefix + '/app/services/token/Get'),
+  TokenUserModel = require(rootPrefix + '/app/models/mysql/TokenUser'),
+  ImageByIdCache = require(rootPrefix + '/lib/cacheManagement/multi/ImageByIds'),
   SecureUserCache = require(rootPrefix + '/lib/cacheManagement/single/SecureUser'),
   PricePointsCache = require(rootPrefix + '/lib/cacheManagement/single/PricePoints'),
-  GetTokenService = require(rootPrefix + '/app/services/token/Get'),
-  ImageByIdCache = require(rootPrefix + '/lib/cacheManagement/multi/ImageByIds'),
   TokenUserDetailByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TokenUserByUserIds'),
-  UserModel = require(rootPrefix + '/app/models/mysql/User'),
-  TokenUserModel = require(rootPrefix + '/app/models/mysql/TokenUser'),
-  localCipher = require(rootPrefix + '/lib/encryptors/localCipher'),
   coreConstants = require(rootPrefix + '/config/coreConstants'),
-  logger = require(rootPrefix + '/lib/logger/customConsoleLogger');
+  logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
+  responseHelper = require(rootPrefix + '/lib/formatter/response'),
+  localCipher = require(rootPrefix + '/lib/encryptors/localCipher'),
+  entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType');
 
 class GetCurrentUser extends ServiceBase {
   /**

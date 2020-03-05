@@ -16,7 +16,6 @@ const rootPrefix = '../../..',
   apiVersions = require(rootPrefix + '/lib/globalConstant/apiVersions'),
   adminConstants = require(rootPrefix + '/lib/globalConstant/admin/admin'),
   adminEntityType = require(rootPrefix + '/lib/globalConstant/adminEntityType'),
-  adminPreLaunchRoutes = require(rootPrefix + '/routes/api/admin/preLaunch/index'),
   adminResponseEntityKey = require(rootPrefix + '/lib/globalConstant/adminResponseEntity'),
   curatedEntitiesDataRoutes = require(rootPrefix + '/routes/api/admin/curatedEntity/index'),
   adminUpdateUsageDataRoutes = require(rootPrefix + '/routes/api/admin/updateUsageData/index');
@@ -427,7 +426,6 @@ router.post('/channels/:channel_id/block-user', sanitizer.sanitizeDynamicUrlPara
   Promise.resolve(routeHelper.perform(req, res, next, '/admin/BlockUserInChannel', 'r_a_v1_ad_21', null, null, null));
 });
 
-router.use('/pre-launch', adminPreLaunchRoutes);
 router.use('/update-usage-data', adminUpdateUsageDataRoutes);
 router.use('/curated-entities', curatedEntitiesDataRoutes);
 
