@@ -59,7 +59,7 @@ router.post('/login', sanitizer.sanitizeDynamicUrlParams, function(req, res, nex
       req,
       res,
       next,
-      '/webConnect/google/Verify',
+      '/webConnect/github/Verify',
       'r_a_w_a_gh_2',
       null,
       onServiceSuccess,
