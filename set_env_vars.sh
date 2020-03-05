@@ -140,7 +140,7 @@ export PA_CAMPAIGN_MASTER_LIST="64194"
 #Twitter API Key
 export PA_TWITTER_CONSUMER_KEY='NEo4gEXzdQZaoTsqzpZvepfKb'
 export PA_TWITTER_CONSUMER_SECRET='iM5UMt4px8rwoqEoRV9gJGrJGtEoMUxOYkaWXSges7t4bk564t'
-export PA_TWITTER_AUTH_CALLBACK_ROUTE='http://pepodev.com/connect/twitter/oauth'
+export PA_TWITTER_AUTH_CALLBACK_ROUTE='https://stagingpepo.com/webview/twitter/oauth'
 
 # image resizer variables
 export PA_PR_LAMBDA_IMAGE_RESIZE_FUNCTION='arn:aws:lambda:us-east-1:274208178423:function:pepoImageResizer'
@@ -202,4 +202,4 @@ export PA_APPLE_TEAM_ID='N83K86W6P4'
 export PA_APPLE_KEY_IDENTIFIER='2P3PRWRQGT'
 export PA_APPLE_PRIVATE_KEY='-----BEGIN%20PRIVATE%20KEY-----%0AMIGTAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBHkwdwIBAQQg16k4h4bCtLDUDEIq%0A8Y/2KEWbueEjZqcdDko24dssmjmgCgYIKoZIzj0DAQehRANCAAQXtk9pu4XbH43k%0Apv51c2iuqqEt2d7NwNmMwgstzXIcAmh5sDgQ0apTUJQCgUmNA1KZOiNa2iNvfGD1%0AqPlhU891%0A-----END%20PRIVATE%20KEY-----'
 export PA_APPLE_WEB_SERVICE_ID='com.pepo.staging.signin'
-export PA_APPLE_WEB_REDIRECT_URI='http://stagingpepo.com/connect/apple/oauth'
+export PA_APPLE_WEB_REDIRECT_URI='https://stagingpepo.com/webview/apple/oauth'

@@ -17,9 +17,11 @@ class TwitterVerify extends ServiceBase {
    * Constructor for twitter prelaunch verification.
    *
    * @param {object} params
-   * @param {string} params.i
+   * @param {string} params.invite_code
    * @param {string} params.oauth_token
    * @param {string} params.oauth_verifier
+   * @param {string} params.api_referer
+   * @param {object} params.utm_params
    *
    * @augments ServiceBase
    *
@@ -30,9 +32,11 @@ class TwitterVerify extends ServiceBase {
 
     const oThis = this;
 
-    oThis.inviteCode = params.i;
     oThis.oauthToken = params.oauth_token;
     oThis.oauthVerifier = params.oauth_verifier;
+    oThis.inviteCode = params.invite_code;
+    oThis.utmParams = params.utm_params;
+    oThis.apiReferer = params.api_referer;
 
     oThis.oAuthTokenSecret = null;
     oThis.twitterAuthTokenObj = null;
@@ -162,7 +166,9 @@ class TwitterVerify extends ServiceBase {
       secret: oThis.twitterRespData.oAuthTokenSecret,
       twitter_id: oThis.twitterRespData.userId,
       handle: oThis.twitterRespData.screenName,
-      invite_code: oThis.inviteCode
+      invite_code: oThis.inviteCode,
+      utm_params: oThis.utmParams,
+      api_referer: oThis.apiReferer
     }).perform();
 
     if (oThis.serviceResponse.isFailure()) {
