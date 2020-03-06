@@ -2,11 +2,11 @@ const rootPrefix = '../../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   TwitterAuthTokenModel = require(rootPrefix + '/app/models/mysql/TwitterAuthToken'),
   AuthorizationTwitterRequestClass = require(rootPrefix + '/lib/connect/wrappers/twitter/oAuth1.0/Authorization'),
-  twitterAuthTokenConstants = require(rootPrefix + '/lib/globalConstant/twitterAuthToken'),
-  responseHelper = require(rootPrefix + '/lib/formatter/response'),
   coreConstants = require(rootPrefix + '/config/coreConstants'),
-  responseEntity = require(rootPrefix + '/lib/globalConstant/responseEntityKey'),
-  logger = require(rootPrefix + '/lib/logger/customConsoleLogger');
+  responseHelper = require(rootPrefix + '/lib/formatter/response'),
+  logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
+  entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
+  twitterAuthTokenConstants = require(rootPrefix + '/lib/globalConstant/twitterAuthToken');
 
 /**
  * Class for getting request token from twitter.
@@ -38,7 +38,7 @@ class GetRequestToken extends ServiceBase {
   }
 
   /**
-   * Get twitter request token
+   * Async perform.
    *
    * @returns {Promise<unknown>}
    * @private
@@ -50,20 +50,13 @@ class GetRequestToken extends ServiceBase {
 
     await oThis._insertTwitterTokens();
 
-    const dataCookieValue = oThis.inviteCode
-      ? JSON.stringify({
-          i: oThis.inviteCode
-        })
-      : null;
-
     const twitterRedirectUrl = coreConstants.TWITTER_OAUTH_URL + oThis.twitterAuthTokenObj.token;
 
-    return Promise.resolve(
-      responseHelper.successWithData({
-        [responseEntity.redirectUrl]: twitterRedirectUrl,
-        dataCookieValue: dataCookieValue
-      })
-    );
+    return responseHelper.successWithData({
+      [entityTypeConstants.redirectUrl]: {
+        url: twitterRedirectUrl
+      }
+    });
   }
 
   /**

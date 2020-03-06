@@ -3,17 +3,17 @@ const rootPrefix = '../../../..',
   basicHelper = require(rootPrefix + '/helpers/basic'),
   coreConstants = require(rootPrefix + '/config/coreConstants'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
-  responseEntity = require(rootPrefix + '/lib/globalConstant/responseEntityKey'),
+  entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
   socialConnectServiceTypeConstants = require(rootPrefix + '/lib/globalConstant/socialConnectServiceType');
 
 /**
- * Class for getting Github redirect Url
+ * Class for getting github redirect url.
  *
  * @class GetGithubRedirectUrl
  */
 class GetGithubRedirectUrl extends ServiceBase {
   /**
-   * Constructor for getting Github redirect Url
+   * Constructor for getting github redirect url.
    *
    * @param {object} params
    * @param {string} params.invite
@@ -24,27 +24,22 @@ class GetGithubRedirectUrl extends ServiceBase {
    * @constructor
    */
   constructor(params) {
-    super(params);
+    super();
 
     const oThis = this;
+
     oThis.inviteCode = params.invite;
     oThis.isDevLogin = params.dev_login;
   }
 
   /**
-   * Get twitter request token
+   * Async perform.
    *
    * @returns {Promise<unknown>}
    * @private
    */
   async _asyncPerform() {
     const oThis = this;
-
-    let dataCookieValue = oThis.inviteCode
-      ? JSON.stringify({
-          i: oThis.inviteCode
-        })
-      : null;
 
     const urlParams = {
       client_id: coreConstants.PA_GITHUB_CLIENT_ID,
@@ -56,14 +51,13 @@ class GetGithubRedirectUrl extends ServiceBase {
       scope: 'read:user user:email'
     };
 
-    let githubRedirectUrl = basicHelper.generateUrl(coreConstants.GITHUB_OAUTH_URL, urlParams);
+    const githubRedirectUrl = basicHelper.generateUrl(coreConstants.GITHUB_OAUTH_URL, urlParams);
 
-    return Promise.resolve(
-      responseHelper.successWithData({
-        [responseEntity.redirectUrl]: githubRedirectUrl,
-        dataCookieValue: dataCookieValue
-      })
-    );
+    return responseHelper.successWithData({
+      [entityTypeConstants.redirectUrl]: {
+        url: githubRedirectUrl
+      }
+    });
   }
 }
 
