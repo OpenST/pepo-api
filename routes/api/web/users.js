@@ -34,6 +34,18 @@ router.get('/:username/share', sanitizer.sanitizeDynamicUrlParams, function(req,
   );
 });
 
+/* Double opt in email*/
+router.get('/double-opt-in', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.doubleOptIn;
+
+  Promise.resolve(routeHelper.perform(req, res, next, '/VerifyDoubleOptIn', 'r_a_w_u_4', null));
+});
+
+//
+// NOTE: Login mandatory for following
+//
+router.use(cookieHelper.validateUserLoginRequired);
+
 /* Logged-In user. */
 router.get('/current', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.loggedInUser;
@@ -78,13 +90,6 @@ router.get('/:user_id/websocket-details', sanitizer.sanitizeDynamicUrlParams, fu
   Promise.resolve(
     routeHelper.perform(req, res, next, '/user/SocketConnectionDetails', 'r_a_w_u_3', null, dataFormatterFunc)
   );
-});
-
-/* Double opt in email*/
-router.get('/double-opt-in', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
-  req.decodedParams.apiName = apiName.doubleOptIn;
-
-  Promise.resolve(routeHelper.perform(req, res, next, '/VerifyDoubleOptIn', 'r_a_w_u_4', null));
 });
 
 module.exports = router;
