@@ -48,7 +48,7 @@ class GetGoogleRedirectUrl extends ServiceBase {
       : null;
 
     const urlParams = {
-      scope: 'https://www.googleapis.com/auth/plus.login https://www.googleapis.com/auth/plus.profile.emails.read',
+      scope: 'email profile openid',
       access_type: 'offline',
       response_type: 'code',
       redirect_uri: basicHelper.getLoginRedirectUrl(

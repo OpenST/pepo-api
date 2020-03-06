@@ -5,6 +5,7 @@ const rootPrefix = '../../..',
   PricePointsCache = require(rootPrefix + '/lib/cacheManagement/single/PricePoints'),
   RedemptionProductsCache = require(rootPrefix + '/lib/cacheManagement/single/RedemptionProducts'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
+  entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
   redemptionConstants = require(rootPrefix + '/lib/globalConstant/redemption/redemption');
 
 /**
@@ -170,10 +171,12 @@ class GetProductList extends ServiceBase {
     const getPepocornBalanceRsp = promisesResponse[2];
 
     return responseHelper.successWithData({
-      redemption_products: activeRedemptionProducts,
-      balance: getUserBalanceResponse.data.balance,
-      pepocorn_balance: getPepocornBalanceRsp[oThis.currentUser.id].balance,
-      price_points: oThis.pricePoints
+      [entityTypeConstants.redemptionsProductList]: {
+        redemption_products: activeRedemptionProducts,
+        balance: getUserBalanceResponse.data.balance,
+        pepocorn_balance: getPepocornBalanceRsp[oThis.currentUser.id].balance,
+        price_points: oThis.pricePoints
+      }
     });
   }
 
