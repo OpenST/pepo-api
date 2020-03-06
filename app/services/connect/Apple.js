@@ -79,11 +79,13 @@ class AppleConnect extends ConnectBase {
       oThis.appleClientId = coreConstants.PA_APPLE_CLIENT_ID;
     }
 
-    let promiseArray = [];
-    promiseArray.push(oThis.verifyIdentityToken());
-    promiseArray.push(oThis.getAccessTokenFromApple());
+    // let promiseArray = [];
+    // promiseArray.push(oThis.verifyIdentityToken());
+    // promiseArray.push(oThis.getAccessTokenFromApple());
+    await oThis.getAccessTokenFromApple();
+    await oThis.verifyIdentityToken();
 
-    await Promise.all(promiseArray);
+    // await Promise.all(promiseArray);
   }
 
   /**
@@ -171,6 +173,7 @@ class AppleConnect extends ConnectBase {
       );
     }
     oThis.appleOAuthDetails = oAuthDetails;
+    console.log('appleOAuthDetails: ', oThis.appleOAuthDetails);
   }
 
   /**
