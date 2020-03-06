@@ -13,8 +13,8 @@ const rootPrefix = '../../../..',
   responseEntityKey = require(rootPrefix + '/lib/globalConstant/responseEntityKey');
 
 /* Request Token for google */
-router.get('/request-token', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
-  req.decodedParams.apiName = apiName.googleRequestToken;
+router.get('/redirect-url', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.googleRedirectUrl;
   req.decodedParams.dev_login = basicHelper.isRequestFromPepoDevEnvAndSupported(req) || false;
 
   const dataFormatterFunc = async function(serviceResponse) {

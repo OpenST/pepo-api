@@ -13,8 +13,8 @@ const rootPrefix = '../../../..',
   responseEntityKey = require(rootPrefix + '/lib/globalConstant/responseEntityKey');
 
 /* Request Token for github */
-router.get('/request-token', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
-  req.decodedParams.apiName = apiName.githubRequestToken;
+router.get('/redirect-url', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.githubRedirectUrl;
   req.decodedParams.dev_login = basicHelper.isRequestFromPepoDevEnvAndSupported(req) || false;
 
   const dataFormatterFunc = async function(serviceResponse) {

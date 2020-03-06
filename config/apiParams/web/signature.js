@@ -3,11 +3,11 @@ const rootPrefix = '../../..',
   paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination');
 
 const webSignature = {
-  [apiName.twitterRequestToken]: {
+  [apiName.twitterRedirectUrl]: {
     mandatory: [],
     optional: []
   },
-  [apiName.googleRequestToken]: {
+  [apiName.googleRedirectUrl]: {
     mandatory: [
       {
         parameter: 'dev_login',
@@ -16,7 +16,7 @@ const webSignature = {
     ],
     optional: []
   },
-  [apiName.githubRequestToken]: {
+  [apiName.githubRedirectUrl]: {
     mandatory: [
       {
         parameter: 'dev_login',
@@ -25,7 +25,7 @@ const webSignature = {
     ],
     optional: []
   },
-  [apiName.appleRequestToken]: {
+  [apiName.appleRedirectUrl]: {
     mandatory: [
       {
         parameter: 'dev_login',

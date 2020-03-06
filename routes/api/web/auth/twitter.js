@@ -13,8 +13,8 @@ const rootPrefix = '../../../..',
   responseEntityKey = require(rootPrefix + '/lib/globalConstant/responseEntityKey');
 
 /* Request token for twitter. */
-router.get('/request-token', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
-  req.decodedParams.apiName = apiName.twitterRequestToken;
+router.get('/redirect-url', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.twitterRedirectUrl;
   req.decodedParams.api_source = apiSourceConstants.web;
   req.decodedParams.dev_login = basicHelper.isRequestFromPepoDevEnvAndSupported(req) || false;
 
