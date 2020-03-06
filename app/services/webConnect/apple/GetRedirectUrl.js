@@ -3,20 +3,19 @@ const rootPrefix = '../../../..',
   basicHelper = require(rootPrefix + '/helpers/basic'),
   coreConstants = require(rootPrefix + '/config/coreConstants'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
-  responseEntity = require(rootPrefix + '/lib/globalConstant/responseEntityKey'),
+  entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
   socialConnectServiceTypeConstants = require(rootPrefix + '/lib/globalConstant/socialConnectServiceType');
 
 /**
- * Class for getting Apple redirect Url
+ * Class for getting apple redirect url.
  *
  * @class GetAppleRedirectUrl
  */
 class GetAppleRedirectUrl extends ServiceBase {
   /**
-   * Constructor for getting Apple redirect Url
+   * Constructor for getting apple redirect url.
    *
    * @param {object} params
-   * @param {string} params.invite
    * @param {boolean} params.dev_login
    *
    * @augments ServiceBase
@@ -24,27 +23,21 @@ class GetAppleRedirectUrl extends ServiceBase {
    * @constructor
    */
   constructor(params) {
-    super(params);
+    super();
 
     const oThis = this;
-    oThis.inviteCode = params.invite;
+
     oThis.isDevLogin = params.dev_login;
   }
 
   /**
-   * Get twitter request token
+   * Async perform.
    *
    * @returns {Promise<unknown>}
    * @private
    */
   async _asyncPerform() {
     const oThis = this;
-
-    let dataCookieValue = oThis.inviteCode
-      ? JSON.stringify({
-          i: oThis.inviteCode
-        })
-      : null;
 
     const urlParams = {
       client_id: coreConstants.PA_APPLE_WEB_SERVICE_ID,
@@ -57,14 +50,13 @@ class GetAppleRedirectUrl extends ServiceBase {
       response_mode: 'form_post'
     };
 
-    let appleRedirectUrl = basicHelper.generateUrl(coreConstants.APPLE_OAUTH_URL, urlParams);
+    const appleRedirectUrl = basicHelper.generateUrl(coreConstants.APPLE_OAUTH_URL, urlParams);
 
-    return Promise.resolve(
-      responseHelper.successWithData({
-        [responseEntity.redirectUrl]: appleRedirectUrl,
-        dataCookieValue: dataCookieValue
-      })
-    );
+    return responseHelper.successWithData({
+      [entityTypeConstants.redirectUrl]: {
+        url: appleRedirectUrl
+      }
+    });
   }
 }
 

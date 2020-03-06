@@ -5,12 +5,7 @@ const rootPrefix = '../../..',
 const webSignature = {
   [apiName.twitterRequestToken]: {
     mandatory: [],
-    optional: [
-      {
-        parameter: 'invite',
-        validatorMethods: ['validateString']
-      }
-    ]
+    optional: []
   },
   [apiName.googleRequestToken]: {
     mandatory: [
@@ -19,12 +14,7 @@ const webSignature = {
         validatorMethods: ['validateBoolean']
       }
     ],
-    optional: [
-      {
-        parameter: 'invite',
-        validatorMethods: ['validateString']
-      }
-    ]
+    optional: []
   },
   [apiName.githubRequestToken]: {
     mandatory: [
@@ -33,12 +23,7 @@ const webSignature = {
         validatorMethods: ['validateBoolean']
       }
     ],
-    optional: [
-      {
-        parameter: 'invite',
-        validatorMethods: ['validateString']
-      }
-    ]
+    optional: []
   },
   [apiName.appleRequestToken]: {
     mandatory: [
@@ -47,12 +32,7 @@ const webSignature = {
         validatorMethods: ['validateBoolean']
       }
     ],
-    optional: [
-      {
-        parameter: 'invite',
-        validatorMethods: ['validateString']
-      }
-    ]
+    optional: []
   },
   [apiName.getRedemptionProducts]: {
     mandatory: [

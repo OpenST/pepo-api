@@ -12,7 +12,7 @@ const rootPrefix = '../../../..',
   apiSourceConstants = require(rootPrefix + '/lib/globalConstant/apiSource'),
   responseEntityKey = require(rootPrefix + '/lib/globalConstant/responseEntityKey');
 
-/* Request Token for twitter */
+/* Request token for twitter. */
 router.get('/request-token', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.twitterRequestToken;
   req.decodedParams.api_source = apiSourceConstants.web;
@@ -20,10 +20,19 @@ router.get('/request-token', sanitizer.sanitizeDynamicUrlParams, function(req, r
 
   const dataFormatterFunc = async function(serviceResponse) {
     cookieHelper.setLoginRefererCookie(req, res);
+    const wrapperFormatterRsp = await new FormatterComposer({
+      resultType: responseEntityKey.redirectUrl,
+      entityKindToResponseKeyMap: {
+        [entityTypeConstants.redirectUrl]: responseEntityKey.redirectUrl
+      },
+      serviceData: serviceResponse.data
+    }).perform();
+
+    serviceResponse.data = wrapperFormatterRsp.data;
   };
 
   Promise.resolve(
-    routeHelper.perform(req, res, next, '/webConnect/twitter/GetRequestToken', 'r_a_w_pl_2', null, dataFormatterFunc)
+    routeHelper.perform(req, res, next, '/webConnect/twitter/GetRedirectUrl', 'r_a_w_pl_2', null, dataFormatterFunc)
   );
 });
 
