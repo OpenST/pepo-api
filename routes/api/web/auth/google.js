@@ -17,12 +17,21 @@ router.get('/request-token', sanitizer.sanitizeDynamicUrlParams, function(req, r
   req.decodedParams.apiName = apiName.googleRequestToken;
   req.decodedParams.dev_login = basicHelper.isRequestFromPepoDevEnvAndSupported(req) || false;
 
-  const onServiceSuccess = async function(serviceResponse) {
+  const dataFormatterFunc = async function(serviceResponse) {
     cookieHelper.setLoginRefererCookie(req, res);
+    const wrapperFormatterRsp = await new FormatterComposer({
+      resultType: responseEntityKey.redirectUrl,
+      entityKindToResponseKeyMap: {
+        [entityTypeConstants.redirectUrl]: responseEntityKey.redirectUrl
+      },
+      serviceData: serviceResponse.data
+    }).perform();
+
+    serviceResponse.data = wrapperFormatterRsp.data;
   };
 
   Promise.resolve(
-    routeHelper.perform(req, res, next, '/webConnect/google/GetRedirectUrl', 'r_a_w_go_2', null, onServiceSuccess)
+    routeHelper.perform(req, res, next, '/webConnect/google/GetRedirectUrl', 'r_a_w_go_2', null, dataFormatterFunc)
   );
 });
 

@@ -16,7 +16,6 @@ class GetGithubRedirectUrl extends ServiceBase {
    * Constructor for getting github redirect url.
    *
    * @param {object} params
-   * @param {string} params.invite
    * @param {boolean} params.dev_login
    *
    * @augments ServiceBase
@@ -28,7 +27,6 @@ class GetGithubRedirectUrl extends ServiceBase {
 
     const oThis = this;
 
-    oThis.inviteCode = params.invite;
     oThis.isDevLogin = params.dev_login;
   }
 

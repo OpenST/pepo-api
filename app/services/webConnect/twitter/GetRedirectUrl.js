@@ -9,16 +9,15 @@ const rootPrefix = '../../../..',
   twitterAuthTokenConstants = require(rootPrefix + '/lib/globalConstant/twitterAuthToken');
 
 /**
- * Class for getting request token from twitter.
+ * Class for getting twitter redirect url.
  *
- * @class GetRequestToken
+ * @class GetTwitterRedirectUrl
  */
-class GetRequestToken extends ServiceBase {
+class GetTwitterRedirectUrl extends ServiceBase {
   /**
-   * Constructor for getting request token from twitter.
+   * Constructor for getting twitter redirect url.
    *
    * @param {object} params
-   * @param {string} params.invite
    * @param {boolean} params.dev_login
    *
    * @augments ServiceBase
@@ -30,7 +29,6 @@ class GetRequestToken extends ServiceBase {
 
     const oThis = this;
 
-    oThis.inviteCode = params.invite;
     oThis.isDevLogin = params.dev_login;
 
     oThis.twitterAuthTokenObj = {};
@@ -124,4 +122,4 @@ class GetRequestToken extends ServiceBase {
   }
 }
 
-module.exports = GetRequestToken;
+module.exports = GetTwitterRedirectUrl;

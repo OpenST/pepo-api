@@ -16,7 +16,6 @@ class GetAppleRedirectUrl extends ServiceBase {
    * Constructor for getting apple redirect url.
    *
    * @param {object} params
-   * @param {string} params.invite
    * @param {boolean} params.dev_login
    *
    * @augments ServiceBase
@@ -28,7 +27,6 @@ class GetAppleRedirectUrl extends ServiceBase {
 
     const oThis = this;
 
-    oThis.inviteCode = params.invite;
     oThis.isDevLogin = params.dev_login;
   }
 

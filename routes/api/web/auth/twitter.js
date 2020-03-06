@@ -32,7 +32,7 @@ router.get('/request-token', sanitizer.sanitizeDynamicUrlParams, function(req, r
   };
 
   Promise.resolve(
-    routeHelper.perform(req, res, next, '/webConnect/twitter/GetRequestToken', 'r_a_w_pl_2', null, dataFormatterFunc)
+    routeHelper.perform(req, res, next, '/webConnect/twitter/GetRedirectUrl', 'r_a_w_pl_2', null, dataFormatterFunc)
   );
 });
 
