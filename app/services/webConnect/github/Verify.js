@@ -73,6 +73,7 @@ class GithubConnectVerify extends ServiceBase {
       isDevLogin: oThis.isDevLogin
     }).perform();
 
+    logger.log('githubResp =====', githubResp);
     if (githubResp.isFailure()) {
       return Promise.reject(
         responseHelper.error({
