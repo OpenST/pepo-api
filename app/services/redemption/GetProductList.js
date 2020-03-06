@@ -172,10 +172,10 @@ class GetProductList extends ServiceBase {
 
     return responseHelper.successWithData({
       [entityTypeConstants.redemptionsProductList]: {
-        redemption_products: activeRedemptionProducts,
+        redemptionProducts: activeRedemptionProducts,
         balance: getUserBalanceResponse.data.balance,
-        pepocorn_balance: getPepocornBalanceRsp[oThis.currentUser.id].balance,
-        price_points: oThis.pricePoints
+        pepocornBalance: getPepocornBalanceRsp[oThis.currentUser.id].balance,
+        pricePoints: oThis.pricePoints
       }
     });
   }
