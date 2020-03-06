@@ -96,8 +96,8 @@ class AppleConnect extends ConnectBase {
   async verifyIdentityToken() {
     const oThis = this;
 
-    let publicKey = await new GetApplePublicKey().perform(),
-      decryptedIdentityToken = await appleHelper.getDecryptedIdentityToken(oThis.identityToken, publicKey);
+    let publicKeys = await new GetApplePublicKey().perform(),
+      decryptedIdentityToken = await appleHelper.getDecryptedIdentityToken(oThis.identityToken, publicKeys);
 
     if (decryptedIdentityToken.iss !== APPLE_API_URL) {
       return Promise.reject(
