@@ -75,16 +75,10 @@ class GithubConnectVerify extends ServiceBase {
 
     logger.log('githubResp =====', githubResp);
     if (githubResp.isFailure()) {
-      return Promise.reject(
-        responseHelper.error({
-          internal_error_identifier: 'a_s_wc_gh_v_1',
-          api_error_identifier: 'something_went_wrong',
-          debug_options: { githubResp: githubResp }
-        })
-      );
+      return Promise.reject(githubResp);
     }
 
-    oThis.githubRespData = githubResp.data;
+    oThis.accessToken = githubResp.data.accessToken;
 
     logger.log('End::_fetchAccessToken');
   }
@@ -103,7 +97,7 @@ class GithubConnectVerify extends ServiceBase {
     logger.log('Start::GithubConnectVerify');
 
     oThis.serviceResponse = await new GithubConnectService({
-      access_token: oThis.githubRespData.response.access_token,
+      access_token: oThis.accessToken,
       invite_code: oThis.inviteCode,
       utm_params: oThis.utmParams,
       api_source: oThis.apiSource
