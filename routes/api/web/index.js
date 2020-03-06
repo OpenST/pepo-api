@@ -37,13 +37,13 @@ router.use('/videos', videoRoutes);
 router.use('/feeds', feedsRoutes);
 router.use('/report', reportRoutes);
 router.use('/communities', communityRoutes);
+router.use('/users', userRoutes);
 
 //
 // NOTE: Login mandatory for following
 //
 router.use(cookieHelper.validateUserLoginRequired);
 
-router.use('/users', userRoutes);
 router.use(webPageConstants.sessionAuthPagePath, sessionAuthRoutes);
 router.use(webPageConstants.ostTransactionsPagePath, ostTransactionRoutes);
 

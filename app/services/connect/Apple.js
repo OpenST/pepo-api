@@ -68,16 +68,15 @@ class AppleConnect extends ConnectBase {
 
     logger.log('FullName: ', oThis.fullName);
 
-    // Different client id and uri has to be used for app and web requests.
+    oThis.appleRedirectUri = basicHelper.getLoginRedirectUrl(
+      oThis.isDevLogin,
+      socialConnectServiceTypeConstants.appleSocialConnect
+    );
+    // Different client id has to be used for app and web requests.
     if (apiSourceConstants.isWebRequest(oThis.apiSource)) {
       oThis.appleClientId = coreConstants.PA_APPLE_WEB_SERVICE_ID;
-      oThis.appleRedirectUri = basicHelper.getLoginRedirectUrl(
-        oThis.isDevLogin,
-        socialConnectServiceTypeConstants.appleSocialConnect
-      );
     } else {
       oThis.appleClientId = coreConstants.PA_APPLE_CLIENT_ID;
-      oThis.appleRedirectUri = coreConstants.PA_APPLE_REDIRECT_URI;
     }
 
     let promiseArray = [];
