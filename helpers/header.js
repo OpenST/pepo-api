@@ -4,6 +4,8 @@
  * @class HeaderHelper
  */
 class HeaderHelper {
+  //Todo:Web-Login check usage
+
   pepoDeviceId(headers) {
     return headers['x-pepo-device-id'] || '';
   }
