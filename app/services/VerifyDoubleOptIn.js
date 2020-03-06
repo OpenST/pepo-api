@@ -165,11 +165,6 @@ class VerifyDoubleOptIn extends ServiceBase {
     };
 
     switch (receiverEntityKind) {
-      case emailServiceApiCallHookConstants.preLaunchInviteEntityKind: {
-        addContactParams.customDescription = 'Contact add for pre launch invite.';
-        addContactParams.customAttributes = { [emailServiceApiCallHookConstants.preLaunchAttribute]: 1 };
-        break;
-      }
       case emailServiceApiCallHookConstants.emailDoubleOptInEntityKind: {
         addContactParams.customDescription = 'Contact add for email double opt in.';
         addContactParams.customAttributes = { [emailServiceApiCallHookConstants.appSignupAttribute]: 1 };

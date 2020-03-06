@@ -14,7 +14,7 @@ const rootPrefix = '../../../..',
  */
 class TwitterVerify extends ServiceBase {
   /**
-   * Constructor for twitter prelaunch verification.
+   * Constructor for twitter verification.
    *
    * @param {object} params
    * @param {string} params.invite_code
