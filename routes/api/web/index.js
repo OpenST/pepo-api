@@ -45,6 +45,7 @@ router.use('/users', userRoutes);
 router.use(cookieHelper.validateUserLoginRequired);
 
 router.use(webPageConstants.sessionAuthPagePath, sessionAuthRoutes);
+// TODO - login - why route is inside webPageConstants?
 router.use(webPageConstants.ostTransactionsPagePath, ostTransactionRoutes);
 
 module.exports = router;
