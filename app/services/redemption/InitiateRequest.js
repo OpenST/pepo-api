@@ -7,7 +7,6 @@ const rootPrefix = '../../..',
   UserMultiCache = require(rootPrefix + '/lib/cacheManagement/multi/User'),
   GetPepocornBalance = require(rootPrefix + '/lib/pepocorn/GetPepocornBalance'),
   PepocornBalanceModel = require(rootPrefix + '/app/models/mysql/redemption/PepocornBalance'),
-  UserMuteByUser2IdsForGlobalCache = require(rootPrefix + '/lib/cacheManagement/multi/UserMuteByUser2IdsForGlobal'),
   VideoDetailsByUserIdCache = require(rootPrefix + '/lib/cacheManagement/single/VideoDetailsByUserIdPagination'),
   PepocornTransactionModel = require(rootPrefix + '/app/models/mysql/redemption/PepocornTransaction'),
   TwitterUserByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TwitterUserByIds'),
@@ -141,28 +140,13 @@ class InitiateRequestRedemption extends ServiceBase {
   }
 
   /**
-   * Validate if user is unmuted and has a video.
+   * Validate if user has a video.
    *
    * @returns {Promise<boolean>}
    * @private
    */
   async _validateUserEligibility() {
     const oThis = this;
-
-    const cacheResponse = await new UserMuteByUser2IdsForGlobalCache({ user2Ids: [oThis.currentUserId] }).fetch();
-    if (cacheResponse.isFailure()) {
-      return Promise.reject(cacheResponse);
-    }
-
-    if (cacheResponse.data[oThis.currentUserId].all == 1) {
-      return Promise.reject(
-        responseHelper.error({
-          internal_error_identifier: 'a_s_r_ir_vue_1',
-          api_error_identifier: 'redemption_user_muted_by_admin',
-          debug_options: {}
-        })
-      );
-    }
 
     const videoDetailCacheResponse = await new VideoDetailsByUserIdCache({
       userId: oThis.currentUserId,
