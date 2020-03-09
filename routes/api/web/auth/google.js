@@ -37,10 +37,12 @@ router.post('/login', sanitizer.sanitizeDynamicUrlParams, function(req, res, nex
   req.decodedParams.apiName = apiName.googleConnect;
 
   cookieHelper.fetchUserUtmCookie(req);
+  cookieHelper.fetchInviteCodeCookie(req);
 
   const onServiceSuccess = async function(serviceResponse) {
     cookieHelper.setWebLoginCookie(res, serviceResponse.data.userLoginCookieValue);
     cookieHelper.deleteUserUtmCookie(res);
+    cookieHelper.deleteInviteCodeCookie(res);
     const wrapperFormatterRsp = await new FormatterComposer({
       resultType: responseEntityKey.loggedInUser,
       entityKindToResponseKeyMap: {

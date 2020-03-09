@@ -3,6 +3,7 @@ const express = require('express'),
 
 const rootPrefix = '../../..',
   FormatterComposer = require(rootPrefix + '/lib/formatter/Composer'),
+  CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   routeHelper = require(rootPrefix + '/routes/helper'),
   apiName = require(rootPrefix + '/lib/globalConstant/apiName'),
   sanitizer = require(rootPrefix + '/helpers/sanitizer'),
@@ -24,7 +25,7 @@ router.get('/', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
     }).perform();
 
     // Utm cookie would be set for user in case of signup goto only
-    if (serviceResponse.data.utmCookieValue) {
+    if (CommonValidators.validateNonBlankString(serviceResponse.data.utmCookieValue)) {
       cookieHelper.setUserUtmCookie(res, serviceResponse.data.utmCookieValue);
     }
     serviceResponse.data = wrapperFormatterRsp.data;
