@@ -19,6 +19,7 @@ const router = express.Router();
  */
 const appApisCommon = function(req, res, next) {
   req.decodedParams.apiVersion = apiVersions.v1;
+  req.decodedParams.dev_login = false;
   next();
 };
 
@@ -31,6 +32,7 @@ const appApisCommon = function(req, res, next) {
  */
 const adminApisCommon = function(req, res, next) {
   req.decodedParams.apiVersion = apiVersions.admin;
+  req.decodedParams.dev_login = false;
   next();
 };
 
