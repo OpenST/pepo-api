@@ -35,6 +35,7 @@ router.post('/twitter-login', sanitizer.sanitizeDynamicUrlParams, function(req, 
   const onServiceSuccess = async function(serviceResponse) {
     cookieHelper.setLoginCookie(res, serviceResponse.data.userLoginCookieValue);
     cookieHelper.deleteUserUtmCookie(res);
+    cookieHelper.deleteInviteCodeCookie(res);
     const wrapperFormatterRsp = await new FormatterComposer({
       resultType: responseEntityKey.loggedInUser,
       entityKindToResponseKeyMap: {
@@ -69,6 +70,7 @@ router.post('/github-login', sanitizer.sanitizeDynamicUrlParams, function(req, r
   const onServiceSuccess = async function(serviceResponse) {
     cookieHelper.setLoginCookie(res, serviceResponse.data.userLoginCookieValue);
     cookieHelper.deleteUserUtmCookie(res);
+    cookieHelper.deleteInviteCodeCookie(res);
     const wrapperFormatterRsp = await new FormatterComposer({
       resultType: responseEntityKey.loggedInUser,
       entityKindToResponseKeyMap: {
@@ -103,6 +105,7 @@ router.post('/google-login', sanitizer.sanitizeDynamicUrlParams, function(req, r
   const onServiceSuccess = async function(serviceResponse) {
     cookieHelper.setLoginCookie(res, serviceResponse.data.userLoginCookieValue);
     cookieHelper.deleteUserUtmCookie(res);
+    cookieHelper.deleteInviteCodeCookie(res);
     const wrapperFormatterRsp = await new FormatterComposer({
       resultType: responseEntityKey.loggedInUser,
       entityKindToResponseKeyMap: {
@@ -137,6 +140,7 @@ router.post('/apple-login', sanitizer.sanitizeDynamicUrlParams, function(req, re
   const onServiceSuccess = async function(serviceResponse) {
     cookieHelper.setLoginCookie(res, serviceResponse.data.userLoginCookieValue);
     cookieHelper.deleteUserUtmCookie(res);
+    cookieHelper.deleteInviteCodeCookie(res);
     const wrapperFormatterRsp = await new FormatterComposer({
       resultType: responseEntityKey.loggedInUser,
       entityKindToResponseKeyMap: {
