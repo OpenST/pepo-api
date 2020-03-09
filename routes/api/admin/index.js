@@ -55,10 +55,10 @@ router.use(cookieHelper.setAdminCsrf());
 router.post('/login', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.adminLogin;
 
-  // TODO - shlok - add formatter here.
-
   const onServiceSuccess = async function(serviceResponse) {
     cookieHelper.setAdminCookie(res, serviceResponse.data.adminCookieValue);
+
+    serviceResponse.data = {};
   };
 
   const onServiceFailure = async function() {
@@ -70,16 +70,15 @@ router.post('/login', sanitizer.sanitizeDynamicUrlParams, function(req, res, nex
   );
 });
 
-/* Logout admin */
-router.post('/logout', sanitizer.sanitizeDynamicUrlParams, function(req, res) {
+/* Logout admin. */
+router.post('/logout', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.adminLogout;
 
   const responseObject = responseHelper.successWithData({});
 
   cookieHelper.deleteAdminCookie(res);
 
-  // TODO - shlok - use route helper
-  Promise.resolve(responseHelper.renderApiResponse(responseObject, res, errorConfig));
+  return res.status(200).json(responseObject); // Deliberately returning success response
 });
 
 /* Users list */
