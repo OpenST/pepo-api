@@ -16,16 +16,16 @@ const rootPrefix = '../../..',
   supportRoutes = require(rootPrefix + '/routes/api/web/support'),
   webPageConstants = require(rootPrefix + '/lib/globalConstant/webPage');
 
-//
-// NOTE: Different cookie secret is used. Handled inside.
-//
-router.use('/support', supportRoutes);
-
 // Node.js cookie parsing middleware.
 router.use(cookieParser(coreConstants.WEB_COOKIE_SECRET));
 
 // CSRF check
 router.use(cookieHelper.setWebCsrf());
+
+//
+// NOTE: Different cookie secret is used. Handled inside.
+//
+router.use('/support', supportRoutes);
 
 //
 // NOTE: Login not mandatory for following

@@ -12,9 +12,6 @@ const rootPrefix = '../../..',
   entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
   responseEntityKey = require(rootPrefix + '/lib/globalConstant/responseEntityKey');
 
-// Node.js cookie parsing middleware.
-router.use(cookieParser(coreConstants.COOKIE_SECRET));
-
 /* Validate support url. */
 router.get(
   '/',
