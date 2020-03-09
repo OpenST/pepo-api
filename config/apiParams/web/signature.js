@@ -295,6 +295,10 @@ const webSignature = {
       {
         parameter: 'sanitized_headers',
         validatorMethods: ['validateNonEmptyObject']
+      },
+      {
+        parameter: 'api_source',
+        validatorMethods: ['validateString']
       }
     ],
     optional: [

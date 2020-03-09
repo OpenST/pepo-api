@@ -11,6 +11,7 @@ const rootPrefix = '../../..',
     '/lib/cacheManagement/multi/UserDeviceExtendedDetailsByDeviceIds'),
   basicHelper = require(rootPrefix + '/helpers/basic'),
   headerHelper = require(rootPrefix + '/helpers/header'),
+  apiSourceConstants = require(rootPrefix + '/lib/globalConstant/apiSource'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination'),
@@ -27,6 +28,7 @@ class PublicVideoFeed extends FeedBase {
    *
    * @param {object} params
    * @param {object} params.current_user
+   * @param {string} params.api_source
    * @param {object} params.sanitized_headers
    * @param {string} [params.pagination_identifier]
    *
@@ -41,6 +43,7 @@ class PublicVideoFeed extends FeedBase {
 
     oThis.paginationIdentifier = params[paginationConstants.paginationIdentifierKey] || null;
     oThis.headers = params.sanitized_headers;
+    oThis.apiSource = params.api_source;
 
     oThis.limit = oThis._defaultPageLimit();
     oThis.pageNumber = null;
@@ -190,7 +193,8 @@ class PublicVideoFeed extends FeedBase {
 
     const getListParams = {
       currentUserId: oThis.currentUserId,
-      headers: oThis.headers
+      headers: oThis.headers,
+      apiSource: oThis.apiSource
     };
 
     const getListResponse = await new GetListFeedLib(getListParams).perform();
@@ -327,7 +331,7 @@ class PublicVideoFeed extends FeedBase {
   async _markUserDeviceDetails() {
     const oThis = this;
 
-    if (!oThis.currentUserId) {
+    if (!oThis.currentUserId || apiSourceConstants.isWebRequest(oThis.apiSource)) {
       return;
     }
 
