@@ -868,8 +868,7 @@ class BasicHelper {
   /**
    * Get login redirect url
    *
-   * @param isDevEnvLogin
-   * @param loginService
+   * @param request
    * @returns {string}
    */
   getAfterLoginRedirectUrl(request) {

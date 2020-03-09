@@ -17,7 +17,6 @@ router.get('/redirect-url', sanitizer.sanitizeDynamicUrlParams, function(req, re
   req.decodedParams.state = basicHelper.getAfterLoginRedirectUrl(req);
 
   const dataFormatterFunc = async function(serviceResponse) {
-    cookieHelper.setLoginRefererCookie(req, res);
     const wrapperFormatterRsp = await new FormatterComposer({
       resultType: responseEntityKey.redirectUrl,
       entityKindToResponseKeyMap: {
