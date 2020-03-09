@@ -176,7 +176,7 @@ class FetchGoto extends ServiceBase {
             return Promise.reject(cacheResponse);
           }
 
-          const channelId = cacheResponse.data[channelPermalink];
+          const channelId = (cacheResponse.data[channelPermalink] || {}).id;
 
           if (Number(channelId)) {
             oThis.gotoParams = { channelId: channelId };
