@@ -30,6 +30,7 @@ class GetTwitterRedirectUrl extends ServiceBase {
     const oThis = this;
 
     oThis.isDevLogin = params.dev_login;
+    oThis.state = params.state;
 
     oThis.twitterAuthTokenObj = {};
     oThis.twitterRespData = null;
@@ -70,7 +71,10 @@ class GetTwitterRedirectUrl extends ServiceBase {
 
     logger.log('Start::_fetchRequestToken');
 
-    const twitterResp = await new AuthorizationTwitterRequestClass({ isDevLogin: oThis.isDevLogin }).requestToken();
+    const twitterResp = await new AuthorizationTwitterRequestClass({
+      isDevLogin: oThis.isDevLogin,
+      state: oThis.state
+    }).requestToken();
 
     if (twitterResp.isFailure()) {
       return Promise.reject(

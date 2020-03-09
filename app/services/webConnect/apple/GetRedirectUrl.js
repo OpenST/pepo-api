@@ -28,6 +28,7 @@ class GetAppleRedirectUrl extends ServiceBase {
     const oThis = this;
 
     oThis.isDevLogin = params.dev_login;
+    oThis.state = params.state;
   }
 
   /**
@@ -47,7 +48,8 @@ class GetAppleRedirectUrl extends ServiceBase {
       ),
       response_type: 'code id_token',
       scope: 'email name',
-      response_mode: 'form_post'
+      response_mode: 'form_post',
+      state: oThis.state
     };
 
     const appleRedirectUrl = basicHelper.generateUrl(coreConstants.APPLE_OAUTH_URL, urlParams);

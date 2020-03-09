@@ -28,6 +28,7 @@ class GetGoogleRedirectUrl extends ServiceBase {
     const oThis = this;
 
     oThis.isDevLogin = params.dev_login;
+    oThis.state = params.state;
   }
 
   /**
@@ -43,6 +44,7 @@ class GetGoogleRedirectUrl extends ServiceBase {
       scope: 'email profile openid',
       access_type: 'offline',
       response_type: 'code',
+      state: oThis.state,
       redirect_uri: basicHelper.getLoginRedirectUrl(
         oThis.isDevLogin,
         socialConnectServiceTypeConstants.googleSocialConnect

@@ -1,4 +1,5 @@
-const BigNumber = require('bignumber.js');
+const BigNumber = require('bignumber.js'),
+  urlParser = require('url');
 
 const rootPrefix = '..',
   base64Helper = require(rootPrefix + '/lib/base64Helper'),
@@ -862,6 +863,21 @@ class BasicHelper {
       redirectDomain = oThis.afterWebLoginRedirectDomain(isDevEnvLogin);
 
     return redirectDomain + '/webview/' + loginService + '/oauth';
+  }
+
+  /**
+   * Get login redirect url
+   *
+   * @param isDevEnvLogin
+   * @param loginService
+   * @returns {string}
+   */
+  getAfterLoginRedirectUrl(request) {
+    let path = '';
+    if (request.headers['referer']) {
+      path = urlParser.parse(request.headers['referer']).path;
+    }
+    return base64Helper.encode(JSON.stringify({ rd: path.replace(/^\/+/, '') }));
   }
 }
 

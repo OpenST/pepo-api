@@ -8,11 +8,13 @@ const rootPrefix = '../../../..',
   cookieHelper = require(rootPrefix + '/lib/cookieHelper'),
   apiName = require(rootPrefix + '/lib/globalConstant/apiName'),
   entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
+  basicHelper = require(rootPrefix + '/helpers/basic'),
   responseEntityKey = require(rootPrefix + '/lib/globalConstant/responseEntityKey');
 
 /* Request Token for github */
 router.get('/redirect-url', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.githubRedirectUrl;
+  req.decodedParams.state = basicHelper.getAfterLoginRedirectUrl(req);
 
   const dataFormatterFunc = async function(serviceResponse) {
     cookieHelper.setLoginRefererCookie(req, res);

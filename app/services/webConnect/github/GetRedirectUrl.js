@@ -28,6 +28,7 @@ class GetGithubRedirectUrl extends ServiceBase {
     const oThis = this;
 
     oThis.isDevLogin = params.dev_login;
+    oThis.state = params.state;
   }
 
   /**
@@ -46,7 +47,8 @@ class GetGithubRedirectUrl extends ServiceBase {
         socialConnectServiceTypeConstants.githubSocialConnect
       ),
       response_type: 'code',
-      scope: 'read:user user:email'
+      scope: 'read:user user:email',
+      state: oThis.state
     };
 
     const githubRedirectUrl = basicHelper.generateUrl(coreConstants.GITHUB_OAUTH_URL, urlParams);

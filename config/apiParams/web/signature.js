@@ -4,7 +4,16 @@ const rootPrefix = '../../..',
 
 const webSignature = {
   [apiName.twitterRedirectUrl]: {
-    mandatory: [],
+    mandatory: [
+      {
+        parameter: 'dev_login',
+        validatorMethods: ['validateBoolean']
+      },
+      {
+        parameter: 'state',
+        validatorMethods: ['validateString']
+      }
+    ],
     optional: []
   },
   [apiName.googleRedirectUrl]: {
@@ -12,6 +21,10 @@ const webSignature = {
       {
         parameter: 'dev_login',
         validatorMethods: ['validateBoolean']
+      },
+      {
+        parameter: 'state',
+        validatorMethods: ['validateString']
       }
     ],
     optional: []
@@ -21,6 +34,10 @@ const webSignature = {
       {
         parameter: 'dev_login',
         validatorMethods: ['validateBoolean']
+      },
+      {
+        parameter: 'state',
+        validatorMethods: ['validateString']
       }
     ],
     optional: []
@@ -30,6 +47,10 @@ const webSignature = {
       {
         parameter: 'dev_login',
         validatorMethods: ['validateBoolean']
+      },
+      {
+        parameter: 'state',
+        validatorMethods: ['validateString']
       }
     ],
     optional: []
