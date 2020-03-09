@@ -7,7 +7,6 @@ const rootPrefix = '../../..',
   routeHelper = require(rootPrefix + '/routes/helper'),
   sanitizer = require(rootPrefix + '/helpers/sanitizer'),
   cookieHelper = require(rootPrefix + '/lib/cookieHelper'),
-  coreConstants = require(rootPrefix + '/config/coreConstants'),
   apiName = require(rootPrefix + '/lib/globalConstant/apiName'),
   entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
   responseEntityKey = require(rootPrefix + '/lib/globalConstant/responseEntityKey');

@@ -55,6 +55,8 @@ router.use(cookieHelper.setAdminCsrf());
 router.post('/login', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.adminLogin;
 
+  // TODO - shlok - add formatter here.
+
   const onServiceSuccess = async function(serviceResponse) {
     cookieHelper.setAdminCookie(res, serviceResponse.data.adminCookieValue);
   };
@@ -76,6 +78,7 @@ router.post('/logout', sanitizer.sanitizeDynamicUrlParams, function(req, res) {
 
   cookieHelper.deleteAdminCookie(res);
 
+  // TODO - shlok - use route helper
   Promise.resolve(responseHelper.renderApiResponse(responseObject, res, errorConfig));
 });
 
