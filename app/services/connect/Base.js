@@ -308,12 +308,29 @@ class SocialConnectBase extends ServiceBase {
     }
   }
 
+  /**
+   * Block specific countries
+   *
+   * @returns {Promise<never>}
+   * @private
+   */
   async _blockSpecificCountries() {
     const oThis = this;
 
+    // nothing to check.
+    if (!oThis.ipAddress) {
+      console.log('--------maxmind------ empty ip:', oThis.ipAddress);
+      return;
+    }
+
+    if (!oThis.ipAddress.match(/[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}/)) {
+      console.log('--------maxmind------ invalid ip:', oThis.ipAddress);
+      return;
+    }
+
     const Reader = require('@maxmind/geoip2-node').Reader;
 
-    let reader = Reader.open('/mnt/pepo/apps/pepoApi/shared/GeoLite2-Country.mmdb');
+    let reader = await Reader.open('/mnt/pepo/apps/pepoApi/shared/GeoLite2-Country.mmdb');
 
     const response = reader.country(oThis.ipAddress);
 
