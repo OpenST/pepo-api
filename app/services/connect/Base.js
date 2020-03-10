@@ -38,6 +38,8 @@ class SocialConnectBase extends ServiceBase {
     const oThis = this;
     oThis.inviteCode = params.invite_code;
     oThis.utmParams = params.utm_params;
+    oThis.ipAddress = params.ip_address;
+
     oThis.socialUserObj = null;
     oThis.newSocialConnect = false;
     oThis.userId = null;
@@ -296,10 +298,36 @@ class SocialConnectBase extends ServiceBase {
     const oThis = this;
 
     if (oThis.isUserSignUp) {
+      // block users from certain countries
+      await oThis._blockSpecificCountries();
+
       await oThis._associateInviteCode();
       await oThis._performSignUp();
     } else {
       await oThis._performLogin();
+    }
+  }
+
+  async _blockSpecificCountries() {
+    const oThis = this;
+
+    const Reader = require('@maxmind/geoip2-node').Reader;
+
+    let reader = Reader.open('/mnt/pepo/apps/pepoApi/shared/GeoLite2-Country.mmdb');
+
+    const response = reader.country(oThis.ipAddress);
+
+    const blockedCountriesIsoCodes = ['ID', 'VN'];
+
+    console.log('--------maxmind------ ip:', oThis.ipAddress, 'country:', response.country.isoCode);
+
+    if (blockedCountriesIsoCodes.includes(response.country.isoCode)) {
+      return Promise.reject(
+        responseHelper.error({
+          internal_error_identifier: 's_c_b_6',
+          api_error_identifier: 'could_not_proceed'
+        })
+      );
     }
   }
 
