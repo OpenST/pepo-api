@@ -253,8 +253,8 @@ class TransactionWebhookBase extends ServiceBase {
       toOstUserId = oThis.ostTransaction.transfers[0].to_user_id,
       ostUserIdToUserIdHash = await oThis._getUserIdFromOstUserIds([fromOstUserId, toOstUserId]);
 
-    oThis.fromUserId = ostUserIdToUserIdHash[fromOstUserId];
-    oThis.toUserId = ostUserIdToUserIdHash[toOstUserId];
+    oThis.fromUserId = ostUserIdToUserIdHash[fromOstUserId] || 0;
+    oThis.toUserId = ostUserIdToUserIdHash[toOstUserId] || 0;
   }
 
   /**
