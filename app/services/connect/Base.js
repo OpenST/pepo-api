@@ -38,6 +38,8 @@ class SocialConnectBase extends ServiceBase {
     const oThis = this;
     oThis.inviteCode = params.invite_code;
     oThis.utmParams = params.utm_params;
+    oThis.ipAddress = params.ip_address;
+
     oThis.socialUserObj = null;
     oThis.newSocialConnect = false;
     oThis.userId = null;
@@ -296,10 +298,53 @@ class SocialConnectBase extends ServiceBase {
     const oThis = this;
 
     if (oThis.isUserSignUp) {
+      // block users from certain countries
+      await oThis._blockSpecificCountries();
+
       await oThis._associateInviteCode();
       await oThis._performSignUp();
     } else {
       await oThis._performLogin();
+    }
+  }
+
+  /**
+   * Block specific countries
+   *
+   * @returns {Promise<never>}
+   * @private
+   */
+  async _blockSpecificCountries() {
+    const oThis = this;
+
+    // nothing to check.
+    if (!oThis.ipAddress) {
+      console.log('--------maxmind------ empty ip:', oThis.ipAddress);
+      return;
+    }
+
+    if (!oThis.ipAddress.match(/[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}/)) {
+      console.log('--------maxmind------ invalid ip:', oThis.ipAddress);
+      return;
+    }
+
+    const Reader = require('@maxmind/geoip2-node').Reader;
+
+    let reader = await Reader.open('/mnt/pepo/apps/pepoApi/shared/GeoLite2-Country.mmdb');
+
+    const response = reader.country(oThis.ipAddress);
+
+    const blockedCountriesIsoCodes = ['ID', 'VN'];
+
+    console.log('--------maxmind------ ip:', oThis.ipAddress, 'country:', response.country.isoCode);
+
+    if (blockedCountriesIsoCodes.includes(response.country.isoCode)) {
+      return Promise.reject(
+        responseHelper.error({
+          internal_error_identifier: 's_c_b_6',
+          api_error_identifier: 'could_not_proceed'
+        })
+      );
     }
   }
 

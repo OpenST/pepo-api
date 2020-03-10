@@ -7,6 +7,7 @@
     "pre-commit": "lint-staged"
   },
   "dependencies": {
+    "@maxmind/geoip2-node": "^1.4.0",
     "@ostdotcom/base": "^2.0.0",
     "@ostdotcom/cache": "1.0.8-beta.4",
     "@ostdotcom/notification": "1.0.8-beta.1",
@@ -29,10 +30,10 @@
     "moment-timezone": "0.5.26",
     "morgan": "1.9.1",
     "mysql": "2.16.0",
+    "node-rsa": "1.0.7",
     "sanitize-html": "1.19.3",
     "slack": "11.0.2",
-    "socket.io": "2.2.0",
-    "node-rsa": "1.0.7"
+    "socket.io": "2.2.0"
   },
   "devDependencies": {
     "eslint": "6.5.1",
