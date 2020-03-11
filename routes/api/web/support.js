@@ -18,7 +18,7 @@ router.get(
   cookieHelper.validateWebviewLoginCookieIfPresent,
   sanitizer.sanitizeDynamicUrlParams,
   cookieHelper.validateTokenIfPresent,
-  cookieHelper.validateUserLoginRequired,
+  cookieHelper.validateWebviewLoginCookieRequired,
   function(req, res, next) {
     req.decodedParams.apiName = apiName.validateSupportUrl;
 

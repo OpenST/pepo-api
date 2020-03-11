@@ -68,7 +68,7 @@ router.use('/users', userRoutes);
 //
 // NOTE: Login mandatory for following
 //
-router.use(cookieHelper.validateUserLoginRequired);
+router.use(cookieHelper.validateUserWebLoginCookieRequired);
 
 router.use(webPageConstants.sessionAuthPagePath, sessionAuthRoutes);
 // TODO - login - why route is inside webPageConstants?

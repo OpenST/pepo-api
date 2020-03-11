@@ -16,7 +16,7 @@ router.get(
   cookieHelper.parseStoreLoginCookieIfPresent,
   sanitizer.sanitizeDynamicUrlParams,
   cookieHelper.validateStoreTokenIfPresent,
-  cookieHelper.validateUserLoginRequired,
+  cookieHelper.validateStoreLoginCookieRequired,
   function(req, res, next) {
     req.decodedParams.apiName = apiName.getRedemptionProducts;
 
@@ -38,7 +38,7 @@ router.get(
   }
 );
 
-router.use(cookieHelper.validateStoreLoginCookieIfPresent, cookieHelper.validateUserLoginRequired);
+router.use(cookieHelper.validateStoreLoginCookieIfPresent, cookieHelper.validateStoreLoginCookieRequired);
 
 // Request for redemption of a product.
 router.post('/request', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {

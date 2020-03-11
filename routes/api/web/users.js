@@ -43,7 +43,7 @@ router.get('/double-opt-in', sanitizer.sanitizeDynamicUrlParams, function(req, r
 //
 // NOTE: Login mandatory for following
 //
-router.use(cookieHelper.validateUserLoginRequired);
+router.use(cookieHelper.validateUserWebLoginCookieRequired);
 
 /* Logged-In user. */
 router.get('/current', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {

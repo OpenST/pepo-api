@@ -70,7 +70,7 @@ router.post('/login', sanitizer.sanitizeDynamicUrlParams, function(req, res, nex
 });
 
 /* Apple disconnect. */
-router.post('/disconnect', cookieHelper.parseUserCookieForLogout, sanitizer.sanitizeDynamicUrlParams, function(
+router.post('/disconnect', cookieHelper.parseUserWebLoginCookieForLogout, sanitizer.sanitizeDynamicUrlParams, function(
   req,
   res,
   next
