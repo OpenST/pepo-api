@@ -53,7 +53,7 @@ class DisconnectBase extends ServiceBase {
 
     await oThis._rotateCookieToken();
 
-    if (oThis.apiSource === apiSourceConstants.app) {
+    if (apiSourceConstants.isAppRequest(oThis.apiSource)) {
       await oThis._fetchDeviceIds();
 
       await oThis._fetchDevices();
