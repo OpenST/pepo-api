@@ -19,7 +19,7 @@ class HeaderHelper {
   }
 
   pepoDeviceOs(headers) {
-    return headers['x-pepo-device-os'] || 'postman';
+    return headers['x-pepo-device-os'] || '';
   }
 
   get androidDeviceOs() {
