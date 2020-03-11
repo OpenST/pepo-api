@@ -372,6 +372,62 @@ const webSignature = {
         validatorMethods: ['validateBoolean']
       }
     ]
+  },
+  [apiName.twitterDisconnect]: {
+    mandatory: [
+      {
+        parameter: 'api_source',
+        validatorMethods: ['validateString']
+      }
+    ],
+    optional: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      }
+    ]
+  },
+  [apiName.appleDisconnect]: {
+    mandatory: [
+      {
+        parameter: 'api_source',
+        validatorMethods: ['validateString']
+      }
+    ],
+    optional: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      }
+    ]
+  },
+  [apiName.googleDisconnect]: {
+    mandatory: [
+      {
+        parameter: 'api_source',
+        validatorMethods: ['validateString']
+      }
+    ],
+    optional: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      }
+    ]
+  },
+  [apiName.githubDisconnect]: {
+    mandatory: [
+      {
+        parameter: 'api_source',
+        validatorMethods: ['validateString']
+      }
+    ],
+    optional: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      }
+    ]
   }
 };
 

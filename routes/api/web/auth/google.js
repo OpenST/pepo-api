@@ -78,7 +78,7 @@ router.post('/login', sanitizer.sanitizeDynamicUrlParams, function(req, res, nex
   );
 });
 
-/* Github disconnect. */
+/* Google disconnect. */
 router.post('/disconnect', cookieHelper.parseUserCookieForLogout, sanitizer.sanitizeDynamicUrlParams, function(
   req,
   res,

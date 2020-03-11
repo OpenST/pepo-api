@@ -7,7 +7,8 @@ const rootPrefix = '../../..',
   UserDeviceByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/UserDeviceByIds'),
   coreConstants = require(rootPrefix + '/config/coreConstants'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
-  localCipher = require(rootPrefix + '/lib/encryptors/localCipher');
+  localCipher = require(rootPrefix + '/lib/encryptors/localCipher'),
+  apiSourceConstants = require(rootPrefix + '/lib/globalConstant/apiSource');
 
 class DisconnectBase extends ServiceBase {
   /**
@@ -15,6 +16,7 @@ class DisconnectBase extends ServiceBase {
    *
    * @param {object} params
    * @param {object} params.current_user
+   * @param {string} params.api_source
    *
    * @augments ServiceBase
    *
@@ -25,6 +27,7 @@ class DisconnectBase extends ServiceBase {
 
     const oThis = this;
     oThis.currentUserId = params.current_user ? params.current_user.id : null;
+    oThis.apiSource = params.api_source;
 
     oThis.userDeviceIds = [];
     oThis.deviceIds = [];
@@ -50,11 +53,13 @@ class DisconnectBase extends ServiceBase {
 
     await oThis._rotateCookieToken();
 
-    await oThis._fetchDeviceIds();
+    if (oThis.apiSource === apiSourceConstants.app) {
+      await oThis._fetchDeviceIds();
 
-    await oThis._fetchDevices();
+      await oThis._fetchDevices();
 
-    await oThis._logoutUserDevices();
+      await oThis._logoutUserDevices();
+    }
 
     return responseHelper.successWithData({});
   }
