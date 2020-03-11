@@ -6,6 +6,10 @@ const webSignature = {
   [apiName.twitterRedirectUrl]: {
     mandatory: [
       {
+        parameter: 'api_source',
+        validatorMethods: ['validateString']
+      },
+      {
         parameter: 'dev_login',
         validatorMethods: ['validateBoolean']
       },
@@ -18,6 +22,10 @@ const webSignature = {
   },
   [apiName.googleRedirectUrl]: {
     mandatory: [
+      {
+        parameter: 'api_source',
+        validatorMethods: ['validateString']
+      },
       {
         parameter: 'dev_login',
         validatorMethods: ['validateBoolean']
@@ -32,6 +40,10 @@ const webSignature = {
   [apiName.githubRedirectUrl]: {
     mandatory: [
       {
+        parameter: 'api_source',
+        validatorMethods: ['validateString']
+      },
+      {
         parameter: 'dev_login',
         validatorMethods: ['validateBoolean']
       },
@@ -44,6 +56,10 @@ const webSignature = {
   },
   [apiName.appleRedirectUrl]: {
     mandatory: [
+      {
+        parameter: 'api_source',
+        validatorMethods: ['validateString']
+      },
       {
         parameter: 'dev_login',
         validatorMethods: ['validateBoolean']
@@ -58,6 +74,10 @@ const webSignature = {
   [apiName.getRedemptionProducts]: {
     mandatory: [
       {
+        parameter: 'api_source',
+        validatorMethods: ['validateString']
+      },
+      {
         parameter: 'current_user',
         validatorMethods: ['validateNonEmptyObject']
       }
@@ -66,6 +86,10 @@ const webSignature = {
   },
   [apiName.validateSupportUrl]: {
     mandatory: [
+      {
+        parameter: 'api_source',
+        validatorMethods: ['validateString']
+      },
       {
         parameter: 'current_user',
         validatorMethods: ['validateNonEmptyObject']
@@ -76,6 +100,10 @@ const webSignature = {
   [apiName.doubleOptIn]: {
     mandatory: [
       {
+        parameter: 'api_source',
+        validatorMethods: ['validateString']
+      },
+      {
         parameter: 't',
         validatorMethods: ['validateString']
       }
@@ -84,6 +112,10 @@ const webSignature = {
   },
   [apiName.requestRedemption]: {
     mandatory: [
+      {
+        parameter: 'api_source',
+        validatorMethods: ['validateString']
+      },
       {
         parameter: 'current_user',
         validatorMethods: ['validateNonEmptyObject']
@@ -106,6 +138,10 @@ const webSignature = {
   [apiName.initiateRedemptionRequest]: {
     mandatory: [
       {
+        parameter: 'api_source',
+        validatorMethods: ['validateString']
+      },
+      {
         parameter: 'current_user',
         validatorMethods: ['validateNonEmptyObject']
       },
@@ -123,6 +159,10 @@ const webSignature = {
   [apiName.redemptionPepocornBalance]: {
     mandatory: [
       {
+        parameter: 'api_source',
+        validatorMethods: ['validateString']
+      },
+      {
         parameter: 'current_user',
         validatorMethods: ['validateNonEmptyObject']
       }
@@ -131,6 +171,10 @@ const webSignature = {
   },
   [apiName.channelShare]: {
     mandatory: [
+      {
+        parameter: 'api_source',
+        validatorMethods: ['validateString']
+      },
       {
         parameter: 'channel_permalink',
         validatorMethods: ['validateName']
@@ -141,6 +185,10 @@ const webSignature = {
   [apiName.profileShare]: {
     mandatory: [
       {
+        parameter: 'api_source',
+        validatorMethods: ['validateString']
+      },
+      {
         parameter: 'username',
         validatorMethods: ['validateName']
       }
@@ -149,6 +197,10 @@ const webSignature = {
   },
   [apiName.getVideo]: {
     mandatory: [
+      {
+        parameter: 'api_source',
+        validatorMethods: ['validateString']
+      },
       {
         parameter: 'video_id',
         validatorMethods: ['validateNonZeroInteger']
@@ -159,6 +211,10 @@ const webSignature = {
   [apiName.videoShare]: {
     mandatory: [
       {
+        parameter: 'api_source',
+        validatorMethods: ['validateString']
+      },
+      {
         parameter: 'video_id',
         validatorMethods: ['validateInteger']
       }
@@ -167,6 +223,10 @@ const webSignature = {
   },
   [apiName.reportIssue]: {
     mandatory: [
+      {
+        parameter: 'api_source',
+        validatorMethods: ['validateString']
+      },
       {
         parameter: 'report_entity_id',
         validatorMethods: ['validateNonZeroInteger']
@@ -180,6 +240,10 @@ const webSignature = {
   },
   [apiName.githubConnect]: {
     mandatory: [
+      {
+        parameter: 'api_source',
+        validatorMethods: ['validateString']
+      },
       {
         parameter: 'authorization_code',
         validatorMethods: ['validateString']
@@ -207,6 +271,10 @@ const webSignature = {
   [apiName.googleConnect]: {
     mandatory: [
       {
+        parameter: 'api_source',
+        validatorMethods: ['validateString']
+      },
+      {
         parameter: 'authorization_code',
         validatorMethods: ['validateString']
       },
@@ -232,6 +300,10 @@ const webSignature = {
   },
   [apiName.appleConnect]: {
     mandatory: [
+      {
+        parameter: 'api_source',
+        validatorMethods: ['validateString']
+      },
       {
         parameter: 'authorization_code',
         validatorMethods: ['validateString']
@@ -271,6 +343,10 @@ const webSignature = {
   [apiName.twitterLogin]: {
     mandatory: [
       {
+        parameter: 'api_source',
+        validatorMethods: ['validateString']
+      },
+      {
         parameter: 'oauth_token',
         validatorMethods: ['validateNonBlankString']
       },
@@ -288,6 +364,10 @@ const webSignature = {
   },
   [apiName.feedsList]: {
     mandatory: [
+      {
+        parameter: 'api_source',
+        validatorMethods: ['validateString']
+      },
       {
         parameter: 'sanitized_headers',
         validatorMethods: ['validateNonEmptyObject']
@@ -311,6 +391,10 @@ const webSignature = {
   [apiName.loggedInUser]: {
     mandatory: [
       {
+        parameter: 'api_source',
+        validatorMethods: ['validateString']
+      },
+      {
         parameter: 'current_user',
         validatorMethods: ['validateNonEmptyObject']
       },
@@ -323,6 +407,10 @@ const webSignature = {
   },
   [apiName.postSessionAuth]: {
     mandatory: [
+      {
+        parameter: 'api_source',
+        validatorMethods: ['validateString']
+      },
       {
         parameter: 'payload',
         validatorMethods: ['validateNonBlankString']
@@ -337,6 +425,10 @@ const webSignature = {
   [apiName.websocketDetails]: {
     mandatory: [
       {
+        parameter: 'api_source',
+        validatorMethods: ['validateString']
+      },
+      {
         parameter: 'user_id',
         validatorMethods: ['validateInteger']
       },
@@ -349,6 +441,10 @@ const webSignature = {
   },
   [apiName.ostTransaction]: {
     mandatory: [
+      {
+        parameter: 'api_source',
+        validatorMethods: ['validateString']
+      },
       {
         parameter: 'ost_transaction',
         validatorMethods: ['validateNonEmptyObject', 'validateOstTransactionObject']
@@ -374,6 +470,10 @@ const webSignature = {
       {
         parameter: 'api_source',
         validatorMethods: ['validateString']
+      },
+      {
+        parameter: 'api_source',
+        validatorMethods: ['validateString']
       }
     ],
     optional: [
@@ -385,6 +485,10 @@ const webSignature = {
   },
   [apiName.appleDisconnect]: {
     mandatory: [
+      {
+        parameter: 'api_source',
+        validatorMethods: ['validateString']
+      },
       {
         parameter: 'api_source',
         validatorMethods: ['validateString']
@@ -402,6 +506,10 @@ const webSignature = {
       {
         parameter: 'api_source',
         validatorMethods: ['validateString']
+      },
+      {
+        parameter: 'api_source',
+        validatorMethods: ['validateString']
       }
     ],
     optional: [
@@ -413,6 +521,10 @@ const webSignature = {
   },
   [apiName.githubDisconnect]: {
     mandatory: [
+      {
+        parameter: 'api_source',
+        validatorMethods: ['validateString']
+      },
       {
         parameter: 'api_source',
         validatorMethods: ['validateString']

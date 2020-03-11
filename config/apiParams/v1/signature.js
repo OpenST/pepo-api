@@ -4,7 +4,12 @@ const rootPrefix = '../../..',
 
 const v1Signature = {
   [apiName.logout]: {
-    mandatory: [],
+    mandatory: [
+      {
+        parameter: 'api_source',
+        validatorMethods: ['validateString']
+      }
+    ],
     optional: [
       {
         parameter: 'device_id',
@@ -19,6 +24,10 @@ const v1Signature = {
   [apiName.recoveryInfo]: {
     mandatory: [
       {
+        parameter: 'api_source',
+        validatorMethods: ['validateString']
+      },
+      {
         parameter: 'current_user',
         validatorMethods: ['validateNonEmptyObject']
       }
@@ -28,6 +37,10 @@ const v1Signature = {
   [apiName.getInviteCode]: {
     mandatory: [
       {
+        parameter: 'api_source',
+        validatorMethods: ['validateString']
+      },
+      {
         parameter: 'current_user',
         validatorMethods: ['validateNonEmptyObject']
       }
@@ -36,6 +49,10 @@ const v1Signature = {
   },
   [apiName.replyList]: {
     mandatory: [
+      {
+        parameter: 'api_source',
+        validatorMethods: ['validateString']
+      },
       {
         parameter: 'video_id',
         validatorMethods: ['validateNonZeroInteger']
@@ -59,6 +76,10 @@ const v1Signature = {
   [apiName.unseenReplies]: {
     mandatory: [
       {
+        parameter: 'api_source',
+        validatorMethods: ['validateString']
+      },
+      {
         parameter: 'video_id',
         validatorMethods: ['validateInteger']
       }
@@ -73,6 +94,10 @@ const v1Signature = {
   [apiName.getReply]: {
     mandatory: [
       {
+        parameter: 'api_source',
+        validatorMethods: ['validateString']
+      },
+      {
         parameter: 'current_user',
         validatorMethods: ['validateNonEmptyObject']
       },
@@ -85,6 +110,10 @@ const v1Signature = {
   },
   [apiName.registerDevice]: {
     mandatory: [
+      {
+        parameter: 'api_source',
+        validatorMethods: ['validateString']
+      },
       {
         parameter: 'current_user',
         validatorMethods: ['validateNonEmptyObject']
@@ -101,11 +130,20 @@ const v1Signature = {
     optional: []
   },
   [apiName.token]: {
-    mandatory: [],
+    mandatory: [
+      {
+        parameter: 'api_source',
+        validatorMethods: ['validateString']
+      }
+    ],
     optional: []
   },
   [apiName.contributionBy]: {
     mandatory: [
+      {
+        parameter: 'api_source',
+        validatorMethods: ['validateString']
+      },
       {
         parameter: 'current_user',
         validatorMethods: ['validateNonEmptyObject']
@@ -125,6 +163,10 @@ const v1Signature = {
   [apiName.contributionTo]: {
     mandatory: [
       {
+        parameter: 'api_source',
+        validatorMethods: ['validateString']
+      },
+      {
         parameter: 'current_user',
         validatorMethods: ['validateNonEmptyObject']
       },
@@ -142,6 +184,10 @@ const v1Signature = {
   },
   [apiName.contributionSuggestion]: {
     mandatory: [
+      {
+        parameter: 'api_source',
+        validatorMethods: ['validateString']
+      },
       {
         parameter: 'current_user',
         validatorMethods: ['validateNonEmptyObject']
@@ -161,6 +207,10 @@ const v1Signature = {
   [apiName.loggedInUser]: {
     mandatory: [
       {
+        parameter: 'api_source',
+        validatorMethods: ['validateString']
+      },
+      {
         parameter: 'current_user',
         validatorMethods: ['validateNonEmptyObject']
       },
@@ -173,6 +223,10 @@ const v1Signature = {
   },
   [apiName.ostTransaction]: {
     mandatory: [
+      {
+        parameter: 'api_source',
+        validatorMethods: ['validateString']
+      },
       {
         parameter: 'ost_transaction',
         validatorMethods: ['validateNonEmptyObject', 'validateOstTransactionObject']
@@ -196,6 +250,10 @@ const v1Signature = {
   [apiName.uploadParams]: {
     mandatory: [
       {
+        parameter: 'api_source',
+        validatorMethods: ['validateString']
+      },
+      {
         parameter: 'current_user',
         validatorMethods: ['validateNonEmptyObject']
       }
@@ -214,6 +272,10 @@ const v1Signature = {
 
   [apiName.getRedemptionProductUrl]: {
     mandatory: [
+      {
+        parameter: 'api_source',
+        validatorMethods: ['validateString']
+      },
       {
         parameter: 'current_user',
         validatorMethods: ['validateNonEmptyObject']
@@ -239,6 +301,10 @@ const v1Signature = {
   },
   [apiName.getRedemptionWebViewProductUrl]: {
     mandatory: [
+      {
+        parameter: 'api_source',
+        validatorMethods: ['validateString']
+      },
       {
         parameter: 'current_user',
         validatorMethods: ['validateNonEmptyObject']
@@ -270,6 +336,10 @@ const v1Signature = {
   [apiName.getSupportUrl]: {
     mandatory: [
       {
+        parameter: 'api_source',
+        validatorMethods: ['validateString']
+      },
+      {
         parameter: 'current_user',
         validatorMethods: ['validateNonEmptyObject']
       }
@@ -279,6 +349,10 @@ const v1Signature = {
 
   [apiName.twitterLogin]: {
     mandatory: [
+      {
+        parameter: 'api_source',
+        validatorMethods: ['validateString']
+      },
       {
         parameter: 'token',
         validatorMethods: ['validateNonBlankString']
@@ -310,6 +384,10 @@ const v1Signature = {
   [apiName.getUserProfile]: {
     mandatory: [
       {
+        parameter: 'api_source',
+        validatorMethods: ['validateString']
+      },
+      {
         parameter: 'current_user',
         validatorMethods: ['validateNonEmptyObject']
       },
@@ -323,6 +401,10 @@ const v1Signature = {
   [apiName.rotateAccount]: {
     mandatory: [
       {
+        parameter: 'api_source',
+        validatorMethods: ['validateString']
+      },
+      {
         parameter: 'user_name',
         validatorMethods: ['validateString']
       }
@@ -331,6 +413,10 @@ const v1Signature = {
   },
   [apiName.saveFanVideo]: {
     mandatory: [
+      {
+        parameter: 'api_source',
+        validatorMethods: ['validateString']
+      },
       {
         parameter: 'current_user',
         validatorMethods: ['validateNonEmptyObject']
@@ -389,6 +475,10 @@ const v1Signature = {
   },
   [apiName.initiateReply]: {
     mandatory: [
+      {
+        parameter: 'api_source',
+        validatorMethods: ['validateString']
+      },
       {
         parameter: 'current_user',
         validatorMethods: ['validateNonEmptyObject']
@@ -452,6 +542,10 @@ const v1Signature = {
   [apiName.validateUploadVideo]: {
     mandatory: [
       {
+        parameter: 'api_source',
+        validatorMethods: ['validateString']
+      },
+      {
         parameter: 'current_user',
         validatorMethods: ['validateNonEmptyObject']
       }
@@ -473,6 +567,10 @@ const v1Signature = {
   },
   [apiName.validateUploadReply]: {
     mandatory: [
+      {
+        parameter: 'api_source',
+        validatorMethods: ['validateString']
+      },
       {
         parameter: 'current_user',
         validatorMethods: ['validateNonEmptyObject']
@@ -500,6 +598,10 @@ const v1Signature = {
   [apiName.mergeVideoSegments]: {
     mandatory: [
       {
+        parameter: 'api_source',
+        validatorMethods: ['validateString']
+      },
+      {
         parameter: 'current_user',
         validatorMethods: ['validateNonEmptyObject']
       },
@@ -513,6 +615,10 @@ const v1Signature = {
   [apiName.videoMergeJobStatus]: {
     mandatory: [
       {
+        parameter: 'api_source',
+        validatorMethods: ['validateString']
+      },
+      {
         parameter: 'current_user',
         validatorMethods: ['validateNonEmptyObject']
       },
@@ -525,6 +631,10 @@ const v1Signature = {
   },
   [apiName.saveProfileImage]: {
     mandatory: [
+      {
+        parameter: 'api_source',
+        validatorMethods: ['validateString']
+      },
       {
         parameter: 'current_user',
         validatorMethods: ['validateNonEmptyObject']
@@ -556,6 +666,10 @@ const v1Signature = {
   [apiName.saveProfile]: {
     mandatory: [
       {
+        parameter: 'api_source',
+        validatorMethods: ['validateString']
+      },
+      {
         parameter: 'current_user',
         validatorMethods: ['validateNonEmptyObject']
       },
@@ -586,6 +700,10 @@ const v1Signature = {
   [apiName.saveEmail]: {
     mandatory: [
       {
+        parameter: 'api_source',
+        validatorMethods: ['validateString']
+      },
+      {
         parameter: 'current_user',
         validatorMethods: ['validateNonEmptyObject']
       },
@@ -603,6 +721,10 @@ const v1Signature = {
   [apiName.blockOtherUserForUser]: {
     mandatory: [
       {
+        parameter: 'api_source',
+        validatorMethods: ['validateString']
+      },
+      {
         parameter: 'current_user',
         validatorMethods: ['validateNonEmptyObject']
       },
@@ -615,6 +737,10 @@ const v1Signature = {
   },
   [apiName.unBlockOtherUserForUser]: {
     mandatory: [
+      {
+        parameter: 'api_source',
+        validatorMethods: ['validateString']
+      },
       {
         parameter: 'current_user',
         validatorMethods: ['validateNonEmptyObject']
@@ -629,6 +755,10 @@ const v1Signature = {
   [apiName.getChannelDetails]: {
     mandatory: [
       {
+        parameter: 'api_source',
+        validatorMethods: ['validateString']
+      },
+      {
         parameter: 'channel_id',
         validatorMethods: ['validateNonZeroInteger']
       },
@@ -641,6 +771,10 @@ const v1Signature = {
   },
   [apiName.joinChannel]: {
     mandatory: [
+      {
+        parameter: 'api_source',
+        validatorMethods: ['validateString']
+      },
       {
         parameter: 'channel_id',
         validatorMethods: ['validateNonZeroInteger']
@@ -655,6 +789,10 @@ const v1Signature = {
   [apiName.leaveChannel]: {
     mandatory: [
       {
+        parameter: 'api_source',
+        validatorMethods: ['validateString']
+      },
+      {
         parameter: 'channel_id',
         validatorMethods: ['validateNonZeroInteger']
       },
@@ -667,6 +805,10 @@ const v1Signature = {
   },
   [apiName.turnOffChannelNotifications]: {
     mandatory: [
+      {
+        parameter: 'api_source',
+        validatorMethods: ['validateString']
+      },
       {
         parameter: 'channel_id',
         validatorMethods: ['validateNonZeroInteger']
@@ -681,6 +823,10 @@ const v1Signature = {
   [apiName.turnOnChannelNotifications]: {
     mandatory: [
       {
+        parameter: 'api_source',
+        validatorMethods: ['validateString']
+      },
+      {
         parameter: 'channel_id',
         validatorMethods: ['validateNonZeroInteger']
       },
@@ -692,7 +838,12 @@ const v1Signature = {
     optional: []
   },
   [apiName.getTags]: {
-    mandatory: [],
+    mandatory: [
+      {
+        parameter: 'api_source',
+        validatorMethods: ['validateString']
+      }
+    ],
     optional: [
       {
         parameter: 'q',
@@ -709,7 +860,12 @@ const v1Signature = {
     ]
   },
   [apiName.getChannels]: {
-    mandatory: [],
+    mandatory: [
+      {
+        parameter: 'api_source',
+        validatorMethods: ['validateString']
+      }
+    ],
     optional: [
       {
         parameter: 'current_user',
@@ -730,7 +886,12 @@ const v1Signature = {
     ]
   },
   [apiName.mixedTopSearch]: {
-    mandatory: [],
+    mandatory: [
+      {
+        parameter: 'api_source',
+        validatorMethods: ['validateString']
+      }
+    ],
     optional: [
       {
         parameter: 'current_user',
@@ -753,6 +914,10 @@ const v1Signature = {
   [apiName.feedsList]: {
     mandatory: [
       {
+        parameter: 'api_source',
+        validatorMethods: ['validateString']
+      },
+      {
         parameter: 'sanitized_headers',
         validatorMethods: ['validateNonEmptyObject']
       }
@@ -770,6 +935,10 @@ const v1Signature = {
   },
   [apiName.userVideoList]: {
     mandatory: [
+      {
+        parameter: 'api_source',
+        validatorMethods: ['validateString']
+      },
       {
         parameter: 'profile_user_id',
         validatorMethods: ['validateNonZeroInteger']
@@ -789,6 +958,10 @@ const v1Signature = {
   [apiName.userReplyList]: {
     mandatory: [
       {
+        parameter: 'api_source',
+        validatorMethods: ['validateString']
+      },
+      {
         parameter: 'profile_user_id',
         validatorMethods: ['validateNonZeroInteger']
       },
@@ -807,6 +980,10 @@ const v1Signature = {
   [apiName.getVideo]: {
     mandatory: [
       {
+        parameter: 'api_source',
+        validatorMethods: ['validateString']
+      },
+      {
         parameter: 'video_id',
         validatorMethods: ['validateNonZeroInteger']
       }
@@ -820,6 +997,10 @@ const v1Signature = {
   },
   [apiName.feedDetails]: {
     mandatory: [
+      {
+        parameter: 'api_source',
+        validatorMethods: ['validateString']
+      },
       {
         parameter: 'feed_id',
         validatorMethods: ['validateInteger']
@@ -835,6 +1016,10 @@ const v1Signature = {
   [apiName.websocketDetails]: {
     mandatory: [
       {
+        parameter: 'api_source',
+        validatorMethods: ['validateString']
+      },
+      {
         parameter: 'user_id',
         validatorMethods: ['validateInteger']
       },
@@ -847,6 +1032,10 @@ const v1Signature = {
   },
   [apiName.getUserNotifications]: {
     mandatory: [
+      {
+        parameter: 'api_source',
+        validatorMethods: ['validateString']
+      },
       {
         parameter: 'current_user',
         validatorMethods: ['validateNonEmptyObject']
@@ -861,6 +1050,10 @@ const v1Signature = {
   },
   [apiName.sayThankYou]: {
     mandatory: [
+      {
+        parameter: 'api_source',
+        validatorMethods: ['validateString']
+      },
       {
         parameter: 'current_user',
         validatorMethods: ['validateNonEmptyObject']
@@ -882,7 +1075,12 @@ const v1Signature = {
     ]
   },
   [apiName.twitterDisconnect]: {
-    mandatory: [],
+    mandatory: [
+      {
+        parameter: 'api_source',
+        validatorMethods: ['validateString']
+      }
+    ],
     optional: [
       {
         parameter: 'current_user',
@@ -891,7 +1089,12 @@ const v1Signature = {
     ]
   },
   [apiName.appleDisconnect]: {
-    mandatory: [],
+    mandatory: [
+      {
+        parameter: 'api_source',
+        validatorMethods: ['validateString']
+      }
+    ],
     optional: [
       {
         parameter: 'current_user',
@@ -900,7 +1103,12 @@ const v1Signature = {
     ]
   },
   [apiName.googleDisconnect]: {
-    mandatory: [],
+    mandatory: [
+      {
+        parameter: 'api_source',
+        validatorMethods: ['validateString']
+      }
+    ],
     optional: [
       {
         parameter: 'current_user',
@@ -909,7 +1117,12 @@ const v1Signature = {
     ]
   },
   [apiName.githubDisconnect]: {
-    mandatory: [],
+    mandatory: [
+      {
+        parameter: 'api_source',
+        validatorMethods: ['validateString']
+      }
+    ],
     optional: [
       {
         parameter: 'current_user',
@@ -918,7 +1131,12 @@ const v1Signature = {
     ]
   },
   [apiName.userSearch]: {
-    mandatory: [],
+    mandatory: [
+      {
+        parameter: 'api_source',
+        validatorMethods: ['validateString']
+      }
+    ],
     optional: [
       {
         parameter: 'q',
@@ -936,6 +1154,10 @@ const v1Signature = {
   },
   [apiName.atMentionSearch]: {
     mandatory: [
+      {
+        parameter: 'api_source',
+        validatorMethods: ['validateString']
+      },
       {
         parameter: 'current_user',
         validatorMethods: ['validateNonEmptyObject']
@@ -963,6 +1185,10 @@ const v1Signature = {
   [apiName.getEmail]: {
     mandatory: [
       {
+        parameter: 'api_source',
+        validatorMethods: ['validateString']
+      },
+      {
         parameter: 'current_user',
         validatorMethods: ['validateNonEmptyObject']
       }
@@ -971,6 +1197,10 @@ const v1Signature = {
   },
   [apiName.addDeviceToken]: {
     mandatory: [
+      {
+        parameter: 'api_source',
+        validatorMethods: ['validateString']
+      },
       {
         parameter: 'current_user',
         validatorMethods: ['validateNonEmptyObject']
@@ -997,6 +1227,10 @@ const v1Signature = {
   [apiName.getTopupProducts]: {
     mandatory: [
       {
+        parameter: 'api_source',
+        validatorMethods: ['validateString']
+      },
+      {
         parameter: 'current_user',
         validatorMethods: ['validateNonEmptyObject']
       },
@@ -1010,6 +1244,10 @@ const v1Signature = {
 
   [apiName.createTopup]: {
     mandatory: [
+      {
+        parameter: 'api_source',
+        validatorMethods: ['validateString']
+      },
       {
         parameter: 'current_user',
         validatorMethods: ['validateNonEmptyObject']
@@ -1033,6 +1271,10 @@ const v1Signature = {
   [apiName.getPendingTopups]: {
     mandatory: [
       {
+        parameter: 'api_source',
+        validatorMethods: ['validateString']
+      },
+      {
         parameter: 'current_user',
         validatorMethods: ['validateNonEmptyObject']
       }
@@ -1042,6 +1284,10 @@ const v1Signature = {
 
   [apiName.getTopupById]: {
     mandatory: [
+      {
+        parameter: 'api_source',
+        validatorMethods: ['validateString']
+      },
       {
         parameter: 'current_user',
         validatorMethods: ['validateNonEmptyObject']
@@ -1062,6 +1308,10 @@ const v1Signature = {
   [apiName.resetBadge]: {
     mandatory: [
       {
+        parameter: 'api_source',
+        validatorMethods: ['validateString']
+      },
+      {
         parameter: 'user_id',
         validatorMethods: ['validateNonZeroInteger']
       },
@@ -1073,6 +1323,10 @@ const v1Signature = {
   },
   [apiName.videoShare]: {
     mandatory: [
+      {
+        parameter: 'api_source',
+        validatorMethods: ['validateString']
+      },
       {
         parameter: 'video_id',
         validatorMethods: ['validateInteger']
@@ -1088,6 +1342,10 @@ const v1Signature = {
   [apiName.replyShare]: {
     mandatory: [
       {
+        parameter: 'api_source',
+        validatorMethods: ['validateString']
+      },
+      {
         parameter: 'reply_detail_id',
         validatorMethods: ['validateInteger']
       }
@@ -1101,6 +1359,10 @@ const v1Signature = {
   },
   [apiName.refreshTwitterConnect]: {
     mandatory: [
+      {
+        parameter: 'api_source',
+        validatorMethods: ['validateString']
+      },
       {
         parameter: 'token',
         validatorMethods: ['validateNonBlankString']
@@ -1127,6 +1389,10 @@ const v1Signature = {
   [apiName.tweetInfo]: {
     mandatory: [
       {
+        parameter: 'api_source',
+        validatorMethods: ['validateString']
+      },
+      {
         parameter: 'receiver_user_id',
         validatorMethods: ['validateNonZeroInteger']
       },
@@ -1139,6 +1405,10 @@ const v1Signature = {
   },
   [apiName.invitedUsersSearch]: {
     mandatory: [
+      {
+        parameter: 'api_source',
+        validatorMethods: ['validateString']
+      },
       {
         parameter: 'current_user',
         validatorMethods: ['validateNonEmptyObject']
@@ -1154,6 +1424,10 @@ const v1Signature = {
   [apiName.fetchGoto]: {
     mandatory: [
       {
+        parameter: 'api_source',
+        validatorMethods: ['validateString']
+      },
+      {
         parameter: 'url',
         validatorMethods: ['validateGenericUrl']
       }
@@ -1162,6 +1436,10 @@ const v1Signature = {
   },
   [apiName.reportIssueForWeb]: {
     mandatory: [
+      {
+        parameter: 'api_source',
+        validatorMethods: ['validateString']
+      },
       {
         parameter: 'app_name',
         validatorMethods: ['validateString']
@@ -1181,6 +1459,10 @@ const v1Signature = {
   [apiName.activationInitiate]: {
     mandatory: [
       {
+        parameter: 'api_source',
+        validatorMethods: ['validateString']
+      },
+      {
         parameter: 'current_user',
         validatorMethods: ['validateNonEmptyObject']
       }
@@ -1189,6 +1471,10 @@ const v1Signature = {
   },
   [apiName.deleteVideo]: {
     mandatory: [
+      {
+        parameter: 'api_source',
+        validatorMethods: ['validateString']
+      },
       {
         parameter: 'video_id',
         validatorMethods: ['validateNonZeroInteger']
@@ -1202,6 +1488,10 @@ const v1Signature = {
   },
   [apiName.reportIssue]: {
     mandatory: [
+      {
+        parameter: 'api_source',
+        validatorMethods: ['validateString']
+      },
       {
         parameter: 'report_entity_id',
         validatorMethods: ['validateNonZeroInteger']
@@ -1221,6 +1511,10 @@ const v1Signature = {
   [apiName.tagDetails]: {
     mandatory: [
       {
+        parameter: 'api_source',
+        validatorMethods: ['validateString']
+      },
+      {
         parameter: 'current_user',
         validatorMethods: ['validateNonEmptyObject']
       },
@@ -1233,6 +1527,10 @@ const v1Signature = {
   },
   [apiName.getVideoListByTagId]: {
     mandatory: [
+      {
+        parameter: 'api_source',
+        validatorMethods: ['validateString']
+      },
       {
         parameter: 'current_user',
         validatorMethods: ['validateNonEmptyObject']
@@ -1251,6 +1549,10 @@ const v1Signature = {
   },
   [apiName.getChannelVideos]: {
     mandatory: [
+      {
+        parameter: 'api_source',
+        validatorMethods: ['validateString']
+      },
       {
         parameter: 'current_user',
         validatorMethods: ['validateNonEmptyObject']
@@ -1275,6 +1577,10 @@ const v1Signature = {
   [apiName.channelUsers]: {
     mandatory: [
       {
+        parameter: 'api_source',
+        validatorMethods: ['validateString']
+      },
+      {
         parameter: 'current_user',
         validatorMethods: ['validateNonEmptyObject']
       },
@@ -1294,6 +1600,10 @@ const v1Signature = {
   [apiName.channelShare]: {
     mandatory: [
       {
+        parameter: 'api_source',
+        validatorMethods: ['validateString']
+      },
+      {
         parameter: 'channel_id',
         validatorMethods: ['validateNonZeroInteger']
       }
@@ -1304,6 +1614,10 @@ const v1Signature = {
   [apiName.profileShare]: {
     mandatory: [
       {
+        parameter: 'api_source',
+        validatorMethods: ['validateString']
+      },
+      {
         parameter: 'user_id',
         validatorMethods: ['validateNonZeroInteger']
       }
@@ -1313,6 +1627,10 @@ const v1Signature = {
 
   [apiName.getAllVideoListByTagId]: {
     mandatory: [
+      {
+        parameter: 'api_source',
+        validatorMethods: ['validateString']
+      },
       {
         parameter: 'current_user',
         validatorMethods: ['validateNonEmptyObject']
@@ -1335,6 +1653,10 @@ const v1Signature = {
   },
   [apiName.pepocornTopUpValidate]: {
     mandatory: [
+      {
+        parameter: 'api_source',
+        validatorMethods: ['validateString']
+      },
       {
         parameter: 'product_id',
         validatorMethods: ['validateString']
@@ -1366,6 +1688,10 @@ const v1Signature = {
   [apiName.pepocornTopUpInfo]: {
     mandatory: [
       {
+        parameter: 'api_source',
+        validatorMethods: ['validateString']
+      },
+      {
         parameter: 'current_user',
         validatorMethods: ['validateNonEmptyObject']
       }
@@ -1375,6 +1701,10 @@ const v1Signature = {
   [apiName.pepocornTopUpGetPepocornBalance]: {
     mandatory: [
       {
+        parameter: 'api_source',
+        validatorMethods: ['validateString']
+      },
+      {
         parameter: 'current_user',
         validatorMethods: ['validateNonEmptyObject']
       }
@@ -1383,6 +1713,10 @@ const v1Signature = {
   },
   [apiName.deleteReplyVideo]: {
     mandatory: [
+      {
+        parameter: 'api_source',
+        validatorMethods: ['validateString']
+      },
       {
         parameter: 'current_user',
         validatorMethods: ['validateNonEmptyObject']
@@ -1397,6 +1731,10 @@ const v1Signature = {
   [apiName.muteUser]: {
     mandatory: [
       {
+        parameter: 'api_source',
+        validatorMethods: ['validateString']
+      },
+      {
         parameter: 'current_user',
         validatorMethods: ['validateNonEmptyObject']
       },
@@ -1410,6 +1748,10 @@ const v1Signature = {
   [apiName.unMuteUser]: {
     mandatory: [
       {
+        parameter: 'api_source',
+        validatorMethods: ['validateString']
+      },
+      {
         parameter: 'current_user',
         validatorMethods: ['validateNonEmptyObject']
       },
@@ -1422,6 +1764,10 @@ const v1Signature = {
   },
   [apiName.githubConnect]: {
     mandatory: [
+      {
+        parameter: 'api_source',
+        validatorMethods: ['validateString']
+      },
       {
         parameter: 'access_token',
         validatorMethods: ['validateString']
@@ -1440,6 +1786,10 @@ const v1Signature = {
   },
   [apiName.googleConnect]: {
     mandatory: [
+      {
+        parameter: 'api_source',
+        validatorMethods: ['validateString']
+      },
       {
         parameter: 'access_token',
         validatorMethods: ['validateString']
@@ -1474,6 +1824,10 @@ const v1Signature = {
   },
   [apiName.appleConnect]: {
     mandatory: [
+      {
+        parameter: 'api_source',
+        validatorMethods: ['validateString']
+      },
       {
         parameter: 'authorization_code',
         validatorMethods: ['validateString']
@@ -1524,6 +1878,10 @@ const v1Signature = {
   },
   [apiName.getSessionAuth]: {
     mandatory: [
+      {
+        parameter: 'api_source',
+        validatorMethods: ['validateString']
+      },
       {
         parameter: 'session_auth_payload_id',
         validatorMethods: ['validateNonZeroInteger']
