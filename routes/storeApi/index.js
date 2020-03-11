@@ -15,6 +15,7 @@ const router = express.Router();
  */
 const appendWebVersion = function(req, res, next) {
   req.decodedParams.apiVersion = apiVersions.web;
+  req.decodedParams.api_source = apiSourceConstants.store;
   next();
 };
 

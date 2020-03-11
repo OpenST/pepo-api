@@ -14,7 +14,32 @@ const rootPrefix = '../../..',
   coreConstants = require(rootPrefix + '/config/coreConstants'),
   reportRoutes = require(rootPrefix + '/routes/api/web/report'),
   supportRoutes = require(rootPrefix + '/routes/api/web/support'),
+  apiSourceConstants = require(rootPrefix + '/lib/globalConstant/apiSource'),
   webPageConstants = require(rootPrefix + '/lib/globalConstant/webPage');
+
+/**
+ * Append api_source
+ *
+ * @param req
+ * @param res
+ * @param next
+ */
+const setWebViewApiSource = function(req, res, next) {
+  req.decodedParams.api_source = apiSourceConstants.webView;
+  next();
+};
+
+/**
+ * Append api_source
+ *
+ * @param req
+ * @param res
+ * @param next
+ */
+const setWebApiSource = function(req, res, next) {
+  req.decodedParams.api_source = apiSourceConstants.web;
+  next();
+};
 
 // Node.js cookie parsing middleware.
 router.use(cookieParser(coreConstants.WEB_COOKIE_SECRET));
@@ -25,8 +50,9 @@ router.use(cookieHelper.setWebCsrf());
 //
 // NOTE: Different cookie secret is used. Handled inside.
 //
-router.use('/support', supportRoutes);
+router.use('/support', setWebViewApiSource, supportRoutes);
 
+router.use(setWebApiSource);
 //
 // NOTE: Login not mandatory for following
 //

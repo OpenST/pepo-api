@@ -19,6 +19,7 @@ const router = express.Router();
  */
 const appApisCommon = function(req, res, next) {
   req.decodedParams.apiVersion = apiVersions.v1;
+  req.decodedParams.api_source = apiSourceConstants.app;
   req.decodedParams.dev_login = false;
   next();
 };
@@ -32,6 +33,7 @@ const appApisCommon = function(req, res, next) {
  */
 const adminApisCommon = function(req, res, next) {
   req.decodedParams.apiVersion = apiVersions.admin;
+  req.decodedParams.api_source = apiSourceConstants.admin;
   req.decodedParams.dev_login = false;
   next();
 };
@@ -45,7 +47,6 @@ const adminApisCommon = function(req, res, next) {
  */
 const webApisCommon = function(req, res, next) {
   req.decodedParams.apiVersion = apiVersions.web;
-  req.decodedParams.api_source = apiSourceConstants.web;
   req.decodedParams.dev_login = basicHelper.isRequestFromPepoDevEnvAndSupported(req) || false;
   next();
 };
