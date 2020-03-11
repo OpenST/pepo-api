@@ -251,10 +251,6 @@ const webSignature = {
     ],
     optional: [
       {
-        parameter: 'email',
-        validatorMethods: ['validateNullString']
-      },
-      {
         parameter: 'state',
         validatorMethods: ['validateNullString']
       },
