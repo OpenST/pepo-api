@@ -249,10 +249,6 @@ const webSignature = {
         validatorMethods: ['validateString']
       },
       {
-        parameter: 'api_source',
-        validatorMethods: ['validateString']
-      },
-      {
         parameter: 'dev_login',
         validatorMethods: ['validateBoolean']
       }
@@ -276,10 +272,6 @@ const webSignature = {
       },
       {
         parameter: 'authorization_code',
-        validatorMethods: ['validateString']
-      },
-      {
-        parameter: 'api_source',
         validatorMethods: ['validateString']
       },
       {
@@ -310,10 +302,6 @@ const webSignature = {
       },
       {
         parameter: 'identity_token',
-        validatorMethods: ['validateString']
-      },
-      {
-        parameter: 'api_source',
         validatorMethods: ['validateString']
       },
       {
@@ -371,10 +359,6 @@ const webSignature = {
       {
         parameter: 'sanitized_headers',
         validatorMethods: ['validateNonEmptyObject']
-      },
-      {
-        parameter: 'api_source',
-        validatorMethods: ['validateString']
       }
     ],
     optional: [
@@ -470,10 +454,6 @@ const webSignature = {
       {
         parameter: 'api_source',
         validatorMethods: ['validateString']
-      },
-      {
-        parameter: 'api_source',
-        validatorMethods: ['validateString']
       }
     ],
     optional: [
@@ -485,10 +465,6 @@ const webSignature = {
   },
   [apiName.appleDisconnect]: {
     mandatory: [
-      {
-        parameter: 'api_source',
-        validatorMethods: ['validateString']
-      },
       {
         parameter: 'api_source',
         validatorMethods: ['validateString']
@@ -506,10 +482,6 @@ const webSignature = {
       {
         parameter: 'api_source',
         validatorMethods: ['validateString']
-      },
-      {
-        parameter: 'api_source',
-        validatorMethods: ['validateString']
       }
     ],
     optional: [
@@ -521,10 +493,6 @@ const webSignature = {
   },
   [apiName.githubDisconnect]: {
     mandatory: [
-      {
-        parameter: 'api_source',
-        validatorMethods: ['validateString']
-      },
       {
         parameter: 'api_source',
         validatorMethods: ['validateString']
