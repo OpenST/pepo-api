@@ -121,7 +121,9 @@ class AppleConnect extends ConnectBase {
       );
     }
 
-    oThis.decryptedAppleEmail = decryptedIdentityToken.email;
+    if (decryptedIdentityToken.email) {
+      oThis.decryptedAppleEmail = decryptedIdentityToken.email;
+    }
   }
 
   /**
