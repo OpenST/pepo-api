@@ -612,11 +612,13 @@ class BasicHelper {
   /**
    * Get usd amount for some pepo amount.
    *
-   * @param usdInOneOst
-   * @param amountPepo
+   * @param {string} usdInOneOst
+   * @param {string} amountPepo
+   * @param {number} [precision]
+   *
    * @returns {string}
    */
-  getUSDAmountForPepo(usdInOneOst, amountPepo) {
+  getUSDAmountForPepo(usdInOneOst, amountPepo, precision = 2) {
     const oThis = this;
 
     const pepoInOneOST = 1;
@@ -625,7 +627,7 @@ class BasicHelper {
       usdInOnePepo = oThis.convertToBigNumber(ostInOnePepo).mul(oThis.convertToBigNumber(usdInOneOst)),
       totalUSDBn = oThis.convertToBigNumber(usdInOnePepo).mul(oThis.convertToBigNumber(amountPepo));
 
-    return totalUSDBn.toString(10);
+    return totalUSDBn.toFixed(precision, BigNumber.ROUND_HALF_UP).toString(10);
   }
 
   /**
