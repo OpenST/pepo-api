@@ -2,15 +2,18 @@ const rootPrefix = '../../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   UserModel = require(rootPrefix + '/app/models/mysql/User'),
   GetTokenService = require(rootPrefix + '/app/services/token/Get'),
+  TokenUserModel = require(rootPrefix + '/app/models/mysql/TokenUser'),
   ImageByIdCache = require(rootPrefix + '/lib/cacheManagement/multi/ImageByIds'),
   SecureUserCache = require(rootPrefix + '/lib/cacheManagement/single/SecureUser'),
   PricePointsCache = require(rootPrefix + '/lib/cacheManagement/single/PricePoints'),
   TokenUserDetailByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TokenUserByUserIds'),
+  basicHelper = require(rootPrefix + '/helpers/basic'),
   coreConstants = require(rootPrefix + '/config/coreConstants'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   localCipher = require(rootPrefix + '/lib/encryptors/localCipher'),
-  TokenUserModel = require(rootPrefix + '/app/models/mysql/TokenUser');
+  tokenConstants = require(rootPrefix + '/lib/globalConstant/token'),
+  ostPricePointsConstants = require(rootPrefix + '/lib/globalConstant/ostPricePoints');
 
 /**
  * Class to fetch current user.
@@ -35,9 +38,11 @@ class GetCurrentUser extends ServiceBase {
 
     oThis.userId = params.current_user.id;
     oThis.loginServiceType = params.login_service_type;
+
     oThis.pricePoints = {};
     oThis.tokenDetails = {};
     oThis.imageMap = {};
+    oThis.airdropDetails = {};
   }
 
   /**
@@ -49,15 +54,16 @@ class GetCurrentUser extends ServiceBase {
   async _asyncPerform() {
     const oThis = this;
 
-    await oThis._fetchUser();
-
-    await oThis._fetchTokenUser();
-
-    await oThis._fetchPricePoints();
-
-    await oThis._setTokenDetails();
+    await Promise.all([
+      oThis._fetchUser(),
+      oThis._fetchTokenUser(),
+      oThis._fetchPricePoints(),
+      oThis._setTokenDetails()
+    ]);
 
     await oThis._fetchImages();
+
+    oThis._setAirdropAmount();
 
     return oThis._serviceResponse();
   }
@@ -170,6 +176,28 @@ class GetCurrentUser extends ServiceBase {
   }
 
   /**
+   * Set airdrop amount.
+   *
+   * @sets oThis.airdropDetails
+   *
+   * @private
+   */
+  _setAirdropAmount() {
+    const oThis = this;
+
+    const stakeCurrency = oThis.tokenDetails.stakeCurrency;
+    const usdInOneOst = oThis.pricePoints[stakeCurrency][ostPricePointsConstants.usdQuoteCurrency];
+
+    const amountInPepoBn = basicHelper.convertWeiToNormal(tokenConstants.airdropAmount);
+    const usdAmountForPepo = basicHelper.getUSDAmountForPepo(usdInOneOst, amountInPepoBn);
+
+    oThis.airdropDetails = {
+      pepoAmountInWei: tokenConstants.airdropAmount,
+      pepoAmountInDollar: usdAmountForPepo
+    };
+  }
+
+  /**
    * Prepare service response.
    *
    * @returns {Promise<result>}
@@ -198,7 +226,8 @@ class GetCurrentUser extends ServiceBase {
       userLoginCookieValue: userLoginCookieValue,
       meta: { isRegistration: 1, serviceType: oThis.loginServiceType },
       pricePointsMap: oThis.pricePoints,
-      tokenDetails: oThis.tokenDetails
+      tokenDetails: oThis.tokenDetails,
+      airdropDetails: oThis.airdropDetails
     });
   }
 }
