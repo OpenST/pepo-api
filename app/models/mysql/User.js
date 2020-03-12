@@ -295,7 +295,7 @@ class UserModel extends ModelBase {
    *
    * @returns {string}
    */
-  getCookieValueFor(userObj, decryptedEncryptionSalt, options) {
+  getTokenFor(userObj, decryptedEncryptionSalt, options) {
     const uniqueStr = localCipher.decrypt(decryptedEncryptionSalt, userObj.cookieToken);
 
     let version = null,
@@ -340,7 +340,35 @@ class UserModel extends ModelBase {
       ':' +
       options.loginServiceType;
 
-    const cookieToken = util.createSha256Digest(salt, stringToSign);
+    return util.createSha256Digest(salt, stringToSign);
+  }
+
+  /**
+   * Get cookie token for different sources.
+   *
+   * @param {object} userObj
+   * @param {string} decryptedEncryptionSalt
+   * @param {object} options
+   *
+   * @returns {string}
+   */
+  getCookieValueFor(userObj, decryptedEncryptionSalt, options) {
+    const oThis = this;
+
+    const cookieToken = oThis.getTokenFor(userObj, decryptedEncryptionSalt, options);
+    let version = null;
+
+    if (apiSourceConstants.isAppRequest(options.apiSource)) {
+      version = 'v2';
+    } else if (
+      apiSourceConstants.isWebViewRequest(options.apiSource) ||
+      apiSourceConstants.isStoreRequest(options.apiSource) ||
+      apiSourceConstants.isWebViewRequest(options.apiSource)
+    ) {
+      version = options.apiSource;
+    } else {
+      throw `Invalid api_source-${options.apiSource} for getCookieValueFor`;
+    }
 
     return version + ':' + userObj.id + ':' + options.loginServiceType + ':' + options.timestamp + ':' + cookieToken;
   }
