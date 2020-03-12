@@ -307,7 +307,7 @@ class UserModel extends ModelBase {
     } else if (
       apiSourceConstants.isWebViewRequest(options.apiSource) ||
       apiSourceConstants.isStoreRequest(options.apiSource) ||
-      apiSourceConstants.isWebViewRequest(options.apiSource)
+      apiSourceConstants.isWebRequest(options.apiSource)
     ) {
       version = options.apiSource;
       strSecret = coreConstants.WEB_COOKIE_SECRET;
@@ -363,7 +363,7 @@ class UserModel extends ModelBase {
     } else if (
       apiSourceConstants.isWebViewRequest(options.apiSource) ||
       apiSourceConstants.isStoreRequest(options.apiSource) ||
-      apiSourceConstants.isWebViewRequest(options.apiSource)
+      apiSourceConstants.isWebRequest(options.apiSource)
     ) {
       version = options.apiSource;
     } else {
