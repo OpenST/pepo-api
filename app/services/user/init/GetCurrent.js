@@ -9,7 +9,6 @@ const rootPrefix = '../../../..',
   TokenUserDetailByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TokenUserByUserIds'),
   coreConstants = require(rootPrefix + '/config/coreConstants'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
-  logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   localCipher = require(rootPrefix + '/lib/encryptors/localCipher'),
   tokenConstants = require(rootPrefix + '/lib/globalConstant/token'),
   ostPricePointsConstants = require(rootPrefix + '/lib/globalConstant/ostPricePoints');
@@ -45,7 +44,7 @@ class GetCurrentUser extends ServiceBase {
   }
 
   /**
-   * Async perform
+   * Async perform.
    *
    * @returns {Promise<result>}
    * @private
@@ -78,8 +77,6 @@ class GetCurrentUser extends ServiceBase {
   async _fetchUser() {
     const oThis = this;
 
-    logger.log('Fetch secure user.');
-
     const cacheResp = await new SecureUserCache({ id: oThis.userId }).fetch();
     if (cacheResp.isFailure() || !cacheResp.data.id) {
       return Promise.reject(cacheResp);
@@ -98,8 +95,6 @@ class GetCurrentUser extends ServiceBase {
    */
   async _fetchTokenUser() {
     const oThis = this;
-
-    logger.log('Fetch token user.');
 
     const tokenUserRes = await new TokenUserDetailByUserIdsCache({ userIds: [oThis.userId] }).fetch();
     if (tokenUserRes.isFailure()) {
@@ -158,11 +153,11 @@ class GetCurrentUser extends ServiceBase {
   async _fetchImages() {
     const oThis = this;
 
-    if (!oThis.secureUser.profileImageId) {
+    const imageId = oThis.secureUser.profileImageId;
+
+    if (!imageId) {
       return;
     }
-
-    const imageId = oThis.secureUser.profileImageId;
 
     const cacheRsp = await new ImageByIdCache({ ids: [imageId] }).fetch();
     if (cacheRsp.isFailure()) {
