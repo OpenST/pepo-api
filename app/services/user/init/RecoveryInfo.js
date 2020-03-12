@@ -1,19 +1,30 @@
 const rootPrefix = '../../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
-  coreConstants = require(rootPrefix + '/config/coreConstants'),
-  logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
-  localCipher = require(rootPrefix + '/lib/encryptors/localCipher'),
   SecureTokenUserByUserIdCache = require(rootPrefix + '/lib/cacheManagement/single/SecureTokenUserByUserId'),
-  responseHelper = require(rootPrefix + '/lib/formatter/response');
+  coreConstants = require(rootPrefix + '/config/coreConstants'),
+  responseHelper = require(rootPrefix + '/lib/formatter/response'),
+  logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
+  localCipher = require(rootPrefix + '/lib/encryptors/localCipher');
 
+/**
+ * Class to get recovery information of current user.
+ *
+ * @class RecoveryInfo
+ */
 class RecoveryInfo extends ServiceBase {
   /**
-   * @param {Object} params
+   * Constructor to get recovery information of current user.
+   *
+   * @param {object} params
+   * @param {object} params.current_user
+   * @param {number} params.current_user.id
+   *
+   * @augments ServiceBase
    *
    * @constructor
    */
   constructor(params) {
-    super(params);
+    super();
 
     const oThis = this;
 
@@ -21,20 +32,21 @@ class RecoveryInfo extends ServiceBase {
   }
 
   /**
-   * perform - perform user creation
+   * Async perform.
    *
-   * @return {Promise<void>}
+   * @returns {Promise<void>}
+   * @private
    */
   async _asyncPerform() {
     const oThis = this;
 
-    let cacheData = await oThis._fetchScryptSaltFromTokenUserCache();
+    const cacheData = await oThis._fetchScryptSaltFromTokenUserCache();
 
     return oThis.decryptScryptSalt(cacheData);
   }
 
   /**
-   * Fetch scrypt salt from token user cache
+   * Fetch scrypt salt from token user cache.
    *
    * @returns {Promise<*>}
    * @private
@@ -42,14 +54,14 @@ class RecoveryInfo extends ServiceBase {
   async _fetchScryptSaltFromTokenUserCache() {
     const oThis = this;
 
-    let secureTokenUserRsp = await new SecureTokenUserByUserIdCache({ userId: oThis.userId }).fetch();
-
+    const secureTokenUserRsp = await new SecureTokenUserByUserIdCache({ userId: oThis.userId }).fetch();
     if (secureTokenUserRsp.isFailure()) {
       return Promise.reject(secureTokenUserRsp);
     }
 
     if (!secureTokenUserRsp.data.id) {
       logger.error('Error while fetching data from token user cache');
+
       return Promise.reject(secureTokenUserRsp);
     }
 
@@ -57,15 +69,14 @@ class RecoveryInfo extends ServiceBase {
   }
 
   /**
-   * Decrypt scrypt salt
+   * Decrypt scrypt salt.
    *
-   * @param cacheData
-   * @returns {Promise<void>}
+   * @param {object} cacheData
+   *
+   * @returns {Promise<result>}
    */
   async decryptScryptSalt(cacheData) {
-    const oThis = this;
-
-    let scryptSaltD = localCipher.decrypt(coreConstants.CACHE_SHA_KEY, cacheData['scryptSaltLc']);
+    const scryptSaltD = localCipher.decrypt(coreConstants.CACHE_SHA_KEY, cacheData.scryptSaltLc);
 
     return responseHelper.successWithData({ scryptSalt: scryptSaltD });
   }

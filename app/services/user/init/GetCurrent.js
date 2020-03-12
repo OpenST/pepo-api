@@ -37,6 +37,8 @@ class GetCurrentUser extends ServiceBase {
     oThis.userId = params.current_user.id;
     oThis.loginServiceType = params.login_service_type;
 
+    oThis.secureUser = {};
+    oThis.tokenUser = {};
     oThis.pricePoints = {};
     oThis.tokenDetails = {};
     oThis.imageMap = {};
@@ -128,7 +130,7 @@ class GetCurrentUser extends ServiceBase {
    *
    * @sets oThis.tokenDetails
    *
-   * @return {Promise<void>}
+   * @returns {Promise<void>}
    * @private
    */
   async _setTokenDetails() {
@@ -147,7 +149,7 @@ class GetCurrentUser extends ServiceBase {
    *
    * @sets oThis.imageMap
    *
-   * @return {Promise<*>}
+   * @returns {Promise<*>}
    * @private
    */
   async _fetchImages() {
