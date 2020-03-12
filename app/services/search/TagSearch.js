@@ -10,7 +10,8 @@ const rootPrefix = '../../..',
   curatedEntitiesConstants = require(rootPrefix + '/lib/globalConstant/curatedEntities');
 
 // Declare variables.
-const topTagsResultsLimit = 5;
+const topTagsResultsLimit = 5,
+  searchTermMaxLength = 200; // This is to ensure that cache key max is not violated.
 
 /**
  * Class to search tags.
@@ -106,7 +107,7 @@ class TagSearch extends ServiceBase {
 
     // Length check is added to ensure that empty data is returned in case of invalid tag name.
     if (oThis.tagPrefix) {
-      if (oThis.tagPrefix.length <= tagConstants.maxTagLength) {
+      if (oThis.tagPrefix.length <= searchTermMaxLength) {
         const tagPaginationRsp = await new TagPaginationCache({
           limit: oThis.limit,
           page: oThis.page,

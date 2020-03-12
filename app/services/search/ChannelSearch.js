@@ -16,7 +16,8 @@ const rootPrefix = '../../..',
   curatedEntitiesConstants = require(rootPrefix + '/lib/globalConstant/curatedEntities');
 
 // Declare variables.
-const topChannelsResultsLimit = 5;
+const topChannelsResultsLimit = 5,
+  searchTermMaxLength = 200; // This is to ensure that cache key max is not violated.
 
 /**
  * Class to search channels.
@@ -131,7 +132,7 @@ class ChannelSearch extends ServiceBase {
 
     // Length check is added to ensure that empty data is returned in case of invalid channel name.
     if (oThis.channelPrefix) {
-      if (CommonValidators.validateChannelTitle(oThis.channelPrefix)) {
+      if (oThis.channelPrefix.length <= searchTermMaxLength) {
         const channelPaginationRsp = await new ChannelNamePaginationCache({
           limit: oThis.limit,
           paginationTimestamp: oThis.paginationTimestamp,
