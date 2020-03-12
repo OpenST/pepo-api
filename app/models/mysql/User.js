@@ -312,7 +312,7 @@ class UserModel extends ModelBase {
       version = options.apiSource;
       strSecret = coreConstants.WEB_COOKIE_SECRET;
     } else {
-      throw `Invalid api_source-${options.apiSource} for getCookieToken`;
+      throw new Error(`Invalid api_source-${options.apiSource} for getCookieToken`);
     }
 
     const stringToSign =
@@ -367,7 +367,7 @@ class UserModel extends ModelBase {
     ) {
       version = options.apiSource;
     } else {
-      throw `Invalid api_source-${options.apiSource} for getCookieValueFor`;
+      throw new Error(`Invalid api_source-${options.apiSource} for getCookieValueFor`);
     }
 
     return version + ':' + userObj.id + ':' + options.loginServiceType + ':' + options.timestamp + ':' + cookieToken;
