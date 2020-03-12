@@ -7,6 +7,7 @@ const rootPrefix = '../../..',
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   userConstants = require(rootPrefix + '/lib/globalConstant/user'),
   localCipher = require(rootPrefix + '/lib/encryptors/localCipher'),
+  apiSourceConstants = require(rootPrefix + '/lib/globalConstant/apiSource'),
   webPageConstants = require(rootPrefix + '/lib/globalConstant/webPage');
 
 /**
@@ -105,7 +106,11 @@ class GetRedemptionInfo extends ServiceBase {
 
     const decryptedEncryptionSalt = localCipher.decrypt(coreConstants.CACHE_SHA_KEY, secureUserObj.encryptionSaltLc);
 
-    return new UserModel().getCookieValueFor(secureUserObj, decryptedEncryptionSalt, { timestamp: Date.now() / 1000 });
+    return new UserModel().getCookieValueFor(secureUserObj, decryptedEncryptionSalt, {
+      timestamp: Date.now() / 1000,
+      //source shall be store
+      apiSource: apiSourceConstants.store
+    });
   }
 }
 

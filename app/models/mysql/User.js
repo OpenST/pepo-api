@@ -287,8 +287,7 @@ class UserModel extends ModelBase {
   }
 
   /**
-   * Get cookie value for version v2.
-   * // NOTE - this cookie versioning has been introduced on 22/01/2020.
+   * Get cookie token for different sources.
    *
    * @param {object} userObj
    * @param {string} decryptedEncryptionSalt
@@ -297,124 +296,53 @@ class UserModel extends ModelBase {
    * @returns {string}
    */
   getCookieValueFor(userObj, decryptedEncryptionSalt, options) {
-    const oThis = this;
+    const uniqueStr = localCipher.decrypt(decryptedEncryptionSalt, userObj.cookieToken);
 
-    let cookieToken = null,
+    let version = null,
+      strSecret = null;
+
+    if (apiSourceConstants.isAppRequest(options.apiSource)) {
       version = 'v2';
-    if (apiSourceConstants.isWebRequest(options.apiSource)) {
-      cookieToken = oThis.getCookieTokenForWeb(userObj, decryptedEncryptionSalt, options);
-      version = apiSourceConstants.web;
+      strSecret = coreConstants.PA_COOKIE_TOKEN_SECRET;
+    } else if (
+      apiSourceConstants.isWebViewRequest(options.apiSource) ||
+      apiSourceConstants.isStoreRequest(options.apiSource) ||
+      apiSourceConstants.isWebViewRequest(options.apiSource)
+    ) {
+      version = options.apiSource;
+      strSecret = coreConstants.WEB_COOKIE_SECRET;
     } else {
-      cookieToken = oThis.getCookieTokenForVersionV2(userObj, decryptedEncryptionSalt, options);
+      throw `Invalid api_source-${options.apiSource} for getCookieToken`;
     }
 
+    const stringToSign =
+      version +
+      ':' +
+      userObj.id +
+      ':' +
+      options.loginServiceType +
+      ':' +
+      options.timestamp +
+      ':' +
+      strSecret +
+      ':' +
+      uniqueStr.substring(0, 16);
+    const salt =
+      version +
+      ':' +
+      userObj.id +
+      ':' +
+      uniqueStr.slice(-16) +
+      ':' +
+      strSecret +
+      ':' +
+      options.timestamp +
+      ':' +
+      options.loginServiceType;
+
+    const cookieToken = util.createSha256Digest(salt, stringToSign);
+
     return version + ':' + userObj.id + ':' + options.loginServiceType + ':' + options.timestamp + ':' + cookieToken;
-  }
-
-  /**
-   * Get cookie token.
-   *
-   * @param {object} userObj
-   * @param {string} decryptedEncryptionSalt
-   * @param {object} options
-   *
-   * @returns {string}
-   */
-  getCookieTokenFor(userObj, decryptedEncryptionSalt, options) {
-    const uniqueStr = localCipher.decrypt(decryptedEncryptionSalt, userObj.cookieToken);
-
-    const stringToSign =
-      userObj.id +
-      ':' +
-      options.timestamp +
-      ':' +
-      coreConstants.PA_COOKIE_TOKEN_SECRET +
-      ':' +
-      uniqueStr.substring(0, 16);
-    const salt =
-      userObj.id + ':' + uniqueStr.slice(-16) + ':' + coreConstants.PA_COOKIE_TOKEN_SECRET + ':' + options.timestamp;
-
-    return util.createSha256Digest(salt, stringToSign);
-  }
-
-  /**
-   * Get cookie token for version v2.
-   *
-   * @param {object} userObj
-   * @param {string} decryptedEncryptionSalt
-   * @param {object} options
-   *
-   * @returns {string}
-   */
-  getCookieTokenForVersionV2(userObj, decryptedEncryptionSalt, options) {
-    const uniqueStr = localCipher.decrypt(decryptedEncryptionSalt, userObj.cookieToken);
-
-    const stringToSign =
-      'v2' +
-      ':' +
-      userObj.id +
-      ':' +
-      options.loginServiceType +
-      ':' +
-      options.timestamp +
-      ':' +
-      coreConstants.PA_COOKIE_TOKEN_SECRET +
-      ':' +
-      uniqueStr.substring(0, 16);
-    const salt =
-      'v2' +
-      ':' +
-      userObj.id +
-      ':' +
-      uniqueStr.slice(-16) +
-      ':' +
-      coreConstants.PA_COOKIE_TOKEN_SECRET +
-      ':' +
-      options.timestamp +
-      ':' +
-      options.loginServiceType;
-
-    return util.createSha256Digest(salt, stringToSign);
-  }
-
-  /**
-   * Get cookie token for web.
-   *
-   * @param {object} userObj
-   * @param {string} decryptedEncryptionSalt
-   * @param {object} options
-   *
-   * @returns {string}
-   */
-  getCookieTokenForWeb(userObj, decryptedEncryptionSalt, options) {
-    const uniqueStr = localCipher.decrypt(decryptedEncryptionSalt, userObj.cookieToken);
-
-    const stringToSign =
-      apiSourceConstants.web +
-      ':' +
-      userObj.id +
-      ':' +
-      options.loginServiceType +
-      ':' +
-      options.timestamp +
-      ':' +
-      coreConstants.WEB_COOKIE_SECRET +
-      ':' +
-      uniqueStr.substring(0, 16);
-    const salt =
-      apiSourceConstants.web +
-      ':' +
-      userObj.id +
-      ':' +
-      uniqueStr.slice(-16) +
-      ':' +
-      coreConstants.PA_COOKIE_TOKEN_SECRET +
-      ':' +
-      options.timestamp +
-      ':' +
-      options.loginServiceType;
-
-    return util.createSha256Digest(salt, stringToSign);
   }
 
   /**

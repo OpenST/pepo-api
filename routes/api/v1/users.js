@@ -8,7 +8,6 @@ const rootPrefix = '../../..',
   apiName = require(rootPrefix + '/lib/globalConstant/apiName'),
   entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
-  cookieHelper = require(rootPrefix + '/lib/cookieHelper'),
   responseEntityKey = require(rootPrefix + '/lib/globalConstant/responseEntityKey');
 
 /* Register Device*/
@@ -156,7 +155,6 @@ router.get('/current', sanitizer.sanitizeDynamicUrlParams, function(req, res, ne
   req.decodedParams.apiName = apiName.loggedInUser;
 
   const dataFormatterFunc = async function(serviceResponse) {
-    cookieHelper.setLoginCookie(res, serviceResponse.data.userLoginCookieValue);
     const wrapperFormatterRsp = await new FormatterComposer({
       resultType: responseEntityKey.loggedInUser,
       entityKindToResponseKeyMap: {

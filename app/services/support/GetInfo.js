@@ -88,6 +88,7 @@ class GetSupportInfo extends ServiceBase {
 
     return new UserModel().getCookieValueFor(secureUserObj, decryptedEncryptionSalt, {
       timestamp: Date.now() / 1000,
+      //source shall be webView
       apiSource: apiSourceConstants.webView
     });
   }
