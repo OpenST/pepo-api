@@ -68,17 +68,21 @@ class ShareDetails extends ServiceBase {
   async _fetchChannelDetails() {
     const oThis = this;
 
+    let lowercaseChPermalink = oThis.channelPermalink.toLowerCase();
+
     // If channel id is not passed and permalink is passed.
     if (!oThis.channelId) {
       const cacheResponse = await new ChannelByPermalinksCache({
-        permalinks: [oThis.channelPermalink.toLowerCase()]
+        permalinks: [lowercaseChPermalink]
       }).fetch();
+
       if (cacheResponse.isFailure()) {
         return Promise.reject(cacheResponse);
       }
 
       const permalinkIdsMap = cacheResponse.data;
-      if (!permalinkIdsMap[oThis.channelPermalink.toLowerCase()]) {
+
+      if (!CommonValidators.validateNonEmptyObject(permalinkIdsMap[lowercaseChPermalink])) {
         return Promise.reject(
           responseHelper.error({
             internal_error_identifier: 'a_s_c_sd_1',
@@ -90,7 +94,7 @@ class ShareDetails extends ServiceBase {
         );
       }
 
-      oThis.channelId = permalinkIdsMap[oThis.channelPermalink.toLowerCase()];
+      oThis.channelId = permalinkIdsMap[lowercaseChPermalink].id;
     }
 
     const channelCacheResponse = await new ChannelByIdsCache({ ids: [oThis.channelId] }).fetch(),

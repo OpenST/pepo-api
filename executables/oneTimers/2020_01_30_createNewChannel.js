@@ -163,7 +163,7 @@ class CreateNewChannel {
     const channelPermalinksResp = await new ChannelModel().fetchIdsByPermalinks([oThis.channelPermalink.toLowerCase()]);
     if (
       CommonValidators.validateNonEmptyObject(channelPermalinksResp) &&
-      channelPermalinksResp[oThis.channelPermalink.toLowerCase()]
+      CommonValidators.validateNonEmptyObject(channelPermalinksResp[oThis.channelPermalink.toLowerCase()])
     ) {
       return Promise.reject(new Error('Same Permalink already exists'));
     }
