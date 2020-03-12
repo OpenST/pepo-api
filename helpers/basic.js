@@ -48,12 +48,23 @@ class BasicHelper {
   /**
    * Convert wei value to un wei (normal).
    *
-   * @param {string} wei
+   * @param {*} wei
    *
    * @return {BigNumber}
    */
   convertWeiToNormal(wei) {
     return this.convertToBigNumber(wei).div(this.convertToBigNumber(10).toPower(18));
+  }
+
+  /**
+   * Convert normal value to wei.
+   *
+   * @param {*} num
+   *
+   * @returns {BigNumber}
+   */
+  convertToWei(num) {
+    return this.convertToBigNumber(num).mul(this.convertToBigNumber(10).toPower(18));
   }
 
   /**
@@ -592,8 +603,9 @@ class BasicHelper {
   /**
    * Get pepo amount for some amount in usd.
    *
-   * @param usdInOneOst
-   * @param amountUSD
+   * @param {string} usdInOneOst
+   * @param {string} amountUSD
+   *
    * @returns {string}
    */
   getPepoAmountForUSD(usdInOneOst, amountUSD) {
@@ -614,11 +626,10 @@ class BasicHelper {
    *
    * @param {string} usdInOneOst
    * @param {string} amountPepo
-   * @param {number} [precision]
    *
    * @returns {string}
    */
-  getUSDAmountForPepo(usdInOneOst, amountPepo, precision = 2) {
+  getUSDAmountForPepo(usdInOneOst, amountPepo) {
     const oThis = this;
 
     const pepoInOneOST = 1;
@@ -627,7 +638,7 @@ class BasicHelper {
       usdInOnePepo = oThis.convertToBigNumber(ostInOnePepo).mul(oThis.convertToBigNumber(usdInOneOst)),
       totalUSDBn = oThis.convertToBigNumber(usdInOnePepo).mul(oThis.convertToBigNumber(amountPepo));
 
-    return totalUSDBn.toFixed(precision, BigNumber.ROUND_HALF_UP).toString(10);
+    return totalUSDBn.toString(10);
   }
 
   /**

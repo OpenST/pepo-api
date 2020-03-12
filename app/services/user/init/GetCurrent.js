@@ -7,7 +7,6 @@ const rootPrefix = '../../../..',
   SecureUserCache = require(rootPrefix + '/lib/cacheManagement/single/SecureUser'),
   PricePointsCache = require(rootPrefix + '/lib/cacheManagement/single/PricePoints'),
   TokenUserDetailByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TokenUserByUserIds'),
-  basicHelper = require(rootPrefix + '/helpers/basic'),
   coreConstants = require(rootPrefix + '/config/coreConstants'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
@@ -122,7 +121,6 @@ class GetCurrentUser extends ServiceBase {
     const oThis = this;
 
     const pricePointsCacheRsp = await new PricePointsCache().fetch();
-
     if (pricePointsCacheRsp.isFailure()) {
       return Promise.reject(pricePointsCacheRsp);
     }
@@ -142,7 +140,6 @@ class GetCurrentUser extends ServiceBase {
     const oThis = this;
 
     const tokenResp = await new GetTokenService({}).perform();
-
     if (tokenResp.isFailure()) {
       return Promise.reject(tokenResp);
     }
@@ -188,12 +185,9 @@ class GetCurrentUser extends ServiceBase {
     const stakeCurrency = oThis.tokenDetails.stakeCurrency;
     const usdInOneOst = oThis.pricePoints[stakeCurrency][ostPricePointsConstants.usdQuoteCurrency];
 
-    const amountInPepoBn = basicHelper.convertWeiToNormal(tokenConstants.airdropAmount);
-    const usdAmountForPepo = basicHelper.getUSDAmountForPepo(usdInOneOst, amountInPepoBn);
-
     oThis.airdropDetails = {
-      pepoAmountInWei: tokenConstants.airdropAmount,
-      pepoAmountInDollar: usdAmountForPepo
+      pepoAmountInWei: tokenConstants.getPepoAirdropAmountInWei(usdInOneOst),
+      pepoAmountInDollar: tokenConstants.airdropAmountInUsd
     };
   }
 
