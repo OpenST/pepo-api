@@ -583,7 +583,7 @@ class CoreConstants {
   }
 
   get PEPO_DEV_ENV_DOMAIN() {
-    return 'http://pepodev.com';
+    return 'https://pepodev.com';
   }
 }
 
