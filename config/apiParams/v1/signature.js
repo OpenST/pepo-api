@@ -269,36 +269,6 @@ const v1Signature = {
       }
     ]
   },
-
-  [apiName.getRedemptionProductUrl]: {
-    mandatory: [
-      {
-        parameter: 'api_source',
-        validatorMethods: ['validateString']
-      },
-      {
-        parameter: 'current_user',
-        validatorMethods: ['validateNonEmptyObject']
-      },
-      {
-        parameter: 'pepo_device_os',
-        validatorMethods: ['validateNonBlankString']
-      },
-      {
-        parameter: 'pepo_device_os_version',
-        validatorMethods: ['validateNonBlankString']
-      },
-      {
-        parameter: 'pepo_build_number',
-        validatorMethods: ['validateNonBlankString']
-      },
-      {
-        parameter: 'pepo_app_version',
-        validatorMethods: ['validateNonBlankString']
-      }
-    ],
-    optional: []
-  },
   [apiName.getRedemptionWebViewProductUrl]: {
     mandatory: [
       {
