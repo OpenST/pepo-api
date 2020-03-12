@@ -28,6 +28,8 @@ router.post('/logout', cookieHelper.parseUserCookieForLogout, sanitizer.sanitize
 router.post('/twitter-login', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.twitterLogin;
 
+  req.decodedParams.ip_address = req.headers['x-forwarded-for'];
+
   cookieHelper.fetchUserUtmCookie(req);
 
   const onServiceSuccess = async function(serviceResponse) {
@@ -62,6 +64,8 @@ router.post('/twitter-login', sanitizer.sanitizeDynamicUrlParams, function(req, 
 /* Github connect. */
 router.post('/github-login', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.githubConnect;
+
+  req.decodedParams.ip_address = req.headers['x-forwarded-for'];
 
   cookieHelper.fetchUserUtmCookie(req);
 
@@ -98,6 +102,8 @@ router.post('/github-login', sanitizer.sanitizeDynamicUrlParams, function(req, r
 router.post('/google-login', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.googleConnect;
 
+  req.decodedParams.ip_address = req.headers['x-forwarded-for'];
+
   cookieHelper.fetchUserUtmCookie(req);
 
   const onServiceSuccess = async function(serviceResponse) {
@@ -132,6 +138,8 @@ router.post('/google-login', sanitizer.sanitizeDynamicUrlParams, function(req, r
 /* Apple connect. */
 router.post('/apple-login', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.appleConnect;
+
+  req.decodedParams.ip_address = req.headers['x-forwarded-for'];
 
   cookieHelper.fetchUserUtmCookie(req);
 

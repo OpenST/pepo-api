@@ -372,6 +372,10 @@ const v1Signature = {
     ],
     optional: [
       {
+        parameter: 'ip_address',
+        validatorMethods: ['validateNonBlankString']
+      },
+      {
         parameter: 'invite_code',
         validatorMethods: ['validateNonBlankString']
       },
@@ -1775,6 +1779,10 @@ const v1Signature = {
     ],
     optional: [
       {
+        parameter: 'ip_address',
+        validatorMethods: ['validateNonBlankString']
+      },
+      {
         parameter: 'invite_code',
         validatorMethods: ['validateNonBlankString']
       },
@@ -1800,6 +1808,10 @@ const v1Signature = {
       }
     ],
     optional: [
+      {
+        parameter: 'ip_address',
+        validatorMethods: ['validateNonBlankString']
+      },
       {
         parameter: 'expires_in',
         validatorMethods: ['validateString']
@@ -1854,6 +1866,10 @@ const v1Signature = {
       }
     ],
     optional: [
+      {
+        parameter: 'ip_address',
+        validatorMethods: ['validateNonBlankString']
+      },
       {
         parameter: 'email',
         validatorMethods: ['validateNullString']
