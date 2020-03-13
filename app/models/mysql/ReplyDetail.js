@@ -114,12 +114,17 @@ class ReplyDetailsModel extends ModelBase {
       videoId = params.videoId,
       paginationTimestamp = params.paginationTimestamp;
 
+    const statuses = [
+      replyDetailConstants.invertedStatuses[replyDetailConstants.activeStatus],
+      replyDetailConstants.invertedStatuses[replyDetailConstants.unppprovedStatus]
+    ];
+
     const queryObject = oThis
       .select('id')
       .where({
         parent_id: videoId,
         entity_kind: replyDetailConstants.invertedEntityKinds[replyDetailConstants.videoEntityKind],
-        status: replyDetailConstants.invertedStatuses[replyDetailConstants.activeStatus]
+        status: statuses
       })
       .order_by('id asc')
       .limit(limit);
@@ -342,11 +347,16 @@ class ReplyDetailsModel extends ModelBase {
       creatorUserId = params.creatorUserId,
       paginationTimestamp = params.paginationTimestamp;
 
+    const statuses = [
+      replyDetailConstants.invertedStatuses[replyDetailConstants.activeStatus],
+      replyDetailConstants.invertedStatuses[replyDetailConstants.unppprovedStatus]
+    ];
+
     const queryObject = oThis
       .select('id, entity_id')
       .where({
         creator_user_id: creatorUserId,
-        status: replyDetailConstants.invertedStatuses[replyDetailConstants.activeStatus]
+        status: statuses
       })
       .order_by('id desc')
       .limit(limit);

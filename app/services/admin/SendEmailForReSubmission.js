@@ -130,18 +130,14 @@ class SendEmailForReSubmission extends ServiceBase {
     }
 
     if (UserModel.isUserApprovedCreator(userObj)) {
-      const isMuted = await oThis._isGloballyMutedByAdmin();
-
-      if (!isMuted) {
-        return Promise.reject(
-          responseHelper.paramValidationError({
-            internal_error_identifier: 'a_s_a_sefrs_5',
-            api_error_identifier: 'could_not_proceed',
-            params_error_identifiers: ['user_already_approved'],
-            debug_options: {}
-          })
-        );
-      }
+      return Promise.reject(
+        responseHelper.paramValidationError({
+          internal_error_identifier: 'a_s_a_sefrs_5',
+          api_error_identifier: 'could_not_proceed',
+          params_error_identifiers: ['user_already_approved'],
+          debug_options: {}
+        })
+      );
     }
 
     if (UserModel.isUserDeniedCreator(userObj)) {

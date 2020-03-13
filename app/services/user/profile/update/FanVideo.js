@@ -255,7 +255,7 @@ class UpdateFanVideo extends UpdateProfileBase {
     /* If user is approved and globally muted, publish content monitoring msg
      else send request to admins to approve new creator.
      */
-    if (UserModelKlass.isUserApprovedCreator(oThis.userObj) && !isUserMuted) {
+    if (UserModelKlass.isUserApprovedCreator(oThis.userObj)) {
       const messagePayload = {
         userId: oThis.profileUserId,
         videoId: oThis.videoId
