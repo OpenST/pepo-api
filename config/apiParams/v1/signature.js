@@ -1513,10 +1513,6 @@ const v1Signature = {
         validatorMethods: ['validateNonBlankString']
       },
       {
-        parameter: 'email',
-        validatorMethods: ['validateNullString']
-      },
-      {
         parameter: 'state',
         validatorMethods: ['validateNullString']
       },

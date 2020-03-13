@@ -16,7 +16,8 @@ const rootPrefix = '../../..',
   curatedEntitiesConstants = require(rootPrefix + '/lib/globalConstant/curatedEntities');
 
 // Declare variables.
-const topChannelsResultsLimit = 5;
+const topChannelsResultsLimit = 5,
+  searchTermMaxLength = 200; // This is to ensure that cache key max is not violated.
 
 /**
  * Class to search channels.
@@ -129,14 +130,17 @@ class ChannelSearch extends ServiceBase {
 
     let channelIds = [];
 
+    // Length check is added to ensure that empty data is returned in case of invalid channel name.
     if (oThis.channelPrefix) {
-      const channelPaginationRsp = await new ChannelNamePaginationCache({
-        limit: oThis.limit,
-        paginationTimestamp: oThis.paginationTimestamp,
-        channelPrefix: oThis.channelPrefix
-      }).fetch();
+      if (oThis.channelPrefix.length <= searchTermMaxLength) {
+        const channelPaginationRsp = await new ChannelNamePaginationCache({
+          limit: oThis.limit,
+          paginationTimestamp: oThis.paginationTimestamp,
+          channelPrefix: oThis.channelPrefix
+        }).fetch();
 
-      channelIds = channelPaginationRsp.data.channelIds;
+        channelIds = channelPaginationRsp.data.channelIds;
+      }
     } else {
       // Display curated channels in search.
       const cacheResponse = await new CuratedEntityIdsByKindCache({
