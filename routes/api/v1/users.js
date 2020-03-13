@@ -136,6 +136,8 @@ router.post('/activation-initiate', sanitizer.sanitizeDynamicUrlParams, function
       resultType: responseEntityKey.activationInitiate,
       entityKindToResponseKeyMap: {
         [entityTypeConstants.loggedInUser]: responseEntityKey.loggedInUser,
+        [entityTypeConstants.airdropDetails]: responseEntityKey.airdropDetails,
+        [entityTypeConstants.airdropDetails]: responseEntityKey.airdropDetails,
         [entityTypeConstants.pricePointsMap]: responseEntityKey.pricePoints,
         [entityTypeConstants.usersMap]: responseEntityKey.users,
         [entityTypeConstants.token]: responseEntityKey.token
@@ -161,6 +163,7 @@ router.get('/current', sanitizer.sanitizeDynamicUrlParams, function(req, res, ne
       resultType: responseEntityKey.loggedInUser,
       entityKindToResponseKeyMap: {
         [entityTypeConstants.loggedInUser]: responseEntityKey.loggedInUser,
+        [entityTypeConstants.airdropDetails]: responseEntityKey.airdropDetails,
         [entityTypeConstants.twitterConnectMeta]: responseEntityKey.meta,
         [entityTypeConstants.pricePointsMap]: responseEntityKey.pricePoints,
         [entityTypeConstants.usersMap]: responseEntityKey.users,
