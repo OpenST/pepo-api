@@ -1,22 +1,31 @@
 const rootPrefix = '../../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
-  responseHelper = require(rootPrefix + '/lib/formatter/response'),
+  UserModel = require(rootPrefix + '/app/models/mysql/User'),
+  GetTokenService = require(rootPrefix + '/app/services/token/Get'),
+  TokenUserModel = require(rootPrefix + '/app/models/mysql/TokenUser'),
+  ImageByIdCache = require(rootPrefix + '/lib/cacheManagement/multi/ImageByIds'),
   SecureUserCache = require(rootPrefix + '/lib/cacheManagement/single/SecureUser'),
   PricePointsCache = require(rootPrefix + '/lib/cacheManagement/single/PricePoints'),
-  GetTokenService = require(rootPrefix + '/app/services/token/Get'),
-  ImageByIdCache = require(rootPrefix + '/lib/cacheManagement/multi/ImageByIds'),
   TokenUserDetailByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TokenUserByUserIds'),
-  UserModel = require(rootPrefix + '/app/models/mysql/User'),
-  TokenUserModel = require(rootPrefix + '/app/models/mysql/TokenUser'),
-  localCipher = require(rootPrefix + '/lib/encryptors/localCipher'),
   coreConstants = require(rootPrefix + '/config/coreConstants'),
-  logger = require(rootPrefix + '/lib/logger/customConsoleLogger');
+  responseHelper = require(rootPrefix + '/lib/formatter/response'),
+  localCipher = require(rootPrefix + '/lib/encryptors/localCipher'),
+  tokenConstants = require(rootPrefix + '/lib/globalConstant/token'),
+  ostPricePointsConstants = require(rootPrefix + '/lib/globalConstant/ostPricePoints');
 
+/**
+ * Class to fetch current user.
+ *
+ * @class GetCurrentUser
+ */
 class GetCurrentUser extends ServiceBase {
   /**
-   * @param {Object} params
-   * @param {String} params.current_user: User Name
-   * @param {String} params.login_service_type: login service type
+   * Constructor to fetch current user.
+   *
+   * @param {object} params
+   * @param {object} params.current_user
+   * @param {number} params.current_user.id
+   * @param {string} params.login_service_type: login service type
    *
    * @constructor
    */
@@ -27,43 +36,48 @@ class GetCurrentUser extends ServiceBase {
 
     oThis.userId = params.current_user.id;
     oThis.loginServiceType = params.login_service_type;
+
+    oThis.secureUser = {};
+    oThis.tokenUser = {};
     oThis.pricePoints = {};
     oThis.tokenDetails = {};
     oThis.imageMap = {};
+    oThis.airdropDetails = {};
   }
 
   /**
-   * perform
+   * Async perform.
    *
-   * @return {Promise<void>}
+   * @returns {Promise<result>}
+   * @private
    */
   async _asyncPerform() {
     const oThis = this;
 
-    await oThis._fetchUser();
-
-    await oThis._fetchTokenUser();
-
-    await oThis._fetchPricePoints();
-
-    await oThis._setTokenDetails();
+    await Promise.all([
+      oThis._fetchUser(),
+      oThis._fetchTokenUser(),
+      oThis._fetchPricePoints(),
+      oThis._setTokenDetails()
+    ]);
 
     await oThis._fetchImages();
 
-    return Promise.resolve(oThis._serviceResponse());
+    oThis._setAirdropAmount();
+
+    return oThis._serviceResponse();
   }
 
   /**
-   * Fetch Secure user
+   * Fetch secure user.
    *
+   * @sets oThis.secureUser
    *
-   * @return {Promise<void>}
-   *
+   * @returns {Promise<void>}
    * @private
    */
   async _fetchUser() {
     const oThis = this;
-    logger.log('fetch User');
 
     const cacheResp = await new SecureUserCache({ id: oThis.userId }).fetch();
     if (cacheResp.isFailure() || !cacheResp.data.id) {
@@ -71,36 +85,31 @@ class GetCurrentUser extends ServiceBase {
     }
 
     oThis.secureUser = cacheResp.data;
-
-    return Promise.resolve(responseHelper.successWithData({}));
   }
 
   /**
-   * Fetch Token user
+   * Fetch token user.
    *
+   * @sets oThis.tokenUser
    *
-   * @return {Promise<void>}
-   *
+   * @returns {Promise<void>}
    * @private
    */
   async _fetchTokenUser() {
     const oThis = this;
 
-    logger.log('fetch Token User');
-
-    let tokenUserRes = await new TokenUserDetailByUserIdsCache({ userIds: [oThis.userId] }).fetch();
-
+    const tokenUserRes = await new TokenUserDetailByUserIdsCache({ userIds: [oThis.userId] }).fetch();
     if (tokenUserRes.isFailure()) {
       return Promise.reject(tokenUserRes);
     }
 
     oThis.tokenUser = tokenUserRes.data[oThis.userId];
-
-    return Promise.resolve(responseHelper.successWithData({}));
   }
 
   /**
    * Fetch price points.
+   *
+   * @sets oThis.pricePoints
    *
    * @returns {Promise<void>}
    * @private
@@ -109,7 +118,6 @@ class GetCurrentUser extends ServiceBase {
     const oThis = this;
 
     const pricePointsCacheRsp = await new PricePointsCache().fetch();
-
     if (pricePointsCacheRsp.isFailure()) {
       return Promise.reject(pricePointsCacheRsp);
     }
@@ -120,19 +128,19 @@ class GetCurrentUser extends ServiceBase {
   /**
    * Fetch token details.
    *
-   * @return {Promise<void>}
+   * @sets oThis.tokenDetails
+   *
+   * @returns {Promise<void>}
    * @private
    */
   async _setTokenDetails() {
     const oThis = this;
 
-    let getTokenServiceObj = new GetTokenService({});
-
-    let tokenResp = await getTokenServiceObj.perform();
-
+    const tokenResp = await new GetTokenService({}).perform();
     if (tokenResp.isFailure()) {
       return Promise.reject(tokenResp);
     }
+
     oThis.tokenDetails = tokenResp.data.tokenDetails;
   }
 
@@ -141,20 +149,19 @@ class GetCurrentUser extends ServiceBase {
    *
    * @sets oThis.imageMap
    *
-   * @return {Promise<*>}
+   * @returns {Promise<*>}
    * @private
    */
   async _fetchImages() {
     const oThis = this;
 
-    if (!oThis.secureUser.profileImageId) {
+    const imageId = oThis.secureUser.profileImageId;
+
+    if (!imageId) {
       return;
     }
 
-    let imageId = oThis.secureUser.profileImageId;
-
     const cacheRsp = await new ImageByIdCache({ ids: [imageId] }).fetch();
-
     if (cacheRsp.isFailure()) {
       return Promise.reject(cacheRsp);
     }
@@ -163,11 +170,28 @@ class GetCurrentUser extends ServiceBase {
   }
 
   /**
-   * Response for service
+   * Set airdrop amount.
    *
+   * @sets oThis.airdropDetails
    *
-   * @return {Promise<void>}
+   * @private
+   */
+  _setAirdropAmount() {
+    const oThis = this;
+
+    const usdInOneOst =
+      oThis.pricePoints[ostPricePointsConstants.stakeCurrency][ostPricePointsConstants.usdQuoteCurrency];
+
+    oThis.airdropDetails = {
+      pepoAmountInWei: tokenConstants.getPepoAirdropAmountInWei(usdInOneOst),
+      pepoAmountInUsd: tokenConstants.airdropAmountInUsd
+    };
+  }
+
+  /**
+   * Prepare service response.
    *
+   * @returns {Promise<result>}
    * @private
    */
   async _serviceResponse() {
@@ -193,7 +217,8 @@ class GetCurrentUser extends ServiceBase {
       userLoginCookieValue: userLoginCookieValue,
       meta: { isRegistration: 1, serviceType: oThis.loginServiceType },
       pricePointsMap: oThis.pricePoints,
-      tokenDetails: oThis.tokenDetails
+      tokenDetails: oThis.tokenDetails,
+      airdropDetails: oThis.airdropDetails
     });
   }
 }

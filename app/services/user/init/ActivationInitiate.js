@@ -1,24 +1,31 @@
 const rootPrefix = '../../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
-  TokenUserDetailByUserIdCache = require(rootPrefix + '/lib/cacheManagement/multi/TokenUserByUserIds'),
   TokenUserModel = require(rootPrefix + '/app/models/mysql/TokenUser'),
-  responseHelper = require(rootPrefix + '/lib/formatter/response'),
   CurrentUser = require(rootPrefix + '/app/services/user/init/GetCurrent'),
+  TokenUserDetailByUserIdCache = require(rootPrefix + '/lib/cacheManagement/multi/TokenUserByUserIds'),
+  responseHelper = require(rootPrefix + '/lib/formatter/response'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   tokenUserConstants = require(rootPrefix + '/lib/globalConstant/tokenUser');
 
+/**
+ * Class to initiate user activation.
+ *
+ * @class ActivationInitiate
+ */
 class ActivationInitiate extends ServiceBase {
   /**
-   * Constructor for Activation Initiate
+   * Constructor to initiate user activation.
    *
-   * @param {String} params.current_user.id: Current user id
+   * @param {object} params.current_user
+   * @param {number} params.current_user.id
    *
    * @constructor
    */
   constructor(params) {
-    super(params);
+    super();
 
     const oThis = this;
+
     oThis.currentUser = params.current_user;
     oThis.userId = params.current_user.id;
 
@@ -27,9 +34,9 @@ class ActivationInitiate extends ServiceBase {
   }
 
   /**
-   * Async Perform
+   * Async perform.
    *
-   * @returns {Promise<void>}
+   * @returns {Promise<result>}
    * @private
    */
   async _asyncPerform() {
@@ -47,13 +54,15 @@ class ActivationInitiate extends ServiceBase {
   /**
    * Function to fetch token user data.
    *
+   * @sets oThis.tokenUserObj
+   *
    * @returns {Promise<void>}
    * @private
    */
   async _fetchTokenUserData() {
     const oThis = this;
 
-    let tokenUserObjsRes = await new TokenUserDetailByUserIdCache({ userIds: [oThis.userId] }).fetch();
+    const tokenUserObjsRes = await new TokenUserDetailByUserIdCache({ userIds: [oThis.userId] }).fetch();
 
     if (tokenUserObjsRes.isFailure()) {
       return Promise.reject(tokenUserObjsRes);
@@ -69,8 +78,6 @@ class ActivationInitiate extends ServiceBase {
         })
       );
     }
-
-    return responseHelper.successWithData({});
   }
 
   /**
@@ -88,7 +95,7 @@ class ActivationInitiate extends ServiceBase {
       oThis.tokenUserObj.ostStatus === tokenUserConstants.activatingOstStatus ||
       oThis.tokenUserObj.ostStatus === tokenUserConstants.activatedOstStatus
     ) {
-      return responseHelper.successWithData({});
+      return;
     }
 
     await new TokenUserModel()
@@ -99,12 +106,10 @@ class ActivationInitiate extends ServiceBase {
       .fire();
 
     await TokenUserModel.flushCache({ userId: oThis.tokenUserObj.userId });
-
-    return responseHelper.successWithData({});
   }
 
   /**
-   * Fetch current user
+   * Fetch current user.
    *
    * @sets oThis.currentUser
    *
@@ -114,15 +119,12 @@ class ActivationInitiate extends ServiceBase {
   async _fetchCurrentUser() {
     const oThis = this;
 
-    let currentUser = new CurrentUser({ current_user: oThis.currentUser });
-
-    let currentUserRsp = await currentUser.perform();
-
+    const currentUserRsp = await new CurrentUser({ current_user: oThis.currentUser }).perform();
     if (currentUserRsp.isFailure()) {
       return Promise.reject(currentUserRsp);
     }
 
-    let currentUserData = currentUserRsp.data;
+    const currentUserData = currentUserRsp.data;
 
     Object.assign(oThis.serviceResponse, currentUserData);
   }
