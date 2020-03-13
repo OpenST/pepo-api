@@ -27,7 +27,7 @@ router.get('/:channel_permalink/share', sanitizer.sanitizeDynamicUrlParams, func
     serviceResponse.data = wrapperFormatterRsp.data;
   };
 
-  Promise.resolve(routeHelper.perform(req, res, next, '/channel/ShareDetails', 'r_a_w_1', null, dataFormatterFunc));
+  Promise.resolve(routeHelper.perform(req, res, next, '/channel/ShareDetails', 'r_a_w_c_1', null, dataFormatterFunc));
 });
 
 /* Get channel details. */
@@ -54,7 +54,42 @@ router.get('/:channel_permalink', sanitizer.sanitizeDynamicUrlParams, function(r
     serviceResponse.data = wrapperFormatterRsp.data;
   };
 
-  Promise.resolve(routeHelper.perform(req, res, next, '/channel/Get', 'r_a_w_2', null, dataFormatterFunc));
+  Promise.resolve(routeHelper.perform(req, res, next, '/channel/Get', 'r_a_w_c_2', null, dataFormatterFunc));
+});
+
+/* Fetch videos of a channel. */
+router.get('/:channel_id/videos', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.getChannelVideos;
+  req.decodedParams.channel_id = req.params.channel_id;
+
+  const dataFormatterFunc = async function(serviceResponse) {
+    const wrapperFormatterRsp = await new FormatterComposer({
+      resultType: responseEntityKey.channelVideoList,
+      entityKindToResponseKeyMap: {
+        [entityTypeConstants.channelVideoList]: responseEntityKey.channelVideoList,
+        [entityTypeConstants.usersMap]: responseEntityKey.users,
+        [entityTypeConstants.videoDescriptionsMap]: responseEntityKey.videoDescriptions,
+        [entityTypeConstants.tagsMap]: responseEntityKey.tags,
+        [entityTypeConstants.linksMap]: responseEntityKey.links,
+        [entityTypeConstants.imagesMap]: responseEntityKey.images,
+        [entityTypeConstants.videosMap]: responseEntityKey.videos,
+        [entityTypeConstants.videoDetailsMap]: responseEntityKey.videoDetails,
+        [entityTypeConstants.channelsMap]: responseEntityKey.channels,
+        [entityTypeConstants.currentUserUserContributionsMap]: responseEntityKey.currentUserUserContributions,
+        [entityTypeConstants.currentUserVideoContributionsMap]: responseEntityKey.currentUserVideoContributions,
+        [entityTypeConstants.currentUserVideoRelationsMap]: responseEntityKey.currentUserVideoRelations,
+        [entityTypeConstants.userProfileAllowedActions]: responseEntityKey.userProfileAllowedActions,
+        [entityTypeConstants.pricePointsMap]: responseEntityKey.pricePoints,
+        [entityTypeConstants.token]: responseEntityKey.token,
+        [entityTypeConstants.channelVideosListMeta]: responseEntityKey.meta
+      },
+      serviceData: serviceResponse.data
+    }).perform();
+
+    serviceResponse.data = wrapperFormatterRsp.data;
+  };
+
+  Promise.resolve(routeHelper.perform(req, res, next, '/channel/GetVideoList', 'r_a_w_c_3', null, dataFormatterFunc));
 });
 
 module.exports = router;

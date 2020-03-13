@@ -516,7 +516,38 @@ const webSignature = {
         validatorMethods: ['validateName']
       }
     ],
-    optional: []
+    optional: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      }
+    ]
+  },
+  [apiName.getChannelVideos]: {
+    mandatory: [
+      {
+        parameter: 'api_source',
+        validatorMethods: ['validateString']
+      },
+      {
+        parameter: 'channel_id',
+        validatorMethods: ['validateNonZeroInteger']
+      }
+    ],
+    optional: [
+      {
+        parameter: paginationConstants.paginationIdentifierKey,
+        validatorMethods: ['validateString', 'validatePaginationIdentifier']
+      },
+      {
+        parameter: paginationConstants.filterByTagIdKey,
+        validatorMethods: ['validateNonZeroInteger']
+      },
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      }
+    ]
   }
 };
 
