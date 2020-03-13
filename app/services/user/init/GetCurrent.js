@@ -184,7 +184,7 @@ class GetCurrentUser extends ServiceBase {
 
     oThis.airdropDetails = {
       pepoAmountInWei: tokenConstants.getPepoAirdropAmountInWei(usdInOneOst),
-      pepoAmountInDollar: tokenConstants.airdropAmountInUsd
+      pepoAmountInUsd: tokenConstants.airdropAmountInUsd
     };
   }
 

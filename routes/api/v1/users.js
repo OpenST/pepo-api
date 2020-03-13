@@ -137,7 +137,6 @@ router.post('/activation-initiate', sanitizer.sanitizeDynamicUrlParams, function
       entityKindToResponseKeyMap: {
         [entityTypeConstants.loggedInUser]: responseEntityKey.loggedInUser,
         [entityTypeConstants.airdropDetails]: responseEntityKey.airdropDetails,
-        [entityTypeConstants.airdropDetails]: responseEntityKey.airdropDetails,
         [entityTypeConstants.pricePointsMap]: responseEntityKey.pricePoints,
         [entityTypeConstants.usersMap]: responseEntityKey.users,
         [entityTypeConstants.token]: responseEntityKey.token
