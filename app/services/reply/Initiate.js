@@ -4,6 +4,7 @@ const rootPrefix = '../../..',
   EditReplyLink = require(rootPrefix + '/lib/editLink/Reply'),
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   EditDescriptionLib = require(rootPrefix + '/lib/editDescription/Reply'),
+  UserModelKlass = require(rootPrefix + '/app/models/mysql/User'),
   AddReplyDescription = require(rootPrefix + '/lib/addDescription/Reply'),
   ValidateReplyService = require(rootPrefix + '/app/services/reply/Validate'),
   ReplyDetailsByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/ReplyDetailsByIds'),
@@ -117,13 +118,20 @@ class InitiateReply extends ServiceBase {
       await oThis._onVideoPostCompletion();
     }
 
-    const messagePayload = {
-      userId: oThis.currentUser.id,
-      parentVideoId: oThis.parentId,
-      replyDetailId: oThis.replyDetailId
-    };
-    //todo: global_mute_change slack message
-    await bgJob.enqueue(bgJobConstants.slackContentReplyMonitoringJobTopic, messagePayload);
+    if (UserModelKlass.isUserApprovedCreator(oThis.currentUser)) {
+      const messagePayload = {
+        userId: oThis.currentUser.id,
+        parentVideoId: oThis.parentId,
+        replyDetailId: oThis.replyDetailId
+      };
+
+      await bgJob.enqueue(bgJobConstants.slackContentReplyMonitoringJobTopic, messagePayload);
+    } else {
+      const messagePayload = {
+        userId: oThis.currentUser.id
+      };
+      await bgJob.enqueue(bgJobConstants.approveNewCreatorJobTopic, messagePayload);
+    }
 
     return responseHelper.successWithData({
       [entityTypeConstants.videoReplyList]: [
