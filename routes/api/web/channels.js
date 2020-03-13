@@ -30,4 +30,31 @@ router.get('/:channel_permalink/share', sanitizer.sanitizeDynamicUrlParams, func
   Promise.resolve(routeHelper.perform(req, res, next, '/channel/ShareDetails', 'r_a_w_1', null, dataFormatterFunc));
 });
 
+/* Get channel details. */
+router.get('/:channel_permalink', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.getChannelDetails;
+  req.decodedParams.channel_permalink = req.params.channel_permalink;
+
+  const dataFormatterFunc = async function(serviceResponse) {
+    const wrapperFormatterRsp = await new FormatterComposer({
+      resultType: responseEntityKey.channel,
+      entityKindToResponseKeyMap: {
+        [entityTypeConstants.channel]: responseEntityKey.channel,
+        [entityTypeConstants.channelDetailsMap]: responseEntityKey.channelDetails,
+        [entityTypeConstants.channelStatsMap]: responseEntityKey.channelStats,
+        [entityTypeConstants.currentUserChannelRelationsMap]: responseEntityKey.currentUserChannelRelations,
+        [entityTypeConstants.tagsMap]: responseEntityKey.tags,
+        [entityTypeConstants.imagesMap]: responseEntityKey.images,
+        [entityTypeConstants.linksMap]: responseEntityKey.links,
+        [entityTypeConstants.textsMap]: responseEntityKey.texts
+      },
+      serviceData: serviceResponse.data
+    }).perform();
+
+    serviceResponse.data = wrapperFormatterRsp.data;
+  };
+
+  Promise.resolve(routeHelper.perform(req, res, next, '/channel/Get', 'r_a_w_2', null, dataFormatterFunc));
+});
+
 module.exports = router;

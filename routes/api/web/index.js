@@ -10,7 +10,7 @@ const rootPrefix = '../../..',
   userRoutes = require(rootPrefix + '/routes/api/web/users'),
   feedsRoutes = require(rootPrefix + '/routes/api/web/feeds'),
   videoRoutes = require(rootPrefix + '/routes/api/web/videos'),
-  communityRoutes = require(rootPrefix + '/routes/api/web/community'),
+  channelRoutes = require(rootPrefix + '/routes/api/web/channels'),
   coreConstants = require(rootPrefix + '/config/coreConstants'),
   reportRoutes = require(rootPrefix + '/routes/api/web/report'),
   supportRoutes = require(rootPrefix + '/routes/api/web/support'),
@@ -62,7 +62,7 @@ router.use('/auth', authRoutes);
 router.use('/videos', videoRoutes);
 router.use('/feeds', feedsRoutes);
 router.use('/report', reportRoutes);
-router.use('/communities', communityRoutes);
+router.use('/channels', channelRoutes);
 router.use('/users', userRoutes);
 
 //

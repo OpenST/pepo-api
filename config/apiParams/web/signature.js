@@ -504,6 +504,19 @@ const webSignature = {
         validatorMethods: ['validateNonEmptyObject']
       }
     ]
+  },
+  [apiName.getChannelDetails]: {
+    mandatory: [
+      {
+        parameter: 'api_source',
+        validatorMethods: ['validateString']
+      },
+      {
+        parameter: 'channel_permalink',
+        validatorMethods: ['validateName']
+      }
+    ],
+    optional: []
   }
 };
 
