@@ -1,5 +1,4 @@
 const rootPrefix = '../../../..',
-  GetTokenService = require(rootPrefix + '/app/services/token/Get'),
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   TokenUserModel = require(rootPrefix + '/app/models/mysql/TokenUser'),
   TransactionModel = require(rootPrefix + '/app/models/mysql/Transaction'),
@@ -192,6 +191,7 @@ class UserActivationSuccess extends UserOstEventBase {
 
     const usdInOneOst =
       oThis.pricePoints[ostPricePointsConstants.stakeCurrency][ostPricePointsConstants.usdQuoteCurrency];
+
     oThis.airdropAmountInWei = tokenConstants.getPepoAirdropAmountInWei(usdInOneOst);
 
     const executePayTransactionParams = {
