@@ -45,6 +45,27 @@ router.get('/double-opt-in', sanitizer.sanitizeDynamicUrlParams, function(req, r
 //
 router.use(cookieHelper.validateUserWebLoginCookieRequired);
 
+/* Register Device*/
+router.post('/register-device', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.registerDevice;
+
+  const onServiceSuccess = async function(serviceResponse) {
+    const wrapperFormatterRsp = await new FormatterComposer({
+      resultType: responseEntityKey.device,
+      entityKindToResponseKeyMap: {
+        [entityTypeConstants.device]: responseEntityKey.device
+      },
+      serviceData: serviceResponse.data
+    }).perform();
+
+    serviceResponse.data = wrapperFormatterRsp.data;
+  };
+
+  Promise.resolve(
+    routeHelper.perform(req, res, next, '/user/init/RegisterDevice', 'r_a_w_u_5', null, onServiceSuccess)
+  );
+});
+
 /* Logged-In user. */
 router.get('/current', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.loggedInUser;

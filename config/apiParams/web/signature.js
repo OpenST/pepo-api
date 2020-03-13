@@ -372,6 +372,27 @@ const webSignature = {
       }
     ]
   },
+  [apiName.registerDevice]: {
+    mandatory: [
+      {
+        parameter: 'api_source',
+        validatorMethods: ['validateString']
+      },
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      },
+      {
+        parameter: 'device_address',
+        validatorMethods: ['validateEthAddress']
+      },
+      {
+        parameter: 'api_signer_address',
+        validatorMethods: ['validateEthAddress']
+      }
+    ],
+    optional: []
+  },
   [apiName.loggedInUser]: {
     mandatory: [
       {
