@@ -6,7 +6,6 @@ const rootPrefix = '../../..',
   TokenUserByUserId = require(rootPrefix + '/lib/cacheManagement/multi/TokenUserByUserIds'),
   ReplyDetailsByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/ReplyDetailsByIds'),
   ReplyVideoPostTransaction = require(rootPrefix + '/lib/transaction/ReplyVideoPostTransaction'),
-  TextIncludesByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TextIncludesByTextIds'),
   VideoDetailsByVideoIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/VideoDetailsByVideoIds'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
@@ -14,9 +13,7 @@ const rootPrefix = '../../..',
   errorLogsConstants = require(rootPrefix + '/lib/globalConstant/errorLogs'),
   transactionConstants = require(rootPrefix + '/lib/globalConstant/transaction'),
   replyDetailConstants = require(rootPrefix + '/lib/globalConstant/replyDetail'),
-  ostPlatformSdkWrapper = require(rootPrefix + '/lib/ostPlatform/jsSdkWrapper'),
-  textIncludeConstants = require(rootPrefix + '/lib/globalConstant/cassandra/textInclude');
-
+  ostPlatformSdkWrapper = require(rootPrefix + '/lib/ostPlatform/jsSdkWrapper');
 /**
  * Class to ReplyOnVideoTransaction.
  *
@@ -258,52 +255,17 @@ class ReplyOnVideoTransaction extends OstTransactionBase {
   async _validateAndUpdateReplyVideoDetails() {
     const oThis = this;
 
-    if (oThis.descriptionId) {
-      await oThis._fetchMentionedUsers();
-    }
-
     const replyVideoResponse = await new ReplyVideoPostTransaction({
       currentUserId: oThis.userId,
       replyCreatorUserId: oThis.replyCreatorUserId,
       replyDetailId: oThis.replyDetailId,
       videoId: oThis.videoId,
       transactionId: oThis.transactionId,
-      pepoAmountInWei: oThis.transfersData[0].amount,
-      mentionedUserIds: oThis.mentionedUserIds
+      pepoAmountInWei: oThis.transfersData[0].amount
     }).perform();
 
     if (replyVideoResponse.isFailure()) {
       return Promise.reject(replyVideoResponse);
-    }
-  }
-
-  /**
-   * Fetch mentioned users for given text/description.
-   *
-   * @returns {Promise<never>}
-   * @private
-   */
-  async _fetchMentionedUsers() {
-    const oThis = this;
-
-    const cacheRsp = await new TextIncludesByIdsCache({ ids: [oThis.descriptionId] }).fetch();
-    if (cacheRsp.isFailure()) {
-      return Promise.reject(cacheRsp);
-    }
-
-    const textIncludes = cacheRsp.data;
-
-    for (const textId in textIncludes) {
-      const includesForAllKinds = textIncludes[textId];
-
-      for (let ind = 0; ind < includesForAllKinds.length; ind++) {
-        const includeRow = includesForAllKinds[ind],
-          entity = includeRow.entityIdentifier.split('_');
-
-        if (entity[0] === textIncludeConstants.userEntityKindShort) {
-          oThis.mentionedUserIds.push(entity[1]);
-        }
-      }
     }
   }
 

@@ -70,7 +70,6 @@ class InitiateReply extends ServiceBase {
     oThis.link = params.link;
 
     oThis.videoId = null;
-    oThis.mentionedUserIds = [];
   }
 
   /**
@@ -123,7 +122,7 @@ class InitiateReply extends ServiceBase {
       parentVideoId: oThis.parentId,
       replyDetailId: oThis.replyDetailId
     };
-
+    //todo: global_mute_change slack message
     await bgJob.enqueue(bgJobConstants.slackContentReplyMonitoringJobTopic, messagePayload);
 
     return responseHelper.successWithData({
@@ -193,8 +192,6 @@ class InitiateReply extends ServiceBase {
   /**
    * Edit reply description.
    *
-   * @sets oThis.mentionedUserIds
-   *
    * @returns {Promise<void>}
    * @private
    */
@@ -210,9 +207,6 @@ class InitiateReply extends ServiceBase {
     if (editDescriptionResp.isFailure()) {
       return Promise.reject(editDescriptionResp);
     }
-
-    // For these users id, we have already sent mention-notification. So, need to skip the reply-event-notification.
-    oThis.mentionedUserIds = editDescriptionResp.data.mentionedUserIds;
   }
 
   /**
@@ -276,7 +270,6 @@ class InitiateReply extends ServiceBase {
   /**
    * Add reply description in text table and update text id in reply details.
    *
-   * @sets oThis.descriptionId
    *
    * @returns {Promise<void>}
    * @private
@@ -293,11 +286,6 @@ class InitiateReply extends ServiceBase {
     if (replyDescriptionResp.isFailure()) {
       return Promise.reject(replyDescriptionResp);
     }
-
-    oThis.descriptionId = replyDescriptionResp.data.descriptionId;
-
-    // For these users id, we have already sent mention-notification. So, need to skip the reply-event-notification.
-    oThis.mentionedUserIds = replyDescriptionResp.data.mentionedUserIds;
   }
 
   /**
@@ -351,8 +339,7 @@ class InitiateReply extends ServiceBase {
         replyCreatorUserId: oThis.currentUser.id,
         replyDetailId: oThis.replyDetailId,
         videoId: oThis.parentId,
-        pepoAmountInWei: 0,
-        mentionedUserIds: oThis.mentionedUserIds
+        pepoAmountInWei: 0
       }).perform();
     }
   }

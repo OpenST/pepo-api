@@ -124,15 +124,6 @@ class ValidateReplyParams extends ServiceBase {
     if (userCacheResp.isFailure()) {
       return Promise.reject(userCacheResp);
     }
-
-    if (!UserModel.isUserApprovedCreator(userCacheResp.data[parentVideoCreatorId])) {
-      return Promise.reject(
-        responseHelper.error({
-          internal_error_identifier: 'a_s_r_v_4',
-          api_error_identifier: 'something_went_wrong'
-        })
-      );
-    }
   }
 
   /**
