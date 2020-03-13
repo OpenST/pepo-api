@@ -41,7 +41,6 @@ class UserActivationSuccess extends UserOstEventBase {
 
     oThis.airdropAmountInWei = '0';
     oThis.pricePoints = {};
-    oThis.tokenDetails = {};
   }
 
   /**
@@ -189,10 +188,10 @@ class UserActivationSuccess extends UserOstEventBase {
 
     logger.log('Starting airdrop for user.');
 
-    await Promise.all([oThis._fetchPricePoints(), oThis._setTokenDetails()]);
+    await oThis._fetchPricePoints();
 
-    const stakeCurrency = oThis.tokenDetails.stakeCurrency;
-    const usdInOneOst = oThis.pricePoints[stakeCurrency][ostPricePointsConstants.usdQuoteCurrency];
+    const usdInOneOst =
+      oThis.pricePoints[ostPricePointsConstants.stakeCurrency][ostPricePointsConstants.usdQuoteCurrency];
     oThis.airdropAmountInWei = tokenConstants.getPepoAirdropAmountInWei(usdInOneOst);
 
     const executePayTransactionParams = {
@@ -235,25 +234,6 @@ class UserActivationSuccess extends UserOstEventBase {
     }
 
     oThis.pricePoints = pricePointsCacheRsp.data;
-  }
-
-  /**
-   * Fetch token details.
-   *
-   * @sets oThis.tokenDetails
-   *
-   * @return {Promise<void>}
-   * @private
-   */
-  async _setTokenDetails() {
-    const oThis = this;
-
-    const tokenResp = await new GetTokenService({}).perform();
-    if (tokenResp.isFailure()) {
-      return Promise.reject(tokenResp);
-    }
-
-    oThis.tokenDetails = tokenResp.data.tokenDetails;
   }
 
   /**

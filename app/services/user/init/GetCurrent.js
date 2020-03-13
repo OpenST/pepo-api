@@ -179,8 +179,8 @@ class GetCurrentUser extends ServiceBase {
   _setAirdropAmount() {
     const oThis = this;
 
-    const stakeCurrency = oThis.tokenDetails.stakeCurrency;
-    const usdInOneOst = oThis.pricePoints[stakeCurrency][ostPricePointsConstants.usdQuoteCurrency];
+    const usdInOneOst =
+      oThis.pricePoints[ostPricePointsConstants.stakeCurrency][ostPricePointsConstants.usdQuoteCurrency];
 
     oThis.airdropDetails = {
       pepoAmountInWei: tokenConstants.getPepoAirdropAmountInWei(usdInOneOst),
