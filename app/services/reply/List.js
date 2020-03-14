@@ -201,10 +201,13 @@ class GetReplyList extends ServiceBase {
     for (let ind = 0; ind < oThis.replyDetailIds.length; ind++) {
       const rdId = oThis.replyDetailIds[ind];
       const rdObj = oThis.userRepliesMap.replyDetailsMap[rdId];
-      oThis.videoReplies.push(oThis.userRepliesMap.fullVideosMap[rdObj.entityId]);
-      if (ind === oThis.replyDetailIds.length - 1) {
-        oThis.nextPaginationTimestamp = rdObj.createdAt;
+
+      if (!rdObj || !rdObj.id) {
+        continue;
       }
+
+      oThis.videoReplies.push(oThis.userRepliesMap.fullVideosMap[rdObj.entityId]);
+      oThis.nextPaginationTimestamp = rdObj.createdAt;
     }
   }
 
