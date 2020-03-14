@@ -2,15 +2,15 @@ const rootPrefix = '../../../..',
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   TokenUserModel = require(rootPrefix + '/app/models/mysql/TokenUser'),
   TransactionModel = require(rootPrefix + '/app/models/mysql/Transaction'),
-  CompanyToUserTransaction = require(rootPrefix + '/lib/transaction/CompanyToUser'),
   UserOstEventBase = require(rootPrefix + '/app/services/ostEvents/users/Base'),
-  SecureTokenCache = require(rootPrefix + '/lib/cacheManagement/single/SecureToken'),
+  CompanyToUserTransaction = require(rootPrefix + '/lib/transaction/CompanyToUser'),
+  PricePointsCache = require(rootPrefix + '/lib/cacheManagement/single/PricePoints'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   tokenConstants = require(rootPrefix + '/lib/globalConstant/token'),
-  ostPlatformSdk = require(rootPrefix + '/lib/ostPlatform/jsSdkWrapper'),
   tokenUserConstants = require(rootPrefix + '/lib/globalConstant/tokenUser'),
   transactionConstants = require(rootPrefix + '/lib/globalConstant/transaction'),
+  ostPricePointsConstants = require(rootPrefix + '/lib/globalConstant/ostPricePoints'),
   transactionTypesConstants = require(rootPrefix + '/lib/globalConstant/transactionTypes');
 
 /**
@@ -37,6 +37,9 @@ class UserActivationSuccess extends UserOstEventBase {
     oThis.tokenData = null;
     oThis.userId = null;
     oThis.airdropTxResp = null;
+
+    oThis.airdropAmountInWei = '0';
+    oThis.pricePoints = {};
   }
 
   /**
@@ -174,7 +177,7 @@ class UserActivationSuccess extends UserOstEventBase {
   /**
    * Start airdrop transaction for user using OST sdk.
    *
-   * @sets oThis.tokenData, oThis.airdropTxResp
+   * @sets oThis.airdropAmountInWei
    *
    * @return {Promise<void>}
    * @private
@@ -184,10 +187,17 @@ class UserActivationSuccess extends UserOstEventBase {
 
     logger.log('Starting airdrop for user.');
 
+    await oThis._fetchPricePoints();
+
+    const usdInOneOst =
+      oThis.pricePoints[ostPricePointsConstants.stakeCurrency][ostPricePointsConstants.usdQuoteCurrency];
+
+    oThis.airdropAmountInWei = tokenConstants.getPepoAirdropAmountInWei(usdInOneOst);
+
     const executePayTransactionParams = {
       transferToAddress: oThis.tokenUserObj.ostTokenHolderAddress,
       transferToUserId: oThis.tokenUserObj.userId,
-      amountInWei: tokenConstants.airdropAmount,
+      amountInWei: oThis.airdropAmountInWei,
       transactionKind: transactionConstants.airdropKind,
       transactionMetaProperties: {
         name: 'UserActivateAirdrop',
@@ -205,6 +215,25 @@ class UserActivationSuccess extends UserOstEventBase {
     }
 
     return responseHelper.successWithData({});
+  }
+
+  /**
+   * Fetch price points.
+   *
+   * @sets oThis.pricePoints
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _fetchPricePoints() {
+    const oThis = this;
+
+    const pricePointsCacheRsp = await new PricePointsCache().fetch();
+    if (pricePointsCacheRsp.isFailure()) {
+      return Promise.reject(pricePointsCacheRsp);
+    }
+
+    oThis.pricePoints = pricePointsCacheRsp.data;
   }
 
   /**
@@ -253,7 +282,7 @@ class UserActivationSuccess extends UserOstEventBase {
       from_user_id: 0,
       kind: transactionConstants.invertedKinds[transactionConstants.airdropKind],
       to_user_id: oThis.tokenUserObj.userId,
-      amount: tokenConstants.airdropAmount,
+      amount: oThis.airdropAmountInWei,
       extra_data: JSON.stringify(extraData),
       status: transactionConstants.invertedStatuses[transactionConstants.pendingStatus]
     };

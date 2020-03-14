@@ -40,6 +40,7 @@ router.post('/twitter-login', sanitizer.sanitizeDynamicUrlParams, function(req, 
       resultType: responseEntityKey.loggedInUser,
       entityKindToResponseKeyMap: {
         [entityTypeConstants.loggedInUser]: responseEntityKey.loggedInUser,
+        [entityTypeConstants.airdropDetails]: responseEntityKey.airdropDetails,
         [entityTypeConstants.usersMap]: responseEntityKey.users,
         [entityTypeConstants.imagesMap]: responseEntityKey.images,
         [entityTypeConstants.utmParams]: responseEntityKey.utmParams,
@@ -77,6 +78,7 @@ router.post('/github-login', sanitizer.sanitizeDynamicUrlParams, function(req, r
       resultType: responseEntityKey.loggedInUser,
       entityKindToResponseKeyMap: {
         [entityTypeConstants.loggedInUser]: responseEntityKey.loggedInUser,
+        [entityTypeConstants.airdropDetails]: responseEntityKey.airdropDetails,
         [entityTypeConstants.usersMap]: responseEntityKey.users,
         [entityTypeConstants.imagesMap]: responseEntityKey.images,
         [entityTypeConstants.utmParams]: responseEntityKey.utmParams,
@@ -114,6 +116,7 @@ router.post('/google-login', sanitizer.sanitizeDynamicUrlParams, function(req, r
       resultType: responseEntityKey.loggedInUser,
       entityKindToResponseKeyMap: {
         [entityTypeConstants.loggedInUser]: responseEntityKey.loggedInUser,
+        [entityTypeConstants.airdropDetails]: responseEntityKey.airdropDetails,
         [entityTypeConstants.usersMap]: responseEntityKey.users,
         [entityTypeConstants.imagesMap]: responseEntityKey.images,
         [entityTypeConstants.utmParams]: responseEntityKey.utmParams,
@@ -151,6 +154,7 @@ router.post('/apple-login', sanitizer.sanitizeDynamicUrlParams, function(req, re
       resultType: responseEntityKey.loggedInUser,
       entityKindToResponseKeyMap: {
         [entityTypeConstants.loggedInUser]: responseEntityKey.loggedInUser,
+        [entityTypeConstants.airdropDetails]: responseEntityKey.airdropDetails,
         [entityTypeConstants.usersMap]: responseEntityKey.users,
         [entityTypeConstants.imagesMap]: responseEntityKey.images,
         [entityTypeConstants.utmParams]: responseEntityKey.utmParams,

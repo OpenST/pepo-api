@@ -125,7 +125,9 @@ class AppleConnect extends ConnectBase {
       );
     }
 
-    oThis.decryptedAppleEmail = decryptedIdentityToken.email;
+    if (decryptedIdentityToken.email) {
+      oThis.decryptedAppleEmail = decryptedIdentityToken.email;
+    }
 
     // In case of web request, we are not getting apple id in response
     if (apiSourceConstants.isWebRequest(oThis.apiSource)) {

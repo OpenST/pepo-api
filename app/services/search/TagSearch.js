@@ -4,12 +4,14 @@ const rootPrefix = '../../..',
   TagPaginationCache = require(rootPrefix + '/lib/cacheManagement/single/TagPagination'),
   CuratedEntityIdsByKindCache = require(rootPrefix + '/lib/cacheManagement/single/CuratedEntityIdsByKind'),
   basicHelper = require(rootPrefix + '/helpers/basic'),
+  tagConstants = require(rootPrefix + '/lib/globalConstant/tag'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination'),
   curatedEntitiesConstants = require(rootPrefix + '/lib/globalConstant/curatedEntities');
 
 // Declare variables.
-const topTagsResultsLimit = 5;
+const topTagsResultsLimit = 5,
+  searchTermMaxLength = 200; // This is to ensure that cache key max is not violated.
 
 /**
  * Class to search tags.
@@ -103,14 +105,17 @@ class TagSearch extends ServiceBase {
   async _getTagIds() {
     const oThis = this;
 
+    // Length check is added to ensure that empty data is returned in case of invalid tag name.
     if (oThis.tagPrefix) {
-      const tagPaginationRsp = await new TagPaginationCache({
-        limit: oThis.limit,
-        page: oThis.page,
-        tagPrefix: oThis.tagPrefix
-      }).fetch();
+      if (oThis.tagPrefix.length <= searchTermMaxLength) {
+        const tagPaginationRsp = await new TagPaginationCache({
+          limit: oThis.limit,
+          page: oThis.page,
+          tagPrefix: oThis.tagPrefix
+        }).fetch();
 
-      oThis.tagIds = tagPaginationRsp.data;
+        oThis.tagIds = tagPaginationRsp.data;
+      }
     } else {
       // Display curated tags in search.
       const cacheResponse = await new CuratedEntityIdsByKindCache({
