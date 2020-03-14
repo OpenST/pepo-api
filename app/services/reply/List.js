@@ -172,7 +172,6 @@ class GetReplyList extends ServiceBase {
     }
 
     oThis.userRepliesMap = response.data;
-    // todo: checkReplyDetailId usecase?
 
     if (oThis.checkReplyDetailId) {
       if (
