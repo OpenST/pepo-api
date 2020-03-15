@@ -53,13 +53,11 @@ class DisconnectBase extends ServiceBase {
 
     await oThis._rotateCookieToken();
 
-    if (apiSourceConstants.isAppRequest(oThis.apiSource)) {
-      await oThis._fetchDeviceIds();
+    await oThis._fetchDeviceIds();
 
-      await oThis._fetchDevices();
+    await oThis._fetchDevices();
 
-      await oThis._logoutUserDevices();
-    }
+    await oThis._logoutUserDevices();
 
     return responseHelper.successWithData({});
   }
@@ -141,6 +139,10 @@ class DisconnectBase extends ServiceBase {
   async _fetchDevices() {
     const oThis = this;
 
+    if (oThis.userDeviceIds.length == 0) {
+      return;
+    }
+
     let userDeviceByIdsCache = new UserDeviceByIdsCache({ ids: oThis.userDeviceIds });
 
     let cacheRsp = await userDeviceByIdsCache.fetch();
@@ -162,6 +164,10 @@ class DisconnectBase extends ServiceBase {
    */
   async _logoutUserDevices() {
     const oThis = this;
+
+    if (oThis.deviceIds.length == 0) {
+      return;
+    }
 
     await new Logout({
       current_user: { id: oThis.currentUserId },
