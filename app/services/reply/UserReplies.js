@@ -107,6 +107,7 @@ class GetUserReplyList extends ServiceBase {
   async _fetchReplyDetailIds() {
     const oThis = this;
 
+    //todo: send fetch unapproved reply in cache
     const cacheResponse = await new ReplyDetailsIdsByUserIdCache({
       userId: oThis.profileUserId,
       limit: oThis.limit,
