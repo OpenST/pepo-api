@@ -401,6 +401,7 @@ class ReplyDetailsModel extends ModelBase {
         parent_kind: replyDetailConstants.invertedEntityKinds[replyDetailConstants.videoEntityKind],
         status: statuses
       })
+      .group_by('parent_id')
       .fire();
 
     const response = {};
