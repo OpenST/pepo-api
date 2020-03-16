@@ -381,6 +381,39 @@ class ReplyDetailsModel extends ModelBase {
   }
 
   /**
+   * Fetch unapproved by creator user id and parent ids.
+   *
+   * @param {number} params.creatorUserId: creator user id
+   * @param {array<number>} params.parentIds: parent video ids
+   *
+   * @returns {Promise}
+   */
+  async fetchUnapprovedByCreatorUserIdAndParentId(params) {
+    const oThis = this;
+
+    const statuses = [replyDetailConstants.invertedStatuses[replyDetailConstants.unppprovedStatus]];
+
+    const dbRows = await oThis
+      .select('parent_id, count(1) as totalReplies')
+      .where({
+        creator_user_id: params.creatorUserId,
+        parent_id: params.parentIds,
+        parent_kind: replyDetailConstants.invertedEntityKinds[replyDetailConstants.videoEntityKind],
+        status: statuses
+      })
+      .fire();
+
+    const response = {};
+
+    for (let index = 0; index < dbRows.length; index++) {
+      const dbRow = dbRows[index];
+      response[dbRow.parent_id] = { totalReplies: dbRow.totalReplies };
+    }
+
+    return response;
+  }
+
+  /**
    * Get all replies
    *
    * @returns {Promise<void>}
@@ -417,7 +450,8 @@ class ReplyDetailsModel extends ModelBase {
    * @param {array<number>} [params.replyDetailIds]
    * @param {array<number>} [params.entityIds]
    * @param {string} [params.entityKind]
-   *
+   * @param {array<number>} [params.parentIds]
+   * @param {number} [params.creatorUserId]
    * @returns {Promise<*>}
    */
   static async flushCache(params) {
@@ -441,6 +475,18 @@ class ReplyDetailsModel extends ModelBase {
         promisesArray.push(new ReplyDetailsByParentVideoPaginationCache({ videoId: currParentVideoId }).clear());
         promisesArray.push(new AllRepliesByParentVideoId({ parentVideoId: currParentVideoId }).clear());
       }
+    }
+
+    if (params.parentIds && params.creatorUserId) {
+      const UnapprovedReplyDetailsCache = require(rootPrefix +
+        '/lib/cacheManagement/multi/ReplyDetailsUnapprovedByParentIdAndCreatorUserId');
+
+      promisesArray.push(
+        new UnapprovedReplyDetailsCache({
+          parentIds: params.parentIds,
+          creatorUserId: params.creatorUserId
+        }).clear()
+      );
     }
 
     if (params.replyDetailId) {
