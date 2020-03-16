@@ -7,6 +7,7 @@ const rootPrefix = '../../..',
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   userConstants = require(rootPrefix + '/lib/globalConstant/user'),
   localCipher = require(rootPrefix + '/lib/encryptors/localCipher'),
+  apiSourceConstants = require(rootPrefix + '/lib/globalConstant/apiSource'),
   webPageConstants = require(rootPrefix + '/lib/globalConstant/webPage');
 
 /**
@@ -20,6 +21,7 @@ class GetWebViewUrl extends ServiceBase {
    *
    * @param {object} params
    * @param {object} params.current_user
+   * @param {object} params.login_service_type
    * @param {string} params.pepo_device_os
    * @param {string} params.pepo_device_os_version
    * @param {string} params.pepo_build_number
@@ -35,6 +37,7 @@ class GetWebViewUrl extends ServiceBase {
     const oThis = this;
 
     oThis.currentUser = params.current_user;
+    oThis.loginViaServiceType = params.login_service_type;
 
     oThis.pepoDeviceOs = params.pepo_device_os;
     oThis.pepoDeviceOsVersion = params.pepo_device_os_version;
@@ -105,7 +108,11 @@ class GetWebViewUrl extends ServiceBase {
 
     const decryptedEncryptionSalt = localCipher.decrypt(coreConstants.CACHE_SHA_KEY, secureUserObj.encryptionSaltLc);
 
-    return new UserModel().getCookieValueFor(secureUserObj, decryptedEncryptionSalt, { timestamp: Date.now() / 1000 });
+    return new UserModel().getCookieValueFor(secureUserObj, decryptedEncryptionSalt, {
+      timestamp: Date.now() / 1000,
+      loginServiceType: oThis.loginViaServiceType,
+      apiSource: apiSourceConstants.store
+    });
   }
 }
 

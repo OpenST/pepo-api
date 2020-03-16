@@ -16,7 +16,6 @@ const rootPrefix = '../../..',
   apiVersions = require(rootPrefix + '/lib/globalConstant/apiVersions'),
   adminConstants = require(rootPrefix + '/lib/globalConstant/admin/admin'),
   adminEntityType = require(rootPrefix + '/lib/globalConstant/adminEntityType'),
-  adminPreLaunchRoutes = require(rootPrefix + '/routes/api/admin/preLaunch/index'),
   adminResponseEntityKey = require(rootPrefix + '/lib/globalConstant/adminResponseEntity'),
   curatedEntitiesDataRoutes = require(rootPrefix + '/routes/api/admin/curatedEntity/index'),
   adminUpdateUsageDataRoutes = require(rootPrefix + '/routes/api/admin/updateUsageData/index');
@@ -58,6 +57,8 @@ router.post('/login', sanitizer.sanitizeDynamicUrlParams, function(req, res, nex
 
   const onServiceSuccess = async function(serviceResponse) {
     cookieHelper.setAdminCookie(res, serviceResponse.data.adminCookieValue);
+
+    serviceResponse.data = {};
   };
 
   const onServiceFailure = async function() {
@@ -69,15 +70,15 @@ router.post('/login', sanitizer.sanitizeDynamicUrlParams, function(req, res, nex
   );
 });
 
-/* Logout admin */
-router.post('/logout', sanitizer.sanitizeDynamicUrlParams, function(req, res) {
+/* Logout admin. */
+router.post('/logout', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.adminLogout;
 
   const responseObject = responseHelper.successWithData({});
 
   cookieHelper.deleteAdminCookie(res);
 
-  Promise.resolve(responseHelper.renderApiResponse(responseObject, res, errorConfig));
+  return res.status(200).json(responseObject); // Deliberately returning success response
 });
 
 /* Users list */
@@ -427,7 +428,6 @@ router.post('/channels/:channel_id/block-user', sanitizer.sanitizeDynamicUrlPara
   Promise.resolve(routeHelper.perform(req, res, next, '/admin/BlockUserInChannel', 'r_a_v1_ad_21', null, null, null));
 });
 
-router.use('/pre-launch', adminPreLaunchRoutes);
 router.use('/update-usage-data', adminUpdateUsageDataRoutes);
 router.use('/curated-entities', curatedEntitiesDataRoutes);
 

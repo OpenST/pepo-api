@@ -10,17 +10,11 @@ const rootPrefix = '../../..',
   cookieHelper = require(rootPrefix + '/lib/cookieHelper'),
   responseEntityKey = require(rootPrefix + '/lib/globalConstant/responseEntityKey');
 
-router.post(
-  '/refresh-token',
-  cookieHelper.validateUserLoginCookieIfPresent,
-  cookieHelper.validateUserLoginRequired,
-  sanitizer.sanitizeDynamicUrlParams,
-  function(req, res, next) {
-    req.decodedParams.apiName = apiName.refreshTwitterConnect;
+router.post('/refresh-token', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.refreshTwitterConnect;
 
-    Promise.resolve(routeHelper.perform(req, res, next, '/twitter/RefreshConnect', 'r_a_v1_a_5', null));
-  }
-);
+  Promise.resolve(routeHelper.perform(req, res, next, '/twitter/RefreshConnect', 'r_a_v1_a_5', null));
+});
 
 /* Fetch twitter info for tweet */
 router.get('/tweet-info', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {

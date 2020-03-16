@@ -197,14 +197,6 @@ class GetCurrentUser extends ServiceBase {
   async _serviceResponse() {
     const oThis = this;
 
-    const decryptedEncryptionSalt = localCipher.decrypt(coreConstants.CACHE_SHA_KEY, oThis.secureUser.encryptionSaltLc);
-
-    // NOTE - this cookie versioning has been introduced on 22/01/2020.
-    const userLoginCookieValue = new UserModel().getCookieValueFor(oThis.secureUser, decryptedEncryptionSalt, {
-      timestamp: Date.now() / 1000,
-      loginServiceType: oThis.loginServiceType
-    });
-
     const safeFormattedUserData = new UserModel().safeFormattedData(oThis.secureUser);
     const safeFormattedTokenUserData = new TokenUserModel().safeFormattedData(oThis.tokenUser);
 
@@ -214,7 +206,6 @@ class GetCurrentUser extends ServiceBase {
       user: safeFormattedUserData,
       imageMap: oThis.imageMap,
       tokenUser: safeFormattedTokenUserData,
-      userLoginCookieValue: userLoginCookieValue,
       meta: { isRegistration: 1, serviceType: oThis.loginServiceType },
       pricePointsMap: oThis.pricePoints,
       tokenDetails: oThis.tokenDetails,

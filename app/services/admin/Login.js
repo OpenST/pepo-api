@@ -144,14 +144,11 @@ class AdminLogin extends ServiceBase {
   _generateCookie() {
     const oThis = this;
 
-    const formattedData = new AdminModel().safeFormattedData(oThis.adminObj);
-
     const adminCookie = new AdminModel().getCookieValueFor(oThis.adminObj, {
       timestamp: Date.now() / 1000
     });
 
     return responseHelper.successWithData({
-      current_admin: formattedData,
       adminCookieValue: adminCookie
     });
   }

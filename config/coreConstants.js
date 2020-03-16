@@ -417,10 +417,6 @@ class CoreConstants {
     return process.env.PA_TWITTER_CONSUMER_SECRET;
   }
 
-  get TWITTER_AUTH_CALLBACK_ROUTE() {
-    return process.env.PA_TWITTER_AUTH_CALLBACK_ROUTE;
-  }
-
   get PA_PR_IMAGE_RESIZE_FUNCTION() {
     return process.env.PA_PR_LAMBDA_IMAGE_RESIZE_FUNCTION;
   }
@@ -534,8 +530,8 @@ class CoreConstants {
     return process.env.PA_APPLE_CLIENT_ID;
   }
 
-  get PA_APPLE_REDIRECT_URI() {
-    return process.env.PA_APPLE_REDIRECT_URI;
+  get PA_APPLE_WEB_SERVICE_ID() {
+    return process.env.PA_APPLE_WEB_SERVICE_ID;
   }
 
   get PA_APPLE_TEAM_ID() {
@@ -564,6 +560,30 @@ class CoreConstants {
 
   get CHANNEL_DATA_S3_FILE_PATH() {
     return process.env.PA_CHANNEL_DATA_S3_FILE_PATH;
+  }
+
+  get GOOGLE_OAUTH_URL() {
+    return 'https://accounts.google.com/o/oauth2/v2/auth';
+  }
+
+  get APPLE_OAUTH_URL() {
+    return 'https://appleid.apple.com/auth/authorize';
+  }
+
+  get GITHUB_OAUTH_URL() {
+    return 'https://github.com/login/oauth/authorize';
+  }
+
+  get PA_GITHUB_CLIENT_ID() {
+    return process.env.PA_GITHUB_CLIENT_ID;
+  }
+
+  get PA_GITHUB_CLIENT_SECRET() {
+    return process.env.PA_GITHUB_CLIENT_SECRET;
+  }
+
+  get PEPO_DEV_ENV_DOMAIN() {
+    return 'https://pepodev.com';
   }
 }
 

@@ -7,6 +7,7 @@ const rootPrefix = '../../..',
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   userConstants = require(rootPrefix + '/lib/globalConstant/user'),
   localCipher = require(rootPrefix + '/lib/encryptors/localCipher'),
+  apiSourceConstants = require(rootPrefix + '/lib/globalConstant/apiSource'),
   pageConstants = require(rootPrefix + '/lib/globalConstant/webPage');
 
 /**
@@ -85,7 +86,11 @@ class GetSupportInfo extends ServiceBase {
 
     const decryptedEncryptionSalt = localCipher.decrypt(coreConstants.CACHE_SHA_KEY, secureUserObj.encryptionSaltLc);
 
-    return new UserModel().getCookieValueFor(secureUserObj, decryptedEncryptionSalt, { timestamp: Date.now() / 1000 });
+    return new UserModel().getCookieValueFor(secureUserObj, decryptedEncryptionSalt, {
+      timestamp: Date.now() / 1000,
+      //source shall be webView
+      apiSource: apiSourceConstants.webView
+    });
   }
 }
 

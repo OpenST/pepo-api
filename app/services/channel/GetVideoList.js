@@ -256,7 +256,7 @@ class GetChannelVideoList extends ServiceBase {
     const oThis = this;
 
     const userVideosObj = new GetUserVideos({
-      currentUserId: oThis.currentUser.id,
+      currentUserId: oThis.currentUser ? oThis.currentUser.id : 0,
       videoIds: oThis.videoIds,
       isAdmin: false
     });

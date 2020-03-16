@@ -11,6 +11,7 @@ const rootPrefix = '../..',
   coreConstants = require(rootPrefix + '/config/coreConstants'),
   gotoConstants = require(rootPrefix + '/lib/globalConstant/goto'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
+  webPageConstants = require(rootPrefix + '/lib/globalConstant/webPage'),
   entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
   userUtmDetailsConstants = require(rootPrefix + '/lib/globalConstant/userUtmDetail');
 
@@ -122,6 +123,14 @@ class FetchGoto extends ServiceBase {
       query = oThis.parsedUrl.query;
 
     switch (pathArray[1]) {
+      case webPageConstants.sessionAuthPagePath: {
+        const sessionAuthPayloadId = Number(pathArray[2]);
+        if (sessionAuthPayloadId) {
+          oThis.gotoParams = { sessionAuthPayloadId: sessionAuthPayloadId };
+          oThis.gotoKind = gotoConstants.sessionAuthGotoKind;
+        }
+        break;
+      }
       case gotoConstants.videoGotoKind: {
         const videoId = Number(pathArray[2]);
         if (videoId) {

@@ -1,4 +1,5 @@
-const BigNumber = require('bignumber.js');
+const BigNumber = require('bignumber.js'),
+  urlParser = require('url');
 
 const rootPrefix = '..',
   base64Helper = require(rootPrefix + '/lib/base64Helper'),
@@ -815,6 +816,80 @@ class BasicHelper {
     return numbers.sort(function(a, b) {
       return a - b;
     });
+  }
+
+  /**
+   * Generate Url
+   *
+   * @param url
+   * @param urlParams
+   * @returns {string}
+   */
+  generateUrl(url, urlParams) {
+    const urlParser = require('url');
+
+    let generatedUrl = new urlParser.URL(url);
+    const searchParams = new urlParser.URLSearchParams(generatedUrl.searchParams);
+    for (let key in urlParams) {
+      let val = urlParams[key];
+      searchParams.append(key, val);
+    }
+    generatedUrl.search = searchParams;
+
+    return generatedUrl.href;
+  }
+
+  /**
+   * Return after login redirect domain
+   *
+   * @param isDevEnvLogin
+   * @returns {string}
+   */
+  afterWebLoginRedirectDomain(isDevEnvLogin) {
+    const oThis = this;
+
+    return !oThis.isProduction() && isDevEnvLogin ? coreConstants.PEPO_DEV_ENV_DOMAIN : coreConstants.PA_DOMAIN;
+  }
+
+  /**
+   * Check if request from pepo dev env
+   * and pepo dev env is supported or not
+   *
+   * @param req
+   * @returns {boolean}
+   */
+  isRequestFromPepoDevEnvAndSupported(req) {
+    const oThis = this;
+
+    return !oThis.isProduction() && req.headers['x-dev-env'];
+  }
+
+  /**
+   * Get login redirect url
+   *
+   * @param isDevEnvLogin
+   * @param loginService
+   * @returns {string}
+   */
+  getLoginRedirectUrl(isDevEnvLogin, loginService) {
+    const oThis = this,
+      redirectDomain = oThis.afterWebLoginRedirectDomain(isDevEnvLogin);
+
+    return redirectDomain + '/webview/' + loginService + '/oauth';
+  }
+
+  /**
+   * Get login redirect url
+   *
+   * @param request
+   * @returns {string}
+   */
+  getAfterLoginRedirectUrl(request) {
+    let path = '';
+    if (request.headers['referer']) {
+      path = urlParser.parse(request.headers['referer']).path;
+    }
+    return base64Helper.encode(JSON.stringify({ rd: path.replace(/^\/+/, '') }));
   }
 }
 

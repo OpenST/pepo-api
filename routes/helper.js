@@ -17,7 +17,7 @@ class RoutesHelper {
    * @param req
    * @param res
    * @param next
-   * @param serviceGetter : in case of getting from ic, this is the getter name. else it is relative path in app root folder
+   * @param serviceGetter
    * @param errorCode
    * @param afterValidationCallback
    * @param onServiceSuccess
@@ -97,11 +97,15 @@ class RoutesHelper {
     }
 
     const handleResponse = async function(response) {
-      if (response.isSuccess() && onServiceSuccess) {
-        // If required, this function could reformat data as per API version requirements.
-        // NOTE: This method should modify response.data
-        response.data.sanitizedRequestHeaders = sanitizer.sanitizeParams(req.headers);
-        await onServiceSuccess(response);
+      if (response.isSuccess()) {
+        if (onServiceSuccess) {
+          // If required, this function could reformat data as per API version requirements.
+          // NOTE: This method should modify response.data
+          response.data.sanitizedRequestHeaders = sanitizer.sanitizeParams(req.headers);
+          await onServiceSuccess(response);
+        } else {
+          response = responseHelper.successWithData({});
+        }
       }
 
       if (response.isFailure() && onServiceFailure) {

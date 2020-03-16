@@ -7,12 +7,12 @@ const rootPrefix = '../../..',
   UserMultiCache = require(rootPrefix + '/lib/cacheManagement/multi/User'),
   GetPepocornBalance = require(rootPrefix + '/lib/pepocorn/GetPepocornBalance'),
   PepocornBalanceModel = require(rootPrefix + '/app/models/mysql/redemption/PepocornBalance'),
-  VideoDetailsByUserIdCache = require(rootPrefix + '/lib/cacheManagement/single/VideoDetailsByUserIdPagination'),
-  PepocornTransactionModel = require(rootPrefix + '/app/models/mysql/redemption/PepocornTransaction'),
   TwitterUserByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TwitterUserByIds'),
   TokenUserByUserIdCache = require(rootPrefix + '/lib/cacheManagement/multi/TokenUserByUserIds'),
   RedemptionProductsCache = require(rootPrefix + '/lib/cacheManagement/single/RedemptionProducts'),
   TwitterUserByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TwitterUserByUserIds'),
+  PepocornTransactionModel = require(rootPrefix + '/app/models/mysql/redemption/PepocornTransaction'),
+  VideoDetailsByUserIdCache = require(rootPrefix + '/lib/cacheManagement/single/VideoDetailsByUserIdPagination'),
   basicHelper = require(rootPrefix + '/helpers/basic'),
   bgJob = require(rootPrefix + '/lib/rabbitMqEnqueue/bgJob'),
   coreConstants = require(rootPrefix + '/config/coreConstants'),
@@ -20,9 +20,9 @@ const rootPrefix = '../../..',
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   emailConstants = require(rootPrefix + '/lib/globalConstant/email'),
   bgJobConstants = require(rootPrefix + '/lib/globalConstant/bgJob'),
+  paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination'),
   redemptionConstants = require(rootPrefix + '/lib/globalConstant/redemption/redemption'),
   pepocornTransactionConstants = require(rootPrefix + '/lib/globalConstant/redemption/pepocornTransaction'),
-  paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination'),
   emailServiceApiCallHookConstants = require(rootPrefix + '/lib/globalConstant/big/emailServiceApiCallHook');
 
 /**
@@ -158,7 +158,7 @@ class InitiateRequestRedemption extends ServiceBase {
       return Promise.reject(videoDetailCacheResponse);
     }
 
-    if (videoDetailCacheResponse.data.videoIds.length == 0) {
+    if (videoDetailCacheResponse.data.videoIds.length === 0) {
       return Promise.reject(
         responseHelper.error({
           internal_error_identifier: 'a_s_r_ir_vue_2',

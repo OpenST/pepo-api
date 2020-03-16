@@ -104,15 +104,15 @@ export PA_INFRA_DB_MYSQL_DB='ost_infra_development'
 export PA_CACHE_DATA_SHA_KEY='066f7e6e833db143afee3dbafc888bcf'
 
 # AWS-KMS details
-export PA_KMS_AWS_ACCESS_KEY='AKIAT7WAUYD3XA7WRZV4'
-export PA_KMS_AWS_SECRET_KEY='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'
+export PA_KMS_AWS_ACCESS_KEY='AKIAT7WAUYD3SCOAJR5U'
+export PA_KMS_AWS_SECRET_KEY='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'
 export PA_KMS_AWS_REGION='us-east-1'
 export PA_API_KEY_KMS_ID='74f6ceff-95be-4c43-b936-f0c2cf6863d0'
 export PA_SECRET_ENC_KEY_KMS_ID='ce7424c5-56cf-48ed-9202-49cbae0cf9d1'
 
 # S3 config details
-export PA_S3_AWS_ACCESS_KEY='AKIAT7WAUYD3XA7WRZV4'
-export PA_S3_AWS_SECRET_KEY='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'
+export PA_S3_AWS_ACCESS_KEY='AKIAT7WAUYD3SCOAJR5U'
+export PA_S3_AWS_SECRET_KEY='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'
 export PA_S3_AWS_REGION='us-east-1'
 export PA_S3_AWS_MASTER_FOLDER='d'
 export PA_S3_USER_ASSETS_BUCKET='uassets.stagingpepo.com'
@@ -129,7 +129,7 @@ export PA_COOKIE_TOKEN_SECRET='aa5298d3a3fe181a3a52d085ee1525df5asa498337f8f3b76
 export PA_PAD_COOKIE_SECRET='aa5298d3a3fe181a3a52d085ee1525df5asa498337f8f3b76ca7df0a5de32123'
 
 # cookie signing secret for web cookie
-export PA_PW_COOKIE_SECRET='aa5298d3a3fe181a3a52d085ee1525df5asa498337f8f3b76ca7df0a5de32124'
+export PA_PW_COOKIE_SECRET='6BC9B1968BBA53CA8E28878DAD4AB549B154027F10EA1C3FD2D37BAE6F9A5540'
 
 # Pepo Campaigns Details
 export PA_CAMPAIGN_CLIENT_KEY="3572cbc0d1895ed73e769d028eb50fec"
@@ -140,7 +140,6 @@ export PA_CAMPAIGN_MASTER_LIST="64194"
 #Twitter API Key
 export PA_TWITTER_CONSUMER_KEY='NEo4gEXzdQZaoTsqzpZvepfKb'
 export PA_TWITTER_CONSUMER_SECRET='iM5UMt4px8rwoqEoRV9gJGrJGtEoMUxOYkaWXSges7t4bk564t'
-export PA_TWITTER_AUTH_CALLBACK_ROUTE='http://pepodev.com:8080/twitter/oauth'
 
 # image resizer variables
 export PA_PR_LAMBDA_IMAGE_RESIZE_FUNCTION='arn:aws:lambda:us-east-1:274208178423:function:pepoImageResizer'
@@ -198,9 +197,13 @@ export PA_REPLY_PIXEL_DATA_APP_FILE_PATH='.'
 # Tracker related constants.
 export PA_TRACKER_ENDPOINT='https://px.pepo.com/devp101_pixel.png'
 
-#Apple constants
+# Apple constants
 export PA_APPLE_CLIENT_ID='com.pepo.staging'
-export PA_APPLE_REDIRECT_URI='https://stagingpepo.com/apple/oauth'
 export PA_APPLE_TEAM_ID='N83K86W6P4'
 export PA_APPLE_KEY_IDENTIFIER='2P3PRWRQGT'
 export PA_APPLE_PRIVATE_KEY='-----BEGIN%20PRIVATE%20KEY-----%0AMIGTAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBHkwdwIBAQQg16k4h4bCtLDUDEIq%0A8Y/2KEWbueEjZqcdDko24dssmjmgCgYIKoZIzj0DAQehRANCAAQXtk9pu4XbH43k%0Apv51c2iuqqEt2d7NwNmMwgstzXIcAmh5sDgQ0apTUJQCgUmNA1KZOiNa2iNvfGD1%0AqPlhU891%0A-----END%20PRIVATE%20KEY-----'
+export PA_APPLE_WEB_SERVICE_ID='com.pepo.staging.signin'
+
+# Github constants.
+export PA_GITHUB_CLIENT_ID='10ca594072962f391504'
+export PA_GITHUB_CLIENT_SECRET='acf9f7c951f034566dcdc1b403ecf1c55429caf1'

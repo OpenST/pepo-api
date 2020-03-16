@@ -4,6 +4,7 @@ const rootPrefix = '../../..',
   FetchAssociatedEntities = require(rootPrefix + '/lib/FetchAssociatedEntities'),
   ChannelByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelByIds'),
   GetCurrentUserChannelRelationsLib = require(rootPrefix + '/lib/channel/GetCurrentUserChannelRelations'),
+  ChannelByPermalinksCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelByPermalinks'),
   ChannelTagByChannelIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelTagByChannelIds'),
   ChannelStatByChannelIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelStatByChannelIds'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
@@ -20,6 +21,7 @@ class GetChannel extends ServiceBase {
    * Constructor to get channel details.
    *
    * @param {object} params
+   * @param {string} params.channel_permalink
    * @param {number} params.channel_id
    * @param {object} params.current_user
    *
@@ -32,7 +34,8 @@ class GetChannel extends ServiceBase {
 
     const oThis = this;
 
-    oThis.channelId = params.channel_id;
+    oThis.channelPermalink = params.channel_permalink || '';
+    oThis.channelId = params.channel_id || null;
     oThis.currentUser = params.current_user;
 
     oThis.channel = {};
@@ -85,12 +88,40 @@ class GetChannel extends ServiceBase {
   async _fetchAndValidateChannel() {
     const oThis = this;
 
-    const cacheResponse = await new ChannelByIdsCache({ ids: [oThis.channelId] }).fetch();
-    if (cacheResponse.isFailure()) {
-      return Promise.reject(cacheResponse);
+    // If channel id is not passed and permalink is passed.
+    if (!oThis.channelId) {
+      let lowercaseChPermalink = oThis.channelPermalink.toLowerCase();
+      const cacheResponse = await new ChannelByPermalinksCache({
+        permalinks: [lowercaseChPermalink]
+      }).fetch();
+
+      if (cacheResponse.isFailure()) {
+        return Promise.reject(cacheResponse);
+      }
+
+      const permalinkIdsMap = cacheResponse.data;
+
+      if (!CommonValidators.validateNonEmptyObject(permalinkIdsMap[lowercaseChPermalink])) {
+        return Promise.reject(
+          responseHelper.error({
+            internal_error_identifier: 'a_s_c_g_3',
+            api_error_identifier: 'entity_not_found',
+            debug_options: {
+              channelPermalink: oThis.channelPermalink
+            }
+          })
+        );
+      }
+
+      oThis.channelId = permalinkIdsMap[lowercaseChPermalink].id;
     }
 
-    oThis.channel = cacheResponse.data[oThis.channelId];
+    const channelCacheResponse = await new ChannelByIdsCache({ ids: [oThis.channelId] }).fetch();
+    if (channelCacheResponse.isFailure()) {
+      return Promise.reject(channelCacheResponse);
+    }
+
+    oThis.channel = channelCacheResponse.data[oThis.channelId];
 
     if (
       !CommonValidators.validateNonEmptyObject(oThis.channel) ||
@@ -183,6 +214,9 @@ class GetChannel extends ServiceBase {
    */
   async _fetchCurrentUserChannelRelations() {
     const oThis = this;
+    if (!oThis.currentUser) {
+      return;
+    }
 
     const currentUserChannelRelationLibParams = {
       currentUserId: oThis.currentUser.id,

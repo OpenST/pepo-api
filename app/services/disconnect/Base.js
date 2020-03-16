@@ -7,7 +7,8 @@ const rootPrefix = '../../..',
   UserDeviceByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/UserDeviceByIds'),
   coreConstants = require(rootPrefix + '/config/coreConstants'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
-  localCipher = require(rootPrefix + '/lib/encryptors/localCipher');
+  localCipher = require(rootPrefix + '/lib/encryptors/localCipher'),
+  apiSourceConstants = require(rootPrefix + '/lib/globalConstant/apiSource');
 
 class DisconnectBase extends ServiceBase {
   /**
@@ -15,6 +16,7 @@ class DisconnectBase extends ServiceBase {
    *
    * @param {object} params
    * @param {object} params.current_user
+   * @param {string} params.api_source
    *
    * @augments ServiceBase
    *
@@ -25,6 +27,7 @@ class DisconnectBase extends ServiceBase {
 
     const oThis = this;
     oThis.currentUserId = params.current_user ? params.current_user.id : null;
+    oThis.apiSource = params.api_source;
 
     oThis.userDeviceIds = [];
     oThis.deviceIds = [];
@@ -136,6 +139,10 @@ class DisconnectBase extends ServiceBase {
   async _fetchDevices() {
     const oThis = this;
 
+    if (oThis.userDeviceIds.length == 0) {
+      return;
+    }
+
     let userDeviceByIdsCache = new UserDeviceByIdsCache({ ids: oThis.userDeviceIds });
 
     let cacheRsp = await userDeviceByIdsCache.fetch();
@@ -157,6 +164,10 @@ class DisconnectBase extends ServiceBase {
    */
   async _logoutUserDevices() {
     const oThis = this;
+
+    if (oThis.deviceIds.length == 0) {
+      return;
+    }
 
     await new Logout({
       current_user: { id: oThis.currentUserId },

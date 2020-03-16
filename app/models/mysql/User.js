@@ -5,7 +5,8 @@ const rootPrefix = '../../..',
   coreConstants = require(rootPrefix + '/config/coreConstants'),
   userConstants = require(rootPrefix + '/lib/globalConstant/user'),
   localCipher = require(rootPrefix + '/lib/encryptors/localCipher'),
-  databaseConstants = require(rootPrefix + '/lib/globalConstant/database');
+  databaseConstants = require(rootPrefix + '/lib/globalConstant/database'),
+  apiSourceConstants = require(rootPrefix + '/lib/globalConstant/apiSource');
 
 // Declare variables names.
 const dbName = databaseConstants.userDbName;
@@ -286,8 +287,64 @@ class UserModel extends ModelBase {
   }
 
   /**
-   * Get cookie value for version v2.
-   * // NOTE - this cookie versioning has been introduced on 22/01/2020.
+   * Get cookie token for different sources.
+   *
+   * @param {object} userObj
+   * @param {string} decryptedEncryptionSalt
+   * @param {object} options
+   *
+   * @returns {string}
+   */
+  getTokenFor(userObj, decryptedEncryptionSalt, options) {
+    const uniqueStr = localCipher.decrypt(decryptedEncryptionSalt, userObj.cookieToken);
+
+    let version = null,
+      strSecret = null;
+
+    if (apiSourceConstants.isAppRequest(options.apiSource)) {
+      version = 'v2';
+      strSecret = coreConstants.PA_COOKIE_TOKEN_SECRET;
+    } else if (
+      apiSourceConstants.isWebViewRequest(options.apiSource) ||
+      apiSourceConstants.isStoreRequest(options.apiSource) ||
+      apiSourceConstants.isWebRequest(options.apiSource)
+    ) {
+      version = options.apiSource;
+      strSecret = coreConstants.WEB_COOKIE_SECRET;
+    } else {
+      throw new Error(`Invalid api_source-${options.apiSource} for getCookieToken`);
+    }
+
+    const stringToSign =
+      version +
+      ':' +
+      userObj.id +
+      ':' +
+      options.loginServiceType +
+      ':' +
+      options.timestamp +
+      ':' +
+      strSecret +
+      ':' +
+      uniqueStr.substring(0, 16);
+    const salt =
+      version +
+      ':' +
+      userObj.id +
+      ':' +
+      uniqueStr.slice(-16) +
+      ':' +
+      strSecret +
+      ':' +
+      options.timestamp +
+      ':' +
+      options.loginServiceType;
+
+    return util.createSha256Digest(salt, stringToSign);
+  }
+
+  /**
+   * Get cookie token for different sources.
    *
    * @param {object} userObj
    * @param {string} decryptedEncryptionSalt
@@ -298,83 +355,22 @@ class UserModel extends ModelBase {
   getCookieValueFor(userObj, decryptedEncryptionSalt, options) {
     const oThis = this;
 
-    return (
-      'v2' +
-      ':' +
-      userObj.id +
-      ':' +
-      options.loginServiceType +
-      ':' +
-      options.timestamp +
-      ':' +
-      oThis.getCookieTokenForVersionV2(userObj, decryptedEncryptionSalt, options)
-    );
-  }
+    const cookieToken = oThis.getTokenFor(userObj, decryptedEncryptionSalt, options);
+    let version = null;
 
-  /**
-   * Get cookie token.
-   *
-   * @param {object} userObj
-   * @param {string} decryptedEncryptionSalt
-   * @param {object} options
-   *
-   * @returns {string}
-   */
-  getCookieTokenFor(userObj, decryptedEncryptionSalt, options) {
-    const uniqueStr = localCipher.decrypt(decryptedEncryptionSalt, userObj.cookieToken);
+    if (apiSourceConstants.isAppRequest(options.apiSource)) {
+      version = 'v2';
+    } else if (
+      apiSourceConstants.isWebViewRequest(options.apiSource) ||
+      apiSourceConstants.isStoreRequest(options.apiSource) ||
+      apiSourceConstants.isWebRequest(options.apiSource)
+    ) {
+      version = options.apiSource;
+    } else {
+      throw new Error(`Invalid api_source-${options.apiSource} for getCookieValueFor`);
+    }
 
-    const stringToSign =
-      userObj.id +
-      ':' +
-      options.timestamp +
-      ':' +
-      coreConstants.PA_COOKIE_TOKEN_SECRET +
-      ':' +
-      uniqueStr.substring(0, 16);
-    const salt =
-      userObj.id + ':' + uniqueStr.slice(-16) + ':' + coreConstants.PA_COOKIE_TOKEN_SECRET + ':' + options.timestamp;
-
-    return util.createSha256Digest(salt, stringToSign);
-  }
-
-  /**
-   * Get cookie token for version v2.
-   *
-   * @param {object} userObj
-   * @param {string} decryptedEncryptionSalt
-   * @param {object} options
-   *
-   * @returns {string}
-   */
-  getCookieTokenForVersionV2(userObj, decryptedEncryptionSalt, options) {
-    const uniqueStr = localCipher.decrypt(decryptedEncryptionSalt, userObj.cookieToken);
-
-    const stringToSign =
-      'v2' +
-      ':' +
-      userObj.id +
-      ':' +
-      options.loginServiceType +
-      ':' +
-      options.timestamp +
-      ':' +
-      coreConstants.PA_COOKIE_TOKEN_SECRET +
-      ':' +
-      uniqueStr.substring(0, 16);
-    const salt =
-      'v2' +
-      ':' +
-      userObj.id +
-      ':' +
-      uniqueStr.slice(-16) +
-      ':' +
-      coreConstants.PA_COOKIE_TOKEN_SECRET +
-      ':' +
-      options.timestamp +
-      ':' +
-      options.loginServiceType;
-
-    return util.createSha256Digest(salt, stringToSign);
+    return version + ':' + userObj.id + ':' + options.loginServiceType + ':' + options.timestamp + ':' + cookieToken;
   }
 
   /**
