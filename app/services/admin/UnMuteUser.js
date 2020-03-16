@@ -1,6 +1,7 @@
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   UserMuteModel = require(rootPrefix + '/app/models/mysql/UserMute'),
+  FeedModel = require(rootPrefix + '/app/models/mysql/Feed'),
   UsersCache = require(rootPrefix + '/lib/cacheManagement/multi/User'),
   AdminActivityLogModel = require(rootPrefix + '/app/models/mysql/admin/AdminActivityLog'),
   UserMuteByUser2IdsForGlobalCache = require(rootPrefix + '/lib/cacheManagement/multi/UserMuteByUser2IdsForGlobal'),
@@ -133,6 +134,8 @@ class UnMuteUser extends ServiceBase {
       .delete()
       .where({ user2_id: oThis.userId, user1_id: 0 })
       .fire();
+
+    await FeedModel.flushCache({});
 
     return UserMuteModel.flushCache({ user2Id: oThis.userId });
   }

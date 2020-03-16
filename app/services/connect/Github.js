@@ -1,5 +1,4 @@
 const rootPrefix = '../../..',
-  ServiceBase = require(rootPrefix + '/app/services/Base'),
   UserModel = require(rootPrefix + '/app/models/mysql/User'),
   ConnectBase = require(rootPrefix + '/app/services/connect/Base'),
   GithubLogin = require(rootPrefix + '/lib/connect/login/ByGithub'),
@@ -12,7 +11,7 @@ const rootPrefix = '../../..',
   userIdentifierConstants = require(rootPrefix + '/lib/globalConstant/userIdentifier');
 
 /**
- * Github Connect
+ * Class for github connect.
  *
  * @class GithubConnect
  */
@@ -23,7 +22,7 @@ class GithubConnect extends ConnectBase {
    * @param {object} params
    * @param {string} params.access_token
    *
-   * @augments ServiceBase
+   * @augments ConnectBase
    *
    * @constructor
    */
@@ -31,6 +30,7 @@ class GithubConnect extends ConnectBase {
     super(params);
 
     const oThis = this;
+
     oThis.accessToken = params.access_token;
     oThis.duplicateRequestIdentifier = oThis.accessToken;
 
@@ -38,7 +38,9 @@ class GithubConnect extends ConnectBase {
   }
 
   /**
-   * Method to validate access tokens and fetching data from Social platforms.
+   * Method to validate access tokens and fetching data from social platforms.
+   *
+   * @sets oThis.formattedGithubUser
    *
    * @returns {Promise<void>}
    * @private
@@ -46,7 +48,7 @@ class GithubConnect extends ConnectBase {
   async _validateAndFetchSocialInfo() {
     const oThis = this;
 
-    let githubUserRsp = await new GithubGetUser().getUser({ oAuthToken: oThis.accessToken });
+    const githubUserRsp = await new GithubGetUser().getUser({ oAuthToken: oThis.accessToken });
 
     if (githubUserRsp.isFailure()) {
       return Promise.reject(githubUserRsp);
@@ -55,13 +57,13 @@ class GithubConnect extends ConnectBase {
     oThis.formattedGithubUser = githubUserRsp.data;
 
     if (!oThis.formattedGithubUser.email) {
-      let githubUserEmailRsp = await new GithubUserEmail().getUserEmails({ oAuthToken: oThis.accessToken });
+      const githubUserEmailRsp = await new GithubUserEmail().getUserEmails({ oAuthToken: oThis.accessToken });
       if (githubUserEmailRsp.isFailure()) {
         return Promise.reject(githubUserRsp);
       }
 
-      for (let i = 0; i < githubUserEmailRsp.data.length; i++) {
-        let emailObject = githubUserEmailRsp.data[i];
+      for (let index = 0; index < githubUserEmailRsp.data.length; index++) {
+        const emailObject = githubUserEmailRsp.data[index];
         if (emailObject.primary == true) {
           oThis.formattedGithubUser.email = emailObject.email;
           break;
@@ -71,9 +73,10 @@ class GithubConnect extends ConnectBase {
   }
 
   /**
-   * Method to fetch data from respective social_users tables
+   * Method to fetch data from respective social_users tables.
    *
-   * @Sets oThis.socialUserObj
+   * @sets oThis.socialUserObj
+   *
    * @returns {Promise<void>}
    * @private
    */
@@ -81,7 +84,7 @@ class GithubConnect extends ConnectBase {
     const oThis = this;
 
     // Fetch social user on the basis of github id.
-    let queryResponse = await new GithubUserModel()
+    const queryResponse = await new GithubUserModel()
       .select('*')
       .where(['github_id = ?', oThis.formattedGithubUser.id])
       .fire();
@@ -94,7 +97,9 @@ class GithubConnect extends ConnectBase {
   /**
    * Method to check whether same social platform is connected before.
    *
-   * @param userObj
+   * @param {object} userObj
+   *
+   * @returns {boolean}
    * @private
    */
   _sameSocialConnectUsed(userObj) {
@@ -105,7 +110,9 @@ class GithubConnect extends ConnectBase {
   }
 
   /**
-   * Method to perform signup action
+   * Method to perform signup action.
+   *
+   * @sets oThis.serviceResp
    *
    * @returns {Promise<void>}
    * @private
@@ -113,17 +120,20 @@ class GithubConnect extends ConnectBase {
   async _performSignUp() {
     const oThis = this;
 
-    let signUpParams = {
+    const signUpParams = {
       accessToken: oThis.accessToken,
       userGithubEntity: oThis.formattedGithubUser
     };
 
     Object.assign(signUpParams, oThis._appendCommonSignupParams());
+
     oThis.serviceResp = await new GithubSignup(signUpParams).perform();
   }
 
   /**
-   * Method to perform login action
+   * Method to perform login action.
+   *
+   * @sets oThis.serviceResp
    *
    * @returns {Promise<void>}
    * @private
@@ -131,19 +141,20 @@ class GithubConnect extends ConnectBase {
   async _performLogin() {
     const oThis = this;
 
-    let loginParams = {
+    const loginParams = {
       accessToken: oThis.accessToken,
       userGithubEntity: oThis.formattedGithubUser,
       githubUserObj: oThis.socialUserObj,
       userId: oThis.userId,
-      isNewSocialConnect: oThis.newSocialConnect
+      isNewSocialConnect: oThis.newSocialConnect,
+      apiSource: oThis.apiSource
     };
 
     oThis.serviceResp = await new GithubLogin(loginParams).perform();
   }
 
   /**
-   * Get unique property from github info, like email
+   * Get unique property from github info, like email.
    *
    * @returns {{}|{kind: string, value: *}}
    * @private
@@ -180,7 +191,7 @@ class GithubConnect extends ConnectBase {
   async _updateEmailInSocialUsers() {
     const oThis = this;
 
-    let email = oThis._getCurrentSocialEmail();
+    const email = oThis._getCurrentSocialEmail();
 
     await new GithubUserModel()
       .update({ email: email })

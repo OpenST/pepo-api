@@ -22,8 +22,6 @@ router.post('/logout', cookieHelper.parseUserCookieForLogout, sanitizer.sanitize
   const resp = responseHelper.successWithData({});
 
   return res.status(200).json(resp); // Deliberately returning success response
-
-  Promise.resolve(routeHelper.perform(req, res, next, '/Logout', 'r_a_v1_a_1', null));
 });
 
 /* Twitter connect. */
@@ -37,10 +35,12 @@ router.post('/twitter-login', sanitizer.sanitizeDynamicUrlParams, function(req, 
   const onServiceSuccess = async function(serviceResponse) {
     cookieHelper.setLoginCookie(res, serviceResponse.data.userLoginCookieValue);
     cookieHelper.deleteUserUtmCookie(res);
+    cookieHelper.deleteInviteCodeCookie(res);
     const wrapperFormatterRsp = await new FormatterComposer({
       resultType: responseEntityKey.loggedInUser,
       entityKindToResponseKeyMap: {
         [entityTypeConstants.loggedInUser]: responseEntityKey.loggedInUser,
+        [entityTypeConstants.airdropDetails]: responseEntityKey.airdropDetails,
         [entityTypeConstants.usersMap]: responseEntityKey.users,
         [entityTypeConstants.imagesMap]: responseEntityKey.images,
         [entityTypeConstants.utmParams]: responseEntityKey.utmParams,
@@ -73,10 +73,12 @@ router.post('/github-login', sanitizer.sanitizeDynamicUrlParams, function(req, r
   const onServiceSuccess = async function(serviceResponse) {
     cookieHelper.setLoginCookie(res, serviceResponse.data.userLoginCookieValue);
     cookieHelper.deleteUserUtmCookie(res);
+    cookieHelper.deleteInviteCodeCookie(res);
     const wrapperFormatterRsp = await new FormatterComposer({
       resultType: responseEntityKey.loggedInUser,
       entityKindToResponseKeyMap: {
         [entityTypeConstants.loggedInUser]: responseEntityKey.loggedInUser,
+        [entityTypeConstants.airdropDetails]: responseEntityKey.airdropDetails,
         [entityTypeConstants.usersMap]: responseEntityKey.users,
         [entityTypeConstants.imagesMap]: responseEntityKey.images,
         [entityTypeConstants.utmParams]: responseEntityKey.utmParams,
@@ -109,10 +111,12 @@ router.post('/google-login', sanitizer.sanitizeDynamicUrlParams, function(req, r
   const onServiceSuccess = async function(serviceResponse) {
     cookieHelper.setLoginCookie(res, serviceResponse.data.userLoginCookieValue);
     cookieHelper.deleteUserUtmCookie(res);
+    cookieHelper.deleteInviteCodeCookie(res);
     const wrapperFormatterRsp = await new FormatterComposer({
       resultType: responseEntityKey.loggedInUser,
       entityKindToResponseKeyMap: {
         [entityTypeConstants.loggedInUser]: responseEntityKey.loggedInUser,
+        [entityTypeConstants.airdropDetails]: responseEntityKey.airdropDetails,
         [entityTypeConstants.usersMap]: responseEntityKey.users,
         [entityTypeConstants.imagesMap]: responseEntityKey.images,
         [entityTypeConstants.utmParams]: responseEntityKey.utmParams,
@@ -145,10 +149,12 @@ router.post('/apple-login', sanitizer.sanitizeDynamicUrlParams, function(req, re
   const onServiceSuccess = async function(serviceResponse) {
     cookieHelper.setLoginCookie(res, serviceResponse.data.userLoginCookieValue);
     cookieHelper.deleteUserUtmCookie(res);
+    cookieHelper.deleteInviteCodeCookie(res);
     const wrapperFormatterRsp = await new FormatterComposer({
       resultType: responseEntityKey.loggedInUser,
       entityKindToResponseKeyMap: {
         [entityTypeConstants.loggedInUser]: responseEntityKey.loggedInUser,
+        [entityTypeConstants.airdropDetails]: responseEntityKey.airdropDetails,
         [entityTypeConstants.usersMap]: responseEntityKey.users,
         [entityTypeConstants.imagesMap]: responseEntityKey.images,
         [entityTypeConstants.utmParams]: responseEntityKey.utmParams,
@@ -170,7 +176,7 @@ router.post('/apple-login', sanitizer.sanitizeDynamicUrlParams, function(req, re
   );
 });
 
-/* Twitter Disconnect */
+/* Twitter disconnect. */
 router.post('/twitter-disconnect', cookieHelper.parseUserCookieForLogout, sanitizer.sanitizeDynamicUrlParams, function(
   req,
   res,
@@ -183,7 +189,7 @@ router.post('/twitter-disconnect', cookieHelper.parseUserCookieForLogout, saniti
   Promise.resolve(routeHelper.perform(req, res, next, '/disconnect/Twitter', 'r_a_v1_a_6', null));
 });
 
-/* Apple Disconnect */
+/* Apple disconnect. */
 router.post('/apple-disconnect', cookieHelper.parseUserCookieForLogout, sanitizer.sanitizeDynamicUrlParams, function(
   req,
   res,
@@ -196,7 +202,7 @@ router.post('/apple-disconnect', cookieHelper.parseUserCookieForLogout, sanitize
   Promise.resolve(routeHelper.perform(req, res, next, '/disconnect/Apple', 'r_a_v1_a_7', null));
 });
 
-/* Google Disconnect */
+/* Google disconnect. */
 router.post('/google-disconnect', cookieHelper.parseUserCookieForLogout, sanitizer.sanitizeDynamicUrlParams, function(
   req,
   res,
@@ -209,7 +215,7 @@ router.post('/google-disconnect', cookieHelper.parseUserCookieForLogout, sanitiz
   Promise.resolve(routeHelper.perform(req, res, next, '/disconnect/Google', 'r_a_v1_a_8', null));
 });
 
-/* Github Disconnect */
+/* Github disconnect. */
 router.post('/github-disconnect', cookieHelper.parseUserCookieForLogout, sanitizer.sanitizeDynamicUrlParams, function(
   req,
   res,

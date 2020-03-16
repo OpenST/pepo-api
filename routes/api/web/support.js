@@ -3,26 +3,38 @@ const express = require('express'),
   cookieParser = require('cookie-parser');
 
 const rootPrefix = '../../..',
+  FormatterComposer = require(rootPrefix + '/lib/formatter/Composer'),
   routeHelper = require(rootPrefix + '/routes/helper'),
-  apiName = require(rootPrefix + '/lib/globalConstant/apiName'),
   sanitizer = require(rootPrefix + '/helpers/sanitizer'),
+  cookieHelper = require(rootPrefix + '/lib/cookieHelper'),
+  apiName = require(rootPrefix + '/lib/globalConstant/apiName'),
   coreConstants = require(rootPrefix + '/config/coreConstants'),
-  cookieHelper = require(rootPrefix + '/lib/cookieHelper');
+  entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
+  responseEntityKey = require(rootPrefix + '/lib/globalConstant/responseEntityKey');
 
-// Node.js cookie parsing middleware.
-router.use(cookieParser(coreConstants.COOKIE_SECRET));
-
-/* Subscribe email*/
+/* Validate support url. */
 router.get(
   '/',
   cookieHelper.validateWebviewLoginCookieIfPresent,
   sanitizer.sanitizeDynamicUrlParams,
   cookieHelper.validateTokenIfPresent,
-  cookieHelper.validateUserLoginRequired,
+  cookieHelper.validateWebviewLoginCookieRequired,
   function(req, res, next) {
     req.decodedParams.apiName = apiName.validateSupportUrl;
 
-    Promise.resolve(routeHelper.perform(req, res, next, '/support/Validate', 'r_a_w_s_1', null));
+    const dataFormatterFunc = async function(serviceResponse) {
+      const wrapperFormatterRsp = await new FormatterComposer({
+        resultType: responseEntityKey.supportValidation,
+        entityKindToResponseKeyMap: {
+          [entityTypeConstants.supportValidation]: responseEntityKey.supportValidation
+        },
+        serviceData: serviceResponse.data
+      }).perform();
+
+      serviceResponse.data = wrapperFormatterRsp.data;
+    };
+
+    Promise.resolve(routeHelper.perform(req, res, next, '/support/Validate', 'r_a_w_s_1', null, dataFormatterFunc));
   }
 );
 

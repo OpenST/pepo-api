@@ -215,7 +215,8 @@ class SocketConnectionDetails extends ServiceBase {
     const oThis = this;
 
     const encryptedPayload = oThis._prepareEncryptedPayload();
-    const response = {
+
+    return {
       websocketEndpoint: {
         id: oThis.userSocketConnectionDetails.id,
         uts: oThis.userSocketConnectionDetails.updatedAt,
@@ -226,8 +227,6 @@ class SocketConnectionDetails extends ServiceBase {
       authKeyExpiryAt: oThis.userSocketConnectionDetails.authKeyExpiryAt,
       payload: encryptedPayload
     };
-
-    return response;
   }
 
   /**

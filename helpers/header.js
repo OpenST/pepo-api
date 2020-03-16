@@ -4,6 +4,8 @@
  * @class HeaderHelper
  */
 class HeaderHelper {
+  //Todo:Web-Login check usage
+
   pepoDeviceId(headers) {
     return headers['x-pepo-device-id'] || '';
   }
@@ -17,7 +19,7 @@ class HeaderHelper {
   }
 
   pepoDeviceOs(headers) {
-    return headers['x-pepo-device-os'] || 'postman';
+    return headers['x-pepo-device-os'] || '';
   }
 
   get androidDeviceOs() {

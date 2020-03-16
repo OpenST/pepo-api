@@ -73,6 +73,11 @@ class SaveEmail extends ServiceBase {
   async _validate() {
     const oThis = this;
 
+    // Sanitize input email.
+    if (oThis.email) {
+      oThis.email = oThis.email.toLowerCase();
+    }
+
     if (+oThis.currentUserId !== +oThis.profileUserId) {
       return Promise.reject(
         responseHelper.paramValidationError({

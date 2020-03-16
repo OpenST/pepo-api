@@ -1,6 +1,7 @@
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   UserMuteModel = require(rootPrefix + '/app/models/mysql/UserMute'),
+  FeedModel = require(rootPrefix + '/app/models/mysql/Feed'),
   UsersCache = require(rootPrefix + '/lib/cacheManagement/multi/User'),
   AdminActivityLogModel = require(rootPrefix + '/app/models/mysql/admin/AdminActivityLog'),
   UserMuteByUser2IdsForGlobalCache = require(rootPrefix + '/lib/cacheManagement/multi/UserMuteByUser2IdsForGlobal'),
@@ -142,6 +143,8 @@ class MuteUser extends ServiceBase {
 
       return Promise.reject(new Error('Error while inserting data in userMute table.'));
     }
+
+    await FeedModel.flushCache({});
 
     return UserMuteModel.flushCache({ user2Id: oThis.userId });
   }

@@ -1,6 +1,7 @@
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
-  responseHelper = require(rootPrefix + '/lib/formatter/response');
+  responseHelper = require(rootPrefix + '/lib/formatter/response'),
+  entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType');
 
 /**
  * Class to validate support URL.
@@ -36,9 +37,11 @@ class ValidateSupportUrl extends ServiceBase {
     const oThis = this;
 
     return responseHelper.successWithData({
-      userId: oThis.currentUser.id,
-      external_user_id: oThis.currentUser.externalUserId,
-      user_name: oThis.currentUser.name
+      [entityTypeConstants.supportValidation]: {
+        userId: oThis.currentUser.id,
+        externalUserId: oThis.currentUser.externalUserId,
+        userName: oThis.currentUser.name
+      }
     });
   }
 }

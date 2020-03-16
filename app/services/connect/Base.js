@@ -25,8 +25,10 @@ class SocialConnectBase extends ServiceBase {
    * Constructor for social platform connects base.
    *
    * @param {object} params
-   * @param {string} [params.invite_code]: invite_code
-   * @param {object} [params.utm_params]: utm_params
+   * @param {string} params.invite_code: invite_code
+   * @param {string} params.api_source: api_source
+   * @param {string} params.ip_address: ip_address
+   * @param {object} params.utm_params: utm_params
    *
    * @augments ServiceBase
    *
@@ -39,6 +41,7 @@ class SocialConnectBase extends ServiceBase {
     oThis.inviteCode = params.invite_code;
     oThis.utmParams = params.utm_params;
     oThis.ipAddress = params.ip_address;
+    oThis.apiSource = params.api_source;
 
     oThis.socialUserObj = null;
     oThis.newSocialConnect = false;
@@ -396,6 +399,7 @@ class SocialConnectBase extends ServiceBase {
     rp.utmParams = oThis.utmParams;
     rp.inviteCode = oThis.inviteCode || '';
     rp.userEmail = oThis.userEmailToSet;
+    rp.apiSource = oThis.apiSource;
     return rp;
   }
 

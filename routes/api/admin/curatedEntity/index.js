@@ -17,7 +17,7 @@ router.post('/update', sanitizer.sanitizeDynamicUrlParams, function(req, res, ne
   Promise.resolve(routeHelper.perform(req, res, next, '/admin/curated/Update', 'r_a_v1_ce_i_1', null, null, null));
 });
 
-/* delete curated entity */
+/* Delete curated entity. */
 router.post('/delete', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.deleteCuratedEntity;
 

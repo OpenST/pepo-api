@@ -12,6 +12,7 @@ const rootPrefix = '../../..',
   tokensRoutes = require(rootPrefix + '/routes/api/v1/tokens'),
   feedsRoutes = require(rootPrefix + '/routes/api/v1/feeds'),
   redemptionsRoutes = require(rootPrefix + '/routes/api/v1/redemptions'),
+  sessionAuthsRoutes = require(rootPrefix + '/routes/api/v1/sessionAuths'),
   supportRoutes = require(rootPrefix + '/routes/api/v1/support'),
   cookieHelper = require(rootPrefix + '/lib/cookieHelper'),
   tagRoutes = require(rootPrefix + '/routes/api/v1/tags'),
@@ -40,19 +41,25 @@ router.use('/auth', authRoutes);
 router.use('/fetch-goto', fetchGotoRoutes);
 
 // Login not mandatory for following
-router.use('/feeds', cookieHelper.validateUserLoginCookieIfPresent, feedsRoutes);
-router.use('/videos', cookieHelper.validateUserLoginCookieIfPresent, videoRoutes);
-router.use('/report', cookieHelper.validateUserLoginCookieIfPresent, reportRoutes);
-router.use('/replies', cookieHelper.validateUserLoginCookieIfPresent, replyRoutes);
-router.use('/channels', cookieHelper.validateUserLoginCookieIfPresent, channelRoutes);
 
-router.use(cookieHelper.validateUserLoginCookieIfPresent, cookieHelper.validateUserLoginRequired);
+router.use(cookieHelper.validateUserLoginCookieIfPresent);
+
+router.use('/feeds', feedsRoutes);
+router.use('/videos', videoRoutes);
+router.use('/report', reportRoutes);
+router.use('/replies', replyRoutes);
+router.use('/channels', channelRoutes);
+
+// Login mandatory for following
+
+router.use(cookieHelper.validateUserLoginRequired);
 
 router.use('/users', usersRoutes);
 router.use('/invites', invitesRoutes);
 router.use('/tokens', tokensRoutes);
 router.use('/ost-transactions', ostTransactionRoutes);
 router.use('/redemptions', redemptionsRoutes);
+router.use('/session-auth', sessionAuthsRoutes);
 router.use('/support', supportRoutes);
 router.use('/upload-params', uploadParamsRoutes);
 router.use('/tags', tagRoutes);

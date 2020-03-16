@@ -3,10 +3,10 @@ const express = require('express'),
 
 const rootPrefix = '../../..',
   routeHelper = require(rootPrefix + '/routes/helper'),
-  apiName = require(rootPrefix + '/lib/globalConstant/apiName'),
-  sanitizer = require(rootPrefix + '/helpers/sanitizer');
+  sanitizer = require(rootPrefix + '/helpers/sanitizer'),
+  apiName = require(rootPrefix + '/lib/globalConstant/apiName');
 
-/* Expression */
+/* OST Transaction. */
 router.post('/', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.ostTransaction;
 

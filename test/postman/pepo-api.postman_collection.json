@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "620a853c-4a22-4531-bb48-45ac5e4a2a46",
+		"_postman_id": "d44c81bb-64ba-458a-b0c3-0bd7cf3f64cb",
 		"name": "pepo-api",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -1024,42 +1024,6 @@
 						}
 					},
 					"response": []
-				},
-				{
-					"name": "whitelist-user",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/x-www-form-urlencoded",
-								"type": "text"
-							},
-							{
-								"key": "csrf-token",
-								"value": "{{csrf-token}}",
-								"type": "text"
-							}
-						],
-						"body": {
-							"mode": "urlencoded",
-							"urlencoded": []
-						},
-						"url": {
-							"raw": "{{api_server}}/api/admin/pre-launch/whitelist/6636",
-							"host": [
-								"{{api_server}}"
-							],
-							"path": [
-								"api",
-								"admin",
-								"pre-launch",
-								"whitelist",
-								"6636"
-							]
-						}
-					},
-					"response": []
 				}
 			],
 			"protocolProfileBehavior": {}
@@ -1145,7 +1109,7 @@
 									"urlencoded": [
 										{
 											"key": "access_token",
-											"value": "1152149157206847488-ocfNpLMSQMykW21zUqT8COi4oEL0NP",
+											"value": "1626ef4aa98944afd2aa639d624092180c93780b",
 											"type": "text"
 										},
 										{
@@ -1333,6 +1297,37 @@
 										"v1",
 										"auth",
 										"twitter-disconnect"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "github-disconnect",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"type": "text",
+										"value": "text/plain"
+									}
+								],
+								"body": {
+									"mode": "urlencoded",
+									"urlencoded": []
+								},
+								"url": {
+									"raw": "{{api_server}}/api/v1/auth/github-disconnect",
+									"host": [
+										"{{api_server}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"auth",
+										"github-disconnect"
 									]
 								}
 							},
@@ -2092,7 +2087,7 @@
 								"method": "GET",
 								"header": [],
 								"url": {
-									"raw": "{{api_server}}/api/v1/users/1445/websocket-details",
+									"raw": "{{api_server}}/api/v1/users/1022/websocket-details",
 									"host": [
 										"{{api_server}}"
 									],
@@ -2100,7 +2095,7 @@
 										"api",
 										"v1",
 										"users",
-										"1445",
+										"1022",
 										"websocket-details"
 									]
 								},
@@ -3785,6 +3780,297 @@
 										"web",
 										"redemptions",
 										""
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"protocolProfileBehavior": {},
+					"_postman_isSubFolder": true
+				},
+				{
+					"name": "auth",
+					"item": [
+						{
+							"name": "github",
+							"item": [
+								{
+									"name": "redirect-url",
+									"protocolProfileBehavior": {
+										"disableBodyPruning": true
+									},
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Content-Type",
+												"name": "Content-Type",
+												"type": "text",
+												"value": "text/plain"
+											}
+										],
+										"body": {
+											"mode": "urlencoded",
+											"urlencoded": [
+												{
+													"key": "access_token",
+													"value": "1626ef4aa98944afd2aa639d624092180c93780b",
+													"type": "text"
+												},
+												{
+													"key": "invite_code",
+													"value": "QUK9IZ",
+													"type": "text",
+													"disabled": true
+												}
+											]
+										},
+										"url": {
+											"raw": "{{api_server}}/api/web/auth/github/redirect-url",
+											"host": [
+												"{{api_server}}"
+											],
+											"path": [
+												"api",
+												"web",
+												"auth",
+												"github",
+												"redirect-url"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "github-login",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"name": "Content-Type",
+												"type": "text",
+												"value": "text/plain"
+											},
+											{
+												"key": "csrf-token",
+												"value": "{{csrf-token}}",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "urlencoded",
+											"urlencoded": [
+												{
+													"key": "authorization_code",
+													"value": "91e2ff50b20cdaf6b7f4",
+													"type": "text"
+												},
+												{
+													"key": "invite_code",
+													"value": "QUK9IZ",
+													"type": "text",
+													"disabled": true
+												}
+											]
+										},
+										"url": {
+											"raw": "{{api_server}}/api/web/auth/github/login",
+											"host": [
+												"{{api_server}}"
+											],
+											"path": [
+												"api",
+												"web",
+												"auth",
+												"github",
+												"login"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "github-disconnect",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"name": "Content-Type",
+												"type": "text",
+												"value": "text/plain"
+											}
+										],
+										"body": {
+											"mode": "urlencoded",
+											"urlencoded": []
+										},
+										"url": {
+											"raw": "{{api_server}}/api/web/auth/github/disconnect",
+											"host": [
+												"{{api_server}}"
+											],
+											"path": [
+												"api",
+												"web",
+												"auth",
+												"github",
+												"disconnect"
+											]
+										}
+									},
+									"response": []
+								}
+							],
+							"protocolProfileBehavior": {},
+							"_postman_isSubFolder": true
+						},
+						{
+							"name": "logout",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"type": "text",
+										"value": "application/x-www-form-urlencoded"
+									}
+								],
+								"body": {
+									"mode": "urlencoded",
+									"urlencoded": []
+								},
+								"url": {
+									"raw": "{{api_server}}/api/v1/auth/logout",
+									"host": [
+										"{{api_server}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"auth",
+										"logout"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "fetch-csrf",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "463dff11-4c9d-4043-b558-3007a6e4d83c",
+										"exec": [
+											"const $ = cheerio.load(pm.response.text())",
+											"",
+											"pm.environment.set('csrf-token', $('meta[name=csrf-token]').attr('content'));"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"auth": {
+									"type": "basic",
+									"basic": [
+										{
+											"key": "password",
+											"value": "Oyee^Yaar!",
+											"type": "string"
+										},
+										{
+											"key": "username",
+											"value": "pepo",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"type": "text",
+										"value": "text/plain"
+									}
+								],
+								"body": {
+									"mode": "urlencoded",
+									"urlencoded": [
+										{
+											"key": "access_token",
+											"value": "1626ef4aa98944afd2aa639d624092180c93780b",
+											"type": "text"
+										},
+										{
+											"key": "invite_code",
+											"value": "QUK9IZ",
+											"type": "text",
+											"disabled": true
+										}
+									]
+								},
+								"url": {
+									"raw": "{{api_server}}",
+									"host": [
+										"{{api_server}}"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"protocolProfileBehavior": {},
+					"_postman_isSubFolder": true
+				},
+				{
+					"name": "users",
+					"item": [
+						{
+							"name": "websocket-details",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{api_server}}/api/web/users/1022/websocket-details",
+									"host": [
+										"{{api_server}}"
+									],
+									"path": [
+										"api",
+										"web",
+										"users",
+										"1022",
+										"websocket-details"
+									]
+								},
+								"description": "GET websocket details"
+							},
+							"response": []
+						},
+						{
+							"name": "logged-in-user",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{api_server}}/api/web/users/current",
+									"host": [
+										"{{api_server}}"
+									],
+									"path": [
+										"api",
+										"web",
+										"users",
+										"current"
 									]
 								}
 							},

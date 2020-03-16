@@ -3,129 +3,75 @@ const express = require('express'),
   router = express.Router();
 
 const rootPrefix = '../../..',
-  preLaunchRoutes = require(rootPrefix + '/routes/api/web/preLaunch'),
+  cookieHelper = require(rootPrefix + '/lib/cookieHelper'),
+  authRoutes = require(rootPrefix + '/routes/api/web/auth/index'),
+  sessionAuthRoutes = require(rootPrefix + '/routes/api/web/sessionAuth'),
+  ostTransactionRoutes = require(rootPrefix + '/routes/api/web/ostTransactions'),
+  userRoutes = require(rootPrefix + '/routes/api/web/users'),
+  feedsRoutes = require(rootPrefix + '/routes/api/web/feeds'),
+  videoRoutes = require(rootPrefix + '/routes/api/web/videos'),
+  channelRoutes = require(rootPrefix + '/routes/api/web/channels'),
   coreConstants = require(rootPrefix + '/config/coreConstants'),
-  apiName = require(rootPrefix + '/lib/globalConstant/apiName'),
-  sanitizer = require(rootPrefix + '/helpers/sanitizer'),
-  routeHelper = require(rootPrefix + '/routes/helper'),
-  FormatterComposer = require(rootPrefix + '/lib/formatter/Composer'),
-  entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
-  responseEntityKey = require(rootPrefix + '/lib/globalConstant/responseEntityKey'),
-  supportRoutes = require(rootPrefix + '/routes/api/web/support');
+  reportRoutes = require(rootPrefix + '/routes/api/web/report'),
+  supportRoutes = require(rootPrefix + '/routes/api/web/support'),
+  apiSourceConstants = require(rootPrefix + '/lib/globalConstant/apiSource'),
+  webPageConstants = require(rootPrefix + '/lib/globalConstant/webPage');
+
+/**
+ * Append api_source
+ *
+ * @param req
+ * @param res
+ * @param next
+ */
+const setWebViewApiSource = function(req, res, next) {
+  req.decodedParams.api_source = apiSourceConstants.webView;
+  next();
+};
+
+/**
+ * Append api_source
+ *
+ * @param req
+ * @param res
+ * @param next
+ */
+const setWebApiSource = function(req, res, next) {
+  req.decodedParams.api_source = apiSourceConstants.web;
+  next();
+};
 
 // Node.js cookie parsing middleware.
 router.use(cookieParser(coreConstants.WEB_COOKIE_SECRET));
 
-// NOTE: CSRF COOKIE SHOULD NOT BE SET HERE. IT SHOULD ONLY BE SET AT WEB. DO NOT UNCOMMENT-AMAN
-// router.use(cookieHelper.setWebCsrf());
+// CSRF check
+router.use(cookieHelper.setWebCsrf());
 
-router.use('/prelaunch', preLaunchRoutes);
+//
+// NOTE: Different cookie secret is used. Handled inside.
+//
+router.use('/support', setWebViewApiSource, supportRoutes);
 
-router.use('/support', supportRoutes);
+router.use(setWebApiSource);
+//
+// NOTE: Login not mandatory for following
+//
+router.use(cookieHelper.validateUserWebLoginCookieIfPresent);
 
-/* Get url and message for sharing channel given its permalink. */
-router.get('/communities/:channel_permalink/share', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
-  req.decodedParams.apiName = apiName.channelShare;
-  req.decodedParams.channel_permalink = req.params.channel_permalink;
+router.use('/auth', authRoutes);
+router.use('/videos', videoRoutes);
+router.use('/feeds', feedsRoutes);
+router.use('/report', reportRoutes);
+router.use('/channels', channelRoutes);
+router.use('/users', userRoutes);
 
-  const dataFormatterFunc = async function(serviceResponse) {
-    const wrapperFormatterRsp = await new FormatterComposer({
-      resultType: responseEntityKey.share,
-      entityKindToResponseKeyMap: {
-        [entityTypeConstants.share]: responseEntityKey.share
-      },
-      serviceData: serviceResponse.data
-    }).perform();
+//
+// NOTE: Login mandatory for following
+//
+router.use(cookieHelper.validateUserWebLoginCookieRequired);
 
-    serviceResponse.data = wrapperFormatterRsp.data;
-  };
-
-  Promise.resolve(routeHelper.perform(req, res, next, '/channel/ShareDetails', 'r_a_w_1', null, dataFormatterFunc));
-});
-
-/* Get url and message for profile given username. */
-router.get('/users/:username/share', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
-  req.decodedParams.apiName = apiName.profileShare;
-  req.decodedParams.username = req.params.username;
-
-  const dataFormatterFunc = async function(serviceResponse) {
-    const wrapperFormatterRsp = await new FormatterComposer({
-      resultType: responseEntityKey.share,
-      entityKindToResponseKeyMap: {
-        [entityTypeConstants.share]: responseEntityKey.share
-      },
-      serviceData: serviceResponse.data
-    }).perform();
-
-    serviceResponse.data = wrapperFormatterRsp.data;
-  };
-
-  Promise.resolve(
-    routeHelper.perform(req, res, next, '/user/profile/ShareDetails', 'r_a_w_2', null, dataFormatterFunc)
-  );
-});
-
-//Report
-router.post('/report', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
-  req.decodedParams.apiName = apiName.reportIssue;
-
-  Promise.resolve(routeHelper.perform(req, res, next, '/miscellaneous/Report', 'r_a_w_r_1', null, null));
-});
-
-/* Video By Id */
-router.get('/videos/:video_id', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
-  req.decodedParams.apiName = apiName.getVideo;
-  req.decodedParams.video_id = req.params.video_id;
-
-  const dataFormatterFunc = async function(serviceResponse) {
-    const wrapperFormatterRsp = await new FormatterComposer({
-      resultType: responseEntityKey.userVideoList,
-      entityKindToResponseKeyMap: {
-        [entityTypeConstants.userVideoList]: responseEntityKey.userVideoList,
-        [entityTypeConstants.usersMap]: responseEntityKey.users,
-        [entityTypeConstants.userStats]: responseEntityKey.userStats,
-        [entityTypeConstants.userProfilesMap]: responseEntityKey.userProfiles,
-        [entityTypeConstants.tagsMap]: responseEntityKey.tags,
-        [entityTypeConstants.linksMap]: responseEntityKey.links,
-        [entityTypeConstants.imagesMap]: responseEntityKey.images,
-        [entityTypeConstants.videosMap]: responseEntityKey.videos,
-        [entityTypeConstants.videoDescriptionsMap]: responseEntityKey.videoDescriptions,
-        [entityTypeConstants.videoDetailsMap]: responseEntityKey.videoDetails,
-        [entityTypeConstants.channelsMap]: responseEntityKey.channels,
-        [entityTypeConstants.currentUserUserContributionsMap]: responseEntityKey.currentUserUserContributions,
-        [entityTypeConstants.currentUserVideoContributionsMap]: responseEntityKey.currentUserVideoContributions,
-        [entityTypeConstants.currentUserVideoRelationsMap]: responseEntityKey.currentUserVideoRelations,
-        [entityTypeConstants.pricePointsMap]: responseEntityKey.pricePoints,
-        [entityTypeConstants.token]: responseEntityKey.token,
-        [entityTypeConstants.userVideoListMeta]: responseEntityKey.meta
-      },
-      serviceData: serviceResponse.data
-    }).perform();
-
-    serviceResponse.data = wrapperFormatterRsp.data;
-  };
-
-  Promise.resolve(routeHelper.perform(req, res, next, '/video/GetById', 'r_a_w_v_1', null, dataFormatterFunc));
-});
-
-/* Video share */
-router.get('/videos/:video_id/share', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
-  req.decodedParams.apiName = apiName.videoShare;
-  req.decodedParams.video_id = req.params.video_id;
-
-  const dataFormatterFunc = async function(serviceResponse) {
-    const wrapperFormatterRsp = await new FormatterComposer({
-      resultType: responseEntityKey.share,
-      entityKindToResponseKeyMap: {
-        [entityTypeConstants.share]: responseEntityKey.share
-      },
-      serviceData: serviceResponse.data
-    }).perform();
-
-    serviceResponse.data = wrapperFormatterRsp.data;
-  };
-
-  Promise.resolve(routeHelper.perform(req, res, next, '/video/ShareDetails', 'r_w_v1_v_2', null, dataFormatterFunc));
-});
+router.use(webPageConstants.sessionAuthPagePath, sessionAuthRoutes);
+// TODO - login - why route is inside webPageConstants?
+router.use(webPageConstants.ostTransactionsPagePath, ostTransactionRoutes);
 
 module.exports = router;

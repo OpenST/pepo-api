@@ -16,15 +16,29 @@ router.get(
   cookieHelper.parseStoreLoginCookieIfPresent,
   sanitizer.sanitizeDynamicUrlParams,
   cookieHelper.validateStoreTokenIfPresent,
-  cookieHelper.validateUserLoginRequired,
+  cookieHelper.validateStoreLoginCookieRequired,
   function(req, res, next) {
     req.decodedParams.apiName = apiName.getRedemptionProducts;
 
-    Promise.resolve(routeHelper.perform(req, res, next, '/redemption/GetProductList', 'r_a_w_r_p_1', null));
+    const dataFormatterFunc = async function(serviceResponse) {
+      const wrapperFormatterRsp = await new FormatterComposer({
+        resultType: responseEntityKey.redemptionsProductList,
+        entityKindToResponseKeyMap: {
+          [entityTypeConstants.redemptionsProductList]: responseEntityKey.redemptionsProductList
+        },
+        serviceData: serviceResponse.data
+      }).perform();
+
+      serviceResponse.data = wrapperFormatterRsp.data;
+    };
+
+    Promise.resolve(
+      routeHelper.perform(req, res, next, '/redemption/GetProductList', 'r_a_w_r_p_1', null, dataFormatterFunc)
+    );
   }
 );
 
-router.use(cookieHelper.validateStoreLoginCookieIfPresent, cookieHelper.validateUserLoginRequired);
+router.use(cookieHelper.validateStoreLoginCookieIfPresent, cookieHelper.validateStoreLoginCookieRequired);
 
 // Request for redemption of a product.
 router.post('/request', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {

@@ -2,6 +2,7 @@ const express = require('express');
 
 const rootPrefix = '../..',
   apiVersions = require(rootPrefix + '/lib/globalConstant/apiVersions'),
+  apiSourceConstants = require(rootPrefix + '/lib/globalConstant/apiSource'),
   storeApiWebRoutes = require(rootPrefix + '/routes/storeApi/web/index');
 
 const router = express.Router();
@@ -15,6 +16,7 @@ const router = express.Router();
  */
 const appendWebVersion = function(req, res, next) {
   req.decodedParams.apiVersion = apiVersions.web;
+  req.decodedParams.api_source = apiSourceConstants.store;
   next();
 };
 

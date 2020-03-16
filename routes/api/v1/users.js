@@ -8,7 +8,6 @@ const rootPrefix = '../../..',
   apiName = require(rootPrefix + '/lib/globalConstant/apiName'),
   entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
-  cookieHelper = require(rootPrefix + '/lib/cookieHelper'),
   responseEntityKey = require(rootPrefix + '/lib/globalConstant/responseEntityKey');
 
 /* Register Device*/
@@ -136,6 +135,7 @@ router.post('/activation-initiate', sanitizer.sanitizeDynamicUrlParams, function
       resultType: responseEntityKey.activationInitiate,
       entityKindToResponseKeyMap: {
         [entityTypeConstants.loggedInUser]: responseEntityKey.loggedInUser,
+        [entityTypeConstants.airdropDetails]: responseEntityKey.airdropDetails,
         [entityTypeConstants.pricePointsMap]: responseEntityKey.pricePoints,
         [entityTypeConstants.usersMap]: responseEntityKey.users,
         [entityTypeConstants.token]: responseEntityKey.token
@@ -156,11 +156,11 @@ router.get('/current', sanitizer.sanitizeDynamicUrlParams, function(req, res, ne
   req.decodedParams.apiName = apiName.loggedInUser;
 
   const dataFormatterFunc = async function(serviceResponse) {
-    cookieHelper.setLoginCookie(res, serviceResponse.data.userLoginCookieValue);
     const wrapperFormatterRsp = await new FormatterComposer({
       resultType: responseEntityKey.loggedInUser,
       entityKindToResponseKeyMap: {
         [entityTypeConstants.loggedInUser]: responseEntityKey.loggedInUser,
+        [entityTypeConstants.airdropDetails]: responseEntityKey.airdropDetails,
         [entityTypeConstants.twitterConnectMeta]: responseEntityKey.meta,
         [entityTypeConstants.pricePointsMap]: responseEntityKey.pricePoints,
         [entityTypeConstants.usersMap]: responseEntityKey.users,
@@ -259,6 +259,7 @@ router.post('/:profile_user_id/profile', sanitizer.sanitizeDynamicUrlParams, fun
   req.decodedParams.apiName = apiName.saveProfile;
   req.decodedParams.profile_user_id = req.params.profile_user_id;
   logger.log('req.decodedParams.name', req.decodedParams.name);
+
   Promise.resolve(routeHelper.perform(req, res, next, '/user/profile/update/Info', 'r_a_v1_u_11', null));
 });
 
