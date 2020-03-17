@@ -408,7 +408,7 @@ class ReplyDetailsModel extends ModelBase {
 
     for (let index = 0; index < dbRows.length; index++) {
       const dbRow = dbRows[index];
-      response[dbRow.parent_id] = { totalReplies: dbRow.totalReplies };
+      response[dbRow.parent_id] = { totalReplies: Number(dbRow.totalReplies) };
     }
 
     return response;
