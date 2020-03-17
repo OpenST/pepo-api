@@ -384,6 +384,7 @@ class ReplyDetailsModel extends ModelBase {
    * Fetch unapproved by creator user id and parent ids.
    *
    * @param {number} params.creatorUserId: creator user id
+   * @param {boolean} params.isAdmin: Fetch For Admin
    * @param {array<number>} params.parentIds: parent video ids
    *
    * @returns {Promise}
@@ -393,16 +394,20 @@ class ReplyDetailsModel extends ModelBase {
 
     const statuses = [replyDetailConstants.invertedStatuses[replyDetailConstants.unppprovedStatus]];
 
-    const dbRows = await oThis
+    let query = oThis
       .select('parent_id, count(1) as totalReplies')
       .where({
-        creator_user_id: params.creatorUserId,
         parent_id: params.parentIds,
         parent_kind: replyDetailConstants.invertedEntityKinds[replyDetailConstants.videoEntityKind],
         status: statuses
       })
-      .group_by('parent_id')
-      .fire();
+      .group_by('parent_id');
+
+    if (!params.isAdmin) {
+      query = query.where({ creator_user_id: params.creatorUserId });
+    }
+
+    const dbRows = await query.fire();
 
     const response = {};
 
@@ -486,6 +491,14 @@ class ReplyDetailsModel extends ModelBase {
         new UnapprovedReplyDetailsCache({
           parentIds: params.parentIds,
           creatorUserId: params.creatorUserId
+        }).clear()
+      );
+
+      //Delete for Admins
+      promisesArray.push(
+        new UnapprovedReplyDetailsCache({
+          parentIds: params.parentIds,
+          isAdmin: true
         }).clear()
       );
     }
