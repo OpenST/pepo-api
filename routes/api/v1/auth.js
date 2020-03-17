@@ -29,6 +29,7 @@ router.post('/twitter-login', sanitizer.sanitizeDynamicUrlParams, function(req, 
   req.decodedParams.apiName = apiName.twitterLogin;
 
   req.decodedParams.ip_address = req.headers['x-forwarded-for'];
+  req.decodedParams.pepo_device_id = req.headers['x-pepo-device-id'];
 
   cookieHelper.fetchUserUtmCookie(req);
 
@@ -67,6 +68,7 @@ router.post('/github-login', sanitizer.sanitizeDynamicUrlParams, function(req, r
   req.decodedParams.apiName = apiName.githubConnect;
 
   req.decodedParams.ip_address = req.headers['x-forwarded-for'];
+  req.decodedParams.pepo_device_id = req.headers['x-pepo-device-id'];
 
   cookieHelper.fetchUserUtmCookie(req);
 
@@ -105,6 +107,7 @@ router.post('/google-login', sanitizer.sanitizeDynamicUrlParams, function(req, r
   req.decodedParams.apiName = apiName.googleConnect;
 
   req.decodedParams.ip_address = req.headers['x-forwarded-for'];
+  req.decodedParams.pepo_device_id = req.headers['x-pepo-device-id'];
 
   cookieHelper.fetchUserUtmCookie(req);
 
@@ -143,6 +146,7 @@ router.post('/apple-login', sanitizer.sanitizeDynamicUrlParams, function(req, re
   req.decodedParams.apiName = apiName.appleConnect;
 
   req.decodedParams.ip_address = req.headers['x-forwarded-for'];
+  req.decodedParams.pepo_device_id = req.headers['x-pepo-device-id'];
 
   cookieHelper.fetchUserUtmCookie(req);
 

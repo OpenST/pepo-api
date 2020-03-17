@@ -338,6 +338,10 @@ const v1Signature = {
       {
         parameter: 'handle',
         validatorMethods: ['validateNonBlankString']
+      },
+      {
+        parameter: 'pepo_device_id',
+        validatorMethods: ['validateString']
       }
     ],
     optional: [
@@ -1745,6 +1749,10 @@ const v1Signature = {
       {
         parameter: 'access_token',
         validatorMethods: ['validateString']
+      },
+      {
+        parameter: 'pepo_device_id',
+        validatorMethods: ['validateString']
       }
     ],
     optional: [
@@ -1774,6 +1782,10 @@ const v1Signature = {
       },
       {
         parameter: 'refresh_token',
+        validatorMethods: ['validateString']
+      },
+      {
+        parameter: 'pepo_device_id',
         validatorMethods: ['validateString']
       }
     ],
@@ -1832,6 +1844,10 @@ const v1Signature = {
       },
       {
         parameter: 'apple_user_id',
+        validatorMethods: ['validateString']
+      },
+      {
+        parameter: 'pepo_device_id',
         validatorMethods: ['validateString']
       }
     ],

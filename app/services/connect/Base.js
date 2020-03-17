@@ -10,6 +10,7 @@ const rootPrefix = '../../..',
   UserIdentifiersByEmailsCache = require(rootPrefix + '/lib/cacheManagement/multi/UserIdentifiersByEmails'),
   UserModel = require(rootPrefix + '/app/models/mysql/User'),
   UserStatsByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/UserStatByUserIds'),
+  UserDeviceIdsByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/UserDeviceIdsByUserIds'),
   ReplayAttackOnSocialConnectCache = require(rootPrefix + '/lib/cacheManagement/single/ReplayAttackOnSocialConnect'),
   CommonValidators = require(rootPrefix + '/lib/validators/Common');
 
@@ -28,6 +29,7 @@ class SocialConnectBase extends ServiceBase {
    * @param {string} params.invite_code: invite_code
    * @param {string} params.api_source: api_source
    * @param {string} params.ip_address: ip_address
+   * @param {string} params.pepo_device_id: pepo_device_id
    * @param {object} params.utm_params: utm_params
    *
    * @augments ServiceBase
@@ -41,6 +43,7 @@ class SocialConnectBase extends ServiceBase {
     oThis.inviteCode = params.invite_code;
     oThis.utmParams = params.utm_params;
     oThis.ipAddress = params.ip_address;
+    oThis.pepoDeviceId = params.pepo_device_id;
     oThis.apiSource = params.api_source;
 
     oThis.socialUserObj = null;
@@ -304,6 +307,8 @@ class SocialConnectBase extends ServiceBase {
       // block users from certain countries
       await oThis._blockSpecificCountries();
 
+      await oThis._checkDuplicateDevice();
+
       await oThis._associateInviteCode();
       await oThis._performSignUp();
     } else {
@@ -345,6 +350,33 @@ class SocialConnectBase extends ServiceBase {
       return Promise.reject(
         responseHelper.error({
           internal_error_identifier: 's_c_b_6',
+          api_error_identifier: 'could_not_proceed'
+        })
+      );
+    }
+  }
+
+  /**
+   * Check Duplicate Device.
+   * NOTE:- If current request is from already existing device, reject it.
+   *
+   * @returns {Promise<never>}
+   * @private
+   */
+  async _checkDuplicateDevice() {
+    const oThis = this;
+
+    const userDeviceCacheRsp = await new UserDeviceIdsByUserIdsCache({ userIds: [oThis.userId] }).fetch();
+    if (userDeviceCacheRsp.isFailure()) {
+      return Promise.reject(userDeviceCacheRsp);
+    }
+
+    const userDeviceIds = userDeviceCacheRsp.data[oThis.userId];
+
+    if (Array.isArray(userDeviceIds) && userDeviceIds.length > 0) {
+      return Promise.reject(
+        responseHelper.error({
+          internal_error_identifier: 'a_s_c_b_7',
           api_error_identifier: 'could_not_proceed'
         })
       );
