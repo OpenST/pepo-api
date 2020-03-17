@@ -831,15 +831,11 @@ class BasicHelper {
     for (const key in urlParams) {
       let val = urlParams[key];
       if (key === 'state') {
-        console.log('===val===1111====', val);
         val = escape(val);
-        console.log('===val===2222====', val);
       }
       searchParams.append(key, val);
     }
     generatedUrl.search = searchParams;
-
-    console.log('===generatedUrl.href====', generatedUrl.href);
 
     return generatedUrl.href;
   }

@@ -15,7 +15,6 @@ const rootPrefix = '../../../..',
 router.get('/redirect-url', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.twitterRedirectUrl;
   req.decodedParams.state = basicHelper.getAfterLoginRedirectUrl(req);
-  console.log('---req.decodedParams.state-----', req.decodedParams.state);
 
   const dataFormatterFunc = async function(serviceResponse) {
     const wrapperFormatterRsp = await new FormatterComposer({
