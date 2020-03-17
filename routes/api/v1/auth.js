@@ -29,7 +29,7 @@ router.post('/twitter-login', sanitizer.sanitizeDynamicUrlParams, function(req, 
   req.decodedParams.apiName = apiName.twitterLogin;
 
   req.decodedParams.ip_address = req.headers['x-forwarded-for'];
-  req.decodedParams.pepo_device_id = req.headers['x-pepo-device-id'];
+  req.decodedParams.sanitized_headers = req.sanitizedHeaders;
 
   cookieHelper.fetchUserUtmCookie(req);
 
@@ -107,7 +107,7 @@ router.post('/google-login', sanitizer.sanitizeDynamicUrlParams, function(req, r
   req.decodedParams.apiName = apiName.googleConnect;
 
   req.decodedParams.ip_address = req.headers['x-forwarded-for'];
-  req.decodedParams.pepo_device_id = req.headers['x-pepo-device-id'];
+  req.decodedParams.sanitized_headers = req.sanitizedHeaders;
 
   cookieHelper.fetchUserUtmCookie(req);
 

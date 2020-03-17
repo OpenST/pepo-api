@@ -340,8 +340,8 @@ const v1Signature = {
         validatorMethods: ['validateNonBlankString']
       },
       {
-        parameter: 'pepo_device_id',
-        validatorMethods: ['validateString']
+        parameter: 'sanitized_headers',
+        validatorMethods: ['validateNonEmptyObject']
       }
     ],
     optional: [
@@ -1751,8 +1751,8 @@ const v1Signature = {
         validatorMethods: ['validateString']
       },
       {
-        parameter: 'pepo_device_id',
-        validatorMethods: ['validateString']
+        parameter: 'sanitized_headers',
+        validatorMethods: ['validateNonEmptyObject']
       }
     ],
     optional: [
@@ -1785,8 +1785,8 @@ const v1Signature = {
         validatorMethods: ['validateString']
       },
       {
-        parameter: 'pepo_device_id',
-        validatorMethods: ['validateString']
+        parameter: 'sanitized_headers',
+        validatorMethods: ['validateNonEmptyObject']
       }
     ],
     optional: [
@@ -1847,8 +1847,8 @@ const v1Signature = {
         validatorMethods: ['validateString']
       },
       {
-        parameter: 'pepo_device_id',
-        validatorMethods: ['validateString']
+        parameter: 'sanitized_headers',
+        validatorMethods: ['validateNonEmptyObject']
       }
     ],
     optional: [
