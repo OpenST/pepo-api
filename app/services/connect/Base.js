@@ -307,8 +307,6 @@ class SocialConnectBase extends ServiceBase {
   async _performConnect() {
     const oThis = this;
 
-    await oThis._checkDuplicateDevice();
-
     if (oThis.isUserSignUp) {
       // block users from certain countries
       await oThis._blockSpecificCountries();
@@ -318,6 +316,7 @@ class SocialConnectBase extends ServiceBase {
     } else {
       await oThis._performLogin();
     }
+    await oThis._checkDuplicateDevice();
   }
 
   /**
@@ -387,10 +386,10 @@ class SocialConnectBase extends ServiceBase {
       return Promise.reject(userDeviceExtCacheResp);
     }
 
-    console.log('userDeviceExtCacheResp------', userDeviceExtCacheResp);
+    console.log('userDeviceExtCacheResp------', userDeviceExtCacheResp, oThis.isUserSignUp);
     const userDeviceExt = userDeviceExtCacheResp.data[deviceId];
 
-    if (CommonValidators.validateNonEmptyObject(userDeviceExt)) {
+    if (CommonValidators.validateNonEmptyObject(userDeviceExt) && oThis.isUserSignUp) {
       return Promise.reject(
         responseHelper.error({
           internal_error_identifier: 'a_s_c_b_7',
