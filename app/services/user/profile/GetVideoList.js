@@ -219,7 +219,8 @@ class GetVideoList extends ServiceBase {
     const usersVideoListObj = new GetUsersVideoList({
       currentUserId: oThis.currentUserId,
       videoIds: oThis.videoIds,
-      isAdmin: oThis.isAdmin
+      isAdmin: oThis.isAdmin,
+      profileUserId: oThis.profileUserId
     });
 
     const response = await usersVideoListObj.perform();

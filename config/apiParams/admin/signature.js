@@ -205,6 +205,10 @@ const adminSignature = {
       {
         parameter: 'video_id',
         validatorMethods: ['validateInteger']
+      },
+      {
+        parameter: 'is_admin',
+        validatorMethods: ['validateBoolean']
       }
     ],
     optional: [
