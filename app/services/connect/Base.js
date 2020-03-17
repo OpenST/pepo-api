@@ -9,6 +9,8 @@ const rootPrefix = '../../..',
   gotoConstants = require(rootPrefix + '/lib/globalConstant/goto'),
   UserIdentifiersByEmailsCache = require(rootPrefix + '/lib/cacheManagement/multi/UserIdentifiersByEmails'),
   UserModel = require(rootPrefix + '/app/models/mysql/User'),
+  UserDeviceExtendedDetailsByDeviceIdsCache = require(rootPrefix +
+    '/lib/cacheManagement/multi/UserDeviceExtendedDetailsByDeviceIds'),
   UserStatsByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/UserStatByUserIds'),
   UserDeviceIdsByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/UserDeviceIdsByUserIds'),
   ReplayAttackOnSocialConnectCache = require(rootPrefix + '/lib/cacheManagement/single/ReplayAttackOnSocialConnect'),
@@ -366,14 +368,17 @@ class SocialConnectBase extends ServiceBase {
   async _checkDuplicateDevice() {
     const oThis = this;
 
-    const userDeviceCacheRsp = await new UserDeviceIdsByUserIdsCache({ userIds: [oThis.userId] }).fetch();
-    if (userDeviceCacheRsp.isFailure()) {
-      return Promise.reject(userDeviceCacheRsp);
+    const userDeviceExtCacheResp = await new UserDeviceExtendedDetailsByDeviceIdsCache({
+      deviceIds: [oThis.pepoDeviceId]
+    }).fetch();
+
+    if (userDeviceExtCacheResp.isFailure()) {
+      return Promise.reject(userDeviceExtCacheResp);
     }
 
-    const userDeviceIds = userDeviceCacheRsp.data[oThis.userId];
+    console.log('userDeviceExtCacheResp------', userDeviceExtCacheResp);
 
-    if (Array.isArray(userDeviceIds) && userDeviceIds.length > 0) {
+    if (CommonValidators.validateNonEmptyObject(userDeviceExtCacheResp.data[oThis.pepoDeviceId])) {
       return Promise.reject(
         responseHelper.error({
           internal_error_identifier: 'a_s_c_b_7',
