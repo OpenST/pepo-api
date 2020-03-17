@@ -397,15 +397,14 @@ class SocialConnectBase extends ServiceBase {
         })
       );
     } else {
-      const insertUpdateParams = {
-        deviceId: deviceId,
-        userId: oThis.userId,
-        buildNumber: currentBuildNumber,
-        appVersion: appVersion,
-        deviceOs: deviceOs
-      };
-
       if (!userDeviceExt[oThis.userId]) {
+        const insertUpdateParams = {
+          deviceId: deviceId,
+          userId: oThis.userId,
+          buildNumber: currentBuildNumber,
+          appVersion: appVersion,
+          deviceOs: deviceOs
+        };
         await new UserDeviceExtendedDetailModel().createNewEntry(insertUpdateParams);
       }
     }
