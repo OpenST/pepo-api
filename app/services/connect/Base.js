@@ -369,10 +369,7 @@ class SocialConnectBase extends ServiceBase {
   async _checkDuplicateDevice() {
     const oThis = this;
 
-    const deviceId = headerHelper.pepoDeviceId(oThis.headers),
-      currentBuildNumber = headerHelper.pepoBuildNumber(oThis.headers),
-      appVersion = headerHelper.pepoAppVersion(oThis.headers),
-      deviceOs = headerHelper.pepoDeviceOs(oThis.headers);
+    const deviceId = headerHelper.pepoDeviceId(oThis.headers);
 
     if (!deviceId) {
       return;

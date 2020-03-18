@@ -230,7 +230,8 @@ class AppleConnect extends ConnectBase {
         email: oThis.decryptedAppleEmail,
         fullName: formattedAppleName.formattedName,
         socialUserName: formattedAppleName.socialUserName
-      }
+      },
+      headers: oThis.headers
     };
 
     Object.assign(params, oThis._appendCommonSignupParams());

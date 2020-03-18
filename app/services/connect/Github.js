@@ -122,7 +122,8 @@ class GithubConnect extends ConnectBase {
 
     const signUpParams = {
       accessToken: oThis.accessToken,
-      userGithubEntity: oThis.formattedGithubUser
+      userGithubEntity: oThis.formattedGithubUser,
+      headers: oThis.headers
     };
 
     Object.assign(signUpParams, oThis._appendCommonSignupParams());

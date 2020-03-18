@@ -180,12 +180,14 @@ class RotateAccountFactory extends ServiceBase {
       deviceIds.push(formattedRow.deviceId);
     }
 
-    await new UserDeviceExtendedDetailModel()
-      .delete()
-      .where({ device_id: deviceIds })
-      .fire();
+    if (deviceIds.length > 0) {
+      await new UserDeviceExtendedDetailModel()
+        .delete()
+        .where({ device_id: deviceIds })
+        .fire();
 
-    await UserDeviceExtendedDetailModel.flushCache({ deviceIds: deviceIds });
+      await UserDeviceExtendedDetailModel.flushCache({ deviceIds: deviceIds });
+    }
   }
 }
 

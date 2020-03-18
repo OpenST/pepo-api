@@ -148,7 +148,8 @@ class TwitterConnect extends ConnectBase {
       userTwitterEntity: oThis.userTwitterEntity,
       twitterRespHeaders: oThis.twitterRespHeaders,
       token: oThis.token,
-      secret: oThis.secret
+      secret: oThis.secret,
+      headers: oThis.headers
     };
 
     Object.assign(requestParams, oThis._appendCommonSignupParams());
