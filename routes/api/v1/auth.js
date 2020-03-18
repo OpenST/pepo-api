@@ -76,7 +76,7 @@ router.post('/github-login', sanitizer.sanitizeDynamicUrlParams, sanitizer.sanit
   req.decodedParams.apiName = apiName.githubConnect;
 
   req.decodedParams.ip_address = req.headers['x-forwarded-for'];
-  req.decodedParams.pepo_device_id = req.headers['x-pepo-device-id'];
+  req.decodedParams.sanitized_headers = req.sanitizedHeaders;
 
   cookieHelper.fetchUserUtmCookie(req);
 
@@ -162,7 +162,7 @@ router.post('/apple-login', sanitizer.sanitizeDynamicUrlParams, sanitizer.saniti
   req.decodedParams.apiName = apiName.appleConnect;
 
   req.decodedParams.ip_address = req.headers['x-forwarded-for'];
-  req.decodedParams.pepo_device_id = req.headers['x-pepo-device-id'];
+  req.decodedParams.sanitized_headers = req.sanitizedHeaders;
 
   cookieHelper.fetchUserUtmCookie(req);
 
