@@ -396,17 +396,6 @@ class SocialConnectBase extends ServiceBase {
           api_error_identifier: 'could_not_proceed'
         })
       );
-    } else {
-      // if (!userDeviceExt[oThis.userId]) {
-      //   const insertUpdateParams = {
-      //     deviceId: deviceId,
-      //     userId: oThis.userId,
-      //     buildNumber: currentBuildNumber,
-      //     appVersion: appVersion,
-      //     deviceOs: deviceOs
-      //   };
-      //   await new UserDeviceExtendedDetailModel().createNewEntry(insertUpdateParams);
-      // }
     }
   }
 
