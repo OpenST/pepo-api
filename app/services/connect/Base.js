@@ -14,7 +14,6 @@ const rootPrefix = '../../..',
   UserDeviceExtendedDetailsByDeviceIdsCache = require(rootPrefix +
     '/lib/cacheManagement/multi/UserDeviceExtendedDetailsByDeviceIds'),
   UserStatsByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/UserStatByUserIds'),
-  UserDeviceIdsByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/UserDeviceIdsByUserIds'),
   ReplayAttackOnSocialConnectCache = require(rootPrefix + '/lib/cacheManagement/single/ReplayAttackOnSocialConnect'),
   CommonValidators = require(rootPrefix + '/lib/validators/Common');
 
@@ -311,12 +310,13 @@ class SocialConnectBase extends ServiceBase {
       // block users from certain countries
       await oThis._blockSpecificCountries();
 
+      await oThis._checkDuplicateDevice();
+
       await oThis._associateInviteCode();
       await oThis._performSignUp();
     } else {
       await oThis._performLogin();
     }
-    await oThis._checkDuplicateDevice();
   }
 
   /**
@@ -389,7 +389,7 @@ class SocialConnectBase extends ServiceBase {
     console.log('userDeviceExtCacheResp------', userDeviceExtCacheResp, oThis.isUserSignUp);
     const userDeviceExt = userDeviceExtCacheResp.data[deviceId];
 
-    if (CommonValidators.validateNonEmptyObject(userDeviceExt) && oThis.isUserSignUp) {
+    if (CommonValidators.validateNonEmptyObject(userDeviceExt)) {
       return Promise.reject(
         responseHelper.error({
           internal_error_identifier: 'a_s_c_b_7',
@@ -397,16 +397,16 @@ class SocialConnectBase extends ServiceBase {
         })
       );
     } else {
-      if (!userDeviceExt[oThis.userId]) {
-        const insertUpdateParams = {
-          deviceId: deviceId,
-          userId: oThis.userId,
-          buildNumber: currentBuildNumber,
-          appVersion: appVersion,
-          deviceOs: deviceOs
-        };
-        await new UserDeviceExtendedDetailModel().createNewEntry(insertUpdateParams);
-      }
+      // if (!userDeviceExt[oThis.userId]) {
+      //   const insertUpdateParams = {
+      //     deviceId: deviceId,
+      //     userId: oThis.userId,
+      //     buildNumber: currentBuildNumber,
+      //     appVersion: appVersion,
+      //     deviceOs: deviceOs
+      //   };
+      //   await new UserDeviceExtendedDetailModel().createNewEntry(insertUpdateParams);
+      // }
     }
   }
 
