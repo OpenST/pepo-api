@@ -143,6 +143,9 @@ class UserMute extends ModelBase {
 
       const UserCache = require(rootPrefix + '/lib/cacheManagement/multi/User');
       promisesArray.push(new UserCache({ ids: [params.user2Id] }).clear());
+
+      const SecureUserCache = require(rootPrefix + '/lib/cacheManagement/single/SecureUser');
+      promisesArray.push(new SecureUserCache({ id: params.user2Id }).clear());
     }
 
     if (params.user1Id) {

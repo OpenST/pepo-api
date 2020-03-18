@@ -161,7 +161,6 @@ class GetVideoById extends ServiceBase {
 
     if (
       !CommonValidators.validateNonEmptyObject(userResponse) ||
-      !userResponse.approvedCreator ||
       userResponse.status === userConstants.inActiveStatus
     ) {
       return Promise.reject(

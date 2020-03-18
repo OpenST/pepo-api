@@ -7,7 +7,6 @@ const rootPrefix = '../../../../..',
   VideoDetailModel = require(rootPrefix + '/app/models/mysql/VideoDetail'),
   ValidateVideoService = require(rootPrefix + '/app/services/video/Validate'),
   UpdateProfileBase = require(rootPrefix + '/app/services/user/profile/update/Base'),
-  UserMuteByUser2IdsForGlobalCache = require(rootPrefix + '/lib/cacheManagement/multi/UserMuteByUser2IdsForGlobal'),
   videoLib = require(rootPrefix + '/lib/videoLib'),
   bgJob = require(rootPrefix + '/lib/rabbitMqEnqueue/bgJob'),
   urlConstants = require(rootPrefix + '/lib/globalConstant/url'),
@@ -229,13 +228,6 @@ class UpdateFanVideo extends UpdateProfileBase {
     // Feed needs to be added for uploaded video.
     const oThis = this;
 
-    const cacheResponse = await new UserMuteByUser2IdsForGlobalCache({ user2Ids: [oThis.profileUserId] }).fetch();
-    if (cacheResponse.isFailure()) {
-      return Promise.reject(cacheResponse);
-    }
-
-    const isUserMuted = cacheResponse.data[oThis.profileUserId].all == 1;
-
     const promisesArray = [];
 
     if (UserModelKlass.isUserApprovedCreator(oThis.userObj)) {
@@ -255,7 +247,7 @@ class UpdateFanVideo extends UpdateProfileBase {
     /* If user is approved and globally muted, publish content monitoring msg
      else send request to admins to approve new creator.
      */
-    if (UserModelKlass.isUserApprovedCreator(oThis.userObj) && !isUserMuted) {
+    if (UserModelKlass.isUserApprovedCreator(oThis.userObj)) {
       const messagePayload = {
         userId: oThis.profileUserId,
         videoId: oThis.videoId

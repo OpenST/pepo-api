@@ -114,12 +114,17 @@ class ReplyDetailsModel extends ModelBase {
       videoId = params.videoId,
       paginationTimestamp = params.paginationTimestamp;
 
+    const statuses = [
+      replyDetailConstants.invertedStatuses[replyDetailConstants.activeStatus],
+      replyDetailConstants.invertedStatuses[replyDetailConstants.unppprovedStatus]
+    ];
+
     const queryObject = oThis
       .select('id')
       .where({
         parent_id: videoId,
         entity_kind: replyDetailConstants.invertedEntityKinds[replyDetailConstants.videoEntityKind],
-        status: replyDetailConstants.invertedStatuses[replyDetailConstants.activeStatus]
+        status: statuses
       })
       .order_by('id asc')
       .limit(limit);
@@ -342,11 +347,16 @@ class ReplyDetailsModel extends ModelBase {
       creatorUserId = params.creatorUserId,
       paginationTimestamp = params.paginationTimestamp;
 
+    const statuses = [
+      replyDetailConstants.invertedStatuses[replyDetailConstants.activeStatus],
+      replyDetailConstants.invertedStatuses[replyDetailConstants.unppprovedStatus]
+    ];
+
     const queryObject = oThis
       .select('id, entity_id')
       .where({
         creator_user_id: creatorUserId,
-        status: replyDetailConstants.invertedStatuses[replyDetailConstants.activeStatus]
+        status: statuses
       })
       .order_by('id desc')
       .limit(limit);
@@ -368,6 +378,45 @@ class ReplyDetailsModel extends ModelBase {
     }
 
     return { videoIds: videoIds, replyDetailIds: replyDetailIds };
+  }
+
+  /**
+   * Fetch unapproved by creator user id and parent ids.
+   *
+   * @param {number} params.creatorUserId: creator user id
+   * @param {boolean} params.isAdmin: Fetch For Admin
+   * @param {array<number>} params.parentIds: parent video ids
+   *
+   * @returns {Promise}
+   */
+  async fetchUnapprovedByCreatorUserIdAndParentId(params) {
+    const oThis = this;
+
+    const statuses = [replyDetailConstants.invertedStatuses[replyDetailConstants.unppprovedStatus]];
+
+    let query = oThis
+      .select('parent_id, count(1) as totalReplies')
+      .where({
+        parent_id: params.parentIds,
+        parent_kind: replyDetailConstants.invertedEntityKinds[replyDetailConstants.videoEntityKind],
+        status: statuses
+      })
+      .group_by('parent_id');
+
+    if (!params.isAdmin) {
+      query = query.where({ creator_user_id: params.creatorUserId });
+    }
+
+    const dbRows = await query.fire();
+
+    const response = {};
+
+    for (let index = 0; index < dbRows.length; index++) {
+      const dbRow = dbRows[index];
+      response[dbRow.parent_id] = { totalReplies: Number(dbRow.totalReplies) };
+    }
+
+    return response;
   }
 
   /**
@@ -407,7 +456,8 @@ class ReplyDetailsModel extends ModelBase {
    * @param {array<number>} [params.replyDetailIds]
    * @param {array<number>} [params.entityIds]
    * @param {string} [params.entityKind]
-   *
+   * @param {array<number>} [params.parentIds]
+   * @param {number} [params.creatorUserId]
    * @returns {Promise<*>}
    */
   static async flushCache(params) {
@@ -431,6 +481,26 @@ class ReplyDetailsModel extends ModelBase {
         promisesArray.push(new ReplyDetailsByParentVideoPaginationCache({ videoId: currParentVideoId }).clear());
         promisesArray.push(new AllRepliesByParentVideoId({ parentVideoId: currParentVideoId }).clear());
       }
+    }
+
+    if (params.parentIds && params.creatorUserId) {
+      const UnapprovedReplyDetailsCache = require(rootPrefix +
+        '/lib/cacheManagement/multi/ReplyDetailsUnapprovedByParentIdAndCreatorUserId');
+
+      promisesArray.push(
+        new UnapprovedReplyDetailsCache({
+          parentIds: params.parentIds,
+          creatorUserId: params.creatorUserId
+        }).clear()
+      );
+
+      //Delete for Admins
+      promisesArray.push(
+        new UnapprovedReplyDetailsCache({
+          parentIds: params.parentIds,
+          isAdmin: true
+        }).clear()
+      );
     }
 
     if (params.replyDetailId) {

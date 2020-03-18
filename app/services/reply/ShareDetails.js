@@ -86,6 +86,7 @@ class ShareDetails extends ServiceBase {
     if (
       !CommonValidators.validateNonEmptyObject(replyDetails) ||
       replyDetails.status === replyDetailConstants.deletedStatus ||
+      replyDetails.status === replyDetailConstants.unppprovedStatus ||
       !replyDetails.creatorUserId
     ) {
       return Promise.reject(

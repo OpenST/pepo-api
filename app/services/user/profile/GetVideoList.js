@@ -123,10 +123,6 @@ class GetVideoList extends ServiceBase {
 
     // If not an admin, only then perform further validations.
     if (!oThis.isAdmin) {
-      // If user's profile(not self) is not approved, videos would not be shown.
-      if (oThis.currentUserId != oThis.profileUserId && !UserModel.isUserApprovedCreator(oThis.profileUserObj)) {
-        return responseHelper.successWithData({});
-      }
       // Check for blocked user's list.
       const cacheResp = await new UserBlockedListCache({ userId: oThis.currentUserId }).fetch();
       if (cacheResp.isFailure()) {
