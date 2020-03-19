@@ -345,7 +345,7 @@ class SocialConnectBase extends ServiceBase {
 
     const response = reader.country(oThis.ipAddress);
 
-    const blockedCountriesIsoCodes = ['ID', 'VN'];
+    const blockedCountriesIsoCodes = ['ID', 'VN', 'UA', 'CU', 'IR', 'KP', 'SY'];
 
     console.log('--------maxmind------ ip:', oThis.ipAddress, 'country:', response.country.isoCode);
 
