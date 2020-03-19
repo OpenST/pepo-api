@@ -57,9 +57,12 @@ class PopulateUserWeeklyData extends CronBase {
     const dateObj = new Date();
     const startTime = new Date('2019-09-01').getTime() / 1000,
       endDate = `${dateObj.getFullYear()}-${dateObj.getMonth() + 1}-${dateObj.getDate()}`,
+      formattedEndDate = `${dateObj.getDate()}-${(dateObj.getMonth() + 1)
+        .toString()
+        .padStart(2, '0')}-${dateObj.getFullYear()}`,
       endTime = new Date(endDate).getTime() / 1000;
 
-    const sheetName = `User Data Lifetime - till ${endDate}`,
+    const sheetName = `User Data Lifetime - till ${formattedEndDate}`,
       sheetGidResp = await new GoogleSheet({}).generateNewTabInSheet(
         coreConstants.PA_GOOGLE_USAGE_REPORT_SPREADSHEET_ID,
         sheetName
