@@ -113,7 +113,8 @@ class GoogleConnect extends ConnectBase {
     const signUpParams = {
       accessToken: oThis.accessToken,
       refreshToken: oThis.refreshToken,
-      userGoogleEntity: oThis.formattedGoogleUser
+      userGoogleEntity: oThis.formattedGoogleUser,
+      headers: oThis.headers
     };
 
     Object.assign(signUpParams, oThis._appendCommonSignupParams());

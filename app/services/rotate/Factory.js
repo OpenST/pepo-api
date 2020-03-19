@@ -8,6 +8,7 @@ const rootPrefix = '../../..',
   UserUniqueIdentifierModel = require(rootPrefix + '/app/models/mysql/UserIdentifier'),
   UserMultiCache = require(rootPrefix + '/lib/cacheManagement/multi/User'),
   UserIdByUserNamesCache = require(rootPrefix + '/lib/cacheManagement/multi/UserIdByUserNames'),
+  UserDeviceExtendedDetailModel = require(rootPrefix + '/app/models/mysql/UserDeviceExtendedDetail'),
   userConstants = require(rootPrefix + '/lib/globalConstant/user'),
   responseHelper = require(rootPrefix + '/lib/formatter/response');
 
@@ -64,6 +65,8 @@ class RotateAccountFactory extends ServiceBase {
     await oThis._markUserEmailAsNull();
 
     await oThis._deleteUniqueUserIdentifier();
+
+    await oThis._deleteUserDeviceExtended();
 
     return responseHelper.successWithData({});
   }
@@ -153,6 +156,37 @@ class RotateAccountFactory extends ServiceBase {
       if (emails.length > 0) {
         await UserUniqueIdentifierModel.flushCache({ emails: emails });
       }
+    }
+  }
+
+  /**
+   * Delete user device extended.
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _deleteUserDeviceExtended() {
+    const oThis = this;
+
+    const dbRows = await new UserDeviceExtendedDetailModel()
+      .select('*')
+      .where({ user_id: oThis.userId })
+      .fire();
+
+    const deviceIds = [];
+
+    for (let index = 0; index < dbRows.length; index++) {
+      const formattedRow = new UserDeviceExtendedDetailModel().formatDbData(dbRows[index]);
+      deviceIds.push(formattedRow.deviceId);
+    }
+
+    if (deviceIds.length > 0) {
+      await new UserDeviceExtendedDetailModel()
+        .delete()
+        .where({ device_id: deviceIds })
+        .fire();
+
+      await UserDeviceExtendedDetailModel.flushCache({ deviceIds: deviceIds });
     }
   }
 }

@@ -338,6 +338,10 @@ const v1Signature = {
       {
         parameter: 'handle',
         validatorMethods: ['validateNonBlankString']
+      },
+      {
+        parameter: 'sanitized_headers',
+        validatorMethods: ['validateNonEmptyObject']
       }
     ],
     optional: [
@@ -1745,6 +1749,10 @@ const v1Signature = {
       {
         parameter: 'access_token',
         validatorMethods: ['validateString']
+      },
+      {
+        parameter: 'sanitized_headers',
+        validatorMethods: ['validateNonEmptyObject']
       }
     ],
     optional: [
@@ -1775,6 +1783,10 @@ const v1Signature = {
       {
         parameter: 'refresh_token',
         validatorMethods: ['validateString']
+      },
+      {
+        parameter: 'sanitized_headers',
+        validatorMethods: ['validateNonEmptyObject']
       }
     ],
     optional: [
@@ -1833,6 +1845,10 @@ const v1Signature = {
       {
         parameter: 'apple_user_id',
         validatorMethods: ['validateString']
+      },
+      {
+        parameter: 'sanitized_headers',
+        validatorMethods: ['validateNonEmptyObject']
       }
     ],
     optional: [

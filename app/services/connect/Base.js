@@ -4,11 +4,15 @@ const rootPrefix = '../../..',
   coreConstants = require(rootPrefix + '/config/coreConstants'),
   InviteCodeCache = require(rootPrefix + '/lib/cacheManagement/single/InviteCodeByCode'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
+  headerHelper = require(rootPrefix + '/helpers/header'),
   gotoFactory = require(rootPrefix + '/lib/goTo/factory'),
   entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
   gotoConstants = require(rootPrefix + '/lib/globalConstant/goto'),
   UserIdentifiersByEmailsCache = require(rootPrefix + '/lib/cacheManagement/multi/UserIdentifiersByEmails'),
   UserModel = require(rootPrefix + '/app/models/mysql/User'),
+  UserDeviceExtendedDetailModel = require(rootPrefix + '/app/models/mysql/UserDeviceExtendedDetail'),
+  UserDeviceExtendedDetailsByDeviceIdsCache = require(rootPrefix +
+    '/lib/cacheManagement/multi/UserDeviceExtendedDetailsByDeviceIds'),
   UserStatsByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/UserStatByUserIds'),
   ReplayAttackOnSocialConnectCache = require(rootPrefix + '/lib/cacheManagement/single/ReplayAttackOnSocialConnect'),
   CommonValidators = require(rootPrefix + '/lib/validators/Common');
@@ -28,6 +32,7 @@ class SocialConnectBase extends ServiceBase {
    * @param {string} params.invite_code: invite_code
    * @param {string} params.api_source: api_source
    * @param {string} params.ip_address: ip_address
+   * @param {string} params.sanitized_headers: sanitized_headers
    * @param {object} params.utm_params: utm_params
    *
    * @augments ServiceBase
@@ -42,6 +47,7 @@ class SocialConnectBase extends ServiceBase {
     oThis.utmParams = params.utm_params;
     oThis.ipAddress = params.ip_address;
     oThis.apiSource = params.api_source;
+    oThis.headers = params.sanitized_headers;
 
     oThis.socialUserObj = null;
     oThis.newSocialConnect = false;
@@ -304,6 +310,8 @@ class SocialConnectBase extends ServiceBase {
       // block users from certain countries
       await oThis._blockSpecificCountries();
 
+      await oThis._checkDuplicateDevice();
+
       await oThis._associateInviteCode();
       await oThis._performSignUp();
     } else {
@@ -345,6 +353,43 @@ class SocialConnectBase extends ServiceBase {
       return Promise.reject(
         responseHelper.error({
           internal_error_identifier: 's_c_b_6',
+          api_error_identifier: 'could_not_proceed'
+        })
+      );
+    }
+  }
+
+  /**
+   * Check Duplicate Device.
+   * NOTE:- If current request is from already existing device, reject it.
+   *
+   * @returns {Promise<never>}
+   * @private
+   */
+  async _checkDuplicateDevice() {
+    const oThis = this;
+
+    const deviceId = headerHelper.pepoDeviceId(oThis.headers);
+
+    if (!deviceId) {
+      return;
+    }
+
+    const userDeviceExtCacheResp = await new UserDeviceExtendedDetailsByDeviceIdsCache({
+      deviceIds: [deviceId]
+    }).fetch();
+
+    if (userDeviceExtCacheResp.isFailure()) {
+      return Promise.reject(userDeviceExtCacheResp);
+    }
+
+    console.log('userDeviceExtCacheResp------', userDeviceExtCacheResp, oThis.isUserSignUp);
+    const userDeviceExt = userDeviceExtCacheResp.data[deviceId];
+
+    if (CommonValidators.validateNonEmptyObject(userDeviceExt)) {
+      return Promise.reject(
+        responseHelper.error({
+          internal_error_identifier: 'a_s_c_b_7',
           api_error_identifier: 'could_not_proceed'
         })
       );

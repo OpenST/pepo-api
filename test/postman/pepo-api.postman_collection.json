@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "d44c81bb-64ba-458a-b0c3-0bd7cf3f64cb",
+		"_postman_id": "ad1daaa1-2cfc-4107-8b89-677576872556",
 		"name": "pepo-api",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -1041,8 +1041,27 @@
 								"header": [
 									{
 										"key": "Content-Type",
-										"name": "Content-Type",
 										"value": "text/plain",
+										"type": "text"
+									},
+									{
+										"key": "x-pepo-device-os",
+										"value": "android",
+										"type": "text"
+									},
+									{
+										"key": "x-pepo-device-id",
+										"value": "68cb32a3c0194cb3",
+										"type": "text"
+									},
+									{
+										"key": "x-pepo-build-number",
+										"value": "32",
+										"type": "text"
+									},
+									{
+										"key": "x-pepo-app-version",
+										"value": " 1.0.5",
 										"type": "text"
 									}
 								],
@@ -1099,9 +1118,28 @@
 								"header": [
 									{
 										"key": "Content-Type",
-										"name": "Content-Type",
-										"type": "text",
-										"value": "text/plain"
+										"value": "text/plain",
+										"type": "text"
+									},
+									{
+										"key": "x-pepo-device-os",
+										"value": "android",
+										"type": "text"
+									},
+									{
+										"key": "x-pepo-device-id",
+										"value": "68cb32a3c0194cb3",
+										"type": "text"
+									},
+									{
+										"key": "x-pepo-build-number",
+										"value": "32",
+										"type": "text"
+									},
+									{
+										"key": "x-pepo-app-version",
+										"value": " 1.0.5",
+										"type": "text"
 									}
 								],
 								"body": {
@@ -1142,9 +1180,28 @@
 								"header": [
 									{
 										"key": "Content-Type",
-										"name": "Content-Type",
-										"type": "text",
-										"value": "text/plain"
+										"value": "text/plain",
+										"type": "text"
+									},
+									{
+										"key": "x-pepo-device-os",
+										"value": "android",
+										"type": "text"
+									},
+									{
+										"key": "x-pepo-device-id",
+										"value": "68cb32a3c0194cb3",
+										"type": "text"
+									},
+									{
+										"key": "x-pepo-build-number",
+										"value": "32",
+										"type": "text"
+									},
+									{
+										"key": "x-pepo-app-version",
+										"value": " 1.0.5",
+										"type": "text"
 									}
 								],
 								"body": {
@@ -1190,9 +1247,28 @@
 								"header": [
 									{
 										"key": "Content-Type",
-										"name": "Content-Type",
-										"type": "text",
-										"value": "text/plain"
+										"value": "text/plain",
+										"type": "text"
+									},
+									{
+										"key": "x-pepo-device-os",
+										"value": "android",
+										"type": "text"
+									},
+									{
+										"key": "x-pepo-device-id",
+										"value": "68cb32a3c0194cb3",
+										"type": "text"
+									},
+									{
+										"key": "x-pepo-build-number",
+										"value": "32",
+										"type": "text"
+									},
+									{
+										"key": "x-pepo-app-version",
+										"value": " 1.0.5",
+										"type": "text"
 									}
 								],
 								"body": {

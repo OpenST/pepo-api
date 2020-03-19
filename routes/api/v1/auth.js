@@ -25,10 +25,15 @@ router.post('/logout', cookieHelper.parseUserCookieForLogout, sanitizer.sanitize
 });
 
 /* Twitter connect. */
-router.post('/twitter-login', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+router.post('/twitter-login', sanitizer.sanitizeDynamicUrlParams, sanitizer.sanitizeHeaderParams, function(
+  req,
+  res,
+  next
+) {
   req.decodedParams.apiName = apiName.twitterLogin;
 
   req.decodedParams.ip_address = req.headers['x-forwarded-for'];
+  req.decodedParams.sanitized_headers = req.sanitizedHeaders;
 
   cookieHelper.fetchUserUtmCookie(req);
 
@@ -63,10 +68,15 @@ router.post('/twitter-login', sanitizer.sanitizeDynamicUrlParams, function(req, 
 });
 
 /* Github connect. */
-router.post('/github-login', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+router.post('/github-login', sanitizer.sanitizeDynamicUrlParams, sanitizer.sanitizeHeaderParams, function(
+  req,
+  res,
+  next
+) {
   req.decodedParams.apiName = apiName.githubConnect;
 
   req.decodedParams.ip_address = req.headers['x-forwarded-for'];
+  req.decodedParams.sanitized_headers = req.sanitizedHeaders;
 
   cookieHelper.fetchUserUtmCookie(req);
 
@@ -101,10 +111,15 @@ router.post('/github-login', sanitizer.sanitizeDynamicUrlParams, function(req, r
 });
 
 /* Google connect. */
-router.post('/google-login', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+router.post('/google-login', sanitizer.sanitizeDynamicUrlParams, sanitizer.sanitizeHeaderParams, function(
+  req,
+  res,
+  next
+) {
   req.decodedParams.apiName = apiName.googleConnect;
 
   req.decodedParams.ip_address = req.headers['x-forwarded-for'];
+  req.decodedParams.sanitized_headers = req.sanitizedHeaders;
 
   cookieHelper.fetchUserUtmCookie(req);
 
@@ -139,10 +154,15 @@ router.post('/google-login', sanitizer.sanitizeDynamicUrlParams, function(req, r
 });
 
 /* Apple connect. */
-router.post('/apple-login', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+router.post('/apple-login', sanitizer.sanitizeDynamicUrlParams, sanitizer.sanitizeHeaderParams, function(
+  req,
+  res,
+  next
+) {
   req.decodedParams.apiName = apiName.appleConnect;
 
   req.decodedParams.ip_address = req.headers['x-forwarded-for'];
+  req.decodedParams.sanitized_headers = req.sanitizedHeaders;
 
   cookieHelper.fetchUserUtmCookie(req);
 
