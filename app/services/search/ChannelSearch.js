@@ -303,6 +303,10 @@ class ChannelSearch extends ServiceBase {
   async _fetchCurrentUserChannelRelations() {
     const oThis = this;
 
+    if (!oThis.currentUser) {
+      return;
+    }
+
     const currentUserChannelRelationLibParams = {
       currentUserId: oThis.currentUser.id,
       channelIds: oThis.channelIds
