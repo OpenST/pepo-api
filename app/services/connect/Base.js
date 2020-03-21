@@ -14,6 +14,7 @@ const rootPrefix = '../../..',
   UserDeviceExtendedDetailsByDeviceIdsCache = require(rootPrefix +
     '/lib/cacheManagement/multi/UserDeviceExtendedDetailsByDeviceIds'),
   UserStatsByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/UserStatByUserIds'),
+  apiSourceConstants = require(rootPrefix + '/lib/globalConstant/apiSource'),
   ReplayAttackOnSocialConnectCache = require(rootPrefix + '/lib/cacheManagement/single/ReplayAttackOnSocialConnect'),
   CommonValidators = require(rootPrefix + '/lib/validators/Common');
 
@@ -307,6 +308,9 @@ class SocialConnectBase extends ServiceBase {
     const oThis = this;
 
     if (oThis.isUserSignUp) {
+      // Don't allow signup from web
+      await oThis._blockSignUpForWeb();
+
       // block users from certain countries
       await oThis._blockSpecificCountries();
 
@@ -316,6 +320,25 @@ class SocialConnectBase extends ServiceBase {
       await oThis._performSignUp();
     } else {
       await oThis._performLogin();
+    }
+  }
+
+  /**
+   * Block Signup for web
+   *
+   * @returns {Promise<never>}
+   * @private
+   */
+  async _blockSignUpForWeb() {
+    const oThis = this;
+
+    if (apiSourceConstants.isWebRequest(oThis.apiSource)) {
+      return Promise.reject(
+        responseHelper.error({
+          internal_error_identifier: 's_c_b_8',
+          api_error_identifier: 'could_not_proceed'
+        })
+      );
     }
   }
 
