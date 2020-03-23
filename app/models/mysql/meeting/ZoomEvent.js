@@ -1,10 +1,10 @@
-const rootPrefix = '../../..',
+const rootPrefix = '../../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
   databaseConstants = require(rootPrefix + '/lib/globalConstant/database'),
   zoomEventConstants = require(rootPrefix + '/lib/globalConstant/zoomEvent');
 
 // Declare variables.
-const dbName = databaseConstants.socialConnectDbName;
+const dbName = databaseConstants.meetingDbName;
 
 /**
  * Class for zoom events model.

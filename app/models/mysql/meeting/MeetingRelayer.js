@@ -1,10 +1,10 @@
-const rootPrefix = '../../..',
+const rootPrefix = '../../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
   meetingRelayerConstants = require(rootPrefix + '/lib/globalConstant/meetingRelayer'),
   databaseConstants = require(rootPrefix + '/lib/globalConstant/database');
 
 // Declare variables.
-const dbName = databaseConstants.socialConnectDbName;
+const dbName = databaseConstants.meetingDbName;
 
 /**
  * Class for meeting relayer model.
