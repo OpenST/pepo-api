@@ -201,36 +201,6 @@ class TwitterConnect extends ConnectBase {
 
     return { kind: userIdentifierConstants.emailKind, values: [oThis.userTwitterEntity.email] };
   }
-
-  /**
-   * Get current social email from parameters.
-   *
-   * @returns {null}
-   * @private
-   */
-  _getCurrentSocialEmail() {
-    const oThis = this;
-
-    return oThis.userTwitterEntity.email;
-  }
-
-  /**
-   * Update email in social users.
-   *
-   * @returns {Promise<void>}
-   * @private
-   */
-  async _updateEmailInSocialUsers() {
-    const oThis = this;
-
-    let email = oThis._getCurrentSocialEmail();
-
-    await new TwitterUserModel()
-      .update({ email: email })
-      .where({ id: oThis.socialUserObj.id })
-      .fire();
-    await TwitterUserModel.flushCache(oThis.socialUserObj);
-  }
 }
 
 module.exports = TwitterConnect;

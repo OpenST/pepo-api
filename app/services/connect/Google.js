@@ -160,35 +160,6 @@ class GoogleConnect extends ConnectBase {
 
     return { kind: userIdentifierConstants.emailKind, values: [oThis.formattedGoogleUser.email] };
   }
-
-  /**
-   * Get current social email from parameters.
-   *
-   * @returns {string/null}
-   * @private
-   */
-  _getCurrentSocialEmail() {
-    const oThis = this;
-
-    return oThis.formattedGoogleUser.email;
-  }
-
-  /**
-   * Update email in social users.
-   *
-   * @returns {Promise<void>}
-   * @private
-   */
-  async _updateEmailInSocialUsers() {
-    const oThis = this;
-
-    const email = oThis._getCurrentSocialEmail();
-
-    await new GoogleUserModel()
-      .update({ email: email })
-      .where({ id: oThis.socialUserObj.id })
-      .fire();
-  }
 }
 
 module.exports = GoogleConnect;

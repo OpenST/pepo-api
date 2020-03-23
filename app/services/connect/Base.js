@@ -333,6 +333,8 @@ class SocialConnectBase extends ServiceBase {
     const oThis = this;
 
     if (apiSourceConstants.isWebRequest(oThis.apiSource)) {
+      await oThis._storeUserDataForFutureRef();
+
       return Promise.reject(
         responseHelper.error({
           internal_error_identifier: 's_c_b_8',
@@ -340,6 +342,18 @@ class SocialConnectBase extends ServiceBase {
         })
       );
     }
+  }
+
+  /**
+   * Store user data for future reference,
+   * Like in case of Apple connect, user data can only be retrieved first time.
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _storeUserDataForFutureRef() {
+    // Do nothing
+    // Apple Connect has overridden this method.
   }
 
   /**
