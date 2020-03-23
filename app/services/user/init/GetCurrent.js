@@ -208,7 +208,7 @@ class GetCurrentUser extends ServiceBase {
       pricePointsMap: oThis.pricePoints,
       tokenDetails: oThis.tokenDetails,
       airdropDetails: oThis.airdropDetails,
-      isManagingAnyChannel: UserModel.isUserManagingChannel()
+      isManagingAnyChannel: UserModel.isUserManagingChannel(oThis.secureUser)
     });
   }
 }
