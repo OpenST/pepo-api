@@ -116,6 +116,13 @@ const mysqlConfig = {
         password: coreConstants.SOCIAL_CONNECT_DB_MYSQL_PASSWORD
       }
     },
+    meetingDbCluster: {
+      master: {
+        host: coreConstants.MEETING_DB_MYSQL_HOST,
+        user: coreConstants.MEETING_DB_MYSQL_USER,
+        password: coreConstants.MEETING_DB_MYSQL_PASSWORD
+      }
+    },
     webhookDbCluster: {
       master: {
         host: coreConstants.WEBHOOK_DB_MYSQL_HOST,
@@ -167,6 +174,9 @@ mysqlConfig.databases[database.redemptionDbName] = ['redemptionDbCluster'];
 // Social connect db
 mysqlConfig.databases[database.socialConnectDbName] = ['socialConnectDbCluster'];
 
+// Meeting db
+mysqlConfig.databases[database.meetingDbName] = ['meetingDbCluster'];
+
 // Socket db
 mysqlConfig.databases[database.socketDbName] = ['socketDbCluster'];
 
@@ -176,7 +186,7 @@ mysqlConfig.databases[database.fiatDbName] = ['fiatDbCluster'];
 // Infra db
 mysqlConfig.databases[database.infraDbName] = ['infraDbCluster'];
 
-//webhook db
+// Webhook db
 mysqlConfig.databases[database.webhookDbName] = ['webhookDbCluster'];
 
 // Channel db

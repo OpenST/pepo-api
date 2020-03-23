@@ -2,7 +2,7 @@ const rootPrefix = '../..',
   dbKindConstants = require(rootPrefix + '/lib/globalConstant/dbKind'),
   databaseConstants = require(rootPrefix + '/lib/globalConstant/database');
 
-const dbName = databaseConstants.socialConnectDbName;
+const dbName = databaseConstants.meetingDbName;
 const dbKind = dbKindConstants.sqlDbKind;
 
 const upQuery =

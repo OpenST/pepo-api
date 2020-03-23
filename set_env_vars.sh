@@ -89,6 +89,11 @@ export PA_SOCIAL_CONNECT_DB_MYSQL_HOST='127.0.0.1'
 export PA_SOCIAL_CONNECT_DB_MYSQL_USER='root'
 export PA_SOCIAL_CONNECT_DB_MYSQL_PASSWORD='root'
 
+#mysql meetings db
+export PA_MEETING_DB_MYSQL_HOST='127.0.0.1'
+export PA_MEETING_DB_MYSQL_USER='root'
+export PA_MEETING_DB_MYSQL_PASSWORD='root'
+
 # mysql channel db
 export PA_CHANNEL_DB_MYSQL_HOST='127.0.0.1'
 export PA_CHANNEL_DB_MYSQL_USER='root'
