@@ -221,16 +221,10 @@ class AppleConnect extends ConnectBase {
   async _performSignUp() {
     const oThis = this;
 
-    let formattedAppleName = new AppleNameFormatter({ fullName: oThis.fullName, email: oThis.decryptedAppleEmail });
-
     let params = {
       appleOAuthDetails: oThis.appleOAuthDetails,
-      appleUserEntity: {
-        id: oThis.appleId,
-        email: oThis.decryptedAppleEmail,
-        fullName: formattedAppleName.formattedName,
-        socialUserName: formattedAppleName.socialUserName
-      },
+      appleUserEntity: oThis._getAppleFormattedData(),
+      appleUserObj: oThis.socialUserObj,
       headers: oThis.headers
     };
 
@@ -248,16 +242,9 @@ class AppleConnect extends ConnectBase {
   async _performLogin() {
     const oThis = this;
 
-    let formattedAppleName = new AppleNameFormatter({ fullName: oThis.fullName, email: oThis.decryptedAppleEmail });
-    let appleUserEntity = {
-      id: oThis.appleId,
-      email: oThis.decryptedAppleEmail,
-      fullName: formattedAppleName.formattedName,
-      socialUserName: formattedAppleName.socialUserName
-    };
     let params = {
       appleUserObj: oThis.socialUserObj,
-      appleUserEntity: appleUserEntity,
+      appleUserEntity: oThis._getAppleFormattedData(),
       accessToken: oThis.appleOAuthDetails.access_token,
       refreshToken: oThis.appleOAuthDetails.refresh_token,
       isNewSocialConnect: oThis.newSocialConnect,
@@ -285,32 +272,47 @@ class AppleConnect extends ConnectBase {
   }
 
   /**
-   * Get current social email from parameters.
+   * Get Formatted data for Apple
    *
-   * @returns {null}
+   * @returns {{fullName: *, socialUserName: *, id: *, email: *}}
    * @private
    */
-  _getCurrentSocialEmail() {
+  _getAppleFormattedData() {
     const oThis = this;
 
-    return oThis.decryptedAppleEmail;
+    let formattedAppleName = new AppleNameFormatter({ fullName: oThis.fullName, email: oThis.decryptedAppleEmail });
+    let appleUserEntity = {
+      id: oThis.appleId,
+      email: oThis.decryptedAppleEmail,
+      fullName: formattedAppleName.formattedName,
+      socialUserName: formattedAppleName.socialUserName
+    };
+
+    return appleUserEntity;
   }
 
   /**
-   * Update email in social users.
+   * Store user data for future reference,
+   * Like in case of Apple connect, user data can only be retrieved first time.
+   * This method is overridden only for apple.
    *
    * @returns {Promise<void>}
    * @private
    */
-  async _updateEmailInSocialUsers() {
+  async _storeUserDataForFutureRef() {
     const oThis = this;
 
-    let email = oThis._getCurrentSocialEmail();
-
-    await new AppleUserModel()
-      .update({ email: email })
-      .where({ id: oThis.socialUserObj.id })
-      .fire();
+    const appleUserEntity = oThis._getAppleFormattedData(),
+      insertParams = {
+        apple_id: appleUserEntity.id,
+        name: appleUserEntity.fullName,
+        email: appleUserEntity.email
+      };
+    // If Apple user obj is already present, then do nothing
+    // As no data can be updated
+    if (!oThis.socialUserObj) {
+      await new AppleUserModel().insert(insertParams).fire();
+    }
   }
 }
 
