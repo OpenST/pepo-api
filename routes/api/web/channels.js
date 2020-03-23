@@ -43,6 +43,7 @@ router.get('/:channel_permalink', sanitizer.sanitizeDynamicUrlParams, function(r
         [entityTypeConstants.channelDetailsMap]: responseEntityKey.channelDetails,
         [entityTypeConstants.channelStatsMap]: responseEntityKey.channelStats,
         [entityTypeConstants.currentUserChannelRelationsMap]: responseEntityKey.currentUserChannelRelations,
+        [entityTypeConstants.channelAllowedActionsMap]: responseEntityKey.channelAllowedActions,
         [entityTypeConstants.tagsMap]: responseEntityKey.tags,
         [entityTypeConstants.imagesMap]: responseEntityKey.images,
         [entityTypeConstants.linksMap]: responseEntityKey.links,
