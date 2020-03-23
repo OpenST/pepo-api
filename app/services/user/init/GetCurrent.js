@@ -7,9 +7,7 @@ const rootPrefix = '../../../..',
   SecureUserCache = require(rootPrefix + '/lib/cacheManagement/single/SecureUser'),
   PricePointsCache = require(rootPrefix + '/lib/cacheManagement/single/PricePoints'),
   TokenUserDetailByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TokenUserByUserIds'),
-  coreConstants = require(rootPrefix + '/config/coreConstants'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
-  localCipher = require(rootPrefix + '/lib/encryptors/localCipher'),
   tokenConstants = require(rootPrefix + '/lib/globalConstant/token'),
   ostPricePointsConstants = require(rootPrefix + '/lib/globalConstant/ostPricePoints');
 
@@ -209,7 +207,8 @@ class GetCurrentUser extends ServiceBase {
       meta: { isRegistration: 1, serviceType: oThis.loginServiceType },
       pricePointsMap: oThis.pricePoints,
       tokenDetails: oThis.tokenDetails,
-      airdropDetails: oThis.airdropDetails
+      airdropDetails: oThis.airdropDetails,
+      isManagingAnyChannel: UserModel.isUserManagingChannel()
     });
   }
 }

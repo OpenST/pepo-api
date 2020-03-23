@@ -284,6 +284,18 @@ class ChannelUserModel extends ModelBase {
     return finalResponse;
   }
 
+  async fetchActiveChannelIdsHostedByUserId(userId) {
+    const oThis = this;
+
+    const dbRows = await oThis
+      .select('id, channel_id')
+      .where({
+        user_id: userId,
+        status: channelUsersConstants.invertedStatuses[channelUsersConstants.activeStatus]
+      })
+      .fire();
+  }
+
   /**
    * Flush cache.
    *

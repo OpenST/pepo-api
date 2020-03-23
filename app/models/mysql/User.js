@@ -582,6 +582,53 @@ class UserModel extends ModelBase {
 
     return propertiesArray.indexOf(userConstants.hasGithubLoginProperty) > -1;
   }
+
+  /**
+   * Is user channel Admin.
+   *
+   * @param {object} userObj
+   *
+   * @returns {boolean}
+   */
+  static isUserManagingChannel(userObj) {
+    const propertiesArray = new UserModel().getBitwiseArray('properties', userObj.properties);
+
+    return propertiesArray.indexOf(userConstants.isManagingChannelProperty) > -1;
+  }
+
+  /**
+   * Approve users.
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async markUserChannelAdmin(userId) {
+    const oThis = this;
+
+    const propertyVal = userConstants.invertedProperties[userConstants.isManagingChannelProperty];
+
+    await new UserModel()
+      .update(['properties = properties | ?', propertyVal])
+      .where({ id: userId })
+      .fire();
+  }
+
+  /**
+   * Approve users.
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async unmarkUserChannelAdmin(userId) {
+    const oThis = this;
+
+    const propertyVal = userConstants.invertedProperties[userConstants.isManagingChannelProperty];
+
+    await new UserModel()
+      .update(['properties = properties & ~?', propertyVal])
+      .where({ id: userId })
+      .fire();
+  }
 }
 
 module.exports = UserModel;
