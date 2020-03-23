@@ -599,6 +599,14 @@ class CoreConstants {
   get PEPO_DEV_ENV_DOMAIN() {
     return 'https://pepodev.com';
   }
+
+  get PEPO_ZOOM_ACCOUNT_ID() {
+    return process.env.PA_ZOOM_ACCOUNT_ID;
+  }
+
+  get PEPO_ZOOM_WEBHOOK_VERIFICATION_TOKEN() {
+    return process.env.PA_ZOOM_WEBHOOK_VERIFICATION_TOKEN;
+  }
 }
 
 module.exports = new CoreConstants();
