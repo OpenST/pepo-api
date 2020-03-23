@@ -1,7 +1,7 @@
 const rootPrefix = '../../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
-  meetingRelayerConstants = require(rootPrefix + '/lib/globalConstant/meetingRelayer'),
-  databaseConstants = require(rootPrefix + '/lib/globalConstant/database');
+  databaseConstants = require(rootPrefix + '/lib/globalConstant/database'),
+  meetingRelayerConstants = require(rootPrefix + '/lib/globalConstant/meeting/meetingRelayer');
 
 // Declare variables.
 const dbName = databaseConstants.meetingDbName;

@@ -1,7 +1,7 @@
 const rootPrefix = '../../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
-  meetingConstants = require(rootPrefix + '/lib/globalConstant/meeting'),
-  databaseConstants = require(rootPrefix + '/lib/globalConstant/database');
+  databaseConstants = require(rootPrefix + '/lib/globalConstant/database'),
+  meetingConstants = require(rootPrefix + '/lib/globalConstant/meeting/meeting');
 
 // Declare variables.
 const dbName = databaseConstants.meetingDbName;
@@ -120,16 +120,47 @@ class MeetingModel extends ModelBase {
   }
 
   /**
-   * Flush cache
+   * Fetch meeting id by channel ids.
    *
-   * @param {object} params
-   * @param {number} params.twitterId
-   * @param {number} params.id
-   * @param {number} [params.userId]
+   * @param {array<number>} channelIds
+   *
+   * @returns {Promise<object>}
+   */
+  async fetchMeetingIdByChannelIds(channelIds) {
+    const oThis = this;
+
+    const dbRows = await oThis
+      .select('id, channel_id')
+      .where({
+        channel_id: channelIds
+      })
+      .where(['status IN ?', [meetingConstants.invertedStatuses[meetingConstants.createdStatus]]])
+      .fire();
+
+    const response = {};
+
+    for (let index = 0; index < channelIds.length; index++) {
+      const channelId = channelIds[index];
+      response[channelId].live_meeting_id = null;
+    }
+
+    for (let index = 0; index < dbRows.length; index++) {
+      const dbRow = dbRows[index];
+      const channelId = dbRow.channel_id;
+      response[channelId].live_meeting_id = dbRow.id;
+    }
+
+    return response;
+  }
+
+  /**
+   * Flush cache.
    *
    * @returns {Promise<*>}
    */
-  static async flushCache(params) {}
+  static async flushCache() {
+    // Do nothing.
+  }
 }
 
 module.exports = MeetingModel;
