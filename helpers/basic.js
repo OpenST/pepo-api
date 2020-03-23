@@ -826,12 +826,13 @@ class BasicHelper {
    * @returns {string}
    */
   generateUrl(url, urlParams) {
-    const urlParser = require('url');
-
-    let generatedUrl = new urlParser.URL(url);
+    const generatedUrl = new urlParser.URL(url);
     const searchParams = new urlParser.URLSearchParams(generatedUrl.searchParams);
-    for (let key in urlParams) {
+    for (const key in urlParams) {
       let val = urlParams[key];
+      if (key === 'state') {
+        val = escape(val);
+      }
       searchParams.append(key, val);
     }
     generatedUrl.search = searchParams;
@@ -852,10 +853,10 @@ class BasicHelper {
   }
 
   /**
-   * Check if request from pepo dev env
-   * and pepo dev env is supported or not
+   * Check if request from pepo dev env and pepo dev env is supported or not.
    *
-   * @param req
+   * @param {object} req
+   *
    * @returns {boolean}
    */
   isRequestFromPepoDevEnvAndSupported(req) {
@@ -872,8 +873,9 @@ class BasicHelper {
    * @returns {string}
    */
   getLoginRedirectUrl(isDevEnvLogin, loginService) {
-    const oThis = this,
-      redirectDomain = oThis.afterWebLoginRedirectDomain(isDevEnvLogin);
+    const oThis = this;
+
+    const redirectDomain = oThis.afterWebLoginRedirectDomain(isDevEnvLogin);
 
     return redirectDomain + '/webview/' + loginService + '/oauth';
   }
@@ -886,9 +888,10 @@ class BasicHelper {
    */
   getAfterLoginRedirectUrl(request) {
     let path = '';
-    if (request.headers['referer']) {
-      path = urlParser.parse(request.headers['referer']).path;
+    if (request.headers.referer) {
+      path = urlParser.parse(request.headers.referer).path;
     }
+
     return base64Helper.encode(JSON.stringify({ rd: path.replace(/^\/+/, '') }));
   }
 }
