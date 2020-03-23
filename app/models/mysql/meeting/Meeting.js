@@ -131,24 +131,13 @@ class MeetingModel extends ModelBase {
 
     const dbRows = await oThis
       .select('id, channel_id')
-      .where({
-        channel_id: channelIds
-      })
-      .where([
-        'status IN (?)',
-        [
-          meetingConstants.invertedStatuses[meetingConstants.createdStatus],
-          meetingConstants.invertedStatuses[meetingConstants.waitingStatus]
-        ]
-      ])
+      .where({ channel_id: channelIds, is_live: meetingConstants.isLiveStatus })
       .fire();
 
     const response = {};
 
     for (let channelIdIndex = 0; channelIdIndex < channelIds.length; channelIdIndex++) {
-      response[channelIds[channelIdIndex]] = {
-        liveMeetingId: null
-      };
+      response[channelIds[channelIdIndex]] = { liveMeetingId: null };
     }
 
     for (let index = 0; index < dbRows.length; index++) {
