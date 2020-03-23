@@ -9,6 +9,7 @@ const rootPrefix = '../../..',
   ostTransactionRoutes = require(rootPrefix + '/routes/api/web/ostTransactions'),
   userRoutes = require(rootPrefix + '/routes/api/web/users'),
   feedsRoutes = require(rootPrefix + '/routes/api/web/feeds'),
+  searchRoutes = require(rootPrefix + '/routes/api/web/search'),
   videoRoutes = require(rootPrefix + '/routes/api/web/videos'),
   channelRoutes = require(rootPrefix + '/routes/api/web/channels'),
   coreConstants = require(rootPrefix + '/config/coreConstants'),
@@ -61,6 +62,7 @@ router.use(cookieHelper.validateUserWebLoginCookieIfPresent);
 router.use('/auth', authRoutes);
 router.use('/videos', videoRoutes);
 router.use('/feeds', feedsRoutes);
+router.use('/search', searchRoutes);
 router.use('/report', reportRoutes);
 router.use('/channels', channelRoutes);
 router.use('/users', userRoutes);
