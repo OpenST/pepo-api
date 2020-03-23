@@ -207,8 +207,7 @@ class GetCurrentUser extends ServiceBase {
       meta: { isRegistration: 1, serviceType: oThis.loginServiceType },
       pricePointsMap: oThis.pricePoints,
       tokenDetails: oThis.tokenDetails,
-      airdropDetails: oThis.airdropDetails,
-      isManagingAnyChannel: UserModel.isUserManagingChannel(oThis.secureUser)
+      airdropDetails: oThis.airdropDetails
     });
   }
 }

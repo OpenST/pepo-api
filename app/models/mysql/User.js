@@ -106,7 +106,8 @@ class UserModel extends ModelBase {
       'status',
       'createdAt',
       'updatedAt',
-      'isUserGlobalMuted'
+      'isUserGlobalMuted',
+      'isManagingAnyChannel'
     ];
   }
 
@@ -217,6 +218,7 @@ class UserModel extends ModelBase {
       const formatDbRow = oThis.formatDbData(dbRows[index]);
       response[formatDbRow.id] = formatDbRow;
       response[formatDbRow.id].isUserGlobalMuted = globalMuteUsersCacheResponse.data[userId].all == 1;
+      response[formatDbRow.id].isManagingAnyChannel = UserModel.isUserManagingChannel(formatDbRow);
     }
 
     return response;
@@ -253,6 +255,7 @@ class UserModel extends ModelBase {
       return Promise.reject(globalMuteUsersCacheResponse);
     }
     response.isUserGlobalMuted = globalMuteUsersCacheResponse.data[id].all == 1;
+    response.isManagingAnyChannel = UserModel.isUserManagingChannel(response);
 
     return response;
   }
