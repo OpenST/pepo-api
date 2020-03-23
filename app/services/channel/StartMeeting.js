@@ -1,6 +1,7 @@
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
+  ChannelModel = require(rootPrefix + '/app/models/mysql/channel/Channel'),
   MeetingModel = require(rootPrefix + '/app/models/mysql/meeting/Meeting'),
   MeetingRelayerModel = require(rootPrefix + '/app/models/mysql/meeting/MeetingRelayer'),
   ChannelByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelByIds'),
@@ -318,6 +319,8 @@ class StartMeeting extends ServiceBase {
       if (!insertResponse) {
         return oThis._rollbackUpdates();
       }
+
+      await new ChannelModel.flushCache({ ids: [oThis.channelId] });
     }
   }
 
