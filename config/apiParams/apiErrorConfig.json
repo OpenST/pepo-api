@@ -243,5 +243,10 @@
     "http_code": "200",
     "code": "BAD_REQUEST",
     "message": "Please enter Integral dollar value. Decimals are not allowed."
+  },
+  "web_signup_prohibited": {
+    "http_code": "200",
+    "code": "web_signup_prohibited",
+    "message": "Signup from Web is prohibited."
   }
 }
