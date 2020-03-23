@@ -212,3 +212,7 @@ export PA_APPLE_WEB_SERVICE_ID='com.pepo.staging.signin'
 # Github constants.
 export PA_GITHUB_CLIENT_ID='10ca594072962f391504'
 export PA_GITHUB_CLIENT_SECRET='acf9f7c951f034566dcdc1b403ecf1c55429caf1'
+
+# Zoom constants
+export PA_ZOOM_JWT_API_KEY='ck1AbI4KT7CpmwFZi8CpPQ'
+export PA_ZOOM_JWT_API_SECRET='jTPAli2zi7PlujYYA7IMBaO5bhdsNhmepKqF'
