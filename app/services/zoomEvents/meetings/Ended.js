@@ -3,9 +3,11 @@ const rootPrefix = '../../../..',
   MeetingIdByZoomMeetingIdsCache = require(rootPrefix + 'lib/cacheManagement/multi/meeting/MeetingIdByZoomMeetingIds'),
   MeetingByIdsCache = require(rootPrefix + 'lib/cacheManagement/multi/meeting/MeetingByIds'),
   MeetingModel = require(rootPrefix + '/app/models/mysql/meeting/Meeting'),
+  MeetingRelayerModel = require(rootPrefix + '/app/models/mysql/meeting/MeetingRelayer'),
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
+  meetingRelayerConstants = require(rootPrefix + '/lib/globalConstant/meeting/meetingRelayer'),
   meetingConstants = require(rootPrefix + '/lib/globalConstant/meeting/meeting');
 
 /**
@@ -27,14 +29,15 @@ class MeetingEnded extends ServiceBase {
     super(params);
 
     const oThis = this;
-    oThis.endTime = params.object.end_time;
-    oThis.zoomMeetingId = params.object.uuid;
+    oThis.endTime = params.payload.object.end_time;
+    oThis.zoomMeetingId = params.payload.object.id;
 
     oThis.meetingId = null;
     oThis.meetingObj = {};
     oThis.endTimestamp = null;
+    oThis.processEvent = true;
 
-    console.log('HERE====constructor===MeetingStarted======', JSON.stringify(params));
+    console.log('HERE====constructor===MeetingEnded======', JSON.stringify(params));
   }
 
   /**
@@ -49,11 +52,13 @@ class MeetingEnded extends ServiceBase {
 
     await oThis._fetchAndValidateMeetingStatus();
 
-    await oThis._updateMeetingStatus();
+    if (!oThis.processEvent) {
+      return responseHelper.successWithData({});
+    }
+
+    await oThis._updateMeeting();
 
     await oThis._markMeetingRelayerAsAvailable();
-
-    // get recording data
 
     return responseHelper.successWithData({});
   }
@@ -112,12 +117,8 @@ class MeetingEnded extends ServiceBase {
     oThis.meetingId = cacheRes1.data[oThis.zoomMeetingId].id;
 
     if (!oThis.meetingId) {
-      return Promise.reject(
-        responseHelper.error({
-          internal_error_identifier: 's_ze_m_e_fm_1',
-          api_error_identifier: 'resource_not_found'
-        })
-      );
+      oThis.processEvent = false;
+      return responseHelper.successWithData({});
     }
 
     const cahceRes2 = await new MeetingByIdsCache({ ids: [oThis.meetingId] }).fetch();
@@ -142,20 +143,22 @@ class MeetingEnded extends ServiceBase {
   }
 
   /**
-   * Update meeting status to ended.
+   * Update meeting status to ended and endTimestamp and isLive.
    *
    * @return {Promise<void>}
    * @private
    */
-  async _updateMeetingStatus() {
+  async _updateMeeting() {
     const oThis = this;
 
-    logger.log('update meeting status.');
+    logger.log('update meeting.');
+
     //mark as ended and relayed users state
     await new MeetingModel()
       .update({
         status: meetingConstants.invertedStatuses[meetingConstants.endedStatus],
-        end_timestamp: oThis.endTimestamp
+        end_timestamp: oThis.endTimestamp,
+        is_live: null
       })
       .where({ id: oThis.meetingId })
       .fire();
@@ -164,6 +167,7 @@ class MeetingEnded extends ServiceBase {
 
     oThis.meetingObj.status = meetingConstants.endedStatus;
     oThis.meetingObj.endTimestamp = oThis.endTimestamp;
+    oThis.meetingObj.isLive = null;
 
     return responseHelper.successWithData({});
   }
@@ -178,6 +182,15 @@ class MeetingEnded extends ServiceBase {
     const oThis = this;
 
     logger.log('update meeting relayer as available.');
+
+    await new MeetingRelayerModel()
+      .update({
+        status: meetingRelayerConstants.invertedStatuses[meetingRelayerConstants.availableStatus]
+      })
+      .where({ id: oThis.meetingObj.meetingRelayerId })
+      .fire();
+
+    await MeetingRelayerModel.flushCache({ id: oThis.meetingObj.meetingRelayerId });
 
     return responseHelper.successWithData({});
   }

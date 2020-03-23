@@ -27,12 +27,13 @@ class MeetingStarted extends ServiceBase {
     super(params);
 
     const oThis = this;
-    oThis.startTime = params.object.start_time;
-    oThis.zoomMeetingId = params.object.uuid;
+    oThis.startTime = params.payload.object.start_time;
+    oThis.zoomMeetingId = params.payload.object.id;
 
     oThis.meetingId = null;
     oThis.meetingObj = {};
     oThis.startTimestamp = null;
+    oThis.processEvent = true;
 
     console.log('HERE====constructor===MeetingStarted======', JSON.stringify(params));
   }
@@ -48,6 +49,10 @@ class MeetingStarted extends ServiceBase {
     await oThis._validateParams();
 
     await oThis._fetchAndValidateMeetingStatus();
+
+    if (!oThis.processEvent) {
+      return responseHelper.successWithData({});
+    }
 
     await oThis._updateMeetingStatus();
 
@@ -108,12 +113,8 @@ class MeetingStarted extends ServiceBase {
     oThis.meetingId = cacheRes1.data[oThis.zoomMeetingId].id;
 
     if (!oThis.meetingId) {
-      return Promise.reject(
-        responseHelper.error({
-          internal_error_identifier: 's_ze_m_s_fm_1',
-          api_error_identifier: 'resource_not_found'
-        })
-      );
+      oThis.processEvent = false;
+      return responseHelper.successWithData({});
     }
 
     const cahceRes2 = await new MeetingByIdsCache({ ids: [oThis.meetingId] }).fetch();
@@ -124,7 +125,7 @@ class MeetingStarted extends ServiceBase {
 
     oThis.meetingObj = cahceRes2.data[oThis.meetingId];
 
-    if (!oThis.meetingObj.id || [meetingConstants.waitingStatus].indexOf(oThis.meetingObj.status) == -1) {
+    if (!oThis.meetingObj.id || meetingConstants.waitingStatus !== oThis.meetingObj.status) {
       return Promise.reject(
         responseHelper.error({
           internal_error_identifier: 's_ze_m_s_fm_2',

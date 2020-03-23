@@ -93,9 +93,6 @@ class MeetingRelayerModel extends ModelBase {
    * Flush cache
    *
    * @param {object} params
-   * @param {number} params.twitterId
-   * @param {number} params.id
-   * @param {number} [params.userId]
    *
    * @returns {Promise<*>}
    */

@@ -24,8 +24,9 @@ class MeetingAlert extends ServiceBase {
     super(params);
 
     const oThis = this;
+    oThis.object = params.payload.object;
 
-    console.log('HERE====constructor===MeetingStarted======', JSON.stringify(params));
+    console.log('HERE====constructor===MeetingAlert======', JSON.stringify(params));
   }
 
   /**
@@ -36,7 +37,13 @@ class MeetingAlert extends ServiceBase {
   async _asyncPerform() {
     const oThis = this;
 
-    // send pagerduty emails for now.
+    const response = responseHelper.error({
+      internal_error_identifier: 's_ze_a_ap_1',
+      api_error_identifier: 'something_went_wrong',
+      debug_options: oThis.object
+    });
+
+    await createErrorLogsEntry.perform(response, errorLogsConstants.lowSeverity);
 
     return responseHelper.successWithData({});
   }
