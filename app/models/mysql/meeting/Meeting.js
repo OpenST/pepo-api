@@ -105,7 +105,7 @@ class MeetingModel extends ModelBase {
     const oThis = this;
 
     const dbRows = await oThis
-      .select('*')
+      .select('id')
       .where({ zoom_meeting_id: zoomMeetingIds })
       .fire();
 
@@ -113,7 +113,7 @@ class MeetingModel extends ModelBase {
 
     for (let index = 0; index < dbRows.length; index++) {
       const formatDbRow = oThis.formatDbData(dbRows[index]);
-      response[formatDbRow.id] = formatDbRow;
+      response[formatDbRow.zoomMeetingId] = formatDbRow;
     }
 
     return response;
