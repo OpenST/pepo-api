@@ -134,20 +134,26 @@ class MeetingModel extends ModelBase {
       .where({
         channel_id: channelIds
       })
-      .where(['status IN ?', [meetingConstants.invertedStatuses[meetingConstants.createdStatus]]])
+      .where([
+        'status IN (?)',
+        [
+          meetingConstants.invertedStatuses[meetingConstants.createdStatus],
+          meetingConstants.invertedStatuses[meetingConstants.waitingStatus]
+        ]
+      ])
       .fire();
 
     const response = {};
 
-    for (let index = 0; index < channelIds.length; index++) {
-      const channelId = channelIds[index];
-      response[channelId].live_meeting_id = null;
+    for (let channelIdIndex = 0; channelIdIndex < channelIds.length; channelIdIndex++) {
+      response[channelIds[channelIdIndex]] = {
+        liveMeetingId: null
+      };
     }
 
     for (let index = 0; index < dbRows.length; index++) {
       const dbRow = dbRows[index];
-      const channelId = dbRow.channel_id;
-      response[channelId].live_meeting_id = dbRow.id;
+      response[dbRow.channel_id].liveMeetingId = dbRow.id;
     }
 
     return response;
