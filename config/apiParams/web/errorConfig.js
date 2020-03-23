@@ -189,6 +189,11 @@ const webErrorConfig = {
     parameter: 'product_id',
     code: 'invalid',
     message: 'Invalid product id.'
+  },
+  web_signup_prohibited: {
+    parameter: 'authorization_code',
+    code: 'web_signup_prohibited',
+    message: 'Signup from Web is prohibited.'
   }
 };
 
