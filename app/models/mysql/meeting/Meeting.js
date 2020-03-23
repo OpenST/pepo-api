@@ -42,6 +42,7 @@ class MeetingModel extends ModelBase {
    * @param {number} dbRow.zoom_meeting_id
    * @param {string} dbRow.recording_url
    * @param {string} dbRow.status
+   * @param {number} dbRow.is_live
    * @param {number} dbRow.created_at
    * @param {number} dbRow.updated_at
    *
@@ -62,6 +63,7 @@ class MeetingModel extends ModelBase {
       zoomMeetingId: dbRow.zoom_meeting_id,
       recordingUrl: dbRow.recording_url,
       status: meetingConstants.statuses[dbRow.status],
+      isLive: dbRow.is_live,
       createdAt: dbRow.created_at,
       updatedAt: dbRow.updated_at
     };
