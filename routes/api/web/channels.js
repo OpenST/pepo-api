@@ -75,7 +75,7 @@ router.post('/:channel_permalink/meetings', sanitizer.sanitizeDynamicUrlParams, 
     serviceResponse.data = wrapperFormatterRsp.data;
   };
 
-  Promise.resolve(routeHelper.perform(req, res, next, '/channel/Get', 'r_a_w_c_3', null, dataFormatterFunc));
+  Promise.resolve(routeHelper.perform(req, res, next, '/channel/StartMeeting', 'r_a_w_c_3', null, dataFormatterFunc));
 });
 
 /* Fetch videos of a channel. */

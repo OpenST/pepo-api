@@ -218,7 +218,7 @@ class StartMeeting extends ServiceBase {
 
     if (dbRows.length > 0) {
       return Promise.reject(
-        responseHelper.paramValidationError({
+        responseHelper.error({
           internal_error_identifier: 'a_s_c_g_5',
           api_error_identifier: 'already_hosting_other_meetings',
           debug_options: { currentUserId: oThis.currentUserId }
