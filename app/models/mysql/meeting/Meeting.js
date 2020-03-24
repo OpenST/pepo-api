@@ -154,12 +154,18 @@ class MeetingModel extends ModelBase {
    * Flush cache.
    *
    * @param {object} params
+   * @param {number} [params.id]
    * @param {array<number>} [params.channelIds]
    *
    * @returns {Promise<*>}
    */
   static async flushCache(params) {
     const promisesArray = [];
+
+    if (params.id) {
+      const MeetingByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/meeting/MeetingByIds');
+      promisesArray.push(new MeetingByIdsCache({ ids: [params.id] }).clear());
+    }
 
     if (params.channelIds) {
       const LiveMeetingIdByChannelIdsCache = require(rootPrefix +
