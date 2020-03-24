@@ -130,6 +130,41 @@ class ChannelUserModel extends ModelBase {
   }
 
   /**
+   * Fetch managed channels for user id.
+   * NOTE:- It will return array of active channel ids for which given user id is ADMIN.
+   *
+   * @param userId - user id.
+   *
+   * @param userId
+   * @returns {Promise<{channelIds: *}>}
+   */
+  async fetchManagedChannelsForUserId(userId) {
+    const oThis = this;
+
+    const dbRows = await oThis
+      .select('*')
+      .where({
+        user_id: userId,
+        role: channelUsersConstants.invertedRoles[channelUsersConstants.adminRole],
+        status: channelUsersConstants.invertedStatuses[channelUsersConstants.activeStatus]
+      })
+      .fire();
+
+    const channelIds = [];
+
+    if (dbRows.length === 0) {
+      return { channelIds: channelIds };
+    }
+
+    for (let index = 0; index < dbRows.length; index++) {
+      const formatDbRow = oThis.formatDbData(dbRows[index]);
+      channelIds.push(formatDbRow.channelId);
+    }
+
+    return { channelIds: channelIds };
+  }
+
+  /**
    * Fetch active channel ids for given user ids.
    *
    * @param {number} userIds: user ids.
