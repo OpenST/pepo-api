@@ -7,6 +7,7 @@ const rootPrefix = '../../..',
   ChannelByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelByIds'),
   GetCurrentUserChannelRelationsLib = require(rootPrefix + '/lib/channel/GetCurrentUserChannelRelations'),
   ChannelByPermalinksCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelByPermalinks'),
+  basicHelper = require(rootPrefix + '/helpers/basic'),
   zoomMeetingLib = require(rootPrefix + '/lib/zoom/meeting'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   createErrorLogsEntry = require(rootPrefix + '/lib/errorLogs/createEntry'),
@@ -243,12 +244,15 @@ class StartMeeting extends ServiceBase {
       .order_by('last_meeting_created_at ASC')
       .fire();
 
+    const currentTimeInSeconds = basicHelper.timestampInSeconds();
+
     for (let index = 0; index < dbRows.length; index++) {
       const dbRow = dbRows[index];
 
       const updateResponse = await new MeetingRelayerModel()
         .update({
-          status: meetingRelayerConstants.invertedStatuses[meetingRelayerConstants.reservedStatus]
+          status: meetingRelayerConstants.invertedStatuses[meetingRelayerConstants.reservedStatus],
+          last_meeting_created_at: currentTimeInSeconds
         })
         .where({
           id: dbRow.id,

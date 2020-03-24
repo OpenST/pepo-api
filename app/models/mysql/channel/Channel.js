@@ -189,6 +189,8 @@ class ChannelModel extends ModelBase {
     if (params.ids) {
       const ChannelByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelByIds');
       promisesArray.push(new ChannelByIdsCache({ ids: params.ids }).clear());
+
+      promisesArray.push(new LiveMeetingIdByChannelIdsCache({ channelIds: params.ids })).clear();
     }
 
     if (params.permalinks) {
