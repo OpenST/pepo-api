@@ -30,11 +30,13 @@ class MeetingEnded extends ServiceBase {
 
     const oThis = this;
     oThis.endTime = params.payload.object.end_time;
+    oThis.startTime = params.payload.object.start_time;
     oThis.zoomMeetingId = params.payload.object.id;
 
     oThis.meetingId = null;
     oThis.meetingObj = {};
     oThis.endTimestamp = null;
+    oThis.startTimestamp = null;
     oThis.processEvent = true;
 
     console.log('HERE====constructor===MeetingEnded======', JSON.stringify(params));
@@ -72,7 +74,10 @@ class MeetingEnded extends ServiceBase {
   async _validateParams() {
     const oThis = this;
 
-    if (!CommonValidators.validateNonBlankString(oThis.endTime)) {
+    if (
+      !CommonValidators.validateNonBlankString(oThis.endTime) ||
+      !CommonValidators.validateNonBlankString(oThis.startTime)
+    ) {
       return Promise.reject(
         responseHelper.error({
           internal_error_identifier: 's_ze_m_e_vp_1',
@@ -82,8 +87,9 @@ class MeetingEnded extends ServiceBase {
     }
 
     oThis.endTimestamp = new Date(oThis.endTime).getTime() / 1000;
+    oThis.startTimestamp = new Date(oThis.startTime).getTime() / 1000;
 
-    if (oThis.endTimestamp == 0) {
+    if (oThis.endTimestamp == 0 || oThis.startTimestamp == 0) {
       return Promise.reject(
         responseHelper.error({
           internal_error_identifier: 's_ze_m_e_vp_2',
@@ -158,6 +164,7 @@ class MeetingEnded extends ServiceBase {
       .update({
         status: meetingConstants.invertedStatuses[meetingConstants.endedStatus],
         end_timestamp: oThis.endTimestamp,
+        start_timestamp: oThis.startTimestamp,
         is_live: null
       })
       .where({ id: oThis.meetingId })
@@ -167,6 +174,7 @@ class MeetingEnded extends ServiceBase {
 
     oThis.meetingObj.status = meetingConstants.endedStatus;
     oThis.meetingObj.endTimestamp = oThis.endTimestamp;
+    oThis.meetingObj.startTimestamp = oThis.startTimestamp;
     oThis.meetingObj.isLive = null;
 
     return responseHelper.successWithData({});
