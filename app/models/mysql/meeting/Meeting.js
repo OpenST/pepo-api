@@ -107,7 +107,7 @@ class MeetingModel extends ModelBase {
     const oThis = this;
 
     const dbRows = await oThis
-      .select('id')
+      .select('id, zoom_meeting_id')
       .where({ zoom_meeting_id: zoomMeetingIds })
       .fire();
 

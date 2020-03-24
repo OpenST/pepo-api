@@ -81,7 +81,7 @@ class MeetingEnded extends ServiceBase {
       );
     }
 
-    oThis.endTimestamp = new Date(oThis.endTime).getTime();
+    oThis.endTimestamp = new Date(oThis.endTime).getTime() / 1000;
 
     if (oThis.endTimestamp == 0) {
       return Promise.reject(

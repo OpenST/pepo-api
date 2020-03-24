@@ -77,7 +77,7 @@ class MeetingStarted extends ServiceBase {
       );
     }
 
-    oThis.startTimestamp = new Date(oThis.startTime).getTime();
+    oThis.startTimestamp = new Date(oThis.startTime).getTime() / 1000;
 
     if (oThis.startTimestamp == 0) {
       return Promise.reject(
