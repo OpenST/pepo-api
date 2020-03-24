@@ -612,6 +612,19 @@ const webSignature = {
         validatorMethods: ['validateNonEmptyObject']
       }
     ]
+  },
+  [apiName.getCurrentUserManagedChannel]: {
+    mandatory: [
+      {
+        parameter: 'user_id',
+        validatorMethods: ['validateInteger']
+      },
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      }
+    ],
+    optional: []
   }
 };
 
