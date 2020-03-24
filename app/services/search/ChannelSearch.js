@@ -110,7 +110,7 @@ class ChannelSearch extends ServiceBase {
 
     if (oThis.paginationIdentifier) {
       const parsedPaginationParams = oThis._parsePaginationParams(oThis.paginationIdentifier);
-      oThis.paginationTimestamp = parsedPaginationParams.paginationTimestamp; // Override paginationTimestamp
+      oThis.paginationTimestamp = parsedPaginationParams.pagination_timestamp; // Override paginationTimestamp
     } else {
       oThis.paginationTimestamp = null;
     }
