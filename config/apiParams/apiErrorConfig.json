@@ -258,5 +258,10 @@
     "http_code": "200",
     "code": "web_signup_prohibited",
     "message": "Signup from Web is prohibited."
+  },
+  "meeting_has_ended": {
+    "http_code": "422",
+    "code": "MEETING_HAS_ENDED",
+    "message": "This Meeting has ended."
   }
 }

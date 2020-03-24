@@ -459,6 +459,12 @@ const v1ErrorConfig = {
     message: 'Channel does not exist.'
   },
 
+  invalid_meeting_id: {
+    parameter: 'meeting_id',
+    code: 'invalid',
+    message: 'Meeting does not exist.'
+  },
+
   invalid_channel_user_role: {
     parameter: 'user_id',
     code: 'invalid',

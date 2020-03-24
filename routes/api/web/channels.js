@@ -113,4 +113,25 @@ router.get('/:channel_id/videos', sanitizer.sanitizeDynamicUrlParams, function(r
   Promise.resolve(routeHelper.perform(req, res, next, '/channel/GetVideoList', 'r_a_w_c_4', null, dataFormatterFunc));
 });
 
+/* Get channel details. */
+router.get('/:channel_permalink/meetings/:meeting_id', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.getMeeting;
+  req.decodedParams.channel_permalink = req.params.channel_permalink;
+  req.decodedParams.meeting_id = req.params.meeting_id;
+
+  const dataFormatterFunc = async function(serviceResponse) {
+    const wrapperFormatterRsp = await new FormatterComposer({
+      resultType: responseEntityKey.joinZoomMeetingPayload,
+      entityKindToResponseKeyMap: {
+        [entityTypeConstants.joinZoomMeetingPayload]: responseEntityKey.joinZoomMeetingPayload
+      },
+      serviceData: serviceResponse.data
+    }).perform();
+
+    serviceResponse.data = wrapperFormatterRsp.data;
+  };
+
+  Promise.resolve(routeHelper.perform(req, res, next, '/channel/meeting/Get', 'r_a_w_c_3', null, dataFormatterFunc));
+});
+
 module.exports = router;

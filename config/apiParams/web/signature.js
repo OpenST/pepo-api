@@ -570,6 +570,28 @@ const webSignature = {
       }
     ]
   },
+  [apiName.getMeeting]: {
+    mandatory: [
+      {
+        parameter: 'api_source',
+        validatorMethods: ['validateString']
+      },
+      {
+        parameter: 'meeting_id',
+        validatorMethods: ['validateInteger']
+      },
+      {
+        parameter: 'channel_permalink',
+        validatorMethods: ['validateName']
+      }
+    ],
+    optional: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      }
+    ]
+  },
   [apiName.startChannelZoomMeeting]: {
     mandatory: [
       {

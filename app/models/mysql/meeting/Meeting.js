@@ -62,6 +62,7 @@ class MeetingModel extends ModelBase {
       channelId: dbRow.channel_id,
       zoomMeetingId: dbRow.zoom_meeting_id,
       recordingUrl: dbRow.recording_url,
+      isLive: dbRow.is_live,
       status: meetingConstants.statuses[dbRow.status],
       isLive: dbRow.is_live,
       createdAt: dbRow.created_at,
