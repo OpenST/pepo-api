@@ -49,6 +49,8 @@ class StartMeeting extends ServiceBase {
     oThis.meetingRelayer = null;
 
     oThis.zoomMeetingId = null;
+
+    oThis.meetingId = null;
   }
 
   /**
@@ -62,11 +64,12 @@ class StartMeeting extends ServiceBase {
 
     await oThis._validate();
 
-    // Step 1.
+    // Step 1: Reserve zoom user.
     await oThis._reserveZoomUser();
-    // Step 2.
+    // Step 2: Create meeting using Zoom API call. If it fails, revert the previous update.
     await oThis._createMeetingUsingZoom();
-    // Step 4.
+    // Step 3: Create a new record in the meetings table.
+    // If the insert fails, revert the previous updates and delete the zoom meeting.
     await oThis._recordMeetingInTable();
 
     return responseHelper.successWithData(oThis._prepareResponse());
@@ -288,20 +291,22 @@ class StartMeeting extends ServiceBase {
   async _createMeetingUsingZoom() {
     const oThis = this;
 
-    if (oThis.meetingRelayer) {
-      const createMeetingResponse = await zoomMeetingLib
-        .create(oThis.meetingRelayer.zoomUserId)
-        .catch(async function() {
-          return oThis._rollbackUpdates();
-        });
-
-      // eslint-disable-next-line require-atomic-updates
-      oThis.zoomMeetingId = createMeetingResponse.id;
+    if (!oThis.meetingRelayer) {
+      return;
     }
+
+    const createMeetingResponse = await zoomMeetingLib.create(oThis.meetingRelayer.zoomUserId).catch(async function() {
+      return oThis._rollbackUpdates();
+    });
+
+    // eslint-disable-next-line require-atomic-updates
+    oThis.zoomMeetingId = createMeetingResponse.id;
   }
 
   /**
    * Record meeting in table.
+   *
+   * @sets oThis.meetingId
    *
    * @returns {Promise<void>}
    * @private
@@ -309,23 +314,27 @@ class StartMeeting extends ServiceBase {
   async _recordMeetingInTable() {
     const oThis = this;
 
-    if (oThis.zoomMeetingId) {
-      const insertResponse = await new MeetingModel()
-        .insert({
-          host_user_id: oThis.currentUserId,
-          meeting_relayer_id: oThis.meetingRelayer.id,
-          channel_id: oThis.channelId,
-          zoom_meeting_id: oThis.zoomMeetingId,
-          status: meetingConstants.invertedStatuses[meetingConstants.waitingStatus]
-        })
-        .fire();
-
-      if (!insertResponse) {
-        return oThis._rollbackUpdates();
-      }
-
-      await new ChannelModel.flushCache({ ids: [oThis.channelId] });
+    if (!oThis.zoomMeetingId) {
+      return;
     }
+
+    const insertResponse = await new MeetingModel()
+      .insert({
+        host_user_id: oThis.currentUserId,
+        meeting_relayer_id: oThis.meetingRelayer.id,
+        channel_id: oThis.channelId,
+        zoom_meeting_id: oThis.zoomMeetingId,
+        status: meetingConstants.invertedStatuses[meetingConstants.waitingStatus]
+      })
+      .fire();
+
+    if (!insertResponse) {
+      return oThis._rollbackUpdates();
+    }
+
+    oThis.meetingId = insertResponse.insertId;
+
+    await ChannelModel.flushCache({ ids: [oThis.channelId] });
   }
 
   /**
@@ -407,7 +416,7 @@ class StartMeeting extends ServiceBase {
 
     return {
       [entityTypeConstants.startZoomMeetingPayload]: {
-        meetingId: oThis.zoomMeetingId
+        meetingId: oThis.meetingId
       }
     };
   }
