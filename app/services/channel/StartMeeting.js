@@ -66,11 +66,23 @@ class StartMeeting extends ServiceBase {
 
     // Step 1: Reserve zoom user.
     await oThis._reserveZoomUser();
+
     // Step 2: Create meeting using Zoom API call. If it fails, revert the previous update.
-    await oThis._createMeetingUsingZoom();
+    const meetingCreationResponse = await oThis._createMeetingUsingZoom();
+    if (meetingCreationResponse.isFailure()) {
+      await oThis._rollbackUpdates();
+
+      return responseHelper.successWithData(oThis._prepareResponse());
+    }
+
     // Step 3: Create a new record in the meetings table.
     // If the insert fails, revert the previous updates and delete the zoom meeting.
-    await oThis._recordMeetingInTable();
+    const meetingRecordResponse = await oThis._recordMeetingInTable();
+    if (meetingRecordResponse.isFailure()) {
+      await oThis._rollbackUpdates();
+
+      return responseHelper.successWithData(oThis._prepareResponse());
+    }
 
     return responseHelper.successWithData(oThis._prepareResponse());
   }
@@ -295,12 +307,23 @@ class StartMeeting extends ServiceBase {
       return;
     }
 
-    const createMeetingResponse = await zoomMeetingLib.create(oThis.meetingRelayer.zoomUserId).catch(async function() {
-      return oThis._rollbackUpdates();
+    let facedError = false;
+
+    const zoomApiResponse = await zoomMeetingLib.create(oThis.meetingRelayer.zoomUserId).catch(function() {
+      facedError = true;
     });
 
-    // eslint-disable-next-line require-atomic-updates
-    oThis.zoomMeetingId = createMeetingResponse.id;
+    if (facedError) {
+      return responseHelper.error({
+        internal_error_identifier: 'a_s_c_g_7',
+        api_error_identifier: 'something_went_wrong',
+        debug_options: {}
+      });
+    }
+
+    oThis.zoomMeetingId = zoomApiResponse.id;
+
+    return responseHelper.successWithData({});
   }
 
   /**
@@ -315,7 +338,7 @@ class StartMeeting extends ServiceBase {
     const oThis = this;
 
     if (!oThis.zoomMeetingId) {
-      return;
+      return responseHelper.error({});
     }
 
     const insertResponse = await new MeetingModel()
@@ -329,12 +352,14 @@ class StartMeeting extends ServiceBase {
       .fire();
 
     if (!insertResponse) {
-      return oThis._rollbackUpdates();
+      return responseHelper.error({});
     }
 
     oThis.meetingId = insertResponse.insertId;
 
     await ChannelModel.flushCache({ ids: [oThis.channelId] });
+
+    return responseHelper.successWithData({});
   }
 
   /**
