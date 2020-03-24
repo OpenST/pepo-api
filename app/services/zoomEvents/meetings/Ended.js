@@ -135,7 +135,7 @@ class MeetingEnded extends ServiceBase {
 
     oThis.meetingObj = cahceRes2.data[oThis.meetingId];
 
-    if (!oThis.meetingObj.id || meetingConstants.startedStatus !== oThis.meetingObj.status) {
+    if (!oThis.meetingObj.id || !oThis.meetingObj.isLive) {
       return Promise.reject(
         responseHelper.error({
           internal_error_identifier: 's_ze_m_e_fm_2',
