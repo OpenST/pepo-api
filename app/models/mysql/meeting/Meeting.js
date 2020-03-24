@@ -64,7 +64,6 @@ class MeetingModel extends ModelBase {
       recordingUrl: dbRow.recording_url,
       isLive: dbRow.is_live,
       status: meetingConstants.statuses[dbRow.status],
-      isLive: dbRow.is_live,
       createdAt: dbRow.created_at,
       updatedAt: dbRow.updated_at
     };
