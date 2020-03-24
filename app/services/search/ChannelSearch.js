@@ -152,7 +152,9 @@ class ChannelSearch extends ServiceBase {
 
       channelIds = cacheResponse.data.entityIds;
 
-      channelIds = oThis.getTopResults ? channelIds.slice(0, topChannelsResultsLimit + 1) : channelIds;
+      channelIds = oThis.getTopResults
+        ? channelIds.slice(0, topChannelsResultsLimit + 1)
+        : channelIds.slice(0, oThis.limit);
     }
 
     return channelIds;
