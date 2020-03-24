@@ -14,15 +14,14 @@ const rootPrefix = '../../..',
 const router = express.Router();
 
 const validateZoomSignature = async function(req, res, next) {
-  let authResponse;
-
   if (
     coreConstants.PEPO_ZOOM_WEBHOOK_VERIFICATION_TOKEN !== req.headers['authorization'] ||
     coreConstants.PEPO_ZOOM_ACCOUNT_ID !== req.body.payload.account_id
   ) {
     const errorObj = responseHelper.error({
       internal_error_identifier: 'r_w_z_i_vzs_1',
-      api_error_identifier: 'unauthorized_api_request'
+      api_error_identifier: 'unauthorized_api_request',
+      debug_options: { body: req.body, authorization: req.headers['authorization'] }
     });
 
     await createErrorLogsEntry.perform(errorObj, errorLogsConstants.mediumSeverity);
