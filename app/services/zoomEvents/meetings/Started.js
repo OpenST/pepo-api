@@ -1,6 +1,6 @@
 const rootPrefix = '../../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
-  MeetingIdByZoomMeetingIdsCache = require(rootPrefix + 'lib/cacheManagement/multi/meeting/MeetingIdByZoomMeetingIds'),
+  MeetingIdByZoomMeetingIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/meeting/MeetingIdByZoomMeetingIds'),
   MeetingByIdsCache = require(rootPrefix + 'lib/cacheManagement/multi/meeting/MeetingByIds'),
   MeetingModel = require(rootPrefix + '/app/models/mysql/meeting/Meeting'),
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
