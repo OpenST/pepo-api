@@ -4,6 +4,7 @@ const rootPrefix = '../../../..',
   ZoomMeetingLib = require(rootPrefix + '/lib/zoom/meeting'),
   ChannelByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelByIds'),
   MeetingByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/meeting/MeetingByIds'),
+  ImageByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/ImageByIds'),
   ChannelByPermalinksCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelByPermalinks'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
@@ -34,12 +35,14 @@ class GetMeetingJoin extends ServiceBase {
     const oThis = this;
 
     oThis.channelPermalink = params.channel_permalink;
-    oThis.currentUser = params.current_user;
+    oThis.currentUser = params.current_user || {};
     oThis.meetingId = params.meeting_id;
 
     oThis.channelId = null;
     oThis.channel = {};
     oThis.meeting = {};
+    oThis.profilePicUrl = null;
+    oThis.name = 'Guest';
   }
 
   /**
@@ -54,6 +57,8 @@ class GetMeetingJoin extends ServiceBase {
     await oThis._fetchAndValidateChannel();
 
     await oThis._fetchAndValidateMeeting();
+
+    await oThis._fetchEntities();
 
     return responseHelper.successWithData(oThis._prepareResponse());
   }
@@ -164,6 +169,36 @@ class GetMeetingJoin extends ServiceBase {
   }
 
   /**
+   * Fetch and validate meeting.
+   *
+   * @sets oThis.meeting
+   *
+   * @returns {Promise<never>}
+   * @private
+   */
+  async _fetchEntities() {
+    const oThis = this;
+
+    if (oThis.currentUser.id) {
+      oThis.name = oThis.currentUser.name;
+
+      if (!oThis.currentUser.profileImageId) {
+        return;
+      }
+    } else {
+      return;
+    }
+
+    const cacheResponse = await new ImageByIdsCache({ ids: [oThis.currentUser.profileImageId] }).fetch();
+    if (cacheResponse.isFailure()) {
+      return Promise.reject(cacheResponse);
+    }
+
+    const imageData = cacheResponse.data[oThis.currentUser.profileImageId];
+    oThis.profilePicUrl = imageData.resolutions.original.url;
+  }
+
+  /**
    * Prepare response.
    *
    * @returns {{joinZoomMeetingPayload: *, }}
@@ -171,15 +206,15 @@ class GetMeetingJoin extends ServiceBase {
    */
   _prepareResponse() {
     const oThis = this;
-    const role = oThis.currentUser && oThis.currentUser.id == oThis.meeting.hostUserId ? 1 : 0;
+    const role = oThis.currentUser.id && oThis.currentUser.id == oThis.meeting.hostUserId ? 1 : 0;
 
     const signature = ZoomMeetingLib.getSignature(oThis.meeting.zoomMeetingId, role);
 
     const joinZoomMeetingPayload = {
       zoomMeetingId: oThis.meeting.zoomMeetingId,
       signature: signature,
-      name: 'Dummy',
-      profile_pic_url: null,
+      name: oThis.name,
+      profile_pic_url: oThis.profilePicUrl,
       role: role,
       api_key: zoomConstant.apiKey
     };
