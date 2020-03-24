@@ -165,7 +165,7 @@ class MeetingModel extends ModelBase {
       const LiveMeetingIdByChannelIdsCache = require(rootPrefix +
         '/lib/cacheManagement/multi/meeting/LiveMeetingIdByChannelIds');
 
-      promisesArray.push(new LiveMeetingIdByChannelIdsCache({ channelIds: params.channelIds })).clear();
+      promisesArray.push(new LiveMeetingIdByChannelIdsCache({ channelIds: params.channelIds }).clear());
     }
 
     await Promise.all(promisesArray);
