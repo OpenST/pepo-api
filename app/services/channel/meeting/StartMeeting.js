@@ -346,6 +346,7 @@ class StartMeeting extends ServiceBase {
         host_user_id: oThis.currentUserId,
         meeting_relayer_id: oThis.meetingRelayer.id,
         channel_id: oThis.channelId,
+        is_live: meetingConstants.isLiveStatus,
         zoom_meeting_id: oThis.zoomMeetingId,
         status: meetingConstants.invertedStatuses[meetingConstants.waitingStatus]
       })
