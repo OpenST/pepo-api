@@ -3,7 +3,7 @@ const rootPrefix = '../../../..',
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   ZoomMeetingLib = require(rootPrefix + '/lib/zoom/meeting'),
   ChannelByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelByIds'),
-  MeetingByIdsCache = require(rootPrefix + 'lib/cacheManagement/multi/meeting/MeetingByIds'),
+  MeetingByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/meeting/MeetingByIds'),
   ChannelByPermalinksCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelByPermalinks'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
@@ -22,6 +22,7 @@ class GetMeetingJoin extends ServiceBase {
    * @param {object} params
    * @param {string} [params.channel_permalink]
    * @param {object} params.current_user
+   * @param {number} params.meeting_id
    *
    * @augments ServiceBase
    *
@@ -34,6 +35,7 @@ class GetMeetingJoin extends ServiceBase {
 
     oThis.channelPermalink = params.channel_permalink;
     oThis.currentUser = params.current_user;
+    oThis.meetingId = params.meeting_id;
 
     oThis.channelId = null;
     oThis.channel = {};
@@ -155,9 +157,7 @@ class GetMeetingJoin extends ServiceBase {
         responseHelper.error({
           internal_error_identifier: 'a_s_c_m_g_favm_2',
           api_error_identifier: 'meeting_has_ended',
-          debug_options: {
-            meetingId: oThis.meetingId
-          }
+          debug_options: oThis.meeting
         })
       );
     }
@@ -181,7 +181,7 @@ class GetMeetingJoin extends ServiceBase {
       name: 'Dummy',
       profile_pic_url: null,
       role: role,
-      api_key: zoomConstant.api_key
+      api_key: zoomConstant.apiKey
     };
 
     return {
