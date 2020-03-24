@@ -188,8 +188,15 @@ class FetchGoto extends ServiceBase {
           const channelId = (cacheResponse.data[channelPermalink] || {}).id;
 
           if (Number(channelId)) {
-            oThis.gotoParams = { channelId: channelId };
-            oThis.gotoKind = gotoConstants.channelsGotoKind;
+            // Channel is valid then look whether meeting is also passed in url
+            // If meetings and meeting id is passed in url then send goto as webview
+            if (pathArray[3] && pathArray[3] == 'meetings' && pathArray[4]) {
+              oThis.gotoParams = { url: oThis.url };
+              oThis.gotoKind = gotoConstants.webViewGotoKind;
+            } else {
+              oThis.gotoParams = { channelId: channelId };
+              oThis.gotoKind = gotoConstants.channelsGotoKind;
+            }
           }
         }
 
@@ -197,6 +204,11 @@ class FetchGoto extends ServiceBase {
       }
       case 'account': {
         oThis.gotoKind = gotoConstants.invitedUsersGotoKind;
+
+        break;
+      }
+      case 'feed': {
+        oThis.gotoKind = gotoConstants.feedGotoKind;
 
         break;
       }
