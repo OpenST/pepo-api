@@ -42,6 +42,7 @@ class MeetingModel extends ModelBase {
    * @param {number} dbRow.zoom_meeting_id
    * @param {string} dbRow.recording_url
    * @param {string} dbRow.status
+   * @param {number} dbRow.is_live
    * @param {number} dbRow.created_at
    * @param {number} dbRow.updated_at
    *
@@ -62,6 +63,7 @@ class MeetingModel extends ModelBase {
       zoomMeetingId: dbRow.zoom_meeting_id,
       recordingUrl: dbRow.recording_url,
       status: meetingConstants.statuses[dbRow.status],
+      isLive: dbRow.is_live,
       createdAt: dbRow.created_at,
       updatedAt: dbRow.updated_at
     };
@@ -105,7 +107,7 @@ class MeetingModel extends ModelBase {
     const oThis = this;
 
     const dbRows = await oThis
-      .select('*')
+      .select('id')
       .where({ zoom_meeting_id: zoomMeetingIds })
       .fire();
 
@@ -113,7 +115,7 @@ class MeetingModel extends ModelBase {
 
     for (let index = 0; index < dbRows.length; index++) {
       const formatDbRow = oThis.formatDbData(dbRows[index]);
-      response[formatDbRow.id] = formatDbRow;
+      response[formatDbRow.zoomMeetingId] = formatDbRow;
     }
 
     return response;
@@ -131,24 +133,13 @@ class MeetingModel extends ModelBase {
 
     const dbRows = await oThis
       .select('id, channel_id')
-      .where({
-        channel_id: channelIds
-      })
-      .where([
-        'status IN (?)',
-        [
-          meetingConstants.invertedStatuses[meetingConstants.createdStatus],
-          meetingConstants.invertedStatuses[meetingConstants.waitingStatus]
-        ]
-      ])
+      .where({ channel_id: channelIds, is_live: meetingConstants.isLiveStatus })
       .fire();
 
     const response = {};
 
     for (let channelIdIndex = 0; channelIdIndex < channelIds.length; channelIdIndex++) {
-      response[channelIds[channelIdIndex]] = {
-        liveMeetingId: null
-      };
+      response[channelIds[channelIdIndex]] = { liveMeetingId: null };
     }
 
     for (let index = 0; index < dbRows.length; index++) {
@@ -162,10 +153,22 @@ class MeetingModel extends ModelBase {
   /**
    * Flush cache.
    *
+   * @param {object} params
+   * @param {array<number>} [params.channelIds]
+   *
    * @returns {Promise<*>}
    */
-  static async flushCache() {
-    // Do nothing.
+  static async flushCache(params) {
+    const promisesArray = [];
+
+    if (params.channelIds) {
+      const LiveMeetingIdByChannelIdsCache = require(rootPrefix +
+        '/lib/cacheManagement/multi/meeting/LiveMeetingIdByChannelIds');
+
+      promisesArray.push(new LiveMeetingIdByChannelIdsCache({ channelIds: params.channelIds })).clear();
+    }
+
+    await Promise.all(promisesArray);
   }
 }
 

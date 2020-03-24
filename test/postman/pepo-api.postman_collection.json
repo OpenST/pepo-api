@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "ad1daaa1-2cfc-4107-8b89-677576872556",
+		"_postman_id": "20e37b4d-fdfc-4416-9b73-4b1203c45e52",
 		"name": "pepo-api",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -859,7 +859,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{api_server}}/api/admin/video-history/2068?",
+							"raw": "{{api_server}}/api/admin/video-history/2068",
 							"host": [
 								"{{api_server}}"
 							],
@@ -886,7 +886,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{api_server}}/api/admin/reply-history/1301?",
+							"raw": "{{api_server}}/api/admin/reply-history/1301",
 							"host": [
 								"{{api_server}}"
 							],
@@ -1003,7 +1003,7 @@
 							]
 						},
 						"url": {
-							"raw": "{{api_server}}/api/admin/update-video/1089/description?",
+							"raw": "{{api_server}}/api/admin/update-video/1089/description",
 							"host": [
 								"{{api_server}}"
 							],
@@ -1987,7 +1987,7 @@
 									]
 								},
 								"url": {
-									"raw": "{{api_server}}/api/v1/users/1445/fan-video?",
+									"raw": "{{api_server}}/api/v1/users/1445/fan-video",
 									"host": [
 										"{{api_server}}"
 									],
@@ -2043,7 +2043,7 @@
 									]
 								},
 								"url": {
-									"raw": "{{api_server}}/api/v1/users/thank-you?",
+									"raw": "{{api_server}}/api/v1/users/thank-you",
 									"host": [
 										"{{api_server}}"
 									],
@@ -2111,7 +2111,7 @@
 								"method": "GET",
 								"header": [],
 								"url": {
-									"raw": "{{api_server}}/api/v1/users/search?",
+									"raw": "{{api_server}}/api/v1/users/search",
 									"host": [
 										"{{api_server}}"
 									],
@@ -2247,7 +2247,7 @@
 									]
 								},
 								"url": {
-									"raw": "{{api_server}}/api/v1/users/1254/fan-video?",
+									"raw": "{{api_server}}/api/v1/users/1254/fan-video",
 									"host": [
 										"{{api_server}}"
 									],
@@ -2364,7 +2364,7 @@
 								"method": "GET",
 								"header": [],
 								"url": {
-									"raw": "{{api_server}}/api/v1/top-up/3?",
+									"raw": "{{api_server}}/api/v1/top-up/3",
 									"host": [
 										"{{api_server}}"
 									],
@@ -2418,7 +2418,7 @@
 								"method": "GET",
 								"header": [],
 								"url": {
-									"raw": "{{api_server}}/api/v1/notifications?",
+									"raw": "{{api_server}}/api/v1/notifications",
 									"host": [
 										"{{api_server}}"
 									],
@@ -2555,7 +2555,7 @@
 								"method": "GET",
 								"header": [],
 								"url": {
-									"raw": "{{api_server}}/api/v1/tags/66?",
+									"raw": "{{api_server}}/api/v1/tags/66",
 									"host": [
 										"{{api_server}}"
 									],
@@ -2582,7 +2582,7 @@
 								"method": "GET",
 								"header": [],
 								"url": {
-									"raw": "{{api_server}}/api/v1/tags/66/videos?",
+									"raw": "{{api_server}}/api/v1/tags/66/videos",
 									"host": [
 										"{{api_server}}"
 									],
@@ -2815,7 +2815,7 @@
 								"method": "GET",
 								"header": [],
 								"url": {
-									"raw": "{{api_server}}/api/v1/feeds?",
+									"raw": "{{api_server}}/api/v1/feeds",
 									"host": [
 										"{{api_server}}"
 									],
@@ -3496,7 +3496,7 @@
 									]
 								},
 								"url": {
-									"raw": "{{api_server}}/api/v1/replies?",
+									"raw": "{{api_server}}/api/v1/replies",
 									"host": [
 										"{{api_server}}"
 									],
@@ -3598,7 +3598,7 @@
 									"urlencoded": []
 								},
 								"url": {
-									"raw": "{{api_server}}/api/v1/channels/1/videos?",
+									"raw": "{{api_server}}/api/v1/channels/1/videos",
 									"host": [
 										"{{api_server}}"
 									],
@@ -4147,6 +4147,96 @@
 										"web",
 										"users",
 										"current"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"protocolProfileBehavior": {},
+					"_postman_isSubFolder": true
+				},
+				{
+					"name": "channels",
+					"item": [
+						{
+							"name": "details",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{api_server}}/api/web/channels/covid19",
+									"host": [
+										"{{api_server}}"
+									],
+									"path": [
+										"api",
+										"web",
+										"channels",
+										"covid19"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "share",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{api_server}}/api/web/channels/covid19/share",
+									"host": [
+										"{{api_server}}"
+									],
+									"path": [
+										"api",
+										"web",
+										"channels",
+										"covid19",
+										"share"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "videos-list",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{api_server}}/api/web/channels/2/videos",
+									"host": [
+										"{{api_server}}"
+									],
+									"path": [
+										"api",
+										"web",
+										"channels",
+										"2",
+										"videos"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "start-meeting",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"url": {
+									"raw": "{{api_server}}/api/web/channels/covid19/meetings",
+									"host": [
+										"{{api_server}}"
+									],
+									"path": [
+										"api",
+										"web",
+										"channels",
+										"covid19",
+										"meetings"
 									]
 								}
 							},

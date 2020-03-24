@@ -35,6 +35,7 @@ class MeetingRelayerModel extends ModelBase {
    * @param {number} dbRow.zoom_user_id
    * @param {string} dbRow.email
    * @param {string} dbRow.status
+   * @param {number} dbRow.last_meeting_created_at
    * @param {number} dbRow.created_at
    * @param {number} dbRow.updated_at
    *
@@ -48,6 +49,7 @@ class MeetingRelayerModel extends ModelBase {
       zoomUserId: dbRow.zoom_user_id,
       email: dbRow.email,
       status: meetingRelayerConstants.statuses[dbRow.status],
+      lastMeetingCreatedAt: dbRow.last_meeting_created_at,
       createdAt: dbRow.created_at,
       updatedAt: dbRow.updated_at
     };
@@ -93,9 +95,6 @@ class MeetingRelayerModel extends ModelBase {
    * Flush cache
    *
    * @param {object} params
-   * @param {number} params.twitterId
-   * @param {number} params.id
-   * @param {number} [params.userId]
    *
    * @returns {Promise<*>}
    */

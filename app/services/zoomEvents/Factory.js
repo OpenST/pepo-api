@@ -110,13 +110,8 @@ class ZoomEventProcess extends ServiceBase {
         break;
       }
       default: {
-        return Promise.reject(
-          responseHelper.error({
-            internal_error_identifier: 's_ze_f_e_1',
-            api_error_identifier: 'something_went_wrong',
-            debug_options: { zoomEventObjId: oThis.zoomEventObj.id, msg: 'Invalid topic of zoom event.' }
-          })
-        );
+        eventProcessResponse = responseHelper.successWithData({});
+        break;
       }
     }
 

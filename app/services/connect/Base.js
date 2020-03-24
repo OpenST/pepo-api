@@ -338,7 +338,7 @@ class SocialConnectBase extends ServiceBase {
       return Promise.reject(
         responseHelper.error({
           internal_error_identifier: 's_c_b_8',
-          api_error_identifier: 'could_not_proceed'
+          api_error_identifier: 'web_signup_prohibited'
         })
       );
     }
