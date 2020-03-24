@@ -58,6 +58,26 @@ router.get('/:channel_permalink', sanitizer.sanitizeDynamicUrlParams, function(r
   Promise.resolve(routeHelper.perform(req, res, next, '/channel/Get', 'r_a_w_c_2', null, dataFormatterFunc));
 });
 
+/* Start channel meeting. */
+router.post('/:channel_permalink/meetings', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.startChannelZoomMeeting;
+  req.decodedParams.channel_permalink = req.params.channel_permalink;
+
+  const dataFormatterFunc = async function(serviceResponse) {
+    const wrapperFormatterRsp = await new FormatterComposer({
+      resultType: responseEntityKey.startZoomMeetingPayload,
+      entityKindToResponseKeyMap: {
+        [entityTypeConstants.startZoomMeetingPayload]: responseEntityKey.startZoomMeetingPayload
+      },
+      serviceData: serviceResponse.data
+    }).perform();
+
+    serviceResponse.data = wrapperFormatterRsp.data;
+  };
+
+  Promise.resolve(routeHelper.perform(req, res, next, '/channel/Get', 'r_a_w_c_3', null, dataFormatterFunc));
+});
+
 /* Fetch videos of a channel. */
 router.get('/:channel_id/videos', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.getChannelVideos;
@@ -90,7 +110,7 @@ router.get('/:channel_id/videos', sanitizer.sanitizeDynamicUrlParams, function(r
     serviceResponse.data = wrapperFormatterRsp.data;
   };
 
-  Promise.resolve(routeHelper.perform(req, res, next, '/channel/GetVideoList', 'r_a_w_c_3', null, dataFormatterFunc));
+  Promise.resolve(routeHelper.perform(req, res, next, '/channel/GetVideoList', 'r_a_w_c_4', null, dataFormatterFunc));
 });
 
 module.exports = router;
