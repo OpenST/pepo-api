@@ -605,14 +605,14 @@ class UserModel extends ModelBase {
    * @returns {Promise<void>}
    * @private
    */
-  async markUserChannelAdmin(userId) {
+  async markUserChannelAdmin(userIds) {
     const oThis = this;
 
     const propertyVal = userConstants.invertedProperties[userConstants.isManagingChannelProperty];
 
     await new UserModel()
       .update(['properties = properties | ?', propertyVal])
-      .where({ id: userId })
+      .where({ id: userIds })
       .fire();
   }
 
@@ -622,14 +622,14 @@ class UserModel extends ModelBase {
    * @returns {Promise<void>}
    * @private
    */
-  async unmarkUserChannelAdmin(userId) {
+  async unmarkUserChannelAdmin(userIds) {
     const oThis = this;
 
     const propertyVal = userConstants.invertedProperties[userConstants.isManagingChannelProperty];
 
     await new UserModel()
       .update(['properties = properties & ~?', propertyVal])
-      .where({ id: userId })
+      .where({ id: userIds })
       .fire();
   }
 }
