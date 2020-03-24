@@ -1,4 +1,4 @@
-const rootPrefix = '../../..',
+const rootPrefix = '../../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   ChannelModel = require(rootPrefix + '/app/models/mysql/channel/Channel'),
@@ -352,7 +352,11 @@ class StartMeeting extends ServiceBase {
       .fire();
 
     if (!insertResponse) {
-      return responseHelper.error({});
+      return responseHelper.error({
+        internal_error_identifier: 'a_s_c_g_8',
+        api_error_identifier: 'something_went_wrong',
+        debug_options: {}
+      });
     }
 
     oThis.meetingId = insertResponse.insertId;
@@ -402,7 +406,7 @@ class StartMeeting extends ServiceBase {
 
     if (updateResponse.affectedRows === 0) {
       const errorObject = responseHelper.error({
-        internal_error_identifier: 'a_s_c_g_7',
+        internal_error_identifier: 'a_s_c_g_9',
         api_error_identifier: 'zoom_user_unreserving_failed',
         debug_options: { zoomUser: oThis.zoomUser }
       });
@@ -421,7 +425,7 @@ class StartMeeting extends ServiceBase {
 
     await zoomMeetingLib.delete(oThis.zoomMeetingId).catch(async function(error) {
       const errorObject = responseHelper.error({
-        internal_error_identifier: 'a_s_c_g_8',
+        internal_error_identifier: 'a_s_c_g_10',
         api_error_identifier: 'zoom_meeting_delete_failed',
         debug_options: { zoomMeetingId: oThis.zoomMeetingId, error: error }
       });

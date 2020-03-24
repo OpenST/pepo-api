@@ -75,7 +75,9 @@ router.post('/:channel_permalink/meetings', sanitizer.sanitizeDynamicUrlParams, 
     serviceResponse.data = wrapperFormatterRsp.data;
   };
 
-  Promise.resolve(routeHelper.perform(req, res, next, '/channel/StartMeeting', 'r_a_w_c_3', null, dataFormatterFunc));
+  Promise.resolve(
+    routeHelper.perform(req, res, next, '/channel/meeting/StartMeeting', 'r_a_w_c_3', null, dataFormatterFunc)
+  );
 });
 
 /* Fetch videos of a channel. */
@@ -131,7 +133,7 @@ router.get('/:channel_permalink/meetings/:meeting_id', sanitizer.sanitizeDynamic
     serviceResponse.data = wrapperFormatterRsp.data;
   };
 
-  Promise.resolve(routeHelper.perform(req, res, next, '/channel/meeting/Get', 'r_a_w_c_3', null, dataFormatterFunc));
+  Promise.resolve(routeHelper.perform(req, res, next, '/channel/meeting/Get', 'r_a_w_c_5', null, dataFormatterFunc));
 });
 
 module.exports = router;
