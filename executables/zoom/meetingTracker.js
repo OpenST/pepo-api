@@ -30,7 +30,7 @@ if (!cronProcessId) {
 }
 
 const BATCH_SIZE = 25;
-const WAIT_TIME = 10 * 60 * 1000; // 10 mins
+const WAIT_TIME = 10 * 60; // 10 mins
 
 class MeetingTracker extends CronBase {
   constructor(params) {
@@ -106,7 +106,7 @@ class MeetingTracker extends CronBase {
         if (isWaiting) {
           await oThis._deleteZoomMeeting(formattedRow.zoomMeetingId);
           await oThis._markMeetingAsNotAlive(formattedRow.id);
-          await oThis._markRelayerAvailable(formattedRow.id);
+          await oThis._markRelayerAvailable(formattedRow.meetingRelayerId);
         }
       }
 
@@ -155,7 +155,7 @@ class MeetingTracker extends CronBase {
     logger.info(`Marking meeting as not alive for id: ${meetingId}`);
     const updateResponse = await new MeetingModel()
       .update({
-        is_live: 0
+        is_live: null
       })
       .where({
         id: meetingId
