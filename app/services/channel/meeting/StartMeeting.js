@@ -237,7 +237,7 @@ class StartMeeting extends ServiceBase {
       return Promise.reject(
         responseHelper.paramValidationError({
           internal_error_identifier: 'a_s_c_m_sm_4',
-          api_error_identifier: 'invalid_api_params',
+          api_error_identifier: 'could_not_proceed',
           params_error_identifiers: ['already_hosting_other_meetings'],
           debug_options: { currentUserId: oThis.currentUserId }
         })
@@ -288,7 +288,7 @@ class StartMeeting extends ServiceBase {
       return Promise.reject(
         responseHelper.paramValidationError({
           internal_error_identifier: 'a_s_c_m_sm_5',
-          api_error_identifier: 'invalid_api_params',
+          api_error_identifier: 'could_not_proceed',
           params_error_identifiers: ['zoom_user_unavailable'],
           debug_options: {}
         })
