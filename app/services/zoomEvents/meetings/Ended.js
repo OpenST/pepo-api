@@ -170,7 +170,7 @@ class MeetingEnded extends ServiceBase {
       .where({ id: oThis.meetingId })
       .fire();
 
-    await MeetingModel.flushCache({ id: oThis.meetingId });
+    await MeetingModel.flushCache({ id: oThis.meetingId, channelId: oThis.meetingObj.channelId });
 
     oThis.meetingObj.status = meetingConstants.endedStatus;
     oThis.meetingObj.endTimestamp = oThis.endTimestamp;

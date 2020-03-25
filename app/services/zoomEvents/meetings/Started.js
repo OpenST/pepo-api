@@ -157,7 +157,7 @@ class MeetingStarted extends ServiceBase {
       .where({ id: oThis.meetingId })
       .fire();
 
-    await MeetingModel.flushCache({ id: oThis.meetingId });
+    await MeetingModel.flushCache({ id: oThis.meetingId, channelId: oThis.meetingObj.channelId });
 
     oThis.meetingObj = meetingConstants.startedStatus;
 
