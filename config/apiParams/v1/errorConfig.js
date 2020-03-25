@@ -471,12 +471,6 @@ const v1ErrorConfig = {
     message: 'Only channel admins can start a meeting. Please make sure you are a channel administrator.'
   },
 
-  meeting_already_exists: {
-    parameter: 'channel_id',
-    code: 'invalid',
-    message: 'An active meeting is already going for this channel.'
-  },
-
   channel_not_active: {
     parameter: 'channel_id',
     code: 'invalid',

@@ -162,10 +162,9 @@ class StartMeeting extends ServiceBase {
     // A live meeting already exists for this channel.
     if (oThis.channel.liveMeetingId) {
       return Promise.reject(
-        responseHelper.paramValidationError({
+        responseHelper.error({
           internal_error_identifier: 'a_s_c_g_3',
-          api_error_identifier: 'resource_not_found',
-          params_error_identifiers: ['meeting_already_exists'],
+          api_error_identifier: 'meeting_already_exists',
           debug_options: {
             channelId: oThis.channelId,
             liveMeetingId: oThis.channel.liveMeetingId
@@ -320,8 +319,6 @@ class StartMeeting extends ServiceBase {
         debug_options: {}
       });
     }
-
-    // console.log("HERE-===-=-=-=-=-=-=-=",JSON.stringify(zoomApiResponse));
 
     oThis.zoomMeetingId = zoomApiResponse.id;
 

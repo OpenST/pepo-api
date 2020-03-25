@@ -235,14 +235,19 @@
     "message": "Maximum redemption amount for redemption crossed."
   },
   "zoom_user_unavailable": {
-    "http_code": "500",
-    "code": "INTERNAL_SERVER_ERROR",
+    "http_code": "422",
+    "code": "ZOOM_USER_UNAVAILABLE",
     "message": "No zoom users are available at the moment. Please try again later."
   },
   "already_hosting_other_meetings": {
-    "http_code": "500",
-    "code": "INTERNAL_SERVER_ERROR",
+    "http_code": "422",
+    "code": "ALREADY_HOSTING_OTHER_MEETINGS",
     "message": "You are already hosting meetings for other channels. Please end those meetings before starting a new one."
+  },
+  "meeting_already_exists": {
+    "http_code": "422",
+    "code": "MEETING_ALREADY_EXISTS",
+    "message": "An active meeting already exists for this channel."
   },
   "pending_transaction_found": {
     "http_code": "200",
