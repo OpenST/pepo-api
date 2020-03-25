@@ -141,6 +141,7 @@ class ChannelUserModel extends ModelBase {
   async fetchManagedChannelsForUserId(userId) {
     const oThis = this;
 
+    // TODO - zoom - are we using index in this query?
     const dbRows = await oThis
       .select('*')
       .where({

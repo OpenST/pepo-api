@@ -112,7 +112,7 @@ router.get('/:channel_permalink/meetings/:meeting_id', sanitizer.sanitizeDynamic
     serviceResponse.data = wrapperFormatterRsp.data;
   };
 
-  Promise.resolve(routeHelper.perform(req, res, next, '/channel/meeting/Get', 'r_a_w_c_4', null, dataFormatterFunc));
+  Promise.resolve(routeHelper.perform(req, res, next, '/channel/meeting/GetJoinPayload', 'r_a_w_c_4', null, dataFormatterFunc));
 });
 
 // NOTE: Login mandatory for following routes.

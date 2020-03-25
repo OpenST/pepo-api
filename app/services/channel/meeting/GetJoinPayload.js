@@ -14,9 +14,9 @@ const rootPrefix = '../../../..',
 /**
  * Class to get meeting join details.
  *
- * @class GetMeetingJoin
+ * @class GetJoinMeetingPayload
  */
-class GetMeetingJoin extends ServiceBase {
+class GetJoinMeetingPayload extends ServiceBase {
   /**
    * Constructor.
    *
@@ -225,4 +225,4 @@ class GetMeetingJoin extends ServiceBase {
   }
 }
 
-module.exports = GetMeetingJoin;
+module.exports = GetJoinMeetingPayload;
