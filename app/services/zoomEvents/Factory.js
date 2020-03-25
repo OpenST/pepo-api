@@ -101,6 +101,17 @@ class ZoomEventProcess extends ServiceBase {
         eventProcessResponse = await new MeetingAlertClass(oThis.eventData).perform();
         break;
       }
+      case zoomEventConstants.meetingParticipantJoinedZoomWebhookTopic: {
+        const MeetingParticipantJoinedClass = require(rootPrefix +
+          '/app/services/zoomEvents/meetings/ParticipantJoined');
+        eventProcessResponse = await new MeetingParticipantJoinedClass(oThis.eventData).perform();
+        break;
+      }
+      case zoomEventConstants.meetingParticipantLeftZoomWebhookTopic: {
+        const MeetingParticipantLeftClass = require(rootPrefix + '/app/services/zoomEvents/meetings/ParticipantLeft');
+        eventProcessResponse = await new MeetingParticipantLeftClass(oThis.eventData).perform();
+        break;
+      }
       default: {
         eventProcessResponse = responseHelper.successWithData({});
         console.log('Unused Zoom Event Received with data', JSON.stringify(oThis.eventData));

@@ -42,6 +42,8 @@ class MeetingModel extends ModelBase {
    * @param {string} dbRow.recording_url
    * @param {string} dbRow.status
    * @param {number} dbRow.is_live
+   * @param {number} dbRow.host_join_count
+   * @param {number} dbRow.host_leave_count
    * @param {number} dbRow.created_at
    * @param {number} dbRow.updated_at
    *
@@ -62,6 +64,8 @@ class MeetingModel extends ModelBase {
       recordingUrl: dbRow.recording_url,
       isLive: dbRow.is_live,
       status: meetingConstants.statuses[dbRow.status],
+      hostJoinCount: dbRow.host_join_count,
+      hostLeaveCount: dbRow.host_leave_count,
       createdAt: dbRow.created_at,
       updatedAt: dbRow.updated_at
     };
