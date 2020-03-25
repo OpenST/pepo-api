@@ -235,10 +235,9 @@ class StartMeeting extends ServiceBase {
 
     if (dbRows.length > 0) {
       return Promise.reject(
-        responseHelper.paramValidationError({
+        responseHelper.error({
           internal_error_identifier: 'a_s_c_m_sm_4',
-          api_error_identifier: 'could_not_proceed',
-          params_error_identifiers: ['already_hosting_other_meetings'],
+          api_error_identifier: 'already_hosting_other_meetings',
           debug_options: { currentUserId: oThis.currentUserId }
         })
       );
@@ -307,7 +306,11 @@ class StartMeeting extends ServiceBase {
     const oThis = this;
 
     if (!oThis.meetingRelayer) {
-      return;
+      return responseHelper.error({
+        internal_error_identifier: 'a_s_c_m_sm_6',
+        api_error_identifier: 'something_went_wrong',
+        debug_options: {}
+      });
     }
 
     let facedError = false;
@@ -318,7 +321,7 @@ class StartMeeting extends ServiceBase {
 
     if (facedError) {
       return responseHelper.error({
-        internal_error_identifier: 'a_s_c_m_sm_6',
+        internal_error_identifier: 'a_s_c_m_sm_7',
         api_error_identifier: 'something_went_wrong',
         debug_options: {}
       });
@@ -341,7 +344,11 @@ class StartMeeting extends ServiceBase {
     const oThis = this;
 
     if (!oThis.zoomMeetingId) {
-      return responseHelper.error({});
+      return responseHelper.error({
+        internal_error_identifier: 'a_s_c_m_sm_8',
+        api_error_identifier: 'something_went_wrong',
+        debug_options: {}
+      });
     }
 
     const insertResponse = await new MeetingModel()
@@ -357,7 +364,7 @@ class StartMeeting extends ServiceBase {
 
     if (!insertResponse) {
       return responseHelper.error({
-        internal_error_identifier: 'a_s_c_m_sm_7',
+        internal_error_identifier: 'a_s_c_m_sm_9',
         api_error_identifier: 'something_went_wrong',
         debug_options: {}
       });
@@ -410,7 +417,7 @@ class StartMeeting extends ServiceBase {
 
     if (updateResponse.affectedRows === 0) {
       const errorObject = responseHelper.error({
-        internal_error_identifier: 'a_s_c_m_sm_8',
+        internal_error_identifier: 'a_s_c_m_sm_10',
         api_error_identifier: 'zoom_user_unreserving_failed',
         debug_options: { zoomUser: oThis.zoomUser }
       });
@@ -429,7 +436,7 @@ class StartMeeting extends ServiceBase {
 
     await zoomMeetingLib.delete(oThis.zoomMeetingId).catch(async function(error) {
       const errorObject = responseHelper.error({
-        internal_error_identifier: 'a_s_c_m_sm_9',
+        internal_error_identifier: 'a_s_c_m_sm_11',
         api_error_identifier: 'zoom_meeting_delete_failed',
         debug_options: { zoomMeetingId: oThis.zoomMeetingId, error: error }
       });

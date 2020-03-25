@@ -240,7 +240,7 @@
     "message": "No zoom users are available at the moment. Please try again later."
   },
   "already_hosting_other_meetings": {
-    "http_code": "422",
+    "http_code": "200",
     "code": "ALREADY_HOSTING_OTHER_MEETINGS",
     "message": "You are already hosting meetings for other channels. Please end those meetings before starting a new one."
   },
@@ -260,7 +260,7 @@
     "message": "Signup from Web is prohibited."
   },
   "meeting_has_ended": {
-    "http_code": "422",
+    "http_code": "200",
     "code": "MEETING_HAS_ENDED",
     "message": "This Meeting has ended."
   }
