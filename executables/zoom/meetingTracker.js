@@ -11,7 +11,8 @@ const rootPrefix = '../../',
   meetingRelayerConstants = require(rootPrefix + '/lib/globalConstant/meeting/meetingRelayer'),
   meetingConstants = require(rootPrefix + '/lib/globalConstant/meeting/meeting'),
   createErrorLogsEntry = require(rootPrefix + '/lib/errorLogs/createEntry'),
-  responseHelper = require(rootPrefix + '/lib/formatter/response');
+  responseHelper = require(rootPrefix + '/lib/formatter/response'),
+  errorLogsConstants = require(rootPrefix + '/lib/globalConstant/errorLogs');
 
 program.option('--cronProcessId <cronProcessId>', 'Cron table process ID').parse(process.argv);
 
