@@ -32,7 +32,7 @@ if (!cronProcessId) {
   process.exit(1);
 }
 
-const BATCH_SIZE = 15;
+const BATCH_SIZE = 10;
 const WAIT_TIME = 10 * 60; // 10 mins
 
 class MeetingTracker extends CronBase {
@@ -118,6 +118,10 @@ class MeetingTracker extends CronBase {
         }
         const isWaiting = await oThis._isZoomMeetingStatusWaiting(formattedRow.zoomMeetingId);
 
+        // This sleep is added to ensure that rate limit of zoom api calls is not exceeded.
+        // NOTE - Zoom API rate limit is 10 requests/second.
+        await basicHelper.sleep(250);
+
         if (isWaiting) {
           await oThis._deleteZoomMeeting(formattedRow.zoomMeetingId);
           await oThis._markMeetingAsNotAliveAndDeleted(formattedRow.id, formattedRow.channelId);
@@ -132,8 +136,6 @@ class MeetingTracker extends CronBase {
         logger.info('All records processed, Quiting job');
         break;
       }
-
-      await basicHelper.sleep(200);
     }
   }
 
