@@ -3,8 +3,9 @@ const rootPrefix = '../../../..',
   MeetingIdByZoomMeetingIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/meeting/MeetingIdByZoomMeetingIds'),
   MeetingByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/meeting/MeetingByIds'),
   MeetingModel = require(rootPrefix + '/app/models/mysql/meeting/Meeting'),
-  CommonValidators = require(rootPrefix + '/lib/validators/Common'),
+  bgJob = require(rootPrefix + '/lib/rabbitMqEnqueue/bgJob'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
+  bgJobConstants = require(rootPrefix + '/lib/globalConstant/bgJob'),
   responseHelper = require(rootPrefix + '/lib/formatter/response');
 
 /**
@@ -17,6 +18,10 @@ class MeetingParticipantLeft extends ServiceBase {
    * Constructor
    *
    * @param {object} params
+   * @param {object} params.payload
+   * @param {object} params.payload.object
+   * @param {object} params.payload.object.participant
+   * @param {String} params.payload.object.participant.id
    *
    * @augments ServiceBase
    *
@@ -27,7 +32,6 @@ class MeetingParticipantLeft extends ServiceBase {
 
     const oThis = this;
     oThis.zoomMeetingId = params.payload.object.id;
-    oThis.leaveTime = params.payload.object.participant.leave_time;
     oThis.zoomParticipantId = params.payload.object.participant.id;
 
     oThis.meetingId = null;
@@ -48,34 +52,19 @@ class MeetingParticipantLeft extends ServiceBase {
 
     await oThis._fetchAndValidateMeetingHost();
 
-    if (!oThis.processEvent) {
-      return responseHelper.successWithData({});
-    }
-
     await oThis._incrementHostLeaveCount();
   }
 
   async _validateParams() {
     const oThis = this;
 
-    if (!CommonValidators.validateNonBlankString(oThis.leaveTime)) {
-      return Promise.reject(
-        responseHelper.error({
-          internal_error_identifier: 's_ze_m_pl_vp_1',
-          api_error_identifier: 'something_went_wrong'
-        })
-      );
-    }
+    const id = oThis.zoomParticipantId.split('_');
+    if (id[0] === 'u') {
+      oThis.participantId = id[1];
+    } else {
+      oThis.processEvent = false;
 
-    oThis.leaveTimestamp = new Date(oThis.leaveTime).getTime() / 1000;
-
-    if (oThis.leaveTimestamp == 0) {
-      return Promise.reject(
-        responseHelper.error({
-          internal_error_identifier: 's_ze_m_pl_vp_2',
-          api_error_identifier: 'something_went_wrong'
-        })
-      );
+      return responseHelper.successWithData({});
     }
 
     return responseHelper.successWithData({});
@@ -90,12 +79,7 @@ class MeetingParticipantLeft extends ServiceBase {
   async _fetchAndValidateMeetingHost() {
     const oThis = this;
 
-    const id = oThis.zoomParticipantId.split('_');
-    if (id[0] === 'u') {
-      oThis.participantId = id[1];
-    } else {
-      oThis.processEvent = false;
-
+    if (!oThis.processEvent) {
       return responseHelper.successWithData({});
     }
 
@@ -139,6 +123,10 @@ class MeetingParticipantLeft extends ServiceBase {
   async _incrementHostLeaveCount() {
     const oThis = this;
 
+    if (!oThis.processEvent) {
+      return responseHelper.successWithData({});
+    }
+
     logger.log('Increment host leave count.');
 
     await new MeetingModel()
@@ -147,6 +135,12 @@ class MeetingParticipantLeft extends ServiceBase {
       .fire();
 
     await MeetingModel.flushCache({ id: oThis.meetingId });
+
+    await bgJob.enqueue(
+      bgJobConstants.endZoomMeetingJobTopic,
+      { meetingId: oThis.meetingId },
+      { publishAfter: 3 * 60 * 1000 } //3 minutes
+    );
 
     return responseHelper.successWithData({});
   }

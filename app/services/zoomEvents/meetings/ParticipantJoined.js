@@ -3,7 +3,6 @@ const rootPrefix = '../../../..',
   MeetingIdByZoomMeetingIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/meeting/MeetingIdByZoomMeetingIds'),
   MeetingByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/meeting/MeetingByIds'),
   MeetingModel = require(rootPrefix + '/app/models/mysql/meeting/Meeting'),
-  CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   responseHelper = require(rootPrefix + '/lib/formatter/response');
 
@@ -17,6 +16,10 @@ class MeetingParticipantJoined extends ServiceBase {
    * Constructor
    *
    * @param {object} params
+   * @param {object} params.payload
+   * @param {object} params.payload.object
+   * @param {object} params.payload.object.participant
+   * @param {String} params.payload.object.participant.id
    *
    * @augments ServiceBase
    *
@@ -27,12 +30,10 @@ class MeetingParticipantJoined extends ServiceBase {
 
     const oThis = this;
     oThis.zoomMeetingId = params.payload.object.id;
-    oThis.joinTime = params.payload.object.participant.join_time;
     oThis.zoomParticipantId = params.payload.object.participant.id;
 
     oThis.meetingId = null;
     oThis.meetingObj = {};
-    oThis.joinTimestamp = null;
     oThis.processEvent = true;
   }
 
@@ -48,34 +49,19 @@ class MeetingParticipantJoined extends ServiceBase {
 
     await oThis._fetchAndValidateMeetingHost();
 
-    if (!oThis.processEvent) {
-      return responseHelper.successWithData({});
-    }
-
     await oThis._incrementHostJoinCount();
   }
 
   async _validateParams() {
     const oThis = this;
 
-    if (!CommonValidators.validateNonBlankString(oThis.joinTime)) {
-      return Promise.reject(
-        responseHelper.error({
-          internal_error_identifier: 's_ze_m_pj_vp_1',
-          api_error_identifier: 'something_went_wrong'
-        })
-      );
-    }
+    const id = oThis.zoomParticipantId.split('_');
 
-    oThis.joinTimestamp = new Date(oThis.joinTime).getTime() / 1000;
-
-    if (oThis.joinTimestamp == 0) {
-      return Promise.reject(
-        responseHelper.error({
-          internal_error_identifier: 's_ze_m_pj_vp_2',
-          api_error_identifier: 'something_went_wrong'
-        })
-      );
+    if (id[0] === 'u') {
+      oThis.participantId = id[1];
+    } else {
+      oThis.processEvent = false;
+      return responseHelper.successWithData({});
     }
 
     return responseHelper.successWithData({});
@@ -90,12 +76,7 @@ class MeetingParticipantJoined extends ServiceBase {
   async _fetchAndValidateMeetingHost() {
     const oThis = this;
 
-    const id = oThis.zoomParticipantId.split('_');
-    if (id[0] === 'u') {
-      oThis.participantId = id[1];
-    } else {
-      oThis.processEvent = false;
-
+    if (!oThis.processEvent) {
       return responseHelper.successWithData({});
     }
 
@@ -138,6 +119,10 @@ class MeetingParticipantJoined extends ServiceBase {
    */
   async _incrementHostJoinCount() {
     const oThis = this;
+
+    if (!oThis.processEvent) {
+      return responseHelper.successWithData({});
+    }
 
     logger.log('Increment host join count.');
 
