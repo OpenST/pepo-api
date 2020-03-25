@@ -198,6 +198,10 @@ class ChannelModel extends ModelBase {
       promisesArray.push(new ChannelByPermalinksCache({ permalinks: params.permalinks }).clear());
     }
 
+    // If there is update in any channel, then flush list cache as well
+    const DefaultChannelsListForWeb = require(rootPrefix + '/lib/cacheManagement/single/DefaultChannelsListForWeb');
+    await new DefaultChannelsListForWeb().clear();
+
     await Promise.all(promisesArray);
   }
 }

@@ -248,6 +248,12 @@ class CuratedEntity extends ModelBase {
     const CuratedEntityIdsByKindCache = require(rootPrefix + '/lib/cacheManagement/single/CuratedEntityIdsByKind');
 
     await new CuratedEntityIdsByKindCache({ entityKind: params.entityKind }).clear();
+
+    // Channels curated entity list is also present in default channels list for web.
+    if (params.entityKind == curatedEntitiesConstants.channelsEntityKind) {
+      const DefaultChannelsListForWeb = require(rootPrefix + '/lib/cacheManagement/single/DefaultChannelsListForWeb');
+      await new DefaultChannelsListForWeb().clear();
+    }
   }
 }
 

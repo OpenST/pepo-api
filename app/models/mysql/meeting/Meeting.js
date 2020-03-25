@@ -195,6 +195,10 @@ class MeetingModel extends ModelBase {
       promisesArray.push(new ChannelByIdsCache({ ids: channelIds }).clear());
     }
 
+    // As live meeting would change the list here, so clearing that as well.
+    const DefaultChannelsListForWeb = require(rootPrefix + '/lib/cacheManagement/single/DefaultChannelsListForWeb');
+    await new DefaultChannelsListForWeb().clear();
+
     await Promise.all(promisesArray);
   }
 }

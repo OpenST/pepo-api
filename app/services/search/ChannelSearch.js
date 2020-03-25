@@ -7,12 +7,14 @@ const rootPrefix = '../../..',
   CuratedEntityIdsByKindCache = require(rootPrefix + '/lib/cacheManagement/single/CuratedEntityIdsByKind'),
   ChannelTagByChannelIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelTagByChannelIds'),
   ChannelStatByChannelIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelStatByChannelIds'),
+  DefaultChannelsListForWeb = require(rootPrefix + '/lib/cacheManagement/single/DefaultChannelsListForWeb'),
   basicHelper = require(rootPrefix + '/helpers/basic'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination'),
   entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
   channelConstants = require(rootPrefix + '/lib/globalConstant/channel/channels'),
+  apiSourceConstants = require(rootPrefix + '/lib/globalConstant/apiSource'),
   curatedEntitiesConstants = require(rootPrefix + '/lib/globalConstant/curatedEntities');
 
 // Declare variables.
@@ -31,6 +33,7 @@ class ChannelSearch extends ServiceBase {
    * @param {object} params
    * @param {object} params.current_user
    * @param {string} params.q
+   * @param {string} params.api_source
    * @param {string} params.pagination_identifier
    * @param {boolean} [params.getTopResults]
    *
@@ -47,6 +50,7 @@ class ChannelSearch extends ServiceBase {
     oThis.channelPrefix = params.q || null;
     oThis.paginationIdentifier = params[paginationConstants.paginationIdentifierKey] || null;
     oThis.getTopResults = params.getTopResults || false;
+    oThis.apiSource = params.api_source;
 
     oThis.limit = null;
     oThis.paginationTimestamp = null;
@@ -141,6 +145,14 @@ class ChannelSearch extends ServiceBase {
 
         channelIds = channelPaginationRsp.data.channelIds;
       }
+    } else if (apiSourceConstants.isWebRequest(oThis.apiSource)) {
+      // Order all channels, first Live, then curated, then rest all
+      const cacheResponse = await new DefaultChannelsListForWeb().fetch();
+      if (cacheResponse.isFailure()) {
+        return Promise.reject(cacheResponse);
+      }
+
+      channelIds = cacheResponse.data.channelIds;
     } else {
       // Display curated channels in search.
       const cacheResponse = await new CuratedEntityIdsByKindCache({
