@@ -25,6 +25,16 @@ const webErrorConfig = {
     code: 'invalid',
     message: 'Last Name can contain alphabets and spaces and should be min 2 characters and max 25 characters'
   },
+  already_hosting_other_meetings: {
+    parameter: 'user_id',
+    code: 'invalid',
+    message: 'You are already hosting meetings for other channels. Please end those meetings before starting a new one.'
+  },
+  zoom_user_unavailable: {
+    parameter: 'zoom_user_id',
+    code: 'invalid',
+    message: 'No zoom users are available at the moment. Please try again later.'
+  },
   invalid_device_address: {
     parameter: 'device_address',
     code: 'invalid',

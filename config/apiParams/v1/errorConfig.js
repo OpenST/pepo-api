@@ -477,12 +477,6 @@ const v1ErrorConfig = {
     message: 'The channel has been disabled.'
   },
 
-  zoom_user_unavailable: {
-    parameter: 'zoom_user_id',
-    code: 'invalid',
-    message: 'No zoom users are available at the moment. Please try again later.'
-  },
-
   missing_video_url: {
     parameter: 'video_url',
     code: 'missing',
