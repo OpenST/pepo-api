@@ -177,8 +177,12 @@ class MeetingModel extends ModelBase {
     if (params.channelIds) {
       const LiveMeetingIdByChannelIdsCache = require(rootPrefix +
         '/lib/cacheManagement/multi/meeting/LiveMeetingIdByChannelIds');
-
       promisesArray.push(new LiveMeetingIdByChannelIdsCache({ channelIds: params.channelIds }).clear());
+
+      // We are clearing channel cache here because liveMeetingId is a part of channel entity.
+      const ChannelByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelByIds');
+
+      promisesArray.push(new ChannelByIdsCache({ ids: params.channelIds }).clear());
     }
 
     await Promise.all(promisesArray);
