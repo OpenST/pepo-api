@@ -30,16 +30,6 @@ const webErrorConfig = {
     code: 'invalid',
     message: 'You are already hosting meetings for other channels. Please end those meetings before starting a new one.'
   },
-  meeting_has_ended: {
-    parameter: 'meeting_id',
-    code: 'invalid',
-    message: 'The meeting which you want to attend has already ended.'
-  },
-  meeting_not_started: {
-    parameter: 'meeting_id',
-    code: 'invalid',
-    message: 'The meeting which you want to join has not started.'
-  },
   zoom_user_unavailable: {
     parameter: 'zoom_user_id',
     code: 'invalid',

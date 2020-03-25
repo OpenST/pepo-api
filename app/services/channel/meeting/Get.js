@@ -159,14 +159,10 @@ class GetMeetingJoin extends ServiceBase {
 
     if (!oThis.meeting.isLive) {
       return Promise.reject(
-        responseHelper.paramValidationError({
+        responseHelper.error({
           internal_error_identifier: 'a_s_c_m_g_favm_2',
-          api_error_identifier: 'resource_not_found',
-          params_error_identifiers: ['meeting_has_ended'],
-          debug_options: {
-            meetingId: oThis.meetingId,
-            channelId: oThis.channelId
-          }
+          api_error_identifier: 'meeting_has_ended',
+          debug_options: oThis.meeting
         })
       );
     }
