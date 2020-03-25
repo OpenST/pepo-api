@@ -9,11 +9,11 @@ const upQuery = 'ALTER TABLE `meetings` AUTO_INCREMENT = 10000';
 
 const downQuery = 'ALTER TABLE `meetings` AUTO_INCREMENT = 1;';
 
-const migrationName = {
+const updateMeetingAutoIncrement = {
   dbName: dbName,
   up: [upQuery],
   down: [downQuery],
   dbKind: dbKind
 };
 
-module.exports = migrationName;
+module.exports = updateMeetingAutoIncrement;

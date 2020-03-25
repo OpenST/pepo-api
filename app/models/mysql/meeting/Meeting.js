@@ -36,8 +36,6 @@ class MeetingModel extends ModelBase {
    * @param {number} dbRow.meeting_relayer_id
    * @param {number} dbRow.start_timestamp
    * @param {number} dbRow.end_timestamp
-   * @param {number} dbRow.live_participants
-   * @param {number} dbRow.cumulative_participants
    * @param {number} dbRow.channel_id
    * @param {number} dbRow.zoom_meeting_id
    * @param {string} dbRow.recording_url
@@ -57,8 +55,6 @@ class MeetingModel extends ModelBase {
       meetingRelayerId: dbRow.meeting_relayer_id,
       startTimestamp: dbRow.start_timestamp || null,
       endTimestamp: dbRow.end_timestamp || null,
-      liveParticipants: dbRow.live_participants,
-      cumulativeParticipants: dbRow.cumulative_participants,
       channelId: dbRow.channel_id,
       zoomMeetingId: dbRow.zoom_meeting_id,
       recordingUrl: dbRow.recording_url,
