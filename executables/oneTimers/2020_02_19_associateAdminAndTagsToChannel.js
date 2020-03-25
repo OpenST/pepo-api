@@ -77,11 +77,11 @@ class AssociateAdminAndTagsToChannel {
 
     await oThis._fetchOrCreateTags();
 
-    if (oThis.adminUserIds && oThis.adminUserIds.length > 0) {
+    if (oThis.tagIds && oThis.tagIds.length > 0) {
       await oThis._associateTagsToChannel();
     }
 
-    if (oThis.tagIds && oThis.tagIds.length > 0) {
+    if (oThis.adminUserIds && oThis.adminUserIds.length > 0) {
       await oThis._associateAdminsToChannel();
     }
   }
