@@ -55,7 +55,7 @@ class MeetingTracker extends CronBase {
 
     oThis.canExit = false;
 
-    await this._performBatch();
+    await oThis._performBatch();
 
     oThis.canExit = true;
   }
@@ -81,13 +81,11 @@ class MeetingTracker extends CronBase {
   async _performBatch() {
     const oThis = this;
 
-    const meetingModel = new MeetingModel();
-
     let offset = 0;
     while (true) {
-      const meetings = await meetingModel
+      const meetings = await new MeetingModel()
         .select('*')
-        .where({ is_live: 1 })
+        .where({ is_live: meetingConstants.isLiveStatus })
         .where(['start_timestamp IS NULL'])
         .where(['created_at < ?', basicHelper.getCurrentTimestampInSeconds() - WAIT_TIME])
         .limit(BATCH_SIZE)
@@ -98,7 +96,7 @@ class MeetingTracker extends CronBase {
       logger.info(`Processing ${meetings.length} records`);
 
       for (let index = 0; index < meetings.length; index += 1) {
-        const formattedRow = meetingModel.formatDbData(meetings[index]);
+        const formattedRow = new MeetingModel().formatDbData(meetings[index]);
 
         // Check for data consistency
         if (formattedRow.status !== meetingConstants.waitingStatus) {
@@ -139,6 +137,7 @@ class MeetingTracker extends CronBase {
 
   /**
    * Checks if zoom meeting is in waiting state.
+   *
    * @param zoomMeetingId Meeting id;
    * @returns {Promise<boolean>}
    * @private
