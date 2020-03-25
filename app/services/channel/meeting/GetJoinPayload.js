@@ -4,7 +4,6 @@ const rootPrefix = '../../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   ZoomMeetingLib = require(rootPrefix + '/lib/zoom/meeting'),
-  UserMultiCache = require(rootPrefix + '/lib/cacheManagement/multi/User'),
   ChannelByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelByIds'),
   MeetingByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/meeting/MeetingByIds'),
   ImageByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/ImageByIds'),
@@ -58,16 +57,6 @@ class GetJoinMeetingPayload extends ServiceBase {
    */
   async _asyncPerform() {
     const oThis = this;
-
-    const cacheResponse = await new UserMultiCache({ ids: [1010] }).fetch();
-
-    if (cacheResponse.isFailure()) {
-      return Promise.reject(cacheResponse);
-    }
-
-    console.log('HERE=================', JSON.stringify(cacheResponse));
-
-    oThis.currentUser = cacheResponse.data[1010] || {};
 
     await oThis._fetchAndValidateChannel();
 
