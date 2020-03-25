@@ -49,6 +49,7 @@ class StartMeeting extends ServiceBase {
     oThis.meetingRelayer = null;
 
     oThis.zoomMeetingId = null;
+    oThis.zoomUuid = null;
 
     oThis.meetingId = null;
   }
@@ -297,7 +298,7 @@ class StartMeeting extends ServiceBase {
   /**
    * Create meeting using zoom.
    *
-   * @sets oThis.zoomMeetingId
+   * @sets oThis.zoomMeetingId, oThis.zoomUuid
    *
    * @returns {Promise<void>}
    * @private
@@ -328,6 +329,7 @@ class StartMeeting extends ServiceBase {
     }
 
     oThis.zoomMeetingId = zoomApiResponse.id;
+    oThis.zoomUuid = zoomApiResponse.uuid;
 
     return responseHelper.successWithData({});
   }
@@ -356,8 +358,9 @@ class StartMeeting extends ServiceBase {
         host_user_id: oThis.currentUserId,
         meeting_relayer_id: oThis.meetingRelayer.id,
         channel_id: oThis.channelId,
-        is_live: meetingConstants.isLiveStatus,
         zoom_meeting_id: oThis.zoomMeetingId,
+        zoom_uuid: oThis.zoomUuid,
+        is_live: meetingConstants.isLiveStatus,
         status: meetingConstants.invertedStatuses[meetingConstants.waitingStatus]
       })
       .fire();
