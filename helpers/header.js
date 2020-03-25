@@ -22,6 +22,10 @@ class HeaderHelper {
     return headers['x-pepo-device-os'] || '';
   }
 
+  fingerprintId(headers) {
+    return headers['x-pepo-fingerprint-id'] || '';
+  }
+
   get androidDeviceOs() {
     return 'android';
   }

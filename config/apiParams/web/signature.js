@@ -589,6 +589,10 @@ const webSignature = {
       {
         parameter: 'current_user',
         validatorMethods: ['validateNonEmptyObject']
+      },
+      {
+        parameter: 'fingerprint_id',
+        validatorMethods: ['validateString']
       }
     ]
   },

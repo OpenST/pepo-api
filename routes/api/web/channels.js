@@ -1,5 +1,6 @@
 const express = require('express'),
   cookieParser = require('cookie-parser'),
+  headerHelper = require(rootPrefix + '/helpers/header'),
   router = express.Router();
 
 const rootPrefix = '../../..',
@@ -99,6 +100,7 @@ router.get('/:channel_permalink/meetings/:meeting_id', sanitizer.sanitizeDynamic
   req.decodedParams.apiName = apiName.getMeeting;
   req.decodedParams.channel_permalink = req.params.channel_permalink;
   req.decodedParams.meeting_id = req.params.meeting_id;
+  req.decodedParams.fingerprint_id = headerHelper.fingerprintId(req.sanitizedHeaders);
 
   const dataFormatterFunc = async function(serviceResponse) {
     const wrapperFormatterRsp = await new FormatterComposer({
@@ -112,7 +114,9 @@ router.get('/:channel_permalink/meetings/:meeting_id', sanitizer.sanitizeDynamic
     serviceResponse.data = wrapperFormatterRsp.data;
   };
 
-  Promise.resolve(routeHelper.perform(req, res, next, '/channel/meeting/GetJoinPayload', 'r_a_w_c_4', null, dataFormatterFunc));
+  Promise.resolve(
+    routeHelper.perform(req, res, next, '/channel/meeting/GetJoinPayload', 'r_a_w_c_4', null, dataFormatterFunc)
+  );
 });
 
 // NOTE: Login mandatory for following routes.
@@ -135,9 +139,7 @@ router.post('/:channel_permalink/meetings', sanitizer.sanitizeDynamicUrlParams, 
     serviceResponse.data = wrapperFormatterRsp.data;
   };
 
-  Promise.resolve(
-    routeHelper.perform(req, res, next, '/channel/meeting/Create', 'r_a_w_c_5', null, dataFormatterFunc)
-  );
+  Promise.resolve(routeHelper.perform(req, res, next, '/channel/meeting/Create', 'r_a_w_c_5', null, dataFormatterFunc));
 });
 
 module.exports = router;

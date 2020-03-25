@@ -1,3 +1,5 @@
+const uuidV4 = require('uuid/v4');
+
 const rootPrefix = '../../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
@@ -24,6 +26,7 @@ class GetJoinMeetingPayload extends ServiceBase {
    * @param {string} [params.channel_permalink]
    * @param {object} params.current_user
    * @param {number} params.meeting_id
+   * @param {number} params.fingerprint_id
    *
    * @augments ServiceBase
    *
@@ -37,12 +40,13 @@ class GetJoinMeetingPayload extends ServiceBase {
     oThis.channelPermalink = params.channel_permalink;
     oThis.currentUser = params.current_user || {};
     oThis.meetingId = params.meeting_id;
+    oThis.fingerprintId = params.fingerprint_id;
 
     oThis.channelId = null;
     oThis.channel = {};
     oThis.meeting = {};
     oThis.profilePicUrl = null;
-    oThis.name = 'Guest';
+    oThis.name = 'Pepo Guest';
   }
 
   /**
@@ -208,6 +212,22 @@ class GetJoinMeetingPayload extends ServiceBase {
     const oThis = this;
     const role = oThis.currentUser.id && oThis.currentUser.id == oThis.meeting.hostUserId ? 1 : 0;
 
+    let participantId = null;
+    if (oThis.currentUser.id) {
+      participantId = 'u_' + oThis.currentUser.id;
+    } else if (oThis.fingerprintId) {
+      participantId = 'f_' + oThis.fingerprintId;
+    } else {
+      const randStr =
+        Math.random()
+          .toString(36)
+          .slice(2) +
+        Math.random()
+          .toString(36)
+          .slice(2);
+      participantId = 'd_' + randStr.slice(0, 20);
+    }
+
     const signature = ZoomMeetingLib.getSignature(oThis.meeting.zoomMeetingId, role);
 
     const joinZoomMeetingPayload = {
@@ -216,7 +236,8 @@ class GetJoinMeetingPayload extends ServiceBase {
       name: oThis.name,
       profile_pic_url: oThis.profilePicUrl,
       role: role,
-      api_key: zoomConstant.apiKey
+      api_key: zoomConstant.apiKey,
+      participantId: participantId
     };
 
     return {
