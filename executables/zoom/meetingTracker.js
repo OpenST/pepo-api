@@ -144,8 +144,17 @@ class MeetingTracker extends CronBase {
    * @private
    */
   async _isZoomMeetingStatusWaiting(zoomMeetingId) {
+    let isError = false;
+
     logger.info(`Getting zoom meeting id :${zoomMeetingId}`);
-    const response = await MeetingLib.getBy(zoomMeetingId);
+    const response = await MeetingLib.getBy(zoomMeetingId).catch((e) => {
+      logger.error(`Error in getting zoom meeting status for zoom meeting id ${zoomMeetingId} Error ${e}`);
+      isError = true;
+    });
+
+    if (isError) {
+      return false;
+    }
     logger.info(`Zoom meeting status for id ${zoomMeetingId} is ${response.status}`);
     return response.status === 'waiting';
   }
@@ -158,13 +167,20 @@ class MeetingTracker extends CronBase {
    * @private
    */
   async _deleteZoomMeeting(zoomMeetingId) {
+    let isError = false;
     logger.info(`Deleting zoom meeting: ${zoomMeetingId}`);
-    await MeetingLib.delete(zoomMeetingId);
-    logger.info(`Meeting deleted: ${zoomMeetingId}`);
+    await MeetingLib.delete(zoomMeetingId).catch((e) => {
+      isError = true;
+      logger.error(`Error in deleting zoom meeting, zoom id ${zoomMeetingId} Error ${e}`);
+    });
+
+    if (!isError) {
+      logger.info(`Meeting deleted: ${zoomMeetingId}`);
+    }
   }
 
   /**
-   * Mark meeting as not alive  and deleted in the meeting table and flushes the
+   * Mark meeting as not alive and deleted in the meeting table and flushes the
    * cache.
    *
    * @param meetingId Primary key of meeting table.
