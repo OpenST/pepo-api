@@ -156,6 +156,7 @@ class MeetingModel extends ModelBase {
    * @param {object} params
    * @param {number} [params.id]
    * @param {array<number>} [params.channelIds]
+   * @param {array<number>} [params.zoomMeetingId]
    *
    * @returns {Promise<*>}
    */
@@ -165,6 +166,12 @@ class MeetingModel extends ModelBase {
     if (params.id) {
       const MeetingByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/meeting/MeetingByIds');
       promisesArray.push(new MeetingByIdsCache({ ids: [params.id] }).clear());
+    }
+
+    if (params.zoomMeetingId) {
+      const MeetingIdByZoomMeetingIdsCache = require(rootPrefix +
+        '/lib/cacheManagement/multi/meeting/MeetingIdByZoomMeetingIds');
+      promisesArray.push(new MeetingIdByZoomMeetingIdsCache({ zoomMeetingIds: [params.zoomMeetingId] }).clear());
     }
 
     if (params.channelIds) {
