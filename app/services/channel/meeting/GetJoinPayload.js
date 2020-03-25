@@ -6,7 +6,6 @@ const rootPrefix = '../../../..',
   ZoomMeetingLib = require(rootPrefix + '/lib/zoom/meeting'),
   ChannelByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelByIds'),
   MeetingByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/meeting/MeetingByIds'),
-  ImageByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/ImageByIds'),
   ChannelByPermalinksCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelByPermalinks'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
@@ -185,21 +184,7 @@ class GetJoinMeetingPayload extends ServiceBase {
 
     if (oThis.currentUser.id) {
       oThis.name = oThis.currentUser.name;
-
-      if (!oThis.currentUser.profileImageId) {
-        return;
-      }
-    } else {
-      return;
     }
-
-    const cacheResponse = await new ImageByIdsCache({ ids: [oThis.currentUser.profileImageId] }).fetch();
-    if (cacheResponse.isFailure()) {
-      return Promise.reject(cacheResponse);
-    }
-
-    const imageData = cacheResponse.data[oThis.currentUser.profileImageId];
-    oThis.profilePicUrl = imageData.resolutions.original.url;
   }
 
   /**
@@ -234,8 +219,6 @@ class GetJoinMeetingPayload extends ServiceBase {
       zoomMeetingId: oThis.meeting.zoomMeetingId,
       signature: signature,
       name: oThis.name,
-      profile_pic_url: oThis.profilePicUrl,
-      role: role,
       api_key: zoomConstant.apiKey,
       participantId: participantId
     };
