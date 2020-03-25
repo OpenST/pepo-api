@@ -286,10 +286,9 @@ class StartMeeting extends ServiceBase {
 
     if (!oThis.meetingRelayer) {
       return Promise.reject(
-        responseHelper.paramValidationError({
+        responseHelper.error({
           internal_error_identifier: 'a_s_c_m_sm_5',
-          api_error_identifier: 'could_not_proceed',
-          params_error_identifiers: ['zoom_user_unavailable'],
+          api_error_identifier: 'zoom_user_unavailable',
           debug_options: {}
         })
       );
