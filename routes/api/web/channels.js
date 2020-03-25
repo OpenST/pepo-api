@@ -96,7 +96,7 @@ router.get('/:channel_id/videos', sanitizer.sanitizeDynamicUrlParams, function(r
 });
 
 /* Get channel details. */
-router.get('/:channel_permalink/meetings/:meeting_id', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+router.get('/:channel_permalink/meetings/:meeting_id', sanitizer.sanitizeDynamicUrlParams, sanitizer.sanitizeHeaderParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.getMeeting;
   req.decodedParams.channel_permalink = req.params.channel_permalink;
   req.decodedParams.meeting_id = req.params.meeting_id;
