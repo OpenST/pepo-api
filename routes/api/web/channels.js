@@ -1,6 +1,5 @@
 const express = require('express'),
   cookieParser = require('cookie-parser'),
-  headerHelper = require(rootPrefix + '/helpers/header'),
   router = express.Router();
 
 const rootPrefix = '../../..',
@@ -10,6 +9,7 @@ const rootPrefix = '../../..',
   apiName = require(rootPrefix + '/lib/globalConstant/apiName'),
   entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
   responseEntityKey = require(rootPrefix + '/lib/globalConstant/responseEntityKey'),
+  headerHelper = require(rootPrefix + '/helpers/header'),
   sanitizer = require(rootPrefix + '/helpers/sanitizer');
 
 /* Get url and message for sharing channel given its permalink. */
