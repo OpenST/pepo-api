@@ -136,7 +136,7 @@ router.post('/:channel_permalink/meetings', sanitizer.sanitizeDynamicUrlParams, 
   };
 
   Promise.resolve(
-    routeHelper.perform(req, res, next, '/channel/meeting/StartMeeting', 'r_a_w_c_5', null, dataFormatterFunc)
+    routeHelper.perform(req, res, next, '/channel/meeting/Create', 'r_a_w_c_5', null, dataFormatterFunc)
   );
 });
 
