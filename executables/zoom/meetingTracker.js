@@ -122,7 +122,7 @@ class MeetingTracker extends CronBase {
 
         if (isWaiting) {
           await oThis._deleteZoomMeeting(formattedRow.zoomMeetingId);
-          await oThis._markMeetingAsNotAlive(formattedRow.id);
+          await oThis._markMeetingAsNotAliveAndDeleted(formattedRow.id, formattedRow.channelId);
           await oThis._markRelayerAvailable(formattedRow.meetingRelayerId);
         } else {
           // skip the non processed record for next iteration.
@@ -164,12 +164,16 @@ class MeetingTracker extends CronBase {
   }
 
   /**
-   * Mark meeting as not alive in the meeting table
+   * Mark meeting as not alive  and deleted in the meeting table and flushes the
+   * cache.
+   *
    * @param meetingId Primary key of meeting table.
+   * @param channelId Channel Identifier.
+   *
    * @returns {Promise<void>}
    * @private
    */
-  async _markMeetingAsNotAlive(meetingId) {
+  async _markMeetingAsNotAliveAndDeleted(meetingId, channelId) {
     logger.info(`Marking meeting as not alive for id: ${meetingId}`);
     const updateResponse = await new MeetingModel()
       .update({
@@ -189,11 +193,14 @@ class MeetingTracker extends CronBase {
         debug_options: { meetingId: meetingId }
       });
       await createErrorLogsEntry.perform(errorObject, errorLogsConstants.highSeverity);
+      return;
     }
+
+    await MeetingModel.flushCache({ id: meetingId, channelId: channelId });
   }
 
   /**
-   * Roll back meeting.
+   * Roll back meeting and flushes the cache.
    *
    * @param meetingRelayerid meeting relayer id.
    * @returns {Promise<void>}
@@ -219,7 +226,10 @@ class MeetingTracker extends CronBase {
         debug_options: { meetingRelayerid: meetingRelayerid }
       });
       await createErrorLogsEntry.perform(errorObject, errorLogsConstants.highSeverity);
+      return;
     }
+
+    await MeetingRelayerModel.flushCache({ id: meetingRelayerid });
   }
 
   /**
