@@ -9,7 +9,9 @@ const rootPrefix = '../../',
   MeetingLib = require(rootPrefix + '/lib/zoom/meeting'),
   basicHelper = require(rootPrefix + '/helpers/basic'),
   meetingRelayerConstants = require(rootPrefix + '/lib/globalConstant/meeting/meetingRelayer'),
-  meetingConstants = require(rootPrefix + '/lib/globalConstant/meeting/meeting');
+  meetingConstants = require(rootPrefix + '/lib/globalConstant/meeting/meeting'),
+  createErrorLogsEntry = require(rootPrefix + '/lib/errorLogs/createEntry'),
+  responseHelper = require(rootPrefix + '/lib/formatter/response');
 
 program.option('--cronProcessId <cronProcessId>', 'Cron table process ID').parse(process.argv);
 
@@ -89,6 +91,7 @@ class MeetingTracker extends CronBase {
         .where(['created_at < ?', basicHelper.getCurrentTimestampInSeconds() - WAIT_TIME])
         .limit(BATCH_SIZE)
         .offset(offset)
+        .order_by('created_at ASC')
         .fire();
 
       logger.info(`Processing ${meetings.length} records`);
@@ -96,10 +99,23 @@ class MeetingTracker extends CronBase {
       for (let index = 0; index < meetings.length; index += 1) {
         const formattedRow = meetingModel.formatDbData(meetings[index]);
 
+        // Check for data consistency
         if (formattedRow.status !== meetingConstants.waitingStatus) {
           logger.error(
-            `Meeting id ${formattedRow.id}, start time stamp is null ` + `but meeting status is not waiting`
+            `For meeting id ${formattedRow.id}, start time stamp is null ` +
+              `but meeting status is not ${meetingConstants.waitingStatus}`
           );
+
+          const errorObject = responseHelper.error({
+            internal_error_identifier: 'e_z_m_t_1',
+            api_error_identifier: 'something_went_wrong',
+            debug_options: { meeting: formattedRow }
+          });
+          await createErrorLogsEntry.perform(errorObject, errorLogsConstants.highSeverity);
+
+          // Skip erroneous record for the next iteration.
+          offset += 1;
+          continue;
         }
         const isWaiting = await oThis._isZoomMeetingStatusWaiting(formattedRow.zoomMeetingId);
 
@@ -107,6 +123,9 @@ class MeetingTracker extends CronBase {
           await oThis._deleteZoomMeeting(formattedRow.zoomMeetingId);
           await oThis._markMeetingAsNotAlive(formattedRow.id);
           await oThis._markRelayerAvailable(formattedRow.meetingRelayerId);
+        } else {
+          // skip the non processed record for next iteration.
+          offset += 1;
         }
       }
 
@@ -114,8 +133,6 @@ class MeetingTracker extends CronBase {
         logger.info('All records processed, Quiting job');
         break;
       }
-
-      offset += BATCH_SIZE;
     }
   }
 
@@ -155,7 +172,8 @@ class MeetingTracker extends CronBase {
     logger.info(`Marking meeting as not alive for id: ${meetingId}`);
     const updateResponse = await new MeetingModel()
       .update({
-        is_live: null
+        is_live: null,
+        status: meetingConstants.invertedStatuses[meetingConstants.deletedStatus]
       })
       .where({
         id: meetingId
@@ -164,6 +182,12 @@ class MeetingTracker extends CronBase {
 
     if (updateResponse.affectedRows !== 1) {
       logger.error(`Error in marking not alive status for meeting ${meetingId}`);
+      const errorObject = responseHelper.error({
+        internal_error_identifier: 'e_z_m_t_2',
+        api_error_identifier: 'something_went_wrong',
+        debug_options: { meetingId: meetingId }
+      });
+      await createErrorLogsEntry.perform(errorObject, errorLogsConstants.highSeverity);
     }
   }
 
@@ -187,6 +211,13 @@ class MeetingTracker extends CronBase {
     if (updateResponse.affectedRows !== 1) {
       logger.error(`Error in updating meeting relayer status to available' +
         ' relayer id ${meetingRelayerid} `);
+
+      const errorObject = responseHelper.error({
+        internal_error_identifier: 'e_z_m_t_3',
+        api_error_identifier: 'something_went_wrong',
+        debug_options: { meetingRelayerid: meetingRelayerid }
+      });
+      await createErrorLogsEntry.perform(errorObject, errorLogsConstants.highSeverity);
     }
   }
 
@@ -207,7 +238,6 @@ const meetingTracker = new MeetingTracker({
 
 meetingTracker
   .perform()
-
   .then(function() {
     logger.step('** Exiting process');
     logger.info('Cron last run at: ', Date.now());
