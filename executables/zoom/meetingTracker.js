@@ -12,7 +12,8 @@ const rootPrefix = '../../',
   meetingConstants = require(rootPrefix + '/lib/globalConstant/meeting/meeting'),
   createErrorLogsEntry = require(rootPrefix + '/lib/errorLogs/createEntry'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
-  errorLogsConstants = require(rootPrefix + '/lib/globalConstant/errorLogs');
+  errorLogsConstants = require(rootPrefix + '/lib/globalConstant/errorLogs'),
+  MeetingEnded = require(rootPrefix + '/app/services/zoomEvents/meetings/Ended');
 
 program.option('--cronProcessId <cronProcessId>', 'Cron table process ID').parse(process.argv);
 
@@ -116,7 +117,14 @@ class MeetingTracker extends CronBase {
           offset += 1;
           continue;
         }
-        const isWaiting = await oThis._isZoomMeetingStatusWaiting(formattedRow.zoomMeetingId);
+
+        const { isWaiting, isEnded } = await oThis._getZoomMeetingStatus(
+          formattedRow.zoomMeetingId,
+          formattedRow.zoomUUID
+        );
+
+        // meeting ended records are considered as processed.
+        let isProcessed = isEnded;
 
         // This sleep is added to ensure that rate limit of zoom api calls is not exceeded.
         // NOTE - Zoom API rate limit is 10 requests/second.
@@ -126,7 +134,10 @@ class MeetingTracker extends CronBase {
           await oThis._deleteZoomMeeting(formattedRow.zoomMeetingId);
           await oThis._markMeetingAsNotAliveAndDeleted(formattedRow.id, formattedRow.channelId);
           await oThis._markRelayerAvailable(formattedRow.meetingRelayerId);
-        } else {
+          isProcessed = true;
+        }
+
+        if (!isProcessed) {
           // skip the non processed record for next iteration.
           offset += 1;
         }
@@ -140,26 +151,35 @@ class MeetingTracker extends CronBase {
   }
 
   /**
-   * Checks if zoom meeting is in waiting state.
+   * Checks if zoom meeting is in waiting state. Otherwise it also tries to end
+   * meeting.
    *
-   * @param zoomMeetingId Meeting id;
-   * @returns {Promise<boolean>}
+   * @param zoomMeetingId
+   * @param zoomUUID
+   * @returns {Promise<{isWaiting: boolean, isEnded: boolean}>}
    * @private
    */
-  async _isZoomMeetingStatusWaiting(zoomMeetingId) {
+  async _getZoomMeetingStatus(zoomMeetingId, zoomUUID) {
+    let oThis = this;
     let isError = false;
+    let isEnded = false;
 
     logger.info(`Getting zoom meeting id :${zoomMeetingId}`);
-    const response = await MeetingLib.getBy(zoomMeetingId).catch((e) => {
-      logger.error(`Error in getting zoom meeting status for zoom meeting id ${zoomMeetingId} Error ${e}`);
+    const response = await MeetingLib.getBy(zoomMeetingId).catch(async (e) => {
+      if (e.statusCode === 404) {
+        logger.info(`Meeting not found or expired zoom meeting id ${zoomMeetingId}`);
+        await oThis._endMeeting(zoomMeetingId, zoomUUID);
+        isEnded = true;
+        logger.info('Meeting ended successfully');
+      }
       isError = true;
     });
 
     if (isError) {
-      return false;
+      return { isWaiting: false, isEnded: isEnded };
     }
     logger.info(`Zoom meeting status for id ${zoomMeetingId} is ${response.status}`);
-    return response.status === 'waiting';
+    return { isWaiting: response.status === 'waiting', isEnded: isEnded };
   }
 
   /**
@@ -179,6 +199,50 @@ class MeetingTracker extends CronBase {
 
     if (!isError) {
       logger.info(`Meeting deleted: ${zoomMeetingId}`);
+    }
+  }
+
+  /**
+   * This method ends the meeting.
+   * @param zoomMeetingId Zoom meeting id.
+   * @param zoomUUID Zoom meeting uuid.
+   * @private
+   */
+  async _endMeeting(zoomMeetingId, zoomUUID) {
+    let isError = false;
+    logger.info(`Ending meeting zoom meeting id ${zoomMeetingId}`);
+    logger.info(`Fetching past meeting details for uuid ${zoomUUID}`);
+
+    const pastMeetingResponse = await MeetingLib.getPastMeeting(zoomUUID).catch(async (e) => {
+      isError = true;
+      logger.error(`Error in fetching past meeting details for UUID ${zoomUUID} error status ${e.statusCode}`);
+      const errorObject = responseHelper.error({
+        internal_error_identifier: 'e_z_m_t_2',
+        api_error_identifier: 'something_went_wrong',
+        debug_options: { zoomMeetingId: zoomMeetingId }
+      });
+      await createErrorLogsEntry.perform(errorObject, errorLogsConstants.highSeverity);
+    });
+    if (!isError) {
+      const response = await new MeetingEnded({
+        payload: {
+          object: {
+            id: zoomMeetingId,
+            start_time: pastMeetingResponse.start_time,
+            end_time: pastMeetingResponse.end_time
+          }
+        }
+      }).perform();
+
+      if (response.isFailure()) {
+        logger.error(`Error in ending meeting zoom meeting id ${zoomMeetingId}`);
+        const errorObject = responseHelper.error({
+          internal_error_identifier: 'e_z_m_t_3',
+          api_error_identifier: 'something_went_wrong',
+          debug_options: { zoomMeetingId: zoomMeetingId }
+        });
+        await createErrorLogsEntry.perform(errorObject, errorLogsConstants.highSeverity);
+      }
     }
   }
 
@@ -207,7 +271,7 @@ class MeetingTracker extends CronBase {
     if (updateResponse.affectedRows !== 1) {
       logger.error(`Error in marking not alive status for meeting ${meetingId}`);
       const errorObject = responseHelper.error({
-        internal_error_identifier: 'e_z_m_t_2',
+        internal_error_identifier: 'e_z_m_t_4',
         api_error_identifier: 'something_went_wrong',
         debug_options: { meetingId: meetingId }
       });
@@ -240,7 +304,7 @@ class MeetingTracker extends CronBase {
         ' relayer id ${meetingRelayerid} `);
 
       const errorObject = responseHelper.error({
-        internal_error_identifier: 'e_z_m_t_3',
+        internal_error_identifier: 'e_z_m_t_5',
         api_error_identifier: 'something_went_wrong',
         debug_options: { meetingRelayerid: meetingRelayerid }
       });

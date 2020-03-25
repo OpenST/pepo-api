@@ -38,6 +38,7 @@ class MeetingModel extends ModelBase {
    * @param {number} dbRow.end_timestamp
    * @param {number} dbRow.channel_id
    * @param {number} dbRow.zoom_meeting_id
+   * @param {string} dbRow.zoom_uuid
    * @param {string} dbRow.recording_url
    * @param {string} dbRow.status
    * @param {number} dbRow.is_live
@@ -57,6 +58,7 @@ class MeetingModel extends ModelBase {
       endTimestamp: dbRow.end_timestamp || null,
       channelId: dbRow.channel_id,
       zoomMeetingId: dbRow.zoom_meeting_id,
+      zoomUUID: dbRow.zoom_uuid,
       recordingUrl: dbRow.recording_url,
       isLive: dbRow.is_live,
       status: meetingConstants.statuses[dbRow.status],
