@@ -156,12 +156,22 @@ class MeetingModel extends ModelBase {
    * @param {object} params
    * @param {number} [params.id]
    * @param {array<number>} [params.channelIds]
+   * @param {array<number>} [params.channelId]
    * @param {array<number>} [params.zoomMeetingId]
    *
    * @returns {Promise<*>}
    */
   static async flushCache(params) {
     const promisesArray = [];
+    let channelIds = [];
+
+    if (params.channelIds) {
+      channelIds = params.channelIds;
+    }
+
+    if (params.channelId) {
+      channelIds.push(params.channelId);
+    }
 
     if (params.id) {
       const MeetingByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/meeting/MeetingByIds');
@@ -174,15 +184,15 @@ class MeetingModel extends ModelBase {
       promisesArray.push(new MeetingIdByZoomMeetingIdsCache({ zoomMeetingIds: [params.zoomMeetingId] }).clear());
     }
 
-    if (params.channelIds) {
+    if (channelIds.length > 0) {
       const LiveMeetingIdByChannelIdsCache = require(rootPrefix +
         '/lib/cacheManagement/multi/meeting/LiveMeetingIdByChannelIds');
-      promisesArray.push(new LiveMeetingIdByChannelIdsCache({ channelIds: params.channelIds }).clear());
+      promisesArray.push(new LiveMeetingIdByChannelIdsCache({ channelIds: channelIds }).clear());
 
       // We are clearing channel cache here because liveMeetingId is a part of channel entity.
       const ChannelByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelByIds');
 
-      promisesArray.push(new ChannelByIdsCache({ ids: params.channelIds }).clear());
+      promisesArray.push(new ChannelByIdsCache({ ids: channelIds }).clear());
     }
 
     await Promise.all(promisesArray);
