@@ -62,7 +62,16 @@ class StartMeeting extends ServiceBase {
   async _asyncPerform() {
     const oThis = this;
 
-    await oThis._validate();
+    // Channel validations.
+    await oThis._fetchAndValidateChannel();
+
+    const isMeetingLive = await oThis._validateChannelLiveMeeting();
+    if (isMeetingLive) {
+      return responseHelper.successWithData(oThis._prepareResponse());
+    }
+
+    // Validate channel user role and existing live meetings of current user.
+    await Promise.all([oThis._validateChannelUser(), oThis._validateCurrentUserLiveMeetings()]);
 
     // Step 1: Reserve zoom user.
     await oThis._reserveZoomUser();
@@ -88,20 +97,6 @@ class StartMeeting extends ServiceBase {
   }
 
   /**
-   * Perform validations.
-   *
-   * @returns {Promise<void>}
-   * @private
-   */
-  async _validate() {
-    const oThis = this;
-
-    await oThis._fetchAndValidateChannel();
-
-    await Promise.all([oThis._validateChannelUser(), oThis._validateCurrentUserLiveMeetings()]);
-  }
-
-  /**
    * Fetch and validate channel.
    *
    * @sets oThis.channelId, oThis.channel
@@ -124,7 +119,7 @@ class StartMeeting extends ServiceBase {
     if (!CommonValidators.validateNonEmptyObject(permalinkIdsMap[oThis.channelPermalink])) {
       return Promise.reject(
         responseHelper.error({
-          internal_error_identifier: 'a_s_c_g_1',
+          internal_error_identifier: 'a_s_c_m_sm_1',
           api_error_identifier: 'entity_not_found',
           debug_options: {
             channelPermalink: oThis.channelPermalink
@@ -148,7 +143,7 @@ class StartMeeting extends ServiceBase {
     ) {
       return Promise.reject(
         responseHelper.paramValidationError({
-          internal_error_identifier: 'a_s_c_g_2',
+          internal_error_identifier: 'a_s_c_m_sm_2',
           api_error_identifier: 'resource_not_found',
           params_error_identifiers: ['invalid_channel_id'],
           debug_options: {
@@ -158,20 +153,28 @@ class StartMeeting extends ServiceBase {
         })
       );
     }
+  }
+
+  /**
+   * Validate whether channel has an ongoing live meeting or not.
+   *
+   * @returns {*|result}
+   * @private
+   */
+  _validateChannelLiveMeeting() {
+    const oThis = this;
+
+    let isMeetingLive = false;
 
     // A live meeting already exists for this channel.
+    // If live meeting already exists, redirect user to the live meeting.
     if (oThis.channel.liveMeetingId) {
-      return Promise.reject(
-        responseHelper.error({
-          internal_error_identifier: 'a_s_c_g_3',
-          api_error_identifier: 'meeting_already_exists',
-          debug_options: {
-            channelId: oThis.channelId,
-            liveMeetingId: oThis.channel.liveMeetingId
-          }
-        })
-      );
+      oThis.meetingId = oThis.channel.liveMeetingId;
+
+      isMeetingLive = true;
     }
+
+    return isMeetingLive;
   }
 
   /**
@@ -200,7 +203,7 @@ class StartMeeting extends ServiceBase {
     if (!currentUserChannelRelations[oThis.channelId].isAdmin) {
       return Promise.reject(
         responseHelper.paramValidationError({
-          internal_error_identifier: 'a_s_c_g_4',
+          internal_error_identifier: 'a_s_c_m_sm_3',
           api_error_identifier: 'resource_not_found',
           params_error_identifiers: ['invalid_channel_user_role'],
           debug_options: {
@@ -233,7 +236,7 @@ class StartMeeting extends ServiceBase {
     if (dbRows.length > 0) {
       return Promise.reject(
         responseHelper.error({
-          internal_error_identifier: 'a_s_c_g_5',
+          internal_error_identifier: 'a_s_c_m_sm_4',
           api_error_identifier: 'already_hosting_other_meetings',
           debug_options: { currentUserId: oThis.currentUserId }
         })
@@ -282,9 +285,10 @@ class StartMeeting extends ServiceBase {
 
     if (!oThis.meetingRelayer) {
       return Promise.reject(
-        responseHelper.error({
-          internal_error_identifier: 'a_s_c_g_6',
+        responseHelper.paramValidationError({
+          internal_error_identifier: 'a_s_c_m_sm_5',
           api_error_identifier: 'zoom_user_unavailable',
+          params_error_identifiers: ['zoom_user_unavailable'],
           debug_options: {}
         })
       );
@@ -314,7 +318,7 @@ class StartMeeting extends ServiceBase {
 
     if (facedError) {
       return responseHelper.error({
-        internal_error_identifier: 'a_s_c_g_7',
+        internal_error_identifier: 'a_s_c_m_sm_6',
         api_error_identifier: 'something_went_wrong',
         debug_options: {}
       });
@@ -353,7 +357,7 @@ class StartMeeting extends ServiceBase {
 
     if (!insertResponse) {
       return responseHelper.error({
-        internal_error_identifier: 'a_s_c_g_8',
+        internal_error_identifier: 'a_s_c_m_sm_7',
         api_error_identifier: 'something_went_wrong',
         debug_options: {}
       });
@@ -406,7 +410,7 @@ class StartMeeting extends ServiceBase {
 
     if (updateResponse.affectedRows === 0) {
       const errorObject = responseHelper.error({
-        internal_error_identifier: 'a_s_c_g_9',
+        internal_error_identifier: 'a_s_c_m_sm_8',
         api_error_identifier: 'zoom_user_unreserving_failed',
         debug_options: { zoomUser: oThis.zoomUser }
       });
@@ -425,7 +429,7 @@ class StartMeeting extends ServiceBase {
 
     await zoomMeetingLib.delete(oThis.zoomMeetingId).catch(async function(error) {
       const errorObject = responseHelper.error({
-        internal_error_identifier: 'a_s_c_g_10',
+        internal_error_identifier: 'a_s_c_m_sm_9',
         api_error_identifier: 'zoom_meeting_delete_failed',
         debug_options: { zoomMeetingId: oThis.zoomMeetingId, error: error }
       });

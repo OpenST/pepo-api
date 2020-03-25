@@ -244,11 +244,6 @@
     "code": "ALREADY_HOSTING_OTHER_MEETINGS",
     "message": "You are already hosting meetings for other channels. Please end those meetings before starting a new one."
   },
-  "meeting_already_exists": {
-    "http_code": "422",
-    "code": "MEETING_ALREADY_EXISTS",
-    "message": "An active meeting already exists for this channel."
-  },
   "pending_transaction_found": {
     "http_code": "200",
     "code": "BAD_REQUEST",
