@@ -71,6 +71,7 @@ class ChannelSearch extends ServiceBase {
     oThis.tags = {};
     oThis.links = {};
     oThis.textsMap = {};
+    oThis.nextPageChannelIdIndex = 0;
   }
 
   /**
@@ -152,7 +153,12 @@ class ChannelSearch extends ServiceBase {
         return Promise.reject(cacheResponse);
       }
 
-      channelIds = cacheResponse.data.channelIds;
+      const allchannelIds = cacheResponse.data.channelIds;
+      let index = oThis.paginationTimestamp ? oThis.paginationTimestamp : 0;
+      channelIds = allchannelIds.slice(index, index + oThis.limit);
+      if (index + oThis.limit < allchannelIds.length) {
+        oThis.nextPageChannelIdIndex = index + oThis.limit;
+      }
     } else {
       // Display curated channels in search.
       const cacheResponse = await new CuratedEntityIdsByKindCache({
@@ -378,6 +384,10 @@ class ChannelSearch extends ServiceBase {
     if (oThis.channelIds.length >= oThis.limit && oThis.channelPrefix) {
       nextPagePayloadKey[paginationConstants.paginationIdentifierKey] = {
         pagination_timestamp: oThis.nextPaginationTimestamp
+      };
+    } else if (apiSourceConstants.isWebRequest(oThis.apiSource) && oThis.nextPageChannelIdIndex) {
+      nextPagePayloadKey[paginationConstants.paginationIdentifierKey] = {
+        pagination_timestamp: oThis.nextPageChannelIdIndex
       };
     }
 
