@@ -81,7 +81,7 @@ class StartMeeting extends ServiceBase {
     if (meetingCreationResponse.isFailure()) {
       await oThis._rollbackUpdates();
 
-      return responseHelper.successWithData(oThis._prepareResponse());
+      return meetingCreationResponse;
     }
 
     // Step 3: Create a new record in the meetings table.
@@ -90,7 +90,7 @@ class StartMeeting extends ServiceBase {
     if (meetingRecordResponse.isFailure()) {
       await oThis._rollbackUpdates();
 
-      return responseHelper.successWithData(oThis._prepareResponse());
+      return meetingRecordResponse;
     }
 
     return responseHelper.successWithData(oThis._prepareResponse());
@@ -308,7 +308,7 @@ class StartMeeting extends ServiceBase {
     if (!oThis.meetingRelayer) {
       return responseHelper.error({
         internal_error_identifier: 'a_s_c_m_sm_6',
-        api_error_identifier: 'something_went_wrong',
+        api_error_identifier: 'zoom_call_could_not_proceed',
         debug_options: {}
       });
     }
@@ -322,7 +322,7 @@ class StartMeeting extends ServiceBase {
     if (facedError) {
       return responseHelper.error({
         internal_error_identifier: 'a_s_c_m_sm_7',
-        api_error_identifier: 'something_went_wrong',
+        api_error_identifier: 'zoom_call_could_not_proceed',
         debug_options: {}
       });
     }
@@ -346,7 +346,7 @@ class StartMeeting extends ServiceBase {
     if (!oThis.zoomMeetingId) {
       return responseHelper.error({
         internal_error_identifier: 'a_s_c_m_sm_8',
-        api_error_identifier: 'something_went_wrong',
+        api_error_identifier: 'zoom_call_could_not_proceed',
         debug_options: {}
       });
     }
@@ -365,7 +365,7 @@ class StartMeeting extends ServiceBase {
     if (!insertResponse) {
       return responseHelper.error({
         internal_error_identifier: 'a_s_c_m_sm_9',
-        api_error_identifier: 'something_went_wrong',
+        api_error_identifier: 'zoom_call_could_not_proceed',
         debug_options: {}
       });
     }

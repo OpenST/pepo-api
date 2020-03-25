@@ -263,5 +263,10 @@
     "http_code": "200",
     "code": "MEETING_HAS_ENDED",
     "message": "This Meeting has ended."
+  },
+  "zoom_call_could_not_proceed": {
+    "http_code": "200",
+    "code": "ZOOM_CALL_COULD_NOT_PROCEED",
+    "message": "We could not create your new meeting. Please try again later."
   }
 }
