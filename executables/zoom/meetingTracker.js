@@ -32,7 +32,7 @@ if (!cronProcessId) {
   process.exit(1);
 }
 
-const BATCH_SIZE = 25;
+const BATCH_SIZE = 15;
 const WAIT_TIME = 10 * 60; // 10 mins
 
 class MeetingTracker extends CronBase {
@@ -132,6 +132,8 @@ class MeetingTracker extends CronBase {
         logger.info('All records processed, Quiting job');
         break;
       }
+
+      await basicHelper.sleep(200);
     }
   }
 
