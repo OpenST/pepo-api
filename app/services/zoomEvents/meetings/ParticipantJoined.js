@@ -50,6 +50,8 @@ class MeetingParticipantJoined extends ServiceBase {
     await oThis._fetchAndValidateMeetingHost();
 
     await oThis._incrementHostJoinCount();
+
+    return responseHelper.successWithData({});
   }
 
   async _validateParams() {

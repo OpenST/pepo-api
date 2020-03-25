@@ -53,6 +53,8 @@ class MeetingParticipantLeft extends ServiceBase {
     await oThis._fetchAndValidateMeetingHost();
 
     await oThis._incrementHostLeaveCount();
+
+    return responseHelper.successWithData({});
   }
 
   async _validateParams() {
