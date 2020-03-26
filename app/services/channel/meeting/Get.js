@@ -2,11 +2,12 @@ const rootPrefix = '../../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   UsersCache = require(rootPrefix + '/lib/cacheManagement/multi/User'),
-  ImageByIdCache = require(rootPrefix + '/lib/cacheManagement/multi/ImageByIds'),
+  FetchAssociatedEntities = require(rootPrefix + '/lib/FetchAssociatedEntities'),
   ChannelByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelByIds'),
   MeetingByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/meeting/MeetingByIds'),
   TokenUserDetailByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TokenUserByUserIds'),
   ChannelByPermalinksCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelByPermalinks'),
+  ChannelTagByChannelIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelTagByChannelIds'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
   channelConstants = require(rootPrefix + '/lib/globalConstant/channel/channels');
@@ -43,8 +44,17 @@ class GetChannelMeeting extends ServiceBase {
     oThis.hostUserId = null;
     oThis.userIds = [];
 
-    oThis.userDetails = {};
+    oThis.textIds = [];
+    oThis.texts = {};
+
     oThis.imageIds = [];
+    oThis.images = {};
+
+    oThis.tagIds = [];
+    oThis.tags = {};
+    oThis.links = {};
+
+    oThis.userDetails = {};
 
     oThis.tokenUsersByUserIdMap = {};
 
@@ -64,7 +74,9 @@ class GetChannelMeeting extends ServiceBase {
 
     await oThis._fetchAndValidateMeeting();
 
-    await oThis._fetchEntities();
+    await Promise.all([oThis._fetchChannelTagIds(), oThis._fetchUserDetails(), oThis._fetchTokenUsers()]);
+
+    await oThis._fetchAssociatedEntities();
 
     return responseHelper.successWithData(oThis._prepareResponse());
   }
@@ -72,7 +84,7 @@ class GetChannelMeeting extends ServiceBase {
   /**
    * Fetch and validate channel.
    *
-   * @sets oThis.channel, oThis.channelId
+   * @sets oThis.channel, oThis.channelId, oThis.textIds, oThis.imageIds
    *
    * @returns {Promise<never>}
    * @private
@@ -128,6 +140,18 @@ class GetChannelMeeting extends ServiceBase {
         })
       );
     }
+
+    if (oThis.channel.taglineId) {
+      oThis.textIds.push(oThis.channel.taglineId);
+    }
+
+    if (oThis.channel.descriptionId) {
+      oThis.textIds.push(oThis.channel.descriptionId);
+    }
+
+    if (oThis.channel.coverImageId) {
+      oThis.imageIds.push(oThis.channel.coverImageId);
+    }
   }
 
   /**
@@ -177,17 +201,22 @@ class GetChannelMeeting extends ServiceBase {
   }
 
   /**
-   * Fetch and validate meeting.
+   * Fetch channel tag ids.
    *
-   * @returns {Promise<never>}
+   * @sets oThis.tagIds
+   *
+   * @returns {Promise<void>}
    * @private
    */
-  async _fetchEntities() {
+  async _fetchChannelTagIds() {
     const oThis = this;
 
-    await Promise.all([oThis._fetchUserDetails(), oThis._fetchTokenUsers()]);
+    const cacheResponse = await new ChannelTagByChannelIdsCache({ channelIds: [oThis.channelId] }).fetch();
+    if (cacheResponse.isFailure()) {
+      return Promise.reject(cacheResponse);
+    }
 
-    await oThis._fetchImages();
+    oThis.tagIds = cacheResponse.data[oThis.channelId];
   }
 
   /**
@@ -241,26 +270,29 @@ class GetChannelMeeting extends ServiceBase {
   }
 
   /**
-   * Fetch profile image of users.
+   * Fetch associated entities.
    *
-   * @sets oThis.imageDetails
+   * @sets oThis.images, oThis.texts
    *
-   * @returns {Promise<void>}
+   * @returns {Promise<never>}
    * @private
    */
-  async _fetchImages() {
+  async _fetchAssociatedEntities() {
     const oThis = this;
 
-    if (oThis.imageIds.length === 0) {
-      return;
+    const associatedEntitiesResponse = await new FetchAssociatedEntities({
+      textIds: oThis.textIds,
+      imageIds: oThis.imageIds,
+      tagIds: oThis.tagIds
+    }).perform();
+    if (associatedEntitiesResponse.isFailure()) {
+      return Promise.reject(associatedEntitiesResponse);
     }
 
-    const imageCacheResponse = await new ImageByIdCache({ ids: oThis.imageIds }).fetch();
-    if (imageCacheResponse.isFailure()) {
-      return Promise.reject(imageCacheResponse);
-    }
-
-    oThis.imageDetails = imageCacheResponse.data;
+    oThis.images = associatedEntitiesResponse.data.imagesMap;
+    oThis.texts = associatedEntitiesResponse.data.textMap;
+    oThis.tags = associatedEntitiesResponse.data.tags;
+    oThis.links = associatedEntitiesResponse.data.links;
   }
 
   /**
@@ -275,9 +307,14 @@ class GetChannelMeeting extends ServiceBase {
     return {
       [entityTypeConstants.meeting]: oThis.meeting,
       [entityTypeConstants.channelsMap]: { [oThis.channelId]: oThis.channel },
+      [entityTypeConstants.channelDetailsMap]: { [oThis.channel.id]: oThis.channel },
+      [entityTypeConstants.channelIdToTagIdsMap]: { [oThis.channel.id]: oThis.tagIds },
       usersByIdMap: oThis.userDetails,
       tokenUsersByUserIdMap: oThis.tokenUsersByUserIdMap,
-      imageMap: oThis.imageDetails
+      [entityTypeConstants.textsMap]: oThis.texts,
+      linkMap: oThis.links,
+      imageMap: oThis.images,
+      tags: oThis.tags
     };
   }
 }

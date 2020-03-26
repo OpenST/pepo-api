@@ -111,8 +111,12 @@ router.get(
         entityKindToResponseKeyMap: {
           [entityTypeConstants.meeting]: responseEntityKey.meeting,
           [entityTypeConstants.channelsMap]: responseEntityKey.channels,
+          [entityTypeConstants.channelDetailsMap]: responseEntityKey.channelDetails,
           [entityTypeConstants.usersMap]: responseEntityKey.users,
-          [entityTypeConstants.imagesMap]: responseEntityKey.images
+          [entityTypeConstants.tagsMap]: responseEntityKey.tags,
+          [entityTypeConstants.imagesMap]: responseEntityKey.images,
+          [entityTypeConstants.linksMap]: responseEntityKey.links,
+          [entityTypeConstants.textsMap]: responseEntityKey.texts
         },
         serviceData: serviceResponse.data
       }).perform();
