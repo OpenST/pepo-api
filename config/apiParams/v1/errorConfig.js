@@ -465,12 +465,6 @@ const v1ErrorConfig = {
     message: 'Meeting does not exist.'
   },
 
-  invalid_channel_user_role: {
-    parameter: 'user_id',
-    code: 'invalid',
-    message: 'If you would like to host live meetings on Pepo, please apply to be a community admin.'
-  },
-
   channel_not_active: {
     parameter: 'channel_id',
     code: 'invalid',

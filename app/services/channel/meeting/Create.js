@@ -203,10 +203,9 @@ class StartMeeting extends ServiceBase {
     // Only a channel admin can start a meeting.
     if (!currentUserChannelRelations[oThis.channelId].isAdmin) {
       return Promise.reject(
-        responseHelper.paramValidationError({
+        responseHelper.error({
           internal_error_identifier: 'a_s_c_m_sm_3',
-          api_error_identifier: 'resource_not_found',
-          params_error_identifiers: ['invalid_channel_user_role'],
+          api_error_identifier: 'invalid_channel_user_role',
           debug_options: {
             channelId: oThis.channelId,
             currentUserChannelRelations: currentUserChannelRelations[oThis.channelId]
