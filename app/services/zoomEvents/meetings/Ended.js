@@ -196,6 +196,7 @@ class MeetingEnded extends ServiceBase {
         status: meetingRelayerConstants.invertedStatuses[meetingRelayerConstants.availableStatus]
       })
       .where({ id: oThis.meetingObj.meetingRelayerId })
+      .where({ status: meetingRelayerConstants.invertedStatuses[meetingRelayerConstants.reservedStatus] })
       .fire();
 
     await MeetingRelayerModel.flushCache({ id: oThis.meetingObj.meetingRelayerId });

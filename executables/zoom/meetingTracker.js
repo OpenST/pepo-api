@@ -292,25 +292,13 @@ class MeetingTracker extends CronBase {
   async _markRelayerAvailable(meetingRelayerid) {
     logger.info(`Marking relayer as available ID: ${meetingRelayerid}`);
 
-    const updateResponse = await new MeetingRelayerModel()
+    await new MeetingRelayerModel()
       .update({
         status: meetingRelayerConstants.invertedStatuses[meetingRelayerConstants.availableStatus]
       })
       .where({ id: meetingRelayerid })
+      .where({ status: meetingRelayerConstants.invertedStatuses[meetingRelayerConstants.reservedStatus] })
       .fire();
-
-    if (updateResponse.affectedRows !== 1) {
-      logger.error(`Error in updating meeting relayer status to available' +
-        ' relayer id ${meetingRelayerid} `);
-
-      const errorObject = responseHelper.error({
-        internal_error_identifier: 'e_z_m_t_5',
-        api_error_identifier: 'something_went_wrong',
-        debug_options: { meetingRelayerid: meetingRelayerid }
-      });
-      await createErrorLogsEntry.perform(errorObject, errorLogsConstants.highSeverity);
-      return;
-    }
 
     await MeetingRelayerModel.flushCache({ id: meetingRelayerid });
   }
