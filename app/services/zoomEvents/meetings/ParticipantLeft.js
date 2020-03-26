@@ -60,6 +60,11 @@ class MeetingParticipantLeft extends ServiceBase {
   async _validateParams() {
     const oThis = this;
 
+    if (!oThis.zoomParticipantId) {
+      oThis.processEvent = false;
+      return;
+    }
+    
     const id = oThis.zoomParticipantId.split('_');
     if (id[0] === 'u') {
       oThis.participantId = id[1];
