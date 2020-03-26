@@ -34,7 +34,7 @@ if (!cronProcessId) {
 }
 
 const BATCH_SIZE = 10;
-const WAIT_TIME = 10 * 60; // 10 mins
+const WAIT_TIME = 5 * 60; // 5 mins
 
 class MeetingTracker extends CronBase {
   constructor(params) {
@@ -96,7 +96,7 @@ class MeetingTracker extends CronBase {
 
       logger.info(`Processing ${meetings.length} records`);
 
-      for (let index = 0; index < meetings.length; index += 1) {
+      for (let index = 0; index < meetings.length; index++) {
         const formattedRow = new MeetingModel().formatDbData(meetings[index]);
 
         // Check for data consistency
@@ -113,8 +113,6 @@ class MeetingTracker extends CronBase {
           });
           await createErrorLogsEntry.perform(errorObject, errorLogsConstants.highSeverity);
 
-          // Skip erroneous record for the next iteration.
-          offset += 1;
           continue;
         }
 
@@ -136,17 +134,13 @@ class MeetingTracker extends CronBase {
           await oThis._markRelayerAvailable(formattedRow.meetingRelayerId);
           isProcessed = true;
         }
-
-        if (!isProcessed) {
-          // skip the non processed record for next iteration.
-          offset += 1;
-        }
       }
 
       if (meetings.length < BATCH_SIZE) {
         logger.info('All records processed, Quiting job');
         break;
       }
+      offset += BATCH_SIZE;
     }
   }
 
