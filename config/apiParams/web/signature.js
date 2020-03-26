@@ -578,7 +578,7 @@ const webSignature = {
       },
       {
         parameter: 'meeting_id',
-        validatorMethods: ['validateInteger']
+        validatorMethods: ['validateAlphaNumericString']
       },
       {
         parameter: 'channel_permalink',
@@ -604,7 +604,7 @@ const webSignature = {
       },
       {
         parameter: 'meeting_id',
-        validatorMethods: ['validateInteger']
+        validatorMethods: ['validateAlphaNumericString']
       },
       {
         parameter: 'channel_permalink',
