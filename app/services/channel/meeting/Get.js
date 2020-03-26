@@ -116,7 +116,7 @@ class GetChannelMeeting extends ServiceBase {
       return Promise.reject(
         responseHelper.error({
           internal_error_identifier: 'a_s_c_m_g_favc_1',
-          api_error_identifier: 'entity_not_found',
+          api_error_identifier: 'resource_not_found',
           debug_options: {
             channelPermalink: oThis.channelPermalink
           }
@@ -191,16 +191,6 @@ class GetChannelMeeting extends ServiceBase {
             meetingId: oThis.meetingId,
             channelId: oThis.channelId
           }
-        })
-      );
-    }
-
-    if (!oThis.meeting.isLive) {
-      return Promise.reject(
-        responseHelper.error({
-          internal_error_identifier: 'a_s_c_m_g_favm_2',
-          api_error_identifier: 'meeting_has_ended',
-          debug_options: oThis.meeting
         })
       );
     }
