@@ -96,28 +96,33 @@ router.get('/:channel_id/videos', sanitizer.sanitizeDynamicUrlParams, function(r
 });
 
 /* Get channel details. */
-router.get('/:channel_permalink/meetings/:meeting_id', sanitizer.sanitizeDynamicUrlParams, sanitizer.sanitizeHeaderParams, function(req, res, next) {
-  req.decodedParams.apiName = apiName.getMeeting;
-  req.decodedParams.channel_permalink = req.params.channel_permalink;
-  req.decodedParams.meeting_id = req.params.meeting_id;
-  req.decodedParams.fingerprint_id = headerHelper.fingerprintId(req.sanitizedHeaders);
+router.get(
+  '/:channel_permalink/meetings/:meeting_id/join-payload',
+  sanitizer.sanitizeDynamicUrlParams,
+  sanitizer.sanitizeHeaderParams,
+  function(req, res, next) {
+    req.decodedParams.apiName = apiName.getMeeting;
+    req.decodedParams.channel_permalink = req.params.channel_permalink;
+    req.decodedParams.meeting_id = req.params.meeting_id;
+    req.decodedParams.fingerprint_id = headerHelper.fingerprintId(req.sanitizedHeaders);
 
-  const dataFormatterFunc = async function(serviceResponse) {
-    const wrapperFormatterRsp = await new FormatterComposer({
-      resultType: responseEntityKey.joinZoomMeetingPayload,
-      entityKindToResponseKeyMap: {
-        [entityTypeConstants.joinZoomMeetingPayload]: responseEntityKey.joinZoomMeetingPayload
-      },
-      serviceData: serviceResponse.data
-    }).perform();
+    const dataFormatterFunc = async function(serviceResponse) {
+      const wrapperFormatterRsp = await new FormatterComposer({
+        resultType: responseEntityKey.joinZoomMeetingPayload,
+        entityKindToResponseKeyMap: {
+          [entityTypeConstants.joinZoomMeetingPayload]: responseEntityKey.joinZoomMeetingPayload
+        },
+        serviceData: serviceResponse.data
+      }).perform();
 
-    serviceResponse.data = wrapperFormatterRsp.data;
-  };
+      serviceResponse.data = wrapperFormatterRsp.data;
+    };
 
-  Promise.resolve(
-    routeHelper.perform(req, res, next, '/channel/meeting/GetJoinPayload', 'r_a_w_c_4', null, dataFormatterFunc)
-  );
-});
+    Promise.resolve(
+      routeHelper.perform(req, res, next, '/channel/meeting/GetJoinPayload', 'r_a_w_c_4', null, dataFormatterFunc)
+    );
+  }
+);
 
 // NOTE: Login mandatory for following routes.
 router.use(cookieHelper.validateUserWebLoginCookieRequired);
