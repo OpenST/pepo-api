@@ -254,8 +254,19 @@ class LeaveChannel extends ServiceBase {
     const oThis = this;
 
     if (oThis.channelUserObj.role === channelUsersConstants.adminRole) {
-      await new UserModel().unmarkUserChannelAdmin([oThis.currentUser.id]);
-      await new SecureUserCache({ id: oThis.currentUser.id }).clear();
+      //check if user is admin in any other channel
+      const userAdminChannels = await new ChannelUserModel()
+        .select('*')
+        .where({
+          user_id: oThis.currentUser.id,
+          role: channelUsersConstants.invertedRoles[channelUsersConstants.adminRole]
+        })
+        .fire();
+
+      if (userAdminChannels.length == 0) {
+        await new UserModel().unmarkUserChannelAdmin([oThis.currentUser.id]);
+        await new SecureUserCache({ id: oThis.currentUser.id }).clear();
+      }
     }
   }
 }
