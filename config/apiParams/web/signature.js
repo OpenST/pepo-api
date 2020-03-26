@@ -611,7 +611,12 @@ const webSignature = {
         validatorMethods: ['validateName']
       }
     ],
-    optional: []
+    optional: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      }
+    ]
   },
   [apiName.startChannelZoomMeeting]: {
     mandatory: [

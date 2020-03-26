@@ -112,6 +112,7 @@ router.get(
           [entityTypeConstants.meeting]: responseEntityKey.meeting,
           [entityTypeConstants.channelsMap]: responseEntityKey.channels,
           [entityTypeConstants.channelDetailsMap]: responseEntityKey.channelDetails,
+          [entityTypeConstants.currentUserChannelRelationsMap]: responseEntityKey.currentUserChannelRelations,
           [entityTypeConstants.usersMap]: responseEntityKey.users,
           [entityTypeConstants.tagsMap]: responseEntityKey.tags,
           [entityTypeConstants.imagesMap]: responseEntityKey.images,

@@ -6,6 +6,7 @@ const rootPrefix = '../../../..',
   ChannelByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelByIds'),
   MeetingByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/meeting/MeetingByIds'),
   TokenUserDetailByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TokenUserByUserIds'),
+  GetCurrentUserChannelRelationsLib = require(rootPrefix + '/lib/channel/GetCurrentUserChannelRelations'),
   ChannelByPermalinksCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelByPermalinks'),
   ChannelTagByChannelIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelTagByChannelIds'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
@@ -24,6 +25,7 @@ class GetChannelMeeting extends ServiceBase {
    * @param {object} params
    * @param {string} [params.channel_permalink]
    * @param {number} params.meeting_id
+   * @param {object} params.current_user
    *
    * @augments ServiceBase
    *
@@ -36,9 +38,11 @@ class GetChannelMeeting extends ServiceBase {
 
     oThis.channelPermalink = params.channel_permalink;
     oThis.meetingId = params.meeting_id;
+    oThis.currentUser = params.current_user || {};
 
     oThis.channelId = null;
     oThis.channel = {};
+    oThis.currentUserChannelRelations = {};
 
     oThis.meeting = {};
     oThis.hostUserId = null;
@@ -74,7 +78,12 @@ class GetChannelMeeting extends ServiceBase {
 
     await oThis._fetchAndValidateMeeting();
 
-    await Promise.all([oThis._fetchChannelTagIds(), oThis._fetchUserDetails(), oThis._fetchTokenUsers()]);
+    await Promise.all([
+      oThis._fetchCurrentUserChannelRelations(),
+      oThis._fetchChannelTagIds(),
+      oThis._fetchUserDetails(),
+      oThis._fetchTokenUsers()
+    ]);
 
     await oThis._fetchAssociatedEntities();
 
@@ -201,6 +210,36 @@ class GetChannelMeeting extends ServiceBase {
   }
 
   /**
+   * Fetch current user channel relations.
+   *
+   * @sets oThis.currentUserChannelRelations
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _fetchCurrentUserChannelRelations() {
+    const oThis = this;
+
+    if (!CommonValidators.validateNonEmptyObject(oThis.currentUser)) {
+      return;
+    }
+
+    const currentUserChannelRelationLibParams = {
+      currentUserId: oThis.currentUser.id,
+      channelIds: [oThis.channelId]
+    };
+
+    const currentUserChannelRelationsResponse = await new GetCurrentUserChannelRelationsLib(
+      currentUserChannelRelationLibParams
+    ).perform();
+    if (currentUserChannelRelationsResponse.isFailure()) {
+      return Promise.reject(currentUserChannelRelationsResponse);
+    }
+
+    oThis.currentUserChannelRelations = currentUserChannelRelationsResponse.data.currentUserChannelRelations;
+  }
+
+  /**
    * Fetch channel tag ids.
    *
    * @sets oThis.tagIds
@@ -309,6 +348,7 @@ class GetChannelMeeting extends ServiceBase {
       [entityTypeConstants.channelsMap]: { [oThis.channelId]: oThis.channel },
       [entityTypeConstants.channelDetailsMap]: { [oThis.channel.id]: oThis.channel },
       [entityTypeConstants.channelIdToTagIdsMap]: { [oThis.channel.id]: oThis.tagIds },
+      [entityTypeConstants.currentUserChannelRelationsMap]: oThis.currentUserChannelRelations,
       usersByIdMap: oThis.userDetails,
       tokenUsersByUserIdMap: oThis.tokenUsersByUserIdMap,
       [entityTypeConstants.textsMap]: oThis.texts,
