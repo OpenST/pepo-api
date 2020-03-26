@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "20e37b4d-fdfc-4416-9b73-4b1203c45e52",
+		"_postman_id": "62496e32-51da-40b6-9d18-ac40026acfa6",
 		"name": "pepo-api",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -4237,6 +4237,28 @@
 										"channels",
 										"covid19",
 										"meetings"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "channel-meeting",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{api_server}}/api/web/channels/covid19/meetings/8",
+									"host": [
+										"{{api_server}}"
+									],
+									"path": [
+										"api",
+										"web",
+										"channels",
+										"covid19",
+										"meetings",
+										"8"
 									]
 								}
 							},
