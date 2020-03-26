@@ -95,13 +95,42 @@ router.get('/:channel_id/videos', sanitizer.sanitizeDynamicUrlParams, function(r
   Promise.resolve(routeHelper.perform(req, res, next, '/channel/GetVideoList', 'r_a_w_c_3', null, dataFormatterFunc));
 });
 
-/* Get channel details. */
+/* Get channel meeting details. */
+router.get(
+  '/:channel_permalink/meetings/:meeting_id',
+  sanitizer.sanitizeDynamicUrlParams,
+  sanitizer.sanitizeHeaderParams,
+  function(req, res, next) {
+    req.decodedParams.apiName = apiName.getChannelMeeting;
+    req.decodedParams.channel_permalink = req.params.channel_permalink;
+    req.decodedParams.meeting_id = req.params.meeting_id;
+
+    const dataFormatterFunc = async function(serviceResponse) {
+      const wrapperFormatterRsp = await new FormatterComposer({
+        resultType: responseEntityKey.meeting,
+        entityKindToResponseKeyMap: {
+          [entityTypeConstants.meeting]: responseEntityKey.meeting,
+          [entityTypeConstants.channelsMap]: responseEntityKey.channels,
+          [entityTypeConstants.usersMap]: responseEntityKey.users,
+          [entityTypeConstants.imagesMap]: responseEntityKey.images
+        },
+        serviceData: serviceResponse.data
+      }).perform();
+
+      serviceResponse.data = wrapperFormatterRsp.data;
+    };
+
+    Promise.resolve(routeHelper.perform(req, res, next, '/channel/meeting/Get', 'r_a_w_c_4', null, dataFormatterFunc));
+  }
+);
+
+/* Get join channel meeting payload. */
 router.get(
   '/:channel_permalink/meetings/:meeting_id/join-payload',
   sanitizer.sanitizeDynamicUrlParams,
   sanitizer.sanitizeHeaderParams,
   function(req, res, next) {
-    req.decodedParams.apiName = apiName.getMeeting;
+    req.decodedParams.apiName = apiName.getJoinMeetingPayload;
     req.decodedParams.channel_permalink = req.params.channel_permalink;
     req.decodedParams.meeting_id = req.params.meeting_id;
     req.decodedParams.fingerprint_id = headerHelper.fingerprintId(req.sanitizedHeaders);
@@ -119,7 +148,7 @@ router.get(
     };
 
     Promise.resolve(
-      routeHelper.perform(req, res, next, '/channel/meeting/GetJoinPayload', 'r_a_w_c_4', null, dataFormatterFunc)
+      routeHelper.perform(req, res, next, '/channel/meeting/GetJoinPayload', 'r_a_w_c_5', null, dataFormatterFunc)
     );
   }
 );
@@ -144,7 +173,7 @@ router.post('/:channel_permalink/meetings', sanitizer.sanitizeDynamicUrlParams, 
     serviceResponse.data = wrapperFormatterRsp.data;
   };
 
-  Promise.resolve(routeHelper.perform(req, res, next, '/channel/meeting/Create', 'r_a_w_c_5', null, dataFormatterFunc));
+  Promise.resolve(routeHelper.perform(req, res, next, '/channel/meeting/Create', 'r_a_w_c_6', null, dataFormatterFunc));
 });
 
 module.exports = router;

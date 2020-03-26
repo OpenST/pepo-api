@@ -570,7 +570,7 @@ const webSignature = {
       }
     ]
   },
-  [apiName.getMeeting]: {
+  [apiName.getJoinMeetingPayload]: {
     mandatory: [
       {
         parameter: 'api_source',
@@ -595,6 +595,23 @@ const webSignature = {
         validatorMethods: ['validateString']
       }
     ]
+  },
+  [apiName.getChannelMeeting]: {
+    mandatory: [
+      {
+        parameter: 'api_source',
+        validatorMethods: ['validateString']
+      },
+      {
+        parameter: 'meeting_id',
+        validatorMethods: ['validateInteger']
+      },
+      {
+        parameter: 'channel_permalink',
+        validatorMethods: ['validateName']
+      }
+    ],
+    optional: []
   },
   [apiName.startChannelZoomMeeting]: {
     mandatory: [
