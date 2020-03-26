@@ -242,7 +242,7 @@
   "already_hosting_other_meetings": {
     "http_code": "200",
     "code": "ALREADY_HOSTING_OTHER_MEETINGS",
-    "message": "You are already hosting meeting for another Community. Please end these meeting before starting a new one."
+    "message": "You are already hosting a live event for another Community. Please end these event before starting a new one."
   },
   "invalid_channel_user_role": {
     "http_code": "200",
@@ -267,11 +267,11 @@
   "meeting_has_ended": {
     "http_code": "200",
     "code": "MEETING_HAS_ENDED",
-    "message": "This Meeting has ended."
+    "message": "This Pepo live event has ended."
   },
   "zoom_call_could_not_proceed": {
     "http_code": "200",
     "code": "ZOOM_CALL_COULD_NOT_PROCEED",
-    "message": "We could not create your new meeting. Please try again later."
+    "message": "We could not create your new Pepo live event. Please try again later."
   }
 }
