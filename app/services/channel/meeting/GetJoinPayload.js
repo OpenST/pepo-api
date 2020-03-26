@@ -1,25 +1,23 @@
-const uuidV4 = require('uuid/v4');
-
 const rootPrefix = '../../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
-  ZoomMeetingLib = require(rootPrefix + '/lib/zoom/meeting'),
   ChannelByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelByIds'),
   MeetingByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/meeting/MeetingByIds'),
   ChannelByPermalinksCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelByPermalinks'),
+  zoomMeetingLib = require(rootPrefix + '/lib/zoom/meeting'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
+  zoomConstants = require(rootPrefix + '/lib/globalConstant/meeting/zoom'),
   entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
-  zoomConstant = require(rootPrefix + '/lib/globalConstant/meeting/zoom'),
   channelConstants = require(rootPrefix + '/lib/globalConstant/channel/channels');
 
 /**
- * Class to get meeting join details.
+ * Class to get meeting join payload.
  *
  * @class GetJoinMeetingPayload
  */
 class GetJoinMeetingPayload extends ServiceBase {
   /**
-   * Constructor.
+   * Constructor to get meeting join payload.
    *
    * @param {object} params
    * @param {string} [params.channel_permalink]
@@ -91,7 +89,7 @@ class GetJoinMeetingPayload extends ServiceBase {
     if (!CommonValidators.validateNonEmptyObject(permalinkIdsMap[lowercaseChannelPermalink])) {
       return Promise.reject(
         responseHelper.error({
-          internal_error_identifier: 'a_s_c_m_g_favc_1',
+          internal_error_identifier: 'a_s_c_m_gjp_favc_1',
           api_error_identifier: 'entity_not_found',
           debug_options: {
             channelPermalink: oThis.channelPermalink
@@ -115,7 +113,7 @@ class GetJoinMeetingPayload extends ServiceBase {
     ) {
       return Promise.reject(
         responseHelper.paramValidationError({
-          internal_error_identifier: 'a_s_c_m_g_favc_2',
+          internal_error_identifier: 'a_s_c_m_gjp_favc_2',
           api_error_identifier: 'resource_not_found',
           params_error_identifiers: ['invalid_channel_id'],
           debug_options: {
@@ -149,7 +147,7 @@ class GetJoinMeetingPayload extends ServiceBase {
     if (!CommonValidators.validateNonEmptyObject(oThis.meeting) || oThis.meeting.channelId != oThis.channelId) {
       return Promise.reject(
         responseHelper.paramValidationError({
-          internal_error_identifier: 'a_s_c_m_g_favm_1',
+          internal_error_identifier: 'a_s_c_m_gjp_favm_1',
           api_error_identifier: 'resource_not_found',
           params_error_identifiers: ['invalid_meeting_id'],
           debug_options: {
@@ -163,7 +161,7 @@ class GetJoinMeetingPayload extends ServiceBase {
     if (!oThis.meeting.isLive) {
       return Promise.reject(
         responseHelper.error({
-          internal_error_identifier: 'a_s_c_m_g_favm_2',
+          internal_error_identifier: 'a_s_c_m_gjp_favm_2',
           api_error_identifier: 'meeting_has_ended',
           debug_options: oThis.meeting
         })
@@ -174,7 +172,7 @@ class GetJoinMeetingPayload extends ServiceBase {
   /**
    * Fetch and validate meeting.
    *
-   * @sets oThis.meeting
+   * @sets oThis.name
    *
    * @returns {Promise<never>}
    * @private
@@ -195,6 +193,7 @@ class GetJoinMeetingPayload extends ServiceBase {
    */
   _prepareResponse() {
     const oThis = this;
+
     const role = oThis.currentUser.id && oThis.currentUser.id == oThis.meeting.hostUserId ? 1 : 0;
 
     let participantId = null;
@@ -213,13 +212,13 @@ class GetJoinMeetingPayload extends ServiceBase {
       participantId = 'd_' + randStr.slice(0, 20);
     }
 
-    const signature = ZoomMeetingLib.getSignature(oThis.meeting.zoomMeetingId, role);
+    const signature = zoomMeetingLib.getSignature(oThis.meeting.zoomMeetingId, role);
 
     const joinZoomMeetingPayload = {
       zoomMeetingId: oThis.meeting.zoomMeetingId,
       signature: signature,
       name: oThis.name,
-      api_key: zoomConstant.apiKey,
+      api_key: zoomConstants.apiKey,
       participantId: participantId
     };
 
