@@ -106,7 +106,8 @@ class UserModel extends ModelBase {
       'status',
       'createdAt',
       'updatedAt',
-      'isUserGlobalMuted'
+      'isUserGlobalMuted',
+      'isManagingAnyChannel'
     ];
   }
 
@@ -217,6 +218,7 @@ class UserModel extends ModelBase {
       const formatDbRow = oThis.formatDbData(dbRows[index]);
       response[formatDbRow.id] = formatDbRow;
       response[formatDbRow.id].isUserGlobalMuted = globalMuteUsersCacheResponse.data[userId].all == 1;
+      response[formatDbRow.id].isManagingAnyChannel = UserModel.isUserManagingChannel(formatDbRow);
     }
 
     return response;
@@ -253,6 +255,7 @@ class UserModel extends ModelBase {
       return Promise.reject(globalMuteUsersCacheResponse);
     }
     response.isUserGlobalMuted = globalMuteUsersCacheResponse.data[id].all == 1;
+    response.isManagingAnyChannel = UserModel.isUserManagingChannel(response);
 
     return response;
   }
@@ -581,6 +584,53 @@ class UserModel extends ModelBase {
     const propertiesArray = new UserModel().getBitwiseArray('properties', userObj.properties);
 
     return propertiesArray.indexOf(userConstants.hasGithubLoginProperty) > -1;
+  }
+
+  /**
+   * Is user channel Admin.
+   *
+   * @param {object} userObj
+   *
+   * @returns {boolean}
+   */
+  static isUserManagingChannel(userObj) {
+    const propertiesArray = new UserModel().getBitwiseArray('properties', userObj.properties);
+
+    return propertiesArray.indexOf(userConstants.isManagingChannelProperty) > -1;
+  }
+
+  /**
+   * Approve users.
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async markUserChannelAdmin(userIds) {
+    const oThis = this;
+
+    const propertyVal = userConstants.invertedProperties[userConstants.isManagingChannelProperty];
+
+    await new UserModel()
+      .update(['properties = properties | ?', propertyVal])
+      .where({ id: userIds })
+      .fire();
+  }
+
+  /**
+   * Approve users.
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async unmarkUserChannelAdmin(userIds) {
+    const oThis = this;
+
+    const propertyVal = userConstants.invertedProperties[userConstants.isManagingChannelProperty];
+
+    await new UserModel()
+      .update(['properties = properties & ~?', propertyVal])
+      .where({ id: userIds })
+      .fire();
   }
 }
 

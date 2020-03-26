@@ -459,6 +459,12 @@ const v1ErrorConfig = {
     message: 'Channel does not exist.'
   },
 
+  invalid_meeting_id: {
+    parameter: 'meeting_id',
+    code: 'invalid',
+    message: 'This Pepo live event does not exist.'
+  },
+
   channel_not_active: {
     parameter: 'channel_id',
     code: 'invalid',

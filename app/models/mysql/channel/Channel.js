@@ -1,5 +1,6 @@
 const rootPrefix = '../../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
+  LiveMeetingIdByChannelIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/meeting/LiveMeetingIdByChannelIds'),
   databaseConstants = require(rootPrefix + '/lib/globalConstant/database'),
   channelConstants = require(rootPrefix + '/lib/globalConstant/channel/channels');
 
@@ -73,16 +74,29 @@ class ChannelModel extends ModelBase {
   async fetchByIds(ids) {
     const oThis = this;
 
-    const dbRows = await oThis
-      .select('*')
-      .where(['id IN (?)', ids])
-      .fire();
+    const promisesResponse = await Promise.all([
+      new LiveMeetingIdByChannelIdsCache({ channelIds: ids }).fetch(),
+      oThis
+        .select('*')
+        .where(['id IN (?)', ids])
+        .fire()
+    ]);
+
+    const liveMeetingIdsCacheResponse = promisesResponse[0];
+    if (liveMeetingIdsCacheResponse.isFailure()) {
+      return Promise.reject(liveMeetingIdsCacheResponse);
+    }
+
+    const liveMeetingIdsData = liveMeetingIdsCacheResponse.data;
+    const dbRows = promisesResponse[1];
 
     const response = {};
 
     for (let index = 0; index < dbRows.length; index++) {
+      const channelId = dbRows[index].id;
       const formatDbRow = oThis.formatDbData(dbRows[index]);
       response[formatDbRow.id] = formatDbRow;
+      response[formatDbRow.id].liveMeetingId = liveMeetingIdsData[channelId].liveMeetingId;
     }
 
     return response;
@@ -175,12 +189,18 @@ class ChannelModel extends ModelBase {
     if (params.ids) {
       const ChannelByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelByIds');
       promisesArray.push(new ChannelByIdsCache({ ids: params.ids }).clear());
+
+      promisesArray.push(new LiveMeetingIdByChannelIdsCache({ channelIds: params.ids }).clear());
     }
 
     if (params.permalinks) {
       const ChannelByPermalinksCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelByPermalinks');
       promisesArray.push(new ChannelByPermalinksCache({ permalinks: params.permalinks }).clear());
     }
+
+    // If there is update in any channel, then flush list cache as well
+    const DefaultChannelsListForWeb = require(rootPrefix + '/lib/cacheManagement/single/DefaultChannelsListForWeb');
+    await new DefaultChannelsListForWeb().clear();
 
     await Promise.all(promisesArray);
   }

@@ -23,6 +23,7 @@ program
   .option('--text <text>', 'Activity text')
   .option('--publishNotification <publishNotification>', 'Is push notification required.')
   .option('--publishActivity <publishActivity>', 'Is activity required.')
+  .option('--userIds <userIds>', 'User ids array')
   .parse(process.argv);
 
 // gotoParams = {
@@ -37,15 +38,15 @@ program
 // JSON.stringify(gotoParams);
 
 // notificationCentreGotoKind
-// node executables/oneTimers/dynamicTextActivityPublisher.js --gotoParams '{"kind":"webview","url":"https://stagingpepo.com?utm_type=1&utm_source=organic"}' --publishNotification 0 --publishActivity 1 --text "New Test System Notification. Goto is webview."
-// node executables/oneTimers/dynamicTextActivityPublisher.js --gotoParams '{"kind":"notificationCentre"}' --publishNotification 1 --publishActivity 0 --text "New Test System Notification. Goto is notification centre."
+// node executables/oneTimers/dynamicTextActivityPublisher.js --gotoParams '{"kind":"webview","url":"https://stagingpepo.com?utm_type=1&utm_source=organic"}' --publishNotification 0 --publishActivity 1 --text "New Test System Notification. Goto is webview." --userIds '[3001,3002]'
+// node executables/oneTimers/dynamicTextActivityPublisher.js --gotoParams '{"kind":"notificationCentre"}' --publishNotification 1 --publishActivity 0 --text "New Test System Notification. Goto is notification centre." --userIds '[3001,3002]'
 
 program.on('--help', function() {
   logger.log('');
   logger.log('  Example:');
   logger.log('');
   logger.log(
-    'node executables/oneTimers/dynamicTextActivityPublisher.js --gotoParams \'{"kind":"webview","url":"https://stagingpepo.com?utm_type=1&utm_source=organic"}\' --publishNotification 0 --publishActivity 1 --text "New Test System Notification. Goto is webview."'
+    'node executables/oneTimers/dynamicTextActivityPublisher.js --gotoParams \'{"kind":"webview","url":"https://stagingpepo.com?utm_type=1&utm_source=organic"}\' --publishNotification 0 --publishActivity 1 --text "New Test System Notification. Goto is webview." --userIds "[3001,3002]"'
   );
   logger.log('');
   logger.log('');
@@ -68,8 +69,7 @@ class DynamicTextActivityPublisher {
     oThis.text = params.text;
     oThis.publishNotification = params.publishNotification || 0;
     oThis.publishActivity = params.publishActivity || 0;
-
-    oThis.userIds = [];
+    oThis.userIds = params.userIds || [];
   }
 
   /**
@@ -80,7 +80,13 @@ class DynamicTextActivityPublisher {
   async perform() {
     const oThis = this;
 
-    await oThis._fetchUserIds();
+    if (!oThis.userIds || oThis.userIds.length === 0) {
+      logger.log('No user ids passed in command line params. So fetching user ids from Users Table.');
+      await oThis._fetchUserIds();
+    } else {
+      // Sanitize input user ids array.
+      oThis.userIds = JSON.parse(oThis.userIds);
+    }
 
     await oThis._publishActivity();
   }
@@ -127,12 +133,10 @@ class DynamicTextActivityPublisher {
 
     let promiseArray = [];
 
-    console.log(
-      'oThis.publishNotification---oThis.publishActivity---oThis.gotoParams-----',
-      oThis.publishNotification,
-      oThis.publishActivity,
-      oThis.gotoParams
-    );
+    logger.info('publishNotification: ', oThis.publishNotification);
+    logger.info('publishActivity: ', oThis.publishActivity);
+    logger.info('gotoParams: ', oThis.gotoParams);
+    logger.info('publish userIds: ', oThis.userIds);
 
     for (let ind = 0; ind < oThis.userIds.length; ind++) {
       promiseArray.push(
@@ -164,7 +168,8 @@ new DynamicTextActivityPublisher({
   gotoParams: program.gotoParams,
   text: program.text,
   publishNotification: program.publishNotification,
-  publishActivity: program.publishActivity
+  publishActivity: program.publishActivity,
+  userIds: program.userIds
 })
   .perform()
   .then(function() {

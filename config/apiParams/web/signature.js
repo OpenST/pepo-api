@@ -372,6 +372,32 @@ const webSignature = {
       }
     ]
   },
+  [apiName.getChannels]: {
+    mandatory: [
+      {
+        parameter: 'api_source',
+        validatorMethods: ['validateString']
+      }
+    ],
+    optional: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      },
+      {
+        parameter: 'q',
+        validatorMethods: ['validateString']
+      },
+      {
+        parameter: paginationConstants.paginationIdentifierKey,
+        validatorMethods: ['validateString', 'validatePaginationIdentifier']
+      },
+      {
+        parameter: 'getTopResults',
+        validatorMethods: ['validateBoolean']
+      }
+    ]
+  },
   [apiName.registerDevice]: {
     mandatory: [
       {
@@ -544,6 +570,71 @@ const webSignature = {
       }
     ]
   },
+  [apiName.getJoinMeetingPayload]: {
+    mandatory: [
+      {
+        parameter: 'api_source',
+        validatorMethods: ['validateString']
+      },
+      {
+        parameter: 'meeting_id',
+        validatorMethods: ['validateAlphaNumericString']
+      },
+      {
+        parameter: 'channel_permalink',
+        validatorMethods: ['validateName']
+      }
+    ],
+    optional: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      },
+      {
+        parameter: 'fingerprint_id',
+        validatorMethods: ['validateString']
+      }
+    ]
+  },
+  [apiName.getChannelMeeting]: {
+    mandatory: [
+      {
+        parameter: 'api_source',
+        validatorMethods: ['validateString']
+      },
+      {
+        parameter: 'meeting_id',
+        validatorMethods: ['validateAlphaNumericString']
+      },
+      {
+        parameter: 'channel_permalink',
+        validatorMethods: ['validateName']
+      }
+    ],
+    optional: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      }
+    ]
+  },
+  [apiName.startChannelZoomMeeting]: {
+    mandatory: [
+      {
+        parameter: 'api_source',
+        validatorMethods: ['validateString']
+      },
+      {
+        parameter: 'channel_permalink',
+        validatorMethods: ['validateName']
+      },
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      }
+    ],
+    optional: []
+  },
   [apiName.getChannelVideos]: {
     mandatory: [
       {
@@ -569,6 +660,19 @@ const webSignature = {
         validatorMethods: ['validateNonEmptyObject']
       }
     ]
+  },
+  [apiName.getCurrentUserManagedChannel]: {
+    mandatory: [
+      {
+        parameter: 'user_id',
+        validatorMethods: ['validateInteger']
+      },
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      }
+    ],
+    optional: []
   }
 };
 

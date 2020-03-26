@@ -234,6 +234,21 @@
     "code": "BAD_REQUEST",
     "message": "Maximum redemption amount for redemption crossed."
   },
+  "zoom_user_unavailable": {
+    "http_code": "200",
+    "code": "ZOOM_USER_UNAVAILABLE",
+    "message": "We have reached the limit of Pepo live events on the same time, please try again later."
+  },
+  "already_hosting_other_meetings": {
+    "http_code": "200",
+    "code": "ALREADY_HOSTING_OTHER_MEETINGS",
+    "message": "You are already hosting a Pepo live event for another Community. Please end these event before starting a new one."
+  },
+  "invalid_channel_user_role": {
+    "http_code": "200",
+    "code": "INVALID_CHANNEL_USER_ROLE",
+    "message": "Only community admins can start a Pepo live event. Please apply to be a community admin."
+  },
   "pending_transaction_found": {
     "http_code": "200",
     "code": "BAD_REQUEST",
@@ -243,5 +258,20 @@
     "http_code": "200",
     "code": "BAD_REQUEST",
     "message": "Please enter Integral dollar value. Decimals are not allowed."
+  },
+  "web_signup_prohibited": {
+    "http_code": "200",
+    "code": "web_signup_prohibited",
+    "message": "Signup from Web is prohibited."
+  },
+  "meeting_has_ended": {
+    "http_code": "200",
+    "code": "MEETING_HAS_ENDED",
+    "message": "This Pepo live event has ended."
+  },
+  "zoom_call_could_not_proceed": {
+    "http_code": "200",
+    "code": "ZOOM_CALL_COULD_NOT_PROCEED",
+    "message": "We could not create your new Pepo live event. Please try again later."
   }
 }

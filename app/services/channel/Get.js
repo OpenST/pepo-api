@@ -7,6 +7,7 @@ const rootPrefix = '../../..',
   ChannelByPermalinksCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelByPermalinks'),
   ChannelTagByChannelIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelTagByChannelIds'),
   ChannelStatByChannelIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelStatByChannelIds'),
+  LiveMeetingIdByChannelIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/meeting/LiveMeetingIdByChannelIds'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
   channelConstants = require(rootPrefix + '/lib/globalConstant/channel/channels');
@@ -21,8 +22,8 @@ class GetChannel extends ServiceBase {
    * Constructor to get channel details.
    *
    * @param {object} params
-   * @param {string} params.channel_permalink
-   * @param {number} params.channel_id
+   * @param {string} [params.channel_permalink]
+   * @param {number} [params.channel_id]
    * @param {object} params.current_user
    *
    * @augments ServiceBase
@@ -51,6 +52,8 @@ class GetChannel extends ServiceBase {
     oThis.tagIds = [];
     oThis.tags = {};
     oThis.links = {};
+
+    oThis.channelAllowedActions = {};
   }
 
   /**
@@ -74,6 +77,8 @@ class GetChannel extends ServiceBase {
 
     await Promise.all(promisesArray);
 
+    await oThis._fetchChannelAllowedActions();
+
     return responseHelper.successWithData(oThis._prepareResponse());
   }
 
@@ -90,9 +95,9 @@ class GetChannel extends ServiceBase {
 
     // If channel id is not passed and permalink is passed.
     if (!oThis.channelId) {
-      let lowercaseChPermalink = oThis.channelPermalink.toLowerCase();
+      const lowercaseChannelPermalink = oThis.channelPermalink.toLowerCase();
       const cacheResponse = await new ChannelByPermalinksCache({
-        permalinks: [lowercaseChPermalink]
+        permalinks: [lowercaseChannelPermalink]
       }).fetch();
 
       if (cacheResponse.isFailure()) {
@@ -101,7 +106,7 @@ class GetChannel extends ServiceBase {
 
       const permalinkIdsMap = cacheResponse.data;
 
-      if (!CommonValidators.validateNonEmptyObject(permalinkIdsMap[lowercaseChPermalink])) {
+      if (!CommonValidators.validateNonEmptyObject(permalinkIdsMap[lowercaseChannelPermalink])) {
         return Promise.reject(
           responseHelper.error({
             internal_error_identifier: 'a_s_c_g_3',
@@ -113,7 +118,7 @@ class GetChannel extends ServiceBase {
         );
       }
 
-      oThis.channelId = permalinkIdsMap[lowercaseChPermalink].id;
+      oThis.channelId = permalinkIdsMap[lowercaseChannelPermalink].id;
     }
 
     const channelCacheResponse = await new ChannelByIdsCache({ ids: [oThis.channelId] }).fetch();
@@ -234,6 +239,40 @@ class GetChannel extends ServiceBase {
   }
 
   /**
+   * Fetch channel allowed actions.
+   *
+   * @private
+   */
+  async _fetchChannelAllowedActions() {
+    const oThis = this;
+
+    oThis.channelAllowedActions[oThis.channelId] = {
+      id: oThis.channelId,
+      canStartMeeting: 0,
+      canJoinMeeting: 0,
+      updatedAt: Math.round(new Date() / 1000)
+    };
+
+    const liveMeetingIdByChannelIdsCacheResponse = await new LiveMeetingIdByChannelIdsCache({
+      channelIds: [oThis.channelId]
+    }).fetch();
+
+    if (liveMeetingIdByChannelIdsCacheResponse.isFailure()) {
+      return Promise.reject(liveMeetingIdByChannelIdsCacheResponse);
+    }
+
+    // If liveMeetingId is present for channel id.
+    if (liveMeetingIdByChannelIdsCacheResponse.data[oThis.channelId].liveMeetingId) {
+      oThis.channelAllowedActions[oThis.channelId].canJoinMeeting = 1;
+    } else if (
+      CommonValidators.validateNonEmptyObject(oThis.currentUser) &&
+      oThis.currentUserChannelRelations[oThis.channelId].isAdmin
+    ) {
+      oThis.channelAllowedActions[oThis.channelId].canStartMeeting = 1;
+    }
+  }
+
+  /**
    * Fetch associated entities.
    *
    * @sets oThis.images, oThis.texts
@@ -275,6 +314,7 @@ class GetChannel extends ServiceBase {
       [entityTypeConstants.channelStatsMap]: oThis.channelStatsMap,
       [entityTypeConstants.currentUserChannelRelationsMap]: oThis.currentUserChannelRelations,
       [entityTypeConstants.textsMap]: oThis.texts,
+      [entityTypeConstants.channelAllowedActionsMap]: oThis.channelAllowedActions,
       linkMap: oThis.links,
       imageMap: oThis.images,
       tags: oThis.tags

@@ -7,12 +7,14 @@ const rootPrefix = '../../..',
   CuratedEntityIdsByKindCache = require(rootPrefix + '/lib/cacheManagement/single/CuratedEntityIdsByKind'),
   ChannelTagByChannelIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelTagByChannelIds'),
   ChannelStatByChannelIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelStatByChannelIds'),
+  DefaultChannelsListForWeb = require(rootPrefix + '/lib/cacheManagement/single/DefaultChannelsListForWeb'),
   basicHelper = require(rootPrefix + '/helpers/basic'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination'),
   entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
   channelConstants = require(rootPrefix + '/lib/globalConstant/channel/channels'),
+  apiSourceConstants = require(rootPrefix + '/lib/globalConstant/apiSource'),
   curatedEntitiesConstants = require(rootPrefix + '/lib/globalConstant/curatedEntities');
 
 // Declare variables.
@@ -31,6 +33,7 @@ class ChannelSearch extends ServiceBase {
    * @param {object} params
    * @param {object} params.current_user
    * @param {string} params.q
+   * @param {string} params.api_source
    * @param {string} params.pagination_identifier
    * @param {boolean} [params.getTopResults]
    *
@@ -47,6 +50,7 @@ class ChannelSearch extends ServiceBase {
     oThis.channelPrefix = params.q || null;
     oThis.paginationIdentifier = params[paginationConstants.paginationIdentifierKey] || null;
     oThis.getTopResults = params.getTopResults || false;
+    oThis.apiSource = params.api_source;
 
     oThis.limit = null;
     oThis.paginationTimestamp = null;
@@ -67,6 +71,7 @@ class ChannelSearch extends ServiceBase {
     oThis.tags = {};
     oThis.links = {};
     oThis.textsMap = {};
+    oThis.nextPageChannelIdIndex = 0;
   }
 
   /**
@@ -110,7 +115,7 @@ class ChannelSearch extends ServiceBase {
 
     if (oThis.paginationIdentifier) {
       const parsedPaginationParams = oThis._parsePaginationParams(oThis.paginationIdentifier);
-      oThis.paginationTimestamp = parsedPaginationParams.paginationTimestamp; // Override paginationTimestamp
+      oThis.paginationTimestamp = parsedPaginationParams.pagination_timestamp; // Override paginationTimestamp
     } else {
       oThis.paginationTimestamp = null;
     }
@@ -141,6 +146,19 @@ class ChannelSearch extends ServiceBase {
 
         channelIds = channelPaginationRsp.data.channelIds;
       }
+    } else if (apiSourceConstants.isWebRequest(oThis.apiSource)) {
+      // Order all channels, first Live, then curated, then rest all
+      const cacheResponse = await new DefaultChannelsListForWeb().fetch();
+      if (cacheResponse.isFailure()) {
+        return Promise.reject(cacheResponse);
+      }
+
+      const allchannelIds = cacheResponse.data.channelIds;
+      let index = oThis.paginationTimestamp ? oThis.paginationTimestamp : 0;
+      channelIds = allchannelIds.slice(index, index + oThis.limit);
+      if (index + oThis.limit < allchannelIds.length) {
+        oThis.nextPageChannelIdIndex = index + oThis.limit;
+      }
     } else {
       // Display curated channels in search.
       const cacheResponse = await new CuratedEntityIdsByKindCache({
@@ -152,7 +170,9 @@ class ChannelSearch extends ServiceBase {
 
       channelIds = cacheResponse.data.entityIds;
 
-      channelIds = oThis.getTopResults ? channelIds.slice(0, topChannelsResultsLimit + 1) : channelIds;
+      channelIds = oThis.getTopResults
+        ? channelIds.slice(0, topChannelsResultsLimit + 1)
+        : channelIds.slice(0, oThis.limit);
     }
 
     return channelIds;
@@ -303,6 +323,10 @@ class ChannelSearch extends ServiceBase {
   async _fetchCurrentUserChannelRelations() {
     const oThis = this;
 
+    if (!oThis.currentUser) {
+      return;
+    }
+
     const currentUserChannelRelationLibParams = {
       currentUserId: oThis.currentUser.id,
       channelIds: oThis.channelIds
@@ -360,6 +384,10 @@ class ChannelSearch extends ServiceBase {
     if (oThis.channelIds.length >= oThis.limit && oThis.channelPrefix) {
       nextPagePayloadKey[paginationConstants.paginationIdentifierKey] = {
         pagination_timestamp: oThis.nextPaginationTimestamp
+      };
+    } else if (apiSourceConstants.isWebRequest(oThis.apiSource) && oThis.nextPageChannelIdIndex) {
+      nextPagePayloadKey[paginationConstants.paginationIdentifierKey] = {
+        pagination_timestamp: oThis.nextPageChannelIdIndex
       };
     }
 

@@ -112,4 +112,26 @@ router.get('/:user_id/websocket-details', sanitizer.sanitizeDynamicUrlParams, fu
   );
 });
 
+/* Get current users managed communities. */
+router.get('/:user_id/channels', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.getCurrentUserManagedChannel;
+  req.decodedParams.user_id = req.params.user_id;
+
+  const dataFormatterFunc = async function(serviceResponse) {
+    const wrapperFormatterRsp = await new FormatterComposer({
+      resultType: responseEntityKey.channels,
+      entityKindToResponseKeyMap: {
+        [entityTypeConstants.channelsMap]: responseEntityKey.channels
+      },
+      serviceData: serviceResponse.data
+    }).perform();
+
+    serviceResponse.data = wrapperFormatterRsp.data;
+  };
+
+  Promise.resolve(
+    routeHelper.perform(req, res, next, '/user/ManagedCommunities', 'r_a_w_u_4', null, dataFormatterFunc)
+  );
+});
+
 module.exports = router;

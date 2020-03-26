@@ -210,6 +210,20 @@ class CoreConstants {
     return process.env.PA_SOCIAL_CONNECT_DB_MYSQL_PASSWORD;
   }
 
+  // Meeting db.
+
+  get MEETING_DB_MYSQL_HOST() {
+    return process.env.PA_MEETING_DB_MYSQL_HOST;
+  }
+
+  get MEETING_DB_MYSQL_USER() {
+    return process.env.PA_MEETING_DB_MYSQL_USER;
+  }
+
+  get MEETING_DB_MYSQL_PASSWORD() {
+    return process.env.PA_MEETING_DB_MYSQL_PASSWORD;
+  }
+
   // Admin db
   get ADMIN_DB_MYSQL_HOST() {
     return process.env.PA_ADMIN_DB_MYSQL_HOST;
@@ -584,6 +598,14 @@ class CoreConstants {
 
   get PEPO_DEV_ENV_DOMAIN() {
     return 'https://pepodev.com';
+  }
+
+  get PEPO_ZOOM_ACCOUNT_ID() {
+    return process.env.PA_ZOOM_ACCOUNT_ID;
+  }
+
+  get PEPO_ZOOM_WEBHOOK_VERIFICATION_TOKEN() {
+    return process.env.PA_ZOOM_WEBHOOK_VERIFICATION_TOKEN;
   }
 }
 

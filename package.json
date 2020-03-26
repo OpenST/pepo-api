@@ -31,6 +31,8 @@
     "morgan": "1.9.1",
     "mysql": "2.16.0",
     "node-rsa": "1.0.7",
+    "request": "2.88.2",
+    "request-promise": "4.2.5",
     "sanitize-html": "1.19.3",
     "slack": "11.0.2",
     "socket.io": "2.2.0"
