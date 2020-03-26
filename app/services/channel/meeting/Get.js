@@ -186,15 +186,15 @@ class GetChannelMeeting extends ServiceBase {
       );
     }
 
-    if (!oThis.meeting.isLive) {
-      return Promise.reject(
-        responseHelper.error({
-          internal_error_identifier: 'a_s_c_m_g_favm_2',
-          api_error_identifier: 'meeting_has_ended',
-          debug_options: oThis.meeting
-        })
-      );
-    }
+    // if (!oThis.meeting.isLive) {
+    //   return Promise.reject(
+    //     responseHelper.error({
+    //       internal_error_identifier: 'a_s_c_m_g_favm_2',
+    //       api_error_identifier: 'meeting_has_ended',
+    //       debug_options: oThis.meeting
+    //     })
+    //   );
+    // }
 
     oThis.hostUserId = oThis.meeting.hostUserId;
     oThis.userIds.push(oThis.meeting.hostUserId);
