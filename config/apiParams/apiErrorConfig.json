@@ -237,7 +237,7 @@
   "zoom_user_unavailable": {
     "http_code": "200",
     "code": "ZOOM_USER_UNAVAILABLE",
-    "message": "No zoom users are available at the moment. Please try again later."
+    "message": "We have reached the limit of Pepo live events on the same time, please try again later."
   },
   "already_hosting_other_meetings": {
     "http_code": "200",
