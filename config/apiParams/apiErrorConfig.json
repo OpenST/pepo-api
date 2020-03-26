@@ -247,7 +247,7 @@
   "invalid_channel_user_role": {
     "http_code": "200",
     "code": "INVALID_CHANNEL_USER_ROLE",
-    "message": "If you would like to host live meetings on Pepo, please apply to be a community admin."
+    "message": "Only community admins can start a meeting. Please apply to be a community admin."
   },
   "pending_transaction_found": {
     "http_code": "200",
