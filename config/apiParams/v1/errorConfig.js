@@ -468,7 +468,7 @@ const v1ErrorConfig = {
   invalid_channel_user_role: {
     parameter: 'user_id',
     code: 'invalid',
-    message: 'Only channel admins can start a meeting. Please make sure you are a channel administrator.'
+    message: 'If you would like to host live meetings on Pepo, please apply to be a community admin.'
   },
 
   channel_not_active: {
