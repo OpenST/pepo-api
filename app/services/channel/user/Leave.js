@@ -44,6 +44,7 @@ class LeaveChannel extends ServiceBase {
     oThis.channelUserObj = null;
     oThis.currentUserChannelRelationsMap = {};
     oThis.channelStatsMap = {};
+    oThis.currentUserChannelRole = null;
   }
 
   /**
@@ -137,6 +138,7 @@ class LeaveChannel extends ServiceBase {
     }
 
     oThis.channelUserObj = cacheResponse.data[oThis.channelId];
+    oThis.currentUserChannelRole = oThis.channelUserObj.role;
   }
 
   /**
@@ -254,7 +256,7 @@ class LeaveChannel extends ServiceBase {
   async _changeUserProperty() {
     const oThis = this;
 
-    if (oThis.channelUserObj.role === channelUsersConstants.adminRole) {
+    if (oThis.currentUserChannelRole === channelUsersConstants.adminRole) {
       const channelUserByUserIdsCacheResp = await new ManageChannelIdsByUserIdsCache({
         userId: oThis.currentUser.id
       }).fetch();
