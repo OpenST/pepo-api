@@ -219,7 +219,8 @@ class GetJoinMeetingPayload extends ServiceBase {
       signature: signature,
       name: oThis.name,
       api_key: zoomConstants.apiKey,
-      participantId: participantId
+      participantId: participantId,
+      role: role
     };
 
     return {
