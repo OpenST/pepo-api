@@ -97,7 +97,7 @@ class GetPreSignedUrl extends ServiceBase {
 
     const version = new Date().getTime() + '-' + Math.floor(Math.random() * 100000000);
 
-    return util.createMd5Digest(version) + '-' + oThis.fileExtension;
+    return util.createMd5Digest(version) + oThis.fileExtension;
   }
 }
 
