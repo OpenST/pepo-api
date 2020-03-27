@@ -1,19 +1,25 @@
 const rootPrefix = '../../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   FilterTags = require(rootPrefix + '/lib/FilterOutTags'),
+  TagModel = require(rootPrefix + '/app/models/mysql/Tag'),
   TextModel = require(rootPrefix + '/app/models/mysql/Text'),
+  UserModel = require(rootPrefix + '/app/models/mysql/User'),
   FilterOutLinks = require(rootPrefix + '/lib/FilterOutLinks'),
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   ChannelModel = require(rootPrefix + '/app/models/mysql/channel/Channel'),
+  AddInChannelLib = require(rootPrefix + '/lib/channelTagVideo/AddTagInChannel'),
   ChannelStatModel = require(rootPrefix + '/app/models/mysql/channel/ChannelStat'),
+  ChangeChannelUserRoleLib = require(rootPrefix + '/lib/channel/ChangeChannelUserRole'),
   ChannelByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelByIds'),
   ChannelByPermalinksCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelByPermalinks'),
   imageLib = require(rootPrefix + '/lib/imageLib'),
+  tagConstants = require(rootPrefix + '/lib/globalConstant/tag'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   textConstants = require(rootPrefix + '/lib/globalConstant/text'),
   imageConstants = require(rootPrefix + '/lib/globalConstant/image'),
-  channelConstants = require(rootPrefix + '/lib/globalConstant/channel/channels');
+  channelConstants = require(rootPrefix + '/lib/globalConstant/channel/channels'),
+  channelUserConstants = require(rootPrefix + '/lib/globalConstant/channel/channelUsers');
 
 // Declare constants.
 const ORIGINAL_IMAGE_WIDTH = 1500;
@@ -54,13 +60,15 @@ class EditChannel extends ServiceBase {
     oThis.channelDescription = params.description;
     oThis.channelTagLine = params.tagline;
     oThis.channelPermalink = params.permalink;
-    oThis.channelAdmins = params.admins;
-    oThis.channelTags = params.tags;
+    oThis.channelAdminUserNames = params.admins;
+    oThis.channelTagNames = params.tags;
     oThis.originalImageUrl = params.original_image;
     oThis.shareImageUrl = params.share_image;
 
     oThis.channelId = null;
     oThis.channel = null;
+
+    oThis.tagIds = [];
   }
 
   /**
@@ -83,7 +91,9 @@ class EditChannel extends ServiceBase {
       oThis._performChannelDescriptionRelatedTasks(),
       oThis._performImageUrlRelatedTasks(),
       oThis._performShareImageUrlRelatedTasks(),
-      oThis._createEntryInChannelStats()
+      oThis._createEntryInChannelStats(),
+      oThis._associateAdminsToChannel(),
+      oThis._associateTagsToChannel()
     ]);
   }
 
@@ -436,6 +446,149 @@ class EditChannel extends ServiceBase {
       .catch(function(error) {
         logger.log('Avoid this error while updating channel. Error while creating channel stats: ', error);
       });
+  }
+
+  /**
+   * Associate admins to channel.
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _associateAdminsToChannel() {
+    const oThis = this;
+
+    if (oThis.channelAdminUserNames.length === 0) {
+      return;
+    }
+
+    const userNamesToUserMap = await new UserModel().fetchByUserNames(oThis.channelAdminUserNames);
+
+    if (Object.keys(userNamesToUserMap).length !== oThis.channelAdminUserNames.length) {
+      logger.error('Some admins are not present in user db.');
+
+      return Promise.reject(
+        responseHelper.error({
+          // TODO: @Kiran - update this.
+          internal_error_identifier: 'e_o_atc_vc_2',
+          api_error_identifier: 'entity_not_found',
+          debug_options: {
+            adminUserNames: oThis.adminUserNames
+          }
+        })
+      );
+    }
+
+    const adminUserIds = [];
+
+    for (const userName in userNamesToUserMap) {
+      adminUserIds.push(userNamesToUserMap[userName].id);
+    }
+
+    const promiseArray = [];
+
+    for (let ind = 0; ind < adminUserIds.length; ind++) {
+      promiseArray.push(
+        new ChangeChannelUserRoleLib({
+          userId: adminUserIds[ind],
+          channelId: oThis.channelId,
+          role: channelUserConstants.adminRole
+        }).perform()
+      );
+    }
+
+    await Promise.all(promiseArray);
+  }
+
+  /**
+   * Associate tags to channel.
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _associateTagsToChannel() {
+    const oThis = this;
+
+    if (oThis.channelTagNames.length === 0) {
+      return;
+    }
+
+    await oThis._fetchOrCreateTags();
+
+    const promiseArray = [];
+
+    for (let ind = 0; ind < oThis.tagIds.length; ind++) {
+      promiseArray.push(
+        new AddInChannelLib({
+          channelId: oThis.channelId,
+          tagId: oThis.tagIds[ind]
+        }).perform()
+      );
+    }
+
+    await Promise.all(promiseArray);
+  }
+
+  /**
+   * Fetch existing or create new tags.
+   *
+   * @sets oThis.tagIds
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _fetchOrCreateTags() {
+    const oThis = this;
+
+    const tagNameToTagIdMap = {},
+      newTagsToInsert = [],
+      newTagsToCreateArray = [];
+
+    const dbRows = await new TagModel()
+      .select(['id', 'name'])
+      .where({ name: oThis.channelTagNames })
+      .fire();
+
+    for (let index = 0; index < dbRows.length; index++) {
+      const formatDbRow = new TagModel()._formatDbData(dbRows[index]);
+      tagNameToTagIdMap[formatDbRow.name.toLowerCase()] = formatDbRow;
+      oThis.tagIds.push(formatDbRow.id);
+    }
+
+    for (let ind = 0; ind < oThis.channelTagNames.length; ind++) {
+      const inputTagName = oThis.channelTagNames[ind];
+      if (!tagNameToTagIdMap[inputTagName.toLowerCase()]) {
+        newTagsToInsert.push(inputTagName);
+        newTagsToCreateArray.push([inputTagName, 0, tagConstants.invertedStatuses[tagConstants.activeStatus]]);
+      }
+    }
+
+    // Creates new tags.
+    if (newTagsToCreateArray.length > 0) {
+      await new TagModel().insertTags(newTagsToCreateArray);
+
+      // Fetch new inserted tags.
+      const newTags = await new TagModel().getTags(newTagsToInsert);
+
+      for (let ind = 0; ind < newTags.length; ind++) {
+        oThis.tagIds.push(newTags[ind].id);
+      }
+    }
+
+    if (oThis.channelTagNames.length !== oThis.tagIds.length) {
+      logger.log('Some tags are not present in db.\nPlease verify.');
+
+      return Promise.reject(
+        // TODO: @Kiran - update this.
+        responseHelper.error({
+          internal_error_identifier: 'e_o_atc_vc_3',
+          api_error_identifier: 'entity_not_found',
+          debug_options: {
+            channelTagNames: oThis.channelTagNames,
+            tagIds: oThis.tagIds
+          }
+        })
+      );
+    }
   }
 }
 
