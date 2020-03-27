@@ -5,17 +5,19 @@ const rootPrefix = '../../../..',
   FilterOutLinks = require(rootPrefix + '/lib/FilterOutLinks'),
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   ChannelModel = require(rootPrefix + '/app/models/mysql/channel/Channel'),
+  ChannelStatModel = require(rootPrefix + '/app/models/mysql/channel/ChannelStat'),
   ChannelByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelByIds'),
   ChannelByPermalinksCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelByPermalinks'),
+  imageLib = require(rootPrefix + '/lib/imageLib'),
+  logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   textConstants = require(rootPrefix + '/lib/globalConstant/text'),
   imageConstants = require(rootPrefix + '/lib/globalConstant/image'),
-  entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
   channelConstants = require(rootPrefix + '/lib/globalConstant/channel/channels');
 
 // Declare constants.
-const ORIGIN_IMAGE_WIDTH = 1500;
-const ORIGIN_IMAGE_HEIGHT = 642;
+const ORIGINAL_IMAGE_WIDTH = 1500;
+const ORIGINAL_IMAGE_HEIGHT = 642;
 const SHARE_IMAGE_WIDTH = 1500;
 const SHARE_IMAGE_HEIGHT = 750;
 
@@ -28,15 +30,15 @@ class EditChannel extends ServiceBase {
   /**
    * Constructor to edit channel.
    *
-   * @param {number} params.isEdit
+   * @param {number} params.is_edit
    * @param {string} params.name
    * @param {string} params.description
-   * @param {string} params.tagLine
+   * @param {string} params.tagline
    * @param {string} params.permalink
    * @param {string[]} params.tags
    * @param {string[]} params.admins
-   * @param {string} params.originalImage
-   * @param {string} params.shareImage
+   * @param {string} params.original_image
+   * @param {string} params.share_image
    *
    * @augments ServiceBase
    *
@@ -47,15 +49,15 @@ class EditChannel extends ServiceBase {
 
     const oThis = this;
 
-    oThis.isEdit = params.isEdit;
+    oThis.isEdit = params.is_edit;
     oThis.channelName = params.name;
     oThis.channelDescription = params.description;
     oThis.channelTagLine = params.tagline;
     oThis.channelPermalink = params.permalink;
     oThis.channelAdmins = params.admins;
     oThis.channelTags = params.tags;
-    oThis.originalImage = params.originalImage;
-    oThis.shareImage = params.shareImage;
+    oThis.originalImageUrl = params.original_image;
+    oThis.shareImageUrl = params.share_image;
 
     oThis.channelId = null;
     oThis.channel = null;
@@ -72,10 +74,17 @@ class EditChannel extends ServiceBase {
 
     await oThis._validateAndSanitize();
 
-    if (oThis.isEdit) {
-    } else {
+    if (!oThis.isEdit) {
       await oThis._createNewChannel();
     }
+
+    await Promise.all([
+      oThis._performChannelTaglineRelatedTasks(),
+      oThis._performChannelDescriptionRelatedTasks(),
+      oThis._performImageUrlRelatedTasks(),
+      oThis._performShareImageUrlRelatedTasks(),
+      oThis._createEntryInChannelStats()
+    ]);
   }
 
   /**
@@ -214,11 +223,7 @@ class EditChannel extends ServiceBase {
   async _performChannelTaglineRelatedTasks() {
     const oThis = this;
 
-    if (
-      (!oThis.isEdit && !oThis.channelTagLine) ||
-      (oThis.channelTagLine && !oThis.isEdit) ||
-      (!oThis.channelTagLine && oThis.isEdit)
-    ) {
+    if (!oThis.isEdit && !oThis.channelTagLine) {
       return Promise.reject(
         responseHelper.error({
           internal_error_identifier: 'a_s_a_c_e_pctrt_1',
@@ -265,21 +270,21 @@ class EditChannel extends ServiceBase {
   async _performChannelDescriptionRelatedTasks() {
     const oThis = this;
 
-    if (oThis.channelDescription) {
-      if (!oThis.isEdit) {
-        return Promise.reject(
-          responseHelper.error({
-            internal_error_identifier: 'a_s_a_c_e_pcdrt_1',
-            api_error_identifier: 'entity_not_found', // TODO: @Kiran - update this.
-            debug_options: {
-              channelPermalink: oThis.channelPermalink,
-              isEdit: oThis.isEdit,
-              channelDescription: oThis.channelDescription
-            }
-          })
-        );
-      }
+    if (!oThis.isEdit && !oThis.channelDescription) {
+      return Promise.reject(
+        responseHelper.error({
+          internal_error_identifier: 'a_s_a_c_e_pcdrt_1',
+          api_error_identifier: 'entity_not_found', // TODO: @Kiran - update this.
+          debug_options: {
+            channelPermalink: oThis.channelPermalink,
+            isEdit: oThis.isEdit,
+            channelDescription: oThis.channelDescription
+          }
+        })
+      );
+    }
 
+    if (oThis.channelDescription) {
       // Create new entry in texts table.
       const textRow = await new TextModel().insertText({
         text: oThis.channelDescription,
@@ -304,6 +309,133 @@ class EditChannel extends ServiceBase {
 
       await ChannelModel.flushCache({ ids: [oThis.channelId], permalinks: [oThis.channelPermalink] });
     }
+  }
+
+  /**
+   * Perform image url related tasks.
+   *
+   * @returns {Promise<never>}
+   * @private
+   */
+  async _performImageUrlRelatedTasks() {
+    const oThis = this;
+
+    if (!oThis.isEdit && !oThis.originalImageUrl) {
+      return Promise.reject(
+        responseHelper.error({
+          internal_error_identifier: 'a_s_a_c_e_pcdrt_1',
+          api_error_identifier: 'entity_not_found', // TODO: @Kiran - update this.
+          debug_options: {
+            channelPermalink: oThis.channelPermalink,
+            isEdit: oThis.isEdit,
+            originalImageUrl: oThis.originalImageUrl
+          }
+        })
+      );
+    }
+
+    if (oThis.originalImageUrl) {
+      const imageParams = {
+        imageUrl: oThis.originalImageUrl,
+        size: oThis.size, // TODO
+        width: ORIGINAL_IMAGE_WIDTH,
+        height: ORIGINAL_IMAGE_HEIGHT,
+        kind: imageConstants.channelImageKind,
+        channelId: oThis.channelId,
+        isExternalUrl: false,
+        enqueueResizer: true
+      };
+
+      // Validate and save image.
+      const resp = await imageLib.validateAndSave(imageParams);
+      if (resp.isFailure()) {
+        return Promise.reject(resp);
+      }
+
+      const imageData = resp.data;
+
+      // Update channel table.
+      await new ChannelModel()
+        .update({ cover_image_id: imageData.insertId })
+        .where({ id: oThis.channelId })
+        .fire();
+
+      await ChannelModel.flushCache({ ids: [oThis.channelId] });
+    }
+  }
+
+  /**
+   * Perform share image url related tasks.
+   *
+   * @returns {Promise<never>}
+   * @private
+   */
+  async _performShareImageUrlRelatedTasks() {
+    const oThis = this;
+
+    if (!oThis.isEdit && !oThis.shareImageUrl) {
+      return Promise.reject(
+        responseHelper.error({
+          internal_error_identifier: 'a_s_a_c_e_pcdrt_1',
+          api_error_identifier: 'entity_not_found', // TODO: @Kiran - update this.
+          debug_options: {
+            channelPermalink: oThis.channelPermalink,
+            isEdit: oThis.isEdit,
+            shareImageUrl: oThis.shareImageUrl
+          }
+        })
+      );
+    }
+
+    if (oThis.shareImageUrl) {
+      const imageParams = {
+        imageUrl: oThis.shareImageUrl,
+        size: oThis.size, // TODO
+        width: SHARE_IMAGE_WIDTH,
+        height: SHARE_IMAGE_HEIGHT,
+        kind: imageConstants.channelShareImageKind,
+        channelId: oThis.channelId,
+        isExternalUrl: false,
+        enqueueResizer: true
+      };
+
+      // Validate and save image.
+      const resp = await imageLib.validateAndSave(imageParams);
+      if (resp.isFailure()) {
+        return Promise.reject(resp);
+      }
+
+      const imageData = resp.data;
+
+      // Update channel table.
+      await new ChannelModel()
+        .update({ share_image_id: imageData.insertId })
+        .where({ id: oThis.channelId })
+        .fire();
+
+      await ChannelModel.flushCache({ ids: [oThis.channelId] });
+    }
+  }
+
+  /**
+   * Create new entry in channel stat table.
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _createEntryInChannelStats() {
+    const oThis = this;
+
+    if (oThis.isEdit) {
+      return;
+    }
+
+    await new ChannelStatModel()
+      .insert({ channel_id: oThis.channelId, total_videos: 0, total_users: 0 })
+      .fire()
+      .catch(function(error) {
+        logger.log('Avoid this error while updating channel. Error while creating channel stats: ', error);
+      });
   }
 }
 
