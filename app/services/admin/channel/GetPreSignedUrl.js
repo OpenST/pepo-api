@@ -1,6 +1,7 @@
 const rootPrefix = '../../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   AwsS3wrapper = require(rootPrefix + '/lib/aws/S3Wrapper'),
+  util = require(rootPrefix + '/lib/util'),
   s3Constants = require(rootPrefix + '/lib/globalConstant/s3'),
   coreConstants = require(rootPrefix + '/config/coreConstants'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
@@ -82,7 +83,7 @@ class GetPreSignedUrl extends ServiceBase {
   _getS3UrlForChannel(fileName) {
     const oThis = this;
 
-    return oThis.getS3UrlPrefix() + '/' + coreConstants.S3_CHANNEL_IMAGES_FOLDER + '/' + fileName;
+    return s3Constants.getS3UrlPrefix() + '/' + coreConstants.S3_CHANNEL_IMAGES_FOLDER + '/' + fileName;
   }
 
   /**
@@ -96,7 +97,7 @@ class GetPreSignedUrl extends ServiceBase {
 
     const version = new Date().getTime() + '-' + Math.floor(Math.random() * 100000000);
 
-    return oThis.createMd5Digest(version) + '-' + oThis.fileExtension;
+    return util.createMd5Digest(version) + '-' + oThis.fileExtension;
   }
 }
 
