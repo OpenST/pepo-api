@@ -214,7 +214,11 @@ class EditChannel extends ServiceBase {
   async _performChannelTaglineRelatedTasks() {
     const oThis = this;
 
-    if (!oThis.isEdit && !oThis.channelTagLine) {
+    if (
+      (!oThis.isEdit && !oThis.channelTagLine) ||
+      (oThis.channelTagLine && !oThis.isEdit) ||
+      (!oThis.channelTagLine && oThis.isEdit)
+    ) {
       return Promise.reject(
         responseHelper.error({
           internal_error_identifier: 'a_s_a_c_e_pctrt_1',
@@ -229,23 +233,6 @@ class EditChannel extends ServiceBase {
     }
 
     if (oThis.channelTagLine) {
-    }
-
-    if (oThis.channelTagline) {
-      if (!oThis.isEdit) {
-        return Promise.reject(
-          responseHelper.error({
-            internal_error_identifier: 'a_s_a_c_e_pctrt_1',
-            api_error_identifier: 'entity_not_found', // TODO: @Kiran - update this.
-            debug_options: {
-              channelPermalink: oThis.channelPermalink,
-              isEdit: oThis.isEdit,
-              channelTagline: oThis.channelTagline
-            }
-          })
-        );
-      }
-
       // Create new entry in texts table.
       const textRow = await new TextModel().insertText({
         text: oThis.channelTagline,
