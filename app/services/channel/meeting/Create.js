@@ -345,8 +345,7 @@ class StartMeeting extends ServiceBase {
    * Record meeting in table.
    * Send slack alert when meeting is live
    *
-   * @sets oThis.meetingId
-   * @sets oThis.errorGoingLive
+   * @sets oThis.meetingId, oThis.errorGoingLive
    *
    * @returns {Promise<void>}
    * @private
@@ -494,7 +493,7 @@ class StartMeeting extends ServiceBase {
       errorGoingLive: oThis.errorGoingLive
     };
 
-    await bgJob.enqueue(bgJobConstants.slackLiveEventMonitoringJobTopic(), payload);
+    await bgJob.enqueue(bgJobConstants.slackLiveEventMonitoringJobTopic, payload);
   }
 }
 
