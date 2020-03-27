@@ -411,11 +411,11 @@ const adminSignature = {
     ],
     optional: []
   },
-  [apiName.editChannel]: {
+  [apiName.adminEditChannel]: {
     mandatory: [
       {
         parameter: 'is_edit',
-        validatorMethods: ['validateBoolean']
+        validatorMethods: ['validateInteger']
       },
       {
         parameter: 'permalink',
@@ -424,16 +424,16 @@ const adminSignature = {
     ],
     optional: [
       {
-        parameter: 'channel_name',
-        validatorMethods: ['validateString']
+        parameter: 'name',
+        validatorMethods: ['validateChannelTitle']
       },
       {
         parameter: 'description',
-        validatorMethods: ['validateString', 'validateStopWords']
+        validatorMethods: ['validateChannelDescription', 'validateStopWords']
       },
       {
         parameter: 'tagline',
-        validatorMethods: ['validateString', 'validateStopWords']
+        validatorMethods: ['validateChannelTagline', 'validateStopWords']
       },
       {
         parameter: 'tags',
@@ -445,11 +445,11 @@ const adminSignature = {
       },
       {
         parameter: 'original_image',
-        validatorMethods: ['validateString']
+        validatorMethods: ['validateHttpBasedUrl']
       },
       {
         parameter: 'share_image',
-        validatorMethods: ['validateString']
+        validatorMethods: ['validateHttpBasedUrl']
       }
     ]
   }
