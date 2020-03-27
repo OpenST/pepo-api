@@ -16,7 +16,15 @@ class EditChannel extends ServiceBase {
   /**
    * Constructor to edit channel.
    *
-   * @param {object} params
+   * @param {number} params.isEdit
+   * @param {string} params.name
+   * @param {string} params.description
+   * @param {string} params.tagLine
+   * @param {string} params.permalink
+   * @param {string[]} params.tags
+   * @param {string[]} params.admins
+   * @param {string} params.originalImage
+   * @param {string} params.shareImage
    *
    * @augments ServiceBase
    *
@@ -32,6 +40,7 @@ class EditChannel extends ServiceBase {
     oThis.description = params.description;
     oThis.tagLine = params.tagLine;
     oThis.permalink = params.permalink;
+    oThis.tags = params.tags;
     oThis.admins = params.admins;
     oThis.originalImage = params.originalImage;
     oThis.shareImage = params.shareImage;
