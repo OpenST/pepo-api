@@ -4,7 +4,6 @@ const rootPrefix = '../../../..',
   util = require(rootPrefix + '/lib/util'),
   s3Constants = require(rootPrefix + '/lib/globalConstant/s3'),
   coreConstants = require(rootPrefix + '/config/coreConstants'),
-  logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   responseHelper = require(rootPrefix + '/lib/formatter/response');
 
 /**
@@ -81,8 +80,6 @@ class GetPreSignedUrl extends ServiceBase {
    * @private
    */
   _getS3UrlForChannel(fileName) {
-    const oThis = this;
-
     return s3Constants.getS3UrlPrefix() + '/' + coreConstants.S3_CHANNEL_IMAGES_FOLDER + '/' + fileName;
   }
 
