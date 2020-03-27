@@ -70,7 +70,7 @@ class PreSignedUrl extends ServiceBase {
 
     oThis.apiResponse[resultKey] = resultHash;
 
-    return responseHelper.successWithData({ [adminEntityType.presignedUrlMap]: oThis.apiResponse });
+    return responseHelper.successWithData({ [adminEntityType.channelUploadParamsMap]: oThis.apiResponse });
   }
 
   /**

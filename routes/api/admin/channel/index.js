@@ -22,9 +22,9 @@ router.get('/presigned-url', sanitizer.sanitizeDynamicUrlParams, function(req, r
 
   const dataFormatterFunc = async function(serviceResponse) {
     const wrapperFormatterRsp = await new AdminFormatterComposer({
-      resultType: adminResponseEntityKey.preSignedUrl,
+      resultType: adminResponseEntityKey.channelUploadParams,
       entityKindToResponseKeyMap: {
-        [adminEntityType.presignedUrlMap]: adminResponseEntityKey.preSignedUrl
+        [adminEntityType.channelUploadParamsMap]: adminResponseEntityKey.channelUploadParams
       },
       serviceData: serviceResponse.data
     }).perform();
