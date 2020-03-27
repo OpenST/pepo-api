@@ -37,14 +37,14 @@ class EditChannel extends ServiceBase {
    * Constructor to edit channel.
    *
    * @param {number} params.is_edit
-   * @param {string} params.name
-   * @param {string} params.description
-   * @param {string} params.tagline
+   * @param {string} [params.name]
+   * @param {string} [params.description]
+   * @param {string} [params.tagline]
    * @param {string} params.permalink
-   * @param {string[]} params.tags
-   * @param {string[]} params.admins
-   * @param {string} params.original_image
-   * @param {string} params.share_image
+   * @param {string[]} [params.tags]
+   * @param {string[]} [params.admins]
+   * @param {string} [params.original_image]
+   * @param {string} [params.share_image]
    *
    * @augments ServiceBase
    *
@@ -163,6 +163,7 @@ class EditChannel extends ServiceBase {
       );
     }
 
+    // This will be set only in case of isEdit = 1.
     oThis.channelId = permalinkIdsMap[lowercaseChannelPermalink].id;
   }
 
@@ -212,6 +213,19 @@ class EditChannel extends ServiceBase {
    */
   async _createNewChannel() {
     const oThis = this;
+
+    if (!oThis.channelName) {
+      return Promise.reject(
+        responseHelper.error({
+          internal_error_identifier: 'a_s_a_c_e_cnc_1',
+          api_error_identifier: 'invalid_api_params',
+          debug_options: {
+            channelPermalink: oThis.channelPermalink,
+            isEdit: oThis.isEdit
+          }
+        })
+      );
+    }
 
     const insertResponse = await new ChannelModel()
       .insert({
