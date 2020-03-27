@@ -4,14 +4,15 @@ const rootPrefix = '../../../..',
   util = require(rootPrefix + '/lib/util'),
   s3Constants = require(rootPrefix + '/lib/globalConstant/s3'),
   coreConstants = require(rootPrefix + '/config/coreConstants'),
-  responseHelper = require(rootPrefix + '/lib/formatter/response');
+  responseHelper = require(rootPrefix + '/lib/formatter/response'),
+  adminEntityType = require(rootPrefix + '/lib/globalConstant/adminEntityType');
 
 /**
  * Class to get pre-signed url.
  *
- * @class GetPreSignedUrl
+ * @class PreSignedUrl
  */
-class GetPreSignedUrl extends ServiceBase {
+class PreSignedUrl extends ServiceBase {
   /**
    * Constructor to get pre-signed url.
    *
@@ -69,7 +70,7 @@ class GetPreSignedUrl extends ServiceBase {
 
     oThis.apiResponse[resultKey] = resultHash;
 
-    return responseHelper.successWithData({ uploadParamsMap: oThis.apiResponse });
+    return responseHelper.successWithData({ [adminEntityType.presignedUrlMap]: oThis.apiResponse });
   }
 
   /**
@@ -98,4 +99,4 @@ class GetPreSignedUrl extends ServiceBase {
   }
 }
 
-module.exports = GetPreSignedUrl;
+module.exports = PreSignedUrl;

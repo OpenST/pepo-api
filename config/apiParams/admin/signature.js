@@ -452,6 +452,10 @@ const adminSignature = {
         validatorMethods: ['validateHttpBasedUrl']
       }
     ]
+  },
+  [apiName.presignedUrl]: {
+    mandatory: [],
+    optional: []
   }
 };
 
