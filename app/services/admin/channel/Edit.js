@@ -37,14 +37,14 @@ class EditChannel extends ServiceBase {
    * Constructor to edit channel.
    *
    * @param {number} params.is_edit
-   * @param {string} params.name
-   * @param {string} params.description
-   * @param {string} params.tagline
+   * @param {string} [params.name]
+   * @param {string} [params.description]
+   * @param {string} [params.tagline]
    * @param {string} params.permalink
-   * @param {string[]} params.tags
-   * @param {string[]} params.admins
-   * @param {string} params.original_image
-   * @param {string} params.share_image
+   * @param {string[]} [params.tags]
+   * @param {string[]} [params.admins]
+   * @param {string} [params.original_image_url]
+   * @param {string} [params.share_image_url]
    *
    * @augments ServiceBase
    *
@@ -62,8 +62,8 @@ class EditChannel extends ServiceBase {
     oThis.channelPermalink = params.permalink;
     oThis.channelAdminUserNames = params.admins;
     oThis.channelTagNames = params.tags;
-    oThis.originalImageUrl = params.original_image;
-    oThis.shareImageUrl = params.share_image;
+    oThis.originalImageUrl = params.original_image_url;
+    oThis.shareImageUrl = params.share_image_url;
 
     oThis.channelId = null;
     oThis.channel = null;
@@ -154,7 +154,7 @@ class EditChannel extends ServiceBase {
       return Promise.reject(
         responseHelper.error({
           internal_error_identifier: 'a_s_a_c_e_vec_2',
-          api_error_identifier: 'entity_not_found', // TODO: @Kiran - update this.
+          api_error_identifier: 'duplicate_entry',
           debug_options: {
             channelPermalink: oThis.channelPermalink,
             isEdit: oThis.isEdit
@@ -163,6 +163,7 @@ class EditChannel extends ServiceBase {
       );
     }
 
+    // This will be set only in case of isEdit = 1.
     oThis.channelId = permalinkIdsMap[lowercaseChannelPermalink].id;
   }
 
@@ -213,6 +214,19 @@ class EditChannel extends ServiceBase {
   async _createNewChannel() {
     const oThis = this;
 
+    if (!oThis.channelName) {
+      return Promise.reject(
+        responseHelper.error({
+          internal_error_identifier: 'a_s_a_c_e_cnc_1',
+          api_error_identifier: 'invalid_api_params',
+          debug_options: {
+            channelPermalink: oThis.channelPermalink,
+            isEdit: oThis.isEdit
+          }
+        })
+      );
+    }
+
     const insertResponse = await new ChannelModel()
       .insert({
         name: oThis.channelName,
@@ -237,7 +251,7 @@ class EditChannel extends ServiceBase {
       return Promise.reject(
         responseHelper.error({
           internal_error_identifier: 'a_s_a_c_e_pctrt_1',
-          api_error_identifier: 'entity_not_found', // TODO: @Kiran - update this.
+          api_error_identifier: 'invalid_api_params',
           debug_options: {
             channelPermalink: oThis.channelPermalink,
             isEdit: oThis.isEdit,
@@ -284,7 +298,7 @@ class EditChannel extends ServiceBase {
       return Promise.reject(
         responseHelper.error({
           internal_error_identifier: 'a_s_a_c_e_pcdrt_1',
-          api_error_identifier: 'entity_not_found', // TODO: @Kiran - update this.
+          api_error_identifier: 'invalid_api_params',
           debug_options: {
             channelPermalink: oThis.channelPermalink,
             isEdit: oThis.isEdit,
@@ -333,8 +347,8 @@ class EditChannel extends ServiceBase {
     if (!oThis.isEdit && !oThis.originalImageUrl) {
       return Promise.reject(
         responseHelper.error({
-          internal_error_identifier: 'a_s_a_c_e_pcdrt_1',
-          api_error_identifier: 'entity_not_found', // TODO: @Kiran - update this.
+          internal_error_identifier: 'a_s_a_c_e_piurt_1',
+          api_error_identifier: 'invalid_api_params',
           debug_options: {
             channelPermalink: oThis.channelPermalink,
             isEdit: oThis.isEdit,
@@ -386,8 +400,8 @@ class EditChannel extends ServiceBase {
     if (!oThis.isEdit && !oThis.shareImageUrl) {
       return Promise.reject(
         responseHelper.error({
-          internal_error_identifier: 'a_s_a_c_e_pcdrt_1',
-          api_error_identifier: 'entity_not_found', // TODO: @Kiran - update this.
+          internal_error_identifier: 'a_s_a_c_e_psiurt_1',
+          api_error_identifier: 'invalid_api_params',
           debug_options: {
             channelPermalink: oThis.channelPermalink,
             isEdit: oThis.isEdit,
@@ -468,9 +482,8 @@ class EditChannel extends ServiceBase {
 
       return Promise.reject(
         responseHelper.error({
-          // TODO: @Kiran - update this.
-          internal_error_identifier: 'e_o_atc_vc_2',
-          api_error_identifier: 'entity_not_found',
+          internal_error_identifier: 'a_s_a_c_e_aatc_1',
+          api_error_identifier: 'something_went_wrong',
           debug_options: {
             adminUserNames: oThis.adminUserNames
           }
@@ -578,10 +591,9 @@ class EditChannel extends ServiceBase {
       logger.log('Some tags are not present in db.\nPlease verify.');
 
       return Promise.reject(
-        // TODO: @Kiran - update this.
         responseHelper.error({
-          internal_error_identifier: 'e_o_atc_vc_3',
-          api_error_identifier: 'entity_not_found',
+          internal_error_identifier: 'a_s_a_c_e_foct_1',
+          api_error_identifier: 'something_went_wrong',
           debug_options: {
             channelTagNames: oThis.channelTagNames,
             tagIds: oThis.tagIds
