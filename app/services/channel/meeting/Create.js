@@ -290,7 +290,7 @@ class StartMeeting extends ServiceBase {
     if (!oThis.meetingRelayer) {
       // Send slack alert when no meeting relayer is available
       oThis.errorGoingLive = true;
-      oThis.sendSlackAlert();
+      await oThis.sendSlackAlert();
 
       return Promise.reject(
         responseHelper.error({
@@ -390,7 +390,7 @@ class StartMeeting extends ServiceBase {
 
     // Send slack alert when meeting is created
     oThis.errorGoingLive = false;
-    oThis.sendSlackAlert();
+    await oThis.sendSlackAlert();
 
     return responseHelper.successWithData({});
   }
