@@ -7,6 +7,7 @@ const rootPrefix = '../../../..',
   SecureUserCache = require(rootPrefix + '/lib/cacheManagement/single/SecureUser'),
   ChannelByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelByIds'),
   GetCurrentUserChannelRelationsLib = require(rootPrefix + '/lib/channel/GetCurrentUserChannelRelations'),
+  ManageChannelIdsByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/single/ManageChannelIdsByUserIds'),
   ChannelStatByChannelIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelStatByChannelIds'),
   ChannelUserByUserIdAndChannelIdsCache = require(rootPrefix +
     '/lib/cacheManagement/multi/channel/ChannelUserByUserIdAndChannelIds'),
@@ -254,16 +255,17 @@ class LeaveChannel extends ServiceBase {
     const oThis = this;
 
     if (oThis.channelUserObj.role === channelUsersConstants.adminRole) {
-      //check if user is admin in any other channel
-      const userAdminChannels = await new ChannelUserModel()
-        .select('*')
-        .where({
-          user_id: oThis.currentUser.id,
-          role: channelUsersConstants.invertedRoles[channelUsersConstants.adminRole]
-        })
-        .fire();
+      const channelUserByUserIdsCacheResp = await new ManageChannelIdsByUserIdsCache({
+        userId: oThis.currentUser.id
+      }).fetch();
 
-      if (userAdminChannels.length == 0) {
+      if (channelUserByUserIdsCacheResp.isFailure()) {
+        return Promise.reject(channelUserByUserIdsCacheResp);
+      }
+
+      const channelIdsArray = channelUserByUserIdsCacheResp.data.channelIds;
+
+      if (channelIdsArray.length == 0) {
         await new UserModel().unmarkUserChannelAdmin([oThis.currentUser.id]);
         await new SecureUserCache({ id: oThis.currentUser.id }).clear();
       }
