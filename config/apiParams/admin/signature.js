@@ -410,6 +410,48 @@ const adminSignature = {
       }
     ],
     optional: []
+  },
+  [apiName.editChannel]: {
+    mandatory: [
+      {
+        parameter: 'is_edit',
+        validatorMethods: ['validateBoolean']
+      },
+      {
+        parameter: 'permalink',
+        validatorMethods: ['validateString']
+      }
+    ],
+    optional: [
+      {
+        parameter: 'channel_name',
+        validatorMethods: ['validateString']
+      },
+      {
+        parameter: 'description',
+        validatorMethods: ['validateString', 'validateStopWords']
+      },
+      {
+        parameter: 'tagline',
+        validatorMethods: ['validateString', 'validateStopWords']
+      },
+      {
+        parameter: 'tags',
+        validatorMethods: ['validateCommaDelimitedStrings']
+      },
+      {
+        parameter: 'admins',
+        validatorMethods: ['validateCommaDelimitedStrings']
+      },
+      {
+        parameter: 'original_image',
+        validatorMethods: ['validateString']
+      },
+      {
+        parameter: 'share_image',
+        validatorMethods: ['validateString']
+      }
+    ]
   }
 };
 
