@@ -386,11 +386,11 @@ class StartMeeting extends ServiceBase {
 
     oThis.meetingId = insertResponse.insertId;
 
+    await ChannelModel.flushCache({ ids: [oThis.channelId] });
+
     // Send slack alert when meeting is created
     oThis.errorGoingLive = false;
     oThis.sendSlackAlert();
-
-    await ChannelModel.flushCache({ ids: [oThis.channelId] });
 
     return responseHelper.successWithData({});
   }
