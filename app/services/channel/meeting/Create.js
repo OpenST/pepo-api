@@ -15,7 +15,9 @@ const rootPrefix = '../../../..',
   entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
   meetingConstants = require(rootPrefix + '/lib/globalConstant/meeting/meeting'),
   channelConstants = require(rootPrefix + '/lib/globalConstant/channel/channels'),
-  meetingRelayerConstants = require(rootPrefix + '/lib/globalConstant/meeting/meetingRelayer');
+  meetingRelayerConstants = require(rootPrefix + '/lib/globalConstant/meeting/meetingRelayer'),
+  bgJob = require(rootPrefix + '/lib/rabbitMqEnqueue/bgJob'),
+  bgJobConstants = require(rootPrefix + '/lib/globalConstant/bgJob');
 
 /**
  * Class to start channel meeting.
@@ -246,6 +248,7 @@ class StartMeeting extends ServiceBase {
 
   /**
    * Reserve zoom user.
+   * Sends slack alert if no meeting relayer is available.
    *
    * @sets oThis.meetingRelayer
    *
@@ -284,6 +287,14 @@ class StartMeeting extends ServiceBase {
     }
 
     if (!oThis.meetingRelayer) {
+      // Send slack alert when no meeting relayer is available
+      const payload = {
+        channelId: oThis.channelId,
+        userId: oThis.currentUserId,
+        errorGoingLive: true
+      };
+      await bgJob.enqueue(bgJobConstants.slackLiveEventMonitoringJobTopic(), payload);
+
       return Promise.reject(
         responseHelper.error({
           internal_error_identifier: 'a_s_c_m_sm_5',
@@ -378,6 +389,7 @@ class StartMeeting extends ServiceBase {
 
     await ChannelModel.flushCache({ ids: [oThis.channelId] });
 
+    // TODO add bgjob here
     return responseHelper.successWithData({});
   }
 
