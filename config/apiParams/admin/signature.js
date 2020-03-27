@@ -444,11 +444,11 @@ const adminSignature = {
         validatorMethods: ['validateCommaDelimitedStrings']
       },
       {
-        parameter: 'original_image',
+        parameter: 'original_image_url',
         validatorMethods: ['validateHttpBasedUrl']
       },
       {
-        parameter: 'share_image',
+        parameter: 'share_image_url',
         validatorMethods: ['validateHttpBasedUrl']
       }
     ]
