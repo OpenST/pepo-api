@@ -465,7 +465,8 @@ class StartMeeting extends ServiceBase {
     // Send notifications to channel members when channel host goes live.
     await notificationJobEnqueue.enqueue(notificationJobConstants.channelGoLiveNotificationsKind, {
       channelId: oThis.channelId,
-      meetingHostUserId: oThis.currentUserId
+      meetingHostUserId: oThis.currentUserId,
+      meetingId: oThis.meetingId
     });
   }
 
