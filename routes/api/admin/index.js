@@ -15,6 +15,7 @@ const rootPrefix = '../../..',
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   apiVersions = require(rootPrefix + '/lib/globalConstant/apiVersions'),
   adminConstants = require(rootPrefix + '/lib/globalConstant/admin/admin'),
+  channelDataRoutes = require(rootPrefix + '/rroutes/api/admin/channel/index'),
   adminEntityType = require(rootPrefix + '/lib/globalConstant/adminEntityType'),
   adminResponseEntityKey = require(rootPrefix + '/lib/globalConstant/adminResponseEntity'),
   curatedEntitiesDataRoutes = require(rootPrefix + '/routes/api/admin/curatedEntity/index'),
@@ -430,5 +431,6 @@ router.post('/channels/:channel_id/block-user', sanitizer.sanitizeDynamicUrlPara
 
 router.use('/update-usage-data', adminUpdateUsageDataRoutes);
 router.use('/curated-entities', curatedEntitiesDataRoutes);
+router.use('/channel', channelDataRoutes);
 
 module.exports = router;
