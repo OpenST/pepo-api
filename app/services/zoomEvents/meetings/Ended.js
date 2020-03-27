@@ -176,7 +176,7 @@ class MeetingEnded extends ServiceBase {
         start_timestamp: oThis.startTimestamp,
         is_live: null
       })
-      .where({ id: oThis.meetingId, is_live: 1 })
+      .where({ id: oThis.meetingId, is_live: meetingConstants.isLiveStatus })
       .fire();
 
     if (updateResp.affectedRows === 0) {
