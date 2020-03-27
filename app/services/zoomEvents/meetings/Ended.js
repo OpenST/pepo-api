@@ -60,6 +60,10 @@ class MeetingEnded extends ServiceBase {
 
     await oThis._updateMeeting();
 
+    if (!oThis.processEvent) {
+      return responseHelper.successWithData({});
+    }
+
     await oThis._markMeetingRelayerAsAvailable();
 
     return responseHelper.successWithData({});
@@ -135,7 +139,7 @@ class MeetingEnded extends ServiceBase {
 
     oThis.meetingObj = cahceRes2.data[oThis.meetingId];
 
-    if (!oThis.meetingObj.id || !oThis.meetingObj.isLive) {
+    if (!oThis.meetingObj.id) {
       return Promise.reject(
         responseHelper.error({
           internal_error_identifier: 's_ze_m_e_fm_2',
@@ -143,6 +147,11 @@ class MeetingEnded extends ServiceBase {
           debug_options: { meetingObj: oThis.meetingObj }
         })
       );
+    }
+
+    if (!oThis.meetingObj.isLive) {
+      oThis.processEvent = false;
+      return responseHelper.successWithData({});
     }
 
     return responseHelper.successWithData({});
@@ -160,15 +169,20 @@ class MeetingEnded extends ServiceBase {
     logger.log('update meeting.');
 
     //mark as ended and relayed users state
-    await new MeetingModel()
+    const updateResp = await new MeetingModel()
       .update({
         status: meetingConstants.invertedStatuses[meetingConstants.endedStatus],
         end_timestamp: oThis.endTimestamp,
         start_timestamp: oThis.startTimestamp,
         is_live: null
       })
-      .where({ id: oThis.meetingId })
+      .where({ id: oThis.meetingId, is_live: 1 })
       .fire();
+
+    if (updateResp.affectedRows === 0) {
+      oThis.processEvent = false;
+      return responseHelper.successWithData({});
+    }
 
     await MeetingModel.flushCache({ id: oThis.meetingId, channelId: oThis.meetingObj.channelId });
 

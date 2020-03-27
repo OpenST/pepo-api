@@ -1,6 +1,5 @@
 const rootPrefix = '../../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
-  meetingConstants = require(rootPrefix + '/lib/globalConstant/meeting/meeting'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   MeetingLib = require(rootPrefix + '/lib/zoom/meeting'),
   createErrorLogsEntry = require(rootPrefix + '/lib/errorLogs/createEntry'),
@@ -11,7 +10,6 @@ const rootPrefix = '../../../..',
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   ChannelByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelByIds'),
   MeetingByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/meeting/MeetingByIds'),
-  GetCurrentUserChannelRelationsLib = require(rootPrefix + '/lib/channel/GetCurrentUserChannelRelations'),
   channelConstants = require(rootPrefix + '/lib/globalConstant/channel/channels');
 
 /**
@@ -52,8 +50,6 @@ class EndMeeting extends ServiceBase {
     await oThis._fetchAndValidateChannel();
 
     await oThis._validateMeeting();
-
-    await oThis._validateUserIsChannelAdmin();
 
     await oThis._endMeeting();
   }
@@ -150,51 +146,17 @@ class EndMeeting extends ServiceBase {
   }
 
   /**
-   * Fetch and validate user is channel admin.
-   *
-   * @returns {Promise<never>}
-   * @private
-   */
-  async _validateUserIsChannelAdmin() {
-    const oThis = this;
-    const currentUserChannelRelationLibParams = {
-      currentUserId: oThis.currentUserId,
-      channelIds: [oThis.channelId]
-    };
-    const currentUserChannelRelationsResponse = await new GetCurrentUserChannelRelationsLib(
-      currentUserChannelRelationLibParams
-    ).perform();
-    if (currentUserChannelRelationsResponse.isFailure()) {
-      return Promise.reject(currentUserChannelRelationsResponse);
-    }
-    const currentUserChannelRelations = currentUserChannelRelationsResponse.data.currentUserChannelRelations;
-    if (!currentUserChannelRelations[oThis.channelId].isAdmin) {
-      return Promise.reject(
-        responseHelper.error({
-          internal_error_identifier: 'a_s_c_m_em_5',
-          api_error_identifier: 'unauthorized_api_request',
-          debug_options: {
-            channelId: oThis.channelId,
-            currentUserId: oThis.currentUserId
-          }
-        })
-      );
-    }
-  }
-
-  /**
    * End the meeting.
    *
    * @private
    */
   async _endMeeting() {
     const oThis = this;
-    if (
-      oThis.meeting.status === meetingConstants.endedStatus ||
-      oThis.meeting.status === meetingConstants.deletedStatus
-    ) {
+
+    if (!oThis.meeting.isLive) {
       return;
     }
+
     const zoomMeetingId = oThis.meeting.zoomMeetingId;
     const zoomUUID = oThis.meeting.zoomUUID;
     await MeetingLib.markEnd(zoomMeetingId).catch((e) => {
@@ -204,7 +166,9 @@ class EndMeeting extends ServiceBase {
         }. API response status ${e.statusCode}`
       );
     });
+
     let isError = false;
+
     const pastMeetingResponse = await MeetingLib.getPastMeeting(zoomUUID).catch(async (e) => {
       isError = true;
       logger.error(`Error in fetching past meeting details for UUID ${zoomUUID} error status ${e.statusCode}`);
@@ -213,13 +177,15 @@ class EndMeeting extends ServiceBase {
         api_error_identifier: 'something_went_wrong',
         debug_options: {
           zoomMeetingId: zoomMeetingId,
-          zoomUUID: zoomUUID
+          zoomUUID: zoomUUID,
+          pastMeetingResponse: JSON.stringify(pastMeetingResponse)
         }
       });
       await createErrorLogsEntry.perform(errorObject, errorLogsConstants.highSeverity);
 
       return Promise.reject(errorObject);
     });
+
     if (!isError) {
       const response = await new MeetingEnded({
         payload: {
