@@ -5,6 +5,7 @@ const rootPrefix = '../../../..',
   s3Constants = require(rootPrefix + '/lib/globalConstant/s3'),
   coreConstants = require(rootPrefix + '/config/coreConstants'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
+  imageConstants = require(rootPrefix + '/lib/globalConstant/image'),
   adminEntityType = require(rootPrefix + '/lib/globalConstant/adminEntityType');
 
 /**
@@ -41,8 +42,8 @@ class PreSignedUrl extends ServiceBase {
 
     const contentType = 'image/jpeg';
 
-    const channelOriginalFileName = oThis._getRandomEncodedFileNames(),
-      channelShareOriginalFileName = oThis._getRandomEncodedFileNames();
+    const channelOriginalFileName = oThis._getRandomEncodedFileNames() + '-original',
+      channelShareOriginalFileName = oThis._getRandomEncodedFileNames() + '-share';
 
     const resultHash = {},
       intent = s3Constants.imageFileType,
@@ -56,7 +57,8 @@ class PreSignedUrl extends ServiceBase {
         intent,
         fileName,
         contentType,
-        coreConstants.AWS_REGION
+        coreConstants.AWS_REGION,
+        { imageKind: imageConstants.channelImageKind }
       );
 
       const s3Url = oThis._getS3UrlForChannel(fileName);
