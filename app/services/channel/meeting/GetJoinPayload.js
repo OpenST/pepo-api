@@ -39,7 +39,7 @@ class GetJoinMeetingPayload extends ServiceBase {
     oThis.currentUser = params.current_user || {};
     oThis.meetingId = params.meeting_id;
     oThis.fingerprintId = params.fingerprint_id;
-    oThis.name = params.guest_name || 'Pepo Guest';
+    oThis.name = params.guest_name;
 
     oThis.channelId = null;
     oThis.channel = {};
@@ -183,6 +183,15 @@ class GetJoinMeetingPayload extends ServiceBase {
 
     if (oThis.currentUser.id) {
       oThis.name = oThis.currentUser.name;
+    }
+
+    if (!oThis.name) {
+      return Promise.reject(
+        responseHelper.error({
+          internal_error_identifier: 'a_s_c_m_gjp_fe_1',
+          api_error_identifier: 'invalid_guest_name'
+        })
+      );
     }
   }
 
