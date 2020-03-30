@@ -448,8 +448,16 @@ const adminSignature = {
         validatorMethods: ['validateHttpBasedUrl']
       },
       {
+        parameter: 'original_image_file_size',
+        validatorMethods: ['validateInteger']
+      },
+      {
         parameter: 'share_image_url',
         validatorMethods: ['validateHttpBasedUrl']
+      },
+      {
+        parameter: 'share_image_file_size',
+        validatorMethods: ['validateInteger']
       }
     ]
   },
