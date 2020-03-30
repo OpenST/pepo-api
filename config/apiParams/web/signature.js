@@ -593,6 +593,10 @@ const webSignature = {
       {
         parameter: 'fingerprint_id',
         validatorMethods: ['validateString']
+      },
+      {
+        parameter: 'guest_name',
+        validatorMethods: ['validateString', 'validateName', 'validateStopWords']
       }
     ]
   },

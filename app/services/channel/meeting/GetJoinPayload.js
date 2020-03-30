@@ -24,6 +24,7 @@ class GetJoinMeetingPayload extends ServiceBase {
    * @param {object} params.current_user
    * @param {number} params.meeting_id
    * @param {number} params.fingerprint_id
+   * @param {string} params.guest_name
    *
    * @augments ServiceBase
    *
@@ -38,12 +39,12 @@ class GetJoinMeetingPayload extends ServiceBase {
     oThis.currentUser = params.current_user || {};
     oThis.meetingId = params.meeting_id;
     oThis.fingerprintId = params.fingerprint_id;
+    oThis.name = params.guest_name || 'Pepo Guest';
 
     oThis.channelId = null;
     oThis.channel = {};
     oThis.meeting = {};
     oThis.profilePicUrl = null;
-    oThis.name = 'Pepo Guest';
   }
 
   /**
