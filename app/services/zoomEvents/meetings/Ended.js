@@ -38,19 +38,20 @@ class MeetingEnded extends ServiceBase {
     oThis.endTimestamp = null;
     oThis.startTimestamp = null;
     oThis.processEvent = true;
-
-    console.log('HERE====constructor===MeetingEnded======', JSON.stringify(params));
   }
 
   /**
-   * Async performer.
+   * Async performer. This will end meeting locally in the database. If
+   * meeting is already ended in database, it will try to update the start and
+   * end timestamps. Relayer is marked as available only if meeting is
+   * currently alive.
    *
    * @return {Promise<void>}
    */
   async _asyncPerform() {
     const oThis = this;
 
-    await oThis._validateParams();
+    await oThis._parseParams();
 
     await oThis._fetchAndValidateMeetingStatus();
 
@@ -58,7 +59,13 @@ class MeetingEnded extends ServiceBase {
       return responseHelper.successWithData({});
     }
 
+    await oThis._updateMeetingTimestamps();
+
     await oThis._updateMeeting();
+
+    if (!oThis.processEvent) {
+      return responseHelper.successWithData({});
+    }
 
     await oThis._markMeetingRelayerAsAvailable();
 
@@ -66,37 +73,16 @@ class MeetingEnded extends ServiceBase {
   }
 
   /**
-   * Validate Params.
+   * Parse the input Params.
    *
    * @return {Promise<void>}
    * @private
    */
-  async _validateParams() {
+  async _parseParams() {
     const oThis = this;
 
-    if (
-      !CommonValidators.validateNonBlankString(oThis.endTime) ||
-      !CommonValidators.validateNonBlankString(oThis.startTime)
-    ) {
-      return Promise.reject(
-        responseHelper.error({
-          internal_error_identifier: 's_ze_m_e_vp_1',
-          api_error_identifier: 'something_went_wrong'
-        })
-      );
-    }
-
-    oThis.endTimestamp = new Date(oThis.endTime).getTime() / 1000;
-    oThis.startTimestamp = new Date(oThis.startTime).getTime() / 1000;
-
-    if (oThis.endTimestamp == 0 || oThis.startTimestamp == 0) {
-      return Promise.reject(
-        responseHelper.error({
-          internal_error_identifier: 's_ze_m_e_vp_2',
-          api_error_identifier: 'something_went_wrong'
-        })
-      );
-    }
+    oThis.endTimestamp = oThis.endTime ? new Date(oThis.endTime).getTime() / 1000 : undefined;
+    oThis.startTimestamp = oThis.startTime ? new Date(oThis.startTime).getTime() / 1000 : undefined;
 
     return responseHelper.successWithData({});
   }
@@ -135,7 +121,7 @@ class MeetingEnded extends ServiceBase {
 
     oThis.meetingObj = cahceRes2.data[oThis.meetingId];
 
-    if (!oThis.meetingObj.id || !oThis.meetingObj.isLive) {
+    if (!oThis.meetingObj.id) {
       return Promise.reject(
         responseHelper.error({
           internal_error_identifier: 's_ze_m_e_fm_2',
@@ -149,7 +135,37 @@ class MeetingEnded extends ServiceBase {
   }
 
   /**
-   * Update meeting status to ended and endTimestamp and isLive.
+   * Update meeting start or end Timestamp.
+   *
+   * @return {Promise<void>}
+   * @private
+   */
+  async _updateMeetingTimestamps() {
+    const oThis = this;
+
+    logger.log('update _updateMeetingTimestamps.');
+    const updateParams = {};
+
+    if (oThis.startTimestamp) {
+      updateParams.start_timestamp = oThis.startTimestamp;
+    }
+
+    if (oThis.endTimestamp) {
+      updateParams.end_timestamp = oThis.endTimestamp;
+    }
+
+    if (CommonValidators.validateNonEmptyObject(updateParams)) {
+      await new MeetingModel()
+        .update(updateParams)
+        .where({ id: oThis.meetingId })
+        .fire();
+
+      await MeetingModel.flushCache({ id: oThis.meetingId });
+    }
+  }
+
+  /**
+   * Update meeting status and isLive.
    *
    * @return {Promise<void>}
    * @private
@@ -159,23 +175,28 @@ class MeetingEnded extends ServiceBase {
 
     logger.log('update meeting.');
 
+    if (!oThis.meetingObj.isLive) {
+      oThis.processEvent = false;
+      return responseHelper.successWithData({});
+    }
+
     //mark as ended and relayed users state
-    await new MeetingModel()
-      .update({
-        status: meetingConstants.invertedStatuses[meetingConstants.endedStatus],
-        end_timestamp: oThis.endTimestamp,
-        start_timestamp: oThis.startTimestamp,
-        is_live: null
-      })
-      .where({ id: oThis.meetingId })
+    const updateParams = {
+      status: meetingConstants.invertedStatuses[meetingConstants.endedStatus],
+      is_live: null
+    };
+
+    const updateResp = await new MeetingModel()
+      .update(updateParams)
+      .where({ id: oThis.meetingId, is_live: meetingConstants.isLiveStatus })
       .fire();
 
-    await MeetingModel.flushCache({ id: oThis.meetingId, channelId: oThis.meetingObj.channelId });
+    if (updateResp.affectedRows === 0) {
+      oThis.processEvent = false;
+      return responseHelper.successWithData({});
+    }
 
-    oThis.meetingObj.status = meetingConstants.endedStatus;
-    oThis.meetingObj.endTimestamp = oThis.endTimestamp;
-    oThis.meetingObj.startTimestamp = oThis.startTimestamp;
-    oThis.meetingObj.isLive = null;
+    await MeetingModel.flushCache({ id: oThis.meetingId, channelId: oThis.meetingObj.channelId });
 
     return responseHelper.successWithData({});
   }
