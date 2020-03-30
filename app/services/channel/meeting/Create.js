@@ -15,8 +15,6 @@ const rootPrefix = '../../../..',
   entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
   meetingConstants = require(rootPrefix + '/lib/globalConstant/meeting/meeting'),
   channelConstants = require(rootPrefix + '/lib/globalConstant/channel/channels'),
-  notificationJobEnqueue = require(rootPrefix + '/lib/rabbitMqEnqueue/notification'),
-  notificationJobConstants = require(rootPrefix + '/lib/globalConstant/notificationJob'),
   meetingRelayerConstants = require(rootPrefix + '/lib/globalConstant/meeting/meetingRelayer');
 
 /**
@@ -95,8 +93,6 @@ class StartMeeting extends ServiceBase {
 
       return meetingRecordResponse;
     }
-
-    await oThis._performNotificationsRelatedTasks();
 
     return responseHelper.successWithData(oThis._prepareResponse());
   }
@@ -450,23 +446,6 @@ class StartMeeting extends ServiceBase {
       });
 
       await createErrorLogsEntry.perform(errorObject, errorLogsConstants.highSeverity);
-    });
-  }
-
-  /**
-   * Perform notifications related tasks.
-   *
-   * @returns {Promise<void>}
-   * @private
-   */
-  async _performNotificationsRelatedTasks() {
-    const oThis = this;
-
-    // Send notifications to channel members when channel host goes live.
-    await notificationJobEnqueue.enqueue(notificationJobConstants.channelGoLiveNotificationsKind, {
-      channelId: oThis.channelId,
-      meetingHostUserId: oThis.currentUserId,
-      meetingId: oThis.meetingId
     });
   }
 
