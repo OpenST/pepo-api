@@ -175,6 +175,15 @@ class ChannelModel extends ModelBase {
   }
 
   /**
+   * Get username unique index name.
+   *
+   * @returns {string}
+   */
+  static get nameUniqueIndexName() {
+    return 'uidx_1';
+  }
+
+  /**
    * Flush cache.
    *
    * @param {object} params

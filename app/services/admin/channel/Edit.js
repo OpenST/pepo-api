@@ -83,7 +83,11 @@ class EditChannel extends ServiceBase {
 
     await oThis._validateAndSanitize();
 
+    console.log('=oThis.isEdit=====', oThis.isEdit);
+    console.log('=oThis.isEdit=====', typeof oThis.isEdit);
+
     if (oThis.isEdit) {
+      console.log('====inside here;;;;;');
       await oThis._updateChannelName();
     } else {
       await oThis._validateChannelCreationParameters();
@@ -266,10 +270,32 @@ class EditChannel extends ServiceBase {
 
     console.log('Reachd here==111111');
 
-    await new ChannelModel()
+    const updateResponse = await new ChannelModel()
       .update({ name: oThis.channelName })
       .where({ id: oThis.channelId })
-      .fire();
+      .fire()
+      .catch(function(err) {
+        logger.log('Error while updating channel name: ', err);
+        if (ChannelModel.isDuplicateIndexViolation(ChannelModel.nameUniqueIndexName, err)) {
+          logger.log('Name conflict.');
+
+          return null;
+        }
+
+        return Promise.reject(err);
+      });
+
+    if (!updateResponse) {
+      logger.error('Error while updating channel name channels table.');
+
+      return Promise.reject(
+        responseHelper.error({
+          internal_error_identifier: 'a_s_a_c_e_ucn_1',
+          api_error_identifier: 'something_went_wrong',
+          debug_options: { channelName: oThis.channelName }
+        })
+      );
+    }
 
     await new ChannelByIdsCache({ ids: [oThis.channelId] }).clear();
   }
