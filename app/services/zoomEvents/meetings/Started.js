@@ -58,7 +58,9 @@ class MeetingStarted extends ServiceBase {
 
     const updateMeetingStatusRsp = await oThis._updateMeetingStatus();
 
-    if (updateMeetingStatusRsp.data && updateMeetingStatusRsp.data.affectedRows.length > 0) {
+    console.log('updateMeetingStatusRsp-----', updateMeetingStatusRsp);
+
+    if (updateMeetingStatusRsp.data && updateMeetingStatusRsp.data.affectedRows > 0) {
       await oThis._performNotificationsRelatedTasks();
     }
 
