@@ -83,11 +83,7 @@ class EditChannel extends ServiceBase {
 
     await oThis._validateAndSanitize();
 
-    console.log('=oThis.isEdit=====', oThis.isEdit);
-    console.log('=oThis.isEdit=====', typeof oThis.isEdit);
-
     if (oThis.isEdit) {
-      console.log('====inside here;;;;;');
       await oThis._updateChannelName();
     } else {
       await oThis._validateChannelCreationParameters();
@@ -262,13 +258,9 @@ class EditChannel extends ServiceBase {
   async _updateChannelName() {
     const oThis = this;
 
-    console.log('Reachd here');
-
     if (!oThis.channelName) {
       return;
     }
-
-    console.log('Reachd here==111111');
 
     const updateResponse = await new ChannelModel()
       .update({ name: oThis.channelName })
