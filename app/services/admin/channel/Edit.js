@@ -144,9 +144,10 @@ class EditChannel extends ServiceBase {
     // If admin wants to edit a channel, the channel should already exist.
     if (oThis.isEdit && !CommonValidators.validateNonEmptyObject(permalinkIdsMap[lowercaseChannelPermalink])) {
       return Promise.reject(
-        responseHelper.error({
+        responseHelper.paramValidationError({
           internal_error_identifier: 'a_s_a_c_e_vec_1',
-          api_error_identifier: 'entity_not_found',
+          api_error_identifier: 'invalid_api_params',
+          params_error_identifiers: ['duplicate_channel_entry'],
           debug_options: {
             channelPermalink: oThis.channelPermalink,
             isEdit: oThis.isEdit
@@ -158,9 +159,10 @@ class EditChannel extends ServiceBase {
     // If admin wants to create a new channel, the channel should not already exist.
     if (!oThis.isEdit && CommonValidators.validateNonEmptyObject(permalinkIdsMap[lowercaseChannelPermalink])) {
       return Promise.reject(
-        responseHelper.error({
+        responseHelper.paramValidationError({
           internal_error_identifier: 'a_s_a_c_e_vec_2',
-          api_error_identifier: 'duplicate_entry',
+          api_error_identifier: 'invalid_api_params',
+          params_error_identifiers: ['duplicate_channel_entry'],
           debug_options: {
             channelPermalink: oThis.channelPermalink,
             isEdit: oThis.isEdit
@@ -193,7 +195,7 @@ class EditChannel extends ServiceBase {
       return Promise.reject(
         responseHelper.paramValidationError({
           internal_error_identifier: 'a_s_a_c_e_vecs_1',
-          api_error_identifier: 'resource_not_found',
+          api_error_identifier: 'invalid_api_params',
           params_error_identifiers: ['invalid_channel_id'],
           debug_options: {
             channelId: oThis.channelId,
@@ -202,51 +204,6 @@ class EditChannel extends ServiceBase {
         })
       );
     }
-  }
-
-  /**
-   * Validate input parameters in case of community creation.
-   *
-   * @returns {Promise<never>}
-   * @private
-   */
-  async _validateChannelCreationParameters() {
-    const oThis = this;
-
-    if (
-      !has.call(oThis, 'channelName') ||
-      !has.call(oThis, 'channelDescription') ||
-      !has.call(oThis, 'channelTagline')
-      // ||
-      // !has.call(oThis, oThis.originalImageUrl) ||
-      // !has.call(oThis, oThis.shareImageUrl)
-    ) {
-      return Promise.reject(new Error('Missing input parameters.'));
-    }
-
-    // We are not validating channelAdminUserNames and channelTagNames as they are not mandatory for creating a new channel.
-  }
-
-  /**
-   * Create new channel.
-   *
-   * @sets oThis.channelId
-   *
-   * @returns {Promise<void>}
-   * @private
-   */
-  async _createNewChannel() {
-    const oThis = this;
-
-    const insertResponse = await new ChannelModel()
-      .insert({
-        name: oThis.channelName,
-        status: channelConstants.invertedStatuses[channelConstants.activeStatus],
-        permalink: oThis.channelPermalink
-      })
-      .fire();
-
-    oThis.channelId = insertResponse.insertId;
   }
 
   /**
@@ -281,15 +238,99 @@ class EditChannel extends ServiceBase {
       logger.error('Error while updating channel name channels table.');
 
       return Promise.reject(
-        responseHelper.error({
+        responseHelper.paramValidationError({
           internal_error_identifier: 'a_s_a_c_e_ucn_1',
-          api_error_identifier: 'something_went_wrong',
+          api_error_identifier: 'invalid_api_params',
+          params_error_identifiers: ['invalid_channel_id'],
           debug_options: { channelName: oThis.channelName }
         })
       );
     }
 
     await new ChannelByIdsCache({ ids: [oThis.channelId] }).clear();
+  }
+
+  /**
+   * Validate input parameters in case of community creation.
+   *
+   * @returns {Promise<never>}
+   * @private
+   */
+  async _validateChannelCreationParameters() {
+    const oThis = this;
+
+    if (
+      !has.call(oThis, 'channelName') ||
+      !has.call(oThis, 'channelDescription') ||
+      !has.call(oThis, 'channelTagline')
+      // !has.call(oThis, oThis.originalImageUrl) ||
+      // !has.call(oThis, oThis.shareImageUrl)
+    ) {
+      return Promise.reject(
+        responseHelper.error({
+          internal_error_identifier: 'a_s_a_c_e_vccp_1',
+          api_error_identifier: 'invalid_api_params',
+          debug_options: {
+            channelName: oThis.channelName,
+            channelDescription: oThis.channelDescription,
+            channelTagline: oThis.channelTagline
+          }
+        })
+      );
+    }
+
+    // We are not validating channelAdminUserNames and channelTagNames as they are not mandatory for creating a new channel.
+  }
+
+  /**
+   * Create new channel.
+   *
+   * @sets oThis.channelId
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _createNewChannel() {
+    const oThis = this;
+
+    const insertResponse = await new ChannelModel()
+      .insert({
+        name: oThis.channelName,
+        status: channelConstants.invertedStatuses[channelConstants.activeStatus],
+        permalink: oThis.channelPermalink
+      })
+      .fire()
+      .catch(function(err) {
+        logger.log('Error while creating new channel: ', err);
+        if (
+          ChannelModel.isDuplicateIndexViolation(ChannelModel.nameUniqueIndexName, err) ||
+          ChannelModel.isDuplicateIndexViolation(ChannelModel.permalinkUniqueIndexName, err)
+        ) {
+          logger.log('Name or permalink conflict.');
+
+          return null;
+        }
+
+        return Promise.reject(err);
+      });
+
+    if (!insertResponse) {
+      logger.error('Error while creating new channel in channels table.');
+
+      return Promise.reject(
+        responseHelper.paramValidationError({
+          internal_error_identifier: 'a_s_a_c_e_cnc_1',
+          api_error_identifier: 'invalid_api_params',
+          params_error_identifiers: ['invalid_channel_id'],
+          debug_options: {
+            channelName: oThis.channelName,
+            channelPermalink: oThis.channelPermalink
+          }
+        })
+      );
+    }
+
+    oThis.channelId = insertResponse.insertId;
   }
 
   /**

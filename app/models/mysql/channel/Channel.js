@@ -184,6 +184,15 @@ class ChannelModel extends ModelBase {
   }
 
   /**
+   * Get username unique index name.
+   *
+   * @returns {string}
+   */
+  static get permalinkUniqueIndexName() {
+    return 'uidx_2';
+  }
+
+  /**
    * Flush cache.
    *
    * @param {object} params
