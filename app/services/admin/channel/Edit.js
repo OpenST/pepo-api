@@ -511,6 +511,10 @@ class EditChannel extends ServiceBase {
       return;
     }
 
+    for (let index = 0; index < oThis.channelAdminUserNames.length; index += 1) {
+      oThis.channelAdminUserNames[index] = oThis.channelAdminUserNames[index].trim();
+    }
+
     const userNamesToUserMap = await new UserModel().fetchByUserNames(oThis.channelAdminUserNames);
 
     if (Object.keys(userNamesToUserMap).length !== oThis.channelAdminUserNames.length) {
@@ -559,6 +563,10 @@ class EditChannel extends ServiceBase {
 
     if (oThis.channelTagNames.length === 0) {
       return;
+    }
+
+    for (let index = 0; index < oThis.channelTagNames.length; index += 1) {
+      oThis.channelTagNames[index] = oThis.channelTagNames[index].trim();
     }
 
     await oThis._fetchOrCreateTags();
