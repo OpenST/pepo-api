@@ -838,12 +838,7 @@ const v1Signature = {
     ]
   },
   [apiName.getChannels]: {
-    mandatory: [
-      {
-        parameter: 'api_source',
-        validatorMethods: ['validateString']
-      }
-    ],
+    mandatory: [],
     optional: [
       {
         parameter: 'current_user',
