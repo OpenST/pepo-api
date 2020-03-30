@@ -42,7 +42,7 @@ class PreSignedUrl extends ServiceBase {
 
     const contentType = 'image/jpeg';
 
-    const channelOriginalFileName = oThis._getRandomEncodedFileNames() + '-original',
+    const channelOriginalFileName = oThis._getRandomEncodedFileNames(),
       channelShareOriginalFileName = oThis._getRandomEncodedFileNames() + '-share';
 
     const resultHash = {},
