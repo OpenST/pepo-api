@@ -113,6 +113,8 @@ class MeetingTracker extends CronBase {
           });
           await createErrorLogsEntry.perform(errorObject, errorLogsConstants.highSeverity);
 
+          // Skip erroneous record for the next iteration.
+          offset += 1;
           continue;
         }
 
@@ -134,13 +136,17 @@ class MeetingTracker extends CronBase {
           await oThis._markRelayerAvailable(formattedRow.meetingRelayerId);
           isProcessed = true;
         }
+
+        if (!isProcessed) {
+          // skip the non processed record for next iteration.
+          offset += 1;
+        }
       }
 
       if (meetings.length < BATCH_SIZE) {
         logger.info('All records processed, Quiting job');
         break;
       }
-      offset += BATCH_SIZE;
     }
   }
 
