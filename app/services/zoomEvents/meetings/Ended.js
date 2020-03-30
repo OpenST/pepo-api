@@ -4,6 +4,7 @@ const rootPrefix = '../../../..',
   MeetingByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/meeting/MeetingByIds'),
   MeetingModel = require(rootPrefix + '/app/models/mysql/meeting/Meeting'),
   MeetingRelayerModel = require(rootPrefix + '/app/models/mysql/meeting/MeetingRelayer'),
+  CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   meetingRelayerConstants = require(rootPrefix + '/lib/globalConstant/meeting/meetingRelayer'),
@@ -57,6 +58,8 @@ class MeetingEnded extends ServiceBase {
     if (!oThis.processEvent) {
       return responseHelper.successWithData({});
     }
+
+    await oThis._updateMeetingTimestamps();
 
     await oThis._updateMeeting();
 
@@ -132,7 +135,37 @@ class MeetingEnded extends ServiceBase {
   }
 
   /**
-   * Update meeting status to ended and endTimestamp and isLive.
+   * Update meeting start or end Timestamp.
+   *
+   * @return {Promise<void>}
+   * @private
+   */
+  async _updateMeetingTimestamps() {
+    const oThis = this;
+
+    logger.log('update _updateMeetingTimestamps.');
+    const updateParams = {};
+
+    if (oThis.startTimestamp) {
+      updateParams.start_timestamp = oThis.startTimestamp;
+    }
+
+    if (oThis.endTimestamp) {
+      updateParams.end_timestamp = oThis.endTimestamp;
+    }
+
+    if (CommonValidators.validateNonEmptyObject(updateParams)) {
+      await new MeetingModel()
+        .update(updateParams)
+        .where({ id: oThis.meetingId })
+        .fire();
+
+      await MeetingModel.flushCache({ id: oThis.meetingId });
+    }
+  }
+
+  /**
+   * Update meeting status and isLive.
    *
    * @return {Promise<void>}
    * @private
@@ -142,19 +175,17 @@ class MeetingEnded extends ServiceBase {
 
     logger.log('update meeting.');
 
+    if (!oThis.meetingObj.isLive) {
+      oThis.processEvent = false;
+      return responseHelper.successWithData({});
+    }
+
     //mark as ended and relayed users state
     const updateParams = {
       status: meetingConstants.invertedStatuses[meetingConstants.endedStatus],
       is_live: null
     };
 
-    if (oThis.startTimestamp) {
-      updateParams.start_timestamp = oThis.startTimestamp;
-    }
-
-    if (oThis.endTimestamp) {
-      updateParams.end_timestamp = oThis.endTimestamp;
-    }
     const updateResp = await new MeetingModel()
       .update(updateParams)
       .where({ id: oThis.meetingId, is_live: meetingConstants.isLiveStatus })
@@ -178,10 +209,6 @@ class MeetingEnded extends ServiceBase {
    */
   async _markMeetingRelayerAsAvailable() {
     const oThis = this;
-
-    if (!this.meetingObj.isLive) {
-      return;
-    }
 
     logger.log('update meeting relayer as available.');
 

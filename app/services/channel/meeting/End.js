@@ -136,7 +136,7 @@ class EndMeeting extends ServiceBase {
       return Promise.reject(
         responseHelper.error({
           internal_error_identifier: 'a_s_c_m_em_4',
-          api_error_identifier: 'unauthorized_api_request',
+          api_error_identifier: 'resource_not_found',
           debug_options: {
             currentUserId: oThis.currentUserId,
             meetingHostId: oThis.meeting.hostUserId,
