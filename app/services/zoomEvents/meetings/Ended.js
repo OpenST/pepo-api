@@ -4,7 +4,6 @@ const rootPrefix = '../../../..',
   MeetingByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/meeting/MeetingByIds'),
   MeetingModel = require(rootPrefix + '/app/models/mysql/meeting/Meeting'),
   MeetingRelayerModel = require(rootPrefix + '/app/models/mysql/meeting/MeetingRelayer'),
-  CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   meetingRelayerConstants = require(rootPrefix + '/lib/globalConstant/meeting/meetingRelayer'),
@@ -38,19 +37,20 @@ class MeetingEnded extends ServiceBase {
     oThis.endTimestamp = null;
     oThis.startTimestamp = null;
     oThis.processEvent = true;
-
-    console.log('HERE====constructor===MeetingEnded======', JSON.stringify(params));
   }
 
   /**
-   * Async performer.
+   * Async performer. This will end meeting locally in the database. If
+   * meeting is already ended in database, it will try to update the start and
+   * end timestamps. Relayer is marked as available only if meeting is
+   * currently alive.
    *
    * @return {Promise<void>}
    */
   async _asyncPerform() {
     const oThis = this;
 
-    await oThis._validateParams();
+    await oThis._parseParams();
 
     await oThis._fetchAndValidateMeetingStatus();
 
@@ -70,37 +70,16 @@ class MeetingEnded extends ServiceBase {
   }
 
   /**
-   * Validate Params.
+   * Parse the input Params.
    *
    * @return {Promise<void>}
    * @private
    */
-  async _validateParams() {
+  async _parseParams() {
     const oThis = this;
 
-    if (
-      !CommonValidators.validateNonBlankString(oThis.endTime) ||
-      !CommonValidators.validateNonBlankString(oThis.startTime)
-    ) {
-      return Promise.reject(
-        responseHelper.error({
-          internal_error_identifier: 's_ze_m_e_vp_1',
-          api_error_identifier: 'something_went_wrong'
-        })
-      );
-    }
-
-    oThis.endTimestamp = new Date(oThis.endTime).getTime() / 1000;
-    oThis.startTimestamp = new Date(oThis.startTime).getTime() / 1000;
-
-    if (oThis.endTimestamp == 0 || oThis.startTimestamp == 0) {
-      return Promise.reject(
-        responseHelper.error({
-          internal_error_identifier: 's_ze_m_e_vp_2',
-          api_error_identifier: 'something_went_wrong'
-        })
-      );
-    }
+    oThis.endTimestamp = oThis.endTime ? new Date(oThis.endTime).getTime() / 1000 : undefined;
+    oThis.startTimestamp = oThis.startTime ? new Date(oThis.startTime).getTime() / 1000 : undefined;
 
     return responseHelper.successWithData({});
   }
@@ -149,11 +128,6 @@ class MeetingEnded extends ServiceBase {
       );
     }
 
-    if (!oThis.meetingObj.isLive) {
-      oThis.processEvent = false;
-      return responseHelper.successWithData({});
-    }
-
     return responseHelper.successWithData({});
   }
 
@@ -169,13 +143,20 @@ class MeetingEnded extends ServiceBase {
     logger.log('update meeting.');
 
     //mark as ended and relayed users state
+    const updateParams = {
+      status: meetingConstants.invertedStatuses[meetingConstants.endedStatus],
+      is_live: null
+    };
+
+    if (oThis.startTimestamp) {
+      updateParams.start_timestamp = oThis.startTimestamp;
+    }
+
+    if (oThis.endTimestamp) {
+      updateParams.end_timestamp = oThis.endTimestamp;
+    }
     const updateResp = await new MeetingModel()
-      .update({
-        status: meetingConstants.invertedStatuses[meetingConstants.endedStatus],
-        end_timestamp: oThis.endTimestamp,
-        start_timestamp: oThis.startTimestamp,
-        is_live: null
-      })
+      .update(updateParams)
       .where({ id: oThis.meetingId, is_live: meetingConstants.isLiveStatus })
       .fire();
 
@@ -185,11 +166,6 @@ class MeetingEnded extends ServiceBase {
     }
 
     await MeetingModel.flushCache({ id: oThis.meetingId, channelId: oThis.meetingObj.channelId });
-
-    oThis.meetingObj.status = meetingConstants.endedStatus;
-    oThis.meetingObj.endTimestamp = oThis.endTimestamp;
-    oThis.meetingObj.startTimestamp = oThis.startTimestamp;
-    oThis.meetingObj.isLive = null;
 
     return responseHelper.successWithData({});
   }
@@ -202,6 +178,10 @@ class MeetingEnded extends ServiceBase {
    */
   async _markMeetingRelayerAsAvailable() {
     const oThis = this;
+
+    if (!this.meetingObj.isLive) {
+      return;
+    }
 
     logger.log('update meeting relayer as available.');
 

@@ -2,9 +2,7 @@ const rootPrefix = '../../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   MeetingLib = require(rootPrefix + '/lib/zoom/meeting'),
-  createErrorLogsEntry = require(rootPrefix + '/lib/errorLogs/createEntry'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
-  errorLogsConstants = require(rootPrefix + '/lib/globalConstant/errorLogs'),
   MeetingEnded = require(rootPrefix + '/app/services/zoomEvents/meetings/Ended'),
   ChannelByPermalinksCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelByPermalinks'),
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
@@ -30,7 +28,7 @@ class EndMeeting extends ServiceBase {
     const oThis = this;
 
     oThis.channelPermalink = params.channel_permalink;
-    oThis.currentUser = params.current_user;
+    oThis.currentUserId = (params.current_user || {}).id;
     oThis.meetingId = params.meeting_id;
 
     oThis.meeting = {};
@@ -39,7 +37,10 @@ class EndMeeting extends ServiceBase {
   }
 
   /**
-   * Async perform.
+   * Async perform. This will try to end zoom meeting and it will also end
+   * zoom meeting locally. If it doesn't receive past meeting details from the
+   * zoom, it will not update start and end timestamp of meeting. Meeting
+   * relayer is marked as available if meeting is alive.
    *
    * @returns {Promise<*|result>}
    * @private
@@ -131,13 +132,14 @@ class EndMeeting extends ServiceBase {
         })
       );
     }
-    if (!oThis.meeting.hostUserId !== oThis.currentUserId) {
+    if (oThis.meeting.hostUserId != oThis.currentUserId) {
       return Promise.reject(
         responseHelper.error({
           internal_error_identifier: 'a_s_c_m_em_4',
           api_error_identifier: 'unauthorized_api_request',
           debug_options: {
-            hostUserId: oThis.currentUserId,
+            currentUserId: oThis.currentUserId,
+            meetingHostId: oThis.meeting.hostUserId,
             meetingId: oThis.meeting.id
           }
         })
@@ -159,6 +161,8 @@ class EndMeeting extends ServiceBase {
 
     const zoomMeetingId = oThis.meeting.zoomMeetingId;
     const zoomUUID = oThis.meeting.zoomUUID;
+
+    logger.info(`Trying to ending zoom meeting ${zoomMeetingId}`);
     await MeetingLib.markEnd(zoomMeetingId).catch((e) => {
       logger.info(
         `Zoom meeting end call failed. Possibly meeting is already ended for zoomMeeting id ${
@@ -167,44 +171,38 @@ class EndMeeting extends ServiceBase {
       );
     });
 
-    let isError = false;
-
+    let isPastMeetingResponse = true;
     const pastMeetingResponse = await MeetingLib.getPastMeeting(zoomUUID).catch(async (e) => {
-      isError = true;
+      isPastMeetingResponse = false;
       logger.error(`Error in fetching past meeting details for UUID ${zoomUUID} error status ${e.statusCode}`);
-      const errorObject = responseHelper.error({
-        internal_error_identifier: 'a_s_c_m_em_6',
-        api_error_identifier: 'something_went_wrong',
-        debug_options: {
-          zoomMeetingId: zoomMeetingId,
-          zoomUUID: zoomUUID,
-          pastMeetingResponse: JSON.stringify(pastMeetingResponse)
-        }
-      });
-      await createErrorLogsEntry.perform(errorObject, errorLogsConstants.highSeverity);
-
-      return Promise.reject(errorObject);
     });
 
-    if (!isError) {
-      const response = await new MeetingEnded({
-        payload: {
-          object: {
-            id: zoomMeetingId,
-            start_time: pastMeetingResponse.start_time,
-            end_time: pastMeetingResponse.end_time
-          }
-        }
-      }).perform();
-      if (response.isFailure()) {
-        logger.error(`Error in ending meeting zoom meeting id ${zoomMeetingId}`);
+    let startTime, endTime;
 
-        return responseHelper.error({
-          internal_error_identifier: 'a_s_c_m_em_7',
-          api_error_identifier: 'something_went_wrong',
-          debug_options: { zoomMeetingId: zoomMeetingId }
-        });
+    if (isPastMeetingResponse) {
+      logger.info(`Received response from zoom past meeting call zoomuuid ${zoomUUID}`);
+      startTime = pastMeetingResponse.start_time;
+      endTime = pastMeetingResponse.end_time;
+    }
+
+    const response = await new MeetingEnded({
+      payload: {
+        object: {
+          id: zoomMeetingId,
+          start_time: startTime,
+          end_time: endTime
+        }
       }
+    }).perform();
+
+    if (response.isFailure()) {
+      logger.error(`Error in ending meeting zoom meeting id ${zoomMeetingId}`);
+
+      return responseHelper.error({
+        internal_error_identifier: 'a_s_c_m_em_7',
+        api_error_identifier: 'something_went_wrong',
+        debug_options: { zoomMeetingId: zoomMeetingId }
+      });
     }
   }
 }
