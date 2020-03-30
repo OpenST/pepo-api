@@ -15,7 +15,9 @@ const rootPrefix = '../../../..',
   entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
   meetingConstants = require(rootPrefix + '/lib/globalConstant/meeting/meeting'),
   channelConstants = require(rootPrefix + '/lib/globalConstant/channel/channels'),
-  meetingRelayerConstants = require(rootPrefix + '/lib/globalConstant/meeting/meetingRelayer');
+  meetingRelayerConstants = require(rootPrefix + '/lib/globalConstant/meeting/meetingRelayer'),
+  bgJob = require(rootPrefix + '/lib/rabbitMqEnqueue/bgJob'),
+  bgJobConstants = require(rootPrefix + '/lib/globalConstant/bgJob');
 
 /**
  * Class to start channel meeting.
@@ -52,6 +54,7 @@ class StartMeeting extends ServiceBase {
     oThis.zoomUuid = null;
 
     oThis.meetingId = null;
+    oThis.errorGoingLive = false;
   }
 
   /**
@@ -246,8 +249,9 @@ class StartMeeting extends ServiceBase {
 
   /**
    * Reserve zoom user.
+   * Sends slack alert if no meeting relayer is available.
    *
-   * @sets oThis.meetingRelayer
+   * @sets oThis.meetingRelayer, oThis.errorGoingLive
    *
    * @returns {Promise<void>}
    * @private
@@ -284,6 +288,10 @@ class StartMeeting extends ServiceBase {
     }
 
     if (!oThis.meetingRelayer) {
+      // Send slack alert when no meeting relayer is available
+      oThis.errorGoingLive = true;
+      await oThis.sendSlackAlert();
+
       return Promise.reject(
         responseHelper.error({
           internal_error_identifier: 'a_s_c_m_sm_5',
@@ -335,8 +343,9 @@ class StartMeeting extends ServiceBase {
 
   /**
    * Record meeting in table.
+   * Send slack alert when meeting is live
    *
-   * @sets oThis.meetingId
+   * @sets oThis.meetingId, oThis.errorGoingLive
    *
    * @returns {Promise<void>}
    * @private
@@ -377,6 +386,10 @@ class StartMeeting extends ServiceBase {
     oThis.meetingId = insertResponse.insertId;
 
     await ChannelModel.flushCache({ ids: [oThis.channelId] });
+
+    // Send slack alert when meeting is created
+    oThis.errorGoingLive = false;
+    await oThis.sendSlackAlert();
 
     return responseHelper.successWithData({});
   }
@@ -463,6 +476,24 @@ class StartMeeting extends ServiceBase {
         meetingId: oThis.meetingId
       }
     };
+  }
+
+  /**
+   * Sends slack alert
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async sendSlackAlert() {
+    const oThis = this;
+
+    const payload = {
+      channelId: oThis.channelId,
+      userId: oThis.currentUserId,
+      errorGoingLive: oThis.errorGoingLive
+    };
+
+    await bgJob.enqueue(bgJobConstants.slackLiveEventMonitoringJobTopic, payload);
   }
 }
 
