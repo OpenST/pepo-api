@@ -260,9 +260,9 @@ class EditChannel extends ServiceBase {
     const oThis = this;
 
     if (
-      !has.call(oThis, 'channelName') ||
-      !has.call(oThis, 'channelDescription') ||
-      !has.call(oThis, 'channelTagline')
+      !oThis.channelName ||
+      !oThis.channelDescription ||
+      !oThis.channelTagline
       // !has.call(oThis, oThis.originalImageUrl) ||
       // !has.call(oThis, oThis.shareImageUrl)
     ) {
