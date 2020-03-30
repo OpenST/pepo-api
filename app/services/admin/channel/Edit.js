@@ -27,8 +27,6 @@ const ORIGINAL_IMAGE_HEIGHT = 642;
 const SHARE_IMAGE_WIDTH = 1500;
 const SHARE_IMAGE_HEIGHT = 750;
 
-const has = Object.prototype.hasOwnProperty; // Cache the lookup once, in module scope.
-
 /**
  * Class to edit channel.
  *
@@ -144,10 +142,9 @@ class EditChannel extends ServiceBase {
     // If admin wants to edit a channel, the channel should already exist.
     if (oThis.isEdit && !CommonValidators.validateNonEmptyObject(permalinkIdsMap[lowercaseChannelPermalink])) {
       return Promise.reject(
-        responseHelper.paramValidationError({
+        responseHelper.error({
           internal_error_identifier: 'a_s_a_c_e_vec_1',
           api_error_identifier: 'invalid_api_params',
-          params_error_identifiers: ['duplicate_channel_entry'],
           debug_options: {
             channelPermalink: oThis.channelPermalink,
             isEdit: oThis.isEdit
