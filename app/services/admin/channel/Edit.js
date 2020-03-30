@@ -68,7 +68,6 @@ class EditChannel extends ServiceBase {
     oThis.shareImageUrl = params.share_image_url;
 
     oThis.channelId = null;
-    oThis.channel = null;
 
     oThis.tagIds = [];
   }
@@ -84,7 +83,9 @@ class EditChannel extends ServiceBase {
 
     await oThis._validateAndSanitize();
 
-    if (!oThis.isEdit) {
+    if (oThis.isEdit) {
+      await oThis._updateChannelName();
+    } else {
       await oThis._validateChannelCreationParameters();
       await oThis._createNewChannel();
     }
@@ -175,8 +176,6 @@ class EditChannel extends ServiceBase {
   /**
    * Validate status of existing channel.
    *
-   * @sets oThis.channel
-   *
    * @returns {Promise<never>}
    * @private
    */
@@ -188,12 +187,9 @@ class EditChannel extends ServiceBase {
       return Promise.reject(channelCacheResponse);
     }
 
-    oThis.channel = channelCacheResponse.data[oThis.channelId];
+    const channel = channelCacheResponse.data[oThis.channelId];
 
-    if (
-      !CommonValidators.validateNonEmptyObject(oThis.channel) ||
-      oThis.channel.status !== channelConstants.activeStatus
-    ) {
+    if (!CommonValidators.validateNonEmptyObject(channel) || channel.status !== channelConstants.activeStatus) {
       return Promise.reject(
         responseHelper.paramValidationError({
           internal_error_identifier: 'a_s_a_c_e_vecs_1',
@@ -201,7 +197,7 @@ class EditChannel extends ServiceBase {
           params_error_identifiers: ['invalid_channel_id'],
           debug_options: {
             channelId: oThis.channelId,
-            channelDetails: oThis.channel
+            channelDetails: channel
           }
         })
       );
@@ -251,6 +247,23 @@ class EditChannel extends ServiceBase {
       .fire();
 
     oThis.channelId = insertResponse.insertId;
+  }
+
+  /**
+   * Update channel name.
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _updateChannelName() {
+    const oThis = this;
+
+    await new ChannelModel()
+      .update({ name: oThis.channelName })
+      .where({ id: oThis.channelId })
+      .fire();
+
+    await new ChannelByIdsCache({ ids: [oThis.channelId] }).clear();
   }
 
   /**
