@@ -511,7 +511,7 @@ class EditChannel extends ServiceBase {
       return;
     }
 
-    for (let index = 0; index < oThis.channelAdminUserNames.length; index += 1) {
+    for (let index = 0; index < oThis.channelAdminUserNames.length; index++) {
       oThis.channelAdminUserNames[index] = oThis.channelAdminUserNames[index].trim();
     }
 
@@ -565,7 +565,7 @@ class EditChannel extends ServiceBase {
       return;
     }
 
-    for (let index = 0; index < oThis.channelTagNames.length; index += 1) {
+    for (let index = 0; index < oThis.channelTagNames.length; index++) {
       oThis.channelTagNames[index] = oThis.channelTagNames[index].trim();
     }
 
