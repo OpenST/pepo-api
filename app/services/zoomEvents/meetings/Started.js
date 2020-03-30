@@ -160,7 +160,11 @@ class MeetingStarted extends ServiceBase {
         status: meetingConstants.invertedStatuses[meetingConstants.startedStatus],
         start_timestamp: oThis.startTimestamp
       })
-      .where({ id: oThis.meetingId })
+      .where([
+        'id = ? AND status != ?',
+        oThis.meetingId,
+        meetingConstants.invertedStatuses[meetingConstants.startedStatus]
+      ])
       .fire();
 
     await MeetingModel.flushCache({ id: oThis.meetingId, channelId: oThis.meetingObj.channelId });
