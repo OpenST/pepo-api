@@ -58,8 +58,6 @@ class MeetingStarted extends ServiceBase {
 
     const updateMeetingStatusRsp = await oThis._updateMeetingStatus();
 
-    console.log('updateMeetingStatusRsp-----', updateMeetingStatusRsp);
-
     if (updateMeetingStatusRsp.data && updateMeetingStatusRsp.data.affectedRows > 0) {
       await oThis._performNotificationsRelatedTasks();
     }
@@ -171,8 +169,6 @@ class MeetingStarted extends ServiceBase {
 
     await MeetingModel.flushCache({ id: oThis.meetingId, channelId: oThis.meetingObj.channelId });
 
-    console.log('updateResponse=======', updateResponse);
-
     return responseHelper.successWithData({ affectedRows: updateResponse.affectedRows });
   }
 
@@ -184,8 +180,6 @@ class MeetingStarted extends ServiceBase {
    */
   async _performNotificationsRelatedTasks() {
     const oThis = this;
-
-    console.log('oThis.meetingObj------', oThis.meetingObj);
 
     // Send notifications to channel members when channel host goes live.
     await notificationJobEnqueue.enqueue(notificationJobConstants.channelGoLiveNotificationsKind, {
