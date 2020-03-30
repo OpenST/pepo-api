@@ -42,12 +42,12 @@ class PreSignedUrl extends ServiceBase {
 
     const contentType = 'image/jpeg';
 
-    const channelOriginalFileName = oThis._getRandomEncodedFileNames(),
-      channelShareOriginalFileName = oThis._getRandomEncodedFileNames() + '-share';
+    const channelOriginalFileName = oThis._getRandomEncodedFileNames('original'),
+      channelShareFileName = oThis._getRandomEncodedFileNames('share-original');
 
     const resultHash = {},
       intent = s3Constants.imageFileType,
-      fileArray = [channelOriginalFileName, channelShareOriginalFileName],
+      fileArray = [channelOriginalFileName, channelShareFileName],
       resultKey = s3Constants.imagesResultKey;
 
     for (let index = 0; index < fileArray.length; index++) {
@@ -92,12 +92,12 @@ class PreSignedUrl extends ServiceBase {
    * @returns {string}
    * @private
    */
-  _getRandomEncodedFileNames() {
+  _getRandomEncodedFileNames(fileSuffix) {
     const oThis = this;
 
     const version = new Date().getTime() + '-' + Math.floor(Math.random() * 100000000);
 
-    return util.createMd5Digest(version) + oThis.fileExtension;
+    return util.createMd5Digest(version) + '-' + fileSuffix + oThis.fileExtension;
   }
 }
 

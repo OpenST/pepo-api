@@ -92,15 +92,13 @@ class EditChannel extends ServiceBase {
       await oThis._createNewChannel();
     }
 
-    await Promise.all([
-      oThis._performChannelTaglineRelatedTasks(),
-      oThis._performChannelDescriptionRelatedTasks(),
-      oThis._performImageUrlRelatedTasks(),
-      oThis._performShareImageUrlRelatedTasks(),
-      oThis._createEntryInChannelStats(),
-      oThis._associateAdminsToChannel(),
-      oThis._associateTagsToChannel()
-    ]);
+    await oThis._performChannelTaglineRelatedTasks();
+    await oThis._performChannelDescriptionRelatedTasks();
+    await oThis._performImageUrlRelatedTasks();
+    await oThis._performShareImageUrlRelatedTasks();
+    await oThis._createEntryInChannelStats();
+    await oThis._associateAdminsToChannel();
+    await oThis._associateTagsToChannel();
 
     return responseHelper.successWithData({});
   }
@@ -526,15 +524,14 @@ class EditChannel extends ServiceBase {
     if (Object.keys(userNamesToUserMap).length !== oThis.channelAdminUserNames.length) {
       logger.error('Some admins are not present in user db.');
 
-      return Promise.reject(
-        responseHelper.error({
-          internal_error_identifier: 'a_s_a_c_e_aatc_1',
-          api_error_identifier: 'something_went_wrong',
-          debug_options: {
-            adminUserNames: oThis.adminUserNames
-          }
-        })
-      );
+      responseHelper.paramValidationError({
+        internal_error_identifier: 'a_s_a_c_e_aatc_1',
+        api_error_identifier: 'invalid_api_params',
+        params_error_identifiers: ['invalid_admin_usernames'],
+        debug_options: {
+          adminUserNames: oThis.adminUserNames
+        }
+      });
     }
 
     const adminUserIds = [];
