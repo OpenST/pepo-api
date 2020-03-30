@@ -24,8 +24,10 @@ const rootPrefix = '../../../..',
 // Declare constants.
 const ORIGINAL_IMAGE_WIDTH = 1500;
 const ORIGINAL_IMAGE_HEIGHT = 642;
+const ORIGINAL_IMAGE_SIZE_IN_BYTES = 334425;
 const SHARE_IMAGE_WIDTH = 1500;
 const SHARE_IMAGE_HEIGHT = 750;
+const SHARE_IMAGE_SIZE_IN_BYTES = 334425;
 
 /**
  * Class to edit channel.
@@ -411,7 +413,7 @@ class EditChannel extends ServiceBase {
     if (oThis.originalImageUrl) {
       const imageParams = {
         imageUrl: oThis.originalImageUrl,
-        size: oThis.size, // TODO
+        size: ORIGINAL_IMAGE_SIZE_IN_BYTES,
         width: ORIGINAL_IMAGE_WIDTH,
         height: ORIGINAL_IMAGE_HEIGHT,
         kind: imageConstants.channelImageKind,
@@ -450,7 +452,7 @@ class EditChannel extends ServiceBase {
     if (oThis.shareImageUrl) {
       const imageParams = {
         imageUrl: oThis.shareImageUrl,
-        size: oThis.size, // TODO
+        size: SHARE_IMAGE_SIZE_IN_BYTES,
         width: SHARE_IMAGE_WIDTH,
         height: SHARE_IMAGE_HEIGHT,
         kind: imageConstants.channelShareImageKind,
