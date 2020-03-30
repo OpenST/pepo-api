@@ -60,7 +60,7 @@ class EditChannel extends ServiceBase {
     oThis.isEdit = Number(params.is_edit);
     oThis.channelName = params.name;
     oThis.channelDescription = params.description;
-    oThis.channelTagLine = params.tagline;
+    oThis.channelTagline = params.tagline;
     oThis.channelPermalink = params.permalink;
     oThis.channelAdminUserNames = params.admins;
     oThis.channelTagNames = params.tags;
@@ -270,7 +270,7 @@ class EditChannel extends ServiceBase {
   async _performChannelTaglineRelatedTasks() {
     const oThis = this;
 
-    if (oThis.channelTagLine) {
+    if (oThis.channelTagline) {
       // Create new entry in texts table.
       const textRow = await new TextModel().insertText({
         text: oThis.channelTagline,
