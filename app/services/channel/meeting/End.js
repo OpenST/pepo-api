@@ -53,6 +53,8 @@ class EndMeeting extends ServiceBase {
     await oThis._validateMeeting();
 
     await oThis._endMeeting();
+
+    return responseHelper.successWithData({});
   }
 
   /**
@@ -206,4 +208,5 @@ class EndMeeting extends ServiceBase {
     }
   }
 }
+
 module.exports = EndMeeting;
