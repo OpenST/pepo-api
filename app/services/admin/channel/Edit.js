@@ -62,8 +62,8 @@ class EditChannel extends ServiceBase {
     oThis.channelDescription = params.description;
     oThis.channelTagline = params.tagline;
     oThis.channelPermalink = params.permalink;
-    oThis.channelAdminUserNames = params.admins;
-    oThis.channelTagNames = params.tags;
+    oThis.channelAdminUserNames = params.admins ? params.admins.split(',') : [];
+    oThis.channelTagNames = params.tags ? params.tags.split(',') : [];
     oThis.originalImageUrl = params.original_image_url;
     oThis.shareImageUrl = params.share_image_url;
 
