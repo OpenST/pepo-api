@@ -1,6 +1,6 @@
 const rootPrefix = '../../../..',
-  ServiceBase = require(rootPrefix + '/app/services/Base'),
   FilterTags = require(rootPrefix + '/lib/FilterOutTags'),
+  ServiceBase = require(rootPrefix + '/app/services/Base'),
   TagModel = require(rootPrefix + '/app/models/mysql/Tag'),
   TextModel = require(rootPrefix + '/app/models/mysql/Text'),
   UserModel = require(rootPrefix + '/app/models/mysql/User'),
@@ -26,6 +26,8 @@ const ORIGINAL_IMAGE_WIDTH = 1500;
 const ORIGINAL_IMAGE_HEIGHT = 642;
 const SHARE_IMAGE_WIDTH = 1500;
 const SHARE_IMAGE_HEIGHT = 750;
+
+const has = Object.prototype.hasOwnProperty; // Cache the lookup once, in module scope.
 
 /**
  * Class to edit channel.
@@ -83,6 +85,7 @@ class EditChannel extends ServiceBase {
     await oThis._validateAndSanitize();
 
     if (!oThis.isEdit) {
+      await oThis._validateChannelCreationParameters();
       await oThis._createNewChannel();
     }
 
@@ -204,6 +207,28 @@ class EditChannel extends ServiceBase {
   }
 
   /**
+   * Validate input parameters in case of community creation.
+   *
+   * @returns {Promise<never>}
+   * @private
+   */
+  async _validateChannelCreationParameters() {
+    const oThis = this;
+
+    if (
+      !has.call(oThis, oThis.channelName) ||
+      !has.call(oThis, oThis.channelDescription) ||
+      !has.call(oThis, oThis.channelTagline) ||
+      !has.call(oThis, oThis.originalImageUrl) ||
+      !has.call(oThis, oThis.shareImageUrl)
+    ) {
+      return Promise.reject(new Error('Missing input parameters.'));
+    }
+
+    // We are not validating channelAdminUserNames and channelTagNames as they are not mandatory for creating a new channel.
+  }
+
+  /**
    * Create new channel.
    *
    * @sets oThis.channelId
@@ -213,19 +238,6 @@ class EditChannel extends ServiceBase {
    */
   async _createNewChannel() {
     const oThis = this;
-
-    if (!oThis.channelName) {
-      return Promise.reject(
-        responseHelper.error({
-          internal_error_identifier: 'a_s_a_c_e_cnc_1',
-          api_error_identifier: 'invalid_api_params',
-          debug_options: {
-            channelPermalink: oThis.channelPermalink,
-            isEdit: oThis.isEdit
-          }
-        })
-      );
-    }
 
     const insertResponse = await new ChannelModel()
       .insert({
@@ -246,20 +258,6 @@ class EditChannel extends ServiceBase {
    */
   async _performChannelTaglineRelatedTasks() {
     const oThis = this;
-
-    if (!oThis.isEdit && !oThis.channelTagLine) {
-      return Promise.reject(
-        responseHelper.error({
-          internal_error_identifier: 'a_s_a_c_e_pctrt_1',
-          api_error_identifier: 'invalid_api_params',
-          debug_options: {
-            channelPermalink: oThis.channelPermalink,
-            isEdit: oThis.isEdit,
-            channelTagline: oThis.channelTagline
-          }
-        })
-      );
-    }
 
     if (oThis.channelTagLine) {
       // Create new entry in texts table.
@@ -293,20 +291,6 @@ class EditChannel extends ServiceBase {
    */
   async _performChannelDescriptionRelatedTasks() {
     const oThis = this;
-
-    if (!oThis.isEdit && !oThis.channelDescription) {
-      return Promise.reject(
-        responseHelper.error({
-          internal_error_identifier: 'a_s_a_c_e_pcdrt_1',
-          api_error_identifier: 'invalid_api_params',
-          debug_options: {
-            channelPermalink: oThis.channelPermalink,
-            isEdit: oThis.isEdit,
-            channelDescription: oThis.channelDescription
-          }
-        })
-      );
-    }
 
     if (oThis.channelDescription) {
       // Create new entry in texts table.
@@ -343,20 +327,6 @@ class EditChannel extends ServiceBase {
    */
   async _performImageUrlRelatedTasks() {
     const oThis = this;
-
-    if (!oThis.isEdit && !oThis.originalImageUrl) {
-      return Promise.reject(
-        responseHelper.error({
-          internal_error_identifier: 'a_s_a_c_e_piurt_1',
-          api_error_identifier: 'invalid_api_params',
-          debug_options: {
-            channelPermalink: oThis.channelPermalink,
-            isEdit: oThis.isEdit,
-            originalImageUrl: oThis.originalImageUrl
-          }
-        })
-      );
-    }
 
     if (oThis.originalImageUrl) {
       const imageParams = {
@@ -396,20 +366,6 @@ class EditChannel extends ServiceBase {
    */
   async _performShareImageUrlRelatedTasks() {
     const oThis = this;
-
-    if (!oThis.isEdit && !oThis.shareImageUrl) {
-      return Promise.reject(
-        responseHelper.error({
-          internal_error_identifier: 'a_s_a_c_e_psiurt_1',
-          api_error_identifier: 'invalid_api_params',
-          debug_options: {
-            channelPermalink: oThis.channelPermalink,
-            isEdit: oThis.isEdit,
-            shareImageUrl: oThis.shareImageUrl
-          }
-        })
-      );
-    }
 
     if (oThis.shareImageUrl) {
       const imageParams = {
