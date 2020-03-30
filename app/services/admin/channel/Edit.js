@@ -218,9 +218,10 @@ class EditChannel extends ServiceBase {
     if (
       !has.call(oThis, oThis.channelName) ||
       !has.call(oThis, oThis.channelDescription) ||
-      !has.call(oThis, oThis.channelTagline) ||
-      !has.call(oThis, oThis.originalImageUrl) ||
-      !has.call(oThis, oThis.shareImageUrl)
+      !has.call(oThis, oThis.channelTagline)
+      // ||
+      // !has.call(oThis, oThis.originalImageUrl) ||
+      // !has.call(oThis, oThis.shareImageUrl)
     ) {
       return Promise.reject(new Error('Missing input parameters.'));
     }
