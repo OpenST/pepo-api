@@ -57,7 +57,7 @@ class EditChannel extends ServiceBase {
 
     const oThis = this;
 
-    oThis.isEdit = params.is_edit;
+    oThis.isEdit = Number(params.is_edit);
     oThis.channelName = params.name;
     oThis.channelDescription = params.description;
     oThis.channelTagLine = params.tagline;
