@@ -165,7 +165,7 @@ class EndMeeting extends ServiceBase {
     const zoomUUID = oThis.meeting.zoomUUID;
 
     logger.info(`Trying to ending zoom meeting ${zoomMeetingId}`);
-    await MeetingLib.markEnd(zoomMeetingId).catch((e) => {
+    await MeetingLib.markEnd(zoomMeetingId).catch(function(e) {
       logger.info(
         `Zoom meeting end call failed. Possibly meeting is already ended for zoomMeeting id ${
           oThis.meeting.zoomMeetingId
@@ -174,7 +174,7 @@ class EndMeeting extends ServiceBase {
     });
 
     let isPastMeetingResponse = true;
-    const pastMeetingResponse = await MeetingLib.getPastMeeting(zoomUUID).catch(async (e) => {
+    const pastMeetingResponse = await MeetingLib.getPastMeeting(zoomUUID).catch(async function(e) {
       isPastMeetingResponse = false;
       logger.error(`Error in fetching past meeting details for UUID ${zoomUUID} error status ${e.statusCode}`);
     });
