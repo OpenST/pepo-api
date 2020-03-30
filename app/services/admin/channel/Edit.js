@@ -258,6 +258,14 @@ class EditChannel extends ServiceBase {
   async _updateChannelName() {
     const oThis = this;
 
+    console.log('Reachd here');
+
+    if (!oThis.channelName) {
+      return;
+    }
+
+    console.log('Reachd here==111111');
+
     await new ChannelModel()
       .update({ name: oThis.channelName })
       .where({ id: oThis.channelId })
