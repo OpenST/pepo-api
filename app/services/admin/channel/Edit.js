@@ -98,26 +98,18 @@ class EditChannel extends ServiceBase {
       oThis._associateAdminsToChannel(),
       oThis._associateTagsToChannel()
     ]);
+
+    return responseHelper.successWithData({});
   }
 
   /**
    * Validate and sanitize input parameters.
-   *
-   * @sets oThis.channelAdminUserNames, oThis.channelTagNames
    *
    * @returns {Promise<void>}
    * @private
    */
   async _validateAndSanitize() {
     const oThis = this;
-
-    if (oThis.channelAdminUserNames) {
-      oThis.channelAdminUserNames = oThis.channelAdminUserNames.split(',');
-    }
-
-    if (oThis.channelTagNames) {
-      oThis.channelTagNames = oThis.channelTagNames.split(',');
-    }
 
     await oThis._validateExistingChannel();
 
