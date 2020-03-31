@@ -1,5 +1,5 @@
 const rootPrefix = '../../../..',
-  ServiceBase = require(rootPrefix + '/app/services/Base'),
+  ZoomEventsForMeetingsBase = require(rootPrefix + '/app/services/zoomEvents/meetings/Base'),
   MeetingIdByZoomMeetingIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/meeting/MeetingIdByZoomMeetingIds'),
   MeetingByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/meeting/MeetingByIds'),
   MeetingModel = require(rootPrefix + '/app/models/mysql/meeting/Meeting'),
@@ -15,7 +15,7 @@ const rootPrefix = '../../../..',
  *
  * @class MeetingStarted
  */
-class MeetingStarted extends ServiceBase {
+class MeetingStarted extends ZoomEventsForMeetingsBase {
   /**
    * Constructor
    *
@@ -30,9 +30,7 @@ class MeetingStarted extends ServiceBase {
 
     const oThis = this;
     oThis.startTime = params.payload.object.start_time;
-    oThis.zoomMeetingId = params.payload.object.id;
 
-    oThis.meetingId = null;
     oThis.meetingObj = {};
     oThis.startTimestamp = null;
     oThis.processEvent = true;
@@ -49,6 +47,8 @@ class MeetingStarted extends ServiceBase {
     const oThis = this;
 
     await oThis._validateParams();
+
+    await oThis.validateAndSetMeetingId();
 
     await oThis._fetchAndValidateMeetingStatus();
 
@@ -100,7 +100,7 @@ class MeetingStarted extends ServiceBase {
   /**
    * Fetch meeting obj.
    *
-   * @sets oThis.meetingId, oThis.meetingObj
+   * @sets oThis.meetingObj
    *
    * @return {Promise<void>}
    * @private
@@ -108,15 +108,7 @@ class MeetingStarted extends ServiceBase {
   async _fetchAndValidateMeetingStatus() {
     const oThis = this;
 
-    logger.log('Fetching meeting obj.');
-
-    let cacheRes1 = await new MeetingIdByZoomMeetingIdsCache({ zoomMeetingIds: [oThis.zoomMeetingId] }).fetch();
-
-    if (cacheRes1.isFailure()) {
-      return Promise.reject(cacheRes1);
-    }
-
-    oThis.meetingId = cacheRes1.data[oThis.zoomMeetingId].id;
+    logger.log('MeetingStarted: Fetching meeting obj.');
 
     if (!oThis.meetingId) {
       oThis.processEvent = false;
@@ -153,7 +145,7 @@ class MeetingStarted extends ServiceBase {
   async _updateMeetingStatus() {
     const oThis = this;
 
-    logger.log('update meeting status.');
+    logger.log('MeetingStarted: Updating meeting status.');
 
     const updateResponse = await new MeetingModel()
       .update({

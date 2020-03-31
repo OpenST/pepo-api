@@ -1,5 +1,5 @@
 const rootPrefix = '../../../..',
-  ServiceBase = require(rootPrefix + '/app/services/Base'),
+  ZoomEventsForMeetingsBase = require(rootPrefix + '/app/services/zoomEvents/meetings/Base'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   createErrorLogsEntry = require(rootPrefix + '/lib/errorLogs/createEntry'),
@@ -10,7 +10,7 @@ const rootPrefix = '../../../..',
  *
  * @class MeetingAlert
  */
-class MeetingAlert extends ServiceBase {
+class MeetingAlert extends ZoomEventsForMeetingsBase {
   /**
    * Constructor
    *
@@ -36,6 +36,8 @@ class MeetingAlert extends ServiceBase {
    */
   async _asyncPerform() {
     const oThis = this;
+
+    await oThis.validateAndSetMeetingId();
 
     const response = responseHelper.error({
       internal_error_identifier: 's_ze_a_ap_1',
