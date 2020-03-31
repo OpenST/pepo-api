@@ -1,6 +1,5 @@
 const rootPrefix = '../../../..',
   ZoomEventsForMeetingsBase = require(rootPrefix + '/app/services/zoomEvents/meetings/Base'),
-  logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   createErrorLogsEntry = require(rootPrefix + '/lib/errorLogs/createEntry'),
   errorLogsConstants = require(rootPrefix + '/lib/globalConstant/errorLogs');

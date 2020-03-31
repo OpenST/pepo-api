@@ -1,6 +1,5 @@
 const rootPrefix = '../../../..',
   ZoomEventsForMeetingsBase = require(rootPrefix + '/app/services/zoomEvents/meetings/Base'),
-  MeetingIdByZoomMeetingIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/meeting/MeetingIdByZoomMeetingIds'),
   MeetingByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/meeting/MeetingByIds'),
   MeetingModel = require(rootPrefix + '/app/models/mysql/meeting/Meeting'),
   bgJob = require(rootPrefix + '/lib/rabbitMqEnqueue/bgJob'),
