@@ -2,6 +2,7 @@ const rootPrefix = '../../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
   LiveMeetingIdByChannelIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/meeting/LiveMeetingIdByChannelIds'),
   databaseConstants = require(rootPrefix + '/lib/globalConstant/database'),
+  basicHelper = require(rootPrefix + '/helpers/basic'),
   channelConstants = require(rootPrefix + '/lib/globalConstant/channel/channels');
 
 // Declare variables names.
@@ -64,6 +65,31 @@ class ChannelModel extends ModelBase {
     };
 
     return oThis.sanitizeFormattedData(formattedData);
+  }
+
+  /**
+   * Fetch ids created recently.
+   *
+   * @return {object}
+   */
+  async fetchNewChannelIds() {
+    const oThis = this;
+
+    const channelIds = [],
+      currentTime = basicHelper.getCurrentTimestampInSeconds();
+
+    const response = await oThis
+      .select('id')
+      .where({ status: channelConstants.invertedStatuses[channelConstants.activeStatus] })
+      .where(['created_at < ?', currentTime - channelConstants.newChannelIntervalInSec])
+      .order_by('created_at desc')
+      .fire();
+
+    for (let i = 0; i < response.length; i++) {
+      channelIds.push(response[i].id);
+    }
+
+    return { ids: channelIds };
   }
 
   /**

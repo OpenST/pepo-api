@@ -52,6 +52,8 @@ router.use('/channels', channelRoutes);
 
 // Login mandatory for following
 
+router.use('/search', searchRoutes);
+
 router.use(cookieHelper.validateUserLoginRequired);
 
 router.use('/users', usersRoutes);
@@ -63,7 +65,6 @@ router.use('/session-auth', sessionAuthsRoutes);
 router.use('/support', supportRoutes);
 router.use('/upload-params', uploadParamsRoutes);
 router.use('/tags', tagRoutes);
-router.use('/search', searchRoutes);
 router.use('/notifications', notificationsRoutes);
 router.use('/top-up', topupRoutes);
 router.use('/twitter', twitterRoutes);

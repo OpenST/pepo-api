@@ -101,6 +101,28 @@ class MeetingModel extends ModelBase {
   /**
    * Fetch meeting objects for zoom meeting ids.
    *
+   * @return {object}
+   */
+  async fetchLiveChannelIds() {
+    const oThis = this;
+
+    const channelIds = [];
+
+    const response = await oThis
+      .select('channel_id')
+      .where({ is_live: meetingConstants.isLiveStatus })
+      .fire();
+
+    for (let i = 0; i < response.length; i++) {
+      channelIds.push(response[i].channel_id);
+    }
+
+    return { ids: channelIds };
+  }
+
+  /**
+   * Fetch meeting objects for zoom meeting ids.
+   *
    * @param {array} zoomMeetingIds
    *
    * @return {object}
@@ -195,6 +217,10 @@ class MeetingModel extends ModelBase {
       const ChannelByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelByIds');
 
       promisesArray.push(new ChannelByIdsCache({ ids: channelIds }).clear());
+
+      const MeetingGetLiveChannelIdsCache = require(rootPrefix +
+        '/lib/cacheManagement/single/meeting/MeetingGetLiveChannelIds');
+      promisesArray.push(new MeetingGetLiveChannelIdsCache({}).clear());
     }
 
     // As live meeting would change the list here, so clearing that as well.
