@@ -389,7 +389,6 @@ class StartMeeting extends ServiceBase {
     // Clear all meetings table caches.
     const meetingObj = new MeetingModel().formatDbData(insertData);
     await MeetingModel.flushCache(meetingObj);
-    await ChannelModel.flushCache({ ids: [oThis.channelId] });
 
     // Send slack alert when meeting is created
     oThis.errorGoingLive = false;
