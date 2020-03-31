@@ -309,7 +309,7 @@ class GetChannelMeeting extends ServiceBase {
 
       const twitterUser = twitterUserByIdsCacheResponse.data[hostTwitterId];
       if (twitterUser) {
-        oThis.twitterUsersMap[hostTwitterId] = twitterUser;
+        oThis.twitterUsersMap[oThis.hostUserId] = twitterUser;
       }
     }
   }
