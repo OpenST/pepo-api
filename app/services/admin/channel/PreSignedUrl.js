@@ -1,4 +1,4 @@
-const rootPrefix = '../../..',
+const rootPrefix = '../../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   AwsS3wrapper = require(rootPrefix + '/lib/aws/S3Wrapper'),
   util = require(rootPrefix + '/lib/util'),

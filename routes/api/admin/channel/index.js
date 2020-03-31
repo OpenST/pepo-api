@@ -13,7 +13,7 @@ const rootPrefix = '../../../..',
 router.post('/edit', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.adminEditChannel;
 
-  Promise.resolve(routeHelper.perform(req, res, next, '/channel/Edit', 'r_a_ad_c_1', null, null, null));
+  Promise.resolve(routeHelper.perform(req, res, next, '/admin/channel/Edit', 'r_a_ad_c_1', null, null, null));
 });
 
 /* Get pre-signed url. */
@@ -31,7 +31,9 @@ router.get('/presigned-url', sanitizer.sanitizeDynamicUrlParams, function(req, r
     serviceResponse.data = wrapperFormatterRsp.data;
   };
 
-  Promise.resolve(routeHelper.perform(req, res, next, '/channel/PreSignedUrl', 'r_a_ad_c_2', null, dataFormatterFunc));
+  Promise.resolve(
+    routeHelper.perform(req, res, next, '/admin/channel/PreSignedUrl', 'r_a_ad_c_2', null, dataFormatterFunc)
+  );
 });
 
 module.exports = router;
