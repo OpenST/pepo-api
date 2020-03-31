@@ -483,14 +483,16 @@ class EditChannel extends ServiceBase {
     if (Object.keys(userNamesToUserMap).length !== oThis.channelAdminUserNames.length) {
       logger.error('Some admins are not present in user db.');
 
-      responseHelper.paramValidationError({
-        internal_error_identifier: 'a_s_a_c_e_aatc_1',
-        api_error_identifier: 'invalid_api_params',
-        params_error_identifiers: ['invalid_admin_usernames'],
-        debug_options: {
-          adminUserNames: oThis.adminUserNames
-        }
-      });
+      return Promise.reject(
+        responseHelper.paramValidationError({
+          internal_error_identifier: 'a_s_a_c_e_aatc_1',
+          api_error_identifier: 'invalid_api_params',
+          params_error_identifiers: ['invalid_admin_usernames'],
+          debug_options: {
+            adminUserNames: oThis.adminUserNames
+          }
+        })
+      );
     }
 
     const adminUserIds = [];
