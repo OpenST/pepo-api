@@ -45,6 +45,10 @@ class MeetingParticipantJoined extends ZoomEventsForMeetingsBase {
 
     await oThis._validateParams();
 
+    if (!oThis.processEvent) {
+      return responseHelper.successWithData({});
+    }
+
     await oThis.validateAndSetMeetingId();
 
     await oThis._fetchAndValidateMeetingHost();
