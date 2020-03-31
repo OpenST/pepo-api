@@ -26,8 +26,6 @@ const rootPrefix = '../../../..',
 // Declare constants.
 const ORIGINAL_IMAGE_WIDTH = 1500;
 const ORIGINAL_IMAGE_HEIGHT = 642;
-const SHARE_IMAGE_WIDTH = 1500;
-const SHARE_IMAGE_HEIGHT = 750;
 
 /**
  * Class to edit channel.
@@ -49,8 +47,6 @@ class EditChannel extends ServiceBase {
    * @param {string[]} [params.admins]
    * @param {string} [params.original_image_url]
    * @param {number} [params.original_image_file_size]
-   * @param {string} [params.share_image_url]
-   * @param {number} [params.share_image_file_size]
    *
    * @augments ServiceBase
    *
@@ -71,8 +67,6 @@ class EditChannel extends ServiceBase {
     oThis.channelTagNames = params.tags ? params.tags.split(',') : [];
     oThis.originalImageUrl = params.original_image_url;
     oThis.originalImageFileSize = params.original_image_file_size;
-    oThis.shareImageUrl = params.share_image_url;
-    oThis.shareImageFileSize = params.share_image_file_size;
 
     oThis.channelId = null;
 
@@ -100,7 +94,6 @@ class EditChannel extends ServiceBase {
     await oThis._performChannelTaglineRelatedTasks();
     await oThis._performChannelDescriptionRelatedTasks();
     await oThis._performImageUrlRelatedTasks();
-    await oThis._performShareImageUrlRelatedTasks();
     await oThis._createEntryInChannelStats();
     await oThis._associateAdminsToChannel();
     await oThis._associateTagsToChannel();
@@ -270,9 +263,7 @@ class EditChannel extends ServiceBase {
       !oThis.channelDescription ||
       !oThis.channelTagline ||
       !oThis.originalImageUrl ||
-      !oThis.shareImageUrl ||
-      !oThis.originalImageFileSize ||
-      !oThis.shareImageFileSize
+      !oThis.originalImageFileSize
     ) {
       return Promise.reject(
         responseHelper.error({
@@ -442,45 +433,6 @@ class EditChannel extends ServiceBase {
       // Update channel table.
       await new ChannelModel()
         .update({ cover_image_id: imageData.insertId })
-        .where({ id: oThis.channelId })
-        .fire();
-
-      await ChannelModel.flushCache({ ids: [oThis.channelId] });
-    }
-  }
-
-  /**
-   * Perform share image url related tasks.
-   *
-   * @returns {Promise<never>}
-   * @private
-   */
-  async _performShareImageUrlRelatedTasks() {
-    const oThis = this;
-
-    if (oThis.shareImageUrl) {
-      const imageParams = {
-        imageUrl: oThis.shareImageUrl,
-        size: oThis.shareImageFileSize,
-        width: SHARE_IMAGE_WIDTH,
-        height: SHARE_IMAGE_HEIGHT,
-        kind: imageConstants.channelShareImageKind,
-        channelId: oThis.channelId,
-        isExternalUrl: false,
-        enqueueResizer: true
-      };
-
-      // Validate and save image.
-      const resp = await imageLib.validateAndSave(imageParams);
-      if (resp.isFailure()) {
-        return Promise.reject(resp);
-      }
-
-      const imageData = resp.data;
-
-      // Update channel table.
-      await new ChannelModel()
-        .update({ share_image_id: imageData.insertId })
         .where({ id: oThis.channelId })
         .fire();
 

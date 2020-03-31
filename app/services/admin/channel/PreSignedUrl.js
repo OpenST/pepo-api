@@ -43,33 +43,27 @@ class PreSignedUrl extends ServiceBase {
 
     const contentType = 'image/jpeg';
 
-    const channelOriginalFileName = oThis._getRandomEncodedFileNames('original'),
-      channelShareFileName = oThis._getRandomEncodedFileNames('share-original');
+    const channelOriginalFileName = oThis._getRandomEncodedFileNames('original');
 
     const resultHash = {},
       intent = s3Constants.imageFileType,
-      fileArray = [channelOriginalFileName, channelShareFileName],
       resultKey = s3Constants.imagesResultKey;
 
-    for (let index = 0; index < fileArray.length; index++) {
-      const fileName = fileArray[index];
+    const preSignedPostParams = await AwsS3wrapper.createPresignedPostFor(
+      intent,
+      channelOriginalFileName,
+      contentType,
+      coreConstants.AWS_REGION,
+      { imageKind: imageConstants.channelImageKind }
+    );
 
-      const preSignedPostParams = await AwsS3wrapper.createPresignedPostFor(
-        intent,
-        fileName,
-        contentType,
-        coreConstants.AWS_REGION,
-        { imageKind: imageConstants.channelImageKind }
-      );
+    const s3Url = oThis._getS3UrlForChannel(channelOriginalFileName);
 
-      const s3Url = oThis._getS3UrlForChannel(fileName);
-
-      resultHash[fileName] = {
-        postUrl: preSignedPostParams.url,
-        postFields: preSignedPostParams.fields,
-        s3Url: s3Url
-      };
-    }
+    resultHash[channelOriginalFileName] = {
+      postUrl: preSignedPostParams.url,
+      postFields: preSignedPostParams.fields,
+      s3Url: s3Url
+    };
 
     oThis.apiResponse[resultKey] = resultHash;
 
