@@ -596,7 +596,7 @@ const webSignature = {
       },
       {
         parameter: 'guest_name',
-        validatorMethods: ['validateString', 'validateName', 'validateStopWords']
+        validatorMethods: ['validateString', 'validateName']
       }
     ]
   },

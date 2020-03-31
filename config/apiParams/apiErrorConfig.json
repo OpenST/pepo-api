@@ -273,10 +273,5 @@
     "http_code": "200",
     "code": "ZOOM_CALL_COULD_NOT_PROCEED",
     "message": "We could not create your new Pepo live event. Please try again later."
-  },
-  "invalid_guest_name": {
-    "http_code": "200",
-    "code": "BAD_REQUEST",
-    "message": "Please provide name to Join Meeting."
   }
 }
