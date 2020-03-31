@@ -39,6 +39,7 @@ class ChannelModel extends ModelBase {
    * @param {number} dbRow.description_id
    * @param {number} dbRow.cover_image_id
    * @param {number} dbRow.share_image_id
+   * @param {number} dbRow.trending_rank
    * @param {String} dbRow.permalink
    * @param {number} dbRow.created_at
    * @param {number} dbRow.updated_at
@@ -57,6 +58,7 @@ class ChannelModel extends ModelBase {
       coverImageId: dbRow.cover_image_id,
       shareImageId: dbRow.share_image_id,
       permalink: dbRow.permalink,
+      trendingRank: dbRow.trending_rank,
       createdAt: dbRow.created_at,
       updatedAt: dbRow.updated_at
     };

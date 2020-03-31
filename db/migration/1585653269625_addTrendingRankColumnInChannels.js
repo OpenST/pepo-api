@@ -7,7 +7,7 @@ const dbKind = DbKindConstant.sqlDbKind;
 
 const upQuery =
   'ALTER TABLE `channels` \n\
-      ADD COLUMN `trending_rank` bigint(20) NULL AFTER `permalink`, \n\
+      ADD COLUMN `trending_rank` int(11) NULL AFTER `permalink`, \n\
       ADD INDEX idx_trending_rank (`trending_rank`) \n\
       ';
 
