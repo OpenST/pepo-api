@@ -266,6 +266,10 @@ const v1Signature = {
       {
         parameter: 'images',
         validatorMethods: ['validateStringArray']
+      },
+      {
+        parameter: 'channel_images',
+        validatorMethods: ['validateStringArray']
       }
     ]
   },
