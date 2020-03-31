@@ -1,4 +1,4 @@
-const rootPrefix = '../../../..',
+const rootPrefix = '../../..',
   FilterTags = require(rootPrefix + '/lib/FilterOutTags'),
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   TagModel = require(rootPrefix + '/app/models/mysql/Tag'),
