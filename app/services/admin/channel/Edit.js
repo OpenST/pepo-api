@@ -10,6 +10,7 @@ const rootPrefix = '../../../..',
   AddInChannelLib = require(rootPrefix + '/lib/channelTagVideo/AddTagInChannel'),
   ChannelStatModel = require(rootPrefix + '/app/models/mysql/channel/ChannelStat'),
   ChangeChannelUserRoleLib = require(rootPrefix + '/lib/channel/ChangeChannelUserRole'),
+  AdminActivityLogModel = require(rootPrefix + '/app/models/mysql/admin/AdminActivityLog'),
   ChannelByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelByIds'),
   ChannelByPermalinksCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelByPermalinks'),
   imageLib = require(rootPrefix + '/lib/imageLib'),
@@ -19,7 +20,8 @@ const rootPrefix = '../../../..',
   textConstants = require(rootPrefix + '/lib/globalConstant/text'),
   imageConstants = require(rootPrefix + '/lib/globalConstant/image'),
   channelConstants = require(rootPrefix + '/lib/globalConstant/channel/channels'),
-  channelUserConstants = require(rootPrefix + '/lib/globalConstant/channel/channelUsers');
+  channelUserConstants = require(rootPrefix + '/lib/globalConstant/channel/channelUsers'),
+  adminActivityLogConstants = require(rootPrefix + '/lib/globalConstant/admin/adminActivityLogs');
 
 // Declare constants.
 const ORIGINAL_IMAGE_WIDTH = 1500;
@@ -36,6 +38,8 @@ class EditChannel extends ServiceBase {
   /**
    * Constructor to edit channel.
    *
+   * @param {object} params.current_admin
+   * @param {number} params.current_admin.id
    * @param {number} params.is_edit
    * @param {string} [params.name]
    * @param {string} [params.description]
@@ -57,6 +61,7 @@ class EditChannel extends ServiceBase {
 
     const oThis = this;
 
+    oThis.currentAdminId = params.current_admin.id;
     oThis.isEdit = Number(params.is_edit);
     oThis.channelName = params.name;
     oThis.channelDescription = params.description;
@@ -99,6 +104,8 @@ class EditChannel extends ServiceBase {
     await oThis._createEntryInChannelStats();
     await oThis._associateAdminsToChannel();
     await oThis._associateTagsToChannel();
+
+    await oThis.logAdminActivity();
 
     return responseHelper.successWithData({});
   }
@@ -648,6 +655,23 @@ class EditChannel extends ServiceBase {
         })
       );
     }
+  }
+
+  /**
+   * Log admin activity.
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async logAdminActivity() {
+    const oThis = this;
+
+    await new AdminActivityLogModel().insertAction({
+      adminId: oThis.currentAdminId,
+      actionOn: oThis.channelId,
+      extraData: JSON.stringify({ cid: [oThis.channelId], chPml: oThis.channelPermalink }),
+      action: adminActivityLogConstants.createEditCommunityEntity
+    });
   }
 }
 

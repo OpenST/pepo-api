@@ -420,6 +420,10 @@ const adminSignature = {
       {
         parameter: 'permalink',
         validatorMethods: ['validateString']
+      },
+      {
+        parameter: 'current_admin',
+        validatorMethods: ['validateNonEmptyObject']
       }
     ],
     optional: [
