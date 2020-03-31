@@ -8,6 +8,9 @@ const rootPrefix = '../../../..',
   imageConstants = require(rootPrefix + '/lib/globalConstant/image'),
   adminEntityType = require(rootPrefix + '/lib/globalConstant/adminEntityType');
 
+// Declare variables.
+const FILE_EXTENSION = '.jpeg';
+
 /**
  * Class to get pre-signed url.
  *
@@ -25,8 +28,6 @@ class PreSignedUrl extends ServiceBase {
     super();
 
     const oThis = this;
-
-    oThis.fileExtension = '.jpeg';
 
     oThis.workingMap = {};
     oThis.apiResponse = {};
@@ -89,15 +90,15 @@ class PreSignedUrl extends ServiceBase {
   /**
    * Get random encoded file names.
    *
+   * @param {string} [fileSuffix]
+   *
    * @returns {string}
    * @private
    */
   _getRandomEncodedFileNames(fileSuffix) {
-    const oThis = this;
-
     const version = new Date().getTime() + '-' + Math.floor(Math.random() * 100000000);
 
-    return util.createMd5Digest(version) + '-' + fileSuffix + oThis.fileExtension;
+    return util.createMd5Digest(version) + '-' + fileSuffix + FILE_EXTENSION;
   }
 }
 
