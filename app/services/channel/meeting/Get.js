@@ -63,6 +63,8 @@ class GetChannelMeeting extends ServiceBase {
     oThis.tokenUsersByUserIdMap = {};
 
     oThis.imageDetails = {};
+
+    oThis.shareDetails = {}
   }
 
   /**
@@ -324,6 +326,16 @@ class GetChannelMeeting extends ServiceBase {
     oThis.links = associatedEntitiesResponse.data.links;
   }
 
+  // Set oThis.shareDetails
+  getShareDetails() {
+    oThis.shareDetails = {
+      channelName: '',
+      imageUrl: '',
+      hostName: '',
+      hostTwitterHandle: '',
+    }
+  }
+
   /**
    * Prepare response.
    *
@@ -339,6 +351,7 @@ class GetChannelMeeting extends ServiceBase {
       [entityTypeConstants.channelDetailsMap]: { [oThis.channel.id]: oThis.channel },
       [entityTypeConstants.channelIdToTagIdsMap]: { [oThis.channel.id]: oThis.tagIds },
       [entityTypeConstants.currentUserChannelRelationsMap]: oThis.currentUserChannelRelations,
+      [entityTypeConstants.share]: oThis.shareDetails,
       usersByIdMap: oThis.userDetails,
       tokenUsersByUserIdMap: oThis.tokenUsersByUserIdMap,
       [entityTypeConstants.textsMap]: oThis.texts,
