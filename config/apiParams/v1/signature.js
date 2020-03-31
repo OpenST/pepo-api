@@ -446,6 +446,14 @@ const v1Signature = {
         validatorMethods: ['validateString', 'validateStopWords']
       },
       {
+        parameter: 'video_duration',
+        validatorMethods: ['validateInteger']
+      },
+      {
+        parameter: 'video_duration_preference',
+        validatorMethods: ['validateInteger']
+      },
+      {
         parameter: 'link',
         validatorMethods: ['validateString', 'validateStopWords']
       } // If link is invalid, consider empty string.
@@ -510,6 +518,14 @@ const v1Signature = {
       {
         parameter: 'video_description',
         validatorMethods: ['validateString', 'validateStopWords']
+      },
+      {
+        parameter: 'video_duration',
+        validatorMethods: ['validateInteger']
+      },
+      {
+        parameter: 'video_duration_preference',
+        validatorMethods: ['validateInteger']
       },
       {
         parameter: 'link',

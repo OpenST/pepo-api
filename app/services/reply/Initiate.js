@@ -40,6 +40,8 @@ class InitiateReply extends ServiceBase {
    * @param {number} params.video_width: video width
    * @param {number} params.video_height {number}: video height
    * @param {number} params.video_size: video size
+   * @param {number} params.video_duration: video duration
+   * @param {number} params.video_duration_preference: video duration Preference
    * @param {number} params.image_width: image width
    * @param {number} params.image_height: image height
    * @param {number} params.image_size: image size
@@ -69,6 +71,8 @@ class InitiateReply extends ServiceBase {
     oThis.imageSize = params.image_size;
     oThis.videoDescription = params.video_description;
     oThis.link = params.link;
+    oThis.videoDuration = params.video_duration;
+    oThis.videoDurationPref = params.video_duration_preference;
 
     oThis.videoId = null;
   }
@@ -254,6 +258,8 @@ class InitiateReply extends ServiceBase {
       size: oThis.videoSize,
       width: oThis.videoWidth,
       height: oThis.videoHeight,
+      duration: oThis.videoDuration,
+      durationPref: oThis.videoDurationPref,
       posterImageUrl: oThis.posterImageUrl,
       posterImageSize: oThis.imageSize,
       posterImageWidth: oThis.imageWidth,
