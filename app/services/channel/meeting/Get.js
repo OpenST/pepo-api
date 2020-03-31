@@ -66,9 +66,7 @@ class GetChannelMeeting extends ServiceBase {
 
     oThis.imageDetails = {};
 
-    oThis.shareDetails = {};
-
-    oThis.hostTwitterHandle = null;
+    oThis.twitterUsersMap = {};
   }
 
   /**
@@ -88,7 +86,7 @@ class GetChannelMeeting extends ServiceBase {
       oThis._fetchCurrentUserChannelRelations(),
       oThis._fetchChannelTagIds(),
       oThis._fetchUserDetails(),
-      oThis._fetchHostTwitterHandle(),
+      oThis._fetchHostTwitterDetails(),
       oThis._fetchTokenUsers()
     ]);
 
@@ -285,12 +283,12 @@ class GetChannelMeeting extends ServiceBase {
   /**
    * Fetch twitter handle.
    *
-   * @sets oThis.hostTwitterHandle
+   * @sets oThis.twitterUsersMap
    *
    * @returns {Promise<never>}
    * @private
    */
-  async _fetchHostTwitterHandle() {
+  async _fetchHostTwitterDetails() {
     const oThis = this;
 
     const twitterUserByUserIdsCacheResponse = await new TwitterUserByUserIdsCache({
@@ -309,7 +307,10 @@ class GetChannelMeeting extends ServiceBase {
         return Promise.reject(twitterUserByIdsCacheResponse);
       }
 
-      oThis.hostTwitterHandle = twitterUserByIdsCacheResponse.data[hostTwitterId].handle || '';
+      const twitterUser = twitterUserByIdsCacheResponse.data[hostTwitterId];
+      if (twitterUser) {
+        oThis.twitterUsersMap[hostTwitterId] = twitterUser;
+      }
     }
   }
 
@@ -362,16 +363,6 @@ class GetChannelMeeting extends ServiceBase {
     oThis.links = associatedEntitiesResponse.data.links;
   }
 
-  // Set oThis.shareDetails
-  getShareDetails() {
-    oThis.shareDetails = {
-      channelName: '',
-      imageUrl: '',
-      hostName: '',
-      hostTwitterHandle: ''
-    };
-  }
-
   /**
    * Prepare response.
    *
@@ -387,7 +378,7 @@ class GetChannelMeeting extends ServiceBase {
       [entityTypeConstants.channelDetailsMap]: { [oThis.channel.id]: oThis.channel },
       [entityTypeConstants.channelIdToTagIdsMap]: { [oThis.channel.id]: oThis.tagIds },
       [entityTypeConstants.currentUserChannelRelationsMap]: oThis.currentUserChannelRelations,
-      [entityTypeConstants.share]: oThis.shareDetails,
+      [entityTypeConstants.twitterUsersMap]: oThis.twitterUsersMap,
       usersByIdMap: oThis.userDetails,
       tokenUsersByUserIdMap: oThis.tokenUsersByUserIdMap,
       [entityTypeConstants.textsMap]: oThis.texts,
