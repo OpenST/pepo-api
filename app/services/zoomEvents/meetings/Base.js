@@ -47,7 +47,7 @@ class ZoomEventsForMeetingsBase extends ServiceBase {
     const oThis = this;
 
     // If zoom meeting id is present, fetch meetings table id from MeetingIdByZoomMeetingIds cache.
-    if (!CommonValidators.isVarNullOrUndefined(oThis.zoomMeetingId)) {
+    if (CommonValidators.validateNonBlankString(oThis.zoomMeetingId)) {
       let meetingIdByZoomMeetingIdsCacheRsp = await new MeetingIdByZoomMeetingIdsCache({
         zoomMeetingIds: [oThis.zoomMeetingId]
       }).fetch();
@@ -57,7 +57,7 @@ class ZoomEventsForMeetingsBase extends ServiceBase {
       }
 
       oThis.meetingId = meetingIdByZoomMeetingIdsCacheRsp.data[oThis.zoomMeetingId].id;
-    } else if (!CommonValidators.isVarNullOrUndefined(oThis.zoomMeetingUuid)) {
+    } else if (CommonValidators.validateNonBlankString(oThis.zoomMeetingUuid)) {
       // otherwise, use MeetingIdByZoomUuids cache.
 
       let meetingIdByZoomUuidsCacheRsp = await new MeetingIdByZoomUuidsCache({
