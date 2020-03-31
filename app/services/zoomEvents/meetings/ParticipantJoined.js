@@ -1,17 +1,16 @@
 const rootPrefix = '../../../..',
-  ServiceBase = require(rootPrefix + '/app/services/Base'),
-  MeetingIdByZoomMeetingIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/meeting/MeetingIdByZoomMeetingIds'),
+  ZoomEventsForMeetingsBase = require(rootPrefix + '/app/services/zoomEvents/meetings/Base'),
   MeetingByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/meeting/MeetingByIds'),
   MeetingModel = require(rootPrefix + '/app/models/mysql/meeting/Meeting'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   responseHelper = require(rootPrefix + '/lib/formatter/response');
 
 /**
- * Class for zoom meeting started webhook processor.
+ * Class for zoom event webhook processor for participant joined the meeting .
  *
  * @class MeetingParticipantJoined
  */
-class MeetingParticipantJoined extends ServiceBase {
+class MeetingParticipantJoined extends ZoomEventsForMeetingsBase {
   /**
    * Constructor
    *
@@ -29,7 +28,6 @@ class MeetingParticipantJoined extends ServiceBase {
     super(params);
 
     const oThis = this;
-    oThis.zoomMeetingId = params.payload.object.id;
     oThis.zoomParticipantId = params.payload.object.participant.id;
 
     oThis.meetingId = null;
@@ -47,6 +45,12 @@ class MeetingParticipantJoined extends ServiceBase {
 
     await oThis._validateParams();
 
+    if (!oThis.processEvent) {
+      return responseHelper.successWithData({});
+    }
+
+    await oThis.validateAndSetMeetingId();
+
     await oThis._fetchAndValidateMeetingHost();
 
     await oThis._incrementHostJoinCount();
@@ -54,6 +58,12 @@ class MeetingParticipantJoined extends ServiceBase {
     return responseHelper.successWithData({});
   }
 
+  /**
+   * Validate params.
+   *
+   * @returns {Promise<*|result>}
+   * @private
+   */
   async _validateParams() {
     const oThis = this;
 
@@ -70,7 +80,7 @@ class MeetingParticipantJoined extends ServiceBase {
   }
 
   /**
-   * Fetch .
+   * Fetch and validate meeting host.
    *
    * @return {Promise<void>}
    * @private
@@ -82,15 +92,7 @@ class MeetingParticipantJoined extends ServiceBase {
       return responseHelper.successWithData({});
     }
 
-    logger.log('Fetching meeting obj.');
-
-    const cacheRes1 = await new MeetingIdByZoomMeetingIdsCache({ zoomMeetingIds: [oThis.zoomMeetingId] }).fetch();
-
-    if (cacheRes1.isFailure()) {
-      return Promise.reject(cacheRes1);
-    }
-
-    oThis.meetingId = cacheRes1.data[oThis.zoomMeetingId].id;
+    logger.log('MeetingParticipantJoined: Fetching meeting obj.');
 
     if (!oThis.meetingId) {
       oThis.processEvent = false;
@@ -126,7 +128,7 @@ class MeetingParticipantJoined extends ServiceBase {
       return responseHelper.successWithData({});
     }
 
-    logger.log('Increment host join count.');
+    logger.log('MeetingParticipantJoined: Increment host join count.');
 
     await new MeetingModel()
       .update('host_join_count = host_join_count + 1')
