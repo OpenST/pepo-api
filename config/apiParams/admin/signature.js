@@ -420,6 +420,10 @@ const adminSignature = {
       {
         parameter: 'permalink',
         validatorMethods: ['validateString']
+      },
+      {
+        parameter: 'current_admin',
+        validatorMethods: ['validateNonEmptyObject']
       }
     ],
     optional: [
@@ -449,14 +453,6 @@ const adminSignature = {
       },
       {
         parameter: 'original_image_file_size',
-        validatorMethods: ['validateInteger']
-      },
-      {
-        parameter: 'share_image_url',
-        validatorMethods: ['validateHttpBasedUrl']
-      },
-      {
-        parameter: 'share_image_file_size',
         validatorMethods: ['validateInteger']
       }
     ]
