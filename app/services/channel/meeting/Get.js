@@ -6,6 +6,8 @@ const rootPrefix = '../../../..',
   ChannelByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelByIds'),
   MeetingByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/meeting/MeetingByIds'),
   TokenUserDetailByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TokenUserByUserIds'),
+  TwitterUserByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TwitterUserByIds'),
+  TwitterUserByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TwitterUserByUserIds'),
   GetCurrentUserChannelRelationsLib = require(rootPrefix + '/lib/channel/GetCurrentUserChannelRelations'),
   ChannelByPermalinksCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelByPermalinks'),
   ChannelTagByChannelIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelTagByChannelIds'),
@@ -64,7 +66,9 @@ class GetChannelMeeting extends ServiceBase {
 
     oThis.imageDetails = {};
 
-    oThis.shareDetails = {}
+    oThis.shareDetails = {};
+
+    oThis.hostTwitterHandle = null;
   }
 
   /**
@@ -84,6 +88,7 @@ class GetChannelMeeting extends ServiceBase {
       oThis._fetchCurrentUserChannelRelations(),
       oThis._fetchChannelTagIds(),
       oThis._fetchUserDetails(),
+      oThis._fetchHostTwitterHandle(),
       oThis._fetchTokenUsers()
     ]);
 
@@ -278,6 +283,37 @@ class GetChannelMeeting extends ServiceBase {
   }
 
   /**
+   * Fetch twitter handle.
+   *
+   * @sets oThis.hostTwitterHandle
+   *
+   * @returns {Promise<never>}
+   * @private
+   */
+  async _fetchHostTwitterHandle() {
+    const oThis = this;
+
+    const twitterUserByUserIdsCacheResponse = await new TwitterUserByUserIdsCache({
+      userIds: [oThis.hostUserId]
+    }).fetch();
+    if (twitterUserByUserIdsCacheResponse.isFailure()) {
+      return Promise.reject(twitterUserByUserIdsCacheResponse);
+    }
+
+    const hostTwitterId = twitterUserByUserIdsCacheResponse.data[oThis.hostUserId].id;
+
+    if (hostTwitterId) {
+      const twitterUserByIdsCacheResponse = await new TwitterUserByIdsCache({ ids: [hostTwitterId] }).fetch();
+
+      if (twitterUserByIdsCacheResponse.isFailure()) {
+        return Promise.reject(twitterUserByIdsCacheResponse);
+      }
+
+      oThis.hostTwitterHandle = twitterUserByIdsCacheResponse.data[hostTwitterId].handle || '';
+    }
+  }
+
+  /**
    * Fetch token users.
    *
    * @sets oThis.tokenUsersByUserIdMap
@@ -332,8 +368,8 @@ class GetChannelMeeting extends ServiceBase {
       channelName: '',
       imageUrl: '',
       hostName: '',
-      hostTwitterHandle: '',
-    }
+      hostTwitterHandle: ''
+    };
   }
 
   /**
