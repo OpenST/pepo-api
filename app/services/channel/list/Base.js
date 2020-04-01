@@ -48,6 +48,7 @@ class ChannelListBase extends ServiceBase {
     oThis.allChannelIds = [];
     oThis.liveChannelIds = [];
     oThis.nextPageNumber = null;
+    oThis.channelIds = [];
 
     oThis.channels = [];
     oThis.imageIds = [];

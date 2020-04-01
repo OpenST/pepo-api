@@ -39,7 +39,7 @@ class ChannelListMy extends ChannelListBase {
   async _getAllChannelIds() {
     const oThis = this;
 
-    const userId = oThis.current_user.id;
+    const userId = oThis.currentUser.id;
     const cacheResp = await new ChannelIdsByUserCache({ userIds: [userId] }).fetch();
     if (cacheResp.isFailure()) {
       return Promise.reject(cacheResp);
