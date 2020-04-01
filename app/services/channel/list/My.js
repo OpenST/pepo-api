@@ -1,14 +1,15 @@
 const rootPrefix = '../../../..',
   ChannelListBase = require(rootPrefix + '/app/services/channel/list/Base'),
   ChannelModel = require(rootPrefix + '/app/models/mysql/channel/Channel'),
-  ChannelNewCache = require(rootPrefix + '/lib/cacheManagement/single/channel/ChannelNew');
+  ChannelIdsByUser = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelIdsByUser'),
+  channelUsersConstants = require(rootPrefix + '/lib/globalConstant/channel/channelUsers');
 
 /**
  * Class to get new channels list.
  *
- * @class ChannelListNew
+ * @class ChannelListMy
  */
-class ChannelListNew extends ChannelListBase {
+class ChannelListMy extends ChannelListBase {
   /**
    * Constructor to search channels.
    *
@@ -38,12 +39,16 @@ class ChannelListNew extends ChannelListBase {
   async _getAllChannelIds() {
     const oThis = this;
 
-    const cacheResp = await new ChannelNewCache().fetch();
+    const userId = oThis.current_user.id;
+    const cacheResp = await new ChannelIdsByUser({ userIds: [userId] }).fetch();
     if (cacheResp.isFailure()) {
       return Promise.reject(cacheResp);
     }
 
-    oThis.allChannelIds = cacheResp.data.ids;
+    oThis.allChannelIds = [
+      ...cacheResp.data[userId][channelUsersConstants.adminRole],
+      ...cacheResp.data[userId][channelUsersConstants.normalRole]
+    ];
   }
 
   /**
@@ -98,8 +103,8 @@ class ChannelListNew extends ChannelListBase {
    */
   _subKind() {
     const oThis = this;
-    return 'new';
+    return 'my';
   }
 }
 
-module.exports = ChannelListNew;
+module.exports = ChannelListMy;

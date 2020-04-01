@@ -83,7 +83,7 @@ class ChannelListAll extends ChannelListBase {
   /**
    * Return Sub kind for meta.
    *
-   * @returns {boolean}
+   * @returns {string}
    * @private
    */
   _subKind() {

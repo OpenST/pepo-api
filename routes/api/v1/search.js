@@ -68,6 +68,34 @@ router.get('/channels/all', sanitizer.sanitizeDynamicUrlParams, function(req, re
 
 router.use(cookieHelper.validateUserLoginRequired);
 
+/* Search channels. */
+router.get('/channels/my', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.getMyChannels;
+
+  const dataFormatterFunc = async function(serviceResponse) {
+    const wrapperFormatterRsp = await new FormatterComposer({
+      resultType: responseEntityKey.channelSearchResults,
+      entityKindToResponseKeyMap: {
+        [entityTypeConstants.channelSearchList]: responseEntityKey.channelSearchResults,
+        [entityTypeConstants.channelsMap]: responseEntityKey.channels,
+        [entityTypeConstants.channelDetailsMap]: responseEntityKey.channelDetails,
+        [entityTypeConstants.channelStatsMap]: responseEntityKey.channelStats,
+        [entityTypeConstants.currentUserChannelRelationsMap]: responseEntityKey.currentUserChannelRelations,
+        [entityTypeConstants.tagsMap]: responseEntityKey.tags,
+        [entityTypeConstants.imagesMap]: responseEntityKey.images,
+        [entityTypeConstants.linksMap]: responseEntityKey.links,
+        [entityTypeConstants.textsMap]: responseEntityKey.texts,
+        [entityTypeConstants.channelListMeta]: responseEntityKey.meta
+      },
+      serviceData: serviceResponse.data
+    }).perform();
+
+    serviceResponse.data = wrapperFormatterRsp.data;
+  };
+
+  Promise.resolve(routeHelper.perform(req, res, next, '/channel/list/My', 'r_a_v1_s_9', null, dataFormatterFunc));
+});
+
 /* Search tags */
 router.get('/tags', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.getTags;

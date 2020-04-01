@@ -321,6 +321,38 @@ class ChannelUserModel extends ModelBase {
   }
 
   /**
+   * Fetch channel ids by user ids order by managed and non managed channels.
+   *
+   * @param {array<number>} userIds
+   *
+   * @returns {Promise<void>}
+   */
+  async fetchByUserIds(userIds) {
+    const oThis = this;
+
+    const dbRows = await oThis
+      .select('user_id, channel_id,role')
+      .where(['user_id IN (?)', userIds])
+      .order_by('user_id asc, role asc, id asc')
+      .fire();
+
+    const finalResponse = {};
+    for (let index = 0; index < userIds.length; index++) {
+      finalResponse[userIds[index]] = {
+        [channelUsersConstants.adminRole]: [],
+        [channelUsersConstants.normalRole]: []
+      };
+    }
+
+    for (let index = 0; index < dbRows.length; index++) {
+      const formatDbRow = oThis.formatDbData(dbRows[index]);
+      finalResponse[formatDbRow.userId][formatDbRow.role].push(formatDbRow.channelId);
+    }
+
+    return finalResponse;
+  }
+
+  /**
    * Flush cache.
    *
    * @param {object} params
