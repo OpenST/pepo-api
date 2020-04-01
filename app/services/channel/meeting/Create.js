@@ -361,8 +361,7 @@ class StartMeeting extends ServiceBase {
       });
     }
 
-    const insertResponse = await new MeetingModel()
-      .insert({
+    const insertData = {
         host_user_id: oThis.currentUserId,
         meeting_relayer_id: oThis.meetingRelayer.id,
         channel_id: oThis.channelId,
@@ -372,8 +371,8 @@ class StartMeeting extends ServiceBase {
         host_join_count: 0,
         is_live: meetingConstants.isLiveStatus,
         status: meetingConstants.invertedStatuses[meetingConstants.waitingStatus]
-      })
-      .fire();
+      },
+      insertResponse = await new MeetingModel().insert(insertData).fire();
 
     if (!insertResponse) {
       return responseHelper.error({
@@ -384,8 +383,12 @@ class StartMeeting extends ServiceBase {
     }
 
     oThis.meetingId = insertResponse.insertId;
+    insertData.id = insertResponse.insertId;
+    Object.assign(insertData, insertResponse.defaultUpdatedAttributes);
 
-    await ChannelModel.flushCache({ ids: [oThis.channelId] });
+    // Clear all meetings table caches.
+    const meetingObj = new MeetingModel().formatDbData(insertData);
+    await MeetingModel.flushCache(meetingObj);
 
     // Send slack alert when meeting is created
     oThis.errorGoingLive = false;

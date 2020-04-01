@@ -114,11 +114,6 @@
     "code": "UNPROCESSABLE_ENTITY",
     "message": "Socket server is not available now. Please try after some time."
   },
-  "duplicate_entry": {
-    "http_code": "409",
-    "code": "ALREADY_EXISTS",
-    "message": "Addresses already exists."
-  },
   "invalid_login_details": {
     "http_code": "401",
     "code": "UNAUTHORIZED",

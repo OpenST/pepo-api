@@ -146,6 +146,31 @@ class MeetingModel extends ModelBase {
   }
 
   /**
+   * Fetch meeting objects for zoom uuids.
+   *
+   * @param {array} zoomUuids - zoom uuids.
+   *
+   * @return {object}
+   */
+  async fetchByZoomUuids(zoomUuids) {
+    const oThis = this;
+
+    const dbRows = await oThis
+      .select('id, zoom_uuid')
+      .where({ zoom_uuid: zoomUuids })
+      .fire();
+
+    const response = {};
+
+    for (let index = 0; index < dbRows.length; index++) {
+      const formatDbRow = oThis.formatDbData(dbRows[index]);
+      response[formatDbRow.zoomUUID] = formatDbRow;
+    }
+
+    return response;
+  }
+
+  /**
    * Fetch meeting id by channel ids.
    *
    * @param {array<number>} channelIds
@@ -182,6 +207,7 @@ class MeetingModel extends ModelBase {
    * @param {array<number>} [params.channelIds]
    * @param {array<number>} [params.channelId]
    * @param {array<number>} [params.zoomMeetingId]
+   * @param {array<number>} [params.zoomUuid]
    *
    * @returns {Promise<*>}
    */
@@ -206,6 +232,12 @@ class MeetingModel extends ModelBase {
       const MeetingIdByZoomMeetingIdsCache = require(rootPrefix +
         '/lib/cacheManagement/multi/meeting/MeetingIdByZoomMeetingIds');
       promisesArray.push(new MeetingIdByZoomMeetingIdsCache({ zoomMeetingIds: [params.zoomMeetingId] }).clear());
+    }
+
+    if (params.zoomUuid) {
+      const MeetingIdByZoomMeetingIdsCache = require(rootPrefix +
+        '/lib/cacheManagement/multi/meeting/MeetingIdByZoomUuids');
+      promisesArray.push(new MeetingIdByZoomMeetingIdsCache({ zoomUuids: [params.zoomUuid] }).clear());
     }
 
     if (channelIds.length > 0) {
