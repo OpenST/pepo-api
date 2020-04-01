@@ -230,20 +230,9 @@ class EditChannel extends ServiceBase {
 
     const modifyChannelResponse = await new ModifyChannel(oThis.updateRequiredParameters).perform();
     if (modifyChannelResponse.isFailure()) {
-      const errorObject = responseHelper.error({
-        internal_error_identifier: 'a_s_c_m_e_mc_1',
-        api_error_identifier: 'channel_update_failed',
-        debug_options: oThis.updateRequiredParameters
-      });
-      await createErrorLogsEntry.perform(errorObject, errorLogsConstants.highSeverity);
+      await createErrorLogsEntry.perform(modifyChannelResponse, errorLogsConstants.highSeverity);
 
-      return Promise.reject(
-        responseHelper.error({
-          internal_error_identifier: 'a_s_c_m_e_mc_2',
-          api_error_identifier: 'something_went_wrong',
-          debug_options: { channelId: oThis.channelId }
-        })
-      );
+      return Promise.reject(modifyChannelResponse);
     }
 
     return modifyChannelResponse.data.channel;
