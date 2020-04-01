@@ -34,7 +34,7 @@ if (!cronProcessId) {
 }
 
 const BATCH_SIZE = 10;
-const WAIT_TIME = 4 * 60; // 5 mins
+const WAIT_TIME = 4 * 60; // 4 mins
 
 class MeetingTracker extends CronBase {
   constructor(params) {
