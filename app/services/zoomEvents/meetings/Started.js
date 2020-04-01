@@ -188,7 +188,7 @@ class MeetingStarted extends ZoomEventsForMeetingsBase {
     const internalUsersIds = [6, 59, 3999];
 
     // No notifications, if internal user id goes live in PEPO community (channel id = 19).
-    if (basicHelper.isProduction() && channelId === 19 && internalUsersIds.includes(+meetingHostUserId)) {
+    if (basicHelper.isProduction() && channelId == 19 && internalUsersIds.includes(+meetingHostUserId)) {
       logger.log('_performNotificationsRelatedTasks: No notification for internal users.');
       return responseHelper.successWithData({});
     }
