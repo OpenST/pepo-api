@@ -174,26 +174,28 @@ class MeetingStarted extends ZoomEventsForMeetingsBase {
    */
   async _performNotificationsRelatedTasks() {
     const oThis = this,
+      channelId = oThis.meetingObj.channelId,
       meetingHostUserId = oThis.meetingObj.hostUserId;
 
     // Send slack alert when meeting is channel host goes live.
     await bgJob.enqueue(bgJobConstants.slackLiveEventMonitoringJobTopic, {
-      channelId: oThis.meetingObj.channelId,
+      channelId: channelId,
       userId: meetingHostUserId,
       errorGoingLive: false
     });
 
-    const internalUsersIds = [6, 7, 59, 3999];
+    // User ids => kedar, bhavik and sunil.
+    const internalUsersIds = [6, 59, 3999];
 
-    // No notifications, if internal user id goes live.
-    if (basicHelper.isProduction() && internalUsersIds.includes(+meetingHostUserId)) {
+    // No notifications, if internal user id goes live in PEPO community (channel id = 19).
+    if (basicHelper.isProduction() && channelId === 19 && internalUsersIds.includes(+meetingHostUserId)) {
       logger.log('_performNotificationsRelatedTasks: No notification for internal users.');
       return responseHelper.successWithData({});
     }
 
     // Send notifications to channel members when channel host goes live.
     await notificationJobEnqueue.enqueue(notificationJobConstants.channelGoLiveNotificationsKind, {
-      channelId: oThis.meetingObj.channelId,
+      channelId: channelId,
       meetingHostUserId: meetingHostUserId,
       meetingId: oThis.meetingId
     });
