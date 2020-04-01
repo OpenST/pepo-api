@@ -250,6 +250,7 @@ class GetChannel extends ServiceBase {
       id: oThis.channelId,
       canStartMeeting: 0,
       canJoinMeeting: 0,
+      canEdit: oThis.currentUserChannelRelations[oThis.channelId].isAdmin,
       updatedAt: Math.round(new Date() / 1000)
     };
 
