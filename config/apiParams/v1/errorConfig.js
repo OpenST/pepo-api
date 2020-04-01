@@ -459,6 +459,12 @@ const v1ErrorConfig = {
     message: 'Channel does not exist.'
   },
 
+  invalid_channel_name: {
+    parameter: 'channel_name',
+    code: 'invalid',
+    message: 'Channel Name is already taken.'
+  },
+
   invalid_meeting_id: {
     parameter: 'meeting_id',
     code: 'invalid',
