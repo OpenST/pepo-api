@@ -320,7 +320,7 @@ class EditChannel extends ServiceBase {
         responseHelper.paramValidationError({
           internal_error_identifier: 'a_s_a_c_e_cnc_1',
           api_error_identifier: 'invalid_api_params',
-          params_error_identifiers: ['invalid_channel_id'],
+          params_error_identifiers: ['duplicate_channel_entry'],
           debug_options: {
             channelName: oThis.channelName,
             channelPermalink: oThis.channelPermalink
