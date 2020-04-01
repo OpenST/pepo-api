@@ -379,7 +379,7 @@ class ChannelSearch extends ServiceBase {
       [paginationConstants.nextPagePayloadKey]: nextPagePayloadKey,
       // Temp hardcoding, move to constants.
       search_term: oThis.channelPrefix,
-      search_kind: 'communities'
+      search_kind: 'channels'
     };
   }
 
