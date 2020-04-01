@@ -100,7 +100,7 @@ class ChannelListBase extends ServiceBase {
       oThis.currentPageNumber = 1;
     }
 
-    if (oThis.channelPrefix.length >= searchTermMaxLength) {
+    if (!oThis.channelPrefix || oThis.channelPrefix.length >= searchTermMaxLength) {
       oThis.channelPrefix = null;
     }
   }
@@ -148,7 +148,7 @@ class ChannelListBase extends ServiceBase {
    */
   async _setChannelIds() {
     const oThis = this;
-    if (oThis._shouldSearch) {
+    if (oThis._shouldSearch()) {
       await oThis._setChannelIdsForSearch();
     } else {
       await oThis._setChannelIdsForList();
@@ -166,7 +166,7 @@ class ChannelListBase extends ServiceBase {
   async _setChannelIdsForList() {
     const oThis = this;
 
-    const offset = oThis._offset;
+    const offset = oThis._offset();
 
     if (oThis._showLiveChannelsOnTop && oThis._isFirstPage) {
       oThis.channelIds = oThis.liveChannelIds;
@@ -229,7 +229,7 @@ class ChannelListBase extends ServiceBase {
     oThis.channels = cacheResponse.data;
 
     for (let index = 0; index < oThis.channelIds.length; index++) {
-      const channelId = channelIds[index],
+      const channelId = oThis.channelIds[index],
         channel = oThis.channels[channelId];
 
       if (channel.status === channelConstants.activeStatus) {

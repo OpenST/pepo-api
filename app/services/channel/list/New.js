@@ -61,12 +61,12 @@ class ChannelListNew extends ChannelListBase {
   async _setChannelIdsForSearch() {
     const oThis = this;
 
-    if (oThis.allChannelIds.length == 0) {
+    if (oThis.allChannelIds.length === 0) {
       return;
     }
 
     const params = {
-      offset: oThis._offset,
+      offset: oThis._offset(),
       limit: oThis.limit,
       channelPrefix: oThis.channelPrefix,
       ids: oThis.allChannelIds
