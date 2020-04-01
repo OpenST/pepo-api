@@ -892,6 +892,23 @@ const v1Signature = {
       }
     ]
   },
+  [apiName.getTrendingChannels]: {
+    mandatory: [],
+    optional: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      },
+      {
+        parameter: 'q',
+        validatorMethods: ['validateString']
+      },
+      {
+        parameter: paginationConstants.paginationIdentifierKey,
+        validatorMethods: ['validateString', 'validatePaginationIdentifier']
+      }
+    ]
+  },
   [apiName.getMyChannels]: {
     mandatory: [
       {
