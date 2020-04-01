@@ -1,11 +1,12 @@
 const rootPrefix = '../../../..',
-  ServiceBase = require(rootPrefix + '/app/services/Base'),
-  MeetingIdByZoomMeetingIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/meeting/MeetingIdByZoomMeetingIds'),
+  ZoomEventsForMeetingsBase = require(rootPrefix + '/app/services/zoomEvents/meetings/Base'),
   MeetingByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/meeting/MeetingByIds'),
   MeetingModel = require(rootPrefix + '/app/models/mysql/meeting/Meeting'),
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
+  bgJob = require(rootPrefix + '/lib/rabbitMqEnqueue/bgJob'),
+  bgJobConstants = require(rootPrefix + '/lib/globalConstant/bgJob'),
   notificationJobEnqueue = require(rootPrefix + '/lib/rabbitMqEnqueue/notification'),
   notificationJobConstants = require(rootPrefix + '/lib/globalConstant/notificationJob'),
   meetingConstants = require(rootPrefix + '/lib/globalConstant/meeting/meeting');
@@ -15,7 +16,7 @@ const rootPrefix = '../../../..',
  *
  * @class MeetingStarted
  */
-class MeetingStarted extends ServiceBase {
+class MeetingStarted extends ZoomEventsForMeetingsBase {
   /**
    * Constructor
    *
@@ -30,9 +31,7 @@ class MeetingStarted extends ServiceBase {
 
     const oThis = this;
     oThis.startTime = params.payload.object.start_time;
-    oThis.zoomMeetingId = params.payload.object.id;
 
-    oThis.meetingId = null;
     oThis.meetingObj = {};
     oThis.startTimestamp = null;
     oThis.processEvent = true;
@@ -49,6 +48,8 @@ class MeetingStarted extends ServiceBase {
     const oThis = this;
 
     await oThis._validateParams();
+
+    await oThis.validateAndSetMeetingId();
 
     await oThis._fetchAndValidateMeetingStatus();
 
@@ -100,7 +101,7 @@ class MeetingStarted extends ServiceBase {
   /**
    * Fetch meeting obj.
    *
-   * @sets oThis.meetingId, oThis.meetingObj
+   * @sets oThis.meetingObj
    *
    * @return {Promise<void>}
    * @private
@@ -108,15 +109,7 @@ class MeetingStarted extends ServiceBase {
   async _fetchAndValidateMeetingStatus() {
     const oThis = this;
 
-    logger.log('Fetching meeting obj.');
-
-    let cacheRes1 = await new MeetingIdByZoomMeetingIdsCache({ zoomMeetingIds: [oThis.zoomMeetingId] }).fetch();
-
-    if (cacheRes1.isFailure()) {
-      return Promise.reject(cacheRes1);
-    }
-
-    oThis.meetingId = cacheRes1.data[oThis.zoomMeetingId].id;
+    logger.log('MeetingStarted: Fetching meeting obj.');
 
     if (!oThis.meetingId) {
       oThis.processEvent = false;
@@ -153,7 +146,7 @@ class MeetingStarted extends ServiceBase {
   async _updateMeetingStatus() {
     const oThis = this;
 
-    logger.log('update meeting status.');
+    logger.log('MeetingStarted: Updating meeting status.');
 
     const updateResponse = await new MeetingModel()
       .update({
@@ -188,8 +181,14 @@ class MeetingStarted extends ServiceBase {
       meetingId: oThis.meetingId
     });
 
-    oThis.meetingObj = meetingConstants.startedStatus;
+    // Send slack alert when meeting is channel host goes live.
+    await bgJob.enqueue(bgJobConstants.slackLiveEventMonitoringJobTopic, {
+      channelId: oThis.meetingObj.channelId,
+      userId: oThis.meetingObj.hostUserId,
+      errorGoingLive: false
+    });
 
+    oThis.meetingObj = meetingConstants.startedStatus;
     return responseHelper.successWithData({});
   }
 }

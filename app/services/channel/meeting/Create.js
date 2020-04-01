@@ -1,7 +1,6 @@
 const rootPrefix = '../../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
-  ChannelModel = require(rootPrefix + '/app/models/mysql/channel/Channel'),
   MeetingModel = require(rootPrefix + '/app/models/mysql/meeting/Meeting'),
   MeetingRelayerModel = require(rootPrefix + '/app/models/mysql/meeting/MeetingRelayer'),
   ChannelByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelByIds'),
@@ -361,8 +360,7 @@ class StartMeeting extends ServiceBase {
       });
     }
 
-    const insertResponse = await new MeetingModel()
-      .insert({
+    const insertData = {
         host_user_id: oThis.currentUserId,
         meeting_relayer_id: oThis.meetingRelayer.id,
         channel_id: oThis.channelId,
@@ -372,8 +370,8 @@ class StartMeeting extends ServiceBase {
         host_join_count: 0,
         is_live: meetingConstants.isLiveStatus,
         status: meetingConstants.invertedStatuses[meetingConstants.waitingStatus]
-      })
-      .fire();
+      },
+      insertResponse = await new MeetingModel().insert(insertData).fire();
 
     if (!insertResponse) {
       return responseHelper.error({
@@ -384,13 +382,12 @@ class StartMeeting extends ServiceBase {
     }
 
     oThis.meetingId = insertResponse.insertId;
+    insertData.id = insertResponse.insertId;
+    Object.assign(insertData, insertResponse.defaultUpdatedAttributes);
 
-    await ChannelModel.flushCache({ ids: [oThis.channelId] });
-    await MeetingModel.flushCache({ id: oThis.meetingId });
-
-    // Send slack alert when meeting is created
-    oThis.errorGoingLive = false;
-    await oThis.sendSlackAlert();
+    // Clear all meetings table caches.
+    const meetingObj = new MeetingModel().formatDbData(insertData);
+    await MeetingModel.flushCache(meetingObj);
 
     return responseHelper.successWithData({});
   }
