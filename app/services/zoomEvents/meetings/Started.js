@@ -3,6 +3,7 @@ const rootPrefix = '../../../..',
   MeetingByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/meeting/MeetingByIds'),
   MeetingModel = require(rootPrefix + '/app/models/mysql/meeting/Meeting'),
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
+  basicHelper = require(rootPrefix + '/helpers/basic'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   bgJob = require(rootPrefix + '/lib/rabbitMqEnqueue/bgJob'),
@@ -172,23 +173,31 @@ class MeetingStarted extends ZoomEventsForMeetingsBase {
    * @private
    */
   async _performNotificationsRelatedTasks() {
-    const oThis = this;
-
-    // Send notifications to channel members when channel host goes live.
-    await notificationJobEnqueue.enqueue(notificationJobConstants.channelGoLiveNotificationsKind, {
-      channelId: oThis.meetingObj.channelId,
-      meetingHostUserId: oThis.meetingObj.hostUserId,
-      meetingId: oThis.meetingId
-    });
+    const oThis = this,
+      meetingHostUserId = oThis.meetingObj.hostUserId;
 
     // Send slack alert when meeting is channel host goes live.
     await bgJob.enqueue(bgJobConstants.slackLiveEventMonitoringJobTopic, {
       channelId: oThis.meetingObj.channelId,
-      userId: oThis.meetingObj.hostUserId,
+      userId: meetingHostUserId,
       errorGoingLive: false
     });
 
-    oThis.meetingObj = meetingConstants.startedStatus;
+    const internalUsersIds = [6, 7, 59, 3999];
+
+    // No notifications, if internal user id goes live.
+    if (basicHelper.isProduction() && internalUsersIds.includes(+meetingHostUserId)) {
+      logger.log('_performNotificationsRelatedTasks: No notification for internal users.');
+      return responseHelper.successWithData({});
+    }
+
+    // Send notifications to channel members when channel host goes live.
+    await notificationJobEnqueue.enqueue(notificationJobConstants.channelGoLiveNotificationsKind, {
+      channelId: oThis.meetingObj.channelId,
+      meetingHostUserId: meetingHostUserId,
+      meetingId: oThis.meetingId
+    });
+
     return responseHelper.successWithData({});
   }
 }
