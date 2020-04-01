@@ -183,6 +183,7 @@ class MeetingModel extends ModelBase {
     const dbRows = await oThis
       .select('id, channel_id')
       .where({ channel_id: channelIds, is_live: meetingConstants.isLiveStatus })
+      .order_by('id desc')
       .fire();
 
     const response = {};

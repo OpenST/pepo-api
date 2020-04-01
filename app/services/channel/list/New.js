@@ -1,5 +1,6 @@
 const rootPrefix = '../../..',
   ChannelListBase = require(rootPrefix + '/app/services/channel/list/Base'),
+  ChannelModel = require(rootPrefix + '/app/models/mysql/channel/Channel'),
   ChannelNewCache = require(rootPrefix + '/lib/cacheManagement/single/channel/ChannelNew');
 
 /**
@@ -27,14 +28,14 @@ class ChannelListNew extends ChannelListBase {
   }
 
   /**
-   * Get all Community Ids for this list.
+   * Get all Channel Ids for this list.
    *
    * @sets oThis.allCommunityIds
    *
    * @returns {Promise<never>}
    * @private
    */
-  async _getAllCommunityIds() {
+  async _getAllChannelIds() {
     const oThis = this;
 
     const cacheResp = await new ChannelNewCache().fetch();
@@ -45,51 +46,50 @@ class ChannelListNew extends ChannelListBase {
     oThis.allChannelIds = cacheResp.data.ids;
 
     for (let i = 0; i < oThis.allChannelIds.length; i++) {
-      oThis.allChannelMap[oThis.allChannelIds[i]] = 1;
+      oThis.allChannelMap[oThis.allChannelIds[i]] = i;
     }
   }
 
   /**
-   * Merge Live Communities in the list with there sorting logic.
+   * Set Channel Ids for current payload of search.
+   *
+   * @sets oThis.channelIds, oThis.nextPageNumber
    *
    * @returns {Promise<never>}
    * @private
    */
-  async _mergeLiveCommunities() {
+  async _setChannelIdsForSearch() {
     const oThis = this;
+
+    if (oThis.allChannelIds.length == 0) {
+      return;
+    }
+
+    const params = {
+      offset: oThis._offset,
+      limit: oThis.limit,
+      channelPrefix: oThis.channelPrefix,
+      ids: oThis.allChannelIds
+    };
+
+    const resp = await new ChannelModel().searchChannelsByPrefix(params);
+
+    oThis.channelIds = resp.channelIds;
+
+    if (oThis.channelIds.length >= oThis.limit) {
+      oThis.nextPageNumber = oThis.currentPageNumber + 1;
+    }
   }
 
   /**
-   * Set Channel Ids for current payload.
+   * Return true if live channels should be shown on top.
    *
-   * @sets oThis.channelIds
-   *
-   * @returns {Promise<never>}
+   * @returns {boolean}
    * @private
    */
-  async _setChannelIds() {
+  _showLiveChannelsOnTop() {
     const oThis = this;
-  }
-
-  /**
-   * Fetch All Associated Entities.
-   *
-   *
-   * @returns {Promise<never>}
-   * @private
-   */
-  async _fetchAllAssociatedEntities() {
-    const oThis = this;
-  }
-
-  /**
-   * Format response to be returned..
-   *
-   * @returns {Promise<never>}
-   * @private
-   */
-  async _formatResponse() {
-    const oThis = this;
+    return !oThis._shouldSearch;
   }
 }
 

@@ -74,7 +74,7 @@ class ChannelListBase extends ServiceBase {
 
     await oThis._validateAndSanitizeParams();
     await oThis._getAllChannelIds();
-    await oThis._mergeLiveCommunities();
+    await oThis._getLiveChannelIds();
     await oThis._setChannelIds();
     await oThis._fetchAllAssociatedEntities();
     return oThis._formatResponse();
@@ -106,15 +106,19 @@ class ChannelListBase extends ServiceBase {
   }
 
   /**
-   * Merge Live Communities in the list with there sorting logic.
+   * Get Live Channel Ids in the list with there sorting logic.
    *
    * @sets oThis.liveChannelIds
    *
    * @returns {Promise<never>}
    * @private
    */
-  async _mergeLiveCommunities() {
+  async _getLiveChannelIds() {
     const oThis = this;
+
+    if (!oThis._showLiveChannelsOnTop) {
+      return;
+    }
 
     const cacheResp = await new MeetingGetLiveChannelIdsCache().fetch();
     if (cacheResp.isFailure()) {
@@ -128,6 +132,10 @@ class ChannelListBase extends ServiceBase {
         oThis.liveChannelIds.push(cid);
       }
     }
+
+    oThis.liveChannelIds.sort(function(a, b) {
+      return oThis.allChannelMap[a] - oThis.allChannelMap[b];
+    });
   }
 
   /**
@@ -140,10 +148,27 @@ class ChannelListBase extends ServiceBase {
    */
   async _setChannelIds() {
     const oThis = this;
+    if (oThis._shouldSearch) {
+      await oThis._setChannelIdsForSearch();
+    } else {
+      await oThis._setChannelIdsForList();
+    }
+  }
 
-    const offset = (oThis.currentPageNumber - 1) * oThis.limit;
+  /**
+   * Set Channel Ids for current payload of list.
+   *
+   * @sets oThis.channelIds, oThis.nextPageNumber
+   *
+   * @returns {Promise<never>}
+   * @private
+   */
+  async _setChannelIdsForList() {
+    const oThis = this;
 
-    if (oThis._isFirstPage) {
+    const offset = oThis._offset;
+
+    if (oThis._showLiveChannelsOnTop && oThis._isFirstPage) {
       oThis.channelIds = oThis.liveChannelIds;
     }
 
@@ -392,6 +417,18 @@ class ChannelListBase extends ServiceBase {
   }
 
   /**
+   * Return true if search response needed else for list response return false
+   *
+   * @returns {number}
+   * @private
+   */
+  _shouldSearch() {
+    const oThis = this;
+
+    return CommonValidators.validateNonBlankString(oThis.channelPrefix);
+  }
+
+  /**
    * Check if it is first page load req.
    *
    * @returns {number}
@@ -401,6 +438,40 @@ class ChannelListBase extends ServiceBase {
     const oThis = this;
 
     return oThis.currentPageNumber === 1;
+  }
+
+  /**
+   * Check if it is first page load req.
+   *
+   * @returns {number}
+   * @private
+   */
+  _offset() {
+    const oThis = this;
+
+    return (oThis.currentPageNumber - 1) * oThis.limit;
+  }
+
+  /**
+   * Set Channel Ids for current payload of search.
+   *
+   * @sets oThis.channelIds, oThis.nextPageNumber
+   *
+   * @returns {Promise<never>}
+   * @private
+   */
+  async _setChannelIdsForSearch() {
+    throw new Error('Sub-class to implement.');
+  }
+
+  /**
+   * Return true if live channels should be shown on top.
+   *
+   * @returns {boolean}
+   * @private
+   */
+  _showLiveChannelsOnTop() {
+    throw new Error('Sub-class to implement.');
   }
 
   /**

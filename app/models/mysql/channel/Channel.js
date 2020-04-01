@@ -158,6 +158,44 @@ class ChannelModel extends ModelBase {
    * Get channels that starts with channel prefix.
    *
    * @param {object} params
+   * @param {number} params.offset
+   * @param {number} params.limit
+   * @param {string} params.channelPrefix
+   * @param {array} params.ids
+   *
+   * @returns {Promise<{}>}
+   */
+  async searchChannelsByPrefix(params) {
+    const oThis = this;
+
+    //Todo: escape mysql regex characters, order logic
+    const queryWithWildCards = params.channelPrefix + '%',
+      queryWithWildCardsSpaceIncluded = '% ' + params.channelPrefix + '%';
+
+    const queryObject = await oThis
+      .select('id')
+      .where(['name LIKE ? OR name LIKE ?', queryWithWildCards, queryWithWildCardsSpaceIncluded])
+      .where({ id: params.ids })
+      .order_by(['FIELD(ID , ?)', [1, 5, 4, 3]])
+      .offset(params.offset)
+      .limit(params.limit);
+
+    const dbRows = await queryObject.fire();
+
+    const channelIds = [];
+
+    for (let index = 0; index < dbRows.length; index++) {
+      const channelId = dbRows[index].id;
+      channelIds.push(channelId);
+    }
+
+    return { channelIds: channelIds };
+  }
+
+  /**
+   * Get channels that starts with channel prefix.
+   *
+   * @param {object} params
    * @param {number} [params.paginationTimestamp]
    * @param {number} [params.limit]
    * @param {boolean} params.isAdminSearch
