@@ -7,6 +7,7 @@ const rootPrefix = '../../../..',
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   createErrorLogsEntry = require(rootPrefix + '/lib/errorLogs/createEntry'),
   errorLogsConstants = require(rootPrefix + '/lib/globalConstant/errorLogs'),
+  entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
   channelConstants = require(rootPrefix + '/lib/globalConstant/channel/channels');
 
 /**
@@ -60,7 +61,7 @@ class EditChannel extends ServiceBase {
   /**
    * Async perform.
    *
-   * @returns {Promise<void>}
+   * @returns {Promise<result>}
    * @private
    */
   async _asyncPerform() {
@@ -76,7 +77,7 @@ class EditChannel extends ServiceBase {
 
     await oThis._modifyChannel();
 
-    return responseHelper.successWithData({ channel: oThis.channel });
+    return responseHelper.successWithData({ [entityTypeConstants.channel]: oThis.channel });
   }
 
   /**
@@ -225,8 +226,8 @@ class EditChannel extends ServiceBase {
   async _modifyChannel() {
     const oThis = this;
 
-    const response = await new ModifyChannel(oThis.updateRequiredParameters).perform();
-    if (response.isFailure()) {
+    const modifyChannelResponse = await new ModifyChannel(oThis.updateRequiredParameters).perform();
+    if (modifyChannelResponse.isFailure()) {
       const errorObject = responseHelper.error({
         internal_error_identifier: 'a_s_c_m_e_mc_1',
         api_error_identifier: 'channel_update_failed',
@@ -243,7 +244,7 @@ class EditChannel extends ServiceBase {
       );
     }
 
-    oThis.channel = response.channel;
+    oThis.channel = modifyChannelResponse.data.channel;
   }
 }
 
