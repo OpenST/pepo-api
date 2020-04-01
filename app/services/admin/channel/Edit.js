@@ -246,7 +246,7 @@ class EditChannel extends ServiceBase {
       );
     }
 
-    await ChannelModel.flushCache({ ids: [oThis.channelId] });
+    await ChannelModel.flushCache({ ids: [oThis.channelId], name: oThis.channelName });
   }
 
   /**

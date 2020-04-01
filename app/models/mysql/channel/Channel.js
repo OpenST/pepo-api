@@ -321,6 +321,8 @@ class ChannelModel extends ModelBase {
    * @param {object} params
    * @param {array<number>} [params.ids]
    * @param {array<string>} [params.permalinks]
+   * @param {array<string>} [params.createdAt]
+   * @param {array<string>} [params.name]
    *
    * @returns {Promise<*>}
    */
@@ -335,6 +337,19 @@ class ChannelModel extends ModelBase {
     if (params.permalinks) {
       const ChannelByPermalinksCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelByPermalinks');
       promisesArray.push(new ChannelByPermalinksCache({ permalinks: params.permalinks }).clear());
+    }
+
+    if (params.createdAt) {
+      const ChannelAllCache = require(rootPrefix + '/lib/cacheManagement/single/channel/ChannelAll');
+      promisesArray.push(new ChannelAllCache({}).clear());
+
+      const ChannelNewCache = require(rootPrefix + '/lib/cacheManagement/single/channel/ChannelNew');
+      promisesArray.push(new ChannelNewCache({}).clear());
+    }
+
+    if (params.name) {
+      const ChannelAllCache = require(rootPrefix + '/lib/cacheManagement/single/channel/ChannelAll');
+      promisesArray.push(new ChannelAllCache({}).clear());
     }
 
     // If there is update in any channel, then flush list cache as well
