@@ -642,17 +642,21 @@ class EditChannel extends ServiceBase {
   async performSlackCommunityMonitoringBg() {
     const oThis = this;
 
+    const enqueueObject = {
+      source: 'admin',
+      source_id: oThis.currentAdminId,
+      channelId: oThis.channelId
+    };
+
     if (oThis.isEdit) {
       await bgJob.enqueue(bgJobConstants.slackCommunityMonitoringJobTopic, {
-        action: slackConstants.channelUpdated,
-        channelId: oThis.channelId,
-        userId: oThis.currentAdminId
+        ...enqueueObject,
+        action: slackConstants.channelUpdated
       });
     } else {
       await bgJob.enqueue(bgJobConstants.slackCommunityMonitoringJobTopic, {
-        action: slackConstants.channelCreated,
-        channelId: oThis.channelId,
-        userId: oThis.currentAdminId
+        ...enqueueObject,
+        action: slackConstants.channelCreated
       });
     }
   }
