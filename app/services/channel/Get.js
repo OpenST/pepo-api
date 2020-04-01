@@ -7,7 +7,6 @@ const rootPrefix = '../../..',
   ChannelByPermalinksCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelByPermalinks'),
   ChannelTagByChannelIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelTagByChannelIds'),
   ChannelStatByChannelIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelStatByChannelIds'),
-  LiveMeetingIdByChannelIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/meeting/LiveMeetingIdByChannelIds'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
   channelConstants = require(rootPrefix + '/lib/globalConstant/channel/channels');
@@ -253,16 +252,8 @@ class GetChannel extends ServiceBase {
       updatedAt: Math.round(new Date() / 1000)
     };
 
-    const liveMeetingIdByChannelIdsCacheResponse = await new LiveMeetingIdByChannelIdsCache({
-      channelIds: [oThis.channelId]
-    }).fetch();
-
-    if (liveMeetingIdByChannelIdsCacheResponse.isFailure()) {
-      return Promise.reject(liveMeetingIdByChannelIdsCacheResponse);
-    }
-
     // If liveMeetingId is present for channel id.
-    if (liveMeetingIdByChannelIdsCacheResponse.data[oThis.channelId].liveMeetingId) {
+    if (oThis.channel.liveMeetingId) {
       oThis.channelAllowedActions[oThis.channelId].canJoinMeeting = 1;
     } else if (
       CommonValidators.validateNonEmptyObject(oThis.currentUser) &&

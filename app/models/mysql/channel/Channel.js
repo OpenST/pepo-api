@@ -1,6 +1,6 @@
 const rootPrefix = '../../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
-  LiveMeetingIdByChannelIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/meeting/LiveMeetingIdByChannelIds'),
+  MeetingModel = require(rootPrefix + '/app/models/mysql/meeting/Meeting'),
   databaseConstants = require(rootPrefix + '/lib/globalConstant/database'),
   basicHelper = require(rootPrefix + '/helpers/basic'),
   channelConstants = require(rootPrefix + '/lib/globalConstant/channel/channels');
@@ -126,19 +126,15 @@ class ChannelModel extends ModelBase {
     const oThis = this;
 
     const promisesResponse = await Promise.all([
-      new LiveMeetingIdByChannelIdsCache({ channelIds: ids }).fetch(),
+      new MeetingModel().fetchMeetingIdByChannelIds(ids),
       oThis
         .select('*')
         .where(['id IN (?)', ids])
         .fire()
     ]);
 
-    const liveMeetingIdsCacheResponse = promisesResponse[0];
-    if (liveMeetingIdsCacheResponse.isFailure()) {
-      return Promise.reject(liveMeetingIdsCacheResponse);
-    }
+    const liveMeetingIdsData = promisesResponse[0];
 
-    const liveMeetingIdsData = liveMeetingIdsCacheResponse.data;
     const dbRows = promisesResponse[1];
 
     const response = {};
@@ -147,7 +143,7 @@ class ChannelModel extends ModelBase {
       const channelId = dbRows[index].id;
       const formatDbRow = oThis.formatDbData(dbRows[index]);
       response[formatDbRow.id] = formatDbRow;
-      response[formatDbRow.id].liveMeetingId = liveMeetingIdsData[channelId].liveMeetingId;
+      response[formatDbRow.id].liveMeetingId = (liveMeetingIdsData[channelId] || {}).liveMeetingId;
     }
 
     return response;
@@ -334,8 +330,6 @@ class ChannelModel extends ModelBase {
     if (params.ids) {
       const ChannelByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelByIds');
       promisesArray.push(new ChannelByIdsCache({ ids: params.ids }).clear());
-
-      promisesArray.push(new LiveMeetingIdByChannelIdsCache({ channelIds: params.ids }).clear());
     }
 
     if (params.permalinks) {
