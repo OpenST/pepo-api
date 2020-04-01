@@ -1,0 +1,583 @@
+const rootPrefix = '../../../..',
+  FilterTags = require(rootPrefix + '/lib/FilterOutTags'),
+  ServiceBase = require(rootPrefix + '/app/services/Base'),
+  TagModel = require(rootPrefix + '/app/models/mysql/Tag'),
+  TextModel = require(rootPrefix + '/app/models/mysql/Text'),
+  UserModel = require(rootPrefix + '/app/models/mysql/User'),
+  FilterOutLinks = require(rootPrefix + '/lib/FilterOutLinks'),
+  CommonValidators = require(rootPrefix + '/lib/validators/Common'),
+  ChannelModel = require(rootPrefix + '/app/models/mysql/channel/Channel'),
+  AddInChannelLib = require(rootPrefix + '/lib/channelTagVideo/AddTagInChannel'),
+  ChannelStatModel = require(rootPrefix + '/app/models/mysql/channel/ChannelStat'),
+  ChangeChannelUserRoleLib = require(rootPrefix + '/lib/channel/ChangeChannelUserRole'),
+  AdminActivityLogModel = require(rootPrefix + '/app/models/mysql/admin/AdminActivityLog'),
+  ChannelByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelByIds'),
+  ChannelByPermalinksCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelByPermalinks'),
+  imageLib = require(rootPrefix + '/lib/imageLib'),
+  tagConstants = require(rootPrefix + '/lib/globalConstant/tag'),
+  logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
+  responseHelper = require(rootPrefix + '/lib/formatter/response'),
+  textConstants = require(rootPrefix + '/lib/globalConstant/text'),
+  imageConstants = require(rootPrefix + '/lib/globalConstant/image'),
+  channelConstants = require(rootPrefix + '/lib/globalConstant/channel/channels'),
+  channelUserConstants = require(rootPrefix + '/lib/globalConstant/channel/channelUsers'),
+  adminActivityLogConstants = require(rootPrefix + '/lib/globalConstant/admin/adminActivityLogs');
+
+// Declare constants.
+const ORIGINAL_IMAGE_WIDTH = 1500;
+const ORIGINAL_IMAGE_HEIGHT = 642;
+
+/**
+ * Class to edit channel.
+ *
+ * @class CreateChannel
+ */
+class CreateChannel extends ServiceBase {
+  /**
+   * Constructor to edit channel.
+   *
+   * @param {object} params.current_user
+   * @param {number} params.current_user.id
+   * @param {number} params.channel_id
+   * @param {string} [params.name]
+   * @param {string} [params.description]
+   * @param {string} [params.tagline]
+   * @param {string[]} [params.tag_names]
+   * @param {string[]} [params.admin_user_ids]
+   * @param {string} [params.cover_image_url]
+   * @param {number} [params.cover_image_file_size]
+   * @param {number} [params.cover_image_height]
+   * @param {number} [params.cover_image_width]
+   *
+   * @augments ServiceBase
+   *
+   * @constructor
+   */
+  constructor(params) {
+    super(params);
+
+    const oThis = this;
+
+    oThis.currentUserId = params.current_user.id;
+
+    oThis.channelId = params.channel_id;
+
+    oThis.channelName = params.name;
+    oThis.channelDescription = params.description;
+    oThis.channelTagline = params.tagline;
+
+    oThis.channelTagNames = params.tag_names || [];
+    oThis.channelAdminUserIds = params.admin_user_ids || [];
+
+    oThis.coverImageUrl = params.cover_image_url;
+    oThis.coverImageFileSize = params.cover_image_file_size;
+    oThis.coverImageHeight = params.cover_image_height;
+    oThis.coverImageWidth = params.cover_image_width;
+
+    oThis.tagIds = [];
+    oThis.channelPermalink = null;
+  }
+
+  /**
+   * Async perform.
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _asyncPerform() {
+    const oThis = this;
+
+    if (oThis.channelId) {
+      await oThis._validateExistingChannel();
+    } else {
+      await oThis._validateChannelCreationParameters();
+      await oThis._generatePermalink();
+    }
+
+    await oThis.validateParams();
+    if (oThis.channelId) {
+      await oThis._updateChannelName();
+    } else {
+      await oThis._createNewChannel();
+    }
+
+    await oThis._performChannelTaglineRelatedTasks();
+    await oThis._performChannelDescriptionRelatedTasks();
+    await oThis._performImageUrlRelatedTasks();
+    await oThis._createEntryInChannelStats();
+    await oThis._associateAdminsToChannel();
+    await oThis._associateTagsToChannel();
+
+    return responseHelper.successWithData({});
+  }
+
+  async _generatePermalink() {
+    return '';
+  }
+
+  /**
+   * Validate status of existing channel.
+   *
+   * @returns {Promise<never>}
+   * @private
+   */
+  async _validateExistingChannel() {
+    const oThis = this;
+
+    const channelCacheResponse = await new ChannelByIdsCache({ ids: [oThis.channelId] }).fetch();
+    if (channelCacheResponse.isFailure()) {
+      return Promise.reject(channelCacheResponse);
+    }
+
+    const channel = channelCacheResponse.data[oThis.channelId];
+
+    if (!CommonValidators.validateNonEmptyObject(channel) || channel.status !== channelConstants.activeStatus) {
+      return Promise.reject(
+        responseHelper.paramValidationError({
+          internal_error_identifier: 'a_s_a_c_e_vecs_1',
+          api_error_identifier: 'invalid_api_params',
+          params_error_identifiers: ['invalid_channel_id'],
+          debug_options: {
+            channelId: oThis.channelId,
+            channelDetails: channel
+          }
+        })
+      );
+    }
+  }
+
+  /**
+   * Update channel name.
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _updateChannelName() {
+    const oThis = this;
+
+    if (!oThis.channelName) {
+      return;
+    }
+
+    const updateResponse = await new ChannelModel()
+      .update({ name: oThis.channelName })
+      .where({ id: oThis.channelId })
+      .fire()
+      .catch(function(err) {
+        logger.log('Error while updating channel name: ', err);
+        if (ChannelModel.isDuplicateIndexViolation(ChannelModel.nameUniqueIndexName, err)) {
+          logger.log('Name conflict.');
+
+          return null;
+        }
+
+        return Promise.reject(err);
+      });
+
+    if (!updateResponse) {
+      logger.error('Error while updating channel name channels table.');
+
+      return Promise.reject(
+        responseHelper.paramValidationError({
+          internal_error_identifier: 'a_s_a_c_e_ucn_1',
+          api_error_identifier: 'invalid_api_params',
+          params_error_identifiers: ['invalid_channel_id'],
+          debug_options: { channelName: oThis.channelName }
+        })
+      );
+    }
+
+    await ChannelModel.flushCache({ ids: [oThis.channelId] });
+  }
+
+  /**
+   * Validate input parameters in case of community creation.
+   *
+   * @returns {Promise<never>}
+   * @private
+   */
+  async _validateChannelCreationParameters() {
+    const oThis = this;
+
+    if (
+      !oThis.channelName ||
+      !oThis.channelDescription ||
+      !oThis.channelTagline ||
+      !oThis.coverImageUrl ||
+      !oThis.coverImageFileSize ||
+      !oThis.coverImageWidth ||
+      !oThis.coverImageHeight ||
+      !oThis.channelTagNames ||
+      oThis.channelTagNames.length == 0 ||
+      !oThis.channelAdminUserIds ||
+      oThis.channelAdminUserIds.length == 0
+    ) {
+      return Promise.reject(
+        responseHelper.error({
+          internal_error_identifier: 'a_s_a_c_e_vccp_1',
+          api_error_identifier: 'invalid_api_params',
+          debug_options: {
+            channelName: oThis.channelName,
+            channelDescription: oThis.channelDescription,
+            channelTagline: oThis.channelTagline,
+            coverImageUrl: oThis.coverImageUrl,
+            coverImageFileSize: oThis.coverImageFileSize,
+            coverImageWidth: oThis.coverImageWidth,
+            coverImageHeight: oThis.coverImageHeight,
+            channelTagNames: oThis.channelTagNames,
+            channelAdminUserIds: oThis.channelAdminUserIds
+          }
+        })
+      );
+    }
+  }
+
+  /**
+   * Create new channel.
+   *
+   * @sets oThis.channelId
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _createNewChannel() {
+    const oThis = this;
+
+    const insertResponse = await new ChannelModel()
+      .insert({
+        name: oThis.channelName,
+        status: channelConstants.invertedStatuses[channelConstants.activeStatus],
+        permalink: oThis.channelPermalink
+      })
+      .fire()
+      .catch(function(err) {
+        logger.log('Error while creating new channel: ', err);
+        if (
+          ChannelModel.isDuplicateIndexViolation(ChannelModel.nameUniqueIndexName, err) ||
+          ChannelModel.isDuplicateIndexViolation(ChannelModel.permalinkUniqueIndexName, err)
+        ) {
+          logger.log('Name or permalink conflict.');
+
+          return null;
+        }
+
+        return Promise.reject(err);
+      });
+
+    if (!insertResponse) {
+      logger.error('Error while creating new channel in channels table.');
+
+      return Promise.reject(
+        responseHelper.paramValidationError({
+          internal_error_identifier: 'a_s_a_c_e_cnc_1',
+          api_error_identifier: 'invalid_api_params',
+          params_error_identifiers: ['invalid_channel_id'],
+          debug_options: {
+            channelName: oThis.channelName,
+            channelPermalink: oThis.channelPermalink
+          }
+        })
+      );
+    }
+
+    oThis.channelId = insertResponse.insertId;
+  }
+
+  /**
+   * Perform channel tagline related tasks.
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _performChannelTaglineRelatedTasks() {
+    const oThis = this;
+
+    if (oThis.channelTagline) {
+      // Create new entry in texts table.
+      const textRow = await new TextModel().insertText({
+        text: oThis.channelTagline,
+        kind: textConstants.channelTaglineKind
+      });
+
+      const textInsertId = textRow.insertId;
+
+      // Filter out tags from channel tagline.
+      await new FilterTags(oThis.channelTagline, textInsertId).perform();
+
+      await TextModel.flushCache({ ids: [textInsertId] });
+
+      // Update channel table.
+      await new ChannelModel()
+        .update({ tagline_id: textInsertId })
+        .where({ id: oThis.channelId })
+        .fire();
+
+      await ChannelModel.flushCache({ ids: [oThis.channelId] });
+    }
+  }
+
+  /**
+   * Perform channel description related tasks.
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _performChannelDescriptionRelatedTasks() {
+    const oThis = this;
+
+    if (oThis.channelDescription) {
+      // Create new entry in texts table.
+      const textRow = await new TextModel().insertText({
+        text: oThis.channelDescription,
+        kind: textConstants.channelDescriptionKind
+      });
+
+      const textInsertId = textRow.insertId;
+
+      // Filter out tags from channel description.
+      await new FilterTags(oThis.channelDescription, textInsertId).perform();
+
+      // Filter out links from channel description.
+      await new FilterOutLinks(oThis.channelDescription, textInsertId).perform();
+
+      await TextModel.flushCache({ ids: [textInsertId] });
+
+      // Update channel table.
+      await new ChannelModel()
+        .update({ description_id: textInsertId })
+        .where({ id: oThis.channelId })
+        .fire();
+
+      await ChannelModel.flushCache({ ids: [oThis.channelId], permalinks: [oThis.channelPermalink] });
+    }
+  }
+
+  /**
+   * Perform image url related tasks.
+   *
+   * @returns {Promise<never>}
+   * @private
+   */
+  async _performImageUrlRelatedTasks() {
+    const oThis = this;
+
+    if (oThis.originalImageUrl) {
+      const imageParams = {
+        imageUrl: oThis.originalImageUrl,
+        size: oThis.coverImageFileSize,
+        width: ORIGINAL_IMAGE_WIDTH,
+        height: ORIGINAL_IMAGE_HEIGHT,
+        kind: imageConstants.channelImageKind,
+        channelId: oThis.channelId,
+        isExternalUrl: false,
+        enqueueResizer: true
+      };
+
+      // Validate and save image.
+      const resp = await imageLib.validateAndSave(imageParams);
+      if (resp.isFailure()) {
+        return Promise.reject(resp);
+      }
+
+      const imageData = resp.data;
+
+      // Update channel table.
+      await new ChannelModel()
+        .update({ cover_image_id: imageData.insertId })
+        .where({ id: oThis.channelId })
+        .fire();
+
+      await ChannelModel.flushCache({ ids: [oThis.channelId] });
+    }
+  }
+
+  /**
+   * Create new entry in channel stat table.
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _createEntryInChannelStats() {
+    const oThis = this;
+
+    if (oThis.isEdit) {
+      return;
+    }
+
+    await new ChannelStatModel()
+      .insert({ channel_id: oThis.channelId, total_videos: 0, total_users: 0 })
+      .fire()
+      .catch(function(error) {
+        logger.log('Avoid this error while updating channel. Error while creating channel stats: ', error);
+      });
+  }
+
+  /**
+   * Associate admins to channel.
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _associateAdminsToChannel() {
+    const oThis = this;
+
+    if (oThis.channelAdminUserNames.length === 0) {
+      return;
+    }
+
+    for (let index = 0; index < oThis.channelAdminUserNames.length; index++) {
+      oThis.channelAdminUserNames[index] = oThis.channelAdminUserNames[index].trim();
+    }
+
+    const userNamesToUserMap = await new UserModel().fetchByUserNames(oThis.channelAdminUserNames);
+
+    if (Object.keys(userNamesToUserMap).length !== oThis.channelAdminUserNames.length) {
+      logger.error('Some admins are not present in user db.');
+
+      return Promise.reject(
+        responseHelper.paramValidationError({
+          internal_error_identifier: 'a_s_a_c_e_aatc_1',
+          api_error_identifier: 'invalid_api_params',
+          params_error_identifiers: ['invalid_admin_usernames'],
+          debug_options: {
+            adminUserNames: oThis.adminUserNames
+          }
+        })
+      );
+    }
+
+    const adminUserIds = [];
+
+    for (const userName in userNamesToUserMap) {
+      adminUserIds.push(userNamesToUserMap[userName].id);
+    }
+
+    const promiseArray = [];
+
+    for (let ind = 0; ind < adminUserIds.length; ind++) {
+      promiseArray.push(
+        new ChangeChannelUserRoleLib({
+          userId: adminUserIds[ind],
+          channelId: oThis.channelId,
+          role: channelUserConstants.adminRole
+        }).perform()
+      );
+    }
+
+    await Promise.all(promiseArray);
+  }
+
+  /**
+   * Associate tags to channel.
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _associateTagsToChannel() {
+    const oThis = this;
+
+    if (oThis.channelTagNames.length === 0) {
+      return;
+    }
+
+    for (let index = 0; index < oThis.channelTagNames.length; index++) {
+      oThis.channelTagNames[index] = oThis.channelTagNames[index].trim();
+    }
+
+    await oThis._fetchOrCreateTags();
+
+    const promiseArray = [];
+
+    for (let ind = 0; ind < oThis.tagIds.length; ind++) {
+      promiseArray.push(
+        new AddInChannelLib({
+          channelId: oThis.channelId,
+          tagId: oThis.tagIds[ind]
+        }).perform()
+      );
+    }
+
+    await Promise.all(promiseArray);
+  }
+
+  /**
+   * Fetch existing or create new tags.
+   *
+   * @sets oThis.tagIds
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _fetchOrCreateTags() {
+    const oThis = this;
+
+    const tagNameToTagIdMap = {},
+      newTagsToInsert = [],
+      newTagsToCreateArray = [];
+
+    const dbRows = await new TagModel()
+      .select(['id', 'name'])
+      .where({ name: oThis.channelTagNames })
+      .fire();
+
+    for (let index = 0; index < dbRows.length; index++) {
+      const formatDbRow = new TagModel()._formatDbData(dbRows[index]);
+      tagNameToTagIdMap[formatDbRow.name.toLowerCase()] = formatDbRow;
+      oThis.tagIds.push(formatDbRow.id);
+    }
+
+    for (let ind = 0; ind < oThis.channelTagNames.length; ind++) {
+      const inputTagName = oThis.channelTagNames[ind];
+      if (!tagNameToTagIdMap[inputTagName.toLowerCase()]) {
+        newTagsToInsert.push(inputTagName);
+        newTagsToCreateArray.push([inputTagName, 0, tagConstants.invertedStatuses[tagConstants.activeStatus]]);
+      }
+    }
+
+    // Creates new tags.
+    if (newTagsToCreateArray.length > 0) {
+      await new TagModel().insertTags(newTagsToCreateArray);
+
+      // Fetch new inserted tags.
+      const newTags = await new TagModel().getTags(newTagsToInsert);
+
+      for (let ind = 0; ind < newTags.length; ind++) {
+        oThis.tagIds.push(newTags[ind].id);
+      }
+    }
+
+    if (oThis.channelTagNames.length !== oThis.tagIds.length) {
+      logger.log('Some tags are not present in db.\nPlease verify.');
+
+      return Promise.reject(
+        responseHelper.error({
+          internal_error_identifier: 'a_s_a_c_e_foct_1',
+          api_error_identifier: 'something_went_wrong',
+          debug_options: {
+            channelTagNames: oThis.channelTagNames,
+            tagIds: oThis.tagIds
+          }
+        })
+      );
+    }
+  }
+
+  /**
+   * Log admin activity.
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async logAdminActivity() {
+    const oThis = this;
+
+    await new AdminActivityLogModel().insertAction({
+      adminId: oThis.currentAdminId,
+      actionOn: oThis.channelId,
+      extraData: JSON.stringify({ cid: [oThis.channelId], chPml: oThis.channelPermalink }),
+      action: adminActivityLogConstants.createEditCommunityEntity
+    });
+  }
+}
+
+module.exports = CreateChannel;
