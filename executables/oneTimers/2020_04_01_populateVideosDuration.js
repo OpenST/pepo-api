@@ -20,7 +20,7 @@ class PopulateVideosDuration {
   constructor() {
     const oThis = this;
 
-    oThis.lastRecordToProcess = 7000;
+    oThis.lastRecordToProcess = 6570;
     oThis.urlPrefix = 'https://dbvoeb7t6hffk.cloudfront.net/pepo-staging1000/ua/videos';
   }
 
@@ -46,8 +46,11 @@ class PopulateVideosDuration {
 
     let promises = [];
     for (let vid in rows) {
-      const row = rows[vid],
-        src = row.urlTemplate.replace('{{s3_vi}}', oThis.urlPrefix).replace('{{s}}', 'original');
+      const row = rows[vid];
+      if (!row.urlTemplate) {
+        continue;
+      }
+      const src = row.urlTemplate.replace('{{s3_vi}}', oThis.urlPrefix).replace('{{s}}', 'original');
 
       promises.push(
         new Promise(async function(onResolve, onReject) {
