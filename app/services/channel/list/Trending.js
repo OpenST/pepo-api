@@ -93,7 +93,7 @@ class ChannelListTrending extends ChannelTrendingBase {
    */
   _subKind() {
     const oThis = this;
-    return 'new';
+    return 'trending';
   }
 }
 

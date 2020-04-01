@@ -1,7 +1,7 @@
 const rootPrefix = '../../../..',
   ChannelListBase = require(rootPrefix + '/app/services/channel/list/Base'),
   ChannelModel = require(rootPrefix + '/app/models/mysql/channel/Channel'),
-  ChannelIdsByUser = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelIdsByUser'),
+  ChannelIdsByUserCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelIdsByUser'),
   channelUsersConstants = require(rootPrefix + '/lib/globalConstant/channel/channelUsers');
 
 /**
@@ -40,7 +40,7 @@ class ChannelListMy extends ChannelListBase {
     const oThis = this;
 
     const userId = oThis.current_user.id;
-    const cacheResp = await new ChannelIdsByUser({ userIds: [userId] }).fetch();
+    const cacheResp = await new ChannelIdsByUserCache({ userIds: [userId] }).fetch();
     if (cacheResp.isFailure()) {
       return Promise.reject(cacheResp);
     }

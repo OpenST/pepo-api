@@ -104,7 +104,7 @@ class ChannelModel extends ModelBase {
 
     const response = await oThis
       .select('id')
-      .order_by('trending_rank desc')
+      .order_by('trending_rank asc')
       .limit(channelConstants.trendingChannelsLimit)
       .fire();
 
@@ -346,6 +346,8 @@ class ChannelModel extends ModelBase {
    * @param {array<string>} [params.permalinks]
    * @param {array<string>} [params.createdAt]
    * @param {array<string>} [params.name]
+   * @param {array<string>} [params.status]
+   * @param {array<string>} [params.trendingRank]
    *
    * @returns {Promise<*>}
    */
@@ -362,17 +364,19 @@ class ChannelModel extends ModelBase {
       promisesArray.push(new ChannelByPermalinksCache({ permalinks: params.permalinks }).clear());
     }
 
-    if (params.createdAt) {
-      const ChannelAllCache = require(rootPrefix + '/lib/cacheManagement/single/channel/ChannelAll');
-      promisesArray.push(new ChannelAllCache({}).clear());
-
+    if (params.createdAt || params.status) {
       const ChannelNewCache = require(rootPrefix + '/lib/cacheManagement/single/channel/ChannelNew');
       promisesArray.push(new ChannelNewCache({}).clear());
     }
 
-    if (params.name) {
+    if (params.createdAt || params.status || params.name) {
       const ChannelAllCache = require(rootPrefix + '/lib/cacheManagement/single/channel/ChannelAll');
       promisesArray.push(new ChannelAllCache({}).clear());
+    }
+
+    if (params.trendingRank) {
+      const ChannelTrendingCache = require(rootPrefix + '/lib/cacheManagement/single/channel/ChannelTrending');
+      promisesArray.push(new ChannelTrendingCache({}).clear());
     }
 
     // If there is update in any channel, then flush list cache as well

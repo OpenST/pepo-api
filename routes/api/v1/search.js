@@ -68,7 +68,7 @@ router.get('/channels/all', sanitizer.sanitizeDynamicUrlParams, function(req, re
 
 /* Search trending channels. */
 router.get('/channels/trending', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
-  req.decodedParams.apiName = apiName.getAllChannels;
+  req.decodedParams.apiName = apiName.getTrendingChannels;
 
   const dataFormatterFunc = async function(serviceResponse) {
     const wrapperFormatterRsp = await new FormatterComposer({
@@ -121,7 +121,7 @@ router.get('/channels/my', sanitizer.sanitizeDynamicUrlParams, function(req, res
     serviceResponse.data = wrapperFormatterRsp.data;
   };
 
-  Promise.resolve(routeHelper.perform(req, res, next, '/channel/list/My', 'r_a_v1_s_9', null, dataFormatterFunc));
+  Promise.resolve(routeHelper.perform(req, res, next, '/channel/list/My', 'r_a_v1_s_10', null, dataFormatterFunc));
 });
 
 /* Search tags */
