@@ -1,34 +1,30 @@
 {
+	"variables": [],
 	"info": {
-		"_postman_id": "62496e32-51da-40b6-9d18-ac40026acfa6",
 		"name": "pepo-api",
-		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+		"_postman_id": "74466ead-a23f-dda6-5a39-e5da1d8689de",
+		"description": "",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json"
 	},
 	"item": [
 		{
 			"name": "admin",
+			"description": "",
 			"item": [
 				{
 					"name": "curated-entity",
+					"description": "",
 					"item": [
 						{
 							"name": "Update",
 							"request": {
 								"auth": {
 									"type": "basic",
-									"basic": [
-										{
-											"key": "username",
-											"value": "pepo",
-											"type": "string"
-										},
-										{
-											"key": "password",
-											"value": "Pepo-Admin-20!9*",
-											"type": "string"
-										}
-									]
+									"basic": {
+										"showPassword": false
+									}
 								},
+								"url": "{{api_server}}/api/admin/curated-entities/update",
 								"method": "POST",
 								"header": [
 									{
@@ -62,18 +58,7 @@
 										}
 									]
 								},
-								"url": {
-									"raw": "{{api_server}}/api/admin/curated-entities/update",
-									"host": [
-										"{{api_server}}"
-									],
-									"path": [
-										"api",
-										"admin",
-										"curated-entities",
-										"update"
-									]
-								}
+								"description": ""
 							},
 							"response": []
 						},
@@ -82,19 +67,11 @@
 							"request": {
 								"auth": {
 									"type": "basic",
-									"basic": [
-										{
-											"key": "username",
-											"value": "pepo",
-											"type": "string"
-										},
-										{
-											"key": "password",
-											"value": "Pepo-Admin-20!9*",
-											"type": "string"
-										}
-									]
+									"basic": {
+										"showPassword": false
+									}
 								},
+								"url": "{{api_server}}/api/admin/curated-entities/delete",
 								"method": "POST",
 								"header": [
 									{
@@ -123,42 +100,20 @@
 										}
 									]
 								},
-								"url": {
-									"raw": "{{api_server}}/api/admin/curated-entities/delete",
-									"host": [
-										"{{api_server}}"
-									],
-									"path": [
-										"api",
-										"admin",
-										"curated-entities",
-										"delete"
-									]
-								}
+								"description": ""
 							},
 							"response": []
 						},
 						{
 							"name": "user list",
-							"protocolProfileBehavior": {
-								"disableBodyPruning": true
-							},
 							"request": {
 								"auth": {
 									"type": "basic",
-									"basic": [
-										{
-											"key": "username",
-											"value": "pepo",
-											"type": "string"
-										},
-										{
-											"key": "password",
-											"value": "Pepo-Admin-20!9*",
-											"type": "string"
-										}
-									]
+									"basic": {
+										"showPassword": false
+									}
 								},
+								"url": "{{api_server}}/api/admin/curated-entities/users",
 								"method": "GET",
 								"header": [
 									{
@@ -173,46 +128,21 @@
 										"value": "{{csrf-token}}"
 									}
 								],
-								"body": {
-									"mode": "urlencoded",
-									"urlencoded": []
-								},
-								"url": {
-									"raw": "{{api_server}}/api/admin/curated-entities/users",
-									"host": [
-										"{{api_server}}"
-									],
-									"path": [
-										"api",
-										"admin",
-										"curated-entities",
-										"users"
-									]
-								}
+								"body": {},
+								"description": ""
 							},
 							"response": []
 						},
 						{
 							"name": "tag list",
-							"protocolProfileBehavior": {
-								"disableBodyPruning": true
-							},
 							"request": {
 								"auth": {
 									"type": "basic",
-									"basic": [
-										{
-											"key": "username",
-											"value": "pepo",
-											"type": "string"
-										},
-										{
-											"key": "password",
-											"value": "Pepo-Admin-20!9*",
-											"type": "string"
-										}
-									]
+									"basic": {
+										"showPassword": false
+									}
 								},
+								"url": "{{api_server}}/api/admin/curated-entities/tags",
 								"method": "GET",
 								"header": [
 									{
@@ -227,46 +157,21 @@
 										"value": "{{csrf-token}}"
 									}
 								],
-								"body": {
-									"mode": "urlencoded",
-									"urlencoded": []
-								},
-								"url": {
-									"raw": "{{api_server}}/api/admin/curated-entities/tags",
-									"host": [
-										"{{api_server}}"
-									],
-									"path": [
-										"api",
-										"admin",
-										"curated-entities",
-										"tags"
-									]
-								}
+								"body": {},
+								"description": ""
 							},
 							"response": []
 						},
 						{
 							"name": "channel list",
-							"protocolProfileBehavior": {
-								"disableBodyPruning": true
-							},
 							"request": {
 								"auth": {
 									"type": "basic",
-									"basic": [
-										{
-											"key": "username",
-											"value": "pepo",
-											"type": "string"
-										},
-										{
-											"key": "password",
-											"value": "Pepo-Admin-20!9*",
-											"type": "string"
-										}
-									]
+									"basic": {
+										"showPassword": false
+									}
 								},
+								"url": "{{api_server}}/api/admin/curated-entities/tags",
 								"method": "GET",
 								"header": [
 									{
@@ -281,22 +186,8 @@
 										"value": "{{csrf-token}}"
 									}
 								],
-								"body": {
-									"mode": "urlencoded",
-									"urlencoded": []
-								},
-								"url": {
-									"raw": "{{api_server}}/api/admin/curated-entities/tags",
-									"host": [
-										"{{api_server}}"
-									],
-									"path": [
-										"api",
-										"admin",
-										"curated-entities",
-										"tags"
-									]
-								}
+								"body": {},
+								"description": ""
 							},
 							"response": []
 						},
@@ -306,35 +197,23 @@
 								{
 									"listen": "test",
 									"script": {
-										"id": "99fee1eb-c1f9-46c7-9f67-2f8e85469d56",
+										"type": "text/javascript",
 										"exec": [
 											"const $ = cheerio.load(pm.response.text())",
 											"",
 											"pm.environment.set('csrf-token', $('meta[name=csrf-token]').attr('content'));"
-										],
-										"type": "text/javascript"
+										]
 									}
 								}
 							],
-							"protocolProfileBehavior": {
-								"disableBodyPruning": true
-							},
 							"request": {
 								"auth": {
 									"type": "basic",
-									"basic": [
-										{
-											"key": "username",
-											"value": "pepo",
-											"type": "string"
-										},
-										{
-											"key": "password",
-											"value": "Pepo-Admin-20!9*",
-											"type": "string"
-										}
-									]
+									"basic": {
+										"showPassword": false
+									}
 								},
+								"url": "{{api_server}}/admin/login",
 								"method": "GET",
 								"header": [
 									{
@@ -359,26 +238,17 @@
 										}
 									]
 								},
-								"url": {
-									"raw": "{{api_server}}/admin/login",
-									"host": [
-										"{{api_server}}"
-									],
-									"path": [
-										"admin",
-										"login"
-									]
-								}
+								"description": ""
 							},
 							"response": []
 						}
 					],
-					"protocolProfileBehavior": {},
 					"_postman_isSubFolder": true
 				},
 				{
 					"name": "logged-in-admin",
 					"request": {
+						"url": "{{api_server}}/api/admin/current",
 						"method": "GET",
 						"header": [
 							{
@@ -388,17 +258,11 @@
 								"type": "text"
 							}
 						],
-						"url": {
-							"raw": "{{api_server}}/api/admin/current",
-							"host": [
-								"{{api_server}}"
-							],
-							"path": [
-								"api",
-								"admin",
-								"current"
-							]
-						}
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"description": ""
 					},
 					"response": []
 				},
@@ -407,19 +271,11 @@
 					"request": {
 						"auth": {
 							"type": "basic",
-							"basic": [
-								{
-									"key": "username",
-									"value": "pepo",
-									"type": "string"
-								},
-								{
-									"key": "password",
-									"value": "Pepo-Admin-20!9*",
-									"type": "string"
-								}
-							]
+							"basic": {
+								"showPassword": false
+							}
 						},
+						"url": "{{api_server}}/api/admin/login",
 						"method": "POST",
 						"header": [
 							{
@@ -449,17 +305,7 @@
 								}
 							]
 						},
-						"url": {
-							"raw": "{{api_server}}/api/admin/login",
-							"host": [
-								"{{api_server}}"
-							],
-							"path": [
-								"api",
-								"admin",
-								"login"
-							]
-						}
+						"description": ""
 					},
 					"response": []
 				},
@@ -468,19 +314,11 @@
 					"request": {
 						"auth": {
 							"type": "basic",
-							"basic": [
-								{
-									"key": "username",
-									"value": "pepo",
-									"type": "string"
-								},
-								{
-									"key": "password",
-									"value": "Pepo-Admin-20!9*",
-									"type": "string"
-								}
-							]
+							"basic": {
+								"showPassword": false
+							}
 						},
+						"url": "{{api_server}}/api/admin/logout",
 						"method": "POST",
 						"header": [
 							{
@@ -510,32 +348,13 @@
 								}
 							]
 						},
-						"url": {
-							"raw": "{{api_server}}/api/admin/logout",
-							"host": [
-								"{{api_server}}"
-							],
-							"path": [
-								"api",
-								"admin",
-								"logout"
-							]
-						}
+						"description": ""
 					},
 					"response": []
 				},
 				{
 					"name": "users",
 					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Content-Type",
-								"name": "Content-Type",
-								"type": "text",
-								"value": "application/x-www-form-urlencoded"
-							}
-						],
 						"url": {
 							"raw": "{{api_server}}/api/admin/users?q=test",
 							"host": [
@@ -556,16 +375,29 @@
 									"value": "eyJwYWdpbmF0aW9uX3RpbWVzdGFtcCI6MTU2ODg5MzMzM30=",
 									"disabled": true
 								}
-							]
-						}
+							],
+							"variable": []
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/x-www-form-urlencoded"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"description": ""
 					},
 					"response": []
 				},
 				{
 					"name": "tags-search",
 					"request": {
-						"method": "GET",
-						"header": [],
 						"url": {
 							"raw": "{{api_server}}/api/v1/tags?q=pepo",
 							"host": [
@@ -586,8 +418,16 @@
 									"value": "eyJwYWdlIjoyfQ==",
 									"disabled": true
 								}
-							]
-						}
+							],
+							"variable": []
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"description": ""
 					},
 					"response": []
 				},
@@ -596,51 +436,11 @@
 					"request": {
 						"auth": {
 							"type": "basic",
-							"basic": [
-								{
-									"key": "username",
-									"value": "pepo",
-									"type": "string"
-								},
-								{
-									"key": "password",
-									"value": "Pepo-Admin-20!9*",
-									"type": "string"
-								}
-							]
-						},
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/x-www-form-urlencoded",
-								"type": "text"
-							},
-							{
-								"key": "csrf-token",
-								"value": "{{csrf-token}}",
-								"type": "text"
+							"basic": {
+								"showPassword": false
 							}
-						],
-						"url": {
-							"raw": "{{api_server}}/api/admin/users/1414/approve",
-							"host": [
-								"{{api_server}}"
-							],
-							"path": [
-								"api",
-								"admin",
-								"users",
-								"1414",
-								"approve"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "deactivate-user",
-					"request": {
+						},
+						"url": "{{api_server}}/api/admin/users/1414/approve",
 						"method": "POST",
 						"header": [
 							{
@@ -655,22 +455,32 @@
 							}
 						],
 						"body": {
-							"mode": "urlencoded",
-							"urlencoded": []
+							"mode": "raw",
+							"raw": ""
 						},
-						"url": {
-							"raw": "{{api_server}}/api/admin/users/1410/delete",
-							"host": [
-								"{{api_server}}"
-							],
-							"path": [
-								"api",
-								"admin",
-								"users",
-								"1410",
-								"delete"
-							]
-						}
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "deactivate-user",
+					"request": {
+						"url": "{{api_server}}/api/admin/users/1410/delete",
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/x-www-form-urlencoded",
+								"type": "text"
+							},
+							{
+								"key": "csrf-token",
+								"value": "{{csrf-token}}",
+								"type": "text"
+							}
+						],
+						"body": {},
+						"description": ""
 					},
 					"response": []
 				},
@@ -679,19 +489,11 @@
 					"request": {
 						"auth": {
 							"type": "basic",
-							"basic": [
-								{
-									"key": "password",
-									"value": "Pepo-Admin-20!9*",
-									"type": "string"
-								},
-								{
-									"key": "username",
-									"value": "pepo",
-									"type": "string"
-								}
-							]
+							"basic": {
+								"showPassword": false
+							}
 						},
+						"url": "{{api_server}}/api/admin/delete-video/1089",
 						"method": "POST",
 						"header": [
 							{
@@ -720,18 +522,7 @@
 								}
 							]
 						},
-						"url": {
-							"raw": "{{api_server}}/api/admin/delete-video/1089",
-							"host": [
-								"{{api_server}}"
-							],
-							"path": [
-								"api",
-								"admin",
-								"delete-video",
-								"1089"
-							]
-						}
+						"description": ""
 					},
 					"response": []
 				},
@@ -740,19 +531,11 @@
 					"request": {
 						"auth": {
 							"type": "basic",
-							"basic": [
-								{
-									"key": "password",
-									"value": "Pepo-Admin-20!9*",
-									"type": "string"
-								},
-								{
-									"key": "username",
-									"value": "pepo",
-									"type": "string"
-								}
-							]
+							"basic": {
+								"showPassword": false
+							}
 						},
+						"url": "{{api_server}}/api/admin/delete-reply-video/803",
 						"method": "POST",
 						"header": [
 							{
@@ -781,18 +564,7 @@
 								}
 							]
 						},
-						"url": {
-							"raw": "{{api_server}}/api/admin/delete-reply-video/803",
-							"host": [
-								"{{api_server}}"
-							],
-							"path": [
-								"api",
-								"admin",
-								"delete-reply-video",
-								"803"
-							]
-						}
+						"description": ""
 					},
 					"response": []
 				},
@@ -801,19 +573,11 @@
 					"request": {
 						"auth": {
 							"type": "basic",
-							"basic": [
-								{
-									"key": "password",
-									"value": "Pepo-Admin-20!9*",
-									"type": "string"
-								},
-								{
-									"key": "username",
-									"value": "pepo",
-									"type": "string"
-								}
-							]
+							"basic": {
+								"showPassword": false
+							}
 						},
+						"url": "{{api_server}}/api/admin/channels/1/block-user",
 						"method": "POST",
 						"header": [
 							{
@@ -837,29 +601,15 @@
 								}
 							]
 						},
-						"url": {
-							"raw": "{{api_server}}/api/admin/channels/1/block-user",
-							"host": [
-								"{{api_server}}"
-							],
-							"path": [
-								"api",
-								"admin",
-								"channels",
-								"1",
-								"block-user"
-							]
-						}
+						"description": ""
 					},
 					"response": []
 				},
 				{
 					"name": "video-history",
 					"request": {
-						"method": "GET",
-						"header": [],
 						"url": {
-							"raw": "{{api_server}}/api/admin/video-history/2068",
+							"raw": "{{api_server}}/api/admin/video-history/2068?",
 							"host": [
 								"{{api_server}}"
 							],
@@ -875,18 +625,24 @@
 									"value": "eyJwYWdlIjoyfQ==",
 									"disabled": true
 								}
-							]
-						}
+							],
+							"variable": []
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"description": ""
 					},
 					"response": []
 				},
 				{
 					"name": "reply-history",
 					"request": {
-						"method": "GET",
-						"header": [],
 						"url": {
-							"raw": "{{api_server}}/api/admin/reply-history/1301",
+							"raw": "{{api_server}}/api/admin/reply-history/1301?",
 							"host": [
 								"{{api_server}}"
 							],
@@ -902,8 +658,16 @@
 									"value": "eyJwYWdlIjoyfQ==",
 									"disabled": true
 								}
-							]
-						}
+							],
+							"variable": []
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"description": ""
 					},
 					"response": []
 				},
@@ -912,18 +676,25 @@
 					"request": {
 						"auth": {
 							"type": "basic",
-							"basic": [
+							"basic": {
+								"showPassword": false
+							}
+						},
+						"url": {
+							"raw": "{{api_server}}/api/admin/update-video/1089/link?link=https://www.google.com",
+							"protocol": "{{api_server}}/api/admin/update-video/1089/link?link=https",
+							"host": [
+								"www",
+								"google",
+								"com"
+							],
+							"query": [
 								{
-									"key": "username",
-									"value": "pepo",
-									"type": "string"
-								},
-								{
-									"key": "password",
-									"value": "Pepo-Admin-20!9*",
-									"type": "string"
+									"key": "link",
+									"value": "https://www.google.com"
 								}
-							]
+							],
+							"variable": []
 						},
 						"method": "POST",
 						"header": [
@@ -938,25 +709,11 @@
 								"type": "text"
 							}
 						],
-						"url": {
-							"raw": "{{api_server}}/api/admin/update-video/1089/link?link=https://www.google.com",
-							"host": [
-								"{{api_server}}"
-							],
-							"path": [
-								"api",
-								"admin",
-								"update-video",
-								"1089",
-								"link"
-							],
-							"query": [
-								{
-									"key": "link",
-									"value": "https://www.google.com"
-								}
-							]
-						}
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"description": ""
 					},
 					"response": []
 				},
@@ -965,18 +722,30 @@
 					"request": {
 						"auth": {
 							"type": "basic",
-							"basic": [
+							"basic": {
+								"showPassword": false
+							}
+						},
+						"url": {
+							"raw": "{{api_server}}/api/admin/update-video/1089/description?",
+							"host": [
+								"{{api_server}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"update-video",
+								"1089",
+								"description"
+							],
+							"query": [
 								{
-									"key": "username",
-									"value": "pepo",
-									"type": "string"
-								},
-								{
-									"key": "password",
-									"value": "Pepo-Admin-20!9*",
-									"type": "string"
+									"key": "description",
+									"value": "Hello. Simply ",
+									"disabled": true
 								}
-							]
+							],
+							"variable": []
 						},
 						"method": "POST",
 						"header": [
@@ -1002,41 +771,24 @@
 								}
 							]
 						},
-						"url": {
-							"raw": "{{api_server}}/api/admin/update-video/1089/description",
-							"host": [
-								"{{api_server}}"
-							],
-							"path": [
-								"api",
-								"admin",
-								"update-video",
-								"1089",
-								"description"
-							],
-							"query": [
-								{
-									"key": "description",
-									"value": "Hello. Simply ",
-									"disabled": true
-								}
-							]
-						}
+						"description": ""
 					},
 					"response": []
 				}
-			],
-			"protocolProfileBehavior": {}
+			]
 		},
 		{
 			"name": "device",
+			"description": "",
 			"item": [
 				{
 					"name": "auth",
+					"description": "",
 					"item": [
 						{
 							"name": "twitter-login",
 							"request": {
+								"url": "{{api_server}}/api/v1/auth/twitter-login",
 								"method": "POST",
 								"header": [
 									{
@@ -1096,24 +848,14 @@
 										}
 									]
 								},
-								"url": {
-									"raw": "{{api_server}}/api/v1/auth/twitter-login",
-									"host": [
-										"{{api_server}}"
-									],
-									"path": [
-										"api",
-										"v1",
-										"auth",
-										"twitter-login"
-									]
-								}
+								"description": ""
 							},
 							"response": []
 						},
 						{
 							"name": "github-login",
 							"request": {
+								"url": "{{api_server}}/api/v1/auth/github-login",
 								"method": "POST",
 								"header": [
 									{
@@ -1158,24 +900,14 @@
 										}
 									]
 								},
-								"url": {
-									"raw": "{{api_server}}/api/v1/auth/github-login",
-									"host": [
-										"{{api_server}}"
-									],
-									"path": [
-										"api",
-										"v1",
-										"auth",
-										"github-login"
-									]
-								}
+								"description": ""
 							},
 							"response": []
 						},
 						{
 							"name": "google-login",
 							"request": {
+								"url": "{{api_server}}/api/v1/auth/google-login",
 								"method": "POST",
 								"header": [
 									{
@@ -1225,24 +957,14 @@
 										}
 									]
 								},
-								"url": {
-									"raw": "{{api_server}}/api/v1/auth/google-login",
-									"host": [
-										"{{api_server}}"
-									],
-									"path": [
-										"api",
-										"v1",
-										"auth",
-										"google-login"
-									]
-								}
+								"description": ""
 							},
 							"response": []
 						},
 						{
 							"name": "apple-login",
 							"request": {
+								"url": "{{api_server}}/api/v1/auth/apple-login",
 								"method": "POST",
 								"header": [
 									{
@@ -1312,24 +1034,14 @@
 										}
 									]
 								},
-								"url": {
-									"raw": "{{api_server}}/api/v1/auth/apple-login",
-									"host": [
-										"{{api_server}}"
-									],
-									"path": [
-										"api",
-										"v1",
-										"auth",
-										"apple-login"
-									]
-								}
+								"description": ""
 							},
 							"response": []
 						},
 						{
 							"name": "logout",
 							"request": {
+								"url": "{{api_server}}/api/v1/auth/logout",
 								"method": "POST",
 								"header": [
 									{
@@ -1339,48 +1051,29 @@
 										"value": "application/x-www-form-urlencoded"
 									}
 								],
-								"body": {
-									"mode": "urlencoded",
-									"urlencoded": []
-								},
-								"url": {
-									"raw": "{{api_server}}/api/v1/auth/logout",
-									"host": [
-										"{{api_server}}"
-									],
-									"path": [
-										"api",
-										"v1",
-										"auth",
-										"logout"
-									]
-								}
+								"body": {},
+								"description": ""
 							},
 							"response": []
 						},
 						{
 							"name": "twitter-disconnect",
 							"request": {
+								"url": "{{api_server}}/api/v1/auth/twitter-disconnect",
 								"method": "POST",
 								"header": [],
-								"url": {
-									"raw": "{{api_server}}/api/v1/auth/twitter-disconnect",
-									"host": [
-										"{{api_server}}"
-									],
-									"path": [
-										"api",
-										"v1",
-										"auth",
-										"twitter-disconnect"
-									]
-								}
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"description": ""
 							},
 							"response": []
 						},
 						{
 							"name": "github-disconnect",
 							"request": {
+								"url": "{{api_server}}/api/v1/auth/github-disconnect",
 								"method": "POST",
 								"header": [
 									{
@@ -1390,187 +1083,127 @@
 										"value": "text/plain"
 									}
 								],
-								"body": {
-									"mode": "urlencoded",
-									"urlencoded": []
-								},
-								"url": {
-									"raw": "{{api_server}}/api/v1/auth/github-disconnect",
-									"host": [
-										"{{api_server}}"
-									],
-									"path": [
-										"api",
-										"v1",
-										"auth",
-										"github-disconnect"
-									]
-								}
+								"body": {},
+								"description": ""
 							},
 							"response": []
 						}
 					],
-					"protocolProfileBehavior": {},
 					"_postman_isSubFolder": true
 				},
 				{
 					"name": "token",
+					"description": "",
 					"item": [
 						{
 							"name": "token",
 							"request": {
+								"url": "{{api_server}}/api/v1/tokens/",
 								"method": "GET",
 								"header": [],
-								"url": {
-									"raw": "{{api_server}}/api/v1/tokens/",
-									"host": [
-										"{{api_server}}"
-									],
-									"path": [
-										"api",
-										"v1",
-										"tokens",
-										""
-									]
-								}
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"description": ""
 							},
 							"response": []
 						}
 					],
-					"protocolProfileBehavior": {},
 					"_postman_isSubFolder": true
 				},
 				{
 					"name": "users",
+					"description": "",
 					"item": [
 						{
 							"name": "recovery-info",
 							"request": {
+								"url": "{{api_server}}/api/v1/users/recovery-info",
 								"method": "GET",
 								"header": [],
-								"url": {
-									"raw": "{{api_server}}/api/v1/users/recovery-info",
-									"host": [
-										"{{api_server}}"
-									],
-									"path": [
-										"api",
-										"v1",
-										"users",
-										"recovery-info"
-									]
-								}
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"description": ""
 							},
 							"response": []
 						},
 						{
 							"name": "Mute-User",
 							"request": {
+								"url": "{{api_server}}/api/v1/users/1000/mute",
 								"method": "POST",
 								"header": [],
-								"url": {
-									"raw": "{{api_server}}/api/v1/users/1000/mute",
-									"host": [
-										"{{api_server}}"
-									],
-									"path": [
-										"api",
-										"v1",
-										"users",
-										"1000",
-										"mute"
-									]
-								}
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"description": ""
 							},
 							"response": []
 						},
 						{
 							"name": "UnMute-User",
 							"request": {
+								"url": "{{api_server}}/api/v1/users/1000/unmute",
 								"method": "POST",
 								"header": [],
-								"url": {
-									"raw": "{{api_server}}/api/v1/users/1000/unmute",
-									"host": [
-										"{{api_server}}"
-									],
-									"path": [
-										"api",
-										"v1",
-										"users",
-										"1000",
-										"unmute"
-									]
-								}
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"description": ""
 							},
 							"response": []
 						},
 						{
 							"name": "user-contribution-to",
 							"request": {
+								"url": "{{api_server}}/api/v1/users/1414/contribution-to",
 								"method": "GET",
 								"header": [],
-								"url": {
-									"raw": "{{api_server}}/api/v1/users/1414/contribution-to",
-									"host": [
-										"{{api_server}}"
-									],
-									"path": [
-										"api",
-										"v1",
-										"users",
-										"1414",
-										"contribution-to"
-									]
-								}
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"description": ""
 							},
 							"response": []
 						},
 						{
 							"name": "user-contribution-by",
 							"request": {
+								"url": "{{api_server}}/api/v1/users/1066/contribution-by",
 								"method": "GET",
 								"header": [],
-								"url": {
-									"raw": "{{api_server}}/api/v1/users/1066/contribution-by",
-									"host": [
-										"{{api_server}}"
-									],
-									"path": [
-										"api",
-										"v1",
-										"users",
-										"1066",
-										"contribution-by"
-									]
-								}
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"description": ""
 							},
 							"response": []
 						},
 						{
 							"name": "user-contribution-suggestion",
 							"request": {
+								"url": "{{api_server}}/api/v1/users/1445/contribution-suggestion",
 								"method": "GET",
 								"header": [],
-								"url": {
-									"raw": "{{api_server}}/api/v1/users/1445/contribution-suggestion",
-									"host": [
-										"{{api_server}}"
-									],
-									"path": [
-										"api",
-										"v1",
-										"users",
-										"1445",
-										"contribution-suggestion"
-									]
-								}
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"description": ""
 							},
 							"response": []
 						},
 						{
 							"name": "register-device",
 							"request": {
+								"url": "{{api_server}}/api/v1/users/register-device",
 								"method": "POST",
 								"header": [
 									{
@@ -1595,24 +1228,14 @@
 										}
 									]
 								},
-								"url": {
-									"raw": "{{api_server}}/api/v1/users/register-device",
-									"host": [
-										"{{api_server}}"
-									],
-									"path": [
-										"api",
-										"v1",
-										"users",
-										"register-device"
-									]
-								}
+								"description": ""
 							},
 							"response": []
 						},
 						{
 							"name": "activation-initiate",
 							"request": {
+								"url": "{{api_server}}/api/v1/users/activation-initiate",
 								"method": "POST",
 								"header": [
 									{
@@ -1622,28 +1245,15 @@
 										"value": "application/x-www-form-urlencoded"
 									}
 								],
-								"body": {
-									"mode": "urlencoded",
-									"urlencoded": []
-								},
-								"url": {
-									"raw": "{{api_server}}/api/v1/users/activation-initiate",
-									"host": [
-										"{{api_server}}"
-									],
-									"path": [
-										"api",
-										"v1",
-										"users",
-										"activation-initiate"
-									]
-								}
+								"body": {},
+								"description": ""
 							},
 							"response": []
 						},
 						{
 							"name": "update-profile",
 							"request": {
+								"url": "{{api_server}}/api/v1/users/1445/profile",
 								"method": "POST",
 								"header": [
 									{
@@ -1678,25 +1288,14 @@
 										}
 									]
 								},
-								"url": {
-									"raw": "{{api_server}}/api/v1/users/1445/profile",
-									"host": [
-										"{{api_server}}"
-									],
-									"path": [
-										"api",
-										"v1",
-										"users",
-										"1445",
-										"profile"
-									]
-								}
+								"description": ""
 							},
 							"response": []
 						},
 						{
 							"name": "save-email",
 							"request": {
+								"url": "{{api_server}}/api/v1/users/1445/save-email",
 								"method": "POST",
 								"header": [
 									{
@@ -1716,28 +1315,14 @@
 										}
 									]
 								},
-								"url": {
-									"raw": "{{api_server}}/api/v1/users/1445/save-email",
-									"host": [
-										"{{api_server}}"
-									],
-									"path": [
-										"api",
-										"v1",
-										"users",
-										"1445",
-										"save-email"
-									]
-								}
+								"description": ""
 							},
 							"response": []
 						},
 						{
 							"name": "video-history",
-							"protocolProfileBehavior": {
-								"disableBodyPruning": true
-							},
 							"request": {
+								"url": "{{api_server}}/api/v1/users/1445/video-history",
 								"method": "GET",
 								"header": [
 									{
@@ -1772,28 +1357,14 @@
 										}
 									]
 								},
-								"url": {
-									"raw": "{{api_server}}/api/v1/users/1445/video-history",
-									"host": [
-										"{{api_server}}"
-									],
-									"path": [
-										"api",
-										"v1",
-										"users",
-										"1445",
-										"video-history"
-									]
-								}
+								"description": ""
 							},
 							"response": []
 						},
 						{
 							"name": "reply-history",
-							"protocolProfileBehavior": {
-								"disableBodyPruning": true
-							},
 							"request": {
+								"url": "{{api_server}}/api/v1/users/1445/reply-history",
 								"method": "GET",
 								"header": [
 									{
@@ -1814,28 +1385,14 @@
 										}
 									]
 								},
-								"url": {
-									"raw": "{{api_server}}/api/v1/users/1445/reply-history",
-									"host": [
-										"{{api_server}}"
-									],
-									"path": [
-										"api",
-										"v1",
-										"users",
-										"1445",
-										"reply-history"
-									]
-								}
+								"description": ""
 							},
 							"response": []
 						},
 						{
 							"name": "email",
-							"protocolProfileBehavior": {
-								"disableBodyPruning": true
-							},
 							"request": {
+								"url": "{{api_server}}/api/v1/users/email",
 								"method": "GET",
 								"header": [
 									{
@@ -1845,28 +1402,36 @@
 										"value": "application/x-www-form-urlencoded"
 									}
 								],
-								"body": {
-									"mode": "urlencoded",
-									"urlencoded": []
-								},
-								"url": {
-									"raw": "{{api_server}}/api/v1/users/email",
-									"host": [
-										"{{api_server}}"
-									],
-									"path": [
-										"api",
-										"v1",
-										"users",
-										"email"
-									]
-								}
+								"body": {},
+								"description": ""
 							},
 							"response": []
 						},
 						{
 							"name": "update-profile-image",
 							"request": {
+								"url": {
+									"raw": "{{api_server}}/api/v1/users/1445/profile-image?image_url=https://s3.amazonaws.com/uassets.stagingpepo.com/pepo-staging1000/ua/images",
+									"protocol": "{{api_server}}/api/v1/users/1445/profile-image?image_url=https",
+									"host": [
+										"s3",
+										"amazonaws",
+										"com"
+									],
+									"path": [
+										"uassets.stagingpepo.com",
+										"pepo-staging1000",
+										"ua",
+										"images"
+									],
+									"query": [
+										{
+											"key": "image_url",
+											"value": "https://s3.amazonaws.com/uassets.stagingpepo.com/pepo-staging1000/ua/images"
+										}
+									],
+									"variable": []
+								},
 								"method": "POST",
 								"header": [
 									{
@@ -1901,8 +1466,15 @@
 										}
 									]
 								},
+								"description": ""
+							},
+							"response": []
+						},
+						{
+							"name": "add-fan-video",
+							"request": {
 								"url": {
-									"raw": "{{api_server}}/api/v1/users/1445/profile-image?image_url=https://s3.amazonaws.com/uassets.stagingpepo.com/pepo-staging1000/ua/images",
+									"raw": "{{api_server}}/api/v1/users/1445/fan-video?",
 									"host": [
 										"{{api_server}}"
 									],
@@ -1911,21 +1483,17 @@
 										"v1",
 										"users",
 										"1445",
-										"profile-image"
+										"fan-video"
 									],
 									"query": [
 										{
 											"key": "image_url",
-											"value": "https://s3.amazonaws.com/uassets.stagingpepo.com/pepo-staging1000/ua/images"
+											"value": "https://s3.amazonaws.com/uassets.stagingpepo.com/pepo-staging1000/ua/images",
+											"disabled": true
 										}
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "add-fan-video",
-							"request": {
+									],
+									"variable": []
+								},
 								"method": "POST",
 								"header": [
 									{
@@ -1986,8 +1554,15 @@
 										}
 									]
 								},
+								"description": ""
+							},
+							"response": []
+						},
+						{
+							"name": "say-thank-you",
+							"request": {
 								"url": {
-									"raw": "{{api_server}}/api/v1/users/1445/fan-video",
+									"raw": "{{api_server}}/api/v1/users/thank-you?",
 									"host": [
 										"{{api_server}}"
 									],
@@ -1995,8 +1570,7 @@
 										"api",
 										"v1",
 										"users",
-										"1445",
-										"fan-video"
+										"thank-you"
 									],
 									"query": [
 										{
@@ -2004,14 +1578,9 @@
 											"value": "https://s3.amazonaws.com/uassets.stagingpepo.com/pepo-staging1000/ua/images",
 											"disabled": true
 										}
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "say-thank-you",
-							"request": {
+									],
+									"variable": []
+								},
 								"method": "POST",
 								"header": [
 									{
@@ -2042,76 +1611,43 @@
 										}
 									]
 								},
-								"url": {
-									"raw": "{{api_server}}/api/v1/users/thank-you",
-									"host": [
-										"{{api_server}}"
-									],
-									"path": [
-										"api",
-										"v1",
-										"users",
-										"thank-you"
-									],
-									"query": [
-										{
-											"key": "image_url",
-											"value": "https://s3.amazonaws.com/uassets.stagingpepo.com/pepo-staging1000/ua/images",
-											"disabled": true
-										}
-									]
-								}
+								"description": ""
 							},
 							"response": []
 						},
 						{
 							"name": "logged-in-user",
 							"request": {
+								"url": "{{api_server}}/api/v1/users/current",
 								"method": "GET",
 								"header": [],
-								"url": {
-									"raw": "{{api_server}}/api/v1/users/current",
-									"host": [
-										"{{api_server}}"
-									],
-									"path": [
-										"api",
-										"v1",
-										"users",
-										"current"
-									]
-								}
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"description": ""
 							},
 							"response": []
 						},
 						{
 							"name": "user-profile",
 							"request": {
+								"url": "{{api_server}}/api/v1/users/1222/profile",
 								"method": "GET",
 								"header": [],
-								"url": {
-									"raw": "{{api_server}}/api/v1/users/1222/profile",
-									"host": [
-										"{{api_server}}"
-									],
-									"path": [
-										"api",
-										"v1",
-										"users",
-										"1222",
-										"profile"
-									]
-								}
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"description": ""
 							},
 							"response": []
 						},
 						{
 							"name": "search",
 							"request": {
-								"method": "GET",
-								"header": [],
 								"url": {
-									"raw": "{{api_server}}/api/v1/users/search",
+									"raw": "{{api_server}}/api/v1/users/search?",
 									"host": [
 										"{{api_server}}"
 									],
@@ -2127,16 +1663,22 @@
 											"value": "aman",
 											"disabled": true
 										}
-									]
-								}
+									],
+									"variable": []
+								},
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"description": ""
 							},
 							"response": []
 						},
 						{
 							"name": "rotate-account",
 							"request": {
-								"method": "GET",
-								"header": [],
 								"url": {
 									"raw": "{{api_server}}/api/v1/rotate-twitter-account?user_name=aman_barbaria_74eccev9g0tuzcn9",
 									"host": [
@@ -2152,28 +1694,28 @@
 											"key": "user_name",
 											"value": "aman_barbaria_74eccev9g0tuzcn9"
 										}
-									]
-								}
+									],
+									"variable": []
+								},
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"description": ""
 							},
 							"response": []
 						},
 						{
 							"name": "websocket-details",
 							"request": {
+								"url": "{{api_server}}/api/v1/users/1022/websocket-details",
 								"method": "GET",
 								"header": [],
-								"url": {
-									"raw": "{{api_server}}/api/v1/users/1022/websocket-details",
-									"host": [
-										"{{api_server}}"
-									],
-									"path": [
-										"api",
-										"v1",
-										"users",
-										"1022",
-										"websocket-details"
-									]
+								"body": {
+									"mode": "raw",
+									"raw": ""
 								},
 								"description": "GET websocket details"
 							},
@@ -2182,6 +1724,27 @@
 						{
 							"name": "add-fan-video",
 							"request": {
+								"url": {
+									"raw": "{{api_server}}/api/v1/users/1254/fan-video?",
+									"host": [
+										"{{api_server}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"users",
+										"1254",
+										"fan-video"
+									],
+									"query": [
+										{
+											"key": "image_url",
+											"value": "https://s3.amazonaws.com/uassets.stagingpepo.com/pepo-staging1000/ua/images",
+											"disabled": true
+										}
+									],
+									"variable": []
+								},
 								"method": "POST",
 								"header": [
 									{
@@ -2246,34 +1809,13 @@
 										}
 									]
 								},
-								"url": {
-									"raw": "{{api_server}}/api/v1/users/1254/fan-video",
-									"host": [
-										"{{api_server}}"
-									],
-									"path": [
-										"api",
-										"v1",
-										"users",
-										"1254",
-										"fan-video"
-									],
-									"query": [
-										{
-											"key": "image_url",
-											"value": "https://s3.amazonaws.com/uassets.stagingpepo.com/pepo-staging1000/ua/images",
-											"disabled": true
-										}
-									]
-								}
+								"description": ""
 							},
 							"response": []
 						},
 						{
 							"name": "available-products",
 							"request": {
-								"method": "GET",
-								"header": [],
 								"url": {
 									"raw": "{{api_server}}/api/v1/top-up/products?os=ios",
 									"host": [
@@ -2290,23 +1832,29 @@
 											"key": "os",
 											"value": "ios"
 										}
-									]
-								}
+									],
+									"variable": []
+								},
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"description": ""
 							},
 							"response": []
 						}
 					],
-					"protocolProfileBehavior": {},
 					"_postman_isSubFolder": true
 				},
 				{
 					"name": "top-up",
+					"description": "",
 					"item": [
 						{
 							"name": "products",
 							"request": {
-								"method": "GET",
-								"header": [],
 								"url": {
 									"raw": "{{api_server}}/api/v1/top-up/products?os=ios",
 									"host": [
@@ -2323,14 +1871,23 @@
 											"key": "os",
 											"value": "ios"
 										}
-									]
-								}
+									],
+									"variable": []
+								},
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"description": ""
 							},
 							"response": []
 						},
 						{
 							"name": "confirm-pay-receipt",
 							"request": {
+								"url": "{{api_server}}/api/v1/top-up",
 								"method": "POST",
 								"header": [
 									{
@@ -2344,27 +1901,15 @@
 									"mode": "raw",
 									"raw": "{\n  \"response\": {\n    \"productId\": \"pd1\",\n    \"transactionDate\": 1567582589000,\n    \"transactionId\": \"1000000564559437\",\n    \"transactionReceipt\": \"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\"\n  },\n  \"os\": \"ios\",\n  \"user_id\": 1445\n}"
 								},
-								"url": {
-									"raw": "{{api_server}}/api/v1/top-up",
-									"host": [
-										"{{api_server}}"
-									],
-									"path": [
-										"api",
-										"v1",
-										"top-up"
-									]
-								}
+								"description": ""
 							},
 							"response": []
 						},
 						{
 							"name": "topup-by-id",
 							"request": {
-								"method": "GET",
-								"header": [],
 								"url": {
-									"raw": "{{api_server}}/api/v1/top-up/3",
+									"raw": "{{api_server}}/api/v1/top-up/3?",
 									"host": [
 										"{{api_server}}"
 									],
@@ -2380,45 +1925,45 @@
 											"value": "1000000566777213",
 											"disabled": true
 										}
-									]
-								}
+									],
+									"variable": []
+								},
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"description": ""
 							},
 							"response": []
 						},
 						{
 							"name": "pending-topups",
 							"request": {
+								"url": "{{api_server}}/api/v1/top-up/pending",
 								"method": "GET",
 								"header": [],
-								"url": {
-									"raw": "{{api_server}}/api/v1/top-up/pending",
-									"host": [
-										"{{api_server}}"
-									],
-									"path": [
-										"api",
-										"v1",
-										"top-up",
-										"pending"
-									]
-								}
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"description": ""
 							},
 							"response": []
 						}
 					],
-					"protocolProfileBehavior": {},
 					"_postman_isSubFolder": true
 				},
 				{
 					"name": "notifications",
+					"description": "",
 					"item": [
 						{
 							"name": "get",
 							"request": {
-								"method": "GET",
-								"header": [],
 								"url": {
-									"raw": "{{api_server}}/api/v1/notifications",
+									"raw": "{{api_server}}/api/v1/notifications?",
 									"host": [
 										"{{api_server}}"
 									],
@@ -2433,14 +1978,23 @@
 											"value": "eyJwYWdlX3N0YXRlIjoiMDAyZjAwMDgwMDAwMDE2ZDQ4MzIyMjA0MjQzOTY1Mzk2NTY0MzEzMDMzMmQ2NjYyNjU2MzJkMzQzOTMwMzQyZDM4NjM2MTY2MmQ2NTMwMzY2MjYzMzc2MTMyMzQzMzM2NjZmMDdmZmZmZmViZjA3ZmZmZmZlYiIsInBhZ2UiOjJ9",
 											"disabled": true
 										}
-									]
-								}
+									],
+									"variable": []
+								},
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"description": ""
 							},
 							"response": []
 						},
 						{
 							"name": "add-device-token",
 							"request": {
+								"url": "{{api_server}}/api/v1/notifications/device-token",
 								"method": "POST",
 								"header": [
 									{
@@ -2475,55 +2029,20 @@
 										}
 									]
 								},
-								"url": {
-									"raw": "{{api_server}}/api/v1/notifications/device-token",
-									"host": [
-										"{{api_server}}"
-									],
-									"path": [
-										"api",
-										"v1",
-										"notifications",
-										"device-token"
-									]
-								}
+								"description": ""
 							},
 							"response": []
 						}
 					],
-					"event": [
-						{
-							"listen": "prerequest",
-							"script": {
-								"id": "b2cb1f83-5d4b-403b-8850-c4d91c4a009f",
-								"type": "text/javascript",
-								"exec": [
-									""
-								]
-							}
-						},
-						{
-							"listen": "test",
-							"script": {
-								"id": "640a9952-5ecb-45d1-81f9-184bc97531b0",
-								"type": "text/javascript",
-								"exec": [
-									""
-								]
-							}
-						}
-					],
-					"protocolProfileBehavior": {},
 					"_postman_isSubFolder": true
 				},
 				{
 					"name": "tags",
+					"description": "",
 					"item": [
 						{
 							"name": "search",
 							"request": {
-								"method": "GET",
-								"header": [],
 								"url": {
 									"raw": "{{api_server}}/api/v1/tags?q=pepo",
 									"host": [
@@ -2544,18 +2063,24 @@
 											"value": "eyJwYWdlIjoyfQ==",
 											"disabled": true
 										}
-									]
-								}
+									],
+									"variable": []
+								},
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"description": ""
 							},
 							"response": []
 						},
 						{
 							"name": "get",
 							"request": {
-								"method": "GET",
-								"header": [],
 								"url": {
-									"raw": "{{api_server}}/api/v1/tags/66",
+									"raw": "{{api_server}}/api/v1/tags/66?",
 									"host": [
 										"{{api_server}}"
 									],
@@ -2571,18 +2096,24 @@
 											"value": "eyJwYWdlIjoyfQ==",
 											"disabled": true
 										}
-									]
-								}
+									],
+									"variable": []
+								},
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"description": ""
 							},
 							"response": []
 						},
 						{
 							"name": "videos",
 							"request": {
-								"method": "GET",
-								"header": [],
 								"url": {
-									"raw": "{{api_server}}/api/v1/tags/66/videos",
+									"raw": "{{api_server}}/api/v1/tags/66/videos?",
 									"host": [
 										"{{api_server}}"
 									],
@@ -2599,16 +2130,22 @@
 											"value": "eyJwYWdlIjoyfQ==",
 											"disabled": true
 										}
-									]
-								}
+									],
+									"variable": []
+								},
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"description": ""
 							},
 							"response": []
 						},
 						{
 							"name": "all-videos",
 							"request": {
-								"method": "GET",
-								"header": [],
 								"url": {
 									"raw": "{{api_server}}/api/v1/tags/66/videos?supported_entities=['videos', 'replies']",
 									"host": [
@@ -2631,23 +2168,175 @@
 											"key": "supported_entities",
 											"value": "['videos', 'replies']"
 										}
-									]
-								}
+									],
+									"variable": []
+								},
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"description": ""
 							},
 							"response": []
 						}
 					],
-					"protocolProfileBehavior": {},
 					"_postman_isSubFolder": true
 				},
 				{
 					"name": "search",
+					"description": "",
 					"item": [
+						{
+							"name": "channels",
+							"description": "",
+							"item": [
+								{
+									"name": "all",
+									"request": {
+										"url": {
+											"raw": "{{api_server}}/api/v1/search/channels/all?q=p",
+											"host": [
+												"{{api_server}}"
+											],
+											"path": [
+												"api",
+												"v1",
+												"search",
+												"channels",
+												"all"
+											],
+											"query": [
+												{
+													"key": "q",
+													"value": "p",
+													"equals": true,
+													"description": ""
+												}
+											],
+											"variable": []
+										},
+										"method": "GET",
+										"header": [],
+										"body": {},
+										"description": ""
+									},
+									"response": []
+								},
+								{
+									"name": "new",
+									"request": {
+										"url": {
+											"raw": "{{api_server}}/api/v1/search/channels/new?q=p",
+											"host": [
+												"{{api_server}}"
+											],
+											"path": [
+												"api",
+												"v1",
+												"search",
+												"channels",
+												"new"
+											],
+											"query": [
+												{
+													"key": "q",
+													"value": "p",
+													"equals": true,
+													"description": ""
+												}
+											],
+											"variable": []
+										},
+										"method": "GET",
+										"header": [],
+										"body": {},
+										"description": ""
+									},
+									"response": []
+								},
+								{
+									"name": "my",
+									"request": {
+										"url": {
+											"raw": "{{api_server}}/api/v1/search/channels/my?q=t",
+											"host": [
+												"{{api_server}}"
+											],
+											"path": [
+												"api",
+												"v1",
+												"search",
+												"channels",
+												"my"
+											],
+											"query": [
+												{
+													"key": "q",
+													"value": "t",
+													"equals": true,
+													"description": ""
+												},
+												{
+													"key": "pagination_identifier",
+													"value": "eyJwYWdlIjoyfQ==",
+													"disabled": true
+												}
+											],
+											"variable": []
+										},
+										"method": "GET",
+										"header": [],
+										"body": {},
+										"description": ""
+									},
+									"response": []
+								},
+								{
+									"name": "trending",
+									"request": {
+										"url": {
+											"raw": "{{api_server}}/api/v1/search/channels/trending/?q=p",
+											"host": [
+												"{{api_server}}"
+											],
+											"path": [
+												"api",
+												"v1",
+												"search",
+												"channels",
+												"trending",
+												""
+											],
+											"query": [
+												{
+													"key": "pagination_identifier",
+													"value": "eyJwYWdlIjoyfQ==",
+													"disabled": true
+												},
+												{
+													"key": "q",
+													"value": "p",
+													"equals": true,
+													"description": ""
+												}
+											],
+											"variable": []
+										},
+										"method": "GET",
+										"header": [],
+										"body": {},
+										"description": ""
+									},
+									"response": []
+								}
+							],
+							"_postman_isSubFolder": true
+						},
 						{
 							"name": "top",
 							"request": {
-								"method": "GET",
-								"header": [],
 								"url": {
 									"raw": "{{api_server}}/api/v1/search/top?q=pe",
 									"host": [
@@ -2669,16 +2358,22 @@
 											"key": "q",
 											"value": "pe"
 										}
-									]
-								}
+									],
+									"variable": []
+								},
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"description": ""
 							},
 							"response": []
 						},
 						{
 							"name": "users",
 							"request": {
-								"method": "GET",
-								"header": [],
 								"url": {
 									"raw": "{{api_server}}/api/v1/search/users?q=pe",
 									"host": [
@@ -2700,16 +2395,22 @@
 											"key": "q",
 											"value": "pe"
 										}
-									]
-								}
+									],
+									"variable": []
+								},
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"description": ""
 							},
 							"response": []
 						},
 						{
 							"name": "tags",
 							"request": {
-								"method": "GET",
-								"header": [],
 								"url": {
 									"raw": "{{api_server}}/api/v1/search/tags?q=pe",
 									"host": [
@@ -2731,16 +2432,22 @@
 											"key": "q",
 											"value": "pe"
 										}
-									]
-								}
+									],
+									"variable": []
+								},
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"description": ""
 							},
 							"response": []
 						},
 						{
 							"name": "channels",
 							"request": {
-								"method": "GET",
-								"header": [],
 								"url": {
 									"raw": "{{api_server}}/api/v1/search/tags?q=pe",
 									"host": [
@@ -2762,16 +2469,22 @@
 											"key": "q",
 											"value": "pe"
 										}
-									]
-								}
+									],
+									"variable": []
+								},
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"description": ""
 							},
 							"response": []
 						},
 						{
 							"name": "users-mention",
 							"request": {
-								"method": "GET",
-								"header": [],
 								"url": {
 									"raw": "{{api_server}}/api/v1/search/users-mention?intent=reply&parent_id=2647",
 									"host": [
@@ -2797,25 +2510,31 @@
 											"key": "parent_id",
 											"value": "2647"
 										}
-									]
-								}
+									],
+									"variable": []
+								},
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"description": ""
 							},
 							"response": []
 						}
 					],
-					"protocolProfileBehavior": {},
 					"_postman_isSubFolder": true
 				},
 				{
 					"name": "feeds",
+					"description": "",
 					"item": [
 						{
 							"name": "public-feed",
 							"request": {
-								"method": "GET",
-								"header": [],
 								"url": {
-									"raw": "{{api_server}}/api/v1/feeds",
+									"raw": "{{api_server}}/api/v1/feeds?",
 									"host": [
 										"{{api_server}}"
 									],
@@ -2830,44 +2549,44 @@
 											"value": "eyJwYWdpbmF0aW9uX3RpbWVzdGFtcCI6MTU2ODk2ODY2Nn0=",
 											"disabled": true
 										}
-									]
-								}
+									],
+									"variable": []
+								},
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"description": ""
 							},
 							"response": []
 						},
 						{
 							"name": "feed-details",
 							"request": {
+								"url": "{{api_server}}/api/v1/feeds/1002",
 								"method": "GET",
 								"header": [],
-								"url": {
-									"raw": "{{api_server}}/api/v1/feeds/1002",
-									"host": [
-										"{{api_server}}"
-									],
-									"path": [
-										"api",
-										"v1",
-										"feeds",
-										"1002"
-									]
-								}
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"description": ""
 							},
 							"response": []
 						}
 					],
-					"protocolProfileBehavior": {},
 					"_postman_isSubFolder": true
 				},
 				{
 					"name": "video",
+					"description": "",
 					"item": [
 						{
 							"name": "get-video",
-							"protocolProfileBehavior": {
-								"disableBodyPruning": true
-							},
 							"request": {
+								"url": "{{api_server}}/api/v1/videos/1009",
 								"method": "GET",
 								"header": [
 									{
@@ -2877,31 +2596,15 @@
 										"value": "application/x-www-form-urlencoded"
 									}
 								],
-								"body": {
-									"mode": "urlencoded",
-									"urlencoded": []
-								},
-								"url": {
-									"raw": "{{api_server}}/api/v1/videos/1009",
-									"host": [
-										"{{api_server}}"
-									],
-									"path": [
-										"api",
-										"v1",
-										"videos",
-										"1009"
-									]
-								}
+								"body": {},
+								"description": ""
 							},
 							"response": []
 						},
 						{
 							"name": "video-merge-job-status",
-							"protocolProfileBehavior": {
-								"disableBodyPruning": true
-							},
 							"request": {
+								"url": "{{api_server}}/api/v1/videos/merge-jobs/1",
 								"method": "GET",
 								"header": [
 									{
@@ -2911,71 +2614,43 @@
 										"value": "application/x-www-form-urlencoded"
 									}
 								],
-								"body": {
-									"mode": "urlencoded",
-									"urlencoded": []
-								},
-								"url": {
-									"raw": "{{api_server}}/api/v1/videos/merge-jobs/1",
-									"host": [
-										"{{api_server}}"
-									],
-									"path": [
-										"api",
-										"v1",
-										"videos",
-										"merge-jobs",
-										"1"
-									]
-								}
+								"body": {},
+								"description": ""
 							},
 							"response": []
 						},
 						{
 							"name": "share",
 							"request": {
+								"url": "{{api_server}}/api/v1/videos/1009/share",
 								"method": "GET",
 								"header": [],
-								"url": {
-									"raw": "{{api_server}}/api/v1/videos/1009/share",
-									"host": [
-										"{{api_server}}"
-									],
-									"path": [
-										"api",
-										"v1",
-										"videos",
-										"1009",
-										"share"
-									]
-								}
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"description": ""
 							},
 							"response": []
 						},
 						{
 							"name": "delete",
 							"request": {
+								"url": "{{api_server}}/api/v1/videos/1009/delete",
 								"method": "POST",
 								"header": [],
-								"url": {
-									"raw": "{{api_server}}/api/v1/videos/1009/delete",
-									"host": [
-										"{{api_server}}"
-									],
-									"path": [
-										"api",
-										"v1",
-										"videos",
-										"1009",
-										"delete"
-									]
-								}
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"description": ""
 							},
 							"response": []
 						},
 						{
 							"name": "merge-segments",
 							"request": {
+								"url": "{{api_server}}/api/v1/videos/merge-jobs",
 								"method": "POST",
 								"header": [
 									{
@@ -2995,27 +2670,14 @@
 										}
 									]
 								},
-								"url": {
-									"raw": "{{api_server}}/api/v1/videos/merge-jobs",
-									"host": [
-										"{{api_server}}"
-									],
-									"path": [
-										"api",
-										"v1",
-										"videos",
-										"merge-jobs"
-									]
-								}
+								"description": ""
 							},
 							"response": []
 						},
 						{
 							"name": "list-replies",
-							"protocolProfileBehavior": {
-								"disableBodyPruning": true
-							},
 							"request": {
+								"url": "{{api_server}}/api/v1/videos/1009/replies",
 								"method": "GET",
 								"header": [
 									{
@@ -3035,27 +2697,13 @@
 										}
 									]
 								},
-								"url": {
-									"raw": "{{api_server}}/api/v1/videos/1009/replies",
-									"host": [
-										"{{api_server}}"
-									],
-									"path": [
-										"api",
-										"v1",
-										"videos",
-										"1009",
-										"replies"
-									]
-								}
+								"description": ""
 							},
 							"response": []
 						},
 						{
 							"name": "unseen-replies",
 							"request": {
-								"method": "GET",
-								"header": [],
 								"url": {
 									"raw": "{{api_server}}/api/v1/search/users-mention?q=&intent=reply&parent_id=4728",
 									"host": [
@@ -3080,21 +2728,30 @@
 											"key": "parent_id",
 											"value": "4728"
 										}
-									]
-								}
+									],
+									"variable": []
+								},
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"description": ""
 							},
 							"response": []
 						}
 					],
-					"protocolProfileBehavior": {},
 					"_postman_isSubFolder": true
 				},
 				{
 					"name": "redemptions",
+					"description": "",
 					"item": [
 						{
 							"name": "redemption-info",
 							"request": {
+								"url": "{{api_server}}/api/v1/redemptions/webview-url",
 								"method": "GET",
 								"header": [
 									{
@@ -3118,31 +2775,25 @@
 										"type": "text"
 									}
 								],
-								"url": {
-									"raw": "{{api_server}}/api/v1/redemptions/webview-url",
-									"host": [
-										"{{api_server}}"
-									],
-									"path": [
-										"api",
-										"v1",
-										"redemptions",
-										"webview-url"
-									]
-								}
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"description": ""
 							},
 							"response": []
 						}
 					],
-					"protocolProfileBehavior": {},
 					"_postman_isSubFolder": true
 				},
 				{
 					"name": "transaction",
+					"description": "",
 					"item": [
 						{
 							"name": "ost-transaction",
 							"request": {
+								"url": "{{api_server}}/api/v1/ost-transactions",
 								"method": "POST",
 								"header": [
 									{
@@ -3156,67 +2807,34 @@
 									"mode": "raw",
 									"raw": "\n{\n\t\"ost_transaction\": {\n    \"to\": \"0x5be7824c25a6edb4d6d22a7ca6058c7a94723fe0\",\n    \"updated_timestamp\": 1568991096,\n    \"transfers\": [\n      {\n        \"amount\": \"1000000000000000000\",\n        \"to_user_id\": \"c0ea8567-e12a-4634-a3fb-9323c06dd810\",\n        \"kind\": \"transfer\",\n        \"to\": \"0x720fb10ac03f560905ab79b963cc5222b2b11528\",\n        \"from_user_id\": \"d6e634c3-f986-4d38-a9a4-a7c254c9a062\",\n        \"from\": \"0x5be7824c25a6edb4d6d22a7ca6058c7a94723fe0\"\n      }\n    ],\n    \"status\": \"CREATED\",\n    \"gas_price\": \"1000000000\",\n    \"id\": \"9b7c43ac-b0cd-4bbd-83f6-acad032b7935\",\n    \"meta_property\": {\n      \"name\": \"video\",\n      \"type\": \"user_to_user\",\n      \"details\": \"vi_2453\"\n    }\n  }\n}"
 								},
-								"url": {
-									"raw": "{{api_server}}/api/v1/ost-transactions",
-									"host": [
-										"{{api_server}}"
-									],
-									"path": [
-										"api",
-										"v1",
-										"ost-transactions"
-									]
-								},
 								"description": "ost-transaction"
 							},
 							"response": []
 						}
 					],
-					"protocolProfileBehavior": {},
 					"_postman_isSubFolder": true
 				},
 				{
 					"name": "invites",
+					"description": "",
 					"item": [
 						{
 							"name": "get-invite-code",
 							"request": {
+								"url": "{{api_server}}/api/v1/invites/code",
 								"method": "GET",
 								"header": [],
-								"url": {
-									"raw": "{{api_server}}/api/v1/invites/code",
-									"host": [
-										"{{api_server}}"
-									],
-									"path": [
-										"api",
-										"v1",
-										"invites",
-										"code"
-									]
-								}
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"description": ""
 							},
 							"response": []
 						},
 						{
 							"name": "invites",
-							"protocolProfileBehavior": {
-								"disableBodyPruning": true
-							},
 							"request": {
-								"method": "GET",
-								"header": [
-									{
-										"key": "Content-Type",
-										"name": "Content-Type",
-										"value": "application/x-www-form-urlencoded",
-										"type": "text"
-									}
-								],
-								"body": {
-									"mode": "urlencoded",
-									"urlencoded": []
-								},
 								"url": {
 									"raw": "{{api_server}}/api/v1/invites/?pagination_identifier=eyJwYWdpbmF0aW9uX2lkIjoiMTAxMCJ9==",
 									"host": [
@@ -3233,23 +2851,33 @@
 											"key": "pagination_identifier",
 											"value": "eyJwYWdpbmF0aW9uX2lkIjoiMTAxMCJ9=="
 										}
-									]
-								}
+									],
+									"variable": []
+								},
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"value": "application/x-www-form-urlencoded",
+										"type": "text"
+									}
+								],
+								"body": {},
+								"description": ""
 							},
 							"response": []
 						}
 					],
-					"protocolProfileBehavior": {},
 					"_postman_isSubFolder": true
 				},
 				{
 					"name": "twitter",
+					"description": "",
 					"item": [
 						{
 							"name": "tweet-info",
 							"request": {
-								"method": "GET",
-								"header": [],
 								"url": {
 									"raw": "{{api_server}}/api/v1/twitter/tweet-info?receiver_user_id=1014",
 									"host": [
@@ -3266,14 +2894,23 @@
 											"key": "receiver_user_id",
 											"value": "1014"
 										}
-									]
-								}
+									],
+									"variable": []
+								},
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"description": ""
 							},
 							"response": []
 						},
 						{
 							"name": "refresh-twitter-connect",
 							"request": {
+								"url": "{{api_server}}/api/v1/twitter/refresh-token",
 								"method": "POST",
 								"header": [
 									{
@@ -3308,31 +2945,21 @@
 										}
 									]
 								},
-								"url": {
-									"raw": "{{api_server}}/api/v1/twitter/refresh-token",
-									"host": [
-										"{{api_server}}"
-									],
-									"path": [
-										"api",
-										"v1",
-										"twitter",
-										"refresh-token"
-									]
-								}
+								"description": ""
 							},
 							"response": []
 						}
 					],
-					"protocolProfileBehavior": {},
 					"_postman_isSubFolder": true
 				},
 				{
 					"name": "pepocornTopUp",
+					"description": "",
 					"item": [
 						{
 							"name": "pepocorn-balance",
 							"request": {
+								"url": "{{api_server}}/api/v1/pepocorn-topups/balance",
 								"method": "GET",
 								"header": [
 									{
@@ -3342,55 +2969,39 @@
 										"type": "text"
 									}
 								],
-								"url": {
-									"raw": "{{api_server}}/api/v1/pepocorn-topups/balance",
-									"host": [
-										"{{api_server}}"
-									],
-									"path": [
-										"api",
-										"v1",
-										"pepocorn-topups",
-										"balance"
-									]
-								}
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"description": ""
 							},
 							"response": []
 						}
 					],
-					"protocolProfileBehavior": {},
 					"_postman_isSubFolder": true
 				},
 				{
 					"name": "replies",
+					"description": "",
 					"item": [
 						{
 							"name": "share",
 							"request": {
+								"url": "{{api_server}}/api/v1/replies/1009/share",
 								"method": "GET",
 								"header": [],
-								"url": {
-									"raw": "{{api_server}}/api/v1/replies/1009/share",
-									"host": [
-										"{{api_server}}"
-									],
-									"path": [
-										"api",
-										"v1",
-										"replies",
-										"1009",
-										"share"
-									]
-								}
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"description": ""
 							},
 							"response": []
 						},
 						{
 							"name": "get-reply",
-							"protocolProfileBehavior": {
-								"disableBodyPruning": true
-							},
 							"request": {
+								"url": "{{api_server}}/api/v1/replies/1009",
 								"method": "GET",
 								"header": [
 									{
@@ -3400,28 +3011,33 @@
 										"value": "application/x-www-form-urlencoded"
 									}
 								],
-								"body": {
-									"mode": "urlencoded",
-									"urlencoded": []
-								},
-								"url": {
-									"raw": "{{api_server}}/api/v1/replies/1009",
-									"host": [
-										"{{api_server}}"
-									],
-									"path": [
-										"api",
-										"v1",
-										"replies",
-										"1009"
-									]
-								}
+								"body": {},
+								"description": ""
 							},
 							"response": []
 						},
 						{
 							"name": "initiate reply",
 							"request": {
+								"url": {
+									"raw": "{{api_server}}/api/v1/replies?",
+									"host": [
+										"{{api_server}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"replies"
+									],
+									"query": [
+										{
+											"key": "image_url",
+											"value": "https://s3.amazonaws.com/uassets.stagingpepo.com/pepo-staging1000/ua/images",
+											"disabled": true
+										}
+									],
+									"variable": []
+								},
 								"method": "POST",
 								"header": [],
 								"body": {
@@ -3495,61 +3111,35 @@
 										}
 									]
 								},
-								"url": {
-									"raw": "{{api_server}}/api/v1/replies",
-									"host": [
-										"{{api_server}}"
-									],
-									"path": [
-										"api",
-										"v1",
-										"replies"
-									],
-									"query": [
-										{
-											"key": "image_url",
-											"value": "https://s3.amazonaws.com/uassets.stagingpepo.com/pepo-staging1000/ua/images",
-											"disabled": true
-										}
-									]
-								}
+								"description": ""
 							},
 							"response": []
 						},
 						{
 							"name": "delete",
 							"request": {
+								"url": "{{api_server}}/api/v1/replies/1009/delete",
 								"method": "POST",
 								"header": [],
-								"url": {
-									"raw": "{{api_server}}/api/v1/replies/1009/delete",
-									"host": [
-										"{{api_server}}"
-									],
-									"path": [
-										"api",
-										"v1",
-										"replies",
-										"1009",
-										"delete"
-									]
-								}
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"description": ""
 							},
 							"response": []
 						}
 					],
-					"protocolProfileBehavior": {},
 					"_postman_isSubFolder": true
 				},
 				{
 					"name": "channels",
+					"description": "",
 					"item": [
 						{
 							"name": "get-channel",
-							"protocolProfileBehavior": {
-								"disableBodyPruning": true
-							},
 							"request": {
+								"url": "{{api_server}}/api/v1/channels/1",
 								"method": "GET",
 								"header": [
 									{
@@ -3559,46 +3149,16 @@
 										"value": "application/x-www-form-urlencoded"
 									}
 								],
-								"body": {
-									"mode": "urlencoded",
-									"urlencoded": []
-								},
-								"url": {
-									"raw": "{{api_server}}/api/v1/channels/1",
-									"host": [
-										"{{api_server}}"
-									],
-									"path": [
-										"api",
-										"v1",
-										"channels",
-										"1"
-									]
-								}
+								"body": {},
+								"description": ""
 							},
 							"response": []
 						},
 						{
 							"name": "get-channel-videos",
-							"protocolProfileBehavior": {
-								"disableBodyPruning": true
-							},
 							"request": {
-								"method": "GET",
-								"header": [
-									{
-										"key": "Content-Type",
-										"name": "Content-Type",
-										"type": "text",
-										"value": "application/x-www-form-urlencoded"
-									}
-								],
-								"body": {
-									"mode": "urlencoded",
-									"urlencoded": []
-								},
 								"url": {
-									"raw": "{{api_server}}/api/v1/channels/1/videos",
+									"raw": "{{api_server}}/api/v1/channels/1/videos?",
 									"host": [
 										"{{api_server}}"
 									],
@@ -3620,21 +3180,34 @@
 											"value": "1",
 											"disabled": true
 										}
-									]
-								}
+									],
+									"variable": []
+								},
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"type": "text",
+										"value": "application/x-www-form-urlencoded"
+									}
+								],
+								"body": {},
+								"description": ""
 							},
 							"response": []
 						}
 					],
-					"protocolProfileBehavior": {},
 					"_postman_isSubFolder": true
 				},
 				{
 					"name": "report",
+					"description": "",
 					"item": [
 						{
 							"name": "report-video",
 							"request": {
+								"url": "{{api_server}}/api/v1/report",
 								"method": "POST",
 								"header": [
 									{
@@ -3659,23 +3232,14 @@
 										}
 									]
 								},
-								"url": {
-									"raw": "{{api_server}}/api/v1/report",
-									"host": [
-										"{{api_server}}"
-									],
-									"path": [
-										"api",
-										"v1",
-										"report"
-									]
-								}
+								"description": ""
 							},
 							"response": []
 						},
 						{
 							"name": "report-reply",
 							"request": {
+								"url": "{{api_server}}/api/v1/report",
 								"method": "POST",
 								"header": [
 									{
@@ -3700,23 +3264,14 @@
 										}
 									]
 								},
-								"url": {
-									"raw": "{{api_server}}/api/v1/report",
-									"host": [
-										"{{api_server}}"
-									],
-									"path": [
-										"api",
-										"v1",
-										"report"
-									]
-								}
+								"description": ""
 							},
 							"response": []
 						},
 						{
 							"name": "report-user",
 							"request": {
+								"url": "{{api_server}}/api/v1/report",
 								"method": "POST",
 								"header": [
 									{
@@ -3741,38 +3296,26 @@
 										}
 									]
 								},
-								"url": {
-									"raw": "{{api_server}}/api/v1/report",
-									"host": [
-										"{{api_server}}"
-									],
-									"path": [
-										"api",
-										"v1",
-										"report"
-									]
-								}
+								"description": ""
 							},
 							"response": []
 						}
 					],
-					"protocolProfileBehavior": {},
 					"_postman_isSubFolder": true
 				}
-			],
-			"protocolProfileBehavior": {}
+			]
 		},
 		{
 			"name": "web",
+			"description": "",
 			"item": [
 				{
 					"name": "redemptions",
+					"description": "",
 					"item": [
 						{
 							"name": "get-redemption-products",
 							"request": {
-								"method": "GET",
-								"header": [],
 								"url": {
 									"raw": "{{api_server}}/api/web/redemptions/products?rt=MTQ0NToxNTY4OTkwMDk3Ljg3MjpkYTFhMjg4NzY4ZTEwM2M1MGVjZmRjMGJhNDgxODljZjVmYzAyODFmODBiYzkwNjFjMTkwMmNiNDAxYjE2N2Zj",
 									"host": [
@@ -3789,34 +3332,37 @@
 											"key": "rt",
 											"value": "MTQ0NToxNTY4OTkwMDk3Ljg3MjpkYTFhMjg4NzY4ZTEwM2M1MGVjZmRjMGJhNDgxODljZjVmYzAyODFmODBiYzkwNjFjMTkwMmNiNDAxYjE2N2Zj"
 										}
-									]
-								}
+									],
+									"variable": []
+								},
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"description": ""
 							},
 							"response": []
 						},
 						{
 							"name": "pepocorn-balance",
 							"request": {
+								"url": "{{api_server}}/api/web/redemptions/pepocorn-balance",
 								"method": "GET",
 								"header": [],
-								"url": {
-									"raw": "{{api_server}}/api/web/redemptions/pepocorn-balance",
-									"host": [
-										"{{api_server}}"
-									],
-									"path": [
-										"api",
-										"web",
-										"redemptions",
-										"pepocorn-balance"
-									]
-								}
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"description": ""
 							},
 							"response": []
 						},
 						{
 							"name": "request-redemption",
 							"request": {
+								"url": "{{api_server}}/api/web/redemptions/",
 								"method": "POST",
 								"header": [
 									{
@@ -3846,37 +3392,25 @@
 										}
 									]
 								},
-								"url": {
-									"raw": "{{api_server}}/api/web/redemptions/",
-									"host": [
-										"{{api_server}}"
-									],
-									"path": [
-										"api",
-										"web",
-										"redemptions",
-										""
-									]
-								}
+								"description": ""
 							},
 							"response": []
 						}
 					],
-					"protocolProfileBehavior": {},
 					"_postman_isSubFolder": true
 				},
 				{
 					"name": "auth",
+					"description": "",
 					"item": [
 						{
 							"name": "github",
+							"description": "",
 							"item": [
 								{
 									"name": "redirect-url",
-									"protocolProfileBehavior": {
-										"disableBodyPruning": true
-									},
 									"request": {
+										"url": "{{api_server}}/api/web/auth/github/redirect-url",
 										"method": "GET",
 										"header": [
 											{
@@ -3902,25 +3436,14 @@
 												}
 											]
 										},
-										"url": {
-											"raw": "{{api_server}}/api/web/auth/github/redirect-url",
-											"host": [
-												"{{api_server}}"
-											],
-											"path": [
-												"api",
-												"web",
-												"auth",
-												"github",
-												"redirect-url"
-											]
-										}
+										"description": ""
 									},
 									"response": []
 								},
 								{
 									"name": "github-login",
 									"request": {
+										"url": "{{api_server}}/api/web/auth/github/login",
 										"method": "POST",
 										"header": [
 											{
@@ -3951,25 +3474,14 @@
 												}
 											]
 										},
-										"url": {
-											"raw": "{{api_server}}/api/web/auth/github/login",
-											"host": [
-												"{{api_server}}"
-											],
-											"path": [
-												"api",
-												"web",
-												"auth",
-												"github",
-												"login"
-											]
-										}
+										"description": ""
 									},
 									"response": []
 								},
 								{
 									"name": "github-disconnect",
 									"request": {
+										"url": "{{api_server}}/api/web/auth/github/disconnect",
 										"method": "POST",
 										"header": [
 											{
@@ -3979,33 +3491,18 @@
 												"value": "text/plain"
 											}
 										],
-										"body": {
-											"mode": "urlencoded",
-											"urlencoded": []
-										},
-										"url": {
-											"raw": "{{api_server}}/api/web/auth/github/disconnect",
-											"host": [
-												"{{api_server}}"
-											],
-											"path": [
-												"api",
-												"web",
-												"auth",
-												"github",
-												"disconnect"
-											]
-										}
+										"body": {},
+										"description": ""
 									},
 									"response": []
 								}
 							],
-							"protocolProfileBehavior": {},
 							"_postman_isSubFolder": true
 						},
 						{
 							"name": "logout",
 							"request": {
+								"url": "{{api_server}}/api/v1/auth/logout",
 								"method": "POST",
 								"header": [
 									{
@@ -4015,22 +3512,8 @@
 										"value": "application/x-www-form-urlencoded"
 									}
 								],
-								"body": {
-									"mode": "urlencoded",
-									"urlencoded": []
-								},
-								"url": {
-									"raw": "{{api_server}}/api/v1/auth/logout",
-									"host": [
-										"{{api_server}}"
-									],
-									"path": [
-										"api",
-										"v1",
-										"auth",
-										"logout"
-									]
-								}
+								"body": {},
+								"description": ""
 							},
 							"response": []
 						},
@@ -4040,35 +3523,23 @@
 								{
 									"listen": "test",
 									"script": {
-										"id": "463dff11-4c9d-4043-b558-3007a6e4d83c",
+										"type": "text/javascript",
 										"exec": [
 											"const $ = cheerio.load(pm.response.text())",
 											"",
 											"pm.environment.set('csrf-token', $('meta[name=csrf-token]').attr('content'));"
-										],
-										"type": "text/javascript"
+										]
 									}
 								}
 							],
-							"protocolProfileBehavior": {
-								"disableBodyPruning": true
-							},
 							"request": {
 								"auth": {
 									"type": "basic",
-									"basic": [
-										{
-											"key": "password",
-											"value": "Oyee^Yaar!",
-											"type": "string"
-										},
-										{
-											"key": "username",
-											"value": "pepo",
-											"type": "string"
-										}
-									]
+									"basic": {
+										"showPassword": false
+									}
 								},
+								"url": "{{api_server}}",
 								"method": "GET",
 								"header": [
 									{
@@ -4094,39 +3565,26 @@
 										}
 									]
 								},
-								"url": {
-									"raw": "{{api_server}}",
-									"host": [
-										"{{api_server}}"
-									]
-								}
+								"description": ""
 							},
 							"response": []
 						}
 					],
-					"protocolProfileBehavior": {},
 					"_postman_isSubFolder": true
 				},
 				{
 					"name": "users",
+					"description": "",
 					"item": [
 						{
 							"name": "websocket-details",
 							"request": {
+								"url": "{{api_server}}/api/web/users/1022/websocket-details",
 								"method": "GET",
 								"header": [],
-								"url": {
-									"raw": "{{api_server}}/api/web/users/1022/websocket-details",
-									"host": [
-										"{{api_server}}"
-									],
-									"path": [
-										"api",
-										"web",
-										"users",
-										"1022",
-										"websocket-details"
-									]
+								"body": {
+									"mode": "raw",
+									"raw": ""
 								},
 								"description": "GET websocket details"
 							},
@@ -4135,151 +3593,111 @@
 						{
 							"name": "logged-in-user",
 							"request": {
+								"url": "{{api_server}}/api/web/users/current",
 								"method": "GET",
 								"header": [],
-								"url": {
-									"raw": "{{api_server}}/api/web/users/current",
-									"host": [
-										"{{api_server}}"
-									],
-									"path": [
-										"api",
-										"web",
-										"users",
-										"current"
-									]
-								}
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"description": ""
 							},
 							"response": []
 						}
 					],
-					"protocolProfileBehavior": {},
 					"_postman_isSubFolder": true
 				},
 				{
 					"name": "channels",
+					"description": "",
 					"item": [
 						{
 							"name": "details",
 							"request": {
+								"url": "{{api_server}}/api/web/channels/covid19",
 								"method": "GET",
 								"header": [],
-								"url": {
-									"raw": "{{api_server}}/api/web/channels/covid19",
-									"host": [
-										"{{api_server}}"
-									],
-									"path": [
-										"api",
-										"web",
-										"channels",
-										"covid19"
-									]
-								}
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"description": ""
 							},
 							"response": []
 						},
 						{
 							"name": "share",
 							"request": {
+								"url": "{{api_server}}/api/web/channels/covid19/share",
 								"method": "GET",
 								"header": [],
-								"url": {
-									"raw": "{{api_server}}/api/web/channels/covid19/share",
-									"host": [
-										"{{api_server}}"
-									],
-									"path": [
-										"api",
-										"web",
-										"channels",
-										"covid19",
-										"share"
-									]
-								}
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"description": ""
 							},
 							"response": []
 						},
 						{
 							"name": "videos-list",
 							"request": {
+								"url": "{{api_server}}/api/web/channels/2/videos",
 								"method": "GET",
 								"header": [],
-								"url": {
-									"raw": "{{api_server}}/api/web/channels/2/videos",
-									"host": [
-										"{{api_server}}"
-									],
-									"path": [
-										"api",
-										"web",
-										"channels",
-										"2",
-										"videos"
-									]
-								}
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"description": ""
 							},
 							"response": []
 						},
 						{
 							"name": "start-meeting",
 							"request": {
+								"url": "{{api_server}}/api/web/channels/covid19/meetings",
 								"method": "POST",
 								"header": [],
-								"url": {
-									"raw": "{{api_server}}/api/web/channels/covid19/meetings",
-									"host": [
-										"{{api_server}}"
-									],
-									"path": [
-										"api",
-										"web",
-										"channels",
-										"covid19",
-										"meetings"
-									]
-								}
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"description": ""
 							},
 							"response": []
 						},
 						{
 							"name": "channel-meeting",
 							"request": {
+								"url": "{{api_server}}/api/web/channels/covid19/meetings/8",
 								"method": "GET",
 								"header": [],
-								"url": {
-									"raw": "{{api_server}}/api/web/channels/covid19/meetings/8",
-									"host": [
-										"{{api_server}}"
-									],
-									"path": [
-										"api",
-										"web",
-										"channels",
-										"covid19",
-										"meetings",
-										"8"
-									]
-								}
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"description": ""
 							},
 							"response": []
 						}
 					],
-					"protocolProfileBehavior": {},
 					"_postman_isSubFolder": true
 				}
-			],
-			"protocolProfileBehavior": {}
+			]
 		},
 		{
 			"name": "webhook",
+			"description": "",
 			"item": [
 				{
 					"name": "slack",
+					"description": "",
 					"item": [
 						{
 							"name": "approve-user",
 							"request": {
+								"url": "{{api_server}}/webhooks/slack/",
 								"method": "POST",
 								"header": [
 									{
@@ -4304,27 +3722,17 @@
 									"mode": "raw",
 									"raw": "payload=%7B%22type%22%3A%22block_actions%22%2C%22team%22%3A%7B%22id%22%3A%22T78KWNKC6%22%2C%22domain%22%3A%22ostdotcom%22%7D%2C%22user%22%3A%7B%22id%22%3A%22U99HQ8NLT%22%2C%22username%22%3A%22aman%22%2C%22name%22%3A%22aman%22%2C%22team_id%22%3A%22T78KWNKC6%22%7D%2C%22api_app_id%22%3A%22AQC5JETDX%22%2C%22token%22%3A%22t2kaSFG00CJoVpW3Vfw2pIJ0%22%2C%22container%22%3A%7B%22type%22%3A%22message%22%2C%22message_ts%22%3A%221574331819.000100%22%2C%22channel_id%22%3A%22CQN8L1SMA%22%2C%22is_ephemeral%22%3Afalse%7D%2C%22trigger_id%22%3A%22832493891955.246676767414.d594ae4ac4f6c4410df4d64a2e02c8fb%22%2C%22channel%22%3A%7B%22id%22%3A%22CQN8L1SMA%22%2C%22name%22%3A%22test_approve_new_creators%22%7D%2C%22message%22%3A%7B%22type%22%3A%22message%22%2C%22subtype%22%3A%22bot_message%22%2C%22text%22%3A%22%2AHi%2C+We+got+a+video+from+a+new+User+at+PEPO.+Please+check+the+details+about+the+videos+and+take+actions+accordingly%2A%22%2C%22ts%22%3A%221574331819.000100%22%2C%22username%22%3A%22Pepo+Development%22%2C%22bot_id%22%3A%22BQKM9737E%22%2C%22blocks%22%3A%5B%7B%22type%22%3A%22section%22%2C%22block_id%22%3A%22d7IY%22%2C%22text%22%3A%7B%22type%22%3A%22mrkdwn%22%2C%22text%22%3A%22---------------------------------------------------------%5Cn%2AHi%2C+We+got+a+video+from+an+existing+User+at+PEPO.+Please+check+the+details+about+the+videos+and+take+actions+accordingly%2A%5Cn%2AUser%27s+Full+Name%3A%2A%3A+Ankit+Singh%5Cn%2AUsername%3A%2A%3A+sing_k0p6b1b8hb%5Cn%2AAdmin+Profile+URL%3A%2A%3A+%3Chttp%3A%5C%2F%5C%2Fpepodev.com%3A8080%5C%2Fadmin%5C%2Fuser-profile%5C%2F1021%3E%5Cn%2ATwitter+handle%3A%2A%3A+singhankit2099%5Cn%2AEmail+address%3A%2A%3A+null%5Cn%22%2C%22verbatim%22%3Afalse%7D%7D%2C%7B%22type%22%3A%22divider%22%2C%22block_id%22%3A%22e1I%22%7D%2C%7B%22type%22%3A%22section%22%2C%22block_id%22%3A%22djZ%22%2C%22text%22%3A%7B%22type%22%3A%22mrkdwn%22%2C%22text%22%3A%22%2AVideoLink%2A%3A+%3Chttps%3A%5C%2F%5C%2Fdbvoeb7t6hffk.cloudfront.net%5C%2Fd%5C%2Fua%5C%2Fvideos%5C%2Fpankaj-profile.mp4-original.mp4%3E%5Cn%2AUpdatedAt%2A%3A+18+Sep+2019+17%3A34%3A32%22%2C%22verbatim%22%3Afalse%7D%2C%22accessory%22%3A%7B%22type%22%3A%22button%22%2C%22style%22%3A%22danger%22%2C%22text%22%3A%7B%22type%22%3A%22plain_text%22%2C%22text%22%3A%22Delete+Video%22%2C%22emoji%22%3Atrue%7D%2C%22value%22%3A%22delete_video%7Cvideo_id%3A22%22%2C%22action_id%22%3A%22aOtUU%22%7D%7D%2C%7B%22type%22%3A%22divider%22%2C%22block_id%22%3A%2229LQg%22%7D%2C%7B%22type%22%3A%22actions%22%2C%22block_id%22%3A%22e87Qk%22%2C%22elements%22%3A%5B%7B%22type%22%3A%22button%22%2C%22action_id%22%3A%22F%5C%2FDZ%5C%2F%22%2C%22text%22%3A%7B%22type%22%3A%22plain_text%22%2C%22text%22%3A%22Approve+User%22%2C%22emoji%22%3Atrue%7D%2C%22style%22%3A%22primary%22%2C%22value%22%3A%22approve_user%7Cuser_id%3A1021%22%7D%2C%7B%22type%22%3A%22button%22%2C%22action_id%22%3A%22Ur6op%22%2C%22text%22%3A%7B%22type%22%3A%22plain_text%22%2C%22text%22%3A%22Block+User%22%2C%22emoji%22%3Atrue%7D%2C%22style%22%3A%22danger%22%2C%22value%22%3A%22block_user%7Cuser_id%3A1021%22%7D%5D%7D%2C%7B%22type%22%3A%22section%22%2C%22block_id%22%3A%22sOYA%22%2C%22text%22%3A%7B%22type%22%3A%22mrkdwn%22%2C%22text%22%3A%22--------------------------------------------------------------------%22%2C%22verbatim%22%3Afalse%7D%7D%5D%7D%2C%22response_url%22%3A%22https%3A%5C%2F%5C%2Fhooks.slack.com%5C%2Factions%5C%2FT78KWNKC6%5C%2F836036662689%5C%2FaYZtwMZtnU4AFCr7H572Rg8R%22%2C%22actions%22%3A%5B%7B%22action_id%22%3A%22F%5C%2FDZ%5C%2F%22%2C%22block_id%22%3A%22e87Qk%22%2C%22text%22%3A%7B%22type%22%3A%22plain_text%22%2C%22text%22%3A%22Approve+User%22%2C%22emoji%22%3Atrue%7D%2C%22value%22%3A%22approve_user%7Cuser_id%3A1021%22%2C%22style%22%3A%22primary%22%2C%22type%22%3A%22button%22%2C%22action_ts%22%3A%221574348564.116169%22%7D%5D%7D"
 								},
-								"url": {
-									"raw": "{{api_server}}/webhooks/slack/",
-									"host": [
-										"{{api_server}}"
-									],
-									"path": [
-										"webhooks",
-										"slack",
-										""
-									]
-								}
+								"description": ""
 							},
 							"response": []
 						}
 					],
-					"protocolProfileBehavior": {},
 					"_postman_isSubFolder": true
 				},
 				{
 					"name": "activate-user-success",
 					"request": {
+						"url": "{{api_server}}/webhooks/ost/v2",
 						"method": "POST",
 						"header": [
 							{
@@ -4338,23 +3746,14 @@
 							"mode": "raw",
 							"raw": "{ \"id\": \"28262d90-4545-424d-8422-74d4df5cc963\",\n  \"topic\": \"users/activation_success\",\n  \"created_at\": 1560164197,\n  \"webhook_id\": \"96f9ff47-5dc8-432f-9a6c-1c79e0cf3bd0\",\n  \"version\": \"2\",\n  \"data\": \n   { \"result_type\": \"user\",\n     \"user\": \n      { \"id\": \"2e0f3041-026a-4be3-b1d2-791c98565219\",\n        \"token_id\": 1128,\n        \"token_holder_address\": \"0x55fc5e23f3ae102f5615f6c7cefaf414922322fe\",\n        \"device_manager_address\": \"0x5ac584e41ec36b16015f86ebff94dcc668a3e457\",\n        \"recovery_address\": \"0x15d3f1825d193d9b688c8dfa3c4234a05e79a092\",\n        \"recovery_owner_address\": \"0x49a74de62e7db11dcc1010780d0699b5bf83c2ac\",\n        \"type\": \"user\",\n        \"status\": \"ACTIVATED\",\n        \"updated_timestamp\": 1560164197 } } }"
 						},
-						"url": {
-							"raw": "{{api_server}}/webhooks/ost/v2",
-							"host": [
-								"{{api_server}}"
-							],
-							"path": [
-								"webhooks",
-								"ost",
-								"v2"
-							]
-						}
+						"description": ""
 					},
 					"response": []
 				},
 				{
 					"name": "airdrop-failed",
 					"request": {
+						"url": "{{api_server}}/webhooks/ost/v2",
 						"method": "POST",
 						"header": [
 							{
@@ -4368,23 +3767,14 @@
 							"mode": "raw",
 							"raw": "{\n    \"id\": \"29262d00-4545-424d-8422-74d4df5cc965\",\n    \"topic\": \"transactions/failure\",\n    \"webhook_id\": \"ncse-42jkrbw-32bekjq3-23jheb423q\",\n    \"created_at\": 1552536269,\n    \"version\": \"2\",\n    \"data\": {\n        \"result_type\": \"transaction\",\n        \"transaction\": {\n            \"id\":\"e2c6cba9-ef2a-4da2-8a23-f6b3421a938c\",\n            \"transaction_hash\":\"0xa9632350057c2226c5a10418b1c3bc9acdf7e2ee\",\n            \"from\":\"0x81b7e08f65bdf5648606c89998a9cc8164397647\",\n            \"to\":\"0x81b7e08f65bdf5648606c89998a9cc8164397647\",\n            \"nonce\":1,\n            \"value\":1000000000,\n            \"gas_price\":\"1000000000\",\n            \"gas_used\":1,\n            \"transaction_fee\":1,\n            \"block_confirmation\":12,\n            \"status\":\"FAILED\",\n            \"updated_timestamp\":1552536269,\n            \"block_timestamp\":1552536269,\n            \"block_number\":1552536269,\n            \"rule_name\":\"\",\n            \"meta_property\":{\n              \"name\":\"UserActivateAirdrop\",\n              \"type\":\"company_to_user\",\n              \"details\":\"Welcome\"\n            },\n            \"transfers\":[]\n        }\n    }\n}  "
 						},
-						"url": {
-							"raw": "{{api_server}}/webhooks/ost/v2",
-							"host": [
-								"{{api_server}}"
-							],
-							"path": [
-								"webhooks",
-								"ost",
-								"v2"
-							]
-						}
+						"description": ""
 					},
 					"response": []
 				},
 				{
 					"name": "airdrop-success",
 					"request": {
+						"url": "{{api_server}}/webhooks/ost/v2",
 						"method": "POST",
 						"header": [
 							{
@@ -4398,23 +3788,14 @@
 							"mode": "raw",
 							"raw": "\n{\n    \"id\": \"29262d00-4545-424d-8422-74d4df5cc963\",\n    \"topic\": \"transactions/success\",\n    \"webhook_id\": \"ncse-42jkrbw-32bekjq3-23jheb423q\",\n    \"created_at\": 1552536269,\n    \"version\": \"2\",\n    \"data\": {\n        \"result_type\": \"transaction\",\n        \"transaction\": {\n            \"id\":\"e2c6cba9-ef2a-4da2-8a23-f6b3421a938c\",\n            \"transaction_hash\":\"0xa9632350057c2226c5a10418b1c3bc9acdf7e2ee\",\n            \"from\":\"0x55fc5e23f3ae102f5615f6c7cefaf414922322fe\",\n            \"to\":\"0xa9632350057c2226c5a10418b1c3bc9acdf7e2ee\",\n            \"nonce\":1,\n            \"value\":1000000000,\n            \"gas_price\":\"1000000000\",\n            \"gas_used\":1,\n            \"transaction_fee\":1,\n            \"block_confirmation\":12,\n            \"status\":\"CREATED\",\n            \"updated_timestamp\":1552536269,\n            \"block_timestamp\":1552536269,\n            \"block_number\":1552536269,\n            \"rule_name\":\"\",\n            \"meta_property\":{\n              \"name\":\"UserActivateAirdrop\",\n              \"type\":\"company_to_user\",\n              \"details\":\"Welcome\"\n            },\n            \"transfers\":[\n                {\n                \"from\":\"0xa9632350057c2226c5a10418b1c3bc9acdf7e2ee\",\n                \"from_user_id\":\"724ed66c-8a0a-477e-b303-b0486e2a3797\",\n                \"to\":\"0xc3b9b4a5c1997d73cd8d9d0fb95aa945e68e0496\",\n                \"to_user_id\":\"9e847ac4-1bd8-498f-b601-51a56bbca076\",\n                \"kind\":\"transfer\"\n                }\n            ]\n        }\n    }\n}   "
 						},
-						"url": {
-							"raw": "{{api_server}}/webhooks/ost/v2",
-							"host": [
-								"{{api_server}}"
-							],
-							"path": [
-								"webhooks",
-								"ost",
-								"v2"
-							]
-						}
+						"description": ""
 					},
 					"response": []
 				},
 				{
 					"name": "user-transaction-failed",
 					"request": {
+						"url": "{{api_server}}/webhooks/ost/v2",
 						"method": "POST",
 						"header": [
 							{
@@ -4428,23 +3809,14 @@
 							"mode": "raw",
 							"raw": "{\n    \"id\": \"29262d00-4545-424d-8422-74d4df5cc976\",\n    \"topic\": \"transactions/failure\",\n    \"webhook_id\": \"ncse-42jkrbw-32bekjq3-23jheb423q\",\n    \"created_at\": 1552536269,\n    \"version\": \"2\",\n    \"data\": {\n        \"result_type\": \"transaction\",\n        \"transaction\": {\n            \"id\":\"8a15c59c-674c-449f-8f0e-dec613d4c6a2\",\n            \"transaction_hash\":\"0xa9632350057c2226c5a10418b1c3bc9acdf7e2ee\",\n            \"from\":\"0x55fc5e23f3ae102f5615f6c7cefaf414922322fe\",\n            \"to\":\"0xa9632350057c2226c5a10418b1c3bc9acdf7e2ee\",\n            \"nonce\":1,\n            \"value\":1000000000,\n            \"gas_price\":\"1000000000\",\n            \"gas_used\":1,\n            \"transaction_fee\":1,\n            \"block_confirmation\":12,\n            \"status\":\"FAILED\",\n            \"updated_timestamp\":1552536269,\n            \"block_timestamp\":1552536269,\n            \"block_number\":1552536269,\n            \"rule_name\":\"\",\n            \"meta_property\": {\n            \t\"name\":\"userTransaction\",\n        \t\t\"type\":\"user_to_user\",\n        \t\t\"details\":\"vi_1\"\n            },\n            \"transfers\":[\n                {\n                \"from\":\"0xa9632350057c2226c5a10418b1c3bc9acdf7e2ee\",\n                \"from_user_id\":\"e65b4c76-07c3-4e6d-86a8-d67d48017ab8\",\n                \"to\":\"0xc3b9b4a5c1997d73cd8d9d0fb95aa945e68e0496\",\n                \"to_user_id\":\"f9fbcb3d-165a-4b3e-a613-879c1bf7c36b\",\n                \"kind\":\"transfer\",\n                \"amount\": \"5\"\n                }\n            ]\n        }\n    }\n}  "
 						},
-						"url": {
-							"raw": "{{api_server}}/webhooks/ost/v2",
-							"host": [
-								"{{api_server}}"
-							],
-							"path": [
-								"webhooks",
-								"ost",
-								"v2"
-							]
-						}
+						"description": ""
 					},
 					"response": []
 				},
 				{
 					"name": "user-transaction-success",
 					"request": {
+						"url": "{{api_server}}/webhooks/ost/v2",
 						"method": "POST",
 						"header": [
 							{
@@ -4458,53 +3830,47 @@
 							"mode": "raw",
 							"raw": "\n{\n    \"id\": \"29262d00-4545-424d-8422-74d4df5cc967\",\n    \"topic\": \"transactions/success\",\n    \"webhook_id\": \"ncse-42jkrbw-32bekjq3-23jheb423q\",\n    \"created_at\": 1552536269,\n    \"version\": \"2\",\n    \"data\": {\n        \"result_type\": \"transaction\",\n        \"transaction\": {\n            \"id\":\"8a15c59c-674c-449f-8f0e-dec613d4c6a1\",\n            \"transaction_hash\":\"0xa9632350057c2226c5a10418b1c3bc9acdf7e2ee\",\n            \"from\":\"0x55fc5e23f3ae102f5615f6c7cefaf414922322fe\",\n            \"to\":\"0xa9632350057c2226c5a10418b1c3bc9acdf7e2ee\",\n            \"nonce\":1,\n            \"value\":1000000000,\n            \"gas_price\":\"1000000000\",\n            \"gas_used\":1,\n            \"transaction_fee\":1,\n            \"block_confirmation\":12,\n            \"status\":\"SUCCESS\",\n            \"updated_timestamp\":1552536269,\n            \"block_timestamp\":1552536269,\n            \"block_number\":1552536269,\n            \"rule_name\":\"\",\n            \"meta_property\": {\n            \t\"name\":\"userTransaction\",\n        \t\t\"type\":\"user_to_user\",\n        \t\t\"details\":\"vi_1\"\n            },\n            \"transfers\":[\n                {\n                \"from\":\"0xa9632350057c2226c5a10418b1c3bc9acdf7e2ee\",\n                \"from_user_id\":\"e65b4c76-07c3-4e6d-86a8-d67d48017ab8\",\n                \"to\":\"0xc3b9b4a5c1997d73cd8d9d0fb95aa945e68e0496\",\n                \"to_user_id\":\"f9fbcb3d-165a-4b3e-a613-879c1bf7c36b\",\n                \"kind\":\"transfer\",\n                \"amount\": \"5\"\n                }\n            ]\n        }\n    }\n}   "
 						},
-						"url": {
-							"raw": "{{api_server}}/webhooks/ost/v2",
-							"host": [
-								"{{api_server}}"
-							],
-							"path": [
-								"webhooks",
-								"ost",
-								"v2"
-							]
-						}
+						"description": ""
 					},
 					"response": []
 				}
-			],
-			"protocolProfileBehavior": {}
+			]
 		},
 		{
 			"name": "fetch-goto",
 			"request": {
-				"method": "GET",
-				"header": [],
 				"url": {
 					"raw": "{{api_server}}/api/v1/fetch-goto?url=https://stagingpepo.com/video/1009",
+					"protocol": "{{api_server}}/api/v1/fetch-goto?url=https",
 					"host": [
-						"{{api_server}}"
+						"stagingpepo",
+						"com"
 					],
 					"path": [
-						"api",
-						"v1",
-						"fetch-goto"
+						"video",
+						"1009"
 					],
 					"query": [
 						{
 							"key": "url",
 							"value": "https://stagingpepo.com/video/1009"
 						}
-					]
-				}
+					],
+					"variable": []
+				},
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"description": ""
 			},
 			"response": []
 		},
 		{
 			"name": "upload-params",
 			"request": {
-				"method": "GET",
-				"header": [],
 				"url": {
 					"raw": "{{api_server}}/api/v1/upload-params?videos%5B%5D=anaghaTest1.mp4&images%5B%5D=anaghaTest.jpeg",
 					"host": [
@@ -4524,11 +3890,18 @@
 							"key": "images%5B%5D",
 							"value": "anaghaTest.jpeg"
 						}
-					]
-				}
+					],
+					"variable": []
+				},
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"description": ""
 			},
 			"response": []
 		}
-	],
-	"protocolProfileBehavior": {}
+	]
 }
