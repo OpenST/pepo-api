@@ -66,10 +66,9 @@ router.post('/', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
 
   const dataFormatterFunc = async function(serviceResponse) {
     const wrapperFormatterRsp = await new FormatterComposer({
-      resultType: responseEntityKey.currentUserChannelRelations,
+      resultType: responseEntityKey.channel,
       entityKindToResponseKeyMap: {
-        [entityTypeConstants.currentUserChannelRelationsMap]: responseEntityKey.currentUserChannelRelations,
-        [entityTypeConstants.channelStatsMap]: responseEntityKey.channelStats
+        [entityTypeConstants.channel]: responseEntityKey.channel
       },
       serviceData: serviceResponse.data
     }).perform();
@@ -87,10 +86,9 @@ router.post('/:channel_id/edit', sanitizer.sanitizeDynamicUrlParams, function(re
 
   const dataFormatterFunc = async function(serviceResponse) {
     const wrapperFormatterRsp = await new FormatterComposer({
-      resultType: responseEntityKey.currentUserChannelRelations,
+      resultType: responseEntityKey.channel,
       entityKindToResponseKeyMap: {
-        [entityTypeConstants.currentUserChannelRelationsMap]: responseEntityKey.currentUserChannelRelations,
-        [entityTypeConstants.channelStatsMap]: responseEntityKey.channelStats
+        [entityTypeConstants.channel]: responseEntityKey.channel
       },
       serviceData: serviceResponse.data
     }).perform();
