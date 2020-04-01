@@ -14,11 +14,14 @@ const rootPrefix = '../../../..',
   ChannelByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelByIds'),
   ChannelByPermalinksCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelByPermalinks'),
   imageLib = require(rootPrefix + '/lib/imageLib'),
+  bgJob = require(rootPrefix + '/lib/rabbitMqEnqueue/bgJob'),
   tagConstants = require(rootPrefix + '/lib/globalConstant/tag'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   textConstants = require(rootPrefix + '/lib/globalConstant/text'),
   imageConstants = require(rootPrefix + '/lib/globalConstant/image'),
+  bgJobConstants = require(rootPrefix + '/lib/globalConstant/bgJob'),
+  slackConstants = require(rootPrefix + '/lib/globalConstant/slack'),
   channelConstants = require(rootPrefix + '/lib/globalConstant/channel/channels'),
   channelUserConstants = require(rootPrefix + '/lib/globalConstant/channel/channelUsers'),
   adminActivityLogConstants = require(rootPrefix + '/lib/globalConstant/admin/adminActivityLogs');
@@ -99,6 +102,8 @@ class EditChannel extends ServiceBase {
     await oThis._associateTagsToChannel();
 
     await oThis.logAdminActivity();
+
+    await oThis.performSlackCommunityMonitoringBg();
 
     return responseHelper.successWithData({});
   }
@@ -626,6 +631,30 @@ class EditChannel extends ServiceBase {
       extraData: JSON.stringify({ cid: [oThis.channelId], chPml: oThis.channelPermalink }),
       action: adminActivityLogConstants.createEditCommunityEntity
     });
+  }
+
+  /**
+   * Perform slack community monitoring job enqueuing
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async performSlackCommunityMonitoringBg() {
+    const oThis = this;
+
+    if (oThis.isEdit) {
+      await bgJob.enqueue(bgJobConstants.slackCommunityMonitoringJobTopic, {
+        action: slackConstants.channelUpdated,
+        channelId: oThis.channelId,
+        userId: oThis.currentAdminId
+      });
+    } else {
+      await bgJob.enqueue(bgJobConstants.slackCommunityMonitoringJobTopic, {
+        action: slackConstants.channelCreated,
+        channelId: oThis.channelId,
+        userId: oThis.currentAdminId
+      });
+    }
   }
 }
 
