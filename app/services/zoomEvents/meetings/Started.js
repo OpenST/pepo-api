@@ -5,6 +5,8 @@ const rootPrefix = '../../../..',
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
+  bgJob = require(rootPrefix + '/lib/rabbitMqEnqueue/bgJob'),
+  bgJobConstants = require(rootPrefix + '/lib/globalConstant/bgJob'),
   notificationJobEnqueue = require(rootPrefix + '/lib/rabbitMqEnqueue/notification'),
   notificationJobConstants = require(rootPrefix + '/lib/globalConstant/notificationJob'),
   meetingConstants = require(rootPrefix + '/lib/globalConstant/meeting/meeting');
@@ -179,8 +181,14 @@ class MeetingStarted extends ZoomEventsForMeetingsBase {
       meetingId: oThis.meetingId
     });
 
-    oThis.meetingObj = meetingConstants.startedStatus;
+    // Send slack alert when meeting is channel host goes live.
+    await bgJob.enqueue(bgJobConstants.slackLiveEventMonitoringJobTopic, {
+      channelId: oThis.meetingObj.channelId,
+      userId: oThis.meetingObj.hostUserId,
+      errorGoingLive: false
+    });
 
+    oThis.meetingObj = meetingConstants.startedStatus;
     return responseHelper.successWithData({});
   }
 }

@@ -1,7 +1,6 @@
 const rootPrefix = '../../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
-  ChannelModel = require(rootPrefix + '/app/models/mysql/channel/Channel'),
   MeetingModel = require(rootPrefix + '/app/models/mysql/meeting/Meeting'),
   MeetingRelayerModel = require(rootPrefix + '/app/models/mysql/meeting/MeetingRelayer'),
   ChannelByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelByIds'),
@@ -389,10 +388,6 @@ class StartMeeting extends ServiceBase {
     // Clear all meetings table caches.
     const meetingObj = new MeetingModel().formatDbData(insertData);
     await MeetingModel.flushCache(meetingObj);
-
-    // Send slack alert when meeting is created
-    oThis.errorGoingLive = false;
-    await oThis.sendSlackAlert();
 
     return responseHelper.successWithData({});
   }
