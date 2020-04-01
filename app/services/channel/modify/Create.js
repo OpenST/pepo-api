@@ -149,17 +149,6 @@ class CreateChannel extends ServiceBase {
     oThis.channelId = insertResponse.insertId;
   }
 
-  async _getChannel() {
-    const oThis = this;
-
-    const channelCacheResponse = await new ChannelByIdsCache({ ids: [oThis.channelId] }).fetch();
-    if (channelCacheResponse.isFailure()) {
-      return Promise.reject(channelCacheResponse);
-    }
-
-    oThis.channel = channelCacheResponse.data[oThis.channelId];
-  }
-
   /**
    * Create new entry in channel stat table.
    *
