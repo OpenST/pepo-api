@@ -115,6 +115,8 @@ class EditChannel extends ServiceBase {
       );
     }
 
+    oThis.updateRequiredParameters.permalink = oThis.channel.permalink;
+
     if (oThis.channel.taglineId) {
       oThis.channelTaglineId = oThis.channel.taglineId;
       oThis.textIds.push(oThis.channel.taglineId);
