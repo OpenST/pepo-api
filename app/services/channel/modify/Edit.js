@@ -75,9 +75,9 @@ class EditChannel extends ServiceBase {
 
     oThis._decideUpdateRequiredParameters();
 
-    await oThis._modifyChannel();
+    const updatedChannelEntity = await oThis._modifyChannel();
 
-    return responseHelper.successWithData({ [entityTypeConstants.channel]: oThis.channel });
+    return responseHelper.successWithData({ [entityTypeConstants.channel]: updatedChannelEntity });
   }
 
   /**
@@ -222,7 +222,7 @@ class EditChannel extends ServiceBase {
    *
    * @sets oThis.channel
    *
-   * @returns {Promise<never>}
+   * @returns {Promise<object>}
    * @private
    */
   async _modifyChannel() {
@@ -246,7 +246,7 @@ class EditChannel extends ServiceBase {
       );
     }
 
-    oThis.channel = modifyChannelResponse.data.channel;
+    return modifyChannelResponse.data.channel;
   }
 }
 
