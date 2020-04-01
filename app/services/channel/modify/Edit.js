@@ -72,7 +72,7 @@ class EditChannel extends ServiceBase {
 
     await oThis._fetchAssociatedEntities();
 
-    await oThis._decideUpdateRequiredParameters();
+    oThis._decideUpdateRequiredParameters();
 
     await oThis._modifyChannel();
 
@@ -174,10 +174,9 @@ class EditChannel extends ServiceBase {
    *
    * @sets oThis.updateRequiredParameters
    *
-   * @returns {Promise<void>}
    * @private
    */
-  async _decideUpdateRequiredParameters() {
+  _decideUpdateRequiredParameters() {
     const oThis = this;
 
     // We are not converting strings to lowerCase before checking intentionally.
