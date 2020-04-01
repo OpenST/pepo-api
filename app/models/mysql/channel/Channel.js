@@ -93,6 +93,29 @@ class ChannelModel extends ModelBase {
   }
 
   /**
+   * Fetch all channel ids.
+   *
+   * @return {object}
+   */
+  async fetchAllChannelIds() {
+    const oThis = this;
+
+    const channelIds = [];
+
+    const response = await oThis
+      .select('id')
+      .where({ status: channelConstants.invertedStatuses[channelConstants.activeStatus] })
+      .order_by('name asc')
+      .fire();
+
+    for (let i = 0; i < response.length; i++) {
+      channelIds.push(response[i].id);
+    }
+
+    return { ids: channelIds };
+  }
+
+  /**
    * Fetch channel for given ids.
    *
    * @param {array} ids: channel ids
@@ -175,11 +198,50 @@ class ChannelModel extends ModelBase {
       .select('id')
       .where(['name LIKE ? OR name LIKE ?', queryWithWildCards, queryWithWildCardsSpaceIncluded])
       .where({ id: params.ids })
+      .where({ status: channelConstants.invertedStatuses[channelConstants.activeStatus] })
       .order_by(['ID', params.ids])
       .offset(params.offset)
       .limit(params.limit);
 
     const dbRows = await queryObject.fire();
+
+    const channelIds = [];
+
+    for (let index = 0; index < dbRows.length; index++) {
+      const channelId = dbRows[index].id;
+      channelIds.push(channelId);
+    }
+
+    return { channelIds: channelIds };
+  }
+
+  /**
+   * Get channels that starts with channel prefix.
+   *
+   * @param {object} params
+   * @param {number} params.offset
+   * @param {number} params.limit
+   * @param {string} params.channelPrefix
+   *
+   * @returns {Promise<{}>}
+   */
+  async searchAllChannelsByPrefix(params) {
+    console.log(params);
+
+    console.log(params.offset);
+    console.log(typeof params.offset);
+    const oThis = this;
+
+    const queryWithWildCards = params.channelPrefix + '%',
+      queryWithWildCardsSpaceIncluded = '% ' + params.channelPrefix + '%';
+
+    const dbRows = await (await oThis
+      .select('id')
+      .where(['name LIKE ? OR name LIKE ?', queryWithWildCards, queryWithWildCardsSpaceIncluded])
+      .where({ status: channelConstants.invertedStatuses[channelConstants.activeStatus] })
+      .order_by('name asc')
+      .offset(params.offset)
+      .limit(params.limit)).fire();
 
     const channelIds = [];
 
