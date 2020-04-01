@@ -171,7 +171,7 @@ class UploadParams extends ServiceBase {
             fileName,
             contentType,
             coreConstants.AWS_REGION,
-            { imageKind: imageConstants.channelImageKind }
+            { imageKind: imageKind }
           );
           s3Url = s3Constants.getS3Url(intent, fileName, true);
         } else {
@@ -202,9 +202,11 @@ class UploadParams extends ServiceBase {
   }
 
   /**
-   * Get cdn url.
+   * Get CDN url.
    *
    * @param {string} s3Url
+   *
+   * @returns {string}
    * @private
    */
   _getCdnUrl(s3Url) {
