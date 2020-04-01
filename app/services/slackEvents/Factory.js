@@ -194,7 +194,8 @@ class SlackEventFactory extends ServiceBase {
         const UnhideChannelEvent = require(rootPrefix + '/app/services/slackEvents/channel/Unhide');
         eventResponse = await new UnhideChannelEvent({
           eventDataPayload: oThis.eventData.payload,
-          eventParams: oThis.eventParams
+          eventParams: oThis.eventParams,
+          currentAdmin: oThis.currentAdmin
         }).perform();
         break;
       }
@@ -202,7 +203,8 @@ class SlackEventFactory extends ServiceBase {
         const DeleteChannelEvent = require(rootPrefix + '/app/services/slackEvents/channel/Delete');
         eventResponse = await new DeleteChannelEvent({
           eventDataPayload: oThis.eventData.payload,
-          eventParams: oThis.eventParams
+          eventParams: oThis.eventParams,
+          currentAdmin: oThis.currentAdmin
         }).perform();
         break;
       }

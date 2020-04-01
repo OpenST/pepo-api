@@ -3,8 +3,7 @@ const rootPrefix = '../../../..',
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   slackConstants = require(rootPrefix + '/lib/globalConstant/slack'),
-  ChannelModel = require(rootPrefix + '/app/models/mysql/channel/Channel'),
-  channelConstants = require(rootPrefix + '/lib/globalConstant/channel/Channel');
+  HideChannelService = require(rootPrefix + 'app/services/admin/channel/Hide');
 
 /**
  * Class to hide channel.
@@ -33,20 +32,16 @@ class HideChannel extends SlackEventBase {
   async _hideChannel() {
     const oThis = this;
 
-    const channelId = oThis.eventParams.channel_id;
+    const hideChannelServiceParams = {
+      channel_id: oThis.eventParams.channel_id,
+      current_admin: oThis.currentAdmin
+    };
 
-    const updateResponse = await new ChannelModel()
-      .update({ status: channelConstants.invertedStatuses[channelConstants.inactiveStatus] })
-      .where({ id: channelId, status: channelConstants.invertedStatuses[channelConstants.activeStatus] })
-      .fire();
+    const hideChannelServiceResponse = await new HideChannelService(hideChannelServiceParams).perform();
 
-    if (!updateResponse) {
-      logger.error(`Error while updating channel to ${channelConstants.inactiveStatus}.`);
-      // Error handling
-      // TODO set slack error
+    if (hideChannelServiceResponse.isFailure()) {
+      oThis._setError(hideChannelServiceResponse);
     }
-
-    await ChannelModel.flushCache({ ids: [oThis.channelId] });
   }
 
   /**
