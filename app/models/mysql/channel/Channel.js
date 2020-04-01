@@ -168,7 +168,6 @@ class ChannelModel extends ModelBase {
   async searchChannelsByPrefix(params) {
     const oThis = this;
 
-    //Todo: escape mysql regex characters, order logic
     const queryWithWildCards = params.channelPrefix + '%',
       queryWithWildCardsSpaceIncluded = '% ' + params.channelPrefix + '%';
 
@@ -176,7 +175,7 @@ class ChannelModel extends ModelBase {
       .select('id')
       .where(['name LIKE ? OR name LIKE ?', queryWithWildCards, queryWithWildCardsSpaceIncluded])
       .where({ id: params.ids })
-      .order_by(['FIELD(ID , ?)', [1, 5, 4, 3]])
+      .order_by(['ID', params.ids])
       .offset(params.offset)
       .limit(params.limit);
 

@@ -22,7 +22,7 @@ class ChannelListNew extends ChannelListBase {
    * @constructor
    */
   constructor(params) {
-    super();
+    super(params);
 
     const oThis = this;
   }
