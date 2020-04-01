@@ -119,6 +119,7 @@ class SlackEventFactory extends ServiceBase {
    * @return {Promise<void>}
    * @private
    */
+  // eslint-disable-next-line max-lines-per-function
   async _execute() {
     const oThis = this;
 
@@ -178,6 +179,21 @@ class SlackEventFactory extends ServiceBase {
           eventParams: oThis.eventParams,
           currentAdmin: oThis.currentAdmin
         }).perform();
+        break;
+      }
+      case slackConstants.hideChannelEventType: {
+        const HideChannelEvent = require(rootPrefix + '/app/services/slackEvents/channel/HideChannel');
+        eventResponse = await new HideChannelEvent({
+          eventDataPayload: oThis.eventData.payload,
+          eventParams: oThis.eventParams,
+          currentAdmin: oThis.currentAdmin
+        }).perform();
+        break;
+      }
+      case slackConstants.unhideChannelEventType: {
+        break;
+      }
+      case slackConstants.deleteChannelEventType: {
         break;
       }
       default: {
