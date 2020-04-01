@@ -22,7 +22,7 @@ class EditChannel extends ServiceBase {
    * @param {string} params.name
    * @param {string} params.tagline
    * @param {string} params.description
-   * @param {string[]} params.tag_names
+   * @param {string[]} params.tags
    * @param {string} [params.cover_image_url]
    * @param {number} [params.cover_image_file_size]
    * @param {number} [params.cover_image_height]
@@ -41,7 +41,7 @@ class EditChannel extends ServiceBase {
     oThis.channelName = params.name;
     oThis.channelTagline = params.tagline;
     oThis.channelDescription = params.description;
-    oThis.channelTagNames = params.tag_names;
+    oThis.channelTagNames = params.tags;
 
     oThis.coverImageUrl = params.cover_image_url || '';
     oThis.coverImageFileSize = params.cover_image_file_size || 0;

@@ -1889,6 +1889,105 @@ const v1Signature = {
       }
     ],
     optional: []
+  },
+  [apiName.createChannel]: {
+    mandatory: [
+      {
+        parameter: 'api_source',
+        validatorMethods: ['validateString']
+      },
+      {
+        parameter: 'channel_id',
+        validatorMethods: ['validateNonZeroInteger']
+      },
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      },
+      {
+        parameter: 'name',
+        validatorMethods: ['validateChannelTitle', 'validateStopWords']
+      },
+      {
+        parameter: 'description',
+        validatorMethods: ['validateChannelDescription', 'validateStopWords']
+      },
+      {
+        parameter: 'tagline',
+        validatorMethods: ['validateChannelTagline', 'validateStopWords']
+      },
+      {
+        parameter: 'tags',
+        validatorMethods: ['validateChannelTagsArray']
+      },
+      {
+        parameter: 'cover_image_url',
+        validatorMethods: ['validateHttpBasedUrl']
+      },
+      {
+        parameter: 'cover_image_file_size',
+        validatorMethods: ['validateChannelCoverImageFileSize']
+      },
+      {
+        parameter: 'cover_image_height',
+        validatorMethods: ['validateChannelCoverImageHeight']
+      },
+      {
+        parameter: 'cover_image_width',
+        validatorMethods: ['validateChannelCoverImageWidth']
+      }
+    ],
+    optional: []
+  },
+  [apiName.editChannel]: {
+    mandatory: [
+      {
+        parameter: 'api_source',
+        validatorMethods: ['validateString']
+      },
+      {
+        parameter: 'channel_id',
+        validatorMethods: ['validateNonZeroInteger']
+      },
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      },
+      {
+        parameter: 'name',
+        validatorMethods: ['validateChannelTitle', 'validateStopWords']
+      },
+      {
+        parameter: 'description',
+        validatorMethods: ['validateChannelDescription', 'validateStopWords']
+      },
+      {
+        parameter: 'tagline',
+        validatorMethods: ['validateChannelTagline', 'validateStopWords']
+      },
+      {
+        parameter: 'tags',
+        validatorMethods: ['validateChannelTagsArray']
+      }
+    ],
+    optional: [
+      {
+        parameter: 'cover_image_url',
+        validatorMethods: ['validateHttpBasedUrl']
+      },
+      {
+        parameter: 'cover_image_file_size',
+        validatorMethods: ['validateChannelCoverImageFileSize']
+      },
+      {
+        parameter: 'cover_image_height',
+        validatorMethods: ['validateChannelCoverImageHeight']
+      },
+      {
+        parameter: 'cover_image_width',
+        validatorMethods: ['validateChannelCoverImageWidth']
+      }
+    ]
   }
 };
 

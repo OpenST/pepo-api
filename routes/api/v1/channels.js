@@ -60,6 +60,47 @@ router.get('/:channel_id', sanitizer.sanitizeDynamicUrlParams, function(req, res
   Promise.resolve(routeHelper.perform(req, res, next, '/channel/Get', 'r_a_v1_c_1', null, dataFormatterFunc));
 });
 
+/* Create new channel by user. */
+router.post('/', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.createChannel;
+
+  const dataFormatterFunc = async function(serviceResponse) {
+    const wrapperFormatterRsp = await new FormatterComposer({
+      resultType: responseEntityKey.currentUserChannelRelations,
+      entityKindToResponseKeyMap: {
+        [entityTypeConstants.currentUserChannelRelationsMap]: responseEntityKey.currentUserChannelRelations,
+        [entityTypeConstants.channelStatsMap]: responseEntityKey.channelStats
+      },
+      serviceData: serviceResponse.data
+    }).perform();
+
+    serviceResponse.data = wrapperFormatterRsp.data;
+  };
+
+  Promise.resolve(routeHelper.perform(req, res, next, '/channel/user/Join', 'r_a_v1_c_2', null, dataFormatterFunc));
+});
+
+/* Edit new channel by user. */
+router.post('/:channel_id/edit', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.editChannel;
+  req.decodedParams.channel_id = req.params.channel_id;
+
+  const dataFormatterFunc = async function(serviceResponse) {
+    const wrapperFormatterRsp = await new FormatterComposer({
+      resultType: responseEntityKey.currentUserChannelRelations,
+      entityKindToResponseKeyMap: {
+        [entityTypeConstants.currentUserChannelRelationsMap]: responseEntityKey.currentUserChannelRelations,
+        [entityTypeConstants.channelStatsMap]: responseEntityKey.channelStats
+      },
+      serviceData: serviceResponse.data
+    }).perform();
+
+    serviceResponse.data = wrapperFormatterRsp.data;
+  };
+
+  Promise.resolve(routeHelper.perform(req, res, next, '/channel/user/Join', 'r_a_v1_c_2', null, dataFormatterFunc));
+});
+
 /* Join channel by user. */
 router.post('/:channel_id/join', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
   req.decodedParams.apiName = apiName.joinChannel;
