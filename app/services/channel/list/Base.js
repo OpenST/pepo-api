@@ -46,7 +46,6 @@ class ChannelListBase extends ServiceBase {
     oThis.limit = paginationConstants.defaultChannelListPageSize;
 
     oThis.allChannelIds = [];
-    oThis.allChannelMap = {};
     oThis.liveChannelIds = [];
     oThis.nextPageNumber = null;
 
@@ -73,11 +72,45 @@ class ChannelListBase extends ServiceBase {
     const oThis = this;
 
     await oThis._validateAndSanitizeParams();
-    await oThis._getAllChannelIds();
-    await oThis._getLiveChannelIds();
-    await oThis._setChannelIds();
+
+    if (oThis._shouldSearch()) {
+      await oThis._setChannelIdsForSearch();
+    } else {
+      await oThis._setChannelIdsForList();
+    }
+
     await oThis._fetchAllAssociatedEntities();
+
     return oThis._formatResponse();
+  }
+
+  /**
+   * Fetch entities and set channel ids for search.
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _setChannelIdsForList() {
+    const oThis = this;
+
+    await oThis._getAllChannelIds();
+
+    await oThis._getLiveChannelIds();
+
+    const offset = oThis._offset();
+
+    if (oThis._showLiveChannelsOnTop && oThis._isFirstPage) {
+      oThis.channelIds = oThis.liveChannelIds;
+    }
+
+    const currentChannelIds = oThis.allChannelIds.slice(offset, offset + oThis.limit);
+
+    if (oThis.allChannelIds.length > offset + oThis.limit) {
+      oThis.nextPageNumber = oThis.currentPageNumber + 1;
+    }
+
+    oThis.channelIds = [...oThis.channelIds, ...currentChannelIds];
+    oThis.channelIds = basicHelper.uniquate(oThis.channelIds);
   }
 
   /**
@@ -126,60 +159,26 @@ class ChannelListBase extends ServiceBase {
     }
 
     const liveChannelIds = cacheResp.data.ids;
+
+    if (liveChannelIds.length === 0) {
+      return;
+    }
+
+    const allChannelMap = {};
+    for (let i = 0; i < oThis.allChannelIds.length; i++) {
+      allChannelMap[oThis.allChannelIds[i]] = i;
+    }
+
     for (let i = 0; i < liveChannelIds; i++) {
       const cid = liveChannelIds[i];
-      if (oThis.allChannelMap[cid]) {
+      if (allChannelMap[cid]) {
         oThis.liveChannelIds.push(cid);
       }
     }
 
     oThis.liveChannelIds.sort(function(a, b) {
-      return oThis.allChannelMap[a] - oThis.allChannelMap[b];
+      return allChannelMap[a] - allChannelMap[b];
     });
-  }
-
-  /**
-   * Set Channel Ids for current payload.
-   *
-   * @sets oThis.channelIds, oThis.nextPageNumber
-   *
-   * @returns {Promise<never>}
-   * @private
-   */
-  async _setChannelIds() {
-    const oThis = this;
-    if (oThis._shouldSearch()) {
-      await oThis._setChannelIdsForSearch();
-    } else {
-      await oThis._setChannelIdsForList();
-    }
-  }
-
-  /**
-   * Set Channel Ids for current payload of list.
-   *
-   * @sets oThis.channelIds, oThis.nextPageNumber
-   *
-   * @returns {Promise<never>}
-   * @private
-   */
-  async _setChannelIdsForList() {
-    const oThis = this;
-
-    const offset = oThis._offset();
-
-    if (oThis._showLiveChannelsOnTop && oThis._isFirstPage) {
-      oThis.channelIds = oThis.liveChannelIds;
-    }
-
-    const currentChannelIds = oThis.allChannelIds.slice(offset, offset + oThis.limit);
-
-    if (oThis.allChannelIds.length > offset + oThis.limit) {
-      oThis.nextPageNumber = oThis.currentPageNumber + 1;
-    }
-
-    oThis.channelIds = [...oThis.channelIds, ...currentChannelIds];
-    oThis.channelIds = basicHelper.uniquate(oThis.channelIds);
   }
 
   /**

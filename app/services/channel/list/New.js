@@ -44,10 +44,6 @@ class ChannelListNew extends ChannelListBase {
     }
 
     oThis.allChannelIds = cacheResp.data.ids;
-
-    for (let i = 0; i < oThis.allChannelIds.length; i++) {
-      oThis.allChannelMap[oThis.allChannelIds[i]] = i;
-    }
   }
 
   /**
@@ -60,6 +56,8 @@ class ChannelListNew extends ChannelListBase {
    */
   async _setChannelIdsForSearch() {
     const oThis = this;
+
+    await oThis._getAllChannelIds();
 
     if (oThis.allChannelIds.length === 0) {
       return;
@@ -89,7 +87,7 @@ class ChannelListNew extends ChannelListBase {
    */
   _showLiveChannelsOnTop() {
     const oThis = this;
-    return !oThis._shouldSearch;
+    return true;
   }
 }
 

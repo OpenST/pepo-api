@@ -42,10 +42,6 @@ class ChannelListAll extends ChannelListBase {
     }
 
     oThis.allChannelIds = cacheResp.data.ids;
-
-    for (let i = 0; i < oThis.allChannelIds.length; i++) {
-      oThis.allChannelMap[oThis.allChannelIds[i]] = i;
-    }
   }
 
   /**
@@ -58,10 +54,6 @@ class ChannelListAll extends ChannelListBase {
    */
   async _setChannelIdsForSearch() {
     const oThis = this;
-
-    if (oThis.allChannelIds.length === 0) {
-      return;
-    }
 
     const params = {
       offset: oThis._offset(),
