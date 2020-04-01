@@ -93,6 +93,29 @@ class ChannelModel extends ModelBase {
   }
 
   /**
+   * Fetch ids based on trendingRank value in descending order.
+   *
+   * @return {object}
+   */
+  async fetchByTrendingChannelIds() {
+    const oThis = this;
+
+    const channelIds = [];
+
+    const response = await oThis
+      .select('id')
+      .order_by('trending_rank desc')
+      .limit(channelConstants.trendingChannelsLimit)
+      .fire();
+
+    for (let i = 0; i < response.length; i++) {
+      channelIds.push(response[i].id);
+    }
+
+    return { ids: channelIds };
+  }
+
+  /**
    * Fetch all channel ids.
    *
    * @return {object}
