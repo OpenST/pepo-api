@@ -11,7 +11,8 @@ const rootPrefix = '../../../..',
   entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
   basicHelper = require(rootPrefix + '/helpers/basic'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
-  channelConstants = require(rootPrefix + '/lib/globalConstant/channel/channels');
+  channelConstants = require(rootPrefix + '/lib/globalConstant/channel/channels'),
+  ChannelModel = require(rootPrefix + '/app/models/mysql/channel/Channel');
 
 // Declare variables.
 const searchTermMaxLength = 200; // This is to ensure that cache key max is not violated.
@@ -369,10 +370,10 @@ class ChannelListBase extends ServiceBase {
    * @returns {*|result}
    * @private
    */
-  _formatResponse() {
+  async _formatResponse() {
     const oThis = this;
 
-    const responseMetaData = oThis._finalResponse();
+    const responseMetaData = await oThis._finalResponse();
 
     const response = {
       [entityTypeConstants.channelSearchList]: oThis.searchResults,
@@ -397,7 +398,7 @@ class ChannelListBase extends ServiceBase {
    * @returns {Promise<*>}
    * @private
    */
-  _finalResponse() {
+  async _finalResponse() {
     const oThis = this;
 
     const nextPagePayloadKey = {};
@@ -412,8 +413,27 @@ class ChannelListBase extends ServiceBase {
       [paginationConstants.nextPagePayloadKey]: nextPagePayloadKey,
       search_term: oThis.channelPrefix,
       search_kind: 'channels',
-      search_sub_kind: oThis._subKind()
+      search_sub_kind: oThis._subKind(),
+      search_in_all: await oThis._isSearchInAll()
     };
+  }
+
+  /**
+   * It returns 1 if no channels are present otherwise 0.
+   */
+  async _isSearchInAll() {
+    const oThis = this;
+    const params = {
+      limit: 1,
+      offset: 0,
+      channelPrefix: oThis.channelPrefix
+    };
+    const response = await new ChannelModel().searchAllChannelsByPrefix(params);
+    if (oThis.currentPageNumber === 1 && oThis._subKind() !== 'all' && response.channelIds.length === 1) {
+      return 1;
+    }
+
+    return 0;
   }
 
   /**
