@@ -333,6 +333,7 @@ class ChannelUserModel extends ModelBase {
     const dbRows = await oThis
       .select('user_id, channel_id,role')
       .where(['user_id IN (?)', userIds])
+      .where({ status: channelUsersConstants.invertedStatuses[channelUsersConstants.activeStatus] })
       .order_by('user_id asc, role asc, id asc')
       .fire();
 
