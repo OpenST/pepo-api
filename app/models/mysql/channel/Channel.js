@@ -195,7 +195,7 @@ class ChannelModel extends ModelBase {
       .where(['name LIKE ? OR name LIKE ?', queryWithWildCards, queryWithWildCardsSpaceIncluded])
       .where({ id: params.ids })
       .where({ status: channelConstants.invertedStatuses[channelConstants.activeStatus] })
-      .order_by(['ID', params.ids])
+      .order_by(['ID', params.ids], { useField: true })
       .offset(params.offset)
       .limit(params.limit);
 
