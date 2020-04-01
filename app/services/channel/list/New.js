@@ -89,6 +89,17 @@ class ChannelListNew extends ChannelListBase {
     const oThis = this;
     return true;
   }
+
+  /**
+   * Return Sub kind for meta.
+   *
+   * @returns {boolean}
+   * @private
+   */
+  _subKind() {
+    const oThis = this;
+    return 'new';
+  }
 }
 
 module.exports = ChannelListNew;

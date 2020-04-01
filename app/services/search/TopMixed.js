@@ -3,6 +3,9 @@ const rootPrefix = '../../..',
   TagSearch = require(rootPrefix + '/app/services/search/TagSearch'),
   UserSearch = require(rootPrefix + '/app/services/search/UserSearch'),
   ChannelSearch = require(rootPrefix + '/app/services/search/ChannelSearch'),
+  AllChannelList = require(rootPrefix + 'app/services/channel/list/All'),
+  TrendingChannelList = require(rootPrefix + 'app/services/channel/list/Trending'),
+  CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   basicHelper = require(rootPrefix + '/helpers/basic'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
@@ -139,11 +142,18 @@ class MixedTopSearch extends ServiceBase {
   async _getTopChannelResults() {
     const oThis = this;
 
-    const resp = await new ChannelSearch({
-      q: oThis.q,
-      getTopResults: true,
-      current_user: oThis.currentUser
-    }).perform();
+    let resp = null;
+
+    const params = {
+      current_user: oThis.currentUser,
+      q: oThis.q
+    };
+
+    if (!CommonValidators.validateNonBlankString(oThis.q)) {
+      resp = new TrendingChannelList(params).perform();
+    } else {
+      resp = new AllChannelList(params).perform();
+    }
 
     oThis.channelResponses = resp.data;
   }

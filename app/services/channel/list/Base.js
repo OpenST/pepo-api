@@ -411,7 +411,8 @@ class ChannelListBase extends ServiceBase {
     return {
       [paginationConstants.nextPagePayloadKey]: nextPagePayloadKey,
       search_term: oThis.channelPrefix,
-      search_kind: 'channels'
+      search_kind: 'channels',
+      search_sub_kind: oThis._subKind()
     };
   }
 
@@ -470,6 +471,16 @@ class ChannelListBase extends ServiceBase {
    * @private
    */
   _showLiveChannelsOnTop() {
+    throw new Error('Sub-class to implement.');
+  }
+
+  /**
+   * Return Sub kind for meta.
+   *
+   * @returns {boolean}
+   * @private
+   */
+  _subKind() {
     throw new Error('Sub-class to implement.');
   }
 

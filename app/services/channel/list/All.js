@@ -79,6 +79,17 @@ class ChannelListAll extends ChannelListBase {
   _showLiveChannelsOnTop() {
     return false;
   }
+
+  /**
+   * Return Sub kind for meta.
+   *
+   * @returns {boolean}
+   * @private
+   */
+  _subKind() {
+    const oThis = this;
+    return 'all';
+  }
 }
 
 module.exports = ChannelListAll;
