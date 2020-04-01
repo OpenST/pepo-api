@@ -182,7 +182,7 @@ class SlackEventFactory extends ServiceBase {
         break;
       }
       case slackConstants.hideChannelEventType: {
-        const HideChannelEvent = require(rootPrefix + '/app/services/slackEvents/channel/HideChannel');
+        const HideChannelEvent = require(rootPrefix + '/app/services/slackEvents/channel/Hide');
         eventResponse = await new HideChannelEvent({
           eventDataPayload: oThis.eventData.payload,
           eventParams: oThis.eventParams,
@@ -191,9 +191,19 @@ class SlackEventFactory extends ServiceBase {
         break;
       }
       case slackConstants.unhideChannelEventType: {
+        const UnhideChannelEvent = require(rootPrefix + '/app/services/slackEvents/channel/Unhide');
+        eventResponse = await new UnhideChannelEvent({
+          eventDataPayload: oThis.eventData.payload,
+          eventParams: oThis.eventParams
+        }).perform();
         break;
       }
       case slackConstants.deleteChannelEventType: {
+        const DeleteChannelEvent = require(rootPrefix + '/app/services/slackEvents/channel/Delete');
+        eventResponse = await new DeleteChannelEvent({
+          eventDataPayload: oThis.eventData.payload,
+          eventParams: oThis.eventParams
+        }).perform();
         break;
       }
       default: {

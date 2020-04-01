@@ -37,23 +37,55 @@ class HideChannel extends SlackEventBase {
 
     const updateResponse = await new ChannelModel()
       .update({ status: channelConstants.invertedStatuses[channelConstants.inactiveStatus] })
-      .where({ id: channelId })
+      .where({ id: channelId, status: channelConstants.invertedStatuses[channelConstants.activeStatus] })
       .fire();
 
     if (!updateResponse) {
       logger.error(`Error while updating channel to ${channelConstants.inactiveStatus}.`);
-
-      return Promise.reject(
-        responseHelper.paramValidationError({
-          internal_error_identifier: 'a_s_s_c_h_hc_1',
-          api_error_identifier: 'invalid_api_params',
-          params_error_identifiers: ['invalid_channel_id'],
-          debug_options: { channelId: oThis.channelId }
-        })
-      );
+      // Error handling
+      // TODO set slack error
     }
 
     await ChannelModel.flushCache({ ids: [oThis.channelId] });
+  }
+
+  /**
+   * Update payload for slack post request.
+   *
+   * @param {number} actionPos
+   * @param {array} newBlocks
+   *
+   * @returns {Promise<array>}
+   * @private
+   */
+  async _updatedBlocks(actionPos, newBlocks) {
+    const oThis = this;
+
+    logger.log('_updateBlocks start');
+
+    if (oThis.errMsg) {
+      const formattedMsg = '`error:`' + oThis.errMsg;
+
+      const trailingArray = newBlocks.splice(actionPos + 1);
+
+      newBlocks[actionPos + 1] = slackConstants.addTextSection(formattedMsg);
+      newBlocks = newBlocks.concat(trailingArray);
+    } else {
+      const txt = await oThis._textToWrite('Hidden');
+      const newElement = {
+        type: 'context',
+        elements: [
+          {
+            type: 'mrkdwn',
+            text: txt
+          }
+        ]
+      };
+
+      newBlocks[actionPos] = newElement;
+    }
+
+    return newBlocks;
   }
 }
 
