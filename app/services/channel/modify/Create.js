@@ -7,6 +7,7 @@ const rootPrefix = '../../../..',
   createErrorLogsEntry = require(rootPrefix + '/lib/errorLogs/createEntry'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
+  errorLogsConstants = require(rootPrefix + '/lib/globalConstant/errorLogs'),
   channelConstants = require(rootPrefix + '/lib/globalConstant/channel/channels');
 
 /**
@@ -21,9 +22,9 @@ class CreateChannel extends ServiceBase {
    * @param {object} params.current_user
    * @param {number} params.current_user.id
    * @param {number} params.channel_id
-   * @param {string} [params.name]
-   * @param {string} [params.description]
-   * @param {string} [params.tagline]
+   * @param {string} [params.channel_name]
+   * @param {string} [params.channel_description]
+   * @param {string} [params.channel_tagline]
    * @param {string[]} [params.tags]
    * @param {string[]} [params.admin_user_ids]
    * @param {string} [params.cover_image_url]
@@ -42,10 +43,9 @@ class CreateChannel extends ServiceBase {
 
     oThis.currentUserId = params.current_user.id;
 
-    oThis.channelId = params.channel_id;
-    oThis.channelName = params.name;
-    oThis.channelDescription = params.description;
-    oThis.channelTagline = params.tagline;
+    oThis.channelName = params.channel_name;
+    oThis.channelDescription = params.channel_description;
+    oThis.channelTagline = params.channel_tagline;
 
     oThis.channelTagNames = params.tags || [];
     oThis.channelAdminUserIds = params.admin_user_ids || [oThis.currentUserId];
@@ -55,8 +55,8 @@ class CreateChannel extends ServiceBase {
     oThis.coverImageHeight = params.cover_image_height;
     oThis.coverImageWidth = params.cover_image_width;
 
+    oThis.channelId = null;
     oThis.channelPermalink = null;
-    oThis.channel = null;
   }
 
   /**
@@ -77,10 +77,10 @@ class CreateChannel extends ServiceBase {
     return responseHelper.successWithData({ [entityTypeConstants.channel]: updatedChannelEntity });
   }
 
-  _generatePermalink(channelName) {
+  _generatePermalink() {
     const oThis = this;
 
-    oThis.channelPermalink = channelName
+    oThis.channelPermalink = oThis.channelName
       .trim() // Remove surrounding whitespace.
       .toLowerCase() // Lowercase.
       .replace(/[^a-z0-9]+/g, '-') // Find everything that is not a lowercase letter or number, one or more times, globally, and replace it with a dash.
@@ -158,7 +158,6 @@ class CreateChannel extends ServiceBase {
 
   /**
    * Modify channel.modifyChannelResponse
-   * @sets oThis.channel
    *
    * @returns {Promise<object>}
    * @private
@@ -166,7 +165,20 @@ class CreateChannel extends ServiceBase {
   async _modifyChannel() {
     const oThis = this;
 
-    const modifyChannelResponse = await new ModifyChannel(oThis.updateRequiredParameters).perform();
+    // Don't send name here since name is used while channel create.
+    const modifyChannelResponse = await new ModifyChannel({
+      channelId: oThis.channelId,
+      channelPermalink: oThis.channelPermalink,
+      description: oThis.channelDescription,
+      tagline: oThis.channelTagline,
+      tagNames: oThis.channelTagNames,
+      adminUserIds: oThis.channelAdminUserIds,
+      coverImageUrl: oThis.coverImageUrl,
+      coverImageFileSize: oThis.coverImageFileSize,
+      coverImageHeight: oThis.coverImageHeight,
+      coverImageWidth: oThis.coverImageWidth
+    }).perform();
+
     if (modifyChannelResponse.isFailure()) {
       await createErrorLogsEntry.perform(modifyChannelResponse, errorLogsConstants.highSeverity);
 
