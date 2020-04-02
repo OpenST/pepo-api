@@ -119,8 +119,7 @@ class ChannelTrendingRankGenerator extends CronBase {
         userCount: 0,
         postCount: 0,
         replyCount: 0,
-        transactionCount: 0,
-        replyTransactionCount: 0
+        transactionCount: 0
       };
     }
   }
@@ -375,9 +374,8 @@ class ChannelTrendingRankGenerator extends CronBase {
       for (let i = 0; i < records.length; i++) {
         const record = records[i];
 
-        oThis.channelMetric[record.channel_id].transactionCount += oThis.videoMetric[record.video_id].transactionCount;
-
-        oThis.channelMetric[record.channel_id].replyTransactionCount +=
+        oThis.channelMetric[record.channel_id].transactionCount +=
+          oThis.videoMetric[record.video_id].transactionCount +
           oThis.videoMetric[record.video_id].replyTransactionCount;
 
         oThis.channelMetric[record.channel_id].replyCount += oThis.videoMetric[record.video_id].replyCount;
@@ -397,53 +395,54 @@ class ChannelTrendingRankGenerator extends CronBase {
   async _createChannelRankMetric() {
     const oThis = this;
 
-    const channels = Object.keys(oThis.channelMetric);
+    const channelIds = oThis.channelIds;
 
     // sort channel by user
-    channels.sort(function(c1, c2) {
-      return -(oThis.channelMetric[c1].userCount - oThis.channelMetric[c2].userCount);
+    channelIds.sort(function(c1, c2) {
+      const val = -(oThis.channelMetric[c1].userCount - oThis.channelMetric[c2].userCount);
+      return val == 0 ? -(c1 - c2) : val;
     });
 
-    for (let i = 0; i < channels.length; i++) {
-      oThis.channelRankMetric[channels[i]] = oThis.channelRankMetric[channels[i]] || {
+    for (let i = 0; i < channelIds.length; i++) {
+      oThis.channelRankMetric[channelIds[i]] = oThis.channelRankMetric[channelIds[i]] || {
         rankByUser: -1,
         rankByPost: -1,
         rankByReply: -1,
-        rankByTransaction: -1
+        rankByTransaction: -1,
+        totalScore: -1
       };
 
-      oThis.channelRankMetric[channels[i]].rankByUser = i + 1;
+      oThis.channelRankMetric[channelIds[i]].rankByUser = i + 1;
     }
 
     // sort channel by posts
-    channels.sort(function(c1, c2) {
-      return -(oThis.channelMetric[c1].postCount - oThis.channelMetric[c2].postCount);
+    channelIds.sort(function(c1, c2) {
+      const val = -(oThis.channelMetric[c1].postCount - oThis.channelMetric[c2].postCount);
+      return val == 0 ? -(c1 - c2) : val;
     });
 
-    for (let i = 0; i < channels.length; i++) {
-      oThis.channelRankMetric[channels[i]].rankByPost = i + 1;
+    for (let i = 0; i < channelIds.length; i++) {
+      oThis.channelRankMetric[channelIds[i]].rankByPost = i + 1;
     }
 
     // sort channel by reply
-    channels.sort(function(c1, c2) {
-      return -(oThis.channelMetric[c1].replyCount - oThis.channelMetric[c2].replyCount);
+    channelIds.sort(function(c1, c2) {
+      const val = -(oThis.channelMetric[c1].replyCount - oThis.channelMetric[c2].replyCount);
+      return val == 0 ? -(c1 - c2) : val;
     });
 
-    for (let i = 0; i < channels.length; i++) {
-      oThis.channelRankMetric[channels[i]].rankByReply = i + 1;
+    for (let i = 0; i < channelIds.length; i++) {
+      oThis.channelRankMetric[channelIds[i]].rankByReply = i + 1;
     }
 
     // sort channel by transactions
-    channels.sort(function(c1, c2) {
-      const c1TransactionCount =
-        oThis.channelMetric[c1].transactionCount + oThis.channelMetric[c1].replyTransactionCount;
-      const c2TransactionCount =
-        oThis.channelMetric[c2].transactionCount + oThis.channelMetric[c2].replyTransactionCount;
-      return -(c1TransactionCount - c2TransactionCount);
+    channelIds.sort(function(c1, c2) {
+      const val = -(oThis.channelMetric[c1].transactionCount - oThis.channelMetric[c2].transactionCount);
+      return val == 0 ? -(c1 - c2) : val;
     });
 
-    for (let i = 0; i < channels.length; i++) {
-      oThis.channelRankMetric[channels[i]].rankByTransaction = i + 1;
+    for (let i = 0; i < channelIds.length; i++) {
+      oThis.channelRankMetric[channelIds[i]].rankByTransaction = i + 1;
     }
   }
 
@@ -458,20 +457,31 @@ class ChannelTrendingRankGenerator extends CronBase {
   async _rankChannels() {
     const oThis = this;
 
-    const channels = Object.keys(oThis.channelRankMetric);
+    for (let i = 0; i < oThis.channelIds.length; i++) {
+      const cid = oThis.channelIds[i];
+      oThis.channelRankMetric[cid].totalScore = oThis._score(cid);
+    }
 
-    channels.sort(function(c1, c2) {
-      return -(oThis._score(c1) - oThis._score(c2));
+    const channelIds = oThis.channelIds;
+
+    channelIds.sort(function(c1, c2) {
+      const val = -(oThis.channelRankMetric[c1].totalScore - oThis.channelRankMetric[c2].totalScore);
+      return val == 0 ? -(c1 - c2) : val;
     });
 
-    for (let i = 0; i < channels.length; i++) {
-      oThis.channelRank[channels[i]] = i + 1;
+    for (let i = 0; i < channelIds.length; i++) {
+      oThis.channelRank[channelIds[i]] = i + 1;
     }
   }
 
-  async _score(rankMetric) {
-    const { rankByUser, rankByPost, rankByReply, rankByTransaction } = rankMetric;
-    return rankByUser * 0.2 + rankByPost * 0.25 + rankByReply * 0.25 + rankByTransaction * 0.3;
+  async _score(channelId) {
+    const rankData = oThis.channelRankMetric[channelId];
+    return (
+      rankData.rankByUser * 0.2 +
+      rankData.rankByPost * 0.25 +
+      rankData.rankByReply * 0.25 +
+      rankData.rankByTransaction * 0.3
+    );
   }
 
   /**
