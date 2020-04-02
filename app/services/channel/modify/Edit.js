@@ -66,8 +66,7 @@ class EditChannel extends ServiceBase {
 
     oThis.updateRequiredParameters = {
       channelId: oThis.channelId,
-      tagNames: oThis.channelTagNames,
-      channelPermalink: oThis.channel.permalink
+      tagNames: oThis.channelTagNames
     };
   }
 
@@ -174,6 +173,7 @@ class EditChannel extends ServiceBase {
 
     oThis.channelTaglineId = oThis.channel.taglineId;
     oThis.channelDescriptionId = oThis.channel.descriptionId;
+    oThis.updateRequiredParameters.channelPermalink = oThis.channel.permalink;
   }
 
   /**
