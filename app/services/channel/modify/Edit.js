@@ -77,19 +77,33 @@ class EditChannel extends ServiceBase {
   async _asyncPerform() {
     const oThis = this;
 
-    oThis._sanitizeInputParameters();
+    await oThis._validateAndSanitize();
 
-    await oThis._validateExistingChannel();
-
-    await oThis._validateCurrentUserChannelRelations();
-
-    await Promise.all([oThis._validateCoverImageParameters(), oThis._fetchAssociatedEntities()]);
+    await oThis._fetchAssociatedEntities();
 
     oThis._decideUpdateRequiredParameters();
 
     const updatedChannelEntity = await oThis._modifyChannel();
 
     return responseHelper.successWithData({ [entityTypeConstants.channel]: updatedChannelEntity });
+  }
+
+  /**
+   * Validate and sanitize input parameters.
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _validateAndSanitize() {
+    const oThis = this;
+
+    oThis._sanitizeInputParameters();
+
+    await oThis._validateExistingChannel();
+
+    await oThis._validateCurrentUserChannelRelations();
+
+    await oThis._validateCoverImageParameters();
   }
 
   /**
