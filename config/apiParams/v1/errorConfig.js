@@ -462,7 +462,7 @@ const v1ErrorConfig = {
   invalid_channel_id: {
     parameter: 'channel_id',
     code: 'invalid',
-    message: 'This community does not exist..'
+    message: 'This community does not exist.'
   },
 
   invalid_channel_name: {

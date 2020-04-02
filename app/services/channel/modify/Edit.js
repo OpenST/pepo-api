@@ -168,7 +168,6 @@ class EditChannel extends ServiceBase {
     }
 
     oThis.channelTaglineId = oThis.channel.taglineId;
-
     oThis.channelDescriptionId = oThis.channel.descriptionId;
   }
 
