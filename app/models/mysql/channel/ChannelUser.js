@@ -379,10 +379,6 @@ class ChannelUserModel extends ModelBase {
       const ChannelUserByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelUserByUserIds');
       promisesArray.push(new ChannelUserByUserIdsCache({ userIds: [params.userId] }).clear());
 
-      const ManageChannelIdsByUserIdsCache = require(rootPrefix +
-        '/lib/cacheManagement/single/ManageChannelIdsByUserIds');
-      promisesArray.push(new ManageChannelIdsByUserIdsCache({ userId: params.userId }).clear());
-
       const ChannelIdsByUserCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelIdsByUser');
       promisesArray.push(new ChannelIdsByUserCache({ userIds: [params.userId] }).clear());
     }
