@@ -250,7 +250,7 @@ class GetChannel extends ServiceBase {
       id: oThis.channelId,
       canStartMeeting: 0,
       canJoinMeeting: 0,
-      canEdit: oThis.currentUserChannelRelations[oThis.channelId].isAdmin,
+      canEdit: 0,
       updatedAt: Math.round(new Date() / 1000)
     };
 
@@ -270,6 +270,13 @@ class GetChannel extends ServiceBase {
       oThis.currentUserChannelRelations[oThis.channelId].isAdmin
     ) {
       oThis.channelAllowedActions[oThis.channelId].canStartMeeting = 1;
+    }
+
+    if (
+      CommonValidators.validateNonEmptyObject(oThis.currentUser) &&
+      oThis.currentUserChannelRelations[oThis.channelId].isAdmin
+    ) {
+      oThis.channelAllowedActions[oThis.channelId].canEdit = 1;
     }
   }
 
