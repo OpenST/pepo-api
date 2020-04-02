@@ -11,26 +11,26 @@ const rootPrefix = '../../../..',
   channelConstants = require(rootPrefix + '/lib/globalConstant/channel/channels');
 
 /**
- * Class to edit channel.
+ * Class to create channel.
  *
  * @class CreateChannel
  */
 class CreateChannel extends ServiceBase {
   /**
-   * Constructor to edit channel.
+   * Constructor to create channel.
    *
    * @param {object} params.current_user
    * @param {number} params.current_user.id
    * @param {number} params.channel_id
-   * @param {string} [params.channel_name]
-   * @param {string} [params.channel_description]
-   * @param {string} [params.channel_tagline]
-   * @param {string[]} [params.tags]
+   * @param {string} params.channel_name
+   * @param {string} params.channel_tagline
+   * @param {string} params.channel_description
+   * @param {string[]} params.channel_tags
    * @param {string[]} [params.admin_user_ids]
-   * @param {string} [params.cover_image_url]
-   * @param {number} [params.cover_image_file_size]
-   * @param {number} [params.cover_image_height]
-   * @param {number} [params.cover_image_width]
+   * @param {string} params.cover_image_url
+   * @param {number} params.cover_image_file_size
+   * @param {number} params.cover_image_height
+   * @param {number} params.cover_image_width
    *
    * @augments ServiceBase
    *
@@ -46,14 +46,13 @@ class CreateChannel extends ServiceBase {
     oThis.channelName = params.channel_name;
     oThis.channelDescription = params.channel_description;
     oThis.channelTagline = params.channel_tagline;
-
-    oThis.channelTagNames = params.tags || [];
-    oThis.channelAdminUserIds = params.admin_user_ids || [oThis.currentUserId];
-
+    oThis.channelTagNames = params.channel_tags;
     oThis.coverImageUrl = params.cover_image_url;
     oThis.coverImageFileSize = params.cover_image_file_size;
     oThis.coverImageHeight = params.cover_image_height;
     oThis.coverImageWidth = params.cover_image_width;
+
+    oThis.channelAdminUserIds = [oThis.currentUserId];
 
     oThis.channelId = null;
     oThis.channelPermalink = null;
@@ -77,6 +76,13 @@ class CreateChannel extends ServiceBase {
     return responseHelper.successWithData({ [entityTypeConstants.channel]: updatedChannelEntity });
   }
 
+  /**
+   * Generate channel permalink.
+   *
+   * @sets oThis.channelPermalink
+   *
+   * @private
+   */
   _generatePermalink() {
     const oThis = this;
 
@@ -157,7 +163,7 @@ class CreateChannel extends ServiceBase {
   }
 
   /**
-   * Modify channel.modifyChannelResponse
+   * Modify channel.
    *
    * @returns {Promise<object>}
    * @private

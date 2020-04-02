@@ -1917,7 +1917,7 @@ const v1Signature = {
         validatorMethods: ['validateChannelDescription', 'validateStopWords']
       },
       {
-        parameter: 'tags',
+        parameter: 'channel_tags',
         validatorMethods: ['validateChannelTagsArray']
       },
       {
@@ -1966,7 +1966,7 @@ const v1Signature = {
         validatorMethods: ['validateChannelDescription', 'validateStopWords']
       },
       {
-        parameter: 'tags',
+        parameter: 'channel_tags',
         validatorMethods: ['validateChannelTagsArray']
       }
     ],
