@@ -235,7 +235,7 @@ class ChannelTrendingRankGenerator extends CronBase {
       .select('min(id) as minId')
       .where({
         kind: [
-          transactionConstants.invertedKinds[transactionConstants.userTransactionOnReplyKind],
+          transactionConstants.invertedKinds[transactionConstants.userTransactionKind],
           transactionConstants.invertedKinds[transactionConstants.userTransactionOnReplyKind]
         ]
       })
@@ -249,6 +249,10 @@ class ChannelTrendingRankGenerator extends CronBase {
     }
 
     let minId = records[0].minId;
+
+    if (!minId) {
+      return;
+    }
 
     while (true) {
       const batchRecords = await new TransactionModel()
