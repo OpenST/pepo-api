@@ -1,13 +1,16 @@
 const rootPrefix = '../../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
+  ModifyChannel = require(rootPrefix + '/lib/channel/ModifyChannel'),
   ChannelModel = require(rootPrefix + '/app/models/mysql/channel/Channel'),
   ChannelStatModel = require(rootPrefix + '/app/models/mysql/channel/ChannelStat'),
-  ModifyChannel = require(rootPrefix + '/lib/channel/ModifyChannel'),
+  bgJob = require(rootPrefix + '/lib/rabbitMqEnqueue/bgJob'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
-  createErrorLogsEntry = require(rootPrefix + '/lib/errorLogs/createEntry'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
-  entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
+  bgJobConstants = require(rootPrefix + '/lib/globalConstant/bgJob'),
+  slackConstants = require(rootPrefix + '/lib/globalConstant/slack'),
+  createErrorLogsEntry = require(rootPrefix + '/lib/errorLogs/createEntry'),
   errorLogsConstants = require(rootPrefix + '/lib/globalConstant/errorLogs'),
+  entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
   channelConstants = require(rootPrefix + '/lib/globalConstant/channel/channels');
 
 /**
@@ -76,6 +79,8 @@ class CreateChannel extends ServiceBase {
     await oThis._createEntryInChannelStats();
 
     const updatedChannelEntity = await oThis._modifyChannel();
+
+    await oThis._performSlackChannelMonitoringBgJob();
 
     return responseHelper.successWithData({ [entityTypeConstants.channel]: updatedChannelEntity });
   }
@@ -211,6 +216,23 @@ class CreateChannel extends ServiceBase {
     }
 
     return modifyChannelResponse.data.channel;
+  }
+
+  /**
+   * Perform slack channel monitoring job enqueuing.
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _performSlackChannelMonitoringBgJob() {
+    const oThis = this;
+
+    await bgJob.enqueue(bgJobConstants.slackChannelMonitoringJobTopic, {
+      source: slackConstants.userSource,
+      source_id: oThis.currentUserId,
+      channel_id: oThis.channelId,
+      action: slackConstants.channelCreated
+    });
   }
 }
 

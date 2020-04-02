@@ -5,7 +5,10 @@ const rootPrefix = '../../../..',
   FetchAssociatedEntities = require(rootPrefix + '/lib/FetchAssociatedEntities'),
   ChannelByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelByIds'),
   GetCurrentUserChannelRelationsLib = require(rootPrefix + '/lib/channel/GetCurrentUserChannelRelations'),
+  bgJob = require(rootPrefix + '/lib/rabbitMqEnqueue/bgJob'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
+  bgJobConstants = require(rootPrefix + '/lib/globalConstant/bgJob'),
+  slackConstants = require(rootPrefix + '/lib/globalConstant/slack'),
   createErrorLogsEntry = require(rootPrefix + '/lib/errorLogs/createEntry'),
   errorLogsConstants = require(rootPrefix + '/lib/globalConstant/errorLogs'),
   entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
@@ -84,6 +87,8 @@ class EditChannel extends ServiceBase {
     oThis._decideUpdateRequiredParameters();
 
     const updatedChannelEntity = await oThis._modifyChannel();
+
+    await oThis._performSlackChannelMonitoringBgJob();
 
     return responseHelper.successWithData({ [entityTypeConstants.channel]: updatedChannelEntity });
   }
@@ -306,6 +311,23 @@ class EditChannel extends ServiceBase {
     }
 
     return modifyChannelResponse.data.channel;
+  }
+
+  /**
+   * Perform slack channel monitoring job enqueuing.
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _performSlackChannelMonitoringBgJob() {
+    const oThis = this;
+
+    await bgJob.enqueue(bgJobConstants.slackChannelMonitoringJobTopic, {
+      source: slackConstants.userSource,
+      source_id: oThis.currentUserId,
+      channel_id: oThis.channelId,
+      action: slackConstants.channelUpdated
+    });
   }
 }
 
