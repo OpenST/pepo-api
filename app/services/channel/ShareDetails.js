@@ -68,7 +68,7 @@ class ShareDetails extends ServiceBase {
   async _fetchChannelDetails() {
     const oThis = this;
 
-    let lowercaseChPermalink = oThis.channelPermalink.toLowerCase();
+    const lowercaseChPermalink = oThis.channelPermalink.toLowerCase();
 
     // If channel id is not passed and permalink is passed.
     if (!oThis.channelId) {
@@ -102,7 +102,7 @@ class ShareDetails extends ServiceBase {
 
     if (
       !CommonValidators.validateNonEmptyObject(channelDetails) ||
-      channelDetails.status === channelConstants.inactiveStatus ||
+      channelDetails.status !== channelConstants.activeStatus ||
       !channelDetails.name
     ) {
       return Promise.reject(
