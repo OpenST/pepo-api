@@ -1,31 +1,13 @@
 const rootPrefix = '../../../..',
-  FilterTags = require(rootPrefix + '/lib/FilterOutTags'),
   ServiceBase = require(rootPrefix + '/app/services/Base'),
-  TagModel = require(rootPrefix + '/app/models/mysql/Tag'),
-  TextModel = require(rootPrefix + '/app/models/mysql/Text'),
-  UserModel = require(rootPrefix + '/app/models/mysql/User'),
-  FilterOutLinks = require(rootPrefix + '/lib/FilterOutLinks'),
-  CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   ChannelModel = require(rootPrefix + '/app/models/mysql/channel/Channel'),
-  AddInChannelLib = require(rootPrefix + '/lib/channelTagVideo/AddTagInChannel'),
   ChannelStatModel = require(rootPrefix + '/app/models/mysql/channel/ChannelStat'),
-  ChangeChannelUserRoleLib = require(rootPrefix + '/lib/channel/ChangeChannelUserRole'),
-  AdminActivityLogModel = require(rootPrefix + '/app/models/mysql/admin/AdminActivityLog'),
-  ChannelByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelByIds'),
-  ChannelByPermalinksCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelByPermalinks'),
-  imageLib = require(rootPrefix + '/lib/imageLib'),
-  tagConstants = require(rootPrefix + '/lib/globalConstant/tag'),
+  ModifyChannel = require(rootPrefix + '/lib/channel/ModifyChannel'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
+  createErrorLogsEntry = require(rootPrefix + '/lib/errorLogs/createEntry'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
-  textConstants = require(rootPrefix + '/lib/globalConstant/text'),
-  imageConstants = require(rootPrefix + '/lib/globalConstant/image'),
-  channelConstants = require(rootPrefix + '/lib/globalConstant/channel/channels'),
-  channelUserConstants = require(rootPrefix + '/lib/globalConstant/channel/channelUsers'),
-  adminActivityLogConstants = require(rootPrefix + '/lib/globalConstant/admin/adminActivityLogs');
-
-// Declare constants.
-const ORIGINAL_IMAGE_WIDTH = 1500;
-const ORIGINAL_IMAGE_HEIGHT = 642;
+  entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
+  channelConstants = require(rootPrefix + '/lib/globalConstant/channel/channels');
 
 /**
  * Class to edit channel.
@@ -61,13 +43,12 @@ class CreateChannel extends ServiceBase {
     oThis.currentUserId = params.current_user.id;
 
     oThis.channelId = params.channel_id;
-
     oThis.channelName = params.name;
     oThis.channelDescription = params.description;
     oThis.channelTagline = params.tagline;
 
     oThis.channelTagNames = params.tags || [];
-    oThis.channelAdminUserIds = params.admin_user_ids || [];
+    oThis.channelAdminUserIds = params.admin_user_ids || [oThis.currentUserId];
 
     oThis.coverImageUrl = params.cover_image_url;
     oThis.coverImageFileSize = params.cover_image_file_size;
@@ -87,15 +68,24 @@ class CreateChannel extends ServiceBase {
   async _asyncPerform() {
     const oThis = this;
 
-    await oThis._generatePermalink();
+    oThis._generatePermalink();
     await oThis._createNewChannel();
     await oThis._createEntryInChannelStats();
 
-    return responseHelper.successWithData({ channel: oThis.channel });
+    const updatedChannelEntity = await oThis._modifyChannel();
+
+    return responseHelper.successWithData({ [entityTypeConstants.channel]: updatedChannelEntity });
   }
 
-  async _generatePermalink() {
-    return '';
+  _generatePermalink(channelName) {
+    const oThis = this;
+
+    oThis.channelPermalink = channelName
+      .trim() // Remove surrounding whitespace.
+      .toLowerCase() // Lowercase.
+      .replace(/[^a-z0-9]+/g, '-') // Find everything that is not a lowercase letter or number, one or more times, globally, and replace it with a dash.
+      .replace(/^-+/, '') // Remove all dashes from the beginning of the string.
+      .replace(/-+$/, ''); // Remove all dashes from the end of the string.
   }
 
   /**
@@ -167,20 +157,23 @@ class CreateChannel extends ServiceBase {
   }
 
   /**
-   * Log admin activity.
+   * Modify channel.modifyChannelResponse
+   * @sets oThis.channel
    *
-   * @returns {Promise<void>}
+   * @returns {Promise<object>}
    * @private
    */
-  async logAdminActivity() {
+  async _modifyChannel() {
     const oThis = this;
 
-    await new AdminActivityLogModel().insertAction({
-      adminId: oThis.currentAdminId,
-      actionOn: oThis.channelId,
-      extraData: JSON.stringify({ cid: [oThis.channelId], chPml: oThis.channelPermalink }),
-      action: adminActivityLogConstants.createEditCommunityEntity
-    });
+    const modifyChannelResponse = await new ModifyChannel(oThis.updateRequiredParameters).perform();
+    if (modifyChannelResponse.isFailure()) {
+      await createErrorLogsEntry.perform(modifyChannelResponse, errorLogsConstants.highSeverity);
+
+      return Promise.reject(modifyChannelResponse);
+    }
+
+    return modifyChannelResponse.data.channel;
   }
 }
 
