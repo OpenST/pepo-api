@@ -52,7 +52,7 @@ class CreateChannel extends ServiceBase {
     oThis.coverImageHeight = params.cover_image_height;
     oThis.coverImageWidth = params.cover_image_width;
 
-    oThis.channelAdminUserIds = [oThis.currentUserId];
+    oThis.channelAdminUserIds = params.admin_user_ids || [oThis.currentUserId];
 
     oThis.channelId = null;
     oThis.channelPermalink = null;
