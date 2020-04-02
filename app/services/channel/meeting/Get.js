@@ -6,6 +6,8 @@ const rootPrefix = '../../../..',
   ChannelByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelByIds'),
   MeetingByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/meeting/MeetingByIds'),
   TokenUserDetailByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TokenUserByUserIds'),
+  TwitterUserByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TwitterUserByIds'),
+  TwitterUserByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/TwitterUserByUserIds'),
   GetCurrentUserChannelRelationsLib = require(rootPrefix + '/lib/channel/GetCurrentUserChannelRelations'),
   ChannelByPermalinksCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelByPermalinks'),
   ChannelTagByChannelIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelTagByChannelIds'),
@@ -63,6 +65,8 @@ class GetChannelMeeting extends ServiceBase {
     oThis.tokenUsersByUserIdMap = {};
 
     oThis.imageDetails = {};
+
+    oThis.twitterUsersMap = {};
   }
 
   /**
@@ -82,6 +86,7 @@ class GetChannelMeeting extends ServiceBase {
       oThis._fetchCurrentUserChannelRelations(),
       oThis._fetchChannelTagIds(),
       oThis._fetchUserDetails(),
+      oThis._fetchHostTwitterDetails(),
       oThis._fetchTokenUsers()
     ]);
 
@@ -276,6 +281,40 @@ class GetChannelMeeting extends ServiceBase {
   }
 
   /**
+   * Fetch twitter handle.
+   *
+   * @sets oThis.twitterUsersMap
+   *
+   * @returns {Promise<never>}
+   * @private
+   */
+  async _fetchHostTwitterDetails() {
+    const oThis = this;
+
+    const twitterUserByUserIdsCacheResponse = await new TwitterUserByUserIdsCache({
+      userIds: [oThis.hostUserId]
+    }).fetch();
+    if (twitterUserByUserIdsCacheResponse.isFailure()) {
+      return Promise.reject(twitterUserByUserIdsCacheResponse);
+    }
+
+    const hostTwitterId = twitterUserByUserIdsCacheResponse.data[oThis.hostUserId].id;
+
+    if (hostTwitterId) {
+      const twitterUserByIdsCacheResponse = await new TwitterUserByIdsCache({ ids: [hostTwitterId] }).fetch();
+
+      if (twitterUserByIdsCacheResponse.isFailure()) {
+        return Promise.reject(twitterUserByIdsCacheResponse);
+      }
+
+      const twitterUser = twitterUserByIdsCacheResponse.data[hostTwitterId];
+      if (twitterUser) {
+        oThis.twitterUsersMap[oThis.hostUserId] = twitterUser;
+      }
+    }
+  }
+
+  /**
    * Fetch token users.
    *
    * @sets oThis.tokenUsersByUserIdMap
@@ -339,6 +378,7 @@ class GetChannelMeeting extends ServiceBase {
       [entityTypeConstants.channelDetailsMap]: { [oThis.channel.id]: oThis.channel },
       [entityTypeConstants.channelIdToTagIdsMap]: { [oThis.channel.id]: oThis.tagIds },
       [entityTypeConstants.currentUserChannelRelationsMap]: oThis.currentUserChannelRelations,
+      [entityTypeConstants.twitterUsersMap]: oThis.twitterUsersMap,
       usersByIdMap: oThis.userDetails,
       tokenUsersByUserIdMap: oThis.tokenUsersByUserIdMap,
       [entityTypeConstants.textsMap]: oThis.texts,
