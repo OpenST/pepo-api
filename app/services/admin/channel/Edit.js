@@ -645,7 +645,7 @@ class EditChannel extends ServiceBase {
     const enqueueObject = {
       source: 'admin',
       source_id: oThis.currentAdminId,
-      channelId: oThis.channelId
+      channel_id: oThis.channelId
     };
 
     if (oThis.isEdit) {
