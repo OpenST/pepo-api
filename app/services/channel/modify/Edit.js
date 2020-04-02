@@ -98,15 +98,26 @@ class EditChannel extends ServiceBase {
 
     oThis.channel = channelCacheResponse.data[oThis.channelId];
 
-    if (
-      !CommonValidators.validateNonEmptyObject(oThis.channel) ||
-      oThis.channel.status !== channelConstants.activeStatus
-    ) {
+    if (!CommonValidators.validateNonEmptyObject(oThis.channel)) {
       return Promise.reject(
         responseHelper.paramValidationError({
           internal_error_identifier: 'a_s_c_m_e_vec_1',
           api_error_identifier: 'invalid_api_params',
           params_error_identifiers: ['invalid_channel_id'],
+          debug_options: {
+            channelId: oThis.channelId,
+            channelDetails: oThis.channel
+          }
+        })
+      );
+    }
+
+    if (oThis.channel.status !== channelConstants.activeStatus) {
+      return Promise.reject(
+        responseHelper.paramValidationError({
+          internal_error_identifier: 'a_s_c_m_e_vec_1',
+          api_error_identifier: 'invalid_api_params',
+          params_error_identifiers: ['channel_not_active'],
           debug_options: {
             channelId: oThis.channelId,
             channelDetails: oThis.channel

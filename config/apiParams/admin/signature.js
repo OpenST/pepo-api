@@ -429,7 +429,7 @@ const adminSignature = {
     optional: [
       {
         parameter: 'name',
-        validatorMethods: ['validateChannelTitle']
+        validatorMethods: ['validateChannelName']
       },
       {
         parameter: 'description',

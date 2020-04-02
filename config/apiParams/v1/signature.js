@@ -1906,7 +1906,7 @@ const v1Signature = {
       },
       {
         parameter: 'channel_name',
-        validatorMethods: ['validateChannelTitle', 'validateStopWords']
+        validatorMethods: ['validateChannelName', 'validateStopWords']
       },
       {
         parameter: 'channel_tagline',
@@ -1955,7 +1955,7 @@ const v1Signature = {
       },
       {
         parameter: 'channel_name',
-        validatorMethods: ['validateChannelTitle', 'validateStopWords']
+        validatorMethods: ['validateChannelName', 'validateStopWords']
       },
       {
         parameter: 'channel_tagline',

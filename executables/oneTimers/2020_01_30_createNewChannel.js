@@ -181,7 +181,7 @@ class CreateNewChannel {
   async createNewChannel() {
     const oThis = this;
 
-    if (!CommonValidators.validateChannelTitle(oThis.channelName)) {
+    if (!CommonValidators.validateChannelName(oThis.channelName)) {
       return Promise.reject(new Error('Invalid channel name.'));
     }
 

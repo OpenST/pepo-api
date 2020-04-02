@@ -462,13 +462,13 @@ const v1ErrorConfig = {
   invalid_channel_id: {
     parameter: 'channel_id',
     code: 'invalid',
-    message: 'This community does not exist or is inactive.'
+    message: 'This community does not exist..'
   },
 
   invalid_channel_name: {
     parameter: 'channel_name',
     code: 'invalid',
-    message: 'Channel Name is already taken.'
+    message: 'The community name contains unsupported characters.'
   },
 
   invalid_meeting_id: {
@@ -480,7 +480,7 @@ const v1ErrorConfig = {
   channel_not_active: {
     parameter: 'channel_id',
     code: 'invalid',
-    message: 'The channel has been disabled.'
+    message: 'The community has been disabled.'
   },
 
   missing_video_url: {
