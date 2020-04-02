@@ -52,6 +52,9 @@ class ChannelTrendingRankGenerator extends CronBase {
     oThis.channelMetric = {};
     oThis.videoMetric = {};
     oThis.replyMetric = {};
+
+    oThis.channelRankMetric = {};
+    oThis.channelRank = {};
   }
 
   async _start() {
@@ -80,8 +83,13 @@ class ChannelTrendingRankGenerator extends CronBase {
 
     // This will aggregate videos from same channel and merged
     // transactionCount, replyTransactionCount and replyCount
-
     await oThis._associateVideoWithChannels();
+
+    // Creates individual ranks by user, post, reply and transactions
+    await oThis._createChannelRankMetric();
+
+    // Create final rank for a channel by score calculation logic.
+    await oThis._rankChannels();
 
     oThis.canExit = true;
 
@@ -376,6 +384,94 @@ class ChannelTrendingRankGenerator extends CronBase {
       }
       index = index + BATCH_SIZE;
     }
+  }
+
+  /**
+   *
+   * Evaluate individual rank by user, post, reply and transactions.
+   * sets oThis.channelRankMetric
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _createChannelRankMetric() {
+    const oThis = this;
+
+    const channels = Object.keys(oThis.channelMetric);
+
+    // sort channel by user
+    channels.sort(function(c1, c2) {
+      return -(oThis.channelMetric[c1].userCount - oThis.channelMetric[c2].userCount);
+    });
+
+    for (let i = 0; i < channels.length; i++) {
+      oThis.channelRankMetric[channels[i]] = oThis.channelRankMetric[channels[i]] || {
+        rankByUser: -1,
+        rankByPost: -1,
+        rankByReply: -1,
+        rankByTransaction: -1
+      };
+
+      oThis.channelRankMetric[channels[i]].rankByUser = i + 1;
+    }
+
+    // sort channel by posts
+    channels.sort(function(c1, c2) {
+      return -(oThis.channelMetric[c1].postCount - oThis.channelMetric[c2].postCount);
+    });
+
+    for (let i = 0; i < channels.length; i++) {
+      oThis.channelRankMetric[channels[i]].rankByPost = i + 1;
+    }
+
+    // sort channel by reply
+    channels.sort(function(c1, c2) {
+      return -(oThis.channelMetric[c1].replyCount - oThis.channelMetric[c2].replyCount);
+    });
+
+    for (let i = 0; i < channels.length; i++) {
+      oThis.channelRankMetric[channels[i]].rankByReply = i + 1;
+    }
+
+    // sort channel by transactions
+    channels.sort(function(c1, c2) {
+      const c1TransactionCount =
+        oThis.channelMetric[c1].transactionCount + oThis.channelMetric[c1].replyTransactionCount;
+      const c2TransactionCount =
+        oThis.channelMetric[c2].transactionCount + oThis.channelMetric[c2].replyTransactionCount;
+      return -(c1TransactionCount - c2TransactionCount);
+    });
+
+    for (let i = 0; i < channels.length; i++) {
+      oThis.channelRankMetric[channels[i]].rankByTransaction = i + 1;
+    }
+  }
+
+  /**
+   * Evaluate final channel rank
+   *
+   * Sets oThis.channelRank
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _rankChannels() {
+    const oThis = this;
+
+    const channels = Object.keys(oThis.channelRankMetric);
+
+    channels.sort(function(c1, c2) {
+      return -(oThis._score(c1) - oThis._score(c2));
+    });
+
+    for (let i = 0; i < channels.length; i++) {
+      oThis.channelRank[channels[i]] = i + 1;
+    }
+  }
+
+  async _score(rankMetric) {
+    const { rankByUser, rankByPost, rankByReply, rankByTransaction } = rankMetric;
+    return rankByUser * 0.2 + rankByPost * 0.25 + rankByReply * 0.25 + rankByTransaction * 0.3;
   }
 
   /**
