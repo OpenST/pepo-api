@@ -643,7 +643,7 @@ class EditChannel extends ServiceBase {
     const oThis = this;
 
     const enqueueObject = {
-      source: 'admin',
+      source: slackConstants.adminSource,
       source_id: oThis.currentAdminId,
       channel_id: oThis.channelId
     };
