@@ -44,8 +44,8 @@ class CreateChannel extends ServiceBase {
     oThis.currentUserId = params.current_user.id;
 
     oThis.channelName = params.channel_name;
-    oThis.channelDescription = params.channel_description;
     oThis.channelTagline = params.channel_tagline;
+    oThis.channelDescription = params.channel_description;
     oThis.channelTagNames = JSON.parse(params.channel_tags);
     oThis.coverImageUrl = params.cover_image_url;
     oThis.coverImageFileSize = params.cover_image_file_size;
@@ -67,13 +67,32 @@ class CreateChannel extends ServiceBase {
   async _asyncPerform() {
     const oThis = this;
 
+    oThis._sanitizeInputParameters();
+
     oThis._generatePermalink();
+
     await oThis._createNewChannel();
+
     await oThis._createEntryInChannelStats();
 
     const updatedChannelEntity = await oThis._modifyChannel();
 
     return responseHelper.successWithData({ [entityTypeConstants.channel]: updatedChannelEntity });
+  }
+
+  /**
+   * Sanitize input parameters.
+   *
+   * @sets oThis.channelName, oThis.channelTagline, oThis.channelDescription
+   *
+   * @private
+   */
+  _sanitizeInputParameters() {
+    const oThis = this;
+
+    oThis.channelName = oThis.channelName.trim();
+    oThis.channelTagline = oThis.channelTagline.trim();
+    oThis.channelDescription = oThis.channelDescription.trim();
   }
 
   /**
