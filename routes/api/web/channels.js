@@ -117,7 +117,8 @@ router.get(
           [entityTypeConstants.tagsMap]: responseEntityKey.tags,
           [entityTypeConstants.imagesMap]: responseEntityKey.images,
           [entityTypeConstants.linksMap]: responseEntityKey.links,
-          [entityTypeConstants.textsMap]: responseEntityKey.texts
+          [entityTypeConstants.textsMap]: responseEntityKey.texts,
+          [entityTypeConstants.twitterUsersMap]: responseEntityKey.twitterUsers
         },
         serviceData: serviceResponse.data
       }).perform();
