@@ -1918,7 +1918,7 @@ const v1Signature = {
       },
       {
         parameter: 'channel_tags',
-        validatorMethods: ['validateChannelTagsArray']
+        validatorMethods: ['validateStringifiedChannelTagsArray']
       },
       {
         parameter: 'cover_image_url',
@@ -1967,7 +1967,7 @@ const v1Signature = {
       },
       {
         parameter: 'channel_tags',
-        validatorMethods: ['validateChannelTagsArray']
+        validatorMethods: ['validateStringifiedChannelTagsArray']
       }
     ],
     optional: [

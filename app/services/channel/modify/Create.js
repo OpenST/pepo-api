@@ -25,7 +25,7 @@ class CreateChannel extends ServiceBase {
    * @param {string} params.channel_name
    * @param {string} params.channel_tagline
    * @param {string} params.channel_description
-   * @param {string[]} params.channel_tags
+   * @param {string} params.channel_tags
    * @param {string[]} [params.admin_user_ids]
    * @param {string} params.cover_image_url
    * @param {number} params.cover_image_file_size
@@ -46,7 +46,7 @@ class CreateChannel extends ServiceBase {
     oThis.channelName = params.channel_name;
     oThis.channelDescription = params.channel_description;
     oThis.channelTagline = params.channel_tagline;
-    oThis.channelTagNames = params.channel_tags;
+    oThis.channelTagNames = JSON.parse(params.channel_tags);
     oThis.coverImageUrl = params.cover_image_url;
     oThis.coverImageFileSize = params.cover_image_file_size;
     oThis.coverImageHeight = params.cover_image_height;
