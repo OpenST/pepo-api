@@ -10,6 +10,7 @@ const rootPrefix = '../../../..',
   AddInChannelLib = require(rootPrefix + '/lib/channelTagVideo/AddTagInChannel'),
   ChannelStatModel = require(rootPrefix + '/app/models/mysql/channel/ChannelStat'),
   ChangeChannelUserRoleLib = require(rootPrefix + '/lib/channel/ChangeChannelUserRole'),
+  AdminActivityLogModel = require(rootPrefix + '/app/models/mysql/admin/AdminActivityLog'),
   ChannelByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelByIds'),
   ChannelByPermalinksCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelByPermalinks'),
   imageLib = require(rootPrefix + '/lib/imageLib'),
@@ -19,13 +20,12 @@ const rootPrefix = '../../../..',
   textConstants = require(rootPrefix + '/lib/globalConstant/text'),
   imageConstants = require(rootPrefix + '/lib/globalConstant/image'),
   channelConstants = require(rootPrefix + '/lib/globalConstant/channel/channels'),
-  channelUserConstants = require(rootPrefix + '/lib/globalConstant/channel/channelUsers');
+  channelUserConstants = require(rootPrefix + '/lib/globalConstant/channel/channelUsers'),
+  adminActivityLogConstants = require(rootPrefix + '/lib/globalConstant/admin/adminActivityLogs');
 
 // Declare constants.
 const ORIGINAL_IMAGE_WIDTH = 1500;
 const ORIGINAL_IMAGE_HEIGHT = 642;
-const SHARE_IMAGE_WIDTH = 1500;
-const SHARE_IMAGE_HEIGHT = 750;
 
 /**
  * Class to edit channel.
@@ -36,6 +36,8 @@ class EditChannel extends ServiceBase {
   /**
    * Constructor to edit channel.
    *
+   * @param {object} params.current_admin
+   * @param {number} params.current_admin.id
    * @param {number} params.is_edit
    * @param {string} [params.name]
    * @param {string} [params.description]
@@ -44,7 +46,7 @@ class EditChannel extends ServiceBase {
    * @param {string[]} [params.tags]
    * @param {string[]} [params.admins]
    * @param {string} [params.original_image_url]
-   * @param {string} [params.share_image_url]
+   * @param {number} [params.original_image_file_size]
    *
    * @augments ServiceBase
    *
@@ -55,6 +57,7 @@ class EditChannel extends ServiceBase {
 
     const oThis = this;
 
+    oThis.currentAdminId = params.current_admin.id;
     oThis.isEdit = Number(params.is_edit);
     oThis.channelName = params.name;
     oThis.channelDescription = params.description;
@@ -63,7 +66,7 @@ class EditChannel extends ServiceBase {
     oThis.channelAdminUserNames = params.admins ? params.admins.split(',') : [];
     oThis.channelTagNames = params.tags ? params.tags.split(',') : [];
     oThis.originalImageUrl = params.original_image_url;
-    oThis.shareImageUrl = params.share_image_url;
+    oThis.originalImageFileSize = params.original_image_file_size;
 
     oThis.channelId = null;
 
@@ -88,15 +91,14 @@ class EditChannel extends ServiceBase {
       await oThis._createNewChannel();
     }
 
-    await Promise.all([
-      oThis._performChannelTaglineRelatedTasks(),
-      oThis._performChannelDescriptionRelatedTasks(),
-      oThis._performImageUrlRelatedTasks(),
-      oThis._performShareImageUrlRelatedTasks(),
-      oThis._createEntryInChannelStats(),
-      oThis._associateAdminsToChannel(),
-      oThis._associateTagsToChannel()
-    ]);
+    await oThis._performChannelTaglineRelatedTasks();
+    await oThis._performChannelDescriptionRelatedTasks();
+    await oThis._performImageUrlRelatedTasks();
+    await oThis._createEntryInChannelStats();
+    await oThis._associateAdminsToChannel();
+    await oThis._associateTagsToChannel();
+
+    await oThis.logAdminActivity();
 
     return responseHelper.successWithData({});
   }
@@ -259,9 +261,9 @@ class EditChannel extends ServiceBase {
     if (
       !oThis.channelName ||
       !oThis.channelDescription ||
-      !oThis.channelTagline
-      // !has.call(oThis, oThis.originalImageUrl) ||
-      // !has.call(oThis, oThis.shareImageUrl)
+      !oThis.channelTagline ||
+      !oThis.originalImageUrl ||
+      !oThis.originalImageFileSize
     ) {
       return Promise.reject(
         responseHelper.error({
@@ -318,7 +320,7 @@ class EditChannel extends ServiceBase {
         responseHelper.paramValidationError({
           internal_error_identifier: 'a_s_a_c_e_cnc_1',
           api_error_identifier: 'invalid_api_params',
-          params_error_identifiers: ['invalid_channel_id'],
+          params_error_identifiers: ['duplicate_channel_entry'],
           debug_options: {
             channelName: oThis.channelName,
             channelPermalink: oThis.channelPermalink
@@ -411,7 +413,7 @@ class EditChannel extends ServiceBase {
     if (oThis.originalImageUrl) {
       const imageParams = {
         imageUrl: oThis.originalImageUrl,
-        size: oThis.size, // TODO
+        size: oThis.originalImageFileSize,
         width: ORIGINAL_IMAGE_WIDTH,
         height: ORIGINAL_IMAGE_HEIGHT,
         kind: imageConstants.channelImageKind,
@@ -431,45 +433,6 @@ class EditChannel extends ServiceBase {
       // Update channel table.
       await new ChannelModel()
         .update({ cover_image_id: imageData.insertId })
-        .where({ id: oThis.channelId })
-        .fire();
-
-      await ChannelModel.flushCache({ ids: [oThis.channelId] });
-    }
-  }
-
-  /**
-   * Perform share image url related tasks.
-   *
-   * @returns {Promise<never>}
-   * @private
-   */
-  async _performShareImageUrlRelatedTasks() {
-    const oThis = this;
-
-    if (oThis.shareImageUrl) {
-      const imageParams = {
-        imageUrl: oThis.shareImageUrl,
-        size: oThis.size, // TODO
-        width: SHARE_IMAGE_WIDTH,
-        height: SHARE_IMAGE_HEIGHT,
-        kind: imageConstants.channelShareImageKind,
-        channelId: oThis.channelId,
-        isExternalUrl: false,
-        enqueueResizer: true
-      };
-
-      // Validate and save image.
-      const resp = await imageLib.validateAndSave(imageParams);
-      if (resp.isFailure()) {
-        return Promise.reject(resp);
-      }
-
-      const imageData = resp.data;
-
-      // Update channel table.
-      await new ChannelModel()
-        .update({ share_image_id: imageData.insertId })
         .where({ id: oThis.channelId })
         .fire();
 
@@ -511,7 +474,7 @@ class EditChannel extends ServiceBase {
       return;
     }
 
-    for (let index = 0; index < oThis.channelAdminUserNames.length; index += 1) {
+    for (let index = 0; index < oThis.channelAdminUserNames.length; index++) {
       oThis.channelAdminUserNames[index] = oThis.channelAdminUserNames[index].trim();
     }
 
@@ -521,9 +484,10 @@ class EditChannel extends ServiceBase {
       logger.error('Some admins are not present in user db.');
 
       return Promise.reject(
-        responseHelper.error({
+        responseHelper.paramValidationError({
           internal_error_identifier: 'a_s_a_c_e_aatc_1',
-          api_error_identifier: 'something_went_wrong',
+          api_error_identifier: 'invalid_api_params',
+          params_error_identifiers: ['invalid_admin_usernames'],
           debug_options: {
             adminUserNames: oThis.adminUserNames
           }
@@ -565,7 +529,7 @@ class EditChannel extends ServiceBase {
       return;
     }
 
-    for (let index = 0; index < oThis.channelTagNames.length; index += 1) {
+    for (let index = 0; index < oThis.channelTagNames.length; index++) {
       oThis.channelTagNames[index] = oThis.channelTagNames[index].trim();
     }
 
@@ -645,6 +609,23 @@ class EditChannel extends ServiceBase {
         })
       );
     }
+  }
+
+  /**
+   * Log admin activity.
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async logAdminActivity() {
+    const oThis = this;
+
+    await new AdminActivityLogModel().insertAction({
+      adminId: oThis.currentAdminId,
+      actionOn: oThis.channelId,
+      extraData: JSON.stringify({ cid: [oThis.channelId], chPml: oThis.channelPermalink }),
+      action: adminActivityLogConstants.createEditCommunityEntity
+    });
   }
 }
 

@@ -33,7 +33,6 @@ class ChannelSearch extends ServiceBase {
    * @param {object} params
    * @param {object} params.current_user
    * @param {string} params.q
-   * @param {string} params.api_source
    * @param {string} params.pagination_identifier
    * @param {boolean} [params.getTopResults]
    *
@@ -50,7 +49,6 @@ class ChannelSearch extends ServiceBase {
     oThis.channelPrefix = params.q || null;
     oThis.paginationIdentifier = params[paginationConstants.paginationIdentifierKey] || null;
     oThis.getTopResults = params.getTopResults || false;
-    oThis.apiSource = params.api_source;
 
     oThis.limit = null;
     oThis.paginationTimestamp = null;
@@ -146,7 +144,7 @@ class ChannelSearch extends ServiceBase {
 
         channelIds = channelPaginationRsp.data.channelIds;
       }
-    } else if (apiSourceConstants.isWebRequest(oThis.apiSource)) {
+    } else {
       // Order all channels, first Live, then curated, then rest all
       const cacheResponse = await new DefaultChannelsListForWeb().fetch();
       if (cacheResponse.isFailure()) {
@@ -159,20 +157,6 @@ class ChannelSearch extends ServiceBase {
       if (index + oThis.limit < allchannelIds.length) {
         oThis.nextPageChannelIdIndex = index + oThis.limit;
       }
-    } else {
-      // Display curated channels in search.
-      const cacheResponse = await new CuratedEntityIdsByKindCache({
-        entityKind: curatedEntitiesConstants.channelsEntityKind
-      }).fetch();
-      if (cacheResponse.isFailure()) {
-        return Promise.reject(cacheResponse);
-      }
-
-      channelIds = cacheResponse.data.entityIds;
-
-      channelIds = oThis.getTopResults
-        ? channelIds.slice(0, topChannelsResultsLimit + 1)
-        : channelIds.slice(0, oThis.limit);
     }
 
     return channelIds;
@@ -385,7 +369,7 @@ class ChannelSearch extends ServiceBase {
       nextPagePayloadKey[paginationConstants.paginationIdentifierKey] = {
         pagination_timestamp: oThis.nextPaginationTimestamp
       };
-    } else if (apiSourceConstants.isWebRequest(oThis.apiSource) && oThis.nextPageChannelIdIndex) {
+    } else if (oThis.nextPageChannelIdIndex) {
       nextPagePayloadKey[paginationConstants.paginationIdentifierKey] = {
         pagination_timestamp: oThis.nextPageChannelIdIndex
       };

@@ -34,7 +34,9 @@ class UpdateFanVideo extends UpdateProfileBase {
    * @param {string} params.video_url: s3 video url
    * @param {string} params.poster_image_url: s3 poster image url
    * @param {number} params.video_width: video width
-   * @param {number} params.video_height {number}: video height
+   * @param {number} params.video_height: video height
+   * @param {number} params.video_duration: video duration
+   * @param {number} params.video_duration_preference: video duration Preference
    * @param {number} params.video_size: video size
    * @param {number} params.image_width: image width
    * @param {number} params.image_height: image height
@@ -58,6 +60,8 @@ class UpdateFanVideo extends UpdateProfileBase {
     oThis.videoWidth = params.video_width;
     oThis.videoHeight = params.video_height;
     oThis.videoSize = params.video_size;
+    oThis.videoDuration = params.video_duration;
+    oThis.videoDurationPref = params.video_duration_preference;
     oThis.imageWidth = params.image_width;
     oThis.imageHeight = params.image_height;
     oThis.imageSize = params.image_size;
@@ -116,6 +120,8 @@ class UpdateFanVideo extends UpdateProfileBase {
       size: oThis.videoSize,
       width: oThis.videoWidth,
       height: oThis.videoHeight,
+      duration: oThis.videoDuration,
+      durationPref: oThis.videoDurationPref,
       posterImageUrl: oThis.posterImageUrl,
       posterImageSize: oThis.imageSize,
       posterImageWidth: oThis.imageWidth,

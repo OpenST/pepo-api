@@ -593,6 +593,10 @@ const webSignature = {
       {
         parameter: 'fingerprint_id',
         validatorMethods: ['validateString']
+      },
+      {
+        parameter: 'guest_name',
+        validatorMethods: ['validateString', 'validateName']
       }
     ]
   },
@@ -631,6 +635,27 @@ const webSignature = {
       {
         parameter: 'current_user',
         validatorMethods: ['validateNonEmptyObject']
+      }
+    ],
+    optional: []
+  },
+  [apiName.endZoomMeeting]: {
+    mandatory: [
+      {
+        parameter: 'api_source',
+        validatorMethods: ['validateString']
+      },
+      {
+        parameter: 'channel_permalink',
+        validatorMethods: ['validateName']
+      },
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      },
+      {
+        parameter: 'meeting_id',
+        validatorMethods: ['validateAlphaNumericString']
       }
     ],
     optional: []

@@ -33,6 +33,13 @@ const adminErrorConfig = {
     message: 'Channel already exists.'
   },
 
+  invalid_admin_usernames: {
+    parameter: 'admins',
+    code: 'invalid',
+    message:
+      'Invalid admin username. Channel has been created. Please use correct usernames and edit the same channel instead of creating it again'
+  },
+
   invalid_last_name: {
     parameter: 'last_name',
     code: 'invalid',
