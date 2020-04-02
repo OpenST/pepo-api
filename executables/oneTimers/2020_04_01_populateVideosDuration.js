@@ -32,9 +32,11 @@ class PopulateVideosDuration {
       Ffmpeg.ffprobe(videoFile, function(err, data) {
         let dimensions = { width: 0, height: 0, duration: 0 };
         if (data && data.streams && data.streams[0]) {
-          dimensions.width = data.streams[0].width;
-          dimensions.height = data.streams[0].height;
-          dimensions.duration = Math.round(data.streams[0].duration * 1000);
+          let dataStream = data.streams[0];
+
+          dimensions.width = dataStream.width;
+          dimensions.height = dataStream.height;
+          dimensions.duration = Math.round(dataStream.duration * 1000);
         }
         onResolve(dimensions);
       });
