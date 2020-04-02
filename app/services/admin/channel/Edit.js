@@ -103,7 +103,7 @@ class EditChannel extends ServiceBase {
 
     await oThis.logAdminActivity();
 
-    await oThis.performSlackCommunityMonitoringBg();
+    await oThis.performSlackChannelMonitoringBg();
 
     return responseHelper.successWithData({});
   }
@@ -634,12 +634,12 @@ class EditChannel extends ServiceBase {
   }
 
   /**
-   * Perform slack community monitoring job enqueuing
+   * Perform slack channel monitoring job enqueuing
    *
    * @returns {Promise<void>}
    * @private
    */
-  async performSlackCommunityMonitoringBg() {
+  async performSlackChannelMonitoringBg() {
     const oThis = this;
 
     const enqueueObject = {
@@ -649,12 +649,12 @@ class EditChannel extends ServiceBase {
     };
 
     if (oThis.isEdit) {
-      await bgJob.enqueue(bgJobConstants.slackCommunityMonitoringJobTopic, {
+      await bgJob.enqueue(bgJobConstants.slackChannelMonitoringJobTopic, {
         ...enqueueObject,
         action: slackConstants.channelUpdated
       });
     } else {
-      await bgJob.enqueue(bgJobConstants.slackCommunityMonitoringJobTopic, {
+      await bgJob.enqueue(bgJobConstants.slackChannelMonitoringJobTopic, {
         ...enqueueObject,
         action: slackConstants.channelCreated
       });
