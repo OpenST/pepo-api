@@ -487,6 +487,47 @@ class ChannelTrendingRankGenerator extends CronBase {
     for (let i = 0; i < channelIds.length; i++) {
       oThis.channelRank[channelIds[i]] = i + 1;
     }
+
+    const header = [
+      'channelId',
+      'userCount',
+      'rankByUser',
+      'postCount',
+      'rankByPost',
+      'replyCount',
+      'rankByReply',
+      'transactionCount',
+      'rankByTransaction',
+      'totalScore',
+      'channelRank'
+    ];
+
+    let logData = 'REPORT DATA FOR TRENDING\n';
+
+    logData = logData + header.join(',') + '\n';
+
+    for (let i = 0; i < oThis.channelIds.length; i++) {
+      const channelId = oThis.channelIds[i];
+      const rankData = oThis.channelRankMetric[channelId];
+      const metricData = oThis.channelMetric[channelId];
+
+      const data = [
+        channelId,
+        metricData.userCount,
+        rankData.rankByUser,
+        metricData.postCount,
+        rankData.rankByPost,
+        metricData.replyCount,
+        rankData.rankByReply,
+        metricData.transactionCount,
+        rankData.rankByTransaction,
+        rankData.totalScore,
+        oThis.channelRank[channelId]
+      ];
+      logData = logData + data.join(',') + '\n';
+    }
+
+    logger.debug(logData);
   }
 
   /**
