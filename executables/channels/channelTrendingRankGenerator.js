@@ -283,8 +283,7 @@ class ChannelTrendingRankGenerator extends CronBase {
         }
       }
 
-      // todo check for integer limit
-      minId = batchRecords[batchRecords.length - 1].id + 1;
+      minId = Number(batchRecords[batchRecords.length - 1].id) + 1;
     }
   }
 
