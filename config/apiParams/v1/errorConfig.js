@@ -471,6 +471,12 @@ const v1ErrorConfig = {
     message: 'The community name either exceeds the character limit or contains unsupported characters.'
   },
 
+  duplicate_channel_entry: {
+    parameter: 'channel_name',
+    code: 'invalid',
+    message: 'This name is already taken.'
+  },
+
   invalid_channel_tagline: {
     parameter: 'channel_tagline',
     code: 'invalid',
