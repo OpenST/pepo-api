@@ -67,6 +67,8 @@ class EditChannel extends ServiceBase {
   async _asyncPerform() {
     const oThis = this;
 
+    oThis._sanitizeInputParameters();
+
     await oThis._validateExistingChannel();
 
     await oThis._validateCoverImageParameters();
@@ -78,6 +80,21 @@ class EditChannel extends ServiceBase {
     const updatedChannelEntity = await oThis._modifyChannel();
 
     return responseHelper.successWithData({ [entityTypeConstants.channel]: updatedChannelEntity });
+  }
+
+  /**
+   * Sanitize input parameters.
+   *
+   * @sets oThis.channelName, oThis.channelTagline, oThis.channelDescription
+   *
+   * @private
+   */
+  _sanitizeInputParameters() {
+    const oThis = this;
+
+    oThis.channelName = oThis.channelName.trim();
+    oThis.channelTagline = oThis.channelTagline.trim();
+    oThis.channelDescription = oThis.channelDescription.trim();
   }
 
   /**

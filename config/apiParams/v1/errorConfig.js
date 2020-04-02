@@ -468,7 +468,19 @@ const v1ErrorConfig = {
   invalid_channel_name: {
     parameter: 'channel_name',
     code: 'invalid',
-    message: 'The community name contains unsupported characters.'
+    message: 'The community name either exceeds the character limit or contains unsupported characters.'
+  },
+
+  invalid_channel_tagline: {
+    parameter: 'channel_tagline',
+    code: 'invalid',
+    message: 'The community tagline exceeds the character limit of 45 characters.'
+  },
+
+  invalid_channel_description: {
+    parameter: 'channel_description',
+    code: 'invalid',
+    message: 'The community description exceeds the character limit of 400 characters.'
   },
 
   invalid_meeting_id: {
