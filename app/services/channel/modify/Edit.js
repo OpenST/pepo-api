@@ -20,9 +20,9 @@ class EditChannel extends ServiceBase {
    * Constructor to edit channel.
    *
    * @param {number} params.channel_id
-   * @param {string} params.name
-   * @param {string} params.tagline
-   * @param {string} params.description
+   * @param {string} params.channel_name
+   * @param {string} params.channel_tagline
+   * @param {string} params.channel_description
    * @param {string[]} params.tags
    * @param {string} [params.cover_image_url]
    * @param {number} [params.cover_image_file_size]
@@ -39,9 +39,9 @@ class EditChannel extends ServiceBase {
     const oThis = this;
 
     oThis.channelId = params.channel_id;
-    oThis.channelName = params.name;
-    oThis.channelTagline = params.tagline;
-    oThis.channelDescription = params.description;
+    oThis.channelName = params.channel_name;
+    oThis.channelTagline = params.channel_tagline;
+    oThis.channelDescription = params.channel_description;
     oThis.channelTagNames = params.tags;
 
     oThis.coverImageUrl = params.cover_image_url || '';

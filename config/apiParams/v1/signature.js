@@ -1905,16 +1905,16 @@ const v1Signature = {
         validatorMethods: ['validateNonEmptyObject']
       },
       {
-        parameter: 'name',
+        parameter: 'channel_name',
         validatorMethods: ['validateChannelTitle', 'validateStopWords']
       },
       {
-        parameter: 'description',
-        validatorMethods: ['validateChannelDescription', 'validateStopWords']
+        parameter: 'channel_tagline',
+        validatorMethods: ['validateChannelTagline', 'validateStopWords']
       },
       {
-        parameter: 'tagline',
-        validatorMethods: ['validateChannelTagline', 'validateStopWords']
+        parameter: 'channel_description',
+        validatorMethods: ['validateChannelDescription', 'validateStopWords']
       },
       {
         parameter: 'tags',
@@ -1954,16 +1954,16 @@ const v1Signature = {
         validatorMethods: ['validateNonEmptyObject']
       },
       {
-        parameter: 'name',
+        parameter: 'channel_name',
         validatorMethods: ['validateChannelTitle', 'validateStopWords']
       },
       {
-        parameter: 'description',
-        validatorMethods: ['validateChannelDescription', 'validateStopWords']
+        parameter: 'channel_tagline',
+        validatorMethods: ['validateChannelTagline', 'validateStopWords']
       },
       {
-        parameter: 'tagline',
-        validatorMethods: ['validateChannelTagline', 'validateStopWords']
+        parameter: 'channel_description',
+        validatorMethods: ['validateChannelDescription', 'validateStopWords']
       },
       {
         parameter: 'tags',
