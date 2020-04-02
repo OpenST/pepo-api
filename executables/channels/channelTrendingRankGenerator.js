@@ -8,10 +8,14 @@ const rootPrefix = '../..',
   ChannelUserModel = require(rootPrefix + '/app/models/mysql/channel/ChannelUser'),
   channelUsersConstants = require(rootPrefix + '/lib/globalConstant/channel/channelUsers'),
   ChannelVideoModel = require(rootPrefix + '/app/models/mysql/channel/ChannelVideo'),
-  channelVideosConstants = require(rootPrefix + '/lib/globalConstant/channel/channelVideos');
-(basicHelper = require(rootPrefix + '/helpers/basic')),
-  (responseHelper = require(rootPrefix + '/lib/formatter/response')),
-  (cronProcessesConstants = require(rootPrefix + '/lib/globalConstant/big/cronProcesses'));
+  channelVideosConstants = require(rootPrefix + '/lib/globalConstant/channel/channelVideos'),
+  ReplyDetailModel = require(rootPrefix + '/app/models/mysql/ReplyDetail'),
+  replyDetailConstants = require(rootPrefix + '/lib/globalConstant/replyDetail'),
+  TransactionModel = require(rootPrefix + '/app/models/mysql/Transaction'),
+  transactionConstants = require(rootPrefix + '/lib/globalConstant/transaction'),
+  basicHelper = require(rootPrefix + '/helpers/basic'),
+  responseHelper = require(rootPrefix + '/lib/formatter/response'),
+  cronProcessesConstants = require(rootPrefix + '/lib/globalConstant/big/cronProcesses');
 
 program.option('--cronProcessId <cronProcessId>', 'Cron table process ID').parse(process.argv);
 
@@ -34,6 +38,7 @@ if (!cronProcessId) {
 }
 
 const ACTIVITY_DURATION = 7 * 24 * 60 * 60; // one week
+const BATCH_SIZE = 100;
 
 class ChannelTrendingRankGenerator extends CronBase {
   constructor(params) {
@@ -41,9 +46,12 @@ class ChannelTrendingRankGenerator extends CronBase {
 
     const oThis = this;
 
+    oThis.recentTimestampInSec = basicHelper.getCurrentTimestampInSeconds() - ACTIVITY_DURATION;
     oThis.channelIds = [];
-    oThis.channelUsersCount = {};
-    oThis.channelPostsCount = {};
+
+    oThis.channelMetric = {};
+    oThis.videoMetric = {};
+    oThis.replyMetric = {};
   }
 
   async _start() {
@@ -53,8 +61,25 @@ class ChannelTrendingRankGenerator extends CronBase {
     logger.info('Staring channel trending rank generator');
 
     await oThis._getAllActiveChannels();
+
     await oThis._countAllRecentlyJoinedChannelUsers();
     await oThis._countAllRecentlyPostedVideos();
+
+    // This will populate video metric with reply count
+    await oThis._getAllReplyForVideos();
+
+    // This will populate video metric with transactionCount and reply
+    // metric with transaction Count
+    await oThis._getAllTransactions();
+
+    // This will aggregate reply from same video
+    // merged replyTransactionCount and  transactionCount.
+    await oThis._associateReplyWithVideos();
+
+    // This will aggregate videos from same channel and merged
+    // transactionCount, replyTransactionCount and replyCount
+
+    await oThis._associateVideoWithChannels();
 
     oThis.canExit = true;
 
@@ -80,6 +105,13 @@ class ChannelTrendingRankGenerator extends CronBase {
 
     for (let i = 0; i < records.length; i++) {
       oThis.channelIds.push(records[i].id);
+      oThis.channelMetric[records[i].id] = {
+        userCount: 0,
+        postCount: 0,
+        replyCount: 0,
+        transactionCount: 0,
+        replyTransactionCount: 0
+      };
     }
   }
 
@@ -100,12 +132,15 @@ class ChannelTrendingRankGenerator extends CronBase {
         status: channelUsersConstants.invertedStatuses[channelUsersConstants.activeStatus]
       })
       .where({ channel_id: oThis.channelIds })
-      .where(['created_at >= ?', basicHelper.getCurrentTimestampInSeconds() - ACTIVITY_DURATION])
+      .where(['created_at >= ?', oThis.recentTimestampInSec])
       .group_by(['channel_id'])
       .fire();
 
     for (let i = 0; i < records.length; i++) {
-      oThis.channelUsersCount[records[i].channel_id] = records[i].userCount;
+      oThis.channelMetric[records[i].channel_id] = {
+        ...oThis.channelMetric[records[i].channel_id],
+        userCount: records[i].userCount
+      };
     }
   }
 
@@ -126,12 +161,201 @@ class ChannelTrendingRankGenerator extends CronBase {
         status: channelVideosConstants.invertedStatuses[channelVideosConstants.activeStatus]
       })
       .where({ channel_id: oThis.channelIds })
-      .where(['created_at >= ?', basicHelper.getCurrentTimestampInSeconds() - ACTIVITY_DURATION])
+      .where(['created_at >= ?', oThis.recentTimestampInSec])
       .group_by(['channel_id'])
       .fire();
 
     for (let i = 0; i < records.length; i++) {
-      oThis.channelPostsCount[records[i].channel_id] = records[i].videoCount;
+      oThis.channelMetric[records[i].channel_id] = {
+        ...oThis.channelMetric[records[i].channel_id],
+        postCount: records[i].videoCount
+      };
+    }
+  }
+
+  /**
+   * fetch reply count for metrics
+   *
+   * sets oThis.videoMetric
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _getAllReplyForVideos() {
+    const oThis = this;
+
+    const records = await new ReplyDetailModel()
+      .select('parent_id as video_id, count(id) as replyCount')
+      .where({ status: replyDetailConstants.activeStatus })
+      .where({
+        parent_kind: replyDetailConstants.invertedEntityKinds[replyDetailConstants.videoParentKind]
+      })
+      .where({
+        entity_kind: replyDetailConstants.invertedEntityKinds[replyDetailConstants.videoEntityKind]
+      })
+      .where(['created_at >= ?', oThis.recentTimestampInSec])
+      .group_by(['parent_id'])
+      .fire();
+
+    for (let i = 0; i < records.length; i++) {
+      oThis.videoMetric[records[i].video_id] = {
+        ...oThis.videoMetric[records[i].video_id],
+        replyCount: records[i].replyCount,
+        transactionCount: 0
+      };
+    }
+  }
+
+  /**
+   * fetch all transactions.
+   *
+   * sets oThis.videoMetric and oThis.replyMetric
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _getAllTransactions() {
+    const oThis = this;
+
+    const records = await new TransactionModel()
+      .select('min(id) as minId')
+      .where({
+        kind: [
+          transactionConstants.invertedKinds[transactionConstants.userTransactionOnReplyKind],
+          transactionConstants.invertedKinds[transactionConstants.userTransactionOnReplyKind]
+        ]
+      })
+      .where({ status: transactionConstants.doneStatus })
+      .where(['created_at >= ?', oThis.recentTimestampInSec])
+      .order_by('id asc')
+      .fire();
+
+    if (records.length === 0) {
+      return;
+    }
+    let minId = records[0].minId;
+
+    while (true) {
+      const batchRecords = await new TransactionModel()
+        .select('*')
+        .where({
+          kind: [
+            transactionConstants.invertedKinds[transactionConstants.userTransactionKind],
+            transactionConstants.invertedKinds[transactionConstants.userTransactionOnReplyKind]
+          ]
+        })
+        .where({ status: transactionConstants.doneStatus })
+        .where(['created_at >= ?', oThis.recentTimestampInSec])
+        .where(['id >= ?', minId])
+        .order_by('id asc')
+        .limit(BATCH_SIZE)
+        .fire();
+
+      if (batchRecords.length === 0) {
+        break;
+      }
+
+      for (let i = 0; i < batchRecords.length; i++) {
+        const transactionRow = TransactionModel.formatDbData(batchRecords[i]);
+
+        if (transactionRow.kind === transactionConstants.userTransactionKind) {
+          const videoId = transactionRow.extraData.videoId;
+          if (videoId) {
+            oThis.videoMetric[videoId] = oThis.videoMetric[videoId] || {
+              replyCount: 0,
+              transactionCount: 0
+            };
+
+            oThis.videoMetric[videoId].transactionCount++;
+          }
+        } else if (transactionRow.kind === transactionConstants.userTransactionOnReplyKind) {
+          const replyId = transactionRow.extraData.replyDetailId;
+          if (replyId) {
+            oThis.replyMetric[replyId] = oThis.replyMetric[replyId] || {
+              transactionCount: 0
+            };
+
+            oThis.replyMetric[replyId].transactionCount++;
+          }
+        }
+      }
+
+      // todo check for integer limit
+      minId = batchRecords[batchRecords.length - 1].id + 1;
+    }
+  }
+
+  /**
+   * Aggregate reply metric for video.
+   *
+   * sets oThis.videoMetric[records[i].videoId].replyTransactionCount
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _associateReplyWithVideos() {
+    const oThis = this;
+
+    const replyIds = Object.keys(oThis.replyMetric);
+
+    if (replyIds.length === 0) {
+      return;
+    }
+
+    const records = await new ReplyDetailModel()
+      .select('id, parent_id as videoId')
+      .where({ status: replyDetailConstants.invertedStatuses[replyDetailConstants.activeStatus] })
+      .where({
+        parent_kind: replyDetailConstants.invertedEntityKinds[replyDetailConstants.videoParentKind]
+      })
+      .where({
+        entity_kind: replyDetailConstants.invertedEntityKinds[replyDetailConstants.videoEntityKind]
+      })
+      .where({ id: replyIds })
+      .fire();
+
+    for (let i = 0; i < records.length; i++) {
+      oThis.videoMetric[records[i].videoId] = oThis.videoMetric[records[i].videoId] || {
+        replyCount: 0,
+        transactionCount: 0,
+        replyTransactionCount: 0
+      };
+
+      oThis.videoMetric[records[i].videoId].replyTransactionCount += oThis.replyMetric[records[i].id].transactionCount;
+    }
+  }
+
+  /**
+   * Aggregate video metric for each channel.
+   *
+   *
+   * @private
+   */
+  async _associateVideoWithChannels() {
+    const oThis = this;
+
+    const videoIds = Object.keys(oThis.videoMetric);
+
+    if (videoIds.length === 0) {
+      return;
+    }
+
+    const records = await new ChannelVideoModel()
+      .select('id, channel_id')
+      .where({
+        status: channelVideosConstants.invertedStatuses[channelVideosConstants.activeStatus]
+      })
+      .where({ id: videoIds })
+      .where({ channel_id: oThis.channelIds })
+      .fire();
+
+    for (let i = 0; i < records.length; i++) {
+      const record = records[i];
+
+      oThis.channelMetric[record.channel_id].transactionCount += oThis.videoMetric[record.id].transactionCount;
+
+      oThis.channelMetric[record.channel_id].replyTransactionCount +=
+        oThis.videoMetric[record.id].replyTransactionCount;
+
+      oThis.channelMetric[record.channel_id].replyCount += oThis.videoMetric[record.id].replyCount;
     }
   }
 
