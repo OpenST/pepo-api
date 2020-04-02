@@ -149,9 +149,9 @@ class MixedTopSearch extends ServiceBase {
     };
 
     if (!CommonValidators.validateNonBlankString(oThis.q)) {
-      resp = new TrendingChannelList(params).perform();
+      resp = await new TrendingChannelList(params).perform();
     } else {
-      resp = new AllChannelList(params).perform();
+      resp = await new AllChannelList(params).perform();
     }
 
     oThis.channelResponses = resp.data;
