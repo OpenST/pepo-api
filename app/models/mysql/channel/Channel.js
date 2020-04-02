@@ -245,10 +245,6 @@ class ChannelModel extends ModelBase {
    * @returns {Promise<{}>}
    */
   async searchAllChannelsByPrefix(params) {
-    console.log(params);
-
-    console.log(params.offset);
-    console.log(typeof params.offset);
     const oThis = this;
 
     const queryWithWildCards = params.channelPrefix + '%',
