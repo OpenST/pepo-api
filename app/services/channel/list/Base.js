@@ -424,13 +424,20 @@ class ChannelListBase extends ServiceBase {
    */
   async _isSearchInAll() {
     const oThis = this;
+
+    if (oThis.currentPageNumber > 1 || oThis._subKind() == 'all' || !oThis._shouldSearch()) {
+      return 0;
+    }
+
     const params = {
       limit: 1,
       offset: 0,
       channelPrefix: oThis.channelPrefix
     };
+
     const response = await new ChannelModel().searchAllChannelsByPrefix(params);
-    if (oThis.currentPageNumber === 1 && oThis._subKind() !== 'all' && response.channelIds.length === 1) {
+
+    if (response.channelIds.length >= 1) {
       return 1;
     }
 
