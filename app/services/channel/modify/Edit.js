@@ -50,12 +50,12 @@ class EditChannel extends ServiceBase {
     oThis.coverImageWidth = params.cover_image_width || 0;
 
     oThis.channel = {};
-    oThis.channelTaglineId = 0;
-    oThis.channelDescriptionId = 0;
-    oThis.textIds = [];
+    oThis.channelTaglineId = null;
+    oThis.channelDescriptionId = null;
+
     oThis.texts = {};
 
-    oThis.updateRequiredParameters = { channelId: oThis.channelId, tagNames: oThis.channelTagNames };
+    oThis.updateRequiredParameters = {};
   }
 
   /**
@@ -69,7 +69,7 @@ class EditChannel extends ServiceBase {
 
     await oThis._validateExistingChannel();
 
-    await oThis._validateInputParameters();
+    await oThis._validateCoverImageParameters();
 
     await oThis._fetchAssociatedEntities();
 
@@ -83,7 +83,7 @@ class EditChannel extends ServiceBase {
   /**
    * Validate status of existing channel.
    *
-   * @sets oThis.channel, oThis.textIds, oThis.channelTaglineId, oThis.channelDescriptionId
+   * @sets oThis.channel, oThis.channelTaglineId, oThis.channelDescriptionId
    *
    * @returns {Promise<never>}
    * @private
@@ -115,36 +115,31 @@ class EditChannel extends ServiceBase {
       );
     }
 
-    oThis.updateRequiredParameters.permalink = oThis.channel.permalink;
+    oThis.channelTaglineId = oThis.channel.taglineId;
 
-    if (oThis.channel.taglineId) {
-      oThis.channelTaglineId = oThis.channel.taglineId;
-      oThis.textIds.push(oThis.channel.taglineId);
-    }
-
-    if (oThis.channel.descriptionId) {
-      oThis.channelDescriptionId = oThis.channel.descriptionId;
-      oThis.textIds.push(oThis.channel.descriptionId);
-    }
+    oThis.channelDescriptionId = oThis.channel.descriptionId;
   }
 
   /**
-   * Validate input parameters.
+   * Validate cover image related parameters.
    *
    * @returns {Promise<never>}
    * @private
    */
-  async _validateInputParameters() {
+  async _validateCoverImageParameters() {
     const oThis = this;
 
     if (oThis.coverImageUrl && (!oThis.coverImageFileSize || !oThis.coverImageHeight || !oThis.coverImageWidth)) {
       return Promise.reject(
         responseHelper.error({
-          internal_error_identifier: 'a_s_c_m_e_vip_1',
+          internal_error_identifier: 'a_s_c_m_e_vcip_1',
           api_error_identifier: 'invalid_api_params',
           debug_options: {
             channelId: oThis.channelId,
-            channelDetails: oThis.channel
+            coverImageUrl: oThis.coverImageUrl,
+            coverImageFileSize: oThis.coverImageFileSize,
+            coverImageHeight: oThis.coverImageHeight,
+            coverImageWidth: oThis.coverImageWidth
           }
         })
       );
@@ -163,7 +158,7 @@ class EditChannel extends ServiceBase {
     const oThis = this;
 
     const associatedEntitiesResponse = await new FetchAssociatedEntities({
-      textIds: oThis.textIds
+      textIds: [oThis.channelTaglineId, oThis.channelDescriptionId]
     }).perform();
     if (associatedEntitiesResponse.isFailure()) {
       return Promise.reject(associatedEntitiesResponse);
@@ -189,23 +184,14 @@ class EditChannel extends ServiceBase {
       oThis.updateRequiredParameters.name = oThis.channelName;
     }
 
-    if (
-      oThis.channelTaglineId &&
-      oThis.texts[oThis.channelTaglineId] &&
-      oThis.texts[oThis.channelTaglineId].text !== oThis.channelTagline
-    ) {
-      oThis.updateRequiredParameters.tagline = oThis.channelTagline;
-    } else if (oThis.channelTagline) {
+    if (oThis.texts[oThis.channelTaglineId] && oThis.texts[oThis.channelTaglineId].text !== oThis.channelTagline) {
       oThis.updateRequiredParameters.tagline = oThis.channelTagline;
     }
 
     if (
-      oThis.channelDescriptionId &&
       oThis.texts[oThis.channelDescriptionId] &&
       oThis.texts[oThis.channelDescriptionId].text !== oThis.channelDescription
     ) {
-      oThis.updateRequiredParameters.description = oThis.channelDescription;
-    } else if (oThis.channelDescription) {
       oThis.updateRequiredParameters.description = oThis.channelDescription;
     }
 
@@ -220,13 +206,19 @@ class EditChannel extends ServiceBase {
   /**
    * Modify channel.
    *
-   * @sets oThis.channel
-   *
    * @returns {Promise<object>}
    * @private
    */
   async _modifyChannel() {
     const oThis = this;
+
+    if (!CommonValidators.validateNonEmptyObject(oThis.updateRequiredParameters)) {
+      return oThis.channel;
+    }
+
+    oThis.updateRequiredParameters.channelId = oThis.channelId;
+    oThis.updateRequiredParameters.tagNames = oThis.channelTagNames;
+    oThis.updateRequiredParameters.permalink = oThis.channel.permalink;
 
     const modifyChannelResponse = await new ModifyChannel(oThis.updateRequiredParameters).perform();
     if (modifyChannelResponse.isFailure()) {
