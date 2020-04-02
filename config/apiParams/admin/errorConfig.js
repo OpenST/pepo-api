@@ -30,7 +30,7 @@ const adminErrorConfig = {
   duplicate_channel_entry: {
     parameter: 'channel_id',
     code: 'invalid',
-    message: 'Channel already exists.'
+    message: 'This name is already taken.'
   },
 
   invalid_admin_usernames: {
