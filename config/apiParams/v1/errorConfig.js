@@ -491,6 +491,16 @@ const v1ErrorConfig = {
     parameter: 'uuid',
     code: 'invalid',
     message: 'Uuid is invalid.'
+  },
+  invalid_guest_name: {
+    parameter: 'guest_name',
+    code: 'invalid',
+    message: 'Name must be min 2 characters and max 30.'
+  },
+  bad_guest_name: {
+    parameter: 'guest_name',
+    code: 'invalid',
+    message: 'Cuss words are not allowed.'
   }
 };
 

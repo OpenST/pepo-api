@@ -24,6 +24,7 @@ class GetJoinMeetingPayload extends ServiceBase {
    * @param {object} params.current_user
    * @param {number} params.meeting_id
    * @param {number} params.fingerprint_id
+   * @param {string} params.guest_name
    *
    * @augments ServiceBase
    *
@@ -38,12 +39,12 @@ class GetJoinMeetingPayload extends ServiceBase {
     oThis.currentUser = params.current_user || {};
     oThis.meetingId = params.meeting_id;
     oThis.fingerprintId = params.fingerprint_id;
+    oThis.name = params.guest_name || '';
 
     oThis.channelId = null;
     oThis.channel = {};
     oThis.meeting = {};
     oThis.profilePicUrl = null;
-    oThis.name = 'Pepo Guest';
   }
 
   /**
@@ -58,8 +59,6 @@ class GetJoinMeetingPayload extends ServiceBase {
     await oThis._fetchAndValidateChannel();
 
     await oThis._fetchAndValidateMeeting();
-
-    await oThis._fetchEntities();
 
     return responseHelper.successWithData(oThis._prepareResponse());
   }
@@ -167,21 +166,43 @@ class GetJoinMeetingPayload extends ServiceBase {
         })
       );
     }
+
+    await oThis._validateJoineeName();
   }
 
   /**
-   * Fetch and validate meeting.
-   *
-   * @sets oThis.name
+   * Method to Validate Joinee's name
    *
    * @returns {Promise<never>}
    * @private
    */
-  async _fetchEntities() {
+  async _validateJoineeName() {
     const oThis = this;
 
     if (oThis.currentUser.id) {
       oThis.name = oThis.currentUser.name;
+    }
+
+    if (!CommonValidators.validateName(oThis.name)) {
+      return Promise.reject(
+        responseHelper.paramValidationError({
+          internal_error_identifier: 'a_s_c_m_gjp_fe_1',
+          api_error_identifier: 'invalid_api_params',
+          params_error_identifiers: ['invalid_guest_name'],
+          debug_options: {}
+        })
+      );
+    }
+
+    if (!CommonValidators.validateStopWords(oThis.name)) {
+      return Promise.reject(
+        responseHelper.paramValidationError({
+          internal_error_identifier: 'a_s_c_m_gjp_fe_2',
+          api_error_identifier: 'invalid_api_params',
+          params_error_identifiers: ['bad_guest_name'],
+          debug_options: {}
+        })
+      );
     }
   }
 

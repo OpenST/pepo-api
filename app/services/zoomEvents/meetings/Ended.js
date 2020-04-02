@@ -1,6 +1,5 @@
 const rootPrefix = '../../../..',
-  ServiceBase = require(rootPrefix + '/app/services/Base'),
-  MeetingIdByZoomMeetingIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/meeting/MeetingIdByZoomMeetingIds'),
+  ZoomEventsForMeetingsBase = require(rootPrefix + '/app/services/zoomEvents/meetings/Base'),
   MeetingByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/meeting/MeetingByIds'),
   MeetingModel = require(rootPrefix + '/app/models/mysql/meeting/Meeting'),
   MeetingRelayerModel = require(rootPrefix + '/app/models/mysql/meeting/MeetingRelayer'),
@@ -15,7 +14,7 @@ const rootPrefix = '../../../..',
  *
  * @class MeetingEnded
  */
-class MeetingEnded extends ServiceBase {
+class MeetingEnded extends ZoomEventsForMeetingsBase {
   /**
    * Constructor
    *
@@ -31,9 +30,7 @@ class MeetingEnded extends ServiceBase {
     const oThis = this;
     oThis.endTime = params.payload.object.end_time;
     oThis.startTime = params.payload.object.start_time;
-    oThis.zoomMeetingId = params.payload.object.id;
 
-    oThis.meetingId = null;
     oThis.meetingObj = {};
     oThis.endTimestamp = null;
     oThis.startTimestamp = null;
@@ -52,6 +49,8 @@ class MeetingEnded extends ServiceBase {
     const oThis = this;
 
     await oThis._parseParams();
+
+    await oThis.validateAndSetMeetingId();
 
     await oThis._fetchAndValidateMeetingStatus();
 
@@ -90,7 +89,7 @@ class MeetingEnded extends ServiceBase {
   /**
    * Fetch meeting obj.
    *
-   * @sets oThis.meetingId, oThis.meetingObj
+   * @sets oThis.meetingObj
    *
    * @return {Promise<void>}
    * @private
@@ -98,15 +97,7 @@ class MeetingEnded extends ServiceBase {
   async _fetchAndValidateMeetingStatus() {
     const oThis = this;
 
-    logger.log('Fetching meeting obj.');
-
-    let cacheRes1 = await new MeetingIdByZoomMeetingIdsCache({ zoomMeetingIds: [oThis.zoomMeetingId] }).fetch();
-
-    if (cacheRes1.isFailure()) {
-      return Promise.reject(cacheRes1);
-    }
-
-    oThis.meetingId = cacheRes1.data[oThis.zoomMeetingId].id;
+    logger.log('MeetingEnded: Fetching meeting obj.');
 
     if (!oThis.meetingId) {
       oThis.processEvent = false;
@@ -143,7 +134,7 @@ class MeetingEnded extends ServiceBase {
   async _updateMeetingTimestamps() {
     const oThis = this;
 
-    logger.log('update _updateMeetingTimestamps.');
+    logger.log('MeetingEnded: Updating _updateMeetingTimestamps.');
     const updateParams = {};
 
     if (oThis.startTimestamp) {
@@ -173,7 +164,7 @@ class MeetingEnded extends ServiceBase {
   async _updateMeeting() {
     const oThis = this;
 
-    logger.log('update meeting.');
+    logger.log('MeetingEnded: updating meeting.');
 
     if (!oThis.meetingObj.isLive) {
       oThis.processEvent = false;
@@ -210,7 +201,7 @@ class MeetingEnded extends ServiceBase {
   async _markMeetingRelayerAsAvailable() {
     const oThis = this;
 
-    logger.log('update meeting relayer as available.');
+    logger.log('MeetingEnded: update meeting relayer as available.');
 
     await new MeetingRelayerModel()
       .update({

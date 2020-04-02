@@ -189,6 +189,16 @@ const webErrorConfig = {
     parameter: 'product_id',
     code: 'invalid',
     message: 'Invalid product id.'
+  },
+  invalid_guest_name: {
+    parameter: 'guest_name',
+    code: 'invalid',
+    message: 'Name must be min 2 characters and max 30.'
+  },
+  bad_guest_name: {
+    parameter: 'guest_name',
+    code: 'invalid',
+    message: 'Cuss words are not allowed.'
   }
 };
 

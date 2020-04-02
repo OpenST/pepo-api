@@ -185,7 +185,7 @@ class MixedTopSearch extends ServiceBase {
         id: 'sc_cr',
         updatedAt: Math.round(new Date() / 1000),
         kind: 'channel',
-        title: oThis.q ? 'Channel' : null
+        title: oThis.q ? 'Communities' : null
       });
 
       response[entityTypeConstants.channelSearchList] = oThis.channelResponses[entityTypeConstants.channelSearchList];

@@ -20,6 +20,26 @@ const adminErrorConfig = {
     code: 'invalid',
     message: 'First Name can contain alphabets and spaces and should be min 2 characters and max 25 characters'
   },
+
+  invalid_channel_id: {
+    parameter: 'channel_id',
+    code: 'invalid',
+    message: 'Channel does not exist.'
+  },
+
+  duplicate_channel_entry: {
+    parameter: 'channel_id',
+    code: 'invalid',
+    message: 'Channel already exists.'
+  },
+
+  invalid_admin_usernames: {
+    parameter: 'admins',
+    code: 'invalid',
+    message:
+      'Invalid admin username. Channel has been created. Please use correct usernames and edit the same channel instead of creating it again'
+  },
+
   invalid_last_name: {
     parameter: 'last_name',
     code: 'invalid',
