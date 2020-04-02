@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "62496e32-51da-40b6-9d18-ac40026acfa6",
+		"_postman_id": "7aa23a6b-112c-4a19-8eea-30ba66cdf537",
 		"name": "pepo-api",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -377,6 +377,42 @@
 					"_postman_isSubFolder": true
 				},
 				{
+					"name": "channel",
+					"item": [
+						{
+							"name": "edit",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"is_edit\": 0,\n    \"name\": \"test1\",\n    \"permalink\": \"test1\",\n    \"tagline\": \"test1 #test1\",\n    \"description\": \"test1 test1 #test1 https://google.com\",\n    \"admins\": \"@shlok, @something\",\n    \"tags\": \"#test1\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{api_server}}/api/admin/channel/edit",
+									"host": [
+										"{{api_server}}"
+									],
+									"path": [
+										"api",
+										"admin",
+										"channel",
+										"edit"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"protocolProfileBehavior": {},
+					"_postman_isSubFolder": true
+				},
+				{
 					"name": "logged-in-admin",
 					"request": {
 						"method": "GET",
@@ -439,7 +475,7 @@
 							"urlencoded": [
 								{
 									"key": "email",
-									"value": "santhosh@ost.com",
+									"value": "shlok@ost.com",
 									"type": "text"
 								},
 								{
@@ -1404,6 +1440,195 @@
 										"v1",
 										"auth",
 										"github-disconnect"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"protocolProfileBehavior": {},
+					"_postman_isSubFolder": true
+				},
+				{
+					"name": "channels",
+					"item": [
+						{
+							"name": "get-channel",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"type": "text",
+										"value": "application/x-www-form-urlencoded"
+									}
+								],
+								"body": {
+									"mode": "urlencoded",
+									"urlencoded": []
+								},
+								"url": {
+									"raw": "{{api_server}}/api/v1/channels/1",
+									"host": [
+										"{{api_server}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"channels",
+										"1"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "get-channel-videos",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"type": "text",
+										"value": "application/x-www-form-urlencoded"
+									}
+								],
+								"body": {
+									"mode": "urlencoded",
+									"urlencoded": []
+								},
+								"url": {
+									"raw": "{{api_server}}/api/v1/channels/1/videos",
+									"host": [
+										"{{api_server}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"channels",
+										"1",
+										"videos"
+									],
+									"query": [
+										{
+											"key": "pagination_identifier",
+											"value": "eyJwYWdlIjozfQ==",
+											"disabled": true
+										},
+										{
+											"key": "filter_by_tag_id",
+											"value": "1",
+											"disabled": true
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "edit",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "urlencoded",
+									"urlencoded": [
+										{
+											"key": "channel_name",
+											"value": "Epicenter",
+											"type": "text"
+										},
+										{
+											"key": "channel_tagline",
+											"value": "This is some tagline. #new #tagline",
+											"type": "text"
+										},
+										{
+											"key": "channel_description",
+											"value": "This is a video description. Link: https://pepo.com. Tags: #test1 #test2",
+											"type": "text"
+										},
+										{
+											"key": "channel_tags",
+											"value": "[\"tag1\", \"tag2\", \"tag3\", \"tag4\", \"tag5\"]",
+											"type": "text"
+										}
+									],
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{api_server}}/api/v1/channels/2/edit",
+									"host": [
+										"{{api_server}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"channels",
+										"2",
+										"edit"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "create",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "urlencoded",
+									"urlencoded": [
+										{
+											"key": "channel_name",
+											"value": "Epicenter",
+											"type": "text"
+										},
+										{
+											"key": "channel_tagline",
+											"value": "This is some tagline. #new #tagline",
+											"type": "text"
+										},
+										{
+											"key": "channel_description",
+											"value": "This is a video description. Link: https://pepo.com. Tags: #test1 #test2",
+											"type": "text"
+										},
+										{
+											"key": "channel_tags",
+											"value": "[\"tag1\", \"tag2\", \"tag3\", \"tag4\", \"tag5\"]",
+											"type": "text"
+										}
+									],
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{api_server}}/api/v1/channels/",
+									"host": [
+										"{{api_server}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"channels",
+										""
 									]
 								}
 							},
@@ -3532,94 +3757,6 @@
 										"replies",
 										"1009",
 										"delete"
-									]
-								}
-							},
-							"response": []
-						}
-					],
-					"protocolProfileBehavior": {},
-					"_postman_isSubFolder": true
-				},
-				{
-					"name": "channels",
-					"item": [
-						{
-							"name": "get-channel",
-							"protocolProfileBehavior": {
-								"disableBodyPruning": true
-							},
-							"request": {
-								"method": "GET",
-								"header": [
-									{
-										"key": "Content-Type",
-										"name": "Content-Type",
-										"type": "text",
-										"value": "application/x-www-form-urlencoded"
-									}
-								],
-								"body": {
-									"mode": "urlencoded",
-									"urlencoded": []
-								},
-								"url": {
-									"raw": "{{api_server}}/api/v1/channels/1",
-									"host": [
-										"{{api_server}}"
-									],
-									"path": [
-										"api",
-										"v1",
-										"channels",
-										"1"
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "get-channel-videos",
-							"protocolProfileBehavior": {
-								"disableBodyPruning": true
-							},
-							"request": {
-								"method": "GET",
-								"header": [
-									{
-										"key": "Content-Type",
-										"name": "Content-Type",
-										"type": "text",
-										"value": "application/x-www-form-urlencoded"
-									}
-								],
-								"body": {
-									"mode": "urlencoded",
-									"urlencoded": []
-								},
-								"url": {
-									"raw": "{{api_server}}/api/v1/channels/1/videos",
-									"host": [
-										"{{api_server}}"
-									],
-									"path": [
-										"api",
-										"v1",
-										"channels",
-										"1",
-										"videos"
-									],
-									"query": [
-										{
-											"key": "pagination_identifier",
-											"value": "eyJwYWdlIjozfQ==",
-											"disabled": true
-										},
-										{
-											"key": "filter_by_tag_id",
-											"value": "1",
-											"disabled": true
-										}
 									]
 								}
 							},
