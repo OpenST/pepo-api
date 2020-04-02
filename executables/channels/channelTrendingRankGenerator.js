@@ -6,6 +6,8 @@ const rootPrefix = '../..',
   ChannelModel = require(rootPrefix + '/app/models/mysql/channel/Channel'),
   channelConstants = require(rootPrefix + '/lib/globalConstant/channel/channels'),
   ChannelUserModel = require(rootPrefix + '/app/models/mysql/channel/ChannelUser'),
+  ChannelByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelByIds'),
+  ChannelTrendingCache = require(rootPrefix + '/lib/cacheManagement/single/channel/ChannelTrending'),
   channelUsersConstants = require(rootPrefix + '/lib/globalConstant/channel/channelUsers'),
   ChannelVideoModel = require(rootPrefix + '/app/models/mysql/channel/ChannelVideo'),
   channelVideosConstants = require(rootPrefix + '/lib/globalConstant/channel/channelVideos'),
@@ -90,6 +92,9 @@ class ChannelTrendingRankGenerator extends CronBase {
 
     // Create final rank for a channel by score calculation logic.
     await oThis._rankChannels();
+
+    // Update Trending Rank for channels
+    await oThis._updateTrendingRankInChannels();
 
     oThis.canExit = true;
 
@@ -458,8 +463,14 @@ class ChannelTrendingRankGenerator extends CronBase {
     const oThis = this;
 
     for (let i = 0; i < oThis.channelIds.length; i++) {
-      const cid = oThis.channelIds[i];
-      oThis.channelRankMetric[cid].totalScore = oThis._score(cid);
+      const channelId = oThis.channelIds[i];
+      const rankData = oThis.channelRankMetric[channelId];
+
+      oThis.channelRankMetric[channelId].totalScore =
+        rankData.rankByUser * 0.2 +
+        rankData.rankByPost * 0.25 +
+        rankData.rankByReply * 0.25 +
+        rankData.rankByTransaction * 0.3;
     }
 
     const channelIds = oThis.channelIds;
@@ -474,14 +485,42 @@ class ChannelTrendingRankGenerator extends CronBase {
     }
   }
 
-  async _score(channelId) {
-    const rankData = oThis.channelRankMetric[channelId];
-    return (
-      rankData.rankByUser * 0.2 +
-      rankData.rankByPost * 0.25 +
-      rankData.rankByReply * 0.25 +
-      rankData.rankByTransaction * 0.3
-    );
+  /**
+   * Update Trending Rank for channels
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _updateTrendingRankInChannels() {
+    const oThis = this;
+
+    let promises = [];
+    let channelIds = [];
+
+    for (let i = 0; i < oThis.channelIds.length; i++) {
+      const channelId = oThis.channelIds[i];
+      channelIds.push(channelId);
+
+      const promise = new ChannelModel()
+        .update({ trending_rank: oThis.channelRank[channelId] })
+        .where({ id: channelId })
+        .fire();
+      promises.push(promise);
+
+      if (promises.length == BATCH_SIZE) {
+        await Promise.all(promises);
+        await new ChannelByIdsCache({ ids: channelIds }).clear();
+        channelIds = [];
+        promises = [];
+      }
+    }
+
+    if (channelIds.length > 0) {
+      await Promise.all(promises);
+      await new ChannelByIdsCache({ ids: channelIds }).clear();
+    }
+
+    await new ChannelTrendingCache({}).clear();
   }
 
   /**
