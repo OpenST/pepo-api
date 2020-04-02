@@ -7,15 +7,13 @@ const rootPrefix = '../../..',
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger');
 
-class HideChannel extends ServiceBase {
+class DeleteChannel extends ServiceBase {
   /**
-   * Constructor to hide channel by admin.
+   * Constructor to delete channel by admin.
    *
    * @param {object} params
-   * @param {array} params.channel_id: Channel id to be hidden by admin.
+   * @param {array} params.channel_id: Channel id to be deleted by admin.
    * @param {object} params.current_admin: current admin.
-   *
-   * @augments ServiceBase
    *
    * @constructor
    */
@@ -24,7 +22,7 @@ class HideChannel extends ServiceBase {
 
     const oThis = this;
 
-    oThis.channelId = params.channel_ids;
+    oThis.channelId = params.channel_id;
     oThis.currentAdminId = params.current_admin.id;
   }
 
@@ -39,7 +37,7 @@ class HideChannel extends ServiceBase {
 
     await oThis._validateAndSanitize();
 
-    await oThis._hideChannel();
+    await oThis._deleteChannel();
 
     return responseHelper.successWithData({});
   }
@@ -75,16 +73,16 @@ class HideChannel extends ServiceBase {
     }
   }
 
-  async _hideChannel() {
+  async _deleteChannel() {
     const oThis = this;
 
     const updateResponse = await new ChannelModel()
-      .update({ status: channelConstants.invertedStatuses[channelConstants.inactiveStatus] })
+      .update({ status: channelConstants.invertedStatuses[channelConstants.deletedStatus] })
       .where({ id: oThis.channelId, status: channelConstants.invertedStatuses[channelConstants.activeStatus] })
       .fire();
 
     if (!updateResponse) {
-      logger.error(`Error while updating channel to ${channelConstants.inactiveStatus}.`);
+      logger.error(`Error while updating channel to ${channelConstants.deletedStatus}.`);
 
       return Promise.reject(
         responseHelper.paramValidationError({
@@ -102,4 +100,4 @@ class HideChannel extends ServiceBase {
   }
 }
 
-module.exports = HideChannel;
+module.exports = DeleteChannel;
