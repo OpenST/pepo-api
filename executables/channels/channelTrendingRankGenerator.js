@@ -235,6 +235,7 @@ class ChannelTrendingRankGenerator extends CronBase {
     if (records.length === 0) {
       return;
     }
+
     let minId = records[0].minId;
 
     while (true) {
@@ -247,7 +248,6 @@ class ChannelTrendingRankGenerator extends CronBase {
           ]
         })
         .where({ status: transactionConstants.doneStatus })
-        .where(['created_at >= ?', oThis.recentTimestampInSec])
         .where(['id >= ?', minId])
         .order_by('id asc')
         .limit(BATCH_SIZE)
