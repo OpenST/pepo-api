@@ -4,6 +4,7 @@ const rootPrefix = '../../../..',
   ModifyChannel = require(rootPrefix + '/lib/channel/ModifyChannel'),
   FetchAssociatedEntities = require(rootPrefix + '/lib/FetchAssociatedEntities'),
   ChannelByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelByIds'),
+  GetCurrentUserChannelRelationsLib = require(rootPrefix + '/lib/channel/GetCurrentUserChannelRelations'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   createErrorLogsEntry = require(rootPrefix + '/lib/errorLogs/createEntry'),
   errorLogsConstants = require(rootPrefix + '/lib/globalConstant/errorLogs'),
@@ -18,6 +19,9 @@ const rootPrefix = '../../../..',
 class EditChannel extends ServiceBase {
   /**
    * Constructor to edit channel.
+   *
+   * @param {object} params.current_user
+   * @param {number} params.current_user.id
    *
    * @param {number} params.channel_id
    * @param {string} params.channel_name
@@ -38,6 +42,8 @@ class EditChannel extends ServiceBase {
 
     const oThis = this;
 
+    oThis.currentUserId = params.current_user.id;
+
     oThis.channelId = params.channel_id;
     oThis.channelName = params.channel_name;
     oThis.channelTagline = params.channel_tagline;
@@ -55,7 +61,11 @@ class EditChannel extends ServiceBase {
 
     oThis.texts = {};
 
-    oThis.updateRequiredParameters = {};
+    oThis.updateRequiredParameters = {
+      channelId: oThis.channelId,
+      tagNames: oThis.channelTagNames,
+      permalink: oThis.channel.permalink
+    };
   }
 
   /**
@@ -71,9 +81,9 @@ class EditChannel extends ServiceBase {
 
     await oThis._validateExistingChannel();
 
-    await oThis._validateCoverImageParameters();
+    await oThis._validateCurrentUserChannelRelations();
 
-    await oThis._fetchAssociatedEntities();
+    await Promise.all([oThis._validateCoverImageParameters(), oThis._fetchAssociatedEntities()]);
 
     oThis._decideUpdateRequiredParameters();
 
@@ -146,6 +156,41 @@ class EditChannel extends ServiceBase {
     oThis.channelTaglineId = oThis.channel.taglineId;
 
     oThis.channelDescriptionId = oThis.channel.descriptionId;
+  }
+
+  /**
+   * Fetch current user channel relations and validate whether user is an admin of the channel or not.
+   *
+   * @returns {Promise<never>}
+   * @private
+   */
+  async _validateCurrentUserChannelRelations() {
+    const oThis = this;
+
+    const currentUserChannelRelationsResponse = await new GetCurrentUserChannelRelationsLib({
+      currentUserId: oThis.currentUserId,
+      channelIds: [oThis.channelId]
+    }).perform();
+    if (currentUserChannelRelationsResponse.isFailure()) {
+      return Promise.reject(currentUserChannelRelationsResponse);
+    }
+
+    const currentUserChannelRelations =
+      currentUserChannelRelationsResponse.data.currentUserChannelRelations[oThis.channelId];
+
+    if (!currentUserChannelRelations.isAdmin) {
+      return Promise.reject(
+        responseHelper.error({
+          internal_error_identifier: 'a_s_c_m_e_vcucr_1',
+          api_error_identifier: 'unauthorized_api_request',
+          debug_options: {
+            channelId: oThis.channelId,
+            currentUserId: oThis.currentUserId,
+            currentUserChannelRelations: currentUserChannelRelations
+          }
+        })
+      );
+    }
   }
 
   /**
@@ -239,14 +284,6 @@ class EditChannel extends ServiceBase {
    */
   async _modifyChannel() {
     const oThis = this;
-
-    if (!CommonValidators.validateNonEmptyObject(oThis.updateRequiredParameters)) {
-      return oThis.channel;
-    }
-
-    oThis.updateRequiredParameters.channelId = oThis.channelId;
-    oThis.updateRequiredParameters.tagNames = oThis.channelTagNames;
-    oThis.updateRequiredParameters.permalink = oThis.channel.permalink;
 
     const modifyChannelResponse = await new ModifyChannel(oThis.updateRequiredParameters).perform();
     if (modifyChannelResponse.isFailure()) {
