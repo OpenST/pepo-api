@@ -153,7 +153,7 @@ class ChannelTrendingRankGenerator extends CronBase {
     for (let i = 0; i < records.length; i++) {
       oThis.channelMetric[records[i].channel_id] = {
         ...oThis.channelMetric[records[i].channel_id],
-        userCount: records[i].userCount
+        userCount: Number(records[i].userCount)
       };
     }
   }
@@ -182,7 +182,7 @@ class ChannelTrendingRankGenerator extends CronBase {
     for (let i = 0; i < records.length; i++) {
       oThis.channelMetric[records[i].channel_id] = {
         ...oThis.channelMetric[records[i].channel_id],
-        postCount: records[i].videoCount
+        postCount: Number(records[i].videoCount)
       };
     }
   }
@@ -213,7 +213,7 @@ class ChannelTrendingRankGenerator extends CronBase {
     for (let i = 0; i < records.length; i++) {
       oThis.videoMetric[records[i].video_id] = {
         ...oThis.videoMetric[records[i].video_id],
-        replyCount: records[i].replyCount,
+        replyCount: Number(records[i].replyCount),
         transactionCount: 0,
         replyTransactionCount: 0
       };
