@@ -453,7 +453,7 @@ const adminSignature = {
       },
       {
         parameter: 'cover_image_file_size',
-        validatorMethods: ['validateInteger']
+        validatorMethods: ['validateChannelCoverImageFileSize']
       }
     ]
   },
