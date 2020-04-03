@@ -3,7 +3,7 @@ const rootPrefix = '../../../..',
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   slackConstants = require(rootPrefix + '/lib/globalConstant/slack'),
-  DeleteChannelService = require(rootPrefix + 'app/services/admin/channel/Delete');
+  DeleteChannelService = require(rootPrefix + '/app/services/admin/channel/Delete');
 
 /**
  * Class to delete channel.
