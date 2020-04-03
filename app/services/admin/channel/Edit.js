@@ -450,6 +450,8 @@ class EditChannel extends ServiceBase {
 
     oThis.channelId = insertResponse.insertId;
     oThis.updateRequiredParameters.channelId = oThis.channelId;
+
+    await ChannelModel.flushCache({ name: oThis.channelName, createdAt: Math.floor(Date.now() / 1000) });
   }
 
   /**

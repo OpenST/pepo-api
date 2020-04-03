@@ -24,7 +24,6 @@ class CreateChannel extends ServiceBase {
    *
    * @param {object} params.current_user
    * @param {number} params.current_user.id
-   * @param {number} params.channel_id
    * @param {string} params.channel_name
    * @param {string} params.channel_tagline
    * @param {string} params.channel_description
@@ -167,6 +166,8 @@ class CreateChannel extends ServiceBase {
     }
 
     oThis.channelId = insertResponse.insertId;
+
+    await ChannelModel.flushCache({ name: oThis.channelName, createdAt: Math.floor(Date.now() / 1000) });
   }
 
   /**

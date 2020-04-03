@@ -1982,10 +1982,6 @@ const v1Signature = {
         validatorMethods: ['validateString']
       },
       {
-        parameter: 'channel_id',
-        validatorMethods: ['validateNonZeroInteger']
-      },
-      {
         parameter: 'current_user',
         validatorMethods: ['validateNonEmptyObject']
       },
