@@ -203,7 +203,6 @@ class ChannelModel extends ModelBase {
    */
   static async flushCache(params) {
     const promisesArray = [];
-
     if (params.ids) {
       const ChannelByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelByIds');
       promisesArray.push(new ChannelByIdsCache({ ids: params.ids }).clear());

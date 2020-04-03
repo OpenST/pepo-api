@@ -7,6 +7,11 @@ const rootPrefix = '../../..',
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger');
 
+/**
+ * Class to delete channel.
+ *
+ * @class DeleteChannel
+ */
 class DeleteChannel extends ServiceBase {
   /**
    * Constructor to delete channel by admin.
@@ -24,6 +29,8 @@ class DeleteChannel extends ServiceBase {
 
     oThis.channelId = params.channel_id;
     oThis.currentAdminId = params.current_admin.id;
+
+    oThis.channel = null;
   }
 
   /**
@@ -42,12 +49,24 @@ class DeleteChannel extends ServiceBase {
     return responseHelper.successWithData({});
   }
 
+  /**
+   * Performs validations
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
   async _validateAndSanitize() {
     const oThis = this;
 
     await oThis._validateChannel();
   }
 
+  /**
+   * Validate if channel is valid or not.
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
   async _validateChannel() {
     const oThis = this;
 
@@ -56,29 +75,41 @@ class DeleteChannel extends ServiceBase {
       return Promise.reject(channelCacheResponse);
     }
 
-    const channel = channelCacheResponse.data[oThis.channelId];
+    oThis.channel = channelCacheResponse.data[oThis.channelId];
 
-    if (!CommonValidators.validateNonEmptyObject(channel) || channel.status !== channelConstants.activeStatus) {
+    if (
+      !CommonValidators.validateNonEmptyObject(oThis.channel) ||
+      oThis.channel.status !== channelConstants.activeStatus
+    ) {
       return Promise.reject(
         responseHelper.paramValidationError({
-          internal_error_identifier: 'a_s_a_c_h_vc_1',
+          internal_error_identifier: 'a_s_a_c_d_vc_1',
           api_error_identifier: 'invalid_api_params',
           params_error_identifiers: ['invalid_channel_id'],
           debug_options: {
             channelId: oThis.channelId,
-            channelDetails: channel
+            channelDetails: oThis.channel
           }
         })
       );
     }
   }
 
+  /**
+   * Delete channel and flush cache
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
   async _deleteChannel() {
     const oThis = this;
 
     const updateResponse = await new ChannelModel()
       .update({ status: channelConstants.invertedStatuses[channelConstants.deletedStatus] })
-      .where({ id: oThis.channelId, status: channelConstants.invertedStatuses[channelConstants.activeStatus] })
+      .where({
+        id: oThis.channelId,
+        status: channelConstants.invertedStatuses[channelConstants.activeStatus]
+      })
       .fire();
 
     if (!updateResponse) {
@@ -86,7 +117,7 @@ class DeleteChannel extends ServiceBase {
 
       return Promise.reject(
         responseHelper.paramValidationError({
-          internal_error_identifier: 'a_s_a_c_h_hc_1',
+          internal_error_identifier: 'a_s_a_c_d_dc_1',
           api_error_identifier: 'invalid_api_params',
           params_error_identifiers: ['invalid_channel_id'],
           debug_options: {
