@@ -104,11 +104,13 @@ class DeleteChannel extends ServiceBase {
     const oThis = this;
 
     const updateResponse = await new ChannelModel()
-      .update({ status: channelConstants.invertedStatuses[channelConstants.deletedStatus] })
+      .update({
+        status: channelConstants.invertedStatuses[channelConstants.deletedStatus],
+        trending_rank: null
+      })
       .where({
         id: oThis.channelId,
-        status: channelConstants.invertedStatuses[channelConstants.activeStatus],
-        trending_rank: null
+        status: channelConstants.invertedStatuses[channelConstants.activeStatus]
       })
       .fire();
 
