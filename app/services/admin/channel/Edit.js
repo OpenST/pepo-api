@@ -41,15 +41,15 @@ class EditChannel extends ServiceBase {
    *
    * @param {object} params.current_admin
    * @param {number} params.current_admin.id
-   * @param {number} params.is_edit
-   * @param {string} [params.name]
-   * @param {string} [params.description]
-   * @param {string} [params.tagline]
    * @param {string} params.permalink
-   * @param {string[]} [params.tags]
-   * @param {string[]} [params.admins]
-   * @param {string} [params.original_image_url]
-   * @param {number} [params.original_image_file_size]
+   * @param {number} params.is_edit
+   * @param {string} [params.channel_name]
+   * @param {string} [params.channel_tagline]
+   * @param {string} [params.channel_description]
+   * @param {string[]} [params.channel_tags]
+   * @param {string[]} [params.channel_admins]
+   * @param {string} [params.cover_image_url]
+   * @param {number} [params.cover_image_file_size]
    *
    * @augments ServiceBase
    *
@@ -61,15 +61,16 @@ class EditChannel extends ServiceBase {
     const oThis = this;
 
     oThis.currentAdminId = params.current_admin.id;
-    oThis.isEdit = Number(params.is_edit);
-    oThis.channelName = params.name;
-    oThis.channelDescription = params.description;
-    oThis.channelTagline = params.tagline;
     oThis.channelPermalink = params.permalink;
-    oThis.channelAdminUserNames = params.admins ? params.admins.split(',') : [];
-    oThis.channelTagNames = params.tags ? params.tags.split(',') : [];
-    oThis.originalImageUrl = params.original_image_url;
-    oThis.originalImageFileSize = params.original_image_file_size;
+    oThis.isEdit = Number(params.is_edit);
+
+    oThis.channelName = params.channel_name;
+    oThis.channelTagline = params.channel_tagline;
+    oThis.channelDescription = params.channel_description;
+    oThis.channelTagNames = params.channel_tags ? params.channel_tags.split(',') : [];
+    oThis.channelAdminUserNames = params.channel_admins ? params.channel_admins.split(',') : [];
+    oThis.originalImageUrl = params.cover_image_url;
+    oThis.originalImageFileSize = params.cover_image_file_size;
 
     oThis.channelId = null;
 

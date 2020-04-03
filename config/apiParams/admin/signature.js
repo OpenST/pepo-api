@@ -428,31 +428,31 @@ const adminSignature = {
     ],
     optional: [
       {
-        parameter: 'name',
+        parameter: 'channel_name',
         validatorMethods: ['validateChannelName']
       },
       {
-        parameter: 'description',
-        validatorMethods: ['validateChannelDescription', 'validateStopWords']
-      },
-      {
-        parameter: 'tagline',
+        parameter: 'channel_tagline',
         validatorMethods: ['validateChannelTagline', 'validateStopWords']
       },
       {
-        parameter: 'tags',
+        parameter: 'channel_description',
+        validatorMethods: ['validateChannelDescription', 'validateStopWords']
+      },
+      {
+        parameter: 'channel_tags',
         validatorMethods: ['validateCommaDelimitedStrings']
       },
       {
-        parameter: 'admins',
+        parameter: 'channel_admins',
         validatorMethods: ['validateCommaDelimitedStrings']
       },
       {
-        parameter: 'original_image_url',
+        parameter: 'cover_image_url',
         validatorMethods: ['validateHttpBasedUrl']
       },
       {
-        parameter: 'original_image_file_size',
+        parameter: 'cover_image_file_size',
         validatorMethods: ['validateInteger']
       }
     ]
