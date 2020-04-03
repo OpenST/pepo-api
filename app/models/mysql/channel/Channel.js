@@ -369,7 +369,7 @@ class ChannelModel extends ModelBase {
       promisesArray.push(new ChannelAllCache({}).clear());
     }
 
-    if (params.trendingRank) {
+    if (params.hasOwnProperty('trendingRank')) {
       const ChannelTrendingCache = require(rootPrefix + '/lib/cacheManagement/single/channel/ChannelTrending');
       promisesArray.push(new ChannelTrendingCache({}).clear());
     }
