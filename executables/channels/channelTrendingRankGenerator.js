@@ -112,7 +112,7 @@ class ChannelTrendingRankGenerator extends CronBase {
   async _getAllActiveChannels() {
     const oThis = this;
     const records = await new ChannelModel()
-      .select('id')
+      .select(['id', 'name'])
       .where({
         status: channelConstants.invertedStatuses[channelConstants.activeStatus]
       })
@@ -121,6 +121,7 @@ class ChannelTrendingRankGenerator extends CronBase {
     for (let i = 0; i < records.length; i++) {
       oThis.channelIds.push(records[i].id);
       oThis.channelMetric[records[i].id] = {
+        name: records[i].name,
         userCount: 0,
         postCount: 0,
         replyCount: 0,
@@ -490,6 +491,7 @@ class ChannelTrendingRankGenerator extends CronBase {
 
     const header = [
       'channelId',
+      'channelName',
       'userCount',
       'rankByUser',
       'postCount',
@@ -513,6 +515,7 @@ class ChannelTrendingRankGenerator extends CronBase {
 
       const data = [
         channelId,
+        metricData.name,
         metricData.userCount,
         rankData.rankByUser,
         metricData.postCount,
