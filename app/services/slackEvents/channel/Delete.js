@@ -39,8 +39,7 @@ class DeleteChannel extends SlackEventBase {
     const oThis = this;
 
     const deletedChannelServiceParams = {
-      channel_id: oThis.eventParams.channel_id,
-      current_admin: oThis.currentAdmin
+      channel_id: oThis.eventParams.channel_id
     };
 
     const deletedChannelServiceResponse = await new DeleteChannelService(deletedChannelServiceParams).perform();

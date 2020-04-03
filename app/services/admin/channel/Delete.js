@@ -1,4 +1,4 @@
-const rootPrefix = '../../..',
+const rootPrefix = '../../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   ChannelModel = require(rootPrefix + '/app/models/mysql/channel/Channel'),
@@ -28,7 +28,6 @@ class DeleteChannel extends ServiceBase {
     const oThis = this;
 
     oThis.channelId = params.channel_id;
-    oThis.currentAdminId = params.current_admin.id;
 
     oThis.channel = null;
   }
