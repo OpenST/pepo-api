@@ -128,7 +128,7 @@ class EditChannel extends ServiceBase {
   /**
    * Validate status of existing channel.
    *
-   * @sets oThis.channel, oThis.channelTaglineId, oThis.channelDescriptionId
+   * @sets oThis.channel, oThis.channelTaglineId, oThis.channelDescriptionId, oThis.updateRequiredParameters
    *
    * @returns {Promise<never>}
    * @private
