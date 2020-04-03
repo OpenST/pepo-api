@@ -193,10 +193,10 @@ class EditChannel extends ServiceBase {
       return Promise.reject(currentUserChannelRelationsResponse);
     }
 
-    const currentUserChannelRelations =
+    const currentUserChannelRelation =
       currentUserChannelRelationsResponse.data.currentUserChannelRelations[oThis.channelId];
 
-    if (!currentUserChannelRelations.isAdmin) {
+    if (!currentUserChannelRelation.isAdmin) {
       return Promise.reject(
         responseHelper.error({
           internal_error_identifier: 'a_s_c_m_e_vcucr_1',
@@ -204,7 +204,7 @@ class EditChannel extends ServiceBase {
           debug_options: {
             channelId: oThis.channelId,
             currentUserId: oThis.currentUserId,
-            currentUserChannelRelations: currentUserChannelRelations
+            currentUserChannelRelations: currentUserChannelRelation
           }
         })
       );

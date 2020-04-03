@@ -58,9 +58,9 @@ class EditChannel extends ServiceBase {
     oThis.channelPermalink = params.permalink;
     oThis.isEdit = Number(params.is_edit);
 
-    oThis.channelName = params.channel_name;
-    oThis.channelTagline = params.channel_tagline;
-    oThis.channelDescription = params.channel_description;
+    oThis.channelName = params.channel_name || '';
+    oThis.channelTagline = params.channel_tagline || '';
+    oThis.channelDescription = params.channel_description || '';
     oThis.channelTagNames = params.channel_tags ? params.channel_tags.split(',') : [];
     oThis.channelAdminUserNames = params.channel_admins ? params.channel_admins.split(',') : [];
     oThis.coverImageUrl = params.cover_image_url;
@@ -351,7 +351,7 @@ class EditChannel extends ServiceBase {
         );
       }
 
-      if (!cacheData[userName].status !== userConstants.activeStatus) {
+      if (cacheData[userName].status !== userConstants.activeStatus) {
         return Promise.reject(
           responseHelper.paramValidationError({
             internal_error_identifier: 'a_s_a_c_e_faui_2',
