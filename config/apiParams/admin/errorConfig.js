@@ -60,6 +60,11 @@ const adminErrorConfig = {
     code: 'invalid',
     message: 'Incorrect login details.'
   },
+  app_user_not_found: {
+    parameter: 'channel_admins',
+    code: 'invalid',
+    message: 'Invalid username. User does not exist.'
+  },
   user_not_active: {
     parameter: 'user_name',
     code: 'invalid',

@@ -1,34 +1,28 @@
 const rootPrefix = '../../../..',
-  FilterTags = require(rootPrefix + '/lib/FilterOutTags'),
   ServiceBase = require(rootPrefix + '/app/services/Base'),
-  TagModel = require(rootPrefix + '/app/models/mysql/Tag'),
-  TextModel = require(rootPrefix + '/app/models/mysql/Text'),
-  UserModel = require(rootPrefix + '/app/models/mysql/User'),
-  FilterOutLinks = require(rootPrefix + '/lib/FilterOutLinks'),
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
+  ModifyChannel = require(rootPrefix + '/lib/channel/ModifyChannel'),
   ChannelModel = require(rootPrefix + '/app/models/mysql/channel/Channel'),
-  AddInChannelLib = require(rootPrefix + '/lib/channelTagVideo/AddTagInChannel'),
+  FetchAssociatedEntities = require(rootPrefix + '/lib/FetchAssociatedEntities'),
   ChannelStatModel = require(rootPrefix + '/app/models/mysql/channel/ChannelStat'),
-  ChangeChannelUserRoleLib = require(rootPrefix + '/lib/channel/ChangeChannelUserRole'),
   AdminActivityLogModel = require(rootPrefix + '/app/models/mysql/admin/AdminActivityLog'),
   ChannelByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelByIds'),
+  UserIdByUserNamesCache = require(rootPrefix + '/lib/cacheManagement/multi/UserIdByUserNames'),
   ChannelByPermalinksCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelByPermalinks'),
-  imageLib = require(rootPrefix + '/lib/imageLib'),
   bgJob = require(rootPrefix + '/lib/rabbitMqEnqueue/bgJob'),
-  tagConstants = require(rootPrefix + '/lib/globalConstant/tag'),
+  userConstants = require(rootPrefix + '/lib/globalConstant/user'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
-  textConstants = require(rootPrefix + '/lib/globalConstant/text'),
-  imageConstants = require(rootPrefix + '/lib/globalConstant/image'),
   bgJobConstants = require(rootPrefix + '/lib/globalConstant/bgJob'),
   slackConstants = require(rootPrefix + '/lib/globalConstant/slack'),
+  createErrorLogsEntry = require(rootPrefix + '/lib/errorLogs/createEntry'),
+  errorLogsConstants = require(rootPrefix + '/lib/globalConstant/errorLogs'),
   channelConstants = require(rootPrefix + '/lib/globalConstant/channel/channels'),
-  channelUserConstants = require(rootPrefix + '/lib/globalConstant/channel/channelUsers'),
   adminActivityLogConstants = require(rootPrefix + '/lib/globalConstant/admin/adminActivityLogs');
 
 // Declare constants.
-const ORIGINAL_IMAGE_WIDTH = 1500;
-const ORIGINAL_IMAGE_HEIGHT = 642;
+const COVER_IMAGE_WIDTH = 1500;
+const COVER_IMAGE_HEIGHT = 642;
 
 /**
  * Class to edit channel.
@@ -69,12 +63,23 @@ class EditChannel extends ServiceBase {
     oThis.channelDescription = params.channel_description;
     oThis.channelTagNames = params.channel_tags ? params.channel_tags.split(',') : [];
     oThis.channelAdminUserNames = params.channel_admins ? params.channel_admins.split(',') : [];
-    oThis.originalImageUrl = params.cover_image_url;
-    oThis.originalImageFileSize = params.cover_image_file_size;
+    oThis.coverImageUrl = params.cover_image_url;
+    oThis.coverImageFileSize = params.cover_image_file_size;
 
     oThis.channelId = null;
+    oThis.channel = {};
+    oThis.channel = {};
+    oThis.channelTaglineId = null;
+    oThis.channelDescriptionId = null;
 
-    oThis.tagIds = [];
+    oThis.adminUserIds = [];
+
+    oThis.texts = {};
+
+    oThis.updateRequiredParameters = {
+      tagNames: oThis.channelTagNames,
+      channelPermalink: oThis.channelPermalink
+    };
   }
 
   /**
@@ -89,22 +94,17 @@ class EditChannel extends ServiceBase {
     await oThis._validateAndSanitize();
 
     if (oThis.isEdit) {
-      await oThis._updateChannelName();
+      await oThis._fetchAssociatedEntities();
+      oThis._decideUpdateRequiredParameters();
+      await oThis._modifyChannel();
     } else {
-      await oThis._validateChannelCreationParameters();
       await oThis._createNewChannel();
+      await oThis._createEntryInChannelStats();
+      oThis._decideUpdateRequiredParameters();
+      await oThis._modifyChannel();
     }
 
-    await oThis._performChannelTaglineRelatedTasks();
-    await oThis._performChannelDescriptionRelatedTasks();
-    await oThis._performImageUrlRelatedTasks();
-    await oThis._createEntryInChannelStats();
-    await oThis._associateAdminsToChannel();
-    await oThis._associateTagsToChannel();
-
-    await oThis.logAdminActivity();
-
-    await oThis.performSlackChannelMonitoringBg();
+    await Promise.all([oThis._performSlackChannelMonitoringBgJob(), oThis.logAdminActivity()]);
 
     return responseHelper.successWithData({});
   }
@@ -118,22 +118,45 @@ class EditChannel extends ServiceBase {
   async _validateAndSanitize() {
     const oThis = this;
 
-    await oThis._validateExistingChannel();
+    oThis._sanitizeInputParameters();
+
+    await oThis._validateChannelPermalink();
 
     if (oThis.isEdit) {
-      await oThis._validateExistingChannelStatus();
+      await oThis._validateChannel();
+    } else {
+      await oThis._validateChannelCreationParameters();
     }
+
+    await oThis._validateCoverImageParameters();
+
+    await oThis._fetchAdminUserIds();
+  }
+
+  /**
+   * Sanitize input parameters.
+   *
+   * @sets oThis.channelName, oThis.channelTagline, oThis.channelDescription
+   *
+   * @private
+   */
+  _sanitizeInputParameters() {
+    const oThis = this;
+
+    oThis.channelName = oThis.channelName.trim();
+    oThis.channelTagline = oThis.channelTagline.trim();
+    oThis.channelDescription = oThis.channelDescription.trim();
   }
 
   /**
    * Validate existing channel using channelPermalink.
    *
-   * @sets oThis.channelId
+   * @sets oThis.channelId, oThis.updateRequiredParameters
    *
    * @returns {Promise<never>}
    * @private
    */
-  async _validateExistingChannel() {
+  async _validateChannelPermalink() {
     const oThis = this;
 
     const lowercaseChannelPermalink = oThis.channelPermalink.toLowerCase();
@@ -178,15 +201,18 @@ class EditChannel extends ServiceBase {
 
     // This will be set only in case of isEdit = 1.
     oThis.channelId = permalinkIdsMap[lowercaseChannelPermalink].id;
+    oThis.updateRequiredParameters.channelId = oThis.channelId;
   }
 
   /**
    * Validate status of existing channel.
    *
+   * @sets oThis.channel, oThis.channelTaglineId, oThis.channelDescriptionId, oThis.updateRequiredParameters
+   *
    * @returns {Promise<never>}
    * @private
    */
-  async _validateExistingChannelStatus() {
+  async _validateChannel() {
     const oThis = this;
 
     const channelCacheResponse = await new ChannelByIdsCache({ ids: [oThis.channelId] }).fetch();
@@ -196,7 +222,7 @@ class EditChannel extends ServiceBase {
 
     const channel = channelCacheResponse.data[oThis.channelId];
 
-    if (!CommonValidators.validateNonEmptyObject(channel) || channel.status !== channelConstants.activeStatus) {
+    if (!CommonValidators.validateNonEmptyObject(channel)) {
       return Promise.reject(
         responseHelper.paramValidationError({
           internal_error_identifier: 'a_s_a_c_e_vecs_1',
@@ -209,50 +235,24 @@ class EditChannel extends ServiceBase {
         })
       );
     }
-  }
 
-  /**
-   * Update channel name.
-   *
-   * @returns {Promise<void>}
-   * @private
-   */
-  async _updateChannelName() {
-    const oThis = this;
-
-    if (!oThis.channelName) {
-      return;
-    }
-
-    const updateResponse = await new ChannelModel()
-      .update({ name: oThis.channelName })
-      .where({ id: oThis.channelId })
-      .fire()
-      .catch(function(err) {
-        logger.log('Error while updating channel name: ', err);
-        if (ChannelModel.isDuplicateIndexViolation(ChannelModel.nameUniqueIndexName, err)) {
-          logger.log('Name conflict.');
-
-          return null;
-        }
-
-        return Promise.reject(err);
-      });
-
-    if (!updateResponse) {
-      logger.error('Error while updating channel name channels table.');
-
+    if (channel.status !== channelConstants.activeStatus) {
       return Promise.reject(
         responseHelper.paramValidationError({
-          internal_error_identifier: 'a_s_a_c_e_ucn_1',
+          internal_error_identifier: 'a_s_a_c_e_vecs_2',
           api_error_identifier: 'invalid_api_params',
-          params_error_identifiers: ['invalid_channel_id'],
-          debug_options: { channelName: oThis.channelName }
+          params_error_identifiers: ['channel_not_active'],
+          debug_options: {
+            channelId: oThis.channelId,
+            channelDetails: channel
+          }
         })
       );
     }
 
-    await ChannelModel.flushCache({ ids: [oThis.channelId] });
+    oThis.channel = channel;
+    oThis.channelTaglineId = oThis.channel.taglineId;
+    oThis.channelDescriptionId = oThis.channel.descriptionId;
   }
 
   /**
@@ -268,8 +268,10 @@ class EditChannel extends ServiceBase {
       !oThis.channelName ||
       !oThis.channelDescription ||
       !oThis.channelTagline ||
-      !oThis.originalImageUrl ||
-      !oThis.originalImageFileSize
+      !oThis.coverImageUrl ||
+      !oThis.coverImageFileSize ||
+      !oThis.channelTagNames ||
+      !oThis.channelAdminUserNames
     ) {
       return Promise.reject(
         responseHelper.error({
@@ -278,7 +280,11 @@ class EditChannel extends ServiceBase {
           debug_options: {
             channelName: oThis.channelName,
             channelDescription: oThis.channelDescription,
-            channelTagline: oThis.channelTagline
+            channelTagline: oThis.channelTagline,
+            coverImageUrl: oThis.coverImageUrl,
+            coverImageFileSize: oThis.coverImageFileSize,
+            channelTagNames: oThis.channelTagNames,
+            channelAdminUserNames: oThis.channelAdminUserNames
           }
         })
       );
@@ -288,9 +294,114 @@ class EditChannel extends ServiceBase {
   }
 
   /**
+   * Validate cover image related parameters.
+   *
+   * @returns {Promise<never>}
+   * @private
+   */
+  async _validateCoverImageParameters() {
+    const oThis = this;
+
+    if (oThis.coverImageUrl && !oThis.coverImageFileSize) {
+      return Promise.reject(
+        responseHelper.error({
+          internal_error_identifier: 'a_s_a_c_e_vcip_1',
+          api_error_identifier: 'invalid_api_params',
+          debug_options: {
+            channelId: oThis.channelId,
+            coverImageUrl: oThis.coverImageUrl,
+            coverImageFileSize: oThis.coverImageFileSize
+          }
+        })
+      );
+    }
+  }
+
+  /**
+   * Fetch and validate admins usernames.
+   *
+   * @sets oThis.adminUserIds
+   *
+   * @returns {Promise<never>}
+   * @private
+   */
+  async _fetchAdminUserIds() {
+    const oThis = this;
+
+    const cacheResponse = await new UserIdByUserNamesCache({ userNames: oThis.channelAdminUserNames }).fetch();
+    if (cacheResponse.isFailure()) {
+      return Promise.reject(cacheResponse);
+    }
+
+    const cacheData = cacheResponse.data;
+
+    for (let index = 0; index < oThis.channelAdminUserNames.length; index++) {
+      const userName = oThis.channelAdminUserNames[index];
+
+      if (!cacheData[userName].id) {
+        return Promise.reject(
+          responseHelper.paramValidationError({
+            internal_error_identifier: 'a_s_a_c_e_faui_1',
+            api_error_identifier: 'invalid_api_params',
+            params_error_identifiers: ['user_not_found'],
+            debug_options: { userName: userName }
+          })
+        );
+      }
+
+      if (!cacheData[userName].status !== userConstants.activeStatus) {
+        return Promise.reject(
+          responseHelper.paramValidationError({
+            internal_error_identifier: 'a_s_a_c_e_faui_2',
+            api_error_identifier: 'invalid_api_params',
+            params_error_identifiers: ['user_inactive'],
+            debug_options: { userName: userName }
+          })
+        );
+      }
+
+      oThis.adminUserIds.push(cacheData[userName].id);
+    }
+  }
+
+  /**
+   * Fetch associated entities.
+   *
+   * @sets oThis.texts
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _fetchAssociatedEntities() {
+    const oThis = this;
+
+    const textsIds = [];
+    if (oThis.channelTagline) {
+      textsIds.push(oThis.channelTaglineId);
+    }
+
+    if (oThis.channelDescription) {
+      textsIds.push(oThis.channelDescriptionId);
+    }
+
+    if (textsIds.length === 0) {
+      return;
+    }
+
+    const associatedEntitiesResponse = await new FetchAssociatedEntities({
+      textIds: [oThis.channelTaglineId, oThis.channelDescriptionId]
+    }).perform();
+    if (associatedEntitiesResponse.isFailure()) {
+      return Promise.reject(associatedEntitiesResponse);
+    }
+
+    oThis.texts = associatedEntitiesResponse.data.textMap;
+  }
+
+  /**
    * Create new channel.
    *
-   * @sets oThis.channelId
+   * @sets oThis.channelId, oThis.updateRequiredParameters
    *
    * @returns {Promise<void>}
    * @private
@@ -336,114 +447,7 @@ class EditChannel extends ServiceBase {
     }
 
     oThis.channelId = insertResponse.insertId;
-  }
-
-  /**
-   * Perform channel tagline related tasks.
-   *
-   * @returns {Promise<void>}
-   * @private
-   */
-  async _performChannelTaglineRelatedTasks() {
-    const oThis = this;
-
-    if (oThis.channelTagline) {
-      // Create new entry in texts table.
-      const textRow = await new TextModel().insertText({
-        text: oThis.channelTagline,
-        kind: textConstants.channelTaglineKind
-      });
-
-      const textInsertId = textRow.insertId;
-
-      // Filter out tags from channel tagline.
-      await new FilterTags(oThis.channelTagline, textInsertId).perform();
-
-      await TextModel.flushCache({ ids: [textInsertId] });
-
-      // Update channel table.
-      await new ChannelModel()
-        .update({ tagline_id: textInsertId })
-        .where({ id: oThis.channelId })
-        .fire();
-
-      await ChannelModel.flushCache({ ids: [oThis.channelId] });
-    }
-  }
-
-  /**
-   * Perform channel description related tasks.
-   *
-   * @returns {Promise<void>}
-   * @private
-   */
-  async _performChannelDescriptionRelatedTasks() {
-    const oThis = this;
-
-    if (oThis.channelDescription) {
-      // Create new entry in texts table.
-      const textRow = await new TextModel().insertText({
-        text: oThis.channelDescription,
-        kind: textConstants.channelDescriptionKind
-      });
-
-      const textInsertId = textRow.insertId;
-
-      // Filter out tags from channel description.
-      await new FilterTags(oThis.channelDescription, textInsertId).perform();
-
-      // Filter out links from channel description.
-      await new FilterOutLinks(oThis.channelDescription, textInsertId).perform();
-
-      await TextModel.flushCache({ ids: [textInsertId] });
-
-      // Update channel table.
-      await new ChannelModel()
-        .update({ description_id: textInsertId })
-        .where({ id: oThis.channelId })
-        .fire();
-
-      await ChannelModel.flushCache({ ids: [oThis.channelId], permalinks: [oThis.channelPermalink] });
-    }
-  }
-
-  /**
-   * Perform image url related tasks.
-   *
-   * @returns {Promise<never>}
-   * @private
-   */
-  async _performImageUrlRelatedTasks() {
-    const oThis = this;
-
-    if (oThis.originalImageUrl) {
-      const imageParams = {
-        imageUrl: oThis.originalImageUrl,
-        size: oThis.originalImageFileSize,
-        width: ORIGINAL_IMAGE_WIDTH,
-        height: ORIGINAL_IMAGE_HEIGHT,
-        kind: imageConstants.channelImageKind,
-        channelId: oThis.channelId,
-        isExternalUrl: false,
-        enqueueResizer: true
-      };
-
-      // Validate and save image.
-      const resp = await imageLib.validateAndSave(imageParams);
-      if (resp.isFailure()) {
-        return Promise.reject(resp);
-      }
-
-      const imageData = resp.data;
-
-      // Update channel table.
-      await new ChannelModel()
-        .update({ cover_image_id: imageData.insertId })
-        .where({ id: oThis.channelId })
-        .fire();
-
-      await ChannelModel.flushCache({ ids: [oThis.channelId] });
-    }
+    oThis.updateRequiredParameters.channelId = oThis.channelId;
   }
 
   /**
@@ -455,10 +459,6 @@ class EditChannel extends ServiceBase {
   async _createEntryInChannelStats() {
     const oThis = this;
 
-    if (oThis.isEdit) {
-      return;
-    }
-
     await new ChannelStatModel()
       .insert({ channel_id: oThis.channelId, total_videos: 0, total_users: 0 })
       .fire()
@@ -468,152 +468,75 @@ class EditChannel extends ServiceBase {
   }
 
   /**
-   * Associate admins to channel.
+   * Decide which channel values need to be updated.
    *
-   * @returns {Promise<void>}
+   * @sets oThis.updateRequiredParameters
+   *
    * @private
    */
-  async _associateAdminsToChannel() {
+  _decideUpdateRequiredParameters() {
     const oThis = this;
 
-    if (oThis.channelAdminUserNames.length === 0) {
-      return;
+    // We are not converting strings to lowerCase before checking intentionally.
+    // Somebody might need to change the case of the strings.
+
+    if (oThis.isEdit) {
+      if (oThis.channelName && oThis.channel.name !== oThis.channelName) {
+        oThis.updateRequiredParameters.name = oThis.channelName;
+      }
+
+      if (
+        oThis.channelTagline &&
+        oThis.texts[oThis.channelTaglineId] &&
+        oThis.texts[oThis.channelTaglineId].text !== oThis.channelTagline
+      ) {
+        oThis.updateRequiredParameters.tagline = oThis.channelTagline;
+      }
+
+      if (
+        oThis.channelDescription &&
+        oThis.texts[oThis.channelDescriptionId] &&
+        oThis.texts[oThis.channelDescriptionId].text !== oThis.channelDescription
+      ) {
+        oThis.updateRequiredParameters.description = oThis.channelDescription;
+      }
+
+      if (oThis.coverImageUrl) {
+        oThis.updateRequiredParameters.coverImageUrl = oThis.coverImageUrl;
+        oThis.updateRequiredParameters.coverImageWidth = COVER_IMAGE_WIDTH;
+        oThis.updateRequiredParameters.coverImageHeight = COVER_IMAGE_HEIGHT;
+        oThis.updateRequiredParameters.coverImageFileSize = oThis.coverImageFileSize;
+      }
+
+      if (oThis.adminUserIds.length > 0) {
+        oThis.updateRequiredParameters.adminUserIds = oThis.adminUserIds;
+      }
+    } else {
+      oThis.updateRequiredParameters.tagline = oThis.channelTagline;
+      oThis.updateRequiredParameters.description = oThis.channelDescription;
+      oThis.updateRequiredParameters.coverImageUrl = oThis.coverImageUrl;
+      oThis.updateRequiredParameters.coverImageWidth = COVER_IMAGE_WIDTH;
+      oThis.updateRequiredParameters.coverImageHeight = COVER_IMAGE_HEIGHT;
+      oThis.updateRequiredParameters.coverImageFileSize = oThis.coverImageFileSize;
+      oThis.updateRequiredParameters.adminUserIds = oThis.adminUserIds;
     }
-
-    for (let index = 0; index < oThis.channelAdminUserNames.length; index++) {
-      oThis.channelAdminUserNames[index] = oThis.channelAdminUserNames[index].trim();
-    }
-
-    const userNamesToUserMap = await new UserModel().fetchByUserNames(oThis.channelAdminUserNames);
-
-    if (Object.keys(userNamesToUserMap).length !== oThis.channelAdminUserNames.length) {
-      logger.error('Some admins are not present in user db.');
-
-      return Promise.reject(
-        responseHelper.paramValidationError({
-          internal_error_identifier: 'a_s_a_c_e_aatc_1',
-          api_error_identifier: 'invalid_api_params',
-          params_error_identifiers: ['invalid_admin_usernames'],
-          debug_options: {
-            adminUserNames: oThis.adminUserNames
-          }
-        })
-      );
-    }
-
-    const adminUserIds = [];
-
-    for (const userName in userNamesToUserMap) {
-      adminUserIds.push(userNamesToUserMap[userName].id);
-    }
-
-    const promiseArray = [];
-
-    for (let ind = 0; ind < adminUserIds.length; ind++) {
-      promiseArray.push(
-        new ChangeChannelUserRoleLib({
-          userId: adminUserIds[ind],
-          channelId: oThis.channelId,
-          role: channelUserConstants.adminRole
-        }).perform()
-      );
-    }
-
-    await Promise.all(promiseArray);
   }
 
   /**
-   * Associate tags to channel.
+   * Modify channel.
    *
-   * @returns {Promise<void>}
+   * @returns {Promise<never>}
    * @private
    */
-  async _associateTagsToChannel() {
+  async _modifyChannel() {
     const oThis = this;
 
-    if (oThis.channelTagNames.length === 0) {
-      return;
-    }
+    const modifyChannelResponse = await new ModifyChannel(oThis.updateRequiredParameters).perform();
 
-    for (let index = 0; index < oThis.channelTagNames.length; index++) {
-      oThis.channelTagNames[index] = oThis.channelTagNames[index].trim();
-    }
+    if (modifyChannelResponse.isFailure()) {
+      await createErrorLogsEntry.perform(modifyChannelResponse, errorLogsConstants.highSeverity);
 
-    await oThis._fetchOrCreateTags();
-
-    const promiseArray = [];
-
-    for (let ind = 0; ind < oThis.tagIds.length; ind++) {
-      promiseArray.push(
-        new AddInChannelLib({
-          channelId: oThis.channelId,
-          tagId: oThis.tagIds[ind]
-        }).perform()
-      );
-    }
-
-    await Promise.all(promiseArray);
-  }
-
-  /**
-   * Fetch existing or create new tags.
-   *
-   * @sets oThis.tagIds
-   *
-   * @returns {Promise<void>}
-   * @private
-   */
-  async _fetchOrCreateTags() {
-    const oThis = this;
-
-    const tagNameToTagIdMap = {},
-      newTagsToInsert = [],
-      newTagsToCreateArray = [];
-
-    const dbRows = await new TagModel()
-      .select(['id', 'name'])
-      .where({ name: oThis.channelTagNames })
-      .fire();
-
-    for (let index = 0; index < dbRows.length; index++) {
-      const formatDbRow = new TagModel()._formatDbData(dbRows[index]);
-      tagNameToTagIdMap[formatDbRow.name.toLowerCase()] = formatDbRow;
-      oThis.tagIds.push(formatDbRow.id);
-    }
-
-    for (let ind = 0; ind < oThis.channelTagNames.length; ind++) {
-      const inputTagName = oThis.channelTagNames[ind];
-      if (!tagNameToTagIdMap[inputTagName.toLowerCase()]) {
-        newTagsToInsert.push(inputTagName);
-        newTagsToCreateArray.push([inputTagName, 0, tagConstants.invertedStatuses[tagConstants.activeStatus]]);
-      }
-    }
-
-    // Creates new tags.
-    if (newTagsToCreateArray.length > 0) {
-      await new TagModel().insertTags(newTagsToCreateArray);
-
-      // Fetch new inserted tags.
-      const newTags = await new TagModel().getTags(newTagsToInsert);
-
-      for (let ind = 0; ind < newTags.length; ind++) {
-        oThis.tagIds.push(newTags[ind].id);
-      }
-    }
-
-    if (oThis.channelTagNames.length !== oThis.tagIds.length) {
-      logger.log('Some tags are not present in db.\nPlease verify.');
-
-      return Promise.reject(
-        responseHelper.error({
-          internal_error_identifier: 'a_s_a_c_e_foct_1',
-          api_error_identifier: 'something_went_wrong',
-          debug_options: {
-            channelTagNames: oThis.channelTagNames,
-            tagIds: oThis.tagIds
-          }
-        })
-      );
+      return Promise.reject(modifyChannelResponse);
     }
   }
 
@@ -635,12 +558,12 @@ class EditChannel extends ServiceBase {
   }
 
   /**
-   * Perform slack channel monitoring job enqueuing
+   * Perform slack channel monitoring job enqueuing.
    *
    * @returns {Promise<void>}
    * @private
    */
-  async performSlackChannelMonitoringBg() {
+  async _performSlackChannelMonitoringBgJob() {
     const oThis = this;
 
     const enqueueObject = {
