@@ -66,9 +66,8 @@ class EditChannel extends ServiceBase {
     oThis.coverImageUrl = params.cover_image_url;
     oThis.coverImageFileSize = params.cover_image_file_size;
 
+    oThis.existingChannelName = null;
     oThis.channelId = null;
-    oThis.channel = {};
-    oThis.channel = {};
     oThis.channelTaglineId = null;
     oThis.channelDescriptionId = null;
 
@@ -95,14 +94,13 @@ class EditChannel extends ServiceBase {
 
     if (oThis.isEdit) {
       await oThis._fetchAssociatedEntities();
-      oThis._decideUpdateRequiredParameters();
-      await oThis._modifyChannel();
     } else {
       await oThis._createNewChannel();
       await oThis._createEntryInChannelStats();
-      oThis._decideUpdateRequiredParameters();
-      await oThis._modifyChannel();
     }
+
+    oThis._decideUpdateRequiredParameters();
+    await oThis._modifyChannel();
 
     await Promise.all([oThis._performSlackChannelMonitoringBgJob(), oThis.logAdminActivity()]);
 
@@ -122,13 +120,13 @@ class EditChannel extends ServiceBase {
 
     await oThis._validateChannelPermalink();
 
+    await oThis._validateCoverImageParameters();
+
     if (oThis.isEdit) {
       await oThis._validateChannel();
     } else {
       await oThis._validateChannelCreationParameters();
     }
-
-    await oThis._validateCoverImageParameters();
 
     await oThis._fetchAdminUserIds();
   }
@@ -205,9 +203,33 @@ class EditChannel extends ServiceBase {
   }
 
   /**
+   * Validate cover image related parameters.
+   *
+   * @returns {Promise<never>}
+   * @private
+   */
+  async _validateCoverImageParameters() {
+    const oThis = this;
+
+    if (oThis.coverImageUrl && !oThis.coverImageFileSize) {
+      return Promise.reject(
+        responseHelper.error({
+          internal_error_identifier: 'a_s_a_c_e_vcip_1',
+          api_error_identifier: 'invalid_api_params',
+          debug_options: {
+            channelId: oThis.channelId,
+            coverImageUrl: oThis.coverImageUrl,
+            coverImageFileSize: oThis.coverImageFileSize
+          }
+        })
+      );
+    }
+  }
+
+  /**
    * Validate status of existing channel.
    *
-   * @sets oThis.channel, oThis.channelTaglineId, oThis.channelDescriptionId, oThis.updateRequiredParameters
+   * @sets oThis.existingChannelName, oThis.channelTaglineId, oThis.channelDescriptionId, oThis.updateRequiredParameters
    *
    * @returns {Promise<never>}
    * @private
@@ -250,9 +272,9 @@ class EditChannel extends ServiceBase {
       );
     }
 
-    oThis.channel = channel;
-    oThis.channelTaglineId = oThis.channel.taglineId;
-    oThis.channelDescriptionId = oThis.channel.descriptionId;
+    oThis.existingChannelName = channel.name;
+    oThis.channelTaglineId = channel.taglineId;
+    oThis.channelDescriptionId = channel.descriptionId;
   }
 
   /**
@@ -294,39 +316,19 @@ class EditChannel extends ServiceBase {
   }
 
   /**
-   * Validate cover image related parameters.
-   *
-   * @returns {Promise<never>}
-   * @private
-   */
-  async _validateCoverImageParameters() {
-    const oThis = this;
-
-    if (oThis.coverImageUrl && !oThis.coverImageFileSize) {
-      return Promise.reject(
-        responseHelper.error({
-          internal_error_identifier: 'a_s_a_c_e_vcip_1',
-          api_error_identifier: 'invalid_api_params',
-          debug_options: {
-            channelId: oThis.channelId,
-            coverImageUrl: oThis.coverImageUrl,
-            coverImageFileSize: oThis.coverImageFileSize
-          }
-        })
-      );
-    }
-  }
-
-  /**
    * Fetch and validate admins usernames.
    *
    * @sets oThis.adminUserIds
    *
-   * @returns {Promise<never>}
+   * @returns {Promise<void>}
    * @private
    */
   async _fetchAdminUserIds() {
     const oThis = this;
+
+    if (oThis.channelAdminUserNames.length === 0) {
+      return;
+    }
 
     const cacheResponse = await new UserIdByUserNamesCache({ userNames: oThis.channelAdminUserNames }).fetch();
     if (cacheResponse.isFailure()) {
@@ -481,7 +483,7 @@ class EditChannel extends ServiceBase {
     // Somebody might need to change the case of the strings.
 
     if (oThis.isEdit) {
-      if (oThis.channelName && oThis.channel.name !== oThis.channelName) {
+      if (oThis.channelName && oThis.existingChannelName !== oThis.channelName) {
         oThis.updateRequiredParameters.name = oThis.channelName;
       }
 
