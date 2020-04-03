@@ -480,7 +480,7 @@ class ChannelTrendingRankGenerator extends CronBase {
     const channelIds = oThis.channelIds;
 
     channelIds.sort(function(c1, c2) {
-      const val = -(oThis.channelRankMetric[c1].totalScore - oThis.channelRankMetric[c2].totalScore);
+      const val = oThis.channelRankMetric[c1].totalScore - oThis.channelRankMetric[c2].totalScore;
       return val == 0 ? -(c1 - c2) : val;
     });
 
