@@ -107,7 +107,8 @@ class DeleteChannel extends ServiceBase {
       .update({ status: channelConstants.invertedStatuses[channelConstants.deletedStatus] })
       .where({
         id: oThis.channelId,
-        status: channelConstants.invertedStatuses[channelConstants.activeStatus]
+        status: channelConstants.invertedStatuses[channelConstants.activeStatus],
+        trending_rank: null
       })
       .fire();
 
