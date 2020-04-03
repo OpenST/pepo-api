@@ -61,7 +61,7 @@ class SlackEventFactory extends ServiceBase {
   async _validateAndSanitizeParams() {
     const oThis = this;
 
-    logger.log('Validate for salck events factory');
+    logger.log('Validate for slack events factory');
 
     if (!oThis.eventData || !CommonValidators.validateNonEmptyObject(oThis.eventData)) {
       return Promise.reject(
