@@ -274,7 +274,7 @@ class ChannelTrendingRankGenerator extends CronBase {
       }
 
       for (let i = 0; i < batchRecords.length; i++) {
-        const transactionRow = TransactionModel.formatDbData(batchRecords[i]);
+        const transactionRow = new TransactionModel().formatDbData(batchRecords[i]);
 
         if (transactionRow.kind === transactionConstants.userTransactionKind) {
           const videoId = transactionRow.extraData.videoId;
