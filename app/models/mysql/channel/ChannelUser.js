@@ -321,6 +321,33 @@ class ChannelUserModel extends ModelBase {
   }
 
   /**
+   * Fetch admin profile ids by channel id.
+   *
+   * @param {number} channelId
+   *
+   * @returns {Promise<[]>}
+   */
+  async fetchAdminProfilesByChannelId(channelId) {
+    const oThis = this;
+
+    const dbRows = await oThis
+      .select('user_id')
+      .where({
+        channel_id: channelId,
+        role: channelUsersConstants.invertedRoles[channelUsersConstants.adminRole]
+      })
+      .fire();
+
+    const channelAdminIds = [];
+
+    for (let index = 0; index < dbRows.length; index++) {
+      channelAdminIds.push(dbRows[index].user_id);
+    }
+
+    return channelAdminIds;
+  }
+
+  /**
    * Flush cache.
    *
    * @param {object} params
