@@ -126,7 +126,11 @@ class DeleteChannel extends ServiceBase {
       );
     }
 
-    await ChannelModel.flushCache({ ids: [oThis.channelId] });
+    await ChannelModel.flushCache({
+      ids: [oThis.channelId],
+      status: channelConstants.deletedStatus,
+      trendingRank: null
+    });
   }
 }
 
