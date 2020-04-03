@@ -199,7 +199,7 @@ class ChannelTrendingRankGenerator extends CronBase {
 
     const records = await new ReplyDetailModel()
       .select('parent_id as video_id, count(id) as replyCount')
-      .where({ status: replyDetailConstants.activeStatus })
+      .where({ status: replyDetailConstants.invertedStatuses[replyDetailConstants.activeStatus] })
       .where({
         parent_kind: replyDetailConstants.invertedEntityKinds[replyDetailConstants.videoParentKind]
       })
@@ -239,7 +239,7 @@ class ChannelTrendingRankGenerator extends CronBase {
           transactionConstants.invertedKinds[transactionConstants.userTransactionOnReplyKind]
         ]
       })
-      .where({ status: transactionConstants.doneStatus })
+      .where({ status: transactionConstants.invertedStatuses[transactionConstants.doneStatus] })
       .where(['created_at >= ?', oThis.recentTimestampInSec])
       .order_by('id asc')
       .fire();
@@ -263,7 +263,7 @@ class ChannelTrendingRankGenerator extends CronBase {
             transactionConstants.invertedKinds[transactionConstants.userTransactionOnReplyKind]
           ]
         })
-        .where({ status: transactionConstants.doneStatus })
+        .where({ status: transactionConstants.invertedStatuses[transactionConstants.doneStatus] })
         .where(['id >= ?', minId])
         .order_by('id asc')
         .limit(BATCH_SIZE)
