@@ -7,7 +7,122 @@ const rootPrefix = '../../..',
   sanitizer = require(rootPrefix + '/helpers/sanitizer'),
   apiName = require(rootPrefix + '/lib/globalConstant/apiName'),
   entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
+  cookieHelper = require(rootPrefix + '/lib/cookieHelper'),
   responseEntityKey = require(rootPrefix + '/lib/globalConstant/responseEntityKey');
+
+/* Search channels. */
+router.get('/channels/new', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.getNewChannels;
+
+  const dataFormatterFunc = async function(serviceResponse) {
+    const wrapperFormatterRsp = await new FormatterComposer({
+      resultType: responseEntityKey.channelSearchResults,
+      entityKindToResponseKeyMap: {
+        [entityTypeConstants.channelSearchList]: responseEntityKey.channelSearchResults,
+        [entityTypeConstants.channelsMap]: responseEntityKey.channels,
+        [entityTypeConstants.channelDetailsMap]: responseEntityKey.channelDetails,
+        [entityTypeConstants.channelStatsMap]: responseEntityKey.channelStats,
+        [entityTypeConstants.currentUserChannelRelationsMap]: responseEntityKey.currentUserChannelRelations,
+        [entityTypeConstants.tagsMap]: responseEntityKey.tags,
+        [entityTypeConstants.imagesMap]: responseEntityKey.images,
+        [entityTypeConstants.linksMap]: responseEntityKey.links,
+        [entityTypeConstants.textsMap]: responseEntityKey.texts,
+        [entityTypeConstants.channelListMeta]: responseEntityKey.meta
+      },
+      serviceData: serviceResponse.data
+    }).perform();
+
+    serviceResponse.data = wrapperFormatterRsp.data;
+  };
+
+  Promise.resolve(routeHelper.perform(req, res, next, '/channel/list/New', 'r_a_v1_s_7', null, dataFormatterFunc));
+});
+
+/* Search channels. */
+router.get('/channels/all', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.getAllChannels;
+
+  const dataFormatterFunc = async function(serviceResponse) {
+    const wrapperFormatterRsp = await new FormatterComposer({
+      resultType: responseEntityKey.channelSearchResults,
+      entityKindToResponseKeyMap: {
+        [entityTypeConstants.channelSearchList]: responseEntityKey.channelSearchResults,
+        [entityTypeConstants.channelsMap]: responseEntityKey.channels,
+        [entityTypeConstants.channelDetailsMap]: responseEntityKey.channelDetails,
+        [entityTypeConstants.channelStatsMap]: responseEntityKey.channelStats,
+        [entityTypeConstants.currentUserChannelRelationsMap]: responseEntityKey.currentUserChannelRelations,
+        [entityTypeConstants.tagsMap]: responseEntityKey.tags,
+        [entityTypeConstants.imagesMap]: responseEntityKey.images,
+        [entityTypeConstants.linksMap]: responseEntityKey.links,
+        [entityTypeConstants.textsMap]: responseEntityKey.texts,
+        [entityTypeConstants.channelListMeta]: responseEntityKey.meta
+      },
+      serviceData: serviceResponse.data
+    }).perform();
+
+    serviceResponse.data = wrapperFormatterRsp.data;
+  };
+
+  Promise.resolve(routeHelper.perform(req, res, next, '/channel/list/All', 'r_a_v1_s_8', null, dataFormatterFunc));
+});
+
+/* Search trending channels. */
+router.get('/channels/trending', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.getTrendingChannels;
+
+  const dataFormatterFunc = async function(serviceResponse) {
+    const wrapperFormatterRsp = await new FormatterComposer({
+      resultType: responseEntityKey.channelSearchResults,
+      entityKindToResponseKeyMap: {
+        [entityTypeConstants.channelSearchList]: responseEntityKey.channelSearchResults,
+        [entityTypeConstants.channelsMap]: responseEntityKey.channels,
+        [entityTypeConstants.channelDetailsMap]: responseEntityKey.channelDetails,
+        [entityTypeConstants.channelStatsMap]: responseEntityKey.channelStats,
+        [entityTypeConstants.currentUserChannelRelationsMap]: responseEntityKey.currentUserChannelRelations,
+        [entityTypeConstants.tagsMap]: responseEntityKey.tags,
+        [entityTypeConstants.imagesMap]: responseEntityKey.images,
+        [entityTypeConstants.linksMap]: responseEntityKey.links,
+        [entityTypeConstants.textsMap]: responseEntityKey.texts,
+        [entityTypeConstants.channelListMeta]: responseEntityKey.meta
+      },
+      serviceData: serviceResponse.data
+    }).perform();
+
+    serviceResponse.data = wrapperFormatterRsp.data;
+  };
+
+  Promise.resolve(routeHelper.perform(req, res, next, '/channel/list/Trending', 'r_a_v1_s_9', null, dataFormatterFunc));
+});
+
+router.use(cookieHelper.validateUserLoginRequired);
+
+/* Search channels. */
+router.get('/channels/my', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.getMyChannels;
+
+  const dataFormatterFunc = async function(serviceResponse) {
+    const wrapperFormatterRsp = await new FormatterComposer({
+      resultType: responseEntityKey.channelSearchResults,
+      entityKindToResponseKeyMap: {
+        [entityTypeConstants.channelSearchList]: responseEntityKey.channelSearchResults,
+        [entityTypeConstants.channelsMap]: responseEntityKey.channels,
+        [entityTypeConstants.channelDetailsMap]: responseEntityKey.channelDetails,
+        [entityTypeConstants.channelStatsMap]: responseEntityKey.channelStats,
+        [entityTypeConstants.currentUserChannelRelationsMap]: responseEntityKey.currentUserChannelRelations,
+        [entityTypeConstants.tagsMap]: responseEntityKey.tags,
+        [entityTypeConstants.imagesMap]: responseEntityKey.images,
+        [entityTypeConstants.linksMap]: responseEntityKey.links,
+        [entityTypeConstants.textsMap]: responseEntityKey.texts,
+        [entityTypeConstants.channelListMeta]: responseEntityKey.meta
+      },
+      serviceData: serviceResponse.data
+    }).perform();
+
+    serviceResponse.data = wrapperFormatterRsp.data;
+  };
+
+  Promise.resolve(routeHelper.perform(req, res, next, '/channel/list/My', 'r_a_v1_s_10', null, dataFormatterFunc));
+});
 
 /* Search tags */
 router.get('/tags', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
@@ -46,7 +161,7 @@ router.get('/tags-mention', sanitizer.sanitizeDynamicUrlParams, function(req, re
     serviceResponse.data = wrapperFormatterRsp.data;
   };
 
-  Promise.resolve(routeHelper.perform(req, res, next, '/search/TagSearch', 'r_a_v1_s_1', null, dataFormatterFunc));
+  Promise.resolve(routeHelper.perform(req, res, next, '/search/TagSearch', 'r_a_v1_s_2', null, dataFormatterFunc));
 });
 
 /* Search users */
@@ -68,7 +183,7 @@ router.get('/users', sanitizer.sanitizeDynamicUrlParams, function(req, res, next
     serviceResponse.data = wrapperFormatterRsp.data;
   };
 
-  Promise.resolve(routeHelper.perform(req, res, next, '/search/UserSearch', 'r_a_v1_s_2', null, dataFormatterFunc));
+  Promise.resolve(routeHelper.perform(req, res, next, '/search/UserSearch', 'r_a_v1_s_3', null, dataFormatterFunc));
 });
 
 /* Search channels. */
@@ -96,7 +211,7 @@ router.get('/channels', sanitizer.sanitizeDynamicUrlParams, function(req, res, n
     serviceResponse.data = wrapperFormatterRsp.data;
   };
 
-  Promise.resolve(routeHelper.perform(req, res, next, '/search/ChannelSearch', 'r_a_v1_c_7', null, dataFormatterFunc));
+  Promise.resolve(routeHelper.perform(req, res, next, '/search/ChannelSearch', 'r_a_v1_c_4', null, dataFormatterFunc));
 });
 
 /* Search user mention */
@@ -119,7 +234,7 @@ router.get('/users-mention', sanitizer.sanitizeDynamicUrlParams, function(req, r
   };
 
   Promise.resolve(
-    routeHelper.perform(req, res, next, '/search/AtMentionSearch', 'r_a_v1_s_3', null, dataFormatterFunc)
+    routeHelper.perform(req, res, next, '/search/AtMentionSearch', 'r_a_v1_s_5', null, dataFormatterFunc)
   );
 });
 
@@ -158,7 +273,7 @@ router.get('/top', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) 
     serviceResponse.data = wrapperFormatterRsp.data;
   };
 
-  Promise.resolve(routeHelper.perform(req, res, next, '/search/TopMixed', 'r_a_v1_s_4', null, dataFormatterFunc));
+  Promise.resolve(routeHelper.perform(req, res, next, '/search/TopMixed', 'r_a_v1_s_6', null, dataFormatterFunc));
 });
 
 module.exports = router;
