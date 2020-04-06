@@ -171,11 +171,12 @@ class EditChannel extends ServiceBase {
     // If admin wants to edit a channel, the channel should already exist.
     if (oThis.isEdit && !CommonValidators.validateNonEmptyObject(permalinkIdsMap[lowercaseChannelPermalink])) {
       return Promise.reject(
-        responseHelper.error({
+        responseHelper.paramValidationError({
           internal_error_identifier: 'a_s_a_c_e_vec_1',
           api_error_identifier: 'invalid_api_params',
           debug_options: {
             channelPermalink: oThis.channelPermalink,
+            params_error_identifiers: ['invalid_channel_id'],
             isEdit: oThis.isEdit
           }
         })
@@ -198,10 +199,8 @@ class EditChannel extends ServiceBase {
     }
 
     // This will be set only in case of isEdit = 1.
-    if (oThis.isEdit) {
-      oThis.channelId = permalinkIdsMap[lowercaseChannelPermalink].id;
-      oThis.updateRequiredParameters.channelId = oThis.channelId;
-    }
+    oThis.channelId = permalinkIdsMap[lowercaseChannelPermalink].id;
+    oThis.updateRequiredParameters.channelId = oThis.channelId;
   }
 
   /**
