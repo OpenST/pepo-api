@@ -112,6 +112,18 @@ class ChannelListBase extends ServiceBase {
   }
 
   /**
+   * Return true if search response needed else for list response return false
+   *
+   * @returns {number}
+   * @private
+   */
+  _shouldSearch() {
+    const oThis = this;
+
+    return CommonValidators.validateNonBlankString(oThis.channelPrefix);
+  }
+
+  /**
    * Fetch entities and set channel ids for search.
    *
    * @returns {Promise<void>}
@@ -442,18 +454,6 @@ class ChannelListBase extends ServiceBase {
     }
 
     return 0;
-  }
-
-  /**
-   * Return true if search response needed else for list response return false
-   *
-   * @returns {number}
-   * @private
-   */
-  _shouldSearch() {
-    const oThis = this;
-
-    return CommonValidators.validateNonBlankString(oThis.channelPrefix);
   }
 
   /**
