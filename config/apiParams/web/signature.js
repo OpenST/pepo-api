@@ -560,7 +560,7 @@ const webSignature = {
       },
       {
         parameter: 'channel_permalink',
-        validatorMethods: ['validateName']
+        validatorMethods: ['validateString']
       }
     ],
     optional: [
