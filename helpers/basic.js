@@ -497,7 +497,7 @@ class BasicHelper {
    * @returns {string}
    */
   sanitizeUsername(username) {
-    return username.toLowerCase().replace(/[^a-z0-9]/g, '');
+    return username.toLowerCase().replace(/[^a-z0-9_]/g, '');
   }
 
   /**
