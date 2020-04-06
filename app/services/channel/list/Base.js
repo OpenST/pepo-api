@@ -138,7 +138,7 @@ class ChannelListBase extends ServiceBase {
 
     const offset = oThis._offset();
 
-    if (oThis._showLiveChannelsOnTop && oThis._isFirstPage) {
+    if (oThis._showLiveChannelsOnTop() && oThis._isFirstPage()) {
       oThis.channelIds = oThis.liveChannelIds;
     }
 
@@ -163,7 +163,7 @@ class ChannelListBase extends ServiceBase {
   async _getLiveChannelIds() {
     const oThis = this;
 
-    if (!oThis._showLiveChannelsOnTop) {
+    if (!oThis._showLiveChannelsOnTop()) {
       return;
     }
 
