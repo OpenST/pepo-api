@@ -120,6 +120,11 @@ const webErrorConfig = {
     code: 'invalid',
     message: 'Invalid user id.'
   },
+  invalid_admin_id: {
+    parameter: 'admin_user_ids',
+    code: 'invalid',
+    message: 'Invalid user passed for admin.'
+  },
   invalid_resolution: {
     parameter: 'resolutions',
     code: 'invalid',

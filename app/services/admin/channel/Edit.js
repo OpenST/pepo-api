@@ -9,6 +9,7 @@ const rootPrefix = '../../../..',
   ChannelByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelByIds'),
   UserIdByUserNamesCache = require(rootPrefix + '/lib/cacheManagement/multi/UserIdByUserNames'),
   ChannelByPermalinksCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelByPermalinks'),
+  UsersCache = require(rootPrefix + '/lib/cacheManagement/multi/User'),
   bgJob = require(rootPrefix + '/lib/rabbitMqEnqueue/bgJob'),
   userConstants = require(rootPrefix + '/lib/globalConstant/user'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
@@ -90,24 +91,17 @@ class EditChannel extends ServiceBase {
   async _asyncPerform() {
     const oThis = this;
 
-    console.log('---1----------------------------');
     await oThis._validateAndSanitize();
 
-    console.log('---2----------------------------');
     if (oThis.isEdit) {
       await oThis._fetchAssociatedEntities();
-      console.log('---3----------------------------');
     } else {
       await oThis._createNewChannel();
-      console.log('---4----------------------------');
       await oThis._createEntryInChannelStats();
-      console.log('---5----------------------------');
     }
 
     oThis._decideUpdateRequiredParameters();
-    console.log('---6----------------------------');
     await oThis._modifyChannel();
-    console.log('---7----------------------------');
 
     await Promise.all([oThis._performSlackChannelMonitoringBgJob(), oThis.logAdminActivity()]);
 
@@ -338,24 +332,23 @@ class EditChannel extends ServiceBase {
       return;
     }
 
-    console.log('---------oThis.channelAdminUserNames-----', oThis.channelAdminUserNames);
     const cacheResponse = await new UserIdByUserNamesCache({ userNames: oThis.channelAdminUserNames }).fetch();
     if (cacheResponse.isFailure()) {
       return Promise.reject(cacheResponse);
     }
 
     const cacheData = cacheResponse.data;
-    console.log('---------cacheData-----', cacheData);
 
     for (let index = 0; index < oThis.channelAdminUserNames.length; index++) {
-      const userName = oThis.channelAdminUserNames[index];
+      const userName = oThis.channelAdminUserNames[index],
+        user = cacheData[userName];
 
-      if (!cacheData[userName].id) {
+      if (!user || !user.id) {
         return Promise.reject(
           responseHelper.paramValidationError({
             internal_error_identifier: 'a_s_a_c_e_faui_1',
             api_error_identifier: 'invalid_api_params',
-            params_error_identifiers: ['user_not_found'],
+            params_error_identifiers: ['invalid_admin_id'],
             debug_options: { userName: userName }
           })
         );
@@ -372,18 +365,31 @@ class EditChannel extends ServiceBase {
         );
       }
 
-      if (!cacheData[userName].approvedCreator) {
+      oThis.adminUserIds.push(user.id);
+    }
+
+    console.log('---------oThis.channelAdminUserNames-----', oThis.channelAdminUserNames);
+
+    const adminUsersCacheRsp = await new UsersCache({ ids: oThis.adminUserIds }).fetch();
+    if (adminUsersCacheRsp.isFailure()) {
+      return Promise.reject(adminUsersCacheRsp);
+    }
+    const adminUsersCacheRspData = adminUsersCacheRsp.data;
+    console.log('---------adminUsersCacheRsp-----', adminUsersCacheRspData);
+
+    for (let caui = 0; caui < oThis.adminUserIds.length; caui++) {
+      const adminUserId = oThis.adminUserIds[caui],
+        adminUserDetail = adminUsersCacheRspData[adminUserId];
+      if (!adminUserDetail.approvedCreator) {
         return Promise.reject(
           responseHelper.paramValidationError({
             internal_error_identifier: 'a_s_a_c_e_faui_3',
             api_error_identifier: 'invalid_api_params',
             params_error_identifiers: ['user_is_not_approved'],
-            debug_options: { userName: userName }
+            debug_options: { userId: adminUserId, userName: adminUserDetail.name }
           })
         );
       }
-
-      oThis.adminUserIds.push(cacheData[userName].id);
     }
   }
 
