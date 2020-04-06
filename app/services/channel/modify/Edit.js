@@ -286,6 +286,7 @@ class EditChannel extends ServiceBase {
       oThis.updateRequiredParameters.description = oThis.channelDescription;
     }
 
+    // NOTE: image URL will be sent from FE only when image is changed.
     if (oThis.coverImageUrl) {
       oThis.updateRequiredParameters.coverImageUrl = oThis.coverImageUrl;
       oThis.updateRequiredParameters.coverImageWidth = oThis.coverImageWidth;

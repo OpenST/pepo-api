@@ -167,7 +167,12 @@ class CreateChannel extends ServiceBase {
 
     oThis.channelId = insertResponse.insertId;
 
-    await ChannelModel.flushCache({ name: oThis.channelName, createdAt: Math.floor(Date.now() / 1000) });
+    await ChannelModel.flushCache({
+      ids: [oThis.channelId],
+      permalinks: [oThis.channelPermalink],
+      name: oThis.channelName,
+      createdAt: Math.floor(Date.now() / 1000)
+    });
   }
 
   /**
@@ -181,10 +186,7 @@ class CreateChannel extends ServiceBase {
 
     await new ChannelStatModel()
       .insert({ channel_id: oThis.channelId, total_videos: 0, total_users: 0 })
-      .fire()
-      .catch(function(error) {
-        logger.log('Avoid this error while updating channel. Error while creating channel stats: ', error);
-      });
+      .fire();
   }
 
   /**
@@ -210,6 +212,7 @@ class CreateChannel extends ServiceBase {
       coverImageWidth: oThis.coverImageWidth
     }).perform();
 
+    // TODO - channel_create - is modifyChannelResponse.isFailure() needed? Modify channel is giving reject.
     if (modifyChannelResponse.isFailure()) {
       await createErrorLogsEntry.perform(modifyChannelResponse, errorLogsConstants.highSeverity);
 
