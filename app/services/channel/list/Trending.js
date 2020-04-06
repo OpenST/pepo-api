@@ -1,9 +1,9 @@
 const rootPrefix = '../../../..',
-  ChannelTrendingBase = require(rootPrefix + '/app/services/channel/list/Base'),
+  ChannelListBase = require(rootPrefix + '/app/services/channel/list/Base'),
   ChannelModel = require(rootPrefix + '/app/models/mysql/channel/Channel'),
   ChannelTrendingCache = require(rootPrefix + '/lib/cacheManagement/single/channel/ChannelTrending');
 
-class ChannelListTrending extends ChannelTrendingBase {
+class ChannelListTrending extends ChannelListBase {
   /**
    * Constructor to search channels.
    *
