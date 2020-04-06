@@ -99,6 +99,12 @@ const v1ErrorConfig = {
     message: 'User is inactive.'
   },
 
+  user_is_not_approved: {
+    parameter: 'channel_admins',
+    code: 'invalid',
+    message: 'User is not approved creator.'
+  },
+
   duplicate_user_name: {
     parameter: 'user_name',
     code: 'invalid',

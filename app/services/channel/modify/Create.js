@@ -43,7 +43,7 @@ class CreateChannel extends ServiceBase {
 
     const oThis = this;
 
-    oThis.currentUserId = params.current_user.id;
+    oThis.currentUser = params.current_user;
 
     oThis.channelName = params.channel_name;
     oThis.channelTagline = params.channel_tagline;
@@ -54,7 +54,7 @@ class CreateChannel extends ServiceBase {
     oThis.coverImageHeight = params.cover_image_height;
     oThis.coverImageWidth = params.cover_image_width;
 
-    oThis.channelAdminUserIds = [oThis.currentUserId];
+    oThis.channelAdminUserIds = [oThis.currentUser.id];
 
     oThis.channelId = null;
     oThis.channelPermalink = null;
@@ -69,7 +69,7 @@ class CreateChannel extends ServiceBase {
   async _asyncPerform() {
     const oThis = this;
 
-    oThis._sanitizeInputParameters();
+    oThis._validateAndSanitizeParams();
 
     oThis._generatePermalink();
 
@@ -91,8 +91,22 @@ class CreateChannel extends ServiceBase {
    *
    * @private
    */
-  _sanitizeInputParameters() {
+  _validateAndSanitizeParams() {
     const oThis = this;
+
+    if (!oThis.currentUser.approvedCreator) {
+      return Promise.reject(
+        responseHelper.error({
+          internal_error_identifier: 'a_s_c_m_c_2',
+          api_error_identifier: 'unauthorized_api_request',
+          debug_options: {
+            currentUserId: oThis.currentUser.id,
+            channelName: oThis.channelName,
+            channelTagline: oThis.channelTagline
+          }
+        })
+      );
+    }
 
     oThis.channelName = oThis.channelName.trim();
     oThis.channelTagline = oThis.channelTagline.trim();
@@ -184,9 +198,7 @@ class CreateChannel extends ServiceBase {
   async _createEntryInChannelStats() {
     const oThis = this;
 
-    await new ChannelStatModel()
-      .insert({ channel_id: oThis.channelId, total_videos: 0, total_users: 0 })
-      .fire();
+    await new ChannelStatModel().insert({ channel_id: oThis.channelId, total_videos: 0, total_users: 0 }).fire();
   }
 
   /**
@@ -233,7 +245,7 @@ class CreateChannel extends ServiceBase {
 
     await bgJob.enqueue(bgJobConstants.slackChannelMonitoringJobTopic, {
       source: slackConstants.userSource,
-      source_id: oThis.currentUserId,
+      source_id: oThis.currentUser.id,
       channel_id: oThis.channelId,
       action: slackConstants.channelCreated
     });

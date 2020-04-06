@@ -127,6 +127,11 @@ const adminErrorConfig = {
     code: 'invalid',
     message: 'User is inactive.'
   },
+  user_is_not_approved: {
+    parameter: 'channel_admins',
+    code: 'invalid',
+    message: 'User is not approved creator.'
+  },
   email_not_double_optin: {
     parameter: 'email',
     code: 'invalid',

@@ -90,17 +90,24 @@ class EditChannel extends ServiceBase {
   async _asyncPerform() {
     const oThis = this;
 
+    console.log('---1----------------------------');
     await oThis._validateAndSanitize();
 
+    console.log('---2----------------------------');
     if (oThis.isEdit) {
       await oThis._fetchAssociatedEntities();
+      console.log('---3----------------------------');
     } else {
       await oThis._createNewChannel();
+      console.log('---4----------------------------');
       await oThis._createEntryInChannelStats();
+      console.log('---5----------------------------');
     }
 
     oThis._decideUpdateRequiredParameters();
+    console.log('---6----------------------------');
     await oThis._modifyChannel();
+    console.log('---7----------------------------');
 
     await Promise.all([oThis._performSlackChannelMonitoringBgJob(), oThis.logAdminActivity()]);
 
@@ -331,12 +338,14 @@ class EditChannel extends ServiceBase {
       return;
     }
 
+    console.log('---------oThis.channelAdminUserNames-----', oThis.channelAdminUserNames);
     const cacheResponse = await new UserIdByUserNamesCache({ userNames: oThis.channelAdminUserNames }).fetch();
     if (cacheResponse.isFailure()) {
       return Promise.reject(cacheResponse);
     }
 
     const cacheData = cacheResponse.data;
+    console.log('---------cacheData-----', cacheData);
 
     for (let index = 0; index < oThis.channelAdminUserNames.length; index++) {
       const userName = oThis.channelAdminUserNames[index];
@@ -358,6 +367,17 @@ class EditChannel extends ServiceBase {
             internal_error_identifier: 'a_s_a_c_e_faui_2',
             api_error_identifier: 'invalid_api_params',
             params_error_identifiers: ['user_inactive'],
+            debug_options: { userName: userName }
+          })
+        );
+      }
+
+      if (!cacheData[userName].approvedCreator) {
+        return Promise.reject(
+          responseHelper.paramValidationError({
+            internal_error_identifier: 'a_s_a_c_e_faui_3',
+            api_error_identifier: 'invalid_api_params',
+            params_error_identifiers: ['user_is_not_approved'],
             debug_options: { userName: userName }
           })
         );
