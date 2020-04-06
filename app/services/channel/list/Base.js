@@ -87,6 +87,31 @@ class ChannelListBase extends ServiceBase {
   }
 
   /**
+   * Validate and sanitize specific params.
+   *
+   * @sets oThis.channelPrefix, oThis.pageNumber, oThis.limit
+   *
+   * @returns {Promise<never>}
+   * @private
+   */
+  async _validateAndSanitizeParams() {
+    const oThis = this;
+
+    oThis.channelPrefix = basicHelper.filterSearchTerm(oThis.channelPrefix);
+
+    if (oThis.paginationIdentifier) {
+      const parsedPaginationParams = oThis._parsePaginationParams(oThis.paginationIdentifier);
+      oThis.currentPageNumber = parsedPaginationParams.page; // Override page
+    } else {
+      oThis.currentPageNumber = 1;
+    }
+
+    if (!oThis.channelPrefix || oThis.channelPrefix.length >= searchTermMaxLength) {
+      oThis.channelPrefix = null;
+    }
+  }
+
+  /**
    * Fetch entities and set channel ids for search.
    *
    * @returns {Promise<void>}
@@ -113,31 +138,6 @@ class ChannelListBase extends ServiceBase {
 
     oThis.channelIds = [...oThis.channelIds, ...currentChannelIds];
     oThis.channelIds = basicHelper.uniquate(oThis.channelIds);
-  }
-
-  /**
-   * Validate and sanitize specific params.
-   *
-   * @sets oThis.channelPrefix, oThis.pageNumber, oThis.limit
-   *
-   * @returns {Promise<never>}
-   * @private
-   */
-  async _validateAndSanitizeParams() {
-    const oThis = this;
-
-    oThis.channelPrefix = basicHelper.filterSearchTerm(oThis.channelPrefix);
-
-    if (oThis.paginationIdentifier) {
-      const parsedPaginationParams = oThis._parsePaginationParams(oThis.paginationIdentifier);
-      oThis.currentPageNumber = parsedPaginationParams.page; // Override page
-    } else {
-      oThis.currentPageNumber = 1;
-    }
-
-    if (!oThis.channelPrefix || oThis.channelPrefix.length >= searchTermMaxLength) {
-      oThis.channelPrefix = null;
-    }
   }
 
   /**
