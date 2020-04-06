@@ -104,6 +104,8 @@ class ChannelModel extends ModelBase {
 
     const response = await oThis
       .select('id')
+      .where({ status: channelConstants.invertedStatuses[channelConstants.activeStatus] })
+      .where('trending_rank is not null')
       .order_by('trending_rank asc')
       .limit(channelConstants.trendingChannelsLimit)
       .fire();
