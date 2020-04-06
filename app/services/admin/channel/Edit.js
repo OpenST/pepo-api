@@ -332,6 +332,10 @@ class EditChannel extends ServiceBase {
       return;
     }
 
+    for (let caun = 0; caun < oThis.channelAdminUserNames.length; caun++) {
+      oThis.channelAdminUserNames[caun] = oThis.channelAdminUserNames[caun].trim();
+    }
+
     const cacheResponse = await new UserIdByUserNamesCache({ userNames: oThis.channelAdminUserNames }).fetch();
     if (cacheResponse.isFailure()) {
       return Promise.reject(cacheResponse);
