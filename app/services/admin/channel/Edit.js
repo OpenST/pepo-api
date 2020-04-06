@@ -198,8 +198,10 @@ class EditChannel extends ServiceBase {
     }
 
     // This will be set only in case of isEdit = 1.
-    oThis.channelId = permalinkIdsMap[lowercaseChannelPermalink].id;
-    oThis.updateRequiredParameters.channelId = oThis.channelId;
+    if (oThis.isEdit) {
+      oThis.channelId = permalinkIdsMap[lowercaseChannelPermalink].id;
+      oThis.updateRequiredParameters.channelId = oThis.channelId;
+    }
   }
 
   /**
