@@ -33,6 +33,42 @@ const adminErrorConfig = {
     message: 'Channel with the given channel permalink does not exist.'
   },
 
+  invalid_channel_tagline: {
+    parameter: 'channel_tagline',
+    code: 'invalid',
+    message: 'The community tagline exceeds the character limit of 45 characters.'
+  },
+
+  invalid_channel_description: {
+    parameter: 'channel_description',
+    code: 'invalid',
+    message: 'The community description exceeds the character limit of 400 characters.'
+  },
+
+  invalid_channel_tags: {
+    parameter: 'channel_tags',
+    code: 'invalid',
+    message: 'At least 1 tag is required. Max 5 tags are allowed each with a character limit of 60 characters.'
+  },
+
+  invalid_cover_image_file_size: {
+    parameter: 'cover_image_file_size',
+    code: 'invalid',
+    message: 'Cover images can be max of 3 MB.'
+  },
+
+  invalid_cover_image_height: {
+    parameter: 'cover_image_height',
+    code: 'invalid',
+    message: 'Cover images must be min 1500 x 642 px.'
+  },
+
+  invalid_cover_image_width: {
+    parameter: 'cover_image_width',
+    code: 'invalid',
+    message: 'Cover images must be min 1500 x 642 px.'
+  },
+
   duplicate_channel_entry: {
     parameter: 'channel_id',
     code: 'invalid',
