@@ -27,6 +27,12 @@ const adminErrorConfig = {
     message: 'Channel does not exist.'
   },
 
+  invalid_channel_permalink: {
+    parameter: 'channel_permalink',
+    code: 'invalid',
+    message: 'Channel with the given channel permalink does not exist.'
+  },
+
   duplicate_channel_entry: {
     parameter: 'channel_id',
     code: 'invalid',

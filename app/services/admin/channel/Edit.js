@@ -176,7 +176,7 @@ class EditChannel extends ServiceBase {
           api_error_identifier: 'invalid_api_params',
           debug_options: {
             channelPermalink: oThis.channelPermalink,
-            params_error_identifiers: ['invalid_channel_id'],
+            params_error_identifiers: ['invalid_channel_permalink'],
             isEdit: oThis.isEdit
           }
         })
