@@ -141,6 +141,12 @@ class ChangeChannelUserRole {
       await oThis._updateChannelStats();
     }
 
+    queryParams = {
+      ...queryParams,
+      user_id: oThis.userId,
+      channel_id: oThis.channelId
+    };
+
     const formatDbData = new ChannelUserModel().formatDbData(queryParams);
     await ChannelUserModel.flushCache(formatDbData);
   }
