@@ -295,9 +295,9 @@ class EditChannel extends ServiceBase {
       !oThis.coverImageUrl ||
       !oThis.coverImageFileSize ||
       !oThis.channelTagNames ||
-      oThis.channelTagNames.length == 0 ||
+      oThis.channelTagNames.length === 0 ||
       !oThis.channelAdminUserNames ||
-      oThis.channelAdminUserNames.length == 0
+      oThis.channelAdminUserNames.length === 0
     ) {
       return Promise.reject(
         responseHelper.error({
@@ -315,8 +315,6 @@ class EditChannel extends ServiceBase {
         })
       );
     }
-
-    // We are not validating channelAdminUserNames and channelTagNames as they are not mandatory for creating a new channel.
   }
 
   /**
