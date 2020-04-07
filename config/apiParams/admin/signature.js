@@ -419,7 +419,7 @@ const adminSignature = {
       },
       {
         parameter: 'permalink',
-        validatorMethods: ['validateString']
+        validatorMethods: ['validateNonEmptyString']
       },
       {
         parameter: 'current_admin',
