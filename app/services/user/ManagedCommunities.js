@@ -2,6 +2,7 @@ const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   ChannelByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelByIds'),
   channelUsersConstants = require(rootPrefix + '/lib/globalConstant/channel/channelUsers'),
+  channelConstants = require(rootPrefix + '/lib/globalConstant/channel/channels'),
   ChannelIdsByUserCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelIdsByUser'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType');
@@ -113,7 +114,14 @@ class CurrentUserManagedCommunities extends ServiceBase {
       return Promise.reject(cacheResponse);
     }
 
-    oThis.channelsMap = cacheResponse.data;
+    // Filter the non active channels
+    for (const channelId in cacheResponse.data) {
+      const channelDetails = cacheResponse.data[channelId];
+      if (channelDetails.status !== channelConstants.activeStatus) {
+        continue;
+      }
+      oThis.channelsMap[channelId] = channelDetails;
+    }
   }
 
   /**
