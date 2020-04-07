@@ -295,7 +295,9 @@ class EditChannel extends ServiceBase {
       !oThis.coverImageUrl ||
       !oThis.coverImageFileSize ||
       !oThis.channelTagNames ||
-      !oThis.channelAdminUserNames
+      oThis.channelTagNames.length == 0 ||
+      !oThis.channelAdminUserNames ||
+      oThis.channelAdminUserNames.length == 0
     ) {
       return Promise.reject(
         responseHelper.error({
