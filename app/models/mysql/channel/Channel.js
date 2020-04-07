@@ -81,7 +81,7 @@ class ChannelModel extends ModelBase {
     const response = await oThis
       .select('id')
       .where({ status: channelConstants.invertedStatuses[channelConstants.activeStatus] })
-      .where(['created_at < ?', currentTime - channelConstants.newChannelIntervalInSec])
+      .where(['created_at >= ?', currentTime - channelConstants.newChannelIntervalInSec])
       .order_by('created_at desc')
       .fire();
 
