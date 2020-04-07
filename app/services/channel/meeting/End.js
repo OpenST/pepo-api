@@ -48,6 +48,8 @@ class EndMeeting extends ServiceBase {
   async _asyncPerform() {
     const oThis = this;
 
+    return responseHelper.successWithData({});
+
     await oThis._fetchAndValidateChannel();
 
     await oThis._validateMeeting();
