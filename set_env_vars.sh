@@ -22,87 +22,87 @@ export PA_MYSQL_CONNECTION_POOL_SIZE='3'
 # mysql main db
 export PA_MAIN_DB_MYSQL_HOST='127.0.0.1'
 export PA_MAIN_DB_MYSQL_USER='root'
-export PA_MAIN_DB_MYSQL_PASSWORD='rootroot'
+export PA_MAIN_DB_MYSQL_PASSWORD='root'
 
 # mysql user db
 export PA_USER_DB_MYSQL_HOST='127.0.0.1'
 export PA_USER_DB_MYSQL_USER='root'
-export PA_USER_DB_MYSQL_PASSWORD='rootroot'
+export PA_USER_DB_MYSQL_PASSWORD='root'
 
 # mysql big db
 export PA_BIG_DB_MYSQL_HOST='127.0.0.1'
 export PA_BIG_DB_MYSQL_USER='root'
-export PA_BIG_DB_MYSQL_PASSWORD='rootroot'
+export PA_BIG_DB_MYSQL_PASSWORD='root'
 
 # mysql entity db
 export PA_ENTITY_DB_MYSQL_HOST='127.0.0.1'
 export PA_ENTITY_DB_MYSQL_USER='root'
-export PA_ENTITY_DB_MYSQL_PASSWORD='rootroot'
+export PA_ENTITY_DB_MYSQL_PASSWORD='root'
 
 # mysql twitter db
 export PA_TWITTER_DB_MYSQL_HOST='127.0.0.1'
 export PA_TWITTER_DB_MYSQL_USER='root'
-export PA_TWITTER_DB_MYSQL_PASSWORD='rootroot'
+export PA_TWITTER_DB_MYSQL_PASSWORD='root'
 
 # mysql feed db
 export PA_FEED_DB_MYSQL_HOST='127.0.0.1'
 export PA_FEED_DB_MYSQL_USER='root'
-export PA_FEED_DB_MYSQL_PASSWORD='rootroot'
+export PA_FEED_DB_MYSQL_PASSWORD='root'
 
 # mysql config db
 export PA_CONFIG_DB_MYSQL_HOST='127.0.0.1'
 export PA_CONFIG_DB_MYSQL_USER='root'
-export PA_CONFIG_DB_MYSQL_PASSWORD='rootroot'
+export PA_CONFIG_DB_MYSQL_PASSWORD='root'
 
 # mysql ost db
 export PA_OST_DB_MYSQL_HOST='127.0.0.1'
 export PA_OST_DB_MYSQL_USER='root'
-export PA_OST_DB_MYSQL_PASSWORD='rootroot'
+export PA_OST_DB_MYSQL_PASSWORD='root'
 
 #mysql socket db
 export PA_SOCKET_DB_MYSQL_HOST='127.0.0.1'
 export PA_SOCKET_DB_MYSQL_USER='root'
-export PA_SOCKET_DB_MYSQL_PASSWORD='rootroot'
+export PA_SOCKET_DB_MYSQL_PASSWORD='root'
 
 # mysql admin db
 export PA_ADMIN_DB_MYSQL_HOST='127.0.0.1'
 export PA_ADMIN_DB_MYSQL_USER='root'
-export PA_ADMIN_DB_MYSQL_PASSWORD='rootroot'
+export PA_ADMIN_DB_MYSQL_PASSWORD='root'
 
 # mysql redemption db
 export PA_REDEMPTION_DB_MYSQL_HOST='127.0.0.1'
 export PA_REDEMPTION_DB_MYSQL_USER='root'
-export PA_REDEMPTION_DB_MYSQL_PASSWORD='rootroot'
+export PA_REDEMPTION_DB_MYSQL_PASSWORD='root'
 
 # webhook redemption db
 export PA_WEBHOOK_DB_MYSQL_HOST='127.0.0.1'
 export PA_WEBHOOK_DB_MYSQL_USER='root'
-export PA_WEBHOOK_DB_MYSQL_PASSWORD='rootroot'
+export PA_WEBHOOK_DB_MYSQL_PASSWORD='root'
 
 #mysql transaction db
 export PA_FIAT_DB_MYSQL_HOST='127.0.0.1'
 export PA_FIAT_DB_MYSQL_USER='root'
-export PA_FIAT_DB_MYSQL_PASSWORD='rootroot'
+export PA_FIAT_DB_MYSQL_PASSWORD='root'
 
 #mysql social connect db
 export PA_SOCIAL_CONNECT_DB_MYSQL_HOST='127.0.0.1'
 export PA_SOCIAL_CONNECT_DB_MYSQL_USER='root'
-export PA_SOCIAL_CONNECT_DB_MYSQL_PASSWORD='rootroot'
+export PA_SOCIAL_CONNECT_DB_MYSQL_PASSWORD='root'
 
 #mysql meetings db
 export PA_MEETING_DB_MYSQL_HOST='127.0.0.1'
 export PA_MEETING_DB_MYSQL_USER='root'
-export PA_MEETING_DB_MYSQL_PASSWORD='rootroot'
+export PA_MEETING_DB_MYSQL_PASSWORD='root'
 
 # mysql channel db
 export PA_CHANNEL_DB_MYSQL_HOST='127.0.0.1'
 export PA_CHANNEL_DB_MYSQL_USER='root'
-export PA_CHANNEL_DB_MYSQL_PASSWORD='rootroot'
+export PA_CHANNEL_DB_MYSQL_PASSWORD='root'
 
 # mysql - devops error logs infra details
 export PA_INFRA_DB_MYSQL_HOST='127.0.0.1'
 export PA_INFRA_DB_MYSQL_USER='root'
-export PA_INFRA_DB_MYSQL_PASSWORD='rootroot'
+export PA_INFRA_DB_MYSQL_PASSWORD='root'
 export PA_INFRA_DB_MYSQL_DB='ost_infra_development'
 
 # SHA256 details
