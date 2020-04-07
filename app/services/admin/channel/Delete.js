@@ -5,7 +5,12 @@ const rootPrefix = '../../../..',
   channelConstants = require(rootPrefix + '/lib/globalConstant/channel/channels'),
   ChannelByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelByIds'),
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
-  logger = require(rootPrefix + '/lib/logger/customConsoleLogger');
+  UserModel = require(rootPrefix + '/app/models/mysql/User'),
+  logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
+  ChannelUserModel = require(rootPrefix + '/app/models/mysql/channel/ChannelUser.js'),
+  ChannelIdsByUserCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelIdsByUser'),
+  UserCache = require(rootPrefix + '/lib/cacheManagement/multi/User'),
+  channelUsersConstants = require(rootPrefix + '/lib/globalConstant/channel/channelUsers');
 
 /**
  * Class to delete channel.
@@ -44,6 +49,8 @@ class DeleteChannel extends ServiceBase {
     await oThis._validateAndSanitize();
 
     await oThis._deleteChannel();
+
+    await oThis._resetManagingChannelProperty();
 
     return responseHelper.successWithData({});
   }
@@ -134,6 +141,43 @@ class DeleteChannel extends ServiceBase {
       status: channelConstants.deletedStatus,
       trendingRank: null
     });
+  }
+
+  /*
+   * Reset Is managing channel property
+   * Steps:
+   * - Fetch all admin users of a channel
+   * - Loop over all admin users
+   * - Check if active channel Ids are 0 for the user
+   * - If active channels are 0 for that user, reset value isManagingChannelProperty
+   * - Flush user cache
+   * - Loop ends
+   */
+  async _resetManagingChannelProperty() {
+    const oThis = this;
+
+    const channelAdminUserIds = await new ChannelUserModel().fetchAdminProfilesByChannelId(oThis.channelId);
+    const channelIdsByUserIdsCacheResponse = await new ChannelIdsByUserCache({ userIds: channelAdminUserIds }).fetch();
+    if (channelIdsByUserIdsCacheResponse.isFailure()) {
+      return Promise.reject(channelIdsByUserIdsCacheResponse);
+    }
+
+    const usersByUserIdsCacheResponse = await new UserCache({ ids: channelAdminUserIds }).fetch();
+    if (usersByUserIdsCacheResponse.isFailure()) {
+      return Promise.reject(usersByUserIdsCacheResponse);
+    }
+
+    for (let index = 0; index < channelAdminUserIds.length; index++) {
+      const userId = channelAdminUserIds[index];
+      let channelIdsArray = channelIdsByUserIdsCacheResponse.data[userId][channelUsersConstants.adminRole] || [];
+      // Remove the current deleted channel id
+      channelIdsArray = channelIdsArray.filter((channelId) => channelId !== oThis.channelId.toString());
+      if (channelIdsArray.length === 0) {
+        await new UserModel().unmarkUserChannelAdmin([userId]);
+        const user = usersByUserIdsCacheResponse.data[userId];
+        await UserModel.flushCache({ id: user.id, userName: user.userName, email: user.email });
+      }
+    }
   }
 }
 
