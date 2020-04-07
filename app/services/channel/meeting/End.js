@@ -165,13 +165,15 @@ class EndMeeting extends ServiceBase {
     const zoomUUID = oThis.meeting.zoomUUID;
 
     logger.info(`Trying to ending zoom meeting ${zoomMeetingId}`);
-    await MeetingLib.markEnd(zoomMeetingId).catch(function(e) {
+    const resMarkEnd = await MeetingLib.markEnd(zoomMeetingId).catch(function(e) {
       logger.info(
         `Zoom meeting end call failed. Possibly meeting is already ended for zoomMeeting id ${
           oThis.meeting.zoomMeetingId
         }. API response status ${e.statusCode}`
       );
     });
+
+    logger.info(`resMarkEnd=============`, JSON.stringify(resMarkEnd));
 
     let isPastMeetingResponse = true;
     const pastMeetingResponse = await MeetingLib.getPastMeeting(zoomUUID).catch(async function(e) {

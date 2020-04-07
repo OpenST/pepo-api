@@ -180,10 +180,10 @@ class ChannelListBase extends ServiceBase {
 
     const allChannelMap = {};
     for (let i = 0; i < oThis.allChannelIds.length; i++) {
-      allChannelMap[oThis.allChannelIds[i]] = i;
+      allChannelMap[oThis.allChannelIds[i]] = i + 1;
     }
 
-    for (let i = 0; i < liveChannelIds; i++) {
+    for (let i = 0; i < liveChannelIds.length; i++) {
       const cid = liveChannelIds[i];
       if (allChannelMap[cid]) {
         oThis.liveChannelIds.push(cid);
