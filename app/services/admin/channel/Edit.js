@@ -16,8 +16,6 @@ const rootPrefix = '../../../..',
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   bgJobConstants = require(rootPrefix + '/lib/globalConstant/bgJob'),
   slackConstants = require(rootPrefix + '/lib/globalConstant/slack'),
-  createErrorLogsEntry = require(rootPrefix + '/lib/errorLogs/createEntry'),
-  errorLogsConstants = require(rootPrefix + '/lib/globalConstant/errorLogs'),
   channelConstants = require(rootPrefix + '/lib/globalConstant/channel/channels'),
   adminActivityLogConstants = require(rootPrefix + '/lib/globalConstant/admin/adminActivityLogs');
 
@@ -568,10 +566,9 @@ class EditChannel extends ServiceBase {
 
     const modifyChannelResponse = await new ModifyChannel(oThis.updateRequiredParameters).perform();
 
-    if (modifyChannelResponse.isFailure()) {
-      await createErrorLogsEntry.perform(modifyChannelResponse, errorLogsConstants.highSeverity);
-
-      return Promise.reject(modifyChannelResponse);
+    // NOTE: We are not checking isFailure because ModifyChannel lib will always send Promise.reject().
+    if (modifyChannelResponse.isSuccess()) {
+      return modifyChannelResponse.data.channel;
     }
   }
 

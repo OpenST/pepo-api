@@ -371,8 +371,8 @@ class ChannelUserModel extends ModelBase {
       const ChannelUsersByChannelIdPaginationCache = require(rootPrefix +
         '/lib/cacheManagement/single/ChannelUsersByChannelIdPagination');
 
-      for (let i = 0; i < channelIds.length; i++) {
-        promisesArray.push(new ChannelUsersByChannelIdPaginationCache({ channelId: channelIds[i] }).clear());
+      for (let ind = 0; ind < channelIds.length; ind++) {
+        promisesArray.push(new ChannelUsersByChannelIdPaginationCache({ channelId: channelIds[ind] }).clear());
       }
 
       const ChannelBlockedUsersByChannelIds = require(rootPrefix +
