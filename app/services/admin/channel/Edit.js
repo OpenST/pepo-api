@@ -175,9 +175,9 @@ class EditChannel extends ServiceBase {
         responseHelper.paramValidationError({
           internal_error_identifier: 'a_s_a_c_e_vec_1',
           api_error_identifier: 'invalid_api_params',
+          params_error_identifiers: ['invalid_channel_permalink'],
           debug_options: {
             channelPermalink: oThis.channelPermalink,
-            params_error_identifiers: ['invalid_channel_permalink'],
             isEdit: oThis.isEdit
           }
         })
