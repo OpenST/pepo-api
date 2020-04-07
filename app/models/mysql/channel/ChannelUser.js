@@ -349,6 +349,7 @@ class ChannelUserModel extends ModelBase {
    *
    * @param {object} params
    * @param {number} [params.channelId]
+   * @param {number} [params.channelIds]
    * @param {number} [params.userId]
    *
    * @returns {Promise<*>}
@@ -356,14 +357,27 @@ class ChannelUserModel extends ModelBase {
   static async flushCache(params) {
     const promisesArray = [];
 
+    let channelIds = [];
+
+    if (params.channelIds) {
+      channelIds = params.channelIds;
+    }
+
     if (params.channelId) {
+      channelIds.push(params.channelId);
+    }
+
+    if (channelIds.length > 0) {
       const ChannelUsersByChannelIdPaginationCache = require(rootPrefix +
         '/lib/cacheManagement/single/ChannelUsersByChannelIdPagination');
-      promisesArray.push(new ChannelUsersByChannelIdPaginationCache({ channelId: params.channelId }).clear());
+
+      for (let i = 0; i < channelIds.length; i++) {
+        promisesArray.push(new ChannelUsersByChannelIdPaginationCache({ channelId: channelIds[i] }).clear());
+      }
 
       const ChannelBlockedUsersByChannelIds = require(rootPrefix +
         '/lib/cacheManagement/multi/channel/ChannelBlockedUserByChannelIds');
-      promisesArray.push(new ChannelBlockedUsersByChannelIds({ channelIds: [params.channelId] }).clear());
+      promisesArray.push(new ChannelBlockedUsersByChannelIds({ channelIds: channelIds }).clear());
     }
 
     if (params.userId) {
@@ -374,11 +388,11 @@ class ChannelUserModel extends ModelBase {
       promisesArray.push(new ChannelIdsByUserCache({ userIds: [params.userId] }).clear());
     }
 
-    if (params.userId && params.channelId) {
+    if (params.userId && channelIds.length > 0) {
       const ChannelUserByUserIdAndChannelIdsCache = require(rootPrefix +
         '/lib/cacheManagement/multi/channel/ChannelUserByUserIdAndChannelIds');
       promisesArray.push(
-        new ChannelUserByUserIdAndChannelIdsCache({ userId: params.userId, channelIds: [params.channelId] }).clear()
+        new ChannelUserByUserIdAndChannelIdsCache({ userId: params.userId, channelIds: channelIds }).clear()
       );
     }
 
