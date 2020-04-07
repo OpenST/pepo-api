@@ -152,6 +152,9 @@ class DeleteChannel extends ServiceBase {
    * - If active channels are 0 for that user, reset value isManagingChannelProperty
    * - Flush user cache
    * - Loop ends
+   *
+   * @returns {Promise<void>}
+   * @private
    */
   async _resetManagingChannelProperty() {
     const oThis = this;
