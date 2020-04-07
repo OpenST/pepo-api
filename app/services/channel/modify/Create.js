@@ -224,14 +224,10 @@ class CreateChannel extends ServiceBase {
       coverImageWidth: oThis.coverImageWidth
     }).perform();
 
-    // TODO - channel_create - is modifyChannelResponse.isFailure() needed? Modify channel is giving reject.
-    if (modifyChannelResponse.isFailure()) {
-      await createErrorLogsEntry.perform(modifyChannelResponse, errorLogsConstants.highSeverity);
-
-      return Promise.reject(modifyChannelResponse);
+    // NOTE: We are not checking isFailure because ModifyChannel lib will always send Promise.reject().
+    if (modifyChannelResponse.isSuccess()) {
+      return modifyChannelResponse.data.channel;
     }
-
-    return modifyChannelResponse.data.channel;
   }
 
   /**
