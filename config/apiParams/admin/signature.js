@@ -441,7 +441,7 @@ const adminSignature = {
       },
       {
         parameter: 'channel_tags',
-        validatorMethods: ['validateCommaDelimitedStrings']
+        validatorMethods: ['validateChannelTagsCommaDelimitedString']
       },
       {
         parameter: 'channel_admins',
