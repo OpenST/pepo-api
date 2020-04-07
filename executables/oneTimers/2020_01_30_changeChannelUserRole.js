@@ -115,32 +115,34 @@ class ChangeChannelUserRole {
   async _changeRole() {
     const oThis = this;
 
+    let queryParams;
     if (oThis.channelUser) {
+      queryParams = {
+        role: channelUsersConstants.invertedRoles[oThis.role]
+      };
       await new ChannelUserModel()
-        .update({
-          role: channelUsersConstants.invertedRoles[oThis.role]
-        })
+        .update(queryParams)
         .where({
           user_id: oThis.userId,
           channel_id: oThis.channelId
         })
         .fire();
     } else {
-      await new ChannelUserModel()
-        .insert({
-          user_id: oThis.userId,
-          channel_id: oThis.channelId,
-          notification_status:
-            channelUsersConstants.invertedNotificationStatuses[channelUsersConstants.activeNotificationStatus],
-          status: channelUsersConstants.invertedStatuses[channelUsersConstants.activeStatus],
-          role: channelUsersConstants.invertedRoles[oThis.role]
-        })
-        .fire();
+      queryParams = {
+        user_id: oThis.userId,
+        channel_id: oThis.channelId,
+        notification_status:
+          channelUsersConstants.invertedNotificationStatuses[channelUsersConstants.activeNotificationStatus],
+        status: channelUsersConstants.invertedStatuses[channelUsersConstants.activeStatus],
+        role: channelUsersConstants.invertedRoles[oThis.role]
+      };
+      await new ChannelUserModel().insert(queryParams).fire();
 
       await oThis._updateChannelStats();
     }
 
-    await ChannelUserModel.flushCache({ userId: oThis.userId, channelId: oThis.channelId });
+    const formatDbData = new ChannelUserModel().formatDbData(queryParams);
+    await ChannelUserModel.flushCache(formatDbData);
   }
 
   /**
