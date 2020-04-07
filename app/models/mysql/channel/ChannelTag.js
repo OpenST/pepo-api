@@ -69,7 +69,7 @@ class ChannelTagModel extends ModelBase {
       .select('channel_id, tag_id')
       .where({
         channel_id: channelIds,
-        status: channelTagsConstants.invertedStatuses[channelTagsConstants.activeStatus] // TODO:channels - verify index.
+        status: channelTagsConstants.invertedStatuses[channelTagsConstants.activeStatus]
       })
       .order_by('created_at asc')
       .fire();
