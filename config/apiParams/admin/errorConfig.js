@@ -24,13 +24,13 @@ const adminErrorConfig = {
   invalid_channel_id: {
     parameter: 'channel_id',
     code: 'invalid',
-    message: 'Channel does not exist.'
+    message: 'Community does not exist.'
   },
 
   invalid_channel_permalink: {
     parameter: 'channel_permalink',
     code: 'invalid',
-    message: 'Channel with the given channel permalink does not exist.'
+    message: 'Community with the given community permalink does not exist.'
   },
 
   invalid_channel_tagline: {
@@ -79,7 +79,7 @@ const adminErrorConfig = {
     parameter: 'admins',
     code: 'invalid',
     message:
-      'Invalid admin username. Channel has been created. Please use correct usernames and edit the same channel instead of creating it again'
+      'Invalid admin username. Community has been created. Please use correct usernames and edit the same community instead of creating it again'
   },
 
   invalid_last_name: {
@@ -255,7 +255,7 @@ const adminErrorConfig = {
   channel_not_active: {
     parameter: 'channel_id',
     code: 'invalid',
-    message: 'The Channel has been disabled.'
+    message: 'The Community has been disabled.'
   },
 
   invalid_entity_ids: {
