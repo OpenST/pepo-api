@@ -67,7 +67,7 @@ class CreateChannel extends ServiceBase {
   async _asyncPerform() {
     const oThis = this;
 
-    oThis._validateAndSanitizeParams();
+    await oThis._validateAndSanitizeParams();
 
     oThis._generatePermalink();
 
@@ -89,7 +89,7 @@ class CreateChannel extends ServiceBase {
    *
    * @private
    */
-  _validateAndSanitizeParams() {
+  async _validateAndSanitizeParams() {
     const oThis = this;
 
     if (!oThis.currentUser.approvedCreator) {
