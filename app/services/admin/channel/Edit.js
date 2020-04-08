@@ -542,7 +542,7 @@ class EditChannel extends ServiceBase {
       }
 
       if (oThis.adminUserIds.length > 0) {
-        oThis.updateRequiredParameters.adminUserIds = oThis.adminUserIds;
+        oThis.updateRequiredParameters.verifiedAdminUserIds = oThis.adminUserIds;
       }
     } else {
       oThis.updateRequiredParameters.tagline = oThis.channelTagline;

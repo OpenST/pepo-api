@@ -471,6 +471,24 @@ const v1ErrorConfig = {
     message: 'This community does not exist.'
   },
 
+  missing_channel_name: {
+    parameter: 'channel_name',
+    code: 'missing',
+    message: 'Name is required.'
+  },
+
+  missing_channel_tagline: {
+    parameter: 'channel_tagline',
+    code: 'missing',
+    message: 'Tagline is required.'
+  },
+
+  missing_channel_description: {
+    parameter: 'channel_description',
+    code: 'missing',
+    message: 'Description is required.'
+  },
+
   invalid_channel_name: {
     parameter: 'channel_name',
     code: 'invalid',
@@ -501,6 +519,12 @@ const v1ErrorConfig = {
     message: 'At least 1 tag is required. Max 5 tags are allowed each with a character limit of 60 characters.'
   },
 
+  invalid_cover_image_url: {
+    parameter: 'cover_image_url',
+    code: 'invalid',
+    message: 'Cover image can be max of 3 MB.'
+  },
+
   invalid_cover_image_file_size: {
     parameter: 'cover_image_file_size',
     code: 'invalid',
@@ -510,13 +534,13 @@ const v1ErrorConfig = {
   invalid_cover_image_height: {
     parameter: 'cover_image_height',
     code: 'invalid',
-    message: 'Cover images must be min 1500 x 642 px.'
+    message: 'Cover image must be min 1500 x 642 px.'
   },
 
   invalid_cover_image_width: {
     parameter: 'cover_image_width',
     code: 'invalid',
-    message: 'Cover images must be min 1500 x 642 px.'
+    message: 'Cover image must be min 1500 x 642 px.'
   },
 
   invalid_meeting_id: {

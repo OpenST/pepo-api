@@ -95,7 +95,7 @@ class CreateChannel extends ServiceBase {
     if (!oThis.currentUser.approvedCreator) {
       return Promise.reject(
         responseHelper.error({
-          internal_error_identifier: 'a_s_c_m_c_2',
+          internal_error_identifier: 'a_s_c_m_c_1',
           api_error_identifier: 'unauthorized_api_request',
           debug_options: {
             currentUserId: oThis.currentUser.id,
@@ -166,9 +166,9 @@ class CreateChannel extends ServiceBase {
 
       return Promise.reject(
         responseHelper.paramValidationError({
-          internal_error_identifier: 'a_s_c_m_c_1',
+          internal_error_identifier: 'a_s_c_m_c_2',
           api_error_identifier: 'invalid_api_params',
-          params_error_identifiers: ['invalid_channel_name'],
+          params_error_identifiers: ['duplicate_channel_entry'],
           debug_options: {
             channelName: oThis.channelName,
             channelPermalink: oThis.channelPermalink
@@ -215,7 +215,7 @@ class CreateChannel extends ServiceBase {
       description: oThis.channelDescription,
       tagline: oThis.channelTagline,
       tagNames: oThis.channelTagNames,
-      adminUserIds: oThis.channelAdminUserIds,
+      verifiedAdminUserIds: oThis.channelAdminUserIds,
       coverImageUrl: oThis.coverImageUrl,
       coverImageFileSize: oThis.coverImageFileSize,
       coverImageHeight: oThis.coverImageHeight,

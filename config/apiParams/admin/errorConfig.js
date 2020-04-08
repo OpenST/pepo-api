@@ -27,6 +27,12 @@ const adminErrorConfig = {
     message: 'Community does not exist.'
   },
 
+  invalid_channel_name: {
+    parameter: 'channel_name',
+    code: 'invalid',
+    message: 'The community name either exceeds the character limit or contains unsupported characters.'
+  },
+
   invalid_channel_permalink: {
     parameter: 'channel_permalink',
     code: 'invalid',
