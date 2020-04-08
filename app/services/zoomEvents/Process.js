@@ -141,7 +141,7 @@ class ZoomEventProcess extends ServiceBase {
         return responseHelper.error({
           internal_error_identifier: 's_ze_p_vas_2',
           api_error_identifier: 'something_went_wrong',
-          debug_options: { Error: err }
+          debug_options: { Error: err, zoomEventObj: oThis.zoomEventObj }
         });
       });
 
