@@ -551,7 +551,7 @@ class EditChannel extends ServiceBase {
       oThis.updateRequiredParameters.coverImageWidth = COVER_IMAGE_WIDTH;
       oThis.updateRequiredParameters.coverImageHeight = COVER_IMAGE_HEIGHT;
       oThis.updateRequiredParameters.coverImageFileSize = oThis.coverImageFileSize;
-      oThis.updateRequiredParameters.adminUserIds = oThis.adminUserIds;
+      oThis.updateRequiredParameters.verifiedAdminUserIds = oThis.adminUserIds;
     }
   }
 
