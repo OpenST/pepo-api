@@ -93,9 +93,6 @@ class EditChannel extends ServiceBase {
 
     if (oThis.isEdit) {
       await oThis._fetchAssociatedEntities();
-    } else {
-      await oThis._createNewChannel();
-      await oThis._createEntryInChannelStats();
     }
 
     oThis._decideUpdateRequiredParameters();
@@ -430,77 +427,6 @@ class EditChannel extends ServiceBase {
   }
 
   /**
-   * Create new channel.
-   *
-   * @sets oThis.channelId, oThis.updateRequiredParameters
-   *
-   * @returns {Promise<void>}
-   * @private
-   */
-  async _createNewChannel() {
-    const oThis = this;
-
-    const insertResponse = await new ChannelModel()
-      .insert({
-        name: oThis.channelName,
-        status: channelConstants.invertedStatuses[channelConstants.activeStatus],
-        permalink: oThis.channelPermalink
-      })
-      .fire()
-      .catch(function(err) {
-        logger.log('Error while creating new channel: ', err);
-        if (
-          ChannelModel.isDuplicateIndexViolation(ChannelModel.nameUniqueIndexName, err) ||
-          ChannelModel.isDuplicateIndexViolation(ChannelModel.permalinkUniqueIndexName, err)
-        ) {
-          logger.log('Name or permalink conflict.');
-
-          return null;
-        }
-
-        return Promise.reject(err);
-      });
-
-    if (!insertResponse) {
-      logger.error('Error while creating new channel in channels table.');
-
-      return Promise.reject(
-        responseHelper.paramValidationError({
-          internal_error_identifier: 'a_s_a_c_e_cnc_1',
-          api_error_identifier: 'invalid_api_params',
-          params_error_identifiers: ['duplicate_channel_entry'],
-          debug_options: {
-            channelName: oThis.channelName,
-            channelPermalink: oThis.channelPermalink
-          }
-        })
-      );
-    }
-
-    oThis.channelId = insertResponse.insertId;
-    oThis.updateRequiredParameters.channelId = oThis.channelId;
-
-    await ChannelModel.flushCache({ name: oThis.channelName, createdAt: Math.floor(Date.now() / 1000) });
-  }
-
-  /**
-   * Create new entry in channel stat table.
-   *
-   * @returns {Promise<void>}
-   * @private
-   */
-  async _createEntryInChannelStats() {
-    const oThis = this;
-
-    await new ChannelStatModel()
-      .insert({ channel_id: oThis.channelId, total_videos: 0, total_users: 0 })
-      .fire()
-      .catch(function(error) {
-        logger.log('Avoid this error while updating channel. Error while creating channel stats: ', error);
-      });
-  }
-
-  /**
    * Decide which channel values need to be updated.
    *
    * @sets oThis.updateRequiredParameters
@@ -514,8 +440,10 @@ class EditChannel extends ServiceBase {
     // Somebody might need to change the case of the strings.
 
     if (oThis.isEdit) {
+      oThis.updateRequiredParameters.isEdit = true;
+
       if (oThis.channelName && oThis.existingChannelName !== oThis.channelName) {
-        oThis.updateRequiredParameters.name = oThis.channelName;
+        oThis.updateRequiredParameters.channelName = oThis.channelName;
       }
 
       if (
@@ -545,6 +473,9 @@ class EditChannel extends ServiceBase {
         oThis.updateRequiredParameters.verifiedAdminUserIds = oThis.adminUserIds;
       }
     } else {
+      oThis.updateRequiredParameters.isEdit = false;
+      oThis.updateRequiredParameters.channelName = oThis.channelName;
+      oThis.updateRequiredParameters.channelPermalink = oThis.channelPermalink;
       oThis.updateRequiredParameters.tagline = oThis.channelTagline;
       oThis.updateRequiredParameters.description = oThis.channelDescription;
       oThis.updateRequiredParameters.coverImageUrl = oThis.coverImageUrl;
@@ -566,10 +497,11 @@ class EditChannel extends ServiceBase {
 
     const modifyChannelResponse = await new ModifyChannel(oThis.updateRequiredParameters).perform();
 
+    const channel = modifyChannelResponse.data.channel;
+    oThis.channelId = channel.id;
+
     // NOTE: We are not checking isFailure because ModifyChannel lib will always send Promise.reject().
-    if (modifyChannelResponse.isSuccess()) {
-      return modifyChannelResponse.data.channel;
-    }
+    return channel;
   }
 
   /**
