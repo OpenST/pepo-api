@@ -50,7 +50,7 @@ class DeleteChannel extends ServiceBase {
 
     await oThis._deleteChannel();
 
-    await oThis._resetManagingChannelProperty();
+    await oThis._resetUserManagingChannelProperty();
 
     return responseHelper.successWithData({});
   }
@@ -156,7 +156,7 @@ class DeleteChannel extends ServiceBase {
    * @returns {Promise<void>}
    * @private
    */
-  async _resetManagingChannelProperty() {
+  async _resetUserManagingChannelProperty() {
     const oThis = this;
 
     const channelAdminUserIds = await new ChannelUserModel().fetchAdminProfilesByChannelId(oThis.channelId);
@@ -172,15 +172,36 @@ class DeleteChannel extends ServiceBase {
 
     for (let index = 0; index < channelAdminUserIds.length; index++) {
       const userId = channelAdminUserIds[index];
-      let channelIdsArray = channelIdsByUserIdsCacheResponse.data[userId][channelUsersConstants.adminRole] || [];
-      // Remove the current deleted channel id
-      channelIdsArray = channelIdsArray.filter((channelId) => channelId !== oThis.channelId.toString());
-      if (channelIdsArray.length === 0) {
+      const channelIdsArray = channelIdsByUserIdsCacheResponse.data[userId][channelUsersConstants.adminRole] || [];
+      const activeChannelIds = await oThis._filterNonActiveChannelIds(channelIdsArray);
+      logger.info(`userId : ${userId}, current active channelIds: ${activeChannelIds}`);
+      if (activeChannelIds.length === 0) {
         await new UserModel().unmarkUserChannelAdmin([userId]);
         const user = usersByUserIdsCacheResponse.data[userId];
         await UserModel.flushCache({ id: user.id, userName: user.userName, email: user.email });
       }
     }
+  }
+
+  /*
+  * Filter the non active channel ids.
+  *
+  * @returns {Promise<Array>}
+  * @private
+  */
+  async _filterNonActiveChannelIds(channelIds) {
+    const activeChannelIds = [];
+    const channelCacheResponse = await new ChannelByIdsCache({ ids: channelIds }).fetch();
+    for (let index = 0; index < channelIds.length; index++) {
+      const channelId = channelIds[index];
+      const channel = channelCacheResponse.data[channelId];
+      if (channel.status !== channelConstants.activeStatus) {
+        continue;
+      }
+      activeChannelIds.push(channelId);
+    }
+
+    return activeChannelIds;
   }
 }
 
