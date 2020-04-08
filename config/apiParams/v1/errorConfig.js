@@ -471,24 +471,6 @@ const v1ErrorConfig = {
     message: 'This community does not exist.'
   },
 
-  missing_channel_name: {
-    parameter: 'channel_name',
-    code: 'missing',
-    message: 'Name is required.'
-  },
-
-  missing_channel_tagline: {
-    parameter: 'channel_tagline',
-    code: 'missing',
-    message: 'Tagline is required.'
-  },
-
-  missing_channel_description: {
-    parameter: 'channel_description',
-    code: 'missing',
-    message: 'Description is required.'
-  },
-
   invalid_channel_name: {
     parameter: 'channel_name',
     code: 'invalid',
@@ -504,7 +486,13 @@ const v1ErrorConfig = {
   invalid_channel_name_characters: {
     parameter: 'channel_name',
     code: 'invalid',
-    message: 'Name contains unrecognized characters'
+    message: 'Name contains unsupported characters'
+  },
+
+  invalid_channel_name_cuss_words: {
+    parameter: 'channel_name',
+    code: 'invalid',
+    message: 'Cuss words are not allowed'
   },
 
   duplicate_channel_entry: {
@@ -525,6 +513,12 @@ const v1ErrorConfig = {
     message: 'Tagline exceeds character limit of 45 characters'
   },
 
+  invalid_channel_tagline_cuss_words: {
+    parameter: 'channel_tagline',
+    code: 'invalid',
+    message: 'Cuss words are not allowed'
+  },
+
   invalid_channel_description: {
     parameter: 'channel_description',
     code: 'invalid',
@@ -537,10 +531,40 @@ const v1ErrorConfig = {
     message: 'Description exceeds character limit of 400 characters'
   },
 
+  invalid_channel_description_cuss_words: {
+    parameter: 'channel_description',
+    code: 'invalid',
+    message: 'Cuss words are not allowed'
+  },
+
   invalid_channel_tags: {
     parameter: 'channel_tags',
     code: 'invalid',
     message: 'At least 1 tag is required'
+  },
+
+  invalid_channel_tags_length: {
+    parameter: 'channel_tags',
+    code: 'invalid',
+    message: 'Max 5 tags are allowed'
+  },
+
+  invalid_channel_tag_length: {
+    parameter: 'channel_tags',
+    code: 'invalid',
+    message: 'Tag exceeds character limit of 60 characters'
+  },
+
+  invalid_channel_tag_characters: {
+    parameter: 'channel_tags',
+    code: 'invalid',
+    message: 'Tag contains unsupported characters'
+  },
+
+  invalid_channel_tag_cuss_words: {
+    parameter: 'channel_tags',
+    code: 'invalid',
+    message: 'Cuss words are not allowed'
   },
 
   invalid_cover_image_url: {

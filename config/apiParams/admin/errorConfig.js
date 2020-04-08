@@ -42,7 +42,19 @@ const adminErrorConfig = {
   invalid_channel_name_characters: {
     parameter: 'channel_name',
     code: 'invalid',
-    message: 'Name contains unrecognized characters'
+    message: 'Name contains unsupported characters'
+  },
+
+  invalid_channel_name_cuss_words: {
+    parameter: 'channel_name',
+    code: 'invalid',
+    message: 'Cuss words are not allowed'
+  },
+
+  duplicate_channel_entry: {
+    parameter: 'channel_name',
+    code: 'invalid',
+    message: 'This name is already taken.'
   },
 
   invalid_channel_permalink: {
@@ -63,6 +75,12 @@ const adminErrorConfig = {
     message: 'Tagline exceeds character limit of 45 characters'
   },
 
+  invalid_channel_tagline_cuss_words: {
+    parameter: 'channel_tagline',
+    code: 'invalid',
+    message: 'Cuss words are not allowed'
+  },
+
   invalid_channel_description: {
     parameter: 'channel_description',
     code: 'invalid',
@@ -75,10 +93,40 @@ const adminErrorConfig = {
     message: 'Description exceeds character limit of 400 characters'
   },
 
+  invalid_channel_description_cuss_words: {
+    parameter: 'channel_description',
+    code: 'invalid',
+    message: 'Cuss words are not allowed'
+  },
+
   invalid_channel_tags: {
     parameter: 'channel_tags',
     code: 'invalid',
     message: 'At least 1 tag is required'
+  },
+
+  invalid_channel_tags_length: {
+    parameter: 'channel_tags',
+    code: 'invalid',
+    message: 'Max 5 tags are allowed'
+  },
+
+  invalid_channel_tag_length: {
+    parameter: 'channel_tags',
+    code: 'invalid',
+    message: 'Tag exceeds character limit of 60 characters'
+  },
+
+  invalid_channel_tag_characters: {
+    parameter: 'channel_tags',
+    code: 'invalid',
+    message: 'Tag contains unsupported characters'
+  },
+
+  invalid_channel_tag_cuss_words: {
+    parameter: 'channel_tags',
+    code: 'invalid',
+    message: 'Cuss words are not allowed'
   },
 
   invalid_cover_image_file_size: {
@@ -97,12 +145,6 @@ const adminErrorConfig = {
     parameter: 'cover_image_width',
     code: 'invalid',
     message: 'Cover image must be min 1500 x 642 px.'
-  },
-
-  duplicate_channel_entry: {
-    parameter: 'channel_id',
-    code: 'invalid',
-    message: 'This name is already taken.'
   },
 
   invalid_admin_usernames: {
