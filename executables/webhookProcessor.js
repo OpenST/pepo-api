@@ -259,7 +259,7 @@ class WebhookProcessorExecutable extends CronBase {
       const errorObject = responseHelper.error({
         internal_error_identifier: 'e_wp_se_1',
         api_error_identifier: 'something_went_wrong',
-        debug_options: { error: err.toString(), stack: err.stack }
+        debug_options: { error: JSON.stringify(err), stack: err.stack }
       });
 
       logger.error('Error: ', JSON.stringify(errorObject));
