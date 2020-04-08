@@ -8,7 +8,8 @@ const rootPrefix = '../../../..',
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   ChannelByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelByIds'),
   MeetingByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/meeting/MeetingByIds'),
-  channelConstants = require(rootPrefix + '/lib/globalConstant/channel/channels');
+  channelConstants = require(rootPrefix + '/lib/globalConstant/channel/channels'),
+  basicHelper = require(rootPrefix + '/helpers/basic');
 
 /**
  *
@@ -48,9 +49,11 @@ class EndMeeting extends ServiceBase {
   async _asyncPerform() {
     const oThis = this;
 
-    return responseHelper.successWithData({});
-
     await oThis._fetchAndValidateChannel();
+
+    if (!oThis._shouldAllowEndMeeting()) {
+      return responseHelper.successWithData({});
+    }
 
     await oThis._validateMeeting();
 
@@ -59,6 +62,16 @@ class EndMeeting extends ServiceBase {
     return responseHelper.successWithData({});
   }
 
+  /**
+   * Checks if environment is staging and channel id is 100.
+   *
+   * @returns {Promise<boolean>}
+   * @private
+   */
+  _shouldAllowEndMeeting() {
+    let oThis = this;
+    return basicHelper.isStaging() && oThis.channelId == 100;
+  }
   /**
    * Fetch and validate channel.
    *
