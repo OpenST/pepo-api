@@ -88,7 +88,7 @@ class CreateChannel extends ServiceBase {
       return Promise.reject(
         responseHelper.error({
           internal_error_identifier: 'a_s_c_m_c_1',
-          api_error_identifier: 'unauthorized_api_request',
+          api_error_identifier: 'create_channel_by_unapproved_creator',
           debug_options: {
             currentUserId: oThis.currentUser.id,
             channelName: oThis.channelName,
