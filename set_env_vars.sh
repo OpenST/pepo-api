@@ -119,7 +119,7 @@ export PA_SECRET_ENC_KEY_KMS_ID='ce7424c5-56cf-48ed-9202-49cbae0cf9d1'
 export PA_S3_AWS_ACCESS_KEY='AKIAT7WAUYD3SCOAJR5U'
 export PA_S3_AWS_SECRET_KEY='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'
 export PA_S3_AWS_REGION='us-east-1'
-export PA_S3_AWS_MASTER_FOLDER='d'
+export PA_S3_AWS_MASTER_FOLDER='pepo-staging1000'
 export PA_S3_USER_ASSETS_BUCKET='uassets.stagingpepo.com'
 export PA_S3_CHANNEL_ASSETS_BUCKET='uassets.stagingpepo.com'
 

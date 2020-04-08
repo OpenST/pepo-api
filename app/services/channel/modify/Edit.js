@@ -63,6 +63,7 @@ class EditChannel extends ServiceBase {
     oThis.texts = {};
 
     oThis.updateRequiredParameters = {
+      isEdit: true,
       channelId: oThis.channelId,
       tagNames: oThis.channelTagNames
     };
@@ -270,7 +271,7 @@ class EditChannel extends ServiceBase {
     // Somebody might need to change the case of the strings.
 
     if (oThis.channel.name !== oThis.channelName) {
-      oThis.updateRequiredParameters.name = oThis.channelName;
+      oThis.updateRequiredParameters.channelName = oThis.channelName;
     }
 
     if (oThis.texts[oThis.channelTaglineId] && oThis.texts[oThis.channelTaglineId].text !== oThis.channelTagline) {

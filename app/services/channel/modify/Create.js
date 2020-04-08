@@ -1,15 +1,11 @@
 const rootPrefix = '../../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   ModifyChannel = require(rootPrefix + '/lib/channel/ModifyChannel'),
-  ChannelModel = require(rootPrefix + '/app/models/mysql/channel/Channel'),
-  ChannelStatModel = require(rootPrefix + '/app/models/mysql/channel/ChannelStat'),
   bgJob = require(rootPrefix + '/lib/rabbitMqEnqueue/bgJob'),
-  logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   bgJobConstants = require(rootPrefix + '/lib/globalConstant/bgJob'),
   slackConstants = require(rootPrefix + '/lib/globalConstant/slack'),
-  entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
-  channelConstants = require(rootPrefix + '/lib/globalConstant/channel/channels');
+  entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType');
 
 /**
  * Class to create channel.
@@ -71,10 +67,6 @@ class CreateChannel extends ServiceBase {
 
     oThis._generatePermalink();
 
-    await oThis._createNewChannel();
-
-    await oThis._createEntryInChannelStats();
-
     const updatedChannelEntity = await oThis._modifyChannel();
 
     await oThis._performSlackChannelMonitoringBgJob();
@@ -130,76 +122,6 @@ class CreateChannel extends ServiceBase {
   }
 
   /**
-   * Create new channel.
-   *
-   * @sets oThis.channelId
-   *
-   * @returns {Promise<void>}
-   * @private
-   */
-  async _createNewChannel() {
-    const oThis = this;
-
-    const insertResponse = await new ChannelModel()
-      .insert({
-        name: oThis.channelName,
-        permalink: oThis.channelPermalink,
-        status: channelConstants.invertedStatuses[channelConstants.activeStatus]
-      })
-      .fire()
-      .catch(function(err) {
-        logger.log('Error while creating new channel: ', err);
-        if (
-          ChannelModel.isDuplicateIndexViolation(ChannelModel.nameUniqueIndexName, err) ||
-          ChannelModel.isDuplicateIndexViolation(ChannelModel.permalinkUniqueIndexName, err)
-        ) {
-          logger.log('Name or permalink conflict.');
-
-          return null;
-        }
-
-        return Promise.reject(err);
-      });
-
-    if (!insertResponse) {
-      logger.error('Error while creating new channel in channels table.');
-
-      return Promise.reject(
-        responseHelper.paramValidationError({
-          internal_error_identifier: 'a_s_c_m_c_2',
-          api_error_identifier: 'invalid_api_params',
-          params_error_identifiers: ['duplicate_channel_entry'],
-          debug_options: {
-            channelName: oThis.channelName,
-            channelPermalink: oThis.channelPermalink
-          }
-        })
-      );
-    }
-
-    oThis.channelId = insertResponse.insertId;
-
-    await ChannelModel.flushCache({
-      ids: [oThis.channelId],
-      permalinks: [oThis.channelPermalink],
-      name: oThis.channelName,
-      createdAt: Math.floor(Date.now() / 1000)
-    });
-  }
-
-  /**
-   * Create new entry in channel stat table.
-   *
-   * @returns {Promise<void>}
-   * @private
-   */
-  async _createEntryInChannelStats() {
-    const oThis = this;
-
-    await new ChannelStatModel().insert({ channel_id: oThis.channelId, total_videos: 0, total_users: 0 }).fire();
-  }
-
-  /**
    * Modify channel.
    *
    * @returns {Promise<object>}
@@ -210,7 +132,9 @@ class CreateChannel extends ServiceBase {
 
     // Don't send name here since name is used while channel create.
     const modifyChannelResponse = await new ModifyChannel({
+      isEdit: false,
       channelId: oThis.channelId,
+      channelName: oThis.channelName,
       channelPermalink: oThis.channelPermalink,
       description: oThis.channelDescription,
       tagline: oThis.channelTagline,
@@ -222,10 +146,11 @@ class CreateChannel extends ServiceBase {
       coverImageWidth: oThis.coverImageWidth
     }).perform();
 
+    const channel = modifyChannelResponse.data.channel;
+    oThis.channelId = channel.id;
+
     // NOTE: We are not checking isFailure because ModifyChannel lib will always send Promise.reject().
-    if (modifyChannelResponse.isSuccess()) {
-      return modifyChannelResponse.data.channel;
-    }
+    return channel;
   }
 
   /**
