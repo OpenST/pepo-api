@@ -7,6 +7,7 @@ const rootPrefix = '../../..',
   ChannelByPermalinksCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelByPermalinks'),
   ChannelTagByChannelIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelTagByChannelIds'),
   ChannelStatByChannelIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelStatByChannelIds'),
+  AdminIdsByChannelIdCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/AdminIdsByChannelId'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
   channelConstants = require(rootPrefix + '/lib/globalConstant/channel/channels');
@@ -270,8 +271,19 @@ class GetChannel extends ServiceBase {
     ) {
       oThis.channelAllowedActions[oThis.channelId].canEdit = 1;
 
-      // if any other admin is not there can not leave channel.
-      //oThis.channelAllowedActions[oThis.channelId].canLeave = 0;
+      await oThis._checkIfUserCanLeave();
+    }
+  }
+
+  async _checkIfUserCanLeave() {
+    const oThis = this,
+      adminIdsByChannelIdCacheResponse = await new AdminIdsByChannelIdCache({ channelIds: [oThis.channelId] }).fetch();
+
+    const channelAdminIds = adminIdsByChannelIdCacheResponse.data[oThis.channelId];
+
+    // if channel has only current user as admin then he can not leave channel.
+    if (channelAdminIds && channelAdminIds.length == 1) {
+      oThis.channelAllowedActions[oThis.channelId].canLeave = 0;
     }
   }
 
