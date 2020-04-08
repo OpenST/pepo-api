@@ -250,6 +250,7 @@ class GetChannel extends ServiceBase {
       canStartMeeting: 0,
       canJoinMeeting: 0,
       canEdit: 0,
+      canLeave: 1,
       updatedAt: Math.round(new Date() / 1000)
     };
 
@@ -268,6 +269,9 @@ class GetChannel extends ServiceBase {
       oThis.currentUserChannelRelations[oThis.channelId].isAdmin
     ) {
       oThis.channelAllowedActions[oThis.channelId].canEdit = 1;
+
+      // if any other admin is not there can not leave channel.
+      //oThis.channelAllowedActions[oThis.channelId].canLeave = 0;
     }
   }
 
