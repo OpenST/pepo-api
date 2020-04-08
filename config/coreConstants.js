@@ -346,6 +346,12 @@ class CoreConstants {
     return oThis.S3_CHANNEL_ASSETS_FOLDER + oThis.IMAGES_S3_FOLDER;
   }
 
+  get S3_CHANNEL_ZOOM_RECORDING_FOLDER() {
+    const oThis = this;
+
+    return oThis.S3_CHANNEL_ASSETS_FOLDER + oThis.RECORDINGS_S3_FOLDER;
+  }
+
   get S3_USER_VIDEOS_FOLDER() {
     const oThis = this;
 
@@ -364,6 +370,10 @@ class CoreConstants {
 
   get VIDEOS_S3_FOLDER() {
     return '/videos';
+  }
+
+  get RECORDINGS_S3_FOLDER() {
+    return '/recordings';
   }
 
   // Encryption secrets.
