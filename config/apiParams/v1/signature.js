@@ -1987,19 +1987,19 @@ const v1Signature = {
       },
       {
         parameter: 'channel_name',
-        validatorMethods: ['validateChannelName', 'validateStopWords']
+        validatorMethods: ['validateNonEmptyString']
       },
       {
         parameter: 'channel_tagline',
-        validatorMethods: ['validateChannelTagline', 'validateStopWords']
+        validatorMethods: ['validateNonEmptyString']
       },
       {
         parameter: 'channel_description',
-        validatorMethods: ['validateChannelDescription', 'validateStopWords']
+        validatorMethods: ['validateNonEmptyString']
       },
       {
         parameter: 'channel_tags',
-        validatorMethods: ['validateChannelTagsArray']
+        validatorMethods: ['validateNonEmptyArray']
       },
       {
         parameter: 'cover_image_url',
@@ -2036,19 +2036,19 @@ const v1Signature = {
       },
       {
         parameter: 'channel_name',
-        validatorMethods: ['validateChannelName', 'validateStopWords']
+        validatorMethods: ['validateNonEmptyString']
       },
       {
         parameter: 'channel_tagline',
-        validatorMethods: ['validateChannelTagline', 'validateStopWords']
+        validatorMethods: ['validateNonEmptyString']
       },
       {
         parameter: 'channel_description',
-        validatorMethods: ['validateChannelDescription', 'validateStopWords']
+        validatorMethods: ['validateNonEmptyString']
       },
       {
         parameter: 'channel_tags',
-        validatorMethods: ['validateChannelTagsArray']
+        validatorMethods: ['validateNonEmptyArray']
       }
     ],
     optional: [
