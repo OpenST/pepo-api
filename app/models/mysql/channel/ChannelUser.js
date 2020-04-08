@@ -324,21 +324,22 @@ class ChannelUserModel extends ModelBase {
    *
    * @returns {Promise<[]>}
    */
-  async fetchAdminProfilesByChannelId(channelId) {
-    const oThis = this;
+  async fetchAdminProfilesByChannelId(channelIds) {
+    const oThis = this,
+      channelAdminIds = {};
 
     const dbRows = await oThis
-      .select('user_id')
+      .select('channel_id, user_id')
       .where({
-        channel_id: channelId,
+        channel_id: channelIds,
         role: channelUsersConstants.invertedRoles[channelUsersConstants.adminRole]
       })
       .fire();
 
-    const channelAdminIds = [];
-
     for (let index = 0; index < dbRows.length; index++) {
-      channelAdminIds.push(dbRows[index].user_id);
+      const channelUserData = dbRows[index];
+      channelAdminIds[channelUserData.channel_id] = channelAdminIds[channelUserData.channel_id] || [];
+      channelAdminIds[channelUserData.channel_id].push(channelUserData.user_id);
     }
 
     return channelAdminIds;
@@ -378,6 +379,9 @@ class ChannelUserModel extends ModelBase {
       const ChannelBlockedUsersByChannelIds = require(rootPrefix +
         '/lib/cacheManagement/multi/channel/ChannelBlockedUserByChannelIds');
       promisesArray.push(new ChannelBlockedUsersByChannelIds({ channelIds: channelIds }).clear());
+
+      const AdminIdsByChannelIdCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/AdminIdsByChannelId');
+      promisesArray.push(new AdminIdsByChannelIdCache({ channelIds: channelIds }).clear());
     }
 
     if (params.userId) {
