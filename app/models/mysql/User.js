@@ -144,7 +144,7 @@ class UserModel extends ModelBase {
     const oThis = this;
 
     const dbRows = await oThis
-      .select('*')
+      .select(['id', 'user_name', 'status'])
       .where(['user_name IN (?)', userNames])
       .fire();
 

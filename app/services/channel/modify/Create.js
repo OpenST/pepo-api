@@ -75,10 +75,11 @@ class CreateChannel extends ServiceBase {
   }
 
   /**
-   * Sanitize input parameters.
+   * Validate and sanitize input parameters.
    *
    * @sets oThis.channelName, oThis.channelTagline, oThis.channelDescription
    *
+   * @returns {Promise<never>}
    * @private
    */
   async _validateAndSanitizeParams() {
@@ -130,7 +131,6 @@ class CreateChannel extends ServiceBase {
   async _modifyChannel() {
     const oThis = this;
 
-    // Don't send name here since name is used while channel create.
     const modifyChannelResponse = await new ModifyChannel({
       isEdit: false,
       channelId: oThis.channelId,

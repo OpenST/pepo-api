@@ -219,6 +219,7 @@ class GetChannel extends ServiceBase {
    */
   async _fetchCurrentUserChannelRelations() {
     const oThis = this;
+
     if (!oThis.currentUser) {
       return;
     }
@@ -270,9 +271,9 @@ class GetChannel extends ServiceBase {
       oThis.currentUserChannelRelations[oThis.channelId].isAdmin
     ) {
       oThis.channelAllowedActions[oThis.channelId].canEdit = 1;
-
-      await oThis._checkIfUserCanLeave();
     }
+
+    await oThis._checkIfUserCanLeave();
   }
 
   /**
