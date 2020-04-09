@@ -471,28 +471,28 @@ const v1ErrorConfig = {
     message: 'This community does not exist.'
   },
 
-  missing_channel_name: {
-    parameter: 'channel_name',
-    code: 'missing',
-    message: 'Name is required.'
-  },
-
-  missing_channel_tagline: {
-    parameter: 'channel_tagline',
-    code: 'missing',
-    message: 'Tagline is required.'
-  },
-
-  missing_channel_description: {
-    parameter: 'channel_description',
-    code: 'missing',
-    message: 'Description is required.'
-  },
-
   invalid_channel_name: {
     parameter: 'channel_name',
     code: 'invalid',
-    message: 'The community name either exceeds the character limit or contains unsupported characters.'
+    message: 'Name is required'
+  },
+
+  invalid_channel_name_length: {
+    parameter: 'channel_name',
+    code: 'invalid',
+    message: 'Name exceeds character limit of 20 characters'
+  },
+
+  invalid_channel_name_characters: {
+    parameter: 'channel_name',
+    code: 'invalid',
+    message: 'Name contains unsupported characters'
+  },
+
+  invalid_channel_name_cuss_words: {
+    parameter: 'channel_name',
+    code: 'invalid',
+    message: 'Cuss words are not allowed'
   },
 
   duplicate_channel_entry: {
@@ -504,19 +504,67 @@ const v1ErrorConfig = {
   invalid_channel_tagline: {
     parameter: 'channel_tagline',
     code: 'invalid',
-    message: 'The community tagline exceeds the character limit of 45 characters.'
+    message: 'Tagline is required'
+  },
+
+  invalid_channel_tagline_length: {
+    parameter: 'channel_tagline',
+    code: 'invalid',
+    message: 'Tagline exceeds character limit of 45 characters'
+  },
+
+  invalid_channel_tagline_cuss_words: {
+    parameter: 'channel_tagline',
+    code: 'invalid',
+    message: 'Cuss words are not allowed'
   },
 
   invalid_channel_description: {
     parameter: 'channel_description',
     code: 'invalid',
-    message: 'The community description exceeds the character limit of 400 characters.'
+    message: 'Description is required'
+  },
+
+  invalid_channel_description_length: {
+    parameter: 'channel_description',
+    code: 'invalid',
+    message: 'Description exceeds character limit of 400 characters'
+  },
+
+  invalid_channel_description_cuss_words: {
+    parameter: 'channel_description',
+    code: 'invalid',
+    message: 'Cuss words are not allowed'
   },
 
   invalid_channel_tags: {
     parameter: 'channel_tags',
     code: 'invalid',
-    message: 'At least 1 tag is required. Max 5 tags are allowed each with a character limit of 60 characters.'
+    message: 'At least 1 tag is required'
+  },
+
+  invalid_channel_tags_length: {
+    parameter: 'channel_tags',
+    code: 'invalid',
+    message: 'Max 5 tags are allowed'
+  },
+
+  invalid_channel_tag_length: {
+    parameter: 'channel_tags',
+    code: 'invalid',
+    message: 'Tag exceeds character limit of 60 characters'
+  },
+
+  invalid_channel_tag_characters: {
+    parameter: 'channel_tags',
+    code: 'invalid',
+    message: 'Tag contains unsupported characters'
+  },
+
+  invalid_channel_tag_cuss_words: {
+    parameter: 'channel_tags',
+    code: 'invalid',
+    message: 'Cuss words are not allowed'
   },
 
   invalid_cover_image_url: {
@@ -528,7 +576,7 @@ const v1ErrorConfig = {
   invalid_cover_image_file_size: {
     parameter: 'cover_image_file_size',
     code: 'invalid',
-    message: 'Cover images can be max of 3 MB.'
+    message: 'Cover image can be max of 3 MB.'
   },
 
   invalid_cover_image_height: {
