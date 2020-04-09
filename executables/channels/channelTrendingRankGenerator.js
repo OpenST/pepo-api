@@ -39,7 +39,8 @@ if (!cronProcessId) {
   process.exit(1);
 }
 
-const ACTIVITY_DURATION = 7 * 24 * 60 * 60; // one week
+const ACTIVITY_DURATION = 12 * 60 * 60; // 12 hours, request by bhavik
+// for testing.
 const BATCH_SIZE = 100;
 
 class ChannelTrendingRankGenerator extends CronBase {
