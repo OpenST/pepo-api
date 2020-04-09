@@ -268,5 +268,15 @@
     "http_code": "200",
     "code": "ZOOM_CALL_COULD_NOT_PROCEED",
     "message": "We could not create your new Pepo live event. Please try again later."
+  },
+  "create_channel_by_unapproved_creator": {
+    "http_code": "200",
+    "code": "BAD_REQUEST",
+    "message": "Unapproved creator cannot create community"
+  },
+  "can_not_leave_channel": {
+    "http_code": "200",
+    "code": "BAD_REQUEST",
+    "message": "Can not leave channel"
   }
 }

@@ -61,7 +61,7 @@ class SlackEventFactory extends ServiceBase {
   async _validateAndSanitizeParams() {
     const oThis = this;
 
-    logger.log('Validate for salck events factory');
+    logger.log('Validate for slack events factory');
 
     if (!oThis.eventData || !CommonValidators.validateNonEmptyObject(oThis.eventData)) {
       return Promise.reject(
@@ -119,6 +119,7 @@ class SlackEventFactory extends ServiceBase {
    * @return {Promise<void>}
    * @private
    */
+  // eslint-disable-next-line max-lines-per-function
   async _execute() {
     const oThis = this;
 
@@ -174,6 +175,15 @@ class SlackEventFactory extends ServiceBase {
         const SendEmailForResubmissionEvent = require(rootPrefix +
           '/app/services/slackEvents/SendEmailForResubmission');
         eventResponse = await new SendEmailForResubmissionEvent({
+          eventDataPayload: oThis.eventData.payload,
+          eventParams: oThis.eventParams,
+          currentAdmin: oThis.currentAdmin
+        }).perform();
+        break;
+      }
+      case slackConstants.deleteChannelEventType: {
+        const DeleteChannelEvent = require(rootPrefix + '/app/services/slackEvents/channel/Delete');
+        eventResponse = await new DeleteChannelEvent({
           eventDataPayload: oThis.eventData.payload,
           eventParams: oThis.eventParams,
           currentAdmin: oThis.currentAdmin

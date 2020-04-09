@@ -8,6 +8,7 @@ const rootPrefix = '../../../..',
   ChannelStatByChannelIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelStatByChannelIds'),
   ChannelUserByUserIdAndChannelIdsCache = require(rootPrefix +
     '/lib/cacheManagement/multi/channel/ChannelUserByUserIdAndChannelIds'),
+  AdminIdsByChannelIdCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/AdminIdsByChannelId'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
   channelConstants = require(rootPrefix + '/lib/globalConstant/channel/channels'),
@@ -68,6 +69,8 @@ class LeaveChannel extends ServiceBase {
         [entityTypeConstants.channelStatsMap]: oThis.channelStatsMap
       });
     }
+
+    await oThis._checkUserCanLeave();
 
     await oThis._removeChannelUser();
 
@@ -130,6 +133,37 @@ class LeaveChannel extends ServiceBase {
     }
 
     oThis.channelUserObj = cacheResponse.data[oThis.channelId];
+  }
+
+  /**
+   * Check if user can leave channel.
+   *
+   * @returns {Promise<never>}
+   * @private
+   */
+  async _checkUserCanLeave() {
+    const oThis = this;
+
+    if (oThis.channelUserObj.role === channelUsersConstants.adminRole) {
+      const adminIdsByChannelIdCacheResponse = await new AdminIdsByChannelIdCache({
+        channelIds: [oThis.channelId]
+      }).fetch();
+
+      const channelAdminIds = adminIdsByChannelIdCacheResponse.data[oThis.channelId];
+
+      if (channelAdminIds && channelAdminIds.length === 1) {
+        return Promise.reject(
+          responseHelper.error({
+            internal_error_identifier: 'a_s_c_u_l_cucl_1',
+            api_error_identifier: 'can_not_leave_channel',
+            debug_options: {
+              channelId: oThis.channelId,
+              userId: oThis.currentUser.id
+            }
+          })
+        );
+      }
+    }
   }
 
   /**

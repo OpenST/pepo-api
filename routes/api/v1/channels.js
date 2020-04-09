@@ -27,7 +27,7 @@ router.get('/:channel_id/share', sanitizer.sanitizeDynamicUrlParams, function(re
     serviceResponse.data = wrapperFormatterRsp.data;
   };
 
-  Promise.resolve(routeHelper.perform(req, res, next, '/channel/ShareDetails', 'r_a_v1_c_6', null, dataFormatterFunc));
+  Promise.resolve(routeHelper.perform(req, res, next, '/channel/ShareDetails', 'r_a_v1_c_1', null, dataFormatterFunc));
 });
 
 // User should be logged in to access all the further routes.
@@ -46,6 +46,7 @@ router.get('/:channel_id', sanitizer.sanitizeDynamicUrlParams, function(req, res
         [entityTypeConstants.channelDetailsMap]: responseEntityKey.channelDetails,
         [entityTypeConstants.channelStatsMap]: responseEntityKey.channelStats,
         [entityTypeConstants.currentUserChannelRelationsMap]: responseEntityKey.currentUserChannelRelations,
+        [entityTypeConstants.channelAllowedActionsMap]: responseEntityKey.channelAllowedActions,
         [entityTypeConstants.tagsMap]: responseEntityKey.tags,
         [entityTypeConstants.imagesMap]: responseEntityKey.images,
         [entityTypeConstants.linksMap]: responseEntityKey.links,
@@ -57,7 +58,46 @@ router.get('/:channel_id', sanitizer.sanitizeDynamicUrlParams, function(req, res
     serviceResponse.data = wrapperFormatterRsp.data;
   };
 
-  Promise.resolve(routeHelper.perform(req, res, next, '/channel/Get', 'r_a_v1_c_1', null, dataFormatterFunc));
+  Promise.resolve(routeHelper.perform(req, res, next, '/channel/Get', 'r_a_v1_c_2', null, dataFormatterFunc));
+});
+
+/* Create new channel by user. */
+router.post('/', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.createChannel;
+
+  const dataFormatterFunc = async function(serviceResponse) {
+    const wrapperFormatterRsp = await new FormatterComposer({
+      resultType: responseEntityKey.channel,
+      entityKindToResponseKeyMap: {
+        [entityTypeConstants.channel]: responseEntityKey.channel
+      },
+      serviceData: serviceResponse.data
+    }).perform();
+
+    serviceResponse.data = wrapperFormatterRsp.data;
+  };
+
+  Promise.resolve(routeHelper.perform(req, res, next, '/channel/modify/Create', 'r_a_v1_c_3', null, dataFormatterFunc));
+});
+
+/* Edit new channel by user. */
+router.post('/:channel_id/edit', sanitizer.sanitizeDynamicUrlParams, function(req, res, next) {
+  req.decodedParams.apiName = apiName.editChannel;
+  req.decodedParams.channel_id = req.params.channel_id;
+
+  const dataFormatterFunc = async function(serviceResponse) {
+    const wrapperFormatterRsp = await new FormatterComposer({
+      resultType: responseEntityKey.channel,
+      entityKindToResponseKeyMap: {
+        [entityTypeConstants.channel]: responseEntityKey.channel
+      },
+      serviceData: serviceResponse.data
+    }).perform();
+
+    serviceResponse.data = wrapperFormatterRsp.data;
+  };
+
+  Promise.resolve(routeHelper.perform(req, res, next, '/channel/modify/Edit', 'r_a_v1_c_4', null, dataFormatterFunc));
 });
 
 /* Join channel by user. */
@@ -78,7 +118,7 @@ router.post('/:channel_id/join', sanitizer.sanitizeDynamicUrlParams, function(re
     serviceResponse.data = wrapperFormatterRsp.data;
   };
 
-  Promise.resolve(routeHelper.perform(req, res, next, '/channel/user/Join', 'r_a_v1_c_2', null, dataFormatterFunc));
+  Promise.resolve(routeHelper.perform(req, res, next, '/channel/user/Join', 'r_a_v1_c_5', null, dataFormatterFunc));
 });
 
 /* Leave channel by user. */
@@ -99,7 +139,7 @@ router.post('/:channel_id/leave', sanitizer.sanitizeDynamicUrlParams, function(r
     serviceResponse.data = wrapperFormatterRsp.data;
   };
 
-  Promise.resolve(routeHelper.perform(req, res, next, '/channel/user/Leave', 'r_a_v1_c_3', null, dataFormatterFunc));
+  Promise.resolve(routeHelper.perform(req, res, next, '/channel/user/Leave', 'r_a_v1_c_6', null, dataFormatterFunc));
 });
 
 /* Mute notification for channel user. */
@@ -178,7 +218,7 @@ router.get('/:channel_id/videos', sanitizer.sanitizeDynamicUrlParams, function(r
     serviceResponse.data = wrapperFormatterRsp.data;
   };
 
-  Promise.resolve(routeHelper.perform(req, res, next, '/channel/GetVideoList', 'r_a_v1_c_4', null, dataFormatterFunc));
+  Promise.resolve(routeHelper.perform(req, res, next, '/channel/GetVideoList', 'r_a_v1_c_9', null, dataFormatterFunc));
 });
 
 /* Fetch users of a channel. */
@@ -201,7 +241,7 @@ router.get('/:channel_id/users', sanitizer.sanitizeDynamicUrlParams, function(re
     serviceResponse.data = wrapperFormatterRsp.data;
   };
 
-  Promise.resolve(routeHelper.perform(req, res, next, '/channel/user/List', 'r_a_v1_c_5', null, dataFormatterFunc));
+  Promise.resolve(routeHelper.perform(req, res, next, '/channel/user/List', 'r_a_v1_c_10', null, dataFormatterFunc));
 });
 
 module.exports = router;

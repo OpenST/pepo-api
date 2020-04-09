@@ -5,9 +5,9 @@ const rootPrefix = '../../..',
   ChannelByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelByIds'),
   GetCurrentUserChannelRelationsLib = require(rootPrefix + '/lib/channel/GetCurrentUserChannelRelations'),
   ChannelByPermalinksCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelByPermalinks'),
+  AdminIdsByChannelIdCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/AdminIdsByChannelId'),
   ChannelTagByChannelIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelTagByChannelIds'),
   ChannelStatByChannelIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelStatByChannelIds'),
-  LiveMeetingIdByChannelIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/meeting/LiveMeetingIdByChannelIds'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
   channelConstants = require(rootPrefix + '/lib/globalConstant/channel/channels');
@@ -219,6 +219,7 @@ class GetChannel extends ServiceBase {
    */
   async _fetchCurrentUserChannelRelations() {
     const oThis = this;
+
     if (!oThis.currentUser) {
       return;
     }
@@ -250,25 +251,63 @@ class GetChannel extends ServiceBase {
       id: oThis.channelId,
       canStartMeeting: 0,
       canJoinMeeting: 0,
+      canEdit: 0,
+      canLeave: 0,
       updatedAt: Math.round(new Date() / 1000)
     };
 
-    const liveMeetingIdByChannelIdsCacheResponse = await new LiveMeetingIdByChannelIdsCache({
-      channelIds: [oThis.channelId]
-    }).fetch();
-
-    if (liveMeetingIdByChannelIdsCacheResponse.isFailure()) {
-      return Promise.reject(liveMeetingIdByChannelIdsCacheResponse);
-    }
-
     // If liveMeetingId is present for channel id.
-    if (liveMeetingIdByChannelIdsCacheResponse.data[oThis.channelId].liveMeetingId) {
+    if (oThis.channel.liveMeetingId) {
       oThis.channelAllowedActions[oThis.channelId].canJoinMeeting = 1;
     } else if (
       CommonValidators.validateNonEmptyObject(oThis.currentUser) &&
       oThis.currentUserChannelRelations[oThis.channelId].isAdmin
     ) {
       oThis.channelAllowedActions[oThis.channelId].canStartMeeting = 1;
+    }
+
+    if (
+      CommonValidators.validateNonEmptyObject(oThis.currentUser) &&
+      oThis.currentUserChannelRelations[oThis.channelId].isAdmin
+    ) {
+      oThis.channelAllowedActions[oThis.channelId].canEdit = 1;
+    }
+
+    await oThis._checkIfUserCanLeave();
+  }
+
+  /**
+   * Check whether the current user can leave channel or not.
+   *
+   * @sets oThis.channelAllowedActions
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _checkIfUserCanLeave() {
+    const oThis = this;
+
+    if (
+      CommonValidators.validateNonEmptyObject(oThis.currentUser) &&
+      oThis.currentUserChannelRelations[oThis.channelId].isMember
+    ) {
+      oThis.channelAllowedActions[oThis.channelId].canLeave = 1;
+    }
+
+    if (
+      CommonValidators.validateNonEmptyObject(oThis.currentUser) &&
+      oThis.currentUserChannelRelations[oThis.channelId].isAdmin
+    ) {
+      const adminIdsByChannelIdCacheResponse = await new AdminIdsByChannelIdCache({
+        channelIds: [oThis.channelId]
+      }).fetch();
+
+      const channelAdminIds = adminIdsByChannelIdCacheResponse.data[oThis.channelId];
+
+      // If channel has only current user as admin, then he cannot leave channel.
+      if (channelAdminIds && channelAdminIds.length === 1) {
+        oThis.channelAllowedActions[oThis.channelId].canLeave = 0;
+      }
     }
   }
 

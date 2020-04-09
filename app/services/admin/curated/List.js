@@ -9,7 +9,8 @@ const rootPrefix = '../../../..',
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   userConstants = require(rootPrefix + '/lib/globalConstant/user'),
   adminEntityType = require(rootPrefix + '/lib/globalConstant/adminEntityType'),
-  curatedEntitiesConstants = require(rootPrefix + '/lib/globalConstant/curatedEntities');
+  curatedEntitiesConstants = require(rootPrefix + '/lib/globalConstant/curatedEntities'),
+  channelConstants = require(rootPrefix + '/lib/globalConstant/channel/channels');
 
 /**
  * Class to get list of curated entities.
@@ -246,7 +247,14 @@ class GetCuratedList extends ServiceBase {
       return Promise.reject(cacheRsp);
     }
 
-    oThis.channels = cacheRsp.data;
+    for (const channelId in cacheRsp.data) {
+      const channel = cacheRsp.data[channelId];
+      if (channel.status !== channelConstants.activeStatus) {
+        continue;
+      }
+
+      oThis.channels[channelId] = channel;
+    }
   }
 
   /**
