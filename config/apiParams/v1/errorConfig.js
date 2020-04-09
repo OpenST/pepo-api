@@ -78,37 +78,37 @@ const v1ErrorConfig = {
   self_profile_cannot_blocked: {
     parameter: 'profile_user_id',
     code: 'invalid',
-    message: 'Self User profile can not be blocked.'
+    message: 'Self User profile can not be blocked'
   },
 
   user_already_approved: {
     parameter: 'user_id',
     code: 'invalid',
-    message: 'User is already approved.'
+    message: 'User is already approved'
   },
 
   user_already_denied_as_creator: {
     parameter: 'user_id',
     code: 'invalid',
-    message: 'User is already denied as creator.'
+    message: 'User is already denied as creator'
   },
 
   user_inactive: {
     parameter: 'user_id',
     code: 'invalid',
-    message: 'User is inactive.'
+    message: 'User is inactive'
   },
 
   user_is_not_approved: {
     parameter: 'channel_admins',
     code: 'invalid',
-    message: 'User is not approved creator.'
+    message: 'User is not approved creator'
   },
 
   duplicate_user_name: {
     parameter: 'user_name',
     code: 'invalid',
-    message: 'User Name has been used.'
+    message: 'User Name has been used'
   },
 
   invalid_token_holder_address: {
@@ -468,7 +468,7 @@ const v1ErrorConfig = {
   invalid_channel_id: {
     parameter: 'channel_id',
     code: 'invalid',
-    message: 'This community does not exist.'
+    message: 'This community does not exist'
   },
 
   invalid_channel_name: {
@@ -498,7 +498,7 @@ const v1ErrorConfig = {
   duplicate_channel_entry: {
     parameter: 'channel_name',
     code: 'invalid',
-    message: 'This name is already taken.'
+    message: 'This name is already taken'
   },
 
   invalid_channel_tagline: {
@@ -570,37 +570,37 @@ const v1ErrorConfig = {
   invalid_cover_image_url: {
     parameter: 'cover_image_url',
     code: 'invalid',
-    message: 'Cover image can be max of 3 MB.'
+    message: 'Cover image can be max of 3 MB'
   },
 
   invalid_cover_image_file_size: {
     parameter: 'cover_image_file_size',
     code: 'invalid',
-    message: 'Cover image can be max of 3 MB.'
+    message: 'Cover image can be max of 3 MB'
   },
 
   invalid_cover_image_height: {
     parameter: 'cover_image_height',
     code: 'invalid',
-    message: 'Cover image must be min 1500 x 642 px.'
+    message: 'Cover image must be min 1500 x 642 px'
   },
 
   invalid_cover_image_width: {
     parameter: 'cover_image_width',
     code: 'invalid',
-    message: 'Cover image must be min 1500 x 642 px.'
+    message: 'Cover image must be min 1500 x 642 px'
   },
 
   invalid_meeting_id: {
     parameter: 'meeting_id',
     code: 'invalid',
-    message: 'This Pepo live event does not exist.'
+    message: 'This Pepo live event does not exist'
   },
 
   channel_not_active: {
     parameter: 'channel_id',
     code: 'invalid',
-    message: 'The community has been disabled.'
+    message: 'The community has been disabled'
   },
 
   missing_video_url: {
