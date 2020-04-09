@@ -5,9 +5,9 @@ const rootPrefix = '../../..',
   ChannelByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelByIds'),
   GetCurrentUserChannelRelationsLib = require(rootPrefix + '/lib/channel/GetCurrentUserChannelRelations'),
   ChannelByPermalinksCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelByPermalinks'),
+  AdminIdsByChannelIdCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/AdminIdsByChannelId'),
   ChannelTagByChannelIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelTagByChannelIds'),
   ChannelStatByChannelIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelStatByChannelIds'),
-  AdminIdsByChannelIdCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/AdminIdsByChannelId'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
   channelConstants = require(rootPrefix + '/lib/globalConstant/channel/channels');
@@ -251,7 +251,7 @@ class GetChannel extends ServiceBase {
       canStartMeeting: 0,
       canJoinMeeting: 0,
       canEdit: 0,
-      canLeave: 1,
+      canLeave: 0,
       updatedAt: Math.round(new Date() / 1000)
     };
 
@@ -275,15 +275,32 @@ class GetChannel extends ServiceBase {
     }
   }
 
+  /**
+   * Check whether the current user can leave channel or not.
+   *
+   * @sets oThis.channelAllowedActions
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
   async _checkIfUserCanLeave() {
-    const oThis = this,
-      adminIdsByChannelIdCacheResponse = await new AdminIdsByChannelIdCache({ channelIds: [oThis.channelId] }).fetch();
+    const oThis = this;
 
-    const channelAdminIds = adminIdsByChannelIdCacheResponse.data[oThis.channelId];
+    if (oThis.currentUserChannelRelations[oThis.channelId].isMember) {
+      oThis.channelAllowedActions[oThis.channelId].canLeave = 1;
+    }
 
-    // if channel has only current user as admin then he can not leave channel.
-    if (channelAdminIds && channelAdminIds.length == 1) {
-      oThis.channelAllowedActions[oThis.channelId].canLeave = 0;
+    if (oThis.currentUserChannelRelations[oThis.channelId].isAdmin) {
+      const adminIdsByChannelIdCacheResponse = await new AdminIdsByChannelIdCache({
+        channelIds: [oThis.channelId]
+      }).fetch();
+
+      const channelAdminIds = adminIdsByChannelIdCacheResponse.data[oThis.channelId];
+
+      // If channel has only current user as admin, then he cannot leave channel.
+      if (channelAdminIds && channelAdminIds.length === 1) {
+        oThis.channelAllowedActions[oThis.channelId].canLeave = 0;
+      }
     }
   }
 
