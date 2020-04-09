@@ -117,6 +117,11 @@ class ZoomEventProcess extends ServiceBase {
         eventProcessResponse = await new RecordingCompletedClass(oThis.eventData).perform();
         break;
       }
+      case zoomEventConstants.meetingRecordingTranscriptCompletedTopic: {
+        const RecordingCompletedClass = require(rootPrefix + '/app/services/zoomEvents/meetings/RecordingCompleted');
+        eventProcessResponse = await new RecordingCompletedClass(oThis.eventData).perform();
+        break;
+      }
       default: {
         eventProcessResponse = responseHelper.successWithData({});
         console.log('Unused Zoom Event Received with data', JSON.stringify(oThis.eventData));
