@@ -486,7 +486,7 @@ const v1ErrorConfig = {
   invalid_channel_name_characters: {
     parameter: 'channel_name',
     code: 'invalid',
-    message: "Only a-z A-Z 0-9 . & ' and - are supported"
+    message: "Only a-z A-Z 0-9 . & ' - are supported"
   },
 
   invalid_channel_name_cuss_words: {
@@ -558,7 +558,7 @@ const v1ErrorConfig = {
   invalid_channel_tag_characters: {
     parameter: 'channel_tags',
     code: 'invalid',
-    message: 'Tag contains unsupported characters'
+    message: 'Only a-z A-Z 0-9  _ are supported'
   },
 
   invalid_channel_tag_cuss_words: {
