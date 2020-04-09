@@ -480,7 +480,7 @@ const v1ErrorConfig = {
   invalid_channel_name_length: {
     parameter: 'channel_name',
     code: 'invalid',
-    message: 'Name exceeds character limit of 20 characters'
+    message: 'Name exceeds character limit of 25 characters'
   },
 
   invalid_channel_name_characters: {
