@@ -114,11 +114,6 @@
     "code": "UNPROCESSABLE_ENTITY",
     "message": "Socket server is not available now. Please try after some time."
   },
-  "duplicate_entry": {
-    "http_code": "409",
-    "code": "ALREADY_EXISTS",
-    "message": "Addresses already exists."
-  },
   "invalid_login_details": {
     "http_code": "401",
     "code": "UNAUTHORIZED",
@@ -273,5 +268,15 @@
     "http_code": "200",
     "code": "ZOOM_CALL_COULD_NOT_PROCEED",
     "message": "We could not create your new Pepo live event. Please try again later."
+  },
+  "create_channel_by_unapproved_creator": {
+    "http_code": "200",
+    "code": "BAD_REQUEST",
+    "message": "Unapproved creator cannot create community"
+  },
+  "can_not_leave_channel": {
+    "http_code": "200",
+    "code": "BAD_REQUEST",
+    "message": "Can not leave channel"
   }
 }

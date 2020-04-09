@@ -130,42 +130,6 @@ class ChannelUserModel extends ModelBase {
   }
 
   /**
-   * Fetch managed channels for user id.
-   * NOTE:- It will return array of active channel ids for which given user id is ADMIN.
-   *
-   * @param userId - user id.
-   *
-   * @param userId
-   * @returns {Promise<{channelIds: *}>}
-   */
-  async fetchManagedChannelsForUserId(userId) {
-    const oThis = this;
-
-    // TODO - zoom - are we using index in this query?
-    const dbRows = await oThis
-      .select('*')
-      .where({
-        user_id: userId,
-        role: channelUsersConstants.invertedRoles[channelUsersConstants.adminRole],
-        status: channelUsersConstants.invertedStatuses[channelUsersConstants.activeStatus]
-      })
-      .fire();
-
-    const channelIds = [];
-
-    if (dbRows.length === 0) {
-      return { channelIds: channelIds };
-    }
-
-    for (let index = 0; index < dbRows.length; index++) {
-      const formatDbRow = oThis.formatDbData(dbRows[index]);
-      channelIds.push(formatDbRow.channelId);
-    }
-
-    return { channelIds: channelIds };
-  }
-
-  /**
    * Fetch active channel ids for given user ids.
    *
    * @param {number} userIds: user ids.
@@ -321,10 +285,77 @@ class ChannelUserModel extends ModelBase {
   }
 
   /**
+   * Fetch channel ids by user ids order by managed and non managed channels.
+   *
+   * @param {array<number>} userIds
+   *
+   * @returns {Promise<void>}
+   */
+  async fetchByUserIds(userIds) {
+    const oThis = this;
+
+    const dbRows = await oThis
+      .select('user_id, channel_id,role')
+      .where(['user_id IN (?)', userIds])
+      .where({ status: channelUsersConstants.invertedStatuses[channelUsersConstants.activeStatus] })
+      .order_by('user_id asc, role asc, id asc')
+      .fire();
+
+    const finalResponse = {};
+    for (let index = 0; index < userIds.length; index++) {
+      finalResponse[userIds[index]] = {
+        [channelUsersConstants.adminRole]: [],
+        [channelUsersConstants.normalRole]: []
+      };
+    }
+
+    for (let index = 0; index < dbRows.length; index++) {
+      const formatDbRow = oThis.formatDbData(dbRows[index]);
+      finalResponse[formatDbRow.userId][formatDbRow.role].push(formatDbRow.channelId);
+    }
+
+    return finalResponse;
+  }
+
+  /**
+   * Fetch admin profile ids by channel ids.
+   *
+   * @param {array<number>} channelIds
+   *
+   * @returns {Promise<{}>}
+   */
+  async fetchAdminProfilesByChannelIds(channelIds) {
+    const oThis = this;
+
+    const channelAdminIds = {};
+
+    for (let index = 0; index < channelIds.length; index++) {
+      channelAdminIds[channelIds[index]] = [];
+    }
+
+    const dbRows = await oThis
+      .select('channel_id, user_id')
+      .where({
+        channel_id: channelIds,
+        role: channelUsersConstants.invertedRoles[channelUsersConstants.adminRole]
+      })
+      .fire();
+
+    for (let index = 0; index < dbRows.length; index++) {
+      const channelUserData = dbRows[index];
+      channelAdminIds[channelUserData.channel_id] = channelAdminIds[channelUserData.channel_id] || [];
+      channelAdminIds[channelUserData.channel_id].push(channelUserData.user_id);
+    }
+
+    return channelAdminIds;
+  }
+
+  /**
    * Flush cache.
    *
    * @param {object} params
    * @param {number} [params.channelId]
+   * @param {number} [params.channelIds]
    * @param {number} [params.userId]
    *
    * @returns {Promise<*>}
@@ -332,30 +363,45 @@ class ChannelUserModel extends ModelBase {
   static async flushCache(params) {
     const promisesArray = [];
 
+    let channelIds = [];
+
+    if (params.channelIds) {
+      channelIds = params.channelIds;
+    }
+
     if (params.channelId) {
+      channelIds.push(params.channelId);
+    }
+
+    if (channelIds.length > 0) {
       const ChannelUsersByChannelIdPaginationCache = require(rootPrefix +
         '/lib/cacheManagement/single/ChannelUsersByChannelIdPagination');
-      promisesArray.push(new ChannelUsersByChannelIdPaginationCache({ channelId: params.channelId }).clear());
+
+      for (let ind = 0; ind < channelIds.length; ind++) {
+        promisesArray.push(new ChannelUsersByChannelIdPaginationCache({ channelId: channelIds[ind] }).clear());
+      }
 
       const ChannelBlockedUsersByChannelIds = require(rootPrefix +
         '/lib/cacheManagement/multi/channel/ChannelBlockedUserByChannelIds');
-      promisesArray.push(new ChannelBlockedUsersByChannelIds({ channelIds: [params.channelId] }).clear());
+      promisesArray.push(new ChannelBlockedUsersByChannelIds({ channelIds: channelIds }).clear());
+
+      const AdminIdsByChannelIdCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/AdminIdsByChannelId');
+      promisesArray.push(new AdminIdsByChannelIdCache({ channelIds: channelIds }).clear());
     }
 
     if (params.userId) {
       const ChannelUserByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelUserByUserIds');
       promisesArray.push(new ChannelUserByUserIdsCache({ userIds: [params.userId] }).clear());
 
-      const ManageChannelIdsByUserIdsCache = require(rootPrefix +
-        '/lib/cacheManagement/single/ManageChannelIdsByUserIds');
-      promisesArray.push(new ManageChannelIdsByUserIdsCache({ userId: params.userId }).clear());
+      const ChannelIdsByUserCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelIdsByUser');
+      promisesArray.push(new ChannelIdsByUserCache({ userIds: [params.userId] }).clear());
     }
 
-    if (params.userId && params.channelId) {
+    if (params.userId && channelIds.length > 0) {
       const ChannelUserByUserIdAndChannelIdsCache = require(rootPrefix +
         '/lib/cacheManagement/multi/channel/ChannelUserByUserIdAndChannelIds');
       promisesArray.push(
-        new ChannelUserByUserIdAndChannelIdsCache({ userId: params.userId, channelIds: [params.channelId] }).clear()
+        new ChannelUserByUserIdAndChannelIdsCache({ userId: params.userId, channelIds: channelIds }).clear()
       );
     }
 

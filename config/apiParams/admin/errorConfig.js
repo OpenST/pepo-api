@@ -20,6 +20,140 @@ const adminErrorConfig = {
     code: 'invalid',
     message: 'First Name can contain alphabets and spaces and should be min 2 characters and max 25 characters'
   },
+
+  invalid_channel_id: {
+    parameter: 'channel_id',
+    code: 'invalid',
+    message: 'Community does not exist'
+  },
+
+  invalid_channel_name: {
+    parameter: 'channel_name',
+    code: 'invalid',
+    message: 'Name is required'
+  },
+
+  invalid_channel_name_length: {
+    parameter: 'channel_name',
+    code: 'invalid',
+    message: 'Name exceeds character limit of 25 characters'
+  },
+
+  invalid_channel_name_characters: {
+    parameter: 'channel_name',
+    code: 'invalid',
+    message: "Only a-z A-Z 0-9 . & ' - are supported"
+  },
+
+  invalid_channel_name_cuss_words: {
+    parameter: 'channel_name',
+    code: 'invalid',
+    message: 'Cuss words are not allowed'
+  },
+
+  duplicate_channel_entry: {
+    parameter: 'channel_name',
+    code: 'invalid',
+    message: 'This name is already taken'
+  },
+
+  invalid_channel_permalink: {
+    parameter: 'channel_permalink',
+    code: 'invalid',
+    message: 'Community with the given community permalink does not exist'
+  },
+
+  invalid_channel_tagline: {
+    parameter: 'channel_tagline',
+    code: 'invalid',
+    message: 'Tagline is required'
+  },
+
+  invalid_channel_tagline_length: {
+    parameter: 'channel_tagline',
+    code: 'invalid',
+    message: 'Tagline exceeds character limit of 45 characters'
+  },
+
+  invalid_channel_tagline_cuss_words: {
+    parameter: 'channel_tagline',
+    code: 'invalid',
+    message: 'Cuss words are not allowed'
+  },
+
+  invalid_channel_description: {
+    parameter: 'channel_description',
+    code: 'invalid',
+    message: 'Description is required'
+  },
+
+  invalid_channel_description_length: {
+    parameter: 'channel_description',
+    code: 'invalid',
+    message: 'Description exceeds character limit of 400 characters'
+  },
+
+  invalid_channel_description_cuss_words: {
+    parameter: 'channel_description',
+    code: 'invalid',
+    message: 'Cuss words are not allowed'
+  },
+
+  invalid_channel_tags: {
+    parameter: 'channel_tags',
+    code: 'invalid',
+    message: 'At least 1 tag is required'
+  },
+
+  invalid_channel_tags_length: {
+    parameter: 'channel_tags',
+    code: 'invalid',
+    message: 'Max 5 tags are allowed'
+  },
+
+  invalid_channel_tag_length: {
+    parameter: 'channel_tags',
+    code: 'invalid',
+    message: 'Tag character limit is 60'
+  },
+
+  invalid_channel_tag_characters: {
+    parameter: 'channel_tags',
+    code: 'invalid',
+    message: 'Only a-z A-Z 0-9  _ are supported'
+  },
+
+  invalid_channel_tag_cuss_words: {
+    parameter: 'channel_tags',
+    code: 'invalid',
+    message: 'Cuss words are not allowed'
+  },
+
+  invalid_cover_image_file_size: {
+    parameter: 'cover_image_file_size',
+    code: 'invalid',
+    message: 'Cover image can be max of 3 MB'
+  },
+
+  invalid_cover_image_height: {
+    parameter: 'cover_image_height',
+    code: 'invalid',
+    message: 'Cover image must be min 1500 x 642 px'
+  },
+
+  invalid_cover_image_width: {
+    parameter: 'cover_image_width',
+    code: 'invalid',
+    message: 'Cover image must be min 1500 x 642 px'
+  },
+
+  invalid_admin_usernames: {
+    parameter: 'admins',
+    code: 'invalid',
+    message:
+      'Invalid admin username. Community has been created. Please use correct usernames and edit the same community instead of creating it again'
+  },
+
   invalid_last_name: {
     parameter: 'last_name',
     code: 'invalid',
@@ -43,17 +177,17 @@ const adminErrorConfig = {
   user_not_active: {
     parameter: 'user_name',
     code: 'invalid',
-    message: 'User login has been disabled.'
+    message: 'User login has been disabled'
   },
   user_already_approved: {
     parameter: 'user_id',
     code: 'invalid',
-    message: 'User is already approved.'
+    message: 'User is already approved'
   },
   user_already_denied_as_creator: {
     parameter: 'user_id',
     code: 'invalid',
-    message: 'User is already denied as creator.'
+    message: 'User is already denied as creator'
   },
   invalid_filter: {
     parameter: 'filter',
@@ -63,7 +197,12 @@ const adminErrorConfig = {
   user_inactive: {
     parameter: 'user_id',
     code: 'invalid',
-    message: 'User is inactive.'
+    message: 'User is inactive'
+  },
+  user_is_not_approved: {
+    parameter: 'channel_admins',
+    code: 'invalid',
+    message: 'User is not approved creator'
   },
   email_not_double_optin: {
     parameter: 'email',
@@ -119,6 +258,11 @@ const adminErrorConfig = {
     parameter: 'user_id',
     code: 'invalid',
     message: 'Invalid user id.'
+  },
+  invalid_admin_id: {
+    parameter: 'admin_user_ids',
+    code: 'invalid',
+    message: 'This user name does not exist'
   },
   invalid_resolution: {
     parameter: 'resolutions',
@@ -183,7 +327,7 @@ const adminErrorConfig = {
   channel_not_active: {
     parameter: 'channel_id',
     code: 'invalid',
-    message: 'The Channel has been disabled.'
+    message: 'The Community has been disabled'
   },
 
   invalid_entity_ids: {

@@ -1,7 +1,9 @@
 const rootPrefix = '../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   ChannelByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelByIds'),
-  ManageChannelIdsByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/single/ManageChannelIdsByUserIds'),
+  channelUsersConstants = require(rootPrefix + '/lib/globalConstant/channel/channelUsers'),
+  channelConstants = require(rootPrefix + '/lib/globalConstant/channel/channels'),
+  ChannelIdsByUserCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelIdsByUser'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType');
 
@@ -85,15 +87,13 @@ class CurrentUserManagedCommunities extends ServiceBase {
   async _fetchManagedChannelIds() {
     const oThis = this;
 
-    const manageChannelIdsByUserIdsCacheRsp = await new ManageChannelIdsByUserIdsCache({
-      userId: oThis.userId
-    }).fetch();
+    const channelIdsByUserIdsCacheResponse = await new ChannelIdsByUserCache({ userIds: [oThis.userId] }).fetch();
 
-    if (manageChannelIdsByUserIdsCacheRsp.isFailure()) {
-      return Promise.reject(manageChannelIdsByUserIdsCacheRsp);
+    if (channelIdsByUserIdsCacheResponse.isFailure()) {
+      return Promise.reject(channelIdsByUserIdsCacheResponse);
     }
 
-    oThis.managedChannelIds = manageChannelIdsByUserIdsCacheRsp.data.channelIds;
+    oThis.managedChannelIds = channelIdsByUserIdsCacheResponse.data[oThis.userId][channelUsersConstants.adminRole];
   }
 
   /**
@@ -114,7 +114,14 @@ class CurrentUserManagedCommunities extends ServiceBase {
       return Promise.reject(cacheResponse);
     }
 
-    oThis.channelsMap = cacheResponse.data;
+    // Filter the non active channels
+    for (const channelId in cacheResponse.data) {
+      const channelDetails = cacheResponse.data[channelId];
+      if (channelDetails.status !== channelConstants.activeStatus) {
+        continue;
+      }
+      oThis.channelsMap[channelId] = channelDetails;
+    }
   }
 
   /**

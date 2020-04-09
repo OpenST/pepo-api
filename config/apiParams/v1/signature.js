@@ -266,6 +266,10 @@ const v1Signature = {
       {
         parameter: 'images',
         validatorMethods: ['validateStringArray']
+      },
+      {
+        parameter: 'channel_images',
+        validatorMethods: ['validateStringArray']
       }
     ]
   },
@@ -446,6 +450,14 @@ const v1Signature = {
         validatorMethods: ['validateString', 'validateStopWords']
       },
       {
+        parameter: 'video_duration',
+        validatorMethods: ['validateInteger']
+      },
+      {
+        parameter: 'video_duration_preference',
+        validatorMethods: ['validateInteger']
+      },
+      {
         parameter: 'link',
         validatorMethods: ['validateString', 'validateStopWords']
       } // If link is invalid, consider empty string.
@@ -510,6 +522,14 @@ const v1Signature = {
       {
         parameter: 'video_description',
         validatorMethods: ['validateString', 'validateStopWords']
+      },
+      {
+        parameter: 'video_duration',
+        validatorMethods: ['validateInteger']
+      },
+      {
+        parameter: 'video_duration_preference',
+        validatorMethods: ['validateInteger']
       },
       {
         parameter: 'link',
@@ -838,12 +858,7 @@ const v1Signature = {
     ]
   },
   [apiName.getChannels]: {
-    mandatory: [
-      {
-        parameter: 'api_source',
-        validatorMethods: ['validateString']
-      }
-    ],
+    mandatory: [],
     optional: [
       {
         parameter: 'current_user',
@@ -860,6 +875,75 @@ const v1Signature = {
       {
         parameter: 'getTopResults',
         validatorMethods: ['validateBoolean']
+      }
+    ]
+  },
+  [apiName.getNewChannels]: {
+    mandatory: [],
+    optional: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      },
+      {
+        parameter: 'q',
+        validatorMethods: ['validateString']
+      },
+      {
+        parameter: paginationConstants.paginationIdentifierKey,
+        validatorMethods: ['validateString', 'validatePaginationIdentifier']
+      }
+    ]
+  },
+  [apiName.getAllChannels]: {
+    mandatory: [],
+    optional: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      },
+      {
+        parameter: 'q',
+        validatorMethods: ['validateString']
+      },
+      {
+        parameter: paginationConstants.paginationIdentifierKey,
+        validatorMethods: ['validateString', 'validatePaginationIdentifier']
+      }
+    ]
+  },
+  [apiName.getTrendingChannels]: {
+    mandatory: [],
+    optional: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      },
+      {
+        parameter: 'q',
+        validatorMethods: ['validateString']
+      },
+      {
+        parameter: paginationConstants.paginationIdentifierKey,
+        validatorMethods: ['validateString', 'validatePaginationIdentifier']
+      }
+    ]
+  },
+  [apiName.getMyChannels]: {
+    mandatory: [
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      }
+    ],
+    optional: [
+      {
+        parameter: 'q',
+        validatorMethods: ['validateString']
+      },
+      {
+        parameter: paginationConstants.paginationIdentifierKey,
+        validatorMethods: ['validateString', 'validatePaginationIdentifier']
       }
     ]
   },
@@ -1890,6 +1974,101 @@ const v1Signature = {
       }
     ],
     optional: []
+  },
+  [apiName.createChannel]: {
+    mandatory: [
+      {
+        parameter: 'api_source',
+        validatorMethods: ['validateString']
+      },
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      },
+      {
+        parameter: 'channel_name',
+        validatorMethods: ['validateNonEmptyString']
+      },
+      {
+        parameter: 'channel_tagline',
+        validatorMethods: ['validateNonEmptyString']
+      },
+      {
+        parameter: 'channel_description',
+        validatorMethods: ['validateNonEmptyString']
+      },
+      {
+        parameter: 'channel_tags',
+        validatorMethods: ['validateNonEmptyArray']
+      },
+      {
+        parameter: 'cover_image_url',
+        validatorMethods: ['validateHttpBasedUrl']
+      },
+      {
+        parameter: 'cover_image_file_size',
+        validatorMethods: ['validateChannelCoverImageFileSize']
+      },
+      {
+        parameter: 'cover_image_height',
+        validatorMethods: ['validateChannelCoverImageHeight']
+      },
+      {
+        parameter: 'cover_image_width',
+        validatorMethods: ['validateChannelCoverImageWidth']
+      }
+    ],
+    optional: []
+  },
+  [apiName.editChannel]: {
+    mandatory: [
+      {
+        parameter: 'api_source',
+        validatorMethods: ['validateString']
+      },
+      {
+        parameter: 'channel_id',
+        validatorMethods: ['validateNonZeroInteger']
+      },
+      {
+        parameter: 'current_user',
+        validatorMethods: ['validateNonEmptyObject']
+      },
+      {
+        parameter: 'channel_name',
+        validatorMethods: ['validateNonEmptyString']
+      },
+      {
+        parameter: 'channel_tagline',
+        validatorMethods: ['validateNonEmptyString']
+      },
+      {
+        parameter: 'channel_description',
+        validatorMethods: ['validateNonEmptyString']
+      },
+      {
+        parameter: 'channel_tags',
+        validatorMethods: ['validateNonEmptyArray']
+      }
+    ],
+    optional: [
+      {
+        parameter: 'cover_image_url',
+        validatorMethods: ['validateHttpBasedUrl']
+      },
+      {
+        parameter: 'cover_image_file_size',
+        validatorMethods: ['validateChannelCoverImageFileSize']
+      },
+      {
+        parameter: 'cover_image_height',
+        validatorMethods: ['validateChannelCoverImageHeight']
+      },
+      {
+        parameter: 'cover_image_width',
+        validatorMethods: ['validateChannelCoverImageWidth']
+      }
+    ]
   }
 };
 

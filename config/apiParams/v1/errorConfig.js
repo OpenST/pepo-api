@@ -78,31 +78,37 @@ const v1ErrorConfig = {
   self_profile_cannot_blocked: {
     parameter: 'profile_user_id',
     code: 'invalid',
-    message: 'Self User profile can not be blocked.'
+    message: 'Self User profile can not be blocked'
   },
 
   user_already_approved: {
     parameter: 'user_id',
     code: 'invalid',
-    message: 'User is already approved.'
+    message: 'User is already approved'
   },
 
   user_already_denied_as_creator: {
     parameter: 'user_id',
     code: 'invalid',
-    message: 'User is already denied as creator.'
+    message: 'User is already denied as creator'
   },
 
   user_inactive: {
     parameter: 'user_id',
     code: 'invalid',
-    message: 'User is inactive.'
+    message: 'User is inactive'
+  },
+
+  user_is_not_approved: {
+    parameter: 'channel_admins',
+    code: 'invalid',
+    message: 'User is not approved creator'
   },
 
   duplicate_user_name: {
     parameter: 'user_name',
     code: 'invalid',
-    message: 'User Name has been used.'
+    message: 'User Name has been used'
   },
 
   invalid_token_holder_address: {
@@ -157,6 +163,12 @@ const v1ErrorConfig = {
     parameter: 'user_id',
     code: 'invalid',
     message: 'Invalid user id.'
+  },
+
+  invalid_admin_id: {
+    parameter: 'admin_user_ids',
+    code: 'invalid',
+    message: 'This user name does not exist.'
   },
 
   invalid_resolution: {
@@ -456,19 +468,139 @@ const v1ErrorConfig = {
   invalid_channel_id: {
     parameter: 'channel_id',
     code: 'invalid',
-    message: 'Channel does not exist.'
+    message: 'This community does not exist'
+  },
+
+  invalid_channel_name: {
+    parameter: 'channel_name',
+    code: 'invalid',
+    message: 'Name is required'
+  },
+
+  invalid_channel_name_length: {
+    parameter: 'channel_name',
+    code: 'invalid',
+    message: 'Name exceeds character limit of 25 characters'
+  },
+
+  invalid_channel_name_characters: {
+    parameter: 'channel_name',
+    code: 'invalid',
+    message: "Only a-z A-Z 0-9 . & ' - are supported"
+  },
+
+  invalid_channel_name_cuss_words: {
+    parameter: 'channel_name',
+    code: 'invalid',
+    message: 'Cuss words are not allowed'
+  },
+
+  duplicate_channel_entry: {
+    parameter: 'channel_name',
+    code: 'invalid',
+    message: 'This name is already taken'
+  },
+
+  invalid_channel_tagline: {
+    parameter: 'channel_tagline',
+    code: 'invalid',
+    message: 'Tagline is required'
+  },
+
+  invalid_channel_tagline_length: {
+    parameter: 'channel_tagline',
+    code: 'invalid',
+    message: 'Tagline exceeds character limit of 45 characters'
+  },
+
+  invalid_channel_tagline_cuss_words: {
+    parameter: 'channel_tagline',
+    code: 'invalid',
+    message: 'Cuss words are not allowed'
+  },
+
+  invalid_channel_description: {
+    parameter: 'channel_description',
+    code: 'invalid',
+    message: 'Description is required'
+  },
+
+  invalid_channel_description_length: {
+    parameter: 'channel_description',
+    code: 'invalid',
+    message: 'Description exceeds character limit of 400 characters'
+  },
+
+  invalid_channel_description_cuss_words: {
+    parameter: 'channel_description',
+    code: 'invalid',
+    message: 'Cuss words are not allowed'
+  },
+
+  invalid_channel_tags: {
+    parameter: 'channel_tags',
+    code: 'invalid',
+    message: 'At least 1 tag is required'
+  },
+
+  invalid_channel_tags_length: {
+    parameter: 'channel_tags',
+    code: 'invalid',
+    message: 'Max 5 tags are allowed'
+  },
+
+  invalid_channel_tag_length: {
+    parameter: 'channel_tags',
+    code: 'invalid',
+    message: 'Tag character limit is 60'
+  },
+
+  invalid_channel_tag_characters: {
+    parameter: 'channel_tags',
+    code: 'invalid',
+    message: 'Only a-z A-Z 0-9  _ are supported'
+  },
+
+  invalid_channel_tag_cuss_words: {
+    parameter: 'channel_tags',
+    code: 'invalid',
+    message: 'Cuss words are not allowed'
+  },
+
+  invalid_cover_image_url: {
+    parameter: 'cover_image_url',
+    code: 'invalid',
+    message: 'Cover image can be max of 3 MB'
+  },
+
+  invalid_cover_image_file_size: {
+    parameter: 'cover_image_file_size',
+    code: 'invalid',
+    message: 'Cover image can be max of 3 MB'
+  },
+
+  invalid_cover_image_height: {
+    parameter: 'cover_image_height',
+    code: 'invalid',
+    message: 'Cover image must be min 1500 x 642 px'
+  },
+
+  invalid_cover_image_width: {
+    parameter: 'cover_image_width',
+    code: 'invalid',
+    message: 'Cover image must be min 1500 x 642 px'
   },
 
   invalid_meeting_id: {
     parameter: 'meeting_id',
     code: 'invalid',
-    message: 'This Pepo live event does not exist.'
+    message: 'This Pepo live event does not exist'
   },
 
   channel_not_active: {
     parameter: 'channel_id',
     code: 'invalid',
-    message: 'The channel has been disabled.'
+    message: 'The community has been disabled'
   },
 
   missing_video_url: {
@@ -491,6 +623,16 @@ const v1ErrorConfig = {
     parameter: 'uuid',
     code: 'invalid',
     message: 'Uuid is invalid.'
+  },
+  invalid_guest_name: {
+    parameter: 'guest_name',
+    code: 'invalid',
+    message: 'Name must be min 2 characters and max 30.'
+  },
+  bad_guest_name: {
+    parameter: 'guest_name',
+    code: 'invalid',
+    message: 'Cuss words are not allowed.'
   }
 };
 

@@ -1,7 +1,8 @@
 const rootPrefix = '../../../..',
   ModelBase = require(rootPrefix + '/app/models/mysql/Base'),
-  LiveMeetingIdByChannelIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/meeting/LiveMeetingIdByChannelIds'),
+  MeetingModel = require(rootPrefix + '/app/models/mysql/meeting/Meeting'),
   databaseConstants = require(rootPrefix + '/lib/globalConstant/database'),
+  basicHelper = require(rootPrefix + '/helpers/basic'),
   channelConstants = require(rootPrefix + '/lib/globalConstant/channel/channels');
 
 // Declare variables names.
@@ -39,6 +40,7 @@ class ChannelModel extends ModelBase {
    * @param {number} dbRow.description_id
    * @param {number} dbRow.cover_image_id
    * @param {number} dbRow.share_image_id
+   * @param {number} dbRow.trending_rank
    * @param {String} dbRow.permalink
    * @param {number} dbRow.created_at
    * @param {number} dbRow.updated_at
@@ -57,11 +59,85 @@ class ChannelModel extends ModelBase {
       coverImageId: dbRow.cover_image_id,
       shareImageId: dbRow.share_image_id,
       permalink: dbRow.permalink,
+      trendingRank: dbRow.trending_rank,
       createdAt: dbRow.created_at,
       updatedAt: dbRow.updated_at
     };
 
     return oThis.sanitizeFormattedData(formattedData);
+  }
+
+  /**
+   * Fetch ids created recently.
+   *
+   * @return {object}
+   */
+  async fetchNewChannelIds() {
+    const oThis = this;
+
+    const channelIds = [],
+      currentTime = basicHelper.getCurrentTimestampInSeconds();
+
+    const response = await oThis
+      .select('id')
+      .where({ status: channelConstants.invertedStatuses[channelConstants.activeStatus] })
+      .where(['created_at >= ?', currentTime - channelConstants.newChannelIntervalInSec])
+      .order_by('created_at desc')
+      .fire();
+
+    for (let i = 0; i < response.length; i++) {
+      channelIds.push(response[i].id);
+    }
+
+    return { ids: channelIds };
+  }
+
+  /**
+   * Fetch ids based on trendingRank value in descending order.
+   *
+   * @return {object}
+   */
+  async fetchByTrendingChannelIds() {
+    const oThis = this;
+
+    const channelIds = [];
+
+    const response = await oThis
+      .select('id')
+      .where({ status: channelConstants.invertedStatuses[channelConstants.activeStatus] })
+      .where('trending_rank is not null')
+      .order_by('trending_rank asc')
+      .limit(channelConstants.trendingChannelsLimit)
+      .fire();
+
+    for (let i = 0; i < response.length; i++) {
+      channelIds.push(response[i].id);
+    }
+
+    return { ids: channelIds };
+  }
+
+  /**
+   * Fetch all channel ids.
+   *
+   * @return {object}
+   */
+  async fetchAllChannelIds() {
+    const oThis = this;
+
+    const channelIds = [];
+
+    const response = await oThis
+      .select('id')
+      .where({ status: channelConstants.invertedStatuses[channelConstants.activeStatus] })
+      .order_by('name asc')
+      .fire();
+
+    for (let i = 0; i < response.length; i++) {
+      channelIds.push(response[i].id);
+    }
+
+    return { ids: channelIds };
   }
 
   /**
@@ -75,19 +151,15 @@ class ChannelModel extends ModelBase {
     const oThis = this;
 
     const promisesResponse = await Promise.all([
-      new LiveMeetingIdByChannelIdsCache({ channelIds: ids }).fetch(),
+      new MeetingModel().fetchMeetingIdByChannelIds(ids),
       oThis
         .select('*')
         .where(['id IN (?)', ids])
         .fire()
     ]);
 
-    const liveMeetingIdsCacheResponse = promisesResponse[0];
-    if (liveMeetingIdsCacheResponse.isFailure()) {
-      return Promise.reject(liveMeetingIdsCacheResponse);
-    }
+    const liveMeetingIdsData = promisesResponse[0];
 
-    const liveMeetingIdsData = liveMeetingIdsCacheResponse.data;
     const dbRows = promisesResponse[1];
 
     const response = {};
@@ -96,7 +168,7 @@ class ChannelModel extends ModelBase {
       const channelId = dbRows[index].id;
       const formatDbRow = oThis.formatDbData(dbRows[index]);
       response[formatDbRow.id] = formatDbRow;
-      response[formatDbRow.id].liveMeetingId = liveMeetingIdsData[channelId].liveMeetingId;
+      response[formatDbRow.id].liveMeetingId = (liveMeetingIdsData[channelId] || {}).liveMeetingId;
     }
 
     return response;
@@ -124,6 +196,78 @@ class ChannelModel extends ModelBase {
     }
 
     return response;
+  }
+
+  /**
+   * Get channels that starts with channel prefix.
+   *
+   * @param {object} params
+   * @param {number} params.offset
+   * @param {number} params.limit
+   * @param {string} params.channelPrefix
+   * @param {array} params.ids
+   *
+   * @returns {Promise<{}>}
+   */
+  async searchChannelsByPrefix(params) {
+    const oThis = this;
+
+    const queryWithWildCards = params.channelPrefix + '%',
+      queryWithWildCardsSpaceIncluded = '% ' + params.channelPrefix + '%';
+
+    const queryObject = await oThis
+      .select('id')
+      .where(['name LIKE ? OR name LIKE ?', queryWithWildCards, queryWithWildCardsSpaceIncluded])
+      .where({ id: params.ids })
+      .where({ status: channelConstants.invertedStatuses[channelConstants.activeStatus] })
+      .order_by(['ID', params.ids], { useField: true })
+      .offset(params.offset)
+      .limit(params.limit);
+
+    const dbRows = await queryObject.fire();
+
+    const channelIds = [];
+
+    for (let index = 0; index < dbRows.length; index++) {
+      const channelId = dbRows[index].id;
+      channelIds.push(channelId);
+    }
+
+    return { channelIds: channelIds };
+  }
+
+  /**
+   * Get channels that starts with channel prefix.
+   *
+   * @param {object} params
+   * @param {number} params.offset
+   * @param {number} params.limit
+   * @param {string} params.channelPrefix
+   *
+   * @returns {Promise<{}>}
+   */
+  async searchAllChannelsByPrefix(params) {
+    const oThis = this;
+
+    const queryWithWildCards = params.channelPrefix + '%',
+      queryWithWildCardsSpaceIncluded = '% ' + params.channelPrefix + '%';
+
+    const dbRows = await (await oThis
+      .select('id')
+      .where(['name LIKE ? OR name LIKE ?', queryWithWildCards, queryWithWildCardsSpaceIncluded])
+      .where({ status: channelConstants.invertedStatuses[channelConstants.activeStatus] })
+      .order_by('name asc')
+      .offset(params.offset)
+      .limit(params.limit)).fire();
+
+    const channelIds = [];
+
+    for (let index = 0; index < dbRows.length; index++) {
+      const channelId = dbRows[index].id;
+      channelIds.push(channelId);
+    }
+
+    return { channelIds: channelIds };
   }
 
   /**
@@ -175,11 +319,33 @@ class ChannelModel extends ModelBase {
   }
 
   /**
+   * Get username unique index name.
+   *
+   * @returns {string}
+   */
+  static get nameUniqueIndexName() {
+    return 'uidx_1';
+  }
+
+  /**
+   * Get username unique index name.
+   *
+   * @returns {string}
+   */
+  static get permalinkUniqueIndexName() {
+    return 'uidx_2';
+  }
+
+  /**
    * Flush cache.
    *
    * @param {object} params
    * @param {array<number>} [params.ids]
    * @param {array<string>} [params.permalinks]
+   * @param {array<string>} [params.createdAt]
+   * @param {array<string>} [params.name]
+   * @param {array<string>} [params.status]
+   * @param {array<string>} [params.trendingRank]
    *
    * @returns {Promise<*>}
    */
@@ -189,13 +355,26 @@ class ChannelModel extends ModelBase {
     if (params.ids) {
       const ChannelByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelByIds');
       promisesArray.push(new ChannelByIdsCache({ ids: params.ids }).clear());
-
-      promisesArray.push(new LiveMeetingIdByChannelIdsCache({ channelIds: params.ids }).clear());
     }
 
     if (params.permalinks) {
       const ChannelByPermalinksCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelByPermalinks');
       promisesArray.push(new ChannelByPermalinksCache({ permalinks: params.permalinks }).clear());
+    }
+
+    if (params.createdAt || params.status) {
+      const ChannelNewCache = require(rootPrefix + '/lib/cacheManagement/single/channel/ChannelNew');
+      promisesArray.push(new ChannelNewCache({}).clear());
+    }
+
+    if (params.createdAt || params.status || params.name) {
+      const ChannelAllCache = require(rootPrefix + '/lib/cacheManagement/single/channel/ChannelAll');
+      promisesArray.push(new ChannelAllCache({}).clear());
+    }
+
+    if (params.hasOwnProperty('trendingRank')) {
+      const ChannelTrendingCache = require(rootPrefix + '/lib/cacheManagement/single/channel/ChannelTrending');
+      promisesArray.push(new ChannelTrendingCache({}).clear());
     }
 
     // If there is update in any channel, then flush list cache as well

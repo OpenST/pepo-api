@@ -491,6 +491,16 @@ class BasicHelper {
   }
 
   /**
+   * Sanitize username
+   *
+   * @param username
+   * @returns {string}
+   */
+  sanitizeUsername(username) {
+    return username.toLowerCase().replace(/[^a-z0-9_]/g, '');
+  }
+
+  /**
    * Convert date to timestamp in seconds.
    *
    * @param {string} dateStr

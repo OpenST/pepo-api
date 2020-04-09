@@ -117,7 +117,8 @@ router.get(
           [entityTypeConstants.tagsMap]: responseEntityKey.tags,
           [entityTypeConstants.imagesMap]: responseEntityKey.images,
           [entityTypeConstants.linksMap]: responseEntityKey.links,
-          [entityTypeConstants.textsMap]: responseEntityKey.texts
+          [entityTypeConstants.textsMap]: responseEntityKey.texts,
+          [entityTypeConstants.twitterUsersMap]: responseEntityKey.twitterUsers
         },
         serviceData: serviceResponse.data
       }).perform();
@@ -179,6 +180,18 @@ router.post('/:channel_permalink/meetings', sanitizer.sanitizeDynamicUrlParams, 
   };
 
   Promise.resolve(routeHelper.perform(req, res, next, '/channel/meeting/Create', 'r_a_w_c_6', null, dataFormatterFunc));
+});
+
+router.post('/:channel_permalink/meetings/:meeting_id/end', sanitizer.sanitizeDynamicUrlParams, function(
+  req,
+  res,
+  next
+) {
+  req.decodedParams.apiName = apiName.endZoomMeeting;
+  req.decodedParams.channel_permalink = req.params.channel_permalink;
+  req.decodedParams.meeting_id = req.params.meeting_id;
+
+  Promise.resolve(routeHelper.perform(req, res, next, '/channel/meeting/End', 'r_a_w_c_7', null));
 });
 
 module.exports = router;

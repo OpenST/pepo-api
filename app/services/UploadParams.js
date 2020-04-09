@@ -1,13 +1,13 @@
 const rootPrefix = '../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   AwsS3wrapper = require(rootPrefix + '/lib/aws/S3Wrapper'),
-  CommonValidator = require(rootPrefix + '/lib/validators/Common'),
   util = require(rootPrefix + '/lib/util'),
   shortToLongUrl = require(rootPrefix + '/lib/shortToLongUrl'),
   s3Constants = require(rootPrefix + '/lib/globalConstant/s3'),
   coreConstants = require(rootPrefix + '/config/coreConstants'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
-  responseHelper = require(rootPrefix + '/lib/formatter/response');
+  responseHelper = require(rootPrefix + '/lib/formatter/response'),
+  imageConstants = require(rootPrefix + '/lib/globalConstant/image');
 
 /**
  * Class to upload current user params.
@@ -21,8 +21,9 @@ class UploadParams extends ServiceBase {
    * @param {object} params
    *
    * @param {string} params.current_user.id
-   * @param {string} [params.images]
-   * @param {string} [params.videos]
+   * @param {array<string>} [params.images]
+   * @param {array<string>} [params.videos]
+   * @param {array<string>} [params.channel_images]
    *
    * @augments ServiceBase
    *
@@ -34,8 +35,9 @@ class UploadParams extends ServiceBase {
     const oThis = this;
 
     oThis.currentUserId = +params.current_user.id;
-    oThis.images = params.images || [];
+    oThis.userImages = params.images || [];
     oThis.videos = params.videos || [];
+    oThis.channelImages = params.channel_images || [];
 
     oThis.workingMap = {};
     oThis.apiResponse = {};
@@ -67,41 +69,24 @@ class UploadParams extends ServiceBase {
   async _validateAndSanitizeParams() {
     const oThis = this;
 
-    const paramErrors = [];
-
-    if (oThis.images) {
-      for (let index = 0; index < oThis.images.length; index++) {
-        if (!CommonValidator.validateString(oThis.images[index])) {
-          paramErrors.push('invalid_images');
-        }
-      }
-    }
-
-    if (oThis.videos) {
-      for (let index = 0; index < oThis.videos.length; index++) {
-        if (!CommonValidator.validateString(oThis.videos[index])) {
-          paramErrors.push('invalid_videos');
-        }
-      }
-    }
-
-    if (oThis.images.length === 0 && oThis.videos.length === 0) {
+    if (oThis.userImages.length === 0 && oThis.videos.length === 0 && oThis.channelImages.length === 0) {
       return Promise.reject(
-        responseHelper.paramValidationError({
+        responseHelper.error({
           internal_error_identifier: 'a_s_up_1',
           api_error_identifier: 'invalid_api_params',
-          params_error_identifiers: paramErrors,
           debug_options: {}
         })
       );
     }
 
-    if (paramErrors.length > 0) {
+    if (
+      (oThis.userImages.length > 0 && oThis.channelImages.length !== 0) ||
+      (oThis.channelImages.length > 0 && oThis.userImages.length !== 0)
+    ) {
       return Promise.reject(
-        responseHelper.paramValidationError({
+        responseHelper.error({
           internal_error_identifier: 'a_s_up_2',
           api_error_identifier: 'invalid_api_params',
-          params_error_identifiers: paramErrors,
           debug_options: {}
         })
       );
@@ -120,17 +105,25 @@ class UploadParams extends ServiceBase {
     const oThis = this;
 
     oThis.workingMap = {
-      [s3Constants.imageFileType]: {
-        [s3Constants.files]: oThis.images,
-        [s3Constants.fileType]: s3Constants.imageFileType,
-        [s3Constants.resultKey]: s3Constants.imagesResultKey
-      },
       [s3Constants.videoFileType]: {
         [s3Constants.files]: oThis.videos,
-        [s3Constants.fileType]: s3Constants.videoFileType,
         [s3Constants.resultKey]: s3Constants.videosResultKey
       }
     };
+
+    if (oThis.userImages.length > 0) {
+      oThis.workingMap[s3Constants.imageFileType] = {
+        [s3Constants.files]: oThis.userImages,
+        imageKind: 'normalImage',
+        [s3Constants.resultKey]: s3Constants.imagesResultKey
+      };
+    } else if (oThis.channelImages.length > 0) {
+      oThis.workingMap[s3Constants.imageFileType] = {
+        [s3Constants.files]: oThis.channelImages,
+        imageKind: imageConstants.channelImageKind,
+        [s3Constants.resultKey]: s3Constants.channelImagesResultKey
+      };
+    }
   }
 
   /**
@@ -148,7 +141,8 @@ class UploadParams extends ServiceBase {
       const resultHash = {},
         intentHash = oThis.workingMap[intent],
         fileArray = intentHash[s3Constants.files],
-        resultKey = intentHash[s3Constants.resultKey];
+        resultKey = intentHash[s3Constants.resultKey],
+        imageKind = intentHash.imageKind || '';
 
       for (let index = 0; index < fileArray.length; index++) {
         const feFileName = fileArray[index],
@@ -165,17 +159,33 @@ class UploadParams extends ServiceBase {
             })
           );
         }
-        const fileName = oThis._getRandomEncodedFileNames(fileExtension);
 
-        const preSignedPostParams = await AwsS3wrapper.createPresignedPostFor(
-          intent,
-          fileName,
-          contentType,
-          coreConstants.AWS_REGION
-        );
+        let fileName = '';
+        let preSignedPostParams = {};
+        let s3Url = '';
 
-        const s3Url = s3Constants.getS3Url(intent, fileName),
-          cdnUrl = oThis._getCdnUrl(s3Url);
+        if (imageKind === imageConstants.channelImageKind) {
+          fileName = oThis._getRandomEncodedFileNames(fileExtension);
+          preSignedPostParams = await AwsS3wrapper.createPresignedPostFor(
+            intent,
+            fileName,
+            contentType,
+            coreConstants.AWS_REGION,
+            { imageKind: imageKind }
+          );
+          s3Url = s3Constants.getS3Url(intent, fileName, true);
+        } else {
+          fileName = oThis._getRandomEncodedFileNames(fileExtension, oThis.currentUserId);
+          preSignedPostParams = await AwsS3wrapper.createPresignedPostFor(
+            intent,
+            fileName,
+            contentType,
+            coreConstants.AWS_REGION
+          );
+          s3Url = s3Constants.getS3Url(intent, fileName, false);
+        }
+
+        const cdnUrl = oThis._getCdnUrl(s3Url);
 
         logger.log('==== cdnUrl', cdnUrl);
 
@@ -192,9 +202,11 @@ class UploadParams extends ServiceBase {
   }
 
   /**
-   * Get cdn url.
+   * Get CDN url.
    *
    * @param {string} s3Url
+   *
+   * @returns {string}
    * @private
    */
   _getCdnUrl(s3Url) {
@@ -214,14 +226,13 @@ class UploadParams extends ServiceBase {
    * Get random encoded file names.
    *
    * @param {string} extension
+   * @param {number} [userId]
    *
    * @returns {string}
    * @private
    */
-  _getRandomEncodedFileNames(extension) {
-    const oThis = this;
-
-    const fileName = util.getS3FileName(oThis.currentUserId, 'original');
+  _getRandomEncodedFileNames(extension, userId = 0) {
+    const fileName = util.getS3FileName('original', userId);
 
     return fileName + extension;
   }

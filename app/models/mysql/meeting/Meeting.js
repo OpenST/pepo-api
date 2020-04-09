@@ -101,6 +101,28 @@ class MeetingModel extends ModelBase {
   /**
    * Fetch meeting objects for zoom meeting ids.
    *
+   * @return {object}
+   */
+  async fetchLiveChannelIds() {
+    const oThis = this;
+
+    const channelIds = [];
+
+    const response = await oThis
+      .select('channel_id')
+      .where({ is_live: meetingConstants.isLiveStatus })
+      .fire();
+
+    for (let i = 0; i < response.length; i++) {
+      channelIds.push(response[i].channel_id);
+    }
+
+    return { ids: channelIds };
+  }
+
+  /**
+   * Fetch meeting objects for zoom meeting ids.
+   *
    * @param {array} zoomMeetingIds
    *
    * @return {object}
@@ -124,6 +146,31 @@ class MeetingModel extends ModelBase {
   }
 
   /**
+   * Fetch meeting objects for zoom uuids.
+   *
+   * @param {array} zoomUuids - zoom uuids.
+   *
+   * @return {object}
+   */
+  async fetchByZoomUuids(zoomUuids) {
+    const oThis = this;
+
+    const dbRows = await oThis
+      .select('id, zoom_uuid')
+      .where({ zoom_uuid: zoomUuids })
+      .fire();
+
+    const response = {};
+
+    for (let index = 0; index < dbRows.length; index++) {
+      const formatDbRow = oThis.formatDbData(dbRows[index]);
+      response[formatDbRow.zoomUUID] = formatDbRow;
+    }
+
+    return response;
+  }
+
+  /**
    * Fetch meeting id by channel ids.
    *
    * @param {array<number>} channelIds
@@ -136,6 +183,7 @@ class MeetingModel extends ModelBase {
     const dbRows = await oThis
       .select('id, channel_id')
       .where({ channel_id: channelIds, is_live: meetingConstants.isLiveStatus })
+      .order_by('id desc')
       .fire();
 
     const response = {};
@@ -160,6 +208,7 @@ class MeetingModel extends ModelBase {
    * @param {array<number>} [params.channelIds]
    * @param {array<number>} [params.channelId]
    * @param {array<number>} [params.zoomMeetingId]
+   * @param {array<number>} [params.zoomUuid]
    *
    * @returns {Promise<*>}
    */
@@ -186,15 +235,21 @@ class MeetingModel extends ModelBase {
       promisesArray.push(new MeetingIdByZoomMeetingIdsCache({ zoomMeetingIds: [params.zoomMeetingId] }).clear());
     }
 
-    if (channelIds.length > 0) {
-      const LiveMeetingIdByChannelIdsCache = require(rootPrefix +
-        '/lib/cacheManagement/multi/meeting/LiveMeetingIdByChannelIds');
-      promisesArray.push(new LiveMeetingIdByChannelIdsCache({ channelIds: channelIds }).clear());
+    if (params.zoomUuid) {
+      const MeetingIdByZoomMeetingIdsCache = require(rootPrefix +
+        '/lib/cacheManagement/multi/meeting/MeetingIdByZoomUuids');
+      promisesArray.push(new MeetingIdByZoomMeetingIdsCache({ zoomUuids: [params.zoomUuid] }).clear());
+    }
 
+    if (channelIds.length > 0) {
       // We are clearing channel cache here because liveMeetingId is a part of channel entity.
       const ChannelByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelByIds');
 
       promisesArray.push(new ChannelByIdsCache({ ids: channelIds }).clear());
+
+      const MeetingGetLiveChannelIdsCache = require(rootPrefix +
+        '/lib/cacheManagement/single/meeting/MeetingGetLiveChannelIds');
+      promisesArray.push(new MeetingGetLiveChannelIdsCache({}).clear());
     }
 
     // As live meeting would change the list here, so clearing that as well.

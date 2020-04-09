@@ -1,7 +1,6 @@
 const rootPrefix = '../../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
-  ChannelModel = require(rootPrefix + '/app/models/mysql/channel/Channel'),
   MeetingModel = require(rootPrefix + '/app/models/mysql/meeting/Meeting'),
   MeetingRelayerModel = require(rootPrefix + '/app/models/mysql/meeting/MeetingRelayer'),
   ChannelByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelByIds'),
@@ -15,7 +14,9 @@ const rootPrefix = '../../../..',
   entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
   meetingConstants = require(rootPrefix + '/lib/globalConstant/meeting/meeting'),
   channelConstants = require(rootPrefix + '/lib/globalConstant/channel/channels'),
-  meetingRelayerConstants = require(rootPrefix + '/lib/globalConstant/meeting/meetingRelayer');
+  meetingRelayerConstants = require(rootPrefix + '/lib/globalConstant/meeting/meetingRelayer'),
+  bgJob = require(rootPrefix + '/lib/rabbitMqEnqueue/bgJob'),
+  bgJobConstants = require(rootPrefix + '/lib/globalConstant/bgJob');
 
 /**
  * Class to start channel meeting.
@@ -52,6 +53,7 @@ class StartMeeting extends ServiceBase {
     oThis.zoomUuid = null;
 
     oThis.meetingId = null;
+    oThis.errorGoingLive = false;
   }
 
   /**
@@ -246,8 +248,9 @@ class StartMeeting extends ServiceBase {
 
   /**
    * Reserve zoom user.
+   * Sends slack alert if no meeting relayer is available.
    *
-   * @sets oThis.meetingRelayer
+   * @sets oThis.meetingRelayer, oThis.errorGoingLive
    *
    * @returns {Promise<void>}
    * @private
@@ -284,6 +287,10 @@ class StartMeeting extends ServiceBase {
     }
 
     if (!oThis.meetingRelayer) {
+      // Send slack alert when no meeting relayer is available
+      oThis.errorGoingLive = true;
+      await oThis.sendSlackAlert();
+
       return Promise.reject(
         responseHelper.error({
           internal_error_identifier: 'a_s_c_m_sm_5',
@@ -335,8 +342,9 @@ class StartMeeting extends ServiceBase {
 
   /**
    * Record meeting in table.
+   * Send slack alert when meeting is live
    *
-   * @sets oThis.meetingId
+   * @sets oThis.meetingId, oThis.errorGoingLive
    *
    * @returns {Promise<void>}
    * @private
@@ -352,8 +360,7 @@ class StartMeeting extends ServiceBase {
       });
     }
 
-    const insertResponse = await new MeetingModel()
-      .insert({
+    const insertData = {
         host_user_id: oThis.currentUserId,
         meeting_relayer_id: oThis.meetingRelayer.id,
         channel_id: oThis.channelId,
@@ -363,8 +370,8 @@ class StartMeeting extends ServiceBase {
         host_join_count: 0,
         is_live: meetingConstants.isLiveStatus,
         status: meetingConstants.invertedStatuses[meetingConstants.waitingStatus]
-      })
-      .fire();
+      },
+      insertResponse = await new MeetingModel().insert(insertData).fire();
 
     if (!insertResponse) {
       return responseHelper.error({
@@ -375,8 +382,12 @@ class StartMeeting extends ServiceBase {
     }
 
     oThis.meetingId = insertResponse.insertId;
+    insertData.id = insertResponse.insertId;
+    Object.assign(insertData, insertResponse.defaultUpdatedAttributes);
 
-    await ChannelModel.flushCache({ ids: [oThis.channelId] });
+    // Clear all meetings table caches.
+    const meetingObj = new MeetingModel().formatDbData(insertData);
+    await MeetingModel.flushCache(meetingObj);
 
     return responseHelper.successWithData({});
   }
@@ -463,6 +474,24 @@ class StartMeeting extends ServiceBase {
         meetingId: oThis.meetingId
       }
     };
+  }
+
+  /**
+   * Sends slack alert
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async sendSlackAlert() {
+    const oThis = this;
+
+    const payload = {
+      channelId: oThis.channelId,
+      userId: oThis.currentUserId,
+      errorGoingLive: oThis.errorGoingLive
+    };
+
+    await bgJob.enqueue(bgJobConstants.slackLiveEventMonitoringJobTopic, payload);
   }
 }
 
