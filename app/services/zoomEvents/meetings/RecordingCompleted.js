@@ -44,6 +44,7 @@ class RecordingCompleted extends ZoomEventsForMeetingsBase {
       });
 
       await createErrorLogsEntry.perform(response, errorLogsConstants.lowSeverity);
+      return Promise.reject(e);
     });
 
     return responseHelper.successWithData({});
