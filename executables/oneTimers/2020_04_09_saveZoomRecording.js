@@ -8,16 +8,12 @@
 const program = require('commander');
 
 const rootPrefix = '../..',
-  Meeting = require(rootPrefix + '/app/models/mysql/meeting/Meeting'),
+  MeetingModel = require(rootPrefix + '/app/models/mysql/meeting/Meeting'),
+  meetingConstants = require(rootPrefix + '/lib/globalConstant/meeting/meeting'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
-  SaveRecording = require(rootPrefix + '/lib/zoom/SaveRecording');
-
-// /Users/gulshanvasnani/Documents/pepo/pepo-api/lib/zoom/SaveRecording.js
-// BasicHelper = require(rootPrefix + '/helpers/basic');
+  SaveRecordingLib = require(rootPrefix + '/lib/zoom/SaveRecording');
 
 const BATCH_SIZE = 25;
-
-const SAVE_ZOOM_RECORDING_BATCH_SIZE = 5;
 
 program.on('--help', function() {
   logger.log('');
@@ -43,13 +39,7 @@ class SaveZoomRecording {
    */
   constructor(params) {
     const oThis = this;
-    oThis.meetingIds = [];
-    // TODO: remove these 2 array
-    oThis.saveCount = 0; // To be removed.
-    oThis.meetingIdsForCount = []; // To be removed.
-    oThis.offset = 0;
-    oThis.limit = BATCH_SIZE;
-    oThis.failedUploadMeetingId = [];
+    oThis.failedZoomMeetingIds = [];
   }
 
   /**
@@ -60,79 +50,50 @@ class SaveZoomRecording {
   async perform() {
     const oThis = this;
 
-    while (true) {
-      await oThis._fetchMeetingIds(oThis.limit, oThis.offset);
+    await oThis._batchPerform();
 
-      if (oThis.meetingIds.length === 0) {
+    logger.info(`Failed zoom meeting ids ${oThis.failedZoomMeetingIds}`);
+  }
+
+  async _batchPerform() {
+    const oThis = this;
+
+    let offset = 0;
+    const limit = BATCH_SIZE;
+
+    while (true) {
+      const rows = await new MeetingModel()
+        .select('zoom_meeting_id')
+        .where({ status: meetingConstants.invertedStatuses[meetingConstants.endedStatus] })
+        .order_by('created_at asc')
+        .limit(limit)
+        .offset(offset)
+        .fire();
+
+      logger.info(`Processing ${rows.length} records`);
+
+      for (let i = 0; i < rows.length; i++) {
+        await oThis._saveRecording(rows[i].zoom_meeting_id);
+      }
+
+      if (rows.length < limit) {
         break;
       }
-
-      oThis.offset = oThis.limit + oThis.offset;
-      await oThis._saveRecording();
-    }
-    console.log('meeting ids for which upload failed : ', oThis.failedUploadMeetingId);
-    console.log('all ids ', oThis.meetingIdsForCount);
-  }
-
-  /**
-   * Fetch meeting ids.
-   *
-   * @returns {Promise<void>}
-   */
-  async _fetchMeetingIds(limit, offset) {
-    const oThis = this;
-    oThis.meetingIds.length = 0;
-
-    const rows = await new Meeting()
-      .select('zoom_meeting_id')
-      .order_by('created_at asc')
-      .limit(limit)
-      .offset(offset)
-      .fire();
-
-    if (rows.length === 0) {
-      return;
-    }
-
-    for (let i = 0; i < rows.length; i++) {
-      const row = rows[i];
-      oThis.meetingIds.push(row.zoom_meeting_id);
+      offset += limit;
     }
   }
 
-  /**
-   * Save zoom recording to S3 using SaveRecording lib.
-   *
-   * @returns {Promise<void>}
-   */
-  async _saveRecording() {
+  async _saveRecording(zoomMeetingId) {
     const oThis = this;
 
-    const saveRecordingPromises = [];
+    const saveRecordingObj = new SaveRecordingLib({
+      zoomMeetingId: zoomMeetingId
+    });
 
-    for (let i = 0; i < oThis.meetingIds.length; i += SAVE_ZOOM_RECORDING_BATCH_SIZE) {
-      for (let j = i; j < i + SAVE_ZOOM_RECORDING_BATCH_SIZE; j++) {
-        oThis.saveCount += 1;
-        const meetingId = oThis.meetingIds[j];
-        if (!meetingId) {
-          break;
-        }
-        oThis.meetingIdsForCount.push(meetingId);
-        const saveRecording = new SaveRecording({
-          zoomMeetingId: meetingId
-        });
-        saveRecordingPromises.push(
-          saveRecording.perform().catch((error) => {
-            oThis.failedUploadMeetingId.push(meetingId);
-            console.log(`error from one timer while saving zoom meeting id ${meetingId} : ${error}`);
-          })
-        );
-      }
-
-      await Promise.all(saveRecordingPromises).catch((error) => {
-        console.log(`error while saving zoom recording : ${error}`);
-      });
-    }
+    return saveRecordingObj.perform().catch((error) => {
+      logger.error(`Failed to save zoom Meeting recording for zoom meeting id ${zoomMeetingId}`);
+      oThis.failedZoomMeetingIds.push(zoomMeetingId);
+    });
   }
 }
 
