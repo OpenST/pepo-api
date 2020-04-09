@@ -2,12 +2,12 @@ const rootPrefix = '../../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   ModifyChannel = require(rootPrefix + '/lib/channel/ModifyChannel'),
+  UsersCache = require(rootPrefix + '/lib/cacheManagement/multi/User'),
   FetchAssociatedEntities = require(rootPrefix + '/lib/FetchAssociatedEntities'),
   AdminActivityLogModel = require(rootPrefix + '/app/models/mysql/admin/AdminActivityLog'),
   ChannelByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelByIds'),
   UserIdByUserNamesCache = require(rootPrefix + '/lib/cacheManagement/multi/UserIdByUserNames'),
   ChannelByPermalinksCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelByPermalinks'),
-  UsersCache = require(rootPrefix + '/lib/cacheManagement/multi/User'),
   bgJob = require(rootPrefix + '/lib/rabbitMqEnqueue/bgJob'),
   userConstants = require(rootPrefix + '/lib/globalConstant/user'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
@@ -223,7 +223,7 @@ class EditChannel extends ServiceBase {
   /**
    * Validate status of existing channel.
    *
-   * @sets oThis.existingChannelName, oThis.channelTaglineId, oThis.channelDescriptionId, oThis.updateRequiredParameters
+   * @sets oThis.existingChannelName, oThis.channelTaglineId, oThis.channelDescriptionId
    *
    * @returns {Promise<never>}
    * @private
@@ -364,18 +364,16 @@ class EditChannel extends ServiceBase {
       oThis.adminUserIds.push(user.id);
     }
 
-    console.log('---------oThis.channelAdminUserNames-----', oThis.channelAdminUserNames);
-
     const adminUsersCacheRsp = await new UsersCache({ ids: oThis.adminUserIds }).fetch();
     if (adminUsersCacheRsp.isFailure()) {
       return Promise.reject(adminUsersCacheRsp);
     }
     const adminUsersCacheRspData = adminUsersCacheRsp.data;
-    console.log('---------adminUsersCacheRsp-----', adminUsersCacheRspData);
 
     for (let caui = 0; caui < oThis.adminUserIds.length; caui++) {
       const adminUserId = oThis.adminUserIds[caui],
         adminUserDetail = adminUsersCacheRspData[adminUserId];
+
       if (!adminUserDetail.approvedCreator) {
         return Promise.reject(
           responseHelper.paramValidationError({

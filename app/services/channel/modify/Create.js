@@ -77,8 +77,7 @@ class CreateChannel extends ServiceBase {
   /**
    * Sanitize input parameters.
    *
-   * @sets oThis.channelName, oThis.channelTagline, oThis.channelDescription
-   *
+   * @returns {Promise<never>}
    * @private
    */
   async _validateAndSanitizeParams() {
