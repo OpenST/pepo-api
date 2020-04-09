@@ -287,11 +287,17 @@ class GetChannel extends ServiceBase {
   async _checkIfUserCanLeave() {
     const oThis = this;
 
-    if (oThis.currentUserChannelRelations[oThis.channelId].isMember) {
+    if (
+      CommonValidators.validateNonEmptyObject(oThis.currentUser) &&
+      oThis.currentUserChannelRelations[oThis.channelId].isMember
+    ) {
       oThis.channelAllowedActions[oThis.channelId].canLeave = 1;
     }
 
-    if (oThis.currentUserChannelRelations[oThis.channelId].isAdmin) {
+    if (
+      CommonValidators.validateNonEmptyObject(oThis.currentUser) &&
+      oThis.currentUserChannelRelations[oThis.channelId].isAdmin
+    ) {
       const adminIdsByChannelIdCacheResponse = await new AdminIdsByChannelIdCache({
         channelIds: [oThis.channelId]
       }).fetch();
