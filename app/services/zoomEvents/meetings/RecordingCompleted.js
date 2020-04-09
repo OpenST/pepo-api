@@ -8,7 +8,7 @@ const rootPrefix = '../../../..',
 /**
  * Class for zoom meeting RecordingCompleted webhook processor.
  *
- * @class MeetingAlert
+ * @class RecordingCompleted
  */
 class RecordingCompleted extends ZoomEventsForMeetingsBase {
   /**
