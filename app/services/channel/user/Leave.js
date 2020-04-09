@@ -136,7 +136,7 @@ class LeaveChannel extends ServiceBase {
   }
 
   /**
-   * check if user can leave channel
+   * Check if user can leave channel.
    *
    * @returns {Promise<never>}
    * @private
@@ -151,7 +151,7 @@ class LeaveChannel extends ServiceBase {
 
       const channelAdminIds = adminIdsByChannelIdCacheResponse.data[oThis.channelId];
 
-      if (channelAdminIds && channelAdminIds.length == 1) {
+      if (channelAdminIds && channelAdminIds.length === 1) {
         return Promise.reject(
           responseHelper.error({
             internal_error_identifier: 'a_s_c_u_l_cucl_1',
