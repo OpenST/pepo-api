@@ -318,15 +318,20 @@ class ChannelUserModel extends ModelBase {
   }
 
   /**
-   * Fetch admin profile ids by channel id.
+   * Fetch admin profile ids by channel ids.
    *
-   * @param {number} channelId
+   * @param {array<number>} channelIds
    *
-   * @returns {Promise<[]>}
+   * @returns {Promise<{}>}
    */
-  async fetchAdminProfilesByChannelId(channelIds) {
-    const oThis = this,
-      channelAdminIds = {};
+  async fetchAdminProfilesByChannelIds(channelIds) {
+    const oThis = this;
+
+    const channelAdminIds = {};
+
+    for (let index = 0; index < channelIds.length; index++) {
+      channelAdminIds[channelIds[index]] = [];
+    }
 
     const dbRows = await oThis
       .select('channel_id, user_id')

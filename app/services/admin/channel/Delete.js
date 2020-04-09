@@ -159,7 +159,7 @@ class DeleteChannel extends ServiceBase {
   async _resetUserManagingChannelProperty() {
     const oThis = this;
 
-    const channelAdminUserIdsMap = await new ChannelUserModel().fetchAdminProfilesByChannelId([oThis.channelId]),
+    const channelAdminUserIdsMap = await new ChannelUserModel().fetchAdminProfilesByChannelIds([oThis.channelId]),
       channelAdminUserIds = channelAdminUserIdsMap[oThis.channelId];
     const channelIdsByUserIdsCacheResponse = await new ChannelIdsByUserCache({ userIds: channelAdminUserIds }).fetch();
     if (channelIdsByUserIdsCacheResponse.isFailure()) {
