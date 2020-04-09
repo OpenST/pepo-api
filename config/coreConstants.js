@@ -582,6 +582,10 @@ class CoreConstants {
     return process.env.PA_CHANNEL_DATA_LOCAL_FILE_PATH;
   }
 
+  get RECORDING_DATA_LOCAL_FOLDER() {
+    return process.env.PA_RECORDING_DATA_LOCAL_FOLDER;
+  }
+
   get CHANNEL_DATA_S3_FILE_PATH() {
     return process.env.PA_CHANNEL_DATA_S3_FILE_PATH;
   }
