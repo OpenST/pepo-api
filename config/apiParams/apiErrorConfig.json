@@ -272,6 +272,6 @@
   "create_channel_by_unapproved_creator": {
     "http_code": "200",
     "code": "BAD_REQUEST",
-    "message": "Unapproved creator can not create community"
+    "message": "Unapproved creator cannot create community"
   }
 }
