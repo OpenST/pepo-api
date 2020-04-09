@@ -168,7 +168,7 @@ const v1ErrorConfig = {
   invalid_admin_id: {
     parameter: 'admin_user_ids',
     code: 'invalid',
-    message: 'Invalid user passed for admin.'
+    message: 'This user name does not exist.'
   },
 
   invalid_resolution: {
@@ -486,7 +486,7 @@ const v1ErrorConfig = {
   invalid_channel_name_characters: {
     parameter: 'channel_name',
     code: 'invalid',
-    message: 'Name contains unsupported characters'
+    message: "Only a-z A-Z 0-9 . & ' and - are supported"
   },
 
   invalid_channel_name_cuss_words: {
@@ -552,7 +552,7 @@ const v1ErrorConfig = {
   invalid_channel_tag_length: {
     parameter: 'channel_tags',
     code: 'invalid',
-    message: 'Tag exceeds character limit of 60 characters'
+    message: 'Tag character limit is 60'
   },
 
   invalid_channel_tag_characters: {

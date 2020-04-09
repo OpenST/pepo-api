@@ -123,7 +123,7 @@ const webErrorConfig = {
   invalid_admin_id: {
     parameter: 'admin_user_ids',
     code: 'invalid',
-    message: 'Invalid user passed for admin.'
+    message: 'This user name does not exist.'
   },
   invalid_resolution: {
     parameter: 'resolutions',
