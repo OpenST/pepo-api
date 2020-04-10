@@ -7,11 +7,11 @@ const rootPrefix = '../../../..',
   SecureUserCache = require(rootPrefix + '/lib/cacheManagement/single/SecureUser'),
   ChannelByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelByIds'),
   GetCurrentUserChannelRelationsLib = require(rootPrefix + '/lib/channel/GetCurrentUserChannelRelations'),
-  ManageChannelIdsByUserIdsCache = require(rootPrefix + '/lib/cacheManagement/single/ManageChannelIdsByUserIds'),
   ChannelStatByChannelIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelStatByChannelIds'),
   ChannelUserByUserIdAndChannelIdsCache = require(rootPrefix +
     '/lib/cacheManagement/multi/channel/ChannelUserByUserIdAndChannelIds'),
   AdminIdsByChannelIdCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/AdminIdsByChannelId'),
+  ChannelIdsByUserCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelIdsByUser'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
   channelConstants = require(rootPrefix + '/lib/globalConstant/channel/channels'),
@@ -46,6 +46,7 @@ class LeaveChannel extends ServiceBase {
     oThis.currentUserChannelRelationsMap = {};
     oThis.channelStatsMap = {};
     oThis.currentUserChannelRole = null;
+    oThis.channelAdminIds = [];
   }
 
   /**
@@ -158,9 +159,9 @@ class LeaveChannel extends ServiceBase {
         channelIds: [oThis.channelId]
       }).fetch();
 
-      const channelAdminIds = adminIdsByChannelIdCacheResponse.data[oThis.channelId];
+      oThis.channelAdminIds = adminIdsByChannelIdCacheResponse.data[oThis.channelId];
 
-      if (channelAdminIds && channelAdminIds.length === 1) {
+      if (oThis.channelAdminIds && oThis.channelAdminIds.length === 1) {
         return Promise.reject(
           responseHelper.error({
             internal_error_identifier: 'a_s_c_u_l_cucl_1',
@@ -291,15 +292,16 @@ class LeaveChannel extends ServiceBase {
     const oThis = this;
 
     if (oThis.currentUserChannelRole === channelUsersConstants.adminRole) {
-      const channelUserByUserIdsCacheResp = await new ManageChannelIdsByUserIdsCache({
-        userId: oThis.currentUser.id
+      const channelIdsByUserIdsCacheResponse = await new ChannelIdsByUserCache({
+        userIds: [oThis.currentUser.id]
       }).fetch();
 
-      if (channelUserByUserIdsCacheResp.isFailure()) {
-        return Promise.reject(channelUserByUserIdsCacheResp);
+      if (channelIdsByUserIdsCacheResponse.isFailure()) {
+        return Promise.reject(channelIdsByUserIdsCacheResponse);
       }
 
-      const channelIdsArray = channelUserByUserIdsCacheResp.data.channelIds;
+      const channelIdsArray =
+        channelIdsByUserIdsCacheResponse.data[oThis.currentUser.id][channelUsersConstants.adminRole] || [];
 
       if (channelIdsArray.length == 0) {
         await new UserModel().unmarkUserChannelAdmin([oThis.currentUser.id]);
