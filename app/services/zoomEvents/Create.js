@@ -146,7 +146,7 @@ class ZoomEventCreate extends ServiceBase {
       options = { publishAfter: 1000 * 60 * 3 }; // 3 min delay
     }
 
-    logger.info(`Publishing event type ${oThis.eventData.event} with options ${options}`);
+    logger.info(`Publishing event type ${oThis.eventData.event} with options ${JSON.stringify(options)}`);
     await bgJob.enqueue(bgJobConstants.zoomWebhookJobTopic, messagePayload, options);
   }
 }
