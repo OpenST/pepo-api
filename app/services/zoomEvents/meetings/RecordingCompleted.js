@@ -4,6 +4,7 @@ const rootPrefix = '../../../..',
   createErrorLogsEntry = require(rootPrefix + '/lib/errorLogs/createEntry'),
   errorLogsConstants = require(rootPrefix + '/lib/globalConstant/errorLogs'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
+  MeetingByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/meeting/MeetingByIds'),
   SaveRecording = require(rootPrefix + '/lib/zoom/saveRecording');
 
 /**
@@ -36,6 +37,7 @@ class RecordingCompleted extends ZoomEventsForMeetingsBase {
 
     await oThis.validateAndSetMeetingId();
     if (oThis.meetingId) {
+      await oThis._setZoomMeetingId();
       await new SaveRecording({ zoomMeetingId: oThis.zoomMeetingId }).perform().catch(async function(e) {
         const response = responseHelper.error({
           internal_error_identifier: 's_ze_rc_ap_1',
@@ -54,6 +56,24 @@ class RecordingCompleted extends ZoomEventsForMeetingsBase {
     }
 
     return responseHelper.successWithData({});
+  }
+
+  /**
+   * Sets zoom meeting id given a meeting id.
+   *
+   * @returns {Promise<Promise<never>|undefined>}
+   * @private
+   */
+  async _setZoomMeetingId() {
+    const oThis = this;
+    const cacheResponse = await new MeetingByIdsCache({ ids: [oThis.meetingId] }).fetch();
+    if (cacheResponse.isFailure()) {
+      return Promise.reject(cacheResponse);
+    }
+
+    let meeting = cacheResponse.data[oThis.meetingId];
+
+    oThis.zoomMeetingId = meeting.zoomMeetingId;
   }
 }
 
