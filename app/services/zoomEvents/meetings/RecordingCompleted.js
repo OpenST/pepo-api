@@ -3,6 +3,7 @@ const rootPrefix = '../../../..',
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   createErrorLogsEntry = require(rootPrefix + '/lib/errorLogs/createEntry'),
   errorLogsConstants = require(rootPrefix + '/lib/globalConstant/errorLogs'),
+  logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   SaveRecording = require(rootPrefix + '/lib/zoom/saveRecording');
 
 /**
@@ -33,19 +34,24 @@ class RecordingCompleted extends ZoomEventsForMeetingsBase {
   async _asyncPerform() {
     const oThis = this;
 
-    await new SaveRecording({ zoomMeetingId: oThis.zoomMeetingId }).perform().catch(async (e) => {
-      const response = responseHelper.error({
-        internal_error_identifier: 's_ze_rc_ap_1',
-        api_error_identifier: 'something_went_wrong',
-        debug_options: {
-          event: oThis.object,
-          errorObject: e
-        }
-      });
+    await oThis.validateAndSetMeetingId();
+    if (oThis.meetingId) {
+      await new SaveRecording({ zoomMeetingId: oThis.zoomMeetingId }).perform().catch(async (e) => {
+        const response = responseHelper.error({
+          internal_error_identifier: 's_ze_rc_ap_1',
+          api_error_identifier: 'something_went_wrong',
+          debug_options: {
+            event: oThis.object,
+            errorObject: e
+          }
+        });
 
-      await createErrorLogsEntry.perform(response, errorLogsConstants.lowSeverity);
-      return Promise.reject(e);
-    });
+        await createErrorLogsEntry.perform(response, errorLogsConstants.lowSeverity);
+        return Promise.reject(e);
+      });
+    } else {
+      logger.info(`Meeting not found for zoom id ${oThis.zoomMeetingId}`);
+    }
 
     return responseHelper.successWithData({});
   }
