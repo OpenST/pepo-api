@@ -118,7 +118,8 @@ router.get(
           [entityTypeConstants.imagesMap]: responseEntityKey.images,
           [entityTypeConstants.linksMap]: responseEntityKey.links,
           [entityTypeConstants.textsMap]: responseEntityKey.texts,
-          [entityTypeConstants.twitterUsersMap]: responseEntityKey.twitterUsers
+          [entityTypeConstants.twitterUsersMap]: responseEntityKey.twitterUsers,
+          [entityTypeConstants.pepoTwitterDetails]: responseEntityKey.pepoTwitterDetails
         },
         serviceData: serviceResponse.data
       }).perform();
