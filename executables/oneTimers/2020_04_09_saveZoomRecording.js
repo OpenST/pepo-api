@@ -100,7 +100,7 @@ class SaveZoomRecording {
       zoomMeetingId: zoomMeetingId
     });
 
-    return saveRecordingObj.perform().catch((error) => {
+    return saveRecordingObj.perform().catch(function(e) {
       logger.error(`Failed to save zoom Meeting recording for zoom meeting id ${zoomMeetingId}`);
       oThis.failedZoomMeetingIds.push(zoomMeetingId);
     });

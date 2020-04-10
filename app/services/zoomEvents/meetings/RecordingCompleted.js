@@ -36,7 +36,7 @@ class RecordingCompleted extends ZoomEventsForMeetingsBase {
 
     await oThis.validateAndSetMeetingId();
     if (oThis.meetingId) {
-      await new SaveRecording({ zoomMeetingId: oThis.zoomMeetingId }).perform().catch(async (e) => {
+      await new SaveRecording({ zoomMeetingId: oThis.zoomMeetingId }).perform().catch(async function(e) {
         const response = responseHelper.error({
           internal_error_identifier: 's_ze_rc_ap_1',
           api_error_identifier: 'something_went_wrong',
