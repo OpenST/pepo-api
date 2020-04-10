@@ -137,6 +137,7 @@ class ZoomEventCreate extends ServiceBase {
       zoomEventId: oThis.zoomEventId
     };
 
+    logger.info(`Publishing event type ${oThis.eventData.event}`);
     let options = {};
 
     if (
