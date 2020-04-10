@@ -10,7 +10,8 @@ const rootPrefix = '../../..',
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   paginationConstants = require(rootPrefix + '/lib/globalConstant/pagination'),
-  entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType');
+  entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
+  channelConstants = require(rootPrefix + '/lib/globalConstant/channel/channels');
 
 // Declare variables.
 const topChannelsResultsLimit = 5;
@@ -160,12 +161,15 @@ class ChannelSearch extends ServiceBase {
       return Promise.reject(cacheResponse);
     }
 
-    oThis.channels = cacheResponse.data;
-
     for (let index = 0; index < channelIds.length; index++) {
       const channelId = channelIds[index],
-        channel = oThis.channels[channelId];
+        channel = cacheResponse.data[channelId];
 
+      if (channel.status !== channelConstants.activeStatus) {
+        continue;
+      }
+
+      oThis.channels[channelId] = channel;
       oThis.channelIds.push(channelId);
       if (channel.coverImageId) {
         oThis.imageIds.push(channel.coverImageId);

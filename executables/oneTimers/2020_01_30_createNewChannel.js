@@ -181,19 +181,26 @@ class CreateNewChannel {
   async createNewChannel() {
     const oThis = this;
 
-    if (!CommonValidators.validateChannelTitle(oThis.channelName)) {
+    if (!CommonValidators.validateChannelName(oThis.channelName)) {
       return Promise.reject(new Error('Invalid channel name.'));
     }
 
-    const insertResponse = await new ChannelModel()
-      .insert({
-        name: oThis.channelName,
-        status: channelsConstants.invertedStatuses[channelsConstants.activeStatus],
-        permalink: oThis.channelPermalink
-      })
-      .fire();
+    const insertData = {
+      name: oThis.channelName,
+      status: channelsConstants.invertedStatuses[channelsConstants.activeStatus],
+      permalink: oThis.channelPermalink
+    };
+
+    const insertResponse = await new ChannelModel().insert(insertData).fire();
 
     oThis.channelId = insertResponse.insertId;
+    insertData.id = insertResponse.insertId;
+
+    Object.assign(insertData, insertResponse.defaultUpdatedAttributes);
+
+    const formattedInsertData = new ChannelModel().formatDbData(insertData);
+
+    await ChannelModel.flushCache(formattedInsertData);
 
     logger.info(`Channel creation done. Channel ID: ${oThis.channelId}`);
   }

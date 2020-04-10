@@ -55,6 +55,11 @@ const webErrorConfig = {
     code: 'invalid',
     message: 'User is inactive.'
   },
+  user_is_not_approved: {
+    parameter: 'channel_admins',
+    code: 'invalid',
+    message: 'User is not approved creator.'
+  },
   duplicate_user_name: {
     parameter: 'user_name',
     code: 'invalid',
@@ -114,6 +119,11 @@ const webErrorConfig = {
     parameter: 'user_id',
     code: 'invalid',
     message: 'Invalid user id.'
+  },
+  invalid_admin_id: {
+    parameter: 'admin_user_ids',
+    code: 'invalid',
+    message: 'This user name does not exist.'
   },
   invalid_resolution: {
     parameter: 'resolutions',

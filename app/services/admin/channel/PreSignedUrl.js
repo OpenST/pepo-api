@@ -10,6 +10,7 @@ const rootPrefix = '../../../..',
 
 // Declare variables.
 const FILE_EXTENSION = '.jpeg';
+const CONTENT_TYPE = 'image/jpeg';
 
 /**
  * Class to get pre-signed url.
@@ -29,19 +30,19 @@ class PreSignedUrl extends ServiceBase {
 
     const oThis = this;
 
-    oThis.workingMap = {};
     oThis.apiResponse = {};
   }
 
   /**
    * Async perform.
    *
-   * @return {Promise<void>}
+   * @sets oThis.apiResponse
+   *
+   * @returns {Promise<void>}
+   * @private
    */
   async _asyncPerform() {
     const oThis = this;
-
-    const contentType = 'image/jpeg';
 
     const channelOriginalFileName = oThis._getRandomEncodedFileNames('original');
 
@@ -52,7 +53,7 @@ class PreSignedUrl extends ServiceBase {
     const preSignedPostParams = await AwsS3wrapper.createPresignedPostFor(
       intent,
       channelOriginalFileName,
-      contentType,
+      CONTENT_TYPE,
       coreConstants.AWS_REGION,
       { imageKind: imageConstants.channelImageKind }
     );
@@ -74,6 +75,7 @@ class PreSignedUrl extends ServiceBase {
    * Get s3 url for channel.
    *
    * @param {string} fileName
+   *
    * @returns {string}
    * @private
    */

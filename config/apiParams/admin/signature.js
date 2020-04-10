@@ -419,7 +419,7 @@ const adminSignature = {
       },
       {
         parameter: 'permalink',
-        validatorMethods: ['validateString']
+        validatorMethods: ['validateNonEmptyString']
       },
       {
         parameter: 'current_admin',
@@ -428,32 +428,32 @@ const adminSignature = {
     ],
     optional: [
       {
-        parameter: 'name',
-        validatorMethods: ['validateChannelTitle']
+        parameter: 'channel_name',
+        validatorMethods: ['validateNonEmptyString']
       },
       {
-        parameter: 'description',
-        validatorMethods: ['validateChannelDescription', 'validateStopWords']
+        parameter: 'channel_tagline',
+        validatorMethods: ['validateNonEmptyString']
       },
       {
-        parameter: 'tagline',
-        validatorMethods: ['validateChannelTagline', 'validateStopWords']
+        parameter: 'channel_description',
+        validatorMethods: ['validateNonEmptyString']
       },
       {
-        parameter: 'tags',
+        parameter: 'channel_tags',
+        validatorMethods: ['validateStringifiedNonEmptyArray']
+      },
+      {
+        parameter: 'channel_admins',
         validatorMethods: ['validateCommaDelimitedStrings']
       },
       {
-        parameter: 'admins',
-        validatorMethods: ['validateCommaDelimitedStrings']
-      },
-      {
-        parameter: 'original_image_url',
+        parameter: 'cover_image_url',
         validatorMethods: ['validateHttpBasedUrl']
       },
       {
-        parameter: 'original_image_file_size',
-        validatorMethods: ['validateInteger']
+        parameter: 'cover_image_file_size',
+        validatorMethods: ['validateChannelCoverImageFileSize']
       }
     ]
   },
