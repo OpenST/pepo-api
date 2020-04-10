@@ -137,7 +137,7 @@ class ZoomEventCreate extends ServiceBase {
       zoomEventId: oThis.zoomEventId
     };
 
-    await bgJob.enqueue(bgJobConstants.zoomWebhookJobTopic, messagePayload);
+    await bgJob.enqueue(bgJobConstants.zoomWebhookJobTopic, messagePayload, { publishAfter: 1000 * 60 * 3 });
   }
 }
 
