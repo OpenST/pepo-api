@@ -15,15 +15,21 @@ const rootPrefix = '../..',
 
 const BATCH_SIZE = 25;
 
+program.option('--relayerIds <relayerIds>', 'List of relayer ids.').parse(process.argv);
+
 program.on('--help', function() {
   logger.log('');
   logger.log('  Example:');
   logger.log('');
-  logger.log('    node executables/oneTimers/2020_04_09_saveZoomRecording.js ');
+  logger.log('    node executables/oneTimers/2020_04_09_saveZoomRecording.js' + ' --relayerId "[1,2]" ');
   logger.log('');
   logger.log('');
 });
 
+if (!program.relayerIds) {
+  program.help();
+  process.exit(1);
+}
 /**
  * Class SaveZoomRecording.
  *
@@ -34,11 +40,14 @@ class SaveZoomRecording {
    * Constructor.
    *
    * @param {object} params
+   * @param {List} param.relayerIds
    *
    * @constructor
    */
   constructor(params) {
     const oThis = this;
+
+    oThis.relayerIds = JSON.parse(params.relayerIds);
     oThis.failedZoomMeetingIds = [];
   }
 
@@ -65,6 +74,7 @@ class SaveZoomRecording {
       const rows = await new MeetingModel()
         .select('zoom_meeting_id')
         .where({ status: meetingConstants.invertedStatuses[meetingConstants.endedStatus] })
+        .where({ meeting_relayer_id: oThis.relayerIds })
         .order_by('created_at asc')
         .limit(limit)
         .offset(offset)
@@ -90,14 +100,16 @@ class SaveZoomRecording {
       zoomMeetingId: zoomMeetingId
     });
 
-    return saveRecordingObj.perform().catch((error) => {
+    return saveRecordingObj.perform().catch(function(e) {
       logger.error(`Failed to save zoom Meeting recording for zoom meeting id ${zoomMeetingId}`);
       oThis.failedZoomMeetingIds.push(zoomMeetingId);
     });
   }
 }
 
-new SaveZoomRecording({})
+new SaveZoomRecording({
+  relayerIds: program.relayerIds
+})
   .perform()
   .then(function() {
     process.exit(0);
