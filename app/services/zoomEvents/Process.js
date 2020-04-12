@@ -7,7 +7,9 @@ const rootPrefix = '../../..',
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   createErrorLogsEntry = require(rootPrefix + '/lib/errorLogs/createEntry'),
   errorLogsConstants = require(rootPrefix + '/lib/globalConstant/errorLogs'),
-  zoomEventConstants = require(rootPrefix + '/lib/globalConstant/zoomEvent');
+  zoomEventConstants = require(rootPrefix + '/lib/globalConstant/zoomEvent'),
+  bgJob = require(rootPrefix + '/lib/rabbitMqEnqueue/bgJob'),
+  bgJobConstants = require(rootPrefix + '/lib/globalConstant/bgJob');
 
 /**
  * Class to process zoom events.
@@ -95,7 +97,6 @@ class ZoomEventProcess extends ServiceBase {
 
       return Promise.reject(dbRow);
     }
-
     oThis.zoomEventObj = dbRow;
   }
 
@@ -117,7 +118,7 @@ class ZoomEventProcess extends ServiceBase {
     }
 
     await new ZoomEventModel()
-      .update({ status: zoomEventstatus })
+      .update({ status: zoomEventstatus, event_data: oThis.zoomEventObj.eventData })
       .where({ id: oThis.zoomEventId })
       .fire();
   }
@@ -148,9 +149,40 @@ class ZoomEventProcess extends ServiceBase {
     if (response.isSuccess()) {
       await oThis._updateZoomEventStatus(zoomEventConstants.doneStatus);
     } else {
-      await createErrorLogsEntry.perform(response, errorLogsConstants.mediumSeverity);
-      await oThis._updateZoomEventStatus(zoomEventConstants.failedStatus);
+      const event_data = JSON.parse(oThis.zoomEventObj.eventData);
+      const { retryCount } = event_data;
+      const currentRetryCount = Number(retryCount) + 1;
+
+      if (
+        (event_data.event === zoomEventConstants.meetingRecordingCompletedTopic ||
+          event_data.event === zoomEventConstants.meetingRecordingTranscriptCompletedTopic) &&
+        currentRetryCount <= zoomEventConstants.maxRetryCount
+      ) {
+        event_data.retryCount = currentRetryCount;
+        await oThis._retryRecordingCompletedAndTranscriptCompleted(event_data);
+      } else {
+        await createErrorLogsEntry.perform(response, errorLogsConstants.mediumSeverity);
+        await oThis._updateZoomEventStatus(zoomEventConstants.failedStatus);
+      }
     }
+  }
+
+  /**
+   * It is for retrying recording and transcript completed web hooks in case of failure.
+   * @param {*} event_data event data in the db.
+   * @param {*} retryCount Current count in the event object
+   */
+  async _retryRecordingCompletedAndTranscriptCompleted(event_data) {
+    const oThis = this;
+    oThis.zoomEventObj.eventData = JSON.stringify(event_data);
+    await oThis._updateZoomEventStatus(zoomEventConstants.pendingStatus);
+
+    const messagePayload = {
+      zoomEventId: oThis.zoomEventId
+    };
+
+    const options = { publishAfter: 1000 * 60 * 3 }; // 3 min delay
+    await bgJob.enqueue(bgJobConstants.zoomWebhookJobTopic, messagePayload, options);
   }
 }
 
