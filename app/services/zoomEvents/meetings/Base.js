@@ -28,9 +28,13 @@ class ZoomEventsForMeetingsBase extends ServiceBase {
     super();
 
     const oThis = this;
-
+    console.log('params : ', params);
     oThis.zoomMeetingId = params.payload.object.id;
     oThis.zoomMeetingUuid = params.payload.object.uuid;
+    oThis.recordingFiles = params.payload.object.recording_files;
+    oThis.accessToken = params.download_token;
+
+    console.log('oThis.accessToken : ', oThis.accessToken);
 
     oThis.meetingId = null;
   }
