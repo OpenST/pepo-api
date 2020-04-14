@@ -13,7 +13,7 @@ const rootPrefix = '../..',
   meetingConstants = require(rootPrefix + '/lib/globalConstant/meeting/meeting'),
   zoomEventConstants = require(rootPrefix + '/lib/globalConstant/zoomEvent'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
-  SaveRecordingLib = require(rootPrefix + '/lib/zoom/SaveRecording');
+  SaveRecordingLib = require(rootPrefix + '/lib/zoom/saveRecording');
 
 const BATCH_SIZE = 25;
 
