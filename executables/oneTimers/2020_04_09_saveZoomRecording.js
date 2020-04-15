@@ -13,7 +13,7 @@ const rootPrefix = '../..',
   meetingConstants = require(rootPrefix + '/lib/globalConstant/meeting/meeting'),
   zoomEventConstants = require(rootPrefix + '/lib/globalConstant/zoomEvent'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
-  SaveRecordingLib = require(rootPrefix + '/lib/zoom/SaveRecording');
+  SaveRecordingLib = require(rootPrefix + '/lib/zoom/saveRecording');
 
 const BATCH_SIZE = 25;
 
@@ -134,9 +134,17 @@ class SaveZoomRecording {
       accessToken: row.download_token
     });
 
-    return saveRecordingObj.perform().catch(function(e) {
-      logger.error(`Failed to save zoom Meeting recording for zoom meeting id ${zoomMeetingId}`);
-      oThis.failedZoomMeetingIds.push(zoomMeetingId);
+    return saveRecordingObj.perform().catch(async function(e) {
+      logger.info(`Retrying with zoom id ${zoomMeetingId}`);
+      const saveRecordingRetryObj = new SaveRecordingLib({
+        zoomMeetingId: zoomMeetingId
+      });
+
+      // Retrying download if access token is expired.
+      await saveRecordingRetryObj.perform().catch(function(err) {
+        logger.error(`Failed to save zoom Meeting recording for zoom meeting id ${zoomMeetingId} with error ${err}`);
+        oThis.failedZoomMeetingIds.push(zoomMeetingId);
+      });
     });
   }
 }
