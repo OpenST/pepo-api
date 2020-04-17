@@ -83,7 +83,6 @@ class ZoomEventCreate extends ServiceBase {
     }
 
     const zoomEventRes = await new ZoomEventModel().fetchByEventId(oThis.eventId);
-    console.log('zoomEventRes : ', zoomEventRes);
     if (zoomEventRes.id) {
       oThis.duplicateEvent = true;
     }
