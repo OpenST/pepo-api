@@ -1,14 +1,17 @@
 const rootPrefix = '../../../..',
   ServiceBase = require(rootPrefix + '/app/services/Base'),
+  UserModel = require(rootPrefix + '/app/models/mysql/User'),
   CommonValidators = require(rootPrefix + '/lib/validators/Common'),
   ChannelUserModel = require(rootPrefix + '/app/models/mysql/channel/ChannelUser'),
   ChannelStatModel = require(rootPrefix + '/app/models/mysql/channel/ChannelStat'),
+  SecureUserCache = require(rootPrefix + '/lib/cacheManagement/single/SecureUser'),
   ChannelByIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelByIds'),
   GetCurrentUserChannelRelationsLib = require(rootPrefix + '/lib/channel/GetCurrentUserChannelRelations'),
   ChannelStatByChannelIdsCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelStatByChannelIds'),
   ChannelUserByUserIdAndChannelIdsCache = require(rootPrefix +
     '/lib/cacheManagement/multi/channel/ChannelUserByUserIdAndChannelIds'),
   AdminIdsByChannelIdCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/AdminIdsByChannelId'),
+  ChannelIdsByUserCache = require(rootPrefix + '/lib/cacheManagement/multi/channel/ChannelIdsByUser'),
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   entityTypeConstants = require(rootPrefix + '/lib/globalConstant/entityType'),
   channelConstants = require(rootPrefix + '/lib/globalConstant/channel/channels'),
@@ -42,6 +45,8 @@ class LeaveChannel extends ServiceBase {
     oThis.channelUserObj = null;
     oThis.currentUserChannelRelationsMap = {};
     oThis.channelStatsMap = {};
+    oThis.currentUserChannelRole = null;
+    oThis.channelAdminIds = [];
   }
 
   /**
@@ -76,7 +81,11 @@ class LeaveChannel extends ServiceBase {
 
     await oThis._updateChannelStat();
 
-    await Promise.all([oThis._fetchCurrentUserChannelRelations(), oThis._fetchChannelStats()]);
+    await Promise.all([
+      oThis._fetchCurrentUserChannelRelations(),
+      oThis._fetchChannelStats(),
+      oThis._changeUserProperty()
+    ]);
 
     return responseHelper.successWithData({
       [entityTypeConstants.currentUserChannelRelationsMap]: oThis.currentUserChannelRelationsMap,
@@ -133,6 +142,7 @@ class LeaveChannel extends ServiceBase {
     }
 
     oThis.channelUserObj = cacheResponse.data[oThis.channelId];
+    oThis.currentUserChannelRole = oThis.channelUserObj.role;
   }
 
   /**
@@ -149,9 +159,9 @@ class LeaveChannel extends ServiceBase {
         channelIds: [oThis.channelId]
       }).fetch();
 
-      const channelAdminIds = adminIdsByChannelIdCacheResponse.data[oThis.channelId];
+      oThis.channelAdminIds = adminIdsByChannelIdCacheResponse.data[oThis.channelId];
 
-      if (channelAdminIds && channelAdminIds.length === 1) {
+      if (oThis.channelAdminIds && oThis.channelAdminIds.length === 1) {
         return Promise.reject(
           responseHelper.error({
             internal_error_identifier: 'a_s_c_u_l_cucl_1',
@@ -269,6 +279,34 @@ class LeaveChannel extends ServiceBase {
           }
         })
       );
+    }
+  }
+
+  /**
+   * Unset isManagingChannelProperty if user is admin.
+   *
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _changeUserProperty() {
+    const oThis = this;
+
+    if (oThis.currentUserChannelRole === channelUsersConstants.adminRole) {
+      const channelIdsByUserIdsCacheResponse = await new ChannelIdsByUserCache({
+        userIds: [oThis.currentUser.id]
+      }).fetch();
+
+      if (channelIdsByUserIdsCacheResponse.isFailure()) {
+        return Promise.reject(channelIdsByUserIdsCacheResponse);
+      }
+
+      const channelIdsArray =
+        channelIdsByUserIdsCacheResponse.data[oThis.currentUser.id][channelUsersConstants.adminRole] || [];
+
+      if (channelIdsArray.length == 0) {
+        await new UserModel().unmarkUserChannelAdmin([oThis.currentUser.id]);
+        await new SecureUserCache({ id: oThis.currentUser.id }).clear();
+      }
     }
   }
 }
