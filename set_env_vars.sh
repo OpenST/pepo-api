@@ -193,6 +193,8 @@ export PA_USER_DATA_S3_FILE_PATH='testFolder/userData.csv';
 export PA_CHANNEL_DATA_LOCAL_FILE_PATH='./channelData.csv';
 export PA_CHANNEL_DATA_S3_FILE_PATH='testFolder/channelData.csv';
 
+export PA_RECORDING_DATA_LOCAL_FOLDER='/tmp';
+
 # Video pixel data file path.
 export PA_VIDEO_PIXEL_DATA_S3_FILE_PATH='redshift/full_video_watched_by_devices.csv'
 export PA_REPLY_PIXEL_DATA_S3_FILE_PATH='redshift/full_reply_watched_by_devices.csv'
