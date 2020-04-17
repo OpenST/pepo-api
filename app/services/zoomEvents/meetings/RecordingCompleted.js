@@ -24,6 +24,9 @@ class RecordingCompleted extends ZoomEventsForMeetingsBase {
     super(params);
     const oThis = this;
     oThis.object = params.payload.object;
+
+    oThis.recordingFiles = params.payload.object.recording_files;
+    oThis.accessToken = params.download_token;
     console.log('HERE====constructor===RecordingCompleted======', JSON.stringify(params));
   }
 
@@ -40,24 +43,8 @@ class RecordingCompleted extends ZoomEventsForMeetingsBase {
       await oThis._setZoomMeetingId();
 
       await new SaveRecording({
-        zoomMeetingId: oThis.zoomMeetingId,
-        recordingFiles: oThis.recordingFiles,
-        accessToken: oThis.accessToken
-      })
-        .perform()
-        .catch(async function(e) {
-          const response = responseHelper.error({
-            internal_error_identifier: 's_ze_rc_ap_1',
-            api_error_identifier: 'something_went_wrong',
-            debug_options: {
-              event: oThis.object,
-              errorObject: e
-            }
-          });
-
-          await createErrorLogsEntry.perform(response, errorLogsConstants.lowSeverity);
-          return Promise.reject(e);
-        });
+        zoomMeetingId: oThis.zoomMeetingId
+      }).perform();
     } else {
       logger.info(`Meeting not found for zoom id ${oThis.zoomMeetingId}`);
     }

@@ -72,27 +72,6 @@ class SaveZoomRecording {
     let offset = 0;
     const limit = BATCH_SIZE;
 
-    const zoomMeetingEventRows = await new ZoomEvent()
-      .select('event_data')
-      .where({ status: zoomEventConstants.invertedStatuses[zoomEventConstants.doneStatus] })
-      .where([
-        `event_data like "%${zoomEventConstants.meetingRecordingCompletedTopic}%" or event_data like "%${
-          zoomEventConstants.meetingRecordingTranscriptCompletedTopic
-        }%"`
-      ])
-      .fire();
-
-    const zoomIdVsEvents = {};
-
-    for (let i = 0; i < zoomMeetingEventRows.length; i++) {
-      const eventData = JSON.parse(zoomMeetingEventRows[i].event_data);
-      const zoomMeetingId = eventData.payload.object.id;
-      if (!zoomIdVsEvents[zoomMeetingId]) {
-        zoomIdVsEvents[zoomMeetingId] = [];
-      }
-      zoomIdVsEvents[zoomMeetingId].push(eventData);
-    }
-
     while (true) {
       const rows = await new MeetingModel()
         .select('zoom_meeting_id')
@@ -107,14 +86,7 @@ class SaveZoomRecording {
 
       for (let i = 0; i < rows.length; i++) {
         const zoomMeetingId = rows[i].zoom_meeting_id;
-        const zoomEvents = zoomIdVsEvents[zoomMeetingId];
-        if (!zoomEvents) {
-          logger.log(`No zoom events found for zoom meeting id ${zoomMeetingId}`);
-          continue;
-        }
-        for (let j = 0; j < zoomEvents.length; j++) {
-          await oThis._saveRecording(zoomEvents[j]);
-        }
+        await oThis._saveRecording(zoomMeetingId);
       }
 
       if (rows.length < limit) {
@@ -124,27 +96,16 @@ class SaveZoomRecording {
     }
   }
 
-  async _saveRecording(row) {
+  async _saveRecording(zoomMeetingId) {
     const oThis = this;
-    const zoomMeetingId = row.payload.object.id;
 
     const saveRecordingObj = new SaveRecordingLib({
-      zoomMeetingId: zoomMeetingId,
-      recordingFiles: row.payload.object.recording_files,
-      accessToken: row.download_token
+      zoomMeetingId: zoomMeetingId
     });
 
-    return saveRecordingObj.perform().catch(async function(e) {
-      logger.info(`Retrying with zoom id ${zoomMeetingId}`);
-      const saveRecordingRetryObj = new SaveRecordingLib({
-        zoomMeetingId: zoomMeetingId
-      });
-
-      // Retrying download if access token is expired.
-      await saveRecordingRetryObj.perform().catch(function(err) {
-        logger.error(`Failed to save zoom Meeting recording for zoom meeting id ${zoomMeetingId} with error ${err}`);
-        oThis.failedZoomMeetingIds.push(zoomMeetingId);
-      });
+    return saveRecordingObj.perform().catch(async function(err) {
+      logger.error(`Failed to save zoom Meeting recording for zoom meeting id ${zoomMeetingId} with error ${err}`);
+      oThis.failedZoomMeetingIds.push(zoomMeetingId);
     });
   }
 }

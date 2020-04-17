@@ -30,8 +30,6 @@ class ZoomEventsForMeetingsBase extends ServiceBase {
     const oThis = this;
     oThis.zoomMeetingId = params.payload.object.id;
     oThis.zoomMeetingUuid = params.payload.object.uuid;
-    oThis.recordingFiles = params.payload.object.recording_files;
-    oThis.accessToken = params.download_token;
 
     oThis.meetingId = null;
   }
