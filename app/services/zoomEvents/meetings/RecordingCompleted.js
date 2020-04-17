@@ -27,7 +27,6 @@ class RecordingCompleted extends ZoomEventsForMeetingsBase {
 
     oThis.recordingFiles = params.payload.object.recording_files;
     oThis.accessToken = params.download_token;
-    console.log('HERE====constructor===RecordingCompleted======', JSON.stringify(params));
   }
 
   /**
