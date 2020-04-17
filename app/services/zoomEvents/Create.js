@@ -83,7 +83,7 @@ class ZoomEventCreate extends ServiceBase {
     }
 
     const zoomEventRes = await new ZoomEventModel().fetchByEventId(oThis.eventId);
-
+    console.log('zoomEventRes : ', zoomEventRes);
     if (zoomEventRes.id) {
       oThis.duplicateEvent = true;
     }
@@ -101,6 +101,10 @@ class ZoomEventCreate extends ServiceBase {
     const oThis = this;
 
     logger.log('Create entry in Zoom Event.');
+
+    if (oThis._isRecordingAndTranscriptCompletedTopic()) {
+      oThis.eventData.retryCount = 1;
+    }
 
     const stringifiedEventData = JSON.stringify(oThis.eventData);
 
@@ -137,7 +141,27 @@ class ZoomEventCreate extends ServiceBase {
       zoomEventId: oThis.zoomEventId
     };
 
-    await bgJob.enqueue(bgJobConstants.zoomWebhookJobTopic, messagePayload);
+    logger.info(`Publishing event type ${oThis.eventData.event}`);
+    let options = {};
+
+    if (oThis._isRecordingAndTranscriptCompletedTopic()) {
+      options = { publishAfter: 1000 * 60 * 3 }; // 3 min delay
+    }
+
+    logger.info(`Publishing event type ${oThis.eventData.event} with options ${JSON.stringify(options)}`);
+    await bgJob.enqueue(bgJobConstants.zoomWebhookJobTopic, messagePayload, options);
+  }
+
+  /**
+   * It returns true if topic recording completed or transcript completed.
+   */
+  _isRecordingAndTranscriptCompletedTopic() {
+    const oThis = this;
+
+    return (
+      oThis.eventData.event === zoomEventConstants.meetingRecordingCompletedTopic ||
+      oThis.eventData.event === zoomEventConstants.meetingRecordingTranscriptCompletedTopic
+    );
   }
 }
 
