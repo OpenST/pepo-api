@@ -117,7 +117,7 @@ class ZoomEventCreate extends ServiceBase {
         api_error_identifier: 'something_went_wrong',
         debug_options: {
           message: 'length is greater than maximum allowed characters',
-          zoomEventData: stringifiedEventData,
+          zoomEventData: stringifiedEventData.substring(0, 1000),
           debugMessage: `Total length of event data is ${stringifiedEventData.length}`
         }
       });
