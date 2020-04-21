@@ -6,6 +6,8 @@ const rootPrefix = '../../..',
   responseHelper = require(rootPrefix + '/lib/formatter/response'),
   logger = require(rootPrefix + '/lib/logger/customConsoleLogger'),
   bgJobConstants = require(rootPrefix + '/lib/globalConstant/bgJob'),
+  createErrorLogsEntry = require(rootPrefix + '/lib/errorLogs/createEntry'),
+  errorLogsConstants = require(rootPrefix + '/lib/globalConstant/errorLogs'),
   zoomEventConstants = require(rootPrefix + '/lib/globalConstant/zoomEvent');
 
 /**
@@ -106,6 +108,24 @@ class ZoomEventCreate extends ServiceBase {
     }
 
     const stringifiedEventData = JSON.stringify(oThis.eventData);
+
+    if (stringifiedEventData.length > zoomEventConstants.maxCharactersInEventData) {
+      logger.error('Error while inserting data in zoom_events table as length is greater than allowed limit');
+
+      const errorObject = responseHelper.error({
+        internal_error_identifier: 's_ze_c_eze_1',
+        api_error_identifier: 'something_went_wrong',
+        debug_options: {
+          message: 'length is greater than maximum allowed characters',
+          zoomEventData: stringifiedEventData.substring(0, 1000),
+          debugMessage: `Total length of event data is ${stringifiedEventData.length}`
+        }
+      });
+
+      await createErrorLogsEntry.perform(errorObject, errorLogsConstants.mediumSeverity);
+
+      return Promise.reject(errorObject);
+    }
 
     // Insert in database.
     const insertResponse = await new ZoomEventModel()

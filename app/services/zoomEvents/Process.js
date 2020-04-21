@@ -152,6 +152,7 @@ class ZoomEventProcess extends ServiceBase {
       await createErrorLogsEntry.perform(response, errorLogsConstants.mediumSeverity);
 
       const event_data = JSON.parse(oThis.zoomEventObj.eventData);
+
       const { retryCount } = event_data;
       const currentRetryCount = Number(retryCount) + 1;
 
