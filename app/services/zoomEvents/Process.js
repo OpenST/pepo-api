@@ -151,15 +151,7 @@ class ZoomEventProcess extends ServiceBase {
     } else {
       await createErrorLogsEntry.perform(response, errorLogsConstants.mediumSeverity);
 
-      const event_data = await oThis._parseData(oThis.zoomEventObj.eventData).catch(function(err) {
-        logger.error('Error in parsing zoom event data.', err);
-
-        return responseHelper.error({
-          internal_error_identifier: 's_ze_p_vas_3',
-          api_error_identifier: 'something_went_wrong',
-          debug_options: { error: err, zoomEventData: oThis.zoomEventObj.eventData }
-        });
-      });
+      const event_data = JSON.parse(oThis.zoomEventObj.eventData);
 
       const { retryCount } = event_data;
       const currentRetryCount = Number(retryCount) + 1;
@@ -175,17 +167,6 @@ class ZoomEventProcess extends ServiceBase {
         await oThis._updateZoomEventStatus(zoomEventConstants.failedStatus);
       }
     }
-  }
-
-  /**
-   * Parse stringified data.
-   *
-   * @param {string} data
-   * @returns {any}
-   * @private
-   */
-  async _parseData(data) {
-    return JSON.parse(data);
   }
 
   /**
