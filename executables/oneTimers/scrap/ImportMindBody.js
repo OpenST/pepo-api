@@ -27,6 +27,7 @@ class ImportMindBody {
         await oThis.insertInCsv(jsonResponse);
       } catch (e) {
         console.log(e);
+        return Promise.reject(e);
       }
     }
     // while (true) {
@@ -186,7 +187,7 @@ class ImportMindBody {
 }
 
 new ImportMindBody({
-  file_directory: '/Users/pankaj/simpleTokenWorkspace'
+  file_directory: '/mnt/pepo/apps/pepoApi/shared/mindBody'
 })
   .perform()
   .then(function() {
