@@ -7,25 +7,40 @@ class ImportMindBody {
   constructor(params) {
     const oThis = this;
 
-    oThis.pageNumber = params.page_number;
+    // oThis.pageNumber = params.page_number;
     oThis.fileDirectory = params.file_directory;
   }
 
   async perform() {
     const oThis = this;
 
-    while (true) {
-      let fileName = `${oThis.fileDirectory}/json/pn-${oThis.pageNumber}.json`;
+    let fileNames = fs.readdirSync(`${oThis.fileDirectory}/json`);
+    for (let i = 0; i < fileNames.length; i++) {
+      let fileName = `${oThis.fileDirectory}/json/${fileNames[i]}`;
       console.log('Reading json file: ', fileName);
       if (!fs.existsSync(fileName)) {
         return Promise.reject('File does not exist');
       }
-      const jsonResponse = JSON.parse(fs.readFileSync(fileName));
+      try {
+        const jsonResponse = JSON.parse(fs.readFileSync(fileName));
 
-      await oThis.insertInCsv(jsonResponse);
-
-      oThis.pageNumber++;
+        await oThis.insertInCsv(jsonResponse);
+      } catch (e) {
+        console.log(e);
+      }
     }
+    // while (true) {
+    //   let fileName = `/pn-${oThis.pageNumber}.json`;
+    //   console.log('Reading json file: ', fileName);
+    //   if (!fs.existsSync(fileName)) {
+    //     return Promise.reject('File does not exist');
+    //   }
+    //   const jsonResponse = JSON.parse(fs.readFileSync(fileName));
+    //
+    //   await oThis.insertInCsv(jsonResponse);
+    //
+    //   oThis.pageNumber++;
+    // }
   }
 
   async insertInCsv(res) {
@@ -63,54 +78,29 @@ class ImportMindBody {
     // Write in files according to event category
     for (let eventCategory in jsonData) {
       const outputFile = `${oThis.fileDirectory}/csv/${eventCategory}.csv`;
-      await oThis._writeCsv(outputFile, headers, jsonData[eventCategory]);
+      await oThis._writeObjectToCsv(outputFile, headers, jsonData[eventCategory]);
     }
   }
 
-  async _writeCsv(outputFile, headers, records) {
-    const createCsvWriter = require('csv-writer').createObjectCsvWriter;
-    const csvWriter = createCsvWriter({
-      path: outputFile,
-      header: headers
-    });
-
-    await csvWriter.writeRecords(records);
-  }
-
   // async _writeCsv(outputFile, headers, records) {
-  //   // const createCsvWriter = require('csv-writer').createObjectCsvWriter;
-  //   // let csvWriter = null;
-  //   // if (!fs.existsSync(outputFile)){
-  //   //   csvWriter = createCsvWriter({
-  //   //     path: outputFile,
-  //   //     header: headers
-  //   //   });
-  //   // } else {
-  //   //   csvWriter = createCsvWriter({
-  //   //     path: outputFile
-  //   //   });
-  //   // }
-  //   //
-  //   // await csvWriter.writeRecords(records);
+  //   const createCsvWriter = require('csv-writer').createObjectCsvWriter;
+  //   const csvWriter = createCsvWriter({
+  //     path: outputFile,
+  //     header: headers
+  //   });
   //
-  //   // const writer = csvWriter();
-  //   // writer.pipe(fs.createWriteStream(outputFile))
-  //   // writer.write(records);
-  //   // writer.end()
-  //
-  //   let writer = null;
-  //   if (!fs.existsSync(outputFile))
-  //     writer = csvWriter({ headers: headers});
-  //   else
-  //     writer = csvWriter({sendHeaders: false});
-  //
-  //   writer.pipe(fs.createWriteStream(outputFile, {flags: 'a'}));
-  //   for(let index in records){
-  //     writer.write(records[index]);
-  //   }
-  //
-  //   writer.end();
+  //   await csvWriter.writeRecords(records);
   // }
+
+  async _writeObjectToCsv(outputFile, headers, records) {
+    const ObjectsToCsv = require('objects-to-csv');
+    const csv = new ObjectsToCsv(records);
+    if (fs.existsSync(outputFile)) {
+      await csv.toDisk(outputFile, { append: true });
+    } else {
+      await csv.toDisk(outputFile);
+    }
+  }
 
   get defaultCsvData() {
     return [
@@ -196,8 +186,7 @@ class ImportMindBody {
 }
 
 new ImportMindBody({
-  file_directory: '/Users/pankaj/simpleTokenWorkspace/pepo-api/executables/oneTimers/scrap/mindBody',
-  page_number: 1
+  file_directory: '/Users/pankaj/simpleTokenWorkspace'
 })
   .perform()
   .then(function() {
