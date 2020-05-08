@@ -60,6 +60,11 @@ class ImportMindBody {
           ? classEvent.attributes['course_category'].split('/')[0].trim()
           : 'null';
 
+      // Put data whose country is US only.
+      if (classEvent.attributes['location_country'] != 'United States') {
+        continue;
+      }
+
       for (let i in oThis.defaultCsvData) {
         const csvColumn = oThis.defaultCsvData[i];
         let key = Object.keys(csvColumn)[0];
@@ -78,7 +83,7 @@ class ImportMindBody {
 
     // Write in files according to event category
     for (let eventCategory in jsonData) {
-      const outputFile = `${oThis.fileDirectory}/csv/${eventCategory}.csv`;
+      const outputFile = `${oThis.fileDirectory}/usCsv/${eventCategory}.csv`;
       await oThis._writeObjectToCsv(outputFile, headers, jsonData[eventCategory]);
     }
   }
